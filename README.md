@@ -115,6 +115,12 @@ Interviews with 20 introductory programming instructors (9 women, 11 men) across
 
 **Key paper for our research.** Replicates a previous study on novice programming problem-solving behavior and extends it by incorporating GenAI tools. Through 21 lab sessions with participant observation, interviews, and think-aloud protocols, reveals that previously known metacognitive difficulties not only persist with GenAI use but are compounded. Struggling students expressed cognitive dissonance about their problem-solving ability, thought they performed better than they did, and finished with an "illusion of competence." More skilled students benefited from GenAI, suggesting AI may widen rather than close the skills gap. This paper most directly answers the question "how does AI hurt code literacy development?"
 
+### Changes in Coding Behavior and Performance Since the Introduction of LLMs (Zhang, Savelka, Goldstein & Conway, 2026)
+
+**`Changes in Coding Behavior and Performance Since the Introduction of LLMs.pdf`** · [DOI: 10.1145/3785022.3785075](https://doi.org/10.1145/3785022.3785075) · [arXiv:2601.11835](https://arxiv.org/abs/2601.11835)
+
+Quasi-longitudinal study (LAK'26) analyzing 10 consecutive semesters of source code submissions in a graduate-level cloud computing course at CMU — 5 pre-ChatGPT (Fall 2020–Fall 2022) and 5 post-ChatGPT (Spring 2023–Spring 2025) — covering 721 students and 2,066 submissions on one unchanged PageRank assignment. Finds that final submissions grew significantly longer post-ChatGPT, and that total edit distance between consecutive submissions increased ~10x between Fall 2022 and Spring 2025. The critical finding: while students were making far more changes per submission attempt, score improvement *decreased* — they were working harder and learning less per effort unit. High assignment scores no longer guaranteed learning mastery. Where "The Widening Gap" explains the *mechanism* (metacognitive failure, illusion of competence), this paper provides the longitudinal observational evidence that over-reliance patterns are real, measurable, and growing at scale. The authors argue curricula must shift toward assessing planning, design decisions, code review, and debugging strategy — skills the human brings to a human-AI team.
+
 ### How Beginning Programmers and Code LLMs (Mis)read Each Other (Nguyen, McLean Babe, Zi, Guha, Anderson & Feldman, 2024)
 
 **`How Beginning Programmers and Code LLMs (Mis)read Each Other.pdf`** · [DOI: 10.1145/3613904.3642706](https://doi.org/10.1145/3613904.3642706)
