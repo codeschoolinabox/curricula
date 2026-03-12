@@ -1,0 +1,4 @@
+You can't just cover a bunch of concepts or skills in sequence and expect learners to integrate them in a final project -> _connections are concepts_. You must explicitly name and practice with each connection between each concept! So if your course has 3 concepts, there are actually (minimum) 6 learning objectives (3 concepts, 3 connections). and if your course has 4 concepts, there are 10 objectives (or more when you start counting out different subsets of concept and connection interact)!
+
+- Concepts: The individual concepts of programming, things like variables and APIs and repositories. Studying each of these concepts separately is important but not enough.
+- Connections: How individual concepts relate to each other. For example once you understand variables and arrays separately, you will still need to study reference vs. value (how variables store arrays in memory).

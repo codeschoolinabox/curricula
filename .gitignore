@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Docusaurus
+build/
+.docusaurus/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+
+# Caches
+.npm
+.eslintcache
+.ruff_cache/
+
+# OS
+Thumbs.db
+Desktop.ini

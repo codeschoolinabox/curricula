@@ -1,0 +1,37 @@
+{
+  "config": {
+    "default": true,
+    // Allow inline HTML (educational content uses details/summary, tables, etc.)
+    "MD033": {
+      "allowed_elements": [
+        "summary",
+        "details",
+        "br",
+        "strong",
+        "code",
+        "em",
+        "table",
+        "thead",
+        "tbody",
+        "tr",
+        "th",
+        "td",
+        "a",
+        "sup",
+        "sub",
+        "img",
+        "kbd"
+      ]
+    },
+    // Allow trailing punctuation in headings (question marks in study content)
+    "MD026": { "punctuation": ".,;:!" },
+    // Line length handled by Prettier
+    "MD013": false,
+    // Allow duplicate headings in sibling sections
+    "MD024": { "siblings_only": true },
+    // Allow multiple top-level headings
+    "MD025": false
+  },
+  "ignores": ["node_modules/**", "build/**", ".docusaurus/**"],
+  "globs": ["**/*.md"]
+}

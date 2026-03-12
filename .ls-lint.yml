@@ -1,0 +1,25 @@
+ls:
+  curricula:
+    .dir: kebab-case
+    .js: kebab-case
+    .mjs: kebab-case
+    .jsx: kebab-case
+    .py: kebab-case | snake_case
+    .md: kebab-case | regex:[0-9A-Z\-]+
+    .mdx: kebab-case | regex:[0-9A-Z\-]+
+    .json: kebab-case | regex:[0-9A-Z\-_]+ | regex:_[a-z]+_
+  .github:
+    .yml: kebab-case
+    .md: regex:[A-Z_]+
+
+ignore:
+  - node_modules
+  - .husky
+  - .git
+  - .vscode
+  - build
+  - .docusaurus
+  - src
+  - static
+  - sidebars
+  - scripts

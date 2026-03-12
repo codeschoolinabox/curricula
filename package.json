@@ -1,0 +1,76 @@
+{
+  "name": "@codeschoolinabox/curricula",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Curriculum content for codeschoolinabox — powered by Docusaurus",
+  "scripts": {
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "serve": "docusaurus serve",
+    "clear": "docusaurus clear",
+    "lint": "npm run lint:js && npm run lint:md && npm run lint:mdx && npm run lint:py && npm run lint:names && npm run lint:spelling",
+    "lint:js": "eslint \"**/*.{js,mjs,jsx}\"",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "lint:mdx": "eslint \"**/*.mdx\"",
+    "lint:py": "ruff check .",
+    "lint:names": "ls-lint",
+    "lint:spelling": "cspell \"**/*.{md,mdx,js,mjs,py,json}\" --no-progress",
+    "format": "npm run format:js && npm run format:md && npm run format:mdx && npm run format:py",
+    "format:js": "prettier --write \"**/*.{js,mjs,jsx}\"",
+    "format:md": "prettier --write \"**/*.md\"",
+    "format:mdx": "prettier --write \"**/*.mdx\"",
+    "format:py": "ruff format .",
+    "format:check": "prettier --check \"**/*.{js,mjs,jsx,md,mdx,json}\"",
+    "format:check:py": "ruff format --check .",
+    "validate": "npm run format:check && npm run format:check:py && npm run lint",
+    "prepare": "husky",
+    "postinstall": "node scripts/check-ruff.mjs || true"
+  },
+  "lint-staged": {
+    "*.{js,mjs,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.mdx": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.md": [
+      "markdownlint-cli2 --fix",
+      "prettier --write"
+    ],
+    "*.py": [
+      "ruff check --fix",
+      "ruff format"
+    ],
+    "*.{json,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.7.0",
+    "@docusaurus/preset-classic": "^3.7.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@ls-lint/ls-lint": "^2.3.1",
+    "cspell": "^9.7.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.1.0",
+    "eslint-plugin-mdx": "^3.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.0.0",
+    "markdownlint-cli2": "^0.21.0",
+    "prettier": "^3.5.0"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codeschoolinabox/curricula"
+  },
+  "author": "@codeschoolinabox",
+  "license": "MIT"
+}

@@ -1,0 +1,23 @@
+# Ruff configuration for Python study content
+# Ruff must be installed separately: pip install ruff (or uv, or standalone installer)
+
+target-version = "py312"
+line-length = 80
+
+[lint]
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # pyflakes
+  "I",    # isort
+  "N",    # pep8-naming
+  "UP",   # pyupgrade
+]
+ignore = [
+  "E501",  # line too long (handled by formatter)
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"

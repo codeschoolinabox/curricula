@@ -1,0 +1,35 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "codeschoolinabox",
+    "curricula",
+    "docusaurus",
+    "devdependencies",
+    "markdownlint",
+    "cspell",
+    "editorconfig",
+    "eslintcache",
+    "commitlint",
+    "commonjs",
+    "ecmascript",
+    "ruff",
+    "jsonc",
+    "prosewrap",
+    "endofline",
+    "proseWrap"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "package-lock.json",
+    "build",
+    ".docusaurus",
+    "*.svg",
+    "*.mp4",
+    "*.png",
+    "*.jpg",
+    "*.gif",
+    "*.ico"
+  ],
+  "enableFiletypes": ["mdx"]
+}
