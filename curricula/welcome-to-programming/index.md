@@ -20,7 +20,7 @@ Source code is a text that simultaneously addresses three audiences:
 
 This rhetorical model (adapted from the classical writer/audience/text triangle) is the curriculum's organizing principle. Each chapter progressively adds an audience to the learner's awareness, building from developer-to-developer communication (Chapter 1) through the full triangle including users (Chapter 3). Chapter 4 introduces agents as a named collaborator in the rhetorical model (not a fourth audience — agents mediate between the development team and the source code). Chapters 5–6 then extend into algorithmic thinking and complexity analysis with full agent collaboration available.
 
-See the diagrams and rationale in `0-what-is-programming/assets/rhetorics-of-programming/`.
+![The Rhetorical Model — source code as a text addressing three audiences](./0-what-is-programming/assets/rhetorics-of-programming/the-big-picture.png)
 
 ### Spiral Curriculum + "Connections are Concepts"
 
@@ -28,7 +28,9 @@ The curriculum revisits concepts at increasing depth across chapters. Each time 
 
 This is why the spiral structure is essential: isolated concept instruction does not produce integrated understanding. Learners must repeatedly practice how concepts interact.
 
-See [`-1-getting-started/connections-are-concepts.md`](./-1-getting-started/connections-are-concepts.md) and [`-1-getting-started/assets/spiral-curriculum.png`](./-1-getting-started/assets/spiral-curriculum.png).
+See [`-1-getting-started/connections-are-concepts.md`](./-1-getting-started/connections-are-concepts.md).
+
+![Spiral Curriculum — concepts revisited at increasing depth across chapters](./-1-getting-started/assets/spiral-curriculum.png)
 
 ### Comprehension Before Production
 
@@ -79,7 +81,11 @@ See [`-1-getting-started/learning-objectives/priority-emojis.md`](./-1-getting-s
 
 Generative AI is a reality of software development. Learners will use it — the question is whether they use it as a crutch or as a tool. This curriculum takes a clear position: **AI can write code for you, but it can't understand a program _for_ you.**
 
-**Where AI sits in the rhetorical model:** AI is not a fourth audience. It sits _outside_ the main rhetorical circle, mediating between the development team and the source code — reading, generating, and modifying the software context. The three core audiences (developers, computer, users) remain the same. Compare the rhetorical diagram [without AI](./0-what-is-programming/assets/rhetorics-of-programming/the-big-picture.png) and [with AI](./0-what-is-programming/assets/rhetorics-of-programming/the-big-picture-plus-ai.png) to see this positioning. See [`4-devs-computers-users-agents/gen-ai-in-the-mix.md`](./4-devs-computers-users-agents/gen-ai-in-the-mix.md) for discussion exercises exploring how AI changes each relationship in the diagram.
+**Where AI sits in the rhetorical model:** AI is not a fourth audience. It sits _outside_ the main rhetorical circle, mediating between the development team and the source code — reading, generating, and modifying the software context. The three core audiences (developers, computer, users) remain the same. Compare the rhetorical diagram without and with AI to see this positioning:
+
+![The Rhetorical Model without AI](./0-what-is-programming/assets/rhetorics-of-programming/the-big-picture.png)
+
+![The Rhetorical Model with AI](./0-what-is-programming/assets/rhetorics-of-programming/the-big-picture-plus-ai.png) See [`4-devs-computers-users-agents/gen-ai-in-the-mix.md`](./4-devs-computers-users-agents/gen-ai-in-the-mix.md) for discussion exercises exploring how AI changes each relationship in the diagram.
 
 **Why comprehension-first matters more, not less:** As AI takes on more code production, the developer's role shifts toward reading, evaluating, describing, and reasoning about code — exactly the skills this curriculum builds. A developer who can trace execution, describe program behavior at multiple levels (PBSI), identify variable roles, and critically evaluate algorithmic strategies is well-prepared for a future where more code is AI-generated and less is written from scratch. The comprehension-first approach is not a concession to beginners. It is preparation for the emerging shape of software development.
 

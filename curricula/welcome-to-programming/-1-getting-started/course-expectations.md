@@ -15,8 +15,9 @@ Setting the right mindset for the learning process:
   you have only mastered it when you can complete the exercises without AI.
   - In the rhetorical model, AI sits _outside_ the main circle — it mediates
     between the development team and the source code, reading and modifying the
-    software context. It is not a fourth audience. See the diagram
-    [with AI in the mix](../0-what-is-programming/assets/rhetorics-of-programming/the-big-picture-plus-ai.png).
+    software context. It is not a fourth audience.
+
+    ![The Rhetorical Model with AI in the mix](../0-what-is-programming/assets/rhetorics-of-programming/the-big-picture-plus-ai.png)
   - LLM study strategies will be introduced alongside exercise types throughout
     the curriculum. General collaboration strategies, a template study prompt,
     and LLM context documents are provided in
@@ -27,8 +28,9 @@ Setting the right mindset for the learning process:
     development — where developers spend more time understanding and directing
     code than writing it from scratch.
 - **Spirals** — concepts will be revisited repeatedly at increasing depth.
-  Something that feels vague now will become concrete later. See
-  [`./assets/spiral-curriculum.png`](./assets/spiral-curriculum.png).
+  Something that feels vague now will become concrete later.
+
+  ![Spiral Curriculum](./assets/spiral-curriculum.png)
 - **Connections are concepts** — learning individual features isn't enough. The
   connections between features are themselves things you must learn and
   practice. See
