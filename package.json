@@ -56,7 +56,7 @@
   "devDependencies": {
     "@ls-lint/ls-lint": "^2.3.1",
     "cspell": "^9.7.0",
-    "eslint": "^9.18.0",
+    "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.0",
     "eslint-plugin-mdx": "^3.6.0",
     "husky": "^9.1.7",
