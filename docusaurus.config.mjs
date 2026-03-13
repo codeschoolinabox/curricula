@@ -37,6 +37,7 @@ const config = {
         path: 'curricula/welcome-to-programming',
         routeBasePath: 'welcome-to-programming',
         sidebarPath: './sidebars/welcome-to-programming.mjs',
+        exclude: ['**/to-use/**'],
       },
     ],
     // --- Add future curricula here ---

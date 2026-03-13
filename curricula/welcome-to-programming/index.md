@@ -73,7 +73,7 @@ Learning objectives use a hatching-progression emoji system to help learners pri
 - **🐥 Studied** — big-picture understanding, may not be confident completing exercises
 - **🐔 Bonus** — extension material for learners who've finished the rest
 
-See [`-1-getting-started/learning-objectives/priority-emojis.md`](./-1-getting-started/learning-objectives/priority-emojis.md) and an example in [`-1-getting-started/learning-objectives/example-welcome-to-js.md`](./-1-getting-started/learning-objectives/example-welcome-to-js.md).
+See [`-1-getting-started/learning-objectives/priority-emojis.md`](./-1-getting-started/learning-objectives/priority-emojis.md) for details.
 
 ### Generative AI in the Mix
 
