@@ -5,7 +5,7 @@ A collection of papers for study and inspiration. We can put all papers here and
 These papers are organized around our two guiding research questions:
 
 1. **What is code literacy and how is it developed?**
-2. **Which AI interaction patterns hurt code literacy development, and which help?**s
+2. **Which AI interaction patterns hurt code literacy development, and which help?**
 
 ---
 
@@ -79,6 +79,12 @@ Overview of the Four-Component Instructional Design model for training complex s
 
 Critically examines three persistent "urban legends" in education: (1) that "digital natives" naturally know how to learn from new media, (2) that education should match individual learning styles, and (3) that learners should be treated as self-educators given maximum control. Using educational and psychological research, the authors show each belief is poorly supported by evidence. The unifying theme is that learner preferences often don't align with effective learning methods — students may feel they learn better a certain way without actually learning better. Directly challenges the assumption that students can productively self-direct their AI-assisted learning, and cautions against giving learners tools they think are helping but that may undermine skill acquisition.
 
+### A Duet for One (Friston & Frith, 2014)
+
+**`A Duet for one - Sync Dove singing.pdf`** · [DOI: 10.1016/j.concog.2014.12.003](https://doi.org/10.1016/j.concog.2014.12.003)
+
+Neuroscience paper that formalizes communication as reciprocal inference between two agents sharing the same generative model. Using an active (Bayesian) inference framework, shows that successful communication emerges when agents alternate between attending to sensory input (listening) and attenuating it (speaking), producing generalized synchrony between their internal brain states. Demonstrated with birdsong simulations as proof of principle. The core insight — that communication requires shared predictive models and that the infinite regress of "modelling someone who is modelling you" is resolved by possessing the same model — provides theoretical grounding for understanding what makes human-AI communication succeed or fail. Relevant to Theory of Mind considerations in human-AI collaboration.
+
 ---
 
 ## Theme C: AI × Programming Education — Impact and Adaptation
@@ -139,6 +145,12 @@ Survey of 253 students at two large universities examining how much they trust G
 
 Classroom deployment study (SIGCSE TS 2026) comparing three AI assistant pacing styles in intro CS courses: Fast (direct answers), Medium (typical instructor preprompting), and Slow (Socratic-style). The slower-paced, Socratic-style AI assistant significantly increased learning, especially for students with less prior knowledge. Fast-paced interaction initially benefited more advanced students, but retention degraded enough to negate those gains. The medium-paced assistant showed no statistically significant improvements. Most actionable paper in the collection — directly suggests that offering a Socratic-style AI alternative could meaningfully improve learning outcomes even when students also use commercial fast-paced tools.
 
+### Quantifying Human-AI Synergy (Riedl & Weidmann, 2025)
+
+**`RiedlWeidmann2025-Human-AI-Synergy.pdf`**
+
+Introduces a novel Bayesian Item Response Theory framework to quantify human-AI synergy, separating individual and collaborative ability while controlling for task difficulty in interactive settings. Applied to human-AI benchmark data (n=667) across mathematics, physics, and moral reasoning tasks. Key finding: collaboration ability is distinct from individual problem-solving ability — users better able to infer and adapt to others' perspectives (Theory of Mind) achieve superior collaborative performance with AI, but not when working alone. Moreover, moment-to-moment fluctuations in perspective-taking influence AI response quality, highlighting the role of dynamic user factors. Directly relevant to understanding why some students benefit from AI collaboration while others don't, and suggests that perspective-taking skills may be a teachable prerequisite for productive human-AI interaction.
+
 ---
 
 ## Theme D: New Pedagogical Approaches for the AI Era
@@ -162,6 +174,18 @@ Proposes a natural synergy between "Explain in Plain English" (EiPE) questions a
 **`Prompting for Comprehension: Exploring the Intersection of Explain in Plain English estions and Prompt Writing.pdf`** · [DOI: 10.1145/3657604.3662039](https://doi.org/10.1145/3657604.3662039)
 
 Related to the above, presented at Learning @ Scale 2024. Explores and evaluates using students' EiPE responses as LLM prompts for auto-grading comprehension questions. Evaluates students' success in completing these tasks, their use of the feedback provided by the system, and their perceptions of the activity. Provides a scalable approach to creating code comprehension questions where feedback comes both through the code generated from a student's description and the results of test cases run on that code. Reinforces the idea that code comprehension and prompt-writing are deeply linked skills for the AI era.
+
+---
+
+## Theme E: Meta-CER — Research Methodology and Field Structure
+
+Papers about Computing Education Research as a field — its structure, divides, and how to bridge research and practice.
+
+### Computing Education Research as a Translational Transdiscipline (Cole, Malaise & Signer)
+
+**`computing-education-research-as-a-translational-transdiscipline_1676996171116_0.pdf`**
+
+Proposes a model of Translational Computing Education Research (TCER) to address two key divides in CER: the research/practice divide (where research insights fail to reach learners and practitioners) and the theory/design divide (where learning theories have limited influence on learning designs). Introduces an overarching model that characterizes CER as a unified translational field where theory and design are equally important but weighted differently depending on an activity's position along the research/practice continuum. Argues this model makes CER more approachable for interdisciplinary and non-academic collaborators. From WISE Lab at VUB Brussels. Relevant for framing how our own research committee bridges the gap between academic CER findings and practical curriculum design.
 
 ---
 
