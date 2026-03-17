@@ -7,10 +7,10 @@ const config = {
   favicon: 'img/favicon.ico',
 
   url: 'https://codeschoolinabox.github.io',
-  baseUrl: '/curricula/',
+  baseUrl: '/spiralearn/',
 
   organizationName: 'codeschoolinabox',
-  projectName: 'curricula',
+  projectName: 'spiralearn',
 
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
@@ -34,7 +34,7 @@ const config = {
       '@docusaurus/plugin-content-docs',
       {
         id: 'welcome-to-programming',
-        path: 'curricula/welcome-to-programming',
+        path: 'spiralearn/welcome-to-programming',
         routeBasePath: 'welcome-to-programming',
         sidebarPath: './sidebars/welcome-to-programming.mjs',
         exclude: ['**/to-use/**'],
@@ -45,13 +45,13 @@ const config = {
       '@docusaurus/plugin-content-docs',
       {
         id: 'welcome-to-algorithms',
-        path: 'curricula/welcome-to-algorithms',
+        path: 'spiralearn/welcome-to-algorithms',
         routeBasePath: 'welcome-to-algorithms',
         sidebarPath: './sidebars/welcome-to-algorithms.mjs',
         exclude: ['**/to-use/**'],
       },
     ],
-    // --- Add future curricula here ---
+    // --- Add future spiralearn here ---
   ],
 
   presets: [
@@ -85,7 +85,7 @@ const config = {
             position: 'left',
           },
           {
-            href: 'https://github.com/codeschoolinabox/curricula',
+            href: 'https://github.com/codeschoolinabox/spiralearn',
             label: 'GitHub',
             position: 'right',
           },
@@ -95,7 +95,7 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Curricula',
+            title: 'spiralearn',
             items: [
               {
                 label: 'Welcome to Programming',

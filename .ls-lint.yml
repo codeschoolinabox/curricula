@@ -1,5 +1,5 @@
 ls:
-  curricula:
+  spiralearn:
     .dir: kebab-case
     .js: kebab-case
     .mjs: kebab-case

@@ -1,4 +1,4 @@
-# codeschoolinabox curricula
+# Spir@Learn
 
 Educational content for learning to program, powered by
 [Docusaurus](https://docusaurus.io/).
@@ -31,19 +31,19 @@ Educational content for learning to program, powered by
 
 ## Content Structure
 
-Each curriculum lives in its own directory under `curricula/`:
+Each curriculum lives in its own directory under `spiralearn/`:
 
 ```text
-curricula/
+spiralearn/
   welcome-to-programming/
     0-what-is-programming/
     1-devs/
     2-devs-computers/
     3-devs-computers-users/
     4-devs-computers-users-agents/
+  welcome-to-algorithms/
     5-devs-computers-users-agents-algorithms/
     6-devs-computers-users-agents-algorithms-complexity/
-    context/
 ```
 
 ## Conventions
