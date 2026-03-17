@@ -22,7 +22,7 @@ replacing them.
 - Chapter 4 introduces AI as a collaborator — not just "use ChatGPT," but a
   framework for understanding what AI can and can't do, and how to work with it
   productively
-- Chapters 5–6 apply everything to algorithms and problem-solving
+- Ready for more? [Welcome to Algorithms](/welcome-to-algorithms/) continues with algorithmic thinking, functions, testing, and complexity analysis
 
 **You might notice** small linked emoji (🔬, 📐, 🧪) scattered through the
 content. These are evidence tags — they tell educators and researchers how

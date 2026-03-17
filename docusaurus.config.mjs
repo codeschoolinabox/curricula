@@ -2,7 +2,7 @@
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'CodeSchool in a Box: Curricula',
+  title: 'Spir@learn',
   tagline: 'What if best practice was common practice?',
   favicon: 'img/favicon.ico',
 
@@ -40,16 +40,18 @@ const config = {
         exclude: ['**/to-use/**'],
       },
     ],
+    // --- Welcome to Algorithms curriculum ---
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'welcome-to-algorithms',
+        path: 'curricula/welcome-to-algorithms',
+        routeBasePath: 'welcome-to-algorithms',
+        sidebarPath: './sidebars/welcome-to-algorithms.mjs',
+        exclude: ['**/to-use/**'],
+      },
+    ],
     // --- Add future curricula here ---
-    // [
-    //   '@docusaurus/plugin-content-docs',
-    //   {
-    //     id: 'next-curriculum',
-    //     path: 'curricula/next-curriculum',
-    //     routeBasePath: 'next-curriculum',
-    //     sidebarPath: './sidebars/next-curriculum.js',
-    //   },
-    // ],
   ],
 
   presets: [
@@ -70,11 +72,16 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'CodeSchool in a Box',
+        title: 'Spir@learn',
         items: [
           {
             to: '/welcome-to-programming/',
             label: 'Welcome to Programming',
+            position: 'left',
+          },
+          {
+            to: '/welcome-to-algorithms/',
+            label: 'Welcome to Algorithms',
             position: 'left',
           },
           {
@@ -93,6 +100,10 @@ const config = {
               {
                 label: 'Welcome to Programming',
                 to: '/welcome-to-programming/',
+              },
+              {
+                label: 'Welcome to Algorithms',
+                to: '/welcome-to-algorithms/',
               },
             ],
           },

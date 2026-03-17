@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Welcome to Programming
 
-A spiral curriculum carrying learners from no programming experience to an introduction to algorithms, using the minimal possible set of language features. Content is designed for JavaScript (browser) and Python, authored for [Study Lenses](./-1-getting-started/exercise-types.md) which generate a range of exercises from each example program. The curriculum prioritizes program comprehension before production, and continuously frames programming as an act of collaborative communication and meaning-making between developers, users, and a computer.
+A spiral curriculum carrying learners from no programming experience to effective AI collaboration, using the minimal possible set of language features. Content is designed for JavaScript (browser) and Python, authored for [Study Lenses](./-1-getting-started/exercise-types.md) which generate a range of exercises from each example program. The curriculum prioritizes program comprehension before production, and continuously frames programming as an act of collaborative communication and meaning-making between developers, users, and a computer.
 
 ## Foundational Frameworks
 
@@ -18,7 +18,7 @@ Source code is a text that simultaneously addresses three audiences:
 - **A computer** — through precise instructions for processing data (state, instruction, state, ...)
 - **End users** — through user interfaces and program behavior
 
-This rhetorical model (adapted from the classical writer/audience/text triangle) is the curriculum's organizing principle. Each chapter progressively adds an audience to the learner's awareness, building from developer-to-developer communication (Chapter 1) through the full triangle including users (Chapter 3). Chapter 4 introduces agents as a named collaborator in the rhetorical model (not a fourth audience — agents mediate between the development team and the source code). Chapters 5–6 then extend into algorithmic thinking and complexity analysis with full agent collaboration available.
+This rhetorical model (adapted from the classical writer/audience/text triangle) is the curriculum's organizing principle. Each chapter progressively adds an audience to the learner's awareness, building from developer-to-developer communication (Chapter 1) through the full triangle including users (Chapter 3). Chapter 4 introduces agents as a named collaborator in the rhetorical model (not a fourth audience — agents mediate between the development team and the source code). For algorithmic thinking and complexity analysis with full agent collaboration, see [Welcome to Algorithms](/welcome-to-algorithms/).
 
 ![The Rhetorical Model — source code as a text addressing three audiences](./0-what-is-programming/assets/rhetorics-of-programming/the-big-picture.png)
 
@@ -97,7 +97,7 @@ Generative AI is a reality of software development. Learners will use it — the
 - **Ch 2: Human-Led Exploring** — LLM as occasional study aid (Unistructural). LLM study strategies are introduced but limited to supporting individual concept discovery.
 - **Ch 3: Human-Led Applying** — LLM as practice partner (Multistructural). LLM strategies expand with exercise types, but learners drive the process.
 - **Ch 4: The AI Integration Threshold** — agents become named, concepts connect, all collaboration approaches become available (Relational). This chapter provides the mental model and collaboration framework that reframes all earlier LLM study strategies. Learners build theory of mind about LLMs as alien cognition and practice genuinely new collaboration skills: Perspective-Take, Calibrate, Articulate, Iterate, Delegate.
-- **Ch 5–6: Leveraging Structure** — algorithms and complexity with full agent collaboration (Extended Abstract). All collaboration approaches are available; learners choose strategically based on learning goals.
+For the Extended Abstract phase — algorithms and complexity with full agent collaboration — see [Welcome to Algorithms](/welcome-to-algorithms/).
 
 This progression maps directly to the SOLO taxonomy — the same framework used to understand how learners build conceptual structure in programming applies to how they should integrate AI:
 
@@ -115,7 +115,7 @@ The principle: you must build conceptual structure before you can leverage it wi
 
 ## Curriculum Map
 
-The curriculum is organized into 7 chapters. Each chapter adds an audience or dimension to the rhetorical model and introduces new skills:
+The curriculum is organized into 5 chapters. Each chapter adds an audience or dimension to the rhetorical model and introduces new skills:
 
 | Chapter                                                                                                      | Audiences in Play                        | Language Features                                                             | Key Skills Introduced                                                                                                                                                                                                                                                                                                 |
 | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -124,8 +124,6 @@ The curriculum is organized into 7 chapters. Each chapter adds an audience or di
 | [**2: Developers and Computers**](./2-devs-computers/index.md)| developers, computer                     | `console.log`/`print`, strings, variables, `assert`, operators, types         | Predictive stepping, trace tables, static vs. dynamic analysis; LLM study strategies expand with exercise types                                                                                                                                                                                                       |
 | [**3: Developers, Computers, and Users**](./3-devs-computers-users/index.md)| developers, computer, users              | `prompt`/`alert`/`confirm`/`input`, conditionals, `while`, `break`/`continue` | User stories, test cases, PBSI, variable roles, debugging, modifying, refactoring, code review, writing from spec; Gen AI in the rhetorical model (thought experiments), LLM as development partner                                                                                                                   |
 | [**4: Developers, Computers, Users, and Agents**](./4-devs-computers-users-agents/index.md) | developers, computer, users + agents | (none new) | 4 Levels of AI Abstraction, LLM theory of mind (alien cognition), collaboration skills (Perspective-Take, Calibrate, Articulate, Iterate, Delegate), SOLO-based AI integration decision framework; reframes all previous LLM study strategies through agent collaboration lens |
-| [**5: Developers, Computers, Users, Agents, and Algorithms**](./5-devs-computers-users-agents-algorithms/index.md) | developers, computer, users + agents + algorithms | `for...of`/`for...in`, `for`/`for...in range`                                 | Iteration (5.0), string algorithms (5.1–5.5), the analytical chain (smallest problem → growth → state → language features), the representation sequence (traces → prose → flowcharts → pseudocode → decision tables → loop invariants → state transitions → pattern schemas), exercise framework (ownership × abstraction), cross-decomposition comparison (5.6), regex as declarative paradigm (5.7); LLM for generating and critically evaluating algorithm representations |
-| [**6: Developers, Computers, Users, Agents, Algorithms, and Complexity**](./6-devs-computers-users-agents-algorithms-complexity/index.md) | developers, computer, users + agents + algorithms + complexity | (none new)                                 | Step-counting, growth rate reasoning, Big O notation; revisits Chapter 5 algorithms through the complexity lens |
 
 ## Key Pedagogical Milestones
 
@@ -135,11 +133,9 @@ Several skill frameworks thread across chapters, each building on the last:
 
 - **Purpose, Behavior, Strategy, Implementation (PBSI)** (introduced 3.4) — a 4-level lens for understanding programs. Purpose: why a program exists. Behavior: what users see. Strategy: the approach. Implementation: specific lines. This is the bridge to algorithmic thinking where Strategy becomes the primary focus. See [`3-devs-computers-users/describing-programs.md`](./3-devs-computers-users/describing-programs.md).
 
-- **Variable Roles** (introduced 3.4) — fixed value, stepper, flag, gatherer, holder, temporary. This vocabulary becomes essential for analyzing algorithm state in Chapter 5. See [`3-devs-computers-users/naming-variables.md`](./3-devs-computers-users/naming-variables.md).
+- **Variable Roles** (introduced 3.4) — fixed value, stepper, flag, gatherer, holder, temporary. This vocabulary carries forward into algorithmic thinking in [Welcome to Algorithms](/welcome-to-algorithms/). See [`3-devs-computers-users/naming-variables.md`](./3-devs-computers-users/naming-variables.md).
 
 - **Agent Collaboration Framework** (Chapter 4) — theory of mind about LLMs as alien cognition, grounded in the 4 Levels of AI Abstraction. Collaboration skills extend the comprehension-before-production progression to agent interaction: transferred skills (Read, Trace, Describe applied to LLM output) and genuinely new skills (Perspective-Take, Calibrate, Articulate, Iterate, Delegate). The SOLO-based decision framework helps learners choose when to use AI-led vs. human-led approaches based on their current learning position. This chapter is the AI Integration Threshold — it reframes all earlier LLM study strategies by providing the _why_ behind them.
-
-- **The Representation Sequence** (Chapter 5) — each algorithm is revisited through progressively abstract behavioral representations: trace tables → prose strategy descriptions → flowcharts → pseudocode → decision tables → loop invariants → state transitions → algorithmic pattern schemas. Exercise design is informed by the Abstraction Transition Taxonomy (Cutts et al.), which structures exercises as transitions between abstraction levels — adjacent, distant, and "why" — ensuring learners don't just produce representations but understand the relationships between them. Complexity analysis (step-counting, Big O) is separated into Chapter 6. See [`5-devs-computers-users-agents-algorithms/assets/abstraction-transition-taxonomy.pdf`](./5-devs-computers-users-agents-algorithms/assets/abstraction-transition-taxonomy.pdf).
 
 - **Studying with LLMs** (introduced Chapter 0, practiced throughout, formalized Chapter 4) — LLMs as study partners, not substitutes for comprehension. General collaboration strategies and a template study prompt are introduced early; exercise-type-specific LLM strategies accumulate as new exercise types appear across chapters. Chapter 4 provides the theoretical framework that reframes all earlier strategies — earlier tips were scaffolding; Chapter 4 is the formal treatment. See [`-1-getting-started/studying-with-llms/`](./-1-getting-started/studying-with-llms/).
 
@@ -165,13 +161,9 @@ The full rhetorical triangle. Users enter the picture with I/O, programs gain va
 
 The AI Integration Threshold. Agents become a named collaborator in the rhetorical model. Learners build a mental model of LLMs as alien cognition (4 Levels of AI Abstraction), then practice collaboration skills through a spiral that revisits all previous chapters with an LLM collaborator: prose-only interaction (4.1), developer-facing code (4.2, revisits Ch 1), computer-facing code (4.3, revisits Ch 2), and user-facing programs (4.4, revisits Ch 3). A brief reflection formalizes the collaboration vocabulary (4.5), and a vibecoding sendoff (4.6) proves the chapter's thesis through forensic analysis of unguided AI collaboration. Seven subchapters: what is an LLM (4.0), collaborating in prose (4.1), agents and developer communication (4.2), agents and computer communication (4.3), agents and user communication (4.4), looking back/forward (4.5), vibecoding (4.6).
 
-### [Chapter 5: Developers, Computers, Users, Agents, and Algorithms](./5-devs-computers-users-agents-algorithms/) _(work in progress)_
+## What's Next
 
-Not a qualitative break — algorithms are still wrapped in the same user-facing program pattern (validate input → process → output). What's new is the focus on Strategy as the primary object of study, organized by an analytical chain (smallest problem → growth pattern → state → language features). The chapter contains its own internal spiral (the "spider web model"): concentric circles represent growth pattern complexity (each subchapter), radial lines represent abstraction levels (the 8 behavioral representation passes), and every subchapter traverses all radial lines. Eight subchapters: iteration setup (5.0), each element independently (5.1), adjacent relationships (5.2), composed scans (5.3), global relationships (5.4), two perspectives (5.5), "can we do better?" as qualitative bridge to Chapter 6 (5.6), and regex as a declarative paradigm (5.7).
-
-### [Chapter 6: Developers, Computers, Users, Agents, Algorithms, and Complexity](./6-devs-computers-users-agents-algorithms-complexity/) _(to be designed)_
-
-Complexity analysis separated from Chapter 5's behavioral representations. Where Chapter 5 asks "what does this algorithm do?", Chapter 6 asks "how much work does it do?" Revisits all Chapter 5 algorithms through the complexity lens: step-counting, growth rate reasoning, and Big O notation. Ends with a fun interlude exploring space vs. time through absurd algorithms — bogosort, sleep sort, Stalin sort, goalpost sort, and the 2025 proof that space is fundamentally cheaper than time (6.6). To be designed after Chapter 5 is implemented.
+After completing this curriculum, continue with [Welcome to Algorithms](/welcome-to-algorithms/) — algorithmic thinking, functions, unit testing, and complexity analysis with full agent collaboration available.
 
 ## Language and Platform Notes
 
@@ -184,9 +176,6 @@ Complexity analysis separated from Chapter 5's behavioral representations. Where
 ## Status and Open Questions
 
 - **Chapter 4**: Chapter structure designed (4.0–4.6). Mental model foundation, collaboration skills framework, and spiral structure specified. Subchapter content drafted.
-- **Chapter 5**: Subchapter progression designed (5.0–5.7). Algorithms selected, analytical chain and exercise framework specified. Implementation of individual algorithm exercises is ongoing.
-- **Chapter 6**: To be designed after Chapter 5 is implemented. Placeholder folder created.
-- **Representation pass count**: The 8-pass behavioral sequence is provisional. Some passes may be removed or consolidated after testing which ones add genuine insight at each difficulty level.
 - **Python track completeness**: The Python cheat sheet needs further development (some sections still contain JS syntax).
 - **IDE requirement in Chapter 1**: Should the curriculum require IDEs from the start, or allow other text editing approaches?
 - **Code sharing mechanism**: GitHub Gists are proposed for Chapter 1 but introduce a dependency. This needs discussion.

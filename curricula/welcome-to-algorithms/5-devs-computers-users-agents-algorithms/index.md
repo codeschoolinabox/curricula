@@ -12,19 +12,19 @@ The chapter also introduces a **representation sequence**: a progression of incr
 
 ### Chapter 4's Internal Spiral: The Spider Web Model
 
-The outer curriculum spirals through audiences (Chapters 0-4). Chapter 4 contains a **fresh spiral within that spiral**, organized like a spider web:
+The outer curriculum spirals through audiences (Chapters 0-5). Chapter 5 contains a **fresh spiral within that spiral**, organized like a spider web:
 
-- **Concentric circles** represent algorithm complexity levels. Each subchapter (4.1, 4.2, ...) sits on a circle, moving outward from the simplest algorithms to the most complex techniques. The complexity comes from the algorithmic technique itself — not from language features, which are all introduced by 4.0.
+- **Concentric circles** represent algorithm complexity levels. Each subchapter (5.1, 5.2, ...) sits on a circle, moving outward from the simplest algorithms to the most complex techniques. The complexity comes from the algorithmic technique itself — not from language features, which are all introduced by 5.0.
 
 - **Radial lines** represent representation/abstraction levels. Every radial line extends from the center outward, taking the learner through a journey of abstraction: prose, flowcharts, pseudocode, decision tables, loop invariants, state transitions, pattern schemas, and finally complexity reasoning.
 
-- **Every subchapter traverses ALL radial lines.** A learner studying a simple accumulation algorithm in 4.1 practices the same full set of representations as a learner studying a two-pointer technique in a later subchapter. The representations are the constant; algorithm complexity is the variable.
+- **Every subchapter traverses ALL radial lines.** A learner studying a simple accumulation algorithm in 5.1 practices the same full set of representations as a learner studying a two-pointer technique in a later subchapter. The representations are the constant; algorithm complexity is the variable.
 
 This means the representations themselves are practiced repeatedly at increasing algorithmic difficulty, just as the outer curriculum revisits language features at increasing complexity. Each representation becomes more natural and more revealing as the learner encounters it across multiple algorithms — and each algorithm becomes more deeply understood as the learner views it through multiple representational lenses. The connections between representations, and between algorithms, are themselves learning objectives (following the "connections are concepts" principle).
 
 ### Language Feature Constraints
 
-The curriculum maxes out at this set of features. Nothing new is added after Chapter 4.0:
+The curriculum maxes out at this set of features. Nothing new is added after Chapter 5.0 (iteration constructs), except for functions in 5.6–5.8:
 
 - Variables and primitive types
 - Minimal operators (concatenation, basic arithmetic, logical, comparison)
@@ -35,8 +35,9 @@ The curriculum maxes out at this set of features. Nothing new is added after Cha
 - User string I/O (`prompt`/`alert`/`confirm` or `input`/`print`)
 - `console.log` / `print`
 - `break` / `continue`
+- **Functions** (introduced in 5.6–5.8): arrow function expressions, parameters, return values, JSDoc, `console.assert`, unit testing (`describe`/`it`/`expect`)
 
-Notable exclusions: arrays (beyond what strings provide), functions, objects. These are covered in the next curriculum module.
+Notable exclusions: arrays (beyond what strings provide), objects, closures, higher-order functions, side effects. Functions are limited to pure functions on strings — wrapping the algorithms from 5.1–5.5.
 
 ### The Representation Sequence: Abstraction Levels
 
@@ -55,7 +56,7 @@ Each algorithm is revisited through progressively abstract representations. The 
 
 Each pass, the learner understands the same algorithm differently. The sequence connects the most abstract behavioral representation (pattern schemas) back to the most concrete skill (tracing).
 
-**Complexity analysis belongs to Chapter 5.** Step-counting, growth rate reasoning, and Big O notation are qualitatively different from behavioral representations — they measure HOW MUCH WORK an algorithm does rather than describing WHAT it does. Chapter 4 builds qualitative intuitions about efficiency (especially in 4.6), which Chapter 5 formalizes with dedicated tools. See `../6-devs-computers-users-agents-algorithms-complexity/to-use/complexity-is-counting/` for the exercise methodology that Chapter 5 will use.
+**Complexity analysis belongs to Chapter 6.** Step-counting, growth rate reasoning, and Big O notation are qualitatively different from behavioral representations — they measure HOW MUCH WORK an algorithm does rather than describing WHAT it does. Chapter 6 formalizes these with dedicated tools. See `../6-devs-computers-users-agents-algorithms-complexity/to-use/complexity-is-counting/` for the exercise methodology that Chapter 6 will use.
 
 The representation pass count (currently 8) is provisional. Some passes may be removed or consolidated after testing which ones add genuine insight at each subchapter's difficulty level.
 
@@ -101,21 +102,35 @@ This works because typing in an input forces the question "what do I expect?" be
 
 **Test case sequencing is a deliberate pedagogical tool.** The order of test cases is a curated narrative: a happy-path case, then an edge case that breaks a naive mental model, then one that reveals a subtlety. Learners working through them in order experience a sequence of productive surprises.
 
+### The Functions Arc (5.6–5.8): Let's Name, Wrap, and Test
+
+After the algorithm pattern subchapters (5.0–5.5), the chapter shifts focus. The algorithms are understood. Now we give them a new form: named, documented, testable functions.
+
+The arc follows an intention-first progression that mirrors patterns from earlier chapters:
+
+1. **5.6 JSDoc** — describe the contract FIRST (intention before implementation, as with comments-before-code in Ch1 and structured program descriptions in Ch3)
+2. **5.7 Functions** — implement the function to fulfill the JSDoc contract, with inline assertions (`console.assert`) for verification and scope exercises
+3. **5.8 Unit Testing** — formalize verification with `describe`/`it`/`expect`, progressive test writing, red-green-refactor
+
+The functions arc wraps algorithms learners already understand — this is NOT new algorithmic thinking, it's restructuring known code into a testable, reusable form. Functions are limited to pure functions on strings (no arrays, no closures, no side effects), preserving the chapter's language constraints.
+
+This arc is essential preparation for Chapter 6. With named, documented, tested functions, learners can meaningfully compare the _efficiency_ of different implementations that satisfy the same contract — the same JSDoc, the same tests, different strategies, different amounts of work.
+
 ### The Analytical Chain: Smallest Problem → Growth → State → Language Features
 
 > This chain of thought may need adjustment! Should it place state before growth? Revisit with some hand-run practice to feel it out.  
 >  There was an earlier version that felt more natural but claude overwrote it then crashed and lost all context or memory.
 
-The organizing principle for Chapter 4's subchapter progression is a chain of reasoning learners apply to every algorithm. It is front-loaded in 4.1 — taught explicitly with the simplest algorithms, then reinforced in every subsequent subchapter. The chain applies both when STUDYING an existing algorithm ("what IS the smallest case? how DOES it grow?") and when DESIGNING one ("what SHOULD the smallest case be? how SHOULD it grow?").
+The organizing principle for Chapter 5's subchapter progression is a chain of reasoning learners apply to every algorithm. It is front-loaded in 5.1 — taught explicitly with the simplest algorithms, then reinforced in every subsequent subchapter. The chain applies both when STUDYING an existing algorithm ("what IS the smallest case? how DOES it grow?") and when DESIGNING one ("what SHOULD the smallest case be? how SHOULD it grow?").
 
 1. **What is the smallest version of this problem?** What happens with 0 elements? 1 element? 2? The smallest case reveals: what the answer is when there's (almost) nothing to process, what state the algorithm must start with, and what edge cases exist. This is a ritualized exercise: for every algorithm, learners try empty string, one character, two characters BEFORE studying the full implementation.
 
 2. **How does the solution grow as the input grows?** When we go from n to n+1 elements, what new work happens? This growth pattern is the subproblem structure — the type of decomposition that characterizes the algorithm. Each subchapter introduces a new growth pattern:
-   - 4.1: Each element processed independently (growth adds one isolated step)
-   - 4.2: Each element depends on the previous (growth extends a chain)
-   - 4.3: Multiple complete passes compose (growth requires solving A before B)
-   - 4.4: Each element spawns a scan of others (growth is nested)
-   - 4.5: Two perspectives converge (growth shrinks from both ends)
+   - 5.1: Each element processed independently (growth adds one isolated step)
+   - 5.2: Each element depends on the previous (growth extends a chain)
+   - 5.3: Multiple complete passes compose (growth requires solving A before B)
+   - 5.4: Each element spawns a scan of others (growth is nested)
+   - 5.5: Two perspectives converge (growth shrinks from both ends)
 
 3. **What does each step need to remember and see?** State (what carries between iterations) and scope of attention (what each iteration examines). Both follow from the growth pattern. Variable roles from prior chapters (gatherer, holder, flag, stepper) help learners name the state they see.
 
@@ -125,7 +140,7 @@ The organizing principle for Chapter 4's subchapter progression is a chain of re
 
 **Why smallest-problem-first:** (1) Concrete and actionable — learners literally run 0, 1, 2-element inputs. (2) Connects directly to the predict-execute-compare cycle from earlier chapters. (3) The chain maps to recursion: smallest problem → base case, growth pattern → recursive step, state → parameters. This is a design constraint on the recursion module: it must use the same vocabulary.
 
-**Vocabulary note:** "Smallest problem" and "growth pattern" are the learner-facing terms in 4.1–4.2. "Subproblem structure" and "decomposition type" are introduced as formal vocabulary in 4.3+ when growth patterns become complex enough to need names. Both refer to the same thing — how an algorithm's work relates to input size. Learners encounter the concrete experience first, then learn the formal vocabulary. This also operationalizes PBSI's "Strategy" level: strategy = growth pattern + state design + scope + realization.
+**Vocabulary note:** "Smallest problem" and "growth pattern" are the learner-facing terms in 5.1–5.2. "Subproblem structure" and "decomposition type" are introduced as formal vocabulary in 5.3+ when growth patterns become complex enough to need names. Both refer to the same thing — how an algorithm's work relates to input size. Learners encounter the concrete experience first, then learn the formal vocabulary. This also operationalizes PBSI's "Strategy" level: strategy = growth pattern + state design + scope + realization.
 
 ### Observable Dimensions
 
@@ -137,7 +152,7 @@ These are what learners point to in actual code. They're consequences of the ana
 4. **Iteration structure** — sequential, multi-pass, nested, two-pointer (follows from: how subproblems are sequenced)
 5. **Output construction** — boolean, numeric, string transformation
 
-Growth rate analysis (O(n), O(n²), etc.) is an observable dimension that belongs to Chapter 5. In Chapter 4, growth rate is observed qualitatively in 4.6 ("this decomposition does more work") but not formally measured.
+Growth rate analysis (O(n), O(n²), etc.) is an observable dimension that belongs to Chapter 6. In Chapter 5, growth rate is observed qualitatively but not formally measured — Chapter 6.1 ("Can We Do Better?") creates the motivating question that Chapter 6 answers with rigor.
 
 ### Exercise Framework
 
@@ -200,50 +215,54 @@ This inverts the typical AI-in-education concern. Instead of learners passively 
 - [5.3: Composed Scans](./5.3-composed-scans.md)
 - [5.4: Global Element Relationships](./5.4-global-element-relationships.md)
 - [5.5: Two Independent Perspectives](./5.5-two-independent-perspectives.md)
-- [5.6: Can We Do Better?](./5.6-can-we-do-better.md) — qualitative bridge to Chapter 6
-- [5.7: Regex — A Different Paradigm](./5.7-regex.md)
+- [5.6: JSDoc — Describing the Contract](./5.6-jsdoc.md)
+- [5.7: Functions — Naming, Wrapping, and Verifying](./5.7-functions.md)
+- [5.8: Unit Testing — Formalizing Verification](./5.8-unit-testing.md)
+- [5.9: Regex — A Different Paradigm](./5.9-regex.md)
 
 ## Subchapter Summary Table
 
-Growth pattern drives subchapter boundaries; decisions drive the internal gradient within each subchapter. State, scope, and iteration are consequences. Growth rate analysis belongs to Chapter 5.
+Growth pattern drives subchapter boundaries; decisions drive the internal gradient within each subchapter. State, scope, and iteration are consequences. Growth rate analysis belongs to Chapter 6.
 
 | Sub | Title                        | Growth Pattern              | State                 | Scope                | Decisions (gradient)                          | Iteration      |
 | --- | ---------------------------- | --------------------------- | --------------------- | -------------------- | --------------------------------------------- | -------------- |
-| 4.0 | Iteration Setup              | —                           | —                     | —                    | —                                             | all types      |
-| 4.1 | Each Element Independently   | independent steps           | 1 gatherer            | current / fixed ref  | none → filter → two-branch                    | single pass    |
-| 4.2 | Adjacent Relationships       | dependent chain             | gatherer + holder(s)  | current vs. previous | simple state-dep → multi-outcome → compound   | single pass    |
-| 4.3 | Composed Scans               | hierarchical (A then B)     | cross-pass results    | prior scan info      | per-pass familiar, inter-pass new             | multi-pass     |
-| 4.4 | Global Relationships         | nested (outer spawns inner) | multiple interacting  | any/all positions    | simple nested → nested+exit → nested+tracking | nested loops   |
-| 4.5 | Two Perspectives             | converging (shrinking)      | 2 steppers            | two positions        | symmetric → asymmetric                        | dual-var while |
-| 4.6 | Can We Do Better?            | (qualitative comparison)    | observing differences | decompositions       | observe → articulate → imagine                | (analysis)     |
-| 4.7 | Regex — A Different Paradigm | don't decompose — declare   | (implicit)            | pattern              | —                                             | —              |
+| 5.0 | Iteration Setup              | —                           | —                     | —                    | —                                             | all types      |
+| 5.1 | Each Element Independently   | independent steps           | 1 gatherer            | current / fixed ref  | none → filter → two-branch                    | single pass    |
+| 5.2 | Adjacent Relationships       | dependent chain             | gatherer + holder(s)  | current vs. previous | simple state-dep → multi-outcome → compound   | single pass    |
+| 5.3 | Composed Scans               | hierarchical (A then B)     | cross-pass results    | prior scan info      | per-pass familiar, inter-pass new             | multi-pass     |
+| 5.4 | Global Relationships         | nested (outer spawns inner) | multiple interacting  | any/all positions    | simple nested → nested+exit → nested+tracking | nested loops   |
+| 5.5 | Two Perspectives             | converging (shrinking)      | 2 steppers            | two positions        | symmetric → asymmetric                        | dual-var while |
+| 5.6 | JSDoc — The Contract         | —                           | —                     | —                    | —                                             | —              |
+| 5.7 | Functions — Wrap & Verify    | —                           | local scope           | function body        | —                                             | —              |
+| 5.8 | Unit Testing                 | —                           | —                     | —                    | —                                             | —              |
+| 5.9 | Regex — A Different Paradigm | don't decompose — declare   | (implicit)            | pattern              | —                                             | —              |
 
 ## Algorithm Family Distribution
 
 The three families emerge across subchapters rather than being taught as blocks:
 
-- **Traversal/accumulation**: primary family in 4.1 and 4.2, where the focus is on what you do as you traverse
-- **Composed operations**: introduced in 4.3, where multiple traversals are combined
-- **String searching**: enters in 4.4 with substring search, the motivating use case for nested iteration
-- **Two-pointer**: arrives in 4.5 as part of the convergence theme
+- **Traversal/accumulation**: primary family in 5.1 and 5.2, where the focus is on what you do as you traverse
+- **Composed operations**: introduced in 5.3, where multiple traversals are combined
+- **String searching**: enters in 5.4 with substring search, the motivating use case for nested iteration
+- **Two-pointer**: arrives in 5.5 as part of the convergence theme
 
 The "pattern schema" representation is where learners explicitly name these families and recognize that algorithms from different subchapters belong to the same structural family.
 
 ## Key Cross-Subchapter Comparison Moments
 
-These are the "connections are concepts" moments — exercises that explicitly bridge subchapters. Each reveals how the same problem (or similar problems) can be decomposed differently. They continue the "comparing two programs that produce the same output but work differently" skill from Chapters 0-3, but the comparison evolves: in earlier chapters it's "same behavior, different implementation." In Chapter 4 it becomes "same behavior, different growth pattern / decomposition."
+These are the "connections are concepts" moments — exercises that explicitly bridge subchapters. Each reveals how the same problem (or similar problems) can be decomposed differently. They continue the "comparing two programs that produce the same output but work differently" skill from Chapters 0-3, but the comparison evolves: in earlier chapters it's "same behavior, different implementation." In Chapter 5 it becomes "same behavior, different growth pattern / decomposition."
 
-1. **4.1 → 4.2**: "count vowels" vs. "count runs" — same counter pattern, but the subproblem is independent in 4.1 ("is this a vowel?") vs. dependent in 4.2 ("did the character change?"). Same code shape, different decomposition — and state requirements follow directly.
-2. **4.2 → 4.3**: "longest run" (one pass, sequential dependent subproblems) vs. "most common vowel" (multiple passes, hierarchical decomposition) — when does local dependency suffice, and when must you decompose hierarchically?
-3. **4.3 → 4.4**: "does A contain all chars in B?" can be decomposed hierarchically (sequential scans, 4.3) or as nested subproblems (nested loops, 4.4) — comparing the two reveals the relationship between hierarchical and nested decomposition.
-4. **4.2 → 4.4**: "longest run" (single pass, sequential dependent) vs. "all unique" (nested subproblems) — same question type (character relationships), different decomposition, dramatically different amounts of work. The efficiency question emerges from the decomposition choice.
-5. **4.4 → 4.5**: Palindrome via nested subproblems (4.4-style) vs. converging subproblems (4.5) — dramatically less work. A different decomposition of the same problem eliminates redundant work.
-6. **4.1/4.4/4.5 → 4.6**: Palindrome three ways — independent subproblems building reversed string (4.1), nested subproblems comparing pairs (4.4), converging subproblems from both ends (4.5). Same behavior, three decompositions. The capstone comparison that 4.6 unpacks qualitatively: _which feels like more work, and why?_ (Formal complexity comparison in Chapter 5.)
-7. **4.4 → 4.6**: Substring search — "what information are we throwing away on mismatch?" "All unique" — "what data structure would eliminate redundant sub-problems?" 4.6 turns these into decomposition reasoning exercises.
-8. **4.1–4.6 → 4.7**: Regex solutions to problems previously solved iteratively. Declarative pattern vs. explicit decomposition — a paradigm comparison that asks: what happens when you don't decompose at all?
+1. **5.1 → 5.2**: "count vowels" vs. "count runs" — same counter pattern, but the subproblem is independent in 5.1 ("is this a vowel?") vs. dependent in 5.2 ("did the character change?"). Same code shape, different decomposition — and state requirements follow directly.
+2. **5.2 → 5.3**: "longest run" (one pass, sequential dependent subproblems) vs. "most common vowel" (multiple passes, hierarchical decomposition) — when does local dependency suffice, and when must you decompose hierarchically?
+3. **5.3 → 5.4**: "does A contain all chars in B?" can be decomposed hierarchically (sequential scans, 5.3) or as nested subproblems (nested loops, 5.4) — comparing the two reveals the relationship between hierarchical and nested decomposition.
+4. **5.2 → 5.4**: "longest run" (single pass, sequential dependent) vs. "all unique" (nested subproblems) — same question type (character relationships), different decomposition, dramatically different amounts of work. The efficiency question emerges from the decomposition choice.
+5. **5.4 → 5.5**: Palindrome via nested subproblems (5.4-style) vs. converging subproblems (5.5) — dramatically less work. A different decomposition of the same problem eliminates redundant work.
+6. **5.1/5.4/5.5 → 6.1**: Palindrome three ways — independent subproblems building reversed string (5.1), nested subproblems comparing pairs (5.4), converging subproblems from both ends (5.5). Same behavior, three decompositions. Chapter 6.1 unpacks this qualitatively: _which feels like more work, and why?_ With functions from 5.7, each decomposition is a named, tested function — making the comparison concrete.
+7. **5.4 → 6.1**: Substring search — "what information are we throwing away on mismatch?" "All unique" — "what data structure would eliminate redundant sub-problems?" Chapter 6.1 turns these into decomposition reasoning exercises.
+8. **5.1–5.5 → 5.9**: Regex solutions to problems previously solved iteratively. Declarative pattern vs. explicit decomposition — a paradigm comparison that asks: what happens when you don't decompose at all? With 5.6–5.8's tools, both solutions can share the same JSDoc and tests.
 
 ## Design Resources
 
 - [`./assets/abstraction-transition-taxonomy.pdf`](./assets/abstraction-transition-taxonomy.pdf) — the AT Taxonomy paper informing exercise design (adjacent/distant transitions, how/why question types)
-- `../6-devs-computers-users-agents-algorithms-complexity/to-use/complexity-is-counting/` — the exercise methodology for Chapter 5's complexity analysis
+- `../6-devs-computers-users-agents-algorithms-complexity/to-use/complexity-is-counting/` — the exercise methodology for Chapter 6's complexity analysis
 - The pre-algorithm skills from Chapters 0-3 (predictive stepping, variable tracing, PBSI, describing programs, comparing programs with same output but different strategies)

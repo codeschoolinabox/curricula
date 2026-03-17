@@ -33,8 +33,8 @@ directory. It serves dual purpose:
 | Ch 2: Devs Talk to Computers (Variables) | Stub                    | —                                                              |
 | Ch 3: Devs Talk to Users                 | Stub                    | —                                                              |
 | **Ch 4: Devs, Computers, Users, Agents** | **Detailed**            | **Human-AI collaboration, perspective-taking, misconceptions** |
-| Ch 5: Algorithms                         | Stub                    | —                                                              |
-| Ch 6: Complexity                         | Stub                    | —                                                              |
+
+For Chapters 5–6 (algorithms, complexity) research framing, see [Welcome to Algorithms](/welcome-to-algorithms/research-framing).
 
 Chapter 4's research framing is the most developed — it's currently the most
 active translational artifact. Other chapters have stubs that will grow as they

@@ -10,7 +10,7 @@ sidebar_position: 99
 - The "cheating" algorithms (Stalin, goalpost, intelligent design) connect back to Chapter 3's discussion of specs, behavior, and what "correct" means. They're funny because they expose that even "correctness" is defined by a spec — and a spec can be wrong, gamed, or absurd.
 - The Williams result is the punchline, not the starting point. Build from concrete absurdity to abstract insight, not the other way around.
 - This subchapter partially answers the open question about space complexity (see chapter index): it gets introduced through the fun diversion's back door, in a context where it's immediately meaningful. Formal space complexity analysis can wait for a more advanced curriculum.
-- The constraint relaxation (arrays, functions) is intentional. Like regex in 5.7 and plaintext programs in 3.6, the fun-diversion shifts the rules. The point is the resource analysis, not the data structures.
+- The constraint relaxation (arrays, functions) is intentional. Like regex in 5.9 and plaintext programs in 3.6, the fun-diversion shifts the rules. The point is the resource analysis, not the data structures.
 
 ## Open Questions
 

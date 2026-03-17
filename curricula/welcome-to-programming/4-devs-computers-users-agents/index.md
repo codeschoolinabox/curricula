@@ -30,7 +30,7 @@ The outer curriculum spiral mirrors a learning progression for AI integration:
 - **Ch 2:** Human-Led Exploring — LLM as occasional study aid
 - **Ch 3:** Human-Led Applying — LLM as practice partner
 - **Ch 4:** The AI Integration Threshold — agents become named, concepts connect, all collaboration approaches become available
-- **Ch 5–6:** Leveraging Structure — algorithms and complexity with full agent collaboration
+- **[Welcome to Algorithms](/welcome-to-algorithms/):** Leveraging Structure — algorithms and complexity with full agent collaboration
 
 LLMs were already present in earlier chapters, but in limited capacities: as a support tool for human-led skill building, not as a full integrated skillset. This chapter reframes those earlier tips by providing the mental model and collaboration framework that makes them make sense retroactively. Earlier content stays, but learners now have the framework to reorganize and deepen their understanding.
 
