@@ -18,6 +18,7 @@ Setting the right mindset for the learning process:
     software context. It is not a fourth audience.
 
     ![The Rhetorical Model with AI in the mix](../0-what-is-programming/assets/rhetorics-of-programming/the-big-picture-plus-ai.png)
+
   - LLM study strategies will be introduced alongside exercise types throughout
     the curriculum. General collaboration strategies, a template study prompt,
     and LLM context documents are provided in
@@ -27,15 +28,16 @@ Setting the right mindset for the learning process:
     comprehension-first approach prepares you for the emerging shape of software
     development — where developers spend more time understanding and directing
     code than writing it from scratch.
+
 - **Spirals** — concepts will be revisited repeatedly at increasing depth.
   Something that feels vague now will become concrete later.
 
   ![Spiral Curriculum](./assets/spiral-curriculum.png)
+
 - **Connections are concepts** — learning individual features isn't enough. The
   connections between features are themselves things you must learn and
   practice. See
   [`./connections-are-concepts.md`](./connections-are-concepts.md).
 - **Study Lenses** — exercises are generated from code. The same program can be
   studied in many different ways (tracing, marking syntax, filling blanks,
-  Parsons problems, etc.). See
-  [`./exercise-types.md`](./exercise-types.md).
+  Parsons problems, etc.). See [`./exercise-types.md`](./exercise-types.md).

@@ -565,8 +565,8 @@ curly braces.
 ```js
 let outer = 'declared outside the block';
 {
-  outer = 'reassigned in the block';
-  let inner = 'only defined in the block';
+	outer = 'reassigned in the block';
+	let inner = 'only defined in the block';
 }
 console.log(outer); // 'reassigned in ...'
 console.log(inner); // ReferenceError
@@ -605,21 +605,21 @@ Execute different blocks of code depending on whether an expression evaluates to
 
 ```js
 if (anExpression) {
-  // path 1: if anExpression is true
+	// path 1: if anExpression is true
 }
 
 if (anExpression) {
-  // path 1: if anExpression is true
+	// path 1: if anExpression is true
 } else {
-  // path 2: if anExpression is false
+	// path 2: if anExpression is false
 }
 
 if (firstExpression) {
-  // path 1: if firstExpression is true
+	// path 1: if firstExpression is true
 } else if (secondExpression) {
-  // path 2: if secondExpression is true
+	// path 2: if secondExpression is true
 } else {
-  // path 3: if both expressions are false
+	// path 3: if both expressions are false
 }
 ```
 
@@ -671,7 +671,7 @@ Repeat a block of code as long as an expression evaluates to `true`.
 
 ```js
 while (anExpression) {
-  // loop body
+	// loop body
 }
 
 // next line after the loop
@@ -709,7 +709,7 @@ the string.
 
 ```js
 for (let character of 'hello') {
-  // loop body
+	// loop body
 }
 
 // next line after the loop
@@ -743,8 +743,8 @@ Exit a loop immediately and skip to the next line after the loop.
 
 ```js
 while (anExpression) {
-  break; // exit the loop immediately
-  // this line is not executed
+	break; // exit the loop immediately
+	// this line is not executed
 }
 
 // next line after the loop
@@ -767,8 +767,8 @@ WHILE: anExpression
 
 ```js
 for (let character of 'hello') {
-  break; // exit the loop immediately
-  // this line is not executed
+	break; // exit the loop immediately
+	// this line is not executed
 }
 
 // next line after the loop
@@ -802,8 +802,8 @@ Skip the rest of the loop body and go to the next iteration.
 
 ```js
 while (anExpression) {
-  continue; // skip to the the loop check
-  // this line is not executed
+	continue; // skip to the the loop check
+	// this line is not executed
 }
 
 // next line after the loop
@@ -826,8 +826,8 @@ WHILE: anExpression
 
 ```js
 for (let character of 'hello') {
-  continue; // skip to the next character
-  // this line is not executed
+	continue; // skip to the next character
+	// this line is not executed
 }
 
 // next line after the loop

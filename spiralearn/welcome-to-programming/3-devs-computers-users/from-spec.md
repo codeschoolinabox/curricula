@@ -307,8 +307,8 @@ one goal:
 // the initial value is not null, so the loop never executes
 let input = '';
 while (input === null) {
-  input = prompt('enter something');
-  console.log(input);
+	input = prompt('enter something');
+	console.log(input);
 }
 console.log(input);
 
@@ -353,8 +353,8 @@ console.log(input);
 let input = null;
 // oops,  used an assignment operator instead of a comparison
 while ((input = null)) {
-  input = prompt('enter something');
-  console.log(input);
+	input = prompt('enter something');
+	console.log(input);
 }
 console.log(input);
 
@@ -398,8 +398,8 @@ console.log(input);
 
 let input = null;
 while (input === null) {
-  input = prompt('enter something');
-  console.log(input);
+	input = prompt('enter something');
+	console.log(input);
 }
 console.log(input);
 
@@ -452,8 +452,8 @@ Notice that the _Data After_ one goal is the _Data Before_ the next goal!
 
 let input = null;
 while (input === null) {
-  input = prompt('enter something');
-  console.log(input);
+	input = prompt('enter something');
+	console.log(input);
 }
 console.log(input);
 
@@ -497,8 +497,8 @@ console.log(input);
 
 let input = null;
 while (input === null) {
-  input = prompt('enter something');
-  console.log(input);
+	input = prompt('enter something');
+	console.log(input);
 }
 console.log(input);
 
@@ -543,8 +543,8 @@ console.log(output);
 
 let input = null;
 while (input === null) {
-  input = prompt('enter something');
-  console.log(input);
+	input = prompt('enter something');
+	console.log(input);
 }
 console.log(input);
 
@@ -604,8 +604,8 @@ it works as expected, and catch any bugs you may have missed while writing.
 
 let input = null;
 while (input === null) {
-  input = prompt('enter something');
-  console.log(input);
+	input = prompt('enter something');
+	console.log(input);
 }
 console.log(input);
 

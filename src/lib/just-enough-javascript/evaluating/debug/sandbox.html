@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Debug Lens Sandbox</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: monospace; padding: 2rem; max-width: 700px; margin: 0 auto; }
+    h1 { font-size: 1.2rem; margin-bottom: 1rem; }
+    textarea {
+      width: 100%;
+      height: 200px;
+      font-family: monospace;
+      font-size: 14px;
+      padding: 0.5rem;
+      tab-size: 2;
+      border: 2px solid #333;
+      resize: vertical;
+    }
+    button {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1.5rem;
+      font-family: monospace;
+      font-size: 14px;
+      cursor: pointer;
+      border: 2px solid #333;
+      background: #eee;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #status { margin-top: 0.5rem; font-size: 13px; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Debug Lens Sandbox</h1>
+  <p style="margin-bottom: 0.5rem; font-size: 13px; color: #666;">
+    Open DevTools before clicking [debug] — the debugger will pause before and after your code.
+  </p>
+  <textarea id="code">let x = 1;
+let y = 2;
+let sum = x + y;
+console.log('sum:', sum);</textarea>
+  <br>
+  <button id="run">[debug]</button>
+  <div id="status"></div>
+
+  <script type="module">
+    // --- inline copy of debug() so this file is self-contained ---
+
+    const IFRAME_HIDDEN_STYLES = `
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      border: none;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: -1;
+    `;
+
+    let callCounter = 0;
+
+    // maxIterations accepted for API parity but not used in sandbox
+    // (no loop guard injection in the standalone sandbox)
+    function debug(code, maxIterations) {
+      if (!code?.trim()) {
+        console.warn('No code to execute');
+        return Promise.resolve();
+      }
+
+      const callId = `debug-${++callCounter}`;
+
+      const wrapper = document.createElement('div');
+      wrapper.id = callId;
+      wrapper.style.display = 'none';
+      document.body.appendChild(wrapper);
+
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = IFRAME_HIDDEN_STYLES;
+
+      return new Promise((resolve, reject) => {
+        function onMessage(event) {
+          if (event.source !== iframe.contentWindow) return;
+          if (event.data !== callId) return;
+
+          window.removeEventListener('message', onMessage);
+          wrapper.remove();
+          resolve();
+        }
+
+        window.addEventListener('message', onMessage);
+
+        iframe.onload = () => {
+          const iframeDocument = iframe.contentDocument;
+
+          if (!iframeDocument) {
+            window.removeEventListener('message', onMessage);
+            wrapper.remove();
+            reject(new Error('Failed to access iframe document'));
+            return;
+          }
+
+          const codeScript = document.createElement('script');
+          codeScript.type = 'module';
+          codeScript.textContent = `debugger;\n\n\n\n${code}\n\n\ndebugger;\n`;
+
+          const doneScript = document.createElement('script');
+          doneScript.type = 'module';
+          doneScript.textContent = `window.parent.postMessage('${callId}', '*');\n`;
+
+          iframeDocument.body.appendChild(codeScript);
+          iframeDocument.body.appendChild(doneScript);
+        };
+
+        wrapper.appendChild(iframe);
+      });
+    }
+
+    // --- sandbox UI ---
+
+    const codeEl = document.getElementById('code');
+    const runBtn = document.getElementById('run');
+    const statusEl = document.getElementById('status');
+
+    runBtn.addEventListener('click', async () => {
+      runBtn.disabled = true;
+      statusEl.textContent = 'running… (step through debugger in DevTools)';
+
+      try {
+        await debug(codeEl.value);
+        statusEl.textContent = 'done — wrapper removed from DOM ✓';
+      } catch (err) {
+        statusEl.textContent = `error: ${err.message}`;
+      } finally {
+        runBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

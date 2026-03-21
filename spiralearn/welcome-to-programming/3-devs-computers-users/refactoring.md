@@ -37,7 +37,7 @@ write the same program. Below is one program refactored 3 different ways:
 
   let input = null;
   while (input === null) {
-    input = prompt('enter something');
+  	input = prompt('enter something');
   }
 
   alert(input);
@@ -50,10 +50,10 @@ write the same program. Below is one program refactored 3 different ways:
 
   let input = null;
   while (true) {
-    input = prompt('enter something');
-    if (input !== null) {
-      break;
-    }
+  	input = prompt('enter something');
+  	if (input !== null) {
+  		break;
+  	}
   }
 
   alert(input);
@@ -68,10 +68,10 @@ write the same program. Below is one program refactored 3 different ways:
 
   let isValid = false;
   while (!isValid) {
-    input = prompt('enter something');
-    if (input !== null) {
-      isValid = true;
-    }
+  	input = prompt('enter something');
+  	if (input !== null) {
+  		isValid = true;
+  	}
   }
 
   alert(input);

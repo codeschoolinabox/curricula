@@ -1,0 +1,41 @@
+! language leveling can avoid needing to talk about what's not avilable in a worker 
+
+rescoping code running
+    (is not yet generalizeable because of limitations in each action that are not relevant at this language level)
+    -> highly tailored to Just Enough JavaScript
+    -> learners are not expected to look in the console unless they are debugging
+        everything else is handled in a friendly UI
+    always run in module mode (worker or iframe script)
+        gives strict without needing to add extra line or reformat
+        prepare them for the future
+    no repl mode, I want to treat scripts as instructions in a simple stateless NM
+    console.log and console.assert are actually traps, 
+    actions
+        - all of them valdiate and enforce langauge level
+        - exclude option narrows JeJ even further for earlier in the course
+            but features beyond JeJ cannot be added!  JeJ is the upper bound for these runners 
+        run(code, { maxTime, block, allow }) -> [
+                { event: log, args: [], line},
+                { event: assert, args: [], line}, 
+                { event: prompt/alert/confirm, args: [], return, line}
+                ...
+                { event: error,name, message, line, phase: creation/execution, }
+            ]  
+            runs in a web worker for time-based stopping and general sandboxing
+            the function that produces this 
+            also logs to the console, why not. but through the wrapper
+        trace(code, { maxiteration? maxtime?, block, allow, options }) -> trace 
+            the existing tracer (ask me, I'll paste it in)
+            runs in iframe because the existing tracer does, and it works, and why make the headache
+                possible to port to worker without too much trouble? then could max-time it 
+                otherwise we could try implementing loopguards?  but that gets much more involved in the instrumentation
+            possibly suppress console output?
+        debug(code, { maxIterations, allow, block }) -> undefined 
+            very basic script tag in iframe so prompt/alert/confirm don't step into obscure code but are instead basic globals
+            opens direct in debugger 
+            clears the console between each run 
+            iframe-based
+        
+
+things we don't need to do 
+    export functions, we can have that later when we cover functions 

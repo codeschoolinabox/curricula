@@ -1,7 +1,9 @@
 # Just Enough Python: Cheat Sheet
 
 A quick guide to all the Python syntax and features you need for Welcome to
-Python, which is enough to write basic programs that process user text. And writing these programs is enough to build very strong foundational programming skills.
+Python, which is enough to write basic programs that process user text. And
+writing these programs is enough to build very strong foundational programming
+skills.
 
 - [Comments](#comments)
 - [Primitive Types](#primitive-types)
@@ -40,8 +42,8 @@ these when executing your code.
 
 ## Primitive Types
 
-The smallest pieces of data in a Python program. There are many primitive types but
-you only need to know these for now:
+The smallest pieces of data in a Python program. There are many primitive types
+but you only need to know these for now:
 
 ```py
 # Booleans
@@ -78,8 +80,7 @@ None
 Ways to transform data. An operator takes in 1 or more values and _evaluates to_
 a new value.
 
-Operators in Python are a huge topic, for
-now this should be enough:
+Operators in Python are a huge topic, for now this should be enough:
 
 ```py
 # type()
@@ -213,12 +214,12 @@ len("ab")  # 2
 
 ## Printing
 
-A simple way to print data to the console while the program is
-running. This is helpful for knowing what data is stored in your program at
-different points in execution.
+A simple way to print data to the console while the program is running. This is
+helpful for knowing what data is stored in your program at different points in
+execution.
 
 ```js
-print("hello");
+print('hello');
 ```
 
 [TOP](#just-enough-python-cheat-sheet)

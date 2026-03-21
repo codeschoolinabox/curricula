@@ -21,18 +21,18 @@
 
 let input = null;
 while (true) {
-  /* --- gather user input --- */
+	/* --- gather user input --- */
 
-  input = prompt('enter anything that is 5 characters long');
-  console.log(input);
+	input = prompt('enter anything that is 5 characters long');
+	console.log(input);
 
-  /* --- check if the input exists and is 5 characters --- */
+	/* --- check if the input exists and is 5 characters --- */
 
-  if (input !== null && input.length === 5) {
-    break;
-  } else {
-    alert('nope, try again.');
-  }
+	if (input !== null && input.length === 5) {
+		break;
+	} else {
+		alert('nope, try again.');
+	}
 }
 
 /* --- create a message for the user --- */

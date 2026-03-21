@@ -55,11 +55,11 @@ actually solves the problem you're working on.
 ### Add Context to your Chats
 
 To help keep your chats with LLMs on topic and limited to
-[Just Enough JavaScript](../just-enough/javascript.md) and the
-DOM I/O library (from the old Welcome to JS repo, no longer available here), we suggest you attach these documents
-to your chat with an LLM, this will work better with some LLMs than with others.
-If you're not able to upload the files, you can copy-paste the first one as your
-first message:
+[Just Enough JavaScript](../just-enough/javascript.md) and the DOM I/O library
+(from the old Welcome to JS repo, no longer available here), we suggest you
+attach these documents to your chat with an LLM, this will work better with some
+LLMs than with others. If you're not able to upload the files, you can
+copy-paste the first one as your first message:
 
 - **[welcome-to-js.llm-instructions.md](./welcome-to-js.llm-instructions.md)**:
   This document helps the LLM understand Welcome to JS.

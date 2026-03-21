@@ -128,18 +128,18 @@ better.
 let input = null;
 // make sure the user doesn't cancel
 while (input === null) {
-  input = prompt('please enter "cat"');
+	input = prompt('please enter "cat"');
 }
 
 // --- check the input and construct a message ---
 
 let message = '';
 if (input !== 'cat') {
-  // create a failure message
-  message = '"' + input + '" is not a cat';
+	// create a failure message
+	message = '"' + input + '" is not a cat';
 } else {
-  // create the success message
-  message = 'thank you for the cat';
+	// create the success message
+	message = 'thank you for the cat';
 }
 
 // --- display the message for the user ---
@@ -195,23 +195,23 @@ There are 5 functions exported from the DOM IO library.
 ```javascript
 // index.js
 import {
-  whenFormDataChanges,
-  readString,
-  readBoolean,
-  readNumber,
-  displayString,
+	whenFormDataChanges,
+	readString,
+	readBoolean,
+	readNumber,
+	displayString,
 } from '../dom-io.js';
 
 whenFormDataChanges('dom-io-example', () => {
-  // --- read input ---
-  const str = readString('str');
-  const num = readNumber('num');
-  const bool = readBoolean('bool');
+	// --- read input ---
+	const str = readString('str');
+	const num = readNumber('num');
+	const bool = readBoolean('bool');
 
-  // --- use input ---
-  console.log(str, num, bool);
+	// --- use input ---
+	console.log(str, num, bool);
 
-  // --- display output ---
-  displayString('output', '🐿️');
+	// --- display output ---
+	displayString('output', '🐿️');
 });
 ```

@@ -2,3 +2,4 @@ node_modules
 .husky
 build
 .docusaurus
+src/lib/sl-trace-js-aran-legacy/record/legacy-aran-trace

@@ -40,16 +40,16 @@ code _already_ does. You may want to add some comments in the program, but try
 to keep them small so they don't get in the way of the next steps.
 
 ```js
-"use strict";
+'use strict';
 
 /*
   modify this program so it accepts only strings longer than 7 characters
 */
 
-let input = "";
+let input = '';
 
 while (input !== null && input.length > 5) {
-  input = prompt("enter something longer than 5 characters");
+	input = prompt('enter something longer than 5 characters');
 }
 
 alert(input);
@@ -66,13 +66,13 @@ If the experiment did not work, no problem! You can just comment it out and move
 on to the next.
 
 ```js
-"use strict";
+'use strict';
 
 /*
   modify this program so it accepts only strings longer than 7 characters
 */
 
-let input = "";
+let input = '';
 
 // original code:
 // while (input !== null && input.length > 5) {
@@ -82,7 +82,7 @@ let input = "";
 //  actual: it does accept strings with 7 characters, but also shorter strings
 //          that's not the goal, it should not accept strings shorter than 7
 while (input !== null && input.length >= 5) {
-  input = prompt("enter something longer than 5 characters");
+	input = prompt('enter something longer than 5 characters');
 }
 
 alert(input);
@@ -97,13 +97,13 @@ Note: just because a line does what you predicted doesn't always mean that
 you're trying to make the right change ;)
 
 ```js
-"use strict";
+'use strict';
 
 /*
   modify this program so it accepts only strings longer than 7 characters
 */
 
-let input = "";
+let input = '';
 
 // original code:
 // while (input !== null && input.length > 5) {
@@ -119,7 +119,7 @@ let input = "";
 //  actual: correct! it did what I predicted
 //      but I misunderstood the challenge, the program shouldn't accept length 7
 while (input !== null && input.length >= 7) {
-  input = prompt("enter something longer than 5 characters");
+	input = prompt('enter something longer than 5 characters');
 }
 
 alert(input);
@@ -128,13 +128,13 @@ alert(input);
 ## Experiment 3, success
 
 ```js
-"use strict";
+'use strict';
 
 /*
   modify this program so it accepts only strings longer than 7 characters
 */
 
-let input = "";
+let input = '';
 
 // original code:
 // while (input !== null && input.length > 5) {
@@ -156,7 +156,7 @@ let input = "";
 //  actual: it does what I wanted, and I wanted the right thing
 // success!
 while (input !== null && input.length > 7) {
-  input = prompt("enter something longer than 5 characters");
+	input = prompt('enter something longer than 5 characters');
 }
 
 alert(input);

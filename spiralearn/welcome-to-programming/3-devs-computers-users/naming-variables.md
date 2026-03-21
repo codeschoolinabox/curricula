@@ -83,8 +83,8 @@ the code with comments like these:
 let _a = null;
 // read: the value of _a
 while (_a === null) {
-  // assign: string or null, depending on the user
-  _a = prompt("enter your name");
+	// assign: string or null, depending on the user
+	_a = prompt('enter your name');
 }
 
 // read: the user's valid input
@@ -128,7 +128,7 @@ variable, one _generic_ name and one _specific_ name:
 
   let input = null;
   while (input === null) {
-    input = prompt("enter your name");
+  	input = prompt('enter your name');
   }
 
   alert(input);
@@ -147,7 +147,7 @@ variable, one _generic_ name and one _specific_ name:
 
   let userName = null;
   while (userName === null) {
-    userName = prompt("enter your name");
+  	userName = prompt('enter your name');
   }
 
   alert(userName);

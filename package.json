@@ -9,25 +9,28 @@
     "serve": "docusaurus serve",
     "clear": "docusaurus clear",
     "lint": "npm run lint:js && npm run lint:md && npm run lint:mdx && npm run lint:py && npm run lint:names && npm run lint:spelling",
-    "lint:js": "eslint \"**/*.{js,mjs,jsx}\"",
+    "typecheck": "tsc --noEmit",
+    "lint:js": "eslint \"**/*.{js,mjs,jsx,ts,tsx}\"",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
     "lint:mdx": "eslint \"**/*.mdx\"",
     "lint:py": "ruff check .",
     "lint:names": "ls-lint",
-    "lint:spelling": "cspell \"**/*.{md,mdx,js,mjs,py,json}\" --no-progress",
+    "lint:spelling": "cspell \"**/*.{md,mdx,js,mjs,ts,tsx,py,json}\" --no-progress",
     "format": "npm run format:js && npm run format:md && npm run format:mdx && npm run format:py",
-    "format:js": "prettier --write \"**/*.{js,mjs,jsx}\"",
+    "format:js": "prettier --write \"**/*.{js,mjs,jsx,ts,tsx}\"",
     "format:md": "prettier --write \"**/*.md\"",
     "format:mdx": "prettier --write \"**/*.mdx\"",
     "format:py": "ruff format .",
-    "format:check": "prettier --check \"**/*.{js,mjs,jsx,md,mdx,json}\"",
+    "format:check": "prettier --check \"**/*.{js,mjs,jsx,ts,tsx,md,mdx,json}\"",
     "format:check:py": "ruff format --check .",
-    "validate": "npm run format:check && npm run format:check:py && npm run lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "validate": "npm run typecheck && npm run format:check && npm run format:check:py && npm run lint && npm run test",
     "prepare": "husky",
     "postinstall": "node scripts/check-ruff.mjs || true"
   },
   "lint-staged": {
-    "*.{js,mjs,jsx}": [
+    "*.{js,mjs,jsx,ts,tsx}": [
       "eslint --fix",
       "prettier --write"
     ],
@@ -50,19 +53,35 @@
   "dependencies": {
     "@docusaurus/core": "^3.7.0",
     "@docusaurus/preset-classic": "^3.7.0",
+    "@study-lenses/tracing": "^0.1.2",
+    "acorn": "^8.16.0",
+    "estree-walker": "^3.0.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "recast": "^0.23.11"
   },
   "devDependencies": {
+    "@docusaurus/tsconfig": "^3.9.2",
     "@ls-lint/ls-lint": "^2.3.1",
+    "@types/node": "^25.5.0",
     "cspell": "^9.7.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.1.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-boundaries": "^6.0.1",
+    "eslint-plugin-functional": "^9.0.4",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-mdx": "^3.6.0",
+    "eslint-plugin-security": "^4.0.0",
+    "eslint-plugin-sonarjs": "^4.0.2",
+    "eslint-plugin-unicorn": "^63.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",
     "markdownlint-cli2": "^0.21.0",
-    "prettier": "^3.5.0"
+    "prettier": "^3.5.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1",
+    "vitest": "^2.1.9"
   },
   "engines": {
     "node": ">=20.11.0"

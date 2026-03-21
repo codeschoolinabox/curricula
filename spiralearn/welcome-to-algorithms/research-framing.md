@@ -31,10 +31,10 @@ directory. It serves dual purpose:
 - **For the referencing system**: The single source of truth for all evidence
   links within that chapter's files
 
-| Chapter                   | Research Framing Status | Primary Focus                                              |
-| ------------------------- | ----------------------- | ---------------------------------------------------------- |
-| Ch 5: Algorithms          | In progress             | Representation sequence, analytical chain, AT Taxonomy     |
-| Ch 6: Complexity          | In progress             | Observable → explanatory dimensions, empirical-first Big O |
+| Chapter          | Research Framing Status | Primary Focus                                              |
+| ---------------- | ----------------------- | ---------------------------------------------------------- |
+| Ch 5: Algorithms | In progress             | Representation sequence, analytical chain, AT Taxonomy     |
+| Ch 6: Complexity | In progress             | Observable → explanatory dimensions, empirical-first Big O |
 
 ---
 
@@ -57,20 +57,20 @@ directory. It serves dual purpose:
    files. Are our 📐 translations defensible?
 2. **Propose research questions**: Each chapter's research framing lists active
    RQs. Missing something? Open an issue.
-3. **Challenge our framing**: The observable → explanatory connection between
-   Ch 5 and Ch 6 is our key novel claim. We welcome critical examination.
+3. **Challenge our framing**: The observable → explanatory connection between Ch
+   5 and Ch 6 is our key novel claim. We welcome critical examination.
 
 ---
 
 ## Committee Ownership
 
-| Deliverable                           | Owner                         | Location                                    |
-| ------------------------------------- | ----------------------------- | ------------------------------------------- |
-| This document (WtA research framing)  | Research committee            | `/curricula/welcome-to-algorithms/`         |
-| Per-chapter research-framing.md       | Research committee            | Chapter directories                         |
-| Chapter content (index, subchapters)  | Curriculum committee          | Chapter directories                         |
-| Evidence tags in content              | Curriculum committee (inline) | Links to research-framing.md                |
-| Exercise design                       | Curriculum committee          | Chapter directories                         |
+| Deliverable                          | Owner                         | Location                            |
+| ------------------------------------ | ----------------------------- | ----------------------------------- |
+| This document (WtA research framing) | Research committee            | `/curricula/welcome-to-algorithms/` |
+| Per-chapter research-framing.md      | Research committee            | Chapter directories                 |
+| Chapter content (index, subchapters) | Curriculum committee          | Chapter directories                 |
+| Evidence tags in content             | Curriculum committee (inline) | Links to research-framing.md        |
+| Exercise design                      | Curriculum committee          | Chapter directories                 |
 
 Research-framing files live in curriculum directories for relative linking but
 are research committee deliverables.

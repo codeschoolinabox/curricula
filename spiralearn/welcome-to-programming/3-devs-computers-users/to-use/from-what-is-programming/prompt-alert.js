@@ -29,6 +29,6 @@ let input = prompt('(prompt) you can type then click "ok" or "cancel"');
 console.log(input);
 
 alert(
-  'no try running the program again passing different input. \n\n' +
-    'PS. check your console!',
+	'no try running the program again passing different input. \n\n' +
+		'PS. check your console!',
 );

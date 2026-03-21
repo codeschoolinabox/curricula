@@ -23,27 +23,27 @@
 
 let input = null;
 while (input === null) {
-  input = prompt(
-    "enter something. \n\nif it's longer than 5 characters it will be reversed",
-  );
-  console.log(input);
+	input = prompt(
+		"enter something. \n\nif it's longer than 5 characters it will be reversed",
+	);
+	console.log(input);
 }
 
 /* --- create the final message --- */
 
 let message = '';
 if (input.length === 5) {
-  /* --- reverse the input if it is 5 characters long --- */
+	/* --- reverse the input if it is 5 characters long --- */
 
-  for (let character of input) {
-    message = character + message;
-    console.log(message);
-  }
+	for (let character of input) {
+		message = character + message;
+		console.log(message);
+	}
 } else {
-  /* --- do nothing if the input was not 5 characters --- */
+	/* --- do nothing if the input was not 5 characters --- */
 
-  message = input;
-  console.log(message);
+	message = input;
+	console.log(message);
 }
 
 /* --- display the message --- */

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aran Trace Sandbox</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); border: 0;
+    }
+    body {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      font-family: 'Consolas', 'Monaco', monospace;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    h1 {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    select, button {
+      background: #2d2d2d;
+      color: #d4d4d4;
+      border: 1px solid #444;
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    select:hover, button:hover { border-color: #666; }
+    button { background: #264f78; border-color: #264f78; }
+    button:hover { background: #365f88; }
+    textarea {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: 1px solid #444;
+      font-family: inherit;
+      font-size: 13px;
+      padding: 12px;
+      resize: vertical;
+      flex: 1;
+      min-height: 120px;
+      tab-size: 2;
+    }
+    textarea:focus { outline: 1px solid #264f78; border-color: #264f78; }
+    .output-label {
+      font-size: 12px;
+      color: #888;
+      margin: 8px 0 4px;
+    }
+    pre {
+      background: #252526;
+      border: 1px solid #333;
+      padding: 12px;
+      overflow: auto;
+      flex: 1;
+      min-height: 100px;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Aran Trace Sandbox</h1>
+
+<div class="controls">
+  <label for="snippet-select" class="sr-only">Snippet</label>
+  <select id="snippet-select" title="Choose a test snippet">
+    <option value="">-- pick a snippet --</option>
+  </select>
+  <button type="button" id="trace-btn">Trace</button>
+  <button type="button" id="copy-btn">Copy JSON</button>
+</div>
+
+<textarea id="code" spellcheck="false" placeholder="Write or load JS to trace..."></textarea>
+
+<div class="output-label">Raw trace output (JSON):</div>
+<pre id="output"></pre>
+
+<script type="module">
+  import { trace } from './index.js';
+
+  // --- snippet list (relative to sandbox.html) ---
+  const SNIPPET_DIR = '../tests/test-snippets';
+  const SNIPPETS = [
+    'break-continue.js',
+    'do-while.js',
+    'errors.js',
+    'for-classic.js',
+    'for-in.js',
+    'for-of.js',
+    'functions.js',
+    'hoisting.js',
+    'if-else.js',
+    'logical-operators.js',
+    'operators.js',
+    'switch.js',
+    'ternary.js',
+    'variables.js',
+    'while.js',
+  ];
+
+  const selectEl = document.getElementById('snippet-select');
+  const codeEl = document.getElementById('code');
+  const outputEl = document.getElementById('output');
+  const traceBtn = document.getElementById('trace-btn');
+  const copyBtn = document.getElementById('copy-btn');
+
+  // populate dropdown
+  for (const name of SNIPPETS) {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name.replace('.js', '');
+    selectEl.appendChild(opt);
+  }
+
+  // load snippet on selection
+  selectEl.addEventListener('change', async function () {
+    if (!selectEl.value) return;
+    try {
+      const res = await fetch(`${SNIPPET_DIR}/${selectEl.value}`);
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      codeEl.value = await res.text();
+    } catch (err) {
+      codeEl.value = `// Failed to load ${selectEl.value}: ${err.message}`;
+    }
+  });
+
+  // run trace
+  traceBtn.addEventListener('click', function () {
+    const code = codeEl.value.trim();
+    if (!code) {
+      outputEl.textContent = '// nothing to trace';
+      return;
+    }
+
+    outputEl.textContent = '// tracing...';
+
+    try {
+      const steps = trace(code);
+      const json = JSON.stringify(steps, null, 2);
+      outputEl.textContent = json;
+      // also log to console for groupCollapsed inspection
+      console.log('--- trace result ---');
+      console.log(steps);
+    } catch (err) {
+      outputEl.textContent = `// Error: ${err.message}\n${err.stack}`;
+    }
+  });
+
+  // copy JSON to clipboard
+  copyBtn.addEventListener('click', function () {
+    const text = outputEl.textContent;
+    navigator.clipboard.writeText(text).then(
+      function () { copyBtn.textContent = 'Copied!'; },
+      function () { copyBtn.textContent = 'Copy failed'; },
+    );
+    setTimeout(function () { copyBtn.textContent = 'Copy JSON'; }, 1500);
+  });
+</script>
+
+</body>
+</html>

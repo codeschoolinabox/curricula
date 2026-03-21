@@ -49,13 +49,13 @@ let input = prompt('enter the word "yes", upper or lower case');
 // a log for the developer to read after the program has completed
 console.log(input);
 
-let reaction = "";
+let reaction = '';
 if (input === null) {
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  reaction = input + "!";
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	reaction = input + '!';
 } else {
-  reaction = "baaaaad: " + input;
+	reaction = 'baaaaad: ' + input;
 }
 
 alert(reaction);
@@ -74,9 +74,9 @@ write logic in your logs you risk one of two things:
   your logs are no longer just windows, they're part of the program!:
 
   ```js
-  let input = prompt("enter something");
+  let input = prompt('enter something');
   // ! you've changed the value of input by accidentally using = instead of ===
-  console.log("did they cancel?", (input = null));
+  console.log('did they cancel?', (input = null));
 
   alert(input);
   ```
@@ -86,9 +86,9 @@ write logic in your logs you risk one of two things:
   that is not actually true about your program:
 
   ```js
-  let input = prompt("enter something");
+  let input = prompt('enter something');
   // this will print "string" even if the user cancels, so the input was null
-  console.log(typeof "the user input was " + input);
+  console.log(typeof 'the user input was ' + input);
 
   alert(input);
   ```
@@ -97,7 +97,7 @@ The best logs just print a variable or a value directly to the console. The one
 useful exception to this rule is using the `typeof` operator in your logs:
 
 ```js
-let input = prompt("enter something");
+let input = prompt('enter something');
 // notice! A comma is used to separate different logs
 console.log(typeof input, input);
 
@@ -132,26 +132,26 @@ learn from it, but here's some ideas for inspiration:
 ```js
 console.log('=== a program to tell a user if they inputted "yes" ===');
 
-console.log("-- gathering the user input");
+console.log('-- gathering the user input');
 
 let input = prompt('enter the word "yes", upper or lower case');
 
-console.log("-- generating the reaction");
+console.log('-- generating the reaction');
 
-let reaction = "";
+let reaction = '';
 if (input === null) {
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  reaction = input + "!";
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	reaction = input + '!';
 } else {
-  reaction = "baaaaad: " + input;
+	reaction = 'baaaaad: ' + input;
 }
 
-console.log("-- communicating the reaction to the user");
+console.log('-- communicating the reaction to the user');
 
 alert(reaction);
 
-console.log("=== all done ===");
+console.log('=== all done ===');
 ```
 
 </details>
@@ -175,13 +175,13 @@ your code to find what's most helpful:
 let input = prompt('enter the word "yes", upper or lower case');
 console.log(input);
 
-let reaction = "";
+let reaction = '';
 if (input === null) {
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  reaction = input + "!";
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	reaction = input + '!';
 } else {
-  reaction = "baaaaad: " + input;
+	reaction = 'baaaaad: ' + input;
 }
 console.log(reaction);
 
@@ -194,17 +194,17 @@ alert(reaction);
 
 ```js
 let input = prompt('enter the word "yes", upper or lower case');
-console.log("input:", input);
+console.log('input:', input);
 
-let reaction = "";
+let reaction = '';
 if (input === null) {
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  reaction = input + "!";
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	reaction = input + '!';
 } else {
-  reaction = "baaaaad: " + input;
+	reaction = 'baaaaad: ' + input;
 }
-console.log("reaction:", reaction);
+console.log('reaction:', reaction);
 
 alert(reaction);
 ```
@@ -215,17 +215,17 @@ alert(reaction);
 
 ```js
 let input = prompt('enter the word "yes", upper or lower case');
-console.log("input:", typeof input, input);
+console.log('input:', typeof input, input);
 
-let reaction = "";
+let reaction = '';
 if (input === null) {
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  reaction = input + "!";
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	reaction = input + '!';
 } else {
-  reaction = "baaaaad: " + input;
+	reaction = 'baaaaad: ' + input;
 }
-console.log("reaction:", typeof reaction, reaction);
+console.log('reaction:', typeof reaction, reaction);
 
 alert(reaction);
 ```
@@ -236,17 +236,17 @@ alert(reaction);
 
 ```js
 let input = prompt('enter the word "yes", upper or lower case');
-console.log("input, declare, init:", typeof input, input);
+console.log('input, declare, init:', typeof input, input);
 
-let reaction = "";
+let reaction = '';
 if (input === null) {
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  reaction = input + "!";
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	reaction = input + '!';
 } else {
-  reaction = "baaaaad: " + input;
+	reaction = 'baaaaad: ' + input;
 }
-console.log("reaction, write:", typeof reaction, reaction);
+console.log('reaction, write:', typeof reaction, reaction);
 
 alert(reaction);
 ```
@@ -259,15 +259,15 @@ alert(reaction);
 let input = prompt('enter the word "yes", upper or lower case');
 console.log('input, should be "yes":', typeof input, input);
 
-let reaction = "";
+let reaction = '';
 if (input === null) {
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  reaction = input + "!";
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	reaction = input + '!';
 } else {
-  reaction = "baaaaad: " + input;
+	reaction = 'baaaaad: ' + input;
 }
-console.log("reaction:", reaction);
+console.log('reaction:', reaction);
 
 alert(reaction);
 ```
@@ -295,18 +295,18 @@ each path to know which path was taken.
 ```js
 let input = prompt('enter the word "yes", upper or lower case');
 
-let reaction = "";
+let reaction = '';
 
-console.log("conditional: deciding the reaction");
+console.log('conditional: deciding the reaction');
 if (input === null) {
-  console.log("path: user canceled");
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  console.log('path: input was "yes"');
-  reaction = input + "!";
+	console.log('path: user canceled');
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	console.log('path: input was "yes"');
+	reaction = input + '!';
 } else {
-  console.log('path: input was not "yes"');
-  reaction = "baaaaad: " + input;
+	console.log('path: input was not "yes"');
+	reaction = 'baaaaad: ' + input;
 }
 
 alert(reaction);
@@ -323,21 +323,21 @@ It's possible to make a mistake
 
 ```js
 let input = null;
-console.log("I/O loop");
+console.log('I/O loop');
 while (input === null) {
-  console.log("prompting for input");
-  input = prompt('enter the word "yes", upper or lower case');
-  console.log("input:", typeof input, input);
+	console.log('prompting for input');
+	input = prompt('enter the word "yes", upper or lower case');
+	console.log('input:', typeof input, input);
 }
 
-let reaction = "";
+let reaction = '';
 
 if (input === null) {
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  reaction = input + "!";
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	reaction = input + '!';
 } else {
-  reaction = "baaaaad: " + input;
+	reaction = 'baaaaad: ' + input;
 }
 
 alert(reaction);
@@ -352,14 +352,14 @@ the result of what your logic in the loop body.
 ```js
 let input = null;
 while (input === null) {
-  input = prompt("enter something");
+	input = prompt('enter something');
 }
 
-let backwards = "";
+let backwards = '';
 for (let char of input) {
-  console.log(char);
-  backwards = char + backwards;
-  console.log(backwards);
+	console.log(char);
+	backwards = char + backwards;
+	console.log(backwards);
 }
 
 alert(backwards);
@@ -374,16 +374,16 @@ want to log the incrementor variable:
 ```js
 let input = null;
 while (input === null) {
-  input = prompt("enter something");
+	input = prompt('enter something');
 }
 
-let everyOther = "";
+let everyOther = '';
 for (let i = 0; i < input.length; i = i + 2) {
-  console.log(i);
-  let char = input[i];
-  console.log(char);
-  everyOther = everyOther + char;
-  console.log(everyOther);
+	console.log(i);
+	let char = input[i];
+	console.log(char);
+	everyOther = everyOther + char;
+	console.log(everyOther);
 }
 
 alert(everyOther);
@@ -411,32 +411,32 @@ Here's an example of all the different logging strategies at once:
 ```js
 console.log('=== a program to tell a user if they inputted "yes" ===');
 
-console.log("-- gathering the user input");
+console.log('-- gathering the user input');
 
 let input = prompt('enter the word "yes", upper or lower case');
 console.log('input, should be "yes":', typeof input, input);
 
-console.log("-- generating a reaction");
+console.log('-- generating a reaction');
 
-let reaction = "";
-console.log("conditional: deciding the reaction");
+let reaction = '';
+console.log('conditional: deciding the reaction');
 if (input === null) {
-  console.log("path: user canceled");
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  console.log('path: input was "yes"');
-  reaction = input + "!";
+	console.log('path: user canceled');
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	console.log('path: input was "yes"');
+	reaction = input + '!';
 } else {
-  console.log('path: input was not "yes"');
-  reaction = "baaaaad: " + input;
+	console.log('path: input was not "yes"');
+	reaction = 'baaaaad: ' + input;
 }
-console.log("reaction:", reaction);
+console.log('reaction:', reaction);
 
-console.log("-- communicating the reaction to the user");
+console.log('-- communicating the reaction to the user');
 
 alert(reaction);
 
-console.log("=== all done ===");
+console.log('=== all done ===');
 ```
 
 </details>
@@ -448,18 +448,18 @@ console.log('=== a program to tell a user if they inputted "yes" ===');
 let input = prompt('enter the word "yes", upper or lower case');
 console.log('input, should be "yes":', typeof input, input);
 
-let reaction = "";
+let reaction = '';
 if (input === null) {
-  console.log("path: user canceled");
-  reaction = ":(";
-} else if (input.toLowerCase() === "yes") {
-  console.log('path: input is "yes"');
-  reaction = input + "!";
+	console.log('path: user canceled');
+	reaction = ':(';
+} else if (input.toLowerCase() === 'yes') {
+	console.log('path: input is "yes"');
+	reaction = input + '!';
 } else {
-  console.log('path: input was not "yes"');
-  reaction = "baaaaad: " + input;
+	console.log('path: input was not "yes"');
+	reaction = 'baaaaad: ' + input;
 }
-console.log("reaction:", reaction);
+console.log('reaction:', reaction);
 
 alert(reaction);
 ```

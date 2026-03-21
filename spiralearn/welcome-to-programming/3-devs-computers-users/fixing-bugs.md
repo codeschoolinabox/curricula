@@ -103,7 +103,7 @@ process. Take a look at the `./examples` directory to see how you can study
 these exercises.
 
 ```js
-"use strict";
+'use strict';
 
 /* program name
 
@@ -130,7 +130,7 @@ these exercises.
 */
 
 // 1. ! what?  this line is surprising because ...
-const someBuggyCode = "goes here";
+const someBuggyCode = 'goes here';
 ```
 
 ---

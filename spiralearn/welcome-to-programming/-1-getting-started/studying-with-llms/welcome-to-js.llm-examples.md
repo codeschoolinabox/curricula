@@ -19,34 +19,34 @@ can also use letters in the blanks and ask specific questions about each blank.
 
 let phrase = null;
 while (phrase === null) {
-  phrase = prompt('enter a phrase');
+	phrase = prompt('enter a phrase');
 }
 
 // --- __goal?__ ---
 
 let keepLetters = __A__(
-  '"ok" to remove everything that is not a letter\n' +
-    '"cancel" to repeat each character',
+	'"ok" to remove everything that is not a letter\n' +
+		'"cancel" to repeat each character',
 );
 
 // --- __goal?__ ---
 
 let newPhrase = '';
 if (__B__) {
-  // --- __goal?__ ---
+	// --- __goal?__ ---
 
-  let letters = 'abcdefghijklmnopqrstuvwxyz';
-  for (let character of __C__) {
-    if (letters.__D__(character.toLowerCase())) {
-      newPhrase = newPhrase + character;
-    }
-  }
+	let letters = 'abcdefghijklmnopqrstuvwxyz';
+	for (let character of __C__) {
+		if (letters.__D__(character.toLowerCase())) {
+			newPhrase = newPhrase + character;
+		}
+	}
 } else {
-  // --- __goal?__ ---
+	// --- __goal?__ ---
 
-  for (let character of phrase) {
-    __E__ = newPhrase + character + character;
-  }
+	for (let character of phrase) {
+		__E__ = newPhrase + character + character;
+	}
 }
 
 // --- __goal?__ ---
@@ -76,25 +76,25 @@ Comprehension questions:
 let toBeFrogged = null;
 
 while (toBeFrogged === null) {
-  toBeFrogged = prompt(
-    'enter some text to frogify.\n' +
-      '- "f" will be replaced with "frog"\n' +
-      '- "F" will be replaced with "FROG"',
-  );
+	toBeFrogged = prompt(
+		'enter some text to frogify.\n' +
+			'- "f" will be replaced with "frog"\n' +
+			'- "F" will be replaced with "FROG"',
+	);
 }
 
 let frogged = '';
 
 for (let character of toBeFrogged) {
-  if (character === 'f') {
-    frogged = frogged + 'frog';
-    continue;
-  }
-  if (character === 'F') {
-    frogged = frogged + 'FROG';
-    continue;
-  }
-  frogged = frogged + character;
+	if (character === 'f') {
+		frogged = frogged + 'frog';
+		continue;
+	}
+	if (character === 'F') {
+		frogged = frogged + 'FROG';
+		continue;
+	}
+	frogged = frogged + character;
 }
 
 alert(frogged);
@@ -113,15 +113,15 @@ let phrase = '';
 
 let longEnough = false;
 while (!longEnough) {
-  phrase = prompt('enter anything longer than ' + limit + ' characters');
+	phrase = prompt('enter anything longer than ' + limit + ' characters');
 
-  if (phrase === null) {
-    alert('there is no escape');
-  } else if (phrase.length <= limit) {
-    alert('too short');
-  } else {
-    longEnough = true;
-  }
+	if (phrase === null) {
+		alert('there is no escape');
+	} else if (phrase.length <= limit) {
+		alert('too short');
+	} else {
+		longEnough = true;
+	}
 }
 
 alert('"' + phrase + '" is ' + phrase.length + ' characters long');
@@ -134,12 +134,12 @@ alert('"' + phrase + '" is ' + phrase.length + ' characters long');
 
 let __A__ = null;
 while (__A__ === null) {
-  __A__ = prompt('enter some text, each character will be repeated');
+	__A__ = prompt('enter some text, each character will be repeated');
 }
 
 let __B__ = '';
 for (let __C__ of __A__) {
-  __B__ = __B__ + __C__ + __C__;
+	__B__ = __B__ + __C__ + __C__;
 }
 
 alert(__A__ + ' -> ' + __B__);
@@ -231,45 +231,45 @@ testing but does use ESLint.
 ```css
 /* index.css */
 .computery {
-  font-family: monospace;
-  color: chartreuse;
-  background-color: black;
+	font-family: monospace;
+	color: chartreuse;
+	background-color: black;
 }
 ```
 
 ```javascript
 // index.js
 import {
-  whenFormDataChanges,
-  readString,
-  readBoolean,
-  readNumber,
-  displayString,
+	whenFormDataChanges,
+	readString,
+	readBoolean,
+	readNumber,
+	displayString,
 } from '../dom-io.js';
 
 whenFormDataChanges('repeaty', () => {
-  // debugger;
+	// debugger;
 
-  // --- read user input ---
-  const text = readString('to-repeat');
-  const repetitions = readNumber('repeats');
-  const screaming = readBoolean('loud');
+	// --- read user input ---
+	const text = readString('to-repeat');
+	const repetitions = readNumber('repeats');
+	const screaming = readBoolean('loud');
 
-  // --- repeat the string input ---
-  let repeated = '';
-  while (repeated.length < text.length * repetitions) {
-    repeated = repeated + text;
-  }
+	// --- repeat the string input ---
+	let repeated = '';
+	while (repeated.length < text.length * repetitions) {
+		repeated = repeated + text;
+	}
 
-  // --- set to upper or lower case ---
-  let finalText = '';
-  if (screaming) {
-    finalText = repeated.toUpperCase();
-  } else {
-    finalText = repeated.toLowerCase();
-  }
+	// --- set to upper or lower case ---
+	let finalText = '';
+	if (screaming) {
+		finalText = repeated.toUpperCase();
+	} else {
+		finalText = repeated.toLowerCase();
+	}
 
-  // --- display the final text ---
-  displayString('out', finalText);
+	// --- display the final text ---
+	displayString('out', finalText);
 });
 ```

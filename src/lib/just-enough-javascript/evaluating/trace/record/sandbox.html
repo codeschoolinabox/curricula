@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aran Trace Sandbox</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); border: 0;
+    }
+    body {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      font-family: 'Consolas', 'Monaco', monospace;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: auto auto 1fr 2fr;
+      gap: 12px;
+      height: 100vh;
+    }
+    h1 {
+      font-size: 14px;
+      color: #888;
+      grid-column: 1 / -1;
+    }
+
+    /* --- Config panel --- */
+    .config-panel {
+      grid-row: 2 / -1;
+      background: #252526;
+      border: 1px solid #333;
+      padding: 12px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    .config-panel h2 {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 12px 0 6px;
+    }
+    .config-panel h2:first-child { margin-top: 0; }
+    .config-panel label {
+      display: block;
+      padding: 2px 0;
+      cursor: pointer;
+    }
+    .config-panel label:hover { color: #fff; }
+    .config-panel input[type="checkbox"] {
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .config-panel .sub { padding-left: 18px; }
+    .config-panel .list-input {
+      width: 100%;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: 1px solid #444;
+      font-family: inherit;
+      font-size: 11px;
+      padding: 3px 6px;
+      margin: 2px 0 6px;
+    }
+    .config-panel .list-input:focus {
+      outline: 1px solid #264f78;
+      border-color: #264f78;
+    }
+    .config-panel .list-label {
+      font-size: 11px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    /* --- Controls --- */
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    select, button {
+      background: #2d2d2d;
+      color: #d4d4d4;
+      border: 1px solid #444;
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    select:hover, button:hover { border-color: #666; }
+    button { background: #264f78; border-color: #264f78; }
+    button:hover { background: #365f88; }
+
+    /* --- Code editor --- */
+    textarea {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: 1px solid #444;
+      font-family: inherit;
+      font-size: 13px;
+      padding: 12px;
+      resize: none;
+      tab-size: 2;
+    }
+    textarea:focus { outline: 1px solid #264f78; border-color: #264f78; }
+
+    /* --- Output --- */
+    .output-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      min-height: 0;
+    }
+    .output-pane {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .output-label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    pre {
+      background: #252526;
+      border: 1px solid #333;
+      padding: 12px;
+      overflow: auto;
+      flex: 1;
+      font-size: 11px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 0;
+    }
+    .build-warning {
+      background: #3a3000;
+      border: 1px solid #665500;
+      color: #ffcc00;
+      padding: 8px 12px;
+      font-size: 11px;
+      grid-column: 1 / -1;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Aran Trace Sandbox <span style="color:#555">(requires: npm run build)</span></h1>
+
+<div id="build-warning" class="build-warning">
+  dist/ not found or import failed. Run <code>npm run build</code> first.
+</div>
+
+<!-- Config panel -->
+<div class="config-panel">
+  <h2>Categories</h2>
+  <label><input type="checkbox" id="cfg-variables" checked> variables</label>
+  <label><input type="checkbox" id="cfg-operators" checked> operators</label>
+  <label><input type="checkbox" id="cfg-controlFlow" checked> controlFlow</label>
+  <label><input type="checkbox" id="cfg-functions" checked> functions</label>
+  <label><input type="checkbox" id="cfg-functionDeclarations" checked> functionDeclarations</label>
+  <label><input type="checkbox" id="cfg-this" checked> this</label>
+  <label><input type="checkbox" id="cfg-errorHandling" checked> errorHandling</label>
+  <label><input type="checkbox" id="cfg-enterLeave" checked> enterLeave</label>
+
+  <h2>List Filters</h2>
+  <div class="list-label">operatorsList (comma-sep)</div>
+  <input type="text" class="list-input" id="cfg-operatorsList" placeholder="+, -, ===">
+  <div class="list-label">controlFlowList</div>
+  <input type="text" class="list-input" id="cfg-controlFlowList" placeholder="if, while, for">
+
+  <h2>Name Filter</h2>
+  <div class="list-label">names (empty = all, non-empty = whitelist)</div>
+  <input type="text" class="list-input" id="cfg-names" placeholder="x, add, total">
+
+  <h2>Range</h2>
+  <div class="list-label">start line</div>
+  <input type="number" class="list-input" id="cfg-range-start" value="1" min="1">
+  <div class="list-label">end line</div>
+  <input type="number" class="list-input" id="cfg-range-end" value="100000" min="1">
+
+  <h2>Data Fields</h2>
+  <label><input type="checkbox" id="cfg-data-loc" checked> loc</label>
+  <label><input type="checkbox" id="cfg-data-values" checked> values</label>
+  <label><input type="checkbox" id="cfg-data-nodeType" checked> nodeType</label>
+  <label><input type="checkbox" id="cfg-data-depth" checked> depth</label>
+</div>
+
+<!-- Controls + code -->
+<div class="controls">
+  <label for="snippet-select" class="sr-only">Snippet</label>
+  <select id="snippet-select" title="Choose a test snippet">
+    <option value="">-- pick a snippet --</option>
+  </select>
+  <button type="button" id="trace-btn">Trace</button>
+  <button type="button" id="copy-btn">Copy</button>
+</div>
+
+<textarea id="code" spellcheck="false" placeholder="Write or load JS to trace..."></textarea>
+
+<!-- Output -->
+<div class="output-row">
+  <div class="output-pane">
+    <div class="output-label">Raw entries (from legacy tracer)</div>
+    <pre id="raw-output"></pre>
+  </div>
+  <div class="output-pane">
+    <div class="output-label">Filtered steps (AranStep[])</div>
+    <pre id="output"></pre>
+  </div>
+</div>
+
+<script type="module">
+  import { trace } from './legacy-aran-trace/index.js';
+
+  // --- compiled TS imports (requires npm run build) ---
+  let postProcess = null;
+  let filterSteps = null;
+
+  try {
+    const ppModule = await import('../../dist/record/post-process.js');
+    const fsModule = await import('../../dist/record/filter-steps.js');
+    postProcess = ppModule.default;
+    filterSteps = fsModule.default;
+  } catch (err) {
+    document.getElementById('build-warning').style.display = 'block';
+    console.warn('Failed to import compiled modules:', err.message);
+    console.warn('Run: npm run build');
+  }
+
+  // --- snippet list ---
+  const SNIPPET_DIR = './tests/test-snippets';
+  const SNIPPETS = [
+    'break-continue.js',
+    'do-while.js',
+    'errors.js',
+    'for-classic.js',
+    'for-in.js',
+    'for-of.js',
+    'functions.js',
+    'hoisting.js',
+    'if-else.js',
+    'logical-operators.js',
+    'operators.js',
+    'switch.js',
+    'ternary.js',
+    'variables.js',
+    'while.js',
+  ];
+
+  // --- DOM refs ---
+  const selectEl = document.getElementById('snippet-select');
+  const codeEl = document.getElementById('code');
+  const outputEl = document.getElementById('output');
+  const rawOutputEl = document.getElementById('raw-output');
+  const traceBtn = document.getElementById('trace-btn');
+  const copyBtn = document.getElementById('copy-btn');
+
+  // populate dropdown
+  for (const name of SNIPPETS) {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name.replace('.js', '');
+    selectEl.appendChild(opt);
+  }
+
+  // --- Config reader ---
+  function readCheckbox(id) {
+    return document.getElementById(id).checked;
+  }
+
+  function readList(id) {
+    const value = document.getElementById(id).value.trim();
+    if (!value) return undefined;
+    return value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+
+  function readNumber(id) {
+    const value = parseInt(document.getElementById(id).value, 10);
+    return isNaN(value) ? undefined : value;
+  }
+
+  function buildOptions() {
+    const options = {};
+
+    // Category toggles
+    options.variables = readCheckbox('cfg-variables');
+    options.operators = readCheckbox('cfg-operators');
+    options.controlFlow = readCheckbox('cfg-controlFlow');
+    options.functions = readCheckbox('cfg-functions');
+    options.functionDeclarations = readCheckbox('cfg-functionDeclarations');
+    options.this = readCheckbox('cfg-this');
+    options.errorHandling = readCheckbox('cfg-errorHandling');
+    options.enterLeave = readCheckbox('cfg-enterLeave');
+
+    // List filters
+    const filter = {};
+    const ol = readList('cfg-operatorsList');
+    if (ol) filter.operatorsList = ol;
+    const cl = readList('cfg-controlFlowList');
+    if (cl) filter.controlFlowList = cl;
+
+    const names = readList('cfg-names');
+    if (names) filter.names = names;
+
+    if (Object.keys(filter).length > 0) options.filter = filter;
+
+    // Range
+    const start = readNumber('cfg-range-start');
+    const end = readNumber('cfg-range-end');
+    if (start !== undefined || end !== undefined) {
+      options.range = {};
+      if (start !== undefined) options.range.start = start;
+      if (end !== undefined) options.range.end = end;
+    }
+
+    // Data fields
+    options.data = {
+      loc: readCheckbox('cfg-data-loc'),
+      values: readCheckbox('cfg-data-values'),
+      nodeType: readCheckbox('cfg-data-nodeType'),
+      depth: readCheckbox('cfg-data-depth'),
+    };
+
+    return options;
+  }
+
+  // --- Load snippet ---
+  selectEl.addEventListener('change', async function () {
+    if (!selectEl.value) return;
+    try {
+      const res = await fetch(SNIPPET_DIR + '/' + selectEl.value);
+      if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+      codeEl.value = await res.text();
+    } catch (err) {
+      codeEl.value = '// Failed to load ' + selectEl.value + ': ' + err.message;
+    }
+  });
+
+  // --- Run trace ---
+  traceBtn.addEventListener('click', function () {
+    const code = codeEl.value.trim();
+    if (!code) {
+      outputEl.textContent = '// nothing to trace';
+      return;
+    }
+
+    outputEl.textContent = '// tracing...';
+    rawOutputEl.textContent = '';
+
+    try {
+      const rawEntries = trace(code);
+      rawOutputEl.textContent = JSON.stringify(rawEntries, null, 2);
+
+      if (postProcess && filterSteps) {
+        const options = buildOptions();
+        const steps = postProcess(rawEntries);
+        const filtered = filterSteps(steps, options);
+        outputEl.textContent = JSON.stringify(filtered, null, 2);
+        console.log('--- filtered steps ---');
+        console.log(filtered);
+      } else {
+        outputEl.textContent = '// postProcess/filterSteps not available\n// run: npm run build';
+      }
+    } catch (err) {
+      outputEl.textContent = '// Error: ' + err.message + '\n' + err.stack;
+      rawOutputEl.textContent = '// Error during trace';
+    }
+  });
+
+  // --- Copy button ---
+  copyBtn.addEventListener('click', function () {
+    navigator.clipboard.writeText(outputEl.textContent).then(
+      function () { copyBtn.textContent = 'Copied!'; },
+      function () { copyBtn.textContent = 'Failed'; },
+    );
+    setTimeout(function () { copyBtn.textContent = 'Copy'; }, 1500);
+  });
+</script>
+
+</body>
+</html>

@@ -33,28 +33,28 @@ types, the one that matters most for now are _strings_. Strings are how
 JavaScript stores and manipulates text:
 
 ```js
-"use strict";
+'use strict';
 
 // strings are any text wrapped in quotation marks
 
-console.log("this is a string");
+console.log('this is a string');
 
 // you can check type of some data using `typeof`
 //  you'll learn a lot more about this later
 //  for now just know that it's possible
-console.log(typeof "hello"); // "string"
+console.log(typeof 'hello'); // "string"
 console.log(typeof 5); // "number"
-console.log(typeof "5"); // "string
+console.log(typeof '5'); // "string
 
 // you can find the length of a string with `.length`
-console.log("abc".length); // 3
-console.log("ab".length); // 2
-console.log("a".length); // 1
-console.log("".length); // 0
+console.log('abc'.length); // 3
+console.log('ab'.length); // 2
+console.log('a'.length); // 1
+console.log(''.length); // 0
 
 // string concatenation:
 //  you can combine two strings using concatenation
-console.log("a" + "b" + "c"); // 'abc'
+console.log('a' + 'b' + 'c'); // 'abc'
 ```
 
 You don't need to understand very much about JavaScript types for now, just that
@@ -97,7 +97,7 @@ Be _very careful_ about your formatting! Study the example comments closely and
 do your best to format yours _exactly_ the same:
 
 ```js
-"use strict";
+'use strict';
 
 /* Program Title
 

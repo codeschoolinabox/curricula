@@ -18,7 +18,18 @@
     "jsonc",
     "prosewrap",
     "endofline",
-    "proseWrap"
+    "proseWrap",
+    "tsconfig",
+    "noEmit",
+    "tseslint",
+    "aran",
+    "tracify",
+    "embody",
+    "vitest",
+    "sonarjs",
+    "deepfreeze",
+    "deepclone",
+    "deepequal"
   ],
   "ignorePaths": [
     "node_modules",
@@ -30,7 +41,8 @@
     "*.png",
     "*.jpg",
     "*.gif",
-    "*.ico"
+    "*.ico",
+    "src/lib/sl-trace-js-aran-legacy/record/legacy-aran-trace"
   ],
   "enableFiletypes": ["mdx"]
 }

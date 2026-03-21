@@ -101,8 +101,8 @@ basics.
 
 We can always provide you with some help, for instance by organizing individual
 video calls or appointments with former students or teachers. Moreover, it is
-important to revisit the basic concepts that you struggle and practice, practice,
-practice until you dream of Javascript functions. After that, you can
+important to revisit the basic concepts that you struggle and practice,
+practice, practice until you dream of Javascript functions. After that, you can
 try to revisit the more advanced concepts (for instance by re-watching the
 lecture on YouTube).
 

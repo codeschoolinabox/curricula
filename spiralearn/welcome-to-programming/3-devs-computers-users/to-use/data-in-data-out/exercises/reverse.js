@@ -17,16 +17,16 @@
 
 let input = null;
 while (input === null) {
-  input = prompt('enter some text to reverse');
-  console.log(input);
+	input = prompt('enter some text to reverse');
+	console.log(input);
 }
 
 /* --- reverse the input text --- */
 
 let reversed = '';
 for (let character of input) {
-  reversed = character + reversed;
-  console.log(reversed);
+	reversed = character + reversed;
+	console.log(reversed);
 }
 
 /* --- create a final message --- */

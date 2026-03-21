@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "aran-legacy-tracer-options",
+  "title": "Aran Legacy Tracer Options",
+  "description": "Post-trace filtering options for the Aran legacy JS tracer",
+  "type": "object",
+  "properties": {
+    "variables": {
+      "type": "boolean",
+      "description": "Toggle variable operations (declare, initialize, assign, read)",
+      "default": true
+    },
+    "operators": {
+      "type": "boolean",
+      "description": "Toggle operator operations (binary, unary, logical, conditional)",
+      "default": true
+    },
+    "controlFlow": {
+      "type": "boolean",
+      "description": "Toggle control flow operations (check, break, continue)",
+      "default": true
+    },
+    "functions": {
+      "type": "boolean",
+      "description": "Toggle function operations (call, return)",
+      "default": true
+    },
+    "functionDeclarations": {
+      "type": "boolean",
+      "description": "Toggle function declaration hoists",
+      "default": true
+    },
+    "this": {
+      "type": "boolean",
+      "description": "Toggle this-binding traces inside function calls",
+      "default": true
+    },
+    "errorHandling": {
+      "type": "boolean",
+      "description": "Toggle error handling operations (catch, throw)",
+      "default": true
+    },
+    "enterLeave": {
+      "type": "boolean",
+      "description": "Toggle block scope enter/leave operations",
+      "default": true
+    },
+    "filter": {
+      "type": "object",
+      "description": "List-based filters for specific categories",
+      "properties": {
+        "operatorsList": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Whitelist of operators to include (empty = all)"
+        },
+        "controlFlowList": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Whitelist of control flow types to include (empty = all)"
+        },
+        "names": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Name whitelist — filters any step with a name (variables, functions, control flow, etc.). Empty = keep all."
+        }
+      },
+      "additionalProperties": false
+    },
+    "range": {
+      "type": "object",
+      "description": "Filter by source line number range",
+      "properties": {
+        "start": { "type": "integer", "minimum": 1, "default": 1 },
+        "end": { "type": "integer", "minimum": 1, "default": 100000 }
+      },
+      "additionalProperties": false
+    },
+    "data": {
+      "type": "object",
+      "description": "Control which data fields appear on output steps",
+      "properties": {
+        "loc": { "type": "boolean", "default": true, "description": "Include source location" },
+        "values": { "type": "boolean", "default": true, "description": "Include traced values" },
+        "nodeType": { "type": "boolean", "default": true, "description": "Include AST node type" },
+        "depth": { "type": "boolean", "default": true, "description": "Include nesting depth and scope type" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -39,19 +39,19 @@ see how something works, but it's not possible to write and save a full program.
 
 ```js
 /* --- for the computer --- */
-"use strict";
+'use strict';
 
 /* --- for the developer --- */
 
 // log to the console for developers to read
-console.log("hello developer (console)");
+console.log('hello developer (console)');
 
 /* --- for the user --- */
 
 // alert hello for the user
 //  not a great UX, but easy to program
 //  you'll use this for now
-alert("hello user (alert)");
+alert('hello user (alert)');
 ```
 
 </details>
