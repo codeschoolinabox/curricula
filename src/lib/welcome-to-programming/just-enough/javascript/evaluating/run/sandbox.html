@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Run Lens Sandbox</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				padding: 2rem;
+				max-width: 700px;
+				margin: 0 auto;
+			}
+			h1 {
+				font-size: 1.2rem;
+				margin-bottom: 1rem;
+			}
+			textarea {
+				width: 100%;
+				height: 200px;
+				font-family: monospace;
+				font-size: 14px;
+				padding: 0.5rem;
+				tab-size: 2;
+				border: 2px solid #333;
+				resize: vertical;
+			}
+			.controls {
+				margin-top: 0.5rem;
+				display: flex;
+				gap: 0.5rem;
+				align-items: center;
+			}
+			button {
+				padding: 0.5rem 1.5rem;
+				font-family: monospace;
+				font-size: 14px;
+				cursor: pointer;
+				border: 2px solid #333;
+				background: #eee;
+			}
+			button:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+			label {
+				font-size: 13px;
+			}
+			input[type='number'] {
+				width: 4em;
+				font-family: monospace;
+				font-size: 14px;
+				padding: 0.3rem;
+				border: 2px solid #333;
+			}
+			#status {
+				margin-top: 0.5rem;
+				font-size: 13px;
+				color: #666;
+			}
+			#events {
+				margin-top: 1rem;
+				border: 2px solid #333;
+				padding: 0.5rem;
+				max-height: 400px;
+				overflow-y: auto;
+				font-size: 13px;
+				white-space: pre-wrap;
+				display: none;
+			}
+			.event-log {
+				color: #060;
+			}
+			.event-assert {
+				color: #660;
+			}
+			.event-error {
+				color: #c00;
+			}
+			.event-prompt,
+			.event-confirm,
+			.event-alert {
+				color: #006;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Run Lens Sandbox</h1>
+		<p style="margin-bottom: 0.5rem; font-size: 13px; color: #666">
+			Runs code in a Web Worker with trapped globals. Requires COOP/COEP headers
+			(served by the vite config below).
+		</p>
+		<textarea id="code">
+let name = prompt('What is your name?', 'a toad');
+console.log('Hello, ' + name + '!');
+
+let again = confirm('Run again?');
+console.log('again:', again);
+
+alert('Done!');
+
+null()
+</textarea
+		>
+		<div class="controls">
+			<button id="run">[run]</button>
+			<label
+				>max seconds:
+				<input id="maxSeconds" type="number" value="5" min="1" max="30"
+			/></label>
+		</div>
+		<div id="status"></div>
+		<div id="events"></div>
+
+		<script type="module">
+			import run from './run.ts';
+
+			const codeEl = document.getElementById('code');
+			const runBtn = document.getElementById('run');
+			const statusEl = document.getElementById('status');
+			const eventsEl = document.getElementById('events');
+			const maxSecondsEl = document.getElementById('maxSeconds');
+
+			function renderEvent(event) {
+				const div = document.createElement('div');
+				div.className = 'event-' + event.event;
+
+				if (event.event === 'log') {
+					div.textContent = `[line ${event.line}] log: ${event.args.map(String).join(', ')}`;
+				} else if (event.event === 'assert') {
+					div.textContent = `[line ${event.line}] assert: ${event.args.map(String).join(', ')}`;
+				} else if (event.event === 'error') {
+					div.textContent = `[${event.phase}] ${event.name}: ${event.message}${event.line ? ' (line ' + event.line + ')' : ''}`;
+				} else if (event.event === 'prompt') {
+					div.textContent = `[line ${event.line}] prompt(${event.args.map(String).join(', ')}) → ${JSON.stringify(event.return)}`;
+				} else if (event.event === 'confirm') {
+					div.textContent = `[line ${event.line}] confirm(${event.args.map(String).join(', ')}) → ${event.return}`;
+				} else if (event.event === 'alert') {
+					div.textContent = `[line ${event.line}] alert(${event.args.map(String).join(', ')})`;
+				}
+
+				return div;
+			}
+
+			runBtn.addEventListener('click', async () => {
+				runBtn.disabled = true;
+				statusEl.textContent = 'running…';
+				eventsEl.innerHTML = '';
+				eventsEl.style.display = 'block';
+
+				const maxSeconds = Number(maxSecondsEl.value) || 5;
+
+				try {
+					const events = await run(codeEl.value, maxSeconds);
+					statusEl.textContent = `done — ${events.length} event(s)`;
+					console.log('RunEvent[]:', events);
+
+					for (const event of events) {
+						eventsEl.appendChild(renderEvent(event));
+					}
+				} catch (err) {
+					statusEl.textContent = `unexpected throw: ${err.message}`;
+				} finally {
+					runBtn.disabled = false;
+				}
+			});
+
+			// SAB availability check
+			if (typeof SharedArrayBuffer === 'undefined') {
+				statusEl.textContent =
+					'⚠ SharedArrayBuffer not available — serve with COOP/COEP headers';
+				statusEl.style.color = '#c00';
+			}
+		</script>
+	</body>
+</html>

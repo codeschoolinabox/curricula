@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>JeJ API Sandbox</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				padding: 2rem;
+				max-width: 800px;
+				margin: 0 auto;
+			}
+			h1 {
+				font-size: 1.2rem;
+				margin-bottom: 0.5rem;
+			}
+			.subtitle {
+				font-size: 13px;
+				color: #666;
+				margin-bottom: 1rem;
+			}
+
+			/* --- Code editor --- */
+			textarea {
+				width: 100%;
+				height: 180px;
+				font-family: monospace;
+				font-size: 14px;
+				padding: 0.5rem;
+				tab-size: 2;
+				border: 2px solid #333;
+				resize: vertical;
+			}
+
+			/* --- Tabs --- */
+			.tab-bar {
+				display: flex;
+				gap: 0;
+				margin-top: 1rem;
+				border-bottom: 2px solid #333;
+			}
+			.tab-btn {
+				padding: 0.5rem 1.2rem;
+				font-family: monospace;
+				font-size: 14px;
+				cursor: pointer;
+				border: 2px solid #333;
+				border-bottom: none;
+				background: #eee;
+				margin-bottom: -2px;
+				color: #666;
+			}
+			.tab-btn:hover {
+				background: #ddd;
+			}
+			.tab-btn.active {
+				background: #fff;
+				color: #000;
+				font-weight: bold;
+				border-bottom: 2px solid #fff;
+			}
+			.tab-panel {
+				display: none;
+				padding: 1rem 0;
+			}
+			.tab-panel.active {
+				display: block;
+			}
+
+			/* --- Controls --- */
+			.controls {
+				display: flex;
+				gap: 0.5rem;
+				align-items: center;
+				margin-bottom: 0.75rem;
+			}
+			button.action-btn {
+				padding: 0.5rem 1.5rem;
+				font-family: monospace;
+				font-size: 14px;
+				cursor: pointer;
+				border: 2px solid #333;
+				background: #eee;
+			}
+			button.action-btn:hover {
+				background: #ddd;
+			}
+			button.action-btn:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+			label {
+				font-size: 13px;
+			}
+			input[type='number'] {
+				width: 5em;
+				font-family: monospace;
+				font-size: 14px;
+				padding: 0.3rem;
+				border: 2px solid #333;
+			}
+
+			/* --- Status --- */
+			.status {
+				font-size: 13px;
+				color: #666;
+				margin-bottom: 0.75rem;
+				min-height: 1.2em;
+			}
+
+			/* --- Result sections --- */
+			.result {
+				border: 2px solid #ddd;
+				padding: 0.75rem;
+				font-size: 13px;
+				display: none;
+			}
+			.result.visible {
+				display: block;
+			}
+			.result-section {
+				margin-bottom: 0.75rem;
+			}
+			.result-section:last-child {
+				margin-bottom: 0;
+			}
+			.result-label {
+				font-weight: bold;
+				color: #333;
+				margin-bottom: 0.25rem;
+				font-size: 12px;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+			}
+			.result-value {
+				padding: 0.25rem 0;
+			}
+			.ok-true {
+				color: #060;
+				font-weight: bold;
+			}
+			.ok-false {
+				color: #c00;
+				font-weight: bold;
+			}
+			.absent {
+				color: #999;
+				font-style: italic;
+			}
+
+			/* --- Error detail --- */
+			.error-detail {
+				background: #fff5f5;
+				border: 1px solid #fcc;
+				padding: 0.5rem;
+				font-size: 12px;
+			}
+			.error-detail div {
+				padding: 1px 0;
+			}
+			.error-key {
+				color: #666;
+			}
+			.error-val {
+				color: #c00;
+			}
+
+			/* --- Violations table --- */
+			.violations-table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 12px;
+			}
+			.violations-table th {
+				text-align: left;
+				background: #f5f5f5;
+				padding: 0.25rem 0.5rem;
+				border: 1px solid #ddd;
+				font-size: 11px;
+				text-transform: uppercase;
+				color: #666;
+			}
+			.violations-table td {
+				padding: 0.25rem 0.5rem;
+				border: 1px solid #ddd;
+				vertical-align: top;
+			}
+
+			/* --- Event log (run) --- */
+			.event-list {
+				max-height: 300px;
+				overflow-y: auto;
+				border: 1px solid #ddd;
+				padding: 0.5rem;
+				font-size: 12px;
+				white-space: pre-wrap;
+			}
+			.ev-log {
+				color: #060;
+			}
+			.ev-assert {
+				color: #660;
+			}
+			.ev-error {
+				color: #c00;
+			}
+			.ev-prompt,
+			.ev-confirm,
+			.ev-alert {
+				color: #006;
+			}
+
+			/* --- Steps (trace) --- */
+			.steps-output {
+				max-height: 400px;
+				overflow: auto;
+				background: #f8f8f8;
+				border: 1px solid #ddd;
+				padding: 0.5rem;
+				font-size: 12px;
+				white-space: pre;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>JeJ API Sandbox</h1>
+		<p class="subtitle">
+			Tests the API wrappers (validate, run, trace, debug) with real
+			execution. No mocking.
+		</p>
+
+		<textarea id="code">let greeting = 'hello';
+console.log(greeting);
+</textarea>
+
+		<div class="tab-bar">
+			<button class="tab-btn active" data-tab="validate">validate</button>
+			<button class="tab-btn" data-tab="run">run</button>
+			<button class="tab-btn" data-tab="trace">trace</button>
+			<button class="tab-btn" data-tab="debug">debug</button>
+		</div>
+
+		<!-- validate tab -->
+		<div class="tab-panel active" id="panel-validate">
+			<div class="controls">
+				<button class="action-btn" id="btn-validate">[validate]</button>
+			</div>
+			<div class="status" id="status-validate"></div>
+			<div class="result" id="result-validate"></div>
+		</div>
+
+		<!-- run tab -->
+		<div class="tab-panel" id="panel-run">
+			<div class="controls">
+				<button class="action-btn" id="btn-run">[run]</button>
+				<label
+					>max seconds:
+					<input id="run-maxSeconds" type="number" value="5" min="1" max="30"
+				/></label>
+			</div>
+			<div class="status" id="status-run"></div>
+			<div class="result" id="result-run"></div>
+		</div>
+
+		<!-- trace tab -->
+		<div class="tab-panel" id="panel-trace">
+			<div class="controls">
+				<button class="action-btn" id="btn-trace">[trace]</button>
+				<label
+					>max seconds:
+					<input
+						id="trace-maxSeconds"
+						type="number"
+						value="5"
+						min="1"
+						max="30"
+				/></label>
+			</div>
+			<div class="status" id="status-trace"></div>
+			<div class="result" id="result-trace"></div>
+		</div>
+
+		<!-- debug tab -->
+		<div class="tab-panel" id="panel-debug">
+			<div class="controls">
+				<button class="action-btn" id="btn-debug">[debug]</button>
+				<label
+					>max iterations:
+					<input
+						id="debug-maxIterations"
+						type="number"
+						value="100"
+						min="1"
+						max="10000"
+				/></label>
+			</div>
+			<p style="font-size: 12px; color: #666; margin-bottom: 0.5rem">
+				Open DevTools before clicking [debug] — debugger will pause before
+				and after your code.
+			</p>
+			<div class="status" id="status-debug"></div>
+			<div class="result" id="result-debug"></div>
+		</div>
+
+		<script type="module">
+			import validate from './validate.ts';
+			import run from './run.ts';
+			import trace from './trace.ts';
+			import debug from './debug.ts';
+
+			const codeEl = document.getElementById('code');
+
+			// --- Tab switching ---
+
+			const tabBtns = document.querySelectorAll('.tab-btn');
+			const tabPanels = document.querySelectorAll('.tab-panel');
+
+			for (const btn of tabBtns) {
+				btn.addEventListener('click', function () {
+					for (const b of tabBtns) b.classList.remove('active');
+					for (const p of tabPanels) p.classList.remove('active');
+					btn.classList.add('active');
+					document
+						.getElementById('panel-' + btn.dataset.tab)
+						.classList.add('active');
+				});
+			}
+
+			// --- Rendering helpers ---
+
+			function renderOk(ok) {
+				return (
+					'<div class="result-section">' +
+					'<div class="result-label">ok</div>' +
+					'<div class="result-value ' +
+					(ok ? 'ok-true' : 'ok-false') +
+					'">' +
+					ok +
+					'</div></div>'
+				);
+			}
+
+			function renderError(error) {
+				var html =
+					'<div class="result-section"><div class="result-label">error</div>';
+				if (!error) {
+					return html + '<div class="absent">\u2014</div></div>';
+				}
+				html += '<div class="error-detail">';
+				var keys = ['kind', 'name', 'message', 'line', 'column', 'phase', 'limit'];
+				for (var i = 0; i < keys.length; i++) {
+					var k = keys[i];
+					if (error[k] !== undefined) {
+						html +=
+							'<div><span class="error-key">' +
+							k +
+							':</span> <span class="error-val">' +
+							escapeHtml(String(error[k])) +
+							'</span></div>';
+					}
+				}
+				html += '</div></div>';
+				return html;
+			}
+
+			function renderViolations(label, violations) {
+				var html =
+					'<div class="result-section"><div class="result-label">' +
+					label +
+					'</div>';
+				if (!violations || violations.length === 0) {
+					return html + '<div class="absent">\u2014</div></div>';
+				}
+				html +=
+					'<table class="violations-table"><thead><tr>' +
+					'<th>severity</th><th>nodeType</th><th>message</th><th>location</th>' +
+					'</tr></thead><tbody>';
+				for (var i = 0; i < violations.length; i++) {
+					var v = violations[i];
+					var loc = v.location
+						? v.location.start.line + ':' + v.location.start.column
+						: '';
+					html +=
+						'<tr><td>' +
+						escapeHtml(v.severity) +
+						'</td><td>' +
+						escapeHtml(v.nodeType) +
+						'</td><td>' +
+						escapeHtml(v.message) +
+						'</td><td>' +
+						escapeHtml(loc) +
+						'</td></tr>';
+				}
+				html += '</tbody></table></div>';
+				return html;
+			}
+
+			function renderLogs(logs) {
+				var html =
+					'<div class="result-section"><div class="result-label">logs (' +
+					(logs ? logs.length : 0) +
+					')</div>';
+				if (!logs) {
+					return html + '<div class="absent">\u2014</div></div>';
+				}
+				html += '<div class="event-list">';
+				for (var i = 0; i < logs.length; i++) {
+					html += renderEvent(logs[i]);
+				}
+				html += '</div></div>';
+				return html;
+			}
+
+			function renderEvent(ev) {
+				var cls = 'ev-' + ev.event;
+				var text = '';
+				if (ev.event === 'log') {
+					text =
+						'[line ' +
+						ev.line +
+						'] log: ' +
+						ev.args.map(String).join(', ');
+				} else if (ev.event === 'assert') {
+					text =
+						'[line ' +
+						ev.line +
+						'] assert: ' +
+						ev.args.map(String).join(', ');
+				} else if (ev.event === 'error') {
+					text =
+						'[' +
+						ev.phase +
+						'] ' +
+						ev.name +
+						': ' +
+						ev.message +
+						(ev.line ? ' (line ' + ev.line + ')' : '');
+				} else if (ev.event === 'prompt') {
+					text =
+						'[line ' +
+						ev.line +
+						'] prompt(' +
+						ev.args.map(String).join(', ') +
+						') \u2192 ' +
+						JSON.stringify(ev.return);
+				} else if (ev.event === 'confirm') {
+					text =
+						'[line ' +
+						ev.line +
+						'] confirm(' +
+						ev.args.map(String).join(', ') +
+						') \u2192 ' +
+						ev.return;
+				} else if (ev.event === 'alert') {
+					text =
+						'[line ' +
+						ev.line +
+						'] alert(' +
+						ev.args.map(String).join(', ') +
+						')';
+				} else {
+					text = JSON.stringify(ev);
+				}
+				return (
+					'<div class="' +
+					cls +
+					'">' +
+					escapeHtml(text) +
+					'</div>'
+				);
+			}
+
+			function renderSteps(steps) {
+				var html =
+					'<div class="result-section"><div class="result-label">steps (' +
+					(steps ? steps.length : 0) +
+					')</div>';
+				if (!steps) {
+					return html + '<div class="absent">\u2014</div></div>';
+				}
+				html +=
+					'<pre class="steps-output">' +
+					escapeHtml(JSON.stringify(steps, null, 2)) +
+					'</pre></div>';
+				return html;
+			}
+
+			function escapeHtml(str) {
+				return str
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/"/g, '&quot;');
+			}
+
+			function renderResult(result, mode) {
+				var html = renderOk(result.ok);
+				html += renderError(result.error);
+				html += renderViolations('warnings', result.warnings);
+				html += renderViolations('rejections', result.rejections);
+				if (mode === 'run') {
+					html += renderLogs(result.logs);
+				}
+				if (mode === 'trace') {
+					html += renderSteps(result.steps);
+				}
+				return html;
+			}
+
+			// --- Validate ---
+
+			document
+				.getElementById('btn-validate')
+				.addEventListener('click', function () {
+					var statusEl = document.getElementById('status-validate');
+					var resultEl = document.getElementById('result-validate');
+					statusEl.textContent = 'validating\u2026';
+
+					try {
+						var result = validate(codeEl.value);
+						console.log('validate result:', result);
+						statusEl.textContent = 'done \u2014 ok: ' + result.ok;
+						resultEl.innerHTML = renderResult(result, 'validate');
+						resultEl.classList.add('visible');
+					} catch (err) {
+						statusEl.textContent = 'unexpected throw: ' + err.message;
+						console.error('validate error:', err);
+					}
+				});
+
+			// --- Run ---
+
+			document
+				.getElementById('btn-run')
+				.addEventListener('click', async function () {
+					var btn = document.getElementById('btn-run');
+					var statusEl = document.getElementById('status-run');
+					var resultEl = document.getElementById('result-run');
+					btn.disabled = true;
+					statusEl.textContent = 'running\u2026';
+
+					var maxSeconds =
+						Number(document.getElementById('run-maxSeconds').value) || 5;
+
+					try {
+						var result = await run(codeEl.value, maxSeconds);
+						console.log('run result:', result);
+						statusEl.textContent = 'done \u2014 ok: ' + result.ok;
+						resultEl.innerHTML = renderResult(result, 'run');
+						resultEl.classList.add('visible');
+					} catch (err) {
+						statusEl.textContent = 'unexpected throw: ' + err.message;
+						console.error('run error:', err);
+					} finally {
+						btn.disabled = false;
+					}
+				});
+
+			// --- Trace ---
+
+			document
+				.getElementById('btn-trace')
+				.addEventListener('click', async function () {
+					var btn = document.getElementById('btn-trace');
+					var statusEl = document.getElementById('status-trace');
+					var resultEl = document.getElementById('result-trace');
+					btn.disabled = true;
+					statusEl.textContent = 'tracing\u2026';
+
+					var maxSeconds =
+						Number(document.getElementById('trace-maxSeconds').value) || 5;
+
+					try {
+						var result = await trace(codeEl.value, maxSeconds);
+						console.log('trace result:', result);
+						statusEl.textContent = 'done \u2014 ok: ' + result.ok;
+						resultEl.innerHTML = renderResult(result, 'trace');
+						resultEl.classList.add('visible');
+					} catch (err) {
+						statusEl.textContent = 'unexpected throw: ' + err.message;
+						console.error('trace error:', err);
+					} finally {
+						btn.disabled = false;
+					}
+				});
+
+			// --- Debug ---
+
+			document
+				.getElementById('btn-debug')
+				.addEventListener('click', async function () {
+					var btn = document.getElementById('btn-debug');
+					var statusEl = document.getElementById('status-debug');
+					var resultEl = document.getElementById('result-debug');
+					btn.disabled = true;
+					statusEl.textContent =
+						'running\u2026 (step through debugger in DevTools)';
+
+					var maxIterations =
+						Number(
+							document.getElementById('debug-maxIterations').value,
+						) || 100;
+
+					try {
+						var result = await debug(codeEl.value, maxIterations);
+						console.log('debug result:', result);
+						statusEl.textContent = 'done \u2014 ok: ' + result.ok;
+						resultEl.innerHTML = renderResult(result, 'debug');
+						resultEl.classList.add('visible');
+					} catch (err) {
+						statusEl.textContent = 'unexpected throw: ' + err.message;
+						console.error('debug error:', err);
+					} finally {
+						btn.disabled = false;
+					}
+				});
+
+			// --- SAB check ---
+
+			if (typeof SharedArrayBuffer === 'undefined') {
+				var warning =
+					'\u26a0 SharedArrayBuffer not available \u2014 run and trace tabs will not work. Serve with COOP/COEP headers.';
+				document.getElementById('status-run').textContent = warning;
+				document.getElementById('status-run').style.color = '#c00';
+				document.getElementById('status-trace').textContent = warning;
+				document.getElementById('status-trace').style.color = '#c00';
+			}
+		</script>
+	</body>
+</html>
