@@ -11,15 +11,6 @@ explicit.
 
 This keeps the code object's role clear: it reports, it doesn't fix.
 
-### No warnings in execution results
-
-Execution results (`RunResult`, `TraceResult`, `DebugResult`) do NOT include
-warnings. Get warnings via `hint()` or the code object's `.warnings` property.
-
-Rationale: execution results are about what happened when the code ran. Warnings
-are about what the code looks like before it runs. Mixing them conflates two
-concerns and makes result types heavier.
-
 ## Execution pipeline
 
 All execution functions run the same pipeline:
@@ -129,8 +120,8 @@ read its properties — no try/catch needed.
 
 ### Why setter re-runs the pipeline
 
-`.code = newCode` updates all properties (`.ok`, `.rejections`, `.isFormatted`,
-`.warnings`). Components sharing a reference to the same code object see the
+`.code = newCode` updates all properties (`.ok`, `.rejections`, `.isFormatted`).
+Components sharing a reference to the same code object see the
 updated state. This is the "live analysis dashboard" model.
 
 ### Why execution is blocked when !ok

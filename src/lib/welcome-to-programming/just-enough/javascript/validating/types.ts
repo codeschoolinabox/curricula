@@ -5,7 +5,7 @@
  * validation: violations, parse errors, and validation reports.
  *
  * These types are consumed by the public `validate()` API and
- * internally by the hinting module.
+ * internally by the code object factory.
  */
 
 import type { Node } from 'acorn';
@@ -49,8 +49,7 @@ type SourceRange = {
  *   `'VariableDeclaration'`, `'BinaryExpression'`)
  * - `message` is human-readable, written for learners — it names
  *   the disallowed construct and suggests the allowed alternative
- * - `severity` distinguishes blocking rejections from informational
- *   warnings
+ * - `severity` is always `'rejection'` — all violations block execution
  * - `location` gives the exact source span for highlighting
  *
  * All fields are readonly. Violation objects are always frozen.
@@ -58,7 +57,7 @@ type SourceRange = {
 type Violation = {
 	readonly nodeType: string;
 	readonly message: string;
-	readonly severity: 'rejection' | 'warning';
+	readonly severity: 'rejection';
 	readonly location: SourceRange;
 };
 
@@ -88,11 +87,8 @@ type ParseError = {
  * @remarks All fields are frozen (including the `violations`
  * array and each `Violation` inside it).
  *
- * - `isValid` is `true` when there are no `'rejection'`-severity
- *   violations and no `parseError` — warning-severity violations
- *   don't invalidate the program
- * - `violations` may be non-empty even when `isValid` is true
- *   (warnings are informational, not blocking)
+ * - `isValid` is `true` when there are no violations and no
+ *   `parseError`
  * - `parseError` is present only when acorn could not parse the
  *   source at all; in that case `violations` is empty (no AST
  *   to walk) and `isValid` is `false`

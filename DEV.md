@@ -1046,7 +1046,7 @@ Each passing TDD cycle = one atomic commit:
 - No skipping doc updates ("I'll do it at the end")
 - Each edit should do exactly one thing
 - **No full implementations in plans** — plans describe BEHAVIOR and INTENT, not
-  code
+  code. Pseudocode is allowed when describing a proposed strategy.
 
 ## Linting Conventions
 

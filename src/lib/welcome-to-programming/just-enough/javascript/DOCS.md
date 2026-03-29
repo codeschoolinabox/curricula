@@ -8,8 +8,8 @@ patterns. "Just Enough JavaScript" (JeJ) is that subset: an allowlist-based
 language level that limits what syntax, operators, and globals learners can use.
 
 This library enforces that subset (validation), provides sandboxed execution
-environments (run, debug, trace), and offers tooling functions (format, hint) so
-learners can safely experiment within bounds.
+environments (run, debug, trace), and offers tooling functions (format, validate)
+so learners can safely experiment within bounds.
 
 ## Architecture
 
@@ -27,9 +27,9 @@ code (string)
 ```
 
 Each API function uses the pipeline up to a different point. Tooling functions
-(`format`, `validate`, `hint`) help learners GET to valid formatted JeJ — they
-don't block. Execution functions (`run`, `trace`, `debug`) require valid
-formatted JeJ — they gate.
+(`format`, `validate`) help learners GET to valid formatted JeJ — they don't
+block. Execution functions (`run`, `trace`, `debug`) require valid formatted
+JeJ — they gate.
 
 ### Module layout
 
@@ -43,7 +43,6 @@ just-enough-javascript/
     trace/          ← Aran AST instrumentation in Worker
     shared/         ← Execution type, SAB protocol, guard-loops
   validating/       ← AST-based validation pipeline
-  hinting/          ← Warning detection (misconceptions, code smells)
   formatting/       ← Recast-based formatting and format checking
   reference.md      ← Learner-facing language cheat sheet
 ```
@@ -56,7 +55,6 @@ index.ts
 
 api/*
   → validating/        (validation preamble)
-  → hinting/           (warning detection)
   → formatting/        (format check + formatting)
   → evaluating/*/      (raw execution)
 
@@ -64,11 +62,7 @@ evaluating/*/
   → evaluating/shared/ (Execution type, SAB protocol)
 
 validating/
-  (no deps on evaluating/, hinting/, or formatting/)
-
-hinting/
-  → validating/        (validates first, early return if !ok)
-  → formatting/        (format check for formatted field)
+  (no deps on evaluating/ or formatting/)
 
 formatting/
   (no deps on validating/ or evaluating/)

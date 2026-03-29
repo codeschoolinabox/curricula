@@ -5,24 +5,66 @@ import getChildNodes from './get-child-nodes.js';
 
 import type { Violation } from './types.js';
 
+/** Known JavaScript built-in globals. Identifiers in this set that are NOT
+ * in the language level's `allowedGlobals` produce a rejection. Identifiers
+ * NOT in this set pass through to runtime — typos get ReferenceError.
+ *
+ * Does not need to be exhaustive — missing entries safely pass to runtime. */
+const KNOWN_JS_GLOBALS: ReadonlySet<string> = Object.freeze(
+	new Set([
+		// Constructors / namespaces
+		'Object', 'Function', 'Array', 'Number', 'String', 'Boolean',
+		'Symbol', 'BigInt', 'Date', 'RegExp',
+		'Error', 'TypeError', 'RangeError', 'ReferenceError',
+		'SyntaxError', 'URIError', 'EvalError', 'AggregateError',
+		'Map', 'Set', 'WeakMap', 'WeakSet', 'WeakRef',
+		'FinalizationRegistry',
+		'Promise', 'Proxy', 'Reflect', 'JSON', 'Math', 'Intl',
+		'ArrayBuffer', 'SharedArrayBuffer', 'DataView', 'Atomics',
+		'Int8Array', 'Uint8Array', 'Uint8ClampedArray',
+		'Int16Array', 'Uint16Array', 'Int32Array', 'Uint32Array',
+		'Float32Array', 'Float64Array', 'BigInt64Array', 'BigUint64Array',
+		'Iterator', 'AsyncIterator',
+		// Global functions
+		'parseInt', 'parseFloat', 'isNaN', 'isFinite',
+		'encodeURI', 'encodeURIComponent', 'decodeURI',
+		'decodeURIComponent',
+		'escape', 'unescape', 'btoa', 'atob',
+		'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval',
+		'requestAnimationFrame', 'cancelAnimationFrame',
+		'queueMicrotask', 'structuredClone',
+		'fetch', 'AbortController', 'AbortSignal',
+		// Browser globals
+		'window', 'self', 'globalThis', 'document', 'navigator',
+		'location', 'history', 'screen',
+		'localStorage', 'sessionStorage', 'indexedDB',
+		'XMLHttpRequest', 'Worker', 'WebSocket', 'EventSource',
+		// DOM
+		'Element', 'HTMLElement', 'Node', 'NodeList',
+		'Event', 'CustomEvent',
+		'MutationObserver', 'IntersectionObserver', 'ResizeObserver',
+		// Web APIs
+		'URL', 'URLSearchParams', 'Headers', 'Request', 'Response',
+		'FormData', 'Blob', 'File', 'FileReader',
+		'TextEncoder', 'TextDecoder',
+		'crypto', 'performance',
+		'ReadableStream', 'WritableStream', 'TransformStream',
+	]),
+);
+
 /**
  * Scope entry for a declared variable.
- *
- * @remarks Tracks name, declaration location, and read count
- * for unused-variable detection.
  */
 type ScopeEntry = {
 	readonly name: string;
 	readonly node: Node;
-	readonly isForOfVar: boolean;
-	readCount: number;
 };
 
 /**
  * A block scope containing variable declarations.
  *
  * @remarks Each scope has a reference to its parent for
- * upward name lookups (undeclared globals, shadowing).
+ * upward name lookups (disallowed globals detection).
  */
 type Scope = {
 	readonly declarations: Map<string, ScopeEntry>;
@@ -30,12 +72,15 @@ type Scope = {
 };
 
 /**
- * Performs scope analysis on a parsed AST to detect undeclared globals,
- * unused variables, and variable shadowing.
+ * Performs scope analysis on a parsed AST to detect disallowed globals.
  *
- * @remarks Walks the AST once, maintaining a scope chain. JeJ's subset
- * has no functions, classes, or catch clauses — only `let`/`const` in
- * blocks and for-of heads create scopes.
+ * @remarks Walks the AST once, maintaining a scope chain to know which
+ * names are user-declared. Flags known JavaScript built-in globals
+ * (from `KNOWN_JS_GLOBALS`) that are not in `allowedGlobals`.
+ * Unknown identifiers pass through to runtime.
+ *
+ * JeJ's subset has no functions, classes, or catch clauses — only
+ * `let`/`const` in blocks and for-of heads create scopes.
  *
  * **Scope boundaries:** `Program`, `BlockStatement`, `ForOfStatement`
  *
@@ -43,10 +88,6 @@ type Scope = {
  * - `VariableDeclarator.id` — declaration, not read
  * - `MemberExpression.property` when `computed: false` — property name
  * - `ForOfStatement.left` — declaration position
- *
- * Returns a frozen array of violations:
- * - `'rejection'` for undeclared identifiers
- * - `'warning'` for unused variables and shadowing
  *
  * @param ast - The root AST node (typically `Program`).
  * @param allowedGlobals - Set of identifier names that don't need
@@ -62,9 +103,6 @@ function checkUndeclaredGlobals(
 
 	walkScope(ast, programScope, allowedGlobals, violations, null, false);
 
-	// after full walk, check for unused variables in program scope
-	reportUnused(programScope, violations);
-
 	return Object.freeze(violations);
 }
 
@@ -75,11 +113,10 @@ function checkUndeclaredGlobals(
  * special positions (VariableDeclarator.id, MemberExpression.property,
  * ForOfStatement.left).
  *
- * `insideWith` suppresses undeclared-identifier rejections and
- * shadowing warnings inside `with` statement bodies. `with`
- * introduces dynamic scope — static analysis can't know what
- * properties the `with` object injects, so we suppress diagnostics
- * but still resolve declared variables (for unused-variable detection).
+ * `insideWith` suppresses disallowed-global rejections inside
+ * `with` statement bodies. `with` introduces dynamic scope —
+ * static analysis can't know what properties the `with` object
+ * injects, so we suppress checks inside the body.
  */
 function walkScope(
 	node: Node,
@@ -115,7 +152,6 @@ function walkScope(
 					insideWith,
 				);
 			}
-			reportUnused(blockScope, violations);
 			break;
 		}
 
@@ -155,10 +191,6 @@ function walkScope(
 							name,
 							id,
 							forOfScope,
-							scope,
-							violations,
-							true,
-							insideWith,
 						);
 					}
 				}
@@ -193,7 +225,6 @@ function walkScope(
 				);
 			}
 
-			reportUnused(forOfScope, violations);
 			break;
 		}
 
@@ -217,7 +248,7 @@ function walkScope(
 			if (id.type === 'Identifier') {
 				const name = (id as unknown as Record<string, unknown>)
 					.name as string;
-				registerDeclaration(name, id, scope, scope.parent, violations, false, insideWith);
+				registerDeclaration(name, id, scope);
 			}
 
 			// Walk the init expression (right-hand side) — these are reads
@@ -279,32 +310,6 @@ function walkScope(
 			break;
 		}
 
-		case 'AssignmentExpression': {
-			// Check if left-hand side is a for-of iteration variable
-			const left = record.left as Node;
-			if (left.type === 'Identifier') {
-				const assignName = (
-					left as unknown as Record<string, unknown>
-				).name as string;
-				const assignEntry = lookupScope(assignName, scope);
-				if (assignEntry && assignEntry.isForOfVar) {
-					violations.push(
-						createViolation(
-							'AssignmentExpression',
-							`Reassigning iteration variable '${assignName}' — this is usually a mistake`,
-							extractLocation(node),
-							'warning',
-						),
-					);
-				}
-			}
-			// Fall through to generic walk for both sides
-			for (const child of getChildNodes(node)) {
-				walkScope(child, scope, allowedGlobals, violations, node.type, insideWith);
-			}
-			break;
-		}
-
 		case 'Identifier': {
 			// Skip if this is a declaration position (handled by
 			// VariableDeclarator and ForOfStatement cases above)
@@ -316,10 +321,8 @@ function walkScope(
 
 			const name = record.name as string;
 
-			// Try to resolve in scope chain
-			const entry = lookupScope(name, scope);
-			if (entry) {
-				entry.readCount += 1;
+			// User-declared → allowed
+			if (lookupScope(name, scope)) {
 				break;
 			}
 
@@ -329,20 +332,22 @@ function walkScope(
 			}
 
 			// Inside `with` body — dynamic scope makes static analysis
-			// impossible, so skip the undeclared rejection
+			// impossible, so skip the check
 			if (insideWith) {
 				break;
 			}
 
-			// Undeclared — rejection
-			violations.push(
-				createViolation(
-					'Identifier',
-					`'${name}' is not declared — declare it with 'let' or 'const', or check spelling`,
-					extractLocation(node),
-					'rejection',
-				),
-			);
+			// Known JS global NOT in allowedGlobals → rejection
+			if (KNOWN_JS_GLOBALS.has(name)) {
+				violations.push(
+					createViolation(
+						'Identifier',
+						`'${name}' is not available at this language level`,
+						extractLocation(node),
+					),
+				);
+			}
+			// else: unknown identifier → let runtime catch it
 			break;
 		}
 
@@ -357,35 +362,14 @@ function walkScope(
 }
 
 /**
- * Registers a variable declaration in a scope, checking for shadowing.
+ * Registers a variable declaration in a scope.
  */
 function registerDeclaration(
 	name: string,
 	node: Node,
 	scope: Scope,
-	parentScopeForShadow: Scope | null,
-	violations: Violation[],
-	isForOfVar: boolean = false,
-	insideWith: boolean = false,
 ): void {
-	// WHY: with is a no-man's land — suppress shadowing warnings
-	// inside with bodies. Static analysis can't reason about
-	// dynamic scope injection from the with object.
-	if (!insideWith && parentScopeForShadow) {
-		const shadowed = lookupScope(name, parentScopeForShadow);
-		if (shadowed) {
-			violations.push(
-				createViolation(
-					'Identifier',
-					`'${name}' shadows a variable in an outer scope`,
-					extractLocation(node),
-					'warning',
-				),
-			);
-		}
-	}
-
-	scope.declarations.set(name, { name, node, readCount: 0, isForOfVar });
+	scope.declarations.set(name, { name, node });
 }
 
 /**
@@ -401,24 +385,6 @@ function lookupScope(name: string, scope: Scope): ScopeEntry | null {
 		current = current.parent;
 	}
 	return null;
-}
-
-/**
- * Reports unused variables in a scope as warnings.
- */
-function reportUnused(scope: Scope, violations: Violation[]): void {
-	for (const entry of scope.declarations.values()) {
-		if (entry.readCount === 0) {
-			violations.push(
-				createViolation(
-					'Identifier',
-					`'${entry.name}' is declared but never used`,
-					extractLocation(entry.node),
-					'warning',
-				),
-			);
-		}
-	}
 }
 
 /**

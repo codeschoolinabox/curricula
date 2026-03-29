@@ -46,16 +46,6 @@ describe('createViolation', () => {
 			expect(violation.severity).toBe('rejection');
 		});
 
-		it('uses the given severity when provided', () => {
-			const violation = createViolation(
-				'Program',
-				"'use strict' is redundant in module mode",
-				{ start: { line: 1, column: 0 }, end: { line: 1, column: 12 } },
-				'warning',
-			);
-			expect(violation.severity).toBe('warning');
-		});
-
 		it('accepts rejection as an explicit severity', () => {
 			const violation = createViolation(
 				'BinaryExpression',

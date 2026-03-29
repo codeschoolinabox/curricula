@@ -23,12 +23,8 @@ import type { LanguageLevel, ParseError, ValidationReport } from './types.js';
  * 2. **Collect violations** — walks every AST node, checking each
  *    against the language level's allowlist.
  * 3. **Scope analysis** — tracks variable declarations per block
- *    scope, flags undeclared identifiers (rejection), unused variables
- *    (warning), and variable shadowing (warning).
+ *    scope, flags disallowed globals (rejection).
  * 4. **Build report** — freezes everything and returns.
- *
- * AST-based warnings (camelCase, empty blocks, etc.) are collected
- * separately by the hinting module — see `hinting/collect-warnings.ts`.
  *
  * Never throws. Parse errors are captured in the report. This is
  * essential for educational tools where student code frequently has
@@ -87,7 +83,7 @@ function validateProgram(
 	// 2. Collect node violations
 	const nodeViolations = collectViolations(ast, languageLevel.nodes);
 
-	// 3. Scope analysis — undeclared globals, unused vars, shadowing
+	// 3. Scope analysis — disallowed globals
 	const scopeViolations = languageLevel.allowedGlobals
 		? checkUndeclaredGlobals(ast, languageLevel.allowedGlobals)
 		: [];
@@ -99,7 +95,7 @@ function validateProgram(
 
 	// 4. Build report
 	const report: ValidationReport = {
-		isValid: violations.every((v) => v.severity !== 'rejection'),
+		isValid: violations.length === 0,
 		violations,
 		source,
 		levelName: languageLevel.name,

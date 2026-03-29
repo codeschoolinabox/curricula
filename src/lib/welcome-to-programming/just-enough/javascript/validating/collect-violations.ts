@@ -81,6 +81,11 @@ function walk(
 		}
 	}
 
+	// WHY: with is a portal to full JavaScript — any syntax is allowed
+	// inside. The with statement itself is checked above (it's `true` in
+	// the allowlist), but we deliberately skip its children.
+	if (node.type === 'WithStatement') return;
+
 	// always recurse into children to catch nested violations
 	for (const child of getChildNodes(node)) {
 		walk(child, nodes, violations);

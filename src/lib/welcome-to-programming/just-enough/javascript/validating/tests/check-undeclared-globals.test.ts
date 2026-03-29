@@ -37,39 +37,53 @@ const ALLOWED_GLOBALS = Object.freeze(
 );
 
 describe('checkUndeclaredGlobals', () => {
-	describe('undeclared globals — rejections', () => {
-		it('flags an undeclared identifier', () => {
-			const ast = parseSource('x;');
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const v = violations.find((v) => v.message.includes('x'));
-			expect(v).toBeDefined();
-			expect(v!.severity).toBe('rejection');
-		});
-
-		it('flags parseInt as undeclared', () => {
+	describe('disallowed globals — rejections', () => {
+		it('rejects known global not in allowedGlobals', () => {
 			const ast = parseSource('parseInt("42");');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			const v = violations.find((v) => v.message.includes('parseInt'));
 			expect(v).toBeDefined();
 			expect(v!.severity).toBe('rejection');
+			expect(v!.message).toContain('not available at this language level');
 		});
 
-		it('flags Math as undeclared', () => {
+		it('rejects Math', () => {
 			const ast = parseSource('Math;');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			const v = violations.find((v) => v.message.includes('Math'));
 			expect(v).toBeDefined();
 		});
 
-		it('flags identifier used after block scope ends', () => {
-			const ast = parseSource('if (true) { let x = 1; }\nx;');
+		it('rejects Date', () => {
+			const ast = parseSource('Date;');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const v = violations.find(
-				(v) => v.severity === 'rejection' && v.message.includes('x'),
-			);
+			const v = violations.find((v) => v.message.includes('Date'));
 			expect(v).toBeDefined();
 		});
 
+		it('rejects document', () => {
+			const ast = parseSource('document;');
+			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
+			const v = violations.find((v) => v.message.includes('document'));
+			expect(v).toBeDefined();
+		});
+
+		it('rejects fetch', () => {
+			const ast = parseSource('fetch;');
+			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
+			const v = violations.find((v) => v.message.includes('fetch'));
+			expect(v).toBeDefined();
+		});
+
+		it('rejects setTimeout', () => {
+			const ast = parseSource('setTimeout;');
+			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
+			const v = violations.find((v) => v.message.includes('setTimeout'));
+			expect(v).toBeDefined();
+		});
+	});
+
+	describe('allowed globals — no rejection', () => {
 		it('does not flag declared variables', () => {
 			const ast = parseSource('let x = 1;\nx;');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
@@ -124,101 +138,35 @@ describe('checkUndeclaredGlobals', () => {
 		});
 	});
 
-	describe('unused variables — warnings', () => {
-		it('warns about an unused declared variable', () => {
-			const ast = parseSource('let x = 1;');
+	describe('unknown identifiers — no rejection (runtime catches)', () => {
+		it('does not reject unknown identifier (typo)', () => {
+			const ast = parseSource('xyzNotAThing;');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const v = violations.find(
-				(v) => v.severity === 'warning' && v.message.includes('x'),
-			);
-			expect(v).toBeDefined();
-			expect(v!.nodeType).toBe('Identifier');
+			expect(violations).toHaveLength(0);
 		});
 
-		it('does not warn when variable is used', () => {
-			const ast = parseSource('let x = 1;\nconsole.log(x);');
+		it('does not reject identifier after block scope ends', () => {
+			const ast = parseSource('if (true) { let x = 1; }\nx;');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const unused = violations.filter(
-				(v) => v.severity === 'warning' && v.message.includes('unused'),
-			);
-			expect(unused).toHaveLength(0);
-		});
-
-		it('does not warn about unused for-of variable that is used', () => {
-			const ast = parseSource('for (const c of "hi") { console.log(c); }');
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const unused = violations.filter(
-				(v) => v.severity === 'warning' && v.message.includes('unused'),
-			);
-			expect(unused).toHaveLength(0);
-		});
-
-		it('warns about unused for-of variable', () => {
-			const ast = parseSource(
-				'for (const c of "hi") { console.log("hello"); }',
-			);
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const v = violations.find(
-				(v) => v.severity === 'warning' && v.message.includes('c'),
-			);
-			expect(v).toBeDefined();
-		});
-
-		it('warns about unused const', () => {
-			const ast = parseSource('const PI = 3.14;');
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const v = violations.find(
-				(v) => v.severity === 'warning' && v.message.includes('PI'),
-			);
-			expect(v).toBeDefined();
+			expect(violations).toHaveLength(0);
 		});
 	});
 
-	describe('variable shadowing — warnings', () => {
-		it('warns when inner block shadows outer variable', () => {
-			const ast = parseSource('let x = 1;\nif (true) { let x = 2; }');
+	describe('user declarations shadow known globals', () => {
+		it('allows user-declared Math', () => {
+			const ast = parseSource('let Math = 5;\nconsole.log(Math);');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const v = violations.find(
-				(v) => v.severity === 'warning' && v.message.includes('shadow'),
-			);
-			expect(v).toBeDefined();
+			expect(violations).toHaveLength(0);
 		});
 
-		it('does not warn for sibling scope same-name declarations', () => {
-			const ast = parseSource(
-				'if (true) { let x = 1; }\nif (true) { let x = 2; }',
-			);
+		it('allows user-declared Array', () => {
+			const ast = parseSource('let Array = "test";\nconsole.log(Array);');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const shadow = violations.filter(
-				(v) => v.severity === 'warning' && v.message.includes('shadow'),
-			);
-			expect(shadow).toHaveLength(0);
-		});
-
-		it('warns when for-of variable shadows outer variable', () => {
-			const ast = parseSource(
-				'let c = "x";\nfor (const c of "hi") { console.log(c); }',
-			);
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const v = violations.find(
-				(v) => v.severity === 'warning' && v.message.includes('shadow'),
-			);
-			expect(v).toBeDefined();
+			expect(violations).toHaveLength(0);
 		});
 	});
 
 	describe('scope boundaries', () => {
-		it('respects block scope — inner declaration not visible outside', () => {
-			const ast = parseSource(
-				'if (true) { let inner = 1; }\nconsole.log(inner);',
-			);
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const v = violations.find(
-				(v) => v.severity === 'rejection' && v.message.includes('inner'),
-			);
-			expect(v).toBeDefined();
-		});
-
 		it('nested scopes can access outer declarations', () => {
 			const ast = parseSource(
 				'let outer = 1;\nif (true) { console.log(outer); }',
@@ -229,14 +177,17 @@ describe('checkUndeclaredGlobals', () => {
 		});
 
 		it('for-of iteration variable is scoped to the loop', () => {
+			// WHY: c is not a known global, so it won't be rejected after the loop.
+			// But a known global declared inside for-of IS scoped to the loop.
 			const ast = parseSource(
-				'for (const c of "hi") { console.log(c); }\nc;',
+				'for (const Date of "hi") { console.log(Date); }\nDate;',
 			);
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const v = violations.find(
-				(v) => v.severity === 'rejection' && v.message.includes("'c'"),
+			const dateViolations = violations.filter(
+				(v) => v.message.includes("'Date'"),
 			);
-			expect(v).toBeDefined();
+			// WHY: exactly 1 — only the Date AFTER the loop, not inside
+			expect(dateViolations).toHaveLength(1);
 		});
 	});
 
@@ -248,15 +199,6 @@ describe('checkUndeclaredGlobals', () => {
 				(v) => v.severity === 'rejection' && v.message.includes("'x'"),
 			);
 			expect(undeclared).toHaveLength(0);
-		});
-
-		it('assignment target resolves declared variable (no unused warning)', () => {
-			const ast = parseSource('let x = 1;\nx = 5;\nconsole.log(x);');
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const unused = violations.filter(
-				(v) => v.severity === 'warning' && v.message.includes('unused'),
-			);
-			expect(unused).toHaveLength(0);
 		});
 
 		it('resolves identifiers in template literal interpolation', () => {
@@ -284,111 +226,51 @@ describe('checkUndeclaredGlobals', () => {
 			expect(undeclared).toHaveLength(0);
 		});
 
-		it('multiple reads prevent unused warning', () => {
-			const ast = parseSource('let x = 1;\nconsole.log(x);\nconsole.log(x);\nconsole.log(x);');
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const unused = violations.filter(
-				(v) => v.severity === 'warning' && v.message.includes('unused'),
-			);
-			expect(unused).toHaveLength(0);
-		});
 	});
 
-	describe('for-of var reassigned — warnings', () => {
-		it('warns when for-of iteration variable is reassigned', () => {
-			const ast = parseSource(
-				'for (let c of "hi") {\n\tc = "x";\n\tconsole.log(c);\n}\n',
+	describe('with statement — scope suppression', () => {
+		it('does not reject known global inside with body', () => {
+			const ast = parseSourceScript(
+				'with ({}) { Map; }',
 			);
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			const v = violations.find(
-				(v) =>
-					v.severity === 'warning' &&
-					v.message.includes('iteration variable'),
-			);
-			expect(v).toBeDefined();
-		});
-
-		it('does not warn when for-of variable is only read', () => {
-			const ast = parseSource(
-				'for (const c of "hi") {\n\tlet x = c;\n\tconsole.log(x);\n}\n',
-			);
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const v = violations.find(
-				(v) =>
-					v.severity === 'warning' &&
-					v.message.includes('iteration variable'),
+				(v) => v.severity === 'rejection' && v.message.includes("'Map'"),
 			);
 			expect(v).toBeUndefined();
 		});
 
-		it('warns only on inner for-of in nested loops', () => {
-			const ast = parseSource(
-				'for (const a of "x") {\n\tfor (let b of "y") {\n\t\tb = "z";\n\t\tconsole.log(a);\n\t\tconsole.log(b);\n\t}\n}\n',
-			);
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const reassignWarnings = violations.filter(
-				(v) =>
-					v.severity === 'warning' &&
-					v.message.includes('iteration variable'),
-			);
-			expect(reassignWarnings).toHaveLength(1);
-		});
-	});
-
-	describe('with statement — scope suppression', () => {
-		it('does not flag identifiers inside with body as undeclared', () => {
-			const ast = parseSourceScript(
-				'with ({ x: 42 }) { console.log(x); }',
-			);
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const undeclared = violations.filter(
-				(v) => v.severity === 'rejection' && v.message.includes("'x'"),
-			);
-			expect(undeclared).toHaveLength(0);
-		});
-
 		it('does not flag deeply nested identifiers inside with body', () => {
 			const ast = parseSourceScript(
-				'with ({ y: 1 }) { if (true) { console.log(y); } }',
+				'with ({}) { if (true) { JSON; } }',
 			);
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const undeclared = violations.filter(
-				(v) => v.severity === 'rejection' && v.message.includes("'y'"),
+			const v = violations.find(
+				(v) => v.severity === 'rejection' && v.message.includes("'JSON'"),
 			);
-			expect(undeclared).toHaveLength(0);
+			expect(v).toBeUndefined();
 		});
 
-		it('still flags identifiers outside with body', () => {
+		it('still rejects known globals outside with body', () => {
 			const ast = parseSourceScript(
-				'with ({ x: 42 }) { console.log(x); }\nz;',
+				'with ({}) { console.log("hi"); }\nMath;',
 			);
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const undeclared = violations.filter(
-				(v) => v.severity === 'rejection' && v.message.includes("'z'"),
+			const v = violations.find(
+				(v) => v.severity === 'rejection' && v.message.includes("'Math'"),
 			);
-			expect(undeclared).toHaveLength(1);
+			expect(v).toBeDefined();
 		});
 
-		it('does not produce unused-variable warnings for vars used inside with body', () => {
+		it('does not reject known global inside with body', () => {
 			const ast = parseSourceScript(
-				'let x = 1;\nwith ({}) { console.log(x); }',
+				'with ({}) { Math.random(); }',
 			);
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const unused = violations.filter(
-				(v) => v.severity === 'warning' && v.message.includes("'x'") && v.message.includes('never used'),
+			const v = violations.find(
+				(v) => v.severity === 'rejection' && v.message.includes("'Math'"),
 			);
-			expect(unused).toHaveLength(0);
-		});
-
-		it('does not produce shadowing warnings inside with body', () => {
-			const ast = parseSourceScript(
-				'let x = 1;\nwith ({ x: 2 }) { let x = 3; }',
-			);
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const shadowing = violations.filter(
-				(v) => v.severity === 'warning' && v.message.includes('shadows'),
-			);
-			expect(shadowing).toHaveLength(0);
+			expect(v).toBeUndefined();
 		});
 
 		it('does not flag identifiers inside nested with', () => {
@@ -402,14 +284,6 @@ describe('checkUndeclaredGlobals', () => {
 			expect(undeclared).toHaveLength(0);
 		});
 
-		it('still produces shadowing warnings outside with body', () => {
-			const ast = parseSource('let x = 1;\n{ let x = 2; }');
-			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const shadowing = violations.filter(
-				(v) => v.severity === 'warning' && v.message.includes('shadows'),
-			);
-			expect(shadowing).toHaveLength(1);
-		});
 	});
 
 	describe('return value', () => {

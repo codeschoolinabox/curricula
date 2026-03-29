@@ -266,7 +266,7 @@ describe('justEnoughJs', () => {
 			expect(result).toHaveProperty('severity', 'rejection');
 		});
 
-		it('warns when head uses let instead of const', () => {
+		it('accepts let in for-of head', () => {
 			const result = validate(
 				fakeNode({
 					type: 'ForOfStatement',
@@ -274,8 +274,7 @@ describe('justEnoughJs', () => {
 					left: { type: 'VariableDeclaration', kind: 'let' },
 				}),
 			);
-			expect(result).not.toBe(true);
-			expect(result).toHaveProperty('severity', 'warning');
+			expect(result).toBe(true);
 		});
 
 		it('returns rejection (not warning) when body is braceless even with let head', () => {

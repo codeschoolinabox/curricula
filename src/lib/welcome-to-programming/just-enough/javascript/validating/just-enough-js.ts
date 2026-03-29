@@ -176,7 +176,7 @@ function validateLogicalExpression(node: Node): true | Violation {
  *
  * @remarks `typeof` is essential for type checking in exercises.
  * `!` (logical NOT) and `-` (numeric negation) are basic operators.
- * `void` is an easter egg — not in reference.md, warned in hinting.
+ * `void` is an easter egg — not in reference.md.
  * Excludes `+` (unary plus — confusing type coercion), `~` (bitwise
  * NOT), and `delete`.
  */
@@ -288,38 +288,21 @@ function validateWhileStatement(node: Node): true | Violation {
 }
 
 /**
- * Validates a for-of statement: block body required, `const` head
- * preferred.
+ * Validates a for-of statement: block body required.
  *
- * @remarks Two checks with different severities:
- * 1. Body must be `BlockStatement` — **rejection** (same as if/while).
- * 2. Head should use `const` — **warning** (convention, not a hard
- *    rule). The iteration variable shouldn't be reassigned, so
- *    `const` is the right default. `let` works but suggests the
- *    learner doesn't know the convention yet.
- *
- * If both apply (braceless + let), the rejection takes priority — the
- * `const` hint is noise when the structure itself is wrong.
+ * @remarks Body must be `BlockStatement` — **rejection** (same as
+ * if/while). Both `let` and `const` are accepted for the iteration
+ * variable head.
  */
 function validateForOfStatement(node: Node): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	const body = record.body as { type: string };
-	const left = record.left as { type: string; kind: string };
 
 	if (body.type !== 'BlockStatement') {
 		return createViolation(
 			'ForOfStatement',
 			'for-of body must use curly braces `{}`',
 			extractLocation(node),
-		);
-	}
-
-	if (left.kind !== 'const') {
-		return createViolation(
-			'ForOfStatement',
-			"use 'const' for the iteration variable in for-of loops",
-			extractLocation(node),
-			'warning',
 		);
 	}
 
@@ -392,8 +375,8 @@ function validateCallExpression(node: Node): true | Violation {
  * @remarks Uses the non-null assertion on `loc` because acorn always
  * provides it when parsed with `locations: true` (which
  * {@link parseProgram} guarantees). Duplicated across validator files
- * (`collect-violations.ts`, `collect-warnings.ts`,
- * `check-undeclared-globals.ts`) to keep each file self-contained.
+ * (`collect-violations.ts`, `check-undeclared-globals.ts`) to keep
+ * each file self-contained.
  */
 function extractLocation(node: Node) {
 	const loc = node.loc!;
@@ -475,7 +458,7 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 			'undefined',
 			'NaN',
 			'Infinity',
-			'eval', // easter egg — not in reference.md, warned in hinting
+			'eval', // easter egg — not in reference.md
 		]),
 	),
 
@@ -501,7 +484,7 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		// and gives trace visualization anchor nodes for grouping.
 		ParenthesizedExpression: true,
 
-		// easter eggs — not in reference.md, warned in hinting
+		// easter eggs — not in reference.md
 		LabeledStatement: true,
 		SequenceExpression: true,
 		WithStatement: true,

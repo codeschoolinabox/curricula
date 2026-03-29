@@ -36,13 +36,8 @@ function validate(code: string): BaseResult {
 		});
 	}
 
-	// 2. Filter rejections only — warnings are NOT included in
-	// validation results. Get warnings via hint() or the code object.
-	const rejections = report.violations.filter(
-		(v) => v.severity === 'rejection',
-	);
-
-	// 3. Rejections — code has language-level violations
+	// 2. Rejections — code has language-level violations
+	const rejections = report.violations;
 	if (rejections.length > 0) {
 		return deepFreezeInPlace({
 			ok: false,

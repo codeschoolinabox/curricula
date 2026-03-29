@@ -101,19 +101,6 @@ describe('createJejProgram', () => {
 		});
 	});
 
-	describe('warnings property', () => {
-		it('is an array for valid code', () => {
-			const code = format('let x = 5;\n');
-			const program = createJejProgram(code);
-			expect(Array.isArray(program.warnings)).toBe(true);
-		});
-
-		it('is empty when code has rejections', () => {
-			const program = createJejProgram('var x = 5;\n');
-			expect(program.warnings).toEqual([]);
-		});
-	});
-
 	describe('code setter', () => {
 		it('updates code property', () => {
 			const program = createJejProgram();

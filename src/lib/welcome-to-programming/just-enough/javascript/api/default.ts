@@ -31,7 +31,6 @@ type AnalysisState = {
 	parseError: SyntaxError | undefined;
 	rejections: readonly Violation[];
 	isFormatted: boolean;
-	warnings: readonly Violation[];
 };
 
 /**
@@ -56,16 +55,10 @@ function analyze(code: string): AnalysisState {
 			parseError: err,
 			rejections: [],
 			isFormatted: false,
-			warnings: [],
 		};
 	}
 
-	const rejections = report.violations.filter(
-		(v) => v.severity === 'rejection',
-	);
-	const warnings = report.violations.filter(
-		(v) => v.severity === 'warning',
-	);
+	const rejections = report.violations;
 
 	if (rejections.length > 0) {
 		return {
@@ -74,7 +67,6 @@ function analyze(code: string): AnalysisState {
 			parseError: undefined,
 			rejections,
 			isFormatted: false,
-			warnings: [],
 		};
 	}
 
@@ -87,7 +79,6 @@ function analyze(code: string): AnalysisState {
 		parseError: undefined,
 		rejections: [],
 		isFormatted: formatted,
-		warnings,
 	};
 }
 
@@ -156,9 +147,6 @@ export default function createJejProgram(code?: string): JejProgram {
 		},
 		get isFormatted() {
 			return state.isFormatted;
-		},
-		get warnings() {
-			return state.warnings;
 		},
 
 		run(config?: EngineConfig): Execution<RunEvent, RunResult> {

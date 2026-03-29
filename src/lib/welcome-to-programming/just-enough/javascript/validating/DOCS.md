@@ -11,20 +11,6 @@ template literals, `console.log`). Static AST validation eliminates all safety
 exemptions — the AST only contains student-written code, engine internals are
 invisible.
 
-## Why extracted from verify-language-level
-
-The original `verify-language-level/` module mixed two concerns:
-
-1. **Rejections** — disallowed syntax (validation proper)
-2. **Warnings** — beginner mistakes (hinting)
-
-These serve different consumers at different pipeline stages. Validation gates
-execution (must pass to run). Warnings are informational (never block execution).
-Splitting them into `validating/` and `hinting/` makes the dependency DAG
-cleaner and lets each module evolve independently.
-
-The code is the same — this is a boundary change, not a rewrite.
-
 ## Architecture
 
 ### Pipeline
@@ -37,7 +23,7 @@ source string
   → ValidationReport { isValid, violations, source, levelName }
 ```
 
-Note: `collectWarnings` is no longer called here — it moved to `hinting/`.
+All violations are rejections — there are no informational warnings.
 
 ### Scope analysis model
 
@@ -96,12 +82,6 @@ fix suggestions.
    `'module'`. Module mode provides strict mode for free and matches how modern
    JS applications work.
 
-8. **Warning boundary principle.** Warnings are now in `hinting/`, but the
-   principle still governs what was originally here: "Could a beginner have
-   written this by accident?" If producing the pattern requires intentional
-   knowledge (e.g., `!!value` for boolean coercion), it belongs in linting, not
-   JeJ warnings.
-
 ## Why preserveParens is enabled
 
 Acorn's `preserveParens: true` option emits `ParenthesizedExpression` nodes in
@@ -142,8 +122,8 @@ assignment is not allowed."
   different tool's job.
 - **Never throws.** Parse errors are captured in the report. Educational tools
   need graceful degradation for broken student code.
-- **No warnings.** Warnings moved to `hinting/`. This module only produces
-  rejections.
+- **No warnings.** All violations are rejections. Pedagogical analysis (unused
+  variables, style hints) belongs in a separate consumer-level API.
 
 ## Module boundaries
 
@@ -167,12 +147,9 @@ locations), `sourceType` parameter (always `'module'` in the pipeline), and
 `preserveParens: true` (for trace visualization anchor nodes).
 
 **`check-undeclared-globals.ts`** — Scope analysis pass. Walks the AST
-maintaining a scope chain and performs three checks: (1) flags undeclared
-identifiers (not declared and not in `allowedGlobals`) as rejections, (2) detects
-unused variables (declared but zero reads) as warnings, (3) detects variable
-shadowing (inner block re-declares an outer scope name) as warnings. Also tags
-for-of iteration variables and warns when they are reassigned inside the loop
-body.
+maintaining a scope chain and flags known JavaScript built-in globals that are
+not in the language level's `allowedGlobals` set. Unknown identifiers (typos)
+pass through to runtime. User-declared variables shadow known globals.
 
 **`collect-violations.ts`** — Recursive AST walker. For each node, looks up
 `node.type` in the `nodes` record. If missing: rejection. If `false`: rejection.

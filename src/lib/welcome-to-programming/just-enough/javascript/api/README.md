@@ -1,8 +1,8 @@
 # api
 
 Public API for the Just Enough JavaScript library. Provides standalone functions
-for validation, hinting, formatting, and execution, plus a code object factory
-as the default export.
+for validation, formatting, and execution, plus a code object factory as the
+default export.
 
 ## Execution Pipeline
 
@@ -23,7 +23,6 @@ Each function uses the pipeline up to a different point:
 | `format(code)`      | yes   | no     | formats | no      |
 | `checkFormat(code)` | yes   | no     | checks  | no      |
 | `validate(code)`    | yes   | checks | no      | no      |
-| `hint(code)`        | yes   | checks | info    | no      |
 | `run/trace/debug`   | yes   | gate   | gate    | yes     |
 
 ## Functions
@@ -34,8 +33,6 @@ Each function uses the pipeline up to a different point:
   just JeJ. Returns formatted code. Synchronous.
 - **`checkFormat(code)`** — returns `{ formatted: boolean }`.
 - **`validate(code)`** — validation only, no execution. Returns rejections.
-- **`hint(code)`** — validates, checks formatting, runs warning detection.
-  Returns `{ ok, rejections?, warnings, formatted }`.
 
 ### Execution (require valid formatted JeJ)
 
@@ -84,8 +81,6 @@ type Result<TEvent> = {
 };
 ```
 
-No warnings in execution results — get warnings via `hint()` or the code object.
-
 ## Structure
 
 | File              | Purpose                                               |
@@ -94,7 +89,6 @@ No warnings in execution results — get warnings via `hint()` or the code objec
 | `trace.ts`        | Trace execution wrapper                               |
 | `debug.ts`        | Debug execution wrapper                               |
 | `validate.ts`     | Validation wrapper                                    |
-| `hint.ts`         | Hinting wrapper (validate + format check + warnings)  |
 | `format.ts`       | Format and checkFormat re-exports                     |
 | `default.ts`      | Code object factory (`createJejProgram`)              |
 | `types.ts`        | Result type definitions                               |
@@ -105,6 +99,5 @@ No warnings in execution results — get warnings via `hint()` or the code objec
 - [DOCS.md](./DOCS.md) — design decisions and rationale
 - [types.ts](./types.ts) — result type definitions
 - [../validating/](../validating/) — the validation pipeline
-- [../hinting/](../hinting/) — warning detection
 - [../formatting/](../formatting/) — recast formatting and format checking
 - [../evaluating/](../evaluating/) — the raw execution engines

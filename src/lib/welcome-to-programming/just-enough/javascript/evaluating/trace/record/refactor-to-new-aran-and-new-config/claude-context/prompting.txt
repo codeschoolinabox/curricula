@@ -1,3 +1,15 @@
+reconstructing what was lost:
+- always include semantics: boolean in all trace events
+- document out the config <-> trace symmetry & signatures for all fields before beginning development
+- still need to reduce the config space 
+- template was a separate config field 
+- literals became a separate event 
+- we flattened a lot of the config 
+- it needed to instrument while loops no matter what for loop guarding, but only sent on the events if the config was on 
+- do not instrument inside of a while statement
+- 
+
+
 - what is the scope structure field? 
 - labels shouldn't be in the config, they are an easter egg.  they should always be traced if they're present which is not a big deal, it's just an extra field not a full event
 - what is propertyCoercion?  whatever it is it likely doesn't belong in config.  we will trace coercion by default, with no option to disable it 

@@ -1,4 +1,4 @@
-// CLAUDE: this was copy-pasted from a past version, we will need to adapt it
+// TODO: this was copy-pasted from a past version, we will need to adapt it to a
 
 // crawl-dir.js
 import { readdir, stat, readFile, writeFile } from 'fs/promises';

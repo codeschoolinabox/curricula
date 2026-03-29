@@ -82,35 +82,6 @@ describe('validateProgram', () => {
 	});
 
 	describe('severity affects isValid', () => {
-		it('is valid when all violations are warnings', () => {
-			// custom level where Literal produces a warning instead of a rejection
-			const warningOnLiteral: LanguageLevel = {
-				name: 'warning-test',
-				nodes: {
-					Program: true,
-					ExpressionStatement: true,
-					Literal: (node) =>
-						createViolation(
-							'Literal',
-							'literals produce a warning in this test level',
-							{
-								start: { line: 1, column: 0 },
-								end: { line: 1, column: 1 },
-							},
-							'warning',
-						),
-				},
-			};
-			const report = validateProgram('5;', warningOnLiteral);
-			const warnings = report.violations.filter(
-				(v) => v.severity === 'warning',
-			);
-			const rejections = report.violations.filter((v) => v.severity === 'rejection');
-			expect(rejections).toHaveLength(0);
-			expect(warnings.length).toBeGreaterThan(0);
-			expect(report.isValid).toBe(true);
-		});
-
 		it('is invalid when there are rejection-severity violations', () => {
 			const report = validateProgram('var x = 5;', justEnoughJs);
 			const rejections = report.violations.filter((v) => v.severity === 'rejection');

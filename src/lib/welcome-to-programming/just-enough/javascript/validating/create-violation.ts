@@ -19,15 +19,14 @@ import type { SourceRange, Violation } from './types.js';
  *   instead (e.g. `"'var' declarations are not allowed — use 'let'"`).
  * @param location - Source range where the violation was found.
  *   Copied and frozen — the caller's object is not retained.
- * @param severity - `'rejection'` (default) or `'warning'`. Rejections
- *   make the program invalid; warnings don't.
+ * @param severity - Always `'rejection'`. All violations block execution.
  * @returns A deeply frozen {@link Violation}.
  */
 function createViolation(
 	nodeType: string,
 	message: string,
 	location: SourceRange,
-	severity: 'rejection' | 'warning' = 'rejection',
+	severity: 'rejection' = 'rejection',
 ): Violation {
 	return Object.freeze({
 		nodeType,

@@ -2,17 +2,16 @@
 
 Validates learner JavaScript against a pedagogical language subset ("Just Enough
 JavaScript") and executes it in sandboxed environments. Provides validation,
-hinting, formatting, and three execution modes (run, trace, debug) — all through
-a unified API with a code object factory as the default export.
+formatting, and three execution modes (run, trace, debug) — all through a
+unified API with a code object factory as the default export.
 
 ## Structure
 
 | Path            | Purpose                                                    |
 | --------------- | ---------------------------------------------------------- |
-| `api/`          | Public API — validate, hint, format, run, trace, debug     |
+| `api/`          | Public API — validate, format, run, trace, debug           |
 | `evaluating/`   | Raw execution engines (Web Worker, iframe, Aran)           |
 | `validating/`   | AST-based validation pipeline and language level def       |
-| `hinting/`      | Warning detection (misconceptions, code smells)            |
 | `formatting/`   | Recast-based formatting and format checking                |
 | `reference.md`  | Learner-facing cheat sheet of allowed language             |
 | `index.ts`      | Package entry — re-exports all API functions               |
@@ -20,7 +19,7 @@ a unified API with a code object factory as the default export.
 ## Public API
 
 ```ts
-import jej, { run, trace, debug, validate, isJej, hint, format, checkFormat } from './index.js';
+import jej, { run, trace, debug, validate, isJej, format, checkFormat } from './index.js';
 ```
 
 ### Tooling functions
@@ -31,7 +30,6 @@ import jej, { run, trace, debug, validate, isJej, hint, format, checkFormat } fr
 | `checkFormat(code)` | `{ formatted }` | Check if code matches recast output     |
 | `validate(code)`    | `BaseResult`    | Validation only — rejections            |
 | `isJej(code)`       | `boolean`       | Convenience: is this valid JeJ?         |
-| `hint(code)`        | `HintResult`    | Validate + format check + warnings      |
 
 ### Execution functions
 
@@ -48,7 +46,6 @@ const program = jej('let x = 5;\n');
 program.ok;          // true
 program.rejections;  // []
 program.isFormatted; // true
-program.warnings;    // []
 ```
 
 ## Result Shape
@@ -64,14 +61,11 @@ type Result<TEvent> = {
 };
 ```
 
-No warnings in execution results — get warnings via `hint()` or the code object.
-
 ## Navigation
 
 - [api/README.md](./api/README.md) — API functions and code object
 - [evaluating/README.md](./evaluating/README.md) — execution engines
 - [validating/README.md](./validating/README.md) — validation pipeline
-- [hinting/README.md](./hinting/README.md) — warning detection
 - [formatting/README.md](./formatting/README.md) — recast formatting
 - [DOCS.md](./DOCS.md) — architecture decisions and design rationale
 - [reference.md](./reference.md) — learner-facing language reference

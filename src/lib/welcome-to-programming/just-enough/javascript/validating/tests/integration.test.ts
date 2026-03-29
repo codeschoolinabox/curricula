@@ -250,19 +250,6 @@ var y = 10;`;
 	});
 });
 
-describe('integration: warnings', () => {
-	it('for-of with let produces a warning but is still valid', () => {
-		const source = `for (let c of "hello") {
-  console.log(c);
-}`;
-		const report = validateProgram(source, justEnoughJs);
-		expect(report.isValid).toBe(true);
-		const warning = report.violations.find((v) => v.severity === 'warning');
-		expect(warning).toBeDefined();
-		expect(warning!.nodeType).toBe('ForOfStatement');
-	});
-});
-
 describe('integration: scope analysis', () => {
 	it('flags undeclared identifier as rejection', () => {
 		const report = validateProgram('parseInt("42");', justEnoughJs);
@@ -287,53 +274,18 @@ describe('integration: scope analysis', () => {
 		expect(report.violations).toHaveLength(0);
 	});
 
-	it('flags identifier after block scope ends', () => {
-		const source = 'if (true) { let x = 1; }\nconsole.log(x);';
+	it('unknown identifier passes through (runtime catches)', () => {
+		const source = 'xyzNotAThing;\n';
+		const report = validateProgram(source, justEnoughJs);
+		expect(report.isValid).toBe(true);
+	});
+
+	it('known global after block scope still rejected', () => {
+		const source = 'if (true) { let Date = 1;\nconsole.log(Date); }\nDate;\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(false);
 		const v = report.violations.find(
-			(v) => v.severity === 'rejection' && v.message.includes("'x'"),
-		);
-		expect(v).toBeDefined();
-	});
-
-	it('warns about unused variable', () => {
-		const source = 'let x = 1;';
-		const report = validateProgram(source, justEnoughJs);
-		expect(report.isValid).toBe(true);
-		const v = report.violations.find(
-			(v) => v.severity === 'warning' && v.message.includes("'x'"),
-		);
-		expect(v).toBeDefined();
-	});
-
-	it('warns about variable shadowing', () => {
-		const source = 'let x = 1;\nif (true) { let x = 2;\nconsole.log(x); }';
-		const report = validateProgram(source, justEnoughJs);
-		expect(report.isValid).toBe(true);
-		const v = report.violations.find(
-			(v) => v.severity === 'warning' && v.message.includes('shadow'),
-		);
-		expect(v).toBeDefined();
-	});
-
-	it('no shadowing for sibling scopes', () => {
-		const source =
-			'if (true) { let x = 1;\nconsole.log(x); }\nif (true) { let x = 2;\nconsole.log(x); }';
-		const report = validateProgram(source, justEnoughJs);
-		const shadow = report.violations.filter(
-			(v) => v.severity === 'warning' && v.message.includes('shadow'),
-		);
-		expect(shadow).toHaveLength(0);
-	});
-
-	it('for-of variable scoped to loop body', () => {
-		const source =
-			'for (const c of "hi") { console.log(c); }\nconsole.log(c);';
-		const report = validateProgram(source, justEnoughJs);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find(
-			(v) => v.severity === 'rejection' && v.message.includes("'c'"),
+			(v) => v.severity === 'rejection' && v.message.includes("'Date'"),
 		);
 		expect(v).toBeDefined();
 	});
@@ -591,47 +543,6 @@ describe('integration: disallowed declarations', () => {
 		expect(report.isValid).toBe(false);
 		const v = report.violations.find(
 			(v) => v.nodeType === 'ClassDeclaration',
-		);
-		expect(v).toBeDefined();
-	});
-});
-
-// WHY: AST-based warnings (use strict, unused expression, camelCase, etc.)
-// moved to hinting/collect-warnings.ts. Integration tests for those
-// now live in hinting/tests/collect-warnings.test.ts.
-// Scope-analysis warnings below still go through validateProgram.
-
-describe('integration: scope-analysis warnings through pipeline', () => {
-	it('for-of var reassigned produces warning', () => {
-		const source =
-			'for (let c of "hi") {\n\tc = "x";\n\tconsole.log(c);\n}\n';
-		const report = validateProgram(source, justEnoughJs);
-		expect(report.isValid).toBe(true);
-		const v = report.violations.find(
-			(v) =>
-				v.severity === 'warning' &&
-				v.message.includes('iteration variable'),
-		);
-		expect(v).toBeDefined();
-	});
-
-	it('variable shadowing produces warning', () => {
-		const source =
-			'let x = 1;\nif (true) {\n\tlet x = 2;\n\tconsole.log(x);\n}\n';
-		const report = validateProgram(source, justEnoughJs);
-		expect(report.isValid).toBe(true);
-		const v = report.violations.find(
-			(v) => v.severity === 'warning' && v.message.includes('shadow'),
-		);
-		expect(v).toBeDefined();
-	});
-
-	it('unused variable produces warning', () => {
-		const source = 'let x = 1;\nconsole.log("hi");\n';
-		const report = validateProgram(source, justEnoughJs);
-		expect(report.isValid).toBe(true);
-		const v = report.violations.find(
-			(v) => v.severity === 'warning' && v.message.includes('never used'),
 		);
 		expect(v).toBeDefined();
 	});

@@ -8,10 +8,9 @@
  * Check `ok` first, then inspect `error` (single failure) or
  * `rejections` (list of language-level violations) for details.
  *
- * Warnings are NOT included in execution results. Get warnings
- * via {@link HintResult} from `hint()` or the code object's
- * `.warnings` property.
  */
+
+import type { Program } from 'acorn';
 
 import type { Violation } from '../validating/types.js';
 import type { RunEvent } from '../evaluating/shared/types.js';
@@ -155,6 +154,32 @@ type BaseResult = {
 };
 
 /**
+ * Result from `parse()` — syntax check only, no validation.
+ *
+ * @remarks
+ * - `ok: true` means acorn parsed successfully; `ast` is present
+ * - `ok: false` means a syntax error; `error` is present
+ * - `code` always echoes back the input source
+ * - `with` is `true` when the program was parsed in script mode
+ *   due to a `with` statement (module mode rejects `with`)
+ *
+ * Standalone type — does not extend `BaseResult` because parse
+ * has no `rejections` field (that requires validation).
+ */
+type ParseResult =
+	| {
+			readonly ok: true;
+			readonly code: string;
+			readonly ast: Readonly<Program>;
+			readonly with?: true;
+	  }
+	| {
+			readonly ok: false;
+			readonly code: string;
+			readonly error: ParseResultError;
+	  };
+
+/**
  * Generic execution result parameterized by event type.
  *
  * @remarks Extends {@link BaseResult} with a `logs` field
@@ -212,33 +237,6 @@ type DebugEvent = {
 	readonly line?: number;
 };
 
-// ─── Hint result ─────────────────────────────────────────────
-
-/**
- * Result from `hint()` — full pre-execution analysis.
- *
- * @remarks Combines validation, format checking, and warning
- * detection in a single call. This is the "code review" result.
- *
- * - `ok` reflects JeJ validation (parse + validate), NOT formatting
- * - `warnings` is always present (may be empty)
- * - `formatted` indicates whether code matches expected format
- * - If validation fails, `warnings` is `[]` and `formatted` is
- *   `false` (no point analyzing non-JeJ code)
- *
- * Warning categories:
- * - **misconceptions** — conceptual confusion (e.g. `if (x = 5)`
- *   when `===` was intended, `while () {} else {}`)
- * - **code smells** — style issues that suggest misunderstanding
- */
-type HintResult = {
-	readonly ok: boolean;
-	readonly error?: ResultError;
-	readonly rejections?: readonly Violation[];
-	readonly warnings: readonly Violation[];
-	readonly formatted: boolean;
-};
-
 // ─── Code object ─────────────────────────────────────────────
 
 /**
@@ -263,7 +261,7 @@ type HintResult = {
  * const program = jej('let x = 5;\n');
  * program.ok;           // true
  * program.isFormatted;  // true
- * program.warnings;     // []
+ * program.rejections;  // []
  *
  * program.code = 'var x = 5;\n';
  * program.ok;           // false
@@ -294,10 +292,6 @@ type JejProgram = {
 	 * Only meaningful when code is valid JeJ. */
 	readonly isFormatted: boolean;
 
-	/** Warnings (misconceptions + code smells). Only populated
-	 * when code is valid JeJ — empty otherwise. */
-	readonly warnings: readonly Violation[];
-
 	/** Execute in Web Worker with trapped I/O.
 	 * Returns immediate error result when `!ok`. */
 	run(config?: EngineConfig): Execution<RunEvent, RunResult>;
@@ -315,6 +309,7 @@ type JejProgram = {
 
 export type {
 	ResultError,
+	ParseResult,
 	ParseResultError,
 	JavaScriptResultError,
 	TimeoutResultError,
@@ -326,6 +321,5 @@ export type {
 	TraceResult,
 	DebugResult,
 	DebugEvent,
-	HintResult,
 	JejProgram,
 };

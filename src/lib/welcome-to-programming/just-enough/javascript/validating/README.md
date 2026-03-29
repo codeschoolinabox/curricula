@@ -4,30 +4,14 @@ Validates JavaScript programs against configurable language level subsets using
 AST analysis. Ships with a pre-built "Just Enough JavaScript" level for the
 Welcome to Programming curriculum.
 
-Extracted from `verify-language-level/` during the module restructure. Same code,
-cleaner boundaries — validation is now a standalone module consumed by the `api/`
-layer and the code object factory.
+Validation is a standalone module consumed by the `api/` layer and the code
+object factory.
 
 ## Purpose
 
 **Neutral infrastructure:** This module validates whether a JS program stays
 within a defined language subset. It makes no pedagogical decisions about
 _which_ subset to use — that belongs to the curriculum or tool that consumes it.
-
-## Severity System
-
-Violations have a `severity` of `'rejection'` or `'warning'`.
-
-- **Rejections** indicate disallowed syntax — features outside the language level.
-  A program with any rejections is **invalid** (`isValid: false`).
-- **Warnings** indicate beginner mistakes that don't violate the language level
-  but are likely accidental. A program with only warnings is **valid**
-  (`isValid: true`).
-
-**Boundary principle for warnings:** JeJ warnings catch syntax that is obviously
-misused, overlooked, or misunderstood by beginners. The test: "Could a beginner
-have written this by accident?" If producing the pattern requires intentional
-knowledge, it belongs in linting, not JeJ warnings.
 
 ## Architecture
 
@@ -36,7 +20,6 @@ source string
   → parseProgram(source, 'module')         — acorn parse to ESTree AST
   → collectViolations(ast, nodes)          — recursive walk, allowlist lookup
   → checkUndeclaredGlobals(ast, config)    — scope analysis
-  → collectWarnings(ast, source)           — beginner mistake detection
   → ValidationReport { isValid, violations, source, levelName }
 ```
 
@@ -63,7 +46,7 @@ The `LanguageLevel` object controls everything:
 | `get-child-nodes.ts`          | Generic ESTree child node extraction                       |
 | `create-violation.ts`         | Violation factory (with severity)                          |
 | `just-enough-js.ts`           | Pre-built "Just Enough JS" LanguageLevel config            |
-| `check-undeclared-globals.ts` | Scope analysis: undeclared globals, unused vars, shadowing |
+| `check-undeclared-globals.ts` | Scope analysis: disallowed globals detection               |
 | `is-jej.ts`                   | Convenience: `isJej(code)` returns boolean                 |
 | `tests/`                      | Unit tests                                                 |
 
@@ -114,36 +97,14 @@ free).
 
 ### Scope analysis
 
-The scope analyzer tracks `let`/`const` declarations per block scope and flags:
+The scope analyzer tracks `let`/`const` declarations per block scope and flags
+known JavaScript built-in globals (e.g. `Math`, `Date`, `document`) that are
+not in the language level's `allowedGlobals` set. Unknown identifiers (typos,
+user-invented names) are not flagged — they produce `ReferenceError` at runtime.
 
-- **Undeclared globals** (rejection): identifiers referenced but not declared and
-  not in `allowedGlobals` (e.g. `parseInt`, `Math`, `document`)
-- **Unused variables** (warning): declared variables with zero references
-- **Variable shadowing** (warning): inner block re-declares a name from an
-  enclosing scope
-
-Scope model is simplified for JeJ's subset — no functions, catch clauses,
-classes, or `with`. Only `let`/`const` in blocks, for-of heads, and
-Program-level. TDZ is not checked.
-
-### Warnings
-
-Warnings don't invalidate the program. They catch beginner mistakes:
-
-- `'use strict'` — redundant in module mode
-- Unused expression — expression result not used (e.g. `5;`, `x + 1;`)
-- camelCase — variable names not matching `/^[a-z][a-zA-Z0-9]*$/`
-- Empty blocks — `BlockStatement` with empty body
-- Assignment in condition — `=` in `if`/`while` test (probably meant `===`)
-- Unreachable code — statements after `break`/`continue`
-- Missing semicolons — missing `;` at statement boundaries
-- Unnecessary semicolons — `;` after `}` of control flow, or `;;`
-- Unused variables — declared variable with zero references
-- for-of with `let` — should use `const`
-- for-of var reassigned — reassigning iteration variable inside loop body
-- Variable shadowing — inner block re-declares outer scope name
-- Tabs not spaces — leading spaces should be tabs
-- Trailing newline — file should end with exactly one newline
+Scope model is simplified for JeJ's subset — no functions, catch clauses, or
+classes. Only `let`/`const` in blocks, for-of heads, and Program-level. TDZ is
+not checked.
 
 ### Blocked syntax
 
@@ -189,4 +150,3 @@ Synchronous (recast format check is sync).
 - [../api/README.md](../api/README.md) — public API wrappers (`validate`,
   `isJej`)
 - [../reference.md](../reference.md) — learner-facing language cheat sheet
-- [../hinting/README.md](../hinting/README.md) — warning extraction

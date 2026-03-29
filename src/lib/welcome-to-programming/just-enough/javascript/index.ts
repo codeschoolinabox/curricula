@@ -13,20 +13,20 @@ export { default as run } from './api/run.js';
 export { default as trace } from './api/trace.js';
 export { default as debug } from './api/debug.js';
 export { default as validate } from './api/validate.js';
-export { default as hint } from './api/hint.js';
+export { default as parse } from './api/parse.js';
 export { default as isJej } from './validating/is-jej.js';
 export { format, checkFormat } from './api/format.js';
 
 // --- Type re-exports ---
 export type {
 	ResultError,
+	ParseResult,
 	BaseResult,
 	Result,
 	RunResult,
 	TraceResult,
 	DebugResult,
 	DebugEvent,
-	HintResult,
 	JejProgram,
 } from './api/types.js';
 
