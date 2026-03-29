@@ -1,74 +1,79 @@
 /**
- * @file Validates and debugs JeJ code, returning a unified result.
+ * @file Validates and debugs JeJ code, returning an Execution.
  *
- * @remarks Validates against the full JeJ language level first.
- * If valid, delegates to the raw debug engine (iframe +
- * debugger statements) and normalizes the outcome into a
- * {@link DebugResult}.
+ * @remarks Pipeline: parse → validate → format check → debug.
+ * Returns an `Execution<DebugEvent, DebugResult>` that is both
+ * `AsyncIterable` (step-through) and `PromiseLike` (batch).
  *
- * Catches rejections from the raw debug engine and classifies
- * by error name: RangeError → `kind: 'iteration-limit'`,
- * others → `kind: 'javascript'`.
+ * Validation or format failures return an Execution that resolves
+ * immediately with the error result — no iframe is created.
+ *
+ * Debug yields 0 events on success, 1 on error. No SAB pause.
  */
 
-import deepFreezeInPlace from '../../../utils/deep-freeze-in-place.js';
+import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import validate from './validate.js';
-import rawDebug from '../evaluating/debug/index.js';
+import { checkFormat } from './format.js';
+import createDebugGenerator from '../evaluating/debug/index.js';
+import createExecution from '../evaluating/shared/create-execution.js';
 
-import type { DebugResult } from './types.js';
+import type { DebugResult, DebugEvent } from './types.js';
+import type { Execution, EngineConfig } from '../evaluating/shared/types.js';
 
 /**
  * Validates code against the full JeJ level, then debugs it.
  *
  * @param code - JavaScript source to validate and debug
- * @param maxIterations - maximum loop iterations before RangeError
- * @returns A frozen {@link DebugResult}
+ * @param config - Engine configuration (only `iterations` supported —
+ *   `seconds` is not supported for iframe-based debug)
+ * @returns An Execution that yields DebugEvents and resolves to DebugResult
+ *
+ * @remarks
+ * - `await debug(code, config)` — batch mode, resolves to DebugResult
+ * - `for await (const event of debug(code, config))` — step-through
+ * - `.cancel()` is a no-op (iframe lifecycle managed by DOM)
+ *
+ * Never throws. All errors are represented in the result.
  */
-async function debug(
+function debug(
 	code: string,
-	maxIterations: number,
-): Promise<DebugResult> {
+	config?: EngineConfig,
+): Execution<DebugEvent, DebugResult> {
 	const validation = validate(code);
 
+	// Validation failure — return immediately, no iframe
 	if (!validation.ok) {
-		return validation;
-	}
-
-	try {
-		await rawDebug(code, maxIterations);
-	} catch (err: unknown) {
-		const error = err instanceof Error ? err : new Error(String(err));
-
-		if (error.name === 'RangeError') {
-			return deepFreezeInPlace({
-				ok: false as const,
-				error: {
-					kind: 'iteration-limit' as const,
-					name: error.name,
-					message: error.message,
-					phase: 'execution' as const,
-					limit: maxIterations,
-				},
-				...(validation.warnings ? { warnings: validation.warnings } : {}),
-			});
-		}
-
-		return deepFreezeInPlace({
-			ok: false as const,
-			error: {
-				kind: 'javascript' as const,
-				name: error.name,
-				message: error.message,
-				phase: 'creation' as const,
+		// WHY: validate() already deep-freezes its result
+		const result = validation as DebugResult;
+		return createExecution(
+			async function* () {
+				return result;
 			},
-			...(validation.warnings ? { warnings: validation.warnings } : {}),
-		});
+			function noop() {},
+		);
 	}
 
-	return deepFreezeInPlace({
-		ok: true as const,
-		...(validation.warnings ? { warnings: validation.warnings } : {}),
-	});
+	// Format gate — unformatted JeJ cannot execute
+	const { formatted } = checkFormat(code);
+	if (!formatted) {
+		const result = deepFreezeInPlace({
+			ok: false as const,
+			error: { kind: 'formatting' as const },
+		});
+		return createExecution(
+			async function* () {
+				return result;
+			},
+			function noop() {},
+		);
+	}
+
+	const iterations = config?.iterations;
+
+	return createExecution(
+		() => createDebugGenerator(code, iterations),
+		function noop() {},
+	);
 }
 
 export default debug;

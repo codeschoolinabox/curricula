@@ -24,10 +24,18 @@ type SetupMessage = {
  *
  * @remarks Sent after setup so that trap definition code does not
  * affect learner code line numbers.
+ *
+ * `loopCount` is optional — when provided, the worker creates
+ * `loop1` through `loopN` parameters for `new Function`, initialized
+ * to 0. The code must already have `if (++loopN > max) throw ...`
+ * guards injected by `guardLoopsCondition()`.
  */
 type ExecuteMessage = {
 	readonly type: 'execute';
 	readonly code: string;
+	readonly loopCount?: number;
+	/** When true, omit `"use strict";` prefix so `with` can execute. */
+	readonly scriptMode?: boolean;
 };
 
 type WorkerInbound = SetupMessage | ExecuteMessage;

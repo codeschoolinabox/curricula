@@ -17,7 +17,8 @@ Internal architecture, conventions, and implementation details for contributors.
 
 ## Architecture Overview
 
-> See [DOCS.md](./DOCS.md) for the full pipeline diagram.
+See [README.md § Architecture](./README.md#architecture) for an overview.
+Detailed conventions and module boundaries are documented in sections below.
 
 ## Codebase Conventions
 
@@ -27,27 +28,27 @@ Internal architecture, conventions, and implementation details for contributors.
 
 ### Conventions Summary
 
-| Situation                      | Convention                                                        |
-| ------------------------------ | ----------------------------------------------------------------- |
-| Non-trivial function           | Named `function` declaration                                      |
-| Inline callback (trivial)      | Arrow OK: `user => user.id`, `n => n > 0`                         |
-| Arrow assigned to variable     | **Not allowed** — use named `function` declaration                |
-| Arrow with body block `{}`     | **Not allowed** — use named `function` declaration                |
-| Callback (non-trivial)         | Extract as named `function`, pass by name                         |
-| Hoisting below call site       | Encouraged for readability                                        |
-| `this` keyword                 | **Banned** (functional codebase)                                  |
-| Classes                        | **Banned** (exception: error classes in `/errors`)                |
-| Error handling                 | Use base error class for catch-all                                |
-| Mutable closures               | **Banned**                                                        |
-| Immutable closures             | OK (e.g. currying over cached config)                             |
-| Method shorthand in objects    | Allowed (`{ process() {} }`)                                      |
-| Variable bindings              | Prefer `const`; `let` only when reassignment needed               |
-| Export                         | Define first, `export default` at bottom                          |
-| Import paths                   | Always include `.js` extension                                    |
-| Multiple things from one file  | Split into separate files                                         |
-| Destructured object params     | Default empty object: `{ ... } = {}`                              |
-| Boolean functions              | Prefix with `is`/`has`/`can`/`should`                             |
-| Return values (objects/arrays) | Deep freeze: `deepFreeze` (external) or `deepFreezeInPlace` (own) |
+| Situation                      | Convention                                                       |
+| ------------------------------ | ---------------------------------------------------------------- |
+| Non-trivial function           | Named `function` declaration                                     |
+| Inline callback (trivial)      | Arrow OK: `user => user.id`, `n => n > 0`                        |
+| Arrow assigned to variable     | **Not allowed** — use named `function` declaration               |
+| Arrow with body block `{}`     | **Not allowed** — use named `function` declaration               |
+| Callback (non-trivial)         | Extract as named `function`, pass by name                        |
+| Hoisting below call site       | Encouraged for readability                                       |
+| `this` keyword                 | **Banned** (functional codebase)                                 |
+| Classes                        | **Banned** (exception: error classes in `/errors`)               |
+| Error handling                 | Use base error class for catch-all                               |
+| Mutable closures               | **Banned**                                                       |
+| Immutable closures             | OK (e.g. currying over cached config)                            |
+| Method shorthand in objects    | Allowed (`{ process() {} }`)                                     |
+| Variable bindings              | Prefer `const`; `let` only when reassignment needed              |
+| Export                         | Define first, `export default` at bottom                         |
+| Import paths                   | Always include `.js` extension                                   |
+| Multiple things from one file  | Split into separate files                                        |
+| Destructured object params     | Default empty object: `{ ... } = {}`                             |
+| Boolean functions              | Prefix with `is`/`has`/`can`/`should`                            |
+| Return values (objects/arrays) | Deep freeze (clone+freeze for external, freeze-in-place for own) |
 
 ### 1. Export Conventions
 
@@ -480,6 +481,8 @@ if (!tracers[tracer]) throw new TracerUnknownError(tracer, ...);
 const options = tracers[tracer].optionsSchema ? prepareConfig(...) : {};
 ```
 
+Real example: `src/api/trace.ts` lines 39–40.
+
 #### Ternary: transparent value selection only
 
 OK when both branches compute "the same kind of thing" — a variable name can
@@ -493,6 +496,8 @@ const entry = condition ? [key, expandBoolean(value, schema)] : [key, value];
 // ❌ — branches do different things; ternary hides the divergence
 const result = condition ? executeSomething() : returnEarlyWithFallback();
 ```
+
+Real example: `src/configuring/expand-shorthand.ts` `.map()` callback.
 
 #### Within-file helpers for readability; separate file for reuse
 
@@ -538,6 +543,8 @@ function createClosure(state) {
 }
 ```
 
+Real examples: `src/configuring/expand-shorthand.ts`, `src/api/embody.ts`.
+
 #### Numbered step comments for multi-phase functions
 
 When a function has distinct phases that aren't self-evident from the code,
@@ -559,6 +566,8 @@ const meta = prepareConfig(...);
 // 4. Record (async) — returns steps directly
 return tracerModule.record(code, { meta, options });
 ```
+
+Real example: `src/api/trace.ts` (8 numbered steps).
 
 #### WHY comments for non-obvious JS semantics
 
@@ -632,18 +641,20 @@ the function boundary. These libraries are consumed by LLMs — freezing catches
 accidental mutation at the return boundary rather than producing silent bugs
 downstream.
 
-**Two utilities, one ownership rule:**
+**Two operations, one ownership rule:**
 
-| Utility             | When to use                                      | Behavior                      |
-| ------------------- | ------------------------------------------------ | ----------------------------- |
-| `deepFreeze`        | Objects we don't own (caller-provided, external) | Clones first, returns new ref |
-| `deepFreezeInPlace` | Objects we just built (fresh results, wrappers)  | Freezes in place, same ref    |
+| Operation       | When to use                                      | Behavior                      |
+| --------------- | ------------------------------------------------ | ----------------------------- |
+| Clone + freeze  | Objects we don't own (caller-provided, external) | Clones first, returns new ref |
+| Freeze in place | Objects we just built (fresh results, wrappers)  | Freezes in place, same ref    |
 
 The distinction is about **ownership**: if you just constructed the object
-(e.g., a spread result, a new config wrapper), use `deepFreezeInPlace` — there's
-no reason to clone something nobody else has a reference to. If the object came
-from outside (a parameter, imported data), use `deepFreeze` to avoid mutating
+(e.g., a spread result, a new config wrapper), freeze it in place — there's no
+reason to clone something nobody else has a reference to. If the object came
+from outside (a parameter, imported data), clone-then-freeze to avoid mutating
 the caller's data.
+
+Use a deep-freeze utility from your package's dependencies for both operations.
 
 **What to freeze:**
 
@@ -660,13 +671,13 @@ comment.
 // ✅ — freshly built result, freeze in place
 function createResult(steps, meta) {
 	const result = { ok: true, steps, meta };
-	return deepFreezeInPlace(result);
+	return freezeInPlace(result); // your deep-freeze utility
 }
 
 // ✅ — caller-provided config, clone + freeze
 function resolveConfig(userConfig) {
-	const resolved = deepMerge(defaults, userConfig);
-	return deepFreeze(resolved);
+	const resolved = merge(defaults, userConfig); // your deep-merge utility
+	return cloneAndFreeze(resolved); // your deep-freeze utility
 }
 
 // ❌ — returned object is mutable; LLM consumer can accidentally mutate
@@ -683,22 +694,30 @@ function createResult(steps, meta) {
 
 ### Directory Documentation Convention
 
-Every source directory under `src/` has a `README.md`:
+Every source directory under `src/` has a `README.md`. Directories with
+non-obvious architecture or key design decisions also have a `DOCS.md`:
 
-| Content                                 | Where               | Audience     |
-| --------------------------------------- | ------------------- | ------------ |
-| What this directory does, why it exists | `README.md`         | Contributors |
-| Key files and their responsibilities    | `README.md`         | Contributors |
-| API reference (auto-generated)          | `docs/` via TypeDoc | Consumers    |
+| Content                                             | Where                      | Audience     |
+| --------------------------------------------------- | -------------------------- | ------------ |
+| API reference (signatures, params, returns, throws) | JSDoc/TSDoc → `docs/`      | Consumers    |
+| Consumer-facing "why" context                       | TSDoc `@remarks` → `docs/` | Consumers    |
+| What this module does, how to navigate it           | `README.md` per directory  | Contributors |
+| Architecture, design decisions, why this approach   | `DOCS.md` per directory    | Developers   |
+| Non-obvious implementation detail                   | Inline `//` comment        | Code readers |
 
 **Rules:**
 
-- Every directory has a `README.md` (brief — 5–15 lines is typical)
-- No `DOCS.md` files anywhere — they go stale. Use JSDoc/TSDoc in source;
-  TypeDoc generates `docs/`
+- Every directory has a `README.md`
+- Directories with non-obvious architecture or key design decisions also have a
+  `DOCS.md`
+- `DOCS.md` captures the "why" — tradeoffs, alternatives considered,
+  constraints. Keep it short. It is NOT an API reference — JSDoc handles that.
+  Hand-maintained: fix it or delete it if it goes stale.
 - Tests directories (`tests/`) are exempt from needing `README.md`
 - `README.md` is cross-referenced: parent links down, child links up, siblings
   link to each other
+- Public functions have JSDoc/TSDoc in source; TypeDoc generates `docs/`
+  (gitignored, CI-only)
 
 **Public function documentation:**
 
@@ -718,36 +737,6 @@ Every source directory under `src/` has a `README.md`:
  */
 function createConfig(options: UserOptions = {}): ResolvedConfig { ... }
 ```
-
-### src/utils/ — Deep Object Helpers
-
-`src/utils/` ships with the template. These are pure, browser-compatible helpers
-for immutable-style programming with nested data structures. Use them instead of
-writing your own or pulling in a library.
-
-| File                      | What it does                                               |
-| ------------------------- | ---------------------------------------------------------- |
-| `deep-clone.ts`           | Deep copy; handles Date, RegExp, Set, Map, cycles          |
-| `deep-freeze.ts`          | Returns frozen copy; original untouched                    |
-| `deep-freeze-in-place.ts` | Freezes in place; same reference, no clone (owned objects) |
-| `deep-merge.ts`           | Merges configs; user values win, objects go deep           |
-| `deep-equal.ts`           | Structural equality; same type universe as clone           |
-| `is-plain-object.ts`      | True for `{}` literals; false for class instances          |
-
-Import directly (no barrel):
-
-```typescript
-import deepClone from './utils/deep-clone.js';
-import deepEqual from './utils/deep-equal.js';
-import deepFreeze from './utils/deep-freeze.js';
-import deepFreezeInPlace from './utils/deep-freeze-in-place.js';
-import deepMerge from './utils/deep-merge.js';
-import isPlainObject from './utils/is-plain-object.js';
-```
-
-Boundary rule: `utils` files can only import from other `utils` files. Non-utils
-source files can import from both `src` and `utils`. See ESLint config and
-`src/utils/README.md`.
 
 ### Test Organization
 
@@ -800,8 +789,8 @@ npm run validate  # lint + type-check + test
       suffix
 - [ ] Tests cover happy path and edge cases
 - [ ] No mutations of input data
-- [ ] Returned objects/arrays are deep frozen (`deepFreeze` or
-      `deepFreezeInPlace`)
+- [ ] Returned objects/arrays are deep frozen (clone-then-freeze for external,
+      freeze-in-place for own)
 - [ ] Errors handled gracefully
 - [ ] `README.md` exists in every modified directory
 - [ ] JSDoc/TSDoc on public functions; `@remarks` for consumer-facing "why"
@@ -819,7 +808,6 @@ Each exported function has a dedicated test file in the nearest `tests/`
 subdirectory:
 
 ```typescript
-// src/utils/tests/parse-json.test.ts
 import { expect, test } from 'vitest';
 
 import parseJSON from '../parse-json.js';
@@ -978,19 +966,17 @@ Documentation-driven development ensures clarity BEFORE code exists.
 
 **0.1. Update README.md** — What does this module do? Where does it fit?
 
-**0.2. Adversarial Design Challenge (AR-1)** — spawn a review agent to challenge
-the README spec before types lock in the contract. Focus: Is this the right
-abstraction? What alternatives exist? What edge cases are missing? What will be
-hard to change later? See AGENTS.md § Adversarial Review Protocol. Skip only if
-the human says so.
+**0.2. Adversarial Design Challenge (AR-1)** — Spawn a separate reviewer agent
+to challenge the README spec before types lock the contract. See AGENTS.md §
+Adversarial Review Protocol for prompt structure and verdict definitions.
 
 **0.3. Update types.ts** — Type signatures are executable documentation
 
-- Incorporate valid AR-1 concerns into the type design
+- Update type definitions to reflect the new contract (incorporating AR-1
+  feedback)
 - Type errors after this step become the TODO list for implementation
 
-**0.4. Review & Resolve** — confirm understanding before writing code. If AR-1
-was skipped, this is a standard self-review.
+**0.4. Review & Resolve** — Confirm understanding before writing code
 
 ### Phase 1: TDD Implementation
 
@@ -1002,10 +988,8 @@ For each behavioral increment:
 3. **Placeholder types** — `any`/`unknown` to unblock; tighten later
 4. **Lint checkpoint 1** — `npm run lint <new-file>`. Fix violations.
 5. **Unit test** — write ONE failing test for the behavior 5b. **Adversarial
-   Test Challenge (AR-2)** — spawn a review agent to challenge the test design.
-   Focus: Are we testing the right behavior? Missing edge cases? Over-testing
-   implementation details? See AGENTS.md § Adversarial Review Protocol. Skip
-   only if the human says so.
+   Test Challenge (AR-2)** — Spawn a separate reviewer agent to challenge test
+   strategy. See AGENTS.md § AR-2 for focus areas.
 6. **Lint checkpoint 2** — `npm run lint <test-file>`. Fix violations.
 7. **Implement** — minimal code to pass the test (Red → Green)
 8. **Lint checkpoint 3** — `npm run lint <impl-file>`. Fix violations.
@@ -1014,9 +998,8 @@ For each behavioral increment:
 11. **Update types** — finalize based on actual implementation
 12. **Self-review** — simplest solution? only what requested?
     junior-maintainable? 12b. **Adversarial Implementation Audit (AR-3)** —
-    spawn a review agent to audit the implementation. Focus: KISS compliance,
-    existing utility reuse, convention violations, subtle bugs. See AGENTS.md §
-    Adversarial Review Protocol. Skip only if the human says so.
+    Spawn a separate reviewer agent to audit the implementation. See AGENTS.md §
+    AR-3 for focus areas.
 13. **Quality checks** — `npm test && npm run lint && npm run type-check`
 14. **Verify docs match implementation** — update README.md if behavior changed
     during TDD
@@ -1029,15 +1012,16 @@ Use linter feedback as refactoring guide:
 
 ### Phase 2: Pre-Merge Review
 
-After all increments are complete:
+After all increments are complete, before prompting the human to commit:
 
-1. Run full quality checks: `npm test && npm run lint && npm run type-check`
-2. **Adversarial Pre-Merge Review (AR-4)** — spawn a review agent to perform a
-   holistic review of the complete changeset. Focus: coherence across files,
-   convention consistency, documentation sync, missed test scenarios. See
-   AGENTS.md § Adversarial Review Protocol.
-3. Address any PAUSE/CONSIDER items from the review
-4. Prompt human for atomic commit
+1. **Run full quality checks** —
+   `npm test && npm run lint && npm run type-check`
+2. **Adversarial Pre-Merge Review (AR-4)** — Spawn a separate reviewer agent to
+   review the full changeset. See AGENTS.md § AR-4 for focus areas. Provide the
+   full diff, modified files list, and the original task description.
+3. **Address PAUSE/CONSIDER items** — resolve concerns per AGENTS.md §
+   Resolution Rules
+4. **Prompt human for atomic commit** — ready to commit only after AR-4 clears
 
 ### Session Handoff
 
@@ -1163,26 +1147,23 @@ and WHY, not just how to fix.
 Import boundaries are enforced via `eslint-plugin-boundaries`. This catches
 architectural violations at lint time.
 
-### Template: Two Layers (`utils` + `src`)
+### Template: Single Layer (`src`)
 
-The template ships with two layers: a pure utility layer (`src/utils/**`) and a
-general source layer (`src/**`). Utils can only import from other utils;
-everything else can import from both.
+The template ships with one layer: all source files under `src/**` can import
+from each other. As your package grows, add more specific layers to enforce
+architectural boundaries.
 
 ```javascript
 // eslint.config.js — current template setup
 'boundaries/elements': [
-  // utils listed first — src/utils/** matches 'utils' before the broader 'src' catch-all
-  { type: 'utils', pattern: 'src/utils/**', mode: 'file' },
-  { type: 'src',   pattern: 'src/**',       mode: 'file' },
+  { type: 'src', pattern: 'src/**', mode: 'file' },
 ],
 'boundaries/element-types': [
   'error',
   {
     default: 'disallow',
     rules: [
-      { from: 'src',   allow: ['src', 'utils'] },
-      { from: 'utils', allow: ['utils'] },
+      { from: 'src', allow: ['src'] },
     ],
   },
 ],
@@ -1191,14 +1172,14 @@ everything else can import from both.
 ### Expanding for Your Package
 
 When your package grows internal layers (e.g., `api/`, `configuring/`,
-`errors/`), expand the elements and add `element-types` rules:
+`errors/`), add elements with more specific patterns (listed before the `src`
+catch-all) and matching `element-types` rules:
 
 ```javascript
-// Example: two-layer package
+// Example: multi-layer package
 'boundaries/elements': [
   { type: 'entry', pattern: 'src/index.ts', mode: 'file' },
   { type: 'core',  pattern: 'src/core/*',   mode: 'file' },
-  { type: 'utils', pattern: 'src/utils/*',  mode: 'file' },
   { type: 'error', pattern: 'src/errors/*', mode: 'file' },
 ],
 // In rules:
@@ -1206,14 +1187,14 @@ When your package grows internal layers (e.g., `api/`, `configuring/`,
   default: 'disallow',
   rules: [
     { from: 'entry', allow: ['core'] },
-    { from: 'core',  allow: ['utils', 'error'] },
-    { from: 'utils', allow: ['utils'] },
+    { from: 'core',  allow: ['error'] },
     { from: 'error', allow: [] },
   ],
 }],
 ```
 
-See embody's `eslint.config.js` for a full multi-layer example.
+More specific patterns are listed first so they match before the broader
+catch-all. See embody's `eslint.config.js` for a full multi-layer example.
 
 ### Updating Boundaries
 

@@ -1,5 +1,66 @@
 # evaluating/run — Architecture & Decisions
 
+## Why an AsyncGenerator
+
+The run engine needs to produce events incrementally for live UI rendering while
+supporting batch consumption for backward compatibility. An async generator lets
+the consumer pull events one at a time (`for await`) or drain all at once
+(`await`). The generator is wrapped by `createExecution` at the `api/` layer to
+add PromiseLike behavior.
+
+The generator pauses the Worker between events using the SAB pause protocol
+(see `evaluating/shared/DOCS.md`). This guarantees events are delivered in
+correct order relative to I/O — log events appear before prompt dialogs.
+
+## Why comma-in-condition loop guards
+
+When `config.iterations` is set, the run engine injects loop guards into while
+loop conditions using the comma operator:
+
+```js
+// before:                          // after:
+while (x < 10) {                   while (++loop1 > 100 && guard(1), x < 10) {
+```
+
+### Why this approach (not body injection)
+
+Body injection (`let loop1 = 0;` before the loop + `if (++loop1 > max) throw`
+inside) shifts line numbers — the `let` declaration adds a line, making error
+messages report wrong line numbers. The comma-in-condition approach adds no
+lines.
+
+### How it works
+
+1. Counter variables (`loop1`, `loop2`, ...) are declared as globals in the
+   Worker setup script, not per-loop. This avoids adding lines to the learner's
+   code.
+2. A `guard(id)` function is also declared in setup — it throws a `RangeError`
+   with loop ID and limit info.
+3. AST transformation (via recast) rewrites each while condition: the original
+   condition becomes the right operand of a comma expression. The left operand
+   is `++loopN > max && guard(N)`.
+4. The comma operator evaluates left-to-right and returns the rightmost value —
+   so the loop condition still evaluates to the original boolean.
+5. If `++loopN > max` is true, `guard(N)` is called (short-circuit `&&`) and
+   throws. If false, the guard is skipped and the original condition evaluates.
+
+### Why recast (not regex)
+
+Regex-based rewriting would break on multi-line conditions, nested loops, or
+conditions containing string literals with `while` in them. Recast parses the
+AST, replaces the condition node, and prints back — preserving the learner's
+formatting exactly.
+
+## Why cumulative timeout (not wall-clock)
+
+Timeout tracks execution time only. When the Worker is paused (waiting for the
+consumer to call `next()` or waiting for an I/O response), the timeout is
+cleared. When execution resumes, `setTimeout(remainingMs)` restarts.
+
+This means a learner stepping through events in the UI can take as long as they
+want — only actual code execution counts toward the limit. Without this, a
+learner examining step 3 of 100 could trigger a timeout while doing nothing.
+
 ## Why a Web Worker
 
 The worker provides two things: **timeout control** and **sandboxing**. An
@@ -102,7 +163,7 @@ static validator catches it before `run` is ever called.
 Earlier designs included an `enforceLevel` step that blocked unauthorized
 globals and prototype methods via property descriptors on the worker's
 `globalThis`. This was removed because static validation via
-`verify-language-level` catches all disallowed constructs at the AST level
+`validating/` catches all disallowed constructs at the AST level
 before execution. Runtime enforcement was belt-and-suspenders complexity with no
 practical benefit at this language level.
 
@@ -141,10 +202,19 @@ script string (plain JS, used by worker). This duplication is intentional —
 the alternative (bundling or dynamic imports in workers) adds complexity that
 is not justified for this amount of code.
 
+## Why console forwarding is kept
+
+`forwardToConsole` forwards events to the real browser console alongside event
+emission. This is intentional: learner code runs in a real browser, and
+`console.log` appearing in the actual console aligns with `prompt`/`alert`/
+`confirm` showing real dialogs. Event emission serves the UI/analysis layer;
+console forwarding serves authenticity.
+
 ## What this module deliberately does NOT do
 
-- **Validate source code** — that is `verify-language-level`'s job, called by
-  the wrapper above
+- **Validate source code** — that is `validating/`'s job, called by the wrapper
+  above
+- **Check formatting** — that is `formatting/`'s job (pipeline gate)
 - **Resolve allow/block config** — that is `evaluating/shared`'s job
 - **Enforce language level at runtime** — static validation is sufficient
 - **Manage the worker script as a separate file** — Blob URL from string avoids

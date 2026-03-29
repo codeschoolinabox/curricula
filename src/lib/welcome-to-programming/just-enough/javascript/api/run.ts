@@ -1,89 +1,82 @@
 /**
- * @file Validates and runs JeJ code, returning a unified result.
+ * @file Validates and runs JeJ code, returning an Execution.
  *
- * @remarks Validates against the full JeJ language level first.
- * If valid, delegates to the raw run engine (Web Worker +
- * SharedArrayBuffer) and normalizes the event log into a
- * structured {@link RunResult}.
+ * @remarks Pipeline: parse → validate → format check → execute.
+ * Returns an `Execution<RunEvent, RunResult>` that is both
+ * `AsyncIterable` (step-through) and `PromiseLike` (batch).
+ *
+ * Validation or format failures return an Execution that resolves
+ * immediately with the error result — no Worker is spawned.
  */
 
-import deepFreezeInPlace from '../../../utils/deep-freeze-in-place.js';
+import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import validate from './validate.js';
-import rawRun from '../evaluating/run/run.js';
+import { checkFormat } from './format.js';
+import createRunGenerator from '../evaluating/run/run.js';
+import createExecution from '../evaluating/shared/create-execution.js';
 
 import type { RunResult } from './types.js';
-import type {
-	RunEvent,
-	ErrorEvent as RunErrorEvent,
-} from '../evaluating/shared/types.js';
+import type { Execution, EngineConfig } from '../evaluating/shared/types.js';
+import type { RunEvent } from '../evaluating/shared/types.js';
 
 /**
  * Validates code against the full JeJ level, then runs it.
  *
  * @param code - JavaScript source to validate and execute
- * @param maxSeconds - timeout in seconds for execution
- * @returns A frozen {@link RunResult}
+ * @param config - Engine configuration (seconds, iterations)
+ * @returns An Execution that yields RunEvents and resolves to RunResult
+ *
+ * @remarks
+ * - `await run(code, config)` — batch mode, resolves to RunResult
+ * - `for await (const e of run(code, config))` — step-through
+ * - Second `for await` replays from cached result (no re-execution)
+ * - `.cancel()` terminates Worker immediately
+ *
+ * Never throws. All errors are represented in the result.
  */
-async function run(code: string, maxSeconds: number): Promise<RunResult> {
+function run(
+	code: string,
+	config?: EngineConfig,
+): Execution<RunEvent, RunResult> {
 	const validation = validate(code);
 
+	// Validation failure — return immediately, no Worker
 	if (!validation.ok) {
-		return validation;
-	}
-
-	const logs = await rawRun(code, maxSeconds);
-
-	const errorEvent = findErrorEvent(logs);
-
-	if (errorEvent) {
-		if (errorEvent.name === 'TimeoutError') {
-			return deepFreezeInPlace({
-				ok: false as const,
-				error: {
-					kind: 'timeout' as const,
-					name: errorEvent.name,
-					message: errorEvent.message,
-					...(errorEvent.line !== undefined ? { line: errorEvent.line } : {}),
-					phase: errorEvent.phase,
-					limit: maxSeconds,
-				},
-				...(validation.warnings ? { warnings: validation.warnings } : {}),
-				logs,
-			});
-		}
-
-		return deepFreezeInPlace({
-			ok: false as const,
-			error: {
-				kind: 'javascript' as const,
-				name: errorEvent.name,
-				message: errorEvent.message,
-				...(errorEvent.line !== undefined ? { line: errorEvent.line } : {}),
-				phase: errorEvent.phase,
+		// WHY: validate() already deep-freezes its result
+		const result = validation as RunResult;
+		return createExecution(
+			async function* () {
+				return result;
 			},
-			...(validation.warnings ? { warnings: validation.warnings } : {}),
-			logs,
+			function noop() {},
+		);
+	}
+
+	// Format gate — unformatted JeJ cannot execute
+	const { formatted } = checkFormat(code);
+	if (!formatted) {
+		const result = deepFreezeInPlace({
+			ok: false as const,
+			error: { kind: 'formatting' as const },
 		});
+		return createExecution(
+			async function* () {
+				return result;
+			},
+			function noop() {},
+		);
 	}
 
-	return deepFreezeInPlace({
-		ok: true as const,
-		...(validation.warnings ? { warnings: validation.warnings } : {}),
-		logs,
-	});
-}
+	const seconds = config?.seconds ?? 5;
+	const iterations = config?.iterations;
 
-/**
- * Finds the last error event in the log array.
- */
-function findErrorEvent(logs: readonly RunEvent[]): RunErrorEvent | undefined {
-	for (let i = logs.length - 1; i >= 0; i--) {
-		const entry = logs[i];
-		if (entry.event === 'error') {
-			return entry;
-		}
-	}
-	return undefined;
+	return createExecution(
+		() => createRunGenerator(code, seconds, iterations),
+		// WHY: cancelFn is a no-op — the generator's finally block
+		// handles Worker termination when createExecution calls
+		// generator.return()
+		function noop() {},
+	);
 }
 
 export default run;

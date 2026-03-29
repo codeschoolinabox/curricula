@@ -1,120 +1,124 @@
 /**
  * @file Types for the shared evaluation infrastructure.
  *
- * Defines the feature configuration system (AllowConfig) and the
- * discriminated union of events produced by the run action (RunEvent).
+ * Defines the Execution type (AsyncGenerator-based), engine
+ * configuration, and the discriminated union of events produced
+ * by the run engine.
  */
 
-// --- JSON Schema (subset of Draft-07) ---
+// ─── Execution type ──────────────────────────────────────────
 
 /**
- * Subset of JSON Schema used for AllowConfig expansion and default-filling.
+ * An async execution that yields events and resolves to a result.
  *
- * Copied from `@study-lenses/tracing`'s configuring module — kept minimal
- * to avoid adding Ajv as a dependency.
+ * @remarks Returned by all three engines (`run`, `trace`, `debug`).
+ * Provides two consumption modes:
+ *
+ * **Step-through** — iterate events one at a time. SAB pause
+ * keeps the Worker frozen between events for correct I/O ordering.
+ * ```ts
+ * for await (const event of execution) {
+ *   renderEvent(event);
+ * }
+ * ```
+ *
+ * **Batch** — await the full result via PromiseLike. Drains
+ * the generator internally, resolves to the complete result.
+ * ```ts
+ * const result = await execution;
+ * // or equivalently:
+ * const result = await execution.result;
+ * ```
+ *
+ * **Re-iteration** — after the generator completes, events are
+ * cached in `result.logs`. A second `for await` replays from the
+ * cache without re-executing.
+ *
+ * **Cancellation** — `cancel()` terminates the Worker and closes
+ * the generator. Idempotent with `break` from `for await`.
+ *
+ * @typeParam TEvent - The event type yielded during execution
+ * @typeParam TResult - The final result type
  */
-type JSONSchema = {
-	readonly type?: string | readonly string[];
-	readonly properties?: Readonly<Record<string, JSONSchema>>;
-	readonly additionalProperties?: boolean | JSONSchema;
-	readonly description?: string;
-};
+type Execution<TEvent, TResult> =
+	AsyncIterable<TEvent> &
+	PromiseLike<TResult> & {
+		/** Promise that resolves when execution completes.
+		 * Same Promise that PromiseLike delegates to. */
+		readonly result: Promise<TResult>;
 
-// --- Feature configuration ---
+		/** Terminate execution immediately. Idempotent.
+		 * After cancel, `.result` resolves with partial logs. */
+		readonly cancel: () => void;
+	};
+
+// ─── Engine configuration ────────────────────────────────────
 
 /**
- * Nested config object controlling which JeJ features are enabled.
+ * Configuration for execution engines.
  *
- * Structure mirrors the reference.md sections. Each property accepts
- * either a boolean (shorthand for all sub-features) or an object with
- * individual feature toggles.
+ * @remarks Program ends when the first limit is reached.
+ * Both are optional — omitting both means no limits (not
+ * recommended for learner code).
  *
- * @remarks Used identically by both `allow` (omitted = disabled) and
- * `block` (omitted = enabled) modes. The difference is in how omitted
- * keys are filled, not in the shape.
+ * - `seconds` — cumulative execution time (pauses during SAB
+ *   wait, so learners can examine steps indefinitely)
+ * - `iterations` — max loop iterations before RangeError
+ *
+ * @example
+ * ```ts
+ * run(code, { seconds: 5 });
+ * run(code, { seconds: 5, iterations: 1000 });
+ * debug(code, { iterations: 100 });
+ * ```
  */
-type AllowConfig = {
-	readonly variables?: boolean | VariablesConfig;
-	readonly console?: boolean | ConsoleConfig;
-	readonly interactions?: boolean | InteractionsConfig;
-	readonly conditionals?: boolean;
-	readonly loops?: boolean | LoopsConfig;
-	readonly jumps?: boolean | JumpsConfig;
-	readonly operators?: boolean | OperatorsConfig;
-	readonly strings?: boolean | StringsConfig;
-	readonly templates?: boolean;
-	readonly coercion?: boolean | CoercionConfig;
+type EngineConfig = {
+	readonly seconds?: number;
+	readonly iterations?: number;
 };
-
-type VariablesConfig = {
-	readonly let?: boolean;
-	readonly const?: boolean;
-};
-
-type ConsoleConfig = {
-	readonly log?: boolean;
-	readonly assert?: boolean;
-};
-
-type InteractionsConfig = {
-	readonly alert?: boolean;
-	readonly confirm?: boolean;
-	readonly prompt?: boolean;
-};
-
-type LoopsConfig = {
-	readonly while?: boolean;
-	readonly forOf?: boolean;
-};
-
-type JumpsConfig = {
-	readonly break?: boolean;
-	readonly continue?: boolean;
-};
-
-type OperatorsConfig = {
-	readonly typeof?: boolean;
-	readonly not?: boolean;
-	readonly negation?: boolean;
-	readonly and?: boolean;
-	readonly or?: boolean;
-	readonly equality?: boolean;
-	readonly comparison?: boolean;
-	readonly plus?: boolean;
-	readonly arithmetic?: boolean;
-	readonly ternary?: boolean;
-};
-
-type StringsConfig = {
-	readonly indexAccess?: boolean;
-	readonly length?: boolean;
-	readonly methods?: boolean | StringMethodsConfig;
-};
-
-type StringMethodsConfig = {
-	readonly toLowerCase?: boolean;
-	readonly toUpperCase?: boolean;
-	readonly includes?: boolean;
-	readonly replaceAll?: boolean;
-	readonly trim?: boolean;
-	readonly indexOf?: boolean;
-	readonly slice?: boolean;
-};
-
-type CoercionConfig = {
-	readonly number?: boolean;
-	readonly string?: boolean;
-	readonly boolean?: boolean;
-	readonly numberIsNaN?: boolean;
-};
-
-// --- Run events ---
 
 /**
- * Discriminated union of events produced by the `run` action.
+ * Configuration for the trace engine.
  *
- * Errors are events in the array, not thrown exceptions. The consumer
- * always receives a `RunEvent[]` back.
+ * @remarks Extends {@link EngineConfig} with optional trace
+ * options. Omitting `options` defaults to full trace (capture
+ * everything). Provide `options` to control granularity.
+ *
+ * @example
+ * ```ts
+ * trace(code, { seconds: 5 });
+ * trace(code, { seconds: 5, options: { variables: true, operators: false } });
+ * ```
+ */
+type TraceConfig = EngineConfig & {
+	readonly options?: TraceOptions;
+};
+
+/**
+ * Options controlling trace granularity.
+ *
+ * @remarks Passed through to the Aran tracer engine.
+ * When omitted from TraceConfig, defaults to full trace.
+ */
+type TraceOptions = Record<string, unknown>;
+
+// ─── Run events ──────────────────────────────────────────────
+
+/**
+ * Discriminated union of events produced by the run engine.
+ *
+ * @remarks Each trapped call (console.log, prompt, alert, etc.)
+ * produces one event. Errors are events in the array, not thrown
+ * exceptions. The consumer always receives a `RunEvent[]` in the
+ * result's `logs` field.
+ *
+ * Discriminate on the `event` field:
+ * - `'log'` — console.log call
+ * - `'assert'` — console.assert call
+ * - `'prompt'` — prompt() call with return value
+ * - `'alert'` — alert() call
+ * - `'confirm'` — confirm() call with return value
+ * - `'error'` — runtime error during execution
  */
 type RunEvent =
 	| LogEvent
@@ -165,69 +169,13 @@ type ErrorEvent = {
 	readonly phase: 'creation' | 'execution';
 };
 
-// --- Action configs ---
-
-/**
- * Config for the `run` action.
- *
- * @remarks Provide `allow` OR `block`, never both. Neither = full JeJ.
- */
-type RunConfig = {
-	readonly maxTime?: number;
-	readonly allow?: AllowConfig;
-	readonly block?: AllowConfig;
-};
-
-/**
- * Config for the `trace` action.
- *
- * @remarks `options` is passed through to the underlying tracer's
- * filter options (AranFilterOptions).
- */
-type TraceConfig = {
-	readonly maxTime?: number;
-	readonly allow?: AllowConfig;
-	readonly block?: AllowConfig;
-	readonly options?: Record<string, unknown>;
-};
-
-/**
- * Config for the `debug` action.
- */
-type DebugConfig = {
-	readonly maxIterations?: number;
-	readonly allow?: AllowConfig;
-	readonly block?: AllowConfig;
-};
-
-// --- Errors ---
-
-/**
- * Thrown when action config is invalid: both `allow` and `block` provided,
- * or unknown keys in the AllowConfig.
- */
-class ConfigError extends Error {
-	override readonly name = 'ConfigError' as const;
-
-	constructor(message: string) {
-		super(message);
-	}
-}
-
-export { ConfigError };
+// ─── Exports ─────────────────────────────────────────────────
 
 export type {
-	JSONSchema,
-	AllowConfig,
-	VariablesConfig,
-	ConsoleConfig,
-	InteractionsConfig,
-	LoopsConfig,
-	JumpsConfig,
-	OperatorsConfig,
-	StringsConfig,
-	StringMethodsConfig,
-	CoercionConfig,
+	Execution,
+	EngineConfig,
+	TraceConfig,
+	TraceOptions,
 	RunEvent,
 	LogEvent,
 	AssertEvent,
@@ -235,7 +183,4 @@ export type {
 	AlertEvent,
 	ConfirmEvent,
 	ErrorEvent,
-	RunConfig,
-	TraceConfig,
-	DebugConfig,
 };

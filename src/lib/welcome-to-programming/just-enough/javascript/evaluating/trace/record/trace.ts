@@ -1,32 +1,31 @@
 /**
  * @file Main-thread orchestrator for worker-based Aran tracing.
  *
- * Spawns a disposable classic worker via blob URL, which dynamically
- * imports the trace-worker module. Messages are buffered until the
- * module loads, then replayed.
+ * Returns an async generator that yields raw entries one at a time,
+ * pausing the Worker between entries via SharedArrayBuffer.
  *
  * WHY classic worker + blob URL (not module worker):
  * Module workers with `{ type: 'module' }` fail to receive messages
- * in Vite 5 dev mode. Classic workers with blob URLs (same pattern as
- * evaluating/run) work reliably. The blob URL loader dynamically
- * imports the trace-worker module, getting the best of both worlds:
- * classic worker reliability + ESM imports for the Aran tracer code.
+ * in Vite 5 dev mode. Classic workers with blob URLs work reliably.
+ * The blob URL loader dynamically imports the trace-worker module.
  *
  * @remarks
  * - Each call spawns a fresh worker (MUST NOT reuse — globalThis is
  *   polluted by Aran setup and learner code).
- * - Per-step streaming preserves partial traces on timeout (critical
- *   for debugging infinite loops).
+ * - Per-entry streaming preserves partial traces on timeout.
  * - I/O traps (prompt/confirm/alert) use SAB+Atomics — same protocol
  *   as evaluating/run.
  */
 
 import {
 	BUFFER_SIZE,
+	CONTROL_INDEX,
 	createBufferViews,
 	writeAlertResponse,
 	writeConfirmResponse,
+	writePauseEngaged,
 	writePromptResponse,
+	writeResumeSignal,
 } from '../../run/worker-protocol.js';
 
 // --- Types ---
@@ -46,52 +45,53 @@ type CompleteMessage = {
 	readonly type: 'complete';
 };
 
-type WorkerOutbound = EntryMessage | IoRequestMessage | CompleteMessage;
+type TimeoutSignal = { readonly type: 'timeout' };
+type WorkerErrorSignal = {
+	readonly type: 'worker-error';
+	readonly message: string;
+};
 
-// --- Orchestrator ---
+type WorkerOutbound = EntryMessage | IoRequestMessage | CompleteMessage;
+type QueueMessage = WorkerOutbound | TimeoutSignal | WorkerErrorSignal;
+
+// --- Generator ---
 
 /**
- * Traces code in a Web Worker and returns raw entries.
+ * Traces code in a Web Worker and yields raw entries.
  *
  * @param code - JavaScript source to instrument and evaluate
- * @param maxMs - timeout in milliseconds; worker is terminated if exceeded.
+ * @param maxMs - timeout in milliseconds (cumulative execution time).
  *   Use `null` for no timeout (not recommended for untrusted code).
- * @returns raw entries array (mix of RawEntry objects and string markers).
- *   On timeout, returns partial entries captured before termination.
- *   Never throws — errors are captured as entries inside the worker.
+ * @returns Async generator yielding raw entries (RawEntry objects and
+ *   string markers). Returns the collected entries array when done.
  */
-function traceInWorker(
+async function* createTraceGenerator(
 	code: string,
 	maxMs: number | null,
-): Promise<readonly unknown[]> {
+): AsyncGenerator<unknown, readonly unknown[]> {
 	// 1. Check SAB availability
 	if (typeof SharedArrayBuffer === 'undefined') {
-		return Promise.resolve(
-			Object.freeze([
-				{
-					type: 'log',
-					prefix: '-> creation phase error:',
-					style: 'font-weight:bold;',
-					logs: [
-						'SharedArrayBuffer is not available. The hosting page must ' +
-							'serve Cross-Origin-Opener-Policy: same-origin and ' +
-							'Cross-Origin-Embedder-Policy: require-corp headers.',
-					],
-					loc: null,
-					nodeType: null,
-				},
-			]),
-		);
+		const errorEntry = {
+			type: 'log',
+			prefix: '-> creation phase error:',
+			style: 'font-weight:bold;',
+			logs: [
+				'SharedArrayBuffer is not available. The hosting page must ' +
+					'serve Cross-Origin-Opener-Policy: same-origin and ' +
+					'Cross-Origin-Embedder-Policy: require-corp headers.',
+			],
+			loc: null,
+			nodeType: null,
+		};
+		yield errorEntry;
+		return [errorEntry];
 	}
 
 	// 2. Create SAB and views
 	const sab = new SharedArrayBuffer(BUFFER_SIZE);
 	const views = createBufferViews(sab);
 
-	// 3. Spawn classic worker via blob URL (mirrors run/run.ts pattern)
-	// WHY blob URL: module workers fail to receive messages in Vite 5 dev.
-	// The blob loads immediately and buffers messages while the ES module
-	// is dynamically imported. Once loaded, buffered messages are replayed.
+	// 3. Spawn classic worker via blob URL
 	const moduleUrl = new URL('./trace-worker.ts', import.meta.url);
 	const loaderCode = [
 		'let _handler = null;',
@@ -126,92 +126,153 @@ function traceInWorker(
 		URL.revokeObjectURL(blobUrl);
 		const message =
 			err instanceof Error ? err.message : 'Failed to create Worker';
-		return Promise.resolve(
-			Object.freeze([
-				{
-					type: 'log',
-					prefix: '-> creation phase error:',
-					style: 'font-weight:bold;',
-					logs: [message],
-					loc: null,
-					nodeType: null,
-				},
-			]),
-		);
+		const errorEntry = {
+			type: 'log',
+			prefix: '-> creation phase error:',
+			style: 'font-weight:bold;',
+			logs: [message],
+			loc: null,
+			nodeType: null,
+		};
+		yield errorEntry;
+		return [errorEntry];
 	}
 
 	URL.revokeObjectURL(blobUrl);
 
-	// 4. Accumulate streamed entries
+	// 4. Message queue — bridges callbacks → generator
+	const queue: QueueMessage[] = [];
+	let resolveWaiting: (() => void) | null = null;
+
+	function enqueue(msg: QueueMessage): void {
+		queue.push(msg);
+		if (resolveWaiting !== null) {
+			resolveWaiting();
+			resolveWaiting = null;
+		}
+	}
+
+	function dequeue(): Promise<QueueMessage> {
+		if (queue.length > 0) {
+			return Promise.resolve(queue.shift()!);
+		}
+		return new Promise<QueueMessage>((resolve) => {
+			resolveWaiting = () => resolve(queue.shift()!);
+		});
+	}
+
+	worker.onmessage = function onWorkerMessage(
+		e: MessageEvent<WorkerOutbound>,
+	) {
+		enqueue(e.data);
+	};
+
+	worker.onerror = function onWorkerError(e: ErrorEvent) {
+		enqueue({
+			type: 'worker-error',
+			message: e.message || 'Unknown worker error',
+		});
+	};
+
+	// 5. Timeout — cumulative execution time tracking
+	let timeout: ReturnType<typeof setTimeout> | null = null;
+	let remainingMs = maxMs ?? Infinity;
+	let lastResumeTime = 0;
+
+	function startTimeout(): void {
+		if (!isFinite(remainingMs)) return;
+		lastResumeTime = Date.now();
+		timeout = setTimeout(function onTimeout() {
+			timeout = null;
+			enqueue({ type: 'timeout' });
+		}, remainingMs);
+	}
+
+	function pauseTimeout(): void {
+		if (timeout !== null) {
+			clearTimeout(timeout);
+			timeout = null;
+			remainingMs -= Date.now() - lastResumeTime;
+			if (remainingMs < 0) remainingMs = 0;
+		}
+	}
+
+	function clearTimeoutIfSet(): void {
+		if (timeout !== null) {
+			clearTimeout(timeout);
+			timeout = null;
+		}
+	}
+
+	// 6. Start execution
+	worker.postMessage({ type: 'setup', sharedBuffer: sab });
+	worker.postMessage({ type: 'execute', code });
+
+	writePauseEngaged(views);
+	startTimeout();
+
 	const entries: unknown[] = [];
 
-	return new Promise(function executor(resolve) {
-		// 5. Timeout handling
-		let timeout: ReturnType<typeof setTimeout> | undefined;
-		if (maxMs !== null && maxMs !== Infinity && maxMs > 0) {
-			timeout = setTimeout(function onTimeout() {
-				worker.terminate();
-				// Surface timeout as an error entry (like run.ts does)
-				entries.push({
+	try {
+		while (true) {
+			const msg = await dequeue();
+
+			if (msg.type === 'entry') {
+				entries.push(msg.entry);
+
+				pauseTimeout();
+				yield msg.entry;
+				startTimeout();
+				writeResumeSignal(views);
+				writePauseEngaged(views);
+				continue;
+			}
+
+			if (msg.type === 'io-request') {
+				handleIoRequest(msg as IoRequestMessage, views);
+				Atomics.notify(views.control, CONTROL_INDEX);
+				continue;
+			}
+
+			if (msg.type === 'complete') {
+				break;
+			}
+
+			if (msg.type === 'worker-error') {
+				const errorEntry = {
+					type: 'log',
+					prefix: '-> worker error:',
+					style: 'font-weight:bold;',
+					logs: [msg.message],
+					loc: null,
+					nodeType: null,
+				};
+				entries.push(errorEntry);
+				yield errorEntry;
+				break;
+			}
+
+			if (msg.type === 'timeout') {
+				const seconds = (maxMs ?? 0) / 1000;
+				const errorEntry = {
 					type: 'log',
 					prefix: '-> execution phase error:',
 					style: 'font-weight:bold;',
-					logs: [
-						`Execution exceeded ${maxMs / 1000} second time limit`,
-					],
+					logs: [`Execution exceeded ${seconds} second time limit`],
 					loc: null,
 					nodeType: null,
-				});
-				resolve(Object.freeze(entries));
-			}, maxMs);
+				};
+				entries.push(errorEntry);
+				yield errorEntry;
+				break;
+			}
 		}
+	} finally {
+		clearTimeoutIfSet();
+		worker.terminate();
+	}
 
-		// 6. Worker message handling
-		worker.onmessage = function onWorkerMessage(
-			e: MessageEvent<WorkerOutbound>,
-		) {
-			const msg = e.data;
-
-			// Per-step streamed entry
-			if (msg.type === 'entry') {
-				entries.push(msg.entry);
-				return;
-			}
-
-			// I/O request — show dialog, write response, notify worker
-			if (msg.type === 'io-request') {
-				handleIoRequest(msg, views);
-				Atomics.notify(views.control, 0);
-				return;
-			}
-
-			// Execution complete
-			if (msg.type === 'complete') {
-				if (timeout !== undefined) clearTimeout(timeout);
-				worker.terminate();
-				resolve(Object.freeze(entries));
-			}
-		};
-
-		worker.onerror = function onWorkerError(e) {
-			if (timeout !== undefined) clearTimeout(timeout);
-			worker.terminate();
-			// WHY: mirror run.ts — surface error info instead of silent empty resolve
-			entries.push({
-				type: 'log',
-				prefix: '-> worker error:',
-				style: 'font-weight:bold;',
-				logs: [e.message || 'Unknown worker error'],
-				loc: null,
-				nodeType: null,
-			});
-			resolve(Object.freeze(entries));
-		};
-
-		// 7. Send setup (SAB) then execute (code)
-		worker.postMessage({ type: 'setup', sharedBuffer: sab });
-		worker.postMessage({ type: 'execute', code });
-	});
+	return entries;
 }
 
 // --- I/O handler (mirrors run/run.ts) ---
@@ -244,4 +305,4 @@ function handleIoRequest(
 	writePromptResponse(views, result);
 }
 
-export default traceInWorker;
+export default createTraceGenerator;

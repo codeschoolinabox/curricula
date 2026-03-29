@@ -7,9 +7,9 @@
  * first and early-returns if `!result.ok`.
  */
 
-import deepFreezeInPlace from '../../../utils/deep-freeze-in-place.js';
-import validateProgram from '../verify-language-level/validate-program.js';
-import justEnoughJs from '../verify-language-level/just-enough-js.js';
+import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
+import validateProgram from '../validating/validate-program.js';
+import justEnoughJs from '../validating/just-enough-js.js';
 
 import type { BaseResult } from './types.js';
 
@@ -36,25 +36,23 @@ function validate(code: string): BaseResult {
 		});
 	}
 
-	// 2. Split violations by severity
+	// 2. Filter rejections only — warnings are NOT included in
+	// validation results. Get warnings via hint() or the code object.
 	const rejections = report.violations.filter(
 		(v) => v.severity === 'rejection',
 	);
-	const warnings = report.violations.filter((v) => v.severity === 'warning');
 
 	// 3. Rejections — code has language-level violations
 	if (rejections.length > 0) {
 		return deepFreezeInPlace({
 			ok: false,
 			rejections,
-			warnings,
 		});
 	}
 
-	// 4. Valid — possibly with warnings
+	// 4. Valid
 	return deepFreezeInPlace({
 		ok: true,
-		warnings,
 	});
 }
 

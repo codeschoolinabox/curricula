@@ -142,8 +142,7 @@ function processConfig({ preset = 'detailed' } = {}) {}
 - One concept per file, named after its default export
 - `kebab-case` for all files and directories
 - Unit tests in `tests/` subdirectory at the same level as source files
-- Every source directory has a `README.md` (brief: what is this module, why does
-  it exist)
+- Every source directory has a `README.md`
 
 #### 14. Prefer `const`
 
@@ -232,7 +231,7 @@ break every line.
 
 **Rules:**
 
-- Every directory has a `README.md` (brief: what is this, how to navigate it)
+- Every directory has a `README.md`
 - Directories with non-obvious architecture or key design decisions also have a
   `DOCS.md`
 - `DOCS.md` is for the "why" — tradeoffs, alternatives considered, constraints.

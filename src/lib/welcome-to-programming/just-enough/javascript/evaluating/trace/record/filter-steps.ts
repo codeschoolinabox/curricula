@@ -10,7 +10,7 @@
  * Follows the same architectural pattern as sl-trace-js-klve's filter-steps.ts.
  */
 
-import deepFreezeInPlace from '../../../../../utils/deep-freeze-in-place.js';
+import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import type {
 	AranFilterOptions,

@@ -1,0 +1,14 @@
+- what is the scope structure field? 
+- labels shouldn't be in the config, they are an easter egg.  they should always be traced if they're present which is not a big deal, it's just an extra field not a full event
+- what is propertyCoercion?  whatever it is it likely doesn't belong in config.  we will trace coercion by default, with no option to disable it 
+- generally, it's ok if things like "coercion" are in the event and not the config.  the symmetry applies to what is in the config being in the trace, not everthing in the trace neds to be in the config
+    same goes for depth in arrays 
+    TODO add trackign scope depth to scope events as well (if it isn't already)
+
+- Evaluate Fodling: please elaborate? oyu may be imagining a problem. I don't think anything gest folded into anything. you'd have the nested thing evaluate, then the evaulated value appears as in input in the next event.  no folding or close oupling or nesting of event objects
+- Source echo filtering  - that was a legacy cruft workaround.  it's better the new wya, just include the loc: object directly in the trace event direcetly, skipping entirely over that string parsing bs 
+- Depth coherence - so maybe like with while loop iteration maxes, we need to trace block scopes and parenthesis even if they're not reported.  if they're off in the config we use them to track scope/expression depth, but do not emit the events 
+
+- /record/tracing/ directory already exists — what is it? -> it's empty for you
+- Step numbering in emit layer is overcomplicated (should stay in main thread) -> yes.  this will also help with things like tracking whiles but not emitting them.  if we count in the thread, then we don't need extra logic in the emitter to decide if we count the step or not
+- Aran setup/pointcut errors not addressed in error handling -> wrap this part in a try-catch and thrwo as an InternalTracerError or somehitng like that?

@@ -1,4 +1,4 @@
-# @study-lenses/trace-js-aran-legacy — Architecture & Decisions
+# evaluating/trace — Architecture & Decisions
 
 ## Why this tracer exists
 
@@ -202,6 +202,63 @@ Filtering is **post-trace** (not pre-trace) because the legacy tracer uses a
 mutable singleton `config.js` to control instrumentation. Rather than threading
 filter options through legacy code, `record.ts` temporarily overrides all config
 flags to "capture everything", then filters structured output post-hoc.
+
+## Why an AsyncGenerator
+
+Same rationale as `evaluating/run/` — the trace engine needs to produce events
+incrementally for live UI rendering (per-AST-node granularity) while supporting
+batch consumption. The generator is wrapped by `createExecution` at the `api/`
+layer.
+
+The trace Worker pauses after each `postMessage` via the SAB pause flag (same
+protocol as run). The generator's `next()` resumes it. This gives the consumer
+full control over pacing — essential for step-by-step visualization.
+
+## Why a streaming processor alongside batch
+
+The existing `postProcess` and `filterSteps` functions work on completed arrays.
+The streaming processor (`createStreamingProcessor`) processes entries one at a
+time as they arrive from the Worker.
+
+Both paths exist because:
+
+- **Streaming**: used by the generator engine for live event delivery. Maintains
+  incremental state (depth counter, scope stack, 1-element pending buffer for
+  evaluate merge).
+- **Batch**: used by the legacy `@study-lenses/tracing` wrapper for backward
+  compatibility. Also serves as the reference implementation for cross-testing.
+
+Both paths import from the same `parsers/` and `filters/` modules, ensuring
+identical processing logic.
+
+## Why extract parsers and filters into separate files
+
+`postProcess` and `filterSteps` were monolithic files with multiple inline
+functions. Extracting into `parsers/` and `filters/` directories:
+
+- Makes each function independently testable
+- Enables sharing between batch and streaming paths
+- Follows the codebase convention of one default export per file
+- Simplifies each file to a single responsibility
+
+The batch orchestrators (`postProcess`, `filterSteps`) remain as thin
+orchestration layers that import from these directories.
+
+## Iteration-based stopping in the streaming processor
+
+The streaming processor counts loop-entry events per source location (dictionary
+keyed by `loc.start.line:loc.start.column`). When any loop exceeds
+`config.iterations`, the processor triggers the cancel callback, which
+terminates the Worker.
+
+This is different from the run engine's approach (AST-injected counters) because
+the trace engine cannot modify the code — Aran instruments the original AST, and
+injecting counter code would interfere with the instrumentation. Instead,
+iteration limits are enforced by counting observed events in the streaming
+processor.
+
+Loop exit events reset the counter for that source location (handles nested
+loops that re-enter).
 
 ## What this package deliberately does NOT do
 

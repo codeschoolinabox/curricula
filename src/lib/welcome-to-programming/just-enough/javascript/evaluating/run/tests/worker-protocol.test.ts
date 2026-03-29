@@ -19,18 +19,18 @@ describe('worker-protocol', () => {
 			expect(views.payload).toBeInstanceOf(Uint8Array);
 		});
 
-		it('Int32Array view covers the first 16 bytes (4 Int32 slots)', () => {
+		it('Int32Array view covers the first 20 bytes (5 Int32 slots)', () => {
 			const sab = new SharedArrayBuffer(BUFFER_SIZE);
 			const views = createBufferViews(sab);
 
-			expect(views.control.length).toBe(4);
+			expect(views.control.length).toBe(5);
 		});
 
-		it('Uint8Array view starts at byte 16 for string payload', () => {
+		it('Uint8Array view starts at byte 20 for string payload', () => {
 			const sab = new SharedArrayBuffer(BUFFER_SIZE);
 			const views = createBufferViews(sab);
 
-			expect(views.payload.byteOffset).toBe(16);
+			expect(views.payload.byteOffset).toBe(20);
 		});
 	});
 

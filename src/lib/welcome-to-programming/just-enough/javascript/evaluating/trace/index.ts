@@ -13,7 +13,7 @@ import id from './id.js';
 import langs from './langs.js';
 import optionsSchema from './options-schema.js';
 import record from './record/index.js';
-import deepFreeze from '../../../../utils/deep-freeze.js';
+import deepFreeze from '@utils/deep-freeze.js';
 import verifyOptions from './verify-options/index.js';
 
 /**
@@ -26,7 +26,11 @@ import verifyOptions from './verify-options/index.js';
 const tracer = Object.freeze({
 	id,
 	langs: Object.freeze(langs),
-	record: record as RecordFunction,
+	// WHY: cast through unknown — record signature changed from
+	// RecordFunction to async generator in Phase 3. This old
+	// integration point will be removed when the @study-lenses/tracing
+	// dependency is dropped.
+	record: record as unknown as RecordFunction,
 	optionsSchema: deepFreeze(optionsSchema),
 	verifyOptions,
 });

@@ -30,11 +30,6 @@ describe('validate', () => {
 			const result = validate('let = ;');
 			expect(result.rejections).toBeUndefined();
 		});
-
-		it('does not set warnings for parse errors', () => {
-			const result = validate('let = ;');
-			expect(result.warnings).toBeUndefined();
-		});
 	});
 
 	describe('rejections', () => {
@@ -52,11 +47,6 @@ describe('validate', () => {
 			const result = validate('var x = 5;');
 			expect(result.rejections).toBeDefined();
 			expect(result.rejections!.length).toBeGreaterThan(0);
-		});
-
-		it('sets warnings array alongside rejections', () => {
-			const result = validate('var x = 5;');
-			expect(result.warnings).toBeDefined();
 		});
 
 		it('rejections all have severity rejection', () => {
@@ -83,23 +73,9 @@ describe('validate', () => {
 			expect(result.rejections).toBeUndefined();
 		});
 
-		it('sets warnings array for valid code', () => {
-			const result = validate('let x = 5;\n');
-			expect(result.warnings).toBeDefined();
-		});
-
 		it('returns ok true for empty program', () => {
 			const result = validate('');
 			expect(result.ok).toBe(true);
-		});
-	});
-
-	describe('warnings only', () => {
-		it('returns ok true when all violations are warnings', () => {
-			// WHY: tab indentation triggers a warning but not a rejection
-			const result = validate('\tlet x = 5;\n');
-			expect(result.ok).toBe(true);
-			expect(result.warnings!.length).toBeGreaterThan(0);
 		});
 	});
 
@@ -107,11 +83,6 @@ describe('validate', () => {
 		it('top-level result is frozen', () => {
 			const result = validate('let x = 5;\n');
 			expect(Object.isFrozen(result)).toBe(true);
-		});
-
-		it('warnings array is frozen', () => {
-			const result = validate('let x = 5;\n');
-			expect(Object.isFrozen(result.warnings)).toBe(true);
 		});
 
 		it('rejections array is frozen when present', () => {
@@ -122,6 +93,34 @@ describe('validate', () => {
 		it('error object is frozen when present', () => {
 			const result = validate('let = ;');
 			expect(Object.isFrozen(result.error)).toBe(true);
+		});
+	});
+
+	describe('property assignment blocked', () => {
+		it('rejects property assignment', () => {
+			const result = validate('console.log = 5;\n');
+			expect(result.ok).toBe(false);
+			expect(result.rejections).toBeDefined();
+			expect(result.rejections![0].message).toContain(
+				'property assignment',
+			);
+		});
+
+		it('rejects computed property assignment', () => {
+			const result = validate('let arr = [1];\narr[0] = 5;\n');
+			expect(result.ok).toBe(false);
+		});
+
+		it('allows simple variable assignment', () => {
+			const result = validate('let x = 5;\nx = 10;\n');
+			expect(result.ok).toBe(true);
+		});
+	});
+
+	describe('parentheses allowed', () => {
+		it('allows parenthesized expressions', () => {
+			const result = validate('let x = (1 + 2) * 3;\n');
+			expect(result.ok).toBe(true);
 		});
 	});
 });

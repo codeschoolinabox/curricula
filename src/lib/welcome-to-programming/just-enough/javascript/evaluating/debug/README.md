@@ -1,4 +1,4 @@
-# Debug Lens
+# evaluating/debug
 
 Execute learner JavaScript in a hidden iframe with `debugger` breakpoints before
 and after their code. The learner steps through their program in DevTools.
@@ -6,14 +6,21 @@ and after their code. The learner steps through their program in DevTools.
 ## API
 
 ```ts
-async function debug(code: string, maxIterations?: number): Promise<void>;
+function debug(code: string, config: EngineConfig): AsyncGenerator<DebugEvent, readonly DebugEvent[]>
 ```
 
-- `maxIterations` — if provided, injects loop guards that throw `RangeError`
-  after this many iterations. Omit to skip loop guarding.
+- `config` — `{ iterations? }`. `seconds` is not supported (iframe shares main
+  thread — no `worker.terminate()`). `iterations` triggers body-injection loop
+  guards that throw `RangeError`.
+- **Yields** — 0-1 `DebugEvent` (only on error: RangeError from loop guard or
+  iframe access error)
+- **Returns** — frozen array of all `DebugEvent` objects on completion
 
-Returns a Promise that resolves after the code (and any debugger pauses)
-finishes executing.
+Wrapped by `createExecution` at the `api/` layer to produce an
+`Execution<DebugEvent, DebugResult>` with PromiseLike backward compatibility.
+
+No SAB pause protocol — the iframe runs on the main thread, so there is no
+Worker to pause.
 
 ## How It Works
 
@@ -26,6 +33,16 @@ finishes executing.
    the Promise
 
 No DOM artifacts remain after execution completes.
+
+## Structure
+
+| Path             | Purpose                                            |
+| ---------------- | -------------------------------------------------- |
+| `index.ts`       | Debug generator engine entry point                 |
+| `types.ts`       | DebugEvent type (imported from `../shared/types`)  |
+
+Loop guard injection uses `guard-loops/` from `../shared/guard-loops/` — the
+body-injection strategy (visible in DevTools).
 
 ## Sandbox
 

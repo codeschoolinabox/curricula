@@ -32,7 +32,8 @@ const CONTROL_INDEX = 0;
 const RESPONSE_TYPE_INDEX = 1;
 const NULL_FLAG_INDEX = 2;
 const PAYLOAD_LENGTH_INDEX = 3;
-const PAYLOAD_BYTE_OFFSET = 16;
+const PAUSE_INDEX = 4;
+const PAYLOAD_BYTE_OFFSET = 20;
 
 const RESPONSE_STRING = 0;
 const RESPONSE_BOOLEAN = 1;
@@ -42,11 +43,23 @@ const SIGNAL_IDLE = 0;
 const SIGNAL_WAITING = 1;
 const SIGNAL_RESPONDED = 2;
 
+const PAUSE_RUNNING = 0;
+const PAUSE_PAUSED = 1;
+
+// --- Pause protocol (blocks Worker between events) ---
+
+function checkPause() {
+  while (Atomics.load(controlView, PAUSE_INDEX) === PAUSE_PAUSED) {
+    Atomics.wait(controlView, PAUSE_INDEX, PAUSE_PAUSED);
+  }
+}
+
 // --- State (set on setup message) ---
 
 let controlView = null;
 let payloadView = null;
 const events = [];
+var isScriptMode = false;
 
 // --- Line extraction ---
 
@@ -59,9 +72,14 @@ function getLine() {
       const match = lines[i].match(/:(\\d+):\\d+\\)?$/);
       if (match) {
         const lineNum = parseInt(match[1], 10);
-        // WHY: new Function wraps code with "use strict" as line 1,
-        // so user code starts at line 2. Subtract 1 to get user line.
-        if (lineNum >= 2) return lineNum - 1;
+        // WHY: without scriptMode, new Function prepends "use strict"
+        // as line 1, so user code starts at line 2. Subtract 1 to get
+        // user line. In scriptMode, no prefix — line numbers are exact.
+        if (isScriptMode) {
+          if (lineNum >= 1) return lineNum;
+        } else {
+          if (lineNum >= 2) return lineNum - 1;
+        }
       }
     }
     return undefined;
@@ -133,6 +151,7 @@ const trappedConsole = {
     const event = { event: 'log', args: args, line: line };
     events.push(event);
     postMessage({ type: 'event', event: event });
+    checkPause();
   },
   assert() {
     const args = safeCloneArgs(Array.from(arguments));
@@ -140,6 +159,7 @@ const trappedConsole = {
     const event = { event: 'assert', args: args, line: line };
     events.push(event);
     postMessage({ type: 'event', event: event });
+    checkPause();
   }
 };
 
@@ -152,6 +172,7 @@ function trappedAlert() {
   const event = { event: 'alert', args: args, return: undefined, line: line };
   events.push(event);
   postMessage({ type: 'event', event: event });
+  checkPause();
 }
 
 function trappedConfirm() {
@@ -164,6 +185,7 @@ function trappedConfirm() {
   const event = { event: 'confirm', args: args, return: returnValue, line: line };
   events.push(event);
   postMessage({ type: 'event', event: event });
+  checkPause();
   return returnValue;
 }
 
@@ -177,6 +199,7 @@ function trappedPrompt() {
   const event = { event: 'prompt', args: args, return: returnValue, line: line };
   events.push(event);
   postMessage({ type: 'event', event: event });
+  checkPause();
   return returnValue;
 }
 
@@ -186,21 +209,35 @@ self.onmessage = function (e) {
   const msg = e.data;
 
   if (msg.type === 'setup') {
-    controlView = new Int32Array(msg.sharedBuffer, 0, 4);
+    controlView = new Int32Array(msg.sharedBuffer, 0, 5);
     payloadView = new Uint8Array(msg.sharedBuffer, PAYLOAD_BYTE_OFFSET);
     return;
   }
 
   if (msg.type === 'execute') {
+    // 0. Build loopN parameter names and initial values
+    // WHY: loop1..loopN are passed as parameters to new Function so
+    // guarded code can use ++loopN without variable declarations in
+    // the source (zero line shift, zero column shift).
+    var loopParams = [];
+    var loopArgs = [];
+    if (msg.loopCount && msg.loopCount > 0) {
+      for (var li = 1; li <= msg.loopCount; li++) {
+        loopParams.push('loop' + li);
+        loopArgs.push(0);
+      }
+    }
+
     // 1. Construction phase — SyntaxError from new Function
-    let fn;
+    var fn;
     try {
-      fn = new Function(
-        'console', 'alert', 'confirm', 'prompt',
-        '"use strict";\\n' + msg.code
-      );
+      var baseParams = ['console', 'alert', 'confirm', 'prompt'];
+      var allParams = baseParams.concat(loopParams);
+      var prefix = msg.scriptMode ? '' : '"use strict";\\n';
+      allParams.push(prefix + msg.code);
+      fn = new Function(...allParams);
     } catch (err) {
-      const errorEvent = {
+      var errorEvent = {
         event: 'error',
         name: err.name || 'Error',
         message: err.message || String(err),
@@ -214,17 +251,18 @@ self.onmessage = function (e) {
 
     // 2. Execution phase — runtime errors
     try {
-      fn(trappedConsole, trappedAlert, trappedConfirm, trappedPrompt);
+      var baseArgs = [trappedConsole, trappedAlert, trappedConfirm, trappedPrompt];
+      fn(...baseArgs.concat(loopArgs));
     } catch (err) {
-      const errorEvent = {
+      var errorEvent2 = {
         event: 'error',
         name: err.name || 'Error',
         message: err.message || String(err),
         line: extractLineFromError(err),
         phase: 'execution'
       };
-      events.push(errorEvent);
-      postMessage({ type: 'event', event: errorEvent });
+      events.push(errorEvent2);
+      postMessage({ type: 'event', event: errorEvent2 });
     }
 
     postMessage({ type: 'complete' });
@@ -238,7 +276,11 @@ function extractLineFromError(err) {
     const match = lines[i].match(/:(\\d+):\\d+\\)?$/);
     if (match) {
       const lineNum = parseInt(match[1], 10);
-      if (lineNum >= 2) return lineNum - 1;
+      if (isScriptMode) {
+        if (lineNum >= 1) return lineNum;
+      } else {
+        if (lineNum >= 2) return lineNum - 1;
+      }
     }
   }
   return undefined;

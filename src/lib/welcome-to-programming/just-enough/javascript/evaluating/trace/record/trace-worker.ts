@@ -24,20 +24,22 @@ import { traceCollector } from './legacy-aran-trace/lib/trace-collector.js';
 // @ts-expect-error — untyped vendored legacy JS
 import { state } from './legacy-aran-trace/data/state.js';
 
-// --- SAB layout constants (from run/worker-protocol.ts) ---
+// --- SAB layout constants (duplicated from run/worker-protocol.ts) ---
 
 const CONTROL_INDEX = 0;
 const RESPONSE_TYPE_INDEX = 1;
 const NULL_FLAG_INDEX = 2;
 const PAYLOAD_LENGTH_INDEX = 3;
-const PAYLOAD_BYTE_OFFSET = 16;
+const PAUSE_INDEX = 4;
+const PAYLOAD_BYTE_OFFSET = 20;
 
-const RESPONSE_STRING = 0;
 const RESPONSE_BOOLEAN = 1;
 const RESPONSE_VOID = 2;
 
 const SIGNAL_IDLE = 0;
 const SIGNAL_WAITING = 1;
+
+const PAUSE_PAUSED = 1;
 
 // --- SAB state (set on 'setup' message) ---
 
@@ -136,13 +138,43 @@ globalThis.alert = function alert(...args: unknown[]): void {
 	readResponse();
 };
 
+// --- Pause protocol (blocks Worker between events) ---
+
+function checkPause(): void {
+	if (!controlView) return;
+	while (Atomics.load(controlView, PAUSE_INDEX) === PAUSE_PAUSED) {
+		Atomics.wait(controlView, PAUSE_INDEX, PAUSE_PAUSED);
+	}
+}
+
+// WHY: The legacy Aran tracer streams entries via postMessage() in
+// trace-log.js. To add pause behavior between entries, we intercept
+// postMessage and call checkPause() after each entry message.
+// This works because the legacy tracer calls self.postMessage directly.
+const _originalPostMessage = self.postMessage.bind(self);
+self.postMessage = function pauseAwarePostMessage(
+	msg: unknown,
+	...rest: unknown[]
+) {
+	// @ts-expect-error — spread of rest args
+	_originalPostMessage(msg, ...rest);
+	if (
+		msg !== null &&
+		typeof msg === 'object' &&
+		'type' in msg &&
+		(msg as { type: string }).type === 'entry'
+	) {
+		checkPause();
+	}
+};
+
 // --- Message handler (exported for classic worker blob URL loader) ---
 
 export function handleMessage(e: MessageEvent): void {
 	const msg = e.data;
 
 	if (msg.type === 'setup') {
-		controlView = new Int32Array(msg.sharedBuffer, 0, 4);
+		controlView = new Int32Array(msg.sharedBuffer, 0, 5);
 		payloadView = new Uint8Array(msg.sharedBuffer, PAYLOAD_BYTE_OFFSET);
 		return;
 	}

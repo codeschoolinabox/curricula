@@ -1,5 +1,26 @@
 # evaluating/debug — Architecture & Decisions
 
+## Why an AsyncGenerator (minimal)
+
+The debug engine is rewritten as an async generator for API consistency with run
+and trace. However, the generator is minimal:
+
+- Yields 0-1 events (only on error — RangeError from loop guard or iframe
+  access error)
+- No SAB pause protocol (iframe, not Worker)
+- Returns when the iframe's completion `postMessage` arrives
+- Empty/whitespace code: yields nothing, returns immediately
+
+The generator is wrapped by `createExecution` at the `api/` layer for
+PromiseLike backward compatibility.
+
+## Why no SAB pause
+
+The debug engine uses an iframe that shares the main thread's event loop. There
+is no Worker to pause — the learner's code runs synchronously on the same thread
+as the generator consumer. `debugger` statements are the pause mechanism, and
+they are controlled by DevTools, not by this engine.
+
 ## Why iframe, not Web Worker
 
 `debugger` statements only pause execution when DevTools is open on the main
@@ -22,26 +43,30 @@ This gives a reliable "done" signal without polling or timers. The `postMessage`
 listener filters by both `event.source` (this iframe's window) and `event.data`
 (a unique `callId`), so concurrent `debug()` calls don't interfere.
 
-## Why loop guards are AST transforms
+## Why body-injection loop guards (not comma-in-condition)
 
-Infinite loops in an iframe freeze the entire page (they share the main thread's
-event loop). Unlike the `run` and `trace` engines, there's no
-`worker.terminate()` available.
-
-Loop guards are injected as AST transforms before execution:
+The debug engine keeps the body-injection strategy for loop guards:
 
 ```text
-// Before each while loop body:
 let loopN = 0;
-if (++loopN > maxIterations) throw new RangeError(...);
+while (condition) {
+  if (++loopN > maxIterations) throw new RangeError(...);
+  // learner code
+}
 ```
 
-This is simpler and more reliable than runtime wrappers — it works at the
-statement level, requires no state management beyond a counter, and the
-`RangeError` is caught by the `api/debug` wrapper as an `iteration-limit` error.
+This is different from the run engine's comma-in-condition approach. The reason:
+learners see their code in the DevTools Sources panel during debugging. Separate
+`let loopN` declarations and `if (++loopN > max)` checks are readable and easy
+to understand. The compact comma-in-condition form (`while (++loop1 > max &&
+guard(1), cond)`) would be confusing to see mid-debug.
 
-See [guard-loops/README.md](./guard-loops/README.md) for the AST transform
-details.
+The line-number shift from body injection is acceptable here because debug error
+messages are less critical — the learner is stepping through code in DevTools and
+can see exactly where things are.
+
+Loop guard injection uses the shared `guard-loops/` module from
+`../shared/guard-loops/`, which supports both injection strategies.
 
 ## Why DevTools must be open
 
@@ -50,10 +75,18 @@ them silently and the code runs straight through. This is browser behavior, not
 something this engine can change. The `api/debug` wrapper should inform the UI
 layer, which should prompt the learner to open DevTools before clicking "debug".
 
-## Why code is formatted before injection
+## Why formatCode is removed from the debug pipeline
 
-The learner's code is run through Prettier (`prettier/standalone`) after loop
-guard injection and before iframe injection. Loop guards add variable
-declarations and if-statements that disrupt the learner's original formatting —
-formatting restores readability so the code in DevTools Sources panel is clean
-and inspectable.
+Previously, the learner's code was run through Prettier after loop guard
+injection to restore readability in DevTools. This is no longer needed because:
+
+1. **Formatting is now a pipeline gate** — code must be formatted before
+   execution. The `api/debug` wrapper checks format compliance before calling
+   this engine. The learner's code is already formatted when it arrives here.
+2. **Guard injection preserves formatting** — recast prints guard lines cleanly.
+   The learner sees their already-formatted code plus clean guard declarations.
+3. **Learners should see their own code** — showing prettier-reformatted code in
+   DevTools would differ from what they wrote. Since they already formatted it
+   (pipeline gate), what they see in DevTools matches what they submitted.
+
+The `format/` directory is extracted to the top-level `formatting/` module.

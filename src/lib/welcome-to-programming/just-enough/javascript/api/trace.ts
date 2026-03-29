@@ -1,140 +1,86 @@
 /**
- * @file Validates and traces JeJ code, returning a unified result.
+ * @file Validates and traces JeJ code, returning an Execution.
  *
- * @remarks Validates against the full JeJ language level first.
- * If valid, delegates to the raw Aran tracer and normalizes
- * the structured steps into a {@link TraceResult}.
+ * @remarks Pipeline: parse → validate → format check → trace.
+ * Returns an `Execution<AranStep, TraceResult>` that is both
+ * `AsyncIterable` (step-through) and `PromiseLike` (batch).
  *
- * Exception steps (operation: 'exception') are detected and
- * classified by error name: TimeoutError → `kind: 'timeout'`,
- * others → `kind: 'javascript'`.
+ * Validation or format failures return an Execution that resolves
+ * immediately with the error result — no Worker is spawned.
  */
 
-import deepFreezeInPlace from '../../../utils/deep-freeze-in-place.js';
+import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import validate from './validate.js';
-import rawRecord from '../evaluating/trace/record/record.js';
+import { checkFormat } from './format.js';
+import createRecordGenerator from '../evaluating/trace/record/record.js';
+import createExecution from '../evaluating/shared/create-execution.js';
 
 import type { TraceResult } from './types.js';
-import type {
-	AranFilterOptions,
-	AranStep,
-} from '../evaluating/trace/record/types.js';
+import type { Execution, TraceConfig } from '../evaluating/shared/types.js';
+import type { AranStep } from '../evaluating/trace/record/types.js';
 
 /**
  * Validates code against the full JeJ level, then traces it.
  *
  * @param code - JavaScript source to validate and trace
- * @param maxSeconds - timeout in seconds for execution
- * @param options - optional Aran filter options for step filtering
- * @returns A frozen {@link TraceResult}
+ * @param config - Trace configuration (seconds, iterations, options)
+ * @returns An Execution that yields AranSteps and resolves to TraceResult
+ *
+ * @remarks
+ * - `await trace(code, config)` — batch mode, resolves to TraceResult
+ * - `for await (const step of trace(code, config))` — step-through
+ * - Second `for await` replays from cached result (no re-execution)
+ * - `.cancel()` terminates Worker immediately
+ *
+ * Never throws. All errors are represented in the result.
  */
-async function trace(
+function trace(
 	code: string,
-	maxSeconds: number,
-	options?: AranFilterOptions,
-): Promise<TraceResult> {
+	config?: TraceConfig,
+): Execution<AranStep, TraceResult> {
 	const validation = validate(code);
 
+	// Validation failure — return immediately, no Worker
 	if (!validation.ok) {
-		return validation;
+		// WHY: validate() already deep-freezes its result
+		const result = validation as TraceResult;
+		return createExecution(
+			async function* () {
+				return result;
+			},
+			function noop() {},
+		);
 	}
 
-	const steps = await rawRecord(code, {
-		meta: {
-			max: {
-				steps: null,
-				iterations: null,
-				callstack: null,
-				time: maxSeconds * 1000,
-			},
-			range: null,
-			timestamps: false,
-			debug: { ast: false },
-		},
-		options: options ?? {},
-	});
-
-	const exceptionStep = findExceptionStep(steps);
-
-	if (exceptionStep) {
-		const errorName = extractErrorName(exceptionStep);
-
-		if (errorName === 'TimeoutError') {
-			return deepFreezeInPlace({
-				ok: false as const,
-				error: {
-					kind: 'timeout' as const,
-					name: errorName,
-					message: extractErrorMessage(exceptionStep),
-					...(exceptionStep.loc ? { line: exceptionStep.loc.start.line } : {}),
-					phase: 'execution' as const,
-					limit: maxSeconds,
-				},
-				...(validation.warnings ? { warnings: validation.warnings } : {}),
-				steps,
-			});
-		}
-
-		return deepFreezeInPlace({
+	// Format gate — unformatted JeJ cannot execute
+	const { formatted } = checkFormat(code);
+	if (!formatted) {
+		const result = deepFreezeInPlace({
 			ok: false as const,
-			error: {
-				kind: 'javascript' as const,
-				name: errorName,
-				message: extractErrorMessage(exceptionStep),
-				...(exceptionStep.loc ? { line: exceptionStep.loc.start.line } : {}),
-				phase: 'execution' as const,
-			},
-			...(validation.warnings ? { warnings: validation.warnings } : {}),
-			steps,
+			error: { kind: 'formatting' as const },
 		});
+		return createExecution(
+			async function* () {
+				return result;
+			},
+			function noop() {},
+		);
 	}
 
-	return deepFreezeInPlace({
-		ok: true as const,
-		...(validation.warnings ? { warnings: validation.warnings } : {}),
-		steps,
-	});
-}
+	const seconds = config?.seconds ?? 5;
+	const iterations = config?.iterations;
+	// WHY: TraceConfig.options flows to the record generator which
+	// passes it to filterSteps for post-trace filtering. The legacy
+	// tracer captures everything; filtering is done after collection.
+	const options =
+		config?.options as
+			| import('../evaluating/trace/record/types.js').AranFilterOptions
+			| undefined;
 
-/**
- * Finds the last exception step in the trace output.
- */
-function findExceptionStep(steps: readonly AranStep[]): AranStep | undefined {
-	for (let i = steps.length - 1; i >= 0; i--) {
-		if (steps[i].operation === 'exception') {
-			return steps[i];
-		}
-	}
-	return undefined;
-}
-
-/**
- * Extracts the error name from an exception step's values.
- *
- * @remarks Red-style exceptions have [errorName, ...messageParts].
- * Phase errors have [errorMessage]. Falls back to 'Error'.
- */
-function extractErrorName(step: AranStep): string {
-	const first = step.values[0];
-	if (typeof first === 'string' && first.endsWith('Error')) {
-		return first;
-	}
-	return 'Error';
-}
-
-/**
- * Extracts the error message from an exception step's values.
- *
- * @remarks Red-style: values[1..] joined. Phase errors: values[0].
- */
-function extractErrorMessage(step: AranStep): string {
-	if (step.values.length > 1) {
-		const first = step.values[0];
-		if (typeof first === 'string' && first.endsWith('Error')) {
-			return step.values.slice(1).map(String).join(' ');
-		}
-	}
-	return step.values.map(String).join(' ') || 'Unknown error';
+	return createExecution(
+		() => createRecordGenerator(code, seconds, options, iterations),
+		function noop() {},
+	);
 }
 
 export default trace;

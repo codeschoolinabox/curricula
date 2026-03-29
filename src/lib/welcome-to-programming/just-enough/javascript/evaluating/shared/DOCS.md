@@ -1,111 +1,108 @@
 # evaluating/shared — Architecture & Decisions
 
-## Why allow AND block
+## Why one AsyncGenerator per engine
 
-Early chapters have few features (allowlist is short). Late chapters have most
-features (blocklist is short). Supporting both avoids verbose configs in either
-case. Mutual exclusivity (`allow` XOR `block`, never both) prevents ambiguity.
+Each engine needs to produce events incrementally (for live UI rendering) while
+also supporting batch consumption (for backward compatibility). An AsyncGenerator
+satisfies both: `for await` pulls events one at a time, while `await execution`
+drains everything and resolves to the final result.
 
-## Why schema-driven expansion
+Alternatives considered:
 
-The `AllowConfig` type supports boolean shorthand at every nesting level:
+- **Callback/EventEmitter**: no backpressure, consumer cannot control pacing.
+  The generator's pull-based model lets the consumer decide when to advance.
+- **ReadableStream**: heavier API surface, less ergonomic for `for await`, and
+  the PromiseLike backward-compat trick wouldn't work naturally.
+- **Observable**: not built into the language, would add a dependency.
 
-```ts
-{
-	loops: true;
-} // expands to { loops: { while: true, forOf: true } }
-{
-	strings: {
-		methods: true;
-	}
-} // expands methods to all sub-keys
+## Why Execution is PromiseLike
+
+`Execution` implements `.then()` by delegating to `.result`. This means
+`await run(code, { seconds: 5 })` resolves to the same `RunResult` as today's
+`await run(code, 5)`. Existing consumers work unchanged — no silent breakage.
+
+The `.result` Promise is created eagerly. If nobody iterates the generator,
+an internal drain loop consumes all events and resolves `.result`. This prevents
+the generator from hanging indefinitely.
+
+## Why re-iteration replays from cache
+
+After the generator completes, events are stored in `.result.logs`. A second
+`for await` iterates over the cached array rather than re-executing. This
+supports use cases like: render events live, then analyze them afterward —
+without running the learner's code twice.
+
+## SAB pause protocol
+
+The Worker must pause between events so the main-thread generator can yield them
+one at a time. Without pause, events would queue up in the message channel and
+arrive in bulk — defeating the purpose of streaming.
+
+### Buffer layout change
+
+The control array extends from 4 to 5 `Int32` slots. `PAYLOAD_BYTE_OFFSET`
+moves from 16 to 20.
+
+```text
+control = Int32Array(sab, 0, 5)    →  bytes 0-19
+  [0]: I/O control (0=idle, 1=waiting, 2=responded)
+  [1]: response type (0=string, 1=boolean, 2=void)
+  [2]: null flag
+  [3]: payload byte length
+  [4]: pause flag (0=running, 1=paused)     ← NEW
+payload = Uint8Array(sab, 20)      →  bytes 20+   (was 16)
 ```
 
-A JSON Schema defines the full structure. The expansion function inspects the
-schema to know which keys exist at each level — same pattern as
-`@study-lenses/tracing`'s `expandShorthand`, but recursive.
+### Why Atomics.wait for pause (not message-based)
 
-## Why no Ajv
+Message-based pause (posting "pause"/"resume" messages) would require the Worker
+to poll its message queue — `onmessage` fires asynchronously and cannot block
+synchronous code mid-execution. `Atomics.wait` truly freezes the Worker thread
+at the exact instruction, guaranteeing no events leak past the pause point.
 
-The project does not depend on Ajv. Rather than adding a heavy dependency for
-filling defaults, we use a simple recursive schema walker that sets omitted keys
-to the provided default value (`false` for allow mode, `true` for block mode).
+### Pause/resume flow
 
-## Validator merging strategy
+1. Worker posts an event via `postMessage`
+2. Worker calls `Atomics.wait(control, 4, 1)` — blocks while flag is 1
+3. Main thread's generator `next()` sets flag to 0 + `Atomics.notify()` — wakes
+   Worker
+4. Worker continues execution until the next event
 
-Multiple operator features may enable the same AST node type. For example,
-`equality` and `arithmetic` both need `BinaryExpression`. The resolution step
-collects all enabled operators per expression type into a single `Set`, then
-builds one merged validator per type:
+For batch mode (`.then()` / `.result`), an internal drain loop calls `next()`
+rapidly — the Worker barely pauses.
 
-```ts
-createBinaryValidator(new Set(['===', '!==', '+', '-', '*', '/']));
-```
+## Why cumulative timeout, not wall-clock
 
-Same pattern for `UnaryExpression` (typeof, !, -) and `LogicalExpression` (&&,
-||).
+Timeout tracks execution time only, not pause time. When the Worker pauses
+(waiting for the consumer to call `next()`), the timeout is cleared. When it
+resumes, `setTimeout(remainingMs)` restarts. This means a learner stepping
+through events can take as long as they want — only actual code execution counts
+toward the limit.
 
-## Structural constraints vs configurable features
+## Why create-execution is a factory function, not a class
 
-JeJ has two categories of validation rules:
+Per AGENTS.md convention: no classes in this codebase. The factory returns a
+plain object with closure-captured state. The generator function and cancel
+callback are injected — `createExecution` knows nothing about Workers, SABs, or
+engines. Each engine builds its own async generator and passes it to the factory.
 
-**Configurable features** (controlled by allow/block): which AST node types are
-permitted (e.g., WhileStatement, TemplateLiteral) and which APIs are available
-at runtime (e.g., `console.log`, `Number`). These are the leaves of the
-AllowConfig object.
+## Why guard-loops moved to shared
 
-**Structural constraints** (always enforced): camelCase variable names, single
-declaration per statement, for-of must use `const`, block-required control flow.
-These apply regardless of the allow/block config because they are JeJ
-conventions — writing `let a, b` is wrong even if `variables.let` is enabled.
-These constraints live in the base JeJ LanguageLevel validators and are carried
-through to every narrowed level.
+Both run and debug engines need loop guard injection. Previously guard-loops
+lived inside `debug/` — run didn't have its own guards (it relied on timeout
+only). With the refactor, run also injects loop guards when `config.iterations`
+is set. Moving to `shared/` reflects this shared dependency.
 
-## Feature interdependencies
+The two engines use different injection strategies from the same module:
 
-`loops.forOf` implicitly requires `variables.const` — the for-of loop variable
-must be `const`, so if `forOf` is enabled but `const` is not in the config,
-`resolveFeatures` auto-enables const in the narrowed LanguageLevel. This is
-silent (no error thrown), documented, and tested.
-
-No other implicit dependencies exist. `jumps.break`/`continue` without loops is
-not an error — acorn will catch misplaced break/continue during parsing.
-
-## Narrowed LanguageLevel construction
-
-`resolveFeatures` builds a **new** LanguageLevel (not a patch):
-
-1. Copy `meta` from the base JeJ level (sourceType, etc.)
-2. Initialize `nodes` with base structural nodes (Program, ExpressionStatement,
-   Identifier, Literal, BlockStatement, MemberExpression, CallExpression,
-   AssignmentExpression)
-3. For each `true` leaf in the expanded config, add corresponding node types and
-   constraint validators from the feature mapping table
-4. For operator nodes, collect enabled operators into a `Set` per expression
-   type, build one merged validator each
-5. Return `Object.freeze({ meta, nodes })`
-
-## AllowConfig → AllowedConfig transformation
-
-The AllowConfig (user input, nested object) maps to two outputs:
-
-- **LanguageLevel** — for static validation (which AST nodes are legal)
-- **AllowedConfig** — for runtime enforcement (which globals/prototypes are
-  accessible)
-
-The AllowedConfig is a flat `Record<string, true>` with dot-path keys (e.g.,
-`'String.prototype.slice'`, `'console.log'`, `'Number'`). Only features with
-enforcement entries in the mapping table produce AllowedConfig entries —
-validation-only features (like loops, operators) don't appear in AllowedConfig.
-
-The existing `enforceLevel(target, allowed)` works unchanged with partial
-AllowedConfig. It blocks globals/prototypes NOT in the config, so fewer entries
-= more blocking (correct behavior). Safety exemptions internal to the enforcer
-are preserved.
+- **run**: comma-in-condition (`while (++loop1 > max && guard(1), cond)`) — zero
+  line shift, errors report correct line numbers
+- **debug**: body-injection (`if (++loopN > max) throw ...`) — visible and
+  readable in DevTools
 
 ## What this module deliberately does NOT do
 
-- Does not validate user code — that's `validate-program`'s job
-- Does not enforce at runtime — that's `enforce-level`'s job
-- Does not execute code — that's the individual actions' job
-- Only translates config → LanguageLevel + AllowedConfig
+- Does not validate user code — that's `validating/`'s job
+- Does not execute code — that's the individual engine's job
+- Only provides shared infrastructure (types, Execution factory, SAB protocol,
+  loop guards)

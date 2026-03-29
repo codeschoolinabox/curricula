@@ -19,7 +19,7 @@
 import * as recast from 'recast';
 import { walk } from 'estree-walker';
 
-import deepFreeze from '../../../../../utils/deep-freeze.js';
+import deepFreeze from '@utils/deep-freeze.js';
 
 import type { Node } from 'estree';
 

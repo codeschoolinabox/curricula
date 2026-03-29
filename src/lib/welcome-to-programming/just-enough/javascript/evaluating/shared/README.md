@@ -1,45 +1,71 @@
 # evaluating/shared
 
-Shared infrastructure for all three evaluation actions (`run`, `trace`,
-`debug`). Provides the feature configuration system that lets curriculum authors
-control which JeJ features are available per chapter.
+Shared infrastructure for all three evaluation engines (`run`, `trace`,
+`debug`). Provides the `Execution` type and factory, SAB pause protocol, and
+loop guard injection.
 
 ## Structure
 
-| File                  | Purpose                                                            |
-| --------------------- | ------------------------------------------------------------------ |
-| `types.ts`            | AllowConfig, RunEvent, action configs                              |
-| `allow-schema.ts`     | JSON Schema defining the AllowConfig structure                     |
-| `expand-allow.ts`     | Boolean shorthand expansion (adapted from sl-tracing)              |
-| `fill-defaults.ts`    | Fills omitted keys with defaults (false for allow, true for block) |
-| `resolve-features.ts` | Expanded config to LanguageLevel + AllowedConfig                   |
+| Path                  | Purpose                                                     |
+| --------------------- | ----------------------------------------------------------- |
+| `types.ts`            | `Execution`, `EngineConfig`, `TraceConfig`, `RunEvent`      |
+| `create-execution.ts` | Factory: wraps an AsyncGenerator into an `Execution` object |
+| `guard-loops/`        | Loop guard injection to prevent infinite loops              |
 
-## How the feature config works
+## Execution type
 
-Each action accepts an optional `allow` or `block` property (mutually
-exclusive). Both use the same `AllowConfig` shape — a nested object whose
-structure mirrors the `reference.md` sections.
+All engines return an `Execution<TEvent, TResult>` — an object that is both
+`AsyncIterable<TEvent>` (for streaming) and `PromiseLike<TResult>` (for batch).
+The `createExecution` factory builds this from an async generator.
 
-**allow** (allowlist): omitted features default to `false` (disabled). **block**
-(blocklist): omitted features default to `true` (enabled). Neither provided:
-full JeJ (everything enabled).
-
-### Processing pipeline
-
-```text
-AllowConfig (user input)
-  → expandShorthand (booleans → full objects, recursive)
-  → fillDefaults (omitted → false or true depending on mode)
-  → resolveFeatures → { level: LanguageLevel, allowed: AllowedConfig }
+```ts
+type Execution<TEvent, TResult> = AsyncIterable<TEvent>
+  & PromiseLike<TResult>
+  & {
+    readonly result: Promise<TResult>;
+    readonly cancel: () => void;
+  };
 ```
 
-The `expandShorthand` step is adapted from `@study-lenses/tracing`'s configuring
-module but extended to handle recursive nesting (e.g.,
-`{ strings: { methods: true } }` expands `methods` to all its sub-keys).
+- `for await (const event of execution)` — step through events one at a time
+- `await execution` — drain all events and resolve to the result (PromiseLike)
+- `execution.result` — same Promise as `.then()` delegates to
+- `execution.cancel()` — terminate execution early (idempotent)
+- Second `for await` replays cached events from `.result.logs`
 
-The `fillDefaults` step uses a lightweight schema walker instead of Ajv (not a
-project dependency).
+## Engine configuration
 
-The `resolveFeatures` step builds a `LanguageLevel` (for validation) and an
-`AllowedConfig` (for enforcement) from the fully expanded config. Operator
-validators are merged when multiple operator features are enabled.
+All engines accept `EngineConfig`:
+
+```ts
+type EngineConfig = {
+  readonly seconds?: number;    // cumulative execution time limit
+  readonly iterations?: number; // max loop iterations before RangeError
+};
+```
+
+Program ends when the first limit is reached. Timeout tracks cumulative
+execution time (pauses during SAB wait so learners can examine steps
+indefinitely).
+
+The trace engine extends this with optional trace granularity options:
+
+```ts
+type TraceConfig = EngineConfig & {
+  readonly options?: TraceOptions;
+};
+```
+
+## Guard loops
+
+The `guard-loops/` module prevents infinite loops in learner code by injecting
+iteration counters into `while` loop conditions via AST transformation. Used by
+both run and debug engines (with different injection strategies per engine).
+
+## Navigation
+
+- [guard-loops/README.md](./guard-loops/README.md) — loop guard injection
+- [DOCS.md](./DOCS.md) — architecture decisions and design rationale
+- [../run/README.md](../run/README.md) — run engine
+- [../trace/README.md](../trace/README.md) — trace engine
+- [../debug/README.md](../debug/README.md) — debug engine
