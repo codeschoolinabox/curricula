@@ -131,7 +131,7 @@ describe('justEnoughJs', () => {
 			expect(result).toHaveProperty('nodeType', 'VariableDeclaration');
 		});
 
-		it('rejects multi-declaration (let a, b)', () => {
+		it('allows multi-declaration (let a, b)', () => {
 			const result = validate(
 				fakeNode({
 					type: 'VariableDeclaration',
@@ -139,11 +139,10 @@ describe('justEnoughJs', () => {
 					declarations: [{}, {}],
 				}),
 			);
-			expect(result).not.toBe(true);
-			expect(result).toHaveProperty('nodeType', 'VariableDeclaration');
+			expect(result).toBe(true);
 		});
 
-		it('rejects multi-declaration with const', () => {
+		it('allows multi-declaration with const', () => {
 			const result = validate(
 				fakeNode({
 					type: 'VariableDeclaration',
@@ -151,7 +150,7 @@ describe('justEnoughJs', () => {
 					declarations: [{}, {}],
 				}),
 			);
-			expect(result).not.toBe(true);
+			expect(result).toBe(true);
 		});
 	});
 

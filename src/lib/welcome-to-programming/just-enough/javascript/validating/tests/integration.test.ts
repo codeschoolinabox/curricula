@@ -78,13 +78,14 @@ let nanCheck = Number.isNaN(count);
 `;
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 
 	it('accepts optional chaining', () => {
-		const source =
-			'let x = null;\nlet y = x?.length;\nconsole.log(y);\n';
+		const source = 'let x = null;\nlet y = x?.length;\nconsole.log(y);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
 		expect(report.violations).toHaveLength(0);
@@ -106,13 +107,10 @@ describe('integration: common student mistakes', () => {
 		expect(v).toBeDefined();
 	});
 
-	it('catches multi-declaration', () => {
+	it('allows multi-declaration', () => {
 		const report = validateProgram('let a = 1, b = 2;', justEnoughJs);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find((v) =>
-			v.message.includes('one variable per declaration'),
-		);
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
+		expect(report.violations).toHaveLength(0);
 	});
 
 	it('catches arrow functions', () => {
@@ -296,7 +294,9 @@ describe('integration: allowed globals coverage', () => {
 		const source = 'let x = NaN;\nconsole.log(x);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 
@@ -304,7 +304,9 @@ describe('integration: allowed globals coverage', () => {
 		const source = 'let x = Infinity;\nconsole.log(x);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 
@@ -312,7 +314,9 @@ describe('integration: allowed globals coverage', () => {
 		const source = 'let s = String;\nconsole.log(s);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 
@@ -320,7 +324,9 @@ describe('integration: allowed globals coverage', () => {
 		const source = 'let b = Boolean;\nconsole.log(b);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 });
@@ -331,15 +337,20 @@ describe('integration: allowed member names coverage', () => {
 			'let text = " hi ";\nlet a = text.trimStart();\nlet b = text.trimEnd();\nconsole.log(a);\nconsole.log(b);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 
 	it('accepts .at()', () => {
-		const source = 'let text = "hello";\nlet c = text.at(0);\nconsole.log(c);\n';
+		const source =
+			'let text = "hello";\nlet c = text.at(0);\nconsole.log(c);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 
@@ -348,15 +359,20 @@ describe('integration: allowed member names coverage', () => {
 			'let text = "hello";\nlet c = text.concat(" world");\nconsole.log(c);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 
 	it('accepts .repeat()', () => {
-		const source = 'let text = "ha";\nlet r = text.repeat(3);\nconsole.log(r);\n';
+		const source =
+			'let text = "ha";\nlet r = text.repeat(3);\nconsole.log(r);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 
@@ -365,7 +381,9 @@ describe('integration: allowed member names coverage', () => {
 			'let text = "5";\nlet a = text.padStart(3, "0");\nlet b = text.padEnd(3, "0");\nconsole.log(a);\nconsole.log(b);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 
@@ -373,14 +391,19 @@ describe('integration: allowed member names coverage', () => {
 		const source = 'console.assert(true);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
-		const rejections = report.violations.filter((v) => v.severity === 'rejection');
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
 		expect(rejections).toHaveLength(0);
 	});
 });
 
 describe('integration: disallowed globals', () => {
 	it('flags Date as undeclared', () => {
-		const report = validateProgram('let x = Date;\nconsole.log(x);\n', justEnoughJs);
+		const report = validateProgram(
+			'let x = Date;\nconsole.log(x);\n',
+			justEnoughJs,
+		);
 		expect(report.isValid).toBe(false);
 		const v = report.violations.find(
 			(v) => v.severity === 'rejection' && v.message.includes('Date'),
@@ -398,10 +421,7 @@ describe('integration: disallowed globals', () => {
 	});
 
 	it('flags setTimeout as undeclared', () => {
-		const report = validateProgram(
-			'setTimeout(alert, 1000);\n',
-			justEnoughJs,
-		);
+		const report = validateProgram('setTimeout(alert, 1000);\n', justEnoughJs);
 		expect(report.isValid).toBe(false);
 		const v = report.violations.find(
 			(v) => v.severity === 'rejection' && v.message.includes('setTimeout'),
@@ -453,8 +473,7 @@ describe('integration: disallowed methods', () => {
 		);
 		expect(report.isValid).toBe(false);
 		const v = report.violations.find(
-			(v) =>
-				v.nodeType === 'MemberExpression' && v.message.includes('charAt'),
+			(v) => v.nodeType === 'MemberExpression' && v.message.includes('charAt'),
 		);
 		expect(v).toBeDefined();
 	});
@@ -466,8 +485,7 @@ describe('integration: disallowed methods', () => {
 		);
 		expect(report.isValid).toBe(false);
 		const v = report.violations.find(
-			(v) =>
-				v.nodeType === 'MemberExpression' && v.message.includes('search'),
+			(v) => v.nodeType === 'MemberExpression' && v.message.includes('search'),
 		);
 		expect(v).toBeDefined();
 	});
@@ -479,8 +497,7 @@ describe('integration: disallowed methods', () => {
 		);
 		expect(report.isValid).toBe(false);
 		const v = report.violations.find(
-			(v) =>
-				v.nodeType === 'MemberExpression' && v.message.includes('replace'),
+			(v) => v.nodeType === 'MemberExpression' && v.message.includes('replace'),
 		);
 		expect(v).toBeDefined();
 	});
@@ -489,8 +506,7 @@ describe('integration: disallowed methods', () => {
 		const report = validateProgram('console.error("oops");\n', justEnoughJs);
 		expect(report.isValid).toBe(false);
 		const v = report.violations.find(
-			(v) =>
-				v.nodeType === 'MemberExpression' && v.message.includes('error'),
+			(v) => v.nodeType === 'MemberExpression' && v.message.includes('error'),
 		);
 		expect(v).toBeDefined();
 	});
@@ -541,9 +557,7 @@ describe('integration: disallowed declarations', () => {
 	it('rejects class declaration', () => {
 		const report = validateProgram('class Foo {}', justEnoughJs);
 		expect(report.isValid).toBe(false);
-		const v = report.violations.find(
-			(v) => v.nodeType === 'ClassDeclaration',
-		);
+		const v = report.violations.find((v) => v.nodeType === 'ClassDeclaration');
 		expect(v).toBeDefined();
 	});
 });

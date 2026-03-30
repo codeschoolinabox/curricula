@@ -33,8 +33,8 @@ simplifies scope analysis compared to general JavaScript.
 
 **Scope boundaries:** `Program`, `BlockStatement`, `ForOfStatement`
 
-**Declaration forms tracked:** `let`/`const` in `VariableDeclaration`, for-of
-`left` declaration.
+**Declaration forms tracked:** `let`/`const` in `VariableDeclaration` (including
+multi-declarations like `let a = 1, b = 2`), for-of `left` declaration.
 
 **Positions skipped (not references):**
 

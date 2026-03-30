@@ -11,31 +11,21 @@ import type { LanguageLevel, NodeRule, Violation } from './types.js';
 // Record<string, unknown> to access them safely.
 
 /**
- * Validates that a variable declaration uses `let` or `const` with
- * exactly one declarator.
+ * Validates that a variable declaration uses `let` or `const`.
  *
  * @remarks Rejects `var` (legacy scoping rules confuse beginners).
- * Also rejects multi-declarations like `let a, b` — one variable per
- * statement keeps code readable and prevents beginners from hiding
- * declarations.
+ * Multi-declarations like `let a = 1, b = 2` are allowed — learners
+ * can explore the expressiveness and readability trade-offs of declaring
+ * multiple variables in a single statement.
  */
 function validateVariableDeclaration(node: Node): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	const kind = record.kind as string;
-	const declarations = record.declarations as unknown[];
 
 	if (kind !== 'let' && kind !== 'const') {
 		return createViolation(
 			'VariableDeclaration',
 			`'${kind}' declarations are not allowed — use 'let' or 'const'`,
-			extractLocation(node),
-		);
-	}
-
-	if (declarations.length !== 1) {
-		return createViolation(
-			'VariableDeclaration',
-			'Only one variable per declaration — use separate statements',
 			extractLocation(node),
 		);
 	}

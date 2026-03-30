@@ -1,92 +1,463 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "aran-legacy-tracer-options",
-  "title": "Aran Legacy Tracer Options",
-  "description": "Post-trace filtering options for the Aran legacy JS tracer",
-  "type": "object",
-  "properties": {
-    "variables": {
-      "type": "boolean",
-      "description": "Toggle variable operations (declare, initialize, assign, read)",
-      "default": true
-    },
-    "operators": {
-      "type": "boolean",
-      "description": "Toggle operator operations (binary, unary, logical, conditional)",
-      "default": true
-    },
-    "controlFlow": {
-      "type": "boolean",
-      "description": "Toggle control flow operations (check, break, continue)",
-      "default": true
-    },
-    "functions": {
-      "type": "boolean",
-      "description": "Toggle function operations (call, return)",
-      "default": true
-    },
-    "functionDeclarations": {
-      "type": "boolean",
-      "description": "Toggle function declaration hoists",
-      "default": true
-    },
-    "this": {
-      "type": "boolean",
-      "description": "Toggle this-binding traces inside function calls",
-      "default": true
-    },
-    "errorHandling": {
-      "type": "boolean",
-      "description": "Toggle error handling operations (catch, throw)",
-      "default": true
-    },
-    "enterLeave": {
-      "type": "boolean",
-      "description": "Toggle block scope enter/leave operations",
-      "default": true
-    },
-    "filter": {
-      "type": "object",
-      "description": "List-based filters for specific categories",
-      "properties": {
-        "operatorsList": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Whitelist of operators to include (empty = all)"
-        },
-        "controlFlowList": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Whitelist of control flow types to include (empty = all)"
-        },
-        "names": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Name whitelist — filters any step with a name (variables, functions, control flow, etc.). Empty = keep all."
-        }
-      },
-      "additionalProperties": false
-    },
-    "range": {
-      "type": "object",
-      "description": "Filter by source line number range",
-      "properties": {
-        "start": { "type": "integer", "minimum": 1, "default": 1 },
-        "end": { "type": "integer", "minimum": 1, "default": 100000 }
-      },
-      "additionalProperties": false
-    },
-    "data": {
-      "type": "object",
-      "description": "Control which data fields appear on output steps",
-      "properties": {
-        "loc": { "type": "boolean", "default": true, "description": "Include source location" },
-        "values": { "type": "boolean", "default": true, "description": "Include traced values" },
-        "nodeType": { "type": "boolean", "default": true, "description": "Include AST node type" },
-        "depth": { "type": "boolean", "default": true, "description": "Include nesting depth and scope type" }
-      },
-      "additionalProperties": false
-    }
-  },
-  "additionalProperties": false
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "options.schema.json",
+	"title": "JEJ Trace Configuration",
+	"description": "Controls which runtime events appear in the trace array. Organized by language semantics. 2D matrix configs (bindings, scopes, controlFlow): an event fires when BOTH its kind-gate AND its event-gate are enabled.",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"bindings": {
+			"description": "Variable binding lifecycle events.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"kind": {
+					"description": "Which binding declaration types to trace.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"let": {
+							"description": "let declarations — block-scoped, reassignable.",
+							"type": "boolean",
+							"default": true
+						},
+						"const": {
+							"description": "const declarations — block-scoped, not reassignable.",
+							"type": "boolean",
+							"default": true
+						},
+						"global": {
+							"description": "Implicit global bindings. Undocumented — strict mode throws on these.",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				},
+				"events": {
+					"description": "Which binding lifecycle events to trace. Timeline: declare → initialize → available → assign/read.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"declare": {
+							"description": "Binding enters scope (hoisting phase).",
+							"type": "boolean",
+							"default": true
+						},
+						"initialize": {
+							"description": "Binding gets its first value.",
+							"type": "boolean",
+							"default": true
+						},
+						"available": {
+							"description": "Binding becomes usable without error.",
+							"type": "boolean",
+							"default": true
+						},
+						"assign": {
+							"description": "Subsequent value changes after initialization.",
+							"type": "boolean",
+							"default": true
+						},
+						"read": {
+							"description": "Binding value is accessed.",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				},
+				"filter": {
+					"description": "If non-empty, only trace bindings with these names.",
+					"type": "array",
+					"items": { "type": "string" },
+					"default": []
+				}
+			},
+			"default": {}
+		},
+
+		"propertyAccess": {
+			"description": "Property access events. In JEJ properties are read-only.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"dot": {
+					"description": "Dot notation: str.length, Math.PI",
+					"type": "boolean",
+					"default": true
+				},
+				"bracket": {
+					"description": "Bracket notation: str[0], str[i]",
+					"type": "boolean",
+					"default": true
+				},
+				"optionalChaining": {
+					"description": "Optional chaining: input?.length, input?.trim()",
+					"type": "boolean",
+					"default": true
+				},
+				"filter": {
+					"description": "If non-empty, only trace these property names.",
+					"type": "array",
+					"items": { "type": "string" },
+					"default": []
+				}
+			},
+			"default": {}
+		},
+
+		"operators": {
+			"description": "Operator evaluation events. Pure (evaluates all operands), shortCircuiting (may skip), assignment (mutates state).",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"pure": {
+					"description": "Operators that always evaluate all operands and produce a new value.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"arithmetic": {
+							"description": "-, *, /, %, **, unary +, unary -",
+							"type": "boolean",
+							"default": true
+						},
+						"addition": {
+							"description": "+ (numeric addition or string concatenation — operand types disambiguate).",
+							"type": "boolean",
+							"default": true
+						},
+						"comparison": {
+							"description": "===, !==, >, <, >=, <=",
+							"type": "boolean",
+							"default": true
+						},
+						"typeof": {
+							"description": "typeof — type introspection.",
+							"type": "boolean",
+							"default": true
+						},
+						"negation": {
+							"description": "Unary inversion operators.",
+							"type": "object",
+							"additionalProperties": false,
+							"properties": {
+								"logical": {
+									"description": "!",
+									"type": "boolean",
+									"default": true
+								},
+								"bitwise": {
+									"description": "~",
+									"type": "boolean",
+									"default": true
+								}
+							},
+							"default": {}
+						},
+						"bitwise": {
+							"description": "&, |, ^, <<, >>, >>>",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				},
+				"shortCircuiting": {
+					"description": "&&, ||, ??, ?:",
+					"type": "boolean",
+					"default": true
+				},
+				"assignment": {
+					"description": "=, +=, -=, *=, /=, %=, **=, &&=, ||=, ??=, &=, |=, ^=, <<=, >>=, >>>=",
+					"type": "boolean",
+					"default": true
+				},
+				"filter": {
+					"description": "If non-empty, only trace these specific operators.",
+					"type": "array",
+					"items": { "type": "string" },
+					"default": []
+				}
+			},
+			"default": {}
+		},
+
+		"parenthesis": {
+			"description": "Grouping parenthesis events.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"enter": {
+					"description": "Evaluation enters a parenthesized group.",
+					"type": "boolean",
+					"default": true
+				},
+				"leave": {
+					"description": "Evaluation leaves a parenthesized group.",
+					"type": "boolean",
+					"default": true
+				}
+			},
+			"default": {}
+		},
+
+		"literals": {
+			"description": "Literal value creation events.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"string": {
+					"description": "String literals.",
+					"type": "boolean",
+					"default": true
+				},
+				"boolean": {
+					"description": "Boolean literals: true, false.",
+					"type": "boolean",
+					"default": true
+				},
+				"number": {
+					"description": "Number literals including NaN, Infinity, -Infinity.",
+					"type": "boolean",
+					"default": true
+				},
+				"undefined": {
+					"description": "The undefined literal.",
+					"type": "boolean",
+					"default": true
+				},
+				"null": {
+					"description": "The null literal.",
+					"type": "boolean",
+					"default": true
+				},
+				"regex": {
+					"description": "RegExp literals (/pattern/flags). Not new RegExp().",
+					"type": "boolean",
+					"default": true
+				}
+			},
+			"default": {}
+		},
+
+		"templates": {
+			"description": "Template literal events. Separate from literals — templates have lifecycle (begin/evaluation/end) and contain sub-expression evaluations.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"begin": {
+					"description": "Template evaluation starts. Includes static string parts and expression count.",
+					"type": "boolean",
+					"default": true
+				},
+				"evaluation": {
+					"description": "A ${} expression inside a template is evaluated.",
+					"type": "boolean",
+					"default": true
+				},
+				"end": {
+					"description": "Template evaluation complete. Includes final assembled string.",
+					"type": "boolean",
+					"default": true
+				}
+			},
+			"default": {}
+		},
+
+		"scopes": {
+			"description": "Scope lifecycle events.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"kind": {
+					"description": "Which scope types to trace.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"script": {
+							"description": "Script-mode scope. Used with `with` statement (undocumented).",
+							"type": "boolean",
+							"default": true
+						},
+						"block": {
+							"description": "Block scope — {}, if/else bodies, loop bodies.",
+							"type": "boolean",
+							"default": true
+						},
+						"module": {
+							"description": "Module scope — top-level in JEJ programs.",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				},
+				"events": {
+					"description": "Which scope lifecycle events to trace.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"create": {
+							"description": "Scope is created.",
+							"type": "boolean",
+							"default": true
+						},
+						"enter": {
+							"description": "Execution enters scope.",
+							"type": "boolean",
+							"default": true
+						},
+						"interrupt": {
+							"description": "Scope interrupted by break or runtime error.",
+							"type": "boolean",
+							"default": true
+						},
+						"completion": {
+							"description": "Scope completes normally.",
+							"type": "boolean",
+							"default": true
+						},
+						"leave": {
+							"description": "Execution leaves scope. Always fires (like finally).",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				}
+			},
+			"default": {}
+		},
+
+		"controlFlow": {
+			"description": "Control flow events for conditionals and loops.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"kind": {
+					"description": "Which control flow structures to trace.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"conditionals": {
+							"description": "if/else.",
+							"type": "boolean",
+							"default": true
+						},
+						"loops": {
+							"description": "Loop structures.",
+							"type": "object",
+							"additionalProperties": false,
+							"properties": {
+								"while": {
+									"description": "while loops.",
+									"type": "boolean",
+									"default": true
+								},
+								"doWhile": {
+									"description": "do...while loops.",
+									"type": "boolean",
+									"default": true
+								},
+								"for": {
+									"description": "for loops.",
+									"type": "boolean",
+									"default": true
+								},
+								"forOf": {
+									"description": "for...of loops (iterating over strings in JEJ).",
+									"type": "boolean",
+									"default": true
+								}
+							},
+							"default": {}
+						}
+					},
+					"default": {}
+				},
+				"events": {
+					"description": "Which control flow events to trace.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"test": {
+							"description": "Condition expression evaluated.",
+							"type": "boolean",
+							"default": true
+						},
+						"branch": {
+							"description": "Which if/else path taken.",
+							"type": "boolean",
+							"default": true
+						},
+						"iteration": {
+							"description": "Loop iteration begins.",
+							"type": "boolean",
+							"default": true
+						},
+						"jump": {
+							"description": "break/continue statements.",
+							"type": "boolean",
+							"default": true
+						},
+						"do": {
+							"description": "do-while: fires before every body execution.",
+							"type": "boolean",
+							"default": true
+						},
+						"initialize": {
+							"description": "for-loop: initialization phase.",
+							"type": "boolean",
+							"default": true
+						},
+						"increment": {
+							"description": "for-loop: update/increment phase.",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				},
+				"filter": {
+					"description": "If non-empty, only trace these specific control flow structures.",
+					"type": "array",
+					"items": { "type": "string" },
+					"default": []
+				}
+			},
+			"default": {}
+		},
+
+		"functions": {
+			"description": "Function call/return events. Traces built-in calls: Number(), Math.floor(), prompt(), console.log(), string methods, etc.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"call": {
+					"description": "Function called — includes name and arguments.",
+					"type": "boolean",
+					"default": true
+				},
+				"return": {
+					"description": "Function returns — includes return value.",
+					"type": "boolean",
+					"default": true
+				},
+				"filter": {
+					"description": "If non-empty, only trace calls to these function names.",
+					"type": "array",
+					"items": { "type": "string" },
+					"default": []
+				}
+			},
+			"default": {}
+		},
+
+		"with": {
+			"description": "Trace the with statement. Undocumented — when active, program runs as script.",
+			"type": "boolean",
+			"default": true
+		}
+	}
 }

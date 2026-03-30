@@ -1776,6 +1776,9 @@ let greeting;
 // declare and initialize
 let name = 'Java';
 
+// declare and initialize multiple variables
+let a = 1, b = 2, greeting2 = 'hello';
+
 // read
 console.log(name);
 ```
@@ -1789,6 +1792,9 @@ console.log(name);
 
 // declare and initialize
 name <- 'Java'
+
+// declare and initialize multiple variables
+a <- 1, b <- 2, greeting2 <- 'hello'
 
 // read
 log(name)
@@ -1809,6 +1815,9 @@ log(name)
 // declare and initialize (cannot be reassigned)
 const language = 'JavaScript';
 
+// declare and initialize multiple constants
+const pi = 3.14, maxRetries = 3;
+
 // cannot be declared without initialization
 const language; // SyntaxError
 ```
@@ -1819,6 +1828,9 @@ const language; // SyntaxError
 ```txt
 // no need to specify const in PseudoCode
 language <- 'JavaScript'
+
+// multiple constants
+pi <- 3.14, maxRetries <- 3
 ```
 
 </td>
