@@ -308,6 +308,8 @@ export type TestEvent = BaseEvent & {
 	readonly value: ValueRepresentation;
 	/** Boolean result after truthiness coercion */
 	readonly result: boolean;
+	/** Boolean(value) — present when value is not already a boolean */
+	readonly coercion?: ValueRepresentation;
 	readonly scopeCreationStep: number;
 	readonly label?: string;
 };
