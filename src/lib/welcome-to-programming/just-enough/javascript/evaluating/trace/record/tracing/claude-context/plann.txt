@@ -20,8 +20,5 @@ other things I think we did wednesday night that might need more re-implementait
 
 - labels shouldn't be in the config. they should always be traced if they're present which is not a big deal, it's just an extra field not a full event
 - what is propertyCoercion?  whatever it is it likely doesn't belong in config.  we will trace coercion by default, with no option to disable it 
-- generally, it's ok if things like "coercion" are in the event and not the config.  the symmetry applies to what is in the config being in the trace, not everthing in the trace neds to be in the config
-    same goes for depth in arrays 
-    TODO add tracking scope depth to scope events as well (if it isn't already)
-    - Depth coherence - so maybe like with while loop iteration maxes, we need to trace block scopes and parenthesis even if they're not reported.  if they're off in the config we use them to track scope/expression depth, but do not emit the events 
+
 

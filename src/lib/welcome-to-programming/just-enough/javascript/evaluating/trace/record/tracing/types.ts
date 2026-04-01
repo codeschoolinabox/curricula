@@ -210,20 +210,7 @@ export type OperatorEvent =
 	| AssignmentOperatorEvent;
 
 // ============================================================================
-// 4. Parenthesis Events
-// ============================================================================
-// Config: parenthesis.{enter,leave}
-
-export type ParenthesisEvent = BaseEvent & {
-	readonly category: 'parenthesis';
-	readonly event: 'enter' | 'leave';
-	readonly depth: number;
-	/** Step ID of enclosing parens enter event (absent on outermost) */
-	readonly parentStep?: number;
-};
-
-// ============================================================================
-// 5. Literal Events
+// 4. Literal Events
 // ============================================================================
 // Config: literals.{string,boolean,number,undefined,null,regex}
 
@@ -423,7 +410,6 @@ export type TraceEvent =
 	| BindingEvent
 	| PropertyAccessEvent
 	| OperatorEvent
-	| ParenthesisEvent
 	| LiteralEvent
 	| TemplateEvent
 	| ScopeEvent

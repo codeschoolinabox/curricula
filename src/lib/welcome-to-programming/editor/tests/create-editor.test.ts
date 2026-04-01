@@ -72,7 +72,7 @@ describe('createEditor', () => {
 	describe('format error handling', () => {
 		it('does not throw when format callback throws', () => {
 			const editor = createEditor('let x = 5;', {
-				format() {
+				format(_code: string): string {
 					throw new Error('format failed');
 				},
 			});
@@ -84,7 +84,7 @@ describe('createEditor', () => {
 		it('does not throw when linter callback throws', () => {
 			const editor = createEditor('let x = 5;', {
 				linters: [
-					function () {
+					function throwingLinter(_code: string): readonly [] {
 						throw new Error('linter failed');
 					},
 				],
@@ -95,7 +95,7 @@ describe('createEditor', () => {
 		it('returns empty array when linter callback throws', () => {
 			const editor = createEditor('let x = 5;', {
 				linters: [
-					function () {
+					function throwingLinter(_code: string): readonly [] {
 						throw new Error('linter failed');
 					},
 				],

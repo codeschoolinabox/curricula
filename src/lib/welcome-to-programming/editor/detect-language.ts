@@ -6,9 +6,11 @@
  * @module detect-language
  */
 
+import type { DetectedLanguage } from './types.js';
+
 // Maps file extensions (with and without dot) to language identifiers.
 // Both forms are stored so callers don't need to normalize.
-const LANGUAGE_MAP = Object.freeze({
+const LANGUAGE_MAP: Readonly<Record<string, DetectedLanguage>> = Object.freeze({
 	'.js': 'javascript',
 	js: 'javascript',
 	'.mjs': 'javascript',
@@ -52,13 +54,13 @@ const LANGUAGE_MAP = Object.freeze({
 /**
  * Detect language from a file object with an `ext` property.
  *
- * @param {{ ext?: string }} [file={}] - File metadata
- * @returns {string} Language identifier (e.g. 'javascript', 'python', 'plaintext')
+ * @param file - File metadata with optional extension
+ * @returns Language identifier (e.g. 'javascript', 'python', 'plaintext')
  */
-function detectLanguage({ ext } = {}) {
+function detectLanguage({ ext }: { readonly ext?: string } = {}): DetectedLanguage {
 	if (!ext) return 'plaintext';
 
-	return LANGUAGE_MAP[ext.toLowerCase()] || 'plaintext';
+	return LANGUAGE_MAP[ext.toLowerCase()] ?? 'plaintext';
 }
 
 export default detectLanguage;

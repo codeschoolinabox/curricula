@@ -183,25 +183,6 @@
 			"default": {}
 		},
 
-		"parenthesis": {
-			"description": "Grouping parenthesis events.",
-			"type": "object",
-			"additionalProperties": false,
-			"properties": {
-				"enter": {
-					"description": "Evaluation enters a parenthesized group.",
-					"type": "boolean",
-					"default": true
-				},
-				"leave": {
-					"description": "Evaluation leaves a parenthesized group.",
-					"type": "boolean",
-					"default": true
-				}
-			},
-			"default": {}
-		},
-
 		"literals": {
 			"description": "Literal value creation events.",
 			"type": "object",

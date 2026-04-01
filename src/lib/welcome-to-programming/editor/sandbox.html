@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Editor Sandbox</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				padding: 2rem;
+				max-width: 900px;
+				margin: 0 auto;
+				background: #1e1e1e;
+				color: #d4d4d4;
+			}
+			h1 {
+				font-size: 1.2rem;
+				margin-bottom: 0.5rem;
+				color: #9cdcfe;
+			}
+			p.hint {
+				font-size: 13px;
+				color: #808080;
+				margin-bottom: 1rem;
+			}
+			.controls {
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+				align-items: center;
+				margin-bottom: 0.5rem;
+			}
+			button {
+				padding: 0.4rem 1rem;
+				font-family: monospace;
+				font-size: 13px;
+				cursor: pointer;
+				border: 1px solid #464647;
+				background: #2d2d30;
+				color: #d4d4d4;
+			}
+			button:hover {
+				background: #365f88;
+			}
+			button:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
+			}
+			select {
+				padding: 0.4rem;
+				font-family: monospace;
+				font-size: 13px;
+				border: 1px solid #464647;
+				background: #2d2d30;
+				color: #d4d4d4;
+			}
+			#editor-container {
+				border: 1px solid #464647;
+				margin-bottom: 1rem;
+				min-height: 300px;
+			}
+			#editor-container .cm-editor {
+				height: 300px;
+			}
+			#log {
+				border: 1px solid #464647;
+				padding: 0.5rem;
+				max-height: 300px;
+				overflow-y: auto;
+				font-size: 12px;
+				white-space: pre-wrap;
+				background: #252526;
+				display: none;
+			}
+			.log-info {
+				color: #4ec9b0;
+			}
+			.log-warn {
+				color: #f48771;
+			}
+			.log-check {
+				color: #dcdcaa;
+			}
+			.log-format {
+				color: #9cdcfe;
+			}
+			.log-content {
+				color: #ce9178;
+			}
+			#status {
+				font-size: 12px;
+				color: #808080;
+				margin-top: 0.3rem;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Editor Sandbox</h1>
+		<p class="hint">
+			Test createEditor with callbacks. Hover keywords for docs, type for
+			completions, Cmd/Ctrl-Shift-F to format.
+		</p>
+
+		<div class="controls">
+			<label
+				>language:
+				<select id="language">
+					<option value="javascript" selected>JavaScript</option>
+					<option value="typescript">TypeScript</option>
+					<option value="python">Python</option>
+					<option value="html">HTML</option>
+					<option value="css">CSS</option>
+					<option value="json">JSON</option>
+					<option value="markdown">Markdown</option>
+					<option value="plaintext">Plain Text</option>
+				</select></label
+			>
+			<button id="btn-check">[check]</button>
+			<button id="btn-format">[format]</button>
+			<button id="btn-reset">[reset]</button>
+			<button id="btn-content">[get content]</button>
+			<button id="btn-destroy">[destroy]</button>
+			<button id="btn-recreate">[recreate]</button>
+		</div>
+
+		<div id="editor-container"></div>
+		<div id="status"></div>
+		<div id="log"></div>
+
+		<script type="module">
+			import createEditor from './create-editor.ts';
+
+			// ─── Sample code ───────────────────────────────────────
+
+			const SAMPLE_CODE = `// try hovering keywords, typing for completions
+let greeting = 'hello';
+const count = 42;
+
+function add(a, b) {
+  return a + b;
+}
+
+console.log(greeting, add(count, 8));
+`;
+
+			// ─── Sample callbacks ───────────────────────────────────
+
+			// Minimal doc lookup — just a few entries for testing
+			function lookupDoc(word) {
+				const docs = {
+					let: {
+						description:
+							'Creates a block-scoped variable that can be reassigned',
+						example: 'let age = 25;\nage = 26;',
+						category: 'variables',
+						commonMistakes: [
+							'Redeclaration: let x = 1; let x = 2; // Error!',
+						],
+						whenToUse: 'When you need a variable that might change',
+					},
+					const: {
+						description:
+							'Creates a block-scoped constant that cannot be reassigned',
+						example: 'const name = "Alice";',
+						category: 'variables',
+						whenToUse: 'When the value should never change',
+					},
+					function: {
+						description: 'Declares a reusable block of code',
+						example:
+							'function greet(name) {\n  return "Hello, " + name;\n}',
+						category: 'functions',
+						commonMistakes: [
+							'Forgetting return statement',
+							'Calling without parentheses',
+						],
+						whenToUse: 'When you need to reuse code',
+					},
+					console: {
+						description:
+							'Browser/Node.js object for debugging and output',
+						example: 'console.log("Hello!");',
+						category: 'debugging',
+						whenToUse:
+							'For debugging and seeing what your code does',
+					},
+					return: {
+						description:
+							'Sends a value back from a function and exits',
+						example: 'function add(a, b) {\n  return a + b;\n}',
+						category: 'functions',
+						commonMistakes: ['Code after return never runs'],
+						whenToUse: 'To send results back from functions',
+					},
+				};
+				return docs[word] || null;
+			}
+
+			// Minimal completions
+			function getCompletions(prefix) {
+				const builtins = [
+					'console',
+					'log',
+					'error',
+					'warn',
+					'function',
+					'return',
+					'let',
+					'const',
+					'if',
+					'else',
+					'for',
+					'while',
+					'true',
+					'false',
+					'null',
+					'undefined',
+				];
+				if (!prefix) return [];
+				const lower = prefix.toLowerCase();
+				return builtins
+					.filter(function matchPrefix(name) {
+						return name.startsWith(lower);
+					})
+					.map(function toItem(name) {
+						return { label: name, type: 'keyword' };
+					});
+			}
+
+			// Minimal linter — just checks for console.log usage
+			function lintCode(code) {
+				const diagnostics = [];
+				const lines = code.split('\n');
+				for (let i = 0; i < lines.length; i++) {
+					const col = lines[i].indexOf('console.log');
+					if (col !== -1) {
+						diagnostics.push({
+							line: i + 1,
+							column: col,
+							endLine: i + 1,
+							endColumn: col + 11,
+							severity: 'warning',
+							message:
+								'console.log left in code — remove before submitting',
+							source: 'sandbox-linter',
+						});
+					}
+				}
+				return diagnostics;
+			}
+
+			// Simple formatter — just trims trailing whitespace
+			function formatCode(code) {
+				return code
+					.split('\n')
+					.map(function trimLine(line) {
+						return line.trimEnd();
+					})
+					.join('\n');
+			}
+
+			// ─── State ─────────────────────────────────────────────
+
+			const containerEl = document.getElementById('editor-container');
+			const statusEl = document.getElementById('status');
+			const logEl = document.getElementById('log');
+			const languageEl = document.getElementById('language');
+			let currentEditor = null;
+
+			function appendLog(cls, text) {
+				logEl.style.display = 'block';
+				const div = document.createElement('div');
+				div.className = 'log-' + cls;
+				div.textContent = text;
+				logEl.appendChild(div);
+				logEl.scrollTop = logEl.scrollHeight;
+			}
+
+			function clearLog() {
+				logEl.innerHTML = '';
+				logEl.style.display = 'none';
+			}
+
+			// ─── Create editor ──────────────────────────────────────
+
+			function makeEditor() {
+				if (currentEditor) {
+					currentEditor.destroy();
+				}
+				containerEl.innerHTML = '';
+
+				const lang = languageEl.value;
+				const isJS =
+					lang === 'javascript' || lang === 'typescript';
+
+				currentEditor = createEditor(SAMPLE_CODE, {
+					language: lang,
+					parent: containerEl,
+					...(isJS
+						? {
+								linters: [lintCode],
+								docLookup: lookupDoc,
+								completions: getCompletions,
+								format: formatCode,
+								onFormat(result) {
+									if (result.changed) {
+										appendLog(
+											'format',
+											'formatted — changes applied',
+										);
+									} else {
+										appendLog(
+											'format',
+											'formatted — no changes needed',
+										);
+									}
+								},
+							}
+						: {}),
+				});
+
+				statusEl.textContent = `editor created (${lang})`;
+				appendLog('info', `created editor with language: ${lang}`);
+				if (isJS) {
+					appendLog(
+						'info',
+						'callbacks: linter, docLookup, completions, format',
+					);
+				} else {
+					appendLog('info', 'no callbacks (non-JS language)');
+				}
+			}
+
+			// ─── Button handlers ────────────────────────────────────
+
+			document
+				.getElementById('btn-check')
+				.addEventListener('click', function onCheck() {
+					if (!currentEditor) return;
+					const diagnostics = currentEditor.check();
+					appendLog(
+						'check',
+						`check() returned ${diagnostics.length} diagnostic(s)`,
+					);
+					for (const d of diagnostics) {
+						appendLog(
+							'warn',
+							`  [${d.line}:${d.column}] ${d.severity}: ${d.message}`,
+						);
+					}
+				});
+
+			document
+				.getElementById('btn-format')
+				.addEventListener('click', function onFormat() {
+					if (!currentEditor) return;
+					currentEditor.format();
+				});
+
+			document
+				.getElementById('btn-reset')
+				.addEventListener('click', function onReset() {
+					if (!currentEditor) return;
+					currentEditor.reset();
+					appendLog('info', 'reset to initial code');
+				});
+
+			document
+				.getElementById('btn-content')
+				.addEventListener('click', function onGetContent() {
+					if (!currentEditor) return;
+					const content = currentEditor.content;
+					appendLog(
+						'content',
+						`content (${content.length} chars):\n${content.substring(0, 200)}${content.length > 200 ? '...' : ''}`,
+					);
+				});
+
+			document
+				.getElementById('btn-destroy')
+				.addEventListener('click', function onDestroy() {
+					if (!currentEditor) return;
+					currentEditor.destroy();
+					currentEditor = null;
+					statusEl.textContent = 'editor destroyed';
+					appendLog(
+						'warn',
+						'destroyed — click [recreate] to make a new one',
+					);
+				});
+
+			document
+				.getElementById('btn-recreate')
+				.addEventListener('click', function onRecreate() {
+					clearLog();
+					makeEditor();
+				});
+
+			languageEl.addEventListener(
+				'change',
+				function onLanguageChange() {
+					clearLog();
+					makeEditor();
+				},
+			);
+
+			// ─── Init ───────────────────────────────────────────────
+
+			makeEditor();
+		</script>
+	</body>
+</html>

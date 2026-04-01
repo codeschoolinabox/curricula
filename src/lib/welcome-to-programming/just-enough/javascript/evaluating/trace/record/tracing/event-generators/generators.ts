@@ -10,7 +10,6 @@ import createPropertyAccessEvent from './property-access/create-property-access-
 import createPureOperatorEvent from './operator/create-pure-operator-event.js';
 import createShortCircuitingOperatorEvent from './operator/create-short-circuiting-operator-event.js';
 import createAssignmentOperatorEvent from './operator/create-assignment-operator-event.js';
-import createParenthesisEvent from './parenthesis/create-parenthesis-event.js';
 import createLiteralEvent from './literal/create-literal-event.js';
 import createTemplateBeginEvent from './template/create-template-begin-event.js';
 import createTemplateEvaluationEvent from './template/create-template-evaluation-event.js';
@@ -60,11 +59,6 @@ const generators = {
 		},
 		shortCircuiting: createShortCircuitingOperatorEvent,
 		assignment: createAssignmentOperatorEvent,
-	},
-
-	parenthesis: {
-		enter: createParenthesisEvent,
-		leave: createParenthesisEvent,
 	},
 
 	literals: {

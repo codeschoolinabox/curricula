@@ -18,14 +18,18 @@ tooltips, markers) but does not know what the feedback means.
 
 ## Files
 
-| File                 | Purpose                                   |
-| -------------------- | ----------------------------------------- |
-| `create-editor.js`   | `createEditor(code, options)` factory     |
-| `detect-language.js` | File extension to language mapping (pure) |
+| File                    | Purpose                                      |
+| ----------------------- | -------------------------------------------- |
+| `types.ts`              | All types, callback signatures, data shapes  |
+| `create-editor.ts`      | `createEditor(code, options)` factory        |
+| `detect-language.ts`    | File extension to language mapping (pure)    |
+| `build-extensions.ts`   | CodeMirror extension builder (internal)      |
+| `build-tooltip-dom.ts`  | Tooltip DOM construction (internal)          |
+| `to-cm-diagnostic.ts`   | Diagnostic data translation (internal)       |
 
 ## Usage
 
-```js
+```ts
 import createEditor from './create-editor.js';
 
 // Bare editor (no callbacks)
@@ -45,12 +49,13 @@ const editor = createEditor('let x = 5;', {
 The editor accepts pure functions as callbacks. It wraps them into CodeMirror
 extensions internally. Callbacks never see or return CodeMirror types.
 
-| Callback      | Signature                      | Editor wraps into             |
-| ------------- | ------------------------------ | ----------------------------- |
-| `format`      | `(code) => formattedCode`      | `editor.dispatch()`           |
-| `linters[n]`  | `(code) => LintDiagnostic[]`   | `linter()` + `lintGutter()`   |
-| `docLookup`   | `(word) => DocEntry \| null`   | `hoverTooltip()`              |
-| `completions` | `(prefix) => CompletionItem[]` | `autocompletion()`            |
-| `onFormat`    | `(result) => void`             | Called after format           |
+| Callback      | Signature                      | Wraps into                   |
+| ------------- | ------------------------------ | ---------------------------- |
+| `format`      | `(code) => formattedCode`      | `editor.dispatch()`         |
+| `linters[n]`  | `(code) => LintDiagnostic[]`   | `linter()` + `lintGutter()` |
+| `docLookup`   | `(word) => DocEntry \| null`   | `hoverTooltip()`            |
+| `completions` | `(prefix) => CompletionItem[]` | `autocompletion()`          |
+| `onFormat`    | `(result) => void`             | Called after format          |
 
 See `DOCS.md` for architecture decisions and data shape definitions.
+See `types.ts` for all type definitions.

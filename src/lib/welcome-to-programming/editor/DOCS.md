@@ -118,14 +118,25 @@ Passed to the `onFormat` callback after formatting completes.
 }
 ```
 
+## File Structure
+
+The editor was split into single-concept files during TypeScript conversion:
+
+- `types.ts` — all types, callback signatures, data shapes
+- `create-editor.ts` — slim factory, mutable closures, public API
+- `detect-language.ts` — pure extension-to-language mapping
+- `build-extensions.ts` — CM extension builder, language loaders
+- `build-tooltip-dom.ts` — tooltip DOM construction from DocEntry
+- `to-cm-diagnostic.ts` — LintDiagnostic to CM Diagnostic translation
+
 ## Language Detection
 
-`detect-language.js` exports a single pure function `detectLanguage({ ext })`
+`detect-language.ts` exports a single pure function `detectLanguage({ ext })`
 that maps file extensions to language identifiers (e.g. `'javascript'`,
 `'python'`, `'plaintext'`).
 
 CodeMirror language loaders and function name mappings are private to
-`create-editor.js` (`CM_LOADERS` and `CM_FUNCTION_NAMES` constants).
+`build-extensions.ts` (`CM_LOADERS` and `CM_FUNCTION_NAMES` constants).
 
 Note: `detectLanguage` maps YAML extensions (`.yaml`, `.yml`) but no
 CodeMirror language package is loaded for YAML. The editor falls back to
