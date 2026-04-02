@@ -11,7 +11,9 @@ import path from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	root: 'src/lib/welcome-to-programming/just-enough/javascript/evaluating/trace',
+	// WHY this root: sandbox.html imports from ../../api/ (validate, format, trace).
+	// The root must include both evaluating/ and api/ directories.
+	root: 'src/lib/welcome-to-programming/just-enough/javascript',
 	resolve: {
 		alias: {
 			'@utils': path.resolve('src/lib/utils'),

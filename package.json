@@ -62,11 +62,12 @@
     "@docusaurus/preset-classic": "^3.7.0",
     "@study-lenses/tracing": "^0.1.2",
     "acorn": "^8.16.0",
+    "aran": "^5.2.2",
+    "astring": "^1.9.0",
     "estree-walker": "^3.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "recast": "^0.23.11",
-    "yaml": "^2.8.3"
+    "recast": "^0.23.11"
   },
   "devDependencies": {
     "@docusaurus/tsconfig": "^3.9.2",

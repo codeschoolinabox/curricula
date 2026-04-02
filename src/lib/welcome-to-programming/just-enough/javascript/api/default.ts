@@ -20,7 +20,7 @@ import createExecution from '../evaluating/shared/create-execution.js';
 import type { JejProgram, RunResult, TraceResult, DebugResult, DebugEvent } from './types.js';
 import type { Execution, EngineConfig, TraceConfig } from '../evaluating/shared/types.js';
 import type { RunEvent } from '../evaluating/shared/types.js';
-import type { AranStep } from '../evaluating/trace/record/types.js';
+import type { TraceEvent } from '../evaluating/trace/record/tracing/types.js';
 import type { Violation } from '../validating/types.js';
 
 // --- Analysis state ---
@@ -158,9 +158,9 @@ export default function createJejProgram(code?: string): JejProgram {
 			return run(state.code, config);
 		},
 
-		trace(config?: TraceConfig): Execution<AranStep, TraceResult> {
+		trace(config?: TraceConfig): Execution<TraceEvent, TraceResult> {
 			if (!state.ok) {
-				return blockedExecution<AranStep, TraceResult>(
+				return blockedExecution<TraceEvent, TraceResult>(
 					buildBlockedResult() as TraceResult,
 				);
 			}

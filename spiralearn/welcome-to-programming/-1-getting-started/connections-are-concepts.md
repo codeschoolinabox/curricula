@@ -1,3 +1,7 @@
+---
+draft: true
+---
+
 You can't just cover a bunch of concepts or skills in sequence and expect
 learners to integrate them in a final project -> _connections are concepts_. You
 must explicitly name and practice with each connection between each concept! So

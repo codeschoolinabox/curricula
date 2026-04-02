@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# 2.5: Be the Computer
+# Toxicode!
 
 A fun interlude. These two browser games put you in the shoes of the computer —
 you read instructions and carry them out, step by step. All that matters is what

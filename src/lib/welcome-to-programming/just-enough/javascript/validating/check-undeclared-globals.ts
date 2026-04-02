@@ -1,5 +1,8 @@
 import type { Node } from 'acorn';
 
+import buildScope from '../scope/build-scope.js';
+import type { ScopeInfo } from '../scope/types.js';
+
 import createViolation from './create-violation.js';
 import getChildNodes from './get-child-nodes.js';
 
@@ -52,42 +55,45 @@ const KNOWN_JS_GLOBALS: ReadonlySet<string> = Object.freeze(
 	]),
 );
 
-/**
- * Scope entry for a declared variable.
- */
-type ScopeEntry = {
-	readonly name: string;
-	readonly node: Node;
-};
+// ─── Scope lookup helpers ──────────────────────────────────
 
 /**
- * A block scope containing variable declarations.
- *
- * @remarks Each scope has a reference to its parent for
- * upward name lookups (disallowed globals detection).
+ * Finds the child scope whose AST node matches the given node.
+ * Falls back to the parent scope if no child matches (e.g.,
+ * a ForOfStatement body block that was merged into the for-of scope).
  */
-type Scope = {
-	readonly declarations: Map<string, ScopeEntry>;
-	readonly parent: Scope | null;
-};
+function findChildScope(node: Node, parentScope: ScopeInfo): ScopeInfo {
+	return parentScope.children.find((c) => c.node === node) ?? parentScope;
+}
+
+/**
+ * Checks if a name is declared in the scope chain from the given
+ * scope upward.
+ */
+function isNameDeclared(name: string, scope: ScopeInfo): boolean {
+	let current: ScopeInfo | null = scope;
+	while (current) {
+		if (current.declarations.has(name)) {
+			return true;
+		}
+		current = current.parent;
+	}
+	return false;
+}
+
+// ─── Main function ─────────────────────────────────────────
 
 /**
  * Performs scope analysis on a parsed AST to detect disallowed globals.
  *
- * @remarks Walks the AST once, maintaining a scope chain to know which
- * names are user-declared. Flags known JavaScript built-in globals
+ * @remarks Uses the shared scope module (`scope/build-scope.ts`) for
+ * all declaration tracking, then walks the AST checking identifiers
+ * against the scope chain. Flags known JavaScript built-in globals
  * (from `KNOWN_JS_GLOBALS`) that are not in `allowedGlobals`.
  * Unknown identifiers pass through to runtime.
  *
  * JeJ's subset has no functions, classes, or catch clauses — only
  * `let`/`const` in blocks and for-of heads create scopes.
- *
- * **Scope boundaries:** `Program`, `BlockStatement`, `ForOfStatement`
- *
- * **Positions skipped (not references):**
- * - `VariableDeclarator.id` — declaration, not read
- * - `MemberExpression.property` when `computed: false` — property name
- * - `ForOfStatement.left` — declaration position
  *
  * @param ast - The root AST node (typically `Program`).
  * @param allowedGlobals - Set of identifier names that don't need
@@ -98,57 +104,54 @@ function checkUndeclaredGlobals(
 	ast: Node,
 	allowedGlobals: ReadonlySet<string>,
 ): readonly Violation[] {
+	const analysis = buildScope(ast);
 	const violations: Violation[] = [];
-	const programScope: Scope = { declarations: new Map(), parent: null };
 
-	walkScope(ast, programScope, allowedGlobals, violations, null, false);
+	walkForGlobals(ast, analysis.root, allowedGlobals, violations, false);
 
 	return Object.freeze(violations);
 }
 
+// ─── AST walk ──────────────────────────────────────────────
+
 /**
- * Recursive scope-aware AST walk.
+ * Walks the AST carrying a pre-built ScopeInfo reference.
  *
- * @remarks `parentContext` indicates the parent node type to handle
- * special positions (VariableDeclarator.id, MemberExpression.property,
- * ForOfStatement.left).
+ * @remarks The scope tree was built by `buildScope`. This walk
+ * matches AST nodes to their corresponding scope by reference
+ * equality (`ScopeInfo.node === node`), then checks identifiers
+ * against the scope chain for undeclared globals.
  *
  * `insideWith` suppresses disallowed-global rejections inside
  * `with` statement bodies. `with` introduces dynamic scope —
  * static analysis can't know what properties the `with` object
  * injects, so we suppress checks inside the body.
  */
-function walkScope(
+function walkForGlobals(
 	node: Node,
-	scope: Scope,
+	scope: ScopeInfo,
 	allowedGlobals: ReadonlySet<string>,
 	violations: Violation[],
-	parentContext: string | null,
 	insideWith: boolean,
 ): void {
 	const record = node as unknown as Record<string, unknown>;
 
 	switch (node.type) {
 		case 'Program': {
-			// Program scope is already created, just walk children
 			for (const child of getChildNodes(node)) {
-				walkScope(child, scope, allowedGlobals, violations, 'Program', insideWith);
+				walkForGlobals(child, scope, allowedGlobals, violations, insideWith);
 			}
 			break;
 		}
 
 		case 'BlockStatement': {
-			const blockScope: Scope = {
-				declarations: new Map(),
-				parent: scope,
-			};
+			const blockScope = findChildScope(node, scope);
 			for (const child of getChildNodes(node)) {
-				walkScope(
+				walkForGlobals(
 					child,
 					blockScope,
 					allowedGlobals,
 					violations,
-					'BlockStatement',
 					insideWith,
 				);
 			}
@@ -158,110 +161,65 @@ function walkScope(
 		case 'WithStatement': {
 			// Walk the object expression in the current scope (it's a read)
 			const object = record.object as Node;
-			walkScope(object, scope, allowedGlobals, violations, 'WithStatement', insideWith);
+			walkForGlobals(object, scope, allowedGlobals, violations, insideWith);
 
-			// Walk the body with insideWith = true — suppresses undeclared rejections
+			// Walk the body with insideWith = true
 			const body = record.body as Node;
-			walkScope(body, scope, allowedGlobals, violations, 'WithStatement', true);
+			walkForGlobals(body, scope, allowedGlobals, violations, true);
 			break;
 		}
 
 		case 'ForOfStatement': {
-			// ForOfStatement creates its own scope for the iteration variable
-			const forOfScope: Scope = {
-				declarations: new Map(),
-				parent: scope,
-			};
-
-			// Register the iteration variable declaration
-			const left = record.left as Node;
-			if (left.type === 'VariableDeclaration') {
-				const leftRecord = left as unknown as Record<string, unknown>;
-				const declarators = leftRecord.declarations as Node[];
-				if (declarators.length > 0) {
-					const declarator = declarators[0] as unknown as Record<
-						string,
-						unknown
-					>;
-					const id = declarator.id as Node;
-					if (id.type === 'Identifier') {
-						const name = (id as unknown as Record<string, unknown>)
-							.name as string;
-						registerDeclaration(
-							name,
-							id,
-							forOfScope,
-						);
-					}
-				}
-			}
+			const forOfScope = findChildScope(node, scope);
 
 			// Walk the right-hand side (iterable) in the PARENT scope
 			const right = record.right as Node;
-			walkScope(right, scope, allowedGlobals, violations, 'ForOfStatement', insideWith);
+			walkForGlobals(right, scope, allowedGlobals, violations, insideWith);
 
 			// Walk the body in the for-of scope
 			const body = record.body as Node;
 			if (body.type === 'BlockStatement') {
 				// Don't create another nested scope — use forOfScope directly
 				for (const child of getChildNodes(body)) {
-					walkScope(
+					walkForGlobals(
 						child,
 						forOfScope,
 						allowedGlobals,
 						violations,
-						'BlockStatement',
 						insideWith,
 					);
 				}
 			} else {
-				walkScope(
+				walkForGlobals(
 					body,
 					forOfScope,
 					allowedGlobals,
 					violations,
-					'ForOfStatement',
 					insideWith,
 				);
 			}
-
 			break;
 		}
 
 		case 'VariableDeclaration': {
+			// Only walk init expressions — ids are declarations, not references.
+			// Scope tracking is handled by buildScope.
 			const declarators = record.declarations as Node[];
 			for (const declarator of declarators) {
-				walkScope(
-					declarator,
-					scope,
-					allowedGlobals,
-					violations,
-					'VariableDeclaration',
-					insideWith,
-				);
-			}
-			break;
-		}
-
-		case 'VariableDeclarator': {
-			const id = record.id as Node;
-			if (id.type === 'Identifier') {
-				const name = (id as unknown as Record<string, unknown>)
-					.name as string;
-				registerDeclaration(name, id, scope);
-			}
-
-			// Walk the init expression (right-hand side) — these are reads
-			const init = record.init as Node | null;
-			if (init) {
-				walkScope(
-					init,
-					scope,
-					allowedGlobals,
-					violations,
-					'VariableDeclarator',
-					insideWith,
-				);
+				const declRecord = declarator as unknown as Record<
+					string,
+					unknown
+				>;
+				const init = declRecord.init as Node | null;
+				if (init) {
+					walkForGlobals(
+						init,
+						scope,
+						allowedGlobals,
+						violations,
+						insideWith,
+					);
+				}
 			}
 			break;
 		}
@@ -269,25 +227,17 @@ function walkScope(
 		case 'MemberExpression': {
 			// Walk the object — it's a reference
 			const object = record.object as Node;
-			walkScope(
-				object,
-				scope,
-				allowedGlobals,
-				violations,
-				'MemberExpression',
-				insideWith,
-			);
+			walkForGlobals(object, scope, allowedGlobals, violations, insideWith);
 
 			// Only walk the property if computed (bracket access)
 			const computed = record.computed as boolean;
 			if (computed) {
 				const property = record.property as Node;
-				walkScope(
+				walkForGlobals(
 					property,
 					scope,
 					allowedGlobals,
 					violations,
-					'MemberExpression',
 					insideWith,
 				);
 			}
@@ -302,27 +252,19 @@ function walkScope(
 			const computed = record.computed as boolean;
 			if (computed) {
 				const key = record.key as Node;
-				walkScope(key, scope, allowedGlobals, violations, 'Property', insideWith);
+				walkForGlobals(key, scope, allowedGlobals, violations, insideWith);
 			}
 			// Always walk the value — it's an expression
 			const value = record.value as Node;
-			walkScope(value, scope, allowedGlobals, violations, 'Property', insideWith);
+			walkForGlobals(value, scope, allowedGlobals, violations, insideWith);
 			break;
 		}
 
 		case 'Identifier': {
-			// Skip if this is a declaration position (handled by
-			// VariableDeclarator and ForOfStatement cases above)
-			if (parentContext === 'VariableDeclaration') {
-				// This shouldn't happen — VariableDeclaration walks
-				// declarators, not identifiers directly
-				break;
-			}
-
 			const name = record.name as string;
 
 			// User-declared → allowed
-			if (lookupScope(name, scope)) {
+			if (isNameDeclared(name, scope)) {
 				break;
 			}
 
@@ -354,37 +296,17 @@ function walkScope(
 		default: {
 			// Generic walk — recurse into all children
 			for (const child of getChildNodes(node)) {
-				walkScope(child, scope, allowedGlobals, violations, node.type, insideWith);
+				walkForGlobals(
+					child,
+					scope,
+					allowedGlobals,
+					violations,
+					insideWith,
+				);
 			}
 			break;
 		}
 	}
-}
-
-/**
- * Registers a variable declaration in a scope.
- */
-function registerDeclaration(
-	name: string,
-	node: Node,
-	scope: Scope,
-): void {
-	scope.declarations.set(name, { name, node });
-}
-
-/**
- * Looks up a name in the scope chain, returning the entry if found.
- */
-function lookupScope(name: string, scope: Scope): ScopeEntry | null {
-	let current: Scope | null = scope;
-	while (current) {
-		const entry = current.declarations.get(name);
-		if (entry) {
-			return entry;
-		}
-		current = current.parent;
-	}
-	return null;
 }
 
 /**

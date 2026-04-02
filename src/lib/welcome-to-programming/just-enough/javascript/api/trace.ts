@@ -2,7 +2,7 @@
  * @file Validates and traces JeJ code, returning an Execution.
  *
  * @remarks Pipeline: parse → validate → format check → trace.
- * Returns an `Execution<AranStep, TraceResult>` that is both
+ * Returns an `Execution<TraceEvent, TraceResult>` that is both
  * `AsyncIterable` (step-through) and `PromiseLike` (batch).
  *
  * Validation or format failures return an Execution that resolves
@@ -12,23 +12,23 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import validate from './validate.js';
 import { checkFormat } from './format.js';
-import createRecordGenerator from '../evaluating/trace/record/record.js';
+import createTracingGenerator from '../evaluating/trace/record/tracing/index.js';
 import createExecution from '../evaluating/shared/create-execution.js';
 
 import type { TraceResult } from './types.js';
 import type { Execution, TraceConfig } from '../evaluating/shared/types.js';
-import type { AranStep } from '../evaluating/trace/record/types.js';
+import type { TraceEvent } from '../evaluating/trace/record/tracing/types.js';
 
 /**
  * Validates code against the full JeJ level, then traces it.
  *
  * @param code - JavaScript source to validate and trace
  * @param config - Trace configuration (seconds, iterations, options)
- * @returns An Execution that yields AranSteps and resolves to TraceResult
+ * @returns An Execution that yields TraceEvents and resolves to TraceResult
  *
  * @remarks
  * - `await trace(code, config)` — batch mode, resolves to TraceResult
- * - `for await (const step of trace(code, config))` — step-through
+ * - `for await (const event of trace(code, config))` — step-through
  * - Second `for await` replays from cached result (no re-execution)
  * - `.cancel()` terminates Worker immediately
  *
@@ -37,7 +37,7 @@ import type { AranStep } from '../evaluating/trace/record/types.js';
 function trace(
 	code: string,
 	config?: TraceConfig,
-): Execution<AranStep, TraceResult> {
+): Execution<TraceEvent, TraceResult> {
 	const validation = validate(code);
 
 	// Validation failure — return immediately, no Worker
@@ -58,6 +58,7 @@ function trace(
 		const result = deepFreezeInPlace({
 			ok: false as const,
 			error: { kind: 'formatting' as const },
+			logs: [] as TraceEvent[],
 		});
 		return createExecution(
 			async function* () {
@@ -68,17 +69,14 @@ function trace(
 	}
 
 	const seconds = config?.seconds ?? 5;
-	const iterations = config?.iterations;
-	// WHY: TraceConfig.options flows to the record generator which
-	// passes it to filterSteps for post-trace filtering. The legacy
-	// tracer captures everything; filtering is done after collection.
-	const options =
-		config?.options as
-			| import('../evaluating/trace/record/types.js').AranFilterOptions
-			| undefined;
+	const maxMs = seconds * 1000;
+
+	// WHY: TraceConfig.options flows to createAspect which uses it to
+	// configure pointcuts at instrumentation time. No post-trace filtering.
+	const tracingConfig = (config?.options ?? {}) as Record<string, unknown>;
 
 	return createExecution(
-		() => createRecordGenerator(code, seconds, options, iterations),
+		() => createTracingGenerator(code, tracingConfig, maxMs),
 		function noop() {},
 	);
 }

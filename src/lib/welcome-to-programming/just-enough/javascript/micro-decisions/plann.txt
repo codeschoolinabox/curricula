@@ -1,0 +1,22 @@
+overall fine, it is a lot of dimensions.  but if we have each question generator clearly tagged it should be arelatively simple matter of filtering for the ones that match our confg. right?
+- why do you separate strings from data in features?
+
+Q1: what about the same block-inspired levels as in /ask's conig?  or a similar linearized, simplified set of ptions eather than two dimensions of block 
+
+Q2: is it that hard to support filtering at the config/generation level?    if it's not, then it's a good value-add 
+
+Q3: there are function _calls_ in JEJ.  so keep this simple and follow ask 
+
+Q4: how about after generation, because some questions about specific lines in a range may require context from outside those lines. if we filter out that context the questions won't be as good 
+
+Q5: we keep the boolean toggling, those notes are old and clearly toggling won out 
+
+Q6: le'ts include a regestier field in the config 
+
+Q7: nope, let's keep the nuance.  we can have multiple objects for the different areas, and within those objects it can be flat and simple.  
+
+
+how/if to integrate /prior-art-for-inspiration? 
+    maybe merge the open-ended ones into /micro-decisions
+    and make a separate MCQ generator about learner code?
+    and distinguish between sytle/choice micro-decision questions and open-ended questions as in /ask-me?

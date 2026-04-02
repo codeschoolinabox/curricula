@@ -14,7 +14,7 @@ import type { Program } from 'acorn';
 
 import type { Violation } from '../validating/types.js';
 import type { RunEvent } from '../evaluating/shared/types.js';
-import type { AranStep } from '../evaluating/trace/record/types.js';
+import type { TraceEvent } from '../evaluating/trace/record/tracing/types.js';
 import type { Execution, EngineConfig, TraceConfig } from '../evaluating/shared/types.js';
 
 // ─── Error types ─────────────────────────────────────────────
@@ -206,13 +206,13 @@ type Result<TEvent> = BaseResult & {
 type RunResult = Result<RunEvent>;
 
 /**
- * Result from `trace()` — Aran AST instrumentation.
+ * Result from `trace()` — Aran instrumentation with structured events.
  *
- * @remarks `logs` contains {@link AranStep} entries: one per
- * expression evaluation, variable access, or control-flow step.
- * Array position is the step identity (no step numbers).
+ * @remarks `logs` contains {@link TraceEvent} entries: one per
+ * binding lifecycle, operator evaluation, control-flow step, etc.
+ * Events are structured and typed — no post-processing needed.
  */
-type TraceResult = Result<AranStep>;
+type TraceResult = Result<TraceEvent>;
 
 /**
  * Result from `debug()` — iframe with debugger statements.
@@ -296,9 +296,9 @@ type JejProgram = {
 	 * Returns immediate error result when `!ok`. */
 	run(config?: EngineConfig): Execution<RunEvent, RunResult>;
 
-	/** Execute with Aran AST instrumentation in Worker.
+	/** Execute with Aran instrumentation in Worker.
 	 * Returns immediate error result when `!ok`. */
-	trace(config?: TraceConfig): Execution<AranStep, TraceResult>;
+	trace(config?: TraceConfig): Execution<TraceEvent, TraceResult>;
 
 	/** Execute in iframe with debugger statements.
 	 * Returns immediate error result when `!ok`. */

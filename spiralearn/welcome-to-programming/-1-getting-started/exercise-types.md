@@ -1,3 +1,7 @@
+---
+draft: true
+---
+
 # Exercise Types
 
 > This README is also a study guide for _Just Enough JavaScript_, we suggest

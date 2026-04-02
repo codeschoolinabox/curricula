@@ -22,6 +22,19 @@ function blockSetup(
 	_label: string | null,
 ): TracerState {
 	try {
+		// 0. Pick up global event callback if not already set.
+		// WHY: Aran JSON-clones initialState into the instrumented code, losing
+		// onEvent (functions aren't JSON-serializable). The worker sets a global
+		// callback before eval. block-setup (first hook) picks it up and sets it
+		// on the state. Since block-setup RETURNS state, all subsequent hooks
+		// inherit onEvent.
+		if (!state.onEvent && typeof globalThis !== 'undefined') {
+			const globalCallback = (globalThis as Record<string, unknown>).__jej_onEvent;
+			if (typeof globalCallback === 'function') {
+				state.onEvent = globalCallback as (event: unknown) => void;
+			}
+		}
+
 		// 1. increment step for scope creation
 		state.step += 1;
 

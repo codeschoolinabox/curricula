@@ -1,3 +1,10 @@
+status as of lsat closing
+    error interpreter should be ready
+    micro-decisions is in progress 
+    still figuring out how to sandbox-test the tracer (also getting some internal errors)
+    docusaurus sidebar work to go
+
+
 this directory will have everything for a full-feature run/trace/debug JS editor
     dynamic
         - errors are auto-passed to error interpretation and hints suggested

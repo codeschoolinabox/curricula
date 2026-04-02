@@ -122,6 +122,7 @@
 				display: flex;
 				gap: 8px;
 				align-items: center;
+				flex-wrap: wrap;
 			}
 			select,
 			button {
@@ -137,12 +138,19 @@
 			button:hover {
 				border-color: #666;
 			}
-			button {
+			button.primary {
 				background: #264f78;
 				border-color: #264f78;
 			}
-			button:hover {
+			button.primary:hover {
 				background: #365f88;
+			}
+			button.danger {
+				background: #8b2020;
+				border-color: #8b2020;
+			}
+			button.danger:hover {
+				background: #a03030;
 			}
 			button:disabled {
 				opacity: 0.5;
@@ -178,8 +186,18 @@
 			#status.ok {
 				color: #4a4;
 			}
+			#status.cancelled {
+				color: #fa0;
+			}
 
 			/* --- Output --- */
+			.output-section {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+				min-height: 0;
+			}
 			pre {
 				background: #252526;
 				border: 1px solid #333;
@@ -195,6 +213,22 @@
 				color: #888;
 				text-transform: uppercase;
 				letter-spacing: 0.5px;
+			}
+			.event-line {
+				cursor: pointer;
+				padding: 1px 0;
+			}
+			.event-line:hover {
+				background: #2a2d2e;
+			}
+			.event-json {
+				color: #888;
+				font-size: 11px;
+				margin-left: 16px;
+				display: none;
+			}
+			.event-json.expanded {
+				display: block;
 			}
 		</style>
 	</head>
@@ -441,39 +475,6 @@
 				<label
 					><input type="checkbox" id="cfg-with" checked /> with statement</label
 				>
-
-				<!-- Range (not in schema — filter-steps concern) -->
-				<h2>Range</h2>
-				<label class="field-label" for="cfg-range-start">start line</label>
-				<input
-					type="number"
-					class="field-input"
-					id="cfg-range-start"
-					value="1"
-					min="1"
-				/>
-				<label class="field-label" for="cfg-range-end">end line</label>
-				<input
-					type="number"
-					class="field-input"
-					id="cfg-range-end"
-					value="100000"
-					min="1"
-				/>
-
-				<!-- Data Fields (not in schema — filter-steps concern) -->
-				<h2>Data Fields</h2>
-				<label><input type="checkbox" id="cfg-data-loc" checked /> loc</label>
-				<label
-					><input type="checkbox" id="cfg-data-values" checked /> values</label
-				>
-				<label
-					><input type="checkbox" id="cfg-data-nodeType" checked />
-					nodeType</label
-				>
-				<label
-					><input type="checkbox" id="cfg-data-depth" checked /> depth</label
-				>
 			</div>
 
 			<!-- Main content -->
@@ -483,56 +484,62 @@
 					<select id="snippet-select" title="Choose a test snippet">
 						<option value="">-- pick a snippet --</option>
 					</select>
-					<button type="button" id="trace-btn">Trace</button>
+					<button type="button" id="format-btn">Format</button>
+					<button type="button" id="batch-btn" class="primary">Trace (batch)</button>
+					<button type="button" id="step-btn" class="primary">Trace (step)</button>
+					<button type="button" id="next-btn" class="primary" disabled>Next</button>
+					<button type="button" id="stop-btn" class="danger" disabled>Stop</button>
 					<button type="button" id="copy-btn">Copy</button>
 				</div>
 
 				<label for="code" class="sr-only">Code to trace</label>
-				<textarea id="code" spellcheck="false">
-let name = prompt('What is your name?', 'a toad');
-console.log('Hello, ' + name + '!');
-
-let again = confirm('Run again?');
-console.log('again:', again);
-
-alert('Done!');
-</textarea
-				>
+				<textarea id="code" spellcheck="false"></textarea>
 
 				<div id="status"></div>
-				<div class="output-label">Trace steps (AranStep[])</div>
-				<pre id="output"></pre>
+				<div class="output-section">
+					<div class="output-label">Trace events (TraceEvent[])</div>
+					<pre id="output"></pre>
+				</div>
 			</div>
 		</div>
 
 		<script type="module">
-			import record from './record/record.ts';
+			import trace from '../../api/trace.ts';
+			import { format } from '../../api/format.ts';
 
-			const SNIPPET_DIR = './record/tests/test-snippets';
+			// WHY relative: sandbox.html is at evaluating/trace/sandbox.html
+			// test-snippets are at evaluating/trace/record/tracing/tests/test-snippets/
+			const SNIPPET_DIR = './record/tracing/tests/test-snippets';
 			const SNIPPETS = [
-				'break-continue.js',
-				'do-while.js',
-				'errors.js',
-				'for-classic.js',
-				'for-in.js',
-				'for-of.js',
-				'functions.js',
-				'hoisting.js',
-				'if-else.js',
-				'logical-operators.js',
-				'operators.js',
-				'switch.js',
-				'ternary.js',
 				'variables.js',
-				'while.js',
+				'conditionals.js',
+				'while-loop.js',
+				'do-while.js',
+				'for-loop.js',
+				'for-of.js',
+				'operators.js',
+				'io.js',
+				'templates.js',
+				'break-continue.js',
 			];
 
 			const selectEl = document.getElementById('snippet-select');
 			const codeEl = document.getElementById('code');
 			const outputEl = document.getElementById('output');
-			const traceBtn = document.getElementById('trace-btn');
+			const formatBtn = document.getElementById('format-btn');
+			const batchBtn = document.getElementById('batch-btn');
+			const stepBtn = document.getElementById('step-btn');
+			const nextBtn = document.getElementById('next-btn');
+			const stopBtn = document.getElementById('stop-btn');
 			const copyBtn = document.getElementById('copy-btn');
 			const statusEl = document.getElementById('status');
+
+			let currentExecution = null;
+			let currentIterator = null;
+			let stepEventCount = 0;
+
+			// Set default code (pre-formatted so checkFormat passes)
+			codeEl.value = format('let x = 5;\nlet y = x + 1;\n');
 
 			for (const name of SNIPPETS) {
 				const opt = document.createElement('option');
@@ -541,6 +548,8 @@ alert('Done!');
 				selectEl.appendChild(opt);
 			}
 
+			// --- Config helpers ---
+
 			function readCheckbox(id) {
 				return document.getElementById(id).checked;
 			}
@@ -548,23 +557,14 @@ alert('Done!');
 			function readList(id) {
 				const value = document.getElementById(id).value.trim();
 				if (!value) return undefined;
-				return value
-					.split(',')
-					.map(function (s) {
-						return s.trim();
-					})
-					.filter(Boolean);
+				return value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
 			}
 
-			function readNumber(id) {
-				const value = parseInt(document.getElementById(id).value, 10);
-				return isNaN(value) ? undefined : value;
-			}
+			function buildConfig() {
+				const maxSeconds = Number(document.getElementById('cfg-max-seconds').value) || 5;
 
-			function buildOptions() {
 				const options = {};
 
-				// 1. Bindings
 				options.bindings = {
 					kind: {
 						let: readCheckbox('cfg-bindings-kind-let'),
@@ -582,7 +582,6 @@ alert('Done!');
 				const bindingsFilter = readList('cfg-bindings-filter');
 				if (bindingsFilter) options.bindings.filter = bindingsFilter;
 
-				// 2. Property Access
 				options.propertyAccess = {
 					dot: readCheckbox('cfg-propertyAccess-dot'),
 					bracket: readCheckbox('cfg-propertyAccess-bracket'),
@@ -591,7 +590,6 @@ alert('Done!');
 				const propertyAccessFilter = readList('cfg-propertyAccess-filter');
 				if (propertyAccessFilter) options.propertyAccess.filter = propertyAccessFilter;
 
-				// 3. Operators
 				options.operators = {
 					pure: {
 						arithmetic: readCheckbox('cfg-operators-pure-arithmetic'),
@@ -610,7 +608,6 @@ alert('Done!');
 				const operatorsFilter = readList('cfg-operators-filter');
 				if (operatorsFilter) options.operators.filter = operatorsFilter;
 
-				// 4. Literals
 				options.literals = {
 					string: readCheckbox('cfg-literals-string'),
 					boolean: readCheckbox('cfg-literals-boolean'),
@@ -620,14 +617,12 @@ alert('Done!');
 					regex: readCheckbox('cfg-literals-regex'),
 				};
 
-				// 5. Templates
 				options.templates = {
 					begin: readCheckbox('cfg-templates-begin'),
 					evaluation: readCheckbox('cfg-templates-evaluation'),
 					end: readCheckbox('cfg-templates-end'),
 				};
 
-				// 6. Scopes
 				options.scopes = {
 					kind: {
 						script: readCheckbox('cfg-scopes-kind-script'),
@@ -643,7 +638,6 @@ alert('Done!');
 					},
 				};
 
-				// 7. Control Flow
 				options.controlFlow = {
 					kind: {
 						conditionals: readCheckbox('cfg-controlFlow-kind-conditionals'),
@@ -667,7 +661,6 @@ alert('Done!');
 				const controlFlowFilter = readList('cfg-controlFlow-filter');
 				if (controlFlowFilter) options.controlFlow.filter = controlFlowFilter;
 
-				// 8. Functions
 				options.functions = {
 					call: readCheckbox('cfg-functions-call'),
 					return: readCheckbox('cfg-functions-return'),
@@ -675,28 +668,180 @@ alert('Done!');
 				const functionsFilter = readList('cfg-functions-filter');
 				if (functionsFilter) options.functions.filter = functionsFilter;
 
-				// 9. With
 				options.with = readCheckbox('cfg-with');
 
-				// Range (not in schema)
-				const start = readNumber('cfg-range-start');
-				const end = readNumber('cfg-range-end');
-				if (start !== undefined || end !== undefined) {
-					options.range = {};
-					if (start !== undefined) options.range.start = start;
-					if (end !== undefined) options.range.end = end;
-				}
-
-				// Data fields (not in schema)
-				options.data = {
-					loc: readCheckbox('cfg-data-loc'),
-					values: readCheckbox('cfg-data-values'),
-					nodeType: readCheckbox('cfg-data-nodeType'),
-					depth: readCheckbox('cfg-data-depth'),
-				};
-
-				return options;
+				return { seconds: maxSeconds, options: options };
 			}
+
+			// --- Event rendering ---
+
+			function summarizeEvent(event) {
+				const cat = event.category || event.semantics || '?';
+				const evt = event.event || event.kind || '';
+				const loc = event.loc
+					? event.loc.start.line + ':' + event.loc.start.column
+					: '';
+
+				let detail = '';
+				if (cat === 'binding') detail = 'name=' + event.name + ' kind=' + event.kind + ' event=' + event.event;
+				if (cat === 'literal') detail = 'kind=' + event.kind;
+				if (cat === 'operator') detail = 'kind=' + event.kind + ' op=' + (event.operator || '');
+				if (cat === 'scope') detail = 'depth=' + event.depth + ' kind=' + event.kind + ' event=' + event.event;
+				if (cat === 'controlFlow') detail = 'event=' + event.event + ' kind=' + (event.kind || '');
+				if (cat === 'propertyAccess') detail = 'kind=' + event.kind + ' key=' + event.key;
+				if (cat === 'function') detail = 'event=' + event.event + ' name=' + event.name;
+				if (cat === 'template') detail = 'event=' + event.event;
+
+				return '[' + cat + '] ' + detail + '  loc=' + loc;
+			}
+
+			function appendEvent(event, index) {
+				const line = document.createElement('div');
+				line.className = 'event-line';
+				line.textContent = (index + 1) + '. ' + summarizeEvent(event);
+
+				const json = document.createElement('div');
+				json.className = 'event-json';
+				json.textContent = JSON.stringify(event, null, 2);
+
+				line.addEventListener('click', function () {
+					json.classList.toggle('expanded');
+				});
+
+				outputEl.appendChild(line);
+				outputEl.appendChild(json);
+				outputEl.scrollTop = outputEl.scrollHeight;
+			}
+
+			// --- UI state ---
+
+			function setRunning(mode) {
+				batchBtn.disabled = true;
+				stepBtn.disabled = true;
+				nextBtn.disabled = true;
+				stopBtn.disabled = mode !== 'step';
+				statusEl.textContent = mode === 'batch' ? 'tracing (batch)...' : 'tracing (step-through)... click Next';
+				statusEl.className = '';
+				outputEl.textContent = '';
+				outputEl.innerHTML = '';
+			}
+
+			function setStepping() {
+				nextBtn.disabled = false;
+				stopBtn.disabled = false;
+			}
+
+			function setDone(result, eventCount, cancelled) {
+				batchBtn.disabled = false;
+				stepBtn.disabled = false;
+				nextBtn.disabled = true;
+				stopBtn.disabled = true;
+				currentExecution = null;
+				currentIterator = null;
+
+				if (cancelled) {
+					statusEl.textContent = 'cancelled — ' + eventCount + ' event(s) collected';
+					statusEl.className = 'cancelled';
+				} else if (result && result.ok) {
+					statusEl.textContent = 'done — ' + eventCount + ' event(s)';
+					statusEl.className = 'ok';
+				} else if (result && result.error) {
+					statusEl.textContent = 'error: ' + (result.error.kind || '') + ' — ' + (result.error.message || '') + ' (' + eventCount + ' events)';
+					statusEl.className = 'error';
+				}
+			}
+
+			// --- Format ---
+
+			formatBtn.addEventListener('click', function () {
+				const formatted = format(codeEl.value);
+				codeEl.value = formatted;
+				statusEl.textContent = 'formatted';
+				statusEl.className = 'ok';
+			});
+
+			// --- Batch mode ---
+
+			batchBtn.addEventListener('click', async function () {
+				const code = codeEl.value;
+				if (!code) return;
+
+				setRunning('batch');
+
+				try {
+					const result = await trace(code, buildConfig());
+					const events = result.logs || [];
+
+					for (let i = 0; i < events.length; i++) {
+						appendEvent(events[i], i);
+					}
+
+					setDone(result, events.length, false);
+					console.log('--- trace result ---', result);
+				} catch (err) {
+					statusEl.textContent = 'unexpected error: ' + err.message;
+					statusEl.className = 'error';
+					batchBtn.disabled = false;
+					stepBtn.disabled = false;
+				}
+			});
+
+			// --- Step-through mode ---
+
+			stepBtn.addEventListener('click', function () {
+				const code = codeEl.value;
+				if (!code) return;
+
+				setRunning('step');
+
+				const execution = trace(code, buildConfig());
+				currentExecution = execution;
+				currentIterator = execution[Symbol.asyncIterator]();
+				stepEventCount = 0;
+
+				setStepping();
+				statusEl.textContent = 'ready — click Next to step through';
+			});
+
+			// --- Next (advance one step) ---
+
+			nextBtn.addEventListener('click', async function () {
+				if (!currentIterator) return;
+
+				nextBtn.disabled = true;
+				statusEl.textContent = 'stepping...';
+
+				try {
+					const { value, done } = await currentIterator.next();
+
+					if (done) {
+						const result = await currentExecution.result;
+						setDone(result, stepEventCount, false);
+						console.log('--- trace result ---', result);
+						return;
+					}
+
+					appendEvent(value, stepEventCount);
+					stepEventCount++;
+					statusEl.textContent = stepEventCount + ' event(s) — click Next or Stop';
+					setStepping();
+				} catch (err) {
+					const result = await currentExecution.result;
+					setDone(result, stepEventCount, true);
+					console.log('--- trace result ---', result);
+				}
+			});
+
+			// --- Stop ---
+
+			stopBtn.addEventListener('click', function () {
+				if (currentExecution) {
+					currentExecution.cancel();
+					stopBtn.disabled = true;
+				}
+			});
+
+			// --- Snippet loading ---
 
 			selectEl.addEventListener('change', async function () {
 				if (!selectEl.value) return;
@@ -705,74 +850,26 @@ alert('Done!');
 					if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
 					codeEl.value = await res.text();
 				} catch (err) {
-					codeEl.value =
-						'// Failed to load ' + selectEl.value + ': ' + err.message;
+					codeEl.value = '// Failed to load ' + selectEl.value + ': ' + err.message;
 				}
 			});
 
-			traceBtn.addEventListener('click', async function () {
-				const code = codeEl.value.trim();
-				if (!code) {
-					outputEl.textContent = '// nothing to trace';
-					return;
-				}
-
-				traceBtn.disabled = true;
-				statusEl.textContent = 'tracing...';
-				statusEl.className = '';
-				outputEl.textContent = '';
-
-				const maxSeconds =
-					Number(document.getElementById('cfg-max-seconds').value) || 5;
-				const options = buildOptions();
-
-				try {
-					const steps = await record(code, {
-						meta: {
-							max: {
-								steps: null,
-								iterations: null,
-								callstack: null,
-								time: maxSeconds * 1000,
-							},
-							range: null,
-							timestamps: false,
-							debug: { ast: false },
-						},
-						options,
-					});
-
-					outputEl.textContent = JSON.stringify(steps, null, 2);
-					statusEl.textContent = 'done — ' + steps.length + ' step(s)';
-					statusEl.className = 'ok';
-					console.log('--- filtered steps ---');
-					console.log(steps);
-				} catch (err) {
-					outputEl.textContent = '// Error: ' + err.message + '\n' + err.stack;
-					statusEl.textContent = 'error: ' + err.message;
-					statusEl.className = 'error';
-				} finally {
-					traceBtn.disabled = false;
-				}
-			});
+			// --- Copy ---
 
 			copyBtn.addEventListener('click', function () {
-				navigator.clipboard.writeText(outputEl.textContent).then(
-					function () {
-						copyBtn.textContent = 'Copied!';
-					},
-					function () {
-						copyBtn.textContent = 'Failed';
-					},
+				const text = outputEl.innerText || outputEl.textContent;
+				navigator.clipboard.writeText(text).then(
+					function () { copyBtn.textContent = 'Copied!'; },
+					function () { copyBtn.textContent = 'Failed'; },
 				);
-				setTimeout(function () {
-					copyBtn.textContent = 'Copy';
-				}, 1500);
+				setTimeout(function () { copyBtn.textContent = 'Copy'; }, 1500);
 			});
+
+			// --- SAB check ---
 
 			if (typeof SharedArrayBuffer === 'undefined') {
 				statusEl.textContent =
-					'SharedArrayBuffer not available — serve with COOP/COEP headers (see vite.sandbox.config.ts). Tracing still works but worker timeout will not.';
+					'SharedArrayBuffer not available — serve with COOP/COEP headers. Tracing may not work.';
 				statusEl.className = 'error';
 			}
 		</script>

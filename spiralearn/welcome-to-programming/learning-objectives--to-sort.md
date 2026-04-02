@@ -1,3 +1,7 @@
+---
+draft: true
+---
+
 ### 2. Just Enough JavaScript
 
 Go in depth on JavaScript you need to know for writing interactive text-based

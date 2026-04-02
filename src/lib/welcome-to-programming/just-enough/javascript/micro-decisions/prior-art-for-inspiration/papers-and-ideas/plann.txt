@@ -1,0 +1,246 @@
+- pull from
+  reading-code/README
+  reading-code/session-agenda
+  the sorva paper
+  various notes & conversations
+  imagination
+
+config panel
+  abandoning slider because
+    it clutters with lower-level questions (expertise reversal effect)
+    can now use aspects instead of levels
+  post-slider
+    variables
+    data
+    operators
+    control flow
+    functions
+    ---
+    syntax
+      what is the name of the operator "_" on line _
+      how would you read the code on line _ (log link to codinghorror)
+      is the '_' a name from JS or from the developer?
+    semantics
+      how does the operator "_" operator work? how is it used on line _?
+
+    connections
+    goals
+    big picture
+
+
+
+
+filtering by lines:
+  at "parse" time, only register nodes who's location overlaps with the range
+
+level descriptions
+  - solo
+    - for evaluating responses rather than generating questions
+      can see it's shadow in block model's skeleton
+    1: pre-structural
+    2: uni-structural
+    3: multi-structural
+    4: relational
+    5: extended abstract
+  - block model
+    - duality: dimensions x levels
+    dimensions
+      1: text surface - "syntax"/"structure"
+        can be answered with ?highlight/?variables/monaco search
+      2: execution - "semantics"
+        can be answered with [trace]
+      3: goals - "purpose"
+        can not be answered by determinate analysis
+    levels
+      1: atoms
+        surface - language elements
+        execution - operation of a statement
+        goals - purpose in context (of the syntax)
+      2: blocks
+        surface - syntactically or semantically a unit
+        execution - operation of a block (sequence of statements)
+        goals - sub-goal
+      3: relations
+        surface - references between blocks
+        execution - flowchart (?), (replace "method call" with "statement/operation")
+        goals - behavior is built of sub-goals
+      4: structure
+        surface - overall structure of text
+        execution - the "algorithm" (strategy)
+        goals - whole program's purpose in context
+  - ask-me
+    if based on dimensions
+      1. source code
+        - "you can find these answers by only reading the code"
+      2. execution
+        - "you can find this answer by studying the program's trace"
+      3. goals
+        - "deep-thought questions, you're on your own  here :)"
+    + if based on levels
+      1. atoms (pieces?)
+        - "you can find the answer just by searching the code"
+      2. blocks (chunks)
+        - "you can find the answer just by reading the code"
+      3. relations (connections)
+        - "questions about relations between collections of pieces"
+      4. structure
+        - "" (?)
+    if invented by study method
+      1. source code
+        - "you can find these answers by only reading the code"
+      2. execution
+        - "you can find this answer by studying the program's trace"
+      3. behavior
+        - "you can answer these questions by running the program"
+        harder to automate: requires goals and higher-level context
+      4. goals
+        - "deep-thought questions, you're on your own  here :)"
+    if invented by amount of effort
+      1. single-line search, one concept
+      2. multiple-location search, one concept
+      3. multiple concepts, one line
+      4. multiple concepts, multiple lines
+    if leveled by audience
+      1. user
+      2. computer
+      3. programmer
+
+meta-info logged per question
+  - contextualize questions for students
+  audience
+    this question asks you to see the program as a "user/developer/computer"
+  level
+    this question is about syntax/behavior/strategy
+    this question focuses on lines/chunks/connections
+
+staging
+  sorva figure 2
+    1) You wrote two functions. Which of those are recursive?
+    2)  What   are   the   parameter   names   of   your   functionsmallestFrom?
+    3)  How  deep  does  the  call  stack  grow  when  executingsmallest("ABBA")?
+    4)  WhenexecutingsmallestFrom("ACDC", 0),which character is assigned torestduring thesecondinvocation ofsmallestFrom?
+    5)  Which  of  the  following  best  describes  the  role  of  yourvariablerest?
+  from reading-code/README
+    variables
+    data
+      What is the main program data? (what goes in at the beginning, what comes out at the end?)
+      How is the data used in each line of code?
+      How is the data used in each chunk?
+      What operations are used to transform the data?
+    program logic
+      Do you see repeated chunks of code?
+      How deeply nested are the blocks?
+      Which chunks of code are executed conditionally?
+      What are the loop conditions?
+      Which lines of code early in the program make a difference later on?
+  from notes in phone
+    structure questions
+      how many goals are there
+    which variables are used in the loop beginning on line _
+    a control flow structure ends on line _, where does it start? what type of control flow is it?
+
+questions
+  variables
+    atom
+    block
+    relations
+    structure
+  data
+    atom
+    block
+    relations
+    structure
+
+    how is the _(type) on line _(num) used in the program?
+    what kind of data does the _(data structure) on line _(num) store?  how is that data used in the program?
+  operators
+    atom
+    block
+    relations
+    structure
+
+    which operators are used on line _? What does this operator do?
+    how many times is the _ operator used in this program?
+  control-flow
+    atom
+    block
+    relations
+    structure
+
+    A _ starts on line _. Enter the number of the last line inside this _
+    what is the purpose of the _ beginning on line _
+  functions
+    atom
+    block
+    relations
+    structure
+
+    how many functions are defined in this file?
+    there are _(num) functions defined in this file, where are they?
+    where is the function _ defined? how many times is it called?
+    what are the parameters for the function called on line _(num)?
+
+
+
+--- poetry analysis ---
+- motivation:
+  code may be more like poetry than prose
+    much is left unsaid
+    much is left to be interpreted by the audience (reader or machine)
+    allusions, metaphors and stand-ins are common and central
+    often short and concise
+    language use may be different from standard spoken/written language
+    shape and layout on the page are meaningful (structure, meaning. form, content. especially in python)
+  so how are people teaching/learning to analyze poetry?
+
+
+elements of poetry analysis
+  references
+    https://www.warrencountyschools.org/userfiles/1608/Classes/14174/Poetry%20Analysis.pdf
+  6 steps
+    - https://www.teachforamerica.org/stories/how-to-analyze-a-poem-in-6-steps
+    Step One: Read
+    Step Two: Title
+    Step Three: Speaker
+    Step Four: Mood and Tone
+    Step Five: Paraphrase
+    Step Six: Theme
+  line length
+  rhyme scheme
+  conventional forms
+  sentence vs. line (enjambment)
+  reading out loud
+  vocabulary and syntax
+
+inspired questions
+  - data (in programming) == meaning (in poetry) ?
+  how does the x operator/control-flow on line x work?
+  what condition is checked in the _control-flow on line x? describe it in JS and in plain language.
+  will the same line always be executed after line x, or could it go different places? (trace-level question)
+  is _ a word from JavaScript or from the author? (ala Alina question)
+  how many times does the program interact with the user? where does it ask for input, and where does it simply display?
+  how would you describe _ variable name, is it a generic name or a specific name?
+  how is the data assigned to variable _ used in the program? what does it represent to the user?
+  there are x _feature_ in this program, is it used in the same way / for the same purpose each time?
+  how would you describe this program's behavior in one sentence using only normal words? (no references to the code or JS)
+  audience perspective taking
+    line _ uses language feature _ to tell the computer to do _ which does _ for the user.
+
+
+code poetry
+  http://code-poetry.com/
+    collection of programs that render an interpretation of themselves
+  vs
+  https://encoded.codetext.net/encoded-poetry.pdf
+  if hemingway wrote javascript
+    https://anguscroll.com/hemingway/
+    https://github.com/angus-c/literary.js
+    https://github.com/janke-learning/if-hemingway
+
+
+
+
+
+--- papers ---
+
+https://www.researchgate.net/profile/Birte-Heinemann/publication/320885152_A_theory_based_tool_set_for_analysing_reading_processes_in_the_context_of_learning_programming/links/5c34e71992851c22a364b8d4/A-theory-based-tool-set-for-analysing-reading-processes-in-the-context-of-learning-programming.pdf

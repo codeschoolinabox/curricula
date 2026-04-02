@@ -37,7 +37,15 @@ const config = {
 				path: 'spiralearn/welcome-to-programming',
 				routeBasePath: 'welcome-to-programming',
 				sidebarPath: './sidebars/welcome-to-programming.mjs',
-				exclude: ['**/to-use/**'],
+				exclude: [
+					'**/to-use/**',                       // teaching-only resources (never shown)
+					'3-devs-computers-users/**',          // chapter 3 (hidden)
+					'4-devs-computers-users-agents/**',   // chapter 4 (hidden)
+					'just-enough-javascript/**',          // reference section (hidden)
+					// --- Add patterns below to hide files/folders globally ---
+					// '**/research-framing.md',  // hide all files named research-framing.md
+					// '**/teaching-tips.md',     // hide all files named teaching-tips.md
+				],
 			},
 		],
 		// --- Welcome to Algorithms curriculum ---

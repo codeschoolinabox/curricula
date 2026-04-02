@@ -1,102 +1,44 @@
-# record — Architecture & Decisions
+# record — Architecture
 
-## Responsibility
+## Pipeline
 
-This module owns the boundary between `@study-lenses/tracing`'s `RecordFunction`
-contract and the legacy Aran instrumentation engine. `record.ts` is the
-implementation; `index.ts` is the entry point (re-export, or
-environment-switching wrapper if needed).
+Code is instrumented on the main thread using Aran's standalone mode, then
+executed in a disposable Web Worker. Events stream back via postMessage.
 
-## Why a folder?
-
-Keeps engine code, adapter, types, and tests co-located and out of `src/`. New
-engine files belong here, not in `src/`.
-
-## What we own vs what we don't
-
-| File                 | Owned by                                                                  |
-| -------------------- | ------------------------------------------------------------------------- |
-| `index.ts`           | This package — entry point / env detection                                |
-| `record.ts`          | This package — capture-all override + pipeline orchestration              |
-| `post-process.ts`    | This package — raw entries → structured `AranStep[]`                      |
-| `filter-steps.ts`    | This package — post-trace filtering pipeline                              |
-| `types.ts`           | This package — `AranStep`, `AranFilterOptions`, `ResolvedAranConfig`      |
-| `legacy-aran-trace/` | **Not owned** — vendored legacy Aran tracer (ESLint global ignores apply) |
-
-## Error mapping
-
-Errors are captured inside the worker and returned as entries, never thrown:
-
-- `ParseError` — Acorn parse failure (creation phase)
-- `RuntimeError` — uncaught exception during eval (execution phase)
-- `LimitExceededError` — `worker.terminate()` fired after `maxSeconds`
-
-## Step format
-
-### Raw entries (from legacy tracer)
-
-The legacy Aran traceCollector emits `RawEntry` objects:
-
-```typescript
-type RawEntry = {
-	type: 'log' | 'groupStart';
-	prefix: string | null; // e.g. "declare (const): x", "binary: +"
-	style: string;
-	logs: unknown[]; // runtime values
-	loc: SourceLocation | null;
-	nodeType: string | null;
-};
+```text
+api/trace.ts → createExecution(createTracingGenerator)
+  → Execution<TraceEvent, TraceResult>
+    createTracingGenerator:
+      1. instrument(code, config)  — main thread: Aran standalone pipeline
+      2. spawn worker via blob URL — same pattern as run engine
+      3. worker registers advice on globalThis, evals instrumented code
+      4. advice fires → emitEvent → state.onEvent → postMessage('entry')
+      5. main thread yields TraceEvent per entry, pauses worker via SAB
+      6. returns TraceResult on completion
 ```
 
-Interspersed with string markers `'>>>'` (enter scope) and `'<<<'` (leave
-scope).
+## Key design decisions
 
-### Transformation (postProcess)
+- **Standalone mode**: Aran captures all builtins into a closure. Learner code
+  can't break Aran internals (e.g., overwriting Array.prototype.push).
+- **No post-processing**: Events are structured by advice functions at runtime.
+  No regex parsing, no post-trace filtering. Config-time pointcuts control what
+  gets instrumented.
+- **onEvent via global callback**: Aran JSON-clones initialState (losing
+  functions). The worker sets `globalThis.__jej_onEvent` before eval.
+  block-setup (first hook) picks it up and sets `state.onEvent`. All
+  subsequent hooks inherit it.
+- **eval kind with strict situ**: JEJ programs are modules (strict mode), but
+  the worker uses `new Function()` which can't handle `import.meta`. Aran's
+  `kind: 'eval'` with `situ: { type: 'local', mode: 'strict' }` gives
+  module-like semantics without `import.meta`.
 
-`postProcess` regex-parses `prefix` strings into structured fields:
+## Files
 
-- `operation` — `declare`, `read`, `assign`, `initialize`, `call`, `return`,
-  `binary`, etc.
-- `name` — variable name, function name, control type (`if`, `while`, `for-of`),
-  or break/continue label (null when absent)
-- `operator` — `+`, `===`, `typeof`, `?:`, etc. (null for non-operators)
-- `modifier` — declaration kind (`let`, `const`, `var`), truthiness (`truthy`,
-  `falsy`), hoist kind, or call type (`built-in`) (null when absent)
-- `values` — copied from `logs`
-- `result` — evaluated result for operator steps (binary, unary, conditional);
-  folded from child `evaluate` entries (only present on operator steps)
-- `depth` — tracked via `>>>`/`<<<` marker counting
-- `scopeType` — inferred from the operation that opened the scope
-- `loc` — shallow-copied to a plain
-  `{start: {line, column}, end: {line, column}}` POJO (Aran AST nodes may carry
-  prototype chains)
-- `nodeType` — copied from raw entry
-
-Steps are **unnumbered** at this stage — `filterSteps` assigns 1-indexed `step`
-numbers to surviving steps after filtering.
-
-### Filtering (filterSteps)
-
-`filterSteps` applies user options in order:
-
-1. **Category toggles** — enable/disable entire operation categories
-2. **List filters** — whitelist specific operators (`operatorsList`) or control
-   flow types (`controlFlowList`)
-3. **Name filter** — whitelist specific names (empty = keep all)
-4. **Range filter** — keep only steps within source line range (with depth
-   coherence)
-5. **Data stripping** — remove loc, values, nodeType, depth from output
-6. **Re-numbering** — surviving steps get 1-indexed `step` numbers
-7. **Deep freeze** — output is frozen for immutable consumer access
-
-## Options design
-
-Options use **JSON Schema + `verifyOptions`**:
-
-- `options.schema.json` defines structure, types, and defaults
-- `verifyOptions` enforces cross-field constraints (`range.start <= range.end`)
-
-**Post-trace filtering** (not pre-trace) because the legacy tracer uses a
-mutable singleton `config.js` to control instrumentation. The CAPTURE_ALL config
-is hardcoded in the worker — config is always all-on. Filtering happens
-post-trace via `filterSteps`.
+- `index.ts` — re-export from `tracing/index.ts`
+- `tracing/index.ts` — async generator (main export)
+- `tracing/instrument.ts` — Aran instrumentation pipeline
+- `tracing/trace-worker.ts` — worker module
+- `tracing/weaving/` — pointcuts + advice functions
+- `tracing/event-generators/` — event factory functions
+- `tracing/types.ts` — TraceEvent type definitions

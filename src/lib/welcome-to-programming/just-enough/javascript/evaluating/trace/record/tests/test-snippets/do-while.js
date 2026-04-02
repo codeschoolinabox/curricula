@@ -1,5 +1,0 @@
-// Targets: check (do-while)
-let count = 0;
-do {
-	count = count + 1;
-} while (count < 3);

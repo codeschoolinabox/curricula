@@ -1,5 +1,6 @@
 ---
 sidebar_position: 99
+draft: true
 ---
 
 # Teaching Tips: Chapter 0
