@@ -58,6 +58,11 @@
 				background: #2d2d30;
 				color: #d4d4d4;
 			}
+			.separator {
+				width: 1px;
+				height: 1.5em;
+				background: #464647;
+			}
 			#editor-container {
 				border: 1px solid #464647;
 				margin-bottom: 1rem;
@@ -69,7 +74,7 @@
 			#log {
 				border: 1px solid #464647;
 				padding: 0.5rem;
-				max-height: 300px;
+				max-height: 400px;
 				overflow-y: auto;
 				font-size: 12px;
 				white-space: pre-wrap;
@@ -82,6 +87,9 @@
 			.log-warn {
 				color: #f48771;
 			}
+			.log-error {
+				color: #f44747;
+			}
 			.log-check {
 				color: #dcdcaa;
 			}
@@ -90,6 +98,9 @@
 			}
 			.log-content {
 				color: #ce9178;
+			}
+			.log-event {
+				color: #b5cea8;
 			}
 			#status {
 				font-size: 12px;
@@ -101,8 +112,8 @@
 	<body>
 		<h1>Editor Sandbox</h1>
 		<p class="hint">
-			Test createEditor with callbacks. Hover keywords for docs, type for
-			completions, Cmd/Ctrl-Shift-F to format.
+			Hover JS keywords for docs. Type for completions. Cmd/Ctrl-Shift-F
+			to format. JeJ violations appear as red markers in the gutter.
 		</p>
 
 		<div class="controls">
@@ -119,12 +130,21 @@
 					<option value="plaintext">Plain Text</option>
 				</select></label
 			>
-			<button id="btn-check">[check]</button>
-			<button id="btn-format">[format]</button>
-			<button id="btn-reset">[reset]</button>
-			<button id="btn-content">[get content]</button>
-			<button id="btn-destroy">[destroy]</button>
-			<button id="btn-recreate">[recreate]</button>
+			<button type="button" id="btn-format">[format]</button>
+			<button type="button" id="btn-reset">[reset]</button>
+			<button type="button" id="btn-content">[get content]</button>
+
+			<div class="separator"></div>
+
+			<button type="button" id="btn-validate">[validate]</button>
+			<button type="button" id="btn-run">[run]</button>
+			<button type="button" id="btn-trace">[trace]</button>
+			<button type="button" id="btn-debug">[debug]</button>
+
+			<div class="separator"></div>
+
+			<button type="button" id="btn-destroy">[destroy]</button>
+			<button type="button" id="btn-recreate">[recreate]</button>
 		</div>
 
 		<div id="editor-container"></div>
@@ -133,6 +153,11 @@
 
 		<script type="module">
 			import createEditor from './create-editor.ts';
+			import format from '../just-enough/javascript/formatting/format.ts';
+			import validate from '../just-enough/javascript/api/validate.ts';
+			import run from '../just-enough/javascript/api/run.ts';
+			import trace from '../just-enough/javascript/api/trace.ts';
+			import debug from '../just-enough/javascript/api/debug.ts';
 
 			// ─── Sample code ───────────────────────────────────────
 
@@ -141,15 +166,52 @@ let greeting = 'hello';
 const count = 42;
 
 function add(a, b) {
-  return a + b;
+\treturn a + b;
 }
 
 console.log(greeting, add(count, 8));
 `;
 
-			// ─── Sample callbacks ───────────────────────────────────
+			// ─── JeJ linter adapter ────────────────────────────────
 
-			// Minimal doc lookup — just a few entries for testing
+			// Maps validate() results to LintDiagnostic[] for gutter markers.
+			// All violations are severity: 'error' (red X) — they block execution.
+			function lintWithJeJ(code) {
+				const result = validate(code);
+
+				// Parse error — syntax is invalid
+				if (result.error && result.error.kind === 'parse') {
+					return [
+						{
+							line: result.error.line || 1,
+							column: result.error.column || 0,
+							severity: 'error',
+							message: result.error.message,
+							source: 'JeJ parse',
+						},
+					];
+				}
+
+				// Validation rejections — valid JS but not valid JeJ
+				if (result.rejections && result.rejections.length > 0) {
+					return result.rejections.map(function todiagnostic(v) {
+						return {
+							line: v.location.start.line,
+							column: v.location.start.column,
+							endLine: v.location.end.line,
+							endColumn: v.location.end.column,
+							severity: 'error',
+							message: v.message,
+							source: 'JeJ',
+						};
+					});
+				}
+
+				return [];
+			}
+
+			// ─── Doc lookup (hardcoded — no JeJ equivalent) ────────
+
 			function lookupDoc(word) {
 				const docs = {
 					let: {
@@ -172,7 +234,7 @@ console.log(greeting, add(count, 8));
 					function: {
 						description: 'Declares a reusable block of code',
 						example:
-							'function greet(name) {\n  return "Hello, " + name;\n}',
+							'function greet(name) {\n\treturn "Hello, " + name;\n}',
 						category: 'functions',
 						commonMistakes: [
 							'Forgetting return statement',
@@ -191,16 +253,37 @@ console.log(greeting, add(count, 8));
 					return: {
 						description:
 							'Sends a value back from a function and exits',
-						example: 'function add(a, b) {\n  return a + b;\n}',
+						example: 'function add(a, b) {\n\treturn a + b;\n}',
 						category: 'functions',
 						commonMistakes: ['Code after return never runs'],
 						whenToUse: 'To send results back from functions',
+					},
+					if: {
+						description:
+							'Executes code only when a condition is true',
+						example: 'if (age >= 18) {\n\tconsole.log("adult");\n}',
+						category: 'control-flow',
+						commonMistakes: [
+							'Using = instead of === in condition',
+						],
+						whenToUse:
+							'When you need to make decisions in your code',
+					},
+					for: {
+						description: 'Repeats code a specific number of times',
+						example:
+							'for (let i = 0; i < 5; i++) {\n\tconsole.log(i);\n}',
+						category: 'control-flow',
+						commonMistakes: ['Off-by-one errors'],
+						whenToUse:
+							'When you know exactly how many times to repeat',
 					},
 				};
 				return docs[word] || null;
 			}
 
-			// Minimal completions
+			// ─── Completions (hardcoded — no JeJ equivalent) ───────
+
 			function getCompletions(prefix) {
 				const builtins = [
 					'console',
@@ -229,38 +312,6 @@ console.log(greeting, add(count, 8));
 					.map(function toItem(name) {
 						return { label: name, type: 'keyword' };
 					});
-			}
-
-			// Minimal linter — just checks for console.log usage
-			function lintCode(code) {
-				const diagnostics = [];
-				const lines = code.split('\n');
-				for (let i = 0; i < lines.length; i++) {
-					const col = lines[i].indexOf('console.log');
-					if (col !== -1) {
-						diagnostics.push({
-							line: i + 1,
-							column: col,
-							endLine: i + 1,
-							endColumn: col + 11,
-							severity: 'warning',
-							message:
-								'console.log left in code — remove before submitting',
-							source: 'sandbox-linter',
-						});
-					}
-				}
-				return diagnostics;
-			}
-
-			// Simple formatter — just trims trailing whitespace
-			function formatCode(code) {
-				return code
-					.split('\n')
-					.map(function trimLine(line) {
-						return line.trimEnd();
-					})
-					.join('\n');
 			}
 
 			// ─── State ─────────────────────────────────────────────
@@ -302,10 +353,10 @@ console.log(greeting, add(count, 8));
 					parent: containerEl,
 					...(isJS
 						? {
-								linters: [lintCode],
+								linters: [lintWithJeJ],
 								docLookup: lookupDoc,
 								completions: getCompletions,
-								format: formatCode,
+								format: format,
 								onFormat(result) {
 									if (result.changed) {
 										appendLog(
@@ -328,31 +379,14 @@ console.log(greeting, add(count, 8));
 				if (isJS) {
 					appendLog(
 						'info',
-						'callbacks: linter, docLookup, completions, format',
+						'callbacks: JeJ linter, docLookup, completions, JeJ format',
 					);
 				} else {
 					appendLog('info', 'no callbacks (non-JS language)');
 				}
 			}
 
-			// ─── Button handlers ────────────────────────────────────
-
-			document
-				.getElementById('btn-check')
-				.addEventListener('click', function onCheck() {
-					if (!currentEditor) return;
-					const diagnostics = currentEditor.check();
-					appendLog(
-						'check',
-						`check() returned ${diagnostics.length} diagnostic(s)`,
-					);
-					for (const d of diagnostics) {
-						appendLog(
-							'warn',
-							`  [${d.line}:${d.column}] ${d.severity}: ${d.message}`,
-						);
-					}
-				});
+			// ─── Editor button handlers ─────────────────────────────
 
 			document
 				.getElementById('btn-format')
@@ -376,7 +410,7 @@ console.log(greeting, add(count, 8));
 					const content = currentEditor.content;
 					appendLog(
 						'content',
-						`content (${content.length} chars):\n${content.substring(0, 200)}${content.length > 200 ? '...' : ''}`,
+						`content (${content.length} chars):\n${content.substring(0, 300)}${content.length > 300 ? '...' : ''}`,
 					);
 				});
 
@@ -408,9 +442,197 @@ console.log(greeting, add(count, 8));
 				},
 			);
 
+			// ─── JeJ execution button handlers ─────────────────────
+
+			document
+				.getElementById('btn-validate')
+				.addEventListener('click', function onValidate() {
+					if (!currentEditor) return;
+					const code = currentEditor.content;
+					const result = validate(code);
+
+					if (result.ok) {
+						appendLog('info', 'validate: ok — valid JeJ');
+					} else if (result.error) {
+						appendLog(
+							'error',
+							`validate: ${result.error.kind} error — ${result.error.message}`,
+						);
+					}
+
+					if (result.rejections && result.rejections.length > 0) {
+						appendLog(
+							'error',
+							`validate: ${result.rejections.length} rejection(s)`,
+						);
+						for (const v of result.rejections) {
+							appendLog(
+								'error',
+								`  [${v.location.start.line}:${v.location.start.column}] ${v.message}`,
+							);
+						}
+					}
+				});
+
+			document
+				.getElementById('btn-run')
+				.addEventListener('click', async function onRun() {
+					if (!currentEditor) return;
+					const code = currentEditor.content;
+					const btn = document.getElementById('btn-run');
+					btn.disabled = true;
+					appendLog('info', 'running...');
+
+					try {
+						const result = await run(code, { seconds: 5 });
+
+						if (!result.ok) {
+							if (result.error) {
+								appendLog(
+									'error',
+									`run error (${result.error.kind}): ${result.error.message}`,
+								);
+							}
+							if (result.rejections && result.rejections.length > 0) {
+								appendLog(
+									'error',
+									`run: ${result.rejections.length} rejection(s) — code is not valid JeJ`,
+								);
+							}
+						}
+
+						if (result.logs) {
+							appendLog(
+								'info',
+								`run: ${result.logs.length} event(s)`,
+							);
+							for (const event of result.logs) {
+								appendLog(
+									'event',
+									renderRunEvent(event),
+								);
+							}
+						}
+					} catch (err) {
+						appendLog('error', `run threw: ${err.message}`);
+					} finally {
+						btn.disabled = false;
+					}
+				});
+
+			document
+				.getElementById('btn-trace')
+				.addEventListener('click', async function onTrace() {
+					if (!currentEditor) return;
+					const code = currentEditor.content;
+					const btn = document.getElementById('btn-trace');
+					btn.disabled = true;
+					appendLog('info', 'tracing...');
+
+					try {
+						const result = await trace(code, { seconds: 5 });
+
+						if (!result.ok) {
+							if (result.error) {
+								appendLog(
+									'error',
+									`trace error (${result.error.kind}): ${result.error.message}`,
+								);
+							}
+							if (result.rejections && result.rejections.length > 0) {
+								appendLog(
+									'error',
+									`trace: ${result.rejections.length} rejection(s)`,
+								);
+							}
+						}
+
+						if (result.logs) {
+							appendLog(
+								'info',
+								`trace: ${result.logs.length} step(s) — see console for details`,
+							);
+							console.log('TraceResult:', result);
+						}
+					} catch (err) {
+						appendLog('error', `trace threw: ${err.message}`);
+					} finally {
+						btn.disabled = false;
+					}
+				});
+
+			document
+				.getElementById('btn-debug')
+				.addEventListener('click', async function onDebug() {
+					if (!currentEditor) return;
+					const code = currentEditor.content;
+					const btn = document.getElementById('btn-debug');
+					btn.disabled = true;
+					appendLog(
+						'info',
+						'debugging — open DevTools before this runs!',
+					);
+
+					try {
+						const result = await debug(code);
+
+						if (!result.ok) {
+							if (result.error) {
+								appendLog(
+									'error',
+									`debug error (${result.error.kind}): ${result.error.message}`,
+								);
+							}
+							if (result.rejections && result.rejections.length > 0) {
+								appendLog(
+									'error',
+									`debug: ${result.rejections.length} rejection(s)`,
+								);
+							}
+						} else {
+							appendLog('info', 'debug: completed');
+						}
+					} catch (err) {
+						appendLog('error', `debug threw: ${err.message}`);
+					} finally {
+						btn.disabled = false;
+					}
+				});
+
+			// ─── Helpers ────────────────────────────────────────────
+
+			function renderRunEvent(event) {
+				if (event.event === 'log') {
+					return `  [line ${event.line}] log: ${event.args.map(String).join(', ')}`;
+				}
+				if (event.event === 'error') {
+					return `  [${event.phase}] ${event.name}: ${event.message}${event.line ? ' (line ' + event.line + ')' : ''}`;
+				}
+				if (event.event === 'prompt') {
+					return `  [line ${event.line}] prompt(${event.args.map(String).join(', ')}) → ${JSON.stringify(event.return)}`;
+				}
+				if (event.event === 'confirm') {
+					return `  [line ${event.line}] confirm(${event.args.map(String).join(', ')}) → ${event.return}`;
+				}
+				if (event.event === 'alert') {
+					return `  [line ${event.line}] alert(${event.args.map(String).join(', ')})`;
+				}
+				if (event.event === 'assert') {
+					return `  [line ${event.line}] assert: ${event.args.map(String).join(', ')}`;
+				}
+				return `  ${JSON.stringify(event)}`;
+			}
+
 			// ─── Init ───────────────────────────────────────────────
 
 			makeEditor();
+
+			// SAB availability check for run/trace
+			if (typeof SharedArrayBuffer === 'undefined') {
+				statusEl.textContent +=
+					' | SharedArrayBuffer not available — run/trace may not work';
+				statusEl.style.color = '#f48771';
+			}
 		</script>
 	</body>
 </html>

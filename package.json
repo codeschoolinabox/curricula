@@ -65,7 +65,8 @@
     "estree-walker": "^3.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "recast": "^0.23.11"
+    "recast": "^0.23.11",
+    "yaml": "^2.8.3"
   },
   "devDependencies": {
     "@docusaurus/tsconfig": "^3.9.2",

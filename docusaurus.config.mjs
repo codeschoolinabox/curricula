@@ -41,16 +41,16 @@ const config = {
 			},
 		],
 		// --- Welcome to Algorithms curriculum ---
-		[
-			'@docusaurus/plugin-content-docs',
-			{
-				id: 'welcome-to-algorithms',
-				path: 'spiralearn/welcome-to-algorithms',
-				routeBasePath: 'welcome-to-algorithms',
-				sidebarPath: './sidebars/welcome-to-algorithms.mjs',
-				exclude: ['**/to-use/**'],
-			},
-		],
+		// [
+		// 	'@docusaurus/plugin-content-docs',
+		// 	{
+		// 		id: 'welcome-to-algorithms',
+		// 		path: 'spiralearn/welcome-to-algorithms',
+		// 		routeBasePath: 'welcome-to-algorithms',
+		// 		sidebarPath: './sidebars/welcome-to-algorithms.mjs',
+		// 		exclude: ['**/to-use/**'],
+		// 	},
+		// ],
 		// --- Add future spiralearn here ---
 		[
 			'@docusaurus/plugin-content-docs',
@@ -88,11 +88,11 @@ const config = {
 						label: 'Welcome to Programming',
 						position: 'left',
 					},
-					{
-						to: '/welcome-to-algorithms/',
-						label: 'Welcome to Algorithms',
-						position: 'left',
-					},
+					// {
+					// 	to: '/welcome-to-algorithms/',
+					// 	label: 'Welcome to Algorithms',
+					// 	position: 'left',
+					// },
 					{
 						href: 'https://github.com/codeschoolinabox/spiralearn',
 						label: 'GitHub',
@@ -110,10 +110,10 @@ const config = {
 								label: 'Welcome to Programming',
 								to: '/welcome-to-programming/',
 							},
-							{
-								label: 'Welcome to Algorithms',
-								to: '/welcome-to-algorithms/',
-							},
+							// {
+							// 	label: 'Welcome to Algorithms',
+							// 	to: '/welcome-to-algorithms/',
+							// },
 						],
 					},
 					{

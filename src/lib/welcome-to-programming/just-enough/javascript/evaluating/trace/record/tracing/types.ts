@@ -139,7 +139,7 @@ export type PropertyAccessKind = 'dot' | 'bracket' | 'optionalChaining';
 export type PropertyAccessEvent = BaseEvent & {
 	readonly category: 'propertyAccess';
 	readonly kind: PropertyAccessKind;
-	readonly object: string;
+	readonly object: ValueRepresentation;
 	readonly key: string | number;
 	readonly value: ValueRepresentation;
 	/** optionalChaining only: base was nullish, no lookup occurred */

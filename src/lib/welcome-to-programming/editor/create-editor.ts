@@ -118,6 +118,10 @@ function createEditor(code = '', {
 		});
 	}
 
+	// If parent was provided, el is already set — trigger init eagerly
+	// (the el getter only triggers init when el is null)
+	if (parent) initEditor();
+
 	// perf: skip freeze — stateful editor API requires mutable methods and closures
 	return {
 		get content(): string {

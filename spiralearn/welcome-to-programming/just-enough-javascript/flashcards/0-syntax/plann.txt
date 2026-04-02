@@ -1,0 +1,8 @@
+- things in the code that aren't dynamic
+
+quotes
+    single, double
+semicolon
+curly brace
+parnethesis
+period/dot

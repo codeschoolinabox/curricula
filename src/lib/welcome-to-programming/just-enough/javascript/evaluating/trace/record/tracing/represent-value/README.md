@@ -11,11 +11,11 @@ objects. This utility bridges the gap.
 
 ## Who uses it
 
-- `pointcuts/advice/block-declaration.ts` — variable initial values
-- `pointcuts/advice/expression-after.ts` — literal values, read values, test values
-- `pointcuts/advice/apply-around.ts` — operator operands/results, property values,
+- `weaving/advice/block-declaration.ts` — variable initial values
+- `weaving/advice/expression-after.ts` — literal values, read values, test values
+- `weaving/advice/apply-around.ts` — operator operands/results, property values,
   function args/returns
-- `pointcuts/advice/effect-before.ts` — assignment values (via `state.lastExpressionResult`)
+- `weaving/advice/effect-before.ts` — assignment values (via `state.lastExpressionResult`)
 
 ## Value mapping
 

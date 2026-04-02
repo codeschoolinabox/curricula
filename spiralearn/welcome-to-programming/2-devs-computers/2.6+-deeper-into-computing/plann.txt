@@ -1,0 +1,6 @@
+-> a hatched chick thing, not required
+
+more math operators and Math
+all string methods
+regex
+bitwise operations

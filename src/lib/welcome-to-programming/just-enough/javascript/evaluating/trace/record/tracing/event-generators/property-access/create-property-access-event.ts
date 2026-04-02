@@ -3,7 +3,7 @@ import type { PropertyAccessEvent, PropertyAccessKind, ValueRepresentation } fro
 /**
  * Creates a PropertyAccessEvent for dot, bracket, or optional chaining reads.
  *
- * @param params - access kind, object name, key, value, optional shortCircuited
+ * @param params - access kind, object value, key, value, optional shortCircuited
  * @returns Domain-specific fields for a PropertyAccessEvent
  * @throws {Error} If shortCircuited is set on non-optionalChaining kind
  */
@@ -15,13 +15,13 @@ function createPropertyAccessEvent({
 	shortCircuited,
 }: {
 	readonly kind: PropertyAccessKind;
-	readonly object: string;
+	readonly object: ValueRepresentation;
 	readonly key: string | number;
 	readonly value: ValueRepresentation;
 	readonly shortCircuited?: true;
 } = {} as {
 	readonly kind: PropertyAccessKind;
-	readonly object: string;
+	readonly object: ValueRepresentation;
 	readonly key: string | number;
 	readonly value: ValueRepresentation;
 	readonly shortCircuited?: true;
