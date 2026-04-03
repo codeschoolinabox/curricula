@@ -16,7 +16,7 @@ function createTemplateBeginEvent({
 } = {} as {
 	readonly strings: readonly string[];
 	readonly expressionCount: number;
-}): Omit<TemplateBeginEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<TemplateBeginEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (strings.length !== expressionCount + 1) {
 		throw new Error(
 			`createTemplateBeginEvent: strings.length (${String(strings.length)}) must be expressionCount + 1 (${String(expressionCount + 1)})`,

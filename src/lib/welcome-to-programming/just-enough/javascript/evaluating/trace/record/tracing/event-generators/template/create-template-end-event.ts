@@ -15,7 +15,7 @@ function createTemplateEndEvent({
 } = {} as {
 	readonly value: ValueRepresentation;
 	readonly beginStep: number;
-}): Omit<TemplateEndEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<TemplateEndEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	return {
 		category: 'template',
 		event: 'end',

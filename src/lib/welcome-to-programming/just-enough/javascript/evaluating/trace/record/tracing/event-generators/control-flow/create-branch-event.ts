@@ -16,7 +16,7 @@ function createBranchEvent({
 	readonly branch: 'consequent' | 'alternate' | 'none';
 	readonly scopeCreationStep: number;
 	readonly label?: string;
-}): Omit<BranchEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<BranchEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	return {
 		category: 'controlFlow',
 		event: 'branch',

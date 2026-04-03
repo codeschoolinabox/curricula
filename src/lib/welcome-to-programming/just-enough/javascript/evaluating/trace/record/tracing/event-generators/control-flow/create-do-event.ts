@@ -13,7 +13,7 @@ function createDoEvent({
 } = {} as {
 	readonly scopeCreationStep: number;
 	readonly label?: string;
-}): Omit<DoEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<DoEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	return {
 		category: 'controlFlow',
 		event: 'do',

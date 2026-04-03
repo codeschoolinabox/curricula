@@ -34,7 +34,7 @@ function createScopeEvent({
 	label,
 }: ScopeParams = {} as ScopeParams): Omit<
 	ScopeEvent,
-	'semantics' | 'loc' | 'node' | 'source'
+	'step' | 'semantics' | 'loc' | 'node' | 'source'
 > {
 	if (depth < 0) {
 		throw new Error('createScopeEvent: depth must be >= 0');

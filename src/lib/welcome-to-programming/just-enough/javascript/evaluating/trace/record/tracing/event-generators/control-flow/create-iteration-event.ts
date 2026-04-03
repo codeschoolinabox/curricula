@@ -26,7 +26,7 @@ function createIterationEvent({
 	label,
 }: IterationParams = {} as IterationParams): Omit<
 	IterationEvent,
-	'semantics' | 'loc' | 'node' | 'source'
+	'step' | 'semantics' | 'loc' | 'node' | 'source'
 > {
 	if (index < 0) {
 		throw new Error('createIterationEvent: index must be >= 0');

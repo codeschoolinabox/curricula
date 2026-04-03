@@ -29,7 +29,8 @@ function emitEvent(
 	payload: any,
 ): void {
 	state.step += 1;
-	const metadata = { semantics, loc: tag.loc, node: tag.node, source: tag.source };
+	state.eventStep += 1;
+	const metadata = { step: state.eventStep, semantics, loc: tag.loc, node: tag.node, source: tag.source };
 	const event = createTraceEvent(metadata, generatorPath, payload);
 	state.trace.push(event);
 	state.onEvent?.(event);

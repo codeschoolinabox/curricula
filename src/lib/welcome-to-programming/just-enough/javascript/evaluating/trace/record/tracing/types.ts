@@ -100,6 +100,8 @@ export type SourceLocation = {
  * layer has access to it, but downstream consumers (step tracker) do not.
  */
 export type BaseEvent = {
+	/** Contiguous 1-indexed event counter. Sequential with no gaps. */
+	readonly step: number;
 	readonly semantics: 'statement' | 'expression';
 	readonly loc: SourceLocation;
 	readonly node: string;
@@ -119,8 +121,9 @@ export type BindingEvent = BaseEvent & {
 	readonly kind: BindingKind;
 	readonly event: BindingEventType;
 	readonly name: string;
-	/** On 'declare': the parent scope. On others: inherited from declaration. */
-	readonly scopeCreationStep: number;
+	/** On 'declare': the parent scope. On others: inherited from declaration.
+	 *  Omitted when scope events are disabled by config. Opaque grouping key. */
+	readonly scopeCreationStep?: number;
 	/** Points to this binding's declare event. Absent on 'declare' itself and on globals. */
 	readonly declarationStep?: number;
 	/** Present on initialize, available, assign, read */
@@ -201,7 +204,7 @@ export type AssignmentOperatorEvent = BaseEvent & {
 	readonly coercion?: readonly ValueRepresentation[];
 	/** For ??=, ||=, &&=: right side not evaluated, no assignment occurred */
 	readonly shortCircuited?: true;
-	readonly scopeCreationStep: number;
+	readonly scopeCreationStep?: number;
 };
 
 export type OperatorEvent =
@@ -297,7 +300,7 @@ export type TestEvent = BaseEvent & {
 	readonly result: boolean;
 	/** Boolean(value) — present when value is not already a boolean */
 	readonly coercion?: ValueRepresentation;
-	readonly scopeCreationStep: number;
+	readonly scopeCreationStep?: number;
 	readonly label?: string;
 };
 
@@ -306,7 +309,7 @@ export type BranchEvent = BaseEvent & {
 	readonly event: 'branch';
 	readonly kind: 'conditional';
 	readonly branch: 'consequent' | 'alternate' | 'none';
-	readonly scopeCreationStep: number;
+	readonly scopeCreationStep?: number;
 	readonly label?: string;
 };
 
@@ -315,7 +318,7 @@ export type IterationEvent = BaseEvent & {
 	readonly event: 'iteration';
 	readonly kind: LoopKind;
 	readonly index: number;
-	readonly scopeCreationStep: number;
+	readonly scopeCreationStep?: number;
 	/** forOf: the iterable (first iteration only) */
 	readonly iterable?: ValueRepresentation;
 	/** forOf: current element value */
@@ -330,7 +333,7 @@ export type JumpEvent = BaseEvent & {
 	readonly event: 'jump';
 	readonly kind: 'break' | 'continue';
 	readonly target: LoopKind;
-	readonly targetScopeCreationStep: number;
+	readonly targetScopeCreationStep?: number;
 	readonly label?: string;
 };
 
@@ -339,7 +342,7 @@ export type DoEvent = BaseEvent & {
 	readonly category: 'controlFlow';
 	readonly event: 'do';
 	readonly kind: 'doWhile';
-	readonly scopeCreationStep: number;
+	readonly scopeCreationStep?: number;
 	readonly label?: string;
 };
 
@@ -348,7 +351,7 @@ export type ForInitializeEvent = BaseEvent & {
 	readonly category: 'controlFlow';
 	readonly event: 'initialize';
 	readonly kind: 'for';
-	readonly scopeCreationStep: number;
+	readonly scopeCreationStep?: number;
 	readonly label?: string;
 };
 
@@ -357,7 +360,7 @@ export type ForIncrementEvent = BaseEvent & {
 	readonly category: 'controlFlow';
 	readonly event: 'increment';
 	readonly kind: 'for';
-	readonly scopeCreationStep: number;
+	readonly scopeCreationStep?: number;
 	readonly label?: string;
 };
 

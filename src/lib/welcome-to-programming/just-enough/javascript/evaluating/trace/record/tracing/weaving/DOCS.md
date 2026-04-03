@@ -1,5 +1,9 @@
 # Weaving — Architecture
 
+> **Status**: This document describes the target design. Sections marked with
+> ⏳ describe planned changes not yet reflected in the code or types. See the
+> plan file for implementation status.
+
 ## Why flexible weave
 
 Aran offers two weave modes. We use **flexible** because it provides
@@ -32,6 +36,47 @@ metadata that survives desugaring:
 The tag is a single type (Aran's Atom.Tag is one type parameter for all nodes).
 The `node` field serves as runtime discriminant for sparse optional fields.
 
+### ⏳ Tag resolution (digest → map → pointcut wrapping)
+
+Aran's `digest` function must return `string | number`. But pointcuts and advice
+need rich JejTag objects. The solution uses three phases:
+
+1. **Digest phase** (during `transpile()`): A custom digest function receives
+   each ESTree node, extracts metadata into a JejTag, stores it in a
+   `Map<string, JejTag>` keyed by hash, and returns the hash string. Aran
+   digests nodes bottom-up (children before parents), so parent-dependent
+   metadata (e.g., VariableDeclarator needs parent VariableDeclaration's `kind`)
+   is resolved via a pre-walk of the AST before transpile.
+
+2. **Pointcut wrapping** (during `createAspect()`): Each pointcut function is
+   wrapped to resolve hash strings → JejTag objects before calling the original
+   pointcut. Resolution is **shallow with a whitelist**: `node.tag`, `parent.tag`,
+   `root.tag`, plus the known nested positions used in identity comparisons:
+   `parent.then?.tag`, `parent.else?.tag`, `parent.try?.tag`, `parent.catch?.tag`,
+   `parent.finally?.tag`. The same Map lookup (`tagMap.get(hash)`) is used for
+   all resolutions, preserving object identity for `===` comparisons in pointcuts
+   like `block-pointcut.ts`. No recursive walking — the whitelist is finite and
+   verified by grep against all pointcut files.
+
+3. **Runtime** (in advice): The pointcut return array contains the resolved
+   JejTag object (not the hash string). Aran JSON-serializes this into the
+   instrumented code. Advice functions receive JejTag objects directly — no
+   further resolution needed.
+
+### Constraint: tag map lookup must succeed
+
+Tag map lookup must succeed for every hash encountered at pointcut time. A
+missing hash indicates a digest/pre-walk bug and should throw an error with the
+hash and node type for debugging. Silent fallback (returning undefined or a
+default tag) would mask instrumentation bugs and produce events with missing
+metadata.
+
+### Constraint: JejTag must be Json-serializable
+
+Because pointcut return arrays are embedded in the instrumented code via JSON,
+every field of JejTag must be a Json primitive, array, or plain object. No
+functions, Maps, Sets, Dates, or class instances.
+
 ## Architecture: one set of advice, conditional dispatch
 
 Not two categories (internal/dispatch). One set of advice functions that:
@@ -44,12 +89,51 @@ parallel advice systems.
 ## State design
 
 TracerState is Json-serializable (Aran requirement). Contains:
+
 - `trace[]` — accumulated events
-- `step` — global step counter for step references
+- `step` — internal step counter for cross-references (see Step numbering below)
+- ⏳ `eventStep` — contiguous event counter for user-facing `step` field
 - `scopeStack[]` — scope nesting for depth/creation tracking
-- `variableScopes{}` — variable name → scope creation step
-- `iterationCounters{}` — scope step → iteration index
+- `iterationCounters{}` — per-loop iteration counts (keyed by source location)
+- `lastExpressionResult` — most recent expression result (for assignment values)
+- `previousExpressionResult` — prior expression result (for short-circuit recovery)
+- `lastReadValues{}` — last read values per variable (for compound assignment operands)
 - `config{}` — user's config for conditional dispatch
+- `onEvent?` — streaming callback (set by worker, not Json-serializable)
+
+### ⏳ Step numbering: single contiguous counter, optional cross-references
+
+**`eventStep`** (user-facing): Contiguous 1-indexed counter. The event emission
+function increments it, injects it as the `step` field on the event object, then
+pushes to trace: `eventStep++ → event.step = eventStep → trace.push(event)`.
+Consumers see sequential steps with no gaps: 1, 2, 3, 4...
+
+**`step`** (internal): Counter used by advice for internal scope and variable
+tracking. Incremented by `block-setup` (scope creation) and `block-declaration`
+(variable registration). Not visible on events. Used to build the internal
+`creationStep` and `declarationStep` values in the scope stack and variable
+registry.
+
+**Cross-reference fields are optional**: Fields like `scopeCreationStep`,
+`declarationStep`, and `parentCreationStep` on events use internal step values
+to reference scope/variable tracking moments. These are **omitted** when the
+referenced event is disabled by config — the consumer can't navigate to a
+disabled event anyway. When present, they reference internal tracking IDs, not
+event step numbers. Consumers should treat them as opaque grouping keys, not as
+step indices for navigation.
+
+Additional cross-reference fields: `beginStep` on template evaluation/end events
+(references the template begin event), `structureStep` on scope events
+(references the control flow structure's initial event). These follow the same
+rule: optional, omitted when the referenced event is disabled. Exception:
+template sub-events (evaluation, end) are meaningless without their begin event,
+so if begin is disabled, evaluation/end should also be suppressed by the config
+gating logic — `beginStep` should never be orphaned in practice.
+
+Why separate counters: internal tracking always runs (scope creation, variable
+registration) even when those event categories are disabled by config. A single
+counter would produce gaps in user-facing step numbers. The learning UI needs
+contiguous steps for step-by-step visualization.
 
 ## Pointcut → advice data flow
 

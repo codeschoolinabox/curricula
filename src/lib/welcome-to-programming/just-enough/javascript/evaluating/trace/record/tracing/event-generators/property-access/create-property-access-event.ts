@@ -25,7 +25,7 @@ function createPropertyAccessEvent({
 	readonly key: string | number;
 	readonly value: ValueRepresentation;
 	readonly shortCircuited?: true;
-}): Omit<PropertyAccessEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<PropertyAccessEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (shortCircuited && kind !== 'optionalChaining') {
 		throw new Error(
 			'createPropertyAccessEvent: shortCircuited is only valid for optionalChaining',

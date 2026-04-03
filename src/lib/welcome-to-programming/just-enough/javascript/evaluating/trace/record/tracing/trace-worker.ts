@@ -23,6 +23,7 @@ import blockTeardown from './weaving/advice/block-teardown.js';
 import expressionAfter from './weaving/advice/expression-after.js';
 import applyAround from './weaving/advice/apply-around.js';
 import effectBefore from './weaving/advice/effect-before.js';
+import effectAfterAdvice from './weaving/advice/effect-after.js';
 import statementBefore from './weaving/advice/statement-before.js';
 
 // --- SAB layout constants (from run/worker-protocol.ts) ---
@@ -62,6 +63,7 @@ const adviceMap: Record<string, Function> = {
 	_jej_expression_after: expressionAfter,
 	_jej_apply_around: applyAround,
 	_jej_effect_before: effectBefore,
+	_jej_effect_after: effectAfterAdvice,
 	_jej_statement_before: statementBefore,
 };
 

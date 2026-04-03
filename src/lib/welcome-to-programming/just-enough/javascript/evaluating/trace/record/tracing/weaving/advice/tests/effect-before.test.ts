@@ -18,7 +18,7 @@ function makeTag(overrides: Partial<JejTag> = {}): JejTag {
 function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 	return {
 		creationStep: 1, depth: 0, kind: 'module', structure: null, structureStep: null,
-		variables: { x: { kind: 'let', declarationStep: 2 } },
+		variables: { x: { kind: 'let', declarationStep: 2, initialized: true } },
 		...overrides,
 	};
 }
@@ -37,26 +37,8 @@ function makeState(overrides: Partial<TracerState> = {}): TracerState {
 
 describe('effectBefore', () => {
 	describe('simple assignment (=)', () => {
-		it('emits BindingEvent(assign) for simple assignment', () => {
+		it('does not emit BindingEvent (moved to effect-after)', () => {
 			const state = makeState();
-			effectBefore(state, 'x', makeTag());
-			const assignEvents = (state.trace as Record<string, unknown>[]).filter(
-				(e) => e.event === 'assign',
-			);
-			expect(assignEvents).toHaveLength(1);
-		});
-
-		it('includes value from lastExpressionResult', () => {
-			const state = makeState({ previousExpressionResult: null, lastReadValues: {}, lastExpressionResult: 42 });
-			effectBefore(state, 'x', makeTag());
-			const event = state.trace[0] as Record<string, unknown>;
-			expect(event.value).toEqual({ type: 'number', value: 42 });
-		});
-
-		it('does not emit when binding gate is closed', () => {
-			const state = makeState({
-				config: { bindings: { kind: { let: false }, events: { assign: true } } },
-			});
 			effectBefore(state, 'x', makeTag());
 			expect(state.trace).toHaveLength(0);
 		});
@@ -76,15 +58,6 @@ describe('effectBefore', () => {
 				(e) => e.category === 'operator' && e.kind === 'assignment',
 			);
 			expect(opEvents).toHaveLength(1);
-		});
-
-		it('also emits BindingEvent(assign) for compound assignment', () => {
-			const state = makeState({ previousExpressionResult: null, lastReadValues: {}, lastExpressionResult: 10 });
-			effectBefore(state, 'x', makeTag({ operator: '+=', source: 'x += 5' }));
-			const assignEvents = (state.trace as Record<string, unknown>[]).filter(
-				(e) => e.event === 'assign',
-			);
-			expect(assignEvents).toHaveLength(1);
 		});
 
 		it('does not emit operator event when operators.assignment is disabled', () => {

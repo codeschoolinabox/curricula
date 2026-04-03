@@ -28,12 +28,17 @@ function blockDeclaration(
 
 	for (const varName of Object.keys(frame)) {
 		if (ARAN_PARAMETERS.has(varName)) continue;
+		// Aran internal variables use `.` prefix (e.g., `.w.1110`)
+		// User variables cannot start with `.` in JavaScript
+		if (varName.startsWith('.')) continue;
 
 		const value = frame[varName];
 
 		// always record variable in scope (internal tracking)
+		// initialized: false when TDZ (symbol value), true when value is available
+		const isTDZ = typeof value === 'symbol';
 		state.step += 1;
-		currentScope.variables[varName] = { kind, declarationStep: state.step };
+		currentScope.variables[varName] = { kind, declarationStep: state.step, initialized: !isTDZ };
 
 		// conditionally emit BindingEvent(declare)
 		if (isBindingGateOpen(state.config, kind, 'declare', varName)) {

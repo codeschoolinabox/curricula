@@ -16,7 +16,7 @@ function createWithEvent({
 } = {} as {
 	readonly event: 'enter' | 'leave';
 	readonly object: ValueRepresentation;
-}): Omit<WithEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<WithEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (!event) {
 		throw new Error('createWithEvent: event is required');
 	}

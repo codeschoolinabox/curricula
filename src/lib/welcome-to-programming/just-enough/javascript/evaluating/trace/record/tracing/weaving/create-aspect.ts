@@ -27,17 +27,110 @@ import blockTeardown from './advice/block-teardown.js';
 import expressionAfter from './advice/expression-after.js';
 import applyAround from './advice/apply-around.js';
 import effectBefore from './advice/effect-before.js';
+import effectAfterAdvice from './advice/effect-after.js';
 import statementBefore from './advice/statement-before.js';
 
 import deepFreezeInPlace from '../../../../../../../../utils/deep-freeze-in-place.js';
 
-import type { TracerState } from './types.js';
+import type { JejTag, TracerState } from './types.js';
 
 type PointcutEntry = {
 	readonly kind: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Aran's flexible API uses heterogeneous signatures per hook kind
 	readonly pointcut: (...args: any[]) => unknown[] | null | undefined;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- AranLang nodes have dynamic shape
+type AranNode = any;
+
+/**
+ * Resolves a hash-string tag to a JejTag from the tag map.
+ * Throws if the hash is not found — indicates a digest/pre-walk bug.
+ */
+function resolveTag(hash: unknown, tagMap: Map<string, JejTag>): JejTag | unknown {
+	if (typeof hash !== 'string') return hash;
+	const resolved = tagMap.get(hash);
+	if (resolved === undefined) {
+		throw new Error(`Tag map lookup failed for hash: ${hash}. This indicates a digest bug.`);
+	}
+	return resolved;
+}
+
+/**
+ * Resolves .tag properties on an AranLang node using the tag map.
+ * Returns a shallow copy with .tag replaced. Does NOT mutate the original.
+ */
+function resolveNodeTags(node: AranNode, tagMap: Map<string, JejTag>): AranNode {
+	if (node === null || node === undefined) return node;
+	if (typeof node !== 'object') return node;
+	if (typeof node.tag !== 'string') return node;
+
+	// Shallow copy with resolved tag
+	return { ...node, tag: resolveTag(node.tag, tagMap) };
+}
+
+/**
+ * Resolves .tag on a parent node AND its known nested positions.
+ *
+ * Whitelist: parent.tag, parent.then?.tag, parent.else?.tag,
+ * parent.try?.tag, parent.catch?.tag, parent.finally?.tag
+ *
+ * WHY whitelist: block-pointcut.ts uses `parent.then?.tag === node.tag`
+ * for branch identification. Both sides must be resolved for identity
+ * comparison to work. tagMap.get() returns the same object reference
+ * for the same hash, preserving ===.
+ */
+function resolveParentTags(parent: AranNode, tagMap: Map<string, JejTag>): AranNode {
+	if (parent === null || parent === undefined) return parent;
+	if (typeof parent !== 'object') return parent;
+
+	const copy = { ...parent };
+
+	if (typeof copy.tag === 'string') {
+		copy.tag = resolveTag(copy.tag, tagMap);
+	}
+
+	// Nested positions used in identity comparisons (block-pointcut.ts)
+	if (copy.then && typeof copy.then.tag === 'string') {
+		copy.then = { ...copy.then, tag: resolveTag(copy.then.tag, tagMap) };
+	}
+	if (copy.else && typeof copy.else.tag === 'string') {
+		copy.else = { ...copy.else, tag: resolveTag(copy.else.tag, tagMap) };
+	}
+	if (copy.try && typeof copy.try.tag === 'string') {
+		copy.try = { ...copy.try, tag: resolveTag(copy.try.tag, tagMap) };
+	}
+	if (copy.catch && typeof copy.catch.tag === 'string') {
+		copy.catch = { ...copy.catch, tag: resolveTag(copy.catch.tag, tagMap) };
+	}
+	if (copy.finally && typeof copy.finally.tag === 'string') {
+		copy.finally = { ...copy.finally, tag: resolveTag(copy.finally.tag, tagMap) };
+	}
+
+	return copy;
+}
+
+/**
+ * Wraps a pointcut function to resolve hash-string tags to JejTag objects.
+ *
+ * Aran's digest produces hash strings as tags. Pointcut functions expect
+ * JejTag objects. This wrapper bridges the two by resolving tags on node,
+ * parent, and root before calling the original pointcut.
+ */
+function wrapPointcut(
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- original pointcut has heterogeneous signature
+	originalPointcut: (...args: any[]) => unknown[] | null | undefined,
+	tagMap: Map<string, JejTag>,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- must match Aran's pointcut signature
+): (...args: any[]) => unknown[] | null | undefined {
+	return function wrappedPointcut(node: AranNode, parent: AranNode, root: AranNode) {
+		return originalPointcut(
+			resolveNodeTags(node, tagMap),
+			resolveParentTags(parent, tagMap),
+			resolveNodeTags(root, tagMap),
+		);
+	};
+}
 
 type AspectResult = {
 	readonly pointcut: Record<string, PointcutEntry>;
@@ -142,35 +235,49 @@ function isAnyScopeDispatchEnabled(config: Record<string, unknown>): boolean {
  * Builds an Aran flexible aspect from user config.
  *
  * @param config - The user's trace config (from options.schema.json)
+ * @param tagMap - Map of hash strings → JejTag objects, built by instrument()'s
+ *   digest callback. Optional — defaults to empty Map for backward compatibility
+ *   with unit tests that don't use the full instrumentation pipeline.
  * @returns Separated pointcut config, advice globals, and initial state
  */
-function createAspect(config: Record<string, unknown>): AspectResult {
+function createAspect(
+	config: Record<string, unknown>,
+	tagMap: Map<string, JejTag> = new Map(),
+): AspectResult {
 	const pointcut: Record<string, PointcutEntry> = {};
 	const adviceGlobals: Record<string, Function> = {};
 
+	// WHY wrap: Aran's digest produces hash strings as tags. Pointcut functions
+	// expect JejTag objects. wrapPointcut resolves hashes → JejTags before
+	// calling the original pointcut. When tagMap is empty (unit tests), tags
+	// pass through as-is (resolveTag returns the original value for non-strings).
+	const wrap = tagMap.size > 0
+		? function withResolution(fn: PointcutEntry['pointcut']) { return wrapPointcut(fn, tagMap); }
+		: function passthrough(fn: PointcutEntry['pointcut']) { return fn; };
+
 	// --- Always: scope tracking hooks ---
 
-	pointcut['_jej_block_setup'] = { kind: 'block@setup', pointcut: blockPointcut };
+	pointcut['_jej_block_setup'] = { kind: 'block@setup', pointcut: wrap(blockPointcut) };
 	adviceGlobals['_jej_block_setup'] = blockSetup;
 
-	pointcut['_jej_block_declaration'] = { kind: 'block@declaration', pointcut: blockPointcut };
+	pointcut['_jej_block_declaration'] = { kind: 'block@declaration', pointcut: wrap(blockPointcut) };
 	adviceGlobals['_jej_block_declaration'] = blockDeclaration;
 
-	pointcut['_jej_block_teardown'] = { kind: 'block@teardown', pointcut: blockPointcut };
+	pointcut['_jej_block_teardown'] = { kind: 'block@teardown', pointcut: wrap(blockPointcut) };
 	adviceGlobals['_jej_block_teardown'] = blockTeardown;
 
 	// --- Always: block@before (handles BranchEvent, IterationEvent, DoEvent, loop guard) ---
 
-	pointcut['_jej_block_before'] = { kind: 'block@before', pointcut: blockPointcut };
+	pointcut['_jej_block_before'] = { kind: 'block@before', pointcut: wrap(blockPointcut) };
 	adviceGlobals['_jej_block_before'] = blockBefore;
 
 	// --- Conditionally: scope event dispatch (block@after, block@throwing) ---
 
 	if (isAnyScopeDispatchEnabled(config)) {
-		pointcut['_jej_block_after'] = { kind: 'block@after', pointcut: blockPointcut };
+		pointcut['_jej_block_after'] = { kind: 'block@after', pointcut: wrap(blockPointcut) };
 		adviceGlobals['_jej_block_after'] = blockAfter;
 
-		pointcut['_jej_block_throwing'] = { kind: 'block@throwing', pointcut: blockPointcut };
+		pointcut['_jej_block_throwing'] = { kind: 'block@throwing', pointcut: wrap(blockPointcut) };
 		adviceGlobals['_jej_block_throwing'] = blockThrowing;
 	}
 
@@ -178,14 +285,14 @@ function createAspect(config: Record<string, unknown>): AspectResult {
 
 	if (isAnyExpressionEnabled(config)) {
 		const expressionPointcut = createExpressionPointcut(config);
-		pointcut['_jej_expression_after'] = { kind: 'expression@after', pointcut: expressionPointcut };
+		pointcut['_jej_expression_after'] = { kind: 'expression@after', pointcut: wrap(expressionPointcut) };
 		adviceGlobals['_jej_expression_after'] = expressionAfter;
 	}
 
 	// --- Conditionally: apply@around (single handler) ---
 
 	if (isAnyApplyEnabled(config)) {
-		pointcut['_jej_apply_around'] = { kind: 'apply@around', pointcut: applyPointcut };
+		pointcut['_jej_apply_around'] = { kind: 'apply@around', pointcut: wrap(applyPointcut) };
 		adviceGlobals['_jej_apply_around'] = applyAround;
 	}
 
@@ -193,15 +300,18 @@ function createAspect(config: Record<string, unknown>): AspectResult {
 
 	if (isAnyEffectEnabled(config)) {
 		const effectPointcut = createEffectPointcut(config);
-		pointcut['_jej_effect_before'] = { kind: 'effect@before', pointcut: effectPointcut };
+		pointcut['_jej_effect_before'] = { kind: 'effect@before', pointcut: wrap(effectPointcut) };
 		adviceGlobals['_jej_effect_before'] = effectBefore;
+
+		pointcut['_jej_effect_after'] = { kind: 'effect@after', pointcut: wrap(effectPointcut) };
+		adviceGlobals['_jej_effect_after'] = effectAfterAdvice;
 	}
 
 	// --- Conditionally: statement hooks (BreakStatement only) ---
 
 	if (isAnyStatementEnabled(config)) {
 		const stmtPointcut = createStatementPointcut(config);
-		pointcut['_jej_statement_before'] = { kind: 'statement@before', pointcut: stmtPointcut };
+		pointcut['_jej_statement_before'] = { kind: 'statement@before', pointcut: wrap(stmtPointcut) };
 		adviceGlobals['_jej_statement_before'] = statementBefore;
 	}
 
@@ -210,6 +320,7 @@ function createAspect(config: Record<string, unknown>): AspectResult {
 	const initialState: TracerState = {
 		trace: [],
 		step: 0,
+		eventStep: 0,
 		scopeStack: [],
 		iterationCounters: {},
 		lastExpressionResult: null,

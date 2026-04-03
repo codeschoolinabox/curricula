@@ -27,7 +27,7 @@ function createTestEvent({
 	readonly coercion?: ValueRepresentation;
 	readonly scopeCreationStep: number;
 	readonly label?: string;
-}): Omit<TestEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<TestEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	return {
 		category: 'controlFlow',
 		event: 'test',

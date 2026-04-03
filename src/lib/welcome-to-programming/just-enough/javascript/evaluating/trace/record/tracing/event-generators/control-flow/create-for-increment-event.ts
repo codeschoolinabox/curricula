@@ -13,7 +13,7 @@ function createForIncrementEvent({
 } = {} as {
 	readonly scopeCreationStep: number;
 	readonly label?: string;
-}): Omit<ForIncrementEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<ForIncrementEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	return {
 		category: 'controlFlow',
 		event: 'increment',

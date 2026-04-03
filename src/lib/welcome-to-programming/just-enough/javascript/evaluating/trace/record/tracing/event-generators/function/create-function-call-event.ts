@@ -16,7 +16,7 @@ function createFunctionCallEvent({
 } = {} as {
 	readonly name: string;
 	readonly args: readonly ValueRepresentation[];
-}): Omit<FunctionCallEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<FunctionCallEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (!name) {
 		throw new Error('createFunctionCallEvent: name is required and must be non-empty');
 	}

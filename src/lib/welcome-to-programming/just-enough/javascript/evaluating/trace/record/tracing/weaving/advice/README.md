@@ -52,10 +52,12 @@ gates are open.
 ## Effect advice
 
 - `effect-before.ts` — `(state, ...point) → void`.
-  Emits BindingEvent(assign) and AssignmentOperatorEvent. Reads assignment value
-  from `state.lastExpressionResult`.
+  Emits AssignmentOperatorEvent for compound assignments (+=, -=, etc.).
 - `effect-after.ts` — `(state, ...point) → void`.
-  Deferred — may be needed for post-assignment value capture.
+  Emits BindingEvent(initialize/available/assign). Fires AFTER the value
+  sub-expression is evaluated, so `state.lastExpressionResult` contains the
+  correct value. For TDZ variables (first write), emits initialize + available
+  instead of assign.
 
 ## Statement advice
 

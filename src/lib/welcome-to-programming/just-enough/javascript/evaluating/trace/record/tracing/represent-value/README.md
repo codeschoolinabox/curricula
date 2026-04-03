@@ -15,7 +15,7 @@ objects. This utility bridges the gap.
 - `weaving/advice/expression-after.ts` — literal values, read values, test values
 - `weaving/advice/apply-around.ts` — operator operands/results, property values,
   function args/returns
-- `weaving/advice/effect-before.ts` — assignment values (via `state.lastExpressionResult`)
+- `weaving/advice/effect-after.ts` — assignment/initialization values (via `state.lastExpressionResult`)
 
 ## Value mapping
 

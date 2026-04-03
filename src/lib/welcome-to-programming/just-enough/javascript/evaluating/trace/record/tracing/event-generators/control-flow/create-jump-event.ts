@@ -18,7 +18,7 @@ function createJumpEvent({
 	readonly target: LoopKind;
 	readonly targetScopeCreationStep: number;
 	readonly label?: string;
-}): Omit<JumpEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<JumpEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	return {
 		category: 'controlFlow',
 		event: 'jump',

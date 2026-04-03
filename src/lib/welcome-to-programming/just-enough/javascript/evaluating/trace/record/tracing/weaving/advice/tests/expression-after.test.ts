@@ -17,7 +17,7 @@ function makeTag(overrides: Partial<JejTag> = {}): JejTag {
 function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 	return {
 		creationStep: 1, depth: 0, kind: 'module', structure: null, structureStep: null,
-		variables: { x: { kind: 'let', declarationStep: 2 } },
+		variables: { x: { kind: 'let', declarationStep: 2, initialized: true } },
 		...overrides,
 	};
 }

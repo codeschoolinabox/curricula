@@ -9,19 +9,29 @@
  */
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
-import validateProgram from '../validating/validate-program.js';
-import justEnoughJs from '../validating/just-enough-js.js';
-import checkFormat from '../formatting/check-format.js';
+import validateProgram from '../lib/validating/validate-program.js';
+import justEnoughJs from '../lib/validating/just-enough-js.js';
+import checkFormat from '../lib/formatting/check-format.js';
 import run from './run.js';
 import trace from './trace.js';
 import debug from './debug.js';
 import createExecution from '../evaluating/shared/create-execution.js';
 
-import type { JejProgram, RunResult, TraceResult, DebugResult, DebugEvent } from './types.js';
-import type { Execution, EngineConfig, TraceConfig } from '../evaluating/shared/types.js';
+import type {
+	JejProgram,
+	RunResult,
+	TraceResult,
+	DebugResult,
+	DebugEvent,
+} from './types.js';
+import type {
+	Execution,
+	EngineConfig,
+	TraceConfig,
+} from '../evaluating/shared/types.js';
 import type { RunEvent } from '../evaluating/shared/types.js';
 import type { TraceEvent } from '../evaluating/trace/record/tracing/types.js';
-import type { Violation } from '../validating/types.js';
+import type { Violation } from '../lib/validating/types.js';
 
 // --- Analysis state ---
 
@@ -108,7 +118,11 @@ export default function createJejProgram(code?: string): JejProgram {
 		);
 	}
 
-	function buildBlockedResult(): { ok: false; error?: object; rejections?: readonly Violation[] } {
+	function buildBlockedResult(): {
+		ok: false;
+		error?: object;
+		rejections?: readonly Violation[];
+	} {
 		if (state.parseError) {
 			return deepFreezeInPlace({
 				ok: false,
@@ -117,7 +131,8 @@ export default function createJejProgram(code?: string): JejProgram {
 					name: 'SyntaxError',
 					message: state.parseError.message,
 					line: (state.parseError as SyntaxError & { line?: number }).line ?? 1,
-					column: (state.parseError as SyntaxError & { column?: number }).column,
+					column: (state.parseError as SyntaxError & { column?: number })
+						.column,
 				},
 			});
 		}
@@ -125,7 +140,10 @@ export default function createJejProgram(code?: string): JejProgram {
 			return deepFreezeInPlace({ ok: false, rejections: state.rejections });
 		}
 		// !ok due to formatting
-		return deepFreezeInPlace({ ok: false, error: { kind: 'formatting' as const } });
+		return deepFreezeInPlace({
+			ok: false,
+			error: { kind: 'formatting' as const },
+		});
 	}
 
 	return {

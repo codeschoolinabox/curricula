@@ -7,7 +7,7 @@
  * Fixed config: `{ useTabs: true, tabWidth: 4, quote: 'single', wrapColumn: 80 }`
  */
 
-import format from '../formatting/format.js';
-import checkFormat from '../formatting/check-format.js';
+import format from '../lib/formatting/format.js';
+import checkFormat from '../lib/formatting/check-format.js';
 
 export { format, checkFormat };

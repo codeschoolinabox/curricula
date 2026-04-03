@@ -12,10 +12,14 @@
 
 import type { Program } from 'acorn';
 
-import type { Violation } from '../validating/types.js';
+import type { Violation } from '../lib/validating/types.js';
 import type { RunEvent } from '../evaluating/shared/types.js';
 import type { TraceEvent } from '../evaluating/trace/record/tracing/types.js';
-import type { Execution, EngineConfig, TraceConfig } from '../evaluating/shared/types.js';
+import type {
+	Execution,
+	EngineConfig,
+	TraceConfig,
+} from '../evaluating/shared/types.js';
 
 // ─── Error types ─────────────────────────────────────────────
 

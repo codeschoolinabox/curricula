@@ -8,8 +8,8 @@
  */
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
-import validateProgram from '../validating/validate-program.js';
-import justEnoughJs from '../validating/just-enough-js.js';
+import validateProgram from '../lib/validating/validate-program.js';
+import justEnoughJs from '../lib/validating/just-enough-js.js';
 
 import type { BaseResult } from './types.js';
 

@@ -13,7 +13,7 @@ function createForInitializeEvent({
 } = {} as {
 	readonly scopeCreationStep: number;
 	readonly label?: string;
-}): Omit<ForInitializeEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<ForInitializeEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	return {
 		category: 'controlFlow',
 		event: 'initialize',

@@ -25,8 +25,8 @@ instrumented code. Some are always present; others depend on config.
 | block-throwing | Conditional | Any `config.scopes.events.*` enabled | Paired with block-after |
 | expression-after | Conditional | Any of: `config.literals.*`, `config.bindings.events.read`, `config.operators.shortCircuiting`, `config.controlFlow.events.test` | |
 | apply-around | Conditional | Any of: `config.operators.pure.*`, `config.operators.shortCircuiting`, `config.operators.assignment`, `config.propertyAccess.*`, `config.functions.*`, `config.templates.*`, `config.bindings.kind.global` | |
-| effect-before | Conditional | `config.bindings.events.assign` OR `config.operators.assignment` | |
-| effect-after | Never | — | Deferred, not registered in current implementation |
+| effect-before | Conditional | `config.operators.assignment` | Compound assignment operators only |
+| effect-after | Conditional | `config.bindings.events.assign` OR `config.bindings.events.initialize` | BindingEvent(assign/initialize/available) |
 | statement-before | Conditional | `config.controlFlow.events.jump` | |
 
 ## Advice-to-event emissions
@@ -69,8 +69,10 @@ Internal state updates (marked with **state**) happen regardless of config.
 | apply-around | emit TemplateBeginEvent | `templates.begin` |
 | apply-around | emit TemplateEvaluationEvent | `templates.evaluation` |
 | apply-around | emit TemplateEndEvent | `templates.end` |
-| effect-before | emit BindingEvent(assign) | `bindings.kind.{kind}` AND `bindings.events.assign` |
 | effect-before | emit AssignmentOperatorEvent | `operators.assignment` |
+| effect-after | emit BindingEvent(initialize) | `bindings.kind.{kind}` AND `bindings.events.initialize` |
+| effect-after | emit BindingEvent(available) | `bindings.kind.{kind}` AND `bindings.events.available` |
+| effect-after | emit BindingEvent(assign) | `bindings.kind.{kind}` AND `bindings.events.assign` |
 | statement-before | emit JumpEvent | `controlFlow.kind.{target}` AND `controlFlow.events.jump` |
 
 ## State mutation model
@@ -169,15 +171,15 @@ fresh at 0.
 
 ## lastExpressionResult
 
-`effect@before` needs the assignment value for BindingEvent(assign), but its
-Aran signature is `(state, ...point)` — no value parameter. The value was
-computed by a preceding expression@after or apply@around.
+`effect@after` needs the assignment value for BindingEvent(assign/initialize),
+but its Aran signature is `(state, ...point)` — no value parameter. The value
+was computed by expression@after or apply@around, which set
+`state.lastExpressionResult = result` (the raw JS value).
 
-Both hooks set `state.lastExpressionResult = result` (the raw JS value). Then
-effect-before reads it via `representValue(state.lastExpressionResult)`.
-
-This works because Aran always evaluates the value sub-expression before firing
-the WriteEffect.
+WHY effect@after not effect@before: Aran fires `effect@before` BEFORE the value
+sub-expression is evaluated. For `let x = 5`, the order is:
+`effect@before(x)` → `expression@after(5)` → `effect@after(x)`. Only at
+`effect@after` is `lastExpressionResult` populated with the correct value.
 
 `lastExpressionResult` holds non-Json values at runtime (functions, RegExps).
 This is safe because Aran only clones state via JSON at startup — runtime state
@@ -399,9 +401,10 @@ These are defined in the type system and/or schema but not yet implemented:
   would require changes to the ESTree→AranLang transpilation/tagging layer,
   not the advice layer.
 
-- **effect-after.ts**: Never registered. effect-before handles assignments via
-  `lastExpressionResult`. No clear use case for post-write value capture since
-  the RHS (which IS the new value) is already available.
+- **effect-after.ts**: Now registered and handles BindingEvent(assign/initialize/
+  available). Moved from effect-before because Aran fires effect@before BEFORE
+  the value expression is evaluated — only at effect@after is the value available
+  via `state.lastExpressionResult`.
 
 - **Global scope[0]**: Built-in globals (Math, Number, String, console) are
   accessed via `aran.getValueProperty` (property access events), not

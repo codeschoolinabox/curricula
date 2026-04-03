@@ -30,7 +30,7 @@ function makeState(scopeStack: ScopeInfo[]): TracerState {
 describe('lookupVariable', () => {
 	it('finds variable in single scope', () => {
 		const scope = makeScope({
-			variables: { x: { kind: 'let', declarationStep: 2 } },
+			variables: { x: { kind: 'let', declarationStep: 2, initialized: true } },
 		});
 		const state = makeState([scope]);
 		const result = lookupVariable(state, 'x');
@@ -41,7 +41,7 @@ describe('lookupVariable', () => {
 	it('returns scope reference', () => {
 		const scope = makeScope({
 			creationStep: 5,
-			variables: { x: { kind: 'let', declarationStep: 6 } },
+			variables: { x: { kind: 'let', declarationStep: 6, initialized: true } },
 		});
 		const state = makeState([scope]);
 		const result = lookupVariable(state, 'x');
@@ -50,7 +50,7 @@ describe('lookupVariable', () => {
 
 	it('returns declarationStep', () => {
 		const scope = makeScope({
-			variables: { x: { kind: 'const', declarationStep: 10 } },
+			variables: { x: { kind: 'const', declarationStep: 10, initialized: true } },
 		});
 		const state = makeState([scope]);
 		expect(lookupVariable(state, 'x')!.info.declarationStep).toBe(10);
@@ -69,12 +69,12 @@ describe('lookupVariable', () => {
 	it('finds innermost binding on shadowing', () => {
 		const outer = makeScope({
 			creationStep: 1,
-			variables: { x: { kind: 'let', declarationStep: 2 } },
+			variables: { x: { kind: 'let', declarationStep: 2, initialized: true } },
 		});
 		const inner = makeScope({
 			creationStep: 5,
 			depth: 1,
-			variables: { x: { kind: 'let', declarationStep: 6 } },
+			variables: { x: { kind: 'let', declarationStep: 6, initialized: true } },
 		});
 		const state = makeState([outer, inner]);
 		const result = lookupVariable(state, 'x');
@@ -85,12 +85,12 @@ describe('lookupVariable', () => {
 	it('finds outer variable when not shadowed', () => {
 		const outer = makeScope({
 			creationStep: 1,
-			variables: { x: { kind: 'let', declarationStep: 2 } },
+			variables: { x: { kind: 'let', declarationStep: 2, initialized: true } },
 		});
 		const inner = makeScope({
 			creationStep: 5,
 			depth: 1,
-			variables: { y: { kind: 'const', declarationStep: 6 } },
+			variables: { y: { kind: 'const', declarationStep: 6, initialized: true } },
 		});
 		const state = makeState([outer, inner]);
 		const result = lookupVariable(state, 'x');

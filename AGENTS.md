@@ -3,18 +3,73 @@
 This file provides specific context for AI assistants working with this
 `@study-lenses` package.
 
+- [Non-Negotiable Invariants](#non-negotiable-invariants)
+- [Session Start Protocol](#session-start-protocol)
 - [Project Overview](#project-overview)
 - [Key Technical Context](#key-technical-context)
   - [Architecture](#architecture)
   - [Critical Conventions](#critical-conventions)
+  - [Readability Patterns](#readability-patterns)
+  - [Documentation Convention](#documentation-convention)
   - [Type System](#type-system)
   - [Testing Approach](#testing-approach)
   - [Linting Approach](#linting-approach)
   - [Incremental TDD Workflow](#incremental-tdd-workflow)
+  - [Context Compaction Protocol](#context-compaction-protocol)
   - [Safety Guardrails](#safety-guardrails)
-- [Adversarial Review Protocol](#adversarial-review-protocol)
+  - [When Working on This Codebase](#when-working-on-this-codebase)
 - [LLM Collaboration Conventions](#llm-collaboration-conventions)
+- [Adversarial Review Protocol](#adversarial-review-protocol)
 - [References](#references)
+
+---
+
+## Non-Negotiable Invariants
+
+These apply unconditionally, regardless of task size, time pressure, or user
+encouragement. They cannot be overridden by momentum.
+
+1. **Read before editing** — never modify a file you haven't read in this
+   session.
+2. **Phase 0 before Phase 1** — work through Phase 0 in order: establish
+   ubiquitous language → update README → run AR-1 → define types.ts → write the
+   architectural sketch in DOCS.md → run AR-2. All seven steps before any
+   implementation. Agents routinely skip this under time pressure. Do not skip
+   it.
+3. **Plan before implementing** — enter plan mode for anything beyond a trivial
+   fix. Exception: user explicitly says "skip plan mode."
+4. **One increment at a time** — complete Red → Green → Refactor → Lint before
+   starting the next behavior.
+5. **Stop at the emergency brake** — if scope creeps, tests fail unexpectedly,
+   or you catch yourself skipping workflow steps: stop and surface it.
+6. **No confident guessing** — when uncertain, say so and investigate rather
+   than confirming assumptions.
+
+> If these feel like friction, that friction is working as intended.
+
+---
+
+## Session Start Protocol
+
+Before writing any code, complete this checklist in order. Do not open an
+editor, create a file, or write a single line of code until every step is done.
+
+- [ ] **Read this file** (AGENTS.md) — if you haven't in this session, read it
+      now
+- [ ] **Read the module README.md** — understand what this module does and where
+      it fits in the `@study-lenses` ecosystem
+- [ ] **Read DOCS.md if it exists** — understand the architectural sketch and
+      any recorded design decisions before writing anything
+- [ ] **Read 1–2 existing similar files** — find existing functions that match
+      the scope of your task; read them fully to absorb patterns before writing
+- [ ] **Check the existing test files** — understand what is already tested and
+      at what level; don't duplicate coverage
+- [ ] **Restate the task in one sentence** — flag ambiguities before proceeding;
+      better to ask now than to build the wrong thing
+- [ ] **Enter plan mode** — unless this is a trivial fix or the user has said
+      "skip plan mode"
+
+---
 
 ## Project Overview
 
@@ -154,14 +209,21 @@ accumulators).
 Objects and arrays returned from functions MUST be deep frozen. This codebase is
 consumed by LLMs that cannot be trusted not to mutate returned data.
 
-- **Clone + freeze**: For objects we don't own (caller-provided, external).
-  Clones first, returns new frozen reference
-- **Freeze in place**: For objects we just built (fresh results, config
-  wrappers). Same reference, now frozen
+Use the freeze utilities from this package's shared utilities:
 
-Use a deep-freeze utility from your package's dependencies for both operations.
+```typescript
+import { freezeInPlace, cloneAndFreeze } from '../utils/freeze.js';
+// ^^^ Adjust import path to match this package's utility location.
+//     If you cannot locate these utilities, stop and ask — do not
+//     inline a custom implementation.
+```
 
-**When to freeze**: Function return values, config objects, constants, shared
+| Operation        | When to use                                         | Behavior                      |
+| ---------------- | --------------------------------------------------- | ----------------------------- |
+| `freezeInPlace`  | Objects we just built (fresh results, new wrappers) | Freezes in place, same ref    |
+| `cloneAndFreeze` | Objects we don't own (caller-provided, external)    | Clones first, returns new ref |
+
+**When to freeze**: function return values, config objects, constants, shared
 defaults.
 
 **Exception**: Performance-critical hot paths where profiling proves freeze
@@ -234,8 +296,13 @@ break every line.
 - Every directory has a `README.md`
 - Directories with non-obvious architecture or key design decisions also have a
   `DOCS.md`
-- `DOCS.md` is for the "why" — tradeoffs, alternatives considered, constraints.
-  NOT an API reference. Hand-maintained: fix it or delete it if it goes stale.
+- `DOCS.md` captures the "why" — tradeoffs, alternatives considered,
+  constraints. Keep it short. It is NOT an API reference — JSDoc handles that.
+  Hand-maintained: fix it or delete it if it goes stale.
+- For **new modules**, DOCS.md is written in Phase 0 step 0.5 as an
+  **architectural sketch** — the structural target the Refactor step is held
+  against. See DEV.md § Directory Documentation Convention for the required
+  format and example.
 - Public functions have JSDoc/TSDoc in source; TypeDoc generates `docs/`
   (gitignored, CI-only)
 - `@remarks` for consumer-facing "why" context (appears alongside signatures in
@@ -248,15 +315,19 @@ per module).
 
 ### Testing Approach
 
-See DEV.md § Testing Strategy for full conventions. Summary:
+See DEV.md § Testing Strategy for full conventions, including triangulation,
+ZOMBIES sequencing, and the Fake It pattern. Summary:
 
 - Explicit vitest imports: `import { describe, it, expect } from 'vitest'` (no
   globals)
 - Unit tests in `tests/` subdirectory (never alongside source files)
 - File suffix: `.test.ts` (never `.spec.ts`)
 - One assertion per `it`; nest `describe` blocks for grouping
+- **Test sequencing: ZOMBIES** — Zero/null/empty → One → Many → Boundaries →
+  Interfaces → Exceptions → Simple scenarios. This order naturally produces
+  **triangulation**: each test constrains the implementation from a new angle,
+  making hardcoded values impossible to sustain past the first increment.
 - Direct description naming with implicit arrows for compactness
-- Test ordering: feature → happy path → edge cases → errors → performance
 - Inline test data only — no shared fixtures
 - `.toThrow()` for errors — no try-catch patterns
 - No comments — test names are documentation
@@ -278,6 +349,32 @@ See DEV.md § Linting Conventions for full details. Summary:
 All development uses TDD with atomic increments. See DEV.md § Incremental
 Development Workflow for the full process.
 
+**Summary:**
+
+- **Phase 0** _(do not skip)_: Establish ubiquitous language (domain glossary) →
+  README spec (domain model in prose, bounded context) → AR-1 design challenge →
+  types.ts (domain model in TypeScript) → architectural sketch in DOCS.md
+  (structural target for the Refactor step) → AR-2 sketch challenge
+- **Phase 1**: For each increment: JSDoc → stub → test (ZOMBIES order) → AR-3 →
+  implement (Fake It is valid for the first test; second test must triangulate
+  it away) → lint → refactor (structural quality against DOCS.md sketch) → AR-4
+  → quality checks → commit
+- **Phase 2**: Full quality checks → AR-5 pre-merge review → commit prompt
+
+Each passing TDD cycle = one atomic commit. Do not batch behaviors.
+
+> **On DDD**: The ubiquitous language established in Phase 0 is not optional
+> ceremony. Names chosen here propagate into every function signature, test
+> description, error message, and JSDoc comment written in Phase 1. A wrong name
+> costs one find-and-replace now; it costs a misread codebase forever. Types are
+> the domain model expressed as TypeScript — readable by someone who understands
+> the domain but not the implementation.
+>
+> **On TDD and structure**: Tests verify _behavioral correctness_ — the function
+> does what it's specified to do. The Refactor step addresses _structural
+> quality_ — the implementation reflects the named phases and constraints in the
+> DOCS.md architectural sketch. Green tests are necessary but not sufficient.
+
 #### Claude-Specific Workflow Notes
 
 **Plan constraints:**
@@ -287,7 +384,9 @@ Development Workflow for the full process.
 - Plans start with a brief context line referencing completed work, then list
   ONLY unimplemented work
 - **Plans describe BEHAVIOR, not code** — never include full implementations in
-  plans. TDD discovers implementation
+  plans. TDD discovers the implementation; the DOCS.md architectural sketch
+  constrains the structure. Plans live between these two: they name what each
+  increment should do, not how.
 - Before starting work, verify understanding with the user: what will be built,
   what constraints apply, what success looks like
 - Before writing any code, explain in plain language what you're about to do and
@@ -297,10 +396,19 @@ Development Workflow for the full process.
 
 - Run lint checkpoints on specific modified files, not the whole codebase:
   `npm run lint <file>`
-- At step 12 (self-review): Run through LLM Anti-Pattern Checklist. Reality
+- Write tests in ZOMBIES order (Zero → One → Many...) to force triangulation.
+  After the first test, ask: _could this be passed by returning a hardcoded
+  value?_ If yes, the second test must make that impossible before you
+  implement.
+- At step 9 (refactor): check the implementation against the DOCS.md
+  architectural sketch. Green tests mean behavioral correctness is achieved.
+  Structural quality is addressed here — named phases, separated concerns, no
+  Fake It values surviving past their triangulation point.
+- At step 12 (self-review): run through the LLM Anti-Pattern Checklist. Reality
   check: did I run it? Did I trigger the exact behavior I changed? Would I bet
-  $100 this works? Flag what you're least confident about for the user to review
-- At step 13: Show actual output from quality checks — don't just claim "tests
+  $100 this works? Flag what you're least confident about for the user to
+  review.
+- At step 13: show actual output from quality checks — don't just claim "tests
   pass"
 
 **Git prompts** (Claude prompts, user executes):
@@ -351,7 +459,8 @@ Long sessions hit context limits, triggering automatic summarization.
 When context is approaching capacity, Claude MUST:
 
 1. **Update plan file** — capture current state, what's done, what's left
-2. **Update docs** — ensure AGENTS.md/DEV.md/README.md reflect current reality
+2. **Update docs** — ensure AGENTS.md/DEV.md/README.md/DOCS.md reflect current
+   reality
 3. **Prompt user to commit** — atomic checkpoint before compaction
 4. **Summarize active context** — write session summary to plan file:
    - Current branch and recent commits
@@ -376,33 +485,9 @@ Ready for session handoff or continuation after compaction.
 
 After context resets:
 
-1. Re-read AGENTS.md, DEV.md, relevant README.md files
+1. Re-read AGENTS.md, DEV.md, and relevant README.md/DOCS.md files
 2. Read plan file to restore session context
 3. Verify understanding with user before resuming
-
-### When Working on This Codebase
-
-1. **Follow the Incremental TDD Workflow above** for all development work
-2. Follow export conventions strictly (named-then-export, no barrels)
-3. Import directly from source files (no barrel imports), always with `.js`
-   extension
-4. Maintain object-threading pattern where applicable
-5. Keep functions pure and deterministic
-6. Use named `function` declarations (arrows only for inline callbacks)
-7. No `this` keyword, no mutable closures
-8. Default empty object `= {}` on all destructured parameters
-9. Verb-first naming; predicates prefixed with `is`/`has`/`can`/`should`
-10. Prefer `type` over `interface`; types in `types.ts` files
-11. Add TypeScript types for all public APIs
-12. JSDoc/TSDoc for public functions; `@remarks` for consumer-facing "why";
-    inline comments for implementation "why"
-13. `DOCS.md` per directory for architecture/decisions (hand-maintained, not
-    auto-generated)
-14. Throw on invalid input; fail fast for critical errors
-15. Place tests in `tests/` subdirectory, `.test.ts` suffix
-16. Ensure `README.md` exists and is current in every directory you modify
-17. Deep freeze all returned objects/arrays (clone-then-freeze for external,
-    freeze-in-place for freshly built)
 
 ### Safety Guardrails
 
@@ -444,13 +529,14 @@ to the last known working state and try a different approach.
 
 #### LLM Anti-Patterns (Resist These Tendencies)
 
-| Anti-Pattern         | Rule                             | Example Fix                                     |
-| -------------------- | -------------------------------- | ----------------------------------------------- |
-| **Over-engineering** | Helper used once? Inline it      | `const x = getX(o)` → `const x = o.x`           |
-| **Class addiction**  | Linter blocks, but check first   | `class X` → `function createX()`                |
-| **Future-proofing**  | User didn't ask? Don't add it    | `options = {}` with unused fields → direct impl |
-| **Defensive coding** | Validate at boundaries only      | Remove internal re-validation                   |
-| **Verbose docs**     | Name + types explain? Skip JSDoc | Only document WHY or non-obvious contracts      |
+| Anti-Pattern                | Rule                                         | Example Fix                                     |
+| --------------------------- | -------------------------------------------- | ----------------------------------------------- |
+| **Over-engineering**        | Helper used once? Inline it                  | `const x = getX(o)` → `const x = o.x`           |
+| **Class addiction**         | Linter blocks, but check first               | `class X` → `function createX()`                |
+| **Future-proofing**         | User didn't ask? Don't add it                | `options = {}` with unused fields → direct impl |
+| **Defensive coding**        | Validate at boundaries only                  | Remove internal re-validation                   |
+| **Verbose docs**            | Name + types explain? Skip JSDoc             | Only document WHY or non-obvious contracts      |
+| **Fake It without Make It** | Hardcoded values expire after the first test | Write second test to make hardcoding impossible |
 
 ##### Pre-Proposal Checklist
 
@@ -461,6 +547,35 @@ Before proposing code, answer YES to ALL:
 - [ ] **Helpers used >1x?** If used once, inline it
 - [ ] **Validate at boundaries only?** No re-validating internal calls
 - [ ] **Junior-maintainable?** Understandable without explanation
+- [ ] **Structural quality?** Does the implementation reflect the DOCS.md
+      architectural sketch — named phases, separated concerns, no Fake It values
+      surviving past the first increment?
+
+### When Working on This Codebase
+
+1. **Follow the Incremental TDD Workflow above** for all development work —
+   Phase 0 (DDD + architectural sketch in DOCS.md) before Phase 1, no exceptions
+2. Follow export conventions strictly (named-then-export, no barrels)
+3. Import directly from source files (no barrel imports), always with `.js`
+   extension
+4. Maintain object-threading pattern where applicable
+5. Keep functions pure and deterministic
+6. Use named `function` declarations (arrows only for inline callbacks)
+7. No `this` keyword, no mutable closures
+8. Default empty object `= {}` on all destructured parameters
+9. Verb-first naming; predicates prefixed with `is`/`has`/`can`/`should`
+10. Prefer `type` over `interface`; types in `types.ts` files
+11. Add TypeScript types for all public APIs
+12. JSDoc/TSDoc for public functions; `@remarks` for consumer-facing "why";
+    inline comments for implementation "why"
+13. `DOCS.md` per directory for architecture/decisions — written prospectively
+    in Phase 0 for new modules, updated whenever structural decisions change
+14. Throw on invalid input; fail fast for critical errors
+15. Place tests in `tests/` subdirectory, `.test.ts` suffix; write in ZOMBIES
+    order to ensure triangulation
+16. Ensure `README.md` exists and is current in every directory you modify
+17. Deep freeze all returned objects/arrays (`freezeInPlace` for freshly built,
+    `cloneAndFreeze` for caller-provided)
 
 ## LLM Collaboration Conventions
 
@@ -500,12 +615,17 @@ concerns, counter-proposals, and a verdict (PROCEED / CONSIDER / PAUSE).
 Only the **human** can skip an adversarial review. The implementing agent must
 never skip its own review — that defeats the purpose.
 
+> **Skip resistance rule**: If you find yourself reasoning about why _this
+> particular case_ doesn't need an AR, that reasoning is the signal it does. The
+> urge to skip is highest when the review would be most valuable. The only valid
+> skip is an explicit opt-out from the human in the current conversation.
+
 ### How to Run an Adversarial Review
 
 Spawn a separate agent instance with read-only access to the codebase. The
 implementing agent or human initiates the review by providing:
 
-1. The review type (AR-1 through AR-4) and its focus areas
+1. The review type (AR-1 through AR-5) and its focus areas
 2. The relevant files or diff to review
 3. Context about what was built/proposed and why
 
@@ -548,12 +668,18 @@ Every adversarial review prompt follows this structure:
 
 ### AR-1: Design Challenge
 
-**Trigger:** During Phase 0, after README spec, before types.ts locks the
-contract. **Skip:** Only when the human explicitly opts out.
+**Trigger:** During Phase 0, after README spec (step 0.2), before types.ts locks
+the contract (step 0.4). **Skip:** Only when the human explicitly opts out.
 
 **Focus areas:**
 
-- Is this the right level of abstraction?
+- Does the ubiquitous language in the README align with the rest of the
+  codebase? Any naming collisions, synonyms, or redefinitions?
+- Are bounded context boundaries correct — is this module doing too much or too
+  little?
+- Does the README design suggest a clean separation of concerns, or will it
+  produce tangled implementation phases? (This is what the architectural sketch
+  will need to reflect — catch the problem here, before types lock it in.)
 - Are there simpler alternatives that achieve the same goal?
 - What edge cases are missing from the spec?
 - What decisions will be hard to change later?
@@ -564,13 +690,46 @@ contract. **Skip:** Only when the human explicitly opts out.
 **Provide to agent:** README updates, any design notes, existing codebase
 patterns
 
-### AR-2: Test Strategy Challenge
+### AR-2: Architectural Sketch Challenge
+
+**Trigger:** After the architectural sketch is written in DOCS.md (Phase 0 step
+0.6), before the final review and implementation begin (step 0.7). **Skip:**
+Only when the human explicitly opts out.
+
+**Focus areas:**
+
+- Is the sketch at the right level of abstraction — does it constrain structure
+  without prescribing implementation? (No function names, variable names, or
+  pseudocode should appear.)
+- Are the named execution phases the right granularity? Are any phases too
+  coarse (should be split) or too fine (should be merged)?
+- Does each phase have a single, distinct responsibility? Are there hidden
+  dependencies between phases that should be made explicit?
+- Are the structural constraints complete? Are there failure modes, async
+  boundaries, or edge cases not captured?
+- Is the "out of scope" section correct and complete? Does it explicitly name
+  things callers are responsible for?
+- Does the sketch use the ubiquitous language from step 0.1, or has new
+  terminology crept in?
+- Is the sketch consistent with the types defined in step 0.4? Do domain terms
+  in the sketch map cleanly to types?
+
+**Provide to agent:** DOCS.md architectural sketch, README.md, types.ts
+
+### AR-3: Test Strategy Challenge
 
 **Trigger:** After first failing test is written for an increment. **Skip:**
 Only when the human explicitly opts out.
 
 **Focus areas:**
 
+- **Triangulation check**: Can this first test be passed by returning a
+  hardcoded value? If yes, name the second test that makes hardcoding
+  impossible. A test suite that doesn't triangulate produces implementations
+  with Fake It values that survive beyond the first increment.
+- **ZOMBIES coverage**: Does the test sequence move from Zero/null/empty → One →
+  Many → Boundaries? If the first test is a complex happy-path case, the
+  ordering is wrong — start simpler.
 - Are we testing behavior or implementation details?
 - What edge cases are missing?
 - Are we over-testing (brittle tests that break on refactor)?
@@ -580,13 +739,20 @@ Only when the human explicitly opts out.
 **Provide to agent:** The test file, the stub/types being tested, related
 existing tests
 
-### AR-3: Implementation Audit
+### AR-4: Implementation Audit
 
 **Trigger:** After self-review (step 12) for an increment. **Skip:** Only when
 the human explicitly opts out.
 
 **Focus areas:**
 
+- **Structural quality**: Does the implementation reflect the DOCS.md
+  architectural sketch? Are the named execution phases present and distinct? Are
+  concerns properly separated, or have phases been collapsed into an
+  undifferentiated block to pass tests?
+- **Fake It residue**: Are there hardcoded or special-cased values that should
+  have been triangulated away? If the implementation returns a fixed value for
+  any non-trivial input, triangulation was incomplete.
 - Is this the simplest solution? Could it be done in fewer lines?
 - Are there existing utilities being ignored (check src/utils/)?
 - Does it follow the codebase's functional conventions (no this, no mutable
@@ -595,10 +761,10 @@ the human explicitly opts out.
 - Is error handling appropriate (validate at boundaries only)?
 - Would a junior developer understand this without explanation?
 
-**Provide to agent:** The implementation file, its test file, types, any
-utilities used
+**Provide to agent:** The implementation file, its test file, types, the DOCS.md
+architectural sketch, any utilities used
 
-### AR-4: Pre-Merge Review
+### AR-5: Pre-Merge Review
 
 **Trigger:** After all increments complete, before commit prompt. **Skip:** Only
 when the human explicitly opts out.
@@ -606,14 +772,16 @@ when the human explicitly opts out.
 **Focus areas:**
 
 - Cross-file consistency: do naming, patterns, and conventions align?
-- Documentation sync: do README, types, JSDoc, and tests all agree?
+- Documentation sync: do README, DOCS.md, types, JSDoc, and tests all agree?
 - Missing test scenarios: are there untested code paths?
 - Convention compliance: does the full changeset follow DEV.md conventions?
-- Architecture: does this fit cleanly into the existing layer stack?
+- Architecture: does this fit cleanly into the existing layer stack? Does the
+  final implementation match the DOCS.md architectural sketch, or did
+  implementation drift from the Phase 0 design?
 - Scope: did we add anything beyond what was requested?
 
 **Provide to agent:** Full diff (git diff), modified files list, the original
-task description
+task description, DOCS.md for modified modules
 
 ## References
 

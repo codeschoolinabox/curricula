@@ -49,7 +49,7 @@ function createPureOperatorEvent({
 	coercedOperands,
 }: PureOperatorParams = {} as PureOperatorParams): Omit<
 	PureOperatorEvent,
-	'semantics' | 'loc' | 'node' | 'source'
+	'step' | 'semantics' | 'loc' | 'node' | 'source'
 > {
 	if (!operands || operands.length === 0) {
 		throw new Error('createPureOperatorEvent: operands must be non-empty');

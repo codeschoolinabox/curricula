@@ -16,7 +16,7 @@ function createFunctionReturnEvent({
 } = {} as {
 	readonly name: string;
 	readonly value: ValueRepresentation;
-}): Omit<FunctionReturnEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<FunctionReturnEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (!name) {
 		throw new Error('createFunctionReturnEvent: name is required and must be non-empty');
 	}

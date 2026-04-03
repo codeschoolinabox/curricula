@@ -19,7 +19,7 @@ function createTemplateEvaluationEvent({
 	readonly index: number;
 	readonly value: ValueRepresentation;
 	readonly beginStep: number;
-}): Omit<TemplateEvaluationEvent, 'semantics' | 'loc' | 'node' | 'source'> {
+}): Omit<TemplateEvaluationEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (index < 0) {
 		throw new Error('createTemplateEvaluationEvent: index must be >= 0');
 	}

@@ -24,7 +24,7 @@ function createLiteralEvent({
 	readonly value: ValueRepresentation;
 } = {} as { readonly kind: LiteralKind; readonly value: ValueRepresentation }): Omit<
 	LiteralEvent,
-	'semantics' | 'loc' | 'node' | 'source'
+	'step' | 'semantics' | 'loc' | 'node' | 'source'
 > {
 	if (!kind || !VALID_KINDS.has(kind)) {
 		throw new Error(

@@ -58,6 +58,9 @@ export type JejTag = {
 export type VariableInfo = {
 	kind: 'let' | 'const' | 'global';
 	declarationStep: number;
+	/** False when variable is in TDZ (declared but not yet initialized).
+	 *  Set to true after the first WriteEffect assigns the initial value. */
+	initialized: boolean;
 };
 
 /**
@@ -93,7 +96,13 @@ export type ScopeInfo = {
  */
 export type TracerState = {
 	trace: unknown[];
+	/** Internal step counter for scope/variable cross-references.
+	 *  Incremented by block-setup (scope creation) and block-declaration
+	 *  (variable registration). Not visible on events. */
 	step: number;
+	/** Contiguous event counter. Only incremented by emitEvent().
+	 *  Appears as the `step` field on every TraceEvent. */
+	eventStep: number;
 	scopeStack: ScopeInfo[];
 	iterationCounters: Record<string, number>;
 	lastExpressionResult: unknown;

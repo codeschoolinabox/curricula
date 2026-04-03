@@ -641,20 +641,27 @@ the function boundary. These libraries are consumed by LLMs — freezing catches
 accidental mutation at the return boundary rather than producing silent bugs
 downstream.
 
+Use the freeze utilities from this package's shared utilities:
+
+```typescript
+import { freezeInPlace, cloneAndFreeze } from '../utils/freeze.js';
+// ^^^ Adjust import path to match this package's utility location.
+//     If you cannot locate these utilities, stop and ask — do not
+//     inline a custom implementation.
+```
+
 **Two operations, one ownership rule:**
 
-| Operation       | When to use                                      | Behavior                      |
-| --------------- | ------------------------------------------------ | ----------------------------- |
-| Clone + freeze  | Objects we don't own (caller-provided, external) | Clones first, returns new ref |
-| Freeze in place | Objects we just built (fresh results, wrappers)  | Freezes in place, same ref    |
+| Operation        | When to use                                         | Behavior                      |
+| ---------------- | --------------------------------------------------- | ----------------------------- |
+| `freezeInPlace`  | Objects we just built (fresh results, new wrappers) | Freezes in place, same ref    |
+| `cloneAndFreeze` | Objects we don't own (caller-provided, external)    | Clones first, returns new ref |
 
 The distinction is about **ownership**: if you just constructed the object
 (e.g., a spread result, a new config wrapper), freeze it in place — there's no
 reason to clone something nobody else has a reference to. If the object came
 from outside (a parameter, imported data), clone-then-freeze to avoid mutating
 the caller's data.
-
-Use a deep-freeze utility from your package's dependencies for both operations.
 
 **What to freeze:**
 
@@ -671,13 +678,13 @@ comment.
 // ✅ — freshly built result, freeze in place
 function createResult(steps, meta) {
 	const result = { ok: true, steps, meta };
-	return freezeInPlace(result); // your deep-freeze utility
+	return freezeInPlace(result);
 }
 
 // ✅ — caller-provided config, clone + freeze
 function resolveConfig(userConfig) {
-	const resolved = merge(defaults, userConfig); // your deep-merge utility
-	return cloneAndFreeze(resolved); // your deep-freeze utility
+	const resolved = merge(defaults, userConfig);
+	return cloneAndFreeze(resolved);
 }
 
 // ❌ — returned object is mutable; LLM consumer can accidentally mutate
@@ -713,11 +720,61 @@ non-obvious architecture or key design decisions also have a `DOCS.md`:
 - `DOCS.md` captures the "why" — tradeoffs, alternatives considered,
   constraints. Keep it short. It is NOT an API reference — JSDoc handles that.
   Hand-maintained: fix it or delete it if it goes stale.
+- For **new modules**, DOCS.md is written in Phase 0 step 0.5 as an
+  **architectural sketch**, before any implementation exists. This is the
+  structural target the Refactor step is held against. See format below.
 - Tests directories (`tests/`) are exempt from needing `README.md`
 - `README.md` is cross-referenced: parent links down, child links up, siblings
   link to each other
 - Public functions have JSDoc/TSDoc in source; TypeDoc generates `docs/`
   (gitignored, CI-only)
+
+**Architectural sketch format** (for DOCS.md, written prospectively in Phase 0):
+
+The sketch describes _structure_, not _implementation_. It constrains the space
+of acceptable implementations without fixing one.
+
+Format constraints:
+
+- Named execution phases with input/output state described in **domain terms**
+- Structural constraints (what must fail loudly vs. degrade gracefully)
+- Out-of-scope concerns (explicit boundary)
+- **No function names, no variable names, no pseudocode** — if it looks like
+  code, it has crossed the line into implementation. Rewrite in prose.
+- Short enough to read in 60 seconds
+
+```markdown
+## Architectural Sketch
+
+> Written Phase 0, before implementation. The Refactor step is held against this
+> document — not what the code does, but what shape it takes.
+
+### Execution phases
+
+1. **Validate** (sync, throws) — reject malformed input at the boundary; loud
+   failure, no silent fallbacks. Input: raw user-provided options (may be
+   partial or malformed). Output: structurally sound input, confirmed at the
+   boundary.
+
+2. **Prepare** (sync, pure) — resolve defaults, expand shorthands, apply
+   presets; no I/O or side effects. Input: validated options. Output: fully
+   resolved config, no optional fields remaining.
+
+3. **Execute** (async, delegates) — hand off to the registered tracer strategy;
+   this is the only async phase. Input: resolved config + code string. Output:
+   trace result.
+
+### Structural constraints
+
+- Tracer lookup: loud failure — no silent fallback to a default tracer
+- Config preparation: pure — no I/O, no observable side effects
+- Execute: the only async phase; everything before it is synchronous
+
+### Out of scope
+
+- Caching results (caller responsibility)
+- Selecting which tracer to use (caller provides the name)
+```
 
 **Public function documentation:**
 
@@ -740,8 +797,7 @@ function createConfig(options: UserOptions = {}): ResolvedConfig { ... }
 
 ### Test Organization
 
-Unit tests live in a `tests/` subdirectory at the same level as the files they
-test:
+Unit tests live in a `tests/` subdirectory co-located with the source they test:
 
 ```text
 src/
@@ -766,11 +822,13 @@ npm run test:watch  # Run tests in watch mode
 
 ### 2. Making Changes
 
+All non-trivial changes follow the Incremental Development Workflow below. For
+quick reference:
+
 1. Create feature branch
-2. Update relevant default export function
-3. Add/update tests
-4. Update `README.md` in affected directories
-5. Run quality checks:
+2. Follow Phase 0 → Phase 1 (per increment) → Phase 2 (see below)
+3. Update `README.md` in affected directories
+4. Run quality checks before each commit:
 
 ```bash
 npm run validate  # lint + type-check + test
@@ -787,12 +845,15 @@ npm run validate  # lint + type-check + test
 - [ ] Types added to module's `types.ts`; prefer `type` over `interface`
 - [ ] Tests in `tests/` subdirectory (not alongside source files), `.test.ts`
       suffix
-- [ ] Tests cover happy path and edge cases
+- [ ] Tests written in ZOMBIES order; suite is triangulated (no single test
+      passable by hardcoding after the first increment)
 - [ ] No mutations of input data
-- [ ] Returned objects/arrays are deep frozen (clone-then-freeze for external,
-      freeze-in-place for own)
+- [ ] Returned objects/arrays are deep frozen (`freezeInPlace` for own,
+      `cloneAndFreeze` for external)
 - [ ] Errors handled gracefully
-- [ ] `README.md` exists in every modified directory
+- [ ] `README.md` exists and is current in every modified directory
+- [ ] `DOCS.md` written (new module) or updated (structural change); reflects
+      actual implementation phases and constraints
 - [ ] JSDoc/TSDoc on public functions; `@remarks` for consumer-facing "why"
 
 ## Testing Strategy
@@ -923,6 +984,52 @@ it.each([
 
 Test names and describe blocks are executable documentation.
 
+#### Triangulation
+
+A test suite is **triangulated** when no individual test can be passed by
+returning a hardcoded value — each test constrains the implementation from a
+different angle. Un-triangulated suites produce implementations with hardcoded
+special cases that survive code review because all tests pass.
+
+After writing the first test for any increment, ask: _could this be passed by
+`return someFixedValue`?_ If yes, write the second test to make that impossible
+before implementing.
+
+#### ZOMBIES Sequencing
+
+**ZOMBIES** is a test-ordering heuristic that naturally produces triangulation.
+Write tests in this order:
+
+| Letter               | Scenario                                         | Why first                                               |
+| -------------------- | ------------------------------------------------ | ------------------------------------------------------- |
+| **Z**ero             | Null, empty, zero — degenerate inputs            | Simplest possible case; often reveals boundary handling |
+| **O**ne              | Single item, simplest non-trivial input          | Forces a real (if minimal) implementation               |
+| **M**any             | Multiple items                                   | Makes hardcoding structurally impossible                |
+| **B**oundaries       | Edge values (min/max, empty vs. one, off-by-one) | Catches range errors                                    |
+| **I**nterfaces       | Contract enforcement at module boundary          | Validates the public API                                |
+| **E**xceptions       | Error paths, throws, invalid input               | Tests the failure modes in the sketch                   |
+| **S**imple scenarios | Additional happy-path sanity checks              | Fills coverage after structure is proven                |
+
+Zero → One → Many is the minimum triangulation sequence. Writing One before Many
+means you can still hardcode; writing Many before One means you're testing the
+general case before the degenerate case, missing the simpler failure modes.
+
+#### Fake It (Till You Make It)
+
+**Fake It** means returning a hardcoded value to pass the first test. It is a
+legitimate and intentional TDD move — not a shortcut. It gives you a Red → Green
+cycle with near-zero implementation risk, confirming the test harness works
+before writing real logic.
+
+**Fake It has an expiry date**: it expires when the second test is written. The
+second test must be written to make the hardcoded value fail. If it doesn't — if
+`return []` still passes the second test — the tests are not triangulated.
+
+**Fake It without Make It** is the anti-pattern: staying in Fake It mode past
+triangulation, either because the test suite didn't force generalization or
+because the Refactor step was treated as formatting cleanup. This is the root
+cause of hardcoded magic values in otherwise-passing implementations.
+
 #### Complete Example
 
 ```typescript
@@ -962,21 +1069,97 @@ of work.
 
 ### Phase 0: Documentation Specification (before any code)
 
-Documentation-driven development ensures clarity BEFORE code exists.
+> **⛔ Agents routinely skip this phase under time pressure or when a task feels
+> small. Do not skip it. The cost of a wrong domain model or ambiguous
+> vocabulary compounds across every file written after. Phase 0 is not overhead
+> — it is the work. Proceed to Phase 1 only after all seven steps below are
+> complete.**
 
-**0.1. Update README.md** — What does this module do? Where does it fit?
+Documentation-driven development ensures clarity BEFORE code exists. It is also
+where Domain-Driven Design (DDD) thinking lives: the domain model, the
+ubiquitous language, and the bounded context should all be established in
+writing before a single type is defined.
 
-**0.2. Adversarial Design Challenge (AR-1)** — Spawn a separate reviewer agent
+**0.1. Establish the ubiquitous language** — Before touching README or code,
+identify the domain vocabulary for this module.
+
+- What do the humans who use this codebase call the core concepts?
+- List the key terms and their precise meanings in a short glossary. This
+  becomes the naming contract: functions, types, variables, and docs must all
+  use these terms consistently.
+- Watch for synonyms (two words for the same thing) and homonyms (one word with
+  two meanings). Resolve them here, not in code review.
+
+```markdown
+<!-- Example glossary in README or DOCS.md -->
+
+**Tracer** — a registered strategy for recording code execution steps. **Step**
+— a single recorded moment in a trace (line, expression, or call). **Trace** —
+the ordered collection of steps produced by running a tracer. **Config** — the
+resolved, validated options passed to a tracer. Not the same as user-provided
+options (UserOptions), which may be partial.
+```
+
+**0.2. Update README.md** — Using the ubiquitous language established above:
+what does this module do? Where does it fit in the bounded context of this
+package? What does it own, and what lies outside its boundary?
+
+- The README is the domain model in prose. If you cannot explain the module in
+  plain language without ambiguity, the design is not ready.
+- Identify inputs and outputs at the boundary. What crosses into this module?
+  What does it return? What does it explicitly NOT handle?
+
+**0.3. Adversarial Design Challenge (AR-1)** — Spawn a separate reviewer agent
 to challenge the README spec before types lock the contract. See AGENTS.md §
 Adversarial Review Protocol for prompt structure and verdict definitions.
 
-**0.3. Update types.ts** — Type signatures are executable documentation
+Key DDD questions for AR-1:
 
+- Does the ubiquitous language align with the rest of the codebase? Any
+  collisions or redefinitions?
+- Are the bounded context boundaries correct? Is this module doing too much or
+  too little?
+- Are any domain concepts missing from the language glossary?
+
+**0.4. Update types.ts** — Types are the domain model expressed in TypeScript.
+
+- Translate the ubiquitous language directly into type names. `Config` in the
+  glossary becomes `type Config` here — not `Options`, not `Settings`, not
+  `Params`.
 - Update type definitions to reflect the new contract (incorporating AR-1
-  feedback)
-- Type errors after this step become the TODO list for implementation
+  feedback).
+- Type errors after this step become the TODO list for implementation.
 
-**0.4. Review & Resolve** — Confirm understanding before writing code
+**0.5. Write the architectural sketch → DOCS.md** — Before any implementation,
+record the structural target in DOCS.md.
+
+This is what separates a plan that produces architecture from a plan that
+produces test-passing code. The sketch describes execution phases, structural
+constraints, and explicit boundaries in domain terms — no function names, no
+variable names, no pseudocode. See § Directory Documentation Convention above
+for the required format and example.
+
+The sketch answers: _What shape must a correct implementation take?_ The
+Refactor step in Phase 1 is held against this document. If the implementation
+passes all tests but doesn't reflect the sketch — wrong phases, collapsed
+concerns, missing boundaries — refactoring is not complete.
+
+**0.6. Adversarial Sketch Challenge (AR-2)** — Spawn a separate reviewer agent
+to challenge the architectural sketch before implementation begins. See
+AGENTS.md § AR-2 for focus areas.
+
+The sketch is the single most consequential document in the workflow — it is
+what the entire Refactor step is held against. A first-pass agent writing it
+without challenge will routinely produce a sketch that is either too abstract
+(useless as a structural target) or too prescriptive (pseudocode in disguise).
+AR-2 catches this before it locks in.
+
+**0.7. Review & Resolve** — Confirm understanding before writing code.
+
+- Can you read types.ts, README.md, and DOCS.md together and fully predict what
+  the implementation will do and what shape it will take?
+- If not, the ambiguity will surface as a bug or a structural mess. Resolve it
+  now.
 
 ### Phase 1: TDD Implementation
 
@@ -987,28 +1170,50 @@ For each behavioral increment:
 2. **Stub function** — create function with stub body
 3. **Placeholder types** — `any`/`unknown` to unblock; tighten later
 4. **Lint checkpoint 1** — `npm run lint <new-file>`. Fix violations.
-5. **Unit test** — write ONE failing test for the behavior 5b. **Adversarial
-   Test Challenge (AR-2)** — Spawn a separate reviewer agent to challenge test
-   strategy. See AGENTS.md § AR-2 for focus areas.
+5. **Unit test** — write ONE failing test in ZOMBIES order. Start with the
+   degenerate case (Zero) if this is the first test for this function. After
+   writing it, ask: _could this be passed by returning a hardcoded value?_ If
+   yes, note what the second test will be — the one that makes hardcoding
+   impossible — before moving on.
+
+   > **5b. Adversarial Test Challenge (AR-3)** — Spawn a separate reviewer agent
+   > to challenge the test strategy before implementing. See AGENTS.md § AR-3
+   > for focus areas, including the triangulation check.
+
 6. **Lint checkpoint 2** — `npm run lint <test-file>`. Fix violations.
-7. **Implement** — minimal code to pass the test (Red → Green)
+7. **Implement** — minimal code to pass the test (Red → Green). **Fake It is
+   acceptable here for the first test** — returning a hardcoded value to confirm
+   the test harness and stub are wired correctly is a legitimate TDD move. It is
+   not a shortcut; it is the move. It expires when the next test is written.
 8. **Lint checkpoint 3** — `npm run lint <impl-file>`. Fix violations.
-9. **Refactor** — clean up while tests stay green
+9. **Refactor** — address structural quality while behavioral correctness holds.
+
+   Tests passing means _behavioral correctness_ is achieved — the function does
+   what it's specified to do. That is necessary but not sufficient. The Refactor
+   step addresses _structural quality_: does the implementation reflect the
+   architectural sketch in DOCS.md?
+
+   Check against the DOCS.md sketch:
+   - Do the execution phases match? Is each phase distinct and named?
+   - Are concerns separated — not collapsed into a monolith to pass tests?
+   - Are there any Fake It values still present? They should have been
+     triangulated away by the second test. If hardcoded values survive here,
+     either the test suite didn't triangulate or generalization was skipped.
+   - Does the code use the ubiquitous language from Phase 0?
+
 10. **Lint checkpoint 4** — final lint on modified files. Should be clean.
 11. **Update types** — finalize based on actual implementation
 12. **Self-review** — simplest solution? only what requested?
-    junior-maintainable? 12b. **Adversarial Implementation Audit (AR-3)** —
-    Spawn a separate reviewer agent to audit the implementation. See AGENTS.md §
-    AR-3 for focus areas.
+    junior-maintainable?
+
+    > **12b. Adversarial Implementation Audit (AR-4)** — Spawn a separate
+    > reviewer agent to audit the implementation. See AGENTS.md § AR-4 for focus
+    > areas, including structural quality and Fake It residue checks.
+
 13. **Quality checks** — `npm test && npm run lint && npm run type-check`
-14. **Verify docs match implementation** — update README.md if behavior changed
-    during TDD
+14. **Verify docs match implementation** — update README.md and DOCS.md if
+    behavior or structure changed during TDD
 15. **Atomic commit** — one behavior per commit
-
-Use linter feedback as refactoring guide:
-
-- `cognitive-complexity` error? Break into smaller functions
-- `no-duplicate-string`? Extract constant
 
 ### Phase 2: Pre-Merge Review
 
@@ -1016,8 +1221,8 @@ After all increments are complete, before prompting the human to commit:
 
 1. **Run full quality checks** —
    `npm test && npm run lint && npm run type-check`
-2. **Adversarial Pre-Merge Review (AR-4)** — Spawn a separate reviewer agent to
-   review the full changeset. See AGENTS.md § AR-4 for focus areas. Provide the
+2. **Adversarial Pre-Merge Review (AR-5)** — Spawn a separate reviewer agent to
+   review the full changeset. See AGENTS.md § AR-5 for focus areas. Provide the
    full diff, modified files list, and the original task description.
 3. **Address PAUSE/CONSIDER items** — resolve concerns per AGENTS.md §
    Resolution Rules
@@ -1209,13 +1414,14 @@ When the architecture evolves:
 
 Common patterns to avoid:
 
-| Anti-Pattern              | Rule                          | Example Fix                                     |
-| ------------------------- | ----------------------------- | ----------------------------------------------- |
-| **Over-engineering**      | Helper used once? Inline it   | `const x = getX(o)` → `const x = o.x`           |
-| **Class addiction**       | Prefer functions over classes | `class X` → `function createX()`                |
-| **Future-proofing**       | Don't add unused flexibility  | `options = {}` with unused fields → direct impl |
-| **Defensive over-coding** | Validate at boundaries only   | Remove internal re-validation                   |
-| **Verbose docs**          | Name + types self-document?   | Only document WHY or non-obvious contracts      |
+| Anti-Pattern                | Rule                                         | Example Fix                                         |
+| --------------------------- | -------------------------------------------- | --------------------------------------------------- |
+| **Over-engineering**        | Helper used once? Inline it                  | `const x = getX(o)` → `const x = o.x`               |
+| **Class addiction**         | Prefer functions over classes                | `class X` → `function createX()`                    |
+| **Future-proofing**         | Don't add unused flexibility                 | `options = {}` with unused fields → direct impl     |
+| **Defensive over-coding**   | Validate at boundaries only                  | Remove internal re-validation                       |
+| **Verbose docs**            | Name + types self-document?                  | Only document WHY or non-obvious contracts          |
+| **Fake It without Make It** | Hardcoded values expire after the first test | Write the second test to make hardcoding impossible |
 
 ### Pre-Commit Checklist
 
@@ -1226,6 +1432,9 @@ Before proposing code, answer YES to ALL:
 - [ ] **Helpers used >1x?** If used once, inline it
 - [ ] **Validate at boundaries only?** No re-validating internal calls
 - [ ] **Junior-maintainable?** Understandable without explanation
+- [ ] **Structural quality?** Does the implementation reflect the DOCS.md
+      architectural sketch — named phases, separated concerns, no Fake It values
+      surviving past the first increment?
 
 ## VS Code Setup
 

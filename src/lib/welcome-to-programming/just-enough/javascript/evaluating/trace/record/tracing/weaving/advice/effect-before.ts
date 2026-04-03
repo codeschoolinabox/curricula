@@ -1,11 +1,18 @@
 /**
  * @file Advice for effect@before — before side-effects execute.
  *
- * Events: emits BindingEvent(assign) and/or AssignmentOperatorEvent.
- * Reads assignment value from state.lastExpressionResult.
+ * Events: emits AssignmentOperatorEvent for compound assignments (+=, -=, etc.).
+ *
+ * @remarks
+ * BindingEvent(assign) has been moved to effect-after.ts because Aran fires
+ * effect@before BEFORE the value sub-expression is evaluated. The compound
+ * AssignmentOperatorEvent stays here because it needs the pre-write current
+ * value (available via state.lastReadValues) and the RHS value (available
+ * via state.lastExpressionResult for compound assignments where the RHS is
+ * evaluated before the compound effect).
  */
 
-import { isBindingGateOpen, isOperatorEnabled } from './config-gate.js';
+import { isOperatorEnabled } from './config-gate.js';
 import emitEvent from './emit-event.js';
 import lookupVariable from './lookup-variable.js';
 import representValue from '../../represent-value/represent-value.js';
@@ -33,18 +40,6 @@ function effectBefore(state: TracerState, ...point: unknown[]): void {
 				: [representValue(assignedValue)],
 			result: representValue(assignedValue),
 			scopeCreationStep: lookup.scope.creationStep,
-		});
-	}
-
-	// BindingEvent(assign) — for both simple and compound
-	if (isBindingGateOpen(state.config, lookup.info.kind, 'assign', variable)) {
-		emitEvent(state, tag, 'expression', 'bindings.assign', {
-			kind: lookup.info.kind,
-			event: 'assign',
-			name: variable,
-			scopeCreationStep: lookup.scope.creationStep,
-			declarationStep: lookup.info.declarationStep,
-			value: representValue(assignedValue),
 		});
 	}
 }

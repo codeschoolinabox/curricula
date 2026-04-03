@@ -23,7 +23,7 @@ function createShortCircuitingOperatorEvent({
 	shortCircuited,
 }: ShortCircuitingParams = {} as ShortCircuitingParams): Omit<
 	ShortCircuitingOperatorEvent,
-	'semantics' | 'loc' | 'node' | 'source'
+	'step' | 'semantics' | 'loc' | 'node' | 'source'
 > {
 	if (shortCircuited && right !== undefined) {
 		throw new Error(

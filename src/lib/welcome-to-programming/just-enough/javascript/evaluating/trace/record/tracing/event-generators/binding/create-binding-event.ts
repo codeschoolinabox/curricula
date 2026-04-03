@@ -39,7 +39,7 @@ function createBindingEvent({
 	explicit,
 }: BindingParams = {} as BindingParams): Omit<
 	BindingEvent,
-	'semantics' | 'loc' | 'node' | 'source'
+	'step' | 'semantics' | 'loc' | 'node' | 'source'
 > {
 	if (!name) {
 		throw new Error('createBindingEvent: name is required and must be non-empty');

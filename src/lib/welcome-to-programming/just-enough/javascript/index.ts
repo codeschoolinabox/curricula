@@ -14,7 +14,7 @@ export { default as trace } from './api/trace.js';
 export { default as debug } from './api/debug.js';
 export { default as validate } from './api/validate.js';
 export { default as parse } from './api/parse.js';
-export { default as isJej } from './validating/is-jej.js';
+export { default as isJej } from './lib/validating/is-jej.js';
 export { format, checkFormat } from './api/format.js';
 
 // --- Type re-exports ---
@@ -39,6 +39,6 @@ export type {
 
 export type { TraceEvent } from './evaluating/trace/record/tracing/types.js';
 
-export type { Violation } from './validating/types.js';
+export type { Violation } from './lib/validating/types.js';
 
-export type { CheckFormatResult } from './formatting/types.js';
+export type { CheckFormatResult } from './lib/formatting/types.js';

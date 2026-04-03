@@ -48,7 +48,7 @@ function createAssignmentOperatorEvent({
 	shortCircuited,
 }: AssignmentParams = {} as AssignmentParams): Omit<
 	AssignmentOperatorEvent,
-	'semantics' | 'loc' | 'node' | 'source'
+	'step' | 'semantics' | 'loc' | 'node' | 'source'
 > {
 	if (!target) {
 		throw new Error('createAssignmentOperatorEvent: target is required and must be non-empty');
