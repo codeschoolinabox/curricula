@@ -171,6 +171,11 @@ Layer 3 browser tests (13 written, 7 pass) revealed Worker module doesn't load i
 | Module Worker for loading | Blob URL + dynamic import broken in vitest. Vite handles module Workers natively | Phase 6a |
 | Module execution deferred | Marginal gain (eval+strict already works), real cost (async, split paths, Firefox) | Phase 6a |
 | Plans only in plan mode | Casual edits bypass review process | Session incident |
+| EVENT_READY SAB flag | Timeout must distinguish paused Worker from stuck Worker | Phase 6c SAB fix |
+| timedOut flag not queued message | Queue floods with events from while(true){} | Phase 6c SAB fix |
+| Trust the code, not the docs | Event shapes differ from type definitions | Phase 6e testing |
+| Git: additive commands only | Claude can commit but not push, amend, reset, or modify history | User rule |
+| Comprehensive plan reviews | Every review must cross-reference plan, codebase, deps, conversation, domain expertise | Phase 9 |
 
 ---
 
