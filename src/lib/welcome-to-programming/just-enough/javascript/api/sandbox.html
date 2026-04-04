@@ -730,13 +730,15 @@ console.log(greeting);
 					var blob = new Blob([json], { type: 'application/json' });
 					var url = URL.createObjectURL(blob);
 					var a = document.createElement('a');
-					var slug = (lastTraceReport.code || 'empty')
-						.replace(/[^a-zA-Z0-9]/g, '-')
-						.replace(/-+/g, '-')
-						.replace(/^-|-$/g, '')
-						.slice(0, 40);
+					var ua = navigator.userAgent;
+					var browser = /Firefox/.test(ua) ? 'firefox'
+						: /Edg/.test(ua) ? 'edge'
+						: /Chrome/.test(ua) ? 'chrome'
+						: /Safari/.test(ua) ? 'safari'
+						: 'unknown';
+					var ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 					a.href = url;
-					a.download = 'trace-bug-' + slug + '.json';
+					a.download = 'trace-bug-' + browser + '-' + ts + '.json';
 					a.click();
 					URL.revokeObjectURL(url);
 				});
