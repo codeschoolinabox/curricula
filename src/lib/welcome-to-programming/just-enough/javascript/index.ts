@@ -37,7 +37,7 @@ export type {
 	RunEvent,
 } from './evaluating/shared/types.js';
 
-export type { TraceEvent } from './evaluating/trace/record/tracing/types.js';
+export type { TraceEvent } from './evaluating/trace/tracing/types.js';
 
 export type { Violation } from './lib/validating/types.js';
 

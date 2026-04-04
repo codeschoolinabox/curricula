@@ -9,7 +9,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import trace from '../trace.js';
 
-import type { TraceEvent } from '../../evaluating/trace/record/tracing/types.js';
+import type { TraceEvent } from '../../evaluating/trace/tracing/types.js';
 
 vi.setConfig({ testTimeout: 60000 });
 

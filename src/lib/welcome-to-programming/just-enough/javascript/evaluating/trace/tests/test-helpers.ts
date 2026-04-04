@@ -5,9 +5,9 @@
  * Each browser test file imports these to avoid duplication.
  */
 
-import createTracingGenerator from '../record/tracing/index.js';
+import createTracingGenerator from '../tracing/index.js';
 
-import type { TraceEvent } from '../record/tracing/types.js';
+import type { TraceEvent } from '../tracing/types.js';
 
 const ALL_ENABLED: Record<string, unknown> = {
 	bindings: {

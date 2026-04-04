@@ -12,7 +12,7 @@ import type { RecordFunction } from '@study-lenses/tracing';
 import id from './id.js';
 import langs from './langs.js';
 import optionsSchema from './options-schema.js';
-import record from './record/index.js';
+import record from './tracing/index.js';
 import deepFreeze from '@utils/deep-freeze.js';
 import verifyOptions from './verify-options/index.js';
 

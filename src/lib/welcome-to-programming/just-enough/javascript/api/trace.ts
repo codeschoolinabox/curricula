@@ -12,14 +12,14 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import validate from './validate.js';
 import { checkFormat } from './format.js';
-import createTracingGenerator from '../evaluating/trace/record/tracing/index.js';
+import createTracingGenerator from '../evaluating/trace/tracing/index.js';
 import createExecution from '../evaluating/shared/create-execution.js';
 import prepareConfig from '../evaluating/trace/configuring/prepare-config.js';
 import optionsSchema from '../evaluating/trace/options-schema.js';
 
 import type { TraceResult } from './types.js';
 import type { Execution, TraceConfig } from '../evaluating/shared/types.js';
-import type { TraceEvent } from '../evaluating/trace/record/tracing/types.js';
+import type { TraceEvent } from '../evaluating/trace/tracing/types.js';
 
 /**
  * Validates code against the full JeJ level, then traces it.

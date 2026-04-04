@@ -1,0 +1,1 @@
+for runtime integration: be sure it adjusts to script if `with` is present
