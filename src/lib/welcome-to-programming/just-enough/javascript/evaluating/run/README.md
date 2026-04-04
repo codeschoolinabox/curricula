@@ -77,6 +77,9 @@ All traps are always defined — there is no config-driven trap selection.
   headers on the hosting site. Returns an error event if SAB is unavailable.
 - **SAB pause protocol**: Worker pauses after each event via `Atomics.wait` on
   control slot 4 (pause flag). Generator `next()` resumes via `Atomics.notify`.
+  The trace module extends this with an event-ready flag at control slot 5 (see
+  `../shared/DOCS.md` for the full 6-slot layout). The run module does not use
+  the event-ready flag.
 - **Two-step protocol**: setup and execute are separate messages so the trap
   definition code does not affect learner code line numbers.
 - **Console forwarding kept**: `forwardToConsole` fires alongside event

@@ -57,9 +57,25 @@
 ### Out of scope
 
 - Caching instrumented code (caller responsibility)
-- Config expansion/validation (handled by `@study-lenses/tracing` wrapper)
+- Config expansion/validation (handled by `../../../configuring/` pipeline)
 - Worker lifecycle management (handled by `index.ts` async generator, not by
   the instrumentation pipeline)
+
+### Worker pause protocol (trace-worker.ts)
+
+The Worker uses a two-flag SAB handshake after each event:
+
+1. `postMessage({ type: 'entry', entry: event })` — queue event data
+2. `Atomics.store(PAUSE_INDEX, PAUSED)` — signal paused
+3. `Atomics.store(EVENT_READY_INDEX, 1)` + `Atomics.notify` — signal event ready
+4. `Atomics.wait(PAUSE_INDEX, PAUSED)` — block until main thread resumes
+
+The EVENT_READY flag lets the main thread's timeout handler distinguish
+"Worker paused with pending event" from "Worker stuck in infinite loop."
+See `evaluating/shared/DOCS.md` for the full SAB layout and protocol details.
+
+The main thread uses a `timedOut` flag (not a queued message) for timeout
+handling, checked directly on every loop iteration.
 
 ## Key design decisions
 

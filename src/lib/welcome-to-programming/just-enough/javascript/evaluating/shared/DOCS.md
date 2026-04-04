@@ -38,19 +38,19 @@ The Worker must pause between events so the main-thread generator can yield them
 one at a time. Without pause, events would queue up in the message channel and
 arrive in bulk — defeating the purpose of streaming.
 
-### Buffer layout change
+### Buffer layout
 
-The control array extends from 4 to 5 `Int32` slots. `PAYLOAD_BYTE_OFFSET`
-moves from 16 to 20.
+The control array uses 6 `Int32` slots. `PAYLOAD_BYTE_OFFSET` is 24.
 
 ```text
-control = Int32Array(sab, 0, 5)    →  bytes 0-19
+control = Int32Array(sab, 0, 6)    →  bytes 0-23
   [0]: I/O control (0=idle, 1=waiting, 2=responded)
   [1]: response type (0=string, 1=boolean, 2=void)
   [2]: null flag
   [3]: payload byte length
-  [4]: pause flag (0=running, 1=paused)     ← NEW
-payload = Uint8Array(sab, 20)      →  bytes 20+   (was 16)
+  [4]: pause flag (0=running, 1=paused)
+  [5]: event-ready flag (0=not ready, 1=ready)
+payload = Uint8Array(sab, 24)      →  bytes 24+
 ```
 
 ### Why Atomics.wait for pause (not message-based)
@@ -60,16 +60,34 @@ to poll its message queue — `onmessage` fires asynchronously and cannot block
 synchronous code mid-execution. `Atomics.wait` truly freezes the Worker thread
 at the exact instruction, guaranteeing no events leak past the pause point.
 
-### Pause/resume flow
+### Pause/resume flow (trace module)
 
 1. Worker posts an event via `postMessage`
-2. Worker calls `Atomics.wait(control, 4, 1)` — blocks while flag is 1
-3. Main thread's generator `next()` sets flag to 0 + `Atomics.notify()` — wakes
-   Worker
-4. Worker continues execution until the next event
+2. Worker stores `PAUSED` to control[4], `EVENT_READY` to control[5], notifies [5]
+3. Worker calls `Atomics.wait(control, 4, 1)` — blocks while flag is 1
+4. Main thread's timeout handler checks control[5] — if event-ready, reschedules
+   (Worker is paused, not stuck)
+5. Main thread receives `postMessage`, processes event
+6. Main thread clears control[5], sets control[4] to 0, `Atomics.notify(4)` — wakes
+7. Worker continues execution until the next event
+
+The run module uses a different pattern where the main thread writes PAUSED.
 
 For batch mode (`.then()` / `.result`), an internal drain loop calls `next()`
 rapidly — the Worker barely pauses.
+
+### Why EVENT_READY flag (control[5])
+
+The timeout handler needs to distinguish "Worker paused with pending event" from
+"Worker stuck in infinite loop." The Worker writes EVENT_READY to SAB (instant)
+before blocking, so the timeout handler has a reliable signal that doesn't depend
+on `postMessage` delivery timing.
+
+### Why timedOut flag instead of queued timeout message
+
+With instrumented `while(true){}`, a queued `{ type: 'timeout' }` message sits
+behind thousands of entry messages in the FIFO queue. The `timedOut` flag is
+checked directly on every loop iteration, bypassing the queue.
 
 ## Why cumulative timeout, not wall-clock
 

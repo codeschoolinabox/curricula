@@ -46,7 +46,16 @@ export default function createExecution<TEvent, TResult>(
 	let generator: AsyncGenerator<TEvent, TResult> | null = null;
 	let done = false;
 	let resolvedResult: TResult | null = null;
+	// WHY hasResult: resolvedResult uses null as "not set" but TResult is
+	// generic and could be null legitimately. hasResult is the real sentinel.
+	let hasResult = false;
 	let drainStarted = false;
+	let cancelled = false;
+	// WHY resolveResultPromise: cancel() and drain() both need to resolve
+	// the shared resultPromise. Extracted so cancel() can resolve it
+	// directly after generator.return() instead of waiting for drain().
+	let resolveResultPromise: ((value: TResult) => void) | null = null;
+	let rejectResultPromise: ((reason: unknown) => void) | null = null;
 
 	// Lazily create the generator
 	function getGenerator(): AsyncGenerator<TEvent, TResult> {
@@ -60,8 +69,14 @@ export default function createExecution<TEvent, TResult>(
 	// Started lazily when .result or .then() is accessed before
 	// anyone iterates, OR after the first iteration completes.
 	async function drain(): Promise<TResult> {
-		if (drainStarted) {
-			// Already draining or drained — wait for result
+		// WHY check done first: if live iteration already completed,
+		// resolvedResult is set. Return it directly — returning
+		// resultPromise here would deadlock (circular: resultPromise
+		// waits for drain(), drain() returns resultPromise).
+		if (done && hasResult) {
+			return resolvedResult as TResult;
+		}
+		if (drainStarted || cancelled) {
 			return resultPromise;
 		}
 		drainStarted = true;
@@ -74,11 +89,15 @@ export default function createExecution<TEvent, TResult>(
 			}
 			done = true;
 			resolvedResult = next.value;
+			hasResult = true;
 			return next.value;
 		} catch {
 			// Generator threw — should not happen per error-as-data
-			// convention, but handle gracefully
+			// convention, but handle gracefully. Set hasResult so replay
+			// returns empty instead of trying to iterate a dead generator.
 			done = true;
+			hasResult = true;
+			resolvedResult = null;
 			throw new Error('Execution generator threw unexpectedly');
 		}
 	}
@@ -86,24 +105,63 @@ export default function createExecution<TEvent, TResult>(
 	// The result Promise — created eagerly so multiple .then() calls
 	// share the same Promise. The drain starts when first accessed.
 	const resultPromise: Promise<TResult> = new Promise((resolve, reject) => {
+		resolveResultPromise = resolve;
+		rejectResultPromise = reject;
 		// Use queueMicrotask to allow the consumer to set up iteration
 		// before the drain starts. If they iterate first, drain() will
 		// be a no-op (drainStarted = true from the iterator).
 		queueMicrotask(() => {
+			if (cancelled) return;
 			drain().then(resolve, reject);
 		});
 	});
 
 	function cancel(): void {
+		if (cancelled) return;
+		cancelled = true;
+
 		if (!done && generator !== null) {
-			generator.return(undefined as unknown as TResult);
+			// WHY await .return(): generator.return() triggers the finally
+			// block which returns the partial result. We need that value
+			// to resolve resultPromise (otherwise it deadlocks when
+			// break in for-await is followed by await .result).
+			const returnResult = generator.return(undefined as unknown as TResult);
+			returnResult.then(
+				function onCancelResult(iterResult) {
+					done = true;
+					resolvedResult = iterResult.value;
+					hasResult = true;
+					if (resolveResultPromise) {
+						resolveResultPromise(iterResult.value);
+						resolveResultPromise = null;
+					}
+				},
+				function onCancelError(err) {
+					done = true;
+					if (rejectResultPromise) {
+						rejectResultPromise(err);
+						rejectResultPromise = null;
+					}
+				},
+			);
+		} else if (!done && generator === null) {
+			// Cancel before iteration — generator was never created.
+			// The queueMicrotask drain will see cancelled=true and skip.
+			// Resolve resultPromise with undefined (no execution occurred).
+			done = true;
+			hasResult = true;
+			if (resolveResultPromise) {
+				resolveResultPromise(undefined as unknown as TResult);
+				resolveResultPromise = null;
+			}
 		}
+
 		cancelFn();
 	}
 
 	// First iteration: live generator. Second+: replay from cache.
 	function createIterator(): AsyncIterator<TEvent> {
-		if (done && resolvedResult !== null) {
+		if (done && hasResult) {
 			// Replay from cached result
 			const logs = (resolvedResult as Record<string, unknown>).logs as
 				| readonly TEvent[]
@@ -138,6 +196,14 @@ export default function createExecution<TEvent, TResult>(
 				if (result.done) {
 					done = true;
 					resolvedResult = result.value;
+					hasResult = true;
+					// WHY resolve here: the queueMicrotask drain sees
+					// drainStarted=true and returns resultPromise (self-ref).
+					// Resolving directly avoids the circular dependency.
+					if (resolveResultPromise) {
+						resolveResultPromise(result.value);
+						resolveResultPromise = null;
+					}
 					return { value: undefined as unknown as TEvent, done: true };
 				}
 				return { value: result.value, done: false };
