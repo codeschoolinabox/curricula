@@ -196,24 +196,6 @@ function writeResumeSignal(views: BufferViews): void {
 	Atomics.notify(views.control, PAUSE_INDEX);
 }
 
-/**
- * Returns a string of JavaScript code that implements the Worker-side
- * pause check. Injected into the generated worker script.
- *
- * @remarks The Worker calls this after posting each event via
- * `postMessage`. If the pause flag is set to 1 (paused), the Worker
- * blocks until the main thread clears it via `writeResumeSignal`.
- *
- * Uses the same `control` Int32Array that the I/O protocol uses.
- */
-function checkPauseCode(): string {
-	return `function checkPause() {
-	while (Atomics.load(control, ${PAUSE_INDEX}) === ${PAUSE_PAUSED}) {
-		Atomics.wait(control, ${PAUSE_INDEX}, ${PAUSE_PAUSED});
-	}
-}`;
-}
-
 // --- Event-ready protocol (main-thread side) ---
 
 /**
@@ -239,7 +221,6 @@ export {
 	SIGNAL_IDLE,
 	SIGNAL_RESPONDED,
 	SIGNAL_WAITING,
-	checkPauseCode,
 	clearEventReady,
 	createBufferViews,
 	readResponse,

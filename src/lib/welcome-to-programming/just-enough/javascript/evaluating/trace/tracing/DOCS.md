@@ -1,6 +1,6 @@
 # tracing — Architecture
 
-> **Status**: Sections marked ⏳ describe planned changes not yet in the code.
+> All features described below are implemented.
 
 ## Architectural Sketch
 
@@ -9,7 +9,7 @@
 
 ### Execution phases
 
-1. **⏳ Pre-walk** (sync, pure) — walk the parsed ESTree AST to build parent
+1. **Pre-walk** (sync, pure) — walk the parsed ESTree AST to build parent
    metadata (e.g., VariableDeclarator → parent VariableDeclaration's `kind`).
    Needed because Aran's digest visits nodes bottom-up. Input: parsed AST.
    Output: parent info map.
@@ -21,7 +21,7 @@
    AranLang AST + tag map.
 
 3. **Aspect assembly** (sync, pure) — `createAspect()` reads user config and
-   the tag map to build pointcuts and advice globals. ⏳ Each pointcut is
+   the tag map to build pointcuts and advice globals. Each pointcut is
    wrapped to resolve hash-string tags → JejTag objects before the original
    pointcut logic runs. Input: config + tag map. Output: Aran-compatible
    aspect (pointcut + adviceGlobals + initialState).
