@@ -225,6 +225,17 @@
 				font-size: 12px;
 				white-space: pre;
 			}
+
+			/* --- Format bar --- */
+			.format-bar {
+				margin-top: 0.5rem;
+				margin-bottom: 0.5rem;
+			}
+			.format-status {
+				font-size: 12px;
+				color: #666;
+				margin-left: 0.5rem;
+			}
 		</style>
 	</head>
 	<body>
@@ -237,6 +248,10 @@
 		<textarea id="code">let greeting = 'hello';
 console.log(greeting);
 </textarea>
+		<div class="format-bar">
+			<button class="action-btn" id="btn-format">[format]</button>
+			<span class="format-status" id="format-status"></span>
+		</div>
 
 		<div class="tab-bar">
 			<button class="tab-btn active" data-tab="validate">validate</button>
@@ -318,6 +333,28 @@ console.log(greeting);
 			import optionsSchema from '../evaluating/trace/options-schema.ts';
 
 			const codeEl = document.getElementById('code');
+
+			// --- Format button ---
+
+			document
+				.getElementById('btn-format')
+				.addEventListener('click', function () {
+					var statusEl = document.getElementById('format-status');
+					try {
+						var formatted = format(codeEl.value);
+						if (formatted === codeEl.value) {
+							statusEl.textContent = 'already formatted';
+							statusEl.style.color = '#060';
+						} else {
+							codeEl.value = formatted;
+							statusEl.textContent = 'formatted';
+							statusEl.style.color = '#060';
+						}
+					} catch (err) {
+						statusEl.textContent = 'format error: ' + err.message;
+						statusEl.style.color = '#c00';
+					}
+				});
 
 			// --- Tab switching ---
 
