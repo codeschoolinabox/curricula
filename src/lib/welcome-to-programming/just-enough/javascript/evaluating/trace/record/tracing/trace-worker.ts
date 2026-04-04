@@ -33,7 +33,8 @@ const RESPONSE_TYPE_INDEX = 1;
 const NULL_FLAG_INDEX = 2;
 const PAYLOAD_LENGTH_INDEX = 3;
 const PAUSE_INDEX = 4;
-const PAYLOAD_BYTE_OFFSET = 20;
+const EVENT_READY_INDEX = 5;
+const PAYLOAD_BYTE_OFFSET = 24;
 
 const RESPONSE_BOOLEAN = 1;
 const RESPONSE_VOID = 2;
@@ -42,6 +43,7 @@ const SIGNAL_IDLE = 0;
 const SIGNAL_WAITING = 1;
 
 const PAUSE_PAUSED = 1;
+const EVENT_READY = 1;
 
 // --- SAB state (set on 'setup' message) ---
 
@@ -136,9 +138,23 @@ globalThis.alert = function alert(...args: unknown[]): void {
 };
 
 // --- Pause protocol (blocks Worker between events) ---
+// WHY two-flag handshake: the Worker signals both "I'm paused" (PAUSE_INDEX)
+// and "I have an event ready" (EVENT_READY_INDEX) via SAB before blocking.
+// The main thread uses Atomics.waitAsync on EVENT_READY_INDEX to detect
+// paused Workers without depending on postMessage delivery timing.
+// This eliminates false timeouts under browser resource pressure.
 
 function checkPause(): void {
 	if (!controlView) return;
+	// 1. Signal paused
+	Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
+	// 2. Signal event ready (wakes main thread's Atomics.waitAsync)
+	Atomics.store(controlView, EVENT_READY_INDEX, EVENT_READY);
+	Atomics.notify(controlView, EVENT_READY_INDEX);
+	// 3. Block until main thread writes RUNNING
+	// WHY while loop: ES spec allows spurious wakeups from Atomics.wait.
+	// Without the loop, a spurious wakeup lets the Worker continue while
+	// the main thread hasn't processed the event — breaking single-step.
 	while (Atomics.load(controlView, PAUSE_INDEX) === PAUSE_PAUSED) {
 		Atomics.wait(controlView, PAUSE_INDEX, PAUSE_PAUSED);
 	}
@@ -146,11 +162,11 @@ function checkPause(): void {
 
 // --- Message handler ---
 
-export function handleMessage(e: MessageEvent): void {
+function handleMessage(e: MessageEvent): void {
 	const msg = e.data;
 
 	if (msg.type === 'setup') {
-		controlView = new Int32Array(msg.sharedBuffer, 0, 5);
+		controlView = new Int32Array(msg.sharedBuffer, 0, 6);
 		payloadView = new Uint8Array(msg.sharedBuffer, PAYLOAD_BYTE_OFFSET);
 		return;
 	}
@@ -183,3 +199,11 @@ export function handleMessage(e: MessageEvent): void {
 		postMessage({ type: 'complete' });
 	}
 }
+
+// --- Module Worker setup ---
+// WHY self.onmessage here (not export): this is a module Worker loaded via
+// new Worker(url, { type: 'module' }). The main thread awaits the 'ready'
+// message before sending setup/execute. Advice globals are registered at
+// module top level (above), so they're available before any message arrives.
+self.onmessage = handleMessage;
+postMessage({ type: 'ready' });

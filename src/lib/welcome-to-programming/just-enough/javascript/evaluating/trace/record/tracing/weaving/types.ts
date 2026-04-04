@@ -114,4 +114,8 @@ export type TracerState = {
 	lastReadValues: Record<string, unknown>;
 	onEvent?: (event: unknown) => void;
 	config: Record<string, unknown>;
+	/** Variable name → binding kind ('let'/'const'). Built during instrument()
+	 *  pre-walk. Used by block-declaration to emit correct kind on declare events
+	 *  because the block tag (Program/Block) has no bindingKind. */
+	variableKinds: Record<string, 'let' | 'const'>;
 };

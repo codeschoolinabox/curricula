@@ -8,14 +8,15 @@
  *
  * @remarks Buffer layout (8192 bytes total):
  *
- * | Index/Offset | View       | Purpose                                |
- * | ------------ | ---------- | -------------------------------------- |
- * | control[0]   | Int32Array | Control: 0=idle, 1=waiting, 2=responded|
+ * | Index/Offset | View       | Purpose                                    |
+ * | ------------ | ---------- | ------------------------------------------ |
+ * | control[0]   | Int32Array | Control: 0=idle, 1=waiting, 2=responded    |
  * | control[1]   | Int32Array | Response type: 0=string, 1=boolean, 2=void |
- * | control[2]   | Int32Array | Null flag: 0=has value, 1=null         |
- * | control[3]   | Int32Array | Payload byte length                    |
- * | control[4]   | Int32Array | Pause flag: 0=running, 1=paused        |
- * | byte 20+     | Uint8Array | UTF-8 encoded string payload           |
+ * | control[2]   | Int32Array | Null flag: 0=has value, 1=null             |
+ * | control[3]   | Int32Array | Payload byte length                        |
+ * | control[4]   | Int32Array | Pause flag: 0=running, 1=paused            |
+ * | control[5]   | Int32Array | Event ready: 0=not ready, 1=ready          |
+ * | byte 24+     | Uint8Array | UTF-8 encoded string payload               |
  */
 
 // --- Layout constants ---
@@ -29,8 +30,11 @@ const PAYLOAD_LENGTH_INDEX = 3;
 /** Int32Array index for the pause flag (0=running, 1=paused) */
 const PAUSE_INDEX = 4;
 
-/** Byte offset where the string payload begins (5 Int32 slots × 4 bytes) */
-const PAYLOAD_BYTE_OFFSET = 20;
+/** Int32Array index for the event-ready flag (0=not ready, 1=ready) */
+const EVENT_READY_INDEX = 5;
+
+/** Byte offset where the string payload begins (6 Int32 slots × 4 bytes) */
+const PAYLOAD_BYTE_OFFSET = 24;
 
 /** Total buffer size in bytes */
 const BUFFER_SIZE = 8192;
@@ -49,6 +53,10 @@ const SIGNAL_RESPONDED = 2;
 const PAUSE_RUNNING = 0;
 const PAUSE_PAUSED = 1;
 
+/** Event-ready flag values */
+const EVENT_NOT_READY = 0;
+const EVENT_READY = 1;
+
 // --- Types ---
 
 type BufferViews = {
@@ -66,13 +74,13 @@ type IoResult = PromptResult | ConfirmResult | VoidResult;
 /**
  * Creates typed array views over a SharedArrayBuffer.
  *
- * @remarks The control view (Int32Array) covers the first 20 bytes
- * (5 slots: I/O control, response type, null flag, payload length,
- * pause flag). The payload view (Uint8Array) covers byte 20 onward
- * for UTF-8 string data.
+ * @remarks The control view (Int32Array) covers the first 24 bytes
+ * (6 slots: I/O control, response type, null flag, payload length,
+ * pause flag, event-ready flag). The payload view (Uint8Array) covers
+ * byte 24 onward for UTF-8 string data.
  */
 function createBufferViews(sab: SharedArrayBuffer): BufferViews {
-	const control = new Int32Array(sab, 0, 5);
+	const control = new Int32Array(sab, 0, 6);
 	const payload = new Uint8Array(sab, PAYLOAD_BYTE_OFFSET);
 
 	return { control, payload };
@@ -206,17 +214,33 @@ function checkPauseCode(): string {
 }`;
 }
 
+// --- Event-ready protocol (main-thread side) ---
+
+/**
+ * Clears the event-ready flag after the main thread has processed
+ * an entry event.
+ *
+ * @remarks Called after yielding an event and before resuming the
+ * Worker. Resets the flag so the next `Atomics.waitAsync` on
+ * `EVENT_READY_INDEX` will wait for the Worker's next signal.
+ */
+function clearEventReady(views: BufferViews): void {
+	Atomics.store(views.control, EVENT_READY_INDEX, EVENT_NOT_READY);
+}
+
 // --- Exports ---
 
 export {
 	BUFFER_SIZE,
 	CONTROL_INDEX,
+	EVENT_READY_INDEX,
 	PAUSE_INDEX,
 	PAYLOAD_BYTE_OFFSET,
 	SIGNAL_IDLE,
 	SIGNAL_RESPONDED,
 	SIGNAL_WAITING,
 	checkPauseCode,
+	clearEventReady,
 	createBufferViews,
 	readResponse,
 	writeAlertResponse,

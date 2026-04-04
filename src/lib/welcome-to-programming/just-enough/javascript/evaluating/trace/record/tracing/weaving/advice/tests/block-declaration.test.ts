@@ -31,6 +31,7 @@ function makeState(overrides: Partial<TracerState> = {}): TracerState {
 	return {
 		trace: [],
 		step: 1,
+		eventStep: 0,
 		scopeStack: [makeScope()],
 		iterationCounters: {},
 		lastExpressionResult: null, previousExpressionResult: null, lastReadValues: {},
@@ -40,6 +41,7 @@ function makeState(overrides: Partial<TracerState> = {}): TracerState {
 				events: { declare: true, initialize: true, available: true },
 			},
 		},
+		variableKinds: { x: 'let' },
 		...overrides,
 	};
 }
@@ -52,9 +54,9 @@ describe('blockDeclaration', () => {
 			expect(state.scopeStack[0].variables.x).toBeDefined();
 		});
 
-		it('records variable kind', () => {
-			const state = makeState();
-			blockDeclaration(state, { x: 5 }, 'Program', 'module', 'bare', makeTag({ bindingKind: 'const' }));
+		it('records variable kind from variableKinds map', () => {
+			const state = makeState({ variableKinds: { x: 'const' } });
+			blockDeclaration(state, { x: 5 }, 'Program', 'module', 'bare', makeTag());
 			expect(state.scopeStack[0].variables.x.kind).toBe('const');
 		});
 

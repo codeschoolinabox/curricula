@@ -30,12 +30,15 @@ function applyPointcut(
 	_parent: unknown,
 	_root: unknown,
 ): [string, JejTag] {
-	if (node.callee?.type === 'IntrinsicExpression' && node.callee.intrinsic) {
-		return [node.callee.intrinsic, node.tag];
-	}
-
+	// WHY template first: Aran transpiles TemplateLiteral into
+	// ApplyExpression(IntrinsicExpression("String.prototype.concat"), ...).
+	// If we check intrinsic first, templates are misclassified as intrinsic calls.
 	if (node.tag.templateStrings) {
 		return ['template', node.tag];
+	}
+
+	if (node.callee?.type === 'IntrinsicExpression' && node.callee.intrinsic) {
+		return [node.callee.intrinsic, node.tag];
 	}
 
 	return ['call', node.tag];

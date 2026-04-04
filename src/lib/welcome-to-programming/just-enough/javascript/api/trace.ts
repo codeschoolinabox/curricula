@@ -14,6 +14,8 @@ import validate from './validate.js';
 import { checkFormat } from './format.js';
 import createTracingGenerator from '../evaluating/trace/record/tracing/index.js';
 import createExecution from '../evaluating/shared/create-execution.js';
+import prepareConfig from '../evaluating/trace/configuring/prepare-config.js';
+import optionsSchema from '../evaluating/trace/options-schema.js';
 
 import type { TraceResult } from './types.js';
 import type { Execution, TraceConfig } from '../evaluating/shared/types.js';
@@ -71,9 +73,15 @@ function trace(
 	const seconds = config?.seconds ?? 5;
 	const maxMs = seconds * 1000;
 
-	// WHY: TraceConfig.options flows to createAspect which uses it to
-	// configure pointcuts at instrumentation time. No post-trace filtering.
-	const tracingConfig = (config?.options ?? {}) as Record<string, unknown>;
+	// Expand shorthand, fill defaults, validate against options.schema.json.
+	// WHY prepareConfig: without this, empty config `{}` produces zero events
+	// because all config gates default to false. prepareConfig uses JSON Schema
+	// defaults to fill all booleans to `true`, and expands boolean shorthand
+	// like `{ bindings: false }` to the full object structure.
+	const tracingConfig = prepareConfig(
+		config?.options ?? {},
+		optionsSchema,
+	) as Record<string, unknown>;
 
 	return createExecution(
 		() => createTracingGenerator(code, tracingConfig, maxMs),

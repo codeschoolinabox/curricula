@@ -28,20 +28,29 @@ function statementBefore(state: TracerState, ...point: unknown[]): void {
 	const jumpKind = point[1] as 'break' | 'continue';
 	const userLabel = point[2] as string | null;
 	const tag = point[3] as JejTag;
-	const target = tag.jumpTarget;
 
-	if (!target) return;
+	// Determine target loop kind. For unlabeled break/continue, walk the
+	// scope stack to find the nearest enclosing loop scope.
+	// WHY: ESTree BreakStatement.label is null for unlabeled breaks. The
+	// tag.jumpTarget comes from the ESTree node and is null in this case.
+	// We derive the target from the scope stack at runtime instead.
+	let target = tag.jumpTarget;
+	let targetScopeCreationStep = 0;
 
-	if (isControlFlowGateOpen(state.config, target, 'jump')) {
-		// walk scopeStack to find the target loop scope
-		let targetScopeCreationStep = 0;
-		for (let i = state.scopeStack.length - 1; i >= 0; i -= 1) {
-			const scope = state.scopeStack[i];
+	for (let i = state.scopeStack.length - 1; i >= 0; i -= 1) {
+		const scope = state.scopeStack[i];
+		if (scope.structure && scope.structure !== 'conditional') {
+			if (!target) target = scope.structure as typeof target;
 			if (scope.structure === target) {
 				targetScopeCreationStep = scope.creationStep;
 				break;
 			}
 		}
+	}
+
+	if (!target) return;
+
+	if (isControlFlowGateOpen(state.config, target, 'jump')) {
 
 		emitEvent(state, tag, 'statement', 'controlFlow.jump', {
 			kind: jumpKind,

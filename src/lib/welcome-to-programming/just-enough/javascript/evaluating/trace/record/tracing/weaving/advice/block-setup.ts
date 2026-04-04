@@ -44,7 +44,9 @@ function blockSetup(
 			depth: state.scopeStack.length,
 			kind: scopeKind,
 			structure: tag.structure ?? null,
-			structureStep: null,
+			// WHY state.step: the scope creation IS the structure's beginning.
+			// Both share the same moment in the internal step sequence.
+			structureStep: tag.structure ? state.step : null,
 			variables: {},
 		});
 

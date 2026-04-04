@@ -90,7 +90,10 @@ function resolveParentTags(parent: AranNode, tagMap: Map<string, JejTag>): AranN
 		copy.tag = resolveTag(copy.tag, tagMap);
 	}
 
-	// Nested positions used in identity comparisons (block-pointcut.ts)
+	// Nested positions used in identity comparisons (block-pointcut.ts, expression-pointcut.ts)
+	if (copy.test && typeof copy.test.tag === 'string') {
+		copy.test = { ...copy.test, tag: resolveTag(copy.test.tag, tagMap) };
+	}
 	if (copy.then && typeof copy.then.tag === 'string') {
 		copy.then = { ...copy.then, tag: resolveTag(copy.then.tag, tagMap) };
 	}
@@ -202,7 +205,10 @@ function isAnyEffectEnabled(config: Record<string, unknown>): boolean {
 	const bindingEvents = (bindings.events ?? {}) as Record<string, unknown>;
 	const operators = (config.operators ?? {}) as Record<string, unknown>;
 
-	return !!(bindingEvents.assign || operators.assignment);
+	// WHY initialize/available: these events fire from effect-after (the
+	// first write to a TDZ variable). They need the effect hooks registered
+	// even when assign is disabled.
+	return !!(bindingEvents.assign || bindingEvents.initialize || bindingEvents.available || operators.assignment);
 }
 
 /**
@@ -243,6 +249,7 @@ function isAnyScopeDispatchEnabled(config: Record<string, unknown>): boolean {
 function createAspect(
 	config: Record<string, unknown>,
 	tagMap: Map<string, JejTag> = new Map(),
+	variableKinds: Record<string, 'let' | 'const'> = {},
 ): AspectResult {
 	const pointcut: Record<string, PointcutEntry> = {};
 	const adviceGlobals: Record<string, Function> = {};
@@ -327,6 +334,7 @@ function createAspect(
 		previousExpressionResult: null,
 		lastReadValues: {},
 		config: config,
+		variableKinds: variableKinds,
 	};
 
 	return deepFreezeInPlace({ pointcut, adviceGlobals, initialState }) as AspectResult;

@@ -1,19 +1,17 @@
 /**
  * @file Semantic validation for tracer options.
  *
- * Called by @study-lenses/tracing after JSON Schema validation and default-filling.
+ * Called after JSON Schema validation and default-filling.
  * Enforces constraints that JSON Schema cannot express.
  *
  * Constraint: range.start must be <= range.end when both are present.
  */
 
-import { OptionsSemanticInvalidError } from '@study-lenses/tracing';
-
 /**
  * Validates cross-field constraints on tracer options.
  *
  * @param options - Fully-filled options (after schema validation)
- * @throws {OptionsSemanticInvalidError} if range.start > range.end
+ * @throws Error if range.start > range.end
  */
 function verifyOptions(options: unknown): void {
 	if (typeof options !== 'object' || options === null) return;
@@ -25,7 +23,7 @@ function verifyOptions(options: unknown): void {
 	if (typeof start !== 'number' || typeof end !== 'number') return;
 
 	if (start > end) {
-		throw new OptionsSemanticInvalidError(
+		throw new Error(
 			`range.start (${String(start)}) must be <= range.end (${String(end)})`,
 		);
 	}

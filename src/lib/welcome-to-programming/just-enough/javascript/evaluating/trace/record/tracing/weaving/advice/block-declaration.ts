@@ -24,7 +24,6 @@ function blockDeclaration(
 	_label: string | null,
 ): void {
 	const currentScope = state.scopeStack[state.scopeStack.length - 1];
-	const kind = tag.bindingKind ?? 'let';
 
 	for (const varName of Object.keys(frame)) {
 		if (ARAN_PARAMETERS.has(varName)) continue;
@@ -33,6 +32,11 @@ function blockDeclaration(
 		if (varName.startsWith('.')) continue;
 
 		const value = frame[varName];
+		// WHY variableKinds lookup: the block tag (Program/Block) has no
+		// bindingKind. The actual kind is on the VariableDeclaration ESTree
+		// node, which Aran desugars away. variableKinds is built during
+		// instrument()'s pre-walk and embedded in initialState.
+		const kind = state.variableKinds[varName] ?? 'let';
 
 		// always record variable in scope (internal tracking)
 		// initialized: false when TDZ (symbol value), true when value is available

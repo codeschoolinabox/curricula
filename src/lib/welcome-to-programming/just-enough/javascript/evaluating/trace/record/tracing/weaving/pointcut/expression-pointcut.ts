@@ -41,9 +41,13 @@ function createExpressionPointcut(config: Record<string, unknown>) {
 		node: ExpressionNode,
 		parent: ParentNode,
 	): boolean {
+		// WHY tag identity, not node identity: our wrapPointcut creates shallow
+		// copies of node and parent. parent.test (original Aran reference) and
+		// node (our copy) are different objects. Tag identity works because
+		// tagMap.get() returns the same JejTag reference for the same hash.
 		return (
 			(parent.type === 'IfStatement' || parent.type === 'WhileStatement') &&
-			parent.test === node
+			parent.test?.tag === node.tag
 		);
 	}
 

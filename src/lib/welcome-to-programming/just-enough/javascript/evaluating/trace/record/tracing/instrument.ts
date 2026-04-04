@@ -60,6 +60,14 @@ function buildParentInfoMap(
 				(parent.kind === 'let' || parent.kind === 'const')
 			) {
 				parentInfo.set(node, { bindingKind: parent.kind });
+				// WHY propagate to Identifier: Aran's transpile maps
+				// VariableDeclarator.id (Identifier) → WriteEffect. The
+				// WriteEffect's tag hash points to the Identifier, not the
+				// VariableDeclarator. So the Identifier's JejTag needs
+				// bindingKind for effect-after to emit correct binding events.
+				if (node.id?.type === 'Identifier') {
+					parentInfo.set(node.id, { bindingKind: parent.kind });
+				}
 			}
 		},
 	});
@@ -186,9 +194,25 @@ function buildJejTag(
 function createDigest(
 	ast: EstreeNode,
 	code: string,
-): { digest: (node: EstreeNode, nodePath: string, filePath: string) => string; tagMap: Map<string, JejTag> } {
+): {
+	digest: (node: EstreeNode, nodePath: string, filePath: string) => string;
+	tagMap: Map<string, JejTag>;
+	variableKinds: Record<string, 'let' | 'const'>;
+} {
 	const parentInfo = buildParentInfoMap(ast);
 	const tagMap = new Map<string, JejTag>();
+
+	// Build variable name → binding kind map from the pre-walk.
+	// Used by block-declaration to emit correct kind on declare events.
+	// WHY: block-declaration receives the block's tag (Program/Block), which
+	// has no bindingKind. The actual kind is on the VariableDeclaration ESTree
+	// node, which Aran desugars away before block-declaration fires.
+	const variableKinds: Record<string, 'let' | 'const'> = {};
+	for (const [node, info] of parentInfo.entries()) {
+		if (node.type === 'Identifier' && node.name && info.bindingKind) {
+			variableKinds[node.name] = info.bindingKind;
+		}
+	}
 
 	function digest(
 		node: EstreeNode,
@@ -200,7 +224,7 @@ function createDigest(
 		return hash;
 	}
 
-	return { digest, tagMap };
+	return { digest, tagMap, variableKinds };
 }
 
 /**
@@ -236,7 +260,7 @@ function instrument(
 	// WHY before transpile: the digest callback runs during transpile and
 	// builds the tagMap as a side effect. The map must be fully populated
 	// before createAspect is called.
-	const { digest, tagMap } = createDigest(ast, code);
+	const { digest, tagMap, variableKinds } = createDigest(ast, code);
 
 	// 4. Aran transpile: ESTree → AranLang (with custom digest for tag map)
 	// WHY 'eval' kind: module kind generates import.meta which new Function()
@@ -257,7 +281,7 @@ function instrument(
 	// 5. Create aspect (pointcut config + advice globals + initial state)
 	// WHY after transpile: createAspect needs the tagMap (populated by digest
 	// during transpile) to wrap pointcuts for tag resolution.
-	const aspect = createAspect(config, tagMap);
+	const aspect = createAspect(config, tagMap, variableKinds);
 
 	// 6. Aran weaveFlexible: inject advice calls based on pointcut
 	const woven = weaveFlexible(aranAST, {

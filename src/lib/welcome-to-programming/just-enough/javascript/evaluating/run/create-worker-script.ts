@@ -33,7 +33,8 @@ const RESPONSE_TYPE_INDEX = 1;
 const NULL_FLAG_INDEX = 2;
 const PAYLOAD_LENGTH_INDEX = 3;
 const PAUSE_INDEX = 4;
-const PAYLOAD_BYTE_OFFSET = 20;
+const EVENT_READY_INDEX = 5;
+const PAYLOAD_BYTE_OFFSET = 24;
 
 const RESPONSE_STRING = 0;
 const RESPONSE_BOOLEAN = 1;
@@ -209,7 +210,7 @@ self.onmessage = function (e) {
   const msg = e.data;
 
   if (msg.type === 'setup') {
-    controlView = new Int32Array(msg.sharedBuffer, 0, 5);
+    controlView = new Int32Array(msg.sharedBuffer, 0, 6);
     payloadView = new Uint8Array(msg.sharedBuffer, PAYLOAD_BYTE_OFFSET);
     return;
   }

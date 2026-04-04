@@ -16,6 +16,8 @@ import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import {
 	BUFFER_SIZE,
 	CONTROL_INDEX,
+	EVENT_READY_INDEX,
+	clearEventReady,
 	createBufferViews,
 	writeAlertResponse,
 	writeConfirmResponse,
@@ -106,33 +108,18 @@ async function* createTracingGenerator(
 	const sab = new SharedArrayBuffer(BUFFER_SIZE);
 	const views = createBufferViews(sab);
 
-	// 4. Spawn classic worker via blob URL
+	// 4. Spawn module worker
+	// WHY module Worker: Vite detects new Worker(new URL(...), { type: 'module' })
+	// and serves the Worker correctly in both dev and production. The previous
+	// blob URL + dynamic import() approach broke in vitest browser mode because:
+	// (a) COEP require-corp blocks cross-origin import() from blob Workers
+	// (b) vitest wraps import() through __vitest_browser_runner__ (absent in Workers)
 	const moduleUrl = new URL('./trace-worker.ts', import.meta.url);
-	const loaderCode = [
-		'let _handler = null;',
-		'const _queue = [];',
-		'self.onmessage = function(e) {',
-		'  if (_handler) { _handler(e); return; }',
-		'  _queue.push(e);',
-		'};',
-		`import("${moduleUrl.href}").then(function(mod) {`,
-		'  _handler = mod.handleMessage;',
-		'  _queue.forEach(function(e) { mod.handleMessage(e); });',
-		'  _queue.length = 0;',
-		'}).catch(function(err) {',
-		'  postMessage({ type: "error", name: "WorkerLoadError",',
-		'    message: err.message || String(err), phase: "creation" });',
-		'  postMessage({ type: "complete" });',
-		'});',
-	].join('\n');
-	const blob = new Blob([loaderCode], { type: 'application/javascript' });
-	const blobUrl = URL.createObjectURL(blob);
 
 	let worker: Worker;
 	try {
-		worker = new Worker(blobUrl);
+		worker = new Worker(moduleUrl, { type: 'module' });
 	} catch (err: unknown) {
-		URL.revokeObjectURL(blobUrl);
 		return deepFreezeInPlace({
 			ok: false as const,
 			error: {
@@ -144,8 +131,6 @@ async function* createTracingGenerator(
 			logs: [] as TraceEvent[],
 		});
 	}
-
-	URL.revokeObjectURL(blobUrl);
 
 	// 5. Message queue — bridges callbacks → async generator
 	const queue: QueueMessage[] = [];
@@ -177,16 +162,56 @@ async function* createTracingGenerator(
 	};
 
 	// 6. Timeout — cumulative execution time
+	// WHY timedOut flag (not queued message): with fast-producing code like
+	// while(true){}, the queue fills with entry messages. A queued timeout
+	// message would sit behind thousands of entries and never get processed.
+	// The flag is checked directly on every loop iteration.
 	let timeout: ReturnType<typeof setTimeout> | null = null;
 	let remainingMs = maxMs ?? Infinity;
 	let lastResumeTime = 0;
+	let timedOut = false;
+
+	function wakeDequeue(): void {
+		if (resolveWaiting !== null) {
+			// WHY enqueue sentinel: resolveWaiting's closure calls queue.shift().
+			// Without a message in the queue, shift() returns undefined.
+			// Push a sentinel so the loop gets a defined message, then
+			// checks timedOut before accessing msg.type.
+			queue.push({ type: 'complete' } as WorkerOutbound);
+			resolveWaiting();
+			resolveWaiting = null;
+		}
+	}
 
 	function startTimeout(): void {
 		if (!isFinite(remainingMs)) return;
+		if (remainingMs <= 0) {
+			timedOut = true;
+			wakeDequeue();
+			return;
+		}
 		lastResumeTime = Date.now();
 		timeout = setTimeout(function onTimeout() {
 			timeout = null;
-			enqueue({ type: 'timeout' });
+
+			// Always deduct elapsed time — the budget was consumed
+			// regardless of whether the Worker is paused or running.
+			remainingMs -= Date.now() - lastResumeTime;
+			if (remainingMs < 0) remainingMs = 0;
+
+			// WHY EVENT_READY guard: the Worker writes EVENT_READY to the
+			// SAB after calling postMessage but before blocking. If set,
+			// the Worker is paused with a pending event — NOT stuck.
+			// If budget remains, reschedule. If exhausted, fire timeout
+			// (infinite loop producing events still exceeds time limit).
+			if (Atomics.load(views.control, EVENT_READY_INDEX) === 1
+				&& remainingMs > 0) {
+				startTimeout();
+				return;
+			}
+
+			timedOut = true;
+			wakeDequeue();
 		}, remainingMs);
 	}
 
@@ -206,11 +231,33 @@ async function* createTracingGenerator(
 		}
 	}
 
-	// 7. Start execution
+	// 7. Wait for Worker module to load, then start execution
+	// WHY ready handshake: module Workers load asynchronously. Messages sent
+	// before the module evaluates are queued by the browser, but we want an
+	// explicit signal that advice globals are registered before executing.
+	await new Promise<void>((resolve, reject) => {
+		const loadTimeout = setTimeout(function onLoadTimeout() {
+			reject(new Error('Worker module failed to load within 10 seconds'));
+		}, 10000);
+
+		function onReady(e: MessageEvent): void {
+			if (e.data?.type === 'ready') {
+				clearTimeout(loadTimeout);
+				worker.removeEventListener('message', onReady);
+				resolve();
+			}
+		}
+		worker.addEventListener('message', onReady);
+	});
+
+	// WHY pause before execute: engage the SAB pause flag BEFORE sending
+	// the execute message. Otherwise the Worker could start executing and
+	// post events before the pause flag is set, creating a race window.
+	writePauseEngaged(views);
+
 	worker.postMessage({ type: 'setup', sharedBuffer: sab });
 	worker.postMessage({ type: 'execute', instrumentedCode });
 
-	writePauseEngaged(views);
 	startTimeout();
 
 	const events: TraceEvent[] = [];
@@ -220,13 +267,35 @@ async function* createTracingGenerator(
 		while (true) {
 			const msg = await dequeue();
 
+			// WHY check timedOut first: the timeout handler sets this flag
+			// and calls wakeDequeue() to unblock us. The sentinel message
+			// pushed by wakeDequeue is irrelevant — we just need to exit.
+			if (timedOut) {
+				const seconds = (maxMs ?? 0) / 1000;
+				return deepFreezeInPlace({
+					ok: false as const,
+					error: {
+						kind: 'timeout' as const,
+						name: 'TimeoutError',
+						message: `Execution exceeded ${seconds} second time limit`,
+						phase: 'execution' as const,
+						limit: seconds,
+					},
+					logs: events,
+				});
+			}
+
 			if (msg.type === 'entry') {
 				events.push(msg.entry);
 				pauseTimeout();
 				yield msg.entry;
-				startTimeout();
+				// WHY clearEventReady before resume: resets the flag so the
+				// timeout handler can distinguish "Worker paused with event"
+				// from "Worker running". Must happen before writeResumeSignal
+				// (which lets the Worker run and potentially set it again).
+				clearEventReady(views);
 				writeResumeSignal(views);
-				writePauseEngaged(views);
+				startTimeout();
 				continue;
 			}
 
@@ -253,21 +322,6 @@ async function* createTracingGenerator(
 					phase: 'execution',
 				};
 				break;
-			}
-
-			if (msg.type === 'timeout') {
-				const seconds = (maxMs ?? 0) / 1000;
-				return deepFreezeInPlace({
-					ok: false as const,
-					error: {
-						kind: 'timeout' as const,
-						name: 'TimeoutError',
-						message: `Execution exceeded ${seconds} second time limit`,
-						phase: 'execution' as const,
-						limit: seconds,
-					},
-					logs: events,
-				});
 			}
 		}
 	} finally {
