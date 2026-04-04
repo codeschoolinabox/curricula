@@ -477,16 +477,31 @@ console.log(greeting);
 
 			function renderSteps(steps) {
 				var html =
-					'<div class="result-section"><div class="result-label">steps (' +
+					'<div class="result-section"><div class="result-label">trace events (' +
 					(steps ? steps.length : 0) +
 					')</div>';
-				if (!steps) {
+				if (!steps || steps.length === 0) {
 					return html + '<div class="absent">\u2014</div></div>';
 				}
-				html +=
-					'<pre class="steps-output">' +
-					escapeHtml(JSON.stringify(steps, null, 2)) +
-					'</pre></div>';
+				html += '<div class="event-list">';
+				for (var i = 0; i < steps.length; i++) {
+					var ev = steps[i];
+					var summary = '#' + ev.step + ' [' + ev.category + ']';
+					if (ev.event) summary += ' ' + ev.event;
+					if (ev.kind) summary += ' (' + ev.kind + ')';
+					if (ev.name) summary += ' ' + ev.name;
+					if (ev.operator) summary += ' ' + ev.operator;
+					if (ev.value && ev.value.type) {
+						summary += ' = ' + JSON.stringify(ev.value.value);
+					}
+					if (ev.result && ev.result.type) {
+						summary += ' \u2192 ' + JSON.stringify(ev.result.value);
+					} else if (typeof ev.result === 'boolean') {
+						summary += ' \u2192 ' + ev.result;
+					}
+					html += '<div>' + escapeHtml(summary) + '</div>';
+				}
+				html += '</div></div>';
 				return html;
 			}
 
@@ -507,7 +522,7 @@ console.log(greeting);
 					html += renderLogs(result.logs);
 				}
 				if (mode === 'trace') {
-					html += renderSteps(result.steps);
+					html += renderSteps(result.logs);
 				}
 				return html;
 			}
@@ -548,7 +563,7 @@ console.log(greeting);
 						Number(document.getElementById('run-maxSeconds').value) || 5;
 
 					try {
-						var result = await run(codeEl.value, maxSeconds);
+						var result = await run(codeEl.value, { seconds: maxSeconds });
 						console.log('run result:', result);
 						statusEl.textContent = 'done \u2014 ok: ' + result.ok;
 						resultEl.innerHTML = renderResult(result, 'run');
@@ -576,7 +591,7 @@ console.log(greeting);
 						Number(document.getElementById('trace-maxSeconds').value) || 5;
 
 					try {
-						var result = await trace(codeEl.value, maxSeconds);
+						var result = await trace(codeEl.value, { seconds: maxSeconds });
 						console.log('trace result:', result);
 						statusEl.textContent = 'done \u2014 ok: ' + result.ok;
 						resultEl.innerHTML = renderResult(result, 'trace');
