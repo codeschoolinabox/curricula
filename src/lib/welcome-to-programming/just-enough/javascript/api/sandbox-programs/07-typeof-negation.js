@@ -1,0 +1,12 @@
+let t1 = typeof 'hello';
+let t2 = typeof 42;
+let t3 = typeof true;
+let t4 = typeof undefined;
+let neg = -5;
+let bitNot = ~7;
+console.log(t1);
+console.log(t2);
+console.log(t3);
+console.log(t4);
+console.log(neg);
+console.log(bitNot);

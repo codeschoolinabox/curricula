@@ -1,0 +1,10 @@
+let both = true && false;
+let either = true || false;
+let fallback = null ?? 'default';
+let negated = !true;
+let ternary = 5 > 3 ? 'yes' : 'no';
+console.log(both);
+console.log(either);
+console.log(fallback);
+console.log(negated);
+console.log(ternary);

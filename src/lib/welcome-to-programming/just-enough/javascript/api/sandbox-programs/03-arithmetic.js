@@ -1,0 +1,12 @@
+let sum = 10 + 3;
+let diff = 10 - 3;
+let product = 10 * 3;
+let quotient = 10 / 3;
+let remainder = 10 % 3;
+let power = 2 ** 8;
+console.log(sum);
+console.log(diff);
+console.log(product);
+console.log(quotient);
+console.log(remainder);
+console.log(power);

@@ -1,0 +1,16 @@
+let asString = String(42);
+let asNumber = Number('3.14');
+let asBool = Boolean('');
+let nanCheck = Number.isNaN(NaN);
+let intCheck = Number.isInteger(5);
+let finCheck = Number.isFinite(Infinity);
+let parsed = parseInt('42abc');
+let parsedFloat = parseFloat('3.14xyz');
+console.log(asString);
+console.log(asNumber);
+console.log(asBool);
+console.log(nanCheck);
+console.log(intCheck);
+console.log(finCheck);
+console.log(parsed);
+console.log(parsedFloat);

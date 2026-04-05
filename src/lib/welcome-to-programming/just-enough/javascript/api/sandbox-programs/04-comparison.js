@@ -1,0 +1,14 @@
+let a = 5;
+let b = 10;
+let equal = a === b;
+let notEqual = a !== b;
+let greater = a > b;
+let less = a < b;
+let greaterEq = a >= 5;
+let lessEq = b <= 10;
+console.log(equal);
+console.log(notEqual);
+console.log(greater);
+console.log(less);
+console.log(greaterEq);
+console.log(lessEq);

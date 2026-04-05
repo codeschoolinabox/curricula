@@ -1,0 +1,16 @@
+let text = 'Hello World';
+console.log(text.toUpperCase());
+console.log(text.toLowerCase());
+console.log(text.includes('World'));
+console.log(text.startsWith('Hello'));
+console.log(text.endsWith('World'));
+console.log(text.indexOf('o'));
+console.log(text.slice(0, 5));
+console.log(text.replaceAll('l', 'r'));
+console.log(text.replace('World', 'JS'));
+console.log(text.trim());
+console.log(text.at(0));
+console.log(text.concat(' !!!'));
+console.log(text.repeat(2));
+console.log(text.padStart(20, '-'));
+console.log(text.padEnd(20, '-'));

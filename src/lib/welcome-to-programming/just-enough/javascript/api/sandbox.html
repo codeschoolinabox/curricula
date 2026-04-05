@@ -226,7 +226,19 @@
 				white-space: pre;
 			}
 
-			/* --- Format bar --- */
+			/* --- Notes field --- */
+		.notes-field {
+			width: 100%;
+			height: 50px;
+			font-family: monospace;
+			font-size: 12px;
+			padding: 0.4rem;
+			border: 1px solid #ccc;
+			resize: vertical;
+			margin-bottom: 0.5rem;
+		}
+
+		/* --- Format bar --- */
 			.format-bar {
 				margin-top: 0.5rem;
 				margin-bottom: 0.5rem;
@@ -244,6 +256,32 @@
 			Tests the API wrappers (validate, run, trace, debug) with real
 			execution. No mocking.
 		</p>
+
+		<div class="format-bar">
+			<select id="program-select">
+				<option value="">— custom —</option>
+				<option value="01-let-const.js">01 let/const</option>
+				<option value="02-primitives.js">02 primitives</option>
+				<option value="03-arithmetic.js">03 arithmetic</option>
+				<option value="04-comparison.js">04 comparison</option>
+				<option value="05-logical.js">05 logical</option>
+				<option value="06-assignment-ops.js">06 assignment ops</option>
+				<option value="07-typeof-negation.js">07 typeof/negation</option>
+				<option value="08-if-else.js">08 if/else</option>
+				<option value="09-while-loop.js">09 while loop</option>
+				<option value="10-for-of.js">10 for-of</option>
+				<option value="11-template-literals.js">11 templates</option>
+				<option value="12-string-methods.js">12 string methods</option>
+				<option value="13-string-properties.js">13 string props</option>
+				<option value="14-type-conversion.js">14 type conversion</option>
+				<option value="15-console-io.js">15 console I/O</option>
+				<option value="16-block-scope.js">16 block scope</option>
+				<option value="17-nullish-coalescing.js">17 nullish ??</option>
+				<option value="18-optional-chaining.js">18 optional ?.</option>
+				<option value="19-math.js">19 Math</option>
+				<option value="20-integration.js">20 integration</option>
+			</select>
+		</div>
 
 		<textarea id="code">let greeting = 'hello';
 console.log(greeting);
@@ -297,6 +335,7 @@ console.log(greeting);
 						max="30"
 				/></label>
 			</div>
+			<textarea id="trace-notes" class="notes-field" placeholder="notes for bug report (optional)"></textarea>
 			<div class="status" id="status-trace"></div>
 			<div class="result" id="result-trace"></div>
 		</div>
@@ -333,6 +372,25 @@ console.log(greeting);
 			import optionsSchema from '../evaluating/trace/options-schema.ts';
 
 			const codeEl = document.getElementById('code');
+
+			// --- Program selector ---
+
+			document
+				.getElementById('program-select')
+				.addEventListener('change', async function () {
+					var filename = this.value;
+					if (!filename) return;
+					try {
+						var response = await fetch('sandbox-programs/' + filename);
+						var code = await response.text();
+						codeEl.value = code;
+						document.getElementById('format-status').textContent =
+							'loaded ' + filename;
+					} catch (err) {
+						document.getElementById('format-status').textContent =
+							'failed to load: ' + err.message;
+					}
+				});
 
 			// --- Format button ---
 
@@ -726,6 +784,10 @@ console.log(greeting);
 				.getElementById('btn-export-trace')
 				.addEventListener('click', function () {
 					if (!lastTraceReport) return;
+					var notes = document.getElementById('trace-notes').value.trim();
+					if (notes) lastTraceReport.notes = notes;
+					var programName = document.getElementById('program-select').value || '(custom)';
+					lastTraceReport.program = programName;
 					var json = JSON.stringify(lastTraceReport, null, 2);
 					var blob = new Blob([json], { type: 'application/json' });
 					var url = URL.createObjectURL(blob);
