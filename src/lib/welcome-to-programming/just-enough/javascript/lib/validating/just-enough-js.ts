@@ -54,6 +54,12 @@ const ALLOWED_ASSIGNMENT_OPERATORS = new Set([
 	'??=',
 	'||=',
 	'&&=',
+	'&=',
+	'|=',
+	'^=',
+	'<<=',
+	'>>=',
+	'>>>=',
 ]);
 
 /**
@@ -116,6 +122,12 @@ const ALLOWED_BINARY_OPERATORS = new Set([
 	'<',
 	'>=',
 	'<=',
+	'&',
+	'|',
+	'^',
+	'<<',
+	'>>',
+	'>>>',
 ]);
 
 /**
@@ -170,7 +182,7 @@ function validateLogicalExpression(node: Node): true | Violation {
  * Excludes `+` (unary plus — confusing type coercion), `~` (bitwise
  * NOT), and `delete`.
  */
-const ALLOWED_UNARY_OPERATORS = new Set(['typeof', '!', '-', 'void']);
+const ALLOWED_UNARY_OPERATORS = new Set(['typeof', '!', '-', '~', 'void']);
 
 /**
  * Validates that a unary expression uses an allowed operator.
@@ -200,13 +212,6 @@ function validateUnaryExpression(node: Node): true | Violation {
  */
 function validateLiteral(node: Node): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
-	if (record.regex) {
-		return createViolation(
-			'Literal',
-			'Regular expression literals are not allowed',
-			extractLocation(node),
-		);
-	}
 	if (record.bigint !== undefined) {
 		return createViolation(
 			'Literal',
@@ -292,6 +297,44 @@ function validateForOfStatement(node: Node): true | Violation {
 		return createViolation(
 			'ForOfStatement',
 			'for-of body must use curly braces `{}`',
+			extractLocation(node),
+		);
+	}
+
+	return true;
+}
+
+/**
+ * Validates a do-while statement: block body required.
+ */
+function validateDoWhileStatement(node: Node): true | Violation {
+	const body = (node as unknown as Record<string, unknown>).body as {
+		type: string;
+	};
+
+	if (body.type !== 'BlockStatement') {
+		return createViolation(
+			'DoWhileStatement',
+			'do-while body must use curly braces `{}`',
+			extractLocation(node),
+		);
+	}
+
+	return true;
+}
+
+/**
+ * Validates a for statement: block body required.
+ */
+function validateForStatement(node: Node): true | Violation {
+	const body = (node as unknown as Record<string, unknown>).body as {
+		type: string;
+	};
+
+	if (body.type !== 'BlockStatement') {
+		return createViolation(
+			'ForStatement',
+			'for body must use curly braces `{}`',
 			extractLocation(node),
 		);
 	}
@@ -402,6 +445,10 @@ const ALLOWED_MEMBER_NAMES: ReadonlySet<string> = Object.freeze(
 		'repeat',
 		'padStart',
 		'padEnd',
+		'startsWith',
+		'endsWith',
+		'search',
+		'replace',
 		// string/readable properties
 		'length',
 		// console methods
@@ -409,6 +456,58 @@ const ALLOWED_MEMBER_NAMES: ReadonlySet<string> = Object.freeze(
 		'assert',
 		// Number static methods
 		'isNaN',
+		'isInteger',
+		'isFinite',
+		// Math constants
+		'PI',
+		'E',
+		'SQRT2',
+		'SQRT1_2',
+		'LN2',
+		'LN10',
+		'LOG2E',
+		'LOG10E',
+		// Math rounding
+		'round',
+		'floor',
+		'ceil',
+		'trunc',
+		// Math core
+		'abs',
+		'sign',
+		'sqrt',
+		'cbrt',
+		'pow',
+		'hypot',
+		'min',
+		'max',
+		'random',
+		// Math logarithmic/exponential
+		'log',
+		'log2',
+		'log10',
+		'exp',
+		'expm1',
+		'log1p',
+		// Math trigonometry
+		'sin',
+		'cos',
+		'tan',
+		'asin',
+		'acos',
+		'atan',
+		'atan2',
+		// Math hyperbolic
+		'sinh',
+		'cosh',
+		'tanh',
+		'asinh',
+		'acosh',
+		'atanh',
+		// Math low-level
+		'fround',
+		'imul',
+		'clz32',
 	]),
 );
 
@@ -445,6 +544,10 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 			'String',
 			'Number',
 			'Boolean',
+			'Math',
+			'RegExp',
+			'parseInt',
+			'parseFloat',
 			'undefined',
 			'NaN',
 			'Infinity',
@@ -484,6 +587,8 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		VariableDeclaration: validateVariableDeclaration,
 		IfStatement: validateIfStatement,
 		WhileStatement: validateWhileStatement,
+		DoWhileStatement: validateDoWhileStatement,
+		ForStatement: validateForStatement,
 		ForOfStatement: validateForOfStatement,
 		MemberExpression: createMemberValidator(ALLOWED_MEMBER_NAMES),
 		CallExpression: validateCallExpression,

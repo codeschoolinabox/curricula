@@ -44,9 +44,16 @@ describe('justEnoughJs', () => {
 		});
 
 		it('excludes disallowed globals', () => {
-			expect(justEnoughJs.allowedGlobals.has('Math')).toBe(false);
-			expect(justEnoughJs.allowedGlobals.has('isNaN')).toBe(false);
 			expect(justEnoughJs.allowedGlobals.has('document')).toBe(false);
+			expect(justEnoughJs.allowedGlobals.has('window')).toBe(false);
+			expect(justEnoughJs.allowedGlobals.has('Array')).toBe(false);
+		});
+
+		it('includes Math and RegExp globals', () => {
+			expect(justEnoughJs.allowedGlobals.has('Math')).toBe(true);
+			expect(justEnoughJs.allowedGlobals.has('RegExp')).toBe(true);
+			expect(justEnoughJs.allowedGlobals.has('parseInt')).toBe(true);
+			expect(justEnoughJs.allowedGlobals.has('parseFloat')).toBe(true);
 		});
 
 		it('has a frozen allowedMemberNames Set', () => {
@@ -421,10 +428,10 @@ describe('justEnoughJs', () => {
 			});
 		}
 
-		const rejectedOperators = ['&=', '|=', '^=', '<<=', '>>=', '>>>='];
+		const bitwiseAssignmentOperators = ['&=', '|=', '^=', '<<=', '>>=', '>>>='];
 
-		for (const op of rejectedOperators) {
-			it(`rejects ${op}`, () => {
+		for (const op of bitwiseAssignmentOperators) {
+			it(`allows ${op}`, () => {
 				const result = validate(
 					fakeNode({
 						type: 'AssignmentExpression',
@@ -432,8 +439,7 @@ describe('justEnoughJs', () => {
 						left: { type: 'Identifier', name: 'x' },
 					}),
 				);
-				expect(result).not.toBe(true);
-				expect(result).toHaveProperty('nodeType', 'AssignmentExpression');
+				expect(result).toBe(true);
 			});
 		}
 
@@ -595,7 +601,7 @@ describe('justEnoughJs', () => {
 			expect(result).toBe(true);
 		});
 
-		it('rejects regex literals', () => {
+		it('allows regex literals', () => {
 			const result = validate(
 				fakeNode({
 					type: 'Literal',
@@ -603,7 +609,7 @@ describe('justEnoughJs', () => {
 					regex: { pattern: 'abc', flags: '' },
 				}),
 			);
-			expect(result).not.toBe(true);
+			expect(result).toBe(true);
 		});
 
 		it('rejects bigint literals', () => {

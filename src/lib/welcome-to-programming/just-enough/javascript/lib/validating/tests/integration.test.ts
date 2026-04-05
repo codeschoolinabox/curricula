@@ -145,14 +145,12 @@ describe('integration: common student mistakes', () => {
 		expect(v).toBeDefined();
 	});
 
-	it('catches classic for loop', () => {
+	it('allows classic for loop', () => {
 		const report = validateProgram(
-			'for (let i = 0; i < 10; i = i + 1) {}',
+			'for (let i = 0; i < 10; i = i + 1) {\n\tconsole.log(i);\n}\n',
 			justEnoughJs,
 		);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find((v) => v.nodeType === 'ForStatement');
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
 	});
 
 	it('catches switch statement', () => {
@@ -250,10 +248,10 @@ var y = 10;`;
 
 describe('integration: scope analysis', () => {
 	it('flags undeclared identifier as rejection', () => {
-		const report = validateProgram('parseInt("42");', justEnoughJs);
+		const report = validateProgram('fetch("url");', justEnoughJs);
 		expect(report.isValid).toBe(false);
 		const v = report.violations.find(
-			(v) => v.severity === 'rejection' && v.message.includes('parseInt'),
+			(v) => v.severity === 'rejection' && v.message.includes('fetch'),
 		);
 		expect(v).toBeDefined();
 	});
@@ -478,28 +476,20 @@ describe('integration: disallowed methods', () => {
 		expect(v).toBeDefined();
 	});
 
-	it('rejects .search()', () => {
+	it('allows .search()', () => {
 		const report = validateProgram(
-			'let x = "hi";\nlet y = x.search("h");\nconsole.log(y);\n',
+			'let x = \'hi\';\nlet y = x.search(\'h\');\nconsole.log(y);\n',
 			justEnoughJs,
 		);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find(
-			(v) => v.nodeType === 'MemberExpression' && v.message.includes('search'),
-		);
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
 	});
 
-	it('rejects .replace()', () => {
+	it('allows .replace()', () => {
 		const report = validateProgram(
-			'let x = "hi";\nlet y = x.replace("h", "b");\nconsole.log(y);\n',
+			'let x = \'hi\';\nlet y = x.replace(\'h\', \'b\');\nconsole.log(y);\n',
 			justEnoughJs,
 		);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find(
-			(v) => v.nodeType === 'MemberExpression' && v.message.includes('replace'),
-		);
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
 	});
 
 	it('rejects console.error', () => {
@@ -520,28 +510,20 @@ describe('integration: disallowed operators', () => {
 		expect(v).toBeDefined();
 	});
 
-	it('rejects >> operator', () => {
+	it('allows >> operator', () => {
 		const report = validateProgram(
 			'let x = 8;\nlet y = x >> 1;\nconsole.log(y);\n',
 			justEnoughJs,
 		);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find(
-			(v) => v.nodeType === 'BinaryExpression' && v.message.includes('>>'),
-		);
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
 	});
 
-	it('rejects & operator', () => {
+	it('allows & operator', () => {
 		const report = validateProgram(
 			'let x = 5;\nlet y = x & 3;\nconsole.log(y);\n',
 			justEnoughJs,
 		);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find(
-			(v) => v.nodeType === 'BinaryExpression' && v.message.includes("'&'"),
-		);
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
 	});
 
 	it('allows **= operator (compound assignment)', () => {
