@@ -1,0 +1,18 @@
+thoughts, in no particular order:
+- I lean towards still having a flat array of linear events with enough cross-references that one could reconstruct hte execution tree for visualizing things like order of operations or for loop evaluation, drawing correlations to the syntax in an editor.  basically the array is the traversal order through the evaluation tree 
+- we should keep the fields of the current config and simply shift them to semantic markers under syntax fields
+- should we still group operators like we have (pure, assignment, ...)?  this is semantic, but maybe this new top-level config should be more like what you see in a cheatsheet?  then they can have tags in teh event with te current semantic category?
+- we will need to refactor the message passing out of the advice and into the state tracking layer.  advice can send trace objects traditionally to the state tracking layer within the worker, then the state tracking layer emits events out of the worker when it's accumulated enough semantic traces to build a syntax event 
+- granularity of one event: a point-to-able element of syntax.  some ideas, thoughts?:
+    - conditionals: check -> branch (repeating for else-if)
+    - for loop: init → [test → body → increment]* → test(false) (like you said)
+    - do-while: do -> body -> check -> do -> body -> check.  or just body -> check -> body -> check ...
+    - while: check -> body -> check -> body 
+    - variable initialization: [declare(x) no? this happens at scope creation, not the declaration line] → evaluate(5) → initialize(x, 5) → available(x)
+    - x += 2: read(x) → evaluate(2) → add(x, 2) → assign(x, 3)
+    - short-circuiting operators: evaluate -> test -> branch[return or evaluate]
+    - `hello ${name}`: one event (with sub-events for each expression), the internal event semantics are what what defined for the current tracer. 
+        however, how will we trace-event the evaluation of sub-expressions in a template?  all embedded in the event payload?  that's not so linear, aybe we should still break up the tempalte into multiple events
+    -> hmm. maybe events are still at the semantic level, and they're grouped into syntax features by id & cross-refeerence rather than by literally being goruped in one event?  so the config we already created still defineds the events emitted?  
+- how deep does breakdown go?  all the way, babee
+- ... ?  discuss!
