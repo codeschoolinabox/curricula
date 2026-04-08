@@ -14,11 +14,14 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import validate from './validate.js';
 import { checkFormat } from './format.js';
-import createDebugGenerator from '../evaluating/debug/index.js';
-import createExecution from '../evaluating/shared/create-execution.js';
+import createDebugGenerator from '../lib/evaluating/debug/index.js';
+import createExecution from '../lib/evaluating/shared/create-execution.js';
 
 import type { DebugResult, DebugEvent } from './types.js';
-import type { Execution, EngineConfig } from '../evaluating/shared/types.js';
+import type {
+	Execution,
+	EngineConfig,
+} from '../lib/evaluating/shared/types.js';
 
 /**
  * Validates code against the full JeJ level, then debugs it.

@@ -1,1 +1,0 @@
-should events be nameda fter the semantics not their syntax, as now?  I think so.  then it's said laik "syntax x has y semantics".  so the language, so the conceptuatecture

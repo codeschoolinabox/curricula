@@ -15,7 +15,7 @@ import checkFormat from '../lib/formatting/check-format.js';
 import run from './run.js';
 import trace from './trace.js';
 import debug from './debug.js';
-import createExecution from '../evaluating/shared/create-execution.js';
+import createExecution from '../lib/evaluating/shared/create-execution.js';
 
 import type {
 	JejProgram,
@@ -24,13 +24,9 @@ import type {
 	DebugResult,
 	DebugEvent,
 } from './types.js';
-import type {
-	Execution,
-	EngineConfig,
-	TraceConfig,
-} from '../evaluating/shared/types.js';
-import type { RunEvent } from '../evaluating/shared/types.js';
-import type { TraceEvent } from '../evaluating/trace/tracing/types.js';
+import type { Execution, EngineConfig, RunEvent } from '../lib/evaluating/shared/types.js';
+import type { TraceConfig } from '../lib/evaluating/trace/config.types.js';
+import type { TraceEvent } from '../lib/evaluating/trace/tracing/types.js';
 import type { Violation } from '../lib/validating/types.js';
 
 // --- Analysis state ---

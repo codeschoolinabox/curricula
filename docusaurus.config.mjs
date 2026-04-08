@@ -38,13 +38,33 @@ const config = {
 				routeBasePath: 'welcome-to-programming',
 				sidebarPath: './sidebars/welcome-to-programming.mjs',
 				exclude: [
-					'**/to-use/**',                       // teaching-only resources (never shown)
-					'3-devs-computers-users/**',          // chapter 3 (hidden)
-					'4-devs-computers-users-agents/**',   // chapter 4 (hidden)
-					'just-enough-javascript/**',          // reference section (hidden)
-					// --- Add patterns below to hide files/folders globally ---
-					// '**/research-framing.md',  // hide all files named research-framing.md
-					// '**/teaching-tips.md',     // hide all files named teaching-tips.md
+					'**/to-use/**',                                        // teaching-only resources (never shown)
+					'3-devs-computers-users/**',                           // chapter 3 — content in design
+					'4-devs-computers-users-agents/**',                    // chapter 4 — content in design
+					// --- author/process docs (not learner-facing) ---
+					'**/research-framing.md',
+					'**/teaching-tips.md',
+					'learning-objectives--to-sort.md',
+					'sidebar-control-guide.md',
+					// --- ch2 legacy/scratch dirs (kept in repo, hidden from TOC) ---
+					'2-devs-computers/*/from-inside-js/**',
+					'2-devs-computers/*/from-welcome-to-js/**',
+					'2-devs-computers/2.1-running-a-program/errors/**',
+					'2-devs-computers/2.1-running-a-program/0-errorsss/**',
+					'2-devs-computers/2.2-program-state/devtools-debugger/**',
+					'2-devs-computers/2.2-program-state/predictive-stepping/**',
+					'2-devs-computers/2.2-program-state/the-computer/**',
+					'2-devs-computers/2.2-program-state/1-predicting-execution/**',
+					'2-devs-computers/2.2-program-state/1-variables/**',
+					'2-devs-computers/2.2-program-state/isolating-javascript.md',
+					'2-devs-computers/2.2-program-state/trace-tables.md',
+					'2-devs-computers/2.3-asserting/2-comparing-and-asserting/**',
+					'2-devs-computers/2.3-asserting/3-value-swaps/**',
+					'2-devs-computers/2.3-asserting/study.json',
+					'2-devs-computers/2.5-control-flow/**',                // no landing page yet
+					'2-devs-computers/2.6+-deeper-into-computing/**',      // no landing page yet
+					// --- just-enough-javascript: keep visible, hide flashcards ---
+					'just-enough-javascript/flashcards/**',
 				],
 			},
 		],

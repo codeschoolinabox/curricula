@@ -19,7 +19,11 @@
  *
  * Primitives and null are returned as-is (nothing to freeze).
  *
+ * Circular references are handled safely — already-visited objects are skipped,
+ * so objects with `.parent` back-references (e.g. ASTNode) won't cause infinite recursion.
+ *
  * @param value - The value to freeze in place
+ * @param visited - Internal cycle guard; do not pass externally
  * @returns The same reference, now frozen
  *
  * @example
@@ -29,16 +33,21 @@
  * console.log(frozen === obj);       // true — same reference
  * frozen.nested.value = 2;           // TypeError in strict mode
  */
-function deepFreezeInPlace<T>(value: T): Readonly<T> {
+function deepFreezeInPlace<T>(value: T, visited = new Set<object>()): Readonly<T> {
 	if (value === null || typeof value !== 'object') {
 		return value;
 	}
 
+	if (visited.has(value as object)) {
+		return value as Readonly<T>;
+	}
+
+	visited.add(value as object);
 	Object.freeze(value);
 
 	for (const propertyValue of Object.values(value)) {
 		if (propertyValue !== null && typeof propertyValue === 'object') {
-			deepFreezeInPlace(propertyValue);
+			deepFreezeInPlace(propertyValue, visited);
 		}
 	}
 

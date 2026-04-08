@@ -13,13 +13,9 @@
 import type { Program } from 'acorn';
 
 import type { Violation } from '../lib/validating/types.js';
-import type { RunEvent } from '../evaluating/shared/types.js';
-import type { TraceEvent } from '../evaluating/trace/tracing/types.js';
-import type {
-	Execution,
-	EngineConfig,
-	TraceConfig,
-} from '../evaluating/shared/types.js';
+import type { RunEvent, Execution, EngineConfig } from '../lib/evaluating/shared/types.js';
+import type { ASTNode, TraceEvent } from '../lib/evaluating/trace/tracing/types.js';
+import type { TraceConfig, TraceOptions } from '../lib/evaluating/trace/config.types.js';
 
 // ─── Error types ─────────────────────────────────────────────
 
@@ -212,11 +208,31 @@ type RunResult = Result<RunEvent>;
 /**
  * Result from `trace()` — Aran instrumentation with structured events.
  *
- * @remarks `logs` contains {@link TraceEvent} entries: one per
- * binding lifecycle, operator evaluation, control-flow step, etc.
- * Events are structured and typed — no post-processing needed.
+ * @remarks
+ * `logs` contains {@link TraceEvent} entries — one per binding lifecycle,
+ * operator evaluation, control-flow step, etc. Events are structured and
+ * typed; no post-processing needed.
+ *
+ * On `ok: true`, three additional fields are present:
+ * - `code` — the original source code (echoed back for convenience)
+ * - `ast`  — flat `Record<syntaxId, ASTNode>` for O(1) syntax navigation.
+ *   `ast['$']` is the root Program node. Every `TraceEvent.node` is a
+ *   direct reference into this frozen structure. Note: `node.parent` is
+ *   circular — `JSON.stringify` requires a custom replacer.
+ * - `options` — snapshot of the `TraceOptions` config that was used,
+ *   so consumers know which events were enabled.
  */
-type TraceResult = Result<TraceEvent>;
+type TraceResult = Result<TraceEvent> & {
+	/** Original source code. Present on ok:true. */
+	readonly code?: string;
+	/**
+	 * Flat AST record for syntaxId-based navigation. Present on ok:true.
+	 * `ast['$']` = root Program. Every event's `.node` is a ref into this structure.
+	 */
+	readonly ast?: Readonly<Record<string, ASTNode>>;
+	/** Config snapshot — which events were enabled. Present on ok:true. */
+	readonly options?: TraceOptions;
+};
 
 /**
  * Result from `debug()` — iframe with debugger statements.
@@ -326,4 +342,7 @@ export type {
 	DebugResult,
 	DebugEvent,
 	JejProgram,
+	// Re-exported for consumer convenience
+	ASTNode,
+	TraceOptions,
 };

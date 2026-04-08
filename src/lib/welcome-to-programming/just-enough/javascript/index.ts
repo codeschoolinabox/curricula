@@ -33,11 +33,12 @@ export type {
 export type {
 	Execution,
 	EngineConfig,
-	TraceConfig,
 	RunEvent,
-} from './evaluating/shared/types.js';
+} from './lib/evaluating/shared/types.js';
 
-export type { TraceEvent } from './evaluating/trace/tracing/types.js';
+export type { TraceConfig } from './lib/evaluating/trace/config.types.js';
+
+export type { TraceEvent } from './lib/evaluating/trace/tracing/types.js';
 
 export type { Violation } from './lib/validating/types.js';
 

@@ -73,6 +73,7 @@ This is **_just enough JavaScript_** to:
     - [Boundary Checks](#boundary-checks)
     - [Transforming](#transforming)
     - [Whitespace & Formatting](#whitespace--formatting)
+  - [`in`](#in)
   - [Optional Chaining](#optional-chaining)
   - [Template Literals](#template-literals)
   - [Variables](#variables)
@@ -81,6 +82,7 @@ This is **_just enough JavaScript_** to:
   - [Assignment Operators](#assignment-operators)
     - [Assignment (`=`)](#assignment-)
     - [Compound Assignment](#compound-assignment)
+    - [Increment & Decrement](#increment--decrement)
   - [Interactions](#interactions)
     - [Input](#input)
     - [Output](#output)
@@ -95,7 +97,6 @@ This is **_just enough JavaScript_** to:
 - [Syntax You'll See (But Not Write)](#syntax-youll-see-but-not-write)
   - [debugger](#debugger)
   - [Braceless `if`](#braceless-if)
-  - [Prefix Increment (`++`)](#prefix-increment-)
   - [`throw`](#throw)
   - [`new RangeError`](#new-rangeerror)
 
@@ -133,8 +134,9 @@ are purely syntactic convenience with no conceptual payoff.
   are genuinely different ways of thinking about position, and syntax (brackets)
   is a different mechanism than methods (.at()).
 - `+` and `.concat()` — both in. Operator vs. method call on the same data.
-- `++` is out — it's just shorthand for `+= 1`. No new mental model, just fewer
-  characters and some new sneaky bugs you shouldn't spend your time on.
+- `++` and `+= 1` — both in. `++` is shorter, but the prefix/postfix distinction
+  (which value it returns) is a genuine conceptual difference worth stepping
+  through.
 
 ### Code & PseudoCode
 
@@ -1622,6 +1624,61 @@ can use it.
 
 ---
 
+### In
+
+_expression_
+
+The `in` operator checks whether a property exists on an object. It's a binary
+operator (like `+` or `===`), introduced here now that you know the global
+objects that make it useful.
+
+`'property' in object` returns `true` if the property exists, `false` if it
+doesn't.
+
+<table>
+
+<tr>
+<td>
+
+```js
+// Math methods you know
+'round' in Math; // true
+'cube' in Math; // false — Math has no cube method
+
+// Number helpers
+'isNaN' in Number; // true
+'isInteger' in Number; // true
+
+// safely call a method only if it exists
+let method = 'round';
+if (method in Math) {
+	Math[method](3.7);
+}
+```
+
+</td>
+<td>
+
+```txt
+'round' IN Math
+'cube' IN Math
+
+'isNaN' IN Number
+'isInteger' IN Number
+
+method <- 'round'
+if method IN Math
+  Math[method](3.7)
+```
+
+</td>
+</tr>
+</table>
+
+[TOP](#just-enough-javascript)
+
+---
+
 ### Optional Chaining
 
 _expression_
@@ -1777,7 +1834,9 @@ let greeting;
 let name = 'Java';
 
 // declare and initialize multiple variables
-let a = 1, b = 2, greeting2 = 'hello';
+let a = 1,
+	b = 2,
+	greeting2 = 'hello';
 
 // read
 console.log(name);
@@ -1816,7 +1875,8 @@ log(name)
 const language = 'JavaScript';
 
 // declare and initialize multiple constants
-const pi = 3.14, maxRetries = 3;
+const pi = 3.14,
+	maxRetries = 3;
 
 // cannot be declared without initialization
 const language; // SyntaxError
@@ -2041,6 +2101,59 @@ name &&= name.toUpperCase()
 </td>
 </tr>
 </table>
+
+#### Increment & Decrement
+
+`++` and `--` add or subtract 1 from a variable in a single expression. Each
+comes in two forms: **prefix** (`++x`) and **postfix** (`x++`). Both modify the
+variable, but they differ in what they _return_.
+
+- **Prefix** — modifies first, then returns the **new** value
+- **Postfix** — returns the **old** value, then modifies
+
+<table>
+
+<tr>
+<td>
+
+```js
+let count = 5;
+
+// prefix increment — returns NEW value (6)
+++count; // 6, count is now 6
+
+// postfix increment — returns OLD value (6)
+count++; // 6, count is now 7
+
+// prefix decrement — returns NEW value (6)
+--count; // 6, count is now 6
+
+// postfix decrement — returns OLD value (6)
+count--; // 6, count is now 5
+```
+
+</td>
+<td>
+
+```txt
+count <- 5
+
+++count
+count++
+
+--count
+count--
+```
+
+</td>
+</tr>
+</table>
+
+The prefix/postfix difference only matters when the expression's value is used
+(e.g. in an assignment or condition). As standalone statements on their own
+line, both forms have the same effect — prefer `+= 1` when you don't need the
+returned value. Use `++` or `--` when you want to trace what the expression
+_evaluates to_.
 
 > **`??=` vs `||=`**: Same difference as `??` vs `||` — see
 > [Short-Circuiting](#short-circuiting). Use `??=` when empty strings and `0`
@@ -2723,9 +2836,9 @@ FOR: character OF 'hello'
 
 These features are added to your code _after_ you write it, for two purposes:
 studying your code in the debugger (the `debugger` statement, added by the
-[debug] button) and avoiding infinite loops (braceless `if`, prefix increment
-`++`, `throw`, and `new RangeError` — added behind the scenes as part of a _loop
-guard_). Here's what a loop guard looks like in the generated code:
+[debug] button) and avoiding infinite loops (braceless `if`, `throw`, and
+`new RangeError` — added behind the scenes as part of a _loop guard_). Here's
+what a loop guard looks like in the generated code:
 
 ```js
 debugger;
@@ -2803,27 +2916,6 @@ if (count > 100) {
   throw new RangeError('too many iterations');
 }
 ```
-
-### Prefix Increment (`++`)
-
-_expression (operator)_
-
-`++variable` adds 1 to the variable _and_ returns the new value, in a single
-expression. In code you write, use `variable += 1` or explicit assignment
-instead.
-
-```js
-// prefix increment (you won't write this)
-++count;
-
-// your style
-count = count + 1;
-count += 1;
-```
-
-[TOP](#just-enough-javascript)
-
----
 
 ### `throw`
 

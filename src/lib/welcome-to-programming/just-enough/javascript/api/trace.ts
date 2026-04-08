@@ -12,20 +12,27 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import validate from './validate.js';
 import { checkFormat } from './format.js';
-import createTracingGenerator from '../evaluating/trace/tracing/index.js';
-import createExecution from '../evaluating/shared/create-execution.js';
-import prepareConfig from '../evaluating/trace/configuring/prepare-config.js';
-import optionsSchema from '../evaluating/trace/options-schema.js';
+import createTracingGenerator from '../lib/evaluating/trace/tracing/index.js';
+import createExecution from '../lib/evaluating/shared/create-execution.js';
+import prepareConfig from '../lib/evaluating/trace/configuring/prepare-config.js';
+import optionsSchema from '../lib/evaluating/trace/options-schema.js';
 
 import type { TraceResult } from './types.js';
-import type { Execution, TraceConfig } from '../evaluating/shared/types.js';
-import type { TraceEvent } from '../evaluating/trace/tracing/types.js';
+import type { Execution } from '../lib/evaluating/shared/types.js';
+import type { TraceConfig } from '../lib/evaluating/trace/config.types.js';
+import type { TraceEvent } from '../lib/evaluating/trace/tracing/types.js';
 
 /**
  * Validates code against the full JeJ level, then traces it.
  *
  * @param code - JavaScript source to validate and trace
- * @param config - Trace configuration (seconds, iterations, options)
+ * @param config - Execution constraints + trace options:
+ *   - `seconds`    — max execution time (default 5)
+ *   - `iterations` — max loop iterations before RangeError
+ *   - `options`    — which events to capture (see TraceOptions for 4-layer structure)
+ *   - `range`      — source range filter: only emit events within `{ start, end }`.
+ *     Each bound is a line number (`number`) or `{ line, column }` for character precision.
+ *     Cross-field constraint `start ≤ end` validated by verifyOptions.
  * @returns An Execution that yields TraceEvents and resolves to TraceResult
  *
  * @remarks
@@ -33,6 +40,9 @@ import type { TraceEvent } from '../evaluating/trace/tracing/types.js';
  * - `for await (const event of trace(code, config))` — step-through
  * - Second `for await` replays from cached result (no re-execution)
  * - `.cancel()` terminates Worker immediately
+ *
+ * On success, `TraceResult` includes `logs` (events), `code` (original source),
+ * `ast` (flat syntaxId→ASTNode map), and `options` (config snapshot).
  *
  * Never throws. All errors are represented in the result.
  */

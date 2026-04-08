@@ -12,12 +12,15 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import validate from './validate.js';
 import { checkFormat } from './format.js';
-import createRunGenerator from '../evaluating/run/run.js';
-import createExecution from '../evaluating/shared/create-execution.js';
+import createRunGenerator from '../lib/evaluating/run/run.js';
+import createExecution from '../lib/evaluating/shared/create-execution.js';
 
 import type { RunResult } from './types.js';
-import type { Execution, EngineConfig } from '../evaluating/shared/types.js';
-import type { RunEvent } from '../evaluating/shared/types.js';
+import type {
+	Execution,
+	EngineConfig,
+} from '../lib/evaluating/shared/types.js';
+import type { RunEvent } from '../lib/evaluating/shared/types.js';
 
 /**
  * Validates code against the full JeJ level, then runs it.

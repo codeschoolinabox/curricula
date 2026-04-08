@@ -1,3 +1,5 @@
+-> idea to integrate:  a field to give each program a name, can be connected to gisting
+
 this directory will have everything for a full-feature run/trace/debug JS editor made of react components consuming the API
 
 /study will contain the main editor with base editor-based study features (run, debug, table, socratizing, ...)

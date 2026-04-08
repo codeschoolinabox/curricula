@@ -1,0 +1,444 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "options.schema.json",
+	"title": "JEJ Trace Options",
+	"description": "Controls which runtime events appear in the trace output. Structured by the 4-layer mental model: resolve (data), expression (which code produced values), statements (control flow), scopes (structure). Boolean shorthand is expanded by expand-shorthand.ts before this schema is applied — this schema describes the POST-expansion shape.",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"resolve": {
+			"description": "Data layer — emit ResolveEvents carrying the produced value after every expression-producing event. Default true. Turning off gives context events with no values.",
+			"type": "boolean",
+			"default": true
+		},
+
+		"expression": {
+			"description": "Expression layer — which code produced those values.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"variables": {
+					"description": "Variable read and update events.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"read": {
+							"description": "Variable value accessed in an expression (x used in `x + 1`).",
+							"type": "boolean",
+							"default": true
+						},
+						"update": {
+							"description": "Variable written after initialization (x = …, x += …, ++x, x++, --x, x--).",
+							"type": "boolean",
+							"default": true
+						},
+						"filter": {
+							"description": "If non-empty, only trace variables with these names.",
+							"type": "array",
+							"items": { "type": "string" },
+							"default": []
+						}
+					},
+					"default": {}
+				},
+
+				"operators": {
+					"description": "Operator evaluation events.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"arithmetic": {
+							"description": "-, *, /, %, **, unary +, unary -",
+							"type": "boolean",
+							"default": true
+						},
+						"addition": {
+							"description": "+ (numeric addition or string concatenation — operand types disambiguate).",
+							"type": "boolean",
+							"default": true
+						},
+						"comparison": {
+							"description": "===, !==, >, <, >=, <=",
+							"type": "boolean",
+							"default": true
+						},
+						"typeof": {
+							"description": "typeof — type introspection.",
+							"type": "boolean",
+							"default": true
+						},
+						"negation": {
+							"description": "Unary inversion operators.",
+							"type": "object",
+							"additionalProperties": false,
+							"properties": {
+								"logical": {
+									"description": "! (logical NOT)",
+									"type": "boolean",
+									"default": true
+								},
+								"bitwise": {
+									"description": "~ (bitwise NOT)",
+									"type": "boolean",
+									"default": true
+								}
+							},
+							"default": {}
+						},
+						"bitwise": {
+							"description": "&, |, ^, <<, >>, >>>",
+							"type": "boolean",
+							"default": true
+						},
+						"shortCircuiting": {
+							"description": "&&, ||, ?? — operators that may skip evaluating the right operand.",
+							"type": "boolean",
+							"default": true
+						},
+						"conditional": {
+							"description": "Ternary operator ?: (ConditionalExpression). Gated separately from if/else (see statements.conditionals).",
+							"type": "boolean",
+							"default": true
+						},
+						"assignment": {
+							"description": "Assignment operators as expressions.",
+							"type": "object",
+							"additionalProperties": false,
+							"properties": {
+								"simple": {
+									"description": "Plain assignment: =",
+									"type": "boolean",
+									"default": true
+								},
+								"compound": {
+									"description": "Compound assignment: +=, -=, *=, /=, %=, **=, &&=, ||=, ??=, &=, |=, ^=, <<=, >>=, >>>=",
+									"type": "boolean",
+									"default": true
+								},
+								"filter": {
+									"description": "If non-empty, only trace these specific assignment operators.",
+									"type": "array",
+									"items": { "type": "string" },
+									"default": []
+								}
+							},
+							"default": {}
+						},
+						"increment": {
+							"description": "Increment and decrement operators (++x, x++, --x, x--). Pointcut context gate: controls sub-events (read, arithmetic, update) when originating from an UpdateExpression.",
+							"type": "object",
+							"additionalProperties": false,
+							"properties": {
+								"prefix": {
+									"description": "Prefix forms: ++x, --x (returns new value).",
+									"type": "boolean",
+									"default": true
+								},
+								"postfix": {
+									"description": "Postfix forms: x++, x-- (returns old value).",
+									"type": "boolean",
+									"default": true
+								}
+							},
+							"default": {}
+						},
+						"in": {
+							"description": "in operator — property existence check (`key in obj`).",
+							"type": "boolean",
+							"default": true
+						},
+						"void": {
+							"description": "void operator — evaluates and discards (`void expr`).",
+							"type": "boolean",
+							"default": true
+						},
+						"comma": {
+							"description": "Comma / sequence expression (easter egg — not in standard JEJ). Pointcut context gate for sub-expressions within a SequenceExpression.",
+							"type": "boolean",
+							"default": true
+						},
+						"filter": {
+							"description": "If non-empty, only trace these specific operators.",
+							"type": "array",
+							"items": { "type": "string" },
+							"default": []
+						}
+					},
+					"default": {}
+				},
+
+				"literals": {
+					"description": "Literal value events. Each fires before its ResolveEvent.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"string": { "type": "boolean", "default": true },
+						"number": { "type": "boolean", "default": true },
+						"boolean": { "type": "boolean", "default": true },
+						"null": { "type": "boolean", "default": true },
+						"undefined": { "type": "boolean", "default": true },
+						"regex": {
+							"description": "RegExp literals (/pattern/flags). Not new RegExp().",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				},
+
+				"templates": {
+					"description": "Template literal events. begin/end bracket the evaluation; evaluation fires per ${} expression.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"begin": {
+							"description": "Template evaluation starts. Includes static string parts and expression count.",
+							"type": "boolean",
+							"default": true
+						},
+						"evaluation": {
+							"description": "A ${} expression inside the template is evaluated. Includes index and value.",
+							"type": "boolean",
+							"default": true
+						},
+						"end": {
+							"description": "Template evaluation complete. Followed by ResolveEvent(kind:'template') with the final string.",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				},
+
+				"properties": {
+					"description": "Property access events (MemberExpression). Each fires before its ResolveEvent(kind:'property').",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"dot": {
+							"description": "Dot notation: obj.prop, Math.PI, str.length",
+							"type": "boolean",
+							"default": true
+						},
+						"bracket": {
+							"description": "Bracket notation: obj[key], str[0], str[i]",
+							"type": "boolean",
+							"default": true
+						},
+						"optionalChaining": {
+							"description": "Optional chaining: input?.length, input?.trim()",
+							"type": "boolean",
+							"default": true
+						},
+						"filter": {
+							"description": "If non-empty, only trace these property names.",
+							"type": "array",
+							"items": { "type": "string" },
+							"default": []
+						}
+					},
+					"default": {}
+				},
+
+				"functions": {
+					"description": "Function call events. FunctionCallEvent fires before the call; ResolveEvent(kind:'call') fires after with the return value.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"call": {
+							"description": "Function called — includes name and arguments.",
+							"type": "boolean",
+							"default": true
+						},
+						"filter": {
+							"description": "If non-empty, only trace calls to these function names.",
+							"type": "array",
+							"items": { "type": "string" },
+							"default": []
+						}
+					},
+					"default": {}
+				}
+			},
+			"default": {}
+		},
+
+		"statements": {
+			"description": "Statement layer — how execution was controlled.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"variables": {
+					"description": "Variable declaration lifecycle events (statement perspective). Read/update events are in expression.variables.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"initialize": {
+							"description": "Binding gets its first value. Fires when the declaration line executes (let x = 5 or let x;).",
+							"type": "boolean",
+							"default": true
+						},
+						"available": {
+							"description": "Binding becomes usable without TDZ error. Fires after initialize.",
+							"type": "boolean",
+							"default": true
+						},
+						"filter": {
+							"description": "If non-empty, only trace variables with these names.",
+							"type": "array",
+							"items": { "type": "string" },
+							"default": []
+						}
+					},
+					"default": {}
+				},
+
+				"conditionals": {
+					"description": "if/else events. Ternary ?: is in expression.operators.conditional.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"test": {
+							"description": "The condition expression was evaluated.",
+							"type": "boolean",
+							"default": true
+						},
+						"branch": {
+							"description": "Which branch (consequent/alternate) was taken.",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				},
+
+				"while": {
+					"description": "while loop events.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"test": { "type": "boolean", "default": true },
+						"iteration": { "type": "boolean", "default": true }
+					},
+					"default": {}
+				},
+
+				"doWhile": {
+					"description": "do...while loop events.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"do": {
+							"description": "Body execution marker — fires before every body execution.",
+							"type": "boolean",
+							"default": true
+						},
+						"test": { "type": "boolean", "default": true },
+						"iteration": { "type": "boolean", "default": true }
+					},
+					"default": {}
+				},
+
+				"for": {
+					"description": "for loop events.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"setup": {
+							"description": "Initialization phase (runs once before first test).",
+							"type": "boolean",
+							"default": true
+						},
+						"test": { "type": "boolean", "default": true },
+						"increment": {
+							"description": "Update/increment phase (runs after each body execution).",
+							"type": "boolean",
+							"default": true
+						},
+						"iteration": { "type": "boolean", "default": true }
+					},
+					"default": {}
+				},
+
+				"forOf": {
+					"description": "for...of loop events. In JEJ, iterates over strings and arrays.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"iteration": {
+							"description": "Each iteration — includes the current element value.",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				},
+
+				"break": {
+					"description": "break statement.",
+					"type": "boolean",
+					"default": true
+				},
+
+				"continue": {
+					"description": "continue statement.",
+					"type": "boolean",
+					"default": true
+				}
+			},
+			"default": {}
+		},
+
+		"scopes": {
+			"description": "Structure layer — scope lifecycle events and variable hoisting (declare events).",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"script": {
+					"description": "Script-level scope (top-level in normal JEJ programs, or with-statement programs).",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"create": { "description": "Scope created.", "type": "boolean", "default": true },
+						"enter": { "description": "Execution enters scope.", "type": "boolean", "default": true },
+						"interrupt": { "description": "Scope interrupted by break or runtime error.", "type": "boolean", "default": true },
+						"completion": { "description": "Scope completes normally.", "type": "boolean", "default": true },
+						"leave": { "description": "Execution leaves scope. Always fires (like finally).", "type": "boolean", "default": true },
+						"declare": {
+							"description": "A variable is hoisted into this scope (TDZ start). Fires once per variable at scope creation. Same BindingEvent(declare) type as other declare events.",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				},
+
+				"block": {
+					"description": "Block-level scope — if/else bodies, loop bodies, bare {} blocks.",
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"create": { "description": "Scope created.", "type": "boolean", "default": true },
+						"enter": { "description": "Execution enters scope.", "type": "boolean", "default": true },
+						"interrupt": { "description": "Scope interrupted by break or runtime error.", "type": "boolean", "default": true },
+						"completion": { "description": "Scope completes normally.", "type": "boolean", "default": true },
+						"leave": { "description": "Execution leaves scope. Always fires (like finally).", "type": "boolean", "default": true },
+						"declare": {
+							"description": "A variable is hoisted into this scope (TDZ start). Fires once per variable at scope creation.",
+							"type": "boolean",
+							"default": true
+						}
+					},
+					"default": {}
+				}
+			},
+			"default": {}
+		},
+
+		"with": {
+			"description": "Easter egg — trace the with statement. When active, program runs as script (sloppy mode). Not in standard JEJ documentation.",
+			"type": "boolean",
+			"default": true
+		}
+	}
+}

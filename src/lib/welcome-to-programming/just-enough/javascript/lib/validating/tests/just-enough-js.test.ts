@@ -473,6 +473,38 @@ describe('justEnoughJs', () => {
 		});
 	});
 
+	describe('UpdateExpression constraint', () => {
+		const validate = justEnoughJs.nodes.UpdateExpression as NodeValidator;
+
+		it('allows prefix ++', () => {
+			const result = validate(
+				fakeNode({ type: 'UpdateExpression', operator: '++', prefix: true }),
+			);
+			expect(result).toBe(true);
+		});
+
+		it('allows postfix ++', () => {
+			const result = validate(
+				fakeNode({ type: 'UpdateExpression', operator: '++', prefix: false }),
+			);
+			expect(result).toBe(true);
+		});
+
+		it('allows prefix --', () => {
+			const result = validate(
+				fakeNode({ type: 'UpdateExpression', operator: '--', prefix: true }),
+			);
+			expect(result).toBe(true);
+		});
+
+		it('allows postfix --', () => {
+			const result = validate(
+				fakeNode({ type: 'UpdateExpression', operator: '--', prefix: false }),
+			);
+			expect(result).toBe(true);
+		});
+	});
+
 	describe('BinaryExpression constraint', () => {
 		const validate = justEnoughJs.nodes.BinaryExpression as NodeValidator;
 		const allowed = [
@@ -488,6 +520,7 @@ describe('justEnoughJs', () => {
 			'<',
 			'>=',
 			'<=',
+			'in',
 		];
 
 		for (const op of allowed) {

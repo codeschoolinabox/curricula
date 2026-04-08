@@ -40,8 +40,8 @@ function validateVariableDeclaration(node: Node): true | Violation {
  * compound operators that combine arithmetic or logic with
  * assignment. Compound forms are shorthand — `x += 1` is
  * equivalent to `x = x + 1`. Excludes bitwise assignments
- * (`&=`, `|=`, `^=`, `<<=`, `>>=`, `>>>=`) and `++`/`--`
- * (which are `UpdateExpression`, not `AssignmentExpression`).
+ * (`&=`, `|=`, `^=`, `<<=`, `>>=`, `>>>=`). Note: `++`/`--` are
+ * `UpdateExpression` nodes, not `AssignmentExpression`.
  */
 const ALLOWED_ASSIGNMENT_OPERATORS = new Set([
 	'=',
@@ -103,11 +103,29 @@ function validateAssignmentExpression(node: Node): true | Violation {
 }
 
 /**
- * Binary operators allowed in JeJ: equality, comparison, arithmetic.
+ * Validates that an update expression uses `++` or `--`.
+ *
+ * @remarks Both prefix (`++x`, `--x`) and postfix (`x++`, `x--`)
+ * forms are allowed. The `prefix` boolean on the node distinguishes
+ * them but is not constrained — any combination is valid JeJ.
+ */
+function validateUpdateExpression(node: Node): true | Violation {
+	const operator = (node as unknown as Record<string, unknown>)
+		.operator as string;
+	if (operator === '++' || operator === '--') return true;
+	return createViolation(
+		'UpdateExpression',
+		`Update operator '${operator}' is not allowed`,
+		extractLocation(node),
+	);
+}
+
+/**
+ * Binary operators allowed in JeJ: equality, comparison, arithmetic, and membership.
  *
  * @remarks Deliberately excludes `==`, `!=` (loose equality is a
  * beginner trap), bitwise operators (`&`, `|`, `^`, `<<`, `>>`),
- * `in`, and `instanceof` (object-oriented concepts not in JeJ).
+ * and `instanceof` (class-based concept not in JeJ).
  */
 const ALLOWED_BINARY_OPERATORS = new Set([
 	'===',
@@ -128,6 +146,7 @@ const ALLOWED_BINARY_OPERATORS = new Set([
 	'<<',
 	'>>',
 	'>>>',
+	'in',
 ]);
 
 /**
@@ -527,10 +546,10 @@ const ALLOWED_MEMBER_NAMES: ReadonlySet<string> = Object.freeze(
  *
  * **What's NOT here is as important as what is.** Absent node types
  * include `FunctionDeclaration`, `ArrowFunctionExpression`,
- * `ClassDeclaration`, `UpdateExpression` (`++`/`--`),
- * `ThrowStatement`, `NewExpression`, and many others. These are
- * blocked by default — learners see a clear "not allowed at this
- * language level" message directing them to the allowed alternative.
+ * `ClassDeclaration`, `ThrowStatement`, `NewExpression`, and many
+ * others. These are blocked by default — learners see a clear "not
+ * allowed at this language level" message directing them to the
+ * allowed alternative.
  */
 const justEnoughJs: LanguageLevel = Object.freeze({
 	name: 'Just Enough JavaScript',
@@ -593,6 +612,7 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		MemberExpression: createMemberValidator(ALLOWED_MEMBER_NAMES),
 		CallExpression: validateCallExpression,
 		AssignmentExpression: validateAssignmentExpression,
+		UpdateExpression: validateUpdateExpression,
 		BinaryExpression: validateBinaryExpression,
 		LogicalExpression: validateLogicalExpression,
 		UnaryExpression: validateUnaryExpression,
