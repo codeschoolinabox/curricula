@@ -1,9 +1,5 @@
 # Weaving — Architecture
 
-> **Status**: This document describes the target design. Sections marked with
-> ⏳ describe planned changes not yet reflected in the code or types. See the
-> plan file for implementation status.
-
 ## Why flexible weave
 
 Aran offers two weave modes. We use **flexible** because it provides
@@ -16,7 +12,7 @@ These are hard requirements from Aran's flexible weave API:
 
 1. **point[] must be Json[]** — pointcut return values are serialized into the
    instrumented code. No functions, Maps, class instances, or circular objects.
-2. **initial_state must be Json** — cloned via JSON.parse/stringify at startup.
+2. **initial_state must be expressible as generated code** — Aran reconstructs `initialState` at weave time using code generation (not `JSON.parse/stringify`). Only JSON-compatible primitives, plain arrays, and plain objects work. `Map`, `Set`, class instances, and functions are rejected.
 3. **expression@after is a value transformer** — advice MUST return the result
    value or the program breaks.
 4. **apply@around replaces execution** — advice MUST call Reflect.apply and
@@ -30,13 +26,14 @@ Aran desugars JS into AranLang IR, erasing original syntax. Tags carry ESTree
 metadata that survives desugaring:
 
 - `loc`, `node` (ESTree type), `source` — always present
-- `operator`, `loopKind`, `bindingKind`, `accessKind`, `literalKind` — present
-  only on relevant ESTree constructs
+- `operator`, `loopKind`, `bindingKind`, `accessKind`, `literalKind`, `prefix` — present
+  only on relevant ESTree constructs. `prefix` on `UpdateExpression`: `true` = `++x`/`--x`,
+  `false` = `x++`/`x--`. Used by pointcut to gate `expression.operators.increment.prefix`/`.postfix`.
 
 The tag is a single type (Aran's Atom.Tag is one type parameter for all nodes).
 The `node` field serves as runtime discriminant for sparse optional fields.
 
-### ⏳ Tag resolution (digest → map → pointcut wrapping)
+### Tag resolution (digest → map → pointcut wrapping)
 
 Aran's `digest` function must return `string | number`. But pointcuts and advice
 need rich JejTag objects. The solution uses three phases:
@@ -80,8 +77,9 @@ functions, Maps, Sets, Dates, or class instances.
 ## Architecture: one set of advice, conditional dispatch
 
 Not two categories (internal/dispatch). One set of advice functions that:
+
 1. Always update internal state (scope stack, variable maps, step counter)
-2. Conditionally call `createTraceEvent()` based on config
+2. Conditionally call `emitExpression()` / `emitResolve()` based on config
 
 An `if` check before calling the wrapper is simpler than maintaining two
 parallel advice systems.
@@ -92,7 +90,7 @@ TracerState is Json-serializable (Aran requirement). Contains:
 
 - `trace[]` — accumulated events
 - `step` — internal step counter for cross-references (see Step numbering below)
-- ⏳ `eventStep` — contiguous event counter for user-facing `step` field
+- `eventStep` — contiguous event counter for user-facing `step` field
 - `scopeStack[]` — scope nesting for depth/creation tracking
 - `iterationCounters{}` — per-loop iteration counts (keyed by source location)
 - `lastExpressionResult` — most recent expression result (for assignment values)
@@ -101,7 +99,7 @@ TracerState is Json-serializable (Aran requirement). Contains:
 - `config{}` — user's config for conditional dispatch
 - `onEvent?` — streaming callback (set by worker, not Json-serializable)
 
-### ⏳ Step numbering: single contiguous counter, optional cross-references
+### Step numbering: single contiguous counter, optional cross-references
 
 **`eventStep`** (user-facing): Contiguous 1-indexed counter. The event emission
 function increments it, injects it as the `step` field on the event object, then
@@ -135,6 +133,26 @@ registration) even when those event categories are disabled by config. A single
 counter would produce gaps in user-facing step numbers. The learning UI needs
 contiguous steps for step-by-step visualization.
 
+## ASTNode lifecycle
+
+ASTNodes are built during `instrument()` with `events: []` and `visits: 0`.
+They are **NOT frozen at instrument time** — they stay mutable until `link()`
+completes after execution (when `.events[]` and `.visits` are populated and frozen).
+
+`TraceEvent.nodePath` stores a **nodePath string** — not an ASTNode. Advice emits
+events via `emitExpression(state, tag, nodePath, category, data)` and
+`emitResolve(state, tag, nodePath, kind, value)`. Both keep events wire-safe.
+
+`block@throwing` advice on the outermost block calls `emitError(state, tag, nodePath, error)`
+then returns the error (re-throws). Location is approximate (last emitted nodePath).
+Gated by `config.errors !== false`.
+
+Two-way linking (`ASTNode.events[]`) is built **post-execution** by the internal
+`link()` — never during execution. Advice never writes to ASTNode objects.
+
+Cycle guard: `deepFreezeInPlace` uses a `visited: Set` to handle both `ASTNode.parent`
+and `events[i].node` circular refs (both formed after `link()`).
+
 ## Pointcut → advice data flow
 
 Pointcut functions inspect AranLang nodes at weave time (static). They extract
@@ -161,3 +179,36 @@ of controlFlow config — it's a safety mechanism, not a trace feature.
 Tracked OUTSIDE Aran, in the wrapper that evaluates instrumented code. The
 wrapper starts a timer, pauses during I/O interactions (prompt/confirm/alert),
 and checks against maxSeconds. Simpler and more accurate than in-advice timing.
+
+---
+
+## Co-gating discriminant
+
+> **Intended design** — the current pointcuts use simple semantic discriminants only. The co-gating discriminant system below describes the pointcut rewrite target: once implemented, pointcuts will return both a semantic discriminant and a co-gating discriminant per intercepted node.
+
+Pointcut functions will make two decisions per intercepted node at weave time:
+
+1. **What to intercept** (semantic discriminant) — `'literal'`, `'read'`, `'shortCircuiting'`, etc. One per intercepted node type.
+2. **How to emit** (co-gating discriminant) — one of four values encoding the co-gating decision made from config at weave time.
+
+| Co-gating discriminant | What advice does | When pointcut returns it |
+| --- | --- | --- |
+| `'expression+resolve'` | calls `emitExpression` then `emitResolve` | expression gate ON + resolve gate ON + `resolve.dependent: true` |
+| `'expression-only'` | calls `emitExpression`, skips `emitResolve` | expression gate ON + resolve gate OFF for this kind |
+| `'resolve-only'` | calls `emitResolve`, skips `emitExpression` | expression gate OFF + `resolve.dependent: false` |
+| `'skip'` | emits nothing; advice returns immediately | all relevant gates off (or expression OFF + `dependent: true`) |
+
+**Zero runtime overhead for disabled gates**: the discriminant is decided at weave time. A node with discriminant `'skip'` has no advice call injected into the instrumented code — no runtime check, no function invocation at all.
+
+**Why four values, not boolean flags**: a boolean pair `(emitExpression, emitResolve)` would require two runtime checks per event. A single discriminant string allows a single `switch` with no boolean logic at runtime.
+
+**Co-gating suppression** (`RESOLVE_ONLY_COGATED` profile): when `expression: false` and `resolve.dependent: true` (the default), the pointcut returns `'skip'` for every node — resolves are suppressed because their paired expression events are also suppressed. This profile produces zero events despite `resolve: true` being set.
+
+**Config scenarios**:
+
+| Config | Discriminant returned |
+| --- | --- |
+| Default (`ALL_ON`) | most nodes → `'expression+resolve'` |
+| `expression: false, resolve: { dependent: false }` | `'resolve-only'` |
+| `expression: false, resolve: { dependent: true }` | `'skip'` (co-gated + suppressed) |
+| `expression: true, resolve: false` | `'expression-only'` |

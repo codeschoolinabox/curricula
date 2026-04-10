@@ -1,14 +1,20 @@
 # tracing — Architecture
 
-> All features described here are the target design. See implementation status
-> in each subsystem's docs.
-
 ## Architectural Sketch
 
-> Written Phase 0, before implementation of syntax-aligned events and ASTNode.
-> The Refactor step is held against this document.
-
 ### Execution phases
+
+0. **Prepare config** (sync, pure, throws on invalid input) — entry point
+   `createTracingGenerator(code, config, maxMs)` first calls
+   `prepareForTrace(code, config)` from `../prepare/prepare-for-trace.ts`. This
+   runs the three-stage config pipeline (expand-shorthand → fill-defaults →
+   validate-config) plus cross-field semantic checks (range, iterations,
+   seconds). Raw user config enters here; a fully-resolved, validated config
+   exits. Every caller of `createTracingGenerator` feeds raw config through
+   this single gate, so prep is never duplicated. Throws on invalid code type,
+   invalid config type, schema violations, or semantic violations — wrapped
+   into a failure `TraceResult { ok: false, error: { kind: 'javascript',
+   phase: 'creation' } }` by `createTracingGenerator`'s try/catch.
 
 1. **Pre-walk** (sync, pure) — walk the parsed ESTree AST to build parent
    metadata (e.g. VariableDeclarator → parent VariableDeclaration's `kind`).
@@ -22,38 +28,46 @@
    by looking up the pre-built parent info map. Input: ESTree AST + parent info
    map. Output: AranLang AST + tag map + ASTNode collection.
 
-3. **Aspect assembly** (sync, pure) — `createAspect()` reads user config and
+3. **Build ast** (sync) — build `ast: Record<nodePath, ASTNode>` from the ASTNode
+   collection. ASTNodes start MUTABLE with `events: []` and `visits: 0`. NOT frozen
+   yet — freezing happens after execution + linking (step 10). Output: mutable `ast`.
+
+4. **Aspect assembly** (sync, pure) — `createAspect()` reads user config and
    the tag map to build pointcuts and advice globals. Each pointcut is wrapped
    to resolve hash-string tags → JejTag objects before the original pointcut
    logic runs. Config gating happens here — most gates resolved statically from
-   JejTag metadata. Input: config + tag map. Output: Aran-compatible aspect.
+   JejTag metadata. Input: config + tag map + ast. Output: Aran-compatible aspect.
 
-4. **Weave** (sync, pure) — Aran's `weaveFlexible()` injects advice calls into
+5. **Weave** (sync, pure) — Aran's `weaveFlexible()` injects advice calls into
    the AranLang IR based on the pointcuts. Input: AranLang AST + aspect.
    Output: woven AranLang AST.
 
-5. **Retropile + generate** (sync, pure) — Aran's `retropile()` converts woven
+6. **Retropile + generate** (sync, pure) — Aran's `retropile()` converts woven
    AranLang → ESTree (standalone mode embeds intrinsic setup). `astring`
    generates the JavaScript string. Input: woven AST. Output: instrumented code.
 
-6. **Freeze AST** (sync) — deep-freeze all ASTNode objects collected in phase 2.
-   Requires a cycle guard (visited Set) because `ASTNode.parent` is circular.
-   Build the flat `ast: Record<syntaxId, ASTNode>` map. Input: ASTNode collection.
-   Output: frozen `ast` record.
-
 7. **Execute** (async, Worker) — the instrumented code is sent to a disposable
    Web Worker (or executed via `new Function()` in Node tests). Advice functions
-   fire during execution, emitting frozen TraceEvents via `state.onEvent`.
-   Input: instrumented code + `ast` record. Output: stream of TraceEvents + TraceResult.
+   fire during execution, pushing scalar TraceEvents to `state.trace` via
+   `emitExpression()` / `emitResolve()`. Each event carries `nodePath: string`
+   (not an ASTNode). `block@throwing` fires `emitError()` on unhandled errors then
+   re-throws. Input: instrumented code. Output: stream of scalar TraceEvents.
+
+8. **Link** (sync, main thread) — after Worker completes: for each scalar event,
+   create `LinkedTraceEvent = { ...event, node: ast[event.nodePath] }`. Push to
+   `ast[event.nodePath].events[]`. Set `ast[nodePath].visits` from visitCounts.
+   `deepFreezeInPlace(ast)` — cycle guard for `.parent` and `.events[i].node`.
+   Return `TraceResult` (generator return value).
 
 ### Structural constraints
 
 - **Tag map built during transpile**: the digest callback mutates the map as a
   side effect. The map must be fully populated before `createAspect()` is called.
   Temporal dependency: transpile → createAspect → weave.
-- **ASTNode freeze after digest**: `.parent` is set during the digest callback.
-  Freezing must happen after the digest completes (all parents set), not during.
-  Cycle guard required — `JSON.stringify` on ASTNode will throw without a replacer.
+- **ASTNode freeze after linking** (not after digest): `.parent` is set during
+  digest; `.events[]` and `.visits` are populated during linking. Freezing must
+  happen after both complete. Cycle guard required — `JSON.stringify` on ASTNode
+  will throw without a replacer for `.parent` and `.events[i].node`.
 - **eval + strict mode**: Aran's `kind: 'eval'` with `situ: { type: 'local', mode: 'strict' }`
   produces code executable via `new Function()`. Unifies Worker and Node test paths.
 - **Standalone retropile**: embeds the intrinsic record directly — no separate
@@ -64,8 +78,11 @@
 ### Out of scope
 
 - Caching instrumented code (caller responsibility)
-- Config expansion/validation (handled by `../configuring/` pipeline)
 - Worker lifecycle management (handled by `index.ts` async generator)
+
+Config expansion/validation is in scope as Phase 0 via
+`../prepare/prepare-for-trace.ts`, called by `createTracingGenerator` before
+instrumentation begins.
 
 ### Worker pause protocol (trace-worker.ts)
 
@@ -82,17 +99,49 @@ See `evaluating/shared/DOCS.md` for the full SAB layout and protocol details.
 
 ## Key design decisions
 
-### BaseEvent uses `node: ASTNode` instead of flat fields
+### BaseEvent is wire-safe and self-contained
 
-The previous design had `loc: SourceLocation`, `node: string` (ESTree type),
-and `source: string` as flat fields on BaseEvent. The new design replaces all
-three with `node: ASTNode` — a direct reference into the frozen AST.
+```typescript
+type BaseEvent = {
+  readonly step:     number          // 1-indexed, sequential, no gaps
+  readonly semantics: 'statement' | 'expression' | 'resolve' | 'error'
+  readonly nodePath: string          // e.g. '$.body.0.test' — AST lookup key
+  readonly type:     string          // ESTree node type — syntactic context
+  readonly loc:      SourceLocation  // source position — for editor highlighting
+  readonly source:   string          // source text — display without AST lookup
+}
+```
 
-**Why:** `ASTNode` gives everything the flat fields gave, plus `syntaxId`,
-`parent` navigation, and access to ESTree children. It eliminates the need to
-pass loc/source down through every advice call. The tradeoff is a circular
-structure (`parent` refs) — accepted, with the cycle guard in `deepFreezeInPlace`
-and a JSON serialization warning in the type definition.
+The previous design had `node: ASTNode` (a direct ref). The final design uses
+`nodePath: string` plus `type`, `loc`, `source` stamped at emit time.
+
+**Why scalars, not ASTNode ref:** `ASTNode.parent` is circular — structured-clone
+(postMessage) throws on circular objects. Events with ASTNode refs cannot cross
+the Worker boundary. The `nodePath` string is postMessage-safe. The full ASTNode
+is recoverable via `ast[event.nodePath]` (O(1)) since `TraceResult.ast` is already
+built on the main thread before postMessage.
+
+**Self-contained:** `loc`, `type`, and `source` are stamped on every event at
+emit time from `tag.loc`, `tag.node` (ESTree type), and `tag.source`. Consumers
+can highlight in an editor or display which code produced a value WITHOUT
+looking up the AST.
+
+**emitExpression and emitResolve:**
+
+```typescript
+emitExpression(state: TracerState, tag: JejTag, nodePath: string, category: string, data: object): void
+emitResolve(state: TracerState, tag: JejTag, nodePath: string, kind: ResolveKind, value: ValueRepresentation): void
+```
+
+`tag` provides `type = tag.node`, `loc = tag.loc`, `source = tag.source`.
+`nodePath` is passed separately from tag — this enables UpdateExpression context
+substitution (same tag, different nodePath for all three `x++` sub-events).
+
+Each: increments `state.eventStep`, stamps `{ nodePath, type, loc, source }`,
+creates a frozen event, pushes to `state.trace`, calls `state.onEvent?.(event)`.
+`emitResolve` additionally increments `state.visitCounts[nodePath]` as a side
+effect, and assigns `valueId` when `resolve.provenance` is enabled.
+`emitResolve` is called independently — advice authors decide when each fires.
 
 ### ResolveEvent extends BaseEvent
 
@@ -133,6 +182,26 @@ every expression-producing event gets a `ResolveEvent` carrying the value, a
 separate return event is redundant. Sequence: `FunctionCallEvent` (context: name,
 args) → `[function body events]` → `ResolveEvent(kind:'call', value: returnValue)`.
 
+### visitCounts — expression visits counted per logical evaluation
+
+`TracerState.visitCounts: Record<string, number>` accumulates how many times
+each nodePath was "visited" during execution.
+
+- **Expression nodes** — incremented inside `emitResolve`. Since `emitResolve`
+  fires exactly once per logical evaluation, `++i` (which generates 3 Aran
+  sub-events) contributes 1 visit, not 3. Requires `resolve` enabled for that
+  `ResolveKind`; if resolve is off, the expression visit count stays 0.
+- **Statement/block nodes** — incremented in statement/block advice, once per
+  execution pass. Not dependent on resolve config.
+
+`visitCounts` is returned in `TraceResult` alongside `events`. The internal `link()`
+uses it to populate `ASTNode.visits` for every node in the ast record.
+
+**Why count in emitResolve for expressions:** The goal is visits per
+learner-visible syntax node, not per Aran semantic event. `emitResolve` is the
+natural bottleneck — it fires once per logical expression evaluation, mapping
+directly to what learners see on the page.
+
 ### nodePath as syntaxId (not a counter)
 
 `syntaxId` is Aran's `nodePath` string (e.g. `$.body.0.test.left`).
@@ -170,3 +239,31 @@ focused on variables sees the full lifecycle picture. `syntaxId` links them.
 
 - `weaving/DOCS.md` — tag strategy, tag resolution, pointcut gating
 - `event-generators/DOCS.md` — event factory design
+- `../DOCS.md` — full 6-layer architecture diagram, layer table, and control enforcement table (lives in `/trace` because the full stack includes the Public API layer in `api/`)
+
+---
+
+## Key constraints
+
+### tagMap cannot be in `initialState`
+
+`initialState` must be expressible as generated JavaScript code. Aran reconstructs it at weave time using code generation — it generates expressions like `Array.of(...)` or `aran.createObject(...)` to rebuild the state object at runtime. A JavaScript `Map` cannot be expressed this way.
+
+**Consequence**: `tagMap` must live in the generator's closure — captured after `instrument()` completes and passed directly to `link()` at completion. Never embed it in `TracerState`.
+
+**Note:** An earlier version of this doc described Aran as using `JSON.parse(JSON.stringify)` for `initialState`. The actual mechanism is code generation, not JSON round-trip. The conclusion is the same (Maps can't be in `initialState`), but the mechanism matters for understanding why.
+
+### Freeze with cycles in `link()`
+
+`link()` deep-freezes the `ast` record. Two circular refs form after linking:
+
+- `ASTNode.parent` — set during digest, points to parent ASTNode
+- `ASTNode.events[i].node` — set by `link()`, points back to the containing ASTNode
+
+`freezeInPlace` handles cycles via a `visited: Set<object>`. `link()` must not be called twice on the same output — double-populating `events[]` is not idempotent.
+
+### `representValue` must run on the Worker side
+
+`block@throwing` fires inside the Worker. Call `representValue(error)` there — before `postMessage`. After `structuredClone` (the Worker→main thread message boundary), `instanceof Error` is `false` on the main thread because the prototype is stripped. Calling `representValue` after postMessage produces `{ type: 'object' }` instead of `{ type: 'error', name, message }`.
+
+See `tracing/represent-value/` for the `ErrorValue` type and `instanceof Error` branch.
