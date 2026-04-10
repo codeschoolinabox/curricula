@@ -12,7 +12,7 @@
  * evaluated before the compound effect).
  */
 
-import { isOperatorEnabled } from './config-gate.js';
+import { isOperatorEnabled } from './gating.js';
 import emitEvent from './emit-event.js';
 import lookupVariable from './lookup-variable.js';
 import representValue from '../../represent-value/represent-value.js';

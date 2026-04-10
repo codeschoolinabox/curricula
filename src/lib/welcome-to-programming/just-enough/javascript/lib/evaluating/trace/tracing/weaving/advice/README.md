@@ -2,7 +2,7 @@
 
 Aran's flexible advice callbacks — one per hook category. These run at runtime
 during instrumented code execution, updating internal state and conditionally
-emitting trace events via `createTraceEvent`.
+emitting trace events via `emitExpression` and `emitResolve`.
 
 See [DOCS.md](DOCS.md) for architecture decisions, state mutation model, and
 config gating patterns.
@@ -32,12 +32,15 @@ gates are open.
 - `block-after.ts` — `(state, ...point) → void`.
   Emits ScopeEvent(completion). Only registered when scope events are enabled.
 - `block-throwing.ts` — `(state, error, ...point) → error`.
-  Emits ScopeEvent(interrupt). **Must return error.**
+  **On all blocks:** emits ScopeEvent(interrupt) when scope events enabled.
+  **On outermost block only:** emits ErrorEvent (if `config.errors !== false`) with
+  `state.lastEmittedNodePath` as approximate location. **Must return error (re-throws).**
 
 ## Expression advice
 
 - `expression-after.ts` — `(state, result, ...point) → result`.
-  Dispatches LiteralEvent, BindingEvent(read), TestEvent, ShortCircuitingOperatorEvent
+  Dispatches LiteralEvent, BindingEvent(category:'variable', event:'read'),
+  ConditionalEvent(test)/LoopEvent(test), ShortCircuitingOperatorEvent
   based on `point[0]` discriminant. Sets `state.lastExpressionResult`.
   **Must return result.**
 
@@ -54,7 +57,7 @@ gates are open.
 - `effect-before.ts` — `(state, ...point) → void`.
   Emits AssignmentOperatorEvent for compound assignments (+=, -=, etc.).
 - `effect-after.ts` — `(state, ...point) → void`.
-  Emits BindingEvent(initialize/available/assign). Fires AFTER the value
+  Emits BindingEvent(initialize/available/update). Fires AFTER the value
   sub-expression is evaluated, so `state.lastExpressionResult` contains the
   correct value. For TDZ variables (first write), emits initialize + available
   instead of assign.
@@ -62,14 +65,22 @@ gates are open.
 ## Statement advice
 
 - `statement-before.ts` — `(state, ...point) → void`.
-  Emits JumpEvent for BreakStatement.
+  Emits JumpEvent(kind:'break') and JumpEvent(kind:'continue').
 
 ## Shared helpers
 
-- `config-gate.ts` — 2D config gate check functions (`isScopeGateOpen`,
-  `isBindingGateOpen`, `isControlFlowGateOpen`, etc.).
-- `emit-event.ts` — Wraps createTraceEvent + state.trace.push + state.step
-  increment.
+- `gating.ts` — Pure config gate predicates. Three kinds: leaf gates (check one or two config
+  flags, optionally filtered by item name), composite gates (OR-aggregations for
+  pointcut-weave decisions), and internal helpers. No state, no side effects, never throws.
+- `emit-expression.ts` — `emitExpression(state, tag, nodePath, category, data)`:
+  increments `state.eventStep`, stamps `nodePath`, `type: tag.node`, `loc: tag.loc`,
+  `source: tag.source` on the frozen event, pushes to `state.trace`, calls
+  `state.onEvent?.(event)`. Also updates `state.lastEmittedNodePath` and
+  `state.lastEmittedTag`.
+- `emit-resolve.ts` — `emitResolve(state, tag, nodePath, kind, value)`: same
+  mechanics, also increments `state.visitCounts[nodePath]`. Produces a `ResolveEvent`.
+  Called independently by advice after the expression event. Two-way linking
+  (`ASTNode.events`) is built by `link()` post-execution — NOT by these emitters.
 - `lookup-variable.ts` — Walks scopeStack top-down to find variable info.
 
 ## Shared constants (in parent directory)

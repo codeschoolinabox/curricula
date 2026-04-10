@@ -18,6 +18,14 @@ import createExpressionPointcut from './pointcut/expression-pointcut.js';
 import createEffectPointcut from './pointcut/effect-pointcut.js';
 import createStatementPointcut from './pointcut/statement-pointcut.js';
 
+import {
+	isAnyExpressionEnabled,
+	isAnyApplyEnabled,
+	isAnyEffectEnabled,
+	isAnyStatementEnabled,
+	isAnyScopeDispatchEnabled,
+} from './advice/gating.js';
+
 import blockSetup from './advice/block-setup.js';
 import blockBefore from './advice/block-before.js';
 import blockDeclaration from './advice/block-declaration.js';
@@ -30,7 +38,7 @@ import effectBefore from './advice/effect-before.js';
 import effectAfterAdvice from './advice/effect-after.js';
 import statementBefore from './advice/statement-before.js';
 
-import deepFreezeInPlace from '../../../../../../../../utils/deep-freeze-in-place.js';
+import { freezeInPlace } from '@utils/freeze.js';
 
 import type { JejTag, TracerState } from './types.js';
 
@@ -158,116 +166,6 @@ type AspectResult = {
 	readonly adviceGlobals: Record<string, Function>;
 	readonly initialState: TracerState;
 };
-
-/**
- * Checks if any expression-level dispatch is enabled.
- */
-function isAnyExpressionEnabled(config: Record<string, unknown>): boolean {
-	const literals = (config.literals ?? {}) as Record<string, unknown>;
-	const bindings = (config.bindings ?? {}) as Record<string, unknown>;
-	const bindingEvents = (bindings.events ?? {}) as Record<string, unknown>;
-	const operators = (config.operators ?? {}) as Record<string, unknown>;
-	const controlFlow = (config.controlFlow ?? {}) as Record<string, unknown>;
-	const controlFlowEvents = (controlFlow.events ?? {}) as Record<
-		string,
-		unknown
-	>;
-
-	return !!(
-		literals.string ||
-		literals.number ||
-		literals.boolean ||
-		literals.null ||
-		literals.undefined ||
-		literals.regex ||
-		bindingEvents.read ||
-		operators.shortCircuiting ||
-		controlFlowEvents.test
-	);
-}
-
-/**
- * Checks if any apply-level dispatch is enabled.
- */
-function isAnyApplyEnabled(config: Record<string, unknown>): boolean {
-	const operators = (config.operators ?? {}) as Record<string, unknown>;
-	const pure = (operators.pure ?? {}) as Record<string, unknown>;
-	const negation = (pure.negation ?? {}) as Record<string, unknown>;
-	const propertyAccess = (config.propertyAccess ?? {}) as Record<
-		string,
-		unknown
-	>;
-	const functions = (config.functions ?? {}) as Record<string, unknown>;
-	const templates = (config.templates ?? {}) as Record<string, unknown>;
-
-	return !!(
-		pure.arithmetic ||
-		pure.addition ||
-		pure.comparison ||
-		pure.typeof ||
-		pure.bitwise ||
-		negation.logical ||
-		negation.bitwise ||
-		operators.shortCircuiting ||
-		operators.assignment ||
-		propertyAccess.dot ||
-		propertyAccess.bracket ||
-		propertyAccess.optionalChaining ||
-		functions.call ||
-		functions.return ||
-		templates.begin ||
-		templates.evaluation ||
-		templates.end
-	);
-}
-
-/**
- * Checks if any effect-level dispatch is enabled.
- */
-function isAnyEffectEnabled(config: Record<string, unknown>): boolean {
-	const bindings = (config.bindings ?? {}) as Record<string, unknown>;
-	const bindingEvents = (bindings.events ?? {}) as Record<string, unknown>;
-	const operators = (config.operators ?? {}) as Record<string, unknown>;
-
-	// WHY initialize/available: these events fire from effect-after (the
-	// first write to a TDZ variable). They need the effect hooks registered
-	// even when assign is disabled.
-	return !!(
-		bindingEvents.assign ||
-		bindingEvents.initialize ||
-		bindingEvents.available ||
-		operators.assignment
-	);
-}
-
-/**
- * Checks if any statement-level dispatch is enabled.
- */
-function isAnyStatementEnabled(config: Record<string, unknown>): boolean {
-	const controlFlow = (config.controlFlow ?? {}) as Record<string, unknown>;
-	const controlFlowEvents = (controlFlow.events ?? {}) as Record<
-		string,
-		unknown
-	>;
-
-	return !!controlFlowEvents.jump;
-}
-
-/**
- * Checks if any scope event dispatch is enabled.
- */
-function isAnyScopeDispatchEnabled(config: Record<string, unknown>): boolean {
-	const scopes = (config.scopes ?? {}) as Record<string, unknown>;
-	const scopeEvents = (scopes.events ?? {}) as Record<string, unknown>;
-
-	return !!(
-		scopeEvents.create ||
-		scopeEvents.enter ||
-		scopeEvents.completion ||
-		scopeEvents.interrupt ||
-		scopeEvents.leave
-	);
-}
 
 /**
  * Builds an Aran flexible aspect from user config.
@@ -407,7 +305,7 @@ function createAspect(
 		variableKinds: variableKinds,
 	};
 
-	return deepFreezeInPlace({
+	return freezeInPlace({
 		pointcut,
 		adviceGlobals,
 		initialState,

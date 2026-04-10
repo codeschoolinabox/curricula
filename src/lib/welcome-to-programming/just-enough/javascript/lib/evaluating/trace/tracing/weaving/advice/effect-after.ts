@@ -15,7 +15,7 @@
  * matter as long as order and content are correct.
  */
 
-import { isBindingGateOpen } from './config-gate.js';
+import { isBindingGateOpen } from './gating.js';
 import emitEvent from './emit-event.js';
 import lookupVariable from './lookup-variable.js';
 import representValue from '../../represent-value/represent-value.js';

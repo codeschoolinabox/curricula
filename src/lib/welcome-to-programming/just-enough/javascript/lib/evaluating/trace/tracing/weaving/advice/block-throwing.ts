@@ -6,7 +6,8 @@
  * Events: emits ScopeEvent(interrupt) when scope gate is open.
  */
 
-import { isScopeGateOpen } from './config-gate.js';
+import { isScopeGateOpen } from './gating.js';
+import { currentScope, parentScope } from './scope-stack.js';
 import emitEvent from './emit-event.js';
 
 import type { TracerState, JejTag } from '../types.js';
@@ -22,19 +23,17 @@ function blockThrowing(
 ): unknown {
 	try {
 		if (isScopeGateOpen(state.config, scopeKind, 'interrupt')) {
-			const currentScope = state.scopeStack[state.scopeStack.length - 1];
-			const parentScope = state.scopeStack.length > 1
-				? state.scopeStack[state.scopeStack.length - 2]
-				: undefined;
+			const current = currentScope(state)!;
+			const parent = parentScope(state);
 
 			emitEvent(state, tag, 'statement', 'scopes.interrupt', {
 				kind: scopeKind,
 				event: 'interrupt',
-				depth: currentScope.depth,
-				creationStep: currentScope.creationStep,
-				...(parentScope !== undefined && { parentCreationStep: parentScope.creationStep }),
-				...(currentScope.structure !== null && { structure: currentScope.structure }),
-				...(currentScope.structureStep !== null && { structureStep: currentScope.structureStep }),
+				depth: current.depth,
+				creationStep: current.creationStep,
+				...(parent !== undefined && { parentCreationStep: parent.creationStep }),
+				...(current.structure !== null && { structure: current.structure }),
+				...(current.structureStep !== null && { structureStep: current.structureStep }),
 			});
 		}
 	} catch {

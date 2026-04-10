@@ -8,7 +8,7 @@
  */
 
 import ARAN_PARAMETERS from '../aran-parameters.js';
-import { isBindingGateOpen } from './config-gate.js';
+import { isBindingGateOpen } from './gating.js';
 import emitEvent from './emit-event.js';
 import representValue from '../../represent-value/represent-value.js';
 
@@ -23,6 +23,7 @@ function blockDeclaration(
 	tag: JejTag,
 	_label: string | null,
 ): void {
+	// deferred: not yet migrated to scope-stack.ts currentScope() — deferred to S2 (variable lifecycle slice)
 	const currentScope = state.scopeStack[state.scopeStack.length - 1];
 
 	for (const varName of Object.keys(frame)) {

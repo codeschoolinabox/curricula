@@ -14,7 +14,8 @@
  *    IterationEvent, DoEvent. Each has its own config gate.
  */
 
-import { isScopeGateOpen, isControlFlowGateOpen } from './config-gate.js';
+import { isScopeGateOpen, isControlFlowGateOpen } from './gating.js';
+import { currentScope, parentScope } from './scope-stack.js';
 import emitEvent from './emit-event.js';
 
 import type { TracerState, JejTag } from '../types.js';
@@ -27,22 +28,20 @@ function blockBefore(
 	tag: JejTag,
 	label: string | null,
 ): void {
-	const currentScope = state.scopeStack[state.scopeStack.length - 1];
+	const current = currentScope(state)!;
 
 	// 1. ScopeEvent(enter)
 	if (isScopeGateOpen(state.config, scopeKind, 'enter')) {
-		const parentScope = state.scopeStack.length > 1
-			? state.scopeStack[state.scopeStack.length - 2]
-			: undefined;
+		const parent = parentScope(state);
 
 		emitEvent(state, tag, 'statement', 'scopes.enter', {
 			kind: scopeKind,
 			event: 'enter',
-			depth: currentScope.depth,
-			creationStep: currentScope.creationStep,
-			...(parentScope !== undefined && { parentCreationStep: parentScope.creationStep }),
-			...(currentScope.structure !== null && { structure: currentScope.structure }),
-			...(currentScope.structureStep !== null && { structureStep: currentScope.structureStep }),
+			depth: current.depth,
+			creationStep: current.creationStep,
+			...(parent !== undefined && { parentCreationStep: parent.creationStep }),
+			...(current.structure !== null && { structure: current.structure }),
+			...(current.structureStep !== null && { structureStep: current.structureStep }),
 		});
 	}
 
@@ -50,7 +49,7 @@ function blockBefore(
 	if (segmentKind === 'then' && isControlFlowGateOpen(state.config, 'conditional', 'branch')) {
 		emitEvent(state, tag, 'statement', 'controlFlow.branch', {
 			branch: 'consequent',
-			scopeCreationStep: currentScope.creationStep,
+			scopeCreationStep: current.creationStep,
 			...(label !== null && { label }),
 		});
 	}
@@ -58,7 +57,7 @@ function blockBefore(
 	if (segmentKind === 'else' && isControlFlowGateOpen(state.config, 'conditional', 'branch')) {
 		emitEvent(state, tag, 'statement', 'controlFlow.branch', {
 			branch: 'alternate',
-			scopeCreationStep: currentScope.creationStep,
+			scopeCreationStep: current.creationStep,
 			...(label !== null && { label }),
 		});
 	}
@@ -77,7 +76,7 @@ function blockBefore(
 			emitEvent(state, tag, 'statement', 'controlFlow.iteration', {
 				kind: loopKind,
 				index: currentIndex,
-				scopeCreationStep: currentScope.creationStep,
+				scopeCreationStep: current.creationStep,
 				...(label !== null && { label }),
 			});
 		}
@@ -87,7 +86,7 @@ function blockBefore(
 		// conditionally: emit DoEvent for do-while
 		if (loopKind === 'doWhile' && isControlFlowGateOpen(state.config, 'doWhile', 'do')) {
 			emitEvent(state, tag, 'statement', 'controlFlow.do', {
-				scopeCreationStep: currentScope.creationStep,
+				scopeCreationStep: current.creationStep,
 				...(label !== null && { label }),
 			});
 		}

@@ -40,9 +40,20 @@ encouragement. They cannot be overridden by momentum.
    fix. Exception: user explicitly says "skip plan mode."
 4. **One increment at a time** — complete Red → Green → Refactor → Lint before
    starting the next behavior.
-5. **Stop at the emergency brake** — if scope creeps, tests fail unexpectedly,
+5. **Atomic commits with clear messages** — commit after each passing TDD cycle
+   and after completing Phase 0 artifacts. Each commit captures one behavior or
+   milestone; never batch multiple increments. Messages use imperative voice and
+   describe the behavior added, not the mechanical change: `add: [behavior]`,
+   `docs: [artifact]`, `fix: [what broke]`, `refactor: [structural change]`.
+   Prompt the user before committing; never commit silently.
+6. **Plans are execution checklists, not references** — every plan document must
+   explicitly list every required workflow step: Phase 0 DDD steps, AR trigger
+   points (AR-1 through AR-5), commit steps, and quality checks. "Follow
+   AGENTS.md" is not a plan step. Agents do not re-read AGENTS.md during
+   execution; if a step is not written in the plan, it will be skipped.
+7. **Stop at the emergency brake** — if scope creeps, tests fail unexpectedly,
    or you catch yourself skipping workflow steps: stop and surface it.
-6. **No confident guessing** — when uncertain, say so and investigate rather
+8. **No confident guessing** — when uncertain, say so and investigate rather
    than confirming assumptions.
 
 > If these feel like friction, that friction is working as intended.
@@ -94,19 +105,32 @@ See [README.md § Architecture](./README.md#architecture) for an overview and
 
 - **One default export per file**: Named function/const, then `export default`
   at bottom
+- **Exception — utility/predicate modules**: Files that export multiple
+  orthogonal utility functions (e.g. `gating.ts`, `scope-stack.ts`) may use
+  named exports. The rule "one default export" applies to single-concept
+  modules (advice hooks, emit functions, pipelines). A utility module with
+  5–15 orthogonal predicates or helpers is better served by named exports —
+  a default-export wrapper object would force verbose `gating.isScopeGateOpen()`
+  call sites with no benefit.
 - **No barrel files**: Import directly from source files (no `index.ts`
   re-exports except `/src/index.ts`)
 - **Always `.js` extension** in imports
 
 ```javascript
-// ✅ CORRECT
+// ✅ CORRECT — single-concept module
 function myFunction() { ... }
 export default myFunction;
 
-// ❌ WRONG
-export default function() { ... }  // inline default
-export function myFunction() { ... }  // named export
-import { x } from './index.js';  // barrel import
+// ✅ CORRECT — utility/predicate module with multiple orthogonal exports
+export function isScopeGateOpen(...) { ... }
+export function isBindingGateOpen(...) { ... }
+
+// ❌ WRONG — inline default
+export default function() { ... }
+// ❌ WRONG — named export on a single-concept module
+export function myFunction() { ... }
+// ❌ WRONG — barrel import
+import { x } from './index.js';
 ```
 
 #### Type Location
@@ -354,11 +378,14 @@ Development Workflow for the full process.
 - **Phase 0** _(do not skip)_: Establish ubiquitous language (domain glossary) →
   README spec (domain model in prose, bounded context) → AR-1 design challenge →
   types.ts (domain model in TypeScript) → architectural sketch in DOCS.md
-  (structural target for the Refactor step) → AR-2 sketch challenge
+  (structural target for the Refactor step) → AR-2 sketch challenge → commit
+  Phase 0 artifacts (`docs: establish [module] domain model and architectural
+  sketch`)
 - **Phase 1**: For each increment: JSDoc → stub → test (ZOMBIES order) → AR-3 →
   implement (Fake It is valid for the first test; second test must triangulate
   it away) → lint → refactor (structural quality against DOCS.md sketch) → AR-4
-  → quality checks → commit
+  → quality checks → commit (atomic: one behavior per commit; message:
+  `add: [behavior this increment implements]`)
 - **Phase 2**: Full quality checks → AR-5 pre-merge review → commit prompt
 
 Each passing TDD cycle = one atomic commit. Do not batch behaviors.
@@ -383,14 +410,31 @@ Each passing TDD cycle = one atomic commit. Do not batch behaviors.
   incrementally
 - Plans start with a brief context line referencing completed work, then list
   ONLY unimplemented work
-- **Plans describe BEHAVIOR, not code** — never include full implementations in
-  plans. TDD discovers the implementation; the DOCS.md architectural sketch
-  constrains the structure. Plans live between these two: they name what each
-  increment should do, not how.
+- **Plans describe BEHAVIOR, not implementation** — never include full function
+  bodies or working code in plans. TypeScript **type declarations** ARE helpful
+  and encouraged — they pin the contract at the boundary and are the domain
+  model expressed in code. Pseudocode is also OK when describing a proposed
+  strategy. The bright line: anything that looks like executable code (function
+  bodies, statement sequences, expression graphs, actual algorithm steps)
+  belongs in the source file, not the plan. TDD discovers the implementation;
+  the DOCS.md architectural sketch constrains the structure. Plans live between
+  these two: they name what each increment should do and what types enter and
+  exit, not how the body is written.
 - Before starting work, verify understanding with the user: what will be built,
   what constraints apply, what success looks like
 - Before writing any code, explain in plain language what you're about to do and
   why
+
+**Plans must explicitly list every workflow step, including:**
+
+- Phase 0: ubiquitous language → README spec → AR-1 → types.ts → architectural
+  sketch in DOCS.md → AR-2 → commit Phase 0 artifacts
+- For each increment: JSDoc → stub → failing test → AR-3 → implement → lint →
+  refactor (check against DOCS.md sketch) → AR-4 → quality checks → commit
+- Phase 2: full quality checks → AR-5 → commit / push prompt
+
+Plans that omit these steps are incomplete. "See AGENTS.md for the workflow" is
+not a valid substitute — write the steps out.
 
 **During TDD cycles:**
 
@@ -413,30 +457,69 @@ Each passing TDD cycle = one atomic commit. Do not batch behaviors.
 
 **Git prompts** (Claude prompts, user executes):
 
-- Before a sprint: "Create a feature branch from main for this work"
-- After each passing TDD cycle: "Ready for atomic commit: `add: [description]`"
-- After the last increment: "Sprint complete — ready to push and open a PR or
-  merge to main"
+- After Phase 0 completes: "Phase 0 complete — ready for atomic commit:
+  `docs: establish [module] domain model and architectural sketch`"
+- After each passing TDD cycle: "Ready for atomic commit:
+  `add: [behavior this increment implements]`"
+- After the last increment: "Sprint complete — ready to push to main"
+
+Commit message format: imperative voice, one line, describes the behavior or
+artifact — not the mechanical change. Prefixes: `add:` (new behavior), `docs:`
+(documentation/types/README), `fix:` (correcting broken behavior),
+`refactor:` (structural changes with no behavior change).
+
+**Default workflow: commit directly to main.** Frequent atomic commits on main
+provide rollback points without branching overhead. Feature branches are the
+human's discretion — agents do NOT create branches unless explicitly instructed
+to do so in the current conversation.
 
 **Interrupt and redirect** if the user tries to skip planning, documentation,
 tests, or quality checks — even if they insist.
 
-#### Git: Humans Only
+#### Git: Additive Actions Only
 
-Claude MUST NOT run any git command that creates, modifies, or deletes history.
+Claude MAY run git commands that are **additive, non-destructive, and
+reversible**. Claude MUST NOT run any git command that mutates existing history,
+rewrites branches, publishes to remotes, or destroys work.
 
-**Allowed** (read-only):
+**Allowed** (read-only + additive, reversible):
 
-- `git status`, `git diff`, `git log`, `git show`, `git blame`,
-  `git branch --list`
+- Read-only: `git status`, `git diff`, `git log`, `git show`, `git blame`,
+  `git branch --list`, `git ls-files`, `git remote -v`
+- Additive: `git add <specific-files>`, `git commit -m "..."` (new commits only),
+  `git fetch` (remote-read-only), `git stash push` (reversible)
+- Branch creation: `git branch <new-name>`, `git checkout -b <new-name>`
+  (creating new branches, not switching in a way that loses work)
 
-**Forbidden** (modifies history):
+**Forbidden** (destructive, rewriting, or publishing):
 
-- `git commit`, `git push`, `git merge`, `git rebase`, `git reset`,
-  `git revert`, `git cherry-pick`, `git tag`, `git stash push/pop/drop`,
-  `git commit --amend`, `git push --force`
+- History mutation: `git commit --amend`, `git rebase` (any form),
+  `git reset --hard`, `git reset` (soft/mixed OK only with explicit user
+  instruction for a specific file unstage), `git revert`, `git cherry-pick`
+- Publishing: `git push` (any form, including `--force`, `--force-with-lease`,
+  `--delete`)
+- Remote mutation: `git push`, `git push --tags`, `git fetch --prune`
+- Destroying work: `git checkout -- <file>` / `git restore <file>` (discards
+  unstaged changes), `git clean -f`, `git stash drop`, `git stash clear`,
+  `git branch -D`, `git branch -d`, `git tag -d`
+- Merging: `git merge` (any form — merges rewrite history in the sense of
+  creating merge commits that are hard to undo without force-push)
+- Skipping hooks or signing: `--no-verify`, `--no-gpg-sign` (unless the user
+  explicitly requests)
 
-**Instead:** Claude prompts the human for all git actions.
+**Rule of thumb**: If the command can be undone by `git reset --hard HEAD~1` or
+a single force-push from the human, it's destructive — ask first. If it only
+adds new commits that can be dropped by the human later without losing
+unrelated work, it's additive — Claude may run it.
+
+**Instead for forbidden actions:** Claude prompts the human. Format:
+
+> "Ready to [action] — would you like me to run `git [command]`, or would you
+> prefer to do it yourself?"
+
+For allowed actions: Claude describes what it's about to do in plain language
+before running the command, so the user can catch misunderstandings before the
+commit lands.
 
 ### Context Compaction Protocol
 

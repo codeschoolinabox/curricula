@@ -22,6 +22,19 @@ import type { SourceLocation, ControlFlowStructure, LoopKind } from '../types.js
  * types for different node kinds at the TypeScript level. The `node` field
  * (ESTree type name) serves as runtime discriminant. Optional fields are
  * sparse — each ESTree node type only populates the fields relevant to it.
+ *
+ * Optional fields by ESTree node type:
+ * - `operator`                — BinaryExpression, UnaryExpression, LogicalExpression, AssignmentExpression, UpdateExpression
+ * - `loopKind`                — WhileStatement, DoWhileStatement, ForStatement, ForOfStatement
+ * - `bindingKind`             — VariableDeclaration (`let` or `const`)
+ * - `explicit`                — VariableDeclarator (true = has initializer, false = implicit undefined)
+ * - `accessKind`              — MemberExpression (`dot`, `bracket`, `optionalChaining`)
+ * - `literalKind`             — Literal (`string`, `number`, `boolean`, `null`, `undefined`, `regex`)
+ * - `jumpTarget`              — BreakStatement, ContinueStatement (loop kind of target)
+ * - `structure`               — blocks with associated control-flow structure
+ * - `templateStrings`         — TemplateLiteral (cooked string parts)
+ * - `templateExpressionCount` — TemplateLiteral (number of `${}` expressions)
+ * - `prefix`                  — UpdateExpression: `true` = prefix (`++x`/`--x`), `false` = postfix (`x++`/`x--`)
  */
 export type JejTag = {
 	readonly loc: SourceLocation;
@@ -44,6 +57,10 @@ export type JejTag = {
 	readonly structure?: ControlFlowStructure;
 	readonly templateStrings?: readonly string[];
 	readonly templateExpressionCount?: number;
+	/** Present only on UpdateExpression nodes.
+	 *  `true` = prefix form (`++x` / `--x`), `false` = postfix form (`x++` / `x--`).
+	 *  Used by the pointcut to gate `expression.operators.increment.prefix` / `.postfix`. */
+	readonly prefix?: boolean;
 };
 
 // ============================================================================
@@ -118,4 +135,21 @@ export type TracerState = {
 	 *  pre-walk. Used by block-declaration to emit correct kind on declare events
 	 *  because the block tag (Program/Block) has no bindingKind. */
 	variableKinds: Record<string, 'let' | 'const'>;
+
+	/** nodePath of the most recently emitted TraceEvent (expression or resolve).
+	 *  Updated by emitExpression and emitResolve after every event.
+	 *  Used by block@throwing as the approximate ErrorEvent location.
+	 *  Initialized to '' before the first event. */
+	lastEmittedNodePath: string;
+
+	/** JejTag of the most recently emitted TraceEvent.
+	 *  Provides type/loc/source for ErrorEvent — uses the last expression's tag
+	 *  rather than the program block's tag (Option A: accurate-ish location).
+	 *  Updated alongside lastEmittedNodePath. Null before the first event. */
+	lastEmittedTag: JejTag | null;
+
+	/** nodePath → visit count. Incremented by emitResolve on every ResolveEvent.
+	 *  Returned in TraceResult.visitCounts. Used by link() to populate ASTNode.visits.
+	 *  Initialized to {} before execution. */
+	visitCounts: Record<string, number>;
 };

@@ -15,14 +15,14 @@ User config + JS source
        ↓
   pointcut functions  ← decide which AranLang nodes to intercept
        ↓
-  advice functions    ← receive runtime values, call event generators
+  advice functions    ← receive runtime values, call emitExpression/emitResolve
        ↓
-  trace events        ← frozen TraceEvent objects in state.trace
+  trace events        ← frozen TraceEvent objects in state.trace (node: syntaxId string)
 ```
 
 - **Upstream**: User provides a config (options.schema.json) and JS source code
-- **This module**: Translates config into Aran weaving/advice
-- **Downstream**: Event generators (../event-generators/) create trace events
+- **This module**: Translates config into Aran weaving/advice, emits frozen `TraceEvent` objects
+- **Two-way linking**: `ASTNode.events[]` and `ASTNode.visits` are built by the internal `link()` post-execution — never by advice
 
 ## Directory structure
 

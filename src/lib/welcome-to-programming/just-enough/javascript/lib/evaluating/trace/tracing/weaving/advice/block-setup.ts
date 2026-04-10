@@ -8,7 +8,8 @@
  * Events: conditionally emits ScopeEvent(create) when scope gate is open.
  */
 
-import { isScopeGateOpen } from './config-gate.js';
+import { isScopeGateOpen } from './gating.js';
+import { pushScope, currentScope, parentScope } from './scope-stack.js';
 import emitEvent from './emit-event.js';
 
 import type { TracerState, JejTag } from '../types.js';
@@ -35,36 +36,22 @@ function blockSetup(
 			}
 		}
 
-		// 1. increment step for scope creation
-		state.step += 1;
-
-		// 2. push scope onto stack
-		state.scopeStack.push({
-			creationStep: state.step,
-			depth: state.scopeStack.length,
-			kind: scopeKind,
-			structure: tag.structure ?? null,
-			// WHY state.step: the scope creation IS the structure's beginning.
-			// Both share the same moment in the internal step sequence.
-			structureStep: tag.structure ? state.step : null,
-			variables: {},
-		});
+		// 1+2. increment step + push scope onto stack (step owned by pushScope)
+		pushScope(state, { kind: scopeKind, structure: tag.structure });
 
 		// 3. conditionally emit ScopeEvent(create)
 		if (isScopeGateOpen(state.config, scopeKind, 'create')) {
-			const currentScope = state.scopeStack[state.scopeStack.length - 1];
-			const parentScope = state.scopeStack.length > 1
-				? state.scopeStack[state.scopeStack.length - 2]
-				: undefined;
+			const current = currentScope(state)!;
+			const parent = parentScope(state);
 
 			emitEvent(state, tag, 'statement', 'scopes.create', {
 				kind: scopeKind,
 				event: 'create',
-				depth: currentScope.depth,
-				creationStep: currentScope.creationStep,
-				...(parentScope !== undefined && { parentCreationStep: parentScope.creationStep }),
-				...(currentScope.structure !== null && { structure: currentScope.structure }),
-				...(currentScope.structureStep !== null && { structureStep: currentScope.structureStep }),
+				depth: current.depth,
+				creationStep: current.creationStep,
+				...(parent !== undefined && { parentCreationStep: parent.creationStep }),
+				...(current.structure !== null && { structure: current.structure }),
+				...(current.structureStep !== null && { structureStep: current.structureStep }),
 			});
 		}
 	} catch {

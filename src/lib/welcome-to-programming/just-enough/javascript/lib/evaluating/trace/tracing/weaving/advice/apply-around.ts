@@ -12,7 +12,7 @@
  * intrinsic name (e.g., 'aran.performBinaryOperation'), 'template', or 'call'.
  */
 
-import { isOperatorEnabled, isPropertyAccessEnabled, isFunctionEnabled, isTemplateEnabled, isBindingGateOpen } from './config-gate.js';
+import { isOperatorEnabled, isPropertyAccessEnabled, isFunctionEnabled, isTemplateEnabled, isBindingGateOpen } from './gating.js';
 import emitEvent from './emit-event.js';
 import representValue from '../../represent-value/represent-value.js';
 

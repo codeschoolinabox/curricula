@@ -10,7 +10,7 @@
  * Also resets iteration counter when a loop test evaluates false.
  */
 
-import { isLiteralEnabled, isBindingGateOpen, isControlFlowGateOpen, isOperatorEnabled } from './config-gate.js';
+import { isLiteralEnabled, isBindingGateOpen, isControlFlowGateOpen, isOperatorEnabled } from './gating.js';
 import emitEvent from './emit-event.js';
 import lookupVariable from './lookup-variable.js';
 import representValue from '../../represent-value/represent-value.js';
@@ -73,6 +73,7 @@ function expressionAfter(
 			const tag = point[2] as JejTag;
 			const boolResult = Boolean(result);
 			const kind = testSource;
+			// deferred: not yet migrated to scope-stack.ts currentScope() — deferred to S3 (read+operators slice)
 			const currentScope = state.scopeStack[state.scopeStack.length - 1];
 
 			if (isControlFlowGateOpen(state.config, kind, 'test')) {

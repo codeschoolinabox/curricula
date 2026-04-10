@@ -11,7 +11,8 @@
  * statement-before is only woven when config.controlFlow.events.jump is enabled.
  */
 
-import { isControlFlowGateOpen } from './config-gate.js';
+import { isControlFlowGateOpen } from './gating.js';
+import { findNearestLoop } from './scope-stack.js';
 import emitEvent from './emit-event.js';
 
 import type { TracerState, JejTag } from '../types.js';
@@ -34,21 +35,11 @@ function statementBefore(state: TracerState, ...point: unknown[]): void {
 	// WHY: ESTree BreakStatement.label is null for unlabeled breaks. The
 	// tag.jumpTarget comes from the ESTree node and is null in this case.
 	// We derive the target from the scope stack at runtime instead.
-	let target = tag.jumpTarget;
-	let targetScopeCreationStep = 0;
+	const loopMatch = findNearestLoop(state, tag.jumpTarget ?? null);
+	if (!loopMatch) return;
 
-	for (let i = state.scopeStack.length - 1; i >= 0; i -= 1) {
-		const scope = state.scopeStack[i];
-		if (scope.structure && scope.structure !== 'conditional') {
-			if (!target) target = scope.structure as typeof target;
-			if (scope.structure === target) {
-				targetScopeCreationStep = scope.creationStep;
-				break;
-			}
-		}
-	}
-
-	if (!target) return;
+	const target = loopMatch.structure;
+	const targetScopeCreationStep = loopMatch.creationStep;
 
 	if (isControlFlowGateOpen(state.config, target, 'jump')) {
 
