@@ -28,10 +28,10 @@ See also:
 │    alert(shout);                                                             │
 │  }                                                                           │
 └───────────────────────────────────────────────────────────────────────────────┘
-        │                                    │
-        │ VISUAL-SYNTAX LEVEL                │ BEHIND-THE-SCENES LEVEL
-        │ (what the code DOES)               │ (what the VM does invisibly)
-        │                                    │
+        │                                    │                                │
+        │ VISUAL-SYNTAX LEVEL                │ BEHIND-THE-SCENES LEVEL        │ I/O CHANNELS
+        │ (what the code DOES)               │ (what the VM does invisibly)    │ (outside the VM)
+        │                                    │                                │
         ▼                                    ▼
 ┌─── EXPRESSIONS ───────────┐    ┌─── VALUES ──────────────────────────────────┐
 │ syntax → value            │    │ primitive data flowing through the program  │
@@ -104,17 +104,19 @@ See also:
                                  │ │          │ │ toISOString      │ │     │   │
                                  │ │          │ └──────────────────┘ │     │   │
                                  │ │          └──────────────────────┘     │   │
-                                 │ │ console ──→ ┌──────────────────┐     │   │
-                                 │ │             │ log assert warn  │     │   │
-                                 │ │             │ error info dir   │     │   │
-                                 │ │             └──────────────────┘     │   │
+                                 │ │ console ──→ ┌──────────────────┐     │   │──→ ┌─ DEV CONSOLE ──────────────┐
+                                 │ │             │ log warn error   │     │   │    │ devtools output             │
+                                 │ │             │ assert ...       │     │   │    │ (append-only, no pause)     │
+                                 │ │             └──────────────────┘     │   │    └─────────────────────────────┘
                                  │ │                                       │   │
                                  │ │ (regex /pat/ → RegExp.prototype       │   │
                                  │ │  .test() — not in global register)    │   │
                                  │ │                                       │   │
                                  │ │ FUNCTIONS (callable, marked ƒ)        │   │
-                                 │ │ ƒ prompt  ƒ confirm  ƒ alert          │   │
-                                 │ │ ƒ parseInt  ƒ parseFloat              │   │
+                                 │ │ ƒ alert   ──────────────────────────────────→ ┌─ USER INTERFACE ────────────┐
+                                 │ │ ƒ confirm ←────────────────────────────────→  │ browser dialogs             │
+                                 │ │ ƒ prompt  ←────────────────────────────────→  │ (pauses until user responds)│
+                                 │ │ ƒ parseInt  ƒ parseFloat              │   │   └─────────────────────────────┘
                                  │ │ ƒ Boolean()                           │   │
                                  │ │                                       │   │
                                  │ │ CONSTANTS (bare values)               │   │
@@ -137,6 +139,8 @@ See also:
 TWO KINDS OF CHAIN LOOKUP:
   Scope chain:     block → script → global   (finding a VARIABLE by name)
   Prototype chain: value → Constructor.prototype   (finding a METHOD on a value)
+
+
 ```
 ---
 
@@ -167,6 +171,11 @@ representation designed to help us program the machine; it is not the machine.
 which syntax (visual) to which data (behind-the-scenes).
 
 **Cross-cutting**: errors (abnormal termination).
+
+**External channels** (outside the computation model, reached via function calls):
+
+- **Developer Console** — append-only output stream (devtools); `console.*` writes here
+- **User Interface** — synchronous browser dialogs; `alert`/`confirm`/`prompt`
 
 ---
 
@@ -297,7 +306,10 @@ create. Distinguished by visual form:
   `getHours`, `getMinutes`, `getSeconds`, `getTime`, `toLocaleDateString`,
   `toLocaleTimeString`, `toISOString`. Date methods return primitives (numbers
   or strings) — no mutation, making Date a gentle intro to reference types.
-- **console**: `log`, `assert`, `warn`, `error`, `info`, `dir`, ...
+- **console**: output by intent: `debug`, `log`, `info`, `warn`, `error`;
+  asserting: `assert`; counting: `count`, `countReset`; grouping: `group`,
+  `groupCollapsed`, `groupEnd`; timing: `time`, `timeLog`, `timeEnd`;
+  utility: `clear`
 
 **Standalone functions** (marked `f`):
 
@@ -379,6 +391,47 @@ Both phases are part of the JS notional machine — learners need to understand
 that code goes through steps BEFORE it runs (parse → validate → instrument)
 and can fail at any of them.
 
+### I/O Channels
+
+Two external channels through which a JEJ program communicates with the outside
+world. Not part of the computation model (values, bindings, scopes) — these are
+the places where the program's effects become visible to humans.
+
+#### Developer Console
+
+An append-only output stream, visible to the developer in browser devtools. Does
+not pause execution. Accessed via the `console` object in the global environment.
+
+`console.*` calls write to this stream — the method signals intent:
+
+| Group | Methods | When to use |
+|---|---|---|
+| Output | `debug`, `log`, `info`, `warn`, `error` | Trace-level detail through broken output |
+| Asserting | `assert(condition, message)` | Claims about what the program should be doing |
+| Counting | `count(label)`, `countReset(label)` | How many times a path has been reached |
+| Grouping | `group(label)`, `groupCollapsed(label)`, `groupEnd()` | Hierarchical output structure |
+| Timing | `time(label)`, `timeLog(label)`, `timeEnd(label)` | Rough duration measurements |
+| Utility | `clear()` | Reset the stream |
+
+#### User Interface
+
+A synchronous dialog channel. Pauses execution until the user responds. Visible
+to the user as a browser dialog.
+
+| Function | User sees | Program receives | Direction |
+|---|---|---|---|
+| `alert(msg)` | message + OK button | `undefined` | one-way → |
+| `confirm(msg)` | message + OK/Cancel | `boolean` | two-way ←──→ |
+| `prompt(msg)` | message + text field + OK/Cancel | `string` or `null` | two-way ←──→ |
+
+The User Interface channel is the primary subject of Chapter 3: writing programs
+that communicate with users via these three functions.
+
+**Tracer visibility**: I/O channel interactions are observable as tracer events.
+`io.dev.*` gates fire one event per `console.*` call carrying the method and
+arguments. `io.user.display` fires when a dialog appears; `io.user.input` fires
+when the user responds. See [tracer.md](./tracer.md) for event shapes.
+
 ---
 
 ## Cross-component interactions
@@ -398,6 +451,8 @@ interact simultaneously:
 | `x++` | expression (update) | identifiers.read(x) → binding access → arithmetic (+1) → binding update → resolve (old or new depending on prefix/postfix) |
 | `break;` | statement exit(break) | scope interrupt → scope leave (always) |
 | `??=` (short-circuit) | expression | access → resolve → NO RHS, NO update (short-circuited) |
+| `console.log(x)` | expression (call) | scope lookup (console) → proto check (.log) → call → resolve(undefined) → **DEV CONSOLE: line appended** |
+| `prompt(msg)` | expression (call) | scope lookup (prompt) → call → **USER INTERFACE: dialog shown, execution pauses, user responds** → resolve(string\|null) |
 
 ---
 

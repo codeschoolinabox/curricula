@@ -1551,70 +1551,81 @@ NOT 5
 
 _expression (used for side effects)_
 
-#### Logging
+#### Output
 
-A simple way to print data to the developer console while the program is
-running. This is helpful for knowing what data is stored in your program at
-different points in execution.
-
-<table>
-
-<tr>
-<td>
+Each `console` output method communicates a different _intent_ to the developer
+watching the console — not just what the value is, but why you're logging it.
 
 ```js
-console.log('hello'); // print one thing
-
-console.log('h', 'e', 'l', 'l', 'o'); // print many things
+console.debug('x is now', x);           // implementation noise while debugging
+console.log('processing step 3');       // happy-path tracing
+console.info('cache populated');        // something worth noting
+console.warn('value outside range');    // unexpected but not broken
+console.error('failed to parse input'); // something is broken
 ```
 
-</td>
-<td>
-
-```txt
-// no need for logs in PseudoCode, the program doesn't run!
-
-// but if you really want to ...
-log('hello')
-```
-
-</td>
-</tr>
-</table>
+All five accept any number of arguments and print them space-separated.
 
 #### Asserting
 
-A way to check your assumptions while the program runs. If the assertion is
-true, nothing happens. If it's false, an error message is logged to the console.
-
-<table>
-
-<tr>
-<td>
+`console.assert(condition, message)` checks a claim about what should be true
+at this point. Silent when the condition holds; logs an error message when it
+doesn't. A way to document your assumptions and let the program catch violations.
 
 ```js
-// no output when the assertion is true
-console.assert(1 === 1, 'this will not show');
-
-// logs an error message when the assertion is false
-console.assert(1 === 2, '1 is not equal to 2!');
+console.assert(1 === 1, 'this will not show');   // silent — assertion passes
+console.assert(1 === 2, '1 is not equal to 2!'); // logs error — assertion fails
 ```
 
-</td>
-<td>
+#### Counting
 
-```txt
-ASSERT: 1 === 1, 'this will not show'
-ASSERT: 1 === 2, '1 is not equal to 2!'
+`console.count(label)` increments and logs a named counter each time it's
+called — useful for tracking how many times a loop body runs or a branch is
+taken. `console.countReset(label)` resets that counter to zero.
+
+```js
+for (let i = 0; i < 3; i++) {
+  console.count('loop'); // logs: loop: 1 / loop: 2 / loop: 3
+}
+console.countReset('loop');
+console.count('loop'); // logs: loop: 1
 ```
 
-</td>
-</tr>
-</table>
+#### Grouping
 
-All other `console` methods are also available in JEJ — see
-[MDN](https://developer.mozilla.org/en-US/docs/Web/API/console) for the full
-list.
+`console.group(label)` starts a collapsible, indented group — all output until
+`console.groupEnd()` is visually nested beneath it. `console.groupCollapsed(label)` starts the group collapsed by default.
+
+```js
+console.group('step 1');
+console.log('x:', x);
+console.log('y:', y);
+console.groupEnd();
+```
+
+#### Timing
+
+`console.time(label)` starts a named timer. `console.timeLog(label)` logs the
+elapsed time without stopping it. `console.timeEnd(label)` stops the timer and
+logs the total elapsed time.
+
+```js
+console.time('loop');
+for (let i = 0; i < 1000; i++) { /* work */ }
+console.timeLog('loop');  // logs elapsed time so far
+for (let i = 0; i < 1000; i++) { /* more work */ }
+console.timeEnd('loop');  // logs total elapsed time and stops
+```
+
+#### Utility
+
+`console.clear()` clears all output from the console — useful at the start of
+a run to get a clean view.
+
+```js
+console.clear();
+console.log('fresh start');
+```
 
 [TOP](#just-enough-javascript)
 

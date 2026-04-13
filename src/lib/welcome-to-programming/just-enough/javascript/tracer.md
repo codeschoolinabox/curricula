@@ -220,6 +220,40 @@ type TraceConfig = {
 		prototype?: boolean; // prototype chain walk events
 		errors?: boolean; // error events (each carries phase: creation | execution)
 
+		// --- I/O CHANNELS ---
+
+		io?:
+			| boolean
+			| {
+					dev?:
+						| boolean
+						| {
+								// one event per console.* call, carrying method + args
+								log?: boolean;
+								info?: boolean;
+								debug?: boolean;
+								warn?: boolean;
+								error?: boolean;
+								assert?: boolean;
+								count?: boolean;
+								countReset?: boolean;
+								group?: boolean;
+								groupCollapsed?: boolean;
+								groupEnd?: boolean;
+								time?: boolean;
+								timeLog?: boolean;
+								timeEnd?: boolean;
+								clear?: boolean;
+						  };
+					user?:
+						| boolean
+						| {
+								output?:
+									| boolean
+									| { prompt?: boolean; alert?: boolean; confirm?: boolean }; // dialog shown to user
+								input?: boolean | { prompt?: boolean; confirm?: boolean }; // user responded (alert excluded: no input)
+						  };
+			  };
 	};
 };
 ```
@@ -250,6 +284,15 @@ type TraceConfig = {
 
 // Specific variable tracking
 { options: { bindings: { filter: ['x', 'total'] } } }
+
+// I/O only — what the program outputs to the developer and user
+{ options: { io: true } }
+
+// User I/O only — when dialogs appear and what the user enters
+{ options: { io: { user: true } } }
+
+// Precise I/O — console.warn/error + every user interaction
+{ options: { io: { dev: { warn: true, error: true }, user: true } } }
 ```
 
 ---
@@ -520,4 +563,51 @@ resolve('5')                  ← left operand
 resolve(1)                    ← right operand
 coerce(1 → '1', context: string-concatenation)
 operator(+, ['5', '1'])       ← now string concat
+```
+
+---
+
+## I/O events
+
+Events that fire at the actual interaction points — when output reaches a
+channel or input arrives from the user. These sit in the event stream alongside
+the call/return events for the same function call.
+
+Gated by `io.dev.*` (console) and `io.user.output` / `io.user.input`.
+
+### Developer Console events (`io.dev`)
+
+One event per `console.*` call. Fires after the call expression resolves. Each
+event carries the method name and the serialized argument values.
+
+```text
+// console.log('x =', 5)
+call(console.log, args: [ValueRep('x ='), ValueRep(5)])
+io:dev { method: 'log', args: [ValueRep('x ='), ValueRep(5)] }
+resolve(undefined)
+```
+
+### User Interface events (`io.user`)
+
+`io.user.output` fires when the dialog appears (the program wrote to the user
+channel). `io.user.input` fires when the user responds (the user channel wrote
+back). `alert` only has an output event — it has no input phase.
+
+```text
+// prompt('Enter name:') where user types 'Alice' and presses OK
+call(prompt, args: [ValueRep('Enter name:')])
+io:user:output { fn: 'prompt', message: 'Enter name:' }
+io:user:input  { fn: 'prompt', value: ValueRep('Alice') }
+resolve(ValueRep('Alice'))
+
+// alert('done')
+call(alert, args: [ValueRep('done')])
+io:user:output { fn: 'alert', message: 'done' }
+resolve(ValueRep(undefined))
+
+// confirm('Continue?') where user presses Cancel
+call(confirm, args: [ValueRep('Continue?')])
+io:user:output { fn: 'confirm', message: 'Continue?' }
+io:user:input  { fn: 'confirm', value: ValueRep(false) }
+resolve(ValueRep(false))
 ```
