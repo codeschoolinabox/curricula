@@ -688,6 +688,9 @@ first attempt:
 - Save your state (git commit) before letting Claude make large changes
 - Core business logic needs close human oversight; peripheral features can run
   more autonomously
+- **Never split a file between agents**: if an agent reads a file, it needs the
+  WHOLE file for context. Don't have one agent read lines 1-100 and another
+  read lines 100-200 of the same file. Assign whole files to agents.
 
 ## Adversarial Review Protocol
 

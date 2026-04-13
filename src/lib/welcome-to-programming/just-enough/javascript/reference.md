@@ -52,6 +52,9 @@ This is **_just enough JavaScript_** to:
     - [Boolean() & Truthiness](#boolean--truthiness)
     - [parseInt & parseFloat](#parseint--parsefloat)
   - [Number Helpers](#number-helpers)
+  - [Number Methods](#number-methods)
+  - [String Helpers](#string-helpers)
+  - [Date](#date)
   - [Math](#math)
   - [Operators](#operators)
     - [typeof](#typeof)
@@ -94,6 +97,7 @@ This is **_just enough JavaScript_** to:
   - [For-Of Loops](#for-of-loops)
   - [Break](#break)
   - [Continue](#continue)
+  - [BigInt](#bigint)
 - [Syntax You'll See (But Not Write)](#syntax-youll-see-but-not-write)
   - [debugger](#debugger)
   - [Braceless `if`](#braceless-if)
@@ -496,9 +500,12 @@ null
 <summary>Why Number.isNaN and not isNaN?</summary>
 <br>
 
-JavaScript also has a global `isNaN()` function, but it secretly converts the
-value to a number before checking — which can give confusing results.
-`Number.isNaN()` only returns true when the value is actually NaN, no surprises.
+JavaScript also has global `isNaN()` and `isFinite()` functions, but they
+secretly convert the value to a number before checking — which can give
+confusing results. The namespaced versions (`Number.isNaN`, `Number.isFinite`,
+`Number.isInteger`) only check the value as-is, no surprises.
+
+JEJ uses only the namespaced versions to avoid coercion surprises.
 
 </details>
 
@@ -746,6 +753,254 @@ Number.isFinite(NaN)
 </td>
 </tr>
 </table>
+
+[TOP](#just-enough-javascript)
+
+---
+
+### Number Methods
+
+_expression_
+
+Methods available on number values for formatting and conversion. Most useful
+is `toString(radix)` for converting between number bases (binary, hex, etc.).
+
+<table>
+
+<tr>
+<td>
+
+```js
+// convert to different bases
+(42).toString(2);     // '101010' (binary)
+(42).toString(16);    // '2a' (hexadecimal)
+(255).toString(8);    // '377' (octal)
+
+// round-trip: number → binary string → number
+let binary = (42).toString(2);    // '101010'
+let back = parseInt(binary, 2);   // 42
+
+// decimal formatting
+(3.14159).toFixed(2);       // '3.14'
+(3.14159).toPrecision(4);   // '3.142'
+(12345).toExponential(2);   // '1.23e+4'
+
+// locale-aware formatting
+(1234567).toLocaleString();  // '1,234,567' (varies by locale)
+```
+
+</td>
+<td>
+
+```txt
+(42).toString(2)
+(42).toString(16)
+(255).toString(8)
+
+binary ← (42).toString(2)
+back ← parseInt(binary, 2)
+
+(3.14159).toFixed(2)
+(3.14159).toPrecision(4)
+(12345).toExponential(2)
+
+(1234567).toLocaleString()
+```
+
+</td>
+</tr>
+</table>
+
+[TOP](#just-enough-javascript)
+
+---
+
+### String Helpers
+
+_expression_
+
+Static methods on the `String` object for creating characters from numeric
+codes. Useful for exploring character encoding, ASCII art, and Unicode.
+
+<table>
+
+<tr>
+<td>
+
+```js
+// create a character from its ASCII/Unicode code number
+String.fromCharCode(65); // 'A'
+String.fromCharCode(97); // 'a'
+String.fromCharCode(48); // '0'
+
+// create a character from its Unicode code point
+// (handles emoji and characters beyond basic ASCII)
+String.fromCodePoint(128516); // '😄'
+String.fromCodePoint(9829); // '♥'
+String.fromCodePoint(65); // 'A' (same as fromCharCode for basic characters)
+```
+
+</td>
+<td>
+
+```txt
+String.fromCharCode(65)
+String.fromCharCode(97)
+String.fromCharCode(48)
+
+String.fromCodePoint(128516)
+String.fromCodePoint(9829)
+String.fromCodePoint(65)
+```
+
+</td>
+</tr>
+</table>
+
+<details>
+<summary>ASCII character codes</summary>
+<br>
+
+Every character has a numeric code. The basic Latin alphabet lives in the ASCII
+range (0–127). Some useful ranges:
+
+- `48`–`57`: digits `'0'` through `'9'`
+- `65`–`90`: uppercase `'A'` through `'Z'`
+- `97`–`122`: lowercase `'a'` through `'z'`
+
+You can go the other direction too — from a character to its code — using
+`.charCodeAt()` on a string:
+
+```js
+'A'.charCodeAt(0); // 65
+'a'.charCodeAt(0); // 97
+```
+
+This pair (`fromCharCode` ↔ `charCodeAt`) is the basis for character-code
+arithmetic: Caesar ciphers, case conversion, character range checks, and more.
+
+</details>
+
+[TOP](#just-enough-javascript)
+
+---
+
+### Date
+
+_expression_
+
+The `Date` object provides tools for working with dates and times. `Date.now()`
+and `Date.parse()` are static methods that return numbers. `new Date()` creates
+a date object with instance methods for extracting parts of a date.
+
+> **`new Date()` is the only use of `new` in JEJ.** The `new` keyword creates
+> objects — a concept covered later. Date is the exception because there's no
+> other way to get formatted dates or extract date parts in JavaScript.
+
+<table>
+
+<tr>
+<td>
+
+```js
+// --- static methods (return numbers) ---
+
+// current time as milliseconds since Jan 1, 1970
+let before = Date.now();
+// ... some code runs ...
+let after = Date.now();
+let elapsed = after - before;
+
+// parse a date string into milliseconds
+Date.parse('2025-12-25');        // 1735084800000
+Date.parse('invalid');           // NaN
+```
+
+```js
+// --- new Date() — the sole `new` exception in JEJ ---
+
+// current date and time
+let now = new Date();
+
+// from a date string
+let christmas = new Date('2025-12-25');
+
+// from milliseconds
+let epoch = new Date(0);  // Jan 1, 1970
+```
+
+```js
+// --- instance methods (on a Date object) ---
+
+let date = new Date('2025-06-15T14:30:45');
+
+// extracting parts
+date.getFullYear();    // 2025
+date.getMonth();       // 5  — 0-indexed! (0=Jan, 5=Jun)
+date.getDate();        // 15 — day of month (1-indexed)
+date.getHours();       // 14
+date.getMinutes();     // 30
+date.getSeconds();     // 45
+
+// milliseconds since epoch (same as Date.now() for current time)
+date.getTime();        // 1750000245000
+
+// formatted strings (vary by locale)
+date.toLocaleDateString();  // '6/15/2025' (US locale)
+date.toLocaleTimeString();  // '2:30:45 PM' (US locale)
+
+// standard format
+date.toISOString();    // '2025-06-15T14:30:45.000Z'
+```
+
+</td>
+<td>
+
+```txt
+before ← Date.now()
+after ← Date.now()
+elapsed ← after - before
+
+Date.parse('2025-12-25')
+Date.parse('invalid')
+```
+
+```txt
+now ← new Date()
+christmas ← new Date('2025-12-25')
+epoch ← new Date(0)
+```
+
+```txt
+date ← new Date('2025-06-15T14:30:45')
+
+date.getFullYear()
+date.getMonth()       // 0-indexed!
+date.getDate()
+date.getHours()
+date.getMinutes()
+date.getSeconds()
+
+date.getTime()
+
+date.toLocaleDateString()
+date.toLocaleTimeString()
+
+date.toISOString()
+```
+
+</td>
+</tr>
+</table>
+
+> **Gotcha — 0-indexed months:** `getMonth()` returns 0 for January, 1 for
+> February, ..., 11 for December. This is a common source of off-by-one bugs.
+> `getDate()` (day of month) is 1-indexed as you'd expect.
+>
+> **Note:** Like `Math.random()`, `Date.now()` and `new Date()` produce
+> different results each time they run. Your program's behavior will vary
+> between executions. This is intentional — time and randomness are concepts
+> worth exploring.
 
 [TOP](#just-enough-javascript)
 
@@ -2827,6 +3082,78 @@ FOR: character OF 'hello'
 </td>
 </tr>
 </table>
+
+[TOP](#just-enough-javascript)
+
+---
+
+### BigInt
+
+_expression_
+
+BigInt is a numeric type for integers of arbitrary size. Regular numbers lose
+precision beyond `Number.MAX_SAFE_INTEGER` (9,007,199,254,740,991). BigInt
+has no limit.
+
+Create BigInts with the `n` suffix or the `BigInt()` function:
+
+<table>
+
+<tr>
+<td>
+
+```js
+// BigInt literals
+let big = 42n;
+let huge = 9007199254740992n;  // beyond Number.MAX_SAFE_INTEGER
+
+// BigInt() conversion
+let fromNumber = BigInt(42);   // 42n
+let fromString = BigInt('99'); // 99n
+
+// arithmetic works (only with other BigInts)
+let sum = 10n + 20n;           // 30n
+let product = 3n * 4n;         // 12n
+
+// integer division (truncates, no decimals)
+let divided = 7n / 2n;         // 3n (not 3.5)
+
+// comparison across types
+42n === 42;   // false (different types)
+42n == 42;    // true (loose equality coerces)
+
+// typeof
+typeof 42n;   // 'bigint'
+```
+
+</td>
+<td>
+
+```txt
+big ← 42n
+huge ← 9007199254740992n
+
+fromNumber ← BigInt(42)
+fromString ← BigInt('99')
+
+sum ← 10n + 20n
+product ← 3n * 4n
+
+divided ← 7n / 2n   (truncates)
+
+42n === 42   → false
+42n == 42    → true
+
+typeof 42n   → 'bigint'
+```
+
+</td>
+</tr>
+</table>
+
+> **Important:** You cannot mix BigInt and regular numbers in arithmetic.
+> `42n + 1` throws a TypeError. Convert explicitly: `42n + BigInt(1)` or
+> `Number(42n) + 1` (but Number conversion loses precision for large values).
 
 [TOP](#just-enough-javascript)
 
