@@ -88,12 +88,21 @@ function createRemarkStudyLenses(
 			config,
 		);
 		if (siblings.length === 0) return;
+		// Optional section heading appended above the embed block (depth 2).
+		if (config.embedSiblings.sectionHeading !== null) {
+			tree.children.push({
+				type: 'heading',
+				depth: 2,
+				children: [
+					{ type: 'text', value: config.embedSiblings.sectionHeading },
+				],
+			});
+		}
 		if (config.embedSiblings.mode === 'tabs') {
 			appendTabsEmbed(tree, siblings, config);
 		} else {
 			appendBottomEmbed(tree, siblings, config);
 		}
-		// TODO(D.11): section heading above the embed block.
 	};
 }
 

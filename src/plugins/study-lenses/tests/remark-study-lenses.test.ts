@@ -187,6 +187,25 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
+	it('section heading appended before embed block when embedSiblings.sectionHeading is set', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'embed-with-heading');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		// Expect: ...original children..., heading (depth 2, text 'Exercises'),
+		// then one code node per sibling.
+		const heading = tree.children.at(-2);
+		const lastCode = tree.children.at(-1);
+		expect(heading?.type).toBe('heading');
+		expect((heading as { depth?: number }).depth).toBe(2);
+		expect(
+			(heading as { children?: Array<{ type: string; value?: string }> })
+				.children?.[0]?.value,
+		).toBe('Exercises');
+		expect(lastCode?.type).toBe('code');
+	});
+
 	it('embed-tabs emits mdxJsxFlowElement Tabs wrapping one TabItem per sibling', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'embed-tabs');
 		const tree = parseAndTransform(
