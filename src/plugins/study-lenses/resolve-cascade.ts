@@ -24,6 +24,24 @@ import DEFAULTS from './defaults.js';
 import type { LensesConfigFile, LensName, ResolvedConfig } from './types.js';
 
 /**
+ * Module-scoped cache. Survives across every `resolveCascade` invocation
+ * within one Node process; each test file gets a fresh cache because
+ * Vitest isolates module graphs per file by default. Key shape:
+ * `` `${contentRoot}\0${absDir}` `` with null-byte separator so a path
+ * segment containing a literal ASCII "0" cannot accidentally alias two
+ * distinct (contentRoot, absDir) pairs.
+ *
+ * @remarks Invalidation (mtime-based revalidation) lands in A.6. Until
+ * then the cache is write-once-read-many per (contentRoot, absDir)
+ * pair — sufficient for A.5's happy-path reference-equality contract,
+ * insufficient for live-reload correctness.
+ *
+ * @remarks Sanctioned exception to DEV.md "no mutable closures" rule —
+ * see DOCS.md §Structural constraints "Module-scoped cache."
+ */
+const cache = new Map<string, ResolvedConfig>();
+
+/**
  * Resolves the effective configuration for a specific directory under
  * a specific content root.
  *
@@ -55,7 +73,20 @@ function resolveCascade(
 	if (contentRoot === '') {
 		throw new Error('resolveCascade: contentRoot is required');
 	}
-	return computeFresh(path.resolve(absDir), path.resolve(contentRoot));
+	const normalizedAbsDir = path.resolve(absDir);
+	const normalizedContentRoot = path.resolve(contentRoot);
+	const cacheKey = `${normalizedContentRoot}\u0000${normalizedAbsDir}`;
+
+	// TODO(A.6): revalidate cached entry against tracked file mtimes
+	// before returning; a stale entry here is currently returned blindly.
+	const cached = cache.get(cacheKey);
+	if (cached !== undefined) {
+		return cached;
+	}
+
+	const fresh = computeFresh(normalizedAbsDir, normalizedContentRoot);
+	cache.set(cacheKey, fresh);
+	return fresh;
 }
 
 /**

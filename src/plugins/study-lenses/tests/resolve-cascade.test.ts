@@ -54,6 +54,15 @@ describe('resolveCascade', () => {
 		});
 	});
 
+	it('repeat call with unchanged inputs → returns same frozen reference (cache hit)', () => {
+		const fixture = path.join(FIXTURES_DIR, 'cache-hit');
+
+		const first = resolveCascade(fixture, { contentRoot: fixture });
+		const second = resolveCascade(fixture, { contentRoot: fixture });
+
+		expect(second).toBe(first);
+	});
+
 	it('empty contentRoot → throws (prevents silent cwd aliasing before cache lands)', () => {
 		expect(() =>
 			resolveCascade('/some/abs/path', { contentRoot: '' }),
