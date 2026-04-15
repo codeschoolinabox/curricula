@@ -88,8 +88,11 @@ function createRemarkStudyLenses(
 			config,
 		);
 		if (siblings.length === 0) return;
-		appendBottomEmbed(tree, siblings, config);
-		// TODO(D.10): tabs-mode embed.
+		if (config.embedSiblings.mode === 'tabs') {
+			appendTabsEmbed(tree, siblings, config);
+		} else {
+			appendBottomEmbed(tree, siblings, config);
+		}
 		// TODO(D.11): section heading above the embed block.
 	};
 }
@@ -151,6 +154,68 @@ function appendBottomEmbed(
 		);
 		tree.children.push(node);
 	}
+}
+
+/**
+ * Appends a single `<Tabs>` `mdxJsxFlowElement` to the tree. Its
+ * children are one `<TabItem>` per sibling (in the walker's
+ * alphabetical-by-label order). Each `<TabItem>` carries `value` and
+ * `label` attributes matching the sibling's label, and contains
+ * exactly one hast-shaped `<StudyLens>` `code` node.
+ *
+ * The plugin emits `<Tabs>` / `<TabItem>` as bare tag names; the
+ * swizzled `MDXComponents` at Module G.1 imports them from
+ * `@theme/Tabs` and `@theme/TabItem` so the MDX runtime resolves them.
+ */
+function appendTabsEmbed(
+	tree: Root,
+	siblings: ReadonlyArray<Sibling>,
+	config: ResolvedConfig,
+): void {
+	const tabItems = siblings.map((sibling) => {
+		const inner: Code = {
+			type: 'code',
+			lang: sibling.lang,
+			value: sibling.code,
+			meta: null,
+		};
+		const lensConfig = resolveEmittedLensConfig(config, sibling);
+		codeBlockToHast(
+			inner,
+			lensConfig === undefined
+				? { lens: sibling.lens, lang: sibling.lang }
+				: { lens: sibling.lens, lang: sibling.lang, lensConfig },
+		);
+		return {
+			type: 'mdxJsxFlowElement' as const,
+			name: 'TabItem',
+			attributes: [
+				{
+					type: 'mdxJsxAttribute' as const,
+					name: 'value',
+					value: sibling.label,
+				},
+				{
+					type: 'mdxJsxAttribute' as const,
+					name: 'label',
+					value: sibling.label,
+				},
+			],
+			children: [inner],
+		};
+	});
+
+	const tabs = {
+		type: 'mdxJsxFlowElement' as const,
+		name: 'Tabs',
+		attributes: [],
+		children: tabItems,
+	};
+
+	// Cast: the `mdxJsxFlowElement` node type is provided by mdast-util-mdx-jsx
+	// (the MDX MDAST extension). Docusaurus's processor allows these via
+	// `rehype-raw`'s passThrough list in .md mode and natively in .mdx mode.
+	(tree.children as Array<unknown>).push(tabs);
 }
 
 /**

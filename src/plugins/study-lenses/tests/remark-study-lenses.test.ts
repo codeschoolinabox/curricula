@@ -187,6 +187,44 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
+	it('embed-tabs emits mdxJsxFlowElement Tabs wrapping one TabItem per sibling', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'embed-tabs');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		const appended = tree.children.at(-1) as unknown as {
+			type: string;
+			name?: string;
+			children?: ReadonlyArray<{
+				type: string;
+				name?: string;
+				attributes?: ReadonlyArray<{ name: string; value: unknown }>;
+				children?: ReadonlyArray<{ type: string; data?: { hName?: string } }>;
+			}>;
+		};
+
+		expect(appended.type).toBe('mdxJsxFlowElement');
+		expect(appended.name).toBe('Tabs');
+
+		const tabItems = (appended.children ?? []).filter(
+			(c) => c.type === 'mdxJsxFlowElement' && c.name === 'TabItem',
+		);
+		expect(tabItems).toHaveLength(2);
+
+		// First TabItem's attributes carry value + label from the sibling.
+		const firstAttrs = Object.fromEntries(
+			(tabItems[0]?.attributes ?? []).map((a) => [a.name, a.value]),
+		);
+		expect(firstAttrs.value).toBe('01-alpha');
+		expect(firstAttrs.label).toBe('01-alpha');
+
+		// First TabItem's sole child is a hast-shaped StudyLens code node.
+		const innerCodeNode = tabItems[0]?.children?.[0];
+		expect(innerCodeNode?.type).toBe('code');
+		expect(innerCodeNode?.data?.hName).toBe('StudyLens');
+	});
+
 	it('embed-bottom deep-merges directive lensConfig over cascade lenses[lens]', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'embed-config-merge');
 		const tree = parseAndTransform(
