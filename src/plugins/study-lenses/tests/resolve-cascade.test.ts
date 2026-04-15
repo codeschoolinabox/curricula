@@ -53,4 +53,18 @@ describe('resolveCascade', () => {
 			exerciseSetPrefixes: [],
 		});
 	});
+
+	it('lenses.json at root AND target but not intermediate → both files applied, no crash on missing intermediate', () => {
+		const root = path.join(FIXTURES_DIR, 'boundary-gap');
+		const page = path.join(root, 'chapter', 'page');
+
+		const result = resolveCascade(page, { contentRoot: root });
+
+		expect(result).toEqual({
+			defaults: { js: 'study', py: 'study' },
+			embedSiblings: DEFAULTS.embedSiblings,
+			lenses: {},
+			exerciseSetPrefixes: [],
+		});
+	});
 });
