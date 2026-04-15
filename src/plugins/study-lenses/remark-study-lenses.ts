@@ -61,10 +61,21 @@ function createRemarkStudyLenses(
 			{ contentRoot: normalizedContentRoot },
 		);
 
+		// 2b. Read per-file frontmatter override (Docusaurus pre-populates
+		//     vfile.data.frontMatter before beforeDefaultRemarkPlugins runs).
+		const frontMatter = (file.data.frontMatter ?? {}) as Record<
+			string,
+			unknown
+		>;
+		const frontmatterDefaultLens =
+			typeof frontMatter.defaultLens === 'string'
+				? frontMatter.defaultLens
+				: undefined;
+
 		// 3. Transform — rewrite fences whose language is configured.
 		for (const node of tree.children) {
 			if (node.type !== 'code') continue;
-			transformFence(node, config);
+			transformFence(node, config, frontmatterDefaultLens);
 		}
 
 		// 4. Embed siblings — only for sibling-bearing pages.
@@ -141,12 +152,19 @@ function appendBottomEmbed(
 /**
  * Rewrites one fenced-code-block MDAST node if its language is
  * configured in `config.defaults`. Unconfigured-language fences are
- * left alone (configured-languages rule). Explicit `:<suffix>` on the
- * info string overrides the default lens for that language.
+ * left alone (configured-languages rule).
+ *
+ * Lens resolution precedence (most-specific wins):
+ *   fence `:suffix`   >   frontmatterDefaultLens   >   cascade `defaults[lang]`
+ *
+ * The configured-languages gate fires at the outermost layer: the
+ * fence's `lang` must be present in `config.defaults` for transformation
+ * to happen AT ALL — frontmatter does not lift unconfigured languages.
  */
 function transformFence(
 	node: Code,
 	config: ReturnType<typeof resolveCascade>,
+	frontmatterDefaultLens: string | undefined,
 ): void {
 	const info = node.lang;
 	if (info === null || info === undefined) return;
@@ -154,10 +172,10 @@ function transformFence(
 	const [lang, suffix] = info.split(':', 2);
 	if (lang === undefined || lang === '') return;
 
-	const defaultLens = config.defaults[lang];
-	if (defaultLens === undefined) return; // configured-languages rule
+	const cascadeDefaultLens = config.defaults[lang];
+	if (cascadeDefaultLens === undefined) return; // configured-languages rule
 
-	const lens = suffix ?? defaultLens;
+	const lens = suffix ?? frontmatterDefaultLens ?? cascadeDefaultLens;
 	const lensConfig = config.lenses[lens];
 	codeBlockToHast(node, { lens, lang, lensConfig });
 }

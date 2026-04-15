@@ -29,10 +29,15 @@ const FIXTURES_DIR = path.resolve(
 function parseAndTransform(
 	absFilePath: string,
 	contentRoot: string,
+	frontMatter?: Record<string, unknown>,
 ): Root {
 	const source = fs.readFileSync(absFilePath, 'utf8');
 	const transformer = createRemarkStudyLenses({ contentRoot });
-	const vfile = new VFile({ value: source, path: absFilePath });
+	const vfile = new VFile({
+		value: source,
+		path: absFilePath,
+		data: frontMatter === undefined ? {} : { frontMatter },
+	});
 	const parser = unified().use(remarkParse);
 	const tree = parser.parse(vfile) as Root;
 	transformer(tree, vfile);
@@ -179,6 +184,30 @@ describe('createRemarkStudyLenses', () => {
 				lens: 'study',
 				lang: 'js',
 			},
+		});
+	});
+
+	it('frontmatter defaultLens overrides cascade for plain fences; :suffix still wins', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'frontmatter-default-lens');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'page.md'),
+			contentRoot,
+			{ defaultLens: 'highlight' },
+		);
+		const codeNodes = tree.children.filter(
+			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
+				n.type === 'code',
+		);
+
+		// Plain ```js fence: frontmatter wins over cascade (study)
+		expect(codeNodes[0]?.data?.hProperties).toMatchObject({
+			lens: 'highlight',
+			lang: 'js',
+		});
+		// ```js:study fence: explicit suffix beats frontmatter
+		expect(codeNodes[1]?.data?.hProperties).toMatchObject({
+			lens: 'study',
+			lang: 'js',
 		});
 	});
 
