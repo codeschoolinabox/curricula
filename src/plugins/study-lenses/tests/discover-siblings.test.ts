@@ -54,6 +54,23 @@ describe('discoverSiblings', () => {
 		expect(result).toEqual([]);
 	});
 
+	it('multiple .js at mixed depths → sorted alphabetically, subpath-disambiguated labels', () => {
+		const fixture = path.join(FIXTURES_DIR, 'many-mixed-depths');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result.map((s) => s.label)).toEqual([
+			'a',
+			'exercises/a',
+			'exercises/b',
+		]);
+	});
+
 	it('single .js in a subdirectory → one Sibling with relative-path label', () => {
 		const fixture = path.join(FIXTURES_DIR, 'single-js-in-subdir');
 		const config = {

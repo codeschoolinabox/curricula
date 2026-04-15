@@ -52,6 +52,10 @@ function discoverSiblings(
 	}
 	const siblings: Array<Sibling> = [];
 	walk(pageDir, pageDir, config, siblings);
+	// Sort by label for a stable, deterministic order across platforms —
+	// `readdirSync` order is filesystem-dependent (alphabetical on APFS,
+	// unpredictable on some Linux filesystems).
+	siblings.sort((a, b) => a.label.localeCompare(b.label));
 	return freezeInPlace(siblings);
 }
 
