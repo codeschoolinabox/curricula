@@ -54,6 +54,19 @@ describe('discoverSiblings', () => {
 		expect(result).toEqual([]);
 	});
 
+	it('nested subdir with its own README.md → descent halts, subpage files excluded', () => {
+		const fixture = path.join(FIXTURES_DIR, 'page-boundary');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result.map((s) => s.label)).toEqual(['here']);
+	});
+
 	it('multiple .js at mixed depths → sorted alphabetically, subpath-disambiguated labels', () => {
 		const fixture = path.join(FIXTURES_DIR, 'many-mixed-depths');
 		const config = {

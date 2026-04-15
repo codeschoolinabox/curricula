@@ -76,6 +76,9 @@ function walk(
 	for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
 		const absPath = path.join(currentDir, entry.name);
 		if (entry.isDirectory()) {
+			// Page boundary: a subdirectory with its own sibling-bearing
+			// page marker owns its subtree; don't leak into the outer page.
+			if (isSiblingBearingPageDir(absPath)) continue;
 			walk(absPath, pageDir, config, out);
 			continue;
 		}
@@ -93,6 +96,20 @@ function walk(
 		const code = fs.readFileSync(absPath, 'utf8');
 		out.push({ absPath, label, code, lang, lens });
 	}
+}
+
+/**
+ * A directory is a sibling-bearing page boundary if it contains
+ * `index.md` or `README.md`. `index.md` takes precedence when both
+ * exist (README.md then plays the contributor-facing role per the
+ * AR-1 resolution in README.md §README.md-vs-index.md); for the
+ * boundary check, presence of *either* is sufficient.
+ */
+function isSiblingBearingPageDir(dir: string): boolean {
+	return (
+		fs.existsSync(path.join(dir, 'index.md')) ||
+		fs.existsSync(path.join(dir, 'README.md'))
+	);
 }
 
 export default discoverSiblings;
