@@ -56,6 +56,21 @@ describe('discoverSiblings', () => {
 		expect(result).toEqual([]);
 	});
 
+	it('.js with // @study-lens <name> directive → sibling lens overrides cascade default', () => {
+		const fixture = path.join(FIXTURES_DIR, 'file-override-name-only');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result).toHaveLength(1);
+		expect(result[0]?.lens).toBe('parsons');
+		expect(result[0]?.lensConfig).toBeUndefined();
+	});
+
 	it('safety exclusions: skips node_modules, hidden dirs, and does not follow symlinks', () => {
 		// Dynamic fixture — symlinks don't travel cleanly through git.
 		const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-B11-'));

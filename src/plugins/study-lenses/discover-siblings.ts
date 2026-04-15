@@ -25,6 +25,7 @@ import path from 'node:path';
 import { freezeInPlace } from '../../lib/utils/freeze.js';
 
 import EXT_TO_LANG from './ext-to-lang.js';
+import parseStudyLensDirective from './parse-study-lens-directive.js';
 
 import type { ResolvedConfig, Sibling } from './types.js';
 
@@ -97,15 +98,20 @@ function walk(
 		const ext = path.extname(entry.name);
 		const lang = EXT_TO_LANG[ext];
 		if (lang === undefined) continue;
-		const lens = config.defaults[lang];
-		if (lens === undefined) continue;
+		const cascadeLens = config.defaults[lang];
+		if (cascadeLens === undefined) continue;
 		const labelPath = path.relative(pageDir, absPath);
 		const label = labelPath
 			.slice(0, -ext.length)
 			.split(path.sep)
 			.join('/');
 		const code = fs.readFileSync(absPath, 'utf8');
-		out.push({ absPath, label, code, lang, lens });
+		const directive = parseStudyLensDirective(code, absPath);
+		const lens = directive?.lens ?? cascadeLens;
+		const sibling: Sibling = directive?.lensConfig !== undefined
+			? { absPath, label, code, lang, lens, lensConfig: directive.lensConfig }
+			: { absPath, label, code, lang, lens };
+		out.push(sibling);
 	}
 }
 
