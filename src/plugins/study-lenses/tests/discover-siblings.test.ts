@@ -28,4 +28,29 @@ describe('discoverSiblings', () => {
 
 		expect(result).toEqual([]);
 	});
+
+	it('mode !== "off" but no .js files anywhere under pageDir → frozen []', () => {
+		const fixture = path.join(FIXTURES_DIR, 'no-js-files');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result).toEqual([]);
+	});
+
+	it('.js files exist but config.defaults.js is unset → frozen [] (configured-languages rule)', () => {
+		const fixture = path.join(FIXTURES_DIR, 'has-js-no-defaults');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result).toEqual([]);
+	});
 });
