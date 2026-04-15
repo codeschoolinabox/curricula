@@ -143,6 +143,15 @@ describe('resolveCascade', () => {
 		).toThrow('contentRoot is required');
 	});
 
+	it('exerciseSetPrefixes concatenates across cascade (root + child, deduped, root-first)', () => {
+		const root = path.join(FIXTURES_DIR, 'exerciseset-concat');
+		const chapter = path.join(root, 'chapter');
+
+		const result = resolveCascade(chapter, { contentRoot: root });
+
+		expect(result.exerciseSetPrefixes).toEqual(['sl-', 'es-']);
+	});
+
 	it('embedSiblings.ignorePrefixes concatenates across cascade (root + child)', () => {
 		const root = path.join(FIXTURES_DIR, 'ignoreprefixes-concat');
 		const chapter = path.join(root, 'chapter');
