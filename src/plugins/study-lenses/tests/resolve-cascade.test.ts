@@ -93,6 +93,20 @@ describe('resolveCascade', () => {
 		expect(second.defaults).toEqual({ js: 'highlight' });
 	});
 
+	it('same absDir under different contentRoot → distinct results (cache keyed by both)', () => {
+		// Dedicated fixture (not two-level-cascade/) to avoid key collision
+		// with A.3 — otherwise the wide-call here would be a cache hit on
+		// A.3's pre-populated entry, not a fresh compute.
+		const root = path.join(FIXTURES_DIR, 'contentroot-isolation');
+		const chapter = path.join(root, 'chapter');
+
+		const narrow = resolveCascade(chapter, { contentRoot: chapter });
+		const wide = resolveCascade(chapter, { contentRoot: root });
+
+		expect(narrow.lenses).toEqual({ study: { debug: false } });
+		expect(wide.lenses).toEqual({ study: { ask: false, debug: false } });
+	});
+
 	it('new ancestor lenses.json appears → tracked set changes, cache invalidated', () => {
 		// Two-level structure where the chapter directory initially has its
 		// own lenses.json and the root has none. Resolving at chapter/ gives
