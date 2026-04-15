@@ -155,6 +155,33 @@ describe('createRemarkStudyLenses', () => {
 		expect(codeNodes[2]?.data).toBeUndefined();
 	});
 
+	it('embed bottom: index.md + two .js siblings → two hast-shaped code nodes appended', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'embed-bottom');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		// The last two children should be the appended siblings in alphabetical label order.
+		const appended = tree.children.slice(-2);
+		expect(appended.every((n) => n.type === 'code')).toBe(true);
+		expect(appended[0]?.data).toEqual({
+			hName: 'StudyLens',
+			hProperties: {
+				code: '// alpha sibling\nconst a = 1;\n',
+				lens: 'study',
+				lang: 'js',
+			},
+		});
+		expect(appended[1]?.data).toEqual({
+			hName: 'StudyLens',
+			hProperties: {
+				code: '// beta sibling\nconst b = 2;\n',
+				lens: 'study',
+				lang: 'js',
+			},
+		});
+	});
+
 	it('vfile with no path → tree unchanged (guard)', () => {
 		const transformer = createRemarkStudyLenses({
 			contentRoot: FIXTURES_DIR,

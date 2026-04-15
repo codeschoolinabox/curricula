@@ -15,15 +15,17 @@
  *                      the embed block when configured.
  */
 
+import fs from 'node:fs';
 import path from 'node:path';
 
 import codeBlockToHast from './code-block-to-hast.js';
+import discoverSiblings from './discover-siblings.js';
 import resolveCascade from './resolve-cascade.js';
 
 import type { Code, Root } from 'mdast';
 import type { VFile } from 'vfile';
 
-import type { RemarkPluginOptions } from './types.js';
+import type { ResolvedConfig, RemarkPluginOptions, Sibling } from './types.js';
 
 type Transformer = (tree: Root, file: VFile) => void;
 
@@ -65,7 +67,17 @@ function createRemarkStudyLenses(
 			transformFence(node, config);
 		}
 
-		// TODO(D.9+): embed siblings.
+		// 4. Embed siblings — only for sibling-bearing pages.
+		if (!isSiblingBearingPageFile(normalizedFilePath)) return;
+		if (config.embedSiblings.mode === 'off') return;
+		const siblings = discoverSiblings(
+			path.dirname(normalizedFilePath),
+			config,
+		);
+		if (siblings.length === 0) return;
+		appendBottomEmbed(tree, siblings, config);
+		// TODO(D.10): tabs-mode embed.
+		// TODO(D.11): section heading above the embed block.
 	};
 }
 
@@ -77,6 +89,53 @@ function createRemarkStudyLenses(
 function isUnder(child: string, ancestor: string): boolean {
 	const rel = path.relative(ancestor, child);
 	return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+}
+
+/**
+ * Decides whether THIS file is the sibling-bearing page for its
+ * directory, using the precedence rule from DOCS.md §Sibling-bearing-
+ * page precedence:
+ *   - `index.md` always qualifies
+ *   - `README.md` qualifies only when no `index.md` exists in the
+ *     same directory
+ *   - any other basename does not
+ *
+ * This is file-level; contrast with `discover-siblings`'s dir-level
+ * `isSiblingBearingPageDir`, which asks "does this dir mark a page
+ * boundary during descent" (presence of EITHER marker).
+ */
+function isSiblingBearingPageFile(absFilePath: string): boolean {
+	const basename = path.basename(absFilePath);
+	if (basename === 'index.md') return true;
+	if (basename !== 'README.md') return false;
+	return !fs.existsSync(path.join(path.dirname(absFilePath), 'index.md'));
+}
+
+/**
+ * Appends one hast-shaped `<StudyLens>` node per sibling to the tree's
+ * children. Each appended node is a fresh synthetic `code` MDAST node
+ * mutated via `codeBlockToHast`, so the same rendering path that
+ * handles in-page fences handles embed-bottom siblings.
+ */
+function appendBottomEmbed(
+	tree: Root,
+	siblings: ReadonlyArray<Sibling>,
+	config: ResolvedConfig,
+): void {
+	for (const sibling of siblings) {
+		const node: Code = {
+			type: 'code',
+			lang: sibling.lang,
+			value: sibling.code,
+			meta: null,
+		};
+		codeBlockToHast(node, {
+			lens: sibling.lens,
+			lang: sibling.lang,
+			lensConfig: config.lenses[sibling.lens],
+		});
+		tree.children.push(node);
+	}
 }
 
 /**
