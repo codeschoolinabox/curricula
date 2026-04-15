@@ -78,7 +78,9 @@
   "devDependencies": {
     "@docusaurus/tsconfig": "^3.9.2",
     "@ls-lint/ls-lint": "^2.3.1",
+    "@types/mdast": "^4.0.4",
     "@types/node": "^25.5.0",
+    "@types/unist": "^3.0.3",
     "@vitest/browser": "^2.1.9",
     "cspell": "^9.7.0",
     "eslint": "^9.18.0",
@@ -91,6 +93,7 @@
     "eslint-plugin-security": "^4.0.0",
     "eslint-plugin-sonarjs": "^4.0.2",
     "eslint-plugin-unicorn": "^63.0.0",
+    "fast-glob": "^3.3.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",
     "markdownlint-cli2": "^0.21.0",
@@ -98,6 +101,7 @@
     "prettier": "^3.5.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.1",
+    "unist-util-visit": "^5.1.0",
     "vitest": "^2.1.9"
   },
   "engines": {

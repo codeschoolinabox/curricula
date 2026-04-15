@@ -32,9 +32,9 @@ To change chapter order, reorder the blocks.
 
 ---
 
-## Layer 2 — Pattern-level: edit the exclude list in `docusaurus.config.mjs`
+## Layer 2 — Pattern-level: edit the exclude list in `docusaurus.config.ts`
 
-**File:** `docusaurus.config.mjs`
+**File:** `docusaurus.config.ts`
 
 The `exclude` array inside the `welcome-to-programming` plugin config takes glob
 patterns (micromatch syntax). Matches are relative to
@@ -77,6 +77,6 @@ global pattern.
 | What you want to hide                   | Use                                                                 |
 | --------------------------------------- | ------------------------------------------------------------------- |
 | One whole chapter                       | Comment out its block in `sidebars/welcome-to-programming.mjs`      |
-| All files named `teaching-tips.md`      | Add `'**/teaching-tips.md'` to `exclude` in `docusaurus.config.mjs` |
+| All files named `teaching-tips.md`      | Add `'**/teaching-tips.md'` to `exclude` in `docusaurus.config.ts`  |
 | One specific file, keep editing it      | Add `draft: true` to its front-matter                               |
 | A folder that's not a top-level chapter | Add `'path/to/folder/**'` to `exclude`                              |

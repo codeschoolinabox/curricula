@@ -10,7 +10,7 @@ export default defineWorkspace([
 		resolve: { alias },
 		test: {
 			name: 'unit',
-			include: ['src/lib/**/*.test.ts'],
+			include: ['src/{lib,plugins}/**/*.test.ts'],
 			exclude: ['src/lib/**/*.browser.test.ts'],
 			environment: 'node',
 		},
