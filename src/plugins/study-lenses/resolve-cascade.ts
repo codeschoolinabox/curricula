@@ -33,29 +33,42 @@ import type { LensesConfigFile, LensName, ResolvedConfig } from './types.js';
  *   sibling-bearing page. **Caller-trusted precondition:** must be an
  *   absolute path under `contentRoot`. The remark plugin's Guard
  *   phase enforces this upstream; the resolver itself does not
- *   validate.
+ *   validate path relationships.
  * @param options - `contentRoot` is the absolute path beyond which
  *   the cascade walk stops. Files outside this root are ignored.
- *   **Caller-trusted precondition:** must be an absolute path that
- *   is an ancestor of (or equal to) `absDir`.
- * @returns A deep-frozen `ResolvedConfig`. Repeat calls with the same
- *   inputs and unchanged filesystem state return the same frozen
- *   reference (cache hit).
+ *   **Must be non-empty and absolute** — the resolver throws on
+ *   empty input (empty would otherwise resolve to `process.cwd()` and
+ *   silently alias unrelated calls together).
+ * @returns A deep-frozen `ResolvedConfig`. Once the cache lands in
+ *   A.5/A.6, repeat calls with the same inputs and unchanged filesystem
+ *   state will return the same frozen reference; until then a fresh
+ *   object is produced every call.
+ * @throws If `contentRoot` is an empty string.
  * @throws If any `lenses.json` along the cascade is syntactically
  *   invalid JSON. The error message includes the offending file path.
  *   Missing `lenses.json` files are not errors — they are skipped.
  */
 function resolveCascade(
 	absDir: string,
-	{ contentRoot }: { readonly contentRoot: string } = { contentRoot: '' },
+	{ contentRoot }: { readonly contentRoot: string },
 ): ResolvedConfig {
-	// Normalize at the boundary so trailing-slash / relative-segment
-	// variants compare equal by string in the walk below.
-	const normalizedAbsDir = path.resolve(absDir);
-	const normalizedContentRoot = path.resolve(contentRoot);
+	if (contentRoot === '') {
+		throw new Error('resolveCascade: contentRoot is required');
+	}
+	return computeFresh(path.resolve(absDir), path.resolve(contentRoot));
+}
 
+/**
+ * Builds a fresh `ResolvedConfig` by walking, merging, and freezing.
+ * Extracted so that A.5's cache-probe logic can sit above it as a
+ * thin wrapper without disturbing the compute path.
+ */
+function computeFresh(
+	absDir: string,
+	contentRoot: string,
+): ResolvedConfig {
 	// 1. Walk — enumerate lenses.json paths from contentRoot down to absDir.
-	const configPaths = walkCascade(normalizedAbsDir, normalizedContentRoot);
+	const configPaths = walkCascade(absDir, contentRoot);
 
 	// 2. Merge — fold each file's contributions onto DEFAULTS, root-first.
 	let merged: ResolvedConfig = DEFAULTS;

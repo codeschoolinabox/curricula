@@ -54,6 +54,12 @@ describe('resolveCascade', () => {
 		});
 	});
 
+	it('empty contentRoot → throws (prevents silent cwd aliasing before cache lands)', () => {
+		expect(() =>
+			resolveCascade('/some/abs/path', { contentRoot: '' }),
+		).toThrow('contentRoot is required');
+	});
+
 	it('lenses.json at root AND target but not intermediate → both files applied, no crash on missing intermediate', () => {
 		const root = path.join(FIXTURES_DIR, 'boundary-gap');
 		const page = path.join(root, 'chapter', 'page');
