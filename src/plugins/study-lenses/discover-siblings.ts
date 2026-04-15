@@ -75,7 +75,14 @@ function walk(
 ): void {
 	for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
 		const absPath = path.join(currentDir, entry.name);
+		// Symlinks register as isSymbolicLink(), not isDirectory() — so the
+		// isDirectory check below already refuses to follow them. Keep the
+		// explicit guard here in case a future refactor changes that.
+		if (entry.isSymbolicLink()) continue;
 		if (entry.isDirectory()) {
+			// Safety: never recurse into node_modules or hidden dirs.
+			if (entry.name === 'node_modules') continue;
+			if (entry.name.startsWith('.')) continue;
 			// Ignore-prefix: dirname-prefix match → skip whole subtree.
 			if (hasIgnoredPrefix(entry.name, config.embedSiblings.ignorePrefixes)) {
 				continue;

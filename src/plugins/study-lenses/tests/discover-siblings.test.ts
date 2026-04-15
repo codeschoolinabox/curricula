@@ -9,9 +9,11 @@
  * first so the repo tree stays immutable.
  */
 
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished } from 'vitest';
 
 import DEFAULTS from '../defaults.js';
 import discoverSiblings from '../discover-siblings.js';
@@ -52,6 +54,43 @@ describe('discoverSiblings', () => {
 		const result = discoverSiblings(fixture, config);
 
 		expect(result).toEqual([]);
+	});
+
+	it('safety exclusions: skips node_modules, hidden dirs, and does not follow symlinks', () => {
+		// Dynamic fixture — symlinks don't travel cleanly through git.
+		const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-B11-'));
+		onTestFinished(() =>
+			fs.rmSync(tmp, { recursive: true, force: true }),
+		);
+
+		fs.writeFileSync(path.join(tmp, 'kept.js'), '// kept');
+		fs.mkdirSync(path.join(tmp, 'node_modules'));
+		fs.writeFileSync(path.join(tmp, 'node_modules', 'junk.js'), '// skip');
+		fs.mkdirSync(path.join(tmp, '.hidden'));
+		fs.writeFileSync(path.join(tmp, '.hidden', 'junk.js'), '// skip');
+
+		// Symlink pointing at an external directory that ALSO has a .js file.
+		const symTarget = fs.mkdtempSync(
+			path.join(os.tmpdir(), 'study-lenses-B11-target-'),
+		);
+		onTestFinished(() =>
+			fs.rmSync(symTarget, { recursive: true, force: true }),
+		);
+		fs.writeFileSync(
+			path.join(symTarget, 'via-symlink.js'),
+			'// should not be followed',
+		);
+		fs.symlinkSync(symTarget, path.join(tmp, 'sym-link'), 'dir');
+
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(tmp, config);
+
+		expect(result.map((s) => s.label)).toEqual(['kept']);
 	});
 
 	it('empty ignorePrefixes → no subtree skipped on prefix grounds', () => {
