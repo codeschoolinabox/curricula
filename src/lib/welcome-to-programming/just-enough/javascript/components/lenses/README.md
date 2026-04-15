@@ -17,7 +17,7 @@ carry this prop shape (see
   code: string;         // raw source from the fenced block (or sibling file)
   lens: string;         // e.g. 'study', 'blanks', 'parsons' — selects which lens renders
   lang: string;         // e.g. 'js', 'jsx' — language identifier from the fence
-  config?: unknown;     // per-lens configuration; object, JSON string, bare string, or absent
+  config?: unknown;     // per-lens options, serialized; object, JSON string, bare string, or absent
 }
 ```
 
@@ -41,7 +41,24 @@ export default { ...MDXComponents, StudyLens };
 The swap from V1 mock (inside the plugin) to V2 (this directory) is a
 single-line import change in that swizzle file. No plugin change is needed.
 
-## Config-prop decoding (reuse the plugin's helper)
+## Domain vocabulary
+
+Load-bearing terms used across the lens directory come from the plan's
+glossary — see [`~/.claude/plans/nested-zooming-frog.md`](../../../../../../../../../../../.claude/plans/nested-zooming-frog.md)
+§Ubiquitous Language. The terms this README relies on:
+
+- **Lens** — one subdirectory here per lens kind.
+- **Study lens** — the default meta-lens (editor + action buttons).
+- **Injection** — the plugin's build-time rewrite of fenced code blocks into
+  `<StudyLens>` JSX nodes.
+- **Original code** — the immutable `code` prop the plugin passes in.
+- **Active code** — the current editor buffer (mutable, local per instance).
+- **Action button** — Run / Format / Reset on the toolbar.
+- **Per-lens options** — the narrowed, typed configuration a lens consumes
+  (e.g. `StudyOptions`, `BlanksOptions`); distinct from the plugin-side
+  cascade `config`.
+
+## Decoding the config prop
 
 The plugin exports a shared, fallback-tolerant decoder at
 [`src/plugins/study-lenses/parse-lens-config.ts`](../../../../../../plugins/study-lenses/parse-lens-config.ts).
@@ -54,17 +71,17 @@ Its resolution order:
 5. string that does not parse → original string
 6. any other type (number, function, etc.) → `null`
 
-**Lens components reuse this helper.** Each lens then narrows the decoded
-shape to its own per-lens options type (e.g. `StudyOptions`, `BlanksOptions`),
-applying defaults for absent or unexpected values. The narrowing step is
-lens-specific and currently lives inline in each lens component; extract to a
-shared utility only once a second lens needs identical narrowing behavior
-(DEV.md "used-once rule").
+**Each lens component calls `parseLensConfig(config)` inline and narrows the
+result to its own `*Options` type**, applying defaults for absent or
+unexpected values. Narrowing lives in the lens's default export — no
+separate file, no shared `parseLensOptions` utility in V1 (DEV.md used-once
+rule; extract only when a second lens needs identical narrowing).
 
-Per-lens type collision note: the plugin already uses "config" for the
-cascade-resolved `lenses[name]: Record<string, unknown>` map. On the
-component side we call the narrowed type `*Options` (not `*Config`) to keep
-the boundary unambiguous.
+Naming discipline: the plugin already uses "config" for its cascade-resolved
+`lenses[name]: Record<string, unknown>` map. On the component side we call
+the narrowed type `*Options` (not `*Config`) to keep the boundary
+unambiguous: plugin produces `config` (untyped bag) → lens narrows into
+`options` (typed).
 
 ## Per-instance state isolation
 
