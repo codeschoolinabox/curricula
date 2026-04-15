@@ -19,6 +19,13 @@
  * fallback lens for unconfigured languages.
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { freezeInPlace } from '../../lib/utils/freeze.js';
+
+import EXT_TO_LANG from './ext-to-lang.js';
+
 import type { ResolvedConfig, Sibling } from './types.js';
 
 /**
@@ -37,11 +44,29 @@ import type { ResolvedConfig, Sibling } from './types.js';
  *   encounters only ignored/boundary directories.
  */
 function discoverSiblings(
-	_pageDir: string,
-	_config: ResolvedConfig,
+	pageDir: string,
+	config: ResolvedConfig,
 ): ReadonlyArray<Sibling> {
-	// TODO(B.4): Fake It — returns []; B.4 triangulates with an actual walk.
-	return [];
+	if (config.embedSiblings.mode === 'off') {
+		return freezeInPlace([]);
+	}
+
+	// TODO(B.5): recursive descent into subdirectories; currently walks
+	// only pageDir itself.
+	const siblings: Array<Sibling> = [];
+	for (const entry of fs.readdirSync(pageDir, { withFileTypes: true })) {
+		if (!entry.isFile()) continue;
+		const ext = path.extname(entry.name);
+		const lang = EXT_TO_LANG[ext];
+		if (lang === undefined) continue;
+		const lens = config.defaults[lang];
+		if (lens === undefined) continue;
+		const absPath = path.join(pageDir, entry.name);
+		const label = entry.name.slice(0, -ext.length);
+		const code = fs.readFileSync(absPath, 'utf8');
+		siblings.push({ absPath, label, code, lang, lens });
+	}
+	return freezeInPlace(siblings);
 }
 
 export default discoverSiblings;
