@@ -59,6 +59,29 @@ function parseAndTransform(
 	return tree;
 }
 
+// ─── Helpers for asserting mdxJsxFlowElement StudyLens nodes ────────────────
+
+type StudyLensJsx = {
+	type: 'mdxJsxFlowElement';
+	name: 'StudyLens';
+	attributes: ReadonlyArray<{ name: string; value: string }>;
+	children: [];
+};
+
+function findStudyLensNode(children: Root['children']): StudyLensJsx | undefined {
+	return children.find(
+		(n) =>
+			(n as { type: string }).type === 'mdxJsxFlowElement' &&
+			(n as { name?: string }).name === 'StudyLens',
+	) as StudyLensJsx | undefined;
+}
+
+function attrsOf(node: StudyLensJsx | undefined): Record<string, string> {
+	return Object.fromEntries((node?.attributes ?? []).map((a) => [a.name, a.value]));
+}
+
+// ─── Tests ──────────────────────────────────────────────────────────────────
+
 describe('createRemarkStudyLenses', () => {
 	it('vfile path outside contentRoot → tree unchanged (guard)', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'some-root');
@@ -89,23 +112,20 @@ describe('createRemarkStudyLenses', () => {
 		expect(codeNode?.data).toBeUndefined();
 	});
 
-	it('configured fence (defaults.js=study) → code node gains hName StudyLens', () => {
+	it('configured fence (defaults.js=study) → code node replaced by mdxJsxFlowElement StudyLens', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
 		const mdFile = path.join(contentRoot, 'index.md');
 
 		const tree = parseAndTransform(mdFile, contentRoot);
-		const codeNode = tree.children.find(
-			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
-				n.type === 'code',
-		);
+		const jsxNode = findStudyLensNode(tree.children);
 
-		expect(codeNode?.data).toEqual({
-			hName: 'StudyLens',
-			hProperties: {
-				code: 'let x = 1;',
-				lens: 'study',
-				lang: 'js',
-			},
+		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
+		expect(jsxNode?.name).toBe('StudyLens');
+		expect(jsxNode?.children).toEqual([]);
+		expect(attrsOf(jsxNode)).toMatchObject({
+			code: 'let x = 1;',
+			lens: 'study',
+			lang: 'js',
 		});
 	});
 
@@ -115,11 +135,8 @@ describe('createRemarkStudyLenses', () => {
 			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
-		const codeNode = tree.children.find(
-			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
-				n.type === 'code',
-		);
-		expect(codeNode?.data?.hProperties).toMatchObject({
+		const jsxNode = findStudyLensNode(tree.children);
+		expect(attrsOf(jsxNode)).toMatchObject({
 			lens: 'highlight',
 			lang: 'js',
 		});
@@ -131,11 +148,8 @@ describe('createRemarkStudyLenses', () => {
 			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
-		const codeNode = tree.children.find(
-			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
-				n.type === 'code',
-		);
-		expect(codeNode?.data?.hProperties).toMatchObject({
+		const jsxNode = findStudyLensNode(tree.children);
+		expect(attrsOf(jsxNode)).toMatchObject({
 			lens: 'highlight',
 			lang: 'js',
 		});
@@ -147,11 +161,8 @@ describe('createRemarkStudyLenses', () => {
 			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
-		const codeNode = tree.children.find(
-			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
-				n.type === 'code',
-		);
-		expect(codeNode?.data?.hProperties).toMatchObject({
+		const jsxNode = findStudyLensNode(tree.children);
+		expect(attrsOf(jsxNode)).toMatchObject({
 			lens: 'study',
 			lang: 'python',
 		});
@@ -163,42 +174,37 @@ describe('createRemarkStudyLenses', () => {
 			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
-		const codeNodes = tree.children.filter(
-			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
-				n.type === 'code',
-		);
-		// js (configured) → transformed
-		expect(codeNodes[0]?.data?.hName).toBe('StudyLens');
-		// txt (unconfigured) → unchanged
-		expect(codeNodes[1]?.data).toBeUndefined();
-		// no language at all → unchanged
-		expect(codeNodes[2]?.data).toBeUndefined();
+		// js (configured) → replaced by mdxJsxFlowElement
+		const jsxNode = findStudyLensNode(tree.children);
+		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
+		expect(jsxNode?.name).toBe('StudyLens');
+		// txt (unconfigured) and no-lang fences remain as plain code nodes
+		const remainingCodeNodes = tree.children.filter((n) => n.type === 'code');
+		expect(remainingCodeNodes).toHaveLength(2);
+		remainingCodeNodes.forEach((n) => {
+			expect((n as { data?: unknown }).data).toBeUndefined();
+		});
 	});
 
-	it('embed bottom: index.md + two .js siblings → two hast-shaped code nodes appended', () => {
+	it('embed bottom: index.md + two .js siblings → two mdxJsxFlowElement StudyLens nodes appended', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'embed-bottom');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
 		// The last two children should be the appended siblings in alphabetical label order.
-		const appended = tree.children.slice(-2);
-		expect(appended.every((n) => n.type === 'code')).toBe(true);
-		expect(appended[0]?.data).toEqual({
-			hName: 'StudyLens',
-			hProperties: {
-				code: '// alpha sibling\nconst a = 1;\n',
-				lens: 'study',
-				lang: 'js',
-			},
+		const appended = tree.children.slice(-2) as unknown as StudyLensJsx[];
+		expect(appended.every((n) => n.type === 'mdxJsxFlowElement')).toBe(true);
+		expect(appended.every((n) => n.name === 'StudyLens')).toBe(true);
+		expect(attrsOf(appended[0])).toMatchObject({
+			code: '// alpha sibling\nconst a = 1;\n',
+			lens: 'study',
+			lang: 'js',
 		});
-		expect(appended[1]?.data).toEqual({
-			hName: 'StudyLens',
-			hProperties: {
-				code: '// beta sibling\nconst b = 2;\n',
-				lens: 'study',
-				lang: 'js',
-			},
+		expect(attrsOf(appended[1])).toMatchObject({
+			code: '// beta sibling\nconst b = 2;\n',
+			lens: 'study',
+			lang: 'js',
 		});
 	});
 
@@ -208,8 +214,12 @@ describe('createRemarkStudyLenses', () => {
 			path.join(contentRoot, 'README.md'),
 			contentRoot,
 		);
-		const appendedCodes = tree.children.filter((n) => n.type === 'code');
-		expect(appendedCodes.length).toBeGreaterThanOrEqual(1);
+		const appendedJsx = tree.children.filter(
+			(n) =>
+				(n as { type: string }).type === 'mdxJsxFlowElement' &&
+				(n as { name?: string }).name === 'StudyLens',
+		);
+		expect(appendedJsx.length).toBeGreaterThanOrEqual(1);
 	});
 
 	it('README.md with sibling index.md → README does NOT receive embeds', () => {
@@ -229,16 +239,17 @@ describe('createRemarkStudyLenses', () => {
 			contentRoot,
 		);
 		// Expect: ...original children..., heading (depth 2, text 'Exercises'),
-		// then one code node per sibling.
+		// then one mdxJsxFlowElement StudyLens per sibling.
 		const heading = tree.children.at(-2);
-		const lastCode = tree.children.at(-1);
+		const lastNode = tree.children.at(-1);
 		expect(heading?.type).toBe('heading');
 		expect((heading as { depth?: number }).depth).toBe(2);
 		expect(
 			(heading as { children?: Array<{ type: string; value?: string }> })
 				.children?.[0]?.value,
 		).toBe('Exercises');
-		expect(lastCode?.type).toBe('code');
+		expect((lastNode as { type: string }).type).toBe('mdxJsxFlowElement');
+		expect((lastNode as { name?: string }).name).toBe('StudyLens');
 	});
 
 	it('embed-tabs emits mdxJsxFlowElement Tabs wrapping one TabItem per sibling', () => {
@@ -286,15 +297,13 @@ describe('createRemarkStudyLenses', () => {
 			contentRoot,
 		);
 		// The last child is the appended sibling.
-		const appended = tree.children.at(-1);
-		expect(appended?.type).toBe('code');
-		const props = (appended as Extract<Root['children'][number], { type: 'code' }>)
-			.data?.hProperties as Record<string, unknown>;
-		expect(props?.lens).toBe('parsons');
+		const appended = tree.children.at(-1) as unknown as StudyLensJsx;
+		expect(appended?.type).toBe('mdxJsxFlowElement');
+		expect(appended?.name).toBe('StudyLens');
+		const attrs = attrsOf(appended);
+		expect(attrs.lens).toBe('parsons');
 		// Merged: cascade shuffleSeed=42 + directive distractors=4.
-		expect(props?.config).toBe(
-			JSON.stringify({ shuffleSeed: 42, distractors: 4 }),
-		);
+		expect(attrs.config).toBe(JSON.stringify({ shuffleSeed: 42, distractors: 4 }));
 	});
 
 	it('frontmatter defaultLens overrides cascade for plain fences; :suffix still wins', () => {
@@ -304,18 +313,19 @@ describe('createRemarkStudyLenses', () => {
 			contentRoot,
 			{ defaultLens: 'highlight' },
 		);
-		const codeNodes = tree.children.filter(
-			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
-				n.type === 'code',
-		);
+		const jsxNodes = tree.children.filter(
+			(n) =>
+				(n as { type: string }).type === 'mdxJsxFlowElement' &&
+				(n as { name?: string }).name === 'StudyLens',
+		) as unknown as StudyLensJsx[];
 
-		// Plain ```js fence: frontmatter wins over cascade (study)
-		expect(codeNodes[0]?.data?.hProperties).toMatchObject({
+		// Plain ```js fence: frontmatter wins over cascade (study → highlight)
+		expect(attrsOf(jsxNodes[0])).toMatchObject({
 			lens: 'highlight',
 			lang: 'js',
 		});
 		// ```js:study fence: explicit suffix beats frontmatter
-		expect(codeNodes[1]?.data?.hProperties).toMatchObject({
+		expect(attrsOf(jsxNodes[1])).toMatchObject({
 			lens: 'study',
 			lang: 'js',
 		});
@@ -325,7 +335,7 @@ describe('createRemarkStudyLenses', () => {
 		// Programmatic tree: one pre-existing mdxJsxFlowElement (simulating
 		// author-placed JSX in an .mdx file) + one ```js fence. After the
 		// transformer runs, the JSX node is byte-identical; the code node
-		// gains hast routing.
+		// is replaced by a new mdxJsxFlowElement emitted by codeBlockToJsx.
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
 		const transformer = createRemarkStudyLenses({ contentRoot });
 
@@ -354,13 +364,17 @@ describe('createRemarkStudyLenses', () => {
 
 		transformer(tree, vfile);
 
-		// JSX node unchanged
+		// Original JSX node unchanged
 		expect(JSON.stringify(tree.children[0])).toBe(jsxSnapshot);
-		// Code node transformed
-		expect(
-			(tree.children[1] as Extract<Root['children'][number], { type: 'code' }>)
-				.data?.hName,
-		).toBe('StudyLens');
+		// Code node replaced by a new mdxJsxFlowElement StudyLens
+		const replaced = tree.children[1] as unknown as StudyLensJsx;
+		expect(replaced.type).toBe('mdxJsxFlowElement');
+		expect(replaced.name).toBe('StudyLens');
+		expect(attrsOf(replaced)).toMatchObject({
+			code: 'let x = 1;',
+			lens: 'study',
+			lang: 'js',
+		});
 	});
 
 	it('vfile with no path → tree unchanged (guard)', () => {

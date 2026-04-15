@@ -6,8 +6,8 @@
  * Five phases per {@link ./DOCS.md} §Remark transformer:
  *   1. Guard         — skip when no path or outside content root.
  *   2. Resolve       — pull `ResolvedConfig` from the cascade resolver.
- *   3. Transform     — walk `code` nodes; mutate via `codeBlockToHast`
- *                      when their language is configured.
+ *   3. Transform     — walk `code` nodes; emit `mdxJsxFlowElement` via
+ *                      `codeBlockToJsx` when their language is configured.
  *   4. Embed siblings — for `index.md` (or `README.md` when alone),
  *                       append per-block StudyLens nodes (bottom mode)
  *                       or a Docusaurus `<Tabs>` tree (tabs mode).
@@ -21,12 +21,14 @@ import path from 'node:path';
 import deepMerge from '../../lib/utils/deep-merge.js';
 
 import codeBlockToHast from './code-block-to-hast.js';
+import codeBlockToJsx from './code-block-to-jsx.js';
 import discoverSiblings from './discover-siblings.js';
 import resolveCascade from './resolve-cascade.js';
 
 import type { Code, Root } from 'mdast';
 import type { VFile } from 'vfile';
 
+import type { StudyLensJsxNode } from './code-block-to-jsx.js';
 import type { ResolvedConfig, RemarkPluginOptions, Sibling } from './types.js';
 
 type Transformer = (tree: Root, file: VFile) => void;
@@ -75,9 +77,11 @@ function createRemarkStudyLenses(
 				: undefined;
 
 		// 3. Transform — rewrite fences whose language is configured.
-		for (const node of tree.children) {
-			if (node.type !== 'code') continue;
-			transformFence(node, config, frontmatterDefaultLens);
+		for (let i = 0; i < tree.children.length; i++) {
+			const node = tree.children[i];
+			if (node === undefined || node.type !== 'code') continue;
+			const jsx = transformFence(node, config, frontmatterDefaultLens);
+			if (jsx !== undefined) (tree.children as Array<unknown>)[i] = jsx;
 		}
 
 		// 4. Embed siblings — only for sibling-bearing pages.
@@ -137,10 +141,9 @@ function isSiblingBearingPageFile(absFilePath: string): boolean {
 }
 
 /**
- * Appends one hast-shaped `<StudyLens>` node per sibling to the tree's
- * children. Each appended node is a fresh synthetic `code` MDAST node
- * mutated via `codeBlockToHast`, so the same rendering path that
- * handles in-page fences handles embed-bottom siblings.
+ * Appends one `mdxJsxFlowElement` `<StudyLens>` node per sibling to the
+ * tree's children. Uses `codeBlockToJsx` so `rehype-raw` preserves the
+ * PascalCase component name (see `code-block-to-jsx.ts` for the rationale).
  */
 function appendBottomEmbed(
 	tree: Root,
@@ -148,20 +151,20 @@ function appendBottomEmbed(
 	config: ResolvedConfig,
 ): void {
 	for (const sibling of siblings) {
-		const node: Code = {
+		const codeNode: Code = {
 			type: 'code',
 			lang: sibling.lang,
 			value: sibling.code,
 			meta: null,
 		};
 		const lensConfig = resolveEmittedLensConfig(config, sibling);
-		codeBlockToHast(
-			node,
+		const jsx = codeBlockToJsx(
+			codeNode,
 			lensConfig === undefined
 				? { lens: sibling.lens, lang: sibling.lang }
 				: { lens: sibling.lens, lang: sibling.lang, lensConfig },
 		);
-		tree.children.push(node);
+		(tree.children as Array<unknown>).push(jsx);
 	}
 }
 
@@ -260,7 +263,7 @@ function transformFence(
 	node: Code,
 	config: ReturnType<typeof resolveCascade>,
 	frontmatterDefaultLens: string | undefined,
-): void {
+): StudyLensJsxNode | undefined {
 	const info = node.lang;
 	if (info === null || info === undefined) return;
 
@@ -272,7 +275,7 @@ function transformFence(
 
 	const lens = suffix ?? frontmatterDefaultLens ?? cascadeDefaultLens;
 	const lensConfig = config.lenses[lens];
-	codeBlockToHast(node, { lens, lang, lensConfig });
+	return codeBlockToJsx(node, { lens, lang, lensConfig });
 }
 
 export default createRemarkStudyLenses;

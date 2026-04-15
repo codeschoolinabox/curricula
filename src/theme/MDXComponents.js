@@ -5,6 +5,9 @@
  * - `StudyLens` — V1 mock component from the `study-lenses` plugin.
  *   V2 swaps this import to point at the rich component at
  *   `src/lib/welcome-to-programming/just-enough/javascript/components/lenses/study/`.
+ *   The plugin now emits `mdxJsxFlowElement` nodes (not hast-name mutations),
+ *   so `rehype-raw` preserves the PascalCase name and the lowercase alias is
+ *   no longer needed.
  * - `Tabs` / `TabItem` — imported from `@theme/`. They ship with
  *   `@docusaurus/theme-classic` but are NOT in the default registry,
  *   so our remark plugin's emitted `mdxJsxFlowElement` nodes for
@@ -24,11 +27,6 @@ import StudyLens from '@site/src/plugins/study-lenses/components/StudyLensMock';
 export default {
 	...MDXComponents,
 	StudyLens,
-	// rehype-raw (used for .md files) passes hast elements through an HTML
-	// parser that lowercases all tag names — 'StudyLens' → 'studylens'.
-	// The lowercase alias ensures the component resolves in both .md and
-	// .mdx pipelines. (.mdx skips rehype-raw so 'StudyLens' is used there.)
-	studylens: StudyLens,
 	Tabs,
 	TabItem,
 };
