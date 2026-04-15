@@ -16,11 +16,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import deepMerge from '../../lib/utils/deep-merge.js';
 import { freezeInPlace } from '../../lib/utils/freeze.js';
 
 import DEFAULTS from './defaults.js';
 
-import type { LensesConfigFile, ResolvedConfig } from './types.js';
+import type { LensesConfigFile, LensName, ResolvedConfig } from './types.js';
 
 /**
  * Resolves the effective configuration for a specific directory under
@@ -125,7 +126,7 @@ function foldFile(
 			...base.embedSiblings,
 			...(file.embedSiblings ?? {}),
 		},
-		lenses: { ...base.lenses, ...(file.lenses ?? {}) },
+		lenses: mergeLenses(base.lenses, file.lenses ?? {}),
 		exerciseSetPrefixes: [
 			...new Set([
 				...base.exerciseSetPrefixes,
@@ -133,6 +134,32 @@ function foldFile(
 			]),
 		],
 	};
+}
+
+/**
+ * Merges two `lenses` maps. For each lens name present in either side,
+ * the result carries a deep-merge of the two configs — child keys
+ * extend parent keys within the same named lens; child values win on
+ * conflict. Lens names present in only one side pass through untouched.
+ *
+ * @remarks Uses the shared `deepMerge` utility whose contract replaces
+ * arrays rather than concatenating them. A lens config with an array
+ * field — e.g. `lenses.highlight.markers` — thus replaces that array
+ * across the cascade, not extends it. If a future lens needs array-
+ * concat semantics within its config, it either uses object keys
+ * instead or gets a dedicated merge strategy at the call site.
+ */
+function mergeLenses(
+	base: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>,
+	file: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>,
+): Readonly<Record<LensName, Readonly<Record<string, unknown>>>> {
+	const result: Record<LensName, Readonly<Record<string, unknown>>> = {
+		...base,
+	};
+	for (const [lensName, lensConfig] of Object.entries(file)) {
+		result[lensName] = deepMerge(base[lensName] ?? {}, lensConfig);
+	}
+	return result;
 }
 
 export default resolveCascade;

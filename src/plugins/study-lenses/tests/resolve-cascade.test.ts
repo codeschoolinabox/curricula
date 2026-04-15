@@ -39,4 +39,18 @@ describe('resolveCascade', () => {
 			exerciseSetPrefixes: [],
 		});
 	});
+
+	it('two-level cascade: child defaults replaces root; child lenses.X.key deep-merges with root lenses.X.key', () => {
+		const root = path.join(FIXTURES_DIR, 'two-level-cascade');
+		const chapter = path.join(root, 'chapter');
+
+		const result = resolveCascade(chapter, { contentRoot: root });
+
+		expect(result).toEqual({
+			defaults: { js: 'highlight' },
+			embedSiblings: DEFAULTS.embedSiblings,
+			lenses: { study: { ask: false, debug: false } },
+			exerciseSetPrefixes: [],
+		});
+	});
 });

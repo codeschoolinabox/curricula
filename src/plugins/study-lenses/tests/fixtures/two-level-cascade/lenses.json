@@ -1,0 +1,6 @@
+{
+	"defaults": { "js": "study" },
+	"lenses": {
+		"study": { "ask": false, "debug": true }
+	}
+}

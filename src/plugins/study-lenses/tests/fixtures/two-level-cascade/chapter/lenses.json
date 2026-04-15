@@ -1,0 +1,6 @@
+{
+	"defaults": { "js": "highlight" },
+	"lenses": {
+		"study": { "debug": false }
+	}
+}
