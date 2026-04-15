@@ -89,6 +89,72 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
+	it('cascade-driven default: defaults.js=highlight in lenses.json → plain ```js picks up highlight', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'cascade-defaults');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'page.md'),
+			contentRoot,
+		);
+		const codeNode = tree.children.find(
+			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
+				n.type === 'code',
+		);
+		expect(codeNode?.data?.hProperties).toMatchObject({
+			lens: 'highlight',
+			lang: 'js',
+		});
+	});
+
+	it('explicit suffix wins: ```js:highlight overrides defaults.js=study', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'suffix-overrides');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'page.md'),
+			contentRoot,
+		);
+		const codeNode = tree.children.find(
+			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
+				n.type === 'code',
+		);
+		expect(codeNode?.data?.hProperties).toMatchObject({
+			lens: 'highlight',
+			lang: 'js',
+		});
+	});
+
+	it('configured python: defaults.python=study + ```python → transformed with lang=python', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'configured-python');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'page.md'),
+			contentRoot,
+		);
+		const codeNode = tree.children.find(
+			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
+				n.type === 'code',
+		);
+		expect(codeNode?.data?.hProperties).toMatchObject({
+			lens: 'study',
+			lang: 'python',
+		});
+	});
+
+	it('mixed-language fences: configured ones transform, unconfigured + no-lang stay plain', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'mixed-langs');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'page.md'),
+			contentRoot,
+		);
+		const codeNodes = tree.children.filter(
+			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
+				n.type === 'code',
+		);
+		// js (configured) → transformed
+		expect(codeNodes[0]?.data?.hName).toBe('StudyLens');
+		// txt (unconfigured) → unchanged
+		expect(codeNodes[1]?.data).toBeUndefined();
+		// no language at all → unchanged
+		expect(codeNodes[2]?.data).toBeUndefined();
+	});
+
 	it('vfile with no path → tree unchanged (guard)', () => {
 		const transformer = createRemarkStudyLenses({
 			contentRoot: FIXTURES_DIR,
