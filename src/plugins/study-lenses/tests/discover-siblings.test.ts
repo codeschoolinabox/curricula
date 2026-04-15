@@ -56,6 +56,19 @@ describe('discoverSiblings', () => {
 		expect(result).toEqual([]);
 	});
 
+	it('.js with malformed @study-lens JSON body → walker throws with file path', () => {
+		const fixture = path.join(FIXTURES_DIR, 'file-override-malformed-json');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+			defaults: { js: 'study' },
+		};
+
+		expect(() => discoverSiblings(fixture, config)).toThrow(
+			/Malformed @study-lens config JSON in .*bad\.js/,
+		);
+	});
+
 	it('.js with multi-line JSDoc @study-lens + JSON body → lens and lensConfig both set', () => {
 		const fixture = path.join(FIXTURES_DIR, 'file-override-with-config');
 		const config = {
