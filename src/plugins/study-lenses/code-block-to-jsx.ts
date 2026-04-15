@@ -12,11 +12,19 @@
  * `rehype-raw` skips them (and their children) entirely, preserving the
  * exact `name: 'StudyLens'` through to the MDX runtime.
  *
- * `appendTabsEmbed` continues to use `codeBlockToHast` for its inner
- * `<StudyLens>` children because those nodes are nested inside a
- * `mdxJsxFlowElement` (`<TabItem>`). `rehype-raw` does not recurse into
- * passThrough node children — the inner nodes are safe and do not require
- * this path.
+ * `appendTabsEmbed` still uses `codeBlockToHast` for its inner `<StudyLens>`
+ * children (each nested inside a `mdxJsxFlowElement` `<TabItem>`). An
+ * earlier note here claimed `rehype-raw` doesn't recurse into passThrough
+ * node children so the inner hast-name element was safe — that claim was
+ * empirically wrong. Runtime evidence (browser console: `The tag <studylens>
+ * is unrecognized`) shows the inner `tagName` does get lowercased somewhere
+ * in Docusaurus's `.md` pipeline. The swizzled `src/theme/MDXComponents.js`
+ * therefore registers both `StudyLens` and a lowercase `studylens` alias so
+ * the MDX runtime resolves the inner emission regardless. Follow-up: migrate
+ * `appendTabsEmbed` to use THIS function (consolidate on
+ * `mdxJsxFlowElement`), then delete the lowercase alias and
+ * `code-block-to-hast.ts` entirely. See plugin README § "Gotcha: `rehype-raw`
+ * lowercases component names…".
  */
 
 import type { Code } from 'mdast';
