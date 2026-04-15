@@ -56,6 +56,21 @@ describe('discoverSiblings', () => {
 		expect(result).toEqual([]);
 	});
 
+	it('.js with multi-line JSDoc @study-lens + JSON body → lens and lensConfig both set', () => {
+		const fixture = path.join(FIXTURES_DIR, 'file-override-with-config');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result).toHaveLength(1);
+		expect(result[0]?.lens).toBe('parsons');
+		expect(result[0]?.lensConfig).toEqual({ distractors: 4 });
+	});
+
 	it('.js with // @study-lens <name> directive → sibling lens overrides cascade default', () => {
 		const fixture = path.join(FIXTURES_DIR, 'file-override-name-only');
 		const config = {
