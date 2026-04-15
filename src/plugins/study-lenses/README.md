@@ -180,11 +180,8 @@ top-level keys, all optional:
   ordering → kebab-case to Title Case (e.g. `sl-01-while-loops` →
   `"While Loops"`). Typical site-root value: `["sl-"]`.
 
-  **Edge cases (V1 contract):**
+  **Edge cases (V1 contract, enforced in the sidebar generator — Module H):**
 
-  - An empty string (`""`) is **rejected** by the cascade resolver (thrown
-    at resolve time with the offending file path) — it would match every
-    directory.
   - Overlapping prefixes (`["sl-", "sl-0"]`): **first match wins**.
     Matching order is the cascade-concatenation order (root-first, then
     deeper); deduplication preserves first occurrence. In the example,
@@ -193,6 +190,10 @@ top-level keys, all optional:
   - Empty residue after stripping (e.g. basename is exactly `"sl-"` or
     `"sl-01-"`): **fall back to the original basename** (no transformation),
     emit a single build-time warning so the author notices.
+  - Empty string (`""`) in the array is a no-op at resolve time — if a
+    pathological config ever sets it, every directory would match and
+    the transform would strip zero characters. Module H guards against
+    this at the boundary it actually bites.
 
 **Cascade semantics:** child `lenses.json` files override parents.
 
