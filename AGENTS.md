@@ -402,6 +402,58 @@ Each passing TDD cycle = one atomic commit. Do not batch behaviors.
 > quality_ — the implementation reflects the named phases and constraints in the
 > DOCS.md architectural sketch. Green tests are necessary but not sufficient.
 
+#### Sandbox Checkpoints — user-observable features
+
+Tests verify behavioral correctness; only a human eye at a running dev server
+catches layout shift, flicker, focus behavior, keyboard feel, accessibility
+regressions, and visual polish. **When a TDD increment adds a user-observable
+change** (a new UI element, a new button, a new behavior visible in the
+browser), a **🔍 Sandbox checkpoint** step is inserted into the cycle **between
+step i (quality checks green) and step j (commit prompt)**.
+
+The cycle becomes:
+
+```text
+a. JSDoc        f. Lint
+b. Stub         g. Refactor
+c. Failing test h. AR-4
+d. AR-3         i. Quality checks
+e. Implement    🔍 Sandbox checkpoint   (when user-observable)
+                j. Commit prompt
+```
+
+At each checkpoint:
+
+1. Steps a–i have produced green tests, clean lint, passing types.
+2. Dev server is started if not already running (reuse hot reload — don't
+   restart per increment).
+3. User navigates to a smoke-test page and exercises the feature.
+4. Agent reports observations **verbatim**; user confirms before step j fires.
+5. **Redirect policy**:
+   - **Cosmetic redirect** (spacing, wording, affordance, visual polish) lands
+     in the _next_ increment. Current commit still lands.
+   - **Behavioral defect** (wrong buffer reset, content corruption, misfire,
+     missing a11y label, etc.) **blocks the commit** and triggers rework of
+     the current increment. Committing broken behavior to patch in the next
+     increment pollutes git history.
+
+**When to skip the checkpoint**: pure utility functions, private types, data
+shape narrowing, and other increments with no user-visible surface. These
+don't benefit from a dev-server round-trip; step i's green tests are enough.
+
+**Checkpoint content quality**: the checkpoint description names a specific
+user action ("paste ugly JS, click Format") and a specific expected
+observation ("tabs / single quotes / semicolons / 80-col wrap"). Avoid
+vague phrasing like "verify the feature works". If you can't name what to
+look at, the increment probably isn't observable.
+
+**Phase-level observation gates** (end-of-phase smoke tests in plan
+documents) use the same 🔍 marker for visual consistency — the semantics
+are identical, just fired at a coarser grain.
+
+Checkpoints are **gate points, not optional**. Skipping one because tests
+are green is the exact failure mode they exist to prevent.
+
 #### Claude-Specific Workflow Notes
 
 **Plan constraints:**
