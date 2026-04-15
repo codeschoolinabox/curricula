@@ -50,23 +50,45 @@ function discoverSiblings(
 	if (config.embedSiblings.mode === 'off') {
 		return freezeInPlace([]);
 	}
-
-	// TODO(B.5): recursive descent into subdirectories; currently walks
-	// only pageDir itself.
 	const siblings: Array<Sibling> = [];
-	for (const entry of fs.readdirSync(pageDir, { withFileTypes: true })) {
+	walk(pageDir, pageDir, config, siblings);
+	return freezeInPlace(siblings);
+}
+
+/**
+ * Recursively walks `currentDir`, pushing a `Sibling` for each eligible
+ * file into `out`. Labels are computed relative to `pageDir` so nested
+ * files carry their subpath for disambiguation.
+ *
+ * @remarks Page-boundary, ignore-prefix, and safety-exclusion filters
+ * land in B.7–B.11 when their tests force them.
+ */
+function walk(
+	currentDir: string,
+	pageDir: string,
+	config: ResolvedConfig,
+	out: Array<Sibling>,
+): void {
+	for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
+		const absPath = path.join(currentDir, entry.name);
+		if (entry.isDirectory()) {
+			walk(absPath, pageDir, config, out);
+			continue;
+		}
 		if (!entry.isFile()) continue;
 		const ext = path.extname(entry.name);
 		const lang = EXT_TO_LANG[ext];
 		if (lang === undefined) continue;
 		const lens = config.defaults[lang];
 		if (lens === undefined) continue;
-		const absPath = path.join(pageDir, entry.name);
-		const label = entry.name.slice(0, -ext.length);
+		const labelPath = path.relative(pageDir, absPath);
+		const label = labelPath
+			.slice(0, -ext.length)
+			.split(path.sep)
+			.join('/');
 		const code = fs.readFileSync(absPath, 'utf8');
-		siblings.push({ absPath, label, code, lang, lens });
+		out.push({ absPath, label, code, lang, lens });
 	}
-	return freezeInPlace(siblings);
 }
 
 export default discoverSiblings;

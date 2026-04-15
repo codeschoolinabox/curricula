@@ -54,6 +54,27 @@ describe('discoverSiblings', () => {
 		expect(result).toEqual([]);
 	});
 
+	it('single .js in a subdirectory → one Sibling with relative-path label', () => {
+		const fixture = path.join(FIXTURES_DIR, 'single-js-in-subdir');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result).toEqual([
+			{
+				absPath: path.join(fixture, 'exercises', 'foo.js'),
+				label: 'exercises/foo',
+				code: "'use strict';\nalert('foo');\n",
+				lang: 'js',
+				lens: 'study',
+			},
+		]);
+	});
+
 	it('single .js directly in pageDir + defaults.js configured → one Sibling', () => {
 		const fixture = path.join(FIXTURES_DIR, 'single-js-in-pagedir');
 		const config = {
