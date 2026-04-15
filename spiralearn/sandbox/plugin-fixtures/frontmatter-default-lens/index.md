@@ -1,3 +1,5 @@
+# Frontmatter defaultLens Override
+
 ```js
 const plainFence = 'picks up frontmatter default (highlight)';
 ```

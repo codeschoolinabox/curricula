@@ -1,4 +1,4 @@
-# no-configured-langs fixture
+# Unconfigured Language Pass-Through
 
 ```txt
      ┌─┐

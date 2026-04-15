@@ -1,1 +1,1 @@
-# Embed-tabs fixture
+# Sibling Embed — Tabs Mode
