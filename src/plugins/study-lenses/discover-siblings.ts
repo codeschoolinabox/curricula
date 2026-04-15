@@ -76,6 +76,10 @@ function walk(
 	for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
 		const absPath = path.join(currentDir, entry.name);
 		if (entry.isDirectory()) {
+			// Ignore-prefix: dirname-prefix match → skip whole subtree.
+			if (hasIgnoredPrefix(entry.name, config.embedSiblings.ignorePrefixes)) {
+				continue;
+			}
 			// Page boundary: a subdirectory with its own sibling-bearing
 			// page marker owns its subtree; don't leak into the outer page.
 			if (isSiblingBearingPageDir(absPath)) continue;
@@ -105,6 +109,17 @@ function walk(
  * AR-1 resolution in README.md §README.md-vs-index.md); for the
  * boundary check, presence of *either* is sufficient.
  */
+/**
+ * Returns true if the basename starts with any configured ignore prefix.
+ * Empty strings are ignored (they would match every directory).
+ */
+function hasIgnoredPrefix(
+	basename: string,
+	prefixes: ReadonlyArray<string>,
+): boolean {
+	return prefixes.some((p) => p !== '' && basename.startsWith(p));
+}
+
 function isSiblingBearingPageDir(dir: string): boolean {
 	return (
 		fs.existsSync(path.join(dir, 'index.md')) ||

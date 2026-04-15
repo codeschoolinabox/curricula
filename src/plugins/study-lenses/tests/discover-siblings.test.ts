@@ -54,6 +54,23 @@ describe('discoverSiblings', () => {
 		expect(result).toEqual([]);
 	});
 
+	it('ignorePrefixes skips a whole subtree whose dirname starts with a listed prefix', () => {
+		const fixture = path.join(FIXTURES_DIR, 'ignore-prefix');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: {
+				...DEFAULTS.embedSiblings,
+				mode: 'tabs' as const,
+				ignorePrefixes: ['staging-'],
+			},
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result.map((s) => s.label)).toEqual(['keep']);
+	});
+
 	it('nested subdir with its own README.md → descent halts, subpage files excluded', () => {
 		const fixture = path.join(FIXTURES_DIR, 'page-boundary');
 		const config = {
