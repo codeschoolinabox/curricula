@@ -305,6 +305,90 @@ If an author writes `<StudyLens code={...} lens="..." />` directly in an `.mdx`
 file, the plugin leaves the JSX alone — it only visits MDAST `code` nodes.
 Fenced code blocks in the same file still get transformed.
 
+### Per-file lens overrides
+
+Authors can override the cascade default without creating a nested
+`lenses.json` file — useful when a single directory has a few files
+needing a different lens than the rest.
+
+**In `.js` sibling files — `@study-lens` directive.** The first
+non-blank leading comment may declare the lens and an optional inline
+JSON config. All four forms below are accepted; `@study-lens <name>`
+is the tag (namespaced, hyphenated).
+
+```js
+// @study-lens parsons
+// @study-lens parsons {"distractors": 4}
+/** @study-lens parsons */
+/** @study-lens parsons {"distractors": 4} */
+/**
+ * @study-lens parsons
+ * {"distractors": 4}
+ */
+```
+
+The walker scans the leading comment block (contiguous blank lines and
+line/JSDoc comments at the top of the file). Any non-comment statement
+— `'use strict';`, a shebang, a top-level `const` — ends the block;
+the directive must appear before any code.
+
+**Malformed JSON throws** with the file path in the error message —
+matching the cascade-resolver's behavior for malformed `lenses.json`.
+
+**In `.md` / `.mdx` files — frontmatter `defaultLens`.** Set a
+per-file default that every fence in the file picks up. Per-fence
+`:suffix` still wins.
+
+```markdown
+---
+defaultLens: highlight
+---
+
+\`\`\`js
+// uses 'highlight' (frontmatter)
+\`\`\`
+
+\`\`\`js:study
+// uses 'study' (explicit suffix wins)
+\`\`\`
+```
+
+Read from `vfile.data.frontMatter.defaultLens`; Docusaurus
+pre-populates it before `beforeDefaultRemarkPlugins` runs. The
+configured-languages gate still applies — frontmatter cannot make an
+unconfigured language transform.
+
+**Precedence (authoritative):**
+
+Fenced code blocks inside `.md` / `.mdx`:
+
+```text
+fence :suffix   >   frontmatter defaultLens   >   cascade defaults[lang]
+```
+
+Sibling `.js` files:
+
+```text
+file's top-line @study-lens NAME   >   cascade defaults[lang]
+```
+
+Lens config (both paths):
+
+```text
+file's directive JSON   deep-merged over   cascade lenses[lens]
+```
+
+**Array-replace caveat.** The deep-merge replaces arrays rather than
+concatenating them. If the cascade has `lenses.highlight.markers =
+["a", "b"]` and a directive supplies `{"markers": ["c"]}`, the result
+is `{markers: ["c"]}` — NOT `["a", "b", "c"]`. If additive array
+behavior is needed, restate the full list in the directive.
+
+**Frontmatter cannot carry lens config.** Only the lens name. Authors
+who need per-lens config inside an `.md` page use a nested
+`lenses.json` in the surrounding directory. Asymmetric with `.js`
+siblings, but acceptable for V1.
+
 ## Types preview
 
 (Subject to refinement at Phase 0 step 0.4; final shape lives in
@@ -339,7 +423,10 @@ type Sibling = Readonly<{
   label: string;        // path relative to pageDir, without extension
   code: string;
   lang: LangName;
-  lens: LensName;
+  lens: LensName;       // directive-override > cascade default
+  lensConfig?: Readonly<Record<string, unknown>>;
+  // ^ directive's JSON body only (un-merged); cascade's `lenses[lens]`
+  //   is applied at emission time.
 }>;
 
 // The props shape the plugin writes to hProperties; what <StudyLens> receives.

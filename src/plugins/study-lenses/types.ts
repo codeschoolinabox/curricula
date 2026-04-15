@@ -106,7 +106,17 @@ type Sibling = Readonly<{
 	label: string;
 	code: string;
 	lang: LangName;
+	/**
+	 * Final resolved lens — directive's lens wins over cascade default.
+	 */
 	lens: LensName;
+	/**
+	 * Raw JSON config from the file's `@study-lens` directive, if any.
+	 * Stored un-merged; the cascade's `lenses[lens]` flows through its
+	 * original emission path, and the merge (directive-over-cascade)
+	 * happens at the call site (see Module D.15 in the plan file).
+	 */
+	lensConfig?: Readonly<Record<string, unknown>>;
 }>;
 
 // ─── hast props (plugin → component interface) ──────────────

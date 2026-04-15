@@ -32,8 +32,11 @@ labels at sidebar-build time.
    rewrite the node in place so that downstream rendering produces the
    plugin's React component. Fences whose language is absent from
    `defaults` are left untouched and fall through to Docusaurus's
-   default rendering. The block's text, declared language, and resolved
-   lens (from lens suffix or default) travel with the transformed node.
+   default rendering. The lens resolution for each transformed fence
+   follows a three-level precedence: explicit `:suffix` on the fence
+   wins, otherwise the per-file `defaultLens` from the markdown
+   frontmatter (read from the vfile's pre-populated frontmatter data,
+   not from an MDAST yaml node), otherwise the cascade's `defaults[lang]`.
 
 4. **Embed siblings** (sync; filesystem read) — only for sibling-bearing
    pages whose resolved configuration enables embedding. Collect the
@@ -88,14 +91,27 @@ labels at sidebar-build time.
 2. **Read** (sync; filesystem read) — load the text contents of each
    collected path.
 
-3. **Annotate** (sync; pure) — attach the relative-path label (the
+3. **Parse directive** (sync; pure) — inspect each file's leading
+   comment block (contiguous blank lines and line-or-JSDoc comments at
+   the top of the file, up to the first non-comment statement). If an
+   `@study-lens` tag is present, capture the declared lens name and
+   any inline JSON body as a raw config object. Malformed JSON in the
+   directive throws with the file path in the error message.
+
+4. **Annotate** (sync; pure) — attach the relative-path label (the
    path from the page's directory to the file, with the extension
    removed — disambiguates same-basename collisions across
    subdirectories), the language identifier (from the extension
-   mapping), and the resolved lens (from the configuration's defaults
-   for that language). Sort the collection alphabetically by label.
+   mapping), and the resolved lens. The resolved lens is the
+   directive's declared lens when present, otherwise the cascade's
+   `defaults[lang]`. When the directive carried a JSON body, that body
+   is attached raw as `sibling.lensConfig` — NOT pre-merged with the
+   cascade's `lenses[lens]`. The merge (directive over cascade) is
+   performed later, at the remark plugin's emission call site, so the
+   cascade-only path stays on its original flow. Sort the final
+   collection alphabetically by label.
 
-4. **Freeze** (sync; pure) — deep-freeze the sibling collection before
+5. **Freeze** (sync; pure) — deep-freeze the sibling collection before
    returning.
 
 ### Lifecycle plugin
