@@ -299,6 +299,41 @@ footgun), but easy to miss. If an exercise doesn't render, first check
 that its language is in `defaults` somewhere up the cascade. V1 does not
 emit a warning for this; a future lint pass may.
 
+### Gotcha: `rehype-raw` lowercases component names in `.md` files
+
+If you're extending the plugin to emit a new component via `data.hName`
+and you notice the built HTML showing a raw lowercase tag (e.g.
+`<myLens code="...">` instead of your React component rendering),
+here's why: Docusaurus's `.md` pipeline adds `rehype-raw` with a
+`passThrough` list (in `node_modules/@docusaurus/mdx-loader/lib/processor.js`)
+that covers only MDX-specific node types (`mdxJsxFlowElement`,
+`mdxFlowExpression`, etc.). Plain hast `element` nodes — which is
+what `data.hName` produces — fall through to `rehype-raw`'s HTML
+parser, which lowercases every tag name. By the time
+`hast-util-to-jsx-runtime` looks up the component, `tagName` is
+`'mylens'` not `'MyLens'`, and `MDXComponents['MyLens']` is missed.
+`.mdx` files skip `rehype-raw` entirely, so uppercase lookup works there.
+
+**Workaround used in this plugin:** register the component twice in
+the swizzled `src/theme/MDXComponents.js` — under its canonical
+PascalCase name and its lowercased alias:
+
+```js
+export default {
+  ...MDXComponents,
+  StudyLens,
+  studylens: StudyLens,  // rehype-raw lowercase alias (.md pipeline)
+  // ...
+};
+```
+
+**Proper fix:** emit `mdxJsxFlowElement` nodes instead of using
+`data.hName`. `mdxJsxFlowElement` IS in the `passThrough` list and
+preserves casing — this is what the plugin's tabs-mode embed
+(`appendTabsEmbed` in `remark-study-lenses.ts`) already does. The
+hast-name path is kept in V1 for simplicity; a future refactor may
+consolidate on `mdxJsxFlowElement`.
+
 ### Manually-placed `<StudyLens>` JSX
 
 If an author writes `<StudyLens code={...} lens="..." />` directly in an `.mdx`
