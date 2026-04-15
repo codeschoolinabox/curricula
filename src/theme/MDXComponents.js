@@ -24,6 +24,11 @@ import StudyLens from '@site/src/plugins/study-lenses/components/StudyLensMock';
 export default {
 	...MDXComponents,
 	StudyLens,
+	// rehype-raw (used for .md files) passes hast elements through an HTML
+	// parser that lowercases all tag names — 'StudyLens' → 'studylens'.
+	// The lowercase alias ensures the component resolves in both .md and
+	// .mdx pipelines. (.mdx skips rehype-raw so 'StudyLens' is used there.)
+	studylens: StudyLens,
 	Tabs,
 	TabItem,
 };
