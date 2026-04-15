@@ -1,11 +1,15 @@
 /**
  * @file Unit tests for the remark plugin orchestrator.
  *
- * Fixtures under `./fixtures/remark-study-lenses/` are on-disk
- * directory trees mirroring real docs-instance layouts. Each `.md`
- * fixture lives inside a `contentRoot` directory; the test reads the
- * markdown, runs it through `unified().use(remarkParse).use(ours)`,
- * and asserts against the resulting MDAST.
+ * Most fixtures live at `/spiralearn/sandbox/plugin-fixtures/` (they
+ * double as live demo pages in the sandbox docs instance). The one
+ * holdout, `readme-with-index/`, stays under `./fixtures/` because
+ * Docusaurus 3.x routing errors on dirs containing both `README.md`
+ * and `index.md` — that co-existence is exactly what the fixture
+ * tests, so we keep it out of the live content tree. Each test sets
+ * its `contentRoot` to the fixture dir itself, which stops the cascade
+ * resolver's walk before it reaches any site-root `lenses.json` —
+ * unit-test behavior is insulated from live-site config drift.
  */
 
 import fs from 'node:fs';
@@ -21,6 +25,17 @@ import createRemarkStudyLenses from '../remark-study-lenses.js';
 import type { Root } from 'mdast';
 
 const FIXTURES_DIR = path.resolve(
+	import.meta.dirname,
+	'..',
+	'..',
+	'..',
+	'..',
+	'spiralearn',
+	'sandbox',
+	'plugin-fixtures',
+);
+
+const LEGACY_FIXTURES_DIR = path.resolve(
 	import.meta.dirname,
 	'fixtures',
 	'remark-study-lenses',
@@ -62,7 +77,7 @@ describe('createRemarkStudyLenses', () => {
 
 	it('fence with lang not in defaults → left unchanged (configured-languages rule)', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'no-configured-langs');
-		const mdFile = path.join(contentRoot, 'page.md');
+		const mdFile = path.join(contentRoot, 'index.md');
 
 		const tree = parseAndTransform(mdFile, contentRoot);
 		const codeNode = tree.children.find(
@@ -76,7 +91,7 @@ describe('createRemarkStudyLenses', () => {
 
 	it('configured fence (defaults.js=study) → code node gains hName StudyLens', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
-		const mdFile = path.join(contentRoot, 'page.md');
+		const mdFile = path.join(contentRoot, 'index.md');
 
 		const tree = parseAndTransform(mdFile, contentRoot);
 		const codeNode = tree.children.find(
@@ -97,7 +112,7 @@ describe('createRemarkStudyLenses', () => {
 	it('cascade-driven default: defaults.js=highlight in lenses.json → plain ```js picks up highlight', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'cascade-defaults');
 		const tree = parseAndTransform(
-			path.join(contentRoot, 'page.md'),
+			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
 		const codeNode = tree.children.find(
@@ -113,7 +128,7 @@ describe('createRemarkStudyLenses', () => {
 	it('explicit suffix wins: ```js:highlight overrides defaults.js=study', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'suffix-overrides');
 		const tree = parseAndTransform(
-			path.join(contentRoot, 'page.md'),
+			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
 		const codeNode = tree.children.find(
@@ -129,7 +144,7 @@ describe('createRemarkStudyLenses', () => {
 	it('configured python: defaults.python=study + ```python → transformed with lang=python', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-python');
 		const tree = parseAndTransform(
-			path.join(contentRoot, 'page.md'),
+			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
 		const codeNode = tree.children.find(
@@ -145,7 +160,7 @@ describe('createRemarkStudyLenses', () => {
 	it('mixed-language fences: configured ones transform, unconfigured + no-lang stay plain', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'mixed-langs');
 		const tree = parseAndTransform(
-			path.join(contentRoot, 'page.md'),
+			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
 		const codeNodes = tree.children.filter(
@@ -198,7 +213,7 @@ describe('createRemarkStudyLenses', () => {
 	});
 
 	it('README.md with sibling index.md → README does NOT receive embeds', () => {
-		const contentRoot = path.join(FIXTURES_DIR, 'readme-with-index');
+		const contentRoot = path.join(LEGACY_FIXTURES_DIR, 'readme-with-index');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'README.md'),
 			contentRoot,
@@ -285,7 +300,7 @@ describe('createRemarkStudyLenses', () => {
 	it('frontmatter defaultLens overrides cascade for plain fences; :suffix still wins', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'frontmatter-default-lens');
 		const tree = parseAndTransform(
-			path.join(contentRoot, 'page.md'),
+			path.join(contentRoot, 'index.md'),
 			contentRoot,
 			{ defaultLens: 'highlight' },
 		);
@@ -334,7 +349,7 @@ describe('createRemarkStudyLenses', () => {
 
 		const vfile = new VFile({
 			value: '',
-			path: path.join(contentRoot, 'page.md'),
+			path: path.join(contentRoot, 'index.md'),
 		});
 
 		transformer(tree, vfile);
