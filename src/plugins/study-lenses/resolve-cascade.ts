@@ -24,6 +24,18 @@ import DEFAULTS from './defaults.js';
 import type { LensesConfigFile, LensName, ResolvedConfig } from './types.js';
 
 /**
+ * A file tracked during a cascade walk, paired with the mtime observed
+ * at the time the walk ran. Used to revalidate cache entries against
+ * the current filesystem state.
+ */
+type TrackedFile = Readonly<{ path: string; mtime: number }>;
+
+type CacheEntry = Readonly<{
+	config: ResolvedConfig;
+	tracked: ReadonlyArray<TrackedFile>;
+}>;
+
+/**
  * Module-scoped cache. Survives across every `resolveCascade` invocation
  * within one Node process; each test file gets a fresh cache because
  * Vitest isolates module graphs per file by default. Key shape:
@@ -31,15 +43,15 @@ import type { LensesConfigFile, LensName, ResolvedConfig } from './types.js';
  * segment containing a literal ASCII "0" cannot accidentally alias two
  * distinct (contentRoot, absDir) pairs.
  *
- * @remarks Invalidation (mtime-based revalidation) lands in A.6. Until
- * then the cache is write-once-read-many per (contentRoot, absDir)
- * pair — sufficient for A.5's happy-path reference-equality contract,
- * insufficient for live-reload correctness.
+ * @remarks Each entry carries a snapshot of the tracked files (their
+ * absolute paths + mtimes) observed during the walk that produced the
+ * entry. The Revalidate phase re-walks the current ancestry and
+ * compares; any divergence (set shape or any mtime) invalidates.
  *
  * @remarks Sanctioned exception to DEV.md "no mutable closures" rule —
  * see DOCS.md §Structural constraints "Module-scoped cache."
  */
-const cache = new Map<string, ResolvedConfig>();
+const cache = new Map<string, CacheEntry>();
 
 /**
  * Resolves the effective configuration for a specific directory under
@@ -77,51 +89,62 @@ function resolveCascade(
 	const normalizedContentRoot = path.resolve(contentRoot);
 	const cacheKey = `${normalizedContentRoot}\u0000${normalizedAbsDir}`;
 
-	// TODO(A.6): revalidate cached entry against tracked file mtimes
-	// before returning; a stale entry here is currently returned blindly.
+	// 1. Walk — always, so Revalidate has the current tracked set to compare.
+	const tracked = walkCascade(normalizedAbsDir, normalizedContentRoot);
+
+	// 2. Revalidate — on a cache hit with an unchanged tracked set (same
+	//    paths AND same mtimes), return the cached config directly.
 	const cached = cache.get(cacheKey);
-	if (cached !== undefined) {
-		return cached;
+	if (cached !== undefined && isTrackedUnchanged(cached.tracked, tracked)) {
+		return cached.config;
 	}
 
-	const fresh = computeFresh(normalizedAbsDir, normalizedContentRoot);
-	cache.set(cacheKey, fresh);
-	return fresh;
+	// 3. Merge — fold each tracked file's contributions onto DEFAULTS.
+	let merged: ResolvedConfig = DEFAULTS;
+	for (const { path: configPath } of tracked) {
+		merged = foldFile(merged, readLensesFile(configPath));
+	}
+
+	// 4. Freeze + 5. Store — freeze the fresh structure and cache it
+	//    alongside the tracked-set snapshot for the next Revalidate.
+	const config = freezeInPlace(merged);
+	cache.set(cacheKey, { config, tracked });
+	return config;
 }
 
 /**
- * Builds a fresh `ResolvedConfig` by walking, merging, and freezing.
- * Extracted so that A.5's cache-probe logic can sit above it as a
- * thin wrapper without disturbing the compute path.
+ * Compares two tracked-file snapshots for structural equality — same
+ * ordered path sequence AND matching mtimes per entry. A mismatch
+ * means the cascade has diverged from the cached state since the last
+ * compute and the cached config must not be reused.
  */
-function computeFresh(
-	absDir: string,
-	contentRoot: string,
-): ResolvedConfig {
-	// 1. Walk — enumerate lenses.json paths from contentRoot down to absDir.
-	const configPaths = walkCascade(absDir, contentRoot);
-
-	// 2. Merge — fold each file's contributions onto DEFAULTS, root-first.
-	let merged: ResolvedConfig = DEFAULTS;
-	for (const configPath of configPaths) {
-		const file = readLensesFile(configPath);
-		merged = foldFile(merged, file);
-	}
-
-	// 3. Freeze — deep-freeze the fresh structure before returning.
-	return freezeInPlace(merged);
+function isTrackedUnchanged(
+	before: ReadonlyArray<TrackedFile>,
+	now: ReadonlyArray<TrackedFile>,
+): boolean {
+	if (before.length !== now.length) return false;
+	return before.every(
+		(entry, index) =>
+			entry.path === now[index]?.path &&
+			entry.mtime === now[index]?.mtime,
+	);
 }
 
 /**
  * Enumerates the absolute paths of `lenses.json` files from `contentRoot`
- * down to `absDir`, inclusive at both ends. Missing files are filtered
- * out silently. Order is root-first so the caller can fold left-to-right
- * with child-overrides-parent semantics.
+ * down to `absDir`, inclusive at both ends, pairing each with the
+ * mtime observed at walk time. Missing files are skipped silently.
+ * Order is root-first so the caller can fold left-to-right with
+ * child-overrides-parent semantics.
+ *
+ * @remarks Uses `fs.statSync(p, { throwIfNoEntry: false })` — one stat
+ * per candidate path instead of existsSync+stat — so the walker can
+ * capture mtimes in the same pass it enumerates existence. Node 15.3+.
  */
 function walkCascade(
 	absDir: string,
 	contentRoot: string,
-): ReadonlyArray<string> {
+): ReadonlyArray<TrackedFile> {
 	const ancestors: Array<string> = [];
 	let current = absDir;
 	// Second condition is a safety net — if the caller-trusted
@@ -132,9 +155,15 @@ function walkCascade(
 		current = path.dirname(current);
 	}
 	ancestors.unshift(contentRoot);
-	return ancestors
-		.map((dir) => path.join(dir, 'lenses.json'))
-		.filter((p) => fs.existsSync(p));
+	const tracked: Array<TrackedFile> = [];
+	for (const dir of ancestors) {
+		const candidate = path.join(dir, 'lenses.json');
+		const stat = fs.statSync(candidate, { throwIfNoEntry: false });
+		if (stat !== undefined) {
+			tracked.push({ path: candidate, mtime: stat.mtimeMs });
+		}
+	}
+	return tracked;
 }
 
 /**

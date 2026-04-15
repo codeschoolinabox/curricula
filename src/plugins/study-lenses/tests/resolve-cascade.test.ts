@@ -9,9 +9,11 @@
  * `os.tmpdir()` first so the repo tree stays immutable.
  */
 
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished } from 'vitest';
 
 import DEFAULTS from '../defaults.js';
 import resolveCascade from '../resolve-cascade.js';
@@ -61,6 +63,64 @@ describe('resolveCascade', () => {
 		const second = resolveCascade(fixture, { contentRoot: fixture });
 
 		expect(second).toBe(first);
+	});
+
+	it('tracked lenses.json mtime changes → cache invalidated, new content applied', () => {
+		// Copy fixture into tmpdir so we can safely mutate mtime + content.
+		const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-A6-'));
+		onTestFinished(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
+		fs.cpSync(path.join(FIXTURES_DIR, 'cache-hit'), tmpDir, {
+			recursive: true,
+		});
+
+		const first = resolveCascade(tmpDir, { contentRoot: tmpDir });
+		expect(first.defaults).toEqual({ js: 'study' });
+
+		// Mutate the tracked file's content AND advance its mtime so the
+		// resolver's revalidate phase detects the change. +5000 ms tolerates
+		// coarse-granularity filesystems (FAT32 is 2s; HFS+ is 1s).
+		const lensesPath = path.join(tmpDir, 'lenses.json');
+		fs.writeFileSync(
+			lensesPath,
+			JSON.stringify({ defaults: { js: 'highlight' } }),
+		);
+		const future = new Date(Date.now() + 5000);
+		fs.utimesSync(lensesPath, future, future);
+
+		const second = resolveCascade(tmpDir, { contentRoot: tmpDir });
+
+		expect(second).not.toBe(first);
+		expect(second.defaults).toEqual({ js: 'highlight' });
+	});
+
+	it('new ancestor lenses.json appears → tracked set changes, cache invalidated', () => {
+		// Two-level structure where the chapter directory initially has its
+		// own lenses.json and the root has none. Resolving at chapter/ gives
+		// only the chapter contributions. Then we add a lenses.json at root;
+		// a subsequent resolve must see the expanded tracked set and fold
+		// both files.
+		const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-A6set-'));
+		onTestFinished(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
+		const chapterDir = path.join(tmpDir, 'chapter');
+		fs.mkdirSync(chapterDir);
+		fs.writeFileSync(
+			path.join(chapterDir, 'lenses.json'),
+			JSON.stringify({ defaults: { js: 'highlight' } }),
+		);
+
+		const first = resolveCascade(chapterDir, { contentRoot: tmpDir });
+		expect(first.exerciseSetPrefixes).toEqual([]);
+
+		// A new ancestor lenses.json appears at the content root.
+		fs.writeFileSync(
+			path.join(tmpDir, 'lenses.json'),
+			JSON.stringify({ exerciseSetPrefixes: ['sl-'] }),
+		);
+
+		const second = resolveCascade(chapterDir, { contentRoot: tmpDir });
+
+		expect(second).not.toBe(first);
+		expect(second.exerciseSetPrefixes).toEqual(['sl-']);
 	});
 
 	it('empty contentRoot → throws (prevents silent cwd aliasing before cache lands)', () => {

@@ -48,13 +48,14 @@ labels at sidebar-build time.
    directory. Missing files along the path are normal — the walk skips
    them silently.
 
-2. **Revalidate** (sync) — compute the cache key from the content root
-   plus the target directory. On a cached entry, re-walk the ancestry
-   to enumerate the *current* set of lens-config files, then compare
-   both the set (additions/removals) and the modified times of the
-   intersection against the recorded state. Any difference invalidates
-   the entry. On invalidation or absence, proceed to Merge with the
-   current walk's results.
+2. **Revalidate** (sync) — the Walk phase runs unconditionally so its
+   result serves both Revalidate and any subsequent Merge. Compute the
+   cache key from the content root plus the target directory. On a
+   cached entry for this key, compare the current tracked set (paths
+   + mtimes, in walk order) against the recorded snapshot. Any
+   divergence — additions, removals, or mtime changes — invalidates.
+   On invalidation or absence, proceed to Merge with the current
+   walk's results.
 
 3. **Merge** (sync; pure) — fold the collected files root-first into a
    configuration structure. Keys under `defaults` use shallow merge
