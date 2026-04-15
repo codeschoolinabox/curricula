@@ -187,6 +187,24 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
+	it('embed-bottom deep-merges directive lensConfig over cascade lenses[lens]', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'embed-config-merge');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		// The last child is the appended sibling.
+		const appended = tree.children.at(-1);
+		expect(appended?.type).toBe('code');
+		const props = (appended as Extract<Root['children'][number], { type: 'code' }>)
+			.data?.hProperties as Record<string, unknown>;
+		expect(props?.lens).toBe('parsons');
+		// Merged: cascade shuffleSeed=42 + directive distractors=4.
+		expect(props?.config).toBe(
+			JSON.stringify({ shuffleSeed: 42, distractors: 4 }),
+		);
+	});
+
 	it('frontmatter defaultLens overrides cascade for plain fences; :suffix still wins', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'frontmatter-default-lens');
 		const tree = parseAndTransform(

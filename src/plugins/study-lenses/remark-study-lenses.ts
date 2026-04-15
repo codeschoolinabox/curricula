@@ -18,6 +18,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import deepMerge from '../../lib/utils/deep-merge.js';
+
 import codeBlockToHast from './code-block-to-hast.js';
 import discoverSiblings from './discover-siblings.js';
 import resolveCascade from './resolve-cascade.js';
@@ -140,13 +142,32 @@ function appendBottomEmbed(
 			value: sibling.code,
 			meta: null,
 		};
-		codeBlockToHast(node, {
-			lens: sibling.lens,
-			lang: sibling.lang,
-			lensConfig: config.lenses[sibling.lens],
-		});
+		const lensConfig = resolveEmittedLensConfig(config, sibling);
+		codeBlockToHast(
+			node,
+			lensConfig === undefined
+				? { lens: sibling.lens, lang: sibling.lang }
+				: { lens: sibling.lens, lang: sibling.lang, lensConfig },
+		);
 		tree.children.push(node);
 	}
+}
+
+/**
+ * Deep-merges the directive's raw `lensConfig` (on the `Sibling`) over
+ * the cascade's `lenses[lens]`. Returns `undefined` when both sides are
+ * empty so the downstream `codeBlockToHast` omits the `config` prop.
+ */
+function resolveEmittedLensConfig(
+	config: ResolvedConfig,
+	sibling: Sibling,
+): Readonly<Record<string, unknown>> | undefined {
+	const cascade = config.lenses[sibling.lens];
+	const directive = sibling.lensConfig;
+	if (cascade === undefined && directive === undefined) return undefined;
+	if (directive === undefined) return cascade;
+	if (cascade === undefined) return directive;
+	return deepMerge(cascade, directive);
 }
 
 /**
