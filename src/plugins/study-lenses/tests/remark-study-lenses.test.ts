@@ -187,6 +187,26 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
+	it('README.md alone (no sibling index.md) → embeds applied', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'readme-alone');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'README.md'),
+			contentRoot,
+		);
+		const appendedCodes = tree.children.filter((n) => n.type === 'code');
+		expect(appendedCodes.length).toBeGreaterThanOrEqual(1);
+	});
+
+	it('README.md with sibling index.md → README does NOT receive embeds', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'readme-with-index');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'README.md'),
+			contentRoot,
+		);
+		const appendedCodes = tree.children.filter((n) => n.type === 'code');
+		expect(appendedCodes).toHaveLength(0);
+	});
+
 	it('section heading appended before embed block when embedSiblings.sectionHeading is set', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'embed-with-heading');
 		const tree = parseAndTransform(
@@ -284,6 +304,48 @@ describe('createRemarkStudyLenses', () => {
 			lens: 'study',
 			lang: 'js',
 		});
+	});
+
+	it('manually-placed <StudyLens> JSX element is NOT touched by the plugin', () => {
+		// Programmatic tree: one pre-existing mdxJsxFlowElement (simulating
+		// author-placed JSX in an .mdx file) + one ```js fence. After the
+		// transformer runs, the JSX node is byte-identical; the code node
+		// gains hast routing.
+		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
+		const transformer = createRemarkStudyLenses({ contentRoot });
+
+		const jsxNode = {
+			type: 'mdxJsxFlowElement',
+			name: 'StudyLens',
+			attributes: [
+				{ type: 'mdxJsxAttribute', name: 'code', value: 'existing' },
+			],
+			children: [],
+		};
+		const jsxSnapshot = JSON.stringify(jsxNode);
+
+		const tree = {
+			type: 'root',
+			children: [
+				jsxNode,
+				{ type: 'code', lang: 'js', value: 'let x = 1;', meta: null },
+			],
+		} as unknown as Root;
+
+		const vfile = new VFile({
+			value: '',
+			path: path.join(contentRoot, 'page.md'),
+		});
+
+		transformer(tree, vfile);
+
+		// JSX node unchanged
+		expect(JSON.stringify(tree.children[0])).toBe(jsxSnapshot);
+		// Code node transformed
+		expect(
+			(tree.children[1] as Extract<Root['children'][number], { type: 'code' }>)
+				.data?.hName,
+		).toBe('StudyLens');
 	});
 
 	it('vfile with no path → tree unchanged (guard)', () => {

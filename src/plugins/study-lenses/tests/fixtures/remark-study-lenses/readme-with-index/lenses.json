@@ -1,0 +1,4 @@
+{
+	"defaults": { "js": "study" },
+	"embedSiblings": { "mode": "bottom" }
+}
