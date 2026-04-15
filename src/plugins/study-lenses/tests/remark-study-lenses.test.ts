@@ -55,6 +55,40 @@ describe('createRemarkStudyLenses', () => {
 		expect(JSON.stringify(tree)).toBe(before);
 	});
 
+	it('fence with lang not in defaults → left unchanged (configured-languages rule)', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'no-configured-langs');
+		const mdFile = path.join(contentRoot, 'page.md');
+
+		const tree = parseAndTransform(mdFile, contentRoot);
+		const codeNode = tree.children.find(
+			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
+				n.type === 'code',
+		);
+
+		expect(codeNode?.lang).toBe('txt');
+		expect(codeNode?.data).toBeUndefined();
+	});
+
+	it('configured fence (defaults.js=study) → code node gains hName StudyLens', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
+		const mdFile = path.join(contentRoot, 'page.md');
+
+		const tree = parseAndTransform(mdFile, contentRoot);
+		const codeNode = tree.children.find(
+			(n): n is Extract<Root['children'][number], { type: 'code' }> =>
+				n.type === 'code',
+		);
+
+		expect(codeNode?.data).toEqual({
+			hName: 'StudyLens',
+			hProperties: {
+				code: 'let x = 1;',
+				lens: 'study',
+				lang: 'js',
+			},
+		});
+	});
+
 	it('vfile with no path → tree unchanged (guard)', () => {
 		const transformer = createRemarkStudyLenses({
 			contentRoot: FIXTURES_DIR,

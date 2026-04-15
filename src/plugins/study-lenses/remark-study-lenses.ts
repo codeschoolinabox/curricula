@@ -17,7 +17,10 @@
 
 import path from 'node:path';
 
-import type { Root } from 'mdast';
+import codeBlockToHast from './code-block-to-hast.js';
+import resolveCascade from './resolve-cascade.js';
+
+import type { Code, Root } from 'mdast';
 import type { VFile } from 'vfile';
 
 import type { RemarkPluginOptions } from './types.js';
@@ -44,13 +47,25 @@ function createRemarkStudyLenses(
 	}
 	const normalizedContentRoot = path.resolve(options.contentRoot);
 
-	return function remarkStudyLenses(_tree, file) {
+	return function remarkStudyLenses(tree, file) {
 		// 1. Guard — no path means a partial or synthetic MDX compile.
 		if (file.path === undefined || file.path === '') return;
-		// 1. Guard — file outside the configured content root.
 		const normalizedFilePath = path.resolve(file.path);
 		if (!isUnder(normalizedFilePath, normalizedContentRoot)) return;
-		// TODO(D.3+): resolve + transform + embed siblings.
+
+		// 2. Resolve — pull the effective config for this file's directory.
+		const config = resolveCascade(
+			path.dirname(normalizedFilePath),
+			{ contentRoot: normalizedContentRoot },
+		);
+
+		// 3. Transform — rewrite fences whose language is configured.
+		for (const node of tree.children) {
+			if (node.type !== 'code') continue;
+			transformFence(node, config);
+		}
+
+		// TODO(D.9+): embed siblings.
 	};
 }
 
@@ -62,6 +77,30 @@ function createRemarkStudyLenses(
 function isUnder(child: string, ancestor: string): boolean {
 	const rel = path.relative(ancestor, child);
 	return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+}
+
+/**
+ * Rewrites one fenced-code-block MDAST node if its language is
+ * configured in `config.defaults`. Unconfigured-language fences are
+ * left alone (configured-languages rule). Explicit `:<suffix>` on the
+ * info string overrides the default lens for that language.
+ */
+function transformFence(
+	node: Code,
+	config: ReturnType<typeof resolveCascade>,
+): void {
+	const info = node.lang;
+	if (info === null || info === undefined) return;
+
+	const [lang, suffix] = info.split(':', 2);
+	if (lang === undefined || lang === '') return;
+
+	const defaultLens = config.defaults[lang];
+	if (defaultLens === undefined) return; // configured-languages rule
+
+	const lens = suffix ?? defaultLens;
+	const lensConfig = config.lenses[lens];
+	codeBlockToHast(node, { lens, lang, lensConfig });
 }
 
 export default createRemarkStudyLenses;

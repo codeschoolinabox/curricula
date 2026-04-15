@@ -14,6 +14,7 @@
  * Module I lands the parser, V1 mocks accept a string.
  */
 
+import type { Properties } from 'hast';
 import type { Code } from 'mdast';
 
 import type { LangName, LensName } from './types.js';
@@ -41,7 +42,7 @@ function codeBlockToHast(
 		readonly lensConfig?: Readonly<Record<string, unknown>>;
 	},
 ): void {
-	const hProperties: Record<string, unknown> = {
+	const hProperties: Properties = {
 		code: codeNode.value,
 		lens,
 		lang,
