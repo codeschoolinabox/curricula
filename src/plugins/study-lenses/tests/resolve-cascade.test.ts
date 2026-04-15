@@ -1,0 +1,29 @@
+/**
+ * @file Unit tests for the cascade resolver.
+ *
+ * Fixtures under `./fixtures/` are on-disk directory trees — each
+ * test points at a dedicated fixture so the preconditions (presence
+ * / absence of `lenses.json` files, file contents, mtimes) are
+ * visible without mocking `node:fs`. Tests that need to mutate
+ * filesystem state (A.6 cache-invalidation) clone a fixture into
+ * `os.tmpdir()` first so the repo tree stays immutable.
+ */
+
+import path from 'node:path';
+
+import { describe, expect, it } from 'vitest';
+
+import DEFAULTS from '../defaults.js';
+import resolveCascade from '../resolve-cascade.js';
+
+const FIXTURES_DIR = path.resolve(import.meta.dirname, 'fixtures');
+
+describe('resolveCascade', () => {
+	it('target equals contentRoot with no lenses.json → resolved config equals DEFAULTS', () => {
+		const fixture = path.join(FIXTURES_DIR, 'no-lenses-json');
+
+		const result = resolveCascade(fixture, { contentRoot: fixture });
+
+		expect(result).toEqual(DEFAULTS);
+	});
+});
