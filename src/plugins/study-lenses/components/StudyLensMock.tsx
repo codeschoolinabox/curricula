@@ -50,21 +50,14 @@ function StudyLensMock({
 
 	return (
 		<div data-study-lens={lens}>
-			<div
-				style={{
-					fontSize: '0.8em',
-					opacity: 0.7,
-					marginBottom: '0.25rem',
-				}}
-			>
-				lens: {lens} · lang: {lang}
+			<ul style={{ fontSize: '0.8em', opacity: 0.7, marginBottom: '0.25rem' }}>
+				<li>lens: {lens}</li>
+				<li>lang: {lang}</li>
 				{configSummary !== null && configSummary !== '' && (
-					<>
-						{' · '}
-						<span>config: {configSummary}</span>
-					</>
+					<li>config: {configSummary}</li>
 				)}
-			</div>
+				<li>code: {code.length} chars</li>
+			</ul>
 			<CodeBlock language={lang} title={`lens: ${lens}`}>
 				{code}
 			</CodeBlock>
