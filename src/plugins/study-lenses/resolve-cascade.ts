@@ -6,11 +6,9 @@
  * file it encounters. Folds the collection root-first into a single
  * deep-frozen `ResolvedConfig`.
  *
- * @remarks Caching (module-scoped Map + timestamp invalidation, per
- * {@link ../DOCS.md} "Module-scoped cache") lands in A.5 / A.6. Until
- * then every call re-walks and re-reads from disk. Deep-merge for
- * `lenses.*` and array-concat for `embedSiblings.ignorePrefixes` land
- * in later A-increments when their tests force them.
+ * @remarks All five phases named in DOCS.md §Cascade resolver are
+ * implemented here: Walk, Revalidate, Merge, Freeze, Store. See the
+ * numbered step comments inside `resolveCascade` for the mapping.
  */
 
 import fs from 'node:fs';
@@ -183,21 +181,37 @@ function readLensesFile(configPath: string): LensesConfigFile {
 
 /**
  * Folds one file's contributions onto a base config, producing a fresh
- * structure. Shallow merge for every top-level field except
- * `exerciseSetPrefixes`, which concatenates-and-dedupes across the
- * cascade. Deep-merge for `lenses.*` and array-concat for
- * `embedSiblings.ignorePrefixes` land in later increments when their
- * tests force them.
+ * structure.
+ *
+ * - `defaults`: shallow merge (child key replaces parent key per language).
+ * - `embedSiblings`: shallow merge on scalar fields (`mode`,
+ *   `sectionHeading`), with `ignorePrefixes` concat-and-deduped across
+ *   the cascade.
+ * - `lenses`: deep-merge per named lens via `mergeLenses`.
+ * - `exerciseSetPrefixes`: concat-and-deduped across the cascade.
  */
 function foldFile(
 	base: ResolvedConfig,
 	file: LensesConfigFile,
 ): ResolvedConfig {
+	const fileEmbedSiblings = file.embedSiblings ?? {};
 	return {
 		defaults: { ...base.defaults, ...(file.defaults ?? {}) },
 		embedSiblings: {
+			// Scalar fields shallow-spread: child wins when present;
+			// child-undefined leaves parent value intact.
 			...base.embedSiblings,
-			...(file.embedSiblings ?? {}),
+			...fileEmbedSiblings,
+			// ignorePrefixes is the one field that concatenates across
+			// the cascade rather than replacing. Dedupe preserves first-
+			// occurrence order, so a prefix declared at the root survives
+			// a child that also lists it.
+			ignorePrefixes: [
+				...new Set([
+					...base.embedSiblings.ignorePrefixes,
+					...(fileEmbedSiblings.ignorePrefixes ?? []),
+				]),
+			],
 		},
 		lenses: mergeLenses(base.lenses, file.lenses ?? {}),
 		exerciseSetPrefixes: [

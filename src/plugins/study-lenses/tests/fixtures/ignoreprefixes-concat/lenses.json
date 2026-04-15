@@ -1,0 +1,6 @@
+{
+	"embedSiblings": {
+		"mode": "tabs",
+		"ignorePrefixes": ["staging-"]
+	}
+}

@@ -143,6 +143,19 @@ describe('resolveCascade', () => {
 		).toThrow('contentRoot is required');
 	});
 
+	it('embedSiblings.ignorePrefixes concatenates across cascade (root + child)', () => {
+		const root = path.join(FIXTURES_DIR, 'ignoreprefixes-concat');
+		const chapter = path.join(root, 'chapter');
+
+		const result = resolveCascade(chapter, { contentRoot: root });
+
+		expect(result.embedSiblings).toEqual({
+			mode: 'tabs',
+			ignorePrefixes: ['staging-', 'wip-'],
+			sectionHeading: null,
+		});
+	});
+
 	it('malformed lenses.json → throws with offending file path in message', () => {
 		const fixture = path.join(FIXTURES_DIR, 'malformed-json');
 
