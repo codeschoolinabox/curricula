@@ -1,4 +1,18 @@
+import path from 'node:path';
+
 import type { Config } from '@docusaurus/types';
+
+import createRemarkStudyLenses from './src/plugins/study-lenses/remark-study-lenses.js';
+import createStudyLensesPlugin from './src/plugins/study-lenses/lifecycle-plugin.js';
+import createStudySidebarGenerator from './src/plugins/study-lenses/sidebar-generator.js';
+
+// Docusaurus invokes this config from the site root (cwd === siteDir),
+// so `path.resolve(relative)` resolves against the correct base. Avoid
+// `import.meta.dirname` here — Docusaurus's jiti-based loader for `.ts`
+// configs does not support `import.meta`.
+function studyLensContentRoot(relative: string): string {
+	return path.resolve(relative);
+}
 
 const config: Config = {
 	title: 'Spir@learn',
@@ -28,6 +42,16 @@ const config: Config = {
 	},
 
 	plugins: [
+		// --- study-lenses lifecycle plugin (watched-path globs) ---
+		[
+			createStudyLensesPlugin,
+			{
+				contentRoots: [
+					'spiralearn/welcome-to-programming',
+					'spiralearn/sandbox',
+				],
+			},
+		],
 		// --- Welcome to Programming curriculum ---
 		[
 			'@docusaurus/plugin-content-docs',
@@ -36,6 +60,21 @@ const config: Config = {
 				path: 'spiralearn/welcome-to-programming',
 				routeBasePath: 'welcome-to-programming',
 				sidebarPath: './sidebars/welcome-to-programming.mjs',
+				beforeDefaultRemarkPlugins: [
+					[
+						createRemarkStudyLenses,
+						{
+							contentRoot: studyLensContentRoot(
+								'spiralearn/welcome-to-programming',
+							),
+						},
+					],
+				],
+				sidebarItemsGenerator: createStudySidebarGenerator({
+					contentRoot: studyLensContentRoot(
+						'spiralearn/welcome-to-programming',
+					),
+				}),
 				exclude: [
 					'**/to-use/**',                                        // teaching-only resources (never shown)
 					'3-devs-computers-users/**',                           // chapter 3 — content in design
@@ -86,6 +125,17 @@ const config: Config = {
 				path: 'spiralearn/sandbox',
 				routeBasePath: 'sandbox',
 				sidebarPath: './sidebars/sandbox.mjs',
+				beforeDefaultRemarkPlugins: [
+					[
+						createRemarkStudyLenses,
+						{
+							contentRoot: studyLensContentRoot('spiralearn/sandbox'),
+						},
+					],
+				],
+				sidebarItemsGenerator: createStudySidebarGenerator({
+					contentRoot: studyLensContentRoot('spiralearn/sandbox'),
+				}),
 			},
 		],
 	],

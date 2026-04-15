@@ -17,7 +17,10 @@
 import CodeBlock from '@theme/CodeBlock';
 import React from 'react';
 
-import parseLensConfig from '../parse-lens-config.js';
+// Webpack resolves extension-less TS imports; the `.js` suffix used
+// elsewhere in the plugin is for the Node/unified runtime path, not
+// the webpack-bundled theme-component path.
+import parseLensConfig from '../parse-lens-config';
 
 type StudyLensProps = {
 	readonly code?: string;
