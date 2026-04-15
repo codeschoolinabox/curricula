@@ -27,4 +27,36 @@ describe('codeBlockToHast', () => {
 			hProperties: { code: 'let x = 1;', lens: 'study', lang: 'js' },
 		});
 	});
+
+	it('lensConfig present → config prop is JSON-stringified', () => {
+		const node = makeCodeNode('print("hi")', 'py');
+
+		codeBlockToHast(node, {
+			lens: 'highlight',
+			lang: 'py',
+			lensConfig: { ask: false },
+		});
+
+		expect(node.data).toEqual({
+			hName: 'StudyLens',
+			hProperties: {
+				code: 'print("hi")',
+				lens: 'highlight',
+				lang: 'py',
+				config: '{"ask":false}',
+			},
+		});
+	});
+
+	it('empty node.value → valid output with code === ""', () => {
+		const node = makeCodeNode('', 'js');
+
+		codeBlockToHast(node, { lens: 'study', lang: 'js' });
+
+		expect(node.data?.hProperties).toEqual({
+			code: '',
+			lens: 'study',
+			lang: 'js',
+		});
+	});
 });
