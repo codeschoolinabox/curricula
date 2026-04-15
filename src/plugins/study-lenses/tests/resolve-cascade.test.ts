@@ -143,6 +143,14 @@ describe('resolveCascade', () => {
 		).toThrow('contentRoot is required');
 	});
 
+	it('malformed lenses.json → throws with offending file path in message', () => {
+		const fixture = path.join(FIXTURES_DIR, 'malformed-json');
+
+		expect(() =>
+			resolveCascade(fixture, { contentRoot: fixture }),
+		).toThrow(/Malformed lenses\.json at .*malformed-json\/lenses\.json/);
+	});
+
 	it('lenses.json at root AND target but not intermediate → both files applied, no crash on missing intermediate', () => {
 		const root = path.join(FIXTURES_DIR, 'boundary-gap');
 		const page = path.join(root, 'chapter', 'page');
