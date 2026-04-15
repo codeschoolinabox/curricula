@@ -54,6 +54,43 @@ describe('discoverSiblings', () => {
 		expect(result).toEqual([]);
 	});
 
+	it('empty ignorePrefixes → no subtree skipped on prefix grounds', () => {
+		const fixture = path.join(FIXTURES_DIR, 'ignore-prefix');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: {
+				...DEFAULTS.embedSiblings,
+				mode: 'tabs' as const,
+				ignorePrefixes: [],
+			},
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result.map((s) => s.label).sort()).toEqual([
+			'keep',
+			'staging-wip/drop',
+		]);
+	});
+
+	it('multiple ignorePrefixes match their respective subtrees', () => {
+		const fixture = path.join(FIXTURES_DIR, 'multiple-prefixes');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: {
+				...DEFAULTS.embedSiblings,
+				mode: 'tabs' as const,
+				ignorePrefixes: ['a-', 'b-'],
+			},
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result.map((s) => s.label)).toEqual(['kept']);
+	});
+
 	it('ignorePrefixes skips a whole subtree whose dirname starts with a listed prefix', () => {
 		const fixture = path.join(FIXTURES_DIR, 'ignore-prefix');
 		const config = {
