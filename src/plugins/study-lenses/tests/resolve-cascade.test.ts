@@ -26,4 +26,17 @@ describe('resolveCascade', () => {
 
 		expect(result).toEqual(DEFAULTS);
 	});
+
+	it('single lenses.json at contentRoot → its one field applied, unspecified fields fall back to DEFAULTS', () => {
+		const fixture = path.join(FIXTURES_DIR, 'single-level');
+
+		const result = resolveCascade(fixture, { contentRoot: fixture });
+
+		expect(result).toEqual({
+			defaults: { js: 'study' },
+			embedSiblings: DEFAULTS.embedSiblings,
+			lenses: {},
+			exerciseSetPrefixes: [],
+		});
+	});
 });
