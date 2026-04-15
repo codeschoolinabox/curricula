@@ -107,8 +107,13 @@ file's absolute path.
    otherwise the `README.md`), any `.js` files found in the directory subtree
    (up to the next nested sibling-bearing page, skipping hidden dirs,
    `node_modules/`, and ignore-prefixed dirs; symlinks are not followed) are
-   appended to the tree as `<StudyLens>` blocks or a single `<StudyLensTabs>`
-   block, depending on `embedSiblings.mode`.
+   appended to the tree. In `bottom` mode they become per-sibling
+   `<StudyLens>` nodes; in `tabs` mode they become a single Docusaurus
+   `<Tabs>` element wrapping one `<TabItem>` per sibling, each TabItem
+   containing a single `<StudyLens>`. The plugin emits Docusaurus's
+   native `Tabs`/`TabItem` (from `@theme/`) rather than a custom wrapper —
+   this gives keyboard navigation, URL-hash tab persistence, and
+   `groupId` synchronization for free.
 
 ### Subsystem 2 — Lifecycle plugin (dev-server watching)
 
@@ -126,11 +131,15 @@ unchanged, as do all doc and link items. Reads config through the same
 cascade resolver as Subsystem 1, so sidebar labels stay in sync with
 MDAST transforms.
 
-The V1 mock `<StudyLens>` / `<StudyLensTabs>` React components live **inside
-this plugin** at [`./components/`](./components/) so the plugin is
-self-contained. They are registered globally via the swizzled theme file at
-[`../../theme/MDXComponents.js`](../../theme/MDXComponents.js). The V2 rich
-study-lens component lives outside the plugin at
+The V1 mock `<StudyLens>` React component lives **inside this plugin**
+at [`./components/StudyLensMock.tsx`](./components/) so the plugin is
+self-contained. It is registered as `StudyLens` via the swizzled theme
+file at [`../../theme/MDXComponents.js`](../../theme/MDXComponents.js),
+alongside `Tabs` and `TabItem` (imported from `@theme/Tabs` and
+`@theme/TabItem` — they ship with `@docusaurus/theme-classic` but are
+NOT in the default `MDXComponents`, so the plugin's swizzle must add
+them for the emitted JSX to resolve). The V2 rich study-lens component
+lives outside the plugin at
 [`../../lib/welcome-to-programming/just-enough/javascript/components/lenses/study/`](../../lib/welcome-to-programming/just-enough/javascript/components/lenses/study/)
 and will replace the V1 mock without plugin changes (swap happens in
 `MDXComponents.js`).
@@ -166,7 +175,8 @@ top-level keys, all optional:
 - **`embedSiblings`** controls auto-embedding of sibling `.js` files:
   - `mode: "off"` disables embedding entirely.
   - `mode: "bottom"` appends each sibling as its own `<StudyLens>` block.
-  - `mode: "tabs"` appends a single `<StudyLensTabs>` wrapper.
+  - `mode: "tabs"` appends a single Docusaurus `<Tabs>` element wrapping
+    one `<TabItem>` per sibling; each TabItem contains one `<StudyLens>`.
   - `ignorePrefixes` is an array of directory-name prefixes to skip during the
     sibling walk (e.g. `"staging-"` — matches `staging-foo/` and `staging-wip/`).
   - `sectionHeading` (optional) injects a depth-2 heading before the embed
@@ -342,10 +352,10 @@ type StudyLensHastProps = Readonly<{
   config?: string | Readonly<Record<string, unknown>>;
 }>;
 
-type StudyLensTabsHastProps = Readonly<{
-  tabsJson: string;                   // JSON-stringified Array<{ label, code, lens, lang }>
-  sectionHeading?: string;
-}>;
+// Tabs-mode emission uses Docusaurus's native <Tabs>/<TabItem> via
+// mdxJsxFlowElement nodes with proper mdxJsxAttribute entries — no custom
+// tabs-wrapper prop type is needed. Section heading, when configured,
+// is emitted as a regular MDAST heading (depth 2) above the Tabs block.
 
 type RemarkPluginOptions = Readonly<{ contentRoot: string }>;
 type LifecyclePluginOptions = Readonly<{ contentRoots: ReadonlyArray<string> }>;
@@ -417,11 +427,15 @@ Docusaurus 3.7; the component's parser is the same either way.
 - `index.ts` — re-exports the three entry points (remark factory,
   lifecycle plugin, sidebar-generator factory) used by
   `docusaurus.config.ts`.
-- `components/StudyLensMock.tsx` — V1 mock component: styled `<pre><code>`
-  with a lens/lang label. Replaced in V2 by the rich component at
+- `components/StudyLensMock.tsx` — V1 mock component. Renders a small
+  lens/lang label above `<CodeBlock>` imported from `@theme/CodeBlock`
+  (Prism highlighting, copy button, dark-mode styling all handled by
+  Docusaurus). Replaced in V2 by the rich component at
   `src/lib/welcome-to-programming/just-enough/javascript/components/lenses/study/`
   (swap happens in the `MDXComponents.js` swizzle; no plugin change needed).
-- `components/StudyLensTabsMock.tsx` — V1 mock tabs wrapper.
+- No custom tabs-wrapper component. Tabs-mode embeds emit Docusaurus's
+  native `<Tabs>`/`<TabItem>` directly from the plugin as
+  `mdxJsxFlowElement` nodes; each `<TabItem>` contains one `<StudyLens>`.
 - `tests/` — Vitest unit tests, co-located per DEV.md convention. On-disk
   fixture trees under `tests/fixtures/`.
 

@@ -198,13 +198,19 @@ a content root and returns the generator function.
   The sidebar generator's `contentRoot` must match one of the remark
   plugin's content roots for dev-server file-watching signals
   (contributed by the lifecycle plugin) to reach it.
-- **Prop serialization asymmetry (structural invariant).** The
-  tabs-mode embed serializes its tab list as a JSON string — always.
-  The per-block `config` prop is fallback-tolerant — passed as an
-  object when the pipeline round-trips objects cleanly, as a JSON
-  string otherwise. Consumers decode both shapes via the shared
-  parser. Component side never sees a raw object vs. string ambiguity
-  for tabs.
+- **Emission shapes (structural invariant).** Two distinct MDAST
+  emission patterns are in use: (a) fenced code blocks and per-block
+  sibling embeds reuse the `code` node in place with
+  `data.hName = 'StudyLens'` + `data.hProperties` (mermaid-style
+  hast-name pattern), suitable for single JSX leaves with primitive
+  props. (b) Tabs-mode sibling embeds emit proper `mdxJsxFlowElement`
+  nodes (`name: 'Tabs'`, with nested `mdxJsxFlowElement` TabItem
+  children), enabling structured JSX that survives both `.md` and
+  `.mdx` pipelines via the `rehype-raw` passThrough list. The
+  per-block `config` prop remains fallback-tolerant — object or
+  JSON string at runtime, decoded by the shared `parseLensConfig`
+  util — because the hast-name pattern it rides on has uncertain
+  object-serialization semantics.
 
 ## Out of scope
 

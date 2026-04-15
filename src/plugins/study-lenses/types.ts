@@ -128,31 +128,12 @@ type StudyLensHastProps = Readonly<{
 	config?: string | Readonly<Record<string, unknown>>;
 }>;
 
-/**
- * One entry inside `StudyLensTabsHastProps.tabsJson`. Each sibling
- * becomes one tab.
- */
-type StudyLensTab = Readonly<{
-	label: string;
-	code: string;
-	lens: LensName;
-	lang: LangName;
-}>;
-
-/**
- * The prop shape the plugin writes to `data.hProperties` on the
- * appended `<StudyLensTabs>` node when `embedSiblings.mode === 'tabs'`.
- *
- * @remarks `tabsJson` is always a string — it is the JSON-serialized
- * `ReadonlyArray<StudyLensTab>`. The component parses it with
- * `JSON.parse`. This is structurally simpler than trying to pass an
- * array of objects through `hProperties` and sidesteps the round-trip
- * uncertainty that affects the `config` prop above.
- */
-type StudyLensTabsHastProps = Readonly<{
-	tabsJson: string;
-	sectionHeading?: string;
-}>;
+// Tabs-mode embeds now emit Docusaurus's native `<Tabs>`/`<TabItem>` via
+// `mdxJsxFlowElement` nodes (see DOCS.md §Sibling-bearing page / Remark
+// transformer phase 4). No custom `StudyLensTabs` component, no
+// `tabsJson` JSON-string prop — the previous `StudyLensTab` and
+// `StudyLensTabsHastProps` types were deleted in the Phase 0 re-pass
+// commit that landed that decision.
 
 // ─── Plugin entry-point options ─────────────────────────────
 
@@ -210,6 +191,4 @@ export type {
 	SidebarGeneratorOptions,
 	Sibling,
 	StudyLensHastProps,
-	StudyLensTab,
-	StudyLensTabsHastProps,
 };
