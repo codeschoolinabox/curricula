@@ -1,3 +1,7 @@
+// @vitest-environment jsdom
+// CodeMirror 6 EditorView construction (post-Phase-1.2 async factory) requires a DOM.
+// detect-language.test.ts stays on the workspace-default `node` env — it's a pure
+// language-identifier lookup with no DOM involvement.
 import { describe, it, expect } from 'vitest';
 
 import createEditor from '../create-editor.js';

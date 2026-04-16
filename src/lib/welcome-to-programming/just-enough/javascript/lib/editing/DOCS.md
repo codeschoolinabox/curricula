@@ -144,9 +144,27 @@ no syntax highlighting for YAML files.
 
 ## Testing
 
-Tests run in node (no DOM). Pre-initialization API surface and error handling
-are tested. Full CodeMirror integration (DOM rendering, extension wiring,
-gutter updates) requires a browser environment and is verified manually.
+`create-editor.test.ts` runs under jsdom (`// @vitest-environment jsdom`
+directive at the file top) so CodeMirror 6 `EditorView` construction has a
+DOM to attach to. `detect-language.test.ts` stays on the workspace-default
+`node` environment — it is a pure language-identifier lookup with no DOM
+involvement.
+
+**Rule of thumb for new test files in this directory**: add the jsdom
+directive iff the test instantiates `new EditorView(...)` or otherwise
+touches `document` / `window`. Otherwise leave it off — node is cheaper.
+
+**Why jsdom is pinned to `^26` in `package.json`**: jsdom `>=27` pulls
+`html-encoding-sniffer@6`, which uses CommonJS `require()` to load an
+ESM-only module (`@exodus/bytes/encoding-lite.js`). Vitest's CJS loader
+rejects this with `ERR_REQUIRE_ESM` during jsdom bootstrap, preventing
+the test environment from initializing. jsdom `^26` pulls
+`html-encoding-sniffer@^4` which is CJS-clean. Revisit the pin once
+`html-encoding-sniffer` ships a CJS-compatible 6.x release.
+
+Full CodeMirror integration beyond `EditorView` construction (DOM rendering
+fidelity, measured layout, gutter update latency) requires a real browser
+and is verified manually via the sandbox demo.
 
 ## basicSetup Contents
 
