@@ -25,3 +25,6 @@ build/
 # OS
 Thumbs.db
 Desktop.ini
+
+# Test Artifacts
+__screenshots__/

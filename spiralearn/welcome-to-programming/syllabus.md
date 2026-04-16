@@ -18,31 +18,42 @@ on it. This course guides you from your first comment to fluent collaboration
 with AI agents, using the smallest possible set of language features. It is
 self-study: no time estimates, no deadlines. Go at your own pace.
 
-**Three threads run beneath every chapter, every exercise, every lens**: and
-together they build toward strong, intentional, impactful communication through
-code:
+**Four threads run beneath every chapter, every exercise, every lens**, arranged
+as an arc where each layer is enabled by the ones before it:
 
-- **Twinning**: building an accurate mental model of a process outside your own
-  mind. Each chapter asks you to twin a different process: the _developer_ who
-  reads your code (Ch1), the _computer_ that executes it (Ch2), the _user_ who
-  experiences it (Ch3), the _agent_ you collaborate with (Ch4). You can't
-  communicate well with something you don't understand.
+- **Twinning** (baseline): building an accurate mental model of a process
+  outside your own mind. Each chapter asks you to twin a different process: the
+  _developer_ who reads your code (Ch1), the _computer_ that executes it (Ch2),
+  the _user_ who experiences it (Ch3), the _agent_ you collaborate with (Ch4).
+  You can't communicate well with something you don't understand.
 
-- **Micro-decisions**: every keyword, name, operator, and structure in your code
-  is a choice. These choices operate at multiple levels: _text voice_ (what does
+- **Decisions (micro and macro)**: every keyword, name, operator, and structure
+  in your code is a **micro**-decision. Every architectural choice, paradigm,
+  and program shape is a **macro**-decision. Both levels reach the twinned
+  audiences. Micro-decisions operate at multiple levels: _text voice_ (what does
   this name communicate?), _logical voice_ (how do you structure your
-  programs?), and _computational voice_ (string operations, pattern matching, or
-  bit manipulation: different models of computation, each with its own
-  expressive range), _experience voice_ (the user's interactions), etc. Noticing
-  these choices and understanding their effects is what separates a good
-  programmer from a great one.
+  programs?), _computational voice_ (string operations, pattern matching, bit
+  manipulation — each a different model of computation), _experience voice_ (the
+  user's interactions). Macro-decisions operate above: what kind of program,
+  what overall shape, what paradigm. **This is where your compositional voice
+  develops** — distinctive programmer voices emerge from cumulative
+  macro-decisions over time. Cultivating voice is a real curriculum aim, not a
+  side effect.
 
-- **Perspective stacking**: any piece of code can be read at multiple levels
-  simultaneously: individual syntax, what a line _does_, how parts _connect_,
-  what the program is _for_, what the _user experiences_. Every chapter deepens
-  your ability to hold more of these perspectives active at once. Study Lenses,
-  trace, and socratizing automate different perspectives; PBSI names them
-  explicitly.
+- **Perspective stacking** (mastery): any piece of code can be read at multiple
+  levels simultaneously: individual syntax, what a line _does_, how parts
+  _connect_, what the program is _for_, what the _user experiences_. Every
+  chapter deepens your ability to hold more of these perspectives active at
+  once. Study Lenses, trace, and socratizing automate different perspectives;
+  PBSI names them explicitly.
+
+- **The whole rhetorical situation** (enabled by the prior three): the entire
+  software context — users, developers, computer, product, environment, and the
+  purpose the code serves. Twinning each part isn't enough; the fullest work
+  holds the _whole_ situation in view at once. This is where design thinking
+  enters — rehearsing, workshopping, focus-testing, iterating across the full
+  system, not just refining individual pieces. This thread emerges most strongly
+  in Chapter 3 (users, PBSI) and deepens through Chapter 5.
 
 **The spiral.** Skills introduced in earlier chapters are practiced and deepened
 throughout. Each objective below marks where a skill is _first introduced_, not
@@ -60,6 +71,301 @@ are identical for both languages. JS is the primary track because it makes the
 developer/user split _architecturally visible_: `console.log` lives in devtools
 (developer space), `prompt`/`alert`/`confirm` live in browser UI (user space).
 That separation is the curriculum's rhetorical model made concrete.
+
+---
+
+## Why Learn to Program
+
+_Why learn to code when LLMs write code?_ Because designing computation is not
+the same work as writing the notation for it. Both matter. The design work is
+harder to delegate. And there are also reasons to program that aren't about
+productivity at all.
+
+### What programming languages are
+
+A programming language is a notation system for describing computation to a
+machine. It's a compromise between how humans think and how machines work —
+easier to learn than directly telling a computer what to do in 1's and 0's, but
+much stricter than human language. The machine executes what you write exactly,
+blindly, without interpretation or judgment. This is true regardless of which
+language you use.
+
+**Although we call it a "language," the computer doesn't read your code the way
+you read a sentence.** To the machine, your source code is a _data structure_ —
+a parsed tree of tokens and nodes — and compilers or interpreters traverse that
+structure without interpreting meaning or intent. That's why syntax and
+semantics have to be exact: there's no forgiving reader on the other end, only a
+structure-walker. What feels like writing a language to us is, for the machine,
+building a precise data structure.
+
+### Notional machines
+
+Every programming language describes computation through an imaginary machine
+— its **notional machine**. Each language has its own, with its own rules,
+capabilities, constraints, and failure modes. A given language can even be
+understood through more than one notional-machine framework: different
+pedagogical accounts can emphasize different aspects of the same underlying
+machine. "The notional machine" is a category, not a universal referent —
+there isn't one NM to learn and be done.
+
+You don't need to understand below the notional machine you're working with;
+the interpreter handles compilation, optimization, and hardware for you. You
+DO need to understand how that particular notional machine operates —
+including which of its parts are themselves black-boxed (built-in APIs like
+`Math.random` — known by interface, not internals).
+
+**The notional machine isn't just something you understand — it's what you
+program.** Code is how you direct the NM to do what you want. Programming is,
+fundamentally, instructing a notional machine through notation it will
+interpret exactly.
+
+**This course focuses on JavaScript's notional machine.** In mastering key
+portions of it deeply (through Just Enough JavaScript), you're doing more
+than learning JavaScript. You're learning **what it means to master a
+programming language** — how to build an accurate mental model of a notional
+machine from the outside, how to read code against that model, how to predict
+execution, how to debug divergence from expectation, how to direct the
+machine precisely. That discipline transfers. Once you've mastered key
+portions of one notional machine deeply, you're equipped to learn others
+when you need them. (No one masters 100% of any real language's NM; "key
+portions" is the realistic target.)
+
+We focus on the machine, not on any specific domain the machine might be used
+in. Web apps, games, data pipelines, ML systems come and go. The capacity to
+read and direct a programming language's notional machine — whichever
+language you're in — is the invariant skill.
+
+This is a subtle distinction from
+[**_Learnable Programming_**](http://worrydream.com/LearnableProgramming/) by
+Bret Victor, which influenced this curriculum. Victor focused on visualizing
+the _output_ of computation — what programs produce. Our tooling visualizes
+the _machine's internals_ — how the mechanism does it. Different pedagogical
+targets; both valuable.
+
+### The architect/implementer division has always existed
+
+Software has always had a design-work / notation-work split: architect /
+implementer (cf. Fred Brooks), staff engineer / junior, consultant / in-house,
+design-phase / build-phase within solo work, greenfield developer /
+contributor-to-an-existing-codebase. Even when these roles aren't explicitly
+divided, both types of work are necessary and the best programming happens when
+the two sides coordinate effectively. The division of labor is old territory,
+not an LLM invention.
+
+To program, you needed notional-machine understanding _and_ full notation
+fluency — both in one head, or split across a small team. This simultaneous
+demand is a large part of what makes programming hard to learn and master.
+
+### The LLM shift: a new participant in an old dance
+
+Experienced collaborators who handle much of the notation — senior engineers,
+pair partners — have always been part of software. LLMs are a new kind of such
+collaborator: same role, different cognition. Chapter 4 develops the
+differences.
+
+**Honest framing**: LLMs are often better at notation than many humans — faster,
+with a broader repertoire, fewer typos. Pretending otherwise would be dishonest.
+But great programming isn't only about productivity. Design judgment, context
+awareness, aesthetic and ethical taste aren't where LLMs excel. And Chapter 5
+develops the case for programming-for-its-own-sake — the practice of keeping
+your own programming skills sharp when you're no longer building full codebases.
+
+**The verification limit**: we don't always understand what we direct. Even our
+tests may be out of our depth — it's possible to verify that a program does the
+_wrong thing correctly_. This makes certain practices _more_ important in an
+LLM-assisted workflow, not less: short iterations of user-visible behavior we
+can actually evaluate, human-evaluable acceptance criteria, testing discipline
+oriented toward visible behavior; Agile development vs Waterfall all over again!
+Chapter 3 (users, PBSI, visible behavior) carries particular weight for this
+reason.
+
+**NM understanding matters more now, not less.** LLMs can write the notation —
+pull the levers, work the controls — but the notional machine they're directing
+is still yours to understand. When you converse with an LLM about what your
+program should do, you're describing what you want the NM to do, and you're
+judging its output against what the NM actually produces. With an LLM in the
+loop, you can (weirdly) abstract away much of the notation layer and program
+the NM more directly — through prose and NM understanding, mediated by the LLM
+that translates your intent into notation. But that route only works if your
+NM understanding is strong enough to specify outcomes the NM can actually
+produce and to evaluate whether the LLM delivered them. Without NM
+understanding, you can't direct the LLM meaningfully and you can't judge its
+output. The NM is what's being programmed — just via a new route.
+
+This frame treats LLMs as authoring partners. Agentic systems where LLMs plan,
+execute, and modify state autonomously are a more complex picture deferred to
+later learning.
+
+### What Bret Victor wanted, decomposed
+
+[**_Learnable Programming_**](http://worrydream.com/LearnableProgramming/) said
+it best:
+
+> - **Programming is a way of thinking, not a rote skill**. Learning about "for"
+>   loops is not learning to program, any more than learning about pencils is
+>   learning to draw.
+> - **People understand what they can see**. If a programmer cannot see what a
+>   program is doing, she can't understand it.
+>
+> Thus, the goals of a programming system should be:
+>
+> - to support and encourage powerful ways of thinking
+> - to enable programmers to see and understand the execution of their programs
+>
+> ...
+>
+> _How do we get people to understand programming?_
+>
+> We change programming. We turn it into something that's understandable by
+> people.
+
+Victor wanted _less implementation toil_ AND _more powerful thinking tools_,
+both at once. LLMs decompose his wish in an unexpected way:
+
+- ✅ **Less toil** — notation burden partially lifted by LLMs
+- ❌ **Less visibility** — LLM-generated code arrives as a fait accompli; the
+  mechanism is more hidden, not less
+- ✅ **Study Lenses reclaims visibility** — of the machine's internals, which is
+  this curriculum's specific focus
+
+Study Lenses gives a slightly different solution the visibility half of Victor's
+wish than he expressed in Learnable Programming: We will focus on visualizing
+the _internal mechanisms_ of your program's execution, not the final output.
+
+### Your instrument: JavaScript, and your practice instrument: Just Enough JavaScript
+
+JavaScript has its own notional machine with specific characteristics and
+capabilities — scopes, bindings, values, coercion, scope chain lookup, prototype
+chain lookup. Chapter 2 studies this machine in depth.
+
+**Just Enough JavaScript (JEJ)** is the deliberately constrained subset we use
+for most of the curriculum. "Few options, many possibilities" — depth on a small
+surface rather than skimming across a large one. This is a pedagogical
+constraint, not a permanent one. The principle is the same.
+
+### What this course builds in you — the four threads
+
+Four threads run beneath every chapter, each enabled by the ones before:
+
+1. **Twinning** — accurate mental models of processes outside your mind
+2. **Decisions (micro and macro)** — every keyword, name, operator, structure
+   (micro) AND every architectural choice, paradigm, program shape (macro). This
+   is where your **compositional voice** develops.
+3. **Perspective stacking** — holding twinning and decisions across multiple
+   simultaneous levels
+4. **The whole rhetorical situation** — the entire software context: users,
+   developers, computer, product, environment, purpose. Design thinking across
+   the whole system.
+
+Plus Study Lenses making the machine's work visible throughout.
+
+### Snippetry
+
+Chapter 5 introduces **snippetry** — writing small, runnable, self-contained
+programs as an ongoing practice. The answer to "what do I do as a programmer
+when I'm no longer building full codebases?" Programming for mastery,
+exploration, aesthetic satisfaction, and the new thoughts programming lets you
+think — alongside or instead of programming for productivity.
+
+### The future beyond human-designed languages
+
+Currently, LLMs work with programming languages designed for humans — machines
+using controls built for human minds. A future where LLMs design their own
+formally-provable languages is possible; those languages would likely defy our
+notions of "high-level" and "low-level," since those adjectives measure distance
+from _human_ cognitive convenience. If we can't read the code and can't evaluate
+the tests, user-visible behavior is what's left to check against — the
+agile-visible-discipline story intensifies further.
+
+Even then, the programming languages we have now remain worth cherishing: for
+their humanity, for how they shape thinking, for the new thoughts they give us,
+and for our connection to a computational history that runs from Jacquard looms
+to JavaScript.
+
+---
+
+## The Metaphor: Composer, Virtuoso, Instrument and Audience
+
+Throughout this course we'll illustrate these ideas using a consistent metaphor:
+**a mechanical instrument, a composer, a virtuoso, a score, and an audience**.
+The specific instrument varies across chapters — sometimes a pipe organ,
+sometimes a music box, sometimes a beat machine or a player piano — but the
+roles stay the same. If the metaphor doesn't click for you, the underlying ideas
+above stand on their own.
+
+### The mapping
+
+| Idea                   | Illustration                                                                                  |
+| ---------------------- | --------------------------------------------------------------------------------------------- |
+| The notional machine   | A **mechanical instrument** — plays the score blindly, deterministically                      |
+| Source code            | **The score** — notation the mechanism reads                                                  |
+| The designer           | **The composer** — holds computational intent, understands the instrument, knows the audience |
+| The implementer        | **The virtuoso** — masters notation and the controls; produces the score from direction       |
+| Users                  | **The audience** — concert-goers who react to the performance                                 |
+| Other developers       | **Co-composers** — fellow score-readers                                                       |
+| The computer executing | **The mechanism playing the score blindly at performance time**                               |
+
+### Why a _mechanical_ instrument specifically
+
+A mechanical instrument plays the score exactly as written — no human in the
+execution loop. This cleanly separates two phases: **composition**, where the
+composer and virtuoso collaborate iteratively on the score, and **performance**,
+where the mechanism plays blindly and deterministically. Matches how JavaScript
+execution works: at runtime, there is no performer-with-judgment to rescue a
+badly-notated passage.
+
+### Why _varying_ instruments
+
+Different instruments serve different moments, just like different programming
+languages. Organs for incrementally-layered visible mechanics; music boxes for
+single-note depth (cf. Ligeti's _Musica Ricercata_, which builds entire
+movements from one note, then two, then three); beat machines for contemporary
+accessibility; gamelan-with-karakuri for non-European automated traditions. The
+metaphor is the role structure, not any one instrument.
+
+### Why "virtuoso" specifically
+
+A virtuoso has technical mastery without owning the compositional vision. They
+mastered a different skillset from the composer — notation fluency, feel for the
+controls, idiom depth. Neither role is a failed version of the other. Composers
+can play; they just haven't mastered virtuoso-level motor patterns because
+they've mastered different things (theory, audience awareness, stylistic
+judgment). This maps cleanly onto the comprehension-before-production stance of
+this curriculum: you learn to read, trace, and evaluate code deeply; you write
+small programs to verify your understanding; but you don't need to automate
+fluent production because the virtuoso handles that.
+
+### Human virtuosos and alien virtuosos
+
+Both are real. Through Chapters 1–3, the virtuoso can often be usefully imagined
+as a **human** senior engineer — someone with fluent hands, deep idiom, and
+patience for collaborative work. Chapter 4 pivots to the **alien** virtuoso (an
+LLM) and develops what makes that collaboration specifically different: the
+jagged frontier, the asymmetric duet, the downstream-of-human cognition.
+
+### The cast
+
+- **The Composer** — your avatar when designing. Curious, earnest. Learns to
+  hear the music in their head before it plays.
+- **The Virtuoso** — human or alien. Dazzling technique, intimate with the
+  controls. The alien form sometimes plays what you said rather than what you
+  meant. More on that in Chapter 4.
+- **The Mechanism** — the mechanical instrument itself. Literal, indifferent,
+  stubborn. Plays exactly what's notated and nothing else. When the notation is
+  unplayable, it stops — honestly.
+- **The Audience** — reactive, emotional, unfiltered. They cheer, boo, throw
+  tomatoes or flowers.
+
+You'll meet them again as the curriculum unfolds. Historical cameos — Mozart
+writing reluctantly for mechanical organ, Bach studying Buxtehude, Ada Lovelace
+on the Analytical Engine — drop in as sidebars.
+
+### The metaphor across chapters
+
+Chapter 2 studies the instrument's mechanism. Chapter 3 brings in the audience
+and design thinking. Chapter 4 teaches collaboration with the alien virtuoso.
+Chapter 5 turns to the composer's daily practice — snippetry — and hints at
+alien composers emerging on the horizon.
 
 ---
 
@@ -105,6 +411,10 @@ depth in Chapter 4.
 
 No language features. Conceptual orientation only.
 
+_Metaphor anchor: **the recital as rhetorical situation** — an entire
+performance event with its audience, its performers, its instrument, and the
+score that ties them together._
+
 - 🥚 Articulate the three human audiences of source code: developers, the
   computer, users
 - 🥚 Explain what it means for code to _address_ each audience simultaneously
@@ -114,8 +424,9 @@ No language features. Conceptual orientation only.
   differently from humans, and writing _for and with_ agents requires its own
   communication skills (explored in Ch4)
 - 🥚 Describe why this course prioritizes comprehension before production
-- 🥚 Identify the three threads that run the whole curriculum: twinning,
-  micro-decisions, perspective stacking
+- 🥚 Identify the four threads that run the whole curriculum: twinning,
+  decisions (micro and macro), perspective stacking, and the whole rhetorical
+  situation
 - 🐣 Explain the spiral curriculum: why revisiting concepts at increasing depth
   produces deeper understanding than covering them once
 
@@ -125,6 +436,10 @@ No language features. Conceptual orientation only.
 
 Language features: comments, `console.log` and the full `console` API with
 string literals.
+
+_Metaphor anchor: **the score as inter-composer communication** — other
+composers read your score for intent and style, long before (or entirely instead
+of) ever hearing it performed. Code has the same property._
 
 A foundational conceptual distinction is introduced here: not as a technical
 exercise but as orientation: **source code (static) vs. program execution
@@ -163,10 +478,10 @@ The computer is not yet a full audience. Devtools console is developer space.
   - **Output by intent**: `console.debug` (trace-level), `console.log`
     (general), `console.info` (informational), `console.warn` (unexpected but
     not broken), `console.error` (broken)
-  - **Asserting**: `console.assert(condition, message)` — silent when true,
-    logs an error when false
-  - **Counting**: `console.count(label)` / `console.countReset(label)` —
-    named counter tracking, useful in loops
+  - **Asserting**: `console.assert(condition, message)` — silent when true, logs
+    an error when false
+  - **Counting**: `console.count(label)` / `console.countReset(label)` — named
+    counter tracking, useful in loops
   - **Grouping**: `console.group(label)` / `console.groupCollapsed(label)` /
     `console.groupEnd()` — collapsible indented output sections
   - **Timing**: `console.time(label)` / `console.timeLog(label)` /
@@ -184,11 +499,17 @@ The computer is not yet a full audience. Devtools console is developer space.
 
 ## Chapter 2: Developers and Computers
 
-The computer is now a full audience. The primary learning objective is the
-**notional machine**: the mental model of how JavaScript executes your code.
-Programs produce output via logs and assertions but do not yet interact with
-users. `undefined` is encountered naturally through variables; `null` is held
-until Chapter 3 where `prompt()` can return it.
+_Metaphor anchor: **studying the instrument's mechanisms** — like an organ
+builder examining bellows, tracker action, registration, and combination action,
+you study how the JavaScript engine actually carries out your instructions._
+
+The computer is now a full audience. The primary learning objective is
+**JavaScript's notional machine**: the mental model of how the JS engine
+executes your code. Other languages have their own notional machines; the
+discipline you develop here transfers. Programs produce output via logs and
+assertions but do not yet interact with users. `undefined` is encountered
+naturally through variables; `null` is held until Chapter 3 where `prompt()`
+can return it.
 
 The chapter has two tracks:
 
@@ -479,6 +800,11 @@ Optional extra.
 
 ## Chapter 3: Developers, Computers, and Users
 
+_Metaphor anchor: **writing for an audience, the composer's design thinking** —
+the concert audience is real: they cheer, boo, throw tomatoes or flowers. The
+composer rehearses with the mechanism, workshops with virtuosos, and
+focus-groups with listeners. Design thinking across the whole situation._
+
 Language features: `prompt`, `alert`, `confirm`. All control flow features
 (`if`, `while`, `break`/`continue`) were introduced in Chapter 2 and are now
 applied in programs where user interactions are the fixed behavioral anchors.
@@ -577,6 +903,11 @@ lenses, no syntax highlighting, no autocomplete, no error highlighting._
 
 ## Chapter 4: Developers, Computers, Users, and Agents
 
+_Metaphor anchor: **the composer-virtuoso asymmetric duet** — with an alien
+virtuoso this time. Dazzling, fast, pattern-rich, but cognitively distinct from
+human virtuosos. Collaboration is specifically different, and this chapter digs
+into why._
+
 No new language features. This chapter applies all Chapter 1–3 skills in
 collaboration with an LLM. Agents are a fourth audience: they read and
 understand code differently from humans, and writing _for and with_ them
@@ -666,6 +997,21 @@ _Revisits Chapter 3: user programs: with an LLM collaborator._
 
 ### 4.5 Looking Back, Looking Forward
 
+Up to this point the virtuoso has done the notation work — the writing of the
+score — while you have done the composing. That's the authoring-partner frame,
+and it's the right one for finding your bearings. But it's a simplification of a
+moving target.
+
+**Alien composers** are emerging: agentic systems that don't just write notation
+but do design work too — planning, decomposing problems, making architectural
+choices, calling tools, modifying state autonomously. That's a more complex
+collaboration than the one this chapter covered. It doesn't replace the
+composer's role so much as shift what the human composer attends to — from
+writing the score to specifying observable outcomes that humans can still
+evaluate, directing a system that does more than transcribe. Flag this as
+territory for post-curriculum learning; _Welcome to Algorithms_ picks it up.
+Chapter 5 will return briefly to it in its closing moments.
+
 - 🐣 Given scenarios, identify which collaboration approach you'd use and why
 - 🐣 Articulate programming concepts precisely enough for an LLM to act on them
 - 🐥 Choose an appropriate collaboration approach based on your learning goals
@@ -675,6 +1021,10 @@ _Revisits Chapter 3: user programs: with an LLM collaborator._
   assistance vs. which undermine learning
 - 🐔 Compare LLM "theory of mind" to human theory of mind: what transfers, what
   doesn't
+- 🐔 Recognize the emergence of **alien composers** (agentic systems doing
+  design work, not just notation) as a more complex development than the
+  alien-virtuoso frame covers, and flag it as territory for post-curriculum
+  learning
 
 ### 4.6 Vibecoding
 
@@ -683,3 +1033,86 @@ _Revisits Chapter 3: user programs: with an LLM collaborator._
 - 🐥 Evaluate code you didn't write or review during generation (PBSI autopsy)
 - 🐥 Identify where the jagged frontier manifested in a concrete collaboration
 - 🐔 Reflect on the difference between "it runs" and "I understand it"
+
+---
+
+## Chapter 5: Snippetry
+
+_Metaphor anchor: **the composer's daily practice** — small, complete pieces
+written for one's own chops. Variations on a theme, études on a single
+technique, sketchbook entries exploring an idea. Ligeti's_ Musica Ricercata,
+Beethoven's sketchbooks, Bach's inventions*. A serious genre in its own right.*
+
+**In development.** Full chapter content is still being designed. The framing
+below is the intended shape.
+
+### Overview
+
+Chapter 5 introduces **snippetry** as an ongoing practice — writing small,
+runnable, self-contained programs for their own sake. It answers a central
+question of the curriculum:
+
+> How do I maintain and grow my skills when I no longer need to write code to
+> build software?
+
+Snippetry is the answer: keep your own compositional chops fresh through small
+programs that exercise whole-program design at small scale while drilling an
+isolated concern — a language feature, an architecture, a paradigm, an
+algorithm, the feel of a new notional machine, a user-experience miniature, or
+just for fun.
+
+The practice balances **broad exploration** and **productive constraint**.
+Students develop their own sense of which balance serves their learning and
+their voice. There's no rigid split between types of snippet; the practice is
+about finding the balance that works for you right now, and letting it change as
+you grow.
+
+### The training-wheels-off commitment (within a preserved sandbox)
+
+Chapter 5 is where students **graduate from the scaffolded curriculum
+environment**, while staying within a deliberate sandbox.
+
+**What comes off:**
+
+- **JEJ language-feature constraint** — students can use any and all JS language
+  features outside DOM and Canvas. Newly available: the event loop, classes,
+  `async`/`await`, generators, `fetch`, `Promise`, `Symbol`, `Proxy`, ES
+  modules, and much more
+- **Enforced formatting** — format your code however you prefer
+- **Study Lenses NM visualizations** — the browser's native debugger and console
+  only, no more curriculum-provided NM visualizations
+
+**What stays as constraint, deliberately:**
+
+- **No DOM manipulation, no Canvas** — preserves the curriculum's
+  machine-focused pedagogy. We still care about the notional machine, not visual
+  output. This constraint also lets the learning environment continue sandboxing
+  snippets in web workers with time limits for integrity.
+- Students who want to build web apps or canvas games can — outside our
+  environment. The constraint serves the chapter's focus, not any limit on what
+  you can do in the world.
+
+### Learning objectives (LLM-generated list, not great)
+
+- 🥚 Identify productive constraints for a given snippet: what are you drilling?
+- 🥚 Identify appropriate exploratory freedoms for a given snippet: what are you
+  discovering?
+- 🥚 Write small complete programs that exercise whole-program design at small
+  scale
+- 🥚 Use the browser's native debugger and console to trace execution without
+  the curriculum's NM visualizations
+- 🐣 Read and write in any JS syntax outside DOM/Canvas, including the event
+  loop, classes, `async`/`await`, generators, `fetch`, `Promise`, and other
+  features outside JEJ
+- 🐣 Evaluate a snippet's effectiveness for its intended purpose (learning,
+  exploration, expression)
+- 🐣 Balance exploration and constraint in a way that serves your current
+  learning goals
+- 🐥 Develop and recognize elements of your own compositional voice through
+  accumulated snippet work
+- 🐥 Engage the Snippetry corpus as a reference and source of inspiration
+- 🐔 Articulate why programming-for-its-own-sake remains valuable in an
+  LLM-assisted world
+- 🐔 Recognize that **alien composers** (agentic systems doing design work, not
+  just notation) are arriving too, and that the snippetry practice is one way
+  humans continue cultivating their own design sensibility as that shift unfolds
