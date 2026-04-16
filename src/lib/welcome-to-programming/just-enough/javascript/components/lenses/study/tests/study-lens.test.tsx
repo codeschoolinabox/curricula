@@ -12,12 +12,22 @@
  */
 
 import React from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 
 // `@docusaurus/BrowserOnly`, `@theme/CodeBlock`, and `@site/*` are
 // aliased in `vitest.workspace.ts` — stubs for the first two, site-root
 // for the third — so the component's imports resolve in jsdom.
+
+// Mock the client with a minimal placeholder; the shell tests don't
+// care about the client's internals (editor mount logic is covered
+// by study-lens-client.test.tsx). Keep the code visible in the DOM
+// so the shell tests can assert on it.
+vi.mock('../study-lens-client.js', () => ({
+	default: ({ code }: { code: string }) =>
+		React.createElement('div', { 'data-test': 'client-mock' }, code),
+}));
+
 import StudyLens, { narrowToStudyOptions } from '../study-lens.js';
 
 describe('StudyLens', () => {
