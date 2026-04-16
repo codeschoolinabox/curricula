@@ -315,21 +315,26 @@ emit a warning for this; a future lint pass may.
 
 ### Note: `rehype-raw` lowercases hast-element tag names in `.md` files
 
-If you're extending this plugin to emit a new component and you use the
-`data.hName` approach (mutating an MDAST `code` node), be aware that
-Docusaurus's `.md` pipeline runs `rehype-raw` before the MDX runtime.
-`rehype-raw`'s `passThrough` list (in `@docusaurus/mdx-loader/lib/processor.js`)
-covers only MDX-specific node types (`mdxJsxFlowElement`, `mdxFlowExpression`,
-etc.). Plain hast `element` nodes produced by `data.hName` fall through to
-`rehype-raw`'s HTML parser, which lowercases every tag name — `'StudyLens'`
-becomes `'studylens'` — and `MDXComponents['StudyLens']` is missed.
+If you're extending this plugin to emit a new component, use the
+`mdxJsxFlowElement` pattern (see `code-block-to-jsx.ts`) rather than the
+`data.hName` hast-name pattern. Docusaurus's `.md` pipeline runs
+`rehype-raw` before the MDX runtime; `rehype-raw`'s `passThrough` list
+(in `@docusaurus/mdx-loader/lib/processor.js`) covers MDX-specific node
+types (`mdxJsxFlowElement`, `mdxFlowExpression`, etc.) but NOT plain
+hast `element` nodes. A `code` MDAST node mutated with
+`data.hName = 'StudyLens'` produces a hast element whose `tagName` is
+lowercased to `'studylens'` — `MDXComponents['StudyLens']` is missed,
+the component never resolves, and the page renders a raw
+`<studylens>` DOM element.
 
-**What this plugin does:** emit `mdxJsxFlowElement` nodes via
-`codeBlockToJsx` (see `code-block-to-jsx.ts`). `mdxJsxFlowElement` IS in the
-`passThrough` list and the `name` field survives casing-intact through to the
-MDX runtime. The `data.hName` path (`codeBlockToHast`) is still used for
-`appendTabsEmbed`'s inner nodes, which are safe because they are children of a
-`mdxJsxFlowElement` (`<TabItem>`) that `rehype-raw` skips entirely.
+**What this plugin does:** every `<StudyLens>` emission goes through
+`codeBlockToJsx`, which returns an `mdxJsxFlowElement` node with
+`name: 'StudyLens'`. That covers in-page fences (`transformFence`),
+bottom-mode sibling embeds (`appendBottomEmbed`), AND the inner
+`<StudyLens>` nested inside each `<TabItem>` in tabs-mode embeds
+(`appendTabsEmbed`). `mdxJsxFlowElement` IS in the `passThrough` list
+so the PascalCase `name` survives intact to the MDX runtime; no
+lowercase alias is needed in the swizzled MDXComponents.
 
 ### Manually-placed `<StudyLens>` JSX
 

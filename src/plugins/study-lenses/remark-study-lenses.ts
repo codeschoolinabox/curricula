@@ -20,7 +20,6 @@ import path from 'node:path';
 
 import deepMerge from '../../lib/utils/deep-merge.js';
 
-import codeBlockToHast from './code-block-to-hast.js';
 import codeBlockToJsx from './code-block-to-jsx.js';
 import discoverSiblings from './discover-siblings.js';
 import resolveCascade from './resolve-cascade.js';
@@ -173,11 +172,14 @@ function appendBottomEmbed(
  * children are one `<TabItem>` per sibling (in the walker's
  * alphabetical-by-label order). Each `<TabItem>` carries `value` and
  * `label` attributes matching the sibling's label, and contains
- * exactly one hast-shaped `<StudyLens>` `code` node.
+ * exactly one `mdxJsxFlowElement` `<StudyLens>` child produced by
+ * `codeBlockToJsx` — same emission path as in-page fences and
+ * bottom-mode embeds.
  *
- * The plugin emits `<Tabs>` / `<TabItem>` as bare tag names; the
- * swizzled `MDXComponents` at Module G.1 imports them from
- * `@theme/Tabs` and `@theme/TabItem` so the MDX runtime resolves them.
+ * The plugin emits `<Tabs>` / `<TabItem>` / `<StudyLens>` as
+ * `mdxJsxFlowElement` nodes; `rehype-raw` preserves them via its
+ * passThrough list. The swizzled `MDXComponents` imports `Tabs` +
+ * `TabItem` from `@theme/` (they're not in the default registry).
  */
 function appendTabsEmbed(
 	tree: Root,
@@ -192,7 +194,7 @@ function appendTabsEmbed(
 			meta: null,
 		};
 		const lensConfig = resolveEmittedLensConfig(config, sibling);
-		codeBlockToHast(
+		const innerJsx = codeBlockToJsx(
 			inner,
 			lensConfig === undefined
 				? { lens: sibling.lens, lang: sibling.lang }
@@ -213,7 +215,7 @@ function appendTabsEmbed(
 					value: sibling.label,
 				},
 			],
-			children: [inner],
+			children: [innerJsx],
 		};
 	});
 
@@ -233,7 +235,7 @@ function appendTabsEmbed(
 /**
  * Deep-merges the directive's raw `lensConfig` (on the `Sibling`) over
  * the cascade's `lenses[lens]`. Returns `undefined` when both sides are
- * empty so the downstream `codeBlockToHast` omits the `config` prop.
+ * empty so the downstream `codeBlockToJsx` omits the `config` attribute.
  */
 function resolveEmittedLensConfig(
 	config: ResolvedConfig,

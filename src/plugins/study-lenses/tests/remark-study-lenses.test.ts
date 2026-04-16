@@ -265,7 +265,11 @@ describe('createRemarkStudyLenses', () => {
 				type: string;
 				name?: string;
 				attributes?: ReadonlyArray<{ name: string; value: unknown }>;
-				children?: ReadonlyArray<{ type: string; data?: { hName?: string } }>;
+				children?: ReadonlyArray<{
+					type: string;
+					name?: string;
+					attributes?: ReadonlyArray<{ name: string; value: unknown }>;
+				}>;
 			}>;
 		};
 
@@ -284,10 +288,16 @@ describe('createRemarkStudyLenses', () => {
 		expect(firstAttrs.value).toBe('01-alpha');
 		expect(firstAttrs.label).toBe('01-alpha');
 
-		// First TabItem's sole child is a hast-shaped StudyLens code node.
-		const innerCodeNode = tabItems[0]?.children?.[0];
-		expect(innerCodeNode?.type).toBe('code');
-		expect(innerCodeNode?.data?.hName).toBe('StudyLens');
+		// First TabItem's sole child is a StudyLens mdxJsxFlowElement
+		// (same emission shape as root-level fences and bottom-mode embeds).
+		const innerJsx = tabItems[0]?.children?.[0];
+		expect(innerJsx?.type).toBe('mdxJsxFlowElement');
+		expect(innerJsx?.name).toBe('StudyLens');
+		const innerAttrs = Object.fromEntries(
+			(innerJsx?.attributes ?? []).map((a) => [a.name, a.value]),
+		);
+		expect(innerAttrs.lens).toBe('study');
+		expect(innerAttrs.lang).toBe('js');
 	});
 
 	it('embed-bottom deep-merges directive lensConfig over cascade lenses[lens]', () => {

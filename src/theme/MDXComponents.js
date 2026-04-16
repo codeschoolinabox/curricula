@@ -1,21 +1,16 @@
 /**
  * @file Swizzled MDXComponents registry. Extends Docusaurus's default
- * registry with four entries:
+ * registry with three entries:
  *
  * - `StudyLens` — V1 mock component from the `study-lenses` plugin.
  *   V2 swaps this import to point at the rich component at
  *   `src/lib/welcome-to-programming/just-enough/javascript/components/lenses/study/`.
- *   The plugin emits `<StudyLens>` through two paths: `codeBlockToJsx`
- *   (`mdxJsxFlowElement` — preserves PascalCase) for in-page fences and
- *   bottom-mode sibling embeds, AND `codeBlockToHast` (`data.hName`) for
- *   the `<StudyLens>` nested inside each `<TabItem>` in tabs-mode embeds.
- * - `studylens` — lowercase defensive alias. `rehype-raw` lowercases the
- *   `tagName` of hast elements produced by the `hName` path somewhere in
- *   Docusaurus's `.md` pipeline, so the MDX runtime looks up
- *   `components.studylens`. Without this alias, tabs-mode pages render
- *   raw `<studylens>` DOM elements. Remove this line only when ALL
- *   emission paths use `mdxJsxFlowElement` (see follow-up in plugin
- *   README § "Gotcha: `rehype-raw` lowercases component names…").
+ *   The plugin emits every `<StudyLens>` occurrence as an
+ *   `mdxJsxFlowElement` node via `codeBlockToJsx` — in-page fences,
+ *   bottom-mode sibling embeds, AND the inner `<StudyLens>` nested
+ *   inside each `<TabItem>` in tabs-mode embeds. `rehype-raw` passes
+ *   `mdxJsxFlowElement` through its `passThrough` list, so the
+ *   PascalCase component name survives intact to the MDX runtime.
  * - `Tabs` / `TabItem` — imported from `@theme/`. They ship with
  *   `@docusaurus/theme-classic` but are NOT in the default registry,
  *   so our remark plugin's emitted `mdxJsxFlowElement` nodes for
@@ -35,7 +30,6 @@ import StudyLens from '@site/src/plugins/study-lenses/components/StudyLensMock';
 export default {
 	...MDXComponents,
 	StudyLens,
-	studylens: StudyLens,
 	Tabs,
 	TabItem,
 };

@@ -229,19 +229,21 @@ a content root and returns the generator function.
   The sidebar generator's `contentRoot` must match one of the remark
   plugin's content roots for dev-server file-watching signals
   (contributed by the lifecycle plugin) to reach it.
-- **Emission shapes (structural invariant).** Two distinct MDAST
-  emission patterns are in use: (a) fenced code blocks and per-block
-  sibling embeds reuse the `code` node in place with
-  `data.hName = 'StudyLens'` + `data.hProperties` (mermaid-style
-  hast-name pattern), suitable for single JSX leaves with primitive
-  props. (b) Tabs-mode sibling embeds emit proper `mdxJsxFlowElement`
-  nodes (`name: 'Tabs'`, with nested `mdxJsxFlowElement` TabItem
-  children), enabling structured JSX that survives both `.md` and
-  `.mdx` pipelines via the `rehype-raw` passThrough list. The
-  per-block `config` prop remains fallback-tolerant — object or
-  JSON string at runtime, decoded by the shared `parseLensConfig`
-  util — because the hast-name pattern it rides on has uncertain
-  object-serialization semantics.
+- **Emission shape (structural invariant).** Every `<StudyLens>`
+  occurrence is emitted as an `mdxJsxFlowElement` node via a single
+  helper (`codeBlockToJsx`) — in-page fences, bottom-mode sibling
+  embeds, AND the inner `<StudyLens>` nested inside each `<TabItem>`
+  in tabs-mode embeds. `mdxJsxFlowElement` is in `rehype-raw`'s
+  `passThrough` list, so the PascalCase `name` survives intact through
+  both `.md` and `.mdx` pipelines without any lowercase-alias
+  workaround in MDXComponents. Tabs-mode composes the same JSX leaf:
+  a top-level `mdxJsxFlowElement(Tabs)` contains one
+  `mdxJsxFlowElement(TabItem)` per sibling, each TabItem containing a
+  single `mdxJsxFlowElement(StudyLens)` leaf. The `config` attribute
+  is fallback-tolerant — object or JSON string at runtime, decoded by
+  the shared `parseLensConfig` util — because MDX attribute
+  serialization has uncertain object round-trip semantics and the
+  contract leaves both shapes valid.
 
 ## Out of scope
 
