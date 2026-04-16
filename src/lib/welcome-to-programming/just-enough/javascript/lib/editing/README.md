@@ -29,19 +29,33 @@ tooltips, markers) but does not know what the feedback means.
 
 ## Usage
 
+`createEditor` is an **async factory** — it resolves after dynamic language
+loading and CodeMirror `EditorView` construction. The resolved instance is
+fully initialized; all methods are unconditionally safe to call.
+
+Bare editor (no callbacks):
+
 ```ts
 import createEditor from './create-editor.js';
 
-// Bare editor (no callbacks)
-const editor = createEditor('let x = 5;', { language: 'javascript' });
+const editor = await createEditor('let x = 5;', { language: 'javascript' });
 document.body.appendChild(editor.el);
+```
 
-// With linting and doc lookup callbacks
-const editor = createEditor('let x = 5;', {
+With linting and doc lookup callbacks:
+
+```ts
+import createEditor from './create-editor.js';
+
+const editor = await createEditor('let x = 5;', {
   language: 'javascript',
   linters: [myLinterFn],
   docLookup: myDocFn,
 });
+
+// After destroy(), the instance becomes a dead sentinel:
+// content returns '', methods no-op, double-destroy is idempotent.
+editor.destroy();
 ```
 
 ## Callback Pattern

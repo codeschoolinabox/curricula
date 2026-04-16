@@ -26,27 +26,50 @@ pure data shapes and CodeMirror types. Callbacks never import CodeMirror.
 
 ## Statefulness Exception
 
-`create-editor.js` uses mutable closures (`let editor`, `let el`,
-`let initPromise`) because CodeMirror is inherently stateful — it manages a
-mutable DOM tree and document state. This is the only file in the module that
-gets an exception to the DEV.md "no mutable closures" rule.
+`create-editor.ts` uses a mutable `destroyed` boolean closure because
+CodeMirror is inherently stateful (it manages a mutable DOM tree and
+document state) and the instance needs a dead-sentinel phase after
+`destroy()`. This is the only file in the module that gets an exception
+to the DEV.md "no mutable closures" rule.
 
-`detect-language.js` follows DEV.md strictly: pure functions, no mutation,
+`detect-language.ts` follows DEV.md strictly: pure functions, no mutation,
 frozen lookup table.
 
-## Async Initialization
+## Async Factory
 
-The `el` getter triggers editor initialization asynchronously (dynamic language
-loading is async). The DOM element is returned synchronously but the CodeMirror
-editor is attached after the promise resolves. A promise-based guard prevents
-double initialization from rapid `el` access.
+`createEditor` is an async factory — it returns `Promise<EditorInstance>`.
+Dynamic language loading and `new EditorView(...)` construction happen
+before the promise resolves, so the resolved instance is fully initialized
+and all methods are unconditionally safe to call. No lazy-init guards, no
+silent-no-op pre-init pathways, no promise-based init machinery.
 
-Before initialization completes:
+## Post-destroy semantics
 
-- `content` returns the initial code string
-- `reset()`, `format()`, `destroy()` are no-ops
+After `destroy()` the instance remains callable but behaves as a dead
+sentinel:
+
+- `content` getter returns `''`
+- `content` setter silently drops
+- `reset()` / `format()` are no-ops
 - `check()` returns `[]`
-- `content` setter silently drops (documented limitation)
+- `destroy()` itself is idempotent — double-destroy does not throw
+- `el` reference is preserved (same HTMLElement), but CM's internal
+  DOM teardown leaves its contents torn down. Do NOT re-append
+  `editor.el` to a new parent after destroy.
+
+This lets React components call methods during cleanup races on an
+already-resolved instance without timing-sensitive guards. Consumers
+that need to cancel an **in-flight** `createEditor(...)` (component
+unmounts before the promise resolves) still need an `AbortController`
+or `cancelled`-flag pattern — that race is outside the dead-sentinel
+contract.
+
+The `destroyed` guard is checked once at each method's entry. V1
+callbacks (`format`, `linters[n]`, `docLookup`, `completions`) are
+synchronous — so no interleaving point exists between the guard check
+and the subsequent `editor.dispatch(...)` calls. If any callback becomes
+async in a future version, each internal dispatch site needs either a
+re-check or a try/catch to survive concurrent `destroy()`.
 
 ## Error Handling
 

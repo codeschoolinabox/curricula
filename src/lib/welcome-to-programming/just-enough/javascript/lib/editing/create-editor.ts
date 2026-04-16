@@ -1,8 +1,11 @@
 /**
  * CodeMirror 6 editor factory with callback-driven extensions.
  *
- * @remarks Stateful wrapper — mutable closures over EditorView are
- * intentional. All callbacks passed via options must be pure functions
+ * @remarks Async factory — resolves after dynamic language loading and
+ * EditorView construction. The resolved instance is post-init: all
+ * methods are unconditionally safe to call. Stateful wrapper — mutable
+ * closure over the CM EditorView is intentional (DOCS.md §Statefulness
+ * Exception). All callbacks passed via options must be pure functions
  * that never see or return CodeMirror types.
  *
  * @module create-editor
@@ -21,13 +24,21 @@ import type { EditorOptions, EditorInstance, LintDiagnostic } from './types.js';
  *
  * @remarks Accepts pure function callbacks for linting, hover docs,
  * completions, and formatting. The editor wraps these into CodeMirror
- * extensions internally — callbacks never touch CM types.
+ * extensions internally — callbacks never touch CM types. After
+ * `destroy()`, the returned instance remains callable but becomes a
+ * dead sentinel (content='', methods no-op).
+ *
+ * The returned promise **rejects** if CodeMirror construction fails
+ * (e.g., malformed extensions, EditorView constructor throws). Callers
+ * should `.catch()` or handle the rejection — see `sandbox.html` startup
+ * for an example pattern. Language-loading errors are swallowed inside
+ * `buildExtensions` (warned + editor continues without highlighting).
  *
  * @param code - Initial editor content
  * @param options - Editor configuration and callbacks
- * @returns Editor instance with content, el, reset, format, check, destroy
+ * @returns A promise resolving to a fully-initialized editor instance.
  */
-function createEditor(code = '', {
+async function createEditor(code = '', {
 	language,
 	indentChar = '\t',
 	tabSize = 4,
@@ -37,19 +48,37 @@ function createEditor(code = '', {
 	docLookup,
 	completions,
 	onFormat,
-}: EditorOptions = {}): EditorInstance {
+}: EditorOptions = {}): Promise<EditorInstance> {
 	const initialCode = code;
-	// Mutable closure vars — stateful by design (CM manages mutable DOM state)
-	let editor: EditorView | null = null;
-	let el: HTMLElement | null = parent ?? null;
-	let initPromise: Promise<void> | null = null;
-
+	const el: HTMLElement = parent ?? document.createElement('div');
 	const resolvedLanguage = language ?? 'plaintext';
 
-	// --- internal helpers (closed over mutable state) ---
+	// 1. Resolve language + build extensions (async — dynamic imports).
+	const extensions = await buildExtensions(resolvedLanguage, {
+		indentChar,
+		tabSize,
+		runFormat,
+		...(linterCallbacks ? { linterCallbacks } : {}),
+		...(docLookup ? { docLookup } : {}),
+		...(completions ? { completions } : {}),
+	});
 
+	// 2. Construct the CM EditorView — the returned instance is post-init.
+	const editor = new EditorView({
+		doc: initialCode,
+		parent: el,
+		extensions,
+	});
+
+	// 3. Destroyed sentinel — short-circuits methods after destroy().
+	let destroyed = false;
+
+	// runFormat / runCheck are `function` declarations so they can be passed
+	// into buildExtensions above (hoisted). Their bodies close over `editor`
+	// and `destroyed`; CM's keymap stores the binding and only invokes `run`
+	// on keypress, long after both are initialized — no TDZ at runtime.
 	function runFormat(): void {
-		if (!editor || !format) return;
+		if (destroyed || !format) return;
 
 		try {
 			const original = editor.state.doc.toString();
@@ -75,7 +104,7 @@ function createEditor(code = '', {
 	}
 
 	function runCheck(): readonly LintDiagnostic[] {
-		if (!editor || !linterCallbacks || linterCallbacks.length === 0) {
+		if (destroyed || !linterCallbacks || linterCallbacks.length === 0) {
 			return [];
 		}
 
@@ -83,54 +112,23 @@ function createEditor(code = '', {
 		const allDiagnostics = runLinterCallbacks(linterCallbacks, currentCode);
 
 		const cmDiagnostics = allDiagnostics.map(
-			(d) => toCMDiagnostic(editor!.state.doc, d),
+			(d) => toCMDiagnostic(editor.state.doc, d),
 		);
 
-		editor.dispatch(
-			setDiagnostics(editor.state, cmDiagnostics),
-		);
+		editor.dispatch(setDiagnostics(editor.state, cmDiagnostics));
 
 		return allDiagnostics;
 	}
 
-	// Promise-based guard prevents double initialization from rapid el access
-	function initEditor(): Promise<void> {
-		if (initPromise) return initPromise;
-		initPromise = doInit();
-		return initPromise;
-	}
-
-	async function doInit(): Promise<void> {
-		// exactOptionalPropertyTypes: only include defined callbacks
-		const extensions = await buildExtensions(resolvedLanguage, {
-			indentChar,
-			tabSize,
-			runFormat,
-			...(linterCallbacks ? { linterCallbacks } : {}),
-			...(docLookup ? { docLookup } : {}),
-			...(completions ? { completions } : {}),
-		});
-
-		editor = new EditorView({
-			doc: initialCode,
-			parent: el!,
-			extensions,
-		});
-	}
-
-	// If parent was provided, el is already set — trigger init eagerly
-	// (the el getter only triggers init when el is null)
-	if (parent) initEditor();
-
 	// perf: skip freeze — stateful editor API requires mutable methods and closures
 	return {
 		get content(): string {
-			if (editor) return editor.state.doc.toString();
-			return initialCode;
+			if (destroyed) return '';
+			return editor.state.doc.toString();
 		},
 
 		set content(newCode: string) {
-			if (!editor) return;
+			if (destroyed) return;
 			editor.dispatch({
 				changes: {
 					from: 0,
@@ -140,17 +138,10 @@ function createEditor(code = '', {
 			});
 		},
 
-		get el(): HTMLElement {
-			if (el) return el;
-
-			el = document.createElement('div');
-			// Async init — editor is ready after the returned promise resolves
-			initEditor();
-			return el;
-		},
+		el,
 
 		reset(): void {
-			if (!editor) return;
+			if (destroyed) return;
 			editor.dispatch({
 				changes: {
 					from: 0,
@@ -169,11 +160,9 @@ function createEditor(code = '', {
 		},
 
 		destroy(): void {
-			if (editor) {
-				editor.destroy();
-				editor = null;
-			}
-			el = null;
+			if (destroyed) return;
+			editor.destroy();
+			destroyed = true;
 		},
 	};
 }

@@ -123,6 +123,12 @@ type EditorOptions = {
 	readonly language?: string;
 	readonly indentChar?: string;
 	readonly tabSize?: number;
+	/**
+	 * If provided, the editor uses this element as its container —
+	 * `editor.el === parent`. CM mounts its `.cm-editor` as a child of
+	 * `parent`. If omitted, the factory creates a fresh `<div>` and
+	 * exposes it via `editor.el`.
+	 */
 	readonly parent?: HTMLElement;
 	readonly format?: FormatCallback;
 	readonly linters?: readonly LinterCallback[];
@@ -136,11 +142,13 @@ type EditorOptions = {
 /**
  * The public API returned by {@link createEditor}.
  *
- * @remarks `content` is read/write — the getter returns the current
- * editor text, the setter replaces it. `el` is a lazy getter that
- * creates the DOM element and triggers async CM initialization on
- * first access. All methods are safe to call before initialization
- * completes (they no-op or return empty results).
+ * @remarks The factory is async — the instance is fully initialized by
+ * the time the returned promise resolves. All methods are unconditionally
+ * safe to call on the resolved instance. After `destroy()`, the instance
+ * remains callable but behaves as a dead sentinel: `content` returns `''`,
+ * the setter drops, `reset`/`format` no-op, `check` returns `[]`. Double
+ * destroy is idempotent. The `el` reference is preserved post-destroy but
+ * its contents are torn down — do not re-append it to a new parent.
  */
 type EditorInstance = {
 	content: string;

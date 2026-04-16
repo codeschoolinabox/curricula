@@ -338,17 +338,24 @@ console.log(greeting, add(count, 8));
 
 			// ─── Create editor ──────────────────────────────────────
 
-			function makeEditor() {
+			async function makeEditor() {
 				if (currentEditor) {
 					currentEditor.destroy();
 				}
+				// WHY null between destroy() and await: during the async window,
+				// button handlers guard with `if (!currentEditor) return;`. If we
+				// left the destroyed sentinel in place, the guard would pass
+				// (sentinel is truthy) and handlers would call no-op methods
+				// silently — confusing dead-click UX. Nulling here makes the
+				// guards work as intended until the new editor resolves.
+				currentEditor = null;
 				containerEl.innerHTML = '';
 
 				const lang = languageEl.value;
 				const isJS =
 					lang === 'javascript' || lang === 'typescript';
 
-				currentEditor = createEditor(SAMPLE_CODE, {
+				currentEditor = await createEditor(SAMPLE_CODE, {
 					language: lang,
 					parent: containerEl,
 					...(isJS
@@ -429,16 +436,16 @@ console.log(greeting, add(count, 8));
 
 			document
 				.getElementById('btn-recreate')
-				.addEventListener('click', function onRecreate() {
+				.addEventListener('click', async function onRecreate() {
 					clearLog();
-					makeEditor();
+					await makeEditor();
 				});
 
 			languageEl.addEventListener(
 				'change',
-				function onLanguageChange() {
+				async function onLanguageChange() {
 					clearLog();
-					makeEditor();
+					await makeEditor();
 				},
 			);
 
@@ -625,7 +632,11 @@ console.log(greeting, add(count, 8));
 
 			// ─── Init ───────────────────────────────────────────────
 
-			makeEditor();
+			makeEditor().catch(function onInitError(err) {
+				statusEl.textContent = 'init failed: ' + (err && err.message || err);
+				statusEl.style.color = '#f48771';
+				console.error('makeEditor startup rejected:', err);
+			});
 
 			// SAB availability check for run/trace
 			if (typeof SharedArrayBuffer === 'undefined') {
