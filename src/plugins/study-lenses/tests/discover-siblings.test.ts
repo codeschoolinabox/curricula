@@ -99,6 +99,24 @@ describe('discoverSiblings', () => {
 		expect(result[0]?.lensConfig).toBeUndefined();
 	});
 
+	it('directive-carrying .js sibling → sibling.code excludes the directive comment', () => {
+		// B.15 — strip behavior at the walker level. The sibling's `code`
+		// is what feeds into <StudyLens>; it must not contain the
+		// directive JSDoc that only the plugin's runtime consumes.
+		const fixture = path.join(FIXTURES_DIR, 'file-override-with-config');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+			defaults: { js: 'study' },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result).toHaveLength(1);
+		expect(result[0]?.code).toBe('const puzzle = true;\n');
+		expect(result[0]?.code).not.toContain('@study-lens');
+	});
+
 	it('safety exclusions: skips node_modules, hidden dirs, and does not follow symlinks', () => {
 		// Dynamic fixture — symlinks don't travel cleanly through git.
 		const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-B11-'));

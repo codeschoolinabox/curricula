@@ -304,6 +304,30 @@ describe('createRemarkStudyLenses', () => {
 		expect(attrs.lens).toBe('parsons');
 		// Merged: cascade shuffleSeed=42 + directive distractors=4.
 		expect(attrs.config).toBe(JSON.stringify({ shuffleSeed: 42, distractors: 4 }));
+		// Byte-exact: the directive JSDoc is stripped from the emitted
+		// code attribute. The fixture's exercise.js is a 6-line file;
+		// after strip only the `const puzzle = '...';\n` line remains.
+		expect(attrs.code).toBe(
+			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
+		);
+	});
+
+	it('D.16: trailing-placement directive behaves identically to leading-placement', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'embed-config-merge-trailing');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		const appended = tree.children.at(-1) as unknown as StudyLensJsx;
+		expect(appended?.type).toBe('mdxJsxFlowElement');
+		expect(appended?.name).toBe('StudyLens');
+		const attrs = attrsOf(appended);
+		expect(attrs.lens).toBe('parsons');
+		expect(attrs.config).toBe(JSON.stringify({ shuffleSeed: 42, distractors: 4 }));
+		// Byte-exact: same stripped content regardless of directive placement.
+		expect(attrs.code).toBe(
+			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
+		);
 	});
 
 	it('frontmatter defaultLens overrides cascade for plain fences; :suffix still wins', () => {

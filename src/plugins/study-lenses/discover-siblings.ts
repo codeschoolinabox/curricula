@@ -105,11 +105,12 @@ function walk(
 			.slice(0, -ext.length)
 			.split(path.sep)
 			.join('/');
-		const code = fs.readFileSync(absPath, 'utf8');
-		const directive = parseStudyLensDirective(code, absPath);
-		const lens = directive?.lens ?? cascadeLens;
-		const sibling: Sibling = directive?.lensConfig !== undefined
-			? { absPath, label, code, lang, lens, lensConfig: directive.lensConfig }
+		const rawContent = fs.readFileSync(absPath, 'utf8');
+		const match = parseStudyLensDirective(rawContent, absPath);
+		const code = match?.strippedCode ?? rawContent;
+		const lens = match?.directive.lens ?? cascadeLens;
+		const sibling: Sibling = match?.directive.lensConfig !== undefined
+			? { absPath, label, code, lang, lens, lensConfig: match.directive.lensConfig }
 			: { absPath, label, code, lang, lens };
 		out.push(sibling);
 	}

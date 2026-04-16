@@ -84,6 +84,20 @@ synonym anywhere in the code is a bug.
   the top-level `exerciseSetPrefixes` key. Site-wide convention: `sl-`.
   Directories matching a prefix receive sidebar-label stripping (strip
   prefix → strip numeric ordering → kebab-case to Title Case).
+- **Directive block** — a comment form (a line-comment run or a
+  block comment) in a sibling `.js` file that contains the
+  `@study-lens` tag. May appear in the file's leading comment block
+  (before any code) OR its trailing comment block (after the last
+  non-comment statement); middle-of-file placement is inert. The
+  directive block is parsed for lens name + optional JSON config, and
+  removed from the code that feeds into `<StudyLens>` — learners see
+  only the exercise body.
+- **Leading comment block** — the contiguous prefix of a `.js` file
+  made of blank lines, an optional shebang, line comments, and block
+  comments, up to the first non-blank/non-comment/non-shebang line.
+- **Trailing comment block** — the mirror region at the end of a
+  `.js` file: blank lines, line comments, and block comments after
+  the last non-comment statement, through EOF.
 
 ## What this plugin does
 
@@ -329,10 +343,17 @@ Authors can override the cascade default without creating a nested
 `lenses.json` file — useful when a single directory has a few files
 needing a different lens than the rest.
 
-**In `.js` sibling files — `@study-lens` directive.** The first
-non-blank leading comment may declare the lens and an optional inline
-JSON config. All four forms below are accepted; `@study-lens <name>`
-is the tag (namespaced, hyphenated).
+**In `.js` sibling files — `@study-lens` directive.** A **directive
+block** — a comment form containing the `@study-lens` tag — may
+declare the lens and an optional inline JSON config. The directive
+block may sit in either the file's **leading comment block** (before
+any code) OR its **trailing comment block** (after the last
+non-comment statement). Authors who prefer metadata at the top write
+directives at the top; authors who prefer to write the exercise first
+and tuck plumbing out of the way write them at the bottom.
+
+All forms below are accepted; `@study-lens <name>` is the tag
+(namespaced, hyphenated).
 
 ```js
 // @study-lens parsons
@@ -345,10 +366,41 @@ is the tag (namespaced, hyphenated).
  */
 ```
 
-The walker scans the leading comment block (contiguous blank lines and
-line/JSDoc comments at the top of the file). Any non-comment statement
-— `'use strict';`, a shebang, a top-level `const` — ends the block;
-the directive must appear before any code.
+**The directive block is stripped from the code that reaches
+`<StudyLens>`.** Learners see only the exercise body, never the
+plumbing. Blank lines immediately between the stripped directive and
+the preserved code body are collapsed alongside the block, so you
+don't get a visual gap; blanks at the file's BOF/EOF edge are
+preserved.
+
+**Middle-of-file placement is NOT supported.** A directive token
+surrounded by code on both sides is inert — reliably distinguishing
+a real directive from the same characters inside a string/regex/
+template literal would require a JS tokenizer.
+
+**Both-block placement throws.** If a `@study-lens` tag appears in
+BOTH the leading AND trailing comment block, the build fails with an
+"ambiguous-placement" error naming the file. Pick one.
+
+**Contiguous `//` runs are atomic.** In
+
+```js
+// Author: Eve
+// @study-lens parsons
+```
+
+the two `//` lines form one comment form and both are stripped when
+the directive is detected. If you want `// Author: Eve` to survive,
+separate it from the directive with a blank line — that breaks the
+run into two independent forms:
+
+```js
+// Author: Eve
+
+// @study-lens parsons
+```
+
+Now only the directive line is stripped.
 
 **Malformed JSON throws** with the file path in the error message —
 matching the cascade-resolver's behavior for malformed `lenses.json`.
@@ -387,7 +439,7 @@ fence :suffix   >   frontmatter defaultLens   >   cascade defaults[lang]
 Sibling `.js` files:
 
 ```text
-file's top-line @study-lens NAME   >   cascade defaults[lang]
+file's @study-lens directive (leading OR trailing)   >   cascade defaults[lang]
 ```
 
 Lens config (both paths):

@@ -91,23 +91,38 @@ labels at sidebar-build time.
 2. **Read** (sync; filesystem read) — load the text contents of each
    collected path.
 
-3. **Parse directive** (sync; pure) — inspect each file's leading
-   comment block (contiguous blank lines and line-or-JSDoc comments at
-   the top of the file, up to the first non-comment statement). If an
-   `@study-lens` tag is present, capture the declared lens name and
-   any inline JSON body as a raw config object. Malformed JSON in the
-   directive throws with the file path in the error message.
+3. **Parse + strip directive** (sync; pure) — inspect each file's
+   leading comment block (contiguous blank lines, optional shebang,
+   and line-or-JSDoc comments at the top of the file up to the first
+   non-blank/non-comment/non-shebang line) AND trailing comment block
+   (the mirror region at EOF after the last non-comment statement).
+   Enumerate discrete comment forms in each block — a form is either
+   a contiguous run of `//` lines (no blank-line break) or a single
+   `/* ... */` block. For each form, detect presence of the
+   `@study-lens` tag. If the tag appears in BOTH blocks, throw
+   ambiguous-placement with the file path. Otherwise pick the single
+   matching form, parse its lens name and any inline JSON body
+   (malformed JSON throws with the file path), and produce a stripped
+   version of the file content with the matching form's lines
+   removed — plus any blank lines that sat immediately between the
+   form and the preserved code body (blanks on the file-edge side of
+   the form are kept, preserving EOF newlines and top-of-file
+   padding). Middle-of-file placement is inert (no tokenizer, so
+   we don't distinguish comments from directive-looking characters
+   inside strings/regexes/templates).
 
 4. **Annotate** (sync; pure) — attach the relative-path label (the
    path from the page's directory to the file, with the extension
    removed — disambiguates same-basename collisions across
    subdirectories), the language identifier (from the extension
-   mapping), and the resolved lens. The resolved lens is the
-   directive's declared lens when present, otherwise the cascade's
-   `defaults[lang]`. When the directive carried a JSON body, that body
-   is attached raw as `sibling.lensConfig` — NOT pre-merged with the
-   cascade's `lenses[lens]`. The merge (directive over cascade) is
-   performed later, at the remark plugin's emission call site, so the
+   mapping), the resolved lens, and the **directive-stripped code**
+   from the previous phase (or the raw file content if no directive
+   was present). The resolved lens is the directive's declared lens
+   when present, otherwise the cascade's `defaults[lang]`. When the
+   directive carried a JSON body, that body is attached raw as
+   `sibling.lensConfig` — NOT pre-merged with the cascade's
+   `lenses[lens]`. The merge (directive over cascade) is performed
+   later, at the remark plugin's emission call site, so the
    cascade-only path stays on its original flow. Sort the final
    collection alphabetically by label.
 
