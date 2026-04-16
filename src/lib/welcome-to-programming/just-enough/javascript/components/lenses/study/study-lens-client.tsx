@@ -30,6 +30,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import createEditor from '../../../lib/editing/create-editor.js';
 import { format as apiFormat } from '../../../api/format.js';
+import run from '../../../api/run.js';
 
 import type { EditorInstance } from '../../../lib/editing/types.js';
 import type { StudyOptions } from './types.js';
@@ -44,14 +45,19 @@ type StudyLensClientProps = {
  * Cleans up on unmount — including the unmount-before-factory-resolves
  * race path.
  */
+const DEFAULT_ENGINE = { seconds: 5 } as const;
+
 function StudyLensClient({
 	code,
+	options,
 }: StudyLensClientProps): React.JSX.Element {
 	const containerRef = useRef<HTMLDivElement>(null);
-	// `setEditor` is plumbing for Commit 3 — buttons will read the
-	// resolved instance from state to enable/disable. In Commit 2 the
-	// getter is unused (tests observe via the DOM side-effect).
-	const [, setEditor] = useState<EditorInstance | null>(null);
+	const [editor, setEditor] = useState<EditorInstance | null>(null);
+	// Independent of the editor null-gate: Run disables while an
+	// in-flight runner promise is pending. Both conditions can hold
+	// simultaneously (editor just resolved, Run clicked, promise
+	// in-flight — `!editor` is false but `isRunning` is true).
+	const [isRunning, setIsRunning] = useState(false);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -90,7 +96,63 @@ function StudyLensClient({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <div ref={containerRef} data-study-lens="study" />;
+	async function handleRun(): Promise<void> {
+		if (editor === null) return;
+		setIsRunning(true);
+		try {
+			// V1 runners are async-void: we await the runner's settlement
+			// purely to gate the button; the RunResult is discarded.
+			// Side-effect output (e.g. `console.log`) surfaces to the
+			// browser devtools console.
+			await run(editor.content, options.engine ?? DEFAULT_ENGINE);
+		} finally {
+			setIsRunning(false);
+		}
+	}
+
+	function handleFormat(): void {
+		if (editor === null) return;
+		editor.format();
+	}
+
+	function handleReset(): void {
+		if (editor === null) return;
+		// Writes the `code` prop captured at mount back into the editor
+		// buffer. `editor.reset()` would also work today (createEditor
+		// stores the `code` arg as its reset target), but writing
+		// through `content` expresses the intent without relying on
+		// the factory's reset semantics remaining stable.
+		editor.content = code;
+	}
+
+	return (
+		<div className="study-lens">
+			<div ref={containerRef} data-study-lens="study" />
+			<div className="study-lens-toolbar">
+				<button
+					type="button"
+					onClick={handleRun}
+					disabled={editor === null || isRunning}
+				>
+					Run
+				</button>
+				<button
+					type="button"
+					onClick={handleFormat}
+					disabled={editor === null}
+				>
+					Format
+				</button>
+				<button
+					type="button"
+					onClick={handleReset}
+					disabled={editor === null}
+				>
+					Reset
+				</button>
+			</div>
+		</div>
+	);
 }
 
 export default StudyLensClient;

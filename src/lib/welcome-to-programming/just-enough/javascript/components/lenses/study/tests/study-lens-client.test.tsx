@@ -17,14 +17,21 @@
  */
 
 import React from 'react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, act, cleanup, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import {
+	render,
+	act,
+	cleanup,
+	waitFor,
+	fireEvent,
+} from '@testing-library/react';
 
 import type { EditorInstance } from '../../../../lib/editing/types.js';
 
 // Track factory state across mocked calls. Tests assert against these.
 type MockInstance = EditorInstance & {
 	destroyCalls: number;
+	contentSetCalls: string[];
 };
 let factoryCalls: Array<{
 	code: string;
@@ -42,21 +49,52 @@ function makeMockInstance(code: string, parent?: HTMLElement): MockInstance {
 	const el = document.createElement('div');
 	el.className = 'cm-editor-mock';
 	if (parent) parent.appendChild(el);
-	const instance = {
-		content: code,
+	// `content` is a getter+setter on the production EditorInstance — CM's
+	// doc lives behind those accessors. `Object.defineProperty` lets the
+	// mock spy on setter calls (for Reset-button tests) and track the
+	// "active code" the way CM's editor state would.
+	let currentContent = code;
+	const instance: MockInstance = {
 		el,
 		reset: vi.fn(),
 		format: vi.fn(),
 		check: () => [],
-		destroy: vi.fn(function destroy(this: MockInstance) {
+		destroy: vi.fn(),
+		destroyCalls: 0,
+		contentSetCalls: [],
+	} as unknown as MockInstance;
+	Object.defineProperty(instance, 'content', {
+		get: () => currentContent,
+		set: (value: string) => {
+			instance.contentSetCalls.push(value);
+			currentContent = value;
+		},
+		enumerable: true,
+		configurable: true,
+	});
+	(instance as unknown as { destroy: () => void }).destroy = vi.fn(
+		function destroy(this: MockInstance) {
 			this.destroyCalls++;
 			if (el.parentNode) el.parentNode.removeChild(el);
-		}),
-		destroyCalls: 0,
-	} as unknown as MockInstance;
+		},
+	);
 	createdInstances.push(instance);
 	return instance;
 }
+
+// Mock the Run API. Tests that exercise Run prime `runImpl` with a
+// controlled implementation (usually returning a PromiseLike / object
+// matching api/run's return shape). Default: immediate success.
+let runCalls: Array<{ code: string; config: unknown }> = [];
+let runImpl: (code: string, config: unknown) => unknown = () =>
+	Promise.resolve({ ok: true });
+
+vi.mock('../../../../api/run.js', () => ({
+	default: vi.fn((code: string, config: unknown) => {
+		runCalls.push({ code, config });
+		return runImpl(code, config);
+	}),
+}));
 
 vi.mock('../../../../lib/editing/create-editor.js', () => ({
 	default: vi.fn(
@@ -89,6 +127,14 @@ beforeEach(() => {
 	factoryCalls = [];
 	createdInstances = [];
 	nextResolver = null;
+	runCalls = [];
+	runImpl = () => Promise.resolve({ ok: true });
+});
+
+afterEach(() => {
+	// Auto-cleanup: tests that share a beforeEach can't rely on
+	// globals being enabled in vitest config.
+	cleanup();
 });
 
 describe('StudyLensClient', () => {
@@ -188,6 +234,188 @@ describe('StudyLensClient', () => {
 		expect(createdInstances).toHaveLength(1);
 		expect(firstInstance.destroyCalls).toBe(0);
 		cleanup();
+	});
+
+	describe('null-gate (pre-factory-resolve)', () => {
+		it('initial render: all three buttons are disabled while factory is in flight', () => {
+			// Deferred factory: never resolves for this test.
+			nextResolver = () => {
+				// intentionally hold — test doesn't release.
+			};
+			const { getByRole } = render(
+				<StudyLensClient code="x" options={{}} />,
+			);
+			expect(getByRole('button', { name: /run/i }).hasAttribute('disabled')).toBe(true);
+			expect(getByRole('button', { name: /format/i }).hasAttribute('disabled')).toBe(true);
+			expect(getByRole('button', { name: /reset/i }).hasAttribute('disabled')).toBe(true);
+			cleanup();
+		});
+
+		it('after factory resolves: all three buttons are enabled', async () => {
+			const { getByRole } = render(
+				<StudyLensClient code="x" options={{}} />,
+			);
+			await waitFor(() => {
+				expect(getByRole('button', { name: /run/i }).hasAttribute('disabled')).toBe(false);
+			});
+			expect(getByRole('button', { name: /format/i }).hasAttribute('disabled')).toBe(false);
+			expect(getByRole('button', { name: /reset/i }).hasAttribute('disabled')).toBe(false);
+			cleanup();
+		});
+	});
+
+	describe('Reset button', () => {
+		it('unchanged content: clicking Reset sets content to original code', async () => {
+			const { getByRole } = render(
+				<StudyLensClient code="original" options={{}} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			const instance = createdInstances[0]!;
+			expect(instance.contentSetCalls).toEqual([]);
+			fireEvent.click(getByRole('button', { name: /reset/i }));
+			expect(instance.contentSetCalls).toEqual(['original']);
+			cleanup();
+		});
+
+		it('after simulated edit: Reset restores the ORIGINAL code (not the edit)', async () => {
+			const { getByRole } = render(
+				<StudyLensClient code="original" options={{}} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			const instance = createdInstances[0]!;
+			// Simulate a user edit via the content setter.
+			instance.content = 'edited';
+			expect(instance.content).toBe('edited');
+			fireEvent.click(getByRole('button', { name: /reset/i }));
+			// Setter called: ['edited', 'original']. Final content is 'original'.
+			expect(instance.contentSetCalls.at(-1)).toBe('original');
+			expect(instance.content).toBe('original');
+			cleanup();
+		});
+	});
+
+	describe('Run button (async-void)', () => {
+		it('click Run: invokes `run` with current editor content and default engine', async () => {
+			const { getByRole } = render(
+				<StudyLensClient code="let x = 1;" options={{}} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			await act(async () => {
+				fireEvent.click(getByRole('button', { name: /run/i }));
+			});
+			expect(runCalls).toHaveLength(1);
+			expect(runCalls[0]?.code).toBe('let x = 1;');
+			expect(runCalls[0]?.config).toEqual({ seconds: 5 });
+			cleanup();
+		});
+
+		it('options.engine overrides default engine config', async () => {
+			const { getByRole } = render(
+				<StudyLensClient code="x" options={{ engine: { seconds: 10 } }} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			await act(async () => {
+				fireEvent.click(getByRole('button', { name: /run/i }));
+			});
+			expect(runCalls[0]?.config).toEqual({ seconds: 10 });
+		});
+
+		it('after edit: Run receives the EDITED content, not the original', async () => {
+			const { getByRole } = render(
+				<StudyLensClient code="let x = 1;" options={{}} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			const instance = createdInstances[0]!;
+			instance.content = 'let x = 42;';
+			await act(async () => {
+				fireEvent.click(getByRole('button', { name: /run/i }));
+			});
+			expect(runCalls[0]?.code).toBe('let x = 42;');
+			cleanup();
+		});
+
+		it('Run disabled while in flight; re-enabled after settlement', async () => {
+			// Deferred runImpl: promise stays pending until test releases it.
+			let releaseRun!: () => void;
+			runImpl = () =>
+				new Promise((resolve) => {
+					releaseRun = () => resolve({ ok: true });
+				});
+
+			const { getByRole } = render(
+				<StudyLensClient code="x" options={{}} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			const runBtn = getByRole('button', { name: /run/i });
+			expect(runBtn.hasAttribute('disabled')).toBe(false);
+			// Click → Run is in flight → button disabled.
+			await act(async () => {
+				fireEvent.click(runBtn);
+				await Promise.resolve();
+			});
+			expect(runBtn.hasAttribute('disabled')).toBe(true);
+			// Release the in-flight runner; button re-enables.
+			await act(async () => {
+				releaseRun();
+				await Promise.resolve();
+			});
+			await waitFor(() => {
+				expect(runBtn.hasAttribute('disabled')).toBe(false);
+			});
+			cleanup();
+		});
+
+		it('runner returns {ok: false, error}: button still re-enables, no crash', async () => {
+			runImpl = () => Promise.resolve({ ok: false, error: new Error('boom') });
+			const { getByRole } = render(
+				<StudyLensClient code="x" options={{}} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			const runBtn = getByRole('button', { name: /run/i });
+			await act(async () => {
+				fireEvent.click(runBtn);
+				await Promise.resolve();
+			});
+			await waitFor(() => {
+				expect(runBtn.hasAttribute('disabled')).toBe(false);
+			});
+			cleanup();
+		});
+	});
+
+	describe('Format button', () => {
+		it('click Format: invokes editor.format() once', async () => {
+			const { getByRole } = render(
+				<StudyLensClient code="x" options={{}} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			const instance = createdInstances[0]!;
+			fireEvent.click(getByRole('button', { name: /format/i }));
+			expect(instance.format).toHaveBeenCalledTimes(1);
+			cleanup();
+		});
+
+		it('Format + Run: Run receives the formatted content', async () => {
+			// editor.format() side effect: in production CM mutates its doc
+			// to the formatted version. Simulate by having the mock's
+			// `format` mutate `content` via the setter.
+			const { getByRole } = render(
+				<StudyLensClient code="let a=1;" options={{}} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			const instance = createdInstances[0]!;
+			(instance.format as unknown as { mockImplementation: (fn: () => void) => void })
+				.mockImplementation(() => {
+					instance.content = 'let a = 1;';
+				});
+			fireEvent.click(getByRole('button', { name: /format/i }));
+			expect(instance.content).toBe('let a = 1;');
+			await act(async () => {
+				fireEvent.click(getByRole('button', { name: /run/i }));
+			});
+			expect(runCalls[0]?.code).toBe('let a = 1;');
+			cleanup();
+		});
 	});
 
 	it('StrictMode double-invoke: first instance destroyed, exactly one editor survives', async () => {
