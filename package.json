@@ -86,6 +86,8 @@
   "devDependencies": {
     "@docusaurus/tsconfig": "^3.9.2",
     "@ls-lint/ls-lint": "^2.3.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/mdast": "^4.0.4",
     "@types/node": "^25.5.0",
     "@types/unist": "^3.0.3",

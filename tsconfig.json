@@ -4,7 +4,9 @@
     "baseUrl": ".",
     "paths": {
       "@utils": ["src/lib/utils/index.ts"],
-      "@utils/*": ["src/lib/utils/*"]
+      "@utils/*": ["src/lib/utils/*"],
+      "@site": ["."],
+      "@site/*": ["./*"]
     },
     "noEmit": true,
     "allowJs": false,

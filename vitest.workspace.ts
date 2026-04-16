@@ -3,6 +3,23 @@ import { defineWorkspace } from 'vitest/config';
 
 const alias = {
 	'@utils': path.resolve(__dirname, 'src/lib/utils'),
+	// `@site/` is Docusaurus's webpack alias pointing at the site root;
+	// unit tests need it too so cross-tree imports (`@site/src/plugins/...`)
+	// resolve. Production Docusaurus provides the same alias via its
+	// webpack config.
+	'@site': path.resolve(__dirname, ''),
+	// Docusaurus `BrowserOnly` + `CodeBlock` are runtime-provided by the
+	// Docusaurus bundle; in tests we stub them to render their children
+	// (BrowserOnly) or a plain <pre> (CodeBlock) so component tests run
+	// under jsdom without Docusaurus's build-time module resolution.
+	'@docusaurus/BrowserOnly': path.resolve(
+		__dirname,
+		'vitest-stubs/docusaurus-BrowserOnly.tsx',
+	),
+	'@theme/CodeBlock': path.resolve(
+		__dirname,
+		'vitest-stubs/theme-CodeBlock.tsx',
+	),
 };
 
 export default defineWorkspace([
@@ -10,7 +27,7 @@ export default defineWorkspace([
 		resolve: { alias },
 		test: {
 			name: 'unit',
-			include: ['src/{lib,plugins}/**/*.test.ts'],
+			include: ['src/{lib,plugins}/**/*.test.{ts,tsx}'],
 			exclude: ['src/lib/**/*.browser.test.ts'],
 			environment: 'node',
 			// WHY server.deps.inline for CM packages: CodeMirror 6 uses
