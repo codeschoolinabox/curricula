@@ -26,7 +26,7 @@
  * `code` prop change in place — doing so would blow away learner edits.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 
 import createEditor from '../../../lib/editing/create-editor.js';
 import { format as apiFormat } from '../../../api/format.js';
@@ -51,6 +51,7 @@ function StudyLensClient({
 	code,
 	options,
 }: StudyLensClientProps): React.JSX.Element {
+	const lensId = useId();
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [editor, setEditor] = useState<EditorInstance | null>(null);
 	// Independent of the editor null-gate: Run disables while an
@@ -126,11 +127,12 @@ function StudyLensClient({
 	}
 
 	return (
-		<div className="study-lens">
+		<div className="study-lens" data-lens-id={lensId}>
 			<div ref={containerRef} data-study-lens="study" />
-			<div className="study-lens-toolbar">
+			<div className="study-lens-toolbar" role="toolbar" aria-label="Code actions">
 				<button
 					type="button"
+					aria-label="Run code"
 					onClick={handleRun}
 					disabled={editor === null || isRunning}
 				>
@@ -138,6 +140,7 @@ function StudyLensClient({
 				</button>
 				<button
 					type="button"
+					aria-label="Format code"
 					onClick={handleFormat}
 					disabled={editor === null}
 				>
@@ -145,6 +148,7 @@ function StudyLensClient({
 				</button>
 				<button
 					type="button"
+					aria-label="Reset to original"
 					onClick={handleReset}
 					disabled={editor === null}
 				>

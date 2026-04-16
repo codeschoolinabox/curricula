@@ -418,6 +418,45 @@ describe('StudyLensClient', () => {
 		});
 	});
 
+	describe('a11y labels + useId', () => {
+		it('each button has a non-empty aria-label', async () => {
+			const { getAllByRole } = render(
+				<StudyLensClient code="x" options={{}} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			const buttons = getAllByRole('button');
+			expect(buttons.length).toBe(3);
+			for (const btn of buttons) {
+				const label = btn.getAttribute('aria-label');
+				expect(label).not.toBeNull();
+				expect(label!.length).toBeGreaterThan(0);
+			}
+		});
+
+		it('toolbar has role="toolbar" with aria-label', async () => {
+			const { getByRole } = render(
+				<StudyLensClient code="x" options={{}} />,
+			);
+			const toolbar = getByRole('toolbar');
+			expect(toolbar.getAttribute('aria-label')).toBe('Code actions');
+		});
+
+		it('two lens instances on the same page have distinct useId values', async () => {
+			const { container } = render(
+				<>
+					<StudyLensClient code="a" options={{}} />
+					<StudyLensClient code="b" options={{}} />
+				</>,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(2));
+			const ids = Array.from(
+				container.querySelectorAll('[data-lens-id]'),
+			).map((el) => el.getAttribute('data-lens-id'));
+			expect(ids).toHaveLength(2);
+			expect(ids[0]).not.toBe(ids[1]);
+		});
+	});
+
 	it('StrictMode double-invoke: first instance destroyed, exactly one editor survives', async () => {
 		const { container } = render(
 			<React.StrictMode>
