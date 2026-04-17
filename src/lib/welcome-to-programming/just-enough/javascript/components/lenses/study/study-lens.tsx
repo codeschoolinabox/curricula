@@ -77,7 +77,7 @@ function narrowToStudyOptions(
 	if (isPlainObject(parsed.engine)) {
 		out.engine = parsed.engine as EngineConfig;
 	}
-	return out;
+	return Object.freeze(out);
 }
 
 /**
