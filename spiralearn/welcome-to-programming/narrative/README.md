@@ -1,9 +1,9 @@
-# Narrative Reference — Welcome to Programming
+# Narrative Reference — Welcome to Programming (coded for humans)
 
 > A map for curriculum authors. Not student-facing.
 
 This document captures the full vision, metaphor system, and design commitments
-for the _Welcome to Programming_ curriculum. It exists so that future chapter
+for the _Welcome to Programming (coded for humans)_ curriculum. It exists so that future chapter
 authors can write with a consistent picture of what the course is doing and why
 — without re-deriving it from scratch.
 
@@ -279,8 +279,11 @@ analysis, design thinking) built on perspective stacking.
 
 The practice for keeping programming alive for its own sake. Small, runnable,
 self-contained programs that balance broad exploration with productive
-constraints. Full Chapter 5. The spirit can be carried informally from
-Chapter 0.
+constraints. Programming for mastery, delight, surprise, discovery, and the new
+thoughts programming lets you think. Chapter 5 opens the full JS language
+(multi-paradigmatic exploration, real browser execution, four sandbox modes) and
+a collaborative gist system for sharing and remixing with peers. The spirit can
+be carried informally from Chapter 0.
 
 ### The PL-future
 
@@ -1902,8 +1905,9 @@ authors can pick them up when relevant.
 - **Voice workshop with real drafts** — the voice spec in §25 needs testing
   against actual chapter prose. The first chapter written after this document
   should be a voice-calibration drop.
-- **Ch 5 full design** — the syllabus has the overview and 11 learning
-  objectives; detailed exercise design is outstanding.
+- **Ch 5 full design** — the syllabus has the overview and 29 learning
+  objectives across 9 sections (5A–5I); detailed exercise design is
+  outstanding.
 - **Mermaid rendering verification** — two diagrams use mermaid syntax (§8
   composition loop, §12 composer pedagogy graph). If the Docusaurus site
   isn't configured with `@docusaurus/theme-mermaid`, they render as raw code
@@ -1911,6 +1915,12 @@ authors can pick them up when relevant.
 - **Excalidraw SVG rendering verification** — a few existing assets are
   `.excalidraw.svg` files. Most modern renderers handle SVG fine, but worth
   smoke-testing in the Docusaurus preview to catch any oddities.
+- **GEB-style character dialogues** — one dialogue before each chapter (not
+  subchapter). Preludes that introduce themes playfully and encode chapter
+  concepts in dialogue form, using the existing cast (Composer, Virtuoso,
+  Mechanism, Audience) + historical cameos. Blocked on: writing quality
+  requirement and the rest of the course taking shape first. Prototype target:
+  Ch 2 (Composer meets Mechanism for the first time).
 
 ### Longer-horizon questions
 

@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Welcome to Programming: Syllabus
+# Welcome to Programming (coded for humans) — Syllabus
 
 > The best authors and the best JavaScript developers are those who obsess about
 > language, who explore and experiment with language every day and in doing so
@@ -294,8 +294,12 @@ Plus Study Lenses making the machine's work visible throughout.
 Chapter 5 introduces **snippetry** — writing small, runnable, self-contained
 programs as an ongoing practice. The answer to "what do I do as a programmer
 when I'm no longer building full codebases?" Programming for mastery,
-exploration, aesthetic satisfaction, and the new thoughts programming lets you
-think — alongside or instead of programming for productivity.
+exploration, aesthetic satisfaction, delight, surprise, discovery, and the new
+thoughts programming lets you think — alongside or instead of programming for
+productivity. "You" is the fifth audience: students program for themselves,
+share with peers through a collaborative gist system, and explore JavaScript's
+full multi-paradigmatic range with training wheels off and real browser
+execution.
 
 ### The future beyond human-designed languages
 
@@ -1094,20 +1098,27 @@ machine, a user-experience miniature, or just for fun.
 The practice balances **broad exploration** and **productive constraint**.
 Students develop their own sense of which balance serves their learning and
 their voice. There's no rigid split between types of snippet; the practice is
-about finding the balance that works for you right now, and letting it change
-as you grow.
+about finding the balance that works for you right now, and letting it change as
+you grow.
 
 **"You" is the fifth audience.** Students have been programming for developers,
 the computer, users, and agents. Now they program for themselves — to learn,
-practice, think, stretch, explore, express, delight, and discover. "You" is
-both singular (your own practice) and plural (sharing with and remixing from
-peers through the collaborative gist system).
+practice, think, stretch, explore, express, delight, and discover. "You" is both
+singular (your own practice) and plural (sharing with and remixing from peers
+through the collaborative gist system).
 
 **JavaScript is multi-paradigmatic.** Chapters 1–4 taught imperative
 programming. Chapter 5 is where students discover that the same language
-supports fundamentally different ways of thinking about computation:
-functional, object-oriented, declarative. Paradigm exploration is a core
-activity, not a sidebar.
+supports fundamentally different ways of thinking about computation: functional,
+object-oriented, declarative. Paradigm exploration is a core activity, not a
+sidebar.
+
+> The best authors and the best JavaScript developers are those who obsess about
+> language, who explore and experiment with language every day and in doing so
+> develop their own style, their own idioms, and their own expression.
+>
+> — [Angus Croll](https://anguscroll.com/),
+> [If Hemingway Wrote JavaScript](https://anguscroll.com/hemingway/)
 
 ### The training-wheels-off commitment
 
@@ -1116,15 +1127,13 @@ environment** into real browser execution with real consequences.
 
 **What comes off:**
 
-- **JEJ language-feature constraint** — students can use any and all JS
-  language features. Newly available: user-defined functions, closures, arrays,
-  objects, the event loop, classes, `async`/`await`, generators, `fetch`,
-  `Promise`, `Symbol`, `Proxy`, ES modules, DOM manipulation, Canvas, and
-  everything else
-- **The web worker sandbox** — code runs directly in the browser (iframe).
-  If your program freezes, the page freezes. Real consequences, real
-  environment. Optional configurable loop guards are available but not
-  enforced
+- **JEJ language-feature constraint** — students can use any and all JS language
+  features. Newly available: user-defined functions, closures, arrays, objects,
+  the event loop, classes, `async`/`await`, generators, `fetch`, `Promise`,
+  `Symbol`, `Proxy`, ES modules, DOM manipulation, Canvas, and everything else
+- **The web worker sandbox** — code runs directly in the browser (iframe). If
+  your program freezes, the page freezes. Real consequences, real environment.
+  Optional configurable loop guards are available but not enforced
 - **Enforced formatting** — format your code however you prefer
 - **Study Lenses NM visualizations** — the curriculum's tracer-based NM
   visualizations are no longer the primary tool
@@ -1134,8 +1143,8 @@ environment** into real browser execution with real consequences.
 - **Full browser devtools debugging toolkit** — line breakpoints, conditional
   breakpoints, logpoints, `debugger` statements, step over/into/out, scope
   panel, watch expressions, call stack, pause on exceptions, DOM breakpoints,
-  event listener breakpoints, console in paused context. Students learn all
-  of it.
+  event listener breakpoints, console in paused context. Students learn all of
+  it.
 - **External NM visualization tools** — open-in buttons for specialized tools
   (loupe for event loop, promisees for Promises, etc.) with different notional
   machine perspectives. Training wheels come off, but power tools are available
@@ -1151,80 +1160,75 @@ environment** into real browser execution with real consequences.
 
 ### The collaborative gist system
 
-Students can save snippets as gists, browse gists saved by other learners,
-and remix them. This makes Chapter 5 collaborative across all learners: your
-practice is your own, but it's enriched by what others are exploring. The
-remix workflow — take someone else's snippet, change its intent, make it
-yours — is a core snippetry activity.
+Students can save snippets as gists, browse gists saved by other learners, and
+remix them. This makes Chapter 5 collaborative across all learners: your
+practice is your own, but it's enriched by what others are exploring. The remix
+workflow — take someone else's snippet, change its intent, make it yours — is a
+core snippetry activity.
 
 ### Learning objectives
 
 #### 5A. Training-Wheels-Off: Carrying Predictive Mastery
 
 - 🥚 Trace code with the full browser devtools debugging toolkit: breakpoints,
-  conditional breakpoints, logpoints, `debugger` statements, step
-  over/into/out, scope panel, watch expressions, call stack, pause on
-  exceptions, DOM breakpoints (HTML modes), event listener breakpoints.
-  Predict each step before stepping
-- 🥚 Predict a program's complete behavior (output, final binding states,
-  error or no error) without stepping, then verify with a single run. The
-  debugger is scaffold; prediction without it is the graduation
+  conditional breakpoints, logpoints, `debugger` statements, step over/into/out,
+  scope panel, watch expressions, call stack, pause on exceptions, DOM
+  breakpoints (HTML modes), event listener breakpoints. Predict each step before
+  stepping
+- 🥚 Predict a program's complete behavior (output, final binding states, error
+  or no error) without stepping, then verify with a single run. The debugger is
+  scaffold; prediction without it is the graduation
 - 🐣 Use the devtools toolkit to isolate a bug: combine debugging features
   strategically (conditional breakpoints, watch expressions, pause on
   exceptions, logpoints) and describe divergence using NM vocabulary
-- 🐣 Choose and use external NM visualization tools (loupe, promisees, etc.)
-  for specific NM concepts; explain the tool choice and what it revealed
+- 🐣 Choose and use external NM visualization tools (loupe, promisees, etc.) for
+  specific NM concepts; explain the tool choice and what it revealed
 
 #### 5B. Extending the NM: New JS Territory
 
-- 🥚 Extend your NM to a JS feature outside JEJ (your choice: functions,
-  arrays, objects, classes, async/await, generators, etc.). Read
-  documentation, form a prediction, write a snippet, verify, update your
-  model
+- 🥚 Extend your NM to a JS feature outside JEJ (your choice: functions, arrays,
+  objects, classes, async/await, generators, etc.). Read documentation, form a
+  prediction, write a snippet, verify, update your model
 - 🐣 Explore "the weird parts": find edge cases and surprising JS behaviors,
   predict, verify, explain using NM concepts why the behavior occurs
 - 🐥 Extend your NM to a second unfamiliar feature; reflect on whether the
   learning process was easier the second time and why
-- 🐔 Explore "historic" vs. "modern" JS: write the same thing using a
-  historic idiom and its modern equivalent, trace both, describe the NM
-  differences
+- 🐔 Explore "historic" vs. "modern" JS: write the same thing using a historic
+  idiom and its modern equivalent, trace both, describe the NM differences
 
 #### 5C. Programming Paradigms
 
 - 🥚 Name the major programming paradigms JS supports (imperative, functional,
-  object-oriented, declarative) and identify which paradigm a given snippet
-  uses
-- 🐣 Solve the same problem in two different paradigms; trace both and
-  describe how the NM behaves differently
-- 🐣 Implement the same paradigm with different features (e.g., functional
-  style with loops+variables vs. array methods; OOP with prototypes vs.
-  classes)
-- 🐥 Translate a snippet between paradigms: preserve behavior, articulate
-  what changed at Strategy/Implementation (PBSI) and what stayed at
-  Purpose/Behavior
+  object-oriented, declarative) and identify which paradigm a given snippet uses
+- 🐣 Solve the same problem in two different paradigms; trace both and describe
+  how the NM behaves differently
+- 🐣 Implement the same paradigm with different features (e.g., functional style
+  with loops+variables vs. array methods; OOP with prototypes vs. classes)
+- 🐥 Translate a snippet between paradigms: preserve behavior, articulate what
+  changed at Strategy/Implementation (PBSI) and what stayed at Purpose/Behavior
 
 #### 5D. Snippetry as Practice
 
-- 🥚 Write a snippet under a productive constraint (a single feature in 3
-  ways, a specific error on purpose, one loop + zero conditionals, etc.)
+- 🥚 Write a snippet under a productive constraint (a single feature in 3 ways,
+  a specific error on purpose, one loop + zero conditionals, etc.)
 - 🥚 Read and trace a snippet from the corpus or a peer's gist that uses
   unfamiliar JS; apply PBSI analysis
-- 🐣 Write a variation on an existing snippet: same purpose, different
-  strategy; articulate what changed and why
-- 🐣 Remix a peer's snippet: change its intent, not just implementation; make
-  it yours
+- 🐣 Write a variation on an existing snippet: same purpose, different strategy;
+  articulate what changed and why
+- 🐣 Remix a peer's snippet: change its intent, not just implementation; make it
+  yours
 
 #### 5E. You as Audience
 
 - 🥚 Make yourself laugh: write a snippet whose output, structure, or concept
-  genuinely amuses you — not funny variable names, the humor lives in what
-  the program does
+  genuinely amuses you — not funny variable names, the humor lives in what the
+  program does
 - 🐣 Surprise yourself: write a snippet where you don't fully know what will
   happen; describe what surprised you
 - 🐣 Discover something unexpected: encounter a behavior you didn't predict,
   investigate it, explain it
-- 🐥 Impress yourself: write a snippet that does something you didn't think
-  you could do a month ago
+- 🐥 Impress yourself: write a snippet that does something you didn't think you
+  could do a month ago
 
 #### 5F. Compositional Voice and Micro-Decisions
 
@@ -1239,8 +1243,8 @@ yours — is a core snippetry activity.
 
 - 🥚 Choose your sandbox mode deliberately: explain the constraints and
   affordances of each mode for a given snippet idea
-- 🐥 Design your own snippet prompt targeting a specific NM concept;
-  interesting enough that a peer would want to try it
+- 🐥 Design your own snippet prompt targeting a specific NM concept; interesting
+  enough that a peer would want to try it
 
 #### 5H. The Whole Rhetorical Situation
 
@@ -1252,6 +1256,6 @@ yours — is a core snippetry activity.
 
 - 🐔 Articulate why programming-for-its-own-sake remains valuable in an
   LLM-assisted world — your answer, grounded in your experience
-- 🐔 Recognize that **alien composers** (agentic systems doing design work,
-  not just notation) are arriving; identify a concrete example and reflect on
-  what it means for the composer/virtuoso distinction
+- 🐔 Recognize that **alien composers** (agentic systems doing design work, not
+  just notation) are arriving; identify a concrete example and reflect on what
+  it means for the composer/virtuoso distinction
