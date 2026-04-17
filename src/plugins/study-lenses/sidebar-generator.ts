@@ -23,6 +23,7 @@
  * (root-first). First match consumed.
  */
 
+import prettifyDirName from './prettify-dir-name.js';
 import resolveCascade from './resolve-cascade.js';
 
 import type { ResolvedConfig, SidebarGeneratorOptions } from './types.js';
@@ -87,38 +88,23 @@ function transformItems(
 }
 
 /**
- * Applies the prefix-strip / numeric-strip / Title-Case-kebab pipeline.
- * Returns the original label unchanged if no prefix matches OR if the
- * transform would produce an empty string (in which case it warns once).
+ * Delegates to the shared prettifyDirName helper for the
+ * prefix-strip / numeric-strip / Title-Case-kebab pipeline.
+ * Returns the original label unchanged if no prefix matches.
  */
 function transformLabel(
 	label: string,
 	prefixes: ReadonlyArray<string>,
 ): string {
-	for (const prefix of prefixes) {
-		if (prefix === '') continue;
-		if (!label.startsWith(prefix)) continue;
-		const afterPrefix = label.slice(prefix.length);
-		const afterNumeric = afterPrefix.replace(/^\d+-/, '');
-		if (afterNumeric === '') {
-			console.warn(
-				`study-lenses: empty residue after stripping prefix "${prefix}" from "${label}"; falling back to original label`,
-			);
-			return label;
-		}
-		return toTitleCase(afterNumeric);
-	}
-	return label;
-}
-
-/**
- * Converts a kebab-case string to Title Case: `while-loops` → `"While Loops"`.
- */
-function toTitleCase(s: string): string {
-	return s
-		.split('-')
-		.map((seg) => (seg === '' ? seg : seg[0]!.toUpperCase() + seg.slice(1)))
-		.join(' ');
+	// The sidebar generator only transforms labels that match a
+	// configured prefix — non-matching labels pass through unchanged.
+	// prettifyDirName also title-cases non-matching names, which the
+	// sidebar should NOT do (Docusaurus's default naming applies there).
+	const hasMatchingPrefix = prefixes.some(
+		(p) => p !== '' && label.startsWith(p),
+	);
+	if (!hasMatchingPrefix) return label;
+	return prettifyDirName(label, prefixes);
 }
 
 export default createStudySidebarGenerator;

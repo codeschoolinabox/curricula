@@ -411,6 +411,145 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
+	// ─── Grouped sibling embeds (D.17–D.20) ──────────────────────────────
+
+	it('D.17: tabs mode with two subdir groups → two separate <Tabs> with headings', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'grouped-tabs');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		// After the heading child, expect: heading(group-a) + Tabs(group-a) +
+		// heading(group-b) + Tabs(group-b) = 4 appended nodes.
+		const appended = tree.children.slice(1); // skip the original heading
+		expect(appended).toHaveLength(4);
+
+		// Group A heading (depth 3)
+		expect(appended[0]?.type).toBe('heading');
+		expect((appended[0] as { depth?: number }).depth).toBe(3);
+
+		// Group A Tabs with 2 TabItems
+		const tabsA = appended[1] as unknown as {
+			type: string;
+			name?: string;
+			children?: ReadonlyArray<{
+				type: string;
+				name?: string;
+				attributes?: ReadonlyArray<{ name: string; value: unknown }>;
+			}>;
+		};
+		expect(tabsA.type).toBe('mdxJsxFlowElement');
+		expect(tabsA.name).toBe('Tabs');
+		const tabItemsA = (tabsA.children ?? []).filter(
+			(c) => c.type === 'mdxJsxFlowElement' && c.name === 'TabItem',
+		);
+		expect(tabItemsA).toHaveLength(2);
+		// Labels should be group-relative (no 'group-a/' prefix)
+		const firstLabel = Object.fromEntries(
+			(tabItemsA[0]?.attributes ?? []).map((a) => [a.name, a.value]),
+		);
+		expect(firstLabel.label).toBe('01');
+
+		// Group B heading (depth 3)
+		expect(appended[2]?.type).toBe('heading');
+
+		// Group B Tabs with 1 TabItem
+		const tabsB = appended[3] as unknown as typeof tabsA;
+		expect(tabsB.name).toBe('Tabs');
+		const tabItemsB = (tabsB.children ?? []).filter(
+			(c) => c.type === 'mdxJsxFlowElement' && c.name === 'TabItem',
+		);
+		expect(tabItemsB).toHaveLength(1);
+	});
+
+	it('D.18: mixed root + subdir → root group first with sectionHeading, then subdir group', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'grouped-mixed');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		const appended = tree.children.slice(1);
+		// Root heading (depth 2, "Exercises") + root Tabs + subdir heading (depth 3) + subdir Tabs = 4
+		expect(appended).toHaveLength(4);
+
+		// Root section heading
+		expect(appended[0]?.type).toBe('heading');
+		expect((appended[0] as { depth?: number }).depth).toBe(2);
+		expect(
+			(appended[0] as { children?: Array<{ value?: string }> }).children?.[0]
+				?.value,
+		).toBe('Exercises');
+
+		// Root group Tabs (one tab: root.js)
+		const rootTabs = appended[1] as unknown as {
+			type: string;
+			name?: string;
+			children?: ReadonlyArray<{ type: string; name?: string }>;
+		};
+		expect(rootTabs.name).toBe('Tabs');
+		expect(
+			rootTabs.children?.filter(
+				(c) => c.type === 'mdxJsxFlowElement' && c.name === 'TabItem',
+			),
+		).toHaveLength(1);
+
+		// Subdir heading (depth 3)
+		expect(appended[2]?.type).toBe('heading');
+		expect((appended[2] as { depth?: number }).depth).toBe(3);
+
+		// Subdir Tabs (one tab: 01.js)
+		const subdirTabs = appended[3] as unknown as typeof rootTabs;
+		expect(subdirTabs.name).toBe('Tabs');
+	});
+
+	it('D.19: bottom mode with groups → per-file StudyLens nodes with headings between groups', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'grouped-bottom');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		const appended = tree.children.slice(1);
+		// group-a heading + 2 StudyLens + group-b heading + 1 StudyLens = 5
+		expect(appended).toHaveLength(5);
+
+		// Group A heading
+		expect(appended[0]?.type).toBe('heading');
+		expect((appended[0] as { depth?: number }).depth).toBe(3);
+
+		// Two StudyLens nodes for group-a
+		expect((appended[1] as { type: string }).type).toBe('mdxJsxFlowElement');
+		expect((appended[2] as { type: string }).type).toBe('mdxJsxFlowElement');
+
+		// Group B heading
+		expect(appended[3]?.type).toBe('heading');
+
+		// One StudyLens for group-b
+		expect((appended[4] as { type: string }).type).toBe('mdxJsxFlowElement');
+	});
+
+	it('D.20: single subdir, no root files → one group Tabs, no empty root group', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'grouped-single-subdir');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		const appended = tree.children.slice(1);
+		// exercises heading + Tabs = 2 nodes (no root group)
+		expect(appended).toHaveLength(2);
+		expect(appended[0]?.type).toBe('heading');
+		const tabs = appended[1] as unknown as {
+			type: string;
+			name?: string;
+			children?: ReadonlyArray<{ type: string; name?: string }>;
+		};
+		expect(tabs.name).toBe('Tabs');
+		expect(
+			tabs.children?.filter(
+				(c) => c.type === 'mdxJsxFlowElement' && c.name === 'TabItem',
+			),
+		).toHaveLength(2);
+	});
+
 	it('vfile with no path → tree unchanged (guard)', () => {
 		const transformer = createRemarkStudyLenses({
 			contentRoot: FIXTURES_DIR,

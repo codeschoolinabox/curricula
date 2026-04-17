@@ -22,6 +22,7 @@ import deepMerge from '../../lib/utils/deep-merge.js';
 
 import codeBlockToJsx from './code-block-to-jsx.js';
 import discoverSiblings from './discover-siblings.js';
+import prettifyDirName from './prettify-dir-name.js';
 import resolveCascade from './resolve-cascade.js';
 
 import type { Code, Root } from 'mdast';
@@ -91,20 +92,39 @@ function createRemarkStudyLenses(
 			config,
 		);
 		if (siblings.length === 0) return;
-		// Optional section heading appended above the embed block (depth 2).
-		if (config.embedSiblings.sectionHeading !== null) {
-			tree.children.push({
-				type: 'heading',
-				depth: 2,
-				children: [
-					{ type: 'text', value: config.embedSiblings.sectionHeading },
-				],
-			});
-		}
-		if (config.embedSiblings.mode === 'tabs') {
-			appendTabsEmbed(tree, siblings, config);
-		} else {
-			appendBottomEmbed(tree, siblings, config);
+		const groups = groupSiblings(siblings);
+		for (const group of groups) {
+			// Root group: depth-2 heading from sectionHeading config.
+			if (group.groupKey === '') {
+				if (config.embedSiblings.sectionHeading !== null) {
+					tree.children.push({
+						type: 'heading',
+						depth: 2,
+						children: [
+							{
+								type: 'text',
+								value: config.embedSiblings.sectionHeading,
+							},
+						],
+					});
+				}
+			} else {
+				// Subdirectory group: depth-3 heading from prettified dirname.
+				const heading = prettifyDirName(
+					group.groupKey,
+					config.exerciseSetPrefixes,
+				);
+				tree.children.push({
+					type: 'heading',
+					depth: 3,
+					children: [{ type: 'text', value: heading }],
+				});
+			}
+			if (config.embedSiblings.mode === 'tabs') {
+				appendTabsEmbed(tree, group.members, group.groupKey, config);
+			} else {
+				appendBottomEmbed(tree, group.members, config);
+			}
 		}
 	};
 }
@@ -137,6 +157,42 @@ function isSiblingBearingPageFile(absFilePath: string): boolean {
 	if (basename === 'index.md') return true;
 	if (basename !== 'README.md') return false;
 	return !fs.existsSync(path.join(path.dirname(absFilePath), 'index.md'));
+}
+
+/**
+ * Groups siblings by first path segment of their label. Root-level
+ * files (no `/` in label) land in the `""` group. Empty groups are
+ * filtered out (a subdirectory whose files all failed the configured-
+ * languages filter would produce an empty group; emitting `<Tabs>`
+ * with zero children crashes Docusaurus).
+ */
+function groupSiblings(
+	siblings: ReadonlyArray<Sibling>,
+): ReadonlyArray<{ groupKey: string; members: ReadonlyArray<Sibling> }> {
+	const map = new Map<string, Sibling[]>();
+	for (const s of siblings) {
+		const slashIdx = s.label.indexOf('/');
+		const key = slashIdx === -1 ? '' : s.label.slice(0, slashIdx);
+		const arr = map.get(key);
+		if (arr !== undefined) arr.push(s);
+		else map.set(key, [s]);
+	}
+	const groups: Array<{ groupKey: string; members: ReadonlyArray<Sibling> }> =
+		[];
+	// Root group first (if it exists and is non-empty).
+	const root = map.get('');
+	if (root !== undefined && root.length > 0) {
+		groups.push({ groupKey: '', members: root });
+	}
+	// Subdirectory groups in alphabetical order by key.
+	const sortedKeys = [...map.keys()]
+		.filter((k) => k !== '')
+		.sort((a, b) => a.localeCompare(b));
+	for (const key of sortedKeys) {
+		const members = map.get(key)!;
+		if (members.length > 0) groups.push({ groupKey: key, members });
+	}
+	return groups;
 }
 
 /**
@@ -184,9 +240,17 @@ function appendBottomEmbed(
 function appendTabsEmbed(
 	tree: Root,
 	siblings: ReadonlyArray<Sibling>,
+	groupKey: string,
 	config: ResolvedConfig,
 ): void {
 	const tabItems = siblings.map((sibling) => {
+		// Within a group, labels are relative to the group — strip the
+		// `groupKey/` prefix so tabs read `01-declare`, not
+		// `sl-01-variables/01-declare`.
+		const tabLabel =
+			groupKey === ''
+				? sibling.label
+				: sibling.label.slice(groupKey.length + 1);
 		const inner: Code = {
 			type: 'code',
 			lang: sibling.lang,
@@ -207,12 +271,12 @@ function appendTabsEmbed(
 				{
 					type: 'mdxJsxAttribute' as const,
 					name: 'value',
-					value: sibling.label,
+					value: tabLabel,
 				},
 				{
 					type: 'mdxJsxAttribute' as const,
 					name: 'label',
-					value: sibling.label,
+					value: tabLabel,
 				},
 			],
 			children: [innerJsx],
