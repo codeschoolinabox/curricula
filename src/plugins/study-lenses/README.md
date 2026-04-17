@@ -98,6 +98,19 @@ synonym anywhere in the code is a bug.
 - **Trailing comment block** — the mirror region at the end of a
   `.js` file: blank lines, line comments, and block comments after
   the last non-comment statement, through EOF.
+- **Sibling group** — a partition of a page's siblings by their first
+  path segment. Root-level files (no `/` in their label) form the
+  **root group**; files under a subdirectory share the subdirectory
+  name as their **group key**. Each group renders as a separate
+  `<Tabs>` element (tabs mode) or a separate block of `<StudyLens>`
+  nodes (bottom mode), preceded by a heading.
+- **Group key** — the first path segment of a sibling's relative-path
+  label. Siblings sharing a group key are rendered together.
+  Root-level files have an empty group key.
+- **Group-relative label** — a sibling's label with its group-key
+  prefix stripped, used as the tab label within that group's `<Tabs>`.
+  Example: `sl-01-variables/01-declare` becomes tab label `01-declare`
+  inside the `Variables` group.
 
 ## What this plugin does
 
@@ -112,22 +125,35 @@ file's absolute path.
 **Output:** the same tree, mutated in place, with two changes:
 
 1. Every fenced code block whose language is a **configured language**
-   (present in the resolved configuration's `defaults` map) gains a hast
-   wrapper (`data.hName = 'StudyLens'`,
-   `data.hProperties = { code, lens, lang, config? }`) so that when the
-   tree is rendered the block becomes a `<StudyLens>` React component.
+   (present in the resolved configuration's `defaults` map) is replaced by
+   an `mdxJsxFlowElement` node named `StudyLens` with `code`, `lens`,
+   `lang`, and optional `config` attributes so that when the tree is
+   rendered the block becomes a `<StudyLens>` React component.
    Unconfigured languages pass through untouched.
 2. For sibling-bearing pages (the `index.md` when present in a directory,
    otherwise the `README.md`), any `.js` files found in the directory subtree
    (up to the next nested sibling-bearing page, skipping hidden dirs,
    `node_modules/`, and ignore-prefixed dirs; symlinks are not followed) are
-   appended to the tree. In `bottom` mode they become per-sibling
-   `<StudyLens>` nodes; in `tabs` mode they become a single Docusaurus
-   `<Tabs>` element wrapping one `<TabItem>` per sibling, each TabItem
-   containing a single `<StudyLens>`. The plugin emits Docusaurus's
-   native `Tabs`/`TabItem` (from `@theme/`) rather than a custom wrapper —
-   this gives keyboard navigation, URL-hash tab persistence, and
-   `groupId` synchronization for free.
+   appended to the tree. Siblings are **grouped by first path segment**
+   (see **Sibling group** in the glossary): root-level files form one group;
+   files under each subdirectory form their own group. Groups are emitted in
+   alphabetical order by group key; empty groups (no files after language
+   filtering) are silently omitted.
+
+   In `bottom` mode each group's siblings become per-sibling `<StudyLens>`
+   nodes preceded by a heading. In `tabs` mode each group becomes a separate
+   Docusaurus `<Tabs>` element wrapping one `<TabItem>` per sibling, each
+   TabItem containing a single `<StudyLens>`. Tab labels are
+   **group-relative** (the group-key prefix is stripped). The plugin emits
+   Docusaurus's native `Tabs`/`TabItem` (from `@theme/`) rather than a
+   custom wrapper — this gives keyboard navigation, URL-hash tab persistence,
+   and `groupId` synchronization for free.
+
+   The root group's heading uses the configured `sectionHeading` (depth 2).
+   Subdirectory group headings are prettified from the directory name using the
+   same pipeline as the sidebar generator: strip exercise-set prefix → strip
+   numeric ordering → kebab-case to Title Case (depth 3). The shared transform
+   lives in `prettify-dir-name.ts`.
 
 ### Subsystem 2 — Lifecycle plugin (dev-server watching)
 
@@ -570,8 +596,10 @@ Docusaurus 3.7; the component's parser is the same either way.
   `ResolvedConfig`, walks downward stopping at page boundaries and
   ignore-prefixed dirs (also skipping hidden dirs, `node_modules/`; not
   following symlinks), returns `Sibling[]` (frozen).
-- `code-block-to-hast.ts` — mutates a `code` MDAST node in place to carry
-  `data.hName = 'StudyLens'` and `data.hProperties = { code, lens, lang, … }`.
+- `code-block-to-jsx.ts` — converts a `code` MDAST node into an
+  `mdxJsxFlowElement` node named `StudyLens` with `code`, `lens`, `lang`,
+  and optional `config` attributes. All `<StudyLens>` emission sites call
+  this single helper.
 - `parse-lens-config.ts` — the shared fallback-tolerant decoder for the
   `config` prop. Imported by `StudyLensMock` in V1; expected to be promoted
   to `src/lib/utils/` when a second consumer (e.g. V2 rich component)
@@ -582,10 +610,14 @@ Docusaurus 3.7; the component's parser is the same either way.
 - `lifecycle-plugin.ts` — the Docusaurus lifecycle plugin: exposes
   `getPathsToWatch` so dev-server rebuilds trigger on `lenses.json` or
   sibling `.js` changes.
+- `prettify-dir-name.ts` — shared pipeline for converting a directory name
+  into a human-readable heading: strip exercise-set prefix → strip numeric
+  ordering → kebab-case to Title Case. Used by both the remark plugin (for
+  sibling group headings) and the sidebar generator (for category labels).
 - `sidebar-generator.ts` — `createStudySidebarGenerator({ contentRoot })`
   factory; returns a Docusaurus `sidebarItemsGenerator` that rewrites
   category labels for directories matching any `exerciseSetPrefixes`
-  entry (strip prefix → strip numeric ordering → Title Case).
+  entry via the shared `prettify-dir-name.ts` pipeline.
 - `index.ts` — re-exports the three entry points (remark factory,
   lifecycle plugin, sidebar-generator factory) used by
   `docusaurus.config.ts`.

@@ -40,9 +40,25 @@ labels at sidebar-build time.
 
 4. **Embed siblings** (sync; filesystem read) — only for sibling-bearing
    pages whose resolved configuration enables embedding. Collect the
-   page's siblings, optionally append a heading node, then append either
-   per-sibling component nodes (bottom mode) or a single tabs-wrapper
-   node (tabs mode) to the tree's children.
+   page's siblings, then partition them into **sibling groups** by first
+   path segment of each sibling's label (root-level files form the root
+   group; files under a subdirectory share the directory name as group
+   key). Groups are emitted in alphabetical order by group key; empty
+   groups (zero siblings after language filtering) are omitted.
+
+   For the root group, emit the configured `sectionHeading` as a depth-2
+   heading (if present). For each subdirectory group, emit a depth-3
+   heading whose text is the prettified directory name (strip
+   exercise-set prefix → strip numeric ordering → kebab-case to Title
+   Case — same pipeline as the sidebar generator, via a shared helper).
+
+   Within each group: in `bottom` mode, append each sibling as its own
+   component node. In `tabs` mode, append a single tabs-wrapper node
+   containing one tab-item per sibling; tab labels are **group-relative**
+   (the group-key prefix is stripped from the sibling's label).
+
+   Grouping is one level deep (first path segment only); deeper nesting
+   is not further sub-grouped.
 
 ### Cascade resolver
 
@@ -244,6 +260,24 @@ a content root and returns the generator function.
   the shared `parseLensConfig` util — because MDX attribute
   serialization has uncertain object round-trip semantics and the
   contract leaves both shapes valid.
+- **Group-relative tab labels.** In tabs-mode embeds, tab labels are
+  group-relative — the group-key prefix is stripped from each sibling's
+  label. A file `groupdir/01-intro.js` renders as tab label `01-intro`,
+  not `groupdir/01-intro`. This keeps tab UIs clean when files are
+  organized in subdirectories.
+- **Single-level grouping.** Sibling grouping partitions by first path
+  segment only. Subdirectories nested more than one level deep are not
+  further sub-grouped; a file `a/b/c.js` lands in the `a` group with
+  label `b/c`.
+- **Prettified heading pipeline is shared.** The directory-name-to-heading
+  transform used for sibling group headings reuses the same pipeline as
+  the sidebar generator (strip exercise-set prefix → strip numeric
+  ordering → kebab-case to Title Case). The shared function lives in
+  `prettify-dir-name.ts`. Changes to the pipeline affect both subsystems.
+- **Empty-group suppression.** A subdirectory group whose siblings are
+  all filtered out (by the configured-languages rule) produces no heading
+  and no `<Tabs>` element. This prevents the Docusaurus `<Tabs>` runtime
+  crash on zero children.
 
 ## Out of scope
 
