@@ -42,6 +42,38 @@ const config: Config = {
 	},
 
 	plugins: [
+		// --- COOP/COEP headers for dev server ---
+		// The V2 study-lens Run button spawns a Web Worker that needs
+		// cross-origin isolation (SharedArrayBuffer). These headers enable
+		// that in the dev server only — they merge into Docusaurus's default
+		// devServer.headers object via webpack-merge.
+		//
+		// Production hosting must set these headers separately (reverse
+		// proxy, CDN config, etc.).
+		//
+		// If cross-origin resources (CDN images, external scripts) break,
+		// they need `Cross-Origin-Resource-Policy: cross-origin` on their
+		// server or a `crossorigin` attribute on the element.
+		//
+		// Note: we use devServer.headers (static) rather than
+		// setupMiddlewares (function) because webpack-merge replaces
+		// functions — it would overwrite Docusaurus's default
+		// setupMiddlewares that adds evalSourceMapMiddleware.
+		function coopCoepHeadersPlugin() {
+			return {
+				name: 'coop-coep-headers',
+				configureWebpack() {
+					return {
+						devServer: {
+							headers: {
+								'Cross-Origin-Opener-Policy': 'same-origin',
+								'Cross-Origin-Embedder-Policy': 'require-corp',
+							},
+						},
+					};
+				},
+			};
+		},
 		// --- .js → .ts/.tsx extension resolution for webpack ---
 		// The `lib/editing/` and `api/` modules use the Node ESM convention
 		// of writing `.js` extension specifiers that resolve to `.ts` source
