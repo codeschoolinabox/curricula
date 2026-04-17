@@ -18,8 +18,17 @@ on it. This course guides you from your first comment to fluent collaboration
 with AI agents, using the smallest possible set of language features. It is
 self-study: no time estimates, no deadlines. Go at your own pace.
 
-**Four threads run beneath every chapter, every exercise, every lens**, arranged
-as an arc where each layer is enabled by the ones before it:
+**What you're actually learning.** Every programming language has a _notional
+machine_ — an imaginary model of how the computer carries out your instructions.
+Programming is building and directing that machine through notation. The
+difference between programming and vibecoding is prediction: a programmer can
+predict what the machine will do when their code runs; a vibecoder can't. This
+course builds predictive mastery of JavaScript's notional machine — the kind of
+understanding that lets you direct the machine precisely, whether you write the
+notation yourself or an LLM writes it for you.
+
+**How do you build this predictive mastery? Four threads** run beneath the
+curriculum, progressively layering as the chapters advance:
 
 - **Twinning** (baseline): building an accurate mental model of a process
   outside your own mind. Each chapter asks you to twin a different process: the
@@ -55,11 +64,15 @@ as an arc where each layer is enabled by the ones before it:
   system, not just refining individual pieces. This thread emerges most strongly
   in Chapter 3 (users, PBSI) and deepens through Chapter 5.
 
-**The spiral.** Skills introduced in earlier chapters are practiced and deepened
-throughout. Each objective below marks where a skill is _first introduced_, not
-where it ends. The "builds on" progressions are rough through-lines: the
-strongest path from prior skills to the new one, not an exhaustive dependency
-list.
+**The spiral (skills) and the ladder (audiences).** Each chapter adds an
+audience to the learner's awareness (the ladder: devs → +computer → +users →
++agents → +you). Within each chapter, skills are revisited at increasing depth
+(the spiral: read → trace → describe → modify → write, practiced again with each
+new audience and language feature). Study Lenses generates exercises that drive
+this spiral at the exercise level. Each objective below marks where a skill is
+_first introduced_, not where it ends. The "builds on" progressions are rough
+through-lines: the strongest path from prior skills to the new one, not an
+exhaustive dependency list.
 
 **Study Lenses** is embedded directly in every page. Every code snippet has a
 full suite of lenses available: trace tables, variable highlighters, Parsons
@@ -100,46 +113,54 @@ building a precise data structure.
 
 ### Notional machines
 
-Every programming language describes computation through an imaginary machine
-— its **notional machine**. Each language has its own, with its own rules,
+Every programming language describes computation through an imaginary machine —
+its **notional machine**. Each language has its own, with its own rules,
 capabilities, constraints, and failure modes. A given language can even be
 understood through more than one notional-machine framework: different
 pedagogical accounts can emphasize different aspects of the same underlying
-machine. "The notional machine" is a category, not a universal referent —
-there isn't one NM to learn and be done.
+machine. "The notional machine" is a category, not a universal referent — there
+isn't one NM to learn and be done.
 
-You don't need to understand below the notional machine you're working with;
-the interpreter handles compilation, optimization, and hardware for you. You
-DO need to understand how that particular notional machine operates —
-including which of its parts are themselves black-boxed (built-in APIs like
-`Math.random` — known by interface, not internals).
+You don't need to understand below the notional machine you're working with; the
+interpreter handles compilation, optimization, and hardware for you. You DO need
+to understand how that particular notional machine operates — including which of
+its parts are themselves black-boxed (built-in APIs like `Math.random` — known
+by interface, not internals).
 
 **The notional machine isn't just something you understand — it's what you
 program.** Code is how you direct the NM to do what you want. Programming is,
-fundamentally, instructing a notional machine through notation it will
-interpret exactly.
+fundamentally, instructing a notional machine through notation it will interpret
+exactly.
 
 **This course focuses on JavaScript's notional machine.** In mastering key
-portions of it deeply (through Just Enough JavaScript), you're doing more
-than learning JavaScript. You're learning **what it means to master a
-programming language** — how to build an accurate mental model of a notional
-machine from the outside, how to read code against that model, how to predict
-execution, how to debug divergence from expectation, how to direct the
-machine precisely. That discipline transfers. Once you've mastered key
-portions of one notional machine deeply, you're equipped to learn others
-when you need them. (No one masters 100% of any real language's NM; "key
-portions" is the realistic target.)
+portions of it deeply (through Just Enough JavaScript), you're doing more than
+learning JavaScript. You're learning **what it means to master a programming
+language** — how to build an accurate mental model of a notional machine from
+the outside, how to read code against that model, how to predict execution, how
+to debug divergence from expectation, how to direct the machine precisely. That
+discipline transfers. Once you've mastered key portions of one notional machine
+deeply, you're equipped to learn others when you need them. (No one masters 100%
+of any real language's NM; "key portions" is the realistic target.)
+
+**The concrete skill: prediction.** The course builds this mastery through
+prediction — you learn to predict what the notional machine will do before your
+code runs, then verify those predictions using Study Lenses and the browser's
+debugger. By the end of Chapter 4, you can trace every category of event the JS
+notional machine produces: scope creation, binding lifecycle, expression
+resolution, coercion, scope chain walks, prototype lookups. That's what
+"understanding the NM" means in practice — not abstract knowledge, but
+demonstrable predictive accuracy.
 
 We focus on the machine, not on any specific domain the machine might be used
 in. Web apps, games, data pipelines, ML systems come and go. The capacity to
-read and direct a programming language's notional machine — whichever
-language you're in — is the invariant skill.
+read and direct a programming language's notional machine — whichever language
+you're in — is the invariant skill.
 
 This is a subtle distinction from
 [**_Learnable Programming_**](http://worrydream.com/LearnableProgramming/) by
-Bret Victor, which influenced this curriculum. Victor focused on visualizing
-the _output_ of computation — what programs produce. Our tooling visualizes
-the _machine's internals_ — how the mechanism does it. Different pedagogical
+Bret Victor, which influenced this curriculum. Victor focused on visualizing the
+_output_ of computation — what programs produce. Our tooling visualizes the
+_machine's internals_ — how the mechanism does it. Different pedagogical
 targets; both valuable.
 
 ### The architect/implementer division has always existed
@@ -184,13 +205,21 @@ pull the levers, work the controls — but the notional machine they're directin
 is still yours to understand. When you converse with an LLM about what your
 program should do, you're describing what you want the NM to do, and you're
 judging its output against what the NM actually produces. With an LLM in the
-loop, you can (weirdly) abstract away much of the notation layer and program
-the NM more directly — through prose and NM understanding, mediated by the LLM
-that translates your intent into notation. But that route only works if your
-NM understanding is strong enough to specify outcomes the NM can actually
-produce and to evaluate whether the LLM delivered them. Without NM
-understanding, you can't direct the LLM meaningfully and you can't judge its
-output. The NM is what's being programmed — just via a new route.
+loop, you can (weirdly) abstract away much of the notation layer and program the
+NM more directly — through prose and NM understanding, mediated by the LLM that
+translates your intent into notation. But that route only works if your NM
+understanding is strong enough to specify outcomes the NM can actually produce
+and to evaluate whether the LLM delivered them. Without NM understanding, you
+can't direct the LLM meaningfully and you can't judge its output. The NM is
+what's being programmed — just via a new route.
+
+**This is the concrete difference between vibecoding and programming.** A
+vibecoder produces code they can't predict — they iterate on visible behavior
+("does the button work?") without a model of what the machine is doing
+underneath. A programmer can predict what the machine will do, evaluate whether
+the output matches intent, and diagnose divergence when it doesn't. With or
+without an LLM, prediction is the skill that separates programming from vibing.
+This course builds that skill.
 
 This frame treats LLMs as authoring partners. Agentic systems where LLMs plan,
 execute, and modify state autonomously are a more complex picture deferred to
@@ -228,9 +257,10 @@ both at once. LLMs decompose his wish in an unexpected way:
 - ✅ **Study Lenses reclaims visibility** — of the machine's internals, which is
   this curriculum's specific focus
 
-Study Lenses gives a slightly different solution the visibility half of Victor's
-wish than he expressed in Learnable Programming: We will focus on visualizing
-the _internal mechanisms_ of your program's execution, not the final output.
+Study Lenses gives a slightly different solution to the visibility half of
+Victor's wish than he expressed in Learnable Programming: We will focus on
+visualizing the _internal mechanisms_ of your program's execution, not the final
+output.
 
 ### Your instrument: JavaScript, and your practice instrument: Just Enough JavaScript
 
@@ -241,7 +271,7 @@ chain lookup. Chapter 2 studies this machine in depth.
 **Just Enough JavaScript (JEJ)** is the deliberately constrained subset we use
 for most of the curriculum. "Few options, many possibilities" — depth on a small
 surface rather than skimming across a large one. This is a pedagogical
-constraint, not a permanent one. The principle is the same.
+constraint, not a permanent one.
 
 ### What this course builds in you — the four threads
 
@@ -508,8 +538,8 @@ The computer is now a full audience. The primary learning objective is
 executes your code. Other languages have their own notional machines; the
 discipline you develop here transfers. Programs produce output via logs and
 assertions but do not yet interact with users. `undefined` is encountered
-naturally through variables; `null` is held until Chapter 3 where `prompt()`
-can return it.
+naturally through variables; `null` is held until Chapter 3 where `prompt()` can
+return it.
 
 The chapter has two tracks:
 
@@ -1036,12 +1066,13 @@ Chapter 5 will return briefly to it in its closing moments.
 
 ---
 
-## Chapter 5: Snippetry
+## Chapter 5: Developers, Computers, Users, Agents, and You
 
 _Metaphor anchor: **the composer's daily practice** — small, complete pieces
-written for one's own chops. Variations on a theme, études on a single
-technique, sketchbook entries exploring an idea. Ligeti's_ Musica Ricercata,
-Beethoven's sketchbooks, Bach's inventions*. A serious genre in its own right.*
+written for the composer's own practice. Variations on a theme, études on a
+single technique, sketchbook entries exploring an idea — Ligeti's Musica
+Ricercata, Beethoven's sketchbooks, Bach's inventions. A serious genre in its
+own right._
 
 **In development.** Full chapter content is still being designed. The framing
 below is the intended shape.
@@ -1055,64 +1086,172 @@ question of the curriculum:
 > How do I maintain and grow my skills when I no longer need to write code to
 > build software?
 
-Snippetry is the answer: keep your own compositional chops fresh through small
-programs that exercise whole-program design at small scale while drilling an
-isolated concern — a language feature, an architecture, a paradigm, an
-algorithm, the feel of a new notional machine, a user-experience miniature, or
-just for fun.
+Snippetry is the answer: keep your own skills sharp through small programs that
+exercise whole-program design at small scale while drilling an isolated concern
+— a language feature, a paradigm, an algorithm, the feel of a new notional
+machine, a user-experience miniature, or just for fun.
 
 The practice balances **broad exploration** and **productive constraint**.
 Students develop their own sense of which balance serves their learning and
 their voice. There's no rigid split between types of snippet; the practice is
-about finding the balance that works for you right now, and letting it change as
-you grow.
+about finding the balance that works for you right now, and letting it change
+as you grow.
 
-### The training-wheels-off commitment (within a preserved sandbox)
+**"You" is the fifth audience.** Students have been programming for developers,
+the computer, users, and agents. Now they program for themselves — to learn,
+practice, think, stretch, explore, express, delight, and discover. "You" is
+both singular (your own practice) and plural (sharing with and remixing from
+peers through the collaborative gist system).
+
+**JavaScript is multi-paradigmatic.** Chapters 1–4 taught imperative
+programming. Chapter 5 is where students discover that the same language
+supports fundamentally different ways of thinking about computation:
+functional, object-oriented, declarative. Paradigm exploration is a core
+activity, not a sidebar.
+
+### The training-wheels-off commitment
 
 Chapter 5 is where students **graduate from the scaffolded curriculum
-environment**, while staying within a deliberate sandbox.
+environment** into real browser execution with real consequences.
 
 **What comes off:**
 
-- **JEJ language-feature constraint** — students can use any and all JS language
-  features outside DOM and Canvas. Newly available: the event loop, classes,
-  `async`/`await`, generators, `fetch`, `Promise`, `Symbol`, `Proxy`, ES
-  modules, and much more
+- **JEJ language-feature constraint** — students can use any and all JS
+  language features. Newly available: user-defined functions, closures, arrays,
+  objects, the event loop, classes, `async`/`await`, generators, `fetch`,
+  `Promise`, `Symbol`, `Proxy`, ES modules, DOM manipulation, Canvas, and
+  everything else
+- **The web worker sandbox** — code runs directly in the browser (iframe).
+  If your program freezes, the page freezes. Real consequences, real
+  environment. Optional configurable loop guards are available but not
+  enforced
 - **Enforced formatting** — format your code however you prefer
-- **Study Lenses NM visualizations** — the browser's native debugger and console
-  only, no more curriculum-provided NM visualizations
+- **Study Lenses NM visualizations** — the curriculum's tracer-based NM
+  visualizations are no longer the primary tool
 
-**What stays as constraint, deliberately:**
+**What replaces it:**
 
-- **No DOM manipulation, no Canvas** — preserves the curriculum's
-  machine-focused pedagogy. We still care about the notional machine, not visual
-  output. This constraint also lets the learning environment continue sandboxing
-  snippets in web workers with time limits for integrity.
-- Students who want to build web apps or canvas games can — outside our
-  environment. The constraint serves the chapter's focus, not any limit on what
-  you can do in the world.
+- **Full browser devtools debugging toolkit** — line breakpoints, conditional
+  breakpoints, logpoints, `debugger` statements, step over/into/out, scope
+  panel, watch expressions, call stack, pause on exceptions, DOM breakpoints,
+  event listener breakpoints, console in paused context. Students learn all
+  of it.
+- **External NM visualization tools** — open-in buttons for specialized tools
+  (loupe for event loop, promisees for Promises, etc.) with different notional
+  machine perspectives. Training wheels come off, but power tools are available
+- **Four sandbox modes** offering different constraints and affordances:
+  - **Script without HTML** — pure computation, closest to Chs 1–4
+  - **Module without HTML** — introduces ES module semantics
+  - **HTML file with a script tag** — DOM available, split view of code and
+    rendered page
+  - **HTML file with a module tag** — DOM + ES modules
 
-### Learning objectives (LLM-generated list, not great)
+  Students learn to distinguish "pure" scripts (computation only) from scripts
+  embedded in a full page, and choose the mode that fits their snippet's needs.
 
-- 🥚 Identify productive constraints for a given snippet: what are you drilling?
-- 🥚 Identify appropriate exploratory freedoms for a given snippet: what are you
-  discovering?
-- 🥚 Write small complete programs that exercise whole-program design at small
-  scale
-- 🥚 Use the browser's native debugger and console to trace execution without
-  the curriculum's NM visualizations
-- 🐣 Read and write in any JS syntax outside DOM/Canvas, including the event
-  loop, classes, `async`/`await`, generators, `fetch`, `Promise`, and other
-  features outside JEJ
-- 🐣 Evaluate a snippet's effectiveness for its intended purpose (learning,
-  exploration, expression)
-- 🐣 Balance exploration and constraint in a way that serves your current
-  learning goals
-- 🐥 Develop and recognize elements of your own compositional voice through
-  accumulated snippet work
-- 🐥 Engage the Snippetry corpus as a reference and source of inspiration
+### The collaborative gist system
+
+Students can save snippets as gists, browse gists saved by other learners,
+and remix them. This makes Chapter 5 collaborative across all learners: your
+practice is your own, but it's enriched by what others are exploring. The
+remix workflow — take someone else's snippet, change its intent, make it
+yours — is a core snippetry activity.
+
+### Learning objectives
+
+#### 5A. Training-Wheels-Off: Carrying Predictive Mastery
+
+- 🥚 Trace code with the full browser devtools debugging toolkit: breakpoints,
+  conditional breakpoints, logpoints, `debugger` statements, step
+  over/into/out, scope panel, watch expressions, call stack, pause on
+  exceptions, DOM breakpoints (HTML modes), event listener breakpoints.
+  Predict each step before stepping
+- 🥚 Predict a program's complete behavior (output, final binding states,
+  error or no error) without stepping, then verify with a single run. The
+  debugger is scaffold; prediction without it is the graduation
+- 🐣 Use the devtools toolkit to isolate a bug: combine debugging features
+  strategically (conditional breakpoints, watch expressions, pause on
+  exceptions, logpoints) and describe divergence using NM vocabulary
+- 🐣 Choose and use external NM visualization tools (loupe, promisees, etc.)
+  for specific NM concepts; explain the tool choice and what it revealed
+
+#### 5B. Extending the NM: New JS Territory
+
+- 🥚 Extend your NM to a JS feature outside JEJ (your choice: functions,
+  arrays, objects, classes, async/await, generators, etc.). Read
+  documentation, form a prediction, write a snippet, verify, update your
+  model
+- 🐣 Explore "the weird parts": find edge cases and surprising JS behaviors,
+  predict, verify, explain using NM concepts why the behavior occurs
+- 🐥 Extend your NM to a second unfamiliar feature; reflect on whether the
+  learning process was easier the second time and why
+- 🐔 Explore "historic" vs. "modern" JS: write the same thing using a
+  historic idiom and its modern equivalent, trace both, describe the NM
+  differences
+
+#### 5C. Programming Paradigms
+
+- 🥚 Name the major programming paradigms JS supports (imperative, functional,
+  object-oriented, declarative) and identify which paradigm a given snippet
+  uses
+- 🐣 Solve the same problem in two different paradigms; trace both and
+  describe how the NM behaves differently
+- 🐣 Implement the same paradigm with different features (e.g., functional
+  style with loops+variables vs. array methods; OOP with prototypes vs.
+  classes)
+- 🐥 Translate a snippet between paradigms: preserve behavior, articulate
+  what changed at Strategy/Implementation (PBSI) and what stayed at
+  Purpose/Behavior
+
+#### 5D. Snippetry as Practice
+
+- 🥚 Write a snippet under a productive constraint (a single feature in 3
+  ways, a specific error on purpose, one loop + zero conditionals, etc.)
+- 🥚 Read and trace a snippet from the corpus or a peer's gist that uses
+  unfamiliar JS; apply PBSI analysis
+- 🐣 Write a variation on an existing snippet: same purpose, different
+  strategy; articulate what changed and why
+- 🐣 Remix a peer's snippet: change its intent, not just implementation; make
+  it yours
+
+#### 5E. You as Audience
+
+- 🥚 Make yourself laugh: write a snippet whose output, structure, or concept
+  genuinely amuses you — not funny variable names, the humor lives in what
+  the program does
+- 🐣 Surprise yourself: write a snippet where you don't fully know what will
+  happen; describe what surprised you
+- 🐣 Discover something unexpected: encounter a behavior you didn't predict,
+  investigate it, explain it
+- 🐥 Impress yourself: write a snippet that does something you didn't think
+  you could do a month ago
+
+#### 5F. Compositional Voice and Micro-Decisions
+
+- 🥚 Identify at least 5 micro-decisions in a snippet and describe what each
+  communicates; name alternatives and how they'd change the voice
+- 🐣 Write the same program two ways that reveal different voices: same
+  behavior, different micro-decisions (the cat-detector corpus is a model)
+- 🐥 After writing 5+ snippets, identify your own recurring patterns with
+  specific examples
+
+#### 5G. Self-Directed Learning
+
+- 🥚 Choose your sandbox mode deliberately: explain the constraints and
+  affordances of each mode for a given snippet idea
+- 🐥 Design your own snippet prompt targeting a specific NM concept;
+  interesting enough that a peer would want to try it
+
+#### 5H. The Whole Rhetorical Situation
+
+- 🐣 Write a snippet for a specific audience beyond yourself; save as a gist
+- 🐥 Conduct a full self-review of one of your own snippets: PBSI,
+  micro-decisions, NM trace, voice reflection
+
+#### 5I. Capstone Reflections
+
 - 🐔 Articulate why programming-for-its-own-sake remains valuable in an
-  LLM-assisted world
-- 🐔 Recognize that **alien composers** (agentic systems doing design work, not
-  just notation) are arriving too, and that the snippetry practice is one way
-  humans continue cultivating their own design sensibility as that shift unfolds
+  LLM-assisted world — your answer, grounded in your experience
+- 🐔 Recognize that **alien composers** (agentic systems doing design work,
+  not just notation) are arriving; identify a concrete example and reflect on
+  what it means for the composer/virtuoso distinction

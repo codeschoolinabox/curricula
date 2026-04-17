@@ -11,3 +11,4 @@ import format from '../lib/formatting/format.js';
 import checkFormat from '../lib/formatting/check-format.js';
 
 export { format, checkFormat };
+export default format;

@@ -42,7 +42,7 @@ skim or dive.
 21. [The honest framing — LLMs are often better](#21-the-honest-framing--llms-are-often-better)
 22. [The verification limit and the rise of agile-visible discipline](#22-the-verification-limit-and-the-rise-of-agile-visible-discipline)
 23. [The PL-future](#23-the-pl-future)
-24. [Chapter 5 — Snippetry (overview for narrative reference)](#24-chapter-5--snippetry-overview-for-narrative-reference)
+24. [Chapter 5 — Developers, Computers, Users, Agents, and You](#24-chapter-5--developers-computers-users-agents-and-you)
 25. [Voice for the curriculum](#25-voice-for-the-curriculum)
 26. [Characters](#26-characters)
 27. [Smaller connections (noted for later chapter authors)](#27-smaller-connections-noted-for-later-chapter-authors)
@@ -146,6 +146,44 @@ area; no one masters all of it. JEJ scopes mastery to the core constructs
 that carry transferable insight. The curriculum's target is mastery of those
 key portions, and the meta-skill of deepening NM understanding more broadly
 over time.
+
+### The NM made concrete: two viewing levels and a tracer
+
+The JS notional machine defined for this curriculum has two viewing levels:
+
+- **Visual-syntax level** (what the code does): expressions and statements
+  — the control panel
+- **Behind-the-scenes level** (what the VM does invisibly): values,
+  bindings, scopes, coercion — the machine itself
+
+The code text is a representation designed to help us program the machine;
+it is not the machine. Study Lenses' tracer captures every observable moment
+of the behind-the-scenes level as structured events: scope creation, binding
+lifecycle (declare → initialize → available → access → update), expression
+resolution, coercion, scope chain walks, prototype chain lookups, I/O
+channel interactions.
+
+The tracer's config structure is itself pedagogically significant: by
+enabling/disabling event categories (`{ bindings: true }` for variable
+lifecycle only, `{ resolve: true }` for data flow only, `{ scopes: true }`
+for scope structure), teachers expose specific NM mechanisms selectively.
+Students experience the machine through controlled visibility.
+
+**The vibecoding distinction (assessable)**: a vibecoder produces code they
+can't predict — they iterate on visible behavior without a model of the
+machine. A programmer can predict the machine's events, evaluate whether
+output matches intent, and diagnose divergence. With or without an LLM,
+prediction is what separates programming from vibing. The curriculum targets
+"deep and demonstrable" NM mastery: students predict every event category
+the tracer captures, verified by auto-correcting trace tables and
+trace-generated quizzes.
+
+For the full NM specification, tracer config, and event-sequence
+walkthroughs, see:
+
+- `src/lib/welcome-to-programming/just-enough/javascript/notional-machine.md`
+- `src/lib/welcome-to-programming/just-enough/javascript/tracer.md`
+- `src/lib/welcome-to-programming/just-enough/javascript/tracer.architecture.md`
 
 ### Why focus on the machine, not the output
 
@@ -784,8 +822,10 @@ greenfield _at small scale_.
 
 ## 12. Composer pedagogy — the spine of the curriculum
 
-Our learners fill the composer role, not the virtuoso role. Composer training
-has a long, deep tradition with direct curriculum parallels.
+Our learners fill the composer role, not the virtuoso role. Musical composition
+training offers specific parallels to this curriculum's skills — not a unified
+"composer pedagogy" we're importing wholesale, but individual practices that
+illuminate what we're doing and why.
 
 | Composer training                                   | Curriculum parallel                                       |
 | --------------------------------------------------- | --------------------------------------------------------- |
@@ -826,8 +866,8 @@ graph LR
 </details>
 
 **The payoff**: the comprehension-before-production pedagogy isn't an eccentric
-choice. It _is_ composer pedagogy — a centuries-old tradition of training people
-to design music well without necessarily being virtuoso performers.
+choice. It echoes centuries of composer training — a tradition of preparing
+people to design music well without necessarily being virtuoso performers.
 
 ---
 
@@ -971,8 +1011,9 @@ awareness.
   Ch 4: THE ALIEN VIRTUOSO       → LLM collaboration
        │                           (workshopping with a new kind of player)
        ▼
-  Ch 5: DAILY PRACTICE           → Snippetry
-                                   (composer's own ongoing practice)
+  Ch 5: YOU                       → Snippetry: programming for yourself
+                                   (the fifth audience; practice,
+                                    training wheels off, graduation)
 ```
 
 </details>
@@ -1279,8 +1320,8 @@ metaphor literal, not just illustrative.
 
 ## 20. Victor's wish, decomposed
 
-Victor wanted _less human toil_ AND _more execution visibility_, both at once.
-LLMs decompose the wish in an unexpected way.
+Victor wanted _less implementation toil_ AND _more powerful thinking tools_,
+both at once. LLMs decompose the wish in an unexpected way.
 
 <details>
 <summary><b>Visualization: Victor's wish decomposed</b> <i>(supporting)</i></summary>
@@ -1325,7 +1366,7 @@ But:
 - **Different kinds of good.** LLM virtuosity is efficient and exhaustive. Human
   virtuosity is creative, context-sensitive, culturally literate. Both real.
 - **Snippetry is the case for programming-for-its-own-sake** — keeping your own
-  chops fresh even when you're no longer building full codebases.
+  skills sharp even when you're no longer building full codebases.
 - **Composers still matter** because they bring different skill, different
   intent, a different relationship to the audience and the instrument.
 
@@ -1483,7 +1524,7 @@ honestly, without reactionary pessimism or utopian projection.
 
 ---
 
-## 24. Chapter 5 — Snippetry (overview for narrative reference)
+## 24. Chapter 5 — Developers, Computers, Users, Agents, and You
 
 Chapter 5 introduces **snippetry** as the practice of writing small, runnable,
 self-contained programs for their own sake. The chapter's arc and learning
@@ -1494,11 +1535,12 @@ narrative-reference framing.
 
 - Small (~40 lines) complete programs
 - Each exercises whole-program design at small scale
-- Each drills some isolated concern: a language feature, an architecture, a
-  paradigm, an algorithm, the feel of a new NM, a user-experience miniature, or
-  just for fun
+- Each drills some isolated concern: a language feature, a paradigm, an
+  algorithm, the feel of a new NM, a user-experience miniature, or just for fun
 - Balances exploration and constraint — students develop their own sense of the
   balance
+- Can target self-expression and delight: make yourself laugh, surprise
+  yourself, discover something unexpected, impress yourself with growth
 
 ### What snippetry is NOT
 
@@ -1509,29 +1551,65 @@ narrative-reference framing.
   introduced informally from Ch 0 onward (small curiosity-driven snippets),
   before Ch 5 formalizes the practice
 
-### The training-wheels-off commitment (within a preserved sandbox)
+### "You" as the fifth audience
 
-Chapter 5 is where students graduate from the scaffolded curriculum environment.
-Specifically:
+The previous audiences were external: developers who read your code, the
+computer that executes it, users who experience it, agents that collaborate on
+it. "You" is the reflexive turn — students program for themselves: to learn,
+practice, think, stretch, explore, express, delight, and discover.
+
+"You" is both singular (your own practice) and plural (sharing with and
+remixing from peers through the collaborative gist system). The collaborative
+dimension enriches the practice without replacing its self-directed core.
+
+### Multi-paradigmatic JS
+
+Chapters 1–4 taught imperative programming. Chapter 5 is where students
+discover that JavaScript supports fundamentally different ways of thinking
+about computation: functional (functions as values, higher-order functions,
+avoiding mutation), object-oriented (classes, prototypes, encapsulation),
+declarative (describing what, not how). Paradigm exploration is a core Ch 5
+activity — students solve problems across paradigms, implement the same
+paradigm with different features, and translate snippets between paradigms.
+
+### The training-wheels-off commitment
+
+Chapter 5 is where students graduate from the scaffolded curriculum environment
+into real browser execution with real consequences.
 
 **What comes off:**
 
-- JEJ language-feature constraint → students can use any JS language features
-  outside DOM/Canvas. Newly available: the event loop, classes, `async`/`await`,
-  generators, `fetch`, `Promise`, `Symbol`, `Proxy`, ES modules, and much more
+- JEJ language-feature constraint → students can use any and all JS language
+  features. Newly available: user-defined functions, closures, arrays, objects,
+  the event loop, classes, `async`/`await`, generators, `fetch`, `Promise`,
+  `Symbol`, `Proxy`, ES modules, DOM manipulation, Canvas, and everything else
+- The web worker sandbox → code runs directly in the browser (iframe). If
+  the program freezes, the page freezes. Real consequences, real environment.
+  Optional configurable loop guards are available but not enforced
 - Enforced formatting → students format code however they prefer
-- Study Lenses NM visualizations → browser's native debugger and console only
+- Study Lenses NM visualizations → the curriculum's tracer-based NM
+  visualizations are no longer the primary tool
 
-**What stays as constraint (deliberately):**
+**What replaces it:**
 
-- **No DOM manipulation, no Canvas** — preserves the curriculum's
-  machine-focused pedagogy (we care about the NM, not visual output per the
-  Victor/NM distinction). Also lets the Study Lenses environment continue
-  sandboxing snippets in web workers with time limits for learning-environment
-  integrity
-- Students who want to build full web apps or canvas games can — outside our
-  environment. The constraint serves the chapter's focus, not any limit on
-  students' world
+- **Full browser devtools debugging toolkit** — line breakpoints, conditional
+  breakpoints, logpoints, `debugger` statements, step over/into/out, scope
+  panel, watch expressions, call stack, pause on exceptions, DOM breakpoints,
+  event listener breakpoints, console in paused context. Students learn the
+  full toolkit.
+- **External NM visualization tools** — open-in buttons for specialized tools
+  (loupe for event loop, promisees for Promises, etc.) with different notional
+  machine perspectives. Training wheels come off, but power tools are
+  available.
+- **Four sandbox modes** offering different constraints and affordances:
+  - Script without HTML — pure computation, closest to Chs 1–4
+  - Module without HTML — introduces ES module semantics
+  - HTML file with a script tag — DOM available, split view of code and
+    rendered page
+  - HTML file with a module tag — DOM + ES modules
+
+  Students learn to distinguish "pure" scripts (computation only) from scripts
+  embedded in a full page, and choose the mode that fits their snippet's needs.
 
 <details>
 <summary><b>Visualization: training wheels off (Ch 5)</b> <i>(supporting)</i></summary>
@@ -1539,16 +1617,21 @@ Specifically:
 ```
     CHAPTERS 1–4                   CHAPTER 5
     ─────────────                  ──────────
-    ─ JEJ constraint               ─ Any JS (minus DOM/Canvas)
+    ─ JEJ constraint               ─ Any JS (all features)
     ─ Enforced formatting          ─ Format however you like
-    ─ Study Lenses NM viz          ─ Browser native debugger only
-                                   ─ Web worker sandbox preserved
-                                   ─ Time limits preserved
-                                   ─ Machine-focus ethos preserved
+    ─ Study Lenses NM viz          ─ Full browser devtools toolkit
+    ─ Web worker sandbox           ─ Real browser execution (iframe)
+    ─ Imperative only              ─ Multi-paradigmatic exploration
 
-    "Here is everything the         "Here is a wider range, with
-     curriculum has built"           enough sandbox to keep
-                                     focus honest."
+                                   + External NM viz tools (loupe, etc.)
+                                   + 4 sandbox modes (script, module,
+                                     HTML+script, HTML+module)
+                                   + Optional loop guards only
+                                   + Collaborative gist system
+
+    "Here is everything the         "Here is everything the language
+     curriculum has built"           offers, with real consequences
+                                     and real tools."
 ```
 
 </details>
@@ -1583,6 +1666,14 @@ Specifically:
 ```
 
 </details>
+
+### The collaborative gist system
+
+Students can save snippets as gists, browse gists saved by other learners,
+and remix them. This makes Chapter 5 collaborative across all learners. The
+remix workflow — take someone else's snippet, change its intent, make it
+yours — is a core snippetry activity. "You" as audience includes "you as
+part of a community of practitioners."
 
 ### Why full main-path chapter, not bonus
 

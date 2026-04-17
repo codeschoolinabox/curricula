@@ -55,6 +55,15 @@ encouragement. They cannot be overridden by momentum.
    or you catch yourself skipping workflow steps: stop and surface it.
 8. **No confident guessing** — when uncertain, say so and investigate rather
    than confirming assumptions.
+9. **Read whole files, never split** — when reviewing, auditing, or comparing
+   files, read each file end-to-end yourself. When spawning a subagent to
+   review a file, instruct it to read the whole file from start to finish, not
+   a slice or a summary. Partial reads miss fiddly details — broken markdown,
+   typos, orphan sentences, meta-comments, late-file divergences. Summaries
+   compress away exactly the anomalies an audit is looking for. This applies
+   to every file in the task, not "the important ones." If a file is too long
+   to read in one pass, paginate deliberately and cover every line; do not
+   sample.
 
 > If these feel like friction, that friction is working as intended.
 
