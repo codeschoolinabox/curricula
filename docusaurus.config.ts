@@ -42,6 +42,40 @@ const config: Config = {
 	},
 
 	plugins: [
+		// --- .js → .ts/.tsx extension resolution for webpack ---
+		// The `lib/editing/` and `api/` modules use the Node ESM convention
+		// of writing `.js` extension specifiers that resolve to `.ts` source
+		// files (e.g. `import x from './foo.js'` where the actual file is
+		// `foo.ts`). Vite/vitest handle this natively; webpack does not.
+		// Now that V2 study-lens components import these modules, they're
+		// pulled into the webpack bundle for the first time.
+		function extensionAliasPlugin() {
+			return {
+				name: 'resolve-ts-extension-alias',
+				configureWebpack() {
+					return {
+						resolve: {
+							extensionAlias: {
+								'.js': ['.ts', '.tsx', '.js'],
+							},
+							alias: {
+								// Match the vitest.workspace.ts `@utils` alias
+								// so `@utils/deep-freeze-in-place` (used by
+								// `api/run.ts` et al.) resolves in webpack too.
+								'@utils': path.resolve('src/lib/utils'),
+							},
+							// `recast` (used by `lib/formatting/format.ts`)
+							// conditionally requires `os` for EOL detection
+							// behind an `isBrowser()` guard. Webpack 5 doesn't
+							// polyfill Node built-ins by default; `false`
+							// resolves to an empty module so the static
+							// analysis succeeds and the runtime never hits it.
+							fallback: { os: false },
+						},
+					};
+				},
+			};
+		},
 		// --- study-lenses lifecycle plugin (watched-path globs) ---
 		[
 			createStudyLensesPlugin,

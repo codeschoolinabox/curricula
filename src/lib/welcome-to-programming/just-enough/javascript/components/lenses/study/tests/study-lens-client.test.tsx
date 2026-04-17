@@ -121,7 +121,7 @@ vi.mock('../../../../lib/editing/create-editor.js', () => ({
 // would be cleaner, but `api/format.ts` has no import-resolution issue
 // so we don't need a stub here.
 
-import StudyLensClient from '../study-lens-client.js';
+import StudyLensClient from '../study-lens-client';
 
 beforeEach(() => {
 	factoryCalls = [];

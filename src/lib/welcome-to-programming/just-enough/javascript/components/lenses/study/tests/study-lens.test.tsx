@@ -23,12 +23,12 @@ import { render, cleanup } from '@testing-library/react';
 // care about the client's internals (editor mount logic is covered
 // by study-lens-client.test.tsx). Keep the code visible in the DOM
 // so the shell tests can assert on it.
-vi.mock('../study-lens-client.js', () => ({
+vi.mock('../study-lens-client', () => ({
 	default: ({ code }: { code: string }) =>
 		React.createElement('div', { 'data-test': 'client-mock' }, code),
 }));
 
-import StudyLens, { narrowToStudyOptions } from '../study-lens.js';
+import StudyLens, { narrowToStudyOptions } from '../study-lens';
 
 describe('StudyLens', () => {
 	describe('supported lens/lang: renders client shell', () => {

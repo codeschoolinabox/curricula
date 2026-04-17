@@ -28,12 +28,12 @@
 
 import React, { useEffect, useId, useRef, useState } from 'react';
 
-import createEditor from '../../../lib/editing/create-editor.js';
-import { format as apiFormat } from '../../../api/format.js';
-import run from '../../../api/run.js';
+import createEditor from '../../../lib/editing/create-editor';
+import { format as apiFormat } from '../../../api/format';
+import run from '../../../api/run';
 
-import type { EditorInstance } from '../../../lib/editing/types.js';
-import type { StudyButton, StudyOptions } from './types.js';
+import type { EditorInstance } from '../../../lib/editing/types';
+import type { StudyButton, StudyOptions } from './types';
 
 const ALL_BUTTONS: ReadonlyArray<StudyButton> = ['run', 'format', 'reset'];
 

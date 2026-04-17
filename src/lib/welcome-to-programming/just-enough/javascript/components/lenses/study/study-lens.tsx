@@ -29,10 +29,10 @@ import React from 'react';
 import parseLensConfig from '@site/src/plugins/study-lenses/parse-lens-config';
 import StudyLensMock from '@site/src/plugins/study-lenses/components/StudyLensMock';
 
-import StudyLensClient from './study-lens-client.js';
+import StudyLensClient from './study-lens-client';
 
-import type { StudyOptions, StudyButton } from './types.js';
-import type { EngineConfig } from '../../../lib/evaluating/shared/types.js';
+import type { StudyOptions, StudyButton } from './types';
+import type { EngineConfig } from '../../../lib/evaluating/shared/types';
 
 type StudyLensProps = {
 	readonly code?: string;
