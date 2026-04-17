@@ -457,6 +457,27 @@ describe('StudyLensClient', () => {
 		});
 	});
 
+	describe('StudyOptions.buttons visibility filter', () => {
+		it('no options.buttons → all three buttons render', async () => {
+			const { getAllByRole } = render(
+				<StudyLensClient code="x" options={{}} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			expect(getAllByRole('button')).toHaveLength(3);
+		});
+
+		it('options.buttons = ["run"] → only Run button in DOM', async () => {
+			const { getAllByRole, queryByRole } = render(
+				<StudyLensClient code="x" options={{ buttons: ['run'] }} />,
+			);
+			await waitFor(() => expect(createdInstances).toHaveLength(1));
+			expect(getAllByRole('button')).toHaveLength(1);
+			expect(queryByRole('button', { name: /run/i })).not.toBeNull();
+			expect(queryByRole('button', { name: /format/i })).toBeNull();
+			expect(queryByRole('button', { name: /reset/i })).toBeNull();
+		});
+	});
+
 	it('StrictMode double-invoke: first instance destroyed, exactly one editor survives', async () => {
 		const { container } = render(
 			<React.StrictMode>

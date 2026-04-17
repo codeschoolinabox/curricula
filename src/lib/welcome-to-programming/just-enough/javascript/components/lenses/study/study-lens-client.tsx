@@ -33,7 +33,9 @@ import { format as apiFormat } from '../../../api/format.js';
 import run from '../../../api/run.js';
 
 import type { EditorInstance } from '../../../lib/editing/types.js';
-import type { StudyOptions } from './types.js';
+import type { StudyButton, StudyOptions } from './types.js';
+
+const ALL_BUTTONS: ReadonlyArray<StudyButton> = ['run', 'format', 'reset'];
 
 type StudyLensClientProps = {
 	readonly code: string;
@@ -126,34 +128,42 @@ function StudyLensClient({
 		editor.content = code;
 	}
 
+	const visible = options.buttons ?? ALL_BUTTONS;
+
 	return (
 		<div className="study-lens" data-lens-id={lensId}>
 			<div ref={containerRef} data-study-lens="study" />
 			<div className="study-lens-toolbar" role="toolbar" aria-label="Code actions">
-				<button
-					type="button"
-					aria-label="Run code"
-					onClick={handleRun}
-					disabled={editor === null || isRunning}
-				>
-					Run
-				</button>
-				<button
-					type="button"
-					aria-label="Format code"
-					onClick={handleFormat}
-					disabled={editor === null}
-				>
-					Format
-				</button>
-				<button
-					type="button"
-					aria-label="Reset to original"
-					onClick={handleReset}
-					disabled={editor === null}
-				>
-					Reset
-				</button>
+				{visible.includes('run') && (
+					<button
+						type="button"
+						aria-label="Run code"
+						onClick={handleRun}
+						disabled={editor === null || isRunning}
+					>
+						Run
+					</button>
+				)}
+				{visible.includes('format') && (
+					<button
+						type="button"
+						aria-label="Format code"
+						onClick={handleFormat}
+						disabled={editor === null}
+					>
+						Format
+					</button>
+				)}
+				{visible.includes('reset') && (
+					<button
+						type="button"
+						aria-label="Reset to original"
+						onClick={handleReset}
+						disabled={editor === null}
+					>
+						Reset
+					</button>
+				)}
 			</div>
 		</div>
 	);
