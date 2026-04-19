@@ -105,21 +105,43 @@ export.
 
 ## Structure
 
-| Path                      | Purpose                                                        |
-| ------------------------- | -------------------------------------------------------------- |
-| `api/`                    | Public API — validate, format, parse, run, trace, debug        |
-| `lib/`                    | Internal libraries (see sub-modules below)                     |
-| `lib/evaluating/`         | Execution engines — trace (Aran), run (Worker), debug (iframe) |
-| `lib/validating/`         | AST-based validation pipeline and language level definition    |
-| `lib/formatting/`         | Recast-based formatting and format checking                    |
-| `lib/editing/`            | Editor integration (completions, hints)                        |
-| `lib/completing/`         | Code completion                                                |
-| `lib/error-interpreting/` | Learner-friendly error message translation                     |
-| `lib/socratizing/`        | Socratic code analysis (micro-decisions)                       |
-| `lib/scope/`              | Scope analysis utilities                                       |
-| `lib/jej-documentation/`  | JEJ documentation generation for editor support                |
-| `components/`             | UI components (study lenses, interactive tools)                |
-| `index.ts`                | Package entry — re-exports public API functions and types      |
+| Path                      | Purpose                                                             |
+| ------------------------- | ------------------------------------------------------------------- |
+| `api/`                    | Public API — validate, format, parse, run, trace, debug             |
+| `lib/`                    | Internal libraries (see sub-modules below)                          |
+| `lib/evaluating/`         | Execution engines — trace (Aran), run (Worker), debug (iframe)      |
+| `lib/validating/`         | AST-based validation pipeline and language level definition         |
+| `lib/formatting/`         | Recast-based formatting and format checking                         |
+| `lib/editing/`            | Editor integration (completions, hints)                             |
+| `lib/completing/`         | Code completion                                                     |
+| `lib/error-interpreting/` | Learner-friendly error message translation                          |
+| `lib/socratizing/`        | Socratic code analysis (micro-decisions)                            |
+| `lib/scope/`              | Scope analysis utilities                                            |
+| `lib/jej-documentation/`  | JEJ documentation generation for editor support                     |
+| `study-lenses/`           | Study lenses system (orchestrator, transforms, lenses, recommender) |
+| `components/`             | UI components (V2 lens components, migration source)                |
+| `index.ts`                | Package entry — re-exports public API functions and types           |
+
+## Study Lenses: research translation platform
+
+The study-lenses system is a research translation platform (TCER Phase 4) built
+on top of JEJ's tooling. The tracer captures the notional machine as data; the
+study-lenses system turns that data — and any JEJ snippet — into interactive
+learning exercises. Each lens embodies a computing education research-backed
+pedagogical intervention: blanks (fill-in-the-blank), parsons (line ordering),
+trace tables (predict-then-compare), and more.
+
+The architecture separates transforms (code-to-code, e.g., format or
+loop-guard) from lenses (code-to-component, e.g., editor or blanks) and
+composes them into pipelines. A recommender analyzes each snippet against the
+JEJ notional machine and suggests relevant exercises organized in a 3D Block
+Model grid (comprehension level x scope x NM components). This enables rapid
+iteration on exercise design — researchers prototype new interventions by
+composing existing lenses, curriculum authors embed them in code fences, and
+learners choose their own path through the recommendations.
+
+See [`study-lenses/README.md`](./study-lenses/README.md) for the full
+architecture, module contracts, and directory layout.
 
 ## Public API (current snapshot — will change)
 
@@ -181,5 +203,6 @@ type Result<TEvent> = {
 - [evaluating/README.md](./evaluating/README.md) — execution engines
 - [validating/README.md](./validating/README.md) — validation pipeline
 - [formatting/README.md](./formatting/README.md) — recast formatting
+- [study-lenses/README.md](./study-lenses/README.md) — study lenses system
 - [DOCS.md](./DOCS.md) — architecture decisions and design rationale
 - [reference.md](./reference.md) — learner-facing language reference
