@@ -11,6 +11,130 @@ sidebar_position: 1
 > — [Angus Croll](https://anguscroll.com/),
 > [If Hemingway Wrote JavaScript](https://anguscroll.com/hemingway/)
 
+## TL;DR
+
+**Welcome to Programming (coded for humans)** is a self-paced course where you
+learn to build programs that intentionally serves its audiences: other
+developers, the computer, users, and AI agents. Vibecoding lets anyone build
+working software without understanding the machine behind it; programming means
+you can predict and direct that machine, evaluate what an LLM produces, and make
+the design judgments that shape what gets built. You build these skills through
+interactive exercises that run directly in your browser.
+
+---
+
+**Welcome to Programming (coded for humans)** is a self-paced course that treats
+programming as collaborative communication. A single piece of source code
+addresses multiple audiences at once (other developers, the computer, users, and
+AI agents). You will develop the ability to recognize who your code is for,
+understand how each audience experiences it, and tailor your decisions so your
+code does exactly what you designed it to do for each of them.
+
+You'll learn to understand and predict what the computer does with your code so
+you can control it precisely. And you'll learn to understand users so you can
+build software that actually serves them, which is ultimately what all the
+technical skill is for. LLMs have made it possible for anyone to build working
+software by describing the user-visible behavior they want without worrying
+about how the computer works behind the scenes. That's vibecoding, and it's
+genuinely powerful for quick prototypes and new projects. But building larger
+systems, extending existing codebases, evaluating whether generated code
+actually does what you need, and making the design judgments that shape what
+gets built in the first place: that's programming, and it requires understanding
+the machine behind the scenes well enough to predict and direct it.
+
+The skills you build here are fundamentally human: communication, empathy,
+user-centered design thinking, the ability to hold a complex situation in view
+and make it work for real people. Those same human skills are exactly what keep
+you professionally relevant and personally capable in a world where machines
+handle more of the writing. Programming is also an intellectual and creative
+practice worth doing for its own sake: for the satisfaction of understanding a
+system deeply, for the new ways of thinking it opens up, and for the small
+programs you write just to explore, experiment, or surprise yourself. This
+course helps you build both at once.
+
+- **Chapter 0. What is Programming?** Conceptual orientation before any code.
+  You learn to see source code as communication that simultaneously addresses
+  multiple audiences (developers, the computer, users, and agents) and
+  understand why comprehension comes before production.
+- **Chapter 1. Developers.** Your first code and your first audience. You learn
+  to write comments and logs as intentional communication to other developers,
+  and begin noticing that every small choice in your code (a word, a placement,
+  a method) is a micro-decision that shapes how it reads.
+- **Chapter 2. Developers and Computers.** The computer becomes a full audience.
+  You build an accurate mental model of JavaScript's notional machine (how it
+  evaluates expressions, stores values, walks scope chains) and develop the
+  discipline of predicting execution before running code, then verifying with
+  trace tables and the debugger.
+- **Chapter 3. Developers, Computers, and Users.** Users enter the picture. You
+  learn to write programs people interact with, where user-visible behavior
+  becomes the anchor that all your reading, tracing, refactoring, and reviewing
+  skills must preserve. Design thinking across the whole situation begins here.
+- **Chapter 4. Developers, Computers, Users, and Agents.** LLMs join as a fourth
+  audience and collaborator. You learn what makes LLM collaboration specifically
+  different from human collaboration, develop skills for evaluating and
+  directing LLM output using everything from Chapters 1–3, and build calibration
+  for when to delegate and when to do the work yourself.
+- **Chapter 5. Developers, Computers, Users, Agents, and You.** Training wheels
+  come off. You program for yourself through snippetry: small, complete,
+  self-contained programs as an ongoing practice. You explore JavaScript's full
+  multi-paradigmatic range, develop your compositional voice, and discover that
+  programming has value beyond productivity: for mastery, exploration, delight,
+  and the new thoughts it lets you think.
+
+---
+
+## Contents
+
+- [Why Learn to Program](#why-learn-to-program)
+  - [What programming languages are](#what-programming-languages-are)
+  - [Notional machines](#notional-machines)
+  - [The LLM shift: a new participant in an old dance](#the-llm-shift-a-new-participant-in-an-old-dance)
+  - [Your instrument: JavaScript, and your practice instrument: Just Enough JavaScript](#your-instrument-javascript-and-your-practice-instrument-just-enough-javascript)
+  - [Snippetry](#snippetry)
+- [The Metaphor: Composer, Virtuoso, Instrument and Audience](#the-metaphor-composer-virtuoso-instrument-and-audience)
+- [References](#references)
+- [Before You Begin](#before-you-begin)
+- [Chapter 0: What is Programming?](#chapter-0-what-is-programming)
+- [Chapter 1: Developers](#chapter-1-developers)
+  - [Comments](#comments)
+  - [Logs](#logs)
+- [Chapter 2: Developers and Computers](#chapter-2-developers-and-computers)
+  - [2.0 The Notional Machine](#20-the-notional-machine)
+  - [2.1 Running a Program](#21-running-a-program)
+  - [2.2 Expressions and Resolve](#22-expressions-and-resolve)
+  - [2.3 Values and Bindings](#23-values-and-bindings)
+  - [2.4 Statements and Control Flow](#24-statements-and-control-flow)
+  - [2.6 Prototype Chain](#26-prototype-chain)
+  - [2.8 Reading, Writing, Reviewing Code](#28-reading-writing-reviewing-code)
+  - [Computational Idioms (2A–2F)](#computational-idioms)
+- [Chapter 3: Developers, Computers, and Users](#chapter-3-developers-computers-and-users)
+  - [3.1 User Input and Output](#31-user-input-and-output)
+  - [3.2 Variable Program Behaviors](#32-variable-program-behaviors)
+  - [3.3 Validating User Input](#33-validating-user-input)
+  - [3.4 PBSI in User Programs](#34-pbsi-in-user-programs)
+  - [3.5 Developing Programs](#35-developing-programs)
+  - [3.6 Plaintext Programs](#36-plaintext-programs)
+- [Chapter 4: Developers, Computers, Users, and Agents](#chapter-4-developers-computers-users-and-agents)
+  - [4.0 What is an LLM?](#40-what-is-an-llm)
+  - [4.1 Collaborating in Prose](#41-collaborating-in-prose)
+  - [4.2 Agents and Developer Communication](#42-agents-and-developer-communication)
+  - [4.3 Agents and Computer Communication](#43-agents-and-computer-communication)
+  - [4.4 Agents and User Communication](#44-agents-and-user-communication)
+  - [4.5 Looking Back, Looking Forward](#45-looking-back-looking-forward)
+  - [4.6 Vibecoding](#46-vibecoding)
+- [Chapter 5: Developers, Computers, Users, Agents, and You](#chapter-5-developers-computers-users-agents-and-you)
+  - [5A. Training-Wheels-Off: Carrying Predictive Mastery](#5a-training-wheels-off-carrying-predictive-mastery)
+  - [5B. Extending the NM: New JS Territory](#5b-extending-the-nm-new-js-territory)
+  - [5C. Programming Paradigms](#5c-programming-paradigms)
+  - [5D. Snippetry as Practice](#5d-snippetry-as-practice)
+  - [5E. You as Audience](#5e-you-as-audience)
+  - [5F. Compositional Voice and Micro-Decisions](#5f-compositional-voice-and-micro-decisions)
+  - [5G. Self-Directed Learning](#5g-self-directed-learning)
+  - [5H. The Whole Rhetorical Situation](#5h-the-whole-rhetorical-situation)
+  - [5I. Capstone Reflections](#5i-capstone-reflections)
+
+---
+
 **Programming is collaborative communication.** A single piece of source code
 simultaneously addresses multiple audiences: other developers who read it, a
 computer that executes it, users who experience it, and agents who collaborate
@@ -316,6 +440,8 @@ their humanity, for how they shape thinking, for the new thoughts they give us,
 and for our connection to a computational history that runs from Jacquard looms
 to JavaScript.
 
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+
 ---
 
 ## The Metaphor: Composer, Virtuoso, Instrument and Audience
@@ -401,6 +527,8 @@ and design thinking. Chapter 4 teaches collaboration with the alien virtuoso.
 Chapter 5 turns to the composer's daily practice — snippetry — and hints at
 alien composers emerging on the horizon.
 
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+
 ---
 
 ## References
@@ -427,6 +555,8 @@ is study support; asking an LLM to trace code for you is bypassing the skill
 you're trying to build. Available from Chapter 1 onward; revisited with new
 depth in Chapter 4.
 
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+
 ---
 
 ## Before You Begin
@@ -438,6 +568,8 @@ depth in Chapter 4.
 - [ ] Skim the Just Enough JavaScript reference: same, just get a feel for the
       terrain
 - [ ] _(coming soon)_ Download the curriculum for offline study
+
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
 ---
 
@@ -463,6 +595,8 @@ score that ties them together._
   situation
 - 🐣 Explain the spiral curriculum: why revisiting concepts at increasing depth
   produces deeper understanding than covering them once
+
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
 ---
 
@@ -528,6 +662,8 @@ The computer is not yet a full audience. Devtools console is developer space.
   choice communicates different things to the developer watching the console\
   _builds on: micro-decisions in comments → now applied to the runtime channel_
 - 🐣 Share code with others _(future feature: save-to-gist, pop-up sandbox)_
+
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
 ---
 
@@ -643,6 +779,8 @@ The chapter has two tracks:
   _builds on: reading assertions → predicting what code produces → now writing
   the code to make the assertion true_
 
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+
 ### 2.4 Statements and Control Flow
 
 - 🥚 Conditionals: `if`/`else if`/`else`: reading and tracing branches\
@@ -721,14 +859,14 @@ The chapter has two tracks:
   _builds on: refactoring → code review → now noticing aesthetic and stylistic
   choices within the language_
 
----
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
-## Computational Idioms
+### Computational Idioms
 
 These branches apply the notional machine to specific computational domains.
 **2A and 2B are required.** Choose at least one from 2C–2E. 2F is optional.
 
-### 2A: Logic and Truthiness 🥚
+#### 2A: Logic and Truthiness 🥚
 
 Required. Foundation for reading conditional programs and understanding how
 values flow through boolean contexts.
@@ -745,7 +883,7 @@ values flow through boolean contexts.
 - 🐣 Refactoring between if/else, ternary, and short-circuit forms\
   _builds on: PBSI refactoring → now applied to conditional expression forms_
 
-### 2B: Strings 🥚
+#### 2B: Strings 🥚
 
 Required. Needed for Chapter 3 user programs (`prompt`/`alert`/`confirm` work
 with strings). Builds directly on the prototype chain understanding from 2.6.
@@ -768,7 +906,7 @@ with strings). Builds directly on the prototype chain understanding from 2.6.
 - 🐣 Text processing programs: searching, transforming, extracting substrings\
   _builds on: string methods → now composing them into full programs_
 
-### 2C: Numbers and Math 🐣
+#### 2C: Numbers and Math 🐣
 
 Choose at least one from 2C–2E.
 
@@ -791,7 +929,7 @@ Choose at least one from 2C–2E.
 - 🐣 Geometry and randomness programs
 - 🐣 Number crunching programs: accumulation, running totals, summarization
 
-### 2D: Pattern Matching 🐔
+#### 2D: Pattern Matching 🐔
 
 Choose at least one from 2C–2E.
 
@@ -803,7 +941,7 @@ Choose at least one from 2C–2E.
 - 🐔 **Computational micro-decisions**: regex vs. string methods: the choice is
   not just what works but what _expresses the problem clearly_
 
-### 2E: Integers and Bits 🐔
+#### 2E: Integers and Bits 🐔
 
 Choose at least one from 2C–2E.
 
@@ -816,7 +954,7 @@ Choose at least one from 2C–2E.
 - 🐔 **Computational micro-decisions**: bitwise vs. arithmetic: the choice
   expresses the problem's structure
 
-### 2F: Dates 🐔
+#### 2F: Dates 🐔
 
 Optional extra.
 
@@ -829,6 +967,8 @@ Optional extra.
   `toLocaleDateString()`, `toLocaleTimeString()`, `toISOString()`
 - 🐔 Date computation programs: elapsed time, formatting, internationalization\
   _builds on: numbers and arithmetic → now applied to time as a domain_
+
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
 ---
 
@@ -932,6 +1072,8 @@ lenses, no syntax highlighting, no autocomplete, no error highlighting._
   you understand what each tool was compensating for\
   _builds on: using IDE tools throughout Ch1–3 → now understanding them as
   scaffolding, not crutches_
+
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
 ---
 
@@ -1060,6 +1202,8 @@ Chapter 5 will return briefly to it in its closing moments.
   alien-virtuoso frame covers, and flag it as territory for post-curriculum
   learning
 
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+
 ### 4.6 Vibecoding
 
 - 🐣 Decompose a complex request into smaller, verifiable steps (by contrast
@@ -1067,6 +1211,8 @@ Chapter 5 will return briefly to it in its closing moments.
 - 🐥 Evaluate code you didn't write or review during generation (PBSI autopsy)
 - 🐥 Identify where the jagged frontier manifested in a concrete collaboration
 - 🐔 Reflect on the difference between "it runs" and "I understand it"
+
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
 ---
 
@@ -1259,3 +1405,5 @@ core snippetry activity.
 - 🐔 Recognize that **alien composers** (agentic systems doing design work, not
   just notation) are arriving; identify a concrete example and reflect on what
   it means for the composer/virtuoso distinction
+
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
