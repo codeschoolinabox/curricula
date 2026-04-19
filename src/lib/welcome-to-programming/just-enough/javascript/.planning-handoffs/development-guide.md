@@ -1,13 +1,13 @@
 # Development Guide: Managing Study-Lenses Work Streams
 
-How to coordinate Claude Code agents across the 4 work streams defined
-in this directory. Written for you (the human coordinator) — not for
-the agents themselves.
+How to coordinate Claude Code agents across the 4 work streams defined in this
+directory. Written for you (the human coordinator) — not for the agents
+themselves.
 
 ## How Claude Code sessions work
 
-Each Claude Code session (whether CLI, desktop app, VS Code extension,
-or web) is a **fresh start**. The agent has:
+Each Claude Code session (whether CLI, desktop app, VS Code extension, or web)
+is a **fresh start**. The agent has:
 
 - No memory of prior sessions beyond what's persisted in files
 - A context window that fills up over time (~200K tokens practical)
@@ -16,12 +16,12 @@ or web) is a **fresh start**. The agent has:
 
 **Implications:**
 
-- Everything an agent needs must be **in the repo** — not in your
-  head, not in a prior conversation, not in `~/.claude/`
-- Long sessions degrade — context compaction loses nuance. Prefer
-  shorter focused sessions with frequent commits over marathon runs
-- Agents on other machines (worktrees, CI, collaborators) won't see
-  `~/.claude/` — all context lives in `.planning-handoffs/`
+- Everything an agent needs must be **in the repo** — not in your head, not in a
+  prior conversation, not in `~/.claude/`
+- Long sessions degrade — context compaction loses nuance. Prefer shorter
+  focused sessions with frequent commits over marathon runs
+- Agents on other machines (worktrees, CI, collaborators) won't see `~/.claude/`
+  — all context lives in `.planning-handoffs/`
 
 ## Kicking off a work stream
 
@@ -70,24 +70,27 @@ WS3 (orchestrator + contracts) ─────┘         │
          └──► WS4 (lens migration) ◄──────────┘
 ```
 
+- **Build is currently broken** — `MDXComponents.js` imports from a
+  deleted path. WS3's Increment 0 fixes this by creating a minimal
+  pass-through component at the new path. Start WS3 first (or in
+  parallel with WS1) so the build is restored early.
 - **WS1 and WS3 can run in parallel** — no dependency between them
-- **WS2 depends on both WS1 and WS3** — needs sub-language level
-  types from WS1 and the LensModule contract from WS3 (types.ts)
+- **WS2 depends on both WS1 and WS3** — needs sub-language level types from WS1
+  and the LensModule contract from WS3 (types.ts)
 - **WS4 depends on WS3** — needs proven contracts + trial lenses
 - **Within WS4**, individual lenses can run in parallel
 
 ### The shared types.ts problem
 
-`study-lenses/types.ts` is consumed by ALL work streams. It already
-exists with the core types. Rules:
+`study-lenses/types.ts` is consumed by ALL work streams. It already exists with
+the core types. Rules:
 
-- **If an agent finds a flaw in types.ts**: STOP. Write the issue
-  to the work stream's notes file. Notify you. Do NOT modify
-  types.ts unilaterally.
-- **You** review the proposed change, assess impact on other streams,
-  and either apply it yourself or approve the agent to do so.
-- After a types.ts change: notify all active agents in other streams
-  to re-read it.
+- **If an agent finds a flaw in types.ts**: STOP. Write the issue to the work
+  stream's notes file. Notify you. Do NOT modify types.ts unilaterally.
+- **You** review the proposed change, assess impact on other streams, and either
+  apply it yourself or approve the agent to do so.
+- After a types.ts change: notify all active agents in other streams to re-read
+  it.
 
 ### Per-stream notes files
 
@@ -102,18 +105,18 @@ Each work stream writes its own notes file in `.planning-handoffs/`:
 
 - Each agent READS other streams' notes at session start
 - Each agent WRITES only to its own notes file
-- Notes include: questions asked/answered, decisions made, blockers,
-  deviations from the handoff, things the next agent should know
+- Notes include: questions asked/answered, decisions made, blockers, deviations
+  from the handoff, things the next agent should know
 - You review notes between sessions and resolve cross-stream issues
 
 ### When to sync
 
-- After WS1 completes: review output, confirm sub-language level
-  types are ready for WS2
-- After WS3 Phase 0 completes: verify types.ts + contracts are
-  stable before starting WS2 or WS4
-- After WS3 trial lenses (editor + highlight) work end-to-end:
-  green light for WS4 lens migration
+- After WS1 completes: review output, confirm sub-language level types are ready
+  for WS2
+- After WS3 Phase 0 completes: verify types.ts + contracts are stable before
+  starting WS2 or WS4
+- After WS3 trial lenses (editor + highlight) work end-to-end: green light for
+  WS4 lens migration
 - After any types.ts change: check all active streams
 
 ## Git strategy
@@ -134,8 +137,8 @@ ws4/lens-trace-table
 - Each TDD increment = one atomic commit
 - Commit messages per AGENTS.md: `add:`, `docs:`, `fix:`, `refactor:`
 - Commit after EVERY passing increment — don't batch
-- If the agent's session ends mid-work: commit what's done with a
-  `checkpoint:` prefix so the next session can pick up
+- If the agent's session ends mid-work: commit what's done with a `checkpoint:`
+  prefix so the next session can pick up
 
 ### Merge order
 
@@ -146,10 +149,9 @@ ws4/lens-trace-table
 
 ### Pre-commit hook
 
-The pre-commit hook runs markdownlint on ALL `.md` files (not just
-staged ones) and has 300+ pre-existing errors. All commits currently
-need `--no-verify`. This is a known issue — don't let agents spend
-time trying to fix the linter.
+The pre-commit hook runs markdownlint on ALL `.md` files (not just staged ones)
+and has 300+ pre-existing errors. All commits currently need `--no-verify`. This
+is a known issue — don't let agents spend time trying to fix the linter.
 
 ## Context management tips
 
@@ -157,8 +159,8 @@ time trying to fix the linter.
 
 - **Ideal**: 1-2 hours per session, focused on one work stream
 - **Maximum useful**: ~3 hours before context quality degrades
-- **Signs of degradation**: agent starts repeating itself, forgets
-  earlier decisions, proposes things that contradict the plan
+- **Signs of degradation**: agent starts repeating itself, forgets earlier
+  decisions, proposes things that contradict the plan
 
 ### When to start a new session
 
@@ -192,10 +194,10 @@ If you use `isolation: "worktree"` for parallel agents:
 - **Resolve types.ts conflicts** — you're the coordinator
 - **Review Phase 0 artifacts** — catch design issues early
 - **Spot-check TDD increments** — verify tests are meaningful
-- **Run the dev server** — agents can run it, but you should
-  visually verify features in the browser (sandbox checkpoints)
-- **Decide on open questions** — caching mechanism, event system,
-  reset semantics. Agents will ask; you decide.
+- **Run the dev server** — agents can run it, but you should visually verify
+  features in the browser (sandbox checkpoints)
+- **Decide on open questions** — caching mechanism, event system, reset
+  semantics. Agents will ask; you decide.
 
 ## What agents handle autonomously
 
@@ -207,19 +209,19 @@ If you use `isolation: "worktree"` for parallel agents:
 
 ## The `/lenses/` directory (old code)
 
-The `/lenses/study/` directory contains V2 code from a prior sprint.
-It is **historical reference only** — not ground truth. Wherever it
-disagrees with `.planning-handoffs/`, the handoffs win. Agents should
-treat it as inspiration, not as code to preserve.
+The `/lenses/study/` directory contains V2 code from a prior sprint. It is
+**historical reference only** — not ground truth. Wherever it disagrees with
+`.planning-handoffs/`, the handoffs win. Agents should treat it as inspiration,
+not as code to preserve.
 
 ## Quick reference: what's in `.planning-handoffs/`
 
-| File | Purpose |
-| --- | --- |
-| `00-master-plan.md` | Full architecture context (canonical reference) |
-| `01-sub-language-levels.md` | WS1: define NM component level progression |
-| `02-analysis-and-recommender.md` | WS2: snippet analysis + recommendation engine |
-| `03-orchestrator-and-contracts.md` | WS3: orchestrator + transform/lens contracts |
-| `04-lens-migration.md` | WS4: individual lens implementations |
-| `05-development-guide.md` | This file (for you, not for agents) |
-| `*-notes.md` | Per-stream notes (created by agents during work) |
+| File                               | Purpose                                          |
+| ---------------------------------- | ------------------------------------------------ |
+| `00-master-plan.md`                | Full architecture context (canonical reference)  |
+| `01-sub-language-levels.md`        | WS1: define NM component level progression       |
+| `02-analysis-and-recommender.md`   | WS2: snippet analysis + recommendation engine    |
+| `03-orchestrator-and-contracts.md` | WS3: orchestrator + transform/lens contracts     |
+| `04-lens-migration.md`             | WS4: individual lens implementations             |
+| `development-guide.md`             | This file (for the human, not for agents)        |
+| `*-notes.md`                       | Per-stream notes (created by agents during work) |

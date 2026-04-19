@@ -1,5 +1,1 @@
-Syllabus notes 
-
-- "The notional machine".  it sounds like there's one notional machine to learn then you're set.  this is so far from the truth.  every programming langauge has a different one, and there can even be more than one NM for visualizing or understanding the same programming langauge.  this course will focus on JS's.  in doing so learners master JEJ _and_ build an understanding of what it means to master a porgramming langauge and how to do it (via NMs).  so they're prepared to learn others later
-    I share this with you instead of editing it myself because it feels like a fundmental-enough misunderstanding that you should consider it's implications throughout and see if you have other udpates to make
-
+#2.  no.  can't you just put the whole live component as a value in an object like you can with a dom element?  no state serialization

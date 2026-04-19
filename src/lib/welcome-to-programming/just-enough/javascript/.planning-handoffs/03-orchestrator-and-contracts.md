@@ -356,6 +356,26 @@ until all 7 steps are done.
 
 ## Phase 1 increment plan
 
+### Increment 0: Fix build wiring (MUST be first)
+
+`src/theme/MDXComponents.js` currently imports `StudyLens` from
+`@site/src/lib/.../components/lenses/study` — a path that no longer
+exists. **The build is broken until this is fixed.**
+
+- [ ] **Increment 0**: Create a minimal pass-through `<StudyLenses>`
+  component at `study-lenses/orchestrator/study-lens.tsx`. It accepts
+  the plugin's props (`code`, `lens`, `config`) and renders a basic
+  `<CodeBlock>` fallback (or delegates to `StudyLensMock` from the
+  plugin). Update `src/theme/MDXComponents.js` to import from the
+  new path. Verify: `npm run build` succeeds AND `npm start` renders
+  code blocks on curriculum pages.
+
+  This is NOT the real orchestrator — it's a scaffold that keeps the
+  build green while the real implementation is developed incrementally.
+  The pass-through is replaced as real increments land.
+
+  Commit: `add: minimal StudyLenses pass-through + MDXComponents wiring`
+
 ### Sub-step 5a: Pure TS orchestrator core
 
 - [ ] **Increment 1**: Registry -- register and retrieve transforms/lenses
