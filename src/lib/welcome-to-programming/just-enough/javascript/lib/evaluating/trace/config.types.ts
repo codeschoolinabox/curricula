@@ -239,6 +239,7 @@ export type TraceOptions = {
 					  };
 				break?: boolean;
 				continue?: boolean;
+				debugger?: boolean;
 		  };
 
 	scopes?:

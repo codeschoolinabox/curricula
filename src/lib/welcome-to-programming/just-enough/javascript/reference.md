@@ -97,9 +97,9 @@ This is **_just enough JavaScript_** to:
   - [For-Of Loops](#for-of-loops)
   - [Break](#break)
   - [Continue](#continue)
+  - [debugger](#debugger)
   - [BigInt](#bigint)
 - [Syntax You'll See (But Not Write)](#syntax-youll-see-but-not-write)
-  - [debugger](#debugger)
   - [Braceless `if`](#braceless-if)
   - [`throw`](#throw)
   - [`new RangeError`](#new-rangeerror)
@@ -3098,6 +3098,44 @@ FOR: character OF 'hello'
 
 ---
 
+### debugger
+
+_statement_
+
+The `debugger` statement pauses your program and opens the browser's debugging
+tools. From there you can inspect variable values, set breakpoints, and step
+through your code line by line.
+
+For `debugger` to work, the browser's DevTools must already be open — otherwise
+the statement is silently skipped and your code runs straight through.
+
+<table>
+
+<tr>
+<td>
+
+```js
+let name = prompt('What is your name?');
+
+debugger; // pauses here, opens dev tools
+
+let greeting = `Hello, ${name}!`;
+alert(greeting);
+```
+
+</td>
+<td>
+
+_N/A in PseudoCode_
+
+</td>
+</tr>
+</table>
+
+[TOP](#just-enough-javascript)
+
+---
+
 ### BigInt
 
 _expression_
@@ -3172,64 +3210,22 @@ typeof 42n   → 'bigint'
 
 ## Syntax You'll See (But Not Write)
 
-These features are added to your code _after_ you write it, for two purposes:
-studying your code in the debugger (the `debugger` statement, added by the
-[debug] button) and avoiding infinite loops (braceless `if`, `throw`, and
-`new RangeError` — added behind the scenes as part of a _loop guard_). Here's
-what a loop guard looks like in the generated code:
+These features are added to your code _after_ you write it to avoid infinite
+loops (braceless `if`, `throw`, and `new RangeError` — added behind the scenes
+as part of a _loop guard_). Here's what a loop guard looks like in the generated
+code:
 
 ```js
-debugger;
-
-// ... the beginning of a program
-
 let loop1 = 0;
 while (condition) {
 	if (++loop1 > 100) throw new RangeError('loop 1 exceeded 100 iterations');
 
 	// ... your loop body
 }
-
-// ... the rest of a program
 ```
 
 You won't write any of this yourself — you just need to recognize these features
 when you see them in the debugger or in an error message.
-
-### debugger
-
-_statement_
-
-When you click the [debug] button, a `debugger` statement is added to your code.
-This pauses your program and opens the browser's debugging tools. From there you
-can set breakpoints, inspect variables, and step through your code line by line.
-
-You won't write `debugger` yourself — use the [debug] button to start, then set
-breakpoints in the browser's dev tools where you want to pause.
-
-<table>
-
-<tr>
-<td>
-
-```js
-// this is what the [debug] button adds to your code:
-debugger; // pauses here, opens dev tools
-
-let name = 'World';
-// set a breakpoint on any line in dev tools
-// to pause there instead
-console.log(name);
-```
-
-</td>
-<td>
-
-_N/A in PseudoCode_
-
-</td>
-</tr>
-</table>
 
 ### Braceless `if`
 

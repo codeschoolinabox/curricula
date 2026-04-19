@@ -402,6 +402,16 @@ export type JumpEvent = BaseEvent & {
 };
 
 // ============================================================================
+// 9b. Debugger Event
+// ============================================================================
+// Config: statements.debugger
+
+export type DebuggerEvent = BaseEvent & {
+	readonly category: 'debugger';
+	readonly event: 'debugger';
+};
+
+// ============================================================================
 // 10. Function Events
 // ============================================================================
 // Config: expression.functions.call
@@ -477,6 +487,7 @@ export type TraceEvent =
 	| ConditionalEvent
 	| LoopEvent
 	| JumpEvent
+	| DebuggerEvent
 	| FunctionEvent
 	| WithEvent
 	| ResolveEvent;

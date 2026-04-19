@@ -113,15 +113,14 @@ These AST node types are NOT in the allowed list and always produce rejections:
 - `UpdateExpression` (`++`, `--`)
 - `ThrowStatement`
 - `NewExpression`
-- `DebuggerStatement`
 - `FunctionDeclaration`, `ArrowFunctionExpression`
 - `ClassDeclaration`
 - Property assignment (`obj.prop = value`, `arr[0] = value`)
 - Any other ESTree node type not in the allowlist
 
-Some (`DebuggerStatement`, loop guards via `UpdateExpression`) appear in
-reference.md under "Syntax You'll See (But Not Write)" — they are injected by
-tools, not written by learners.
+Some (loop guards via `UpdateExpression`) appear in reference.md under "Syntax
+You'll See (But Not Write)" — they are injected by tools, not written by
+learners.
 
 ## API
 

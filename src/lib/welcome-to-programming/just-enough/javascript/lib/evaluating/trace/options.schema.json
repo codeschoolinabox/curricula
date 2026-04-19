@@ -384,6 +384,12 @@
 					"description": "continue statement.",
 					"type": "boolean",
 					"default": true
+				},
+
+				"debugger": {
+					"description": "debugger statement — pauses execution and opens DevTools.",
+					"type": "boolean",
+					"default": true
 				}
 			},
 			"default": {}
