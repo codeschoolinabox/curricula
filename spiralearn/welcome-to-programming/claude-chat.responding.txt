@@ -1,7 +1,0 @@
-1. I had numbered tem by 0,  the formatter must have changed it. I've updated it to use bullets and include the number in the text to survive formatting 
-2. propseective learnere deciding whetehr to start.  (interactivity of exercises should be a selling point?)
-3. no, stay languae-agnostic.
-4. propose a draft with and without, then we can discuss
-5. nope, it shoudl start the same way.  if the TL;DR is taken out of context it should stil lbe identifiable
-
-plase include several full drafts in your exitplanmode so we can comemnt and discuss them

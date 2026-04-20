@@ -13,13 +13,17 @@ sidebar_position: 1
 
 ## TL;DR
 
-**Welcome to Programming (coded for humans)** is a self-paced course where you
-learn to build programs that intentionally serves its audiences: other
-developers, the computer, users, and AI agents. Vibecoding lets anyone build
-working software without understanding the machine behind it; programming means
-you can predict and direct that machine, evaluate what an LLM produces, and make
-the design judgments that shape what gets built. You build these skills through
-interactive exercises that run directly in your browser.
+**Welcome to Programming (_coded for humans_)** is a self-paced course that will
+take you from _learning to program_ (building your code literacy) to
+_programming to learn_ (applying your literacy to explore new concepts and
+skills). You will build predictive mastery of JavaScript's notional machine:
+reading code before writing it, correlating syntax to the runtime events it
+produces, and moving through the PRIMM progression (predict, run, investigate,
+modify, make) until prediction is reliable and authorship is confident. Each
+step of the way you will ground your skills in the world around you, learning to
+consider who you're building for and what you hope to achieve. Ultimately you
+will build the confidence to write your own programs, and the awareness to write
+the _right_ programs.
 
 ---
 
@@ -555,6 +559,14 @@ is study support; asking an LLM to trace code for you is bypassing the skill
 you're trying to build. Available from Chapter 1 onward; revisited with new
 depth in Chapter 4.
 
+### Learning Expectations
+
+A reference document for when you're in the middle of something hard and want
+context for what you are experiencing. Covers the big picture of spiral
+curriculum design, threshold concepts, liminal zone thinking, and the learning
+sequence. Not required reading before starting, but available whenever you need
+context about your own learning journey.
+
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
 ---
@@ -581,6 +593,38 @@ _Metaphor anchor: **the recital as rhetorical situation** — an entire
 performance event with its audience, its performers, its instrument, and the
 score that ties them together._
 
+### 0.1 The Rhetorics of Programming
+
+When you write source code, you are not writing for a single reader. Like a
+recital — a performance event with its audience, its performers, its instrument,
+and the score — source code addresses multiple readers simultaneously, each with
+different needs and different ways of understanding.
+
+Three human audiences read your code:
+
+1. **Other developers** — they read your code to understand your intent, learn
+   your style, collaborate on changes, and maintain the work long after you
+   wrote it
+2. **The computer** — it parses, interprets, or compiles your code; it does not
+   understand intent, only syntax and semantics
+3. **Users of the program** — they never see the code, but they experience its
+   effects; their correctness is behavioral (does it do what I need?), not
+   syntactic
+
+A fourth audience has recently arrived:
+
+4. **Agents (LLMs)** — they read and understand code differently from humans;
+   they can infer intent from examples, find patterns, suggest changes, and help
+   you write it. Writing _for and with_ agents is its own communication skill,
+   developed in Chapter 4.
+
+The central skill this course teaches is writing code that **addresses all four
+audiences simultaneously**. Different chapters focus on different audiences
+(hence the twinning: developer → computer → user → agent), but they all matter
+in real work.
+
+---
+
 - 🥚 Articulate the three human audiences of source code: developers, the
   computer, users
 - 🥚 Explain what it means for code to _address_ each audience simultaneously
@@ -595,6 +639,127 @@ score that ties them together._
   situation
 - 🐣 Explain the spiral curriculum: why revisiting concepts at increasing depth
   produces deeper understanding than covering them once
+
+### 0.2 Positioning Programming
+
+Programming is a large space. Before spending time inside one part of it, it
+helps to know roughly where that part is — and what it is not.
+
+The following distinctions are not knowledge to memorize. They are landmarks.
+You will encounter each one again as the course progresses, and what feels
+abstract now will become concrete. For now, use them as orientation.
+
+**What WtP is and what it isn't:**
+
+| This course                                                                                                                                                                                    | Not this course (yet)                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Embodied computation** — learning to read, predict, and direct one specific notional machine through the notation it interprets. Embodied work makes theoretical work tractable and visible. | **Theory of computation** — the formal/mathematical framework defining what computation IS (Turing machines, lambda calculus, complexity classes). Begins in WtA. |
+| **Programming** — specific use cases, concrete inputs and outputs, particular implementations                                                                                                  | **Computer Science** — general classes of problems and algorithms, asymptotic analysis, formal proofs of correctness                                              |
+| **Local fluency** — expressions, bindings, scopes, control flow at the statement level                                                                                                         | **Global architecture** — system design, API boundaries, database schemas, how large codebases are organized                                                      |
+| **Comprehension before production** — you'll read and trace code before you write it; programs are written to verify understanding, not to demonstrate output                                  | **Production-first** — most courses have you writing immediately; output becomes the measure of understanding                                                     |
+| **Depth on a constrained surface** — Just Enough JavaScript offers few features deliberately                                                                                                   | **Breadth across many features** — JS has hundreds; covering all of them diffuses the focus needed to build a real mental model                                   |
+
+**How you will work:**
+
+| WtP's approach                                                                                                                                           | The common alternative                                                                           |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Errors as information** — the machine is honest; an error tells you precisely where what you specified and what the machine can interpret do not match | Errors as failure — something is broken                                                          |
+| **Read from code first** — you will spend real time as a code investigator before you write                                                              | Learn by writing — produce output to prove you understand                                        |
+| **Predict and check** — proactive and mechanistic; you will see what happens and update your model                                                       | Watch and explain — retroactive and justifying; post-hoc description of what you've already seen |
+
+**Where WtP fits in the larger journey:**
+
+| WtP                                                                                                                                                                                    | What follows                                                                                                                                 |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Learning to program** — build fluency in the embodied language of computation. Chapter 5 is the first pivot: snippetry is where you begin using programming to explore and discover. | **Programming to learn** — use programming as a tool to explore algorithms, complexity, paradigms, and domains (WtA, Trees, SoC, and beyond) |
+
+WtP is a prerequisite for any Spiralearn curriculum that requires computational
+thinking. What follows it: **Welcome to Algorithms** (algorithm strategies,
+step-counting, Big O), **Trees** (tree data structures → the DOM → browser event
+dispatch), **Separation of Concerns** (programs organized at scale across files
+and modules), and onward into specific domains, languages, and specializations.
+Trees and Separation of Concerns can be studied in either order depending on
+your goals; Trees-first provides conceptual grounding for the DOM, SoC-first
+reaches interactive pages sooner.
+
+A note on comprehension before production: all professional programming work
+takes place in existing codebases. All of what programmers do is arrangement and
+variation — reading code, understanding it, modifying it, fitting new pieces
+into existing structures. This course teaches you to read and understand code
+first because that is what all programming work actually is. You will write
+programs throughout, but to verify understanding, not to demonstrate output.
+
+**Three vocabulary distinctions worth having early:**
+
+| Term                     | What it means                                                                                                                                                                                                                                                          | In WtP                                                                                                                                                       |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Programming paradigm** | A design philosophy for organizing programs — how you decompose problems, structure solutions, manage state                                                                                                                                                            | Ch1–4 is imperative: sequences of statements, explicit control flow, mutable state. Functional, OOP, and declarative are deferred to Ch5.                    |
+| **Computational domain** | What you are computing _about_ — the thing in the world you are modeling. A programmer who understands medicine writes better medical software; one who understands finance builds better financial tools. Domain expertise is a separate axis from programming skill. | WtP is largely domain-agnostic by design — the same NM skills transfer to any domain.                                                                        |
+| **Computational idioms** | Types of operators and operations available within a programming language — how you manipulate values. Different languages emphasize different idioms; mastering an idiom means fluency with a category of operations.                                                 | Ch2's sections (2A–2F) are organized by idiom: logic, strings, numbers, pattern matching, bits, dates. Distinct from computational domains (subject matter). |
+| **Model of computation** | A formal mathematical framework defining what computation _is_ — Turing machines, lambda calculus, finite automata                                                                                                                                                     | Largely deferred to WtA and beyond                                                                                                                           |
+
+These three are orthogonal. You can write functional medical software or
+imperative medical software — the domain (medicine) is independent of the
+paradigm (functional/imperative). The model of computation is a different
+question again.
+
+One useful test: when you encounter a new concept, ask — is this about how I
+organize my program (paradigm)? About what I'm computing about (domain)? Or
+about what computation fundamentally is (model)?
+
+Two questions this taxonomy answers before you even ask them:
+
+- _"Why aren't we doing functional programming?"_ — Paradigm. Deferred to Ch5.
+- _"Why aren't we working on a specific project like a web app or game?"_ —
+  Domain. WtP is domain-agnostic by design.
+
+A note on JavaScript specifically: JS is a multi-paradigm language — it can
+_look_ like OOP, functional, or declarative code syntactically. But it runs one
+notional machine: procedural + prototypes. When you write "OOP-style" JS, the
+machine underneath is still producing the same events it always does — and the
+notional machine does not change. Languages designed _for_ a paradigm (Haskell,
+Smalltalk, Java) have genuinely different notional machines and different event
+vocabularies. This course teaches JS's actual machine. Understanding it gives
+you a stable base from which to see that paradigm choices are partly about which
+machine's event vocabulary you want to think in.
+
+**What the course constrains — and why:**
+
+Just Enough JavaScript is deliberately small. It excludes classes, most array
+methods, async/await, modules, destructuring, generators, and dozens of other
+features JS has. This is not an oversight. Fewer features means more cognitive
+bandwidth for the concepts that actually matter in Ch1–4: how the machine
+executes, how values and bindings behave, how control flow works.
+
+The constraints are temporary and intentional:
+
+- Ch5 lifts most of them
+- Welcome to Algorithms adds functions, arrays, and objects — and uses them to
+  study algorithms
+- Trees and Separation of Concerns add DOM manipulation, event handling, and
+  module structure
+
+If a feature you want is missing, the likely answer is: it is coming, and it
+will make more sense when it arrives because you have the foundation.
+
+**On architecture specifically:** WtP builds fluency at the level of
+expressions, statements, and small programs. It does not teach how programs are
+organized at scale — API boundaries, module systems, separation of concerns
+across files and services. That is a later skill, developed across Trees and
+Separation of Concerns and beyond.
+
+**Learning objectives for §0.2:**
+
+- 🥚 Use the positioning tables to locate WtP's scope within the broader space
+  of programming and computer science
+- 🥚 Explain what distinguishes a programming paradigm, a computational domain,
+  and a computational idiom, and give examples of each
+- 🥚 Understand why WtP constrains itself to Just Enough JavaScript and why
+  those constraints are temporary
+- 🥚 Recognize that architecture (organizing programs at scale) is a separate
+  skill, developed later in Trees and Separation of Concerns
+- 🐣 Articulate the differences between the vocabulary triangle terms and
+  explain their orthogonality (you can combine any paradigm with any domain)
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -693,23 +858,74 @@ The chapter has two tracks:
 
 ### 2.0 The Notional Machine
 
-- 🥚 Name the components of the JEJ notional machine: values, bindings, scopes,
-  expressions, statements, resolve, coercion, errors, scope chain lookup,
-  prototype chain lookup
-- 🥚 Distinguish the two viewing levels: _visual-syntax_ (expressions and
-  statements: what you write) and _behind-the-scenes_ (values, bindings, scopes,
-  coercion: what the VM does invisibly)
-- 🥚 Explain what "twinning the computer" means: building an accurate internal
-  model of what the VM does when it runs your code
-- 🥚 Recognize that source code is static; execution produces a dynamic stream
-  of **runtime events**: observable moments the VM produces as code runs
+Every programming language describes a machine. The machine JavaScript describes
+has a name: the **notional machine** (NM). You do not program JavaScript — you
+program the notional machine _using_ JavaScript.
+
+The NM is best understood as a machine that works through a fixed vocabulary of
+**execution events**: observable moments that occur in a specific order as your
+code runs. Each event has a type. Types have relationships. A given piece of
+syntax produces a predictable sequence of typed events. Learning the NM is
+learning this vocabulary — what categories of events exist, which events
+necessarily follow which, and which syntactic forms produce which sequences.
+
+The machine has two viewing levels:
+
+- **Visual-syntax level** — what you can see in the source code: expressions,
+  statements, the control panel you write to direct the machine
+- **Behind-the-scenes level** — what the machine is actually doing: binding
+  lifecycle, scope creation and chain-walking, value resolution, coercion,
+  errors
+
+Behind the scenes, the machine maintains **state** — values, bindings, scopes —
+that events read and mutate. The events are what happen; the state is what they
+happen to.
+
+**The further skill: decoupling syntax from events**
+
+Once you can think in events, a new ability becomes possible: you can specify
+_what you want the machine to do_ — describe a desired event sequence — before
+choosing the syntax that produces it. You can communicate that specification to
+another person, to the tracer, or to an LLM, and then evaluate whether what was
+produced actually achieves what you wanted.
+
+This is what "programming the machine directly" means. The syntax is notation
+for the machine; the events are what the machine actually speaks.
+
+**Errors**
+
+An error is not a personal failure and it is not the machine breaking. It is a
+specific event that fires because the machine encountered a specification it
+cannot interpret. The machine is being precisely honest: it found a mismatch
+between what was specified and what it can do. Errors are the notional machine's
+most useful output.
+
+Learning to read errors as information — rather than experiencing them as
+indictments — is a skill this chapter develops alongside everything else.
+
+**The tracer**
+
+Study Lenses' tracer captures the execution event stream: every
+behind-the-scenes moment as your code runs, as a structured sequence you can
+step through.
+
+Study Lenses' tracer serves two roles:
+
+1. **Training wheels** — while you are building your internal NM model, the
+   tracer makes visible what your mental model should eventually produce on its
+   own
+2. **Power tool** — when code is too complex to trace mentally, the tracer
+   extends your working memory, letting you attend to execution you could not
+   hold in your head alone
+
+---
 
 ### 2.1 Running a Program
 
 - 🥚 Static source code vs. dynamic execution: reading a file vs. running it\
   _builds on: comments as static text → logs as runtime observation →
   distinguishing the two clearly_
-- 🥚 **Runtime events**: a running program produces an ordered stream of
+- 🥚 **Execution events**: a running program produces an ordered stream of
   observable moments; the tracer captures these automatically; trace tables
   record them by hand\
   _builds on: static/dynamic distinction → now naming the individual moments of
@@ -863,7 +1079,7 @@ The chapter has two tracks:
 
 ### Computational Idioms
 
-These branches apply the notional machine to specific computational domains.
+These branches apply the notional machine through specific computational idioms.
 **2A and 2B are required.** Choose at least one from 2C–2E. 2F is optional.
 
 #### 2A: Logic and Truthiness 🥚
@@ -1253,18 +1469,49 @@ practice, think, stretch, explore, express, delight, and discover. "You" is both
 singular (your own practice) and plural (sharing with and remixing from peers
 through the collaborative gist system).
 
-**JavaScript is multi-paradigmatic.** Chapters 1–4 taught imperative
-programming. Chapter 5 is where students discover that the same language
-supports fundamentally different ways of thinking about computation: functional,
-object-oriented, declarative. Paradigm exploration is a core activity, not a
-sidebar.
-
 > The best authors and the best JavaScript developers are those who obsess about
 > language, who explore and experiment with language every day and in doing so
 > develop their own style, their own idioms, and their own expression.
 >
 > — [Angus Croll](https://anguscroll.com/),
 > [If Hemingway Wrote JavaScript](https://anguscroll.com/hemingway/)
+
+### The Notional Machine and Programming Paradigms
+
+**JavaScript is multi-paradigmatic.** Chapters 1–4 taught imperative
+programming. Chapter 5 is where students discover that the same language
+supports fundamentally different ways of thinking about computation: functional,
+object-oriented, declarative. Paradigm exploration is a core activity, not a
+sidebar.
+
+Once you understand programs as event streams, the paradigm distinctions become
+grounded in the same vocabulary. All paradigms run on a machine that produces
+execution events. What differs is the _relationship_ the programmer has to that
+event stream — how explicitly and in what terms the event sequence is specified:
+
+| Paradigm                                             | Relationship to the execution event stream                                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Imperative** (JS Ch1–4)                            | Explicit event sequence — every step specified. JS's actual NM vocabulary.                                                                        |
+| **OOP in JS** (Ch5)                                  | Syntactic organization on top of the same machine — method calls = prototype chain walk + function call events. A style, not a different machine. |
+| **OOP in purpose-built languages** (Java, Smalltalk) | Genuinely different NMs — message-send events, virtual dispatch. Different event vocabulary.                                                      |
+| **Functional in JS** (Ch5)                           | Compose transformations; the same machine generates events from function application. Same machine, different organization.                       |
+| **Declarative** (regex, SQL)                         | Specify the goal; delegate event generation. Maximum decoupling from the event sequence.                                                          |
+| **Event-driven** (JS Ch5 event loop)                 | External events — clicks, timers — enter the stream as first-class participants.                                                                  |
+
+Imperative programming — what you will learn in Chapters 1–4 — is explicit about
+the event sequence: every step is specified, every event directed. Other
+paradigms have different relationships to that stream. You will explore them in
+Chapter 5.
+
+**Looking further: Welcome to Algorithms**
+
+The execution event vocabulary you build in Ch2 is one conceptual bridge from
+embodied computing to CS. Welcome to Algorithms' step-counting and Big O
+analysis require the same cognitive habit — counting discrete operations —
+though the abstraction differs: execution events are implementation-level;
+algorithmic steps are defined relative to input size and are intentionally
+implementation-agnostic. The machine you learn here makes that work tractable
+and visible.
 
 ### The training-wheels-off commitment
 
