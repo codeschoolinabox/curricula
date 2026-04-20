@@ -6,17 +6,22 @@ of something hard and want context for what you are experiencing.
 
 ## The Big Picture
 
-_[TODO: Insert spiral curriculum visual here — shows WtP→WtA→Trees→SoC
-progression]_
+This course is one turn of a larger spiral. You will revisit the same core ideas
+— reading code, tracing execution, reasoning about values and scope — many times
+across WtP, Welcome to Algorithms, Trees, and Separation of Concerns. Each turn
+goes deeper. What feels out of reach in one chapter becomes obvious after the
+next pass.
 
-_[TODO: Insert skills vs. technologies spiderweb —
-https://denepo.js.org/web-development-curriculum#the-curriculum-a-spider-web]_
+![Spiral Curriculum — concepts revisited at increasing depth across WtP → WtA → Trees → SoC](../-1-getting-started/assets/spiral-curriculum.png)
 
-Skills in programming grow as a web, not a ladder. The spider web model shows
-how different skills — reading code, tracing execution, understanding
-algorithms, working with data structures — connect and reinforce each other
-across courses. No skill is learned once and finished; each course spirals back
-through the same core skills at a deeper level.
+Skills in programming grow as a web, not a ladder. Reading code, tracing
+execution, understanding algorithms, working with data structures — these
+connect and reinforce each other. No skill is learned once and finished; each
+course spirals back through the same core skills at a deeper level. The diagram
+below, adapted from the [spider web curriculum model](https://denepo.js.org/web-development-curriculum#the-curriculum-a-spider-web),
+shows that structure: concentric rings of depth, radial threads of skill.
+
+![Curriculum spider web — skills vs. technologies](../narrative/assets/curriculum-spider-web.svg)
 
 Connections, too, are concepts: every new idea you build in this course is an
 addition to a network, not a discrete fact to memorize. See:
