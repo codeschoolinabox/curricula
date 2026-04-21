@@ -1,3 +1,5 @@
+<!-- !! CLAUDE !! stop and check with the user before proceeding, a key premise of this task has changed: the 3rd dimension won't be language levels, but text-visible features as gated by the syntax-level tracer documented in /just-enough/javscript/notional-machine/  --->
+
 # Work Stream 2: Snippet Analysis + Recommendation System
 
 ## Prerequisites
@@ -8,23 +10,22 @@ Before starting, read these files in full (do not skim):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/AGENTS.md`
 - **DEV.md** (repo root):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/DEV.md`
-- **Master plan**:
-  `./00-master-plan.md` (in this directory)
+- **Master plan**: `./00-master-plan.md` (in this directory)
 - **Notional machine** (NM components the analysis detects):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/notional-machine.md`
 - **Tracer docs** (semantic layers, gate config):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/tracer.md`
 - **Existing recommender directory** (currently just an empty README):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/recommender/`
-- **Existing socratizing module** (prior art for snippet analysis -- this
-  module may later consume the shared analysis):
+- **Existing socratizing module** (prior art for snippet analysis -- this module
+  may later consume the shared analysis):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/socratizing/`
 - **Existing validating module** (AST parsing for JEJ):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/validating/`
 - **Lenses DOCS.md** (current lens architecture):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lenses/DOCS.md`
-- **Sub-language levels** (Work Stream 1 output -- read when available):
-  The types and data from Work Stream 1 define the third Block Model dimension
+- **Sub-language levels** (Work Stream 1 output -- read when available): The
+  types and data from Work Stream 1 define the third Block Model dimension
 
 ## Context
 
@@ -36,17 +37,16 @@ This work stream builds two pure TS modules that work together:
    returns a structured `AnalysisReport`. Pure TS, no React, no DOM.
 
 2. **`lib/recommender/`** -- Recommendation engine. Takes an `AnalysisReport`
-   plus a list of registered lenses, returns a `RecommendationGrid` organized
-   by the 3D Block Model dimensions. Pure TS, no React, no DOM.
+   plus a list of registered lenses, returns a `RecommendationGrid` organized by
+   the 3D Block Model dimensions. Pure TS, no React, no DOM.
 
 ### Why it matters
 
 The analysis + recommender is the intelligence behind the study lens system's
-spiral learning experience. Instead of showing learners a flat list of
-all lenses, the recommender suggests lenses configured for the specific
-snippet and the learner's progression level. This is what makes each code
-snippet a "study object" with multiple entry points at different
-comprehension depths.
+spiral learning experience. Instead of showing learners a flat list of all
+lenses, the recommender suggests lenses configured for the specific snippet and
+the learner's progression level. This is what makes each code snippet a "study
+object" with multiple entry points at different comprehension depths.
 
 ### How it fits in the architecture
 
@@ -68,23 +68,23 @@ lib/analysis/ --> AnalysisReport
      +---> (future) socratizing could consume AnalysisReport
 ```
 
-The analysis runs **lazily** -- only when the learner opens the
-recommendation panel, not on every keystroke. JEJ-only (simplified
-parsing, no general JS analysis needed).
+The analysis runs **lazily** -- only when the learner opens the recommendation
+panel, not on every keystroke. JEJ-only (simplified parsing, no general JS
+analysis needed).
 
 ### The three-tier lens classification
 
 Each lens falls into one of three tiers based on what it needs from the code:
 
-**Tier 1: Text-only static** -- Works on raw text, no parse needed.
-Always available, even with syntax errors.
+**Tier 1: Text-only static** -- Works on raw text, no parse needed. Always
+available, even with syntax errors.
 
 - parsons (line shuffling)
 - highlight (annotation)
 - copy-type (writeme)
 
-**Tier 2: AST-dependent static** -- Needs a valid parse but no execution.
-Syntax errors -> relevance 0.
+**Tier 2: AST-dependent static** -- Needs a valid parse but no execution. Syntax
+errors -> relevance 0.
 
 - blanks (token removal)
 - variables (scope analysis)
@@ -98,9 +98,9 @@ relevance 0.
 - debug
 - predict-then-compare trace tables
 
-This classification drives the analysis: if a snippet has syntax errors,
-only Tier 1 lenses are recommended. The analysis must report parse status
-so each lens's `recommend()` can gate on it.
+This classification drives the analysis: if a snippet has syntax errors, only
+Tier 1 lenses are recommended. The analysis must report parse status so each
+lens's `recommend()` can gate on it.
 
 ### Recommender signals
 
@@ -110,9 +110,9 @@ consumes them to decide what to suggest. The analysis produces:
 1. **Parse status** -- Valid AST? Syntax errors? Which errors? Gates the
    three-tier classification above.
 
-2. **Code length** -- Lines, characters, statements. Shorter snippets
-   support higher blanks difficulty; parsons works best around 8-15 lines;
-   trace tables become unwieldy past ~20 lines.
+2. **Code length** -- Lines, characters, statements. Shorter snippets support
+   higher blanks difficulty; parsons works best around 8-15 lines; trace tables
+   become unwieldy past ~20 lines.
 
 3. **NM components present** -- Which components from `notional-machine.md`
    appear in the code: values only -> simpler lenses; bindings with update ->
@@ -120,21 +120,20 @@ consumes them to decide what to suggest. The analysis produces:
    operator-focused lenses; I/O -> execution-focused lenses. The set of NM
    components determines the sub-language level (from Work Stream 1).
 
-4. **Complexity signals** -- Nesting depth, variable count, branch count.
-   Drives both WHICH lenses and WHAT CONFIG within each lens.
+4. **Complexity signals** -- Nesting depth, variable count, branch count. Drives
+   both WHICH lenses and WHAT CONFIG within each lens.
 
-5. **JEJ NM semantic layers present** -- Which of the 5 tracer semantic
-   layers (values, bindings, expressions, statements, scopes) appear in
-   the snippet.
+5. **JEJ NM semantic layers present** -- Which of the 5 tracer semantic layers
+   (values, bindings, expressions, statements, scopes) appear in the snippet.
 
 6. **Author overrides** -- `lenses.json` or `@study-lens` directives can
-   constrain which lenses the recommender offers. The free-exploration panel
-   is always available regardless of constraints.
+   constrain which lenses the recommender offers. The free-exploration panel is
+   always available regardless of constraints.
 
 ### The Recommendation type
 
-Each lens's `recommend()` function returns `Recommendation[]`. A single lens
-can suggest multiple versions of itself at different Block Model cells with
+Each lens's `recommend()` function returns `Recommendation[]`. A single lens can
+suggest multiple versions of itself at different Block Model cells with
 different configs:
 
 ```text
@@ -148,8 +147,8 @@ Recommendation = {
 }
 ```
 
-- `lens` is a string (not a component reference) -- keeps `recommend()` in
-  pure TS. The orchestrator resolves names to components via the registry.
+- `lens` is a string (not a component reference) -- keeps `recommend()` in pure
+  TS. The orchestrator resolves names to components via the registry.
 - `transforms` enables pipeline recommendations (e.g.,
   `{ transforms: ['translate'], lens: 'parsons' }` = pseudocode parsons).
 - A single lens can suggest multiple versions of itself (e.g., blanks at
@@ -157,25 +156,25 @@ Recommendation = {
 
 ### The RecommendationGrid
 
-The recommender collects all `Recommendation[]` from all registered lenses
-and organizes them into a 3D grid:
+The recommender collects all `Recommendation[]` from all registered lenses and
+organizes them into a 3D grid:
 
 - Dimension 1: **Level** (text surface, program execution, function/purpose)
 - Dimension 2: **Scope** (atoms, blocks, relations, macro)
 - Dimension 3: **NM components** (sub-language levels from Work Stream 1)
 
-Not every cell needs filling -- only cells matching the code's features
-and available lens suggestions are populated.
+Not every cell needs filling -- only cells matching the code's features and
+available lens suggestions are populated.
 
 ### The socratizing refactor connection
 
-The existing `lib/socratizing/` module does its own snippet analysis to
-generate Socratic prompts. A future refactor could make it consume the
-shared `AnalysisReport` from `lib/analysis/` instead. Same pattern:
-`AnalysisReport -> Socratic prompts` mirrors `AnalysisReport -> lens
-recommendations`. Keep this in mind during design: the `AnalysisReport`
-should be general enough that socratizing could consume it, but do NOT
-design for that use case now -- just don't block it.
+The existing `lib/socratizing/` module does its own snippet analysis to generate
+Socratic prompts. A future refactor could make it consume the shared
+`AnalysisReport` from `lib/analysis/` instead. Same pattern:
+`AnalysisReport -> Socratic prompts` mirrors
+`AnalysisReport -> lens recommendations`. Keep this in mind during design: the
+`AnalysisReport` should be general enough that socratizing could consume it, but
+do NOT design for that use case now -- just don't block it.
 
 ### What's decided
 
@@ -200,33 +199,32 @@ design for that use case now -- just don't block it.
 
 ### This stream depends on
 
-- **Work Stream 1 (Sub-Language Levels)**: needs the level definitions to
-  map NM components to sub-language levels and to build the third dimension
-  of the recommendation grid. Can start Phase 0 (DDD) in parallel, but
-  Phase 1 implementation depends on the level types.
+- **Work Stream 1 (Sub-Language Levels)**: needs the level definitions to map NM
+  components to sub-language levels and to build the third dimension of the
+  recommendation grid. Can start Phase 0 (DDD) in parallel, but Phase 1
+  implementation depends on the level types.
 
 ### Other streams that depend on this
 
 - **Work Stream 3 (Orchestrator)**: the orchestrator calls the recommender
   lazily when the recommendation panel opens. The orchestrator needs the
   `RecommendationGrid` type to render the spiral/grid UI.
-- **Work Stream 4 (Lens Migration)**: each lens implements `recommend()`
-  which takes `AnalysisReport` as input. Lens authors need the
-  `AnalysisReport` type.
+- **Work Stream 4 (Lens Migration)**: each lens implements `recommend()` which
+  takes `AnalysisReport` as input. Lens authors need the `AnalysisReport` type.
 
 ## Non-negotiable constraints
 
 From the master plan:
 
-1. **Pure TS, no React, no DOM.** Both modules are in `lib/`. They are
-   consumed by the orchestrator (React) but must be testable without React.
+1. **Pure TS, no React, no DOM.** Both modules are in `lib/`. They are consumed
+   by the orchestrator (React) but must be testable without React.
 2. **Lazy analysis.** Analysis runs only when the recommendation panel opens,
    NOT on every edit.
-3. **Three-tier lens classification.** Parse status gates which lenses can
-   be recommended. Text-only lenses are always available. AST-dependent and
-   dynamic lenses require valid parse.
-4. **Self-describing lenses.** Each lens's `recommend()` function declares
-   its own relevance. The recommender does NOT have hardcoded knowledge of
+3. **Three-tier lens classification.** Parse status gates which lenses can be
+   recommended. Text-only lenses are always available. AST-dependent and dynamic
+   lenses require valid parse.
+4. **Self-describing lenses.** Each lens's `recommend()` function declares its
+   own relevance. The recommender does NOT have hardcoded knowledge of
    individual lenses -- it collects from registered lenses.
 5. **Pipeline recommendations.** The recommender can compose transform+lens
    pipelines (e.g., `translate` transform + `parsons` lens = pseudocode
@@ -238,9 +236,9 @@ From the master plan:
 
 ## Phase 0 checklist (from AGENTS.md)
 
-Two modules need Phase 0, done together or sequentially. Complete every
-step in order. Do not skip any step. Do not start Phase 1 until all 7
-steps are done for BOTH modules.
+Two modules need Phase 0, done together or sequentially. Complete every step in
+order. Do not skip any step. Do not start Phase 1 until all 7 steps are done for
+BOTH modules.
 
 ### Phase 0 for `lib/analysis/`
 
@@ -250,31 +248,32 @@ steps are done for BOTH modules.
   - NM component detection (how components are identified in code)
   - Complexity signals (nesting depth, variable count, branch count)
   - Code metrics (lines, characters, statements)
-  - Semantic layers (mapping to tracer's 5-layer model)
-  Watch for: "feature" (overloaded term -- NM component? syntax feature?
-  language feature?). Pick precise terms and stick with them.
+  - Semantic layers (mapping to tracer's 5-layer model) Watch for: "feature"
+    (overloaded term -- NM component? syntax feature? language feature?). Pick
+    precise terms and stick with them.
 
 - [ ] **0.2 Update README.md** -- for `lib/analysis/`. What the module does,
-  where it fits, what it owns, what it does NOT own (recommending is the
-  recommender's job, not analysis's).
+      where it fits, what it owns, what it does NOT own (recommending is the
+      recommender's job, not analysis's).
 
 - [ ] **0.3 AR-1 design challenge** -- Focus areas:
   - Is AnalysisReport too broad or too narrow?
   - Does the analysis duplicate work in `lib/validating/`? Should it reuse?
-  - Are the NM component names aligned with `notional-machine.md`?
-  Provide: README, notional-machine.md, existing validating module.
+  - Are the NM component names aligned with `notional-machine.md`? Provide:
+    README, notional-machine.md, existing validating module.
 
 - [ ] **0.4 Update types.ts** -- Define `AnalysisReport` and related types.
 
 - [ ] **0.5 Write DOCS.md architectural sketch** -- Execution phases for
-  analysis (parse, detect components, measure complexity, assemble report).
+      analysis (parse, detect components, measure complexity, assemble report).
 
-- [ ] **0.6 AR-2 sketch challenge** -- Is the sketch at the right
-  abstraction? Are phases the right granularity?
+- [ ] **0.6 AR-2 sketch challenge** -- Is the sketch at the right abstraction?
+      Are phases the right granularity?
 
 - [ ] **0.7 Review & resolve** -- Can you predict the implementation shape?
 
-  Commit: `docs: establish analysis module domain model and architectural sketch`
+  Commit:
+  `docs: establish analysis module domain model and architectural sketch`
 
 ### Phase 0 for `lib/recommender/`
 
@@ -293,11 +292,11 @@ steps are done for BOTH modules.
   - Is the 3D grid the right structure? Could a flat list suffice?
   - How do pipeline recommendations compose without combinatorial explosion?
 
-- [ ] **0.4 Update types.ts** -- Define `RecommendationGrid`,
-  `Recommendation`, related types.
+- [ ] **0.4 Update types.ts** -- Define `RecommendationGrid`, `Recommendation`,
+      related types.
 
-- [ ] **0.5 Write DOCS.md architectural sketch** -- Execution phases
-  (collect from lenses, organize into grid, apply overrides).
+- [ ] **0.5 Write DOCS.md architectural sketch** -- Execution phases (collect
+      from lenses, organize into grid, apply overrides).
 
 - [ ] **0.6 AR-2 sketch challenge**
 
@@ -309,46 +308,45 @@ steps are done for BOTH modules.
 
 ### Analysis module increments
 
-- [ ] **Increment 1**: Parse status detection. Input: JEJ code string.
-  Output: parse status (valid/invalid + error details). ZOMBIES: empty
-  string, valid one-liner, syntax error.
-- [ ] **Increment 2**: Code metrics. Input: code string. Output: line
-  count, character count, statement count. ZOMBIES: empty, one line,
-  multi-line.
+- [ ] **Increment 1**: Parse status detection. Input: JEJ code string. Output:
+      parse status (valid/invalid + error details). ZOMBIES: empty string, valid
+      one-liner, syntax error.
+- [ ] **Increment 2**: Code metrics. Input: code string. Output: line count,
+      character count, statement count. ZOMBIES: empty, one line, multi-line.
 - [ ] **Increment 3**: NM component detection -- values and bindings. Input:
-  parsed AST. Output: which value types and binding operations appear.
-  ZOMBIES: no bindings, one let, const, let+update.
+      parsed AST. Output: which value types and binding operations appear.
+      ZOMBIES: no bindings, one let, const, let+update.
 - [ ] **Increment 4**: NM component detection -- expressions and coercion.
-  Operators present, coercion moments.
-- [ ] **Increment 5**: NM component detection -- statements and scopes.
-  Control flow constructs, block scope creation.
-- [ ] **Increment 6**: NM component detection -- I/O channels.
-  Console calls, prompt/alert/confirm.
-- [ ] **Increment 7**: Complexity signals. Nesting depth, variable count,
-  branch count.
-- [ ] **Increment 8**: Sub-language level mapping. Given detected NM
-  components, determine the snippet's sub-language level (consumes
-  Work Stream 1 output).
-- [ ] **Increment 9**: Full `AnalysisReport` assembly. Combine all signals
-  into the typed report. Integration test with a realistic JEJ snippet.
+      Operators present, coercion moments.
+- [ ] **Increment 5**: NM component detection -- statements and scopes. Control
+      flow constructs, block scope creation.
+- [ ] **Increment 6**: NM component detection -- I/O channels. Console calls,
+      prompt/alert/confirm.
+- [ ] **Increment 7**: Complexity signals. Nesting depth, variable count, branch
+      count.
+- [ ] **Increment 8**: Sub-language level mapping. Given detected NM components,
+      determine the snippet's sub-language level (consumes Work Stream 1
+      output).
+- [ ] **Increment 9**: Full `AnalysisReport` assembly. Combine all signals into
+      the typed report. Integration test with a realistic JEJ snippet.
 
 ### Recommender module increments
 
-- [ ] **Increment 10**: Collect recommendations from a single lens.
-  Input: AnalysisReport + one lens with `recommend()`. Output: that lens's
-  recommendations. ZOMBIES: lens returns empty array, one recommendation,
-  multiple.
-- [ ] **Increment 11**: Collect from multiple lenses. Verify deduplication
-  and that all lenses are queried.
+- [ ] **Increment 10**: Collect recommendations from a single lens. Input:
+      AnalysisReport + one lens with `recommend()`. Output: that lens's
+      recommendations. ZOMBIES: lens returns empty array, one recommendation,
+      multiple.
+- [ ] **Increment 11**: Collect from multiple lenses. Verify deduplication and
+      that all lenses are queried.
 - [ ] **Increment 12**: Organize into Block Model grid. Place each
-  recommendation at its `blockModelCell` coordinates. ZOMBIES: empty grid,
-  one cell, multiple cells.
-- [ ] **Increment 13**: Pipeline recommendations. Verify that
-  recommendations with `transforms` are preserved and resolved correctly.
-- [ ] **Increment 14**: Author overrides. Filter/constrain recommendations
-  based on override config.
+      recommendation at its `blockModelCell` coordinates. ZOMBIES: empty grid,
+      one cell, multiple cells.
+- [ ] **Increment 13**: Pipeline recommendations. Verify that recommendations
+      with `transforms` are preserved and resolved correctly.
+- [ ] **Increment 14**: Author overrides. Filter/constrain recommendations based
+      on override config.
 - [ ] **Increment 15**: Full `RecommendationGrid` assembly. Integration test
-  with multiple lenses and a realistic analysis report.
+      with multiple lenses and a realistic analysis report.
 
 For each increment, follow the full TDD cycle from AGENTS.md:
 
@@ -373,16 +371,16 @@ For each increment, follow the full TDD cycle from AGENTS.md:
 ## Phase 2 checklist
 
 - [ ] Run full quality checks: `npm test && npm run lint && npm run type-check`
-- [ ] **AR-5 pre-merge review**: Spawn reviewer for the full changeset.
-  Provide: full diff, modified files, this handoff document, DOCS.md files.
-  Focus areas from AGENTS.md AR-5:
+- [ ] **AR-5 pre-merge review**: Spawn reviewer for the full changeset. Provide:
+      full diff, modified files, this handoff document, DOCS.md files. Focus
+      areas from AGENTS.md AR-5:
   - Cross-file consistency between analysis and recommender modules
   - Documentation sync (README, DOCS.md, types, JSDoc, tests all agree)
   - Missing test scenarios (edge cases: unparseable code, lens with no
     recommendations, grid with empty cells)
   - Convention compliance
-  - Architecture fit (do these modules integrate cleanly with the
-    orchestrator and lens contracts from Work Streams 3-4?)
+  - Architecture fit (do these modules integrate cleanly with the orchestrator
+    and lens contracts from Work Streams 3-4?)
   - Scope: did we add anything beyond what was requested?
 - [ ] Address PAUSE/CONSIDER items from AR-5
 - [ ] Commit prompt
@@ -395,21 +393,20 @@ For each increment, follow the full TDD cycle from AGENTS.md:
 2. **Type checking**: `npm run type-check` -- no errors
 3. **Lint**: `npm run lint` -- clean
 4. **Integration test scenario**: Create a test with a realistic JEJ snippet
-   (e.g., `let x = 5; let y = x + 1; if (y > 3) { console.log(y); }`),
-   run it through analysis to get an AnalysisReport, then through the
-   recommender with mock lenses that have `recommend()` functions, and
-   verify the RecommendationGrid has recommendations in the expected
-   Block Model cells
-5. **Parse error scenario**: Run analysis on invalid code, verify only
-   Tier 1 (text-only) lenses get non-zero relevance from mock lenses
-6. **Documentation review**: read both READMEs, both DOCS.md files, and
-   both types.ts files -- a developer can understand the full pipeline
-   from code to recommendation grid
+   (e.g., `let x = 5; let y = x + 1; if (y > 3) { console.log(y); }`), run it
+   through analysis to get an AnalysisReport, then through the recommender with
+   mock lenses that have `recommend()` functions, and verify the
+   RecommendationGrid has recommendations in the expected Block Model cells
+5. **Parse error scenario**: Run analysis on invalid code, verify only Tier 1
+   (text-only) lenses get non-zero relevance from mock lenses
+6. **Documentation review**: read both READMEs, both DOCS.md files, and both
+   types.ts files -- a developer can understand the full pipeline from code to
+   recommendation grid
 
 ### What success looks like
 
 A fresh agent working on Work Stream 3 (orchestrator) can import the
-recommender, call it with an AnalysisReport and registered lenses, and
-receive a RecommendationGrid to render. A fresh agent working on Work
-Stream 4 (lens migration) can import AnalysisReport and implement
-`recommend()` on each lens against the typed contract.
+recommender, call it with an AnalysisReport and registered lenses, and receive a
+RecommendationGrid to render. A fresh agent working on Work Stream 4 (lens
+migration) can import AnalysisReport and implement `recommend()` on each lens
+against the typed contract.

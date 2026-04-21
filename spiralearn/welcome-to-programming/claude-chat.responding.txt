@@ -1,0 +1,18 @@
+L1  Resolves only              
+    → "what's the 'data skeleton/circulatory/signature' for this program'?"
+        treating data flow and transformation as the base level of a program can help later with ideas like BSI and algorithms
+L2  + Literals and I/O
+    → "where does data originate and where does it go (within and across program boundaries)"
+L3  + Operators & coercion     
+    → "how is the data transformed through the program?"
+(up to this point variables appear as data traveling down a forked path to reunite with the active flow/transformations later.  we can literally visualize it like a sort of flowchart through time with data appearing as a new line when it's introduced by primitive (popping up de novo in the timeline) or I/O (entering from "outside" the flowchart), as the line continuing straight when it's stored in a variable, and as lines merging and becoming a new line when an operator occurs, and as it leaving the program with the O of I/O.  then to be true to primitives (vs. reference types) reading from a variable acutally spawns a new line from the storage track.  what do you think of this?   I can see the lyaers being added!  methods are also a form of tranformation, and require a parallel "dimension" for scope lookup.   ... there's a lot here, let's actually pivot to sketch some possible visualizations and how each level of the NM build on the visual?)
+L4  + Bindings                 
+    → "where do values go when they're not actively transforming"
+L5  + Scopes & lookup          
+    → "how are the bindings organized?"
+L6  + Control flow             
+    → "how do we control which transformations occur?"
+L7  + Prototype & registers    
+    → "how are methods found on values?"
+Errors are cross-cutting — surfaced when their triggers become reachable
+  (ReferenceError needs L4, TypeError needs L3 coercion or L4 const, RangeError needs L6 loops)

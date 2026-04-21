@@ -31,7 +31,7 @@ is a **fresh start**. The agent has:
 Read these files before doing anything:
 1. .planning-handoffs/0N-[work-stream].md (your assignment)
 2. .planning-handoffs/00-master-plan.md (full architecture context)
-3. AGENTS.md and DEV.md at the repo root (workflow + conventions)
+3. 0-curricula/AGENTS.md and 0-curricula/DEV.md at the repo root (workflow + conventions)
 4. study-lenses/README.md and study-lenses/DOCS.md (architecture docs)
 5. study-lenses/types.ts (existing shared types)
 
@@ -70,10 +70,10 @@ WS3 (orchestrator + contracts) ─────┘         │
          └──► WS4 (lens migration) ◄──────────┘
 ```
 
-- **Build is currently broken** — `MDXComponents.js` imports from a
-  deleted path. WS3's Increment 0 fixes this by creating a minimal
-  pass-through component at the new path. Start WS3 first (or in
-  parallel with WS1) so the build is restored early.
+- **Build is currently broken** — `MDXComponents.js` imports from a deleted
+  path. WS3's Increment 0 fixes this by creating a minimal pass-through
+  component at the new path. Start WS3 first (or in parallel with WS1) so the
+  build is restored early.
 - **WS1 and WS3 can run in parallel** — no dependency between them
 - **WS2 depends on both WS1 and WS3** — needs sub-language level types from WS1
   and the LensModule contract from WS3 (types.ts)
