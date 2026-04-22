@@ -111,11 +111,16 @@ type ConsoleMethod =
  * - `'alert'` — alert() call
  * - `'confirm'` — confirm() call with return value
  * - `'error'` — runtime error during execution
+ * - `'cancel'` — external cancellation via `.cancel()` on the Execution
  *
  * @remarks `LogEvent` and `AssertEvent` are deprecated aliases kept
  * during the transition from per-method event types to unified
  * `ConsoleEvent`. They will be removed once `create-worker-script.ts`
  * emits `{ event: 'console', method: 'log'|'assert', ... }`.
+ *
+ * `CancelEvent` is never emitted by the worker — it's appended by the
+ * main thread when `.cancel()` is invoked. Consumers that care whether
+ * a run was cancelled can check `logs.at(-1)?.event === 'cancel'`.
  */
 type RunEvent =
 	| ConsoleEvent
@@ -124,7 +129,8 @@ type RunEvent =
 	| PromptEvent
 	| AlertEvent
 	| ConfirmEvent
-	| ErrorEvent;
+	| ErrorEvent
+	| CancelEvent;
 
 /** Unified console event — replaces LogEvent and AssertEvent. */
 type ConsoleEvent = {
@@ -177,6 +183,17 @@ type ErrorEvent = {
 	readonly phase: 'creation' | 'execution';
 };
 
+/**
+ * Emitted on external cancellation via `.cancel()` on the Execution
+ * handle.
+ *
+ * @remarks Minimal shape — cancel is external to user code, so no
+ * line number, no phase, no reason. Presence in `logs` is the signal.
+ */
+type CancelEvent = {
+	readonly event: 'cancel';
+};
+
 // ─── Exports ─────────────────────────────────────────────────
 
 export type {
@@ -191,4 +208,5 @@ export type {
 	AlertEvent,
 	ConfirmEvent,
 	ErrorEvent,
+	CancelEvent,
 };

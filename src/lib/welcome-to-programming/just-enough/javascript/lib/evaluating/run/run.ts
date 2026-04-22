@@ -21,6 +21,7 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import type {
+	CancelEvent,
 	ConsoleMethod,
 	RunEvent,
 	ErrorEvent as RunErrorEvent,
@@ -136,6 +137,19 @@ function makeInternalError(err: unknown): RunErrorEvent {
 	};
 }
 
+/** AsyncGenerator extended with `.cancel()`. Matches the
+ * `Execution<RunEvent, RunResult>` shape that will be completed in
+ * Task D (PromiseLike + `.result` Promise). */
+type RunHandle = AsyncGenerator<RunEvent, RunResult> & {
+	/** Terminate execution immediately. Idempotent.
+	 * - Before first iterate: skips Worker creation entirely.
+	 * - During iteration: unsticks `await dequeue()`, main loop breaks,
+	 *   finally terminates the Worker, a `{event: 'cancel'}` is
+	 *   appended to `logs`, result resolves with `{ok: true, logs}`.
+	 * - After completion: no-op. */
+	readonly cancel: () => void;
+};
+
 /**
  * Creates an async generator that runs learner code in a Web Worker
  * and yields events as they occur.
@@ -143,9 +157,32 @@ function makeInternalError(err: unknown): RunErrorEvent {
  * @param code - JavaScript source to execute (assumed valid — no
  *   parsing or validation happens here)
  * @param options - Optional: seconds (default 5), iterations, io mocks
- * @returns Async generator yielding RunEvent, returning RunResult
+ * @returns `AsyncGenerator<RunEvent, RunResult> & { cancel(): void }`
  *
- * @remarks All globals (all 19 console methods, alert, confirm, prompt)
+ * @remarks
+ * **Lazy startup.** The Worker is not created until the first
+ * `.next()` call. Calling `.cancel()` before the first iteration
+ * skips Worker creation entirely — no resource leak.
+ *
+ * **Cancellation.** `.cancel()` sets an internal flag and unsticks
+ * any pending `await dequeue()`. The main loop breaks cleanly,
+ * terminates the Worker in its finally block, and returns a
+ * `RunResult` with a trailing `{event: 'cancel'}` in `logs`. No
+ * exception is thrown. Idempotent — safe to call any number of
+ * times, at any phase.
+ *
+ * **Cancel latency.** Cancel takes effect on the next resolution of
+ * `await dequeue()` in the main loop. In most phases that's within
+ * one macrotask. One exception: if the main loop is currently suspended
+ * inside `await handleIoRequest(...)` — i.e., a consumer-provided
+ * async `io.prompt/alert/confirm` mock is awaiting user input — the
+ * cancel flag is set synchronously, but teardown waits for that mock's
+ * promise to settle. Native `window.prompt` blocks the main thread
+ * synchronously, so cancel can't be clicked while it's open. For
+ * styled/async dialogs the consumer should resolve/reject the pending
+ * IO promise if they want immediate teardown.
+ *
+ * All globals (all 19 console methods, alert, confirm, prompt)
  * are trapped. Each trap posts a ConsoleEvent (console) or io-request
  * (dialogs) and blocks on the SAB pause flag until the main thread
  * processes the event and resumes.
@@ -155,96 +192,29 @@ function makeInternalError(err: unknown): RunErrorEvent {
  * learners can examine steps and consumers can run async UIs without
  * consuming execution time.
  */
-async function* createRunGenerator(
+function createRunGenerator(
 	code: string,
 	options?: RunOptions,
-): AsyncGenerator<RunEvent, RunResult> {
-	const maxSeconds = options?.seconds ?? 5;
-	const maxIterations = options?.iterations;
-	const resolvedIo = buildResolvedIo(options?.io);
-
-	// 1. Check SAB availability
-	if (typeof SharedArrayBuffer === 'undefined') {
-		const error: RunErrorEvent = {
-			event: 'error',
-			name: 'EnvironmentError',
-			message:
-				'SharedArrayBuffer is not available. The hosting page must ' +
-				'serve Cross-Origin-Opener-Policy: same-origin and ' +
-				'Cross-Origin-Embedder-Policy: require-corp headers.',
-			phase: 'creation',
-		};
-		return deepFreezeInPlace({
-			ok: false,
-			error: {
-				kind: 'javascript',
-				name: error.name,
-				message: error.message,
-				phase: error.phase,
-			},
-			logs: [error],
-		});
-	}
-
-	// 2. Apply loop guards if iterations limit is configured.
-	// Number.isFinite(Infinity) === false, so Infinity means "no guards";
-	// any finite number (including 0 and negatives) injects guards, and
-	// the `++loopN > maxIterations` template throws on the first iteration
-	// for non-positive limits — counterintuitive otherwise.
-	let execCode = code;
-	let loopCount = 0;
-	if (maxIterations !== undefined && Number.isFinite(maxIterations)) {
-		const guardResult = guardLoopsCondition(code, maxIterations);
-		execCode = guardResult.code;
-		loopCount = guardResult.loopCount;
-	}
-
-	// 3. Create SAB and views
-	const sab = new SharedArrayBuffer(BUFFER_SIZE);
-	const views = createBufferViews(sab);
-
-	// 4. Create worker from Blob URL
-	const script = createWorkerScript();
-	const blob = new Blob([script], { type: 'application/javascript' });
-	const url = URL.createObjectURL(blob);
-
-	let worker: Worker;
-	try {
-		worker = new Worker(url);
-	} catch (err: unknown) {
-		URL.revokeObjectURL(url);
-		const message =
-			err instanceof Error ? err.message : 'Failed to create Worker';
-		const error: RunErrorEvent = {
-			event: 'error',
-			name: 'WorkerError',
-			message,
-			phase: 'creation',
-		};
-		return deepFreezeInPlace({
-			ok: false,
-			error: {
-				kind: 'javascript',
-				name: error.name,
-				message,
-				phase: 'creation',
-			},
-			logs: [error],
-		});
-	}
-
-	// 4. Message queue — bridges callback-based onmessage to
-	// pull-based async generator
+): RunHandle {
+	// Queue + cancel plumbing — lives in the outer closure so cancel()
+	// can reach wakeDequeue regardless of where the generator body is
+	// suspended (before first iterate, mid-await, or mid-yield).
 	const queue: QueueMessage[] = [];
 	let resolveWaiting: (() => void) | null = null;
-	let timedOut = false;
+	let cancelled = false;
 
 	function wakeDequeue(): void {
-		if (resolveWaiting !== null) {
-			// WHY sentinel: resolveWaiting's closure calls queue.shift().
-			// Without a message in the queue, shift() returns undefined.
-			// timedOut is checked before msg.type so the sentinel type is irrelevant.
+		// WHY push unconditionally when empty: if wakeDequeue is called
+		// while the main loop is not currently awaiting dequeue (e.g. the
+		// timer fires between yield and the next await dequeue, or cancel
+		// fires while await setTimeout(0) is pending), resolveWaiting is
+		// null. The next dequeue() must still return promptly so the loop
+		// can reach its cancelled/timedOut check. Pushing a sentinel now
+		// guarantees that — dequeue() sees queue.length > 0 synchronously.
+		if (queue.length === 0) {
 			queue.push({ type: 'complete' } as QueueMessage);
+		}
+		if (resolveWaiting !== null) {
 			resolveWaiting();
 			resolveWaiting = null;
 		}
@@ -267,155 +237,271 @@ async function* createRunGenerator(
 		});
 	}
 
-	// 5. Wire up Worker callbacks
-	worker.onmessage = function onWorkerMessage(e: MessageEvent<WorkerOutbound>) {
-		enqueue(e.data);
-	};
-
-	worker.onerror = function onWorkerError(e: ErrorEvent) {
-		enqueue({
-			type: 'worker-error',
-			message: e.message || 'Unknown worker error',
-		});
-	};
-
-	// 6. Timeout — cumulative execution time tracking
-	const maxMs = maxSeconds * 1000;
-	let timeout: ReturnType<typeof setTimeout> | null = null;
-	let remainingMs = maxMs;
-	let lastResumeTime = 0;
-
-	function startTimeout(): void {
-		if (!isFinite(remainingMs)) return;
-		if (remainingMs <= 0) {
-			timedOut = true;
-			wakeDequeue();
-			return;
-		}
-		lastResumeTime = performance.now();
-		timeout = setTimeout(function onTimeout() {
-			timeout = null;
-			timedOut = true;
-			wakeDequeue();
-		}, remainingMs);
+	function cancel(): void {
+		cancelled = true;
+		wakeDequeue();
 	}
 
-	function pauseTimeout(): void {
-		if (timeout !== null) {
-			clearTimeout(timeout);
-			timeout = null;
-			remainingMs -= performance.now() - lastResumeTime;
-			if (remainingMs < 0) remainingMs = 0;
+	async function* body(): AsyncGenerator<RunEvent, RunResult> {
+		const maxSeconds = options?.seconds ?? 5;
+		const maxIterations = options?.iterations;
+		const resolvedIo = buildResolvedIo(options?.io);
+
+		// 0. Cancelled before first iterate — skip all setup.
+		if (cancelled) {
+			const cancelEvent: CancelEvent = { event: 'cancel' };
+			return deepFreezeInPlace({ ok: true, logs: [cancelEvent] });
 		}
-	}
 
-	function clearTimeoutIfSet(): void {
-		if (timeout !== null) {
-			clearTimeout(timeout);
-			timeout = null;
+		// 1. Check SAB availability
+		if (typeof SharedArrayBuffer === 'undefined') {
+			const error: RunErrorEvent = {
+				event: 'error',
+				name: 'EnvironmentError',
+				message:
+					'SharedArrayBuffer is not available. The hosting page must ' +
+					'serve Cross-Origin-Opener-Policy: same-origin and ' +
+					'Cross-Origin-Embedder-Policy: require-corp headers.',
+				phase: 'creation',
+			};
+			return deepFreezeInPlace({
+				ok: false,
+				error: {
+					kind: 'javascript',
+					name: error.name,
+					message: error.message,
+					phase: error.phase,
+				},
+				logs: [error],
+			});
 		}
-	}
 
-	// 7. Start execution
-	worker.postMessage({ type: 'setup', sharedBuffer: sab });
-	worker.postMessage({
-		type: 'execute',
-		code: execCode,
-		...(loopCount > 0 ? { loopCount } : {}),
-	});
+		// 2. Apply loop guards if iterations limit is configured.
+		// Number.isFinite(Infinity) === false, so Infinity means "no guards";
+		// any finite number (including 0 and negatives) injects guards, and
+		// the `++loopN > maxIterations` template throws on the first iteration
+		// for non-positive limits — counterintuitive otherwise.
+		let execCode = code;
+		let loopCount = 0;
+		if (maxIterations !== undefined && Number.isFinite(maxIterations)) {
+			const guardResult = guardLoopsCondition(code, maxIterations);
+			execCode = guardResult.code;
+			loopCount = guardResult.loopCount;
+		}
 
-	// Engage pause so worker blocks after posting each event
-	writePauseEngaged(views);
-	startTimeout();
+		// 3. Create SAB and views
+		const sab = new SharedArrayBuffer(BUFFER_SIZE);
+		const views = createBufferViews(sab);
 
-	const logs: RunEvent[] = [];
+		// 4. Create worker from Blob URL
+		const script = createWorkerScript();
+		const blob = new Blob([script], { type: 'application/javascript' });
+		const url = URL.createObjectURL(blob);
 
-	try {
-		while (true) {
-			const msg = await dequeue();
+		let worker: Worker;
+		try {
+			worker = new Worker(url);
+		} catch (err: unknown) {
+			URL.revokeObjectURL(url);
+			const message =
+				err instanceof Error ? err.message : 'Failed to create Worker';
+			const error: RunErrorEvent = {
+				event: 'error',
+				name: 'WorkerError',
+				message,
+				phase: 'creation',
+			};
+			return deepFreezeInPlace({
+				ok: false,
+				error: {
+					kind: 'javascript',
+					name: error.name,
+					message,
+					phase: 'creation',
+				},
+				logs: [error],
+			});
+		}
 
-			// WHY check timedOut first: timeout handler sets this flag and calls
-			// wakeDequeue() to unblock us. The sentinel msg is irrelevant — exit immediately.
-			if (timedOut) {
-				const timeoutEvent: RunErrorEvent = {
-					event: 'error',
-					name: 'TimeoutError',
-					message: `Execution exceeded ${maxSeconds} second time limit`,
-					phase: 'execution',
-				};
-				logs.push(timeoutEvent);
-				yield timeoutEvent;
-				break;
+		// 5. Wire up Worker callbacks (enqueue closes over outer queue state)
+		worker.onmessage = function onWorkerMessage(e: MessageEvent<WorkerOutbound>) {
+			enqueue(e.data);
+		};
+
+		worker.onerror = function onWorkerError(e: ErrorEvent) {
+			enqueue({
+				type: 'worker-error',
+				message: e.message || 'Unknown worker error',
+			});
+		};
+
+		// 6. Timeout — cumulative execution time tracking
+		const maxMs = maxSeconds * 1000;
+		let timeout: ReturnType<typeof setTimeout> | null = null;
+		let remainingMs = maxMs;
+		let lastResumeTime = 0;
+		let timedOut = false;
+
+		function startTimeout(): void {
+			if (!isFinite(remainingMs)) return;
+			if (remainingMs <= 0) {
+				timedOut = true;
+				wakeDequeue();
+				return;
 			}
+			lastResumeTime = performance.now();
+			timeout = setTimeout(function onTimeout() {
+				timeout = null;
+				timedOut = true;
+				wakeDequeue();
+			}, remainingMs);
+		}
 
-			// 7a. Streamed event — route IO callback, yield to consumer
-			if (msg.type === 'event') {
-				const event = msg.event;
-				logs.push(event);
+		function pauseTimeout(): void {
+			if (timeout !== null) {
+				clearTimeout(timeout);
+				timeout = null;
+				remainingMs -= performance.now() - lastResumeTime;
+				if (remainingMs < 0) remainingMs = 0;
+			}
+		}
 
-				if (event.event === 'console') {
+		function clearTimeoutIfSet(): void {
+			if (timeout !== null) {
+				clearTimeout(timeout);
+				timeout = null;
+			}
+		}
+
+		// 7. Start execution
+		worker.postMessage({ type: 'setup', sharedBuffer: sab });
+		worker.postMessage({
+			type: 'execute',
+			code: execCode,
+			...(loopCount > 0 ? { loopCount } : {}),
+		});
+
+		// Engage pause so worker blocks after posting each event
+		writePauseEngaged(views);
+		startTimeout();
+
+		const logs: RunEvent[] = [];
+
+		try {
+			while (true) {
+				const msg = await dequeue();
+
+				// Cancellation supersedes everything else, including any
+				// in-flight event that arrived just before cancel fired.
+				if (cancelled) {
+					const cancelEvent: CancelEvent = { event: 'cancel' };
+					logs.push(cancelEvent);
+					break;
+				}
+
+				// WHY check timedOut next: timeout handler sets this flag and calls
+				// wakeDequeue() to unblock us. The sentinel msg is irrelevant — exit immediately.
+				if (timedOut) {
+					const timeoutEvent: RunErrorEvent = {
+						event: 'error',
+						name: 'TimeoutError',
+						message: `Execution exceeded ${maxSeconds} second time limit`,
+						phase: 'execution',
+					};
+					logs.push(timeoutEvent);
+					yield timeoutEvent;
+					break;
+				}
+
+				// 7a. Streamed event — route IO callback, yield to consumer
+				if (msg.type === 'event') {
+					const event = msg.event;
+					logs.push(event);
+
+					if (event.event === 'console') {
+						try {
+							await resolvedIo.console[event.method](...event.args);
+						} catch (err) {
+							logs.push(makeInternalError(err));
+							break;
+						}
+					}
+
+					yield event;
+
+					// WHY: yield one macrotask slot before releasing the worker.
+					// The wall-clock timer callback is a macrotask — it cannot fire
+					// during an unbroken microtask chain. This break gives it a
+					// guaranteed firing slot each event. Worker remains paused here.
+					// WHY no writePauseEngaged: each trap arms its own pause before
+					// postMessage to avoid the race where notify fires before the main
+					// thread re-arms, causing Atomics.wait to see PAUSED and deadlock.
+					await new Promise<void>(resolve => setTimeout(resolve, 0));
+					// WHY cancelled check BEFORE writeResumeSignal: if cancel
+					// fired during the macrotask wait, we must NOT unpause the
+					// worker — that would let it run one more chunk of user
+					// code before the finally block can terminate it. The next
+					// iteration dequeues the sentinel cancel pushed and breaks.
+					if (cancelled) continue;
+					writeResumeSignal(views);
+					continue;
+				}
+
+				// 7b. I/O request — await callback, write response, wake worker
+				if (msg.type === 'io-request') {
+					pauseTimeout();
 					try {
-						await resolvedIo.console[event.method](...event.args);
+						await handleIoRequest(msg as IoRequestMessage, views, resolvedIo);
+						Atomics.notify(views.control, CONTROL_INDEX);
 					} catch (err) {
 						logs.push(makeInternalError(err));
 						break;
 					}
+					startTimeout();
+					continue;
 				}
 
-				yield event;
-
-				// WHY: yield one macrotask slot before releasing the worker.
-				// The wall-clock timer callback is a macrotask — it cannot fire
-				// during an unbroken microtask chain. This break gives it a
-				// guaranteed firing slot each event. Worker remains paused here.
-				// WHY no writePauseEngaged: each trap arms its own pause before
-				// postMessage to avoid the race where notify fires before the main
-				// thread re-arms, causing Atomics.wait to see PAUSED and deadlock.
-				await new Promise<void>(resolve => setTimeout(resolve, 0));
-				writeResumeSignal(views);
-				continue;
-			}
-
-			// 7b. I/O request — await callback, write response, wake worker
-			if (msg.type === 'io-request') {
-				pauseTimeout();
-				try {
-					await handleIoRequest(msg as IoRequestMessage, views, resolvedIo);
-					Atomics.notify(views.control, CONTROL_INDEX);
-				} catch (err) {
-					logs.push(makeInternalError(err));
+				// 7c. Complete — break out of loop
+				if (msg.type === 'complete') {
 					break;
 				}
-				startTimeout();
-				continue;
+
+				// 7d. Worker error — record and break
+				if (msg.type === 'worker-error') {
+					logs.push({
+						event: 'error',
+						name: 'WorkerError',
+						message: msg.message,
+						phase: 'execution',
+					});
+					break;
+				}
+
+
 			}
-
-			// 7c. Complete — break out of loop
-			if (msg.type === 'complete') {
-				break;
-			}
-
-			// 7d. Worker error — record and break
-			if (msg.type === 'worker-error') {
-				logs.push({
-					event: 'error',
-					name: 'WorkerError',
-					message: msg.message,
-					phase: 'execution',
-				});
-				break;
-			}
-
-
+		} finally {
+			clearTimeoutIfSet();
+			worker.terminate();
+			URL.revokeObjectURL(url);
 		}
-	} finally {
-		clearTimeoutIfSet();
-		worker.terminate();
-		URL.revokeObjectURL(url);
+
+		// 8. Build result from collected logs
+		return buildResult(logs, maxSeconds, maxIterations);
 	}
 
-	// 8. Build result from collected logs
-	return buildResult(logs, maxSeconds, maxIterations);
+	const gen = body();
+	// WHY defineProperty over Object.assign: the RunHandle type marks
+	// cancel as `readonly`. Object.assign creates a plain writable
+	// property, so consumers could clobber `.cancel` without a type
+	// error. defineProperty with writable:false + configurable:false
+	// makes the readonly guarantee actually enforced at runtime.
+	Object.defineProperty(gen, 'cancel', {
+		value: cancel,
+		writable: false,
+		configurable: false,
+		enumerable: true,
+	});
+	return gen as RunHandle;
 }
 
 // --- Helpers ---

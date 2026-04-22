@@ -765,6 +765,28 @@ first attempt:
 - When uncertain, investigate first rather than confirming assumptions
 - Lead with problems and risks, not optimism
 
+### Batch-fix review findings in the current session
+
+When an adversarial review (AR-1 through AR-5) or any review surfaces
+multiple concerns — minor or otherwise — default to fixing **all** of
+them in the current commit/task rather than deferring as follow-ups.
+
+**Why:** Deferred issues rot. The cost of fixing-later includes
+re-acquiring context, re-reading code, and re-understanding the bug —
+often exceeding the cost of fixing-now. Context you have right now is
+worth more than context you'll rebuild later.
+
+**How to apply:** When presenting review findings to the human with
+multiple concerns, propose fixing all of them. Only ask about deferral
+when a fix would genuinely double the commit's scope, requires
+infrastructure that doesn't exist (e.g., a browser-test scaffold), or
+the human explicitly scopes a fix out.
+
+**Anti-pattern to avoid:** Presenting a review with 5 findings and
+asking the human to pick 2 or 3. They'll often say "all of them" and
+you'll have wasted a round-trip. Recommend "fix all unless one is out
+of scope" upfront.
+
 ### Working with Claude
 
 - Treat Claude as an iterative partner, not a one-shot solution

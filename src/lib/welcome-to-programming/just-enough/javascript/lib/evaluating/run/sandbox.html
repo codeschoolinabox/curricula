@@ -706,8 +706,11 @@ console.error('three');"
 					}
 					if (currentGen === gen) {
 						statusEl.textContent = `done — ${eventCount} event(s)`;
-						if (result) console.log('[run result]', result);
 					}
+					// Log run result regardless of cancel — consumers
+					// inspecting DevTools want to see what the engine
+					// returned, including the cancel event in logs.
+					if (result) console.log('[run result]', result);
 				} catch (err) {
 					statusEl.textContent = `unexpected throw: ${err.message}`;
 				} finally {
@@ -728,7 +731,12 @@ console.error('three');"
 					nextBtn.disabled = true;
 					predictionWrap.style.display = 'none';
 					predictionInput.value = '';
-					currentGen.return();
+					// Engine-level cancel: unsticks any pending await dequeue,
+					// runs the generator's finally (worker.terminate +
+					// URL.revokeObjectURL), returns a RunResult with a
+					// trailing {event: 'cancel'} in logs. Synchronous flag
+					// set; resolution happens on next iterate.
+					currentGen.cancel();
 					currentGen = null;
 					statusEl.textContent = 'cancelled';
 					runBtn.disabled = false;
