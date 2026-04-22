@@ -51,15 +51,69 @@ conditions containing string literals with `while` in them. Recast parses the
 AST, replaces the condition node, and prints back — preserving the learner's
 formatting exactly.
 
+## Resolved IO table
+
+When a run begins, the engine merges consumer-provided mocks with Native IO
+wrappers into a single `resolvedIo` object:
+
+```ts
+resolvedIo = {
+  prompt:  options.io?.prompt  ?? nativePrompt,
+  alert:   options.io?.alert   ?? nativeAlert,
+  confirm: options.io?.confirm ?? nativeConfirm,
+  console: {
+    log:   options.io?.console?.log   ?? nativeConsoleLog,
+    // ... all 19 methods
+  },
+}
+```
+
+Slot-by-slot — not all-or-nothing. Consumer overrides one key; the rest stay
+native. The worker is unaware of which slots are mocked vs. native — it always
+sees the same event-emission path. This is what gives us the shape-identical
+guarantee (sequence, event tags, and `args` structure preserved).
+
+### IO execution model (unified)
+
+ALL IO hooks hold learner execution until the callback completes. There is no
+fire-and-forget category:
+
+- **Dialog hooks** (`prompt`, `alert`, `confirm`): worker blocks on SAB
+  `Atomics.wait`. Main thread awaits the callback, writes the response to the
+  SAB response slot, then calls `Atomics.notify`. Worker reads response and
+  continues.
+- **Console hooks** (all 19 methods): worker blocks on the SAB pause flag
+  (same mechanism used between every event). Main thread awaits the console
+  callback, yields the `ConsoleEvent`, and on the consumer's next `next()` call,
+  releases the pause. No response-slot write is needed (console hooks return
+  `void`; nothing is delivered back to the worker).
+
+The net effect: learner code does not proceed past any IO call until the
+callback completes, whether native or mocked.
+
+### Mock error handling
+
+Native IO hooks do not throw. If a consumer-provided mock throws (sync or async
+rejection), the main-thread catch path surfaces an `ErrorEvent` with
+`name: 'InternalError'`. The worker is terminated. The learner sees an internal
+error, not an exception from their own code. This is the only circumstance where
+an IO callback's exception reaches the learner's event stream.
+
 ## Why cumulative timeout (not wall-clock)
 
-Timeout tracks execution time only. When the Worker is paused (waiting for the
-consumer to call `next()` or waiting for an I/O response), the timeout is
-cleared. When execution resumes, `setTimeout(remainingMs)` restarts.
+Timeout tracks execution time only. The timer pauses:
+
+- While the worker is blocked on the SAB pause flag (waiting for the consumer's
+  `next()` call)
+- While the main thread is awaiting any IO callback (dialog or console)
+
+When execution resumes, `setTimeout(remainingMs)` restarts.
 
 This means a learner stepping through events in the UI can take as long as they
 want — only actual code execution counts toward the limit. Without this, a
-learner examining step 3 of 100 could trigger a timeout while doing nothing.
+learner examining step 3 of 100 could trigger a timeout while doing nothing. The
+same applies to styled dialogs: a consumer-provided `prompt` mock showing a
+custom modal does not count against the learner's execution time budget.
 
 ## Why a Web Worker
 
@@ -112,16 +166,34 @@ requirement). There is no zero-cost synchronous path.
 SAB+Atomics was chosen because it is simpler, more reliable, and the COOP/COEP
 requirement is the hosting platform's concern — not this package's.
 
-### I/O flow
+### I/O flow — dialog hooks (prompt/alert/confirm)
 
 1. Worker encounters `prompt("name")` via trapped global
 2. Worker posts `io-request` message to main thread
 3. Worker sets control signal to `1` (waiting) and calls `Atomics.wait`
-4. Main thread receives message, shows native `prompt()` dialog
+4. Main thread receives message, awaits `resolvedIo.prompt("name", undefined)`
+   (native browser dialog or consumer mock — both awaited the same way)
 5. Main thread writes response to buffer, sets signal to `2`, calls
-   `Atomics.notify`
+   `Atomics.notify`; on callback throw, surfaces `ErrorEvent { name:
+   'InternalError' }` and terminates worker
 6. Worker unblocks, reads response, resets signal to `0`
 7. Trapped `prompt` returns the value to the learner's code
+
+### I/O flow — console hooks
+
+1. Worker calls (e.g.) `console.log("hello")` via trapped global
+2. Worker posts `event` message (ConsoleEvent) to main thread
+3. Worker blocks on the SAB pause flag (`Atomics.wait` on pause slot)
+4. Main thread receives event, awaits `resolvedIo.console.log("hello")`
+   (native console or consumer mock); on callback throw, surfaces
+   `ErrorEvent { name: 'InternalError' }` and terminates worker
+5. Main thread yields the `ConsoleEvent` to the generator consumer
+6. Consumer calls `next()` → main thread releases pause (`Atomics.notify`)
+7. Worker unblocks and continues execution
+
+Console hooks use the existing SAB pause mechanism (the same pause used between
+every event). No response-slot write is needed — nothing is delivered back to
+the worker. The effect is the same: worker is held until the callback completes.
 
 ### COOP/COEP requirement
 
@@ -148,7 +220,7 @@ means:
 
 ## Why all traps are always defined
 
-Traps are not config-driven. Every run defines console.log, console.assert,
+Traps are not config-driven. Every run defines all 19 standard console methods,
 alert, confirm, and prompt — regardless of what the future allow/block config
 says. The allow/block config controls **static validation** (which AST nodes are
 permitted), not which traps exist at runtime.
@@ -202,13 +274,16 @@ script string (plain JS, used by worker). This duplication is intentional —
 the alternative (bundling or dynamic imports in workers) adds complexity that
 is not justified for this amount of code.
 
-## Why console forwarding is kept
+## Why console routing goes through Resolved IO
 
-`forwardToConsole` forwards events to the real browser console alongside event
-emission. This is intentional: learner code runs in a real browser, and
-`console.log` appearing in the actual console aligns with `prompt`/`alert`/
-`confirm` showing real dialogs. Event emission serves the UI/analysis layer;
-console forwarding serves authenticity.
+Console calls are routed through `resolvedIo.console[method]` for the same
+reason dialog calls are routed through `resolvedIo.prompt/alert/confirm` — the
+Native IO wrapper for each console method is just `window.console[method]`. The
+consumer can replace it with a styled panel renderer, a typewriter animation, or
+any other async function. Routing through the Resolved IO table is what provides
+the shape-identical guarantee: whether native or mocked, the `ConsoleEvent` in
+the stream looks identical. Event emission serves the UI/analysis layer; the
+native wrapper serves authenticity when no mock is provided.
 
 ## What this module deliberately does NOT do
 
