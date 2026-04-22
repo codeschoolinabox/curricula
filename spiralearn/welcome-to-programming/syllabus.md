@@ -89,6 +89,7 @@ course helps you build both at once.
 
 ## Contents
 
+- [What to Expect](#what-to-expect)
 - [Why Learn to Program](#why-learn-to-program)
   - [What programming languages are](#what-programming-languages-are)
   - [Notional machines](#notional-machines)
@@ -138,6 +139,8 @@ course helps you build both at once.
   - [5I. Capstone Reflections](#5i-capstone-reflections)
 
 ---
+
+## What to Expect
 
 **Programming is collaborative communication.** A single piece of source code
 simultaneously addresses multiple audiences: other developers who read it, a
