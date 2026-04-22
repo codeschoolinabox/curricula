@@ -60,6 +60,16 @@ type IoMocks = {
  * Options accepted by createRunGenerator.
  *
  * Extends EngineConfig (seconds, iterations) with the IO mock surface.
+ *
+ * @remarks
+ * `iterations` controls the `while`-loop guard injector. `Infinity` (or
+ * omitted) skips guard injection — the only way to permit truly
+ * unbounded loops. **Any finite number** injects guards that throw
+ * `RangeError` when `++loopN > iterations` — so `0` bans loop bodies
+ * entirely (first iteration throws), `-1` also throws on the first
+ * iteration, and `n` allows exactly `n` iterations. `NaN` is treated
+ * as invalid and falls through to the no-guard path; callers should
+ * validate input upstream if stricter semantics are required.
  */
 type RunOptions = {
 	readonly seconds?: number;

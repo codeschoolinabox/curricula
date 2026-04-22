@@ -587,7 +587,6 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		BreakStatement: true,
 		ContinueStatement: true,
 		EmptyStatement: true,
-		DebuggerStatement: true,
 		TemplateLiteral: true,
 		TemplateElement: true,
 		ConditionalExpression: true,

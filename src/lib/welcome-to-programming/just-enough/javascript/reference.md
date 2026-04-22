@@ -38,12 +38,12 @@ This is **_just enough JavaScript_** to:
   - [Code & PseudoCode](#code--pseudocode)
   - [Statements vs Expressions](#statements-vs-expressions)
 - [Code Style](#code-style)
-  - [Program Type: Module](#program-type-module)
+  - [Program Type: Strict Mode Script](#program-type-strict-mode-script)
   - [Naming Convention: camelCase](#naming-convention-camelcase)
   - [Indentation: Tabs](#indentation-tabs)
   - [Semicolons](#semicolons)
   - [Before Your Code Runs](#before-your-code-runs)
-- [Syntax You'll Write](#syntax-youll-write)
+- [Syntax You'll Learn](#syntax-youll-learn)
   - [Comments](#comments)
   - [Primitive Types](#primitive-types)
   - [Type Conversion](#type-conversion)
@@ -97,12 +97,7 @@ This is **_just enough JavaScript_** to:
   - [For-Of Loops](#for-of-loops)
   - [Break](#break)
   - [Continue](#continue)
-  - [debugger](#debugger)
   - [BigInt](#bigint)
-- [Syntax You'll See (But Not Write)](#syntax-youll-see-but-not-write)
-  - [Braceless `if`](#braceless-if)
-  - [`throw`](#throw)
-  - [`new RangeError`](#new-rangeerror)
 
 ---
 
@@ -216,20 +211,28 @@ get feedback about what to fix:
    not a language constraint.
 4. **Run it!**: Run the program and return data about the code's execution.
 
-### Program Type: Module
+### Program Type: Strict Mode Script
 
-Your programs run as modules, like using `<script type="module">` in HTML.
-Module mode helps catch mistakes and is how modern JavaScript applications are
-structured.
+Your programs run as strict mode scripts. The learning environment
+automatically adds `"use strict"` at the top of your code before running it
+— you don't need to write it yourself.
+
+Strict mode catches common mistakes JavaScript normally allows silently:
+
+- Using a variable before declaring it throws a `ReferenceError` instead of
+  silently creating a global
+- Assigning to a read-only value throws a `TypeError` instead of silently
+  doing nothing
 
 <table>
 
 <tr>
 <td>
 
-```html
-<!-- in your HTML file -->
-<script type="module" src="./your-program.js"></script>
+```js
+// the runner adds this automatically — you just write your code:
+let name = 'Alice';
+alert(name);
 ```
 
 </td>
@@ -242,31 +245,14 @@ _N/A in PseudoCode_
 </table>
 
 <details>
-<summary>Fun fact: `"strict mode"`</summary>
+<summary>Fun fact: module mode</summary>
 <br>
 
-JavaScript also has an older "script" program type. In script mode, you can opt
-in to stricter error checking by writing `"use strict"` at the top of your file.
-Module mode has this built in — one less thing to think about.
-
-<table>
-
-<tr>
-<td>
-
-```js
-'use strict';
-// ... your code in script mode
-```
-
-</td>
-<td>
-
-_N/A in PseudoCode_
-
-</td>
-</tr>
-</table>
+Modern JavaScript applications often use `<script type="module">` in HTML,
+which also enables strict mode automatically — plus `import`/`export` for
+splitting code across files. JEJ programs skip the module system (arrays and
+imports are out of scope here). You get the same strict error-checking with
+less machinery.
 
 </details>
 
@@ -335,7 +321,7 @@ makes your intent clear and avoids avoidable mistakes.
 
 ---
 
-## Syntax You'll Write
+## Syntax You'll Learn
 
 ### Comments
 
@@ -762,8 +748,8 @@ Number.isFinite(NaN)
 
 _expression_
 
-Methods available on number values for formatting and conversion. Most useful
-is `toString(radix)` for converting between number bases (binary, hex, etc.).
+Methods available on number values for formatting and conversion. Most useful is
+`toString(radix)` for converting between number bases (binary, hex, etc.).
 
 <table>
 
@@ -772,21 +758,21 @@ is `toString(radix)` for converting between number bases (binary, hex, etc.).
 
 ```js
 // convert to different bases
-(42).toString(2);     // '101010' (binary)
-(42).toString(16);    // '2a' (hexadecimal)
-(255).toString(8);    // '377' (octal)
+(42).toString(2); // '101010' (binary)
+(42).toString(16); // '2a' (hexadecimal)
+(255).toString(8); // '377' (octal)
 
 // round-trip: number → binary string → number
-let binary = (42).toString(2);    // '101010'
-let back = parseInt(binary, 2);   // 42
+let binary = (42).toString(2); // '101010'
+let back = parseInt(binary, 2); // 42
 
 // decimal formatting
-(3.14159).toFixed(2);       // '3.14'
-(3.14159).toPrecision(4);   // '3.142'
-(12345).toExponential(2);   // '1.23e+4'
+(3.14159).toFixed(2); // '3.14'
+(3.14159).toPrecision(4); // '3.142'
+(12345).toExponential(2); // '1.23e+4'
 
 // locale-aware formatting
-(1234567).toLocaleString();  // '1,234,567' (varies by locale)
+(1234567).toLocaleString(); // '1,234,567' (varies by locale)
 ```
 
 </td>
@@ -912,8 +898,8 @@ let after = Date.now();
 let elapsed = after - before;
 
 // parse a date string into milliseconds
-Date.parse('2025-12-25');        // 1735084800000
-Date.parse('invalid');           // NaN
+Date.parse('2025-12-25'); // 1735084800000
+Date.parse('invalid'); // NaN
 ```
 
 ```js
@@ -926,7 +912,7 @@ let now = new Date();
 let christmas = new Date('2025-12-25');
 
 // from milliseconds
-let epoch = new Date(0);  // Jan 1, 1970
+let epoch = new Date(0); // Jan 1, 1970
 ```
 
 ```js
@@ -935,22 +921,22 @@ let epoch = new Date(0);  // Jan 1, 1970
 let date = new Date('2025-06-15T14:30:45');
 
 // extracting parts
-date.getFullYear();    // 2025
-date.getMonth();       // 5  — 0-indexed! (0=Jan, 5=Jun)
-date.getDate();        // 15 — day of month (1-indexed)
-date.getHours();       // 14
-date.getMinutes();     // 30
-date.getSeconds();     // 45
+date.getFullYear(); // 2025
+date.getMonth(); // 5  — 0-indexed! (0=Jan, 5=Jun)
+date.getDate(); // 15 — day of month (1-indexed)
+date.getHours(); // 14
+date.getMinutes(); // 30
+date.getSeconds(); // 45
 
 // milliseconds since epoch (same as Date.now() for current time)
-date.getTime();        // 1750000245000
+date.getTime(); // 1750000245000
 
 // formatted strings (vary by locale)
-date.toLocaleDateString();  // '6/15/2025' (US locale)
-date.toLocaleTimeString();  // '2:30:45 PM' (US locale)
+date.toLocaleDateString(); // '6/15/2025' (US locale)
+date.toLocaleTimeString(); // '2:30:45 PM' (US locale)
 
 // standard format
-date.toISOString();    // '2025-06-15T14:30:45.000Z'
+date.toISOString(); // '2025-06-15T14:30:45.000Z'
 ```
 
 </td>
@@ -1557,10 +1543,11 @@ Each `console` output method communicates a different _intent_ to the developer
 watching the console — not just what the value is, but why you're logging it.
 
 ```js
-console.debug('x is now', x);           // implementation noise while debugging
-console.log('processing step 3');       // happy-path tracing
-console.info('cache populated');        // something worth noting
-console.warn('value outside range');    // unexpected but not broken
+console.debug('x is now', x); // implementation noise while debugging
+console.log('processing step 3'); // happy-path tracing
+console.info('cache populated'); // something worth noting
+console.warn('value outside range'); // unexpected but not broken
+console.error('failed to parse input'); // something is broken
 console.error('failed to parse input'); // something is broken
 ```
 
@@ -1568,24 +1555,25 @@ All five accept any number of arguments and print them space-separated.
 
 #### Asserting
 
-`console.assert(condition, message)` checks a claim about what should be true
-at this point. Silent when the condition holds; logs an error message when it
-doesn't. A way to document your assumptions and let the program catch violations.
+`console.assert(condition, message)` checks a claim about what should be true at
+this point. Silent when the condition holds; logs an error message when it
+doesn't. A way to document your assumptions and let the program catch
+violations.
 
 ```js
-console.assert(1 === 1, 'this will not show');   // silent — assertion passes
+console.assert(1 === 1, 'this will not show'); // silent — assertion passes
 console.assert(1 === 2, '1 is not equal to 2!'); // logs error — assertion fails
 ```
 
 #### Counting
 
-`console.count(label)` increments and logs a named counter each time it's
-called — useful for tracking how many times a loop body runs or a branch is
-taken. `console.countReset(label)` resets that counter to zero.
+`console.count(label)` increments and logs a named counter each time it's called
+— useful for tracking how many times a loop body runs or a branch is taken.
+`console.countReset(label)` resets that counter to zero.
 
 ```js
 for (let i = 0; i < 3; i++) {
-  console.count('loop'); // logs: loop: 1 / loop: 2 / loop: 3
+	console.count('loop'); // logs: loop: 1 / loop: 2 / loop: 3
 }
 console.countReset('loop');
 console.count('loop'); // logs: loop: 1
@@ -1594,7 +1582,8 @@ console.count('loop'); // logs: loop: 1
 #### Grouping
 
 `console.group(label)` starts a collapsible, indented group — all output until
-`console.groupEnd()` is visually nested beneath it. `console.groupCollapsed(label)` starts the group collapsed by default.
+`console.groupEnd()` is visually nested beneath it.
+`console.groupCollapsed(label)` starts the group collapsed by default.
 
 ```js
 console.group('step 1');
@@ -1611,21 +1600,62 @@ logs the total elapsed time.
 
 ```js
 console.time('loop');
-for (let i = 0; i < 1000; i++) { /* work */ }
-console.timeLog('loop');  // logs elapsed time so far
-for (let i = 0; i < 1000; i++) { /* more work */ }
-console.timeEnd('loop');  // logs total elapsed time and stops
+for (let i = 0; i < 1000; i++) {
+	/* work */
+}
+console.timeLog('loop'); // logs elapsed time so far
+for (let i = 0; i < 1000; i++) {
+	/* more work */
+}
+console.timeEnd('loop'); // logs total elapsed time and stops
 ```
 
 #### Utility
 
-`console.clear()` clears all output from the console — useful at the start of
-a run to get a clean view.
+`console.clear()` clears all output from the console — useful at the start of a
+run to get a clean view.
 
 ```js
 console.clear();
 console.log('fresh start');
 ```
+
+#### Inspection
+
+`console.table(value)` renders an object's properties as a two-column table
+(name | value) in DevTools. At the JEJ level the most useful target is a
+built-in object — scanning `Math`'s full property list in a table is far more
+readable than scrolling through a collapsed tree.
+
+```js
+console.table(Math); // one row per Math property — constants show their value, methods show "ƒ"
+console.table(String); // static methods on String
+console.table(Number); // isNaN, isFinite, isInteger, …
+```
+
+`console.dir(value)` renders the same data as a collapsible tree rather than a
+table. The two methods show the same information; `.table` is easier to scan
+when you want an overview, `.dir` is easier to navigate when you already know
+what you're looking for.
+
+```js
+console.dir(Math); // interactive tree of all Math properties
+```
+
+<details>
+<summary>console.trace — call stack snapshot</summary>
+<br>
+
+`console.trace(label?)` prints the current call stack. In JEJ programs — which
+have no user-defined functions — the stack is always just the top-level script,
+so the output isn't informative. It becomes useful once you start writing
+functions (covered in later modules).
+
+```js
+console.trace('where am I?'); // logs: "where am I?" + a one-line stack
+```
+
+</details>
 
 [TOP](#just-enough-javascript)
 
@@ -3098,51 +3128,13 @@ FOR: character OF 'hello'
 
 ---
 
-### debugger
-
-_statement_
-
-The `debugger` statement pauses your program and opens the browser's debugging
-tools. From there you can inspect variable values, set breakpoints, and step
-through your code line by line.
-
-For `debugger` to work, the browser's DevTools must already be open — otherwise
-the statement is silently skipped and your code runs straight through.
-
-<table>
-
-<tr>
-<td>
-
-```js
-let name = prompt('What is your name?');
-
-debugger; // pauses here, opens dev tools
-
-let greeting = `Hello, ${name}!`;
-alert(greeting);
-```
-
-</td>
-<td>
-
-_N/A in PseudoCode_
-
-</td>
-</tr>
-</table>
-
-[TOP](#just-enough-javascript)
-
----
-
 ### BigInt
 
 _expression_
 
 BigInt is a numeric type for integers of arbitrary size. Regular numbers lose
-precision beyond `Number.MAX_SAFE_INTEGER` (9,007,199,254,740,991). BigInt
-has no limit.
+precision beyond `Number.MAX_SAFE_INTEGER` (9,007,199,254,740,991). BigInt has
+no limit.
 
 Create BigInts with the `n` suffix or the `BigInt()` function:
 
@@ -3154,25 +3146,25 @@ Create BigInts with the `n` suffix or the `BigInt()` function:
 ```js
 // BigInt literals
 let big = 42n;
-let huge = 9007199254740992n;  // beyond Number.MAX_SAFE_INTEGER
+let huge = 9007199254740992n; // beyond Number.MAX_SAFE_INTEGER
 
 // BigInt() conversion
-let fromNumber = BigInt(42);   // 42n
+let fromNumber = BigInt(42); // 42n
 let fromString = BigInt('99'); // 99n
 
 // arithmetic works (only with other BigInts)
-let sum = 10n + 20n;           // 30n
-let product = 3n * 4n;         // 12n
+let sum = 10n + 20n; // 30n
+let product = 3n * 4n; // 12n
 
 // integer division (truncates, no decimals)
-let divided = 7n / 2n;         // 3n (not 3.5)
+let divided = 7n / 2n; // 3n (not 3.5)
 
 // comparison across types
-42n === 42;   // false (different types)
-42n == 42;    // true (loose equality coerces)
+42n === 42; // false (different types)
+42n == 42; // true (loose equality coerces)
 
 // typeof
-typeof 42n;   // 'bigint'
+typeof 42n; // 'bigint'
 ```
 
 </td>
@@ -3203,92 +3195,5 @@ typeof 42n   → 'bigint'
 > **Important:** You cannot mix BigInt and regular numbers in arithmetic.
 > `42n + 1` throws a TypeError. Convert explicitly: `42n + BigInt(1)` or
 > `Number(42n) + 1` (but Number conversion loses precision for large values).
-
-[TOP](#just-enough-javascript)
-
----
-
-## Syntax You'll See (But Not Write)
-
-These features are added to your code _after_ you write it to avoid infinite
-loops (braceless `if`, `throw`, and `new RangeError` — added behind the scenes
-as part of a _loop guard_). Here's what a loop guard looks like in the generated
-code:
-
-```js
-let loop1 = 0;
-while (condition) {
-	if (++loop1 > 100) throw new RangeError('loop 1 exceeded 100 iterations');
-
-	// ... your loop body
-}
-```
-
-You won't write any of this yourself — you just need to recognize these features
-when you see them in the debugger or in an error message.
-
-### Braceless `if`
-
-_statement_
-
-JavaScript allows `if (condition) statement;` without curly braces _only when_
-your conditional has a single statement. In code you write for JEJ, braces are
-always required — but you'll encounter this braceless form in generated code.
-
-The following two conditionals have the same behavior. We use the inline
-conditional in loop guards so it takes up less space in your program when you
-debug it. You use blocks when you write conditionals for consistency and to
-avoid distracting bugs.
-
-<!-- prettier-ignore -->
-```js
-// braceless (you won't write this)
-if (count > 100) throw new RangeError('too many iterations');
-
-// your style (always use braces)
-if (count > 100) {
-  throw new RangeError('too many iterations');
-}
-```
-
-### `throw`
-
-_statement_
-
-`throw` immediately stops execution and raises an error. Whatever value comes
-after `throw` becomes the error. You'll see it paired with error constructors
-like `new RangeError(...)`.
-
-```js
-// stops the program with an error
-throw new RangeError('too many iterations');
-// console -> RangeError: too many iterations
-
-console.log('this line is not reached');
-```
-
-```js
-// stops the program for a party
-throw 'a party';
-// console -> 'a party'
-
-console.log('this line is not reached');
-```
-
-[TOP](#just-enough-javascript)
-
----
-
-### `new RangeError`
-
-_expression_
-
-`new RangeError(message)` creates an error object for when a value is outside an
-expected range. In the loop guard, it tells you which loop got stuck and how
-many iterations it ran before being stopped.
-
-```js
-new RangeError('loop 1 exceeded 100 iterations');
-```
 
 [TOP](#just-enough-javascript)

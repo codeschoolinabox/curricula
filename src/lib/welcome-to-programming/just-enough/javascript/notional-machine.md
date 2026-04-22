@@ -7,12 +7,6 @@ visualize it.
 
 Covers exactly the language features in [reference.md](./reference.md).
 
-> **TODO: `debugger` statement** — `debugger` is now an allowed JEJ language
-> feature (see reference.md). Its placement in this notional machine model and
-> how it should be visualized in the tracer/UI is still under discussion.
-> Candidates: Statements section, Developer Console channel (as interactive
-> counterpart to append-only `console.*`), cross-component interactions table.
-
 See also:
 
 - [tracer.md](./tracer.md) — how the tracer captures this model (config, result

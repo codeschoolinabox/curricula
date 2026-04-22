@@ -161,6 +161,7 @@ CONSOLE_METHODS.forEach(function(method) {
     const line = getLine();
     const event = { event: 'console', method: method, args: args, line: line };
     events.push(event);
+    Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
     postMessage({ type: 'event', event: event });
     checkPause();
   };
@@ -176,6 +177,7 @@ function trappedAlert() {
   readResponse();
   const event = { event: 'alert', args: args, return: undefined, line: line };
   events.push(event);
+  Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
   postMessage({ type: 'event', event: event });
   checkPause();
 }
@@ -189,6 +191,7 @@ function trappedConfirm() {
   const returnValue = response.value;
   const event = { event: 'confirm', args: args, return: returnValue, line: line };
   events.push(event);
+  Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
   postMessage({ type: 'event', event: event });
   checkPause();
   return returnValue;
@@ -203,6 +206,7 @@ function trappedPrompt() {
   const returnValue = response.value;
   const event = { event: 'prompt', args: args, return: returnValue, line: line };
   events.push(event);
+  Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
   postMessage({ type: 'event', event: event });
   checkPause();
   return returnValue;

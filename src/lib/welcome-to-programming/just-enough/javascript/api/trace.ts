@@ -12,15 +12,15 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import validate from './validate.js';
 import { checkFormat } from './format.js';
-import createTracingGenerator from '../lib/evaluating/trace/tracing/index.js';
+import createTracingGenerator from '../lib/evaluating/trace/semantics/tracing/index.js';
 import createExecution from '../lib/evaluating/shared/create-execution.js';
-import prepareConfig from '../lib/evaluating/trace/configuring/prepare-config.js';
-import optionsSchema from '../lib/evaluating/trace/options-schema.js';
+import prepareConfig from '../lib/evaluating/trace/semantics/configuring/prepare-config.js';
+import optionsSchema from '../lib/evaluating/trace/semantics/options-schema.js';
 
 import type { TraceResult } from './types.js';
 import type { Execution } from '../lib/evaluating/shared/types.js';
-import type { TraceConfig } from '../lib/evaluating/trace/config.types.js';
-import type { TraceEvent } from '../lib/evaluating/trace/tracing/types.js';
+import type { TraceConfig } from '../lib/evaluating/trace/semantics/config.types.js';
+import type { TraceEvent } from '../lib/evaluating/trace/semantics/tracing/types.js';
 
 /**
  * Validates code against the full JeJ level, then traces it.

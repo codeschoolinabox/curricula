@@ -11,7 +11,6 @@ export { default } from './api/default.js';
 // --- Named exports: API functions ---
 export { default as run } from './api/run.js';
 export { default as trace } from './api/trace.js';
-export { default as debug } from './api/debug.js';
 export { default as validate } from './api/validate.js';
 export { default as parse } from './api/parse.js';
 export { default as isJej } from './lib/validating/is-jej.js';
@@ -25,8 +24,6 @@ export type {
 	Result,
 	RunResult,
 	TraceResult,
-	DebugResult,
-	DebugEvent,
 	JejProgram,
 } from './api/types.js';
 
@@ -36,9 +33,9 @@ export type {
 	RunEvent,
 } from './lib/evaluating/shared/types.js';
 
-export type { TraceConfig } from './lib/evaluating/trace/config.types.js';
+export type { TraceConfig } from './lib/evaluating/trace/semantics/config.types.js';
 
-export type { TraceEvent } from './lib/evaluating/trace/tracing/types.js';
+export type { TraceEvent } from './lib/evaluating/trace/semantics/tracing/types.js';
 
 export type { Violation } from './lib/validating/types.js';
 

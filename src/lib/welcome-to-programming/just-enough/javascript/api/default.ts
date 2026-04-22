@@ -24,9 +24,13 @@ import type {
 	DebugResult,
 	DebugEvent,
 } from './types.js';
-import type { Execution, EngineConfig, RunEvent } from '../lib/evaluating/shared/types.js';
-import type { TraceConfig } from '../lib/evaluating/trace/config.types.js';
-import type { TraceEvent } from '../lib/evaluating/trace/tracing/types.js';
+import type {
+	Execution,
+	EngineConfig,
+	RunEvent,
+} from '../lib/evaluating/shared/types.js';
+import type { TraceConfig } from '../lib/evaluating/trace/semantics/config.types.js';
+import type { TraceEvent } from '../lib/evaluating/trace/semantics/tracing/types.js';
 import type { Violation } from '../lib/validating/types.js';
 
 // --- Analysis state ---

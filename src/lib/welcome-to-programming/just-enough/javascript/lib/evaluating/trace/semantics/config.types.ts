@@ -39,7 +39,7 @@
  * @see tracing/types.ts for the event types these options gate
  */
 
-import type { EngineConfig } from '../shared/types.js';
+import type { EngineConfig } from '../../shared/types.js';
 
 // ─── Range types ─────────────────────────────────────────────
 
@@ -49,7 +49,9 @@ import type { EngineConfig } from '../shared/types.js';
  * @remarks Used in {@link SourceRange} to define range boundaries.
  * A bare number means the entire line; an object gives column-level precision.
  */
-export type RangePosition = number | { readonly line: number; readonly column: number };
+export type RangePosition =
+	| number
+	| { readonly line: number; readonly column: number };
 
 /**
  * A source range for filtering trace events.

@@ -1,0 +1,18 @@
+search by
+    language feature 
+    text
+    type 
+
+processing before saving 
+    count of all node types: { nodeName: number }
+    comment tags?  // tags: _, _, ...
+
+metadata 
+    language features 
+    tags 
+    remixes 
+    remixee 
+    type (script|module|documentScript)
+
+can people save without account?  nah
+can people search and remix locally without one?  yah

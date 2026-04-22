@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<title>Run Lens Sandbox</title>
+		<title>Run Lens Sandbox — IO Mocks</title>
 		<style>
 			* {
 				box-sizing: border-box;
@@ -11,19 +11,24 @@
 			}
 			body {
 				font-family: monospace;
-				padding: 2rem;
-				max-width: 700px;
+				padding: 1.5rem;
+				max-width: 800px;
 				margin: 0 auto;
+				font-size: 13px;
 			}
 			h1 {
-				font-size: 1.2rem;
+				font-size: 1.1rem;
+				margin-bottom: 0.5rem;
+			}
+			p.note {
+				color: #666;
 				margin-bottom: 1rem;
 			}
 			textarea {
 				width: 100%;
-				height: 200px;
+				height: 180px;
 				font-family: monospace;
-				font-size: 14px;
+				font-size: 13px;
 				padding: 0.5rem;
 				tab-size: 2;
 				border: 2px solid #333;
@@ -32,13 +37,14 @@
 			.controls {
 				margin-top: 0.5rem;
 				display: flex;
-				gap: 0.5rem;
+				gap: 0.75rem;
 				align-items: center;
+				flex-wrap: wrap;
 			}
 			button {
-				padding: 0.5rem 1.5rem;
+				padding: 0.4rem 1.2rem;
 				font-family: monospace;
-				font-size: 14px;
+				font-size: 13px;
 				cursor: pointer;
 				border: 2px solid #333;
 				background: #eee;
@@ -48,52 +54,187 @@
 				cursor: not-allowed;
 			}
 			label {
-				font-size: 13px;
+				font-size: 12px;
 			}
 			input[type='number'] {
 				width: 4em;
 				font-family: monospace;
-				font-size: 14px;
-				padding: 0.3rem;
+				font-size: 13px;
+				padding: 0.25rem;
 				border: 2px solid #333;
 			}
 			#status {
 				margin-top: 0.5rem;
-				font-size: 13px;
-				color: #666;
+				font-size: 12px;
+				color: #555;
 			}
+			#maxIterations {
+				width: 6em;
+			}
+			.snippets {
+				margin-top: 0.35rem;
+				font-size: 12px;
+			}
+			.snippets summary {
+				cursor: pointer;
+				color: #555;
+			}
+			.snippet-btns {
+				margin-top: 0.35rem;
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+
+			/* IO Hook Toggles */
+			.toggles {
+				margin-top: 1rem;
+				border: 2px solid #333;
+				padding: 0.75rem;
+			}
+			.toggles h2 {
+				font-size: 0.9rem;
+				margin-bottom: 0.5rem;
+			}
+			.toggle-row {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				margin-bottom: 0.25rem;
+			}
+			.toggle-row label {
+				min-width: 120px;
+			}
+			.toggle-row select {
+				font-family: monospace;
+				font-size: 12px;
+				border: 1px solid #555;
+				padding: 0.15rem 0.3rem;
+			}
+
+			/* Event log */
 			#events {
 				margin-top: 1rem;
 				border: 2px solid #333;
 				padding: 0.5rem;
-				max-height: 400px;
+				max-height: 350px;
 				overflow-y: auto;
-				font-size: 13px;
+				font-size: 12px;
 				white-space: pre-wrap;
 				display: none;
 			}
-			.event-log {
+			.ev {
+				margin-bottom: 2px;
+			}
+			.ev-console {
 				color: #060;
 			}
-			.event-assert {
-				color: #660;
+			.ev-console.warn {
+				color: #850;
 			}
-			.event-error {
+			.ev-console.error {
 				color: #c00;
 			}
-			.event-prompt,
-			.event-confirm,
-			.event-alert {
+			.ev-console.assert {
+				color: #840;
+			}
+			.ev-alert,
+			.ev-confirm,
+			.ev-prompt {
 				color: #006;
+			}
+			.ev-error {
+				color: #c00;
+				font-weight: bold;
+			}
+			.pred-correct {
+				color: #060;
+				font-style: italic;
+			}
+			.pred-wrong {
+				color: #c00;
+				font-style: italic;
+			}
+			.step-sub {
+				opacity: 0.4;
+			}
+			.step-sub.enabled {
+				opacity: 1;
+			}
+			#prediction-wrap {
+				display: none;
+			}
+			#prediction {
+				width: 14em;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.25rem;
+				border: 2px solid #333;
+			}
+
+			/* Shape-identical note */
+			#shape-note {
+				margin-top: 0.5rem;
+				font-size: 11px;
+				color: #555;
+				display: none;
+			}
+
+			/* Styled dialog overlay */
+			.sd-overlay {
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.45);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				z-index: 1000;
+			}
+			.sd-box {
+				background: #fff;
+				border: 2px solid #333;
+				padding: 1.25rem;
+				min-width: 280px;
+				max-width: 400px;
+				font-family: monospace;
+				font-size: 13px;
+			}
+			.sd-box p {
+				margin-bottom: 0.75rem;
+			}
+			.sd-box input {
+				width: 100%;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.3rem;
+				border: 2px solid #333;
+				margin-bottom: 0.75rem;
+			}
+			.sd-box .sd-btns {
+				display: flex;
+				gap: 0.5rem;
+				justify-content: flex-end;
+			}
+			.sd-box button {
+				padding: 0.3rem 0.9rem;
+				font-family: monospace;
+				font-size: 12px;
+				border: 2px solid #333;
+				background: #eee;
+				cursor: pointer;
 			}
 		</style>
 	</head>
 	<body>
-		<h1>Run Lens Sandbox</h1>
-		<p style="margin-bottom: 0.5rem; font-size: 13px; color: #666">
-			Runs code in a Web Worker with trapped globals. Requires COOP/COEP headers
-			(served by the vite config below).
+		<h1>Run Lens Sandbox — IO Mocks</h1>
+		<p class="note">
+			Runs code in a Web Worker with trapped globals. Toggle each IO hook
+			between <strong>native</strong> (browser built-in) and
+			<strong>styled</strong> (in-page mock). The event stream must be
+			shape-identical regardless of the setting — same events, same args, same
+			discriminant. Return values reflect actual IO interaction and may differ.
 		</p>
+
 		<textarea id="code">
 let name = prompt('What is your name?', 'a toad');
 console.log('Hello, ' + name + '!');
@@ -103,77 +244,530 @@ console.log('again:', again);
 
 alert('Done!');
 
-null()
-</textarea
+null()</textarea
 		>
+		<details open class="snippets">
+			<summary>code snippets</summary>
+			<div class="snippet-btns">
+				<button
+					type="button"
+					class="snippet"
+					data-code="let name = prompt('What is your name?', 'a toad');
+console.log('Hello, ' + name + '!');
+
+let again = confirm('Run again?');
+console.log('again:', again);
+
+alert('Done!');
+
+null()"
+				>
+					[io + error]
+				</button>
+				<button
+					type="button"
+					class="snippet"
+					data-code="let i = 0;
+while (true) {
+  console.log('i =', i);
+  i = i + 1;
+}"
+				>
+					[infinite loop]
+				</button>
+				<button
+					type="button"
+					class="snippet"
+					data-code="console.log('one');
+console.warn('two');
+console.error('three');"
+				>
+					[console methods]
+				</button>
+			</div>
+		</details>
+
 		<div class="controls">
 			<button id="run">[run]</button>
 			<label
-				>max seconds:
-				<input id="maxSeconds" type="number" value="5" min="1" max="30"
-			/></label>
+				><input id="maxSecondsEnabled" type="checkbox" checked /> max seconds:
+				<input id="maxSeconds" type="number" value="5" min="1" max="30" />
+			</label>
+			<label
+				><input id="maxIterationsEnabled" type="checkbox" /> max iterations:
+				<input id="maxIterations" type="number" placeholder="none" min="-10" />
+			</label>
+			<button id="cancel" disabled>[cancel]</button>
+		</div>
+		<div class="controls">
+			<label><input id="step" type="checkbox" /> step</label>
+			<label class="step-sub"
+				><input id="step-dev" type="checkbox" checked /> dev</label
+			>
+			<label class="step-sub"
+				><input id="step-user" type="checkbox" checked /> user</label
+			>
+			<label class="step-sub"
+				><input id="predict-logs" type="checkbox" /> predict logs</label
+			>
+			<button id="next" disabled>[next]</button>
+			<br />
+			<span id="prediction-wrap"
+				>predict:
+				<input id="prediction" type="text" placeholder="expected output"
+			/></span>
 		</div>
 		<div id="status"></div>
+
+		<div class="toggles">
+			<h2>IO Hook Toggles</h2>
+			<div class="toggle-row">
+				<label for="t-prompt">prompt</label>
+				<select id="t-prompt" title="prompt hook">
+					<option value="native">native</option>
+					<option value="styled">styled</option>
+				</select>
+			</div>
+			<div class="toggle-row">
+				<label for="t-alert">alert</label>
+				<select id="t-alert" title="alert hook">
+					<option value="native">native</option>
+					<option value="styled">styled</option>
+				</select>
+			</div>
+			<div class="toggle-row">
+				<label for="t-confirm">confirm</label>
+				<select id="t-confirm" title="confirm hook">
+					<option value="native">native</option>
+					<option value="styled">styled</option>
+				</select>
+			</div>
+			<div class="toggle-row">
+				<label for="t-log">console.log</label>
+				<select id="t-log" title="console.log hook">
+					<option value="native">native</option>
+					<option value="styled">styled</option>
+				</select>
+			</div>
+			<div class="toggle-row">
+				<label for="t-warn">console.warn</label>
+				<select id="t-warn" title="console.warn hook">
+					<option value="native">native</option>
+					<option value="styled">styled</option>
+				</select>
+			</div>
+			<div class="toggle-row">
+				<label for="t-error">console.error</label>
+				<select id="t-error" title="console.error hook">
+					<option value="native">native</option>
+					<option value="styled">styled</option>
+				</select>
+			</div>
+		</div>
+
 		<div id="events"></div>
+		<div id="shape-note">
+			↑ Event stream above. Toggle hooks between native/styled and re-run —
+			event discriminants, method names, and args must be identical. Return
+			values (→) reflect actual IO and may differ.
+		</div>
 
 		<script type="module">
-			import run from './run.ts';
+			import createRunGenerator from './run.ts';
 
+			// --- Elements ---
 			const codeEl = document.getElementById('code');
 			const runBtn = document.getElementById('run');
+			const cancelBtn = document.getElementById('cancel');
 			const statusEl = document.getElementById('status');
 			const eventsEl = document.getElementById('events');
+			const shapeNoteEl = document.getElementById('shape-note');
 			const maxSecondsEl = document.getElementById('maxSeconds');
+			const maxSecondsEnabledEl = document.getElementById('maxSecondsEnabled');
+			const maxIterationsEl = document.getElementById('maxIterations');
+			const maxIterationsEnabledEl = document.getElementById(
+				'maxIterationsEnabled',
+			);
+			const stepCheckbox = document.getElementById('step');
+			const devCheckbox = document.getElementById('step-dev');
+			const userCheckbox = document.getElementById('step-user');
+			const predictLogsCheckbox = document.getElementById('predict-logs');
+			const nextBtn = document.getElementById('next');
+			const predictionWrap = document.getElementById('prediction-wrap');
+			const predictionInput = document.getElementById('prediction');
 
-			function renderEvent(event) {
+			// --- Mode UI: mutual exclusion + step-sub visual state ---
+
+			function updateModeUI() {
+				const stepping = stepCheckbox.checked;
+				document.querySelectorAll('.step-sub').forEach((el) => {
+					el.classList.toggle('enabled', stepping);
+				});
+				devCheckbox.disabled = !stepping;
+				userCheckbox.disabled = !stepping;
+				predictLogsCheckbox.disabled = !stepping;
+			}
+
+			stepCheckbox.addEventListener('change', updateModeUI);
+
+			updateModeUI();
+
+			function updateMaxSecondsUI() {
+				maxSecondsEl.disabled = !maxSecondsEnabledEl.checked;
+			}
+			function updateMaxIterationsUI() {
+				maxIterationsEl.disabled = !maxIterationsEnabledEl.checked;
+			}
+			maxSecondsEnabledEl.addEventListener('change', updateMaxSecondsUI);
+			maxIterationsEnabledEl.addEventListener('change', updateMaxIterationsUI);
+			updateMaxSecondsUI();
+			updateMaxIterationsUI();
+
+			// --- Styled dialog helpers ---
+
+			function styledAlert(message) {
+				return new Promise((resolve) => {
+					const overlay = makeOverlay();
+					overlay.innerHTML = `
+						<div class="sd-box">
+							<p>alert: ${escapeHtml(String(message))}</p>
+							<div class="sd-btns">
+								<button id="sd-ok">OK</button>
+							</div>
+						</div>`;
+					document.body.appendChild(overlay);
+					overlay.querySelector('#sd-ok').addEventListener('click', () => {
+						document.body.removeChild(overlay);
+						resolve();
+					});
+				});
+			}
+
+			function styledConfirm(message) {
+				return new Promise((resolve) => {
+					const overlay = makeOverlay();
+					overlay.innerHTML = `
+						<div class="sd-box">
+							<p>confirm: ${escapeHtml(String(message))}</p>
+							<div class="sd-btns">
+								<button id="sd-cancel">Cancel</button>
+								<button id="sd-ok">OK</button>
+							</div>
+						</div>`;
+					document.body.appendChild(overlay);
+					overlay.querySelector('#sd-ok').addEventListener('click', () => {
+						document.body.removeChild(overlay);
+						resolve(true);
+					});
+					overlay.querySelector('#sd-cancel').addEventListener('click', () => {
+						document.body.removeChild(overlay);
+						resolve(false);
+					});
+				});
+			}
+
+			function styledPrompt(message, defaultValue) {
+				return new Promise((resolve) => {
+					const overlay = makeOverlay();
+					const defStr =
+						defaultValue !== undefined ? escapeHtml(String(defaultValue)) : '';
+					overlay.innerHTML = `
+						<div class="sd-box">
+							<p>prompt: ${escapeHtml(String(message))}</p>
+							<input id="sd-input" type="text" value="${defStr}" />
+							<div class="sd-btns">
+								<button id="sd-cancel">Cancel</button>
+								<button id="sd-ok">OK</button>
+							</div>
+						</div>`;
+					document.body.appendChild(overlay);
+					const input = overlay.querySelector('#sd-input');
+					input.focus();
+					overlay.querySelector('#sd-ok').addEventListener('click', () => {
+						const val = input.value;
+						document.body.removeChild(overlay);
+						resolve(val);
+					});
+					overlay.querySelector('#sd-cancel').addEventListener('click', () => {
+						document.body.removeChild(overlay);
+						resolve(null);
+					});
+				});
+			}
+
+			// --- Styled console panel appender ---
+			function makeConsoleMock(method) {
+				return (...args) => {
+					const line = document.createElement('div');
+					line.className = `ev ev-console ${method}`;
+					line.textContent = `[styled:${method}] ${args.map(String).join(' ')}`;
+					eventsEl.appendChild(line);
+					eventsEl.scrollTop = eventsEl.scrollHeight;
+				};
+			}
+
+			// --- Step gate ---
+			let stepResolve = null;
+
+			function waitForStep() {
+				return new Promise((resolve) => {
+					stepResolve = resolve;
+					nextBtn.disabled = false;
+				});
+			}
+
+			nextBtn.addEventListener('click', () => {
+				if (stepResolve) {
+					const res = stepResolve;
+					stepResolve = null;
+					nextBtn.disabled = true;
+					statusEl.textContent = 'running…';
+					res();
+				}
+			});
+
+			predictionInput.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') nextBtn.click();
+			});
+
+			// --- Build io mocks from toggle state ---
+			function buildIoMocks() {
+				const io = {};
+				const stepped = stepCheckbox.checked && userCheckbox.checked;
+
+				if (stepped) {
+					const basePrompt =
+						sel('t-prompt') === 'styled'
+							? styledPrompt
+							: (msg, def) => window.prompt(msg, def ?? undefined);
+					const baseAlert =
+						sel('t-alert') === 'styled'
+							? styledAlert
+							: async (msg) => {
+									window.alert(msg);
+								};
+					const baseConfirm =
+						sel('t-confirm') === 'styled'
+							? styledConfirm
+							: (msg) => window.confirm(msg);
+
+					io.prompt = async (msg, def) => {
+						statusEl.textContent = `step: prompt(${JSON.stringify(String(msg))}) — click [next]`;
+						await waitForStep();
+						return basePrompt(msg, def);
+					};
+					io.alert = async (msg) => {
+						statusEl.textContent = `step: alert(${JSON.stringify(String(msg))}) — click [next]`;
+						await waitForStep();
+						return baseAlert(msg);
+					};
+					io.confirm = async (msg) => {
+						statusEl.textContent = `step: confirm(${JSON.stringify(String(msg))}) — click [next]`;
+						await waitForStep();
+						return baseConfirm(msg);
+					};
+				} else {
+					if (sel('t-prompt') === 'styled') io.prompt = styledPrompt;
+					if (sel('t-alert') === 'styled') io.alert = styledAlert;
+					if (sel('t-confirm') === 'styled') io.confirm = styledConfirm;
+				}
+
+				const consoleMocks = {};
+				for (const method of ['log', 'warn', 'error']) {
+					if (sel(`t-${method}`) === 'styled') {
+						consoleMocks[method] = makeConsoleMock(method);
+					}
+				}
+				if (Object.keys(consoleMocks).length > 0) {
+					io.console = consoleMocks;
+				}
+
+				return Object.keys(io).length > 0 ? io : undefined;
+			}
+
+			// --- Event rendering ---
+			function renderEvent(event, annotation = null) {
 				const div = document.createElement('div');
-				div.className = 'event-' + event.event;
+				div.className = `ev ev-${event.event}`;
 
-				if (event.event === 'log') {
-					div.textContent = `[line ${event.line}] log: ${event.args.map(String).join(', ')}`;
-				} else if (event.event === 'assert') {
-					div.textContent = `[line ${event.line}] assert: ${event.args.map(String).join(', ')}`;
+				if (event.event === 'console') {
+					div.classList.add(event.method);
+					div.textContent =
+						`[line ${event.line}] console.${event.method}: ` +
+						`${event.args.map((a) => JSON.stringify(a)).join(', ')}`;
 				} else if (event.event === 'error') {
-					div.textContent = `[${event.phase}] ${event.name}: ${event.message}${event.line ? ' (line ' + event.line + ')' : ''}`;
+					div.textContent =
+						`[${event.phase}] ${event.name}: ${event.message}` +
+						(event.line ? ` (line ${event.line})` : '');
 				} else if (event.event === 'prompt') {
-					div.textContent = `[line ${event.line}] prompt(${event.args.map(String).join(', ')}) → ${JSON.stringify(event.return)}`;
+					div.textContent =
+						`[line ${event.line}] prompt(${event.args.map((a) => JSON.stringify(a)).join(', ')})` +
+						` → ${JSON.stringify(event.return)}`;
 				} else if (event.event === 'confirm') {
-					div.textContent = `[line ${event.line}] confirm(${event.args.map(String).join(', ')}) → ${event.return}`;
+					div.textContent =
+						`[line ${event.line}] confirm(${event.args.map((a) => JSON.stringify(a)).join(', ')})` +
+						` → ${event.return}`;
 				} else if (event.event === 'alert') {
-					div.textContent = `[line ${event.line}] alert(${event.args.map(String).join(', ')})`;
+					div.textContent = `[line ${event.line}] alert(${event.args.map((a) => JSON.stringify(a)).join(', ')})`;
+				} else {
+					div.textContent = JSON.stringify(event);
+				}
+
+				if (annotation !== null) {
+					const annSpan = document.createElement('span');
+					annSpan.className = annotation.correct
+						? 'pred-correct'
+						: 'pred-wrong';
+					annSpan.textContent = annotation.correct
+						? ` ✓ "${annotation.prediction}"`
+						: ` ✗ predicted "${annotation.prediction}", got "${annotation.actual}"`;
+					div.appendChild(annSpan);
 				}
 
 				return div;
 			}
 
+			// --- Run ---
+			let currentGen = null;
+
 			runBtn.addEventListener('click', async () => {
 				runBtn.disabled = true;
+				cancelBtn.disabled = false;
 				statusEl.textContent = 'running…';
 				eventsEl.innerHTML = '';
 				eventsEl.style.display = 'block';
+				shapeNoteEl.style.display = 'none';
 
-				const maxSeconds = Number(maxSecondsEl.value) || 5;
+				const stepping = stepCheckbox.checked || predictLogsCheckbox.checked;
+				const maxSeconds =
+					stepping || !maxSecondsEnabledEl.checked
+						? Infinity
+						: Number(maxSecondsEl.value) || 5;
+				// WHY explicit empty-string check: Number('') === 0, not NaN.
+				// Without this, an enabled-but-empty input would pass
+				// `Number.isFinite(0)` and propagate 0 to the engine — which
+				// under the new semantics bans all loop bodies.
+				const iterationsRaw = Number(maxIterationsEl.value);
+				const iterations =
+					maxIterationsEnabledEl.checked
+					&& maxIterationsEl.value !== ''
+					&& Number.isFinite(iterationsRaw)
+						? iterationsRaw
+						: undefined;
+				const io = buildIoMocks();
 
+				const gen = createRunGenerator(codeEl.value, {
+					seconds: maxSeconds,
+					iterations,
+					io,
+				});
+				currentGen = gen;
+
+				let result = undefined;
+				let eventCount = 0;
 				try {
-					const events = await run(codeEl.value, maxSeconds);
-					statusEl.textContent = `done — ${events.length} event(s)`;
-					console.log('RunEvent[]:', events);
+					while (true) {
+						const { value, done } = await gen.next();
+						if (done) {
+							result = value;
+							break;
+						}
+						if (currentGen !== gen) break; // cancelled mid-iteration
+						eventCount++;
 
-					for (const event of events) {
-						eventsEl.appendChild(renderEvent(event));
+						const devStepping = stepCheckbox.checked && devCheckbox.checked;
+
+						if (value.event === 'console' && devStepping) {
+							if (value.method === 'log' && predictLogsCheckbox.checked) {
+								predictionInput.value = '';
+								predictionWrap.style.display = 'inline';
+								predictionInput.focus();
+								statusEl.textContent = `step: console.log (line ${value.line}) — predict output, click [next]`;
+								await waitForStep();
+								predictionWrap.style.display = 'none';
+								const prediction = predictionInput.value;
+								const actual = value.args
+									.map((a) => (typeof a === 'string' ? a : JSON.stringify(a)))
+									.join(' ');
+								const correct = prediction.trim() === actual.trim();
+								eventsEl.appendChild(
+									renderEvent(value, { prediction, actual, correct }),
+								);
+							} else {
+								statusEl.textContent = `step: console.${value.method} (line ${value.line}) — click [next]`;
+								await waitForStep();
+								eventsEl.appendChild(renderEvent(value));
+							}
+						} else {
+							eventsEl.appendChild(renderEvent(value));
+						}
+
+						eventsEl.scrollTop = eventsEl.scrollHeight;
+					}
+					if (currentGen === gen) {
+						statusEl.textContent = `done — ${eventCount} event(s)`;
+						if (result) console.log('[run result]', result);
 					}
 				} catch (err) {
 					statusEl.textContent = `unexpected throw: ${err.message}`;
 				} finally {
+					stepResolve = null;
+					nextBtn.disabled = true;
+					predictionWrap.style.display = 'none';
+					predictionInput.value = '';
+					if (currentGen === gen) currentGen = null;
 					runBtn.disabled = false;
+					cancelBtn.disabled = true;
+					shapeNoteEl.style.display = 'block';
 				}
 			});
 
-			// SAB availability check
+			cancelBtn.addEventListener('click', () => {
+				if (currentGen) {
+					stepResolve = null;
+					nextBtn.disabled = true;
+					predictionWrap.style.display = 'none';
+					predictionInput.value = '';
+					currentGen.return();
+					currentGen = null;
+					statusEl.textContent = 'cancelled';
+					runBtn.disabled = false;
+					cancelBtn.disabled = true;
+				}
+			});
+
+			// --- Snippet buttons ---
+			document.querySelectorAll('.snippet').forEach((btn) => {
+				btn.addEventListener('click', () => {
+					codeEl.value = btn.dataset.code;
+				});
+			});
+
+			// --- Helpers ---
+			function sel(id) {
+				return document.getElementById(id).value;
+			}
+
+			function makeOverlay() {
+				const el = document.createElement('div');
+				el.className = 'sd-overlay';
+				return el;
+			}
+
+			function escapeHtml(str) {
+				return str
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/"/g, '&quot;');
+			}
+
+			// --- SAB availability check ---
 			if (typeof SharedArrayBuffer === 'undefined') {
 				statusEl.textContent =
-					'⚠ SharedArrayBuffer not available — serve with COOP/COEP headers';
+					'⚠ SharedArrayBuffer not available — serve with COOP/COEP headers (use the vite config)';
 				statusEl.style.color = '#c00';
+				runBtn.disabled = true;
 			}
 		</script>
 	</body>

@@ -13,9 +13,19 @@
 import type { Program } from 'acorn';
 
 import type { Violation } from '../lib/validating/types.js';
-import type { RunEvent, Execution, EngineConfig } from '../lib/evaluating/shared/types.js';
-import type { ASTNode, TraceEvent } from '../lib/evaluating/trace/tracing/types.js';
-import type { TraceConfig, TraceOptions } from '../lib/evaluating/trace/config.types.js';
+import type {
+	RunEvent,
+	Execution,
+	EngineConfig,
+} from '../lib/evaluating/shared/types.js';
+import type {
+	ASTNode,
+	TraceEvent,
+} from '../lib/evaluating/trace/semantics/tracing/types.js';
+import type {
+	TraceConfig,
+	TraceOptions,
+} from '../lib/evaluating/trace/semantics/config.types.js';
 
 // ─── Error types ─────────────────────────────────────────────
 

@@ -48,12 +48,11 @@ import {
 
 // --- Internal message types for the queue ---
 
-type TimeoutSignal = { readonly type: 'timeout' };
 type WorkerErrorSignal = {
 	readonly type: 'worker-error';
 	readonly message: string;
 };
-type QueueMessage = WorkerOutbound | TimeoutSignal | WorkerErrorSignal;
+type QueueMessage = WorkerOutbound | WorkerErrorSignal;
 
 // --- Resolved IO ---
 
@@ -187,10 +186,14 @@ async function* createRunGenerator(
 		});
 	}
 
-	// 2. Apply loop guards if iterations limit is configured
+	// 2. Apply loop guards if iterations limit is configured.
+	// Number.isFinite(Infinity) === false, so Infinity means "no guards";
+	// any finite number (including 0 and negatives) injects guards, and
+	// the `++loopN > maxIterations` template throws on the first iteration
+	// for non-positive limits — counterintuitive otherwise.
 	let execCode = code;
 	let loopCount = 0;
-	if (maxIterations !== undefined && maxIterations > 0) {
+	if (maxIterations !== undefined && Number.isFinite(maxIterations)) {
 		const guardResult = guardLoopsCondition(code, maxIterations);
 		execCode = guardResult.code;
 		loopCount = guardResult.loopCount;
@@ -234,6 +237,18 @@ async function* createRunGenerator(
 	// pull-based async generator
 	const queue: QueueMessage[] = [];
 	let resolveWaiting: (() => void) | null = null;
+	let timedOut = false;
+
+	function wakeDequeue(): void {
+		if (resolveWaiting !== null) {
+			// WHY sentinel: resolveWaiting's closure calls queue.shift().
+			// Without a message in the queue, shift() returns undefined.
+			// timedOut is checked before msg.type so the sentinel type is irrelevant.
+			queue.push({ type: 'complete' } as QueueMessage);
+			resolveWaiting();
+			resolveWaiting = null;
+		}
+	}
 
 	function enqueue(msg: QueueMessage): void {
 		queue.push(msg);
@@ -272,10 +287,16 @@ async function* createRunGenerator(
 
 	function startTimeout(): void {
 		if (!isFinite(remainingMs)) return;
-		lastResumeTime = Date.now();
+		if (remainingMs <= 0) {
+			timedOut = true;
+			wakeDequeue();
+			return;
+		}
+		lastResumeTime = performance.now();
 		timeout = setTimeout(function onTimeout() {
 			timeout = null;
-			enqueue({ type: 'timeout' });
+			timedOut = true;
+			wakeDequeue();
 		}, remainingMs);
 	}
 
@@ -283,7 +304,7 @@ async function* createRunGenerator(
 		if (timeout !== null) {
 			clearTimeout(timeout);
 			timeout = null;
-			remainingMs -= Date.now() - lastResumeTime;
+			remainingMs -= performance.now() - lastResumeTime;
 			if (remainingMs < 0) remainingMs = 0;
 		}
 	}
@@ -313,15 +334,24 @@ async function* createRunGenerator(
 		while (true) {
 			const msg = await dequeue();
 
+			// WHY check timedOut first: timeout handler sets this flag and calls
+			// wakeDequeue() to unblock us. The sentinel msg is irrelevant — exit immediately.
+			if (timedOut) {
+				const timeoutEvent: RunErrorEvent = {
+					event: 'error',
+					name: 'TimeoutError',
+					message: `Execution exceeded ${maxSeconds} second time limit`,
+					phase: 'execution',
+				};
+				logs.push(timeoutEvent);
+				yield timeoutEvent;
+				break;
+			}
+
 			// 7a. Streamed event — route IO callback, yield to consumer
 			if (msg.type === 'event') {
 				const event = msg.event;
 				logs.push(event);
-
-				// WHY: pause timeout for the entire duration of callback + yield.
-				// Consumer may take arbitrarily long; IO callback is awaited before
-				// yield. Cumulative time = only time the Worker is actually running.
-				pauseTimeout();
 
 				if (event.event === 'console') {
 					try {
@@ -334,12 +364,15 @@ async function* createRunGenerator(
 
 				yield event;
 
-				// Consumer called next() — restart timer, resume worker
-				startTimeout();
+				// WHY: yield one macrotask slot before releasing the worker.
+				// The wall-clock timer callback is a macrotask — it cannot fire
+				// during an unbroken microtask chain. This break gives it a
+				// guaranteed firing slot each event. Worker remains paused here.
+				// WHY no writePauseEngaged: each trap arms its own pause before
+				// postMessage to avoid the race where notify fires before the main
+				// thread re-arms, causing Atomics.wait to see PAUSED and deadlock.
+				await new Promise<void>(resolve => setTimeout(resolve, 0));
 				writeResumeSignal(views);
-
-				// Re-engage pause for the next event
-				writePauseEngaged(views);
 				continue;
 			}
 
@@ -373,16 +406,7 @@ async function* createRunGenerator(
 				break;
 			}
 
-			// 7e. Timeout — record and break
-			if (msg.type === 'timeout') {
-				logs.push({
-					event: 'error',
-					name: 'TimeoutError',
-					message: `Execution exceeded ${maxSeconds} second time limit`,
-					phase: 'execution',
-				});
-				break;
-			}
+
 		}
 	} finally {
 		clearTimeoutIfSet();

@@ -20,6 +20,7 @@ and returns either `null` (skip) or `Json[]` point data (intercept).
 ## How pointcut functions work
 
 Each receives `(node, parent, root)`:
+
 - `node` — the AranLang AST node being visited
 - `parent` — the immediate AranLang parent node (NOT ESTree parent)
 - `root` — the complete instrumented program

@@ -171,4 +171,41 @@ describe('guardLoopsCondition', () => {
 			expect(fn(0, 0, 0)).toBe(2);
 		});
 	});
+
+	describe('iteration threshold edge cases', () => {
+		// Template shape per maxIterations — one assertion per value.
+		it.each([
+			[-1, 'if (++loop1 > -1)'],
+			[0, 'if (++loop1 > 0)'],
+			[1, 'if (++loop1 > 1)'],
+			[100, 'if (++loop1 > 100)'],
+		])('maxIterations = %i → template contains %p', (max, expected) => {
+			const result = guardLoopsCondition(
+				'while (true) {\n\tx++;\n}\n',
+				max,
+			);
+			expect(result.code).toContain(expected);
+		});
+
+		// Runtime behavior — triangulated. A stub that always throws (or
+		// never throws) cannot produce all four {max → executed} pairs.
+		it.each([
+			[-1, []],
+			[0, []],
+			[1, [1]],
+			[3, [1, 2, 3]],
+		])(
+			'maxIterations = %i runs body %p times before throwing',
+			(max, expected) => {
+				const executed: number[] = [];
+				const code =
+					'while (true) { executed.push(loop1); }\n';
+				const result = guardLoopsCondition(code, max);
+				// eslint-disable-next-line no-new-func
+				const fn = new Function('loop1', 'executed', result.code);
+				expect(() => fn(0, executed)).toThrow(RangeError);
+				expect(executed).toEqual(expected);
+			},
+		);
+	});
 });
