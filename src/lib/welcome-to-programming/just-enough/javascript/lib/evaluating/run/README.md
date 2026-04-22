@@ -56,17 +56,34 @@ run(
     iterations?: number; // optional loop-guard limit
     io?: IoMocks;        // per-hook mocks; unspecified slots use natives
   }
-): AsyncGenerator<RunEvent, RunResult>
+): RunHandle
 ```
+
+`RunHandle` is an `AsyncGenerator<RunEvent, RunResult>` augmented with
+three consumer-facing additions:
+
+- `.cancel()` — tear down the worker and resolve with a cancel-marked
+  RunResult. Idempotent. See § Cancellation.
+- `.result` — memoized `Promise<RunResult>` that drains the generator
+  internally. See § Result.
+- `then(...)` — PromiseLike delegate so `await run(code)` works
+  directly without explicit `.result`. Same Promise as `.result`.
+
+These three augmentations match the `Execution<RunEvent, RunResult>`
+contract in `../shared/types.ts`. A consumer may iterate events, await
+the final result, or cancel — with no separate wrapper required.
 
 - **`code`** — JavaScript source to execute (assumed valid — no
   parsing or validation happens here).
-- **`options.seconds`** — cumulative execution time limit. Pauses while
-  the generator is suspended at a `yield` AND while an IO callback is
-  being awaited. Learners can examine events indefinitely without
-  triggering a timeout.
-- **`options.iterations`** — when set, injects comma-in-condition loop
-  guards into while loops via AST rewrite (zero line shift).
+- **`options.seconds`** — cumulative execution time limit. Intended
+  to pause while the generator is suspended at a `yield` AND while an
+  IO callback is being awaited. **Known inconsistency:** currently the
+  timer only pauses during IO-callback await, not during yield —
+  stepping time counts against the limit. Fix pending the api/run
+  merge task (requires EVENT_READY adoption in run).
+- **`options.iterations`** — when set to any finite number (including
+  `0` and negatives), injects loop guards that throw `RangeError` when
+  `++loopN > iterations`. `Infinity` / `undefined` = no guards.
 - **`options.io`** — optional mocks for IO hooks. Each slot is
   independently overridable; omitted slots fall back to the Native IO
   wrapper. See § IO mocking.
@@ -76,8 +93,109 @@ run(
   on completion.
 
 Wrapped by `createExecution` (from `../shared/`) at the `api/` layer
-to produce an `Execution<RunEvent, RunResult>` with `PromiseLike` +
-`AsyncIterable` + `.cancel()`.
+to add event-replay on re-iteration and a few ergonomic helpers. The
+merge of `api/run` validation into `evaluating/run` is a planned
+follow-up; see the merge task.
+
+### Consumption modes
+
+```ts
+// 1. Iterate events
+const handle = run(code);
+for await (const event of handle) render(event);
+
+// 2. Await the result, no event iteration
+const result = await run(code);
+// equivalent:
+const result = await run(code).result;
+
+// 3. Mix iteration with cancel
+const handle = run(code);
+setTimeout(() => handle.cancel(), 1000);
+for await (const event of handle) render(event);
+```
+
+**Do not mix** modes 1 and 2 on the same handle. `.result` internally
+drives `.next()`; concurrent `for await` alongside `await handle`
+causes AsyncGenerator to serialize the `.next()` calls, and each
+consumer sees a disjoint subset of events. Pick one mode per handle.
+
+## Cancellation
+
+`.cancel()` terminates execution immediately. Idempotent — safe to
+call any number of times at any phase.
+
+- **Before first iterate:** sets a cancelled flag. First `.next()`
+  sees the flag, returns `{done: true}` immediately. The Worker is
+  never constructed. Zero resource leak.
+- **During iteration:** pushes a sentinel into the internal queue,
+  unsticks the pending `await dequeue()`, main loop's cancelled check
+  breaks out, finally block terminates the Worker and revokes the
+  Blob URL. A `{event: 'cancel'}` is appended to `logs`. The final
+  RunResult is `{ok: true, logs: [...events, {event: 'cancel'}]}`.
+- **After completion:** no-op.
+
+Consumers that care whether a run was cancelled can inspect the logs:
+
+```ts
+const result = await run(code);
+const wasCancelled = result.logs.at(-1)?.event === 'cancel';
+```
+
+Cancel is not an error — it did not originate in the learner's
+program. The RunResult stays `ok: true`; the cancel event in logs
+is the signal.
+
+### Cancel latency caveat
+
+Cancel takes effect on the next main-loop iteration. For the worker
+to actually stop executing user code, the main loop must reach its
+cancelled check. If the main loop is suspended inside `await
+handleIoRequest(...)` — i.e. a consumer's async `io.prompt/alert/
+confirm` mock is awaiting user input — cancel waits for that
+Promise to settle. Native `window.prompt` blocks the main thread
+synchronously, so cancel can't even be clicked while it's open. For
+styled/async dialogs, the consumer should resolve or reject the
+pending IO promise if they want immediate teardown.
+
+## Result
+
+`.result` is a memoized `Promise<RunResult>` that drives the generator
+to completion. First access creates the Promise; subsequent accesses
+return the same Promise. `await run(code)` is equivalent.
+
+```ts
+const result = await run(code);
+if (result.ok) {
+  console.log('logs:', result.logs);
+} else {
+  console.log('error:', result.error);
+}
+```
+
+The Promise resolves with the same RunResult the generator would have
+produced via manual iteration. Errors inside the worker (uncaught
+`TypeError` etc.) surface as `{ok: false, error: ...}` — they are NOT
+thrown from `.result`. The only way `.result` rejects is if the main-
+thread code itself throws (unreachable under current code).
+
+## Replay / re-iteration
+
+The raw `RunHandle` returned by this module **does not support
+re-iteration**. Once the generator completes, subsequent `.next()`
+calls return `{done: true}` with no value — the events are not
+replayed. This matches standard AsyncGenerator semantics.
+
+Re-iteration (replay from cached logs after completion) is a feature
+of the `Execution` wrapper in `../shared/create-execution.ts`, accessed
+via `api/run.ts`. Consumers who need replay should use the `api/run`
+entry point, not this module directly.
+
+When the api/run validation merges into evaluating/run (planned follow-
+up), replay will be available on the merged handle, with the same
+identity-stable event references (`logs.push(event)` uses the exact
+yielded reference, `deepFreezeInPlace` freezes in place — a consumer
+can `===`-compare events across live and replayed iterations).
 
 ## IO mocking
 
@@ -245,7 +363,7 @@ To test interactively, start the Vite dev server from the project
 root:
 
 ```sh
-npx vite --config src/lib/just-enough-javascript/evaluating/run/vite.sandbox.config.ts
+npx vite --config src/lib/welcome-to-programming/just-enough/javascript/lib/evaluating/run/vite.sandbox.config.ts
 ```
 
 Then open `http://localhost:5173/sandbox.html`.

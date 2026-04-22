@@ -252,6 +252,24 @@ This is browser-dependent. Chrome, Firefox, and Safari format `Error.stack`
 differently. The line number in `RunEvent` is best-effort — correct in common
 cases, possibly wrong for edge cases like multi-line expressions.
 
+### scriptMode
+
+The `execute` message accepts an optional `scriptMode` flag (see
+`types.ts`'s `ExecuteMessage`). When true, the worker omits the
+`"use strict";\n` prefix in front of user code. This is needed for
+constructs that strict mode forbids — most notably the `with`
+statement, which some legacy/teaching examples use.
+
+Because scriptMode removes the prefix line, user code starts at line
+**1** instead of line 2. `getLine()` branches on `isScriptMode`:
+return the raw stack line number directly when `scriptMode` is true,
+or subtract 1 when it's false. Same branch exists in
+`extractLineFromError` for uncaught runtime errors.
+
+scriptMode is a worker-side setup concern only — the main thread
+never needs to know. Consumers who pass `scriptMode: true` get line
+numbers that match their source 1:1.
+
 ## Why new Function instead of eval
 
 `new Function('console', 'alert', 'confirm', 'prompt', code)` provides argument

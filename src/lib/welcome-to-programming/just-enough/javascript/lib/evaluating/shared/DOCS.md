@@ -60,7 +60,13 @@ to poll its message queue — `onmessage` fires asynchronously and cannot block
 synchronous code mid-execution. `Atomics.wait` truly freezes the Worker thread
 at the exact instruction, guaranteeing no events leak past the pause point.
 
-### Pause/resume flow (trace module)
+### Pause/resume flow — two engines, two patterns
+
+The SAB layout is shared but the two engines use the pause protocol
+differently. This section documents both; unification is planned for
+the `api/run` → `evaluating/run` merge task.
+
+#### Trace module (worker-managed pause, uses EVENT_READY)
 
 1. Worker posts an event via `postMessage`
 2. Worker stores `PAUSED` to control[4], `EVENT_READY` to control[5], notifies [5]
@@ -71,17 +77,35 @@ at the exact instruction, guaranteeing no events leak past the pause point.
 6. Main thread clears control[5], sets control[4] to 0, `Atomics.notify(4)` — wakes
 7. Worker continues execution until the next event
 
-The run module uses a different pattern where the main thread writes PAUSED.
+#### Run module (main-thread-managed pause, no EVENT_READY)
 
-For batch mode (`.then()` / `.result`), an internal drain loop calls `next()`
-rapidly — the Worker barely pauses.
+1. Main thread writes `PAUSED=1` at startup (`writePauseEngaged`)
+2. Worker's trapped global (console.*, prompt, alert, confirm) fires:
+   - Sets `PAUSED=1` (idempotent — main thread already set it)
+   - `postMessage(event)` to main thread
+   - Calls `checkPause()` — blocks while `PAUSED=1`
+3. Main thread's `onmessage` enqueues event; consumer iterates
+4. Consumer calls `.next()` → generator yields event, then writes
+   `PAUSED=0` + `Atomics.notify` → worker unblocks, continues
+
+Run does not consume `EVENT_READY` today. Its timeout handler relies
+on a `timedOut` flag set by a wall-clock `setTimeout` — not on
+differentiating paused-with-event from stuck-no-event. One consequence:
+time spent waiting for the consumer to iterate (e.g. stepping mode)
+still counts against the `seconds` limit. The `run.ts` JSDoc says
+otherwise; the code doesn't match. Resolution pending the merge task.
+
+For batch mode (`.then()` / `.result`), an internal drain loop calls
+`next()` rapidly — the Worker barely pauses.
 
 ### Why EVENT_READY flag (control[5])
 
-The timeout handler needs to distinguish "Worker paused with pending event" from
-"Worker stuck in infinite loop." The Worker writes EVENT_READY to SAB (instant)
-before blocking, so the timeout handler has a reliable signal that doesn't depend
-on `postMessage` delivery timing.
+Used by the trace engine. The timeout handler needs to distinguish
+"Worker paused with pending event" from "Worker stuck in infinite
+loop." The Worker writes EVENT_READY to SAB (instant) before blocking,
+so the timeout handler has a reliable signal that doesn't depend on
+`postMessage` delivery timing. The slot is reserved in the SAB layout
+for cross-engine consistency; run will adopt it in the merge task.
 
 ### Why timedOut flag instead of queued timeout message
 

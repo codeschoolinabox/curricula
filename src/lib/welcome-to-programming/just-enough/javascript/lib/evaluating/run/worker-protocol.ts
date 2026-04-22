@@ -30,7 +30,16 @@ const PAYLOAD_LENGTH_INDEX = 3;
 /** Int32Array index for the pause flag (0=running, 1=paused) */
 const PAUSE_INDEX = 4;
 
-/** Int32Array index for the event-ready flag (0=not ready, 1=ready) */
+/** Int32Array index for the event-ready flag (0=not ready, 1=ready).
+ *
+ * @remarks Currently consumed by the **trace engine** (via
+ * `trace/semantics/tracing/index.ts`). The run engine does NOT read
+ * or write this flag today — the run engine's main thread manages
+ * pause state directly via `writePauseEngaged` / `writeResumeSignal`.
+ * Protocol unification (run adopts EVENT_READY like trace does) is
+ * planned as part of the `api/run` → `evaluating/run` merge task.
+ * Until then, this slot is reserved in the SAB layout for cross-
+ * engine consistency. */
 const EVENT_READY_INDEX = 5;
 
 /** Byte offset where the string payload begins (6 Int32 slots × 4 bytes) */
@@ -197,14 +206,21 @@ function writeResumeSignal(views: BufferViews): void {
 }
 
 // --- Event-ready protocol (main-thread side) ---
+//
+// These helpers are currently consumed by the TRACE engine only
+// (see `trace/semantics/tracing/index.ts`). The run engine's main
+// thread manages pause state directly via writePauseEngaged /
+// writeResumeSignal and does not use EVENT_READY. Protocol
+// unification is planned for the api/run → evaluating/run merge task.
 
 /**
  * Clears the event-ready flag after the main thread has processed
  * an entry event.
  *
- * @remarks Called after yielding an event and before resuming the
- * Worker. Resets the flag so the next `Atomics.waitAsync` on
- * `EVENT_READY_INDEX` will wait for the Worker's next signal.
+ * @remarks Called by the TRACE engine after yielding an event and
+ * before resuming the Worker. Resets the flag so the next
+ * `Atomics.waitAsync` on `EVENT_READY_INDEX` will wait for the
+ * Worker's next signal. Not called by the run engine today.
  */
 function clearEventReady(views: BufferViews): void {
 	Atomics.store(views.control, EVENT_READY_INDEX, EVENT_NOT_READY);

@@ -210,7 +210,9 @@ type RunHandle = AsyncGenerator<RunEvent, RunResult> & {
  * ```
  *
  * **Do not mix modes 1 and 2** on the same handle — both call
- * `.next()` internally; concurrent use interleaves unpredictably.
+ * `.next()` internally. AsyncGenerator serializes concurrent
+ * `.next()` calls, so each consumer silently sees a disjoint subset
+ * of events as the two paths alternate. Pick one mode per handle.
  *
  * **Lazy startup.** The Worker is not created until the first
  * `.next()` call (or the first `.result` access, which calls
@@ -241,9 +243,17 @@ type RunHandle = AsyncGenerator<RunEvent, RunResult> & {
  * processes the event and resumes.
  *
  * IO callbacks (mocked or native) are always awaited. The cumulative
- * timer pauses during every IO callback and every generator yield, so
- * learners can examine steps and consumers can run async UIs without
- * consuming execution time.
+ * timer is intended to pause during every IO callback AND every
+ * generator yield, so learners can examine steps and consumers can
+ * run async UIs without consuming execution time.
+ *
+ * **Known inconsistency:** the timer currently only pauses during IO
+ * callbacks (via pauseTimeout/startTimeout around handleIoRequest).
+ * It does NOT pause during generator yield — time the consumer spends
+ * between `.next()` calls (e.g. stepping mode) still counts toward
+ * the `seconds` limit. Fix pending the api/run → evaluating/run merge
+ * task, which will adopt the trace engine's EVENT_READY protocol and
+ * gain a reliable "worker paused, don't tick" signal for the timer.
  */
 function createRunGenerator(
 	code: string,

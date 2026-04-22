@@ -113,43 +113,24 @@ type ConsoleMethod =
  * - `'error'` — runtime error during execution
  * - `'cancel'` — external cancellation via `.cancel()` on the Execution
  *
- * @remarks `LogEvent` and `AssertEvent` are deprecated aliases kept
- * during the transition from per-method event types to unified
- * `ConsoleEvent`. They will be removed once `create-worker-script.ts`
- * emits `{ event: 'console', method: 'log'|'assert', ... }`.
- *
  * `CancelEvent` is never emitted by the worker — it's appended by the
  * main thread when `.cancel()` is invoked. Consumers that care whether
  * a run was cancelled can check `logs.at(-1)?.event === 'cancel'`.
  */
 type RunEvent =
 	| ConsoleEvent
-	| LogEvent
-	| AssertEvent
 	| PromptEvent
 	| AlertEvent
 	| ConfirmEvent
 	| ErrorEvent
 	| CancelEvent;
 
-/** Unified console event — replaces LogEvent and AssertEvent. */
+/** Unified console event — one shape for all 19 console methods.
+ * Consumers discriminate first on `event === 'console'`, then filter
+ * by `method` if they care about a specific call. */
 type ConsoleEvent = {
 	readonly event: 'console';
 	readonly method: ConsoleMethod;
-	readonly args: readonly unknown[];
-	readonly line: number;
-};
-
-/** @deprecated Use ConsoleEvent with method: 'log' instead. */
-type LogEvent = {
-	readonly event: 'log';
-	readonly args: readonly unknown[];
-	readonly line: number;
-};
-
-/** @deprecated Use ConsoleEvent with method: 'assert' instead. */
-type AssertEvent = {
-	readonly event: 'assert';
 	readonly args: readonly unknown[];
 	readonly line: number;
 };
@@ -202,8 +183,6 @@ export type {
 	ConsoleMethod,
 	RunEvent,
 	ConsoleEvent,
-	LogEvent,
-	AssertEvent,
 	PromptEvent,
 	AlertEvent,
 	ConfirmEvent,
