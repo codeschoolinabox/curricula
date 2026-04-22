@@ -1,12 +1,71 @@
 /**
- * @file Worker message protocol types for the run action.
+ * @file Worker message protocol types and IO mock surface for the run action.
  *
  * Defines the two-step message protocol (setup → execute) between the
- * main thread and the execution worker, and the SharedArrayBuffer
- * layout for synchronous I/O (prompt/confirm/alert).
+ * main thread and the execution worker, the SharedArrayBuffer layout
+ * for synchronous I/O (prompt/confirm/alert), and the consumer-facing
+ * IO mock types (IoMocks, IoConsole, RunOptions).
  */
 
-import type { RunEvent } from '../shared/types.js';
+import type { ConsoleMethod, RunEvent } from '../shared/types.js';
+
+// ─── IO mock surface ──────────────────────────────────────────
+
+/**
+ * Per-method console mock surface. All slots optional — omitted slots
+ * fall back to the Native IO wrapper (`window.console.*`).
+ *
+ * Each callback is async-compatible. Sync returns work; async returns
+ * are awaited before learner execution continues (the worker remains
+ * blocked until the Promise resolves).
+ *
+ * If a callback throws (sync or async rejection), the error is caught
+ * and surfaced as an ErrorEvent with `name: 'InternalError'`.
+ */
+type IoConsole = {
+	readonly [K in ConsoleMethod]?: (
+		...args: readonly unknown[]
+	) => void | Promise<void>;
+};
+
+/**
+ * Consumer-provided IO mock overrides for a single run invocation.
+ *
+ * Each slot is independently overridable. Omitted slots fall back to
+ * the Native IO wrapper (window.prompt / window.alert / window.confirm
+ * / console.*). Built into the Resolved IO table at invocation time.
+ *
+ * @remarks
+ * - `prompt` — called with (message, defaultValue?); must return
+ *   string | null (or a Promise resolving to one)
+ * - `alert` — called with (message); return value ignored
+ * - `confirm` — called with (message); must return boolean (or Promise)
+ * - `console` — per-method overrides; see IoConsole
+ *
+ * All callbacks are awaited. The learner's script does not continue
+ * past the IO call until the callback resolves. If a callback throws,
+ * execution surfaces an InternalError and terminates.
+ */
+type IoMocks = {
+	readonly prompt?: (
+		message: string,
+		defaultValue?: string,
+	) => string | null | Promise<string | null>;
+	readonly alert?: (message: string) => void | Promise<void>;
+	readonly confirm?: (message: string) => boolean | Promise<boolean>;
+	readonly console?: IoConsole;
+};
+
+/**
+ * Options accepted by createRunGenerator.
+ *
+ * Extends EngineConfig (seconds, iterations) with the IO mock surface.
+ */
+type RunOptions = {
+	readonly seconds?: number;
+	readonly iterations?: number;
+	readonly io?: IoMocks;
+};
 
 // --- Messages: main → worker ---
 
@@ -81,6 +140,9 @@ type CompleteMessage = {
 // See worker-protocol.ts for the layout documentation.
 
 export type {
+	IoConsole,
+	IoMocks,
+	RunOptions,
 	WorkerInbound,
 	WorkerOutbound,
 	SetupMessage,

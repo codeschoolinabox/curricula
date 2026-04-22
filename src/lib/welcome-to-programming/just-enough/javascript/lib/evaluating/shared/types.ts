@@ -77,25 +77,48 @@ type EngineConfig = {
 	readonly iterations?: number;
 };
 
+// ─── Console method surface ───────────────────────────────────
+
+/**
+ * Full standard console method surface trapped by the run engine.
+ *
+ * Every listed method is intercepted in the worker — both to emit a
+ * `ConsoleEvent` and to invoke the consumer's mock (if any) before
+ * execution continues. Notably, `trace` here is the MDN stack-trace
+ * dumper, not our semantic trace engine.
+ */
+type ConsoleMethod =
+	| 'log' | 'debug' | 'info' | 'warn' | 'error'
+	| 'assert' | 'table' | 'dir' | 'dirxml'
+	| 'group' | 'groupCollapsed' | 'groupEnd'
+	| 'count' | 'countReset'
+	| 'time' | 'timeEnd' | 'timeLog'
+	| 'trace' | 'clear';
+
 // ─── Run events ──────────────────────────────────────────────
 
 /**
  * Discriminated union of events produced by the run engine.
  *
- * @remarks Each trapped call (console.log, prompt, alert, etc.)
+ * @remarks Each trapped call (any console method, prompt, alert, etc.)
  * produces one event. Errors are events in the array, not thrown
  * exceptions. The consumer always receives a `RunEvent[]` in the
  * result's `logs` field.
  *
  * Discriminate on the `event` field:
- * - `'log'` — console.log call
- * - `'assert'` — console.assert call
+ * - `'console'` — any console.* call (inspect `method` for which one)
  * - `'prompt'` — prompt() call with return value
  * - `'alert'` — alert() call
  * - `'confirm'` — confirm() call with return value
  * - `'error'` — runtime error during execution
+ *
+ * @remarks `LogEvent` and `AssertEvent` are deprecated aliases kept
+ * during the transition from per-method event types to unified
+ * `ConsoleEvent`. They will be removed once `create-worker-script.ts`
+ * emits `{ event: 'console', method: 'log'|'assert', ... }`.
  */
 type RunEvent =
+	| ConsoleEvent
 	| LogEvent
 	| AssertEvent
 	| PromptEvent
@@ -103,12 +126,22 @@ type RunEvent =
 	| ConfirmEvent
 	| ErrorEvent;
 
+/** Unified console event — replaces LogEvent and AssertEvent. */
+type ConsoleEvent = {
+	readonly event: 'console';
+	readonly method: ConsoleMethod;
+	readonly args: readonly unknown[];
+	readonly line: number;
+};
+
+/** @deprecated Use ConsoleEvent with method: 'log' instead. */
 type LogEvent = {
 	readonly event: 'log';
 	readonly args: readonly unknown[];
 	readonly line: number;
 };
 
+/** @deprecated Use ConsoleEvent with method: 'assert' instead. */
 type AssertEvent = {
 	readonly event: 'assert';
 	readonly args: readonly unknown[];
@@ -149,7 +182,9 @@ type ErrorEvent = {
 export type {
 	Execution,
 	EngineConfig,
+	ConsoleMethod,
 	RunEvent,
+	ConsoleEvent,
 	LogEvent,
 	AssertEvent,
 	PromptEvent,
