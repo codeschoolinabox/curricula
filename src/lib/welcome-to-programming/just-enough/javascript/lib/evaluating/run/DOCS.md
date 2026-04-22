@@ -184,16 +184,19 @@ requirement is the hosting platform's concern — not this package's.
 1. Worker calls (e.g.) `console.log("hello")` via trapped global
 2. Worker posts `event` message (ConsoleEvent) to main thread
 3. Worker blocks on the SAB pause flag (`Atomics.wait` on pause slot)
-4. Main thread receives event, awaits `resolvedIo.console.log("hello")`
-   (native console or consumer mock); on callback throw, surfaces
-   `ErrorEvent { name: 'InternalError' }` and terminates worker
-5. Main thread yields the `ConsoleEvent` to the generator consumer
-6. Consumer calls `next()` → main thread releases pause (`Atomics.notify`)
-7. Worker unblocks and continues execution
+4. Main thread receives event, **pauses the cumulative timer**, then awaits
+   `resolvedIo.console.log("hello")` (native console or consumer mock)
+5. Timer restarts; on callback throw, surfaces `ErrorEvent { name:
+   'InternalError' }` and terminates worker
+6. Main thread yields the `ConsoleEvent` to the generator consumer
+7. Consumer calls `next()` → main thread releases pause (`Atomics.notify`)
+8. Worker unblocks and continues execution
 
 Console hooks use the existing SAB pause mechanism (the same pause used between
 every event). No response-slot write is needed — nothing is delivered back to
-the worker. The effect is the same: worker is held until the callback completes.
+the worker. The cumulative timer is explicitly paused (step 4) and restarted
+(step 5) so that slow consumer mocks (typewriter animations, network calls, etc.)
+do not count against the learner's execution time budget.
 
 ### COOP/COEP requirement
 
