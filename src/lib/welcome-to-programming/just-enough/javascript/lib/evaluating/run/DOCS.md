@@ -5,12 +5,260 @@
 The run engine needs to produce events incrementally for live UI rendering while
 supporting batch consumption for backward compatibility. An async generator lets
 the consumer pull events one at a time (`for await`) or drain all at once
-(`await`). The generator is wrapped by `createExecution` at the `api/` layer to
-add PromiseLike behavior.
+(`await`). The returned handle itself is `PromiseLike` — no external wrapper is
+needed to support `await run(code)`.
 
 The generator pauses the Worker between events using the SAB pause protocol
 (see `evaluating/shared/DOCS.md`). This guarantees events are delivered in
 correct order relative to I/O — log events appear before prompt dialogs.
+
+## Architectural Sketch — merge-era invariants
+
+> Written Phase 0, before the merge implementation lands. The Refactor
+> step of each M.x TDD increment is held against this document —
+> what shape a correct implementation must take, not what the code does
+> today. Domain terms only; no function names, no variable names, no
+> pseudocode.
+
+This sketch captures three new invariants introduced by the
+`api/run → evaluating/run` merge task: the unified pause protocol
+(shared with trace), native replay on the RunHandle, and the
+timer-vs-yield interaction that makes "stepping time does not count"
+actually hold. The existing § sections that follow describe the
+pre-merge state and will be reconciled in M.6.
+
+### Unified pause protocol
+
+Consumer-observable invariant: each Worker-emitted event surfaces to
+the consumer exactly once, the Worker does not run further learner
+code until the consumer pulls again, and the cumulative timer does
+not fire while a Worker is paused-with-pending-event (it reschedules).
+
+**Execution phases**, per event, starting when a trap fires in the
+Worker and ending when the consumer's next pull resumes execution:
+
+1. **Flag-arm (Worker, sync)** — Worker trap stores the pause flag
+   to "paused" and stores the event-ready flag to "set," in that
+   order. Both stores are sequentially consistent per slot (no
+   multi-slot atomic primitive exists; the "together" is an ordering
+   claim, not a hardware-atomic claim).
+2. **Post (Worker, sync)** — Worker trap posts the event payload on
+   the message channel. **Happens-before**: the flag stores in step 1
+   must precede `postMessage`, so any main-thread dequeue of the
+   posted event is guaranteed to observe both flags set via the
+   message-channel synchronization edge. Posting before the flags
+   would open a race window: main thread dequeues, reads flags, sees
+   "not paused," misinterprets.
+3. **Block (Worker, sync)** — Worker trap blocks on the pause flag
+   via `Atomics.wait`. This is the only point where the Worker
+   thread yields control back to the runtime.
+4. **Dequeue (main, async)** — The main loop receives the posted
+   event via the message channel and resolves its pending wait.
+5. **Timer-guard (main, sync, only if the cumulative timer happens
+   to fire during this window)** — When the timer fires, the
+   handler first deducts the elapsed budget (unconditionally — time
+   elapsed is time elapsed, regardless of whether the Worker is
+   paused), then reads the event-ready flag. If the flag is set AND
+   the remaining budget is positive, the Worker is paused with a
+   pending event and the handler reschedules for the remaining
+   budget — it does NOT mark the run as timed-out. Otherwise, the
+   run times out. (This ordering — deduct elapsed first, then check
+   EVENT_READY — matches trace's pattern and must match; diverging
+   gives different budget behavior.)
+6. **Yield (main, async)** — The main loop surfaces the event to
+   the consumer. The cumulative timer is paused before this step
+   begins (see § Timer-vs-yield). Consumer may take arbitrarily long.
+7. **Resume (main, sync)** — On the consumer's next pull: clear the
+   event-ready flag first, then release the pause flag, then re-arm
+   the cumulative timer with the preserved remaining budget.
+   Ordering constraints:
+   - Clear-before-release: clearing the flag after releasing the
+     pause would race against the Worker's next trap arming the
+     flag again; the main thread would clobber a fresh signal.
+   - Release-before-rearm: the micro-window between releasing the
+     pause flag and re-arming the timer (typically sub-microsecond)
+     is uncharged to the budget. This is accepted — ultra-short
+     runtime between events doesn't meaningfully shift the timeout
+     behavior, and rearm-before-release would fire the timer on a
+     still-paused Worker.
+
+**Structural constraints**:
+
+- Per-slot sequential consistency of `Atomics.store` plus the
+  happens-before edge of `postMessage` delivery is what makes the
+  protocol correct. Implementations that try to be clever with
+  batching or relaxed ordering are out of spec.
+- The timer handler consults the event-ready flag AFTER deducting
+  elapsed time and BEFORE marking timed-out. Missing this guard
+  surfaces a race where a paused Worker with a pending event is
+  reported as stuck.
+- The event-ready flag is cleared before the pause flag is released.
+- The pause flag is released before the next event can be produced.
+- This protocol is shared with the trace engine. Both engines'
+  timer handlers read the same flag. Divergence (each engine using
+  its own flag) is an anti-goal.
+- The intentional macrotask-break idiom used in the pre-merge
+  engine (an `await setTimeout(0)` between yield and resume, to
+  guarantee the wall-clock timer callback a firing slot) becomes
+  unnecessary once the timer is paused during yield. The resume
+  step runs as a straight sync sequence.
+
+**Cancel interaction**:
+
+- Cancel during **Flag-arm/Post/Block** (inside the Worker): cannot
+  happen — these are synchronous and uninterruptible on the Worker
+  side.
+- Cancel during **Dequeue**: the cancel flag is set on the main
+  thread and `wakeDequeue` unsticks the pending wait via a sentinel
+  push. The main loop observes the cancel flag on its next
+  iteration, pushes a CancelEvent to the log, and breaks.
+- Cancel during **Yield**: the main loop is awaiting the consumer;
+  cancel flag is set. On the consumer's next pull the macrotask
+  schedules the next iteration, which observes the cancel flag and
+  exits without releasing the pause (Worker is terminated by the
+  finally block).
+- Cancel during **Resume**: observed before the release, so the
+  pause flag is NOT released and the Worker is terminated while
+  still paused. Clean teardown.
+
+**Out of scope**:
+
+- The response-slot protocol used by dialog IO (`prompt`, `alert`,
+  `confirm`). That is a separate two-way mechanism already in place;
+  this sketch does not alter it.
+- Per-engine event shape. Both engines carry different event
+  payloads; the pause protocol is agnostic.
+
+### Replay / re-iteration on RunHandle
+
+Consumer-observable invariant: after a run completes (successfully,
+via a thrown error, or via cancel), a second `for await` over the
+same handle surfaces the same event references as the first
+iteration, in the same order, with no Worker respawn.
+
+**Execution phases**:
+
+1. **Pull (main, async)** — Worker emits an event (via the unified
+   pause protocol above); the main loop dequeues it.
+2. **Accumulate (main, sync)** — The main loop pushes the event
+   reference (not a clone) into the run's internal log array. This
+   is the ONLY point at which events enter the log; the push
+   happens before the yield. If cancel has been signaled before
+   this point, the main loop pushes a CancelEvent as the final
+   entry instead of an emitted event.
+3. **Yield (main, async)** — The consumer receives the reference.
+4. **Completion (main, sync)** — When the main loop exits (normal
+   completion, timeout, error, or cancel), the run's final result
+   (including the log) is constructed and frozen in place. No
+   clone; the references in the log are the exact references the
+   consumer saw during yield.
+5. **Replay iteration (post-completion)** — The consumer begins a
+   new `for await` over the same handle. The handle returns a fresh
+   iterator positioned at the start of the frozen log. No Worker is
+   created. No new events are produced. The iterator yields each
+   log entry in order (same references as live iteration), then
+   terminates.
+
+**Structural constraints**:
+
+- The Accumulate step pushes by reference. No clone, no
+  normalization, no copy.
+- The CancelEvent (if any) is appended by the main thread during
+  live iteration — not by the Worker — and lives in the log before
+  Completion freeze, so replay sees it as the final entry.
+- The final result (including the log) is frozen in place.
+  References of event objects survive freeze.
+- Replay drains as fast as the consumer pulls. No artificial
+  throttle between replayed events; consumers who want a paced
+  replay pace it themselves.
+- Re-iteration while the run is still in flight returns the same
+  underlying AsyncGenerator. Two concurrent consumers will silently
+  split events as `.next()` calls serialize — this is documented
+  as unsupported; the contract does not promise to throw. Consumers
+  must wait for completion (or cancel) before re-iterating.
+- Cancel counts as completion. The cancel event is part of the log;
+  the replayed iterator yields it as the final entry.
+
+**Out of scope**:
+
+- Partial replay (starting replay from an arbitrary index).
+  Consumers iterate from the start.
+- Cloning events on replay. Intentionally not offered — reference
+  identity is the promise.
+- Snapshot export. Consumers who want the raw log read it off the
+  result directly.
+- Throw-on-concurrent-iteration. Would require separate plumbing
+  and doesn't buy enough for the cost; AsyncGenerator's native
+  serialize-and-split behavior is accepted as the failure mode.
+
+### Timer-vs-yield
+
+Consumer-observable invariant: the cumulative timer counts only
+Worker-thread code-execution time. Time spent yielded to the
+consumer (between `for await` pulls) and time spent awaiting IO
+callbacks (styled dialogs, slow console mocks) never counts toward
+the `seconds` limit.
+
+**Execution phases** per event yield cycle:
+
+1. **Timer pause (main, sync)** — The main loop pauses the cumulative
+   timer before surfacing the event to the consumer. The remaining
+   budget is preserved (computed as `budget_at_start - elapsed_since_arm`,
+   floored at zero).
+2. **Yield (main, async)** — Event is surfaced; the consumer may
+   take arbitrarily long to pull the next event.
+3. **Timer resume (main, sync)** — On the consumer's next pull, as
+   the final step of the pause-protocol resume sequence: after
+   clearing the event-ready flag and releasing the pause flag, the
+   cumulative timer is re-armed with the preserved remaining budget.
+
+Parallel phases for IO-callback path (already in place, preserved):
+
+1. **Timer pause** — Before awaiting the dialog callback.
+2. **Callback await** — Main thread awaits the consumer-provided or
+   native dialog. May take arbitrarily long.
+3. **Timer resume** — After writing the IO response and before
+   notifying the Worker.
+
+**Structural constraints**:
+
+- The timer is paused for the entire window between event yield and
+  consumer pull. Not partial, not approximate.
+- Budget depletion (remaining-ms reaches zero while the Worker is
+  running and no event is pending) triggers the timeout path.
+- The timer is NOT paused while the Worker is running between traps.
+  Only during yield and IO callback await.
+- Timeout produces a TimeoutError event in the log and a
+  timeout-kind result. No partial budget is refunded.
+- The sub-microsecond window between pause-flag release and timer
+  re-arm during the resume sequence is uncharged. This is accepted
+  (see § Unified pause protocol § Ordering constraints).
+
+**Cancel interaction**:
+
+- Cancel during **Timer pause / Yield / Timer resume** of the event
+  path: handled by § Unified pause protocol § Cancel interaction.
+  The timer's remaining budget is preserved through teardown (not
+  that it matters — the finally block terminates the Worker).
+- Cancel during **Callback await** of the IO path: the cancel flag
+  is set synchronously, but the IO callback await cannot be
+  interrupted. The main loop waits for the callback Promise to
+  settle, then observes the cancel flag on the next iteration and
+  exits. Native `window.prompt` blocks the main thread
+  synchronously, so cancel physically cannot be clicked while it's
+  open; for styled/async dialogs the consumer can resolve the
+  pending IO promise to shorten teardown.
+
+**Out of scope**:
+
+- Wall-clock timeouts. The engine uses cumulative execution time
+  only; wall-clock enforcement is a caller concern.
+- Per-event timing telemetry. Consumers who want per-event timing
+  measure it themselves.
+- Different budgets per phase (e.g. separate budgets for code
+  execution vs IO await). The budget is unified.
+- Interrupting an in-flight IO callback on cancel. The callback
+  runs to natural settle; the Worker is torn down afterwards.
 
 ## Why comma-in-condition loop guards
 
@@ -308,10 +556,13 @@ native wrapper serves authenticity when no mock is provided.
 
 ## What this module deliberately does NOT do
 
-- **Validate source code** — that is `validating/`'s job, called by the wrapper
-  above
-- **Check formatting** — that is `formatting/`'s job (pipeline gate)
 - **Resolve allow/block config** — that is `evaluating/shared`'s job
-- **Enforce language level at runtime** — static validation is sufficient
+- **Enforce language level at runtime** — static validation (run inside the
+  engine's lazy-startup pipeline, ahead of Worker spawn) is sufficient
 - **Manage the worker script as a separate file** — Blob URL from string avoids
   bundler/path concerns
+
+Note: validation (`validating/`) and format checking (`formatting/`) are
+invoked *from* this module during lazy startup — they run before Worker
+spawn, inside the generator body. They are not separate consumer-visible
+steps. See `README.md` § Lazy startup pipeline.

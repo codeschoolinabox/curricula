@@ -4,10 +4,16 @@
  * Defines the two-step message protocol (setup → execute) between the
  * main thread and the execution worker, the SharedArrayBuffer layout
  * for synchronous I/O (prompt/confirm/alert), and the consumer-facing
- * IO mock types (IoMocks, IoConsole, RunOptions).
+ * IO mock types (IoMocks, IoConsole, RunOptions). Also exports the
+ * public `RunHandle` — the return type of `createRunGenerator`.
  */
 
-import type { ConsoleMethod, RunEvent } from '../shared/types.js';
+import type {
+	ConsoleMethod,
+	Execution,
+	RunEvent,
+} from '../shared/types.js';
+import type { RunResult } from '../../../api/types.js';
 
 // ─── IO mock surface ──────────────────────────────────────────
 
@@ -76,6 +82,39 @@ type RunOptions = {
 	readonly iterations?: number;
 	readonly io?: IoMocks;
 };
+
+// ─── Public return type ───────────────────────────────────────
+
+/**
+ * The handle returned by `createRunGenerator`.
+ *
+ * @remarks Simultaneously satisfies three interfaces:
+ *
+ * - `AsyncGenerator<RunEvent, RunResult>` — the raw iteration
+ *   surface (`.next()`, `.return()`, `.throw()`) used by
+ *   fine-grained consumers and the internal test suite.
+ * - `Execution<RunEvent, RunResult>` — from `../shared/types.ts`.
+ *   Provides `.cancel()`, `.result`, and PromiseLike `.then()`.
+ *
+ * The `Execution` contract is a strict subset of what's exposed —
+ * consumers that only want the high-level `await run(code)` /
+ * `for await` / `.cancel()` surface can annotate as `Execution`
+ * directly. The AsyncGenerator surface is kept available for
+ * low-level needs (currently only internal tests).
+ *
+ * **Three consumption modes** (see run/README.md § Public API for
+ * detail):
+ * 1. Iterate events — `for await (const event of handle) {...}`.
+ * 2. Await the result — `await handle` (PromiseLike) or
+ *    `await handle.result`.
+ * 3. Cancel — `handle.cancel()` at any point.
+ *
+ * Mode 1 and Mode 2 must not be mixed on the same handle — see
+ * JSDoc on `createRunGenerator` for why.
+ */
+type RunHandle =
+	AsyncGenerator<RunEvent, RunResult> &
+	Execution<RunEvent, RunResult>;
 
 // --- Messages: main → worker ---
 
@@ -153,6 +192,7 @@ export type {
 	IoConsole,
 	IoMocks,
 	RunOptions,
+	RunHandle,
 	WorkerInbound,
 	WorkerOutbound,
 	SetupMessage,

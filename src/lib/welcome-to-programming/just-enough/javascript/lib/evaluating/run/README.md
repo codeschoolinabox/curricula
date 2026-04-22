@@ -1,10 +1,10 @@
 # evaluating/run
 
 Executes JeJ code in a Web Worker with trapped globals, emitting an
-event stream and resolving to a structured result. This is the
-low-level execution engine — it does not validate or enforce language
-levels. A higher-level wrapper (`api/run`) handles config resolution
-and static validation before calling this function.
+event stream and resolving to a structured result. This is the single
+public entry point for running learner code — validation, format
+gating, config resolution, and execution are all built in. There is
+no higher-level wrapper.
 
 ## Structure
 
@@ -45,6 +45,44 @@ README. Use them consistently.
   hook's callback completes. There is no fire-and-forget category.
   Async mocks let the platform (DOM, network, etc.) do its work without
   the learner's script noticing the difference from a native call.
+- **Execution contract** — the `Execution<TEvent, TResult>` shape
+  defined in `../shared/types.ts`: `AsyncIterable<TEvent>` +
+  `PromiseLike<TResult>` + `.result: Promise<TResult>` +
+  `.cancel(): void`. The RunHandle returned by this module satisfies
+  this contract natively — no wrapper needed. Trace and debug engines
+  return objects satisfying this same contract; their internal
+  execution models differ (Worker + SAB for run/trace, iframe for
+  debug).
+- **Replay / re-iteration** — after a run completes (successfully,
+  via a thrown runtime error, or via cancel), a second `for await`
+  over the same handle yields the same event **references** that the
+  first iteration yielded. Consumers can `===`-compare events across
+  live and replayed iterations. Events come from the result's `logs`
+  array; no clone, no separate cache. Events are `deepFreezeInPlace`-
+  frozen before the first yield; consumer mutation attempts throw in
+  strict mode.
+- **Unified pause protocol** — the SAB-based coordination that freezes
+  the Worker between events. Uses two flags in the control slot array:
+  **PAUSE** (control[4], 0=running, 1=paused) and **EVENT_READY**
+  (control[5], 0=not ready, 1=ready). Worker sets both in the same
+  trap step before `postMessage`; main thread clears EVENT_READY
+  before writing the resume signal; the timer handler reads
+  EVENT_READY to distinguish "Worker paused with pending event" from
+  "Worker stuck in infinite loop." Shared with the trace engine.
+  Staging note: adoption in run lands in M.3 of the merge task;
+  until then, control[5] is written by the worker but ignored by
+  run's timer handler.
+- **Cumulative timer** — tracks code-execution time only. Paused
+  during generator yield (consumer stepping time does not count),
+  during IO callback await (styled dialog time does not count), and
+  while the Worker is otherwise blocked. Resumes when the Worker is
+  unblocked. Staging note: pause-during-yield lands in M.5; current
+  code pauses only during IO callback await.
+- **Non-IO events** — events whose generation does not involve an IO
+  hook: `ErrorEvent` (creation- or execution-phase errors in the
+  learner's code) and `CancelEvent` (appended by the main thread
+  when `.cancel()` is invoked). They travel the same `RunEvent`
+  stream as IO events.
 
 ## Public API
 
@@ -59,8 +97,19 @@ run(
 ): RunHandle
 ```
 
-`RunHandle` is an `AsyncGenerator<RunEvent, RunResult>` augmented with
-three consumer-facing additions:
+`RunHandle` is defined as
+
+```ts
+type RunHandle =
+  AsyncGenerator<RunEvent, RunResult> &
+  Execution<RunEvent, RunResult> &
+  PromiseLike<RunResult>;
+```
+
+— it **is** an `AsyncGenerator<RunEvent, RunResult>` (all of
+`.next()`, `.return()`, `.throw()` are available and used by internal
+tests) AND it **satisfies** the `Execution<RunEvent, RunResult>`
+contract from `../shared/types.ts`:
 
 - `.cancel()` — tear down the worker and resolve with a cancel-marked
   RunResult. Idempotent. See § Cancellation.
@@ -69,18 +118,20 @@ three consumer-facing additions:
 - `then(...)` — PromiseLike delegate so `await run(code)` works
   directly without explicit `.result`. Same Promise as `.result`.
 
-These three augmentations match the `Execution<RunEvent, RunResult>`
-contract in `../shared/types.ts`. A consumer may iterate events, await
-the final result, or cancel — with no separate wrapper required.
+A consumer may iterate events, await the final result, cancel, or
+replay — with no separate wrapper required. The underlying
+AsyncGenerator surface is intentionally kept exposed so fine-grained
+consumers (primarily the test suite) can call `.next()` directly.
 
-- **`code`** — JavaScript source to execute (assumed valid — no
-  parsing or validation happens here).
-- **`options.seconds`** — cumulative execution time limit. Intended
-  to pause while the generator is suspended at a `yield` AND while an
-  IO callback is being awaited. **Known inconsistency:** currently the
-  timer only pauses during IO-callback await, not during yield —
-  stepping time counts against the limit. Fix pending the api/run
-  merge task (requires EVENT_READY adoption in run).
+- **`code`** — JavaScript source. Validated on the first `.next()`
+  (or first `.result` access). Parse errors, language-level
+  violations, and unformatted code are surfaced as immediate error
+  RunResults — no Worker is spawned. See § Validation pipeline.
+- **`options.seconds`** — cumulative execution time limit. Pauses
+  during generator yield (consumer stepping time does not count) AND
+  while an IO callback is being awaited (styled dialog time does not
+  count). Only actual Worker-thread code execution counts toward the
+  limit.
 - **`options.iterations`** — when set to any finite number (including
   `0` and negatives), injects loop guards that throw `RangeError` when
   `++loopN > iterations`. `Infinity` / `undefined` = no guards.
@@ -88,14 +139,58 @@ the final result, or cancel — with no separate wrapper required.
   independently overridable; omitted slots fall back to the Native IO
   wrapper. See § IO mocking.
 - **Yields** — `RunEvent` objects one at a time, pausing the worker
-  between events via the SAB pause protocol.
-- **Returns** — `RunResult` (frozen `{ ok, error?, logs: RunEvent[] }`)
-  on completion.
+  between events via the unified pause protocol (PAUSE + EVENT_READY
+  flags on the SAB).
+- **Returns** — `RunResult` (frozen `{ ok, error?, logs?: RunEvent[] }`)
+  on completion. `logs` is absent when code was rejected before
+  execution (parse, rejections, formatting gate).
 
-Wrapped by `createExecution` (from `../shared/`) at the `api/` layer
-to add event-replay on re-iteration and a few ergonomic helpers. The
-merge of `api/run` validation into `evaluating/run` is a planned
-follow-up; see the merge task.
+### Lazy startup pipeline
+
+On the first `.next()` call (or first `.result` access), the
+generator body runs three phases in order. The `run(...)` call
+itself returns cheaply — no work happens until a consumer pulls.
+
+1. **Cancel fast-path** — if `.cancel()` fired before any iteration,
+   return a cancel-only RunResult (`{ok:true, logs:[{event:'cancel'}]}`)
+   and skip everything else. Worker is never spawned.
+2. **Validation gates** — two ordered checks, both producing an
+   immediate error RunResult on failure. Worker is still never
+   spawned.
+   1. **Parse + JeJ validation** — `validate(code)` runs acorn parse,
+      then walks the AST against the JeJ language allow-list.
+      Returns a `BaseResult`:
+      - Parse failure: `{ok:false, error:{kind:'parse', line,
+        column, ...}}`
+      - Language-level violations: `{ok:false, rejections:[...]}`
+      - Pass: `{ok:true}` — continue.
+   2. **Format gate** — `checkFormat(code)` verifies the source
+      matches the fixed recast output. Unformatted code →
+      `{ok:false, error:{kind:'formatting'}}`. No runtime error is
+      produced here; unformatted code is valid JavaScript — the gate
+      is a learning constraint, not a correctness check.
+3. **Execute** — only reached when both gates pass. Worker is
+   spawned, the generator body streams events until completion,
+   cancel, or timeout.
+
+#### Input-boundary behavior
+
+- **Non-string `code`** — TypeScript types require `code: string`. A
+  non-string input reaches `validate()` and (depending on the value)
+  produces a `SyntaxError`-shaped parse-failure RunResult via the
+  acorn path, or is wrapped as a creation-phase `ErrorEvent` if
+  validate throws unexpectedly. The engine does not sync-throw at
+  the `run(...)` call boundary.
+- **Non-object `options`** — TypeScript types require the options
+  parameter shape; a non-object runtime value produces undefined
+  destructure reads (`options?.seconds` → `undefined`), which apply
+  defaults. No error. This is intentional: the engine is lenient at
+  the options boundary for ergonomics.
+- **`validate()` / `checkFormat()` unexpected throws** — both are
+  specified to return values, never throw. Any throw is an engine
+  bug; it is caught inside the generator body and surfaced as a
+  creation-phase `ErrorEvent` RunResult rather than escaping to the
+  consumer. Iteration still resolves cleanly with `done:true`.
 
 ### Consumption modes
 
@@ -181,21 +276,43 @@ thread code itself throws (unreachable under current code).
 
 ## Replay / re-iteration
 
-The raw `RunHandle` returned by this module **does not support
-re-iteration**. Once the generator completes, subsequent `.next()`
-calls return `{done: true}` with no value — the events are not
-replayed. This matches standard AsyncGenerator semantics.
+Once a run completes — successfully, via a thrown error, or via
+`.cancel()` — a second `for await` over the same handle replays the
+events from the result's `logs` array. No re-execution; no Worker
+respawn.
 
-Re-iteration (replay from cached logs after completion) is a feature
-of the `Execution` wrapper in `../shared/create-execution.ts`, accessed
-via `api/run.ts`. Consumers who need replay should use the `api/run`
-entry point, not this module directly.
+```ts
+const handle = run(code);
+for await (const event of handle) render(event);     // live run
+for await (const event of handle) postProcess(event); // replay
+```
 
-When the api/run validation merges into evaluating/run (planned follow-
-up), replay will be available on the merged handle, with the same
-identity-stable event references (`logs.push(event)` uses the exact
-yielded reference, `deepFreezeInPlace` freezes in place — a consumer
-can `===`-compare events across live and replayed iterations).
+The replay yields the same event **references** that the live
+iteration yielded. Consumers can `===`-compare events across live
+and replayed iterations:
+
+```ts
+const liveEvents = [];
+for await (const e of handle) liveEvents.push(e);
+const replayedEvents = [];
+for await (const e of handle) replayedEvents.push(e);
+console.log(liveEvents[0] === replayedEvents[0]); // true
+```
+
+This is possible because the engine's main loop pushes each yielded
+event into an internal `logs` array using the exact reference the
+consumer sees — no clone. `deepFreezeInPlace` freezes the final
+RunResult (including the `logs` array) in place; identity survives.
+
+Replay does not throttle — events drain as fast as the consumer
+pulls. If the consumer wants to pace the replay (e.g. for a
+typewriter UI), they do that themselves.
+
+Mid-execution re-iteration (starting a second `for await` before the
+first has completed) is unsupported. The underlying
+AsyncGenerator serializes concurrent `.next()` calls, so each
+consumer sees a disjoint subset of events as the two paths alternate.
+Wait for completion (or `.cancel()`) before re-iterating.
 
 ## IO mocking
 
@@ -317,8 +434,8 @@ semantic trace engine — different namespace, no conflict.)
   us the shape-identical guarantee.
 - **AsyncGenerator**: yields events one at a time with SAB pause
   between each. Enables live streaming to UI and step-through
-  consumption. Wrapped by `createExecution` for `PromiseLike`
-  (batch) compatibility.
+  consumption. The handle itself is `PromiseLike` so `await run(code)`
+  works without iterating — no separate wrapper.
 - **Comma-in-condition loop guards**:
   `while (++loop1 > max && guard(1), cond)` — zero line shift.
   Counter globals declared in worker setup, not per-loop.
@@ -341,9 +458,16 @@ semantic trace engine — different namespace, no conflict.)
 - **Two-step worker protocol**: `setup` and `execute` are separate
   messages so trap-definition code does not affect learner-code line
   numbers.
-- **No validation or enforcement**: this module only executes.
-  Language-level validation and config resolution belong to the
-  wrapper above.
+- **Validation + format gating inside the engine**: parse, JeJ
+  allow-list validation, and format check run lazy inside the
+  generator body before Worker spawn. Pedagogy-level gates coupled to
+  execution intentionally — callers never have to thread a separate
+  "is this runnable?" check through their control flow.
+- **No runtime language-level enforcement**: static validation (step
+  2 of the Lazy startup pipeline) catches all disallowed constructs
+  at the AST level before execution. Runtime enforcement via
+  property-descriptor trickery on `globalThis` was removed as
+  belt-and-suspenders complexity.
 
 ## Platform requirements
 

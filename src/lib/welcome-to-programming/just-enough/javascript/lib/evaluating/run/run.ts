@@ -29,8 +29,9 @@ import type {
 import type { RunResult } from '../../../api/types.js';
 import type {
 	IoMocks,
-	RunOptions,
 	IoRequestMessage,
+	RunHandle,
+	RunOptions,
 	WorkerOutbound,
 } from './types.js';
 
@@ -136,49 +137,6 @@ function makeInternalError(err: unknown): RunErrorEvent {
 		phase: 'execution',
 	};
 }
-
-/**
- * The returned run handle. Structurally satisfies
- * `Execution<RunEvent, RunResult>` from shared/types.ts, plus the
- * underlying `AsyncGenerator` methods (`.next()`, `.return()`,
- * `.throw()`) for consumers that want fine-grained control.
- *
- * Three consumption modes:
- * 1. **Iterate events** — `for await (const event of handle) {...}`.
- * 2. **Await the result** — `const result = await handle;` (via
- *    PromiseLike) or `await handle.result`. Both resolve to the same
- *    RunResult and share the same memoized Promise.
- * 3. **Mixed** — not supported. `.result` internally drives `.next()`.
- *    AsyncGenerator serializes concurrent `.next()` calls, so *both*
- *    consumers run — but each sees a disjoint subset of events as
- *    they alternate. A `for await` consumer running alongside
- *    `await handle` silently loses every other event. Don't mix.
- */
-type RunHandle = AsyncGenerator<RunEvent, RunResult> & {
-	/** Terminate execution immediately. Idempotent.
-	 * - Before first iterate: skips Worker creation entirely.
-	 * - During iteration: unsticks `await dequeue()`, main loop breaks,
-	 *   finally terminates the Worker, a `{event: 'cancel'}` is
-	 *   appended to `logs`, result resolves with `{ok: true, logs}`.
-	 * - After completion: no-op. */
-	readonly cancel: () => void;
-
-	/** Promise that resolves when execution completes. Memoized —
-	 * accessing twice returns the same Promise. Drains the generator
-	 * internally; do not also iterate externally. */
-	readonly result: Promise<RunResult>;
-
-	/** PromiseLike.then — `await handle` resolves to the RunResult.
-	 * Delegates to `.result`. */
-	then<TResult1 = RunResult, TResult2 = never>(
-		onFulfilled?:
-			| ((value: RunResult) => TResult1 | PromiseLike<TResult1>)
-			| null,
-		onRejected?:
-			| ((reason: unknown) => TResult2 | PromiseLike<TResult2>)
-			| null,
-	): Promise<TResult1 | TResult2>;
-};
 
 /**
  * Creates an async generator that runs learner code in a Web Worker

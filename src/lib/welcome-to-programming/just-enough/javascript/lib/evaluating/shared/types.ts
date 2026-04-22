@@ -30,9 +30,14 @@
  * const result = await execution.result;
  * ```
  *
- * **Re-iteration** — after the generator completes, events are
- * cached in `result.logs`. A second `for await` replays from the
- * cache without re-executing.
+ * **Re-iteration** — after the generator completes (successfully,
+ * via a thrown error, or via `cancel()`), a second `for await`
+ * replays from `result.logs` without re-executing. Replay yields the
+ * **same event references** that the live iteration yielded, so
+ * consumers can `===`-compare events across iterations. The engine
+ * must push each yielded event into `logs` by reference (no clone)
+ * and freeze-in-place the completed result; implementations that
+ * clone events break this invariant.
  *
  * **Cancellation** — `cancel()` terminates the Worker and closes
  * the generator. Idempotent with `break` from `for await`.
