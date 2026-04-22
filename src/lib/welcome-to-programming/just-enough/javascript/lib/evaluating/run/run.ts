@@ -1,22 +1,37 @@
 /**
  * @file Executes JeJ code in a Web Worker with trapped globals.
  *
- * @remarks This is the low-level execution engine. It does not
- * validate or enforce language levels — a higher-level wrapper
- * handles that before calling the generator.
+ * @internal DO NOT import from outside `api/run.ts`. Use the validated,
+ * gated `run` export from the package root instead. This module bypasses
+ * validation and the format gate; importing it directly will produce a
+ * `boundaries/element-types` lint error once the boundaries rule is added.
  *
- * Returns an async generator that yields RunEvent objects one at a
- * time, pausing the Worker between events via SharedArrayBuffer.
- * The generator returns a RunResult when execution completes.
+ * @remarks This is the low-level execution engine. It does not validate
+ * or enforce language levels — a higher-level wrapper handles that before
+ * calling the generator.
+ *
+ * Returns an async generator that yields RunEvent objects one at a time,
+ * pausing the Worker between events via SharedArrayBuffer. The generator
+ * returns a RunResult when execution completes.
  *
  * See DOCS.md § SAB pause protocol for the pause/resume mechanism.
+ * See DOCS.md § Resolved IO table for the IO mock resolution model.
  */
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
-import type { RunEvent, ErrorEvent as RunErrorEvent } from '../shared/types.js';
+import type {
+	ConsoleMethod,
+	RunEvent,
+	ErrorEvent as RunErrorEvent,
+} from '../shared/types.js';
 import type { RunResult } from '../../../api/types.js';
-import type { IoRequestMessage, WorkerOutbound } from './types.js';
+import type {
+	IoMocks,
+	RunOptions,
+	IoRequestMessage,
+	WorkerOutbound,
+} from './types.js';
 
 import createWorkerScript from './create-worker-script.js';
 import guardLoopsCondition from '../shared/guard-loops/guard-loops.js';
@@ -40,34 +55,115 @@ type WorkerErrorSignal = {
 };
 type QueueMessage = WorkerOutbound | TimeoutSignal | WorkerErrorSignal;
 
+// --- Resolved IO ---
+
+const CONSOLE_METHODS: readonly ConsoleMethod[] = [
+	'log', 'debug', 'info', 'warn', 'error',
+	'assert', 'table', 'dir', 'dirxml',
+	'group', 'groupCollapsed', 'groupEnd',
+	'count', 'countReset',
+	'time', 'timeEnd', 'timeLog',
+	'trace', 'clear',
+];
+
+type ResolvedConsole = Record<ConsoleMethod, (...args: readonly unknown[]) => Promise<void>>;
+
+type ResolvedIo = {
+	readonly prompt: (message: string, defaultValue?: string) => Promise<string | null>;
+	readonly alert: (message: string) => Promise<void>;
+	readonly confirm: (message: string) => Promise<boolean>;
+	readonly console: ResolvedConsole;
+};
+
+/**
+ * Merges consumer-provided mocks with Native IO wrappers into the
+ * Resolved IO table. Each slot is independently overridable — omitted
+ * slots fall back to the Native IO wrapper. All callbacks are wrapped
+ * in async so the main loop can always `await` them uniformly.
+ */
+function buildResolvedIo(io?: IoMocks): ResolvedIo {
+	const resolvedConsole = {} as ResolvedConsole;
+
+	for (const method of CONSOLE_METHODS) {
+		const mock = io?.console?.[method];
+		if (mock) {
+			resolvedConsole[method] = async (...args) => {
+				await mock(...args);
+			};
+		} else {
+			const nativeFn = (
+				console as unknown as Record<ConsoleMethod, (...a: unknown[]) => void>
+			)[method];
+			resolvedConsole[method] = async (...args) => {
+				// eslint-disable-next-line no-console
+				nativeFn?.(...args);
+			};
+		}
+	}
+
+	return {
+		prompt: io?.prompt
+			? async (msg, def) => io.prompt!(msg, def)
+			: async (msg, def) =>
+					// eslint-disable-next-line no-alert
+					def === undefined ? window.prompt(msg) : window.prompt(msg, def),
+
+		alert: io?.alert
+			? async (msg) => { await io.alert!(msg); }
+			: async (msg) => {
+					// eslint-disable-next-line no-alert
+					window.alert(msg);
+				},
+
+		confirm: io?.confirm
+			? async (msg) => io.confirm!(msg)
+			: async (msg) => {
+					// eslint-disable-next-line no-alert
+					return window.confirm(msg);
+				},
+
+		console: resolvedConsole,
+	};
+}
+
+// --- Internal error helper ---
+
+function makeInternalError(err: unknown): RunErrorEvent {
+	return {
+		event: 'error',
+		name: 'InternalError',
+		message: err instanceof Error ? err.message : String(err),
+		phase: 'execution',
+	};
+}
+
 /**
  * Creates an async generator that runs learner code in a Web Worker
  * and yields events as they occur.
  *
- * @param code - JavaScript source to execute (assumed valid)
- * @param maxSeconds - timeout in seconds (cumulative execution time,
- *   not wall-clock — pauses during SAB wait)
+ * @param code - JavaScript source to execute (assumed valid — no
+ *   parsing or validation happens here)
+ * @param options - Optional: seconds (default 5), iterations, io mocks
  * @returns Async generator yielding RunEvent, returning RunResult
  *
- * @remarks All globals (console.log, console.assert, alert, confirm,
- * prompt) are trapped. I/O traps block the worker via SAB+Atomics
- * while the main thread shows real browser dialogs.
+ * @remarks All globals (all 19 console methods, alert, confirm, prompt)
+ * are trapped. Each trap posts a ConsoleEvent (console) or io-request
+ * (dialogs) and blocks on the SAB pause flag until the main thread
+ * processes the event and resumes.
  *
- * The Worker pauses after posting each event via `checkPause()`.
- * The generator resumes it on each `next()` call, enabling
- * step-through consumption. For batch mode, the drain loop in
- * `createExecution` calls `next()` rapidly.
- *
- * Timeout tracks cumulative execution time: cleared when the
- * Worker pauses, restarted with remaining time when it resumes.
- * This means learners can examine steps indefinitely without
- * triggering the timeout.
+ * IO callbacks (mocked or native) are always awaited. The cumulative
+ * timer pauses during every IO callback and every generator yield, so
+ * learners can examine steps and consumers can run async UIs without
+ * consuming execution time.
  */
 async function* createRunGenerator(
 	code: string,
-	maxSeconds: number,
-	maxIterations?: number,
+	options?: RunOptions,
 ): AsyncGenerator<RunEvent, RunResult> {
+	const maxSeconds = options?.seconds ?? 5;
+	const maxIterations = options?.iterations;
+	const resolvedIo = buildResolvedIo(options?.io);
+
 	// 1. Check SAB availability
 	if (typeof SharedArrayBuffer === 'undefined') {
 		const error: RunErrorEvent = {
@@ -217,20 +313,28 @@ async function* createRunGenerator(
 		while (true) {
 			const msg = await dequeue();
 
-			// 7a. Streamed event — yield to consumer
+			// 7a. Streamed event — route IO callback, yield to consumer
 			if (msg.type === 'event') {
 				const event = msg.event;
 				logs.push(event);
-				forwardToConsole(event);
 
-				// WHY: pause timeout while generator is suspended at yield.
-				// Consumer may take arbitrarily long to call next().
-				// Cumulative time = only time the Worker is running.
+				// WHY: pause timeout for the entire duration of callback + yield.
+				// Consumer may take arbitrarily long; IO callback is awaited before
+				// yield. Cumulative time = only time the Worker is actually running.
 				pauseTimeout();
+
+				if (event.event === 'console') {
+					try {
+						await resolvedIo.console[event.method](...event.args);
+					} catch (err) {
+						logs.push(makeInternalError(err));
+						break;
+					}
+				}
 
 				yield event;
 
-				// Consumer called next() — resume worker and timeout
+				// Consumer called next() — restart timer, resume worker
 				startTimeout();
 				writeResumeSignal(views);
 
@@ -239,10 +343,17 @@ async function* createRunGenerator(
 				continue;
 			}
 
-			// 7b. I/O request — show dialog, write response, wake worker
+			// 7b. I/O request — await callback, write response, wake worker
 			if (msg.type === 'io-request') {
-				handleIoRequest(msg as IoRequestMessage, views);
-				Atomics.notify(views.control, CONTROL_INDEX);
+				pauseTimeout();
+				try {
+					await handleIoRequest(msg as IoRequestMessage, views, resolvedIo);
+					Atomics.notify(views.control, CONTROL_INDEX);
+				} catch (err) {
+					logs.push(makeInternalError(err));
+					break;
+				}
+				startTimeout();
 				continue;
 			}
 
@@ -284,6 +395,37 @@ async function* createRunGenerator(
 }
 
 // --- Helpers ---
+
+/**
+ * Awaits the Resolved IO callback for a dialog io-request, then writes
+ * the response to the SAB. Throws if the callback throws — caller
+ * catches and surfaces as InternalError.
+ */
+async function handleIoRequest(
+	msg: IoRequestMessage,
+	views: ReturnType<typeof createBufferViews>,
+	resolvedIo: ResolvedIo,
+): Promise<void> {
+	const dialogMessage = String(msg.args[0] ?? '');
+
+	if (msg.name === 'alert') {
+		await resolvedIo.alert(dialogMessage);
+		writeAlertResponse(views);
+		return;
+	}
+
+	if (msg.name === 'confirm') {
+		const result = await resolvedIo.confirm(dialogMessage);
+		writeConfirmResponse(views, result);
+		return;
+	}
+
+	// msg.name === 'prompt'
+	const defaultValue =
+		msg.args.length > 1 ? String(msg.args[1] ?? '') : undefined;
+	const result = await resolvedIo.prompt(dialogMessage, defaultValue);
+	writePromptResponse(views, result);
+}
 
 /**
  * Builds a RunResult from the collected event logs.
@@ -360,63 +502,6 @@ function findErrorEvent(logs: readonly RunEvent[]): RunErrorEvent | undefined {
 		}
 	}
 	return undefined;
-}
-
-/**
- * Shows the real browser dialog and writes the response to the SAB.
- *
- * @remarks Called on the main thread when the worker posts an
- * io-request. The worker is blocked on `Atomics.wait` and will
- * unblock when `Atomics.notify` is called after this function.
- */
-function handleIoRequest(
-	msg: IoRequestMessage,
-	views: ReturnType<typeof createBufferViews>,
-): void {
-	const dialogMessage = String(msg.args[0] ?? '');
-
-	if (msg.name === 'alert') {
-		// eslint-disable-next-line no-alert
-		alert(dialogMessage);
-		writeAlertResponse(views);
-		return;
-	}
-
-	if (msg.name === 'confirm') {
-		// eslint-disable-next-line no-alert
-		const result = confirm(dialogMessage);
-		writeConfirmResponse(views, result);
-		return;
-	}
-
-	// msg.name === 'prompt'
-	const defaultValue =
-		msg.args.length > 1 ? String(msg.args[1] ?? '') : undefined;
-	// eslint-disable-next-line no-alert
-	const result = prompt(dialogMessage, defaultValue);
-	writePromptResponse(views, result);
-}
-
-/**
- * Forwards a run event to the real console for debugging visibility.
- */
-function forwardToConsole(event: RunEvent): void {
-	if (event.event === 'log') {
-		// eslint-disable-next-line no-console
-		console.log(...event.args);
-		return;
-	}
-
-	if (event.event === 'assert') {
-		// eslint-disable-next-line no-console
-		console.assert(event.args[0] as boolean, ...event.args.slice(1));
-		return;
-	}
-
-	if (event.event === 'error') {
-		// eslint-disable-next-line no-console
-		console.error(`[${event.phase}] ${event.name}: ${event.message}`);
-	}
 }
 
 export default createRunGenerator;

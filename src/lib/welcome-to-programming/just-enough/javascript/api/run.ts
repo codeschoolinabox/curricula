@@ -21,12 +21,13 @@ import type {
 	EngineConfig,
 } from '../lib/evaluating/shared/types.js';
 import type { RunEvent } from '../lib/evaluating/shared/types.js';
+import type { IoMocks } from '../lib/evaluating/run/types.js';
 
 /**
  * Validates code against the full JeJ level, then runs it.
  *
  * @param code - JavaScript source to validate and execute
- * @param config - Engine configuration (seconds, iterations)
+ * @param config - Engine config: seconds, iterations, and optional io mocks
  * @returns An Execution that yields RunEvents and resolves to RunResult
  *
  * @remarks
@@ -39,7 +40,7 @@ import type { RunEvent } from '../lib/evaluating/shared/types.js';
  */
 function run(
 	code: string,
-	config?: EngineConfig,
+	config?: EngineConfig & { io?: IoMocks },
 ): Execution<RunEvent, RunResult> {
 	const validation = validate(code);
 
@@ -70,11 +71,8 @@ function run(
 		);
 	}
 
-	const seconds = config?.seconds ?? 5;
-	const iterations = config?.iterations;
-
 	return createExecution(
-		() => createRunGenerator(code, seconds, iterations),
+		() => createRunGenerator(code, config),
 		// WHY: cancelFn is a no-op — the generator's finally block
 		// handles Worker termination when createExecution calls
 		// generator.return()

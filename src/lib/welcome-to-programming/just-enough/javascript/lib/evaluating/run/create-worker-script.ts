@@ -18,10 +18,10 @@
  * 2. Listens for an `execute` message — runs learner code via
  *    `new Function` with trapped globals as arguments
  *
- * All traps are always defined (console.log, console.assert, alert,
- * confirm, prompt). Traps record events and post them to the main
- * thread. I/O traps (alert/confirm/prompt) block via `Atomics.wait`
- * until the main thread writes a response to the SAB.
+ * All traps are always defined (all 19 console methods, alert, confirm,
+ * prompt). Traps record ConsoleEvents and post them to the main thread.
+ * I/O traps (alert/confirm/prompt) block via `Atomics.wait` until the
+ * main thread writes a response to the SAB.
  */
 function createWorkerScript(): string {
 	return `"use strict";
@@ -143,26 +143,30 @@ function safeCloneArgs(args) {
   }
 }
 
-// --- Traps ---
+// --- Console traps (all 19 standard methods → ConsoleEvent) ---
 
-const trappedConsole = {
-  log() {
+const CONSOLE_METHODS = [
+  'log', 'debug', 'info', 'warn', 'error',
+  'assert', 'table', 'dir', 'dirxml',
+  'group', 'groupCollapsed', 'groupEnd',
+  'count', 'countReset',
+  'time', 'timeEnd', 'timeLog',
+  'trace', 'clear'
+];
+
+const trappedConsole = {};
+CONSOLE_METHODS.forEach(function(method) {
+  trappedConsole[method] = function() {
     const args = safeCloneArgs(Array.from(arguments));
     const line = getLine();
-    const event = { event: 'log', args: args, line: line };
+    const event = { event: 'console', method: method, args: args, line: line };
     events.push(event);
     postMessage({ type: 'event', event: event });
     checkPause();
-  },
-  assert() {
-    const args = safeCloneArgs(Array.from(arguments));
-    const line = getLine();
-    const event = { event: 'assert', args: args, line: line };
-    events.push(event);
-    postMessage({ type: 'event', event: event });
-    checkPause();
-  }
-};
+  };
+});
+
+// --- Dialog traps (prompt/alert/confirm → io-request) ---
 
 function trappedAlert() {
   const args = safeCloneArgs(Array.from(arguments));
