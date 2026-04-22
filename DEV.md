@@ -995,6 +995,43 @@ After writing the first test for any increment, ask: _could this be passed by
 `return someFixedValue`?_ If yes, write the second test to make that impossible
 before implementing.
 
+#### Dependency-order coverage
+
+Where a test sits in the dependency graph changes what kind of test it
+should be. The rule for this codebase is **bottom-up**:
+
+1. **Leaves first**: pure helpers and protocol primitives
+   (`worker-protocol`, `create-worker-script`, `guard-loops`, etc.) get
+   unit tests against real inputs. No siblings involved.
+2. **Engines next**: modules that compose leaves into behavior
+   (`evaluating/run`, `evaluating/trace`) get integration tests against
+   the _real_ leaves already covered in step 1. Browser environment if
+   the engine requires `Worker` + `SharedArrayBuffer`.
+3. **API layer last**: wrappers that layer validation / format / config
+   resolution over an engine (`api/run`, `api/trace`) get tests against
+   the _real_ engine already covered in step 2. Again, browser
+   environment when the engine requires it.
+
+The practical consequence: `vi.mock('./sibling')` in a consumer's test
+is almost never correct. If step N's test needs step N−1 to be
+trustworthy, finish step N−1's coverage first. Mocks paper over missing
+coverage with duplicate behavior; the duplicate eventually drifts from
+reality and the mocked test starts passing on production-broken code.
+
+This is also a **development order constraint**. When adding new
+behavior, implement and test inside-out: leaf → engine → API. When an
+existing feature is being refactored and one layer's tests are broken
+(mocks have drifted, or the underlying contract changed), fix the
+innermost layer first — outer-layer fixes become trivial once the
+inner layer is stable.
+
+**Exceptions are narrow and explicit**. The environment boundary (node
+vs. browser) is crossed by _moving the test file_, not by mocking the
+environment away. Third-party boundaries (network, filesystem, random
+clocks) may be stubbed, but `vi.mock` of an internal sibling in this
+package is a code smell — treat it as a TODO to finish the sibling's
+coverage.
+
 #### ZOMBIES Sequencing
 
 **ZOMBIES** is a test-ordering heuristic that naturally produces triangulation.

@@ -365,6 +365,28 @@ ZOMBIES sequencing, and the Fake It pattern. Summary:
 - `.toThrow()` for errors — no try-catch patterns
 - No comments — test names are documentation
 
+#### Test dependency order (bottom-up)
+
+When a module has internal layers, test in dependency order — leaves first,
+then the engine that uses them, then the API that wraps the engine. By the
+time an outer-layer test runs, every sibling it depends on is already
+covered; the outer test uses those real siblings directly, not mocks.
+
+If you need `vi.mock('./sibling')` on a sibling in this package, that is a
+signal the sibling is under-tested. Stop, cover the sibling, then return to
+the consumer test with real wiring. Mocks paper over missing coverage;
+the duplicate behavior eventually drifts from reality, and the mocked test
+starts passing on production-broken code.
+
+**Exception — environment boundary**: when a test needs a browser API
+unavailable in the current env (e.g. `Worker` + `SharedArrayBuffer` in
+node), move the test to a `.browser.test.ts` file under the
+playwright-chromium vitest project. Don't mock the environment.
+
+Leaf unit tests of pure functions do not violate this rule — they exercise
+real behavior against real inputs. The rule targets `vi.mock` of internal
+siblings, not unit isolation of leaves.
+
 ### Linting Approach
 
 See DEV.md § Linting Conventions for full details. Summary:
