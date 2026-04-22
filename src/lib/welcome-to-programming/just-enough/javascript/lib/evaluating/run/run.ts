@@ -137,9 +137,23 @@ function makeInternalError(err: unknown): RunErrorEvent {
 	};
 }
 
-/** AsyncGenerator extended with `.cancel()`. Matches the
- * `Execution<RunEvent, RunResult>` shape that will be completed in
- * Task D (PromiseLike + `.result` Promise). */
+/**
+ * The returned run handle. Structurally satisfies
+ * `Execution<RunEvent, RunResult>` from shared/types.ts, plus the
+ * underlying `AsyncGenerator` methods (`.next()`, `.return()`,
+ * `.throw()`) for consumers that want fine-grained control.
+ *
+ * Three consumption modes:
+ * 1. **Iterate events** — `for await (const event of handle) {...}`.
+ * 2. **Await the result** — `const result = await handle;` (via
+ *    PromiseLike) or `await handle.result`. Both resolve to the same
+ *    RunResult and share the same memoized Promise.
+ * 3. **Mixed** — not supported. `.result` internally drives `.next()`.
+ *    AsyncGenerator serializes concurrent `.next()` calls, so *both*
+ *    consumers run — but each sees a disjoint subset of events as
+ *    they alternate. A `for await` consumer running alongside
+ *    `await handle` silently loses every other event. Don't mix.
+ */
 type RunHandle = AsyncGenerator<RunEvent, RunResult> & {
 	/** Terminate execution immediately. Idempotent.
 	 * - Before first iterate: skips Worker creation entirely.
@@ -148,6 +162,22 @@ type RunHandle = AsyncGenerator<RunEvent, RunResult> & {
 	 *   appended to `logs`, result resolves with `{ok: true, logs}`.
 	 * - After completion: no-op. */
 	readonly cancel: () => void;
+
+	/** Promise that resolves when execution completes. Memoized —
+	 * accessing twice returns the same Promise. Drains the generator
+	 * internally; do not also iterate externally. */
+	readonly result: Promise<RunResult>;
+
+	/** PromiseLike.then — `await handle` resolves to the RunResult.
+	 * Delegates to `.result`. */
+	then<TResult1 = RunResult, TResult2 = never>(
+		onFulfilled?:
+			| ((value: RunResult) => TResult1 | PromiseLike<TResult1>)
+			| null,
+		onRejected?:
+			| ((reason: unknown) => TResult2 | PromiseLike<TResult2>)
+			| null,
+	): Promise<TResult1 | TResult2>;
 };
 
 /**
@@ -157,11 +187,34 @@ type RunHandle = AsyncGenerator<RunEvent, RunResult> & {
  * @param code - JavaScript source to execute (assumed valid — no
  *   parsing or validation happens here)
  * @param options - Optional: seconds (default 5), iterations, io mocks
- * @returns `AsyncGenerator<RunEvent, RunResult> & { cancel(): void }`
+ * @returns A `RunHandle` — an AsyncGenerator augmented with
+ *   `.cancel()`, `.result` (memoized Promise), and `.then()`
+ *   (PromiseLike).
  *
  * @remarks
+ * **Three consumption modes:**
+ *
+ * ```ts
+ * // 1. Iterate events
+ * const handle = run(code);
+ * for await (const event of handle) { render(event); }
+ *
+ * // 2. Await the result (no event iteration needed)
+ * const result = await run(code);
+ * // equivalent:
+ * const result = await run(code).result;
+ *
+ * // 3. Cancel
+ * const handle = run(code);
+ * handle.cancel();
+ * ```
+ *
+ * **Do not mix modes 1 and 2** on the same handle — both call
+ * `.next()` internally; concurrent use interleaves unpredictably.
+ *
  * **Lazy startup.** The Worker is not created until the first
- * `.next()` call. Calling `.cancel()` before the first iteration
+ * `.next()` call (or the first `.result` access, which calls
+ * `.next()` internally). Calling `.cancel()` before any of these
  * skips Worker creation entirely — no resource leak.
  *
  * **Cancellation.** `.cancel()` sets an internal flag and unsticks
@@ -490,18 +543,58 @@ function createRunGenerator(
 	}
 
 	const gen = body();
+
+	// Memoized .result Promise. Lazy: first access drives the
+	// generator to completion. Subsequent accesses return the same
+	// Promise — safe to call `.result` or `await handle` repeatedly.
+	let resultPromise: Promise<RunResult> | null = null;
+	function getResult(): Promise<RunResult> {
+		if (resultPromise === null) {
+			resultPromise = (async function drain() {
+				while (true) {
+					const { value, done } = await gen.next();
+					if (done) return value;
+				}
+			})();
+		}
+		return resultPromise;
+	}
+
 	// WHY defineProperty over Object.assign: the RunHandle type marks
-	// cancel as `readonly`. Object.assign creates a plain writable
-	// property, so consumers could clobber `.cancel` without a type
-	// error. defineProperty with writable:false + configurable:false
-	// makes the readonly guarantee actually enforced at runtime.
+	// cancel/result as `readonly`. Object.assign creates plain writable
+	// properties, so consumers could clobber them without a type error.
+	// defineProperty with writable:false + configurable:false makes the
+	// readonly guarantee actually enforced at runtime.
 	Object.defineProperty(gen, 'cancel', {
 		value: cancel,
 		writable: false,
 		configurable: false,
 		enumerable: true,
 	});
-	return gen as RunHandle;
+	Object.defineProperty(gen, 'result', {
+		get: getResult,
+		configurable: false,
+		enumerable: true,
+	});
+	// WHY enumerable:false on then: matches native Promise's behavior —
+	// `Object.keys(handle)` shouldn't include `then`. Also prevents
+	// accidental serialization (JSON.stringify) from including it.
+	Object.defineProperty(gen, 'then', {
+		value: function then<TResult1 = RunResult, TResult2 = never>(
+			onFulfilled?:
+				| ((value: RunResult) => TResult1 | PromiseLike<TResult1>)
+				| null,
+			onRejected?:
+				| ((reason: unknown) => TResult2 | PromiseLike<TResult2>)
+				| null,
+		): Promise<TResult1 | TResult2> {
+			return getResult().then(onFulfilled, onRejected);
+		},
+		writable: false,
+		configurable: false,
+		enumerable: false,
+	});
+	return gen as unknown as RunHandle;
 }
 
 // --- Helpers ---
