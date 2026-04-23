@@ -64,7 +64,7 @@ landed on main; keep entries for audit trail)*
   declaration from `new Function` params to Worker-setup globals.
   Phase 0 artifacts (README, DOCS, types.ts) complete at new location;
   AR-1 + AR-2 cleared with batch-fix. Approximate touched regions on
-  SHARED files (claim before edit; merge rebases last):
+  SHARED files (claim before edit; conflict → stop and escalate to user):
   - `run/run.ts` ~lines 189–200: import path update + call site.
   - `run/create-worker-script.ts` ~lines 225–265: counter-declaration
     region (ABOVE trap functions). Merge agent's EVENT_READY edits

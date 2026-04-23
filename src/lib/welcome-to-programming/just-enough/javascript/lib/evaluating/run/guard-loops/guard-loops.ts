@@ -26,7 +26,7 @@
 import * as recast from 'recast';
 import { walk } from 'estree-walker';
 
-import type { GuardResult } from './types.js';
+import type { GuardResult, LoopType } from './types.js';
 
 /**
  * Builds an array mapping 0-indexed line numbers to the character
@@ -99,59 +99,41 @@ function toOffset(
  * positions). String insertion at computed offsets preserves all
  * original formatting — no lines added, no columns shifted.
  */
+/** Loop node shape we depend on — `body.loc` for guard insertion; full `loc`
+ * for do-while reset insertion (statement end, past the trailing `while(cond);`). */
+type LoopNode = {
+	readonly body: {
+		readonly loc: { readonly start: AstPosition; readonly end: AstPosition };
+	};
+	readonly loc: { readonly start: AstPosition; readonly end: AstPosition };
+};
+
+type CollectedLoop = {
+	readonly loopType: LoopType;
+	readonly node: LoopNode;
+};
+
+/** A single text insertion planned against the original source string. */
+type Insertion = { readonly offset: number; readonly text: string };
+
+/** Loop types this module guards. Single source of truth for the walker filter. */
+const GUARDED_LOOP_TYPES: readonly LoopType[] = ['WhileStatement'];
+
 function guardLoops(code: string, maxIterations: number): GuardResult {
 	const ast = recast.parse(code);
-
-	// Collect while loops in reading order (pre-order DFS)
-	const loops: Array<{
-		node: {
-			body: {
-				loc: { start: AstPosition; end: AstPosition };
-			};
-		};
-	}> = [];
-
-	(walk as (node: unknown, walker: Record<string, unknown>) => void)(ast, {
-		enter(node: Record<string, unknown>) {
-			if (node.type === 'WhileStatement') {
-				loops.push({
-					node: node as (typeof loops)[number]['node'],
-				});
-			}
-		},
-	});
+	const loops: CollectedLoop[] = collectLoops(ast);
 
 	if (loops.length === 0) {
 		return { code, loopCount: 0 };
 	}
 
 	const lineStarts = computeLineStartOffsets(code);
+	const insertions: Insertion[] = loops.flatMap((loop, index) =>
+		planLoopInsertions(loop, index + 1, maxIterations, code, lineStarts),
+	);
 
-	// Collect all insertions with their offsets in the original string.
-	// Applying them from highest offset to lowest guarantees each
-	// insertion doesn't shift any remaining (lower) offsets.
-	type Insertion = { readonly offset: number; readonly text: string };
-	const insertions: Insertion[] = [];
-
-	for (let i = 0; i < loops.length; i++) {
-		const id = i + 1;
-		const body = loops[i].node.body;
-
-		// Guard check: insert AFTER opening {
-		const openOffset = toOffset(body.loc.start, code, lineStarts);
-		insertions.push({
-			offset: openOffset + 1,
-			text: ` if (++loop${id} > ${maxIterations}) throw new RangeError("Loop ${id} exceeded ${maxIterations} iterations.");`,
-		});
-
-		// Counter reset: insert AFTER closing }
-		const closeOffset = toOffset(body.loc.end, code, lineStarts);
-		insertions.push({
-			offset: closeOffset,
-			text: ` loop${id} = 0;`,
-		});
-	}
-
+	// Descending offset is load-bearing — applying lower offsets first would
+	// shift all higher offsets and invalidate the plan.
 	insertions.sort((a, b) => b.offset - a.offset);
 
 	let result = code;
@@ -159,10 +141,64 @@ function guardLoops(code: string, maxIterations: number): GuardResult {
 		result = result.slice(0, offset) + text + result.slice(offset);
 	}
 
-	return {
-		code: result,
-		loopCount: loops.length,
-	};
+	return { code: result, loopCount: loops.length };
+}
+
+/**
+ * Walks the AST in reading order and collects every node whose type is in
+ * GUARDED_LOOP_TYPES. Classification happens here so later phases can dispatch
+ * on loopType without re-reading AST node types.
+ */
+function collectLoops(ast: unknown): CollectedLoop[] {
+	const loops: CollectedLoop[] = [];
+	(walk as (node: unknown, walker: Record<string, unknown>) => void)(ast, {
+		enter(node: Record<string, unknown>) {
+			if (isGuardedLoopType(node.type)) {
+				loops.push({ loopType: node.type, node: node as unknown as LoopNode });
+			}
+		},
+	});
+	return loops;
+}
+
+function isGuardedLoopType(nodeType: unknown): nodeType is LoopType {
+	return (
+		typeof nodeType === 'string' &&
+		(GUARDED_LOOP_TYPES as readonly string[]).includes(nodeType)
+	);
+}
+
+/**
+ * Produces the two insertions for a single collected loop: the guard at the
+ * top of the body (after `{`) and the counter reset at the loop's closing
+ * position. For `while`, `for`, and `for-of` the reset sits after the body's
+ * closing `}`; for `do-while` it sits at the full statement's parser-reported
+ * end — after the trailing `;` if the learner wrote one, otherwise after the
+ * closing `)` of `while (cond)` (ASI case). The reset text for `do-while`
+ * begins with `;` so it can't fuse with a bare `while (cond)` as its body.
+ */
+function planLoopInsertions(
+	loop: CollectedLoop,
+	id: number,
+	maxIterations: number,
+	code: string,
+	lineStarts: number[],
+): Insertion[] {
+	const { loopType, node } = loop;
+
+	const guardOffset = toOffset(node.body.loc.start, code, lineStarts) + 1;
+	const guardText = ` if (++loop${id} > ${maxIterations}) throw new RangeError("Loop ${id} exceeded ${maxIterations} iterations.");`;
+
+	const resetAnchor =
+		loopType === 'DoWhileStatement' ? node.loc.end : node.body.loc.end;
+	const resetOffset = toOffset(resetAnchor, code, lineStarts);
+	const resetText =
+		loopType === 'DoWhileStatement' ? `; loop${id} = 0;` : ` loop${id} = 0;`;
+
+	return [
+		{ offset: guardOffset, text: guardText },
+		{ offset: resetOffset, text: resetText },
+	];
 }
 
 export default guardLoops;

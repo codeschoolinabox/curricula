@@ -431,9 +431,10 @@ Protocol (also documented in that file):
 - `shared/DOCS.md` — your §Why guard-loops moved to shared update;
   merge agent's §Pause/resume flow consolidation. Different sections.
 
-**Last to merge rebases.** If both agents land changes to the same
-file in incompatible ways, the second agent rebases and resolves
-locally before pushing.
+**Conflict → stop and escalate.** If a push is rejected or you detect
+a conflict on a shared file, stop immediately and post the details in
+COORDINATION.md §Open questions for the user to resolve. Do not
+attempt to rebase or merge independently.
 
 ## Verification
 

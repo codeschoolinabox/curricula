@@ -390,8 +390,12 @@ Protocol (also documented in COORDINATION.md):
 pause. Loop-guard's changes are in the `loopParams` /
 `loopArgs` / `new Function(...)` setup region. Your M.3 changes are
 in the trap function bodies (`trappedConsole`, `trappedPrompt`,
-etc.). Different regions — merge cleanly — but don't edit
-simultaneously on divergent branches; rebase first.
+etc.). Different regions — should merge cleanly — but wait for their
+`[done]` entry before pushing your own edit to that file.
+
+**If a push is rejected or a conflict is detected:** stop immediately
+and post the details in COORDINATION.md §Open questions for the user
+to resolve. Do not attempt to rebase or merge independently.
 
 **If loop-guard has already merged to main:**
 `git pull`, review their trap/counter setup changes, adjust your
