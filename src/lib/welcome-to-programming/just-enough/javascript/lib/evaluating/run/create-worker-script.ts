@@ -225,11 +225,10 @@ self.onmessage = function (e) {
 
   if (msg.type === 'execute') {
     // 0. Build loop counter declarations prefix.
-    // WHY: var loop1=0,...; is prepended to the code string on the same
-    // line as "use strict" (no added newline) so user code line numbers
-    // are unchanged — zero-line-shift preserved without new Function params.
+    // WHY: var loop1=0,...; is prepended on the same line as "use strict"
+    // (no added newline) so user code line numbers are unchanged.
     var loopDeclarations = '';
-    if (msg.loopCount && msg.loopCount > 0) {
+    if (msg.loopCount > 0) {
       var decls = [];
       for (var li = 1; li <= msg.loopCount; li++) {
         decls.push('loop' + li + ' = 0');
@@ -240,8 +239,6 @@ self.onmessage = function (e) {
     // 1. Construction phase — SyntaxError from new Function
     var fn;
     try {
-      // Non-scriptMode: declarations on same line as use strict, user code at line 2.
-      // scriptMode: declarations prepended before user code on line 1.
       var prefix = msg.scriptMode
         ? loopDeclarations
         : ('"use strict"; ' + loopDeclarations + '\\n');

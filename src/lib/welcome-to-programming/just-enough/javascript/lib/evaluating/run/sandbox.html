@@ -289,6 +289,7 @@ console.error('three');"
 
 		<div class="controls">
 			<button id="run">[run]</button>
+			<button id="format">[format]</button>
 			<label
 				><input id="maxSecondsEnabled" type="checkbox" checked /> max seconds:
 				<input id="maxSeconds" type="number" value="5" min="1" max="30" />
@@ -374,6 +375,8 @@ console.error('three');"
 
 		<script type="module">
 			import createRunGenerator from './run.ts';
+			import { format } from '../../../api/format.ts';
+			import guardLoops from './guard-loops/guard-loops.ts';
 
 			// --- Elements ---
 			const codeEl = document.getElementById('code');
@@ -654,6 +657,10 @@ console.error('three');"
 					&& Number.isFinite(iterationsRaw)
 						? iterationsRaw
 						: undefined;
+				if (iterations !== undefined) {
+					const guardResult = guardLoops(codeEl.value, iterations);
+					console.log('[guarded code]', guardResult);
+				}
 				const io = buildIoMocks();
 
 				const gen = createRunGenerator(codeEl.value, {
@@ -742,6 +749,11 @@ console.error('three');"
 					runBtn.disabled = false;
 					cancelBtn.disabled = true;
 				}
+			});
+
+			// --- Format button ---
+			document.getElementById('format').addEventListener('click', () => {
+				codeEl.value = format(codeEl.value);
 			});
 
 			// --- Snippet buttons ---
