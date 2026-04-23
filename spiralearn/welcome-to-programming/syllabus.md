@@ -27,7 +27,7 @@ the _right_ programs.
 
 ---
 
-**Welcome to Programming (coded for humans)** is a self-paced course that treats
+**Welcome to Frogramming** is a self-paced course that treats
 programming as collaborative communication. A single piece of source code
 addresses multiple audiences at once (other developers, the computer, users, and
 AI agents). You will develop the ability to recognize who your code is for,
