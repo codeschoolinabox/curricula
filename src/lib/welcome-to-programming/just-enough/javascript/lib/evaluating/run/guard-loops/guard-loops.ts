@@ -117,7 +117,10 @@ type CollectedLoop = {
 type Insertion = { readonly offset: number; readonly text: string };
 
 /** Loop types this module guards. Single source of truth for the walker filter. */
-const GUARDED_LOOP_TYPES: readonly LoopType[] = ['WhileStatement'];
+const GUARDED_LOOP_TYPES: readonly LoopType[] = [
+	'WhileStatement',
+	'ForStatement',
+];
 
 function guardLoops(code: string, maxIterations: number): GuardResult {
 	const ast = recast.parse(code);

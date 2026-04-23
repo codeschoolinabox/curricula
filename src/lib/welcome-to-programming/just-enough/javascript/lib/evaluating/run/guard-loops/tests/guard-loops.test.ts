@@ -208,4 +208,123 @@ describe('guardLoops', () => {
 			},
 		);
 	});
+
+	describe('for-loop coverage', () => {
+		describe('single for loop', () => {
+			it('injects guard after opening brace', () => {
+				const code = 'for (let i = 0; i < 10; i++) {\n\ttotal += i;\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.code).toContain(
+					`{ if (++loop1 > ${MAX}) throw new RangeError`,
+				);
+			});
+
+			it('injects counter reset after closing brace', () => {
+				const code = 'for (let i = 0; i < 10; i++) {\n\ttotal += i;\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.code).toContain('} loop1 = 0;');
+			});
+
+			it('returns loopCount 1', () => {
+				const code = 'for (let i = 0; i < 10; i++) {\n\ttotal += i;\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.loopCount).toBe(1);
+			});
+
+			it('preserves original for-header unchanged', () => {
+				const code = 'for (let i = 0; i < 10; i++) {\n\ttotal += i;\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.code).toContain('for (let i = 0; i < 10; i++) {');
+			});
+
+			it('does not shift line numbers', () => {
+				const code =
+					'let total = 0;\nfor (let i = 0; i < 5; i++) {\n\ttotal += i;\n}\nconsole.log(total);\n';
+				const result = guardLoops(code, MAX);
+				const lines = result.code.split('\n');
+				expect(lines[0]).toBe('let total = 0;');
+				expect(lines[1]).toMatch(/^for/);
+				expect(lines[4]).toMatch(/console\.log\(total\)/);
+			});
+		});
+
+		describe('mixed while + for', () => {
+			it('numbers in reading order across loop types', () => {
+				const code =
+					'while (a) {\n\ta++;\n}\nfor (let i = 0; i < 3; i++) {\n\ti++;\n}\n';
+				const result = guardLoops(code, MAX);
+				const firstWhileGuard = result.code.indexOf('++loop1');
+				const secondForGuard = result.code.indexOf('++loop2');
+				expect(firstWhileGuard).toBeLessThan(secondForGuard);
+				expect(result.loopCount).toBe(2);
+			});
+
+			it('for inside while gets higher ID', () => {
+				const code =
+					'while (a) {\n\tfor (let i = 0; i < 3; i++) {\n\t\ti++;\n\t}\n}\n';
+				const result = guardLoops(code, MAX);
+				const whileGuard = result.code.indexOf('++loop1');
+				const forGuard = result.code.indexOf('++loop2');
+				expect(whileGuard).toBeLessThan(forGuard);
+				expect(result.loopCount).toBe(2);
+			});
+		});
+
+		describe('for-loop edge cases', () => {
+			it('handles for without init', () => {
+				const code = 'for (; i < 10; i++) {\n\ti++;\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.code).toContain('++loop1');
+				expect(result.loopCount).toBe(1);
+			});
+
+			it('handles for without update', () => {
+				const code = 'for (let i = 0; i < 10;) {\n\ti++;\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.code).toContain('++loop1');
+				expect(result.loopCount).toBe(1);
+			});
+
+			it('handles fully bare for (;;)', () => {
+				const code = 'for (;;) {\n\tbreak;\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.code).toContain('++loop1');
+				expect(result.loopCount).toBe(1);
+			});
+		});
+
+		describe('for-loop runtime behavior (Task B contract)', () => {
+			it.each([
+				[-1, 'if (++loop1 > -1)'],
+				[0, 'if (++loop1 > 0)'],
+				[1, 'if (++loop1 > 1)'],
+				[100, 'if (++loop1 > 100)'],
+			])('maxIterations = %i → template contains %p', (max, expected) => {
+				const result = guardLoops(
+					'for (let i = 0; i < 1000; i++) {\n\tx++;\n}\n',
+					max,
+				);
+				expect(result.code).toContain(expected);
+			});
+
+			it.each([
+				[-1, []],
+				[0, []],
+				[1, [1]],
+				[3, [1, 2, 3]],
+			])(
+				'maxIterations = %i runs for-body %p times before throwing',
+				(max, expected) => {
+					const executed: number[] = [];
+					const code =
+						'for (let i = 0; i < 1000; i++) { executed.push(loop1); }\n';
+					const result = guardLoops(code, max);
+					// eslint-disable-next-line no-new-func
+					const fn = new Function('loop1', 'executed', result.code);
+					expect(() => fn(0, executed)).toThrow(RangeError);
+					expect(executed).toEqual(expected);
+				},
+			);
+		});
+	});
 });

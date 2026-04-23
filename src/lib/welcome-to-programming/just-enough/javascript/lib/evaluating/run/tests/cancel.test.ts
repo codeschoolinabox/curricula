@@ -330,4 +330,68 @@ describe('createRunGenerator cancel', () => {
 			expect(result.ok).toBe(true);
 		});
 	});
+
+	/**
+	 * Invariant: after the api/run → evaluating/run merge (M.1), ANY
+	 * consumer that calls .cancel() gets a RunResult whose last log
+	 * entry is `{event: 'cancel'}`. shared/types.ts § CancelEvent
+	 * documents this as universal: "Presence in `logs` is the signal."
+	 * Previously, the api/run wrapper's cancel bypassed this path by
+	 * calling generator.return(), skipping the main-loop cancelled
+	 * branch that appends the event. After the merge there is no
+	 * wrapper — every cancel goes through the engine's native path.
+	 */
+	describe('cancel invariant: logs.at(-1).event === "cancel"', () => {
+		describe('cancel before first iterate', () => {
+			it('invariant holds', async () => {
+				const gen = createRunGenerator('let x = 1;\n');
+				gen.cancel();
+				const result = await gen.result;
+				if (!result.ok) throw new Error('expected ok');
+				expect(result.logs.at(-1)).toEqual({ event: 'cancel' });
+			});
+		});
+
+		describe('cancel mid-iterate (awaiting dequeue)', () => {
+			const setupFakeWorker = () => {
+				vi.stubGlobal('Worker', FakeWorker);
+				vi.stubGlobal('URL', {
+					createObjectURL: () => 'blob:fake',
+					revokeObjectURL: () => {},
+				});
+				vi.stubGlobal(
+					'Blob',
+					class {
+						constructor(_parts: unknown[], _options?: unknown) {}
+					},
+				);
+			};
+
+			beforeEach(setupFakeWorker);
+			afterEach(() => vi.unstubAllGlobals());
+
+			it('invariant holds', async () => {
+				const gen = createRunGenerator('let x = 1;\n');
+				const nextPromise = gen.next();
+				await Promise.resolve();
+				await Promise.resolve();
+				gen.cancel();
+				const iter = await nextPromise;
+				if (!iter.done) throw new Error('expected done');
+				if (!iter.value.ok) throw new Error('expected ok');
+				expect(iter.value.logs.at(-1)).toEqual({ event: 'cancel' });
+			});
+		});
+
+		describe('cancel via await handle.result', () => {
+			it('invariant holds', async () => {
+				const gen = createRunGenerator('let x = 1;\n');
+				gen.cancel();
+				const result = await gen;
+				if (!result.ok) throw new Error('expected ok');
+				expect(result.logs.at(-1)).toEqual({ event: 'cancel' });
+			});
+		});
+
+	});
 });
