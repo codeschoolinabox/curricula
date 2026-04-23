@@ -1,8 +1,8 @@
 # evaluating/shared
 
 Shared infrastructure for all three evaluation engines (`run`, `trace`,
-`debug`). Provides the `Execution` type and factory, SAB pause protocol, and
-loop guard injection.
+`debug`). Provides the `Execution` type and factory, and the SAB pause
+protocol.
 
 ## Structure
 
@@ -10,7 +10,6 @@ loop guard injection.
 | --------------------- | ----------------------------------------------------------- |
 | `types.ts`            | `Execution`, `EngineConfig`, `TraceConfig`, `RunEvent`      |
 | `create-execution.ts` | Factory: wraps an AsyncGenerator into an `Execution` object |
-| `guard-loops/`        | Loop guard injection to prevent infinite loops              |
 
 ## Execution type
 
@@ -56,16 +55,9 @@ type TraceConfig = EngineConfig & {
 };
 ```
 
-## Guard loops
-
-The `guard-loops/` module prevents infinite loops in learner code by injecting
-iteration counters into `while` loop conditions via AST transformation. Used by
-both run and debug engines (with different injection strategies per engine).
-
 ## Navigation
 
-- [guard-loops/README.md](./guard-loops/README.md) — loop guard injection
 - [DOCS.md](./DOCS.md) — architecture decisions and design rationale
-- [../run/README.md](../run/README.md) — run engine
+- [../run/README.md](../run/README.md) — run engine (owns `guard-loops/`)
 - [../trace/README.md](../trace/README.md) — trace engine
 - [../debug/README.md](../debug/README.md) — debug engine

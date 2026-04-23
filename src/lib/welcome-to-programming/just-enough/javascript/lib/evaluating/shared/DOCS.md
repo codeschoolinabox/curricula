@@ -128,23 +128,10 @@ plain object with closure-captured state. The generator function and cancel
 callback are injected — `createExecution` knows nothing about Workers, SABs, or
 engines. Each engine builds its own async generator and passes it to the factory.
 
-## Why guard-loops moved to shared
-
-Both run and debug engines need loop guard injection. Previously guard-loops
-lived inside `debug/` — run didn't have its own guards (it relied on timeout
-only). With the refactor, run also injects loop guards when `config.iterations`
-is set. Moving to `shared/` reflects this shared dependency.
-
-The two engines use different injection strategies from the same module:
-
-- **run**: comma-in-condition (`while (++loop1 > max && guard(1), cond)`) — zero
-  line shift, errors report correct line numbers
-- **debug**: body-injection (`if (++loopN > max) throw ...`) — visible and
-  readable in DevTools
-
 ## What this module deliberately does NOT do
 
 - Does not validate user code — that's `validating/`'s job
 - Does not execute code — that's the individual engine's job
-- Only provides shared infrastructure (types, Execution factory, SAB protocol,
-  loop guards)
+- Only provides shared infrastructure (types, Execution factory, SAB protocol)
+- Does NOT own loop-guard injection — that lives in `run/guard-loops/`
+  (the run engine is the sole consumer; it was never genuinely shared)

@@ -101,7 +101,7 @@ describe('discoverSiblings', () => {
 
 	it('directive-carrying .js sibling → sibling.code excludes the directive comment', () => {
 		// B.15 — strip behavior at the walker level. The sibling's `code`
-		// is what feeds into <StudyLens>; it must not contain the
+		// is what feeds into <StudyLenses>; it must not contain the
 		// directive JSDoc that only the plugin's runtime consumes.
 		const fixture = path.join(FIXTURES_DIR, 'file-override-with-config');
 		const config = {

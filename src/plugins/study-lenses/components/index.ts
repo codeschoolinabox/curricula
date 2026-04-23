@@ -3,4 +3,4 @@
  * file at `src/theme/MDXComponents.js` imports and registers.
  */
 
-export { default as StudyLensMock } from './StudyLensMock.js';
+export { default as StudyLensesMock } from './StudyLensesMock.js';

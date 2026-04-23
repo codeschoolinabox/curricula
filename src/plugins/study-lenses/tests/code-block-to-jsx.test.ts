@@ -25,7 +25,7 @@ describe('codeBlockToJsx', () => {
 
 		// returned node shape
 		expect(result.type).toBe('mdxJsxFlowElement');
-		expect(result.name).toBe('StudyLens');
+		expect(result.name).toBe('StudyLenses');
 		expect(result.children).toEqual([]);
 		expect(result.attributes).toEqual([
 			{ type: 'mdxJsxAttribute', name: 'code', value: 'let x = 1;' },

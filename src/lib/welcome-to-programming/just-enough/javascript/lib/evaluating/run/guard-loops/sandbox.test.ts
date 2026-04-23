@@ -1,7 +1,7 @@
 /**
  * Sandbox for experimenting with the loop guard instrumentation.
  *
- * Usage:  npx vitest run src/lib/.../shared/guard-loops/sandbox.test.ts
+ * Usage:  npx vitest run src/lib/.../run/guard-loops/sandbox.test.ts
  *
  * Edit the `code` template string below, save, re-run.
  */

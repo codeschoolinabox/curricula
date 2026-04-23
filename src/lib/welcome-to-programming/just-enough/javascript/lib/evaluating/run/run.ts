@@ -40,7 +40,7 @@ import type {
 } from './types.js';
 
 import createWorkerScript from './create-worker-script.js';
-import guardLoopsCondition from '../shared/guard-loops/guard-loops.js';
+import guardLoopsCondition from './guard-loops/guard-loops.js';
 import {
 	BUFFER_SIZE,
 	CONTROL_INDEX,

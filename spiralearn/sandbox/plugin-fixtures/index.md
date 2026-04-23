@@ -9,7 +9,7 @@ integration test suite. Browsing them in order exercises every V1 feature.
 
 ## Fence transform
 
-- [configured-js](./configured-js/) — baseline `<StudyLens>` emission
+- [configured-js](./configured-js/) — baseline `<StudyLenses>` emission
 - [suffix-overrides](./suffix-overrides/) — `:highlight` suffix wins
 - [cascade-defaults](./cascade-defaults/) — chapter `lenses.json` override
 - [configured-python](./configured-python/) — `defaults.python` opts in
@@ -19,7 +19,7 @@ integration test suite. Browsing them in order exercises every V1 feature.
 
 ## Sibling auto-embed
 
-- [embed-bottom](./embed-bottom/) — per-sibling `<StudyLens>` at page end
+- [embed-bottom](./embed-bottom/) — per-sibling `<StudyLenses>` at page end
 - [embed-tabs](./embed-tabs/) — native Docusaurus `<Tabs>`
 - [embed-with-heading](./embed-with-heading/) — custom h2 section header
 - [embed-config-merge](./embed-config-merge/) — directive JSON merged with cascade

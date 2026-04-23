@@ -59,11 +59,11 @@ function parseAndTransform(
 	return tree;
 }
 
-// ─── Helpers for asserting mdxJsxFlowElement StudyLens nodes ────────────────
+// ─── Helpers for asserting mdxJsxFlowElement StudyLenses nodes ────────────────
 
 type StudyLensJsx = {
 	type: 'mdxJsxFlowElement';
-	name: 'StudyLens';
+	name: 'StudyLenses';
 	attributes: ReadonlyArray<{ name: string; value: string }>;
 	children: [];
 };
@@ -72,7 +72,7 @@ function findStudyLensNode(children: Root['children']): StudyLensJsx | undefined
 	return children.find(
 		(n) =>
 			(n as { type: string }).type === 'mdxJsxFlowElement' &&
-			(n as { name?: string }).name === 'StudyLens',
+			(n as { name?: string }).name === 'StudyLenses',
 	) as StudyLensJsx | undefined;
 }
 
@@ -112,7 +112,7 @@ describe('createRemarkStudyLenses', () => {
 		expect(codeNode?.data).toBeUndefined();
 	});
 
-	it('configured fence (defaults.js=study) → code node replaced by mdxJsxFlowElement StudyLens', () => {
+	it('configured fence (defaults.js=study) → code node replaced by mdxJsxFlowElement StudyLenses', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
 		const mdFile = path.join(contentRoot, 'index.md');
 
@@ -120,7 +120,7 @@ describe('createRemarkStudyLenses', () => {
 		const jsxNode = findStudyLensNode(tree.children);
 
 		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
-		expect(jsxNode?.name).toBe('StudyLens');
+		expect(jsxNode?.name).toBe('StudyLenses');
 		expect(jsxNode?.children).toEqual([]);
 		expect(attrsOf(jsxNode)).toMatchObject({
 			code: 'let x = 1;',
@@ -177,7 +177,7 @@ describe('createRemarkStudyLenses', () => {
 		// js (configured) → replaced by mdxJsxFlowElement
 		const jsxNode = findStudyLensNode(tree.children);
 		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
-		expect(jsxNode?.name).toBe('StudyLens');
+		expect(jsxNode?.name).toBe('StudyLenses');
 		// txt (unconfigured) and no-lang fences remain as plain code nodes
 		const remainingCodeNodes = tree.children.filter((n) => n.type === 'code');
 		expect(remainingCodeNodes).toHaveLength(2);
@@ -186,7 +186,7 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
-	it('embed bottom: index.md + two .js siblings → two mdxJsxFlowElement StudyLens nodes appended', () => {
+	it('embed bottom: index.md + two .js siblings → two mdxJsxFlowElement StudyLenses nodes appended', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'embed-bottom');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
@@ -195,7 +195,7 @@ describe('createRemarkStudyLenses', () => {
 		// The last two children should be the appended siblings in alphabetical label order.
 		const appended = tree.children.slice(-2) as unknown as StudyLensJsx[];
 		expect(appended.every((n) => n.type === 'mdxJsxFlowElement')).toBe(true);
-		expect(appended.every((n) => n.name === 'StudyLens')).toBe(true);
+		expect(appended.every((n) => n.name === 'StudyLenses')).toBe(true);
 		expect(attrsOf(appended[0])).toMatchObject({
 			code: '// alpha sibling\nconst a = 1;\n',
 			lens: 'study',
@@ -217,7 +217,7 @@ describe('createRemarkStudyLenses', () => {
 		const appendedJsx = tree.children.filter(
 			(n) =>
 				(n as { type: string }).type === 'mdxJsxFlowElement' &&
-				(n as { name?: string }).name === 'StudyLens',
+				(n as { name?: string }).name === 'StudyLenses',
 		);
 		expect(appendedJsx.length).toBeGreaterThanOrEqual(1);
 	});
@@ -239,7 +239,7 @@ describe('createRemarkStudyLenses', () => {
 			contentRoot,
 		);
 		// Expect: ...original children..., heading (depth 2, text 'Exercises'),
-		// then one mdxJsxFlowElement StudyLens per sibling.
+		// then one mdxJsxFlowElement StudyLenses per sibling.
 		const heading = tree.children.at(-2);
 		const lastNode = tree.children.at(-1);
 		expect(heading?.type).toBe('heading');
@@ -249,7 +249,7 @@ describe('createRemarkStudyLenses', () => {
 				.children?.[0]?.value,
 		).toBe('Exercises');
 		expect((lastNode as { type: string }).type).toBe('mdxJsxFlowElement');
-		expect((lastNode as { name?: string }).name).toBe('StudyLens');
+		expect((lastNode as { name?: string }).name).toBe('StudyLenses');
 	});
 
 	it('embed-tabs emits mdxJsxFlowElement Tabs wrapping one TabItem per sibling', () => {
@@ -288,11 +288,11 @@ describe('createRemarkStudyLenses', () => {
 		expect(firstAttrs.value).toBe('01-alpha');
 		expect(firstAttrs.label).toBe('01-alpha');
 
-		// First TabItem's sole child is a StudyLens mdxJsxFlowElement
+		// First TabItem's sole child is a StudyLenses mdxJsxFlowElement
 		// (same emission shape as root-level fences and bottom-mode embeds).
 		const innerJsx = tabItems[0]?.children?.[0];
 		expect(innerJsx?.type).toBe('mdxJsxFlowElement');
-		expect(innerJsx?.name).toBe('StudyLens');
+		expect(innerJsx?.name).toBe('StudyLenses');
 		const innerAttrs = Object.fromEntries(
 			(innerJsx?.attributes ?? []).map((a) => [a.name, a.value]),
 		);
@@ -309,7 +309,7 @@ describe('createRemarkStudyLenses', () => {
 		// The last child is the appended sibling.
 		const appended = tree.children.at(-1) as unknown as StudyLensJsx;
 		expect(appended?.type).toBe('mdxJsxFlowElement');
-		expect(appended?.name).toBe('StudyLens');
+		expect(appended?.name).toBe('StudyLenses');
 		const attrs = attrsOf(appended);
 		expect(attrs.lens).toBe('parsons');
 		// Merged: cascade shuffleSeed=42 + directive distractors=4.
@@ -330,7 +330,7 @@ describe('createRemarkStudyLenses', () => {
 		);
 		const appended = tree.children.at(-1) as unknown as StudyLensJsx;
 		expect(appended?.type).toBe('mdxJsxFlowElement');
-		expect(appended?.name).toBe('StudyLens');
+		expect(appended?.name).toBe('StudyLenses');
 		const attrs = attrsOf(appended);
 		expect(attrs.lens).toBe('parsons');
 		expect(attrs.config).toBe(JSON.stringify({ shuffleSeed: 42, distractors: 4 }));
@@ -350,7 +350,7 @@ describe('createRemarkStudyLenses', () => {
 		const jsxNodes = tree.children.filter(
 			(n) =>
 				(n as { type: string }).type === 'mdxJsxFlowElement' &&
-				(n as { name?: string }).name === 'StudyLens',
+				(n as { name?: string }).name === 'StudyLenses',
 		) as unknown as StudyLensJsx[];
 
 		// Plain ```js fence: frontmatter wins over cascade (study → highlight)
@@ -365,7 +365,7 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
-	it('manually-placed <StudyLens> JSX element is NOT touched by the plugin', () => {
+	it('manually-placed <StudyLenses> JSX element is NOT touched by the plugin', () => {
 		// Programmatic tree: one pre-existing mdxJsxFlowElement (simulating
 		// author-placed JSX in an .mdx file) + one ```js fence. After the
 		// transformer runs, the JSX node is byte-identical; the code node
@@ -375,7 +375,7 @@ describe('createRemarkStudyLenses', () => {
 
 		const jsxNode = {
 			type: 'mdxJsxFlowElement',
-			name: 'StudyLens',
+			name: 'StudyLenses',
 			attributes: [
 				{ type: 'mdxJsxAttribute', name: 'code', value: 'existing' },
 			],
@@ -400,10 +400,10 @@ describe('createRemarkStudyLenses', () => {
 
 		// Original JSX node unchanged
 		expect(JSON.stringify(tree.children[0])).toBe(jsxSnapshot);
-		// Code node replaced by a new mdxJsxFlowElement StudyLens
+		// Code node replaced by a new mdxJsxFlowElement StudyLenses
 		const replaced = tree.children[1] as unknown as StudyLensJsx;
 		expect(replaced.type).toBe('mdxJsxFlowElement');
-		expect(replaced.name).toBe('StudyLens');
+		expect(replaced.name).toBe('StudyLenses');
 		expect(attrsOf(replaced)).toMatchObject({
 			code: 'let x = 1;',
 			lens: 'study',
@@ -502,28 +502,28 @@ describe('createRemarkStudyLenses', () => {
 		expect(subdirTabs.name).toBe('Tabs');
 	});
 
-	it('D.19: bottom mode with groups → per-file StudyLens nodes with headings between groups', () => {
+	it('D.19: bottom mode with groups → per-file StudyLenses nodes with headings between groups', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'grouped-bottom');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
 		const appended = tree.children.slice(1);
-		// group-a heading + 2 StudyLens + group-b heading + 1 StudyLens = 5
+		// group-a heading + 2 StudyLenses + group-b heading + 1 StudyLenses = 5
 		expect(appended).toHaveLength(5);
 
 		// Group A heading
 		expect(appended[0]?.type).toBe('heading');
 		expect((appended[0] as { depth?: number }).depth).toBe(3);
 
-		// Two StudyLens nodes for group-a
+		// Two StudyLenses nodes for group-a
 		expect((appended[1] as { type: string }).type).toBe('mdxJsxFlowElement');
 		expect((appended[2] as { type: string }).type).toBe('mdxJsxFlowElement');
 
 		// Group B heading
 		expect(appended[3]?.type).toBe('heading');
 
-		// One StudyLens for group-b
+		// One StudyLenses for group-b
 		expect((appended[4] as { type: string }).type).toBe('mdxJsxFlowElement');
 	});
 

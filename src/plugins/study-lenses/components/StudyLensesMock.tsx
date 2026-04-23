@@ -1,15 +1,15 @@
 /**
- * @file V1 mock `<StudyLens>` React component.
+ * @file V1 mock `<StudyLenses>` React component.
  *
- * Rendered wherever the remark plugin emits `<StudyLens>` (either
+ * Rendered wherever the remark plugin emits `<StudyLenses>` (either
  * as a transformed fenced code block or as a sibling embed inside
  * `<Tabs>`/`<TabItem>`). Presents a small lens/lang label above a
  * Docusaurus-styled code block via `@theme/CodeBlock` — getting
  * Prism highlighting, copy-to-clipboard, and dark-mode support for
  * free.
  *
- * V2 target: this mock is replaced by the rich study-lens component
- * at `src/lib/welcome-to-programming/just-enough/javascript/components/lenses/study/`
+ * V2 target: this mock is replaced by the rich study-lenses orchestrator
+ * at `src/lib/welcome-to-programming/just-enough/javascript/study-lenses/orchestrator/`
  * via an MDXComponents swizzle switch. The plugin emission path is
  * unchanged.
  */
@@ -22,7 +22,7 @@ import React from 'react';
 // the webpack-bundled theme-component path.
 import parseLensConfig from '../parse-lens-config';
 
-type StudyLensProps = {
+type StudyLensesProps = {
 	readonly code?: string;
 	readonly lens?: string;
 	readonly lang?: string;
@@ -34,12 +34,12 @@ type StudyLensProps = {
  * Every prop is optional so the mock stays robust if the remark
  * plugin ever emits a degenerate node.
  */
-function StudyLensMock({
+function StudyLensesMock({
 	code = '',
 	lens = 'study',
 	lang = 'js',
 	config,
-}: StudyLensProps = {}): React.JSX.Element {
+}: StudyLensesProps = {}): React.JSX.Element {
 	const parsedConfig = parseLensConfig(config);
 	const configSummary =
 		parsedConfig === null
@@ -49,7 +49,7 @@ function StudyLensMock({
 				: Object.keys(parsedConfig).join(', ');
 
 	return (
-		<div data-study-lens={lens}>
+		<div data-study-lenses={lens}>
 			<ul style={{ fontSize: '0.8em', opacity: 0.7, marginBottom: '0.25rem' }}>
 				<li>lens: {lens}</li>
 				<li>lang: {lang}</li>
@@ -65,4 +65,4 @@ function StudyLensMock({
 	);
 }
 
-export default StudyLensMock;
+export default StudyLensesMock;

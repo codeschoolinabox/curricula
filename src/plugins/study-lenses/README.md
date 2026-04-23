@@ -2,10 +2,10 @@
 
 A build-time Docusaurus plugin that pre-processes markdown content in the
 `@spiralearn` curriculum so that every fenced code block renders as a
-`<StudyLens>` React component, and every `.js` file co-located with an
+`<StudyLenses>` React component, and every `.js` file co-located with an
 `index.md` page auto-embeds into that page.
 
-V1 is **pipeline plumbing with a mock component**: the `<StudyLens>` emitted by
+V1 is **pipeline plumbing with a mock component**: the `<StudyLenses>` emitted by
 the plugin is a styled `<pre><code>` with labels showing the lens and language
 identifiers. The rich study environment (CodeMirror editor, trace table,
 run/debug/socratizing) is V2.
@@ -90,7 +90,7 @@ synonym anywhere in the code is a bug.
   (before any code) OR its trailing comment block (after the last
   non-comment statement); middle-of-file placement is inert. The
   directive block is parsed for lens name + optional JSON config, and
-  removed from the code that feeds into `<StudyLens>` — learners see
+  removed from the code that feeds into `<StudyLenses>` — learners see
   only the exercise body.
 - **Leading comment block** — the contiguous prefix of a `.js` file
   made of blank lines, an optional shebang, line comments, and block
@@ -102,7 +102,7 @@ synonym anywhere in the code is a bug.
   path segment. Root-level files (no `/` in their label) form the
   **root group**; files under a subdirectory share the subdirectory
   name as their **group key**. Each group renders as a separate
-  `<Tabs>` element (tabs mode) or a separate block of `<StudyLens>`
+  `<Tabs>` element (tabs mode) or a separate block of `<StudyLenses>`
   nodes (bottom mode), preceded by a heading.
 - **Group key** — the first path segment of a sibling's relative-path
   label. Siblings sharing a group key are rendered together.
@@ -126,9 +126,9 @@ file's absolute path.
 
 1. Every fenced code block whose language is a **configured language**
    (present in the resolved configuration's `defaults` map) is replaced by
-   an `mdxJsxFlowElement` node named `StudyLens` with `code`, `lens`,
+   an `mdxJsxFlowElement` node named `StudyLenses` with `code`, `lens`,
    `lang`, and optional `config` attributes so that when the tree is
-   rendered the block becomes a `<StudyLens>` React component.
+   rendered the block becomes a `<StudyLenses>` React component.
    Unconfigured languages pass through untouched.
 2. For sibling-bearing pages (the `index.md` when present in a directory,
    otherwise the `README.md`), any `.js` files found in the directory subtree
@@ -140,10 +140,10 @@ file's absolute path.
    alphabetical order by group key; empty groups (no files after language
    filtering) are silently omitted.
 
-   In `bottom` mode each group's siblings become per-sibling `<StudyLens>`
+   In `bottom` mode each group's siblings become per-sibling `<StudyLenses>`
    nodes preceded by a heading. In `tabs` mode each group becomes a separate
    Docusaurus `<Tabs>` element wrapping one `<TabItem>` per sibling, each
-   TabItem containing a single `<StudyLens>`. Tab labels are
+   TabItem containing a single `<StudyLenses>`. Tab labels are
    **group-relative** (the group-key prefix is stripped). The plugin emits
    Docusaurus's native `Tabs`/`TabItem` (from `@theme/`) rather than a
    custom wrapper — this gives keyboard navigation, URL-hash tab persistence,
@@ -171,9 +171,9 @@ unchanged, as do all doc and link items. Reads config through the same
 cascade resolver as Subsystem 1, so sidebar labels stay in sync with
 MDAST transforms.
 
-The V1 mock `<StudyLens>` React component lives **inside this plugin**
-at [`./components/StudyLensMock.tsx`](./components/) so the plugin is
-self-contained. It is registered as `StudyLens` via the swizzled theme
+The V1 mock `<StudyLenses>` React component lives **inside this plugin**
+at [`./components/StudyLensesMock.tsx`](./components/) so the plugin is
+self-contained. It is registered as `StudyLenses` via the swizzled theme
 file at [`../../theme/MDXComponents.js`](../../theme/MDXComponents.js),
 alongside `Tabs` and `TabItem` (imported from `@theme/Tabs` and
 `@theme/TabItem` — they ship with `@docusaurus/theme-classic` but are
@@ -214,9 +214,9 @@ top-level keys, all optional:
   omitting `"py"` leaves Python fences as plain code blocks.
 - **`embedSiblings`** controls auto-embedding of sibling `.js` files:
   - `mode: "off"` disables embedding entirely.
-  - `mode: "bottom"` appends each sibling as its own `<StudyLens>` block.
+  - `mode: "bottom"` appends each sibling as its own `<StudyLenses>` block.
   - `mode: "tabs"` appends a single Docusaurus `<Tabs>` element wrapping
-    one `<TabItem>` per sibling; each TabItem contains one `<StudyLens>`.
+    one `<TabItem>` per sibling; each TabItem contains one `<StudyLenses>`.
   - `ignorePrefixes` is an array of directory-name prefixes to skip during the
     sibling walk (e.g. `"staging-"` — matches `staging-foo/` and `staging-wip/`).
   - `sectionHeading` (optional) injects a depth-2 heading before the embed
@@ -348,23 +348,23 @@ If you're extending this plugin to emit a new component, use the
 (in `@docusaurus/mdx-loader/lib/processor.js`) covers MDX-specific node
 types (`mdxJsxFlowElement`, `mdxFlowExpression`, etc.) but NOT plain
 hast `element` nodes. A `code` MDAST node mutated with
-`data.hName = 'StudyLens'` produces a hast element whose `tagName` is
-lowercased to `'studylens'` — `MDXComponents['StudyLens']` is missed,
+`data.hName = 'StudyLenses'` produces a hast element whose `tagName` is
+lowercased to `'studylens'` — `MDXComponents['StudyLenses']` is missed,
 the component never resolves, and the page renders a raw
 `<studylens>` DOM element.
 
-**What this plugin does:** every `<StudyLens>` emission goes through
+**What this plugin does:** every `<StudyLenses>` emission goes through
 `codeBlockToJsx`, which returns an `mdxJsxFlowElement` node with
-`name: 'StudyLens'`. That covers in-page fences (`transformFence`),
+`name: 'StudyLenses'`. That covers in-page fences (`transformFence`),
 bottom-mode sibling embeds (`appendBottomEmbed`), AND the inner
-`<StudyLens>` nested inside each `<TabItem>` in tabs-mode embeds
+`<StudyLenses>` nested inside each `<TabItem>` in tabs-mode embeds
 (`appendTabsEmbed`). `mdxJsxFlowElement` IS in the `passThrough` list
 so the PascalCase `name` survives intact to the MDX runtime; no
 lowercase alias is needed in the swizzled MDXComponents.
 
-### Manually-placed `<StudyLens>` JSX
+### Manually-placed `<StudyLenses>` JSX
 
-If an author writes `<StudyLens code={...} lens="..." />` directly in an `.mdx`
+If an author writes `<StudyLenses code={...} lens="..." />` directly in an `.mdx`
 file, the plugin leaves the JSX alone — it only visits MDAST `code` nodes.
 Fenced code blocks in the same file still get transformed.
 
@@ -398,7 +398,7 @@ All forms below are accepted; `@study-lens <name>` is the tag
 ```
 
 **The directive block is stripped from the code that reaches
-`<StudyLens>`.** Learners see only the exercise body, never the
+`<StudyLenses>`.** Learners see only the exercise body, never the
 plumbing. Blank lines immediately between the stripped directive and
 the preserved code body are collapsed alongside the block, so you
 don't get a visual gap; blanks at the file's BOF/EOF edge are
@@ -530,10 +530,10 @@ type Sibling = Readonly<{
   //   is applied at emission time.
 }>;
 
-// The props shape the plugin writes to hProperties; what <StudyLens> receives.
+// The props shape the plugin writes to hProperties; what <StudyLenses> receives.
 // `config` is serialization-tolerant (see § Config-prop serialization below):
 // string (possibly JSON) OR object. Consumers parse via a shared util.
-type StudyLensHastProps = Readonly<{
+type StudyLensesHastProps = Readonly<{
   code: string;
   lens: LensName;
   lang: LangName;
@@ -597,11 +597,11 @@ Docusaurus 3.7; the component's parser is the same either way.
   ignore-prefixed dirs (also skipping hidden dirs, `node_modules/`; not
   following symlinks), returns `Sibling[]` (frozen).
 - `code-block-to-jsx.ts` — converts a `code` MDAST node into an
-  `mdxJsxFlowElement` node named `StudyLens` with `code`, `lens`, `lang`,
-  and optional `config` attributes. All `<StudyLens>` emission sites call
+  `mdxJsxFlowElement` node named `StudyLenses` with `code`, `lens`, `lang`,
+  and optional `config` attributes. All `<StudyLenses>` emission sites call
   this single helper.
 - `parse-lens-config.ts` — the shared fallback-tolerant decoder for the
-  `config` prop. Imported by `StudyLensMock` in V1; expected to be promoted
+  `config` prop. Imported by `StudyLensesMock` in V1; expected to be promoted
   to `src/lib/utils/` when a second consumer (e.g. V2 rich component)
   appears.
 - `remark-study-lenses.ts` — the remark plugin factory: guards, resolves
@@ -621,7 +621,7 @@ Docusaurus 3.7; the component's parser is the same either way.
 - `index.ts` — re-exports the three entry points (remark factory,
   lifecycle plugin, sidebar-generator factory) used by
   `docusaurus.config.ts`.
-- `components/StudyLensMock.tsx` — V1 mock component. Renders a small
+- `components/StudyLensesMock.tsx` — V1 mock component. Renders a small
   lens/lang label above `<CodeBlock>` imported from `@theme/CodeBlock`
   (Prism highlighting, copy button, dark-mode styling all handled by
   Docusaurus). Replaced in V2 by the rich component at
@@ -629,7 +629,7 @@ Docusaurus 3.7; the component's parser is the same either way.
   (swap happens in the `MDXComponents.js` swizzle; no plugin change needed).
 - No custom tabs-wrapper component. Tabs-mode embeds emit Docusaurus's
   native `<Tabs>`/`<TabItem>` directly from the plugin as
-  `mdxJsxFlowElement` nodes; each `<TabItem>` contains one `<StudyLens>`.
+  `mdxJsxFlowElement` nodes; each `<TabItem>` contains one `<StudyLenses>`.
 - `tests/` — Vitest unit tests, co-located per DEV.md convention. On-disk
   fixture trees under `tests/fixtures/`.
 

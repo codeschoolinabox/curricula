@@ -196,7 +196,7 @@ function groupSiblings(
 }
 
 /**
- * Appends one `mdxJsxFlowElement` `<StudyLens>` node per sibling to the
+ * Appends one `mdxJsxFlowElement` `<StudyLenses>` node per sibling to the
  * tree's children. Uses `codeBlockToJsx` so `rehype-raw` preserves the
  * PascalCase component name (see `code-block-to-jsx.ts` for the rationale).
  */
@@ -228,11 +228,11 @@ function appendBottomEmbed(
  * children are one `<TabItem>` per sibling (in the walker's
  * alphabetical-by-label order). Each `<TabItem>` carries `value` and
  * `label` attributes matching the sibling's label, and contains
- * exactly one `mdxJsxFlowElement` `<StudyLens>` child produced by
+ * exactly one `mdxJsxFlowElement` `<StudyLenses>` child produced by
  * `codeBlockToJsx` — same emission path as in-page fences and
  * bottom-mode embeds.
  *
- * The plugin emits `<Tabs>` / `<TabItem>` / `<StudyLens>` as
+ * The plugin emits `<Tabs>` / `<TabItem>` / `<StudyLenses>` as
  * `mdxJsxFlowElement` nodes; `rehype-raw` preserves them via its
  * passThrough list. The swizzled `MDXComponents` imports `Tabs` +
  * `TabItem` from `@theme/` (they're not in the default registry).
@@ -329,7 +329,7 @@ function transformFence(
 	node: Code,
 	config: ReturnType<typeof resolveCascade>,
 	frontmatterDefaultLens: string | undefined,
-): StudyLensJsxNode | undefined {
+): StudyLensesJsxNode | undefined {
 	const info = node.lang;
 	if (info === null || info === undefined) return;
 

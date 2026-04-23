@@ -245,17 +245,17 @@ a content root and returns the generator function.
   The sidebar generator's `contentRoot` must match one of the remark
   plugin's content roots for dev-server file-watching signals
   (contributed by the lifecycle plugin) to reach it.
-- **Emission shape (structural invariant).** Every `<StudyLens>`
+- **Emission shape (structural invariant).** Every `<StudyLenses>`
   occurrence is emitted as an `mdxJsxFlowElement` node via a single
   helper (`codeBlockToJsx`) — in-page fences, bottom-mode sibling
-  embeds, AND the inner `<StudyLens>` nested inside each `<TabItem>`
+  embeds, AND the inner `<StudyLenses>` nested inside each `<TabItem>`
   in tabs-mode embeds. `mdxJsxFlowElement` is in `rehype-raw`'s
   `passThrough` list, so the PascalCase `name` survives intact through
   both `.md` and `.mdx` pipelines without any lowercase-alias
   workaround in MDXComponents. Tabs-mode composes the same JSX leaf:
   a top-level `mdxJsxFlowElement(Tabs)` contains one
   `mdxJsxFlowElement(TabItem)` per sibling, each TabItem containing a
-  single `mdxJsxFlowElement(StudyLens)` leaf. The `config` attribute
+  single `mdxJsxFlowElement(StudyLenses)` leaf. The `config` attribute
   is fallback-tolerant — object or JSON string at runtime, decoded by
   the shared `parseLensConfig` util — because MDX attribute
   serialization has uncertain object round-trip semantics and the
