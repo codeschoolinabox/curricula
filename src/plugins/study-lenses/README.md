@@ -51,8 +51,12 @@ synonym anywhere in the code is a bug.
   `txt`, `bash`, `diff`) fall through to Docusaurus's default code-block
   rendering. This avoids footguns like replacing an ASCII diagram in a
   `txt` fence with a plaintext editor.
-- **Lens suffix** — the `:name` portion after the language in an info string
-  (e.g. `js:highlight` → suffix `highlight`).
+- **Lens suffix** — the text after the colon in a fence info string. A
+  bare suffix names a single lens (`js:highlight`). A comma-separated
+  suffix names zero or more transforms followed by a terminal lens
+  (`js:format,loopGuard,editor` → transforms `[format, loopGuard]`, lens
+  `editor`). The last token is always the lens; earlier tokens are
+  transforms in authored order.
 - **Cascade** — the root → leaf directory walk that collects and merges
   `lenses.json` files.
 - **Resolved config** — the frozen, deep-merged output of the cascade for a
@@ -458,6 +462,19 @@ Read from `vfile.data.frontMatter.defaultLens`; Docusaurus
 pre-populates it before `beforeDefaultRemarkPlugins` runs. The
 configured-languages gate still applies — frontmatter cannot make an
 unconfigured language transform.
+
+**Fence info string grammar (Option A):**
+
+```text
+<lang>[:<token>(,<token>)*]
+```
+
+- No suffix → lens from frontmatter or cascade default; no transforms.
+- One token → lens name; no transforms. (`js:editor`)
+- N tokens → last is lens, earlier are transforms in order.
+  (`js:format,loopGuard,editor` → transforms=[format,loopGuard], lens=editor)
+- Any empty token (leading/trailing/doubled comma) → fence left as plain
+  code block (malformed; not transformed).
 
 **Precedence (authoritative):**
 

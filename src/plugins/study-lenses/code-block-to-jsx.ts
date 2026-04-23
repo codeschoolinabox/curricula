@@ -52,7 +52,10 @@ type StudyLensesJsxNode = {
  * @param params - `lens` is the resolved lens name; `lang` is the
  *   language identifier from the fence info string; `lensConfig` is the
  *   per-lens cascade configuration, serialised as JSON onto the `config`
- *   attribute when present.
+ *   attribute when present; `transforms` is the ordered list of transform
+ *   names from the fence's comma-separated suffix (Option A), serialised
+ *   as a comma-joined string onto the `transforms` attribute when
+ *   non-empty.
  * @returns A fresh `mdxJsxFlowElement` node with `name: 'StudyLenses'` and
  *   attribute values matching the plugin's component prop contract.
  */
@@ -62,10 +65,12 @@ function codeBlockToJsx(
 		lens,
 		lang,
 		lensConfig,
+		transforms,
 	}: {
 		readonly lens: LensName;
 		readonly lang: LangName;
 		readonly lensConfig?: Readonly<Record<string, unknown>>;
+		readonly transforms?: ReadonlyArray<string>;
 	},
 ): StudyLensesJsxNode {
 	const attributes: StudyLensesJsxAttribute[] = [
@@ -78,6 +83,13 @@ function codeBlockToJsx(
 			type: 'mdxJsxAttribute',
 			name: 'config',
 			value: JSON.stringify(lensConfig),
+		});
+	}
+	if (transforms !== undefined && transforms.length > 0) {
+		attributes.push({
+			type: 'mdxJsxAttribute',
+			name: 'transforms',
+			value: transforms.join(','),
 		});
 	}
 	return {

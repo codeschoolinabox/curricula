@@ -324,6 +324,12 @@ function resolveEmittedLensConfig(
  * The configured-languages gate fires at the outermost layer: the
  * fence's `lang` must be present in `config.defaults` for transformation
  * to happen AT ALL — frontmatter does not lift unconfigured languages.
+ *
+ * Option-A comma-separated suffix: when a suffix contains commas the
+ * last token is the lens and earlier tokens are transform names (in
+ * order). Example: `js:format,loopGuard,editor` → transforms=[format,
+ * loopGuard], lens=editor. Any empty token (leading, trailing, or
+ * doubled comma) rejects the fence as malformed — left as plain code.
  */
 function transformFence(
 	node: Code,
@@ -339,9 +345,21 @@ function transformFence(
 	const cascadeDefaultLens = config.defaults[lang];
 	if (cascadeDefaultLens === undefined) return; // configured-languages rule
 
-	const lens = suffix ?? frontmatterDefaultLens ?? cascadeDefaultLens;
+	let lens: string;
+	let transforms: ReadonlyArray<string>;
+
+	if (suffix !== undefined) {
+		const tokens = suffix.split(',');
+		if (tokens.some((t) => t === '')) return; // malformed: empty token
+		lens = tokens[tokens.length - 1]!;
+		transforms = tokens.slice(0, -1);
+	} else {
+		lens = frontmatterDefaultLens ?? cascadeDefaultLens;
+		transforms = [];
+	}
+
 	const lensConfig = config.lenses[lens];
-	return codeBlockToJsx(node, { lens, lang, lensConfig });
+	return codeBlockToJsx(node, { lens, lang, lensConfig, transforms });
 }
 
 export default createRemarkStudyLenses;

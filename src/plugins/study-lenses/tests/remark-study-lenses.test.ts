@@ -562,4 +562,70 @@ describe('createRemarkStudyLenses', () => {
 
 		expect(JSON.stringify(tree)).toBe(before);
 	});
+
+	// ─── Option-A: comma-separated fence syntax ──────────────────────────
+	//
+	// Tests use the `configured-js` fixture dir (defaults.js=study) with a
+	// synthetic vfile path so the cascade resolver finds the real lenses.json
+	// while the fence content comes from the parsed string directly.
+
+	function parseStringInConfiguredJs(md: string): Root {
+		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
+		const transformer = createRemarkStudyLenses({ contentRoot });
+		const vfile = new VFile({
+			value: md,
+			path: path.join(contentRoot, 'index.md'),
+		});
+		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		transformer(tree, vfile);
+		return tree;
+	}
+
+	it('Option-A: js:editor (no comma) → lens=editor, no transforms attribute (regression baseline)', () => {
+		const tree = parseStringInConfiguredJs('```js:editor\nlet x = 1;\n```\n');
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('editor');
+		expect(attrs.transforms).toBeUndefined();
+	});
+
+	it('Option-A: js:format,editor → lens=editor, transforms=format', () => {
+		const tree = parseStringInConfiguredJs('```js:format,editor\nlet x = 1;\n```\n');
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('editor');
+		expect(attrs.transforms).toBe('format');
+	});
+
+	it('Option-A: js:format,loopGuard,editor → lens=editor, transforms=format,loopGuard', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:format,loopGuard,editor\nlet x = 1;\n```\n',
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('editor');
+		expect(attrs.transforms).toBe('format,loopGuard');
+	});
+
+	it('Option-A malformed: js:,editor (leading empty token) → fence NOT transformed', () => {
+		const tree = parseStringInConfiguredJs('```js:,editor\nlet x = 1;\n```\n');
+
+		// No StudyLenses node emitted; original code node preserved
+		expect(findStudyLensNode(tree.children)).toBeUndefined();
+		const codeNode = tree.children.find((n) => n.type === 'code');
+		expect(codeNode).toBeDefined();
+	});
+
+	it('Option-A malformed: js:format,,editor (double comma) → fence NOT transformed', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:format,,editor\nlet x = 1;\n```\n',
+		);
+
+		expect(findStudyLensNode(tree.children)).toBeUndefined();
+		const codeNode = tree.children.find((n) => n.type === 'code');
+		expect(codeNode).toBeDefined();
+	});
 });

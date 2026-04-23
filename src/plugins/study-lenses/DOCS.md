@@ -32,11 +32,21 @@ labels at sidebar-build time.
    rewrite the node in place so that downstream rendering produces the
    plugin's React component. Fences whose language is absent from
    `defaults` are left untouched and fall through to Docusaurus's
-   default rendering. The lens resolution for each transformed fence
-   follows a three-level precedence: explicit `:suffix` on the fence
-   wins, otherwise the per-file `defaultLens` from the markdown
-   frontmatter (read from the vfile's pre-populated frontmatter data,
-   not from an MDAST yaml node), otherwise the cascade's `defaults[lang]`.
+   default rendering.
+
+   Suffix parsing (Option A — comma-separated transforms + lens):
+
+   - Split the info string on `:` → `[lang, suffix]`.
+   - If `suffix` is absent: lens from frontmatter or cascade; no
+     transforms.
+   - If `suffix` is present: split on `,`. Any empty token (leading,
+     trailing, or doubled comma) → leave fence untouched (malformed).
+     Last token = lens; earlier tokens = transforms in authored order.
+   - `transforms` emitted as a comma-joined string on the `transforms`
+     attribute; omitted when empty.
+
+   Lens resolution precedence: fence `:suffix` (last comma token) >
+   frontmatter `defaultLens` > cascade `defaults[lang]`.
 
 4. **Embed siblings** (sync; filesystem read) — only for sibling-bearing
    pages whose resolved configuration enables embedding. Collect the

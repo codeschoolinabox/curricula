@@ -179,10 +179,12 @@ type OrchestratorState = Readonly<{
  * JSX nodes, resolved to the orchestrator component through the
  * swizzled `MDXComponents` registry.
  *
- * @remarks The plugin does NOT yet parse comma-separated fence
- * syntax — `lens` is a single lens name today. The orchestrator
- * parses this into an internal `Pipeline`. Updating the plugin to
- * emit `Pipeline` directly is backlogged (master plan §Backlog).
+ * @remarks `transforms` carries the comma-separated ordered list of
+ * transform names from the fence's Option-A suffix (e.g.
+ * `js:format,loopGuard,editor` → `transforms="format,loopGuard"`,
+ * `lens="editor"`). The orchestrator parses it via
+ * `transforms?.split(',').filter(Boolean) ?? []` to construct a
+ * `Pipeline`. When absent, the pipeline has no transforms.
  *
  * `lang` is passed through for historical reasons; the orchestrator
  * accepts it and validates that it is `'js'` (JEJ-only). Non-JS
@@ -193,6 +195,8 @@ type PluginEmittedProps = Readonly<{
 	lens?: string;
 	lang?: string;
 	config?: string | Readonly<Record<string, unknown>>;
+	/** Comma-separated ordered transform names from the fence suffix. */
+	transforms?: string;
 }>;
 
 // --- Event protocol (payload shapes only; dispatch mechanism is in event-bus.ts) ---

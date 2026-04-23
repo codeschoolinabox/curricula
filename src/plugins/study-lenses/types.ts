@@ -136,6 +136,8 @@ type StudyLensesHastProps = Readonly<{
 	lens: LensName;
 	lang: LangName;
 	config?: string | Readonly<Record<string, unknown>>;
+	/** Comma-separated ordered list of transform names (Option A). */
+	transforms?: string;
 }>;
 
 // Tabs-mode embeds now emit Docusaurus's native `<Tabs>`/`<TabItem>` via
