@@ -8,11 +8,6 @@ import eslintPluginSonarJS from 'eslint-plugin-sonarjs';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import tseslint from 'typescript-eslint';
 
-// Per-package boundary configs
-import enforcerBoundaries from './src/lib/language-level-enforcer/eslint.boundaries.mjs';
-import validatorBoundaries from './src/lib/language-level-validator/eslint.boundaries.mjs';
-import traceBoundaries from './src/lib/sl-trace-js-aran-legacy/eslint.boundaries.mjs';
-
 export default tseslint.config(
 	// =========================================================================
 	// Global ignores
@@ -276,25 +271,6 @@ export default tseslint.config(
 				},
 			],
 		},
-	},
-
-	// =========================================================================
-	// Zone 3: Per-package boundary rules (imported from each lib package)
-	// =========================================================================
-	{
-		files: ['src/lib/language-level-enforcer/**/*.ts'],
-		settings: enforcerBoundaries.settings,
-		rules: enforcerBoundaries.rules,
-	},
-	{
-		files: ['src/lib/language-level-validator/**/*.ts'],
-		settings: validatorBoundaries.settings,
-		rules: validatorBoundaries.rules,
-	},
-	{
-		files: ['src/lib/sl-trace-js-aran-legacy/**/*.ts'],
-		settings: traceBoundaries.settings,
-		rules: traceBoundaries.rules,
 	},
 
 	// =========================================================================
