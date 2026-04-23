@@ -580,6 +580,38 @@ function createRunGenerator(
 
 	const gen = body();
 
+	// Replay support. Every path through which the RunResult emerges
+	// goes through gen.next() returning {done:true, value}; we wrap
+	// it once here to capture the settled value for replay. The
+	// replayed event refs come from `value.logs` — the same array
+	// `body()` pushed into during live iteration, frozen in place by
+	// buildResult. No clone; live and replay consumers see identical
+	// event references. See DOCS.md § Replay / re-iteration.
+	let isDone = false;
+	let settledResult: RunResult | null = null;
+	const origNext = gen.next.bind(gen);
+	Object.defineProperty(gen, 'next', {
+		value: async function interceptingNext(
+			...args: Parameters<typeof origNext>
+		): Promise<IteratorResult<RunEvent, RunResult>> {
+			const res = await origNext(...args);
+			// WHY the res.value !== undefined guard: externally-invoked
+			// gen.return() (triggered by a for-await break) completes the
+			// underlying AsyncGenerator with done:true, value:undefined,
+			// bypassing body()'s natural `return buildResult(...)`. We do
+			// NOT mark the run "settled" in that case — replay has no log
+			// to draw from. See DOCS.md § Replay § Out of scope.
+			if (res.done && res.value !== undefined) {
+				isDone = true;
+				settledResult = res.value as RunResult;
+			}
+			return res;
+		},
+		writable: false,
+		configurable: false,
+		enumerable: false,
+	});
+
 	// Memoized .result Promise. Lazy: first access drives the
 	// generator to completion. Subsequent accesses return the same
 	// Promise — safe to call `.result` or `await handle` repeatedly.
@@ -625,6 +657,33 @@ function createRunGenerator(
 				| null,
 		): Promise<TResult1 | TResult2> {
 			return getResult().then(onFulfilled, onRejected);
+		},
+		writable: false,
+		configurable: false,
+		enumerable: false,
+	});
+	// Capture the underlying AsyncGenerator's @@asyncIterator BEFORE we
+	// override it, so the live-iteration branch below can delegate
+	// without infinite recursion.
+	const liveAsyncIterator = gen[Symbol.asyncIterator].bind(gen);
+	Object.defineProperty(gen, Symbol.asyncIterator, {
+		value: function asyncIterator(): AsyncIterator<RunEvent, RunResult> {
+			// In-progress: delegate to the raw AsyncGenerator (which
+			// returns `this`, so concurrent for-awaits silently split
+			// via .next() serialization — DOCS.md § Replay).
+			if (!isDone || settledResult === null) return liveAsyncIterator();
+			// Settled: fresh iterator replays the frozen log refs.
+			const settled = settledResult;
+			const logs: readonly RunEvent[] = settled.logs ?? [];
+			let index = 0;
+			return {
+				next(): Promise<IteratorResult<RunEvent, RunResult>> {
+					if (index < logs.length) {
+						return Promise.resolve({ value: logs[index++]!, done: false });
+					}
+					return Promise.resolve({ value: settled, done: true });
+				},
+			};
 		},
 		writable: false,
 		configurable: false,
