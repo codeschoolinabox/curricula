@@ -231,6 +231,7 @@ function clearEventReady(views: BufferViews): void {
 export {
 	BUFFER_SIZE,
 	CONTROL_INDEX,
+	EVENT_READY,
 	EVENT_READY_INDEX,
 	PAUSE_INDEX,
 	PAYLOAD_BYTE_OFFSET,

@@ -47,6 +47,8 @@ const SIGNAL_RESPONDED = 2;
 const PAUSE_RUNNING = 0;
 const PAUSE_PAUSED = 1;
 
+const EVENT_READY = 1;
+
 // --- Pause protocol (blocks Worker between events) ---
 
 function checkPause() {
@@ -162,6 +164,7 @@ CONSOLE_METHODS.forEach(function(method) {
     const event = { event: 'console', method: method, args: args, line: line };
     events.push(event);
     Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
+    Atomics.store(controlView, EVENT_READY_INDEX, EVENT_READY);
     postMessage({ type: 'event', event: event });
     checkPause();
   };
@@ -178,6 +181,7 @@ function trappedAlert() {
   const event = { event: 'alert', args: args, return: undefined, line: line };
   events.push(event);
   Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
+  Atomics.store(controlView, EVENT_READY_INDEX, EVENT_READY);
   postMessage({ type: 'event', event: event });
   checkPause();
 }
@@ -192,6 +196,7 @@ function trappedConfirm() {
   const event = { event: 'confirm', args: args, return: returnValue, line: line };
   events.push(event);
   Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
+  Atomics.store(controlView, EVENT_READY_INDEX, EVENT_READY);
   postMessage({ type: 'event', event: event });
   checkPause();
   return returnValue;
@@ -207,6 +212,7 @@ function trappedPrompt() {
   const event = { event: 'prompt', args: args, return: returnValue, line: line };
   events.push(event);
   Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
+  Atomics.store(controlView, EVENT_READY_INDEX, EVENT_READY);
   postMessage({ type: 'event', event: event });
   checkPause();
   return returnValue;

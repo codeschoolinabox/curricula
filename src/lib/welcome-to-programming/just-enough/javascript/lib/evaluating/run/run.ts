@@ -44,6 +44,9 @@ import guardLoops from './guard-loops/guard-loops.js';
 import {
 	BUFFER_SIZE,
 	CONTROL_INDEX,
+	EVENT_READY,
+	EVENT_READY_INDEX,
+	clearEventReady,
 	createBufferViews,
 	writeAlertResponse,
 	writeConfirmResponse,
@@ -414,6 +417,25 @@ function createRunGenerator(
 			lastResumeTime = performance.now();
 			timeout = setTimeout(function onTimeout() {
 				timeout = null;
+
+				// Always deduct elapsed — the budget was consumed regardless of
+				// whether the Worker is paused or running.
+				remainingMs -= performance.now() - lastResumeTime;
+				if (remainingMs < 0) remainingMs = 0;
+
+				// EVENT_READY guard mirrors the trace engine: the Worker writes
+				// EVENT_READY after postMessage but before blocking. If set AND
+				// budget remains, the Worker is paused with a pending event —
+				// NOT stuck. Reschedule for the remaining budget so a real
+				// exhaustion (even with events flowing) still fires timedOut.
+				if (
+					Atomics.load(views.control, EVENT_READY_INDEX) === EVENT_READY &&
+					remainingMs > 0
+				) {
+					startTimeout();
+					return;
+				}
+
 				timedOut = true;
 				wakeDequeue();
 			}, remainingMs);
@@ -505,6 +527,11 @@ function createRunGenerator(
 					// code before the finally block can terminate it. The next
 					// iteration dequeues the sentinel cancel pushed and breaks.
 					if (cancelled) continue;
+					// WHY clearEventReady BEFORE writeResumeSignal: clearing
+					// after release would race against the Worker's next trap
+					// re-arming the flag — the main thread would clobber a
+					// fresh signal. See DOCS.md § Unified pause protocol.
+					clearEventReady(views);
 					writeResumeSignal(views);
 					continue;
 				}
