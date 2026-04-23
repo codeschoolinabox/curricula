@@ -26,17 +26,7 @@
 import * as recast from 'recast';
 import { walk } from 'estree-walker';
 
-/**
- * Result of guard injection — includes the transformed code and the
- * number of loops found (needed by the worker to know how many
- * `loopN` parameters to create for `new Function`).
- */
-type GuardResult = {
-	/** Transformed code with body-injection guards */
-	readonly code: string;
-	/** Number of while loops found and guarded */
-	readonly loopCount: number;
-};
+import type { GuardResult } from './types.js';
 
 /**
  * Builds an array mapping 0-indexed line numbers to the character
@@ -109,7 +99,7 @@ function toOffset(
  * positions). String insertion at computed offsets preserves all
  * original formatting — no lines added, no columns shifted.
  */
-function guardLoopsCondition(code: string, maxIterations: number): GuardResult {
+function guardLoops(code: string, maxIterations: number): GuardResult {
 	const ast = recast.parse(code);
 
 	// Collect while loops in reading order (pre-order DFS)
@@ -175,5 +165,4 @@ function guardLoopsCondition(code: string, maxIterations: number): GuardResult {
 	};
 }
 
-export default guardLoopsCondition;
-export type { GuardResult };
+export default guardLoops;

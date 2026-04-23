@@ -8,14 +8,11 @@ Live coordination file for the two parallel agents working on
 - **@agent-loopguard** — loop-guard implementation update.
   Spec: `./agent-loopguard.md`
 
-Both agents work on separate branches. This file is the cross-branch
-communication channel — update it on your branch and rebase off main
-regularly, or push coordination updates directly to main (small,
-non-code changes don't need review).
+Both agents work on **main**. Pull before every edit to a shared file.
 
 ---
 
-## How to use — 4-step protocol
+## How to use — 3-step protocol
 
 Follow this BEFORE editing any of these shared files:
 
@@ -26,22 +23,18 @@ Follow this BEFORE editing any of these shared files:
 
 The protocol:
 
-1. **Claim.** Append an entry to §Active claims below with your
-   agent name, branch, file(s) claimed, timestamp, and what you're
-   about to do.
-2. **Publish.** Commit + push the COORDINATION.md update to main
-   BEFORE starting the edit. (This is a coordination-only commit, no
-   code changes in it. Commit message: `coord: @agent-X claims <file>
-   for <reason>`.)
-3. **Sync.** If you're about to edit a shared file, `git pull origin
-   main` first. Check §Active claims. If another agent has an active
-   claim on the same file, hold off — either wait for their `[done]`
-   marker or message them via §Open questions.
-4. **Release.** When your edit lands on main, update your §Active
-   claims entry to `[done]` with the commit hash. Push to main.
+1. **Pull.** `git pull origin main` before editing any shared file.
+   Check §Active claims — if another agent has an active claim on the
+   same file, hold off or post in §Open questions.
+2. **Claim + edit.** Append an entry to §Active claims with your
+   agent name, file(s), timestamp, and what you're about to do.
+   Then make your edit.
+3. **Release.** Push to main. Update your §Active claims entry to
+   `[done]` with the commit hash.
 
-**Branch merges:** add an entry to §Branch queue before merging.
-Describe expected conflicts. Last-to-merge rebases.
+**Conflict?** If a push is rejected or a conflict is detected, **stop
+immediately.** Post the conflict details in §Open questions for the
+user to resolve. Do not attempt to rebase or merge independently.
 
 **Status updates:** one-liners in §Status log so the human user can
 see activity without reading diffs.
@@ -57,11 +50,11 @@ user-facing issues go here.
 landed on main; keep entries for audit trail)*
 
 <!-- Example format:
-- `[active]` **@agent-loopguard** on `feature/loopguard-update`:
-  editing `create-worker-script.ts` (lines 220–260, `loopParams`
-  setup). Started 2026-04-22 14:40. Expected duration: ~30min.
-- `[done, dead00d]` **@agent-merge** on `feature/api-merge`: moved
-  validation from api/run.ts into run.ts. Landed 2026-04-22 16:12.
+- `[active]` **@agent-loopguard**: editing `create-worker-script.ts`
+  (lines 220–260, `loopParams` setup). Started 2026-04-22 14:40.
+  Expected duration: ~30min.
+- `[done, dead00d]` **@agent-merge**: moved validation from
+  api/run.ts into run.ts. Landed 2026-04-22 16:12.
 -->
 
 - `[active]` **@agent-loopguard** on `feature/loopguard-update`:
@@ -87,25 +80,6 @@ landed on main; keep entries for audit trail)*
   - `shared/README.md` — remove guard-loops link/reference.
 
   Started 2026-04-22. Expected duration: 2–3 days.
-
----
-
-## §Branch queue
-
-*(agents: add an entry before merging to main; other agent reads
-before merging their own; last-to-merge rebases)*
-
-<!-- Example format:
-- **@agent-loopguard** — `feature/loopguard-update`:
-  - Summary: replaces body-injection with comma-in-condition; adds
-    support for for/do-while/for-of/for-in.
-  - Files: guard-loops.ts, guard-loops.test.ts, shared/README.md,
-    run/DOCS.md, run/README.md (loop-guard sections).
-  - Expected conflicts: NONE with merge's touched files — isolated
-    to the `guardLoopsCondition` template + docs sections.
-  - Tests: 35+ new cases in guard-loops.test.ts, all passing.
-  - Ready: 2026-04-22 16:00.
--->
 
 ---
 
@@ -177,6 +151,9 @@ but helpful)*
   don't touch `api/run.ts`, SAB protocol, or cancel logic.
 - **When in doubt, claim first.** A claim entry costs a tiny commit;
   a merge conflict costs an hour.
+- **Conflict → stop and escalate.** If a push is rejected or you
+  detect a conflict, stop immediately. Post the details in §Open
+  questions for the user. Do not attempt to resolve it yourself.
 - **Coordinate via this file, not private channels.** User reads
   here to see progress.
 - **When done with your task, push a final `[done]` status log

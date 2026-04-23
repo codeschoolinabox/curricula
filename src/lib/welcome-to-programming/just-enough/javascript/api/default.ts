@@ -12,7 +12,7 @@ import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import validateProgram from '../lib/validating/validate-program.js';
 import justEnoughJs from '../lib/validating/just-enough-js.js';
 import checkFormat from '../lib/formatting/check-format.js';
-import run from '../lib/evaluating/run/run.js';
+import run from './run.js';
 import trace from './trace.js';
 import debug from './debug.js';
 import createExecution from '../lib/evaluating/shared/create-execution.js';

@@ -136,7 +136,7 @@ type SetupMessage = {
  * `loopCount` is optional — when provided, the worker creates
  * `loop1` through `loopN` parameters for `new Function`, initialized
  * to 0. The code must already have `if (++loopN > max) throw ...`
- * guards injected by `guardLoopsCondition()`.
+ * guards injected by `guardLoops()`.
  */
 type ExecuteMessage = {
 	readonly type: 'execute';

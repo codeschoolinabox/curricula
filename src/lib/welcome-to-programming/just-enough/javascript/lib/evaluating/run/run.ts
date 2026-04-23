@@ -40,7 +40,7 @@ import type {
 } from './types.js';
 
 import createWorkerScript from './create-worker-script.js';
-import guardLoopsCondition from './guard-loops/guard-loops.js';
+import guardLoops from './guard-loops/guard-loops.js';
 import {
 	BUFFER_SIZE,
 	CONTROL_INDEX,
@@ -346,7 +346,7 @@ function createRunGenerator(
 		let execCode = code;
 		let loopCount = 0;
 		if (maxIterations !== undefined && Number.isFinite(maxIterations)) {
-			const guardResult = guardLoopsCondition(code, maxIterations);
+			const guardResult = guardLoops(code, maxIterations);
 			execCode = guardResult.code;
 			loopCount = guardResult.loopCount;
 		}

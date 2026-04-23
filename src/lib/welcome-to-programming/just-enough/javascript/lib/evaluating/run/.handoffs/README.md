@@ -65,9 +65,8 @@ for-in).
 is smaller; merge's trap-body EVENT_READY additions want to know the
 final loop-counter declaration shape.
 
-**If strictly parallel:** separate branches; use
-`evaluating/run/.handoffs/COORDINATION.md` as the cross-branch channel;
-last-to-merge rebases.
+**If strictly parallel:** both agents work on main; use the
+COORDINATION.md claim protocol to serialise edits to shared files.
 
 ## Coordination channel
 
@@ -76,12 +75,11 @@ A live communication file lives at
 
 Both agents must:
 
-1. Claim shared files in §Active claims before editing.
-2. Commit + push the claim BEFORE starting the edit.
-3. `git pull` before editing shared files; check active claims.
-4. Mark `[done]` with the merge commit hash when landed.
+1. `git pull origin main` before editing any shared file.
+2. Claim shared files in §Active claims before editing.
+3. Mark `[done]` with the commit hash when the edit lands on main.
 
-Branch merges are queued via §Branch queue in that file.
+Both agents work on main directly — no separate branches.
 Status updates (one-liners) go in §Status log.
 Cross-agent or user-facing blockers go in §Open questions.
 
