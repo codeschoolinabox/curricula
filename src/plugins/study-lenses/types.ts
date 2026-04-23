@@ -124,14 +124,14 @@ type Sibling = Readonly<{
 /**
  * The prop shape the plugin writes to `data.hProperties` on a
  * transformed fenced code block node. Surfaces as React props on
- * `<StudyLens>`.
+ * `<StudyLenses>`.
  *
  * @remarks `config` is serialization-tolerant — it arrives as either
  * a structured object (when the remark-rehype pipeline round-trips
  * objects cleanly) or a JSON-stringified representation (fallback).
  * Consumers decode via the shared `parseLensConfig` utility.
  */
-type StudyLensHastProps = Readonly<{
+type StudyLensesHastProps = Readonly<{
 	code: string;
 	lens: LensName;
 	lang: LangName;
@@ -200,5 +200,5 @@ export type {
 	ResolvedConfig,
 	SidebarGeneratorOptions,
 	Sibling,
-	StudyLensHastProps,
+	StudyLensesHastProps,
 };

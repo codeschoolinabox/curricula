@@ -9,7 +9,7 @@
  *   3. Transform     — walk `code` nodes; emit `mdxJsxFlowElement` via
  *                      `codeBlockToJsx` when their language is configured.
  *   4. Embed siblings — for `index.md` (or `README.md` when alone),
- *                       append per-block StudyLens nodes (bottom mode)
+ *                       append per-block StudyLenses nodes (bottom mode)
  *                       or a Docusaurus `<Tabs>` tree (tabs mode).
  *   5. (Heading)     — optional section-heading node appended before
  *                      the embed block when configured.
@@ -28,7 +28,7 @@ import resolveCascade from './resolve-cascade.js';
 import type { Code, Root } from 'mdast';
 import type { VFile } from 'vfile';
 
-import type { StudyLensJsxNode } from './code-block-to-jsx.js';
+import type { StudyLensesJsxNode } from './code-block-to-jsx.js';
 import type { ResolvedConfig, RemarkPluginOptions, Sibling } from './types.js';
 
 type Transformer = (tree: Root, file: VFile) => void;

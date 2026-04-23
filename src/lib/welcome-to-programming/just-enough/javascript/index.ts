@@ -9,7 +9,7 @@
 export { default } from './api/default.js';
 
 // --- Named exports: API functions ---
-export { default as run } from './api/run.js';
+export { default as run } from './lib/evaluating/run/run.js';
 export { default as trace } from './api/trace.js';
 export { default as validate } from './api/validate.js';
 export { default as parse } from './api/parse.js';

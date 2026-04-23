@@ -48,14 +48,14 @@ class FakeWorker {
 describe('createRunGenerator cancel', () => {
 	describe('cancel before first iterate', () => {
 		it('next() resolves with done: true', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.next();
 			expect(result.done).toBe(true);
 		});
 
 		it('result.ok is true (cancel is not a program error)', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.next();
 			if (!result.done) throw new Error('expected done');
@@ -63,7 +63,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('logs contains exactly one cancel event', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.next();
 			if (!result.done) throw new Error('expected done');
@@ -74,7 +74,7 @@ describe('createRunGenerator cancel', () => {
 
 	describe('idempotency', () => {
 		it('calling cancel twice does not throw', () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			expect(() => {
 				gen.cancel();
 				gen.cancel();
@@ -82,7 +82,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('calling cancel after completion does not throw', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			await gen.next();
 			expect(() => gen.cancel()).not.toThrow();
@@ -91,7 +91,7 @@ describe('createRunGenerator cancel', () => {
 
 	describe('subsequent next() after cancel completes', () => {
 		it('returns done: true on repeated next() calls', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			await gen.next();
 			const second = await gen.next();
@@ -119,7 +119,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('cancel during pending dequeue resolves next() with done:true', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			// Kick off iteration — body runs through setup, awaits dequeue
 			// (FakeWorker never posts, so dequeue suspends).
 			const nextPromise = gen.next();
@@ -132,7 +132,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('mid-iterate cancel appends cancel event to logs', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			const nextPromise = gen.next();
 			await Promise.resolve();
 			await Promise.resolve();
@@ -144,7 +144,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('result.ok is true after mid-iterate cancel', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			const nextPromise = gen.next();
 			await Promise.resolve();
 			await Promise.resolve();
@@ -157,7 +157,7 @@ describe('createRunGenerator cancel', () => {
 
 	describe('cancel is not writable (runtime enforcement)', () => {
 		it('assigning cancel throws in strict mode', () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			expect(() => {
 				(gen as { cancel: () => void }).cancel = () => {};
 			}).toThrow();
@@ -166,14 +166,14 @@ describe('createRunGenerator cancel', () => {
 
 	describe('.result (Task D)', () => {
 		it('resolves to RunResult when cancelled before iterate', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.result;
 			expect(result.ok).toBe(true);
 		});
 
 		it('resolved RunResult contains cancel event in logs', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.result;
 			if (!result.ok) throw new Error('expected ok');
@@ -181,7 +181,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('memoizes — same Promise on repeated access', () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const p1 = gen.result;
 			const p2 = gen.result;
@@ -189,7 +189,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('result property is not writable', () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			expect(() => {
 				(gen as { result: Promise<unknown> }).result = Promise.resolve(
 					null,
@@ -200,14 +200,14 @@ describe('createRunGenerator cancel', () => {
 
 	describe('.then / PromiseLike (Task D)', () => {
 		it('await handle resolves to RunResult', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen;
 			expect(result.ok).toBe(true);
 		});
 
 		it('await handle and await handle.result return same value', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const viaAwait = await gen;
 			const viaResult = await gen.result;
@@ -215,24 +215,24 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('then() callback receives RunResult', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const value = await gen.then((r) => (r.ok ? r.logs.length : -1));
 			expect(value).toBe(1);
 		});
 
 		it('then is not enumerable (matches Promise convention)', () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			expect(Object.keys(gen)).not.toContain('then');
 		});
 
 		it('cancel IS enumerable (positive case for comparison)', () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			expect(Object.keys(gen)).toContain('cancel');
 		});
 
 		it('result IS enumerable (positive case for comparison)', () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			expect(Object.keys(gen)).toContain('result');
 		});
 	});
@@ -259,13 +259,13 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('.result resolves with ok: true when worker posts complete', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			const result = await gen.result;
 			expect(result.ok).toBe(true);
 		});
 
 		it('.result logs do not contain a cancel event on happy path', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			const result = await gen.result;
 			if (!result.ok) throw new Error('expected ok');
 			const hasCancel = result.logs.some((e) => e.event === 'cancel');
@@ -273,7 +273,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('await handle resolves to RunResult (PromiseLike drain)', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			const result = await gen;
 			expect(result.ok).toBe(true);
 		});
@@ -281,7 +281,7 @@ describe('createRunGenerator cancel', () => {
 
 	describe('.then with both onFulfilled and onRejected', () => {
 		it('invokes onFulfilled on cancel (never onRejected under normal flow)', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			let fulfilledCalled = false;
 			let rejectedCalled = false;
@@ -319,7 +319,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('in-flight .result Promise resolves when cancel fires later', async () => {
-			const gen = createRunGenerator('let x = 1;');
+			const gen = createRunGenerator('let x = 1;\n');
 			// Start the drain — IIFE runs body, reaches await dequeue
 			// (FakeWorker never posts without autoComplete).
 			const resultPromise = gen.result;

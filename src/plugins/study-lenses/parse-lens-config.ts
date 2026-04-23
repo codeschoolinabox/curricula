@@ -1,6 +1,6 @@
 /**
  * @file Shared, fallback-tolerant decoder for the `config` prop a
- * `<StudyLens>` React component receives.
+ * `<StudyLenses>` React component receives.
  *
  * The plugin may pass `config` as a structured object (when the
  * hProperties pipeline round-trips objects cleanly), as a

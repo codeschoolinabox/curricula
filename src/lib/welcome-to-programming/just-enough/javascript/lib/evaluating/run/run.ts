@@ -1,14 +1,15 @@
 /**
- * @file Executes JeJ code in a Web Worker with trapped globals.
+ * @file Public entry point for running learner code in a Web Worker
+ * with trapped globals.
  *
- * @internal DO NOT import from outside `api/run.ts`. Use the validated,
- * gated `run` export from the package root instead. This module bypasses
- * validation and the format gate; importing it directly will produce a
- * `boundaries/element-types` lint error once the boundaries rule is added.
- *
- * @remarks This is the low-level execution engine. It does not validate
- * or enforce language levels — a higher-level wrapper handles that before
- * calling the generator.
+ * @remarks The engine runs three gates lazily inside the generator
+ * body before spawning a Worker:
+ *   1. Cancel fast-path
+ *   2. Parse + JeJ allow-list validation
+ *   3. Format check
+ * Any gate failure returns an immediate error RunResult. See
+ * `README.md` § Lazy startup pipeline and `DOCS.md` § Architectural
+ * Sketch for the full contract.
  *
  * Returns an async generator that yields RunEvent objects one at a time,
  * pausing the Worker between events via SharedArrayBuffer. The generator
@@ -19,6 +20,9 @@
  */
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
+
+import { checkFormat } from '../../../api/format.js';
+import validate from '../../../api/validate.js';
 
 import type {
 	CancelEvent,
@@ -274,7 +278,44 @@ function createRunGenerator(
 			return deepFreezeInPlace({ ok: true, logs: [cancelEvent] });
 		}
 
-		// 1. Check SAB availability
+		// 1. Validation + format gates. validate/checkFormat are
+		// specified to never throw; any throw is caught here and
+		// surfaced as a creation-phase ErrorEvent so iteration still
+		// resolves cleanly rather than escaping to the consumer.
+		try {
+			const validation = validate(code);
+			if (!validation.ok) {
+				return validation as RunResult;
+			}
+			const { formatted } = checkFormat(code);
+			if (!formatted) {
+				return deepFreezeInPlace({
+					ok: false as const,
+					error: { kind: 'formatting' as const },
+				});
+			}
+		} catch (err: unknown) {
+			const message = err instanceof Error ? err.message : String(err);
+			const name = err instanceof Error ? err.name : 'Error';
+			const error: RunErrorEvent = {
+				event: 'error',
+				name,
+				message,
+				phase: 'creation',
+			};
+			return deepFreezeInPlace({
+				ok: false,
+				error: {
+					kind: 'javascript',
+					name,
+					message,
+					phase: 'creation',
+				},
+				logs: [error],
+			});
+		}
+
+		// 2. Check SAB availability
 		if (typeof SharedArrayBuffer === 'undefined') {
 			const error: RunErrorEvent = {
 				event: 'error',
@@ -297,7 +338,7 @@ function createRunGenerator(
 			});
 		}
 
-		// 2. Apply loop guards if iterations limit is configured.
+		// 3. Apply loop guards if iterations limit is configured.
 		// Number.isFinite(Infinity) === false, so Infinity means "no guards";
 		// any finite number (including 0 and negatives) injects guards, and
 		// the `++loopN > maxIterations` template throws on the first iteration
@@ -310,11 +351,11 @@ function createRunGenerator(
 			loopCount = guardResult.loopCount;
 		}
 
-		// 3. Create SAB and views
+		// 4. Create SAB and views
 		const sab = new SharedArrayBuffer(BUFFER_SIZE);
 		const views = createBufferViews(sab);
 
-		// 4. Create worker from Blob URL
+		// 5. Create worker from Blob URL
 		const script = createWorkerScript();
 		const blob = new Blob([script], { type: 'application/javascript' });
 		const url = URL.createObjectURL(blob);
@@ -344,7 +385,7 @@ function createRunGenerator(
 			});
 		}
 
-		// 5. Wire up Worker callbacks (enqueue closes over outer queue state)
+		// 6. Wire up Worker callbacks (enqueue closes over outer queue state)
 		worker.onmessage = function onWorkerMessage(e: MessageEvent<WorkerOutbound>) {
 			enqueue(e.data);
 		};
@@ -356,7 +397,7 @@ function createRunGenerator(
 			});
 		};
 
-		// 6. Timeout — cumulative execution time tracking
+		// 7. Timeout — cumulative execution time tracking
 		const maxMs = maxSeconds * 1000;
 		let timeout: ReturnType<typeof setTimeout> | null = null;
 		let remainingMs = maxMs;
@@ -394,7 +435,7 @@ function createRunGenerator(
 			}
 		}
 
-		// 7. Start execution
+		// 8. Start execution
 		worker.postMessage({ type: 'setup', sharedBuffer: sab });
 		worker.postMessage({
 			type: 'execute',
@@ -434,7 +475,7 @@ function createRunGenerator(
 					break;
 				}
 
-				// 7a. Streamed event — route IO callback, yield to consumer
+				// 8a. Streamed event — route IO callback, yield to consumer
 				if (msg.type === 'event') {
 					const event = msg.event;
 					logs.push(event);
@@ -468,7 +509,7 @@ function createRunGenerator(
 					continue;
 				}
 
-				// 7b. I/O request — await callback, write response, wake worker
+				// 8b. I/O request — await callback, write response, wake worker
 				if (msg.type === 'io-request') {
 					pauseTimeout();
 					try {
@@ -482,12 +523,12 @@ function createRunGenerator(
 					continue;
 				}
 
-				// 7c. Complete — break out of loop
+				// 8c. Complete — break out of loop
 				if (msg.type === 'complete') {
 					break;
 				}
 
-				// 7d. Worker error — record and break
+				// 8d. Worker error — record and break
 				if (msg.type === 'worker-error') {
 					logs.push({
 						event: 'error',
@@ -506,7 +547,7 @@ function createRunGenerator(
 			URL.revokeObjectURL(url);
 		}
 
-		// 8. Build result from collected logs
+		// 9. Build result from collected logs
 		return buildResult(logs, maxSeconds, maxIterations);
 	}
 

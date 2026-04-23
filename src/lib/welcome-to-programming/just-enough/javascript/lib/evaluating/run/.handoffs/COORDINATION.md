@@ -64,6 +64,30 @@ landed on main; keep entries for audit trail)*
   validation from api/run.ts into run.ts. Landed 2026-04-22 16:12.
 -->
 
+- `[active]` **@agent-loopguard** on `feature/loopguard-update`:
+  relocate guard-loops from `shared/` to `run/`; introduce uniform
+  body-injection across 4 loop types (while, for, do-while, for-of);
+  rename `guardLoopsCondition` → `guardLoops`; migrate `loopN` counter
+  declaration from `new Function` params to Worker-setup globals.
+  Phase 0 artifacts (README, DOCS, types.ts) complete at new location;
+  AR-1 + AR-2 cleared with batch-fix. Approximate touched regions on
+  SHARED files (claim before edit; merge rebases last):
+  - `run/run.ts` ~lines 189–200: import path update + call site.
+  - `run/create-worker-script.ts` ~lines 225–265: counter-declaration
+    region (ABOVE trap functions). Merge agent's EVENT_READY edits
+    go INSIDE trap bodies — different regions, should merge clean.
+  - `run/DOCS.md` §Why comma-in-condition → §Why body-injection.
+    Merge agent's §Unified pause protocol + §scriptMode are different
+    sections.
+  - `run/README.md` §How it works + §Key design decisions (loop-guard
+    language). Merge agent's Cancellation/Result sections different.
+  - `shared/DOCS.md` §Why guard-loops moved to shared — to be REMOVED
+    (guard-loops no longer in shared). Merge agent's §Pause/resume
+    flow consolidation is a different section.
+  - `shared/README.md` — remove guard-loops link/reference.
+
+  Started 2026-04-22. Expected duration: 2–3 days.
+
 ---
 
 ## §Branch queue
@@ -111,6 +135,22 @@ but helpful)*
     (3) Delete api/run.ts outright, no shim.
   New questions that arise during implementation go in §Open
   questions below, not back to the user by default.
+- **2026-04-22 — @agent-loopguard** — Sub-task 0 complete: git
+  archaeology shows comma-in-condition was NEVER committed; only HEAD
+  body-injection design ever shipped. User approved **Path A** (keep
+  body-injection, extend coverage, fix docs). Scope expanded to 4
+  loop types (while/for/do-while/for-of); for-in EXCLUDED per user
+  direction (not in JeJ surface). Do-while is NOT special under Path
+  A — reset text simply starts with `;` for ASI safety.
+- **2026-04-22 — @agent-loopguard** — Phase 0 artifacts drafted at
+  new location `run/guard-loops/` (README.md, types.ts, DOCS.md).
+  AR-1 returned PAUSE with 2 blockers (counter-declaration factual
+  mismatch vs HEAD; parent doc drift to comma-in-condition). AR-2
+  returned PAUSE with 3 blockers (scope-vs-HEAD-tests; for-in
+  exclusion justification; ID-range density). All 11 AR-2 findings
+  and 9 AR-1 findings batch-fixed per AGENTS.md batch-fix directive.
+  Ready to commit Phase 0 and move to I-0 (relocation). Branch:
+  `feature/loopguard-update` off `58aa111`.
 
 ---
 

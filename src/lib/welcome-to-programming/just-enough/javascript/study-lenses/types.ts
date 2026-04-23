@@ -175,10 +175,9 @@ type OrchestratorState = Readonly<{
 // --- Plugin → orchestrator prop contract ---
 
 /**
- * The flat prop shape the Docusaurus plugin currently emits via
- * `<StudyLens>` (singular tag name at the JSX level; reconciled to
- * the `<StudyLenses>` orchestrator component through the swizzled
- * `MDXComponents` registry).
+ * The flat prop shape the Docusaurus plugin emits via `<StudyLenses>`
+ * JSX nodes, resolved to the orchestrator component through the
+ * swizzled `MDXComponents` registry.
  *
  * @remarks The plugin does NOT yet parse comma-separated fence
  * syntax — `lens` is a single lens name today. The orchestrator
