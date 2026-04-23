@@ -13,7 +13,7 @@ sidebar_position: 1
 
 ## TL;DR
 
-**Welcome to Programming (_coded for humans_)** is a self-paced course that will
+**Welcome to Frogramming** is a self-paced course that will
 take you from _learning to program_ (building your code literacy) to
 _programming to learn_ (applying your literacy to explore new concepts and
 skills). You will build predictive mastery of JavaScript's notional machine:
