@@ -157,7 +157,8 @@
 			import validate from '../../api/validate.ts';
 			import run from '../../lib/evaluating/run/run.ts';
 			import trace from '../../api/trace.ts';
-			import debug from '../../api/debug.ts';
+			// api/debug.ts not yet implemented — stub so sandbox loads
+			const debug = async (_code) => ({ ok: false, error: { kind: 'javascript', message: 'debug not yet implemented' } });
 
 			// ─── Sample code ───────────────────────────────────────
 
@@ -321,6 +322,7 @@ console.log(greeting, add(count, 8));
 			const logEl = document.getElementById('log');
 			const languageEl = document.getElementById('language');
 			let currentEditor = null;
+			let currentRun = null;
 
 			function appendLog(cls, text) {
 				logEl.style.display = 'block';
@@ -485,13 +487,28 @@ console.log(greeting, add(count, 8));
 				.getElementById('btn-run')
 				.addEventListener('click', async function onRun() {
 					if (!currentEditor) return;
+
+					// Cancel in-progress run
+					if (currentRun) {
+						currentRun.cancel();
+						return;
+					}
+
 					const code = currentEditor.content;
 					const btn = document.getElementById('btn-run');
-					btn.disabled = true;
+					btn.textContent = '[cancel]';
 					appendLog('info', 'running...');
 
+					const gen = run(code, { seconds: 5 });
+					currentRun = gen;
+
 					try {
-						const result = await run(code, { seconds: 5 });
+						for await (const event of gen) {
+							console.log('[run event]', event);
+							appendLog('event', renderRunEvent(event));
+						}
+						const result = await gen.result;
+						console.log('[run result]', result.logs);
 
 						if (!result.ok) {
 							if (result.error) {
@@ -506,23 +523,17 @@ console.log(greeting, add(count, 8));
 									`run: ${result.rejections.length} rejection(s) — code is not valid JeJ`,
 								);
 							}
-						}
-
-						if (result.logs) {
+						} else {
 							appendLog(
 								'info',
 								`run: ${result.logs.length} event(s)`,
 							);
-							for (const event of result.logs) {
-								appendLog(
-									'event',
-									renderRunEvent(event),
-								);
-							}
 						}
 					} catch (err) {
 						appendLog('error', `run threw: ${err.message}`);
 					} finally {
+						currentRun = null;
+						btn.textContent = '[run]';
 						btn.disabled = false;
 					}
 				});
