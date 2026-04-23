@@ -5,38 +5,110 @@
  * Recommendation type used by the recommender. The return type IS the
  * only difference between transforms and lenses — enforced at the type
  * level so pipelines are structurally validated.
+ *
+ * This file is framework-agnostic: no React, no DOM globals beyond
+ * `HTMLElement` on the `LensMount` handle. Lens React wrappers mount
+ * into the `LensMount.el` element; the orchestrator's core logic never
+ * needs JSX.
  */
 
-import type React from 'react';
+// --- Serializable config values ---
+
+/**
+ * Primitive values that can be stably hashed (JSON-safe). Function,
+ * symbol, Date, and class-instance values are deliberately excluded:
+ * any such value in a config makes cache keys unreliable. Callbacks
+ * and instance state belong on the EventBus or on `LensMount`, not in
+ * config.
+ */
+type SerializablePrimitive = string | number | boolean | null;
+
+/**
+ * A config value — either a primitive or a readonly array of
+ * primitives. Tight by design so config hashing is deterministic.
+ */
+type SerializableValue =
+	| SerializablePrimitive
+	| ReadonlyArray<SerializablePrimitive>;
 
 // --- Transform contract ---
 
-type TransformConfig = Readonly<Record<string, unknown>>;
+type TransformConfig = Readonly<Record<string, SerializableValue>>;
 
 /**
  * A code-to-code transformation module. Transforms accept a code string
  * and return a transformed code string. They never produce UI. Zero or
  * more transforms chain in a pipeline before a terminal lens.
+ *
+ * @remarks `onFailure` declares what happens when `transform()` throws:
+ * `'abort'` (the orchestrator's default when the field is absent) halts
+ * the pipeline and renders the original snippet in a read-only
+ * diagnostic banner; `'fallthrough'` logs a warning and passes the
+ * untransformed snippet to the next stage. Safety-critical transforms
+ * (loopGuard, translate) rely on the abort default; cosmetic transforms
+ * (format) may opt into fallthrough.
  */
 type TransformModule = Readonly<{
 	name: string;
 	transform: (code: string, config?: TransformConfig) => string;
 	config: (overrides?: Partial<TransformConfig>) => TransformConfig;
+	onFailure?: TransformFailureMode;
 }>;
 
 // --- Lens contract ---
 
-type LensConfig = Readonly<Record<string, unknown>>;
+type LensConfig = Readonly<Record<string, SerializableValue>>;
+
+/**
+ * A live lens instance returned by `LensModule.lens()`. Framework-
+ * agnostic DOM handle — the orchestrator owns mount/detach and caches
+ * the returned record.
+ *
+ * @remarks
+ * - `el` is the detachable HTMLElement the orchestrator inserts into
+ *   and removes from the visible DOM when switching lenses. The lens
+ *   renders into `el`.
+ * - `dispose` is the cleanup contract: called when the cache entry is
+ *   evicted or the orchestrator unmounts. The lens owns tearing down
+ *   subscriptions, event listeners, and heavy DOM (e.g.
+ *   CodeMirror `EditorView.destroy()`).
+ * - `onSnippetChanged` is the inversion-of-control hook. When the
+ *   orchestrator's snippet changes via a source OTHER than this lens
+ *   itself (a transform toggle, Reset, Reset All, recommender-driven
+ *   pipeline change), the orchestrator calls this hook on every cached
+ *   instance that implements it. The lens decides per-semantic: the
+ *   editor pushes the change as an edit (preserving undo continuity);
+ *   parsons reshuffles; blanks re-blanks; trace-table re-runs. Lenses
+ *   that omit the hook keep their cache entry as "stale" — on next
+ *   reattach the orchestrator shows a stale-state affordance (refresh
+ *   to new snippet vs. continue with old state) and the learner
+ *   chooses.
+ */
+type LensMount = Readonly<{
+	el: HTMLElement;
+	dispose: () => void;
+	onSnippetChanged?: (snippet: string) => void;
+}>;
 
 /**
  * A code-to-component lens module. Lenses accept a code string and
- * return a renderable component. Always terminal — exactly one per
- * pipeline. Each lens self-describes its relevance for a given snippet
- * via `recommend()`.
+ * return a `LensMount` (framework-agnostic DOM handle). Always
+ * terminal — exactly one per pipeline. Each lens self-describes its
+ * relevance for a given snippet via `recommend()`.
+ *
+ * @remarks The `lens` function may be synchronous or asynchronous.
+ * Lenses that require async setup (e.g. the editor lens dynamically
+ * loading CodeMirror language modules) return a `Promise<LensMount>`;
+ * lenses that can mount synchronously (highlight, parsons) return a
+ * bare `LensMount`. The orchestrator awaits either form, showing a
+ * lightweight mounting affordance during pending async mounts.
  */
 type LensModule = Readonly<{
 	name: string;
-	lens: (code: string, config?: LensConfig) => React.JSX.Element;
+	lens: (
+		code: string,
+		config?: LensConfig,
+	) => LensMount | Promise<LensMount>;
 	config: (overrides?: Partial<LensConfig>) => LensConfig;
 	recommend: (analysis: AnalysisReport) => ReadonlyArray<Recommendation>;
 }>;
@@ -283,12 +355,12 @@ type EventBus = Readonly<{
 	clear(): void;
 }>;
 
-// --- Transform failure mode (AR-1 Concern #10 — awaiting user approval
-//     to wire into TransformModule.onFailure) ---
+// --- Transform failure mode ---
 
 /**
- * Declared failure semantics for a transform. Not yet part of
- * `TransformModule` — pending user decision per AR-1 Concern #10.
+ * Declared failure semantics for a transform. Wired into
+ * `TransformModule.onFailure`; the orchestrator defaults to `'abort'`
+ * when a transform omits the field.
  *
  * - `'abort'` — transform failure renders the original snippet in a
  *   read-only diagnostic panel (no lens mounted). Safe default.
@@ -300,10 +372,14 @@ type EventBus = Readonly<{
 type TransformFailureMode = 'abort' | 'fallthrough';
 
 export type {
+	SerializablePrimitive,
+	SerializableValue,
 	TransformModule,
 	TransformConfig,
+	TransformFailureMode,
 	LensModule,
 	LensConfig,
+	LensMount,
 	BlockModelCell,
 	Recommendation,
 	Pipeline,
@@ -323,7 +399,6 @@ export type {
 	EventPayload,
 	EventListener,
 	EventBus,
-	TransformFailureMode,
 };
 
 export { EVENT_NAMES };

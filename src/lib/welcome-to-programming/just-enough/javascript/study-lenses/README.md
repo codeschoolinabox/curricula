@@ -46,9 +46,10 @@ any new code.
 | **Original code** | The immutable `code` prop received at initialization. The target of Reset and Reset All. |
 | **Initial lens / active lens** | Configured at initialization (via fence suffix or cascade default) vs. currently rendering. They diverge after a learner switches lenses. |
 | **Initial transforms / active transforms** | Same distinction applied to the pipeline's transform list. |
-| **Lens cache** | Live component instances keyed by `(lens name, content-at-mount, config hash)`. Detached (not destroyed) when inactive so learner state survives switching. |
-| **Content-at-mount** | The snippet the lens was first mounted with. Immutable for the lifetime of a cached instance. Distinct from the current orchestrator snippet, which may change (via editor edits or transform toggles) while a lens is detached. Cache lookup on switch uses the CURRENT snippet against each entry's content-at-mount. |
-| **Event protocol** | Per-instance typed pub/sub ("EventBus"). Lenses dispatch `snippet-changed`, `exercise-completed`, `config-changed`. The orchestrator dispatches `lens-switched`, `transforms-changed`, `state-reset`, `state-reset-all`. |
+| **Lens cache** | Live lens instances keyed by `(lens-name, config-hash)`. At most one entry per key. Detached (not destroyed) when inactive so learner state survives switching. External snippet changes propagate to cached instances via the `onSnippetChanged` hook; lenses that omit the hook surface a stale-state affordance on reattach. |
+| **Lens mount** | The live DOM handle returned by `LensModule.lens()`: `el` (detachable HTMLElement), `dispose()` (cleanup on eviction or orchestrator unmount), and optional `onSnippetChanged(snippet)` hook. Framework-agnostic — the lens module is pure TS; the React wrapper mounts `el` into a container div. |
+| **Snippet-change hook** | `LensMount.onSnippetChanged(snippet)`. Inversion-of-control: the orchestrator pushes the new snippet into every cached instance when snippet changes via a source other than the active lens itself (transform toggle, Reset, Reset All). The lens decides per-semantic — editor adds an edit (undo continuity); parsons reshuffles; blanks re-blanks; highlight re-renders. Lenses that omit the hook keep their cache entry as-is; on next reattach the orchestrator shows a stale-state affordance. |
+| **Event protocol** | Per-instance typed pub/sub ("EventBus"). Separate from the `onSnippetChanged` hook — events carry cross-cutting signals; the hook pushes snippet state directly. Lenses dispatch `snippet-changed`, `exercise-completed`, `config-changed`. The orchestrator dispatches `lens-switched`, `transforms-changed`, `state-reset`, `state-reset-all`, `snippet-name-changed`. |
 | **Toolbar** | The always-visible controls the orchestrator owns. Lens-switcher, transform buttons, Reset, Reset All, recommender panel, free-exploration dropdown, snippet-name field. |
 | **Inline lens swap** | Detach the currently mounted lens, reattach from cache OR mount a fresh instance in its place. No popup, no modal. |
 | **Reset** | Restores `snippet = originalCode`; dispatches `state-reset`. Does NOT change `initialLens`, `initialTransforms`, or the cache. |
@@ -103,19 +104,28 @@ Responsibilities:
   or recommender-built pipelines.
 - **Pipeline execution** — runs transforms in sequence, then renders the
   terminal lens with the transformed result.
-- **Lens caching** — caches live component instances (not serialized state),
-  keyed by content string + config hash. Switching lenses detaches the current
-  DOM and reattaches the cached target. Learner state (blanks answers, cursor
-  position) survives because the component was never unmounted.
-- **Event-based communication (EventBus)** — all lens-to-orchestrator
-  communication uses a **per-instance typed EventBus** (pure TS pub/sub, no
-  DOM, no React context). Each orchestrator owns its bus; isolation is
-  structural. Lenses dispatch `snippet-changed`, `exercise-completed`,
-  `config-changed`. The orchestrator dispatches `lens-switched`,
-  `transforms-changed`, `state-reset` (Reset: code-only), and
-  `state-reset-all` (Reset All: code + initialLens + initialTransforms +
-  cache cleared). Event _payload shapes_ live in `types.ts`; dispatch/listen
-  mechanics live in `orchestrator/event-bus.ts`.
+- **Lens caching** — caches live `LensMount` handles (not serialized state),
+  keyed by `(lens-name, config-hash)`. At most one entry per key. Switching
+  lenses detaches the current `el` and reattaches the cached target. Learner
+  state (blanks answers, cursor position, editor undo history) survives
+  because the DOM was never destroyed. External snippet changes propagate to
+  cached instances via each `LensMount.onSnippetChanged` hook; lenses without
+  the hook keep stale state and surface a refresh-or-continue affordance on
+  reattach.
+- **Lens ↔ orchestrator communication** — two mechanisms:
+  - **EventBus** — a per-instance typed pub/sub (pure TS, no DOM, no React
+    context). Each orchestrator owns its bus; isolation is structural.
+    Lenses dispatch `snippet-changed`, `exercise-completed`, `config-changed`.
+    The orchestrator dispatches `lens-switched`, `transforms-changed`,
+    `state-reset` (Reset: code-only), `state-reset-all` (Reset All: code +
+    initialLens + initialTransforms + cache cleared), and
+    `snippet-name-changed`. Event _payload shapes_ live in `types.ts`;
+    dispatch/listen mechanics live in `orchestrator/event-bus.ts`.
+  - **`onSnippetChanged` hook** — direct push, not pub/sub. The orchestrator
+    invokes this hook on every cached `LensMount` whenever the snippet
+    changes via a source other than the active lens itself. Separate from
+    the EventBus because the cache is an orchestrator-private structure and
+    hook invocation is synchronous, targeted, and per-instance.
 
 What the orchestrator does NOT do: exercise-specific rendering (that is the
 lens's job), exercise-specific config panels (each lens renders its own), or
@@ -127,8 +137,9 @@ Same surface area but different return types, enforced at the type level:
 
 - **Transforms** — code in, code out. Always continue the pipeline. Never
   produce UI. Examples: format, loop-guard, translate (JS to pseudocode).
-- **Lenses** — code in, component out. Always terminal. Exactly one per
-  pipeline. Examples: editor, blanks, parsons, highlight, trace-table.
+- **Lenses** — code in, `LensMount` out (framework-agnostic DOM handle).
+  Always terminal. Exactly one per pipeline. Examples: editor, blanks,
+  parsons, highlight, trace-table.
 
 A pipeline is structurally typed as `{ transforms: Transform[], lens: Lens }`.
 If a fence specifies two lenses (e.g., `js:blanks,parsons`), the plugin errors
@@ -141,20 +152,38 @@ TransformModule = {
   name: string
   transform: (code, config?) => string
   config: (overrides?) => TransformConfig
+  onFailure?: 'abort' | 'fallthrough'    // default 'abort' at orchestrator
+}
+
+LensMount = {
+  el: HTMLElement                         // detachable render target
+  dispose: () => void                     // cleanup on evict or unmount
+  onSnippetChanged?: (snippet) => void    // IoC hook for external updates
 }
 
 LensModule = {
   name: string
-  lens: (code, config?) => Component
+  lens: (code, config?) => LensMount | Promise<LensMount>
   config: (overrides?) => LensConfig
   recommend: (analysis) => Recommendation[]
 }
 ```
 
-Transforms accept and return strings (not ASTs). Only lenses have `recommend()`.
-A single lens can suggest multiple versions of itself at different Block Model
-cells with different configs — the recommender does not know lens internals;
-each lens is self-describing.
+Transforms accept and return strings (not ASTs). `TransformConfig` and
+`LensConfig` are tight `Record<string, SerializableValue>` — primitives and
+readonly arrays of primitives only, so config hashes are deterministic.
+Callbacks and instance state belong on the EventBus or on `LensMount`, not in
+config.
+
+Only lenses have `recommend()`. A single lens can suggest multiple versions of
+itself at different Block Model cells with different configs — the recommender
+does not know lens internals; each lens is self-describing.
+
+Lens construction may be synchronous or asynchronous. Lenses that dynamically
+load heavy dependencies (e.g. the editor lens loading CodeMirror language
+modules) return `Promise<LensMount>`; lenses that can mount synchronously
+(highlight, parsons) return a bare `LensMount`. The orchestrator awaits either
+form and shows a lightweight mounting affordance during pending async mounts.
 
 ### Registry
 
@@ -267,6 +296,6 @@ study-lenses/
   plugin
 - **Editor factory:** [`../lib/editing/README.md`](../lib/editing/README.md) —
   CodeMirror wrapper consumed by the editor lens
-- **Runtime API:** [`../api/README.md`](../api/README.md) — validate, format,
-  run, trace, debug
+- **Runtime library:** [`../lib/README.md`](../lib/README.md) — validate,
+  format, run, trace, debug (`api/` is being merged into `lib/`)
 - **Master plan:** [`../.planning-handoffs/00-master-plan.md`](../.planning-handoffs/00-master-plan.md)

@@ -9,16 +9,15 @@ The study-lenses system sits between two upstream boundaries and one downstream
 consumer:
 
 - **Upstream: Docusaurus plugin** (`src/plugins/study-lenses/`) — a build-time
-  MDAST transformer. Emits JSX nodes named `<StudyLens>` (singular at the tag
-  level — reconciled to the `<StudyLenses>` orchestrator component via the
-  swizzled `MDXComponents` registry) with a flat prop shape
+  MDAST transformer. Emits `<StudyLenses>` JSX nodes with a flat prop shape
   (`code`, `lens`, `lang`, `config`). Opaque to runtime internals. Future:
   parses comma-separated fence syntax and validates max-one-lens at build
   time; current: emits a single `lens` name, orchestrator parses to
   `Pipeline` internally.
-- **Upstream: JEJ runtime** (`api/`, `lib/`) — execution engines (run, trace,
+- **Upstream: JEJ runtime** (`lib/`) — execution engines (run, trace,
   debug), validation, formatting, editor factory. Consumed by lenses and
-  transforms. Not reimplemented here.
+  transforms. Not reimplemented here. (`api/` is being merged into `lib/`;
+  all utilities consolidate under `lib/`.)
 - **Downstream: theme swizzle** (`src/theme/MDXComponents.tsx`) — a single
   import binding that maps the `StudyLenses` tag name to the orchestrator
   component. The only integration point with Docusaurus rendering.
@@ -75,33 +74,44 @@ produces a component. No lens-to-lens chaining.
 
 ### 3. Cache
 
-Content-keyed caching of live component instances. The cache key is
-`(lens-name, content-at-mount, config-hash)`. **Content-at-mount is immutable
-for the lifetime of a cached instance** — it is the snippet the lens was
-first mounted with, not the current orchestrator snippet. This carveout is
-essential: the `editor` lens is a write-through lens (it IS the source of
-truth for snippet while mounted) and would cache-thrash on every keystroke
-if the cache key tracked the mutable snippet instead of mount-time content.
-Read-only lenses (blanks, parsons, highlight) also benefit: learner progress
-within a blanks exercise survives switching away and back.
+Per-instance cache of live `LensMount` handles. The cache key is
+`(lens-name, config-hash)` — at most one cached instance per key. Content
+is NOT part of the key: the cache is content-orthogonal. External snippet
+changes are propagated into cached instances via each mount's
+`onSnippetChanged` hook (inversion of control), not via cache-key churn.
+This keeps the cache small, stable, and predictable: the editor lens never
+cache-thrashes on keystrokes because its own edits are the source of truth
+for snippet and don't trigger the IoC hook; read-only lenses keep their
+in-progress state across switches because their cache entry is identified
+by `(name, config)` alone.
 
-On lens switch or transform toggle, the orchestrator recomputes the key from
-the transform-produced snippet + the target lens + target config. Cache
-hits: the existing component instance is reattached to the visible DOM.
-Learner state (editor cursor, blanks answers, trace entries) survives
-because the component was detached, not destroyed. Cache misses: a new
-component instance is created via the lens function, mounted, and added
-to the cache.
+On lens switch, the orchestrator computes the key from the target lens +
+target config. Cache hit: the existing `LensMount.el` is reattached to the
+visible DOM; if the lens implements `onSnippetChanged`, the orchestrator
+does not re-invoke it here (the instance was already being kept in sync
+while detached). Cache miss: the orchestrator calls the lens module's
+`lens(code, config)` function (awaiting if it returns a `Promise`), stores
+the resulting `LensMount` under the key, and mounts it.
+
+On external snippet change (transform toggle, Reset, Reset All, recommender-
+driven pipeline change), the orchestrator iterates every cached mount and
+invokes `mount.onSnippetChanged(newSnippet)` if the hook is defined. Lenses
+decide per-semantic: the editor appends an external edit to its undo stack;
+parsons reshuffles the new snippet; blanks re-blanks; highlight re-renders.
+Lenses without the hook keep their cache entry as-is; the orchestrator
+tracks per-instance "last-seen snippet" metadata and, on next reattach,
+renders a refresh-or-continue affordance above the lens if that last-seen
+snippet differs from the current orchestrator snippet. Learner picks
+"refresh" (evict + remount fresh) or "continue" (suppress the banner for
+this instance).
 
 Structural constraints:
 
-- Cache entries are live DOM nodes or React elements held in memory. No
-  serialization or deserialization.
-- The `editor` lens is cached with content-at-mount = the initial snippet
-  at editor mount time. It is never re-keyed while active because it
-  publishes snippet changes outward (via `snippet-changed`), not inward.
-- Read-only lenses cache content-at-mount = the transform-produced snippet
-  at their mount time.
+- Cache entries are live `LensMount` handles — detachable DOM with a
+  `dispose` contract. No serialization or deserialization.
+- Cache key is `(lens-name, config-hash)`. Exactly one entry per key.
+- External snippet mutations propagate via `onSnippetChanged`; lenses
+  without the hook surface a stale-state affordance to the learner.
 - Eviction strategy is deferred (unbounded per-instance cache; memory
   trade-off documented in the master plan backlog).
 
@@ -124,18 +134,17 @@ the active lens area when opened.
 Learner clicks the **Reset** button on the toolbar. The orchestrator restores
 the current snippet to the original code (the immutable `code` prop received
 at initialization). It dispatches a `state-reset` event with the restored
-snippet payload. The active lens listens and responds — the `editor` lens
-overwrites its CodeMirror content with the new snippet (it does NOT call
-its own internal `reset()`, which would restore its construction-time
-initial content and could disagree with the orchestrator's `originalCode`
-if the editor was mounted after snippet had diverged); other lenses
-re-derive whatever they derive from the snippet (blanks re-blanks,
-parsons re-shuffles).
+snippet payload, then pushes the restored snippet into every cached mount
+via `onSnippetChanged(originalCode)` — including the active mount. Lenses
+that implement the hook absorb the change per their own semantics (editor
+appends an external edit preserving undo; blanks re-blanks; parsons
+reshuffles; highlight re-renders). Lenses that omit the hook retain their
+state; next reattach surfaces the stale-state affordance.
 
 Reset does NOT restore the initial lens — the learner stays in whichever
 lens they chose. Reset does NOT touch `activeTransforms`. Reset does NOT
-clear the cache — cached instances keyed by content-at-mount for the
-original code may still exist and will be reused on next switch.
+clear the cache — stale-aware reattachment is the orchestrator's
+responsibility, not a cache-invalidation side effect.
 
 ### 5b. Reset All
 
@@ -218,17 +227,21 @@ or DOM survive React unmount.
   untransformed snippet passes through with a warning). See phase 2 above.
 - **Lenses are terminal.** Exactly one per pipeline. No lens-to-lens chaining.
   Build-time validation by the plugin catches violations.
-- **Event protocol for communication.** No prop-drilling for
-  lens-to-orchestrator signals. Lenses dispatch events; the orchestrator
-  listens.
+- **Two communication mechanisms, each with a distinct shape.** Pub/sub
+  EventBus carries cross-cutting signals (lens-to-orchestrator:
+  `snippet-changed`, `exercise-completed`, `config-changed`; orchestrator-
+  to-lens: `lens-switched`, `transforms-changed`, `state-reset`,
+  `state-reset-all`, `snippet-name-changed`). The `onSnippetChanged`
+  IoC hook pushes snippet state directly into cached mounts.
+  No prop-drilling; no global context.
 - **Registry is static.** Transforms and lenses are registered at module load
   time, not dynamically at runtime. The registry is read-only after
   initialization.
-- **Cache is content-at-mount keyed.** Same lens + same content-at-mount +
-  same config = same cache entry. Content-at-mount is captured when the lens
-  first mounts; it does NOT change when the write-through `editor` lens
-  publishes snippet edits. Toggling a transform produces different
-  content-at-mount for the next mount, producing a different cache entry.
+- **Cache is `(lens-name, config)` keyed.** Exactly one cached `LensMount`
+  per key. Content is orthogonal — the cache does not churn on snippet
+  changes. External snippet mutations propagate via each mount's
+  `onSnippetChanged` hook; cached mounts without the hook surface a
+  stale-state affordance to the learner on next reattach.
 - **Language is JEJ-only.** The orchestrator validates `lang === 'js'` at
   initialization. Any other value produces a warning and a diagnostic
   banner; no lens is mounted. Non-JS fences are author error until the
@@ -248,13 +261,11 @@ or DOM survive React unmount.
   signal fires before the cache is cleared. The active lens's listeners
   run synchronously and observe the pre-disposal instance; disposal
   follows. The new initial lens mounts afterward from an empty cache.
-- **Active lens remounts after Reset.** On Reset (code-only), the
-  orchestrator invalidates the cache entry for the currently active lens
-  — its content-at-mount no longer describes the instance after the
-  reset handler rebinds the lens to the new snippet. Non-active cached
-  entries (other lenses, other content-at-mount values) remain. The
-  active lens reattaches fresh on next switch. (PENDING USER APPROVAL:
-  see orchestrator notes AR-2 concern #1 for alternatives.)
+- **Reset propagates via IoC, not cache invalidation.** Reset dispatches
+  `state-reset` and invokes `onSnippetChanged(originalCode)` on every
+  cached mount (active + detached). The cache is untouched. Lenses that
+  omit the hook surface a stale-state affordance on next reattach. Reset
+  All is the only action that clears the cache.
 
 ## Out of scope
 

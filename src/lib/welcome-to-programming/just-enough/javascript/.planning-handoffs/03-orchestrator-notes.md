@@ -468,3 +468,96 @@ Changes applied in this session after AR-2:
 - Narrow unmount cleanup claim to "orchestrator-owned references"
 - Add lens-switched / transforms-changed ordering constraint
 - Add content-at-mount to README glossary
+
+---
+
+## Decisions finalized after AR-2 + user review (Session 1, 2026-04-22)
+
+The user reviewed all AR-1 + AR-2 concerns and resolved them. Applied in
+this session to `types.ts`, `README.md`, `DOCS.md`, and the plan file.
+
+### Resolved PAUSE concerns from AR-1
+
+- **AR-1 #1** (LensModule.lens return type) — **RESOLVED**: option C
+  (framework-agnostic `LensMount` DOM handle) adopted. Lenses may be
+  synchronous OR asynchronous — `LensMount | Promise<LensMount>`. The
+  `LensMount` record has `el: HTMLElement`, `dispose: () => void`, and
+  optional `onSnippetChanged?: (snippet) => void` hook. `types.ts`
+  updated; `React.JSX.Element` import removed.
+- **AR-1 #2** (LensConfig shape) — **RESOLVED**: option A (tighten to
+  `Record<string, SerializableValue>`). New helper types
+  `SerializablePrimitive` and `SerializableValue` added to `types.ts`.
+  `TransformConfig` and `LensConfig` both tightened. Callbacks and
+  instance state now belong on the EventBus or `LensMount`.
+- **AR-1 #3** (naming) — **RESOLVED**: rename `<StudyLens>` →
+  `<StudyLenses>` everywhere. Pre-Increment-0 commit will touch plugin
+  (`code-block-to-jsx.ts`, `remark-study-lenses.ts`, README),
+  `StudyLensMock.tsx` → `StudyLensesMock.tsx`, and `MDXComponents.js`.
+  Fixes broken build simultaneously.
+- **AR-1 #10** (transform failure) — **RESOLVED**: option A
+  (`TransformModule.onFailure?: TransformFailureMode`). Default
+  behavior when absent is `'abort'`, enforced at the orchestrator
+  (`mode = transform.onFailure ?? 'abort'`). `TransformFailureMode`
+  exported.
+
+### Resolved AR-2 concerns via inversion of control
+
+- **AR-2 #1** (stale cache entries on Reset) — **SUBSUMED** by the IoC
+  adoption. The "content-at-mount" carveout has been REMOVED from
+  `DOCS.md` §3 and README glossary. Cache key is now
+  `(lens-name, config-hash)`; exactly one entry per key. Stale
+  reattachment surfaces a "Content has changed. [Refresh] [Continue]"
+  affordance (Safe-2) for cached mounts whose last-seen snippet differs
+  from the current orchestrator snippet.
+- **AR-2 #2** (editor divergence + undo continuity) — **RESOLVED**: IoC
+  hook `LensMount.onSnippetChanged?` adopted. Orchestrator pushes
+  external snippet changes into every cached mount. Lenses decide
+  per-semantic: editor appends an external edit preserving undo;
+  parsons reshuffles; blanks re-blanks; highlight re-renders. Lenses
+  without the hook keep stale state and surface the affordance.
+
+### Files edited in this session
+
+1. `study-lenses/types.ts` — added `SerializablePrimitive`,
+   `SerializableValue`, `LensMount`; tightened configs; added
+   `onFailure?: TransformFailureMode` to `TransformModule`; flipped
+   `LensModule.lens` return type; removed React import; updated
+   exports.
+2. `study-lenses/README.md` — glossary (dropped "Content-at-mount",
+   added "Lens mount" and "Snippet-change hook", updated "Lens cache"
+   and "Event protocol"); module contracts code block (added
+   `LensMount`, `onFailure`, IoC signature); "Lens ↔ orchestrator
+   communication" paragraph (two mechanisms: EventBus + IoC hook).
+3. `study-lenses/DOCS.md` — rewrote phase 3 (Cache) for
+   `(lens-name, config-hash)` keying + IoC propagation + stale banner;
+   simplified phase 5a (Reset) to use IoC push instead of cache
+   invalidation; replaced "content-at-mount keyed" structural
+   constraint with `(lens-name, config)`; replaced "active lens
+   remounts after Reset" constraint with "Reset propagates via IoC,
+   not cache invalidation"; updated "event protocol" constraint to
+   document both mechanisms (EventBus + IoC hook).
+4. `/Users/master/.claude/plans/read-these-files-before-curious-nest.md` —
+   plan file updated to reflect IoC, stale affordance, LensMount
+   contract, rename work sequenced before Increment 0. (Local plan
+   file, not in repo.)
+
+### Next steps (per approved plan)
+
+1. Commit this DDD finalization as `docs: finalize orchestrator domain
+   model post-AR review` (single commit covering types.ts, README.md,
+   DOCS.md, and this notes file).
+2. Pre-Increment-0: naming consolidation + orchestrator stub + fix
+   broken build. See plan file §Pre-Increment-0 for the full step list.
+3. Phase 1: TDD increments (Increment 1 Registry onwards). Not in this
+   session per user directive "stop after DDD for us to review."
+
+### User-visible sandbox checks needed
+
+- After Pre-Increment-0: navigate to a curriculum page with a `` ```js ``
+  fence and confirm `StudyLensesMock` renders (no broken build, no
+  missing-component errors).
+- After each Phase 1 increment that ships a user-visible behavior (per
+  plan's inline 🔍 markers). Dedicated todos added to the todo list
+  per user instruction "add steps in your todos for me to do browser
+  sandbox checks of user-visible behavior whenever there is a new
+  user-visible behavior."
