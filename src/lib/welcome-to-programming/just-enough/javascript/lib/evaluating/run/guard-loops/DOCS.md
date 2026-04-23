@@ -27,14 +27,12 @@ grows from `{WhileStatement}` (HEAD) to `{WhileStatement, ForStatement,
 DoWhileStatement, ForOfStatement}` (target). `ForInStatement` remains
 excluded.
 
-The HEAD test at `evaluating/shared/guard-loops/tests/guard-loops.test.ts`
-asserts `for-of loops are not guarded` (`result.loopCount === 0` for a
-for-of input). **This test inverts** when for-of coverage lands. Inverting
-it is part of the for-of increment, not a separate refactor; attempting to
-preserve it would contradict the new coverage set. The Task B contract
-(below) is the regression gate for behavior this sketch preserves; the
-for-of, for, and do-while coverage tests are NEW behavior introduced by
-this sketch and are out of the regression gate's scope.
+The pre-task test at `evaluating/run/guard-loops/tests/guard-loops.test.ts`
+asserted `for-of loops are not guarded` (`result.loopCount === 0` for a
+for-of input). That test was inverted as part of increment I-5 — it now
+asserts for-of IS guarded. The Task B contract (below) is the regression
+gate for behavior that predates this sketch; the for / do-while / for-of
+coverage tests are new behavior introduced by this sketch.
 
 ### Why for-of is guarded, for-in is not
 
@@ -187,9 +185,10 @@ The six phases are *named responsibilities*, not *function boundaries*. A
 correct implementation may realize them as one function with labeled
 sections, as six small functions, or any grouping in between. The sketch is
 neutral on function decomposition as long as each phase's responsibility is
-traceable in the code. The HEAD implementation at
-`evaluating/shared/guard-loops/guard-loops.ts` is a single ~80-line function
-with phases inlined; that shape is an acceptable target for this sketch.
+traceable in the code. The current implementation at
+`evaluating/run/guard-loops/guard-loops.ts` is a single ~230-line module
+with phases realized as small named functions; that shape is an
+acceptable target for this sketch.
 
 ## Out of scope
 

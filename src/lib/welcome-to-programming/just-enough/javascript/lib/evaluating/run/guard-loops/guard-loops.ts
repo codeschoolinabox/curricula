@@ -2,21 +2,25 @@
  * @file Body-injection loop guard for the run engine.
  *
  * Prevents infinite loops by injecting iteration checks directly after
- * the opening `{` of each `while` loop body, and counter resets after
- * the closing `}`. Zero line shift, zero column shift on the condition.
+ * the opening `{` of each loop body, and counter resets after the
+ * closing `}` (or after the trailing `while(cond);` for do-while).
+ * Zero line shift, zero column shift on all source characters.
  *
  * @remarks
  * **Before:** `while (x < 10) {\n\tx++;\n}\n`
  * **After:**  `while (x < 10) { if (++loop1 > 100) throw new RangeError(...);\n\tx++;\n} loop1 = 0;\n`
  *
+ * Covered loop types: `WhileStatement`, `ForStatement`,
+ * `DoWhileStatement`, `ForOfStatement`. `ForInStatement` is
+ * deliberately excluded — not in the JeJ curriculum surface.
+ *
  * Counter variables (`loop1`, `loop2`, ...) are NOT declared in the
- * source code. They are passed as named parameters to `new Function`
- * by the worker script (see create-worker-script.ts), initialized to 0.
+ * source code. The Worker script (create-worker-script.ts) emits
+ * `var loop1 = 0, ..., loopN = 0;` as a Worker-setup global on the
+ * same line as `"use strict"`.
  *
  * Each counter is reset to 0 after its loop's closing `}` so that
  * nested inner loops do not accumulate counts across outer iterations.
- *
- * `for-of` loops are not guarded — they iterate finite collections.
  *
  * The transformation uses recast only for parsing (to get AST node
  * positions). The actual injection is done via string insertion at

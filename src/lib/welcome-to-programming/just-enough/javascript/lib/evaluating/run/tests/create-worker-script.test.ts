@@ -159,5 +159,20 @@ describe('createWorkerScript', () => {
 			expect(script).not.toContain('allParams');
 			expect(script).not.toContain('baseParams');
 		});
+
+		it('non-scriptMode prefix includes "use strict" and then declarations', () => {
+			const script = createWorkerScript();
+			// For non-scriptMode: '"use strict"; ' + loopDeclarations + '\n'
+			expect(script).toContain('"use strict"; ');
+			expect(script).toContain("? loopDeclarations");
+		});
+
+		it('scriptMode prefix uses only declarations (no "use strict" prefix)', () => {
+			const script = createWorkerScript();
+			// scriptMode branch: loopDeclarations only, no "use strict" prefix
+			expect(script).toContain('msg.scriptMode');
+			// The ternary puts loopDeclarations alone on scriptMode branch
+			expect(script).toMatch(/\? loopDeclarations\s*:/);
+		});
 	});
 });

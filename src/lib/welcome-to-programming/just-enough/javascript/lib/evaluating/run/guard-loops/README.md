@@ -206,8 +206,10 @@ emits matching declarations as Worker-setup globals:
 var loop1 = 0, loop2 = 0, loop3 = 0;  // for loopCount === 3
 ```
 
-These live above the trap function definitions in the Worker script
-string. Explicit `= 0` initializers are required — a bare `var loop1;`
+The declarations are prepended to the learner's code as part of the
+`prefix` string inside the `execute` handler — on the same line as
+`"use strict"`, before a `\n`. This adds no additional lines to user
+code. Explicit `= 0` initializers are required — a bare `var loop1;`
 would leave `loop1` as `undefined`, and `++undefined` is `NaN`, breaking
 the guard check.
 

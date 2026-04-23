@@ -506,4 +506,30 @@ describe('guardLoops', () => {
 			);
 		});
 	});
+
+	describe('brace-less loop bodies (skip guard)', () => {
+		it('skips while loop with no braces — loopCount 0', () => {
+			const result = guardLoops('while (x > 0) x--;\n', MAX);
+			expect(result.loopCount).toBe(0);
+			expect(result.code).toBe('while (x > 0) x--;\n');
+		});
+
+		it('skips for loop with no braces — loopCount 0', () => {
+			const result = guardLoops('for (let i = 0; i < 10; i++) i;\n', MAX);
+			expect(result.loopCount).toBe(0);
+		});
+
+		it('skips for-of loop with no braces — loopCount 0', () => {
+			const result = guardLoops('for (const x of xs) log(x);\n', MAX);
+			expect(result.loopCount).toBe(0);
+		});
+
+		it('guards braced loop but skips sibling brace-less loop', () => {
+			const code = 'while (a) { a--; }\nwhile (b) b--;\n';
+			const result = guardLoops(code, MAX);
+			expect(result.loopCount).toBe(1);
+			expect(result.code).toContain('++loop1');
+			expect(result.code).not.toContain('++loop2');
+		});
+	});
 });
