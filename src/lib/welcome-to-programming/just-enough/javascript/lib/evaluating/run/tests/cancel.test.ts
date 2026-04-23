@@ -1,49 +1,18 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import createRunGenerator from '../run.js';
 
 /**
- * Cancel semantics unit tests.
+ * Cancel semantics — node project.
  *
- * Covers both phases:
- * - **cancel-before-first-iterate** runs entirely in node without
- *   touching Worker/URL. Body() step 0 exits with a cancel-only
- *   RunResult.
- * - **cancel-during-iterate** uses vi.stubGlobal to replace the
- *   Worker constructor + URL + Blob with no-op fakes, so body() can
- *   run through its full setup without a real browser env. The fake
- *   Worker never posts messages, so `await dequeue()` suspends; cancel
- *   then unsticks it via the sentinel-push path.
- */
-
-/**
- * Fake Worker for node-env testing. Supports two triggers:
+ * Covers cancel-before-first-iterate paths only: every test cancels
+ * before the first `.next()` call, so no Worker is ever spawned and
+ * all assertions run entirely in node.
  *
- * - **Default:** posts nothing — useful for testing cancel-during-dequeue
- *   where the consumer wants the main thread suspended at `await dequeue()`.
- * - **autoComplete (statically configured before construct):** posts
- *   `{type: 'complete'}` on receipt of the `execute` message so `.result`
- *   can drain through a happy-path completion without a real worker.
+ * Worker-dependent cancel scenarios (cancel mid-iterate, happy-path
+ * drain, in-flight cancel via IO suspend) live in cancel.browser.test.ts
+ * where they run against a real Worker + SharedArrayBuffer environment.
  */
-class FakeWorker {
-	static autoComplete = false;
-
-	onmessage: ((e: MessageEvent) => void) | null = null;
-	onerror: ((e: ErrorEvent) => void) | null = null;
-
-	postMessage(msg: { type?: string }): void {
-		if (FakeWorker.autoComplete && msg?.type === 'execute') {
-			// Schedule as microtask so the main thread finishes setup first.
-			queueMicrotask(() => {
-				if (this.onmessage) {
-					this.onmessage({ data: { type: 'complete' } } as MessageEvent);
-				}
-			});
-		}
-	}
-
-	terminate(): void {}
-}
 
 describe('createRunGenerator cancel', () => {
 	describe('cancel before first iterate', () => {
@@ -96,62 +65,6 @@ describe('createRunGenerator cancel', () => {
 			await gen.next();
 			const second = await gen.next();
 			expect(second.done).toBe(true);
-		});
-	});
-
-	describe('cancel-during-iterate (with stubbed Worker)', () => {
-		beforeEach(() => {
-			vi.stubGlobal('Worker', FakeWorker);
-			vi.stubGlobal('URL', {
-				createObjectURL: () => 'blob:fake',
-				revokeObjectURL: () => {},
-			});
-			vi.stubGlobal(
-				'Blob',
-				class {
-					constructor(_parts: unknown[], _options?: unknown) {}
-				},
-			);
-		});
-
-		afterEach(() => {
-			vi.unstubAllGlobals();
-		});
-
-		it('cancel during pending dequeue resolves next() with done:true', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
-			// Kick off iteration — body runs through setup, awaits dequeue
-			// (FakeWorker never posts, so dequeue suspends).
-			const nextPromise = gen.next();
-			// Yield to event loop so body reaches await dequeue.
-			await Promise.resolve();
-			await Promise.resolve();
-			gen.cancel();
-			const result = await nextPromise;
-			expect(result.done).toBe(true);
-		});
-
-		it('mid-iterate cancel appends cancel event to logs', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
-			const nextPromise = gen.next();
-			await Promise.resolve();
-			await Promise.resolve();
-			gen.cancel();
-			const result = await nextPromise;
-			if (!result.done) throw new Error('expected done');
-			if (!result.value.ok) throw new Error('expected ok');
-			expect(result.value.logs.at(-1)).toEqual({ event: 'cancel' });
-		});
-
-		it('result.ok is true after mid-iterate cancel', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
-			const nextPromise = gen.next();
-			await Promise.resolve();
-			await Promise.resolve();
-			gen.cancel();
-			const result = await nextPromise;
-			if (!result.done) throw new Error('expected done');
-			expect(result.value.ok).toBe(true);
 		});
 	});
 
@@ -237,48 +150,6 @@ describe('createRunGenerator cancel', () => {
 		});
 	});
 
-	describe('.result drain through happy-path completion (FakeWorker autoComplete)', () => {
-		beforeEach(() => {
-			FakeWorker.autoComplete = true;
-			vi.stubGlobal('Worker', FakeWorker);
-			vi.stubGlobal('URL', {
-				createObjectURL: () => 'blob:fake',
-				revokeObjectURL: () => {},
-			});
-			vi.stubGlobal(
-				'Blob',
-				class {
-					constructor(_parts: unknown[], _options?: unknown) {}
-				},
-			);
-		});
-
-		afterEach(() => {
-			FakeWorker.autoComplete = false;
-			vi.unstubAllGlobals();
-		});
-
-		it('.result resolves with ok: true when worker posts complete', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
-			const result = await gen.result;
-			expect(result.ok).toBe(true);
-		});
-
-		it('.result logs do not contain a cancel event on happy path', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
-			const result = await gen.result;
-			if (!result.ok) throw new Error('expected ok');
-			const hasCancel = result.logs.some((e) => e.event === 'cancel');
-			expect(hasCancel).toBe(false);
-		});
-
-		it('await handle resolves to RunResult (PromiseLike drain)', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
-			const result = await gen;
-			expect(result.ok).toBe(true);
-		});
-	});
-
 	describe('.then with both onFulfilled and onRejected', () => {
 		it('invokes onFulfilled on cancel (never onRejected under normal flow)', async () => {
 			const gen = createRunGenerator('let x = 1;\n');
@@ -295,39 +166,6 @@ describe('createRunGenerator cancel', () => {
 			);
 			expect(fulfilledCalled).toBe(true);
 			expect(rejectedCalled).toBe(false);
-		});
-	});
-
-	describe('.result accessed before cancel, cancelled mid-drain', () => {
-		beforeEach(() => {
-			FakeWorker.autoComplete = false;
-			vi.stubGlobal('Worker', FakeWorker);
-			vi.stubGlobal('URL', {
-				createObjectURL: () => 'blob:fake',
-				revokeObjectURL: () => {},
-			});
-			vi.stubGlobal(
-				'Blob',
-				class {
-					constructor(_parts: unknown[], _options?: unknown) {}
-				},
-			);
-		});
-
-		afterEach(() => {
-			vi.unstubAllGlobals();
-		});
-
-		it('in-flight .result Promise resolves when cancel fires later', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
-			// Start the drain — IIFE runs body, reaches await dequeue
-			// (FakeWorker never posts without autoComplete).
-			const resultPromise = gen.result;
-			await Promise.resolve();
-			await Promise.resolve();
-			gen.cancel();
-			const result = await resultPromise;
-			expect(result.ok).toBe(true);
 		});
 	});
 
@@ -349,37 +187,6 @@ describe('createRunGenerator cancel', () => {
 				const result = await gen.result;
 				if (!result.ok) throw new Error('expected ok');
 				expect(result.logs.at(-1)).toEqual({ event: 'cancel' });
-			});
-		});
-
-		describe('cancel mid-iterate (awaiting dequeue)', () => {
-			const setupFakeWorker = () => {
-				vi.stubGlobal('Worker', FakeWorker);
-				vi.stubGlobal('URL', {
-					createObjectURL: () => 'blob:fake',
-					revokeObjectURL: () => {},
-				});
-				vi.stubGlobal(
-					'Blob',
-					class {
-						constructor(_parts: unknown[], _options?: unknown) {}
-					},
-				);
-			};
-
-			beforeEach(setupFakeWorker);
-			afterEach(() => vi.unstubAllGlobals());
-
-			it('invariant holds', async () => {
-				const gen = createRunGenerator('let x = 1;\n');
-				const nextPromise = gen.next();
-				await Promise.resolve();
-				await Promise.resolve();
-				gen.cancel();
-				const iter = await nextPromise;
-				if (!iter.done) throw new Error('expected done');
-				if (!iter.value.ok) throw new Error('expected ok');
-				expect(iter.value.logs.at(-1)).toEqual({ event: 'cancel' });
 			});
 		});
 
