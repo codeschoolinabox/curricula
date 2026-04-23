@@ -130,4 +130,34 @@ describe('createWorkerScript', () => {
 			expect(script).toContain('execution');
 		});
 	});
+
+	describe('loop counter declarations — Worker-setup globals', () => {
+		it('does NOT use loopParams array (old new Function params approach)', () => {
+			const script = createWorkerScript();
+			expect(script).not.toContain('loopParams');
+		});
+
+		it('does NOT use loopArgs array (old new Function args approach)', () => {
+			const script = createWorkerScript();
+			expect(script).not.toContain('loopArgs');
+		});
+
+		it('builds var declaration string from msg.loopCount', () => {
+			const script = createWorkerScript();
+			expect(script).toContain('msg.loopCount');
+			expect(script).toContain("'var '");
+		});
+
+		it('emits loop counter variable names as loop1, loop2, etc.', () => {
+			const script = createWorkerScript();
+			expect(script).toContain("'loop' + li");
+		});
+
+		it('uses new Function with only base params (console, alert, confirm, prompt)', () => {
+			const script = createWorkerScript();
+			// After migration, new Function should not concatenate loopParams
+			expect(script).not.toContain('allParams');
+			expect(script).not.toContain('baseParams');
+		});
+	});
 });

@@ -224,27 +224,28 @@ self.onmessage = function (e) {
   }
 
   if (msg.type === 'execute') {
-    // 0. Build loopN parameter names and initial values
-    // WHY: loop1..loopN are passed as parameters to new Function so
-    // guarded code can use ++loopN without variable declarations in
-    // the source (zero line shift, zero column shift).
-    var loopParams = [];
-    var loopArgs = [];
+    // 0. Build loop counter declarations prefix.
+    // WHY: var loop1=0,...; is prepended to the code string on the same
+    // line as "use strict" (no added newline) so user code line numbers
+    // are unchanged — zero-line-shift preserved without new Function params.
+    var loopDeclarations = '';
     if (msg.loopCount && msg.loopCount > 0) {
+      var decls = [];
       for (var li = 1; li <= msg.loopCount; li++) {
-        loopParams.push('loop' + li);
-        loopArgs.push(0);
+        decls.push('loop' + li + ' = 0');
       }
+      loopDeclarations = 'var ' + decls.join(', ') + '; ';
     }
 
     // 1. Construction phase — SyntaxError from new Function
     var fn;
     try {
-      var baseParams = ['console', 'alert', 'confirm', 'prompt'];
-      var allParams = baseParams.concat(loopParams);
-      var prefix = msg.scriptMode ? '' : '"use strict";\\n';
-      allParams.push(prefix + msg.code);
-      fn = new Function(...allParams);
+      // Non-scriptMode: declarations on same line as use strict, user code at line 2.
+      // scriptMode: declarations prepended before user code on line 1.
+      var prefix = msg.scriptMode
+        ? loopDeclarations
+        : ('"use strict"; ' + loopDeclarations + '\\n');
+      fn = new Function('console', 'alert', 'confirm', 'prompt', prefix + msg.code);
     } catch (err) {
       var errorEvent = {
         event: 'error',
@@ -260,8 +261,7 @@ self.onmessage = function (e) {
 
     // 2. Execution phase — runtime errors
     try {
-      var baseArgs = [trappedConsole, trappedAlert, trappedConfirm, trappedPrompt];
-      fn(...baseArgs.concat(loopArgs));
+      fn(trappedConsole, trappedAlert, trappedConfirm, trappedPrompt);
     } catch (err) {
       var errorEvent2 = {
         event: 'error',
