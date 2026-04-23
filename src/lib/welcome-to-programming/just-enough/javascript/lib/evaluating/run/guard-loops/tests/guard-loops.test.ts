@@ -293,6 +293,124 @@ describe('guardLoops', () => {
 			});
 		});
 
+		describe('do-while coverage', () => {
+			describe('explicit trailing semicolon', () => {
+				it('injects guard after opening brace of do body', () => {
+					const code = 'do {\n\tx--;\n} while (x > 0);\n';
+					const result = guardLoops(code, MAX);
+					expect(result.code).toContain(
+						`do { if (++loop1 > ${MAX}) throw new RangeError`,
+					);
+				});
+
+				it('injects reset with leading semicolon after trailing ;', () => {
+					const code = 'do {\n\tx--;\n} while (x > 0);\n';
+					const result = guardLoops(code, MAX);
+					// Note: reset text is `; loop1 = 0;` (leading ; for ASI safety)
+					expect(result.code).toContain('; loop1 = 0;');
+				});
+
+				it('returns loopCount 1', () => {
+					const code = 'do {\n\tx--;\n} while (x > 0);\n';
+					const result = guardLoops(code, MAX);
+					expect(result.loopCount).toBe(1);
+				});
+
+				it('preserves original do-while shape unchanged', () => {
+					const code = 'do {\n\tx--;\n} while (x > 0);\n';
+					const result = guardLoops(code, MAX);
+					expect(result.code).toContain('} while (x > 0);');
+				});
+
+				it('does not shift line numbers', () => {
+					const code =
+						'let x = 3;\ndo {\n\tx--;\n} while (x > 0);\nconsole.log(x);\n';
+					const result = guardLoops(code, MAX);
+					const lines = result.code.split('\n');
+					expect(lines[0]).toBe('let x = 3;');
+					expect(lines[1]).toMatch(/^do/);
+					expect(lines[4]).toMatch(/console\.log\(x\)/);
+				});
+			});
+
+			describe('ASI (no trailing semicolon)', () => {
+				it('still injects guard and reset', () => {
+					const code = 'do {\n\tx--;\n} while (x > 0)\n';
+					const result = guardLoops(code, MAX);
+					expect(result.code).toContain('++loop1');
+					expect(result.code).toContain('; loop1 = 0;');
+					expect(result.loopCount).toBe(1);
+				});
+
+				it('reset leading ; prevents fusion with while(cond) as its body', () => {
+					const code = 'do {\n\tx--;\n} while (x > 0)\n';
+					const result = guardLoops(code, MAX);
+					// If reset had no leading ;, the ASI case would produce
+					// `while (x > 0) loop1 = 0;` which parses as an infinite
+					// `while (x > 0) { loop1 = 0; }`. Leading ; prevents this.
+					expect(result.code).toMatch(/while \(x > 0\);\s*loop1 = 0;/);
+				});
+			});
+
+			describe('mixed with while + for', () => {
+				it('reading-order numbering across all three types', () => {
+					const code = [
+						'while (a) {',
+						'\ta++;',
+						'}',
+						'for (let i = 0; i < 3; i++) {',
+						'\ti++;',
+						'}',
+						'do {',
+						'\tb--;',
+						'} while (b > 0);',
+						'',
+					].join('\n');
+					const result = guardLoops(code, MAX);
+					const loop1 = result.code.indexOf('++loop1');
+					const loop2 = result.code.indexOf('++loop2');
+					const loop3 = result.code.indexOf('++loop3');
+					expect(loop1).toBeLessThan(loop2);
+					expect(loop2).toBeLessThan(loop3);
+					expect(result.loopCount).toBe(3);
+				});
+			});
+
+			describe('runtime behavior (Task B contract)', () => {
+				it.each([
+					[-1, 'if (++loop1 > -1)'],
+					[0, 'if (++loop1 > 0)'],
+					[1, 'if (++loop1 > 1)'],
+					[100, 'if (++loop1 > 100)'],
+				])('maxIterations = %i → template contains %p', (max, expected) => {
+					const result = guardLoops(
+						'do {\n\tx++;\n} while (true);\n',
+						max,
+					);
+					expect(result.code).toContain(expected);
+				});
+
+				it.each([
+					[-1, []],
+					[0, []],
+					[1, [1]],
+					[3, [1, 2, 3]],
+				])(
+					'maxIterations = %i runs do-body %p times before throwing',
+					(max, expected) => {
+						const executed: number[] = [];
+						const code =
+							'do { executed.push(loop1); } while (true);\n';
+						const result = guardLoops(code, max);
+						// eslint-disable-next-line no-new-func
+						const fn = new Function('loop1', 'executed', result.code);
+						expect(() => fn(0, executed)).toThrow(RangeError);
+						expect(executed).toEqual(expected);
+					},
+				);
+			});
+		});
+
 		describe('for-loop runtime behavior (Task B contract)', () => {
 			it.each([
 				[-1, 'if (++loop1 > -1)'],

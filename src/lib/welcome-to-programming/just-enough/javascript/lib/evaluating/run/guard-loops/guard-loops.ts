@@ -120,6 +120,7 @@ type Insertion = { readonly offset: number; readonly text: string };
 const GUARDED_LOOP_TYPES: readonly LoopType[] = [
 	'WhileStatement',
 	'ForStatement',
+	'DoWhileStatement',
 ];
 
 function guardLoops(code: string, maxIterations: number): GuardResult {
