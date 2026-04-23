@@ -374,6 +374,48 @@ type EventBus = Readonly<{
  */
 type TransformFailureMode = 'abort' | 'fallthrough';
 
+// ─── Registry ───────────────────────────────────────────────────────
+
+/**
+ * A module registry. Callers create one instance per application
+ * lifetime via `createRegistry`. The registry is NOT a global
+ * singleton — the orchestrator owns its registry instance.
+ *
+ * @remarks `register` mutates the registry (intentional — registries
+ * are populated at boot then queried; no structural need to make them
+ * immutable). `getTransform` and `getLens` are safe to call from any
+ * context.
+ */
+type Registry = {
+	/**
+	 * Registers a transform or lens module.
+	 *
+	 * @param module - The module to register. Must have a non-empty
+	 *   `name` that has not been registered before (across both
+	 *   transforms and lenses).
+	 * @throws {Error} If `module.name` is already registered.
+	 */
+	register(module: TransformModule | LensModule): void;
+
+	/**
+	 * Returns the registered transform with the given name, or
+	 * `undefined` if no transform with that name exists.
+	 *
+	 * @remarks Does NOT throw on unknown names. Pipeline validation
+	 *   is responsible for surfacing unknown-name errors to the
+	 *   orchestrator.
+	 */
+	getTransform(name: string): TransformModule | undefined;
+
+	/**
+	 * Returns the registered lens with the given name, or `undefined`
+	 * if no lens with that name exists.
+	 *
+	 * @remarks Does NOT throw on unknown names.
+	 */
+	getLens(name: string): LensModule | undefined;
+};
+
 export type {
 	SerializablePrimitive,
 	SerializableValue,
@@ -402,6 +444,7 @@ export type {
 	EventPayload,
 	EventListener,
 	EventBus,
+	Registry,
 };
 
 export { EVENT_NAMES };
