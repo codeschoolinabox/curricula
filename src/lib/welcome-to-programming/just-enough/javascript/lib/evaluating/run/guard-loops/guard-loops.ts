@@ -121,6 +121,7 @@ const GUARDED_LOOP_TYPES: readonly LoopType[] = [
 	'WhileStatement',
 	'ForStatement',
 	'DoWhileStatement',
+	'ForOfStatement',
 ];
 
 function guardLoops(code: string, maxIterations: number): GuardResult {
@@ -157,12 +158,28 @@ function collectLoops(ast: unknown): CollectedLoop[] {
 	const loops: CollectedLoop[] = [];
 	(walk as (node: unknown, walker: Record<string, unknown>) => void)(ast, {
 		enter(node: Record<string, unknown>) {
-			if (isGuardedLoopType(node.type)) {
+			// Only guard loops whose body is a BlockStatement. Brace-less
+			// bodies (e.g. `while (cond) x++;`) are skipped because the
+			// injection anchors are `{` and `}` positions — without braces,
+			// inserting at body.loc.start lands mid-token and produces a
+			// SyntaxError. JeJ in practice always uses braced bodies
+			// (prettier-formatted), but this keeps guardLoops total over all
+			// AST inputs.
+			if (
+				isGuardedLoopType(node.type) &&
+				isBlockStatement(node.body as Record<string, unknown> | undefined)
+			) {
 				loops.push({ loopType: node.type, node: node as unknown as LoopNode });
 			}
 		},
 	});
 	return loops;
+}
+
+function isBlockStatement(
+	node: Record<string, unknown> | undefined,
+): boolean {
+	return node !== undefined && node.type === 'BlockStatement';
 }
 
 function isGuardedLoopType(nodeType: unknown): nodeType is LoopType {

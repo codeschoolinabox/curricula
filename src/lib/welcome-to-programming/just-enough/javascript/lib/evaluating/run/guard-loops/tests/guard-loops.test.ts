@@ -93,13 +93,74 @@ describe('guardLoops', () => {
 		});
 	});
 
-	describe('for-of loops are not guarded', () => {
-		it('ignores for-of loops', () => {
-			const code =
-				'for (const item of items) {\n\tconsole.log(item);\n}\n';
-			const result = guardLoops(code, MAX);
-			expect(result.code).not.toContain('++loop');
-			expect(result.loopCount).toBe(0);
+	describe('for-of coverage', () => {
+		describe('single for-of', () => {
+			it('injects guard after opening brace', () => {
+				const code =
+					'for (const item of items) {\n\tconsole.log(item);\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.code).toContain(
+					`{ if (++loop1 > ${MAX}) throw new RangeError`,
+				);
+			});
+
+			it('injects counter reset after closing brace', () => {
+				const code =
+					'for (const item of items) {\n\tconsole.log(item);\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.code).toContain('} loop1 = 0;');
+			});
+
+			it('returns loopCount 1', () => {
+				const code =
+					'for (const item of items) {\n\tconsole.log(item);\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.loopCount).toBe(1);
+			});
+
+			it('preserves original for-of header unchanged', () => {
+				const code =
+					'for (const item of items) {\n\tconsole.log(item);\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.code).toContain('for (const item of items) {');
+			});
+
+			it('handles destructuring head', () => {
+				const code =
+					'for (const [k, v] of entries) {\n\tlog(k, v);\n}\n';
+				const result = guardLoops(code, MAX);
+				expect(result.code).toContain('++loop1');
+				expect(result.loopCount).toBe(1);
+			});
+		});
+
+		describe('runtime behavior (Task B contract)', () => {
+			it.each([
+				[-1, []],
+				[0, []],
+				[1, [1]],
+				[3, [1, 2, 3]],
+			])(
+				'maxIterations = %i runs for-of body %p times before throwing',
+				(max, expected) => {
+					const executed: number[] = [];
+					// Long iterable. The guard fires based on iteration count,
+					// not iterable length — defensive coverage's whole point.
+					const items = Array.from({ length: 1000 }, (_, i) => i);
+					const code =
+						'for (const n of items) { executed.push(loop1); }\n';
+					const result = guardLoops(code, max);
+					// eslint-disable-next-line no-new-func
+					const fn = new Function(
+						'loop1',
+						'items',
+						'executed',
+						result.code,
+					);
+					expect(() => fn(0, items, executed)).toThrow(RangeError);
+					expect(executed).toEqual(expected);
+				},
+			);
 		});
 	});
 
