@@ -7,28 +7,6 @@ loop exceeds its limit.
 `run` is the sole consumer — the module lives here (not in `shared/`) to
 reflect that.
 
-## Target state vs current state
-
-This README describes the module's **target shape** after the
-`feature/loopguard-update` branch lands. The branch makes four changes from
-HEAD, applied as atomic Phase 1 increments:
-
-1. Relocate from `evaluating/shared/guard-loops/` to here (I-0).
-2. Rename the exported function `guardLoopsCondition` → `guardLoops` (I-1).
-   The `Condition` suffix referred to an earlier, never-shipped
-   comma-in-condition design and is a misnomer under body-injection.
-3. Expand coverage from `WhileStatement` only to all four supported loop
-   types (I-3 through I-5).
-4. Migrate `loopN` counter declaration from `new Function` parameter
-   injection to Worker-setup globals (I-6). Until I-6 lands, § Counter
-   declaration below describes a future state, not current reality.
-
-Parent documents (`../README.md`, `../DOCS.md`) still describe the rejected
-comma-in-condition design at HEAD and will be synced in I-7. A junior
-reader who encounters those sections before this README has read outdated
-architecture; this note is here so that subsequent AR reviewers (AR-3,
-AR-4, AR-5) don't re-flag the drift.
-
 ## What it does
 
 Given a source string and a `maxIterations` limit, rewrites the source to
@@ -181,9 +159,9 @@ guarantee is sustained.
 - **Body-injection** — the technique: insert a guard statement at the top
   of the loop body + a counter-reset statement after the loop's closing
   brace (or after the trailing `while (cond);` for `do-while`).
-- **Counter** — a per-loop numeric variable `loopN` declared outside the
-  learner's source (target: Worker-setup global; current: `new Function`
-  parameter), incremented each iteration.
+- **Counter** — a per-loop numeric variable `loopN` declared as a
+  Worker-setup global (`var loop1 = 0, ..., loopN = 0;` emitted by
+  `create-worker-script.ts`), incremented on each loop iteration.
 - **Guard limit** — `maxIterations`, the numeric threshold passed to the
   module. `Infinity` means "no guard" and is filtered by the caller
   before invoking `guardLoops`. Any finite value — including `0` and
@@ -220,10 +198,6 @@ edge cases).
 
 ## Counter declaration
 
-> **Target state (post-I-6).** Until I-6 lands, the Worker uses
-> `new Function` parameter injection as described under § Current
-> mechanism below.
-
 `guardLoops` returns `loopCount` but does NOT declare the counters. The
 Worker script in `create-worker-script.ts` consumes `loopCount` and
 emits matching declarations as Worker-setup globals:
@@ -241,14 +215,6 @@ Nested and sequential loops correctly reuse counters: the `loopN = 0;`
 reset string injected after each loop's closing brace restores the
 counter to zero so that a subsequent entry to the same loop (via an
 outer iteration) or a sequential loop later in the source starts fresh.
-
-### Current mechanism (pre-I-6, HEAD)
-
-The Worker currently passes `loop1, loop2, …, loopN` as named parameters
-to `new Function`, with initial values `[0, 0, …, 0]`. Both the parameter
-names and the initial values are computed from `msg.loopCount`. See
-`create-worker-script.ts` lines 227–264. I-6 replaces this with the
-Worker-setup-global mechanism described above.
 
 ### ID range is dense
 
@@ -270,8 +236,6 @@ Test harnesses running transformed code outside the Worker (via
 `new Function` or `eval`) must provide matching declarations. See
 `tests/guard-loops.test.ts` for the current convention: tests pass
 `loop1, …, loopN` as `new Function` parameters with initial value `0`.
-Tests added for new loop types (I-3 through I-5) follow the same
-pattern.
 
 ## Navigation
 

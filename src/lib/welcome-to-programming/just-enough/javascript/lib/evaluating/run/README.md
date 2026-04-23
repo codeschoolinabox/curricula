@@ -405,8 +405,9 @@ semantic trace engine — different namespace, no conflict.)
 ## How it works
 
 1. Build the **Resolved IO** table from `options.io` + Native IO wrappers.
-2. If `options.iterations` is set, inject comma-in-condition loop
-   guards into while loops via AST rewrite (zero line shift).
+2. If `options.iterations` is set, inject body-injection loop guards
+   into `while`, `for`, `do-while`, and `for-of` loops via string
+   offset splice (zero line shift). See `guard-loops/`.
 3. Create a SharedArrayBuffer for synchronous IO and pause protocol.
 4. Generate a self-contained worker script with trapped globals +
    pause logic.
@@ -436,9 +437,12 @@ semantic trace engine — different namespace, no conflict.)
   between each. Enables live streaming to UI and step-through
   consumption. The handle itself is `PromiseLike` so `await run(code)`
   works without iterating — no separate wrapper.
-- **Comma-in-condition loop guards**:
-  `while (++loop1 > max && guard(1), cond)` — zero line shift.
-  Counter globals declared in worker setup, not per-loop.
+- **Body-injection loop guards**: `{ if (++loop1 > max) throw ...; }
+  loop1 = 0;` — zero line shift, zero column shift. Covers `while`,
+  `for`, `do-while`, and `for-of`; `for-in` is deliberately excluded
+  (not in JeJ surface). Counter globals declared in worker setup via
+  `var loop1 = 0, ..., loopN = 0;` — not per-loop inline declarations.
+  See `guard-loops/DOCS.md` for the body-injection architecture.
 - **Cumulative timeout**: tracks execution time only. Paused during
   SAB wait AND during IO-callback await so learners can examine
   events — or drive a styled dialog — indefinitely.

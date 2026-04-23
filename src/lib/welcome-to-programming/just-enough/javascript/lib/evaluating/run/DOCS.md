@@ -260,44 +260,55 @@ Parallel phases for IO-callback path (already in place, preserved):
 - Interrupting an in-flight IO callback on cancel. The callback
   runs to natural settle; the Worker is torn down afterwards.
 
-## Why comma-in-condition loop guards
+## Why body-injection via string offsets
 
-When `config.iterations` is set, the run engine injects loop guards into while
-loop conditions using the comma operator:
+When `options.iterations` is set to a finite value, the run engine injects loop
+guards via `guard-loops/guard-loops.ts`. The technique is **body-injection**: a
+guard statement is spliced immediately after the loop body's opening `{`, and a
+counter-reset statement is spliced immediately after the closing `}` (or after
+the trailing `while (cond);` for do-while).
 
 ```js
-// before:                          // after:
-while (x < 10) {                   while (++loop1 > 100 && guard(1), x < 10) {
+// before:
+while (x < 10) {
+    x++;
+}
+
+// after (maxIterations = 100):
+while (x < 10) { if (++loop1 > 100) throw new RangeError("Loop 1 exceeded 100 iterations.");
+    x++;
+} loop1 = 0;
 ```
 
-### Why this approach (not body injection)
+### Why string-offset splice (not AST reprint)
 
-Body injection (`let loop1 = 0;` before the loop + `if (++loop1 > max) throw`
-inside) shifts line numbers — the `let` declaration adds a line, making error
-messages report wrong line numbers. The comma-in-condition approach adds no
-lines.
+Splicing at computed character offsets preserves the original source byte-for-
+byte everywhere except the two insertion points per loop. An AST reprint
+(`recast.print`) normalizes whitespace and comment placement even when a node is
+not modified — learner formatting, trailing commas, and whitespace-dependent
+tests would fail. String-offset splice gives identical output to input for all
+characters not directly adjacent to the insertion points.
 
-### How it works
+### Why body injection (not comma-in-condition)
 
-1. Counter variables (`loop1`, `loop2`, ...) are declared as globals in the
-   Worker setup script, not per-loop. This avoids adding lines to the learner's
-   code.
-2. A `guard(id)` function is also declared in setup — it throws a `RangeError`
-   with loop ID and limit info.
-3. AST transformation (via recast) rewrites each while condition: the original
-   condition becomes the right operand of a comma expression. The left operand
-   is `++loopN > max && guard(N)`.
-4. The comma operator evaluates left-to-right and returns the rightmost value —
-   so the loop condition still evaluates to the original boolean.
-5. If `++loopN > max` is true, `guard(N)` is called (short-circuit `&&`) and
-   throws. If false, the guard is skipped and the original condition evaluates.
+Comma-in-condition (`while (++loop1 > max && guard(1), cond)`) was the original
+design intent documented in early architecture notes but was never implemented.
+Body injection achieves the same zero-line-shift property: guard text is
+appended to the existing opening `{` line, and reset text is appended to the
+existing closing `}` line — no newline characters added, line count preserved
+exactly.
 
-### Why recast (not regex)
+### Counter declaration
 
-Regex-based rewriting would break on multi-line conditions, nested loops, or
-conditions containing string literals with `while` in them. Recast parses the
-AST, replaces the condition node, and prints back — preserving the learner's
-formatting exactly.
+Counter identifiers (`loop1`, …, `loopN`) are not declared in the learner's
+source. The Worker script in `create-worker-script.ts` emits `var loop1 = 0,
+..., loopN = 0;` on the same line as `"use strict"` — no additional line added.
+
+### Coverage
+
+Four loop types are covered: `WhileStatement`, `ForStatement`,
+`DoWhileStatement`, `ForOfStatement`. `ForInStatement` is deliberately excluded
+— not in the JeJ curriculum surface. See `guard-loops/README.md`.
 
 ## Resolved IO table
 

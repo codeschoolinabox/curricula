@@ -102,6 +102,16 @@ behavior as HEAD for any non-covered AST node.
    would shift every higher-offset position and invalidate the remaining
    plan. Return the spliced string paired with `loopCount`.
 
+## Data flow
+
+```mermaid
+flowchart TD
+    A[source code<br/>+ maxIterations] -->|parse<br/>throws on malformed| B[AST<br/>with loc positions]
+    B -->|collect<br/>pure, pre-order DFS| C[CollectedLoops<br/>in reading order]
+    C -->|plan<br/>pure| D[InsertionPlan<br/>sorted descending by offset]
+    D -->|apply<br/>pure| E[GuardResult<br/>{ code, loopCount }]
+```
+
 ## Structural constraints
 
 - **Parse is loud.** Malformed source throws; no fallback to unguarded code.
