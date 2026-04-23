@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Welcome to Programming (coded for humans) — Syllabus
+# Welcome to Frogramming - Syllabus
 
 > The best authors and the best JavaScript developers are those who obsess about
 > language, who explore and experiment with language every day and in doing so
