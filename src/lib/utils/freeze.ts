@@ -80,6 +80,10 @@ function freezeInPlace<T>(
  *
  * Primitives and null are returned as-is (nothing to freeze or clone).
  *
+ * Function-valued properties are passed through by reference — the clone
+ * contains the same callable function. Closure state inside those functions
+ * is not frozen.
+ *
  * @param value - The value to deep clone and freeze
  * @returns A deeply frozen copy of the input (new reference)
  *

@@ -9,15 +9,6 @@ function namedFunction() {
 	return 1;
 }
 
-function longBodyFunction() {
-	const alpha = 1;
-	const bravo = 2;
-	const charlie = 3;
-	const delta = 4;
-	const echo = 5;
-	return alpha + bravo + charlie + delta + echo;
-}
-
 describe('deepClone', () => {
 	describe('primitives', () => {
 		it('returns null as-is', () => {
@@ -42,21 +33,64 @@ describe('deepClone', () => {
 	});
 
 	describe('functions', () => {
-		it('converts named function to serializable representation', () => {
-			const result = deepClone(namedFunction) as { type: string; name: string };
-			expect(result.type).toBe('function');
-			expect(result.name).toBe('namedFunction');
+		it('named function → returns the same function reference', () => {
+			expect(deepClone(namedFunction)).toBe(namedFunction);
 		});
 
-		it('converts anonymous function to serializable representation', () => {
-			const result = deepClone(() => 1) as { type: string; name: string };
-			expect(result.type).toBe('function');
+		it('arrow function → returns the same function reference', () => {
+			const fn = () => 42;
+			expect(deepClone(fn)).toBe(fn);
 		});
 
-		it('truncates long function bodies to 100 chars with ellipsis', () => {
-			const result = deepClone(longBodyFunction) as { stringified: string };
-			expect(result.stringified.length).toBeLessThanOrEqual(103);
-			expect(result.stringified.endsWith('...')).toBe(true);
+		it('async function → returns the same function reference', () => {
+			async function asyncFn() {}
+			expect(deepClone(asyncFn)).toBe(asyncFn);
+		});
+
+		it('returned function is callable and behaves identically', () => {
+			function double(x: number) {
+				return x * 2;
+			}
+			expect((deepClone(double) as typeof double)(3)).toBe(6);
+		});
+
+		it('function inside array → same reference at same index', () => {
+			expect(deepClone([namedFunction])[0]).toBe(namedFunction);
+		});
+	});
+
+	describe('objects containing functions', () => {
+		it('function property in cloned object is the same reference', () => {
+			function fn() {}
+			expect(deepClone({ transform: fn }).transform).toBe(fn);
+		});
+
+		it('cloned object with function property is a different object reference', () => {
+			function fn() {}
+			const original = { transform: fn };
+			expect(deepClone(original)).not.toBe(original);
+		});
+
+		it('first of multiple function properties is the same reference', () => {
+			function fn1() {}
+			function fn2() {}
+			expect(deepClone({ fn1, fn2 }).fn1).toBe(fn1);
+		});
+
+		it('second of multiple function properties is the same reference', () => {
+			function fn1() {}
+			function fn2() {}
+			expect(deepClone({ fn1, fn2 }).fn2).toBe(fn2);
+		});
+
+		it('primitive sibling property is cloned by value', () => {
+			function fn() {}
+			expect(deepClone({ fn, count: 42 }).count).toBe(42);
+		});
+
+		it('function value in Map → same reference', () => {
+			function fn() {}
+			expect(deepClone(new Map([['fn', fn]])).get('fn')).toBe(fn);
 		});
 	});
 

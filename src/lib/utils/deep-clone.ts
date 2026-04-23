@@ -1,29 +1,24 @@
 /**
- * Deep clone utility for creating serializable copies of JavaScript values
- * Handles nested objects, arrays, and special types while avoiding circular references
+ * Deep clone utility. Handles nested objects, arrays, and special types
+ * while detecting circular references.
+ *
+ * Functions (including async functions and class constructors) are returned
+ * as-is — the same function identity, no copy. All other non-primitive types
+ * (Date, RegExp, Array, Set, Map, plain objects) are deeply cloned into
+ * new references.
  *
  * @param value - The value to clone
- * @param visited - WeakSet to track visited objects (for circular reference detection)
- * @returns A deep copy of the input value
+ * @param visited - Internal cycle guard; do not pass externally
+ * @returns A deep copy of the input value. Functions are the same
+ *   identity; all other structures are new references.
  */
 function deepClone<T>(value: T, visited = new WeakSet<object>()): T {
-	// Null clones as-is
 	if (value === null) {
 		return value;
 	}
 
-	// Handle functions (store as string representation)
 	if (typeof value === 'function') {
-		const function_ = value as unknown as (
-			...arguments_: readonly unknown[]
-		) => unknown;
-		return {
-			type: 'function',
-			name: function_.name || 'anonymous',
-			stringified:
-				function_.toString().slice(0, 100) +
-				(function_.toString().length > 100 ? '...' : ''),
-		} as T;
+		return value;
 	}
 
 	// Primitives clone as-is

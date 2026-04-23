@@ -9,9 +9,12 @@ structures.
 
 ### deep-clone
 
-Creates a serializable deep copy of any JavaScript value. Handles nested
-objects, arrays, and special types (Date, RegExp, Set, Map) while detecting
-circular references.
+Creates a deep copy of any JavaScript value. Handles nested objects, arrays,
+and special types (Date, RegExp, Set, Map) while detecting circular references.
+
+Functions (including async functions and class constructors) are passed through
+by reference — the clone contains the same callable function as the original.
+All other non-primitive types are deeply cloned into new references.
 
 ```typescript
 import deepClone from './deep-clone.js';
@@ -20,6 +23,10 @@ const original = { date: new Date(), nested: { value: 1 } };
 const cloned = deepClone(original);
 // cloned.date is a new Date instance
 // cloned.nested is a different reference from original.nested
+
+const withFn = { transform: (x: string) => x.toUpperCase() };
+const clonedWithFn = deepClone(withFn);
+// clonedWithFn.transform === withFn.transform  (same reference, callable)
 ```
 
 ### deep-freeze
