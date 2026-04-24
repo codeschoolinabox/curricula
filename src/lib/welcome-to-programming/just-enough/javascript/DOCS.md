@@ -1,5 +1,27 @@
 # just-enough-javascript — Architecture & Decisions
 
+## Data flow
+
+Top-level view — subdirectories as nodes. The package's shape is
+"public surface (api/) on top of language primitives (lib/), with
+study-lens composition (study-lenses/) as an orthogonal concern."
+
+```mermaid
+flowchart TD
+    S[learner source] -->|parse / validate / format| A[api/]
+    A -->|run / trace, async| E[lib/evaluating/]
+    A -->|validate language, pure| V[lib/validating/]
+    A -->|format, pure| F[lib/formatting/]
+    A -->|interpret errors, pure| I[lib/error-interpreting/]
+    E -->|RunResult / TraceResult with outcome| C[consumer]
+    SL[study-lenses/] -.->|compose transforms on source| A
+```
+
+Each subdirectory has its own `DOCS.md` with a more detailed
+flow at its abstraction level. Domain-agnostic utilities (freeze,
+clone, deep-clone) are invisible at every level — called within
+nodes, not shown between them.
+
 ## Why this library exists
 
 Beginners learning to read code before writing it need a constrained JavaScript

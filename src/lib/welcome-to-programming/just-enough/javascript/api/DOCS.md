@@ -1,5 +1,29 @@
 # api — Architecture & Decisions
 
+## Data flow
+
+Mixed abstraction — this directory exposes the package's public
+surface. Files (parse, validate, format) are synchronous pre-gates;
+the engines (run, trace) run asynchronously behind them; the
+`default.ts` factory (`JejProgram`) wires everything into a live
+dashboard.
+
+```mermaid
+flowchart TD
+    S[raw source] -->|parse, throws on SyntaxError| P[parse.ts]
+    P -->|AST| V[validate.ts]
+    V -->|language gate, pure| F[format.ts checkFormat]
+    F -->|pretty source| D[default.ts JejProgram factory]
+    D -->|run config, async| R[../lib/evaluating/run]
+    D -->|trace config, async| T[../lib/evaluating/trace]
+    R -->|RunResult with outcome| C[consumer]
+    T -->|TraceResult with outcome| C
+```
+
+`default.ts` does not bypass the gates — a `JejProgram` with
+`!ok` returns an immediate-resolving blocked Execution carrying the
+gate rejection.
+
 ## Design principles
 
 ### Object describes, functions transform

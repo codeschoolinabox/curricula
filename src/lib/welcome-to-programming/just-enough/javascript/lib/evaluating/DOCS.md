@@ -1,5 +1,26 @@
 # evaluating — Architecture & Decisions
 
+## Data flow
+
+Parent-directory view — children as nodes. The `shared/` subdirectory
+hosts the unified pause protocol + Execution contract; each engine
+composes on top of it.
+
+```mermaid
+flowchart TD
+    A[validated source + engine config] --> D{engine choice}
+    D -->|run, async| R[run/]
+    D -->|trace, async| T[trace/]
+    R -->|RunResult with outcome| RC[consumer]
+    T -->|TraceResult with outcome| TC[consumer]
+    R -.->|Execution + SAB pause protocol| S[shared/]
+    T -.->|Execution + SAB pause protocol| S
+```
+
+Parse/validate/format gates run before engine selection; see
+`../validating/DOCS.md` and `../formatting/DOCS.md`. Guard-loops
+lives inside `run/` (only consumer) and is invisible at this level.
+
 ## Why three separate engines
 
 Each engine serves a different pedagogical use case with a fundamentally different

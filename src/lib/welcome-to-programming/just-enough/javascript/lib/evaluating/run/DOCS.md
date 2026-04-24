@@ -1,5 +1,26 @@
 # evaluating/run — Architecture & Decisions
 
+## Data flow
+
+Files-as-nodes view of this leaf directory. `guard-loops/` is shown
+as a single subdirectory node because it has its own DOCS.md diagram
+at its own abstraction level.
+
+```mermaid
+flowchart TD
+    A[source + options] -->|createRunGenerator, async| B[run.ts]
+    B -->|parse + language gate, sync-throws| V[validate]
+    B -->|format gate, pure| F[checkFormat]
+    B -->|inject loop guards, pure| G[guard-loops/]
+    B -->|spawn Worker from Blob URL| C[create-worker-script.ts]
+    C -->|SAB flags + postMessage + Atomics| P[worker-protocol.ts]
+    B -->|frozen RunResult with outcome| R[consumer]
+    B -.->|settled replay on re-iterate| R
+```
+
+Domain-agnostic utilities (deepFreezeInPlace, structuredClone) are
+invisible — called within nodes, not shown between nodes.
+
 ## Why an AsyncGenerator
 
 The run engine needs to produce events incrementally for live UI rendering while

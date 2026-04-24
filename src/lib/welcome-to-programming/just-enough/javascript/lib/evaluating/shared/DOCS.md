@@ -1,5 +1,28 @@
 # evaluating/shared — Architecture & Decisions
 
+## Data flow
+
+Mixed abstraction — this directory holds cross-engine primitives
+(shared types, the SAB pause protocol) consumed by both `../run` and
+`../trace`. Both engines sit on top of the same protocol; this
+directory is the protocol's vocabulary.
+
+```mermaid
+flowchart TD
+    A[engine builds AsyncGenerator] -->|uses| T[types.ts / Execution contract]
+    A -->|uses| S[SAB protocol<br/>PAUSE + EVENT_READY]
+    S -->|main: writePauseEngaged / writeResumeSignal / clearEventReady| W[Worker blocks on Atomics.wait]
+    W -->|Worker sets PAUSED + EVENT_READY, postMessage| S
+    S -->|timer reads EVENT_READY| TG[timer handler]
+    TG -->|reschedule if paused-with-event| TG
+    TG -->|exhaustion → timedOut| A
+    A -->|frozen Result| C[consumer]
+```
+
+Run and trace both drive this shared protocol identically (unified
+pause protocol). Engine-specific differences live in the per-engine
+DOCS.md.
+
 ## Why one AsyncGenerator per engine
 
 Each engine needs to produce events incrementally (for live UI rendering) while
