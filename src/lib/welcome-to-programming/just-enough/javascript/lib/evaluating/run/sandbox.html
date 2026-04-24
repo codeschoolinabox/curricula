@@ -650,20 +650,24 @@ console.error('three');"
 				shapeNoteEl.style.display = 'none';
 				userBroke = false;
 
-				const stepping = stepCheckbox.checked || predictLogsCheckbox.checked;
-				const maxSeconds =
-					stepping || !maxSecondsEnabledEl.checked
-						? Infinity
-						: Number(maxSecondsEl.value) || 5;
+				// Pre-M.5, the engine's timer ticked during yield, so step
+				// mode used to force Infinity as a workaround. Post-M.5 the
+				// timer pauses during yield, and post-E.1 the timer also
+				// pauses around console callbacks — so max-seconds is now
+				// a faithful cumulative-execution-time budget regardless of
+				// step/predict-logs mode. Respect the user's input directly.
+				const maxSeconds = !maxSecondsEnabledEl.checked
+					? Infinity
+					: Number(maxSecondsEl.value) || 5;
 				// WHY explicit empty-string check: Number('') === 0, not NaN.
 				// Without this, an enabled-but-empty input would pass
 				// `Number.isFinite(0)` and propagate 0 to the engine — which
 				// under the new semantics bans all loop bodies.
 				const iterationsRaw = Number(maxIterationsEl.value);
 				const iterations =
-					maxIterationsEnabledEl.checked
-					&& maxIterationsEl.value !== ''
-					&& Number.isFinite(iterationsRaw)
+					maxIterationsEnabledEl.checked &&
+					maxIterationsEl.value !== '' &&
+					Number.isFinite(iterationsRaw)
 						? iterationsRaw
 						: undefined;
 				if (iterations !== undefined) {
@@ -672,11 +676,13 @@ console.error('three');"
 				}
 				const io = buildIoMocks();
 
-				const gen = createRunGenerator(codeEl.value, {
+				const runConfig = {
 					seconds: maxSeconds,
 					iterations,
 					io,
-				});
+				};
+				console.log(runConfig);
+				const gen = createRunGenerator(codeEl.value, runConfig);
 
 				let eventCount = 0;
 				try {
@@ -747,7 +753,11 @@ console.error('three');"
 				userBroke = true;
 				// Resolve any pending step-wait so the loop unblocks and
 				// sees userBroke. Without this, step mode stalls forever.
-				if (stepResolve) { const r = stepResolve; stepResolve = null; r(); }
+				if (stepResolve) {
+					const r = stepResolve;
+					stepResolve = null;
+					r();
+				}
 				nextBtn.disabled = true;
 				predictionWrap.style.display = 'none';
 				predictionInput.value = '';

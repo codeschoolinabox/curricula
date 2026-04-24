@@ -538,6 +538,14 @@ function createRunGenerator(
 					const event = msg.event;
 					logs.push(event);
 
+					// WHY pauseTimeout at the TOP of the event-path: the
+					// cumulative timer counts only worker-thread code-execution
+					// time. Console callback time, yield time, and consumer
+					// processing time are all consumer/UI work. Matches the
+					// IO-path discipline around handleIoRequest below. See
+					// DOCS.md § Timer-vs-yield.
+					pauseTimeout();
+
 					if (event.event === 'console') {
 						try {
 							await resolvedIo.console[event.method](...event.args);
@@ -546,11 +554,6 @@ function createRunGenerator(
 							break;
 						}
 					}
-
-					// WHY pauseTimeout BEFORE yield: budget must not deplete
-					// while yielded to the consumer. Paired with startTimeout
-					// below on resume. See DOCS.md § Timer-vs-yield.
-					pauseTimeout();
 
 					yield event;
 
