@@ -228,10 +228,10 @@ function createRunGenerator(
 		// WHY push unconditionally when empty: if wakeDequeue is called
 		// while the main loop is not currently awaiting dequeue (e.g. the
 		// timer fires between yield and the next await dequeue, or cancel
-		// fires while await setTimeout(0) is pending), resolveWaiting is
-		// null. The next dequeue() must still return promptly so the loop
-		// can reach its cancelled/timedOut check. Pushing a sentinel now
-		// guarantees that — dequeue() sees queue.length > 0 synchronously.
+		// fires during yield/resume before the next pull), resolveWaiting
+		// is null. The next dequeue() must still return promptly so the
+		// loop can reach its cancelled/timedOut check. Pushing a sentinel
+		// now guarantees that — dequeue() sees queue.length > 0 synchronously.
 		if (queue.length === 0) {
 			queue.push({ type: 'complete' } as QueueMessage);
 		}
@@ -520,13 +520,14 @@ function createRunGenerator(
 					// re-arming the flag — the main thread would clobber a
 					// fresh signal. See DOCS.md § Unified pause protocol.
 					clearEventReady(views);
-					// WHY startTimeout BEFORE writeResumeSignal: the sub-micro-
-					// second window between release and re-arm is an accepted
-					// uncharged slice (DOCS.md § Ordering constraints). Any
-					// rearm-after-release would risk firing on a Worker that
-					// has already begun its next chunk — better to arm first.
-					startTimeout();
+					// WHY writeResumeSignal BEFORE startTimeout: per DOCS.md
+					// § Ordering constraints (release-before-rearm), the
+					// sub-microsecond window between release and re-arm is
+					// uncharged to the budget. Rearm-before-release would
+					// fire the timer on a still-paused Worker. Matches both
+					// the IO-path pattern below and trace's event-path.
 					writeResumeSignal(views);
+					startTimeout();
 					continue;
 				}
 

@@ -83,4 +83,16 @@ describe('createRunGenerator replay (browser)', () => {
 			expect(iter).toBe(gen);
 		});
 	});
+
+	describe('after for-await-break (unsupported completion path)', () => {
+		it('subsequent for-await yields nothing (DOCS § Replay § Out of scope)', async () => {
+			const code = format('console.log(1);\nconsole.log(2);\n');
+			const gen = createRunGenerator(code);
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			for await (const event of gen) break;
+			const replayed: unknown[] = [];
+			for await (const event of gen) replayed.push(event);
+			expect(replayed).toEqual([]);
+		});
+	});
 });

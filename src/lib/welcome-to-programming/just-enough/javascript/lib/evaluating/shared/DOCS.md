@@ -84,9 +84,11 @@ traps/advice; the main-thread logic is shared helpers in
    do NOT mark timed out. If exhausted, mark timed out.
 6. Main thread pauses the cumulative timer, yields the event to
    the consumer, waits for the next pull.
-7. On resume: main thread clears EVENT_READY (control[5]=0),
-   restarts the cumulative timer, writes PAUSE=0 (control[4]=0),
-   then calls `Atomics.notify(control, 4)` — wakes the Worker.
+7. On resume: main thread clears EVENT_READY (control[5]=0), writes
+   PAUSE=0 (control[4]=0), calls `Atomics.notify(control, 4)` to
+   wake the Worker, then restarts the cumulative timer. The
+   release-before-rearm order accepts a sub-microsecond uncharged
+   window so the timer never fires on a still-paused Worker.
 8. Worker continues execution until the next trap fires.
 
 The clear-before-release ordering in step 7 matters: clearing after

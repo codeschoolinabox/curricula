@@ -98,14 +98,14 @@ run(
 ```ts
 type RunHandle =
   AsyncGenerator<RunEvent, RunResult> &
-  Execution<RunEvent, RunResult> &
-  PromiseLike<RunResult>;
+  Execution<RunEvent, RunResult>;
 ```
 
-— it **is** an `AsyncGenerator<RunEvent, RunResult>` (all of
-`.next()`, `.return()`, `.throw()` are available and used by internal
-tests) AND it **satisfies** the `Execution<RunEvent, RunResult>`
-contract from `../shared/types.ts`:
+— `Execution` already extends `PromiseLike` (shape shown at line 105
+above just for readers). It **is** an `AsyncGenerator<RunEvent,
+RunResult>` (all of `.next()`, `.return()`, `.throw()` are available
+and used by internal tests) AND it **satisfies** the
+`Execution<RunEvent, RunResult>` contract from `../shared/types.ts`:
 
 - `.cancel()` — tear down the worker and resolve with a cancel-marked
   RunResult. Idempotent. See § Cancellation.
