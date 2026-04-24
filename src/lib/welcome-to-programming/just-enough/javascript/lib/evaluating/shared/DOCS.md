@@ -60,52 +60,51 @@ to poll its message queue — `onmessage` fires asynchronously and cannot block
 synchronous code mid-execution. `Atomics.wait` truly freezes the Worker thread
 at the exact instruction, guaranteeing no events leak past the pause point.
 
-### Pause/resume flow — two engines, two patterns
+### Pause/resume flow — unified protocol (shared by both engines)
 
-The SAB layout is shared but the two engines use the pause protocol
-differently. This section documents both; unification is planned for
-the `api/run` → `evaluating/run` merge task.
+Both the run and trace engines follow the same per-event ordering,
+coordinated through two slots in the SAB control view: PAUSE
+(control[4], 0=running, 1=paused) and EVENT_READY (control[5],
+0=not-ready, 1=ready). The Worker-side logic lives in each engine's
+traps/advice; the main-thread logic is shared helpers in
+`run/worker-protocol.ts`.
 
-#### Trace module (worker-managed pause, uses EVENT_READY)
+1. Worker stores `PAUSED=1` (control[4]) then `EVENT_READY=1`
+   (control[5]); the per-slot sequential consistency of
+   `Atomics.store` establishes the flags-before-post ordering.
+2. Worker calls `postMessage(event)` — the message-channel
+   happens-before edge guarantees the main thread observes both
+   flag stores when it dequeues the event.
+3. Worker calls `Atomics.wait(control, 4, 1)` — blocks while
+   PAUSE=1.
+4. Main thread dequeues the posted event.
+5. Main thread's timer handler, if it fires during this window,
+   deducts elapsed then reads EVENT_READY. If set AND budget
+   remains, the Worker is paused-with-pending-event — reschedule,
+   do NOT mark timed out. If exhausted, mark timed out.
+6. Main thread pauses the cumulative timer, yields the event to
+   the consumer, waits for the next pull.
+7. On resume: main thread clears EVENT_READY (control[5]=0),
+   restarts the cumulative timer, writes PAUSE=0 (control[4]=0),
+   then calls `Atomics.notify(control, 4)` — wakes the Worker.
+8. Worker continues execution until the next trap fires.
 
-1. Worker posts an event via `postMessage`
-2. Worker stores `PAUSED` to control[4], `EVENT_READY` to control[5], notifies [5]
-3. Worker calls `Atomics.wait(control, 4, 1)` — blocks while flag is 1
-4. Main thread's timeout handler checks control[5] — if event-ready, reschedules
-   (Worker is paused, not stuck)
-5. Main thread receives `postMessage`, processes event
-6. Main thread clears control[5], sets control[4] to 0, `Atomics.notify(4)` — wakes
-7. Worker continues execution until the next event
-
-#### Run module (main-thread-managed pause, no EVENT_READY)
-
-1. Main thread writes `PAUSED=1` at startup (`writePauseEngaged`)
-2. Worker's trapped global (console.*, prompt, alert, confirm) fires:
-   - Sets `PAUSED=1` (idempotent — main thread already set it)
-   - `postMessage(event)` to main thread
-   - Calls `checkPause()` — blocks while `PAUSED=1`
-3. Main thread's `onmessage` enqueues event; consumer iterates
-4. Consumer calls `.next()` → generator yields event, then writes
-   `PAUSED=0` + `Atomics.notify` → worker unblocks, continues
-
-Run does not consume `EVENT_READY` today. Its timeout handler relies
-on a `timedOut` flag set by a wall-clock `setTimeout` — not on
-differentiating paused-with-event from stuck-no-event. One consequence:
-time spent waiting for the consumer to iterate (e.g. stepping mode)
-still counts against the `seconds` limit. The `run.ts` JSDoc says
-otherwise; the code doesn't match. Resolution pending the merge task.
-
+The clear-before-release ordering in step 7 matters: clearing after
+the release would race against the Worker's next trap re-arming
+EVENT_READY, causing the main thread to clobber a fresh signal.
 For batch mode (`.then()` / `.result`), an internal drain loop calls
-`next()` rapidly — the Worker barely pauses.
+`.next()` rapidly — the Worker still pauses between every event,
+but the main-side yield is effectively a pass-through microtask.
 
 ### Why EVENT_READY flag (control[5])
 
-Used by the trace engine. The timeout handler needs to distinguish
-"Worker paused with pending event" from "Worker stuck in infinite
-loop." The Worker writes EVENT_READY to SAB (instant) before blocking,
-so the timeout handler has a reliable signal that doesn't depend on
-`postMessage` delivery timing. The slot is reserved in the SAB layout
-for cross-engine consistency; run will adopt it in the merge task.
+Lets the timer handler distinguish "Worker paused with pending
+event" (reschedule for the remaining budget) from "Worker stuck in
+an infinite loop" (fire timeout). The Worker writes EVENT_READY to
+the SAB instantaneously before blocking — faster and more reliable
+than inferring "paused with event" from `postMessage` delivery
+timing, which is subject to message-channel latency and microtask
+ordering.
 
 ### Why timedOut flag instead of queued timeout message
 

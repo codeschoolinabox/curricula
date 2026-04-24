@@ -12,20 +12,21 @@ The generator pauses the Worker between events using the SAB pause protocol
 (see `evaluating/shared/DOCS.md`). This guarantees events are delivered in
 correct order relative to I/O — log events appear before prompt dialogs.
 
-## Architectural Sketch — merge-era invariants
+## Architectural Sketch
 
-> Written Phase 0, before the merge implementation lands. The Refactor
-> step of each M.x TDD increment is held against this document —
-> what shape a correct implementation must take, not what the code does
-> today. Domain terms only; no function names, no variable names, no
-> pseudocode.
+> Structural contract for the merged run engine. Written Phase 0 of
+> the `api/run → evaluating/run` merge; the implementation in this
+> directory is held against it. Domain terms only; no function
+> names, no variable names, no pseudocode.
 
-This sketch captures three new invariants introduced by the
-`api/run → evaluating/run` merge task: the unified pause protocol
-(shared with trace), native replay on the RunHandle, and the
-timer-vs-yield interaction that makes "stepping time does not count"
-actually hold. The existing § sections that follow describe the
-pre-merge state and will be reconciled in M.6.
+This sketch captures three invariants that distinguish the merged
+engine from the pre-merge split: the unified pause protocol (shared
+with trace), native replay on the RunHandle, and the timer-vs-yield
+interaction that makes "stepping time does not count" actually hold.
+The § sections below ("Why an AsyncGenerator" onward) give the "why"
+behind specific design decisions — tradeoffs, alternatives
+considered, constraints — and use the same ubiquitous language as
+the sketch.
 
 ### Unified pause protocol
 

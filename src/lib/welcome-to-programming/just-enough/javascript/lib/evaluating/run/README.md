@@ -69,9 +69,6 @@ README. Use them consistently.
   before writing the resume signal; the timer handler reads
   EVENT_READY to distinguish "Worker paused with pending event" from
   "Worker stuck in infinite loop." Shared with the trace engine.
-  Staging note: adoption in run lands in M.3 of the merge task;
-  until then, control[5] is written by the worker but ignored by
-  run's timer handler.
 - **Cumulative timer** — tracks code-execution time only. Paused
   during generator yield (consumer stepping time does not count),
   during IO callback await (styled dialog time does not count), and
