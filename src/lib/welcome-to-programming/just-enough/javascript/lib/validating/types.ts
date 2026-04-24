@@ -10,7 +10,7 @@
 
 import type { Node } from 'acorn';
 
-import type { ParseError } from '../parse/types.js';
+import type { ParseError, ParseResultError } from '../parse/types.js';
 
 // ─── Source locations ────────────────────────────────────────
 
@@ -89,6 +89,62 @@ type ValidationReport = {
 	readonly scriptMode?: boolean;
 };
 
+// ─── Public API result types ─────────────────────────────────
+
+/**
+ * Code is not properly formatted.
+ *
+ * @remarks Returned when the format check pipeline gate rejects
+ * code that is valid JeJ but doesn't match the expected format.
+ * The UI should show a "Format your code" prompt, not a generic
+ * error message.
+ *
+ * This is a learning environment constraint — unformatted JeJ
+ * code is valid JavaScript and will run elsewhere.
+ *
+ * Lives here (rather than in `lib/formatting/`) because the type
+ * is part of the unified result-error vocabulary consumed by
+ * `BaseResult.error`. `lib/formatting/check-format` returns a
+ * separate `CheckFormatResult` shape; the API-shaped error
+ * `FormattingResultError` is what surfaces in `BaseResult` when a
+ * downstream pipeline includes a format gate.
+ */
+type FormattingResultError = {
+	readonly kind: 'formatting';
+};
+
+/**
+ * Base result shape used by `validate(code)` and as the
+ * compositional root for execution result types.
+ *
+ * @remarks
+ * - `ok` is `true` when the code passes all checks that ran.
+ * - `error` is set when a check produced a single error.
+ * - `rejections` is set when language-level validation found
+ *   violations (code parsed but isn't valid JeJ).
+ *
+ * Parse error and rejections are mutually exclusive: if code
+ * can't parse, there are no rejections (no AST to walk).
+ *
+ * The `E` type parameter widens the error union for callers that
+ * need to express runtime error kinds. Defaults to the validate-stage
+ * errors only (`ParseResultError | FormattingResultError`):
+ *
+ * - `validate(code)` returns `BaseResult` (default narrow error).
+ * - Execution wrappers (`run`/`trace`/`debug`) compose their own
+ *   result types like `BaseResult<ResultError> & { logs?: ... }`,
+ *   widening to include `JavaScriptResultError`, `TimeoutResultError`,
+ *   etc., declared in their own modules.
+ *
+ * @typeParam E - the error union for this result. Defaults to
+ *   `ParseResultError | FormattingResultError`.
+ */
+type BaseResult<E = ParseResultError | FormattingResultError> = {
+	readonly ok: boolean;
+	readonly error?: E;
+	readonly rejections?: readonly Violation[];
+};
+
 // ─── Language level ──────────────────────────────────────────
 
 /**
@@ -163,6 +219,8 @@ type LanguageLevel = {
 // ─── Exports ─────────────────────────────────────────────────
 
 export type {
+	BaseResult,
+	FormattingResultError,
 	LanguageLevel,
 	NodeRule,
 	NodeValidator,

@@ -17,11 +17,18 @@ invisible.
 
 ```text
 source string
-  → parseProgram(source, 'module')         — from ../parse/parse-program.ts
-  → collectViolations(ast, nodes)          — recursive walk, allowlist lookup
-  → checkUndeclaredGlobals(ast, config)    — scope analysis pass
-  → ValidationReport { isValid, violations, source, levelName }
+  → parseProgram(source, 'module')                              — from ../parse/parse-program.ts
+  → AST  ─→  collectViolations(ast, nodes)         (independent pass)
+        └─→  checkUndeclaredGlobals(ast, config)  (independent pass)
+  → concat violations
+  → ValidationReport { isValid, violations, source, levelName, scriptMode? }
 ```
+
+`collectViolations` and `checkUndeclaredGlobals` are two **independent
+pure passes** over the same AST. Their outputs are concatenated into a
+single frozen `violations` array; neither pass observes the other's
+results. (Earlier drafts of this doc described a linear chain — that
+was wrong; the source has always run both passes independently.)
 
 `parseProgram` and the AST traversal helper `getChildNodes` live in
 [`../parse/`](../parse/README.md); this module imports them as building
@@ -30,6 +37,63 @@ once in `validate-program.ts` (for the validation pipeline) and once in
 `../parse/parse.ts` (for the public `parse(code)` API).
 
 All violations are rejections — there are no informational warnings.
+
+### Public entry: result shaping
+
+`validate(code)` (Phase 1a) is the public entry. It wraps the
+pipeline above with result-shape transformation:
+
+```mermaid
+flowchart TD
+    Source[source code] -->|parseProgram<br/>module mode| AST
+    AST -->|collectViolations<br/>pure| Violations
+    AST -->|checkUndeclaredGlobals<br/>pure| Globals
+    Violations --> Combine[ValidationReport]
+    Globals --> Combine
+    Combine -->|shape| BaseRes["BaseResult&lt;ParseResultError | FormattingResultError&gt;"]
+```
+
+`validate(code)` produces one of three terminal `BaseResult` shapes:
+
+- `{ ok: true }` — code passes parse and language-level validation.
+- `{ ok: false, error: ParseResultError }` — code did not parse.
+  The `ParseResultError` flattens `ValidationReport.parseError`'s
+  nested `location` to top-level `line` and `column` fields and
+  hardcodes `name: 'SyntaxError'`. Information is preserved; the
+  shape is flatter for ergonomic top-level access.
+- `{ ok: false, rejections: Violation[] }` — code parsed but
+  contained language-level violations.
+
+The terminal node above carries the explicit generic
+`BaseResult<ParseResultError | FormattingResultError>` to make the
+composition seam visible. The `E` type parameter is what execution
+wrappers widen — `lib/evaluating/run/run.ts` returns
+`BaseResult<ResultError> & { logs?: ... }`, supplying its own
+broader error union from `api/types.ts`. This module always returns
+the narrow default.
+
+All terminal results are deep-frozen (utility, not shown).
+
+#### Out of scope
+
+- **Format gate** — `validate(code)` does **not** call `checkFormat`.
+  `FormattingResultError` is in the `BaseResult.error` union only so
+  downstream execution wrappers can return that error kind through a
+  shared shape; `validate.ts` never produces it.
+- **scriptMode surfacing** — when the `with`-statement fallback is
+  used internally by `validate-program.ts`, the resulting
+  `ValidationReport.scriptMode: true` flag is **dropped** by the
+  shaper. `BaseResult` has no `scriptMode` field. Tools that need
+  this signal should call `parse(code)` (which exposes `scriptMode`)
+  or `validateProgram` (which exposes `ValidationReport.scriptMode`)
+  directly.
+- **Caller-supplied LanguageLevel** — `validate(code)` always uses
+  `justEnoughJs`. Custom levels go through `validateProgram(source,
+  level)`.
+- **Async boundary** — synchronous throughout. No I/O.
+- **Caller responsibilities** — formatting `error.message` for
+  display, mapping `line`/`column` to editor coordinates, deciding
+  what to show learners on each `error.kind`.
 
 ### Scope analysis model
 

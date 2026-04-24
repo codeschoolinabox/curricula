@@ -14,7 +14,11 @@ import type {
 	ParseResult,
 	ParseResultError,
 } from '../lib/parse/types.js';
-import type { Violation } from '../lib/validating/types.js';
+import type {
+	BaseResult,
+	FormattingResultError,
+	Violation,
+} from '../lib/validating/types.js';
 import type {
 	RunEvent,
 	Execution,
@@ -86,21 +90,6 @@ type IterationLimitResultError = {
 };
 
 /**
- * Code is not properly formatted.
- *
- * @remarks Returned when the format check pipeline gate rejects
- * code that is valid JeJ but doesn't match the expected format.
- * The UI should show a "Format your code" prompt, not a generic
- * error message.
- *
- * This is a learning environment constraint — unformatted JeJ
- * code is valid JavaScript and will run elsewhere.
- */
-type FormattingResultError = {
-	readonly kind: 'formatting';
-};
-
-/**
  * Discriminated union of all error kinds.
  *
  * @remarks Use `error.kind` to switch:
@@ -133,28 +122,10 @@ type ResultError =
 // ─── Result types ────────────────────────────────────────────
 
 /**
- * Base result shape shared by `validate()` and used as a
- * building block for execution results.
- *
- * @remarks
- * - `ok` is `true` when the code passes all checks that ran
- * - `error` is set for parse failures and formatting gate
- * - `rejections` is set when validation found language-level
- *   violations (code parsed but isn't valid JeJ)
- *
- * Parse error and rejections are mutually exclusive: if code
- * can't parse, there are no rejections (no AST to walk).
- */
-type BaseResult = {
-	readonly ok: boolean;
-	readonly error?: ResultError;
-	readonly rejections?: readonly Violation[];
-};
-
-/**
  * Generic execution result parameterized by event type.
  *
- * @remarks Extends {@link BaseResult} with a `logs` field
+ * @remarks Composes `BaseResult` (from `lib/validating/types.ts`)
+ * with the wider `ResultError` union, then adds a `logs` field
  * containing the event stream from execution.
  *
  * `logs` is present when execution ran (even partially — a
@@ -164,7 +135,7 @@ type BaseResult = {
  *
  * @typeParam TEvent - The event type for this engine
  */
-type Result<TEvent> = BaseResult & {
+type Result<TEvent> = BaseResult<ResultError> & {
 	readonly logs?: readonly TEvent[];
 };
 

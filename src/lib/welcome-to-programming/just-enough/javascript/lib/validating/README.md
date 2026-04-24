@@ -38,19 +38,124 @@ The `LanguageLevel` object controls everything:
 
 ## Structure
 
-| File                          | Purpose                                                    |
-| ----------------------------- | ---------------------------------------------------------- |
-| `types.ts`                    | Domain types: Violation, ValidationReport, etc.            |
-| `validate-program.ts`         | Public entry: `validateProgram(source, level)`             |
-| `collect-violations.ts`       | Recursive AST walk + allowlist checking                    |
-| `create-violation.ts`         | Violation factory (with severity)                          |
-| `just-enough-js.ts`           | Pre-built "Just Enough JS" LanguageLevel config            |
-| `check-undeclared-globals.ts` | Scope analysis: disallowed globals detection               |
-| `is-jej.ts`                   | Convenience: `isJej(code)` returns boolean                 |
-| `tests/`                      | Unit tests                                                 |
+| File                          | Purpose                                                       |
+| ----------------------------- | ------------------------------------------------------------- |
+| `types.ts`                    | Domain types: Violation, ValidationReport, BaseResult, etc.   |
+| `validate-program.ts`         | Building block: `validateProgram(source, level)` → ValidationReport |
+| `validate.ts` (Phase 1a)      | Public entry: `validate(code)` → frozen `BaseResult`          |
+| `collect-violations.ts`       | Recursive AST walk + allowlist checking                       |
+| `create-violation.ts`         | Violation factory (with severity)                             |
+| `just-enough-js.ts`           | Pre-built "Just Enough JS" LanguageLevel config               |
+| `check-undeclared-globals.ts` | Scope analysis: disallowed globals detection                  |
+| `is-jej.ts`                   | Convenience: `isJej(code)` returns boolean                    |
+| `tests/`                      | Unit tests                                                    |
 
 Files moved out: `parse-program.ts` and `get-child-nodes.ts` now live in
 [`../parse/`](../parse/README.md). `ParseError` type also moved there.
+
+## Glossary additions
+
+These terms join the existing `Violation` / `ValidationReport` /
+`LanguageLevel` vocabulary; they are produced by the public
+`validate(code)` entry (Phase 1a).
+
+- **BaseResult** — frozen `{ ok, error?, rejections? }` returned by
+  `validate(code)`. The `ok` boolean is the primary success signal;
+  `error` and `rejections` are mutually exclusive optional details.
+  The optional-fields shape is preserved verbatim from the api-layer
+  contract; `BaseResult` is **not** a TypeScript discriminated union
+  (consumers should check `ok` and presence of `error`/`rejections`
+  rather than rely on type narrowing). The `error` field uses the
+  validate-stage error union (`ParseResultError |
+  FormattingResultError`); execution wrappers (`run` / `trace` /
+  `debug`) compose `BaseResult` with their own wider error union via
+  the type's `E` parameter.
+- **FormattingResultError** — frozen `{ kind: 'formatting' }`.
+  Returned when a downstream pipeline includes a format gate and the
+  source doesn't match recast's expected output. Lives in
+  lib/validating because it is part of the unified result-error
+  vocabulary consumed by `BaseResult.error`; it is distinct from
+  `lib/formatting/`'s internal `CheckFormatResult` (`{ formatted:
+  boolean }`), which is the format gate's own return shape.
+- **Rejection** — a `Violation` with `severity: 'rejection'`. All
+  violations are rejections in this module (no informational
+  warnings).
+
+### When to use `BaseResult` vs `ValidationReport`
+
+Both shapes describe a validation outcome but are aimed at different
+consumers:
+
+| Use this              | When you want…                                                                 |
+| --------------------- | ------------------------------------------------------------------------------ |
+| `BaseResult`          | Public-facing shaped result. `ok` boolean, `error` flattened to `{ kind, ... }`, deep-frozen. Returned by `validate(code)`. Composed by execution wrappers. |
+| `ValidationReport`    | Lower-level full report. `isValid`, raw `violations[]`, `source`, `levelName`, optional `parseError` (with nested `location`), optional `scriptMode`. Returned by `validateProgram(source, level)`. |
+
+## Public API
+
+### `validate(code)` (planned — Phase 1a)
+
+```ts
+function validate(code: string): BaseResult;
+```
+
+Public entry. Returns a frozen `BaseResult`. Never throws.
+
+- `{ ok: true }` — code parses and passes JeJ language-level
+  validation.
+- `{ ok: false, error: { kind: 'parse', name, message, line, column } }`
+  — code is not valid JavaScript syntax.
+- `{ ok: false, rejections: [...] }` — code parses but contains
+  language-level violations (e.g. `var`, `for-in`, etc.).
+
+Internally composes `parseProgram` (`../parse/`) and
+`collectViolations` / `checkUndeclaredGlobals` (this module). The
+`with`-statement script-mode fallback in `validate-program.ts`
+remains; `validate(code)` inherits it.
+
+#### Input-boundary behavior
+
+- **Empty input** parses successfully and validates as
+  `{ ok: true }` (empty Program has no nodes to reject).
+- **Non-string `code`** — TypeScript types require `code: string`. A
+  non-string runtime value reaches `parseProgram` and produces a
+  parse-shaped `BaseResult` failure or, depending on shape, a
+  thrown error from acorn that bubbles up. `validate(code)` is
+  documented as "never throws" only for string input.
+- **Source with shebang / BOM / unicode identifiers** — accepted per
+  acorn's defaults (see `lib/parse/README.md` § Parse semantics).
+- **`with`-statement easter egg** — programs that fail module-mode
+  parse but succeed in script mode and contain a `WithStatement`
+  validate against the script-mode AST. The resulting
+  `ValidationReport.scriptMode` flag is **not** surfaced on
+  `BaseResult` — `validate(code)` flattens that detail away. Tools
+  that need to know whether script-mode was used should call
+  `parse(code)` (which exposes `scriptMode`) or `validateProgram`
+  (which exposes `ValidationReport.scriptMode`) directly.
+
+### `validateProgram(source, level)` (building block)
+
+```ts
+function validateProgram(
+  source: string,
+  level: LanguageLevel,
+): ValidationReport;
+```
+
+Lower-level entry. Returns a `ValidationReport` instead of the
+shaped `BaseResult`. Suitable for tools that want the raw
+`violations` array, the `levelName`, or to validate against a
+custom (non-JeJ) `LanguageLevel`.
+
+### `isJej(code)` (boolean convenience)
+
+```ts
+function isJej(code: string): boolean;
+```
+
+Returns `true` when code parses, passes JeJ validation, AND is properly
+formatted. Equivalent to `validate(code).ok && checkFormat(code).formatted`.
+Synchronous (recast format check is sync).
 
 ## Just Enough JS Level Definition
 
