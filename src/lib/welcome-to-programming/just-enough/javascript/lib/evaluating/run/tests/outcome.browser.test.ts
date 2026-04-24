@@ -1,0 +1,156 @@
+/**
+ * @file RunResult.outcome classification tests — browser project.
+ *
+ * Triangulates buildResult's outcome classification (run.ts) across
+ * all six paths: complete, cancel-via-explicit, cancel-via-break,
+ * timeout, iteration-limit, error. Pins outcome ↔ ok consistency.
+ *
+ * @remarks Adapted from Test-Design Specialist's N1 + N2 clusters in
+ * the termination-contract plan. Every outcome variant gets at least
+ * one test that would fail if the classification branch were removed.
+ * The `it.each` ok-consistency table prevents a future "add new
+ * outcome without wiring ok" bug.
+ */
+
+import { describe, expect, it, vi } from 'vitest';
+
+import format from '../../../formatting/format.js';
+import createRunGenerator from '../run.js';
+
+vi.setConfig({ testTimeout: 60_000 });
+
+describe('createRunGenerator outcome classification (browser)', () => {
+	describe('happy path', () => {
+		it('empty program → outcome:complete, ok:true', async () => {
+			const result = await createRunGenerator('let x = 1;\n');
+			expect(result.outcome).toBe('complete');
+			expect(result.ok).toBe(true);
+		});
+
+		it('console-only program → outcome:complete, ok:true', async () => {
+			const code = format('console.log(1);\nconsole.log(2);\n');
+			const result = await createRunGenerator(code);
+			expect(result.outcome).toBe('complete');
+			expect(result.ok).toBe(true);
+		});
+	});
+
+	describe('stopped', () => {
+		it('explicit .cancel() after first event → outcome:cancel, ok:true', async () => {
+			const gen = createRunGenerator('console.log(1);\n');
+			await gen.next();
+			gen.cancel();
+			const result = await gen;
+			expect(result.outcome).toBe('cancel');
+			expect(result.ok).toBe(true);
+		});
+
+		it('for-await break after first event → outcome:cancel, ok:true', async () => {
+			const code = format('console.log(1);\nconsole.log(2);\n');
+			const gen = createRunGenerator(code);
+			for await (const event of gen) {
+				void event;
+				break;
+			}
+			const result = await gen;
+			expect(result.outcome).toBe('cancel');
+			expect(result.ok).toBe(true);
+		});
+
+		it('cancel before first iterate → outcome:cancel, ok:true (worker never spawned)', async () => {
+			const gen = createRunGenerator('let x = 1;\n');
+			gen.cancel();
+			const result = await gen;
+			expect(result.outcome).toBe('cancel');
+			expect(result.ok).toBe(true);
+		});
+	});
+
+	describe('failure outcomes', () => {
+		it('stuck infinite loop within seconds budget → outcome:timeout, ok:false', async () => {
+			const code = format('while (true) { let x = 1; }\n');
+			const result = await createRunGenerator(code, { seconds: 0.1 });
+			expect(result.outcome).toBe('timeout');
+			expect(result.ok).toBe(false);
+		});
+
+		it('loop exceeds iterations cap → outcome:iteration-limit, ok:false', async () => {
+			const code = format(
+				'for (let i = 0; i < 1000; i = i + 1) { let x = 1; }\n',
+			);
+			const result = await createRunGenerator(code, { iterations: 5 });
+			expect(result.outcome).toBe('iteration-limit');
+			expect(result.ok).toBe(false);
+		});
+
+		it('unformatted source → outcome:error, ok:false (format gate)', async () => {
+			const result = await createRunGenerator('let x=1;\n');
+			expect(result.outcome).toBe('error');
+			expect(result.ok).toBe(false);
+		});
+	});
+
+	describe('outcome ↔ ok consistency matrix', () => {
+		// Drive real runs for each outcome. If someone adds a new outcome
+		// variant and forgets to wire ok, one of these rows fails — far
+		// stronger than a hand-built Record<string, boolean> tautology.
+		it.each([
+			{
+				label: 'complete → ok:true',
+				code: 'let x = 1;\n',
+				options: undefined as never,
+				expectedOutcome: 'complete' as const,
+				expectedOk: true,
+			},
+			{
+				label: 'timeout → ok:false',
+				code: format('while (true) { let x = 1; }\n'),
+				options: { seconds: 0.1 },
+				expectedOutcome: 'timeout' as const,
+				expectedOk: false,
+			},
+			{
+				label: 'iteration-limit → ok:false',
+				code: format(
+					'for (let i = 0; i < 1000; i = i + 1) { let x = 1; }\n',
+				),
+				options: { iterations: 5 },
+				expectedOutcome: 'iteration-limit' as const,
+				expectedOk: false,
+			},
+			{
+				label: 'error (format-reject) → ok:false',
+				code: 'let x=1;\n',
+				options: undefined as never,
+				expectedOutcome: 'error' as const,
+				expectedOk: false,
+			},
+		])('$label', async ({ code, options, expectedOutcome, expectedOk }) => {
+			const result = await createRunGenerator(code, options);
+			expect(result.outcome).toBe(expectedOutcome);
+			expect(result.ok).toBe(expectedOk);
+		});
+
+		it('cancel → ok:true', async () => {
+			const gen = createRunGenerator('let x = 1;\n');
+			gen.cancel();
+			const result = await gen;
+			expect(result.outcome).toBe('cancel');
+			expect(result.ok).toBe(true);
+		});
+	});
+
+	describe('CancelEvent reference identity across replay', () => {
+		it('same CancelEvent ref in live logs and replayed iteration (via .cancel)', async () => {
+			const gen = createRunGenerator('console.log(1);\n');
+			await gen.next();
+			gen.cancel();
+			const result = await gen;
+			if (!result.ok || !result.logs) throw new Error('expected ok+logs');
+			const liveCancel = result.logs.at(-1);
+			const replayed: unknown[] = [];
+			for await (const event of gen) replayed.push(event);
+			expect(replayed.at(-1)).toBe(liveCancel);
+		});
+	});
+});

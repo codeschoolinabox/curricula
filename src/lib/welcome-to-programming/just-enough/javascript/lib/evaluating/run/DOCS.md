@@ -130,6 +130,80 @@ Worker and ending when the consumer's next pull resumes execution:
 - Per-engine event shape. Both engines carry different event
   payloads; the pause protocol is agnostic.
 
+### Unified termination protocol
+
+Consumer-observable invariant: every path that ends a run (natural
+completion, cancel via `.cancel()`, break out of a live `for await`,
+wall-clock timeout, guarded-loop iteration-limit, runtime error)
+resolves to a settled RunResult whose `outcome` field classifies the
+cause. The RunResult is cached for replay. The Worker is torn down
+in every case.
+
+**Execution phases**:
+
+1. **Set cause (main, sync, first-write-wins)** — any termination
+   entry point calls a single `setTermination(cause)` helper. The
+   helper writes only if the cause closure variable is null;
+   otherwise the earlier cause wins and the new one is dropped.
+2. **Wake dequeue (main, sync)** — a sentinel is pushed to the
+   queue if empty; any pending `await dequeue()` resolves.
+3. **Dispatch (main, sync, top of the while-loop)** — the body's
+   main loop reads the cause on each iteration. Branch on kind:
+   - `cancel` → push CancelEvent into logs, break.
+   - `timeout` → push TimeoutError into logs, yield it, break.
+   - `worker-error` → push error into logs, break.
+   - Runtime error in learner code is carried via the message
+     channel as an error event; main loop pushes and breaks.
+4. **Finally (main, sync)** — `worker.terminate()`, revoke the
+   Blob URL, clear any pending timer.
+5. **Build result (main, sync)** — `buildResult(logs, ...)`
+   classifies `outcome` from the log contents:
+   - TimeoutError errorEvent → `timeout`.
+   - Iteration-limit RangeError → `iteration-limit`.
+   - Any other errorEvent → `error`.
+   - Trailing CancelEvent (no error) → `cancel`.
+   - Otherwise → `complete`.
+
+**Precedence** (first-write-wins):
+
+| First-set cause | Wins over any later-set | Rationale |
+| --- | --- | --- |
+| `cancel` (via `.cancel()` or `.return()` for break) | yes | consumer intent takes precedence |
+| `timeout` | yes (if arrives first) | wall-clock budget exhausted |
+| `worker-error` | yes (if arrives first) | Worker crashed — main thread cannot override |
+
+Under first-write-wins, concurrent triggers produce non-deterministic
+but always-consistent outcomes: whichever called `setTermination`
+first wins. No priority ladder; the closure variable's monotonic
+write is the single source of truth.
+
+**Structural constraints**:
+
+- CancelEvent (the trailing `{event:'cancel'}`) is constructed
+  inside `body()`'s cancel-branch, never in an interceptor.
+  Identity-stable replay requires the same reference lives in both
+  `logs` and the frozen RunResult's `logs` array.
+- The `.return` interceptor drives body via `origNext`, never
+  `origReturn`. Native `.return()` aborts body before `buildResult`;
+  that would regress to the pre-fix broken state.
+- The `.return` / `.next` interceptors short-circuit on `isDone`
+  per ECMA-262 §27.6.3.3.
+- `deepFreezeInPlace` freezes logs recursively; no post-push event
+  mutation. The outcome field on the RunResult is frozen with the
+  rest.
+
+**Out of scope**:
+
+- Consumer-propagated error via `gen.throw(e)` or a `.fail(reason)`
+  method. The runtime's for-await body throw already routes through
+  `.return()` here — classified as `outcome: 'cancel'` because the
+  engine cannot distinguish "consumer threw" from "consumer broke."
+  If a real consumer need surfaces, add a `.fail(reason)` method on
+  RunHandle that sets a dedicated cause variant.
+- Additive outcome enrichment for trace/debug. `TraceOutcome` and
+  `DebugOutcome` are already typed (subsets of `RunOutcome`) but
+  their engines don't yet set the field. Migration is additive.
+
 ### Replay / re-iteration on RunHandle
 
 Consumer-observable invariant: after a run completes (successfully,

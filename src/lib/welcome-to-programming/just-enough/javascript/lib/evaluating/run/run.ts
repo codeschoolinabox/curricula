@@ -63,6 +63,20 @@ type WorkerErrorSignal = {
 };
 type QueueMessage = WorkerOutbound | WorkerErrorSignal;
 
+// --- Internal termination state (first-write-wins) ---
+
+/**
+ * Every path that ends a run records a cause here via setTermination.
+ * First-write-wins: concurrent triggers (cancel racing timeout,
+ * worker-error racing cancel) resolve monotonically — no priority
+ * ladder, no flag combinatorics. See DOCS.md § Unified termination
+ * protocol.
+ */
+type TerminationCause =
+	| { readonly kind: 'cancel' }
+	| { readonly kind: 'timeout' }
+	| { readonly kind: 'worker-error' };
+
 // --- Resolved IO ---
 
 const CONSOLE_METHODS: readonly ConsoleMethod[] = [
@@ -222,7 +236,25 @@ function createRunGenerator(
 	// suspended (before first iterate, mid-await, or mid-yield).
 	const queue: QueueMessage[] = [];
 	let resolveWaiting: (() => void) | null = null;
-	let cancelled = false;
+	// Termination cause — first-write-wins. All paths that end a run
+	// (consumer cancel, for-await break, wall-clock timeout, worker error,
+	// iteration-limit via RangeError, natural complete) funnel through
+	// setTermination so the concurrent-trigger precedence collapses to a
+	// monotonic state machine. See DOCS.md § Unified termination protocol.
+	let terminationCause: TerminationCause | null = null;
+
+	function setTermination(cause: TerminationCause): void {
+		if (terminationCause === null) terminationCause = cause;
+	}
+
+	// Single-cast helper: reading `terminationCause?.kind` directly lets TS
+	// narrow through the pre-iterate `if (... === 'cancel') return` at
+	// body()'s top, which means later checks in this closure can't see
+	// 'cancel' as a possibility. Centralizing the widening cast keeps
+	// future readers from forgetting it and accidentally losing a branch.
+	function getTerminationKind(): TerminationCause['kind'] | undefined {
+		return (terminationCause as TerminationCause | null)?.kind;
+	}
 
 	function wakeDequeue(): void {
 		// WHY push unconditionally when empty: if wakeDequeue is called
@@ -259,7 +291,7 @@ function createRunGenerator(
 	}
 
 	function cancel(): void {
-		cancelled = true;
+		setTermination({ kind: 'cancel' });
 		wakeDequeue();
 	}
 
@@ -269,9 +301,13 @@ function createRunGenerator(
 		const resolvedIo = buildResolvedIo(options?.io);
 
 		// 0. Cancelled before first iterate — skip all setup.
-		if (cancelled) {
+		if (terminationCause?.kind === 'cancel') {
 			const cancelEvent: CancelEvent = { event: 'cancel' };
-			return deepFreezeInPlace({ ok: true, logs: [cancelEvent] });
+			return deepFreezeInPlace({
+				ok: true,
+				outcome: 'cancel' as const,
+				logs: [cancelEvent],
+			});
 		}
 
 		// 1. Validation + format gates. validate/checkFormat are
@@ -287,6 +323,7 @@ function createRunGenerator(
 			if (!formatted) {
 				return deepFreezeInPlace({
 					ok: false as const,
+					outcome: 'error' as const,
 					error: { kind: 'formatting' as const },
 				});
 			}
@@ -301,6 +338,7 @@ function createRunGenerator(
 			};
 			return deepFreezeInPlace({
 				ok: false,
+				outcome: 'error' as const,
 				error: {
 					kind: 'javascript',
 					name,
@@ -324,6 +362,7 @@ function createRunGenerator(
 			};
 			return deepFreezeInPlace({
 				ok: false,
+				outcome: 'error' as const,
 				error: {
 					kind: 'javascript',
 					name: error.name,
@@ -371,6 +410,7 @@ function createRunGenerator(
 			};
 			return deepFreezeInPlace({
 				ok: false,
+				outcome: 'error' as const,
 				error: {
 					kind: 'javascript',
 					name: error.name,
@@ -398,12 +438,11 @@ function createRunGenerator(
 		let timeout: ReturnType<typeof setTimeout> | null = null;
 		let remainingMs = maxMs;
 		let lastResumeTime = 0;
-		let timedOut = false;
 
 		function startTimeout(): void {
 			if (!isFinite(remainingMs)) return;
 			if (remainingMs <= 0) {
-				timedOut = true;
+				setTermination({ kind: 'timeout' });
 				wakeDequeue();
 				return;
 			}
@@ -420,7 +459,7 @@ function createRunGenerator(
 				// EVENT_READY after postMessage but before blocking. If set AND
 				// budget remains, the Worker is paused with a pending event —
 				// NOT stuck. Reschedule for the remaining budget so a real
-				// exhaustion (even with events flowing) still fires timedOut.
+				// exhaustion (even with events flowing) still sets terminationCause.
 				if (
 					Atomics.load(views.control, EVENT_READY_INDEX) === EVENT_READY &&
 					remainingMs > 0
@@ -429,7 +468,7 @@ function createRunGenerator(
 					return;
 				}
 
-				timedOut = true;
+				setTermination({ kind: 'timeout' });
 				wakeDequeue();
 			}, remainingMs);
 		}
@@ -468,17 +507,21 @@ function createRunGenerator(
 			while (true) {
 				const msg = await dequeue();
 
-				// Cancellation supersedes everything else, including any
+				// Termination check — first-write-wins via setTermination.
+				// Whichever path got there first (cancel, timeout, worker-error)
+				// is the cause; others are ignored. Cancellation supersedes any
 				// in-flight event that arrived just before cancel fired.
-				if (cancelled) {
+				const cause = getTerminationKind();
+				if (cause === 'cancel') {
 					const cancelEvent: CancelEvent = { event: 'cancel' };
 					logs.push(cancelEvent);
 					break;
 				}
 
-				// WHY check timedOut next: timeout handler sets this flag and calls
-				// wakeDequeue() to unblock us. The sentinel msg is irrelevant — exit immediately.
-				if (timedOut) {
+				// WHY check timeout next: timeout handler calls setTermination
+				// and wakeDequeue() to unblock us. The sentinel msg is
+				// irrelevant — exit immediately.
+				if (cause === 'timeout') {
 					const timeoutEvent: RunErrorEvent = {
 						event: 'error',
 						name: 'TimeoutError',
@@ -514,7 +557,7 @@ function createRunGenerator(
 					// WHY cancelled check BEFORE releasing the Worker: if cancel
 					// fired during yield, we must NOT resume — the finally
 					// block terminates the Worker still-paused. Clean teardown.
-					if (cancelled) continue;
+					if (getTerminationKind() === 'cancel') continue;
 					// WHY clearEventReady BEFORE writeResumeSignal: clearing
 					// after release would race against the Worker's next trap
 					// re-arming the flag — the main thread would clobber a
@@ -638,7 +681,7 @@ function createRunGenerator(
 					done: true,
 				};
 			}
-			if (!cancelled) cancel();
+			if (terminationCause === null) cancel();
 			while (!isDone) {
 				const res = await origNext(undefined);
 				if (res.done && res.value !== undefined) {
@@ -769,6 +812,13 @@ async function handleIoRequest(
 
 /**
  * Builds a RunResult from the collected event logs.
+ *
+ * @remarks Sets the `outcome` field based on the event stream:
+ * - TimeoutError in logs → `timeout`
+ * - Iteration-limit RangeError in logs → `iteration-limit`
+ * - Any other error event → `error`
+ * - Trailing CancelEvent and no error → `cancel`
+ * - Otherwise → `complete`
  */
 function buildResult(
 	logs: readonly RunEvent[],
@@ -781,6 +831,7 @@ function buildResult(
 		if (errorEvent.name === 'TimeoutError') {
 			return deepFreezeInPlace({
 				ok: false,
+				outcome: 'timeout' as const,
 				error: {
 					kind: 'timeout',
 					name: errorEvent.name,
@@ -803,6 +854,7 @@ function buildResult(
 		) {
 			return deepFreezeInPlace({
 				ok: false,
+				outcome: 'iteration-limit' as const,
 				error: {
 					kind: 'iteration-limit',
 					name: errorEvent.name,
@@ -817,6 +869,7 @@ function buildResult(
 
 		return deepFreezeInPlace({
 			ok: false,
+			outcome: 'error' as const,
 			error: {
 				kind: 'javascript',
 				name: errorEvent.name,
@@ -828,7 +881,11 @@ function buildResult(
 		});
 	}
 
-	return deepFreezeInPlace({ ok: true, logs });
+	// No error event. Trailing CancelEvent → consumer stopped the run
+	// (via .cancel() or for-await break). Otherwise natural complete.
+	const outcome: 'cancel' | 'complete' =
+		logs.at(-1)?.event === 'cancel' ? 'cancel' : 'complete';
+	return deepFreezeInPlace({ ok: true, outcome, logs });
 }
 
 /**

@@ -79,6 +79,23 @@ README. Use them consistently.
   learner's code) and `CancelEvent` (appended by the main thread
   when `.cancel()` is invoked). They travel the same `RunEvent`
   stream as IO events.
+- **Outcome** — how a run resolved. Five first-class variants set
+  on the `RunResult` by the engine's buildResult: `complete`
+  (natural end of learner code), `cancel` (consumer stopped the
+  run, whether via `.cancel()` or for-await break), `timeout`
+  (seconds budget exhausted), `iteration-limit` (guarded loop
+  exceeded cap), `error` (learner code threw, or parse/format/
+  creation gate failed). Consumers should switch on
+  `result.outcome` rather than inspecting `logs.at(-1)?.event`
+  for the cancel sentinel — the former narrows exhaustively in
+  TypeScript, the latter is easy to forget. See § Outcome below.
+- **Termination cause** (internal) — the single closure variable
+  inside `createRunGenerator` that records the first reason the
+  run ended (first-write-wins). All termination entry points
+  funnel through one `setTermination()` helper so concurrent
+  triggers (cancel racing timeout, worker error racing user
+  cancel) collapse to a monotonic state machine without a priority
+  ladder.
 
 ## Public API
 
@@ -285,6 +302,40 @@ produced via manual iteration. Errors inside the worker (uncaught
 `TypeError` etc.) surface as `{ok: false, error: ...}` — they are NOT
 thrown from `.result`. The only way `.result` rejects is if the main-
 thread code itself throws (unreachable under current code).
+
+## Outcome
+
+Every RunResult carries an `outcome` field classifying how the run
+ended. Five variants, exhaustively switchable in TypeScript:
+
+```ts
+const result = await run(code);
+switch (result.outcome) {
+    case 'complete':         // learner code reached its natural end
+    case 'cancel':           // consumer stopped via .cancel() or break
+    case 'timeout':          // seconds budget exhausted
+    case 'iteration-limit':  // a guarded loop exceeded its cap
+    case 'error':            // learner code threw or gate failed
+}
+```
+
+`ok` is a derived convenience flag. `complete | cancel` → `ok:true`;
+`timeout | iteration-limit | error` → `ok:false`. Use `outcome` for
+fine-grained discrimination; `ok` remains the gate on `result.error`
+presence (errors only exist on `ok:false`).
+
+**Transitional type note.** `outcome` is typed as optional today
+(`outcome?: RunOutcome`) so literal `RunResult` constructions in
+existing code continue to compile. In practice every result produced
+by the engine's buildResult has `outcome` set. Consumers writing
+exhaustive switches should include a `default` branch (or use
+`result.outcome!`) until the type tightens to required.
+
+The legacy `result.logs.at(-1)?.event === 'cancel'` pattern still
+works — CancelEvent is still appended to `logs` on every cancel-path
+termination. Prefer `result.outcome === 'cancel'` in new code;
+TypeScript narrows it exhaustively and consumers can't forget to
+check.
 
 ## Replay / re-iteration
 

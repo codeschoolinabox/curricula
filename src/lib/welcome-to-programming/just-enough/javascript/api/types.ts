@@ -122,31 +122,66 @@ type ResultError =
 // ─── Result types ────────────────────────────────────────────
 
 /**
- * Generic execution result parameterized by event type.
+ * Generic execution result parameterized by event type and outcome.
  *
  * @remarks Composes `BaseResult` (from `lib/validating/types.ts`)
  * with the wider `ResultError` union, then adds a `logs` field
- * containing the event stream from execution.
+ * containing the event stream from execution and an `outcome`
+ * field classifying how the run ended.
  *
  * `logs` is present when execution ran (even partially — a
  * runtime error still produces partial logs up to the crash).
  * `logs` is absent when code was rejected before execution
  * (parse error, validation failure, or formatting gate).
  *
+ * `outcome` is set by the engine's buildResult for every
+ * execution result it produces. It is typed as optional for
+ * backward compatibility with literal constructions that pre-date
+ * this field; future work may tighten to required once all
+ * construction sites are migrated.
+ *
  * @typeParam TEvent - The event type for this engine
+ * @typeParam TOutcome - The outcome discriminant subset supported by
+ *   this engine. Engines with fewer outcomes narrow this parameter
+ *   (e.g. `DebugOutcome = 'complete' | 'error'`).
  */
-type Result<TEvent> = BaseResult<ResultError> & {
+type Result<TEvent, TOutcome extends string = string> = BaseResult<ResultError> & {
 	readonly logs?: readonly TEvent[];
+	readonly outcome?: TOutcome;
 };
+
+/**
+ * The five outcome variants a run can resolve to.
+ *
+ * @remarks Classifies how a `run()` finished. Set by the engine's
+ * buildResult. First-class on the RunResult — consumers switch on
+ * `result.outcome` rather than inspecting `logs.at(-1)?.event`.
+ *
+ * - `'complete'` — learner code reached its natural end.
+ * - `'cancel'` — consumer stopped the run, either via `.cancel()`
+ *   or by `break`ing out of a live `for await`. Still `ok: true`
+ *   (cancel is not an error).
+ * - `'timeout'` — seconds budget exhausted.
+ * - `'iteration-limit'` — a guarded loop exceeded its cap.
+ * - `'error'` — learner code threw, or a pre-execution gate
+ *   (parse, validation, formatting, worker creation) rejected.
+ */
+type RunOutcome =
+	| 'complete'
+	| 'cancel'
+	| 'timeout'
+	| 'iteration-limit'
+	| 'error';
 
 /**
  * Result from `run()` — Web Worker execution with trapped I/O.
  *
  * @remarks `logs` contains {@link RunEvent} entries: one per
  * trapped call (console.log, prompt, alert, confirm, etc.)
- * plus an error event if execution failed.
+ * plus an error event if execution failed. `outcome` classifies
+ * how the run ended.
  */
-type RunResult = Result<RunEvent>;
+type RunResult = Result<RunEvent, RunOutcome>;
 
 /**
  * Result from `trace()` — Aran instrumentation with structured events.
@@ -165,7 +200,13 @@ type RunResult = Result<RunEvent>;
  * - `options` — snapshot of the `TraceOptions` config that was used,
  *   so consumers know which events were enabled.
  */
-type TraceResult = Result<TraceEvent> & {
+type TraceOutcome =
+	| 'complete'
+	| 'timeout'
+	| 'iteration-limit'
+	| 'error';
+
+type TraceResult = Result<TraceEvent, TraceOutcome> & {
 	/** Original source code. Present on ok:true. */
 	readonly code?: string;
 	/**
@@ -184,7 +225,9 @@ type TraceResult = Result<TraceEvent> & {
  * on normal completion) or `[errorEvent]` on failure. Debug has
  * no streaming — it yields 0 or 1 events total.
  */
-type DebugResult = Result<DebugEvent>;
+type DebugOutcome = 'complete' | 'error';
+
+type DebugResult = Result<DebugEvent, DebugOutcome>;
 
 /**
  * Event produced by the debug engine on error.
@@ -281,8 +324,11 @@ export type {
 	BaseResult,
 	Result,
 	RunResult,
+	RunOutcome,
 	TraceResult,
+	TraceOutcome,
 	DebugResult,
+	DebugOutcome,
 	DebugEvent,
 	JejProgram,
 	// Re-exported for consumer convenience
