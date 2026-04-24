@@ -56,18 +56,25 @@ a snippet-name-changed signal for future engagement hooks).
 ### 2. Pipeline
 
 Run the active transforms in declared order. Each transform receives the current
-snippet string and returns a new snippet string. After all transforms complete,
-pass the resulting snippet to the active lens. The lens returns a renderable
-component. The orchestrator mounts that component in the lens area.
+snippet string AND its resolved config (the module's own defaults merged with
+any override from `pipeline.configs[transformName]`, via
+`module.config(overrides)`), and returns a new snippet string. After all
+transforms complete, pass the resulting snippet to the active lens. The lens
+receives its own resolved config (from `pipeline.configs[lensName]` merged
+over the module's defaults) and returns a renderable component. The
+orchestrator mounts that component in the lens area.
 
 Structural constraint: transforms are pure string-to-string functions with no
-side effects. A transform that fails throws — the orchestrator catches,
-aborts the pipeline, renders the original snippet in a read-only
-diagnostic banner (no lens mounted), and dispatches no state-change
-signal. This is the safe default for all transforms. A future
-declarative opt-in for per-transform "fallthrough on failure" semantics
-is pending user approval (see notes); until then, all transform failures
-abort.
+side effects. A transform that fails throws — behavior at the pipeline layer
+is controlled by the module's declared `onFailure` mode. With
+`onFailure: 'abort'` (the default when the field is absent), the pipeline
+halts at the failing transform and the error propagates to the orchestrator,
+which renders the original snippet in a read-only diagnostic banner (no lens
+mounted) and dispatches no state-change signal. With
+`onFailure: 'fallthrough'`, the pipeline layer catches the throw, emits a
+`console.warn`, leaves the accumulated snippet unchanged, and continues
+with the next transform — useful for cosmetic transforms (format) where the
+untransformed code is still safe and useful.
 
 A lens is always terminal — it receives the final transformed snippet and
 produces a component. No lens-to-lens chaining.
@@ -237,6 +244,16 @@ or DOM survive React unmount.
 - **Registry is static.** Transforms and lenses are registered at module load
   time, not dynamically at runtime. The registry is read-only after
   initialization.
+- **Configs flow by module name.** Per-instance module configs travel on
+  the `Pipeline` via an optional `configs` field keyed by module name —
+  the transforms and the lens share a keyspace because registry names are
+  unique across both. Entries are `Partial<TransformConfig>` (structurally
+  identical to `Partial<LensConfig>`) and are merged over each module's
+  own defaults at call time via `module.config(overrides)`. The plugin's
+  `lenses.json` cascade + per-file `@study-lens` directive narrow into
+  this shape. A `configs` key that does not correspond to any module in
+  the pipeline warns at validation time (kept on the Pipeline, ignored at
+  execution).
 - **Cache is `(lens-name, config)` keyed.** Exactly one cached `LensMount`
   per key. Content is orthogonal — the cache does not churn on snippet
   changes. External snippet mutations propagate via each mount's

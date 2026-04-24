@@ -47,6 +47,12 @@ type TransformConfig = Readonly<Record<string, SerializableValue>>;
  * untransformed snippet to the next stage. Safety-critical transforms
  * (loopGuard, translate) rely on the abort default; cosmetic transforms
  * (format) may opt into fallthrough.
+ *
+ * A transform can receive a per-instance config at call time via
+ * `Pipeline.configs[name]` — the Docusaurus plugin's cascade (rooted
+ * `lenses.json` + per-file `@study-lens` directives) narrows per-name
+ * entries into the emitted pipeline, and the executor merges them over
+ * the transform's own defaults by calling `module.config(overrides)`.
  */
 type TransformModule = Readonly<{
 	name: string;
@@ -158,10 +164,28 @@ type Recommendation = Readonly<{
  * A structurally typed pipeline: zero or more transforms followed by
  * exactly one lens. Build-time validation by the plugin ensures this
  * invariant; the orchestrator trusts the prop shape.
+ *
+ * @remarks Optional `configs` carries per-module config overrides keyed
+ * by module name. The keyspace is shared between transforms and the
+ * lens because registry names are unique across the namespace, so one
+ * key maps to at most one module. Entries are `Partial<TransformConfig>`
+ * structurally — `TransformConfig` and `LensConfig` are the same shape
+ * (`Readonly<Record<string, SerializableValue>>`), so a single field
+ * covers both.
+ *
+ * Configs originate from the Docusaurus plugin's cascade: walk
+ * `lenses.json` files from the content root down to the target file,
+ * deep-merge per-module entries, then merge any per-file `@study-lens`
+ * directive overrides on top. The plugin narrows the cascade to the
+ * modules actually in this pipeline and emits them here. Keys that
+ * don't correspond to any `transforms[]` entry or the `lens` are a
+ * coherence warning (see `validatePipeline`) — they are kept on the
+ * returned Pipeline but ignored at execution time.
  */
 type Pipeline = Readonly<{
 	transforms: ReadonlyArray<string>;
 	lens: string;
+	configs?: Readonly<Record<string, Partial<TransformConfig>>>;
 }>;
 
 // --- Snippet analysis (consumed from lib/analysis/) ---
