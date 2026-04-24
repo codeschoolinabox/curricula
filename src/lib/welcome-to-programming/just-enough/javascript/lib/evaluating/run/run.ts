@@ -208,17 +208,10 @@ function makeInternalError(err: unknown): RunErrorEvent {
  * processes the event and resumes.
  *
  * IO callbacks (mocked or native) are always awaited. The cumulative
- * timer is intended to pause during every IO callback AND every
- * generator yield, so learners can examine steps and consumers can
- * run async UIs without consuming execution time.
- *
- * **Known inconsistency:** the timer currently only pauses during IO
- * callbacks (via pauseTimeout/startTimeout around handleIoRequest).
- * It does NOT pause during generator yield — time the consumer spends
- * between `.next()` calls (e.g. stepping mode) still counts toward
- * the `seconds` limit. Fix pending the api/run → evaluating/run merge
- * task, which will adopt the trace engine's EVENT_READY protocol and
- * gain a reliable "worker paused, don't tick" signal for the timer.
+ * timer pauses during every IO callback AND during every generator
+ * yield (via `pauseTimeout` / `startTimeout` around both phases), so
+ * learners can examine steps and consumers can run async UIs without
+ * consuming execution time.
  */
 function createRunGenerator(
 	code: string,
@@ -511,27 +504,28 @@ function createRunGenerator(
 						}
 					}
 
+					// WHY pauseTimeout BEFORE yield: budget must not deplete
+					// while yielded to the consumer. Paired with startTimeout
+					// below on resume. See DOCS.md § Timer-vs-yield.
+					pauseTimeout();
+
 					yield event;
 
-					// WHY: yield one macrotask slot before releasing the worker.
-					// The wall-clock timer callback is a macrotask — it cannot fire
-					// during an unbroken microtask chain. This break gives it a
-					// guaranteed firing slot each event. Worker remains paused here.
-					// WHY no writePauseEngaged: each trap arms its own pause before
-					// postMessage to avoid the race where notify fires before the main
-					// thread re-arms, causing Atomics.wait to see PAUSED and deadlock.
-					await new Promise<void>(resolve => setTimeout(resolve, 0));
-					// WHY cancelled check BEFORE writeResumeSignal: if cancel
-					// fired during the macrotask wait, we must NOT unpause the
-					// worker — that would let it run one more chunk of user
-					// code before the finally block can terminate it. The next
-					// iteration dequeues the sentinel cancel pushed and breaks.
+					// WHY cancelled check BEFORE releasing the Worker: if cancel
+					// fired during yield, we must NOT resume — the finally
+					// block terminates the Worker still-paused. Clean teardown.
 					if (cancelled) continue;
 					// WHY clearEventReady BEFORE writeResumeSignal: clearing
 					// after release would race against the Worker's next trap
 					// re-arming the flag — the main thread would clobber a
 					// fresh signal. See DOCS.md § Unified pause protocol.
 					clearEventReady(views);
+					// WHY startTimeout BEFORE writeResumeSignal: the sub-micro-
+					// second window between release and re-arm is an accepted
+					// uncharged slice (DOCS.md § Ordering constraints). Any
+					// rearm-after-release would risk firing on a Worker that
+					// has already begun its next chunk — better to arm first.
+					startTimeout();
 					writeResumeSignal(views);
 					continue;
 				}

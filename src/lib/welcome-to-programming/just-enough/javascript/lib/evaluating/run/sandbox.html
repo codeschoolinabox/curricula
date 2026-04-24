@@ -681,6 +681,7 @@ console.error('three');"
 						}
 						if (currentGen !== gen) break; // cancelled mid-iteration
 						eventCount++;
+						console.log('[event]', value);
 
 						const devStepping = stepCheckbox.checked && devCheckbox.checked;
 
@@ -714,9 +715,11 @@ console.error('three');"
 					if (currentGen === gen) {
 						statusEl.textContent = `done — ${eventCount} event(s)`;
 					}
-					// Log run result regardless of cancel — consumers
-					// inspecting DevTools want to see what the engine
-					// returned, including the cancel event in logs.
+					// If the loop broke via the cancel guard before reaching
+					// done:true, fetch the final RunResult via gen.result so
+					// [run result] always fires — the logs array will contain
+					// the trailing {event:'cancel'} entry.
+					if (result === undefined) result = await gen.result;
 					if (result) console.log('[run result]', result);
 				} catch (err) {
 					statusEl.textContent = `unexpected throw: ${err.message}`;

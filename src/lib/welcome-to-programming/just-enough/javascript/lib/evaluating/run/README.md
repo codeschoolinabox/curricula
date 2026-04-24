@@ -76,8 +76,7 @@ README. Use them consistently.
   during generator yield (consumer stepping time does not count),
   during IO callback await (styled dialog time does not count), and
   while the Worker is otherwise blocked. Resumes when the Worker is
-  unblocked. Staging note: pause-during-yield lands in M.5; current
-  code pauses only during IO callback await.
+  unblocked.
 - **Non-IO events** — events whose generation does not involve an IO
   hook: `ErrorEvent` (creation- or execution-phase errors in the
   learner's code) and `CancelEvent` (appended by the main thread
