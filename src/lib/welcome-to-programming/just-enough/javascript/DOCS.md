@@ -3,24 +3,33 @@
 ## Data flow
 
 Top-level view — subdirectories as nodes. The package's shape is
-"public surface (api/) on top of language primitives (lib/), with
-study-lens composition (study-lenses/) as an orthogonal concern."
+"public functions live in their own lib/ modules; execution engines
+in lib/evaluating/; study-lens composition (study-lenses/) is an
+orthogonal concern."
 
 ```mermaid
 flowchart TD
-    S[learner source] -->|parse / validate / format| A[api/]
-    A -->|run / trace, async| E[lib/evaluating/]
-    A -->|validate language, pure| V[lib/validating/]
-    A -->|format, pure| F[lib/formatting/]
-    A -->|interpret errors, pure| I[lib/error-interpreting/]
+    S[learner source] -->|parse| P[lib/parse/]
+    S -->|validate language| V[lib/validating/]
+    S -->|format / format-check| F[lib/formatting/]
+    S -->|run / trace, async| E[lib/evaluating/]
+    S -->|interpret errors, pure| I[lib/error-interpreting/]
     E -->|RunResult / TraceResult with outcome| C[consumer]
-    SL[study-lenses/] -.->|compose transforms on source| A
+    V -->|BaseResult| C
+    P -->|ParseResult| C
+    F -->|formatted source / CheckFormatResult| C
+    SL[study-lenses/] -.->|compose transforms on source| S
 ```
 
 Each subdirectory has its own `DOCS.md` with a more detailed
 flow at its abstraction level. Domain-agnostic utilities (freeze,
 clone, deep-clone) are invisible at every level — called within
 nodes, not shown between them.
+
+The legacy `api/` layer was a public-surface aggregator over these
+modules. Validate/parse/format/default were migrated to lib/; only
+trace/run/debug-related types remain in api/types.ts pending the
+parallel trace-migration effort.
 
 ## Why this library exists
 
@@ -57,37 +66,48 @@ JeJ — they gate.
 
 ```text
 just-enough-javascript/
-  index.ts          ← Package entry: default export + named exports
-  api/              ← Public API (wrappers + code object factory)
-  evaluating/       ← Raw execution engines
-    run/            ← Web Worker + SAB for synchronous I/O
-    debug/          ← iframe + debugger statements
-    trace/          ← Aran AST instrumentation in Worker
-    shared/         ← Execution type, SAB protocol, guard-loops
-  validating/       ← AST-based validation pipeline
-  formatting/       ← Recast-based formatting and format checking
-  reference.md      ← Learner-facing language cheat sheet
+  index.ts                ← Package entry: named exports
+  lib/parse/              ← parse() + parseProgram + getChildNodes
+  lib/validating/         ← validate() + AST validation pipeline
+  lib/formatting/         ← format() + checkFormat()
+  lib/evaluating/         ← Raw execution engines
+    run/                  ← Web Worker + SAB for synchronous I/O
+    trace/                ← Aran AST instrumentation in Worker
+    shared/               ← Execution type, SAB protocol, guard-loops
+  lib/editing/            ← Editor integration
+  lib/socratizing/        ← Socratic micro-decision analysis
+  lib/scope/              ← Scope analysis utilities
+  lib/error-interpreting/ ← Learner-friendly error translation
+  lib/jej-documentation/  ← JEJ docs for editor support
+  api/                    ← Legacy: trace/run/debug-related types remain pending parallel migration
+  reference.md            ← Learner-facing language cheat sheet
 ```
 
 ### Dependency DAG
 
 ```text
 index.ts
-  → api/*
+  → lib/parse/parse           (parse public entry)
+  → lib/validating/validate   (validate public entry)
+  → lib/validating/is-jej     (boolean convenience)
+  → lib/formatting/{format, check-format}  (format functions)
+  → lib/evaluating/run/run    (run public entry)
+  → api/trace                 (legacy; parallel migration in flight)
+  → api/types                 (trace/run/debug-related types remain)
 
-api/*
-  → validating/        (validation preamble)
-  → formatting/        (format check + formatting)
-  → evaluating/*/      (raw execution)
+lib/parse/
+  (depends only on acorn)
 
-evaluating/*/
-  → evaluating/shared/ (Execution type, SAB protocol)
+lib/validating/
+  → lib/parse/                (parseProgram + getChildNodes + ParseError)
 
-validating/
-  (no deps on evaluating/ or formatting/)
-
-formatting/
+lib/formatting/
   (no deps on validating/ or evaluating/)
+
+lib/evaluating/run/
+  → lib/validating/validate   (validation gate)
+  → lib/formatting/check-format (format gate)
+  → lib/evaluating/shared/    (Execution type, SAB protocol)
 ```
 
 ## Key design decisions

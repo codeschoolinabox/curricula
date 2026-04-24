@@ -43,8 +43,9 @@ isolation model and output type:
 
 All engines follow the same contract:
 
-1. Receive already-validated, formatted code (validation and format checking is
-   the `api/` layer's job — the execution pipeline gate)
+1. Each engine's public entry composes `validate` (from `lib/validating/`) and
+   `checkFormat` (from `lib/formatting/`) as gates inside its lazy-startup
+   pipeline. The engine's body assumes already-validated, formatted code.
 2. Execute in isolation (worker or iframe — never on the main thread)
 3. Yield events via AsyncGenerator, one at a time
 4. Return frozen event arrays on completion
@@ -53,8 +54,8 @@ All engines follow the same contract:
 ## Why AsyncGenerator for all engines
 
 All three engines return async generators for API consistency. The generators are
-wrapped by `createExecution` (from `shared/`) at the `api/` layer to produce
-`Execution` objects with PromiseLike backward compatibility.
+wrapped by `createExecution` (from `shared/`) inside each engine's public entry
+to produce `Execution` objects with PromiseLike backward compatibility.
 
 The run and trace engines use SAB pause to block the Worker between events —
 giving the consumer full control over pacing. The debug engine's generator is

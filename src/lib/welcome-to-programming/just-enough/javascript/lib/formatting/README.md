@@ -45,5 +45,7 @@ function checkFormat(code: string): { formatted: boolean };
 ## Navigation
 
 - [DOCS.md](./DOCS.md) — design decisions and rationale
-- [../api/README.md](../api/README.md) — public API wrappers (`format`,
-  `checkFormat`)
+- [../validating/README.md](../validating/README.md) — `validate(code)` and
+  `isJej(code)` (the formatting + validation composition lives there)
+- [../evaluating/run/README.md](../evaluating/run/README.md) — `run()` uses
+  `checkFormat` as an execution gate

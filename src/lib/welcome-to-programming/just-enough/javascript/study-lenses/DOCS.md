@@ -16,8 +16,10 @@ consumer:
   `Pipeline` internally.
 - **Upstream: JEJ runtime** (`lib/`) — execution engines (run, trace,
   debug), validation, formatting, editor factory. Consumed by lenses and
-  transforms. Not reimplemented here. (`api/` is being merged into `lib/`;
-  all utilities consolidate under `lib/`.)
+  transforms. Not reimplemented here. (The legacy `api/` aggregator is
+  largely dismantled; validate/parse/format now live in `lib/{validating,
+  parse,formatting}/` directly. Trace/run/debug-related types remain in
+  `api/` pending the parallel trace migration.)
 - **Downstream: theme swizzle** (`src/theme/MDXComponents.tsx`) — a single
   import binding that maps the `StudyLenses` tag name to the orchestrator
   component. The only integration point with Docusaurus rendering.

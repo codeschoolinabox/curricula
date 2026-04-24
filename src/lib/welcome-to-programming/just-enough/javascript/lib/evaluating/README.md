@@ -2,8 +2,10 @@
 
 Raw execution engines for running JeJ code in sandboxed environments. Each engine
 receives already-validated, formatted code and yields events via an AsyncGenerator.
-None of these modules perform validation, format checking, or language-level
-enforcement — that belongs in `api/`.
+The validation and format gates are composed inside each engine's public entry
+(`lib/evaluating/run/run.ts` calls `validate` from `lib/validating/` and
+`checkFormat` from `lib/formatting/` before spawning a Worker); the engines
+themselves do not re-implement language-level enforcement.
 
 ## Structure
 

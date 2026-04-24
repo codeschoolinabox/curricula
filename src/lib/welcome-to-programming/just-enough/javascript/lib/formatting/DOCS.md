@@ -35,12 +35,13 @@ All analysis functions in this library return result objects (`{ ok, ... }` or
 `{ formatted, ... }`). Throwing on unformatted code would force consumers into
 try-catch patterns and break the consistent API style.
 
-`checkFormat` is used in two contexts:
+`checkFormat` is used as a **pipeline gate** by execution wrappers (`run`,
+`trace`, `debug`): unformatted code returns
+`{ ok: false, error: { kind: 'formatting' } }`. No try-catch needed.
 
-1. **Pipeline gate** (in `api/run`, `api/trace`, `api/debug`): unformatted code
-   returns `{ ok: false, error: { kind: 'formatting' } }`. No try-catch needed.
-2. **Code object** (`JejProgram.isFormatted`): a boolean property, not a thrown
-   exception.
+(Earlier drafts also fed `JejProgram.isFormatted` on a code-object factory;
+that factory was removed as YAGNI bloat — superseded by the `<StudyLenses>`
+container component.)
 
 ## Why `checkFormat` returns `{ formatted: true }` on recast failure
 

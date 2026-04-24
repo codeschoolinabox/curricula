@@ -42,7 +42,7 @@ The tracer has two axes of concern, each with its own test strategy.
 **Architecture axis (horizontal)** — what phase of execution:
 
 ```text
-Layer 1  Public API         api/trace.ts, api/validate.ts, api/format.ts
+Layer 1  Public API         api/trace.ts, lib/validating/validate.ts, lib/formatting/format.ts
 Layer 2  Instrumentation    prepare/ + tracing/instrument.ts + tracing/weaving/
 Layer 3  Execution          tracing/weaving/advice/ (11 files + helpers)
 Layer 4  Dispatcher         emit-expression.ts (+ planned: emit-resolve.ts, emit-error.ts)
@@ -149,7 +149,7 @@ Semantic profile tests (T4) cover one **column**.
 
 | #   | Layer           | One-sentence job                                              | State mutations                                                                    | Files                                                                                 |
 | --- | --------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| 1   | Public API      | parse + validate + format; early-return on failure            | none                                                                               | `api/trace.ts`, `api/validate.ts`, `api/format.ts`                                    |
+| 1   | Public API      | parse + validate + format; early-return on failure            | none                                                                               | `api/trace.ts`, `lib/validating/validate.ts`, `lib/formatting/format.ts`                                    |
 | 2   | Instrumentation | parse → ast + tagMap → weave → retropile → JS string          | none (static)                                                                      | `prepare/`, `tracing/instrument.ts`, `tracing/weaving/`                               |
 | 3   | Execution       | advice fires per Aran hook; reads values; enforces loop guard | scopeStack, iterationCounters, lastExpressionResult, lastEmittedTag, variableKinds | `tracing/weaving/advice/*`, `tracing/event-generators/**`, `tracing/represent-value/` |
 | 4   | Dispatcher      | range filter + stamp + freeze + push + visitCount + onEvent   | state.trace, state.eventStep, state.visitCounts                                    | `tracing/weaving/advice/emit-*.ts`                                                    |

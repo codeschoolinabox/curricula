@@ -48,8 +48,8 @@
 - Worker lifecycle — the tracer handles that
 - Aran instrumentation — the tracer handles that
 - Streaming vs batch — the tracer handles that
-- Format checking of the source (JEJ-level concern lives in `api/format.ts`)
-- Parse validation of the source (JEJ-level concern lives in `api/validate.ts`)
+- Format checking of the source (JEJ-level concern lives in `lib/formatting/format.ts`)
+- Parse validation of the source (JEJ-level concern lives in `lib/validating/validate.ts`)
 
 ## Pipeline stages
 

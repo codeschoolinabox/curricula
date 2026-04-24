@@ -107,11 +107,11 @@ export.
 
 | Path                      | Purpose                                                             |
 | ------------------------- | ------------------------------------------------------------------- |
-| `api/`                    | Public API — validate, format, parse, run, trace, debug             |
-| `lib/`                    | Internal libraries (see sub-modules below)                          |
-| `lib/evaluating/`         | Execution engines — trace (Aran), run (Worker), debug (iframe)      |
-| `lib/validating/`         | AST-based validation pipeline and language level definition         |
-| `lib/formatting/`         | Recast-based formatting and format checking                         |
+| `lib/`                    | Public modules and internal libraries (see sub-modules below)       |
+| `lib/parse/`              | `parse(code)` public entry + parse primitives (acorn wrapper, AST walker) |
+| `lib/validating/`         | `validate(code)` public entry + AST-based validation pipeline        |
+| `lib/formatting/`         | `format(code)` and `checkFormat(code)` — recast-based               |
+| `lib/evaluating/`         | Execution engines — trace (Aran), run (Worker)                      |
 | `lib/editing/`            | Editor integration (completions, hints)                             |
 | `lib/completing/`         | Code completion                                                     |
 | `lib/error-interpreting/` | Learner-friendly error message translation                          |
@@ -121,6 +121,7 @@ export.
 | `study-lenses/`           | Study lenses system (orchestrator, transforms, lenses, recommender) |
 | `components/`             | UI components (V2 lens components, migration source)                |
 | `index.ts`                | Package entry — re-exports public API functions and types           |
+| `api/`                    | Legacy directory; trace/run/debug-related types remain here pending parallel migration. The validate/parse/format/default migration is complete. |
 
 ## Study Lenses: research translation platform
 
@@ -146,7 +147,7 @@ architecture, module contracts, and directory layout.
 ## Public API (current snapshot — will change)
 
 ```ts
-import jej, {
+import {
 	run,
 	trace,
 	debug,
@@ -157,6 +158,10 @@ import jej, {
 	checkFormat,
 } from './index.js';
 ```
+
+> The package no longer has a default export. The previous `createJejProgram`
+> code-object factory was removed as YAGNI bloat — superseded by the
+> `<StudyLenses>` container component.
 
 ### Tooling functions
 
@@ -175,15 +180,6 @@ import jej, {
 | `trace(code, config)` | `Execution<AranStep, TraceResult>`   | Web Worker w/ Aran instrumentation |
 | `debug(code, config)` | `Execution<DebugEvent, DebugResult>` | iframe                             |
 
-### Code object factory (default export)
-
-```ts
-const program = jej('let x = 5;\n');
-program.ok; // true
-program.rejections; // []
-program.isFormatted; // true
-```
-
 ## Result Shape
 
 All execution results share a common base:
@@ -199,10 +195,10 @@ type Result<TEvent> = {
 
 ## Navigation
 
-- [api/README.md](./api/README.md) — API functions and code object
-- [evaluating/README.md](./evaluating/README.md) — execution engines
-- [validating/README.md](./validating/README.md) — validation pipeline
-- [formatting/README.md](./formatting/README.md) — recast formatting
+- [lib/parse/README.md](./lib/parse/README.md) — `parse(code)` + parse primitives
+- [lib/validating/README.md](./lib/validating/README.md) — `validate(code)` + validation pipeline
+- [lib/formatting/README.md](./lib/formatting/README.md) — `format(code)` / `checkFormat(code)`
+- [lib/evaluating/README.md](./lib/evaluating/README.md) — execution engines
 - [study-lenses/README.md](./study-lenses/README.md) — study lenses system
 - [DOCS.md](./DOCS.md) — architecture decisions and design rationale
 - [reference.md](./reference.md) — learner-facing language reference

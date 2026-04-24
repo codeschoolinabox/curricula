@@ -252,7 +252,7 @@ The tracer has two orthogonal axes of concern, each with its own test strategy.
 **Architecture axis (horizontal)** — what phase of execution:
 
 ```text
-Layer 1  Public API         api/trace.ts, api/validate.ts, api/format.ts
+Layer 1  Public API         api/trace.ts, lib/validating/validate.ts, lib/formatting/format.ts
 Layer 2  Instrumentation    prepare/ + tracing/instrument.ts + tracing/weaving/
 Layer 3  Execution          tracing/weaving/advice/ (11 files + 4 helpers)
 Layer 4  Dispatcher         emit-expression.ts, emit-resolve.ts, emit-error.ts
@@ -363,7 +363,7 @@ Each cell is one test target. Architecture tests (T1/T3) cover one **row** — o
 
 | # | Layer | One-sentence job | State mutations | File locations |
 | --- | --- | --- | --- | --- |
-| 1 | Public API | parse-check + JEJ-subset validate + format check; early-return on failure | none | `api/trace.ts`, `api/validate.ts`, `api/format.ts` |
+| 1 | Public API | parse-check + JEJ-subset validate + format check; early-return on failure | none | `api/trace.ts`, `lib/validating/validate.ts`, `lib/formatting/format.ts` |
 | 2 | Instrumentation | parse → ast + tagMap → pointcut config gating → weave → retropile → instrumented JS string | none (static) | `prepare/`, `tracing/instrument.ts`, `tracing/weaving/` |
 | 3 | Execution + Data Collection | advice fires per Aran hook; reads runtime values; calls event factories; enforces `iterations` loop guard; hands payloads to Dispatcher | scopeStack, iterationCounters, lastExpressionResult, lastEmittedTag, variableKinds | `tracing/weaving/advice/*`, `tracing/event-generators/**`, `tracing/represent-value/` |
 | 4 | Dispatcher | range filter + filter arrays + TDZ check + step++ + stamp + freeze + push + visitCount bump + onEvent call | state.trace, state.eventStep, state.visitCounts | `tracing/weaving/advice/emit-expression.ts`, `emit-resolve.ts`, `emit-error.ts` |

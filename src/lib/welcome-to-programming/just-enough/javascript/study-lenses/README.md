@@ -296,6 +296,8 @@ study-lenses/
   plugin
 - **Editor factory:** [`../lib/editing/README.md`](../lib/editing/README.md) —
   CodeMirror wrapper consumed by the editor lens
-- **Runtime library:** [`../lib/README.md`](../lib/README.md) — validate,
-  format, run, trace, debug (`api/` is being merged into `lib/`)
+- **Runtime library:** [`../lib/README.md`](../lib/README.md) — `parse`,
+  `validate`, `format`, `run`, `trace`, `debug`. Validate/parse/format have
+  been migrated from the legacy `api/` layer; trace/run/debug-related types
+  still live in `api/` pending the parallel trace migration.
 - **Master plan:** [`../.planning-handoffs/00-master-plan.md`](../.planning-handoffs/00-master-plan.md)
