@@ -115,6 +115,24 @@ type LensModule = Readonly<{
 
 // --- Recommendation ---
 
+/**
+ * A cell in the 3D Block Model grid (Schulte 2008 + NM-components
+ * extension).
+ *
+ * - `level` — comprehension level (text surface, execution, function).
+ * - `scope` — comprehension scope (atoms, blocks, relations, macro).
+ * - `nmComponents` — the **unordered set of NM components** present
+ *   in the snippet. Valid values are the 10 outer categories from the
+ *   syntax tracer's `StepCategory` enum, defined at
+ *   `../lib/evaluating/trace/syntax/types.ts`:
+ *   `expression`, `resolve`, `statement`, `scope`, `control-flow`,
+ *   `initialization`, `for-init`, `write`, `emit`, `error`.
+ *   String-typed (not a union) while the syntax tracer's Phase 0.1
+ *   kind-level sub-enums are still TBD. A lens may tag MULTIPLE
+ *   categories per recommendation.
+ *
+ * @see `.planning-handoffs/01-NM-components.md` for the 3rd-dim contract.
+ */
 type BlockModelCell = Readonly<{
 	level: 'surface' | 'execution' | 'function';
 	scope: 'atoms' | 'blocks' | 'relations' | 'macro';
