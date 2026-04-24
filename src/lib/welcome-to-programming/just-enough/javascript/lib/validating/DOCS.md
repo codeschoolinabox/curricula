@@ -17,11 +17,17 @@ invisible.
 
 ```text
 source string
-  → parseProgram(source, 'module')         — acorn parse to ESTree AST
+  → parseProgram(source, 'module')         — from ../parse/parse-program.ts
   → collectViolations(ast, nodes)          — recursive walk, allowlist lookup
   → checkUndeclaredGlobals(ast, config)    — scope analysis pass
   → ValidationReport { isValid, violations, source, levelName }
 ```
+
+`parseProgram` and the AST traversal helper `getChildNodes` live in
+[`../parse/`](../parse/README.md); this module imports them as building
+blocks. The `with`-statement script-mode fallback is implemented twice —
+once in `validate-program.ts` (for the validation pipeline) and once in
+`../parse/parse.ts` (for the public `parse(code)` API).
 
 All violations are rejections — there are no informational warnings.
 
@@ -127,10 +133,11 @@ assignment is not allowed."
 
 ## Module boundaries
 
-- `validating/` is self-contained — no cross-module imports
+- `validating/` imports parse primitives (`parseProgram`, `getChildNodes`,
+  `ParseError`) from `../parse/`. No other cross-module imports.
 - The ESLint `boundaries` plugin enforces a DAG between modules
-- No acorn-walk dependency — a simple recursive `getChildNodes` helper walks the
-  tree generically
+- No acorn-walk dependency — `getChildNodes` (in `../parse/`) is a simple
+  recursive walker
 
 ### File roles
 
@@ -141,10 +148,6 @@ what JeJ permits — it must match `reference.md`. The `ALLOWED_MEMBER_NAMES` Se
 is defined once and referenced by both the `createMemberValidator` factory (for
 runtime checking) and the `allowedMemberNames` config field (for external
 consumers).
-
-**`parse-program.ts`** — Acorn wrapper. Parses with `locations: true` (for error
-locations), `sourceType` parameter (always `'module'` in the pipeline), and
-`preserveParens: true` (for trace visualization anchor nodes).
 
 **`check-undeclared-globals.ts`** — Scope analysis pass. Walks the AST
 maintaining a scope chain and flags known JavaScript built-in globals that are

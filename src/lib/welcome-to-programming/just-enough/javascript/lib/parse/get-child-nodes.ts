@@ -14,8 +14,10 @@ import type { Node } from 'acorn';
  * primitives (e.g. `Literal.value`), and non-node objects (e.g.
  * `Literal.regex`).
  *
- * The returned array is not frozen — the caller (typically `walk` in
- * {@link collectViolations}) iterates it immediately and discards it.
+ * The returned array is not frozen — callers (parse's with-statement
+ * walker, validating's collect-violations and check-undeclared-globals,
+ * scope's build-scope, socratizing's analyzers) iterate it immediately
+ * and discard it. Treated as transient.
  *
  * @param node - Any acorn AST node.
  * @returns A flat array of all direct child nodes, in property

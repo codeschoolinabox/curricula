@@ -12,7 +12,7 @@
 
 import type { Node } from 'acorn';
 
-import getChildNodes from '../validating/get-child-nodes.js';
+import getChildNodes from '../parse/get-child-nodes.js';
 
 import type {
 	DeclarationInfo,

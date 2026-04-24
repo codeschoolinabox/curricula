@@ -3,7 +3,7 @@ import { parse } from 'acorn';
 import type { Node } from 'acorn';
 
 import buildScope from '../../scope/build-scope.js';
-import getChildNodes from '../../validating/get-child-nodes.js';
+import getChildNodes from '../../parse/get-child-nodes.js';
 
 import voiceAnalyzers from '../analyzers/voice.js';
 import type { CodeQuestion, PointAnalyzer } from '../types.js';

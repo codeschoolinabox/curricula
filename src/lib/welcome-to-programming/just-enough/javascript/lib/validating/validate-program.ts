@@ -2,10 +2,10 @@ import type { Node, Program } from 'acorn';
 
 import checkUndeclaredGlobals from './check-undeclared-globals.js';
 import collectViolations from './collect-violations.js';
-import parseProgram from './parse-program.js';
-import getChildNodes from './get-child-nodes.js';
+import parseProgram from '../parse/parse-program.js';
+import getChildNodes from '../parse/get-child-nodes.js';
 
-import type { LanguageLevel, ParseError, ValidationReport } from './types.js';
+import type { LanguageLevel, ValidationReport } from './types.js';
 
 /**
  * Validates a JavaScript program against a language level.

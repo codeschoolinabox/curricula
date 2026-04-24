@@ -10,8 +10,10 @@
  *
  */
 
-import type { Program } from 'acorn';
-
+import type {
+	ParseResult,
+	ParseResultError,
+} from '../lib/parse/types.js';
 import type { Violation } from '../lib/validating/types.js';
 import type {
 	RunEvent,
@@ -28,20 +30,6 @@ import type {
 } from '../lib/evaluating/trace/semantics/config.types.js';
 
 // ─── Error types ─────────────────────────────────────────────
-
-/**
- * A parse error — code is not valid JavaScript syntax.
- *
- * @remarks `line` is always present (acorn always reports it).
- * `column` is present when acorn provides it.
- */
-type ParseResultError = {
-	readonly kind: 'parse';
-	readonly name: string;
-	readonly message: string;
-	readonly line: number;
-	readonly column?: number;
-};
 
 /**
  * A JavaScript runtime error during execution.
@@ -162,32 +150,6 @@ type BaseResult = {
 	readonly error?: ResultError;
 	readonly rejections?: readonly Violation[];
 };
-
-/**
- * Result from `parse()` — syntax check only, no validation.
- *
- * @remarks
- * - `ok: true` means acorn parsed successfully; `ast` is present
- * - `ok: false` means a syntax error; `error` is present
- * - `code` always echoes back the input source
- * - `with` is `true` when the program was parsed in script mode
- *   due to a `with` statement (module mode rejects `with`)
- *
- * Standalone type — does not extend `BaseResult` because parse
- * has no `rejections` field (that requires validation).
- */
-type ParseResult =
-	| {
-			readonly ok: true;
-			readonly code: string;
-			readonly ast: Readonly<Program>;
-			readonly with?: true;
-	  }
-	| {
-			readonly ok: false;
-			readonly code: string;
-			readonly error: ParseResultError;
-	  };
 
 /**
  * Generic execution result parameterized by event type.

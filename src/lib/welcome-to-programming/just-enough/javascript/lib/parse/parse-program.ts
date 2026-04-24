@@ -4,24 +4,25 @@ import type { Program } from 'acorn';
 import type { ParseError } from './types.js';
 
 /**
- * Parses a JavaScript source string into an ESTree `Program` node.
+ * Parses a JavaScript source string into an acorn `Program` AST.
  *
- * @remarks Uses acorn with `ecmaVersion: 'latest'` and `locations:
- * true` so every node carries line/column data for violation
- * reporting.
+ * @remarks The low-level parse primitive owned by `lib/parse/`.
+ * Used by `parse()` (the public lib/parse entry, planned Phase 1a)
+ * and by `validateProgram` in `lib/validating/`. Both consumers
+ * need graceful degradation for student code with syntax errors,
+ * so this function never throws — parse errors are returned as
+ * {@link ParseError} values instead.
  *
- * Returns a {@link ParseError} on syntax errors instead of throwing.
- * This is a deliberate design choice: `validateProgram` must never
- * throw because educational tools need graceful degradation for
- * student code with syntax errors. A parse error still means
- * `isValid: false` — it just arrives in the report rather than as
- * an exception.
+ * Uses acorn with `ecmaVersion: 'latest'`, `locations: true` (every
+ * node carries line/column data for violation reporting), and
+ * `preserveParens: true` (keeps `ParenthesizedExpression` nodes so
+ * trace visualization has anchor points for grouping parens).
  *
  * @param source - The raw JavaScript source code to parse.
  * @param sourceType - Acorn's source type: `'script'` or `'module'`.
  *   Module mode enables ES module syntax and implicit strict mode.
- *   Defaults to `'script'` for backwards compatibility, but the JeJ
- *   level always passes `'module'`.
+ *   Defaults to `'script'` for backwards compatibility; the JeJ
+ *   validation pipeline always passes `'module'`.
  * @returns An acorn `Program` AST on success, or a frozen
  *   {@link ParseError} on failure.
  */

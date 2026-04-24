@@ -4,8 +4,9 @@ Validates JavaScript programs against configurable language level subsets using
 AST analysis. Ships with a pre-built "Just Enough JavaScript" level for the
 Welcome to Programming curriculum.
 
-Validation is a standalone module consumed by the `api/` layer and the code
-object factory.
+Consumes the parse primitives (`parseProgram`, `getChildNodes`) from
+[`../parse/`](../parse/README.md). Provides the `validate(code)` public entry
+(see Structure below).
 
 ## Purpose
 
@@ -17,7 +18,7 @@ _which_ subset to use — that belongs to the curriculum or tool that consumes i
 
 ```text
 source string
-  → parseProgram(source, 'module')         — acorn parse to ESTree AST
+  → parseProgram(source, 'module')         — from ../parse/parse-program.ts
   → collectViolations(ast, nodes)          — recursive walk, allowlist lookup
   → checkUndeclaredGlobals(ast, config)    — scope analysis
   → ValidationReport { isValid, violations, source, levelName }
@@ -41,14 +42,15 @@ The `LanguageLevel` object controls everything:
 | ----------------------------- | ---------------------------------------------------------- |
 | `types.ts`                    | Domain types: Violation, ValidationReport, etc.            |
 | `validate-program.ts`         | Public entry: `validateProgram(source, level)`             |
-| `parse-program.ts`            | Acorn wrapper with `preserveParens: true`                  |
 | `collect-violations.ts`       | Recursive AST walk + allowlist checking                    |
-| `get-child-nodes.ts`          | Generic ESTree child node extraction                       |
 | `create-violation.ts`         | Violation factory (with severity)                          |
 | `just-enough-js.ts`           | Pre-built "Just Enough JS" LanguageLevel config            |
 | `check-undeclared-globals.ts` | Scope analysis: disallowed globals detection               |
 | `is-jej.ts`                   | Convenience: `isJej(code)` returns boolean                 |
 | `tests/`                      | Unit tests                                                 |
+
+Files moved out: `parse-program.ts` and `get-child-nodes.ts` now live in
+[`../parse/`](../parse/README.md). `ParseError` type also moved there.
 
 ## Just Enough JS Level Definition
 
@@ -146,6 +148,6 @@ Synchronous (recast format check is sync).
 ## Navigation
 
 - [DOCS.md](./DOCS.md) — design decisions and rationale
-- [../api/README.md](../api/README.md) — public API wrappers (`validate`,
-  `isJej`)
+- [../parse/README.md](../parse/README.md) — parse primitives this module
+  consumes
 - [../reference.md](../reference.md) — learner-facing language cheat sheet

@@ -11,8 +11,8 @@
 
 import deepFreeze from '@utils/deep-freeze.js';
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
-import parseProgram from '../lib/validating/parse-program.js';
-import getChildNodes from '../lib/validating/get-child-nodes.js';
+import parseProgram from '../lib/parse/parse-program.js';
+import getChildNodes from '../lib/parse/get-child-nodes.js';
 
 import type { Node } from 'acorn';
 import type { ParseResult } from './types.js';

@@ -10,6 +10,8 @@
 
 import type { Node } from 'acorn';
 
+import type { ParseError } from '../parse/types.js';
+
 // ─── Source locations ────────────────────────────────────────
 
 /**
@@ -59,24 +61,6 @@ type Violation = {
 	readonly message: string;
 	readonly severity: 'rejection';
 	readonly location: SourceRange;
-};
-
-// ─── Parse errors ────────────────────────────────────────────
-
-/**
- * A parse error from acorn when the source cannot be parsed.
- *
- * @remarks Captures the error message and position where parsing
- * failed. Returned inside {@link ValidationReport} so the
- * pipeline never throws — educational tools need graceful
- * degradation for student code with syntax errors.
- *
- * The `location` points to the character where acorn gave up,
- * which is often (but not always) where the actual mistake is.
- */
-type ParseError = {
-	readonly message: string;
-	readonly location: SourcePosition;
 };
 
 // ─── Validation report ───────────────────────────────────────
@@ -182,7 +166,6 @@ export type {
 	LanguageLevel,
 	NodeRule,
 	NodeValidator,
-	ParseError,
 	SourcePosition,
 	SourceRange,
 	ValidationReport,
