@@ -17,21 +17,13 @@ import type {
 import type {
 	BaseResult,
 	FormattingResultError,
-	Violation,
 } from '../lib/validating/types.js';
-import type {
-	RunEvent,
-	Execution,
-	EngineConfig,
-} from '../lib/evaluating/shared/types.js';
+import type { RunEvent } from '../lib/evaluating/shared/types.js';
 import type {
 	ASTNode,
 	TraceEvent,
 } from '../lib/evaluating/trace/semantics/tracing/types.js';
-import type {
-	TraceConfig,
-	TraceOptions,
-} from '../lib/evaluating/trace/semantics/config.types.js';
+import type { TraceOptions } from '../lib/evaluating/trace/semantics/config.types.js';
 
 // ─── Error types ─────────────────────────────────────────────
 
@@ -243,74 +235,6 @@ type DebugEvent = {
 	readonly line?: number;
 };
 
-// ─── Code object ─────────────────────────────────────────────
-
-/**
- * Live analysis dashboard for a piece of JeJ code.
- *
- * @remarks Created by the default export factory
- * (`createJejProgram`). Construction always succeeds — never
- * throws. The `.code` setter re-runs the analysis pipeline
- * synchronously, updating all properties immediately.
- *
- * **Object describes, functions transform.** The code object
- * reports the current state of the code. Standalone API functions
- * (`format`, `validate`, etc.) transform code. To update:
- * `program.code = format(program.code)` — external, explicit.
- *
- * **`.ok` gates execution.** When `!ok`, the execution methods
- * (`run`, `trace`, `debug`) return immediate error results
- * without spawning Workers or iframes.
- *
- * @example
- * ```ts
- * const program = jej('let x = 5;\n');
- * program.ok;           // true
- * program.isFormatted;  // true
- * program.rejections;  // []
- *
- * program.code = 'var x = 5;\n';
- * program.ok;           // false
- * program.rejections;   // [{ message: "'var' is not allowed...", ... }]
- *
- * program.code = format(program.code);
- * program.isFormatted;  // true
- * ```
- */
-type JejProgram = {
-	/** The current source code. Setter re-runs the full analysis
-	 * pipeline synchronously. Never throws. */
-	code: string;
-
-	/** `true` when code parses, passes JeJ validation, AND is
-	 * properly formatted. Same semantics as `isJej(code)`. */
-	readonly ok: boolean;
-
-	/** Parse error from acorn, if code is not syntactically valid.
-	 * `undefined` when code parses successfully. */
-	readonly parseError: SyntaxError | undefined;
-
-	/** JeJ language-level violations. Empty array when code is
-	 * valid JeJ. Only populated when code parses successfully. */
-	readonly rejections: readonly Violation[];
-
-	/** `true` when code matches the expected recast format output.
-	 * Only meaningful when code is valid JeJ. */
-	readonly isFormatted: boolean;
-
-	/** Execute in Web Worker with trapped I/O.
-	 * Returns immediate error result when `!ok`. */
-	run(config?: EngineConfig): Execution<RunEvent, RunResult>;
-
-	/** Execute with Aran instrumentation in Worker.
-	 * Returns immediate error result when `!ok`. */
-	trace(config?: TraceConfig): Execution<TraceEvent, TraceResult>;
-
-	/** Execute in iframe with debugger statements.
-	 * Returns immediate error result when `!ok`. */
-	debug(config?: EngineConfig): Execution<DebugEvent, DebugResult>;
-};
-
 // ─── Exports ─────────────────────────────────────────────────
 
 export type {
@@ -330,7 +254,6 @@ export type {
 	DebugResult,
 	DebugOutcome,
 	DebugEvent,
-	JejProgram,
 	// Re-exported for consumer convenience
 	ASTNode,
 	TraceOptions,

@@ -1,30 +1,33 @@
 /**
  * @file Package entry point for the JeJ library.
  *
- * Default export: `createJejProgram` factory (code object).
  * Named exports: all public API functions and types.
+ *
+ * The JejProgram code-object factory (formerly the package's default
+ * export) was removed as YAGNI bloat — superseded by the
+ * `<StudyLenses>` container component. The package no longer has a
+ * default export.
  */
-
-// --- Default export: code object factory ---
-export { default } from './api/default.js';
 
 // --- Named exports: API functions ---
 export { default as run } from './lib/evaluating/run/run.js';
 export { default as trace } from './api/trace.js';
-export { default as validate } from './api/validate.js';
-export { default as parse } from './api/parse.js';
+export { default as validate } from './lib/validating/validate.js';
+export { default as parse } from './lib/parse/parse.js';
 export { default as isJej } from './lib/validating/is-jej.js';
-export { format, checkFormat } from './api/format.js';
+export { default as format } from './lib/formatting/format.js';
+export { default as checkFormat } from './lib/formatting/check-format.js';
 
 // --- Type re-exports ---
+export type { ParseResult } from './lib/parse/types.js';
+
+export type { BaseResult } from './lib/validating/types.js';
+
 export type {
 	ResultError,
-	ParseResult,
-	BaseResult,
 	Result,
 	RunResult,
 	TraceResult,
-	JejProgram,
 } from './api/types.js';
 
 export type {

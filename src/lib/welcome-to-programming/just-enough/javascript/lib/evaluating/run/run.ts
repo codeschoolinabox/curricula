@@ -22,7 +22,7 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import checkFormat from '../../formatting/check-format.js';
-import validate from '../../../api/validate.js';
+import validate from '../../validating/validate.js';
 
 import type {
 	CancelEvent,
