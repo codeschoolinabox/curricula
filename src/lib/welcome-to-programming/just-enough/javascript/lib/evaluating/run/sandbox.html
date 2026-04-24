@@ -375,7 +375,7 @@ console.error('three');"
 
 		<script type="module">
 			import createRunGenerator from './run.ts';
-			import { format } from '../../../api/format.ts';
+			import format from '../../formatting/format.ts';
 			import guardLoops from './guard-loops/guard-loops.ts';
 
 			// --- Elements ---
@@ -737,7 +737,10 @@ console.error('three');"
 
 			cancelBtn.addEventListener('click', () => {
 				if (currentGen) {
-					stepResolve = null;
+					// Resolve any pending step-wait BEFORE nulling stepResolve,
+					// otherwise the run loop stays parked on waitForStep()
+					// forever and the post-loop [run result] log never fires.
+					if (stepResolve) { const r = stepResolve; stepResolve = null; r(); }
 					nextBtn.disabled = true;
 					predictionWrap.style.display = 'none';
 					predictionInput.value = '';

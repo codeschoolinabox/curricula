@@ -237,6 +237,22 @@ Cancel is not an error — it did not originate in the learner's
 program. The RunResult stays `ok: true`; the cancel event in logs
 is the signal.
 
+**`break` inside a live `for await` is equivalent to calling
+`.cancel()`** — the runtime's implicit `gen.return()` is intercepted
+and routed through the same cancel path, producing the same trailing
+`{event: 'cancel'}` and the same replay semantics. Consumers can
+`break` out of the iteration loop safely; there is no "lost replay"
+footgun:
+
+```ts
+const handle = run(code);
+for await (const event of handle) {
+    if (shouldStop(event)) break;   // same outcome as handle.cancel()
+}
+const result = await handle;  // settled with {event:'cancel'} in logs
+for await (const event of handle) render(event);  // replay works
+```
+
 ### Cancel latency caveat
 
 Cancel takes effect on the next main-loop iteration. For the worker

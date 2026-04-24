@@ -191,13 +191,15 @@ iteration, in the same order, with no Worker respawn.
 - Throw-on-concurrent-iteration. Would require separate plumbing
   and doesn't buy enough for the cost; AsyncGenerator's native
   serialize-and-split behavior is accepted as the failure mode.
-- For-await-break before completion. The runtime's implicit
-  `.return()` on a `break` terminates the Worker cleanly but does
-  NOT settle a RunResult — body()'s natural `return buildResult(...)`
-  is skipped. A subsequent `for await` yields nothing. Consumers
-  who want replay after partial iteration should call `.cancel()`
-  instead of `break`, which produces a settled RunResult with
-  `{event:'cancel'}` appended and full replay coverage.
+
+**For-await-break is supported and equivalent to `.cancel()`**. The
+RunHandle's `gen.return()` interceptor routes the runtime's implicit
+call (triggered by `break` inside a live `for await`) through the
+same cancel path as explicit `.cancel()` — body() reaches its
+natural `return buildResult(...)`, a `{event:'cancel'}` is appended
+to logs, and the settled RunResult is cached for replay. Consumers
+can choose `break` or `.cancel()` interchangeably; identity-stable
+replay holds for both.
 
 ### Timer-vs-yield
 

@@ -19,7 +19,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { format } from '../../../../api/format.js';
+import format from '../../../formatting/format.js';
 import createRunGenerator from '../run.js';
 
 vi.setConfig({ testTimeout: 60_000 });

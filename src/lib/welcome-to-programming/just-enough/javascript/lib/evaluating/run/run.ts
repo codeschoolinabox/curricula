@@ -21,7 +21,7 @@
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
-import { checkFormat } from '../../../api/format.js';
+import checkFormat from '../../formatting/check-format.js';
 import validate from '../../../api/validate.js';
 
 import type {
@@ -589,18 +589,65 @@ function createRunGenerator(
 		value: async function interceptingNext(
 			...args: Parameters<typeof origNext>
 		): Promise<IteratorResult<RunEvent, RunResult>> {
+			// WHY the isDone short-circuit: after for-await-break,
+			// interceptingReturn drove the body to completion and captured
+			// settledResult. The underlying AsyncGenerator is now in
+			// completed state, so origNext() would return
+			// {done:true, value:undefined} — clobbering drain's return
+			// value and making `await handle` resolve to undefined.
+			// Serve the stored settledResult instead.
+			if (isDone) {
+				return { value: settledResult!, done: true };
+			}
 			const res = await origNext(...args);
-			// WHY the res.value !== undefined guard: externally-invoked
-			// gen.return() (triggered by a for-await break) completes the
-			// underlying AsyncGenerator with done:true, value:undefined,
-			// bypassing body()'s natural `return buildResult(...)`. We do
-			// NOT mark the run "settled" in that case — replay has no log
-			// to draw from. See DOCS.md § Replay § Out of scope.
+			// WHY the res.value !== undefined guard: the underlying
+			// AsyncGenerator can emit {done:true, value:undefined} when
+			// it has been aborted externally (e.g. .return() bypassing
+			// our interceptor). Don't clobber settledResult with
+			// undefined — interceptingReturn captures it authoritatively.
 			if (res.done && res.value !== undefined) {
 				isDone = true;
 				settledResult = res.value as RunResult;
 			}
 			return res;
+		},
+		writable: false,
+		configurable: false,
+		enumerable: false,
+	});
+	// Intercept gen.return so for-await-break settles the RunResult
+	// via the existing cancel path. Consumers who `break` out of a
+	// live `for await (const e of gen)` get the same settled shape
+	// as explicit `.cancel()` — trailing {event:'cancel'} in logs,
+	// replay-identity preserved. See DOCS.md § Replay.
+	//
+	// Invariants (from AR):
+	// - CancelEvent is constructed INSIDE body()'s cancelled-check
+	//   (run.ts:473-477), never here. Identity-stable replay requires
+	//   the same ref in `logs` and the frozen RunResult.
+	// - Drive via origNext, never origReturn. Native .return() aborts
+	//   body before buildResult — regresses to the pre-fix state.
+	// - Short-circuit on isDone per ECMA-262 §27.6.3.3.
+	Object.defineProperty(gen, 'return', {
+		value: async function interceptingReturn(
+			value?: RunResult,
+		): Promise<IteratorResult<RunEvent, RunResult>> {
+			if (isDone) {
+				return {
+					value: settledResult ?? (value as RunResult),
+					done: true,
+				};
+			}
+			if (!cancelled) cancel();
+			while (!isDone) {
+				const res = await origNext(undefined);
+				if (res.done && res.value !== undefined) {
+					isDone = true;
+					settledResult = res.value as RunResult;
+					break;
+				}
+			}
+			return { value: settledResult!, done: true };
 		},
 		writable: false,
 		configurable: false,
