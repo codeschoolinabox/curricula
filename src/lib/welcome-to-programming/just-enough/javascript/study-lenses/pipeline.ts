@@ -44,6 +44,14 @@ const FALLBACK_LENS = 'editor';
  *   instead the resolved lens is rewritten to `'editor'` and a
  *   `console.warn` is emitted. The orchestrator is trusted to have
  *   registered an `'editor'` lens at boot.
+ *
+ *   Separately, any key in `pipeline.configs` that does not correspond
+ *   to a name in `pipeline.transforms` or the resolved lens emits a
+ *   `console.warn` (stray configs — author provided a config for a
+ *   module not in this pipeline). The key is NOT removed; executors
+ *   simply ignore it. Loud but non-fatal — helps surface cascade-source
+ *   drift (e.g. a rename of a transform that left a `lenses.json`
+ *   entry behind).
  */
 function validatePipeline(pipeline: Pipeline, registry: Registry): Pipeline {
 	for (const name of pipeline.transforms) {
@@ -70,6 +78,18 @@ function validatePipeline(pipeline: Pipeline, registry: Registry): Pipeline {
 		console.warn(
 			`Pipeline: unknown lens "${lens}" — falling back to "${FALLBACK_LENS}"`,
 		);
+	}
+
+	const { transforms, configs } = pipeline;
+	if (configs) {
+		const knownNames = new Set<string>([...transforms, resolvedLens]);
+		for (const configName of Object.keys(configs)) {
+			if (!knownNames.has(configName)) {
+				console.warn(
+					`Pipeline: config provided for "${configName}" but it is not in the pipeline (ignored)`,
+				);
+			}
+		}
 	}
 
 	return freezeInPlace({ ...pipeline, lens: resolvedLens });

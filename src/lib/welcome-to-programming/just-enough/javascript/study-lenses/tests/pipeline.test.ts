@@ -204,6 +204,54 @@ describe('validatePipeline', () => {
 		});
 	});
 
+	describe('W — configs coherence', () => {
+		it('warns when configs has a key not in the pipeline', () => {
+			const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			const registry = createRegistry();
+			registry.register(makeLens('editor'));
+			const input = {
+				transforms: [],
+				lens: 'editor',
+				configs: { mystery: { x: 1 } },
+			} as const;
+
+			validatePipeline(input, registry);
+
+			expect(warnSpy).toHaveBeenCalledWith(expect.stringMatching(/mystery/));
+		});
+
+		it('does not warn when a configs key matches a transform name', () => {
+			const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			const registry = createRegistry();
+			registry.register(makeTransform('format'));
+			registry.register(makeLens('editor'));
+			const input = {
+				transforms: ['format'],
+				lens: 'editor',
+				configs: { format: { indentWidth: 4 } },
+			} as const;
+
+			validatePipeline(input, registry);
+
+			expect(warnSpy).not.toHaveBeenCalled();
+		});
+
+		it('does not warn when a configs key matches the lens name', () => {
+			const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			const registry = createRegistry();
+			registry.register(makeLens('editor'));
+			const input = {
+				transforms: [],
+				lens: 'editor',
+				configs: { editor: { theme: 'dark' } },
+			} as const;
+
+			validatePipeline(input, registry);
+
+			expect(warnSpy).not.toHaveBeenCalled();
+		});
+	});
+
 	describe('S — full happy-path pipeline', () => {
 		it('returns a valid Pipeline for format + loopGuard + editor', () => {
 			const registry = createRegistry();
