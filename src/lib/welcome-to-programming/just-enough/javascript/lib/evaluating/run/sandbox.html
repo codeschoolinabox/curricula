@@ -631,7 +631,15 @@ console.error('three');"
 			}
 
 			// --- Run ---
-			let currentGen = null;
+			// userBroke is the ONLY cancel-coordination state. The cancel
+			// button sets this flag and resolves any pending step-wait; the
+			// for-await loop checks it at the top of each iteration and
+			// `break`s. That `break` routes through the .return interceptor
+			// in run.ts — body() reaches its natural buildResult, the
+			// RunResult is settled, replay works, [run result] always logs.
+			// No currentGen-as-identity sentinel, no gen.cancel() call; the
+			// engine's contract carries the weight.
+			let userBroke = false;
 
 			runBtn.addEventListener('click', async () => {
 				runBtn.disabled = true;
@@ -640,6 +648,7 @@ console.error('three');"
 				eventsEl.innerHTML = '';
 				eventsEl.style.display = 'block';
 				shapeNoteEl.style.display = 'none';
+				userBroke = false;
 
 				const stepping = stepCheckbox.checked || predictLogsCheckbox.checked;
 				const maxSeconds =
@@ -668,18 +677,11 @@ console.error('three');"
 					iterations,
 					io,
 				});
-				currentGen = gen;
 
-				let result = undefined;
 				let eventCount = 0;
 				try {
-					while (true) {
-						const { value, done } = await gen.next();
-						if (done) {
-							result = value;
-							break;
-						}
-						if (currentGen !== gen) break; // cancelled mid-iteration
+					for await (const value of gen) {
+						if (userBroke) break;
 						eventCount++;
 						console.log('[event]', value);
 
@@ -692,6 +694,7 @@ console.error('three');"
 								predictionInput.focus();
 								statusEl.textContent = `step: console.log (line ${value.line}) — predict output, click [next]`;
 								await waitForStep();
+								if (userBroke) break;
 								predictionWrap.style.display = 'none';
 								const prediction = predictionInput.value;
 								const actual = value.args
@@ -704,6 +707,7 @@ console.error('three');"
 							} else {
 								statusEl.textContent = `step: console.${value.method} (line ${value.line}) — click [next]`;
 								await waitForStep();
+								if (userBroke) break;
 								eventsEl.appendChild(renderEvent(value));
 							}
 						} else {
@@ -712,15 +716,14 @@ console.error('three');"
 
 						eventsEl.scrollTop = eventsEl.scrollHeight;
 					}
-					if (currentGen === gen) {
-						statusEl.textContent = `done — ${eventCount} event(s)`;
-					}
-					// If the loop broke via the cancel guard before reaching
-					// done:true, fetch the final RunResult via gen.result so
-					// [run result] always fires — the logs array will contain
-					// the trailing {event:'cancel'} entry.
-					if (result === undefined) result = await gen.result;
-					if (result) console.log('[run result]', result);
+					// gen is settled whether we exited via break (routed through
+					// the .return interceptor) or natural completion. Fetch the
+					// cached RunResult — always resolves, never pending.
+					const result = await gen;
+					statusEl.textContent = userBroke
+						? 'cancelled'
+						: `done — ${eventCount} event(s) (outcome: ${result.outcome ?? 'unknown'})`;
+					console.log('[run result]', result);
 				} catch (err) {
 					statusEl.textContent = `unexpected throw: ${err.message}`;
 				} finally {
@@ -728,7 +731,6 @@ console.error('three');"
 					nextBtn.disabled = true;
 					predictionWrap.style.display = 'none';
 					predictionInput.value = '';
-					if (currentGen === gen) currentGen = null;
 					runBtn.disabled = false;
 					cancelBtn.disabled = true;
 					shapeNoteEl.style.display = 'block';
@@ -736,25 +738,20 @@ console.error('three');"
 			});
 
 			cancelBtn.addEventListener('click', () => {
-				if (currentGen) {
-					// Resolve any pending step-wait BEFORE nulling stepResolve,
-					// otherwise the run loop stays parked on waitForStep()
-					// forever and the post-loop [run result] log never fires.
-					if (stepResolve) { const r = stepResolve; stepResolve = null; r(); }
-					nextBtn.disabled = true;
-					predictionWrap.style.display = 'none';
-					predictionInput.value = '';
-					// Engine-level cancel: unsticks any pending await dequeue,
-					// runs the generator's finally (worker.terminate +
-					// URL.revokeObjectURL), returns a RunResult with a
-					// trailing {event: 'cancel'} in logs. Synchronous flag
-					// set; resolution happens on next iterate.
-					currentGen.cancel();
-					currentGen = null;
-					statusEl.textContent = 'cancelled';
-					runBtn.disabled = false;
-					cancelBtn.disabled = true;
-				}
+				// Mark userBroke so the next for-await iteration (or the
+				// pending step-wait resolution below) breaks out. The
+				// break routes through run.ts's .return interceptor: body()
+				// reaches buildResult, {event:'cancel'} appended to logs,
+				// RunResult settled and cached for replay. No engine-level
+				// cancel() call needed — the contract carries it.
+				userBroke = true;
+				// Resolve any pending step-wait so the loop unblocks and
+				// sees userBroke. Without this, step mode stalls forever.
+				if (stepResolve) { const r = stepResolve; stepResolve = null; r(); }
+				nextBtn.disabled = true;
+				predictionWrap.style.display = 'none';
+				predictionInput.value = '';
+				cancelBtn.disabled = true;
 			});
 
 			// --- Format button ---
