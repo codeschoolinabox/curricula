@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Welcome to Programming (coded for humans) — Syllabus
+# Welcome to Frogramming - Syllabus
 
 > The best authors and the best JavaScript developers are those who obsess about
 > language, who explore and experiment with language every day and in doing so
@@ -13,7 +13,7 @@ sidebar_position: 1
 
 ## TL;DR
 
-**Welcome to Programming (_coded for humans_)** is a self-paced course that will
+**Welcome to Frogramming** is a self-paced course that will
 take you from _learning to program_ (building your code literacy) to
 _programming to learn_ (applying your literacy to explore new concepts and
 skills). You will build predictive mastery of JavaScript's notional machine:
@@ -27,7 +27,7 @@ the _right_ programs.
 
 ---
 
-**Welcome to Programming (coded for humans)** is a self-paced course that treats
+**Welcome to Frogramming** is a self-paced course that treats
 programming as collaborative communication. A single piece of source code
 addresses multiple audiences at once (other developers, the computer, users, and
 AI agents). You will develop the ability to recognize who your code is for,
