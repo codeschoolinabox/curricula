@@ -155,7 +155,7 @@
 			import createEditor from './create-editor.ts';
 			import format from '../formatting/format.ts';
 			import validate from '../validating/validate.ts';
-			import run from '../../lib/evaluating/run/run.ts';
+			import intercept from '../../lib/evaluating/intercept/intercept.ts';
 			import trace from '../../api/trace.ts';
 			// api/debug.ts not yet implemented — stub so sandbox loads
 			const debug = async (_code) => ({ ok: false, error: { kind: 'javascript', message: 'debug not yet implemented' } });
@@ -499,13 +499,13 @@ console.log(greeting, add(count, 8));
 					btn.textContent = '[cancel]';
 					appendLog('info', 'running...');
 
-					const gen = run(code, { seconds: 5 });
+					const gen = intercept(code, { seconds: 5 });
 					currentRun = gen;
 
 					try {
 						for await (const event of gen) {
 							console.log('[run event]', event);
-							appendLog('event', renderRunEvent(event));
+							appendLog('event', renderInterceptEvent(event));
 						}
 						const result = await gen.result;
 						console.log('[run result]', result.logs);
@@ -619,7 +619,7 @@ console.log(greeting, add(count, 8));
 
 			// ─── Helpers ────────────────────────────────────────────
 
-			function renderRunEvent(event) {
+			function renderInterceptEvent(event) {
 				if (event.event === 'log') {
 					return `  [line ${event.line}] log: ${event.args.map(String).join(', ')}`;
 				}

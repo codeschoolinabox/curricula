@@ -16,7 +16,7 @@ flowchart TD
     E -->|checkFormat, pure| F{format outcome}
     F -->|unformatted| RF[ok:false result<br/>format-rejected]
     F -->|formatted| G[execution-ready source]
-    G -->|run, async| H[RunResult<br/>outcome + logs + optional reason]
+    G -->|run, async| H[InterceptResult<br/>outcome + logs + optional reason]
     G -->|trace, async| I[TraceResult<br/>outcome + logs + ast]
     A -.->|format alone, pure| FM[formatted source<br/>tooling output]
     A -.->|interpret error, pure| EI[learner-friendly explanation]
@@ -93,7 +93,7 @@ index.ts
   → lib/validating/validate   (validate public entry)
   → lib/validating/is-jej     (boolean convenience)
   → lib/formatting/{format, check-format}  (format functions)
-  → lib/evaluating/run/run    (run public entry)
+  → lib/evaluating/intercept/run    (run public entry)
   → api/trace                 (legacy; parallel migration in flight)
   → api/types                 (trace/run/debug-related types remain)
 
@@ -106,7 +106,7 @@ lib/validating/
 lib/formatting/
   (no deps on validating/ or evaluating/)
 
-lib/evaluating/run/
+lib/evaluating/intercept/
   → lib/validating/validate   (validation gate)
   → lib/formatting/check-format (format gate)
   → lib/evaluating/shared/    (Execution type, SAB protocol)
@@ -119,7 +119,7 @@ lib/evaluating/run/
 Each serves a different pedagogical purpose with a different isolation model:
 
 - **run** — Web Worker. Trapped `console.log`, `alert`, `confirm`, `prompt`.
-  Returns `RunEvent` stream. Synchronous I/O via SharedArrayBuffer + Atomics.
+  Returns `InterceptEvent` stream. Synchronous I/O via SharedArrayBuffer + Atomics.
   SAB pause between events for correct I/O ordering.
 
 - **debug** — iframe with module `<script>` tags. Injects `debugger` statements

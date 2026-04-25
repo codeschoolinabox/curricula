@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import createRunGenerator from '../run.js';
+import createInterceptGenerator from '../intercept.js';
 
 /**
  * Validation + format gate tests for the merged engine.
  *
- * After the api/run → evaluating/run merge (M.1), createRunGenerator
+ * After the api/run → evaluating/run merge (M.1), createInterceptGenerator
  * runs the validation and format gates lazily inside the generator
  * body, before any Worker is spawned. Failures return immediate error
- * RunResults without touching the Worker code path.
+ * InterceptResults without touching the Worker code path.
  *
  * ZOMBIES ordering within each gate:
  *   Z — simplest/empty case
@@ -17,24 +17,24 @@ import createRunGenerator from '../run.js';
  *   I — cancel-supersedes-gates (interface-level ordering)
  */
 
-describe('createRunGenerator validation gate', () => {
+describe('createInterceptGenerator validation gate', () => {
 	describe('parse failure', () => {
 		describe('happy path', () => {
 			it('line-1 parse error → ok:false', async () => {
-				const handle = createRunGenerator('let x =;');
+				const handle = createInterceptGenerator('let x =;');
 				const result = await handle.result;
 				expect(result.ok).toBe(false);
 			});
 
 			it('line-1 parse error → kind = parse', async () => {
-				const handle = createRunGenerator('let x =;');
+				const handle = createInterceptGenerator('let x =;');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
 				expect(result.error?.kind).toBe('parse');
 			});
 
 			it('line-1 parse error → line = 1', async () => {
-				const handle = createRunGenerator('let x =;');
+				const handle = createInterceptGenerator('let x =;');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
 				if (result.error?.kind !== 'parse') {
@@ -44,7 +44,7 @@ describe('createRunGenerator validation gate', () => {
 			});
 
 			it('line-2 parse error → line = 2 (triangulates line number)', async () => {
-				const handle = createRunGenerator('let x = 1;\nlet y =;');
+				const handle = createInterceptGenerator('let x = 1;\nlet y =;');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
 				if (result.error?.kind !== 'parse') {
@@ -54,7 +54,7 @@ describe('createRunGenerator validation gate', () => {
 			});
 
 			it('parse-fail result has no logs field', async () => {
-				const handle = createRunGenerator('let x =;');
+				const handle = createInterceptGenerator('let x =;');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
 				expect((result as { logs?: unknown }).logs).toBeUndefined();
@@ -65,13 +65,13 @@ describe('createRunGenerator validation gate', () => {
 	describe('JeJ rejection', () => {
 		describe('happy path', () => {
 			it('var declaration → ok:false', async () => {
-				const handle = createRunGenerator('var x = 5;\n');
+				const handle = createInterceptGenerator('var x = 5;\n');
 				const result = await handle.result;
 				expect(result.ok).toBe(false);
 			});
 
 			it('var declaration → rejections field, not error', async () => {
-				const handle = createRunGenerator('var x = 5;\n');
+				const handle = createInterceptGenerator('var x = 5;\n');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
 				expect(result.rejections).toBeDefined();
@@ -79,14 +79,14 @@ describe('createRunGenerator validation gate', () => {
 			});
 
 			it('one var declaration → exactly one rejection', async () => {
-				const handle = createRunGenerator('var x = 5;\n');
+				const handle = createInterceptGenerator('var x = 5;\n');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
 				expect(result.rejections?.length).toBe(1);
 			});
 
 			it('two var declarations → two rejections (triangulates count)', async () => {
-				const handle = createRunGenerator('var x = 5;\nvar y = 6;\n');
+				const handle = createInterceptGenerator('var x = 5;\nvar y = 6;\n');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
 				expect(result.rejections?.length).toBe(2);
@@ -99,20 +99,20 @@ describe('createRunGenerator validation gate', () => {
 			// Definitely valid JeJ (no `var`, no `with`), parses, no rejections;
 			// just unformatted (extra whitespace). Isolates format-gate failure.
 			it('unformatted valid JeJ → ok:false', async () => {
-				const handle = createRunGenerator('let   x = 5;\n');
+				const handle = createInterceptGenerator('let   x = 5;\n');
 				const result = await handle.result;
 				expect(result.ok).toBe(false);
 			});
 
 			it('unformatted valid JeJ → kind = formatting', async () => {
-				const handle = createRunGenerator('let   x = 5;\n');
+				const handle = createInterceptGenerator('let   x = 5;\n');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
 				expect(result.error?.kind).toBe('formatting');
 			});
 
 			it('format-fail result has no logs field', async () => {
-				const handle = createRunGenerator('let   x = 5;\n');
+				const handle = createInterceptGenerator('let   x = 5;\n');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
 				expect((result as { logs?: unknown }).logs).toBeUndefined();
@@ -122,7 +122,7 @@ describe('createRunGenerator validation gate', () => {
 
 	describe('gate ordering — cancel supersedes gates', () => {
 		it('cancel before first iterate → ok:true (bypasses validation)', async () => {
-			const handle = createRunGenerator('let x =;'); // would parse-fail
+			const handle = createInterceptGenerator('let x =;'); // would parse-fail
 			handle.cancel();
 			const result = await handle.result;
 			expect(result.ok).toBe(true);
@@ -134,7 +134,7 @@ describe('createRunGenerator validation gate', () => {
 		// Proves validation runs first: result carries rejections, not a
 		// formatting error.
 		it('rejected + unformatted → rejections, not formatting', async () => {
-			const handle = createRunGenerator('var x=5;');
+			const handle = createInterceptGenerator('var x=5;');
 			const result = await handle.result;
 			if (result.ok) throw new Error('expected !ok');
 			expect(result.rejections).toBeDefined();

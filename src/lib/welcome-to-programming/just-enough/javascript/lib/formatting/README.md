@@ -47,5 +47,5 @@ function checkFormat(code: string): { formatted: boolean };
 - [DOCS.md](./DOCS.md) — design decisions and rationale
 - [../validating/README.md](../validating/README.md) — `validate(code)` and
   `isJej(code)` (the formatting + validation composition lives there)
-- [../evaluating/run/README.md](../evaluating/run/README.md) — `run()` uses
+- [../evaluating/intercept/README.md](../evaluating/intercept/README.md) — `run()` uses
   `checkFormat` as an execution gate

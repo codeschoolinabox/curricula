@@ -3,7 +3,7 @@
 Raw execution engines for running JeJ code in sandboxed environments. Each engine
 receives already-validated, formatted code and yields events via an AsyncGenerator.
 The validation and format gates are composed inside each engine's public entry
-(`lib/evaluating/run/run.ts` calls `validate` from `lib/validating/` and
+(`lib/evaluating/intercept/intercept.ts` calls `validate` from `lib/validating/` and
 `checkFormat` from `lib/formatting/` before spawning a Worker); the engines
 themselves do not re-implement language-level enforcement.
 
@@ -11,7 +11,7 @@ themselves do not re-implement language-level enforcement.
 
 | Directory | Isolation Model | Events       | Purpose                                        |
 | --------- | --------------- | ------------ | ---------------------------------------------- |
-| `run/`    | Web Worker      | `RunEvent`   | Execute with trapped globals, event logging    |
+| `run/`    | Web Worker      | `InterceptEvent`   | Execute with trapped globals, event logging    |
 | `debug/`  | iframe          | `DebugEvent` | Debugger breakpoints, loop guards              |
 | `trace/`  | Web Worker      | `AranStep`   | Aran AST instrumentation, step-by-step trace   |
 | `shared/` | —               | —            | Execution type, SAB pause, guard-loops, config |

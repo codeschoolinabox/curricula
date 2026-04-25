@@ -1,12 +1,12 @@
 /**
  * @file EVENT_READY pause-protocol parity tests — browser project.
  *
- * Verifies that after M.3 the run engine's timer handler consults
+ * Verifies that after M.3 the intercept engine's timer handler consults
  * EVENT_READY (same shape as the trace engine): budget depletion
  * still marks `timedOut` regardless of whether events are flowing.
  *
  * @remarks M.3 changes the shape of `onTimeout` inside `startTimeout`
- * (run.ts) from a blind `timedOut = true` into the sequence:
+ * (intercept.ts) from a blind `timedOut = true` into the sequence:
  * deduct elapsed → check exhaustion → check EVENT_READY → reschedule
  * or set `timedOut`. These tests triangulate the exhaustion check:
  * without it, an infinite loop that continuously emits `console`
@@ -20,15 +20,15 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import format from '../../../formatting/format.js';
-import createRunGenerator from '../run.js';
+import createInterceptGenerator from '../intercept.js';
 
 vi.setConfig({ testTimeout: 60_000 });
 
-describe('createRunGenerator EVENT_READY timer-guard (browser)', () => {
+describe('createInterceptGenerator EVENT_READY timer-guard (browser)', () => {
 	describe('Worker stuck without events', () => {
 		it('timer fires timeout within remainingMs when no trap is hit', async () => {
 			const code = format('while (true) { let x = 1; }\n');
-			const result = await createRunGenerator(code, { seconds: 0.1 });
+			const result = await createInterceptGenerator(code, { seconds: 0.1 });
 			if (result.ok) throw new Error('expected ok:false');
 			expect(result.error.kind).toBe('timeout');
 		});
@@ -37,7 +37,7 @@ describe('createRunGenerator EVENT_READY timer-guard (browser)', () => {
 	describe('Worker emits events continuously', () => {
 		it('infinite event-emitting loop still times out (EVENT_READY does not mask exhaustion)', async () => {
 			const code = format('while (true) { console.log(1); }\n');
-			const result = await createRunGenerator(code, {
+			const result = await createInterceptGenerator(code, {
 				seconds: 0.1,
 				io: {
 					console: {
@@ -58,7 +58,7 @@ describe('createRunGenerator EVENT_READY timer-guard (browser)', () => {
 			// the assertion fails only if the charge regresses to a much
 			// smaller value (or zero), letting hundreds of events through.
 			const code = format('while (true) { console.log(1); }\n');
-			const result = await createRunGenerator(code, {
+			const result = await createInterceptGenerator(code, {
 				seconds: 0.1,
 				io: {
 					console: {

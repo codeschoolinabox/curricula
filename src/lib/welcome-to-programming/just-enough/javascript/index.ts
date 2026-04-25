@@ -10,7 +10,7 @@
  */
 
 // --- Named exports: API functions ---
-export { default as run } from './lib/evaluating/run/run.js';
+export { default as intercept } from './lib/evaluating/intercept/intercept.js';
 export { default as trace } from './api/trace.js';
 export { default as validate } from './lib/validating/validate.js';
 export { default as parse } from './lib/parse/parse.js';
@@ -26,14 +26,14 @@ export type { BaseResult } from './lib/validating/types.js';
 export type {
 	ResultError,
 	Result,
-	RunResult,
+	InterceptResult,
 	TraceResult,
 } from './api/types.js';
 
 export type {
 	Execution,
 	EngineConfig,
-	RunEvent,
+	InterceptEvent,
 } from './lib/evaluating/shared/types.js';
 
 export type { TraceConfig } from './lib/evaluating/trace/semantics/config.types.js';

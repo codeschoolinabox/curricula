@@ -24,7 +24,7 @@ import {
 	writePauseEngaged,
 	writePromptResponse,
 	writeResumeSignal,
-} from '../../../run/worker-protocol.js';
+} from '../../../intercept/worker-protocol.js';
 
 import instrument from './instrument.js';
 

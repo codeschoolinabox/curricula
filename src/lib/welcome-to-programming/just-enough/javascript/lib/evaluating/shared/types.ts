@@ -3,7 +3,7 @@
  *
  * Defines the Execution type (AsyncGenerator-based), engine
  * configuration, and the discriminated union of events produced
- * by the run engine.
+ * by the intercept engine.
  */
 
 // ─── Execution type ──────────────────────────────────────────
@@ -85,7 +85,7 @@ type EngineConfig = {
 // ─── Console method surface ───────────────────────────────────
 
 /**
- * Full standard console method surface trapped by the run engine.
+ * Full standard console method surface trapped by the intercept engine.
  *
  * Every listed method is intercepted in the worker — both to emit a
  * `ConsoleEvent` and to invoke the consumer's mock (if any) before
@@ -103,11 +103,11 @@ type ConsoleMethod =
 // ─── Run events ──────────────────────────────────────────────
 
 /**
- * Discriminated union of events produced by the run engine.
+ * Discriminated union of events produced by the intercept engine.
  *
  * @remarks Each trapped call (any console method, prompt, alert, etc.)
  * produces one event. Errors are events in the array, not thrown
- * exceptions. The consumer always receives a `RunEvent[]` in the
+ * exceptions. The consumer always receives a `InterceptEvent[]` in the
  * result's `logs` field.
  *
  * Discriminate on the `event` field:
@@ -117,12 +117,12 @@ type ConsoleMethod =
  * - `'confirm'` — confirm() call with return value
  * - `'error'` — runtime error during execution
  *
- * `RunEvent` is strictly worker-emitted events — what the program did.
+ * `InterceptEvent` is strictly worker-emitted events — what the program did.
  * Termination markers (cancel / break / fail) are NOT events; they
- * live on the RunResult as `outcome` + optional `reason`. Consumers
+ * live on the InterceptResult as `outcome` + optional `reason`. Consumers
  * check `result.outcome === 'cancel' | 'fail'` (never `logs.at(-1)`).
  */
-type RunEvent =
+type InterceptEvent =
 	| ConsoleEvent
 	| PromptEvent
 	| AlertEvent
@@ -174,7 +174,7 @@ export type {
 	Execution,
 	EngineConfig,
 	ConsoleMethod,
-	RunEvent,
+	InterceptEvent,
 	ConsoleEvent,
 	PromptEvent,
 	AlertEvent,

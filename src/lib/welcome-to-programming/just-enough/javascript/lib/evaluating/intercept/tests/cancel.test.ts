@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import createRunGenerator from '../run.js';
+import createInterceptGenerator from '../intercept.js';
 
 /**
  * Cancel semantics — node project.
@@ -14,17 +14,17 @@ import createRunGenerator from '../run.js';
  * where they run against a real Worker + SharedArrayBuffer environment.
  */
 
-describe('createRunGenerator cancel', () => {
+describe('createInterceptGenerator cancel', () => {
 	describe('cancel before first iterate', () => {
 		it('next() resolves with done: true', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.next();
 			expect(result.done).toBe(true);
 		});
 
 		it('result.ok is true (cancel is not a program error)', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.next();
 			if (!result.done) throw new Error('expected done');
@@ -32,7 +32,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('outcome is cancel; logs are empty (no worker ran)', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.next();
 			if (!result.done) throw new Error('expected done');
@@ -43,7 +43,7 @@ describe('createRunGenerator cancel', () => {
 
 	describe('idempotency', () => {
 		it('calling cancel twice does not throw', () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			expect(() => {
 				gen.cancel();
 				gen.cancel();
@@ -51,7 +51,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('calling cancel after completion does not throw', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			await gen.next();
 			expect(() => gen.cancel()).not.toThrow();
@@ -60,7 +60,7 @@ describe('createRunGenerator cancel', () => {
 
 	describe('subsequent next() after cancel completes', () => {
 		it('returns done: true on repeated next() calls', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			await gen.next();
 			const second = await gen.next();
@@ -70,7 +70,7 @@ describe('createRunGenerator cancel', () => {
 
 	describe('cancel is not writable (runtime enforcement)', () => {
 		it('assigning cancel throws in strict mode', () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			expect(() => {
 				(gen as { cancel: () => void }).cancel = () => {};
 			}).toThrow();
@@ -78,22 +78,22 @@ describe('createRunGenerator cancel', () => {
 	});
 
 	describe('.result (Task D)', () => {
-		it('resolves to RunResult when cancelled before iterate', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+		it('resolves to InterceptResult when cancelled before iterate', async () => {
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.result;
 			expect(result.ok).toBe(true);
 		});
 
-		it('resolved RunResult has outcome:cancel', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+		it('resolved InterceptResult has outcome:cancel', async () => {
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.result;
 			expect(result.outcome).toBe('cancel');
 		});
 
 		it('memoizes — same Promise on repeated access', () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			const p1 = gen.result;
 			const p2 = gen.result;
@@ -101,7 +101,7 @@ describe('createRunGenerator cancel', () => {
 		});
 
 		it('result property is not writable', () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			expect(() => {
 				(gen as { result: Promise<unknown> }).result = Promise.resolve(
 					null,
@@ -111,47 +111,47 @@ describe('createRunGenerator cancel', () => {
 	});
 
 	describe('.then / PromiseLike (Task D)', () => {
-		it('await handle resolves to RunResult', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+		it('await handle resolves to InterceptResult', async () => {
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen;
 			expect(result.ok).toBe(true);
 		});
 
 		it('await handle and await handle.result return same value', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			const viaAwait = await gen;
 			const viaResult = await gen.result;
 			expect(viaAwait).toBe(viaResult);
 		});
 
-		it('then() callback receives RunResult', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+		it('then() callback receives InterceptResult', async () => {
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			const value = await gen.then((r) => r.outcome);
 			expect(value).toBe('cancel');
 		});
 
 		it('then is not enumerable (matches Promise convention)', () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			expect(Object.keys(gen)).not.toContain('then');
 		});
 
 		it('cancel IS enumerable (positive case for comparison)', () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			expect(Object.keys(gen)).toContain('cancel');
 		});
 
 		it('result IS enumerable (positive case for comparison)', () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			expect(Object.keys(gen)).toContain('result');
 		});
 	});
 
 	describe('.then with both onFulfilled and onRejected', () => {
 		it('invokes onFulfilled on cancel (never onRejected under normal flow)', async () => {
-			const gen = createRunGenerator('let x = 1;\n');
+			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			let fulfilledCalled = false;
 			let rejectedCalled = false;
@@ -169,9 +169,9 @@ describe('createRunGenerator cancel', () => {
 	});
 
 	/**
-	 * Invariant: ANY consumer that calls .cancel() gets a RunResult
+	 * Invariant: ANY consumer that calls .cancel() gets a InterceptResult
 	 * with `outcome: 'cancel'`. Termination is classified on the
-	 * RunResult, not smuggled into logs. Previously there was a
+	 * InterceptResult, not smuggled into logs. Previously there was a
 	 * trailing `{event:'cancel'}` in logs; that was removed when
 	 * termination moved to first-class result metadata. See DOCS.md
 	 * § Unified termination protocol.
@@ -179,7 +179,7 @@ describe('createRunGenerator cancel', () => {
 	describe('cancel invariant: outcome === "cancel"', () => {
 		describe('cancel before first iterate', () => {
 			it('invariant holds', async () => {
-				const gen = createRunGenerator('let x = 1;\n');
+				const gen = createInterceptGenerator('let x = 1;\n');
 				gen.cancel();
 				const result = await gen.result;
 				expect(result.outcome).toBe('cancel');
@@ -188,7 +188,7 @@ describe('createRunGenerator cancel', () => {
 
 		describe('cancel via await handle.result', () => {
 			it('invariant holds', async () => {
-				const gen = createRunGenerator('let x = 1;\n');
+				const gen = createInterceptGenerator('let x = 1;\n');
 				gen.cancel();
 				const result = await gen;
 				expect(result.outcome).toBe('cancel');

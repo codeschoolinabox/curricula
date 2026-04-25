@@ -10,7 +10,7 @@
 `run` is the sole consumer. The module takes a learner-provided source string
 and a guard limit, walks the source's AST, and returns a transformed string
 with guard statements injected into every covered loop's body. The caller
-(`run.ts`) filters out the `Infinity` guard-limit case before invocation —
+(`intercept.ts`) filters out the `Infinity` guard-limit case before invocation —
 this module assumes a finite limit on entry.
 
 The transformation is a string-level splice driven by AST positions. The
@@ -27,7 +27,7 @@ grows from `{WhileStatement}` (HEAD) to `{WhileStatement, ForStatement,
 DoWhileStatement, ForOfStatement}` (target). `ForInStatement` remains
 excluded.
 
-The pre-task test at `evaluating/run/guard-loops/tests/guard-loops.test.ts`
+The pre-task test at `evaluating/intercept/guard-loops/tests/guard-loops.test.ts`
 asserted `for-of loops are not guarded` (`result.loopCount === 0` for a
 for-of input). That test was inverted as part of increment I-5 — it now
 asserts for-of IS guarded. The Task B contract (below) is the regression
@@ -186,7 +186,7 @@ correct implementation may realize them as one function with labeled
 sections, as six small functions, or any grouping in between. The sketch is
 neutral on function decomposition as long as each phase's responsibility is
 traceable in the code. The current implementation at
-`evaluating/run/guard-loops/guard-loops.ts` is a single ~230-line module
+`evaluating/intercept/guard-loops/guard-loops.ts` is a single ~230-line module
 with phases realized as small named functions; that shape is an
 acceptable target for this sketch.
 
@@ -205,7 +205,7 @@ acceptable target for this sketch.
   failures — is the Worker's concern.
 
 - **Filtering the guard limit.** This module assumes the limit is finite.
-  `Infinity` handling lives upstream in `run.ts`, which decides not to
+  `Infinity` handling lives upstream in `intercept.ts`, which decides not to
   invoke this module when guards should be skipped entirely. If `Infinity`
   is passed anyway, the module emits its normal guard, which never fires
   (`++loopN > Infinity` is always false). The module does not defend

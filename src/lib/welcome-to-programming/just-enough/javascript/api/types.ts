@@ -18,7 +18,7 @@ import type {
 	BaseResult,
 	FormattingResultError,
 } from '../lib/validating/types.js';
-import type { RunEvent } from '../lib/evaluating/shared/types.js';
+import type { InterceptEvent } from '../lib/evaluating/shared/types.js';
 import type {
 	ASTNode,
 	TraceEvent,
@@ -130,7 +130,7 @@ type ResultError =
  * trace/debug engines have not yet migrated to set the field.
  * Per-engine result types intersect with `{readonly outcome:
  * <Outcome>}` to make it required where the engine guarantees it
- * — e.g. `RunResult` does this so consumers narrow exhaustively
+ * — e.g. `InterceptResult` does this so consumers narrow exhaustively
  * without `default` or `?.` chains.
  *
  * `reason` is set only by `.fail(reason)` on engines that expose
@@ -159,7 +159,7 @@ type Result<TEvent, TOutcome extends string = string> = BaseResult<ResultError> 
  * The six outcome variants a run can resolve to.
  *
  * @remarks Classifies how a `run()` finished. Set by the engine's
- * buildResult. First-class on the RunResult — consumers switch on
+ * buildResult. First-class on the InterceptResult — consumers switch on
  * `result.outcome` rather than scanning `logs` for termination
  * markers. `logs` is a pure worker-emitted event stream and does
  * NOT carry synthetic cancel/break/fail entries.
@@ -178,7 +178,7 @@ type Result<TEvent, TOutcome extends string = string> = BaseResult<ResultError> 
  * - `'error'` — learner code threw, or a pre-execution gate
  *   (parse, validation, formatting, worker creation) rejected.
  */
-type RunOutcome =
+type InterceptOutcome =
 	| 'complete'
 	| 'cancel'
 	| 'fail'
@@ -189,17 +189,17 @@ type RunOutcome =
 /**
  * Result from `run()` — Web Worker execution with trapped I/O.
  *
- * @remarks `logs` contains {@link RunEvent} entries: one per
+ * @remarks `logs` contains {@link InterceptEvent} entries: one per
  * trapped call (console.log, prompt, alert, confirm, etc.)
  * plus an error event if execution failed. Termination markers
  * (cancel, break, fail) are NOT in logs — they're classified on
  * `outcome`, with optional `reason` payload for `.fail()`.
  *
- * `outcome` is required on RunResult. Consumers can switch on it
+ * `outcome` is required on InterceptResult. Consumers can switch on it
  * exhaustively without a `default` branch.
  */
-type RunResult = Result<RunEvent, RunOutcome> & {
-	readonly outcome: RunOutcome;
+type InterceptResult = Result<InterceptEvent, InterceptOutcome> & {
+	readonly outcome: InterceptOutcome;
 };
 
 /**
@@ -274,8 +274,8 @@ export type {
 	FormattingResultError,
 	BaseResult,
 	Result,
-	RunResult,
-	RunOutcome,
+	InterceptResult,
+	InterceptOutcome,
 	TraceResult,
 	TraceOutcome,
 	DebugResult,

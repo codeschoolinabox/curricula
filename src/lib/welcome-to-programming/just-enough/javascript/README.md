@@ -176,7 +176,7 @@ import {
 
 | Function              | Returns                              | Engine                             |
 | --------------------- | ------------------------------------ | ---------------------------------- |
-| `run(code, config)`   | `Execution<RunEvent, RunResult>`     | Web Worker                         |
+| `run(code, config)`   | `Execution<InterceptEvent, InterceptResult>`     | Web Worker                         |
 | `trace(code, config)` | `Execution<AranStep, TraceResult>`   | Web Worker w/ Aran instrumentation |
 | `debug(code, config)` | `Execution<DebugEvent, DebugResult>` | iframe                             |
 

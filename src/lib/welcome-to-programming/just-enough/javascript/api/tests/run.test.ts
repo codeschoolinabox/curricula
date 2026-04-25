@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 
-import type { RunEvent } from '../../evaluating/shared/types.js';
-import type { RunResult } from '../types.js';
+import type { InterceptEvent } from '../../evaluating/shared/types.js';
+import type { InterceptResult } from '../types.js';
 
-// WHY: raw createRunGenerator uses Web Workers + SharedArrayBuffer,
+// WHY: raw createInterceptGenerator uses Web Workers + SharedArrayBuffer,
 // unavailable in Node. Mock it to return a controlled async generator.
-vi.mock('../../evaluating/run/run.js', () => ({
+vi.mock('../../evaluating/intercept/intercept.js', () => ({
 	default: vi.fn(),
 }));
 
@@ -17,10 +17,10 @@ vi.mock('../format.js', () => ({
 }));
 
 import run from '../run.js';
-import createRunGenerator from '../../evaluating/run/run.js';
+import createInterceptGenerator from '../../evaluating/intercept/intercept.js';
 import { checkFormat } from '../format.js';
 
-const mockedGenerator = vi.mocked(createRunGenerator);
+const mockedGenerator = vi.mocked(createInterceptGenerator);
 const mockedCheckFormat = vi.mocked(checkFormat);
 
 /**
@@ -28,9 +28,9 @@ const mockedCheckFormat = vi.mocked(checkFormat);
  * and returns the given result.
  */
 function createMockGenerator(
-	events: readonly RunEvent[],
-	result: RunResult,
-): () => AsyncGenerator<RunEvent, RunResult> {
+	events: readonly InterceptEvent[],
+	result: InterceptResult,
+): () => AsyncGenerator<InterceptEvent, InterceptResult> {
 	return async function* () {
 		for (const event of events) {
 			yield event;
@@ -81,7 +81,7 @@ describe('run', () => {
 
 	describe('successful execution', () => {
 		it('returns ok true when code runs without errors', async () => {
-			const logs: RunEvent[] = [
+			const logs: InterceptEvent[] = [
 				{ event: 'log' as const, args: ['hello'], line: 1 },
 			];
 			mockedGenerator.mockReturnValueOnce(
@@ -93,7 +93,7 @@ describe('run', () => {
 		});
 
 		it('includes logs in the result', async () => {
-			const logs: RunEvent[] = [
+			const logs: InterceptEvent[] = [
 				{ event: 'log' as const, args: ['hello'], line: 1 },
 			];
 			mockedGenerator.mockReturnValueOnce(
@@ -147,7 +147,7 @@ describe('run', () => {
 
 	describe('runtime errors', () => {
 		it('returns ok false when code throws', async () => {
-			const logs: RunEvent[] = [
+			const logs: InterceptEvent[] = [
 				{
 					event: 'error' as const,
 					name: 'ReferenceError',
@@ -156,7 +156,7 @@ describe('run', () => {
 					phase: 'execution' as const,
 				},
 			];
-			const result: RunResult = {
+			const result: InterceptResult = {
 				ok: false,
 				error: {
 					kind: 'javascript',
@@ -176,7 +176,7 @@ describe('run', () => {
 		});
 
 		it('sets error with kind javascript', async () => {
-			const logs: RunEvent[] = [
+			const logs: InterceptEvent[] = [
 				{
 					event: 'error' as const,
 					name: 'ReferenceError',
@@ -185,7 +185,7 @@ describe('run', () => {
 					phase: 'execution' as const,
 				},
 			];
-			const result: RunResult = {
+			const result: InterceptResult = {
 				ok: false,
 				error: {
 					kind: 'javascript',
@@ -206,7 +206,7 @@ describe('run', () => {
 		});
 
 		it('includes logs alongside error', async () => {
-			const logs: RunEvent[] = [
+			const logs: InterceptEvent[] = [
 				{ event: 'log' as const, args: ['before'], line: 1 },
 				{
 					event: 'error' as const,
@@ -215,7 +215,7 @@ describe('run', () => {
 					phase: 'execution' as const,
 				},
 			];
-			const result: RunResult = {
+			const result: InterceptResult = {
 				ok: false,
 				error: {
 					kind: 'javascript',
@@ -236,7 +236,7 @@ describe('run', () => {
 
 	describe('timeout errors', () => {
 		it('returns ok false on timeout', async () => {
-			const logs: RunEvent[] = [
+			const logs: InterceptEvent[] = [
 				{
 					event: 'error' as const,
 					name: 'TimeoutError',
@@ -244,7 +244,7 @@ describe('run', () => {
 					phase: 'execution' as const,
 				},
 			];
-			const result: RunResult = {
+			const result: InterceptResult = {
 				ok: false,
 				error: {
 					kind: 'timeout',
@@ -264,7 +264,7 @@ describe('run', () => {
 		});
 
 		it('sets error with kind timeout', async () => {
-			const logs: RunEvent[] = [
+			const logs: InterceptEvent[] = [
 				{
 					event: 'error' as const,
 					name: 'TimeoutError',
@@ -272,7 +272,7 @@ describe('run', () => {
 					phase: 'execution' as const,
 				},
 			];
-			const result: RunResult = {
+			const result: InterceptResult = {
 				ok: false,
 				error: {
 					kind: 'timeout',
@@ -292,7 +292,7 @@ describe('run', () => {
 		});
 
 		it('includes limit value on timeout error', async () => {
-			const logs: RunEvent[] = [
+			const logs: InterceptEvent[] = [
 				{
 					event: 'error' as const,
 					name: 'TimeoutError',
@@ -300,7 +300,7 @@ describe('run', () => {
 					phase: 'execution' as const,
 				},
 			];
-			const result: RunResult = {
+			const result: InterceptResult = {
 				ok: false,
 				error: {
 					kind: 'timeout',
@@ -362,7 +362,7 @@ describe('run', () => {
 
 	describe('multi-error detection', () => {
 		it('detects last error from generator result', async () => {
-			const logs: RunEvent[] = [
+			const logs: InterceptEvent[] = [
 				{
 					event: 'error' as const,
 					name: 'TypeError',
@@ -377,7 +377,7 @@ describe('run', () => {
 					phase: 'execution' as const,
 				},
 			];
-			const result: RunResult = {
+			const result: InterceptResult = {
 				ok: false,
 				error: {
 					kind: 'javascript',
@@ -398,7 +398,7 @@ describe('run', () => {
 	});
 
 	describe('Execution interface', () => {
-		it('is PromiseLike — await resolves to RunResult', async () => {
+		it('is PromiseLike — await resolves to InterceptResult', async () => {
 			mockedGenerator.mockReturnValueOnce(
 				createMockGenerator([], { ok: true, logs: [] })(),
 			);
@@ -429,7 +429,7 @@ describe('run', () => {
 		});
 
 		it('is AsyncIterable — yields events', async () => {
-			const logs: RunEvent[] = [
+			const logs: InterceptEvent[] = [
 				{ event: 'log' as const, args: ['a'], line: 1 },
 				{ event: 'log' as const, args: ['b'], line: 2 },
 			];
@@ -438,7 +438,7 @@ describe('run', () => {
 			);
 
 			const execution = run('let x = 5;\n', { seconds: 5 });
-			const collected: RunEvent[] = [];
+			const collected: InterceptEvent[] = [];
 			for await (const event of execution) {
 				collected.push(event);
 			}
@@ -456,7 +456,7 @@ describe('run', () => {
 
 		it('validation failure yields no events', async () => {
 			const execution = run('let = ;', { seconds: 5 });
-			const collected: RunEvent[] = [];
+			const collected: InterceptEvent[] = [];
 			for await (const event of execution) {
 				collected.push(event);
 			}
@@ -500,11 +500,11 @@ describe('run', () => {
 
 	describe('re-iteration', () => {
 		it('second for-await replays cached events without re-execution', async () => {
-			const events: readonly RunEvent[] = [
+			const events: readonly InterceptEvent[] = [
 				{ event: 'log', args: ['hello'], line: 1 },
 				{ event: 'log', args: ['world'], line: 2 },
 			];
-			const result: RunResult = { ok: true, logs: events };
+			const result: InterceptResult = { ok: true, logs: events };
 
 			mockedGenerator.mockReturnValueOnce(
 				createMockGenerator(events, result)(),
@@ -513,7 +513,7 @@ describe('run', () => {
 			const execution = run('let x = 5;\n', { seconds: 5 });
 
 			// First iteration — live
-			const firstPass: RunEvent[] = [];
+			const firstPass: InterceptEvent[] = [];
 			for await (const event of execution) {
 				firstPass.push(event);
 			}
@@ -525,7 +525,7 @@ describe('run', () => {
 			const callsAfterFirst = mockedGenerator.mock.calls.length;
 
 			// Second iteration — replay from cache (generator NOT called again)
-			const secondPass: RunEvent[] = [];
+			const secondPass: InterceptEvent[] = [];
 			for await (const event of execution) {
 				secondPass.push(event);
 			}

@@ -11,7 +11,7 @@ no higher-level wrapper.
 | File                      | Purpose                                                     |
 | ------------------------- | ----------------------------------------------------------- |
 | `types.ts`                | Worker message protocol, event types, `IoMocks`             |
-| `run.ts`                  | Public entry: `run(code, { seconds?, iterations?, io? })`   |
+| `intercept.ts`                  | Public entry: `run(code, { seconds?, iterations?, io? })`   |
 | `create-worker-script.ts` | Generates self-contained worker JS string                   |
 | `worker-protocol.ts`      | SharedArrayBuffer encode/decode utilities                   |
 
@@ -32,11 +32,11 @@ README. Use them consistently.
   built once per invocation. Each slot is either the consumer's mock
   or the Native IO wrapper. The worker is unaware of which — it always
   sees the same event-emission path.
-- **IO event** — a `RunEvent` whose generation involves an IO hook
+- **IO event** — a `InterceptEvent` whose generation involves an IO hook
   (`ConsoleEvent`, `AlertEvent`, `ConfirmEvent`, `PromptEvent`).
   `ErrorEvent` is not an IO event.
 - **Shape-identical guarantee** — the sequence, event tags, and `args`
-  structure of `RunEvent`s emitted by a run is unaffected by which
+  structure of `InterceptEvent`s emitted by a run is unaffected by which
   slots in the Resolved IO are mocks vs. native wrappers. Return values
   may differ (they reflect actual IO interaction), but the event shape
   does not.
@@ -48,7 +48,7 @@ README. Use them consistently.
 - **Execution contract** — the `Execution<TEvent, TResult>` shape
   defined in `../shared/types.ts`: `AsyncIterable<TEvent>` +
   `PromiseLike<TResult>` + `.result: Promise<TResult>` +
-  `.cancel(): void`. The RunHandle returned by this module satisfies
+  `.cancel(): void`. The InterceptHandle returned by this module satisfies
   this contract natively — no wrapper needed. Trace and debug engines
   return objects satisfying this same contract; their internal
   execution models differ (Worker + SAB for run/trace, iframe for
@@ -76,11 +76,11 @@ README. Use them consistently.
   unblocked.
 - **Non-IO event** — an event whose generation does not involve an IO
   hook: `ErrorEvent` (creation- or execution-phase errors in the
-  learner's code). It travels the same `RunEvent` stream as IO
+  learner's code). It travels the same `InterceptEvent` stream as IO
   events. Termination markers (cancel, break, fail) are NOT events
-  — they live on the RunResult as `outcome` + optional `reason`.
+  — they live on the InterceptResult as `outcome` + optional `reason`.
 - **Outcome** — how a run resolved. Six first-class variants set
-  on the `RunResult` by the engine's buildResult: `complete`
+  on the `InterceptResult` by the engine's buildResult: `complete`
   (natural end of learner code), `cancel` (consumer stopped via
   `.cancel()` or for-await break), `fail` (consumer stopped via
   `.fail(reason)` with a structured rejection payload), `timeout`
@@ -91,13 +91,13 @@ README. Use them consistently.
   emitted event stream; it does NOT carry synthetic cancel/fail
   markers. See § Outcome below.
 - **Termination cause** (internal) — the single closure variable
-  inside `createRunGenerator` that records the first reason the
+  inside `createInterceptGenerator` that records the first reason the
   run ended (first-write-wins). All termination entry points
   (cancel / fail / timeout / worker-error) funnel through one
   `setTermination()` helper so concurrent triggers collapse to a
   monotonic state machine without a priority ladder. The
   termination-cause payload (e.g. the `reason` passed to `.fail()`)
-  surfaces on the RunResult alongside `outcome`.
+  surfaces on the InterceptResult alongside `outcome`.
 
 ## Public API
 
@@ -109,26 +109,26 @@ run(
     iterations?: number; // optional loop-guard limit
     io?: IoMocks;        // per-hook mocks; unspecified slots use natives
   }
-): RunHandle
+): InterceptHandle
 ```
 
-`RunHandle` is defined as
+`InterceptHandle` is defined as
 
 ```ts
-type RunHandle =
-  AsyncGenerator<RunEvent, RunResult> &
-  Execution<RunEvent, RunResult>;
+type InterceptHandle =
+  AsyncGenerator<InterceptEvent, InterceptResult> &
+  Execution<InterceptEvent, InterceptResult>;
 ```
 
 — `Execution` already extends `PromiseLike` (shape shown at line 105
-above just for readers). It **is** an `AsyncGenerator<RunEvent,
-RunResult>` (all of `.next()`, `.return()`, `.throw()` are available
+above just for readers). It **is** an `AsyncGenerator<InterceptEvent,
+InterceptResult>` (all of `.next()`, `.return()`, `.throw()` are available
 and used by internal tests) AND it **satisfies** the
-`Execution<RunEvent, RunResult>` contract from `../shared/types.ts`:
+`Execution<InterceptEvent, InterceptResult>` contract from `../shared/types.ts`:
 
 - `.cancel()` — tear down the worker and resolve with a cancel-marked
-  RunResult. Idempotent. See § Cancellation.
-- `.result` — memoized `Promise<RunResult>` that drains the generator
+  InterceptResult. Idempotent. See § Cancellation.
+- `.result` — memoized `Promise<InterceptResult>` that drains the generator
   internally. See § Result.
 - `then(...)` — PromiseLike delegate so `await run(code)` works
   directly without explicit `.result`. Same Promise as `.result`.
@@ -141,7 +141,7 @@ consumers (primarily the test suite) can call `.next()` directly.
 - **`code`** — JavaScript source. Validated on the first `.next()`
   (or first `.result` access). Parse errors, language-level
   violations, and unformatted code are surfaced as immediate error
-  RunResults — no Worker is spawned. See § Validation pipeline.
+  InterceptResults — no Worker is spawned. See § Validation pipeline.
 - **`options.seconds`** — user-perceived runtime budget. Pauses
   during generator yield (consumer stepping time does not count) AND
   while an IO callback is being awaited (styled dialog time does not
@@ -156,10 +156,10 @@ consumers (primarily the test suite) can call `.next()` directly.
 - **`options.io`** — optional mocks for IO hooks. Each slot is
   independently overridable; omitted slots fall back to the Native IO
   wrapper. See § IO mocking.
-- **Yields** — `RunEvent` objects one at a time, pausing the worker
+- **Yields** — `InterceptEvent` objects one at a time, pausing the worker
   between events via the unified pause protocol (PAUSE + EVENT_READY
   flags on the SAB).
-- **Returns** — `RunResult` (frozen `{ ok, error?, logs?: RunEvent[] }`)
+- **Returns** — `InterceptResult` (frozen `{ ok, error?, logs?: InterceptEvent[] }`)
   on completion. `logs` is absent when code was rejected before
   execution (parse, rejections, formatting gate).
 
@@ -170,12 +170,12 @@ generator body runs three phases in order. The `run(...)` call
 itself returns cheaply — no work happens until a consumer pulls.
 
 1. **Termination fast-path** — if `.cancel()` or `.fail(reason)`
-   fired before any iteration, return a settled RunResult
+   fired before any iteration, return a settled InterceptResult
    (`{ok:true, outcome:'cancel', logs:[]}` or
    `{ok:true, outcome:'fail', reason, logs:[]}`) and skip everything
    else. Worker is never spawned.
 2. **Validation gates** — two ordered checks, both producing an
-   immediate error RunResult on failure. Worker is still never
+   immediate error InterceptResult on failure. Worker is still never
    spawned.
    1. **Parse + JeJ validation** — `validate(code)` runs acorn parse,
       then walks the AST against the JeJ language allow-list.
@@ -197,7 +197,7 @@ itself returns cheaply — no work happens until a consumer pulls.
 
 - **Non-string `code`** — TypeScript types require `code: string`. A
   non-string input reaches `validate()` and (depending on the value)
-  produces a `SyntaxError`-shaped parse-failure RunResult via the
+  produces a `SyntaxError`-shaped parse-failure InterceptResult via the
   acorn path, or is wrapped as a creation-phase `ErrorEvent` if
   validate throws unexpectedly. The engine does not sync-throw at
   the `run(...)` call boundary.
@@ -209,7 +209,7 @@ itself returns cheaply — no work happens until a consumer pulls.
 - **`validate()` / `checkFormat()` unexpected throws** — both are
   specified to return values, never throw. Any throw is an engine
   bug; it is caught inside the generator body and surfaced as a
-  creation-phase `ErrorEvent` RunResult rather than escaping to the
+  creation-phase `ErrorEvent` InterceptResult rather than escaping to the
   consumer. Iteration still resolves cleanly with `done:true`.
 
 ### Consumption modes
@@ -241,12 +241,12 @@ consumer sees a disjoint subset of events. Pick one mode per handle.
 call any number of times at any phase.
 
 - **Before first iterate:** sets the termination cause. First `.next()`
-  sees it, returns a settled RunResult (`outcome:'cancel'`, empty
+  sees it, returns a settled InterceptResult (`outcome:'cancel'`, empty
   logs) without constructing the Worker. Zero resource leak.
 - **During iteration:** pushes a sentinel into the internal queue,
   unsticks the pending `await dequeue()`, main loop's termination
   check breaks out, finally block terminates the Worker and revokes
-  the Blob URL. The final RunResult is
+  the Blob URL. The final InterceptResult is
   `{ok: true, outcome: 'cancel', logs: [...events]}`. Logs contain
   only worker-emitted events — no synthetic cancel marker.
 - **After completion:** no-op.
@@ -259,7 +259,7 @@ const wasCancelled = result.outcome === 'cancel';
 ```
 
 Cancel is not an error — it did not originate in the learner's
-program. The RunResult stays `ok: true`; `outcome: 'cancel'` is the
+program. The InterceptResult stays `ok: true`; `outcome: 'cancel'` is the
 signal.
 
 **`break` inside a live `for await` is equivalent to calling
@@ -281,7 +281,7 @@ for await (const event of handle) render(event);  // replay works
 ## Fail — consumer-driven structured termination
 
 `.fail(reason?)` stops the run and attaches a structured rejection
-payload to the RunResult. It serves consumer use cases that
+payload to the InterceptResult. It serves consumer use cases that
 `.cancel()` can't — specifically, teaching harnesses that need to
 record WHY the run was stopped:
 
@@ -331,7 +331,7 @@ pending IO promise if they want immediate teardown.
 
 ## Result
 
-`.result` is a memoized `Promise<RunResult>` that drives the generator
+`.result` is a memoized `Promise<InterceptResult>` that drives the generator
 to completion. First access creates the Promise; subsequent accesses
 return the same Promise. `await run(code)` is equivalent.
 
@@ -344,7 +344,7 @@ if (result.ok) {
 }
 ```
 
-The Promise resolves with the same RunResult the generator would have
+The Promise resolves with the same InterceptResult the generator would have
 produced via manual iteration. Errors inside the worker (uncaught
 `TypeError` etc.) surface as `{ok: false, error: ...}` — they are NOT
 thrown from `.result`. The only way `.result` rejects is if the main-
@@ -352,7 +352,7 @@ thread code itself throws (unreachable under current code).
 
 ## Outcome
 
-Every RunResult carries a required `outcome` field classifying how
+Every InterceptResult carries a required `outcome` field classifying how
 the run ended. Six variants, exhaustively switchable in TypeScript:
 
 ```ts
@@ -373,7 +373,7 @@ switch (result.outcome) {
 `outcome` for fine-grained discrimination; `ok` remains the gate on
 `result.error` presence (errors only exist on `ok:false`).
 
-On `outcome: 'fail'` the RunResult also carries `reason` — the
+On `outcome: 'fail'` the InterceptResult also carries `reason` — the
 payload passed to `.fail(reason)`. Not cloned, not separately
 frozen; the reference is replay-stable.
 
@@ -411,7 +411,7 @@ console.log(liveEvents[0] === replayedEvents[0]); // true
 This is possible because the engine's main loop pushes each yielded
 event into an internal `logs` array using the exact reference the
 consumer sees — no clone. `deepFreezeInPlace` freezes the final
-RunResult (including the `logs` array) in place; identity survives.
+InterceptResult (including the `logs` array) in place; identity survives.
 
 Replay does not throttle — events drain as fast as the consumer
 pulls. If the consumer wants to pace the replay (e.g. for a
@@ -535,7 +535,7 @@ semantic trace engine — different namespace, no conflict.)
 11. Timeout tracks user-perceived runtime: paused while yielded AND
     while awaiting any IO callback, plus a flat 5 ms per-yield charge
     so rendering-bound loops still deplete the budget.
-12. Return frozen `RunResult` on completion, timeout, or iteration
+12. Return frozen `InterceptResult` on completion, timeout, or iteration
     limit.
 
 ## Key design decisions
@@ -562,7 +562,7 @@ semantic trace engine — different namespace, no conflict.)
   DOCS.md § Timer-vs-yield.
 - **Errors are events**: runtime errors (`phase: 'execution'`) and
   construction errors (`phase: 'creation'`) appear in the logs
-  array. The consumer always gets `RunEvent[]`, never a thrown
+  array. The consumer always gets `InterceptEvent[]`, never a thrown
   exception.
 - **SAB + Atomics for IO**: `prompt` / `confirm` / `alert` block the
   worker via `Atomics.wait` while the main thread runs the Resolved IO
@@ -605,7 +605,7 @@ To test interactively, start the Vite dev server from the project
 root:
 
 ```sh
-npx vite --config src/lib/welcome-to-programming/just-enough/javascript/lib/evaluating/run/vite.sandbox.config.ts
+npx vite --config src/lib/welcome-to-programming/just-enough/javascript/lib/evaluating/intercept/vite.sandbox.config.ts
 ```
 
 Then open `http://localhost:5173/sandbox.html`.

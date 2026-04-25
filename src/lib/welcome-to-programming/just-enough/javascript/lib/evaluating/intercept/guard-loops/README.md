@@ -1,6 +1,6 @@
 # guard-loops
 
-Loop-guard injection for the run engine. Caps learner-code iteration counts on
+Loop-guard injection for the intercept engine. Caps learner-code iteration counts on
 `while`, `for`, `do-while`, and `for-of` loops, throwing `RangeError` when a
 loop exceeds its limit.
 
@@ -102,7 +102,7 @@ ASI-relied cases.
 
 ### Input precondition
 
-Upstream, `run.ts` format-gates source through `checkFormat` before
+Upstream, `intercept.ts` format-gates source through `checkFormat` before
 invoking this module. The format gate runs through recast's `prettyPrint`,
 which emits explicit semicolons after `while (cond)` tails. In practice
 all production inputs to this module have explicit `;`; the ASI case is a
@@ -243,6 +243,6 @@ Test harnesses running transformed code outside the Worker (via
 
 - [types.ts](./types.ts) — `GuardResult`, `LoopType`
 - [tests/](./tests/) — unit tests (ZOMBIES + Task B edge cases per loop type)
-- [../README.md](../README.md) — parent: run engine
+- [../README.md](../README.md) — parent: intercept engine
 - [DOCS.md](./DOCS.md) — architecture: execution phases and structural
   constraints

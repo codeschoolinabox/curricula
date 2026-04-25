@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<title>Run Lens Sandbox — IO Mocks</title>
+		<title>Intercept Lens Sandbox — IO Mocks</title>
 		<style>
 			* {
 				box-sizing: border-box;
@@ -226,7 +226,7 @@
 		</style>
 	</head>
 	<body>
-		<h1>Run Lens Sandbox — IO Mocks</h1>
+		<h1>Intercept Lens Sandbox — IO Mocks</h1>
 		<p class="note">
 			Runs code in a Web Worker with trapped globals. Toggle each IO hook
 			between <strong>native</strong> (browser built-in) and
@@ -378,7 +378,7 @@ console.error('three');"
 		</div>
 
 		<script type="module">
-			import createRunGenerator from './run.ts';
+			import createInterceptGenerator from './intercept.ts';
 			import format from '../../formatting/format.ts';
 			import guardLoops from './guard-loops/guard-loops.ts';
 
@@ -641,8 +641,8 @@ console.error('three');"
 			// button sets this flag and resolves any pending step-wait; the
 			// for-await loop checks it at the top of each iteration and
 			// `break`s. That `break` routes through the .return interceptor
-			// in run.ts — body() reaches its natural buildResult, the
-			// RunResult is settled, replay works, [run result] always logs.
+			// in intercept.ts — body() reaches its natural buildResult, the
+			// InterceptResult is settled, replay works, [run result] always logs.
 			// No currentGen-as-identity sentinel, no gen.cancel() call; the
 			// engine's contract carries the weight.
 			let userBroke = false;
@@ -688,7 +688,7 @@ console.error('three');"
 					io,
 				};
 				console.log(runConfig);
-				const gen = createRunGenerator(codeEl.value, runConfig);
+				const gen = createInterceptGenerator(codeEl.value, runConfig);
 
 				let eventCount = 0;
 				try {
@@ -718,9 +718,9 @@ console.error('three');"
 								);
 								if (!correct && failOnWrongCheckbox.checked) {
 									// Mark fail with structured reason BEFORE break: the
-									// break triggers run.ts's .return interceptor, but
+									// break triggers intercept.ts's .return interceptor, but
 									// terminationCause is first-write-wins, so the
-									// settled RunResult is outcome:'fail' (with reason)
+									// settled InterceptResult is outcome:'fail' (with reason)
 									// rather than 'cancel'.
 									gen.fail({
 										kind: 'wrong-prediction',
@@ -744,7 +744,7 @@ console.error('three');"
 					}
 					// gen is settled whether we exited via break (routed through
 					// the .return interceptor) or natural completion. Fetch the
-					// cached RunResult — always resolves, never pending.
+					// cached InterceptResult — always resolves, never pending.
 					const result = await gen;
 					statusEl.textContent = userBroke
 						? 'cancelled'
@@ -766,9 +766,9 @@ console.error('three');"
 			cancelBtn.addEventListener('click', () => {
 				// Mark userBroke so the next for-await iteration (or the
 				// pending step-wait resolution below) breaks out. The
-				// break routes through run.ts's .return interceptor: body()
+				// break routes through intercept.ts's .return interceptor: body()
 				// reaches buildResult, {event:'cancel'} appended to logs,
-				// RunResult settled and cached for replay. No engine-level
+				// InterceptResult settled and cached for replay. No engine-level
 				// cancel() call needed — the contract carries it.
 				userBroke = true;
 				// Resolve any pending step-wait so the loop unblocks and

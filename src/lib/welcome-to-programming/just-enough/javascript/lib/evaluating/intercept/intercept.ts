@@ -7,13 +7,13 @@
  *   1. Cancel fast-path
  *   2. Parse + JeJ allow-list validation
  *   3. Format check
- * Any gate failure returns an immediate error RunResult. See
+ * Any gate failure returns an immediate error InterceptResult. See
  * `README.md` § Lazy startup pipeline and `DOCS.md` § Architectural
  * Sketch for the full contract.
  *
- * Returns an async generator that yields RunEvent objects one at a time,
+ * Returns an async generator that yields InterceptEvent objects one at a time,
  * pausing the Worker between events via SharedArrayBuffer. The generator
- * returns a RunResult when execution completes.
+ * returns a InterceptResult when execution completes.
  *
  * See DOCS.md § SAB pause protocol for the pause/resume mechanism.
  * See DOCS.md § Resolved IO table for the IO mock resolution model.
@@ -26,15 +26,15 @@ import validate from '../../validating/validate.js';
 
 import type {
 	ConsoleMethod,
-	RunEvent,
+	InterceptEvent,
 	ErrorEvent as RunErrorEvent,
 } from '../shared/types.js';
-import type { RunResult } from '../../../api/types.js';
+import type { InterceptResult } from '../../../api/types.js';
 import type {
 	IoMocks,
 	IoRequestMessage,
-	RunHandle,
-	RunOptions,
+	InterceptHandle,
+	InterceptOptions,
 	WorkerOutbound,
 } from './types.js';
 
@@ -172,7 +172,7 @@ function makeInternalError(err: unknown): RunErrorEvent {
  * @param code - JavaScript source to execute (assumed valid — no
  *   parsing or validation happens here)
  * @param options - Optional: seconds (default 5), iterations, io mocks
- * @returns A `RunHandle` — an AsyncGenerator augmented with
+ * @returns A `InterceptHandle` — an AsyncGenerator augmented with
  *   `.cancel()`, `.result` (memoized Promise), and `.then()`
  *   (PromiseLike).
  *
@@ -207,7 +207,7 @@ function makeInternalError(err: unknown): RunErrorEvent {
  * **Cancellation.** `.cancel()` sets `terminationCause` and unsticks
  * any pending `await dequeue()`. The main loop breaks cleanly,
  * terminates the Worker in its finally block, and returns a
- * `RunResult` with `outcome: 'cancel'`. Logs stay pure (no
+ * `InterceptResult` with `outcome: 'cancel'`. Logs stay pure (no
  * synthetic cancel marker appended). No exception is thrown.
  * Idempotent and first-write-wins — safe to call any number of
  * times, at any phase.
@@ -241,10 +241,10 @@ function makeInternalError(err: unknown): RunErrorEvent {
  * learners can examine steps and consumers can run async UIs without
  * consuming execution time.
  */
-function createRunGenerator(
+function createInterceptGenerator(
 	code: string,
-	options?: RunOptions,
-): RunHandle {
+	options?: InterceptOptions,
+): InterceptHandle {
 	// Queue + cancel plumbing — lives in the outer closure so cancel()
 	// can reach wakeDequeue regardless of where the generator body is
 	// suspended (before first iterate, mid-await, or mid-yield).
@@ -314,7 +314,7 @@ function createRunGenerator(
 		wakeDequeue();
 	}
 
-	async function* body(): AsyncGenerator<RunEvent, RunResult> {
+	async function* body(): AsyncGenerator<InterceptEvent, InterceptResult> {
 		const maxSeconds = options?.seconds ?? 5;
 		const maxIterations = options?.iterations;
 		const resolvedIo = buildResolvedIo(options?.io);
@@ -345,7 +345,7 @@ function createRunGenerator(
 		try {
 			const validation = validate(code);
 			if (!validation.ok) {
-				return validation as RunResult;
+				return validation as InterceptResult;
 			}
 			const { formatted } = checkFormat(code);
 			if (!formatted) {
@@ -530,7 +530,7 @@ function createRunGenerator(
 		writePauseEngaged(views);
 		startTimeout();
 
-		const logs: RunEvent[] = [];
+		const logs: InterceptEvent[] = [];
 
 		try {
 			while (true) {
@@ -659,7 +659,7 @@ function createRunGenerator(
 
 	const gen = body();
 
-	// Replay support. Every path through which the RunResult emerges
+	// Replay support. Every path through which the InterceptResult emerges
 	// goes through gen.next() returning {done:true, value}; we wrap
 	// it once here to capture the settled value for replay. The
 	// replayed event refs come from `value.logs` — the same array
@@ -667,12 +667,12 @@ function createRunGenerator(
 	// buildResult. No clone; live and replay consumers see identical
 	// event references. See DOCS.md § Replay / re-iteration.
 	let isDone = false;
-	let settledResult: RunResult | null = null;
+	let settledResult: InterceptResult | null = null;
 	const origNext = gen.next.bind(gen);
 	Object.defineProperty(gen, 'next', {
 		value: async function interceptingNext(
 			...args: Parameters<typeof origNext>
-		): Promise<IteratorResult<RunEvent, RunResult>> {
+		): Promise<IteratorResult<InterceptEvent, InterceptResult>> {
 			// WHY the isDone short-circuit: after for-await-break,
 			// interceptingReturn drove the body to completion and captured
 			// settledResult. The underlying AsyncGenerator is now in
@@ -691,7 +691,7 @@ function createRunGenerator(
 			// undefined — interceptingReturn captures it authoritatively.
 			if (res.done && res.value !== undefined) {
 				isDone = true;
-				settledResult = res.value as RunResult;
+				settledResult = res.value as InterceptResult;
 			}
 			return res;
 		},
@@ -699,7 +699,7 @@ function createRunGenerator(
 		configurable: false,
 		enumerable: false,
 	});
-	// Intercept gen.return so for-await-break settles the RunResult
+	// Intercept gen.return so for-await-break settles the InterceptResult
 	// via the existing cancel path. Consumers who `break` out of a
 	// live `for await (const e of gen)` get the same settled shape
 	// as explicit `.cancel()` — outcome: 'cancel' on the result,
@@ -707,7 +707,7 @@ function createRunGenerator(
 	// DOCS.md § Replay and § Unified termination protocol.
 	//
 	// Invariants (from AR):
-	// - Termination metadata (cancel/fail) lives on the RunResult as
+	// - Termination metadata (cancel/fail) lives on the InterceptResult as
 	//   `outcome` + optional `reason`. Logs are pure worker events —
 	//   no synthetic termination marker is pushed anywhere.
 	// - Drive via origNext, never origReturn. Native .return() aborts
@@ -715,11 +715,11 @@ function createRunGenerator(
 	// - Short-circuit on isDone per ECMA-262 §27.6.3.3.
 	Object.defineProperty(gen, 'return', {
 		value: async function interceptingReturn(
-			value?: RunResult,
-		): Promise<IteratorResult<RunEvent, RunResult>> {
+			value?: InterceptResult,
+		): Promise<IteratorResult<InterceptEvent, InterceptResult>> {
 			if (isDone) {
 				return {
-					value: settledResult ?? (value as RunResult),
+					value: settledResult ?? (value as InterceptResult),
 					done: true,
 				};
 			}
@@ -728,7 +728,7 @@ function createRunGenerator(
 				const res = await origNext(undefined);
 				if (res.done && res.value !== undefined) {
 					isDone = true;
-					settledResult = res.value as RunResult;
+					settledResult = res.value as InterceptResult;
 					break;
 				}
 			}
@@ -742,8 +742,8 @@ function createRunGenerator(
 	// Memoized .result Promise. Lazy: first access drives the
 	// generator to completion. Subsequent accesses return the same
 	// Promise — safe to call `.result` or `await handle` repeatedly.
-	let resultPromise: Promise<RunResult> | null = null;
-	function getResult(): Promise<RunResult> {
+	let resultPromise: Promise<InterceptResult> | null = null;
+	function getResult(): Promise<InterceptResult> {
 		if (resultPromise === null) {
 			resultPromise = (async function drain() {
 				while (true) {
@@ -755,7 +755,7 @@ function createRunGenerator(
 		return resultPromise;
 	}
 
-	// WHY defineProperty over Object.assign: the RunHandle type marks
+	// WHY defineProperty over Object.assign: the InterceptHandle type marks
 	// cancel/result as `readonly`. Object.assign creates plain writable
 	// properties, so consumers could clobber them without a type error.
 	// defineProperty with writable:false + configurable:false makes the
@@ -781,9 +781,9 @@ function createRunGenerator(
 	// `Object.keys(handle)` shouldn't include `then`. Also prevents
 	// accidental serialization (JSON.stringify) from including it.
 	Object.defineProperty(gen, 'then', {
-		value: function then<TResult1 = RunResult, TResult2 = never>(
+		value: function then<TResult1 = InterceptResult, TResult2 = never>(
 			onFulfilled?:
-				| ((value: RunResult) => TResult1 | PromiseLike<TResult1>)
+				| ((value: InterceptResult) => TResult1 | PromiseLike<TResult1>)
 				| null,
 			onRejected?:
 				| ((reason: unknown) => TResult2 | PromiseLike<TResult2>)
@@ -800,17 +800,17 @@ function createRunGenerator(
 	// without infinite recursion.
 	const liveAsyncIterator = gen[Symbol.asyncIterator].bind(gen);
 	Object.defineProperty(gen, Symbol.asyncIterator, {
-		value: function asyncIterator(): AsyncIterator<RunEvent, RunResult> {
+		value: function asyncIterator(): AsyncIterator<InterceptEvent, InterceptResult> {
 			// In-progress: delegate to the raw AsyncGenerator (which
 			// returns `this`, so concurrent for-awaits silently split
 			// via .next() serialization — DOCS.md § Replay).
 			if (!isDone || settledResult === null) return liveAsyncIterator();
 			// Settled: fresh iterator replays the frozen log refs.
 			const settled = settledResult;
-			const logs: readonly RunEvent[] = settled.logs ?? [];
+			const logs: readonly InterceptEvent[] = settled.logs ?? [];
 			let index = 0;
 			return {
-				next(): Promise<IteratorResult<RunEvent, RunResult>> {
+				next(): Promise<IteratorResult<InterceptEvent, InterceptResult>> {
 					if (index < logs.length) {
 						return Promise.resolve({ value: logs[index++]!, done: false });
 					}
@@ -822,7 +822,7 @@ function createRunGenerator(
 		configurable: false,
 		enumerable: false,
 	});
-	return gen as unknown as RunHandle;
+	return gen as unknown as InterceptHandle;
 }
 
 // --- Helpers ---
@@ -859,7 +859,7 @@ async function handleIoRequest(
 }
 
 /**
- * Builds a RunResult from the collected event logs + terminationCause.
+ * Builds a InterceptResult from the collected event logs + terminationCause.
  *
  * @remarks Sets the `outcome` field from:
  * - terminationCause is 'cancel' → `cancel` (consumer stopped)
@@ -874,11 +874,11 @@ async function handleIoRequest(
  * marker is appended. The cancel/fail signal lives on outcome + reason.
  */
 function buildResult(
-	logs: readonly RunEvent[],
+	logs: readonly InterceptEvent[],
 	maxSeconds: number,
 	terminationCause: TerminationCause | null,
 	maxIterations?: number,
-): RunResult {
+): InterceptResult {
 	if (terminationCause?.kind === 'cancel') {
 		return deepFreezeInPlace({ ok: true, outcome: 'cancel' as const, logs });
 	}
@@ -953,7 +953,7 @@ function buildResult(
 /**
  * Finds the last error event in the log array.
  */
-function findErrorEvent(logs: readonly RunEvent[]): RunErrorEvent | undefined {
+function findErrorEvent(logs: readonly InterceptEvent[]): RunErrorEvent | undefined {
 	for (let i = logs.length - 1; i >= 0; i--) {
 		const entry = logs[i];
 		if (entry.event === 'error') {
@@ -963,4 +963,4 @@ function findErrorEvent(logs: readonly RunEvent[]): RunErrorEvent | undefined {
 	return undefined;
 }
 
-export default createRunGenerator;
+export default createInterceptGenerator;

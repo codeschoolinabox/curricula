@@ -67,7 +67,7 @@ flowchart TD
 The terminal node above carries the explicit generic
 `BaseResult<ParseResultError | FormattingResultError>` to make the
 composition seam visible. The `E` type parameter is what execution
-wrappers widen — `lib/evaluating/run/run.ts` returns
+wrappers widen — `lib/evaluating/intercept/intercept.ts` returns
 `BaseResult<ResultError> & { logs?: ... }`, supplying its own
 broader error union from `api/types.ts`. This module always returns
 the narrow default.

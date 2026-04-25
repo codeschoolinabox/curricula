@@ -1,19 +1,19 @@
 /**
- * @file Worker message protocol types and IO mock surface for the run action.
+ * @file Worker message protocol types and IO mock surface for the intercept action.
  *
  * Defines the two-step message protocol (setup → execute) between the
  * main thread and the execution worker, the SharedArrayBuffer layout
  * for synchronous I/O (prompt/confirm/alert), and the consumer-facing
- * IO mock types (IoMocks, IoConsole, RunOptions). Also exports the
- * public `RunHandle` — the return type of `createRunGenerator`.
+ * IO mock types (IoMocks, IoConsole, InterceptOptions). Also exports the
+ * public `InterceptHandle` — the return type of `createInterceptGenerator`.
  */
 
 import type {
 	ConsoleMethod,
 	Execution,
-	RunEvent,
+	InterceptEvent,
 } from '../shared/types.js';
-import type { RunResult } from '../../../api/types.js';
+import type { InterceptResult } from '../../../api/types.js';
 
 // ─── IO mock surface ──────────────────────────────────────────
 
@@ -63,7 +63,7 @@ type IoMocks = {
 };
 
 /**
- * Options accepted by createRunGenerator.
+ * Options accepted by createInterceptGenerator.
  *
  * Extends EngineConfig (seconds, iterations) with the IO mock surface.
  *
@@ -77,7 +77,7 @@ type IoMocks = {
  * as invalid and falls through to the no-guard path; callers should
  * validate input upstream if stricter semantics are required.
  */
-type RunOptions = {
+type InterceptOptions = {
 	readonly seconds?: number;
 	readonly iterations?: number;
 	readonly io?: IoMocks;
@@ -86,14 +86,14 @@ type RunOptions = {
 // ─── Public return type ───────────────────────────────────────
 
 /**
- * The handle returned by `createRunGenerator`.
+ * The handle returned by `createInterceptGenerator`.
  *
  * @remarks Simultaneously satisfies three interfaces:
  *
- * - `AsyncGenerator<RunEvent, RunResult>` — the raw iteration
+ * - `AsyncGenerator<InterceptEvent, InterceptResult>` — the raw iteration
  *   surface (`.next()`, `.return()`, `.throw()`) used by
  *   fine-grained consumers and the internal test suite.
- * - `Execution<RunEvent, RunResult>` — from `../shared/types.ts`.
+ * - `Execution<InterceptEvent, InterceptResult>` — from `../shared/types.ts`.
  *   Provides `.cancel()`, `.result`, and PromiseLike `.then()`.
  *
  * The `Execution` contract is a strict subset of what's exposed —
@@ -110,11 +110,11 @@ type RunOptions = {
  * 3. Cancel — `handle.cancel()` at any point.
  *
  * Mode 1 and Mode 2 must not be mixed on the same handle — see
- * JSDoc on `createRunGenerator` for why.
+ * JSDoc on `createInterceptGenerator` for why.
  */
-type RunHandle =
-	AsyncGenerator<RunEvent, RunResult> &
-	Execution<RunEvent, RunResult> & {
+type InterceptHandle =
+	AsyncGenerator<InterceptEvent, InterceptResult> &
+	Execution<InterceptEvent, InterceptResult> & {
 		/**
 		 * Stop the run and attach a structured rejection payload.
 		 *
@@ -179,7 +179,7 @@ type WorkerOutbound = EventMessage | IoRequestMessage | CompleteMessage;
  */
 type EventMessage = {
 	readonly type: 'event';
-	readonly event: RunEvent;
+	readonly event: InterceptEvent;
 };
 
 /**
@@ -212,8 +212,8 @@ type CompleteMessage = {
 export type {
 	IoConsole,
 	IoMocks,
-	RunOptions,
-	RunHandle,
+	InterceptOptions,
+	InterceptHandle,
 	WorkerInbound,
 	WorkerOutbound,
 	SetupMessage,

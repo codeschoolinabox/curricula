@@ -12,7 +12,7 @@ flowchart TD
     A[validated formatted source<br/>+ engine config] --> B{engine selected by consumer}
     B -->|run config| C[run pipeline:<br/>guard loops, spawn Worker, stream events]
     B -->|trace config| D[trace pipeline:<br/>Aran-instrument, spawn Worker, stream entries]
-    C -->|live RunEvent stream<br/>+ logs accumulation| E[frozen RunResult<br/>outcome, optional reason, logs]
+    C -->|live InterceptEvent stream<br/>+ logs accumulation| E[frozen InterceptResult<br/>outcome, optional reason, logs]
     D -->|live TraceEvent stream<br/>+ logs accumulation| F[frozen TraceResult<br/>code, ast, options, logs]
     E -.->|replay re-iteration<br/>same event refs| E
     F -.->|replay re-iteration<br/>same event refs| F
@@ -34,7 +34,7 @@ isolation model and output type:
 
 - **run** uses a Web Worker because it needs timeout safety (`worker.terminate()`)
   and synchronous I/O traps (SAB+Atomics for `prompt`/`confirm`/`alert`). Yields
-  `RunEvent` objects — the consumer builds UI from logged events.
+  `InterceptEvent` objects — the consumer builds UI from logged events.
 
 - **debug** uses an iframe because `debugger` statements only pause execution when
   DevTools is open on the main thread — workers have no DevTools access. Yields
@@ -70,7 +70,7 @@ Worker to pause.
 
 ## Why no unified "execute" function
 
-The output types are fundamentally different (`RunEvent` vs `AranStep` vs
+The output types are fundamentally different (`InterceptEvent` vs `AranStep` vs
 `DebugEvent`). A unified function would require either a discriminated union that
 consumers must narrow, or runtime type checks — both worse than separate
 well-typed functions.
@@ -80,7 +80,7 @@ well-typed functions.
 `shared/` provides infrastructure used across all engines:
 
 - **`types.ts`** — `Execution`, `EngineConfig`, `DebugEvent`,
-  `RunEvent`, action configs
+  `InterceptEvent`, action configs
 - **`create-execution.ts`** — factory wrapping async generators into `Execution`
   objects (PromiseLike, re-iteration, cancel)
 - **`guard-loops/`** — loop guard injection for while loops (used by run with

@@ -49,7 +49,7 @@ Alternatives considered:
 ## Why Execution is PromiseLike
 
 `Execution` implements `.then()` by delegating to `.result`. This means
-`await run(code, { seconds: 5 })` resolves to the same `RunResult` as today's
+`await run(code, { seconds: 5 })` resolves to the same `InterceptResult` as today's
 `await run(code, 5)`. Existing consumers work unchanged — no silent breakage.
 
 The `.result` Promise is created eagerly. If nobody iterates the generator,
@@ -166,4 +166,4 @@ engines. Each engine builds its own async generator and passes it to the factory
 - Does not execute code — that's the individual engine's job
 - Only provides shared infrastructure (types, Execution factory, SAB protocol)
 - Does NOT own loop-guard injection — that lives in `run/guard-loops/`
-  (the run engine is the sole consumer; it was never genuinely shared)
+  (the intercept engine is the sole consumer; it was never genuinely shared)

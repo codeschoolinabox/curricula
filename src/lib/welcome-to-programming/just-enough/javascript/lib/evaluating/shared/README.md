@@ -8,7 +8,7 @@ protocol.
 
 | Path                  | Purpose                                                     |
 | --------------------- | ----------------------------------------------------------- |
-| `types.ts`            | `Execution`, `EngineConfig`, `TraceConfig`, `RunEvent`      |
+| `types.ts`            | `Execution`, `EngineConfig`, `TraceConfig`, `InterceptEvent`      |
 | `create-execution.ts` | Factory: wraps an AsyncGenerator into an `Execution` object |
 
 ## Execution type
@@ -58,6 +58,6 @@ type TraceConfig = EngineConfig & {
 ## Navigation
 
 - [DOCS.md](./DOCS.md) — architecture decisions and design rationale
-- [../run/README.md](../run/README.md) — run engine (owns `guard-loops/`)
+- [../intercept/README.md](../intercept/README.md) — intercept engine (owns `guard-loops/`)
 - [../trace/README.md](../trace/README.md) — trace engine
 - [../debug/README.md](../debug/README.md) — debug engine

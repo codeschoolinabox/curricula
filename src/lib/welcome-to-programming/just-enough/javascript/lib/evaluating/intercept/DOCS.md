@@ -2,16 +2,16 @@
 
 ## Data flow
 
-What the data looks like at each phase of `createRunGenerator`'s
+What the data looks like at each phase of `createInterceptGenerator`'s
 pipeline, and what transforms one shape into the next.
 
 ```mermaid
 flowchart TD
     A[raw source + options] -->|validate, throws on parse error| B{validation result}
-    B -->|rejected| RJ[ok:false RunResult<br/>outcome: error]
+    B -->|rejected| RJ[ok:false InterceptResult<br/>outcome: error]
     B -->|passed| C[validated source]
     C -->|checkFormat, pure| D{format check}
-    D -->|unformatted| RF[ok:false RunResult<br/>outcome: error]
+    D -->|unformatted| RF[ok:false InterceptResult<br/>outcome: error]
     D -->|formatted| E[formatted source]
     E -->|inject loop guards, pure<br/>only when iterations is set| F[execution-ready source]
     F -->|spawn Worker, send execute message| G[live event stream<br/>via SAB pause protocol]
@@ -20,7 +20,7 @@ flowchart TD
     I -.->|.cancel / .fail / break| J[terminationCause set]
     G -->|natural completion / error / timeout| K[terminated worker]
     J --> K
-    K -->|buildResult, freeze in place| L[frozen RunResult<br/>ok + outcome + reason? + logs]
+    K -->|buildResult, freeze in place| L[frozen InterceptResult<br/>ok + outcome + reason? + logs]
     L -.->|re-iterate after settle| M[replayed logs<br/>same references]
 ```
 
@@ -34,7 +34,7 @@ states, so they don't appear as edges.
 
 ## Why an AsyncGenerator
 
-The run engine needs to produce events incrementally for live UI rendering while
+The intercept engine needs to produce events incrementally for live UI rendering while
 supporting batch consumption for backward compatibility. An async generator lets
 the consumer pull events one at a time (`for await`) or drain all at once
 (`await`). The returned handle itself is `PromiseLike` — no external wrapper is
@@ -46,16 +46,16 @@ correct order relative to I/O — log events appear before prompt dialogs.
 
 ## Architectural Sketch
 
-> Structural contract for the run engine. The implementation in this
+> Structural contract for the intercept engine. The implementation in this
 > directory is held against this sketch. Domain terms only; no
 > function names, no variable names, no pseudocode.
 
 This sketch captures four invariants the engine guarantees: the
 unified pause protocol (shared with trace), native replay on the
-RunHandle, the timer-vs-yield interaction that makes "stepping
+InterceptHandle, the timer-vs-yield interaction that makes "stepping
 time does not count" actually hold, and the unified termination
 protocol (cancel / fail / timeout / worker-error all funnel
-through one cause variable; metadata lives on the RunResult, never
+through one cause variable; metadata lives on the InterceptResult, never
 in logs). The § sections below ("Why an AsyncGenerator" onward)
 give the "why" behind specific design decisions — tradeoffs,
 alternatives considered, constraints — and use the same ubiquitous
@@ -169,8 +169,8 @@ Worker and ending when the consumer's next pull resumes execution:
 Consumer-observable invariant: every path that ends a run (natural
 completion, cancel via `.cancel()`, break out of a live `for await`,
 wall-clock timeout, guarded-loop iteration-limit, runtime error)
-resolves to a settled RunResult whose `outcome` field classifies the
-cause. The RunResult is cached for replay. The Worker is torn down
+resolves to a settled InterceptResult whose `outcome` field classifies the
+cause. The InterceptResult is cached for replay. The Worker is torn down
 in every case.
 
 **Execution phases**:
@@ -187,7 +187,7 @@ in every case.
 3. **Dispatch (main, sync, top of the while-loop)** — the body's
    main loop reads the cause on each iteration. Branch on kind:
    - `cancel` or `fail` → just break. Termination metadata goes
-     on the RunResult via buildResult; no synthetic event is
+     on the InterceptResult via buildResult; no synthetic event is
      pushed to logs.
    - `timeout` → push TimeoutError into logs, yield it, break.
    - `worker-error` → push error into logs, break.
@@ -222,7 +222,7 @@ write is the single source of truth.
 
 **Structural constraints**:
 
-- Termination metadata (cancel, fail) lives on the RunResult as
+- Termination metadata (cancel, fail) lives on the InterceptResult as
   `outcome` + optional `reason`. It is NEVER pushed into logs as a
   synthetic event. Logs are strictly worker-emitted — what the
   program did. This is the core invariant that separates "program
@@ -237,7 +237,7 @@ write is the single source of truth.
 - The `.return` / `.next` interceptors short-circuit on `isDone`
   per ECMA-262 §27.6.3.3.
 - `deepFreezeInPlace` freezes logs recursively; no post-push event
-  mutation. The outcome field on the RunResult is frozen with the
+  mutation. The outcome field on the InterceptResult is frozen with the
   rest; the `reason` object is frozen in place if it's a plain
   object (consumers passing primitives see no change).
 
@@ -251,10 +251,10 @@ write is the single source of truth.
   `.fail(reason)` method instead — see § Fail in the README and
   the `fail` rows in this section's precedence table.
 - Additive outcome enrichment for trace/debug. `TraceOutcome` and
-  `DebugOutcome` are already typed (subsets of `RunOutcome`) but
+  `DebugOutcome` are already typed (subsets of `InterceptOutcome`) but
   their engines don't yet set the field. Migration is additive.
 
-### Replay / re-iteration on RunHandle
+### Replay / re-iteration on InterceptHandle
 
 Consumer-observable invariant: after a run completes (successfully,
 via a thrown error, via cancel, or via fail), a second `for await`
@@ -276,7 +276,7 @@ replayed stream — it's on `result.outcome` and `result.reason`.
 3. **Yield (main, async)** — The consumer receives the reference.
 4. **Completion (main, sync)** — When the main loop exits (normal
    completion, timeout, error, cancel, or fail), buildResult
-   constructs the RunResult with `outcome` (and optional `reason`
+   constructs the InterceptResult with `outcome` (and optional `reason`
    for fail) and freezes the whole structure in place. No clone;
    the log references are the exact references the consumer saw
    during yield.
@@ -324,11 +324,11 @@ replayed stream — it's on `result.outcome` and `result.reason`.
   serialize-and-split behavior is accepted as the failure mode.
 
 **For-await-break is supported and equivalent to `.cancel()`**. The
-RunHandle's `gen.return()` interceptor routes the runtime's implicit
+InterceptHandle's `gen.return()` interceptor routes the runtime's implicit
 call (triggered by `break` inside a live `for await`) through the
 same cancel path as explicit `.cancel()` — body() reaches its
 natural `return buildResult(...)` with `terminationCause.kind ===
-'cancel'`, the settled RunResult is cached for replay with
+'cancel'`, the settled InterceptResult is cached for replay with
 `outcome: 'cancel'`. Consumers can choose `break` or `.cancel()`
 interchangeably; identity-stable replay of worker-emitted events
 holds for both.
@@ -418,7 +418,7 @@ Parallel phases for IO-callback path (already in place, preserved):
 
 ## Why body-injection via string offsets
 
-When `options.iterations` is set to a finite value, the run engine injects loop
+When `options.iterations` is set to a finite value, the intercept engine injects loop
 guards via `guard-loops/guard-loops.ts`. The technique is **body-injection**: a
 guard statement is spliced immediately after the loop body's opening `{`, and a
 counter-reset statement is spliced immediately after the closing `}` (or after
@@ -638,7 +638,7 @@ Throwing exceptions forces consumers into try-catch patterns and loses partial
 results (e.g., logs before the error). Returning errors as events in the array
 means:
 
-- Consumer always gets `RunEvent[]` back
+- Consumer always gets `InterceptEvent[]` back
 - Partial results (logs before a crash) are preserved
 - Construction errors and runtime errors use the same interface
 - `phase: 'creation'` vs `'execution'` distinguishes when the error occurred
@@ -671,7 +671,7 @@ to the user code offset. The `new Function` wrapper with `"use strict"` prefix
 means user code starts at line 2 — the extraction logic subtracts 1.
 
 This is browser-dependent. Chrome, Firefox, and Safari format `Error.stack`
-differently. The line number in `RunEvent` is best-effort — correct in common
+differently. The line number in `InterceptEvent` is best-effort — correct in common
 cases, possibly wrong for edge cases like multi-line expressions.
 
 ### scriptMode

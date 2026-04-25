@@ -1,5 +1,5 @@
 /**
- * Types for the run engine's loop-guard module.
+ * Types for the intercept engine's loop-guard module.
  *
  * @see ./README.md § Glossary for the ubiquitous language.
  * @see ./DOCS.md for the architectural sketch.

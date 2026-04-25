@@ -1,5 +1,5 @@
 /**
- * @file Body-injection loop guard for the run engine.
+ * @file Body-injection loop guard for the intercept engine.
  *
  * Prevents infinite loops by injecting iteration checks directly after
  * the opening `{` of each loop body, and counter resets after the
