@@ -2,26 +2,34 @@
 
 ## Data flow
 
-Mixed abstraction — this directory holds cross-engine primitives
-(shared types, the SAB pause protocol) consumed by both `../run` and
-`../trace`. Both engines sit on top of the same protocol; this
-directory is the protocol's vocabulary.
+This module hosts cross-engine primitives — the `Execution` contract
+type and the SAB pause protocol — that mediate the data flow between
+the Worker thread (where learner code runs) and the main thread
+(where the consumer pulls events). The diagram below shows the
+shape of the data as it crosses the worker↔main boundary on a
+single event cycle.
 
 ```mermaid
 flowchart TD
-    A[engine builds AsyncGenerator] -->|uses| T[types.ts / Execution contract]
-    A -->|uses| S[SAB protocol<br/>PAUSE + EVENT_READY]
-    S -->|main: writePauseEngaged / writeResumeSignal / clearEventReady| W[Worker blocks on Atomics.wait]
-    W -->|Worker sets PAUSED + EVENT_READY, postMessage| S
-    S -->|timer reads EVENT_READY| TG[timer handler]
-    TG -->|reschedule if paused-with-event| TG
-    TG -->|exhaustion → timedOut| A
-    A -->|frozen Result| C[consumer]
+    A[learner code running in Worker] -->|trap fires<br/>console.log / prompt / etc| B[event payload<br/>+ PAUSED=1, EVENT_READY=1 in SAB]
+    B -->|postMessage + Atomics.wait| C[Worker frozen on pause flag]
+    B -->|main thread dequeues message| D[event in main-thread queue]
+    D -->|main loop pulls| E[event observable to consumer]
+    E -->|consumer pulls next| F[clearEventReady + writeResumeSignal]
+    F -->|Atomics.notify wakes Worker| A
+    B -.->|timer fires during pause window| G[timer handler reads EVENT_READY]
+    G -->|EVENT_READY=1 + budget left| G2[reschedule]
+    G -->|EVENT_READY=0 or budget exhausted| H[timedOut signal]
 ```
 
-Run and trace both drive this shared protocol identically (unified
-pause protocol). Engine-specific differences live in the per-engine
-DOCS.md.
+The data of interest at each phase: a learner program runs in the
+Worker; trap calls become event payloads that cross to the main
+thread via `postMessage`; the main thread surfaces them to the
+consumer; the consumer's pull triggers a resume that lets the
+Worker produce the next event. The SAB flags are the data states
+that the timer handler reads to decide reschedule-vs-timeout. Run
+and trace use this same flow — engine-specific behavior (event
+shapes, replay) lives in their per-engine DOCS.md.
 
 ## Why one AsyncGenerator per engine
 

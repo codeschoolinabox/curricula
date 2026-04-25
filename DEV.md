@@ -701,8 +701,7 @@ function createResult(steps, meta) {
 
 ### Directory Documentation Convention
 
-Every source directory under `src/` has a `README.md`. Directories with
-non-obvious architecture or key design decisions also have a `DOCS.md`:
+Every source directory under `src/` has both a `README.md` and a `DOCS.md`:
 
 | Content                                             | Where                      | Audience     |
 | --------------------------------------------------- | -------------------------- | ------------ |
@@ -714,11 +713,10 @@ non-obvious architecture or key design decisions also have a `DOCS.md`:
 
 **Rules:**
 
-- Every directory has a `README.md`
-- Directories with non-obvious architecture or key design decisions also have a
-  `DOCS.md`
+- Every directory has a `README.md` AND a `DOCS.md`
 - `DOCS.md` captures the "why" — tradeoffs, alternatives considered,
-  constraints. Keep it short. It is NOT an API reference — JSDoc handles that.
+  constraints, and the **data flow diagram** for this directory's abstraction
+  level. Keep it short. It is NOT an API reference — JSDoc handles that.
   Hand-maintained: fix it or delete it if it goes stale.
 - For **new modules**, DOCS.md is written in Phase 0 step 0.5 as an
   **architectural sketch**, before any implementation exists. This is the
@@ -737,13 +735,48 @@ of acceptable implementations without fixing one.
 Format constraints:
 
 - Named execution phases with input/output state described in **domain terms**
+- A **`## Data flow`** section with a Mermaid flowchart diagram at the
+  directory's abstraction level (see "Data flow diagram" below)
 - Structural constraints (what must fail loudly vs. degrade gracefully)
 - Out-of-scope concerns (explicit boundary)
 - **No function names, no variable names, no pseudocode** — if it looks like
   code, it has crossed the line into implementation. Rewrite in prose.
 - Short enough to read in 60 seconds
 
-```markdown
+**Data flow diagram** — in every `DOCS.md`, a `## Data flow` section contains a
+Mermaid flowchart depicting the **data's journey** through the module:
+
+- **Nodes are data states**, not files or types. Each node names a shape the
+  data takes at some phase of processing — `raw source string`, `validated
+  AST`, `frozen RunResult`, `event stream`, `formatted source`. Domain
+  vocabulary from the ubiquitous language in step 0.1; never code identifiers,
+  symbol names, or filenames.
+- **Edges are transformations** that produce the next state. The label names
+  the operation and its structural constraint — `parse, throws on SyntaxError`,
+  `validate, pure`, `execute in Worker, async`, `inject loop guards, pure`.
+- **Files / directories that don't transform data are invisible.** A
+  re-export, a wrapper, a delegating shim — none are nodes. If multiple files
+  cooperate on a single transformation, one edge labels it; the files are
+  inside the implementation, not on the diagram. Domain-agnostic utilities
+  (freeze, merge, clone) are also invisible.
+- **Branching / joining**: when the data takes a different shape based on
+  validation or config (e.g. parse-success vs. parse-error), use Mermaid's
+  branch syntax (`{decision} -->|yes| ...`). When two pipelines merge into
+  the same downstream state, draw both edges to the same node.
+- **Abstraction level**: the depth of detail matches the directory's place
+  in the tree. Top-level `DOCS.md` shows the user-source → final-result
+  arc with maybe 4–6 nodes. A leaf module's `DOCS.md` zooms in on the
+  intermediate shapes that module produces and consumes.
+- The diagram answers "what shape is the data in at each phase, and what
+  changes between phases" — not "what imports what." If you can answer
+  the diagram by reading the import statements, you've drawn the wrong
+  thing.
+
+The same Mermaid syntax handles linear, branching, and joining flows. Use
+whatever topology the actual data flow requires; there is no separate choice
+of format.
+
+````markdown
 ## Architectural Sketch
 
 > Written Phase 0, before implementation. The Refactor step is held against this
@@ -764,6 +797,15 @@ Format constraints:
    this is the only async phase. Input: resolved config + code string. Output:
    trace result.
 
+### Data flow
+
+```mermaid
+flowchart TD
+    A[rawOptions<br/>partial, unvalidated] -->|validate<br/>throws on malformed| B[cleanedOptions]
+    B -->|prepare<br/>pure, resolves defaults| C[resolvedConfig]
+    C -->|execute<br/>async, delegates to tracer| D[TraceResult]
+```
+
 ### Structural constraints
 
 - Tracer lookup: loud failure — no silent fallback to a default tracer
@@ -774,7 +816,24 @@ Format constraints:
 
 - Caching results (caller responsibility)
 - Selecting which tracer to use (caller provides the name)
+````
+
+**Branching example** — when flow has conditionals, joins, or parallel paths,
+the same Mermaid syntax handles it without any change of format:
+
+````markdown
+### Data flow
+
+```mermaid
+flowchart TD
+    A[userConfig] -->|resolve| B{presetSpecified?}
+    B -->|yes| C[applyPreset]
+    B -->|no| D[applyDefaults]
+    C --> E[resolvedConfig]
+    D --> E
+    E -->|validate<br/>throws on malformed| F[validatedConfig]
 ```
+````
 
 **Public function documentation:**
 
@@ -1237,6 +1296,35 @@ For each behavioral increment:
      triangulated away by the second test. If hardcoded values survive here,
      either the test suite didn't triangulate or generalization was skipped.
    - Does the code use the ubiquitous language from Phase 0?
+
+   **Data flow check** (ephemeral) — sketch the actual intra-file data flow as
+   Mermaid for your own reasoning; this is a thinking tool, not a committed
+   artifact. At each phase boundary: what enters, what exits, what is
+   transformed, added, or dropped? Is anything carried further than the phase
+   that needs it? Is any transformation redundant?
+
+   **Inter-file contract check** — verify the file's inputs and outputs match
+   what the peer `DOCS.md`'s Mermaid data flow diagram shows.
+
+   - Contract preserved → intra-file refactor is autonomous; commit.
+   - Contract changed → **flag to user before proceeding**; discuss together;
+     update DOCS.md only with approval.
+
+   **Two-tier autonomy** — the refactor boundary is mechanical, not judgment:
+
+   - **Intra-file data flow** (internal phases of a single function): refactor
+     freely. Ephemeral Mermaid reasoning is fine, not committed.
+   - **Inter-file data flow** (captured in peer `DOCS.md`): flag to user before
+     proceeding if ANY trigger fires:
+     - A file is added to or removed from the flow
+     - A file's inputs or outputs change shape
+     - A phase annotation changes (throws / pure / async)
+
+   `DOCS.md` is an architectural contract; updates require user approval.
+   Extracting an intra-file helper to a new domain-related file IS a trigger
+   (changes the set of files in the flow). Extracting to a domain-agnostic
+   utility file (freeze, merge, clone — utilities are invisible in every
+   data flow diagram) is NOT a trigger.
 
 10. **Lint checkpoint 4** — final lint on modified files. Should be clean.
 11. **Update types** — finalize based on actual implementation

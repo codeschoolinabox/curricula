@@ -2,24 +2,30 @@
 
 ## Data flow
 
-Parent-directory view — children as nodes. The `shared/` subdirectory
-hosts the unified pause protocol + Execution contract; each engine
-composes on top of it.
+What happens to the validated, formatted source after the consumer
+picks an engine. The two engines produce different result shapes
+but share the same execution-isolation pattern (Worker + SAB pause
+protocol).
 
 ```mermaid
 flowchart TD
-    A[validated source + engine config] --> D{engine choice}
-    D -->|run, async| R[run/]
-    D -->|trace, async| T[trace/]
-    R -->|RunResult with outcome| RC[consumer]
-    T -->|TraceResult with outcome| TC[consumer]
-    R -.->|Execution + SAB pause protocol| S[shared/]
-    T -.->|Execution + SAB pause protocol| S
+    A[validated formatted source<br/>+ engine config] --> B{engine selected by consumer}
+    B -->|run config| C[run pipeline:<br/>guard loops, spawn Worker, stream events]
+    B -->|trace config| D[trace pipeline:<br/>Aran-instrument, spawn Worker, stream entries]
+    C -->|live RunEvent stream<br/>+ logs accumulation| E[frozen RunResult<br/>outcome, optional reason, logs]
+    D -->|live TraceEvent stream<br/>+ logs accumulation| F[frozen TraceResult<br/>code, ast, options, logs]
+    E -.->|replay re-iteration<br/>same event refs| E
+    F -.->|replay re-iteration<br/>same event refs| F
 ```
 
-Parse/validate/format gates run before engine selection; see
-`../validating/DOCS.md` and `../formatting/DOCS.md`. Guard-loops
-lives inside `run/` (only consumer) and is invisible at this level.
+Consumers drive each engine the same way — `for await` for live
+event streaming, `await result` for batch consumption, `.cancel()`
+or for-await break to stop early. The result types diverge because
+the engines surface different domain data: run yields what the
+program *did* (console output, dialogs, errors); trace yields what
+the program *was* (AST-level execution steps). Parse / validate /
+format gates run upstream of this diagram (see `../validating/` and
+`../formatting/`).
 
 ## Why three separate engines
 

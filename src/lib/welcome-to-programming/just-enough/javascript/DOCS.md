@@ -2,34 +2,36 @@
 
 ## Data flow
 
-Top-level view — subdirectories as nodes. The package's shape is
-"public functions live in their own lib/ modules; execution engines
-in lib/evaluating/; study-lens composition (study-lenses/) is an
-orthogonal concern."
+The journey of a learner source string through the package's public
+surface, from raw input to a frozen result.
 
 ```mermaid
 flowchart TD
-    S[learner source] -->|parse| P[lib/parse/]
-    S -->|validate language| V[lib/validating/]
-    S -->|format / format-check| F[lib/formatting/]
-    S -->|run / trace, async| E[lib/evaluating/]
-    S -->|interpret errors, pure| I[lib/error-interpreting/]
-    E -->|RunResult / TraceResult with outcome| C[consumer]
-    V -->|BaseResult| C
-    P -->|ParseResult| C
-    F -->|formatted source / CheckFormatResult| C
-    SL[study-lenses/] -.->|compose transforms on source| S
+    A[raw source string] -->|parse, throws on SyntaxError| B{parse outcome}
+    B -->|fail| RP[ParseResult<br/>ok:false]
+    B -->|pass| C[parsed AST]
+    C -->|JeJ language validate, pure| D{language outcome}
+    D -->|violations| RV[BaseResult<br/>ok:false + rejections]
+    D -->|allowed| E[validated source]
+    E -->|checkFormat, pure| F{format outcome}
+    F -->|unformatted| RF[ok:false result<br/>format-rejected]
+    F -->|formatted| G[execution-ready source]
+    G -->|run, async| H[RunResult<br/>outcome + logs + optional reason]
+    G -->|trace, async| I[TraceResult<br/>outcome + logs + ast]
+    A -.->|format alone, pure| FM[formatted source<br/>tooling output]
+    A -.->|interpret error, pure| EI[learner-friendly explanation]
 ```
 
-Each subdirectory has its own `DOCS.md` with a more detailed
-flow at its abstraction level. Domain-agnostic utilities (freeze,
-clone, deep-clone) are invisible at every level — called within
-nodes, not shown between them.
+Each downstream subdirectory's `DOCS.md` zooms into its own data-
+flow at finer granularity. Tooling functions like `format()` and
+the error interpreter operate on raw source independently —
+they're help-the-learner-reach-valid-JeJ flows, not gate flows.
+Execution flows (`run`, `trace`) require already-validated,
+already-formatted JeJ; the gates produce the typed input shape they
+consume.
 
-The legacy `api/` layer was a public-surface aggregator over these
-modules. Validate/parse/format/default were migrated to lib/; only
-trace/run/debug-related types remain in api/types.ts pending the
-parallel trace-migration effort.
+`study-lenses/` composes transforms over source independently and
+sits orthogonal to this flow.
 
 ## Why this library exists
 

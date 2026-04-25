@@ -113,30 +113,22 @@ See [README.md § Architecture](./README.md#architecture) for an overview and
 #### 1. Export Conventions
 
 - **One default export per file**: Named function/const, then `export default`
-  at bottom
-- **Exception — utility/predicate modules**: Files that export multiple
-  orthogonal utility functions (e.g. `gating.ts`, `scope-stack.ts`) may use
-  named exports. The rule "one default export" applies to single-concept
-  modules (advice hooks, emit functions, pipelines). A utility module with
-  5–15 orthogonal predicates or helpers is better served by named exports —
-  a default-export wrapper object would force verbose `gating.isScopeGateOpen()`
-  call sites with no benefit.
+  at bottom. **No exceptions** — utility and predicate files follow the same
+  rule. If multiple utilities are needed, each lives in its own file and is
+  imported individually. Slightly more verbose, but consistent, simpler to
+  reason about, and better tree-shakable.
 - **No barrel files**: Import directly from source files (no `index.ts`
   re-exports except `/src/index.ts`)
 - **Always `.js` extension** in imports
 
 ```javascript
-// ✅ CORRECT — single-concept module
+// ✅ CORRECT — one default export per file
 function myFunction() { ... }
 export default myFunction;
 
-// ✅ CORRECT — utility/predicate module with multiple orthogonal exports
-export function isScopeGateOpen(...) { ... }
-export function isBindingGateOpen(...) { ... }
-
 // ❌ WRONG — inline default
 export default function() { ... }
-// ❌ WRONG — named export on a single-concept module
+// ❌ WRONG — named export
 export function myFunction() { ... }
 // ❌ WRONG — barrel import
 import { x } from './index.js';
@@ -326,16 +318,30 @@ break every line.
 
 **Rules:**
 
-- Every directory has a `README.md`
-- Directories with non-obvious architecture or key design decisions also have a
-  `DOCS.md`
+- Every directory has a `README.md` AND a `DOCS.md`
 - `DOCS.md` captures the "why" — tradeoffs, alternatives considered,
-  constraints. Keep it short. It is NOT an API reference — JSDoc handles that.
-  Hand-maintained: fix it or delete it if it goes stale.
+  constraints, and the **data flow diagram** (Mermaid flowchart) at the
+  directory's abstraction level. Keep it short. It is NOT an API reference —
+  JSDoc handles that. Hand-maintained: fix it or delete it if it goes stale.
 - For **new modules**, DOCS.md is written in Phase 0 step 0.5 as an
   **architectural sketch** — the structural target the Refactor step is held
   against. See DEV.md § Directory Documentation Convention for the required
   format and example.
+- Data flow diagrams use **Mermaid** (flowchart syntax). They depict
+  the **data's journey** through the module — not the import graph,
+  not the call graph. Nodes are **data states** in domain vocabulary
+  (e.g. `raw source string`, `validated AST`, `frozen RunResult`),
+  and edges are **transformations** that produce the next state
+  (e.g. `parse, throws on SyntaxError`, `validate, pure`,
+  `execute in Worker, async`). Edge labels carry structural
+  constraints (throws / pure / async). If a file does not transform
+  data — it just delegates, re-exports, or wraps — it does not
+  appear as a node. If multiple files cooperate on a single
+  transformation, one edge labels the transformation; the files are
+  invisible. Domain-agnostic utilities (freeze, merge, clone) are
+  invisible at every level. The diagram answers "what shape is the
+  data in at each phase, and what changes between phases" — not
+  "what imports what."
 - Public functions have JSDoc/TSDoc in source; TypeDoc generates `docs/`
   (gitignored, CI-only)
 - `@remarks` for consumer-facing "why" context (appears alongside signatures in
@@ -409,9 +415,10 @@ Development Workflow for the full process.
 - **Phase 0** _(do not skip)_: Establish ubiquitous language (domain glossary) →
   README spec (domain model in prose, bounded context) → AR-1 design challenge →
   types.ts (domain model in TypeScript) → architectural sketch in DOCS.md
-  (structural target for the Refactor step) → AR-2 sketch challenge → commit
-  Phase 0 artifacts (`docs: establish [module] domain model and architectural
-  sketch`)
+  including the **Mermaid `## Data flow` diagram** (structural target for the
+  Refactor step; abstraction level matches this directory's position in the
+  tree) → AR-2 sketch challenge → commit Phase 0 artifacts
+  (`docs: establish [module] domain model and architectural sketch`)
 - **Phase 1**: For each increment: JSDoc → stub → test (ZOMBIES order) → AR-3 →
   implement (Fake It is valid for the first test; second test must triangulate
   it away) → lint → refactor (structural quality against DOCS.md sketch) → AR-4
@@ -531,6 +538,22 @@ not a valid substitute — write the steps out.
   architectural sketch. Green tests mean behavioral correctness is achieved.
   Structural quality is addressed here — named phases, separated concerns, no
   Fake It values surviving past their triangulation point.
+- **Data flow check at step 9** (ephemeral): sketch the intra-file data flow
+  as Mermaid for your own reasoning. Is anything carried further than the
+  phase that needs it? Any redundant transformations? This diagram is a
+  thinking tool — not committed.
+- **Inter-file contract check at step 9**: verify the file's inputs and
+  outputs still match the peer `DOCS.md` Mermaid data flow diagram.
+  - Contract preserved → autonomous; commit.
+  - Contract changed → flag to user; update `DOCS.md` only with approval.
+- **Two-tier autonomy** (mechanical, not judgment):
+  - Intra-file refactors are autonomous.
+  - Inter-file changes require user check-in if ANY trigger fires: file added
+    to or removed from the flow; file's input/output shape changes; phase
+    annotation changes (throws / pure / async).
+  - Extracting a helper to a new domain-related file IS a trigger.
+    Extracting to a domain-agnostic utility file (freeze, merge, clone) is
+    NOT (utilities are invisible in data flow diagrams).
 - At step 12 (self-review): run through the LLM Anti-Pattern Checklist. Reality
   check: did I run it? Did I trigger the exact behavior I changed? Would I bet
   $100 this works? Flag what you're least confident about for the user to
@@ -680,6 +703,10 @@ Work stops immediately if:
 - Test failures that aren't immediately understood
 - Breaking changes to public APIs without explicit approval
 - Claude catches itself skipping workflow steps
+- An inter-file data flow trigger fires during refactor (file added to or
+  removed from the flow; file's input/output shape changes; phase annotation
+  changes). See § Incremental TDD Workflow step 9 for the full two-tier
+  autonomy rule.
 
 #### Intellectual Honesty
 
@@ -904,6 +931,13 @@ Only when the human explicitly opts out.
   terminology crept in?
 - Is the sketch consistent with the types defined in step 0.4? Do domain terms
   in the sketch map cleanly to types?
+- **Data flow**: Does the sketch's Mermaid flow diagram make sense? Is data
+  passed through phases that don't use it? Are any transformations redundant
+  — data restructured into an equivalent shape under a different name? Is the
+  data state at each phase boundary as slim as it could be? Does the diagram
+  use the ubiquitous language consistently? Are domain-agnostic utilities
+  (freeze, merge, clone) correctly omitted as invisible, and domain-related
+  functions correctly shown as nodes?
 
 **Provide to agent:** DOCS.md architectural sketch, README.md, types.ts
 
@@ -926,9 +960,15 @@ Only when the human explicitly opts out.
 - Are we over-testing (brittle tests that break on refactor)?
 - Is the test naming clear and descriptive?
 - Does the test ordering follow convention (feature → happy → edge → error)?
+- **Data flow coverage**: Do the tests exercise each data transition shown in
+  the peer DOCS.md Mermaid flow diagram, or only end-to-end behavior? A suite
+  that only covers start-to-finish can pass even when intermediate
+  transformations are broken in compensating ways. Each arrow in the flow
+  should have at least one test that would fail if that specific
+  transformation were removed or wrong.
 
 **Provide to agent:** The test file, the stub/types being tested, related
-existing tests
+existing tests, the peer DOCS.md data flow diagram
 
 ### AR-4: Implementation Audit
 
@@ -951,9 +991,16 @@ the human explicitly opts out.
 - Are there subtle bugs (off-by-one, null handling, async footguns)?
 - Is error handling appropriate (validate at boundaries only)?
 - Would a junior developer understand this without explanation?
+- **Data flow**: Sketch the actual intra-file data flow as Mermaid (ephemeral,
+  not committed). Compare the file's inputs and outputs against the peer
+  DOCS.md Mermaid flow diagram for contract match. Is the intra-file flow
+  simpler or more complex than the sketch implied? Is anything carried
+  further than needed? Are there redundant transformations the sketch didn't
+  catch? If divergence, describe it in prose — the user decides whether the
+  implementation drifted or the sketch needs updating.
 
 **Provide to agent:** The implementation file, its test file, types, the DOCS.md
-architectural sketch, any utilities used
+architectural sketch (including the Mermaid data flow diagram), any utilities used
 
 ### AR-5: Pre-Merge Review
 

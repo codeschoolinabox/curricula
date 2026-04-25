@@ -2,24 +2,35 @@
 
 ## Data flow
 
-Files-as-nodes view of this leaf directory. `guard-loops/` is shown
-as a single subdirectory node because it has its own DOCS.md diagram
-at its own abstraction level.
+What the data looks like at each phase of `createRunGenerator`'s
+pipeline, and what transforms one shape into the next.
 
 ```mermaid
 flowchart TD
-    A[source + options] -->|createRunGenerator, async| B[run.ts]
-    B -->|parse + language gate, sync-throws| V[validate]
-    B -->|format gate, pure| F[checkFormat]
-    B -->|inject loop guards, pure| G[guard-loops/]
-    B -->|spawn Worker from Blob URL| C[create-worker-script.ts]
-    C -->|SAB flags + postMessage + Atomics| P[worker-protocol.ts]
-    B -->|frozen RunResult with outcome| R[consumer]
-    B -.->|settled replay on re-iterate| R
+    A[raw source + options] -->|validate, throws on parse error| B{validation result}
+    B -->|rejected| RJ[ok:false RunResult<br/>outcome: error]
+    B -->|passed| C[validated source]
+    C -->|checkFormat, pure| D{format check}
+    D -->|unformatted| RF[ok:false RunResult<br/>outcome: error]
+    D -->|formatted| E[formatted source]
+    E -->|inject loop guards, pure<br/>only when iterations is set| F[execution-ready source]
+    F -->|spawn Worker, send execute message| G[live event stream<br/>via SAB pause protocol]
+    G -->|accumulate by reference into logs| H[growing logs array]
+    H -->|yield to consumer| I[consumer-observed event]
+    I -.->|.cancel / .fail / break| J[terminationCause set]
+    G -->|natural completion / error / timeout| K[terminated worker]
+    J --> K
+    K -->|buildResult, freeze in place| L[frozen RunResult<br/>ok + outcome + reason? + logs]
+    L -.->|re-iterate after settle| M[replayed logs<br/>same references]
 ```
 
-Domain-agnostic utilities (deepFreezeInPlace, structuredClone) are
-invisible — called within nodes, not shown between nodes.
+Termination causes (`.cancel()`, `.fail(reason)`, for-await break,
+timeout, worker-error) all funnel through `setTermination` →
+`buildResult`, surfacing on `result.outcome` (and `result.reason`
+for `.fail`). Logs stay strictly worker-emitted — no synthetic
+markers. Domain-agnostic utilities (deepFreezeInPlace,
+structuredClone) operate inside transformations, not between data
+states, so they don't appear as edges.
 
 ## Why an AsyncGenerator
 
