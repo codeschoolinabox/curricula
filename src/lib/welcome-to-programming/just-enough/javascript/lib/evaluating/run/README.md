@@ -112,18 +112,25 @@ handle.options.seconds; // resolved (default 5 if omitted)
 handle.options.iterations; // as-passed (no default)
 ```
 
-## I/O divergence from intercept
+## I/O fallback (parity with intercept)
 
 When learner code calls `prompt`/`alert`/`confirm` and the consumer
-**did not provide a mock for that dialog**, run **throws** — the
-result settles with `outcome:'error'`, `error.kind:'javascript'`,
-and a message identifying the missing mock.
+**did not provide a mock for that dialog**, run falls back to the
+native browser dialog: `globalThis.prompt` / `globalThis.alert` /
+`globalThis.confirm`. Same behavior as intercept — no divergence.
 
-This is the only behavioral divergence from `intercept`, which falls
-back to `window.prompt` / `window.alert` / `window.confirm`. Run's
-divergence exists so headless test runners and fire-and-forget
-consumers don't stall on a native dialog. See [DOCS.md](./DOCS.md)
-§ I/O default for the rationale.
+For headless or fire-and-forget contexts where a native dialog would
+hang, pass mocks for every dialog the program might call:
+
+```ts
+const result = await run(code, {
+	io: {
+		prompt: () => null,
+		alert: () => undefined,
+		confirm: () => false,
+	},
+});
+```
 
 ## What is NOT here
 

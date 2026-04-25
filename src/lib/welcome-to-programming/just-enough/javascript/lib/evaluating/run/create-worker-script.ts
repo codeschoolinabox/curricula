@@ -55,9 +55,13 @@ const SIGNAL_RESPONDED = 2;
 
 let controlView = null;
 let payloadView = null;
-var isScriptMode = false;
 
 // --- Line extraction ---
+//
+// The trapless engine always prepends \`"use strict"; \` to learner
+// code (no scriptMode easter egg — the \`with\` easter egg lives in
+// intercept). User code therefore starts at worker-script line 2;
+// subtract 1 to get the user-facing line number.
 
 function getLine() {
   try {
@@ -68,14 +72,7 @@ function getLine() {
       const match = lines[i].match(/:(\\d+):\\d+\\)?$/);
       if (match) {
         const lineNum = parseInt(match[1], 10);
-        // WHY: without scriptMode, new Function prepends "use strict"
-        // as line 1, so user code starts at line 2. Subtract 1 to get
-        // user line. In scriptMode, no prefix — line numbers are exact.
-        if (isScriptMode) {
-          if (lineNum >= 1) return lineNum;
-        } else {
-          if (lineNum >= 2) return lineNum - 1;
-        }
+        if (lineNum >= 2) return lineNum - 1;
       }
     }
     return undefined;
@@ -192,11 +189,11 @@ self.onmessage = function (e) {
     //    NOTE: the trapless engine does NOT pass a 'console'
     //    parameter, so learner code's \`console.log\` resolves to
     //    the worker's native global console.
+    //    The "use strict" prefix is unconditional — run does not
+    //    support intercept's scriptMode \`with\` easter egg.
     var fn;
     try {
-      var prefix = msg.scriptMode
-        ? loopDeclarations
-        : ('"use strict"; ' + loopDeclarations + '\\n');
+      var prefix = '"use strict"; ' + loopDeclarations + '\\n';
       fn = new Function('alert', 'confirm', 'prompt', prefix + msg.code);
     } catch (err) {
       postMessage({
@@ -237,11 +234,7 @@ function extractLineFromError(err) {
     const match = lines[i].match(/:(\\d+):\\d+\\)?$/);
     if (match) {
       const lineNum = parseInt(match[1], 10);
-      if (isScriptMode) {
-        if (lineNum >= 1) return lineNum;
-      } else {
-        if (lineNum >= 2) return lineNum - 1;
-      }
+      if (lineNum >= 2) return lineNum - 1;
     }
   }
   return undefined;

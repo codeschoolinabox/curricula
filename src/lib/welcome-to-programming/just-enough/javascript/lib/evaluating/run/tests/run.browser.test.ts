@@ -93,11 +93,10 @@ describe('run — browser (real Worker)', () => {
 			expect(calls).toBe(1);
 		});
 
-		it('prompt with no mock surfaces as outcome:error (D5b divergence)', async () => {
-			const r = await run(fmt('prompt("?");\n'));
-			expect(r.outcome).toBe('error');
-			expect(r.error?.kind).toBe('javascript');
-		});
+		// (D5b "no-mock throws" was rescinded — engine now falls back to
+		// globalThis.prompt/alert/confirm matching intercept. Native-
+		// dialog behavior in headless browsers is environment-specific
+		// and best left to intercept's coverage.)
 
 		it('alert + confirm parity', async () => {
 			let alertCalls = 0;
@@ -261,12 +260,75 @@ describe('run — browser (real Worker)', () => {
 			const cases = [
 				await run(fmt('1 + 1;\n')),
 				await run(fmt('null();\n')),
-				await run('while (true) {}\n', { seconds: 0.3 }),
-				await run('while (true) {}\n', { iterations: 5 }),
+				await run(fmt('while (true) { let x = 1; }\n'), { seconds: 0.3 }),
+				await run(fmt('while (true) { let x = 1; }\n'), { iterations: 5 }),
 			];
 			for (const r of cases) {
 				expect('logs' in r).toBe(false);
 			}
+		});
+	});
+
+	describe('seconds budget under I/O', () => {
+		it('budget is charged YIELD_CHARGE_MS per pause, not wall-clock', async () => {
+			// Mock sleeps 100ms × 4 calls. seconds budget = 1.
+			// If pauses charged wall-clock, the engine would consume
+			// all 400ms — but worker time is ~0ms either way and per-
+			// pause is YIELD_CHARGE_MS (0.8ms). Result must be complete.
+			let n = 0;
+			const r = await run(
+				fmt(
+					'let a = prompt();\n' +
+						'let b = prompt();\n' +
+						'let c = prompt();\n' +
+						'let d = prompt();\n',
+				),
+				{
+					seconds: 1,
+					io: {
+						prompt: async () => {
+							n += 1;
+							await sleep(100);
+							return 'x';
+						},
+					},
+				},
+			);
+			expect(r.outcome).toBe('complete');
+			expect(n).toBe(4);
+		});
+	});
+
+	// (No "timeout during I/O await" test: the timer is paused during
+	// the I/O mock await, so it cannot fire while the mock is in
+	// flight. After the mock resolves, the timer resumes with the
+	// budget that remained pre-pause — wall-clock mock duration is
+	// not charged. This is intentional per the YIELD_CHARGE_MS
+	// model; constructing a meaningful "I/O caused timeout" scenario
+	// would require pre-exhausting the budget with worker-side busy
+	// work, which JeJ doesn't readily allow.)
+
+	describe('cancel races timeout (first-write-wins)', () => {
+		it('cancel before timer fires → outcome:cancel', async () => {
+			const h = run(fmt('while (true) { let x = 1; }\n'), {
+				seconds: 5,
+			});
+			await sleep(20);
+			h.cancel();
+			const r = await h.result;
+			expect(r.outcome).toBe('cancel');
+		});
+
+		it('timer fires first → outcome:timeout (late cancel is no-op)', async () => {
+			const h = run(fmt('while (true) { let x = 1; }\n'), {
+				seconds: 0.1,
+			});
+			// Wait for the timer to fire and settle the result.
+			await h.result;
+			// Now cancel — should be a no-op since result is already settled.
+			h.cancel();
+			const r = await h.result;
+			expect(r.outcome).toBe('timeout');
 		});
 	});
 });

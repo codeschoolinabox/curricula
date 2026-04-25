@@ -90,39 +90,25 @@ type ResolvedIo = {
 };
 
 /**
- * Wraps consumer mocks; missing slots become "throw on call" stubs.
+ * Wraps consumer mocks; missing slots fall back to the native browser
+ * dialog (`globalThis.prompt` / `globalThis.alert` / `globalThis.confirm`).
  *
- * @remarks **This is the deliberate divergence from intercept.**
- * Intercept's `buildResolvedIo` defaults to `window.prompt` /
- * `window.alert` / `window.confirm` when no mock is provided; the
- * trapless engine throws instead, so callers expecting fire-and-
- * forget semantics never have execution stall on a native dialog.
+ * @remarks Matches intercept's `buildResolvedIo` behavior — there is no
+ * behavioral divergence between the two engines here. (An earlier
+ * version of this engine threw on missing mocks; that decision was
+ * reverted in favor of parity with intercept.)
  */
 function buildResolvedIo(io?: IoMocks): ResolvedIo {
 	return {
 		prompt: io?.prompt
 			? async (msg, def) => io.prompt!(msg, def)
-			: async () => {
-					throw new Error(
-						'prompt: no I/O mock provided to run({ io: { prompt } })',
-					);
-				},
+			: async (msg, def) => globalThis.prompt!(msg, def),
 		alert: io?.alert
-			? async (msg) => {
-					await io.alert!(msg);
-				}
-			: async () => {
-					throw new Error(
-						'alert: no I/O mock provided to run({ io: { alert } })',
-					);
-				},
+			? async (msg) => await io.alert!(msg)
+			: async (msg) => await globalThis.alert!(msg),
 		confirm: io?.confirm
 			? async (msg) => io.confirm!(msg)
-			: async () => {
-					throw new Error(
-						'confirm: no I/O mock provided to run({ io: { confirm } })',
-					);
-				},
+			: async (msg) => globalThis.confirm!(msg),
 	};
 }
 
@@ -407,9 +393,7 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 			// Post-await termination check (cancel-during-IO or
 			// worker-error-during-IO). Cast defeats TS's stale narrowing
 			// of the closure-captured `terminationCause` mutable.
-			const postCause = terminationCause as
-				| TerminationCause
-				| undefined;
+			const postCause = terminationCause as TerminationCause | undefined;
 			if (postCause !== undefined) {
 				if (postCause.kind === 'cancel') {
 					terminate();
@@ -477,9 +461,7 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 			// and now (synchronously, before the microtask).
 			// `as` defeats TS's static narrowing — terminationCause is
 			// closure-captured and may have been mutated by cancel().
-			const earlyCause = terminationCause as
-				| TerminationCause
-				| undefined;
+			const earlyCause = terminationCause as TerminationCause | undefined;
 			if (earlyCause !== undefined) {
 				terminate();
 				if (earlyCause.kind === 'cancel') {
@@ -499,10 +481,7 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 					if (msg.error) {
 						if (!setTermination({ kind: 'worker-error' })) return;
 						terminate();
-						const classified = classifyCompleteError(
-							msg.error,
-							maxIterations,
-						);
+						const classified = classifyCompleteError(msg.error, maxIterations);
 						settle({
 							...classified,
 							...(ast ? { ast } : {}),
@@ -570,12 +549,8 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 
 	function buildHandle(): RunHandle {
 		function then<T1 = RunResult, T2 = never>(
-			onFulfilled?:
-				| ((v: RunResult) => T1 | PromiseLike<T1>)
-				| null,
-			onRejected?:
-				| ((reason: unknown) => T2 | PromiseLike<T2>)
-				| null,
+			onFulfilled?: ((v: RunResult) => T1 | PromiseLike<T1>) | null,
+			onRejected?: ((reason: unknown) => T2 | PromiseLike<T2>) | null,
 		): Promise<T1 | T2> {
 			return result.then(onFulfilled, onRejected);
 		}

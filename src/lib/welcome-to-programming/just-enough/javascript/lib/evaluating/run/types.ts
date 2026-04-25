@@ -123,10 +123,9 @@ type RunResult = BaseResult<RunResultError> & {
  * Consumer-provided IO mock overrides.
  *
  * @remarks
- * Each slot is independently overridable. Omitted slots have **no
- * native fallback** in run (this is the deliberate divergence from
- * intercept). If learner code calls a dialog without a mock, the
- * engine settles with `outcome:'error'`.
+ * Each slot is independently overridable. Omitted slots fall back to
+ * the native browser dialog (`globalThis.prompt`, `globalThis.alert`,
+ * `globalThis.confirm`) — same fallback behavior as intercept.
  *
  * Mocks may return values directly or via Promise; the engine awaits
  * either. If a mock throws synchronously or rejects asynchronously,

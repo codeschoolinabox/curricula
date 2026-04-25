@@ -128,26 +128,26 @@ load-bearing. Without it, `new Worker(...)` would execute inside
 immediately after `run()` returns. The defer pushes the spawn into
 the next microtask so cancel can land first.
 
-## I/O default (D5b — divergence from intercept)
+## I/O default (parity with intercept)
 
-This is the only behavioral divergence. Documented per the
-ResultError type system and tested in `run.browser.test.ts`.
+No behavioral divergence between the two engines on missing-mock
+behavior:
 
 - **Intercept** (`intercept.ts:152-156`, `buildResolvedIo`): missing
   mock → defaults to `window.prompt` / `window.alert` /
   `window.confirm` (native browser dialogs).
-- **Run**: missing mock → "throw on call" stub. The thrown error
-  propagates through the `io-request` handler, which catches it,
-  terminates the worker, and resolves the result Promise with
-  `outcome:'error'`, `error.kind:'javascript'`, message identifying
-  the missing mock (e.g. `prompt: no I/O mock provided to run({ io: { prompt } })`).
+- **Run** (`run.ts:101-113`, `buildResolvedIo`): missing mock →
+  defaults to `globalThis.prompt` / `globalThis.alert` /
+  `globalThis.confirm` (native browser dialogs).
 
-**Why diverge.** Run's pedagogical role is "did this program
-complete cleanly?". Native-dialog fallback would block headless
-test runners indefinitely (no human to dismiss the dialog) and
-surprise consumers expecting fire-and-forget semantics. The
-intercept fallback exists because intercept is the
-event-streaming-with-UI engine; run isn't.
+Same fallback semantics, same SAB handshake on the worker side.
+
+**Historical note (D5b rescinded):** an earlier version of run threw
+on missing mocks instead of falling back, on the theory that
+fire-and-forget consumers shouldn't stall on a native dialog. After
+testing, that decision was reverted in favor of intercept-parity. If
+you need a no-dialog environment (headless tests, CI), pass mocks
+for every dialog your code might call.
 
 ## Result and handle types
 

@@ -236,7 +236,7 @@ alert('done!');"
 					data-code="let x = prompt('input?');
 console.log('got:', x);"
 				>
-					[prompt — no mock (D5b error)]
+					[prompt — native fallback]
 				</button>
 				<button
 					type="button"
@@ -283,7 +283,7 @@ let x = prompt(() => 1);"
 			<div class="toggle-row">
 				<label for="t-prompt">prompt</label>
 				<select id="t-prompt" title="prompt hook">
-					<option value="none">throw (D5b default)</option>
+					<option value="none">native (default)</option>
 					<option value="styled">styled</option>
 					<option value="native">native</option>
 				</select>
@@ -291,7 +291,7 @@ let x = prompt(() => 1);"
 			<div class="toggle-row">
 				<label for="t-alert">alert</label>
 				<select id="t-alert" title="alert hook">
-					<option value="none">throw (D5b default)</option>
+					<option value="none">native (default)</option>
 					<option value="styled">styled</option>
 					<option value="native">native</option>
 				</select>
@@ -299,7 +299,7 @@ let x = prompt(() => 1);"
 			<div class="toggle-row">
 				<label for="t-confirm">confirm</label>
 				<select id="t-confirm" title="confirm hook">
-					<option value="none">throw (D5b default)</option>
+					<option value="none">native (default)</option>
 					<option value="styled">styled</option>
 					<option value="native">native</option>
 				</select>
