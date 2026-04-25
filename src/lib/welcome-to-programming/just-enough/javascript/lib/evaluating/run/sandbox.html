@@ -315,8 +315,12 @@ console.error('three');"
 			<br />
 			<span id="prediction-wrap"
 				>predict:
-				<input id="prediction" type="text" placeholder="expected output"
-			/></span>
+				<input id="prediction" type="text" placeholder="expected output" />
+				<label class="step-sub"
+					><input id="fail-on-wrong" type="checkbox" /> fail on wrong
+					prediction</label
+				></span
+			>
 		</div>
 		<div id="status"></div>
 
@@ -395,6 +399,7 @@ console.error('three');"
 			const devCheckbox = document.getElementById('step-dev');
 			const userCheckbox = document.getElementById('step-user');
 			const predictLogsCheckbox = document.getElementById('predict-logs');
+			const failOnWrongCheckbox = document.getElementById('fail-on-wrong');
 			const nextBtn = document.getElementById('next');
 			const predictionWrap = document.getElementById('prediction-wrap');
 			const predictionInput = document.getElementById('prediction');
@@ -409,6 +414,7 @@ console.error('three');"
 				devCheckbox.disabled = !stepping;
 				userCheckbox.disabled = !stepping;
 				predictLogsCheckbox.disabled = !stepping;
+				failOnWrongCheckbox.disabled = !stepping;
 			}
 
 			stepCheckbox.addEventListener('change', updateModeUI);
@@ -710,6 +716,20 @@ console.error('three');"
 								eventsEl.appendChild(
 									renderEvent(value, { prediction, actual, correct }),
 								);
+								if (!correct && failOnWrongCheckbox.checked) {
+									// Mark fail with structured reason BEFORE break: the
+									// break triggers run.ts's .return interceptor, but
+									// terminationCause is first-write-wins, so the
+									// settled RunResult is outcome:'fail' (with reason)
+									// rather than 'cancel'.
+									gen.fail({
+										kind: 'wrong-prediction',
+										line: value.line,
+										expected: prediction,
+										actual,
+									});
+									break;
+								}
 							} else {
 								statusEl.textContent = `step: console.${value.method} (line ${value.line}) — click [next]`;
 								await waitForStep();
