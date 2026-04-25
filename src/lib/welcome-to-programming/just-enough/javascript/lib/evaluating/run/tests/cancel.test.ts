@@ -31,13 +31,13 @@ describe('createRunGenerator cancel', () => {
 			expect(result.value.ok).toBe(true);
 		});
 
-		it('logs contains exactly one cancel event', async () => {
+		it('outcome is cancel; logs are empty (no worker ran)', async () => {
 			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.next();
 			if (!result.done) throw new Error('expected done');
-			if (!result.value.ok) throw new Error('expected ok');
-			expect(result.value.logs).toEqual([{ event: 'cancel' }]);
+			expect(result.value.outcome).toBe('cancel');
+			expect(result.value.logs).toEqual([]);
 		});
 	});
 
@@ -85,12 +85,11 @@ describe('createRunGenerator cancel', () => {
 			expect(result.ok).toBe(true);
 		});
 
-		it('resolved RunResult contains cancel event in logs', async () => {
+		it('resolved RunResult has outcome:cancel', async () => {
 			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.result;
-			if (!result.ok) throw new Error('expected ok');
-			expect(result.logs.at(-1)).toEqual({ event: 'cancel' });
+			expect(result.outcome).toBe('cancel');
 		});
 
 		it('memoizes — same Promise on repeated access', () => {
@@ -130,8 +129,8 @@ describe('createRunGenerator cancel', () => {
 		it('then() callback receives RunResult', async () => {
 			const gen = createRunGenerator('let x = 1;\n');
 			gen.cancel();
-			const value = await gen.then((r) => (r.ok ? r.logs.length : -1));
-			expect(value).toBe(1);
+			const value = await gen.then((r) => r.outcome);
+			expect(value).toBe('cancel');
 		});
 
 		it('then is not enumerable (matches Promise convention)', () => {
@@ -170,23 +169,20 @@ describe('createRunGenerator cancel', () => {
 	});
 
 	/**
-	 * Invariant: after the api/run → evaluating/run merge (M.1), ANY
-	 * consumer that calls .cancel() gets a RunResult whose last log
-	 * entry is `{event: 'cancel'}`. shared/types.ts § CancelEvent
-	 * documents this as universal: "Presence in `logs` is the signal."
-	 * Previously, the api/run wrapper's cancel bypassed this path by
-	 * calling generator.return(), skipping the main-loop cancelled
-	 * branch that appends the event. After the merge there is no
-	 * wrapper — every cancel goes through the engine's native path.
+	 * Invariant: ANY consumer that calls .cancel() gets a RunResult
+	 * with `outcome: 'cancel'`. Termination is classified on the
+	 * RunResult, not smuggled into logs. Previously there was a
+	 * trailing `{event:'cancel'}` in logs; that was removed when
+	 * termination moved to first-class result metadata. See DOCS.md
+	 * § Unified termination protocol.
 	 */
-	describe('cancel invariant: logs.at(-1).event === "cancel"', () => {
+	describe('cancel invariant: outcome === "cancel"', () => {
 		describe('cancel before first iterate', () => {
 			it('invariant holds', async () => {
 				const gen = createRunGenerator('let x = 1;\n');
 				gen.cancel();
 				const result = await gen.result;
-				if (!result.ok) throw new Error('expected ok');
-				expect(result.logs.at(-1)).toEqual({ event: 'cancel' });
+				expect(result.outcome).toBe('cancel');
 			});
 		});
 
@@ -195,8 +191,7 @@ describe('createRunGenerator cancel', () => {
 				const gen = createRunGenerator('let x = 1;\n');
 				gen.cancel();
 				const result = await gen;
-				if (!result.ok) throw new Error('expected ok');
-				expect(result.logs.at(-1)).toEqual({ event: 'cancel' });
+				expect(result.outcome).toBe('cancel');
 			});
 		});
 

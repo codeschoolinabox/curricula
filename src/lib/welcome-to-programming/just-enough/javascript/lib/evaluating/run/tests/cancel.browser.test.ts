@@ -32,14 +32,13 @@ describe('createRunGenerator cancel (browser — real Worker)', () => {
 			expect(result.done).toBe(true);
 		});
 
-		it('mid-iterate cancel appends cancel event to logs', async () => {
+		it('mid-iterate cancel sets outcome:cancel on the result', async () => {
 			const gen = createRunGenerator('console.log(1);\n');
 			await gen.next();
 			gen.cancel();
 			const result = await gen.next();
 			if (!result.done) throw new Error('expected done');
-			if (!result.value.ok) throw new Error('expected ok');
-			expect(result.value.logs.at(-1)).toEqual({ event: 'cancel' });
+			expect(result.value.outcome).toBe('cancel');
 		});
 
 		it('result.ok is true after mid-iterate cancel', async () => {
@@ -59,12 +58,10 @@ describe('createRunGenerator cancel (browser — real Worker)', () => {
 			expect(result.ok).toBe(true);
 		});
 
-		it('.result logs do not contain a cancel event on happy path', async () => {
+		it('happy-path outcome is complete, not cancel', async () => {
 			const gen = createRunGenerator('let x = 1;\n');
 			const result = await gen.result;
-			if (!result.ok) throw new Error('expected ok');
-			const hasCancel = result.logs.some((e) => e.event === 'cancel');
-			expect(hasCancel).toBe(false);
+			expect(result.outcome).toBe('complete');
 		});
 
 		it('await handle resolves to RunResult (PromiseLike drain)', async () => {
@@ -107,15 +104,14 @@ describe('createRunGenerator cancel (browser — real Worker)', () => {
 		});
 	});
 
-	describe('cancel invariant: logs.at(-1).event === "cancel" (mid-iterate)', () => {
+	describe('cancel invariant: outcome === "cancel" (mid-iterate)', () => {
 		it('invariant holds', async () => {
 			const gen = createRunGenerator('console.log(1);\n');
 			await gen.next();
 			gen.cancel();
 			const iter = await gen.next();
 			if (!iter.done) throw new Error('expected done');
-			if (!iter.value.ok) throw new Error('expected ok');
-			expect(iter.value.logs.at(-1)).toEqual({ event: 'cancel' });
+			expect(iter.value.outcome).toBe('cancel');
 		});
 	});
 });

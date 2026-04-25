@@ -140,17 +140,73 @@ describe('createRunGenerator outcome classification (browser)', () => {
 		});
 	});
 
-	describe('CancelEvent reference identity across replay', () => {
-		it('same CancelEvent ref in live logs and replayed iteration (via .cancel)', async () => {
+	describe('.fail(reason) — consumer-driven structured termination', () => {
+		it('outcome:fail + reason preserved by reference identity through replay', async () => {
+			const payload = { kind: 'prediction-wrong', expected: 42, got: 43 };
+			const gen = createRunGenerator('console.log(1);\n');
+			await gen.next();
+			gen.fail(payload);
+			const result = await gen;
+			expect(result.outcome).toBe('fail');
+			expect(result.reason).toBe(payload);
+		});
+
+		it('.fail() with no reason → outcome:fail, reason:undefined', async () => {
+			const gen = createRunGenerator('let x = 1;\n');
+			gen.fail();
+			const result = await gen;
+			expect(result.outcome).toBe('fail');
+			expect(result.reason).toBe(undefined);
+		});
+
+		it('.fail() first-write-wins over subsequent .cancel()', async () => {
+			const gen = createRunGenerator('let x = 1;\n');
+			gen.fail('first');
+			gen.cancel();
+			const result = await gen;
+			expect(result.outcome).toBe('fail');
+			expect(result.reason).toBe('first');
+		});
+
+		it('.cancel() first-write-wins over subsequent .fail()', async () => {
+			const gen = createRunGenerator('let x = 1;\n');
+			gen.cancel();
+			gen.fail('too late');
+			const result = await gen;
+			expect(result.outcome).toBe('cancel');
+			expect(result.reason).toBe(undefined);
+		});
+
+		it('.fail() is ok:true (consumer-driven stop, not an error)', async () => {
+			const gen = createRunGenerator('let x = 1;\n');
+			gen.fail({ kind: 'done-early' });
+			const result = await gen;
+			expect(result.ok).toBe(true);
+		});
+	});
+
+	describe('logs are pure — no synthetic termination markers', () => {
+		it('cancel: logs contain only live events, not a trailing cancel marker', async () => {
 			const gen = createRunGenerator('console.log(1);\n');
 			await gen.next();
 			gen.cancel();
 			const result = await gen;
-			if (!result.ok || !result.logs) throw new Error('expected ok+logs');
-			const liveCancel = result.logs.at(-1);
-			const replayed: unknown[] = [];
-			for await (const event of gen) replayed.push(event);
-			expect(replayed.at(-1)).toBe(liveCancel);
+			if (!result.logs) throw new Error('expected logs');
+			for (const event of result.logs) {
+				expect(event.event).not.toBe('cancel');
+			}
+		});
+
+		it('fail: logs contain only live events, not a trailing fail marker', async () => {
+			const gen = createRunGenerator('console.log(1);\n');
+			await gen.next();
+			gen.fail('test');
+			const result = await gen;
+			if (!result.logs) throw new Error('expected logs');
+			for (const event of result.logs) {
+				expect((event as { event: string }).event).not.toBe('cancel');
+				expect((event as { event: string }).event).not.toBe('fail');
+			}
 		});
 	});
 });

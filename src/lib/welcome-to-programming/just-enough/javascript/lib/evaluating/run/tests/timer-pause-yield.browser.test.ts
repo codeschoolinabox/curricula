@@ -41,15 +41,14 @@ describe('createRunGenerator timer pauses during yield (browser)', () => {
 	});
 
 	describe('cancel interacts correctly with paused timer', () => {
-		it('cancel after stall beyond seconds returns CancelEvent, not TimeoutError', async () => {
+		it('cancel after stall beyond seconds returns outcome:cancel, not timeout', async () => {
 			const code = format('console.log(1);\nconsole.log(2);\n');
 			const gen = createRunGenerator(code, { seconds: 0.2 });
 			await gen.next();
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			gen.cancel();
 			const result = await gen.result;
-			if (!result.ok) throw new Error('expected ok:true (cancel, not timeout)');
-			expect(result.logs.at(-1)).toEqual({ event: 'cancel' });
+			expect(result.outcome).toBe('cancel');
 		});
 	});
 });

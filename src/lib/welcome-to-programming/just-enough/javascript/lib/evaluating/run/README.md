@@ -74,28 +74,30 @@ README. Use them consistently.
   during IO callback await (styled dialog time does not count), and
   while the Worker is otherwise blocked. Resumes when the Worker is
   unblocked.
-- **Non-IO events** — events whose generation does not involve an IO
+- **Non-IO event** — an event whose generation does not involve an IO
   hook: `ErrorEvent` (creation- or execution-phase errors in the
-  learner's code) and `CancelEvent` (appended by the main thread
-  when `.cancel()` is invoked). They travel the same `RunEvent`
-  stream as IO events.
-- **Outcome** — how a run resolved. Five first-class variants set
+  learner's code). It travels the same `RunEvent` stream as IO
+  events. Termination markers (cancel, break, fail) are NOT events
+  — they live on the RunResult as `outcome` + optional `reason`.
+- **Outcome** — how a run resolved. Six first-class variants set
   on the `RunResult` by the engine's buildResult: `complete`
-  (natural end of learner code), `cancel` (consumer stopped the
-  run, whether via `.cancel()` or for-await break), `timeout`
+  (natural end of learner code), `cancel` (consumer stopped via
+  `.cancel()` or for-await break), `fail` (consumer stopped via
+  `.fail(reason)` with a structured rejection payload), `timeout`
   (seconds budget exhausted), `iteration-limit` (guarded loop
   exceeded cap), `error` (learner code threw, or parse/format/
-  creation gate failed). Consumers should switch on
-  `result.outcome` rather than inspecting `logs.at(-1)?.event`
-  for the cancel sentinel — the former narrows exhaustively in
-  TypeScript, the latter is easy to forget. See § Outcome below.
+  creation gate failed). Consumers switch on `result.outcome` —
+  TypeScript narrows it exhaustively. `logs` is a pure worker-
+  emitted event stream; it does NOT carry synthetic cancel/fail
+  markers. See § Outcome below.
 - **Termination cause** (internal) — the single closure variable
   inside `createRunGenerator` that records the first reason the
   run ended (first-write-wins). All termination entry points
-  funnel through one `setTermination()` helper so concurrent
-  triggers (cancel racing timeout, worker error racing user
-  cancel) collapse to a monotonic state machine without a priority
-  ladder.
+  (cancel / fail / timeout / worker-error) funnel through one
+  `setTermination()` helper so concurrent triggers collapse to a
+  monotonic state machine without a priority ladder. The
+  termination-cause payload (e.g. the `reason` passed to `.fail()`)
+  surfaces on the RunResult alongside `outcome`.
 
 ## Public API
 
@@ -164,9 +166,11 @@ On the first `.next()` call (or first `.result` access), the
 generator body runs three phases in order. The `run(...)` call
 itself returns cheaply — no work happens until a consumer pulls.
 
-1. **Cancel fast-path** — if `.cancel()` fired before any iteration,
-   return a cancel-only RunResult (`{ok:true, logs:[{event:'cancel'}]}`)
-   and skip everything else. Worker is never spawned.
+1. **Termination fast-path** — if `.cancel()` or `.fail(reason)`
+   fired before any iteration, return a settled RunResult
+   (`{ok:true, outcome:'cancel', logs:[]}` or
+   `{ok:true, outcome:'fail', reason, logs:[]}`) and skip everything
+   else. Worker is never spawned.
 2. **Validation gates** — two ordered checks, both producing an
    immediate error RunResult on failure. Worker is still never
    spawned.
@@ -233,31 +237,32 @@ consumer sees a disjoint subset of events. Pick one mode per handle.
 `.cancel()` terminates execution immediately. Idempotent — safe to
 call any number of times at any phase.
 
-- **Before first iterate:** sets a cancelled flag. First `.next()`
-  sees the flag, returns `{done: true}` immediately. The Worker is
-  never constructed. Zero resource leak.
+- **Before first iterate:** sets the termination cause. First `.next()`
+  sees it, returns a settled RunResult (`outcome:'cancel'`, empty
+  logs) without constructing the Worker. Zero resource leak.
 - **During iteration:** pushes a sentinel into the internal queue,
-  unsticks the pending `await dequeue()`, main loop's cancelled check
-  breaks out, finally block terminates the Worker and revokes the
-  Blob URL. A `{event: 'cancel'}` is appended to `logs`. The final
-  RunResult is `{ok: true, logs: [...events, {event: 'cancel'}]}`.
+  unsticks the pending `await dequeue()`, main loop's termination
+  check breaks out, finally block terminates the Worker and revokes
+  the Blob URL. The final RunResult is
+  `{ok: true, outcome: 'cancel', logs: [...events]}`. Logs contain
+  only worker-emitted events — no synthetic cancel marker.
 - **After completion:** no-op.
 
-Consumers that care whether a run was cancelled can inspect the logs:
+Consumers check the first-class `outcome` field:
 
 ```ts
 const result = await run(code);
-const wasCancelled = result.logs.at(-1)?.event === 'cancel';
+const wasCancelled = result.outcome === 'cancel';
 ```
 
 Cancel is not an error — it did not originate in the learner's
-program. The RunResult stays `ok: true`; the cancel event in logs
-is the signal.
+program. The RunResult stays `ok: true`; `outcome: 'cancel'` is the
+signal.
 
 **`break` inside a live `for await` is equivalent to calling
 `.cancel()`** — the runtime's implicit `gen.return()` is intercepted
-and routed through the same cancel path, producing the same trailing
-`{event: 'cancel'}` and the same replay semantics. Consumers can
+and routed through the same cancel path, producing the same
+`outcome: 'cancel'` and the same replay semantics. Consumers can
 `break` out of the iteration loop safely; there is no "lost replay"
 footgun:
 
@@ -266,9 +271,48 @@ const handle = run(code);
 for await (const event of handle) {
     if (shouldStop(event)) break;   // same outcome as handle.cancel()
 }
-const result = await handle;  // settled with {event:'cancel'} in logs
+const result = await handle;  // settled with outcome: 'cancel'
 for await (const event of handle) render(event);  // replay works
 ```
+
+## Fail — consumer-driven structured termination
+
+`.fail(reason?)` stops the run and attaches a structured rejection
+payload to the RunResult. It serves consumer use cases that
+`.cancel()` can't — specifically, teaching harnesses that need to
+record WHY the run was stopped:
+
+```ts
+const handle = run(code);
+for await (const event of handle) {
+    if (isWrongPrediction(event)) {
+        handle.fail({
+            kind: 'prediction-wrong',
+            expected: 42,
+            got: event.value,
+        });
+        break;
+    }
+}
+const result = await handle;
+// result.outcome === 'fail'
+// result.reason === { kind: 'prediction-wrong', expected: 42, got: 43 }
+```
+
+`.fail()` is idempotent and first-write-wins with `.cancel()` /
+timeout / worker-error: whichever termination entry point reaches
+`setTermination` first wins. Calling `.fail()` after `.cancel()`
+(or vice versa) is a no-op.
+
+`reason` is stored by reference — not cloned, not separately
+frozen. The same object the consumer passed is what appears on
+`result.reason`, and the reference is replay-stable.
+
+Like cancel, `.fail()` is NOT an error — it's consumer-driven
+termination, classified as `ok: true, outcome: 'fail'`. If the
+consumer needs the run to be classified as an error instead, they
+should let the learner's code throw naturally and check
+`result.outcome === 'error'`.
 
 ### Cancel latency caveat
 
@@ -305,37 +349,36 @@ thread code itself throws (unreachable under current code).
 
 ## Outcome
 
-Every RunResult carries an `outcome` field classifying how the run
-ended. Five variants, exhaustively switchable in TypeScript:
+Every RunResult carries a required `outcome` field classifying how
+the run ended. Six variants, exhaustively switchable in TypeScript:
 
 ```ts
 const result = await run(code);
 switch (result.outcome) {
     case 'complete':         // learner code reached its natural end
     case 'cancel':           // consumer stopped via .cancel() or break
+    case 'fail':             // consumer stopped via .fail(reason)
     case 'timeout':          // seconds budget exhausted
     case 'iteration-limit':  // a guarded loop exceeded its cap
     case 'error':            // learner code threw or gate failed
+    // no default — TypeScript exhaustiveness covers every case
 }
 ```
 
-`ok` is a derived convenience flag. `complete | cancel` → `ok:true`;
-`timeout | iteration-limit | error` → `ok:false`. Use `outcome` for
-fine-grained discrimination; `ok` remains the gate on `result.error`
-presence (errors only exist on `ok:false`).
+`ok` is a derived convenience flag. `complete | cancel | fail` →
+`ok:true`; `timeout | iteration-limit | error` → `ok:false`. Use
+`outcome` for fine-grained discrimination; `ok` remains the gate on
+`result.error` presence (errors only exist on `ok:false`).
 
-**Transitional type note.** `outcome` is typed as optional today
-(`outcome?: RunOutcome`) so literal `RunResult` constructions in
-existing code continue to compile. In practice every result produced
-by the engine's buildResult has `outcome` set. Consumers writing
-exhaustive switches should include a `default` branch (or use
-`result.outcome!`) until the type tightens to required.
+On `outcome: 'fail'` the RunResult also carries `reason` — the
+payload passed to `.fail(reason)`. Not cloned, not separately
+frozen; the reference is replay-stable.
 
-The legacy `result.logs.at(-1)?.event === 'cancel'` pattern still
-works — CancelEvent is still appended to `logs` on every cancel-path
-termination. Prefer `result.outcome === 'cancel'` in new code;
-TypeScript narrows it exhaustively and consumers can't forget to
-check.
+`logs` is a pure worker-emitted event stream. It does NOT carry
+synthetic termination markers. Consumers inspecting `logs.at(-1)`
+for a `{event:'cancel'}` sentinel will find only the real final
+event (or nothing if no events were emitted). Use `result.outcome`
+for termination classification.
 
 ## Replay / re-iteration
 

@@ -126,11 +126,16 @@ type ResultError =
  * `logs` is absent when code was rejected before execution
  * (parse error, validation failure, or formatting gate).
  *
- * `outcome` is set by the engine's buildResult for every
- * execution result it produces. It is typed as optional for
- * backward compatibility with literal constructions that pre-date
- * this field; future work may tighten to required once all
- * construction sites are migrated.
+ * `outcome` is optional on the generic Result base because
+ * trace/debug engines have not yet migrated to set the field.
+ * Per-engine result types intersect with `{readonly outcome:
+ * <Outcome>}` to make it required where the engine guarantees it
+ * — e.g. `RunResult` does this so consumers narrow exhaustively
+ * without `default` or `?.` chains.
+ *
+ * `reason` is set only by `.fail(reason)` on engines that expose
+ * the method (currently `run` only). Stored by reference;
+ * reference-stable across replay.
  *
  * @typeParam TEvent - The event type for this engine
  * @typeParam TOutcome - The outcome discriminant subset supported by
@@ -140,19 +145,34 @@ type ResultError =
 type Result<TEvent, TOutcome extends string = string> = BaseResult<ResultError> & {
 	readonly logs?: readonly TEvent[];
 	readonly outcome?: TOutcome;
+	/**
+	 * Structured rejection payload set by `.fail(reason)`.
+	 *
+	 * @remarks Present only on `{outcome: 'fail'}` results; reference-
+	 * stable across replay (not cloned, not frozen-separately — the
+	 * same object the consumer passed to `.fail()`).
+	 */
+	readonly reason?: unknown;
 };
 
 /**
- * The five outcome variants a run can resolve to.
+ * The six outcome variants a run can resolve to.
  *
  * @remarks Classifies how a `run()` finished. Set by the engine's
  * buildResult. First-class on the RunResult — consumers switch on
- * `result.outcome` rather than inspecting `logs.at(-1)?.event`.
+ * `result.outcome` rather than scanning `logs` for termination
+ * markers. `logs` is a pure worker-emitted event stream and does
+ * NOT carry synthetic cancel/break/fail entries.
  *
  * - `'complete'` — learner code reached its natural end.
  * - `'cancel'` — consumer stopped the run, either via `.cancel()`
  *   or by `break`ing out of a live `for await`. Still `ok: true`
  *   (cancel is not an error).
+ * - `'fail'` — consumer stopped the run via `.fail(reason)` with
+ *   a structured rejection payload. Still `ok: true` — `.fail()`
+ *   is for consumer-driven early termination (e.g. a teaching
+ *   harness detecting a failed prediction), not a program error.
+ *   The payload is available on `result.reason`.
  * - `'timeout'` — seconds budget exhausted.
  * - `'iteration-limit'` — a guarded loop exceeded its cap.
  * - `'error'` — learner code threw, or a pre-execution gate
@@ -161,6 +181,7 @@ type Result<TEvent, TOutcome extends string = string> = BaseResult<ResultError> 
 type RunOutcome =
 	| 'complete'
 	| 'cancel'
+	| 'fail'
 	| 'timeout'
 	| 'iteration-limit'
 	| 'error';
@@ -170,10 +191,16 @@ type RunOutcome =
  *
  * @remarks `logs` contains {@link RunEvent} entries: one per
  * trapped call (console.log, prompt, alert, confirm, etc.)
- * plus an error event if execution failed. `outcome` classifies
- * how the run ended.
+ * plus an error event if execution failed. Termination markers
+ * (cancel, break, fail) are NOT in logs — they're classified on
+ * `outcome`, with optional `reason` payload for `.fail()`.
+ *
+ * `outcome` is required on RunResult. Consumers can switch on it
+ * exhaustively without a `default` branch.
  */
-type RunResult = Result<RunEvent, RunOutcome>;
+type RunResult = Result<RunEvent, RunOutcome> & {
+	readonly outcome: RunOutcome;
+};
 
 /**
  * Result from `trace()` — Aran instrumentation with structured events.

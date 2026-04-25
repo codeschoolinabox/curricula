@@ -65,14 +65,17 @@ describe('createRunGenerator replay (browser)', () => {
 	});
 
 	describe('after cancel', () => {
-		it('cancel event appears as final entry of replay', async () => {
+		it('replay yields only real worker-emitted events; outcome carries cancel', async () => {
 			const gen = createRunGenerator('console.log(1);\n');
 			await gen.next();
 			gen.cancel();
-			await gen.result;
-			const replayed: { event: string }[] = [];
-			for await (const event of gen) replayed.push(event as { event: string });
-			expect(replayed.at(-1)).toEqual({ event: 'cancel' });
+			const result = await gen.result;
+			expect(result.outcome).toBe('cancel');
+			const replayed: unknown[] = [];
+			for await (const event of gen) replayed.push(event);
+			for (const event of replayed) {
+				expect(event).not.toEqual({ event: 'cancel' });
+			}
 		});
 	});
 
@@ -85,7 +88,7 @@ describe('createRunGenerator replay (browser)', () => {
 	});
 
 	describe('after for-await-break', () => {
-		it('replay yields live events plus trailing {event:cancel}', async () => {
+		it('replay yields live events with === identity (no synthetic cancel marker)', async () => {
 			const code = format('console.log(1);\nconsole.log(2);\nconsole.log(3);\n');
 			const gen = createRunGenerator(code);
 			const live: unknown[] = [];
@@ -95,13 +98,13 @@ describe('createRunGenerator replay (browser)', () => {
 			}
 			const replayed: unknown[] = [];
 			for await (const event of gen) replayed.push(event);
+			expect(replayed.length).toBe(live.length);
 			for (let i = 0; i < live.length; i++) {
 				expect(replayed[i]).toBe(live[i]);
 			}
-			expect(replayed.at(-1)).toEqual({ event: 'cancel' });
 		});
 
-		it('await handle after break resolves to settled RunResult with cancel event', async () => {
+		it('await handle after break resolves to settled RunResult with outcome:cancel', async () => {
 			const code = format('console.log(1);\nconsole.log(2);\n');
 			const gen = createRunGenerator(code);
 			for await (const event of gen) {
@@ -109,8 +112,7 @@ describe('createRunGenerator replay (browser)', () => {
 				break;
 			}
 			const result = await gen;
-			if (!result.ok) throw new Error('expected ok:true');
-			expect(result.logs.at(-1)).toEqual({ event: 'cancel' });
+			expect(result.outcome).toBe('cancel');
 		});
 
 		it('identity-stable across multiple replays after break', async () => {

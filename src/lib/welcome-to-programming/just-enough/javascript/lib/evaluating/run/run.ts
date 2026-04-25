@@ -25,7 +25,6 @@ import checkFormat from '../../formatting/check-format.js';
 import validate from '../../validating/validate.js';
 
 import type {
-	CancelEvent,
 	ConsoleMethod,
 	RunEvent,
 	ErrorEvent as RunErrorEvent,
@@ -74,6 +73,7 @@ type QueueMessage = WorkerOutbound | WorkerErrorSignal;
  */
 type TerminationCause =
 	| { readonly kind: 'cancel' }
+	| { readonly kind: 'fail'; readonly reason: unknown }
 	| { readonly kind: 'timeout' }
 	| { readonly kind: 'worker-error' };
 
@@ -198,12 +198,20 @@ function makeInternalError(err: unknown): RunErrorEvent {
  * `.next()` internally). Calling `.cancel()` before any of these
  * skips Worker creation entirely — no resource leak.
  *
- * **Cancellation.** `.cancel()` sets an internal flag and unsticks
+ * **Cancellation.** `.cancel()` sets `terminationCause` and unsticks
  * any pending `await dequeue()`. The main loop breaks cleanly,
  * terminates the Worker in its finally block, and returns a
- * `RunResult` with a trailing `{event: 'cancel'}` in `logs`. No
- * exception is thrown. Idempotent — safe to call any number of
+ * `RunResult` with `outcome: 'cancel'`. Logs stay pure (no
+ * synthetic cancel marker appended). No exception is thrown.
+ * Idempotent and first-write-wins — safe to call any number of
  * times, at any phase.
+ *
+ * **Consumer-driven structured stop.** `.fail(reason)` is a
+ * parallel method that settles with `outcome: 'fail'` and
+ * `result.reason === reason`. Used for teaching harnesses that
+ * want to record WHY a run was stopped (e.g., a learner's
+ * prediction was wrong). `reason` is stored by reference —
+ * reference-stable across replay.
  *
  * **Cancel latency.** Cancel takes effect on the next resolution of
  * `await dequeue()` in the main loop. In most phases that's within
@@ -295,18 +303,32 @@ function createRunGenerator(
 		wakeDequeue();
 	}
 
+	function fail(reason?: unknown): void {
+		setTermination({ kind: 'fail', reason });
+		wakeDequeue();
+	}
+
 	async function* body(): AsyncGenerator<RunEvent, RunResult> {
 		const maxSeconds = options?.seconds ?? 5;
 		const maxIterations = options?.iterations;
 		const resolvedIo = buildResolvedIo(options?.io);
 
-		// 0. Cancelled before first iterate — skip all setup.
+		// 0. Consumer-initiated termination before first iterate — skip
+		// all setup. Outcome + reason carry the signal; logs stay empty
+		// (no worker ran, no events were emitted).
 		if (terminationCause?.kind === 'cancel') {
-			const cancelEvent: CancelEvent = { event: 'cancel' };
 			return deepFreezeInPlace({
 				ok: true,
 				outcome: 'cancel' as const,
-				logs: [cancelEvent],
+				logs: [],
+			});
+		}
+		if (terminationCause?.kind === 'fail') {
+			return deepFreezeInPlace({
+				ok: true,
+				outcome: 'fail' as const,
+				reason: terminationCause.reason,
+				logs: [],
 			});
 		}
 
@@ -512,9 +534,10 @@ function createRunGenerator(
 				// is the cause; others are ignored. Cancellation supersedes any
 				// in-flight event that arrived just before cancel fired.
 				const cause = getTerminationKind();
-				if (cause === 'cancel') {
-					const cancelEvent: CancelEvent = { event: 'cancel' };
-					logs.push(cancelEvent);
+				if (cause === 'cancel' || cause === 'fail') {
+					// Consumer-initiated stop. Termination metadata goes on
+					// the result (outcome + reason via buildResult); logs
+					// stay pure — no synthetic event is pushed here.
 					break;
 				}
 
@@ -557,10 +580,15 @@ function createRunGenerator(
 
 					yield event;
 
-					// WHY cancelled check BEFORE releasing the Worker: if cancel
-					// fired during yield, we must NOT resume — the finally
-					// block terminates the Worker still-paused. Clean teardown.
-					if (getTerminationKind() === 'cancel') continue;
+					// WHY termination check BEFORE releasing the Worker: if
+					// cancel / fail fired during yield, we must NOT resume —
+					// the finally block terminates the Worker still-paused.
+					// Clean teardown. Loop-top check then breaks out on the
+					// next iteration via the cause dispatch.
+					{
+						const postYieldCause = getTerminationKind();
+						if (postYieldCause === 'cancel' || postYieldCause === 'fail') continue;
+					}
 					// WHY clearEventReady BEFORE writeResumeSignal: clearing
 					// after release would race against the Worker's next trap
 					// re-arming the flag — the main thread would clobber a
@@ -615,8 +643,11 @@ function createRunGenerator(
 			URL.revokeObjectURL(url);
 		}
 
-		// 9. Build result from collected logs
-		return buildResult(logs, maxSeconds, maxIterations);
+		// 9. Build result from collected logs + terminationCause.
+		// Consumer-initiated stops (cancel/fail) surface via outcome
+		// + reason; engine-level failures (timeout, worker-error)
+		// surface via errorEvent in logs.
+		return buildResult(logs, maxSeconds, terminationCause, maxIterations);
 	}
 
 	const gen = body();
@@ -664,13 +695,14 @@ function createRunGenerator(
 	// Intercept gen.return so for-await-break settles the RunResult
 	// via the existing cancel path. Consumers who `break` out of a
 	// live `for await (const e of gen)` get the same settled shape
-	// as explicit `.cancel()` — trailing {event:'cancel'} in logs,
-	// replay-identity preserved. See DOCS.md § Replay.
+	// as explicit `.cancel()` — outcome: 'cancel' on the result,
+	// replay-identity preserved for worker-emitted events. See
+	// DOCS.md § Replay and § Unified termination protocol.
 	//
 	// Invariants (from AR):
-	// - CancelEvent is constructed INSIDE body()'s cancelled-check
-	//   (run.ts:473-477), never here. Identity-stable replay requires
-	//   the same ref in `logs` and the frozen RunResult.
+	// - Termination metadata (cancel/fail) lives on the RunResult as
+	//   `outcome` + optional `reason`. Logs are pure worker events —
+	//   no synthetic termination marker is pushed anywhere.
 	// - Drive via origNext, never origReturn. Native .return() aborts
 	//   body before buildResult — regresses to the pre-fix state.
 	// - Short-circuit on isDone per ECMA-262 §27.6.3.3.
@@ -723,6 +755,12 @@ function createRunGenerator(
 	// readonly guarantee actually enforced at runtime.
 	Object.defineProperty(gen, 'cancel', {
 		value: cancel,
+		writable: false,
+		configurable: false,
+		enumerable: true,
+	});
+	Object.defineProperty(gen, 'fail', {
+		value: fail,
 		writable: false,
 		configurable: false,
 		enumerable: true,
@@ -814,20 +852,38 @@ async function handleIoRequest(
 }
 
 /**
- * Builds a RunResult from the collected event logs.
+ * Builds a RunResult from the collected event logs + terminationCause.
  *
- * @remarks Sets the `outcome` field based on the event stream:
+ * @remarks Sets the `outcome` field from:
+ * - terminationCause is 'cancel' → `cancel` (consumer stopped)
+ * - terminationCause is 'fail' → `fail` (consumer stopped with reason)
  * - TimeoutError in logs → `timeout`
  * - Iteration-limit RangeError in logs → `iteration-limit`
- * - Any other error event → `error`
- * - Trailing CancelEvent and no error → `cancel`
+ * - Any other error event in logs → `error`
  * - Otherwise → `complete`
+ *
+ * Consumer-initiated stops take precedence over in-flight error events.
+ * `logs` is a pure worker-emitted event stream — no synthetic cancel
+ * marker is appended. The cancel/fail signal lives on outcome + reason.
  */
 function buildResult(
 	logs: readonly RunEvent[],
 	maxSeconds: number,
+	terminationCause: TerminationCause | null,
 	maxIterations?: number,
 ): RunResult {
+	if (terminationCause?.kind === 'cancel') {
+		return deepFreezeInPlace({ ok: true, outcome: 'cancel' as const, logs });
+	}
+	if (terminationCause?.kind === 'fail') {
+		return deepFreezeInPlace({
+			ok: true,
+			outcome: 'fail' as const,
+			reason: terminationCause.reason,
+			logs,
+		});
+	}
+
 	const errorEvent = findErrorEvent(logs);
 
 	if (errorEvent) {
@@ -884,11 +940,7 @@ function buildResult(
 		});
 	}
 
-	// No error event. Trailing CancelEvent → consumer stopped the run
-	// (via .cancel() or for-await break). Otherwise natural complete.
-	const outcome: 'cancel' | 'complete' =
-		logs.at(-1)?.event === 'cancel' ? 'cancel' : 'complete';
-	return deepFreezeInPlace({ ok: true, outcome, logs });
+	return deepFreezeInPlace({ ok: true, outcome: 'complete' as const, logs });
 }
 
 /**

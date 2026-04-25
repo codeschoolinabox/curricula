@@ -130,10 +130,11 @@ Worker and ending when the consumer's next pull resumes execution:
 - Cancel during **Flag-arm/Post/Block** (inside the Worker): cannot
   happen — these are synchronous and uninterruptible on the Worker
   side.
-- Cancel during **Dequeue**: the cancel flag is set on the main
-  thread and `wakeDequeue` unsticks the pending wait via a sentinel
-  push. The main loop observes the cancel flag on its next
-  iteration, pushes a CancelEvent to the log, and breaks.
+- Cancel during **Dequeue**: the termination cause is set on the
+  main thread and `wakeDequeue` unsticks the pending wait via a
+  sentinel push. The main loop observes `terminationCause.kind ===
+  'cancel'` on its next iteration and breaks (no synthetic event is
+  pushed — the cancel surfaces on `result.outcome` from buildResult).
 - Cancel during **Yield**: the main loop is awaiting the consumer;
   cancel flag is set. On the consumer's next pull the macrotask
   schedules the next iteration, which observes the cancel flag and
@@ -166,30 +167,39 @@ in every case.
    entry point calls a single `setTermination(cause)` helper. The
    helper writes only if the cause closure variable is null;
    otherwise the earlier cause wins and the new one is dropped.
+   `cancel` and `fail` are consumer-driven causes (`fail` carries
+   a `reason` payload); `timeout` and `worker-error` are engine-
+   detected.
 2. **Wake dequeue (main, sync)** — a sentinel is pushed to the
    queue if empty; any pending `await dequeue()` resolves.
 3. **Dispatch (main, sync, top of the while-loop)** — the body's
    main loop reads the cause on each iteration. Branch on kind:
-   - `cancel` → push CancelEvent into logs, break.
+   - `cancel` or `fail` → just break. Termination metadata goes
+     on the RunResult via buildResult; no synthetic event is
+     pushed to logs.
    - `timeout` → push TimeoutError into logs, yield it, break.
    - `worker-error` → push error into logs, break.
    - Runtime error in learner code is carried via the message
      channel as an error event; main loop pushes and breaks.
 4. **Finally (main, sync)** — `worker.terminate()`, revoke the
    Blob URL, clear any pending timer.
-5. **Build result (main, sync)** — `buildResult(logs, ...)`
-   classifies `outcome` from the log contents:
-   - TimeoutError errorEvent → `timeout`.
-   - Iteration-limit RangeError → `iteration-limit`.
-   - Any other errorEvent → `error`.
-   - Trailing CancelEvent (no error) → `cancel`.
-   - Otherwise → `complete`.
+5. **Build result (main, sync)** — `buildResult(logs, maxSeconds,
+   terminationCause, maxIterations)` classifies `outcome`:
+   - `terminationCause` is `cancel` → `outcome: 'cancel'`, logs
+     stay pure.
+   - `terminationCause` is `fail` → `outcome: 'fail'`, `reason`
+     set to the payload, logs stay pure.
+   - TimeoutError errorEvent in logs → `outcome: 'timeout'`.
+   - Iteration-limit RangeError in logs → `outcome: 'iteration-limit'`.
+   - Any other errorEvent in logs → `outcome: 'error'`.
+   - Otherwise → `outcome: 'complete'`.
 
 **Precedence** (first-write-wins):
 
 | First-set cause | Wins over any later-set | Rationale |
 | --- | --- | --- |
 | `cancel` (via `.cancel()` or `.return()` for break) | yes | consumer intent takes precedence |
+| `fail` (via `.fail(reason)`) | yes (if arrives first) | consumer-initiated structured stop |
 | `timeout` | yes (if arrives first) | wall-clock budget exhausted |
 | `worker-error` | yes (if arrives first) | Worker crashed — main thread cannot override |
 
@@ -200,10 +210,15 @@ write is the single source of truth.
 
 **Structural constraints**:
 
-- CancelEvent (the trailing `{event:'cancel'}`) is constructed
-  inside `body()`'s cancel-branch, never in an interceptor.
-  Identity-stable replay requires the same reference lives in both
-  `logs` and the frozen RunResult's `logs` array.
+- Termination metadata (cancel, fail) lives on the RunResult as
+  `outcome` + optional `reason`. It is NEVER pushed into logs as a
+  synthetic event. Logs are strictly worker-emitted — what the
+  program did. This is the core invariant that separates "program
+  behavior" from "how the run ended."
+- The `.fail(reason)` path stores `reason` by reference on the
+  terminationCause closure variable, then buildResult surfaces it
+  on `result.reason`. No clone, no separate freeze — reference-
+  stable across replay.
 - The `.return` interceptor drives body via `origNext`, never
   `origReturn`. Native `.return()` aborts body before `buildResult`;
   that would regress to the pre-fix broken state.
@@ -211,7 +226,8 @@ write is the single source of truth.
   per ECMA-262 §27.6.3.3.
 - `deepFreezeInPlace` freezes logs recursively; no post-push event
   mutation. The outcome field on the RunResult is frozen with the
-  rest.
+  rest; the `reason` object is frozen in place if it's a plain
+  object (consumers passing primitives see no change).
 
 **Out of scope**:
 
@@ -228,9 +244,11 @@ write is the single source of truth.
 ### Replay / re-iteration on RunHandle
 
 Consumer-observable invariant: after a run completes (successfully,
-via a thrown error, or via cancel), a second `for await` over the
-same handle surfaces the same event references as the first
-iteration, in the same order, with no Worker respawn.
+via a thrown error, via cancel, or via fail), a second `for await`
+over the same handle surfaces the same worker-emitted event
+references as the first iteration, in the same order, with no
+Worker respawn. Termination metadata (cancel/fail) is NOT in the
+replayed stream — it's on `result.outcome` and `result.reason`.
 
 **Execution phases**:
 
@@ -239,15 +257,16 @@ iteration, in the same order, with no Worker respawn.
 2. **Accumulate (main, sync)** — The main loop pushes the event
    reference (not a clone) into the run's internal log array. This
    is the ONLY point at which events enter the log; the push
-   happens before the yield. If cancel has been signaled before
-   this point, the main loop pushes a CancelEvent as the final
-   entry instead of an emitted event.
+   happens before the yield. Termination triggers (cancel/fail/
+   timeout) do NOT push synthetic events — they set `terminationCause`,
+   which buildResult reads to classify `outcome`.
 3. **Yield (main, async)** — The consumer receives the reference.
 4. **Completion (main, sync)** — When the main loop exits (normal
-   completion, timeout, error, or cancel), the run's final result
-   (including the log) is constructed and frozen in place. No
-   clone; the references in the log are the exact references the
-   consumer saw during yield.
+   completion, timeout, error, cancel, or fail), buildResult
+   constructs the RunResult with `outcome` (and optional `reason`
+   for fail) and freezes the whole structure in place. No clone;
+   the log references are the exact references the consumer saw
+   during yield.
 5. **Replay iteration (post-completion)** — The consumer begins a
    new `for await` over the same handle. The handle returns a fresh
    iterator positioned at the start of the frozen log. No Worker is
@@ -259,11 +278,14 @@ iteration, in the same order, with no Worker respawn.
 
 - The Accumulate step pushes by reference. No clone, no
   normalization, no copy.
-- The CancelEvent (if any) is appended by the main thread during
-  live iteration — not by the Worker — and lives in the log before
-  Completion freeze, so replay sees it as the final entry.
+- Termination metadata (cancel / fail) does NOT appear in the log.
+  It lives on `result.outcome` and `result.reason`. Consumers that
+  want to know "was this run stopped" check `result.outcome`, not
+  the log's last entry.
 - The final result (including the log) is frozen in place.
-  References of event objects survive freeze.
+  References of event objects survive freeze. The `reason` payload
+  for `.fail()` is stored by reference and frozen in place (when
+  it's a plain object; primitives are immutable already).
 - Replay drains as fast as the consumer pulls. No artificial
   throttle between replayed events; consumers who want a paced
   replay pace it themselves.
@@ -272,8 +294,9 @@ iteration, in the same order, with no Worker respawn.
   split events as `.next()` calls serialize — this is documented
   as unsupported; the contract does not promise to throw. Consumers
   must wait for completion (or cancel) before re-iterating.
-- Cancel counts as completion. The cancel event is part of the log;
-  the replayed iterator yields it as the final entry.
+- Cancel / fail count as completion. The consumer checks
+  `result.outcome` to distinguish; the replayed iterator yields
+  only the worker-emitted events that preceded the stop.
 
 **Out of scope**:
 
@@ -291,10 +314,11 @@ iteration, in the same order, with no Worker respawn.
 RunHandle's `gen.return()` interceptor routes the runtime's implicit
 call (triggered by `break` inside a live `for await`) through the
 same cancel path as explicit `.cancel()` — body() reaches its
-natural `return buildResult(...)`, a `{event:'cancel'}` is appended
-to logs, and the settled RunResult is cached for replay. Consumers
-can choose `break` or `.cancel()` interchangeably; identity-stable
-replay holds for both.
+natural `return buildResult(...)` with `terminationCause.kind ===
+'cancel'`, the settled RunResult is cached for replay with
+`outcome: 'cancel'`. Consumers can choose `break` or `.cancel()`
+interchangeably; identity-stable replay of worker-emitted events
+holds for both.
 
 ### Timer-vs-yield
 

@@ -116,19 +116,18 @@ type ConsoleMethod =
  * - `'alert'` — alert() call
  * - `'confirm'` — confirm() call with return value
  * - `'error'` — runtime error during execution
- * - `'cancel'` — external cancellation via `.cancel()` on the Execution
  *
- * `CancelEvent` is never emitted by the worker — it's appended by the
- * main thread when `.cancel()` is invoked. Consumers that care whether
- * a run was cancelled can check `logs.at(-1)?.event === 'cancel'`.
+ * `RunEvent` is strictly worker-emitted events — what the program did.
+ * Termination markers (cancel / break / fail) are NOT events; they
+ * live on the RunResult as `outcome` + optional `reason`. Consumers
+ * check `result.outcome === 'cancel' | 'fail'` (never `logs.at(-1)`).
  */
 type RunEvent =
 	| ConsoleEvent
 	| PromptEvent
 	| AlertEvent
 	| ConfirmEvent
-	| ErrorEvent
-	| CancelEvent;
+	| ErrorEvent;
 
 /** Unified console event — one shape for all 19 console methods.
  * Consumers discriminate first on `event === 'console'`, then filter
@@ -169,17 +168,6 @@ type ErrorEvent = {
 	readonly phase: 'creation' | 'execution';
 };
 
-/**
- * Emitted on external cancellation via `.cancel()` on the Execution
- * handle.
- *
- * @remarks Minimal shape — cancel is external to user code, so no
- * line number, no phase, no reason. Presence in `logs` is the signal.
- */
-type CancelEvent = {
-	readonly event: 'cancel';
-};
-
 // ─── Exports ─────────────────────────────────────────────────
 
 export type {
@@ -192,5 +180,4 @@ export type {
 	AlertEvent,
 	ConfirmEvent,
 	ErrorEvent,
-	CancelEvent,
 };

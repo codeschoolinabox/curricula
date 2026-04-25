@@ -114,7 +114,28 @@ type RunOptions = {
  */
 type RunHandle =
 	AsyncGenerator<RunEvent, RunResult> &
-	Execution<RunEvent, RunResult>;
+	Execution<RunEvent, RunResult> & {
+		/**
+		 * Stop the run and attach a structured rejection payload.
+		 *
+		 * @param reason - arbitrary payload the consumer wants surfaced
+		 *   on `result.reason`. Not cloned, not frozen-separately; the
+		 *   same reference is replay-stable.
+		 *
+		 * @remarks `.fail(reason)` is for consumer-driven structured
+		 * termination — e.g. a teaching harness that wants to stop the
+		 * run and record "learner's prediction was wrong" with a
+		 * specific rejection payload. The result settles with
+		 * `{ok:true, outcome:'fail', reason}`. Logs remain pure
+		 * (no synthetic termination marker appended).
+		 *
+		 * Idempotent and first-write-wins with `.cancel()` / timeout
+		 * / worker-error: whichever termination path sets its cause
+		 * first wins; subsequent `.fail()` / `.cancel()` calls are
+		 * no-ops. Safe to call any number of times at any phase.
+		 */
+		readonly fail: (reason?: unknown) => void;
+	};
 
 // --- Messages: main → worker ---
 
