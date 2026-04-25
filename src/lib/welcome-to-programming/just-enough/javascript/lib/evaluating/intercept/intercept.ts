@@ -39,7 +39,7 @@ import type {
 } from './types.js';
 
 import createWorkerScript from './create-worker-script.js';
-import guardLoops from './guard-loops/guard-loops.js';
+import guardLoops from '../shared/guard-loops/guard-loops.js';
 import {
 	BUFFER_SIZE,
 	CONTROL_INDEX,
