@@ -15,6 +15,8 @@
  * Never throws (for string input).
  */
 
+import type { Program } from 'acorn';
+
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import justEnoughJs from './just-enough-js.js';
@@ -26,9 +28,13 @@ import type { BaseResult } from './types.js';
  * Validates a program against the full Just Enough JavaScript level.
  *
  * @param code - JavaScript source to validate
- * @returns A frozen {@link BaseResult}
+ * @returns A frozen {@link BaseResult}, augmented with the parsed
+ *   acorn `Program` when parsing succeeded. The `ast` field is
+ *   undefined only when parse itself failed.
  */
-function validate(code: string): BaseResult {
+function validate(
+	code: string,
+): BaseResult & { readonly ast?: Program } {
 	const report = validateProgram(code, justEnoughJs);
 
 	// 1. Parse error — code is not valid syntax
@@ -46,17 +52,20 @@ function validate(code: string): BaseResult {
 	}
 
 	// 2. Rejections — code has language-level violations
+	//    (parse succeeded; ast is available)
 	const rejections = report.violations;
 	if (rejections.length > 0) {
 		return deepFreezeInPlace({
 			ok: false,
 			rejections,
+			...(report.ast ? { ast: report.ast } : {}),
 		});
 	}
 
-	// 3. Valid
+	// 3. Valid (parse succeeded; ast is available)
 	return deepFreezeInPlace({
 		ok: true,
+		...(report.ast ? { ast: report.ast } : {}),
 	});
 }
 

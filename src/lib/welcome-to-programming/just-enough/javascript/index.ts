@@ -11,6 +11,7 @@
 
 // --- Named exports: API functions ---
 export { default as intercept } from './lib/evaluating/intercept/intercept.js';
+export { default as run } from './lib/evaluating/run/run.js';
 export { default as trace } from './api/trace.js';
 export { default as validate } from './lib/validating/validate.js';
 export { default as parse } from './lib/parse/parse.js';
@@ -43,3 +44,13 @@ export type { TraceEvent } from './lib/evaluating/trace/semantics/tracing/types.
 export type { Violation } from './lib/validating/types.js';
 
 export type { CheckFormatResult } from './lib/formatting/types.js';
+
+export type {
+	RunResult,
+	RunOutcome,
+	RunResultError,
+	RunHandle,
+	RunOptions,
+	ResolvedRunOptions,
+	IoMocks as RunIoMocks,
+} from './lib/evaluating/run/types.js';

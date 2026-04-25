@@ -99,6 +99,7 @@ function validateProgram(
 		violations,
 		source,
 		levelName: languageLevel.name,
+		ast,
 	};
 
 	if (scriptMode) {
