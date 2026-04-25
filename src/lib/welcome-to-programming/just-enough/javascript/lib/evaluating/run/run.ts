@@ -454,8 +454,15 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 	// can return synchronously. cancel() can fire between the handle
 	// return and the microtask running — we check terminationCause
 	// before spawning.
+	//
+	// **The leading `await Promise.resolve()` is load-bearing.** Async
+	// function bodies run synchronously until the first `await`; without
+	// this defer, `new Worker(...)` would execute inside `run()`'s sync
+	// frame, race-blocking any cancel() the caller queues immediately
+	// after `run()` returns.
 	void (async () => {
 		try {
+			await Promise.resolve();
 			if (terminationCause !== undefined) return; // already cancelled
 
 			const sab = new SharedArrayBuffer(BUFFER_SIZE);
