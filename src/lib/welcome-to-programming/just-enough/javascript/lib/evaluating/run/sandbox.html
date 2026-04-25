@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Run Lens Sandbox — Trapless Engine</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: monospace;
+				padding: 1.5rem;
+				max-width: 800px;
+				margin: 0 auto;
+				font-size: 13px;
+			}
+			h1 {
+				font-size: 1.1rem;
+				margin-bottom: 0.5rem;
+			}
+			p.note {
+				color: #666;
+				margin-bottom: 1rem;
+			}
+			textarea {
+				width: 100%;
+				height: 180px;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.5rem;
+				tab-size: 2;
+				border: 2px solid #333;
+				resize: vertical;
+			}
+			.controls {
+				margin-top: 0.5rem;
+				display: flex;
+				gap: 0.75rem;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+			button {
+				padding: 0.4rem 1.2rem;
+				font-family: monospace;
+				font-size: 13px;
+				cursor: pointer;
+				border: 2px solid #333;
+				background: #eee;
+			}
+			button:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+			label {
+				font-size: 12px;
+			}
+			input[type='number'] {
+				width: 4em;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.25rem;
+				border: 2px solid #333;
+			}
+			#status {
+				margin-top: 0.75rem;
+				font-size: 12px;
+				color: #555;
+				white-space: pre-wrap;
+				padding: 0.5rem;
+				border: 1px dashed #999;
+				background: #fafafa;
+			}
+			#maxIterations {
+				width: 6em;
+			}
+			.snippets {
+				margin-top: 0.35rem;
+				font-size: 12px;
+			}
+			.snippets summary {
+				cursor: pointer;
+				color: #555;
+			}
+			.snippet-btns {
+				margin-top: 0.35rem;
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+			.toggles {
+				margin-top: 1rem;
+				border: 2px solid #333;
+				padding: 0.75rem;
+			}
+			.toggles h2 {
+				font-size: 0.9rem;
+				margin-bottom: 0.5rem;
+			}
+			.toggle-row {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				margin-bottom: 0.25rem;
+			}
+			.toggle-row label {
+				min-width: 120px;
+			}
+			.toggle-row select {
+				font-family: monospace;
+				font-size: 12px;
+				border: 1px solid #555;
+				padding: 0.15rem 0.3rem;
+			}
+			.console-banner {
+				margin-top: 0.75rem;
+				padding: 0.5rem;
+				border-left: 3px solid #840;
+				background: #fff8e6;
+				font-size: 11px;
+				color: #555;
+			}
+
+			/* Styled dialog overlay (mirrored from intercept) */
+			.sd-overlay {
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.45);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				z-index: 1000;
+			}
+			.sd-box {
+				background: #fff;
+				border: 2px solid #333;
+				padding: 1.25rem;
+				min-width: 280px;
+				max-width: 400px;
+				font-family: monospace;
+				font-size: 13px;
+			}
+			.sd-box p {
+				margin-bottom: 0.75rem;
+			}
+			.sd-box input {
+				width: 100%;
+				font-family: monospace;
+				font-size: 13px;
+				padding: 0.3rem;
+				border: 2px solid #333;
+				margin-bottom: 0.75rem;
+			}
+			.sd-box .sd-btns {
+				display: flex;
+				gap: 0.5rem;
+				justify-content: flex-end;
+			}
+			.sd-box button {
+				padding: 0.3rem 0.9rem;
+				font-family: monospace;
+				font-size: 12px;
+				border: 2px solid #333;
+				background: #eee;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Run Lens Sandbox — Trapless Engine</h1>
+		<p class="note">
+			Runs code in a Web Worker without traps and returns final status only —
+			no event stream, no logs. Programs that call <code>console.log</code>
+			write to the worker&rsquo;s native console (visible in browser dev
+			tools, not captured here). To see captured logs, use the
+			<strong>intercept</strong> engine instead.
+		</p>
+
+		<textarea id="code">
+let x = 1 + 2;
+console.log('hello from the worker:', x);
+</textarea>
+
+		<details open class="snippets">
+			<summary>code snippets</summary>
+			<div class="snippet-btns">
+				<button
+					type="button"
+					class="snippet"
+					data-code="let x = 1 + 2;
+console.log('hello from the worker:', x);"
+				>
+					[trivial complete]
+				</button>
+				<button
+					type="button"
+					class="snippet"
+					data-code="while (true) {
+	let x = 1;
+}"
+				>
+					[infinite loop — timeout]
+				</button>
+				<button
+					type="button"
+					class="snippet"
+					data-code="while (true) {
+	let x = 1;
+}"
+					data-iterations="100"
+				>
+					[infinite loop — iteration limit]
+				</button>
+				<button
+					type="button"
+					class="snippet"
+					data-code="null();"
+				>
+					[runtime error]
+				</button>
+				<button
+					type="button"
+					class="snippet"
+					data-code="let name = prompt('What is your name?', 'a toad');
+console.log('hello,', name);
+let again = confirm('run again?');
+console.log('again:', again);
+alert('done!');"
+				>
+					[prompt + alert + confirm]
+				</button>
+				<button
+					type="button"
+					class="snippet"
+					data-code="let x = prompt('input?');
+console.log('got:', x);"
+				>
+					[prompt — no mock (D5b error)]
+				</button>
+				<button
+					type="button"
+					class="snippet"
+					data-code="// Click [run], then immediately click [cancel] before the 5-second
+// prompt mock resolves. Wait-for-mock semantics: cancel waits for
+// the mock to settle before terminating, so total elapsed >= 5s.
+let x = prompt('slow mock');
+console.log('finished:', x);"
+					data-slow-mock="5000"
+				>
+					[slow mock then cancel]
+				</button>
+				<button
+					type="button"
+					class="snippet"
+					data-code="// Passing a non-cloneable arg to prompt; safeCloneArgs in the
+// worker should fall back to String(fn).
+let x = prompt(() => 1);"
+				>
+					[structured-clone edge]
+				</button>
+			</div>
+		</details>
+
+		<div class="controls">
+			<button id="run">[run]</button>
+			<button id="format">[format]</button>
+			<button id="cancel" disabled>[cancel]</button>
+			<label
+				><input id="maxSecondsEnabled" type="checkbox" checked /> max
+				seconds:
+				<input id="maxSeconds" type="number" value="5" min="1" max="30" />
+			</label>
+			<label
+				><input id="maxIterationsEnabled" type="checkbox" /> max
+				iterations:
+				<input id="maxIterations" type="number" placeholder="none" min="-10" />
+			</label>
+		</div>
+
+		<div class="toggles">
+			<h2>IO Hook Toggles</h2>
+			<div class="toggle-row">
+				<label for="t-prompt">prompt</label>
+				<select id="t-prompt" title="prompt hook">
+					<option value="none">throw (D5b default)</option>
+					<option value="styled">styled</option>
+					<option value="native">native</option>
+				</select>
+			</div>
+			<div class="toggle-row">
+				<label for="t-alert">alert</label>
+				<select id="t-alert" title="alert hook">
+					<option value="none">throw (D5b default)</option>
+					<option value="styled">styled</option>
+					<option value="native">native</option>
+				</select>
+			</div>
+			<div class="toggle-row">
+				<label for="t-confirm">confirm</label>
+				<select id="t-confirm" title="confirm hook">
+					<option value="none">throw (D5b default)</option>
+					<option value="styled">styled</option>
+					<option value="native">native</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="console-banner">
+			console output goes to the browser dev tools (worker context) — this
+			engine doesn&rsquo;t capture it. Open dev tools to see what learner
+			code prints.
+		</div>
+
+		<div id="status">click [run] to begin.</div>
+
+		<script type="module">
+			import run from './run.ts';
+			import format from '../../formatting/format.ts';
+
+			// --- Elements ---
+			const codeEl = document.getElementById('code');
+			const runBtn = document.getElementById('run');
+			const formatBtn = document.getElementById('format');
+			const cancelBtn = document.getElementById('cancel');
+			const statusEl = document.getElementById('status');
+			const maxSecondsEnabled = document.getElementById('maxSecondsEnabled');
+			const maxSeconds = document.getElementById('maxSeconds');
+			const maxIterationsEnabled = document.getElementById('maxIterationsEnabled');
+			const maxIterations = document.getElementById('maxIterations');
+			const tPrompt = document.getElementById('t-prompt');
+			const tAlert = document.getElementById('t-alert');
+			const tConfirm = document.getElementById('t-confirm');
+
+			// --- Snippet buttons ---
+			document.querySelectorAll('.snippet').forEach((btn) => {
+				btn.addEventListener('click', () => {
+					codeEl.value = btn.dataset.code;
+					if (btn.dataset.iterations) {
+						maxIterationsEnabled.checked = true;
+						maxIterations.value = btn.dataset.iterations;
+					}
+					if (btn.dataset.slowMock) {
+						tPrompt.value = 'styled-slow';
+					}
+				});
+			});
+
+			// --- Format button ---
+			formatBtn.addEventListener('click', () => {
+				try {
+					codeEl.value = format(codeEl.value);
+				} catch (err) {
+					setStatus('format error: ' + (err && err.message ? err.message : String(err)));
+				}
+			});
+
+			// --- Styled dialog impl ---
+			function styledPrompt(message, defaultValue) {
+				return new Promise((resolve) => {
+					const overlay = document.createElement('div');
+					overlay.className = 'sd-overlay';
+					const box = document.createElement('div');
+					box.className = 'sd-box';
+					const p = document.createElement('p');
+					p.textContent = message ?? '';
+					const input = document.createElement('input');
+					input.type = 'text';
+					input.value = defaultValue ?? '';
+					const btns = document.createElement('div');
+					btns.className = 'sd-btns';
+					const cancelBtn2 = document.createElement('button');
+					cancelBtn2.textContent = 'cancel';
+					const okBtn = document.createElement('button');
+					okBtn.textContent = 'ok';
+					btns.append(cancelBtn2, okBtn);
+					box.append(p, input, btns);
+					overlay.append(box);
+					document.body.append(overlay);
+					input.focus();
+					okBtn.onclick = () => {
+						overlay.remove();
+						resolve(input.value);
+					};
+					cancelBtn2.onclick = () => {
+						overlay.remove();
+						resolve(null);
+					};
+				});
+			}
+			function styledAlert(message) {
+				return new Promise((resolve) => {
+					const overlay = document.createElement('div');
+					overlay.className = 'sd-overlay';
+					const box = document.createElement('div');
+					box.className = 'sd-box';
+					const p = document.createElement('p');
+					p.textContent = message ?? '';
+					const btns = document.createElement('div');
+					btns.className = 'sd-btns';
+					const okBtn = document.createElement('button');
+					okBtn.textContent = 'ok';
+					btns.append(okBtn);
+					box.append(p, btns);
+					overlay.append(box);
+					document.body.append(overlay);
+					okBtn.focus();
+					okBtn.onclick = () => {
+						overlay.remove();
+						resolve();
+					};
+				});
+			}
+			function styledConfirm(message) {
+				return new Promise((resolve) => {
+					const overlay = document.createElement('div');
+					overlay.className = 'sd-overlay';
+					const box = document.createElement('div');
+					box.className = 'sd-box';
+					const p = document.createElement('p');
+					p.textContent = message ?? '';
+					const btns = document.createElement('div');
+					btns.className = 'sd-btns';
+					const noBtn = document.createElement('button');
+					noBtn.textContent = 'cancel';
+					const okBtn = document.createElement('button');
+					okBtn.textContent = 'ok';
+					btns.append(noBtn, okBtn);
+					box.append(p, btns);
+					overlay.append(box);
+					document.body.append(overlay);
+					okBtn.focus();
+					okBtn.onclick = () => {
+						overlay.remove();
+						resolve(true);
+					};
+					noBtn.onclick = () => {
+						overlay.remove();
+						resolve(false);
+					};
+				});
+			}
+
+			// --- Build IO mocks from toggles ---
+			function buildIo() {
+				const io = {};
+				const tp = tPrompt.value;
+				const ta = tAlert.value;
+				const tc = tConfirm.value;
+				// 'styled-slow' is set by the slow-mock snippet — wraps styledPrompt
+				// with a 5-second delay so users can test wait-for-mock cancel.
+				if (tp === 'styled') io.prompt = styledPrompt;
+				else if (tp === 'native') io.prompt = (m, d) => window.prompt(m, d);
+				else if (tp === 'styled-slow')
+					io.prompt = async (m, d) => {
+						await new Promise((r) => setTimeout(r, 5000));
+						return styledPrompt(m, d);
+					};
+				if (ta === 'styled') io.alert = styledAlert;
+				else if (ta === 'native') io.alert = (m) => window.alert(m);
+				if (tc === 'styled') io.confirm = styledConfirm;
+				else if (tc === 'native') io.confirm = (m) => window.confirm(m);
+				return io;
+			}
+
+			// --- Status helpers ---
+			function setStatus(text) {
+				statusEl.textContent = text;
+			}
+			function describeResult(result) {
+				const lines = [
+					`outcome: ${result.outcome}`,
+					`ok: ${result.ok}`,
+				];
+				if (result.error) {
+					lines.push(`error.kind: ${result.error.kind}`);
+					if (result.error.message) lines.push(`error.message: ${result.error.message}`);
+				}
+				if (result.rejections && result.rejections.length > 0) {
+					lines.push(`rejections: ${result.rejections.length}`);
+				}
+				return lines.join('\n');
+			}
+
+			// --- Run ---
+			let currentHandle = null;
+			runBtn.addEventListener('click', async () => {
+				if (currentHandle) return;
+				const code = codeEl.value;
+				const opts = { io: buildIo() };
+				if (maxSecondsEnabled.checked) {
+					opts.seconds = Number(maxSeconds.value) || 5;
+				}
+				if (maxIterationsEnabled.checked && maxIterations.value !== '') {
+					opts.iterations = Number(maxIterations.value);
+				}
+				setStatus('running…');
+				cancelBtn.disabled = false;
+				runBtn.disabled = true;
+				const handle = run(code, opts);
+				currentHandle = handle;
+				console.log('[run handle]', {
+					code: handle.code,
+					ast: handle.ast,
+					options: handle.options,
+				});
+				try {
+					const result = await handle;
+					console.log('[run result]', result);
+					setStatus(describeResult(result));
+				} catch (err) {
+					setStatus(
+						'unexpected throw: ' +
+							(err && err.message ? err.message : String(err)),
+					);
+				} finally {
+					currentHandle = null;
+					cancelBtn.disabled = true;
+					runBtn.disabled = false;
+				}
+			});
+
+			// --- Cancel ---
+			cancelBtn.addEventListener('click', () => {
+				if (!currentHandle) return;
+				currentHandle.cancel();
+				setStatus('cancel sent — waiting for engine to settle…');
+			});
+		</script>
+	</body>
+</html>
