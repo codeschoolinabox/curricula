@@ -77,6 +77,12 @@ type TerminationCause =
 	| { readonly kind: 'timeout' }
 	| { readonly kind: 'worker-error' };
 
+// Flat per-pause deduction representing the typical wall-clock cost
+// of one event-cycle's consumer-side processing. Rounded up so a busy
+// event loop times out at-or-before its `seconds` budget rather than
+// after — see DOCS.md "Timer-vs-yield".
+const YIELD_CHARGE_MS = 5;
+
 // --- Resolved IO ---
 
 const CONSOLE_METHODS: readonly ConsoleMethod[] = [
@@ -500,6 +506,7 @@ function createRunGenerator(
 				clearTimeout(timeout);
 				timeout = null;
 				remainingMs -= performance.now() - lastResumeTime;
+				remainingMs -= YIELD_CHARGE_MS;
 				if (remainingMs < 0) remainingMs = 0;
 			}
 		}

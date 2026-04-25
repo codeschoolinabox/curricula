@@ -335,11 +335,25 @@ holds for both.
 
 ### Timer-vs-yield
 
-Consumer-observable invariant: the cumulative timer counts only
-Worker-thread code-execution time. Time spent yielded to the
-consumer (between `for await` pulls) and time spent awaiting IO
-callbacks (styled dialogs, slow console mocks) never counts toward
-the `seconds` limit.
+Consumer-observable invariant: the cumulative timer counts
+**user-perceived runtime between paused interactions** — not pure
+worker-thread code-execution time, and not raw wall-clock time.
+Each event yield deducts a flat `YIELD_CHARGE_MS = 5` from the
+remaining budget on top of the worker-active elapsed time. Time
+spent yielded to the consumer between events (rendering wait, user
+think-time on a step) and time spent awaiting IO callbacks (styled
+dialogs, slow console mocks) does NOT itself add to the budget,
+but the per-yield flat charge means a tight rendering-bound loop
+still depletes the budget within wall-clock-ish bounds.
+
+Why a flat per-yield charge (not pure worker time): a busy
+`console.log(1)` loop's worker-active time per event is ~50µs but
+its wall-clock cost (including DOM rendering on the main thread)
+is ~1–2ms. Pure-worker-time accounting let a 1s budget run for
+~7s of wall-clock — counter-intuitive for learners. The 5ms charge
+rounds up so the timeout fires at-or-before the budget rather than
+after, matching the directive that no class-use-case has a
+legitimately long-running program.
 
 **Execution phases** per event yield cycle:
 
@@ -500,21 +514,28 @@ rejection), the main-thread catch path surfaces an `ErrorEvent` with
 error, not an exception from their own code. This is the only circumstance where
 an IO callback's exception reaches the learner's event stream.
 
-## Why cumulative timeout (not wall-clock)
+## Why cumulative timeout with a flat per-yield charge (not wall-clock)
 
-Timeout tracks execution time only. The timer pauses:
+Timeout tracks **user-perceived runtime between paused interactions**,
+not raw wall-clock and not pure worker code-execution time. The timer
+pauses:
 
 - While the worker is blocked on the SAB pause flag (waiting for the consumer's
   `next()` call)
 - While the main thread is awaiting any IO callback (dialog or console)
 
-When execution resumes, `setTimeout(remainingMs)` restarts.
+When execution resumes, `setTimeout(remainingMs)` restarts. Additionally,
+each pause deducts a flat `YIELD_CHARGE_MS = 5` representing the
+typical wall-clock cost of one event-cycle's consumer-side processing
+(DOM render, native log dispatch). The constant rounds up so a
+busy event loop times out at-or-before its budget — preferable to
+overshoot, since learners feel runs as longer than they are and
+no class-use-case justifies a legitimately long-running program.
 
-This means a learner stepping through events in the UI can take as long as they
-want — only actual code execution counts toward the limit. Without this, a
-learner examining step 3 of 100 could trigger a timeout while doing nothing. The
-same applies to styled dialogs: a consumer-provided `prompt` mock showing a
-custom modal does not count against the learner's execution time budget.
+Step waits stay free in practice: a learner pausing 5 minutes on
+event 3-of-100 burns one 5ms charge for that yield, not 5 minutes.
+Styled dialogs likewise pay the per-yield 5ms but not the entire
+modal-open duration.
 
 ## Why a Web Worker
 

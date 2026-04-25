@@ -50,5 +50,30 @@ describe('createRunGenerator EVENT_READY timer-guard (browser)', () => {
 			if (result.ok) throw new Error('expected ok:false');
 			expect(result.error.kind).toBe('timeout');
 		});
+
+		it('infinite event-emitting loop times out within ~budget/YIELD_CHARGE_MS events', async () => {
+			// Pins the flat per-yield charge: with budget=100ms and a 5ms
+			// charge per pause, ≤ ceil(100/5)=20 events should be drained
+			// before timeout fires. Generous epsilon absorbs slow CI:
+			// the assertion fails only if the charge regresses to a much
+			// smaller value (or zero), letting hundreds of events through.
+			const code = format('while (true) { console.log(1); }\n');
+			const result = await createRunGenerator(code, {
+				seconds: 0.1,
+				io: {
+					console: {
+						log: async () => {
+							/* drain fast, no stall */
+						},
+					},
+				},
+			});
+			if (result.ok) throw new Error('expected ok:false');
+			expect(result.error.kind).toBe('timeout');
+			// budget(100ms) / charge(5ms) = 20 events, plus epsilon
+			// for the worker-active deduction occasionally rounding
+			// remainingMs down by a sub-millisecond residue.
+			expect(result.logs?.length ?? 0).toBeLessThanOrEqual(40);
+		});
 	});
 });

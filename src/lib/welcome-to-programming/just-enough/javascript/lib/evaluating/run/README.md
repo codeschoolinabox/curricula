@@ -105,7 +105,7 @@ README. Use them consistently.
 run(
   code: string,
   options?: {
-    seconds?: number;    // default 5 — cumulative execution time
+    seconds?: number;    // default 5 — user-perceived runtime budget
     iterations?: number; // optional loop-guard limit
     io?: IoMocks;        // per-hook mocks; unspecified slots use natives
   }
@@ -142,11 +142,14 @@ consumers (primarily the test suite) can call `.next()` directly.
   (or first `.result` access). Parse errors, language-level
   violations, and unformatted code are surfaced as immediate error
   RunResults — no Worker is spawned. See § Validation pipeline.
-- **`options.seconds`** — cumulative execution time limit. Pauses
+- **`options.seconds`** — user-perceived runtime budget. Pauses
   during generator yield (consumer stepping time does not count) AND
   while an IO callback is being awaited (styled dialog time does not
-  count). Only actual Worker-thread code execution counts toward the
-  limit.
+  count). Each event yield additionally deducts a flat 5 ms charge
+  representing the typical wall-clock cost of one event-cycle's
+  consumer-side processing. The flat charge rounds up so a busy
+  rendering-bound loop times out at-or-before the budget rather than
+  after — see DOCS.md § Timer-vs-yield.
 - **`options.iterations`** — when set to any finite number (including
   `0` and negatives), injects loop guards that throw `RangeError` when
   `++loopN > iterations`. `Infinity` / `undefined` = no guards.
@@ -485,9 +488,10 @@ call until the callback completes.
 
 **All IO callbacks are awaited.** Sync callbacks cost one microtask;
 async callbacks pause the worker for however long the Promise takes
-to resolve. The cumulative timer pauses during each callback await so
-consumer UI interactions (custom dialogs, typewriter animations) do not
-count against execution time.
+to resolve. The timer pauses during each callback await so consumer
+UI interactions (custom dialogs, typewriter animations) do not count
+against the runtime budget — only the flat 5 ms per-yield charge
+applies, regardless of how long the modal stays open.
 
 ## Trapped globals
 
@@ -528,8 +532,9 @@ semantic trace engine — different namespace, no conflict.)
    with `name: 'InternalError'` and terminate.
 10. Handle console events by awaiting `resolvedIo.console[method]` (if
     any) before yielding; on throw, same `InternalError` path.
-11. Timeout tracks cumulative execution time: paused while yielded
-    AND while awaiting any IO callback.
+11. Timeout tracks user-perceived runtime: paused while yielded AND
+    while awaiting any IO callback, plus a flat 5 ms per-yield charge
+    so rendering-bound loops still deplete the budget.
 12. Return frozen `RunResult` on completion, timeout, or iteration
     limit.
 
@@ -549,9 +554,12 @@ semantic trace engine — different namespace, no conflict.)
   (not in JeJ surface). Counter globals declared in worker setup via
   `var loop1 = 0, ..., loopN = 0;` — not per-loop inline declarations.
   See `guard-loops/DOCS.md` for the body-injection architecture.
-- **Cumulative timeout**: tracks execution time only. Paused during
-  SAB wait AND during IO-callback await so learners can examine
-  events — or drive a styled dialog — indefinitely.
+- **User-perceived runtime budget**: pauses during SAB wait AND
+  during IO-callback await so learners can examine events — or
+  drive a styled dialog — without burning duration. Each event
+  yield deducts a flat 5 ms charge, rounded up so the timeout
+  fires at-or-before the wall-clock budget on busy loops. See
+  DOCS.md § Timer-vs-yield.
 - **Errors are events**: runtime errors (`phase: 'execution'`) and
   construction errors (`phase: 'creation'`) appear in the logs
   array. The consumer always gets `RunEvent[]`, never a thrown
