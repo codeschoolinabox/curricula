@@ -285,11 +285,11 @@ record WHY the run was stopped:
 ```ts
 const handle = run(code);
 for await (const event of handle) {
-    if (isWrongPrediction(event)) {
+    if (event.event === 'console' && isWrongPrediction(event)) {
         handle.fail({
             kind: 'prediction-wrong',
             expected: 42,
-            got: event.value,
+            got: event.args[0],
         });
         break;
     }

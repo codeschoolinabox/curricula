@@ -35,19 +35,20 @@ correct order relative to I/O — log events appear before prompt dialogs.
 
 ## Architectural Sketch
 
-> Structural contract for the merged run engine. Written Phase 0 of
-> the `api/run → evaluating/run` merge; the implementation in this
-> directory is held against it. Domain terms only; no function
-> names, no variable names, no pseudocode.
+> Structural contract for the run engine. The implementation in this
+> directory is held against this sketch. Domain terms only; no
+> function names, no variable names, no pseudocode.
 
-This sketch captures three invariants that distinguish the merged
-engine from the pre-merge split: the unified pause protocol (shared
-with trace), native replay on the RunHandle, and the timer-vs-yield
-interaction that makes "stepping time does not count" actually hold.
-The § sections below ("Why an AsyncGenerator" onward) give the "why"
-behind specific design decisions — tradeoffs, alternatives
-considered, constraints — and use the same ubiquitous language as
-the sketch.
+This sketch captures four invariants the engine guarantees: the
+unified pause protocol (shared with trace), native replay on the
+RunHandle, the timer-vs-yield interaction that makes "stepping
+time does not count" actually hold, and the unified termination
+protocol (cancel / fail / timeout / worker-error all funnel
+through one cause variable; metadata lives on the RunResult, never
+in logs). The § sections below ("Why an AsyncGenerator" onward)
+give the "why" behind specific design decisions — tradeoffs,
+alternatives considered, constraints — and use the same ubiquitous
+language as the sketch.
 
 ### Unified pause protocol
 
@@ -231,12 +232,13 @@ write is the single source of truth.
 
 **Out of scope**:
 
-- Consumer-propagated error via `gen.throw(e)` or a `.fail(reason)`
-  method. The runtime's for-await body throw already routes through
-  `.return()` here — classified as `outcome: 'cancel'` because the
-  engine cannot distinguish "consumer threw" from "consumer broke."
-  If a real consumer need surfaces, add a `.fail(reason)` method on
-  RunHandle that sets a dedicated cause variant.
+- Consumer-propagated error via `gen.throw(e)`. The runtime's for-
+  await body throw routes through `.return()` here — classified as
+  `outcome: 'cancel'` because the engine cannot distinguish
+  "consumer threw" from "consumer broke." Consumers needing
+  structured consumer-driven termination use the shipped
+  `.fail(reason)` method instead — see § Fail in the README and
+  the `fail` rows in this section's precedence table.
 - Additive outcome enrichment for trace/debug. `TraceOutcome` and
   `DebugOutcome` are already typed (subsets of `RunOutcome`) but
   their engines don't yet set the field. Migration is additive.
