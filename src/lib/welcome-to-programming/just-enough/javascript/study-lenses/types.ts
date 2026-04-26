@@ -456,6 +456,29 @@ type Registry = {
 	 * @remarks Does NOT throw on unknown names.
 	 */
 	getLens(name: string): LensModule | undefined;
+
+	/**
+	 * Returns a snapshot of every registered lens name, in insertion
+	 * order (first registered first). The returned array is frozen.
+	 *
+	 * @remarks Used by the orchestrator's lens-picker toolbar to
+	 *   enumerate options. A fresh array is returned per call;
+	 *   callers should not mutate it (the freeze enforces this at
+	 *   runtime). Lens and transform names share a keyspace, but
+	 *   `getLensNames` returns ONLY lens names — transform names are
+	 *   reachable via `getTransformNames`.
+	 */
+	getLensNames(): ReadonlyArray<string>;
+
+	/**
+	 * Returns a snapshot of every registered transform name, in
+	 * insertion order (first registered first). The returned array is
+	 * frozen.
+	 *
+	 * @remarks Symmetric counterpart to `getLensNames`. Used by future
+	 *   orchestrator toolbar work (transform toggles in Increment 10+).
+	 */
+	getTransformNames(): ReadonlyArray<string>;
 };
 
 export type {

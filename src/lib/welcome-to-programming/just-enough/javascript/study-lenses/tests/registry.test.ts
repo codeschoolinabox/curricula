@@ -286,4 +286,105 @@ describe('createRegistry', () => {
 			});
 		});
 	});
+
+	describe('Enumeration — getLensNames / getTransformNames', () => {
+		describe('Zero — empty registry', () => {
+			it('getLensNames() returns an empty frozen array on a fresh registry', () => {
+				const registry = createRegistry();
+				const names = registry.getLensNames();
+				expect(names).toEqual([]);
+				expect(Object.isFrozen(names)).toBe(true);
+			});
+
+			it('getTransformNames() returns an empty frozen array on a fresh registry', () => {
+				const registry = createRegistry();
+				const names = registry.getTransformNames();
+				expect(names).toEqual([]);
+				expect(Object.isFrozen(names)).toBe(true);
+			});
+		});
+
+		describe('One — single registration', () => {
+			it('getLensNames() returns a one-element array after a single lens is registered', () => {
+				const registry = createRegistry();
+				registry.register(makeLens('editor'));
+				expect(registry.getLensNames()).toEqual(['editor']);
+			});
+
+			it('getTransformNames() returns a one-element array after a single transform is registered', () => {
+				const registry = createRegistry();
+				registry.register(makeTransform('format'));
+				expect(registry.getTransformNames()).toEqual(['format']);
+			});
+		});
+
+		describe('Many — multiple registrations preserve insertion order', () => {
+			it('getLensNames() returns lens names in insertion order', () => {
+				const registry = createRegistry();
+				registry.register(makeLens('editor'));
+				registry.register(makeLens('highlight'));
+				registry.register(makeLens('parsons'));
+				expect(registry.getLensNames()).toEqual([
+					'editor',
+					'highlight',
+					'parsons',
+				]);
+			});
+
+			it('getTransformNames() returns transform names in insertion order', () => {
+				const registry = createRegistry();
+				registry.register(makeTransform('format'));
+				registry.register(makeTransform('loopGuard'));
+				expect(registry.getTransformNames()).toEqual([
+					'format',
+					'loopGuard',
+				]);
+			});
+		});
+
+		describe('Boundary — separation between lens and transform lists', () => {
+			let registry: Registry;
+			beforeEach(() => {
+				registry = createRegistry();
+				registry.register(makeTransform('format'));
+				registry.register(makeLens('editor'));
+				registry.register(makeTransform('loopGuard'));
+				registry.register(makeLens('highlight'));
+			});
+
+			it('getLensNames() does not include transform names', () => {
+				expect(registry.getLensNames()).toEqual([
+					'editor',
+					'highlight',
+				]);
+			});
+
+			it('getTransformNames() does not include lens names', () => {
+				expect(registry.getTransformNames()).toEqual([
+					'format',
+					'loopGuard',
+				]);
+			});
+		});
+
+		describe('Interface — fresh array per call', () => {
+			it('getLensNames() returns a different array reference on each call (no shared mutable singleton)', () => {
+				const registry = createRegistry();
+				registry.register(makeLens('editor'));
+				const first = registry.getLensNames();
+				const second = registry.getLensNames();
+				expect(first).not.toBe(second);
+				expect(first).toEqual(second);
+			});
+
+			it('getTransformNames() returns a different array reference on each call', () => {
+				const registry = createRegistry();
+				registry.register(makeTransform('format'));
+				const first = registry.getTransformNames();
+				const second = registry.getTransformNames();
+				expect(first).not.toBe(second);
+				expect(first).toEqual(second);
+			});
+		});
+	});
 });

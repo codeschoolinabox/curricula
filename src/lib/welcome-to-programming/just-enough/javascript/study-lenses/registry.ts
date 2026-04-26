@@ -78,7 +78,24 @@ function createRegistry(): Registry {
 		return lenses.get(name);
 	}
 
-	return freezeInPlace({ register, getTransform, getLens });
+	function getLensNames(): ReadonlyArray<string> {
+		// Map iteration is insertion-order in JS; a fresh array per call so
+		// callers cannot mutate the underlying Map by reference. freezeInPlace
+		// rejects post-return mutation at runtime.
+		return freezeInPlace([...lenses.keys()]);
+	}
+
+	function getTransformNames(): ReadonlyArray<string> {
+		return freezeInPlace([...transforms.keys()]);
+	}
+
+	return freezeInPlace({
+		register,
+		getTransform,
+		getLens,
+		getLensNames,
+		getTransformNames,
+	});
 }
 
 export default createRegistry;
