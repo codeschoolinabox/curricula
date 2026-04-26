@@ -88,4 +88,57 @@ describe('buildLocationIndex', () => {
 			expect(index.exactStarts.get('1:0')).not.toBe(index.exactStarts.get('2:0'));
 		});
 	});
+
+	describe('children[] (generic navigation)', () => {
+		it('CallExpression has callee + each argument as children, in source order', () => {
+			const index = indexFor('console.log(1);');
+			const callExpr = index.astByPath.get('$.body.0.expression')!;
+			expect(callExpr.type).toBe('CallExpression');
+			// CallExpression children: [callee MemberExpression, argument Literal]
+			expect(callExpr.children.length).toBe(2);
+			expect(callExpr.children[0]!.type).toBe('MemberExpression');
+			expect(callExpr.children[1]!.type).toBe('Literal');
+		});
+
+		it('children entries are the SAME ASTNode references as named slots', () => {
+			const index = indexFor('console.log(1);');
+			const callExpr = index.astByPath.get('$.body.0.expression')!;
+			const callee = (callExpr as unknown as { callee: unknown }).callee;
+			const argsArray = (callExpr as unknown as { arguments: unknown[] }).arguments;
+			// children[0] === .callee, children[1] === .arguments[0]
+			expect(callExpr.children[0]).toBe(callee);
+			expect(callExpr.children[1]).toBe(argsArray[0]);
+		});
+
+		it('Program root children include every top-level statement', () => {
+			const index = indexFor('let x = 1;\nlet y = 2;\nlet z = 3;');
+			expect(index.root.children.length).toBe(3);
+			for (const child of index.root.children) {
+				expect(child.type).toBe('VariableDeclaration');
+			}
+		});
+
+		it('leaf nodes (Identifier, Literal) have empty children arrays', () => {
+			const index = indexFor('let x = 1;');
+			// Identifier `x` and Literal `1` are both leaves
+			for (const node of index.astByPath.values()) {
+				if (node.type === 'Identifier' || node.type === 'Literal') {
+					expect(node.children.length).toBe(0);
+				}
+			}
+		});
+
+		it('children appear in source-position order', () => {
+			const index = indexFor('console.log(1, 2, 3);');
+			const callExpr = index.astByPath.get('$.body.0.expression')!;
+			// children: [callee, arg0, arg1, arg2] — left-to-right by source position
+			for (let i = 1; i < callExpr.children.length; i++) {
+				const prev = callExpr.children[i - 1]!;
+				const curr = callExpr.children[i]!;
+				expect(curr.loc.start.column).toBeGreaterThanOrEqual(
+					prev.loc.start.column,
+				);
+			}
+		});
+	});
 });

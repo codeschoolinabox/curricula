@@ -61,6 +61,13 @@ function walk(
 	const start = (acornNode as { start: number }).start;
 	const end = (acornNode as { end: number }).end;
 
+	// `children` is mutable until the result is frozen; we push every
+	// direct AST descendant here in source order so consumers have a
+	// generic walk path that doesn't require knowing ESTree property
+	// names per node type. The same ASTNode references are also stored
+	// under their named slots (.body, .callee, .arguments, etc.) below.
+	const childrenList: ASTNode[] = [];
+
 	const astNode = {
 		syntaxId: path,
 		parent,
@@ -68,6 +75,7 @@ function walk(
 		loc: cloneLoc(acornNode.loc),
 		source: source.slice(start, end),
 		events: [],
+		children: childrenList,
 	} as unknown as ASTNode & Record<string, unknown>;
 
 	astByPath.set(path, astNode);
@@ -88,9 +96,16 @@ function walk(
 				const item = value[i];
 				if (isAcornNode(item)) {
 					const childPath = `${path}.${key}.${i}`;
-					childArray.push(
-						walk(item, astNode, childPath, source, astByPath, exactStarts),
+					const childAstNode = walk(
+						item,
+						astNode,
+						childPath,
+						source,
+						astByPath,
+						exactStarts,
 					);
+					childArray.push(childAstNode);
+					childrenList.push(childAstNode);
 				} else {
 					// Preserve non-node items (rare — e.g. holes in array patterns)
 					// at their original index so downstream indexing is stable.
@@ -100,7 +115,16 @@ function walk(
 			astNode[key] = childArray;
 		} else if (isAcornNode(value)) {
 			const childPath = `${path}.${key}`;
-			astNode[key] = walk(value, astNode, childPath, source, astByPath, exactStarts);
+			const childAstNode = walk(
+				value,
+				astNode,
+				childPath,
+				source,
+				astByPath,
+				exactStarts,
+			);
+			astNode[key] = childAstNode;
+			childrenList.push(childAstNode);
 		} else {
 			// Primitive (Literal.value, Identifier.name, operator strings) or
 			// non-node object (Literal.regex { pattern, flags }) — copy as-is.

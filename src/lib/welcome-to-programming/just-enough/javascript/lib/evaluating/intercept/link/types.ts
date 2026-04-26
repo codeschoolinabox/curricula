@@ -82,10 +82,18 @@ type NodePathSource = 'instrumented' | 'enclosing-fallback' | 'no-ast';
  *                     `result.events`. Entries appear in ascending
  *                     `.step` order (worker emits sequentially; the
  *                     main loop pushes in receive order).
+ * - `node.children` — flat array of every direct AST child, in source
+ *                     order. Generic traversal primitive: a consumer can
+ *                     walk the entire tree without knowing ESTree
+ *                     property names per node type.
  *
- * Standard ESTree children (`.body`, `.expression`, `.arguments`, etc.)
- * are present as `ASTNode` references via the open record extension.
- * Discriminate on `node.type` before accessing children.
+ * Standard ESTree children (`.body`, `.expression`, `.arguments`,
+ * `.callee`, etc.) are ALSO present as named `ASTNode` references via
+ * the open record extension. The same `ASTNode` reference appears in
+ * both `node.children` and the appropriate named slot — choose
+ * whichever fits the consumer (named for typed access, `children` for
+ * generic walks). Discriminate on `node.type` before accessing named
+ * children.
  */
 type ASTNode = {
 	readonly syntaxId: string;
@@ -94,6 +102,7 @@ type ASTNode = {
 	readonly loc: SourceLocation;
 	readonly source: string;
 	readonly events: readonly LinkedInterceptEvent[];
+	readonly children: readonly ASTNode[];
 } & { readonly [key: string]: unknown };
 
 // ─── LinkedInterceptEvent ────────────────────────────────────
