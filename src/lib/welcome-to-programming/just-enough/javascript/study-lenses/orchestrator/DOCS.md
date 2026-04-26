@@ -67,16 +67,38 @@ lens name. The wrapper applies the transition through the existing
    `cache.get(name, cfg)` → cache hit reattaches the existing
    `mount.el`; cache miss runs `lens(code, cfg)` and `cache.set(name,
    cfg, mount)`.
-4. **Dispatch** (sync, separate dispatch-effect) —
+4. **Dispatch** (sync, separate dispatch-effect, **runs after the
+   React commit that updated `state.activeLens`**) —
    `bus.dispatch('lens-switched', { previous, next })` fires from a
    second `useEffect` whose dep is `[state.activeLens, bus]` and
    whose body uses a `useRef`-held previous-lens value to suppress
-   the first-mount case. The exact dispatch ordering relative to
-   attach is one of the open Phase-0 design questions for Increment
-   9 — see
-   [`../../.planning-handoffs/03-orchestrator-and-contracts.md`](../../.planning-handoffs/03-orchestrator-and-contracts.md).
-   This document is updated to the resolved choice during Increment
-   9 Phase 0.
+   the first-mount case. React effect ordering: effects run in
+   registration order on commit; the dispatch-effect is registered
+   AFTER the mount-effect, so its synchronous portion runs after the
+   mount-effect's synchronous portion.
+
+   **Important async caveat.** The mount-effect body is an `async
+   function` invoked via `void run()`. Even when `lens(code, cfg)`
+   returns synchronously and `cache.get(...)` hits, the body goes
+   through an `await` and `host.append(mount.el)` happens in a
+   microtask AFTER the synchronous portion of the commit completes.
+   The dispatch-effect runs **synchronously** as part of the same
+   commit, so listeners may observe `Dispatched` BEFORE `mount.el`
+   is in the DOM. Subscribers that need the new mount attached
+   should defer their work to a microtask (`Promise.resolve().then`)
+   or `requestAnimationFrame`. The Increment-9 sandbox checkpoint
+   verifies the observable behavior; future increments may flip the
+   mount-effect to a synchronous fast-path for cache-hit and
+   sync-lens cases (closing the async window for those paths).
+
+   `LensSwitchedPayload.previous` is the value of the previous-lens
+   ref at the moment the dispatch-effect fires — not necessarily the
+   lens currently visible in the DOM. A switch issued during an
+   in-flight async-mount cancellation may produce a `previous` that
+   pre-dates the cancelled mount.
+
+   (Resolved Increment-9 Phase-0 decision; see §Why a separate
+   dispatch-effect below for the reasoning.)
 
 #### Phase 3: Unmount
 
@@ -111,46 +133,54 @@ flowchart TD
     FreshMount -->|"on async-cancel for fresh only"| Disposed["disposed mount<br/>(not attached)"]
     CachedMount --> Attached["lens host with<br/>mount.el child"]
     FreshMount --> Attached
-    State -->|"dispatch on activeLens change<br/>(timing TBD per Inc-9 Phase 0)"| Event["dispatched<br/>LensSwitchedPayload"]
+    State -->|"dispatch on activeLens change, sync (after React commit)"| Event["dispatched<br/>LensSwitchedPayload"]
+    Event -.may fire BEFORE Attached on async-mount paths.-> Attached
 ```
 
 The diagram covers the happy path (Mount + Switch) and three failure
 modes (lang ≠ js banner; validation throw; async-cancel-of-fresh-mount).
-The dispatch edge is intentionally drawn from `State` rather than
-from `Attached`: the timing relative to attach is one of the open
-Phase-0 design questions for Increment 9, so the source of the edge
-is "the state change that triggered it" rather than a particular
-sequencing point. Phase 0 will pin the edge to its real source.
+The dispatch edge originates from `State` (the trigger is
+`state.activeLens` changing — what the dispatch-effect deps watch),
+runs synchronously on the same React commit as the mount-effect, and
+fires AFTER the mount-effect's synchronous portion. The dotted edge
+captures the **async caveat**: because the mount-effect body is
+async, `Attached` may complete in a microtask AFTER the synchronous
+dispatch fires. See §Switch flow below for the isolated diagram and
+§Phase 2 step 4 for the listener-side implications.
 
 ### Switch flow
 
 This subsection is the canonical reference for Increment-9 toolbar
 behavior. Anchor: `§Switch flow`. The data-flow diagram above covers
 the cache-resolve / mount / attach machinery; this diagram is scoped
-to the **user-trigger seam and the dispatch sequencing question**
-that the data-flow diagram intentionally elides.
+to the **user-trigger seam and the resolved dispatch ordering**.
 
 ```mermaid
 flowchart TD
-    userSelect["learner selects lens N<br/>(toolbar onChange)"] -->|"call, sync"| Transitioning["new OrchestratorState<br/>(activeLens = N)"]
-    Transitioning -->|"trigger mount-effect re-run"| Mounted["resolved mount<br/>(see data-flow diagram for cache/mount/attach)"]
-    Transitioning -->|"trigger dispatch-effect"| Dispatched["dispatched LensSwitchedPayload<br/>{ previous, next: N }"]
+    userSelect["learner selects lens N<br/>(toolbar onChange)"] -->|"setState, sync"| Transitioning["new OrchestratorState<br/>(activeLens = N)"]
+    Transitioning -->|"trigger mount-effect re-run, sync"| MountSync["mount-effect synchronous portion<br/>(detach, kick off run())"]
+    MountSync -->|"trigger dispatch-effect, sync"| Dispatched["dispatched LensSwitchedPayload<br/>{ previous, next: N }"]
+    MountSync -.async microtask, awaited cache-hit OR lens(code, cfg).-> Attached["mount.el attached to host"]
 ```
 
-The two trigger edges from `Transitioning` fire on the same React
-commit. Their **observable order** at listeners is the open Phase-0
-design question:
+**Ordering on the commit**: `Transitioning` triggers BOTH the
+mount-effect and dispatch-effect re-runs. Effects run in registration
+order (mount-effect first, dispatch-effect second), so the
+**synchronous portions** complete in that order: the mount-effect's
+synchronous body schedules `void run()` and returns, then the
+dispatch-effect fires `bus.dispatch(...)`.
 
-- **If dispatch-effect runs after mount-effect attach** (current
-  default in this sketch): listeners observe `Dispatched` AFTER
-  `Mounted`'s `el` is in the DOM.
-- **If in-handler synchronous dispatch is chosen instead**: the
-  `Dispatched` edge collapses to fire from `userSelect` directly,
-  before the React commit, and listeners observe it BEFORE
-  `Mounted`.
+**Async caveat (dotted edge)**: the mount-effect's `run()` is async
+— even on cache-hit and synchronous `lens()` it goes through an
+`await` before `host.append(mount.el)`. So `Attached` happens in a
+microtask AFTER `Dispatched`. Listeners that need `mount.el` in the
+DOM at callback time must defer their work
+(`Promise.resolve().then(...)` or `requestAnimationFrame`).
 
-Increment 9 Phase 0 picks one and updates this diagram and the prose
-in §Phase 2 step 4 to match.
+(Resolved Increment-9 Phase-0 decision. See §Why a separate
+dispatch-effect below for the reasoning. The async window may close
+in a future increment if the mount-effect is split into a
+synchronous fast-path for cache-hit and sync-lens cases.)
 
 ### Effect topology
 
@@ -159,11 +189,25 @@ Three named `useEffect`s, each with a single responsibility. The
 detach (every re-run) from dispose (unmount only) is what makes
 cache-hit reattach work.
 
-| Effect              | Deps                                        | Cleanup runs on                              | Cleanup work                                              | Purpose                                                                          |
-| ------------------- | ------------------------------------------- | -------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `mountActiveLens`   | `[state, registry, bus, cache, langOk]`     | every effect re-run AND on unmount           | detach `mount.el` from host (NO dispose); set cancel flag | Resolve the active lens, attach `mount.el`. Cache survives across switch.        |
-| `dispatchSwitch`    | `[state.activeLens, bus]` (Increment 9+)    | on `state.activeLens` change AND on unmount  | none (pure dispatch effect)                               | Fire `bus.dispatch('lens-switched', ...)` after a real switch. First-mount suppressed via ref. |
-| `disposeOnUnmount`  | `[bus, cache]`                              | on unmount only                              | `bus.clear`; `cache.visit(dispose)`; `cache.clear`        | Owns full teardown — runs once, on real unmount only (Increment 9 Pre-work-B split). |
+| Effect              | Deps                                            | Cleanup runs on                              | Cleanup work                                              | Purpose                                                                          |
+| ------------------- | ----------------------------------------------- | -------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `disposeOnUnmount`  | `[bus, cache]`                                  | on unmount only                              | `bus.clear`; `cache.visit(dispose)`; `cache.clear`        | Owns full teardown — runs once, on real unmount only (Increment 9 Pre-work-B split). |
+| `mountActiveLens`   | `[state, registry, cache, langOk]`              | every effect re-run AND on unmount           | detach `mount.el` from host (NO dispose); set cancel flag | Resolve the active lens, attach `mount.el`. Cache survives across switch.        |
+| `dispatchSwitch`    | `[state.activeLens, bus]` (Increment 9+)        | on `state.activeLens` change AND on unmount  | none — see registration-order note below                  | Fire `bus.dispatch('lens-switched', ...)` after a real switch. First-mount suppressed via ref. |
+
+**Registration order** (top of the table = first registered, bottom =
+last): `disposeOnUnmount`, `mountActiveLens`, `dispatchSwitch`.
+
+**Cleanup order on unmount** (reverse of registration):
+`dispatchSwitch.cleanup` (none) → `mountActiveLens.cleanup` (detach)
+→ `disposeOnUnmount.cleanup` (bus.clear → cache-dispose-all →
+cache.clear).
+
+The `dispatchSwitch` cleanup is `none` because the dispatch effect
+is purely a watch-and-fire; on unmount no further dispatch is needed
+and `disposeOnUnmount` (declared earlier, cleanup runs later) clears
+the bus. No dispatch fires into a cleared bus because the
+dispatch-effect's body does not re-run during cleanup.
 
 Splitting the cleanup across two effects (mount-effect retains
 detach-without-dispose; unmount-effect owns the full teardown) is

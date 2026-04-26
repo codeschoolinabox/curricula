@@ -36,12 +36,17 @@ Docusaurus theme. Per `<StudyLenses>` instance:
    `setState` updates `state.activeLens`. The mount-effect re-runs:
    detaches the outgoing mount (cache stays alive — no dispose), then
    either reattaches a cached mount (cache hit) or mounts fresh (miss).
-   The `lens-switched` event fires during the switch — exact timing
-   (before or after attach) is one of the open Phase-0 design
-   questions in
-   [`../../.planning-handoffs/03-orchestrator-and-contracts.md`](../../.planning-handoffs/03-orchestrator-and-contracts.md)
-   and will be pinned in this README once Increment 9 Phase 0 resolves
-   it. See [`./DOCS.md`](./DOCS.md) for the resolved switch flow.
+   A separate dispatch-effect watches `state.activeLens` and fires
+   `bus.dispatch('lens-switched', { previous, next })` **after the
+   React commit that updated `state.activeLens`** — the
+   dispatch-effect is registered after the mount-effect, so its
+   synchronous portion runs after the mount-effect's synchronous
+   portion. Note: the mount-effect body is async, so `mount.el` may
+   be attached in a microtask AFTER `lens-switched` listeners fire;
+   subscribers that need the new mount attached should defer their
+   work to a microtask or `requestAnimationFrame`. See
+   [`./DOCS.md`](./DOCS.md) §Switch flow for the diagram and the
+   §Async caveat.
 3. **Unmount.** A dedicated unmount-cleanup effect runs `bus.clear()`,
    then `cache.visit(entry => entry.mount.dispose())`, then
    `cache.clear()`. The split between switch-cleanup and
@@ -52,6 +57,89 @@ SSR: the entire React tree is wrapped in `<BrowserOnly>`; the server
 pass renders `<pre>{code}</pre>` per
 [`../DOCS.md`](../DOCS.md) §Structural constraints.
 
+## Toolbar (Increment 9+)
+
+Increment 9 ships **only the lens-picker dropdown** as the toolbar's
+first child. Transform toggles, Reset, Reset All, snippet name, and
+recommender land in Increments 10–14 as additional toolbar children
+— none of those changes the wrapper's effect topology described in
+[`./DOCS.md`](./DOCS.md) §Effect topology.
+
+The toolbar sits **outside** the lens host, in a sibling position
+inside an outer `<div data-orchestrator-root>` wrapper. The
+lang-not-js fallback path keeps its current structure unchanged
+(`<div data-orchestrator="study-lenses">` wrapping the banner +
+raw `<pre>`), and the error fallback also stays as-is.
+
+```text
+<div data-orchestrator-root>
+  ├── <nav data-orchestrator-toolbar>
+  │     └── <select data-orchestrator-lens-picker>
+  │           ├── <option value="editor">editor</option>
+  │           └── <option value="highlight">highlight</option>
+  └── <div data-orchestrator="study-lenses">     // lens host (unchanged)
+        └── (one of the registered lens mounts: see Lens host content below)
+```
+
+**Lens host content** is one of:
+
+- `<textarea data-lens="editor-stub">` when `state.activeLens === 'editor'`.
+- `<pre data-lens="highlight-stub"><code>...</code></pre>` when `state.activeLens === 'highlight'`.
+
+Only one lens is mounted at a time per the parent
+[`../DOCS.md`](../DOCS.md) §Structural constraints.
+
+### Toolbar prop contract
+
+The lens-picker dropdown is purely presentational. The Toolbar
+component takes:
+
+| Prop            | Type                          | Behavior                                                                               |
+| --------------- | ----------------------------- | -------------------------------------------------------------------------------------- |
+| `value`         | `string`                      | The current `state.activeLens` passed in. Pre-selects the matching `<option>`.         |
+| `options`       | `ReadonlyArray<string>`       | The registered lens names from `registry.getLensNames()`, in registration order.       |
+| `onLensChange`  | `(next: string) => void`      | Fires on `<select>` `onChange`. The wrapper invokes `setState` from inside this callback. |
+
+**Edge cases the Toolbar component must handle**:
+
+- **Empty `options`.** Should not happen in practice (`createDefaultRegistry` always
+  registers at least the `editor` stub, which is also the unknown-name fallback target —
+  see [`../pipeline.ts`](../pipeline.ts)). If it ever happens, the toolbar renders
+  `<select>` with no options; the wrapper still mounts whatever `state.activeLens` resolves
+  to via `validatePipeline`.
+- **`value` not in `options`.** Means `state.activeLens` is a name not currently
+  registered. The browser falls back to the first option's value visually, but the wrapper's
+  state is unchanged until `onLensChange` fires. Tests must assert this divergence does not
+  occur in practice — `validatePipeline` rewrites unknown names to `'editor'` before they
+  reach `state`.
+- **`onLensChange` throws.** The wrapper does not wrap the call in `try/catch`. A throw
+  propagates to React's error boundary; recovery requires unmount/remount. This is an
+  intentional fail-loud choice — silent state-transition failures are worse than visible
+  crashes.
+
+**Accessibility**:
+
+- The `<select>` MUST carry an accessible name. The component wires a visually-hidden
+  `<label htmlFor="...">` (or `aria-label="Lens"`); pick one and stay consistent across
+  Increments 10+.
+- Keyboard navigation is the browser default for `<select>` (Tab to focus, arrow keys to
+  cycle, Space/Enter to commit). No custom handlers.
+- No focus management on switch — the `<select>` retains focus by default, which is the
+  expected affordance for a learner mid-exploration.
+
+### Selection behavior
+
+Selecting a different option triggers a state transition: the wrapper
+calls `setState(prev => freezeInPlace({ ...prev, activeLens: next }))`.
+The mount-effect re-runs (detach, resolve, reattach) and the
+dispatch-effect fires `lens-switched` on the same React commit (see
+the Lifecycle §Switch above for the timing, and `./DOCS.md` §Switch
+flow for the async caveat).
+
+Selecting the currently-active lens is a no-op — no dispatch fires
+and no DOM swap happens. The dispatch-effect short-circuits when the
+new value equals the previous value.
+
 ## Data attributes the DOM exposes
 
 | Attribute                              | Where                              | Used by                                                         |
@@ -59,7 +147,8 @@ pass renders `<pre>{code}</pre>` per
 | `data-orchestrator="study-lenses"`     | The lens host `<div>`              | Tests + dev sandbox (locate the host).                          |
 | `data-orchestrator-banner=""`          | The lang≠js banner `<div>`         | Tests + accessibility (banner has `role="alert"`).              |
 | `data-orchestrator-error=""`           | The error fallback `<pre>`         | Tests (verify `validatePipeline` throw is rendered).            |
-| `data-orchestrator-root` (Inc-9)       | The wrapper `<div>` (toolbar + host)| Tests + sandbox; survives Inc-8 selectors unchanged.            |
+| `data-orchestrator-root` (Inc-9)       | The wrapper `<div>` (toolbar + host)| Tests + sandbox; the inner `data-orchestrator="study-lenses"` selector still resolves to the lens host. |
+| `data-orchestrator-toolbar` (Inc-9)    | The toolbar `<nav>`                | Tests + sandbox (locate the toolbar container without depending on tag). |
 | `data-orchestrator-lens-picker` (Inc-9)| The toolbar `<select>`             | Tests + sandbox (locate the dropdown without depending on tag). |
 
 ## Conventions
