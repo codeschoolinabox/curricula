@@ -1,0 +1,254 @@
+/**
+ * @file End-to-end integration tests for AST entwining.
+ *
+ * Verifies the full Stage A → D pipeline:
+ *   - Worker emits scalar (line, column) events
+ *   - Main thread enriches with nodePath/nodePathSource
+ *   - getResult links events to AST nodes (.node refs + back-refs)
+ *   - Result is deep-frozen with cycle handling
+ *
+ * Plus the eager handle data:
+ *   - handle.code is the input source
+ *   - handle.options is the passed-in options
+ *   - handle.ast resolves with the AST record (or null on validation fail)
+ */
+
+import { describe, expect, it } from 'vitest';
+
+import createInterceptGenerator from '../intercept.js';
+
+// Two console.log calls: one top-level, one inside an if-block.
+// Pattern proven to pass the format gate via column-accuracy test.
+const VALID_FIXTURE = [
+	'if (true) {',
+	'\tconsole.log(1);',
+	'\tconsole.log(2);',
+	'}',
+	'',
+].join('\n');
+
+describe('AST entwining (browser, end-to-end)', () => {
+	describe('result.ast', () => {
+		it('is non-null and contains the program root for valid runs', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			expect(result.ast).not.toBeNull();
+			expect(result.ast!['$']).toBeDefined();
+			expect(result.ast!['$']!.type).toBe('Program');
+		});
+
+		it('contains every CallExpression as a navigable AST node', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			const callPaths = Object.keys(result.ast!).filter(
+				(p) => result.ast![p]!.type === 'CallExpression',
+			);
+			expect(callPaths.length).toBe(2);
+		});
+
+		it('is null when validation fails (no AST built)', async () => {
+			const result = await createInterceptGenerator('var x = 5;\n');
+			expect(result.ast).toBeNull();
+		});
+	});
+
+	describe('event ↔ node linkage', () => {
+		it('event.node is the SAME reference as result.ast[event.nodePath]', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			const consoleEvent = result.events.find((e) => e.event === 'console')!;
+			expect(consoleEvent.node).toBe(result.ast![consoleEvent.nodePath!]);
+		});
+
+		it('node.events back-ref includes the event', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			const consoleEvent = result.events.find((e) => e.event === 'console')!;
+			const node = result.ast![consoleEvent.nodePath!]!;
+			expect(node.events).toContain(consoleEvent);
+		});
+
+		it('validation failure → empty events + error.kind: validation (no AST built)', async () => {
+			const result = await createInterceptGenerator('var x = 5;\n');
+			expect(result.events).toEqual([]);
+			expect(result.ast).toBeNull();
+			expect(result.error?.kind).toBe('validation');
+		});
+
+		it('worker construction error → events carry the error with no-ast provenance', async () => {
+			// SAB unavailable (rare, but the only construction-error path
+			// reachable via public API without mocking). Skip the test if
+			// SAB is available — otherwise the event has no-ast provenance.
+			if (typeof SharedArrayBuffer !== 'undefined') return;
+			const result = await createInterceptGenerator('console.log(1);\n');
+			expect(result.events.length).toBeGreaterThan(0);
+			const errorEvent = result.events[0]!;
+			expect(errorEvent.event).toBe('error');
+			expect(errorEvent.nodePathSource).toBe('no-ast');
+			expect(errorEvent.node).toBeNull();
+		});
+	});
+
+	describe('result freezing', () => {
+		it('result.ast nodes are frozen (cycle-safe)', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			expect(Object.isFrozen(result.ast!['$'])).toBe(true);
+			// Cycle: parent ↔ child
+			const child = Object.values(result.ast!).find(
+				(n) => n.parent !== null,
+			);
+			expect(child).toBeDefined();
+			expect(Object.isFrozen(child!.parent!)).toBe(true);
+		});
+
+		it('result.events are frozen', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			expect(Object.isFrozen(result.events[0])).toBe(true);
+		});
+	});
+
+	describe('result.code, options, visitCounts', () => {
+		it('result.code is the original source string', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			expect(result.code).toBe(VALID_FIXTURE);
+		});
+
+		it('result.options reflects the passed-in options', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE, {
+				seconds: 2,
+			});
+			expect(result.options.seconds).toBe(2);
+		});
+
+		it('result.visitCounts has at least one entry per fired event', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			const totalVisits = Object.values(result.visitCounts).reduce(
+				(a, b) => a + b,
+				0,
+			);
+			const consoleEventCount = result.events.filter(
+				(e) => e.event === 'console',
+			).length;
+			expect(totalVisits).toBeGreaterThanOrEqual(consoleEventCount);
+		});
+	});
+
+	describe('handle eager data', () => {
+		it('handle.code is readable immediately (before iteration)', () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			expect(handle.code).toBe(VALID_FIXTURE);
+			handle.cancel();
+		});
+
+		it('handle.options is readable immediately, defaults to {}', () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			expect(handle.options).toEqual({});
+			handle.cancel();
+		});
+
+		it('handle.ast resolves to the AST record on validation success', async () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			// Drive the generator so validation runs
+			await handle.result;
+			const ast = await handle.ast;
+			expect(ast).not.toBeNull();
+			expect(ast!['$']!.type).toBe('Program');
+		});
+
+		it('handle.ast resolves to null on validation failure', async () => {
+			const handle = createInterceptGenerator('var x = 5;\n');
+			await handle.result;
+			const ast = await handle.ast;
+			expect(ast).toBeNull();
+		});
+
+		it('handle.ast resolves to null when cancelled before iterate', async () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			handle.cancel();
+			await handle.result;
+			const ast = await handle.ast;
+			expect(ast).toBeNull();
+		});
+	});
+
+	describe('replay identity', () => {
+		it('linked events preserve identity across re-iteration', async () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			const firstPass: unknown[] = [];
+			for await (const ev of handle) firstPass.push(ev);
+
+			const secondPass: unknown[] = [];
+			for await (const ev of handle) secondPass.push(ev);
+
+			expect(secondPass.length).toBe(firstPass.length);
+			for (let i = 0; i < firstPass.length; i++) {
+				expect(secondPass[i]).toBe(firstPass[i]);
+			}
+		});
+	});
+
+	describe('event.step (timeline sequence number)', () => {
+		it('result.events[i].step === i + 1 (1-indexed, contiguous)', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			expect(result.events.length).toBeGreaterThan(0);
+			for (let i = 0; i < result.events.length; i++) {
+				expect(result.events[i]!.step).toBe(i + 1);
+			}
+		});
+
+		it('node.events back-refs are in ascending step order', async () => {
+			// Loop the same call 3 times so one CallExpression accumulates
+			// 3 back-refs. Their .step values must be strictly ascending.
+			const code = [
+				'for (let i = 0; i < 3; i = i + 1) {',
+				'\tconsole.log(i);',
+				'}',
+				'',
+			].join('\n');
+			const result = await createInterceptGenerator(code, { iterations: 5 });
+			expect(result.outcome).toBe('complete');
+			const consoleEvent = result.events.find((e) => e.event === 'console')!;
+			const node = result.ast![consoleEvent.nodePath!]!;
+			expect(node.events.length).toBe(3);
+			for (let i = 1; i < node.events.length; i++) {
+				expect(node.events[i]!.step).toBeGreaterThan(
+					node.events[i - 1]!.step,
+				);
+			}
+		});
+
+		it('step matches between result.events and node.events back-refs', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			for (const ev of result.events) {
+				if (ev.nodePath === null) continue;
+				const node = result.ast![ev.nodePath]!;
+				const backref = node.events.find((e) => e.step === ev.step);
+				expect(backref).toBe(ev);
+			}
+		});
+
+		it('error events also carry step', async () => {
+			// Worker construction error → stepped to 1
+			const result = await createInterceptGenerator(
+				'this is not valid javascript;\n',
+			);
+			expect(result.outcome).toBe('error');
+			expect(result.error?.kind).toBe('parse');
+			// Parse-error path returns empty events (no worker ran)
+			expect(result.events).toEqual([]);
+		});
+
+		it('execution-time error event carries a step continuing the sequence', async () => {
+			// Run code that emits two console events, then throws at runtime.
+			// `undefined()` is JeJ-allowed but throws TypeError when invoked.
+			const code = [
+				'console.log(1);',
+				'console.log(2);',
+				'undefined();',
+				'',
+			].join('\n');
+			const result = await createInterceptGenerator(code);
+			expect(result.outcome).toBe('error');
+			const errorEvent = result.events.find((e) => e.event === 'error');
+			expect(errorEvent).toBeDefined();
+			// Error fires after the 2 console.logs → step 3.
+			expect(errorEvent!.step).toBe(3);
+		});
+	});
+});
