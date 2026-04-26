@@ -151,6 +151,19 @@ type LinkedInterceptEvent = InterceptEvent & {
 	readonly nodePathFallbackFrom?: SourcePosition;
 	readonly node: ASTNode | null;
 	readonly loc: SourceLocation | null;
+	/** Direct reference to the `callee` subnode of `node` when `node.type
+	 *  === 'CallExpression'`. For trap calls (the happy path) this is the
+	 *  function-reference node — an `Identifier` for `prompt`/`alert`/
+	 *  `confirm`, a `MemberExpression` for `console.log`/etc., a
+	 *  parenthesized expression for `(c ? a : b)(x)`, etc. `null` when
+	 *  `node` is null (no-ast) OR `node.type !== 'CallExpression'`
+	 *  (residual error path attributing to a non-call node). */
+	readonly callee: ASTNode | null;
+	/** The `nodePath` of `callee` (when non-null) — typically
+	 *  `nodePath + '.callee'`. Useful for editor highlighting that wants
+	 *  to underline only the function reference, not the entire call
+	 *  expression. `null` whenever `callee` is null. */
+	readonly calleePath: string | null;
 };
 
 // ─── LocationIndex ───────────────────────────────────────────

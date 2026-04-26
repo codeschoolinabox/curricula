@@ -236,10 +236,23 @@ function enrichEvent(
 			nodePath: string | null;
 			nodePathSource: NodePathSource;
 			loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
+			callee: ASTNode | null;
+			calleePath: string | null;
 		};
 		enriched.nodePath = incomingNodePath;
 		enriched.nodePathSource = 'instrumented';
 		enriched.loc = node ? node.loc : null;
+		// Direct callee navigation: only meaningful when node is a
+		// CallExpression (the wrapped happy path). For non-call nodes
+		// (residual error path), callee/calleePath stay null.
+		if (node && node.type === 'CallExpression') {
+			const calleeRef = (node as unknown as { callee: ASTNode | undefined }).callee;
+			enriched.callee = calleeRef ?? null;
+			enriched.calleePath = calleeRef ? calleeRef.syntaxId : null;
+		} else {
+			enriched.callee = null;
+			enriched.calleePath = null;
+		}
 		return enriched as unknown as EnrichedEvent;
 	}
 
@@ -252,10 +265,14 @@ function enrichEvent(
 			nodePath: string | null;
 			nodePathSource: NodePathSource;
 			loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
+			callee: ASTNode | null;
+			calleePath: string | null;
 		};
 		enriched.nodePath = null;
 		enriched.nodePathSource = 'no-ast';
 		enriched.loc = null;
+		enriched.callee = null;
+		enriched.calleePath = null;
 		return enriched as unknown as EnrichedEvent;
 	}
 
@@ -267,11 +284,24 @@ function enrichEvent(
 		nodePathSource: NodePathSource;
 		nodePathFallbackFrom?: { line: number; column: number };
 		loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
+		callee: ASTNode | null;
+		calleePath: string | null;
 	};
 	enriched.nodePath = lookup.nodePath;
 	enriched.nodePathSource = lookup.source;
 	enriched.nodePathFallbackFrom = lookup.fallbackFrom;
 	enriched.loc = node ? node.loc : null;
+	// Same CallExpression discriminator as Branch 1; residual lookups
+	// usually land on non-call nodes (e.g. MemberExpression for
+	// `let x = null.foo;`), in which case callee/calleePath stay null.
+	if (node && node.type === 'CallExpression') {
+		const calleeRef = (node as unknown as { callee: ASTNode | undefined }).callee;
+		enriched.callee = calleeRef ?? null;
+		enriched.calleePath = calleeRef ? calleeRef.syntaxId : null;
+	} else {
+		enriched.callee = null;
+		enriched.calleePath = null;
+	}
 	return enriched as unknown as EnrichedEvent;
 }
 
@@ -295,7 +325,14 @@ function buildEarlyResult(
 	const ok =
 		outcome === 'complete' || outcome === 'cancel' || outcome === 'fail';
 	const linked = events.map((e) => {
-		(e as { node: ASTNode | null }).node = null;
+		const ev = e as {
+			node: ASTNode | null;
+			callee: ASTNode | null;
+			calleePath: string | null;
+		};
+		ev.node = null;
+		ev.callee = null;
+		ev.calleePath = null;
 		return e as unknown as LinkedInterceptEvent;
 	});
 	return deepFreezeInPlace({
