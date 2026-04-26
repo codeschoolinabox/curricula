@@ -31,13 +31,13 @@ describe('createInterceptGenerator cancel', () => {
 			expect(result.value.ok).toBe(true);
 		});
 
-		it('outcome is cancel; logs are empty (no worker ran)', async () => {
+		it('outcome is cancel; events are empty (no worker ran)', async () => {
 			const gen = createInterceptGenerator('let x = 1;\n');
 			gen.cancel();
 			const result = await gen.next();
 			if (!result.done) throw new Error('expected done');
 			expect(result.value.outcome).toBe('cancel');
-			expect(result.value.logs).toEqual([]);
+			expect(result.value.events).toEqual([]);
 		});
 	});
 

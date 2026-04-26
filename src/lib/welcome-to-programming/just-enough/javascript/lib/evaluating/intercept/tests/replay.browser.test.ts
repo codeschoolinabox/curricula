@@ -54,7 +54,7 @@ describe('createInterceptGenerator replay (browser)', () => {
 
 	describe('after runtime error', () => {
 		it('error event appears in replay (thrown-error completion path)', async () => {
-			const code = format('for (let i = 0; i < 1000; i = i + 1) { let x = 1; }\n');
+			const code = await format('for (let i = 0; i < 1000; i = i + 1) { let x = 1; }\n');
 			const gen = createInterceptGenerator(code, { iterations: 5 });
 			await gen.result;
 			const replayed: { event: string }[] = [];
@@ -89,7 +89,7 @@ describe('createInterceptGenerator replay (browser)', () => {
 
 	describe('after for-await-break', () => {
 		it('replay yields live events with === identity (no synthetic cancel marker)', async () => {
-			const code = format('console.log(1);\nconsole.log(2);\nconsole.log(3);\n');
+			const code = await format('console.log(1);\nconsole.log(2);\nconsole.log(3);\n');
 			const gen = createInterceptGenerator(code);
 			const live: unknown[] = [];
 			for await (const event of gen) {
@@ -105,7 +105,7 @@ describe('createInterceptGenerator replay (browser)', () => {
 		});
 
 		it('await handle after break resolves to settled InterceptResult with outcome:cancel', async () => {
-			const code = format('console.log(1);\nconsole.log(2);\n');
+			const code = await format('console.log(1);\nconsole.log(2);\n');
 			const gen = createInterceptGenerator(code);
 			for await (const event of gen) {
 				void event;
@@ -116,7 +116,7 @@ describe('createInterceptGenerator replay (browser)', () => {
 		});
 
 		it('identity-stable across multiple replays after break', async () => {
-			const code = format('console.log(1);\nconsole.log(2);\n');
+			const code = await format('console.log(1);\nconsole.log(2);\n');
 			const gen = createInterceptGenerator(code);
 			for await (const event of gen) {
 				void event;

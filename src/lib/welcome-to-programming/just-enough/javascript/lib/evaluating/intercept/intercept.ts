@@ -22,21 +22,36 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import checkFormat from '../../formatting/check-format.js';
-import validate from '../../validating/validate.js';
+import validateProgram from '../../validating/validate-program.js';
+import justEnoughJs from '../../validating/just-enough-js.js';
+
+import buildLocationIndex from './link/build-location-index.js';
+import lookupNodePath from './link/lookup-node-path.js';
+import link from './link/link.js';
+import wrapCallExpressions from './wrap-call-expressions.js';
 
 import type {
 	ConsoleMethod,
 	InterceptEvent,
 	ErrorEvent as RunErrorEvent,
 } from '../shared/types.js';
-import type { InterceptResult } from '../../../api/types.js';
 import type {
 	IoMocks,
 	IoRequestMessage,
 	InterceptHandle,
 	InterceptOptions,
+	InterceptResult,
+	InterceptResultError,
+	InterceptOutcome,
 	WorkerOutbound,
 } from './types.js';
+import type {
+	ASTNode,
+	LinkedInterceptEvent,
+	LocationIndex,
+	NodePathSource,
+} from './link/types.js';
+import type { EnrichedEvent } from './link/link.js';
 
 import createWorkerScript from './create-worker-script.js';
 import guardLoops from '../shared/guard-loops/guard-loops.js';
@@ -86,18 +101,37 @@ const YIELD_CHARGE_MS = 5;
 // --- Resolved IO ---
 
 const CONSOLE_METHODS: readonly ConsoleMethod[] = [
-	'log', 'debug', 'info', 'warn', 'error',
-	'assert', 'table', 'dir', 'dirxml',
-	'group', 'groupCollapsed', 'groupEnd',
-	'count', 'countReset',
-	'time', 'timeEnd', 'timeLog',
-	'trace', 'clear',
+	'log',
+	'debug',
+	'info',
+	'warn',
+	'error',
+	'assert',
+	'table',
+	'dir',
+	'dirxml',
+	'group',
+	'groupCollapsed',
+	'groupEnd',
+	'count',
+	'countReset',
+	'time',
+	'timeEnd',
+	'timeLog',
+	'trace',
+	'clear',
 ];
 
-type ResolvedConsole = Record<ConsoleMethod, (...args: readonly unknown[]) => Promise<void>>;
+type ResolvedConsole = Record<
+	ConsoleMethod,
+	(...args: readonly unknown[]) => Promise<void>
+>;
 
 type ResolvedIo = {
-	readonly prompt: (message: string, defaultValue?: string) => Promise<string | null>;
+	readonly prompt: (
+		message: string,
+		defaultValue?: string,
+	) => Promise<string | null>;
 	readonly alert: (message: string) => Promise<void>;
 	readonly confirm: (message: string) => Promise<boolean>;
 	readonly console: ResolvedConsole;
@@ -137,7 +171,9 @@ function buildResolvedIo(io?: IoMocks): ResolvedIo {
 					def === undefined ? window.prompt(msg) : window.prompt(msg, def),
 
 		alert: io?.alert
-			? async (msg) => { await io.alert!(msg); }
+			? async (msg) => {
+					await io.alert!(msg);
+				}
 			: async (msg) => {
 					// eslint-disable-next-line no-alert
 					window.alert(msg);
@@ -154,14 +190,136 @@ function buildResolvedIo(io?: IoMocks): ResolvedIo {
 	};
 }
 
+// --- LinkedInterceptEvent enrichment helpers ---
+
+/**
+ * Enriches a worker-emitted `InterceptEvent` with AST navigation
+ * fields (nodePath, nodePathSource, loc).
+ *
+ * @remarks Mutates `event` in place to preserve reference identity
+ * (load-bearing for the replay invariant: linked events yielded
+ * during streaming must be `===` the same objects the post-completion
+ * `link()` step attaches `.node` refs to).
+ *
+ * Three branches:
+ *
+ * 1. **Worker-emitted with `nodePath` already set** (the happy path
+ *    after the universal CallExpression wrap). Worker stamped
+ *    `event.nodePath = __currentPath`. Stamp `nodePathSource:
+ *    'instrumented'` and resolve `event.loc` from
+ *    `locationIndex.astByPath[nodePath].loc`.
+ * 2. **Residual error path** — runtime error fired OUTSIDE any
+ *    wrapped CallExpression. Worker fell back to
+ *    `extractPositionFromError` and emitted `line` (and maybe
+ *    `column`) without `nodePath`. Look up via `lookupNodePath` to
+ *    find the deepest containing AST node; stamp
+ *    `nodePathSource: 'enclosing-fallback'` and resolve `event.loc`
+ *    from that node.
+ * 3. **No AST built** — `locationIndex` is `null` (validation failed
+ *    pre-parse) OR the event has no nodePath/line/column to look up.
+ *    Stamp `nodePath: null, nodePathSource: 'no-ast', loc: null`.
+ *    Downstream `link()` sets `node: null`.
+ */
+function enrichEvent(
+	event: InterceptEvent,
+	locationIndex: LocationIndex | null,
+): EnrichedEvent {
+	const incomingNodePath = (event as { nodePath?: string | null }).nodePath;
+
+	// Branch 1: worker stamped nodePath via __$ic — instrumented path.
+	if (
+		typeof incomingNodePath === 'string' &&
+		locationIndex !== null
+	) {
+		const node = locationIndex.astByPath.get(incomingNodePath);
+		const enriched = event as InterceptEvent & {
+			nodePath: string | null;
+			nodePathSource: NodePathSource;
+			loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
+		};
+		enriched.nodePath = incomingNodePath;
+		enriched.nodePathSource = 'instrumented';
+		enriched.loc = node ? node.loc : null;
+		return enriched as unknown as EnrichedEvent;
+	}
+
+	const line = (event as { line?: number }).line;
+	const column = (event as { column?: number }).column;
+
+	// Branch 3: no AST OR no usable position — no-ast.
+	if (locationIndex === null || line === undefined || column === undefined) {
+		const enriched = event as InterceptEvent & {
+			nodePath: string | null;
+			nodePathSource: NodePathSource;
+			loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
+		};
+		enriched.nodePath = null;
+		enriched.nodePathSource = 'no-ast';
+		enriched.loc = null;
+		return enriched as unknown as EnrichedEvent;
+	}
+
+	// Branch 2: residual error path — fall back to (line, column) lookup.
+	const lookup = lookupNodePath(locationIndex, line, column);
+	const node = locationIndex.astByPath.get(lookup.nodePath);
+	const enriched = event as InterceptEvent & {
+		nodePath: string;
+		nodePathSource: NodePathSource;
+		nodePathFallbackFrom?: { line: number; column: number };
+		loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
+	};
+	enriched.nodePath = lookup.nodePath;
+	enriched.nodePathSource = lookup.source;
+	enriched.nodePathFallbackFrom = lookup.fallbackFrom;
+	enriched.loc = node ? node.loc : null;
+	return enriched as unknown as EnrichedEvent;
+}
+
+/**
+ * Builds an InterceptResult for early-return paths that occur BEFORE
+ * the AST exists (cancel/fail before iterate, validation/format/SAB
+ * gate failures, Worker construction errors). Events on these paths
+ * carry `nodePath: null, nodePathSource: 'no-ast', node: null` and
+ * `result.ast` is `null`.
+ *
+ * For the post-execution full-AST path see `buildResult`.
+ */
+function buildEarlyResult(
+	code: string,
+	options: InterceptOptions,
+	outcome: InterceptOutcome,
+	events: readonly EnrichedEvent[],
+	error?: InterceptResultError,
+	reason?: unknown,
+): InterceptResult {
+	const ok =
+		outcome === 'complete' || outcome === 'cancel' || outcome === 'fail';
+	const linked = events.map((e) => {
+		(e as { node: ASTNode | null }).node = null;
+		return e as unknown as LinkedInterceptEvent;
+	});
+	return deepFreezeInPlace({
+		ok,
+		outcome,
+		events: linked,
+		...(error !== undefined ? { error } : {}),
+		...(reason !== undefined ? { reason } : {}),
+		code,
+		options,
+		ast: null as Readonly<Record<string, ASTNode>> | null,
+		visitCounts: {} as Readonly<Record<string, number>>,
+	});
+}
+
 // --- Internal error helper ---
 
-function makeInternalError(err: unknown): RunErrorEvent {
+function makeInternalError(err: unknown, step: number): RunErrorEvent {
 	return {
 		event: 'error',
 		name: 'InternalError',
 		message: err instanceof Error ? err.message : String(err),
 		phase: 'execution',
+		step,
 	};
 }
 
@@ -245,6 +403,41 @@ function createInterceptGenerator(
 	code: string,
 	options?: InterceptOptions,
 ): InterceptHandle {
+	// LocationIndex — built after successful validation, used to enrich
+	// each worker-emitted event with nodePath/nodePathSource before
+	// yielding. Stays null when validation fails (no AST available).
+	let locationIndex: LocationIndex | null = null;
+
+	// Eager handle.ast Promise. Resolved exactly once: on validation
+	// success with the astByPath record, or with `null` on any path
+	// that completes without building an AST (validation failure,
+	// pre-iterate cancel/fail, SAB unavailable, worker construction
+	// failure). Idempotent via `astResolved` guard so the second
+	// resolveAst call (e.g. cleanup after early-error) is a no-op.
+	let astResolved = false;
+	let astResolver:
+		| ((value: Readonly<Record<string, ASTNode>> | null) => void)
+		| null = null;
+	const astPromise = new Promise<Readonly<Record<string, ASTNode>> | null>(
+		(resolve) => {
+			astResolver = resolve;
+		},
+	);
+	function resolveAst(value: Readonly<Record<string, ASTNode>> | null): void {
+		if (!astResolved && astResolver !== null) {
+			astResolved = true;
+			astResolver(value);
+		}
+	}
+	function toAstRecord(
+		map: ReadonlyMap<string, ASTNode>,
+	): Readonly<Record<string, ASTNode>> {
+		// Object.fromEntries for the public API surface — `Record<...>`
+		// is what trace exposes too. The underlying ASTNode references
+		// are the same; only the container wrapper differs.
+		return Object.fromEntries(map);
+	}
+
 	// Queue + cancel plumbing — lives in the outer closure so cancel()
 	// can reach wakeDequeue regardless of where the generator body is
 	// suspended (before first iterate, mid-await, or mid-yield).
@@ -314,72 +507,115 @@ function createInterceptGenerator(
 		wakeDequeue();
 	}
 
-	async function* body(): AsyncGenerator<InterceptEvent, InterceptResult> {
-		const maxSeconds = options?.seconds ?? 5;
-		const maxIterations = options?.iterations;
-		const resolvedIo = buildResolvedIo(options?.io);
+	async function* body(): AsyncGenerator<LinkedInterceptEvent, InterceptResult> {
+		const resolvedOptions: InterceptOptions = options ?? {};
+		const maxSeconds = resolvedOptions.seconds ?? 5;
+		const maxIterations = resolvedOptions.iterations;
+		const resolvedIo = buildResolvedIo(resolvedOptions.io);
 
 		// 0. Consumer-initiated termination before first iterate — skip
-		// all setup. Outcome + reason carry the signal; logs stay empty
-		// (no worker ran, no events were emitted).
+		// all setup. Outcome + reason carry the signal; events stay empty
+		// (no worker ran, no events were emitted). No AST built either.
 		if (terminationCause?.kind === 'cancel') {
-			return deepFreezeInPlace({
-				ok: true,
-				outcome: 'cancel' as const,
-				logs: [],
-			});
+			resolveAst(null);
+			return buildEarlyResult(code, resolvedOptions, 'cancel', []);
 		}
 		if (terminationCause?.kind === 'fail') {
-			return deepFreezeInPlace({
-				ok: true,
-				outcome: 'fail' as const,
-				reason: terminationCause.reason,
-				logs: [],
-			});
+			resolveAst(null);
+			return buildEarlyResult(
+				code,
+				resolvedOptions,
+				'fail',
+				[],
+				undefined,
+				terminationCause.reason,
+			);
 		}
 
-		// 1. Validation + format gates. validate/checkFormat are
+		// 1. Validation + format gates. validateProgram/checkFormat are
 		// specified to never throw; any throw is caught here and
 		// surfaced as a creation-phase ErrorEvent so iteration still
 		// resolves cleanly rather than escaping to the consumer.
+		// parsedProgram hoisted so the post-validation instrumentation
+		// step can reach it without re-parsing.
+		let parsedProgram: import('acorn').Program | null = null;
 		try {
-			const validation = validate(code);
-			if (!validation.ok) {
-				return validation as InterceptResult;
+			const validationReport = validateProgram(code, justEnoughJs);
+			if (validationReport.parseError) {
+				resolveAst(null);
+				return buildEarlyResult(
+					code,
+					resolvedOptions,
+					'error',
+					[],
+					{
+						kind: 'parse',
+						name: 'SyntaxError',
+						message: validationReport.parseError.message,
+						line: validationReport.parseError.location.line,
+						column: validationReport.parseError.location.column,
+					},
+				);
 			}
-			const { formatted } = checkFormat(code);
+			if (!validationReport.isValid) {
+				resolveAst(null);
+				return buildEarlyResult(
+					code,
+					resolvedOptions,
+					'error',
+					[],
+					{
+						kind: 'validation',
+						violations: validationReport.violations,
+					},
+				);
+			}
+			// Successful validation — retain the AST for instrumentation,
+			// build the LocationIndex now, and resolve handle.ast eagerly
+			// so consumers can begin AST-shape work before the worker
+			// even starts.
+			parsedProgram = validationReport.ast!;
+			locationIndex = buildLocationIndex(parsedProgram, code);
+			resolveAst(toAstRecord(locationIndex.astByPath));
+
+			const { formatted } = await checkFormat(code);
 			if (!formatted) {
-				return deepFreezeInPlace({
-					ok: false as const,
-					outcome: 'error' as const,
-					error: { kind: 'formatting' as const },
-				});
+				return buildEarlyResult(
+					code,
+					resolvedOptions,
+					'error',
+					[],
+					{ kind: 'formatting' },
+				);
 			}
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : String(err);
 			const name = err instanceof Error ? err.name : 'Error';
-			const error: RunErrorEvent = {
+			const errorEvent: RunErrorEvent = {
 				event: 'error',
 				name,
 				message,
 				phase: 'creation',
+				step: 1,
 			};
-			return deepFreezeInPlace({
-				ok: false,
-				outcome: 'error' as const,
-				error: {
+			resolveAst(null);
+			return buildEarlyResult(
+				code,
+				resolvedOptions,
+				'error',
+				[enrichEvent(errorEvent, locationIndex)],
+				{
 					kind: 'javascript',
 					name,
 					message,
 					phase: 'creation',
 				},
-				logs: [error],
-			});
+			);
 		}
 
 		// 2. Check SAB availability
 		if (typeof SharedArrayBuffer === 'undefined') {
-			const error: RunErrorEvent = {
+			const errorEvent: RunErrorEvent = {
 				event: 'error',
 				name: 'EnvironmentError',
 				message:
@@ -387,29 +623,39 @@ function createInterceptGenerator(
 					'serve Cross-Origin-Opener-Policy: same-origin and ' +
 					'Cross-Origin-Embedder-Policy: require-corp headers.',
 				phase: 'creation',
+				step: 1,
 			};
-			return deepFreezeInPlace({
-				ok: false,
-				outcome: 'error' as const,
-				error: {
+			return buildEarlyResult(
+				code,
+				resolvedOptions,
+				'error',
+				[enrichEvent(errorEvent, locationIndex)],
+				{
 					kind: 'javascript',
-					name: error.name,
-					message: error.message,
-					phase: error.phase,
+					name: errorEvent.name,
+					message: errorEvent.message,
+					phase: errorEvent.phase,
 				},
-				logs: [error],
-			});
+			);
 		}
 
-		// 3. Apply loop guards if iterations limit is configured.
+		// 3a. Instrument: wrap every CallExpression with __$ic('nodePath', () => ...).
+		// Trap functions inside the worker read __currentPath at fire time,
+		// avoiding Error.stack parsing entirely. Lines preserved 1:1.
+		// parsedProgram is non-null here because validation passed.
+		let execCode = wrapCallExpressions(parsedProgram!, code);
+
+		// 3b. Apply loop guards if iterations limit is configured. Operates
+		// on the INSTRUMENTED source — guard regex matches loop syntax which
+		// is unaffected by the wrap (wraps only touch CallExpressions inside
+		// loop bodies, not the loop headers).
 		// Number.isFinite(Infinity) === false, so Infinity means "no guards";
 		// any finite number (including 0 and negatives) injects guards, and
 		// the `++loopN > maxIterations` template throws on the first iteration
 		// for non-positive limits — counterintuitive otherwise.
-		let execCode = code;
 		let loopCount = 0;
 		if (maxIterations !== undefined && Number.isFinite(maxIterations)) {
-			const guardResult = guardLoops(code, maxIterations);
+			const guardResult = guardLoops(execCode, maxIterations);
 			execCode = guardResult.code;
 			loopCount = guardResult.loopCount;
 		}
@@ -430,27 +676,31 @@ function createInterceptGenerator(
 			URL.revokeObjectURL(url);
 			const message =
 				err instanceof Error ? err.message : 'Failed to create Worker';
-			const error: RunErrorEvent = {
+			const errorEvent: RunErrorEvent = {
 				event: 'error',
 				name: 'WorkerError',
 				message,
 				phase: 'creation',
+				step: 1,
 			};
-			return deepFreezeInPlace({
-				ok: false,
-				outcome: 'error' as const,
-				error: {
+			return buildEarlyResult(
+				code,
+				resolvedOptions,
+				'error',
+				[enrichEvent(errorEvent, locationIndex)],
+				{
 					kind: 'javascript',
-					name: error.name,
+					name: errorEvent.name,
 					message,
 					phase: 'creation',
 				},
-				logs: [error],
-			});
+			);
 		}
 
 		// 6. Wire up Worker callbacks (enqueue closes over outer queue state)
-		worker.onmessage = function onWorkerMessage(e: MessageEvent<WorkerOutbound>) {
+		worker.onmessage = function onWorkerMessage(
+			e: MessageEvent<WorkerOutbound>,
+		) {
 			enqueue(e.data);
 		};
 
@@ -530,7 +780,7 @@ function createInterceptGenerator(
 		writePauseEngaged(views);
 		startTimeout();
 
-		const logs: InterceptEvent[] = [];
+		const events: EnrichedEvent[] = [];
 
 		try {
 			while (true) {
@@ -543,7 +793,7 @@ function createInterceptGenerator(
 				const cause = getTerminationKind();
 				if (cause === 'cancel' || cause === 'fail') {
 					// Consumer-initiated stop. Termination metadata goes on
-					// the result (outcome + reason via buildResult); logs
+					// the result (outcome + reason via buildResult); events
 					// stay pure — no synthetic event is pushed here.
 					break;
 				}
@@ -557,16 +807,19 @@ function createInterceptGenerator(
 						name: 'TimeoutError',
 						message: `Execution exceeded ${maxSeconds} second time limit`,
 						phase: 'execution',
+						step: events.length + 1,
 					};
-					logs.push(timeoutEvent);
-					yield timeoutEvent;
+					const enriched = enrichEvent(timeoutEvent, locationIndex);
+					events.push(enriched);
+					yield enriched as unknown as LinkedInterceptEvent;
 					break;
 				}
 
 				// 8a. Streamed event — route IO callback, yield to consumer
 				if (msg.type === 'event') {
 					const event = msg.event;
-					logs.push(event);
+					const enriched = enrichEvent(event, locationIndex);
+					events.push(enriched);
 
 					// WHY pauseTimeout at the TOP of the event-path: the
 					// cumulative timer counts only worker-thread code-execution
@@ -580,12 +833,17 @@ function createInterceptGenerator(
 						try {
 							await resolvedIo.console[event.method](...event.args);
 						} catch (err) {
-							logs.push(makeInternalError(err));
+							events.push(
+								enrichEvent(
+									makeInternalError(err, events.length + 1),
+									locationIndex,
+								),
+							);
 							break;
 						}
 					}
 
-					yield event;
+					yield enriched as unknown as LinkedInterceptEvent;
 
 					// WHY termination check BEFORE releasing the Worker: if
 					// cancel / fail fired during yield, we must NOT resume —
@@ -594,7 +852,8 @@ function createInterceptGenerator(
 					// next iteration via the cause dispatch.
 					{
 						const postYieldCause = getTerminationKind();
-						if (postYieldCause === 'cancel' || postYieldCause === 'fail') continue;
+						if (postYieldCause === 'cancel' || postYieldCause === 'fail')
+							continue;
 					}
 					// WHY clearEventReady BEFORE writeResumeSignal: clearing
 					// after release would race against the Worker's next trap
@@ -619,7 +878,12 @@ function createInterceptGenerator(
 						await handleIoRequest(msg as IoRequestMessage, views, resolvedIo);
 						Atomics.notify(views.control, CONTROL_INDEX);
 					} catch (err) {
-						logs.push(makeInternalError(err));
+						events.push(
+							enrichEvent(
+								makeInternalError(err, events.length + 1),
+								locationIndex,
+							),
+						);
 						break;
 					}
 					startTimeout();
@@ -633,16 +897,20 @@ function createInterceptGenerator(
 
 				// 8d. Worker error — record and break
 				if (msg.type === 'worker-error') {
-					logs.push({
-						event: 'error',
-						name: 'WorkerError',
-						message: msg.message,
-						phase: 'execution',
-					});
+					events.push(
+						enrichEvent(
+							{
+								event: 'error',
+								name: 'WorkerError',
+								message: msg.message,
+								phase: 'execution',
+								step: events.length + 1,
+							},
+							locationIndex,
+						),
+					);
 					break;
 				}
-
-
 			}
 		} finally {
 			clearTimeoutIfSet();
@@ -650,11 +918,21 @@ function createInterceptGenerator(
 			URL.revokeObjectURL(url);
 		}
 
-		// 9. Build result from collected logs + terminationCause.
+		// 9. Build result from collected events + terminationCause.
 		// Consumer-initiated stops (cancel/fail) surface via outcome
 		// + reason; engine-level failures (timeout, worker-error)
-		// surface via errorEvent in logs.
-		return buildResult(logs, maxSeconds, terminationCause, maxIterations);
+		// surface via errorEvent in events. The full-AST path through
+		// `buildResult` calls `link()` to attach `.node` refs and
+		// populate per-node `events[]` back-refs, then deep-freezes.
+		return buildResult(
+			code,
+			resolvedOptions,
+			events,
+			locationIndex,
+			maxSeconds,
+			terminationCause,
+			maxIterations,
+		);
 	}
 
 	const gen = body();
@@ -662,7 +940,7 @@ function createInterceptGenerator(
 	// Replay support. Every path through which the InterceptResult emerges
 	// goes through gen.next() returning {done:true, value}; we wrap
 	// it once here to capture the settled value for replay. The
-	// replayed event refs come from `value.logs` — the same array
+	// replayed event refs come from `value.events` — the same array
 	// `body()` pushed into during live iteration, frozen in place by
 	// buildResult. No clone; live and replay consumers see identical
 	// event references. See DOCS.md § Replay / re-iteration.
@@ -800,19 +1078,32 @@ function createInterceptGenerator(
 	// without infinite recursion.
 	const liveAsyncIterator = gen[Symbol.asyncIterator].bind(gen);
 	Object.defineProperty(gen, Symbol.asyncIterator, {
-		value: function asyncIterator(): AsyncIterator<InterceptEvent, InterceptResult> {
+		value: function asyncIterator(): AsyncIterator<
+			LinkedInterceptEvent,
+			InterceptResult
+		> {
 			// In-progress: delegate to the raw AsyncGenerator (which
 			// returns `this`, so concurrent for-awaits silently split
 			// via .next() serialization — DOCS.md § Replay).
-			if (!isDone || settledResult === null) return liveAsyncIterator();
-			// Settled: fresh iterator replays the frozen log refs.
+			if (!isDone || settledResult === null) {
+				return liveAsyncIterator() as unknown as AsyncIterator<
+					LinkedInterceptEvent,
+					InterceptResult
+				>;
+			}
+			// Settled: fresh iterator replays the frozen event refs.
+			// `result.events` (renamed from legacy `logs`) carries the
+			// SAME LinkedInterceptEvent references the live iteration
+			// yielded — this is the replay-identity invariant.
 			const settled = settledResult;
-			const logs: readonly InterceptEvent[] = settled.logs ?? [];
+			const events: readonly LinkedInterceptEvent[] = settled.events;
 			let index = 0;
 			return {
-				next(): Promise<IteratorResult<InterceptEvent, InterceptResult>> {
-					if (index < logs.length) {
-						return Promise.resolve({ value: logs[index++]!, done: false });
+				next(): Promise<
+					IteratorResult<LinkedInterceptEvent, InterceptResult>
+				> {
+					if (index < events.length) {
+						return Promise.resolve({ value: events[index++]!, done: false });
 					}
 					return Promise.resolve({ value: settled, done: true });
 				},
@@ -822,6 +1113,30 @@ function createInterceptGenerator(
 		configurable: false,
 		enumerable: false,
 	});
+
+	// Eager handle data: code/options/ast are readable immediately
+	// after construction, before any iteration. handle.ast resolves
+	// when the validation gate completes (success → astByPath record;
+	// failure → null). See DOCS.md § Eager handle data.
+	Object.defineProperty(gen, 'code', {
+		value: code,
+		writable: false,
+		configurable: false,
+		enumerable: true,
+	});
+	Object.defineProperty(gen, 'options', {
+		value: options ?? {},
+		writable: false,
+		configurable: false,
+		enumerable: true,
+	});
+	Object.defineProperty(gen, 'ast', {
+		value: astPromise,
+		writable: false,
+		configurable: false,
+		enumerable: true,
+	});
+
 	return gen as unknown as InterceptHandle;
 }
 
@@ -874,24 +1189,60 @@ async function handleIoRequest(
  * marker is appended. The cancel/fail signal lives on outcome + reason.
  */
 function buildResult(
-	logs: readonly InterceptEvent[],
+	code: string,
+	options: InterceptOptions,
+	rawEvents: readonly EnrichedEvent[],
+	locationIndex: LocationIndex | null,
 	maxSeconds: number,
 	terminationCause: TerminationCause | null,
 	maxIterations?: number,
 ): InterceptResult {
+	// Stage C: link enriched events to AST nodes (attach .node, push
+	// back-refs into ast[path].events[]). When locationIndex is null
+	// (validation failed), link sets node:null on each event.
+	const astByPath = locationIndex?.astByPath ?? new Map<string, ASTNode>();
+	const linkedEvents = link(rawEvents, astByPath);
+
+	// Build the public Record<nodePath, ASTNode> shape (or null when
+	// validation failed). Object.fromEntries materializes the Map.
+	const ast: Readonly<Record<string, ASTNode>> | null = locationIndex
+		? Object.fromEntries(locationIndex.astByPath)
+		: null;
+
+	// Compute visitCounts from linked events. nodePath:null events
+	// (no-ast / no-location) don't count toward any node.
+	const visitCountsObj: Record<string, number> = {};
+	for (const ev of linkedEvents) {
+		if (ev.nodePath !== null) {
+			visitCountsObj[ev.nodePath] = (visitCountsObj[ev.nodePath] ?? 0) + 1;
+		}
+	}
+
+	const baseFields = {
+		events: linkedEvents,
+		code,
+		options,
+		ast,
+		visitCounts: visitCountsObj as Readonly<Record<string, number>>,
+	};
+
 	if (terminationCause?.kind === 'cancel') {
-		return deepFreezeInPlace({ ok: true, outcome: 'cancel' as const, logs });
+		return deepFreezeInPlace({
+			ok: true,
+			outcome: 'cancel' as const,
+			...baseFields,
+		});
 	}
 	if (terminationCause?.kind === 'fail') {
 		return deepFreezeInPlace({
 			ok: true,
 			outcome: 'fail' as const,
 			reason: terminationCause.reason,
-			logs,
+			...baseFields,
 		});
 	}
 
-	const errorEvent = findErrorEvent(logs);
+	const errorEvent = findErrorEvent(linkedEvents);
 
 	if (errorEvent) {
 		if (errorEvent.name === 'TimeoutError') {
@@ -899,14 +1250,17 @@ function buildResult(
 				ok: false,
 				outcome: 'timeout' as const,
 				error: {
-					kind: 'timeout',
+					kind: 'timeout' as const,
 					name: errorEvent.name,
 					message: errorEvent.message,
 					...(errorEvent.line !== undefined ? { line: errorEvent.line } : {}),
-					phase: errorEvent.phase,
+					// Timeout fires only during worker execution; the type narrows
+					// to the literal 'execution'. Construction-phase errors take a
+					// different path (kind: 'javascript' below).
+					phase: 'execution' as const,
 					limit: maxSeconds,
 				},
-				logs,
+				...baseFields,
 			});
 		}
 
@@ -922,14 +1276,16 @@ function buildResult(
 				ok: false,
 				outcome: 'iteration-limit' as const,
 				error: {
-					kind: 'iteration-limit',
+					kind: 'iteration-limit' as const,
 					name: errorEvent.name,
 					message: errorEvent.message,
 					...(errorEvent.line !== undefined ? { line: errorEvent.line } : {}),
-					phase: errorEvent.phase,
+					// Loop-guard RangeErrors are thrown inside running worker code,
+					// never during construction. Type narrows to literal 'execution'.
+					phase: 'execution' as const,
 					limit: maxIterations,
 				},
-				logs,
+				...baseFields,
 			});
 		}
 
@@ -937,27 +1293,33 @@ function buildResult(
 			ok: false,
 			outcome: 'error' as const,
 			error: {
-				kind: 'javascript',
+				kind: 'javascript' as const,
 				name: errorEvent.name,
 				message: errorEvent.message,
 				...(errorEvent.line !== undefined ? { line: errorEvent.line } : {}),
 				phase: errorEvent.phase,
 			},
-			logs,
+			...baseFields,
 		});
 	}
 
-	return deepFreezeInPlace({ ok: true, outcome: 'complete' as const, logs });
+	return deepFreezeInPlace({
+		ok: true,
+		outcome: 'complete' as const,
+		...baseFields,
+	});
 }
 
 /**
- * Finds the last error event in the log array.
+ * Finds the last error event in a linked event array.
  */
-function findErrorEvent(logs: readonly InterceptEvent[]): RunErrorEvent | undefined {
-	for (let i = logs.length - 1; i >= 0; i--) {
-		const entry = logs[i];
+function findErrorEvent(
+	events: readonly LinkedInterceptEvent[],
+): (RunErrorEvent & { nodePath: string | null }) | undefined {
+	for (let i = events.length - 1; i >= 0; i--) {
+		const entry = events[i];
 		if (entry.event === 'error') {
-			return entry;
+			return entry as RunErrorEvent & { nodePath: string | null };
 		}
 	}
 	return undefined;

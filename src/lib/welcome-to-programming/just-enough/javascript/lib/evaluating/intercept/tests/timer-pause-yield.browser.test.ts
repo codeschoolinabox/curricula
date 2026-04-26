@@ -22,7 +22,7 @@ vi.setConfig({ testTimeout: 60_000 });
 describe('createInterceptGenerator timer pauses during yield (browser)', () => {
 	describe('consumer stalls between pulls', () => {
 		it('seconds budget is not consumed while yielded to consumer', async () => {
-			const code = format('console.log(1);\nconsole.log(2);\n');
+			const code = await format('console.log(1);\nconsole.log(2);\n');
 			const gen = createInterceptGenerator(code, { seconds: 0.2 });
 			await gen.next();
 			await new Promise((resolve) => setTimeout(resolve, 500));
@@ -33,7 +33,7 @@ describe('createInterceptGenerator timer pauses during yield (browser)', () => {
 
 	describe('Worker runs without emitting events', () => {
 		it('timer fires timeout within remainingMs when no traps are hit', async () => {
-			const code = format('while (true) { let x = 1; }\n');
+			const code = await format('while (true) { let x = 1; }\n');
 			const result = await createInterceptGenerator(code, { seconds: 0.1 });
 			if (result.ok) throw new Error('expected ok:false');
 			expect(result.error.kind).toBe('timeout');
@@ -42,7 +42,7 @@ describe('createInterceptGenerator timer pauses during yield (browser)', () => {
 
 	describe('cancel interacts correctly with paused timer', () => {
 		it('cancel after stall beyond seconds returns outcome:cancel, not timeout', async () => {
-			const code = format('console.log(1);\nconsole.log(2);\n');
+			const code = await format('console.log(1);\nconsole.log(2);\n');
 			const gen = createInterceptGenerator(code, { seconds: 0.2 });
 			await gen.next();
 			await new Promise((resolve) => setTimeout(resolve, 500));

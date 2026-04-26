@@ -1,11 +1,18 @@
 /**
- * @file Worker message protocol types and IO mock surface for the intercept action.
+ * @file Worker message protocol types, IO mock surface, result shape, and
+ * handle for the intercept engine.
  *
  * Defines the two-step message protocol (setup → execute) between the
  * main thread and the execution worker, the SharedArrayBuffer layout
- * for synchronous I/O (prompt/confirm/alert), and the consumer-facing
- * IO mock types (IoMocks, IoConsole, InterceptOptions). Also exports the
- * public `InterceptHandle` — the return type of `createInterceptGenerator`.
+ * for synchronous I/O (prompt/confirm/alert), the consumer-facing IO
+ * mock types (IoMocks, IoConsole, InterceptOptions), the public
+ * `InterceptResult` shape, and the public `InterceptHandle` — the
+ * return type of `createInterceptGenerator`.
+ *
+ * `InterceptResult` lives here (engine-owned) per the convention
+ * documented in [evaluating/run/types.ts]: "execution wrappers compose
+ * their own result types … declared in their own modules." This
+ * replaces the legacy `lib/api/types.ts` aggregation.
  */
 
 import type {
@@ -13,7 +20,145 @@ import type {
 	Execution,
 	InterceptEvent,
 } from '../shared/types.js';
-import type { InterceptResult } from '../../../api/types.js';
+import type {
+	BaseResult,
+	FormattingResultError,
+	Violation,
+} from '../../validating/types.js';
+import type { ParseResultError } from '../../parse/types.js';
+import type { ASTNode, LinkedInterceptEvent } from './link/types.js';
+
+// ─── Result error types (engine-owned) ───────────────────────
+
+/**
+ * Validation failed — code parsed but contains JeJ-disallowed constructs.
+ *
+ * @remarks Replaces the legacy `BaseResult.rejections` field for intercept
+ * by normalizing into the `error` channel with a stable `kind` discriminant.
+ * The `violations` array carries the per-node rejection details.
+ */
+type ValidationResultError = {
+	readonly kind: 'validation';
+	readonly violations: readonly Violation[];
+};
+
+/** A JavaScript runtime or construction error during execution. */
+type JavaScriptResultError = {
+	readonly kind: 'javascript';
+	readonly name: string;
+	readonly message: string;
+	readonly line?: number;
+	readonly column?: number;
+	readonly phase: 'creation' | 'execution';
+};
+
+/** Execution exceeded the seconds budget. */
+type TimeoutResultError = {
+	readonly kind: 'timeout';
+	readonly name: string;
+	readonly message: string;
+	readonly line?: number;
+	readonly phase: 'execution';
+	readonly limit: number;
+};
+
+/** A guarded loop exceeded its iteration cap. */
+type IterationLimitResultError = {
+	readonly kind: 'iteration-limit';
+	readonly name: string;
+	readonly message: string;
+	readonly line?: number;
+	readonly phase: 'execution';
+	readonly limit: number;
+};
+
+/**
+ * Discriminated union of every error kind `intercept` can surface on
+ * `result.error`. Switch on `error.kind` to narrow.
+ *
+ * @remarks Mirrors the shape of `RunResultError` in evaluating/run plus
+ * one intercept-only variant (`'validation'`) for normalized JeJ
+ * violations. The `'timeout'` and `'iteration-limit'` variants also
+ * appear as `ErrorEvent`s in the event stream — `result.error` is the
+ * structured form, `result.events.find(e => e.event === 'error')` is
+ * the streamed form.
+ */
+type InterceptResultError =
+	| ParseResultError
+	| FormattingResultError
+	| ValidationResultError
+	| JavaScriptResultError
+	| TimeoutResultError
+	| IterationLimitResultError;
+
+// ─── Outcome + Result ────────────────────────────────────────
+
+/**
+ * Outcome variants for a settled intercept run.
+ *
+ * @remarks
+ * - `'complete'`        — worker reached natural end-of-program.
+ * - `'cancel'`          — `handle.cancel()` was called.
+ * - `'fail'`            — `handle.fail(reason)` was called; `result.reason`
+ *                         carries the consumer-supplied payload.
+ * - `'timeout'`         — seconds budget exhausted.
+ * - `'iteration-limit'` — a guarded loop exceeded its cap.
+ * - `'error'`           — pre-execution gate (parse/validation/formatting)
+ *                         rejected, or worker construction failed.
+ *
+ * `ok` mapping (computed in `getResult`):
+ * - `'complete' | 'cancel' | 'fail'` → `ok: true`
+ * - `'timeout' | 'iteration-limit' | 'error'` → `ok: false`
+ */
+type InterceptOutcome =
+	| 'complete'
+	| 'cancel'
+	| 'fail'
+	| 'timeout'
+	| 'iteration-limit'
+	| 'error';
+
+/**
+ * Result from `createInterceptGenerator`. Always returned (never thrown);
+ * even runtime errors are reified as data.
+ *
+ * @remarks
+ * Composes `BaseResult<InterceptResultError>` (the validating-module
+ * compositional root) with intercept-specific fields per the convention
+ * in `evaluating/run/types.ts`. New fields beyond legacy intercept:
+ *
+ * - `events` — RENAMED from `logs`. Each element is a `LinkedInterceptEvent`
+ *   carrying both the original event payload and AST navigation
+ *   (`nodePath`, `nodePathSource`, `node`, optional `nodePathFallbackFrom`).
+ *   Every event also carries `step: number` (1-indexed, contiguous):
+ *   `events[i].step === i + 1`. Same `step` value appears on the back-ref
+ *   in `ast[event.nodePath].events`, enabling timeline reconstruction
+ *   directly from any AST node.
+ * - `code` — the original source string passed to `createInterceptGenerator`.
+ * - `options` — the options object passed in (or `{}` if omitted).
+ * - `ast` — `Record<nodePath, ASTNode>` of every AST node in the program,
+ *   each carrying back-refs to the events that fired on it
+ *   (`node.events[]`). `null` only when validation failed before parsing
+ *   produced a usable tree (the lone error event has
+ *   `nodePathSource: 'no-ast'`).
+ * - `visitCounts` — `Record<nodePath, number>` of trap-fire counts per
+ *   AST node; trivially `events.reduce(...)` but pre-computed for
+ *   convenience and to mirror trace's result shape.
+ *
+ * Replay invariant: a second `for await` over a settled handle yields
+ * the SAME event references that the live iteration yielded; `events[i]`
+ * after settlement is identity-equal to `events[i]` during streaming.
+ * The link step mutates events in place (adds `.node` ref) — never clones.
+ */
+type InterceptResult = BaseResult<InterceptResultError> & {
+	readonly outcome: InterceptOutcome;
+	readonly events: readonly LinkedInterceptEvent[];
+	readonly reason?: unknown;
+	readonly code: string;
+	readonly options: InterceptOptions;
+	readonly ast: Readonly<Record<string, ASTNode>> | null;
+	readonly visitCounts: Readonly<Record<string, number>>;
+};
 
 // ─── IO mock surface ──────────────────────────────────────────
 
@@ -113,8 +258,8 @@ type InterceptOptions = {
  * JSDoc on `createInterceptGenerator` for why.
  */
 type InterceptHandle =
-	AsyncGenerator<InterceptEvent, InterceptResult> &
-	Execution<InterceptEvent, InterceptResult> & {
+	AsyncGenerator<LinkedInterceptEvent, InterceptResult> &
+	Execution<LinkedInterceptEvent, InterceptResult> & {
 		/**
 		 * Stop the run and attach a structured rejection payload.
 		 *
@@ -126,7 +271,7 @@ type InterceptHandle =
 		 * termination — e.g. a teaching harness that wants to stop the
 		 * run and record "learner's prediction was wrong" with a
 		 * specific rejection payload. The result settles with
-		 * `{ok:true, outcome:'fail', reason}`. Logs remain pure
+		 * `{ok:true, outcome:'fail', reason}`. Events remain pure
 		 * (no synthetic termination marker appended).
 		 *
 		 * Idempotent and first-write-wins with `.cancel()` / timeout
@@ -135,6 +280,39 @@ type InterceptHandle =
 		 * no-ops. Safe to call any number of times at any phase.
 		 */
 		readonly fail: (reason?: unknown) => void;
+
+		/**
+		 * The original source string passed to `createInterceptGenerator`.
+		 * Eager — available immediately after construction, before any
+		 * iteration or result access.
+		 */
+		readonly code: string;
+
+		/**
+		 * The options object passed to `createInterceptGenerator` (or
+		 * `{}` if omitted). Eager — same lifetime as `code`. Reference
+		 * is the consumer's own object, not a clone — do not mutate it.
+		 */
+		readonly options: InterceptOptions;
+
+		/**
+		 * Promise that resolves to the AST node record once the
+		 * validation gate completes successfully (and so before the
+		 * worker runs). Resolves to `null` when validation fails (parse
+		 * error, JeJ violations, or formatting rejection) — in that case
+		 * `result.ast` is also `null`.
+		 *
+		 * @remarks Useful for consumers that need AST shape *before*
+		 * events start firing — e.g. an editor that wants to set up
+		 * highlighting for every CallExpression before the run begins.
+		 *
+		 * Same `Record<nodePath, ASTNode>` reference that ends up on
+		 * `result.ast` after completion. Pre-completion the structure
+		 * is mutable (back-ref `events[]` arrays will be populated as
+		 * events fire); post-completion the whole graph is frozen
+		 * via `deepFreezeInPlace` in `getResult`.
+		 */
+		readonly ast: Promise<Readonly<Record<string, ASTNode>> | null>;
 	};
 
 // --- Messages: main → worker ---
@@ -190,7 +368,11 @@ type IoRequestMessage = {
 	readonly type: 'io-request';
 	readonly name: 'prompt' | 'confirm' | 'alert';
 	readonly args: readonly unknown[];
-	readonly line: number;
+	/** AST nodePath of the firing CallExpression, set by `__$ic`'s
+	 *  `__currentPath` slot at the moment the worker emits the request.
+	 *  Null only if the call somehow fired outside any wrapped call (in
+	 *  practice unreachable for instrumented code). */
+	readonly nodePath: string | null;
 };
 
 /**
@@ -214,6 +396,13 @@ export type {
 	IoMocks,
 	InterceptOptions,
 	InterceptHandle,
+	InterceptOutcome,
+	InterceptResult,
+	InterceptResultError,
+	ValidationResultError,
+	JavaScriptResultError,
+	TimeoutResultError,
+	IterationLimitResultError,
 	WorkerInbound,
 	WorkerOutbound,
 	SetupMessage,

@@ -53,11 +53,11 @@ describe('createInterceptGenerator validation gate', () => {
 				expect(result.error.line).toBe(2);
 			});
 
-			it('parse-fail result has no logs field', async () => {
+			it('parse-fail result has empty events array (no worker ran)', async () => {
 				const handle = createInterceptGenerator('let x =;');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
-				expect((result as { logs?: unknown }).logs).toBeUndefined();
+				expect(result.events).toEqual([]);
 			});
 		});
 	});
@@ -70,26 +70,31 @@ describe('createInterceptGenerator validation gate', () => {
 				expect(result.ok).toBe(false);
 			});
 
-			it('var declaration → rejections field, not error', async () => {
+			it('var declaration → error.kind: validation', async () => {
 				const handle = createInterceptGenerator('var x = 5;\n');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
-				expect(result.rejections).toBeDefined();
-				expect(result.error).toBeUndefined();
+				expect(result.error?.kind).toBe('validation');
 			});
 
-			it('one var declaration → exactly one rejection', async () => {
+			it('one var declaration → exactly one violation', async () => {
 				const handle = createInterceptGenerator('var x = 5;\n');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
-				expect(result.rejections?.length).toBe(1);
+				if (result.error?.kind !== 'validation') {
+					throw new Error(`expected validation, got ${result.error?.kind}`);
+				}
+				expect(result.error.violations.length).toBe(1);
 			});
 
-			it('two var declarations → two rejections (triangulates count)', async () => {
+			it('two var declarations → two violations (triangulates count)', async () => {
 				const handle = createInterceptGenerator('var x = 5;\nvar y = 6;\n');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
-				expect(result.rejections?.length).toBe(2);
+				if (result.error?.kind !== 'validation') {
+					throw new Error(`expected validation, got ${result.error?.kind}`);
+				}
+				expect(result.error.violations.length).toBe(2);
 			});
 		});
 	});
@@ -111,11 +116,11 @@ describe('createInterceptGenerator validation gate', () => {
 				expect(result.error?.kind).toBe('formatting');
 			});
 
-			it('format-fail result has no logs field', async () => {
+			it('format-fail result has empty events array (no worker ran)', async () => {
 				const handle = createInterceptGenerator('let   x = 5;\n');
 				const result = await handle.result;
 				if (result.ok) throw new Error('expected !ok');
-				expect((result as { logs?: unknown }).logs).toBeUndefined();
+				expect(result.events).toEqual([]);
 			});
 		});
 	});
@@ -133,12 +138,11 @@ describe('createInterceptGenerator validation gate', () => {
 		// Input is BOTH JeJ-rejected (var) AND unformatted (no trailing newline).
 		// Proves validation runs first: result carries rejections, not a
 		// formatting error.
-		it('rejected + unformatted → rejections, not formatting', async () => {
+		it('rejected + unformatted → error.kind: validation, not formatting', async () => {
 			const handle = createInterceptGenerator('var x=5;');
 			const result = await handle.result;
 			if (result.ok) throw new Error('expected !ok');
-			expect(result.rejections).toBeDefined();
-			expect(result.error).toBeUndefined();
+			expect(result.error?.kind).toBe('validation');
 		});
 	});
 });

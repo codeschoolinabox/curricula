@@ -63,29 +63,44 @@ let controlView = null;
 let payloadView = null;
 const events = [];
 var isScriptMode = false;
+// 1-indexed sequence number for emitted events. Stamped on every event
+// (console / dialog / construction-error / execution-error). After the
+// run, result.events[i].step === i + 1, and ASTNode.events[j].step
+// reveals where in the global stream that back-ref fired.
+let eventStep = 1;
 
-// --- Line extraction ---
+// --- Per-call instrumentation: __$ic ---
+//
+// Pre-execution AST walk on the main thread (wrap-call-expressions.ts)
+// rewrites EVERY CallExpression in user code as:
+//   __$ic('<nodePath>', () => <originalCall>)
+// __$ic pushes the call's nodePath onto __currentPath before invoking
+// the thunk, restores the previous value in finally, and stamps the
+// nodePath onto any error that propagates up. Trap functions (console.X,
+// prompt, alert, confirm) read __currentPath at fire time — no stack
+// parsing needed.
+//
+// __currentPath is null only when execution is OUTSIDE any wrapped call
+// (e.g. between top-level statements). Trap fires from outside any wrap
+// shouldn't happen for instrumented code, but the trap defaults to null
+// defensively (the main thread treats null as "no nodePath" → enrich
+// would set source: 'no-ast', but in practice this branch is unreachable
+// for valid JeJ programs after instrumentation).
 
-function getLine() {
+let __currentPath = null;
+
+function __$ic(nodePath, thunk) {
+  const prev = __currentPath;
+  __currentPath = nodePath;
   try {
-    throw new Error();
-  } catch (e) {
-    const lines = (e.stack || '').split('\\n');
-    for (let i = 0; i < lines.length; i++) {
-      const match = lines[i].match(/:(\\d+):\\d+\\)?$/);
-      if (match) {
-        const lineNum = parseInt(match[1], 10);
-        // WHY: without scriptMode, new Function prepends "use strict"
-        // as line 1, so user code starts at line 2. Subtract 1 to get
-        // user line. In scriptMode, no prefix — line numbers are exact.
-        if (isScriptMode) {
-          if (lineNum >= 1) return lineNum;
-        } else {
-          if (lineNum >= 2) return lineNum - 1;
-        }
-      }
+    return thunk();
+  } catch (err) {
+    if (err && typeof err === 'object' && err.__nodePath === undefined) {
+      try { err.__nodePath = nodePath; } catch (_) { /* frozen err — ignore */ }
     }
-    return undefined;
+    throw err;
+  } finally {
+    __currentPath = prev;
   }
 }
 
@@ -160,8 +175,7 @@ const trappedConsole = {};
 CONSOLE_METHODS.forEach(function(method) {
   trappedConsole[method] = function() {
     const args = safeCloneArgs(Array.from(arguments));
-    const line = getLine();
-    const event = { event: 'console', method: method, args: args, line: line };
+    const event = { event: 'console', method: method, args: args, nodePath: __currentPath, step: eventStep++ };
     events.push(event);
     Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
     Atomics.store(controlView, EVENT_READY_INDEX, EVENT_READY);
@@ -174,11 +188,10 @@ CONSOLE_METHODS.forEach(function(method) {
 
 function trappedAlert() {
   const args = safeCloneArgs(Array.from(arguments));
-  const line = getLine();
-  postMessage({ type: 'io-request', name: 'alert', args: args, line: line });
+  postMessage({ type: 'io-request', name: 'alert', args: args, nodePath: __currentPath });
   waitForResponse();
   readResponse();
-  const event = { event: 'alert', args: args, return: undefined, line: line };
+  const event = { event: 'alert', args: args, return: undefined, nodePath: __currentPath, step: eventStep++ };
   events.push(event);
   Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
   Atomics.store(controlView, EVENT_READY_INDEX, EVENT_READY);
@@ -188,12 +201,11 @@ function trappedAlert() {
 
 function trappedConfirm() {
   const args = safeCloneArgs(Array.from(arguments));
-  const line = getLine();
-  postMessage({ type: 'io-request', name: 'confirm', args: args, line: line });
+  postMessage({ type: 'io-request', name: 'confirm', args: args, nodePath: __currentPath });
   waitForResponse();
   const response = readResponse();
   const returnValue = response.value;
-  const event = { event: 'confirm', args: args, return: returnValue, line: line };
+  const event = { event: 'confirm', args: args, return: returnValue, nodePath: __currentPath, step: eventStep++ };
   events.push(event);
   Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
   Atomics.store(controlView, EVENT_READY_INDEX, EVENT_READY);
@@ -204,12 +216,11 @@ function trappedConfirm() {
 
 function trappedPrompt() {
   const args = safeCloneArgs(Array.from(arguments));
-  const line = getLine();
-  postMessage({ type: 'io-request', name: 'prompt', args: args, line: line });
+  postMessage({ type: 'io-request', name: 'prompt', args: args, nodePath: __currentPath });
   waitForResponse();
   const response = readResponse();
   const returnValue = response.value;
-  const event = { event: 'prompt', args: args, return: returnValue, line: line };
+  const event = { event: 'prompt', args: args, return: returnValue, nodePath: __currentPath, step: eventStep++ };
   events.push(event);
   Atomics.store(controlView, PAUSE_INDEX, PAUSE_PAUSED);
   Atomics.store(controlView, EVENT_READY_INDEX, EVENT_READY);
@@ -242,19 +253,24 @@ self.onmessage = function (e) {
       loopDeclarations = 'var ' + decls.join(', ') + '; ';
     }
 
-    // 1. Construction phase — SyntaxError from new Function
+    // 1. Construction phase — SyntaxError from new Function.
+    // The trap globals (console/alert/confirm/prompt) plus the per-call
+    // wrap helper (__$ic) are all injected as parameters so they cannot
+    // be shadowed by user code. The body is the instrumented learner
+    // source produced by wrapCallExpressions on the main thread.
     var fn;
     try {
       var prefix = msg.scriptMode
         ? loopDeclarations
         : ('"use strict"; ' + loopDeclarations + '\\n');
-      fn = new Function('console', 'alert', 'confirm', 'prompt', prefix + msg.code);
+      fn = new Function('console', 'alert', 'confirm', 'prompt', '__$ic', prefix + msg.code);
     } catch (err) {
       var errorEvent = {
         event: 'error',
         name: err.name || 'Error',
         message: err.message || String(err),
-        phase: 'creation'
+        phase: 'creation',
+        step: eventStep++
       };
       events.push(errorEvent);
       postMessage({ type: 'event', event: errorEvent });
@@ -262,17 +278,32 @@ self.onmessage = function (e) {
       return;
     }
 
-    // 2. Execution phase — runtime errors
+    // 2. Execution phase — runtime errors.
+    // Errors thrown inside a wrapped CallExpression carry __$ic-stamped
+    // .__nodePath (set in __$ic's catch). Read it to attribute the error
+    // to the firing call without parsing Error.stack. Errors thrown
+    // OUTSIDE any wrapped call (e.g. bare null.foo;) have no
+    // .__nodePath; fall back to extractPositionFromError for residual
+    // line-only attribution.
     try {
-      fn(trappedConsole, trappedAlert, trappedConfirm, trappedPrompt);
+      fn(trappedConsole, trappedAlert, trappedConfirm, trappedPrompt, __$ic);
     } catch (err) {
       var errorEvent2 = {
         event: 'error',
         name: err.name || 'Error',
         message: err.message || String(err),
-        line: extractLineFromError(err),
-        phase: 'execution'
+        phase: 'execution',
+        step: eventStep++
       };
+      if (err && typeof err === 'object' && err.__nodePath) {
+        errorEvent2.nodePath = err.__nodePath;
+      } else {
+        var errPos = extractPositionFromError(err);
+        if (errPos) {
+          errorEvent2.line = errPos.line;
+          errorEvent2.column = errPos.column;
+        }
+      }
       events.push(errorEvent2);
       postMessage({ type: 'event', event: errorEvent2 });
     }
@@ -281,17 +312,24 @@ self.onmessage = function (e) {
   }
 };
 
-function extractLineFromError(err) {
+// Residual position extraction — only used for runtime errors thrown
+// OUTSIDE any wrapped CallExpression (e.g. bare null.foo;). Trap
+// fires use __currentPath instead. The line offset arithmetic accounts
+// for new Function wrapping (+2 lines) and the "use strict" prefix
+// (+1 line in non-scriptMode) so the returned line matches user source.
+function extractPositionFromError(err) {
   if (!err || !err.stack) return undefined;
   const lines = err.stack.split('\\n');
   for (let i = 0; i < lines.length; i++) {
-    const match = lines[i].match(/:(\\d+):\\d+\\)?$/);
+    const line = lines[i];
+    const match = line.match(/:(\\d+):(\\d+)\\)?$/);
     if (match) {
       const lineNum = parseInt(match[1], 10);
+      const colNum = parseInt(match[2], 10);
       if (isScriptMode) {
-        if (lineNum >= 1) return lineNum;
+        if (lineNum >= 3) return { line: lineNum - 2, column: colNum - 1 };
       } else {
-        if (lineNum >= 2) return lineNum - 1;
+        if (lineNum >= 4) return { line: lineNum - 3, column: colNum - 1 };
       }
     }
   }
