@@ -132,6 +132,16 @@ function walk(
 		}
 	}
 
+	// ESTree mostly produces children in source order via Object.keys, but
+	// TemplateLiteral splits its parts into two parallel arrays (`quasis`
+	// and `expressions`) that interleave at runtime. Sort by loc.start so
+	// `children` always reflects source order regardless of node type.
+	childrenList.sort((left, right) =>
+		left.loc.start.line === right.loc.start.line
+			? left.loc.start.column - right.loc.start.column
+			: left.loc.start.line - right.loc.start.line,
+	);
+
 	return astNode;
 }
 

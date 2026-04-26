@@ -140,5 +140,27 @@ describe('buildLocationIndex', () => {
 				);
 			}
 		});
+
+		it('TemplateLiteral interleaves quasis and expressions in source order', () => {
+			// Acorn stores `expressions` and `quasis` as two parallel arrays
+			// on TemplateLiteral. Without the loc-sort they would arrive
+			// grouped (all quasis, then all expressions, or vice-versa).
+			// `children` must reflect source order: quasi, expr, quasi.
+			const index = indexFor('let s = `hello ${name} world`;');
+			const tl = index.astByPath.get(
+				'$.body.0.declarations.0.init',
+			)!;
+			expect(tl.type).toBe('TemplateLiteral');
+			expect(tl.children.length).toBe(3);
+			expect(tl.children[0]!.type).toBe('TemplateElement');
+			expect(tl.children[1]!.type).toBe('Identifier');
+			expect(tl.children[2]!.type).toBe('TemplateElement');
+			// Strict ascending by column — interleave proven, no ties.
+			for (let i = 1; i < tl.children.length; i++) {
+				expect(tl.children[i]!.loc.start.column).toBeGreaterThan(
+					tl.children[i - 1]!.loc.start.column,
+				);
+			}
+		});
 	});
 });
