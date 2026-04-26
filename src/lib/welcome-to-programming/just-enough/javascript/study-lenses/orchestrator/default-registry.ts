@@ -15,6 +15,7 @@
  */
 
 import editor from '../lenses/editor/editor.js';
+import highlight from '../lenses/highlight/highlight.js';
 import createRegistry from '../registry.js';
 import type { Registry } from '../types.js';
 
@@ -28,6 +29,7 @@ import type { Registry } from '../types.js';
 function createDefaultRegistry(): Registry {
 	const registry = createRegistry();
 	registry.register(editor);
+	registry.register(highlight);
 	return registry;
 }
 
