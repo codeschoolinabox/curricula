@@ -35,9 +35,11 @@ describe('<StudyLenses>', () => {
 			await act(async function flush() {});
 			const host = container.querySelector('[data-orchestrator="study-lenses"]');
 			expect(host).not.toBeNull();
-			const stub = host?.querySelector('[data-lens="editor-stub"]');
+			const stub = host?.querySelector<HTMLTextAreaElement>(
+				'[data-lens="editor-stub"]',
+			);
 			expect(stub).not.toBeNull();
-			expect(stub?.textContent).toBe('');
+			expect(stub?.value).toBe('');
 		});
 	});
 
@@ -47,8 +49,10 @@ describe('<StudyLenses>', () => {
 				<StudyLenses code="let x = 42;" lens="editor" lang="js" />,
 			);
 			await act(async function flush() {});
-			const stub = container.querySelector('[data-lens="editor-stub"]');
-			expect(stub?.textContent).toBe('let x = 42;');
+			const stub = container.querySelector<HTMLTextAreaElement>(
+				'[data-lens="editor-stub"]',
+			);
+			expect(stub?.value).toBe('let x = 42;');
 		});
 	});
 
@@ -60,7 +64,7 @@ describe('<StudyLenses>', () => {
 			await act(async function flush() {});
 			const host = container.querySelector('[data-orchestrator="study-lenses"]');
 			const first = host?.firstElementChild as HTMLElement | null;
-			expect(first?.tagName).toBe('PRE');
+			expect(first?.tagName).toBe('TEXTAREA');
 			expect(first?.dataset.lens).toBe('editor-stub');
 		});
 	});
