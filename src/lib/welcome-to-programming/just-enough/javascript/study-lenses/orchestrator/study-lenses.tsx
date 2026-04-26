@@ -48,6 +48,7 @@ import validatePipeline from '../pipeline.js';
 import type { Pipeline, PluginEmittedProps } from '../types.js';
 
 import createDefaultRegistry from './default-registry.js';
+import Toolbar from './toolbar.js';
 
 function StudyLenses(properties: PluginEmittedProps): React.JSX.Element {
 	return (
@@ -147,7 +148,17 @@ function StudyLensesClient(properties: PluginEmittedProps): React.JSX.Element {
 	if (error) {
 		return <pre data-orchestrator-error="">{error.message}</pre>;
 	}
-	return <div ref={hostReference} data-orchestrator="study-lenses" />;
+	const lensOptions = registry.getLensNames();
+	return (
+		<div data-orchestrator-root="">
+			<Toolbar
+				value={state.activeLens}
+				options={lensOptions}
+				onLensChange={function noopOnLensChange() {}}
+			/>
+			<div ref={hostReference} data-orchestrator="study-lenses" />
+		</div>
+	);
 }
 
 export default StudyLenses;
