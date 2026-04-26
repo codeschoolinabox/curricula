@@ -32,7 +32,7 @@
  *
  * **Re-iteration** — after the generator completes (successfully,
  * via a thrown error, or via `cancel()`), a second `for await`
- * replays from `result.logs` without re-executing. Replay yields the
+ * replays from `result.events` without re-executing. Replay yields the
  * **same event references** that the live iteration yielded, so
  * consumers can `===`-compare events across iterations. The engine
  * must push each yielded event into `logs` by reference (no clone)
@@ -131,33 +131,46 @@ type InterceptEvent =
 
 /** Unified console event — one shape for all 19 console methods.
  * Consumers discriminate first on `event === 'console'`, then filter
- * by `method` if they care about a specific call. */
+ * by `method` if they care about a specific call.
+ *
+ * No `line` or `column` field on trap event variants — position comes
+ * from the AST via the link layer. After entwining, every event carries
+ * `nodePath` (string) and (in the linked form) a `loc` SourceLocation
+ * referencing `event.node.loc`. Read `event.loc.start.line` /
+ * `event.loc.start.column` for integer positions. See intercept's
+ * `link/types.ts` for the linked event shape.
+ *
+ * `step` is the 1-indexed, contiguous sequence number in the global
+ * event stream. `result.events[i].step === i + 1`. After link, every
+ * `ASTNode.events[j].step` reveals where in the timeline that
+ * back-ref fired — so a consumer reading `node.events` can reconstruct
+ * what happened between events without scanning `result.events`. */
 type ConsoleEvent = {
 	readonly event: 'console';
 	readonly method: ConsoleMethod;
 	readonly args: readonly unknown[];
-	readonly line: number;
+	readonly step: number;
 };
 
 type PromptEvent = {
 	readonly event: 'prompt';
 	readonly args: readonly unknown[];
 	readonly return: string | null;
-	readonly line: number;
+	readonly step: number;
 };
 
 type AlertEvent = {
 	readonly event: 'alert';
 	readonly args: readonly unknown[];
 	readonly return: undefined;
-	readonly line: number;
+	readonly step: number;
 };
 
 type ConfirmEvent = {
 	readonly event: 'confirm';
 	readonly args: readonly unknown[];
 	readonly return: boolean;
-	readonly line: number;
+	readonly step: number;
 };
 
 type ErrorEvent = {
@@ -165,7 +178,9 @@ type ErrorEvent = {
 	readonly name: string;
 	readonly message: string;
 	readonly line?: number;
+	readonly column?: number;
 	readonly phase: 'creation' | 'execution';
+	readonly step: number;
 };
 
 // ─── Exports ─────────────────────────────────────────────────

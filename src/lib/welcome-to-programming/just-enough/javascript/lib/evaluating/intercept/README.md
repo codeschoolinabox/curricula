@@ -57,7 +57,7 @@ README. Use them consistently.
   via a thrown runtime error, or via cancel), a second `for await`
   over the same handle yields the same event **references** that the
   first iteration yielded. Consumers can `===`-compare events across
-  live and replayed iterations. Events come from the result's `logs`
+  live and replayed iterations. Events come from the result's `events`
   array; no clone, no separate cache. Events are `deepFreezeInPlace`-
   frozen before the first yield; consumer mutation attempts throw in
   strict mode.
@@ -87,9 +87,17 @@ README. Use them consistently.
   (seconds budget exhausted), `iteration-limit` (guarded loop
   exceeded cap), `error` (learner code threw, or parse/format/
   creation gate failed). Consumers switch on `result.outcome` —
-  TypeScript narrows it exhaustively. `logs` is a pure worker-
+  TypeScript narrows it exhaustively. `events` is a pure worker-
   emitted event stream; it does NOT carry synthetic cancel/fail
   markers. See § Outcome below.
+- **wrap** / **`__$ic`** / **`__currentPath`** / **instrumentation phase** /
+  **nodePath** / **provenance (`'instrumented'`/`'enclosing-fallback'`/`'no-ast'`)** /
+  **link** / **entwining** — see [DOCS.md § Ubiquitous Language](DOCS.md)
+  for the full architectural vocabulary. Briefly: every trap call's source
+  position is captured at AST-walk time and baked into a per-call wrap; the
+  trap reads it at fire time. Events carry `nodePath`, `nodePathSource`,
+  `node`, and `loc` directly — the AST is the single source of truth for
+  position.
 - **Termination cause** (internal) — the single closure variable
   inside `createInterceptGenerator` that records the first reason the
   run ended (first-write-wins). All termination entry points
@@ -159,9 +167,10 @@ consumers (primarily the test suite) can call `.next()` directly.
 - **Yields** — `InterceptEvent` objects one at a time, pausing the worker
   between events via the unified pause protocol (PAUSE + EVENT_READY
   flags on the SAB).
-- **Returns** — `InterceptResult` (frozen `{ ok, error?, logs?: InterceptEvent[] }`)
-  on completion. `logs` is absent when code was rejected before
-  execution (parse, rejections, formatting gate).
+- **Returns** — `InterceptResult` (frozen `{ ok, error?, events: LinkedInterceptEvent[], ast, code, options, visitCounts }`)
+  on completion. `events` is empty (`[]`) when code was rejected before
+  execution (parse error, JeJ violation, formatting gate); `ast` is
+  `null` in those cases too.
 
 ### Lazy startup pipeline
 
@@ -171,36 +180,43 @@ itself returns cheaply — no work happens until a consumer pulls.
 
 1. **Termination fast-path** — if `.cancel()` or `.fail(reason)`
    fired before any iteration, return a settled InterceptResult
-   (`{ok:true, outcome:'cancel', logs:[]}` or
-   `{ok:true, outcome:'fail', reason, logs:[]}`) and skip everything
+   (`{ok:true, outcome:'cancel', events:[]}` or
+   `{ok:true, outcome:'fail', reason, events:[]}`) and skip everything
    else. Worker is never spawned.
-2. **Validation gates** — two ordered checks, both producing an
-   immediate error InterceptResult on failure. Worker is still never
-   spawned.
-   1. **Parse + JeJ validation** — `validate(code)` runs acorn parse,
-      then walks the AST against the JeJ language allow-list.
-      Returns a `BaseResult`:
-      - Parse failure: `{ok:false, error:{kind:'parse', line,
-        column, ...}}`
-      - Language-level violations: `{ok:false, rejections:[...]}`
-      - Pass: `{ok:true}` — continue.
-   2. **Format gate** — `checkFormat(code)` verifies the source
-      matches the fixed recast output. Unformatted code →
-      `{ok:false, error:{kind:'formatting'}}`. No runtime error is
-      produced here; unformatted code is valid JavaScript — the gate
-      is a learning constraint, not a correctness check.
-3. **Execute** — only reached when both gates pass. Worker is
-   spawned, the generator body streams events until completion,
+2. **Validation gate** — `validateProgram(code, justEnoughJs)` runs
+   acorn parse and walks the AST against the JeJ language allow-list.
+   Returns a `ValidationReport` carrying the parsed AST on success:
+   - Parse failure: `error: {kind:'parse', line, column, ...}`
+   - JeJ violations: `error: {kind:'validation', violations:[...]}`
+   - Pass: AST returned for use by steps 3 and 4.
+3. **Build LocationIndex** — `buildLocationIndex(ast, code)` walks
+   the parsed Program once, producing the `astByPath` record (every
+   AST node by nodePath) plus position lookups for the residual
+   error path. Pure, deterministic; the result is reused by the link
+   layer and the residual `extractPositionFromError` fallback.
+4. **Instrument** — `wrapCallExpressions(ast, code)` rewrites every
+   CallExpression as `__$ic('<nodePath>', () => <originalCall>)`
+   in-place (string-splice; lines preserved 1:1). The rewritten
+   source is what gets sent to the worker via `execute`.
+5. **Format gate** — `checkFormat(code)` verifies the original
+   source (not the instrumented one) matches the fixed recast
+   output. Unformatted code → `{ok:false, error:{kind:'formatting'}}`.
+   No runtime error is produced here; unformatted code is valid
+   JavaScript — the gate is a learning constraint, not a correctness
+   check.
+6. **Execute** — only reached when all prior steps pass. Worker is
+   spawned with `__$ic` + the trapped IO globals as `new Function`
+   parameters. The generator body streams events until completion,
    cancel, or timeout.
 
 #### Input-boundary behavior
 
 - **Non-string `code`** — TypeScript types require `code: string`. A
-  non-string input reaches `validate()` and (depending on the value)
-  produces a `SyntaxError`-shaped parse-failure InterceptResult via the
-  acorn path, or is wrapped as a creation-phase `ErrorEvent` if
-  validate throws unexpectedly. The engine does not sync-throw at
-  the `run(...)` call boundary.
+  non-string input reaches `validateProgram(code, justEnoughJs)` and
+  (depending on the value) produces a `SyntaxError`-shaped parse-failure
+  InterceptResult via the acorn path, or is wrapped as a creation-phase
+  `ErrorEvent` if validation throws unexpectedly. The engine does not
+  sync-throw at the `run(...)` call boundary.
 - **Non-object `options`** — TypeScript types require the options
   parameter shape; a non-object runtime value produces undefined
   destructure reads (`options?.seconds` → `undefined`), which apply
@@ -242,13 +258,13 @@ call any number of times at any phase.
 
 - **Before first iterate:** sets the termination cause. First `.next()`
   sees it, returns a settled InterceptResult (`outcome:'cancel'`, empty
-  logs) without constructing the Worker. Zero resource leak.
+  events) without constructing the Worker. Zero resource leak.
 - **During iteration:** pushes a sentinel into the internal queue,
   unsticks the pending `await dequeue()`, main loop's termination
   check breaks out, finally block terminates the Worker and revokes
   the Blob URL. The final InterceptResult is
-  `{ok: true, outcome: 'cancel', logs: [...events]}`. Logs contain
-  only worker-emitted events — no synthetic cancel marker.
+  `{ok: true, outcome: 'cancel', events: [...firedEvents]}`. Events
+  contain only worker-emitted ones — no synthetic cancel marker.
 - **After completion:** no-op.
 
 Consumers check the first-class `outcome` field:
@@ -338,7 +354,7 @@ return the same Promise. `await run(code)` is equivalent.
 ```ts
 const result = await run(code);
 if (result.ok) {
-  console.log('logs:', result.logs);
+  console.log('events:', result.events);
 } else {
   console.log('error:', result.error);
 }
@@ -377,8 +393,8 @@ On `outcome: 'fail'` the InterceptResult also carries `reason` — the
 payload passed to `.fail(reason)`. Not cloned, not separately
 frozen; the reference is replay-stable.
 
-`logs` is a pure worker-emitted event stream. It does NOT carry
-synthetic termination markers. Consumers inspecting `logs.at(-1)`
+`events` is a pure worker-emitted event stream. It does NOT carry
+synthetic termination markers. Consumers inspecting `events.at(-1)`
 for a `{event:'cancel'}` sentinel will find only the real final
 event (or nothing if no events were emitted). Use `result.outcome`
 for termination classification.
@@ -387,7 +403,7 @@ for termination classification.
 
 Once a run completes — successfully, via a thrown error, or via
 `.cancel()` — a second `for await` over the same handle replays the
-events from the result's `logs` array. No re-execution; no Worker
+events from the result's `events` array. No re-execution; no Worker
 respawn.
 
 ```ts
@@ -409,9 +425,9 @@ console.log(liveEvents[0] === replayedEvents[0]); // true
 ```
 
 This is possible because the engine's main loop pushes each yielded
-event into an internal `logs` array using the exact reference the
+event into an internal `events` array using the exact reference the
 consumer sees — no clone. `deepFreezeInPlace` freezes the final
-InterceptResult (including the `logs` array) in place; identity survives.
+InterceptResult (including the `events` array) in place; identity survives.
 
 Replay does not throttle — events drain as fast as the consumer
 pulls. If the consumer wants to pace the replay (e.g. for a
@@ -499,12 +515,29 @@ All traps are always defined in the worker — there is no
 config-driven trap selection. Which implementation fires on the main
 thread is determined by the Resolved IO table.
 
-| Global               | Event produced                              |
-| -------------------- | ------------------------------------------- |
-| `console.*` (all 19) | `ConsoleEvent` — method, args, line         |
-| `alert`              | `AlertEvent` — args, line                   |
-| `confirm`            | `ConfirmEvent` — args, return value, line   |
-| `prompt`             | `PromptEvent` — args, return value, line    |
+| Global               | Event produced                                                                  |
+| -------------------- | ------------------------------------------------------------------------------- |
+| `console.*` (all 19) | `ConsoleEvent` — method, args, nodePath, nodePathSource, node, loc, step        |
+| `alert`              | `AlertEvent` — args, nodePath, nodePathSource, node, loc, step                  |
+| `confirm`            | `ConfirmEvent` — args, return value, nodePath, nodePathSource, node, loc, step  |
+| `prompt`             | `PromptEvent` — args, return value, nodePath, nodePathSource, node, loc, step   |
+
+Every event carries a 1-indexed `step` field giving its position in the
+global event stream — `result.events[i].step === i + 1`. After AST
+entwining, the same `step` value appears on each AST node's
+`events[]` back-refs, so `result.ast[nodePath].events[j].step` reveals
+exactly when in the run that fire occurred without rescanning
+`result.events`.
+
+Every event also carries `nodePath` (the firing CallExpression's AST
+path), `nodePathSource` (`'instrumented'` for the happy path,
+`'enclosing-fallback'` for residual errors outside any wrapped call,
+`'no-ast'` when validation failed before parsing), `loc` (the AST
+node's `SourceLocation` — same reference as `event.node.loc` after
+entwining), and `node` (a direct reference into `result.ast`). No
+`line` or `column` fields on trap events — read `event.loc.start.line`
+or `event.loc.start.column` for those integer values. See [DOCS.md §
+Ubiquitous Language and Data flow](DOCS.md) for the mechanism.
 
 The 19 trapped `console` methods: `log`, `debug`, `info`, `warn`,
 `error`, `assert`, `table`, `dir`, `dirxml`, `group`, `groupCollapsed`,
@@ -514,29 +547,29 @@ semantic trace engine — different namespace, no conflict.)
 
 ## How it works
 
+> Pipeline expanded from the prior 12 steps to 17 with the addition of the
+> instrumentation phase (steps 3–4) — the pre-execution AST walk that wraps
+> every CallExpression so trap functions can read the firing nodePath without
+> parsing `Error.stack`. See [DOCS.md § Data flow](DOCS.md) for the canonical
+> diagram and [§ Ubiquitous Language](DOCS.md) for the wrap/trap vocabulary.
+
 1. Build the **Resolved IO** table from `options.io` + Native IO wrappers.
-2. If `options.iterations` is set, inject body-injection loop guards
-   into `while`, `for`, `do-while`, and `for-of` loops via string
-   offset splice (zero line shift). See `guard-loops/`.
-3. Create a SharedArrayBuffer for synchronous IO and pause protocol.
-4. Generate a self-contained worker script with trapped globals +
-   pause logic.
-5. Send a **setup** message (delivers SAB; worker defines traps).
-6. Send an **execute** message (delivers learner code).
-7. Worker posts each event, then pauses via `Atomics.wait` on the
-   pause flag.
-8. Generator `next()` resumes the worker via `Atomics.notify` — yields
-   one event to the consumer.
-9. Handle `io-request` by awaiting `resolvedIo.{prompt|alert|confirm}`
-   and writing the response to the SAB; on throw, surface `ErrorEvent`
-   with `name: 'InternalError'` and terminate.
-10. Handle console events by awaiting `resolvedIo.console[method]` (if
-    any) before yielding; on throw, same `InternalError` path.
-11. Timeout tracks user-perceived runtime: paused while yielded AND
-    while awaiting any IO callback, plus a flat 5 ms per-yield charge
-    so rendering-bound loops still deplete the budget.
-12. Return frozen `InterceptResult` on completion, timeout, or iteration
-    limit.
+2. **Validate** the source (parse + JeJ allow-list check). On failure, return early with `outcome: 'error'` and an `error.kind` payload (`'parse'` or `'validation'`).
+3. **Build the LocationIndex** from the parsed Program (every AST node by nodePath, plus position lookups for the residual error path).
+4. **Instrument** the source via `wrapCallExpressions(program, code)`: every `CallExpression` in the user's code is rewritten to `__$ic('<nodePath>', () => <originalCall>)`. The `__$ic` helper is injected into the worker as a `new Function` parameter; it pushes/pops a `__currentPath` slot around each call so trap functions can read the firing site directly. Lines preserved 1:1.
+5. Run **format check** on the original source (rejection → early return).
+6. If `options.iterations` is set, inject body-injection loop guards into `while`, `for`, `do-while`, and `for-of` loops via string offset splice (zero line shift). See `guard-loops/`.
+7. Create a SharedArrayBuffer for synchronous IO and pause protocol.
+8. Generate a self-contained worker script with `__$ic` + trapped globals + pause logic.
+9. Send a **setup** message (delivers SAB; worker defines traps and `__$ic`).
+10. Send an **execute** message (delivers instrumented learner code).
+11. Worker runs user code. Each `__$ic` wrap pushes its `nodePath` onto `__currentPath` before invoking the call thunk; trap functions read `__currentPath` to know their firing site.
+12. Worker posts each event, then pauses via `Atomics.wait` on the pause flag.
+13. Generator `next()` resumes the worker via `Atomics.notify` — yields one event to the consumer.
+14. Handle `io-request` by awaiting `resolvedIo.{prompt|alert|confirm}` and writing the response to the SAB; on throw, surface `ErrorEvent` with `name: 'InternalError'` and terminate.
+15. Handle console events by awaiting `resolvedIo.console[method]` (if any) before yielding; on throw, same `InternalError` path.
+16. Timeout tracks user-perceived runtime: paused while yielded AND while awaiting any IO callback, plus a flat 5 ms per-yield charge so rendering-bound loops still deplete the budget.
+17. Return frozen `InterceptResult` on completion, timeout, or iteration limit. `link()` attaches `.node` refs and back-refs to the AST.
 
 ## Key design decisions
 
@@ -561,8 +594,8 @@ semantic trace engine — different namespace, no conflict.)
   fires at-or-before the wall-clock budget on busy loops. See
   DOCS.md § Timer-vs-yield.
 - **Errors are events**: runtime errors (`phase: 'execution'`) and
-  construction errors (`phase: 'creation'`) appear in the logs
-  array. The consumer always gets `InterceptEvent[]`, never a thrown
+  construction errors (`phase: 'creation'`) appear in the events
+  array. The consumer always gets `LinkedInterceptEvent[]`, never a thrown
   exception.
 - **SAB + Atomics for IO**: `prompt` / `confirm` / `alert` block the
   worker via `Atomics.wait` while the main thread runs the Resolved IO
