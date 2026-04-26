@@ -10,18 +10,23 @@
  * fence renders a `<div data-orchestrator="study-lenses">` with the
  * resolved lens's `el` attached inside it.
  *
- * Lifecycle (per DOCS §1, §2, §7):
+ * Lifecycle (per DOCS §1, §2, §7 and `orchestrator/DOCS.md` §Effect topology):
  *
  * 1. Mount: `useMemo` constructs the per-instance registry/bus/cache.
- *    `useState` lazily builds the `OrchestratorState`. The effect runs
- *    once: validate → execute → resolve lens module → call `lens()`
+ *    `useState` lazily builds the `OrchestratorState`. The mount-effect
+ *    runs once: validate → execute → resolve lens module → call `lens()`
  *    (sync or async) → attach `mount.el` to the host ref.
  * 2. Cancellation: if the component unmounts while `lens()` is in
  *    flight, the eventual mount is disposed and never attached.
- * 3. Unmount: detach `mountedElement`, `bus.clear()`, iterate
- *    `cache.visit(entry => entry.mount.dispose())`, then `cache.clear()`.
- *    The cache does not auto-dispose — caller (this effect) owns
- *    teardown per `create-lens-cache.ts`.
+ * 3. Switch (Increment 9+): a state-identity change re-runs the
+ *    mount-effect. Its cleanup detaches `mountedElement` WITHOUT
+ *    disposing — the cached entry survives so a future switch-back
+ *    reattaches the cached `mount.el` instead of remounting.
+ * 4. Unmount: a separate effect (`disposeOnUnmount`) owns the full
+ *    teardown: `bus.clear()`, `cache.visit(entry => entry.mount.dispose())`,
+ *    then `cache.clear()`. Runs once on real component unmount only.
+ *    Splitting this from the mount-effect cleanup is what makes
+ *    cache-hit reattach work across switches.
  *
  * SSR: wrapped in `<BrowserOnly>` per DOCS §Structural constraints; the
  * fallback is a `<pre>` of the raw code so non-JS readers still see the
@@ -72,6 +77,16 @@ function StudyLensesClient(properties: PluginEmittedProps): React.JSX.Element {
 	});
 	const [error, setError] = useState<Error | null>(null);
 
+	useEffect(function disposeOnUnmount() {
+		return function cleanup(): void {
+			bus.clear();
+			cache.visit(function disposeEntry(entry) {
+				entry.mount.dispose();
+			});
+			cache.clear();
+		};
+	}, [bus, cache]);
+
 	useEffect(function mountActiveLens() {
 		const noop = function noopCleanup(): void {};
 		if (!langOk) return noop;
@@ -116,13 +131,8 @@ function StudyLensesClient(properties: PluginEmittedProps): React.JSX.Element {
 		return function cleanup(): void {
 			cancelled = true;
 			mountedElement?.remove();
-			bus.clear();
-			cache.visit(function disposeEntry(entry) {
-				entry.mount.dispose();
-			});
-			cache.clear();
 		};
-	}, [state, registry, bus, cache, langOk]);
+	}, [state, registry, cache, langOk]);
 
 	if (!langOk) {
 		return (
