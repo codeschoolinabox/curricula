@@ -23,6 +23,64 @@ not a stylistic choice.
 | **link**                          | Post-completion step (in `link/link.ts`) that attaches `.node: ASTNode` references to events and pushes back-refs into `node.events[]`. Produces `LinkedInterceptEvent`s.                                                                                                                                                                |
 | **entwining**                     | The combined effect of instrumentation + link: every event carries `nodePath`, `nodePathSource`, `node`, `loc`; every AST node carries `events[]` back-refs. Bidirectional navigation between events and source.                                                                                                                         |
 | **residual error path**           | The narrow case where a runtime error fires OUTSIDE any wrapped CallExpression (e.g. bare `null.foo;`). Handled by `extractPositionFromError` for line attribution; provenance `'enclosing-fallback'`.                                                                                                                                   |
+| **`children`** (ASTNode field)    | A flat array of every direct AST descendant of a node, in source-position order. Generic traversal primitive: a consumer can walk the entire tree without knowing ESTree property names per node type. The same `ASTNode` references also appear under their named slots (`.body`, `.callee`, `.arguments`, …).                          |
+| **`callee`** (event field)        | On a `LinkedInterceptEvent`, a direct reference to the callee subnode of `event.node` when `event.node.type === 'CallExpression'`. Same object as `event.node.callee` — single source of truth. `null` when `event.node` is `null` (no-ast) or not a `CallExpression` (residual error path).                                             |
+| **`calleePath`** (event field)    | The `nodePath` of `event.callee` (typically `event.nodePath + '.callee'`). Useful for editor highlighting that wants to underline only the function reference, not the entire call expression. `null` whenever `event.callee` is `null`.                                                                                                 |
+
+## Navigation
+
+After [`link()`](link/link.ts) runs, an event and its AST node are entwined: every event has a typed reference into `result.ast`, and every node has a back-ref array of the events that fired on it. The graph below names every navigation path; consumers pick whichever fits their use case.
+
+```text
+result
+├── events: LinkedInterceptEvent[]      ── chronological stream
+│     └── (each event)
+│         ├── step           number     ── 1-indexed sequence number
+│         ├── nodePath       string?    ── '$.body.0.expression', etc.
+│         ├── nodePathSource              'instrumented' | 'enclosing-fallback' | 'no-ast'
+│         ├── node           ASTNode?   ── ===  result.ast[event.nodePath]
+│         ├── loc            SourceLoc? ── ===  event.node.loc
+│         ├── calleePath     string?    ── event.nodePath + '.callee' (when CallExpression)
+│         └── callee         ASTNode?   ── ===  event.node.callee
+│
+└── ast: Record<nodePath, ASTNode>       ── flat lookup map
+      └── (each ASTNode)
+          ├── syntaxId       string     ── its own nodePath
+          ├── type           string     ── ESTree type discriminator
+          ├── loc            SourceLoc  ── start/end line+column
+          ├── source         string     ── slice of original code
+          ├── parent         ASTNode?   ── upward link (null at Program root)
+          ├── events         Linked[]   ── back-refs in step order
+          ├── children       ASTNode[]  ── every direct descendant in source order
+          └── (named slots)             ── .body, .expression, .callee, .arguments, …
+                                            same references as appear in `children`
+```
+
+**Named slots vs `.children`.** Named ESTree slots (`.body`, `.callee`, `.arguments`, `.expression`, …) give typed access once you've discriminated on `node.type`. `.children` is the generic walk path: the same `ASTNode` references, flattened in source order. Use named slots when you know the node type; use `.children` for type-agnostic traversal (e.g. a renderer that highlights every descendant of a clicked node).
+
+**`event.callee` / `event.calleePath`.** Convenience accessors for the common case of "I have an event from a `console.log(...)` and want to underline just `console.log`, not `console.log(arg)`." Equivalent to `event.node.callee` / `event.node.callee.syntaxId`, but spelled directly on the event so consumers don't need to dispatch on `node.type` first. **Shared reference invariant**: `event.callee === event.node.callee`. Same object, no copy.
+
+**`.parent` (upward links).** Walk upward from any node to find a containing statement, declaration, or block. Note that `parent` forms a cycle with `children` / named slots; `JSON.stringify` will throw without a replacer. The result is deep-frozen with cycle handling — see [utils/deep-freeze-in-place.ts](../utils/deep-freeze-in-place.ts).
+
+**Single source of truth.** Every shared field name is the same object reference, never a copy:
+
+- `event.node` ===  `result.ast[event.nodePath]`
+- `event.loc` ===  `event.node.loc`
+- `event.callee` ===  `event.node.callee`
+- `node.children[i]` ===  the corresponding named slot (e.g. `node.callee` or `node.arguments[k]`)
+
+Consumers can compare by identity (`===`) without worrying about shallow vs deep equality.
+
+**Usage examples.**
+
+| Goal                                                | Path                                                                            |
+| --------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Highlight just the function reference               | `event.callee.loc`                                                              |
+| Highlight the entire call expression                | `event.node.loc` (or equivalently `event.loc`)                                  |
+| Walk every descendant of a node                     | recurse through `node.children`                                                 |
+| Find the containing statement                       | walk `node.parent` upward until `parent.type` ends in `Statement`/`Declaration` |
+| List every event that fired on a node, in order     | `node.events` (already step-ordered)                                            |
+| Resolve `event.nodePath` to the underlying AST node | `result.ast[event.nodePath]` (or just read `event.node`)                        |
 
 ## Data flow
 

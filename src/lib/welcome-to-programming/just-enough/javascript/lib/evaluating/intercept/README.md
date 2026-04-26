@@ -515,12 +515,12 @@ All traps are always defined in the worker — there is no
 config-driven trap selection. Which implementation fires on the main
 thread is determined by the Resolved IO table.
 
-| Global               | Event produced                                                                  |
-| -------------------- | ------------------------------------------------------------------------------- |
-| `console.*` (all 19) | `ConsoleEvent` — method, args, nodePath, nodePathSource, node, loc, step        |
-| `alert`              | `AlertEvent` — args, nodePath, nodePathSource, node, loc, step                  |
-| `confirm`            | `ConfirmEvent` — args, return value, nodePath, nodePathSource, node, loc, step  |
-| `prompt`             | `PromptEvent` — args, return value, nodePath, nodePathSource, node, loc, step   |
+| Global               | Event produced                                                                                       |
+| -------------------- | ---------------------------------------------------------------------------------------------------- |
+| `console.*` (all 19) | `ConsoleEvent` — method, args, nodePath, nodePathSource, node, loc, callee, calleePath, step         |
+| `alert`              | `AlertEvent` — args, nodePath, nodePathSource, node, loc, callee, calleePath, step                   |
+| `confirm`            | `ConfirmEvent` — args, return value, nodePath, nodePathSource, node, loc, callee, calleePath, step   |
+| `prompt`             | `PromptEvent` — args, return value, nodePath, nodePathSource, node, loc, callee, calleePath, step    |
 
 Every event carries a 1-indexed `step` field giving its position in the
 global event stream — `result.events[i].step === i + 1`. After AST
@@ -534,10 +534,17 @@ path), `nodePathSource` (`'instrumented'` for the happy path,
 `'enclosing-fallback'` for residual errors outside any wrapped call,
 `'no-ast'` when validation failed before parsing), `loc` (the AST
 node's `SourceLocation` — same reference as `event.node.loc` after
-entwining), and `node` (a direct reference into `result.ast`). No
-`line` or `column` fields on trap events — read `event.loc.start.line`
-or `event.loc.start.column` for those integer values. See [DOCS.md §
-Ubiquitous Language and Data flow](DOCS.md) for the mechanism.
+entwining), `node` (a direct reference into `result.ast`), and the
+callee accessors `callee` / `calleePath` (the function-reference
+subnode of `event.node` — `Identifier` for `prompt`/`alert`/`confirm`,
+`MemberExpression` for `console.X` — useful when an editor wants to
+underline only the function reference rather than the full call
+expression). `callee` is the same object as `event.node.callee` —
+single source of truth, no copy. No `line` or `column` fields on trap
+events — read `event.loc.start.line` or `event.loc.start.column` for
+those integer values. See [DOCS.md § Navigation](DOCS.md#navigation)
+for the full event ↔ node ↔ ast traversal graph; [DOCS.md § Ubiquitous
+Language and Data flow](DOCS.md) covers the underlying mechanism.
 
 The 19 trapped `console` methods: `log`, `debug`, `info`, `warn`,
 `error`, `assert`, `table`, `dir`, `dirxml`, `group`, `groupCollapsed`,
