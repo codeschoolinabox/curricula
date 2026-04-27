@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Welcome to Frogramming - Syllabus
+# 🐸 Welcome to Frogramming - Syllabus
 
 > The best authors and the best JavaScript developers are those who obsess about
 > language, who explore and experiment with language every day and in doing so
@@ -98,6 +98,7 @@ course helps you build both at once.
   - [Snippetry](#snippetry)
 - [The Metaphor: Composer, Virtuoso, Instrument and Audience](#the-metaphor-composer-virtuoso-instrument-and-audience)
 - [References](#references)
+- [Symbology](#symbology)
 - [Before You Begin](#before-you-begin)
 - [Chapter 0: What is Programming?](#chapter-0-what-is-programming)
   - [0.1 The Rhetorics of Programming](#01-the-rhetorics-of-programming)
@@ -157,13 +158,13 @@ _notional machine_ — an imaginary model of how the computer carries out your
 instructions. Whether you're writing the code yourself or directing an LLM (or a
 human!) to write it for you, you can work two ways:
 
-- **The Vibetoader** works from user-visible behavior. _Does the button work?
+- **🎨 The Vibetoader** works from user-visible behavior. _Does the button work?
   Does the test pass? Does the page render?_ Iteration is on outcomes. The
   machine underneath is a black box.
-- **The Frogrammer** works grounded in the notional machine itself. They predict
-  what the machine will do, evaluate output against that prediction, and apply
-  craft practices (testing, documentation, review, security) intentionally — to
-  mitigate risks their NM-awareness makes visible.
+- **🔬 The Frogrammer** works grounded in the notional machine itself. They
+  predict what the machine will do, evaluate output against that prediction,
+  and apply craft practices (testing, documentation, review, security)
+  intentionally — to mitigate risks their NM-awareness makes visible.
 
 Neither hat is better, and they're not a binary — Vibetoading and Frogramming
 are a spectrum, and most developers wear different hats on different tasks,
@@ -185,10 +186,11 @@ curriculum, progressively layering as the chapters advance:
 
 - **Twinning** (baseline): building an accurate mental model of a process
   outside your own mind. Each chapter asks you to twin a different process: the
-  _developer_ who reads your code (Ch1), the _computer_ that executes it (Ch2),
-  the _user_ who experiences it (Ch3), the _agent_ you collaborate with (Ch4).
-  You can't communicate well with something you don't understand. **Vibetoading
-  prioritizes _twinning_ the user; Frogramming prioritizes _twinning_ the NM.**
+  🧑‍💻 _developer_ who reads your code (Ch1), the 💻 _computer_ that executes
+  it (Ch2), the _user_ who experiences it (Ch3), the 🤖 _agent_ you collaborate
+  with (Ch4). You can't communicate well with something you don't understand.
+  **Vibetoading prioritizes _twinning_ the user; Frogramming prioritizes
+  _twinning_ the NM.**
 
 - **Decisions (micro and macro)**: every keyword, name, operator, and structure
   in your code is a **micro**-decision. Every architectural choice, paradigm,
@@ -444,7 +446,7 @@ Four threads run beneath every chapter, each enabled by the ones before:
 
 Plus Study Lenses making the machine's work visible throughout.
 
-### Snippetry
+### 💭 Snippetry
 
 Chapter 5 introduces **snippetry** — writing small, runnable, self-contained
 programs as an ongoing practice. The answer to "why write code when I'm no
@@ -452,16 +454,16 @@ longer building full codebases? how do I build and maintain my NM for a
 programming language?" Snippetry is how the Frogrammer keeps the NM alive
 between full-codebase projects: **complete enough to run** (each snippet
 executes top-to-bottom), **small enough to understand** (you can hold the whole
-NM in your head at once and predict-trace-verify in full), **connected enough
-to inspire** (snippets allude to, vary on, and remix each other — nothing
-stands alone). It's also a natural home for deliberate Vibetoading — quick
-exploratory sketches where you choose to chase the outcome and skip the
-machine. Frogramming for mastery, exploration, aesthetic satisfaction, delight,
-surprise, discovery, and the new thoughts code lets you think — alongside or
-instead of programming for productivity. "You" is the fifth audience: students
-program for themselves, share with peers through a collaborative gist system
-that extends a living snippetry corpus, and explore JavaScript's full
-multi-paradigmatic range with training wheels off and real browser execution.
+NM in your head at once and predict-trace-verify in full), **connected enough to
+inspire** (snippets allude to, vary on, and remix each other — nothing stands
+alone). It's also a natural home for deliberate Vibetoading — quick exploratory
+sketches where you choose to chase the outcome and skip the machine. Frogramming
+for mastery, exploration, aesthetic satisfaction, delight, surprise, discovery,
+and the new thoughts code lets you think — alongside or instead of programming
+for productivity. "You" is the fifth audience: students program for themselves,
+share with peers through a collaborative gist system that extends a living
+snippetry corpus, and explore JavaScript's full multi-paradigmatic range with
+training wheels off and real browser execution.
 
 ### The future beyond human-designed languages
 
@@ -605,6 +607,39 @@ context about your own learning journey.
 
 ---
 
+## Symbology
+
+A small set of glyphs runs through this syllabus, each tied to a recurring
+concept. They appear inline at structural anchors — section headings, bold
+labels, table cells, audience lists — wherever the marked concept is the
+active subject. This is a **reading aid**, not a memorization task; ignore
+any symbol whose meaning isn't yet clear and come back to this key when
+needed.
+
+| Symbol | Concept | What it marks |
+| --- | --- | --- |
+| 🐸 | The course / both hats together | The umbrella. Frog/toad ambiguity is a feature: it carries both hats at once. Appears in the title and stays out of body text. |
+| 🔬 | Frogrammer | Development grounded in the notional machine — predict, trace, verify, apply craft practices intentionally. |
+| 🎨 | Vibetoader | Development grounded in user-visible behavior — iterate on outcomes, treat the machine underneath as a black box. |
+| 🧑 | Human | Used at active Human / AI distinctions. |
+| 🤖 | AI / Agent | Used both for "AI" (in the Human/AI distinction) and for "Agent" (the fourth audience). Same thing, two framings. |
+| 🧑‍💻 | Developer (audience) | The human who reads and writes code — Chapter 1's audience. |
+| 💻 | Computer (audience) | The machine that executes code — Chapter 2's audience. |
+| 💭 | Snippetry | Small, runnable, self-contained programs as ongoing practice. The thought-bubble glyph is borrowed from the snippetry source repo. |
+
+**Flagged for later:** the User audience (Chapter 3) and the Notional Machine
+itself don't yet have locked symbols. Both will be picked once the rest of
+the symbology has been seen in rendered context — context will reveal what
+reads cleanly.
+
+**Out of scope for the symbology:** the egg / chick / chicken progression
+markers (🥚🐣🐥🐔) used on learning objectives are a separate, established
+convention for difficulty progression — not part of this set.
+
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+
+---
+
 ## Before You Begin
 
 - [ ] Read the course expectations: understand the comprehension-first approach
@@ -636,21 +671,21 @@ different needs and different ways of understanding.
 
 Three human audiences read your code:
 
-1. **Other developers** — they read your code to understand your intent, learn
-   your style, collaborate on changes, and maintain the work long after you
-   wrote it
-2. **The computer** — it parses, interprets, or compiles your code; it does not
-   understand intent, only syntax and semantics
+1. **🧑‍💻 Other developers** — they read your code to understand your intent,
+   learn your style, collaborate on changes, and maintain the work long after
+   you wrote it
+2. **💻 The computer** — it parses, interprets, or compiles your code; it does
+   not understand intent, only syntax and semantics
 3. **Users of the program** — they never see the code, but they experience its
    effects; their correctness is behavioral (does it do what I need?), not
    syntactic
 
 A fourth audience has recently arrived:
 
-4. **Agents (LLMs)** — they read and understand code differently from humans;
-   they can infer intent from examples, find patterns, suggest changes, and help
-   you write it. Writing _for and with_ agents is its own communication skill,
-   developed in Chapter 4.
+4. **🤖 Agents (LLMs)** — they read and understand code differently from
+   humans; they can infer intent from examples, find patterns, suggest changes,
+   and help you write it. Writing _for and with_ agents is its own
+   communication skill, developed in Chapter 4.
 
 The central skill this course teaches is writing code that **addresses all four
 audiences simultaneously**. Different chapters focus on different audiences
@@ -802,18 +837,19 @@ in every moment of work, wears one of two hats. Both are real practices, both
 have their time, and most people wear both — sometimes within the same hour on
 the same project.
 
-**The Vibetoader** works from user-visible behavior. They iterate on outcomes:
-does the button work, does the test pass, does the page render? The notional
-machine underneath is a black box. They may use LLMs heavily or not at all; what
-defines the hat is that the code itself is incantation — a means to produce the
-behavior — rather than a model the developer is reasoning about.
+**🎨 The Vibetoader** works from user-visible behavior. They iterate on
+outcomes: does the button work, does the test pass, does the page render? The
+notional machine underneath is a black box. They may use LLMs heavily or not
+at all; what defines the hat is that the code itself is incantation — a means
+to produce the behavior — rather than a model the developer is reasoning
+about.
 
-**The Frogrammer** works grounded in the notional machine. They predict what the
-machine will do before they run anything, evaluate output against that
-prediction, and apply craft practices (testing, documentation, code review,
-security audits) intentionally — to mitigate specific risks their NM-awareness
-makes visible. They may use LLMs heavily or not at all; what defines the hat is
-the grounding.
+**🔬 The Frogrammer** works grounded in the notional machine. They predict
+what the machine will do before they run anything, evaluate output against
+that prediction, and apply craft practices (testing, documentation, code
+review, security audits) intentionally — to mitigate specific risks their
+NM-awareness makes visible. They may use LLMs heavily or not at all; what
+defines the hat is the grounding.
 
 **Spectrum, not binary.** A given developer doesn't _be_ a Vibetoader or a
 Frogrammer — they wear different hats on different tasks, files, moments. A
@@ -843,7 +879,7 @@ surprising. Same activity, different ground. A Frogrammer can also skip tests on
 a throwaway script and still be Frogramming, because they know what they're
 skipping and why.
 
-**Vibing predates LLMs.** It's tempting to read the dichotomy as
+**Vibetoading predates LLMs.** It's tempting to read the dichotomy as
 "vibing-with-LLMs vs. engineering-without". It isn't. Pattern-matching syntax
 without understanding the underlying mechanism is older than LLMs by decades —
 copy-paste-tweak from Stack Overflow, React hooks rules without understanding
@@ -857,8 +893,8 @@ the loop:
 
 |                                    | **Humans-only**                                                                                                     | **LLM-collab**                                                                                                         |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Vibetoading** (outcome-grounded) | Cargo-cult coding — copy-paste-tweak, hooks-rules-without-reconciliation, CSS by trial-and-error. _Pre-LLM vibing._ | Karpathy's _vibe coding_ — LLM writes, you don't read; outcomes are the only ground truth.                             |
-| **Frogramming** (NM-grounded)      | Traditional engineering — humans write notation grounded in NM-awareness, applying craft practices intentionally.   | Willison's _vibe engineering_ / _agentic engineering_ — LLM writes the notation; you direct and verify against the NM. |
+| **🎨 Vibetoading** (outcome-grounded) | Cargo-cult coding — copy-paste-tweak, hooks-rules-without-reconciliation, CSS by trial-and-error. _Pre-LLM vibing._ | Karpathy's _vibe coding_ — LLM writes, you don't read; outcomes are the only ground truth.                             |
+| **🔬 Frogramming** (NM-grounded)      | Traditional engineering — humans write notation grounded in NM-awareness, applying craft practices intentionally.   | Willison's _vibe engineering_ / _agentic engineering_ — LLM writes the notation; you direct and verify against the NM. |
 
 #### Related vocabulary
 
@@ -891,8 +927,8 @@ it.
 - 🐣 Identify when each hat is appropriate for a concrete scenario
 - 🐣 Distinguish cargo-cult process (process by ceremony) from intentional craft
   practice (process targeting NM-visible risks)
-- 🐣 Wear the Vibetoader hat intentionally — choose it for the scope where it's
-  right
+- 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
+  it's right
 - 🐥 Articulate why this curriculum centers Frogramming while honoring
   Vibetoading
 
@@ -1436,8 +1472,8 @@ human virtuosos. Collaboration is specifically different, and this chapter digs
 into why._
 
 No new language features. This chapter applies all Chapter 1–3 skills in
-collaboration with an LLM. Agents are a fourth audience: they read and
-understand code differently from humans, and writing _for and with_ them
+collaboration with an LLM. 🤖 Agents are a fourth audience: they read and
+understand code differently from 🧑 humans, and writing _for and with_ them
 requires its own communication skills.
 
 ### 4.0 What is an LLM?
@@ -1525,19 +1561,19 @@ _Revisits Chapter 3: user programs: with an LLM collaborator._
 ### 4.5 Looking Back, Looking Forward
 
 Up to this point the LLM has done the notation work — writing the code — while
-you have done the design work. That's the authoring-partner frame, and it's
-the right one for finding your bearings. But it's a simplification of a moving
+you have done the design work. That's the authoring-partner frame, and it's the
+right one for finding your bearings. But it's a simplification of a moving
 target.
 
-**Agentic AI systems** are emerging — LLMs that don't just write notation but
-do design work too: planning, decomposing problems, making architectural
-choices, calling tools, modifying state autonomously. That's a more complex
-collaboration than the one this chapter covered. It doesn't replace your role
-so much as shift what you attend to — from writing the code to specifying
-observable outcomes that humans can still evaluate, directing a system that
-does more than transcribe. Flag this as territory for post-curriculum
-learning; _Welcome to Algorithms_ picks it up. Chapter 5 will return briefly
-to it in its closing moments.
+**Agentic AI systems** are emerging — LLMs that don't just write notation but do
+design work too: planning, decomposing problems, making architectural choices,
+calling tools, modifying state autonomously. That's a more complex collaboration
+than the one this chapter covered. It doesn't replace your role so much as shift
+what you attend to — from writing the code to specifying observable outcomes
+that humans can still evaluate, directing a system that does more than
+transcribe. Flag this as territory for post-curriculum learning; _Welcome to
+Algorithms_ picks it up. Chapter 5 will return briefly to it in its closing
+moments.
 
 - 🐣 Given scenarios, identify which collaboration approach you'd use and why
 - 🐣 Articulate programming concepts precisely enough for an LLM to act on them
@@ -1548,19 +1584,18 @@ to it in its closing moments.
   assistance vs. which undermine learning
 - 🐔 Compare LLM "theory of mind" to human theory of mind: what transfers, what
   doesn't
-- 🐔 Recognize the emergence of **agentic AI systems** (LLMs doing design
-  work, not just notation) as a more complex development than the
-  authoring-partner frame covers, and flag it as territory for post-curriculum
-  learning
+- 🐔 Recognize the emergence of **agentic AI systems** (LLMs doing design work,
+  not just notation) as a more complex development than the authoring-partner
+  frame covers, and flag it as territory for post-curriculum learning
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
-### 4.6 Vibetoading
+### 🎨 4.6 Vibetoading
 
 - 🐣 Decompose a complex request into smaller, verifiable steps (by contrast
   with unguided Vibetoading)
-- 🐣 Wear the Vibetoader hat intentionally — choose it for the scope where it's
-  right
+- 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
+  it's right
 - 🐥 Evaluate code you didn't write or review during generation (PBSI autopsy)
 - 🐥 Identify where the jagged frontier manifested in a concrete collaboration
 - 🐔 Reflect on the difference between "it runs" and "I understand it"
@@ -1580,7 +1615,7 @@ own right._
 **In development.** Full chapter content is still being designed. The framing
 below is the intended shape.
 
-### Overview
+### 💭 Overview
 
 Chapter 5 introduces **snippetry** as an ongoing practice — writing small,
 runnable, self-contained programs for their own sake. It answers a central
@@ -1591,11 +1626,11 @@ question of the curriculum:
 > full-codebase work no longer provides the daily reps?
 
 Snippetry is the answer: small programs that exercise whole-program design at
-small scale while drilling an isolated concern — a language feature, a
-paradigm, an algorithm, the feel of a new notional machine, a user-experience
-miniature, or just for fun. Snippetry is also where deliberate Vibetoading
-lives in this course: low-stakes, outcome-only sketches you write because that
-hat fits the moment.
+small scale while drilling an isolated concern — a language feature, a paradigm,
+an algorithm, the feel of a new notional machine, a user-experience miniature,
+or just for fun. Snippetry is also where deliberate Vibetoading lives in this
+course: low-stakes, outcome-only sketches you write because that hat fits the
+moment.
 
 The practice balances **broad exploration** and **productive constraint**.
 Students develop their own sense of which balance serves their learning and
@@ -1740,7 +1775,7 @@ core snippetry activity.
 - 🐥 Translate a snippet between paradigms: preserve behavior, articulate what
   changed at Strategy/Implementation (PBSI) and what stayed at Purpose/Behavior
 
-#### 5D. Snippetry as Practice
+#### 💭 5D. Snippetry as Practice
 
 - 🥚 Write a snippet under a productive constraint (a single feature in 3 ways,
   a specific error on purpose, one loop + zero conditionals, etc.)
