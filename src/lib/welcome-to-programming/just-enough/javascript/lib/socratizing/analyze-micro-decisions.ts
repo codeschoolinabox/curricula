@@ -7,7 +7,7 @@
  */
 
 import buildScope from '../scope/build-scope.js';
-import getChildNodes from '../parse/get-child-nodes.js';
+import getChildNodes from '../parse-old/get-child-nodes.js';
 
 import type { Node } from 'acorn';
 import type { ScopeAnalysis } from '../scope/types.js';

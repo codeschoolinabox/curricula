@@ -108,7 +108,7 @@ export.
 | Path                      | Purpose                                                             |
 | ------------------------- | ------------------------------------------------------------------- |
 | `lib/`                    | Public modules and internal libraries (see sub-modules below)       |
-| `lib/parse/`              | `parse(code)` public entry + parse primitives (acorn wrapper, AST walker) |
+| `lib/parse-old/`              | `parse(code)` public entry + parse primitives (acorn wrapper, AST walker) |
 | `lib/validating/`         | `validate(code)` public entry + AST-based validation pipeline        |
 | `lib/formatting/`         | `format(code)` and `checkFormat(code)` — recast-based               |
 | `lib/evaluating/`         | Execution engines — trace (Aran), run (Worker)                      |
@@ -195,7 +195,7 @@ type Result<TEvent> = {
 
 ## Navigation
 
-- [lib/parse/README.md](./lib/parse/README.md) — `parse(code)` + parse primitives
+- [lib/parse-old/README.md](./lib/parse-old/README.md) — `parse(code)` + parse primitives
 - [lib/validating/README.md](./lib/validating/README.md) — `validate(code)` + validation pipeline
 - [lib/formatting/README.md](./lib/formatting/README.md) — `format(code)` / `checkFormat(code)`
 - [lib/evaluating/README.md](./lib/evaluating/README.md) — execution engines

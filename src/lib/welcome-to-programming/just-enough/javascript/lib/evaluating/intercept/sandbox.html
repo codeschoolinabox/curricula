@@ -689,6 +689,12 @@ console.error('three');"
 				};
 				console.log(runConfig);
 				const gen = createInterceptGenerator(codeEl.value, runConfig);
+				// Eager handle data — verifiable in devtools without
+				// awaiting the result. handle.ast resolves on validation
+				// success (or null on failure).
+				console.log('[handle.code]', gen.code);
+				console.log('[handle.options]', gen.options);
+				gen.ast.then((ast) => console.log('[handle.ast]', ast));
 
 				let eventCount = 0;
 				try {
@@ -704,7 +710,7 @@ console.error('three');"
 								predictionInput.value = '';
 								predictionWrap.style.display = 'inline';
 								predictionInput.focus();
-								statusEl.textContent = `step: console.log (line ${value.line}) — predict output, click [next]`;
+								statusEl.textContent = `step: console.log (line ${value.loc.start.line}) — predict output, click [next]`;
 								await waitForStep();
 								if (userBroke) break;
 								predictionWrap.style.display = 'none';
@@ -785,8 +791,8 @@ console.error('three');"
 			});
 
 			// --- Format button ---
-			document.getElementById('format').addEventListener('click', () => {
-				codeEl.value = format(codeEl.value);
+			document.getElementById('format').addEventListener('click', async () => {
+				codeEl.value = await format(codeEl.value);
 			});
 
 			// --- Snippet buttons ---

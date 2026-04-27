@@ -10,7 +10,7 @@
 
 import type { Node } from 'acorn';
 
-import type { ParseError, ParseResultError } from '../parse/types.js';
+import type { ParseError, ParseResultError } from '../parse-old/types.js';
 
 // ─── Source locations ────────────────────────────────────────
 

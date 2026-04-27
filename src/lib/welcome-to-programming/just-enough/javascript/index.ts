@@ -14,13 +14,13 @@ export { default as intercept } from './lib/evaluating/intercept/intercept.js';
 export { default as run } from './lib/evaluating/run/run.js';
 export { default as trace } from './api/trace.js';
 export { default as validate } from './lib/validating/validate.js';
-export { default as parse } from './lib/parse/parse.js';
+export { default as parse } from './lib/parse-old/parse.js';
 export { default as isJej } from './lib/validating/is-jej.js';
 export { default as format } from './lib/formatting/format.js';
 export { default as checkFormat } from './lib/formatting/check-format.js';
 
 // --- Type re-exports ---
-export type { ParseResult } from './lib/parse/types.js';
+export type { ParseResult } from './lib/parse-old/types.js';
 
 export type { BaseResult } from './lib/validating/types.js';
 

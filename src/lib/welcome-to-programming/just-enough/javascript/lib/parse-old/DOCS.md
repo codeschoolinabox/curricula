@@ -1,4 +1,8 @@
-# parse — Architecture & Decisions
+# parse-old — Architecture & Decisions
+
+> **Status — being superseded by `lib/ast/`.** Kept as a working reference for
+> existing consumers until they migrate. See `lib/ast/{tokenize,parse}/` for
+> the stepping-generator successor.
 
 ## Why this module exists
 
@@ -6,12 +10,12 @@ The parse step is foundational: every language-level validator, formatter,
 analyzer, and visualiser in the JeJ ecosystem ultimately depends on a
 parsed AST. Owning the acorn primitive plus the generic AST walker plus
 the public `parse(code)` entry in one module concentrates the parse
-contract in one place — consumers depend on `lib/parse/` rather than
+contract in one place — consumers depend on `lib/parse-old/` rather than
 threading acorn options through every call site.
 
 Originally, the acorn primitive (`parse-program`) and the AST walker
 (`get-child-nodes`) lived inside `lib/validating/` because validation was
-the first consumer. They were extracted into `lib/parse/` as part of the
+the first consumer. They were extracted into `lib/parse-old/` as part of the
 api/ teardown so the parse step is a first-class module.
 
 ## Architectural sketch
@@ -158,8 +162,8 @@ When that lands, this DOCS.md will gain an additional phase between
 
 This module's source was originally split across `api/parse.ts`
 (public wrapper) and `lib/validating/{parse-program,get-child-nodes}.ts`
-(primitives). All three were consolidated into `lib/parse/` as part of
+(primitives). All three were consolidated into `lib/parse-old/` as part of
 the api-layer teardown. Prior consumers of the primitives in
 `lib/validating/{validate-program,collect-violations,
 check-undeclared-globals}.ts`, `lib/scope/build-scope.ts`, and
-`lib/socratizing/` had their import paths redirected to `lib/parse/`.
+`lib/socratizing/` had their import paths redirected to `lib/parse-old/`.

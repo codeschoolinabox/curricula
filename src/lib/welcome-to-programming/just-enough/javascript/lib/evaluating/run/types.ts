@@ -19,7 +19,7 @@
 
 import type { Program } from 'acorn';
 
-import type { ParseResultError } from '../../parse/types.js';
+import type { ParseResultError } from '../../parse-old/types.js';
 import type {
 	BaseResult,
 	FormattingResultError,

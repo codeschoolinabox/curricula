@@ -1,15 +1,16 @@
-# parse
+# parse-old
+
+> **Status — being superseded by `lib/ast/`.** This module is kept as a working
+> reference and continues to serve its existing consumers (`lib/validating/`,
+> `lib/scope/`, `lib/socratizing/`, plus the top-level `parse` export in
+> `index.ts`). The new stepping-generator-based `lib/ast/tokenize/` and
+> `lib/ast/parse/` are being built alongside; consumers will migrate in a
+> follow-up PR, after which `lib/parse-old/` is deleted.
 
 Owns the parse step for the JeJ ecosystem: the acorn primitive, the
 generic AST child walker, and the public `parse(code)` entry that wraps
 both with `with`-statement script-mode fallback and a frozen
 `ParseResult`. Self-contained: imports only `acorn`.
-
-> **Status — Phase 0 in progress.** Module structure, types, and primitives
-> (`parse-program.ts`, `get-child-nodes.ts`) are in place after a structural
-> move from `lib/validating/`. The public `parse(code)` entry (`parse.ts`)
-> lands in the next commit (Phase 1a). Tests for the primitives are
-> already running at the new location.
 
 ## Glossary (ubiquitous language)
 

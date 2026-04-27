@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import parseProgram from '../../parse/parse-program.js';
+import parseProgram from '../../parse-old/parse-program.js';
 import wrapCallExpressions from './wrap-call-expressions.js';
 import HELPER_NAME from './wrap-helper-name.js';
 

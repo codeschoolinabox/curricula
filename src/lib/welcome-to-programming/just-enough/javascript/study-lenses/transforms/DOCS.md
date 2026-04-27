@@ -74,7 +74,7 @@ transform's concern.
 
 - **AST-level transforms with shared parsers.** Transforms parse and
   serialize internally — they do not exchange ASTs. A transform that
-  needs an AST imports `lib/parse/parse.js` and converts back to a
+  needs an AST imports `lib/parse-old/parse.js` and converts back to a
   string before returning.
 - **UI affordances for transform results.** Transforms produce code,
   not components. UI is the lens's responsibility.

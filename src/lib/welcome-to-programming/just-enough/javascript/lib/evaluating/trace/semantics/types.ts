@@ -15,7 +15,7 @@ import type {
 	BaseResult,
 	FormattingResultError,
 } from '../../../validating/types.js';
-import type { ParseResultError } from '../../../parse/types.js';
+import type { ParseResultError } from '../../../parse-old/types.js';
 import type {
 	ASTNode,
 	TraceEvent,

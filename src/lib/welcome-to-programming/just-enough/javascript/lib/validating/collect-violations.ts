@@ -1,7 +1,7 @@
 import type { Node } from 'acorn';
 
 import createViolation from './create-violation.js';
-import getChildNodes from '../parse/get-child-nodes.js';
+import getChildNodes from '../parse-old/get-child-nodes.js';
 
 import type { NodeRule, Violation } from './types.js';
 

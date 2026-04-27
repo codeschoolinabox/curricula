@@ -69,7 +69,7 @@ JeJ — they gate.
 ```text
 just-enough-javascript/
   index.ts                ← Package entry: named exports
-  lib/parse/              ← parse() + parseProgram + getChildNodes
+  lib/parse-old/              ← parse() + parseProgram + getChildNodes
   lib/validating/         ← validate() + AST validation pipeline
   lib/formatting/         ← format() + checkFormat()
   lib/evaluating/         ← Raw execution engines
@@ -89,7 +89,7 @@ just-enough-javascript/
 
 ```text
 index.ts
-  → lib/parse/parse           (parse public entry)
+  → lib/parse-old/parse           (parse public entry)
   → lib/validating/validate   (validate public entry)
   → lib/validating/is-jej     (boolean convenience)
   → lib/formatting/{format, check-format}  (format functions)
@@ -97,11 +97,11 @@ index.ts
   → api/trace                 (legacy; parallel migration in flight)
   → api/types                 (trace/run/debug-related types remain)
 
-lib/parse/
+lib/parse-old/
   (depends only on acorn)
 
 lib/validating/
-  → lib/parse/                (parseProgram + getChildNodes + ParseError)
+  → lib/parse-old/                (parseProgram + getChildNodes + ParseError)
 
 lib/formatting/
   (no deps on validating/ or evaluating/)

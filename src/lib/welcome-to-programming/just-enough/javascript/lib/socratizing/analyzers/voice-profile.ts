@@ -16,7 +16,7 @@
 import type { Node } from 'acorn';
 
 import type { ScopeAnalysis } from '../../scope/types.js';
-import getChildNodes from '../../parse/get-child-nodes.js';
+import getChildNodes from '../../parse-old/get-child-nodes.js';
 
 import createCodeQuestion from '../create-code-question.js';
 import extractLocation from '../extract-location.js';

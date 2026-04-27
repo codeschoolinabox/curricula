@@ -25,7 +25,7 @@ import type {
 	FormattingResultError,
 	Violation,
 } from '../../validating/types.js';
-import type { ParseResultError } from '../../parse/types.js';
+import type { ParseResultError } from '../../parse-old/types.js';
 import type { ASTNode, LinkedInterceptEvent } from './link/types.js';
 
 // ─── Result error types (engine-owned) ───────────────────────
@@ -129,7 +129,7 @@ type InterceptOutcome =
  *
  * - `events` — RENAMED from `logs`. Each element is a `LinkedInterceptEvent`
  *   carrying both the original event payload and AST navigation
- *   (`nodePath`, `nodePathSource`, `node`, optional `nodePathFallbackFrom`).
+ *   (`nodePath`, `nodePathSource`, `node`, `loc`, `callee`, `calleePath`).
  *   Every event also carries `step: number` (1-indexed, contiguous):
  *   `events[i].step === i + 1`. Same `step` value appears on the back-ref
  *   in `ast[event.nodePath].events`, enabling timeline reconstruction

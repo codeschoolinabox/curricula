@@ -123,7 +123,7 @@ remains; `validate(code)` inherits it.
   thrown error from acorn that bubbles up. `validate(code)` is
   documented as "never throws" only for string input.
 - **Source with shebang / BOM / unicode identifiers** — accepted per
-  acorn's defaults (see `lib/parse/README.md` § Parse semantics).
+  acorn's defaults (see `lib/parse-old/README.md` § Parse semantics).
 - **`with`-statement easter egg** — programs that fail module-mode
   parse but succeed in script mode and contain a `WithStatement`
   validate against the script-mode AST. The resulting

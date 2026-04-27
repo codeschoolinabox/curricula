@@ -4,7 +4,7 @@ import buildScope from '../scope/build-scope.js';
 import type { ScopeInfo } from '../scope/types.js';
 
 import createViolation from './create-violation.js';
-import getChildNodes from '../parse/get-child-nodes.js';
+import getChildNodes from '../parse-old/get-child-nodes.js';
 
 import type { Violation } from './types.js';
 

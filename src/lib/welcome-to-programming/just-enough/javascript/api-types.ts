@@ -13,7 +13,7 @@
 import type {
 	ParseResult,
 	ParseResultError,
-} from './lib/parse/types.js';
+} from './lib/parse-old/types.js';
 import type {
 	BaseResult,
 	FormattingResultError,

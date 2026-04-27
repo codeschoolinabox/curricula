@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import parseProgram from '../../../../parse/parse-program.js';
+import parseProgram from '../../../../parse-old/parse-program.js';
 import buildLocationIndex from '../build-location-index.js';
 
 function indexFor(source: string) {
