@@ -1,9 +1,10 @@
 /**
  * @file Format check for JeJ code.
  *
- * Compares code against the expected recast output. Synchronous.
+ * Compares code against the expected Prettier output. Asynchronous
+ * (because `format()` is async).
  *
- * Graceful degradation: if recast throws, returns `{ formatted: true }`
+ * Graceful degradation: if Prettier throws, returns `{ formatted: true }`
  * — don't block learners on formatter bugs.
  */
 
@@ -14,13 +15,12 @@ import type { CheckFormatResult } from './types.js';
  * Check whether code matches the expected JeJ format.
  *
  * @param code - JavaScript source code to check
- * @returns `{ formatted: boolean }`
+ * @returns `Promise<{ formatted: boolean }>`
  */
-function checkFormat(code: string): CheckFormatResult {
+async function checkFormat(code: string): Promise<CheckFormatResult> {
 	try {
-		return { formatted: format(code) === code };
+		return { formatted: (await format(code)) === code };
 	} catch {
-		// Graceful degradation — don't block on formatter bugs
 		return { formatted: true };
 	}
 }

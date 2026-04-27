@@ -1,6 +1,6 @@
 # formatting
 
-Formats JavaScript code using recast's prettyPrint and checks whether code is
+Formats JavaScript code using Prettier (standalone) and checks whether code is
 already formatted. Works on any syntactically valid JavaScript — not restricted
 to JeJ.
 
@@ -9,7 +9,7 @@ to JeJ.
 | File              | Purpose                                           |
 | ----------------- | ------------------------------------------------- |
 | `types.ts`        | `CheckFormatResult` type                          |
-| `format.ts`       | `format(code)` — recast prettyPrint wrapper       |
+| `format.ts`       | `format(code)` — Prettier wrapper                 |
 | `check-format.ts` | `checkFormat(code)` — compares input to formatted |
 | `tests/`          | Unit tests                                        |
 
@@ -18,29 +18,32 @@ to JeJ.
 ### `format`
 
 ```ts
-function format(code: string): string;
+function format(code: string): Promise<string>;
 ```
 
-- Synchronous — recast.prettyPrint is sync
-- Returns formatted code, or the original code unchanged if recast fails
-  (graceful degradation)
+- Asynchronous — Prettier standalone is async
+- Resolves to formatted code, or the original code unchanged if Prettier
+  throws (graceful degradation, e.g. on parse errors)
 - No options parameter — always formats the JeJ way
-- Fixed config: `{ useTabs: true, tabWidth: 4, quote: 'single', wrapColumn: 80 }`
+- Fixed config:
+  `{ parser: 'babel', useTabs: true, tabWidth: 4, printWidth: 80, singleQuote: true, semi: true }`
 - Uses accessibility-first defaults: tabs for indentation, 4-space tab width,
-  single quotes, trailing commas, explicit semicolons
+  single quotes, explicit semicolons
+- **Blank-line preservation:** 1+ consecutive blank lines in source → exactly 1
+  blank line in output (Prettier's standard "paragraph break" semantics)
 
 ### `checkFormat`
 
 ```ts
-function checkFormat(code: string): { formatted: boolean };
+function checkFormat(code: string): Promise<{ formatted: boolean }>;
 ```
 
-- Synchronous — formats with recast and compares output to input
-  (`format(code) === code`)
-- Returns `{ formatted: true }` if the code matches the expected format
-- Returns `{ formatted: true }` if recast throws (don't block on formatter bugs)
-- Used internally by the code object factory and as a pipeline gate for
-  execution
+- Asynchronous — awaits `format` then compares output to input
+  (`(await format(code)) === code`)
+- Resolves to `{ formatted: true }` if the code matches the expected format
+- Resolves to `{ formatted: true }` if Prettier throws (don't block on
+  formatter bugs)
+- Used as a pipeline gate by execution wrappers (`run`, `intercept`)
 
 ## Navigation
 

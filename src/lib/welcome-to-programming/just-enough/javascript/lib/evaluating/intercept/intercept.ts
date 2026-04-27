@@ -27,7 +27,6 @@ import justEnoughJs from '../../validating/just-enough-js.js';
 
 import buildLocationIndex from './link/build-location-index.js';
 import lookupNodePath from './link/lookup-node-path.js';
-import link from './link/link.js';
 import wrapCallExpressions from './wrap-call-expressions.js';
 
 import type {
@@ -51,7 +50,6 @@ import type {
 	LocationIndex,
 	NodePathSource,
 } from './link/types.js';
-import type { EnrichedEvent } from './link/link.js';
 
 import createWorkerScript from './create-worker-script.js';
 import guardLoops from '../shared/guard-loops/guard-loops.js';
@@ -194,36 +192,39 @@ function buildResolvedIo(io?: IoMocks): ResolvedIo {
 
 /**
  * Enriches a worker-emitted `InterceptEvent` with AST navigation
- * fields (nodePath, nodePathSource, loc).
+ * fields (nodePath, nodePathSource, node, loc, callee, calleePath)
+ * AND pushes the event into the resolved node's `events[]` back-ref
+ * array. Entwining happens inline at emission time so consumers
+ * iterating live see fully-linked events without waiting for run
+ * completion.
  *
  * @remarks Mutates `event` in place to preserve reference identity
- * (load-bearing for the replay invariant: linked events yielded
- * during streaming must be `===` the same objects the post-completion
- * `link()` step attaches `.node` refs to).
+ * (load-bearing for the replay invariant: events yielded during
+ * streaming must be `===` the same objects in `result.events`).
  *
  * Three branches:
  *
  * 1. **Worker-emitted with `nodePath` already set** (the happy path
  *    after the universal CallExpression wrap). Worker stamped
  *    `event.nodePath = __currentPath`. Stamp `nodePathSource:
- *    'instrumented'` and resolve `event.loc` from
- *    `locationIndex.astByPath[nodePath].loc`.
+ *    'instrumented'`, resolve `event.node` and `event.loc` from
+ *    `locationIndex.astByPath[nodePath]`, push back-ref.
  * 2. **Residual error path** — runtime error fired OUTSIDE any
  *    wrapped CallExpression. Worker fell back to
  *    `extractPositionFromError` and emitted `line` (and maybe
  *    `column`) without `nodePath`. Look up via `lookupNodePath` to
  *    find the deepest containing AST node; stamp
- *    `nodePathSource: 'enclosing-fallback'` and resolve `event.loc`
- *    from that node.
+ *    `nodePathSource: 'enclosing-fallback'`, resolve `event.node`
+ *    and `event.loc`, push back-ref.
  * 3. **No AST built** — `locationIndex` is `null` (validation failed
  *    pre-parse) OR the event has no nodePath/line/column to look up.
- *    Stamp `nodePath: null, nodePathSource: 'no-ast', loc: null`.
- *    Downstream `link()` sets `node: null`.
+ *    Stamp `nodePath: null, nodePathSource: 'no-ast', node: null,
+ *    loc: null`. No back-ref to push.
  */
 function enrichEvent(
 	event: InterceptEvent,
 	locationIndex: LocationIndex | null,
-): EnrichedEvent {
+): LinkedInterceptEvent {
 	const incomingNodePath = (event as { nodePath?: string | null }).nodePath;
 
 	// Branch 1: worker stamped nodePath via __$ic — instrumented path.
@@ -235,12 +236,14 @@ function enrichEvent(
 		const enriched = event as InterceptEvent & {
 			nodePath: string | null;
 			nodePathSource: NodePathSource;
+			node: ASTNode | null;
 			loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
 			callee: ASTNode | null;
 			calleePath: string | null;
 		};
 		enriched.nodePath = incomingNodePath;
 		enriched.nodePathSource = 'instrumented';
+		enriched.node = node ?? null;
 		enriched.loc = node ? node.loc : null;
 		// Direct callee navigation: only meaningful when node is a
 		// CallExpression (the wrapped happy path). For non-call nodes
@@ -253,7 +256,15 @@ function enrichEvent(
 			enriched.callee = null;
 			enriched.calleePath = null;
 		}
-		return enriched as unknown as EnrichedEvent;
+		// Push back-ref into node.events[] (the AST → events accessor).
+		// Replaces what the post-completion `link()` step used to do; now
+		// happens inline so consumers see populated back-refs mid-stream.
+		if (node !== undefined) {
+			(node.events as LinkedInterceptEvent[]).push(
+				enriched as unknown as LinkedInterceptEvent,
+			);
+		}
+		return enriched as unknown as LinkedInterceptEvent;
 	}
 
 	const line = (event as { line?: number }).line;
@@ -264,16 +275,18 @@ function enrichEvent(
 		const enriched = event as InterceptEvent & {
 			nodePath: string | null;
 			nodePathSource: NodePathSource;
+			node: ASTNode | null;
 			loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
 			callee: ASTNode | null;
 			calleePath: string | null;
 		};
 		enriched.nodePath = null;
 		enriched.nodePathSource = 'no-ast';
+		enriched.node = null;
 		enriched.loc = null;
 		enriched.callee = null;
 		enriched.calleePath = null;
-		return enriched as unknown as EnrichedEvent;
+		return enriched as unknown as LinkedInterceptEvent;
 	}
 
 	// Branch 2: residual error path — fall back to (line, column) lookup.
@@ -282,12 +295,14 @@ function enrichEvent(
 	const enriched = event as InterceptEvent & {
 		nodePath: string;
 		nodePathSource: NodePathSource;
+		node: ASTNode | null;
 		loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
 		callee: ASTNode | null;
 		calleePath: string | null;
 	};
 	enriched.nodePath = lookup.nodePath;
 	enriched.nodePathSource = lookup.source;
+	enriched.node = node ?? null;
 	enriched.loc = node ? node.loc : null;
 	// Same CallExpression discriminator as Branch 1; residual lookups
 	// usually land on non-call nodes (e.g. MemberExpression for
@@ -300,7 +315,13 @@ function enrichEvent(
 		enriched.callee = null;
 		enriched.calleePath = null;
 	}
-	return enriched as unknown as EnrichedEvent;
+	// Push back-ref into node.events[] for residual-path attribution.
+	if (node !== undefined) {
+		(node.events as LinkedInterceptEvent[]).push(
+			enriched as unknown as LinkedInterceptEvent,
+		);
+	}
+	return enriched as unknown as LinkedInterceptEvent;
 }
 
 /**
@@ -316,7 +337,7 @@ function buildEarlyResult(
 	code: string,
 	options: InterceptOptions,
 	outcome: InterceptOutcome,
-	events: readonly EnrichedEvent[],
+	events: readonly LinkedInterceptEvent[],
 	error?: InterceptResultError,
 	reason?: unknown,
 ): InterceptResult {
@@ -824,7 +845,7 @@ function createInterceptGenerator(
 		writePauseEngaged(views);
 		startTimeout();
 
-		const events: EnrichedEvent[] = [];
+		const events: LinkedInterceptEvent[] = [];
 
 		try {
 			while (true) {
@@ -1236,18 +1257,16 @@ async function handleIoRequest(
 function buildResult(
 	code: string,
 	options: InterceptOptions,
-	rawEvents: readonly EnrichedEvent[],
+	events: readonly LinkedInterceptEvent[],
 	locationIndex: LocationIndex | null,
 	maxSeconds: number,
 	terminationCause: TerminationCause | null,
 	astRecord: Readonly<Record<string, ASTNode>> | null,
 	maxIterations?: number,
 ): InterceptResult {
-	// Stage C: link enriched events to AST nodes (attach .node, push
-	// back-refs into ast[path].events[]). When locationIndex is null
-	// (validation failed), link sets node:null on each event.
-	const astByPath = locationIndex?.astByPath ?? new Map<string, ASTNode>();
-	const linkedEvents = link(rawEvents, astByPath);
+	// Events arrive already linked: `enrichEvent` (in the main loop)
+	// resolves `.node` and pushes back-refs into `node.events[]` per
+	// event before yielding. No post-completion link step needed.
 
 	// Reuse the same Record reference the consumer awaited via
 	// `handle.ast` — single-source-of-truth invariant per DOCS.md

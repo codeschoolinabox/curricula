@@ -1,16 +1,28 @@
 # formatting — Architecture & Decisions
 
-## Why recast, not Prettier
+## Why Prettier (async tradeoff acknowledged)
 
-Prettier/standalone is async-only in the browser. This would cascade async
-through `checkFormat`, `isJej`, `hint`, the code object factory, and the
-`.code` setter — making the entire analysis pipeline asynchronous.
+Prettier is the canonical JavaScript formatter and preserves blank lines
+between statements (Prettier collapses 1+ consecutive blank lines to 1). This
+matches the "blank lines as paragraph breaks" convention documented in
+`DEV.md §12` and used throughout this codebase.
 
-Recast's prettyPrint is synchronous and already a project dependency (used for
-loop guard AST injection). JeJ's constrained syntax subset doesn't use features
-where recast and Prettier output diverges (no object literals, no multi-line
-parameter lists, no complex line wrapping). Recast achieves near-identical
-formatting for JeJ code.
+The tradeoff: `prettier/standalone` is async-only (`Promise<string>`). This
+makes `format()`, `checkFormat()`, and `isJej()` async too. Since the
+execution-side of the library is already async (`run.result` is a Promise,
+`intercept` is an async generator, IO mocks are all async), making
+static-analysis async too just removes an artificial sync island — it does
+not introduce a fundamentally new asynchronicity.
+
+The previous implementation used `recast.prettyPrint()` (sync) but
+unconditionally stripped all blank lines between statements, which made the
+formatter actively hostile to the project's "paragraph breaks" convention.
+Recast has no setting to preserve blank lines (they're not AST nodes), and
+workarounds (sentinel comments, AST-walks) were judged to be permanent
+technical debt without enough payoff.
+
+`recast` is still a project dependency for AST loop-guard injection
+(`evaluating/run/guard-loops`). It is no longer used for formatting.
 
 ## Why format works on any valid JS (not just JeJ)
 
@@ -43,9 +55,9 @@ try-catch patterns and break the consistent API style.
 that factory was removed as YAGNI bloat — superseded by the `<StudyLenses>`
 container component.)
 
-## Why `checkFormat` returns `{ formatted: true }` on recast failure
+## Why `checkFormat` returns `{ formatted: true }` on Prettier failure
 
-If recast itself throws (e.g., internal bug, unexpected input), `checkFormat`
+If Prettier itself throws (e.g., parse error on the input), `checkFormat`
 returns `{ formatted: true }` rather than blocking execution. Formatter bugs
 should not prevent learners from running their code. This is the same graceful
 degradation philosophy as `format()` returning the original code on failure.
@@ -57,8 +69,11 @@ degradation philosophy as `format()` returning the original code on failure.
   lock in a fixed width.
 - **`tabWidth: 4`** — Readability for beginners. Wider indentation makes nesting
   levels more visually distinct.
-- **`quote: 'single'`** — Consistency with JeJ conventions.
-- **`wrapColumn: 80`** — Standard line width.
+- **`singleQuote: true`** — Consistency with JeJ conventions.
+- **`printWidth: 80`** — Standard line width.
+- **`semi: true`** — Explicit semicolons (JeJ convention).
+- **`parser: 'babel'`** — Covers all JS the learners may write while iterating
+  toward JeJ compliance (no JSX/decorators/Flow needed).
 
 ## Extracted from `evaluating/debug/format/`
 

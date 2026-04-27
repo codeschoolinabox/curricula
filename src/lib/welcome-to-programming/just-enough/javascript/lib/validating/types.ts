@@ -8,7 +8,7 @@
  * internally by the code object factory.
  */
 
-import type { Node } from 'acorn';
+import type { Node, Program } from 'acorn';
 
 import type { ParseError, ParseResultError } from '../parse-old/types.js';
 
@@ -87,6 +87,11 @@ type ValidationReport = {
 	/** True when the program was parsed in script mode for the `with`
 	 * easter egg. Absent or false for normal module-mode programs. */
 	readonly scriptMode?: boolean;
+	/** The parsed acorn `Program`. Present whenever parsing succeeded
+	 * (even if violations were collected). Absent only when `parseError`
+	 * is present. Consumers needing the AST for tooling (e.g. intercept's
+	 * AST entwining link layer) read this directly. */
+	readonly ast?: Program;
 };
 
 // ─── Public API result types ─────────────────────────────────

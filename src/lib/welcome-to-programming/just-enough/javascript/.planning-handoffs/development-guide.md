@@ -4,6 +4,9 @@ How to coordinate Claude Code agents across the 4 work streams defined in this
 directory. Written for you (the human coordinator) — not for the agents
 themselves.
 
+> **WS3 current status**: See `03-orchestrator-and-contracts.md` — it opens
+> with a status banner showing exactly which increment is next.
+
 ## How Claude Code sessions work
 
 Each Claude Code session (whether CLI, desktop app, VS Code extension, or web)
@@ -58,25 +61,70 @@ Then ask me questions before writing any code.
 - Large uncommitted changes (should be atomic commits per increment)
 - Agent referencing `/lenses/study/` code as ground truth (it's old)
 
+## Starting a new WS3 session
+
+### Human pre-checks (do these BEFORE opening Claude Code)
+
+1. **Read `03-orchestrator-and-contracts.md` yourself** — the status banner at
+   the top tells you which increment to kick off. Confirm the behavioral contract
+   makes sense to you before the agent starts.
+2. **Sandbox check Option-A** (pending since Increment 1): start the dev server,
+   find a code fence using `js:format,editor` syntax, open React DevTools and
+   confirm a `transforms` prop is visible on the `<StudyLenses>` component. This
+   validates the pipeline prop wiring the agent will build on.
+3. **Verify tests still pass**: `npx vitest run` scoped to
+   `src/lib/welcome-to-programming/just-enough/javascript/study-lenses/tests/`
+
+### Prompt template (paste this verbatim to start the session)
+
+```text
+Read .planning-handoffs/03-orchestrator-and-contracts.md in full before doing
+anything else. That document contains your task, the complete behavioral
+contract, the ZOMBIES test order, and the conventions to follow. Follow
+DEV.md and AGENTS.md discipline throughout — full Phase 1 TDD cycle
+including AR-3 before implementing and AR-4 after. Start with plan mode.
+```
+
+### What NOT to do
+
+- Do not paste the prompt and immediately leave — the agent will enter plan mode
+  and ask alignment questions. Stay present for the first 10 minutes.
+- Do not skip the Option-A sandbox check — it validates the plugin prop wiring
+  that Increment 2 depends on.
+- Do not approve the agent's plan without reading the behavioral contract in the
+  handoff yourself first. The type-mismatch throw rules are easy to accidentally
+  soften.
+
+---
+
 ## Coordination between work streams
 
 ### Dependency graph
 
 ```text
-WS1 (sub-language levels) ──────────┐
-                                     ├──► WS2 (analysis + recommender)
-WS3 (orchestrator + contracts) ─────┘         │
-         │                                    │
-         └──► WS4 (lens migration) ◄──────────┘
+lib/evaluating/trace/syntax/  (standalone syntax tracer module)
+         │
+         │  StepCategory enum + docs
+         ▼
+WS1 (NM components — 01-NM-components.md) ──────────┐
+                                                     ├──► WS2 (analysis + recommender)
+WS3 (orchestrator + contracts) ─────────────────────┘         │
+         │                                                    │
+         └──► WS4 (lens migration) ◄──────────────────────────┘
 ```
 
-- **Build is currently broken** — `MDXComponents.js` imports from a deleted
-  path. WS3's Increment 0 fixes this by creating a minimal pass-through
-  component at the new path. Start WS3 first (or in parallel with WS1) so the
-  build is restored early.
+- **Build is fixed** — WS3 Increment 0 completed; `MDXComponents.js` now points
+  to the orchestrator stub. `npm run build` is green.
+- **WS3 Phase 1 in progress** — Increments 0–1 committed to `main`. Next: Increment 2 (Pipeline validation).
+- **WS1 depends on the syntax tracer at `lib/evaluating/trace/syntax/`** —
+  its Phase 0 stabilized the `StepCategory` enum (the 3rd Block Model
+  dimension). WS1 is now a thin coordination layer (wire the enum into
+  `study-lenses/types.ts`, document the contract). See
+  `01-NM-components.md` for full details and the "sub-language levels
+  → NM components" pivot note.
 - **WS1 and WS3 can run in parallel** — no dependency between them
-- **WS2 depends on both WS1 and WS3** — needs sub-language level types from WS1
-  and the LensModule contract from WS3 (types.ts)
+- **WS2 depends on both WS1 and WS3** — needs the NM-components enum
+  from WS1 and the LensModule contract from WS3 (`study-lenses/types.ts`)
 - **WS4 depends on WS3** — needs proven contracts + trial lenses
 - **Within WS4**, individual lenses can run in parallel
 
@@ -96,10 +144,12 @@ the core types. Rules:
 
 Each work stream writes its own notes file in `.planning-handoffs/`:
 
-- `01-sub-language-levels-notes.md`
+- `01-NM-components-notes.md`
 - `02-analysis-and-recommender-notes.md`
-- `03-orchestrator-notes.md`
 - `04-lens-migration-notes.md`
+
+WS3 does not have a notes file — decisions were folded into
+`03-orchestrator-and-contracts.md` when the handoff was rewritten for Increment 2.
 
 **Convention:**
 
@@ -111,8 +161,9 @@ Each work stream writes its own notes file in `.planning-handoffs/`:
 
 ### When to sync
 
-- After WS1 completes: review output, confirm sub-language level types are ready
-  for WS2
+- After WS1 completes: review output, confirm the NM-components enum
+  (`StepCategory` from the syntax tracer) is wired into
+  `study-lenses/types.ts` and ready for WS2
 - After WS3 Phase 0 completes: verify types.ts + contracts are stable before
   starting WS2 or WS4
 - After WS3 trial lenses (editor + highlight) work end-to-end: green light for
@@ -124,7 +175,7 @@ Each work stream writes its own notes file in `.planning-handoffs/`:
 ### Branch naming
 
 ```
-ws1/sub-language-levels
+ws1/nm-components
 ws3/orchestrator-contracts
 ws2/analysis-recommender
 ws4/lens-blanks
@@ -219,9 +270,9 @@ not as code to preserve.
 | File                               | Purpose                                          |
 | ---------------------------------- | ------------------------------------------------ |
 | `00-master-plan.md`                | Full architecture context (canonical reference)  |
-| `01-sub-language-levels.md`        | WS1: define NM component level progression       |
+| `01-NM-components.md`              | WS1: wire `StepCategory` enum from the syntax tracer as the 3rd Block Model dimension |
 | `02-analysis-and-recommender.md`   | WS2: snippet analysis + recommendation engine    |
-| `03-orchestrator-and-contracts.md` | WS3: orchestrator + transform/lens contracts     |
+| `03-orchestrator-and-contracts.md` | WS3: Increment 2 handoff (forward-looking only)  |
 | `04-lens-migration.md`             | WS4: individual lens implementations             |
 | `development-guide.md`             | This file (for the human, not for agents)        |
 | `*-notes.md`                       | Per-stream notes (created by agents during work) |

@@ -25,11 +25,10 @@ export type { ParseResult } from './lib/parse-old/types.js';
 export type { BaseResult } from './lib/validating/types.js';
 
 export type {
-	ResultError,
-	Result,
 	InterceptResult,
-	TraceResult,
-} from './api/types.js';
+	InterceptOutcome,
+	InterceptResultError,
+} from './lib/evaluating/intercept/types.js';
 
 export type {
 	Execution,

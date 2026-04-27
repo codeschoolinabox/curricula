@@ -170,17 +170,18 @@
 	<body>
 		<h1>Run Lens Sandbox — Trapless Engine</h1>
 		<p class="note">
-			Runs code in a Web Worker without traps and returns final status only —
-			no event stream, no logs. Programs that call <code>console.log</code>
-			write to the worker&rsquo;s native console (visible in browser dev
-			tools, not captured here). To see captured logs, use the
+			Runs code in a Web Worker without traps and returns final status only — no
+			event stream, no logs. Programs that call <code>console.log</code>
+			write to the worker&rsquo;s native console (visible in browser dev tools,
+			not captured here). To see captured logs, use the
 			<strong>intercept</strong> engine instead.
 		</p>
 
 		<textarea id="code">
 let x = 1 + 2;
 console.log('hello from the worker:', x);
-</textarea>
+</textarea
+		>
 
 		<details open class="snippets">
 			<summary>code snippets</summary>
@@ -212,11 +213,7 @@ console.log('hello from the worker:', x);"
 				>
 					[infinite loop — iteration limit]
 				</button>
-				<button
-					type="button"
-					class="snippet"
-					data-code="null();"
-				>
+				<button type="button" class="snippet" data-code="null();">
 					[runtime error]
 				</button>
 				<button
@@ -267,13 +264,11 @@ let x = prompt(() => 1);"
 			<button id="format">[format]</button>
 			<button id="cancel" disabled>[cancel]</button>
 			<label
-				><input id="maxSecondsEnabled" type="checkbox" checked /> max
-				seconds:
+				><input id="maxSecondsEnabled" type="checkbox" checked /> max seconds:
 				<input id="maxSeconds" type="number" value="5" min="1" max="30" />
 			</label>
 			<label
-				><input id="maxIterationsEnabled" type="checkbox" /> max
-				iterations:
+				><input id="maxIterationsEnabled" type="checkbox" /> max iterations:
 				<input id="maxIterations" type="number" placeholder="none" min="-10" />
 			</label>
 		</div>
@@ -308,8 +303,8 @@ let x = prompt(() => 1);"
 
 		<div class="console-banner">
 			console output goes to the browser dev tools (worker context) — this
-			engine doesn&rsquo;t capture it. Open dev tools to see what learner
-			code prints.
+			engine doesn&rsquo;t capture it. Open dev tools to see what learner code
+			prints.
 		</div>
 
 		<div id="status">click [run] to begin.</div>
@@ -326,7 +321,9 @@ let x = prompt(() => 1);"
 			const statusEl = document.getElementById('status');
 			const maxSecondsEnabled = document.getElementById('maxSecondsEnabled');
 			const maxSeconds = document.getElementById('maxSeconds');
-			const maxIterationsEnabled = document.getElementById('maxIterationsEnabled');
+			const maxIterationsEnabled = document.getElementById(
+				'maxIterationsEnabled',
+			);
 			const maxIterations = document.getElementById('maxIterations');
 			const tPrompt = document.getElementById('t-prompt');
 			const tAlert = document.getElementById('t-alert');
@@ -347,11 +344,13 @@ let x = prompt(() => 1);"
 			});
 
 			// --- Format button ---
-			formatBtn.addEventListener('click', () => {
+			formatBtn.addEventListener('click', async () => {
 				try {
-					codeEl.value = format(codeEl.value);
+					codeEl.value = await format(codeEl.value);
 				} catch (err) {
-					setStatus('format error: ' + (err && err.message ? err.message : String(err)));
+					setStatus(
+						'format error: ' + (err && err.message ? err.message : String(err)),
+					);
 				}
 			});
 
@@ -468,13 +467,11 @@ let x = prompt(() => 1);"
 				statusEl.textContent = text;
 			}
 			function describeResult(result) {
-				const lines = [
-					`outcome: ${result.outcome}`,
-					`ok: ${result.ok}`,
-				];
+				const lines = [`outcome: ${result.outcome}`, `ok: ${result.ok}`];
 				if (result.error) {
 					lines.push(`error.kind: ${result.error.kind}`);
-					if (result.error.message) lines.push(`error.message: ${result.error.message}`);
+					if (result.error.message)
+						lines.push(`error.message: ${result.error.message}`);
 				}
 				if (result.rejections && result.rejections.length > 0) {
 					lines.push(`rejections: ${result.rejections.length}`);

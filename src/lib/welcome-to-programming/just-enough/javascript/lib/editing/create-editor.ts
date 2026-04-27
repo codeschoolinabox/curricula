@@ -77,12 +77,15 @@ async function createEditor(code = '', {
 	// into buildExtensions above (hoisted). Their bodies close over `editor`
 	// and `destroyed`; CM's keymap stores the binding and only invokes `run`
 	// on keypress, long after both are initialized — no TDZ at runtime.
-	function runFormat(): void {
-		if (destroyed || !format) return;
-
+	// `format` may be sync or async (the Prettier-based formatter is async).
+	// `applyFormat` catches both sync throws and async rejections, and
+	// re-checks `destroyed` since the editor may be torn down between the
+	// caller invoking `runFormat()` and the dispatch landing.
+	async function applyFormat(original: string): Promise<void> {
+		if (!format) return;
 		try {
-			const original = editor.state.doc.toString();
-			const formatted = format(original);
+			const formatted = await format(original);
+			if (destroyed) return;
 			const changed = original !== formatted;
 
 			if (changed) {
@@ -101,6 +104,11 @@ async function createEditor(code = '', {
 		} catch (err: unknown) {
 			console.warn('Format callback threw:', err);
 		}
+	}
+
+	function runFormat(): void {
+		if (destroyed || !format) return;
+		void applyFormat(editor.state.doc.toString());
 	}
 
 	function runCheck(): readonly LintDiagnostic[] {

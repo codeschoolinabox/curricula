@@ -51,6 +51,11 @@ encouragement. They cannot be overridden by momentum.
    points (AR-1 through AR-5), commit steps, and quality checks. "Follow
    AGENTS.md" is not a plan step. Agents do not re-read AGENTS.md during
    execution; if a step is not written in the plan, it will be skipped.
+   Plans must also include at least one **mermaid data-flow diagram** (or
+   sequence/state diagram, whichever fits) for any change touching multiple
+   modules or layers — ASCII art is not a substitute. The diagram should make
+   the before/after data path visually obvious so reviewers can verify the
+   architecture at a glance.
 7. **Stop at the emergency brake** — if scope creeps, tests fail unexpectedly,
    or you catch yourself skipping workflow steps: stop and surface it.
 8. **No confident guessing** — when uncertain, say so and investigate rather

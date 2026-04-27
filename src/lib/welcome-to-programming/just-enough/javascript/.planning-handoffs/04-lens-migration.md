@@ -281,8 +281,12 @@ All paths are relative to:
 - **Work Stream 2 (Analysis + Recommender)**: needs the `AnalysisReport`
   type to implement each lens's `recommend()` function. Can stub with a
   mock AnalysisReport during development, but the type must be defined.
-- **Work Stream 1 (Sub-Language Levels)**: needs the level types for
-  `recommend()` to specify `blockModelCell` coordinates.
+- **Work Stream 1 (`01-NM-components.md`)**: supplies the 3rd Block
+  Model dimension — the syntax tracer's `StepCategory` enum at
+  `lib/evaluating/trace/syntax/types.ts`. A lens's `recommend()`
+  uses category names (as strings) in its
+  `blockModelCell.nmComponents` array. A lens may tag MULTIPLE
+  categories per recommendation.
 
 ### Other streams that depend on this
 

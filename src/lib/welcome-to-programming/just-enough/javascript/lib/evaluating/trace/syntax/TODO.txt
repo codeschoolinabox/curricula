@@ -1,0 +1,1 @@
+the config/event categories need help, I don't love them.  CLAUDE, we should address this before anything else

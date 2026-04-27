@@ -1,0 +1,40 @@
+flowchart TB
+    subgraph WorkerThread["Worker thread"]
+        A["Trap fires<br/>(console.log / prompt / etc)"]
+        B["Capture line+column<br/>from new Error().stack"]
+        C["postMessage scalar event<br/>{event, ..., line, column}"]
+        A --> B --> C
+    end
+
+    C -. "postMessage<br/>(wire-safe scalars only)" .-> D
+
+    subgraph MainLoop["Main thread — intercept.ts main loop (Stage B)"]
+        D["Receive EventMessage"]
+        E["lookupNodePath(index, line, column)<br/>→ {nodePath, source, fallbackFrom?}"]
+        F["Enrich event in-place:<br/>+ nodePath<br/>+ nodePathSource<br/>+ nodePathFallbackFrom?"]
+        G["Yield to consumer"]
+        H["Append to events[] (by reference)"]
+        D --> E --> F --> G --> H
+    end
+
+    H -. "on completion (worker done)" .-> I
+
+    subgraph GetResult["getResult — Stage C + D"]
+        I["link(events, astByPath)"]
+        J["Per event: attach .node ref"]
+        K["Push back-ref into<br/>node.events[]"]
+        L["Build visitCounts<br/>(nodePath → count)"]
+        M["Assemble InterceptResult<br/>{events, ast, code, options,<br/>visitCounts, outcome, ...}"]
+        N["deepFreezeInPlace(result)<br/>(cycle-safe via WeakSet)"]
+        I --> J --> K --> L --> M --> N
+    end
+
+    subgraph Handle["InterceptHandle (eager)"]
+        H1["handle.code (constructor arg)"]
+        H2["handle.options (constructor arg)"]
+        H3["handle.ast: Promise<br/>(resolves on validation success)"]
+    end
+
+    style WorkerThread fill:#fef3c7,stroke:#92400e
+    style MainLoop fill:#dbeafe,stroke:#1e3a8a
+    style GetResult fill:#d1fae5,stroke:#065f46

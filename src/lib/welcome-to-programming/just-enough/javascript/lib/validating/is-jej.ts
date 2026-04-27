@@ -2,25 +2,26 @@
  * Quick boolean check: is this code ready to execute in the
  * learning environment?
  *
- * @remarks Runs the full pre-execution pipeline synchronously:
- * parse + JeJ validation + format check. Returns `true` only
+ * @remarks Runs the full pre-execution pipeline:
+ * parse + JeJ validation + format check. Resolves `true` only
  * if ALL three pass.
  *
- * Equivalent to `validate(code).ok && checkFormat(code).formatted`.
+ * Equivalent to
+ * `validate(code).ok && (await checkFormat(code)).formatted`.
  *
- * **Sync** — recast format check is synchronous.
+ * **Async** — Prettier-based format check is async.
  *
  * @param code - JavaScript source code to check
- * @returns `true` if code parses, passes JeJ validation, AND
- *   is properly formatted
+ * @returns `Promise<true>` if code parses, passes JeJ validation,
+ *   AND is properly formatted
  *
  * @example
  * ```ts
- * isJej('let x = 5;\n');          // true
- * isJej('let x =   5;\n');        // false (unformatted)
- * isJej('var x = 5;\n');          // false (not JeJ)
- * isJej('console.log = 5;\n');    // false (property assignment)
- * isJej('let x = ;');             // false (parse error)
+ * await isJej('let x = 5;\n');          // true
+ * await isJej('let x =   5;\n');        // false (unformatted)
+ * await isJej('var x = 5;\n');          // false (not JeJ)
+ * await isJej('console.log = 5;\n');    // false (property assignment)
+ * await isJej('let x = ;');             // false (parse error)
  * ```
  */
 
@@ -28,10 +29,11 @@ import validateProgram from './validate-program.js';
 import justEnoughJs from './just-enough-js.js';
 import checkFormat from '../formatting/check-format.js';
 
-export default function isJej(code: string): boolean {
+export default async function isJej(code: string): Promise<boolean> {
 	const report = validateProgram(code, justEnoughJs);
 
 	if (!report.isValid) return false;
 
-	return checkFormat(code).formatted;
+	const formatCheck = await checkFormat(code);
+	return formatCheck.formatted;
 }

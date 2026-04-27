@@ -1,60 +1,51 @@
 /**
- * @file Recast-based code formatter for JeJ.
+ * @file Prettier-based code formatter for JeJ.
  *
- * Uses recast.prettyPrint() with a fixed configuration — no options,
- * no overrides. All JeJ code looks identical in structure.
+ * Uses prettier (standalone build) with a fixed configuration — no
+ * options, no overrides. All JeJ code looks identical in structure.
  *
  * Works on ANY valid JavaScript, not just JeJ. Learners can format
  * code while iterating towards JeJ compliance.
  *
- * Synchronous — recast.prettyPrint() is sync, unlike Prettier/standalone.
+ * Asynchronous — prettier.format is async. Blank lines between
+ * statements are preserved (1+ in source → exactly 1 in output),
+ * which is the reason for choosing Prettier over recast.
  */
 
-import * as recast from 'recast';
+import * as babelPlugin from 'prettier/plugins/babel';
+import * as estreePlugin from 'prettier/plugins/estree';
+import { format as prettierFormat } from 'prettier/standalone';
 
 /**
- * Fixed recast print options for JeJ formatting.
+ * Fixed Prettier options for JeJ formatting.
  *
  * WHY these values: match the project's .editorconfig and established
  * style. No configurability — the whole point is uniformity.
  *
- * WHY tabWidth 4 (not useTabs): recast.prettyPrint() ignores
- * useTabs. We print with 4-space indent, then convert leading
- * spaces to tabs in post-processing.
+ * `parser: 'babel'` covers all valid JS the learners may write while
+ * iterating toward JeJ compliance (no JSX/decorators/Flow needed).
  */
-const JEJ_PRINT_OPTIONS: recast.Options = Object.freeze({
+const JEJ_PRETTIER_OPTIONS = Object.freeze({
+	parser: 'babel',
+	plugins: [estreePlugin, babelPlugin],
+	useTabs: true,
 	tabWidth: 4,
-	quote: 'single',
-	wrapColumn: 80,
+	printWidth: 80,
+	singleQuote: true,
+	semi: true,
 });
-
-/**
- * Convert leading groups of 4 spaces to tabs on each line.
- *
- * WHY post-process: recast.prettyPrint() does not support useTabs.
- */
-function spacesToTabs(code: string): string {
-	return code.replace(/^( {4})+/gm, (match) => {
-		return '\t'.repeat(match.length / 4);
-	});
-}
 
 /**
  * Format JavaScript source code the JeJ way.
  *
  * @param code - ANY valid JavaScript source code
- * @returns Formatted code string. Graceful degradation: returns the
- *   original code unchanged if recast throws.
+ * @returns Promise resolving to formatted code. Graceful degradation:
+ *   resolves to the original code unchanged if Prettier throws
+ *   (e.g. on a parse error).
  */
-function format(code: string): string {
+async function format(code: string): Promise<string> {
 	try {
-		const ast = recast.parse(code);
-		const printed = recast.prettyPrint(ast, JEJ_PRINT_OPTIONS).code;
-		const tabbed = spacesToTabs(printed);
-		// WHY: recast strips trailing newlines but POSIX convention and
-		// .editorconfig both require a final newline. Empty programs stay empty.
-		if (tabbed === '') return '';
-		return tabbed.endsWith('\n') ? tabbed : tabbed + '\n';
+		return await prettierFormat(code, JEJ_PRETTIER_OPTIONS);
 	} catch {
 		return code;
 	}

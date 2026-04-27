@@ -86,8 +86,10 @@ type FormatResult = {
 
 /**
  * Formats code and returns the formatted string.
+ *
+ * May be sync or async. The editor accepts both via `Promise.resolve()`.
  */
-type FormatCallback = (code: string) => string;
+type FormatCallback = (code: string) => string | Promise<string>;
 
 /**
  * Analyzes code and returns lint diagnostics.

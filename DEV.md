@@ -747,34 +747,33 @@ Format constraints:
 Mermaid flowchart depicting the **data's journey** through the module:
 
 - **Nodes are data states**, not files or types. Each node names a shape the
-  data takes at some phase of processing — `raw source string`, `validated
-  AST`, `frozen RunResult`, `event stream`, `formatted source`. Domain
-  vocabulary from the ubiquitous language in step 0.1; never code identifiers,
-  symbol names, or filenames.
-- **Edges are transformations** that produce the next state. The label names
-  the operation and its structural constraint — `parse, throws on SyntaxError`,
+  data takes at some phase of processing — `raw source string`, `validated AST`,
+  `frozen RunResult`, `event stream`, `formatted source`. Domain vocabulary from
+  the ubiquitous language in step 0.1; never code identifiers, symbol names, or
+  filenames.
+- **Edges are transformations** that produce the next state. The label names the
+  operation and its structural constraint — `parse, throws on SyntaxError`,
   `validate, pure`, `execute in Worker, async`, `inject loop guards, pure`.
-- **Files / directories that don't transform data are invisible.** A
-  re-export, a wrapper, a delegating shim — none are nodes. If multiple files
-  cooperate on a single transformation, one edge labels it; the files are
-  inside the implementation, not on the diagram. Domain-agnostic utilities
-  (freeze, merge, clone) are also invisible.
+- **Files / directories that don't transform data are invisible.** A re-export,
+  a wrapper, a delegating shim — none are nodes. If multiple files cooperate on
+  a single transformation, one edge labels it; the files are inside the
+  implementation, not on the diagram. Domain-agnostic utilities (freeze, merge,
+  clone) are also invisible.
 - **Branching / joining**: when the data takes a different shape based on
   validation or config (e.g. parse-success vs. parse-error), use Mermaid's
-  branch syntax (`{decision} -->|yes| ...`). When two pipelines merge into
-  the same downstream state, draw both edges to the same node.
-- **Abstraction level**: the depth of detail matches the directory's place
-  in the tree. Top-level `DOCS.md` shows the user-source → final-result
-  arc with maybe 4–6 nodes. A leaf module's `DOCS.md` zooms in on the
-  intermediate shapes that module produces and consumes.
-- The diagram answers "what shape is the data in at each phase, and what
-  changes between phases" — not "what imports what." If you can answer
-  the diagram by reading the import statements, you've drawn the wrong
-  thing.
+  branch syntax (`{decision} -->|yes| ...`). When two pipelines merge into the
+  same downstream state, draw both edges to the same node.
+- **Abstraction level**: the depth of detail matches the directory's place in
+  the tree. Top-level `DOCS.md` shows the user-source → final-result arc with
+  maybe 4–6 nodes. A leaf module's `DOCS.md` zooms in on the intermediate shapes
+  that module produces and consumes.
+- The diagram answers "what shape is the data in at each phase, and what changes
+  between phases" — not "what imports what." If you can answer the diagram by
+  reading the import statements, you've drawn the wrong thing.
 
 The same Mermaid syntax handles linear, branching, and joining flows. Use
-whatever topology the actual data flow requires; there is no separate choice
-of format.
+whatever topology the actual data flow requires; there is no separate choice of
+format.
 
 ````markdown
 ## Architectural Sketch
@@ -1056,40 +1055,38 @@ before implementing.
 
 #### Dependency-order coverage
 
-Where a test sits in the dependency graph changes what kind of test it
-should be. The rule for this codebase is **bottom-up**:
+Where a test sits in the dependency graph changes what kind of test it should
+be. The rule for this codebase is **bottom-up**:
 
-1. **Leaves first**: pure helpers and protocol primitives
-   (`worker-protocol`, `create-worker-script`, `guard-loops`, etc.) get
-   unit tests against real inputs. No siblings involved.
+1. **Leaves first**: pure helpers and protocol primitives (`worker-protocol`,
+   `create-worker-script`, `guard-loops`, etc.) get unit tests against real
+   inputs. No siblings involved.
 2. **Engines next**: modules that compose leaves into behavior
-   (`evaluating/run`, `evaluating/trace`) get integration tests against
-   the _real_ leaves already covered in step 1. Browser environment if
-   the engine requires `Worker` + `SharedArrayBuffer`.
+   (`evaluating/run`, `evaluating/trace`) get integration tests against the
+   _real_ leaves already covered in step 1. Browser environment if the engine
+   requires `Worker` + `SharedArrayBuffer`.
 3. **API layer last**: wrappers that layer validation / format / config
-   resolution over an engine (`api/run`, `api/trace`) get tests against
-   the _real_ engine already covered in step 2. Again, browser
-   environment when the engine requires it.
+   resolution over an engine (`api/run`, `api/trace`) get tests against the
+   _real_ engine already covered in step 2. Again, browser environment when the
+   engine requires it.
 
-The practical consequence: `vi.mock('./sibling')` in a consumer's test
-is almost never correct. If step N's test needs step N−1 to be
-trustworthy, finish step N−1's coverage first. Mocks paper over missing
-coverage with duplicate behavior; the duplicate eventually drifts from
-reality and the mocked test starts passing on production-broken code.
+The practical consequence: `vi.mock('./sibling')` in a consumer's test is almost
+never correct. If step N's test needs step N−1 to be trustworthy, finish step
+N−1's coverage first. Mocks paper over missing coverage with duplicate behavior;
+the duplicate eventually drifts from reality and the mocked test starts passing
+on production-broken code.
 
-This is also a **development order constraint**. When adding new
-behavior, implement and test inside-out: leaf → engine → API. When an
-existing feature is being refactored and one layer's tests are broken
-(mocks have drifted, or the underlying contract changed), fix the
-innermost layer first — outer-layer fixes become trivial once the
-inner layer is stable.
+This is also a **development order constraint**. When adding new behavior,
+implement and test inside-out: leaf → engine → API. When an existing feature is
+being refactored and one layer's tests are broken (mocks have drifted, or the
+underlying contract changed), fix the innermost layer first — outer-layer fixes
+become trivial once the inner layer is stable.
 
-**Exceptions are narrow and explicit**. The environment boundary (node
-vs. browser) is crossed by _moving the test file_, not by mocking the
-environment away. Third-party boundaries (network, filesystem, random
-clocks) may be stubbed, but `vi.mock` of an internal sibling in this
-package is a code smell — treat it as a TODO to finish the sibling's
-coverage.
+**Exceptions are narrow and explicit**. The environment boundary (node vs.
+browser) is crossed by _moving the test file_, not by mocking the environment
+away. Third-party boundaries (network, filesystem, random clocks) may be
+stubbed, but `vi.mock` of an internal sibling in this package is a code smell —
+treat it as a TODO to finish the sibling's coverage.
 
 #### ZOMBIES Sequencing
 
@@ -1305,13 +1302,11 @@ For each behavioral increment:
 
    **Inter-file contract check** — verify the file's inputs and outputs match
    what the peer `DOCS.md`'s Mermaid data flow diagram shows.
-
    - Contract preserved → intra-file refactor is autonomous; commit.
    - Contract changed → **flag to user before proceeding**; discuss together;
      update DOCS.md only with approval.
 
    **Two-tier autonomy** — the refactor boundary is mechanical, not judgment:
-
    - **Intra-file data flow** (internal phases of a single function): refactor
      freely. Ephemeral Mermaid reasoning is fine, not committed.
    - **Inter-file data flow** (captured in peer `DOCS.md`): flag to user before
@@ -1323,8 +1318,8 @@ For each behavioral increment:
    `DOCS.md` is an architectural contract; updates require user approval.
    Extracting an intra-file helper to a new domain-related file IS a trigger
    (changes the set of files in the flow). Extracting to a domain-agnostic
-   utility file (freeze, merge, clone — utilities are invisible in every
-   data flow diagram) is NOT a trigger.
+   utility file (freeze, merge, clone — utilities are invisible in every data
+   flow diagram) is NOT a trigger.
 
 10. **Lint checkpoint 4** — final lint on modified files. Should be clean.
 11. **Update types** — finalize based on actual implementation
@@ -1351,7 +1346,6 @@ After all increments are complete, before prompting the human to commit:
    full diff, modified files list, and the original task description.
 3. **Address PAUSE/CONSIDER items** — resolve concerns per AGENTS.md §
    Resolution Rules
-4. **Prompt human for atomic commit** — ready to commit only after AR-4 clears
 
 ### Session Handoff
 

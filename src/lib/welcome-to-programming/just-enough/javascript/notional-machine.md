@@ -16,6 +16,18 @@ See also:
 - [tracer.architecture.md](./tracer.architecture.md) — implementation layers,
   vocabulary, test taxonomy
 
+**Operational implementation.** The NM components described in this spec are
+implemented as step categories in the **syntax tracer** at
+[`lib/evaluating/trace/syntax/`](./lib/evaluating/trace/syntax/) — a sibling
+to the semantic tracer at
+[`lib/evaluating/trace/semantics/`](./lib/evaluating/trace/semantics/). Each
+NM component corresponds to one of the syntax tracer's ten step categories
+(`expression`, `resolve`, `statement`, `scope`, `control-flow`,
+`initialization`, `for-init`, `write`, `emit`, `error`). The `StepCategory`
+enum in the syntax tracer's
+[`types.ts`](./lib/evaluating/trace/syntax/types.ts) is the canonical source;
+the study-lenses recommender consumes it as its 3rd Block Model dimension.
+
 ---
 
 ## The machine at a glance

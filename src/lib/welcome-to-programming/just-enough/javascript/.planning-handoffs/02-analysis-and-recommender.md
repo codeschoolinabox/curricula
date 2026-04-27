@@ -1,6 +1,12 @@
-<!-- !! CLAUDE !! stop and check with the user before proceeding, a key premise of this task has changed: the 3rd dimension won't be language levels, but text-visible features as gated by the syntax-level tracer documented in /just-enough/javscript/notional-machine/  --->
-
 # Work Stream 2: Snippet Analysis + Recommendation System
+
+> **Pivot resolved (see `01-NM-components.md`).** The 3rd Block Model
+> dimension is no longer an ordinal sub-language level progression. It
+> is the **unordered set of 10 NM components** sourced from the syntax
+> tracer's `StepCategory` enum at
+> `lib/evaluating/trace/syntax/types.ts`. Analysis detects categories
+> via **static AST mapping** (no execution). Lens recommendations may
+> tag MULTIPLE categories per `Recommendation`.
 
 ## Prerequisites
 
@@ -11,10 +17,17 @@ Before starting, read these files in full (do not skim):
 - **DEV.md** (repo root):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/DEV.md`
 - **Master plan**: `./00-master-plan.md` (in this directory)
-- **Notional machine** (NM components the analysis detects):
-  `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/notional-machine.md`
-- **Tracer docs** (semantic layers, gate config):
-  `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/tracer.md`
+- **Syntax tracer** (canonical source of the NM-components enum — the
+  3rd Block Model dimension):
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/evaluating/trace/syntax/`
+  — read `PLAN.md` (Resolutions), `README.md` (categories table),
+  `types.ts` (`StepCategory` enum), `DOCS.md` (step-closing rules).
+- **Notional machine** (conceptual spec; operational implementation
+  is the syntax tracer above):
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/notional-machine.md`
+- **Semantic tracer docs** (semantic layers, gate config — the
+  syntax tracer's input):
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/tracer.md`
 - **Existing recommender directory** (currently just an empty README):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/recommender/`
 - **Existing socratizing module** (prior art for snippet analysis -- this module
@@ -24,8 +37,11 @@ Before starting, read these files in full (do not skim):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/validating/`
 - **Lenses DOCS.md** (current lens architecture):
   `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lenses/DOCS.md`
-- **Sub-language levels** (Work Stream 1 output -- read when available): The
-  types and data from Work Stream 1 define the third Block Model dimension
+- **NM components** (Work Stream 1 output, `01-NM-components.md`):
+  the 3rd Block Model dimension. The canonical enum
+  (`StepCategory`) lives in the syntax tracer; WS1 wires it into
+  `study-lenses/types.ts`. Read `01-NM-components.md` for
+  the contract.
 
 ## Context
 
@@ -114,11 +130,16 @@ consumes them to decide what to suggest. The analysis produces:
    higher blanks difficulty; parsons works best around 8-15 lines; trace tables
    become unwieldy past ~20 lines.
 
-3. **NM components present** -- Which components from `notional-machine.md`
-   appear in the code: values only -> simpler lenses; bindings with update ->
-   trace tables high-value; scopes -> variables lens relevant; coercion ->
-   operator-focused lenses; I/O -> execution-focused lenses. The set of NM
-   components determines the sub-language level (from Work Stream 1).
+3. **NM components present** -- Which of the 10 syntax-tracer
+   categories appear in the code, detected via static AST mapping
+   (no execution). The canonical enum is `StepCategory` at
+   `lib/evaluating/trace/syntax/types.ts`. Examples: snippet has only
+   `expression` + `resolve` → simpler lenses; has `write` +
+   `initialization` → trace tables high-value; has `scope` +
+   `control-flow` → variables lens relevant; has `emit` → execution-
+   focused lenses. NM components detected = the set of step
+   categories present in the snippet; this set is UNORDERED (no
+   ordinal level is derived from it).
 
 4. **Complexity signals** -- Nesting depth, variable count, branch count. Drives
    both WHICH lenses and WHAT CONFIG within each lens.
@@ -161,7 +182,8 @@ organizes them into a 3D grid:
 
 - Dimension 1: **Level** (text surface, program execution, function/purpose)
 - Dimension 2: **Scope** (atoms, blocks, relations, macro)
-- Dimension 3: **NM components** (sub-language levels from Work Stream 1)
+- Dimension 3: **NM components** (the 10 syntax-tracer categories
+  from `StepCategory`, unordered; see `01-NM-components.md`)
 
 Not every cell needs filling -- only cells matching the code's features and
 available lens suggestions are populated.
@@ -199,10 +221,13 @@ do NOT design for that use case now -- just don't block it.
 
 ### This stream depends on
 
-- **Work Stream 1 (Sub-Language Levels)**: needs the level definitions to map NM
-  components to sub-language levels and to build the third dimension of the
-  recommendation grid. Can start Phase 0 (DDD) in parallel, but Phase 1
-  implementation depends on the level types.
+- **Work Stream 1 (`01-NM-components.md`)**: supplies the 3rd Block
+  Model dimension (the `StepCategory` enum from the syntax tracer).
+  WS1 is small — it wires `StepCategory` into `study-lenses/types.ts`
+  and confirms the 10-category list. WS1 is ready now (the syntax
+  tracer's Phase 0 has stabilized the outer categories); WS2 can
+  start Phase 0 (DDD) immediately and consume the enum during
+  Phase 1 implementation.
 
 ### Other streams that depend on this
 
@@ -313,20 +338,23 @@ BOTH modules.
       one-liner, syntax error.
 - [ ] **Increment 2**: Code metrics. Input: code string. Output: line count,
       character count, statement count. ZOMBIES: empty, one line, multi-line.
-- [ ] **Increment 3**: NM component detection -- values and bindings. Input:
-      parsed AST. Output: which value types and binding operations appear.
-      ZOMBIES: no bindings, one let, const, let+update.
-- [ ] **Increment 4**: NM component detection -- expressions and coercion.
-      Operators present, coercion moments.
-- [ ] **Increment 5**: NM component detection -- statements and scopes. Control
-      flow constructs, block scope creation.
-- [ ] **Increment 6**: NM component detection -- I/O channels. Console calls,
-      prompt/alert/confirm.
-- [ ] **Increment 7**: Complexity signals. Nesting depth, variable count, branch
-      count.
-- [ ] **Increment 8**: Sub-language level mapping. Given detected NM components,
-      determine the snippet's sub-language level (consumes Work Stream 1
-      output).
+- [ ] **Increment 3**: NM-component detection -- `expression` +
+      `resolve` categories via static AST mapping. Input: parsed AST.
+      Output: presence flags. ZOMBIES: empty program, single literal,
+      binary op.
+- [ ] **Increment 4**: NM-component detection -- `initialization` +
+      `for-init` + `write`. Variable declarations and reassignments.
+- [ ] **Increment 5**: NM-component detection -- `statement` +
+      `scope` + `control-flow`. Block boundaries and flow constructs.
+- [ ] **Increment 6**: NM-component detection -- `emit` + `error`.
+      I/O calls (prompt/alert/confirm/console.*) and error-prone
+      constructs.
+- [ ] **Increment 7**: Complexity signals. Nesting depth, variable
+      count, branch count.
+- [ ] **Increment 8**: `AnalysisReport.nmComponents` assembly -- union
+      the per-category presence flags into a single unordered set
+      matching the canonical `StepCategory` enum. No ordinal level is
+      derived.
 - [ ] **Increment 9**: Full `AnalysisReport` assembly. Combine all signals into
       the typed report. Integration test with a realistic JEJ snippet.
 

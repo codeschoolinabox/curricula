@@ -61,6 +61,19 @@ describe('createEditor', () => {
 				format: (code: string) => code.toUpperCase(),
 			});
 			editor.format();
+			// Format runs in a microtask (async IIFE) — flush before
+			// asserting on dispatched content.
+			await Promise.resolve();
+			expect(editor.content).toBe('ABC');
+		});
+
+		it('dispatches resolved value when format is async', async () => {
+			const editor = await createEditor('abc', {
+				format: async (code: string) => code.toUpperCase(),
+			});
+			editor.format();
+			// Async format → wait for the IIFE's await + microtask drain.
+			await new Promise((r) => setTimeout(r, 0));
 			expect(editor.content).toBe('ABC');
 		});
 	});

@@ -4,8 +4,9 @@
 
 V2 study lens shipped (143 tests, build green, COOP/COEP headers).
 The next milestone: design the Study meta-lens infrastructure — the
-recommender system, lens contract, and sub-language progression that
-enable a spiral learning experience for each code snippet.
+recommender system, lens contract, and NM-component enum (via the
+syntax tracer at `lib/evaluating/trace/syntax/`) that enable a
+spiral learning experience for each code snippet.
 
 ## Objective
 
@@ -286,10 +287,13 @@ The analysis produces a structured report:
 
 - Parse status (valid AST? syntax errors? which errors?)
 - Code length (lines, characters, statements)
-- NM components present (which components from notional-machine.md
-  appear: values, bindings, scopes, coercion, I/O, etc.)
+- NM components present — which of the 10 syntax-tracer categories
+  from `StepCategory` (at `lib/evaluating/trace/syntax/types.ts`)
+  appear, detected via static AST mapping (no execution). Unordered
+  set; see `01-NM-components.md`.
 - Complexity signals (nesting depth, variable count, branch count)
-- JeJ NM semantic layers present (which of the 5 layers appear?)
+- Semantic tracer layers present (which of the 5 semantic layers in
+  the semantic tracer appear — reference only)
 
 ### 3D Block Model space
 
@@ -299,10 +303,12 @@ comprehension across two dimensions. We extend it to three:
 
 1. **Level**: text surface → program execution → function/purpose
 2. **Scope**: atoms → blocks → relations → macro
-3. **NM components**: the conceptual model from notional-machine.md
-   — Values, Bindings, Expressions, Statements, Scopes, Coercion,
-   Resolve, Errors, I/O Channels. Sub-language levels map to NM
-   component groups, not syntax features (see Step 2 in transition)
+3. **NM components**: the 10 step categories from the syntax tracer's
+   `StepCategory` enum at `lib/evaluating/trace/syntax/types.ts` —
+   `expression`, `resolve`, `statement`, `scope`, `control-flow`,
+   `initialization`, `for-init`, `write`, `emit`, `error`.
+   **Unordered** set (no ordinal level is derived). See
+   `01-NM-components.md` for the enum contract.
 
 This creates the 3D space through which learners spiral. The
 curriculum's exercise-types.md progression (mark syntax → trace →
@@ -321,11 +327,18 @@ Not every cell needs filling for a given snippet — only cells
 matching the code × available lens suggestions are populated. A
 short snippet with no loops won't have trace table options.
 
-The third dimension (language features) means the same lens can
-appear at multiple sub-language levels with different configs. E.g.,
-?blanks appears configured for keywords at one level, identifiers
-at another, operators at another. This IS the spiral — revisiting
-the same comprehension activity with increasing feature scope.
+The third dimension (NM components) means the same lens can
+appear at multiple cells with different configs. E.g., ?blanks
+appears configured for keywords in one recommendation, identifiers
+in another, operators in another. The spiral in this framing is no
+longer an intrinsic ordering of the 3rd dimension (which is now an
+unordered set of categories). Instead, the spiral emerges from
+(a) lens-configuration variation across snippets — a `blanks` lens
+configured for keywords vs. operators vs. control-flow reads
+differently at each configuration; and (b) curriculum-author-imposed
+ordering of category-filtered recommendations, chosen pedagogically
+rather than enforced by the NM model. The recommender surfaces the
+options; the author or learner walks the spiral.
 
 ### Recommender signals (critical for system design)
 
@@ -346,11 +359,16 @@ consumes them to decide what to suggest:
   difficulty (fewer tokens to reconstruct); longer snippets need
   lower difficulty. Parsons works best around 8-15 lines. Trace
   tables become unwieldy past ~20 lines.
-- **NM components present** — which notional machine components
-  appear in the code: values only → simpler lenses; bindings with
-  update → trace tables high-value; scopes → variables lens
-  relevant; coercion → operator-focused lenses; I/O → execution-
-  focused lenses. NM components detected = the sub-language level.
+- **NM components present** — which of the 10 syntax-tracer
+  categories appear in the code (unordered set): `expression`,
+  `resolve`, `statement`, `scope`, `control-flow`, `initialization`,
+  `for-init`, `write`, `emit`, `error`. Detected via static AST
+  mapping (no execution). NM components detected = the set of step
+  categories present in the snippet, detected via static AST
+  mapping. Examples: only `expression` + `resolve` → simpler
+  lenses; `write` + `initialization` → trace tables high-value;
+  `scope` + `control-flow` → variables lens relevant; `emit` →
+  execution-focused lenses.
 - **Complexity** — nesting depth, variable count, branch count.
   Drives both *which* lenses and *what config* within each lens.
 - **Author overrides** — `lenses.json` or `@study-lens` directives
@@ -449,9 +467,13 @@ the codebase, not just in plan files.
 **Then**: split into independent work streams, each with a handoff
 doc in `.planning-handoffs/` AND a copy of this master plan file:
 
-1. **Sub-language level progression** — defining JEJ NM component
-   levels (the 3rd Block Model dimension). Goes into `/just-enough/
-   javascript/` documentation. Prerequisite for the recommender.
+1. **NM components (3rd dim via syntax tracer)** — the 3rd Block
+   Model dimension is the syntax tracer's `StepCategory` enum at
+   `lib/evaluating/trace/syntax/types.ts` (10 unordered categories).
+   WS1 (`01-NM-components.md`) is small: wire the enum into
+   `study-lenses/types.ts`, document the contract. Prior "sub-
+   language level progression" framing retired; see
+   `01-NM-components.md` for details.
 
 2. **Snippet analysis + recommendation system** — two modules,
    developed together. **Analysis** takes code → returns structured
@@ -495,32 +517,41 @@ sessions:
   decoupled, recommender is pure utility, lenses in `/lenses/` not
   `/components/`, composed lenses via pipeline
 
-### Step 2: Define sub-language level progression
+### Step 2: NM components via the syntax tracer
 
-**Before the recommender.** Define a progression of JEJ sub-language
-levels based on **notional-machine.md components** (not syntax
-features). The NM components ARE the conceptual model learners
-build — the 3rd Block Model dimension tracks which components
-have been introduced.
+**Before the recommender.** The 3rd Block Model dimension is
+supplied by the syntax tracer at
+`lib/evaluating/trace/syntax/` — specifically the `StepCategory`
+enum in `types.ts`. No ordinal sub-language level progression is
+defined (the pivot from the prior framing).
 
-Example (to be refined in DDD, grounded in NM component groups):
+The 10 categories (unordered set):
 
-- Level 1: Values (primitives) + Bindings (declare, initialize)
-- Level 2: Expressions (operators, resolve) + Coercion
-- Level 3: Statements (if/else) + Scopes (block scope)
-- Level 4: Statements (loops) + Bindings (update lifecycle)
-- Level 5: I/O Channels (console, prompt/alert/confirm)
-- ...
+- `expression` — value producers (literal / identifier /
+  property / operator / call / template)
+- `resolve` — data-flow edges
+- `statement` — structural enter/exit
+- `scope` — create/leave at block boundaries
+- `control-flow` — conditionals, loops, break, continue
+- `initialization` — `let` / `const` declarations
+- `for-init` — for-loop init bindings
+- `write` — reassignments
+- `emit` — I/O output
+- `error` — runtime errors
 
-Each level adds language features. A snippet's sub-language level
-is determined by which features it uses — the snippet analysis
-detects this. The recommender can then suggest lenses configured
-for the features at that level.
+A snippet's set of NM components is whichever of these 10
+categories appear in it, detected via static AST mapping (no
+execution). The recommender uses the set (not an ordered level)
+to decide which lenses to surface.
 
-The spiral is achieved by including the same lens multiple times
-with different configs focused on different language features at
-each level. Goes into `/just-enough/javascript/` documentation
-and integrates with the NM/tracer's existing semantic layer model.
+The spiral is achieved via lens-config variation and curriculum-
+author-imposed ordering over the unordered set — NOT via ordering
+in the enum itself. See the §Spiral discussion above.
+
+WS1 (`01-NM-components.md`) is the thin coordination layer:
+re-export / reference `StepCategory` from
+`study-lenses/types.ts` and document the contract. The
+substantive design lives in the syntax tracer module.
 
 ### Step 3: DDD Phase 0 — analysis + recommender (two modules)
 
@@ -551,7 +582,7 @@ humans:
 - 3D Block Model space (level × scope × NM components)
 - Research translation platform vision
 - Study Lenses philosophy
-- Sub-language level integration
+- NM-components integration (syntax tracer's `StepCategory` as 3rd dim)
 - `editor` as default lens, inline swapping, content-keyed caching
 - Author sets initial lens; learner always switches via toolbar
 

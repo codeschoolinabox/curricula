@@ -1,0 +1,16 @@
+- builds a rich data structure representing every event in a JEJ program evaluation from src -> end with generator-based phases
+
+!! closure-backed getters all around so we can add entwinings on frozen objects !! see entwining getters in intercept/
+ 
+layers of the fully entwined data structure 
+    source phase
+        code 
+    creation phase 
+        tokens
+        ast
+        environment
+    execution phase
+        syntax events 
+        semantic events 
+    end-stat 
+        the payload 

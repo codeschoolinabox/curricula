@@ -227,46 +227,14 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 		return buildHandle();
 	}
 
-	// Phase 2: format gate (parse + validate already passed; ast set)
-	const formatCheck = checkFormat(code);
-	if (!formatCheck.formatted) {
-		settle({
-			ok: false,
-			outcome: 'error',
-			error: { kind: 'formatting' },
-			...(ast ? { ast } : {}),
-		});
-		return buildHandle();
-	}
-
-	// Phase 3: guard loops (only when iterations is finite)
+	// Phase 2 (format gate) and Phase 3 (guard loops) run inside the
+	// async body below — `checkFormat` is async (Prettier-based), so
+	// gating must happen on a Promise. Variables they populate are
+	// declared here so closures defined further down can capture them.
 	let processedCode = code;
 	let loopCount = 0;
-	if (maxIterations !== undefined && Number.isFinite(maxIterations)) {
-		try {
-			const guarded = guardLoops(code, maxIterations);
-			processedCode = guarded.code;
-			loopCount = guarded.loopCount;
-		} catch (err) {
-			// guardLoops parses internally; if it throws (shouldn't,
-			// since validate already parsed successfully), surface as
-			// a creation-phase javascript error.
-			settle({
-				ok: false,
-				outcome: 'error',
-				error: {
-					kind: 'javascript',
-					name: err instanceof Error ? err.name : 'Error',
-					message: err instanceof Error ? err.message : String(err),
-					phase: 'creation',
-				},
-				...(ast ? { ast } : {}),
-			});
-			return buildHandle();
-		}
-	}
 
-	// --- Async path: spawn worker, run, settle --------------------------
+	// --- Async path: format gate, guard loops, spawn worker, run, settle
 
 	let terminationCause: TerminationCause | undefined;
 	function setTermination(cause: TerminationCause): boolean {
@@ -439,14 +407,57 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 	// return and the microtask running — we check terminationCause
 	// before spawning.
 	//
-	// **The leading `await Promise.resolve()` is load-bearing.** Async
-	// function bodies run synchronously until the first `await`; without
-	// this defer, `new Worker(...)` would execute inside `run()`'s sync
-	// frame, race-blocking any cancel() the caller queues immediately
-	// after `run()` returns.
+	// The first `await checkFormat(code)` is load-bearing as the defer
+	// point: async function bodies run synchronously until the first
+	// `await`, so without it `new Worker(...)` would execute inside
+	// `run()`'s sync frame, race-blocking any cancel() the caller queues
+	// immediately after `run()` returns.
 	void (async () => {
 		try {
-			await Promise.resolve();
+			// Phase 2: format gate (async — Prettier)
+			const formatCheck = await checkFormat(code);
+			if (terminationCause !== undefined) return; // cancel during format
+			if (!formatCheck.formatted) {
+				settle({
+					ok: false,
+					outcome: 'error',
+					error: { kind: 'formatting' },
+					...(ast ? { ast } : {}),
+				});
+				return;
+			}
+
+			// Phase 3: guard loops (sync; only when iterations is finite)
+			if (
+				maxIterations !== undefined &&
+				Number.isFinite(maxIterations)
+			) {
+				try {
+					const guarded = guardLoops(code, maxIterations);
+					processedCode = guarded.code;
+					loopCount = guarded.loopCount;
+				} catch (err) {
+					// guardLoops parses internally; if it throws (shouldn't,
+					// since validate already parsed successfully), surface as
+					// a creation-phase javascript error.
+					settle({
+						ok: false,
+						outcome: 'error',
+						error: {
+							kind: 'javascript',
+							name: err instanceof Error ? err.name : 'Error',
+							message:
+								err instanceof Error
+									? err.message
+									: String(err),
+							phase: 'creation',
+						},
+						...(ast ? { ast } : {}),
+					});
+					return;
+				}
+			}
+
 			if (terminationCause !== undefined) return; // already cancelled
 
 			const sab = new SharedArrayBuffer(BUFFER_SIZE);
