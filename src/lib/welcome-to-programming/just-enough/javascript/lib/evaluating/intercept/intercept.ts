@@ -449,7 +449,15 @@ function createInterceptGenerator(
 	// pre-iterate cancel/fail, SAB unavailable, worker construction
 	// failure). Idempotent via `astResolved` guard so the second
 	// resolveAst call (e.g. cleanup after early-error) is a no-op.
+	//
+	// `astRecord` caches the resolved value (or null) so the eventual
+	// `result.ast` is the SAME reference the consumer awaited via
+	// `handle.ast`. Without the cache, `Object.fromEntries(...)` runs
+	// twice and produces two distinct Record shells with the same
+	// inner ASTNode references — which violates the single-source-of-
+	// truth invariant documented in DOCS.md § Navigation.
 	let astResolved = false;
+	let astRecord: Readonly<Record<string, ASTNode>> | null = null;
 	let astResolver:
 		| ((value: Readonly<Record<string, ASTNode>> | null) => void)
 		| null = null;
@@ -461,6 +469,7 @@ function createInterceptGenerator(
 	function resolveAst(value: Readonly<Record<string, ASTNode>> | null): void {
 		if (!astResolved && astResolver !== null) {
 			astResolved = true;
+			astRecord = value;
 			astResolver(value);
 		}
 	}
@@ -966,6 +975,7 @@ function createInterceptGenerator(
 			locationIndex,
 			maxSeconds,
 			terminationCause,
+			astRecord,
 			maxIterations,
 		);
 	}
@@ -1230,6 +1240,7 @@ function buildResult(
 	locationIndex: LocationIndex | null,
 	maxSeconds: number,
 	terminationCause: TerminationCause | null,
+	astRecord: Readonly<Record<string, ASTNode>> | null,
 	maxIterations?: number,
 ): InterceptResult {
 	// Stage C: link enriched events to AST nodes (attach .node, push
@@ -1238,11 +1249,13 @@ function buildResult(
 	const astByPath = locationIndex?.astByPath ?? new Map<string, ASTNode>();
 	const linkedEvents = link(rawEvents, astByPath);
 
-	// Build the public Record<nodePath, ASTNode> shape (or null when
-	// validation failed). Object.fromEntries materializes the Map.
-	const ast: Readonly<Record<string, ASTNode>> | null = locationIndex
-		? Object.fromEntries(locationIndex.astByPath)
-		: null;
+	// Reuse the same Record reference the consumer awaited via
+	// `handle.ast` — single-source-of-truth invariant per DOCS.md
+	// § Navigation. `astRecord` was set by `resolveAst` at validation
+	// time (or stays null if no AST was built). Building a fresh
+	// Object.fromEntries here would produce a distinct shell with
+	// the same inner ASTNode references — violating the invariant.
+	const ast: Readonly<Record<string, ASTNode>> | null = astRecord;
 
 	// Compute visitCounts from linked events. nodePath:null events
 	// (no-ast / no-location) don't count toward any node.

@@ -64,6 +64,31 @@ describe('AST entwining (browser, end-to-end)', () => {
 			expect(node.events).toContain(consoleEvent);
 		});
 
+		it('event.loc is the SAME reference as event.node.loc (single source of truth)', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			const consoleEvent = result.events.find((e) => e.event === 'console')!;
+			expect(consoleEvent.loc).toBe(consoleEvent.node!.loc);
+		});
+
+		it('node.children entries are the SAME references as named slots (e2e via public engine)', async () => {
+			const result = await createInterceptGenerator('console.log(1);\n');
+			const callPath = '$.body.0.expression';
+			const callExpr = result.ast![callPath]!;
+			expect(callExpr.type).toBe('CallExpression');
+			const callee = (callExpr as unknown as { callee: unknown }).callee;
+			const argsArray = (callExpr as unknown as { arguments: unknown[] })
+				.arguments;
+			expect(callExpr.children[0]).toBe(callee);
+			expect(callExpr.children[1]).toBe(argsArray[0]);
+		});
+
+		it('result.ast is the SAME reference as the resolved handle.ast', async () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			const result = await handle.result;
+			const handleAst = await handle.ast;
+			expect(result.ast).toBe(handleAst);
+		});
+
 		it('validation failure → empty events + error.kind: validation (no AST built)', async () => {
 			const result = await createInterceptGenerator('var x = 5;\n');
 			expect(result.events).toEqual([]);
@@ -249,6 +274,27 @@ describe('AST entwining (browser, end-to-end)', () => {
 			expect(errorEvent).toBeDefined();
 			// Error fires after the 2 console.logs → step 3.
 			expect(errorEvent!.step).toBe(3);
+		});
+
+		it('execution-time error attributes to the throwing CallExpression via err.__nodePath', async () => {
+			// `undefined()` is the throwing CallExpression. The __$ic wrap
+			// stamps err.__nodePath on the way up; the top-level worker
+			// error handler reads it. Pin the end-to-end propagation:
+			// the error event should carry a non-null nodePath, the
+			// 'instrumented' provenance (the wrap is the source of truth),
+			// and a node whose type is 'CallExpression'.
+			const code = [
+				'console.log(1);',
+				'console.log(2);',
+				'undefined();',
+				'',
+			].join('\n');
+			const result = await createInterceptGenerator(code);
+			const errorEvent = result.events.find((e) => e.event === 'error')!;
+			expect(errorEvent.nodePath).not.toBeNull();
+			expect(errorEvent.nodePathSource).toBe('instrumented');
+			expect(errorEvent.node).not.toBeNull();
+			expect(errorEvent.node!.type).toBe('CallExpression');
 		});
 	});
 
