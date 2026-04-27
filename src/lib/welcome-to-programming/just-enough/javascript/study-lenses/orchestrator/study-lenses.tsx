@@ -37,7 +37,15 @@
  */
 
 import BrowserOnly from '@docusaurus/BrowserOnly';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
+
+import { freezeInPlace } from '@utils/freeze.js';
 
 import createEventBus from '../create-event-bus.js';
 import createLensCache from '../create-lens-cache.js';
@@ -69,7 +77,7 @@ function StudyLensesClient(properties: PluginEmittedProps): React.JSX.Element {
 	const bus = useMemo(createEventBus, []);
 	const cache = useMemo(createLensCache, []);
 
-	const [state] = useState(function initialState() {
+	const [state, setState] = useState(function initialState() {
 		return createOrchestratorState({
 			originalCode: code,
 			initialLens: lens,
@@ -77,6 +85,17 @@ function StudyLensesClient(properties: PluginEmittedProps): React.JSX.Element {
 		});
 	});
 	const [error, setError] = useState<Error | null>(null);
+	const previousLensReference = useRef<string | null>(null);
+
+	const onLensChange = useCallback(
+		function transitionLens(nextLens: string): void {
+			setState(function applyLensChange(previousState) {
+				if (previousState.activeLens === nextLens) return previousState;
+				return freezeInPlace({ ...previousState, activeLens: nextLens });
+			});
+		},
+		[],
+	);
 
 	useEffect(function disposeOnUnmount() {
 		return function cleanup(): void {
@@ -135,6 +154,19 @@ function StudyLensesClient(properties: PluginEmittedProps): React.JSX.Element {
 		};
 	}, [state, registry, cache, langOk]);
 
+	useEffect(function dispatchSwitch() {
+		if (previousLensReference.current === null) {
+			previousLensReference.current = state.activeLens;
+			return;
+		}
+		if (previousLensReference.current === state.activeLens) return;
+		bus.dispatch('lens-switched', {
+			previous: previousLensReference.current,
+			next: state.activeLens,
+		});
+		previousLensReference.current = state.activeLens;
+	}, [state.activeLens, bus]);
+
 	if (!langOk) {
 		return (
 			<div data-orchestrator="study-lenses">
@@ -154,7 +186,7 @@ function StudyLensesClient(properties: PluginEmittedProps): React.JSX.Element {
 			<Toolbar
 				value={state.activeLens}
 				options={lensOptions}
-				onLensChange={function noopOnLensChange() {}}
+				onLensChange={onLensChange}
 			/>
 			<div ref={hostReference} data-orchestrator="study-lenses" />
 		</div>
