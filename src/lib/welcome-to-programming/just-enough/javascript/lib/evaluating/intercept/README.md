@@ -1,4 +1,4 @@
-# evaluating/run
+# evaluating/intercept
 
 Executes JeJ code in a Web Worker with trapped globals, emitting an
 event stream and resolving to a structured result. This is the single
@@ -8,12 +8,12 @@ no higher-level wrapper.
 
 ## Structure
 
-| File                      | Purpose                                                     |
-| ------------------------- | ----------------------------------------------------------- |
-| `types.ts`                | Worker message protocol, event types, `IoMocks`             |
-| `intercept.ts`                  | Public entry: `run(code, { seconds?, iterations?, io? })`   |
-| `create-worker-script.ts` | Generates self-contained worker JS string                   |
-| `worker-protocol.ts`      | SharedArrayBuffer encode/decode utilities                   |
+| File                      | Purpose                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `types.ts`                | Worker message protocol, event types, `IoMocks`                                 |
+| `intercept.ts`            | Public entry: `createInterceptGenerator(code, { seconds?, iterations?, io? })`  |
+| `create-worker-script.ts` | Generates self-contained worker JS string                                       |
+| `worker-protocol.ts`      | SharedArrayBuffer encode/decode utilities                                       |
 
 ## Glossary (ubiquitous language)
 
@@ -110,7 +110,7 @@ README. Use them consistently.
 ## Public API
 
 ```ts
-run(
+createInterceptGenerator(
   code: string,
   options?: {
     seconds?: number;    // default 5 — user-perceived runtime budget
@@ -120,26 +120,44 @@ run(
 ): InterceptHandle
 ```
 
-`InterceptHandle` is defined as
+`InterceptHandle` extends the standard `Execution` contract with
+intercept-specific eager fields and a structured-failure trigger. The
+shape per `intercept/types.ts`:
 
 ```ts
 type InterceptHandle =
   AsyncGenerator<InterceptEvent, InterceptResult> &
-  Execution<InterceptEvent, InterceptResult>;
+  Execution<InterceptEvent, InterceptResult> & {
+    readonly code: string;             // the source passed in
+    readonly options: InterceptOptions;// the options passed in (defaults applied)
+    readonly ast: Promise<AstRecord | null>; // resolves once validation runs
+    fail(reason?: unknown): void;      // structured-failure trigger
+  };
 ```
 
-— `Execution` already extends `PromiseLike` (shape shown at line 105
-above just for readers). It **is** an `AsyncGenerator<InterceptEvent,
-InterceptResult>` (all of `.next()`, `.return()`, `.throw()` are available
-and used by internal tests) AND it **satisfies** the
-`Execution<InterceptEvent, InterceptResult>` contract from `../shared/types.ts`:
+It **is** an `AsyncGenerator<InterceptEvent, InterceptResult>` (all of
+`.next()`, `.return()`, `.throw()` are available and used by internal
+tests) AND it **satisfies** the `Execution<InterceptEvent,
+InterceptResult>` contract from `../shared/types.ts`:
 
 - `.cancel()` — tear down the worker and resolve with a cancel-marked
   InterceptResult. Idempotent. See § Cancellation.
 - `.result` — memoized `Promise<InterceptResult>` that drains the generator
   internally. See § Result.
-- `then(...)` — PromiseLike delegate so `await run(code)` works
-  directly without explicit `.result`. Same Promise as `.result`.
+- `then(...)` — PromiseLike delegate so `await createInterceptGenerator(code)`
+  works directly without explicit `.result`. Same Promise as `.result`.
+
+Plus the intercept-specific fields:
+
+- `.code` — the source string the consumer passed (verbatim).
+- `.options` — the options object the consumer passed, with defaults
+  applied. Read at any time, before or during iteration.
+- `.ast` — `Promise<AstRecord | null>` that resolves to the parsed-and-
+  built AST record once validation completes. Resolves to `null` if
+  validation fails (parse error, JeJ violation) or if `.cancel()` ran
+  before iteration began. Same record reference attached to the eventual
+  `result.ast`.
+- `.fail(reason?)` — structured-failure trigger. See § Fail.
 
 A consumer may iterate events, await the final result, cancel, or
 replay — with no separate wrapper required. The underlying
@@ -167,15 +185,17 @@ consumers (primarily the test suite) can call `.next()` directly.
 - **Yields** — `InterceptEvent` objects one at a time, pausing the worker
   between events via the unified pause protocol (PAUSE + EVENT_READY
   flags on the SAB).
-- **Returns** — `InterceptResult` (frozen `{ ok, error?, events: LinkedInterceptEvent[], ast, code, options, visitCounts }`)
-  on completion. `events` is empty (`[]`) when code was rejected before
-  execution (parse error, JeJ violation, formatting gate); `ast` is
-  `null` in those cases too.
+- **Returns** — `InterceptResult` (frozen `{ ok, outcome, reason?, error?, events: LinkedInterceptEvent[], ast, code, options, visitCounts }`)
+  on completion. `outcome` is required and exhaustively classifies how
+  the run ended (see § Outcome). `reason` is present only when
+  `outcome === 'fail'`. `events` is empty (`[]`) when code was rejected
+  before execution (parse error, JeJ violation, formatting gate); `ast`
+  is `null` in those cases too.
 
 ### Lazy startup pipeline
 
 On the first `.next()` call (or first `.result` access), the
-generator body runs three phases in order. The `run(...)` call
+generator body runs three phases in order. The `createInterceptGenerator(...)` call
 itself returns cheaply — no work happens until a consumer pulls.
 
 1. **Termination fast-path** — if `.cancel()` or `.fail(reason)`
@@ -216,13 +236,13 @@ itself returns cheaply — no work happens until a consumer pulls.
   (depending on the value) produces a `SyntaxError`-shaped parse-failure
   InterceptResult via the acorn path, or is wrapped as a creation-phase
   `ErrorEvent` if validation throws unexpectedly. The engine does not
-  sync-throw at the `run(...)` call boundary.
+  sync-throw at the `createInterceptGenerator(...)` call boundary.
 - **Non-object `options`** — TypeScript types require the options
   parameter shape; a non-object runtime value produces undefined
   destructure reads (`options?.seconds` → `undefined`), which apply
   defaults. No error. This is intentional: the engine is lenient at
   the options boundary for ergonomics.
-- **`validate()` / `checkFormat()` unexpected throws** — both are
+- **`validateProgram()` / `checkFormat()` unexpected throws** — both are
   specified to return values, never throw. Any throw is an engine
   bug; it is caught inside the generator body and surfaced as a
   creation-phase `ErrorEvent` InterceptResult rather than escaping to the
@@ -232,16 +252,16 @@ itself returns cheaply — no work happens until a consumer pulls.
 
 ```ts
 // 1. Iterate events
-const handle = run(code);
+const handle = createInterceptGenerator(code);
 for await (const event of handle) render(event);
 
 // 2. Await the result, no event iteration
-const result = await run(code);
+const result = await createInterceptGenerator(code);
 // equivalent:
-const result = await run(code).result;
+const result = await createInterceptGenerator(code).result;
 
 // 3. Mix iteration with cancel
-const handle = run(code);
+const handle = createInterceptGenerator(code);
 setTimeout(() => handle.cancel(), 1000);
 for await (const event of handle) render(event);
 ```
@@ -270,7 +290,7 @@ call any number of times at any phase.
 Consumers check the first-class `outcome` field:
 
 ```ts
-const result = await run(code);
+const result = await createInterceptGenerator(code);
 const wasCancelled = result.outcome === 'cancel';
 ```
 
@@ -286,7 +306,7 @@ and routed through the same cancel path, producing the same
 footgun:
 
 ```ts
-const handle = run(code);
+const handle = createInterceptGenerator(code);
 for await (const event of handle) {
     if (shouldStop(event)) break;   // same outcome as handle.cancel()
 }
@@ -302,7 +322,7 @@ payload to the InterceptResult. It serves consumer use cases that
 record WHY the run was stopped:
 
 ```ts
-const handle = run(code);
+const handle = createInterceptGenerator(code);
 for await (const event of handle) {
     if (event.event === 'console' && isWrongPrediction(event)) {
         handle.fail({
@@ -349,10 +369,10 @@ pending IO promise if they want immediate teardown.
 
 `.result` is a memoized `Promise<InterceptResult>` that drives the generator
 to completion. First access creates the Promise; subsequent accesses
-return the same Promise. `await run(code)` is equivalent.
+return the same Promise. `await createInterceptGenerator(code)` is equivalent.
 
 ```ts
-const result = await run(code);
+const result = await createInterceptGenerator(code);
 if (result.ok) {
   console.log('events:', result.events);
 } else {
@@ -372,7 +392,7 @@ Every InterceptResult carries a required `outcome` field classifying how
 the run ended. Six variants, exhaustively switchable in TypeScript:
 
 ```ts
-const result = await run(code);
+const result = await createInterceptGenerator(code);
 switch (result.outcome) {
     case 'complete':         // learner code reached its natural end
     case 'cancel':           // consumer stopped via .cancel() or break
@@ -407,7 +427,7 @@ events from the result's `events` array. No re-execution; no Worker
 respawn.
 
 ```ts
-const handle = run(code);
+const handle = createInterceptGenerator(code);
 for await (const event of handle) render(event);     // live run
 for await (const event of handle) postProcess(event); // replay
 ```
@@ -445,7 +465,7 @@ The consumer overrides any subset of IO hooks; the rest fall back to
 Native IO wrappers:
 
 ```ts
-run(code, {
+createInterceptGenerator(code, {
   io: {
     prompt: async (message, defaultValue) =>
       showStyledDialog(message, defaultValue),
@@ -586,7 +606,7 @@ semantic trace engine — different namespace, no conflict.)
   us the shape-identical guarantee.
 - **AsyncGenerator**: yields events one at a time with SAB pause
   between each. Enables live streaming to UI and step-through
-  consumption. The handle itself is `PromiseLike` so `await run(code)`
+  consumption. The handle itself is `PromiseLike` so `await createInterceptGenerator(code)`
   works without iterating — no separate wrapper.
 - **Body-injection loop guards**: `{ if (++loop1 > max) throw ...; }
   loop1 = 0;` — zero line shift, zero column shift. Covers `while`,
@@ -636,7 +656,7 @@ Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
 
-If SAB is unavailable, `run` returns a single `ErrorEvent` with
+If SAB is unavailable, `createInterceptGenerator` returns a single `ErrorEvent` with
 `name: 'EnvironmentError'` rather than throwing.
 
 ## Sandbox
