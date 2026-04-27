@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 
-import parseProgram from '../../../../parse/parse-program.js';
+import parseProgram from '../../../../parse-old/parse-program.js';
 import buildLocationIndex from '../build-location-index.js';
 import link, { type EnrichedEvent } from '../link.js';
-import type { ASTNode } from '../types.js';
+import type { ASTNode, NodePathSource } from '../types.js';
 
 function indexFor(source: string) {
 	const program = parseProgram(source, 'module');
@@ -17,7 +17,7 @@ function fakeConsoleEvent(
 	nodePath: string | null,
 	line: number,
 	column: number,
-	source: 'exact' | 'enclosing-fallback' | 'no-ast',
+	source: NodePathSource,
 ): EnrichedEvent {
 	return {
 		event: 'console',
@@ -35,7 +35,7 @@ describe('link', () => {
 		it('per event, looked up via astByPath.get(nodePath)', () => {
 			const index = indexFor('console.log(1);');
 			const callPath = '$.body.0.expression';
-			const event = fakeConsoleEvent(callPath, 1, 0, 'exact');
+			const event = fakeConsoleEvent(callPath, 1, 0, 'instrumented');
 
 			const linked = link([event], index.astByPath);
 
@@ -44,7 +44,7 @@ describe('link', () => {
 
 		it('preserves event identity (no clone)', () => {
 			const index = indexFor('console.log(1);');
-			const event = fakeConsoleEvent('$.body.0.expression', 1, 0, 'exact');
+			const event = fakeConsoleEvent('$.body.0.expression', 1, 0, 'instrumented');
 
 			const linked = link([event], index.astByPath);
 
@@ -56,7 +56,7 @@ describe('link', () => {
 		it('pushes the linked event into ast[nodePath].events[]', () => {
 			const index = indexFor('console.log(1);');
 			const callPath = '$.body.0.expression';
-			const event = fakeConsoleEvent(callPath, 1, 0, 'exact');
+			const event = fakeConsoleEvent(callPath, 1, 0, 'instrumented');
 
 			link([event], index.astByPath);
 
@@ -67,8 +67,8 @@ describe('link', () => {
 		it('multiple events on the same node accumulate in order', () => {
 			const index = indexFor('console.log(1);');
 			const callPath = '$.body.0.expression';
-			const e1 = fakeConsoleEvent(callPath, 1, 0, 'exact');
-			const e2 = fakeConsoleEvent(callPath, 1, 0, 'exact');
+			const e1 = fakeConsoleEvent(callPath, 1, 0, 'instrumented');
+			const e2 = fakeConsoleEvent(callPath, 1, 0, 'instrumented');
 
 			link([e1, e2], index.astByPath);
 
@@ -95,7 +95,7 @@ describe('link', () => {
 	describe('defensive: unknown nodePath', () => {
 		it('attaches node: null when astByPath has no entry for the path', () => {
 			const index = indexFor('let x = 1;');
-			const event = fakeConsoleEvent('$.does.not.exist', 1, 0, 'exact');
+			const event = fakeConsoleEvent('$.does.not.exist', 1, 0, 'instrumented');
 
 			const linked = link([event], index.astByPath);
 

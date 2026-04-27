@@ -6,11 +6,10 @@
  * (`wrap-call-expressions.ts`) handles all in-call attribution by
  * baking nodePath into the wrap; trap functions read it directly.
  *
- * Always returns `'enclosing-fallback'` provenance — there's no
- * `'exact'` distinction anymore (it was always a near-miss given how
- * V8 reports stack positions, and the new instrumentation makes the
- * happy path exact by construction). The `'no-ast'` provenance is set
- * by the caller for events with no AST to look up.
+ * Always returns `'enclosing-fallback'` provenance — see
+ * [DOCS.md § Ubiquitous Language](../DOCS.md) for the full provenance
+ * vocabulary. The `'no-ast'` provenance is set by the caller for events
+ * with no AST to look up.
  */
 
 import type { LocationIndex } from './types.js';

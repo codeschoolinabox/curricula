@@ -5,9 +5,9 @@
  * can copy this directory as a starting point. Until then, intercept is
  * the only consumer.
  *
- * Two-tier lookup provenance:
- * - 'exact'              — a node's `.loc.start` matched the runtime (line, column)
- * - 'enclosing-fallback' — no exact match; deepest containing node was used
+ * Provenance values: every event records how its `nodePath` was determined
+ * via `nodePathSource`. See `NodePathSource` below for the three values
+ * (`'instrumented'`, `'enclosing-fallback'`, `'no-ast'`) and their semantics.
  */
 
 import type {
