@@ -79,11 +79,11 @@ course helps you build both at once.
   directing LLM output using everything from Chapters 1–3, and build calibration
   for when to delegate and when to do the work yourself.
 - **Chapter 5. Developers, Computers, Users, Agents, and You.** Training wheels
-  come off. You program for yourself through snippetry: small, complete,
+  come off. You Frogram for yourself through snippetry: small, complete,
   self-contained programs as an ongoing practice. You explore JavaScript's full
   multi-paradigmatic range, develop your compositional voice, and discover that
-  programming has value beyond productivity: for mastery, exploration, delight,
-  and the new thoughts it lets you think.
+  Frogramming has value beyond productivity: for mastery, exploration, delight,
+  the steady upkeep of one's craft, and the new thoughts it lets you think.
 
 ---
 
@@ -340,10 +340,11 @@ differences.
 
 **Honest framing**: LLMs are often better at notation than many humans — faster,
 with a broader repertoire, fewer typos. Pretending otherwise would be dishonest.
-But great programming isn't only about productivity. Design judgment, context
+But great Frogramming isn't only about productivity. Design judgment, context
 awareness, aesthetic and ethical taste aren't where LLMs excel. And Chapter 5
-develops the case for programming-for-its-own-sake — the practice of keeping
-your own programming skills sharp when you're no longer building full codebases.
+develops the case for Frogramming-for-its-own-sake — the practice of keeping
+your NM-fluency sharp when you're no longer writing most of the notation
+yourself.
 
 **The verification limit**: we don't always understand what we direct. Even our
 tests may be out of our depth — it's possible to verify that a program does the
@@ -446,14 +447,21 @@ Plus Study Lenses making the machine's work visible throughout.
 ### Snippetry
 
 Chapter 5 introduces **snippetry** — writing small, runnable, self-contained
-programs as an ongoing practice. The answer to "what do I do as a programmer
-when I'm no longer building full codebases?" Programming for mastery,
-exploration, aesthetic satisfaction, delight, surprise, discovery, and the new
-thoughts programming lets you think — alongside or instead of programming for
-productivity. "You" is the fifth audience: students program for themselves,
-share with peers through a collaborative gist system, and explore JavaScript's
-full multi-paradigmatic range with training wheels off and real browser
-execution.
+programs as an ongoing practice. The answer to "why write code when I'm no
+longer building full codebases? how do I build and maintain my NM for a
+programming language?" Snippetry is how the Frogrammer keeps the NM alive
+between full-codebase projects: **complete enough to run** (each snippet
+executes top-to-bottom), **small enough to understand** (you can hold the whole
+NM in your head at once and predict-trace-verify in full), **connected enough
+to inspire** (snippets allude to, vary on, and remix each other — nothing
+stands alone). It's also a natural home for deliberate Vibetoading — quick
+exploratory sketches where you choose to chase the outcome and skip the
+machine. Frogramming for mastery, exploration, aesthetic satisfaction, delight,
+surprise, discovery, and the new thoughts code lets you think — alongside or
+instead of programming for productivity. "You" is the fifth audience: students
+program for themselves, share with peers through a collaborative gist system
+that extends a living snippetry corpus, and explore JavaScript's full
+multi-paradigmatic range with training wheels off and real browser execution.
 
 ### The future beyond human-designed languages
 
@@ -1516,20 +1524,20 @@ _Revisits Chapter 3: user programs: with an LLM collaborator._
 
 ### 4.5 Looking Back, Looking Forward
 
-Up to this point the virtuoso has done the notation work — the writing of the
-score — while you have done the composing. That's the authoring-partner frame,
-and it's the right one for finding your bearings. But it's a simplification of a
-moving target.
+Up to this point the LLM has done the notation work — writing the code — while
+you have done the design work. That's the authoring-partner frame, and it's
+the right one for finding your bearings. But it's a simplification of a moving
+target.
 
-**Alien composers** are emerging: agentic systems that don't just write notation
-but do design work too — planning, decomposing problems, making architectural
+**Agentic AI systems** are emerging — LLMs that don't just write notation but
+do design work too: planning, decomposing problems, making architectural
 choices, calling tools, modifying state autonomously. That's a more complex
-collaboration than the one this chapter covered. It doesn't replace the
-composer's role so much as shift what the human composer attends to — from
-writing the score to specifying observable outcomes that humans can still
-evaluate, directing a system that does more than transcribe. Flag this as
-territory for post-curriculum learning; _Welcome to Algorithms_ picks it up.
-Chapter 5 will return briefly to it in its closing moments.
+collaboration than the one this chapter covered. It doesn't replace your role
+so much as shift what you attend to — from writing the code to specifying
+observable outcomes that humans can still evaluate, directing a system that
+does more than transcribe. Flag this as territory for post-curriculum
+learning; _Welcome to Algorithms_ picks it up. Chapter 5 will return briefly
+to it in its closing moments.
 
 - 🐣 Given scenarios, identify which collaboration approach you'd use and why
 - 🐣 Articulate programming concepts precisely enough for an LLM to act on them
@@ -1540,9 +1548,9 @@ Chapter 5 will return briefly to it in its closing moments.
   assistance vs. which undermine learning
 - 🐔 Compare LLM "theory of mind" to human theory of mind: what transfers, what
   doesn't
-- 🐔 Recognize the emergence of **alien composers** (agentic systems doing
-  design work, not just notation) as a more complex development than the
-  alien-virtuoso frame covers, and flag it as territory for post-curriculum
+- 🐔 Recognize the emergence of **agentic AI systems** (LLMs doing design
+  work, not just notation) as a more complex development than the
+  authoring-partner frame covers, and flag it as territory for post-curriculum
   learning
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
@@ -1578,13 +1586,16 @@ Chapter 5 introduces **snippetry** as an ongoing practice — writing small,
 runnable, self-contained programs for their own sake. It answers a central
 question of the curriculum:
 
-> How do I maintain and grow my skills when I no longer need to write code to
-> build software?
+> Why write code when LLMs can write the notation? And how do I keep my
+> Frogramming sharp — particularly my NM-fluency in a language — when
+> full-codebase work no longer provides the daily reps?
 
-Snippetry is the answer: keep your own skills sharp through small programs that
-exercise whole-program design at small scale while drilling an isolated concern
-— a language feature, a paradigm, an algorithm, the feel of a new notional
-machine, a user-experience miniature, or just for fun.
+Snippetry is the answer: small programs that exercise whole-program design at
+small scale while drilling an isolated concern — a language feature, a
+paradigm, an algorithm, the feel of a new notional machine, a user-experience
+miniature, or just for fun. Snippetry is also where deliberate Vibetoading
+lives in this course: low-stakes, outcome-only sketches you write because that
+hat fits the moment.
 
 The practice balances **broad exploration** and **productive constraint**.
 Students develop their own sense of which balance serves their learning and
@@ -1776,10 +1787,10 @@ core snippetry activity.
 
 #### 5I. Capstone Reflections
 
-- 🐔 Articulate why programming-for-its-own-sake remains valuable in an
+- 🐔 Articulate why Frogramming-for-its-own-sake remains valuable in an
   LLM-assisted world — your answer, grounded in your experience
-- 🐔 Recognize that **alien composers** (agentic systems doing design work, not
-  just notation) are arriving; identify a concrete example and reflect on what
-  it means for the composer/virtuoso distinction
+- 🐔 Recognize that **agentic AI systems** (LLMs doing design work, not just
+  notation) are arriving; identify a concrete example and reflect on what it
+  means for the design-vs-notation split
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
