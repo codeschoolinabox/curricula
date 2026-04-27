@@ -17,7 +17,6 @@ import type { LocationIndex } from './types.js';
 type LookupResult = {
 	readonly source: 'enclosing-fallback';
 	readonly nodePath: string;
-	readonly fallbackFrom: { readonly line: number; readonly column: number };
 };
 
 function lookupNodePath(
@@ -50,7 +49,6 @@ function lookupNodePath(
 	return {
 		source: 'enclosing-fallback',
 		nodePath: resolvedPath,
-		fallbackFrom: { line, column },
 	};
 }
 

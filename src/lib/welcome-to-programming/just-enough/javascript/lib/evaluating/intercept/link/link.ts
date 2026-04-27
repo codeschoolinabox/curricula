@@ -6,8 +6,7 @@
  * file is the starting point.
  *
  * Contract:
- * - Input events ALREADY carry `nodePath`, `nodePathSource`, and
- *   (when `'enclosing-fallback'`) `nodePathFallbackFrom`. That
+ * - Input events ALREADY carry `nodePath` and `nodePathSource`. That
  *   enrichment happens in intercept.ts's main loop, per event,
  *   before each `yield` — so streaming consumers see provenance
  *   in real time. Events also carry `step` (1-indexed sequence

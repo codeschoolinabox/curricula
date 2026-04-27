@@ -46,8 +46,6 @@ type SourceLocation = {
  *                            CallExpression (e.g. bare `null.foo;`). Line
  *                            extracted from `Error.stack`, mapped to the
  *                            deepest containing AST node. Rare in practice.
- *                            `nodePathFallbackFrom` carries the original
- *                            location so the heuristic is auditable.
  * - `'no-ast'`             — no AST was built for this run (validation
  *                            failed before parsing produced a usable tree).
  *                            `nodePath` and `node` are both `null`. Applies
@@ -145,10 +143,6 @@ type ASTNode = {
 type LinkedInterceptEvent = InterceptEvent & {
 	readonly nodePath: string | null;
 	readonly nodePathSource: NodePathSource;
-	/** Present only when `nodePathSource === 'enclosing-fallback'` —
-	 *  the original `(line, column)` from `Error.stack` that the
-	 *  residual error path used to find the deepest enclosing node. */
-	readonly nodePathFallbackFrom?: SourcePosition;
 	readonly node: ASTNode | null;
 	readonly loc: SourceLocation | null;
 	/** Direct reference to the `callee` subnode of `node` when `node.type

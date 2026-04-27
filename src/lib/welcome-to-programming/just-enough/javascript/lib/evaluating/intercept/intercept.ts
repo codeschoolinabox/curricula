@@ -282,14 +282,12 @@ function enrichEvent(
 	const enriched = event as InterceptEvent & {
 		nodePath: string;
 		nodePathSource: NodePathSource;
-		nodePathFallbackFrom?: { line: number; column: number };
 		loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
 		callee: ASTNode | null;
 		calleePath: string | null;
 	};
 	enriched.nodePath = lookup.nodePath;
 	enriched.nodePathSource = lookup.source;
-	enriched.nodePathFallbackFrom = lookup.fallbackFrom;
 	enriched.loc = node ? node.loc : null;
 	// Same CallExpression discriminator as Branch 1; residual lookups
 	// usually land on non-call nodes (e.g. MemberExpression for

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import parseProgram from '../../../../parse/parse-program.js';
+import parseProgram from '../../../../parse-old/parse-program.js';
 import buildLocationIndex from '../build-location-index.js';
 import lookupNodePath from '../lookup-node-path.js';
 
@@ -42,13 +42,6 @@ describe('lookupNodePath', () => {
 			// (it's mid-token within the MemberExpression).
 			const result = lookupNodePath(index, 1, 7);
 			expect(result.source).toBe('enclosing-fallback');
-		});
-
-		it('fallback carries the original (line, column) in fallbackFrom', () => {
-			const index = indexFor('console.log(1);');
-			const result = lookupNodePath(index, 1, 7);
-			if (result.source !== 'enclosing-fallback') throw new Error('expected fallback');
-			expect(result.fallbackFrom).toEqual({ line: 1, column: 7 });
 		});
 
 		it('fallback picks the deepest containing node', () => {
