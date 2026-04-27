@@ -50,11 +50,11 @@ The skills you build here are fundamentally human: communication, empathy,
 user-centered design thinking, the ability to hold a complex situation in view
 and make it work for real people. Those same human skills are exactly what keep
 you professionally relevant and personally capable in a world where machines
-handle more of the writing. Programming is also an intellectual and creative
-practice worth doing for its own sake: for the satisfaction of understanding a
-system deeply, for the new ways of thinking it opens up, and for the small
-programs you write just to explore, experiment, or surprise yourself. This
-course helps you build both at once.
+handle more of the writing. Both **Frogramming** and deliberate **Vibetoading**
+have value beyond productivity: for the satisfaction of understanding a system
+deeply, for the new ways of thinking it opens up, and for the small programs
+you write just to explore, experiment, or surprise yourself. This course helps
+you build both at once.
 
 - **Chapter 0. What is Programming?** Conceptual orientation before any code.
   You learn to see source code as communication that simultaneously addresses
@@ -948,8 +948,8 @@ of) ever hearing it performed. Code has the same property._
 A foundational conceptual distinction is introduced here: not as a technical
 exercise but as orientation: **source code (static) vs. program execution
 (dynamic)**. Comments exist in the static text; logs are observed during
-execution. This sets up the developer twin: the developer who reads your code
-sees the static text, not the runtime. Understanding this distinction is
+execution. This sets up the **🧑‍💻** developer twin: the developer who reads
+your code sees the static text, not the runtime. Understanding this distinction is
 prerequisite to understanding why comments and logs serve different purposes.
 
 The computer is not yet a full audience. Devtools console is developer space.
@@ -1009,7 +1009,7 @@ _Metaphor anchor: **studying the instrument's mechanisms** — like an organ
 builder examining bellows, tracker action, registration, and combination action,
 you study how the JavaScript engine actually carries out your instructions._
 
-The computer is now a full audience. The primary learning objective is
+The **💻** computer is now a full audience. The primary learning objective is
 **JavaScript's notional machine**: the mental model of how the JS engine
 executes your code. Other languages have their own notional machines; the
 discipline you develop here transfers. Programs produce output via logs and
