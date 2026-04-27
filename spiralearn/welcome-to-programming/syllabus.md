@@ -13,38 +13,38 @@ sidebar_position: 1
 
 ## TL;DR
 
-**Welcome to Frogramming** is a self-paced course that will
-take you from _learning to program_ (building your code literacy) to
-_programming to learn_ (applying your literacy to explore new concepts and
-skills). You will build predictive mastery of JavaScript's notional machine:
-reading code before writing it, correlating syntax to the runtime events it
-produces, and moving through the PRIMM progression (predict, run, investigate,
-modify, make) until prediction is reliable and authorship is confident. Each
-step of the way you will ground your skills in the world around you, learning to
-consider who you're building for and what you hope to achieve. Ultimately you
-will build the confidence to write your own programs, and the awareness to write
-the _right_ programs.
+**Welcome to Frogramming** is a self-paced course that will take you from
+_learning to program_ (building your code literacy) to _programming to learn_
+(applying your literacy to explore new concepts and skills). You will build
+predictive mastery of JavaScript's notional machine: reading code before writing
+it, correlating syntax to the runtime events it produces, and moving through the
+PRIMM progression (predict, run, investigate, modify, make) until prediction is
+reliable and authorship is confident. Each step of the way you will ground your
+skills in the world around you, learning to consider who you're building for and
+what you hope to achieve. Ultimately you will build the confidence to write your
+own programs, and the awareness to write the _right_ programs.
 
 ---
 
-**Welcome to Frogramming** is a self-paced course that treats
-programming as collaborative communication. A single piece of source code
-addresses multiple audiences at once (other developers, the computer, users, and
-AI agents). You will develop the ability to recognize who your code is for,
-understand how each audience experiences it, and tailor your decisions so your
-code does exactly what you designed it to do for each of them.
+**Welcome to Frogramming** is a self-paced course that treats programming as
+collaborative communication. A single piece of source code addresses multiple
+audiences at once (other developers, the computer, users, and AI agents). You
+will develop the ability to recognize who your code is for, understand how each
+audience experiences it, and tailor your decisions so your code does exactly
+what you designed it to do for each of them.
 
 You'll learn to understand and predict what the computer does with your code so
 you can control it precisely. And you'll learn to understand users so you can
 build software that actually serves them, which is ultimately what all the
 technical skill is for. LLMs have made it possible for anyone to build working
 software by describing the user-visible behavior they want without worrying
-about how the computer works behind the scenes. That's vibecoding, and it's
+about how the computer works behind the scenes. That's **Vibetoading**, and it's
 genuinely powerful for quick prototypes and new projects. But building larger
 systems, extending existing codebases, evaluating whether generated code
 actually does what you need, and making the design judgments that shape what
-gets built in the first place: that's programming, and it requires understanding
-the machine behind the scenes well enough to predict and direct it.
+gets built in the first place: that's **Frogramming**, and it requires
+understanding the machine behind the scenes well enough to predict and direct
+it.
 
 The skills you build here are fundamentally human: communication, empathy,
 user-centered design thinking, the ability to hold a complex situation in view
@@ -90,7 +90,7 @@ course helps you build both at once.
 ## Contents
 
 - [What to Expect](#what-to-expect)
-- [Why Learn to Program](#why-learn-to-program)
+- [Why Learn to Frogram](#why-learn-to-frogram)
   - [What programming languages are](#what-programming-languages-are)
   - [Notional machines](#notional-machines)
   - [The LLM shift: a new participant in an old dance](#the-llm-shift-a-new-participant-in-an-old-dance)
@@ -100,6 +100,9 @@ course helps you build both at once.
 - [References](#references)
 - [Before You Begin](#before-you-begin)
 - [Chapter 0: What is Programming?](#chapter-0-what-is-programming)
+  - [0.1 The Rhetorics of Programming](#01-the-rhetorics-of-programming)
+  - [0.2 Positioning _Welcome to Frogramming_](#02-positioning-welcome-to-frogramming)
+  - [0.3 Two Hats: Vibetoading and Frogramming](#03-two-hats-vibetoading-and-frogramming)
 - [Chapter 1: Developers](#chapter-1-developers)
   - [Comments](#comments)
   - [Logs](#logs)
@@ -126,7 +129,7 @@ course helps you build both at once.
   - [4.3 Agents and Computer Communication](#43-agents-and-computer-communication)
   - [4.4 Agents and User Communication](#44-agents-and-user-communication)
   - [4.5 Looking Back, Looking Forward](#45-looking-back-looking-forward)
-  - [4.6 Vibecoding](#46-vibecoding)
+  - [4.6 Vibetoading](#46-vibetoading)
 - [Chapter 5: Developers, Computers, Users, Agents, and You](#chapter-5-developers-computers-users-agents-and-you)
   - [5A. Training-Wheels-Off: Carrying Predictive Mastery](#5a-training-wheels-off-carrying-predictive-mastery)
   - [5B. Extending the NM: New JS Territory](#5b-extending-the-nm-new-js-territory)
@@ -149,14 +152,33 @@ on it. This course guides you from your first comment to fluent collaboration
 with AI agents, using the smallest possible set of language features. It is
 self-study: no time estimates, no deadlines. Go at your own pace.
 
-**What you're actually learning.** Every programming language has a _notional
-machine_ — an imaginary model of how the computer carries out your instructions.
-Programming is building and directing that machine through notation. The
-difference between programming and vibecoding is prediction: a programmer can
-predict what the machine will do when their code runs; a vibecoder can't. This
-course builds predictive mastery of JavaScript's notional machine — the kind of
-understanding that lets you direct the machine precisely, whether you write the
-notation yourself or an LLM writes it for you.
+**Vibetoading vs. Frogramming.** Every programming language describes a
+_notional machine_ — an imaginary model of how the computer carries out your
+instructions. Whether you're writing the code yourself or directing an LLM (or a
+human!) to write it for you, you can work two ways:
+
+- **The Vibetoader** works from user-visible behavior. _Does the button work?
+  Does the test pass? Does the page render?_ Iteration is on outcomes. The
+  machine underneath is a black box.
+- **The Frogrammer** works grounded in the notional machine itself. They predict
+  what the machine will do, evaluate output against that prediction, and apply
+  craft practices (testing, documentation, review, security) intentionally — to
+  mitigate risks their NM-awareness makes visible.
+
+Neither hat is better, and they're not a binary — Vibetoading and Frogramming
+are a spectrum, and most developers wear different hats on different tasks,
+different files, different moments. Vibetoading shines for prototyping,
+ideation, low-stakes work, and giving domain experts the power to solve their
+own problems. Frogramming is what holds up under stakes: production code,
+security-sensitive systems, anything multi-person or long-lived. This course
+teaches you to wear both hats deliberately — and especially to recognize which
+the moment is asking for.
+
+The Frogramming skill is harder to acquire and harder to delegate, so this
+course centers it. Once you understand what it means to _Frogram_, you can
+design your own NMs at the right abstraction for any system — a flowchart of
+cloud services, a state machine of UI components, or the JEJ NM at the bottom.
+The layer adapts; the skill is the same.
 
 **How do you build this predictive mastery? Four threads** run beneath the
 curriculum, progressively layering as the chapters advance:
@@ -165,7 +187,8 @@ curriculum, progressively layering as the chapters advance:
   outside your own mind. Each chapter asks you to twin a different process: the
   _developer_ who reads your code (Ch1), the _computer_ that executes it (Ch2),
   the _user_ who experiences it (Ch3), the _agent_ you collaborate with (Ch4).
-  You can't communicate well with something you don't understand.
+  You can't communicate well with something you don't understand. **Vibetoading
+  prioritizes _twinning_ the user; Frogramming prioritizes _twinning_ the NM.**
 
 - **Decisions (micro and macro)**: every keyword, name, operator, and structure
   in your code is a **micro**-decision. Every architectural choice, paradigm,
@@ -218,7 +241,7 @@ That separation is the curriculum's rhetorical model made concrete.
 
 ---
 
-## Why Learn to Program
+## Why Learn to Frogram
 
 _Why learn to code when LLMs write code?_ Because designing computation is not
 the same work as writing the notation for it. Both matter. The design work is
@@ -344,13 +367,13 @@ and to evaluate whether the LLM delivered them. Without NM understanding, you
 can't direct the LLM meaningfully and you can't judge its output. The NM is
 what's being programmed — just via a new route.
 
-**This is the concrete difference between vibecoding and programming.** A
-vibecoder produces code they can't predict — they iterate on visible behavior
+**This is the concrete difference between Vibetoading and Frogramming.** A
+Vibetoader produces code they can't predict — they iterate on visible behavior
 ("does the button work?") without a model of what the machine is doing
-underneath. A programmer can predict what the machine will do, evaluate whether
+underneath. A Frogrammer can predict what the machine will do, evaluate whether
 the output matches intent, and diagnose divergence when it doesn't. With or
-without an LLM, prediction is the skill that separates programming from vibing.
-This course builds that skill.
+without an LLM, prediction is the skill that separates Frogramming from
+Vibetoading. This course builds that skill.
 
 This frame treats LLMs as authoring partners. Agentic systems where LLMs plan,
 execute, and modify state autonomously are a more complex picture deferred to
@@ -643,7 +666,7 @@ in real work.
 - 🐣 Explain the spiral curriculum: why revisiting concepts at increasing depth
   produces deeper understanding than covering them once
 
-### 0.2 Positioning Programming
+### 0.2 Positioning _Welcome to Frogramming_
 
 Programming is a large space. Before spending time inside one part of it, it
 helps to know roughly where that part is — and what it is not.
@@ -652,7 +675,7 @@ The following distinctions are not knowledge to memorize. They are landmarks.
 You will encounter each one again as the course progresses, and what feels
 abstract now will become concrete. For now, use them as orientation.
 
-**What WtP is and what it isn't:**
+**What WtF is and what it isn't:**
 
 | This course                                                                                                                                                                                    | Not this course (yet)                                                                                                                                             |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -664,19 +687,19 @@ abstract now will become concrete. For now, use them as orientation.
 
 **How you will work:**
 
-| WtP's approach                                                                                                                                           | The common alternative                                                                           |
+| WtF's approach                                                                                                                                           | The common alternative                                                                           |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | **Errors as information** — the machine is honest; an error tells you precisely where what you specified and what the machine can interpret do not match | Errors as failure — something is broken                                                          |
 | **Read from code first** — you will spend real time as a code investigator before you write                                                              | Learn by writing — produce output to prove you understand                                        |
 | **Predict and check** — proactive and mechanistic; you will see what happens and update your model                                                       | Watch and explain — retroactive and justifying; post-hoc description of what you've already seen |
 
-**Where WtP fits in the larger journey:**
+**Where WtF fits in the larger journey:**
 
-| WtP                                                                                                                                                                                    | What follows                                                                                                                                 |
+| WtF                                                                                                                                                                                    | What follows                                                                                                                                 |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Learning to program** — build fluency in the embodied language of computation. Chapter 5 is the first pivot: snippetry is where you begin using programming to explore and discover. | **Programming to learn** — use programming as a tool to explore algorithms, complexity, paradigms, and domains (WtA, Trees, SoC, and beyond) |
 
-WtP is a prerequisite for any Spiralearn curriculum that requires computational
+WtF is a prerequisite for any Spiralearn curriculum that requires computational
 thinking. What follows it: **Welcome to Algorithms** (algorithm strategies,
 step-counting, Big O), **Trees** (tree data structures → the DOM → browser event
 dispatch), **Separation of Concerns** (programs organized at scale across files
@@ -694,10 +717,10 @@ programs throughout, but to verify understanding, not to demonstrate output.
 
 **Three vocabulary distinctions worth having early:**
 
-| Term                     | What it means                                                                                                                                                                                                                                                          | In WtP                                                                                                                                                       |
+| Term                     | What it means                                                                                                                                                                                                                                                          | In WtF                                                                                                                                                       |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Programming paradigm** | A design philosophy for organizing programs — how you decompose problems, structure solutions, manage state                                                                                                                                                            | Ch1–4 is imperative: sequences of statements, explicit control flow, mutable state. Functional, OOP, and declarative are deferred to Ch5.                    |
-| **Computational domain** | What you are computing _about_ — the thing in the world you are modeling. A programmer who understands medicine writes better medical software; one who understands finance builds better financial tools. Domain expertise is a separate axis from programming skill. | WtP is largely domain-agnostic by design — the same NM skills transfer to any domain.                                                                        |
+| **Computational domain** | What you are computing _about_ — the thing in the world you are modeling. A programmer who understands medicine writes better medical software; one who understands finance builds better financial tools. Domain expertise is a separate axis from programming skill. | WtF is largely domain-agnostic by design — the same NM skills transfer to any domain.                                                                        |
 | **Computational idioms** | Types of operators and operations available within a programming language — how you manipulate values. Different languages emphasize different idioms; mastering an idiom means fluency with a category of operations.                                                 | Ch2's sections (2A–2F) are organized by idiom: logic, strings, numbers, pattern matching, bits, dates. Distinct from computational domains (subject matter). |
 | **Model of computation** | A formal mathematical framework defining what computation _is_ — Turing machines, lambda calculus, finite automata                                                                                                                                                     | Largely deferred to WtA and beyond                                                                                                                           |
 
@@ -714,7 +737,7 @@ Two questions this taxonomy answers before you even ask them:
 
 - _"Why aren't we doing functional programming?"_ — Paradigm. Deferred to Ch5.
 - _"Why aren't we working on a specific project like a web app or game?"_ —
-  Domain. WtP is domain-agnostic by design.
+  Domain. WtF is domain-agnostic by design.
 
 A note on JavaScript specifically: JS is a multi-paradigm language — it can
 _look_ like OOP, functional, or declarative code syntactically. But it runs one
@@ -745,7 +768,7 @@ The constraints are temporary and intentional:
 If a feature you want is missing, the likely answer is: it is coming, and it
 will make more sense when it arrives because you have the foundation.
 
-**On architecture specifically:** WtP builds fluency at the level of
+**On architecture specifically:** WtF builds fluency at the level of
 expressions, statements, and small programs. It does not teach how programs are
 organized at scale — API boundaries, module systems, separation of concerns
 across files and services. That is a later skill, developed across Trees and
@@ -753,16 +776,117 @@ Separation of Concerns and beyond.
 
 **Learning objectives for §0.2:**
 
-- 🥚 Use the positioning tables to locate WtP's scope within the broader space
+- 🥚 Use the positioning tables to locate WtF's scope within the broader space
   of programming and computer science
 - 🥚 Explain what distinguishes a programming paradigm, a computational domain,
   and a computational idiom, and give examples of each
-- 🥚 Understand why WtP constrains itself to Just Enough JavaScript and why
+- 🥚 Understand why WtF constrains itself to Just Enough JavaScript and why
   those constraints are temporary
 - 🥚 Recognize that architecture (organizing programs at scale) is a separate
   skill, developed later in Trees and Separation of Concerns
 - 🐣 Articulate the differences between the vocabulary triangle terms and
   explain their orthogonality (you can combine any paradigm with any domain)
+
+### 0.3 Two Hats: Vibetoading and Frogramming
+
+A foundational distinction this course returns to throughout: every developer,
+in every moment of work, wears one of two hats. Both are real practices, both
+have their time, and most people wear both — sometimes within the same hour on
+the same project.
+
+**The Vibetoader** works from user-visible behavior. They iterate on outcomes:
+does the button work, does the test pass, does the page render? The notional
+machine underneath is a black box. They may use LLMs heavily or not at all; what
+defines the hat is that the code itself is incantation — a means to produce the
+behavior — rather than a model the developer is reasoning about.
+
+**The Frogrammer** works grounded in the notional machine. They predict what the
+machine will do before they run anything, evaluate output against that
+prediction, and apply craft practices (testing, documentation, code review,
+security audits) intentionally — to mitigate specific risks their NM-awareness
+makes visible. They may use LLMs heavily or not at all; what defines the hat is
+the grounding.
+
+**Spectrum, not binary.** A given developer doesn't _be_ a Vibetoader or a
+Frogrammer — they wear different hats on different tasks, files, moments. A
+seasoned Frogrammer prototyping a UI tweak Vibetoads on purpose. A junior who
+genuinely understands the part of the NM they're touching is Frogramming on that
+part. The question is never "which kind of person are you?" — it's "which hat
+fits this moment?"
+
+**Why the twinning anchor cuts where it does.** Recall the four audiences from
+the threads: developer, computer, user, agent. Vibetoading prioritizes twinning
+the _user_ — the experiencer of behavior. Frogramming prioritizes twinning the
+_NM_ — the producer of behavior. Notice that the Vibetoader doesn't really twin
+the developer-reader either: code is a textual representation of the NM and its
+levers, and without NM-awareness there isn't much to read _for_ in the code
+itself. The Frogrammer, by contrast, cares deeply about code quality — both
+because the code represents the NM they understand, and because well-shaped code
+is what lets humans _and_ agents read, review, and extend the work over time (a
+point well-developed in agent-collaboration practice — see this org's
+`AGENTS.md`, Simon Willison's writing, and the broader engineering literature).
+
+**The cargo-cult test.** Process discipline (TDD, DDD, QA, security review,
+docs) doesn't determine which hat you're wearing — _intentionality_ does. When a
+Vibetoader does TDD, the tests are ceremonial: written because Process Says So,
+not because they target NM-visible risks. When a Frogrammer does TDD, the tests
+are intentional: they cover the specific edge cases the NM predicts will be
+surprising. Same activity, different ground. A Frogrammer can also skip tests on
+a throwaway script and still be Frogramming, because they know what they're
+skipping and why.
+
+**Vibing predates LLMs.** It's tempting to read the dichotomy as
+"vibing-with-LLMs vs. engineering-without". It isn't. Pattern-matching syntax
+without understanding the underlying mechanism is older than LLMs by decades —
+copy-paste-tweak from Stack Overflow, React hooks rules without understanding
+reconciliation, CSS flexbox by trial-and-error, jQuery selectors without a DOM
+model, Rails magic accepted as opaque. LLMs amplified the practice; they didn't
+invent it.
+
+The four-quadrant grid makes this concrete. Vibetoading vs. Frogramming is a
+stance about your relationship to the NM, _orthogonal_ to whether an LLM is in
+the loop:
+
+|                                    | **Humans-only**                                                                                                     | **LLM-collab**                                                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Vibetoading** (outcome-grounded) | Cargo-cult coding — copy-paste-tweak, hooks-rules-without-reconciliation, CSS by trial-and-error. _Pre-LLM vibing._ | Karpathy's _vibe coding_ — LLM writes, you don't read; outcomes are the only ground truth.                             |
+| **Frogramming** (NM-grounded)      | Traditional engineering — humans write notation grounded in NM-awareness, applying craft practices intentionally.   | Willison's _vibe engineering_ / _agentic engineering_ — LLM writes the notation; you direct and verify against the NM. |
+
+#### Related vocabulary
+
+This course's house terms are **Vibetoading** and **Frogramming**. The wider
+discourse has its own vocabulary, and learners will encounter it; the most
+useful landmarks:
+
+- **Vibe coding** — coined by Andrej Karpathy. Originally narrow: building with
+  an LLM without reading or reviewing the code it writes.
+- **Vibe engineering** — Simon Willison's term for the disciplined counterpart:
+  seasoned engineers using LLMs while staying accountable for the code, with
+  testing, docs, planning, and review.
+- **Agentic engineering** — Willison, Addy Osmani, others. Specifically about
+  building with coding agents (Claude Code, Codex) that can execute and iterate
+  on their own output.
+
+Frogramming is broader than any of these — it's tool-agnostic and
+abstraction-level-agnostic. Vibe engineering and agentic engineering are flavors
+of LLM-collaborative Frogramming; traditional engineering is humans-only
+Frogramming; cargo-cult coding is humans-only Vibetoading. The house terms name
+the underlying stance; the wider vocabulary names specific working modes within
+it.
+
+**Learning objectives for §0.3:**
+
+- 🥚 Distinguish Vibetoading from Frogramming by their grounding (visible
+  behavior vs. notional machine)
+- 🥚 Place a given workflow on the four-quadrant grid
+- 🥚 Recognize that vibing predates LLMs and give one pre-LLM example
+- 🐣 Identify when each hat is appropriate for a concrete scenario
+- 🐣 Distinguish cargo-cult process (process by ceremony) from intentional craft
+  practice (process targeting NM-visible risks)
+- 🐣 Wear the Vibetoader hat intentionally — choose it for the scope where it's
+  right
+- 🐥 Articulate why this curriculum centers Frogramming while honoring
+  Vibetoading
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -1423,10 +1547,12 @@ Chapter 5 will return briefly to it in its closing moments.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
-### 4.6 Vibecoding
+### 4.6 Vibetoading
 
 - 🐣 Decompose a complex request into smaller, verifiable steps (by contrast
-  with unguided vibe-coding)
+  with unguided Vibetoading)
+- 🐣 Wear the Vibetoader hat intentionally — choose it for the scope where it's
+  right
 - 🐥 Evaluate code you didn't write or review during generation (PBSI autopsy)
 - 🐥 Identify where the jagged frontier manifested in a concrete collaboration
 - 🐔 Reflect on the difference between "it runs" and "I understand it"
