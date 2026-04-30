@@ -148,6 +148,20 @@ type LinkedInterceptEvent = InterceptEvent & {
 	readonly nodePathSource: NodePathSource;
 	readonly node: ASTNode | null;
 	readonly loc: SourceLocation | null;
+	/** Previous event in the global timeline. `null` for the head event
+	 *  (`step === 1`). Captured at the moment this event is added to
+	 *  the list; reading is reference-stable for the event's lifetime. */
+	readonly prev: LinkedInterceptEvent | null;
+	/** Next event in the global timeline. `null` until the next event
+	 *  arrives — including for the tail of a completed run AND for the
+	 *  last event of a truncated run (cancel/fail/timeout/error
+	 *  mid-stream — discriminate via `result.outcome`). For events
+	 *  added incrementally (worker-emitted, streamed), backed by an
+	 *  accessor; the underlying closure state mutates as events arrive,
+	 *  but the event object itself is `Object.freeze`-immutable. For
+	 *  events added all-at-once (early-return paths in buildEarlyResult),
+	 *  a plain frozen property since the neighbor is known at build time. */
+	readonly next: LinkedInterceptEvent | null;
 	/** Direct reference to the `callee` subnode of `node` when `node.type
 	 *  === 'CallExpression'`. For trap calls (the happy path) this is the
 	 *  function-reference node — an `Identifier` for `prompt`/`alert`/

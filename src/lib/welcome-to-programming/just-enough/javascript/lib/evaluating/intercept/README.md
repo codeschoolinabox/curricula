@@ -535,12 +535,12 @@ All traps are always defined in the worker — there is no
 config-driven trap selection. Which implementation fires on the main
 thread is determined by the Resolved IO table.
 
-| Global               | Event produced                                                                                       |
-| -------------------- | ---------------------------------------------------------------------------------------------------- |
-| `console.*` (all 19) | `ConsoleEvent` — method, args, nodePath, nodePathSource, node, loc, callee, calleePath, step         |
-| `alert`              | `AlertEvent` — args, nodePath, nodePathSource, node, loc, callee, calleePath, step                   |
-| `confirm`            | `ConfirmEvent` — args, return value, nodePath, nodePathSource, node, loc, callee, calleePath, step   |
-| `prompt`             | `PromptEvent` — args, return value, nodePath, nodePathSource, node, loc, callee, calleePath, step    |
+| Global               | Event produced                                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `console.*` (all 19) | `ConsoleEvent` — method, args, nodePath, nodePathSource, node, loc, callee, calleePath, prev, next, step         |
+| `alert`              | `AlertEvent` — args, nodePath, nodePathSource, node, loc, callee, calleePath, prev, next, step                   |
+| `confirm`            | `ConfirmEvent` — args, return value, nodePath, nodePathSource, node, loc, callee, calleePath, prev, next, step   |
+| `prompt`             | `PromptEvent` — args, return value, nodePath, nodePathSource, node, loc, callee, calleePath, prev, next, step    |
 
 Every event carries a 1-indexed `step` field giving its position in the
 global event stream — `result.events[i].step === i + 1`. After AST
@@ -560,9 +560,17 @@ subnode of `event.node` — `Identifier` for `prompt`/`alert`/`confirm`,
 `MemberExpression` for `console.X` — useful when an editor wants to
 underline only the function reference rather than the full call
 expression). `callee` is the same object as `event.node.callee` —
-single source of truth, no copy. No `line` or `column` fields on trap
-events — read `event.loc.start.line` or `event.loc.start.column` for
-those integer values. See [DOCS.md § Navigation](DOCS.md#navigation)
+single source of truth, no copy. Each event also carries `prev` and
+`next` references to its neighbors in the global timeline, forming a
+doubly-linked list — walk `event.next.next…` forward or
+`event.prev.prev…` backward without indexing through `result.events`.
+`prev` is captured at insert time (reference-stable); `next` is backed
+by an accessor that returns `null` until the next event arrives, then
+the next event reference (events are `Object.freeze`-immutable from
+yield time, but the backing closure state mutates). No `line` or
+`column` fields on trap events — read `event.loc.start.line` or
+`event.loc.start.column` for those integer values. See
+[DOCS.md § Navigation](DOCS.md#navigation)
 for the full event ↔ node ↔ ast traversal graph; [DOCS.md § Ubiquitous
 Language and Data flow](DOCS.md) covers the underlying mechanism.
 

@@ -26,6 +26,8 @@ not a stylistic choice.
 | **`children`** (ASTNode field)    | A flat array of every direct AST descendant of a node, in source-position order. Generic traversal primitive: a consumer can walk the entire tree without knowing ESTree property names per node type. The same `ASTNode` references also appear under their named slots (`.body`, `.callee`, `.arguments`, …).                          |
 | **`callee`** (event field)        | On a `LinkedInterceptEvent`, a direct reference to the callee subnode of `event.node` when `event.node.type === 'CallExpression'`. Same object as `event.node.callee` — single source of truth. `null` when `event.node` is `null` (no-ast) or not a `CallExpression` (residual error path).                                             |
 | **`calleePath`** (event field)    | The `nodePath` of `event.callee` (typically `event.nodePath + '.callee'`). Useful for editor highlighting that wants to underline only the function reference, not the entire call expression. `null` whenever `event.callee` is `null`.                                                                                                 |
+| **`prev`** (event field)          | Previous event in the global timeline. `null` for the head event. Reference-stable from the moment the event is added.                                                                                                                                                                                                                   |
+| **`next`** (event field)          | Next event in the global timeline. `null` until the next event arrives — and remains `null` for a truncated run's tail (discriminate via `result.outcome`). Backed by an accessor; underlying state mutates as events arrive.                                                                                                            |
 
 ## Navigation
 
@@ -34,14 +36,16 @@ An event and its AST node are entwined the moment the event is emitted: `enrichE
 ```text
 result
 ├── events: LinkedInterceptEvent[]      ── chronological stream
-│     └── (each event)
+│     └── (each event, Object.freeze-immutable from yield time)
 │         ├── step           number     ── 1-indexed sequence number
 │         ├── nodePath       string?    ── '$.body.0.expression', etc.
 │         ├── nodePathSource              'instrumented' | 'enclosing-fallback' | 'no-ast'
 │         ├── node           ASTNode?   ── ===  result.ast[event.nodePath]
 │         ├── loc            SourceLoc? ── ===  event.node.loc
 │         ├── calleePath     string?    ── event.nodePath + '.callee' (when CallExpression)
-│         └── callee         ASTNode?   ── ===  event.node.callee
+│         ├── callee         ASTNode?   ── ===  event.node.callee
+│         ├── prev           Linked?    ── previous event in the timeline (null at head)
+│         └── next           Linked?    ── next event in the timeline (null until it arrives)
 │
 └── ast: Record<nodePath, ASTNode>       ── flat lookup map
       └── (each ASTNode)
@@ -61,6 +65,8 @@ result
 **`event.callee` / `event.calleePath`.** Convenience accessors for the common case of "I have an event from a `console.log(...)` and want to underline just `console.log`, not `console.log(arg)`." Equivalent to `event.node.callee` / `event.node.callee.syntaxId`, but spelled directly on the event so consumers don't need to dispatch on `node.type` first. **Shared reference invariant**: `event.callee === event.node.callee`. Same object, no copy.
 
 **`.parent` (upward links).** Walk upward from any node to find a containing statement, declaration, or block. Note that `parent` forms a cycle with `children` / named slots; `JSON.stringify` will throw without a replacer. The result is deep-frozen with cycle handling — see [utils/deep-freeze-in-place.ts](../utils/deep-freeze-in-place.ts).
+
+**`event.prev` / `event.next` (doubly-linked timeline).** Every event is wired into a doubly-linked list — walk the timeline forward (`event.next.next…`) or backward (`event.prev.prev…`) without indexing through `result.events`. `prev` is captured at the moment the event is added to the list and is reference-stable; `next` is backed by an accessor that returns `null` until the next event arrives, then the next event reference. `null` at `next` therefore means "no event yet" OR "tail of stream" OR "tail of a truncated run" — discriminate via `result.outcome` (`complete` → tail; `cancel`/`fail`/`timeout`/`error` → truncation). Events are `Object.freeze`-immutable from yield time; the `next` accessor reads closure-held state that mutates as new events arrive, but the event object itself never changes shape.
 
 **Single source of truth.** Every shared field name is the same object reference, never a copy:
 

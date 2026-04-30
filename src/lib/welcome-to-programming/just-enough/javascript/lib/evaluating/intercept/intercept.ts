@@ -362,6 +362,15 @@ function buildEarlyResult(
 		ev.calleePath = null;
 		return e as unknown as LinkedInterceptEvent;
 	});
+	// Wire prev/next as plain frozen properties — for one-shot finalization
+	// the neighbor is known at build time, so accessor backing isn't needed.
+	// Same observable shape as the streaming-path appendEvent helper.
+	for (let i = 0; i < linked.length; i++) {
+		const ev = linked[i] as { prev: LinkedInterceptEvent | null; next: LinkedInterceptEvent | null };
+		ev.prev = i > 0 ? (linked[i - 1] ?? null) : null;
+		ev.next = i + 1 < linked.length ? (linked[i + 1] ?? null) : null;
+		Object.freeze(linked[i]);
+	}
 	return deepFreezeInPlace({
 		ok,
 		outcome,
@@ -509,6 +518,43 @@ function createInterceptGenerator(
 		// is what trace exposes too. The underlying ASTNode references
 		// are the same; only the container wrapper differs.
 		return Object.fromEntries(map);
+	}
+
+	// Doubly-linked event timeline — see DOCS.md § Navigation. Each event
+	// arrives, gets prev/next accessor properties wired, gets pushed onto
+	// `events`, then frozen at yield. The closure variables below carry
+	// the tail state across appendEvent calls. `setTailNext` is the
+	// previous tail's next-setter (closes over its `nextRef` variable);
+	// when the new event arrives we call it to wire the previous tail's
+	// next, then refresh setTailNext to point at the new tail's setter.
+	let eventListTail: LinkedInterceptEvent | null = null;
+	let setTailNext: ((next: LinkedInterceptEvent) => void) | null = null;
+
+	function appendEvent(
+		eventsArray: LinkedInterceptEvent[],
+		enriched: LinkedInterceptEvent,
+	): void {
+		const prevRef = eventListTail; // captured at define time, stable
+		let nextRef: LinkedInterceptEvent | null = null;
+		Object.defineProperty(enriched, 'prev', {
+			get(): LinkedInterceptEvent | null { return prevRef; },
+			enumerable: true,
+			configurable: false,
+		});
+		Object.defineProperty(enriched, 'next', {
+			get(): LinkedInterceptEvent | null { return nextRef; },
+			enumerable: true,
+			configurable: false,
+		});
+		// Wire the previous tail's `next` via its closure-held setter.
+		if (setTailNext !== null) setTailNext(enriched);
+		// Update tail state for the next iteration.
+		eventListTail = enriched;
+		setTailNext = (n) => { nextRef = n; };
+		eventsArray.push(enriched);
+		// Safe: prev/next are accessor properties; data fields were all
+		// set by enrichEvent before appendEvent ran.
+		Object.freeze(enriched);
 	}
 
 	// Queue + cancel plumbing — lives in the outer closure so cancel()
@@ -870,7 +916,7 @@ function createInterceptGenerator(
 						step: events.length + 1,
 					};
 					const enriched = enrichEvent(timeoutEvent, locationIndex);
-					events.push(enriched);
+					appendEvent(events, enriched);
 					yield enriched as unknown as LinkedInterceptEvent;
 					break;
 				}
@@ -879,7 +925,7 @@ function createInterceptGenerator(
 				if (msg.type === 'event') {
 					const event = msg.event;
 					const enriched = enrichEvent(event, locationIndex);
-					events.push(enriched);
+					appendEvent(events, enriched);
 
 					// WHY pauseTimeout at the TOP of the event-path: the
 					// cumulative timer counts only worker-thread code-execution
@@ -893,7 +939,8 @@ function createInterceptGenerator(
 						try {
 							await resolvedIo.console[event.method](...event.args);
 						} catch (err) {
-							events.push(
+							appendEvent(
+								events,
 								enrichEvent(
 									makeInternalError(err, events.length + 1),
 									locationIndex,
@@ -938,7 +985,8 @@ function createInterceptGenerator(
 						await handleIoRequest(msg as IoRequestMessage, views, resolvedIo);
 						Atomics.notify(views.control, CONTROL_INDEX);
 					} catch (err) {
-						events.push(
+						appendEvent(
+							events,
 							enrichEvent(
 								makeInternalError(err, events.length + 1),
 								locationIndex,
@@ -957,7 +1005,8 @@ function createInterceptGenerator(
 
 				// 8d. Worker error — record and break
 				if (msg.type === 'worker-error') {
-					events.push(
+					appendEvent(
+						events,
 						enrichEvent(
 							{
 								event: 'error',

@@ -202,6 +202,73 @@ describe('AST entwining (browser, end-to-end)', () => {
 		});
 	});
 
+	describe('event.prev / event.next (doubly-linked timeline)', () => {
+		it('result.events[0].prev === null and last event.next === null on complete run', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			expect(result.events.length).toBeGreaterThan(1);
+			expect(result.events[0]!.prev).toBeNull();
+			expect(result.events[result.events.length - 1]!.next).toBeNull();
+		});
+
+		it('result.events[i].next === result.events[i + 1] (forward links)', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			for (let i = 0; i < result.events.length - 1; i++) {
+				expect(result.events[i]!.next).toBe(result.events[i + 1]);
+			}
+		});
+
+		it('result.events[i].prev === result.events[i - 1] (backward links)', async () => {
+			const result = await createInterceptGenerator(VALID_FIXTURE);
+			for (let i = 1; i < result.events.length; i++) {
+				expect(result.events[i]!.prev).toBe(result.events[i - 1]);
+			}
+		});
+
+		it('event.prev wired at emission time (mid-stream observation)', async () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			const seen: unknown[] = [];
+			for await (const ev of handle) {
+				if (seen.length > 0) {
+					expect(ev.prev).toBe(seen[seen.length - 1]);
+				} else {
+					expect(ev.prev).toBeNull();
+				}
+				seen.push(ev);
+			}
+		});
+
+		it('event is Object.freeze-immutable at yield time', async () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			for await (const ev of handle) {
+				expect(Object.isFrozen(ev)).toBe(true);
+			}
+		});
+
+		it('replay yields the SAME prev/next references as the live iteration', async () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			const live: unknown[] = [];
+			for await (const ev of handle) live.push(ev);
+			const replayed: unknown[] = [];
+			for await (const ev of handle) replayed.push(ev);
+			for (let i = 0; i < live.length; i++) {
+				expect(replayed[i]).toBe(live[i]);
+				expect((replayed[i] as { prev: unknown }).prev).toBe(
+					(live[i] as { prev: unknown }).prev,
+				);
+				expect((replayed[i] as { next: unknown }).next).toBe(
+					(live[i] as { next: unknown }).next,
+				);
+			}
+		});
+
+		it('mid-stream truncation: tail.next === null (cancel/error semantics)', async () => {
+			const code = ['console.log(1);', 'console.log(2);', 'undefined();', ''].join('\n');
+			const result = await createInterceptGenerator(code);
+			expect(result.outcome).toBe('error');
+			expect(result.events[result.events.length - 1]!.next).toBeNull();
+		});
+	});
+
 	describe('replay identity', () => {
 		it('linked events preserve identity across re-iteration', async () => {
 			const handle = createInterceptGenerator(VALID_FIXTURE);
