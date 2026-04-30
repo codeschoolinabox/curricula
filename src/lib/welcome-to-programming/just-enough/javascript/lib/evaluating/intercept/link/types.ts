@@ -135,10 +135,13 @@ type ASTNode = {
  *   wrapped call.
  *
  * Timeline access via `step`: every event carries `step: number` (1-indexed,
- * contiguous, inherited from `InterceptEvent`). After link, `node.events`
- * accumulates back-refs in step order, so `node.events[i].step` reveals
- * exactly when in the global stream that fire occurred — consumers can
- * reconstruct the timeline without scanning `result.events`.
+ * contiguous, inherited from `InterceptEvent`). Events are entwined at
+ * emission time by `enrichEvent` in [intercept.ts](../intercept.ts) — `.node`
+ * and `node.events[]` back-refs are populated before each event is yielded,
+ * so consumers iterating live see fully-linked events without waiting for
+ * run completion. `node.events[i].step` reveals exactly when in the global
+ * stream that fire occurred — consumers can reconstruct the timeline
+ * without scanning `result.events`.
  */
 type LinkedInterceptEvent = InterceptEvent & {
 	readonly nodePath: string | null;

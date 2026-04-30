@@ -20,7 +20,7 @@ not a stylistic choice.
 | **`'enclosing-fallback'`**        | Provenance value for the residual error path: a runtime error fired OUTSIDE any CallExpression. Position derived from `Error.stack` via `extractPositionFromError`, mapped to the deepest containing AST node.                                                                                                                           |
 | **`'no-ast'`**                    | Provenance value when no AST was built (validation failed before parsing). `nodePath`, `node`, and `loc` are all `null`.                                                                                                                                                                                                                 |
 | **instrumentation phase**         | The pre-execution AST walk + source rewrite (in `wrapCallExpressions`) that produces the wrapped source. Distinct from "validation phase" and "format phase".                                                                                                                                                                            |
-| **link**                          | Post-completion step (in `link/link.ts`) that attaches `.node: ASTNode` references to events and pushes back-refs into `node.events[]`. Produces `LinkedInterceptEvent`s.                                                                                                                                                                |
+| **link** (verb)                   | Per-event step performed inline by `enrichEvent` in `intercept.ts`: resolves `event.node` from `astByPath[event.nodePath]` and pushes the event into `node.events[]`. Happens before each event is yielded, so consumers iterating live see fully-linked events.                                                                          |
 | **entwining**                     | The combined effect of instrumentation + link: every event carries `nodePath`, `nodePathSource`, `node`, `loc`; every AST node carries `events[]` back-refs. Bidirectional navigation between events and source.                                                                                                                         |
 | **residual error path**           | The narrow case where a runtime error fires OUTSIDE any wrapped CallExpression (e.g. bare `null.foo;`). Handled by `extractPositionFromError` for line attribution; provenance `'enclosing-fallback'`.                                                                                                                                   |
 | **`children`** (ASTNode field)    | A flat array of every direct AST descendant of a node, in source-position order. Generic traversal primitive: a consumer can walk the entire tree without knowing ESTree property names per node type. The same `ASTNode` references also appear under their named slots (`.body`, `.callee`, `.arguments`, …).                          |
@@ -29,7 +29,7 @@ not a stylistic choice.
 
 ## Navigation
 
-After [`link()`](link/link.ts) runs, an event and its AST node are entwined: every event has a typed reference into `result.ast`, and every node has a back-ref array of the events that fired on it. The graph below names every navigation path; consumers pick whichever fits their use case.
+An event and its AST node are entwined the moment the event is emitted: `enrichEvent` (in [intercept.ts](intercept.ts)) resolves `event.node` and pushes the event into `node.events[]` before the `yield`, so consumers iterating live see fully-linked events without waiting for completion. Every event has a typed reference into `result.ast`, and every node has a back-ref array of the events that fired on it. The graph below names every navigation path; consumers pick whichever fits their use case.
 
 ```text
 result
@@ -88,8 +88,8 @@ The intercept engine's full pipeline: from raw source to a frozen, entwined
 `InterceptResult`. The four subgraphs trace the shape of the data and the
 responsibility of each thread/component:
 
-- **Main thread** — validation, AST production, instrumentation, post-execute
-  link/freeze
+- **Main thread** — validation, AST production, instrumentation, per-event
+  enrichment + entwining, post-execute freeze
 - **Worker thread** — receives instrumented code, exposes `__$ic` + trapped IO
   globals to user code
 - **Per-call wrap (`__$ic`)** — the push/pop-current-path mechanism that makes
@@ -137,8 +137,8 @@ flowchart TB
         N --> O --> P
     end
 
-    P --> Q["Main: link(events, ast)"]
-    Q --> R["result.events + result.ast<br/>perfect attribution, no Error.stack"]
+    P --> R["Main: enrichEvent attaches<br/>nodePath/node/loc/callee/calleePath<br/>+ pushes node.events[] back-ref"]
+    R --> S["yield → result.events + result.ast<br/>perfect attribution, no Error.stack"]
 
     style MainThread fill:#dbeafe,stroke:#1e3a8a
     style Worker fill:#fef3c7,stroke:#92400e

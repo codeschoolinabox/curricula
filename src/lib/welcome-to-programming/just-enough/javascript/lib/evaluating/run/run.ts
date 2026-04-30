@@ -428,10 +428,7 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 			}
 
 			// Phase 3: guard loops (sync; only when iterations is finite)
-			if (
-				maxIterations !== undefined &&
-				Number.isFinite(maxIterations)
-			) {
+			if (maxIterations !== undefined && Number.isFinite(maxIterations)) {
 				try {
 					const guarded = guardLoops(code, maxIterations);
 					processedCode = guarded.code;
@@ -446,10 +443,7 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 						error: {
 							kind: 'javascript',
 							name: err instanceof Error ? err.name : 'Error',
-							message:
-								err instanceof Error
-									? err.message
-									: String(err),
+							message: err instanceof Error ? err.message : String(err),
 							phase: 'creation',
 						},
 						...(ast ? { ast } : {}),

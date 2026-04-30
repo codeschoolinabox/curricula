@@ -89,6 +89,16 @@ describe('AST entwining (browser, end-to-end)', () => {
 			expect(result.ast).toBe(handleAst);
 		});
 
+		it('event.node is non-null at emission time (mid-stream, before completion)', async () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			const liveNodes: unknown[] = [];
+			for await (const ev of handle) {
+				if (ev.event === 'console') liveNodes.push(ev.node);
+			}
+			expect(liveNodes.length).toBeGreaterThan(0);
+			for (const n of liveNodes) expect(n).not.toBeNull();
+		});
+
 		it('validation failure → empty events + error.kind: validation (no AST built)', async () => {
 			const result = await createInterceptGenerator('var x = 5;\n');
 			expect(result.events).toEqual([]);

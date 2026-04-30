@@ -228,16 +228,16 @@ function enrichEvent(
 	const incomingNodePath = (event as { nodePath?: string | null }).nodePath;
 
 	// Branch 1: worker stamped nodePath via __$ic — instrumented path.
-	if (
-		typeof incomingNodePath === 'string' &&
-		locationIndex !== null
-	) {
+	if (typeof incomingNodePath === 'string' && locationIndex !== null) {
 		const node = locationIndex.astByPath.get(incomingNodePath);
 		const enriched = event as InterceptEvent & {
 			nodePath: string | null;
 			nodePathSource: NodePathSource;
 			node: ASTNode | null;
-			loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
+			loc: {
+				start: { line: number; column: number };
+				end: { line: number; column: number };
+			} | null;
 			callee: ASTNode | null;
 			calleePath: string | null;
 		};
@@ -249,7 +249,8 @@ function enrichEvent(
 		// CallExpression (the wrapped happy path). For non-call nodes
 		// (residual error path), callee/calleePath stay null.
 		if (node && node.type === 'CallExpression') {
-			const calleeRef = (node as unknown as { callee: ASTNode | undefined }).callee;
+			const calleeRef = (node as unknown as { callee: ASTNode | undefined })
+				.callee;
 			enriched.callee = calleeRef ?? null;
 			enriched.calleePath = calleeRef ? calleeRef.syntaxId : null;
 		} else {
@@ -276,7 +277,10 @@ function enrichEvent(
 			nodePath: string | null;
 			nodePathSource: NodePathSource;
 			node: ASTNode | null;
-			loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
+			loc: {
+				start: { line: number; column: number };
+				end: { line: number; column: number };
+			} | null;
 			callee: ASTNode | null;
 			calleePath: string | null;
 		};
@@ -296,7 +300,10 @@ function enrichEvent(
 		nodePath: string;
 		nodePathSource: NodePathSource;
 		node: ASTNode | null;
-		loc: { start: { line: number; column: number }; end: { line: number; column: number } } | null;
+		loc: {
+			start: { line: number; column: number };
+			end: { line: number; column: number };
+		} | null;
 		callee: ASTNode | null;
 		calleePath: string | null;
 	};
@@ -308,7 +315,8 @@ function enrichEvent(
 	// usually land on non-call nodes (e.g. MemberExpression for
 	// `let x = null.foo;`), in which case callee/calleePath stay null.
 	if (node && node.type === 'CallExpression') {
-		const calleeRef = (node as unknown as { callee: ASTNode | undefined }).callee;
+		const calleeRef = (node as unknown as { callee: ASTNode | undefined })
+			.callee;
 		enriched.callee = calleeRef ?? null;
 		enriched.calleePath = calleeRef ? calleeRef.syntaxId : null;
 	} else {
@@ -572,7 +580,10 @@ function createInterceptGenerator(
 		wakeDequeue();
 	}
 
-	async function* body(): AsyncGenerator<LinkedInterceptEvent, InterceptResult> {
+	async function* body(): AsyncGenerator<
+		LinkedInterceptEvent,
+		InterceptResult
+	> {
 		const resolvedOptions: InterceptOptions = options ?? {};
 		const maxSeconds = resolvedOptions.seconds ?? 5;
 		const maxIterations = resolvedOptions.iterations;
@@ -608,32 +619,20 @@ function createInterceptGenerator(
 			const validationReport = validateProgram(code, justEnoughJs);
 			if (validationReport.parseError) {
 				resolveAst(null);
-				return buildEarlyResult(
-					code,
-					resolvedOptions,
-					'error',
-					[],
-					{
-						kind: 'parse',
-						name: 'SyntaxError',
-						message: validationReport.parseError.message,
-						line: validationReport.parseError.location.line,
-						column: validationReport.parseError.location.column,
-					},
-				);
+				return buildEarlyResult(code, resolvedOptions, 'error', [], {
+					kind: 'parse',
+					name: 'SyntaxError',
+					message: validationReport.parseError.message,
+					line: validationReport.parseError.location.line,
+					column: validationReport.parseError.location.column,
+				});
 			}
 			if (!validationReport.isValid) {
 				resolveAst(null);
-				return buildEarlyResult(
-					code,
-					resolvedOptions,
-					'error',
-					[],
-					{
-						kind: 'validation',
-						violations: validationReport.violations,
-					},
-				);
+				return buildEarlyResult(code, resolvedOptions, 'error', [], {
+					kind: 'validation',
+					violations: validationReport.violations,
+				});
 			}
 			// Successful validation — retain the AST for instrumentation,
 			// build the LocationIndex now, and resolve handle.ast eagerly
@@ -645,13 +644,9 @@ function createInterceptGenerator(
 
 			const { formatted } = await checkFormat(code);
 			if (!formatted) {
-				return buildEarlyResult(
-					code,
-					resolvedOptions,
-					'error',
-					[],
-					{ kind: 'formatting' },
-				);
+				return buildEarlyResult(code, resolvedOptions, 'error', [], {
+					kind: 'formatting',
+				});
 			}
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : String(err);
@@ -1165,9 +1160,7 @@ function createInterceptGenerator(
 			const events: readonly LinkedInterceptEvent[] = settled.events;
 			let index = 0;
 			return {
-				next(): Promise<
-					IteratorResult<LinkedInterceptEvent, InterceptResult>
-				> {
+				next(): Promise<IteratorResult<LinkedInterceptEvent, InterceptResult>> {
 					if (index < events.length) {
 						return Promise.resolve({ value: events[index++]!, done: false });
 					}
@@ -1279,14 +1272,14 @@ function buildResult(
 	// Compute visitCounts from linked events. nodePath:null events
 	// (no-ast / no-location) don't count toward any node.
 	const visitCountsObj: Record<string, number> = {};
-	for (const ev of linkedEvents) {
+	for (const ev of events) {
 		if (ev.nodePath !== null) {
 			visitCountsObj[ev.nodePath] = (visitCountsObj[ev.nodePath] ?? 0) + 1;
 		}
 	}
 
 	const baseFields = {
-		events: linkedEvents,
+		events: events,
 		code,
 		options,
 		ast,
@@ -1309,7 +1302,7 @@ function buildResult(
 		});
 	}
 
-	const errorEvent = findErrorEvent(linkedEvents);
+	const errorEvent = findErrorEvent(events);
 
 	if (errorEvent) {
 		if (errorEvent.name === 'TimeoutError') {
