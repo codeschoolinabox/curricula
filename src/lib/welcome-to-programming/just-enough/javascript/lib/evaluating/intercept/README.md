@@ -596,7 +596,7 @@ semantic trace engine — different namespace, no conflict.)
 14. Handle `io-request` by awaiting `resolvedIo.{prompt|alert|confirm}` and writing the response to the SAB; on throw, surface `ErrorEvent` with `name: 'InternalError'` and terminate.
 15. Handle console events by awaiting `resolvedIo.console[method]` (if any) before yielding; on throw, same `InternalError` path.
 16. Timeout tracks user-perceived runtime: paused while yielded AND while awaiting any IO callback, plus a flat 5 ms per-yield charge so rendering-bound loops still deplete the budget.
-17. Return frozen `InterceptResult` on completion, timeout, or iteration limit. `link()` attaches `.node` refs and back-refs to the AST.
+17. Return frozen `InterceptResult` on completion, timeout, or iteration limit. Events are already linked to AST nodes (set inline by `enrichEvent` as each event arrives, before yield).
 
 ## Key design decisions
 
