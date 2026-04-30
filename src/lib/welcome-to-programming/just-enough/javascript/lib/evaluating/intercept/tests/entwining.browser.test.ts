@@ -136,6 +136,44 @@ describe('AST entwining (browser, end-to-end)', () => {
 			const result = await createInterceptGenerator(VALID_FIXTURE);
 			expect(Object.isFrozen(result.events[0])).toBe(true);
 		});
+
+		it('every AST node is Object.freeze-immutable on the resolved ast record', async () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			// Drive the generator so validation runs and ast resolves.
+			await handle.result;
+			const ast = await handle.ast;
+			expect(ast).not.toBeNull();
+			for (const path of Object.keys(ast!)) {
+				expect(Object.isFrozen(ast![path])).toBe(true);
+			}
+		});
+
+		it('handle.ast nodes are frozen as soon as ast resolves (before .result settles)', async () => {
+			const handle = createInterceptGenerator(VALID_FIXTURE);
+			// Pull the first event to trigger the lazy validation pipeline,
+			// then check ast frozen state — this fires after walk() completes
+			// (which freezes each node) but before iteration completes.
+			const firstResult = await handle.next();
+			expect(firstResult.done).toBe(false);
+			const ast = await handle.ast;
+			expect(ast).not.toBeNull();
+			for (const path of Object.keys(ast!)) {
+				expect(Object.isFrozen(ast![path])).toBe(true);
+			}
+			handle.cancel();
+			await handle.result;
+		});
+
+		it('node.events accumulates back-refs through the frozen node (push survives shallow freeze)', async () => {
+			// 3 fires from the loop on the same console.log call expression.
+			const code = ['for (let i = 0; i < 3; i = i + 1) {', '\tconsole.log(i);', '}', ''].join('\n');
+			const result = await createInterceptGenerator(code, { iterations: 5 });
+			expect(result.outcome).toBe('complete');
+			const consoleEvent = result.events.find((e) => e.event === 'console')!;
+			const node = result.ast![consoleEvent.nodePath!]!;
+			expect(node.events.length).toBe(3);
+			expect(Object.isFrozen(node)).toBe(true);
+		});
 	});
 
 	describe('result.code, options, visitCounts', () => {

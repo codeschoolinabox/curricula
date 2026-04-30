@@ -2,7 +2,7 @@
  * @file Builds a `LocationIndex` from a validated acorn `Program`.
  *
  * Walks the AST once, producing a parallel tree of `ASTNode` objects
- * (enriched with `syntaxId`, `parent`, `source`, mutable `events: []`)
+ * (enriched with `syntaxId`, `parent`, `source`, `events: []`)
  * plus two maps: `astByPath` for nodePath → node lookup, and `exactStarts`
  * for `(line, column) → nodePath` exact-start matching.
  *
@@ -15,8 +15,16 @@
  *   `'$.body.0.expression'` for nested. Matches trace's documented style.
  * - `exactStarts` collisions: deepest node wins (parent set first, child
  *   overwrites during recursion).
- * - `events` arrays start empty; `link()` mutates them in place before
- *   the result is frozen.
+ * - **AST nodes are `Object.freeze`-immutable from the moment they're
+ *   built** (shallow freeze applied at the end of each `walk(node)` call,
+ *   after children are sorted into source order). The `events` array
+ *   reference itself is locked — consumers can't reassign
+ *   `node.events = ...` — but the array is still mutable until completion:
+ *   `enrichEvent` (in [intercept.ts](../intercept.ts)) pushes back-refs
+ *   into it as events arrive. `deepFreezeInPlace` at completion freezes
+ *   the array too. Same shape contract as the events at yield time:
+ *   the surrounding object is frozen; specific mutable sub-arrays
+ *   accumulate during the run before the final freeze.
  */
 
 import type { Node, Program } from 'acorn';
@@ -141,6 +149,14 @@ function walk(
 			? left.loc.start.column - right.loc.start.column
 			: left.loc.start.line - right.loc.start.line,
 	);
+
+	// Shallow freeze: locks the astNode's own properties (events,
+	// children, parent, named ESTree slots) — consumers can't reassign
+	// them. The `events` array remains mutable until completion;
+	// enrichEvent pushes back-refs through the cast. The `children`
+	// array's order is locked-in at this point (sorted just above) so
+	// further pushes are not expected. See file-header docblock.
+	Object.freeze(astNode);
 
 	return astNode;
 }
