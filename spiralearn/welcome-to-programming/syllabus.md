@@ -247,7 +247,11 @@ exhaustive dependency list.
 **Study Lenses** is embedded directly in every page. Every code snippet has a
 full suite of lenses available: trace tables, variable highlighters, Parsons
 problems, flow charts, fill-in-the-blanks, and more. Exercises suggest lenses,
-but you're always free to use whichever helps you most.
+but you're always free to use whichever helps you most. The just-enough/javascript
+tooling that powers Study Lenses implements the Explorotron pedagogical
+framework (Malaise & Signer, 2023) — see
+[`src/lib/welcome-to-programming/just-enough/javascript/README.md`](../../src/lib/welcome-to-programming/just-enough/javascript/README.md)
+§ Pedagogical first principles for the architectural mapping.
 
 **JavaScript only** for now; Python track in development. Skill-level objectives
 are identical for both languages. JS is the primary track because it makes the

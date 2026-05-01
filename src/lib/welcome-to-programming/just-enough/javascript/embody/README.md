@@ -117,6 +117,14 @@ Every `embody/types.ts` shape corresponds to a concept in `notional-machine.md`:
 If you're unsure what something means, the NM doc is upstream of the
 types — read the prose, then come back to the type.
 
+**Pyramid placement.** embody is **per-snippet operational data** —
+the substrate that Layers I–IV (lenses, recommender, path generation)
+all consume. It is NOT the pyramid base ("Progress modelling" of the
+Malaise & Signer pyramid), which is system-wide learner state owned
+by the embedding LMS. embody handles "what does this snippet look
+like"; the LMS handles "where is this learner in their journey." See
+[`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles).
+
 ## Status
 
 embody is **pre-implementation**. The types are locked

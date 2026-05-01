@@ -23,6 +23,12 @@ term to its ECMA-262 (ES2024) abstract operation.
 **Pedagogy is not decided here.** This document describes what is
 *observable*; lenses choose what to *teach*. The contract is accuracy.
 
+**Scope.** The NM is the conceptual model; embody is the per-snippet
+operational data form lenses consume. The system-wide learner state
+(the "Progress modelling" base layer of Malaise & Signer's Explorotron
+pyramid — see [README.md § Pedagogical first principles](./README.md#pedagogical-first-principles))
+is the embedding LMS's responsibility, not the NM's or embody's scope.
+
 See also:
 
 - [README.md](./README.md) — JEJ overview, the conceptual chain, audiences

@@ -209,6 +209,72 @@ session. Each evaluation is a fresh run with no accumulated state.
 JEJ defines the _maximum_ syntax available to learners. Features beyond JEJ
 cannot be added. JEJ is the ceiling, not the floor.
 
+## Pedagogical grounding
+
+This package's architecture implements the framework described in
+Malaise & Signer (2023), _Explorotron: An IDE Extension for Guided and
+Independent Code Exploration and Learning_, Koli Calling '23.
+[`README.md` § Pedagogical first principles](./README.md#pedagogical-first-principles)
+has the conceptual narrative; this section maps each architectural
+decision to the framework.
+
+### Recommender = Applicability filter + Ranking engine
+
+The paper's Figure 3 architecture (applicability filter → ranking
+engine → recommended lenses) is the implementation contract for
+[`compose/lib/recommender/`](#categorization-rationale-which-lib-modules-go-where).
+**Snippet-fit only** — the recommender takes an embodiment and a
+roster of lens plugins, runs applicability gates, ranks by snippet-fit,
+returns recommended lenses. No learner state. ZPD-targeting at the
+curricular scope is the embedding LMS's job (it picks which snippet
+to render); we do not see learner state inside our recommender.
+
+### Pyramid layers — the fractal claim
+
+The framework's pyramid applies at two scopes. We own the snippet
+scope; the LMS owns the curricular scope.
+
+| Pyramid layer | Snippet scope (us) | Curricular scope (LMS) |
+| --- | --- | --- |
+| Base — Progress modelling | _(n/a)_ | Learner state / knowledge graph / ZPD positioning |
+| Layer I — Lenses & defaults | `compose/lib/recommender/` ranks by snippet-fit; `lenses/` are the plugins | _(subsumed)_ |
+| Layer II — Path generation | Open spec — auto-generated lens path on one snippet (3D Block × NM in draft) | Sequence of `<StudyLenses>` instances across snippets |
+| Layer III — Manual recommendations | `<StudyLenses>` `recommendedLens` config | LMS picks the curated snippet |
+| Layer IV — Manually crafted paths | `<StudyLenses>` `lensSequence` config | Full curriculum sequence |
+| Top — Monitored learning | _(n/a)_ | Grade reports, LMS integration, cheating detection |
+
+### What we explicitly do NOT own
+
+- **System-wide learner state, knowledge graph, ZPD positioning.**
+  Learner profiles live in the embedding LMS. Our recommender ranks
+  by snippet-fit; we never see who the learner is.
+- **Multi-snippet path arrangement.** The LMS decides which snippet
+  to render next. `<StudyLenses>` is a stepping stone, not a path.
+- **Grade reports / LMS integration / cheating detection.** Top of
+  the pyramid; LMS responsibility.
+- **A data-emit protocol from `<StudyLenses>` back to the LMS.**
+  Deferred until a concrete integration target exists; out of scope
+  for now.
+
+### How architectural decisions implement framework principles
+
+- **Single-writer state model + lens-as-mini-web-app** — derived from
+  the paper's principle that lenses provide "views on a file that
+  focus on learning or exploring certain aspects." Lenses produce the
+  view; only the editor mutates the snippet.
+- **`<StudyLenses>` as the public surface** — derived from the
+  skill-transfer principle: learners use the same component for
+  curriculum content and for any code they paste in (Quadrant I of
+  the framework).
+- **Lens plugins receive `embodiment` via props (no peer imports)** —
+  derived from the modularity needs of an extensible lens roster:
+  new lenses contributed independently must be wireable without
+  reaching into embody internals.
+- **`embody/lib/*` returns raw data; `embody()` deep-freezes once** —
+  derived from the centralization needed when many downstream
+  consumers (lenses, the editor, the recommender) all read the same
+  snippet representation. One source of truth, frozen at the seam.
+
 ## Dependency rules (one-way)
 
 ```text

@@ -83,6 +83,100 @@ lens reveals one aspect of the same machine.
 
 See the [syllabus][metaphor] for the full hats / metaphor / audiences framing.
 
+## Pedagogical first principles
+
+> **This package implements the middle layers.** Progress modelling
+> (system-wide learner state) and monitored learning (grade reports,
+> LMS integration, cheating detection) belong to the embedding LMS.
+> `<StudyLenses>` renders one stepping stone in a learning path; the
+> embedding LMS chooses which stones, in what order, with what configs.
+
+The architecture implements the framework described in:
+
+> Yoshi Malaise and Beat Signer (2023). _Explorotron: An IDE Extension
+> for Guided and Independent Code Exploration and Learning._
+> Proc. of Koli Calling '23.
+> [PDF](https://wise.vub.ac.be/sites/default/files/publications/Malaise_KoliCalling2023.pdf)
+
+### The two-axis grid + the layered pyramid
+
+![Figure 2 from Malaise & Signer (2023): (a) Quadrants of learning along curated/uncurated × guided/unguided axes; (b) Layered pyramid of learning tools, from progress modelling at the base to monitored learning at the top.](./explorotron-quadrants-and-pyramid.png)
+
+_Figure 2 from Malaise & Signer (2023): **(a)** Quadrants of learning
+along curated/uncurated × guided/unguided axes; **(b)** Layered
+pyramid of learning tools, from progress modelling at the base to
+monitored learning at the top._
+
+### How `<StudyLenses>` realizes the framework
+
+The framework's quadrants apply at **two scopes** — snippet scope (one
+`<StudyLenses>` instance) and curricular scope (the embedding LMS
+arranging instances). We own the snippet scope; the LMS owns the
+curricular scope.
+
+| Pyramid layer | Snippet scope (us) | Curricular scope (LMS) |
+| --- | --- | --- |
+| Base — Progress modelling | _(n/a)_ | Learner state / knowledge graph / ZPD positioning |
+| Layer I — Lenses & defaults | Recommender ranks lenses by snippet-fit | _(subsumed)_ |
+| Layer II — Path generation | Auto-generated lens path on one snippet (open spec — Block-model × NM in draft) | Sequence of `<StudyLenses>` instances across snippets |
+| Layer III — Manual recommendations | `recommendedLens` config: "open in this lens first" | LMS picks the curated snippet to render |
+| Layer IV — Manually crafted paths | `lensSequence` config: walk lenses in this order | Full curriculum (sequence of curated snippets + configs) |
+| Top — Monitored learning | _(n/a)_ | Grade reports, LMS integration, cheating detection |
+
+A free-form lens dropdown is **always** available within
+`<StudyLenses>` — the learner can override any recommendation or
+config at any time. This is Quadrant I at the snippet scope and
+underwrites the lifelong-learning autonomy framing below.
+
+### Concrete examples (snippet-scope quadrants)
+
+- **Q1 — uncurated/unguided.** A learner pastes random JS into the
+  editor, opens `<StudyLenses>`, sees default lens recommendations
+  ranked by snippet-fit, picks one. Works on any code, not just
+  curriculum content.
+- **Q2 — uncurated/guided.** Same starting point; the learner asks for
+  an auto-generated path through the recommended lenses. Strategy is
+  an open spec (a 3D framework based on the Block model × the NM is
+  in draft).
+- **Q3 — curated/unguided.** Curriculum author renders
+  `<StudyLenses snippet={X} recommendedLens="trace" />`. The trace
+  lens opens by default; the learner can switch via the dropdown.
+- **Q4 — curated/guided.** Curriculum author renders
+  `<StudyLenses snippet={X} lensSequence={["flowchart", "trace", "parsons"]} />`.
+  The learner walks the sequence; the dropdown stays available as an
+  override.
+
+(`recommendedLens` and `lensSequence` are sketched here as the
+conceptual model; the actual prop surface locks during compose
+implementation.)
+
+### Why this architecture
+
+Three load-bearing principles from the paper:
+
+- **Skill transfer** (Chiaburu & Marinova, 2005) — learn skills in
+  environments close to where they'll be used. Lenses live in the
+  same editor learners use for real work, not a separate "school" tool.
+- **Expertise reversal** (Sweller et al., 2003) — scaffolding helps
+  beginners but hurts experts. Lenses are designed to peel away
+  support based on context.
+- **Lifelong-learning autonomy** — Quadrant I (uncurated/unguided)
+  isn't a fallback; it's the central pedagogical bet. Students take
+  their learning skills with them, applied to any code they encounter
+  long after graduation. The 🔬 Frogrammer's magnifying-glass kit is
+  the embodied form: the learner carries the lens kit and uses it on
+  code from anywhere.
+
+The Begel & Ko (2019) question — should technology "structure learning
+for learners" or should learners "be taught how to structure their own
+independent learning" — gets a **both-yes** answer:
+
+- Quadrants I + II support learners structuring their own.
+- Quadrants III + IV support educators structuring it for them.
+
+Both reach the same `<StudyLenses>` component; the difference is which
+configs the embedding system passes (and which the learner overrides).
+
 ## Directory structure
 
 The folder layout mirrors the conceptual chain:
