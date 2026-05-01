@@ -2,7 +2,104 @@
 
 A curated JavaScript language level + static and dynamic tooling for
 introductory programming education. JEJ programs are the learning vehicle for
-the Welcome to Programming curriculum.
+the Welcome to Frogramming curriculum.
+
+## The story (the conceptual chain)
+
+Welcome to Frogramming teaches **JEJ** (just-enough JavaScript) — a curated
+subset of the language. Every JEJ program runs on a precise, bounded **notional
+machine** (NM): the conceptual model of how JEJ evaluates. Twinning the NM in
+your own mind is the **learning objective** of the course. The NM is the
+[mechanical instrument][metaphor] of the syllabus's metaphor — what the 🔬
+Frogrammer grounds their predictions in.
+
+**Code is the UI.** The JS source text is the _control panel_ through which a
+programmer operates the NM. Authoring code is one way to operate that panel;
+describing intent to an LLM is another (Chapter 4). Either way, the NM is the
+thing the panel controls — and you can also observe it directly through visual
+debuggers / embody / lenses, bypassing the panel entirely.
+
+The NM doesn't only live in prose. It is **embodied** by the
+[`embody/`](./embody/) factory — every JEJ snippet becomes a frozen-data +
+event-stream object whose every field corresponds to a concept in the NM.
+**Study lenses** then offer different perspectives on the embodied NM — think of
+them as the kit of magnifying glasses 🔬 the Frogrammer carries: each lens
+highlights a different aspect of the same machine.
+
+```mermaid
+flowchart LR
+    JEJ["JEJ<br/>(language subset)"]
+    NM["Notional Machine<br/>(this is what learners twin)"]
+    embody["embody/<br/>(operational data + event streams)"]
+    lenses["study-lenses/<br/>(pedagogical perspectives)"]
+    JEJ --> NM --> embody --> lenses
+```
+
+| Layer            | What it is                                                         | File / dir                                     |
+| ---------------- | ------------------------------------------------------------------ | ---------------------------------------------- |
+| **JEJ**          | The language subset (what learners write)                          | [`reference.md`](./reference.md)               |
+| **NM**           | The conceptual evaluation model (the learning objective)           | [`notional-machine.md`](./notional-machine.md) |
+| **embody**       | The operational embodiment of the NM (frozen data + event streams) | [`embody/`](./embody/)                         |
+| **study lenses** | Pedagogical perspectives on the embodied NM                        | [`lenses/`](./lenses/)                         |
+
+Get the NM right and embody / lenses / curriculum follow. This package's
+internal directory structure mirrors the chain.
+
+[metaphor]: ../../../../spiralearn/welcome-to-programming/syllabus.md
+
+## Four audiences of code
+
+A JEJ program addresses four audiences simultaneously:
+
+1. 🧑‍💻 **Other developers** read your code through comments, names, and
+   structure. `console.*` is your tool for talking to them.
+2. 💻 **The computer** parses and evaluates your code — but for our purposes,
+   "understanding the computer" means **twinning the notional machine**. The NM
+   _is_ the computer at our level of abstraction. The Frogrammer hat is about
+   twinning this audience.
+3. 👤 **Users** never see the code; they experience the program's effects via
+   `prompt`, `confirm`, `alert`. Their correctness is behavioral.
+4. 🤖 **Agents** (LLMs) collaborate with you on code as authoring partners.
+
+The Notional Machine is the lens through which we address audience #2. The
+course's [syllabus][metaphor] casts the NM as the _mechanical instrument_ of the
+metaphor — composer / virtuoso / instrument / score / audience.
+
+## Two hats: 🔬 Frogrammer & 🎨 Vibetoader
+
+The two hats correspond to which audience you twin:
+
+- 🔬 **The Frogrammer** twins **the NM**. They predict what the machine will do,
+  evaluate output against that prediction, apply craft practices intentionally.
+  Frogramming = twinning the NM.
+- 🎨 **The Vibetoader** twins **the User**. They iterate on user-visible
+  behavior: does the button work? does the test pass? does the page render?
+  Vibetoading = twinning the User audience.
+
+Neither hat is better; they're a spectrum. This package centers the Frogrammer
+skill (NM-grounded prediction). Study lenses are the Frogrammer's **kit of
+magnifying glasses** for examining the embodied NM from different angles — each
+lens reveals one aspect of the same machine.
+
+See the [syllabus][metaphor] for the full hats / metaphor / audiences framing.
+
+## Directory structure
+
+The folder layout mirrors the conceptual chain:
+
+| Path                                           | Purpose                                                                            |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `README.md` (this)                             | Orientation — front door                                                           |
+| [`reference.md`](./reference.md)               | Allowed language features (syntax / controls)                                      |
+| [`notional-machine.md`](./notional-machine.md) | How the NM controlled by our language level works                                  |
+| [`embody/`](./embody/)                         | Programmatic embodiment of the NM                                                  |
+| [`study-lenses/`](./study-lenses/)             | Pedagogical views on the embodied NM                                               |
+| `sandbox-programs/`                            | Test fixtures (may be moved later)                                                 |
+| `sandbox.html`                                 | _Planned smoke-test harness — TBD agent (see [DOCS.md](./DOCS.md))_                |
+| [`lib/`](./lib/)                               | Helpers used to build embody and lenses (will be split — see [DOCS.md](./DOCS.md)) |
+
+(`.planning-handoff/` is a temporary dev artifact — intentionally not documented
+in README.)
 
 ## Why a language level?
 
@@ -12,8 +109,8 @@ the entire program is visible on screen at once, traceable step-by-step.
 
 The language level is designed around a specific balance: **meaningful
 computational exploration** within a **manageable notional machine** — which is
-why we've defined the NM explicitly in this directory (see
-[notional-machine.md](./notional-machine.md)). The NM is the learning objective.
+why we've defined the NM explicitly in
+[notional-machine.md](./notional-machine.md). The NM is the learning objective.
 
 ### Few options, many possibilities
 
@@ -36,23 +133,10 @@ manipulation, math, pattern matching, bitwise logic, comparison — without
 complicating the notional machine. They're all expressions that resolve to
 values through the same mechanisms.
 
-### Three audiences of code
-
-Every JEJ program reaches all three audiences at once:
-
-- **Developers** read your code — through comments, variable names, and
-  structure (`console.log` and `console.assert` help you communicate what's
-  happening)
-- **The computer** executes your code — you can trace exactly how the JS engine
-  interprets each expression, with every piece of the program visually present
-  on screen at once
-- **Users** interact with your running program — through `prompt`, `confirm`,
-  and `alert`
-
 ### What learners can do with JEJ
 
-- Read code as communication between three audiences
-- Trace exactly how the JS engine interprets each line
+- Read code as communication between four audiences
+- Trace exactly how the NM interprets each line (Frogrammer hat)
 - Explore creativity within the shape of imperative programs
 - Explore style and readability tradeoffs to find your own voice
 - Discuss a program's _behavior_, _strategy_, and _implementation_
@@ -83,68 +167,79 @@ exploration and creativity.
 
 ## Language level documentation
 
-| Document                                           | Purpose                                                         |
-| -------------------------------------------------- | --------------------------------------------------------------- |
-| [reference.md](./reference.md)                     | Learner-facing cheat sheet — every allowed syntax with examples |
-| [notional-machine.md](./notional-machine.md)       | The conceptual execution model JEJ programs run on              |
-| [tracer.md](./tracer.md)                           | How the tracer captures the NM as data (config, result shape)   |
-| [tracer.walkthroughs.md](./tracer.walkthroughs.md) | Event sequences for every JEJ construct                         |
-| [tracer.architecture.md](./tracer.architecture.md) | Implementation layers, vocabulary, test taxonomy                |
-| [open-questions.md](./open-questions.md)           | Questions for the Aran creator about capabilities and design    |
+| Document                                                             | Purpose                                                         |
+| -------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [reference.md](./reference.md)                                       | Learner-facing cheat sheet — every allowed syntax with examples |
+| [notional-machine.md](./notional-machine.md)                         | The conceptual evaluation model JEJ programs run on             |
+| [embody/](./embody/)                                                 | Operational embodiment of the NM (data + event streams)         |
+| [embody/types.ts](./embody/types.ts)                                 | Canonical TypeScript contract                                   |
+| [embody/DOCS.md](./embody/DOCS.md)                                   | embody architecture + data flow                                 |
+| [lib/evaluating/trace/syntax/](./lib/evaluating/trace/syntax/)       | Syntax tracer — NM-step-category implementation (README + DOCS) |
+| [lib/evaluating/trace/semantics/](./lib/evaluating/trace/semantics/) | Semantic tracer — finer-grained instrumentation (README + DOCS) |
+| [open-questions.md](./open-questions.md)                             | Questions for the Aran creator about capabilities and design    |
 
 ## Tooling (under active development)
 
-Validates learner JavaScript against the language level and executes it in
-sandboxed environments. Provides validation, formatting, parsing, and execution
+Validates learner JavaScript against the language level and evaluates it in
+sandboxed environments. Provides validation, formatting, parsing, and evaluation
 modes — all through a unified API with a code object factory as the default
 export.
 
 > **Note**: the API surface and available tooling are under active development.
 > The exports and function signatures below will change as the tracer refactor
-> and new execution modes are implemented.
+> and new evaluation modes are implemented.
 
-## Structure
-
-| Path                      | Purpose                                                             |
-| ------------------------- | ------------------------------------------------------------------- |
-| `lib/`                    | Public modules and internal libraries (see sub-modules below)       |
-| `lib/parse-old/`              | `parse(code)` public entry + parse primitives (acorn wrapper, AST walker) |
-| `lib/validating/`         | `validate(code)` public entry + AST-based validation pipeline        |
-| `lib/formatting/`         | `format(code)` and `checkFormat(code)` — recast-based               |
-| `lib/evaluating/`         | Execution engines — trace (Aran), run (Worker)                      |
-| `lib/editing/`            | Editor integration (completions, hints)                             |
-| `lib/completing/`         | Code completion                                                     |
-| `lib/error-interpreting/` | Learner-friendly error message translation                          |
-| `lib/socratizing/`        | Socratic code analysis (micro-decisions)                            |
-| `lib/scope/`              | Scope analysis utilities                                            |
-| `lib/jej-documentation/`  | JEJ documentation generation for editor support                     |
-| `study-lenses/`           | Study lenses system (orchestrator, transforms, lenses, recommender) |
-| `components/`             | UI components (V2 lens components, migration source)                |
-| `index.ts`                | Package entry — re-exports public API functions and types           |
-| `api/`                    | Legacy directory; trace/run/debug-related types remain here pending parallel migration. The validate/parse/format/default migration is complete. |
-
-## Study Lenses: research translation platform
+## Study lenses: research translation platform
 
 The study-lenses system is a research translation platform (TCER Phase 4) built
-on top of JEJ's tooling. The tracer captures the notional machine as data; the
-study-lenses system turns that data — and any JEJ snippet — into interactive
+on top of JEJ's tooling. **embody** captures the notional machine as data; the
+**study-lenses** system turns that data — and any JEJ snippet — into interactive
 learning exercises. Each lens embodies a computing education research-backed
 pedagogical intervention: blanks (fill-in-the-blank), parsons (line ordering),
 trace tables (predict-then-compare), and more.
 
-The architecture separates transforms (code-to-code, e.g., format or
-loop-guard) from lenses (code-to-component, e.g., editor or blanks) and
-composes them into pipelines. A recommender analyzes each snippet against the
-JEJ notional machine and suggests relevant exercises organized in a 3D Block
-Model grid (comprehension level x scope x NM components). This enables rapid
-iteration on exercise design — researchers prototype new interventions by
-composing existing lenses, curriculum authors embed them in code fences, and
-learners choose their own path through the recommendations.
+The architecture separates transforms (code-to-code, e.g., format or loop-guard)
+from lenses (code-to-component, e.g., editor or blanks) and composes them into
+pipelines. A recommender analyzes each snippet against the JEJ notional machine
+and suggests relevant exercises organized in a 3D Block Model grid
+(comprehension level × scope × NM components). This enables rapid iteration on
+exercise design — researchers prototype new interventions by composing existing
+lenses, curriculum authors embed them in code fences, and learners choose their
+own path through the recommendations.
 
 See [`study-lenses/README.md`](./study-lenses/README.md) for the full
 architecture, module contracts, and directory layout.
 
-## Public API (current snapshot — will change)
+## Public API: `<StudyLenses>`
+
+The package's primary public interface is the **`<StudyLenses>`** React
+component, exported by `index.ts`:
+
+```ts
+import { StudyLenses } from './index.js';
+
+// In a curriculum page or markdown extension:
+<StudyLenses snippet={`let x = 5; console.log(x + 1);`} />
+```
+
+`<StudyLenses>` is the orchestrator: it ingests the snippet, builds the
+embodiment via `embody()`, runs the pre-processing pipeline (formatting),
+selects which lenses to surface (via the recommender), mounts them, and
+manages all state. Consumers get one component to mount; everything else
+is internal.
+
+`embody`, lens plugins, and `compose/lib/*` analysis helpers are **not**
+part of the public API. They are internal building blocks that
+`<StudyLenses>` composes. Lens authors ship plugins that the orchestrator
+mounts; lens plugins receive `embodiment` as a prop. Curriculum authors
+embed `<StudyLenses>` in code fences.
+
+### Legacy named exports (will be deprecated)
+
+`index.ts` also re-exports the legacy tooling and evaluation functions
+(`run`, `trace`, `validate`, `parse`, `format`, `checkFormat`) for
+existing callers. These will be reconsidered as `<StudyLenses>` becomes
+the dominant interface; no deprecation timeline is set.
 
 ```ts
 import {
@@ -159,9 +254,9 @@ import {
 } from './index.js';
 ```
 
-> The package no longer has a default export. The previous `createJejProgram`
-> code-object factory was removed as YAGNI bloat — superseded by the
-> `<StudyLenses>` container component.
+> The package has no default export. The previous `createJejProgram`
+> code-object factory was removed as YAGNI bloat — superseded by
+> `<StudyLenses>`.
 
 ### Tooling functions
 
@@ -172,17 +267,35 @@ import {
 | `validate(code)`    | `BaseResult`    | Returns an array with any JEJ language constraint violations |
 | `isJej(code)`       | `boolean`       | Convenience: is this valid JeJ?                              |
 
-### Execution functions
+### Evaluation functions
 
-| Function              | Returns                              | Engine                             |
-| --------------------- | ------------------------------------ | ---------------------------------- |
-| `run(code, config)`   | `Execution<InterceptEvent, InterceptResult>`     | Web Worker                         |
-| `trace(code, config)` | `Execution<AranStep, TraceResult>`   | Web Worker w/ Aran instrumentation |
-| `debug(code, config)` | `Execution<DebugEvent, DebugResult>` | iframe                             |
+| Function              | Returns                                      | Engine                             |
+| --------------------- | -------------------------------------------- | ---------------------------------- |
+| `run(code, config)`   | `Execution<InterceptEvent, InterceptResult>` | Web Worker                         |
+| `trace(code, config)` | `Execution<AranStep, TraceResult>`           | Web Worker w/ Aran instrumentation |
+| `debug(code, config)` | `Execution<DebugEvent, DebugResult>`         | iframe                             |
 
-## Result Shape
+## Internal lib structure
 
-All execution results share a common base:
+| Path                      | Purpose                                                                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `lib/parse-old/`          | `parse(code)` public entry + parse primitives (acorn wrapper, AST walker)                                                                        |
+| `lib/validating/`         | `validate(code)` public entry + AST-based validation pipeline                                                                                    |
+| `lib/formatting/`         | `format(code)` and `checkFormat(code)` — recast-based                                                                                            |
+| `lib/evaluating/`         | Evaluation engines — trace (Aran), run (Worker), intercept (Worker)                                                                              |
+| `lib/editing/`            | Editor integration (completions, hints)                                                                                                          |
+| `lib/completing/`         | Code completion                                                                                                                                  |
+| `lib/error-interpreting/` | Learner-friendly error message translation                                                                                                       |
+| `lib/socratizing/`        | Socratic code analysis (micro-decisions)                                                                                                         |
+| `lib/scope/`              | Scope analysis utilities                                                                                                                         |
+| `lib/jej-documentation/`  | JEJ documentation generation for editor support                                                                                                  |
+| `components/`             | UI components (V2 lens components, migration source)                                                                                             |
+| `index.ts`                | Package entry — exports the `<StudyLenses>` orchestrator component (primary surface) + legacy named functions (will be deprecated)               |
+| `api/`                    | Legacy directory; trace/run/debug-related types remain here pending parallel migration. The validate/parse/format/default migration is complete. |
+
+## Result shape
+
+All evaluation results share a common base:
 
 ```ts
 type Result<TEvent> = {
@@ -195,10 +308,18 @@ type Result<TEvent> = {
 
 ## Navigation
 
-- [lib/parse-old/README.md](./lib/parse-old/README.md) — `parse(code)` + parse primitives
-- [lib/validating/README.md](./lib/validating/README.md) — `validate(code)` + validation pipeline
-- [lib/formatting/README.md](./lib/formatting/README.md) — `format(code)` / `checkFormat(code)`
-- [lib/evaluating/README.md](./lib/evaluating/README.md) — execution engines
-- [study-lenses/README.md](./study-lenses/README.md) — study lenses system
-- [DOCS.md](./DOCS.md) — architecture decisions and design rationale
 - [reference.md](./reference.md) — learner-facing language reference
+- [notional-machine.md](./notional-machine.md) — the NM (conceptual evaluation
+  model)
+- [embody/README.md](./embody/README.md) — embody factory
+- [embody/DOCS.md](./embody/DOCS.md) — embody architecture + data flow
+- [embody/types.ts](./embody/types.ts) — canonical types
+- [study-lenses/README.md](./study-lenses/README.md) — study lenses system
+- [lib/parse-old/README.md](./lib/parse-old/README.md) — `parse(code)` + parse
+  primitives
+- [lib/validating/README.md](./lib/validating/README.md) — `validate(code)` +
+  validation pipeline
+- [lib/formatting/README.md](./lib/formatting/README.md) — `format(code)` /
+  `checkFormat(code)`
+- [lib/evaluating/README.md](./lib/evaluating/README.md) — evaluation engines
+- [DOCS.md](./DOCS.md) — architecture decisions and design rationale

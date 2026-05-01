@@ -1,198 +1,321 @@
-# just-enough-javascript — Architecture & Decisions
+# just-enough/javascript — Architecture & Decisions
 
-## Data flow
+This package is the language-level + tooling layer for Welcome to Frogramming.
+It validates learner JavaScript against the JEJ subset, evaluates it in
+sandboxed environments, and exposes a frozen-data + event-stream representation
+of each snippet (via [`embody/`](./embody/)) for study lenses to consume.
 
-The journey of a learner source string through the package's public
-surface, from raw input to a frozen result.
+The conceptual chain — **JEJ → NM → embody → lenses** — is established in
+[`README.md`](./README.md). The NM is documented in
+[`notional-machine.md`](./notional-machine.md). Embody architecture + data flow
+are in [`embody/DOCS.md`](./embody/DOCS.md). This document captures the
+**package-level architectural decisions**: directory shape, peer
+responsibilities, dependency rules, and the migration roadmap.
 
-```mermaid
-flowchart TD
-    A[raw source string] -->|parse, throws on SyntaxError| B{parse outcome}
-    B -->|fail| RP[ParseResult<br/>ok:false]
-    B -->|pass| C[parsed AST]
-    C -->|JeJ language validate, pure| D{language outcome}
-    D -->|violations| RV[BaseResult<br/>ok:false + rejections]
-    D -->|allowed| E[validated source]
-    E -->|checkFormat, pure| F{format outcome}
-    F -->|unformatted| RF[ok:false result<br/>format-rejected]
-    F -->|formatted| G[execution-ready source]
-    G -->|run, async| H[InterceptResult<br/>outcome + logs + optional reason]
-    G -->|trace, async| I[TraceResult<br/>outcome + logs + ast]
-    A -.->|format alone, pure| FM[formatted source<br/>tooling output]
-    A -.->|interpret error, pure| EI[learner-friendly explanation]
-```
+A separate [`REFACTOR-HANDOFF.md`](./REFACTOR-HANDOFF.md) holds the ordered
+step-by-step migration recipe a future refactor agent will follow (deletable
+after the work is done).
 
-Each downstream subdirectory's `DOCS.md` zooms into its own data-
-flow at finer granularity. Tooling functions like `format()` and
-the error interpreter operate on raw source independently —
-they're help-the-learner-reach-valid-JeJ flows, not gate flows.
-Execution flows (`run`, `trace`) require already-validated,
-already-formatted JeJ; the gates produce the typed input shape they
-consume.
+## Directory architecture
 
-`study-lenses/` composes transforms over source independently and
-sits orthogonal to this flow.
+The package is mid-migration. Both shapes are documented so contributors know
+what is and what will be.
 
-## Why this library exists
-
-Beginners learning to read code before writing it need a constrained JavaScript
-subset — small enough to trace mentally, strict enough to prevent confusing
-patterns. "Just Enough JavaScript" (JeJ) is that subset: an allowlist-based
-language level that limits what syntax, operators, and globals learners can use.
-
-This library enforces that subset (validation), provides sandboxed execution
-environments (run, debug, trace), and offers tooling functions (format, validate)
-so learners can safely experiment within bounds.
-
-## Architecture
-
-### Execution pipeline
-
-All execution modes run the same pipeline before evaluating code:
+### Current shape
 
 ```text
-code (string)
-  → parse              ← is it syntactically valid?
-  → validate (JeJ)     ← does it use things it shouldn't?
-  → format check       ← is it properly formatted?
-  → execute            ← what happens when we run it?
-  → frozen result      ← deep-frozen before returning
+javascript/
+  README.md                     front door
+  notional-machine.md           NM spec
+  notional-machine.svg          canonical NM poster
+  reference.md                  language reference
+  DOCS.md                       this doc
+  REFACTOR-HANDOFF.md           migration roadmap (deletable post-refactor)
+  index.ts                      public API surface — exports the orchestrator's
+                                <StudyLenses> component (the consumer-facing
+                                interface)
+  sandbox.html                  PLANNED — whole-setup smoke test (TBD agent)
+
+  embody/                       NM embodiment (frozen data)
+  study-lenses/                 lens system (will rename to lenses/)
+  lib/                          shared helpers (will be split — see target shape)
+  sandbox-programs/             test fixtures
 ```
 
-Each API function uses the pipeline up to a different point. Tooling functions
-(`format`, `validate`) help learners GET to valid formatted JeJ — they don't
-block. Execution functions (`run`, `trace`, `debug`) require valid formatted
-JeJ — they gate.
+### Target shape (post-refactor)
 
-### Module layout
+Three peers under `javascript/` mirror the conceptual chain. The implementation
+peer (`compose/`) wires everything together for the learner.
 
 ```text
-just-enough-javascript/
-  index.ts                ← Package entry: named exports
-  lib/parse-old/              ← parse() + parseProgram + getChildNodes
-  lib/validating/         ← validate() + AST validation pipeline
-  lib/formatting/         ← format() + checkFormat()
-  lib/evaluating/         ← Raw execution engines
-    run/                  ← Web Worker + SAB for synchronous I/O
-    trace/                ← Aran AST instrumentation in Worker
-    shared/               ← Execution type, SAB protocol, guard-loops
-  lib/editing/            ← Editor integration
-  lib/socratizing/        ← Socratic micro-decision analysis
-  lib/scope/              ← Scope analysis utilities
-  lib/error-interpreting/ ← Learner-friendly error translation
-  lib/jej-documentation/  ← JEJ docs for editor support
-  api/                    ← Legacy: trace/run/debug-related types remain pending parallel migration
-  reference.md            ← Learner-facing language cheat sheet
+javascript/
+  README.md
+  notional-machine.md
+  notional-machine.svg
+  reference.md
+  DOCS.md
+  index.ts                      exports compose's <StudyLenses> orchestrator
+                                component as the public interface
+  sandbox.html                  whole-setup smoke test
+
+  embody/                       NM embodiment (frozen data)
+    README.md, DOCS.md, types.ts
+    lib/                        NM-representation engine helpers
+      parse/                    new acorn wrapper (replaces parse-old/)
+      ast/                      AST utilities
+      validating/               JEJ subset check
+      formatting/               JEJ formatting
+      evaluating/               run, intercept, trace.{syntax,semantics}
+      scope/                    scope analysis
+
+  lenses/                       (was study-lenses/) — stateful "mini web app" plugins
+    README.md, DOCS.md
+    parsons/, blanks/, trace-table/, …  (each lens self-contained)
+
+  compose/                      orchestrator + default editor + analysis libs
+    README.md, DOCS.md
+    editor/                     default home base (the only writer of snippet state)
+    orchestrator/               state mgmt + lens dispatch + pre-processing
+    lib/                        analysis helpers — all (embodiment) → result
+      recommender/              which lenses to surface for an embodiment
+      completing/               autocomplete (editor concern)
+      editing/                  editor integration (editor concern)
+      error-interpreting/       learner-friendly error messages (editor concern)
+      jej-documentation/        JEJ docs for editor tooltips (editor concern)
+      socratizing/              Socratic micro-decision analysis
+
+  sandbox-programs/             test fixtures
 ```
 
-### Dependency DAG
+`utils/` (cross-cutting infra like `deep-freeze-in-place`) stays at
+`src/lib/utils/` — outside `javascript/` — imported by all peers via the
+existing `@`-alias.
 
-```text
-index.ts
-  → lib/parse-old/parse           (parse public entry)
-  → lib/validating/validate   (validate public entry)
-  → lib/validating/is-jej     (boolean convenience)
-  → lib/formatting/{format, check-format}  (format functions)
-  → lib/evaluating/intercept/run    (run public entry)
-  → api/trace                 (legacy; parallel migration in flight)
-  → api/types                 (trace/run/debug-related types remain)
+## Locked decisions
 
-lib/parse-old/
-  (depends only on acorn)
+### Single-writer state model
 
-lib/validating/
-  → lib/parse-old/                (parseProgram + getChildNodes + ParseError)
+Only `compose/editor/` mutates the snippet's source. Everything else reacts:
 
-lib/formatting/
-  (no deps on validating/ or evaluating/)
+- The editor is **always present** as the home base — even when no lenses apply,
+  the learner sees the editor.
+- Lens plugins are **read-only views**; they cannot change snippet state.
+- Re-embody happens once per edit cycle; the orchestrator distributes the fresh
+  embodiment to mounted lenses via props.
 
-lib/evaluating/intercept/
-  → lib/validating/validate   (validation gate)
-  → lib/formatting/check-format (format gate)
-  → lib/evaluating/shared/    (Execution type, SAB protocol)
-```
+This is a major state-management simplification: one writer, many observers. No
+reconciliation between competing mutators.
 
-## Key design decisions
+### Lenses are stateful "mini web apps"
 
-### Why three separate execution engines
+Each lens is a self-contained component with its own UI, internal state, and
+pedagogical logic. Lenses absorb what would otherwise be a "transforms" tier —
+exercises like parsons (statement shuffling), blanks (fill-in), and
+bug-injection are all implemented inside the relevant lens, not as a separate
+pre-processing step.
 
-Each serves a different pedagogical purpose with a different isolation model:
+Concretely a lens receives `embodiment` as a prop and:
 
-- **run** — Web Worker. Trapped `console.log`, `alert`, `confirm`, `prompt`.
-  Returns `InterceptEvent` stream. Synchronous I/O via SharedArrayBuffer + Atomics.
-  SAB pause between events for correct I/O ordering.
+- Shuffles / hides / mutates a _display_ derived from the embodiment
+- Tracks learner interaction state (UI)
+- Validates learner answers
+- Scores / reports
 
-- **debug** — iframe with module `<script>` tags. Injects `debugger` statements
-  so learners can step through in DevTools. Cannot use a Worker because
-  `debugger` only pauses when DevTools is open on the main thread. No SAB pause.
+There is **no separate `transforms/` or `remix/` peer.** Anything that produces
+a derivative snippet for an exercise is a lens concern.
 
-- **trace** — Web Worker with Aran AST instrumentation. Captures every
-  expression evaluation, variable access, and control-flow step. Returns
-  `AranStep` stream. SAB pause for step-by-step visualization.
+### Formatting is compose pre-processing (formatting only)
 
-There is no unified "execute" function — each engine returns fundamentally
-different event types.
+The orchestrator runs a **formatting** pre-processing step on source before
+constructing the embodiment. By the time anything reaches a lens, the source is
+consistently formatted regardless of how it was authored.
 
-### Why AsyncGenerator for all engines
+**Validation is NOT gated by the orchestrator.** Educators may intentionally
+include non-JEJ examples (e.g., a `function` declaration to demonstrate what JEJ
+excludes). embody still computes `validation.{isJeJ, violations, …}` as snippet
+metadata; lenses choose whether to surface those — a "JEJ-conformance" lens can
+highlight violations, other lenses can ignore them. Pre-processing does not
+reject non-JEJ source.
 
-All engines return `Execution<TEvent, TResult>` — an async generator that is
-also `PromiseLike`. This gives consumers two modes:
+### `embody/lib/*` returns raw data
 
-- **Step-through**: `for await (const event of execution)` — SAB pause keeps
-  the Worker frozen between events
-- **Batch**: `await execution` — PromiseLike drains the generator, resolves to
-  the full result (backward compatible with the old Promise API)
+The `embody()` factory composes raw `embody/lib/*` outputs and applies the
+single deep-freeze + validation at the end. `embody/lib/*` modules do not
+validate or freeze their own outputs — that responsibility lives centrally in
+embody. (No `_meta` arg refactor; the simpler model suffices.)
 
-### Why format is a pipeline gate
+### `embodiment` is the canonical parameter name
 
-Formatting is required before execution. Same pedagogical philosophy as JeJ
-language constraints — remove choices to focus learning. All code from all
-learners looks identical in structure.
+Anywhere a function takes a Snippet instance as input, the parameter is named
+`embodiment`. Codifies the term across the codebase (lens props, analysis-helper
+signatures, etc.).
 
-### Why parentheses are explicitly tracked
+### Strict immutability
 
-Acorn parses with `preserveParens: true`, emitting `ParenthesizedExpression`
-nodes in the AST. This provides anchor nodes for trace visualization — when the
-Aran tracer emits parenthesis enter/leave events, the UI can highlight the
-corresponding ESTree node.
+All public results are deep-frozen. The codebase is consumed by LLMs (and any
+number of lenses) that cannot be trusted not to mutate returned data. Freeze is
+a hard guarantee, not a politeness. Consumers wanting a mutable working copy
+`structuredClone` themselves.
 
-### Why property assignment is blocked
+### Three evaluation-engine isolation models
 
-JeJ has no object literals, no arrays, no constructors — zero valid use case for
-`obj.prop = value`. Allowing it risks learners overwriting built-in methods
-(`console.log = 5`). Assignment is restricted to variable names only.
+Each engine in `embody/lib/evaluating/` (post-refactor; today `lib/evaluating/`)
+serves a different pedagogical purpose:
 
-### Why module mode everywhere
+- **run** — Web Worker. No traps. Returns a final report. Cheapest; used when
+  learners just want "did it work?"
+- **intercept** — Web Worker with `console.*` + `alert`/`confirm`/ `prompt`
+  trapped, SharedArrayBuffer + Atomics for synchronous I/O, SAB pause between
+  events for correct ordering. Returns an event stream + final result.
+- **trace** — Web Worker with Aran AST instrumentation, capturing every
+  expression evaluation, variable access, control-flow step. Two flavors
+  (`syntax` / `semantics`) at different granularities. SAB pause for
+  step-by-step visualization.
 
-All execution uses ES module mode (`type: 'module'` for scripts, module workers).
-This gives implicit strict mode without requiring `'use strict'` or adding an
-extra line that would shift line numbers.
+`debug` (iframe + `debugger` statements) is a separate isolation model for
+DevTools step-through.
 
-### Why console.log and console.assert are traps
+### Module mode everywhere
 
-Learners are not expected to look in the browser console unless debugging.
-Everything is surfaced in a friendly UI. `console.log` and `console.assert` are
-intercepted and recorded as events in the log. Console forwarding is also kept
-for authenticity — learner code runs in a real browser environment.
-
-### Why language level is an upper bound
-
-The JeJ language level defines the maximum syntax available to learners.
-Features beyond JeJ cannot be added. JeJ is the ceiling, not the floor.
-
-### No REPL mode
-
-Code is treated as instructions in a simple stateless program — not an
-interactive session. Each execution is a fresh run with no accumulated state.
-
-### Deep-freeze all results
-
-Per AGENTS.md convention: this codebase is consumed by LLMs that cannot be
-trusted not to mutate returned data. All result objects are deep-frozen in place
-before returning.
+All evaluation uses ES module mode (`type: 'module'` for scripts, module
+workers). Implicit strict mode without requiring `'use strict'` or shifting line
+numbers.
 
 ### Error-as-data
 
-Execution functions never throw. Errors are captured and returned in the result
-object's `error` field, discriminated by `kind`. This gives consumers a single
-code path for all outcomes.
+Engines never throw to the consumer. Errors are captured in result objects'
+`error` field, discriminated by `kind`. One code path for all outcomes.
+
+### Property assignment is blocked
+
+JEJ has no object literals, no arrays, no constructors — zero valid use case for
+`obj.prop = value`. Allowing it would risk learners overwriting built-in methods
+(`console.log = 5`). Assignment is restricted to variable names only.
+
+### `console.*` and dialog APIs are intercepted
+
+`console.log` / `console.assert` / `alert` / `confirm` / `prompt` are trapped
+and surfaced as events (Developer Console + User Interface channels per the NM).
+Browser console forwarding is also kept for authenticity — code runs in a real
+browser environment.
+
+### No REPL
+
+Code is treated as instructions in a stateless program — not an interactive
+session. Each evaluation is a fresh run with no accumulated state.
+
+### JEJ language level is an upper bound
+
+JEJ defines the _maximum_ syntax available to learners. Features beyond JEJ
+cannot be added. JEJ is the ceiling, not the floor.
+
+## Dependency rules (one-way)
+
+```text
+src/lib/utils/   (@-aliased; outside javascript/)
+   ↑      ↑      ↑
+   |      |      |
+embody/lib/   compose/lib/   lenses/<lens>/lib/
+   ↑              ↑                ↑
+   |              |                |
+embody/       compose/   ←    embody/  +  lenses/
+                                 ↑
+                                 |
+                              (compose distributes embodiment to lenses via props)
+```
+
+Concrete:
+
+- `embody/` may import from `embody/lib/*` and `@-utils`. Never from `compose/`
+  or `lenses/`.
+- `embody/lib/*` may import from sibling `embody/lib/*` and `@-utils`. Never
+  from `embody/` (top), `compose/`, or `lenses/`.
+- `lenses/<lens>/*` may import from sibling lens-internal files,
+  `compose/lib/*`, and `@-utils`. Receives `embodiment` via props from the
+  orchestrator. Never imports from `embody/` or `compose/` (top).
+- `compose/` may import from `compose/lib/*`, `embody/`, `lenses/`, `@-utils`.
+- `compose/lib/*` may import from sibling `compose/lib/*`, `embody/` (consume
+  embodiment instances), `@-utils`. Never from `lenses/`.
+- `@-utils` may not import from anywhere else in `javascript/`.
+
+## Categorization rationale (which `lib/*` modules go where)
+
+| Current path              | Target path                       | Why                                                            |
+| ------------------------- | --------------------------------- | -------------------------------------------------------------- |
+| `lib/parse-old/`          | `embody/lib/parse-old/` (temp)    | Legacy; reference for new `parse/`; deleted after parity       |
+| (new)                     | `embody/lib/parse/`               | Tokenize + AST-build → NM input                                |
+| `lib/ast/`                | `embody/lib/ast/`                 | AST utilities are NM-data shape                                |
+| `lib/validating/`         | `embody/lib/validating/`          | JEJ subset check → snippet metadata                            |
+| `lib/formatting/`         | `embody/lib/formatting/`          | JEJ formatting → snippet metadata                              |
+| `lib/evaluating/`         | `embody/lib/evaluating/`          | Evaluation engines that `embody.streams.evaluate.*` wrap       |
+| `lib/scope/`              | `embody/lib/scope/`               | Scope analysis → NM scope-chain understanding                  |
+| `lib/socratizing/`        | `compose/lib/socratizing/`        | Socratic micro-decision analysis (orchestrator-level pedagogy) |
+| `lib/jej-documentation/`  | `compose/lib/jej-documentation/`  | JEJ docs for editor tooltips                                   |
+| `lib/completing/`         | `compose/lib/completing/`         | Autocomplete (editor concern)                                  |
+| `lib/editing/`            | `compose/lib/editing/`            | Editor integration                                             |
+| `lib/error-interpreting/` | `compose/lib/error-interpreting/` | Learner-friendly error messages (editor concern)               |
+| `lib/recommender/`        | `compose/lib/recommender/`        | Exercise recommender; consumes embodiment after refactor       |
+| Cross-cutting infra       | stays at `src/lib/utils/`         | Used by all peers via @-alias                                  |
+
+The full step-by-step move sequence is in
+[`REFACTOR-HANDOFF.md`](./REFACTOR-HANDOFF.md).
+
+## Public API: `<StudyLenses>` (orchestrator-primary, not embody-primary)
+
+The package's public interface is the **`<StudyLenses>`** React component
+exported from `compose/orchestrator/`. `index.ts` re-exports it. Consumers
+mount `<StudyLenses snippet={…} />`; everything else (embody, lenses,
+editor, analysis libs) is internal implementation.
+
+embody is **not** part of the public surface. It is the operational data
+layer the orchestrator consumes. Lens authors and curriculum authors don't
+import `embody` directly — they ship lens plugins that the orchestrator
+mounts under `<StudyLenses>`, and lens plugins receive `embodiment` via
+props from the orchestrator.
+
+embody architecture, data flow, and tradeoffs are documented in
+[`embody/DOCS.md`](./embody/DOCS.md). The `embody/lib/*` evaluation engines
+(`run`, `intercept`, `trace.syntax`, `trace.semantics`) are what
+`embody.streams.evaluate.*` wraps internally.
+
+## Open specs (placeholders)
+
+Not yet locked; will firm up during implementation. Consumers should not rely on
+shapes here:
+
+- **embody static-side stream generators** — `streams.realm()`,
+  `streams.parse.tokenize()`, `streams.parse.parse()`, `streams.create()` — new
+  modules built on `embody/lib/*` outputs. Implementation pending.
+- **embody evaluate-side streams** — wrap the existing evaluation engines. Each
+  call returns a `RunInstance`; final entwinement details (events array vs.
+  linked list refs vs. derived indexes) lock during implementation per
+  `lib/evaluating/intercept`'s `LinkedInterceptEvent` + `InterceptResult` prior
+  art.
+- **Per-category event payload kinds** — sketched in `embody/types.ts` but full
+  payload shape per kind locks as event emission is implemented.
+- **`Distribution` exposure for metrics** — currently
+  `{ min, max, mean, median, samples }`. Whether `samples` stays as raw arrays
+  vs. pre-computed stats only locks once lenses consume them.
+- **`HasIo` shape** — per-method counts plus convenience sums currently; may
+  simplify.
+- **`features` enumeration** — boolean record may grow as lenses pull on it.
+- **embody `opts` backdoors** — small config surface for downstream consumers
+  (e.g., a remix-style lens that wants to skip auto-format on its derivative
+  source). Shape TBD.
+- **Public API surface for `index.ts`** — exports the `<StudyLenses>`
+  orchestrator component as the consumer-facing interface. Legacy
+  named-function re-exports (`run`, `trace`, `validate`, `parse`, `format`,
+  `checkFormat`) will be reconsidered as embody/orchestrator land (no
+  deprecation timeline set).
+
+## Contributor guidelines
+
+- Don't add new public-API functions ad hoc. Either fold observability features
+  into embody, or keep them internal to the relevant peer.
+- New types belong in `embody/types.ts` (canonical contract) or a peer's local
+  types module. Don't add types elsewhere.
+- All public results deep-frozen. No exceptions.
+- Respect the dependency rules above. Lenses don't import from embody; compose
+  distributes embodiment via props.
+- Cross-doc links (`README` ↔ `notional-machine` ↔ peer `README`/`DOCS`) must
+  stay alive after structural moves.

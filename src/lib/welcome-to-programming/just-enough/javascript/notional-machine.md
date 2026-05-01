@@ -1,159 +1,103 @@
 # JEJ Notional Machine
 
-The mental model of how JavaScript works that JEJ learners build. This document
-defines the conceptual model — what elements exist, how they relate, and how
-execution proceeds. The tracer captures this model as data; educational tools
-visualize it.
+This document defines the **conceptual evaluation model** — the precise,
+bounded mental model of how JEJ programs run.
+
+The NM is the **mechanical instrument** that Welcome to Frogramming centers
+on (per the [syllabus's mechanical-instrument metaphor][metaphor]): the
+machine the 🔬 Frogrammer grounds their predictions in. It is one of four
+audiences a JEJ program addresses (developers, the NM, users, agents);
+twinning it is the focus of the Frogrammer hat.
+
+For the larger story — **JEJ → NM → embody → study lenses**, the four
+audiences, and the Frogrammer's predict-trace-verify practice — see
+[README.md](./README.md). This document is upstream of all of that: get
+the NM right and embody / lenses / curriculum follow.
 
 Covers exactly the language features in [reference.md](./reference.md).
 
+**Spec-aligned.** Learner-friendly names in the body; the
+[Spec correspondence appendix](#spec-correspondence-appendix) maps every
+term to its ECMA-262 (ES2024) abstract operation.
+
+**Pedagogy is not decided here.** This document describes what is
+*observable*; lenses choose what to *teach*. The contract is accuracy.
+
 See also:
 
-- [tracer.md](./tracer.md) — how the tracer captures this model (config, result
-  shape, entwined data)
-- [tracer.walkthroughs.md](./tracer.walkthroughs.md) — event sequences for every
-  JEJ construct
-- [tracer.architecture.md](./tracer.architecture.md) — implementation layers,
-  vocabulary, test taxonomy
+- [README.md](./README.md) — JEJ overview, the conceptual chain, audiences
+- [embody/](./embody/) — operational embodiment (data + event streams) of this NM
+- [embody/types.ts](./embody/types.ts) — canonical TypeScript contract
+- [embody/DOCS.md](./embody/DOCS.md) — embody architecture + data flow
+- [`lib/evaluating/trace/syntax/`](./lib/evaluating/trace/syntax/) — syntax tracer: README + DOCS for the NM-step-category implementation
+- [`lib/evaluating/trace/semantics/`](./lib/evaluating/trace/semantics/) — semantic tracer: README + DOCS for finer-grained instrumentation
 
-**Operational implementation.** The NM components described in this spec are
+[metaphor]: ../../../../spiralearn/welcome-to-programming/syllabus.md
+
+**Operational implementation.** The NM components described here are
 implemented as step categories in the **syntax tracer** at
-[`lib/evaluating/trace/syntax/`](./lib/evaluating/trace/syntax/) — a sibling
-to the semantic tracer at
+[`lib/evaluating/trace/syntax/`](./lib/evaluating/trace/syntax/) and the
+**semantic tracer** at
 [`lib/evaluating/trace/semantics/`](./lib/evaluating/trace/semantics/). Each
-NM component corresponds to one of the syntax tracer's ten step categories
+NM component corresponds to one of the tracer's step categories
 (`expression`, `resolve`, `statement`, `scope`, `control-flow`,
-`initialization`, `for-init`, `write`, `emit`, `error`). The `StepCategory`
-enum in the syntax tracer's
-[`types.ts`](./lib/evaluating/trace/syntax/types.ts) is the canonical source;
-the study-lenses recommender consumes it as its 3rd Block Model dimension.
+`initialization`, `for-init`, `write`, `coerce`, `emit`, `error`).
+
+---
+
+## Lifecycle: four phases
+
+**Realm is static data, not a runtime phase.** The realm exists before any
+user script runs (host-installed). Strictly, realm setup *precedes* parse,
+but parse does not depend on it — parsing is purely syntactic. The
+`streams.realm` generator on embody is **documentary**: it iterates the
+already-installed realm bindings (alphabetically) for "what's available in
+the world?" lenses. It is not an ordered sequence of installation events.
+
+Three temporally ordered phases follow: **parse → creation → evaluation**.
+
+```mermaid
+flowchart LR
+    R0["realm setup<br/>(host pre-populates<br/>intrinsics + host APIs)"]
+    P1["parse<br/>(tokenize → AST)"]
+    C2["creation<br/>(script-scope<br/>let/const TDZ)"]
+    E3["evaluation<br/>(statements run;<br/>block scopes push lazily)"]
+
+    R0 --> P1 --> C2 --> E3
+
+    R0 -.->|host hook| R0a[("console, alert,<br/>prompt, confirm")]
+    R0 -.->|ECMA-262| R0b[("Math, Date, Number,<br/>String, Boolean,<br/>parseInt, parseFloat,<br/>Infinity, NaN, undefined")]
+```
+
+| JEJ name | ES2024 op | What fires | Errors possible |
+| --- | --- | --- | --- |
+| **Realm setup: ECMA intrinsics** | `SetDefaultGlobalBindings` (§9.3.4) called from `InitializeHostDefinedRealm` (§9.6) | The host installs ECMA-262 intrinsic bindings: `Math`, `Date`, `Number`, `String`, `Boolean`, `parseInt`, `parseFloat`, `Infinity`, `NaN`, `undefined`. (`RegExp.prototype` exists for regex literal `.test()` proto-lookup; `RegExp` constructor itself is not in JEJ scope.) | None (host does this before any code runs) |
+| **Realm setup: host bindings** | Host hook inside `InitializeHostDefinedRealm` (HTML "initialise the global object") | The host installs WHATWG/HTML APIs: `console`, `alert`, `prompt`, `confirm`. **Spec-distinct from ECMA intrinsics.** | None |
+| **Parse** | `ParseScript` (§16.1.5) | Source string → token stream → AST. JEJ pedagogically splits this into tokenize → AST-build for stepping; the spec defines a single op (lexing is folded into the grammar via on-demand `InputElementDiv`/`InputElementRegExp` goal symbols). | `SyntaxError` — invalid character sequences (tokenize), invalid grammar (AST-build), Early Errors like `break` outside a loop. |
+| **Creation: script-scope** | `GlobalDeclarationInstantiation` (§16.1.7) | One AST walk. Reserves all script-level `let`/`const` bindings as **uninitialized** (TDZ is the access-time consequence, not the state name). Block scopes are NOT created. | `SyntaxError` — duplicate `let`/`const` at script scope. (Statically detectable; no evaluation needed.) |
+| **Evaluation** | `ScriptEvaluation` body (§16.1.6) + per-Block `BlockDeclarationInstantiation` (§14.2.3) + per-iteration `CreatePerIterationEnvironment` (§14.7.4.4) for `for(let …)` | Statements run in source order. Block scopes push lazily on Block entry (only when they have lexical decls — see [§14.2.2 note](#empty-blocks-dont-push)). Bindings transition `tdz → initialized` when their declaration evaluates. `for (let i …)` creates a fresh env each iteration body. | `ReferenceError` (TDZ access, unresolvable identifier), `TypeError` (call non-callable, property on null/undefined, const reassignment), `RangeError` (numeric out of range or JEJ iteration-guard `limit`). |
+
+`ScriptEvaluation` (§16.1.6) is the umbrella containing creation +
+evaluation + execution-context push/pop bookends. (Note: "execution
+context" is a precise ECMA-262 term — the spec object containing the
+LexicalEnvironment chain — and stays as the spec term even though the
+JEJ phase is named "evaluation".) JEJ has no functions, so the
+execution-context stack only ever has one frame — the bookends become
+the first and last events of the evaluate stream.
 
 ---
 
 ## The machine at a glance
 
-```text
-┌─── PROGRAM SOURCE CODE ───────────────────────────────────────────────────────┐
-│  let greeting = 'hello';                                                      │
-│  let shout = greeting.toUpperCase() + '!';                                   │
-│  if (shout.length > 3) {                                                     │
-│    alert(shout);                                                             │
-│  }                                                                           │
-└───────────────────────────────────────────────────────────────────────────────┘
-        │                                    │                                │
-        │ VISUAL-SYNTAX LEVEL                │ BEHIND-THE-SCENES LEVEL        │ I/O CHANNELS
-        │ (what the code DOES)               │ (what the VM does invisibly)    │ (outside the VM)
-        │                                    │                                │
-        ▼                                    ▼
-┌─── EXPRESSIONS ───────────┐    ┌─── VALUES ──────────────────────────────────┐
-│ syntax → value            │    │ primitive data flowing through the program  │
-│                           │    │                                             │
-│ operators: +, >, ===, ... │    │ string number bigint boolean null undefined │
-│ literals: 5, 'hello', ... │    │                                             │
-│ identifiers: x, y        │    │ primitives: direct containment (x holds 5)   │
-│ calls: alert(...), ...    │    │ globals: reference (Math → register)        │
-│ templates: `${x}`        │     └─────────────────────────────────────────────┘
-│ property: str.length      │              ▲ stored in       │ flow through
-│ assignment: x = ...       │              │                 ▼
-├───────────────────────────┤    ┌─── BINDINGS ────────────────────────────────┐
-│    resolve ──────────────────→ │ named memory slots holding values           │
-│ (bridges visual ↔ behind) │    │                                             │
-└───────────────────────────┘    │ lifecycle:                                  │
-                                 │   declare → initialize → available          │
-┌─── STATEMENTS ────────────┐    │   → access / update                         │
-│ syntax → control flow     │    │ kind: let | const | global                  │
-│                           │    └─────────────────────────────────────────────┘
-│ declarations, if/else,    │              │ contained in
-│ while, for, do-while,     │              ▼
-│ for-of, break, continue   │    ┌─── SCOPES (chain, walked top-down) ─────────┐
-└───────────────────────────┘    │                                             │
-                                 │ ┌─ global environment ──────────────────┐   │
-┌─── ERRORS ────────────────┐    │ │                                       │   │
-│ abnormal termination      │    │ │ REGISTERS (by reference)              │   │
-│ (cross-cutting, with      │    │ │                                       │   │
-│ creation/execution phase) │    │ │ Math ──→ ┌──────────────────────┐     │   │
-│                           │    │ │          │ max min abs floor    │     │   │
-│ ReferenceError            │    │ │          │ ceil round random    │     │   │
-│ TypeError                 │    │ │          │ PI E sqrt pow ...    │     │   │
-│ RangeError                │    │ │          └──────────────────────┘     │   │
-└───────────────────────────┘    │ │ String ──→ ┌────────────────────┐     │   │
-                                 │ │            │ ƒ String()         │     │   │
-                                 │ │            │ fromCharCode       │     │   │
-                                 │ │            │ fromCodePoint      │     │   │
-                                 │ │            │ ┌ prototype ─────┐ │     │   │
-                                 │ │            │ │ toUpperCase    │ │     │   │
-                                 │ │            │ │ toLowerCase    │ │     │   │
-                                 │ │            │ │ slice trim     │ │     │   │
-                                 │ │            │ │ includes       │ │     │   │
-                                 │ │            │ │ indexOf        │ │     │   │
-                                 │ │            │ │ replace ...    │ │     │   │
-                                 │ │            │ └────────────────┘ │     │   │
-                                 │ │            └────────────────────┘     │   │
-                                 │ │ Number ──→ ┌────────────────────┐     │   │
-                                 │ │            │ ƒ Number()         │     │   │
-                                 │ │            │ isNaN isFinite     │     │   │
-                                 │ │            │ isInteger          │     │   │
-                                 │ │            │ ┌ prototype ─────┐ │     │   │
-                                 │ │            │ │ toString       │ │     │   │
-                                 │ │            │ │ toFixed        │ │     │   │
-                                 │ │            │ │ toPrecision    │ │     │   │
-                                 │ │            │ │ toExponential  │ │     │   │
-                                 │ │            │ │ toLocaleString │ │     │   │
-                                 │ │            │ └────────────────┘ │     │   │
-                                 │ │            └────────────────────┘     │   │
-                                 │ │ Date ──→ ┌──────────────────────┐     │   │
-                                 │ │          │ static: now  parse   │     │   │
-                                 │ │          │ ctor: new Date()     │     │   │
-                                 │ │          │ ┌ instance ────────┐ │     │   │
-                                 │ │          │ │ getFullYear      │ │     │   │
-                                 │ │          │ │ getMonth getDate │ │     │   │
-                                 │ │          │ │ getHours         │ │     │   │
-                                 │ │          │ │ getMinutes       │ │     │   │
-                                 │ │          │ │ getSeconds       │ │     │   │
-                                 │ │          │ │ getTime          │ │     │   │
-                                 │ │          │ │ toLocaleDateStr  │ │     │   │
-                                 │ │          │ │ toLocaleTimeStr  │ │     │   │
-                                 │ │          │ │ toISOString      │ │     │   │
-                                 │ │          │ └──────────────────┘ │     │   │
-                                 │ │          └──────────────────────┘     │   │
-                                 │ │ console ──→ ┌──────────────────┐     │   │──→ ┌─ DEV CONSOLE ──────────────┐
-                                 │ │             │ log warn error   │     │   │    │ devtools output             │
-                                 │ │             │ assert ...       │     │   │    │ (append-only, no pause)     │
-                                 │ │             └──────────────────┘     │   │    └─────────────────────────────┘
-                                 │ │                                       │   │
-                                 │ │ (regex /pat/ → RegExp.prototype       │   │
-                                 │ │  .test() — not in global register)    │   │
-                                 │ │                                       │   │
-                                 │ │ FUNCTIONS (callable, marked ƒ)        │   │
-                                 │ │ ƒ alert   ──────────────────────────────────→ ┌─ USER INTERFACE ────────────┐
-                                 │ │ ƒ confirm ←────────────────────────────────→  │ browser dialogs             │
-                                 │ │ ƒ prompt  ←────────────────────────────────→  │ (pauses until user responds)│
-                                 │ │ ƒ parseInt  ƒ parseFloat              │   │   └─────────────────────────────┘
-                                 │ │ ƒ Boolean()                           │   │
-                                 │ │                                       │   │
-                                 │ │ CONSTANTS (bare values)               │   │
-                                 │ │ Infinity  NaN  undefined              │   │
-                                 │ │                                       │   │
-                                 │ └───────────────────────────────────────┘   │
-                                 │   ▲ (top of scope chain)                    │
-                                 │   │                                         │
-                                 │ ┌─ script scope ────────────────────────┐   │
-                                 │ │ greeting: let │ 'hello'               │   │
-                                 │ │ shout:    let │ 'HELLO!'              │   │
-                                 │ └───────────────────────────────────────┘   │
-                                 │   ▲                                         │
-                                 │   │                                         │
-                                 │ ┌─ block scope (if-body) ───────────────┐   │
-                                 │ │ (no bindings in this block)           │   │
-                                 │ └───────────────────────────────────────┘   │
-                                 └─────────────────────────────────────────────┘
+The canonical poster — full NM at one zoom. Three pillars:
+visual-syntax level (what the code says) · behind-the-scenes (what the NM
+does invisibly) · host I/O channels.
 
-TWO KINDS OF CHAIN LOOKUP:
-  Scope chain:     block → script → global   (finding a VARIABLE by name)
-  Prototype chain: value → Constructor.prototype   (finding a METHOD on a value)
+![JEJ Notional Machine — Machine at a Glance: source code feeds a scope chain (realm → script → block); realm splits into ECMA intrinsics and host bindings; two chain lookups (scope chain finds variables, prototype chain finds methods); I/O routes through host bindings to the dev console and user dialogs.](./notional-machine.svg)
 
+The sections below unpack each piece of the poster in prose with smaller
+diagrams that reinforce specific aspects.
 
-```
 ---
 
 ## Two viewing levels
@@ -168,26 +112,24 @@ TWO KINDS OF CHAIN LOOKUP:
 - **Values** — primitive data flowing through the program
 - **Bindings** — named memory slots that hold values
 - **Scopes** — containers for bindings, forming a chain
-- **Global environment** — built-in objects, functions, and constants (top of
-  the scope chain)
+- **Realm** — the world the script is born into (intrinsics + host bindings)
 - **Coercion** — implicit type transformations (invisible in code, observable
-  only in the trace — fires between operand resolution and operator)
+  only in the trace)
 
-**Control panel vs. machine**: The visible syntax (expressions + statements) is
-the CONTROL PANEL — the interface through which the programmer controls the
-machine. The behind-the-scenes level (bindings, scopes, values, coercion) is
-what JavaScript actually IS — the machine itself. The code text is a
-representation designed to help us program the machine; it is not the machine.
+**Control panel vs. machine.** The visible syntax (expressions + statements)
+is the CONTROL PANEL — the interface through which the programmer controls
+the machine. The behind-the-scenes level (bindings, scopes, values, coercion)
+is what JavaScript actually IS — the machine itself. The code text is a
+representation designed to help us program the machine; it is not the
+machine.
 
-**Bridge**: resolve captures when an expression produces a value — connecting
-which syntax (visual) to which data (behind-the-scenes).
+**Bridge.** `resolve` captures when an expression produces a value —
+connecting which syntax (visual) to which data (behind-the-scenes).
 
-**Cross-cutting**: errors (abnormal termination).
+**Cross-cutting.** Errors (abnormal termination).
 
-**External channels** (outside the computation model, reached via function calls):
-
-- **Developer Console** — append-only output stream (devtools); `console.*` writes here
-- **User Interface** — synchronous browser dialogs; `alert`/`confirm`/`prompt`
+**External channels.** I/O channels (Developer Console, User Interface) are
+host-provided; not part of the computation model. See [I/O Channels](#io-channels).
 
 ---
 
@@ -205,9 +147,9 @@ Values are the currency of the notional machine. They:
 - Are passed as arguments to function calls and returned as results
 - Are transformed by coercion (one type becomes another implicitly)
 
-**Containment model**: primitives use direct containment — "the box labeled x
-contains 5." Global objects use reference — "Math points to a register of
-available methods."
+**Containment model**: primitives use direct containment — "the box labeled
+`x` contains 5." Realm-level objects use reference — "Math points to a
+register of available methods."
 
 ### Bindings
 
@@ -217,134 +159,257 @@ Named memory slots that hold values. Each binding has:
 - **kind**: `let`, `const`, or `global`
 - **value**: the current value held
 - **scope**: which scope this binding lives in
+- **status**: queryable state — `'tdz'` | `'initialized'` | `'dead'`
 
 Lifecycle:
 
-1. **declare** — the binding exists but is in the Temporal Dead Zone (TDZ).
-   Fires at SCOPE CREATION (hoisting) — before the declaration line runs.
-2. **initialize** — the binding receives its first value. `let x = 5` → value
-   is `5`. `let x;` → value is `undefined`. TDZ ends.
-3. **available** — the binding is safe to read. Fires immediately after
-   initialize.
-4. **access** — the binding's current value is read (behind-the-scenes
-   perspective). Fires when an identifier is evaluated.
-5. **update** — the binding's value changes. Fires on assignment (`x = 6`,
+1. **declare** — the binding is created in its scope with `status: 'tdz'`.
+   For script-scope bindings this fires during creation phase
+   (`GlobalDeclarationInstantiation`); for block-scope bindings it fires on
+   block entry (`BlockDeclarationInstantiation`).
+   - Spec uses the term *uninitialized*; **TDZ** ("Temporal Dead Zone") is
+     the access-time consequence — reading an uninitialized binding throws
+     `ReferenceError`.
+2. **initialize** — the binding receives its first value. `let x = 5` →
+   value is `5`. `let x;` → value is `undefined`. `status: 'initialized'`.
+3. **access** — the binding's current value is read.
+4. **update** — the binding's value changes. Fires on assignment (`x = 6`,
    `x += 1`, `x++`).
+5. **dead** (block-scope only) — when evaluation leaves the enclosing block,
+   block-scope bindings become unreachable. `status: 'dead'`.
 
-There is also an expression-level **identifiers.read** event that fires for ALL
-identifier nodes in the AST — both scope-chain identifiers (`x`, `Math`) AND
-property-key identifiers (`.max`, `.length`, `.toUpperCase`). This is the
-visual-syntax perspective: "I see this identifier in the code." The
-behind-the-scenes counterpart for scope-chain identifiers is `bindings.access`
-(binding lifecycle); for property-key identifiers it's `register-check` or
-`proto-check` (property resolution). Mirrors the assignment/update split.
+`const` bindings: initialize once, never update. Update attempt → `TypeError`
+(per ECMA-262, **not** `SyntaxError`).
 
-`const` bindings: initialize once, never update. Update attempt → TypeError.
+There is also a visual-syntax `expression: identifier` event that fires for
+all identifier nodes in the AST — both scope-chain identifiers (`x`, `Math`)
+AND property-key identifiers (`.max`, `.length`). The behind-the-scenes
+counterpart for scope-chain identifiers is `binding:access` (binding
+lifecycle); for property-key identifiers it's `proto-check` (property
+resolution).
 
 ### Scopes
 
-Containers for bindings. Scopes form a chain — inner scopes can see bindings in
-outer scopes via name resolution.
+Containers for bindings. Scopes form a chain — inner scopes can see bindings
+in outer scopes via name resolution.
 
 Kinds:
 
-- **script scope** — top-level scope of the program
-- **block scope** — created by each `{ }` block (if-bodies, loop bodies, bare
-  blocks)
-- **global environment** — the outermost scope. Built-in objects, functions, and
-  constants. Always present. Top of the scope chain.
+- **global environment** — outermost scope. Realm intrinsics + host
+  bindings. Always present. Top of the scope chain.
+- **script scope** — top-level scope of the program. Created by
+  `GlobalDeclarationInstantiation` during the creation phase.
+- **block scope** — created by each `{ }` block (if-bodies, loop bodies,
+  bare blocks) **that has lexical declarations**. See
+  [Empty blocks don't push](#empty-blocks-dont-push).
 
-Lifecycle:
+Lifecycle (per ECMA-262, modelled as `push`/`pop` events on the
+LexicalEnvironment chain):
 
-1. **create** — scope created. All bindings hoisted (declare events fire here).
-2. **enter** — execution enters the scope body.
-3. **completion** — scope body finishes normally.
-4. **interrupt** — scope body exits abnormally (break, continue, or error).
-5. **leave** — execution leaves the scope. Always fires (like `finally`).
+1. **push** — a new env is pushed onto the chain. Bindings declared as TDZ.
+2. **pop** — the env is popped. Block-scope bindings become `dead`.
+
+Scope pop reasons: `'normal' | 'break' | 'continue' | 'error' | 'limit'`.
+
+#### Micro-ordering: push → declares → first statement
+
+On `scope:push` for a non-empty block (one with lexical declarations), all
+`binding:declare` events for the block's `let`/`const` bindings fire
+immediately, in source order, **before** the first statement event inside
+the block. This mirrors `GlobalDeclarationInstantiation` for script scope.
+
+```text
+scope:push (kind: 'block')
+  binding:declare (name: 'x', status: 'tdz')   ← all declares burst here
+  binding:declare (name: 'y', status: 'tdz')
+statement:enter ...                             ← first body statement
+```
+
+The same micro-ordering applies to the `streams.create` stream for
+script-scope: the stream opens with one `scope:push` event for the script
+scope, followed by a `binding:declare` event for each script-level `let`/
+`const` in source order.
+
+`limit` is JEJ-specific (iteration/time guard) — not ECMAScript, but a real
+reason scopes exit in our runtime. Internally implemented via thrown
+loop-guards; learners never see the throw, only the `limit` pop reason.
+
+#### Empty blocks don't push
+
+Per ECMA-262 §14.2.2, a `Block` only creates a new declarative environment
+record if it contains lexical declarations (`let`/`const`). A block like
+`{ console.log(1); }` does not push an env — the engine elides the scope.
+
+This is a real case of **syntax behaving differently based on context**: the
+`{ }` looks scope-shaped to a reader but the engine optimizes away the
+unused frame. Worth surfacing as a teachable moment about syntax-vs-semantics
+in curriculum, not as machinery the NM hides.
 
 ### Scope chain lookup (name resolution)
 
-When an identifier is evaluated, the engine walks the scope chain. Each scope
-checked is a separate observable step:
+When an identifier is evaluated, the engine walks the scope chain. Each
+scope checked is a separate observable step — exposed on every
+`category: 'resolve'` event with `kind: 'identifier'` as the
+`scopeChainWalk` array.
 
+```mermaid
+flowchart LR
+    id(["identifier<br/>e.g. greeting"])
+    block["block scope<br/>{ y, z }"]
+    script["script scope<br/>{ greeting, shout }"]
+    realm["realm<br/>{ Math, console, … }"]
+    found(["✓ found"])
+    err(["✗ ReferenceError"])
+    id --> block
+    block -- miss --> script
+    script -- hit --> found
+    script -. miss .-> realm
+    realm -. miss .-> err
 ```
-scope-check(block, names: [y, z], result: miss)
-scope-check(script, names: [greeting, shout], result: hit)
+
+```text
+scopeChainWalk: [
+  { scope: <block>,  hit: false },   // ['y', 'z'] — miss
+  { scope: <script>, hit: true  },   // ['greeting', 'shout'] — hit on greeting
+]
 → found greeting in script scope
 ```
 
-Failed lookup = chain of misses ending in error:
+Failed lookup = chain of misses ending in `ReferenceError`:
 
-```
-scope-check(block, miss) → scope-check(script, miss) → scope-check(global, miss)
+```text
+scopeChainWalk: [
+  { scope: <block>,  hit: false },
+  { scope: <script>, hit: false },
+  { scope: <global>, hit: false },
+]
 → ReferenceError: undeclaredVar is not defined
 ```
 
 ### Prototype chain lookup (method resolution)
 
-When a method is accessed on a value (`str.toUpperCase()`), JavaScript walks the
-prototype chain. Parallels scope chain lookup — both are "walk a chain to find
-a name."
+When a method is accessed on a value (`str.toUpperCase()`), JavaScript walks
+the prototype chain. Parallels scope chain lookup — both are "walk a chain
+to find a name." Exposed on every `resolve` event with `kind: 'member'` as
+the `protoChainWalk` array.
 
+```mermaid
+flowchart LR
+    val(["value<br/>'hello'"])
+    primitive["primitive itself<br/>(no own .toUpperCase)"]
+    proto["String.prototype<br/>{ toUpperCase, slice, … }"]
+    found(["✓ found toUpperCase"])
+    val --> primitive
+    primitive -- miss --> proto
+    proto -- hit --> found
 ```
-proto-check(value: 'hello', miss)
-proto-check(String.prototype, hit: toUpperCase)
+
+```text
+protoChainWalk: [
+  { object: 'hello',           hit: false },   // primitive itself
+  { object: String.prototype,  hit: true },    // toUpperCase found
+]
 → found toUpperCase on String.prototype
 ```
 
-For JEJ primitives, the chain is always two steps (value → Constructor.prototype):
+For JEJ primitives, the chain is always two steps:
 
-- `string` → `String.prototype` (toUpperCase, slice, trim, includes, ...)
-- `number` → `Number.prototype` (toString, toFixed, toPrecision, toExponential,
-  toLocaleString)
+- `string` → `String.prototype` (toUpperCase, slice, trim, includes, …)
+- `number` → `Number.prototype` (toString, toFixed, toPrecision,
+  toExponential, toLocaleString)
 - regex literal → `RegExp.prototype` (test)
 
-### Global environment
+The "two chains, same shape" insight is the central pedagogical leverage
+point for resolution events — both walks observable as arrays of step
+records.
 
-Top of the scope chain. Everything JavaScript provides that the learner didn't
-create. Distinguished by visual form:
+### Realm
+
+The realm is "the world your script is born into." It contains everything
+JavaScript provides that the learner didn't create. Spec-wise, the realm
+has **two distinct populations** (annotates the SVG poster's realm box):
+
+```mermaid
+flowchart TB
+    realm[("Realm<br/>(global environment)")]
+    intrinsics["ECMA intrinsics<br/>SetDefaultGlobalBindings (§9.3.4)<br/><br/>Math · Date · Number · String · Boolean<br/>parseInt · parseFloat<br/>Infinity · NaN · undefined"]
+    host["Host bindings<br/>HTML host hook in InitializeHostDefinedRealm (§9.6)<br/><br/>console · alert · prompt · confirm"]
+    realm --> intrinsics
+    realm --> host
+```
+
+Realm bindings are categorized by visual form (used by lenses to render
+differently):
+
+- **`object-register`** — boxes with methods + a prototype.
+  E.g. `Math`, `String`, `Number`, `Date`, `console`.
+- **`function`** — callable values (notated with the `ƒ` prefix in
+  diagrams). E.g. `ƒ alert`, `ƒ parseInt`, `ƒ Boolean`.
+- **`constant`** — bare primitive values. E.g. `Infinity`, `NaN`, `undefined`.
+
+The `ƒ` notation is internal to JEJ visualizations — learners won't see it
+in their code or on MDN. It's a typographic cue: "this is callable."
+
+#### ECMA-262 intrinsics
+
+Set by `SetDefaultGlobalBindings` (§9.3.4), called from
+`InitializeHostDefinedRealm` (§9.6). These are always present, regardless of
+host environment:
 
 **Object registers** (boxes with methods + prototype):
 
-- **Math**: `max`, `min`, `abs`, `floor`, `ceil`, `round`, `random`, `PI`, ...
+- **Math**: `max`, `min`, `abs`, `floor`, `ceil`, `round`, `random`, `PI`,
+  `E`, `sqrt`, `pow`, …
 - **String**: `f String()` (conversion), `fromCharCode`, `fromCodePoint`.
   Prototype: `toUpperCase`, `toLowerCase`, `slice`, `trim`, `includes`,
-  `indexOf`, `replace`, `charAt`, `charCodeAt`, `at`, ...
+  `indexOf`, `replace`, `charAt`, `charCodeAt`, `at`, …
 - **Number**: `f Number()` (conversion), `isNaN`, `isFinite`, `isInteger`.
   Prototype: `toString`, `toFixed`, `toPrecision`, `toExponential`,
   `toLocaleString`.
-- **Date**: static: `now`, `parse`. Constructor: `new Date()` (the sole `new`
-  exception in JEJ). Instance methods: `getFullYear`, `getMonth`, `getDate`,
-  `getHours`, `getMinutes`, `getSeconds`, `getTime`, `toLocaleDateString`,
-  `toLocaleTimeString`, `toISOString`. Date methods return primitives (numbers
-  or strings) — no mutation, making Date a gentle intro to reference types.
-- **console**: output by intent: `debug`, `log`, `info`, `warn`, `error`;
-  asserting: `assert`; counting: `count`, `countReset`; grouping: `group`,
-  `groupCollapsed`, `groupEnd`; timing: `time`, `timeLog`, `timeEnd`;
-  utility: `clear`
+- **Date**: static: `now`, `parse`. Constructor: `new Date()` (the sole
+  `new` exception in JEJ). Instance methods: `getFullYear`, `getMonth`,
+  `getDate`, `getHours`, `getMinutes`, `getSeconds`, `getTime`,
+  `toLocaleDateString`, `toLocaleTimeString`, `toISOString`.
+  Date methods return primitives — no mutation, gentle intro to reference
+  types.
 
 **Standalone functions** (marked `f`):
 
-- `f prompt`, `f confirm`, `f alert` — user I/O
 - `f parseInt`, `f parseFloat` — string-to-number parsing
 - `f Boolean()` — explicit boolean conversion (teaches truthiness)
-- Global `isNaN`/`isFinite` are NOT in JEJ — use only the namespaced
-  `Number.isNaN` / `Number.isFinite`
 
-**Constants**: `Infinity`, `NaN`, `undefined`
+**Constants**: `Infinity`, `NaN`, `undefined`.
 
-Regex literals (`/pattern/flags`) create RegExp instances — `.test()` is found
-via `RegExp.prototype`. No `RegExp` constructor in JEJ.
+Regex literals (`/pattern/flags`) create RegExp instances; `.test()` is
+found via `RegExp.prototype`. No `RegExp` constructor in JEJ.
+
+`globalThis` is an ECMA intrinsic but **not in JEJ scope**.
+
+#### Host bindings (HTML)
+
+Set by the host hook inside `InitializeHostDefinedRealm`. These are
+WHATWG/HTML APIs — **not** part of ECMA-262:
+
+- `console` — output by intent: `debug`, `log`, `info`, `warn`, `error`;
+  asserting: `assert`; counting: `count`, `countReset`; grouping: `group`,
+  `groupCollapsed`, `groupEnd`; timing: `time`, `timeLog`, `timeEnd`;
+  utility: `clear`. Routes to the [Developer Console](#developer-console).
+- `alert`, `confirm`, `prompt` — synchronous UI dialogs. Route to the
+  [User Interface](#user-interface).
+
+Treating host bindings and ECMA intrinsics as a single population conflates
+spec-distinct concepts. Lenses can mark them differently to teach the
+distinction (e.g., "this is a JS feature, this is a browser feature").
 
 ### Expressions
 
 Syntax that produces values through evaluation. Compound expressions have
 sub-expressions that evaluate in order (left-to-right, respecting precedence).
 
-Expression kinds in JEJ: operators, short-circuit operators (`&&`, `||`, `??`),
-ternary (`a ? b : c`), assignment (`=`, `+=`, `??=`, ...), increment/decrement
-(`++x`, `x++`), property access (`.`, `[]`, `?.`), function calls, template
-literals, identifiers, literals.
+Expression kinds in JEJ: operators, short-circuit operators (`&&`, `||`,
+`??`), ternary (`a ? b : c`), assignment (`=`, `+=`, `??=`, …),
+increment/decrement (`++x`, `x++`), property access (`.`, `[]`, `?.`),
+function calls, template literals, identifiers, literals.
 
 ### Statements
 
@@ -354,70 +419,184 @@ Statement kinds in JEJ: variable declarations (`let`, `const`), expression
 statements, if/else, while, do-while, for, for-of (strings only), break,
 continue.
 
-Statements have an exit reason: `normal`, `break`, `continue`, or `error`.
+Statements have an exit reason: `'normal' | 'break' | 'continue' | 'error'
+| 'limit'`.
 
 ### Coercion
 
-Implicit type transformation. Fires BETWEEN operand resolution and operator
-application — making the invisible visible.
+Implicit type transformation. Coercion is observable as
+`category: 'coerce'` events with `kind: 'ToPrimitive' | 'ToString' |
+'ToNumeric' | 'ToBoolean'` (matching the ECMA-262 abstract operations).
 
-Key coercion moments:
+The general pattern for binary operators:
 
-- **String concatenation**: `'5' + 1` → coerces `1` to `'1'`
-- **Numeric operations**: `'5' - 1` → coerces `'5'` to `5`
-- **Boolean contexts**: `if (x)`, `while (x)`, `!x` — truthiness
-- **Template interpolation**: `${value}` → coerces to string
-- **Comparison**: `'5' == 5` → coercion before comparison
-- **Type conversion functions**: `Number('hello')` → `NaN`, `Boolean(0)` →
-  `false` — explicit coercion visible as function calls
+```text
+resolve operands → coerce → apply operator
+```
+
+`ToBoolean` fires for the test of `if`, `while`, `do-while`, the test
+clause of `for`, ternary, `!`, and the **LHS-only** test of `&&` / `||`.
+Observable as a single `coerce` event with `kind: 'ToBoolean'`.
+
+`&&` / `||` semantics: the LHS is `ToBoolean`'d only to **decide** which
+side to return — the value returned is the *original, un-coerced* operand,
+not its boolean form. So `'hi' && 0` returns `0` (not `false`); `0 || 'hi'`
+returns `'hi'` (not `true`).
+
+`??` does **not** invoke `ToBoolean` — its nullish check is an inline
+`!= null` test, not a coercion. No `coerce` event fires for the `??` test.
+
+`ToNumeric` fires for numeric operators (`-`, `*`, `/`, `%`, `**`, `<`,
+`<=`, `>`, `>=`, `&`, `|`, `^`, `<<`, `>>`, `>>>`).
+
+`ToString` fires for template-literal interpolation: `${value}` calls
+`ToString(value)` regardless of type.
+
+#### `+` is special: three coercion clusters
+
+Per ECMA-262 §13.15.3 `ApplyStringOrNumericBinaryOperator`, `+` does not
+collapse into the simple "resolve → coerce → apply" pattern. It emits three
+coercion clusters in spec order:
+
+```mermaid
+flowchart TB
+    L["resolve L"]
+    R["resolve R"]
+    P1["coerce ToPrimitive(L, 'default') → lprim"]
+    P2["coerce ToPrimitive(R, 'default') → rprim"]
+    branch{either is String?}
+    SL["coerce ToString(lprim)"]
+    SR["coerce ToString(rprim)"]
+    NL["coerce ToNumeric(lprim)"]
+    NR["coerce ToNumeric(rprim)"]
+    concat["expression '+' → string concat"]
+    add["expression '+' → numeric add"]
+    L --> P1
+    R --> P2
+    P1 --> branch
+    P2 --> branch
+    branch -- yes --> SL --> SR --> concat
+    branch -- no --> NL --> NR --> add
+```
+
+Famous gotcha: `'5' + 1` → `'51'` (string path); `'5' - 1` → `4` (numeric
+path, because `-` always uses `ToNumeric`). The three-cluster sequence makes
+the gotcha explicit.
+
+#### `??=` short-circuit semantics
+
+Per ECMA-262 §13.15.2, when the LHS is non-nullish, `??=` performs **no
+`PutValue`** at all — the assignment is fully skipped, not "performed with
+no update":
+
+```text
+LHS resolve → not nullish → skip RHS evaluation, skip PutValue entirely
+```
+
+Observable as: a `resolve` event for the LHS, no further events from the
+`??=` expression. Same shape applies to `&&=` and `||=`.
+
+#### Postfix update event ordering
+
+Per ECMA-262 §13.4.3 `UpdateExpression`, postfix and prefix differ only in
+which value is returned by the expression. The event sequences:
+
+**Postfix `x++`:**
+
+```text
+1. binding:access (x) → oldRefValue
+2. coerce ToNumeric (oldRefValue) → oldNumeric
+3. compute newNumeric = oldNumeric + 1
+4. binding:update (x, newNumeric)
+5. expression (kind: 'update', returnedValue: oldNumeric)   ← OLD
+```
+
+**Prefix `++x`:**
+
+```text
+1. binding:access (x) → oldRefValue
+2. coerce ToNumeric (oldRefValue) → oldNumeric
+3. compute newNumeric = oldNumeric + 1
+4. binding:update (x, newNumeric)
+5. expression (kind: 'update', returnedValue: newNumeric)   ← NEW
+```
+
+The `returnedValue` field is on the **expression** event (the moment the
+expression produces a value), not on the resolve event. `resolve` then
+flows the expression's result to its consumer. Easy to invert — postfix
+returns OLD, prefix returns NEW.
 
 ### Resolve
 
 The moment an expression produces a value. Bridges the two viewing levels:
 which syntax (visual) produced which data (behind-the-scenes).
 
-Resolve kinds: variable, literal, operator, shortCircuit, conditional,
-assignment, increment, property, call, template.
+Resolve kinds: `'identifier' | 'member' | 'literal' | 'operator' |
+'shortCircuit' | 'conditional' | 'assignment' | 'increment' | 'call' |
+'template'`.
 
-Resolves are traceable in isolation — filtering only resolves shows the complete
-data flow through a program, including provenance (which value came from which).
+Every resolve event carries chain-walk data when relevant:
+
+- `kind: 'identifier'` → `scopeChainWalk: ScopeChainStep[]`
+- `kind: 'member'` → `protoChainWalk: ProtoChainStep[]`
+
+Resolves are traceable in isolation — filtering only resolves shows the
+complete data flow through a program, including provenance (which value
+came from which).
 
 ### Errors
 
-JEJ has no `try`/`catch` — every runtime error is unhandled. Errors occur in
-two phases:
+JEJ has no `try`/`catch` — every runtime error is unhandled.
 
-**Creation phase** (before execution starts): the learning environment validates
-and instruments the code. Failures here include parse errors (syntax mistakes),
-JEJ validation rejections (using features outside the language level), and
-instrumentation failures. The program never runs.
+Error type to phase mapping:
 
-**Execution phase** (during execution): runtime errors that occur while the
-program is running:
+| Error | Phase | Cause | Spec |
+| --- | --- | --- | --- |
+| `SyntaxError` | parse (AST-build) | Invalid grammar; Early Errors (e.g. `break` outside loop, `let` redeclaration) | §16.1.5, §13.7.3 |
+| `ReferenceError` (TDZ) | evaluation | Access of binding declared but not yet initialized | §9.1.1.1.1 |
+| `ReferenceError` (unresolvable) | evaluation | Identifier not in any scope on the chain | §9.1.1.1.7 |
+| `TypeError` | evaluation | Call non-callable, property on null/undefined, **const reassignment**, mixing `bigint` with `number` in arithmetic, `for-of` on a non-string (JEJ restricts `for-of` to strings) | §13.6.1, §10.1.1 |
+| `RangeError` | evaluation | Numeric out of range; JEJ iteration-guard `limit` | §6.2.5 |
 
-- **ReferenceError**: undeclared variable, or TDZ access
-- **TypeError**: wrong type for operation, or assigning to `const`
-- **RangeError**: loop guard exceeded (generated by the learning environment)
+Const reassignment is `TypeError`, **not** `SyntaxError` — common
+misconception worth flagging.
 
-Both phases are part of the JS notional machine — learners need to understand
-that code goes through steps BEFORE it runs (parse → validate → instrument)
-and can fail at any of them.
+**Validation rejection** — distinct from JS errors. The JEJ learning
+environment rejects valid JavaScript that uses features outside the JEJ
+subset (user-defined functions, arrays, `var`, etc.). This is a
+**learning constraint**, not a JavaScript error. Surfaced as
+`validation.violations` on the embody object, not as a runtime error.
+
+Validation requires a successful AST. If parse fails (tokenize or AST-build
+error), there is no AST to walk: `validation.isJeJ` is `false` and
+`validation.violations` is `[]`. The parse error itself is in
+`embody.errors`.
+
+| | SyntaxError | Validation rejection |
+| --- | --- | --- |
+| Detected by | The JS parser | The JEJ learning environment |
+| Cause | Invalid JavaScript | Valid JavaScript outside JEJ's scope |
+| Example | `const = 5` | `function foo() {}` |
+| Fixable by | Fixing the syntax | Removing or replacing the feature |
 
 ### I/O Channels
 
-Two external channels through which a JEJ program communicates with the outside
-world. Not part of the computation model (values, bindings, scopes) — these are
-the places where the program's effects become visible to humans.
+Two host-provided channels through which a JEJ program communicates with
+the outside world. Not part of the computation model — these are where the
+program's effects become visible to humans.
+
+`console.*`, `alert`, `confirm`, `prompt` are **host bindings**, not
+ECMA-262. See [Realm: Host bindings](#host-bindings-html).
 
 #### Developer Console
 
-An append-only output stream, visible to the developer in browser devtools. Does
-not pause execution. Accessed via the `console` object in the global environment.
+An append-only output stream, visible to the developer in browser devtools.
+Does not pause evaluation. Accessed via the `console` object.
 
 `console.*` calls write to this stream — the method signals intent:
 
 | Group | Methods | When to use |
-|---|---|---|
+| --- | --- | --- |
 | Output | `debug`, `log`, `info`, `warn`, `error` | Trace-level detail through broken output |
 | Asserting | `assert(condition, message)` | Claims about what the program should be doing |
 | Counting | `count(label)`, `countReset(label)` | How many times a path has been reached |
@@ -427,22 +606,43 @@ not pause execution. Accessed via the `console` object in the global environment
 
 #### User Interface
 
-A synchronous dialog channel. Pauses execution until the user responds. Visible
-to the user as a browser dialog.
+A synchronous dialog channel. Pauses evaluation until the user responds.
+Visible to the user as a browser dialog.
 
 | Function | User sees | Program receives | Direction |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `alert(msg)` | message + OK button | `undefined` | one-way → |
 | `confirm(msg)` | message + OK/Cancel | `boolean` | two-way ←──→ |
 | `prompt(msg)` | message + text field + OK/Cancel | `string` or `null` | two-way ←──→ |
 
-The User Interface channel is the primary subject of Chapter 3: writing programs
-that communicate with users via these three functions.
+The User Interface channel is the primary subject of Chapter 3: writing
+programs that communicate with users via these three functions.
 
-**Tracer visibility**: I/O channel interactions are observable as tracer events.
-`io.dev.*` gates fire one event per `console.*` call carrying the method and
-arguments. `io.user.display` fires when a dialog appears; `io.user.input` fires
-when the user responds. See [tracer.md](./tracer.md) for event shapes.
+**Tracer visibility.** I/O channel interactions are observable as
+`category: 'emit'` events with `kind: 'console' | 'alert' | 'confirm' |
+'prompt'` carrying the method, args, and (for confirm/prompt) the return
+value.
+
+---
+
+## Environment is derivable, not an event
+
+The environment is **where** events take place, not an event itself. There
+is no `category: 'environment'` event type. Instead, the environment at any
+point in evaluation is derivable from:
+
+1. `static.initialScope` — post-creation, pre-first-statement frozen
+   snapshot (intrinsics + host bindings + script-scope `let`/`const` in TDZ).
+2. `category: 'scope'` events — push/pop frames as block scopes enter/exit.
+3. `category: 'binding'` events — declare → initialize → access → update.
+
+Lenses building "memory diagram at step N" fold scope and binding events
+from `static.initialScope` up to step N. State is fully queryable through
+pure data — no event needs to encode "the whole environment now," because
+the deltas already do.
+
+This is more parsimonious than diff events: the environment isn't a thing
+that *happens*, it's the substrate that other things happen in.
 
 ---
 
@@ -452,40 +652,151 @@ The richest moments in the notional machine are where multiple components
 interact simultaneously:
 
 | Moment | Visual-syntax | Behind-the-scenes |
-|---|---|---|
-| `let x = 5;` | statement enters/exits | binding declare (hoisted) → initialize → available |
-| `x` in expression | identifiers.read(x) | scope chain lookup → binding access → resolve |
-| `x = x + 1` | expression (= and +) | scope lookup → binding access → resolve → binding update |
-| `'5' + 1` | expression (+) | operand resolves → **coercion** → operator |
-| `if (x > 0) {...}` | statement (if) | test expression → coercion (to boolean) → scope create/enter/leave |
-| `Math.max(3, 7)` | expression (call) | scope lookup (Math) → prototype check (.max) → call → resolve |
-| `str.toUpperCase()` | expression (call) | scope lookup (str) → proto check (String.prototype) → call → resolve |
-| `x++` | expression (update) | identifiers.read(x) → binding access → arithmetic (+1) → binding update → resolve (old or new depending on prefix/postfix) |
-| `break;` | statement exit(break) | scope interrupt → scope leave (always) |
-| `??=` (short-circuit) | expression | access → resolve → NO RHS, NO update (short-circuited) |
-| `console.log(x)` | expression (call) | scope lookup (console) → proto check (.log) → call → resolve(undefined) → **DEV CONSOLE: line appended** |
-| `prompt(msg)` | expression (call) | scope lookup (prompt) → call → **USER INTERFACE: dialog shown, execution pauses, user responds** → resolve(string\|null) |
+| --- | --- | --- |
+| `let x = 5;` | statement enter/exit | binding `declare` (creation if script-scope, or block entry) → `initialize` |
+| `x` in expression | `expression: identifier` | scope chain walk → `binding:access` → `resolve(identifier)` |
+| `x = x + 1` | expression (= and +) | scope walk → `binding:access` → coerce(+) → `binding:update` → `resolve(assignment)` |
+| `'5' + 1` | expression (+) | resolve operands → `coerce ToPrimitive×2` → `coerce ToString×2` → expression `'+'` (string concat, result `'51'`) |
+| `'5' - 1` | expression (-) | resolve operands → `coerce ToNumeric×2` → expression `'-'` (numeric, result `4`) |
+| `if (x > 0) {…}` | statement (if) | resolve test → `coerce ToBoolean` → `scope:push` (only if body has lexical decls) → … → `scope:pop` |
+| `Math.max(3, 7)` | expression (call) | scope walk (Math) → proto-check (.max) → call → `resolve` |
+| `str.toUpperCase()` | expression (call) | scope walk (str) → proto-check (String.prototype) → call → `resolve` |
+| `x++` (postfix) | expression (update) | `binding:access(x) → coerce ToNumeric(old) → compute new → binding:update(new) → expression(kind: 'update', returnedValue: OLD) → resolve` |
+| `++x` (prefix) | expression (update) | `binding:access(x) → coerce ToNumeric(old) → compute new → binding:update(new) → expression(kind: 'update', returnedValue: NEW) → resolve` |
+| `x ??= 5` (LHS non-nullish) | expression | `resolve(x)` → not-nullish → **no PutValue, no RHS eval** |
+| `x ??= 5` (LHS nullish) | expression | `resolve(x)` → nullish → resolve RHS → `binding:update(x, 5)` |
+| `for (let i = 0; i < n; i++) {…}` | statement (for) | outer `scope:push` (decl env for `i`) → for-init evaluates → per-iteration: fresh `scope:push` (CreatePerIterationEnvironment) → `scope:push` (block body if non-empty) → body events → `scope:pop` (block) → `scope:pop` (per-iter) → … → `scope:pop` (outer) |
+| `break;` | statement (`exit: break`) | enclosing loop's `scope:pop` with `reason: 'break'` |
+| `console.log(x)` | expression (call) | scope walk (console) → proto-check (.log) → call → `emit { kind: 'console', method: 'log', args: [x] }` → resolve(undefined) |
+| `prompt(msg)` | expression (call) | scope walk (prompt) → call → **evaluation pauses** → `emit { kind: 'prompt', args: [msg], returnValue: '…' }` → resolve(string\|null) |
+
+---
+
+## Determinism
+
+Definition: **observable values are a pure function of source.** A
+deterministic JEJ snippet produces the same observable values on every run.
+
+Sources of nondeterminism (each tracked as a boolean on
+`static.nonDeterminism`):
+
+| Source | What triggers it | Why |
+| --- | --- | --- |
+| `random` | `Math.random()` | Spec-allowed randomness |
+| `clock` | `Date.now()`, `new Date()` (no args) | Real-world time |
+| `userInput` | `prompt(…)`, `confirm(…)` | User-supplied values |
+| `locale` | `toLocaleString` variants, `Date.parse(string)`, `new Date(string)`, `localeCompare` | Implementation- and locale-dependent (ECMA-402) |
+
+`alert(…)` is **effectful but deterministic** from the program's POV — no
+return value depends on the user, only a side-effect.
+
+`isDeterministic` is a derived flat boolean: `!any(nonDeterminism)`.
+
+Mocks (`options.io`) can pin nondeterministic programs to specific
+behaviors, but doing so doesn't change the static `isDeterministic` flag —
+it just makes the run reproducible.
 
 ---
 
 ## JEJ language scope
 
-**In scope**: primitives (including `bigint`), `let`/`const`, all operators in
-reference.md, block scope, conditionals, all loop types, break/continue,
-template literals, optional chaining, `in` operator, property access on
-built-ins, built-in function calls, regex literals, `Boolean()`,
-`String.fromCharCode`/`fromCodePoint`,
-`Number.isNaN`/`isFinite`/`isInteger`, `Number.prototype` methods (`toString`,
-`toFixed`, `toPrecision`, `toExponential`, `toLocaleString`), `Date.now()`,
-`Date.parse()`, `new Date()` + all Date instance methods, all console methods.
-Note: `new Date()` is the sole `new` exception — Date methods return primitives
-(numbers or strings), require no mutation, and serve as a gentle introduction to
-reference types without requiring full object/class coverage.
+**In scope**: primitives (including `bigint`), `let`/`const`, all operators
+in [reference.md](./reference.md), block scope, conditionals, all loop
+types, break/continue, template literals, optional chaining, `in` operator,
+property access on built-ins, built-in function calls, regex literals,
+`Boolean()`, `String.fromCharCode`/`fromCodePoint`,
+`Number.isNaN`/`isFinite`/`isInteger`, `Number.prototype` methods
+(`toString`, `toFixed`, `toPrecision`, `toExponential`, `toLocaleString`),
+`Date.now()`, `Date.parse()`, `new Date()` + all Date instance methods, all
+`console` methods.
 
-**Out of scope**: user-defined functions, arrays, objects as literals, classes,
-`var`, `try`/`catch`, async/await, destructuring, spread/rest. Exception:
-`new Date()` is permitted despite using `new` — Date instance methods return
-only primitives, involve no mutation, and provide a controlled introduction to
-reference types.
+Note: `new Date()` is the sole `new` exception — Date methods return
+primitives (numbers or strings), require no mutation, and serve as a
+gentle introduction to reference types without requiring full object/class
+coverage.
+
+**Out of scope**: user-defined functions, arrays, objects as literals,
+classes, `var`, `try`/`catch`, async/await, destructuring, spread/rest,
+`globalThis`. Exception: `new Date()` is permitted despite using `new` —
+Date instance methods return only primitives, involve no mutation, and
+provide a controlled introduction to reference types.
 
 **Easter eggs**: `void` operator, comma/sequence operator, `with` statement.
+
+---
+
+## Spec correspondence appendix
+
+### Phase mapping
+
+| JEJ name | ECMA-262 op | Section |
+| --- | --- | --- |
+| Realm setup (intrinsics) | `SetDefaultGlobalBindings` | §9.3.4 |
+| Realm setup (host bindings) | Host hook in `InitializeHostDefinedRealm` | §9.6 + HTML |
+| Parse (tokenize + AST-build) | `ParseScript` | §16.1.5 |
+| Creation: script-scope | `GlobalDeclarationInstantiation` | §16.1.7 |
+| Evaluation: script body | `ScriptEvaluation` (after creation) | §16.1.6 |
+| Evaluation: block scope push | `BlockDeclarationInstantiation` | §14.2.3 |
+| Evaluation: per-iteration env | `CreatePerIterationEnvironment` | §14.7.4.4 |
+
+### Glossary bridges
+
+When learners encounter our terms vs. what they'll see elsewhere
+(MDN / Stack Overflow / their next course):
+
+| JEJ term | What learners may see elsewhere |
+| --- | --- |
+| "creation phase" | "hoisting" — same idea, less precise |
+| "script scope" | "global scope" (MDN's typical term) |
+| "realm" | "the globals" (informal) |
+| `BindingStatus = 'tdz'` | spec term: "uninitialized binding"; learner-facing nickname: "TDZ" — TDZ is the *access-time consequence* of being uninitialized |
+| "intercept" | JEJ-internal name; learners won't see it elsewhere |
+| `scope:push` / `scope:pop` | The spec's `Push`/`Pop` of the LexicalEnvironment chain on the running execution context |
+| "evaluation phase" | Spec's `ScriptEvaluation` body. Distinct from "execution context" (§9.4) — that's a separate spec term for the object containing the LexicalEnvironment chain. We use "evaluation" for the JEJ phase to avoid the harshness of "execution"; we keep "execution context" as the spec term where it appears. |
+
+### JEJ-pedagogical splits
+
+Some splits in our model are pedagogical, not spec-defined. We make these
+explicit so learners aren't misled when they read the actual spec:
+
+- **Tokenize vs. AST-build**: The spec defines a single op `ParseScript`
+  (§16.1.5). Lexing is folded into the grammar via on-demand
+  `InputElementDiv` / `InputElementRegExp` goal symbols (§12). Our
+  separation is for stepping through, not because the spec runs lexing as
+  a separate phase.
+- **"Creation" vs. "evaluation"**: Both happen inside the umbrella op
+  `ScriptEvaluation` (§16.1.6). Creation = the
+  `GlobalDeclarationInstantiation` step; evaluation = the subsequent
+  evaluation of the `StatementList` (the spec calls this "Evaluation"
+  too). Spec doesn't name them as separate phases.
+- **Realm setup before parse**: Strictly true (the realm exists before any
+  user script runs). But parsing is purely syntactic and does not depend
+  on the realm being initialized — it's an ordering pedagogy chooses, not
+  a strict dependency.
+
+### Variable Environment vs Lexical Environment
+
+The execution context (§9.4) carries two distinct fields:
+**LexicalEnvironment** (used for `let`/`const`/`function` resolution) and
+**VariableEnvironment** (used for `var`). For JEJ-without-functions and
+without `var`, these coincide at script level — we flatten in the NM body
+and present a single chain. The distinction matters in full JS but doesn't
+in JEJ.
+
+### Empty blocks and the `BlockDeclarationInstantiation` optimization
+
+Per §14.2.2, `Block : { StatementList }` only invokes
+`BlockDeclarationInstantiation` (§14.2.3) when the block contains lexical
+declarations. Empty blocks, or blocks with only expression/statement
+content, do not push a new declarative environment record. JEJ honors this:
+no `scope:push` event for variable-less blocks. Surface this as a teaching
+moment about when syntax has semantic effect.
+
+### `for (let i …)` and per-iteration environments
+
+§14.7.4.4 `CreatePerIterationEnvironment` creates a fresh env each
+iteration body — distinct from `BlockDeclarationInstantiation`. Each
+iteration sees a fresh `i`, which is why closures captured inside the loop
+body each get their own `i`. (JEJ has no closures since no functions, but
+the env is still created — observable as a fresh `scope:push` per iteration
+when the loop body is a `Block`.)

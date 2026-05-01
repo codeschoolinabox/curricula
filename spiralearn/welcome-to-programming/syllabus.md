@@ -60,24 +60,38 @@ you build both at once.
   You learn to see source code as communication that simultaneously addresses
   multiple audiences (developers, the computer, users, and agents) and
   understand why comprehension comes before production.
-- **Chapter 1. Developers.** Your first code and your first audience. You learn
-  to write comments and logs as intentional communication to other developers,
-  and begin noticing that every small choice in your code (a word, a placement,
-  a method) is a micro-decision that shapes how it reads.
+- **Chapter 1. Developers.** Your first code and your first audience.
+  You learn to write comments and logs as intentional communication to
+  other developers — including future-you, who is a stranger by the time
+  they come back to this code. **Twinning the developer audience** is the
+  central skill of this chapter, naming what the long programming-culture
+  tradition of "writing for the next reader" has always been. Every small
+  choice in your code (a word, a placement, a method) is a micro-decision
+  that shapes how it reads.
 - **Chapter 2. Developers and Computers.** The computer becomes a full audience.
   You build an accurate mental model of JavaScript's notional machine (how it
   evaluates expressions, stores values, walks scope chains) and develop the
-  discipline of predicting execution before running code, then verifying with
+  discipline of predicting evaluation before running code, then verifying with
   trace tables and the debugger.
 - **Chapter 3. Developers, Computers, and Users.** Users enter the picture. You
   learn to write programs people interact with, where user-visible behavior
   becomes the anchor that all your reading, tracing, refactoring, and reviewing
   skills must preserve. Design thinking across the whole situation begins here.
-- **Chapter 4. Developers, Computers, Users, and Agents.** LLMs join as a fourth
-  audience and collaborator. You learn what makes LLM collaboration specifically
-  different from human collaboration, develop skills for evaluating and
-  directing LLM output using everything from Chapters 1–3, and build calibration
-  for when to delegate and when to do the work yourself.
+- **Chapter 4. Developers, Computers, Users, and Agents.** Source code is
+  the **UI** — the control panel through which a programmer operates the
+  notional machine. LLMs are an alternative way to operate that UI: you
+  delegate the typing while still owning the NM. Two conversational modes
+  fall out of this naturally — **NM-grounded** (Frogramming-with-
+  delegation: "make the NM declare a `const`, then enter a loop…") and
+  **user-grounded** (Vibetoading-with-delegation: "when the user clicks,
+  greet them by name…"). Same Frogrammer/Vibetoader spectrum, different
+  interface. Visual debuggers / embody / lenses are the _direct_ NM view
+  that complements the code text — letting you observe and predict the
+  machine even when you didn't write the code yourself. You learn what
+  makes LLM collaboration specifically different from human collaboration,
+  develop skills for evaluating and directing LLM output using everything
+  from Chapters 1–3, and build calibration for when to delegate and when
+  to do the work yourself.
 - **Chapter 5. Developers, Computers, Users, Agents, and You.** Training wheels
   come off. You Frogram for yourself through snippetry: small, complete,
   self-contained programs as an ongoing practice. You explore JavaScript's full
@@ -148,7 +162,7 @@ you build both at once.
 
 **Programming is collaborative communication.** A single piece of source code
 simultaneously addresses multiple audiences: other developers who read it, a
-computer that executes it, users who experience it, and agents who collaborate
+computer that evaluates it, users who experience it, and agents who collaborate
 on it. This course guides you from your first comment to fluent collaboration
 with AI agents, using the smallest possible set of language features. It is
 self-study: no time estimates, no deadlines. Go at your own pace.
@@ -186,7 +200,7 @@ curriculum, progressively layering as the chapters advance:
 
 - **Twinning** (baseline): building an accurate mental model of a process
   outside your own mind. Each chapter asks you to twin a different process: the
-  🧑‍💻 _developer_ who reads your code (Ch1), the 💻 _computer_ that executes
+  🧑‍💻 _developer_ who reads your code (Ch1), the 💻 _computer_ that evaluates
   it (Ch2), the _user_ who experiences it (Ch3), the 🤖 _agent_ you collaborate
   with (Ch4). You can't communicate well with something you don't understand.
   **Vibetoading prioritizes _twinning_ the user; Frogramming prioritizes
@@ -255,7 +269,7 @@ productivity at all.
 A programming language is a notation system for describing computation to a
 machine. It's a compromise between how humans think and how machines work —
 easier to learn than directly telling a computer what to do in 1's and 0's, but
-much stricter than human language. The machine executes what you write exactly,
+much stricter than human language. The machine evaluates what you write exactly,
 blindly, without interpretation or judgment. This is true regardless of which
 language you use.
 
@@ -292,7 +306,7 @@ exactly.
 portions of it deeply (through Just Enough JavaScript), you're doing more than
 learning JavaScript. You're learning **what it means to master a programming
 language** — how to build an accurate mental model of a notional machine from
-the outside, how to read code against that model, how to predict execution, how
+the outside, how to read code against that model, how to predict evaluation, how
 to debug divergence from expectation, how to direct the machine precisely. That
 discipline transfers. Once you've mastered key portions of one notional machine
 deeply, you're equipped to learn others when you need them. (No one masters 100%
@@ -416,7 +430,7 @@ both at once. LLMs decompose his wish in an unexpected way:
 
 Study Lenses gives a slightly different solution to the visibility half of
 Victor's wish than he expressed in Learnable Programming: We will focus on
-visualizing the _internal mechanisms_ of your program's execution, not the final
+visualizing the _internal mechanisms_ of your program's evaluation, not the final
 output.
 
 ### Your instrument: JavaScript, and your practice instrument: Just Enough JavaScript
@@ -453,7 +467,7 @@ programs as an ongoing practice. The answer to "why write code when I'm no
 longer building full codebases? how do I build and maintain my NM for a
 programming language?" Snippetry is how the Frogrammer keeps the NM alive
 between full-codebase projects: **complete enough to run** (each snippet
-executes top-to-bottom), **small enough to understand** (you can hold the whole
+evaluates top-to-bottom), **small enough to understand** (you can hold the whole
 NM in your head at once and predict-trace-verify in full), **connected enough to
 inspire** (snippets allude to, vary on, and remix each other — nothing stands
 alone). It's also a natural home for deliberate Vibetoading — quick exploratory
@@ -463,7 +477,7 @@ and the new thoughts code lets you think — alongside or instead of programming
 for productivity. "You" is the fifth audience: students program for themselves,
 share with peers through a collaborative gist system that extends a living
 snippetry corpus, and explore JavaScript's full multi-paradigmatic range with
-training wheels off and real browser execution.
+training wheels off and real browser evaluation.
 
 ### The future beyond human-designed languages
 
@@ -503,15 +517,15 @@ above stand on their own.
 | The implementer        | **The virtuoso** — masters notation and the controls; produces the score from direction       |
 | Users                  | **The audience** — concert-goers who react to the performance                                 |
 | Other developers       | **Co-composers** — fellow score-readers                                                       |
-| The computer executing | **The mechanism playing the score blindly at performance time**                               |
+| The computer evaluating | **The mechanism playing the score blindly at performance time**                              |
 
 ### Why a _mechanical_ instrument specifically
 
 A mechanical instrument plays the score exactly as written — no human in the
-execution loop. This cleanly separates two phases: **composition**, where the
+evaluation loop. This cleanly separates two phases: **composition**, where the
 composer and virtuoso collaborate iteratively on the score, and **performance**,
 where the mechanism plays blindly and deterministically. Matches how JavaScript
-execution works: at runtime, there is no performer-with-judgment to rescue a
+evaluation works: at runtime, there is no performer-with-judgment to rescue a
 badly-notated passage.
 
 ### Why _varying_ instruments
@@ -624,7 +638,7 @@ needed.
 | 🧑 | Human | Used at active Human / AI distinctions. |
 | 🤖 | AI / Agent | Used both for "AI" (in the Human/AI distinction) and for "Agent" (the fourth audience). Same thing, two framings. |
 | 🧑‍💻 | Developer (audience) | The human who reads and writes code — Chapter 1's audience. |
-| 💻 | Computer (audience) | The machine that executes code — Chapter 2's audience. |
+| 💻 | Computer (audience) | The machine that evaluates code — Chapter 2's audience. "Understanding the computer" = twinning the notional machine; the NM is the computer at our chosen level of abstraction. |
 | 💭 | Snippetry | Small, runnable, self-contained programs as ongoing practice. The thought-bubble glyph is borrowed from the snippetry source repo. |
 
 **Flagged for later:** the User audience (Chapter 3) and the Notional Machine
@@ -675,7 +689,11 @@ Three human audiences read your code:
    learn your style, collaborate on changes, and maintain the work long after
    you wrote it
 2. **💻 The computer** — it parses, interprets, or compiles your code; it does
-   not understand intent, only syntax and semantics
+   not understand intent, only syntax and semantics. Throughout this course,
+   "understanding the computer" means **twinning its notional machine** —
+   building an accurate mental model of how the engine evaluates your code at
+   our chosen level of abstraction. The NM _is_ the computer for our
+   purposes (see § Notional machines below).
 3. **Users of the program** — they never see the code, but they experience its
    effects; their correctness is behavioral (does it do what I need?), not
    syntactic
@@ -798,7 +816,7 @@ Just Enough JavaScript is deliberately small. It excludes classes, most array
 methods, async/await, modules, destructuring, generators, and dozens of other
 features JS has. This is not an oversight. Fewer features means more cognitive
 bandwidth for the concepts that actually matter in Ch1–4: how the machine
-executes, how values and bindings behave, how control flow works.
+evaluates, how values and bindings behave, how control flow works.
 
 The constraints are temporary and intentional:
 
@@ -945,10 +963,37 @@ _Metaphor anchor: **the score as inter-composer communication** — other
 composers read your score for intent and style, long before (or entirely instead
 of) ever hearing it performed. Code has the same property._
 
+### Twinning the developer audience
+
+The central skill of this chapter is **twinning the 🧑‍💻 developer
+audience** — imagining who will read your code and writing for them, not
+for yourself-right-now. This is not a new practice; it is the explicit
+naming of something the programming community has always done:
+
+> _"Programs must be written for people to read, and only incidentally for
+> machines to execute."_
+> — Abelson & Sussman, _Structure and Interpretation of Computer Programs_
+
+> _"Always code as if the guy who ends up maintaining your code will be a
+> violent psychopath who knows where you live."_
+> — John Woods (and a thousand undergraduate code-style lectures since)
+
+The developer audience includes the obvious reader — a teammate
+maintaining your code — and the often-overlooked one: **future-you**.
+You-in-six-months is a stranger. You-in-ten-minutes is already on the
+way there. Twinning the developer audience means writing so that
+stranger can pick up where you left off without phoning you.
+
+This anticipates Chapter 5's "you" audience: by the time we promote
+yourself-as-a-distinct-audience, you've been twinning future-you all
+along.
+
+### Static vs. dynamic
+
 A foundational conceptual distinction is introduced here: not as a technical
-exercise but as orientation: **source code (static) vs. program execution
+exercise but as orientation: **source code (static) vs. program evaluation
 (dynamic)**. Comments exist in the static text; logs are observed during
-execution. This sets up the **🧑‍💻** developer twin: the developer who reads
+evaluation. This sets up the **🧑‍💻** developer twin: the developer who reads
 your code sees the static text, not the runtime. Understanding this distinction is
 prerequisite to understanding why comments and logs serve different purposes.
 
@@ -973,7 +1018,7 @@ The computer is not yet a full audience. Devtools console is developer space.
 
 ### Logs
 
-- 🥚 Source code (static) vs. program execution (dynamic): comments live in the
+- 🥚 Source code (static) vs. program evaluation (dynamic): comments live in the
   static text; logs are observed at runtime\
   _builds on: reading comments as text → understanding that running code
   produces a different, separate experience_
@@ -1011,7 +1056,7 @@ you study how the JavaScript engine actually carries out your instructions._
 
 The **💻** computer is now a full audience. The primary learning objective is
 **JavaScript's notional machine**: the mental model of how the JS engine
-executes your code. Other languages have their own notional machines; the
+evaluates your code. Other languages have their own notional machines; the
 discipline you develop here transfers. Programs produce output via logs and
 assertions but do not yet interact with users. `undefined` is encountered
 naturally through variables; `null` is held until Chapter 3 where `prompt()` can
@@ -1034,7 +1079,7 @@ has a name: the **notional machine** (NM). You do not program JavaScript — you
 program the notional machine _using_ JavaScript.
 
 The NM is best understood as a machine that works through a fixed vocabulary of
-**execution events**: observable moments that occur in a specific order as your
+**evaluation events**: observable moments that occur in a specific order as your
 code runs. Each event has a type. Types have relationships. A given piece of
 syntax produces a predictable sequence of typed events. Learning the NM is
 learning this vocabulary — what categories of events exist, which events
@@ -1076,7 +1121,7 @@ indictments — is a skill this chapter develops alongside everything else.
 
 **The tracer**
 
-Study Lenses' tracer captures the execution event stream: every
+Study Lenses' tracer captures the evaluation event stream: every
 behind-the-scenes moment as your code runs, as a structured sequence you can
 step through.
 
@@ -1086,23 +1131,23 @@ Study Lenses' tracer serves two roles:
    tracer makes visible what your mental model should eventually produce on its
    own
 2. **Power tool** — when code is too complex to trace mentally, the tracer
-   extends your working memory, letting you attend to execution you could not
+   extends your working memory, letting you attend to evaluation you could not
    hold in your head alone
 
 ---
 
 ### 2.1 Running a Program
 
-- 🥚 Static source code vs. dynamic execution: reading a file vs. running it\
+- 🥚 Static source code vs. dynamic evaluation: reading a file vs. running it\
   _builds on: comments as static text → logs as runtime observation →
   distinguishing the two clearly_
-- 🥚 **Execution events**: a running program produces an ordered stream of
+- 🥚 **Evaluation events**: a running program produces an ordered stream of
   observable moments; the tracer captures these automatically; trace tables
   record them by hand\
   _builds on: static/dynamic distinction → now naming the individual moments of
-  execution_
-- 🥚 Logging string literals to the console from programs that execute
-- 🥚 Fix errors: parse errors (creation phase) vs. runtime errors (execution
+  evaluation_
+- 🥚 Logging string literals to the console from programs that evaluate
+- 🥚 Fix errors: parse errors (creation phase) vs. runtime errors (evaluation
   phase)\
   _builds on: reading error messages → locating the source line → categorizing
   the failure type_
@@ -1145,7 +1190,7 @@ Study Lenses' tracer serves two roles:
 - 🥚 Log variable values to the console; observe state change over time\
   _builds on: logging string literals (Ch1) → logging computed values →
   observing state change_
-- 🥚 **Trace tables**: systematic notation of execution: declare/initialize/
+- 🥚 **Trace tables**: systematic notation of evaluation: declare/initialize/
   access/update events for each binding, in steps-format and values-format\
   _builds on: reading code → logging to observe state → writing down every read
   and write in a table_
@@ -1171,13 +1216,13 @@ Study Lenses' tracer serves two roles:
 ### 2.4 Statements and Control Flow
 
 - 🥚 Conditionals: `if`/`else if`/`else`: reading and tracing branches\
-  _builds on: tracing linear programs → now tracing programs where execution
+  _builds on: tracing linear programs → now tracing programs where evaluation
   path depends on values_
 - 🥚 Ternary expressions: recognizing as a compact conditional form\
   _builds on: reading if/else → recognizing ternary as equivalent → refactoring
   between them_
 - 🥚 While loops, do-while loops, for loops, for-of loops: reading and tracing\
-  _builds on: tracing sequential execution → now tracing repeated execution_
+  _builds on: tracing sequential evaluation → now tracing repeated evaluation_
 - 🥚 `break` and `continue`: recognizing and tracing their effect
 - 🐣 Refactoring between equivalent loop forms (while ↔ for, do-while ↔ while)\
   _builds on: tracing loops → seeing structural equivalence → translating one
@@ -1476,6 +1521,42 @@ collaboration with an LLM. 🤖 Agents are a fourth audience: they read and
 understand code differently from 🧑 humans, and writing _for and with_ them
 requires its own communication skills.
 
+### Wrapping premise: code is the UI for the NM
+
+Up to now this course has framed code text as **what you write to talk to
+the four audiences**. There's a deeper way to see the same fact: source
+code is the **UI / control panel** through which a programmer operates
+the notional machine. Authoring code is _one_ way to operate that panel.
+Describing intent to an LLM is another. Either way, the NM is the thing
+the panel controls.
+
+LLMs let you **delegate operation of the control panel** while still
+owning the machine. The same Frogrammer/Vibetoader spectrum from Ch0.3
+applies — but now to your conversation with the alien virtuoso, not just
+to your typing:
+
+- 🔬 **NM-grounded conversation** (Frogramming-with-delegation) — "Make
+  the NM declare a `const balance = 0`, then enter a `while` loop that
+  decrements it until it hits zero." You specify behavior in NM terms.
+  You predict-trace-verify the LLM's output against the NM. The LLM
+  operates the panel for you; you stay grounded in the machine.
+- 🎨 **User-grounded conversation** (Vibetoading-with-delegation) —
+  "When the user types their amount and clicks OK, count down to zero
+  and tell them when it's done." You specify behavior in user-experience
+  terms. You evaluate against user outcomes; the machine is a black box.
+
+Both produce text in the same control panel; the difference is **which
+audience you twin during the conversation**. This is why every section
+below revisits a Ch1–Ch3 audience: agent communication is what you've
+already been doing, just refracted through the alien.
+
+**The visual NM view (`embody/` + study lenses) becomes load-bearing
+here.** When you delegate the control panel, you can no longer rely on
+the act of typing to keep your NM understanding sharp. Visual debuggers
+let you observe, predict, and debug the machine _directly_ — the NM view
+that exists regardless of who (or what) wrote the code text. Frogramming
+with delegation is only sustainable if you keep the direct NM view alive.
+
 ### 4.0 What is an LLM?
 
 - 🥚 Explain why an LLM is not a database or keyword-lookup system
@@ -1661,10 +1742,10 @@ sidebar.
 
 Once you understand programs as event streams, the paradigm distinctions become
 grounded in the same vocabulary. All paradigms run on a machine that produces
-execution events. What differs is the _relationship_ the programmer has to that
+evaluation events. What differs is the _relationship_ the programmer has to that
 event stream — how explicitly and in what terms the event sequence is specified:
 
-| Paradigm                                             | Relationship to the execution event stream                                                                                                        |
+| Paradigm                                             | Relationship to the evaluation event stream                                                                                                       |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Imperative** (JS Ch1–4)                            | Explicit event sequence — every step specified. JS's actual NM vocabulary.                                                                        |
 | **OOP in JS** (Ch5)                                  | Syntactic organization on top of the same machine — method calls = prototype chain walk + function call events. A style, not a different machine. |
@@ -1680,10 +1761,10 @@ Chapter 5.
 
 **Looking further: Welcome to Algorithms**
 
-The execution event vocabulary you build in Ch2 is one conceptual bridge from
+The evaluation event vocabulary you build in Ch2 is one conceptual bridge from
 embodied computing to CS. Welcome to Algorithms' step-counting and Big O
 analysis require the same cognitive habit — counting discrete operations —
-though the abstraction differs: execution events are implementation-level;
+though the abstraction differs: evaluation events are implementation-level;
 algorithmic steps are defined relative to input size and are intentionally
 implementation-agnostic. The machine you learn here makes that work tractable
 and visible.
@@ -1691,7 +1772,7 @@ and visible.
 ### The training-wheels-off commitment
 
 Chapter 5 is where students **graduate from the scaffolded curriculum
-environment** into real browser execution with real consequences.
+environment** into real browser evaluation with real consequences.
 
 **What comes off:**
 
