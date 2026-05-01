@@ -82,11 +82,23 @@ function createRegistry(): Registry {
 		// Map iteration is insertion-order in JS; a fresh array per call so
 		// callers cannot mutate the underlying Map by reference. freezeInPlace
 		// rejects post-return mutation at runtime.
-		return freezeInPlace([...lenses.keys()]);
+		//
+		// Use `Array.from(...)` rather than `[...lenses.keys()]`: the
+		// Docusaurus Babel pipeline transpiles iterator-spread in a way that
+		// wraps the iterator in a single-element array under some target
+		// configurations, surfaced as a single
+		// `<option value="[object Map Iterator]">editorhighlight</option>` in
+		// the dev server during the Increment-9 sandbox checkpoint. Vitest
+		// in Node runs native ES so it never reproduced the bug. `Array.from`
+		// goes through the iterator protocol explicitly and is stable across
+		// every transpilation target.
+		// eslint-disable-next-line unicorn/prefer-spread -- iterator-spread emit was unstable across the Docusaurus Babel pipeline; see comment above.
+		return freezeInPlace(Array.from(lenses.keys()));
 	}
 
 	function getTransformNames(): ReadonlyArray<string> {
-		return freezeInPlace([...transforms.keys()]);
+		// eslint-disable-next-line unicorn/prefer-spread -- same iterator-spread Babel-emit defect as `getLensNames`; see that comment.
+		return freezeInPlace(Array.from(transforms.keys()));
 	}
 
 	return freezeInPlace({
