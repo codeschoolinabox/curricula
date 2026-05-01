@@ -87,91 +87,99 @@ function StudyLensesClient(properties: PluginEmittedProps): React.JSX.Element {
 	const [error, setError] = useState<Error | null>(null);
 	const previousLensReference = useRef<string | null>(null);
 
-	const onLensChange = useCallback(
-		function transitionLens(nextLens: string): void {
-			setState(function applyLensChange(previousState) {
-				if (previousState.activeLens === nextLens) return previousState;
-				return freezeInPlace({ ...previousState, activeLens: nextLens });
-			});
+	const onLensChange = useCallback(function transitionLens(
+		nextLens: string,
+	): void {
+		setState(function applyLensChange(previousState) {
+			if (previousState.activeLens === nextLens) return previousState;
+			return freezeInPlace({ ...previousState, activeLens: nextLens });
+		});
+	}, []);
+
+	useEffect(
+		function disposeOnUnmount() {
+			return function cleanup(): void {
+				bus.clear();
+				cache.visit(function disposeEntry(entry) {
+					entry.mount.dispose();
+				});
+				cache.clear();
+			};
 		},
-		[],
+		[bus, cache],
 	);
 
-	useEffect(function disposeOnUnmount() {
-		return function cleanup(): void {
-			bus.clear();
-			cache.visit(function disposeEntry(entry) {
-				entry.mount.dispose();
-			});
-			cache.clear();
-		};
-	}, [bus, cache]);
+	useEffect(
+		function mountActiveLens() {
+			const noop = function noopCleanup(): void {};
+			if (!langOk) return noop;
+			let cancelled = false;
+			let mountedElement: HTMLElement | null = null;
 
-	useEffect(function mountActiveLens() {
-		const noop = function noopCleanup(): void {};
-		if (!langOk) return noop;
-		let cancelled = false;
-		let mountedElement: HTMLElement | null = null;
-
-		async function run(): Promise<void> {
-			try {
-				const pipeline: Pipeline = {
-					transforms: state.activeTransforms,
-					lens: state.activeLens,
-				};
-				const validated = validatePipeline(pipeline, registry);
-				const { transformedCode, resolvedLens } = executePipeline(
-					state.snippet,
-					validated,
-					registry,
-				);
-				const lensModule = registry.getLens(resolvedLens);
-				if (!lensModule) {
-					throw new Error(`No lens module: ${resolvedLens}`);
+			async function run(): Promise<void> {
+				try {
+					const pipeline: Pipeline = {
+						transforms: state.activeTransforms,
+						lens: state.activeLens,
+					};
+					const validated = validatePipeline(pipeline, registry);
+					const { transformedCode, resolvedLens } = executePipeline(
+						state.snippet,
+						validated,
+						registry,
+					);
+					const lensModule = registry.getLens(resolvedLens);
+					if (!lensModule) {
+						throw new Error(`No lens module: ${resolvedLens}`);
+					}
+					const cfg = lensModule.config();
+					const cached = cache.get(resolvedLens, cfg);
+					const mount = cached ?? (await lensModule.lens(transformedCode, cfg));
+					if (cancelled) {
+						if (!cached) mount.dispose();
+						return;
+					}
+					if (!cached) cache.set(resolvedLens, cfg, mount);
+					if (hostReference.current) {
+						hostReference.current.append(mount.el);
+						mountedElement = mount.el;
+					}
+				} catch (caughtError) {
+					if (!cancelled) setError(caughtError as Error);
 				}
-				const cfg = lensModule.config();
-				const cached = cache.get(resolvedLens, cfg);
-				const mount =
-					cached ?? (await lensModule.lens(transformedCode, cfg));
-				if (cancelled) {
-					if (!cached) mount.dispose();
-					return;
-				}
-				if (!cached) cache.set(resolvedLens, cfg, mount);
-				if (hostReference.current) {
-					hostReference.current.append(mount.el);
-					mountedElement = mount.el;
-				}
-			} catch (caughtError) {
-				if (!cancelled) setError(caughtError as Error);
 			}
-		}
-		void run();
+			void run();
 
-		return function cleanup(): void {
-			cancelled = true;
-			mountedElement?.remove();
-		};
-	}, [state, registry, cache, langOk]);
+			return function cleanup(): void {
+				cancelled = true;
+				mountedElement?.remove();
+			};
+		},
+		[state, registry, cache, langOk],
+	);
 
-	useEffect(function dispatchSwitch() {
-		if (previousLensReference.current === null) {
+	useEffect(
+		function dispatchSwitch() {
+			if (previousLensReference.current === null) {
+				previousLensReference.current = state.activeLens;
+				return;
+			}
+			if (previousLensReference.current === state.activeLens) return;
+			bus.dispatch('lens-switched', {
+				previous: previousLensReference.current,
+				next: state.activeLens,
+			});
 			previousLensReference.current = state.activeLens;
-			return;
-		}
-		if (previousLensReference.current === state.activeLens) return;
-		bus.dispatch('lens-switched', {
-			previous: previousLensReference.current,
-			next: state.activeLens,
-		});
-		previousLensReference.current = state.activeLens;
-	}, [state.activeLens, bus]);
+		},
+		[state.activeLens, bus],
+	);
 
 	if (!langOk) {
 		return (
 			<div data-orchestrator="study-lenses">
 				<div data-orchestrator-banner="" role="alert">
-					study-lenses only supports lang=&quot;js&quot; (got &quot;{lang}&quot;)
+					study-lenses only supports lang=&quot;js&quot; (got &quot;{lang}
+					&quot;)
 				</div>
 				<pre>{code}</pre>
 			</div>

@@ -30,11 +30,11 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import StudyLenses from '../study-lenses.js';
+
 afterEach(function tearDown() {
 	cleanup();
 });
-
-import StudyLenses from '../study-lenses.js';
 
 // Spy on EventBus.dispatch by wrapping the real factory. Mirrors the
 // hoisted-mock pattern in study-lenses.async-cancel.test.tsx (Pitfall #12).
@@ -57,7 +57,7 @@ vi.mock('../../create-event-bus.js', async function mockEventBus() {
 	};
 });
 
-describe('<StudyLenses> Toolbar (Increment 9 TDD-1)', () => {
+describe('<StudyLenses> Toolbar (Increment 9 TDD-1 + TDD-2)', () => {
 	describe('Zero — lens-picker select is present', () => {
 		it('renders a `<select data-orchestrator-lens-picker>` in the DOM', async () => {
 			const { container } = render(

@@ -271,6 +271,23 @@ because async cancel still uses the per-effect closure flag and real
 unmount still runs the full dispose sequence — just from a
 different effect.
 
+**Strict-mode caveat (development only).** React 18 Strict Mode in
+development double-invokes effects on initial mount: setup → cleanup
+→ setup. `disposeOnUnmount`'s cleanup runs in that fake-unmount
+cycle and calls `bus.clear()` + `cache.visit(dispose)` +
+`cache.clear()`. The first cycle's setup populates nothing (the
+mount-effect runs separately and may not have set anything yet), so
+the wipe is a benign no-op on the very first mount. After the first
+switch in strict mode, the wipe would dispose the cached lens that
+was just registered, defeating cache-hit reattach for that one
+session. None of the Increment-9 tests wrap renders in
+`<React.StrictMode>`, so the test suite does not exercise this
+path; the `[bus, cache]` deps are stable references from `useMemo`
+in production, which keeps the cleanup unmount-only outside strict
+mode. A future increment may convert the deps to truly empty (with
+an eslint disable + comment) or move the dispose-all into a
+ref-based one-shot guard to make strict-mode safe end-to-end.
+
 ## Why a separate dispatch-effect (rather than dispatching in the handler)
 
 Two reasons:

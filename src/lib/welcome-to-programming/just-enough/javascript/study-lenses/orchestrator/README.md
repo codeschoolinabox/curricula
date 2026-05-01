@@ -100,28 +100,31 @@ component takes:
 | `options`       | `ReadonlyArray<string>`       | The registered lens names from `registry.getLensNames()`, in registration order.       |
 | `onLensChange`  | `(next: string) => void`      | Fires on `<select>` `onChange`. The wrapper invokes `setState` from inside this callback. |
 
-**Edge cases the Toolbar component must handle**:
+**Edge cases the Toolbar component handles** (pinned by direct unit
+tests in [`./tests/toolbar.test.tsx`](./tests/toolbar.test.tsx)):
 
 - **Empty `options`.** Should not happen in practice (`createDefaultRegistry` always
   registers at least the `editor` stub, which is also the unknown-name fallback target —
   see [`../pipeline.ts`](../pipeline.ts)). If it ever happens, the toolbar renders
-  `<select>` with no options; the wrapper still mounts whatever `state.activeLens` resolves
-  to via `validatePipeline`.
+  `<select>` with zero `<option>` children; the wrapper still mounts whatever
+  `state.activeLens` resolves to via `validatePipeline`.
 - **`value` not in `options`.** Means `state.activeLens` is a name not currently
-  registered. The browser falls back to the first option's value visually, but the wrapper's
-  state is unchanged until `onLensChange` fires. Tests must assert this divergence does not
-  occur in practice — `validatePipeline` rewrites unknown names to `'editor'` before they
-  reach `state`.
-- **`onLensChange` throws.** The wrapper does not wrap the call in `try/catch`. A throw
-  propagates to React's error boundary; recovery requires unmount/remount. This is an
-  intentional fail-loud choice — silent state-transition failures are worse than visible
-  crashes.
+  registered. The browser falls back to the first option's value visually, but
+  `onLensChange` does not fire on render — the wrapper's state stays unchanged until the
+  learner explicitly picks a different option. `validatePipeline` rewrites unknown names
+  to `'editor'` before they reach `state`, so this divergence is not expected in practice.
+- **`onLensChange` throws.** The Toolbar does not wrap the call in `try/catch`. A throw
+  propagates to React's event-handler error reporting (console.error in dev,
+  error-boundary in production); recovery requires unmount/remount. The Toolbar's own
+  invariant — pinned by the unit test — is "invokes the handler exactly once with the
+  selected value per change", regardless of what the handler does. This is an intentional
+  fail-loud choice — silent state-transition failures are worse than visible crashes.
 
 **Accessibility**:
 
-- The `<select>` MUST carry an accessible name. The component wires a visually-hidden
-  `<label htmlFor="...">` (or `aria-label="Lens"`); pick one and stay consistent across
-  Increments 10+.
+- The `<select>` carries `aria-label="Lens"` for its accessible name (resolved
+  Increment-9 decision). Increments 10+ retain this and never add a competing
+  visible `<label htmlFor>`.
 - Keyboard navigation is the browser default for `<select>` (Tab to focus, arrow keys to
   cycle, Space/Enter to commit). No custom handlers.
 - No focus management on switch — the `<select>` retains focus by default, which is the
