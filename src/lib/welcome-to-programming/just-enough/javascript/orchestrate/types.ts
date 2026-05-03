@@ -46,8 +46,8 @@
  * internal-only.
  */
 
-import type { Snippet } from '../../embody/types.js';
-import type { LensConfig } from '../../lenses/types.js';
+import type { Snippet } from '../embody/types.js';
+import type { LensConfig } from '../lenses/types.js';
 
 // --- Public prop surface (the only externally-visible type) ---
 

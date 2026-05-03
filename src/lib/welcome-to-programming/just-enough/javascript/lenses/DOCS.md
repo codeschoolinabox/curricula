@@ -18,10 +18,10 @@ threading them through the orchestrator) means:
   registry the WS2 recommender ranks against.
 - Adding a lens is one subdirectory (`lenses/<name>/`) plus a
   registration step (planned: a static enumeration in
-  `compose/orchestrator/`). Replacing a lens is a same-path
+  `orchestrate/`). Replacing a lens is a same-path
   same-shape swap.
 - Lens authors ship plugins that the orchestrator mounts; they
-  never reach into `embody/` (top) or `compose/` (top) — they
+  never reach into `embody/` (top) or `orchestrate/` (top) — they
   receive `embodiment` via React props.
 
 Lens modules are intentionally **two-layer**: a pure-TS core (no
@@ -78,7 +78,7 @@ embodiment={…} config={…} />`. From the lens's perspective:
 
 ```mermaid
 flowchart TD
-    Embodiment["embodiment: Snippet<br/>(frozen, from compose/orchestrator)"]
+    Embodiment["embodiment: Snippet<br/>(frozen, from orchestrate/orchestrator)"]
     Cfg["LensConfig<br/>(frozen, optional)"]
     Defaults["module defaults"]
     Overrides["overrides? (Partial)"]
@@ -90,7 +90,7 @@ flowchart TD
     Embodiment -->|"render, sync OR async"| ExerciseUI
 
     Embodiment -->|"filter, sync, pure"| Applicable["applicableTo: boolean"]
-    Analysis["AnalysisReport<br/>(from compose/lib/analysis)"] -->|"recommend, sync, pure"| Recs["ReadonlyArray&lt;Recommendation&gt;"]
+    Analysis["AnalysisReport<br/>(from orchestrate/lib/analysis)"] -->|"recommend, sync, pure"| Recs["ReadonlyArray&lt;Recommendation&gt;"]
 ```
 
 The diagram is per-lens. The orchestrator (upstream) supplies
@@ -102,7 +102,7 @@ UI is what the learner interacts with — its internal state
 ### Structural constraints
 
 - **Read-only views.** Lenses MUST NOT mutate the snippet. The
-  only writer of snippet state is [`compose/editor/`](../compose/editor/).
+  only writer of snippet state is [`orchestrate/editor/`](../orchestrate/editor/).
 - **Disposable practice.** Lens-internal UI state is per-mount
   only. When the snippet changes (re-embody), React unmounts the
   lens. Do NOT reach for `localStorage`, refs across mounts, or
@@ -135,7 +135,7 @@ UI is what the learner interacts with — its internal state
 
 - **Cross-lens communication.** Lenses do not import each other
   and do not share state. Any shared logic moves into a
-  domain-agnostic utility under `compose/lib/*` or `@-utils`.
+  domain-agnostic utility under `orchestrate/lib/*` or `@-utils`.
 - **Snippet mutation.** Editor's job; lenses are read-only views.
 - **Persistence across edits.** LMS's job per the disposability
   principle.
@@ -146,7 +146,7 @@ UI is what the learner interacts with — its internal state
 - **The lens registry itself.** The registration mechanism is
   open-spec; F4's Phase 0 nails the shape. Likely a static
   enumeration (an import-list of `LensModule` defaults) inside
-  `compose/orchestrator/`, but a runtime registry with `register()`
+  `orchestrate/`, but a runtime registry with `register()`
   is on the table. Either way: lenses just export their
   `LensModule` default; the registry consumes them. Per WS3 handoff
   § Open specs, the "registry" concept may dissolve into a plain
@@ -220,8 +220,8 @@ own DOCS can refer to a single source of truth.
   (e.g. a "save my parsons answer" feature), it lands at the LMS
   level via the deferred outbound event protocol — not as a
   lens-internal concern.
-- A shared `compose/lib/` helper (or a dedicated
-  `compose/lib/lens-helpers/`) may emerge once enough lenses ship
+- A shared `orchestrate/lib/` helper (or a dedicated
+  `orchestrate/lib/lens-helpers/`) may emerge once enough lenses ship
   to surface common patterns (display derivation utilities,
   validation primitives, scoring helpers). Per AGENTS.md "extract
   to a separate file only when used in 2+ places" — defer until

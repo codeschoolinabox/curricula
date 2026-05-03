@@ -9,9 +9,9 @@ currently at `../../lib/editing/`) into a React home-base component.
 > **🚧 PRE-REFACTOR SENTINEL** — this directory does not exist on
 > disk before REFACTOR-HANDOFF executes. The CodeMirror integration
 > at [`../../lib/editing/`](../../lib/editing/) is the prior-art
-> source; that module moves to `compose/lib/editing/` during
+> source; that module moves to `orchestrate/lib/editing/` during
 > REFACTOR-HANDOFF Step 9 (analysis-libs move), and a new home-base
-> wrapper at `compose/editor/` arrives during Step 8 (editor
+> wrapper at `orchestrate/editor/` arrives during Step 8 (editor
 > extraction from `study-lenses/`).
 >
 > **Prior art**:
@@ -30,25 +30,25 @@ currently at `../../lib/editing/`) into a React home-base component.
 | ---------------------------- | ----------------------------------------------------------------------------------------------- |
 | [`./README.md`](./README.md) | This file — orientation + navigation.                                                           |
 | [`./DOCS.md`](./DOCS.md)     | Architectural sketch — edit-callback contract, mode transitions, lifecycle in editor mode.       |
-| `index.tsx`                  | The home-base React component (planned, F1). Wraps `compose/lib/editing/createEditor`.          |
+| `index.tsx`                  | The home-base React component (planned, F1). Wraps `orchestrate/lib/editing/createEditor`.          |
 | `tests/`                     | vitest jsdom + `@testing-library/react` tests (planned, per-increment).                          |
 
 ## What this component does
 
-`compose/editor/` is the React component the orchestrator mounts when
+`orchestrate/editor/` is the React component the orchestrator mounts when
 the UI is in editor mode (per
 [`../orchestrator/README.md` § Editor-vs-lens state machine](../orchestrator/README.md)).
 Its responsibilities:
 
 1. **Render the CodeMirror editor** for the current snippet string,
-   using `compose/lib/editing/createEditor()` for the underlying
+   using `orchestrate/lib/editing/createEditor()` for the underlying
    editor instance.
 2. **Forward edits to the orchestrator** via an `onSnippetChange`
    prop — the only mutation surface for snippet state in the
    `<StudyLenses>` component.
 3. **Wire pedagogical callbacks** the editor consumes (linters,
    doc lookup, completions) by routing them through to
-   `compose/lib/editing/`'s callback API.
+   `orchestrate/lib/editing/`'s callback API.
 4. **Tear down cleanly** when the orchestrator switches to lens
    mode — React's natural unmount calls the editor's `destroy()`
    via a `useEffect` cleanup.
@@ -92,7 +92,7 @@ top-level `AGENTS.md`. Subdirectory-specific rules:
   `onSnippetChange` callback) mutates snippet state. Lenses are
   read-only views (per
   [`../../README.md` § Pedagogical first principles](../../README.md#pedagogical-first-principles)).
-- **CodeMirror integration via `compose/lib/editing/`**. Don't
+- **CodeMirror integration via `orchestrate/lib/editing/`**. Don't
   import CodeMirror directly here — go through the
   `createEditor()` factory + callback API documented at
   [`../lib/editing/README.md`](../lib/editing/README.md)
@@ -105,7 +105,7 @@ top-level `AGENTS.md`. Subdirectory-specific rules:
 
 ## Navigation
 
-- **Parent**: [`../README.md`](../README.md) — `compose/` peer
+- **Parent**: [`../README.md`](../README.md) — `orchestrate/` peer
   overview.
 - **Architectural sketch**: [`./DOCS.md`](./DOCS.md).
 - **Editor factory it wraps**: [`../lib/editing/README.md`](../lib/editing/README.md)

@@ -22,7 +22,7 @@
  * snippet-fit relevance), plus the supporting types `LensConfig`,
  * `BlockModelCell`, `Recommendation`, and `SerializableValue` /
  * `SerializablePrimitive`. `BlockModelCell` and `Recommendation`
- * migrate ownership to WS2's `compose/lib/recommender/types.ts` per
+ * migrate ownership to WS2's `orchestrate/lib/recommender/types.ts` per
  * `02-analysis-and-recommender.md`; this file re-exports them as the
  * lens-facing surface until that lock-in lands.
  *
@@ -36,7 +36,7 @@
  *   impact note about plugin alignment).
  * - `OrchestratorState`, `EventBus`, `EventName`, `EVENT_NAMES`,
  *   `Registry`, all `*Payload` event types — these migrate to
- *   `compose/orchestrator/types.ts` as the orchestrator-internal
+ *   `orchestrate/types.ts` as the orchestrator-internal
  *   contract (not lens-facing).
  *
  * @remarks **Two-layer module shape** (per
@@ -62,8 +62,8 @@ import type { Snippet } from '../embody/types.js';
 
 /**
  * Snippet analysis report consumed by `recommend()`. Owned by
- * `compose/lib/analysis/` (planned in `02-analysis-and-recommender.md`
- * — WS2 ships `compose/lib/analysis/` alongside `compose/lib/recommender/`).
+ * `orchestrate/lib/analysis/` (planned in `02-analysis-and-recommender.md`
+ * — WS2 ships `orchestrate/lib/analysis/` alongside `orchestrate/lib/recommender/`).
  * Listed here as a placeholder so the `recommend` signature is complete;
  * tighten when WS2's analysis types are locked.
  */
@@ -71,7 +71,7 @@ type AnalysisReport = Readonly<Record<string, unknown>>;
 
 /**
  * 3D Block Model grid cell (Schulte 2008 + NM-components extension).
- * Owned by `compose/lib/recommender/types.ts` (WS2). Recommendations
+ * Owned by `orchestrate/lib/recommender/types.ts` (WS2). Recommendations
  * place themselves on this grid.
  *
  * @remarks Adapted from `study-lenses/types.ts:142-146`. The shape
@@ -87,7 +87,7 @@ type BlockModelCell = Readonly<{
 /**
  * A single recommendation from a lens. A lens can return multiple
  * recommendations at different Block Model cells with different
- * configs. Owned by `compose/lib/recommender/types.ts` (WS2).
+ * configs. Owned by `orchestrate/lib/recommender/types.ts` (WS2).
  *
  * @remarks Adapted from `study-lenses/types.ts:148-159`. Drop the
  * `transforms` field (no transforms tier in the new architecture);

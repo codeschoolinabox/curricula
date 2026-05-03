@@ -13,13 +13,13 @@ verification criteria. Read DOCS.md first.
 ## Constraints to honor
 
 - **Three peers + utils.** Final shape is `embody/`, `lenses/`,
-  `compose/` under `javascript/`; cross-cutting infra stays at
+  `orchestrate/` under `javascript/`; cross-cutting infra stays at
   `src/lib/utils/` and is imported via the existing `@`-alias.
-- **Single writer.** Only `compose/editor/` mutates snippet source.
+- **Single writer.** Only `orchestrate/editor/` mutates snippet source.
   Lenses are read-only views.
 - **Lens purity.** Lens plugins receive `embodiment` via props. They
-  do not import from `embody/` (top) or `compose/` (top). They may
-  import from `compose/lib/*` for shared analysis utilities and from
+  do not import from `embody/` (top) or `orchestrate/` (top). They may
+  import from `orchestrate/lib/*` for shared analysis utilities and from
   `@-utils` for generic infra.
 - **`embody/lib/*` returns raw data.** No validation/freezing in lib;
   the `embody()` factory does both at the end.
@@ -28,7 +28,7 @@ verification criteria. Read DOCS.md first.
 - **`evaluation` not `execution`.** The phase 3 name is "evaluation"
   throughout docs and canon (already done at this handoff's creation
   time; preserve it).
-- **Formatting in compose pre-processing; not validation.** The
+- **Formatting in orchestrate pre-processing; not validation.** The
   orchestrator formats source on load; it does NOT gate on JEJ-ness.
   Lenses choose what to do with `embodiment.validation.violations`.
 - **Dependency rules** (per DOCS.md § Dependency rules) must hold at
@@ -40,7 +40,7 @@ verification criteria. Read DOCS.md first.
 
 `src/lib/utils/` is at its current location and imported via the
 existing `@`-alias. Do **not** create `javascript/utils/`. The new
-peers (`embody`, `lenses`, `compose`) import from the existing path.
+peers (`embody`, `lenses`, `orchestrate`) import from the existing path.
 
 **Verify:** `@`-alias resolves from each peer; `src/lib/utils/`
 unchanged.
@@ -123,36 +123,36 @@ currently do; consume the embedded data instead.
 fixture; no `lib/parse-old/` or `lib/ast/` imports remain in these
 modules.
 
-### Step 8 — Create `compose/`; move editor concerns
+### Step 8 — Create `orchestrate/`; move editor concerns
 
 Pull editor concerns out of `study-lenses/` (the editor lens, its UI,
-its state hooks) into `compose/editor/`. The editor is no longer a
+its state hooks) into `orchestrate/editor/`. The editor is no longer a
 lens; it's the orchestrator's default home-base view.
 
 **Verify:** `study-lenses/` no longer contains an editor lens;
-`compose/editor/` builds and renders the editor; `compose/editor/`
+`orchestrate/editor/` builds and renders the editor; `orchestrate/editor/`
 mutates snippet source via the orchestrator.
 
-### Step 9 — Move analysis libs to `compose/lib/`
+### Step 9 — Move analysis libs to `orchestrate/lib/`
 
 ```text
-lib/socratizing/        → compose/lib/socratizing/
-lib/jej-documentation/  → compose/lib/jej-documentation/
-lib/completing/         → compose/lib/completing/
-lib/editing/            → compose/lib/editing/
-lib/error-interpreting/ → compose/lib/error-interpreting/
-lib/recommender/        → compose/lib/recommender/
+lib/socratizing/        → orchestrate/lib/socratizing/
+lib/jej-documentation/  → orchestrate/lib/jej-documentation/
+lib/completing/         → orchestrate/lib/completing/
+lib/editing/            → orchestrate/lib/editing/
+lib/error-interpreting/ → orchestrate/lib/error-interpreting/
+lib/recommender/        → orchestrate/lib/recommender/
 ```
 
 Update imports across the codebase.
 
-**Verify:** each module accessible from `compose/lib/`; no remaining
+**Verify:** each module accessible from `orchestrate/lib/`; no remaining
 imports from old `lib/` paths.
 
 ### Step 10 — Move orchestrator + bake formatting pre-processing
 
 Pull the orchestrator out of `study-lenses/` into
-`compose/orchestrator/`. Add a formatting pre-processing step in the
+`orchestrate/`. Add a formatting pre-processing step in the
 orchestrator's load pipeline so all source feeding into `embody(code)`
 is consistently formatted.
 
@@ -165,14 +165,14 @@ metadata, not a gate).
 Rename the directory. Verify each lens is self-contained:
 
 - Receives `embodiment` via props (not via direct embody import)
-- Does not import from `embody/` or `compose/` (top)
-- May import from `compose/lib/*` and `@-utils`
+- Does not import from `embody/` or `orchestrate/` (top)
+- May import from `orchestrate/lib/*` and `@-utils`
 
 For any lens that fails the audit, refactor it to receive what it
 needs as props from the orchestrator.
 
 **Verify:** dependency-rule audit passes for all lenses; no lens
-imports from `embody/` or `compose/` (top).
+imports from `embody/` or `orchestrate/` (top).
 
 ### Step 12 — Update `index.ts`
 
@@ -180,9 +180,9 @@ Export the orchestrator's `<StudyLenses>` component as the primary
 public surface (NOT embody — embody is internal):
 
 ```ts
-export { StudyLenses } from './compose/orchestrator/index.js';
+export { StudyLenses } from './orchestrate/index.js';
 // Optionally re-export types consumers need to type their snippet props
-export type { … } from './compose/orchestrator/types.js';
+export type { … } from './orchestrate/types.js';
 ```
 
 `embody` is **not** exported. Lens authors and curriculum authors don't
@@ -207,7 +207,7 @@ directory.
 
 ### Step 14 — Update peer READMEs and DOCS
 
-Each peer (`embody/`, `lenses/`, `compose/`) gets its `README.md` and
+Each peer (`embody/`, `lenses/`, `orchestrate/`) gets its `README.md` and
 `DOCS.md` updated to reflect the post-refactor reality. Also update:
 
 - `javascript/README.md` directory-structure table → final shape
@@ -225,7 +225,7 @@ where-to-next; all cross-doc links resolve.
 
 Out of scope for this refactor agent; flagged as a separate
 ticket / different agent. The smoke-test harness at
-`javascript/sandbox.html` exercises embody + lenses + compose
+`javascript/sandbox.html` exercises embody + lenses + orchestrate
 end-to-end during development. README + DOCS already mention it as
 planned.
 
@@ -233,12 +233,12 @@ planned.
 
 Verify (manually or with a lint rule):
 
-- No `lenses/<lens>/*` imports from `embody/` (top) or `compose/` (top)
-- No `embody/` imports from `compose/`, `lenses/`, or `embody/lib/`
+- No `lenses/<lens>/*` imports from `embody/` (top) or `orchestrate/` (top)
+- No `embody/` imports from `orchestrate/`, `lenses/`, or `embody/lib/`
   → `embody/` (cycle)
-- No `embody/lib/*` imports from `embody/` (top), `compose/`, or
+- No `embody/lib/*` imports from `embody/` (top), `orchestrate/`, or
   `lenses/`
-- No `compose/lib/*` imports from `lenses/`
+- No `orchestrate/lib/*` imports from `lenses/`
 - No `@-utils` imports from anywhere inside `javascript/`
 
 **Verify:** audit passes; consider committing a CI check that catches
@@ -263,7 +263,7 @@ Once the work is done, verified, and merged: delete
 - **AR cycle.** The whole plan was AR-1 reviewed at architectural
   level; substantial implementation choices made during steps 5 and 8
   warrant their own AR check (architectural-sketch challenge for
-  embody factory shape, design challenge for compose orchestrator
+  embody factory shape, design challenge for orchestrate component
   shape).
 - **Tests.** Existing tests live alongside the moved modules; expect
   them to need import-path updates but mostly to pass unchanged.
@@ -283,10 +283,10 @@ import { deepFreezeInPlace } from '@/utils/...';       // OK
 
 // Inside lenses/parsons/
 import type { Snippet } from '../../embody/types.js';  // OK (type only)
-import { interpret } from '../../compose/lib/error-interpreting/...';  // OK
+import { interpret } from '../../orchestrate/lib/error-interpreting/...';  // OK
 import { foo } from '../../embody/index.js';           // ❌ never
 
-// Inside compose/orchestrator/
+// Inside orchestrate/
 import { embody } from '../../embody/index.js';        // OK
 import { ParsonsLens } from '../../lenses/parsons/...';  // OK
 import { recommend } from '../lib/recommender/...';    // OK

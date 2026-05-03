@@ -147,7 +147,7 @@ underwrites the lifelong-learning autonomy framing below.
   override.
 
 (`recommendedLens` and `lensSequence` are sketched here as the
-conceptual model; the actual prop surface locks during compose
+conceptual model; the actual prop surface locks during orchestrate
 implementation.)
 
 ### Why this architecture
@@ -292,9 +292,9 @@ learning exercises. Each lens embodies a computing education research-backed
 pedagogical intervention: blanks (fill-in-the-blank), parsons (line ordering),
 trace tables (predict-then-compare), and more.
 
-The architecture separates transforms (code-to-code, e.g., format or loop-guard)
-from lenses (code-to-component, e.g., editor or blanks) and composes them into
-pipelines. A recommender analyzes each snippet against the JEJ notional machine
+The architecture provides lenses (code-to-component, e.g., editor, parsons,
+blanks) that consume frozen embodiments built by the embody factory.
+A recommender analyzes each snippet against the JEJ notional machine
 and suggests relevant exercises organized in a 3D Block Model grid
 (comprehension level × scope × NM components). This enables rapid iteration on
 exercise design — researchers prototype new interventions by composing existing
@@ -322,9 +322,9 @@ selects which lenses to surface (via the recommender), mounts them, and
 manages all state. Consumers get one component to mount; everything else
 is internal.
 
-`embody`, lens plugins, and `compose/lib/*` analysis helpers are **not**
+`embody`, lens plugins, and `orchestrate/lib/*` analysis helpers are **not**
 part of the public API. They are internal building blocks that
-`<StudyLenses>` composes. Lens authors ship plugins that the orchestrator
+`<StudyLenses>` orchestrates. Lens authors ship plugins that the orchestrator
 mounts; lens plugins receive `embodiment` as a prop. Curriculum authors
 embed `<StudyLenses>` in code fences.
 

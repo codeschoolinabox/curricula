@@ -17,7 +17,7 @@
 2. **Confirm WS2 recommender status if starting Layer II
    (L5/L6).** WS2
    ([`02-analysis-and-recommender.md`](./02-analysis-and-recommender.md))
-   ships `compose/lib/recommender/`; Layer II in the 03 handoff
+   ships `orchestrate/lib/recommender/`; Layer II in the 03 handoff
    consumes it. If WS2's recommender doesn't exist yet, restrict
    the session to Foundation tier (F1-F5) or Layer I (L1-L2).
 3. **Verify the test suite is green before opening the session:**
@@ -83,11 +83,11 @@ Start with plan mode.
 5. [`../REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md) — to confirm
    prerequisite execution state.
 6. The peer `README.md` + `DOCS.md` for the directory the
-   increment will modify (e.g. `compose/orchestrator/README.md`).
+   increment will modify (e.g. `orchestrate/README.md`).
 7. [`02-analysis-and-recommender.md`](./02-analysis-and-recommender.md)
    — only if the increment is Layer II (L5/L6) and consumes the
    recommender.
-8. The current source under `compose/orchestrator/` (post-refactor)
+8. The current source under `orchestrate/` (post-refactor)
    — read whole files, never split.
 
 ## Expected session cadence
@@ -145,7 +145,7 @@ Stop the agent and redirect if you see:
   If a session uncovers a refactor bug, stop and surface it; don't
   fix it in-line. The refactor is its own change.
 - **[`02-analysis-and-recommender.md`](./02-analysis-and-recommender.md)
-  (WS2)** — produces `compose/lib/recommender/`. Layer II in the
+  (WS2)** — produces `orchestrate/lib/recommender/`. Layer II in the
   03 handoff consumes it. Coordinate via `.planning-handoffs/`
   notes if both are in flight.
 - **[`04-lens-migration.md`](./04-lens-migration.md)** — produces

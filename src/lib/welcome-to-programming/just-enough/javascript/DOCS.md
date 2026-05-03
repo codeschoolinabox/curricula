@@ -45,7 +45,7 @@ javascript/
 ### Target shape (post-refactor)
 
 Three peers under `javascript/` mirror the conceptual chain. The implementation
-peer (`compose/`) wires everything together for the learner.
+peer (`orchestrate/`) wires everything together for the learner.
 
 ```text
 javascript/
@@ -54,7 +54,7 @@ javascript/
   notional-machine.svg
   reference.md
   DOCS.md
-  index.ts                      exports compose's <StudyLenses> orchestrator
+  index.ts                      exports orchestrate's <StudyLenses>
                                 component as the public interface
   sandbox.html                  whole-setup smoke test
 
@@ -72,7 +72,7 @@ javascript/
     README.md, DOCS.md
     parsons/, blanks/, trace-table/, …  (each lens self-contained)
 
-  compose/                      orchestrator + default editor + analysis libs
+  orchestrate/                      orchestrator + default editor + analysis libs
     README.md, DOCS.md
     editor/                     default home base (the only writer of snippet state)
     orchestrator/               state mgmt + lens dispatch + pre-processing
@@ -95,7 +95,7 @@ existing `@`-alias.
 
 ### Single-writer state model
 
-Only `compose/editor/` mutates the snippet's source. Everything else reacts:
+Only `orchestrate/editor/` mutates the snippet's source. Everything else reacts:
 
 - The editor is **always present** as the home base — even when no lenses apply,
   the learner sees the editor.
@@ -124,7 +124,7 @@ Concretely a lens receives `embodiment` as a prop and:
 There is **no separate `transforms/` or `remix/` peer.** Anything that produces
 a derivative snippet for an exercise is a lens concern.
 
-### Formatting is compose pre-processing (formatting only)
+### Formatting is orchestrate pre-processing (formatting only)
 
 The orchestrator runs a **formatting** pre-processing step on source before
 constructing the embodiment. By the time anything reaches a lens, the source is
@@ -222,7 +222,7 @@ decision to the framework.
 
 The paper's Figure 3 architecture (applicability filter → ranking
 engine → recommended lenses) is the implementation contract for
-[`compose/lib/recommender/`](#categorization-rationale-which-lib-modules-go-where).
+[`orchestrate/lib/recommender/`](#categorization-rationale-which-lib-modules-go-where).
 **Snippet-fit only** — the recommender takes an embodiment and a
 roster of lens plugins, runs applicability gates, ranks by snippet-fit,
 returns recommended lenses. No learner state. ZPD-targeting at the
@@ -237,7 +237,7 @@ scope; the LMS owns the curricular scope.
 | Pyramid layer | Snippet scope (us) | Curricular scope (LMS) |
 | --- | --- | --- |
 | Base — Progress modelling | _(n/a)_ | Learner state / knowledge graph / ZPD positioning |
-| Layer I — Lenses & defaults | `compose/lib/recommender/` ranks by snippet-fit; `lenses/` are the plugins | _(subsumed)_ |
+| Layer I — Lenses & defaults | `orchestrate/lib/recommender/` ranks by snippet-fit; `lenses/` are the plugins | _(subsumed)_ |
 | Layer II — Path generation | Open spec — auto-generated lens path on one snippet (3D Block × NM in draft) | Sequence of `<StudyLenses>` instances across snippets |
 | Layer III — Manual recommendations | `<StudyLenses>` `recommendedLens` config | LMS picks the curated snippet |
 | Layer IV — Manually crafted paths | `<StudyLenses>` `lensSequence` config | Full curriculum sequence |
@@ -281,26 +281,26 @@ scope; the LMS owns the curricular scope.
 src/lib/utils/   (@-aliased; outside javascript/)
    ↑      ↑      ↑
    |      |      |
-embody/lib/   compose/lib/   lenses/<lens>/lib/
+embody/lib/   orchestrate/lib/   lenses/<lens>/lib/
    ↑              ↑                ↑
    |              |                |
-embody/       compose/   ←    embody/  +  lenses/
+embody/       orchestrate/   ←    embody/  +  lenses/
                                  ↑
                                  |
-                              (compose distributes embodiment to lenses via props)
+                              (orchestrate distributes embodiment to lenses via props)
 ```
 
 Concrete:
 
-- `embody/` may import from `embody/lib/*` and `@-utils`. Never from `compose/`
+- `embody/` may import from `embody/lib/*` and `@-utils`. Never from `orchestrate/`
   or `lenses/`.
 - `embody/lib/*` may import from sibling `embody/lib/*` and `@-utils`. Never
-  from `embody/` (top), `compose/`, or `lenses/`.
+  from `embody/` (top), `orchestrate/`, or `lenses/`.
 - `lenses/<lens>/*` may import from sibling lens-internal files,
-  `compose/lib/*`, and `@-utils`. Receives `embodiment` via props from the
-  orchestrator. Never imports from `embody/` or `compose/` (top).
-- `compose/` may import from `compose/lib/*`, `embody/`, `lenses/`, `@-utils`.
-- `compose/lib/*` may import from sibling `compose/lib/*`, `embody/` (consume
+  `orchestrate/lib/*`, and `@-utils`. Receives `embodiment` via props from the
+  orchestrator. Never imports from `embody/` or `orchestrate/` (top).
+- `orchestrate/` may import from `orchestrate/lib/*`, `embody/`, `lenses/`, `@-utils`.
+- `orchestrate/lib/*` may import from sibling `orchestrate/lib/*`, `embody/` (consume
   embodiment instances), `@-utils`. Never from `lenses/`.
 - `@-utils` may not import from anywhere else in `javascript/`.
 
@@ -315,12 +315,12 @@ Concrete:
 | `lib/formatting/`         | `embody/lib/formatting/`          | JEJ formatting → snippet metadata                              |
 | `lib/evaluating/`         | `embody/lib/evaluating/`          | Evaluation engines that `embody.streams.evaluate.*` wrap       |
 | `lib/scope/`              | `embody/lib/scope/`               | Scope analysis → NM scope-chain understanding                  |
-| `lib/socratizing/`        | `compose/lib/socratizing/`        | Socratic micro-decision analysis (orchestrator-level pedagogy) |
-| `lib/jej-documentation/`  | `compose/lib/jej-documentation/`  | JEJ docs for editor tooltips                                   |
-| `lib/completing/`         | `compose/lib/completing/`         | Autocomplete (editor concern)                                  |
-| `lib/editing/`            | `compose/lib/editing/`            | Editor integration                                             |
-| `lib/error-interpreting/` | `compose/lib/error-interpreting/` | Learner-friendly error messages (editor concern)               |
-| `lib/recommender/`        | `compose/lib/recommender/`        | Exercise recommender; consumes embodiment after refactor       |
+| `lib/socratizing/`        | `orchestrate/lib/socratizing/`        | Socratic micro-decision analysis (orchestrator-level pedagogy) |
+| `lib/jej-documentation/`  | `orchestrate/lib/jej-documentation/`  | JEJ docs for editor tooltips                                   |
+| `lib/completing/`         | `orchestrate/lib/completing/`         | Autocomplete (editor concern)                                  |
+| `lib/editing/`            | `orchestrate/lib/editing/`            | Editor integration                                             |
+| `lib/error-interpreting/` | `orchestrate/lib/error-interpreting/` | Learner-friendly error messages (editor concern)               |
+| `lib/recommender/`        | `orchestrate/lib/recommender/`        | Exercise recommender; consumes embodiment after refactor       |
 | Cross-cutting infra       | stays at `src/lib/utils/`         | Used by all peers via @-alias                                  |
 
 The full step-by-step move sequence is in
@@ -329,7 +329,7 @@ The full step-by-step move sequence is in
 ## Public API: `<StudyLenses>` (orchestrator-primary, not embody-primary)
 
 The package's public interface is the **`<StudyLenses>`** React component
-exported from `compose/orchestrator/`. `index.ts` re-exports it. Consumers
+exported from `orchestrate/`. `index.ts` re-exports it. Consumers
 mount `<StudyLenses snippet={…} />`; everything else (embody, lenses,
 editor, analysis libs) is internal implementation.
 
@@ -381,7 +381,7 @@ shapes here:
 - New types belong in `embody/types.ts` (canonical contract) or a peer's local
   types module. Don't add types elsewhere.
 - All public results deep-frozen. No exceptions.
-- Respect the dependency rules above. Lenses don't import from embody; compose
+- Respect the dependency rules above. Lenses don't import from embody; orchestrate
   distributes embodiment via props.
 - Cross-doc links (`README` ↔ `notional-machine` ↔ peer `README`/`DOCS`) must
   stay alive after structural moves.

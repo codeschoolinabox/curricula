@@ -1,4 +1,4 @@
-# compose/lib
+# orchestrate/lib
 
 Analysis helpers consumed by the orchestrator and the home base.
 Each module is a pure-TS function that takes an
@@ -76,14 +76,14 @@ top-level `AGENTS.md`. Library-specific rules:
 - **`embodiment` parameter name** wherever a function takes a
   Snippet instance.
 - **Dependency rules** per [`../../DOCS.md` § Dependency rules](../../DOCS.md):
-  - `compose/lib/*` may import from sibling `compose/lib/*`,
+  - `orchestrate/lib/*` may import from sibling `orchestrate/lib/*`,
     `embody/`, `@-utils`. Never from `lenses/`.
-  - `lenses/<lens>/*` may import from `compose/lib/*` (for shared
+  - `lenses/<lens>/*` may import from `orchestrate/lib/*` (for shared
     analysis utilities).
 
 ## Navigation
 
-- **Parent**: [`../README.md`](../README.md) — `compose/` peer
+- **Parent**: [`../README.md`](../README.md) — `orchestrate/` peer
   overview.
 - **Embodiment contract**: [`../../embody/types.ts`](../../embody/types.ts).
 - **Recommender plan**: [`../../.planning-handoffs/02-analysis-and-recommender.md`](../../.planning-handoffs/02-analysis-and-recommender.md)

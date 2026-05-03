@@ -15,7 +15,7 @@ JEJ  →  NM  →  embody  →  study lenses
   what concepts exist (phases, scopes, bindings, coercion, …).
 - **embody** turns each JEJ snippet into a data object whose every field
   and event corresponds to one of those NM concepts.
-- The **orchestrator** (`compose/`) consumes embody instances and
+- The **orchestrator** (`orchestrate/`) consumes embody instances and
   distributes the `embodiment` to mounted **lenses** via props. Lenses
   never re-derive what embody exposes; they also do not import embody
   directly — they receive `embodiment` from the orchestrator.

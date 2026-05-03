@@ -2,7 +2,7 @@
 
 ## Why this module exists
 
-`compose/editor/` is the **always-present home base** — the React
+`orchestrate/editor/` is the **always-present home base** — the React
 component the orchestrator mounts in editor mode. It's the **only
 writer of snippet state** in the entire `<StudyLenses>` system.
 Everything else (lenses, recommender, analysis libs) is a read-only
@@ -19,9 +19,9 @@ callback.
 > [`../../lib/editing/DOCS.md`](../../lib/editing/DOCS.md)
 > documents the underlying CodeMirror integration — language
 > loading, callback API for linters / completions / hover docs,
-> destroy lifecycle. That module moves to `compose/lib/editing/`
+> destroy lifecycle. That module moves to `orchestrate/lib/editing/`
 > during REFACTOR-HANDOFF Step 9 unchanged in shape; this
-> `compose/editor/` component is a new thin React wrapper around
+> `orchestrate/editor/` component is a new thin React wrapper around
 > its `createEditor()` factory.
 
 ## Architectural sketch
@@ -145,7 +145,7 @@ append to the DOM, with linters / hover / completions injected
 via callback. It's framework-agnostic (no React, no
 `@docusaurus/BrowserOnly`).
 
-`compose/editor/` could:
+`orchestrate/editor/` could:
 
 - Replace `createEditor()` with a React-native CodeMirror
   integration (e.g. `@uiw/react-codemirror`).
@@ -160,8 +160,8 @@ We chose option 2 because:
   the same pattern as [`../../lenses/`](../../lenses/) (TS core
   + React wrapper). Consistency across peers.
 - **Future migrations** (e.g. switching CodeMirror versions,
-  swapping in Monaco, etc.) are contained in `compose/lib/editing/`
-  — `compose/editor/` doesn't change.
+  swapping in Monaco, etc.) are contained in `orchestrate/lib/editing/`
+  — `orchestrate/editor/` doesn't change.
 
 ## Why controlled (not uncontrolled)
 
@@ -186,11 +186,11 @@ Phase 0 if needed.
 This module owns the React component + its tests. It does NOT own:
 
 - The CodeMirror integration (lives in `lib/editing/` →
-  `compose/lib/editing/`).
+  `orchestrate/lib/editing/`).
 - The pedagogical callbacks themselves (linters in
-  `compose/lib/error-interpreting/`, completions in
-  `compose/lib/completing/`, doc lookups in
-  `compose/lib/jej-documentation/`). This component just wires
+  `orchestrate/lib/error-interpreting/`, completions in
+  `orchestrate/lib/completing/`, doc lookups in
+  `orchestrate/lib/jej-documentation/`). This component just wires
   them.
 - The orchestrator's mode state machine (lives in
   [`../orchestrator/`](../orchestrator/)).

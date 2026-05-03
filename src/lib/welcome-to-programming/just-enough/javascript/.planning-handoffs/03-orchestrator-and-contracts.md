@@ -1,15 +1,15 @@
-# WS3: compose/orchestrator — post-refactor increment plan
+# WS3: orchestrate/orchestrator — post-refactor increment plan
 
 > **Status**: This handoff was rewritten end-to-end after the package's
 > top-level docs (`README.md`, `DOCS.md`, `REFACTOR-HANDOFF.md`) locked
-> in the **embody / lenses / compose three-peer architecture** and
+> in the **embody / lenses / orchestrate three-peer architecture** and
 > integrated the **Explorotron quadrant + pyramid** framework. The
 > previous version targeted `<StudyLenses code lens lang transforms>`
 > with a transforms-tier pipeline; that whole framing is superseded.
 >
 > **Hard prerequisite**: `REFACTOR-HANDOFF.md` Steps 1-16 must be
 > executed and merged before any increment in this handoff begins.
-> The refactor is the only path to the embody / lenses / compose
+> The refactor is the only path to the embody / lenses / orchestrate
 > layout this handoff targets.
 >
 > **Operational instructions (prompt template, pre-session checks,
@@ -33,7 +33,7 @@ Per `javascript/README.md` § Pedagogical first principles and
   `code` → renamed to `snippet`; `lang` → no longer needed (embody
   auto-detects); `transforms` → no transforms tier.
 
-- **Single-writer state model**: only `compose/editor/` mutates
+- **Single-writer state model**: only `orchestrate/editor/` mutates
   snippet source. Lenses are read-only views consuming `embodiment`
   via props.
 
@@ -111,7 +111,7 @@ Per `javascript/README.md` § Pedagogical first principles and
   Parsons / blanks / bug-injection live inside the relevant lens.
 
 - **Editor is not a lens**: it is the always-present home base at
-  `compose/editor/`, the orchestrator's snippet writer.
+  `orchestrate/editor/`, the orchestrator's snippet writer.
 
 - **Lens shape**: each lens is a **two-layer module** — a pure-TS
   core (display derivation, validation, scoring — testable in
@@ -175,14 +175,14 @@ needing realignment in separate sessions:
 | Era                  | Concern                                | Files / commits                                          | Refactor disposition                                                                                  |
 | -------------------- | -------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Phase 1 (Inc 0–7b)   | Pure-TS substrate (registry, pipeline, state, EventBus, cache, reset, reset-all) | `study-lenses/*.ts` (10 modules)                         | Modules reshape: registry simplifies (no transforms peer); pipeline-execute becomes `format → embody`; cache disappears (disposability); EventBus migrates to internal-only. Recovered durables: name-enumeration, EventBus pattern, freeze discipline, cleanup-split lessons. REFACTOR-HANDOFF Step 11 decides specifics. |
-| Inc 8                | React wrapper scaffolding              | `study-lenses/orchestrator/study-lenses.tsx` + default-registry + editor stub | Wrapper migrates to `compose/orchestrator/` (Step 10); editor stub becomes `compose/editor/` home base (Step 8); registry concept may dissolve.                                                                                                                                       |
+| Inc 8                | React wrapper scaffolding              | `study-lenses/orchestrator/study-lenses.tsx` + default-registry + editor stub | Wrapper migrates to `orchestrate/` (Step 10); editor stub becomes `orchestrate/editor/` home base (Step 8); registry concept may dissolve.                                                                                                                                       |
 | Inc 9                | Toolbar with lens-picker, dispatch-effect, cache-hit reattach | 11 commits `fc3257c..228c04c`                            | Toolbar lens-picker SURVIVES as the Q-I/Q-III learner-driven exploration surface. `lens-switched` dispatch-effect SURVIVES (still fires on learner-driven switch — internal-only per F5). Cache-hit reattach DISSOLVES (disposability — lens state is per-mount, snippet change unmounts lenses).               |
 
 Test count pre-refactor: ~228 tests across 17 files. Expect
 substantial shifting during REFACTOR-HANDOFF Steps 3-11 (moves)
 and Step 5 (embody factory new tests). "Do NOT redo Phase 0,
 Inc-8, or Inc-9 work" reinterpreted: don't re-implement what the
-refactor migrates. New increments target `compose/orchestrator/`
+refactor migrates. New increments target `orchestrate/`
 and assume the post-refactor shape.
 
 ## Lessons carried forward
@@ -214,19 +214,19 @@ increments:
 5. **Cleanup-split rationale**: when an effect's cleanup runs on
    every re-run AND on unmount, separate "switch-cleanup" from
    "unmount-cleanup" into two effects. Even if
-   `compose/orchestrator/`'s specific effects differ, the
+   `orchestrate/`'s specific effects differ, the
    discipline of "what runs on every re-render vs. only on unmount"
    applies.
 6. **README/DOCS-per-directory invariant** (AGENTS.md): every
    source directory has both. Post-refactor each peer (`embody/`,
-   `lenses/`, `compose/`) and their sub-modules need the same.
+   `lenses/`, `orchestrate/`) and their sub-modules need the same.
 7. **AR-1 + AR-2 on documentation commits**: pure-doc commits get
    the full AR cycle ("docs are ground truth"). New handoff
    increments that touch READMEs / DOCS run AR-1 and AR-2.
 8. **The effect-topology architectural sketch pattern**: lifecycle
    phases + per-effect deps + per-effect cleanup work +
    registration order makes a reviewable contract that AR-2 can
-   hold to. The new `compose/orchestrator/` inherits this
+   hold to. The new `orchestrate/` inherits this
    convention.
 
 ## Known pitfalls
@@ -262,9 +262,9 @@ The base of the pyramid. Without this, no quadrant has a substrate.
 
 #### F1 — `<StudyLenses snippet>` end-to-end smoke
 
-Wire `compose/orchestrator/`: take a `snippet` string prop → format
+Wire `orchestrate/`: take a `snippet` string prop → format
 pre-processing → `embody(snippet)` → frozen `Snippet` → mount
-`compose/editor/` as home base with the embodiment as a prop. No
+`orchestrate/editor/` as home base with the embodiment as a prop. No
 recommender, no other lenses, no picker yet. Just the conceptual
 chain JEJ → NM → embody → editor flowing end-to-end.
 
@@ -275,7 +275,7 @@ React DevTools as a frozen `Snippet`.
 
 The orchestrator's UI is in exactly one of two modes at a time:
 
-- **Editor mode**: `compose/editor/` is mounted; the learner is
+- **Editor mode**: `orchestrate/editor/` is mounted; the learner is
   editing the snippet string. **No active lens, no embodiment**
   (yet). The toolbar's lens-picker is visible; selecting a lens
   exits editor mode.
@@ -340,7 +340,7 @@ against the `embodiment`-prop contract: TS core + light React
 wrapper. Bootstraps a non-trivial registered set so Layer-I /
 Layer-II surfaces have something to enumerate / rank.
 Dependency-rule audit: lens never imports from `embody/` (top)
-or `compose/` (top).
+or `orchestrate/` (top).
 
 Coordinate with `04-lens-migration.md` so one lens is finished
 end-to-end (TS core + React wrapper) before F4's sandbox
@@ -351,7 +351,7 @@ input against the embodiment.
 
 #### F5 — INTERNAL EventBus only (host-emit protocol DEFERRED)
 
-Migrate the Inc-9 EventBus to the new `compose/orchestrator/`
+Migrate the Inc-9 EventBus to the new `orchestrate/`
 for **intra-component coordination only**. Per `DOCS.md`
 §Pedagogical grounding §"What we explicitly do NOT own": *"A
 data-emit protocol from `<StudyLenses>` back to the LMS.
@@ -386,7 +386,7 @@ types.ts) and transitions the orchestrator into lens mode for
 the chosen lens. The picker's default-selected option comes
 from the `lens` prop (per F1's prop contract); if `lens` is
 absent, the default is the first lens in the roster (or a
-compose-level baseline default — to settle in L1's Phase 0).
+orchestrate-level baseline default — to settle in L1's Phase 0).
 
 Sandbox: dropdown shows every registered lens; selecting swaps
 the mount; `lens-switched` event fires on the internal bus;
@@ -416,14 +416,14 @@ The recommender. Per Explorotron Figure 3:
 **Code → Applicability Filter → Ranking Engine → Recommended grid**.
 
 > **WS2 owns the engine.** The Applicability Filter and Ranking
-> Engine themselves (`compose/lib/recommender/`) are planned in
+> Engine themselves (`orchestrate/lib/recommender/`) are planned in
 > [`02-analysis-and-recommender.md`](./02-analysis-and-recommender.md)
 > — that handoff specifies the analysis types, recommendation
 > shapes, ranking signals, and grid dimensions. WS3 (this
 > handoff) only covers the orchestrator's *consumption* of the
 > recommender's output. Cross-handoff dependency: Layer II in
 > this handoff blocks until WS2 ships a working
-> `compose/lib/recommender/` public surface.
+> `orchestrate/lib/recommender/` public surface.
 
 #### L5 — Recommendations panel UI
 
@@ -510,7 +510,7 @@ curriculum need surfaces) is a contained change: add a
 `sequence` field inside the `config` prop bundle, extend the
 plugin's `parse-lens-config.ts` to recognize it, add a
 sequential-walk-through React component inside
-`compose/orchestrator/`. No props added; no architectural
+`orchestrate/`. No props added; no architectural
 disruption. **Treat L9-L11 as deferred follow-up tickets, not
 out-of-the-question.**
 
@@ -541,7 +541,7 @@ pedagogical priorities clarify.
 
 ### First step: detailed Phase 0 for Foundation tier (F1)
 
-The post-refactor `compose/orchestrator/` is a fresh module.
+The post-refactor `orchestrate/` is a fresh module.
 Every Phase 0 question from the OLD handoff (where the toolbar
 sits, how to enumerate lens names, how to wrap state
 transitions, etc.) is moot — those concerns are at Layer I
@@ -556,7 +556,7 @@ smoke-test of the JEJ → NM → embody → editor chain):
 - Pre-processing pipeline: format ONLY (per locked decision)
   or format + a passthrough hook for downstream pipelines?
   Where does the formatter live? `embody/lib/formatting/`
-  (per Step 3) or `compose/lib/`?
+  (per Step 3) or `orchestrate/lib/`?
 - Effect topology: with React handling component reconciliation
   (lenses are React components, not framework-agnostic mounts),
   is the wrapper effectively a single `useEffect` running
@@ -572,7 +572,7 @@ smoke-test of the JEJ → NM → embody → editor chain):
   embodiment per F3 says we build it on need rather than on
   edit; how is the cached-embodiment-since-last-edit stored?
   Memo? Ref? Discrete state field?
-- Test environment: vitest + jsdom for `compose/orchestrator/`
+- Test environment: vitest + jsdom for `orchestrate/`
   tests; `embody()` integration tests likely need real
   evaluation engines (Worker + SharedArrayBuffer) which jsdom
   doesn't support — those go in `.browser.test.ts` files under
@@ -612,12 +612,12 @@ After REFACTOR-HANDOFF executes, the orchestrator has access to:
 - `embody(code) → Snippet` from `embody/index.ts` — the factory.
 - `embody/types.ts` — `Snippet`, `Status`, `Streams`, etc. types
   (canonical contract).
-- `compose/lib/recommender/` — analysis of an embodiment to
+- `orchestrate/lib/recommender/` — analysis of an embodiment to
   lens recommendations (WS2 deliverable).
-- `compose/lib/socratizing/`, `completing/`, `editing/`,
+- `orchestrate/lib/socratizing/`, `completing/`, `editing/`,
   `error-interpreting/`, `jej-documentation/` — analysis libs
   taking `embodiment`.
-- `compose/editor/` — the editor home-base component.
+- `orchestrate/editor/` — the editor home-base component.
 - `lenses/<name>/` — each lens self-contained: TS core + React
   wrapper, takes `embodiment` via props.
 
@@ -641,11 +641,11 @@ Carry-forward (still apply):
 New, specific to the post-refactor layout:
 
 - **Lens purity**: lens plugins receive `embodiment` via props.
-  They do NOT import from `embody/` (top) or `compose/` (top).
-  May import from `compose/lib/*` and `@-utils`.
+  They do NOT import from `embody/` (top) or `orchestrate/` (top).
+  May import from `orchestrate/lib/*` and `@-utils`.
 - **Lens shape**: TS core + React wrapper. NOT a single React
   component; NOT a framework-agnostic LensMount.
-- **Single-writer**: only `compose/editor/` mutates snippet
+- **Single-writer**: only `orchestrate/editor/` mutates snippet
   source. Lenses are read-only views.
 - **`embodiment` parameter name** wherever a function takes a
   Snippet instance.

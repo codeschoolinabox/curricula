@@ -29,7 +29,7 @@ lenses/
 After REFACTOR-HANDOFF Steps 8 + 11 land:
 
 - **Editor moves out**. The pre-refactor editor lens at
-  `study-lenses/lenses/editor/` migrates to `compose/editor/` (Step 8)
+  `study-lenses/lenses/editor/` migrates to `orchestrate/editor/` (Step 8)
   — it's the home base, not a lens.
 - **Other lenses move in**. The pre-refactor `study-lenses/lenses/`
   subdirs (highlight, plus future parsons/blanks/etc.) merge into
@@ -52,7 +52,7 @@ turning an embodiment into an exercise.
 Each lens is a **two-layer module** at `lenses/<name>/`:
 
 1. **Pure-TS core** (e.g. `core.ts`) — display derivation,
-   validation, scoring. Imports from `compose/lib/*` (analysis
+   validation, scoring. Imports from `orchestrate/lib/*` (analysis
    utilities), `@-utils` (freeze, etc.), and the lens's own local
    files. Testable in vitest **without** `jsdom`.
 2. **Light React wrapper** (e.g. `index.tsx`) — exports the
@@ -108,11 +108,11 @@ Inherits all conventions from [`../README.md`](../README.md) and the
 top-level `AGENTS.md`. Subdirectory-specific rules:
 
 - **Lens purity**. Lens modules MUST NOT import **runtime values**
-  from `embody/` (top) or `compose/` (top). Receive `embodiment`
+  from `embody/` (top) or `orchestrate/` (top). Receive `embodiment`
   via props. **Type-only imports** from `embody/types.ts` (e.g.
   `import type { Snippet } from '../../embody/types.js'`) are OK
   per the REFACTOR-HANDOFF.md § Quick reference final-import-paths
-  table. May also import (runtime + type) from `compose/lib/*`
+  table. May also import (runtime + type) from `orchestrate/lib/*`
   and `@-utils`. (Per [`../DOCS.md` § Dependency rules](../DOCS.md).)
 - **Disposable practice**. Lens-internal UI state (parsons shuffle,
   blanks fills) is per-mount only. When the snippet changes, React
@@ -122,7 +122,7 @@ top-level `AGENTS.md`. Subdirectory-specific rules:
   [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles)
   implication 5.
 - **Single-writer state**. Lenses are read-only views; they CANNOT
-  mutate the snippet. Editing happens only in [`compose/editor/`](../compose/editor/).
+  mutate the snippet. Editing happens only in [`orchestrate/editor/`](../orchestrate/editor/).
 - **`embodiment` parameter name** wherever a function takes a
   Snippet instance.
 - One default export per file (named function/const, then
@@ -139,9 +139,9 @@ top-level `AGENTS.md`. Subdirectory-specific rules:
 - **Embodiment contract**: [`../embody/types.ts`](../embody/types.ts)
   — the `Snippet` type lenses receive via props.
 - **Orchestrator that mounts these lenses**:
-  [`../compose/orchestrator/README.md`](../compose/orchestrator/README.md).
+  [`../orchestrate/README.md`](../orchestrate/README.md).
 - **Recommender that ranks these lenses**:
-  [`../compose/lib/README.md`](../compose/lib/README.md) →
+  [`../orchestrate/lib/README.md`](../orchestrate/lib/README.md) →
   [`02-analysis-and-recommender.md`](../.planning-handoffs/02-analysis-and-recommender.md).
 - **Migration plan**:
   [`../REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md) Steps 8 + 11
