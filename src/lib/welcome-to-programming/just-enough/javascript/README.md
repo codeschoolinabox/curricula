@@ -199,7 +199,7 @@ The folder layout mirrors the conceptual chain:
 | [`lenses/`](./lenses/)                         | Pedagogical views on the embodied NM                                               |
 | `sandbox-programs/`                            | Test fixtures (may be moved later)                                                 |
 | `sandbox.html`                                 | _Planned smoke-test harness — TBD agent (see [DOCS.md](./DOCS.md))_                |
-| [`lib/`](./lib/)                               | Helpers used to build embody and lenses (will be split — see [DOCS.md](./DOCS.md)) |
+| [`lib/`](./lib/)                               | Helpers used to build embody and lenses                                            |
 
 (`.planning-handoff/` is a temporary dev artifact — intentionally not documented
 in README.)
@@ -280,16 +280,12 @@ exploration and creativity.
 | [lib/evaluating/trace/syntax/](./lib/evaluating/trace/syntax/)       | Syntax tracer — NM-step-category implementation (README + DOCS) |
 | [lib/evaluating/trace/semantics/](./lib/evaluating/trace/semantics/) | Semantic tracer — finer-grained instrumentation (README + DOCS) |
 
-## Tooling (under active development)
+## Tooling
 
 Validates learner JavaScript against the language level and evaluates it in
 sandboxed environments. Provides validation, formatting, parsing, and evaluation
 modes — all through a unified API with a code object factory as the default
 export.
-
-> **Note**: the API surface and available tooling are under active development.
-> The exports and function signatures below will change as the tracer refactor
-> and new evaluation modes are implemented.
 
 ## Study lenses: research translation platform
 
@@ -361,12 +357,11 @@ part of the public API. They are internal building blocks that
 mounts; lens plugins receive `embodiment` as a prop. Curriculum authors
 embed `<StudyLenses>` in code fences.
 
-### Legacy named exports (will be deprecated)
+### Legacy named exports
 
 `index.ts` also re-exports the legacy tooling and evaluation functions
 (`run`, `trace`, `validate`, `parse`, `format`, `checkFormat`) for
-existing callers. These will be reconsidered as `<StudyLenses>` becomes
-the dominant interface; no deprecation timeline is set.
+existing callers.
 
 ```ts
 import {
@@ -417,7 +412,7 @@ import {
 | `lib/scope/`              | Scope analysis utilities                                                                                                                         |
 | `lib/jej-documentation/`  | JEJ documentation generation for editor support                                                                                                  |
 | `components/`             | UI components (V2 lens components, migration source)                                                                                             |
-| `index.ts`                | Package entry — exports the `<StudyLenses>` orchestrator component (primary surface) + legacy named functions (will be deprecated)               |
+| `index.ts`                | Package entry — exports the `<StudyLenses>` orchestrator component (primary surface) + legacy named functions                                    |
 | `api/`                    | Legacy directory; trace/run/debug-related types remain here pending parallel migration. The validate/parse/format/default migration is complete. |
 
 ## Result shape

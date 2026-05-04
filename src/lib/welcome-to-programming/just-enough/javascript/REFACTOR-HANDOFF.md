@@ -46,18 +46,52 @@ modules are real. See
 | 15 | n/a (separate ticket) | — |
 
 **Phase A execution order** (within-phase ordering matters because
-Step 8's editor extraction consumes analysis libs that Step 9 moves):
+Step 8's editor extraction consumes analysis libs that Step 9
+copies):
 
 ```text
 1 → 5 → 7 → 9 → 8 → 10 → 11 → 12 → 14 → 16 → 17
 ```
 
-Why 9 before 8: Step 8 pulls editor concerns out of `study-lenses/`
-into `orchestrate/editor/`, where the editor consumes analysis libs
+Why 9 before 8: Step 8 copies editor concerns from `study-lenses/`
+to `orchestrate/editor/`, where the editor consumes analysis libs
 (`error-interpreting`, `completing`, `editing`, `jej-documentation`)
 via their new paths under `orchestrate/lib/*`. Step 9 must do the
-move first; otherwise Step 8 lands with broken imports or has to
+copy first; otherwise Step 8 lands with broken imports or has to
 re-fix them post-Step-9.
+
+### Cross-stream impact
+
+Phase A unblocks parallel work on the four work streams in
+`.planning-handoffs/`. Which streams unblock when:
+
+- **WS3** (`03-orchestrator-and-contracts.md`): unblocked once
+  Step 5 lands. Mounts lenses with mock embodiments; passes the
+  four-prop API (`snippet`, `lens?`, `config?`, `configs?`)
+  through to picker/recommender. WS3's F1-F5 + L1-L8 increments
+  exercise the orchestrator surface independently of real embody
+  internals.
+- **WS4** (`04-lens-migration.md`): partially unblocked once
+  Step 5 + Step 11 land. Static-side lenses (`highlight`,
+  `parsons`, `blanks`) — anything that reads `parse`, `static`,
+  `validation`, `errors` — unblocks fully. Dynamic-side lenses
+  (e.g. `trace-table` validating predictions against the syntax
+  tracer) gate on Phase B Step B7 (event-payload locking) for
+  their specific evaluation module.
+- **WS1** (`01-NM-components.md`): independent of the mock/real
+  split — the `StepCategory` enum's implementation lives in
+  Phase B's evaluating module, but WS1's consumer interface (the
+  `nmComponents` field on `BlockModelCell`) is already locked in
+  [`lenses/types.ts`](./lenses/types.ts) and unaffected. The
+  handoff itself is known-drifty (per
+  [`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md) § Open
+  questions); resolve when WS1 picks up.
+- **WS2** (`02-analysis-and-recommender.md`): consumes mock
+  embodiments via the Step-7 signature change. Step 7's scope is
+  static-side only — any analysis-lib **code path** that today
+  reads `embodiment.streams.evaluate.*().events` is deferred
+  per-code-path (not whole-lib) to Phase B Step B7. Static-side
+  recommender ranking unblocks fully once Step 7 lands.
 
 ## Constraints to honor
 
@@ -163,7 +197,7 @@ data (because nothing public consumes raw `embody/lib/*` outputs yet).
 > **Phase A — pivot from earlier draft.** This step builds a frozen-
 > output mock that satisfies the `Snippet` contract from
 > [`embody/types.ts`](./embody/types.ts) **without invoking any
-> `embody/lib/*` internals** (the lib is moved/built in Phase B). The
+> `embody/lib/*` internals** (the lib is copied/built in Phase B). The
 > real per-module composition replaces this mock body in
 > [`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md) once each
 > module's pedagogical re-typing is locked.
@@ -314,15 +348,23 @@ on `embodiment.status.parsed === false` without crashing on absent
 optional fields; no `lib/parse-old/` or `lib/ast/` imports remain in
 these modules.
 
-### Step 8 — Create `orchestrate/`; move editor concerns
+### Step 8 — Create `orchestrate/`; copy editor concerns
 
-Pull editor concerns out of `study-lenses/` (the editor lens, its UI,
-its state hooks) into `orchestrate/editor/`. The editor is no longer a
-lens; it's the orchestrator's default home-base view.
+**Copy semantics, not move.** Same pattern as Steps 3 and 9: the
+V2 editor at `study-lenses/lenses/editor/` (CodeMirror 6 impl, UI,
+state hooks) is **copied** to `orchestrate/editor/`. The original
+is kept until WS4's last increment removes `study-lenses/`.
+Otherwise V2 consumers (`study-lenses/orchestrator/study-lenses.tsx`
+mounts the V2 editor lens) break mid-migration.
 
-**Verify:** `study-lenses/` no longer contains an editor lens;
-`orchestrate/editor/` builds and renders the editor; `orchestrate/editor/`
-mutates snippet source via the orchestrator.
+The editor is no longer a lens in the new architecture — it's the
+orchestrator's default home-base view, the only writer of snippet
+state.
+
+**Verify:** `orchestrate/editor/` builds and renders the editor;
+mutates snippet source via the orchestrator; the original at
+`study-lenses/lenses/editor/` continues to exist alongside until
+WS4 deletes `study-lenses/`.
 
 ### Step 9 — Copy analysis libs to `orchestrate/lib/`
 
@@ -353,16 +395,25 @@ Phase-A-touched consumers import from the new paths; the originals
 at `javascript/lib/<module>/` still exist and are still imported by
 non-Phase-A consumers.
 
-### Step 10 — Move orchestrator + bake formatting pre-processing
+### Step 10 — Copy orchestrator; bake formatting pre-processing
 
-Pull the orchestrator out of `study-lenses/` into
-`orchestrate/`. Add a formatting pre-processing step in the
-orchestrator's load pipeline so all source feeding into `embody(code)`
-is consistently formatted.
+**Copy semantics, not move.** The V2 orchestrator at
+`study-lenses/orchestrator/` (study-lenses.tsx, default-registry.ts,
+toolbar.tsx, tests/) is **copied** to `orchestrate/orchestrator/`.
+The original is kept until WS4's last increment removes
+`study-lenses/`. Phase A's `<StudyLenses>` consumer (Step 12
+public API export) wires to the new path; legacy named exports
+per Step 12 still point at originals.
 
-**Verify:** orchestrator builds; loading any source produces a
-formatted snippet; non-JEJ source is NOT rejected (validation is
-metadata, not a gate).
+Add a formatting pre-processing step in the new orchestrator's
+load pipeline so all source feeding into `embody(code)` is
+consistently formatted.
+
+**Verify:** orchestrate/orchestrator/ builds; loading any source
+produces a formatted snippet; non-JEJ source is NOT rejected
+(validation is metadata, not a gate); the original at
+`study-lenses/orchestrator/` continues to exist alongside until
+WS4 deletes `study-lenses/`.
 
 ### Step 11 — Migrate V2 lenses into `lenses/` (WS4-owned execution)
 
@@ -373,8 +424,9 @@ metadata, not a gate).
 > `study-lenses/lenses/{editor, highlight, …}` and migrates one lens
 > at a time per
 > [`.planning-handoffs/04-lens-migration.md`](./.planning-handoffs/04-lens-migration.md).
-> Note `editor/` does NOT migrate to `lenses/` — Step 8 moves it to
-> `orchestrate/editor/` as the home base.
+> Note `editor/` does NOT migrate to `lenses/` — Step 8 copies it to
+> `orchestrate/editor/` as the home base; the original at
+> `study-lenses/lenses/editor/` is removed by WS4's last increment.
 
 For each V2 lens migrated to `lenses/<name>/`, verify it is
 self-contained against the canonical contract:
@@ -517,12 +569,16 @@ each individually, document why in the deletion commit body).
       signatures) import from the new `orchestrate/lib/*` paths.
       Non-Phase-A consumers (legacy named exports, V2 lenses still
       in `study-lenses/`) continue importing from originals.
-- [ ] Step 8: editor concerns extracted to `orchestrate/editor/`;
-      editor consumes `embodiment` via prop (not internal parsing);
-      imports point at `orchestrate/lib/*` for analysis-lib usage.
-- [ ] Step 10: orchestrator builds; formatting pre-processing on load
-      works; non-JEJ source is **not** rejected (validation is
-      metadata, not a gate).
+- [ ] Step 8: editor concerns **copied** from
+      `study-lenses/lenses/editor/` to `orchestrate/editor/`
+      (original kept). The new editor consumes `embodiment` via
+      prop (not internal parsing); imports point at
+      `orchestrate/lib/*` for analysis-lib usage.
+- [ ] Step 10: V2 orchestrator **copied** from
+      `study-lenses/orchestrator/` to `orchestrate/orchestrator/`
+      (original kept). The new orchestrator builds; formatting
+      pre-processing on load works; non-JEJ source is **not**
+      rejected (validation is metadata, not a gate).
 - [ ] Step 11: at least one V2 lens (recommended: `highlight`) is
       migrated to `lenses/<name>/` against the `LensModule` contract;
       that lens passes the dependency-rule audit. WS4 owns migrating
@@ -565,11 +621,13 @@ each individually, document why in the deletion commit body).
   pass against fiction?) and AR-2 (sketch challenge against
   `embody/types.ts`'s Snippet shape). The Step-8 orchestrate component
   shape warrants its own AR-1 design challenge.
-- **Tests.** Existing tests live alongside the moved modules; expect
-  them to need import-path updates but mostly to pass unchanged. The
-  Step-5 mock needs new tests covering: shape-conformance (typecheck
-  passes), deep-freeze, callable-stream methods, at least one
-  round-trip through an analysis lib from Step 7.
+- **Tests.** Existing tests live alongside the originals at
+  `javascript/lib/<module>/`; verify they still pass against both
+  the originals AND the new copies after Phase A consumers
+  migrate. The Step-5 mock needs new tests covering: shape-
+  conformance (typecheck passes), deep-freeze, callable-stream
+  methods, at least one round-trip through an analysis lib from
+  Step 7.
 - **`embodiment` parameter name everywhere.** When refactoring lib
   signatures (step 7), use this name consistently — it codifies the
   term across the codebase per the architectural decision. Function
@@ -599,7 +657,7 @@ import { recommend } from '../lib/recommender/...';    // OK
 ## Cross-references
 
 - [`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md) — Phase B's
-  ordered steps for real embody internals (parse, NM-rep moves with
+  ordered steps for real embody internals (parse, NM-rep copies with
   pedagogical re-typing, validation strip, parity test, event
   payloads, generator surfaces).
 - [`embody/types.ts`](./embody/types.ts) — the `Snippet` contract the

@@ -125,14 +125,7 @@ by the embedding LMS. embody handles "what does this snippet look
 like"; the LMS handles "where is this learner in their journey." See
 [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles).
 
-## Status
-
-embody is **pre-implementation**. The types are locked
-([`types.ts`](./types.ts)) and adversarial-reviewed (AR-1 + AR-2 — see
-[`DOCS.md`](./DOCS.md) § AR history). Implementation begins at
-documentation-driven-development phase 1; the
-[`lib/`](../lib/) modules will be coordinated to support embody (see
-[`DOCS.md`](./DOCS.md) § `lib/*` integration).
+## Archive
 
 `.legacy/` holds pre-DDD sketches superseded by the locked design — kept
 for archival reference only, not part of the live module.

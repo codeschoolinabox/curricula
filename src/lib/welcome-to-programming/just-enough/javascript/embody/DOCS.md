@@ -210,18 +210,7 @@ imperfections.
   global-env layer treatment, etc.). All BLOCKERs and high-leverage
   IMPORTANTs resolved before this DOCS.md was written.
 
-## Status
-
-embody is **pre-implementation**. Types are locked; implementation begins
-in DDD Phase 1 after the `lib/*` `_meta` refactor lands. Critical files:
-
-| File | State |
-| --- | --- |
-| [`types.ts`](./types.ts) | Locked (canonical contract) |
-| [`README.md`](./README.md) | Written |
-| `DOCS.md` (this) | Written |
-| Implementation modules (TBD) | Not started |
-| Tests (TBD) | Not started |
+## Archive
 
 `.legacy/` holds pre-DDD sketches (plann.txt, plann.excalidraw.svg,
 parse-phase-error-categorization.js) — superseded by the locked design,
