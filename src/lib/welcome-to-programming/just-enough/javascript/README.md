@@ -361,6 +361,18 @@ part of the public API. They are internal building blocks that
 mounts; lens plugins receive `embodiment` as a prop. Curriculum authors
 embed `<StudyLenses>` in code fences.
 
+> **Migration phase note.** The package is currently in **Phase A** of
+> the embody implementation per
+> [`DOCS.md` § Locked decisions § Mock-first implementation strategy](./DOCS.md).
+> `<StudyLenses>` mounts and exercises the lens contracts against a
+> **mock embodiment** that satisfies the `Snippet` type contract but
+> doesn't yet drive real evaluation. Real per-module evaluation arrives
+> in Phase B (see [`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md)).
+> The legacy named exports below (`run`, `trace`, `validate`, `parse`,
+> `format`, `checkFormat`) still wrap the existing real `lib/*`
+> modules and continue to work in both phases — they're independent of
+> the `<StudyLenses>` mock-first ramp-up.
+
 ### Legacy named exports (will be deprecated)
 
 `index.ts` also re-exports the legacy tooling and evaluation functions

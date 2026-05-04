@@ -36,8 +36,13 @@ contract defined by Work Stream 3. Each lens is a self-contained exercise
 renderer that plugs into the orchestrator.
 
 This work is **parallelizable** -- once the orchestrator proves the contract
-with trial lenses (editor + highlight, done in Work Stream 3), multiple
-lenses can be built independently by separate agents.
+with the trial lens (`highlight`, done in Work Stream 3), multiple
+lenses can be built independently by separate agents. Note: `editor`
+is **not a lens** in the post-refactor architecture — it lives at
+`orchestrate/editor/` as the orchestrator's home base (per
+[`../REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md) Step 8 and
+[`../lenses/README.md`](../lenses/README.md)). The editor's CodeMirror
+6 implementation is migrated by WS3, not by this work stream.
 
 ### Why it matters
 
@@ -200,18 +205,25 @@ The pure TS files (`core.ts`, `config.ts`, `applicable.ts`,
 `recommend.ts`) are testable without React. The React wrapper
 (`index.tsx`) is a thin shell.
 
-### Trial lenses (done in Work Stream 3)
+### Trial lens (done in Work Stream 3) + editor placement
 
-Work Stream 3 builds two trial lenses to prove the contracts:
+**The editor is not a lens.** Post-refactor it lives at
+`orchestrate/editor/` (per
+[`../REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md) Step 8 +
+[`../lenses/README.md`](../lenses/README.md)) — the orchestrator's
+home base, the only writer of snippet state. CodeMirror 6, refactored
+from the V2 `study-lens-client.tsx`. WS3 owns this migration; this
+work stream does not touch it.
 
-1. **`editor`** -- Refactored from the V2 `study-lens-client.tsx`. CodeMirror
-   6 editor. The default lens. Reads/writes orchestrator state. Has Run
-   and Format buttons (not Reset -- that's the orchestrator's toolbar).
+Work Stream 3 also builds **one trial lens** to prove the
+`LensModule` contract:
 
-2. **`highlight`** -- Read-only syntax-highlighted code view. Uses
+1. **`highlight`** -- Read-only syntax-highlighted code view. Uses
    Prism/CodeBlock. The first NEW lens built against the contract.
+   Lives at `lenses/highlight/`.
 
-You do NOT need to build these. They exist when you start.
+You do NOT need to build the editor or `highlight`. They exist when
+you start.
 
 ### Lens design patterns
 

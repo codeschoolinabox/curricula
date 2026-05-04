@@ -127,12 +127,26 @@ like"; the LMS handles "where is this learner in their journey." See
 
 ## Status
 
-embody is **pre-implementation**. The types are locked
-([`types.ts`](./types.ts)) and adversarial-reviewed (AR-1 + AR-2 — see
-[`DOCS.md`](./DOCS.md) § AR history). Implementation begins at
-documentation-driven-development phase 1; the
-[`lib/`](../lib/) modules will be coordinated to support embody (see
-[`DOCS.md`](./DOCS.md) § `lib/*` integration).
+embody ships in two phases per
+[`../DOCS.md` § Locked decisions § Mock-first implementation strategy](../DOCS.md):
+
+- **Phase A — mock-first.** The types are locked
+  ([`types.ts`](./types.ts)) and adversarial-reviewed (AR-1 + AR-2 —
+  see [`DOCS.md`](./DOCS.md) § AR history). Phase A ships a frozen
+  **mock** factory at `embody/index.ts` that satisfies the `Snippet`
+  contract (input-discriminated across happy / parse-fail / tokenize-
+  fail modes) **without** invoking any `embody/lib/*` internals. This
+  unblocks the orchestrator (WS3) and per-lens migration (WS4).
+- **Phase B — real internals.** Each `embody/lib/*` module
+  (`parse`, `ast`, `validating`, `formatting`, `evaluating`, `scope`)
+  lands as its own DDD/AR increment, replacing the corresponding
+  slice of the mock factory body. Token + AST types are
+  pedagogically re-typed at this point. Full plan in
+  [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md).
+
+The peer-doc finalization (this file + [`DOCS.md`](./DOCS.md)
+matching the post-real-impl shape) lands in Phase B per
+`REFACTOR-HANDOFF.md` Step 14.
 
 `.legacy/` holds pre-DDD sketches superseded by the locked design — kept
 for archival reference only, not part of the live module.

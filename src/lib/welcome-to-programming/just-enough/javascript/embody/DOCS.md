@@ -212,16 +212,17 @@ imperfections.
 
 ## Status
 
-embody is **pre-implementation**. Types are locked; implementation begins
-in DDD Phase 1 after the `lib/*` `_meta` refactor lands. Critical files:
+embody ships in **two phases** per
+[`../DOCS.md` § Locked decisions § Mock-first implementation strategy](../DOCS.md):
 
-| File | State |
-| --- | --- |
-| [`types.ts`](./types.ts) | Locked (canonical contract) |
-| [`README.md`](./README.md) | Written |
-| `DOCS.md` (this) | Written |
-| Implementation modules (TBD) | Not started |
-| Tests (TBD) | Not started |
+| File / artifact | Phase A state | Phase B state |
+| --- | --- | --- |
+| [`types.ts`](./types.ts) | Locked (canonical contract) | Unchanged (any update is a separate doc commit with full AR-1 + AR-2) |
+| [`README.md`](./README.md) | Written; status section reflects Phase A | Finalized in REFACTOR-HANDOFF Step 14 |
+| `DOCS.md` (this) | Written; status section reflects Phase A | Finalized in REFACTOR-HANDOFF Step 14 |
+| `embody/index.ts` (factory) | **Mock**: input-discriminated, frozen, type-conformant; no `lib/*` invocation | Real composition of `embody/lib/*` outputs |
+| `embody/lib/*` modules | Not started (live in `javascript/lib/` pre-refactor) | Each lands as its own DDD/AR increment per [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md) |
+| Tests | Mock-shape tests (freeze, status modes, override builder) | Real-impl tests per module |
 
 `.legacy/` holds pre-DDD sketches (plann.txt, plann.excalidraw.svg,
 parse-phase-error-categorization.js) — superseded by the locked design,
