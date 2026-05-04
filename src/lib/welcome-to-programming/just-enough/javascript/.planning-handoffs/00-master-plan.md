@@ -93,3 +93,39 @@ retains). `.planning-handoffs/` is a transitional directory.
   explicitly do NOT own)
 - Learner-modelling / progress modelling — out of scope for this
   package; lives in the embedding LMS
+
+### Round-2 AR follow-ups (tabled as optional 2026-05-04)
+
+These came out of AR-1 + AR-2 during the Round-2 canon/handoff
+realignment (commit `3b8792d`). Each was reviewed; none are
+load-bearing for unblocking WS3, so they were tabled. Address as
+separate doc-only commits when bandwidth allows.
+
+- **Four-audiences metadata on `LensModule`** (AR-1 P1) — add a
+  `targetAudience: 'dev' | 'nm' | 'user' | 'agent'` (or array) field
+  to the canonical `LensModule` so each lens declares which of the
+  four audiences from `README.md` § Four audiences of code it
+  primarily exercises for the learner. Value: the recommender grid
+  can group by audience; lens authors get a forcing function to
+  pick. Cost: contract change in `lenses/types.ts` + per-lens fills
+  during WS4 migrations.
+- **Pyramid placement paragraphs in WS handoffs** (AR-1 P2) — add a
+  one-paragraph "Pyramid placement" subsection at the top of
+  `01-NM-components.md`, `02-analysis-and-recommender.md`, and
+  `04-lens-migration.md`, mirroring the one already in
+  `lenses/README.md` § Pyramid placement. Names the layer + quadrant
+  each WS serves; links to `README.md` § Pedagogical first
+  principles. Mechanical — ~30 lines total.
+- **Sharpen "three-peer" framing** (AR-1 P4) — `lenses/README.md`
+  and `DOCS.md` describe `embody/`, `lenses/`, `orchestrate/` as
+  "three peers", which is true at the directory layout level but
+  hides the dependency hierarchy (`orchestrate → embody`,
+  `orchestrate → lenses`, `lenses → embody types only`). Add an
+  explicit one-paragraph "directory peers, dependency hierarchy"
+  clarification in `DOCS.md` § Dependency rules and reference it
+  from each peer's README.
+- **Mermaid the ASCII pyramid in 03** (AR-2 CP3) — convert the ASCII
+  quadrant + pyramid diagram in
+  `03-orchestrator-and-contracts.md:46-61` to a mermaid `flowchart`
+  diagram, matching the user's standing preference for mermaid over
+  ASCII.
