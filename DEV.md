@@ -854,6 +854,81 @@ flowchart TD
 function createConfig(options: UserOptions = {}): ResolvedConfig { ... }
 ```
 
+#### What goes in docs vs. plans vs. handoffs
+
+**Scope.** This rule governs **package/module documentation** —
+`README.md`, `DOCS.md`, `types.ts` files inside source directories.
+**Governance docs** (`AGENTS.md`, `CLAUDE.md`, `HUMANS.md`, this
+file, `CONTRIBUTING.md`, `CODE-OF-CONDUCT.md`) describe process
+AS their end-state contract — workflow rules, AR ceremony, plan
+discipline — and are out of scope.
+
+Within scope, four kinds of documentation, with strict separation:
+
+- **End-state docs** (`README.md`, `DOCS.md`, `types.ts` per
+  source directory): describe the **intended end state** of the
+  package/module. What it IS, not where the work CURRENTLY
+  STANDS.
+  - Forbidden: status snapshots, migration-phase notes,
+    `(under active development)`, `(will be deprecated)`,
+    `(will be split)`, `implementation begins in phase X`,
+    `we tried Y, then migrated to X` narratives.
+  - Allowed: present-tense rationale (`X is shaped this way
+    because Y`), structural constraints (`this field is
+    intentionally left unspecified — locking it would foreclose
+    Z`), stability classifiers describing the current API tier
+    (`(experimental)`, `(deprecated)`, `(internal)` — labels
+    that classify what the API IS).
+  - **Architectural sketches** (a Phase 0 prospective `DOCS.md`)
+    ARE end-state docs — they describe the intended structural
+    target, written before code exists. The "Written Phase 0"
+    framing in the sketch template is a meta-comment to the
+    reader, not part of the contract.
+  - **Rationale framing matters**: "X is shaped this way because
+    Y has property Z" is end-state. "We considered Y, then chose
+    X" is past-tense process narrative — that goes in the commit
+    message or git history. The contract is in present tense.
+- **Plan files** (per-task scratchpad files; for the Claude Code
+  workflow these live at `~/.claude/plans/*.md`, other tools use
+  their own location): context, scope, AR cycles, open questions,
+  verification. Ephemeral; deleted or archived when the task
+  lands. May contain process narrative as long as it's pruned
+  aggressively (`HUMANS.md § Plan-clutter discipline` covers the
+  pruning).
+- **Handoff files** (`*-HANDOFF.md` at repo or directory root,
+  `.planning-handoffs/*.md` including per-stream `*-notes.md`):
+  per-migration coordination scaffolding. Process info, ordered
+  steps, phase splits, status snapshots, cross-stream coordination
+  all live here. Most handoffs are deleted when their migration
+  completes; some (durable coordination guides like
+  `development-guide.md`) persist as the project's coordination
+  manual.
+- **Git history** (commit messages, `git log`, PR descriptions):
+  what was changed and why, captured at commit time. AR-cycle
+  history, rejected alternatives, prior attempts, "we tried Y
+  before X" narratives — all go here. Not in `DOCS.md`.
+
+**Quick test (when amending an end-state doc):** "does this
+describe what the thing IS, or where the work currently STANDS?"
+The latter goes in a plan, handoff, or commit message.
+
+**Carve-outs.** CI/coverage badges in `README.md` are end-state
+representations of current quality (they update over time but
+describe what the package's quality IS); they're fine. Permanent
+dev/test infrastructure (sandbox programs, fixtures, test
+harnesses) is end-state content describing what the package
+contains. The forbidden thing is **lifecycle/migration/status
+narration** — not "this thing exists" but "this thing is currently
+in state X of Y".
+
+**Why this matters.** End-state docs are the canonical source of
+truth that consumers code against. Process talk in those docs
+rots — every "(will be deprecated)" / "(under active development)"
+note is a hostage to a future cleanup pass. Process talk also
+expands the surface a careful reader has to mentally subtract
+when reasoning about the current contract. Keep the process out
+of the contract.
+
 ### Test Organization
 
 Unit tests live in a `tests/` subdirectory co-located with the source they test:
@@ -1798,6 +1873,7 @@ Common patterns to avoid:
 | **Defensive over-coding**   | Validate at boundaries only                  | Remove internal re-validation                       |
 | **Verbose docs**            | Name + types self-document?                  | Only document WHY or non-obvious contracts          |
 | **Fake It without Make It** | Hardcoded values expire after the first test | Write the second test to make hardcoding impossible |
+| **Status hedging in docs**  | Status/phase belongs in plan or handoff      | `## Status — pre-impl...` → handoff file            |
 
 ### Pre-Commit Checklist
 

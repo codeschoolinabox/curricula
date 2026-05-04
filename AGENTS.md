@@ -148,6 +148,15 @@ developers). For new modules, `DOCS.md` is written during Phase 0 as an
 **architectural sketch** — the structural target Phase 1's Refactor step is
 held against.
 
+**End-state docs only.** `README.md`, `DOCS.md`, and `types.ts` describe the
+intended end state of the package/module. Quick test: "does this describe
+what the thing IS, or where the work currently STANDS?" The latter — status
+snapshots, migration phases, hedging language — goes in plan files, handoff
+files, or commit messages, NOT in end-state docs. Governance docs (this file,
+DEV.md, HUMANS.md, etc.) describe process as their end-state contract and
+are out of scope. See [DEV.md § What goes in docs vs. plans vs.
+handoffs](./DEV.md#what-goes-in-docs-vs-plans-vs-handoffs).
+
 See [DEV.md § Directory Documentation Convention](./DEV.md#directory-documentation-convention)
 for the full format, the data flow diagram rules, and the architectural sketch
 template.
@@ -534,14 +543,15 @@ immeasurable trust loss.
 
 #### LLM Anti-Patterns (Resist These Tendencies)
 
-| Anti-Pattern                | Rule                                         | Example Fix                                     |
-| --------------------------- | -------------------------------------------- | ----------------------------------------------- |
-| **Over-engineering**        | Helper used once? Inline it                  | `const x = getX(o)` → `const x = o.x`           |
-| **Class addiction**         | Linter blocks, but check first               | `class X` → `function createX()`                |
-| **Future-proofing**         | User didn't ask? Don't add it                | `options = {}` with unused fields → direct impl |
-| **Defensive coding**        | Validate at boundaries only                  | Remove internal re-validation                   |
-| **Verbose docs**            | Name + types explain? Skip JSDoc             | Only document WHY or non-obvious contracts      |
-| **Fake It without Make It** | Hardcoded values expire after the first test | Write second test to make hardcoding impossible |
+| Anti-Pattern                | Rule                                                                            | Example Fix                                                          |
+| --------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Over-engineering**        | Helper used once? Inline it                                                     | `const x = getX(o)` → `const x = o.x`                                |
+| **Class addiction**         | Linter blocks, but check first                                                  | `class X` → `function createX()`                                     |
+| **Future-proofing**         | User didn't ask? Don't add it                                                   | `options = {}` with unused fields → direct impl                      |
+| **Defensive coding**        | Validate at boundaries only                                                     | Remove internal re-validation                                        |
+| **Verbose docs**            | Name + types explain? Skip JSDoc                                                | Only document WHY or non-obvious contracts                           |
+| **Fake It without Make It** | Hardcoded values expire after the first test                                    | Write second test to make hardcoding impossible                      |
+| **Status hedging in docs**  | Status / phase / hedging belongs in plan, handoff, or commit message, not docs  | `## Status — pre-impl...` → handoff or `.planning-handoffs/`         |
 
 ##### Pre-Proposal Checklist
 
