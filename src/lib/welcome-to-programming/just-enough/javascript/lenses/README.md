@@ -19,22 +19,16 @@ lenses/
   README.md              (this — orientation + navigation)
   DOCS.md                architectural sketch + Mermaid data flow
   types.ts               LensModule contract + LensProps + LensConfig
-  parsons/               (planned, post-refactor)
-  blanks/
-  trace-table/
-  highlight/
+  parsons/               drag-and-drop ordering exercise
+  blanks/                fill-in-the-blank exercise
+  trace-table/           predict-then-compare execution trace
+  highlight/             read-only annotated code view
   …
 ```
 
-After REFACTOR-HANDOFF Steps 8 + 11 land:
-
-- **Editor moves out**. The pre-refactor editor lens at
-  `study-lenses--reference-to-migrate/lenses/editor/` migrates to
-  `orchestrate/editor/` (Step 8) — it's the home base, not a lens.
-- **Other lenses move in**. The pre-refactor
-  `study-lenses--reference-to-migrate/lenses/` subdirs (highlight,
-  plus future parsons/blanks/etc.) merge into this directory's
-  subdirs.
+The editor is **not a lens** — it lives at
+[`../orchestrate/editor/`](../orchestrate/editor/) as the
+orchestrator's home base, the only writer of snippet state.
 
 ## Pyramid placement
 

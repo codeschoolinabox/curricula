@@ -2,27 +2,9 @@
 
 The default home base — the always-present surface the learner edits
 their snippet on. The ONLY writer of snippet state in the
-`<StudyLenses>` orchestrator. Wraps the existing CodeMirror-backed
-editor factory at [`../lib/editing/`](../lib/editing/) (post-refactor;
-currently at `../../lib/editing/`) into a React home-base component.
-
-> **🚧 PRE-REFACTOR SENTINEL** — this directory does not exist on
-> disk before REFACTOR-HANDOFF executes. The CodeMirror integration
-> at [`../../lib/editing/`](../../lib/editing/) is the prior-art
-> source; that module moves to `orchestrate/lib/editing/` during
-> REFACTOR-HANDOFF Step 9 (analysis-libs move), and a new home-base
-> wrapper at `orchestrate/editor/` arrives during Step 8 (editor
-> extraction from `study-lenses/`).
->
-> **Prior art**:
-> - [`../../lib/editing/README.md`](../../lib/editing/README.md) +
->   [`../../lib/editing/DOCS.md`](../../lib/editing/DOCS.md) — the
->   `createEditor(code, options)` factory (CodeMirror 6 wrapper, lint
->   gutters, hover tooltips, autocomplete via callback injection).
-> - [`../../study-lenses/lenses/editor/`](../../study-lenses/lenses/editor/)
->   — the pre-refactor "editor lens" stub (post-refactor: NOT a
->   lens; the home base lives here instead). The stub is replaced
->   during the refactor.
+`<StudyLenses>` orchestrator. Wraps the CodeMirror-backed editor
+factory at [`../lib/editing/`](../lib/editing/) into a React home-
+base component.
 
 ## What lives here
 
@@ -30,8 +12,8 @@ currently at `../../lib/editing/`) into a React home-base component.
 | ---------------------------- | ----------------------------------------------------------------------------------------------- |
 | [`./README.md`](./README.md) | This file — orientation + navigation.                                                           |
 | [`./DOCS.md`](./DOCS.md)     | Architectural sketch — edit-callback contract, mode transitions, lifecycle in editor mode.       |
-| `index.tsx`                  | The home-base React component (planned, F1). Wraps `orchestrate/lib/editing/createEditor`.          |
-| `tests/`                     | vitest jsdom + `@testing-library/react` tests (planned, per-increment).                          |
+| `index.tsx`                  | The home-base React component. Wraps `orchestrate/lib/editing/createEditor`.                    |
+| `tests/`                     | vitest jsdom + `@testing-library/react` tests.                                                   |
 
 ## What this component does
 
@@ -95,9 +77,7 @@ top-level `AGENTS.md`. Subdirectory-specific rules:
 - **CodeMirror integration via `orchestrate/lib/editing/`**. Don't
   import CodeMirror directly here — go through the
   `createEditor()` factory + callback API documented at
-  [`../lib/editing/README.md`](../lib/editing/README.md)
-  (post-refactor) or [`../../lib/editing/README.md`](../../lib/editing/README.md)
-  (pre-refactor).
+  [`../lib/editing/README.md`](../lib/editing/README.md).
 - **Async setup**. `createEditor()` is async (dynamic language
   loading). Use `useEffect` + state-machine OR `React.lazy` +
   `<Suspense>` to handle the async mount; never block render.
@@ -108,10 +88,7 @@ top-level `AGENTS.md`. Subdirectory-specific rules:
 - **Parent**: [`../README.md`](../README.md) — `orchestrate/` peer
   overview.
 - **Architectural sketch**: [`./DOCS.md`](./DOCS.md).
-- **Editor factory it wraps**: [`../lib/editing/README.md`](../lib/editing/README.md)
-  (post-refactor) or
-  [`../../lib/editing/README.md`](../../lib/editing/README.md)
-  (pre-refactor).
+- **Editor factory it wraps**: [`../lib/editing/README.md`](../lib/editing/README.md).
 - **Orchestrator that mounts it**: [`../orchestrator/README.md`](../orchestrator/README.md).
 - **Increment plan**: [`../../.planning-handoffs/03-orchestrator-and-contracts.md`](../../.planning-handoffs/03-orchestrator-and-contracts.md)
   F1 + F2.

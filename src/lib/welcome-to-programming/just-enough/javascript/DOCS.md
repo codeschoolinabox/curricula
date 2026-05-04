@@ -16,36 +16,11 @@ A separate [`REFACTOR-HANDOFF.md`](./REFACTOR-HANDOFF.md) holds the ordered
 step-by-step migration recipe a future refactor agent will follow (deletable
 after the work is done).
 
-## Directory architecture
+## Directory layout
 
-The package is mid-migration. Both shapes are documented so contributors know
-what is and what will be.
-
-### Current shape
-
-```text
-javascript/
-  README.md                     front door
-  notional-machine.md           NM spec
-  notional-machine.svg          canonical NM poster
-  reference.md                  language reference
-  DOCS.md                       this doc
-  REFACTOR-HANDOFF.md           migration roadmap (deletable post-refactor)
-  index.ts                      public API surface — exports the orchestrator's
-                                <StudyLenses> component (the consumer-facing
-                                interface)
-  sandbox.html                  PLANNED — whole-setup smoke test (TBD agent)
-
-  embody/                       NM embodiment (frozen data)
-  lenses/                       lens system (renamed from study-lenses/)
-  lib/                          shared helpers (will be split — see target shape)
-  sandbox-programs/             test fixtures
-```
-
-### Target shape (post-refactor)
-
-Three peers under `javascript/` mirror the conceptual chain. The implementation
-peer (`orchestrate/`) wires everything together for the learner.
+Three peers under `javascript/` mirror the conceptual chain. The
+implementation peer (`orchestrate/`) wires everything together for the
+learner.
 
 ```text
 javascript/
@@ -61,18 +36,18 @@ javascript/
   embody/                       NM embodiment (frozen data)
     README.md, DOCS.md, types.ts
     lib/                        NM-representation engine helpers
-      parse/                    new acorn wrapper (replaces parse-old/)
+      parse/                    acorn wrapper
       ast/                      AST utilities
       validating/               JEJ subset check
       formatting/               JEJ formatting
       evaluating/               run, intercept, trace.{syntax,semantics}
       scope/                    scope analysis
 
-  lenses/                       (was study-lenses/) — stateful "mini web app" plugins
+  lenses/                       stateful "mini web app" plugins
     README.md, DOCS.md
     parsons/, blanks/, trace-table/, …  (each lens self-contained)
 
-  orchestrate/                      orchestrator + default editor + analysis libs
+  orchestrate/                  orchestrator + default editor + analysis libs
     README.md, DOCS.md
     editor/                     default home base (the only writer of snippet state)
     orchestrator/               state mgmt + lens dispatch + pre-processing
@@ -198,8 +173,8 @@ a hard guarantee, not a politeness. Consumers wanting a mutable working copy
 
 ### Three evaluation-engine isolation models
 
-Each engine in `embody/lib/evaluating/` (post-refactor; today `lib/evaluating/`)
-serves a different pedagogical purpose:
+Each engine in `embody/lib/evaluating/` serves a different pedagogical
+purpose:
 
 - **run** — Web Worker. No traps. Returns a final report. Cheapest; used when
   learners just want "did it work?"
@@ -492,35 +467,27 @@ prop / meta-key in `configs` / directory-level setting) is intentionally
 undecided until Q-IV un-defers. The LMS owns curricular sequencing;
 auto-recommended Q-II tours suffice for in-snippet guidance.
 
-## Open specs (placeholders)
+## Open holes in the contract
 
-Not yet locked; will firm up during implementation. Consumers should not rely on
-shapes here:
+The package contract intentionally leaves the following parts unspecified.
+Each gap is a deliberate choice — locking these would foreclose options
+that consumers' real use is needed to inform. Consumers should not rely on
+specific shapes within these gaps. Embody-internal contract gaps are
+documented in detail at
+[`embody/DOCS.md` § Open holes in the contract](./embody/DOCS.md#open-holes-in-the-contract);
+the package-level gaps below are the ones beyond the embody surface.
 
-- **embody static-side stream generators** — `streams.realm()`,
-  `streams.parse.tokenize()`, `streams.parse.parse()`, `streams.create()` — new
-  modules built on `embody/lib/*` outputs. Implementation pending.
-- **embody evaluate-side streams** — wrap the existing evaluation engines. Each
-  call returns a `RunInstance`; final entwinement details (events array vs.
-  linked list refs vs. derived indexes) lock during implementation per
-  `lib/evaluating/intercept`'s `LinkedInterceptEvent` + `InterceptResult` prior
-  art.
-- **Per-category event payload kinds** — sketched in `embody/types.ts` but full
-  payload shape per kind locks as event emission is implemented.
-- **`Distribution` exposure for metrics** — currently
-  `{ min, max, mean, median, samples }`. Whether `samples` stays as raw arrays
-  vs. pre-computed stats only locks once lenses consume them.
-- **`HasIo` shape** — per-method counts plus convenience sums currently; may
-  simplify.
-- **`features` enumeration** — boolean record may grow as lenses pull on it.
-- **embody `opts` backdoors** — small config surface for downstream consumers
-  (e.g., a remix-style lens that wants to skip auto-format on its derivative
-  source). Shape TBD.
-- **Public API surface for `index.ts`** — exports the `<StudyLenses>`
-  orchestrator component as the consumer-facing interface. Legacy
-  named-function re-exports (`run`, `trace`, `validate`, `parse`, `format`,
-  `checkFormat`) will be reconsidered as embody/orchestrator land (no
-  deprecation timeline set).
+- **embody `opts` config surface** — the contract leaves room for a
+  small downstream-consumer config surface (e.g., a remix-style lens
+  that wants to skip auto-format on its derivative source). The shape
+  is intentionally open until concrete consumer needs make the right
+  shape visible.
+- **Public API surface for `index.ts`** — `<StudyLenses>` is the
+  consumer-facing interface; `index.ts` also re-exports the legacy
+  named functions (`run`, `trace`, `validate`, `parse`, `format`,
+  `checkFormat`). The contract leaves the long-term place of those
+  legacy exports open — they may consolidate into `<StudyLenses>` or
+  remain alongside as a parallel surface.
 
 ## Contributor guidelines
 

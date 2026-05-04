@@ -53,9 +53,8 @@ flowchart TD
 ```
 
 The component is intentionally thin: most logic lives inside
-[`../lib/editing/`](../lib/editing/) (post-refactor) /
-[`../../lib/editing/`](../../lib/editing/) (pre-refactor)'s
-editor-construction factory. The component's job is just:
+[`../lib/editing/`](../lib/editing/)'s editor-construction factory.
+The component's job is just:
 
 1. **Construct** the underlying editor via the `lib/editing/`
    factory in a `useEffect` mount (async; CodeMirror language
@@ -125,8 +124,7 @@ The mode-transition asymmetry to be explicit about:
 ### Out of scope
 
 - **CodeMirror integration internals** — owned by
-  [`../lib/editing/`](../lib/editing/) (post-refactor) /
-  [`../../lib/editing/`](../../lib/editing/) (pre-refactor).
+  [`../lib/editing/`](../lib/editing/).
 - **Snippet persistence across page reloads** — LMS's job.
 - **Auto-save / draft management** — out of scope; the LMS or
   the embedding application owns this if needed.
@@ -139,11 +137,10 @@ The mode-transition asymmetry to be explicit about:
 
 ## Why a thin React wrapper around `lib/editing/createEditor()`
 
-The pre-refactor `lib/editing/createEditor()` is a fully-baked
-async factory: it returns a CodeMirror `EditorView` ready to
-append to the DOM, with linters / hover / completions injected
-via callback. It's framework-agnostic (no React, no
-`@docusaurus/BrowserOnly`).
+`orchestrate/lib/editing/createEditor()` is a fully-baked async
+factory: it returns a CodeMirror `EditorView` ready to append to
+the DOM, with linters / hover / completions injected via callback.
+It's framework-agnostic (no React, no `@docusaurus/BrowserOnly`).
 
 `orchestrate/editor/` could:
 

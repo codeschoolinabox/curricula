@@ -2,8 +2,8 @@
 
 **Status:** roadmap, not yet executed.
 **Audience:** the agent (Claude or otherwise) that will perform the
-restructure described in [`DOCS.md`](./DOCS.md) § Directory architecture
-§ Target shape (post-refactor).
+restructure described in
+[`DOCS.md` § Directory layout](./DOCS.md#directory-layout).
 **Lifecycle:** delete this file after the work is done. It exists to
 hand off context, not to live forever.
 
@@ -499,12 +499,14 @@ full test suite passes; no import resolution errors.
 ### Step 14 — Update peer READMEs and DOCS
 
 Each peer (`embody/`, `lenses/`, `orchestrate/`) gets its `README.md` and
-`DOCS.md` updated to reflect the post-refactor reality. Also update:
+`DOCS.md` updated to reflect end-state reality. Also update:
 
-- `javascript/README.md` directory-structure table → final shape
-- `javascript/DOCS.md` "Current shape" section → drop (it IS the
-  current shape now); keep "Locked decisions", "Dependency rules",
-  "Categorization rationale", "Open specs"
+- `javascript/README.md` directory-structure table — already reflects
+  the final shape (commit `0368be3`); verify it still does.
+- `javascript/DOCS.md` § Directory architecture — already restructured
+  to § Directory layout end-state-only (commit applying the
+  end-state-only rule); verify the locked decisions, dependency rules,
+  categorization rationale, and open holes sections still align.
 - Cross-doc links: every reference to the old `lib/*` path is dead;
   fix them all.
 

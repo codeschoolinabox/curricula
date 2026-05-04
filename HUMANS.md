@@ -142,6 +142,12 @@ proposes plan updates that include "considered alternatives", "previous
 attempts", or "context for why we're not doing X", redirect: *"Drop the
 history. Keep only what's still live."*
 
+The mirror rule for end-state docs (READMEs, DOCSes, types.ts) is in
+[`DEV.md` § What goes in docs vs. plans vs. handoffs](./DEV.md#what-goes-in-docs-vs-plans-vs-handoffs):
+process talk that belongs in plan files MUST NOT appear in end-state docs.
+Plan-clutter discipline prunes the plan; the docs rule keeps process out
+of the contract entirely.
+
 ---
 
 ## Coaching contract

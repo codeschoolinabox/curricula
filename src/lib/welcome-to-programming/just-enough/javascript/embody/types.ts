@@ -683,8 +683,9 @@ interface TierFilters {
 // ═════════════════════════════════════════════════════════════════════════════
 // 10. RUN INSTANCE
 //
-// One evaluation of a snippet. Sketch only — final shape locks during DDD per
-// the prior art at lib/evaluating/intercept (LinkedInterceptEvent + InterceptResult).
+// One evaluation of a snippet. The exact entwinement of events, node refs,
+// and prev/next links is intentionally open in the contract — see
+// embody/DOCS.md § Open holes in the contract for the rationale.
 // ═════════════════════════════════════════════════════════════════════════════
 
 interface EndReport {

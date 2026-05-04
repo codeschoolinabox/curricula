@@ -169,9 +169,11 @@ full test suite passes; no import resolution errors.
 
 ### Step B7 — Lock event-type payloads
 
-The `embody/types.ts` § Open specs lists "Per-category event payload
-kinds — sketched in `embody/types.ts` but full payload shape per kind
-locks as event emission is implemented." This step does the locking.
+[`embody/DOCS.md` § Open holes in the contract](./embody/DOCS.md#open-holes-in-the-contract)
+captures that per-category event payload kinds are intentionally
+left open in the contract: the kinds within each category are named
+in `embody/types.ts`, but the full payload shape per kind is open.
+This step does the locking.
 
 For each `EventCategory` in `embody/types.ts`:
 
@@ -184,10 +186,12 @@ For each `EventCategory` in `embody/types.ts`:
 
 ### Step B8 — Lock generator surfaces
 
-The `embody/types.ts` § Open specs lists "embody static-side stream
-generators — `streams.realm()`, `streams.parse.tokenize()`,
-`streams.parse.parse()`, `streams.create()` — new modules built on
-`embody/lib/*` outputs. Implementation pending."
+The static-side stream generators (`streams.realm()`,
+`streams.parse.tokenize()`, `streams.parse.parse()`,
+`streams.create()`) yield event-wrapped views over `embody/lib/*`
+outputs. Their return-type contracts are typed in `embody/types.ts`
+but the implementation lives only in the Phase A mock until this
+step lands the real ones.
 
 For each generator: lock its return-type contract (DDD + AR-1),
 implement against `embody/lib/*` outputs, integrate into the factory.

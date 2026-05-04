@@ -150,28 +150,21 @@ Events form a doubly-linked list of plain frozen objects with `prev` /
 index (array) or by sequence (linked refs) without arithmetic. Not OOP
 nodes — just data with object cross-references.
 
-## `lib/*` integration (coordinated cross-cutting refactor)
+## `embody/lib/*` integration
 
-embody composes outputs from `lib/parse-old/` (renamed to
-`embody/lib/parse/` per REFACTOR-HANDOFF Step 9), `lib/validating/`,
-`lib/evaluating/`, `lib/formatting/` into one entwined frozen graph.
-The existing `lib/*` functions freeze their outputs by default. To
-compose freely, embody needs unfrozen outputs:
+embody composes outputs from sibling `embody/lib/*` modules
+(`parse/`, `ast/`, `validating/`, `formatting/`, `evaluating/`,
+`scope/`) into one entwined frozen graph. The lib modules return
+raw (unfrozen, unvalidated) data; embody validates the composition
+and applies the single deep-freeze at the entwined-graph boundary.
+This keeps lib outputs freely composable and freeze a hard
+guarantee at the public seam.
 
-```ts
-libFn(code, options, _meta?: { freeze?: boolean })
-```
-
-`_meta` is underscore-prefixed to signal "embody-only, not part of the
-public lib API." Single shape, single use case. This is a coordinated
-cross-cutting refactor that **must be sequenced before embody
-implementation** — its own plan + AR cycle.
-
-The static-side parse and create generators are **new modules** built for
-embody (no equivalent exists in `lib/` today). Implementation: each calls
-the existing sync `lib/*` function, then iterates the result and yields
-event-wrapped items. Frozen pre-computed event arrays cached on the
-snippet; generators just emit from the cached array.
+Static-side stream generators (`streams.realm`,
+`streams.parse.tokenize`, `streams.parse.parse`, `streams.create`)
+yield event-wrapped views over pre-computed event arrays cached on
+the snippet — generators emit from the cached array rather than
+recomputing.
 
 ## Spec correspondence
 
@@ -194,50 +187,41 @@ See `../notional-machine.md` § Spec correspondence appendix for the full
 mapping including JEJ-pedagogical splits, glossary bridges, and known
 imperfections.
 
-## AR history
-
-- **AR-1 (multi-hat design challenge)** — formal AR-1 + ECMAScript
-  spec-pedant + pedagogical reviewer + senior-staff software-design
-  reviewer (all on Opus). Found two BLOCKERs (realm name collision,
-  false-or-generator polymorphism), several IMPORTANTs (snowball
-  conceptual model, environment events vs. derivation, host vs.
-  ECMA conflation, etc.), and many MINORs. All BLOCKERs and high-leverage
-  IMPORTANTs resolved before [`types.ts`](./types.ts) locked.
-- **AR-2 (architectural sketch challenge)** — applied to the rewritten
-  `notional-machine.md`. Found two BLOCKERs (realm-as-phase confusion,
-  declare-after-push micro-ordering not specified) and several
-  IMPORTANTs (postfix update return value, prefix/postfix sequencing,
-  global-env layer treatment, etc.). All BLOCKERs and high-leverage
-  IMPORTANTs resolved before this DOCS.md was written.
-
 ## Archive
 
 `.legacy/` holds pre-DDD sketches (plann.txt, plann.excalidraw.svg,
 parse-phase-error-categorization.js) — superseded by the locked design,
 kept for archival reference only.
 
-## Open specs (placeholders)
+## Open holes in the contract
 
-These are scoped open questions that DDD Phase 1 will resolve. Documented
-here so implementers know they are *not* part of the locked contract:
+The contract intentionally leaves the following parts unspecified.
+Each gap is a deliberate choice — locking these would foreclose
+options that consumers' real use is needed to inform.
 
-- **RunInstance entwinement details** — exact relationship between
-  `events`, `node` references, `prev/next` linked-list, and any
-  derived indexes lock during DDD per `lib/evaluating/intercept`'s
-  `LinkedInterceptEvent` + `InterceptResult` prior art.
+- **RunInstance entwinement details** — the contract names
+  `events`, `node` references, and `prev/next` linked-list shape
+  but does not specify their exact relationship or any derived
+  indexes. The shape concretizes when consumers' access patterns
+  on the `LinkedInterceptEvent` + `InterceptResult` surface make
+  the right indexing visible.
 - **Per-category event payloads** — the kinds within each category
   (`expression: 'literal' | 'identifier' | …`, `coerce: 'ToPrimitive' |
-  'ToString' | …`, etc.) are sketched in [`types.ts`](./types.ts) but
-  the full payload-shape per kind locks during DDD as event emission is
-  implemented.
-- **`Distribution` shape for `metrics`** — currently `{ min, max, mean,
-  median, samples }`. Whether to expose `samples` as raw arrays vs.
-  pre-computed stats only locks once we see how lenses consume them.
-- **`HasIo` per-method counts vs. only sums** — currently per-method
-  with convenience totals. Could simplify to sums only if lenses don't
-  need per-method detail.
-- **`features` enumeration** — the boolean record of language-feature
-  usage may grow as lenses pull on it.
-- **`lib/*` `_meta` shape** — currently `{ freeze?: boolean }`. May
-  expand if other internal-only flags become necessary during the
-  coordinated refactor.
+  'ToString' | …`, etc.) are named in [`types.ts`](./types.ts);
+  the full payload shape per kind is intentionally open so
+  per-category emission detail is not premature.
+- **`Distribution` shape for `metrics`** — currently `{ min, max,
+  mean, median, samples }`. The contract leaves open whether
+  `samples` exposes raw arrays or pre-computed stats only — which
+  one wins depends on what lens consumption actually requires.
+- **`HasIo` per-method counts vs. only sums** — the contract
+  exposes per-method counts with convenience totals. The split
+  is open: it may collapse to sums-only if lens consumption
+  doesn't require per-method detail.
+- **`features` enumeration** — the boolean record of
+  language-feature usage is intentionally non-exhaustive. Lenses
+  pull what they need; the record extends rather than commits to
+  a closed list.
+- **`lib/*` `_meta` shape** — currently `{ freeze?: boolean }`.
+  Open for additional internal-only flags as the internal
+  contract evolves.
