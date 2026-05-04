@@ -2,7 +2,8 @@
 
 **Status:** roadmap, not yet executed.
 **Audience:** the agent (Claude or otherwise) that will perform the
-restructure described in [`DOCS.md`](./DOCS.md) § Target shape.
+restructure described in [`DOCS.md`](./DOCS.md) § Directory architecture
+§ Target shape (post-refactor).
 **Lifecycle:** delete this file after the work is done. It exists to
 hand off context, not to live forever.
 
@@ -57,9 +58,6 @@ into `orchestrate/editor/`, where the editor consumes analysis libs
 via their new paths under `orchestrate/lib/*`. Step 9 must do the
 move first; otherwise Step 8 lands with broken imports or has to
 re-fix them post-Step-9.
-
-The cross-cutting reasoning is captured in
-[`DOCS.md` § Locked decisions § Mock-first implementation strategy](./DOCS.md).
 
 ## Constraints to honor
 
@@ -600,8 +598,6 @@ import { recommend } from '../lib/recommender/...';    // OK
 
 ## Cross-references
 
-- [`DOCS.md` § Locked decisions § Mock-first implementation strategy](./DOCS.md)
-  — the architectural-decision capture for the Phase A/B split.
 - [`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md) — Phase B's
   ordered steps for real embody internals (parse, NM-rep moves with
   pedagogical re-typing, validation strip, parity test, event

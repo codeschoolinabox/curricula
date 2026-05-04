@@ -15,7 +15,7 @@ of Phase A); both files are migration scaffolding, not permanent docs.
 
 The architectural narrative (mock-first split, why each module gets
 its own DDD cycle) is in
-[`DOCS.md` § Locked decisions § Mock-first implementation strategy](./DOCS.md).
+[`REFACTOR-HANDOFF.md` § Two-phase refactor](./REFACTOR-HANDOFF.md).
 The contract every step here must satisfy is
 [`embody/types.ts`](./embody/types.ts).
 
@@ -222,11 +222,10 @@ permanent record of how we got here.
   every Phase-B step must satisfy on output.
 - [`embody/index.ts`](./embody/index.ts) — the Phase-A mock factory
   whose body Phase B replaces module by module.
-- [`REFACTOR-HANDOFF.md`](./REFACTOR-HANDOFF.md) — Phase A. Self-
-  deletes at end of Phase A; if you're reading this, that file may
-  already be gone.
-- [`DOCS.md` § Locked decisions § Mock-first implementation strategy](./DOCS.md)
-  — the architectural-decision capture for the Phase A/B split.
+- [`REFACTOR-HANDOFF.md`](./REFACTOR-HANDOFF.md) — Phase A. Carries
+  the § Two-phase refactor narrative for the Phase A/B split.
+  Self-deletes at end of Phase A; if you're reading this, that file
+  may already be gone.
 - [`.planning-handoffs/01-NM-components.md`](./.planning-handoffs/01-NM-components.md)
   — semi-hallucinated; reconciled here as the syntax-tracer
   `StepCategory` enum wires through `embody/lib/evaluating/trace/`
