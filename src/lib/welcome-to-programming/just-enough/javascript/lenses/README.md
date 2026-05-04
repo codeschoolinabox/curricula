@@ -5,12 +5,12 @@ Each subdirectory is one lens — a stateful "mini web app" plugin that
 takes a frozen [`embodiment`](../embody/types.ts) (`Snippet`) plus an
 optional [`LensConfig`](./types.ts) and renders a learning exercise.
 
-> **🚧 PRE-REFACTOR SENTINEL** — this directory pre-exists with target
-> docs only. The pre-refactor source for lenses lives at
-> [`../study-lenses/lenses/`](../study-lenses/lenses/). REFACTOR-HANDOFF
-> Step 11 (rename `study-lenses/` → `lenses/`) MUST merge content INTO
-> this directory rather than `mv`-ing the whole tree (target dir
-> already exists). After the merge, this banner is removed.
+> **🚧 PRE-REFACTOR SENTINEL** — this directory holds the target
+> contract docs (this README, `DOCS.md`, `types.ts`); per-lens
+> implementations migrate in via REFACTOR-HANDOFF Steps 8 + 11. The
+> pre-refactor source lives at
+> [`../study-lenses--reference-to-migrate/`](../study-lenses--reference-to-migrate/).
+> After the migration completes, this banner is removed.
 
 ## What lives here
 
@@ -29,11 +29,12 @@ lenses/
 After REFACTOR-HANDOFF Steps 8 + 11 land:
 
 - **Editor moves out**. The pre-refactor editor lens at
-  `study-lenses/lenses/editor/` migrates to `orchestrate/editor/` (Step 8)
-  — it's the home base, not a lens.
-- **Other lenses move in**. The pre-refactor `study-lenses/lenses/`
-  subdirs (highlight, plus future parsons/blanks/etc.) merge into
-  this directory's subdirs.
+  `study-lenses--reference-to-migrate/lenses/editor/` migrates to
+  `orchestrate/editor/` (Step 8) — it's the home base, not a lens.
+- **Other lenses move in**. The pre-refactor
+  `study-lenses--reference-to-migrate/lenses/` subdirs (highlight,
+  plus future parsons/blanks/etc.) merge into this directory's
+  subdirs.
 
 ## Pyramid placement
 
@@ -89,7 +90,7 @@ type LensModule = Readonly<{
   Component: ComponentType<LensProps>;             // React wrapper around the TS core
   config: (overrides?: Partial<LensConfig>) => LensConfig;
   applicableTo: (embodiment: Snippet) => boolean;  // recommender's applicability filter
-  recommend: (analysis: AnalysisReport) => ReadonlyArray<Recommendation>;
+  recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
 }>;
 
 type LensProps = Readonly<{
@@ -98,9 +99,40 @@ type LensProps = Readonly<{
 }>;
 ```
 
+`applicableTo` is the cheap O(1) gate; `recommend` is the richer
+relevance computation that runs only on already-applicable lenses.
+Both take the frozen `Snippet` directly — analysis is internal to
+`orchestrate/lib/recommender/`, not a separate hand-off type.
+
 See [`./types.ts`](./types.ts) for the full doc-comments and
 adaptation notes (this contract reshapes the pre-refactor
 `study-lenses/types.ts:99-120` LensModule).
+
+## Three-tier classification
+
+Each lens belongs to one of three tiers based on what it needs from
+the embodiment. The tier determines what `applicableTo` returns.
+
+| Tier | What it needs                          | `applicableTo` returns                |
+| ---- | -------------------------------------- | ------------------------------------- |
+| 1    | Text only — no parse needed            | always `true`                         |
+| 2    | Valid AST (no execution)               | `embodiment.status.parsed`            |
+| 3    | Valid parse AND evaluable script-scope | `embodiment.status.created`           |
+
+Tier 1 lenses (parsons line-shuffling, copy-type, highlight) work
+even on syntactically-broken snippets. Tier 2 lenses (blanks,
+variables/scope, ask) need a valid AST. Tier 3 lenses (trace-table,
+run) need the snippet to be evaluable — i.e. the script-scope
+creation phase passed (per
+[`../embody/types.ts`](../embody/types.ts) §Status booleans).
+
+The `status` chain is monotonic by construction: `created` implies
+`parsed` implies `tokenized`. Lens-author logic only checks the
+field it cares about; the chain handles itself.
+
+See
+[`../.planning-handoffs/04-lens-migration.md`](../.planning-handoffs/04-lens-migration.md)
+for per-lens tier assignments and the full migration roadmap.
 
 ## Conventions
 

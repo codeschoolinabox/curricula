@@ -18,11 +18,14 @@
  *   grounding §Recommender = Applicability filter + Ranking engine).
  *
  * **What survives unchanged**: `name` (registry identity),
- * `config(overrides?)` (config factory), `recommend(analysis)` (per-lens
- * snippet-fit relevance), plus the supporting types `LensConfig`,
- * `BlockModelCell`, `Recommendation`, and `SerializableValue` /
- * `SerializablePrimitive`. `BlockModelCell` and `Recommendation`
- * migrate ownership to WS2's `orchestrate/lib/recommender/types.ts` per
+ * `config(overrides?)` (config factory), plus the supporting types
+ * `LensConfig`, `BlockModelCell`, `Recommendation`, and
+ * `SerializableValue` / `SerializablePrimitive`. `recommend` survives
+ * but its parameter changed from a separate `AnalysisReport` to the
+ * frozen `Snippet` (the embodiment) directly — analysis is an internal
+ * helper inside `orchestrate/lib/recommender/`, not a separate hand-off
+ * type lenses consume. `BlockModelCell` and `Recommendation` migrate
+ * ownership to WS2's `orchestrate/lib/recommender/types.ts` per
  * `02-analysis-and-recommender.md`; this file re-exports them as the
  * lens-facing surface until that lock-in lands.
  *
@@ -61,19 +64,16 @@ import type { Snippet } from '../embody/types.js';
 // --- Placeholders for WS2-owned types (see 02-analysis-and-recommender.md) ---
 
 /**
- * Snippet analysis report consumed by `recommend()`. Owned by
- * `orchestrate/lib/analysis/` (planned in `02-analysis-and-recommender.md`
- * — WS2 ships `orchestrate/lib/analysis/` alongside `orchestrate/lib/recommender/`).
- * Listed here as a placeholder so the `recommend` signature is complete;
- * tighten when WS2's analysis types are locked.
- */
-type AnalysisReport = Readonly<Record<string, unknown>>;
-
-/**
  * 3D Block Model grid cell (Schulte 2008 + NM-components extension).
  * Owned by `orchestrate/lib/recommender/types.ts` (WS2). Recommendations
  * place themselves on this grid.
  *
+ * The `nmComponents` field is the unordered set of NM-component
+ * categories present in the snippet — the 3rd Block Model dimension
+ * per WS1 (`.planning-handoffs/01-NM-components.md`).
+ *
+ * @see `../lib/evaluating/trace/syntax/types.ts` `StepCategory` — the
+ *      canonical enum supplying the NM-component category names.
  * @remarks Adapted from `study-lenses/types.ts:142-146`. The shape
  * survives the refactor; ownership migrates to WS2 during
  * REFACTOR-HANDOFF Step 9.
@@ -173,14 +173,22 @@ type LensProps = Readonly<{
  * snippet → false for AST-dependent lenses); `recommend` is the
  * richer relevance computation that runs only on applicable lenses.
  * Splitting them keeps the recommender's applicability-filter pass
- * cheap.
+ * cheap. Both take the frozen `Snippet` (the embodiment) directly —
+ * analysis is an internal helper inside `orchestrate/lib/recommender/`,
+ * not a separate hand-off type lenses consume.
+ *
+ * **Three-tier classification gating** (per
+ * [`./README.md`](./README.md) § Three-tier classification): Tier 1
+ * (text-only) lenses' `applicableTo` always returns `true`. Tier 2
+ * (AST-dependent) lenses return `embodiment.status.parsed`. Tier 3
+ * (dynamic) lenses return `embodiment.status.created`.
  */
 type LensModule = Readonly<{
 	name: string;
 	Component: ComponentType<LensProps>;
 	config: (overrides?: Partial<LensConfig>) => LensConfig;
 	applicableTo: (embodiment: Snippet) => boolean;
-	recommend: (analysis: AnalysisReport) => ReadonlyArray<Recommendation>;
+	recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
 }>;
 
 export type {
@@ -189,7 +197,6 @@ export type {
 	LensConfig,
 	LensProps,
 	LensModule,
-	AnalysisReport,
 	BlockModelCell,
 	Recommendation,
 };

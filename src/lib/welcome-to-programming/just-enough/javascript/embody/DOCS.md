@@ -152,10 +152,11 @@ nodes — just data with object cross-references.
 
 ## `lib/*` integration (coordinated cross-cutting refactor)
 
-embody composes outputs from `lib/parsing/`, `lib/validating/`,
-`lib/evaluating/`, `lib/formatting/` into one entwined frozen graph. The
-existing `lib/*` functions freeze their outputs by default. To compose
-freely, embody needs unfrozen outputs:
+embody composes outputs from `lib/parse-old/` (renamed to
+`embody/lib/parse/` per REFACTOR-HANDOFF Step 9), `lib/validating/`,
+`lib/evaluating/`, `lib/formatting/` into one entwined frozen graph.
+The existing `lib/*` functions freeze their outputs by default. To
+compose freely, embody needs unfrozen outputs:
 
 ```ts
 libFn(code, options, _meta?: { freeze?: boolean })

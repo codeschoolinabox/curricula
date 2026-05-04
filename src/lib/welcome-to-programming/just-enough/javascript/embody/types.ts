@@ -19,8 +19,9 @@
 // shapes).
 //
 // Companion documents:
-//   - notional-machine.md — prose model and spec correspondence
-//   - embody/phases/{0,1,2,3}-*.md — per-phase narrative
+//   - ../notional-machine.md — prose model and spec correspondence
+//   - ./README.md — peer-front-door overview
+//   - ./DOCS.md — architecture sketch + data flow + tradeoffs
 //
 // ─────────────────────────────────────────────────────────────────────────────
 

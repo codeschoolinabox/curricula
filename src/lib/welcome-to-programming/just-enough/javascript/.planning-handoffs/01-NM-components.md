@@ -6,6 +6,14 @@
 > 10 NM components** sourced from the syntax tracer's `StepCategory`
 > enum.
 
+> **High-level direction lives in
+> [`../DOCS.md` § 3D Block Model space](../DOCS.md#3d-block-model-space).**
+> That section names the three dimensions and explains why the third is
+> unordered. **This file is the WS1 implementation pave-the-way:** wiring
+> the syntax tracer's `StepCategory` enum into the shared types and
+> setting expectations for downstream consumers (analysis, recommender,
+> lenses).
+
 ## Prerequisites
 
 Before starting, read these files in full (do not skim):
@@ -27,7 +35,7 @@ Before starting, read these files in full (do not skim):
   the syntax tracer above):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/notional-machine.md`
 - **Study-lenses types.ts** (consumer of the enum):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/study-lenses/types.ts`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lenses/types.ts`
 
 ## Context
 
@@ -49,7 +57,7 @@ This work stream supplies the third dimension:
 canonical enum lives at
 `lib/evaluating/trace/syntax/types.ts::StepCategory`. WS1's job is to
 ensure that enum is consumable by the recommender (WS2) and by
-`study-lenses/types.ts` (WS3).
+`lenses/types.ts` (WS3).
 
 ### Two concepts that must not be conflated
 
@@ -100,6 +108,59 @@ Finer kinds within each category (e.g., `expression:literal` vs
 items. The 10 outer categories are the Phase 1 target; finer kinds
 can be layered in later without breaking the 3rd-dim contract.
 
+### How the three dimensions compose at the cell level
+
+A `BlockModelCell` is `{ level, scope, nmComponents }`. Each axis is
+populated independently:
+
+- **`level`** — derived from the lens's `recommend()` self-description.
+  Each lens declares which level its recommendation targets (text
+  surface / execution / function-purpose).
+- **`scope`** — derived the same way (atoms / blocks / relations / macro).
+- **`nmComponents`** — populated by the snippet-analysis module (WS2)
+  via static AST mapping. Detected categories are merged into the
+  cell each lens-recommendation tags.
+
+The three together identify "where in the 3D space this recommendation
+is teaching." Multiple lenses can populate the same cell (different
+exercises for the same teaching opportunity); the recommender groups
+recommendations by cell for the learner to browse.
+
+### How analysis populates `BlockModelCell` from the embodiment
+
+WS2's recommender (with internal analysis helpers) walks the
+embodiment's frozen AST (`embodiment.parse.ast`) and detects which of
+the 10 categories appear:
+
+```text
+embodiment ──► lib/recommender/ (with internal analysis) ──► RecommendationGrid
+                                                              with each cell carrying
+                                                              nmComponents: ReadonlyArray<StepCategory>
+```
+
+The mapping is **static** — no evaluation needed. AST node types
+combined with structural context yield the category set. WS2's Phase
+0 formalizes the mapping (AST node type → `StepCategory`). There is no
+separate `AnalysisReport` hand-off type; the category-detection helpers
+live inside `lib/recommender/`.
+
+### How the recommender consumes the populated cells
+
+Each lens's `recommend(embodiment)` returns `Recommendation[]`, where
+each `Recommendation` carries a `blockModelCell: BlockModelCell` and
+config. The recommender:
+
+1. Calls every registered lens's `recommend(embodiment)`.
+2. Collects all `Recommendation`s.
+3. Organizes them into a `RecommendationGrid` keyed by
+   `BlockModelCell`.
+4. Returns the grid to the orchestrator panel UI.
+
+The recommender does NOT enforce ordering of the `nmComponents`
+dimension. Display ordering is a presentation concern (see
+`03-orchestrator-and-contracts.md` for the recommender-panel UI
+spec).
+
 ### How it fits in the architecture
 
 - **Consumed by** the snippet-analysis module (WS2), which detects
@@ -112,7 +173,9 @@ can be layered in later without breaking the 3rd-dim contract.
   recommendations into the 3D Block Model grid.
 - **Does NOT drive** spiral ordering. The spiral is curriculum-author
   or lens-config-driven, not enum-driven. See
-  `00-master-plan.md §Spiral`.
+  [`../DOCS.md` § Pyramid layers — the fractal claim](../DOCS.md#pyramid-layers--the-fractal-claim)
+  and
+  [`../DOCS.md` § 3D Block Model space](../DOCS.md#3d-block-model-space).
 
 ### Dependencies
 
@@ -128,7 +191,8 @@ can be layered in later without breaking the 3rd-dim contract.
 
 - Any ordinal progression through categories (that's a
   curriculum-author concern, not an enum concern).
-- Category-detection algorithm in code (that's WS2's analysis module).
+- Category-detection algorithm in code (that's internal to WS2's
+  `lib/recommender/`).
 - UI rendering of recommendations (that's WS3/WS4).
 - Finer kinds within a category (that's the syntax tracer's Phase 0.1).
 
@@ -139,7 +203,7 @@ syntax tracer. WS1's deliverables:
 
 1. **Confirm the `StepCategory` enum at
    `lib/evaluating/trace/syntax/types.ts` is exported.**
-2. **Ensure `study-lenses/types.ts` BlockModelCell.nmComponents
+2. **Ensure `lenses/types.ts` BlockModelCell.nmComponents
    JSDoc points at `StepCategory`** (minimal edit — no structural
    change; string-typed for flexibility while kind-level TBDs are
    open).
@@ -152,7 +216,7 @@ syntax tracer. WS1's deliverables:
 
 There is **no Phase 0 DDD + Phase 1 TDD cycle** required for WS1 in
 isolation. The substantive DDD cycle already ran in the syntax tracer.
-WS1 just wires the enum into the study-lenses type system.
+WS1 just wires the enum into the `lenses/` type system.
 
 ## Open questions
 
@@ -177,20 +241,24 @@ WS1 just wires the enum into the study-lenses type system.
 - Don't restore any "Level 1 / Level 2 / ..." progression — the
   pivot was deliberate. If a lens or curriculum author needs ordering,
   they impose it themselves.
-- When adding JSDoc to `study-lenses/types.ts`, link to
+- When adding JSDoc to `lenses/types.ts`, link to
   `lib/evaluating/trace/syntax/types.ts` by relative path from the
   file being edited.
-- Keep `nmComponents` as the field name (Resolution from the session
-  that spawned this file; see `00-master-plan.md §Spiral` for the
-  rationale of preserving the "NM components" terminology).
+- Keep `nmComponents` as the field name (preserving the "NM
+  components" terminology was a deliberate choice during the
+  session that spawned this file). Rationale: NM-component naming
+  ties the 3rd Block Model dimension directly to the notional-machine
+  semantics, distinguishing it from generic "syntax features" or
+  ad-hoc category labels. See
+  [`../DOCS.md` § 3D Block Model space](../DOCS.md#3d-block-model-space).
 
 ## Definition of done
 
 - `StepCategory` is exported from the syntax tracer ✓ (already done).
-- `study-lenses/types.ts::BlockModelCell.nmComponents` has a JSDoc
-  comment pointing at `StepCategory`.
-- `00-master-plan.md`'s §Step 2 and §3D Block Model space reflect the
-  unordered-set framing.
+- `lenses/types.ts::BlockModelCell.nmComponents` has a JSDoc
+  comment with `@see` pointing at `StepCategory` ✓ (Round-2 lock).
+- `../DOCS.md § 3D Block Model space` reflects the unordered-set
+  framing ✓.
 - `02-analysis-and-recommender.md` references `StepCategory` as the
   3rd-dim source.
 - A fresh agent assigned WS2 can read `00-master-plan.md` + this file

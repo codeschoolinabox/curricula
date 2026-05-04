@@ -7,9 +7,12 @@
  * @remarks **What changed from the pre-refactor shape**:
  * - Replace the multi-prop `<StudyLenses code? lens? lensConfig?
  *   transforms? height? autoFocus? lenses>` API with the locked
- *   three-prop trio: `<StudyLenses snippet lens? config?>` (per
- *   `../../README.md` § Pedagogical first principles + WS3 handoff
- *   F1).
+ *   four-prop API: `<StudyLenses snippet lens? config? configs?>`
+ *   (per `../DOCS.md` § Four-prop public API + WS3 handoff F1).
+ *   `config` is the override for the resolved-default lens; `configs`
+ *   is the cascade bundle keyed by lens name. Resolution chain:
+ *   `resolved(lens) = module.config() ⊕ configs?.[lens] ⊕
+ *   (lens === resolvedDefault ? config : {})`.
  * - Drop `transforms` prop and `TransformModule`-related types
  *   entirely (no transforms tier in the new architecture).
  * - Replace `OrchestratorState`'s always-active-lens shape with a
@@ -52,32 +55,49 @@ import type { LensConfig } from '../lenses/types.js';
 // --- Public prop surface (the only externally-visible type) ---
 
 /**
- * Props for `<StudyLenses>` — the package's public API. Three props
- * (one required, two optional) per the locked decision in
- * `../../README.md` § Pedagogical first principles.
+ * Props for `<StudyLenses>` — the package's public API. Four props
+ * (one required, three optional) per the locked decision in
+ * `../DOCS.md` § Four-prop public API + WS3 handoff F1.
  *
  * @remarks
  * - `snippet` — the source string. The orchestrator builds the
  *   embodiment internally on lens-open (lazy). Caller does NOT
  *   pre-build.
- * - `lens?` — Q-III educator-supplied default lens name. The
+ * - `lens?` — Q-III educator-supplied default-mount lens name. The
  *   learner can switch via the toolbar picker; this is just the
  *   initial selection.
- * - `config?` — Q-III educator-supplied per-lens config bundle
- *   applied to the lens named in `lens`. Out of scope for any other
- *   lens (the picker switches to a different lens with its own
- *   defaults; cascade resolution lives in the Docusaurus plugin).
+ * - `config?` — override config applied to the resolved-default
+ *   lens. The default may come from `lens` prop or from
+ *   `configs[default]` (cascade declaration). When `lens` is unset
+ *   AND `configs` declares no default, supplying `config` is an
+ *   error — the orchestrator throws at mount.
+ * - `configs?` — cascade bundle keyed by lens name. The picker uses
+ *   `configs[lensName]` when opening any lens. Populated by the
+ *   Docusaurus plugin from the `lenses.json` directory cascade.
+ *
+ * **Resolution chain for any lens-name**:
+ *
+ * ```text
+ * resolved(lensName) = module.config()                          // tier 0: defaults
+ *                    ⊕ configs?.[lensName]                      // tier 1: cascade
+ *                    ⊕ (lensName === resolvedDefault ? config : {})  // tier 2: override
+ * ```
+ *
+ * (`⊕` = deep-merge-right-wins.)
  *
  * @remarks **Plugin alignment**: the Docusaurus plugin at
- * `src/plugins/study-lenses/` parses per-fence info-strings
- * (`js:trace`) and `lenses.json` cascades, then emits these three
- * props onto the rendered `<StudyLenses>` JSX node. See WS3 handoff
- * § Cross-handoff impact for the plugin-emit narrowing schedule.
+ * `src/plugins/study-lenses/` parses URL-style fence info-strings
+ * (`js:trace?stepDelay=500` → `lens="trace"` + `config={
+ * stepDelay: 500 }`) and the `lenses.json` cascade (→ `configs`
+ * bundle), then emits these four props onto the rendered
+ * `<StudyLenses>` JSX node. See WS3 handoff § Cross-handoff impact
+ * for the plugin-emit narrowing schedule.
  */
 type StudyLensesProps = Readonly<{
 	snippet: string;
 	lens?: string;
 	config?: LensConfig;
+	configs?: Readonly<Record<string, LensConfig>>;
 }>;
 
 // --- Internal mode state (2-state machine per WS3 F2) ---

@@ -5,24 +5,24 @@
 Before starting, read these files in full (do not skim):
 
 - **AGENTS.md** (repo root):
-  `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/AGENTS.md`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/AGENTS.md`
 - **DEV.md** (repo root):
-  `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/DEV.md`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/DEV.md`
 - **Master plan**:
   `./00-master-plan.md` (in this directory)
 - **Orchestrator contracts** (Work Stream 3 output -- the LensModule
   interface each lens must implement):
-  Read the `study-lenses/types.ts` file once Work Stream 3 has defined it.
+  Read the `lenses/types.ts` file once Work Stream 3 has defined it.
   Until then, the contract signatures in this document are authoritative.
 - **Orchestrator DOCS.md** (Work Stream 3 output -- how the orchestrator
   renders lenses):
   Read once available.
 - **Notional machine** (for understanding what NM components each lens
   exercises):
-  `/Users/master/Documents/0-teach-code/0-tbd-met-alums/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/notional-machine.md`
-- **Analysis types** (Work Stream 2 output -- `AnalysisReport` that
-  `recommend()` receives):
-  Read once available.
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/notional-machine.md`
+- **Embodiment type** (canonical input to `recommend()` — the frozen
+  `Snippet` produced by `embody()`):
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/embody/types.ts`
 
 **Prior art locations** (read the specific source files for each lens you
 migrate -- listed in the Prior Art section below).
@@ -48,30 +48,51 @@ renders only a code editor.
 
 ### The LensModule contract
 
-Every lens must implement this interface (defined in Work Stream 3's
-`study-lenses/types.ts`):
+Every lens's default export satisfies this interface. **The canonical
+contract lives in [`../lenses/types.ts`](../lenses/types.ts)**; this
+section is a working sketch — when the two disagree, the canonical
+type wins.
 
-```text
-LensModule = {
-  name: string
-  lens: (code: string, config?: LensConfig) => Component
-  config: (overrides?: Partial<LensConfig>) => LensConfig
-  recommend: (analysis: AnalysisReport) => Recommendation[]
-}
+```ts
+type LensModule = Readonly<{
+  name: string;
+  Component: ComponentType<LensProps>;             // React component reference
+  config: (overrides?: Partial<LensConfig>) => LensConfig;
+  applicableTo: (embodiment: Snippet) => boolean;  // cheap O(1) gate
+  recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
+}>;
+
+type LensProps = Readonly<{
+  embodiment: Snippet;
+  config?: LensConfig;
+}>;
 ```
 
-- `name` -- registry key (kebab-case, e.g., `"blanks"`, `"trace-table"`)
-- `lens()` -- receives code (possibly transformed by pipeline), returns a
-  React component. The orchestrator handles mounting/unmounting.
-- `config()` -- factory that returns default config, optionally merged with
+- `name` — registry key (kebab-case, e.g., `"blanks"`, `"trace-table"`).
+- `Component` — React component reference. Receives `LensProps`
+  (`embodiment` + optional `config`) via props. The orchestrator handles
+  mounting/unmounting; React reconciles. Two-layer shape: pure TS core
+  (`core.ts`) + light React wrapper (`index.tsx`).
+- `config()` — factory returning default config, optionally merged with
   overrides. The lens renders its own config panel.
-- `recommend()` -- receives an AnalysisReport (from Work Stream 2), returns
-  zero or more Recommendations. This is how lenses self-describe their
-  relevance for a given snippet.
+- `applicableTo(embodiment)` — fast pure boolean. Returns true if this
+  lens can do anything useful with this embodiment. The recommender's
+  applicability-filter pass calls this BEFORE the more expensive
+  `recommend()`. See § Three-tier classification below for the standard
+  status-boolean gates.
+- `recommend(embodiment)` — receives the **frozen `embodiment`** (a
+  `Snippet` instance from `embody()`). Returns zero or more
+  Recommendations. Self-describes the lens's snippet-fit relevance.
+  Runs only on already-applicable lenses (the recommender filters via
+  `applicableTo` first). Snippet-fit only — no learner state (the
+  embedding LMS handles ZPD via snippet choice). See
+  [`../DOCS.md` § Recommender = Applicability filter + Ranking
+  engine](../DOCS.md#recommender--applicability-filter--ranking-engine).
 
 ### The Recommendation type
 
-Each lens's `recommend()` returns `Recommendation[]`:
+Each lens's `recommend()` returns `Recommendation[]`. The canonical
+type lives in [`../lenses/types.ts`](../lenses/types.ts):
 
 ```text
 Recommendation = {
@@ -79,10 +100,14 @@ Recommendation = {
   config: LensConfig
   relevance: number               // 0-1 score
   blockModelCell: { level, scope, nmComponents? }
-  transforms?: string[]           // optional pipeline prefix
   label: string
 }
 ```
+
+The previous design had a `transforms?: string[]` "pipeline prefix"
+field; it was dropped along with the transforms tier. Lenses that want
+text transforms (e.g., pseudocode→JS for parsons) handle it
+internally.
 
 A single lens can suggest multiple versions of itself at different Block
 Model cells with different configs. For example, the blanks lens might
@@ -130,34 +155,50 @@ Always available, even with syntax errors.
 | trace-table (operators) | Manual trace: operator results | Needs tracer execution |
 | run | Execute and observe | Needs runtime execution |
 
-In `recommend()`, gate on the analysis report's parse status:
+**Gating happens in `applicableTo`**, not in `recommend`. The recommender
+filters via `applicableTo` first, then calls `recommend` only on
+applicable lenses. The status-boolean rules per tier (see
+[`../embody/types.ts`](../embody/types.ts) for the canonical
+`Status` shape):
 
-- Tier 1: always return recommendations (ignore parse status)
-- Tier 2: return empty array if `analysis.parseStatus !== 'valid'`
-- Tier 3: return empty array if `analysis.parseStatus !== 'valid'`
+- **Tier 1**: `applicableTo(_) => true` — always applicable.
+- **Tier 2**: `applicableTo(embodiment) => embodiment.status.parsed`.
+- **Tier 3**: `applicableTo(embodiment) => embodiment.status.created`.
+
+The status chain is monotonic by construction: `created` implies
+`parsed` implies `tokenized`. Lens-author logic only checks the field
+it cares about. The canonical home for this contract is
+[`../lenses/README.md` § Three-tier classification](../lenses/README.md#three-tier-classification)
+— this handoff documents the per-lens tier assignments; the contract
+itself lives there.
 
 ### Lens file structure
 
-Each lens lives in its own directory under `study-lenses/lenses/`:
+Each lens lives in its own directory under `lenses/` (per
+[`../lenses/README.md` § How to add a lens](../lenses/README.md#how-to-add-a-lens)):
 
 ```text
-study-lenses/lenses/
+lenses/
   blanks/
-    lens.ts              -- pure TS lens function
+    index.tsx            -- default export — LensModule with React Component
+    core.ts              -- pure TS core (display derivation, validation)
     config.ts            -- config factory
-    recommend.ts         -- relevance function
-    wrapper.tsx          -- React wrapper (thin, renders exercise UI)
+    applicable.ts        -- applicableTo() (cheap status-boolean gate)
+    recommend.ts         -- recommend() (relevance computation)
     types.ts             -- lens-specific types
     README.md            -- what this lens does
     DOCS.md              -- architectural sketch (if non-obvious)
     tests/
-      lens.test.ts
+      core.test.ts
       config.test.ts
+      applicable.test.ts
       recommend.test.ts
+      component.test.tsx -- vitest + jsdom + @testing-library/react
 ```
 
-The pure TS files (`lens.ts`, `config.ts`, `recommend.ts`) are testable
-without React. The wrapper (`wrapper.tsx`) is a thin React shell.
+The pure TS files (`core.ts`, `config.ts`, `applicable.ts`,
+`recommend.ts`) are testable without React. The React wrapper
+(`index.tsx`) is a thin shell.
 
 ### Trial lenses (done in Work Stream 3)
 
@@ -172,6 +213,61 @@ Work Stream 3 builds two trial lenses to prove the contracts:
 
 You do NOT need to build these. They exist when you start.
 
+### Lens design patterns
+
+Patterns that recur across multiple lenses. Apply them as you migrate.
+
+**Multi-variant lens (one lens, multiple Block-model cells).**
+
+A single lens can suggest multiple versions of itself at different
+Block Model cells with different configs. The recommender doesn't
+know lens internals — each lens is self-describing via its
+`recommend()` function, which can return multiple recommendations
+keyed to different configs.
+
+The trace-table lens is the canonical example. Three variants of the
+same lens, each zeroing in on a different NM aspect:
+
+- **Steps table** — which lines execute in which order. Present when
+  the snippet has sequential execution.
+- **Values table** — what values variables hold after each step.
+  Present when the snippet has multiple variable assignments.
+- **Operators table** — what each operator produces. Present when
+  the snippet has complex expressions.
+- **(Future) Control-flow table** — present when the snippet has
+  branches/loops.
+- **(Future) Function-call table** — present when the snippet has
+  function calls (out of scope for JEJ but on the radar for sibling
+  language levels).
+
+Each variant is a different config of the trace-table lens. The
+lens's `recommend(embodiment)` function inspects the embodiment's
+features and returns one Recommendation per applicable variant, each
+with a different config and a different Block-model cell mapping.
+
+The same pattern applies to other lenses:
+
+- `blanks` may suggest variants for keywords vs. identifiers vs.
+  operators (different `tokenTypes` configs).
+- `highlight` may suggest variants for control-flow highlighting vs.
+  scope-chain highlighting vs. coercion-points highlighting.
+- A future `flowchart` lens may suggest pretty-print variants
+  (sequential vs. branched vs. compact).
+
+**Predict-then-compare flow.** Many lenses (especially trace-table)
+follow this shape: learner fills a prediction → clicks [check] →
+the lens runs the JEJ evaluator (via embodiment's
+`streams.evaluate.*`) → validates the prediction against ground
+truth → renders feedback. Reusable across any lens that has a
+verifiable answer.
+
+**Tier-gated availability.** Lenses declare their tier (text-only,
+AST-dependent, dynamic) — see § Three-tier lens classification
+above. The recommender uses tier + embodiment status booleans to
+gate availability: AST-dependent lenses return zero recommendations
+when `status.parsed` is false; dynamic lenses return zero when
+`status.created` is false.
+
 ### Lenses to migrate from prior art
 
 These lenses have prior implementations in the codebase. Each entry lists
@@ -183,14 +279,14 @@ the prior art location, what to extract, and the tier classification.
 - What: fill-in-the-blank exercise. Removes tokens from code (configurable: keywords, identifiers, operators, literals). Learner types missing tokens. Difficulty levels map to which token types are blanked.
 - Config: `{ difficulty: number, tokenTypes: string[] }`
 - Block Model mapping: text surface level, atoms-to-blocks scope
-- `recommend()`: gate on parse status (Tier 2). Higher relevance for shorter snippets. Different configs at different difficulty levels = multiple recommendations.
+- `applicableTo`: `embodiment.status.parsed` (Tier 2). `recommend()`: higher relevance for shorter snippets. Different configs at different difficulty levels = multiple recommendations.
 
 **parsons** (Tier 1: Text-only static)
 - Prior art: same old React app (look for parsons lens component)
 - What: drag-and-drop line reordering. Shuffles code lines, learner puts them back in order. Works best with 8-15 lines.
 - Config: `{ includeDistractors: boolean }`
 - Block Model mapping: text surface level, relations scope (line ordering implies understanding of sequence)
-- `recommend()`: always available (Tier 1). Relevance peaks at 8-15 lines, drops for very short or very long snippets.
+- `applicableTo`: always `true` (Tier 1). `recommend()`: relevance peaks at 8-15 lines, drops for very short or very long snippets.
 
 **trace-table** (Tier 3: Dynamic) -- Multiple variants
 - Prior art: `0---the-big-idea/00--evancole-be/0--snippetry/dump/00-claude-refactoring/0--study-lenses--it-begins/sandbox/src/utils` (trace table web components: values/steps/operators, Shadow DOM)
@@ -202,52 +298,75 @@ the prior art location, what to extract, and the tier classification.
   - **operators**: what each operator produces
 - Config: `{ variant: 'steps' | 'values' | 'operators', columns: string[] }`
 - Block Model mapping: execution level; steps=blocks scope, values=atoms scope, operators=atoms scope
-- `recommend()`: gate on parse status (Tier 3). Steps variant: relevant when code has sequential execution. Values variant: relevant when code has multiple variable assignments. Operators variant: relevant when code has complex expressions. Each variant is a separate recommendation.
+- `applicableTo`: `embodiment.status.created` (Tier 3 — needs evaluable script-scope). `recommend()`: steps variant relevant when code has sequential execution; values variant when multiple variable assignments; operators variant when complex expressions. Each variant is a separate recommendation.
 
 **copy-type** (Tier 1: Text-only static)
 - Prior art: old React app (writeme component)
 - What: code is shown, then hidden. Learner types it from memory. Compares against original.
 - Config: `{ displayTime: number }`
 - Block Model mapping: text surface level, macro scope (must understand whole snippet)
-- `recommend()`: always available (Tier 1). Higher relevance for shorter snippets (memorizable).
+- `applicableTo`: always `true` (Tier 1). `recommend()`: higher relevance for shorter snippets (memorizable).
 
 **ask** (Tier 2: AST-dependent static)
 - Prior art: `0--study-lenses--it-begins/dist/static/ask/component/` (5-level cognitive model x language features)
 - What: generates comprehension questions based on code features. 5 cognitive levels (code -> how it works -> connections -> goals -> UX). Configurable by language features (variables, data, operators, control flow).
 - Config: `{ cognitiveLevel: number, features: string[] }`
 - Block Model mapping: function/purpose level, variable scope
-- `recommend()`: gate on parse status (Tier 2). Relevance depends on which NM components are present (more components = more questions possible = higher relevance at higher cognitive levels).
+- `applicableTo`: `embodiment.status.parsed` (Tier 2). `recommend()`: relevance depends on which NM components are present (more components = more questions possible = higher relevance at higher cognitive levels).
 
 **variables** (Tier 2: AST-dependent static)
 - Prior art: old React app (variables/scope lens)
 - What: scope analysis visualization. Shows which variables are declared in which scope, scope chain lookup paths.
 - Config: `{ showScopeChain: boolean }`
 - Block Model mapping: execution level, relations scope
-- `recommend()`: gate on parse status (Tier 2). Relevant when code has multiple scopes (if/else blocks, loops). Low relevance for single-scope code.
+- `applicableTo`: `embodiment.status.parsed` (Tier 2). `recommend()`: relevant when code has multiple scopes (if/else blocks, loops). Low relevance for single-scope code.
 
 ### Prior art base paths
 
-These are the base directories to search for prior implementations:
+These are the base directories to search for prior implementations.
+All paths are relative to
+`/Users/master/Documents/0-teach-code/0-spiralearn/`:
 
 ```text
-0-study-lenses-committee/zz--oldd-clauding-and-context-dump/0--study-lenses--it-begins/src/
-  -> Old React app with 24+ lens implementations
+0-study-lenses-committee/zz--oldd-clauding-and-context-dump/
+  0--study-lenses--it-begins/src/
+    -> Old React app with 24+ lens implementations.
+    -> LensMenu dropdown, LensModal popup, StudyBar toolbar.
+    -> URL-based config. CodeMirror 6. noPasteExtension.
 
-0-study-lenses-committee/zz--study-lenses-package--2025-try/study-lenses-wc-kit/
-  -> WC kit with LensObject pattern and pipeline
+0-study-lenses-committee/zz--oldd-clauding-and-context-dump/
+  0--study-lenses--it-begins/sandbox/src/utils/
+    -> Trace table web components (values/steps/operators, Shadow DOM).
+    -> Loop guards (AST transform). Code execution sandbox.
 
-0---the-big-idea/00--evancole-be/0--snippetry/dump/00-claude-refactoring/0--study-lenses--it-begins/sandbox/src/utils/
-  -> Trace table web components, loop guards, execution sandbox
+0-study-lenses-committee/zz--oldd-clauding-and-context-dump/
+  0--study-lenses--it-begins/dist/static/ask/component/
+    -> Ask component: 5-level cognitive model
+       (code → how it works → connections → goals → UX)
+       × language features (variables, data, operators, control flow,
+       functions). Configurable AST-based question generation.
 
-0-study-lenses-committee/zz--oldd-clauding-and-context-dump/Explorotron/
-  -> 11 lenses mapped to PRIMM stages, recommendation engine
+0-study-lenses-committee/zz--oldd-clauding-and-context-dump/
+  Explorotron/
+    -> 11 lenses mapped to PRIMM stages.
+    -> Study tours (.study-tour JSON).
+    -> Recommendation engine (heuristic scoring).
+    -> Argument picker, comment slots, pseudo lens.
 
-0--study-lenses--it-begins/dist/static/ask/component/
-  -> Ask component with 5-level cognitive model
+0-study-lenses-committee/zz--study-lenses-package--2025-try/
+  study-lenses-wc-kit/
+    -> WC kit (2025): LensObject pattern { name, lens, config, register }.
+    -> Pipeline: pipeLenses(). Registry: load().
 ```
 
-All paths are relative to:
-`/Users/master/Documents/0-teach-code/0-tbd-met-alums/`
+Additional reference (in the live package):
+
+```text
+src/lib/welcome-to-programming/just-enough/javascript/
+  lib/evaluating/.old-notes-for-reference-and-inspiration/
+    -> tracer.md, tracer.architecture.md, tracer.walkthroughs.md,
+       open-questions.md (relocated for historical reference)
+```
 
 ### What's decided
 
@@ -278,9 +397,13 @@ All paths are relative to:
   through the trial lenses proving the contract) before this stream starts
   Phase 1. The `LensModule` type, registry, and orchestrator must be
   working end-to-end.
-- **Work Stream 2 (Analysis + Recommender)**: needs the `AnalysisReport`
-  type to implement each lens's `recommend()` function. Can stub with a
-  mock AnalysisReport during development, but the type must be defined.
+- **Work Stream 2 (Analysis + Recommender)**: each lens's
+  `recommend(embodiment)` reads from the frozen `Snippet` directly
+  (`embodiment.parse.ast`, `embodiment.status.*`). Analysis is an
+  internal helper inside `lib/recommender/`, not a separate hand-off
+  type — there is no `AnalysisReport` for lenses to consume. WS2's
+  shape only matters for the recommender entry point, not for
+  individual lens `recommend()` functions.
 - **Work Stream 1 (`01-NM-components.md`)**: supplies the 3rd Block
   Model dimension — the syntax tracer's `StepCategory` enum at
   `lib/evaluating/trace/syntax/types.ts`. A lens's `recommend()`
@@ -295,29 +418,38 @@ All paths are relative to:
 
 ## Non-negotiable constraints
 
-From the master plan:
+From the master plan + canonical contract at
+[`../lenses/types.ts`](../lenses/types.ts):
 
 1. **Implement the LensModule contract exactly.** Every lens must export
-   `{ name, lens, config, recommend }` matching the types from Work
-   Stream 3.
-2. **Pure TS logic + thin React wrapper.** `lens.ts`, `config.ts`,
-   `recommend.ts` are testable without React. `wrapper.tsx` is a thin
-   shell.
-3. **Three-tier classification enforced.** `recommend()` must gate on
-   parse status according to the lens's tier. No exceptions.
+   `{ name, Component, config, applicableTo, recommend }` matching
+   `LensModule` from `lenses/types.ts`. `Component` is a React
+   component reference (not a function returning one).
+2. **Pure TS core + thin React wrapper.** `core.ts`, `config.ts`,
+   `applicable.ts`, `recommend.ts` are testable without React.
+   `index.tsx` is a thin React shell.
+3. **Three-tier classification enforced via `applicableTo`.**
+   `applicableTo(embodiment)` gates on `embodiment.status.{parsed,created}`
+   per the lens's tier (see § Three-tier classification above and
+   [`../lenses/README.md`](../lenses/README.md)). No exceptions.
 4. **Lenses don't do infrastructure.** No toolbar rendering, no state
    management, no pipeline execution, no lens switching. All of that is
    the orchestrator's job.
-5. **Self-describing via `recommend()`.** The recommender has no hardcoded
-   knowledge of individual lenses. Each lens declares its own relevance.
-6. **Deep freeze all return values** from pure TS functions.
-7. **No barrel files.** Import directly from source files.
-8. **One concept per file.** `lens.ts`, `config.ts`, `recommend.ts` are
-   separate files, not combined.
-9. **Per-instance isolation.** Multiple instances of the same lens on one
-   page are independent.
-10. **Web-standard syntax only.** Programs are valid code reusable outside
-    the lens system. Lenses never change how the language works.
+5. **Self-describing via `applicableTo` + `recommend`.** The recommender
+   has no hardcoded knowledge of individual lenses. Each lens declares
+   its own applicability (cheap O(1)) and relevance.
+6. **Disposable practice.** Lens-internal UI state is per-mount only —
+   when the snippet changes, React unmounts; in-progress UI state is
+   gone. No `localStorage`, no cross-mount refs. Per
+   [`../DOCS.md` § Lenses are stateful "mini web apps"](../DOCS.md).
+7. **Deep freeze all return values** from pure TS functions.
+8. **No barrel files.** Import directly from source files.
+9. **One concept per file.** `core.ts`, `config.ts`, `applicable.ts`,
+   `recommend.ts` are separate files, not combined.
+10. **Per-instance isolation.** Multiple instances of the same lens on
+    one page are independent.
+11. **Web-standard syntax only.** Programs are valid code reusable
+    outside the lens system. Lenses never change how the language works.
 
 ## Phase 0 checklist (from AGENTS.md)
 
@@ -336,12 +468,15 @@ build (suggested: blanks). Complete every step before Phase 1.
   embodies, what it does NOT do (infrastructure).
 
 - [ ] **0.3 AR-1 design challenge** -- Focus areas:
-  - Does this lens's `recommend()` correctly self-describe its relevance?
+  - Does this lens's `applicableTo` correctly gate by status booleans
+    for its tier?
+  - Does this lens's `recommend()` correctly self-describe its
+    relevance (only meaningful for already-applicable embodiments)?
   - Is the config shape right? Too many options? Too few?
   - Does the tier classification make sense for this lens?
   - Is the Block Model mapping correct?
-  Provide: README, the LensModule contract (from Work Stream 3 types.ts),
-  the AnalysisReport type (from Work Stream 2).
+  Provide: README, the LensModule contract (from `lenses/types.ts`),
+  the `Snippet` type (from `embody/types.ts`).
 
 - [ ] **0.4 Update types.ts** -- lens-specific types (config shape,
   internal state, etc.).
@@ -365,23 +500,31 @@ Each lens follows this increment sequence (adapt specifics per lens):
 - [ ] **Increment 1**: `config.ts` -- config factory with defaults. Test:
   default config shape, override merging. ZOMBIES: no overrides, one
   override, invalid override.
-- [ ] **Increment 2**: `recommend.ts` -- relevance function. Test: returns
-  empty for wrong tier (e.g., Tier 2 lens with invalid parse status),
-  returns recommendations for matching snippets, returns multiple configs
-  for different complexity levels. ZOMBIES: empty analysis, minimal
-  analysis, rich analysis.
-- [ ] **Increment 3**: `lens.ts` -- pure TS lens logic. For blanks: token
-  removal from AST. For parsons: line shuffling. For trace-table: table
-  schema generation. Test the logic without React.
-- [ ] **Increment 4**: `wrapper.tsx` -- React wrapper. Mount the lens in
-  the orchestrator. Verify rendering.
+- [ ] **Increment 2**: `applicable.ts` -- `applicableTo(embodiment)`
+  cheap O(1) gate. Test: Tier 1 always true; Tier 2 returns
+  `embodiment.status.parsed`; Tier 3 returns `embodiment.status.created`.
+  ZOMBIES: minimal embodiment (tokens-only), parsed embodiment (AST
+  present), created embodiment (script-scope ready).
+- [ ] **Increment 3**: `recommend.ts` -- relevance function (assumes
+  the lens is already applicable). Test: returns recommendations for
+  matching snippets, returns multiple configs for different complexity
+  levels. ZOMBIES: minimal-applicable embodiment, rich embodiment with
+  many features.
+- [ ] **Increment 4**: `core.ts` -- pure TS lens logic. For blanks:
+  token removal from AST. For parsons: line shuffling. For trace-table:
+  table schema generation. Test the logic without React.
+- [ ] **Increment 5**: `index.tsx` -- React wrapper exporting the
+  lens's `Component` field. Mount the lens in the orchestrator. Verify
+  rendering.
 
   **Sandbox checkpoint**: Start dev server, navigate to a code block,
   switch to this lens via lens-switcher, exercise the interaction.
 
-- [ ] **Increment 5**: Integration -- register in the registry, verify
-  it appears in lens-switcher and free-explore, verify caching works
-  (switch away and back, state preserved).
+- [ ] **Increment 6**: Integration -- register in the registry, verify
+  it appears in lens-switcher and free-explore, verify the lens
+  unmounts cleanly on snippet change and remounts fresh (per
+  disposable-practice contract; in-progress UI state is intentionally
+  NOT preserved across remounts).
 
 For each increment, follow the full TDD cycle from AGENTS.md:
 
@@ -406,7 +549,7 @@ For each increment, follow the full TDD cycle from AGENTS.md:
 ### Suggested lens build order
 
 1. **blanks** -- exercises the full Tier 2 path (AST-dependent).
-   Validates that `recommend()` correctly gates on parse status.
+   Validates that `applicableTo` correctly gates on `status.parsed`.
 2. **parsons** -- exercises Tier 1 (text-only). Simplest lens to
    implement. Validates that Tier 1 lenses work with invalid parse.
 3. **trace-table** -- exercises Tier 3 (dynamic) and multi-variant
@@ -428,10 +571,11 @@ Run per-lens and also as a batch after all lenses are done:
   Focus areas from AGENTS.md AR-5:
   - Cross-lens consistency (do all lenses follow the same patterns?)
   - Contract compliance (does every lens implement LensModule exactly?)
-  - Tier classification correctness (does `recommend()` gate correctly?)
+  - Tier classification correctness (does `applicableTo` gate correctly?)
   - Documentation sync
   - Convention compliance
   - No infrastructure leakage (lenses doing orchestrator's job)
+  - Disposable practice (no cross-mount state preservation)
 - [ ] Address PAUSE/CONSIDER items from AR-5
 - [ ] Commit prompt
 
@@ -439,8 +583,8 @@ Run per-lens and also as a batch after all lenses are done:
 
 ### How to test end-to-end (per lens)
 
-1. **Unit tests**: `npm test` -- all lens tests green (config, recommend,
-   lens logic)
+1. **Unit tests**: `npm test` -- all lens tests green (core, config,
+   applicable, recommend)
 2. **Type checking**: `npm run type-check` -- no errors
 3. **Lint**: `npm run lint` -- clean
 4. **Dev server smoke test** (Sandbox checkpoint):
@@ -452,9 +596,12 @@ Run per-lens and also as a batch after all lenses are done:
      - parsons: verify lines are shuffled, drag to reorder, check order
      - trace-table: verify table renders, fill in predictions, click check
      - copy-type: verify code shows, hides, type from memory, compare
-   - Switch to another lens and back: verify state preserved (caching)
+   - Edit the snippet, then return to this lens: verify the lens
+     remounts fresh (no preserved in-progress UI state — this is the
+     disposable-practice contract, not a regression)
    - Try with a syntax-error snippet: verify Tier 2/3 lenses are not
-     available in recommender, Tier 1 lenses still work
+     available in recommender (`applicableTo` returns false), Tier 1
+     lenses still work
 5. **Recommender test**: Open the recommender panel. Verify this lens
    appears at the correct Block Model cells with appropriate configs.
 
@@ -464,6 +611,49 @@ A learner visiting a code block sees the editor (default). They click the
 lens-switcher and see all registered lenses. They select blanks and get a
 fill-in-the-blank exercise configured for that snippet's complexity. They
 switch to trace-table and get a prediction exercise. They open the
-recommender and see suggestions organized by comprehension level and scope.
-Each exercise works independently, state is preserved via caching, and
-the experience matches the pedagogical intent.
+recommender and see suggestions organized by comprehension level and
+scope. Each exercise works independently. When the learner edits the
+snippet, lenses remount fresh — in-progress UI state is intentionally
+disposable, per the locked architecture.
+
+## Streams primer for lens authors
+
+Lenses that run code (predict-then-compare, run, trace-table) call into
+`embodiment.streams.evaluate.*`. Quick reference (canonical at
+[`../embody/types.ts`](../embody/types.ts)):
+
+| Surface                        | Returns                  | When to use                                    |
+| ------------------------------ | ------------------------ | ---------------------------------------------- |
+| `streams.evaluate.run(opts?)`  | `Promise<RunInstance>`   | Just-want-the-final-result; no event stream    |
+| `streams.evaluate.intercept(opts?)` | `EvaluateHandle`    | Async iteration over IO + final state         |
+| `streams.evaluate.trace.syntax(opts?)` | `EvaluateHandle` | Step-by-step syntax-tracer events              |
+| `streams.evaluate.trace.semantics(opts?)` | `EvaluateHandle` | Finer-grained semantic events             |
+
+`EvaluateOptions` (per `embody/types.ts:725-738`) carries:
+
+- `seconds` — execution timeout
+- `iterations` — loop-iteration cap (the JEJ loop guard)
+- `io: IoMocks` — pinned mock responses for `prompt` / `confirm` /
+  `alert` / `console.*`. Use these for predict-then-compare flows so
+  every learner sees the same ground truth regardless of what the live
+  IO would do.
+
+`EvaluateHandle` is an async iterable plus `.result` (the final
+`RunInstance`). Tier-filter whitelists at `embody/types.ts:672-680`
+document which event categories each tier emits — useful when a lens
+only wants `emit` events (an output-focused lens) or only
+`control-flow` events (a branching-focused lens).
+
+The predict-then-compare flow:
+
+1. Learner fills a prediction in the lens UI.
+2. Learner clicks [check].
+3. Lens calls `embodiment.streams.evaluate.run({ io: pinnedMocks })`
+   (or `.trace.syntax()` for step-level prediction lenses).
+4. Lens compares the result to the prediction.
+5. Lens renders feedback.
+
+The pinned `IoMocks` are the lens's responsibility — choose values that
+exercise the pedagogical intent of the lens (e.g. trace-table values
+variant pins `prompt` returns so the learner can predict the value
+deterministically).

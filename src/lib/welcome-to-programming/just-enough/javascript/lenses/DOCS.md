@@ -49,10 +49,13 @@ these without instantiating the React component:
    WS2 recommender's applicability filter calls this to gate which
    lenses are even considered. Fast pure check; no I/O, no side
    effects.
-3. **Recommend** — `recommend(analysis)` consumes a snippet
-   analysis report and returns zero or more `Recommendation` objects
-   placed on the 3D Block Model grid. Independent of mount; called
-   only when the recommendations panel opens.
+3. **Recommend** — `recommend(embodiment)` consumes the frozen
+   `Snippet` and returns zero or more `Recommendation` objects placed
+   on the 3D Block Model grid. Independent of mount; called only when
+   the recommendations panel opens. Runs only on lenses that already
+   passed `applicableTo`. Analysis is internal to
+   `orchestrate/lib/recommender/`; there is no separate
+   `AnalysisReport` hand-off type lenses consume.
 
 ### Mount lifecycle
 
@@ -90,7 +93,7 @@ flowchart TD
     Embodiment -->|"render, sync OR async"| ExerciseUI
 
     Embodiment -->|"filter, sync, pure"| Applicable["applicableTo: boolean"]
-    Analysis["AnalysisReport<br/>(from orchestrate/lib/analysis)"] -->|"recommend, sync, pure"| Recs["ReadonlyArray&lt;Recommendation&gt;"]
+    Embodiment -->|"recommend, sync, pure (runs only when applicableTo === true)"| Recs["ReadonlyArray&lt;Recommendation&gt;"]
 ```
 
 The diagram is per-lens. The orchestrator (upstream) supplies
@@ -115,8 +118,7 @@ UI is what the learner interacts with — its internal state
   split similarly: `tests/core.test.ts` (no jsdom),
   `tests/component.test.tsx` (jsdom + @testing-library/react).
 - **`embodiment` parameter name** wherever a function takes a
-  Snippet instance (LensProps, applicableTo, recommend's analysis
-  consumption).
+  Snippet instance (LensProps, applicableTo, recommend).
 - **Self-describing for the recommender.** Each lens's
   `applicableTo` and `recommend` are the only inputs the WS2
   recommender's applicability filter and ranking engine consume to

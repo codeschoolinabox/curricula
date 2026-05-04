@@ -1,11 +1,15 @@
-# Development Guide: Managing Study-Lenses Work Streams
+# Development Guide: Managing JEJ Tooling Work Streams
 
 How to coordinate Claude Code agents across the 4 work streams defined in this
 directory. Written for you (the human coordinator) — not for the agents
 themselves.
 
-> **WS3 current status**: See `03-orchestrator-and-contracts.md` — it opens
-> with a status banner showing exactly which increment is next.
+> **WS3 current status**: See `03-orchestrator-and-contracts.md` — it
+> opens with a status banner. The handoff was rewritten end-to-end
+> after the embody / lenses / orchestrate three-peer architecture
+> locked in. Increments are now F1-F5 (Foundation tier) and L1-L8
+> (Layers I/II/III). `REFACTOR-HANDOFF.md` Steps 1-16 are a hard
+> prerequisite.
 
 ## How Claude Code sessions work
 
@@ -35,8 +39,8 @@ Read these files before doing anything:
 1. .planning-handoffs/0N-[work-stream].md (your assignment)
 2. .planning-handoffs/00-master-plan.md (full architecture context)
 3. 0-curricula/AGENTS.md and 0-curricula/DEV.md at the repo root (workflow + conventions)
-4. study-lenses/README.md and study-lenses/DOCS.md (architecture docs)
-5. study-lenses/types.ts (existing shared types)
+4. lenses/README.md and lenses/DOCS.md (architecture docs)
+5. lenses/types.ts (existing shared types)
 
 Then ask me questions before writing any code.
 ```
@@ -56,7 +60,7 @@ Then ask me questions before writing any code.
 
 - Agent skipping Phase 0 and jumping to code — stop it immediately
 - Agent writing tests AFTER implementation (not TDD)
-- Agent modifying `study-lenses/types.ts` without asking you first
+- Agent modifying `lenses/types.ts` without asking you first
 - Agent making assumptions instead of asking questions
 - Large uncommitted changes (should be atomic commits per increment)
 - Agent referencing `/lenses/study/` code as ground truth (it's old)
@@ -65,35 +69,40 @@ Then ask me questions before writing any code.
 
 ### Human pre-checks (do these BEFORE opening Claude Code)
 
-1. **Read `03-orchestrator-and-contracts.md` yourself** — the status banner at
-   the top tells you which increment to kick off. Confirm the behavioral contract
-   makes sense to you before the agent starts.
-2. **Sandbox check Option-A** (pending since Increment 1): start the dev server,
-   find a code fence using `js:format,editor` syntax, open React DevTools and
-   confirm a `transforms` prop is visible on the `<StudyLenses>` component. This
-   validates the pipeline prop wiring the agent will build on.
-3. **Verify tests still pass**: `npx vitest run` scoped to
-   `src/lib/welcome-to-programming/just-enough/javascript/study-lenses/tests/`
+1. **Confirm REFACTOR-HANDOFF status.** Steps 1-16 must be merged on
+   `main` before any WS3 increment can begin. If not, open a session
+   for REFACTOR-HANDOFF instead.
+2. **Read `03-orchestrator-and-contracts.md` yourself** — the status
+   banner at the top tells you which F-tier or Layer increment is
+   next. Confirm the behavioral contract makes sense to you before
+   the agent starts.
+3. **Read `03-orchestrator-and-contracts-kickoff.md`** for the
+   per-session pre-checks, prompt template, and red-flag list.
+4. **Verify tests still pass**: `npx vitest run` scoped to the package
+   root.
+5. **Sandbox check (post-F1)**: once F1 lands, render a fence and
+   confirm `<StudyLenses>` receives the locked four-prop API
+   (`snippet`, `lens?`, `config?`, `configs?`) in React DevTools. The
+   plugin should NOT emit `transforms`, `code`, or `lang`.
 
 ### Prompt template (paste this verbatim to start the session)
 
-```text
-Read .planning-handoffs/03-orchestrator-and-contracts.md in full before doing
-anything else. That document contains your task, the complete behavioral
-contract, the ZOMBIES test order, and the conventions to follow. Follow
-DEV.md and AGENTS.md discipline throughout — full Phase 1 TDD cycle
-including AR-3 before implementing and AR-4 after. Start with plan mode.
-```
+See
+[`03-orchestrator-and-contracts-kickoff.md`](./03-orchestrator-and-contracts-kickoff.md)
+§ Session prompt template — that file owns the canonical prompt and
+keeps it in sync with the increment list. Don't duplicate here; pull
+from there at session start.
 
 ### What NOT to do
 
-- Do not paste the prompt and immediately leave — the agent will enter plan mode
-  and ask alignment questions. Stay present for the first 10 minutes.
-- Do not skip the Option-A sandbox check — it validates the plugin prop wiring
-  that Increment 2 depends on.
-- Do not approve the agent's plan without reading the behavioral contract in the
-  handoff yourself first. The type-mismatch throw rules are easy to accidentally
-  soften.
+- Do not paste the prompt and immediately leave — the agent will enter
+  plan mode and ask alignment questions. Stay present for the first
+  10 minutes.
+- Do not start a WS3 session before REFACTOR-HANDOFF Steps 1-16 land.
+  The agent will look for `embody/`, `lenses/`, `orchestrate/` peer
+  layout that doesn't exist yet.
+- Do not approve the agent's plan without reading the behavioral
+  contract in the handoff yourself first.
 
 ---
 
@@ -113,24 +122,28 @@ WS3 (orchestrator + contracts) ────────────────�
          └──► WS4 (lens migration) ◄──────────────────────────┘
 ```
 
-- **Build is fixed** — WS3 Increment 0 completed; `MDXComponents.js` now points
-  to the orchestrator stub. `npm run build` is green.
-- **WS3 Phase 1 in progress** — Increments 0–1 committed to `main`. Next: Increment 2 (Pipeline validation).
+- **WS3 status**: forward-looking spec; rewritten end-to-end after
+  the three-peer architecture lock-in. The increments now run F1-F5
+  (Foundation tier) then L1-L8 (Layers I/II/III). Hard prerequisite:
+  `REFACTOR-HANDOFF.md` Steps 1-16 must be done first. Read the
+  status banner at the top of `03-orchestrator-and-contracts.md` for
+  the current increment; read `03-orchestrator-and-contracts-kickoff.md`
+  for pre-session checks before opening a session.
 - **WS1 depends on the syntax tracer at `lib/evaluating/trace/syntax/`** —
   its Phase 0 stabilized the `StepCategory` enum (the 3rd Block Model
   dimension). WS1 is now a thin coordination layer (wire the enum into
-  `study-lenses/types.ts`, document the contract). See
+  `lenses/types.ts`, document the contract). See
   `01-NM-components.md` for full details and the "sub-language levels
   → NM components" pivot note.
 - **WS1 and WS3 can run in parallel** — no dependency between them
 - **WS2 depends on both WS1 and WS3** — needs the NM-components enum
-  from WS1 and the LensModule contract from WS3 (`study-lenses/types.ts`)
+  from WS1 and the LensModule contract from WS3 (`lenses/types.ts`)
 - **WS4 depends on WS3** — needs proven contracts + trial lenses
 - **Within WS4**, individual lenses can run in parallel
 
 ### The shared types.ts problem
 
-`study-lenses/types.ts` is consumed by ALL work streams. It already exists with
+`lenses/types.ts` is consumed by ALL work streams. It already exists with
 the core types. Rules:
 
 - **If an agent finds a flaw in types.ts**: STOP. Write the issue to the work
@@ -148,8 +161,10 @@ Each work stream writes its own notes file in `.planning-handoffs/`:
 - `02-analysis-and-recommender-notes.md`
 - `04-lens-migration-notes.md`
 
-WS3 does not have a notes file — decisions were folded into
-`03-orchestrator-and-contracts.md` when the handoff was rewritten for Increment 2.
+WS3 does not have a notes file — decisions are folded directly into
+`03-orchestrator-and-contracts.md` (or its sibling kickoff file)
+because the handoff was rewritten end-to-end for the post-refactor
+F1-F5 + L1-L8 increments.
 
 **Convention:**
 
@@ -163,7 +178,7 @@ WS3 does not have a notes file — decisions were folded into
 
 - After WS1 completes: review output, confirm the NM-components enum
   (`StepCategory` from the syntax tracer) is wired into
-  `study-lenses/types.ts` and ready for WS2
+  `lenses/types.ts` and ready for WS2
 - After WS3 Phase 0 completes: verify types.ts + contracts are stable before
   starting WS2 or WS4
 - After WS3 trial lenses (editor + highlight) work end-to-end: green light for
@@ -172,9 +187,18 @@ WS3 does not have a notes file — decisions were folded into
 
 ## Git strategy
 
-### Branch naming
+> **NOTE — current preference**: default to commits on `main`. Don't
+> create branches unless the human coordinator explicitly asks for one.
+> The branch-naming convention below is retained for reference if
+> branching becomes useful later (e.g. parallel WS4 lens work where
+> multiple agents are coding simultaneously). For solo-session work,
+> the simplest path — commit directly on `main`, use `--no-verify`
+> when the pre-existing markdownlint hook blocks an unrelated diff —
+> wins.
 
-```
+### Branch naming (only if branching is explicitly requested)
+
+```text
 ws1/nm-components
 ws3/orchestrator-contracts
 ws2/analysis-recommender

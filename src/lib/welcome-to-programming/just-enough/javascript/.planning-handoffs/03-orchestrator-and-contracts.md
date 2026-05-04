@@ -23,15 +23,55 @@
 Per `javascript/README.md` § Pedagogical first principles and
 `javascript/DOCS.md` § Locked decisions:
 
-- **Three-prop public API**: `<StudyLenses snippet={…} lens={…}?
-  config={…}? />`. `snippet` is a string of code (the orchestrator
-  builds the embodiment internally — caller does NOT pre-build it).
-  `lens` is an optional default-mounted lens name (Q-III seam).
-  `config` is an optional per-lens config bundle. Both `lens` and
-  `config` flow from per-fence info-string (`js:trace`) and
-  per-directory `lenses.json` cascade. Dropped from the old API:
-  `code` → renamed to `snippet`; `lang` → no longer needed (embody
-  auto-detects); `transforms` → no transforms tier.
+- **Four-prop public API**: `<StudyLenses snippet={…} lens={…}?
+  config={…}? configs={…}? />`. `snippet` is a string of code (the
+  orchestrator builds the embodiment internally — caller does NOT
+  pre-build it). `lens` is an optional default-mounted lens name
+  (Q-III seam). `config` is an optional override for the
+  resolved-default lens. `configs` is the optional cascade bundle
+  keyed by lens name — the picker reads `configs[lensName]` when
+  opening any lens. Dropped from the old API: `code` → renamed to
+  `snippet`; `lang` → no longer needed (embody auto-detects);
+  `transforms` → no transforms tier.
+
+  **Resolved-default-lens resolution order**: `lens` prop → cascade
+  default declaration in `configs` → none.
+
+  **Resolution chain for any lens-name**:
+
+  ```text
+  resolved(lensName) = module.config()                          // tier 0
+                     ⊕ configs?.[lensName]                      // tier 1
+                     ⊕ (lensName === resolvedDefault ? config : {})  // tier 2
+  ```
+
+  (`⊕` = deep-merge-right-wins.)
+
+  **`config=` without `lens=` prop**: applies to the resolved-default
+  lens (which may come from the cascade rather than the prop). Use
+  case: cascade declares the default; per-fence supplies a
+  fence-level config for that default. If NO default resolves, the
+  orchestrator throws at mount with a clear message — F1 implements.
+
+  **Per-fence info-string syntax (URL-style)**:
+
+  ```text
+  js:trace                   → lens="trace"
+  js:trace?stepDelay=500     → lens="trace", config={ stepDelay: 500 }
+  js:trace?cols=value,steps  → lens="trace", config={ cols: ["value","steps"] }
+  ```
+
+  The plugin parses fence args and emits `lens` + `config` on
+  `<StudyLenses>`. The directory-wide `lenses.json` cascade emits
+  `configs`.
+
+  **API revision note**: the original three-prop API conflated two
+  signals into a single `config` bundle (the cascade's per-lens
+  bundle, and the per-fence override for the default-mount lens).
+  The four-prop split surfaces what was already in the cascade
+  pipeline; the names just got assigned. This amendment was made
+  during the Round-2 AR realignment that surfaced canon/handoff
+  drift between `lenses/types.ts` and the handoffs.
 
 - **Single-writer state model**: only `orchestrate/editor/` mutates
   snippet source. Lenses are read-only views consuming `embodiment`
@@ -88,7 +128,9 @@ Per `javascript/README.md` § Pedagogical first principles and
      intra-component coordination (lens-to-orchestrator events such
      as `exercise-completed` consumed by future increments), not
      outbound telemetry. Per-snippet manual study tours (Q-IV) are
-     deferred entirely (auto-recommended Q-II tours suffice).
+     deferred entirely (auto-recommended Q-II tours suffice). The
+     future shape (5th prop / meta-key in `configs` / `lenses.json`
+     directory-level) is intentionally undecided until Q-IV un-defers.
   5. **Disposable practice, not persisted progress.** Lens state is
      *per-mount only*. When the snippet changes (re-embody), all
      active lenses are disposed and remounted fresh against the
@@ -142,26 +184,29 @@ needing realignment in separate sessions:
   `src/plugins/study-lenses/`. The plugin's prop emission contract
   (`code-block-to-jsx.ts:76-94`) currently produces
   `<StudyLenses code lens lang config transforms>`; the new
-  orchestrator API is `<StudyLenses snippet lens? config?>`.
+  orchestrator API is `<StudyLenses snippet lens? config? configs?>`.
   Required plugin alignment:
   - **Drop `transforms` attribute** entirely (no transforms tier).
   - **Rename `code` → `snippet`** to match the new orchestrator
     prop.
   - **Drop `lang` attribute** (embody auto-detects).
-  - **Simplify fence syntax**: `js:format,loopGuard,blanks`
-    becomes just `js:blanks` (or `js` for the default editor home
-    base). Comma-separated transforms parsing dies.
+  - **Adopt URL-style fence syntax**: `js:trace?stepDelay=500`
+    parses to `lens="trace"` + `config={ stepDelay: 500 }`. Bare
+    `js:trace` is `lens="trace"` only. Plain `js` is the default
+    editor home base. Comma-separated transforms parsing dies.
   - **`lens` attribute survives** (Q-III seam — picker default).
     The learner can still pick freely (Q-I).
-  - **`config` attribute survives** as the per-lens config bundle.
-    Q-IV per-snippet tours are deferred entirely (see Layer IV
-    below); no `sequence` field needed.
-  - **No new top-level prop attributes**; the prop trio stays
-    `<StudyLenses snippet lens? config?>`.
+  - **`config` attribute survives** as the override for the
+    resolved-default lens. Q-IV per-snippet tours are deferred
+    (see Layer IV below); no `sequence` field needed.
+  - **NEW `configs` attribute**: the cascade bundle keyed by lens
+    name. The plugin populates this from the `lenses.json`
+    directory cascade (`resolve-cascade.ts`).
   - **Per-fence `@study-lens` directive** at
     `parse-study-lens-directive.ts` survives — Q-III educator-
     override surface.
-  - **`lenses.json` cascade** (`resolve-cascade.ts`) survives.
+  - **`lenses.json` cascade** (`resolve-cascade.ts`) survives;
+    its output now flows into the new `configs` prop.
   - **Recommendation**: REFACTOR-HANDOFF.md should gain new steps
     (e.g. Step 11.5 or new Step 18) covering plugin alignment,
     landing AFTER the orchestrator's prop contract stabilizes
@@ -174,8 +219,8 @@ needing realignment in separate sessions:
 
 | Era                  | Concern                                | Files / commits                                          | Refactor disposition                                                                                  |
 | -------------------- | -------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Phase 1 (Inc 0–7b)   | Pure-TS substrate (registry, pipeline, state, EventBus, cache, reset, reset-all) | `study-lenses/*.ts` (10 modules)                         | Modules reshape: registry simplifies (no transforms peer); pipeline-execute becomes `format → embody`; cache disappears (disposability); EventBus migrates to internal-only. Recovered durables: name-enumeration, EventBus pattern, freeze discipline, cleanup-split lessons. REFACTOR-HANDOFF Step 11 decides specifics. |
-| Inc 8                | React wrapper scaffolding              | `study-lenses/orchestrator/study-lenses.tsx` + default-registry + editor stub | Wrapper migrates to `orchestrate/` (Step 10); editor stub becomes `orchestrate/editor/` home base (Step 8); registry concept may dissolve.                                                                                                                                       |
+| Phase 1 (Inc 0–7b)   | Pure-TS substrate (registry, pipeline, state, EventBus, cache, reset, reset-all) | `lenses/*.ts` (10 modules, pre-refactor location)        | Modules reshape: registry simplifies (no transforms peer); pipeline-execute becomes `format → embody`; cache disappears (disposability); EventBus migrates to internal-only. Recovered durables: name-enumeration, EventBus pattern, freeze discipline, cleanup-split lessons. REFACTOR-HANDOFF Step 11 decides specifics. |
+| Inc 8                | React wrapper scaffolding              | `lenses/orchestrator/study-lenses.tsx` + default-registry + editor stub (pre-refactor location) | Wrapper migrates to `orchestrate/` (Step 10); editor stub becomes `orchestrate/editor/` home base (Step 8); registry concept may dissolve.                                                                                                                                       |
 | Inc 9                | Toolbar with lens-picker, dispatch-effect, cache-hit reattach | 11 commits `fc3257c..228c04c`                            | Toolbar lens-picker SURVIVES as the Q-I/Q-III learner-driven exploration surface. `lens-switched` dispatch-effect SURVIVES (still fires on learner-driven switch — internal-only per F5). Cache-hit reattach DISSOLVES (disposability — lens state is per-mount, snippet change unmounts lenses).               |
 
 Test count pre-refactor: ~228 tests across 17 files. Expect
@@ -506,13 +551,14 @@ this orchestrator handoff. Two reasons:
   per-snippet sequence primitive is needed inside our component.
 
 Re-introducing per-snippet sequences later (if a future
-curriculum need surfaces) is a contained change: add a
-`sequence` field inside the `config` prop bundle, extend the
-plugin's `parse-lens-config.ts` to recognize it, add a
-sequential-walk-through React component inside
-`orchestrate/`. No props added; no architectural
-disruption. **Treat L9-L11 as deferred follow-up tickets, not
-out-of-the-question.**
+curriculum need surfaces) is a contained change. The future
+shape is intentionally undecided — plausible options are a 5th
+prop (`sequence={[…]}`), a reserved meta-key inside `configs`,
+or a `lenses.json` directory-level setting. The plugin's
+`parse-lens-config.ts` would extend to recognize whichever
+shape lands; a sequential-walk-through React component lives
+inside `orchestrate/`. **Treat L9-L11 as deferred follow-up
+tickets, not out-of-the-question.**
 
 ### Top — Monitored learning (out of scope)
 
@@ -548,11 +594,15 @@ transitions, etc.) is moot — those concerns are at Layer I
 (L1), not Foundation. New Phase 0 questions for F1 (the
 smoke-test of the JEJ → NM → embody → editor chain):
 
-- The `<StudyLenses snippet lens? config?>` prop contract:
-  what's the TypeScript shape? `Readonly<{ snippet: string;
-  lens?: string; config?: …; }>` is the obvious starting point
+- The `<StudyLenses snippet lens? config? configs?>` prop
+  contract: what's the TypeScript shape? `Readonly<{ snippet:
+  string; lens?: string; config?: LensConfig; configs?:
+  Record<string, LensConfig>; }>` is the obvious starting point
   but `embody/types.ts` may want the snippet pre-typed (a
-  branded type? a `Source` opaque?).
+  branded type? a `Source` opaque?). `configs` may carry a
+  reserved `default` key for the cascade-declared default lens
+  (the resolution order is `lens` prop → `configs.default` →
+  none).
 - Pre-processing pipeline: format ONLY (per locked decision)
   or format + a passthrough hook for downstream pipelines?
   Where does the formatter live? `embody/lib/formatting/`
@@ -590,11 +640,13 @@ smoke-test of the JEJ → NM → embody → editor chain):
   order (most-specific wins is the obvious default). Confirm
   before the picker default ordering and the recommender
   ranking are wired.
-- **Locked prop trio**: `<StudyLenses snippet: string lens?:
-  string config?: …>`. The README's earlier sketches of
-  `recommendedLens` and `lensSequence` are SUPERSEDED; replace
-  any remaining sketched-prop references in `README.md` and
-  `DOCS.md` with the locked trio when F1 pins the surface.
+- **Locked four-prop API**: `<StudyLenses snippet: string lens?:
+  string config?: LensConfig configs?: Record<string,
+  LensConfig>>`. The README and DOCS were updated in Round-2 to
+  match (replacing earlier sketches of `recommendedLens` /
+  `lensSequence`). F1's Phase 0 confirms no stale references
+  survive in `README.md` / `DOCS.md` and types the contract in
+  `orchestrate/types.ts`.
 - **Q-IV per-snippet sequences are deferred entirely** (user
   decision; see Layer IV above). F1's Phase 0 doesn't need to
   resolve sequence routing — auto-recommended Q-II tours cover
