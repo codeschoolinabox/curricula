@@ -49,8 +49,8 @@
  * assemble Snippet per types.ts § 12 staircase
  *   |
  *   v
- * deepFreezeInPlace(snippet)
- * (WeakSet cycle guard handles RunInstance.snippet back-ref)
+ * deepFreezeInPlace(snippet) — single freeze pass; visited-set
+ * cycle guard handles the runInstance.snippet back-ref in happy mode
  *   |
  *   v
  * frozen Snippet
@@ -105,15 +105,34 @@
  * @see ../EMBODY-IMPL-HANDOFF.md — Phase B real-internals plan
  */
 
+import type { Node as AcornNode } from 'acorn';
+
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import type {
+	AugmentedASTNode,
 	AugmentedToken,
+	BindingEvent,
+	ControlFlow,
 	EmbodyError,
+	EvaluateHandle,
+	EvaluateOptions,
+	Event,
+	Features,
+	HasIo,
+	InitialScope,
+	Metrics,
+	Distribution,
 	NodeEvent,
+	NonDeterminism,
+	Realm,
 	RealmBindingEvent,
+	RunInstance,
+	Scope,
+	ScopeEvent,
 	Snippet,
 	Source,
+	StaticAnalyses,
 	TokenEvent,
 	Validation,
 } from './types.js';
@@ -233,11 +252,178 @@ function makeStubToken(code: string): AugmentedToken {
  *   rung determined by `code`. All required fields per types.ts § 12 are
  *   present; optional fields gated by `status.*` follow the staircase rules.
  */
+/** Build a zero-default `Distribution` — open-hole stub per DOCS.md § Open holes. */
+function makeStubDistribution(): Distribution {
+	return { min: 0, max: 0, mean: 0, median: 0, samples: [] };
+}
+
+/**
+ * Build a zero-default `Metrics` — every required sub-field present
+ * with empty/zero values. M3 enriches; M1 ships shape-valid skeleton.
+ * `Distribution.samples: []` is a deliberate open-hole stub.
+ */
+function makeStubMetrics(): Metrics {
+	return {
+		source: { chars: 0, lines: 0 },
+		tokens: 0,
+		nodes: 0,
+		comments: 0,
+		statements: 0,
+		expressions: 0,
+		blockLengths: makeStubDistribution(),
+		lineLengths: makeStubDistribution(),
+		expressionLengths: makeStubDistribution(),
+		statementLengths: makeStubDistribution(),
+		loops: 0,
+		branches: 0,
+		bindings: { script: 0, block: 0, total: 0 },
+		maxNestingDepth: 0,
+	};
+}
+
+/** Build a zero-default `Features` — only the 12 fields enumerated in types.ts; all `false`. */
+function makeStubFeatures(): Features {
+	return {
+		usesShortCircuit: false,
+		usesOptionalChaining: false,
+		usesCoercionPlus: false,
+		usesIncrementOp: false,
+		usesForOf: false,
+		usesTemplateLiteral: false,
+		usesTernary: false,
+		usesIn: false,
+		usesTypeof: false,
+		usesRegex: false,
+		usesBigInt: false,
+		usesNewDate: false,
+	};
+}
+
+/** Build an empty `ControlFlow`. */
+function makeStubControlFlow(): ControlFlow {
+	return { branches: [], breaks: [], continues: [] };
+}
+
+/** Build a zero-default `NonDeterminism`. */
+function makeStubNonDeterminism(): NonDeterminism {
+	return { random: false, clock: false, userInput: false, locale: false };
+}
+
+/**
+ * Build a zero-default `HasIo` — only `total: 0` keys; per-method keys
+ * omitted (open-hole stub per DOCS.md § Open holes).
+ */
+function makeStubHasIo(): HasIo {
+	return {
+		user: { total: 0 },
+		dev: { total: 0 },
+		total: 0,
+	};
+}
+
+/** Build a stub `Realm` — empty intrinsics + host. M2 enriches with canned bindings. */
+function makeStubRealm(): Realm {
+	return { intrinsics: {}, host: {} };
+}
+
+/** Build a stub `InitialScope` — kind 'script', empty bindings, no outer. M2 enriches. */
+function makeStubInitialScope(): InitialScope {
+	return { kind: 'script', bindings: [], outer: null, nodePath: '$' };
+}
+
+/**
+ * Build the stub `AugmentedASTNode` (Program root) for happy mode.
+ * `acornNode` carries the underlying acorn-shape (a `Node` per acorn
+ * typings) with a `body: []` array since we don't fabricate statements.
+ */
+function makeStubProgram(code: string): AugmentedASTNode {
+	const acornNode = {
+		type: 'Program',
+		start: 0,
+		end: code.length,
+		body: [],
+		sourceType: 'script',
+	} as unknown as AcornNode;
+	return {
+		type: 'Program',
+		start: 0,
+		end: code.length,
+		loc: {
+			start: { line: 1, column: 0 },
+			end: { line: 1, column: code.length },
+		},
+		path: '$',
+		text: code,
+		parent: null,
+		children: [],
+		tokens: [],
+		comments: [],
+		firstToken: null,
+		lastToken: null,
+		acornNode,
+	};
+}
+
+/** Empty create-stream — yields no scope or binding events. */
+function* emptyCreateStream(): Generator<ScopeEvent | BindingEvent> {
+	// intentionally empty — no events in the mock
+}
+
+/** Empty async event stream for `EvaluateHandle`. Yields nothing, completes immediately. */
+async function* emptyEvaluateAsyncIterator(): AsyncGenerator<Event> {
+	// intentionally empty — no events in the mock
+}
+
+/** No-op cancel for `EvaluateHandle`. Phase A mock does not schedule cancellation. */
+function noOpCancel(): void {
+	// intentional no-op
+}
+
+/**
+ * Build an `EvaluateHandle` whose async iterator yields zero events,
+ * `.cancel()` is a no-op, and `.result` resolves with the supplied
+ * `runInstance`. Used by intercept and trace.{syntax, semantics} stubs.
+ */
+function makeStubEvaluateHandle(runInstance: RunInstance): EvaluateHandle {
+	return {
+		[Symbol.asyncIterator]: emptyEvaluateAsyncIterator,
+		result: Promise.resolve(runInstance),
+		cancel: noOpCancel,
+	};
+}
+
+/**
+ * Build a stub `RunInstance` for happy mode. Eager construction per the
+ * plan's locked design (AR-2 Concern A resolution): one canned
+ * RunInstance per `embody(code)` call; back-ref `snippet` set after the
+ * outer Snippet is constructed but before the deep-freeze pass — the
+ * cycle is closed in a single freeze and cycle-safe via the WeakSet
+ * guard in `@utils/deep-freeze-in-place`.
+ *
+ * `events: []` and a stub `Scope` for `finalEnvironment` keep the
+ * happy-mode RunInstance shape-valid without fabricating evaluation
+ * data.
+ */
+function makeStubRunInstance(initialScope: Scope): RunInstance {
+	return {
+		events: [],
+		endReport: { ok: true, error: null, outcome: 'completed' },
+		finalEnvironment: initialScope,
+		runMetrics: { steps: 0, durationMs: 0, iterationCount: 0 },
+		// `snippet` is wired up after the outer Snippet object exists;
+		// see buildHappyModeSnippet for the assignment.
+		snippet: undefined as unknown as Snippet,
+	};
+}
+
 function embody(code: string): Snippet {
+	if (code === '') {
+		return buildEmptySnippet(code);
+	}
 	if (code === SENTINEL_PARSE_FAIL) {
 		return buildParseFailSnippet(code);
 	}
-	return buildEmptySnippet(code);
+	return buildHappyModeSnippet(code);
 }
 
 /** Build the empty-mode (tokenize-fail) Snippet. */
@@ -262,6 +448,90 @@ function buildEmptySnippet(code: string): Snippet {
 		},
 	};
 	return deepFreezeInPlace(snippet);
+}
+
+/**
+ * Build the happy-mode Snippet (any non-empty, non-sentinel input).
+ * All status booleans true; full parse graph + static analyses + every
+ * stream slot. Eager `RunInstance` construction with back-ref wired
+ * to the snippet identity; deep-freeze handles the cycle natively.
+ *
+ * Replaces the empty-mode return for any input that is not the empty
+ * string and not a known sentinel.
+ */
+function buildHappyModeSnippet(code: string): Snippet {
+	const ast = makeStubProgram(code);
+	const initialScope = makeStubInitialScope();
+	const staticAnalyses: StaticAnalyses = {
+		realm: makeStubRealm(),
+		initialScope,
+		bindings: [],
+		dependencies: [],
+		features: makeStubFeatures(),
+		metrics: makeStubMetrics(),
+		controlFlow: makeStubControlFlow(),
+		nonDeterminism: makeStubNonDeterminism(),
+		hasIo: makeStubHasIo(),
+	};
+	const runInstance = makeStubRunInstance(initialScope);
+	const validation: Validation = {
+		isJeJ: true,
+		isDeterministic: true,
+		doesPause: false,
+		formatted: true,
+		violations: [],
+	};
+	const snippet: Snippet = {
+		status: { tokenized: true, parsed: true, created: true },
+		source: buildSource(code),
+		parse: {
+			tokens: [makeStubToken(code)],
+			comments: [],
+			ast,
+			nodesByPath: { $: ast },
+			tokensByOffset: {},
+			nodesByOffset: { 0: ast },
+		},
+		static: staticAnalyses,
+		validation,
+		errors: null,
+		streams: {
+			realm: emptyRealmStream,
+			parse: {
+				tokenize: emptyTokenizeStream,
+				parse: emptyParseStream,
+			},
+			create: emptyCreateStream,
+			evaluate: {
+				run: (_options?: EvaluateOptions): Promise<RunInstance> =>
+					Promise.resolve(runInstance),
+				intercept: (_options?: EvaluateOptions): EvaluateHandle =>
+					makeStubEvaluateHandle(runInstance),
+				trace: {
+					syntax: (_options?: EvaluateOptions): EvaluateHandle =>
+						makeStubEvaluateHandle(runInstance),
+					semantics: (_options?: EvaluateOptions): EvaluateHandle =>
+						makeStubEvaluateHandle(runInstance),
+				},
+			},
+		},
+	};
+	// Wire the back-ref before freezing. The mutation is intentional
+	// and contained to the construction window — neither the snippet
+	// nor the runInstance is observable in its pre-freeze state.
+	// eslint-disable-next-line functional/immutable-data
+	(runInstance as { snippet: Snippet }).snippet = snippet;
+
+	// Freeze the runInstance first so its walk includes runInstance.snippet
+	// (the back-ref to the snippet object); that walk freezes the entire
+	// snippet graph in one pass. The visited-set cycle guard inside
+	// `@utils/deep-freeze-in-place` prevents infinite recursion. Functions
+	// (the streams.evaluate.* closures inside snippet) are not walked
+	// recursively but are themselves frozen by Object.freeze, which is
+	// what the deep-freeze utility applies. Both runInstance and snippet
+	// are fully frozen after this single call.
+	deepFreezeInPlace(runInstance);
+	return snippet;
 }
 
 /**

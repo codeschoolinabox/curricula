@@ -199,4 +199,96 @@ describe('embody', () => {
 			expect(Object.isFrozen(embody(SENTINEL))).toBe(true);
 		});
 	});
+
+	describe('happy-mode (any non-empty, non-sentinel input)', () => {
+		const CODE = 'let x = 1;';
+
+		it('returns a Snippet with status.tokenized: true', () => {
+			expect(embody(CODE).status.tokenized).toBe(true);
+		});
+
+		it('returns a Snippet with status.parsed: true', () => {
+			expect(embody(CODE).status.parsed).toBe(true);
+		});
+
+		it('returns a Snippet with status.created: true', () => {
+			expect(embody(CODE).status.created).toBe(true);
+		});
+
+		it('returns a Snippet with errors: null', () => {
+			expect(embody(CODE).errors).toBe(null);
+		});
+
+		it('returns a Snippet with source.code matching the input', () => {
+			expect(embody(CODE).source.code).toBe(CODE);
+		});
+
+		it('returns a Snippet with parse.tokens populated', () => {
+			expect(embody(CODE).parse.tokens!.length).toBeGreaterThan(0);
+		});
+
+		it('returns a Snippet with parse.ast defined as a Program node', () => {
+			expect(embody(CODE).parse.ast?.type).toBe('Program');
+		});
+
+		it('returns a Snippet with parse.ast.acornNode.body as an array', () => {
+			const ast = embody(CODE).parse.ast;
+			expect(Array.isArray((ast?.acornNode as { body?: unknown }).body)).toBe(
+				true,
+			);
+		});
+
+		it('returns a Snippet with parse.comments: []', () => {
+			expect(embody(CODE).parse.comments).toEqual([]);
+		});
+
+		it('returns a Snippet with static defined and shape-valid', () => {
+			expect(embody(CODE).static).toMatchObject({
+				realm: expect.objectContaining({
+					intrinsics: expect.any(Object),
+					host: expect.any(Object),
+				}),
+				initialScope: expect.objectContaining({ kind: 'script' }),
+				bindings: expect.any(Array),
+				dependencies: expect.any(Array),
+				features: expect.objectContaining({ usesShortCircuit: false }),
+				metrics: expect.objectContaining({ tokens: expect.any(Number) }),
+				controlFlow: expect.objectContaining({ branches: expect.any(Array) }),
+				nonDeterminism: expect.objectContaining({ random: false }),
+				hasIo: expect.objectContaining({ total: 0 }),
+			});
+		});
+
+		it('exposes streams.create as a callable function', () => {
+			expect(typeof embody(CODE).streams.create).toBe('function');
+		});
+
+		it('exposes streams.evaluate as defined', () => {
+			expect(embody(CODE).streams.evaluate).toBeDefined();
+		});
+
+		it('exposes streams.evaluate.run as a callable function', () => {
+			expect(typeof embody(CODE).streams.evaluate!.run).toBe('function');
+		});
+
+		it('exposes streams.evaluate.intercept as a callable function', () => {
+			expect(typeof embody(CODE).streams.evaluate!.intercept).toBe('function');
+		});
+
+		it('exposes streams.evaluate.trace.syntax as a callable function', () => {
+			expect(typeof embody(CODE).streams.evaluate!.trace.syntax).toBe(
+				'function',
+			);
+		});
+
+		it('exposes streams.evaluate.trace.semantics as a callable function', () => {
+			expect(typeof embody(CODE).streams.evaluate!.trace.semantics).toBe(
+				'function',
+			);
+		});
+
+		it('returns a frozen Snippet (top-level)', () => {
+			expect(Object.isFrozen(embody(CODE))).toBe(true);
+		});
+	});
 });
