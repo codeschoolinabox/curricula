@@ -593,4 +593,39 @@ describe('embody', () => {
 			expect(Object.isFrozen(embody(SENTINEL))).toBe(true);
 		});
 	});
+
+	describe('discriminator-boundary edges (B)', () => {
+		it('whitespace-only input is happy-mode (not empty-mode)', () => {
+			expect(embody('   ').status.tokenized).toBe(true);
+		});
+
+		it('newline-only input is happy-mode', () => {
+			expect(embody('\n').status.tokenized).toBe(true);
+		});
+
+		it('parse-fail sentinel with trailing newline is happy-mode (not parse-fail)', () => {
+			const code = '/' + '* MOCK_PARSE_FAIL *' + '/' + '\n';
+			expect(embody(code).status.parsed).toBe(true);
+		});
+
+		it('parse-fail sentinel as substring is happy-mode', () => {
+			const code = '// ' + '/' + '* MOCK_PARSE_FAIL *' + '/' + ' in a string';
+			expect(embody(code).status.parsed).toBe(true);
+		});
+
+		it('create-fail sentinel with trailing space is happy-mode (not create-fail)', () => {
+			const code = '/' + '* MOCK_CREATE_FAIL *' + '/' + ' ';
+			expect(embody(code).status.created).toBe(true);
+		});
+
+		it('exact-match parse-fail sentinel triggers parse-fail', () => {
+			const code = '/' + '* MOCK_PARSE_FAIL *' + '/';
+			expect(embody(code).status.parsed).toBe(false);
+		});
+
+		it('exact-match create-fail sentinel triggers create-fail', () => {
+			const code = '/' + '* MOCK_CREATE_FAIL *' + '/';
+			expect(embody(code).status.created).toBe(false);
+		});
+	});
 });
