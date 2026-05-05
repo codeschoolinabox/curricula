@@ -777,6 +777,12 @@ describe('embody', () => {
 			expect(baseAfter.status.created).toBe(true);
 		});
 
+		it('returns a fresh Snippet identity (not the underlying base reference)', () => {
+			const base = embody(HAPPY);
+			const overridden = embodyMock(HAPPY).with({});
+			expect(overridden).not.toBe(base);
+		});
+
 		it('returns a deep-frozen Snippet', () => {
 			const snippet = embodyMock(HAPPY).with({ status: { created: false } });
 			expect(Object.isFrozen(snippet)).toBe(true);

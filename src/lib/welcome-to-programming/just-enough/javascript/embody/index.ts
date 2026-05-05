@@ -245,17 +245,6 @@ function makeStubToken(code: string): AugmentedToken {
 	};
 }
 
-/**
- * Builds a frozen `Snippet` for the given `code` string. Phase A mock body —
- * see file header for the four-mode discriminator and the Phase B replacement
- * plan.
- *
- * @param code - The JEJ source string. Empty string and well-known
- *   sentinel comments select non-happy modes; any other string is happy mode.
- * @returns A deep-frozen `Snippet` whose `status` reflects the staircase
- *   rung determined by `code`. All required fields per types.ts § 12 are
- *   present; optional fields gated by `status.*` follow the staircase rules.
- */
 /** Build a zero-default `Distribution` — open-hole stub per DOCS.md § Open holes. */
 function makeStubDistribution(): Distribution {
 	return { min: 0, max: 0, mean: 0, median: 0, samples: [] };
@@ -468,6 +457,19 @@ function makeStubRunInstance(initialScope: Scope): RunInstance {
 	};
 }
 
+/**
+ * Build a frozen `Snippet` for the given `code` string. Phase A mock
+ * body — see file header for the four-mode discriminator and the
+ * Phase B replacement plan.
+ *
+ * @param code - The JEJ source string. Empty string and well-known
+ *   sentinel comments select non-happy modes; any other string is
+ *   happy mode.
+ * @returns A deep-frozen `Snippet` whose `status` reflects the
+ *   staircase rung determined by `code`. All required fields per
+ *   types.ts § 12 are present; optional fields gated by `status.*`
+ *   follow the staircase rules.
+ */
 function embody(code: string): Snippet {
 	if (code === '') {
 		return buildEmptySnippet(code);
