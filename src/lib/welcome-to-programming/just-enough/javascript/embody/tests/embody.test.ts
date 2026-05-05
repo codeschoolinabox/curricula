@@ -411,4 +411,134 @@ describe('embody', () => {
 			});
 		});
 	});
+
+	describe('happy-mode streams.evaluate.* (M5)', () => {
+		const CODE = 'let x = 1;';
+
+		describe('streams.evaluate.run', () => {
+			it('returns a Promise (not a RunInstance directly)', () => {
+				const result = embody(CODE).streams.evaluate!.run();
+				expect(result).toBeInstanceOf(Promise);
+			});
+
+			it('resolves to a RunInstance with events: []', async () => {
+				const ri = await embody(CODE).streams.evaluate!.run();
+				expect(ri.events).toEqual([]);
+			});
+
+			it('resolves to a RunInstance with endReport.ok: true', async () => {
+				const ri = await embody(CODE).streams.evaluate!.run();
+				expect(ri.endReport.ok).toBe(true);
+			});
+
+			it('resolves to a RunInstance with endReport.error: null', async () => {
+				const ri = await embody(CODE).streams.evaluate!.run();
+				expect(ri.endReport.error).toBe(null);
+			});
+
+			it('resolves to a RunInstance with endReport.outcome: completed', async () => {
+				const ri = await embody(CODE).streams.evaluate!.run();
+				expect(ri.endReport.outcome).toBe('completed');
+			});
+
+			it('resolves to a RunInstance with finalEnvironment defined', async () => {
+				const ri = await embody(CODE).streams.evaluate!.run();
+				expect(ri.finalEnvironment).toBeDefined();
+			});
+
+			it('resolves to a RunInstance with runMetrics shape', async () => {
+				const ri = await embody(CODE).streams.evaluate!.run();
+				expect(ri.runMetrics).toEqual({
+					steps: 0,
+					durationMs: 0,
+					iterationCount: 0,
+				});
+			});
+
+			it('back-ref RunInstance.snippet === the embodiment (identity)', async () => {
+				const snippet = embody(CODE);
+				const ri = await snippet.streams.evaluate!.run();
+				expect(ri.snippet).toBe(snippet);
+			});
+
+			it('resolved RunInstance is frozen', async () => {
+				const ri = await embody(CODE).streams.evaluate!.run();
+				expect(Object.isFrozen(ri)).toBe(true);
+			});
+		});
+
+		describe('streams.evaluate.intercept', () => {
+			it('returns an EvaluateHandle (synchronously, not a Promise)', () => {
+				const handle = embody(CODE).streams.evaluate!.intercept();
+				expect(handle).not.toBeInstanceOf(Promise);
+			});
+
+			it('exposes .result as a Promise<RunInstance>', () => {
+				const handle = embody(CODE).streams.evaluate!.intercept();
+				expect(handle.result).toBeInstanceOf(Promise);
+			});
+
+			it('exposes .cancel as a callable function', () => {
+				const handle = embody(CODE).streams.evaluate!.intercept();
+				expect(typeof handle.cancel).toBe('function');
+			});
+
+			it('async-iterates zero events and completes immediately', async () => {
+				const handle = embody(CODE).streams.evaluate!.intercept();
+				const collected: unknown[] = [];
+				for await (const event of handle) {
+					collected.push(event);
+				}
+				expect(collected).toEqual([]);
+			});
+
+			it('.cancel() is a no-op (returns undefined)', () => {
+				const handle = embody(CODE).streams.evaluate!.intercept();
+				expect(handle.cancel()).toBeUndefined();
+			});
+
+			it('.result resolves to the same canned RunInstance run() returns', async () => {
+				const snippet = embody(CODE);
+				const handleResult = await snippet.streams.evaluate!.intercept().result;
+				const runResult = await snippet.streams.evaluate!.run();
+				expect(handleResult).toBe(runResult);
+			});
+		});
+
+		describe('streams.evaluate.trace.{syntax, semantics}', () => {
+			it('trace.syntax returns an EvaluateHandle', () => {
+				const handle = embody(CODE).streams.evaluate!.trace.syntax();
+				expect(handle).toMatchObject({
+					result: expect.any(Promise),
+					cancel: expect.any(Function),
+				});
+			});
+
+			it('trace.semantics returns an EvaluateHandle', () => {
+				const handle = embody(CODE).streams.evaluate!.trace.semantics();
+				expect(handle).toMatchObject({
+					result: expect.any(Promise),
+					cancel: expect.any(Function),
+				});
+			});
+
+			it('trace.syntax async-iterates zero events', async () => {
+				const handle = embody(CODE).streams.evaluate!.trace.syntax();
+				const collected: unknown[] = [];
+				for await (const event of handle) {
+					collected.push(event);
+				}
+				expect(collected).toEqual([]);
+			});
+
+			it('trace.semantics async-iterates zero events', async () => {
+				const handle = embody(CODE).streams.evaluate!.trace.semantics();
+				const collected: unknown[] = [];
+				for await (const event of handle) {
+					collected.push(event);
+				}
+				expect(collected).toEqual([]);
+			});
+		});
+	});
 });
