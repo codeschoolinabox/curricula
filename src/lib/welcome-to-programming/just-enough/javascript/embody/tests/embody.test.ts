@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
+import embodyMock from '../embody-mock.js';
 import embody from '../index.js';
 
 describe('embody', () => {
@@ -232,7 +233,7 @@ describe('embody', () => {
 		});
 
 		it('returns a Snippet with parse.ast.acornNode.body as an array', () => {
-			const ast = embody(CODE).parse.ast;
+			const { ast } = embody(CODE).parse;
 			expect(Array.isArray((ast?.acornNode as { body?: unknown }).body)).toBe(
 				true,
 			);
@@ -643,12 +644,11 @@ describe('embody', () => {
 			if (value === null || typeof value !== 'object') {
 				return;
 			}
-			const ref = value as object;
-			if (visited.has(ref)) {
+			if (visited.has(value)) {
 				return;
 			}
-			visited.add(ref);
-			expect(Object.isFrozen(ref)).toBe(true);
+			visited.add(value);
+			expect(Object.isFrozen(value)).toBe(true);
 			for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
 				assertDeepFrozen(child, `${path}.${key}`, visited);
 			}
@@ -718,6 +718,82 @@ describe('embody', () => {
 			// triggered an infinite freeze recursion at construction time and thrown.
 			// Reaching this assertion means the cycle was traversed safely.
 			expect(ri.snippet.streams.evaluate).toBeDefined();
+		});
+	});
+
+	describe('embodyMock(code).with({...}) override builder (S)', () => {
+		const HAPPY = 'let x = 1;';
+
+		it('without overrides, embodyMock(code).with({}) returns a happy-mode Snippet', () => {
+			expect(embodyMock(HAPPY).with({}).status.tokenized).toBe(true);
+		});
+
+		it('overrides status.created to false without tripping sentinel logic', () => {
+			const snippet = embodyMock(HAPPY).with({ status: { created: false } });
+			expect(snippet.status.created).toBe(false);
+		});
+
+		it('overriding status.created leaves status.tokenized untouched', () => {
+			const snippet = embodyMock(HAPPY).with({ status: { created: false } });
+			expect(snippet.status.tokenized).toBe(true);
+		});
+
+		it('overrides errors with a custom shape', () => {
+			const snippet = embodyMock(HAPPY).with({
+				errors: {
+					phase: 'create',
+					kind: 'TypeError',
+					message: 'fixture-specific message',
+					loc: null,
+				},
+			});
+			expect(snippet.errors!.message).toBe('fixture-specific message');
+		});
+
+		it('arrays in overrides replace base arrays (do not concat)', () => {
+			const snippet = embodyMock(HAPPY).with({
+				validation: {
+					violations: [
+						{
+							kind: 'FunctionDeclaration',
+							message: 'fixture violation',
+							nodePath: '$.body[0]',
+							loc: {
+								start: { line: 1, column: 0 },
+								end: { line: 1, column: 1 },
+							},
+						},
+					],
+				},
+			});
+			expect(snippet.validation.violations.length).toBe(1);
+		});
+
+		it('does not mutate the underlying base Snippet', () => {
+			const baseBefore = embody(HAPPY);
+			embodyMock(HAPPY).with({ status: { created: false } });
+			const baseAfter = embody(HAPPY);
+			expect(baseBefore.status.created).toBe(true);
+			expect(baseAfter.status.created).toBe(true);
+		});
+
+		it('returns a deep-frozen Snippet', () => {
+			const snippet = embodyMock(HAPPY).with({ status: { created: false } });
+			expect(Object.isFrozen(snippet)).toBe(true);
+			expect(Object.isFrozen(snippet.status)).toBe(true);
+		});
+
+		it('preserves the four-mode discriminator on the BASE before override', () => {
+			const snippet = embodyMock('').with({});
+			expect(snippet.status.tokenized).toBe(false);
+		});
+
+		it('allows overriding fields on a non-happy base mode', () => {
+			const snippet = embodyMock('').with({
+				validation: { isJeJ: false },
+			});
+			expect(snippet.validation.isJeJ).toBe(false);
+			expect(snippet.status.tokenized).toBe(false);
 		});
 	});
 });
