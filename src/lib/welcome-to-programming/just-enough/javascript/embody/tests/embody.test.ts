@@ -291,4 +291,124 @@ describe('embody', () => {
 			expect(Object.isFrozen(embody(CODE))).toBe(true);
 		});
 	});
+
+	describe('happy-mode static.* enrichment (M2/M3/M4)', () => {
+		const CODE = 'let x = 1;';
+
+		describe('realm + host bindings (M2)', () => {
+			it('static.realm.intrinsics includes Math', () => {
+				expect(embody(CODE).static!.realm.intrinsics.Math).toMatchObject({
+					name: 'Math',
+					category: 'object-register',
+					origin: 'ecma',
+				});
+			});
+
+			it('static.realm.intrinsics includes parseInt as a function', () => {
+				expect(embody(CODE).static!.realm.intrinsics.parseInt).toMatchObject({
+					name: 'parseInt',
+					category: 'function',
+					origin: 'ecma',
+				});
+			});
+
+			it('static.realm.intrinsics includes Infinity as a constant', () => {
+				expect(embody(CODE).static!.realm.intrinsics.Infinity).toMatchObject({
+					name: 'Infinity',
+					category: 'constant',
+					origin: 'ecma',
+				});
+			});
+
+			it('static.realm.host includes console as object-register host', () => {
+				expect(embody(CODE).static!.realm.host.console).toMatchObject({
+					name: 'console',
+					category: 'object-register',
+					origin: 'host',
+				});
+			});
+
+			it('static.realm.host includes alert as a host function', () => {
+				expect(embody(CODE).static!.realm.host.alert).toMatchObject({
+					name: 'alert',
+					category: 'function',
+					origin: 'host',
+				});
+			});
+
+			it('static.initialScope.kind is "script"', () => {
+				expect(embody(CODE).static!.initialScope.kind).toBe('script');
+			});
+
+			it('static.initialScope.outer is null', () => {
+				expect(embody(CODE).static!.initialScope.outer).toBe(null);
+			});
+
+			it('static.initialScope.nodePath is "$"', () => {
+				expect(embody(CODE).static!.initialScope.nodePath).toBe('$');
+			});
+		});
+
+		describe('metrics derivation (M3)', () => {
+			it('static.metrics.source.chars equals code.length', () => {
+				expect(embody(CODE).static!.metrics.source.chars).toBe(CODE.length);
+			});
+
+			it('static.metrics.source.lines is 1 for single-line code', () => {
+				expect(embody(CODE).static!.metrics.source.lines).toBe(1);
+			});
+
+			it('static.metrics.tokens equals parse.tokens.length', () => {
+				const snippet = embody(CODE);
+				expect(snippet.static!.metrics.tokens).toBe(snippet.parse.tokens!.length);
+			});
+
+			it('static.features.usesShortCircuit is false for non-feature code', () => {
+				expect(embody(CODE).static!.features.usesShortCircuit).toBe(false);
+			});
+
+			it('static.dependencies is an empty array', () => {
+				expect(embody(CODE).static!.dependencies).toEqual([]);
+			});
+		});
+
+		describe('validation derivation + remaining static.* shape (M4)', () => {
+			it('validation.isDeterministic = !any(static.nonDeterminism)', () => {
+				const snippet = embody(CODE);
+				const nd = snippet.static!.nonDeterminism;
+				const expected = !(nd.random || nd.clock || nd.userInput || nd.locale);
+				expect(snippet.validation.isDeterministic).toBe(expected);
+			});
+
+			it('validation.doesPause = (static.hasIo.user.total > 0)', () => {
+				const snippet = embody(CODE);
+				const expected = snippet.static!.hasIo.user.total > 0;
+				expect(snippet.validation.doesPause).toBe(expected);
+			});
+
+			it('static.controlFlow.branches is an empty array', () => {
+				expect(embody(CODE).static!.controlFlow.branches).toEqual([]);
+			});
+
+			it('static.controlFlow.breaks is an empty array', () => {
+				expect(embody(CODE).static!.controlFlow.breaks).toEqual([]);
+			});
+
+			it('static.controlFlow.continues is an empty array', () => {
+				expect(embody(CODE).static!.controlFlow.continues).toEqual([]);
+			});
+
+			it('static.nonDeterminism.random is false', () => {
+				expect(embody(CODE).static!.nonDeterminism.random).toBe(false);
+			});
+
+			it('static.hasIo.total is 0 (no IO in stub)', () => {
+				expect(embody(CODE).static!.hasIo.total).toBe(0);
+			});
+
+			it('static.bindings is an empty array', () => {
+				expect(embody(CODE).static!.bindings).toEqual([]);
+			});
+		});
+	});
 });

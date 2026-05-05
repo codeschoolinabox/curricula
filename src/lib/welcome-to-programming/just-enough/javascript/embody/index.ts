@@ -113,6 +113,7 @@ import type {
 	AugmentedASTNode,
 	AugmentedToken,
 	BindingEvent,
+	BuiltinBinding,
 	ControlFlow,
 	EmbodyError,
 	EvaluateHandle,
@@ -258,14 +259,20 @@ function makeStubDistribution(): Distribution {
 }
 
 /**
- * Build a zero-default `Metrics` — every required sub-field present
- * with empty/zero values. M3 enriches; M1 ships shape-valid skeleton.
- * `Distribution.samples: []` is a deliberate open-hole stub.
+ * Build a `Metrics` deriving the safely-computable fields from
+ * inputs (source.chars, source.lines, tokens). Distributions and
+ * the rest stay zero per open-hole stub discipline.
+ *
+ * `Distribution.samples: []` is deliberate — DOCS.md § Open holes
+ * leaves the raw-vs-stats-only resolution open.
  */
-function makeStubMetrics(): Metrics {
+function makeStubMetrics(code: string, tokensCount: number): Metrics {
 	return {
-		source: { chars: 0, lines: 0 },
-		tokens: 0,
+		source: {
+			chars: code.length,
+			lines: code.split('\n').length,
+		},
+		tokens: tokensCount,
 		nodes: 0,
 		comments: 0,
 		statements: 0,
@@ -321,9 +328,51 @@ function makeStubHasIo(): HasIo {
 	};
 }
 
-/** Build a stub `Realm` — empty intrinsics + host. M2 enriches with canned bindings. */
+/** Construct a `BuiltinBinding` for the canned realm-binding tables below. */
+function builtin(
+	name: string,
+	category: BuiltinBinding['category'],
+	origin: BuiltinBinding['origin'],
+): BuiltinBinding {
+	return { name, category, origin };
+}
+
+/**
+ * Build a stub `Realm` carrying the canonical ECMA-262
+ * intrinsics (per types.ts § 3 line 216) and the standard HTML host
+ * bindings (per types.ts line 217). Per-call fresh records honor
+ * DOCS.md § "Per-instance, no shared state".
+ *
+ * The set is enumerated by types.ts and is therefore not an open hole;
+ * locking these names is by design. Per-method shape (the
+ * `BuiltinBinding` interface) is separately locked in types.ts § 3.
+ */
 function makeStubRealm(): Realm {
-	return { intrinsics: {}, host: {} };
+	const objectRegister: BuiltinBinding['category'] = 'object-register';
+	const callable: BuiltinBinding['category'] = 'function';
+	const constant: BuiltinBinding['category'] = 'constant';
+	const ecmaOrigin: BuiltinBinding['origin'] = 'ecma';
+	const hostOrigin: BuiltinBinding['origin'] = 'host';
+	return {
+		intrinsics: {
+			Math: builtin('Math', objectRegister, ecmaOrigin),
+			Date: builtin('Date', objectRegister, ecmaOrigin),
+			Number: builtin('Number', objectRegister, ecmaOrigin),
+			String: builtin('String', objectRegister, ecmaOrigin),
+			Boolean: builtin('Boolean', callable, ecmaOrigin),
+			parseInt: builtin('parseInt', callable, ecmaOrigin),
+			parseFloat: builtin('parseFloat', callable, ecmaOrigin),
+			Infinity: builtin('Infinity', constant, ecmaOrigin),
+			NaN: builtin('NaN', constant, ecmaOrigin),
+			undefined: builtin('undefined', constant, ecmaOrigin),
+		},
+		host: {
+			console: builtin('console', objectRegister, hostOrigin),
+			alert: builtin('alert', callable, hostOrigin),
+			prompt: builtin('prompt', callable, hostOrigin),
+			confirm: builtin('confirm', callable, hostOrigin),
+		},
+	};
 }
 
 /** Build a stub `InitialScope` — kind 'script', empty bindings, no outer. M2 enriches. */
@@ -462,22 +511,26 @@ function buildEmptySnippet(code: string): Snippet {
 function buildHappyModeSnippet(code: string): Snippet {
 	const ast = makeStubProgram(code);
 	const initialScope = makeStubInitialScope();
+	const tokens = [makeStubToken(code)];
 	const staticAnalyses: StaticAnalyses = {
 		realm: makeStubRealm(),
 		initialScope,
 		bindings: [],
 		dependencies: [],
 		features: makeStubFeatures(),
-		metrics: makeStubMetrics(),
+		metrics: makeStubMetrics(code, tokens.length),
 		controlFlow: makeStubControlFlow(),
 		nonDeterminism: makeStubNonDeterminism(),
 		hasIo: makeStubHasIo(),
 	};
 	const runInstance = makeStubRunInstance(initialScope);
+	const nd = staticAnalyses.nonDeterminism;
 	const validation: Validation = {
 		isJeJ: true,
-		isDeterministic: true,
-		doesPause: false,
+		// derive per types.ts lines 380-381 — keeps the implementation
+		// honest if a future increment flips a nonDeterminism stub.
+		isDeterministic: !(nd.random || nd.clock || nd.userInput || nd.locale),
+		doesPause: staticAnalyses.hasIo.user.total > 0,
 		formatted: true,
 		violations: [],
 	};
@@ -485,7 +538,7 @@ function buildHappyModeSnippet(code: string): Snippet {
 		status: { tokenized: true, parsed: true, created: true },
 		source: buildSource(code),
 		parse: {
-			tokens: [makeStubToken(code)],
+			tokens,
 			comments: [],
 			ast,
 			nodesByPath: { $: ast },
