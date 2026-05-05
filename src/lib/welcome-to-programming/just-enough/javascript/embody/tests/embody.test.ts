@@ -628,4 +628,96 @@ describe('embody', () => {
 			expect(embody(code).status.created).toBe(false);
 		});
 	});
+
+	describe('deep-freeze invariants (I)', () => {
+		const HAPPY = 'let x = 1;';
+		const PARSE_FAIL = '/' + '* MOCK_PARSE_FAIL *' + '/';
+		const CREATE_FAIL = '/' + '* MOCK_CREATE_FAIL *' + '/';
+
+		// Walk every reachable plain-object property and assert each is frozen.
+		// Skips functions (the @utils/deep-freeze-in-place utility does not
+		// freeze functions; their internals are opaque to Object.freeze
+		// anyway and the public surface contract is "data is frozen,
+		// generators are pure").
+		function assertDeepFrozen(value: unknown, path: string, visited: Set<object>): void {
+			if (value === null || typeof value !== 'object') {
+				return;
+			}
+			const ref = value as object;
+			if (visited.has(ref)) {
+				return;
+			}
+			visited.add(ref);
+			expect(Object.isFrozen(ref)).toBe(true);
+			for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+				assertDeepFrozen(child, `${path}.${key}`, visited);
+			}
+		}
+
+		it('empty-mode Snippet is recursively frozen', () => {
+			assertDeepFrozen(embody(''), 'snippet', new Set());
+		});
+
+		it('parse-fail-mode Snippet is recursively frozen', () => {
+			assertDeepFrozen(embody(PARSE_FAIL), 'snippet', new Set());
+		});
+
+		it('create-fail-mode Snippet is recursively frozen', () => {
+			assertDeepFrozen(embody(CREATE_FAIL), 'snippet', new Set());
+		});
+
+		it('happy-mode Snippet is recursively frozen', () => {
+			assertDeepFrozen(embody(HAPPY), 'snippet', new Set());
+		});
+
+		it('mutating snippet.status throws in strict mode', () => {
+			const snippet = embody(HAPPY);
+			expect(() => {
+				(snippet as { status: unknown }).status = {
+					tokenized: false,
+					parsed: false,
+					created: false,
+				};
+			}).toThrow();
+		});
+
+		it('mutating snippet.status.tokenized throws in strict mode', () => {
+			const snippet = embody(HAPPY);
+			expect(() => {
+				(snippet.status as { tokenized: boolean }).tokenized = false;
+			}).toThrow();
+		});
+
+		it('mutating snippet.parse.tokens throws in strict mode', () => {
+			const snippet = embody(HAPPY);
+			expect(() => {
+				(snippet.parse as { tokens: unknown[] }).tokens = [];
+			}).toThrow();
+		});
+
+		it('happy-mode runInstance.snippet === embodiment (back-ref by identity)', async () => {
+			const snippet = embody(HAPPY);
+			const ri = await snippet.streams.evaluate!.run();
+			expect(ri.snippet).toBe(snippet);
+		});
+
+		it('happy-mode runInstance is frozen', async () => {
+			const ri = await embody(HAPPY).streams.evaluate!.run();
+			expect(Object.isFrozen(ri)).toBe(true);
+		});
+
+		it('happy-mode runInstance.snippet (the back-ref) is frozen', async () => {
+			const ri = await embody(HAPPY).streams.evaluate!.run();
+			expect(Object.isFrozen(ri.snippet)).toBe(true);
+		});
+
+		it('cycle freeze does not stack-overflow (back-ref reaches itself)', async () => {
+			const snippet = embody(HAPPY);
+			const ri = await snippet.streams.evaluate!.run();
+			// If the cycle weren't handled, accessing ri.snippet.streams... would have
+			// triggered an infinite freeze recursion at construction time and thrown.
+			// Reaching this assertion means the cycle was traversed safely.
+			expect(ri.snippet.streams.evaluate).toBeDefined();
+		});
+	});
 });
