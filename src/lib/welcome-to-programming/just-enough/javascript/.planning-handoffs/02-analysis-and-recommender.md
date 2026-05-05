@@ -4,9 +4,9 @@
 > dimension is no longer an ordinal sub-language level progression. It
 > is the **unordered set of 10 NM components** sourced from the syntax
 > tracer's `StepCategory` enum at
-> `lib/evaluating/trace/syntax/types.ts`. Analysis detects categories
-> via **static AST mapping** (no execution). Lens recommendations may
-> tag MULTIPLE categories per `Recommendation`.
+> `embody/lib/evaluating/trace/syntax/types.ts`. Analysis detects
+> categories via **static AST mapping** (no execution). Lens
+> recommendations may tag MULTIPLE categories per `Recommendation`.
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ Before starting, read these files in full (do not skim):
 - **Master plan**: `./00-master-plan.md` (in this directory)
 - **Syntax tracer** (canonical source of the NM-components enum — the
   3rd Block Model dimension):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/evaluating/trace/syntax/`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/embody/lib/evaluating/trace/syntax/`
   — read `PLAN.md` (Resolutions), `README.md` (categories table),
   `types.ts` (`StepCategory` enum), `DOCS.md` (step-closing rules).
 - **Notional machine** (conceptual spec; operational implementation
@@ -27,16 +27,16 @@ Before starting, read these files in full (do not skim):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/notional-machine.md`
 - **Semantic tracer docs** (current implementation — the syntax tracer's
   input; semantic layers, gate config):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/evaluating/trace/semantics/`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/embody/lib/evaluating/trace/semantics/`
   (README + DOCS). Historical references at
-  `lib/evaluating/.old-notes-for-reference-and-inspiration/tracer.md`.
-- **Existing recommender directory** (currently just an empty README):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/recommender/`
-- **Existing socratizing module** (prior art for snippet analysis -- this module
-  may later consume the shared analysis):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/socratizing/`
-- **Existing validating module** (AST parsing for JEJ):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/validating/`
+  `embody/lib/evaluating/.old-notes-for-reference-and-inspiration/tracer.md`.
+- **Recommender directory** (currently empty scaffolding — README only):
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/orchestrate/lib/recommender/`
+- **Socratizing module** (prior art for snippet analysis; may later
+  consume the shared analysis):
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/orchestrate/lib/socratizing/`
+- **Validating module** (AST parsing for JEJ):
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/embody/lib/validating/`
 - **Lenses DOCS.md** (current lens architecture):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lenses/DOCS.md`
 - **NM components** (Work Stream 1 output, `01-NM-components.md`):
@@ -47,29 +47,29 @@ Before starting, read these files in full (do not skim):
 
 ## Context
 
-> **Path note.** This handoff references the recommender at
-> `lib/recommender/` — a **current** source path (mostly empty
-> scaffolding). The structural refactor in
-> [`../REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md) will move it to
-> `orchestrate/lib/recommender/`. Until that refactor lands, the
-> current path is correct.
+> **Path note.** The recommender lives at
+> `orchestrate/lib/recommender/` (relocated to its post-refactor
+> home in commit `9df535e`, 2026-05-04). This handoff specs the
+> module's impl against this path.
 
 ### What this work stream does
 
-This work stream builds one pure TS module: `lib/recommender/`. The
-recommender takes the frozen `embodiment` (a `Snippet` instance
-produced by `embody()`) plus the registered lens roster, runs each
-applicable lens's `recommend(embodiment)`, organizes the results into
-a `RecommendationGrid` indexed by the 3D Block Model dimensions, and
+This work stream builds one pure TS module:
+`orchestrate/lib/recommender/`. The recommender takes the frozen
+`embodiment` (a `Snippet` instance produced by `embody()`) plus the
+registered lens roster, runs each applicable lens's
+`recommend(embodiment)`, organizes the results into a
+`RecommendationGrid` indexed by the 3D Block Model dimensions, and
 returns it. Pure TS, no React, no DOM.
 
 Internal analysis helpers (NM-component detection, complexity signals,
 etc.) live alongside the recommender's entry-point inside
-`lib/recommender/`. There is **no separate `lib/analysis/` module and no
-`AnalysisReport` hand-off type**; analysis is the recommender's internal
-plumbing. Lens authors receive the frozen `embodiment` directly via
-`applicableTo(embodiment)` and `recommend(embodiment)` and read whatever
-embodiment surfaces they need (`parse.ast`, `status.*`,
+`orchestrate/lib/recommender/`. There is **no separate
+`lib/analysis/` module and no `AnalysisReport` hand-off type**;
+analysis is the recommender's internal plumbing. Lens authors
+receive the frozen `embodiment` directly via
+`applicableTo(embodiment)` and `recommend(embodiment)` and read
+whatever embodiment surfaces they need (`parse.ast`, `status.*`,
 `static.features`).
 
 The recommender does not re-parse code — it walks the already-frozen
@@ -160,7 +160,7 @@ the same surfaces. The signals available:
 3. **NM components present** -- Which of the 10 syntax-tracer
    categories appear in the code, detected via static AST mapping
    (no execution). The canonical enum is `StepCategory` at
-   `lib/evaluating/trace/syntax/types.ts`. Examples: snippet has only
+   `embody/lib/evaluating/trace/syntax/types.ts`. Examples: snippet has only
    `expression` + `resolve` → simpler lenses; has `write` +
    `initialization` → trace tables high-value; has `scope` +
    `control-flow` → variables lens relevant; has `emit` → execution-
@@ -220,14 +220,15 @@ available lens suggestions are populated.
 
 ### The socratizing refactor connection
 
-The existing `lib/socratizing/` module does its own snippet analysis to generate
-Socratic prompts. A future refactor (per `DOCS.md` § backlog) makes it
-consume the frozen `embodiment` directly — same single-source-of-truth
-pattern as the recommender. Both consume the embodiment; neither
-depends on a shared intermediate type. The recommender's internal
-analysis helpers may become reusable utilities under
-`orchestrate/lib/*` if a second consumer (socratizing) finds them
-useful, but that's a future-refactor concern, not WS2's scope.
+The `orchestrate/lib/socratizing/` module does its own snippet
+analysis to generate Socratic prompts. A future refactor (per
+`DOCS.md` § backlog) makes it consume the frozen `embodiment`
+directly — same single-source-of-truth pattern as the recommender.
+Both consume the embodiment; neither depends on a shared
+intermediate type. The recommender's internal analysis helpers may
+become reusable utilities under `orchestrate/lib/*` if a second
+consumer (socratizing) finds them useful, but that's a future-
+refactor concern, not WS2's scope.
 
 ### What's decided
 
@@ -240,7 +241,7 @@ useful, but that's a future-refactor concern, not WS2's scope.
   per `lenses/types.ts`). The recommender does NOT have hardcoded
   knowledge of individual lenses.
 - Lenses receive the frozen `embodiment` directly; analysis is internal
-  to `lib/recommender/`, not a separate hand-off type.
+  to `orchestrate/lib/recommender/`, not a separate hand-off type.
 - 3D Block Model space organizes recommendations (level × scope × NM
   components per WS1 + DOCS.md § 3D Block Model space).
 - **No transforms tier** — transforms are a lens-internal concern
@@ -283,8 +284,9 @@ useful, but that's a future-refactor concern, not WS2's scope.
 
 From the master plan:
 
-1. **Pure TS, no React, no DOM.** The recommender lives in `lib/`; it is
-   consumed by the orchestrator (React) but must be testable without React.
+1. **Pure TS, no React, no DOM.** The recommender lives in
+   `orchestrate/lib/recommender/`; it is consumed by the
+   orchestrator (React) but must be testable without React.
 2. **Lazy analysis.** The recommender's internal analysis runs only when
    the recommendation panel opens, NOT on every edit.
 3. **Three-tier lens classification.** Lens-author-implemented
@@ -303,11 +305,12 @@ From the master plan:
 
 ## Phase 0 checklist (from AGENTS.md)
 
-The recommender is one module (`lib/recommender/`). Internal analysis
-helpers live alongside it. Complete every step in order. Do not skip any
-step. Do not start Phase 1 until all 7 steps are done.
+The recommender is one module (`orchestrate/lib/recommender/`).
+Internal analysis helpers live alongside it. Complete every step in
+order. Do not skip any step. Do not start Phase 1 until all 7 steps
+are done.
 
-### Phase 0 for `lib/recommender/`
+### Phase 0 for `orchestrate/lib/recommender/`
 
 - [ ] **0.1 Establish ubiquitous language** -- Key terms to define
       precisely:
@@ -326,23 +329,24 @@ step. Do not start Phase 1 until all 7 steps are done.
   `embodiment.static.features`; reserve "NM component" for the 10
   `StepCategory` set.
 
-- [ ] **0.2 Update README.md** -- for `lib/recommender/`. What the module
-      does, where it fits, what it owns, what it does NOT own (lens-
-      specific knowledge is the lens's job via `applicableTo` +
-      `recommend`).
+- [ ] **0.2 Update README.md** -- for `orchestrate/lib/recommender/`.
+      What the module does, where it fits, what it owns, what it does
+      NOT own (lens-specific knowledge is the lens's job via
+      `applicableTo` + `recommend`).
 
 - [ ] **0.3 AR-1 design challenge** -- Focus areas:
   - Is the recommender doing too much? (it should NOT own lens knowledge)
   - Is the 3D grid the right structure? Could a flat list suffice?
   - Are the NM component names aligned with `notional-machine.md` and
-    the `StepCategory` enum at `lib/evaluating/trace/syntax/types.ts`?
+    the `StepCategory` enum at
+    `embody/lib/evaluating/trace/syntax/types.ts`?
   - Provide: README, notional-machine.md, `lenses/types.ts`,
     `embody/types.ts`.
 
 - [ ] **0.4 Update types.ts** -- Confirm `RecommendationGrid` shape;
       `Recommendation` and `BlockModelCell` are already in
-      `lenses/types.ts` and migrate to `lib/recommender/types.ts` per
-      that file's JSDoc.
+      `lenses/types.ts` and migrate to
+      `orchestrate/lib/recommender/types.ts` per that file's JSDoc.
 
 - [ ] **0.5 Write DOCS.md architectural sketch** -- Execution phases:
       (1) collect applicable lenses via `applicableTo(embodiment)`,

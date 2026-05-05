@@ -73,12 +73,12 @@ Each Claude Code session is a **fresh start**. The agent has:
 
 ```
 Read these files before doing anything:
-1. just-enough/javascript/lib/evaluating/trace/syntax/PLAN.md (the plan — your assignment)
-2. just-enough/javascript/lib/evaluating/trace/syntax/development-guide.md (this file, skim)
-3. just-enough/javascript/lib/evaluating/trace/syntax/README.md (Phase 0.2 output)
-4. just-enough/javascript/lib/evaluating/trace/syntax/DOCS.md (Phase 0.5 output)
-5. just-enough/javascript/lib/evaluating/trace/syntax/types.ts (Phase 0.4 skeleton)
-6. just-enough/javascript/lib/evaluating/trace/semantics/README.md and DOCS.md
+1. just-enough/javascript/embody/lib/evaluating/trace/syntax/PLAN.md (the plan — your assignment)
+2. just-enough/javascript/embody/lib/evaluating/trace/syntax/development-guide.md (this file, skim)
+3. just-enough/javascript/embody/lib/evaluating/trace/syntax/README.md (Phase 0.2 output)
+4. just-enough/javascript/embody/lib/evaluating/trace/syntax/DOCS.md (Phase 0.5 output)
+5. just-enough/javascript/embody/lib/evaluating/trace/syntax/types.ts (Phase 0.4 skeleton)
+6. just-enough/javascript/embody/lib/evaluating/trace/semantics/README.md and DOCS.md
    (the sibling semantic tracer — our input)
 7. 0-curricula/AGENTS.md and 0-curricula/DEV.md (workflow + conventions)
 8. just-enough/javascript/notional-machine.md (the NM spec — what we're modelling)

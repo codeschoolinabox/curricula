@@ -4,12 +4,15 @@ How to coordinate Claude Code agents across the 4 work streams defined in this
 directory. Written for you (the human coordinator) — not for the agents
 themselves.
 
-> **WS3 current status**: See `03-orchestrator-and-contracts.md` — it
-> opens with a status banner. The handoff was rewritten end-to-end
-> after the embody / lenses / orchestrate three-peer architecture
-> locked in. Increments are now F1-F5 (Foundation tier) and L1-L8
-> (Layers I/II/III). `REFACTOR-HANDOFF.md` Steps 1-16 are a hard
-> prerequisite.
+> **WS3 current status**: **Unblocked.** REFACTOR-HANDOFF.md
+> Steps 3, 5, 8, 9, 10, 11 complete and merged (commits `9f1db34`,
+> `9df535e`, `5d6fc54`, `8db59e6`, 2026-05-04..05). Steps 7, 12,
+> 14, 16 remain as the **post-migration sweep** — typecheck is
+> currently RED across `orchestrate/*` and `lenses/*`; the sweep
+> restores it. F1 (`<StudyLenses snippet>` smoke) starts once the
+> sweep is done. See `03-orchestrator-and-contracts.md` for the
+> increment list and `~/.claude/plans/next-session-post-phase-a-handoff.md`
+> for the sweep starter prompt.
 
 ## How Claude Code sessions work
 
@@ -69,17 +72,22 @@ Then ask me questions before writing any code.
 
 ### Human pre-checks (do these BEFORE opening Claude Code)
 
-1. **Confirm REFACTOR-HANDOFF status.** Steps 1-16 must be merged on
-   `main` before any WS3 increment can begin. If not, open a session
-   for REFACTOR-HANDOFF instead.
+1. **Confirm REFACTOR-HANDOFF status.** Steps 3, 5, 8, 9, 10, 11
+   ARE merged (commits `9f1db34`, `9df535e`, `5d6fc54`, `8db59e6`).
+   Confirm via `git log --oneline | head -10`. If the
+   post-migration sweep (Step 7) hasn't started, open a session for
+   that first via
+   `~/.claude/plans/next-session-post-phase-a-handoff.md`.
 2. **Read `03-orchestrator-and-contracts.md` yourself** — the status
    banner at the top tells you which F-tier or Layer increment is
    next. Confirm the behavioral contract makes sense to you before
    the agent starts.
 3. **Read `03-orchestrator-and-contracts-kickoff.md`** for the
    per-session pre-checks, prompt template, and red-flag list.
-4. **Verify tests still pass**: `npx vitest run` scoped to the package
-   root.
+4. **Verify tests still pass**: `npx vitest run` scoped to the
+   package root. Note: only the embody mock test suite (102 tests)
+   is verified-green during the post-migration interval; other
+   tests are RED until the sweep lands.
 5. **Sandbox check (post-F1)**: once F1 lands, render a fence and
    confirm `<StudyLenses>` receives the locked four-prop API
    (`snippet`, `lens?`, `config?`, `configs?`) in React DevTools. The
@@ -98,9 +106,11 @@ from there at session start.
 - Do not paste the prompt and immediately leave — the agent will enter
   plan mode and ask alignment questions. Stay present for the first
   10 minutes.
-- Do not start a WS3 session before REFACTOR-HANDOFF Steps 1-16 land.
-  The agent will look for `embody/`, `lenses/`, `orchestrate/` peer
-  layout that doesn't exist yet.
+- Do not start a WS3 F1 session before the **post-migration sweep**
+  (REFACTOR-HANDOFF.md Step 7) lands. The structural moves are done;
+  the orchestrator code references deleted `study-lenses/types.ts`
+  imports and the analysis libs have pre-Step-7 signatures —
+  typecheck is RED. The sweep restores it.
 - Do not approve the agent's plan without reading the behavioral
   contract in the handoff yourself first.
 
@@ -122,19 +132,23 @@ WS3 (orchestrator + contracts) ────────────────�
          └──► WS4 (lens migration) ◄──────────────────────────┘
 ```
 
-- **WS3 status**: forward-looking spec; rewritten end-to-end after
-  the three-peer architecture lock-in. The increments now run F1-F5
-  (Foundation tier) then L1-L8 (Layers I/II/III). Hard prerequisite:
-  `REFACTOR-HANDOFF.md` Steps 1-16 must be done first. Read the
-  status banner at the top of `03-orchestrator-and-contracts.md` for
-  the current increment; read `03-orchestrator-and-contracts-kickoff.md`
-  for pre-session checks before opening a session.
-- **WS1 depends on the syntax tracer at `lib/evaluating/trace/syntax/`** —
-  its Phase 0 stabilized the `StepCategory` enum (the 3rd Block Model
-  dimension). WS1 is now a thin coordination layer (wire the enum into
+- **WS3 status**: **Unblocked.** Structural moves landed
+  2026-05-04..05 (commits `9f1db34`, `9df535e`, `5d6fc54`,
+  `8db59e6`). The remaining REFACTOR-HANDOFF work is the
+  **post-migration sweep** (Steps 7, 12, 14, 16) — not "blocked",
+  but precursor work to F1. F1 starts after the sweep restores
+  typecheck-green. Read the status banner at the top of
+  `03-orchestrator-and-contracts.md` for the current increment;
+  read `03-orchestrator-and-contracts-kickoff.md` for pre-session
+  checks before opening a session. Sweep starter prompt at
+  `~/.claude/plans/next-session-post-phase-a-handoff.md`.
+- **WS1 depends on the syntax tracer at
+  `embody/lib/evaluating/trace/syntax/`** — its Phase 0 stabilized
+  the `StepCategory` enum (the 3rd Block Model dimension). WS1 is
+  now a thin coordination layer (wire the enum into
   `lenses/types.ts`, document the contract). See
-  `01-NM-components.md` for full details and the "sub-language levels
-  → NM components" pivot note.
+  `01-NM-components.md` for full details and the "sub-language
+  levels → NM components" pivot note.
 - **WS1 and WS3 can run in parallel** — no dependency between them
 - **WS2 depends on both WS1 and WS3** — needs the NM-components enum
   from WS1 and the LensModule contract from WS3 (`lenses/types.ts`)
@@ -282,12 +296,20 @@ If you use `isolation: "worktree"` for parallel agents:
 - Documentation updates
 - Git commits (additive only — per AGENTS.md)
 
-## The `/lenses/` directory (old code)
+## The `lenses/` peer (post-refactor)
 
-The `/lenses/study/` directory contains V2 code from a prior sprint. It is
-**historical reference only** — not ground truth. Wherever it disagrees with
-`.planning-handoffs/`, the handoffs win. Agents should treat it as inspiration,
-not as code to preserve.
+After the Phase A migration (commit `5d6fc54`, 2026-05-05), the
+`lenses/` peer holds individual lens implementations against the
+`LensModule` contract in `lenses/types.ts`. Currently:
+
+- `lenses/highlight/` — migrated as the Phase-A gate.
+- `lenses/types.ts` — canonical `LensModule` contract.
+- `lenses/DOCS.md`, `lenses/README.md` — peer architecture docs.
+
+The pre-refactor `study-lenses/` directory was deleted entirely in
+commit `5d6fc54`. WS4 lens migrations (parsons, blanks, trace-table,
+etc.) come from a richer-source project the user has, not from
+the deleted `study-lenses/`.
 
 ## Quick reference: what's in `.planning-handoffs/`
 

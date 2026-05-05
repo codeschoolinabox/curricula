@@ -1,11 +1,18 @@
 # Refactor handoff — directory split + embody implementation
 
-**Status:** roadmap, not yet executed.
+**Status:** Phase A in progress. Steps 3, 5, 8, 9, 10, 11 complete and
+merged to `main` (commits `9f1db34`, `9df535e`, `5d6fc54`, `8db59e6`,
+2026-05-04..05). **Steps 7, 12, 14, 16, 17 remain** — the
+post-migration sweep + cleanup work. Phase B
+(`EMBODY-IMPL-HANDOFF.md`) is ready once Step 17 deletes this file.
+
 **Audience:** the agent (Claude or otherwise) that will perform the
-restructure described in
-[`DOCS.md` § Directory layout](./DOCS.md#directory-layout).
-**Lifecycle:** delete this file after the work is done. It exists to
-hand off context, not to live forever.
+**remaining** Phase A work — the post-migration sweep (Step 7
+analysis-lib signature change), the package-index update (Step 12),
+peer doc audit (Step 14), dependency-rule audit (Step 16), and final
+file deletion (Step 17).
+
+**Lifecycle:** delete this file after Step 17 (final cleanup).
 
 The architectural narrative — *why* this shape — is in
 [`DOCS.md`](./DOCS.md). This file is the *how*: ordered steps with
@@ -147,34 +154,20 @@ fixtures.
 
 ### Step 3 — Copy NM-rep modules to `embody/lib/`
 
-> **Phase B — deferred until after the Step-5 mock lands.** The work
-> happens in [`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md).
-> Each module's typing is re-evaluated for pedagogical clarity as it
-> moves; this is not a verbatim relocation.
-
-**Copy semantics, not move.** The original `javascript/lib/<module>/`
-paths stay in place during the migration so consumers can switch
-incrementally. Once every consumer points at the new path AND the
-new module is the canonical source, the original is deleted in a
-later cleanup step. Two paths coexist during the transition.
-
-```text
-lib/ast/             ⇒ embody/lib/ast/         (copy; original kept)
-lib/validating/      ⇒ embody/lib/validating/  (copy; original kept)
-lib/formatting/      ⇒ embody/lib/formatting/  (copy; original kept)
-lib/evaluating/      ⇒ embody/lib/evaluating/  (copy; original kept)
-lib/scope/           ⇒ embody/lib/scope/       (copy; original kept)
-lib/parse-old/       ⇒ embody/lib/parse-old/   (copy; both deleted at step 6 once parity confirmed)
-```
-
-After the copy: update internal imports across the new copies to
-point at sibling new copies (so the new tree is self-contained).
-Original `lib/<module>/` paths remain untouched until the cleanup
-step.
-
-**Verify:** TypeScript compiles; existing tests still pass against
-both the copies AND the originals; consumers can opt-in to either
-path during the transition.
+> **✓ Complete (commit `9df535e`, 2026-05-04).** The 6 NM-rep
+> modules (`parse-old`, `ast`, `validating`, `formatting`,
+> `evaluating`, `scope`) were **moved** (not copied) from
+> `javascript/lib/<module>/` to `javascript/embody/lib/<module>/`.
+> Originals deleted; `javascript/lib/` directory removed entirely.
+> The user chose delete-originals (deviating from the spec's
+> copy-and-keep) since Explore verified zero external consumers
+> existed.
+>
+> Pedagogical re-typing is **deferred to Phase B**
+> ([`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md) Step B2)
+> per the user's "defer types and signatures and logic later"
+> mandate. The modules sit at their new homes verbatim; the sweep
+> then re-types them in place.
 
 ### Step 4 — Strip validation/freezing from `embody/lib/*`
 
@@ -404,86 +397,66 @@ these modules.
 
 ### Step 8 — Create `orchestrate/`; copy editor concerns
 
-**Copy semantics, not move.** Same pattern as Steps 3 and 9: the
-V2 editor at `study-lenses/lenses/editor/` (CodeMirror 6 impl, UI,
-state hooks) is **copied** to `orchestrate/editor/`. The original
-is kept until WS4's last increment removes `study-lenses/`.
-Otherwise V2 consumers (`study-lenses/orchestrator/study-lenses.tsx`
-mounts the V2 editor lens) break mid-migration.
-
-The editor is no longer a lens in the new architecture — it's the
-orchestrator's default home-base view, the only writer of snippet
-state.
-
-**Verify:** `orchestrate/editor/` builds and renders the editor;
-mutates snippet source via the orchestrator; the original at
-`study-lenses/lenses/editor/` continues to exist alongside until
-WS4 deletes `study-lenses/`.
+> **✓ Complete (commit `5d6fc54`, 2026-05-05).** Editor moved (not
+> copied) from `study-lenses/lenses/editor/` to
+> `orchestrate/editor/`. Original deleted along with the rest of
+> `study-lenses/`. The editor is the orchestrator's default
+> home-base view, the only writer of snippet state.
+>
+> Pre-existing references in `src/theme/MDXComponents.js` were
+> updated to the new path. The `<StudyLenses>` runtime resolution
+> path is intact.
 
 ### Step 9 — Copy analysis libs to `orchestrate/lib/`
 
-**Copy semantics, not move.** Same pattern as Step 3 (Phase B):
-originals stay at `javascript/lib/<module>/` while the new copies
-land at `orchestrate/lib/<module>/`. Consumers migrate incrementally;
-the originals are deleted in a later cleanup step.
-
-```text
-lib/socratizing/        ⇒ orchestrate/lib/socratizing/        (copy; original kept)
-lib/jej-documentation/  ⇒ orchestrate/lib/jej-documentation/  (copy; original kept)
-lib/completing/         ⇒ orchestrate/lib/completing/         (copy; original kept)
-lib/editing/            ⇒ orchestrate/lib/editing/            (copy; original kept)
-lib/error-interpreting/ ⇒ orchestrate/lib/error-interpreting/ (copy; original kept)
-lib/recommender/        ⇒ orchestrate/lib/recommender/        (copy; original kept)
-```
-
-After the copy: update internal imports inside each new copy to
-point at sibling new copies. Update the consumers that are part of
-Phase A (the orchestrator + editor in Step 8/10, the
-to-be-modified-in-Step-7 analysis-lib signatures) to point at the
-new `orchestrate/lib/*` paths. Consumers outside Phase A (legacy
-named exports per Step 12, V2 lenses still in `study-lenses/`)
-continue to point at the originals until WS4 migrates them.
-
-**Verify:** each module accessible from `orchestrate/lib/`;
-Phase-A-touched consumers import from the new paths; the originals
-at `javascript/lib/<module>/` still exist and are still imported by
-non-Phase-A consumers.
+> **✓ Complete (commit `9df535e`, 2026-05-04).** 4 of the 6
+> originally-listed analysis libs existed and moved (not copied):
+> `socratizing`, `editing`, `error-interpreting`, `recommender`.
+> The other two listed (`completing`, `jej-documentation`) were
+> never created and are not part of this commit. Originals deleted.
+>
+> Cross-tree imports updated:
+> `orchestrate/lib/socratizing/{analyzers,tests}/` references to
+> `scope/` and `parse-old/` rewrote `'../../<module>/'` →
+> `'../../../../embody/lib/<module>/'` (depth shift across peers).
+>
+> Pre-Step-7 signatures preserved verbatim — the actual signature
+> change to `(embodiment: Snippet)` is the post-migration sweep
+> (Step 7 below).
 
 ### Step 10 — Copy orchestrator; bake formatting pre-processing
 
-**Copy semantics, not move.** The V2 orchestrator at
-`study-lenses/orchestrator/` (study-lenses.tsx, default-registry.ts,
-toolbar.tsx, tests/) is **copied** to `orchestrate/orchestrator/`.
-The original is kept until WS4's last increment removes
-`study-lenses/`. Phase A's `<StudyLenses>` consumer (Step 12
-public API export) wires to the new path; legacy named exports
-per Step 12 still point at originals.
-
-Add a formatting pre-processing step in the new orchestrator's
-load pipeline so all source feeding into `embody(code)` is
-consistently formatted.
-
-**Verify:** orchestrate/orchestrator/ builds; loading any source
-produces a formatted snippet; non-JEJ source is NOT rejected
-(validation is metadata, not a gate); the original at
-`study-lenses/orchestrator/` continues to exist alongside until
-WS4 deletes `study-lenses/`.
+> **✓ Relocation complete (commit `5d6fc54`, 2026-05-05).** The V2
+> orchestrator (`study-lenses.tsx`, `default-registry.ts`,
+> `toolbar.tsx`, tests/) moved (not copied) to
+> `orchestrate/orchestrator/`. The 5 top-level helpers
+> (`create-event-bus`, `create-orchestrator-state`,
+> `execute-pipeline`, `pipeline`, `registry`) moved alongside.
+> Originals deleted along with `study-lenses/`.
+>
+> **Formatting pre-processing NOT yet added** — left for the
+> post-migration sweep / WS3 F1 work. The orchestrator code
+> currently has typecheck errors from referencing the deleted
+> `study-lenses/types.ts`; the sweep also fixes that.
 
 ### Step 11 — Migrate V2 lenses into `lenses/` (WS4-owned execution)
 
-> **Phase A gate criterion lives here; per-lens execution is owned by
-> WS4.** The new `lenses/` peer already exists with the canonical
-> `LensModule` contract in [`lenses/types.ts`](./lenses/types.ts)
-> (landed in Round 2). V2 lens code lives in
-> `study-lenses/lenses/{editor, highlight, …}` and migrates one lens
-> at a time per
-> [`.planning-handoffs/04-lens-migration.md`](./.planning-handoffs/04-lens-migration.md).
-> Note `editor/` does NOT migrate to `lenses/` — Step 8 copies it to
-> `orchestrate/editor/` as the home base; the original at
-> `study-lenses/lenses/editor/` is removed by WS4's last increment.
+> **✓ Phase-A gate criterion met (commit `5d6fc54`, 2026-05-05).**
+> `highlight` migrated to `lenses/highlight/` (contains
+> `highlight.ts`, `DOCS.md`, `README.md`, `tests/`). Editor did NOT
+> migrate to `lenses/` — instead moved to `orchestrate/editor/` as
+> the orchestrator home base per Step 8. `study-lenses/`
+> directory was deleted entirely along with all migrations.
+>
+> The migrated `highlight/` carries its **pre-Step-7 signatures
+> verbatim** — the entry function still expects raw input, not
+> `(embodiment: Snippet)`. The post-migration sweep + WS4 follow-up
+> migrate the rest of WS4's lens roster (parsons, blanks,
+> trace-table, etc.) from a richer-source project the user has.
 
-For each V2 lens migrated to `lenses/<name>/`, verify it is
-self-contained against the canonical contract:
+The `LensModule` contract lives in
+[`lenses/types.ts`](./lenses/types.ts). Future lens migrations
+must be self-contained against the canonical contract:
 
 - Conforms to `LensModule` (`name`, `Component`, `config`,
   `applicableTo`, `recommend`).
@@ -491,16 +464,6 @@ self-contained against the canonical contract:
 - Does not import from `embody/` or `orchestrate/` (top).
 - May import from `orchestrate/lib/*` and `@-utils`.
 - Receives whatever else it needs as props from the orchestrator.
-
-`study-lenses/` is **deleted only after the last V2 lens migrates**
-out of it (a Phase-A-completion marker enforced by WS4's last
-increment).
-
-**Verify (Phase-A gate):** at least one V2 lens — `highlight` is the
-natural first since `editor` becomes the orchestrator's home base in
-Step 8 — is migrated through this contract; the dependency-rule
-audit passes for that lens; the path is unblocked for the rest of
-WS4 to migrate the remaining lenses lens-by-lens.
 
 ### Step 12 — Update `index.ts`
 
@@ -528,27 +491,11 @@ NOT exposed as a public export.
 
 ### Step 13 — Delete originals at `javascript/lib/`
 
-> **Phase B — deferred.** This is the cleanup step that mirrors the
-> copy-semantics of Steps 3 and 9: originals at `javascript/lib/*`
-> are deleted only once every consumer has migrated to the new
-> `embody/lib/*` and `orchestrate/lib/*` paths. Lives in
-> [`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md).
-
-After every consumer has migrated to the new paths AND the new
-copies are the canonical sources, delete the originals one module
-at a time:
-
-1. Confirm no remaining imports from `javascript/lib/<module>/`
-   (grep across the repo).
-2. Delete `javascript/lib/<module>/`.
-3. Run the full test suite.
-4. Repeat per module.
-
-When all originals are gone, `javascript/lib/` should contain
-nothing. Delete the directory itself.
-
-**Verify:** `ls javascript/lib/` returns "no such file or directory";
-full test suite passes; no import resolution errors.
+> **✓ Obsolete (effectively merged into Step 9).** The user chose
+> delete-originals semantics; `javascript/lib/` was deleted in
+> commit `9df535e` (2026-05-04) at the same time the modules
+> moved. There are no remaining originals. This step exists in the
+> original spec but is now a no-op.
 
 ### Step 14 — Update peer READMEs and DOCS
 
@@ -603,94 +550,89 @@ self-deletes at end of Phase B.
 
 #### Phase A completion checklist
 
-Before deleting this file, confirm every item below. **All items
-must be ticked**; "skipped because trivial" is not allowed (skip
-each individually, document why in the deletion commit body).
+Steps marked `[✓]` are complete and merged. Steps marked `[ ]` are
+the remaining work — the **post-migration sweep** + cleanup. This
+file deletes (Step 17) once every item below is ticked.
 
-- [ ] Step 1: `@`-alias resolves from each peer; `src/lib/utils/` is
+- [✓] Step 1: `@`-alias resolves from each peer; `src/lib/utils/` is
       unchanged.
-- [ ] Step 5: mock `embody(code)` returns a deep-frozen `Snippet`
+- [✓] Step 3: NM-rep modules relocated to `embody/lib/*`
+      (commit `9df535e`, 2026-05-04). Originals deleted.
+- [✓] Step 5: mock `embody(code)` returns a deep-frozen `Snippet`
       across all 11 named-scenario sentinels (`OK`, `FAIL_AT_*`,
       `VALIDATION_FAIL`, `NON_DETERMINISTIC`, `PAUSES`, `EVAL_*`);
       `embody("<unknown>")` throws; TypeScript compiles end-to-end
-      against the returned shape.
-- [ ] Step 7: each analysis lib (`recommender`, `socratizing`,
-      `completing`, `editing`, `error-interpreting`,
-      `jej-documentation`) accepts `(embodiment: Snippet)`; tests
+      against the returned shape (commit `9f1db34`, 2026-05-05).
+- [ ] Step 7: each analysis lib at `orchestrate/lib/<module>/`
+      (`recommender`, `socratizing`, `editing`,
+      `error-interpreting`) accepts `(embodiment: Snippet)`; tests
       pass against the relevant scenario sentinels covering each
-      staircase rung; no `lib/parse-old/` or `lib/ast/` imports
-      remain.
-- [ ] Step 9 (executed before Step 8): all six analysis libs are
-      **copied** to `orchestrate/lib/` (originals at
-      `javascript/lib/*` kept). Phase-A-touched consumers
-      (orchestrator, editor, the Step-7-modified analysis-lib
-      signatures) import from the new `orchestrate/lib/*` paths.
-      Non-Phase-A consumers (legacy named exports, V2 lenses still
-      in `study-lenses/`) continue importing from originals.
-- [ ] Step 8: editor concerns **copied** from
+      staircase rung. **The post-migration sweep.** This is what
+      the next agent does.
+- [✓] Step 8: editor moved (not copied) from
       `study-lenses/lenses/editor/` to `orchestrate/editor/`
-      (original kept). The new editor consumes `embodiment` via
-      prop (not internal parsing); imports point at
-      `orchestrate/lib/*` for analysis-lib usage.
-- [ ] Step 10: V2 orchestrator **copied** from
-      `study-lenses/orchestrator/` to `orchestrate/orchestrator/`
-      (original kept). The new orchestrator builds; formatting
-      pre-processing on load works; non-JEJ source is **not**
-      rejected (validation is metadata, not a gate).
-- [ ] Step 11: at least one V2 lens (recommended: `highlight`) is
-      migrated to `lenses/<name>/` against the `LensModule` contract;
-      that lens passes the dependency-rule audit. WS4 owns migrating
-      the rest; `study-lenses/` deletion is WS4's concern, NOT this
-      checklist's.
-- [ ] Step 12: `index.ts` exports `<StudyLenses>` as the public
-      surface; legacy named exports still work with deprecation
-      warnings; `embody` is not part of the public surface.
-- [ ] Step 14 (Phase A portion): `lenses/` and `orchestrate/`
-      `README.md` + `DOCS.md` reflect post-Phase-A reality;
-      `javascript/README.md` directory-structure table updated;
-      cross-doc links resolve. (`embody/` peer docs finalize in
-      Phase B.)
-- [ ] Step 16 (Phase A audit): dependency-rule audit passes for the
-      Phase A-touched files. Note: a CI lint rule covering all rules
-      may need a temporary allowlist for `study-lenses/` paths
-      (lenses not yet migrated by WS4); document the allowlist.
-- [ ] **All Phase B steps remain marked deferred** in this file (no
-      one accidentally implemented Step 2/3/4/6/13 against the
-      mock); they live in `EMBODY-IMPL-HANDOFF.md`.
+      (commit `5d6fc54`, 2026-05-05). Originals deleted.
+- [✓] Step 9: 4 analysis libs (`socratizing`, `editing`,
+      `error-interpreting`, `recommender`) moved to `orchestrate/
+      lib/` (commit `9df535e`). Originals deleted.
+- [✓] Step 10: V2 orchestrator + 5 helpers moved to
+      `orchestrate/orchestrator/` (commit `5d6fc54`). Originals
+      deleted. **Formatting pre-processing NOT yet added** — Step 7
+      sweep or WS3 F1 picks this up.
+- [✓] Step 11 (Phase-A gate): `highlight` migrated to
+      `lenses/highlight/` (commit `5d6fc54`). WS4 owns migrating
+      the rest from a richer-source project.
+- [ ] Step 12: `javascript/index.ts` exports `<StudyLenses>` as the
+      public surface; `embody` is NOT part of the public surface.
+      Legacy named exports (`run`, `trace`, `validate`, etc.) are
+      deleted (the prior `api/` directory is already gone).
+- [ ] Step 13: ✓ Obsolete (effectively merged into Step 9 by the
+      delete-originals policy).
+- [ ] Step 14: `lenses/` and `orchestrate/` `README.md` + `DOCS.md`
+      reflect post-Phase-A reality; `javascript/README.md`
+      directory-structure table verified; cross-doc links resolve.
+      (`embody/` peer docs finalize in Phase B.)
+- [ ] Step 16: dependency-rule audit passes for all Phase-A-touched
+      files. Consider adding a CI lint rule.
+- [ ] Step 17: delete this file.
 
-## Notes for the refactor agent
+**All Phase B steps remain in `EMBODY-IMPL-HANDOFF.md`** (B1, B2
+re-typing, B3 strip validation/freezing, B4 parity, B5 replace mock
+body, B6 obsolete now, B7 event payloads, B8 generators, B9 final
+audit, B10 delete EMBODY-IMPL-HANDOFF.md).
 
-- **Steps 8–11 are the highest-blast.** Editor extraction (Step 8)
-  and per-lens migration into the new `lenses/` shell (Step 11, WS4-
-  owned) touch many imports. Do them as coordinated commits; verify
-  TypeScript at each one. Step 11's per-lens execution lives in
-  [`.planning-handoffs/04-lens-migration.md`](./.planning-handoffs/04-lens-migration.md);
-  this file only carries the Phase-A gate criterion.
-- **Step 5 is a mock, not the real factory.** Reference
-  [`embody/types.ts`](./embody/types.ts) as the contract the mock
-  satisfies. The mock fabricates shape-valid stub data without invoking
-  any `embody/lib/*` internals. Real per-module composition replaces
-  the mock body in
-  [`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md) (Phase B).
-- **AR cycle.** Doc commits get full AR-1 + AR-2 (per repo convention).
-  Code commits get at minimum AR-5 pre-merge audit. The Step-5 mock
-  warrants AR-1 (mock-design challenge: are we faking enough fields
-  to unblock consumers without faking so many that downstream tests
-  pass against fiction?) and AR-2 (sketch challenge against
-  `embody/types.ts`'s Snippet shape). The Step-8 orchestrate component
-  shape warrants its own AR-1 design challenge.
-- **Tests.** Existing tests live alongside the originals at
-  `javascript/lib/<module>/`; verify they still pass against both
-  the originals AND the new copies after Phase A consumers
-  migrate. The Step-5 mock needs new tests covering: shape-
-  conformance (typecheck passes), deep-freeze, callable-stream
-  methods, at least one round-trip through an analysis lib from
-  Step 7.
+## Notes for the next agent (post-migration sweep)
+
+- **The remaining steps are the sweep.** Step 7 is the load-bearing
+  one: walk each `orchestrate/lib/<module>/` and update the entry
+  function's signature to `(embodiment: Snippet, …rest)`. Drop
+  internal parsing/AST building; consume `embodiment.parse`,
+  `embodiment.static`, `embodiment.errors`, `embodiment.status`.
+  Tests update in lockstep — pass `embody("OK")` (or other named
+  scenarios) instead of building ASTs directly.
+- **Typecheck is RED post-migration.** Multiple causes — analysis
+  libs' pre-Step-7 signatures, orchestrator code referencing
+  deleted `study-lenses/types.ts`, and pre-existing broken imports
+  (`@study-lenses/tracing` package alias, `'../../../../utils/'`
+  relative paths in `orchestrate/lib/error-interpreting/*.ts`).
+  Sweep restores typecheck-green.
+- **Embody mock tests are the only verified-green signal.** 102/102
+  passing. The mock factory at `embody/index.ts` and its contract
+  at `embody/types.ts` are LOCKED — do not touch.
 - **`embodiment` parameter name everywhere.** When refactoring lib
-  signatures (step 7), use this name consistently — it codifies the
-  term across the codebase per the architectural decision. Function
-  bodies that need fields the mock doesn't yet populate get
-  `TODO(phase-b):` markers, not silent stubs.
+  signatures, use this name consistently. Function bodies that need
+  fields the mock doesn't yet populate get `TODO(phase-b):` markers,
+  not silent stubs.
+- **No consumer-side sentinel string branching** (durable rule):
+  orchestrator and lens code MUST NOT branch on `code === "OK"` or
+  any sentinel literal. Branch on the resulting `Snippet`'s status
+  / endReport / validation fields. AR audits grep consumer code for
+  sentinel literals and fail any non-test usage.
+- **AR cycle.** AR-3 (test strategy) + AR-4 (impl audit) per atomic
+  commit per AGENTS.md non-negotiable. AR-5 at end of the sweep.
+- **Per-module atomic commits.** One commit per analysis lib + one
+  for orchestrator/editor `study-lenses/types.ts` cleanup. Avoid
+  monolithic sweep commits.
 
 ## Quick reference — final import paths
 
@@ -699,7 +641,7 @@ After the refactor:
 ```ts
 // Inside embody/
 import { foo } from './lib/parse/index.js';            // OK
-import { deepFreezeInPlace } from '@/utils/...';       // OK
+import { deepFreezeInPlace } from '@utils/deep-freeze-in-place.js'; // OK
 
 // Inside lenses/parsons/
 import type { Snippet } from '../../embody/types.js';  // OK (type only)

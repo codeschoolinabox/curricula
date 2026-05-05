@@ -26,7 +26,7 @@ Before starting, read these files in full (do not skim):
   `./00-master-plan.md` (in this directory)
 - **Syntax tracer module** (the canonical source of the NM-components
   enum — replaces the prior "sub-language level progression" concept):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lib/evaluating/trace/syntax/`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/embody/lib/evaluating/trace/syntax/`
   - `PLAN.md` — load-bearing Resolutions (read for context)
   - `README.md` — glossary, step-category summary table
   - `types.ts` — the `StepCategory` enum definition
@@ -55,7 +55,7 @@ This work stream supplies the third dimension:
 
 **The NM components ARE the syntax tracer's step categories.** The
 canonical enum lives at
-`lib/evaluating/trace/syntax/types.ts::StepCategory`. WS1's job is to
+`embody/lib/evaluating/trace/syntax/types.ts::StepCategory`. WS1's job is to
 ensure that enum is consumable by the recommender (WS2) and by
 `lenses/types.ts` (WS3).
 
@@ -88,7 +88,7 @@ Block Model grid for the learner to browse.
 
 ### The 10 categories
 
-From `StepCategory` in `lib/evaluating/trace/syntax/types.ts`:
+From `StepCategory` in `embody/lib/evaluating/trace/syntax/types.ts`:
 
 - `expression` — value-producer nodes (literal, identifier, property,
   operator, call, template)
@@ -133,7 +133,7 @@ embodiment's frozen AST (`embodiment.parse.ast`) and detects which of
 the 10 categories appear:
 
 ```text
-embodiment ──► lib/recommender/ (with internal analysis) ──► RecommendationGrid
+embodiment ──► orchestrate/lib/recommender/ (with internal analysis) ──► RecommendationGrid
                                                               with each cell carrying
                                                               nmComponents: ReadonlyArray<StepCategory>
 ```
@@ -142,7 +142,7 @@ The mapping is **static** — no evaluation needed. AST node types
 combined with structural context yield the category set. WS2's Phase
 0 formalizes the mapping (AST node type → `StepCategory`). There is no
 separate `AnalysisReport` hand-off type; the category-detection helpers
-live inside `lib/recommender/`.
+live inside `orchestrate/lib/recommender/`.
 
 ### How the recommender consumes the populated cells
 
@@ -181,7 +181,7 @@ spec).
 
 - **Requires** the syntax tracer's Phase 0 to have stabilized
   `StepCategory` at the outer-category level (it has; see
-  `lib/evaluating/trace/syntax/types.ts`).
+  `embody/lib/evaluating/trace/syntax/types.ts`).
 - **Feeds** WS2 (analysis + recommender) and WS3
   (orchestrator + contracts). WS3's `BlockModelCell.nmComponents`
   field name is kept; only its JSDoc gets a pointer to this file and
@@ -192,7 +192,7 @@ spec).
 - Any ordinal progression through categories (that's a
   curriculum-author concern, not an enum concern).
 - Category-detection algorithm in code (that's internal to WS2's
-  `lib/recommender/`).
+  `orchestrate/lib/recommender/`).
 - UI rendering of recommendations (that's WS3/WS4).
 - Finer kinds within a category (that's the syntax tracer's Phase 0.1).
 
@@ -202,7 +202,7 @@ WS1 is now **small**. Most of the substantive design is in the
 syntax tracer. WS1's deliverables:
 
 1. **Confirm the `StepCategory` enum at
-   `lib/evaluating/trace/syntax/types.ts` is exported.**
+   `embody/lib/evaluating/trace/syntax/types.ts` is exported.**
 2. **Ensure `lenses/types.ts` BlockModelCell.nmComponents
    JSDoc points at `StepCategory`** (minimal edit — no structural
    change; string-typed for flexibility while kind-level TBDs are
@@ -242,7 +242,7 @@ WS1 just wires the enum into the `lenses/` type system.
   pivot was deliberate. If a lens or curriculum author needs ordering,
   they impose it themselves.
 - When adding JSDoc to `lenses/types.ts`, link to
-  `lib/evaluating/trace/syntax/types.ts` by relative path from the
+  `embody/lib/evaluating/trace/syntax/types.ts` by relative path from the
   file being edited.
 - Keep `nmComponents` as the field name (preserving the "NM
   components" terminology was a deliberate choice during the

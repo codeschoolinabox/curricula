@@ -248,14 +248,15 @@ increments:
 3. **React 18 Strict Mode double-invokes effects on initial mount**.
    Any effect whose cleanup is destructive (dispose, clear) needs
    to handle the fake-unmount cycle. Reference: the cleanup-split
-   discussion in pre-refactor `study-lenses/orchestrator/DOCS.md`
-   §Why split.
+   discussion in `orchestrate/orchestrator/DOCS.md` §Why split
+   (relocated from pre-refactor `study-lenses/orchestrator/`).
 4. **vi.hoisted + vi.mock pattern** for spying on a factory's
    output: `const spy = vi.hoisted(() => vi.fn());` then
    `vi.mock(path, () => ({ default: () => ({ ...real(), method: spy }) }))`.
-   Reference: pre-refactor
-   `study-lenses/orchestrator/tests/study-lenses.async-cancel.test.tsx`
-   and `…/study-lenses.toolbar.test.tsx`.
+   Reference:
+   `orchestrate/orchestrator/tests/study-lenses.async-cancel.test.tsx`
+   and `…/study-lenses.toolbar.test.tsx` (relocated from
+   pre-refactor `study-lenses/orchestrator/tests/`).
 5. **Cleanup-split rationale**: when an effect's cleanup runs on
    every re-run AND on unmount, separate "switch-cleanup" from
    "unmount-cleanup" into two effects. Even if

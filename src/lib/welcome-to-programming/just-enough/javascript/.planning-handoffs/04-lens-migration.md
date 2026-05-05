@@ -302,7 +302,7 @@ the prior art location, what to extract, and the tier classification.
 
 **trace-table** (Tier 3: Dynamic) -- Multiple variants
 - Prior art: `0---the-big-idea/00--evancole-be/0--snippetry/dump/00-claude-refactoring/0--study-lenses--it-begins/sandbox/src/utils` (trace table web components: values/steps/operators, Shadow DOM)
-- Also: existing JEJ tracer in `lib/evaluating/`
+- Also: existing JEJ tracer in `embody/lib/evaluating/`
 - What: split view: code display + manual trace table + [check] button. Learner fills the table as a prediction exercise. Clicks [check], the lens runs the JeJ tracer on the snippet and validates guesses.
 - Three variants (different configs of the same lens):
   - **steps**: which lines execute in which order
@@ -375,7 +375,7 @@ Additional reference (in the live package):
 
 ```text
 src/lib/welcome-to-programming/just-enough/javascript/
-  lib/evaluating/.old-notes-for-reference-and-inspiration/
+  embody/lib/evaluating/.old-notes-for-reference-and-inspiration/
     -> tracer.md, tracer.architecture.md, tracer.walkthroughs.md,
        open-questions.md (relocated for historical reference)
 ```
@@ -412,14 +412,14 @@ src/lib/welcome-to-programming/just-enough/javascript/
 - **Work Stream 2 (Analysis + Recommender)**: each lens's
   `recommend(embodiment)` reads from the frozen `Snippet` directly
   (`embodiment.parse.ast`, `embodiment.status.*`). Analysis is an
-  internal helper inside `lib/recommender/`, not a separate hand-off
-  type — there is no `AnalysisReport` for lenses to consume. WS2's
-  shape only matters for the recommender entry point, not for
-  individual lens `recommend()` functions.
+  internal helper inside `orchestrate/lib/recommender/`, not a
+  separate hand-off type — there is no `AnalysisReport` for lenses
+  to consume. WS2's shape only matters for the recommender entry
+  point, not for individual lens `recommend()` functions.
 - **Work Stream 1 (`01-NM-components.md`)**: supplies the 3rd Block
   Model dimension — the syntax tracer's `StepCategory` enum at
-  `lib/evaluating/trace/syntax/types.ts`. A lens's `recommend()`
-  uses category names (as strings) in its
+  `embody/lib/evaluating/trace/syntax/types.ts`. A lens's
+  `recommend()` uses category names (as strings) in its
   `blockModelCell.nmComponents` array. A lens may tag MULTIPLE
   categories per recommendation.
 

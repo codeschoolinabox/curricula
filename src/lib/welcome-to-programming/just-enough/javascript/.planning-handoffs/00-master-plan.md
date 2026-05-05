@@ -26,13 +26,14 @@ streams whose handoff files coordinate the implementation.
 | --- | --- | --- | --- |
 | **WS1** | [`01-NM-components.md`](./01-NM-components.md) | Wires the syntax tracer's `StepCategory` enum (10 unordered NM components) into the shared types as the 3rd Block Model dimension | Small; mostly done |
 | **WS2** | [`02-analysis-and-recommender.md`](./02-analysis-and-recommender.md) | Recommender (applicability filter + ranking engine, per Explorotron Figure 3) with internal analysis helpers. Pure TS, consumed by orchestrator | Phase 0 not yet started |
-| **WS3** | [`03-orchestrator-and-contracts.md`](./03-orchestrator-and-contracts.md) | Orchestrator + lens contracts (Foundation tier F1–F5; Layers I/II/III L1–L8) | Spec ready; **blocked on REFACTOR-HANDOFF Steps 1–16** |
-| **WS4** | [`04-lens-migration.md`](./04-lens-migration.md) | Individual lens implementations against the LensModule contract | Parallelizable once WS3 trial lens lands |
+| **WS3** | [`03-orchestrator-and-contracts.md`](./03-orchestrator-and-contracts.md) | Orchestrator + lens contracts (Foundation tier F1–F5; Layers I/II/III L1–L8) | **Unblocked.** REFACTOR-HANDOFF Steps 3, 5, 8, 9, 10, 11 complete (commits `9f1db34`, `9df535e`, `5d6fc54`, `8db59e6`, 2026-05-04..05). Steps 7, 12, 14, 16 remain as the **post-migration sweep**; F1 starts once the sweep restores typecheck-green. |
+| **WS4** | [`04-lens-migration.md`](./04-lens-migration.md) | Individual lens implementations against the LensModule contract | Parallelizable once WS3 trial lens lands. `highlight` already migrated as the Phase-A gate. |
 
 ## Inter-stream dependencies
 
 ```text
-REFACTOR-HANDOFF (Steps 1–16)  ← hard prerequisite for WS3
+REFACTOR-HANDOFF Phase A — structural moves COMPLETE (2026-05-04..05)
+                          — sweep + cleanup REMAINING (Steps 7, 12, 14, 16)
   │
   ▼
 WS1 (NM components / 3rd dim)
@@ -43,11 +44,13 @@ WS1 (NM components / 3rd dim)
 ```
 
 WS1 and WS3 can run in parallel until WS3 needs to wire WS1's enum
-into orchestrator types. WS3 itself cannot start until
-REFACTOR-HANDOFF Steps 1–16 (the structural moves) execute and merge —
-those steps are the prerequisite for the post-refactor `embody/`,
-`lenses/`, `orchestrate/` peer layout WS3 targets. WS4 starts once
-WS3's trial lens (`editor`, `highlight`) proves the contract.
+into orchestrator types. WS3's structural prerequisites are now in
+place (`embody/`, `lenses/`, `orchestrate/` peer layout exists with
+populated subdirectories). The remaining REFACTOR-HANDOFF sweep
+(Step 7 analysis-lib signature change + supporting Step 12 / 14 /
+16 cleanup) is what restores typecheck-green and unblocks F1 dev.
+WS4 already has its trial lens (`highlight`) migrated; richer
+lenses migrate from a prior project.
 
 ## Pointers (where things live now)
 
@@ -55,7 +58,7 @@ WS3's trial lens (`editor`, `highlight`) proves the contract.
 | --- | --- |
 | Conceptual chain + four audiences + Pedagogical first principles | `../README.md` |
 | Architectural decisions (single-writer state, lens-as-mini-web-app, dependency rules, Block Model 3D space, Explorotron mapping) | `../DOCS.md` |
-| Structural-move recipe (lib split, study-lenses → lenses rename, etc.) | `../REFACTOR-HANDOFF.md` |
+| Structural-move recipe (lib split, study-lenses → lenses rename, etc.) | `../REFACTOR-HANDOFF.md` (Phase A migration executed 2026-05-04..05; Steps 7/12/14/16 remain as post-migration sweep) |
 | NM model (phases, scopes, bindings, evaluation) | `../notional-machine.md` |
 | Canonical type contract (Snippet, Event, RunInstance, etc.) | `../embody/types.ts` |
 | Embody architecture | `../embody/{README,DOCS}.md` |

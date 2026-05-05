@@ -1,13 +1,23 @@
 # Embody implementation handoff — Phase B
 
-**Status:** Phase B of the embody refactor. Runs **after Phase A**
-([`REFACTOR-HANDOFF.md`](./REFACTOR-HANDOFF.md)) lands the mock at
-`embody/index.ts` plus the structural moves (orchestrate, lenses,
-analysis-libs signature change). Not yet executed.
+**Status:** Phase B ready (or near-ready). Phase A migration steps
+complete (commits `9f1db34`, `9df535e`, `5d6fc54`, `8db59e6`,
+2026-05-04..05). Mock embodiment factory at `embody/index.ts` is
+live with 11 named scenarios. Structural moves complete:
+`embody/lib/`, `orchestrate/lib/`, `orchestrate/editor/`,
+`orchestrate/orchestrator/`, `lenses/highlight/` all populated
+with verbatim copies.
+
+Phase B can begin once REFACTOR-HANDOFF.md's remaining steps land:
+the post-migration sweep (Step 7 signature change), Step 12
+(package index update), Step 14 (peer doc audit), Step 16
+(dependency-rule audit), and Step 17 (delete REFACTOR-HANDOFF.md).
+At that point the three-peer architecture is fully live and Phase B
+re-types `embody/lib/*` modules in place per the locked decisions.
 
 **Audience:** the agent (Claude or otherwise) that will replace the
 Phase-A mock with real `embody/lib/*` composition, one module at a
-time.
+time, AFTER Phase A has fully closed.
 
 **Lifecycle:** delete this file after Phase B is done, verified, and
 merged. Companion to `REFACTOR-HANDOFF.md` (which self-deletes at end
@@ -90,38 +100,34 @@ fixtures; the typed surface drives at least one consumer's pattern-
 match cleanly (e.g. a lens reading token kinds without
 string-equality).
 
-### Step B2 — Copy NM-rep modules to `embody/lib/` with per-module re-evaluation
+### Step B2 — Pedagogical re-typing of NM-rep modules at `embody/lib/`
 
-Was REFACTOR-HANDOFF Step 3, expanded. Each module is its own
-increment.
+Was REFACTOR-HANDOFF Step 3 + the original "copy semantics"
+framing. **The relocation already happened** in Phase A commit
+`9df535e` (2026-05-04): the 6 NM-rep modules now live at
+`embody/lib/<module>/` verbatim. `javascript/lib/` is gone.
 
-**Copy semantics, not move.** The originals at `javascript/lib/*`
-stay in place during the migration. Each module is copied to
-`embody/lib/<module>/`, the copy is pedagogically re-typed and
-becomes the canonical source, and the original is deleted later in
-Step B6 once every consumer has migrated.
+Phase B's focus here is **pedagogical re-typing in place**:
 
 ```text
-lib/ast/             ⇒ embody/lib/ast/         (copy; original kept until B6)
-lib/validating/      ⇒ embody/lib/validating/  (copy; original kept until B6)
-lib/formatting/      ⇒ embody/lib/formatting/  (copy; original kept until B6)
-lib/evaluating/      ⇒ embody/lib/evaluating/  (copy; original kept until B6)
-lib/scope/           ⇒ embody/lib/scope/       (copy; original kept until B6)
-lib/parse-old/       ⇒ embody/lib/parse-old/   (copy; both deleted at B4 once parity confirmed)
+embody/lib/parse-old/    — re-typed by B1 (re-emits as embody/lib/parse/)
+embody/lib/ast/          — re-typed in place
+embody/lib/validating/   — re-typed in place
+embody/lib/formatting/   — re-typed in place
+embody/lib/evaluating/   — re-typed in place (token kinds, event payloads)
+embody/lib/scope/        — re-typed in place
 ```
 
 For each module: read the existing types, audit pedagogical clarity
-(does a learner-facing lens find the field it needs without spelunking
-into ECMA-262?), update if needed (separate doc commit if the public
-type shape changes), copy the implementation, update internal imports
-inside the new copy to point at sibling new copies. Migrate consumers
-to the new path once the copy is verified.
+(does a learner-facing lens find the field it needs without
+spelunking into ECMA-262?), update types if needed (separate doc
+commit if the public type shape changes), and refit the
+implementation against the re-typed surface. Each module is its own
+atomic increment with its own DDD/AR cycle.
 
-**Verify (per module):** TypeScript compiles; existing tests pass
-against the new copy; the mock factory body now wires the module's
-real output for that module's slice of `Snippet`, while other slices
-remain mock-stub; the original at `javascript/lib/<module>/` still
-exists and is still imported by any non-yet-migrated consumer.
+**Verify (per module):** TypeScript compiles; existing tests pass;
+the mock factory body now wires the module's real output for that
+module's slice of `Snippet`, while other slices remain mock-stub.
 
 ### Step B3 — Strip validation/freezing from `embody/lib/*`
 
@@ -161,23 +167,15 @@ This step is mostly verification:
 
 ### Step B6 — Delete originals at `javascript/lib/`
 
-Was REFACTOR-HANDOFF Step 13. After every consumer has migrated to
-the new paths (`embody/lib/*` for NM-rep modules per B2;
-`orchestrate/lib/*` for analysis libs per Phase A Step 9) AND the
-new copies are the canonical sources, delete the originals one
-module at a time:
-
-1. Confirm no remaining imports from `javascript/lib/<module>/`
-   (grep across the repo).
-2. Delete `javascript/lib/<module>/`.
-3. Run the full test suite.
-4. Repeat per module.
-
-When all originals are gone, `javascript/lib/` should contain
-nothing. Delete the directory itself.
-
-**Verify:** `ls javascript/lib/` returns "no such file or directory";
-full test suite passes; no import resolution errors.
+> **✓ Obsolete.** Originals were deleted in Phase A commit
+> `9df535e` (2026-05-04) per the user's delete-originals policy.
+> `javascript/lib/` is gone. This step survives as a sanity-check
+> grep at the end of Phase B:
+>
+> ```bash
+> grep -rn 'javascript/lib/\(parse-old\|ast\|validating\|formatting\|evaluating\|scope\|socratizing\|editing\|error-interpreting\|recommender\)' src/
+> # expected: zero hits
+> ```
 
 ### Step B7 — Lock event-type payloads
 
