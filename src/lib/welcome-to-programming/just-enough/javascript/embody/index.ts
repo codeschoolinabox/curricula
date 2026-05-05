@@ -108,6 +108,8 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import type {
+	AugmentedToken,
+	EmbodyError,
 	NodeEvent,
 	RealmBindingEvent,
 	Snippet,
@@ -115,6 +117,9 @@ import type {
 	TokenEvent,
 	Validation,
 } from './types.js';
+
+/** Sentinel: `code` exactly equal to this string selects parse-fail mode. */
+const SENTINEL_PARSE_FAIL = '/' + '* MOCK_PARSE_FAIL *' + '/';
 
 /**
  * Build a `Source` from the input string. Reused by O / M / create-fail
@@ -158,7 +163,7 @@ function* emptyRealmStream(): Generator<RealmBindingEvent> {
 	// intentionally empty — no events in the mock
 }
 
-/** Empty token-events generator. Yields nothing. Reused by O / create-fail modes. */
+/** Empty token-events generator. Yields nothing. Reused by Z, O, and create-fail modes. */
 function* emptyTokenizeStream(): Generator<TokenEvent> {
 	// intentionally empty — no events in the mock
 }
@@ -174,6 +179,50 @@ function* emptyParseStream(): Generator<NodeEvent> {
 }
 
 /**
+ * Build a single stub `AugmentedToken` representing the synthetic eof
+ * marker for `code`. Used by O / create-fail / M modes where
+ * `parse.tokens` must be non-empty per types.ts § 2 ("includes 'eof'
+ * as the last element").
+ *
+ * The label `'eof'` is chosen so `innermostNode: null` complies with
+ * the contract comment at types.ts line 92 ("null only for 'eof'").
+ * Per-call fresh `TokenType` literal honors DOCS.md § "Per-instance,
+ * no shared state" — no module-level shared object.
+ *
+ * If a future increment adds canned events, `event.node` must `===`
+ * `snippet.parse.ast` (identity, not equality) per DOCS.md
+ * § "Single static AST shared across runs".
+ */
+function makeStubToken(code: string): AugmentedToken {
+	return {
+		type: {
+			label: 'eof',
+			keyword: undefined,
+			beforeExpr: false,
+			startsExpr: false,
+			isAssign: false,
+			binop: null,
+			prefix: false,
+			postfix: false,
+		},
+		value: undefined,
+		start: code.length,
+		end: code.length,
+		loc: {
+			start: { line: 1, column: code.length },
+			end: { line: 1, column: code.length },
+		},
+		text: '',
+		index: 0,
+		innermostNode: null,
+		innermostPath: null,
+		prevToken: null,
+		nextToken: null,
+		leadingGap: null,
+	};
+}
+
+/**
  * Builds a frozen `Snippet` for the given `code` string. Phase A mock body —
  * see file header for the four-mode discriminator and the Phase B replacement
  * plan.
@@ -185,6 +234,14 @@ function* emptyParseStream(): Generator<NodeEvent> {
  *   present; optional fields gated by `status.*` follow the staircase rules.
  */
 function embody(code: string): Snippet {
+	if (code === SENTINEL_PARSE_FAIL) {
+		return buildParseFailSnippet(code);
+	}
+	return buildEmptySnippet(code);
+}
+
+/** Build the empty-mode (tokenize-fail) Snippet. */
+function buildEmptySnippet(code: string): Snippet {
 	const snippet: Snippet = {
 		status: { tokenized: false, parsed: false, created: false },
 		source: buildSource(code),
@@ -196,6 +253,34 @@ function embody(code: string): Snippet {
 			message: 'empty source',
 			loc: null,
 		},
+		streams: {
+			realm: emptyRealmStream,
+			parse: {
+				tokenize: emptyTokenizeStream,
+				parse: emptyParseStream,
+			},
+		},
+	};
+	return deepFreezeInPlace(snippet);
+}
+
+/**
+ * Build the parse-fail-sentinel-mode Snippet. Tokenize succeeded
+ * (status.tokenized: true), parse failed (status.parsed: false).
+ */
+function buildParseFailSnippet(code: string): Snippet {
+	const errors: EmbodyError = {
+		phase: 'parse:ast',
+		kind: 'SyntaxError',
+		message: 'mock: parse failure (Phase A sentinel)',
+		loc: null,
+	};
+	const snippet: Snippet = {
+		status: { tokenized: true, parsed: false, created: false },
+		source: buildSource(code),
+		parse: { tokens: [makeStubToken(code)] },
+		validation: buildEmptyValidation(),
+		errors,
 		streams: {
 			realm: emptyRealmStream,
 			parse: {
