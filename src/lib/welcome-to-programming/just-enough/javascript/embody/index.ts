@@ -141,6 +141,9 @@ import type {
 /** Sentinel: `code` exactly equal to this string selects parse-fail mode. */
 const SENTINEL_PARSE_FAIL = '/' + '* MOCK_PARSE_FAIL *' + '/';
 
+/** Sentinel: `code` exactly equal to this string selects create-fail mode. */
+const SENTINEL_CREATE_FAIL = '/' + '* MOCK_CREATE_FAIL *' + '/';
+
 /**
  * Build a `Source` from the input string. Reused by O / M / create-fail
  * modes.
@@ -472,6 +475,9 @@ function embody(code: string): Snippet {
 	if (code === SENTINEL_PARSE_FAIL) {
 		return buildParseFailSnippet(code);
 	}
+	if (code === SENTINEL_CREATE_FAIL) {
+		return buildCreateFailSnippet(code);
+	}
 	return buildHappyModeSnippet(code);
 }
 
@@ -585,6 +591,53 @@ function buildHappyModeSnippet(code: string): Snippet {
 	// are fully frozen after this single call.
 	deepFreezeInPlace(runInstance);
 	return snippet;
+}
+
+/**
+ * Build the create-fail-sentinel-mode Snippet. Tokenize and parse
+ * succeeded; creation (`GlobalDeclarationInstantiation` per
+ * ECMA-262 §16.1.7) failed. `static` is absent (creation didn't
+ * complete); `streams.evaluate` is omitted (creation gate is the
+ * prerequisite). `streams.create` is exposed but yields nothing in
+ * the mock — consumers reading creation events should guard on
+ * `status.created` first.
+ *
+ * The fabricated `errors.kind: 'SyntaxError'` and the mock-labeled
+ * message are deliberate per AR-1 Concern C: Phase B will produce real
+ * create-phase error shapes; downstream tests against the mock should
+ * branch on `errors.phase === 'create'`, not on specific kind/message.
+ */
+function buildCreateFailSnippet(code: string): Snippet {
+	const ast = makeStubProgram(code);
+	const errors: EmbodyError = {
+		phase: 'create',
+		kind: 'SyntaxError',
+		message: 'mock: create-phase failure (Phase A sentinel)',
+		loc: null,
+	};
+	const snippet: Snippet = {
+		status: { tokenized: true, parsed: true, created: false },
+		source: buildSource(code),
+		parse: {
+			tokens: [makeStubToken(code)],
+			comments: [],
+			ast,
+			nodesByPath: { $: ast },
+			tokensByOffset: {},
+			nodesByOffset: { 0: ast },
+		},
+		validation: buildEmptyValidation(),
+		errors,
+		streams: {
+			realm: emptyRealmStream,
+			parse: {
+				tokenize: emptyTokenizeStream,
+				parse: emptyParseStream,
+			},
+			create: emptyCreateStream,
+		},
+	};
+	return deepFreezeInPlace(snippet);
 }
 
 /**

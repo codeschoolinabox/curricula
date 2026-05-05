@@ -541,4 +541,56 @@ describe('embody', () => {
 			});
 		});
 	});
+
+	describe('create-fail-sentinel mode', () => {
+		const SENTINEL = '/' + '* MOCK_CREATE_FAIL *' + '/';
+
+		it('returns a Snippet with status.tokenized: true', () => {
+			expect(embody(SENTINEL).status.tokenized).toBe(true);
+		});
+
+		it('returns a Snippet with status.parsed: true', () => {
+			expect(embody(SENTINEL).status.parsed).toBe(true);
+		});
+
+		it('returns a Snippet with status.created: false', () => {
+			expect(embody(SENTINEL).status.created).toBe(false);
+		});
+
+		it('returns a Snippet with errors.phase: create', () => {
+			expect(embody(SENTINEL).errors!.phase).toBe('create');
+		});
+
+		it('returns a Snippet with errors.message identifying the mock', () => {
+			expect(embody(SENTINEL).errors!.message).toMatch(/mock/i);
+		});
+
+		it('returns a Snippet with parse.ast defined (parse succeeded)', () => {
+			expect(embody(SENTINEL).parse.ast?.type).toBe('Program');
+		});
+
+		it('returns a Snippet with parse.comments: []', () => {
+			expect(embody(SENTINEL).parse.comments).toEqual([]);
+		});
+
+		it('returns a Snippet with no static (creation failed)', () => {
+			expect(embody(SENTINEL).static).toBeUndefined();
+		});
+
+		it('exposes streams.create as callable (creation-stream stub)', () => {
+			expect(typeof embody(SENTINEL).streams.create).toBe('function');
+		});
+
+		it('streams.create yields no events', () => {
+			expect([...embody(SENTINEL).streams.create!()]).toEqual([]);
+		});
+
+		it('omits streams.evaluate (creation gate not passed)', () => {
+			expect(embody(SENTINEL).streams.evaluate).toBeUndefined();
+		});
+
+		it('returns a frozen Snippet (top-level)', () => {
+			expect(Object.isFrozen(embody(SENTINEL))).toBe(true);
+		});
+	});
 });
