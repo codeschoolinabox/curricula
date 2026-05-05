@@ -132,6 +132,37 @@ UI is what the learner interacts with — its internal state
   surface stays the open `Readonly<Record<string,
   SerializableValue>>`. Config hashability is the load-bearing
   constraint — primitives + primitive arrays only, no callbacks.
+- **Transforms are lens-internal, not a peer concept.** The
+  pre-refactor `transforms/` peer module was deleted in Round-2.
+  There is no shared "transform pipeline" between lenses + the
+  orchestrator: each lens decides what visual / pre-eval
+  transformations to apply to the snippet it received (formatting
+  toolbar buttons, the `loopGuard` rewrite a tracing lens applies
+  before evaluation, the `parsons` lens's line shuffler — each
+  lives inside the lens that uses them, not in a shared peer).
+  Composition between lenses is opt-in: a lens that wants format-
+  before-display can import a small format helper out of
+  `orchestrate/lib/*` or `@-utils`, but it does not declare a
+  `transforms` field on its `LensModule` and the plugin does not
+  emit a `transforms` attribute.
+- **No consumer-side sentinel branching on `embody` mock outputs.**
+  During Phase A, `embody(code)` is a mock dispatched by sentinel
+  comments (e.g. `/* MOCK_OK */`, `/* MOCK_PARSE_FAIL */`). Lens
+  code MUST NOT inspect the input string for sentinels; branch only
+  on the **shape** of the returned `Snippet` (e.g.
+  `embodiment.parsed === false`, `embodiment.validation.isJeJ`).
+  The sentinels disappear in Phase B; consumer code that branched
+  on them would silently break. See
+  [`../embody/index.ts`](../embody/index.ts) JSDoc + the
+  `EMBODY_MOCK_SCENARIOS` export for the full scenario list.
+- **Validation field derivation is fixed.** The `Snippet.validation`
+  fields `isDeterministic` and `doesPause` are **derived** from the
+  raw analyses on construction:
+  `isDeterministic = !any(nonDeterminism)`,
+  `doesPause = hasIo.user.total > 0`. Lens authors treat these as
+  read-only summaries; the underlying source of truth lives on
+  `nonDeterminism` and `hasIo`. Pinned in
+  [`../embody/types.ts`](../embody/types.ts) JSDoc.
 
 ### Out of scope
 

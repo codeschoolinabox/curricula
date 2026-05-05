@@ -12,18 +12,20 @@ consumer-mountable surface, and ships the package's public API:
 > `<StudyLenses>` component itself). After source lands, this
 > banner is removed.
 >
-> **Prior art**: [`../study-lenses--reference-to-migrate/orchestrator/README.md`](../study-lenses--reference-to-migrate/orchestrator/README.md)
-> documents the pre-refactor `<StudyLenses>` component. The
-> structural patterns there (lifecycle phases, effect topology,
-> Switch flow Mermaid, async caveat, `vi.hoisted` test pattern)
-> carry forward here. The contract details (LensModule shape,
-> `(name, configHash)` cache, framework-agnostic `LensMount`)
-> reshape per the locked decisions in
-> [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles).
-> Data-attribute names also update — see § Data attributes below
-> for the new selector set; the pre-refactor
-> `data-orchestrator="study-lenses"` is replaced by
-> `data-orchestrator-host`.
+> **Prior art**: the pre-refactor `<StudyLenses>` orchestrator was
+> relocated verbatim to [`./orchestrator/`](./orchestrator/) during
+> REFACTOR-HANDOFF Step 10 (commit `5d6fc54`). Those subdir docs
+> are banner-flagged STALE; the structural patterns they describe
+> (lifecycle phases, effect topology, Switch flow Mermaid, async
+> caveat, `vi.hoisted` test pattern) carry forward to the new
+> orchestrator, but the contract details (LensModule shape,
+> `(name, configHash)` cache, framework-agnostic `LensMount`,
+> three-prop API) reshape per the locked decisions in
+> [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles)
+> and this peer's [`./DOCS.md`](./DOCS.md). Data-attribute names
+> also update — see § Data attributes below for the new selector
+> set; the pre-refactor `data-orchestrator="study-lenses"` is
+> replaced by `data-orchestrator-host`.
 
 ## What lives here
 
@@ -83,31 +85,64 @@ because they ARE the orchestrator.
 <StudyLenses snippet="let x = 5; console.log(x + 1);" />
 <StudyLenses snippet={X} lens="trace" />
 <StudyLenses snippet={X} lens="parsons" config={{ difficulty: 'easy' }} />
+<StudyLenses
+  snippet={X}
+  configs={{ trace: { stepDelay: 500 }, parsons: { difficulty: 'easy' } }}
+/>
 ```
 
-Three props (per the locked decision in
+Four props (per the locked decision in
 [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles)):
 
-| Prop      | Type                | Required | Purpose                                                                                |
-| --------- | ------------------- | -------- | -------------------------------------------------------------------------------------- |
-| `snippet` | `string`            | yes      | The code string. The orchestrator builds the embodiment internally — caller does NOT pre-build. |
-| `lens`    | `string`            | no       | Default-selected lens name (Q-III seam). Learner can switch via picker.                |
-| `config`  | `LensConfig`        | no       | Per-lens config bundle the educator pre-fills, applied to the lens named in `lens`.    |
+| Prop      | Type                                | Required | Purpose                                                                                |
+| --------- | ----------------------------------- | -------- | -------------------------------------------------------------------------------------- |
+| `snippet` | `string`                            | yes      | The code string. The orchestrator builds the embodiment internally — caller does NOT pre-build. |
+| `lens`    | `string`                            | no       | Default-mounted lens name (Q-III seam). Learner can switch via picker. Resolution order: `lens` prop → `configs.default` → none. |
+| `config`  | `LensConfig`                        | no       | Override applied to the **resolved-default lens**. If `lens` is unset, `config` applies to whatever the cascade declares as default. If no default resolves, supplying `config` is an error — the orchestrator throws at mount. |
+| `configs` | `Record<string, LensConfig>`        | no       | Cascade bundle keyed by lens name. The picker reads `configs[lensName]` when opening any lens. Populated by the Docusaurus plugin from the `lenses.json` directory cascade. May carry a reserved `default` key declaring the default-mounted lens via cascade. |
 
-The `lens` and `config` props flow from per-fence info-string
-(`js:trace`) and per-directory `lenses.json` cascade — the Docusaurus
-plugin at `src/plugins/study-lenses/` parses both and emits the
-resolved values onto the JSX node.
+The `lens`, `config`, and `configs` props flow from per-fence
+info-string (`js:trace`), per-directory `lenses.json` cascade, and
+the optional per-fence `@study-lens` directive — the Docusaurus
+plugin at `src/plugins/study-lenses/` parses all three and emits
+the resolved values onto the JSX node.
 
-**`config` scope when the learner switches lenses**: `config` applies
-only to the lens named in `lens` (the default-selected one). If the
-learner picks a different lens via the picker, that lens uses its
-own defaults from its `LensModule.config()` factory and any
-`lenses.json` cascade entry keyed by its name — NOT the `config` prop
-intended for the default lens. (Pinned during F1 Phase 0 if a
-multi-lens config-cascade emerges; sketched here.)
+### Per-lens config resolution chain
+
+For any lens the learner mounts (default or picker-switched), the
+final config is computed as:
+
+```text
+resolved(lensName) = module.config()                                      // tier 0: lens defaults
+                   ⊕ configs?.[lensName]                                  // tier 1: cascade
+                   ⊕ (lensName === resolvedDefault ? config : {})         // tier 2: per-fence override
+```
+
+`⊕` is **deep-merge-right-wins**. Tier 0 is the lens's own default
+factory; tier 1 is the directory `lenses.json` cascade; tier 2 is
+the per-fence override (only applied to the resolved-default lens).
+The orchestrator threads this chain in `pipeline.ts`; lens authors
+don't compute it themselves.
 
 The full type declarations live in [`./types.ts`](./types.ts).
+
+### Anti-patterns (durable rules)
+
+- **No consumer-side sentinel branching.** During the Phase A
+  embody mock, `embody(code)` accepts named-scenario sentinels
+  (e.g. `"OK"`, `"FAIL_AT_PARSE"`). Orchestrator code MUST NOT
+  branch on `snippet.source.code === "OK"` or any sentinel
+  literal. Always branch on the resulting `Snippet`'s
+  `status.{tokenized,parsed,created}`, `errors`, `validation`,
+  and `endReport.outcome` fields. Sentinels are inputs to
+  `embody()` only; in Phase B they vanish (real tokenization
+  replaces the discriminator) and any consumer code that branched
+  on them silently breaks. See
+  [`../embody/index.ts`](../embody/index.ts) JSDoc and
+  [`../REFACTOR-HANDOFF.md` § Step 5](../REFACTOR-HANDOFF.md).
+- **Single-writer state.** Only `orchestrate/editor/` mutates
+  snippet source. Lenses are read-only views; they never mutate
+  `embodiment` or call back into the editor.
 
 ## Pyramid placement
 
@@ -170,8 +205,9 @@ mode switches — the disposability principle.
 
 **Sketched** — F1 Phase 0 locks the final names. The set below
 extends the pre-refactor surface from
-[`../study-lenses--reference-to-migrate/orchestrator/README.md` § Data attributes](../study-lenses--reference-to-migrate/orchestrator/README.md)
-with the recommendations-panel + host-rename additions:
+[`./orchestrator/README.md` § Data attributes the DOM exposes](./orchestrator/README.md)
+(STALE-banner-flagged but kept verbatim for reference) with the
+recommendations-panel + host-rename additions:
 
 | Attribute                                | Where                                | Used by                                                                            |
 | ---------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------- |
@@ -193,13 +229,14 @@ noun-form because its primary surface is itself a verb
 component (`<StudyLenses>`), so the noun form creeps in for
 internals. The asymmetry is honest, not a mistake.
 
-**Migration note (Step 10).** The pre-refactor
+**Migration note (Step 10 / WS3 F1).** The pre-refactor
 `data-orchestrator="study-lenses"` attribute is sketched as
 DROPPED in favor of `data-orchestrator-host` (the old name
-conflated the wrapper and the lens-area concerns). Pre-refactor
-tests at `study-lenses--reference-to-migrate/orchestrator/tests/*.test.tsx`
-use the old selector and need to migrate to the new attribute set
-when REFACTOR-HANDOFF Step 10 lands. F1 Phase 0 may revisit this
+conflated the wrapper and the lens-area concerns). The
+relocated-but-STALE tests under
+[`./orchestrator/tests/`](./orchestrator/tests/) use the old
+selector and need to migrate to the new attribute set when WS3 F1
+brings the orchestrator back online. F1 Phase 0 may revisit this
 drop if the migration cost is judged too high; otherwise the
 rename proceeds and tests update at the same commit.
 
@@ -239,8 +276,8 @@ top-level `AGENTS.md`. Peer-specific rules:
     `@vitest-environment jsdom`).
   - `vi.mock` factories that reference outer-scope variables wrap
     them in `vi.hoisted(() => ({ ... }))` (lint pitfall #12 — see
-    the pre-refactor
-    [`../study-lenses--reference-to-migrate/orchestrator/tests/study-lenses.async-cancel.test.tsx`](../study-lenses--reference-to-migrate/orchestrator/tests/study-lenses.async-cancel.test.tsx)
+    the relocated-but-STALE
+    [`./orchestrator/tests/study-lenses.async-cancel.test.tsx`](./orchestrator/tests/study-lenses.async-cancel.test.tsx)
     for the canonical pattern).
 
 ## Navigation
@@ -259,6 +296,7 @@ top-level `AGENTS.md`. Peer-specific rules:
   (kickoff at sibling
   [`-kickoff.md`](../.planning-handoffs/03-orchestrator-and-contracts-kickoff.md)).
 - **Migration plan**: [`../REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md).
-- **Pre-refactor prior art**:
-  [`../study-lenses--reference-to-migrate/orchestrator/README.md`](../study-lenses--reference-to-migrate/orchestrator/README.md)
-  + [`../study-lenses--reference-to-migrate/orchestrator/DOCS.md`](../study-lenses--reference-to-migrate/orchestrator/DOCS.md).
+- **Pre-refactor prior art** (relocated verbatim, banner-flagged
+  STALE — kept for archival reference only):
+  [`./orchestrator/README.md`](./orchestrator/README.md)
+  + [`./orchestrator/DOCS.md`](./orchestrator/DOCS.md).

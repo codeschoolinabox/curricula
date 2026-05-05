@@ -150,6 +150,59 @@ Events form a doubly-linked list of plain frozen objects with `prev` /
 index (array) or by sequence (linked refs) without arithmetic. Not OOP
 nodes — just data with object cross-references.
 
+## Validation field derivation
+
+Two `Snippet.validation` fields are **derived** from raw analyses
+on construction, not raw fields a producer writes:
+
+```text
+isDeterministic = !any(nonDeterminism)
+doesPause       = hasIo.user.total > 0
+```
+
+The raw signals (`nonDeterminism`, `hasIo`) are the source of
+truth; `validation.isDeterministic` and `validation.doesPause` are
+**read-only summaries** layered on top so lens authors and
+recommender authors don't have to recompute. Pinned in
+[`./types.ts`](./types.ts) JSDoc.
+
+Implications:
+
+- A consumer who needs richer detail (e.g. *which* I/O method
+  pauses) reads `hasIo`, not `validation.doesPause`.
+- Phase B's real `embody/lib/*` MUST keep these derivation rules
+  honest. The mock factory in [`./index.ts`](./index.ts) sets the
+  raw fields and lets the derivation produce the booleans (it
+  never writes the booleans directly).
+
+## Phase A mock factory
+
+`embody/index.ts` ships a Phase A mock that returns hand-shaped
+`Snippet` instances dispatched by **sentinel comments** in the
+input string. The mock unblocks orchestrator + lens development
+before the Phase B real internals (`embody/lib/*`) come online.
+See [`./README.md` § Phase A — mock embody](./README.md) for the
+consumer-facing description and [`./index.ts`](./index.ts) JSDoc
+for the full Phase A → Phase B migration plan.
+
+The mock exports `EMBODY_MOCK_SCENARIOS` — a frozen list of the 11
+named sentinel constants tests + sandbox demos use to construct
+deterministic inputs. Unknown sentinels throw.
+
+> **Anti-pattern: no consumer-side sentinel branching.** Consumers
+> (orchestrator, lenses, tests) MUST NOT inspect the input string
+> for sentinels to choose code paths. Branch on the **shape** of
+> the returned `Snippet` (e.g. `snippet.parsed === false`,
+> `snippet.validation.isJeJ === false`), not on the sentinel that
+> produced it. Sentinels are an internal mock dispatch mechanism;
+> they will not exist in Phase B. Consumer code that branches on
+> them ties itself to scaffolding that is about to disappear.
+
+The contract surface (`types.ts`) does not mention sentinels at
+all. The mock is the only place sentinels are recognized; Phase B
+removes them entirely (the public `embody(code)` signature does
+not change).
+
 ## `embody/lib/*` integration
 
 embody composes outputs from sibling `embody/lib/*` modules

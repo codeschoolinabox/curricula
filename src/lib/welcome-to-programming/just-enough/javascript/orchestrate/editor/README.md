@@ -1,4 +1,22 @@
-# lenses/editor
+# orchestrate/editor
+
+> **⚠️ STALE — pre-refactor content. Superseded by
+> [`../README.md`](../README.md) +
+> [`../DOCS.md`](../DOCS.md) for the post-Round-2 architecture.**
+> This file was relocated verbatim from `study-lenses/editor/` and
+> describes the editor as a **lens module** with a `LensMount` /
+> `lens(code, cfg)` contract — that framing is obsolete. Per the
+> locked architecture, `orchestrate/editor/` is the orchestrator's
+> internal **home base** (default mode, single writer for snippet
+> mutation, never reachable through the lens registry). It is NOT a
+> lens. The "Increment-8 stub" sprint terminology, the
+> `editor.recommend()` shape, the `<pre data-lens="editor-stub">` DOM,
+> and the `LensMount` cache reattach pattern have all been superseded.
+> Regenerated content lands as part of the post-migration sweep
+> (REFACTOR-HANDOFF Step 7). Do not consult this file for current
+> architecture.
+
+---
 
 The `editor` lens module — the default landing lens for `js:editor`
 fences and the orchestrator's fallback when an unknown lens name is

@@ -1,5 +1,21 @@
 # editor — Architecture & Decisions
 
+> **⚠️ STALE — pre-refactor content. Superseded by
+> [`../DOCS.md`](../DOCS.md) §Editor as home base.** This file was
+> relocated verbatim from `study-lenses/editor/` and describes the
+> editor as a **lens module** with the `LensMount` /
+> `lens(code, cfg)` contract — that framing is obsolete. Per the
+> locked architecture, `orchestrate/editor/` is the orchestrator's
+> internal home base (single writer for snippet mutation, default
+> mode, not registered as a lens, never reachable through lens
+> resolution). The Mermaid diagrams, `LensMount` lifecycle, async
+> cancellation discussion, and Increment-8/15 sprint timeline have
+> all been superseded. Regenerated content lands as part of the
+> post-migration sweep (REFACTOR-HANDOFF Step 7). Do not consult
+> this file for current architecture.
+
+---
+
 ## Why this module exists
 
 The `editor` lens is the default landing lens for `js:editor` fences

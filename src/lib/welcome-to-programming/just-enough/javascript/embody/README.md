@@ -89,6 +89,43 @@ with the events that fired plus an end-report.
    friendly); spec correspondence is in `../notional-machine.md` § Spec
    correspondence appendix.
 
+## Phase A — mock embody (current)
+
+`embody/index.ts` currently ships a **mock factory** that returns
+hand-shaped `Snippet` instances dispatched by sentinel comments in the
+input source. The mock unblocks orchestrator and lens development
+before the real Phase B internals (`embody/lib/*`) come online.
+
+The 11 named scenarios are exported as `EMBODY_MOCK_SCENARIOS` so
+tests + sandbox demos can construct deterministic inputs:
+
+```typescript
+import { embody, EMBODY_MOCK_SCENARIOS } from './embody/index.js';
+
+// Each scenario is a constant whose value is the sentinel comment
+// the mock dispatches on (e.g. '/* MOCK_OK */').
+const ok = embody(EMBODY_MOCK_SCENARIOS.OK + '\nlet x = 1;');
+```
+
+Scenarios cover: `OK`, `FAIL_AT_TOKENIZE`, `FAIL_AT_PARSE`,
+`FAIL_AT_CREATE`, `VALIDATION_FAIL`, `NON_DETERMINISTIC`, `PAUSES`,
+`EVAL_ERROR`, `EVAL_TIMEOUT`, `EVAL_LIMIT`, `EVAL_CANCELLED`. Unknown
+sentinels throw — the mock fails loud rather than silently degrading.
+
+> **Anti-pattern: no consumer-side sentinel branching.** Consumers
+> (orchestrator, lenses, tests) must never `if (code.includes('/*
+> MOCK_…'))` to choose code paths. Branch on the **shape** of the
+> returned `Snippet` (e.g. `snippet.parsed === false`,
+> `snippet.validation.isJeJ === false`), not on the sentinel that
+> produced it. Sentinels are an internal mock dispatch mechanism;
+> they will not exist in Phase B. Branching on them ties consumer
+> code to scaffolding that is about to disappear.
+
+The Phase B real implementation replaces `embody(code)` internals
+without changing the public `Snippet` shape — see the JSDoc on
+[`./index.ts`](./index.ts) for the full Phase A → Phase B migration
+plan.
+
 ## How to read this directory
 
 | File | Audience | Purpose |

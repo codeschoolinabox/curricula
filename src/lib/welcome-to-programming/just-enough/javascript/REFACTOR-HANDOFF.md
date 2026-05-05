@@ -588,10 +588,20 @@ file deletes (Step 17) once every item below is ticked.
       deleted (the prior `api/` directory is already gone).
 - [ ] Step 13: ✓ Obsolete (effectively merged into Step 9 by the
       delete-originals policy).
-- [ ] Step 14: `lenses/` and `orchestrate/` `README.md` + `DOCS.md`
+- [~] Step 14: `lenses/` and `orchestrate/` `README.md` + `DOCS.md`
       reflect post-Phase-A reality; `javascript/README.md`
       directory-structure table verified; cross-doc links resolve.
-      (`embody/` peer docs finalize in Phase B.)
+      (`embody/` peer docs finalize in Phase B.) **Partial — the
+      doc-completeness sweep landed 2026-05-05** (locked four-prop
+      API + `configs` resolution chain documented, no-consumer-side-
+      sentinel-branching rule pinned across all peer docs,
+      transforms-as-lens-internal explicit, validation derivation
+      rules cross-referenced, pre-refactor subdirs (`orchestrate/
+      orchestrator/`, `orchestrate/editor/`, `lenses/highlight/`)
+      banner-flagged STALE pending Step-7 regeneration). What
+      remains for Step 14: regenerate the STALE-banner-flagged files
+      bottom-up after Step 7 lands and after WS3 F1 ships the real
+      orchestrator wiring.
 - [ ] Step 16: dependency-rule audit passes for all Phase-A-touched
       files. Consider adding a CI lint rule.
 - [ ] Step 17: delete this file.

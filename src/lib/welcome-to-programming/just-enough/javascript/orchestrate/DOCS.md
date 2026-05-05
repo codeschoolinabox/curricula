@@ -42,13 +42,15 @@ types) sit at the peer's top level, mirroring
 concerns the peer also owns; the orchestrator's primary export
 sits above them at the peer root.
 
-> **Prior art**:
-> [`../study-lenses--reference-to-migrate/orchestrator/DOCS.md`](../study-lenses--reference-to-migrate/orchestrator/DOCS.md)
-> documents the pre-refactor effect topology, Switch flow Mermaid,
-> and async caveat. Structural patterns carry forward; specific
-> mechanisms (cache, framework-agnostic LensMount, multi-prop API,
-> always-active lens mount, transforms tier) reshape per the
-> locked decisions in
+> **Prior art**: the pre-refactor orchestrator's architectural
+> sketch was relocated verbatim to
+> [`./orchestrator/DOCS.md`](./orchestrator/DOCS.md) (commit
+> `5d6fc54`); that file is banner-flagged STALE pending Step-7 /
+> WS3 F1 regeneration. It documents the pre-refactor effect
+> topology, Switch flow Mermaid, and async caveat. Structural
+> patterns carry forward; specific mechanisms (cache,
+> framework-agnostic LensMount, multi-prop API, always-active lens
+> mount, transforms tier) reshape per the locked decisions in
 > [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles).
 
 ## Architectural sketch
@@ -100,7 +102,8 @@ and bus dispatch (those are in the next diagram).
 flowchart TD
     SnippetProp["snippet prop<br/>(string, required)"]
     LensProp["lens? prop<br/>(string, Q-III default)"]
-    ConfigProp["config? prop<br/>(LensConfig, Q-III bundle)"]
+    ConfigProp["config? prop<br/>(LensConfig, override<br/>for resolved-default lens)"]
+    ConfigsProp["configs? prop<br/>(Record&lt;string, LensConfig&gt;,<br/>cascade bundle by lens name)"]
 
     SnippetProp --> EditorPath
     SnippetProp -->|"format pre-process, sync, pure"| Formatted["formatted snippet"]
@@ -110,9 +113,10 @@ flowchart TD
     Embodiment --> RecPath
     LensProp --> LensPath
     ConfigProp --> LensPath
+    ConfigsProp --> LensPath
 
     EditorPath["editor mode<br/>(home base mounted; consumes snippet string only)"]
-    LensPath["lens mode<br/>(active lens mounted with embodiment + config props)"]
+    LensPath["lens mode<br/>(active lens mounted with embodiment +<br/>resolved per-lens config)"]
     RecPath["recommendations panel<br/>(WS2 recommender ranks applicable lenses)"]
 
     Picker["toolbar lens-picker<br/>(Q-I — always available)"] -->|"selection, sync"| LensPath
@@ -123,6 +127,32 @@ flowchart TD
     EditorPath -->|"edit, sync"| SnippetProp
     SnippetProp -.invalidates cached embodiment.-> Embodiment
 ```
+
+#### Per-lens config resolution chain
+
+For any lens the learner mounts, the final config feeding
+`<LensModule.Component config={…}>` is computed as:
+
+```text
+resolved(lensName) = module.config()                                      // tier 0: lens defaults
+                   ⊕ configs?.[lensName]                                  // tier 1: cascade
+                   ⊕ (lensName === resolvedDefault ? config : {})         // tier 2: per-fence override
+```
+
+`⊕` is **deep-merge-right-wins**. The orchestrator computes this in
+its pipeline; lens authors don't compute it themselves.
+
+`resolvedDefault` resolution order:
+
+1. The `lens` prop (per-fence info-string `js:trace` or `@study-lens` directive).
+2. `configs.default` (cascade-declared default in `lenses.json`).
+3. None — if no default resolves AND `config` is supplied, the
+   orchestrator throws at mount with a clear message (per F1).
+
+`config` without `lens` prop: applies to the resolved default
+(which may come from the cascade rather than the prop). Use case:
+cascade declares the default; per-fence supplies a fence-level
+config for that default.
 
 Steady-state lifecycle:
 
@@ -152,7 +182,7 @@ mode state).
 
 ```mermaid
 flowchart TD
-    Props["&lt;StudyLenses snippet=… lens?=… config?=…&gt;"]
+    Props["&lt;StudyLenses snippet=… lens?=… config?=… configs?=…&gt;"]
 
     Props -->|"lazy state, sync read"| Mode["mode: editor | lens<br/>(initially editor)"]
     Props -->|"lazy state, sync read"| SnippetState["snippet: string<br/>(controlled by editor)"]
@@ -277,9 +307,24 @@ be a curated subset of these.
 
 ### Structural constraints
 
-- **Public surface is one component**: `<StudyLenses>`. Three
-  optional props (`snippet`, `lens?`, `config?`). Everything else
-  internal.
+- **Public surface is one component**: `<StudyLenses>`. Four props
+  total — one required (`snippet`), three optional (`lens?`,
+  `config?`, `configs?`). Everything else internal. See § Per-lens
+  config resolution chain (above) for how `config` + `configs`
+  layer per lens.
+- **No consumer-side sentinel branching.** During the Phase A
+  embody mock, `embody(code)` accepts named-scenario sentinels
+  (e.g. `"OK"`, `"FAIL_AT_PARSE"`, `"EVAL_TIMEOUT"`). Orchestrator
+  code MUST NOT branch on `snippet.source.code === "OK"` or any
+  sentinel literal. Always branch on the resulting `Snippet`'s
+  `status.{tokenized, parsed, created}`, `errors`,
+  `validation.{isJeJ, isDeterministic, doesPause}`, and
+  `endReport.outcome` (from a resolved `streams.evaluate.run()`).
+  Sentinels are inputs to `embody()` only; in Phase B they vanish
+  (real tokenization replaces the discriminator) and any consumer
+  code that branched on them silently breaks. See
+  [`../embody/index.ts`](../embody/index.ts) JSDoc and
+  [`../REFACTOR-HANDOFF.md` § Step 5](../REFACTOR-HANDOFF.md).
 - **Single-writer state.** Only [`./editor/`](./editor/) mutates
   snippet source. The orchestrator threads the editor's
   `onSnippetChange` callback into its state-update; lenses receive
@@ -314,7 +359,8 @@ be a curated subset of these.
   Subscribers to `lens-switched` that need the new mount in the
   DOM should defer their work to a microtask or
   `requestAnimationFrame` (per
-  `study-lenses--reference-to-migrate/orchestrator/DOCS.md` § Phase 2 step 4).
+  [`./orchestrator/DOCS.md`](./orchestrator/DOCS.md) § Phase 2 step 4
+  — relocated-but-STALE pre-refactor reference).
 - **Dependency rules** (per `../DOCS.md` § Dependency rules):
   - `orchestrate/` may import from `orchestrate/lib/*`, `embody/`,
     `lenses/`, `@-utils`.

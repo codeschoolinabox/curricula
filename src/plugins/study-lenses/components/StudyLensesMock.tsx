@@ -8,10 +8,14 @@
  * Prism highlighting, copy-to-clipboard, and dark-mode support for
  * free.
  *
- * V2 target: this mock is replaced by the rich orchestrator at
- * `src/lib/welcome-to-programming/just-enough/javascript/orchestrate/orchestrator/`
- * via an MDXComponents swizzle switch. The plugin emission path is
- * unchanged.
+ * V2 target: this mock is replaced by the `<StudyLenses>` exported
+ * from
+ * `src/lib/welcome-to-programming/just-enough/javascript/orchestrate/`
+ * (the post-Round-2 four-prop API: `snippet`, `lens?`, `config?`,
+ * `configs?`) via an MDXComponents swizzle switch. The plugin
+ * emission path needs alignment to the four-prop API first — see
+ * `src/plugins/study-lenses/README.md § Plugin alignment to the
+ * locked four-prop API`.
  */
 
 import CodeBlock from '@theme/CodeBlock';

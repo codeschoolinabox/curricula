@@ -25,6 +25,80 @@ via Docusaurus's native TypeScript config support.
 Plan file: [`transient-puzzling-crane.md`](../../../../../.claude/plans/transient-puzzling-crane.md)
 (ambient; may not exist in every checkout).
 
+## Plugin alignment to the locked four-prop API (TODO)
+
+> **⚠️ Drift notice — this plugin currently emits the V1 prop set
+> (`code`, `lens`, `lang`, optional `config`).** The locked
+> orchestrator API (Round-2 architecture, see
+> [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md))
+> is a **four-prop API**:
+>
+> ```jsx
+> <StudyLenses
+>   snippet={…}    // string source — was `code`, plus drop `lang`
+>   lens?={…}      // resolved lens name (string)
+>   config?={…}    // per-instance config for the resolved lens
+>   configs?={…}   // map of lens-name → config from lenses.json cascade
+> />
+> ```
+>
+> Plugin code does **not** match this yet. This section is the
+> alignment punch list for the next plugin commit:
+>
+> 1. **Rename `code` → `snippet`** in
+>    [`code-block-to-jsx.ts`](./code-block-to-jsx.ts) and
+>    [`components/StudyLensesMock.tsx`](./components/StudyLensesMock.tsx).
+> 2. **Drop the `lang` prop entirely.** Language is encoded by the
+>    fence head; the orchestrator does not branch on it.
+> 3. **Drop the `transforms` concept.** Transforms are now a
+>    **lens-internal concern** — each lens decides what visual
+>    transforms to apply (the `format` toolbar button, the
+>    `loopGuard` pre-eval rewrite, etc.). The plugin must NOT emit a
+>    `transforms` attribute, NOT parse comma-separated transform
+>    chains in fence suffixes, and NOT carry transform names in
+>    sibling-file directives. The glossary section "Lens suffix" and
+>    the "Fence info string grammar" §below need rewriting against
+>    the URL-style syntax (next item).
+> 4. **Adopt URL-style fence syntax** (replaces comma-chain syntax):
+>
+>    ```text
+>    js                     → lens=cascade default, config={}
+>    js:trace               → lens="trace", config={}
+>    js:trace?stepDelay=500 → lens="trace", config={ stepDelay: 500 }
+>    js:trace?cols=value,steps
+>                          → lens="trace", config={ cols: ["value","steps"] }
+>    ```
+>
+>    Query-string semantics:
+>    - `?key=value` — string value
+>    - `?key=v1,v2,v3` — array of strings (comma split)
+>    - `?key` (no `=`) — boolean true
+>    - `?key=&…` (empty value) — empty string ""
+>
+>    Numeric coercion happens at lens config time, not at parse time.
+> 5. **Add the new `configs` attribute.** Populated by the cascade
+>    resolver: every lens config in the resolved
+>    `lenses.*` map flows through to the orchestrator unchanged. The
+>    orchestrator merges per the resolution chain
+>    `module.config() ⊕ configs?.[lensName] ⊕ (lensName === resolvedDefault ? config : {})`.
+>    See
+>    [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md` § Per-lens config resolution chain](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md).
+> 6. **Keep `config`.** It carries the per-fence/per-sibling
+>    overrides (the directive JSON or the fence query string),
+>    applied **only to the resolved active lens** per the resolution
+>    chain.
+> 7. **Update `parseLensConfig`** if needed to handle the URL-style
+>    fence form. The directive JSON form on `.js` siblings stays.
+> 8. **Re-verify `StudyLensesMock`** path JSDoc points at the
+>    post-migration locations (Round-2 moved the orchestrator to
+>    `orchestrate/` and split lenses peer-up).
+>
+> Until this alignment lands, the plugin is on the V1 prop set and
+> the orchestrator is on the four-prop set — the swap-in
+> `<StudyLenses>` from `orchestrate/` will reject the missing
+> `snippet` prop. The V1 mock component continues to work because
+> it reads the V1 props directly.
+
 ## Glossary
 
 The terms below are **ubiquitous** — they propagate verbatim into function

@@ -5,12 +5,17 @@ Each subdirectory is one lens — a stateful "mini web app" plugin that
 takes a frozen [`embodiment`](../embody/types.ts) (`Snippet`) plus an
 optional [`LensConfig`](./types.ts) and renders a learning exercise.
 
-> **🚧 PRE-REFACTOR SENTINEL** — this directory holds the target
-> contract docs (this README, `DOCS.md`, `types.ts`); per-lens
-> implementations migrate in via REFACTOR-HANDOFF Steps 8 + 11. The
-> pre-refactor source lives at
-> [`../study-lenses--reference-to-migrate/`](../study-lenses--reference-to-migrate/).
-> After the migration completes, this banner is removed.
+> **🚧 MIGRATION IN PROGRESS** — this directory holds the target
+> contract docs (this README, `DOCS.md`, `types.ts`) plus the
+> first migrated lens [`./highlight/`](./highlight/) (commit
+> `5d6fc54`, banner-flagged STALE pending React-component-shape
+> rewrite). The remaining per-lens implementations migrate in via
+> WS4 (REFACTOR-HANDOFF.md Step 11). The pre-refactor
+> `study-lenses/` source tree was deleted in commit `5d6fc54`;
+> the editor was promoted to [`../orchestrate/editor/`](../orchestrate/editor/)
+> as the orchestrator home base, and the remaining lenses sit
+> outside this repo until WS4 brings them in. This banner is
+> removed once WS4 lands.
 
 ## What lives here
 
@@ -149,6 +154,33 @@ top-level `AGENTS.md`. Subdirectory-specific rules:
   implication 5.
 - **Single-writer state**. Lenses are read-only views; they CANNOT
   mutate the snippet. Editing happens only in [`orchestrate/editor/`](../orchestrate/editor/).
+- **No consumer-side sentinel branching on `embody` mock outputs.**
+  During Phase A, `embody(code)` is a mock dispatched by sentinel
+  comments (e.g. `/* MOCK_OK */`, `/* MOCK_PARSE_FAIL */` — see
+  [`../embody/index.ts`](../embody/index.ts) JSDoc and
+  [`../embody/README.md` § Phase A — mock embody](../embody/README.md)).
+  Lens code must never inspect the input string for sentinels;
+  branch only on the **shape** of the returned `Snippet` (e.g.
+  `embodiment.parsed === false`, `embodiment.validation.isJeJ`).
+  Sentinels are an internal mock dispatch mechanism and disappear
+  in Phase B.
+- **Transforms are a lens-internal concern, not a peer concept.**
+  Round-2 deleted the pre-refactor `transforms/` peer module. There
+  is no shared "transform pipeline" between lenses + the
+  orchestrator; each lens decides what visual / pre-eval
+  transformations to apply to the snippet it received (formatting
+  toolbar buttons, the `loopGuard` rewrite a tracing lens applies
+  before evaluation, the `parsons` lens's line shuffler — all live
+  inside the lens that uses them). The `<StudyLenses>` plugin must
+  NOT emit a `transforms` attribute (see
+  [`../../../../plugins/study-lenses/README.md` § Plugin alignment](../../../../plugins/study-lenses/README.md)).
+- **`Validation` derivation rules.** The `validation` fields
+  `isDeterministic` and `doesPause` are **derived** from the raw
+  analyses, not raw fields a lens can override:
+  `isDeterministic = !any(nonDeterminism)` and
+  `doesPause = hasIo.user.total > 0`. Pinned in
+  [`../embody/types.ts`](../embody/types.ts) JSDoc; lens authors
+  reading these fields treat them as read-only summaries.
 - **`embodiment` parameter name** wherever a function takes a
   Snippet instance.
 - One default export per file (named function/const, then

@@ -1,5 +1,21 @@
 # orchestrator
 
+> **⚠️ STALE — pre-refactor content. Superseded by
+> [`../README.md`](../README.md) +
+> [`../DOCS.md`](../DOCS.md) for the post-Round-2 architecture
+> (four-prop API, two-mode state machine, disposable practice,
+> React-component lens mounts).** This file was relocated verbatim
+> from `study-lenses/orchestrator/` in commit `5d6fc54` and
+> describes the Inc-8/Inc-9 sprint architecture (LensMount,
+> dispose, framework-agnostic mounts, three-prop API,
+> `onSnippetChanged` IoC hook, lens cache reattach) — all of which
+> were superseded by the locked architecture in the peer-level
+> README + DOCS. Regenerated content lands as part of the
+> post-migration sweep + WS3 F1 implementation. Do not consult this
+> file for current architecture.
+
+---
+
 The React wrapper for the study-lenses orchestrator. Wires the Phase-1
 pure-TS substrate (registry, pipeline validate/execute, state factory,
 EventBus, lens cache) to a Docusaurus-rendered React tree. This is the

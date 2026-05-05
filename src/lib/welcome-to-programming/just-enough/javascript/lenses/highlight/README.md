@@ -1,5 +1,23 @@
 # lenses/highlight
 
+> **⚠️ STALE — pre-refactor content. Superseded by
+> [`../README.md`](../README.md) +
+> [`../DOCS.md`](../DOCS.md) for the post-Round-2 architecture.**
+> This file was relocated verbatim from
+> `study-lenses/lenses/highlight/` and describes the lens with the
+> framework-agnostic `LensMount` / `dispose()` / `lens(code, cfg)`
+> contract — that framing is obsolete. Per the locked architecture,
+> a `LensModule` is `{ name, Component, config, applicableTo,
+> recommend }` where `Component` is a React component receiving
+> `LensProps` (two-layer lens shape: TS core + React wrapper). The
+> peer mentioning `editor/` as a sibling lens is also obsolete —
+> editor is now the orchestrator's internal home base, not a peer
+> lens. Regenerated content lands as part of the post-migration
+> sweep (REFACTOR-HANDOFF Step 7). Do not consult this file for
+> current architecture.
+
+---
+
 The `highlight` lens module — a read-only syntax-view counterpart to
 the editable [`editor`](../editor/) lens. The eventual real
 implementation is a Shiki/Prism-driven syntax highlighter; today this

@@ -1,5 +1,19 @@
 # highlight — Architecture & Decisions
 
+> **⚠️ STALE — pre-refactor content. Superseded by
+> [`../DOCS.md`](../DOCS.md) for the post-Round-2 lens architecture.**
+> This file describes the framework-agnostic `LensMount` /
+> `dispose()` / `lens(code, cfg)` contract — that framing is
+> obsolete. The locked `LensModule` contract is React `Component` +
+> `applicableTo` + `recommend` (two-layer lens shape: TS core + React
+> wrapper). The Mermaid diagram, structural-constraints section,
+> data-flow narrative, and `editor` peer references all describe the
+> obsolete model. Regenerated content lands as part of the
+> post-migration sweep (REFACTOR-HANDOFF Step 7). Do not consult
+> this file for current architecture.
+
+---
+
 ## Why this module exists
 
 The `highlight` lens is the read-only syntax-view counterpart to the

@@ -1,5 +1,21 @@
 # orchestrator — Architecture & Decisions
 
+> **⚠️ STALE — pre-refactor content. Superseded by
+> [`../DOCS.md`](../DOCS.md)** (the peer-level orchestrator
+> architecture). This file was relocated verbatim from
+> `study-lenses/orchestrator/` in commit `5d6fc54` and describes
+> the Inc-8/Inc-9 sprint design (LensMount, dispose, lens cache,
+> framework-agnostic mounts, three-prop API, `onSnippetChanged`
+> IoC hook). The post-Round-2 architecture is locked in
+> `../DOCS.md`: four-prop API, two-mode state machine (editor ↔
+> lens), disposable practice, React-component lens mounts via
+> `LensModule.Component`, internal-only EventBus. Regenerated
+> content lands during the post-migration sweep + WS3 F1
+> implementation. Do not consult this file for current
+> architecture.
+
+---
+
 ## Why this module exists
 
 The `orchestrator/` directory is the React seam between the
