@@ -27,7 +27,7 @@ const mockState = vi.hoisted(function makeMockState() {
 	return { state, lensSpy };
 });
 
-vi.mock('../../lenses/editor/editor.js', function mockEditor() {
+vi.mock('../../editor/editor.js', function mockEditor() {
 	return {
 		default: {
 			name: 'editor',

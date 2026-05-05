@@ -2,203 +2,148 @@
 
 ## Why this module exists
 
-`orchestrate/editor/` is the **always-present home base** — the React
-component the orchestrator mounts in editor mode. It's the **only
-writer of snippet state** in the entire `<StudyLenses>` system.
-Everything else (lenses, recommender, analysis libs) is a read-only
-consumer of the snippet via the embodiment the orchestrator builds.
+The `editor` lens is the default landing lens for `js:editor` fences
+and the orchestrator's fallback when an unknown lens name is
+requested. Pipeline validation in
+[`../../pipeline.ts`](../../pipeline.ts) rewrites unknown lens names
+to `'editor'` with a console warning, so this module **must** stay
+registered.
 
-Concentrating snippet mutation in one component makes the
-single-writer state model structural rather than conventional: a
-lens trying to mutate the snippet has nowhere to send the mutation.
-The orchestrator only threads `onSnippetChange` to the editor;
-lenses receive `embodiment` (frozen) and have no comparable
-callback.
+The eventual real implementation is a CodeMirror-backed editable code
+surface. Today this directory ships a stub.
 
-> **Prior art**:
-> [`../../lib/editing/DOCS.md`](../../lib/editing/DOCS.md)
-> documents the underlying CodeMirror integration — language
-> loading, callback API for linters / completions / hover docs,
-> destroy lifecycle. That module moves to `orchestrate/lib/editing/`
-> during REFACTOR-HANDOFF Step 9 unchanged in shape; this
-> `orchestrate/editor/` component is a new thin React wrapper around
-> its `createEditor()` factory.
+## Why a stub
+
+Increment 8 ships the React orchestrator scaffolding. Wiring
+mount/detach, async cancellation, and the lens cache requires a
+concrete `LensModule` to register and resolve. Building the real
+CodeMirror lens at the same time as the orchestrator scaffolding
+would overload the increment; the stub is the smallest substitute
+that satisfies the contract:
+
+- It has the correct default-export shape (frozen `LensModule`).
+- It returns a real `LensMount` (`el` + `dispose`) — not a Promise.
+- It fills the unknown-name fallback role without console errors.
+
+What the stub does NOT do: parse, format, dispatch
+`snippet-changed`, or persist edits. Those arrive with the
+CodeMirror replacement in Increment 15+.
+
+## Replacement contract
+
+The real CodeMirror lens MUST keep:
+
+- Same file path: [`./editor.ts`](./editor.ts).
+- Same default export: a frozen `LensModule`.
+- Same `name` field: `'editor'`.
+- Same backwards-compatible `lens(code, cfg)` signature; may switch
+  the return type from `LensMount` to `Promise<LensMount>`.
+
+The orchestrator does not need to change when the swap happens. The
+stub-vs-real difference is observable only through the `data-lens`
+attribute (today `"editor-stub"`; the real lens picks its own value,
+e.g. `"editor-codemirror"`).
 
 ## Architectural sketch
 
-> Written Phase 0, before implementation. The Refactor step of F1's
-> editor-mount work is held against this sketch. Domain terms only —
-> no function names, no variable names, no pseudocode (React API
-> names like `useEffect` / `useState` / `useRef` are acceptable as
-> structural-mechanism references, mirroring the orchestrator
-> DOCS's escape clause).
+### Execution phases
+
+1. **Mount** (sync today, may become async post-replacement) — create
+   a single detachable element, populate it with the snippet text,
+   return a `LensMount` whose `dispose()` is a no-op. Increment 9
+   Pre-work C-1 changes the element from `<pre>` to `<textarea>` so
+   learners can type into it; edits remain non-propagating until the
+   real lens lands.
+2. **Config resolution** — accept partial overrides; spread + freeze;
+   cast back to `LensConfig`. The stub has no configuration surface.
+3. **Recommend** — return an empty array. The real CodeMirror lens
+   will populate this once the analysis pipeline lands per
+   [`../../../.planning-handoffs/02-analysis-and-recommender.md`](../../../.planning-handoffs/02-analysis-and-recommender.md).
 
 ### Data flow
 
 ```mermaid
 flowchart TD
-    Props["<EditorComponent<br/>snippet onSnippetChange callbacks?>"]
-
-    Props -->|"mount, async (language load)"| EditorMounted["mounted editor<br/>(CodeMirror-backed)"]
-    EditorMounted --> Host["host element<br/>(container ref)"]
-
-    LearnerType["learner types"] -->|"doc change, sync"| EditNotify["edit notification"]
-    EditNotify -->|"flows out via prop"| Props
-
-    Props -->|"unmount, sync"| TornDown["editor torn down"]
-
-    Linters["linters? (callback)"] -->|"injected at mount"| EditorMounted
-    DocLookup["docLookup? (callback)"] -.injected.-> EditorMounted
-    Completions["completions? (callback)"] -.injected.-> EditorMounted
+    Overrides["partial overrides<br/>(or absent)"] -->|"resolve, sync, pure"| Cfg["LensConfig<br/>frozen, empty in stub"]
+    Code["code: string"] --> Mounted
+    Cfg --> Mounted["LensMount<br/>{ el: stub-element, dispose: noop }"]
+    Mounted -->|"mount, sync"| Mounted
+    Mounted --> CacheKey["cache entry<br/>keyed by (name='editor', hash(cfg))"]
+    NoInput["(no inputs)"] -->|"recommend, sync, pure"| Empty["ReadonlyArray&lt;Recommendation&gt;<br/>= []"]
 ```
 
-The component is intentionally thin: most logic lives inside
-[`../lib/editing/`](../lib/editing/)'s editor-construction factory.
-The component's job is just:
-
-1. **Construct** the underlying editor via the `lib/editing/`
-   factory in a `useEffect` mount (async; CodeMirror language
-   modules load dynamically).
-2. **Append** the constructed editor's element to a host
-   container ref.
-3. **Forward edits** via the `onSnippetChange` prop on every
-   document change.
-4. **Tear down** in the `useEffect` cleanup (factory's
-   destroy/dispose path).
-
-### Per-mode behavior
-
-The orchestrator mounts `<EditorComponent>` only in editor mode
-(per [`../orchestrator/DOCS.md` § Lifecycle modes](../orchestrator/DOCS.md)).
-On the editor → lens mode transition, the orchestrator unmounts the
-editor and the embodiment is constructed at that moment — not while
-the editor is mounted.
-
-The mode-transition asymmetry to be explicit about:
-
-- **Snippet content survives** mode transitions: it lives in the
-  orchestrator's state (controlled-component model), so when the
-  editor remounts after returning lens → editor, the snippet string
-  is whatever the orchestrator currently has.
-- **Cursor / undo / selection do NOT survive** mode transitions:
-  they live in CodeMirror's view instance, which is destroyed at
-  unmount. Remount creates a fresh view; cursor lands at default
-  position, undo history is empty.
+The "stub-element" node is `<pre data-lens="editor-stub">` today and
+becomes `<textarea data-lens="editor-stub">` after Increment 9
+Pre-work C-1. The replacement (Increment 15+) returns CodeMirror's
+`EditorView.dom` element and the mount edge gains an `async` constraint;
+the rest of the contract above is unchanged.
 
 ### Structural constraints
 
-- **Single writer**. This component (and its `onSnippetChange`
-  callback) is the ONLY surface that produces snippet mutations
-  in the whole `<StudyLenses>` system. No lens has a comparable
-  callback prop. Per the locked decision in
-  [`../../README.md` § Pedagogical first principles](../../README.md#pedagogical-first-principles)
-  + [`../DOCS.md` § Locked decisions](../DOCS.md).
-- **Consumes raw `snippet: string`, not `embodiment: Snippet`.**
-  The orchestrator builds the embodiment downstream of the editor
-  (at the editor → lens mode transition). The editor never sees
-  an embodiment. This is what makes the editor structurally
-  distinct from a lens: different input shape (string vs frozen
-  Snippet), different lifecycle role (write surface vs read-only
-  view).
-- **Async setup boundary**. `createEditor()` is async (dynamic
-  language loading). Use `useEffect` + a state machine OR
-  `React.lazy` + `<Suspense>` to handle the async mount; never
-  block render. Specific approach pins during F1's Phase 0.
-- **No internal snippet state**. The component is **controlled** —
-  `snippet` flows in from props, edits flow out via
-  `onSnippetChange`. The orchestrator owns the snippet string in
-  its own state. Avoids drift between an internal-snippet-state
-  and the orchestrator-snippet-state.
-- **Pedagogical callbacks are pass-through**. `linters`,
-  `docLookup`, `completions` (per `lib/editing/`'s callback API)
-  are forwarded from the orchestrator's analysis libs. This
-  component doesn't know what the callbacks do; it just wires
-  them into the editor.
-- **Disposability**. CodeMirror-owned view state (cursor position,
-  undo history, selection) is destroyed at unmount; a fresh view is
-  constructed at remount. Cursor / undo / selection are NOT
-  preserved across mode transitions. This matches the system-wide
-  disposability principle. (Snippet content is orchestrator-owned
-  and DOES survive — see § Per-mode behavior.)
+- **No React import.** This file is pure TypeScript. The replacement
+  may use `createRoot` internally if it picks a React-driven editor,
+  but the boundary stays inside this file.
+- **`dispose()` is owned by the lens.** The orchestrator calls it on
+  unmount and on cache eviction; the lens decides what cleanup means
+  (CodeMirror: `editorView.destroy()`; stub: no-op).
+- **No `snippet-changed` dispatch in the stub.** Edits inside the
+  textarea (post-Pre-work-C-1) are visible but not propagated to the
+  orchestrator. The real lens implements debounced dispatch.
+- **Cache survival across switch.** When the orchestrator caches an
+  `editor`-stub mount and reattaches it later, any text the learner
+  typed survives because the DOM node was detached, not destroyed.
+  This survival behavior is the whole reason the
+  switch-cleanup-vs-unmount-cleanup split (Increment 9 Pre-work B)
+  matters for this lens.
 
 ### Out of scope
 
-- **CodeMirror integration internals** — owned by
-  [`../lib/editing/`](../lib/editing/).
-- **Snippet persistence across page reloads** — LMS's job.
-- **Auto-save / draft management** — out of scope; the LMS or
-  the embedding application owns this if needed.
-- **Multi-file editing / tabbed buffers** — out of scope. One
-  `<StudyLenses>` instance = one snippet.
-- **Read-only mode** (e.g. for showing reference solutions) —
-  not a use case today; if it surfaces, it's a prop on this
-  component (`readOnly?: boolean`) plus a one-line CodeMirror
-  extension.
+- **Edit propagation.** Stub-only. Belongs to the real lens.
+- **Syntax error handling.** Stub renders the snippet verbatim; no
+  parse, no validation. The `lib/validating/` module handles parse
+  errors; the real lens consumes that report.
+- **Recommend-time analysis.** Stub returns `[]`. The real lens
+  consumes the analysis report from `lib/analysis/` (TBD).
 
-## Why a thin React wrapper around `lib/editing/createEditor()`
+## Why `<textarea>` instead of `<pre>` for the upgraded stub
 
-`orchestrate/lib/editing/createEditor()` is a fully-baked async
-factory: it returns a CodeMirror `EditorView` ready to append to
-the DOM, with linters / hover / completions injected via callback.
-It's framework-agnostic (no React, no `@docusaurus/BrowserOnly`).
-
-`orchestrate/editor/` could:
-
-- Replace `createEditor()` with a React-native CodeMirror
-  integration (e.g. `@uiw/react-codemirror`).
-- Wrap `createEditor()` in a thin React component.
-
-We chose option 2 because:
-
-- **`createEditor()` is already AR-reviewed** and battle-tested.
-  Replacing it would re-derive design decisions (callback API,
-  destroy semantics, dynamic language loading) for marginal gain.
-- **Framework-agnostic core, React boundary at the wrapper** is
-  the same pattern as [`../../lenses/`](../../lenses/) (TS core
-  + React wrapper). Consistency across peers.
-- **Future migrations** (e.g. switching CodeMirror versions,
-  swapping in Monaco, etc.) are contained in `orchestrate/lib/editing/`
-  — `orchestrate/editor/` doesn't change.
-
-## Why controlled (not uncontrolled)
-
-A controlled editor (`snippet` flows in from props,
-`onSnippetChange` flows out) keeps the snippet string in the
-orchestrator's React state — single source of truth. An
-uncontrolled editor (with the snippet living inside CodeMirror's
-own state) would split the truth between React and CodeMirror,
-requiring sync logic on every read.
-
-The cost of controlled is a re-render on every keystroke. CodeMirror
-is fast; React's re-render of a single component is fast; the cost
-is acceptable.
-
-A potential optimisation: the editor component memoises on
-`snippet` reference equality and only updates the EditorView's doc
-when `snippet` changes externally (e.g. on Reset). Pin during F1's
-Phase 0 if needed.
+Increment 9 needs a second lens to switch between, and the user wants
+the stub semantically aligned with its eventual replacement. The real
+CodeMirror editor is editable; a textarea is the simplest DOM element
+that conveys "type here" without pulling in CodeMirror. It contrasts
+visually and behaviorally with the read-only `<pre><code>` of the
+[`../highlight/`](../highlight/) stub (planned, Increment 9 Pre-work
+C-2).
 
 ## Module ownership
 
-This module owns the React component + its tests. It does NOT own:
+This module owns:
 
-- The CodeMirror integration (lives in `lib/editing/` →
-  `orchestrate/lib/editing/`).
-- The pedagogical callbacks themselves (linters in
-  `orchestrate/lib/error-interpreting/`, completions in
-  `orchestrate/lib/completing/`, doc lookups in
-  `orchestrate/lib/jej-documentation/`). This component just wires
-  them.
-- The orchestrator's mode state machine (lives in
-  [`../orchestrator/`](../orchestrator/)).
+- [`./editor.ts`](./editor.ts) — the `LensModule` default export.
+- [`./tests/editor.test.ts`](./tests/editor.test.ts) — vitest jsdom
+  unit tests.
+
+Consumers:
+
+- [`../../orchestrator/default-registry.ts`](../../orchestrator/default-registry.ts)
+  imports the default and registers it.
+- The orchestrator wrapper at
+  [`../../orchestrator/study-lenses.tsx`](../../orchestrator/study-lenses.tsx)
+  resolves it through `registry.getLens('editor')`.
+
+No other consumers. The replacement (Increment 15+) keeps the same
+import surface.
 
 ## Future direction
 
-- A `readOnly` prop if a use case surfaces (showing a solution
-  snippet, locking edits during evaluation). One-line CodeMirror
-  extension.
-- A "preview" affordance — show the snippet in lens mode without
-  fully transitioning (a peek). Out of scope for the initial
-  increments; revisit if learner UX demands it.
-- Performance optimisation if the controlled re-render cost
-  becomes noticeable. Memoise + diff-based EditorView updates.
+When the CodeMirror replacement lands:
+
+- This DOCS.md grows a "CodeMirror integration" section describing
+  language extensions, theme wiring, and the `EditorView.destroy()`
+  cleanup contract.
+- The data-flow diagram's mount edge changes from sync to async
+  (`Promise<LensMount>`).
+- The "no `snippet-changed` dispatch" structural constraint flips —
+  the real lens MUST dispatch debounced edits.
+- The `recommend()` empty-array short-circuit becomes a real
+  Block-Model placement function consuming the analysis report.

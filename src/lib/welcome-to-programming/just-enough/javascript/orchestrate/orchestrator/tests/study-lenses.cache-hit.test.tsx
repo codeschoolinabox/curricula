@@ -54,7 +54,7 @@ const spies = vi.hoisted(function makeSpies() {
 	};
 });
 
-vi.mock('../../lenses/editor/editor.js', function mockEditor() {
+vi.mock('../../editor/editor.js', function mockEditor() {
 	return {
 		default: {
 			name: 'editor',
@@ -69,7 +69,7 @@ vi.mock('../../lenses/editor/editor.js', function mockEditor() {
 	};
 });
 
-vi.mock('../../lenses/highlight/highlight.js', function mockHighlight() {
+vi.mock('../../../lenses/highlight/highlight.js', function mockHighlight() {
 	return {
 		default: {
 			name: 'highlight',

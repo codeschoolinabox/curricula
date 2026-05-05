@@ -14,8 +14,8 @@
  * default-export shape.
  */
 
-import editor from '../lenses/editor/editor.js';
-import highlight from '../lenses/highlight/highlight.js';
+import editor from '../editor/editor.js';
+import highlight from '../../lenses/highlight/highlight.js';
 import createRegistry from '../registry.js';
 import type { Registry } from '../types.js';
 

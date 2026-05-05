@@ -1,94 +1,79 @@
-# editor
+# lenses/editor
 
-The default home base — the always-present surface the learner edits
-their snippet on. The ONLY writer of snippet state in the
-`<StudyLenses>` orchestrator. Wraps the CodeMirror-backed editor
-factory at [`../lib/editing/`](../lib/editing/) into a React home-
-base component.
+The `editor` lens module — the default landing lens for `js:editor`
+fences and the orchestrator's fallback when an unknown lens name is
+requested. The eventual real implementation is the CodeMirror-backed
+code editor; today this directory ships a stub that stands in for it.
 
-## What lives here
+> **Status — Increment-8 stub.** Renders the snippet inside
+> `<pre data-lens="editor-stub">` (read-only, no edit propagation).
+> Increment 9 Pre-work C-1 upgrades the stub to a `<textarea>` so the
+> learner can visibly type into it (still no `snippet-changed` dispatch
+> — that arrives with the real lens). Increment 15+ replaces the stub
+> with the CodeMirror-backed lens. The replacement keeps the same file
+> path ([`./editor.ts`](./editor.ts)), the same default-export shape
+> (`LensModule`), and the same `name: 'editor'` so the orchestrator
+> does not need to change.
 
-| File                         | Purpose                                                                                         |
-| ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| [`./README.md`](./README.md) | This file — orientation + navigation.                                                           |
-| [`./DOCS.md`](./DOCS.md)     | Architectural sketch — edit-callback contract, mode transitions, lifecycle in editor mode.       |
-| `index.tsx`                  | The home-base React component. Wraps `orchestrate/lib/editing/createEditor`.                    |
-| `tests/`                     | vitest jsdom + `@testing-library/react` tests.                                                   |
+## Stub today, CodeMirror later
 
-## What this component does
+This module is a stub. The replacement contract, the rationale for
+shipping a stub during the orchestrator's scaffolding phase, and the
+"unknown-name fallback target" role enforced by
+[`../../pipeline.ts`](../../pipeline.ts) live in
+[`./DOCS.md`](./DOCS.md). The README only restates that callers
+**must** keep `editor` registered, because the orchestrator's pipeline
+validation rewrites unknown lens names to `'editor'`.
 
-`orchestrate/editor/` is the React component the orchestrator mounts when
-the UI is in editor mode (per
-[`../orchestrator/README.md` § Editor-vs-lens state machine](../orchestrator/README.md)).
-Its responsibilities:
+## Files
 
-1. **Render the CodeMirror editor** for the current snippet string,
-   using `orchestrate/lib/editing/createEditor()` for the underlying
-   editor instance.
-2. **Forward edits to the orchestrator** via an `onSnippetChange`
-   prop — the only mutation surface for snippet state in the
-   `<StudyLenses>` component.
-3. **Wire pedagogical callbacks** the editor consumes (linters,
-   doc lookup, completions) by routing them through to
-   `orchestrate/lib/editing/`'s callback API.
-4. **Tear down cleanly** when the orchestrator switches to lens
-   mode — React's natural unmount calls the editor's `destroy()`
-   via a `useEffect` cleanup.
-
-What this component does NOT do:
-
-- Build embodiments (lazy embodiment is the orchestrator's job; the
-  editor reads/writes the snippet string only).
-- Mount lenses (the orchestrator does that when the learner opens
-  one).
-- Persist edits across page reloads (LMS responsibility — see
-  [`../../README.md` § Pedagogical first principles](../../README.md#pedagogical-first-principles)
-  scope-boundary).
+| File                             | Purpose                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| [`editor.ts`](./editor.ts)       | The `LensModule` default export. ~30 lines.                              |
+| `tests/editor.test.ts`           | vitest jsdom unit tests for the stub.                                    |
+| [`./DOCS.md`](./DOCS.md)         | Architectural sketch — replacement contract, data flow, why-decisions.   |
 
 ## Public API
 
-```tsx
-<Editor snippet={current} onSnippetChange={(next) => …} />
+The module's default export is the frozen `LensModule`. Consumers
+(today, only [`../../orchestrator/default-registry.ts`](../../orchestrator/default-registry.ts))
+import it directly and pass it to `registry.register(...)`:
+
+```typescript
+import editor from './editor.js';
+registry.register(editor);
 ```
 
-Props (planned; F1 Phase 0 locks the exact shape):
+`editor.lens(code)` mounts a fresh DOM element per call. The
+orchestrator caches the returned `LensMount` keyed by
+`(lens-name, config-hash)`, so subsequent same-config switch-back
+operations reattach the cached element instead of re-mounting.
 
-| Prop              | Type                       | Required | Purpose                                                                              |
-| ----------------- | -------------------------- | -------- | ------------------------------------------------------------------------------------ |
-| `snippet`         | `string`                   | yes      | The current snippet string (controlled by the orchestrator).                         |
-| `onSnippetChange` | `(next: string) => void`   | yes      | Called on every edit. The orchestrator's `setState` lives inside this callback.      |
-
-The exact prop names + signatures lock during F1's Phase 0 — F1 is
-where `<StudyLenses snippet>` end-to-end smoke first mounts the
-editor as the home base, so the prop contract pins there. F2 builds
-the editor-vs-lens mode machinery AROUND the editor; it does not
-reshape the editor's own prop surface. This README will be updated
-to remove the "planned" hedge once F1 lands.
+`editor.recommend()` returns an empty array in the stub. The real
+CodeMirror lens will populate this with Block-Model recommendations
+when its Increment 15+ replacement lands and consumes the analysis
+report from
+[`../../../.planning-handoffs/02-analysis-and-recommender.md`](../../../.planning-handoffs/02-analysis-and-recommender.md).
 
 ## Conventions
 
-Inherits all conventions from [`../README.md`](../README.md) and the
-top-level `AGENTS.md`. Subdirectory-specific rules:
+Inherits all conventions from [`../README.md`](../README.md),
+[`../../README.md`](../../README.md), and the top-level `AGENTS.md`.
+Module-specific rules:
 
-- **Single writer**. Only this component (and its
-  `onSnippetChange` callback) mutates snippet state. Lenses are
-  read-only views (per
-  [`../../README.md` § Pedagogical first principles](../../README.md#pedagogical-first-principles)).
-- **CodeMirror integration via `orchestrate/lib/editing/`**. Don't
-  import CodeMirror directly here — go through the
-  `createEditor()` factory + callback API documented at
-  [`../lib/editing/README.md`](../lib/editing/README.md).
-- **Async setup**. `createEditor()` is async (dynamic language
-  loading). Use `useEffect` + state-machine OR `React.lazy` +
-  `<Suspense>` to handle the async mount; never block render.
-- React tests use `.test.tsx` + `jsdom`.
+- The default export is a frozen `LensModule` record (`freezeInPlace`
+  on the literal). The `LensMount` returned by `lens(code)` is also
+  frozen.
+- The replacement (Increment 15+) is required to keep the same file
+  path, the same default-export shape, and the `name: 'editor'`
+  identity so the orchestrator does not need to change.
 
 ## Navigation
 
-- **Parent**: [`../README.md`](../README.md) — `orchestrate/` peer
-  overview.
-- **Architectural sketch**: [`./DOCS.md`](./DOCS.md).
-- **Editor factory it wraps**: [`../lib/editing/README.md`](../lib/editing/README.md).
-- **Orchestrator that mounts it**: [`../orchestrator/README.md`](../orchestrator/README.md).
-- **Increment plan**: [`../../.planning-handoffs/03-orchestrator-and-contracts.md`](../../.planning-handoffs/03-orchestrator-and-contracts.md)
-  F1 + F2.
+- **Parent:** [`../README.md`](../README.md) — lenses index
+- **Architectural sketch:** [`./DOCS.md`](./DOCS.md)
+- **Types:** [`../../types.ts`](../../types.ts) (`LensModule`,
+  `LensMount`, `LensConfig`)
+- **Orchestrator wiring:** [`../../orchestrator/default-registry.ts`](../../orchestrator/default-registry.ts)
+- **Replacement plan:** Increments 15–18 in
+  [`../../../.planning-handoffs/04-lens-migration.md`](../../../.planning-handoffs/04-lens-migration.md)
