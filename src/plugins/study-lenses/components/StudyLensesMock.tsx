@@ -8,8 +8,8 @@
  * Prism highlighting, copy-to-clipboard, and dark-mode support for
  * free.
  *
- * V2 target: this mock is replaced by the rich study-lenses orchestrator
- * at `src/lib/welcome-to-programming/just-enough/javascript/study-lenses/orchestrator/`
+ * V2 target: this mock is replaced by the rich orchestrator at
+ * `src/lib/welcome-to-programming/just-enough/javascript/orchestrate/orchestrator/`
  * via an MDXComponents swizzle switch. The plugin emission path is
  * unchanged.
  */

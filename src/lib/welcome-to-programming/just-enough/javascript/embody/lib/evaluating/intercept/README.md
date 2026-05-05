@@ -673,7 +673,7 @@ To test interactively, start the Vite dev server from the project
 root:
 
 ```sh
-npx vite --config src/lib/welcome-to-programming/just-enough/javascript/lib/evaluating/intercept/vite.sandbox.config.ts
+npx vite --config src/lib/welcome-to-programming/just-enough/javascript/embody/lib/evaluating/intercept/vite.sandbox.config.ts
 ```
 
 Then open `http://localhost:5173/sandbox.html`.

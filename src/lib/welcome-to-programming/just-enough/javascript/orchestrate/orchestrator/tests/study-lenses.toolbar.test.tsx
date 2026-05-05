@@ -42,10 +42,10 @@ const dispatchSpy = vi.hoisted(function makeDispatchSpy() {
 	return vi.fn();
 });
 
-vi.mock('../../create-event-bus.js', async function mockEventBus() {
+vi.mock('../create-event-bus.js', async function mockEventBus() {
 	const original = await vi.importActual<
-		typeof import('../../create-event-bus.js')
-	>('../../create-event-bus.js');
+		typeof import('../create-event-bus.js')
+	>('../create-event-bus.js');
 	return {
 		default: function createSpyBus() {
 			const realBus = original.default();
