@@ -1,27 +1,32 @@
 /**
  * @file `embody(code)` — Phase A mock factory for the JEJ snippet contract.
  *
- * Phase A scaffolding. The body is a **mock** that satisfies the `Snippet`
- * contract from `./types.ts` without invoking any `embody/lib/*` internals
- * (the lib modules don't exist yet — they ship in Phase B per
- * `EMBODY-IMPL-HANDOFF.md`). The mock fabricates shape-valid stub data per
- * status-mode so downstream consumers (orchestrator, analysis libs, lenses)
- * can pin against the contract end-to-end before real internals exist.
+ * Phase A scaffolding. The body is a **named-scenario discriminator** that
+ * satisfies the `Snippet` contract from `./types.ts` without invoking any
+ * `embody/lib/*` internals (the lib modules don't exist yet — they ship in
+ * Phase B per `EMBODY-IMPL-HANDOFF.md`). Each named scenario fabricates
+ * shape-valid stub data so downstream consumers (orchestrator, analysis
+ * libs, lenses) can develop against specific status / validation / eval
+ * outcomes before real internals exist.
  *
  * Phase A's gate: consumers compile and tests pass against the mock.
  *
- * @remarks **Replaced in Phase B.** The mock body is replaced module by
- * module as `embody/lib/parse/`, `embody/lib/ast/`, `embody/lib/scope/`,
+ * @remarks **Replaced in Phase B.** The mock body is replaced when
+ * `embody/lib/parse/`, `embody/lib/ast/`, `embody/lib/scope/`,
  * `embody/lib/validating/`, `embody/lib/formatting/`, and
  * `embody/lib/evaluating/` land. The factory's contract (signature,
  * frozen output, deep-freeze pass) is stable; only the body changes.
+ * The named-scenario discriminator + the throw on unknown sentinels +
+ * `EMBODY_MOCK_SCENARIOS` all delete in the Phase B cleanup commit.
  *
- * ## Four-mode discriminator
+ * ## Eleven named scenarios
  *
- * The mock branches on `code` (exact `===` match) into four modes covering
- * the four staircase rungs of `Snippet.status`. This is the only place
- * the input string gates behavior; all four modes assemble a Snippet that
- * conforms to types.ts § 12 (lines 776-780) staircase semantics.
+ * The mock branches on `code` (exact `===` match) to one of 11 scenarios.
+ * Anything not in the named set throws `Error: Unknown embody mock
+ * scenario "..."`. This is intentional — orchestrator/lens dev passes
+ * scenario sentinels (e.g. `embody("FAIL_AT_PARSE")`,
+ * `embody("EVAL_TIMEOUT")`) while the mock is in place. Real JEJ source
+ * will work in Phase B when real tokenization replaces this body.
  *
  * ```text
  * code: string
@@ -29,75 +34,82 @@
  *   v
  * discriminate (exact === match)
  *   |
- *   |--- code === ""                         --> Z mode (tokenize-fail)
- *   |                                            status: {t:F, p:F, c:F}
- *   |                                            errors.phase: 'parse:tokenize'
- *   |
- *   |--- code === parse-fail sentinel        --> O mode (parse-fail)
- *   |                                            status: {t:T, p:F, c:F}
- *   |                                            errors.phase: 'parse:ast'
- *   |
- *   |--- code === create-fail sentinel       --> create-fail mode
- *   |                                            status: {t:T, p:T, c:F}
- *   |                                            errors.phase: 'create'
- *   |
- *   |--- else                                --> M mode (happy)
- *   |                                            status: {t:T, p:T, c:T}
- *   |                                            errors: null
+ *   |--- "OK"                  --> apex; all green; eval completes
+ *   |--- "FAIL_AT_TOKENIZE"    --> tokenize fails; status all false
+ *   |--- "FAIL_AT_PARSE"       --> parse fails; tokenized:T parsed:F
+ *   |--- "FAIL_AT_CREATE"      --> create fails; parsed:T created:F
+ *   |--- "VALIDATION_FAIL"     --> apex status; isJeJ:F + canned violation
+ *   |--- "NON_DETERMINISTIC"   --> apex status; nonDeterminism.random:T
+ *   |--- "PAUSES"              --> apex status; hasIo.user.total:1
+ *   |--- "EVAL_ERROR"          --> apex status; run() outcome:'errored'
+ *   |--- "EVAL_TIMEOUT"        --> apex status; run() outcome:'timed-out'
+ *   |--- "EVAL_LIMIT"          --> apex status; run() outcome:'limit-exceeded'
+ *   |--- "EVAL_CANCELLED"      --> apex status; run() outcome:'cancelled'
+ *   |--- anything else         --> throw
  *   |
  *   v
  * assemble Snippet per types.ts § 12 staircase
  *   |
  *   v
- * deepFreezeInPlace(snippet) — single freeze pass; visited-set
- * cycle guard handles the runInstance.snippet back-ref in happy mode
+ * deepFreezeInPlace — single freeze pass; visited-set cycle guard
+ * handles the runInstance.snippet back-ref in apex-status modes
  *   |
  *   v
  * frozen Snippet
  * ```
  *
- * The sentinel string literals are introduced in the O / create-fail
- * increments (kept out of this JSDoc to avoid the `*` + `/` comment-end
- * interaction).
+ * This is the Phase A *mock* discriminator path; the real eager-
+ * construction lifecycle (tokenize → AST → validate → create → static
+ * analyses) is in `embody/DOCS.md` § Data flow and replaces the
+ * `assemble` node when Phase B lands.
  *
- * ## Why the create-fail mode is fabricated
+ * ## Naming convention
  *
- * The spec at REFACTOR-HANDOFF.md § Step 5 enumerates three modes (empty,
- * parse-fail-sentinel, happy). The `!created` rung is added to fill the
- * staircase gap so Step 7 analysis libs reading `embodiment.static.*` (a
- * `created`-gated field) have a fixture to test the create-fail
- * short-circuit against. The fabricated `errors.phase: 'create'` ships
- * with `kind: 'SyntaxError'` and a clearly-labeled mock message; Step 7
- * tests should treat the `kind` and `message` as Phase-B-locked shape
- * (assert `errors.phase === 'create'`, NOT specific kind/message).
+ * - `FAIL_AT_<STAGE>` — the named stage's status flag is false.
+ *   `FAIL_AT_TOKENIZE` sets `status.tokenized: false`; subsequent
+ *   stages cascade-false per types.ts § 12 staircase.
+ * - `EVAL_<OUTCOME>` — apex `status.*: true`, but `run()` resolves to
+ *   a frozen `RunInstance` whose `endReport.outcome` is the named
+ *   outcome (`'errored' | 'timed-out' | 'limit-exceeded' | 'cancelled'`).
+ *   types.ts has no `status.evaluated` flag — eval failure is a
+ *   per-call `endReport.outcome` concern, hence the asymmetric name.
+ * - `OK`, `VALIDATION_FAIL`, `NON_DETERMINISTIC`, `PAUSES` — apex
+ *   status with overlay flips. `OK` is the unmodified apex.
  *
- * ## EvaluateHandle iteration semantics (Phase A)
+ * ## Phase-A-shape stub fields (open holes preserved)
  *
- * The `streams.evaluate.intercept`/`trace.{syntax,semantics}` handles in
- * happy mode yield zero events (the async iterator completes immediately),
- * `.cancel()` is a no-op (no microtask scheduling, no .result rejection),
- * and `.result` resolves with the same canned `RunInstance` that
- * `streams.evaluate.run()` produces. In create-fail mode, `streams.evaluate`
- * is absent from the streams partial bag entirely.
+ * Per `embody/DOCS.md` § "Open holes in the contract", several fields
+ * are intentionally unspecified. The mock honors this:
+ * - `Distribution.samples: []` (raw vs stats-only resolution open).
+ * - `HasIo` ships only `total` keys; per-method counts (alert/prompt/
+ *   confirm/log/etc) omitted (per-method-vs-sums-only resolution open).
+ * - `Features` ships only the 12 fields enumerated in types.ts.
+ * - The canned `Violation` for `VALIDATION_FAIL`, the eval-failure
+ *   `EmbodyError` shapes, and the create-fail `errors.kind` are all
+ *   Phase-A mock-shape; downstream tests should branch on the named
+ *   field (e.g. `errors.phase === 'create'`, `validation.violations.
+ *   length > 0`, `endReport.outcome === 'errored'`) rather than on
+ *   specific kind/message/path values.
  *
- * ## Open holes — minimum-shape-only stubs
+ * ## Anti-patterns to avoid (Phase B handoff rule)
  *
- * Per `embody/DOCS.md` § "Open holes in the contract", several fields are
- * intentionally unspecified. Stubs use minimum-shape-only values:
- * - `Distribution.samples: []` (empty array; min/max/mean/median = 0)
- * - `HasIo` ships only `total: 0`; per-method keys omitted (optional in types.ts)
- * - `Features` ships only the 12 fields enumerated in types.ts; all `false`
- *
- * Each stub helper has a `// open-hole stub` comment.
+ * Orchestrator and lens code MUST NOT branch on the sentinel string
+ * identity (e.g. `if (snippet.source.code === 'EVAL_TIMEOUT') ...`).
+ * Always branch on the resulting `Snippet`'s status / endReport /
+ * validation fields. Sentinels are inputs to `embody()` only; they
+ * are NOT consumed downstream. AR-4 / AR-5 audits should grep
+ * consumer code for sentinel literal occurrences and fail any
+ * non-test usage. This rule also lives in `EMBODY-IMPL-HANDOFF.md`.
  *
  * ## Public surface
  *
  * Default export: `embody(code: string): Snippet`. Internal-only per
  * `embody/README.md` (the package's public surface is the
- * `<StudyLenses>` orchestrator, not embody). The `embodyMock` override
- * builder for tests lands in a separate co-located file when
- * increment S is added; this file ships only the `embody` factory to
- * honor DEV.md § 1's single-default-export rule.
+ * `<StudyLenses>` orchestrator, not embody). Named export:
+ * `EMBODY_MOCK_SCENARIOS` — a frozen `ReadonlyArray<string>` of the
+ * 11 valid scenarios, used by the throw error message and by
+ * orchestrator dev / test fixtures that want to enumerate scenarios.
+ * `@internal` — Phase A scaffolding; deletes in Phase B.
  *
  * @see ./types.ts — the `Snippet` contract
  * @see ./DOCS.md — architectural sketch + § Open holes
@@ -116,6 +128,7 @@ import type {
 	BuiltinBinding,
 	ControlFlow,
 	EmbodyError,
+	EndReport,
 	EvaluateHandle,
 	EvaluateOptions,
 	Event,
@@ -136,85 +149,81 @@ import type {
 	StaticAnalyses,
 	TokenEvent,
 	Validation,
+	Violation,
 } from './types.js';
 
-/** Sentinel: `code` exactly equal to this string selects parse-fail mode. */
-const SENTINEL_PARSE_FAIL = '/' + '* MOCK_PARSE_FAIL *' + '/';
-
-/** Sentinel: `code` exactly equal to this string selects create-fail mode. */
-const SENTINEL_CREATE_FAIL = '/' + '* MOCK_CREATE_FAIL *' + '/';
+// ─────────────────────────────────────────────────────────────────────────────
+// Scenario list — single source of truth for the discriminator + throw message.
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Build a `Source` from the input string. Reused by O / M / create-fail
- * modes.
+ * The 11 named scenarios accepted by `embody(code)`.
  *
- * Fake It: `offsets` is always `[0]` (single-line). Real offset
- * computation lands in Phase B's tokenizer; for the Phase A mock the
- * empty array suffices to satisfy the type contract since no consumer
- * line-lookup logic exercises offsets in Phase A.
+ * @internal — Phase A mock scaffolding; deleted in Phase B when real
+ * tokenization replaces the discriminator. NOT re-exported from any
+ * package barrel.
  */
+const EMBODY_MOCK_SCENARIOS = Object.freeze([
+	'OK',
+	'FAIL_AT_TOKENIZE',
+	'FAIL_AT_PARSE',
+	'FAIL_AT_CREATE',
+	'VALIDATION_FAIL',
+	'NON_DETERMINISTIC',
+	'PAUSES',
+	'EVAL_ERROR',
+	'EVAL_TIMEOUT',
+	'EVAL_LIMIT',
+	'EVAL_CANCELLED',
+] as const);
+
+type EmbodyMockScenario = (typeof EMBODY_MOCK_SCENARIOS)[number];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers — shape-valid stubs reused across scenarios.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Build a `Source` from the input string. */
 function buildSource(code: string): Source {
 	return { code, offsets: [0] };
 }
 
-/**
- * Build the `validation` summary for a non-happy mode. All five fields
- * explicit per types.ts § 5. Reused by Z, O, and create-fail modes.
- *
- * open-hole stub: per REFACTOR-HANDOFF.md § Step 5 line 242, all
- * non-happy modes ship the same validation object (`isJeJ: true`,
- * `isDeterministic: true`, `doesPause: false`, `formatted: true`,
- * `violations: []`). The `isJeJ: true` for a snippet that failed to
- * tokenize is a known soft inconsistency — per the spec, the mock
- * doesn't compute JEJ-ness on un-tokenized source. M4 enforces the
- * derivation rules `isDeterministic = !any(nonDeterminism)` and
- * `doesPause = hasIo.user.total > 0` (per types.ts lines 380-381) for
- * happy mode where `static` is populated.
- */
-function buildEmptyValidation(): Validation {
-	return {
-		isJeJ: true,
-		isDeterministic: true,
-		doesPause: false,
-		formatted: true,
-		violations: [],
-	};
-}
-
-/** Empty realm-bindings generator. Yields nothing. Reused by Z, O, create-fail modes. */
+/** Empty realm-bindings generator. Yields nothing. */
 function* emptyRealmStream(): Generator<RealmBindingEvent> {
 	// intentionally empty — no events in the mock
 }
 
-/** Empty token-events generator. Yields nothing. Reused by Z, O, and create-fail modes. */
+/** Empty token-events generator. Yields nothing. */
 function* emptyTokenizeStream(): Generator<TokenEvent> {
 	// intentionally empty — no events in the mock
 }
 
-/**
- * Empty AST-node-events generator. Yields nothing. Present so the
- * `streams.parse` slot satisfies the full structural type from types.ts;
- * staircase semantics (Z mode shouldn't yield AST events) are guarded by
- * `status.parsed`, not by slot presence.
- */
+/** Empty AST-node-events generator. Yields nothing. */
 function* emptyParseStream(): Generator<NodeEvent> {
 	// intentionally empty — no events in the mock
 }
 
+/** Empty create-stream — yields no scope or binding events. */
+function* emptyCreateStream(): Generator<ScopeEvent | BindingEvent> {
+	// intentionally empty — no events in the mock
+}
+
+/** Empty async event stream for `EvaluateHandle`. Yields nothing, completes immediately. */
+async function* emptyEvaluateAsyncIterator(): AsyncGenerator<Event> {
+	// intentionally empty — no events in the mock
+}
+
+/** No-op cancel for `EvaluateHandle`. Phase A mock does not schedule cancellation. */
+function noOpCancel(): void {
+	// intentional no-op
+}
+
 /**
  * Build a single stub `AugmentedToken` representing the synthetic eof
- * marker for `code`. Used by O / create-fail / M modes where
- * `parse.tokens` must be non-empty per types.ts § 2 ("includes 'eof'
- * as the last element").
- *
- * The label `'eof'` is chosen so `innermostNode: null` complies with
- * the contract comment at types.ts line 92 ("null only for 'eof'").
- * Per-call fresh `TokenType` literal honors DOCS.md § "Per-instance,
- * no shared state" — no module-level shared object.
- *
- * If a future increment adds canned events, `event.node` must `===`
- * `snippet.parse.ast` (identity, not equality) per DOCS.md
- * § "Single static AST shared across runs".
+ * marker for `code`. The label `'eof'` is chosen so `innermostNode:
+ * null` complies with the contract comment at types.ts line 92
+ * ("null only for 'eof'"). Per-call fresh `TokenType` literal honors
+ * DOCS.md § "Per-instance, no shared state".
  */
 function makeStubToken(code: string): AugmentedToken {
 	return {
@@ -251,19 +260,13 @@ function makeStubDistribution(): Distribution {
 }
 
 /**
- * Build a `Metrics` deriving the safely-computable fields from
- * inputs (source.chars, source.lines, tokens). Distributions and
- * the rest stay zero per open-hole stub discipline.
- *
- * `Distribution.samples: []` is deliberate — DOCS.md § Open holes
- * leaves the raw-vs-stats-only resolution open.
+ * Build a `Metrics` deriving the safely-computable fields from inputs
+ * (source.chars, source.lines, tokens). Distributions and the rest
+ * stay zero per open-hole stub discipline.
  */
 function makeStubMetrics(code: string, tokensCount: number): Metrics {
 	return {
-		source: {
-			chars: code.length,
-			lines: code.split('\n').length,
-		},
+		source: { chars: code.length, lines: code.split('\n').length },
 		tokens: tokensCount,
 		nodes: 0,
 		comments: 0,
@@ -303,20 +306,43 @@ function makeStubControlFlow(): ControlFlow {
 	return { branches: [], breaks: [], continues: [] };
 }
 
-/** Build a zero-default `NonDeterminism`. */
-function makeStubNonDeterminism(): NonDeterminism {
-	return { random: false, clock: false, userInput: false, locale: false };
+/**
+ * Build a `NonDeterminism` record. By default all four sources
+ * (`random`, `clock`, `userInput`, `locale`) are false.
+ *
+ * For the `NON_DETERMINISTIC` scenario, `random: true` is set —
+ * arbitrary among the four sources; granularity not modeled in
+ * Phase A. If a lens differentiates by source, add `NON_DETERMINISTIC_
+ * CLOCK` / `_USER_INPUT` / `_LOCALE` modes on demand.
+ */
+function makeStubNonDeterminism(
+	overrides: Partial<NonDeterminism> = {},
+): NonDeterminism {
+	return {
+		random: false,
+		clock: false,
+		userInput: false,
+		locale: false,
+		...overrides,
+	};
 }
 
 /**
- * Build a zero-default `HasIo` — only `total: 0` keys; per-method keys
- * omitted (open-hole stub per DOCS.md § Open holes).
+ * Build a `HasIo` shape. By default all `total` keys are 0 and per-
+ * method keys are omitted (open-hole stub per DOCS.md § Open holes —
+ * per-method-vs-sums-only resolution is left open).
+ *
+ * For the `PAUSES` scenario, `user.total: 1` is set. This is the
+ * smallest value that makes `Validation.doesPause` derive to `true`
+ * per types.ts line 381. Per-method counts (alert/confirm/prompt)
+ * remain omitted; if a lens needs to differentiate the IO source,
+ * add `PAUSES_PROMPT` / `PAUSES_ALERT` modes on demand.
  */
-function makeStubHasIo(): HasIo {
+function makeStubHasIo(userTotal = 0): HasIo {
 	return {
-		user: { total: 0 },
+		user: { total: userTotal },
 		dev: { total: 0 },
-		total: 0,
+		total: userTotal,
 	};
 }
 
@@ -330,14 +356,9 @@ function builtin(
 }
 
 /**
- * Build a stub `Realm` carrying the canonical ECMA-262
- * intrinsics (per types.ts § 3 line 216) and the standard HTML host
- * bindings (per types.ts line 217). Per-call fresh records honor
- * DOCS.md § "Per-instance, no shared state".
- *
- * The set is enumerated by types.ts and is therefore not an open hole;
- * locking these names is by design. Per-method shape (the
- * `BuiltinBinding` interface) is separately locked in types.ts § 3.
+ * Build a stub `Realm` carrying the canonical ECMA-262 intrinsics and
+ * standard HTML host bindings (per types.ts § 3 lines 215-218). The
+ * set is enumerated by types.ts and is therefore not an open hole.
  */
 function makeStubRealm(): Realm {
 	const objectRegister: BuiltinBinding['category'] = 'object-register';
@@ -367,15 +388,15 @@ function makeStubRealm(): Realm {
 	};
 }
 
-/** Build a stub `InitialScope` — kind 'script', empty bindings, no outer. M2 enriches. */
+/** Build a stub `InitialScope` — kind 'script', empty bindings, no outer. */
 function makeStubInitialScope(): InitialScope {
 	return { kind: 'script', bindings: [], outer: null, nodePath: '$' };
 }
 
 /**
- * Build the stub `AugmentedASTNode` (Program root) for happy mode.
- * `acornNode` carries the underlying acorn-shape (a `Node` per acorn
- * typings) with a `body: []` array since we don't fabricate statements.
+ * Build the stub `AugmentedASTNode` (Program root) for apex-status
+ * scenarios. `acornNode` is a manual literal coerced to acorn's
+ * `Node` type (Phase A acceptable; Phase B uses real acorn output).
  */
 function makeStubProgram(code: string): AugmentedASTNode {
 	const acornNode = {
@@ -405,26 +426,7 @@ function makeStubProgram(code: string): AugmentedASTNode {
 	};
 }
 
-/** Empty create-stream — yields no scope or binding events. */
-function* emptyCreateStream(): Generator<ScopeEvent | BindingEvent> {
-	// intentionally empty — no events in the mock
-}
-
-/** Empty async event stream for `EvaluateHandle`. Yields nothing, completes immediately. */
-async function* emptyEvaluateAsyncIterator(): AsyncGenerator<Event> {
-	// intentionally empty — no events in the mock
-}
-
-/** No-op cancel for `EvaluateHandle`. Phase A mock does not schedule cancellation. */
-function noOpCancel(): void {
-	// intentional no-op
-}
-
-/**
- * Build an `EvaluateHandle` whose async iterator yields zero events,
- * `.cancel()` is a no-op, and `.result` resolves with the supplied
- * `runInstance`. Used by intercept and trace.{syntax, semantics} stubs.
- */
+/** Build an `EvaluateHandle` whose async iterator yields zero events. */
 function makeStubEvaluateHandle(runInstance: RunInstance): EvaluateHandle {
 	return {
 		[Symbol.asyncIterator]: emptyEvaluateAsyncIterator,
@@ -434,89 +436,179 @@ function makeStubEvaluateHandle(runInstance: RunInstance): EvaluateHandle {
 }
 
 /**
- * Build a stub `RunInstance` for happy mode. Eager construction per the
- * plan's locked design (AR-2 Concern A resolution): one canned
- * RunInstance per `embody(code)` call; back-ref `snippet` set after the
- * outer Snippet is constructed but before the deep-freeze pass — the
- * cycle is closed in a single freeze and cycle-safe via the WeakSet
- * guard in `@utils/deep-freeze-in-place`.
- *
- * `events: []` and a stub `Scope` for `finalEnvironment` keep the
- * happy-mode RunInstance shape-valid without fabricating evaluation
- * data.
+ * Build a `RunInstance` shell with the supplied `endReport`. The
+ * `snippet` back-ref is wired up after the outer Snippet is
+ * constructed; see `buildApexSnippet` for the assignment.
  */
-function makeStubRunInstance(initialScope: Scope): RunInstance {
+function makeStubRunInstance(
+	initialScope: Scope,
+	endReport: EndReport,
+): RunInstance {
 	return {
 		events: [],
-		endReport: { ok: true, error: null, outcome: 'completed' },
+		endReport,
 		finalEnvironment: initialScope,
 		runMetrics: { steps: 0, durationMs: 0, iterationCount: 0 },
-		// `snippet` is wired up after the outer Snippet object exists;
-		// see buildHappyModeSnippet for the assignment.
 		snippet: undefined as unknown as Snippet,
 	};
 }
 
 /**
- * Build a frozen `Snippet` for the given `code` string. Phase A mock
- * body — see file header for the four-mode discriminator and the
- * Phase B replacement plan.
- *
- * @param code - The JEJ source string. Empty string and well-known
- *   sentinel comments select non-happy modes; any other string is
- *   happy mode.
- * @returns A deep-frozen `Snippet` whose `status` reflects the
- *   staircase rung determined by `code`. All required fields per
- *   types.ts § 12 are present; optional fields gated by `status.*`
- *   follow the staircase rules.
+ * Build the canned `EmbodyError` for an evaluate-phase failure. The
+ * `kind` and `message` are Phase-A mock-shape; downstream tests should
+ * branch on `endReport.outcome`, NOT on these specifics.
  */
-function embody(code: string): Snippet {
-	if (code === '') {
-		return buildEmptySnippet(code);
-	}
-	if (code === SENTINEL_PARSE_FAIL) {
-		return buildParseFailSnippet(code);
-	}
-	if (code === SENTINEL_CREATE_FAIL) {
-		return buildCreateFailSnippet(code);
-	}
-	return buildHappyModeSnippet(code);
+function makeEvalError(outcome: EndReport['outcome']): EmbodyError {
+	return {
+		phase: 'evaluate',
+		kind: 'EvalError',
+		message: `mock: evaluate-phase ${outcome} (Phase A sentinel)`,
+		loc: null,
+	};
 }
 
-/** Build the empty-mode (tokenize-fail) Snippet. */
-function buildEmptySnippet(code: string): Snippet {
+/**
+ * Build the `endReport` for an apex-status mode given the requested
+ * outcome. `'completed'` → ok:true, error:null. All other outcomes
+ * → ok:false with a fabricated `EmbodyError`.
+ */
+function makeApexEndReport(outcome: EndReport['outcome']): EndReport {
+	if (outcome === 'completed') {
+		return { ok: true, error: null, outcome: 'completed' };
+	}
+	return { ok: false, error: makeEvalError(outcome), outcome };
+}
+
+/**
+ * The canned `Violation` used by the `VALIDATION_FAIL` scenario.
+ * Phase-A mock-shape: downstream tests should assert
+ * `validation.violations.length > 0` rather than specific
+ * kind/message/path values.
+ */
+function makeStubViolation(): Violation {
+	return {
+		kind: 'FunctionDeclaration',
+		message: 'mock: JEJ does not allow function declarations (Phase A sentinel)',
+		nodePath: '$.body[0]',
+		loc: {
+			start: { line: 1, column: 0 },
+			end: { line: 1, column: 1 },
+		},
+	};
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scenario builders.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Build the `validation` summary for a stage-failure mode. All five
+ * fields explicit per types.ts § 5. Reused by `FAIL_AT_*` modes —
+ * none of them populate `static`, so `validation` is shape-valid
+ * defaults rather than derived.
+ */
+function buildStageFailValidation(): Validation {
+	return {
+		isJeJ: true,
+		isDeterministic: true,
+		doesPause: false,
+		formatted: true,
+		violations: [],
+	};
+}
+
+/** Build the `FAIL_AT_TOKENIZE` Snippet — status all false. */
+function buildFailAtTokenizeSnippet(code: string): Snippet {
 	const snippet: Snippet = {
 		status: { tokenized: false, parsed: false, created: false },
 		source: buildSource(code),
 		parse: { tokens: [] },
-		validation: buildEmptyValidation(),
+		validation: buildStageFailValidation(),
 		errors: {
 			phase: 'parse:tokenize',
 			kind: 'SyntaxError',
-			message: 'empty source',
+			message: 'mock: tokenize-phase failure (Phase A sentinel)',
 			loc: null,
 		},
 		streams: {
 			realm: emptyRealmStream,
-			parse: {
-				tokenize: emptyTokenizeStream,
-				parse: emptyParseStream,
-			},
+			parse: { tokenize: emptyTokenizeStream, parse: emptyParseStream },
 		},
 	};
 	return deepFreezeInPlace(snippet);
 }
 
+/** Build the `FAIL_AT_PARSE` Snippet — tokenize OK, parse fails. */
+function buildFailAtParseSnippet(code: string): Snippet {
+	const snippet: Snippet = {
+		status: { tokenized: true, parsed: false, created: false },
+		source: buildSource(code),
+		parse: { tokens: [makeStubToken(code)] },
+		validation: buildStageFailValidation(),
+		errors: {
+			phase: 'parse:ast',
+			kind: 'SyntaxError',
+			message: 'mock: parse-phase failure (Phase A sentinel)',
+			loc: null,
+		},
+		streams: {
+			realm: emptyRealmStream,
+			parse: { tokenize: emptyTokenizeStream, parse: emptyParseStream },
+		},
+	};
+	return deepFreezeInPlace(snippet);
+}
+
+/** Build the `FAIL_AT_CREATE` Snippet — parse OK, creation fails. `static` absent; `streams.evaluate` absent. */
+function buildFailAtCreateSnippet(code: string): Snippet {
+	const ast = makeStubProgram(code);
+	const snippet: Snippet = {
+		status: { tokenized: true, parsed: true, created: false },
+		source: buildSource(code),
+		parse: {
+			tokens: [makeStubToken(code)],
+			comments: [],
+			ast,
+			nodesByPath: { $: ast },
+			tokensByOffset: {},
+			nodesByOffset: { 0: ast },
+		},
+		validation: buildStageFailValidation(),
+		errors: {
+			phase: 'create',
+			kind: 'SyntaxError',
+			message: 'mock: create-phase failure (Phase A sentinel)',
+			loc: null,
+		},
+		streams: {
+			realm: emptyRealmStream,
+			parse: { tokenize: emptyTokenizeStream, parse: emptyParseStream },
+			create: emptyCreateStream,
+		},
+	};
+	return deepFreezeInPlace(snippet);
+}
+
+/** Apex overlay parameters — the orthogonal axes one apex-status scenario can flip. */
+type ApexOverlay = {
+	readonly violations: ReadonlyArray<Violation>;
+	readonly nonDeterminismOverride: Partial<NonDeterminism>;
+	readonly hasIoUserTotal: number;
+	readonly evalOutcome: EndReport['outcome'];
+};
+
 /**
- * Build the happy-mode Snippet (any non-empty, non-sentinel input).
- * All status booleans true; full parse graph + static analyses + every
- * stream slot. Eager `RunInstance` construction with back-ref wired
- * to the snippet identity; deep-freeze handles the cycle natively.
+ * Build an apex-status Snippet with the supplied overlay. All seven
+ * apex-status scenarios (`OK`, `VALIDATION_FAIL`, `NON_DETERMINISTIC`,
+ * `PAUSES`, `EVAL_ERROR`, `EVAL_TIMEOUT`, `EVAL_LIMIT`,
+ * `EVAL_CANCELLED`) share this code path with different overlays.
  *
- * Replaces the empty-mode return for any input that is not the empty
- * string and not a known sentinel.
+ * Eager `RunInstance` construction with back-ref wired to the snippet
+ * identity; `deepFreezeInPlace(runInstance)` walks `.snippet` into
+ * the snippet graph in one pass and is cycle-safe via the visited-
+ * set guard.
  */
-function buildHappyModeSnippet(code: string): Snippet {
+function buildApexSnippet(code: string, overlay: ApexOverlay): Snippet {
 	const ast = makeStubProgram(code);
 	const initialScope = makeStubInitialScope();
 	const tokens = [makeStubToken(code)];
@@ -528,19 +620,21 @@ function buildHappyModeSnippet(code: string): Snippet {
 		features: makeStubFeatures(),
 		metrics: makeStubMetrics(code, tokens.length),
 		controlFlow: makeStubControlFlow(),
-		nonDeterminism: makeStubNonDeterminism(),
-		hasIo: makeStubHasIo(),
+		nonDeterminism: makeStubNonDeterminism(overlay.nonDeterminismOverride),
+		hasIo: makeStubHasIo(overlay.hasIoUserTotal),
 	};
-	const runInstance = makeStubRunInstance(initialScope);
+	const runInstance = makeStubRunInstance(
+		initialScope,
+		makeApexEndReport(overlay.evalOutcome),
+	);
 	const nd = staticAnalyses.nonDeterminism;
 	const validation: Validation = {
-		isJeJ: true,
-		// derive per types.ts lines 380-381 — keeps the implementation
-		// honest if a future increment flips a nonDeterminism stub.
+		isJeJ: overlay.violations.length === 0,
+		// Derive per types.ts lines 380-381.
 		isDeterministic: !(nd.random || nd.clock || nd.userInput || nd.locale),
 		doesPause: staticAnalyses.hasIo.user.total > 0,
 		formatted: true,
-		violations: [],
+		violations: overlay.violations,
 	};
 	const snippet: Snippet = {
 		status: { tokenized: true, parsed: true, created: true },
@@ -558,10 +652,7 @@ function buildHappyModeSnippet(code: string): Snippet {
 		errors: null,
 		streams: {
 			realm: emptyRealmStream,
-			parse: {
-				tokenize: emptyTokenizeStream,
-				parse: emptyParseStream,
-			},
+			parse: { tokenize: emptyTokenizeStream, parse: emptyParseStream },
 			create: emptyCreateStream,
 			evaluate: {
 				run: (_options?: EvaluateOptions): Promise<RunInstance> =>
@@ -583,91 +674,106 @@ function buildHappyModeSnippet(code: string): Snippet {
 	// eslint-disable-next-line functional/immutable-data
 	(runInstance as { snippet: Snippet }).snippet = snippet;
 
-	// Freeze the runInstance first so its walk includes runInstance.snippet
-	// (the back-ref to the snippet object); that walk freezes the entire
-	// snippet graph in one pass. The visited-set cycle guard inside
-	// `@utils/deep-freeze-in-place` prevents infinite recursion. Functions
-	// (the streams.evaluate.* closures inside snippet) are not walked
-	// recursively but are themselves frozen by Object.freeze, which is
-	// what the deep-freeze utility applies. Both runInstance and snippet
-	// are fully frozen after this single call.
+	// Freeze the runInstance first; its walk includes runInstance.snippet
+	// which freezes the entire snippet graph in one pass. The visited-set
+	// cycle guard inside `@utils/deep-freeze-in-place` prevents infinite
+	// recursion. Both runInstance and snippet are fully frozen after this
+	// single call.
 	deepFreezeInPlace(runInstance);
 	return snippet;
 }
 
-/**
- * Build the create-fail-sentinel-mode Snippet. Tokenize and parse
- * succeeded; creation (`GlobalDeclarationInstantiation` per
- * ECMA-262 §16.1.7) failed. `static` is absent (creation didn't
- * complete); `streams.evaluate` is omitted (creation gate is the
- * prerequisite). `streams.create` is exposed but yields nothing in
- * the mock — consumers reading creation events should guard on
- * `status.created` first.
- *
- * The fabricated `errors.kind: 'SyntaxError'` and the mock-labeled
- * message are deliberate per AR-1 Concern C: Phase B will produce real
- * create-phase error shapes; downstream tests against the mock should
- * branch on `errors.phase === 'create'`, not on specific kind/message.
- */
-function buildCreateFailSnippet(code: string): Snippet {
-	const ast = makeStubProgram(code);
-	const errors: EmbodyError = {
-		phase: 'create',
-		kind: 'SyntaxError',
-		message: 'mock: create-phase failure (Phase A sentinel)',
-		loc: null,
-	};
-	const snippet: Snippet = {
-		status: { tokenized: true, parsed: true, created: false },
-		source: buildSource(code),
-		parse: {
-			tokens: [makeStubToken(code)],
-			comments: [],
-			ast,
-			nodesByPath: { $: ast },
-			tokensByOffset: {},
-			nodesByOffset: { 0: ast },
-		},
-		validation: buildEmptyValidation(),
-		errors,
-		streams: {
-			realm: emptyRealmStream,
-			parse: {
-				tokenize: emptyTokenizeStream,
-				parse: emptyParseStream,
-			},
-			create: emptyCreateStream,
-		},
-	};
-	return deepFreezeInPlace(snippet);
-}
+const APEX_OVERLAYS: Readonly<Record<string, ApexOverlay>> = Object.freeze({
+	OK: {
+		violations: [],
+		nonDeterminismOverride: {},
+		hasIoUserTotal: 0,
+		evalOutcome: 'completed',
+	},
+	VALIDATION_FAIL: {
+		violations: [makeStubViolation()],
+		nonDeterminismOverride: {},
+		hasIoUserTotal: 0,
+		evalOutcome: 'completed',
+	},
+	NON_DETERMINISTIC: {
+		violations: [],
+		nonDeterminismOverride: { random: true },
+		hasIoUserTotal: 0,
+		evalOutcome: 'completed',
+	},
+	PAUSES: {
+		violations: [],
+		nonDeterminismOverride: {},
+		hasIoUserTotal: 1,
+		evalOutcome: 'completed',
+	},
+	EVAL_ERROR: {
+		violations: [],
+		nonDeterminismOverride: {},
+		hasIoUserTotal: 0,
+		evalOutcome: 'errored',
+	},
+	EVAL_TIMEOUT: {
+		violations: [],
+		nonDeterminismOverride: {},
+		hasIoUserTotal: 0,
+		evalOutcome: 'timed-out',
+	},
+	EVAL_LIMIT: {
+		violations: [],
+		nonDeterminismOverride: {},
+		hasIoUserTotal: 0,
+		evalOutcome: 'limit-exceeded',
+	},
+	EVAL_CANCELLED: {
+		violations: [],
+		nonDeterminismOverride: {},
+		hasIoUserTotal: 0,
+		evalOutcome: 'cancelled',
+	},
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Discriminator entry point.
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Build the parse-fail-sentinel-mode Snippet. Tokenize succeeded
- * (status.tokenized: true), parse failed (status.parsed: false).
+ * Build a frozen `Snippet` for the given scenario sentinel. Phase A
+ * mock body — see file header for the eleven-scenario discriminator
+ * and the Phase B replacement plan.
+ *
+ * @param code - One of the strings in `EMBODY_MOCK_SCENARIOS`. Any
+ *   other input throws.
+ * @returns A deep-frozen `Snippet` whose status / validation / static /
+ *   eval outcome reflects the named scenario.
+ * @throws `Error` when `code` is not a recognized scenario sentinel.
  */
-function buildParseFailSnippet(code: string): Snippet {
-	const errors: EmbodyError = {
-		phase: 'parse:ast',
-		kind: 'SyntaxError',
-		message: 'mock: parse failure (Phase A sentinel)',
-		loc: null,
-	};
-	const snippet: Snippet = {
-		status: { tokenized: true, parsed: false, created: false },
-		source: buildSource(code),
-		parse: { tokens: [makeStubToken(code)] },
-		validation: buildEmptyValidation(),
-		errors,
-		streams: {
-			realm: emptyRealmStream,
-			parse: {
-				tokenize: emptyTokenizeStream,
-				parse: emptyParseStream,
-			},
-		},
-	};
-	return deepFreezeInPlace(snippet);
+function embody(code: string): Snippet {
+	if (code === 'FAIL_AT_TOKENIZE') {
+		return buildFailAtTokenizeSnippet(code);
+	}
+	if (code === 'FAIL_AT_PARSE') {
+		return buildFailAtParseSnippet(code);
+	}
+	if (code === 'FAIL_AT_CREATE') {
+		return buildFailAtCreateSnippet(code);
+	}
+	if (Object.hasOwn(APEX_OVERLAYS, code)) {
+		return buildApexSnippet(code, APEX_OVERLAYS[code]);
+	}
+	throw new Error(
+		`Unknown embody mock scenario: ${JSON.stringify(code)}. Expected one of: ${EMBODY_MOCK_SCENARIOS.join(', ')}.`,
+	);
 }
 
 export default embody;
+
+/* eslint-disable import/no-named-export -- Phase A mock scaffolding;
+   EMBODY_MOCK_SCENARIOS is the @internal source-of-truth list used by
+   the throw error message and by orchestrator dev / test fixtures.
+   Deletes in Phase B alongside the discriminator. Type re-export
+   rides alongside per the same justification. */
+export { EMBODY_MOCK_SCENARIOS };
+export type { EmbodyMockScenario };
+/* eslint-enable import/no-named-export */

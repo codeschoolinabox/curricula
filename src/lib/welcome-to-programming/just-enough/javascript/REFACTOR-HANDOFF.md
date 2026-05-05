@@ -192,94 +192,147 @@ checks; only strip the boundary defenses.
 data; the test suite still passes; no public boundary leaks unfrozen
 data (because nothing public consumes raw `embody/lib/*` outputs yet).
 
-### Step 5 — Build a full mock of `embody(code)`
+### Step 5 — Build a named-scenario mock of `embody(code)`
 
-> **Phase A — pivot from earlier draft.** This step builds a frozen-
-> output mock that satisfies the `Snippet` contract from
+> **Phase A — named-scenario discriminator.** This step builds a
+> frozen-output mock that satisfies the `Snippet` contract from
 > [`embody/types.ts`](./embody/types.ts) **without invoking any
 > `embody/lib/*` internals** (the lib is copied/built in Phase B). The
 > real per-module composition replaces this mock body in
 > [`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md) once each
 > module's pedagogical re-typing is locked.
+>
+> Orchestrator and lens dev passes scenario sentinels (e.g.
+> `embody("FAIL_AT_PARSE")`, `embody("EVAL_TIMEOUT")`) to drive
+> specific UI paths without authoring real JEJ source. Phase B
+> replaces the discriminator with real tokenization; the sentinels
+> become defunct and the discriminator + scenarios delete in one
+> cleanup commit.
 
-The mock at `embody/index.ts` (or similar) must:
+The mock at `embody/index.ts` must:
 
-1. **Be input-discriminated, not a constant.** Phase A's gate is
-   "consumers compile and tests pass against the mock"; that gate is
-   only meaningful if the mock can produce the staircase failures the
-   `status` booleans gate against. At minimum three modes:
-   - `code === ""` (empty) → tokenize fails: `status.tokenized: false`,
-     `status.parsed: false`, `status.created: false`,
-     `errors: { phase: 'parse:tokenize', kind: 'SyntaxError', message:
-     'empty source', loc: null }`. Per types.ts § 12 staircase
-     comment: only `source`, `parse.tokens` (partial), `errors`,
-     `validation`, `streams.realm`, `streams.parse.tokenize` are
-     available; everything else is per-status absent.
-   - Sentinel `code === '/* MOCK_PARSE_FAIL */'` (or similar
-     well-known marker) → tokenize succeeds, parse fails:
-     `status.tokenized: true, parsed: false, created: false`,
-     `errors: { phase: 'parse:ast', … }`.
-   - Anything else → happy path: all `status.*: true`, `errors: null`.
+1. **Discriminate on a closed set of named-scenario sentinels.**
+   The mock branches on `code` (exact `===` match) into one of 11
+   scenarios. Anything not in the named set throws
+   `Error: Unknown embody mock scenario: "<input>". Expected one of: …`.
 
-   Plus an exported override builder:
-   `embodyMock(code).with({ status: { … }, errors: { … }, … })` so
-   Step 7 / Step 11 tests can construct partial-status fixtures
-   without tripping the sentinel logic. The override builder accepts
-   a deep-partial of `Snippet` and merges right-wins before freezing.
+   The 11 scenarios:
+
+   | Sentinel | status | errors | static | run().endReport |
+   | --- | --- | --- | --- | --- |
+   | `OK` | t:T p:T c:T | null | full | ok:T outcome:'completed' |
+   | `FAIL_AT_TOKENIZE` | t:F p:F c:F | parse:tokenize | absent | n/a (streams.evaluate absent) |
+   | `FAIL_AT_PARSE` | t:T p:F c:F | parse:ast | absent | n/a |
+   | `FAIL_AT_CREATE` | t:T p:T c:F | create | absent | n/a |
+   | `VALIDATION_FAIL` | t:T p:T c:T | null | full + violations | ok:T outcome:'completed' |
+   | `NON_DETERMINISTIC` | t:T p:T c:T | null | nonDeterminism.random:T | ok:T outcome:'completed' |
+   | `PAUSES` | t:T p:T c:T | null | hasIo.user.total:1 | ok:T outcome:'completed' |
+   | `EVAL_ERROR` | t:T p:T c:T | null | full | ok:F outcome:'errored' |
+   | `EVAL_TIMEOUT` | t:T p:T c:T | null | full | ok:F outcome:'timed-out' |
+   | `EVAL_LIMIT` | t:T p:T c:T | null | full | ok:F outcome:'limit-exceeded' |
+   | `EVAL_CANCELLED` | t:T p:T c:T | null | full | ok:F outcome:'cancelled' |
+
+   Naming convention:
+
+   - `FAIL_AT_<STAGE>` — the named stage's status flag is false; the
+     subsequent stages cascade-false per types.ts § 12 staircase.
+   - `EVAL_<OUTCOME>` — apex `status.*: true`, but `run()` resolves
+     to a frozen `RunInstance` whose `endReport.outcome` matches.
+     types.ts has no `status.evaluated` flag (eval failure is a
+     per-call `endReport.outcome` concern), hence the asymmetric
+     shape vs. the `FAIL_AT_*` family.
+   - `OK`, `VALIDATION_FAIL`, `NON_DETERMINISTIC`, `PAUSES` — apex
+     status with overlay flips on validation / nonDeterminism /
+     hasIo respectively.
+
+   Composition is **not** supported. A snippet that needs `OK +
+   NON_DETERMINISTIC + PAUSES` gets a future `NON_DETERMINISTIC_AND_
+   PAUSES` named mode added when a lens needs it. If the combo
+   surface exceeds N=3 modes, revisit composition.
+
+   The scenario list is exported as a frozen
+   `EMBODY_MOCK_SCENARIOS: ReadonlyArray<string>` named export from
+   `embody/index.ts` so the throw error message, orchestrator dev
+   code, and test fixtures share one source. The named export is
+   `@internal` Phase A scaffolding; deletes in Phase B.
 
 2. Accept `(code: string) => Snippet`. Return a deep-frozen object
    that satisfies the `Snippet` type from
    [`embody/types.ts`](./embody/types.ts) (lines 784-803). Fabricate
    shape-valid stub data per status-mode:
 
-   | Field | Empty / parse-fail | Happy path |
-   | --- | --- | --- |
-   | `source` | `Source` from `code` (whitespace-only OK) | same |
-   | `parse.tokens` | `[]` (empty per "partial" allowance) | array with one fake `AugmentedToken` spanning `[0, code.length]` |
-   | `parse.comments` | `[]` | `[]` |
-   | `parse.ast` | absent (not parsed) | fake `Program` node with `body: []`, wrapping a stub `acornNode` of `type: 'Program'` |
-   | `static.*` | absent (not created) | every sub-field per types.ts §5 (`realm`, `initialScope`, `scope`, `dependencies`, `features`, `metrics`, `controlFlow`, `nonDeterminism`, `hasIo`) populated with empty-state defaults conforming to types.ts |
-   | `validation` | `{ isJeJ: true, isDeterministic: true, doesPause: false, formatted: true, violations: [] }` | same |
-   | `errors` | per-mode (see above) | `null` |
-   | `status` | per-mode | all `true` |
+   | Field | FAIL_AT_TOKENIZE | FAIL_AT_PARSE | FAIL_AT_CREATE | apex (OK + overlays + EVAL_*) |
+   | --- | --- | --- | --- | --- |
+   | `source` | `Source` from `code` | same | same | same |
+   | `parse.tokens` | `[]` | one stub `AugmentedToken` (eof) | same as parse | same as parse |
+   | `parse.comments` | absent | absent | `[]` | `[]` |
+   | `parse.ast` | absent | absent | stub `Program` AST + acornNode | same as create-fail |
+   | `static.*` | absent | absent | absent | every sub-field per types.ts §4 populated with empty-state defaults; `realm` carries the canonical ECMA-262 + HTML host bindings; `metrics.source.{chars,lines,tokens}` derive from `code` and `tokens` |
+   | `validation` | `{ isJeJ:T, isDeterministic:T, doesPause:F, formatted:T, violations:[] }` | same | same | derived per types.ts lines 380-381 (`isDeterministic = !any(nonDeterminism)`, `doesPause = hasIo.user.total > 0`); `violations` non-empty only for `VALIDATION_FAIL`; `isJeJ === violations.length === 0` |
+   | `errors` | `parse:tokenize` mock | `parse:ast` mock | `create` mock | `null` |
+   | `status` | t:F p:F c:F | t:T p:F c:F | t:T p:T c:F | t:T p:T c:T |
 
-   **All five `Validation` fields** must be set explicitly (per
-   types.ts lines 378-384: `isJeJ`, `isDeterministic`, `doesPause`,
-   `formatted`, `violations`). The earlier "etc." in this spec is
-   not acceptable; enumerate every field.
+   **All five `Validation` fields** are set explicitly (per types.ts
+   lines 378-384). For `FAIL_AT_*` modes (no `static`), the
+   validation values are stub defaults; for apex modes, validation
+   derives from the populated `static.*` per the contract.
+
+   **Open holes preserved** (per `embody/DOCS.md` § Open holes):
+   - `Distribution.samples: []` (raw vs stats-only resolution open).
+   - `HasIo` ships only `total` keys; per-method counts (alert/
+     prompt/confirm/log/etc) omitted (per-method-vs-sums-only
+     resolution open).
+   - `Features` ships only the 12 fields enumerated in types.ts.
+   - The canned `Violation` for `VALIDATION_FAIL`, the eval-failure
+     `EmbodyError` shapes (`endReport.error`), and the
+     `FAIL_AT_<STAGE>` `errors.kind` are all Phase-A mock-shape;
+     downstream tests should branch on the named field (e.g.
+     `errors.phase === 'create'`, `validation.violations.length > 0`,
+     `endReport.outcome === 'errored'`) rather than on specific
+     kind/message/path values.
 
 3. **Stream method shapes match types.ts § Streams (lines 747-770)
    exactly.** The mock returns the right shape, not just the right
    slot:
 
-   - `streams.realm()` → `Generator<RealmBindingEvent>` (mock yields
-     nothing or one canned event).
+   - `streams.realm()` → `Generator<RealmBindingEvent>` (yields
+     nothing in the mock).
    - `streams.parse.tokenize()` → `Generator<TokenEvent>`.
    - `streams.parse.parse()` → `Generator<NodeEvent>`.
-   - `streams.create()` → `Generator<ScopeEvent | BindingEvent>`.
+   - `streams.create()` → `Generator<ScopeEvent | BindingEvent>` —
+     present in `FAIL_AT_CREATE` and apex modes; absent in
+     `FAIL_AT_TOKENIZE` and `FAIL_AT_PARSE`.
    - `streams.evaluate.run(options?)` → **`Promise<RunInstance>`**
-     (NOT a `RunInstance`). Resolves to a frozen `RunInstance` with
-     `events: []`, `endReport` carrying `success`, `finalEnvironment`
-     a stub `Scope`, `runMetrics` per types.ts § 10.
-   - `streams.evaluate.intercept(options?)` →
-     **`EvaluateHandle`** (sync return; async-iterable + `.result`
-     Promise per types.ts lines 742-745).
-   - `streams.evaluate.trace.{syntax, semantics}(options?)` →
-     **`EvaluateHandle`**.
+     (NOT a `RunInstance`). Apex modes resolve to a frozen
+     `RunInstance` with `events: []`, `endReport` per the scenario,
+     `finalEnvironment` a stub `Scope`, `runMetrics` per types.ts
+     § 10. Absent in `FAIL_AT_*` modes.
+   - `streams.evaluate.intercept(options?)` → **`EvaluateHandle`**
+     (sync return; async-iterable yielding zero events; `.result`
+     Promise resolving to the same canned `RunInstance` `run()`
+     produces; `.cancel()` is a no-op).
+   - `streams.evaluate.trace.{syntax, semantics}(options?)` → same
+     `EvaluateHandle` shape as intercept.
 
-   Generators may be empty (`function* () {}`); `EvaluateHandle`
-   instances may resolve immediately to an empty-events
-   `RunInstance`.
+4. **Deep-freeze the returned graph.** Apex-status modes wire the
+   `RunInstance.snippet` back-ref before freezing; calling
+   `deepFreezeInPlace(runInstance)` walks `.snippet` into the snippet
+   graph and freezes both in one pass. The
+   [`@utils/deep-freeze-in-place`](../../utils/deep-freeze-in-place.ts)
+   utility's visited-set guard prevents infinite recursion on the
+   cycle. `FAIL_AT_*` modes have no `RunInstance` and freeze the
+   snippet directly.
 
-4. **Deep-freeze the returned graph including back-references.**
-   `RunInstance.snippet` (types.ts line 711) is a back-ref to the
-   embodiment that produced it. The existing
-   [`@/utils/deep-freeze-in-place`](../../utils/deep-freeze-in-place.ts)
-   utility tracks visited objects via a `WeakSet` parameter, so cycles
-   are handled natively — wire `RunInstance.snippet` to the same
-   frozen `Snippet` reference and call the freezer on the snippet
-   graph; the back-ref is visited-once and skipped on re-entry. No
-   need for a lazy getter.
+5. **No consumer-side sentinel string branching** (Phase B handoff
+   rule). Orchestrator and lens code MUST NOT branch on the sentinel
+   string identity (e.g. `if (snippet.source.code === 'EVAL_TIMEOUT')`).
+   Always branch on the resulting Snippet's status / endReport /
+   validation fields. Sentinels are inputs to `embody()` only; they
+   are NOT consumed downstream. This rule is durable across Phase A
+   and survives Phase B unchanged: in Phase B, `snippet.source.code`
+   becomes real source, and any consumer code that branched on the
+   sentinel breaks. AR-4 / AR-5 audits should grep consumer code for
+   sentinel literal occurrences and fail any non-test usage.
 
 **Why a mock first.** Pinning the consumption surface (orchestrator,
 analysis libs in Step 7, lenses post-WS4) lets Phase A complete the
@@ -287,18 +340,19 @@ structural refactor without first solving real embody internals.
 Token + AST type pedagogy refinement, event-payload locking, and the
 generator surfaces all live in Phase B.
 
-**Verify:** `embody(code)` returns a Snippet for any input string;
-TypeScript compiles end-to-end against the returned shape;
-`Object.isFrozen(snippet) === true` (recursively, including the
-`RunInstance.snippet` back-ref); mutation attempts throw in strict
-mode; the three input modes produce three distinct `status` shapes;
-the override builder produces shape-valid fixtures with the
-overridden fields applied; downstream code (Step 7 onward) can call
-all the methods on `streams.*` without runtime errors **across all
-three modes** (especially: an analysis lib must successfully
-short-circuit on `embodiment.status.parsed === false`). At least one
-mock fixture in each mode round-trips through a downstream consumer
-(e.g. an analysis lib from Step 7) end-to-end.
+**Verify:** `embody(code)` returns a Snippet for any of the 11
+scenario sentinels; `embody("anything-else")` throws; TypeScript
+compiles end-to-end against the returned shape;
+`Object.isFrozen(snippet) === true` recursively across all 11
+scenarios; mutation attempts throw in strict mode; the eleven inputs
+produce eleven distinct combinations of `status` /
+`validation.isJeJ` / `static.nonDeterminism.random` /
+`static.hasIo.user.total` / `endReport.outcome`; downstream code
+(Step 7 onward) can call all the methods on `streams.*` without
+runtime errors **across all apex-status scenarios** (especially: an
+analysis lib must successfully short-circuit on
+`embodiment.status.parsed === false` and `embodiment.status.created
+=== false` without crashing on absent optional fields).
 
 ### Step 6 — Validate new `embody/lib/parse/` against `parse-old/`
 
@@ -556,14 +610,16 @@ each individually, document why in the deletion commit body).
 - [ ] Step 1: `@`-alias resolves from each peer; `src/lib/utils/` is
       unchanged.
 - [ ] Step 5: mock `embody(code)` returns a deep-frozen `Snippet`
-      across all three input modes (empty / parse-fail / happy);
-      override builder works; TypeScript compiles end-to-end against
-      the returned shape.
+      across all 11 named-scenario sentinels (`OK`, `FAIL_AT_*`,
+      `VALIDATION_FAIL`, `NON_DETERMINISTIC`, `PAUSES`, `EVAL_*`);
+      `embody("<unknown>")` throws; TypeScript compiles end-to-end
+      against the returned shape.
 - [ ] Step 7: each analysis lib (`recommender`, `socratizing`,
       `completing`, `editing`, `error-interpreting`,
       `jej-documentation`) accepts `(embodiment: Snippet)`; tests
-      pass against all three mock modes; no `lib/parse-old/` or
-      `lib/ast/` imports remain.
+      pass against the relevant scenario sentinels covering each
+      staircase rung; no `lib/parse-old/` or `lib/ast/` imports
+      remain.
 - [ ] Step 9 (executed before Step 8): all six analysis libs are
       **copied** to `orchestrate/lib/` (originals at
       `javascript/lib/*` kept). Phase-A-touched consumers

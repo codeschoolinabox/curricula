@@ -378,6 +378,17 @@ surfaces at the trigger moment; the lens displays whatever it
 displays for an unparseable embodiment (per its own
 error-surface contract).
 
+**Phase A note**: while the embody mock is in place
+(`REFACTOR-HANDOFF.md` § Step 5), the F3 sandbox drives the parse-
+error UX path by passing scenario sentinels (e.g. `embody("FAIL_AT_
+PARSE")`, `embody("FAIL_AT_TOKENIZE")`) instead of real source.
+The "type a snippet" sandbox flow that exercises real tokenization
+unblocks fully in Phase B when real `embody/lib/parse/` lands.
+Orchestrator code MUST NOT branch on the sentinel string identity —
+always branch on the resulting `Snippet`'s `status` / `errors`
+fields so the orchestrator works unchanged when Phase B switches
+the discriminator out.
+
 #### F4 — First trial lens against the new contract
 
 Implement one lens (parsons or blanks) at `lenses/<name>/`

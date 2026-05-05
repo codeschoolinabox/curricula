@@ -44,6 +44,18 @@ adds the following:
   annotations) gets first-class type representation. This is why the
   Phase A mock can't be "implementation in disguise" — the real
   internals need shape rework that the mock isn't blocking.
+- **No consumer-side sentinel string branching** (Phase A handoff
+  rule that survives into Phase B). Orchestrator and lens code MUST
+  NOT branch on the sentinel string identity (e.g. `if (snippet.
+  source.code === 'EVAL_TIMEOUT')`). Always branch on the resulting
+  `Snippet`'s `status` / `endReport` / `validation` fields. The
+  Phase-A mock's named scenarios (`OK`, `FAIL_AT_*`, `EVAL_*`, etc.)
+  exist only as inputs to `embody()` during Phase A dev; they
+  vanish in Phase B when real tokenization replaces the
+  discriminator. Any consumer that branches on a sentinel literal
+  silently breaks at the Phase B switchover. AR-4 / AR-5 audits
+  grep consumer code for sentinel literals and fail any non-test
+  occurrence.
 
 ## Ordered steps
 
