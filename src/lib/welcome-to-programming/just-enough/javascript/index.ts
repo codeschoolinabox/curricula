@@ -14,5 +14,5 @@
  * as the primary entry.
  */
 
-export { StudyLenses } from './orchestrate/index.js';
+export { default as StudyLenses } from './orchestrate/index.js';
 export type { StudyLensesProps } from './orchestrate/types.js';
