@@ -129,7 +129,7 @@ type Sibling = Readonly<{
  * @remarks `config` is serialization-tolerant — it arrives as either
  * a structured object (when the remark-rehype pipeline round-trips
  * objects cleanly) or a JSON-stringified representation (fallback).
- * Consumers decode via the shared `parseLensConfig` utility.
+ * Consumers decode via a fallback-tolerant config parser.
  */
 type StudyLensesHastProps = Readonly<{
 	code: string;

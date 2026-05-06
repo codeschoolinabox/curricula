@@ -5,10 +5,11 @@ A build-time Docusaurus plugin that pre-processes markdown content in the
 `<StudyLenses>` React component, and every `.js` file co-located with an
 `index.md` page auto-embeds into that page.
 
-V1 is **pipeline plumbing with a mock component**: the `<StudyLenses>` emitted by
-the plugin is a styled `<pre><code>` with labels showing the lens and language
-identifiers. The rich study environment (CodeMirror editor, trace table,
-run/debug/socratizing) is V2.
+The `<StudyLenses>` emitted by the plugin is rendered by the orchestrator
+component at
+[`src/lib/welcome-to-programming/just-enough/javascript/orchestrate/`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/),
+registered as `StudyLenses` in the swizzled
+[`src/theme/MDXComponents.js`](../../theme/MDXComponents.js).
 
 **Architectural framing:** this is a _bounded subsystem_ — its own
 documentation, domain model, and workflow conventions — but _not_ a physical
@@ -46,8 +47,7 @@ Plan file: [`transient-puzzling-crane.md`](../../../../../.claude/plans/transien
 > alignment punch list for the next plugin commit:
 >
 > 1. **Rename `code` → `snippet`** in
->    [`code-block-to-jsx.ts`](./code-block-to-jsx.ts) and
->    [`components/StudyLensesMock.tsx`](./components/StudyLensesMock.tsx).
+>    [`code-block-to-jsx.ts`](./code-block-to-jsx.ts).
 > 2. **Drop the `lang` prop entirely.** Language is encoded by the
 >    fence head; the orchestrator does not branch on it.
 > 3. **Drop the `transforms` concept.** Transforms are now a
@@ -87,12 +87,6 @@ Plan file: [`transient-puzzling-crane.md`](../../../../../.claude/plans/transien
 >    overrides (the directive JSON or the fence query string),
 >    applied **only to the resolved active lens** per the resolution
 >    chain.
-> 7. **Update `parseLensConfig`** if needed to handle the URL-style
->    fence form. The directive JSON form on `.js` siblings stays.
-> 8. **Re-verify `StudyLensesMock`** path JSDoc points at the
->    post-migration locations (Round-2 moved the orchestrator to
->    `orchestrate/` and split lenses peer-up).
->
 > Until this alignment lands, the plugin is on the V1 prop set and
 > the orchestrator is on the four-prop set — the swap-in
 > `<StudyLenses>` from `orchestrate/` will reject the missing
@@ -249,18 +243,14 @@ unchanged, as do all doc and link items. Reads config through the same
 cascade resolver as Subsystem 1, so sidebar labels stay in sync with
 MDAST transforms.
 
-The V1 mock `<StudyLenses>` React component lives **inside this plugin**
-at [`./components/StudyLensesMock.tsx`](./components/) so the plugin is
-self-contained. It is registered as `StudyLenses` via the swizzled theme
-file at [`../../theme/MDXComponents.js`](../../theme/MDXComponents.js),
-alongside `Tabs` and `TabItem` (imported from `@theme/Tabs` and
-`@theme/TabItem` — they ship with `@docusaurus/theme-classic` but are
-NOT in the default `MDXComponents`, so the plugin's swizzle must add
-them for the emitted JSX to resolve). The V2 rich study-lens component
-lives outside the plugin at
-[`../../lib/welcome-to-programming/just-enough/javascript/components/lenses/study/`](../../lib/welcome-to-programming/just-enough/javascript/components/lenses/study/)
-and will replace the V1 mock without plugin changes (swap happens in
-`MDXComponents.js`).
+The `<StudyLenses>` component is registered as `StudyLenses` via the
+swizzled theme file at
+[`../../theme/MDXComponents.js`](../../theme/MDXComponents.js), alongside
+`Tabs` and `TabItem` (imported from `@theme/Tabs` and `@theme/TabItem` —
+they ship with `@docusaurus/theme-classic` but are NOT in the default
+`MDXComponents`, so the plugin's swizzle must add them for the emitted
+JSX to resolve). The orchestrator component lives at
+[`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/).
 
 ## `lenses.json` schema
 
@@ -659,18 +649,13 @@ happens to serialize:
 2. If the environment serializes objects cleanly, pass the object directly.
 3. Otherwise, `JSON.stringify` the object and pass the string.
 
-On the component side, a shared `parseLensConfig(input)` utility decodes:
+On the component side, a fallback-tolerant config parser decodes:
 
 1. If `input` is a non-null object → use directly.
 2. If `input` is a string → try `JSON.parse`. If it parses, use as object.
    If it doesn't parse, use the raw string (some lenses accept a simple string
    config; e.g. a parsons lens might take a `"freeform"` token).
 3. If `input` is `null`/`undefined`/anything else → treat as no config.
-
-This util is expected to be shared across all lenses (not plugin-specific).
-V1 candidate location: inside the plugin at
-[`./parse-lens-config.ts`](./parse-lens-config.ts); promote to a shared
-utility in `src/lib/utils/` once a second lens consumer appears.
 
 The Phase 0.7 spike determines which branch of (2)/(3) the plugin takes on
 Docusaurus 3.7; the component's parser is the same either way.
@@ -691,10 +676,6 @@ Docusaurus 3.7; the component's parser is the same either way.
   `mdxJsxFlowElement` node named `StudyLenses` with `code`, `lens`, `lang`,
   and optional `config` attributes. All `<StudyLenses>` emission sites call
   this single helper.
-- `parse-lens-config.ts` — the shared fallback-tolerant decoder for the
-  `config` prop. Imported by `StudyLensesMock` in V1; expected to be promoted
-  to `src/lib/utils/` when a second consumer (e.g. V2 rich component)
-  appears.
 - `remark-study-lenses.ts` — the remark plugin factory: guards, resolves
   config, transforms fenced code blocks whose language is configured,
   appends sibling embeds.
@@ -712,12 +693,6 @@ Docusaurus 3.7; the component's parser is the same either way.
 - `index.ts` — re-exports the three entry points (remark factory,
   lifecycle plugin, sidebar-generator factory) used by
   `docusaurus.config.ts`.
-- `components/StudyLensesMock.tsx` — V1 mock component. Renders a small
-  lens/lang label above `<CodeBlock>` imported from `@theme/CodeBlock`
-  (Prism highlighting, copy button, dark-mode styling all handled by
-  Docusaurus). Replaced in V2 by the rich component at
-  `src/lib/welcome-to-programming/just-enough/javascript/components/lenses/study/`
-  (swap happens in the `MDXComponents.js` swizzle; no plugin change needed).
 - No custom tabs-wrapper component. Tabs-mode embeds emit Docusaurus's
   native `<Tabs>`/`<TabItem>` directly from the plugin as
   `mdxJsxFlowElement` nodes; each `<TabItem>` contains one `<StudyLenses>`.

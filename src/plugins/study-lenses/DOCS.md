@@ -267,7 +267,7 @@ a content root and returns the generator function.
   `mdxJsxFlowElement(TabItem)` per sibling, each TabItem containing a
   single `mdxJsxFlowElement(StudyLenses)` leaf. The `config` attribute
   is fallback-tolerant — object or JSON string at runtime, decoded by
-  the shared `parseLensConfig` util — because MDX attribute
+  the consuming component — because MDX attribute
   serialization has uncertain object round-trip semantics and the
   contract leaves both shapes valid.
 - **Group-relative tab labels.** In tabs-mode embeds, tab labels are
