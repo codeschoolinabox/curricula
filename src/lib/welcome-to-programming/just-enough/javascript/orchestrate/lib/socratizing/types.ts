@@ -17,12 +17,12 @@
 
 import type { Node } from 'acorn';
 
-import type { SourcePosition, SourceRange } from '../validating/types.js';
-import type { ScopeAnalysis } from '../scope/types.js';
+import type { SourcePosition, SourceRange } from '../../../embody/lib/validating/types.js';
+import type { ScopeAnalysis } from '../../../embody/lib/scope/types.js';
 
 // ─── Re-exports for consumer convenience ────────────────────
 
-export type { SourcePosition, SourceRange } from '../validating/types.js';
+export type { SourcePosition, SourceRange } from '../../../embody/lib/validating/types.js';
 
 // ─── BLOCK model (Schulte 2008) ─────────────────────────────
 

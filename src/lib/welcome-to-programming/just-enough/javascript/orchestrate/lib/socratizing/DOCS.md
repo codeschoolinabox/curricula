@@ -296,17 +296,29 @@ Individual omitted toggles within a group default to `true`.
 
 ## Parsing strategy
 
-The function parses internally with a fallback chain:
+The entry reads source and AST from the embodiment — it does not parse
+internally. Parsing is the responsibility of `embody()`.
 
-1. **Module mode** — the JeJ default. Covers all normal programs.
-2. **Script mode + WithStatement check** — mirrors the existing fallback in
-   `validate-program.ts`. Only accepts script parse if `with` is present.
-3. **Module mode + allowExpression** — for partial code (single expressions,
-   fragments).
+```text
+embodiment.status.parsed === false  →  { ok: false, error }
+embodiment.status.parsed === true   →  read embodiment.parse.ast.acornNode → { ok: true, questions }
+```
 
-Unparseable input returns `{ ok: false, error: { message, location? } }`. This
-is a deliberate divergence from the old pattern of returning an empty array —
-the caller can distinguish "parse failure" from "no matching questions".
+`{ ok: false }` uses the embodiment's own `errors.message` (and
+`errors.loc.start` as `location` when present). `{ ok: true }` runs all
+analyzers against the AST. In Phase A, the mock AST has `body: []` so all
+analyzers return zero questions — graceful degradation, not a crash.
+
+`parse-source.ts` is retained as a test-fixture builder for the 16 sibling
+analyzer test files that parse real source strings directly to get AST nodes
+for individual analyzer unit tests. It is not called by the production entry
+after the Step 7 sweep. Deletion is deferred to a follow-up commit.
+
+**Phase B followup:** when real parsing is wired into `embody()`, the 16
+analyzer test files should migrate their fixtures from `parseSource(source)`
+to `embody(source)` to stay in alignment with the production path. Until then,
+the per-analyzer coverage remains accurate (real AST, real source, direct
+analyzer calls).
 
 ## What this module deliberately does NOT do
 

@@ -1,19 +1,20 @@
 /**
  * @file Main entry point for the micro-decisions module.
  *
- * @remarks Pure function: source string in, frozen result out.
- * Parses internally, builds scope, runs all analyzers, filters
- * by config, and returns a discriminated union result.
+ * @remarks Pure function: embodiment in, frozen result out.
+ * Reads source and AST from the embodiment, builds scope, runs
+ * all analyzers, filters by config, and returns a discriminated
+ * union result.
  */
 
-import buildScope from '../scope/build-scope.js';
-import getChildNodes from '../parse-old/get-child-nodes.js';
+import buildScope from '../../../embody/lib/scope/build-scope.js';
+import getChildNodes from '../../../embody/lib/parse-old/get-child-nodes.js';
 
 import type { Node } from 'acorn';
-import type { ScopeAnalysis } from '../scope/types.js';
+import type { ScopeAnalysis } from '../../../embody/lib/scope/types.js';
+import type { Snippet } from '../../../embody/types.js';
 
 import filterQuestions from './filter-questions.js';
-import parseSource from './parse-source.js';
 
 import type {
 	AnalyzerError,
@@ -103,38 +104,63 @@ function walkAndAnalyze(
 /**
  * Analyzes JeJ source code for micro-decisions and comprehension questions.
  *
- * @remarks Pure function. Parses internally. Works in Node and browsers.
- * All config fields are optional — omitting means "include everything."
+ * @remarks Pure function. Reads source and AST from the embodiment.
+ * Works in Node and browsers. All config fields are optional — omitting
+ * means "include everything."
  *
- * @param source - Raw JeJ source code.
+ * Returns `{ ok: false }` when the embodiment has no parsed AST
+ * (i.e. `status.parsed === false` or `parse.ast` is absent).
+ *
+ * Phase B alignment deferred: real acorn AST unlocks full analyzer
+ * coverage. Phase A mock returns a stub Program with `body: []` —
+ * all analyzers return zero questions. Per-analyzer coverage lives
+ * in the 16 sibling test files that use `parseSource` directly.
+ *
+ * Analyzers receive `embodiment.parse.ast.acornNode` (raw acorn `Node`),
+ * not the augmented graph. `extract-location.ts` and all analyzer files
+ * in `analyzers/` operate on raw acorn nodes — no change needed in Phase A.
+ *
+ * @param embodiment - Frozen Snippet from `embody()`. Source is read from
+ *   `source.code`; AST from `parse.ast.acornNode` (when `status.parsed`).
  * @param config - Optional filtering configuration.
  * @returns A frozen `MicroDecisionResult`.
  */
 function analyzeMicroDecisions(
-	source: string,
+	embodiment: Snippet,
 	config: MicroDecisionConfig = {},
 ): MicroDecisionResult {
-	// 1. Parse
-	const parseResult = parseSource(source);
-	if (!parseResult.ok) {
+	// 1. Read source from embodiment
+	const source = embodiment.source.code;
+
+	// 2. Read AST from embodiment (when parsed)
+	// Per embody contract: status.parsed === false implies errors !== null.
+	// Defensive fallback below fires only if mock violates that contract.
+	const ast: Node | null =
+		embodiment.status.parsed && embodiment.parse.ast
+			? embodiment.parse.ast.acornNode
+			: null;
+
+	if (ast === null) {
+		const embodyError = embodiment.errors;
 		return Object.freeze({
 			ok: false as const,
-			error: parseResult.error,
+			error: {
+				message: embodyError?.message ?? 'Snippet did not produce an AST',
+				...(embodyError?.loc != null ? { location: embodyError.loc.start } : {}),
+			},
 		});
 	}
 
-	const ast = parseResult.ast;
-
-	// 2. Build scope
+	// 3. Build scope
 	const scope = buildScope(ast);
 
-	// 3. Walk AST with point analyzers
+	// 4. Walk AST with point analyzers
 	const questions: CodeQuestion[] = [];
 	const errors: AnalyzerError[] = [];
 
 	walkAndAnalyze(ast, scope, source, POINT_ANALYZERS, questions, errors);
 
-	// 4. Run program analyzers
+	// 5. Run program analyzers
 	for (const { id, analyze } of PROGRAM_ANALYZERS) {
 		try {
 			const results = analyze(ast, scope, source);
@@ -150,10 +176,10 @@ function analyzeMicroDecisions(
 		}
 	}
 
-	// 5. Filter by config
+	// 6. Filter by config
 	const filtered = filterQuestions(questions, config);
 
-	// 6. Return result
+	// 7. Return result
 	const result: MicroDecisionResult = {
 		ok: true as const,
 		questions: filtered,

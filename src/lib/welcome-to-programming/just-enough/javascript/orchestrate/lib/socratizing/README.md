@@ -258,13 +258,15 @@ runtime from the AST.
 
 ```ts
 function analyzeMicroDecisions(
-	source: string,
+	embodiment: Snippet,
 	config?: MicroDecisionConfig,
 ): MicroDecisionResult;
 ```
 
-Pure function. Takes raw JeJ source code and an optional configuration, returns
-a result object. No side effects, no state, works in Node and browsers.
+Pure function. Takes a frozen `Snippet` embodiment (from `embody()`) and an
+optional configuration, returns a result object. Reads source from
+`embodiment.source.code` and AST from `embodiment.parse.ast.acornNode` (when
+`status.parsed` is true). No side effects, no state, works in Node and browsers.
 
 ```ts
 // Success — questions is a frozen array (may be empty)
@@ -342,16 +344,16 @@ const config: MicroDecisionConfig = {
 
 ```ts
 // Micro-decisions only (style/choice questions)
-analyzeMicroDecisions(src, { kind: { comprehension: false } });
+analyzeMicroDecisions(embodiment, { kind: { comprehension: false } });
 
 // Comprehension only (understanding questions)
-analyzeMicroDecisions(src, { kind: { microDecision: false } });
+analyzeMicroDecisions(embodiment, { kind: { microDecision: false } });
 
 // Only questions about lines 5-10
-analyzeMicroDecisions(src, { range: { start: 5, end: 10 } });
+analyzeMicroDecisions(embodiment, { range: { start: 5, end: 10 } });
 
 // Only control flow and variable questions
-analyzeMicroDecisions(src, {
+analyzeMicroDecisions(embodiment, {
 	features: {
 		data: false,
 		operators: false,
@@ -362,17 +364,19 @@ analyzeMicroDecisions(src, {
 });
 
 // Remove comparative questions (simplify for beginners)
-analyzeMicroDecisions(src, { register: { comparative: false } });
+analyzeMicroDecisions(embodiment, { register: { comparative: false } });
 
 // Limit to 3 questions
-analyzeMicroDecisions(src, { count: 3 });
+analyzeMicroDecisions(embodiment, { count: 3 });
 ```
 
 ## Architecture
 
 ```text
-source string
-  -> parseSource(source)                — acorn parse with fallback chain
+Snippet embodiment
+  -> read .source.code                  — source string for analyzers
+  -> read .parse.ast.acornNode (if .status.parsed && .parse.ast)
+                                        — else return { ok: false, error }
   -> buildScope(ast)                    — shared scope/ module
   -> walk AST with point analyzers      — per-node question detection
   -> run program analyzers              — whole-program patterns (consistency, voice profile)
@@ -382,9 +386,11 @@ source string
   -> MicroDecisionResult
 ```
 
-The function parses internally. It handles full programs, partial expressions,
-and script-mode code (for the `with` easter egg). Unparseable input returns
-`{ ok: false, error }`.
+The entry reads source and AST directly from the embodiment — it does not
+parse internally. Embodiments whose `status.parsed` is false return
+`{ ok: false, error }` using the embodiment's error message and location.
+Embodiments with `status.parsed: true` return `{ ok: true, questions }`
+(empty array with Phase A stub AST; full question set in Phase B).
 
 ## Structure
 
@@ -392,7 +398,7 @@ and script-mode code (for the `with` easter egg). Unparseable input returns
 | ----------------------------------------- | ------------------------------------------- |
 | `types.ts`                                | All domain types                            |
 | `analyze-micro-decisions.ts`              | Main entry point                            |
-| `parse-source.ts`                         | Internal parse with fallback chain          |
+| `parse-source.ts`                         | Acorn parse helper used only by sibling tests; deletion deferred |
 | `create-code-question.ts`                 | Factory: builds and freezes each question   |
 | `extract-location.ts`                     | Location extraction from acorn nodes        |
 | `filter-questions.ts`                     | Config-based filtering (post-generation)    |

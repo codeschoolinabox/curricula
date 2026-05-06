@@ -9,7 +9,7 @@
 
 import type { Node } from 'acorn';
 
-import type { SourceRange } from '../validating/types.js';
+import type { SourceRange } from '../../../embody/lib/validating/types.js';
 
 /**
  * Extracts start/end source positions from an acorn node.

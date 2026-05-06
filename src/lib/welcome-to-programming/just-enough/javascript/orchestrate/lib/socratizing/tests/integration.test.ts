@@ -1,169 +1,119 @@
 import { describe, it, expect } from 'vitest';
 
+import embody from '../../../../embody/index.js';
+
 import analyzeMicroDecisions from '../analyze-micro-decisions.js';
 
+// Phase B followup: Phase A reduces these tests to "pipeline shape" only because
+// the mock embody factory returns a stub Program with body: [] — all AST-dependent
+// analyzers produce zero questions. When real parsing is wired in (Phase B), restore
+// end-to-end tests verifying specific analyzer outputs for representative source
+// strings (e.g., let-vs-const, mixed-equality, voice profile).
+// Per-analyzer coverage in Phase A lives in the 16 sibling test files.
+//
+// Dual-guard gap (untestable in Phase A): the branch `status.parsed:true &&
+// parse.ast:undefined` in analyze-micro-decisions.ts cannot be produced by the
+// Phase A mock — buildFailAtCreateSnippet and buildApexSnippet both populate
+// parse.ast when status.parsed is true. This defensive fallback is dead code
+// in Phase A and cannot be covered until Phase B wires real parsing.
+
 describe('analyzeMicroDecisions — integration', () => {
-	describe('parse behavior', () => {
-		it('returns ok: true for valid code', () => {
-			const result = analyzeMicroDecisions('let count = 5;');
-			expect(result.ok).toBe(true);
-		});
-
-		it('returns ok: false for unparseable code', () => {
-			const result = analyzeMicroDecisions('}}}invalid{{{');
+	describe('parse failure path (Zero)', () => {
+		it('returns ok: false when tokenization failed', () => {
+			const result = analyzeMicroDecisions(embody('FAIL_AT_TOKENIZE'));
 			expect(result.ok).toBe(false);
-			if (!result.ok) {
-				expect(result.error.message).toBeTruthy();
-			}
 		});
 
-		it('returns ok: true with empty questions for empty program', () => {
-			const result = analyzeMicroDecisions('');
-			expect(result.ok).toBe(true);
-			if (result.ok) {
-				expect(result.questions).toHaveLength(0);
-			}
-		});
-	});
-
-	describe('first analyzer: let-vs-const', () => {
-		it('detects a let that could be const', () => {
-			const result = analyzeMicroDecisions('let count = 5;');
-			expect(result.ok).toBe(true);
-			if (result.ok) {
-				const letVsConst = result.questions.filter(
-					(q) => q.id === 'let-vs-const',
-				);
-				expect(letVsConst).toHaveLength(1);
-				expect(letVsConst[0].kind).toBe('micro-decision');
-			}
+		it('returns ok: false when parse failed', () => {
+			const result = analyzeMicroDecisions(embody('FAIL_AT_PARSE'));
+			expect(result.ok).toBe(false);
 		});
 
-		it('does not flag let that is reassigned', () => {
-			const result = analyzeMicroDecisions(
-				'let count = 5;\ncount = 10;',
-			);
-			expect(result.ok).toBe(true);
-			if (result.ok) {
-				const letVsConst = result.questions.filter(
-					(q) => q.id === 'let-vs-const',
-				);
-				expect(letVsConst).toHaveLength(0);
-			}
+		it('error has a message string', () => {
+			const result = analyzeMicroDecisions(embody('FAIL_AT_TOKENIZE'));
+			if (result.ok) throw new Error('Expected ok: false');
+			expect(typeof result.error.message).toBe('string');
+			expect(result.error.message.length).toBeGreaterThan(0);
 		});
 	});
 
-	describe('multiple analyzers fire', () => {
-		it('detects multiple patterns in a real program', () => {
-			const source = [
-				'let input = prompt("enter a number:");',
-				'let message = "";',
-				'if (input === null) {',
-				'  message = "cancelled";',
-				'} else {',
-				'  message = `you entered: ${input}`;',
-				'}',
-				'console.log(message);',
-			].join('\n');
+	describe('parsed path (One)', () => {
+		// Triangulation: FAIL_AT_PARSE → ok:false, FAIL_AT_CREATE → ok:true.
+		// These two together rule out any hardcoded return.
 
-			const result = analyzeMicroDecisions(source);
+		it('returns ok: true when embodiment is parsed (OK)', () => {
+			const result = analyzeMicroDecisions(embody('OK'));
 			expect(result.ok).toBe(true);
-			if (result.ok) {
-				const ids = result.questions.map((q) => q.id);
-				// Should fire several analyzers on this code
-				expect(ids.length).toBeGreaterThan(1);
-				// Should include at least these patterns
-				expect(ids).toContain('input-validation-strategy');
-				expect(ids).toContain('string-construction');
-				expect(ids).toContain('console-log-audience');
-			}
+		});
+
+		it('returns ok: true for create-failure embodiment (parsed=true, ast present)', () => {
+			// Dual-guard truth-branch: status.parsed=T and parse.ast present even
+			// when status.created=F. Confirms ok:true is driven by AST availability,
+			// not by full-success status.
+			const result = analyzeMicroDecisions(embody('FAIL_AT_CREATE'));
+			expect(result.ok).toBe(true);
+		});
+
+		it('returns ok: true for apex eval-outcome scenarios', () => {
+			// All apex scenarios (OK, VALIDATION_FAIL, NON_DETERMINISTIC, PAUSES,
+			// EVAL_*) have status.parsed:true and parse.ast populated with a stub
+			// Program. analyzeMicroDecisions reads only parse.ast — not static,
+			// streams.evaluate, or status.created — so all apex scenarios return
+			// ok:true regardless of eval outcome.
+			const result = analyzeMicroDecisions(embody('EVAL_ERROR'));
+			expect(result.ok).toBe(true);
+		});
+
+		it('questions is an array (empty with Phase A stub AST)', () => {
+			const result = analyzeMicroDecisions(embody('OK'));
+			if (!result.ok) throw new Error('Expected ok: true');
+			expect(Array.isArray(result.questions)).toBe(true);
+		});
+
+		it('analyzerErrors is absent when no analyzer threw', () => {
+			// Tests the conditional spread: analyzerErrors must be absent (not an
+			// empty array) when all analyzers complete without throwing.
+			const result = analyzeMicroDecisions(embody('OK'));
+			if (!result.ok) throw new Error('Expected ok: true');
+			expect(result.analyzerErrors).toBeUndefined();
 		});
 	});
 
-	describe('config filtering', () => {
-		it('no config returns all questions', () => {
-			const result = analyzeMicroDecisions('let count = 5;');
-			expect(result.ok).toBe(true);
-			if (result.ok) {
-				expect(result.questions.length).toBeGreaterThan(0);
-			}
-		});
+	describe('config filtering (does not crash on empty result set)', () => {
+		// Cap logic is exercised in filter-questions.test.ts; these tests guard
+		// the integration path only (pipeline does not throw for non-default config
+		// even when the stub AST produces zero questions).
 
-		it('kind filter excludes micro-decisions', () => {
-			const result = analyzeMicroDecisions('let count = 5;', {
+		it('kind filter on empty result returns empty array', () => {
+			const result = analyzeMicroDecisions(embody('OK'), {
 				kind: { microDecision: false },
 			});
-			expect(result.ok).toBe(true);
-			if (result.ok) {
-				for (const q of result.questions) {
-					expect(q.kind).toBe('comprehension');
-				}
-			}
+			if (!result.ok) throw new Error('Expected ok: true');
+			expect(Array.isArray(result.questions)).toBe(true);
 		});
 
-		it('feature filter excludes variable questions', () => {
-			const result = analyzeMicroDecisions('let count = 5;', {
-				features: { variables: false },
-			});
-			expect(result.ok).toBe(true);
-			if (result.ok) {
-				const varQuestions = result.questions.filter(
-					(q) => q.feature === 'variables',
-				);
-				expect(varQuestions).toHaveLength(0);
-			}
-		});
-
-		it('register filter removes comparative questions', () => {
-			const result = analyzeMicroDecisions('let count = 5;', {
-				register: { comparative: false },
-			});
-			expect(result.ok).toBe(true);
-			if (result.ok) {
-				for (const q of result.questions) {
-					const registers = q.questions.map((sub) => sub.register);
-					expect(registers).not.toContain('comparative');
-				}
-			}
-		});
-
-		it('count caps results', () => {
-			const result = analyzeMicroDecisions(
-				'let alpha = 1;\nlet bravo = 2;\nlet charlie = 3;',
-				{ count: 1 },
-			);
-			expect(result.ok).toBe(true);
-			if (result.ok) {
-				expect(result.questions).toHaveLength(1);
-			}
-		});
-
-		it('range filter limits to line range', () => {
-			const result = analyzeMicroDecisions(
-				'let alpha = 1;\nlet bravo = 2;\nlet charlie = 3;',
-				{ range: { start: 2, end: 2 } },
-			);
-			expect(result.ok).toBe(true);
-			if (result.ok) {
-				for (const q of result.questions) {
-					expect(q.location.start.line).toBeLessThanOrEqual(2);
-					expect(q.location.end.line).toBeGreaterThanOrEqual(2);
-				}
-			}
+		it('count cap on empty result returns empty array', () => {
+			const result = analyzeMicroDecisions(embody('OK'), { count: 1 });
+			if (!result.ok) throw new Error('Expected ok: true');
+			expect(result.questions.length).toBeLessThanOrEqual(1);
 		});
 	});
 
 	describe('result immutability', () => {
-		it('result is frozen', () => {
-			const result = analyzeMicroDecisions('let count = 5;');
+		it('ok:true result is frozen', () => {
+			const result = analyzeMicroDecisions(embody('OK'));
 			expect(Object.isFrozen(result)).toBe(true);
 		});
 
-		it('questions array is frozen', () => {
-			const result = analyzeMicroDecisions('let count = 5;');
-			if (result.ok) {
-				expect(Object.isFrozen(result.questions)).toBe(true);
-			}
+		it('ok:true questions array is frozen', () => {
+			const result = analyzeMicroDecisions(embody('OK'));
+			if (!result.ok) throw new Error('Expected ok: true');
+			expect(Object.isFrozen(result.questions)).toBe(true);
+		});
+
+		it('ok:false result is frozen', () => {
+			const result = analyzeMicroDecisions(embody('FAIL_AT_TOKENIZE'));
+			expect(Object.isFrozen(result)).toBe(true);
 		});
 	});
 });
