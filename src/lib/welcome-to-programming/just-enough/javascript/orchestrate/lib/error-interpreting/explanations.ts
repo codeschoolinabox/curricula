@@ -18,13 +18,14 @@
  * who has been programming for days, not years.
  */
 
+import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
+
 import type { ExplanationPattern } from './types.js';
 
-import deepFreezeInPlace from '../../../../utils/deep-freeze-in-place.js';
 
 // ─── Parse errors ───────────────────────────────────────────
 
-const PARSE_ERRORS: ExplanationPattern[] = [
+const PARSE_ERRORS: readonly ExplanationPattern[] = [
 	{
 		id: 'unexpected-token',
 		errorName: 'SyntaxError',
@@ -233,7 +234,7 @@ const PARSE_ERRORS: ExplanationPattern[] = [
 
 // ─── Runtime errors ─────────────────────────────────────────
 
-const RUNTIME_ERRORS: ExplanationPattern[] = [
+const RUNTIME_ERRORS: readonly ExplanationPattern[] = [
 	{
 		id: 'reference-error-not-defined',
 		errorName: 'ReferenceError',

@@ -563,12 +563,20 @@ file deletes (Step 17) once every item below is ticked.
       `VALIDATION_FAIL`, `NON_DETERMINISTIC`, `PAUSES`, `EVAL_*`);
       `embody("<unknown>")` throws; TypeScript compiles end-to-end
       against the returned shape (commit `9f1db34`, 2026-05-05).
-- [ ] Step 7: each analysis lib at `orchestrate/lib/<module>/`
+- [~] Step 7: each analysis lib at `orchestrate/lib/<module>/`
       (`recommender`, `socratizing`, `editing`,
       `error-interpreting`) accepts `(embodiment: Snippet)`; tests
       pass against the relevant scenario sentinels covering each
-      staircase rung. **The post-migration sweep.** This is what
-      the next agent does.
+      staircase rung. **The post-migration sweep.** Partial:
+      `error-interpreting` complete (2026-05-05; `(embodiment: Snippet,
+      error, options?)` shape; 67/67 tests pass; bundled
+      `'../../../../utils/' → '@utils/'` path-fix in 3 files;
+      tsc error-line count dropped 102 → 79). Remaining:
+      `socratizing` (heaviest; 22 source files, ~1400 tests, deep
+      parse/scope coupling); `editing` (CodeMirror wrapper —
+      Step 7 fit nuanced; revisit shape). `recommender` is empty
+      on disk (only a 0-byte `README.md`); WS2 lands the source
+      separately, so it is OUT OF SCOPE for this sweep.
 - [✓] Step 8: editor moved (not copied) from
       `study-lenses/lenses/editor/` to `orchestrate/editor/`
       (commit `5d6fc54`, 2026-05-05). Originals deleted.

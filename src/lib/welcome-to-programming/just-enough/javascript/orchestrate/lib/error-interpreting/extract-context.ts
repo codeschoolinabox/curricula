@@ -6,12 +6,13 @@
  * All extraction is best-effort — missing fields are `undefined`.
  */
 
-import type { Program, Node } from 'acorn';
+import type { Node } from 'acorn';
 import { walk } from 'estree-walker';
 
-import type { ErrorContext, ErrorInput } from './types.js';
+import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
+
 import findNodeAtLine from './find-node-at-line.js';
-import deepFreezeInPlace from '../../../../utils/deep-freeze-in-place.js';
+import type { ErrorContext, ErrorInput } from './types.js';
 
 // ─── Name extraction patterns ───────────────────────────────
 
@@ -64,7 +65,7 @@ function extractSourceLine(
 /**
  * Collects all declared variable names from the AST.
  */
-function collectDeclaredNames(ast: Program): readonly string[] {
+function collectDeclaredNames(ast: Node): readonly string[] {
 	const names: string[] = [];
 
 	walk(ast as any, {
@@ -103,7 +104,7 @@ function isSimilar(a: string, b: string): boolean {
 function generateSuggestion(
 	error: ErrorInput,
 	name: string | undefined,
-	ast: Program | null,
+	ast: Node | null,
 	node: Node | undefined,
 ): string | undefined {
 	// "not defined" + AST → check for similar variable names
@@ -154,13 +155,16 @@ function isPromptRelated(node: Node): boolean {
  *
  * @param error - The error to analyze
  * @param source - The JEJ program source code
- * @param ast - Pre-parsed AST (or `null` if parsing failed)
+ * @param ast - Pre-parsed AST (or `null` if parsing failed). Loosened
+ *   from `Program | null` to `Node | null` per the Step 7 sweep so the
+ *   entry can pass `embodiment.parse.ast.acornNode` (typed as the
+ *   broader `AcornNode`) without an extra cast.
  * @returns A frozen `ErrorContext` with all available fields
  */
 function extractContext(
 	error: ErrorInput,
 	source: string,
-	ast: Program | null,
+	ast: Node | null,
 ): Readonly<ErrorContext> {
 	const name = extractName(error.message);
 	const expression = extractSourceLine(source, error.line);

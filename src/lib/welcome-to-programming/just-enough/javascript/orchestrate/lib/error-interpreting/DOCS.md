@@ -13,11 +13,20 @@ entry is clearly labeled with an `id` field.
 
 ## Why best-effort AST analysis
 
-Students produce broken code. The module must never crash. When acorn cannot
-parse the source (common for parse errors), the module falls back to
-regex/string pattern matching on the source text. AST analysis is used when
-available to provide richer context (e.g. detecting `prompt()` calls for null
-TypeErrors).
+Students produce broken code. The module must never crash. The entry function
+reads its AST from the embodiment (`embodiment.parse.ast.acornNode` when
+`status.parsed && parse.ast` is truthy); when the AST is absent (the
+embodiment didn't reach the parse phase, or `Partial<ParseGraph>` left
+`parse.ast` undefined), the module falls back to regex/string pattern
+matching on the error message and source text. AST analysis, when available,
+provides richer context — detecting `prompt()` calls for null TypeErrors,
+collecting declared names for "did you mean" suggestions on ReferenceErrors.
+
+In Phase A, the embody mock ships a stub `Program` with `body: []`, so
+AST-dependent suggestion paths silently degrade to `undefined` against any
+apex embodiment; the message-regex paths remain intact. Phase B's real
+`embody/lib/parse/` reinstates a fully populated AST and these
+suggestions resume working without code change here.
 
 ## Why `{{placeholder}}` interpolation
 

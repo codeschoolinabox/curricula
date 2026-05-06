@@ -72,14 +72,12 @@ type ErrorInterpretation = {
 // ─── Internal types ─────────────────────────────────────────
 
 /**
- * An explanation pattern parsed from a YAML file.
+ * An explanation pattern from `explanations.ts`.
  *
- * @remarks Loaded eagerly at module initialization by
- * `load-explanations.ts`. The `match` field is a substring
- * matched case-insensitively against `error.message`.
- *
- * Text fields are templates containing `{{placeholder}}` tokens
- * that are interpolated at interpretation time.
+ * @remarks The `match` field is a substring matched
+ * case-insensitively against `error.message`. Text fields are
+ * templates containing `{{placeholder}}` tokens that are
+ * interpolated at interpretation time by `interpolate-template.ts`.
  */
 type ExplanationPattern = {
 	readonly id: string;

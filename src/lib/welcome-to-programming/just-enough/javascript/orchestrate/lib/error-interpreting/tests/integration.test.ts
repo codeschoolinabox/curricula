@@ -1,20 +1,31 @@
 /**
  * @file Integration tests verifying each YAML explanation file
  * produces a non-generic interpretation for realistic error inputs.
+ *
+ * Step 7 sweep: rewritten to take an embodiment instead of a raw
+ * source string. Fixture choice by `phase`: parse-phase tests use
+ * `embody('FAIL_AT_PARSE')` (status: tokenized:T parsed:F created:F);
+ * runtime-phase tests use `embody('OK')` (apex; runtime errors fire
+ * post-evaluation against an apex-status snippet). The original
+ * source strings are retained as `// source:` comments above each
+ * call so the suite still documents the real JEJ scenarios each
+ * pattern was authored to interpret.
  */
 
 import { describe, it, expect } from 'vitest';
 
+import embody from '../../../../embody/index.js';
+import type { Snippet } from '../../../../embody/types.js';
 import interpretError from '../interpret-error.js';
 
 // ─── Helper ─────────────────────────────────────────────────
 
 function expectSpecificInterpretation(
-	source: string,
+	embodiment: Snippet,
 	error: { name: string; message: string; line?: number },
 	options?: { phase?: 'parse' | 'runtime' },
 ): void {
-	const result = interpretError(source, error, options);
+	const result = interpretError(embodiment, error, options);
 	// a generic fallback contains "does not have a specific explanation"
 	expect(result.whatWentWrong).not.toContain(
 		'does not have a specific explanation',
@@ -25,16 +36,18 @@ function expectSpecificInterpretation(
 
 describe('parse error interpretations', () => {
 	it('unexpected-token', () => {
+		// source: 'let x = ;'
 		expectSpecificInterpretation(
-			'let x = ;',
+			embody('FAIL_AT_PARSE'),
 			{ name: 'SyntaxError', message: 'Unexpected token (1:8)', line: 1 },
 			{ phase: 'parse' },
 		);
 	});
 
 	it('unterminated-string', () => {
+		// source: "let x = 'hello;"
 		expectSpecificInterpretation(
-			"let x = 'hello;",
+			embody('FAIL_AT_PARSE'),
 			{
 				name: 'SyntaxError',
 				message: 'Unterminated string constant (1:8)',
@@ -45,8 +58,9 @@ describe('parse error interpretations', () => {
 	});
 
 	it('unterminated-template', () => {
+		// source: 'let x = `hello;'
 		expectSpecificInterpretation(
-			'let x = `hello;',
+			embody('FAIL_AT_PARSE'),
 			{
 				name: 'SyntaxError',
 				message: 'Unterminated template (1:8)',
@@ -57,8 +71,9 @@ describe('parse error interpretations', () => {
 	});
 
 	it('unterminated-regexp', () => {
+		// source: 'let x = /hello;'
 		expectSpecificInterpretation(
-			'let x = /hello;',
+			embody('FAIL_AT_PARSE'),
 			{
 				name: 'SyntaxError',
 				message: 'Unterminated regular expression (1:8)',
@@ -69,8 +84,9 @@ describe('parse error interpretations', () => {
 	});
 
 	it('missing-semicolon', () => {
+		// source: 'let x = 5 let y = 10'
 		expectSpecificInterpretation(
-			'let x = 5 let y = 10',
+			embody('FAIL_AT_PARSE'),
 			{
 				name: 'SyntaxError',
 				message: 'Missing semicolon (1:11)',
@@ -81,8 +97,9 @@ describe('parse error interpretations', () => {
 	});
 
 	it('bad-escape-sequence', () => {
+		// source: "let x = '\\q';"
 		expectSpecificInterpretation(
-			"let x = '\\q';",
+			embody('FAIL_AT_PARSE'),
 			{
 				name: 'SyntaxError',
 				message: 'Bad escape sequence in untagged template literal',
@@ -93,8 +110,9 @@ describe('parse error interpretations', () => {
 	});
 
 	it('identifier-after-number', () => {
+		// source: 'let x = 42abc;'
 		expectSpecificInterpretation(
-			'let x = 42abc;',
+			embody('FAIL_AT_PARSE'),
 			{
 				name: 'SyntaxError',
 				message: 'Identifier directly after number (1:11)',
@@ -105,8 +123,9 @@ describe('parse error interpretations', () => {
 	});
 
 	it('unexpected-reserved-word', () => {
+		// source: 'let class = 5;'
 		expectSpecificInterpretation(
-			'let class = 5;',
+			embody('FAIL_AT_PARSE'),
 			{
 				name: 'SyntaxError',
 				message: "Unexpected reserved word 'class'",
@@ -121,8 +140,9 @@ describe('parse error interpretations', () => {
 
 describe('runtime error interpretations', () => {
 	it('reference-error-not-defined', () => {
+		// source: 'console.log(userName);'
 		expectSpecificInterpretation(
-			'console.log(userName);',
+			embody('OK'),
 			{
 				name: 'ReferenceError',
 				message: 'userName is not defined',
@@ -133,8 +153,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('reference-error-tdz', () => {
+		// source: 'console.log(x);\nlet x = 5;'
 		expectSpecificInterpretation(
-			'console.log(x);\nlet x = 5;',
+			embody('OK'),
 			{
 				name: 'ReferenceError',
 				message: "Cannot access 'x' before initialization",
@@ -145,8 +166,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('type-error-null-property', () => {
+		// source: "let input = prompt('name');\ninput.toLowerCase();"
 		expectSpecificInterpretation(
-			"let input = prompt('name');\ninput.toLowerCase();",
+			embody('OK'),
 			{
 				name: 'TypeError',
 				message: "Cannot read properties of null (reading 'toLowerCase')",
@@ -157,8 +179,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('type-error-undefined-property', () => {
+		// source: 'let x;\nx.length;'
 		expectSpecificInterpretation(
-			'let x;\nx.length;',
+			embody('OK'),
 			{
 				name: 'TypeError',
 				message: "Cannot read properties of undefined (reading 'length')",
@@ -169,8 +192,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('type-error-not-a-function', () => {
+		// source: "let x = 'hello';\nx.length();"
 		expectSpecificInterpretation(
-			"let x = 'hello';\nx.length();",
+			embody('OK'),
 			{
 				name: 'TypeError',
 				message: 'x.length is not a function',
@@ -181,8 +205,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('type-error-const-assignment', () => {
+		// source: "const name = 'Alice';\nname = 'Bob';"
 		expectSpecificInterpretation(
-			"const name = 'Alice';\nname = 'Bob';",
+			embody('OK'),
 			{
 				name: 'TypeError',
 				message: 'Assignment to constant variable.',
@@ -193,8 +218,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('range-error-invalid-count', () => {
+		// source: "'-'.repeat(-1);"
 		expectSpecificInterpretation(
-			"'-'.repeat(-1);",
+			embody('OK'),
 			{
 				name: 'RangeError',
 				message: 'Invalid count value: -1',
@@ -205,8 +231,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('range-error-iteration-limit', () => {
+		// source: 'while (true) {}'
 		expectSpecificInterpretation(
-			'while (true) {}',
+			embody('OK'),
 			{
 				name: 'RangeError',
 				message: 'loop 1 exceeded 100 iterations',
@@ -217,8 +244,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('range-error-call-stack', () => {
+		// source: 'let x = 1;'
 		expectSpecificInterpretation(
-			'let x = 1;',
+			embody('OK'),
 			{
 				name: 'RangeError',
 				message: 'Maximum call stack size exceeded',
@@ -229,8 +257,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('uri-error-malformed', () => {
+		// source: "decodeURI('%');"
 		expectSpecificInterpretation(
-			"decodeURI('%');",
+			embody('OK'),
 			{
 				name: 'URIError',
 				message: 'URI malformed',
@@ -241,8 +270,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('internal-error-recursion', () => {
+		// source: 'let x = 1;'
 		expectSpecificInterpretation(
-			'let x = 1;',
+			embody('OK'),
 			{
 				name: 'InternalError',
 				message: 'too much recursion',
@@ -253,8 +283,9 @@ describe('runtime error interpretations', () => {
 	});
 
 	it('syntax-error-runtime-regex', () => {
+		// source: 'let re = /[/;'
 		expectSpecificInterpretation(
-			'let re = /[/;',
+			embody('OK'),
 			{
 				name: 'SyntaxError',
 				message:

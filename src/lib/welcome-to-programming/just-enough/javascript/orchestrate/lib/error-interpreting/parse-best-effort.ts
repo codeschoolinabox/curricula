@@ -2,8 +2,13 @@
  * @file Best-effort acorn parse that never throws.
  *
  * @remarks Tries module mode first, then script mode. Returns
- * `null` if neither succeeds. Used by `extract-context.ts` to
- * provide AST-aware error analysis when the source is parseable.
+ * `null` if neither succeeds. Retained as a test-fixture builder
+ * for `tests/parse-best-effort.test.ts`,
+ * `tests/find-node-at-line.test.ts`, and
+ * `tests/extract-context.test.ts`. Not used by any production
+ * module after the Step 7 sweep — the entry now reads its AST
+ * directly from `embodiment.parse.ast.acornNode`. Deletion
+ * deferred to a follow-up commit.
  */
 
 import { parse, type Program } from 'acorn';
