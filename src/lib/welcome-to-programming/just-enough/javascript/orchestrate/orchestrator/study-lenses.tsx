@@ -47,11 +47,11 @@ import React, {
 
 import { freezeInPlace } from '@utils/freeze.js';
 
-import createEventBus from '../create-event-bus.js';
-import createLensCache from '../create-lens-cache.js';
-import createOrchestratorState from '../create-orchestrator-state.js';
-import executePipeline from '../execute-pipeline.js';
-import validatePipeline from '../pipeline.js';
+import createEventBus from './create-event-bus.js';
+import createLensCache from './create-lens-cache.js';
+import createOrchestratorState from './create-orchestrator-state.js';
+import executePipeline from './execute-pipeline.js';
+import validatePipeline from './pipeline.js';
 // eslint-disable-next-line unicorn/prevent-abbreviations -- contract type lives in types.ts and is off-limits in Increment 8
 import type { Pipeline, PluginEmittedProps } from '../types.js';
 

@@ -34,7 +34,7 @@ import type {
 	EventListener,
 	EventName,
 	EventPayload,
-} from './types.js';
+} from '../types.js';
 
 type InternalListener = (payload: unknown) => void;
 
@@ -70,13 +70,14 @@ function createEventBus(): EventBus {
 	function subscribe<N extends EventName>(
 		name: N,
 		listener: EventListener<N>,
-	): void {
+	): () => void {
 		const existing = listenersByEvent.get(name);
 		if (existing) {
 			existing.add(listener as InternalListener);
-			return;
+		} else {
+			listenersByEvent.set(name, new Set([listener as InternalListener]));
 		}
-		listenersByEvent.set(name, new Set([listener as InternalListener]));
+		return () => unsubscribe(name, listener);
 	}
 
 	function unsubscribe<N extends EventName>(

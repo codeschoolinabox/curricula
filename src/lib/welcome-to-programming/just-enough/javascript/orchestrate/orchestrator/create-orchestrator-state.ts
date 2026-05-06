@@ -18,7 +18,7 @@
 
 import { freezeInPlace } from '@utils/freeze.js';
 
-import type { OrchestratorState } from './types.js';
+import type { OrchestratorState } from '../types.js';
 
 type InitialOrchestratorState = {
 	readonly originalCode: string;
