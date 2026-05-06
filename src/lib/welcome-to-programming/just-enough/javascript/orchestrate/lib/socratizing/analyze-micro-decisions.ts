@@ -114,7 +114,7 @@ function walkAndAnalyze(
  * Phase B alignment deferred: real acorn AST unlocks full analyzer
  * coverage. Phase A mock returns a stub Program with `body: []` —
  * all analyzers return zero questions. Per-analyzer coverage lives
- * in the 16 sibling test files that use `parseSource` directly.
+ * in the sibling test files, which call acorn directly via local helpers.
  *
  * Analyzers receive `embodiment.parse.ast.acornNode` (raw acorn `Node`),
  * not the augmented graph. `extract-location.ts` and all analyzer files

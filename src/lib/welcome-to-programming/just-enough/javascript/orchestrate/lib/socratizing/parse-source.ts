@@ -9,13 +9,11 @@
  * Returns a discriminated union: `{ ok: true, ast }` or
  * `{ ok: false, error }`.
  *
- * Retained as a test-fixture builder for `tests/parse-source.test.ts`
- * and the 16 sibling analyzer test files that parse real source to get
- * AST nodes for individual analyzers. Not used by the production
- * entry (`analyze-micro-decisions.ts`) after the Step 7 sweep —
- * the entry now reads its AST directly from
- * `embodiment.parse.ast.acornNode`. Deletion deferred to a
- * follow-up commit.
+ * Retained only for its own unit test (`tests/parse-source.test.ts`).
+ * Not imported by the production entry (`analyze-micro-decisions.ts`)
+ * or by any analyzer test file — those call `acorn.parse()` directly
+ * via their own local helpers. Deletion (along with the self-test)
+ * deferred to a follow-up commit.
  */
 
 import { parse } from 'acorn';

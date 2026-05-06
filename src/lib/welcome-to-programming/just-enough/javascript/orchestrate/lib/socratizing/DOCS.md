@@ -309,16 +309,16 @@ embodiment.status.parsed === true   →  read embodiment.parse.ast.acornNode →
 analyzers against the AST. In Phase A, the mock AST has `body: []` so all
 analyzers return zero questions — graceful degradation, not a crash.
 
-`parse-source.ts` is retained as a test-fixture builder for the 16 sibling
-analyzer test files that parse real source strings directly to get AST nodes
-for individual analyzer unit tests. It is not called by the production entry
-after the Step 7 sweep. Deletion is deferred to a follow-up commit.
+`parse-source.ts` is retained only for its own unit test
+(`tests/parse-source.test.ts`). The analyzer test files do not import it —
+they call `acorn.parse()` directly via their own local helpers. The production
+entry does not call it after the Step 7 sweep. Deletion (along with the
+self-test) is deferred to a follow-up commit.
 
-**Phase B followup:** when real parsing is wired into `embody()`, the 16
-analyzer test files should migrate their fixtures from `parseSource(source)`
-to `embody(source)` to stay in alignment with the production path. Until then,
-the per-analyzer coverage remains accurate (real AST, real source, direct
-analyzer calls).
+**Phase B followup:** when real parsing is wired into `embody()`, the analyzer
+test files should migrate their local `acorn.parse()` helpers to `embody(source)`
+to stay in alignment with the production path. Until then, the per-analyzer
+coverage remains accurate (real AST, real source, direct analyzer calls).
 
 ## What this module deliberately does NOT do
 
