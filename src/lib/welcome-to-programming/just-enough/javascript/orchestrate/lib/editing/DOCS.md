@@ -24,6 +24,15 @@ pure data shapes and CodeMirror types. Callbacks never import CodeMirror.
 3. **Middleware/plugin registry**: Rejected — we have a small, known set of
    extension points, not an open plugin system.
 
+## No Parse Guard
+
+`createEditor` reads only `embodiment.source.code` from the Snippet. It
+deliberately does not check `status.parsed`, `parse.ast`, or `errors`. The
+editor's role is display-and-edit; whether the source parsed is irrelevant to
+opening it for editing. CodeMirror runs its own tokenizer (independent of
+acorn) for syntax highlighting. Even `embody('FAIL_AT_TOKENIZE')` produces a
+working editor whose initial content is the (failed) source string.
+
 ## Statefulness Exception
 
 `create-editor.ts` uses a mutable `destroyed` boolean closure because

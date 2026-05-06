@@ -357,7 +357,10 @@ console.log(greeting, add(count, 8));
 				const isJS =
 					lang === 'javascript' || lang === 'typescript';
 
-				currentEditor = await createEditor(SAMPLE_CODE, {
+				// TODO(phase-b): replace stub with embody(SAMPLE_CODE) once real parsing is wired in.
+				// createEditor reads only embodiment.source.code; Phase A stub supplies just that.
+				const sampleEmbodiment = { source: { code: SAMPLE_CODE } };
+				currentEditor = await createEditor(/** @type {any} */ (sampleEmbodiment), {
 					language: lang,
 					parent: containerEl,
 					...(isJS

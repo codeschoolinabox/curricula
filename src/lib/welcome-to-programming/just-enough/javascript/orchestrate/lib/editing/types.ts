@@ -120,6 +120,8 @@ type FormatResultCallback = (result: FormatResult) => void;
  * defaults (plaintext language, tab indentation, no callbacks).
  * Callbacks are pure functions — they receive plain data and return
  * plain data. The editor wraps them into CM extensions internally.
+ * Content comes from the required `embodiment: Snippet` first argument
+ * to `createEditor` — not from this type.
  */
 type EditorOptions = {
 	readonly language?: string;
@@ -155,6 +157,7 @@ type EditorOptions = {
 type EditorInstance = {
 	content: string;
 	readonly el: HTMLElement;
+	/** Restores editor content to `embodiment.source.code` (captured at factory time). */
 	readonly reset: () => void;
 	readonly format: () => void;
 	readonly check: () => readonly LintDiagnostic[];

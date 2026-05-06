@@ -21,7 +21,7 @@ tooltips, markers) but does not know what the feedback means.
 | File                    | Purpose                                      |
 | ----------------------- | -------------------------------------------- |
 | `types.ts`              | All types, callback signatures, data shapes  |
-| `create-editor.ts`      | `createEditor(code, options)` factory        |
+| `create-editor.ts`      | `createEditor(embodiment, options)` factory  |
 | `detect-language.ts`    | File extension to language mapping (pure)    |
 | `build-extensions.ts`   | CodeMirror extension builder (internal)      |
 | `build-tooltip-dom.ts`  | Tooltip DOM construction (internal)          |
@@ -37,8 +37,11 @@ Bare editor (no callbacks):
 
 ```ts
 import createEditor from './create-editor.js';
+import embody from '../../../embody/index.js';
 
-const editor = await createEditor('let x = 5;', { language: 'javascript' });
+// Phase A: embody() accepts named scenarios. Phase B: accepts any source string.
+// The editor renders embodiment.source.code either way.
+const editor = await createEditor(embody('OK'), { language: 'javascript' });
 document.body.appendChild(editor.el);
 ```
 
@@ -46,8 +49,9 @@ With linting and doc lookup callbacks:
 
 ```ts
 import createEditor from './create-editor.js';
+import embody from '../../../embody/index.js';
 
-const editor = await createEditor('let x = 5;', {
+const editor = await createEditor(embody('OK'), {
   language: 'javascript',
   linters: [myLinterFn],
   docLookup: myDocFn,

@@ -6,12 +6,17 @@
 // document/window, add the directive; otherwise leave it off.
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 
+// Only the 'OK' apex scenario is used here: createEditor accepts any Snippet
+// regardless of parse/eval status (no parse guard). embody('OK').source.code === 'OK'.
+// Phase B: if embody normalises source.code (trim, BOM, newlines), update
+// content assertions below to match the normalised form.
+import embody from '../../../../embody/index.js';
 import createEditor from '../create-editor.js';
 
 describe('createEditor', () => {
 	describe('factory shape (Zero)', () => {
 		it('returns an object with the expected API surface', async () => {
-			const editor = await createEditor();
+			const editor = await createEditor(embody('OK'));
 			expect(editor).toMatchObject({
 				content: expect.any(String),
 				el: expect.any(HTMLElement),
@@ -27,13 +32,13 @@ describe('createEditor', () => {
 		// Test 2 and Test 3 form a triangulation pair: Test 2 alone could be
 		// satisfied by an initialCode fallback returning the constructor arg;
 		// Test 3's setter-then-read pins the CM document as the true source.
-		it('initial content mirrors the code argument', async () => {
-			const editor = await createEditor('abc');
-			expect(editor.content).toBe('abc');
+		it('initial content mirrors embodiment.source.code', async () => {
+			const editor = await createEditor(embody('OK'));
+			expect(editor.content).toBe('OK');
 		});
 
 		it('setter mutates the CM document (triangulates the real-read path)', async () => {
-			const editor = await createEditor('abc');
+			const editor = await createEditor(embody('OK'));
 			editor.content = 'xyz';
 			expect(editor.content).toBe('xyz');
 		});
@@ -41,49 +46,49 @@ describe('createEditor', () => {
 
 	describe('reset restores construction code (Many)', () => {
 		it('after edit, reset returns content to original', async () => {
-			const editor = await createEditor('abc');
+			const editor = await createEditor(embody('OK'));
 			editor.content = 'edited';
 			editor.reset();
-			expect(editor.content).toBe('abc');
+			expect(editor.content).toBe('OK');
 		});
 	});
 
 	describe('format callback', () => {
 		it('invokes callback with current content', async () => {
-			const formatSpy = vi.fn((code: string) => code.toUpperCase());
-			const editor = await createEditor('abc', { format: formatSpy });
+			const formatSpy = vi.fn((code: string) => code + '!');
+			const editor = await createEditor(embody('OK'), { format: formatSpy });
 			editor.format();
-			expect(formatSpy).toHaveBeenCalledWith('abc');
+			expect(formatSpy).toHaveBeenCalledWith('OK');
 		});
 
 		it('dispatches return value into editor buffer', async () => {
-			const editor = await createEditor('abc', {
-				format: (code: string) => code.toUpperCase(),
+			const editor = await createEditor(embody('OK'), {
+				format: (code: string) => code + '!',
 			});
 			editor.format();
 			// Format runs in a microtask (async IIFE) — flush before
 			// asserting on dispatched content.
 			await Promise.resolve();
-			expect(editor.content).toBe('ABC');
+			expect(editor.content).toBe('OK!');
 		});
 
 		it('dispatches resolved value when format is async', async () => {
-			const editor = await createEditor('abc', {
-				format: async (code: string) => code.toUpperCase(),
+			const editor = await createEditor(embody('OK'), {
+				format: async (code: string) => code + '!',
 			});
 			editor.format();
 			// Async format → wait for the IIFE's await + microtask drain.
 			await new Promise((r) => setTimeout(r, 0));
-			expect(editor.content).toBe('ABC');
+			expect(editor.content).toBe('OK!');
 		});
 	});
 
 	describe('check callback', () => {
 		it('invokes linter with current content', async () => {
 			const linterSpy = vi.fn((_code: string) => []);
-			const editor = await createEditor('abc', { linters: [linterSpy] });
+			const editor = await createEditor(embody('OK'), { linters: [linterSpy] });
 			editor.check();
-			expect(linterSpy).toHaveBeenCalledWith('abc');
+			expect(linterSpy).toHaveBeenCalledWith('OK');
 		});
 
 		it('returns diagnostics from the linter', async () => {
@@ -95,7 +100,7 @@ describe('createEditor', () => {
 					message: 'stub diagnostic',
 				},
 			]);
-			const editor = await createEditor('abc', { linters: [linterSpy] });
+			const editor = await createEditor(embody('OK'), { linters: [linterSpy] });
 			const result = editor.check();
 			expect(result).toHaveLength(1);
 			expect(result[0]?.message).toBe('stub diagnostic');
@@ -104,26 +109,26 @@ describe('createEditor', () => {
 
 	describe('destroy (Boundary)', () => {
 		it('tears down — post-destroy content returns empty string', async () => {
-			const editor = await createEditor('abc');
+			const editor = await createEditor(embody('OK'));
 			editor.destroy();
 			expect(editor.content).toBe('');
 		});
 
 		it('post-destroy returns empty even after edits', async () => {
-			const editor = await createEditor('abc');
+			const editor = await createEditor(embody('OK'));
 			editor.content = 'xyz';
 			editor.destroy();
 			expect(editor.content).toBe('');
 		});
 
 		it('is idempotent — double destroy does not throw', async () => {
-			const editor = await createEditor('abc');
+			const editor = await createEditor(embody('OK'));
 			editor.destroy();
 			expect(() => editor.destroy()).not.toThrow();
 		});
 
 		it('post-destroy: setter drops, reset/format/check are safe no-ops', async () => {
-			const editor = await createEditor('abc');
+			const editor = await createEditor(embody('OK'));
 			editor.destroy();
 			editor.content = 'xyz';
 			expect(editor.content).toBe('');
@@ -139,18 +144,18 @@ describe('createEditor', () => {
 		// as a child of parent; our factory preserves the parent reference.
 		it('parent option: editor.el is the provided element', async () => {
 			const parent = document.createElement('section');
-			const editor = await createEditor('x', { parent });
+			const editor = await createEditor(embody('OK'), { parent });
 			expect(editor.el).toBe(parent);
 		});
 
 		it('parent option: CM mounts its .cm-editor as a child of parent', async () => {
 			const parent = document.createElement('section');
-			await createEditor('x', { parent });
+			await createEditor(embody('OK'), { parent });
 			expect(parent.querySelector('.cm-editor')).not.toBeNull();
 		});
 
 		it('no parent option: el is a fresh div not attached to any document', async () => {
-			const editor = await createEditor('x');
+			const editor = await createEditor(embody('OK'));
 			expect(editor.el.tagName).toBe('DIV');
 			expect(editor.el.parentNode).toBeNull();
 		});
@@ -168,7 +173,7 @@ describe('createEditor', () => {
 		});
 
 		it('format callback throwing does not crash', async () => {
-			const editor = await createEditor('abc', {
+			const editor = await createEditor(embody('OK'), {
 				format(_code: string): string {
 					throw new Error('format failed');
 				},
@@ -178,7 +183,7 @@ describe('createEditor', () => {
 
 		it('linter callback throwing does not crash; other linters still run', async () => {
 			const goodLinter = vi.fn((_code: string) => []);
-			const editor = await createEditor('abc', {
+			const editor = await createEditor(embody('OK'), {
 				linters: [
 					function throwingLinter(_code: string): readonly [] {
 						throw new Error('linter failed');
@@ -193,11 +198,7 @@ describe('createEditor', () => {
 
 	describe('options defaults (Simple)', () => {
 		it('accepts empty options object', async () => {
-			await expect(createEditor('', {})).resolves.toBeDefined();
-		});
-
-		it('accepts no arguments at all', async () => {
-			await expect(createEditor()).resolves.toBeDefined();
+			await expect(createEditor(embody('OK'), {})).resolves.toBeDefined();
 		});
 	});
 });

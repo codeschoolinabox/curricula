@@ -17,6 +17,7 @@ import { setDiagnostics } from '@codemirror/lint';
 import buildExtensions from './build-extensions.js';
 import { toCMDiagnostic, runLinterCallbacks } from './to-cm-diagnostic.js';
 
+import type { Snippet } from '../../../embody/types.js';
 import type { EditorOptions, EditorInstance, LintDiagnostic } from './types.js';
 
 /**
@@ -34,11 +35,18 @@ import type { EditorOptions, EditorInstance, LintDiagnostic } from './types.js';
  * for an example pattern. Language-loading errors are swallowed inside
  * `buildExtensions` (warned + editor continues without highlighting).
  *
- * @param code - Initial editor content
+ * Reads only `embodiment.source.code` from the Snippet. Does not consult
+ * `status.parsed`, `parse.ast`, or `errors` — the editor's role is
+ * display-and-edit; whether the source parsed is irrelevant to opening it
+ * for editing. CodeMirror runs its own tokenizer independently. Even an
+ * embodiment whose tokenize/parse failed produces a working editor.
+ *
+ * @param embodiment - Frozen Snippet from `embody()`; source read from
+ *   `embodiment.source.code`.
  * @param options - Editor configuration and callbacks
  * @returns A promise resolving to a fully-initialized editor instance.
  */
-async function createEditor(code = '', {
+async function createEditor(embodiment: Snippet, {
 	language,
 	indentChar = '\t',
 	tabSize = 4,
@@ -49,7 +57,7 @@ async function createEditor(code = '', {
 	completions,
 	onFormat,
 }: EditorOptions = {}): Promise<EditorInstance> {
-	const initialCode = code;
+	const initialCode = embodiment.source.code;
 	const el: HTMLElement = parent ?? document.createElement('div');
 	const resolvedLanguage = language ?? 'plaintext';
 
