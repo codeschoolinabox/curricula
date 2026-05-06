@@ -43,15 +43,18 @@ concerns the peer also owns; the orchestrator's primary export
 sits above them at the peer root.
 
 > **Prior art**: the pre-refactor orchestrator's architectural
-> sketch was relocated verbatim to
-> [`./orchestrator/DOCS.md`](./orchestrator/DOCS.md) (commit
-> `5d6fc54`); that file is banner-flagged STALE pending Step-7 /
-> WS3 F1 regeneration. It documents the pre-refactor effect
-> topology, Switch flow Mermaid, and async caveat. Structural
-> patterns carry forward; specific mechanisms (cache,
-> framework-agnostic LensMount, multi-prop API, always-active lens
-> mount, transforms tier) reshape per the locked decisions in
+> sketch was relocated to a sibling `orchestrator/` directory
+> during the Phase A refactor (commit `5d6fc54`) and then deleted
+> when F1 brought the new orchestrator online. Structural
+> patterns documented there carried forward (cleanup-split
+> rationale, `vi.hoisted` test pattern, async-caveat for
+> mid-mount cancellation); specific mechanisms (cache,
+> framework-agnostic LensMount, multi-prop API, always-active
+> lens mount, transforms tier) were superseded per the locked
+> decisions in
 > [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles).
+> The pre-refactor source remains in git history under
+> commits prior to F1.A.
 
 ## Architectural sketch
 
@@ -62,6 +65,20 @@ sits above them at the peer root.
 > names, no variable names, no pseudocode (React API names like
 > `useEffect` / `useState` / `useRef` are acceptable as
 > structural-mechanism references).
+
+> **End-state vs. F1 reality.** The diagrams below depict the
+> steady-state F2/F3/F5 architecture (mode discriminator, lens-mode
+> subtree, lens-switched dispatch, recommendations-panel branch).
+> In F1 only the `snippet → embody → editor-mount` path is wired.
+> Specifically: no mode discriminator (the editor is mounted
+> unconditionally), no `onSnippetChange` edge (F1 textarea is
+> editable but does not propagate up), no lens-mode subtree (F1
+> ships before F2), no panel-open path (F1 ships before L5), no
+> internal-bus dispatch (F1 ships before F5). The F1 effect
+> topology is *"embody fires on every snippet change, derived
+> synchronously"*; F2-F5 narrow it. See
+> [`../.planning-handoffs/03-orchestrator-and-contracts.md`](../.planning-handoffs/03-orchestrator-and-contracts.md)
+> for the per-increment narrowing schedule.
 
 ### Lifecycle modes
 
@@ -106,8 +123,7 @@ flowchart TD
     ConfigsProp["configs? prop<br/>(Record&lt;string, LensConfig&gt;,<br/>cascade bundle by lens name)"]
 
     SnippetProp --> EditorPath
-    SnippetProp -->|"format pre-process, sync, pure"| Formatted["formatted snippet"]
-    Formatted -->|"embody, sync (lazy on lens-open)"| Embodiment["frozen Snippet<br/>(embodiment)"]
+    SnippetProp -->|"embody, sync (lazy on lens-open)"| Embodiment["frozen Snippet<br/>(embodiment)"]
 
     Embodiment --> LensPath
     Embodiment --> RecPath
@@ -127,6 +143,11 @@ flowchart TD
     EditorPath -->|"edit, sync"| SnippetProp
     SnippetProp -.invalidates cached embodiment.-> Embodiment
 ```
+
+The recommendations panel opens via an explicit toolbar button or
+keyboard shortcut — that open-trigger is a UI affordance, not a
+data path, so it isn't drawn in the data-flow diagram. Lands in
+L5 alongside the panel UI itself.
 
 #### Per-lens config resolution chain
 
@@ -157,9 +178,12 @@ config for that default.
 Steady-state lifecycle:
 
 - `<StudyLenses>` ingests the `snippet` prop.
-- Format pre-processing runs lazily (on need; not every keystroke).
-- `embody()` turns formatted snippet into a frozen `Snippet` —
-  also lazy (built when a lens or evaluation needs it).
+- `embody()` turns the snippet directly into a frozen `Snippet` —
+  lazy (built when a lens or evaluation needs it). Format
+  compliance is checked inside `embody` and surfaced via
+  `Snippet.validation.formatted` (boolean) plus JEJ-subset
+  violations on `Snippet.validation.violations`. The orchestrator
+  does NOT pre-format; formatting is the learner's responsibility.
 - The orchestrator switches between **editor mode** (home base
   active, no lens) and **lens mode** (active lens mounted with
   embodiment + config props).
@@ -193,8 +217,7 @@ flowchart TD
 
     Mode -->|"lens mode (on transition)"| EmbodyTrigger["embody trigger"]
     SnippetState --> EmbodyTrigger
-    EmbodyTrigger -->|"format, sync, pure"| Formatted["formatted snippet"]
-    Formatted -->|"embody, sync"| Embodiment["frozen Snippet"]
+    EmbodyTrigger -->|"embody, sync"| Embodiment["frozen Snippet"]
 
     Mode -->|"lens mode"| LensMount["&lt;LensModule.Component<br/>embodiment config&gt;"]
     Embodiment --> LensMount
@@ -211,20 +234,22 @@ flowchart TD
 Errors the orchestrator coordinates between the embody trigger
 and the mounted lens:
 
-- **Format / validate / parse error at embody trigger** — surfaces
-  in lens mode at the moment the trigger fires (lens-open from
-  editor). Lens receives an embodiment with `status.parsed=false`
-  (or equivalent gates) and displays per its own error-surface
-  contract. NOT surfaced while typing.
+- **Validation / parse error at embody trigger** — surfaces in
+  lens mode at the moment the trigger fires (lens-open from
+  editor). `embody` does NOT throw; it returns a `Snippet` whose
+  `status.parsed=false` (or equivalent gates), `errors` field, and
+  `validation.{formatted, isJeJ, violations}` flags carry the
+  diagnostic. The lens receives that embodiment and displays per
+  its own error-surface contract. NOT surfaced while typing.
 - **Evaluation error inside a lens** — surfaces only when the
   lens's evaluation triggers (run / predict button), even if
   detectable statically. Per lens's own error-surface contract.
 - **Async setup inside a lens** — async resource loading (e.g.
   CodeMirror language modules) lives inside the lens's React
   component, not in the embody trigger. The orchestrator's
-  embody trigger is **sync** by contract: format → embody →
-  cache. If a future evaluation engine needs async embody, that
-  contract change re-opens this section; until then, sync.
+  embody trigger is **sync** by contract: embody → cache. If a
+  future evaluation engine needs async embody, that contract
+  change re-opens this section; until then, sync.
 
 ### Switch flow (lens-mode internal)
 
@@ -261,9 +286,23 @@ in one place.
 **Orchestrator-internal effect categories** (load-bearing names;
 specific deps and ordering pin during F1's Phase 0):
 
+> **F1 narrowing of this table.** F1 implements the **Embody
+> trigger** only, with a *broadened* trigger condition: because
+> F1 has no mode discriminator, embody fires on every snippet
+> change unconditionally, not only on mode → lens transition. F2
+> narrows the trigger to the table's "mode → lens transition" row
+> shape once the discriminator lands; F3 refines further to
+> lazy-on-need. The other two categories (Lens-switch dispatch,
+> Embodiment-on-edit invalidation) are wired in F5 and F2
+> respectively. The exact React shape in F1 (`useMemo` keyed on
+> `snippet` vs. `useState`+`useEffect`) is an implementation
+> choice F1.B picks during TDD — the F1 contract pinned here is
+> just *"a fresh `Snippet` is available on every snippet change,
+> derived synchronously"*.
+
 | Category                                | Triggers on                             | What it does                                                                                | Cleanup                                              |
 | --------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| **Embody trigger**                      | mode → lens transition                  | Format pre-process → `embody(snippet)` → cache embodiment in state                           | None — embodiment is plain frozen data               |
+| **Embody trigger**                      | mode → lens transition                  | `embody(snippet)` → cache embodiment in state                                                | None — embodiment is plain frozen data               |
 | **Lens-switch dispatch**                | active-lens change while in lens mode   | Fire `lens-switched` (payload `{ previous, next }`) on the internal bus                      | None                                                 |
 | **Embodiment-on-edit invalidation**     | snippet change while in editor mode     | Discard cached embodiment; next lens-open builds a fresh one                                 | None                                                 |
 
@@ -358,9 +397,8 @@ be a curated subset of these.
   a microtask gap between effect-fire and side-effect-completion.
   Subscribers to `lens-switched` that need the new mount in the
   DOM should defer their work to a microtask or
-  `requestAnimationFrame` (per
-  [`./orchestrator/DOCS.md`](./orchestrator/DOCS.md) § Phase 2 step 4
-  — relocated-but-STALE pre-refactor reference).
+  `requestAnimationFrame` (the pre-refactor orchestrator's effect
+  topology surfaced this as Phase 2 step 4; durable rule).
 - **Dependency rules** (per `../DOCS.md` § Dependency rules):
   - `orchestrate/` may import from `orchestrate/lib/*`, `embody/`,
     `lenses/`, `@-utils`.
@@ -377,6 +415,12 @@ be a curated subset of these.
 - **Embodiment construction details** — owned by
   [`../embody/`](../embody/). The orchestrator just calls
   `embody(snippet)` and consumes the returned `Snippet`.
+- **Format pre-processing** — `embody` checks format compliance
+  via `Snippet.validation.formatted` and surfaces JEJ-subset
+  violations via `Snippet.validation.violations`; the learner
+  formats their own code; the orchestrator does not pre-format.
+  (Was sketched in earlier drafts; removed per the
+  user-confirmed Phase 0 decision.)
 - **Lens internals** — owned by [`../lenses/`](../lenses/).
   The orchestrator passes `embodiment` + `config` props; what the
   lens does inside is its own concern.
@@ -464,9 +508,11 @@ strategy ties embody construction to **explicit user actions**
 (open a lens, run/predict an evaluation phase) — moments where the
 learner has paused and the snippet is meaningful to inspect.
 
-This also aligns the **error-surfacing UX**: format / validate /
-parse errors appear at lens-open time (not while typing), and
-evaluation errors appear at run/predict time (not statically).
+This also aligns the **error-surfacing UX**: validation /
+parse / format-compliance signals appear at lens-open time (not
+while typing) — surfaced via `Snippet.validation.*` and
+`Snippet.errors` on the returned embodiment. Evaluation errors
+appear at run/predict time (not statically).
 Per the lifelong-learning autonomy principle, this avoids
 intruding on the learner's typing with real-time syntax-error
 spam.

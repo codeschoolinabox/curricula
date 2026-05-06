@@ -1,165 +1,171 @@
 # editor — Architecture & Decisions
 
-> **⚠️ STALE — pre-refactor content. Superseded by
-> [`../DOCS.md`](../DOCS.md) §Editor as home base.** This file was
-> relocated verbatim from `study-lenses/editor/` and describes the
-> editor as a **lens module** with the `LensMount` /
-> `lens(code, cfg)` contract — that framing is obsolete. Per the
-> locked architecture, `orchestrate/editor/` is the orchestrator's
-> internal home base (single writer for snippet mutation, default
-> mode, not registered as a lens, never reachable through lens
-> resolution). The Mermaid diagrams, `LensMount` lifecycle, async
-> cancellation discussion, and Increment-8/15 sprint timeline have
-> all been superseded. Regenerated content lands as part of the
-> post-migration sweep (REFACTOR-HANDOFF Step 7). Do not consult
-> this file for current architecture.
-
----
-
 ## Why this module exists
 
-The `editor` lens is the default landing lens for `js:editor` fences
-and the orchestrator's fallback when an unknown lens name is
-requested. Pipeline validation in
-[`../../pipeline.ts`](../../pipeline.ts) rewrites unknown lens names
-to `'editor'` with a console warning, so this module **must** stay
-registered.
+`orchestrate/editor/` is the orchestrator's **home base** — the
+always-mounted React surface where learners edit the snippet
+string. Per the locked single-writer state model in
+[`../README.md`](../README.md) § Conventions and
+[`../DOCS.md` § Why the editor is a peer subdir, not a lens](../DOCS.md),
+this is the only surface in the package that mutates snippet
+source. Lenses, the recommender, and the toolbar picker are all
+read-only.
 
-The eventual real implementation is a CodeMirror-backed editable code
-surface. Today this directory ships a stub.
+The editor is **not** a `LensModule`. It is **not** registered in
+the lens registry. The orchestrator's editor-mode UI mounts
+[`./index.tsx`](./index.tsx) directly as a peer React component;
+when the orchestrator transitions to lens mode it unmounts the
+editor and mounts a `<LensModule.Component>` instead (per
+[`../DOCS.md` § Lifecycle modes](../DOCS.md)). The two surfaces
+never co-render.
 
-## Why a stub
+## Single-component module
 
-Increment 8 ships the React orchestrator scaffolding. Wiring
-mount/detach, async cancellation, and the lens cache requires a
-concrete `LensModule` to register and resolve. Building the real
-CodeMirror lens at the same time as the orchestrator scaffolding
-would overload the increment; the stub is the smallest substitute
-that satisfies the contract:
+| File        | Purpose                                                                          |
+| ----------- | -------------------------------------------------------------------------------- |
+| `index.tsx` | React home-base component (default export). Renders the editable host element.   |
+| `editor.ts` | **Legacy** pre-refactor `LensModule`-shaped stub. Not in the load-bearing path.  |
 
-- It has the correct default-export shape (frozen `LensModule`).
-- It returns a real `LensMount` (`el` + `dispose`) — not a Promise.
-- It fills the unknown-name fallback role without console errors.
-
-What the stub does NOT do: parse, format, dispatch
-`snippet-changed`, or persist edits. Those arrive with the
-CodeMirror replacement in Increment 15+.
-
-## Replacement contract
-
-The real CodeMirror lens MUST keep:
-
-- Same file path: [`./editor.ts`](./editor.ts).
-- Same default export: a frozen `LensModule`.
-- Same `name` field: `'editor'`.
-- Same backwards-compatible `lens(code, cfg)` signature; may switch
-  the return type from `LensMount` to `Promise<LensMount>`.
-
-The orchestrator does not need to change when the swap happens. The
-stub-vs-real difference is observable only through the `data-lens`
-attribute (today `"editor-stub"`; the real lens picks its own value,
-e.g. `"editor-codemirror"`).
+The previous draft of this DOCS framed the editor as a two-layer
+"React adapter + LensModule stub" module. AR-1 rejected that
+framing: the post-refactor `LensModule` contract (per
+[`../../lenses/types.ts`](../../lenses/types.ts) lines 186-192)
+requires `Component` + `applicableTo` fields, which the legacy
+`editor.ts` lacks (and `editor.ts` still exposes the dropped
+`lens(code)` method, which is not part of the post-refactor lens
+shape). The home base is a single React component; `editor.ts` is
+demoted to legacy scaffolding pending removal.
 
 ## Architectural sketch
-
-### Execution phases
-
-1. **Mount** (sync today, may become async post-replacement) — create
-   a single detachable element, populate it with the snippet text,
-   return a `LensMount` whose `dispose()` is a no-op. Increment 9
-   Pre-work C-1 changes the element from `<pre>` to `<textarea>` so
-   learners can type into it; edits remain non-propagating until the
-   real lens lands.
-2. **Config resolution** — accept partial overrides; spread + freeze;
-   cast back to `LensConfig`. The stub has no configuration surface.
-3. **Recommend** — return an empty array. The real CodeMirror lens
-   will populate this once the analysis pipeline lands per
-   [`../../../.planning-handoffs/02-analysis-and-recommender.md`](../../../.planning-handoffs/02-analysis-and-recommender.md).
 
 ### Data flow
 
 ```mermaid
 flowchart TD
-    Overrides["partial overrides<br/>(or absent)"] -->|"resolve, sync, pure"| Cfg["LensConfig<br/>frozen, empty in stub"]
-    Code["code: string"] --> Mounted
-    Cfg --> Mounted["LensMount<br/>{ el: stub-element, dispose: noop }"]
-    Mounted -->|"mount, sync"| Mounted
-    Mounted --> CacheKey["cache entry<br/>keyed by (name='editor', hash(cfg))"]
-    NoInput["(no inputs)"] -->|"recommend, sync, pure"| Empty["ReadonlyArray&lt;Recommendation&gt;<br/>= []"]
+    OrchestratorProps["orchestrator state<br/>{ mode: 'editor', snippet }"]
+    OrchestratorProps -->|"snippet (string)"| Editor["&lt;EditorComponent<br/>snippet /&gt;<br/>(index.tsx)"]
+    Editor -->|"renders JSX"| Host["&lt;textarea<br/>data-orchestrator-host<br/>value={snippet} /&gt;"]
+    Host -->|"DOM"| Browser["browser-rendered<br/>editable surface"]
+
+    Editor -. "F2: onSnippetChange?(next)" .-> OrchestratorProps
+    Host -. "F2: onChange handler<br/>fires onSnippetChange" .-> Editor
 ```
 
-The "stub-element" node is `<pre data-lens="editor-stub">` today and
-becomes `<textarea data-lens="editor-stub">` after Increment 9
-Pre-work C-1. The replacement (Increment 15+) returns CodeMirror's
-`EditorView.dom` element and the mount edge gains an `async` constraint;
-the rest of the contract above is unchanged.
+The dotted edges are **F2 only** — F1 ships without edit
+propagation. The textarea is editable in F1 so learners see a
+"type here" affordance, but keystrokes do not yet reach the
+orchestrator's snippet state.
+
+### Execution phases
+
+1. **Mount** — orchestrator is in editor mode; renders
+   `<EditorComponent snippet={…} />`. The component returns its
+   JSX body containing `<textarea data-orchestrator-host
+   value={snippet}>`. React mounts the textarea natively. No
+   `useRef`-managed DOM mount, no manual `appendChild`.
+2. **Re-render on snippet change** — when the orchestrator passes
+   a new `snippet`, React reconciles the textarea's `value`
+   attribute. No teardown / re-mount; React's standard
+   reconciliation handles it.
+3. **(F2 onward) Mode transition (editor → lens)** — orchestrator
+   switches `state.mode` to `'lens'`. React unmounts
+   `<EditorComponent>` entirely and mounts `<LensModule.Component>`
+   in its place. Any `useEffect` cleanups inside the editor run as
+   part of the unmount. F1 has no mode discriminator, so this
+   transition does not fire in F1.
+4. **(F2 onward) Mode transition (lens → editor)** — symmetric.
+   React unmounts the lens and mounts a fresh `<EditorComponent>`.
+   Editor-internal state (cursor position, scroll) is per-mount;
+   nothing carries across. Same F1-vs-F2 caveat as step 3.
 
 ### Structural constraints
 
-- **No React import.** This file is pure TypeScript. The replacement
-  may use `createRoot` internally if it picks a React-driven editor,
-  but the boundary stays inside this file.
-- **`dispose()` is owned by the lens.** The orchestrator calls it on
-  unmount and on cache eviction; the lens decides what cleanup means
-  (CodeMirror: `editorView.destroy()`; stub: no-op).
-- **No `snippet-changed` dispatch in the stub.** Edits inside the
-  textarea (post-Pre-work-C-1) are visible but not propagated to the
-  orchestrator. The real lens implements debounced dispatch.
-- **Cache survival across switch.** When the orchestrator caches an
-  `editor`-stub mount and reattaches it later, any text the learner
-  typed survives because the DOM node was detached, not destroyed.
-  This survival behavior is the whole reason the
-  switch-cleanup-vs-unmount-cleanup split (Increment 9 Pre-work B)
-  matters for this lens.
+- **No edit propagation in F1.** The textarea is editable, but the
+  component does not call back to the orchestrator. F2 adds an
+  optional `onSnippetChange?(next: string) => void` prop and a
+  matching `onChange` handler on the textarea; the orchestrator
+  routes that callback into its `useState` setter for snippet.
+- **No `embodiment` prop on the editor — ever.** The editor is
+  editor-mode-only. Per [`../DOCS.md` § Lifecycle modes](../DOCS.md)
+  (lines 82-84) and the F2 handoff (lines 325-327 of
+  [`../../.planning-handoffs/03-orchestrator-and-contracts.md`](../../.planning-handoffs/03-orchestrator-and-contracts.md)),
+  editor mode has no embodiment built. Embodiment is a lens-mode
+  concept and is passed to `<LensModule.Component>`, not to this
+  editor.
+- **No `LensModule` registration.** The editor is not enumerated
+  by the picker, not ranked by the recommender, not present in
+  the lens registry. The orchestrator imports the component
+  directly.
+- **Sync mount today.** The F1 placeholder is a synchronous JSX
+  body — no async setup, no `Promise<…>` mount API. Inc 15+'s
+  CodeMirror replacement may need async language-module loading;
+  that async lives **inside the component** (`useEffect` +
+  `React.lazy` + `<Suspense>`) and does not change the prop
+  contract.
+- **Single host element.** The component renders **one**
+  `<textarea data-orchestrator-host>` directly. The data attribute
+  is the test / dev-sandbox handle for "this is the home base
+  surface". (If Inc 15+ needs to wrap CodeMirror in a containing
+  `<div>`, the data attribute moves to whichever element is the
+  outermost stable handle.)
 
 ### Out of scope
 
-- **Edit propagation.** Stub-only. Belongs to the real lens.
-- **Syntax error handling.** Stub renders the snippet verbatim; no
-  parse, no validation. The `lib/validating/` module handles parse
-  errors; the real lens consumes that report.
-- **Recommend-time analysis.** Stub returns `[]`. The real lens
-  consumes the analysis report from `lib/analysis/` (TBD).
+- **Edit propagation** — F2 adds `onSnippetChange?`.
+- **Embodiment-aware diagnostics** — the editor never receives an
+  embodiment. CodeMirror in-editor diagnostics (Inc 15+) will
+  consume `validation.*` / `errors.*` from a `Snippet` only if a
+  future contract change passes the embodiment in lens mode (out
+  of scope for the editor itself).
+- **Recommend-time analysis** — the editor is not a lens; it has
+  no `recommend()` surface. Recommendations belong to lens
+  modules.
 
-## Why `<textarea>` instead of `<pre>` for the upgraded stub
+## Replacement contract
 
-Increment 9 needs a second lens to switch between, and the user wants
-the stub semantically aligned with its eventual replacement. The real
-CodeMirror editor is editable; a textarea is the simplest DOM element
-that conveys "type here" without pulling in CodeMirror. It contrasts
-visually and behaviorally with the read-only `<pre><code>` of the
-[`../highlight/`](../highlight/) stub (planned, Increment 9 Pre-work
-C-2).
+The CodeMirror-backed home base (Inc 15+) MUST keep:
+
+- **Same file path:** [`./index.tsx`](./index.tsx).
+- **Same default export shape:** a React function component.
+- **Same prop surface:** `{ snippet }` in F1; `{ snippet,
+  onSnippetChange? }` from F2 onward.
+- **Same data attribute on the host element:** `data-orchestrator-host`.
+
+When CodeMirror lands the orchestrator's call site does not
+change. The component's internal implementation swaps from a
+plain `<textarea>` body to a CodeMirror `EditorView` mounted via
+`useEffect`; everything outside the component is invariant.
 
 ## Module ownership
 
 This module owns:
 
-- [`./editor.ts`](./editor.ts) — the `LensModule` default export.
-- [`./tests/editor.test.ts`](./tests/editor.test.ts) — vitest jsdom
-  unit tests.
+- [`./index.tsx`](./index.tsx) — the React home-base component.
+- [`./tests/`](./tests/) — vitest jsdom unit tests.
+- [`./editor.ts`](./editor.ts) — **legacy** stub, scheduled for
+  removal. Tests that target it are also legacy.
 
 Consumers:
 
-- [`../../orchestrator/default-registry.ts`](../../orchestrator/default-registry.ts)
-  imports the default and registers it.
-- The orchestrator wrapper at
-  [`../../orchestrator/study-lenses.tsx`](../../orchestrator/study-lenses.tsx)
-  resolves it through `registry.getLens('editor')`.
+- [`../index.tsx`](../index.tsx) — the orchestrator imports the
+  component for editor mode.
 
-No other consumers. The replacement (Increment 15+) keeps the same
-import surface.
+No other consumers. Lenses do not consume the editor; the
+recommender does not consume it; the toolbar does not consume it.
 
 ## Future direction
 
-When the CodeMirror replacement lands:
+When the CodeMirror replacement lands (Inc 15+):
 
-- This DOCS.md grows a "CodeMirror integration" section describing
-  language extensions, theme wiring, and the `EditorView.destroy()`
-  cleanup contract.
-- The data-flow diagram's mount edge changes from sync to async
-  (`Promise<LensMount>`).
-- The "no `snippet-changed` dispatch" structural constraint flips —
-  the real lens MUST dispatch debounced edits.
-- The `recommend()` empty-array short-circuit becomes a real
-  Block-Model placement function consuming the analysis report.
+- The component body switches from a `<textarea>` JSX child to a
+  `<div ref={hostRef} data-orchestrator-host />` plus a
+  `useEffect` that constructs `new EditorView({ parent:
+  hostRef.current, … })` and returns its `destroy()` as the
+  effect cleanup.
+- F2's `onSnippetChange?` wiring becomes a CodeMirror update
+  listener that debounces and dispatches.
+- This DOCS.md grows a "CodeMirror integration" section
+  describing the extension stack and the `validation.*`-driven
+  diagnostics linter.
+- The legacy [`./editor.ts`](./editor.ts) is deleted along with
+  any tests targeting it.

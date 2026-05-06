@@ -6,27 +6,6 @@ views), and the home-base [`editor/`](./editor/) into one
 consumer-mountable surface, and ships the package's public API:
 `<StudyLenses>`.
 
-> **🚧 PRE-REFACTOR SENTINEL** — this directory holds target docs
-> only. Source code arrives during REFACTOR-HANDOFF Step 8 (editor
-> extraction), Step 9 (analysis-libs move), and Step 10 (the
-> `<StudyLenses>` component itself). After source lands, this
-> banner is removed.
->
-> **Prior art**: the pre-refactor `<StudyLenses>` orchestrator was
-> relocated verbatim to [`./orchestrator/`](./orchestrator/) during
-> REFACTOR-HANDOFF Step 10 (commit `5d6fc54`). Those subdir docs
-> are banner-flagged STALE; the structural patterns they describe
-> (lifecycle phases, effect topology, Switch flow Mermaid, async
-> caveat, `vi.hoisted` test pattern) carry forward to the new
-> orchestrator, but the contract details (LensModule shape,
-> `(name, configHash)` cache, framework-agnostic `LensMount`,
-> three-prop API) reshape per the locked decisions in
-> [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles)
-> and this peer's [`./DOCS.md`](./DOCS.md). Data-attribute names
-> also update — see § Data attributes below for the new selector
-> set; the pre-refactor `data-orchestrator="study-lenses"` is
-> replaced by `data-orchestrator-host`.
-
 ## What lives here
 
 ```text
@@ -35,13 +14,13 @@ orchestrate/
   DOCS.md                    architectural sketch + Mermaid (peer + StudyLenses)
   types.ts                   <StudyLenses> prop contract + state shape + INTERNAL EventBus events
 
-  index.tsx                  the <StudyLenses> component (planned, F1)
+  index.tsx                  the <StudyLenses> component
   toolbar.tsx                lens-picker dropdown (planned, L1)
   recommendations-panel.tsx  recommendations panel UI (planned, L5)
-  tests/                     vitest jsdom tests (planned, per-increment)
+  tests/                     vitest jsdom tests (per-increment)
 
   editor/                    default home base — only writer of snippet state
-    README.md, DOCS.md       (planned: index.tsx, tests/)
+    index.tsx, editor.ts, README.md, DOCS.md, tests/
 
   lib/                       analysis helpers — all (embodiment) → result
     README.md                (index — links to per-lib READMEs/DOCS)
@@ -106,6 +85,38 @@ info-string (`js:trace`), per-directory `lenses.json` cascade, and
 the optional per-fence `@study-lens` directive — the Docusaurus
 plugin at `src/plugins/study-lenses/` parses all three and emits
 the resolved values onto the JSX node.
+
+> **F1 narrowing**: the four-prop signature is the public contract
+> at the type level today, but only `snippet` is wired to runtime
+> behavior in F1. `lens?` / `config?` / `configs?` are accepted on
+> every render and pass typecheck; they remain no-ops until later
+> increments wire them. `lens` gains behavior in L1 (toolbar
+> default-selected option) and F2 (initial-mount lens for the
+> editor → lens transition). `config` and `configs` gain behavior
+> in L2 (cascade resolution chain). The **mount-time guard** for
+> "`config` supplied with no resolved default" lands in **F1**
+> (per handoff line 54: *"the orchestrator throws at mount with a
+> clear message — F1 implements"*). Because F1 has no cascade
+> machinery yet — `lens` is a no-op and `configs?.default` cannot
+> resolve — the F1-only guard fires whenever `config` is supplied
+> at all: *if `config` is supplied AND `lens` is unset AND
+> `configs?.default` is unset, throw at mount*. L2 expands the
+> resolved-default check once `configs.default` becomes meaningful
+> (i.e. once cascade resolution actually decides what counts as a
+> "resolved default"); the guard itself predates that machinery.
+
+> **F1 ↔ plugin alignment gap**: until the Docusaurus plugin
+> alignment lands (see
+> [`../.planning-handoffs/03-orchestrator-and-contracts.md`](../.planning-handoffs/03-orchestrator-and-contracts.md)
+> § Cross-handoff impact), the plugin still emits the pre-refactor
+> prop shape (`code`, `lens`, `lang`, `transforms`). F1's contract
+> is the new four-prop API (`snippet`, `lens?`, `config?`,
+> `configs?`); the plugin's emitted shape will not match during
+> this window. Plugin-fence integration is post-F1 cross-tier
+> work; F1's sandbox checkpoint runs against an isolated harness
+> page at `src/pages/study-lenses-smoke.tsx` (Docusaurus auto-
+> routes `src/pages/`) which mounts `<StudyLenses>` directly,
+> bypassing the plugin entirely.
 
 ### Per-lens config resolution chain
 
@@ -203,19 +214,19 @@ mode switches — the disposability principle.
 
 ## Data attributes the DOM exposes
 
-**Sketched** — F1 Phase 0 locks the final names. The set below
-extends the pre-refactor surface from
-[`./orchestrator/README.md` § Data attributes the DOM exposes](./orchestrator/README.md)
-(STALE-banner-flagged but kept verbatim for reference) with the
-recommendations-panel + host-rename additions:
+The set below is the orchestrator's stable selector surface. F1
+ships the **root** + **host** pair; the toolbar / picker / panel
+attributes land alongside their owning increments (L1 picker, L5
+panel) and are kept here so test authors and sandbox harnesses
+know what to expect across the pyramid.
 
-| Attribute                                | Where                                | Used by                                                                            |
-| ---------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------- |
-| `data-orchestrator-root`                 | The wrapper `<div>` (toolbar + lens area) | Tests + sandbox locate the orchestrator instance.                              |
-| `data-orchestrator-toolbar`              | The toolbar `<nav>`                  | Tests + sandbox locate the toolbar without depending on tag.                       |
-| `data-orchestrator-lens-picker`          | The toolbar `<select>`               | Tests + sandbox locate the dropdown.                                               |
-| `data-orchestrator-recommendations-panel` | The recommendations panel container | Tests + sandbox locate the panel.                                                  |
-| `data-orchestrator-host`                 | The lens-area `<div>`                | Tests + sandbox locate where the active lens mounts.                               |
+| Attribute                                 | Where                                     | Lands in | Used by                                                  |
+| ----------------------------------------- | ----------------------------------------- | -------- | -------------------------------------------------------- |
+| `data-orchestrator-root`                  | The wrapper `<div>` (toolbar + lens area) | F1       | Tests + sandbox locate the orchestrator instance.        |
+| `data-orchestrator-host`                  | The host element where the active surface mounts (F1: a `<textarea>` for the editor home base; later increments may use a wrapping container when the surface needs one) | F1       | Tests + sandbox locate where the active surface mounts.  |
+| `data-orchestrator-toolbar`               | The toolbar `<nav>`                       | L1       | Tests + sandbox locate the toolbar without depending on tag. |
+| `data-orchestrator-lens-picker`           | The toolbar `<select>`                    | L1       | Tests + sandbox locate the dropdown.                     |
+| `data-orchestrator-recommendations-panel` | The recommendations panel container       | L5       | Tests + sandbox locate the panel.                        |
 
 **Directory → type/attribute asymmetry.** The directory is named
 `orchestrate/` (verb) to mirror `embody/`'s convention of
@@ -228,17 +239,6 @@ noun-form because its primary surface is itself a verb
 (`embody()`); `orchestrate/`'s primary surface is a noun-form
 component (`<StudyLenses>`), so the noun form creeps in for
 internals. The asymmetry is honest, not a mistake.
-
-**Migration note (Step 10 / WS3 F1).** The pre-refactor
-`data-orchestrator="study-lenses"` attribute is sketched as
-DROPPED in favor of `data-orchestrator-host` (the old name
-conflated the wrapper and the lens-area concerns). The
-relocated-but-STALE tests under
-[`./orchestrator/tests/`](./orchestrator/tests/) use the old
-selector and need to migrate to the new attribute set when WS3 F1
-brings the orchestrator back online. F1 Phase 0 may revisit this
-drop if the migration cost is judged too high; otherwise the
-rename proceeds and tests update at the same commit.
 
 ## Conventions
 
@@ -275,10 +275,7 @@ top-level `AGENTS.md`. Peer-specific rules:
     environment (configured at the file level via
     `@vitest-environment jsdom`).
   - `vi.mock` factories that reference outer-scope variables wrap
-    them in `vi.hoisted(() => ({ ... }))` (lint pitfall #12 — see
-    the relocated-but-STALE
-    [`./orchestrator/tests/study-lenses.async-cancel.test.tsx`](./orchestrator/tests/study-lenses.async-cancel.test.tsx)
-    for the canonical pattern).
+    them in `vi.hoisted(() => ({ ... }))` (lint pitfall #12).
 
 ## Navigation
 
@@ -295,8 +292,3 @@ top-level `AGENTS.md`. Peer-specific rules:
   [`../.planning-handoffs/03-orchestrator-and-contracts.md`](../.planning-handoffs/03-orchestrator-and-contracts.md)
   (kickoff at sibling
   [`-kickoff.md`](../.planning-handoffs/03-orchestrator-and-contracts-kickoff.md)).
-- **Migration plan**: [`../REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md).
-- **Pre-refactor prior art** (relocated verbatim, banner-flagged
-  STALE — kept for archival reference only):
-  [`./orchestrator/README.md`](./orchestrator/README.md)
-  + [`./orchestrator/DOCS.md`](./orchestrator/DOCS.md).

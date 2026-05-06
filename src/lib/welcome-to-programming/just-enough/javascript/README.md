@@ -345,10 +345,14 @@ directory-wide `lenses.json` cascade emits `configs`. See
 the full resolution chain.
 
 `<StudyLenses>` is the orchestrator: it ingests the snippet, builds the
-embodiment via `embody()`, runs the pre-processing pipeline (formatting),
-selects which lenses to surface (via the recommender), mounts them, and
-manages all state. Consumers get one component to mount; everything else
-is internal.
+embodiment via `embody()` (which checks the snippet against JEJ language
+constraints and surfaces violations and format-compliance via
+`Snippet.validation.*` — JEJ-subset violations as a list, format
+compliance as a boolean), selects which lenses to surface (via the
+recommender), mounts them, and manages all state. Formatting is the
+learner's responsibility — the orchestrator does not pre-format
+snippets. Consumers get one component to mount; everything else is
+internal.
 
 `embody`, lens plugins, and `orchestrate/lib/*` analysis helpers are **not**
 part of the public API. They are internal building blocks that
