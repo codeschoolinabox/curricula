@@ -197,9 +197,8 @@ The folder layout mirrors the conceptual chain:
 | [`notional-machine.md`](./notional-machine.md) | How the NM controlled by our language level works                                  |
 | [`embody/`](./embody/)                         | Programmatic embodiment of the NM                                                  |
 | [`lenses/`](./lenses/)                         | Pedagogical views on the embodied NM                                               |
+| [`orchestrate/`](./orchestrate/)               | `<StudyLenses>` orchestrator + analysis helpers                                    |
 | `sandbox-programs/`                            | Test fixtures (may be moved later)                                                 |
-| `sandbox.html`                                 | _Planned smoke-test harness — TBD agent (see [DOCS.md](./DOCS.md))_                |
-| [`lib/`](./lib/)                               | Helpers used to build embody and lenses                                            |
 
 (`.planning-handoff/` is a temporary dev artifact — intentionally not documented
 in README.)
@@ -277,8 +276,8 @@ exploration and creativity.
 | [embody/](./embody/)                                                 | Operational embodiment of the NM (data + event streams)         |
 | [embody/types.ts](./embody/types.ts)                                 | Canonical TypeScript contract                                   |
 | [embody/DOCS.md](./embody/DOCS.md)                                   | embody architecture + data flow                                 |
-| [lib/evaluating/trace/syntax/](./lib/evaluating/trace/syntax/)       | Syntax tracer — NM-step-category implementation (README + DOCS) |
-| [lib/evaluating/trace/semantics/](./lib/evaluating/trace/semantics/) | Semantic tracer — finer-grained instrumentation (README + DOCS) |
+| [embody/lib/evaluating/trace/syntax/](./embody/lib/evaluating/trace/syntax/)       | Syntax tracer — NM-step-category implementation (README + DOCS) |
+| [embody/lib/evaluating/trace/semantics/](./embody/lib/evaluating/trace/semantics/) | Semantic tracer — finer-grained instrumentation (README + DOCS) |
 
 ## Tooling
 
@@ -437,11 +436,11 @@ type Result<TEvent> = {
 - [embody/DOCS.md](./embody/DOCS.md) — embody architecture + data flow
 - [embody/types.ts](./embody/types.ts) — canonical types
 - [lenses/README.md](./lenses/README.md) — lens system
-- [lib/parse-old/README.md](./lib/parse-old/README.md) — `parse(code)` + parse
+- [embody/lib/parse-old/README.md](./embody/lib/parse-old/README.md) — `parse(code)` + parse
   primitives
-- [lib/validating/README.md](./lib/validating/README.md) — `validate(code)` +
+- [embody/lib/validating/README.md](./embody/lib/validating/README.md) — `validate(code)` +
   validation pipeline
-- [lib/formatting/README.md](./lib/formatting/README.md) — `format(code)` /
+- [embody/lib/formatting/README.md](./embody/lib/formatting/README.md) — `format(code)` /
   `checkFormat(code)`
-- [lib/evaluating/README.md](./lib/evaluating/README.md) — evaluation engines
+- [embody/lib/evaluating/README.md](./embody/lib/evaluating/README.md) — evaluation engines
 - [DOCS.md](./DOCS.md) — architecture decisions and design rationale
