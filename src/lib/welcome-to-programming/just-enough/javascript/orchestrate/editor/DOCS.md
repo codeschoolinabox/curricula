@@ -21,20 +21,17 @@ never co-render.
 
 ## Single-component module
 
-| File        | Purpose                                                                          |
-| ----------- | -------------------------------------------------------------------------------- |
-| `index.tsx` | React home-base component (default export). Renders the editable host element.   |
-| `editor.ts` | **Legacy** pre-refactor `LensModule`-shaped stub. Not in the load-bearing path.  |
+| File        | Purpose                                                                                  |
+| ----------- | ---------------------------------------------------------------------------------------- |
+| `index.tsx` | React home-base component (default export). Renders the read-only host textarea in F1.   |
 
 The previous draft of this DOCS framed the editor as a two-layer
 "React adapter + LensModule stub" module. AR-1 rejected that
 framing: the post-refactor `LensModule` contract (per
 [`../../lenses/types.ts`](../../lenses/types.ts) lines 186-192)
-requires `Component` + `applicableTo` fields, which the legacy
-`editor.ts` lacks (and `editor.ts` still exposes the dropped
-`lens(code)` method, which is not part of the post-refactor lens
-shape). The home base is a single React component; `editor.ts` is
-demoted to legacy scaffolding pending removal.
+requires `Component` + `applicableTo` fields, which the
+pre-refactor stub lacked. The home base is a single React component;
+the legacy stub at `./editor.ts` was deleted as part of F1.C.
 
 ## Architectural sketch
 
@@ -44,17 +41,17 @@ demoted to legacy scaffolding pending removal.
 flowchart TD
     OrchestratorProps["orchestrator state<br/>{ mode: 'editor', snippet }"]
     OrchestratorProps -->|"snippet (string)"| Editor["&lt;EditorComponent<br/>snippet /&gt;<br/>(index.tsx)"]
-    Editor -->|"renders JSX"| Host["&lt;textarea<br/>data-orchestrator-host<br/>value={snippet} /&gt;"]
-    Host -->|"DOM"| Browser["browser-rendered<br/>editable surface"]
+    Editor -->|"renders JSX"| Host["&lt;textarea<br/>data-orchestrator-host<br/>readOnly<br/>value={snippet} /&gt;"]
+    Host -->|"DOM"| Browser["browser-rendered<br/>read-only display surface"]
 
-    Editor -. "F2: onSnippetChange?(next)" .-> OrchestratorProps
+    Editor -. "F2: lifts readOnly + adds onSnippetChange?(next)" .-> OrchestratorProps
     Host -. "F2: onChange handler<br/>fires onSnippetChange" .-> Editor
 ```
 
-The dotted edges are **F2 only** — F1 ships without edit
-propagation. The textarea is editable in F1 so learners see a
-"type here" affordance, but keystrokes do not yet reach the
-orchestrator's snippet state.
+The dotted edges are **F2 only** — F1 ships read-only display
+because there is no path for edits to reach the orchestrator's
+snippet state. F2 lifts the `readOnly` attribute and adds the
+`onChange` handler that fires `onSnippetChange?`.
 
 ### Execution phases
 
@@ -80,9 +77,11 @@ orchestrator's snippet state.
 
 ### Structural constraints
 
-- **No edit propagation in F1.** The textarea is editable, but the
-  component does not call back to the orchestrator. F2 adds an
-  optional `onSnippetChange?(next: string) => void` prop and a
+- **Read-only in F1.** The textarea uses `readOnly` and a controlled
+  `value={snippet}`; learners see the snippet but cannot type into
+  it because F1 has no path for edits to reach the orchestrator's
+  snippet state. F2 lifts the `readOnly` attribute and adds an
+  optional `onSnippetChange?(next: string) => void` prop with a
   matching `onChange` handler on the textarea; the orchestrator
   routes that callback into its `useState` setter for snippet.
 - **No `embodiment` prop on the editor — ever.** The editor is
@@ -141,9 +140,6 @@ plain `<textarea>` body to a CodeMirror `EditorView` mounted via
 This module owns:
 
 - [`./index.tsx`](./index.tsx) — the React home-base component.
-- [`./tests/`](./tests/) — vitest jsdom unit tests.
-- [`./editor.ts`](./editor.ts) — **legacy** stub, scheduled for
-  removal. Tests that target it are also legacy.
 
 Consumers:
 
@@ -157,6 +153,12 @@ recommender does not consume it; the toolbar does not consume it.
 
 When the CodeMirror replacement lands (Inc 15+):
 
+- A dedicated unit test directory at [`./tests/`](./tests/) returns
+  with isolated coverage of the React component (the orchestrate-level
+  tests at [`../tests/study-lenses.test.tsx`](../tests/study-lenses.test.tsx)
+  cover F1's behavior end-to-end; isolated tests gain value once
+  CodeMirror's surface area expands the component beyond a 3-line
+  JSX body).
 - The component body switches from a `<textarea>` JSX child to a
   `<div ref={hostRef} data-orchestrator-host />` plus a
   `useEffect` that constructs `new EditorView({ parent:

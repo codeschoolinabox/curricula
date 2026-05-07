@@ -1,14 +1,13 @@
 /**
  * @file `<StudyLenses>` — the package's public API surface.
  *
- * **F1.B scope** (this commit): four-prop component skeleton +
+ * **F1.C scope** (this commit): four-prop component skeleton +
  * mount-time guard for `config` supplied without a resolved-default
- * lens + `embody(snippet)` chain wiring. F1.C mounts the editor home
- * base. When F1 is complete, this file orchestrates the chain
- * `snippet → embody(snippet) → frozen Snippet → mount editor home
- * base`, per the locked decisions in
- * [`./README.md` § Public API](./README.md) and the F1 narrowing
- * block in the same file:
+ * lens + `embody(snippet)` chain wiring + editor home-base mount.
+ * F1 is complete: this file orchestrates the chain `snippet →
+ * embody(snippet) → frozen Snippet → mount editor home base`, per
+ * the locked decisions in [`./README.md` § Public API](./README.md)
+ * and the F1 narrowing block in the same file:
  *
  * - **Four-prop signature is the public contract.** Accepts
  *   `{ snippet, lens?, config?, configs? }`. Every prop typechecks;
@@ -25,26 +24,36 @@
  *   violations via `Snippet.validation.violations`; the orchestrator
  *   does not pre-format.
  * - **No mode discriminator yet.** F1 has no editor-vs-lens state
- *   machine; F1.C will mount the editor unconditionally. F2
- *   introduces the 2-mode discriminator per `./types.ts` §
- *   `OrchestratorState`.
+ *   machine; the editor mounts unconditionally. F2 introduces the
+ *   2-mode discriminator per `./types.ts` § `OrchestratorState`.
  * - **Internal-only EventBus.** F1 fires no events; F5 wires the
  *   internal bus.
  *
- * @remarks F1.B scope: the embody chain is wired but the resulting
- * `Snippet` is held in a `useMemo` slot without a downstream consumer
- * — F1.C will mount the editor home base, but the editor never
- * receives the embodiment as a prop (per AR-1 CP-1; the editor is
- * editor-mode-only and embodiment is a lens-mode concept introduced
- * in F2). The F1.B smoke goal: the chain is alive end-to-end and the
- * memoized embodiment is observable in React DevTools' Hooks panel.
+ * @remarks F1.C scope: the embody chain is wired and the editor home
+ * base is mounted as a child of the orchestrator's root. The
+ * `Snippet` returned by `embody(snippet)` is held in a `useEmbodiment`
+ * custom hook (which calls `useDebugValue` so React DevTools shows
+ * the value when inspecting `<StudyLenses>`) but is not passed to
+ * the editor — per AR-1 CP-1, the editor is editor-mode-only and
+ * `embodiment` is a lens-mode concept introduced in F2. The F1 smoke
+ * goal is met: the chain is alive end-to-end (snippet flows into
+ * `embody`; the editor renders the snippet) and the embodiment is
+ * observable via the custom-hook debug value.
  */
 
 import React from 'react';
 
 import embody from '../embody/index.js';
+import type { Snippet } from '../embody/types.js';
 
+import EditorComponent from './editor/index.js';
 import type { StudyLensesProps } from './types.js';
+
+function useEmbodiment(snippet: string): Snippet {
+	const embodiment = React.useMemo(() => embody(snippet), [snippet]);
+	React.useDebugValue(embodiment);
+	return embodiment;
+}
 
 export default function StudyLenses({
 	snippet,
@@ -61,18 +70,21 @@ export default function StudyLenses({
 			'<StudyLenses>: `config` requires a resolved default lens. Set `lens={…}` or `configs.default={…}` (or omit `config`).',
 		);
 	}
-	// Embody chain (F1.B). Memoized on snippet — a fresh Snippet is
+	// Embody chain (F1.B/C). Wrapped in a custom hook so React
+	// DevTools surfaces the value via `useDebugValue` when inspecting
+	// `<StudyLenses>`. Memoized on snippet — a fresh Snippet is
 	// derived synchronously on every snippet change, per
-	// `./DOCS.md` § F1 narrowing of the effect-topology table.
-	// Note: this trigger condition (every snippet change) is the
-	// broadened F1 approximation; F2 narrows it to the mode → lens
-	// transition once the discriminator lands.
-	// Held but not yet consumed: F1's smoke goal per AR-1 is that the
-	// chain is alive end-to-end and the embodiment is observable in
-	// React DevTools' Hooks panel; future increments add consumers.
-	// eslint-disable-next-line sonarjs/no-unused-vars -- intentional smoke-test scaffolding (AR-1 concern 4)
-	const _embodiment = React.useMemo(() => embody(snippet), [snippet]);
-	return <div data-orchestrator-root />;
+	// `./DOCS.md` § F1 narrowing of the effect-topology table. Note:
+	// this trigger condition (every snippet change) is the broadened
+	// F1 approximation; F2 narrows it to the mode → lens transition
+	// once the discriminator lands. The result is not yet passed to
+	// any UI in F1 (per AR-1 CP-1; the editor is editor-mode-only).
+	useEmbodiment(snippet);
+	return (
+		<div data-orchestrator-root>
+			<EditorComponent snippet={snippet} />
+		</div>
+	);
 }
 
 export type { StudyLensesProps } from './types.js';

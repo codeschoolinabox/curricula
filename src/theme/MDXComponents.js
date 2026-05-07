@@ -3,7 +3,7 @@
  * registry with three entries:
  *
  * - `StudyLenses` — the orchestrator component, lives at
- *   `src/lib/welcome-to-programming/just-enough/javascript/orchestrate/orchestrator/study-lenses.tsx`
+ *   `src/lib/welcome-to-programming/just-enough/javascript/orchestrate/index.tsx`
  *   per the embody / lenses / orchestrate three-peer architecture.
  *   The remark plugin emits every `<StudyLenses>` occurrence as an
  *   `mdxJsxFlowElement` node via `codeBlockToJsx` — in-page fences,
@@ -25,7 +25,7 @@ import MDXComponents from '@theme-original/MDXComponents';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-import StudyLenses from '@site/src/lib/welcome-to-programming/just-enough/javascript/orchestrate/orchestrator/study-lenses';
+import StudyLenses from '@site/src/lib/welcome-to-programming/just-enough/javascript/orchestrate/index';
 
 export default {
 	...MDXComponents,
