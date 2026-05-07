@@ -1,41 +1,76 @@
 # Embody implementation handoff — Phase B
 
-**Status:** Phase B ready (or near-ready). Phase A migration steps
-complete (commits `9f1db34`, `9df535e`, `5d6fc54`, `8db59e6`,
-2026-05-04..05). Mock embodiment factory at `embody/index.ts` is
-live with 11 named scenarios. Structural moves complete:
-`embody/lib/`, `orchestrate/lib/`, `orchestrate/editor/`,
-`orchestrate/orchestrator/`, `lenses/highlight/` all populated
-with verbatim copies.
+**Status:** Phase B is **unblocked**. Phase A is closed —
+`REFACTOR-HANDOFF.md` self-deleted in commit `4526dc3`
+(2026-05-06, "Phase A complete"). The three-peer
+embody/lenses/orchestrate architecture is the running shape;
+the mock embodiment factory at `embody/index.ts` is live with
+11 named scenarios; F1 of the orchestrator pyramid landed
+across commits `bd98648`–`dd5e55b` (2026-05-06) bringing the
+new four-prop `<StudyLenses>` component online and clearing the
+pre-refactor `orchestrate/orchestrator/` archival. The
+sandbox harness for direct orchestrator mounting lives at
+`src/pages/study-lenses-smoke.tsx`.
 
-Phase B can begin once REFACTOR-HANDOFF.md's remaining steps land:
-the post-migration sweep (Step 7 signature change), Step 12
-(package index update), Step 14 (peer doc audit), Step 16
-(dependency-rule audit), and Step 17 (delete REFACTOR-HANDOFF.md).
-At that point the three-peer architecture is fully live and Phase B
-re-types `embody/lib/*` modules in place per the locked decisions.
+Phase B re-types `embody/lib/*` modules in place per the locked
+decisions, replacing slices of the mock factory body with real
+composition one module at a time.
 
-**Audience:** the agent (Claude or otherwise) that will replace the
-Phase-A mock with real `embody/lib/*` composition, one module at a
-time, AFTER Phase A has fully closed.
+**Audience:** the agent (Claude or otherwise) that will replace
+the Phase-A mock with real `embody/lib/*` composition, one
+module at a time.
 
-**Lifecycle:** delete this file after Phase B is done, verified, and
-merged. Companion to `REFACTOR-HANDOFF.md` (which self-deletes at end
-of Phase A); both files are migration scaffolding, not permanent docs.
+**Lifecycle:** delete this file after Phase B is done, verified,
+and merged. The companion `REFACTOR-HANDOFF.md` self-deleted at
+end of Phase A; this file follows the same pattern at end of
+Phase B. Both files were migration scaffolding, not permanent
+docs.
 
-The architectural narrative (mock-first split, why each module gets
-its own DDD cycle) is in
-[`REFACTOR-HANDOFF.md` § Two-phase refactor](./REFACTOR-HANDOFF.md).
-The contract every step here must satisfy is
+**Architectural narrative (mock-first split).** The two-phase
+refactor split the substrate work into a Phase-A move (relocate
+modules without re-typing — fast, mechanical, deletes the old
+locations) and a Phase-B re-typing pass (each module gets its
+own DDD cycle in its new home, picking up pedagogical clarity
+that the verbatim moves didn't). The mock factory at
+`embody/index.ts` is the load-bearing simplification — it
+keeps `embody(code) → Snippet` callable through Phase B while
+modules flip from stub to real one at a time. The contract
+every step here must satisfy is
 [`embody/types.ts`](./embody/types.ts).
 
 ## Constraints to honor
 
-The Phase A constraints in `REFACTOR-HANDOFF.md` § Constraints to
-honor still apply (single writer, lens purity, `embody/lib/*` raw
-data, `embodiment` canonical parameter name, dependency rules,
-strict immutability, evaluation phase named "evaluation"). Phase B
-adds the following:
+The Phase A constraints carry forward into Phase B:
+
+- **Three peers + utils.** Final shape is `embody/`, `lenses/`,
+  `orchestrate/` under `javascript/`; cross-cutting infra stays
+  at `src/lib/utils/` and is imported via the existing `@`-alias.
+  Any new `embody/lib/<module>/` module honors this — no
+  cross-peer reaches.
+- **Single writer of snippet state.** Only the orchestrator's
+  editor home base mutates the snippet string. Lenses are
+  read-only views over a frozen embodiment; analysis libs and
+  recommenders are read-only too.
+- **Lens purity.** Lenses receive `embodiment` via React props
+  from the orchestrator; they never import from `embody/` (top)
+  or `orchestrate/` (top), only type-only from
+  `embody/types.ts` and runtime from `orchestrate/lib/*` or
+  `@-utils`.
+- **`embody/lib/*` outputs are raw data.** Each module's output
+  is plain (post-Phase-B Step B3, no boundary-side validation
+  or freezing); the factory at `embody/index.ts` is the single
+  freezing point.
+- **`embodiment` is the canonical parameter name** wherever a
+  function takes a `Snippet` instance.
+- **Dependency rules** per `DOCS.md` § Dependency rules:
+  `embody/` and `lenses/` and `orchestrate/lib/*` are pure-TS
+  peers; `orchestrate/` is the React seam.
+- **Strict immutability.** All factory outputs are deep-frozen.
+- **Evaluation phase is named "evaluation"** (not "execution"
+  or "run"); the per-call object is an `Execution<…>` per
+  `embody/types.ts`.
+
+Phase B adds the following:
 
 - **Mock is the contract.** Every Phase-B step replaces some part of
   the mock body with real composition; the **return type is
@@ -76,8 +111,8 @@ locking, generator surface locking).
 
 ### Step B1 — Build `embody/lib/parse/` against re-typed tokens + AST
 
-Was REFACTOR-HANDOFF Step 2. The acorn wrapper itself is mostly a
-mechanical port from `lib/parse-old/`; the type design isn't.
+The acorn wrapper itself is mostly a mechanical port from
+`lib/parse-old/`; the type design isn't.
 
 1. Phase 0 DDD on `embody/lib/parse/types.ts`:
    - Token kinds — drop acorn's flat `Token` shape; introduce a
@@ -102,10 +137,10 @@ string-equality).
 
 ### Step B2 — Pedagogical re-typing of NM-rep modules at `embody/lib/`
 
-Was REFACTOR-HANDOFF Step 3 + the original "copy semantics"
-framing. **The relocation already happened** in Phase A commit
-`9df535e` (2026-05-04): the 6 NM-rep modules now live at
+The Phase A relocation already happened in commit `9df535e`
+(2026-05-04): the 6 NM-rep modules now live at
 `embody/lib/<module>/` verbatim. `javascript/lib/` is gone.
+Phase B re-types them in place.
 
 Phase B's focus here is **pedagogical re-typing in place**:
 
@@ -131,9 +166,9 @@ module's slice of `Snippet`, while other slices remain mock-stub.
 
 ### Step B3 — Strip validation/freezing from `embody/lib/*`
 
-Was REFACTOR-HANDOFF Step 4. Walk each `embody/lib/*` module, remove
-output-side validation wrappers and `Object.freeze` /
-`deepFreezeInPlace` calls at the module boundary. Keep internal
+Walk each `embody/lib/*` module, remove output-side validation
+wrappers and `Object.freeze` / `deepFreezeInPlace` calls at the
+module boundary. Keep internal
 correctness checks; only strip boundary defenses. The factory becomes
 the single freezing point — including for the not-yet-real-module
 slices (the mock kept freezing them, the real impl now does).
@@ -144,7 +179,7 @@ deep-frozen Snippet (factory-level freeze still works).
 
 ### Step B4 — Validate new `embody/lib/parse/` against `parse-old/`
 
-Was REFACTOR-HANDOFF Step 6. Run both over the sandbox-programs corpus.
+Run both over the sandbox-programs corpus.
 Compare token streams + AST shapes. When parity is confirmed (ideally
 automated diff test), delete `embody/lib/parse-old/`.
 
@@ -210,8 +245,7 @@ time.
 
 ### Step B9 — Final dependency-rule audit (Phase B side)
 
-Mirror of `REFACTOR-HANDOFF.md` Step 16, but applied at end of Phase
-B. Verify:
+End-of-Phase-B dependency-rule audit. Verify:
 
 - No `embody/lib/*` imports from `embody/` (top), `orchestrate/`, or
   `lenses/`.
@@ -236,10 +270,12 @@ permanent record of how we got here.
   every Phase-B step must satisfy on output.
 - [`embody/index.ts`](./embody/index.ts) — the Phase-A mock factory
   whose body Phase B replaces module by module.
-- [`REFACTOR-HANDOFF.md`](./REFACTOR-HANDOFF.md) — Phase A. Carries
-  the § Two-phase refactor narrative for the Phase A/B split.
-  Self-deletes at end of Phase A; if you're reading this, that file
-  may already be gone.
+- [`DOCS.md`](./DOCS.md) § Locked decisions — the permanent record
+  of architectural decisions the two-phase refactor implemented.
+  REFACTOR-HANDOFF.md (Phase A's companion to this file) was
+  migration scaffolding and self-deleted in commit `4526dc3` at
+  end of Phase A; the load-bearing constraints carried across
+  into the Constraints section above.
 - [`.planning-handoffs/01-NM-components.md`](./.planning-handoffs/01-NM-components.md)
   — semi-hallucinated; reconciled here as the syntax-tracer
   `StepCategory` enum wires through `embody/lib/evaluating/trace/`

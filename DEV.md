@@ -942,7 +942,10 @@ src/
 ```
 
 - Directory name: `tests/` (plural, always)
-- File suffix: `.test.ts` (never `.spec.ts`)
+- File suffix: `.test.ts` (never `.spec.ts`). `.test.tsx` is acceptable
+  for React component tests where JSX in `.ts` files is not supported by
+  the project's tsconfig (e.g. when the parent tsconfig sets
+  `jsx: 'preserve'` and only `.tsx` files allow JSX syntax).
 - Root `/tests/` directory: integration test fixtures (not unit tests)
 
 ## Development Workflow
@@ -978,7 +981,7 @@ npm run validate  # lint + type-check + test
 - [ ] Verb-first naming; predicates prefixed with `is`/`has`/`can`/`should`
 - [ ] Types added to module's `types.ts`; prefer `type` over `interface`
 - [ ] Tests in `tests/` subdirectory (not alongside source files), `.test.ts`
-      suffix
+      suffix (or `.test.tsx` for React component tests)
 - [ ] Tests written in ZOMBIES order; suite is triangulated (no single test
       passable by hardcoding after the first increment)
 - [ ] No mutations of input data; pipeline functions thread an object

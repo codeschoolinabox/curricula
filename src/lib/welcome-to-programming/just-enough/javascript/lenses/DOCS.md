@@ -117,6 +117,13 @@ UI is what the learner interacts with — its internal state
   The wrapper exports the LensModule's `Component` field. Tests
   split similarly: `tests/core.test.ts` (no jsdom),
   `tests/component.test.tsx` (jsdom + @testing-library/react).
+- **`data-lens="<name>"` on the lens's root element.** Each lens's
+  React wrapper renders a root element carrying
+  `data-lens="<name>"` (matching the LensModule's `name` field).
+  This is the orchestrator-visible / CSS-targetable handle for
+  identifying which lens is currently mounted. The attribute is
+  load-bearing for sandbox harnesses, integration tests, and
+  per-lens CSS rules.
 - **`embodiment` parameter name** wherever a function takes a
   Snippet instance (LensProps, applicableTo, recommend).
 - **Self-describing for the recommender.** Each lens's

@@ -1,171 +1,168 @@
 # highlight — Architecture & Decisions
 
-> **⚠️ STALE — pre-refactor content. Superseded by
-> [`../DOCS.md`](../DOCS.md) for the post-Round-2 lens architecture.**
-> This file describes the framework-agnostic `LensMount` /
-> `dispose()` / `lens(code, cfg)` contract — that framing is
-> obsolete. The locked `LensModule` contract is React `Component` +
-> `applicableTo` + `recommend` (two-layer lens shape: TS core + React
-> wrapper). The Mermaid diagram, structural-constraints section,
-> data-flow narrative, and `editor` peer references all describe the
-> obsolete model. Regenerated content lands as part of the
-> post-migration sweep (REFACTOR-HANDOFF Step 7). Do not consult
-> this file for current architecture.
-
----
-
 ## Why this module exists
 
-The `highlight` lens is the read-only syntax-view counterpart to the
-editable [`editor`](../editor/) lens. The eventual real implementation
-is a Shiki- or Prism-backed syntax highlighter; today this directory
-ships a stub.
+The `highlight` lens is the read-only syntax-view of the snippet —
+the simplest possible lens against the post-refactor `LensModule`
+contract. It renders `embodiment.source.code` as colorized
+`<pre><code>` and provides no interaction surface. Its purpose is
+twofold:
 
-The stub serves two purposes:
+1. **A scaffolding-minimum lens module.** When the orchestrator's
+   lens roster needs a "this code is here, look at it" surface
+   (always applicable, no AST dependency, no learner input
+   required), highlight is the answer.
+2. **A reference shape for the two-layer lens module.** Pure-TS
+   core (tokenization + theme application) plus a thin React
+   wrapper. New lens authors can copy this shape.
 
-1. **Test fixture for orchestrator lens switching.** Increment 9 wires
-   a lens-picker dropdown above the orchestrator host. The dropdown
-   needs ≥ 2 lens options to be testable, and the cache-hit reattach
-   sandbox checkpoint needs ≥ 2 lenses to switch between. The
-   `editor` stub alone is not enough.
-2. **Visually distinct second lens.** The editor stub renders an
-   editable `<textarea>`; this stub renders a read-only
-   `<pre><code>`. A sandbox observer (and a screenshot regression
-   test) can tell at a glance which lens is currently mounted.
+## Single-module surface
 
-## Why a stub
+| File        | Purpose                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------ |
+| `index.tsx` | React component — the `LensModule.Component`. Imports the core and renders the colorized DOM.    |
+| `core.ts`   | Pure-TS core. Tokenizes `embodiment.source.code` and produces a frozen span tree the wrapper renders. |
 
-Building a real syntax highlighter at the same time as the
-lens-picker toolbar would overload Increment 9. The stub is the
-smallest substitute that satisfies the contract:
-
-- It has the correct default-export shape (frozen `LensModule`).
-- It returns a real `LensMount` (`el` + `dispose`) — not a Promise.
-- It is visually distinct from the editor stub.
-
-What the stub does NOT do: parse, tokenize, syntax-highlight,
-dispatch any events, or react to snippet changes. Those arrive with
-the real highlighter in Increment 15+.
-
-## Replacement contract
-
-The real highlight lens MUST keep:
-
-- Same file path: [`./highlight.ts`](./highlight.ts).
-- Same default export: a frozen `LensModule`.
-- Same `name` field: `'highlight'`.
-- Same backwards-compatible `lens(code, cfg)` signature; may switch
-  the return type from `LensMount` to `Promise<LensMount>` if it
-  picks Shiki (lazy theme loading) over Prism (synchronous).
-
-The orchestrator does not need to change when the swap happens. The
-stub-vs-real difference is observable only through the `data-lens`
-attribute (today `"highlight-stub"`; the real lens picks its own
-value, e.g. `"highlight-shiki"`).
+The default export from `index.tsx` is the frozen `LensModule`
+record. The core is internal — only the React wrapper imports it.
+Tests that exercise tokenization / theme application target the
+core directly (vitest, no `jsdom`). Tests that exercise the React
+wrapper use jsdom + `@testing-library/react`.
 
 ## Architectural sketch
-
-### Execution phases
-
-1. **Mount** (sync today, may become async post-replacement) — create
-   a `<pre>` wrapping a `<code>` text node, populate the inner
-   `<code>` with the snippet text, return a `LensMount` whose
-   `dispose()` is a no-op.
-2. **Config resolution** — accept partial overrides; spread + freeze;
-   cast back to `LensConfig`. The stub has no configuration surface;
-   the real lens may grow theme / language / line-numbering options.
-3. **Recommend** — return an empty array. The real highlight lens
-   will populate this once the analysis pipeline lands per
-   [`../../../.planning-handoffs/02-analysis-and-recommender.md`](../../../.planning-handoffs/02-analysis-and-recommender.md).
 
 ### Data flow
 
 ```mermaid
 flowchart TD
-    Overrides["partial overrides<br/>(or absent)"] -->|"resolve, sync, pure"| Cfg["LensConfig<br/>frozen, empty in stub"]
-    Code["code: string"] --> Mounted
-    Cfg --> Mounted["LensMount<br/>{ el: pre&gt;code, dispose: noop }"]
-    Mounted -->|"mount, sync"| Mounted
-    Mounted --> CacheKey["cache entry<br/>keyed by (name='highlight', hash(cfg))"]
-    NoInput["(no inputs)"] -->|"recommend, sync, pure"| Empty["ReadonlyArray&lt;Recommendation&gt;<br/>= []"]
+    LensProps["LensProps<br/>{ embodiment: Snippet (frozen), config? }"]
+    LensProps -->|"embodiment.source.code,<br/>config"| Core["TS core<br/>(tokenize + theme)"]
+    Core -->|"span tree (frozen)"| Component["LensModule.Component<br/>(React wrapper)"]
+    Component -->|"renders JSX"| DOM["&lt;pre data-lens=highlight&gt;<br/>&lt;code&gt;…spans…&lt;/code&gt;<br/>&lt;/pre&gt;"]
+    DOM -->|"reconciles to"| Browser["read-only display surface"]
 ```
 
-The "pre&gt;code" node is `<pre data-lens="highlight-stub"><code>...</code></pre>`
-today. The replacement (Increment 15+) returns a `<pre>` whose inner
-contents are tokenized + colorized; the outer container shape is
-unchanged.
+The "span tree" is highlight's internal name for the
+tokenized-and-themed intermediate the React wrapper renders. Not
+a contract type; private to this module.
+
+### Execution phases
+
+1. **Mount** — orchestrator is in lens mode with `activeLens =
+   'highlight'`. React mounts the LensModule's
+   `Component` with `embodiment` and `config` props. The Component
+   derives a span tree from `embodiment.source.code` + `config`
+   via the TS core and renders.
+2. **Re-render with same embodiment** — orchestrator passes the
+   same frozen `embodiment` reference; React reconciles. The
+   Component's strategy for avoiding redundant tokenization
+   (`useMemo`, `React.memo`, or no memoization at all if the cost
+   is negligible) is an implementation choice, not part of the
+   contract.
+3. **Re-render with new embodiment** — orchestrator passes a new
+   frozen `embodiment` (snippet edit triggered re-embodiment in
+   editor mode and the learner re-entered lens mode). The
+   Component derives a new span tree from the new source and
+   renders it; React reconciles the DOM.
+4. **Unmount** — orchestrator transitions out of lens mode (back
+   to editor, or to a different lens). React unmounts the
+   Component; any `useEffect` cleanups inside it run.
 
 ### Structural constraints
 
-- **No React import.** This file is pure TypeScript. The replacement
-  may use a framework-agnostic highlighter (Shiki / Prism) which does
-  not require React.
-- **`dispose()` is owned by the lens.** The orchestrator calls it on
-  unmount and on cache eviction; the stub's dispose is a no-op
-  because there are no listeners or external resources to release.
-  The real highlighter may register intersection-observers or
-  language-loader subscriptions whose dispose contract becomes
-  non-trivial.
-- **Read-only.** No edit propagation, no `snippet-changed` dispatch.
-  External snippet changes propagate via `onSnippetChanged` (not
-  implemented in the stub) — when added, the real highlight lens
-  will re-render the entire token tree.
-- **Cache survival across switch.** When the orchestrator caches a
-  `highlight`-stub mount and reattaches it later, the displayed
-  snippet remains unchanged because the DOM node was detached, not
-  destroyed. Same survival mechanism as the editor stub — see
-  [`../../orchestrator/DOCS.md`](../../orchestrator/DOCS.md)
-  §Switch flow for the orchestrator-side guarantee.
+- **Read-only.** The component does not mutate `embodiment` (it
+  is deep-frozen by the embody contract) or `config` (also
+  frozen). It does not dispatch snippet edits — only the editor
+  home base at [`../../orchestrate/editor/`](../../orchestrate/editor/)
+  does.
+- **No embodiment reach-back.** The component depends only on
+  `embodiment.source.code` plus the optional `config`. It never
+  imports from `embody/` (top) or `orchestrate/` (top); only
+  type-level imports from `embody/types.ts` are allowed.
+- **Tier 1 applicability.** `applicableTo(embodiment)` returns
+  `true` unconditionally — highlight applies to any snippet,
+  including parse-failed ones (the source string is always
+  present). Per [`../README.md`](../README.md) § Three-tier
+  classification.
+- **Per-mount UI state.** Any local state lives inside the
+  Component (`useState` / `useReducer`). When the snippet
+  changes and the orchestrator unmounts the lens, that state
+  goes with it. No cross-mount persistence.
+- **LensModule surface stays synchronous.** Per
+  [`../DOCS.md` § Structural constraints](../DOCS.md). If a future
+  highlighter needs lazy theme/language loading (e.g. Shiki),
+  that async lives **inside** the Component (`React.lazy` +
+  `<Suspense>` or `useEffect` with a state-machine).
 
 ### Out of scope
 
-- **Token-level interaction.** Stub renders raw text. Click-to-jump,
-  hover-tooltip, AST-aware highlighting all belong to the real lens.
-- **Theme / language config.** Stub ignores config overrides entirely.
-  The real lens will define a `theme` and `language` field on its
-  `LensConfig`.
-- **Recommend-time analysis.** Stub returns `[]`. The real lens
-  consumes the analysis report from `lib/analysis/` (TBD).
+- **Token-level interaction** — click-to-jump, hover tooltips,
+  AST-aware highlighting. Belong to dedicated AST lenses (Tier 2)
+  per the three-tier classification. Highlight is text-only.
+- **Theme / language config schema** — owned by the lens. The
+  config eventually grows `theme` + `language` fields; for now
+  the schema is open (any `LensConfig`-shaped record).
+- **Snippet edits / single-writer state** — highlight is
+  read-only by structural contract; only the editor home base
+  mutates snippet state.
+- **Recommender ranking logic** — `recommend(embodiment)`
+  populates Block-Model placements via the WS2 analysis
+  pipeline per
+  [`../../.planning-handoffs/02-analysis-and-recommender.md`](../../.planning-handoffs/02-analysis-and-recommender.md).
+  Highlight's recommender contribution is part of WS2's Phase
+  0; not part of this module's contract beyond the field's
+  presence.
 
-## Why a `<pre><code>` structure (not just `<pre>`)
+## Why `<pre><code>` (not just `<pre>`)
 
-The `<pre><code>` pattern is the de facto standard for code blocks in
-HTML — semantic, accessible, styleable. Both Shiki and Prism produce
-DOM in this shape. Using the same shape in the stub means the
-replacement is a content swap inside the inner `<code>`, not a
-structural change. CSS targeting `pre code { ... }` works against the
-stub and against the real lens.
+The `<pre><code>` pattern is the de facto standard for code blocks
+in HTML — semantic, accessible, styleable. Both Shiki and Prism
+produce DOM in this shape. CSS targeting `pre code { … }` works
+against any reasonable highlighter implementation. The outer
+`<pre>` carries the peer-wide `data-lens="<name>"` attribute (per
+[`../DOCS.md` § Structural constraints](../DOCS.md)); the inner
+`<code>` carries the colorized spans.
 
 ## Module ownership
 
 This module owns:
 
-- [`./highlight.ts`](./highlight.ts) — the `LensModule` default
-  export.
-- [`./tests/highlight.test.ts`](./tests/highlight.test.ts) — vitest
-  jsdom unit tests.
+- `./index.tsx` — the React wrapper (LensModule default export).
+- `./core.ts` — the pure-TS tokenization + theme core.
+- `./tests/` — vitest unit tests (core in node env; component in
+  jsdom env).
 
 Consumers:
 
-- [`../../orchestrator/default-registry.ts`](../../orchestrator/default-registry.ts)
-  imports the default and registers it.
-- The orchestrator wrapper at
-  [`../../orchestrator/study-lenses.tsx`](../../orchestrator/study-lenses.tsx)
-  resolves it through `registry.getLens('highlight')`.
+- The orchestrator's lens roster (mechanism open-spec per F4
+  Phase 0; likely a static import-list of `LensModule` defaults
+  at the orchestrator's peer top level) imports the default and
+  includes it in the picker / panel set.
+- The picker dropdown (L1) lists `name: 'highlight'`; the
+  recommender (WS2) ranks it.
 
-No other consumers. The replacement (Increment 15+) keeps the same
-import surface.
+No other consumers. The orchestrator never reaches into the
+component's internals; it mounts via React reconciliation and
+passes `embodiment` + `config` props.
 
 ## Future direction
 
-When the Shiki/Prism replacement lands:
-
-- This DOCS.md grows a "Highlighter integration" section describing
-  language loading, theme wiring, and the dispose contract for
-  long-lived subscriptions.
-- The data-flow diagram's mount edge may flip to async if Shiki is
-  chosen.
-- The "no `onSnippetChanged` hook" structural constraint flips —
-  the real lens MUST re-render on external snippet changes.
-- The `recommend()` empty-array short-circuit becomes a real
-  Block-Model placement function consuming the analysis report.
+- **Shiki vs. Prism** decision lands when the core's
+  tokenization implementation is written (lens-migration
+  session). Shiki has richer theme support and async theme
+  loading; Prism is synchronous and lighter. Either fits inside
+  the Component without changing the LensModule surface.
+- **Three-tier classification annotations**: when the Block
+  Model is locked at WS2 Phase 0, `recommend` returns the cells
+  highlight contributes to (likely `(level=1, scope=local,
+  components=[syntax])` and similar).
+- **JEJ-aware highlighting** — once `embody/lib/parse/` lands
+  Phase B, highlight can consume `embodiment.parse.ast` to
+  refine token classes per the JEJ NM (e.g. mark binding kinds
+  / scope chains differently). That's a Component-internal
+  refinement, not a contract change.
+- **Validation/error-driven affordances** — the Component could
+  consume `embodiment.validation.violations` to grey out lines
+  inside JEJ-violation spans, or `embodiment.errors` to mark
+  parse-failure regions. Same shape as JEJ-aware highlighting:
+  a richer Component, no contract change.

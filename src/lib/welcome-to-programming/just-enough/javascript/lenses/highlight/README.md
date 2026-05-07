@@ -1,93 +1,65 @@
 # lenses/highlight
 
-> **⚠️ STALE — pre-refactor content. Superseded by
-> [`../README.md`](../README.md) +
-> [`../DOCS.md`](../DOCS.md) for the post-Round-2 architecture.**
-> This file was relocated verbatim from
-> `study-lenses/lenses/highlight/` and describes the lens with the
-> framework-agnostic `LensMount` / `dispose()` / `lens(code, cfg)`
-> contract — that framing is obsolete. Per the locked architecture,
-> a `LensModule` is `{ name, Component, config, applicableTo,
-> recommend }` where `Component` is a React component receiving
-> `LensProps` (two-layer lens shape: TS core + React wrapper). The
-> peer mentioning `editor/` as a sibling lens is also obsolete —
-> editor is now the orchestrator's internal home base, not a peer
-> lens. Regenerated content lands as part of the post-migration
-> sweep (REFACTOR-HANDOFF Step 7). Do not consult this file for
-> current architecture.
-
----
-
-The `highlight` lens module — a read-only syntax-view counterpart to
-the editable [`editor`](../editor/) lens. The eventual real
-implementation is a Shiki/Prism-driven syntax highlighter; today this
-directory ships a stub.
-
-> **Status — Stub.** Renders the snippet inside
-> `<pre data-lens="highlight-stub"><code>...</code></pre>` (read-only,
-> no syntax highlighting). The real highlighter lands in Increment 15+.
-> The stub exists so the orchestrator's lens-picker has a second
-> option to switch between (alongside `editor`) and the cache-hit
-> reattach contract can be exercised end-to-end.
-
-## Why a stub now
-
-Increment 9 wires the lens-picker dropdown above the orchestrator
-host. The dropdown needs ≥ 2 lens options; the cache-hit reattach
-sandbox checkpoint needs ≥ 2 lenses to switch between. Without a
-second registered lens, the lens-picker would have nothing to switch
-to. Adding a real syntax highlighter at the same time as the
-lens-picker would overload the increment; the stub is the smallest
-substitute that satisfies the contract.
-
-The stub is visually distinct from the editor stub (read-only
-`<pre><code>` vs editable `<textarea>`) so a sandbox observer can
-tell which lens is currently mounted.
-
-## Replacement contract
-
-The real highlight lens MUST keep:
-
-- Same file path: [`./highlight.ts`](./highlight.ts).
-- Same default export: a frozen `LensModule`.
-- Same `name` field: `'highlight'`.
-- Same backwards-compatible `lens(code, cfg)` signature; may switch
-  the return type from `LensMount` to `Promise<LensMount>` (Shiki
-  lazily loads themes; Prism is sync).
-
-The orchestrator does not need to change when the swap happens. The
-stub-vs-real difference is observable only through the `data-lens`
-attribute (today `"highlight-stub"`; the real lens picks its own
-value, e.g. `"highlight-shiki"`).
-
-## Files
-
-| File                                     | Purpose                                                                  |
-| ---------------------------------------- | ------------------------------------------------------------------------ |
-| [`highlight.ts`](./highlight.ts)         | The `LensModule` default export. ~30 lines.                              |
-| `tests/highlight.test.ts`                | vitest jsdom unit tests for the stub.                                    |
-| [`./DOCS.md`](./DOCS.md)                 | Architectural sketch — replacement contract, data flow, why-decisions.   |
+The `highlight` lens — a read-only syntax-view of the snippet,
+rendered as colorized `<pre><code>` over the frozen
+[`embodiment`](../../embody/types.ts). One of the lens-module
+implementations the orchestrator's picker enumerates and the
+recommender ranks.
 
 ## Public API
 
-The module's default export is the frozen `LensModule`. Consumers
-(today, only [`../../orchestrator/default-registry.ts`](../../orchestrator/default-registry.ts))
-import it directly and pass it to `registry.register(...)`:
+The module's default export is a frozen `LensModule` per
+[`../types.ts`](../types.ts) § LensModule:
 
-```typescript
-import highlight from './highlight.js';
-registry.register(highlight);
+```ts
+import highlight from './index.js';
+
+// orchestrator side (illustrative — registry shape is open-spec; see
+// `../../orchestrate/DOCS.md` § Module ownership for the lock):
+const roster = [highlight, /* parsons, blanks, … */];
+
+// orchestrator mounts in lens mode:
+<highlight.Component embodiment={frozenSnippet} config={resolved} />;
 ```
 
-`highlight.lens(code)` mounts a fresh DOM element per call. The
-orchestrator caches the returned `LensMount` keyed by
-`(lens-name, config-hash)`, so subsequent same-config switch-back
-operations reattach the cached element instead of re-mounting.
+Fields:
 
-`highlight.recommend()` returns an empty array in the stub. The real
-highlight lens will populate this once the analysis pipeline lands
-per
-[`../../../.planning-handoffs/02-analysis-and-recommender.md`](../../../.planning-handoffs/02-analysis-and-recommender.md).
+- `name: 'highlight'` — registry identity.
+- `Component: ComponentType<LensProps>` — React wrapper around the
+  lens's pure-TS core. Renders read-only colorized
+  `<pre data-lens="highlight"><code>…</code></pre>` from
+  `embodiment.source.code`.
+- `config(overrides?): LensConfig` — resolves the per-lens config
+  (eventually: theme, language). Empty `{}` when no overrides are
+  supplied; deep-frozen.
+- `applicableTo(embodiment): boolean` — returns `true` for any
+  snippet (highlight is a Tier 1 text-only lens per
+  [`../README.md`](../README.md) § Three-tier classification).
+- `recommend(embodiment): ReadonlyArray<Recommendation>` —
+  Block-Model placement contributions; populated by the WS2
+  analysis pipeline per
+  [`../../.planning-handoffs/02-analysis-and-recommender.md`](../../.planning-handoffs/02-analysis-and-recommender.md).
+
+## Why a separate lens (vs. living inside the editor)
+
+The editor at [`../../orchestrate/editor/`](../../orchestrate/editor/)
+is the orchestrator's home base — the **single writer** of snippet
+state and the always-mounted React surface in editor mode. Highlight
+is read-only, lens-mode-only, and has no mutation surface. Keeping
+them as distinct modules keeps the single-writer invariant
+structural: lenses receive `embodiment` via props and never reach
+back into the snippet.
+
+## Two-layer module
+
+Per [`../README.md`](../README.md) § How to add a lens, the lens
+lives across two files:
+
+- **`core.ts`** — pure TypeScript. Tokenization / theme resolution
+  / span-tree construction. Testable in vitest without `jsdom`.
+- **`index.tsx`** — React wrapper. The `LensModule.Component`
+  consumes `LensProps`, calls into the core, renders the
+  colorized DOM.
 
 ## Conventions
 
@@ -95,20 +67,23 @@ Inherits all conventions from [`../README.md`](../README.md),
 [`../../README.md`](../../README.md), and the top-level `AGENTS.md`.
 Module-specific rules:
 
-- The default export is a frozen `LensModule` record (`freezeInPlace`
-  on the literal). The `LensMount` returned by `lens(code)` is also
-  frozen.
-- The replacement (Increment 15+) is required to keep the same file
-  path, the same default-export shape, and the `name: 'highlight'`
-  identity so the orchestrator does not need to change.
+- **Read-only.** The `Component` never mutates `embodiment` or
+  `config` (both are deep-frozen). It does not dispatch snippet
+  edits — only the editor home base does.
+- **Per-mount UI state.** Any lens-internal state (scroll
+  position, hover highlight) lives in `useState` /
+  `useReducer` inside the Component and is per-mount only.
+  When the snippet changes the orchestrator unmounts the lens
+  via React reconciliation; nothing carries across.
+- **Default export is a frozen `LensModule` record**
+  (`freezeInPlace` on the literal).
 
 ## Navigation
 
-- **Parent:** [`../README.md`](../README.md) — lenses index
-- **Architectural sketch:** [`./DOCS.md`](./DOCS.md)
-- **Sibling stub:** [`../editor/`](../editor/) — editable counterpart
-- **Types:** [`../../types.ts`](../../types.ts) (`LensModule`,
-  `LensMount`, `LensConfig`)
-- **Orchestrator wiring:** [`../../orchestrator/default-registry.ts`](../../orchestrator/default-registry.ts)
-- **Replacement plan:** Increments 15–18 in
-  [`../../../.planning-handoffs/04-lens-migration.md`](../../../.planning-handoffs/04-lens-migration.md)
+- **Parent:** [`../README.md`](../README.md) — lenses index +
+  contract.
+- **Architectural sketch:** [`./DOCS.md`](./DOCS.md).
+- **Lens contract:** [`../types.ts`](../types.ts).
+- **Embodiment contract:** [`../../embody/types.ts`](../../embody/types.ts).
+- **Lens-migration plan:**
+  [`../../.planning-handoffs/04-lens-migration.md`](../../.planning-handoffs/04-lens-migration.md).

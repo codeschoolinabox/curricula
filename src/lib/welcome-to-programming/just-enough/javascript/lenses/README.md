@@ -7,15 +7,18 @@ optional [`LensConfig`](./types.ts) and renders a learning exercise.
 
 > **🚧 MIGRATION IN PROGRESS** — this directory holds the target
 > contract docs (this README, `DOCS.md`, `types.ts`) plus the
-> first migrated lens [`./highlight/`](./highlight/) (commit
-> `5d6fc54`, banner-flagged STALE pending React-component-shape
-> rewrite). The remaining per-lens implementations migrate in via
-> WS4 (REFACTOR-HANDOFF.md Step 11). The pre-refactor
-> `study-lenses/` source tree was deleted in commit `5d6fc54`;
-> the editor was promoted to [`../orchestrate/editor/`](../orchestrate/editor/)
-> as the orchestrator home base, and the remaining lenses sit
-> outside this repo until WS4 brings them in. This banner is
-> removed once WS4 lands.
+> docs-only `./highlight/` placeholder (post-refactor `LensModule`
+> end-state described in
+> [`./highlight/README.md`](./highlight/README.md) +
+> [`./highlight/DOCS.md`](./highlight/DOCS.md); source pending the
+> lens-migration session that lands the React component + pure-TS
+> core against the new contract). The remaining per-lens
+> implementations migrate in via WS4
+> ([`../.planning-handoffs/04-lens-migration.md`](../.planning-handoffs/04-lens-migration.md)).
+> The pre-refactor `study-lenses/` source tree was deleted in
+> commit `5d6fc54`; the editor was promoted to
+> [`../orchestrate/editor/`](../orchestrate/editor/) as the
+> orchestrator home base. This banner is removed once WS4 lands.
 
 ## What lives here
 
