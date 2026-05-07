@@ -81,7 +81,7 @@ embodiment={…} config={…} />`. From the lens's perspective:
 
 ```mermaid
 flowchart TD
-    Embodiment["embodiment: Snippet<br/>(frozen, from orchestrate/orchestrator)"]
+    Embodiment["embodiment: Snippet<br/>(frozen, from orchestrate/)"]
     Cfg["LensConfig<br/>(frozen, optional)"]
     Defaults["module defaults"]
     Overrides["overrides? (Partial)"]

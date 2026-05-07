@@ -153,5 +153,3 @@ When the CodeMirror replacement lands (Inc 15+):
   debounces and dispatches.
 - This DOCS.md grows a "CodeMirror integration" section describing the extension
   stack and the `validation.*`-driven diagnostics linter.
-- The legacy [`./editor.ts`](./editor.ts) is deleted along with any tests
-  targeting it.
