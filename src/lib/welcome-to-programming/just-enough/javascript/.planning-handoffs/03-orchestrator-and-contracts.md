@@ -1,16 +1,28 @@
 # WS3: orchestrate/orchestrator — post-refactor increment plan
 
-> **Status**: This handoff was rewritten end-to-end after the package's
-> top-level docs (`README.md`, `DOCS.md`, `REFACTOR-HANDOFF.md`) locked
-> in the **embody / lenses / orchestrate three-peer architecture** and
+> **Status (2026-05-07)**: **F1 COMPLETE** (commits
+> `bd98648`–`abe70bb`, 2026-05-06..07). Four-prop
+> `<StudyLenses snippet lens? config? configs?>` is live with the
+> mount-time guard, embody chain wiring, and editor home base
+> (single React component per AR-1 CP-1). Sandbox harness at
+> `src/pages/study-lenses-smoke.tsx`. C cleanup landed
+> (`abe70bb`): highlight legacy source deleted; EMBODY-IMPL-HANDOFF
+> status block refreshed; DEV.md test-convention clause for
+> `.test.tsx`. Phase A migration is closed —
+> `REFACTOR-HANDOFF.md` self-deleted in `4526dc3`.
+>
+> **Next**: F2 (editor-vs-lens 2-mode state machine), or
+> in-parallel B (cross-tier Docusaurus plugin alignment) — see
+> `./B-plugin-alignment.md` for the
+> B starter prompt. F3-F5 + L1-L8 follow per the pyramid
+> build-order below.
+>
+> This handoff was rewritten end-to-end after the package's
+> top-level docs (`README.md`, `DOCS.md`) locked in the
+> **embody / lenses / orchestrate three-peer architecture** and
 > integrated the **Explorotron quadrant + pyramid** framework. The
 > previous version targeted `<StudyLenses code lens lang transforms>`
 > with a transforms-tier pipeline; that whole framing is superseded.
->
-> **Hard prerequisite**: `REFACTOR-HANDOFF.md` Steps 1-16 must be
-> executed and merged before any increment in this handoff begins.
-> The refactor is the only path to the embody / lenses / orchestrate
-> layout this handoff targets.
 >
 > **Operational instructions (prompt template, pre-session checks,
 > red flags, coordination points)** live in the sibling file
@@ -180,11 +192,13 @@ needing realignment in separate sessions:
   Analysis modules now consume `embodiment`; lens migration
   targets the TS-core + React-wrapper contract; recommender
   consumes `embodiment` and is the authoritative Layer-II engine.
-- **REFACTOR-HANDOFF.md does NOT cover the Docusaurus plugin** at
-  `src/plugins/study-lenses/`. The plugin's prop emission contract
-  (`code-block-to-jsx.ts:76-94`) currently produces
-  `<StudyLenses code lens lang config transforms>`; the new
-  orchestrator API is `<StudyLenses snippet lens? config? configs?>`.
+- **The Docusaurus plugin alignment is its own session (B).** The
+  pre-refactor migration (`REFACTOR-HANDOFF.md`, deleted in
+  `4526dc3`) didn't cover plugin work either. The plugin at
+  `src/plugins/study-lenses/` currently produces
+  `<StudyLenses code lens lang config transforms>` (per
+  `code-block-to-jsx.ts`); the new orchestrator API is
+  `<StudyLenses snippet lens? config? configs?>`.
   Required plugin alignment:
   - **Drop `transforms` attribute** entirely (no transforms tier).
   - **Rename `code` → `snippet`** to match the new orchestrator
@@ -207,28 +221,38 @@ needing realignment in separate sessions:
     override surface.
   - **`lenses.json` cascade** (`resolve-cascade.ts`) survives;
     its output now flows into the new `configs` prop.
-  - **Recommendation**: REFACTOR-HANDOFF.md should gain new steps
-    (e.g. Step 11.5 or new Step 18) covering plugin alignment,
-    landing AFTER the orchestrator's prop contract stabilizes
-    (Step 10) and AFTER the `study-lenses/` → `lenses/` rename
-    (Step 11). The plugin keeps its directory name
+  - **Plugin alignment is its own session.** B (the
+    Docusaurus plugin alignment work — drop `transforms`, drop
+    `lang`, rename `code` → `snippet`, adopt URL-style fence
+    syntax, emit `configs` from the `lenses.json` cascade) lands
+    AFTER F1's prop contract stabilizes (which it has, post-F1)
+    and gates L7/L8. See
+    `./B-plugin-alignment.md` for
+    the B starter prompt. The plugin keeps its directory name
     `src/plugins/study-lenses/` because "study-lenses" is the
     public user-facing concept.
 
-## What's landed (pre-refactor; pending migration)
+## Historical: pre-refactor substrate (now superseded)
 
-| Era                  | Concern                                | Files / commits                                          | Refactor disposition                                                                                  |
+The Phase A migration (commits `9f1db34`–`5d6fc54`, 2026-05-04..05)
+relocated the pre-refactor `study-lenses/` source tree into the
+three-peer layout (`embody/`, `lenses/`, `orchestrate/`). F1.A
+then deleted the relocated-but-stale `orchestrate/orchestrator/`
+archival (12 source + 12 test files) when the new four-prop
+`<StudyLenses>` came online. The pre-refactor work in the table
+below is preserved as historical context; the dispositions are
+now actuals, not plans.
+
+| Era                  | Concern                                | Files / commits                                          | Disposition (now actual)                                                                              |
 | -------------------- | -------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Phase 1 (Inc 0–7b)   | Pure-TS substrate (registry, pipeline, state, EventBus, cache, reset, reset-all) | `lenses/*.ts` (10 modules, pre-refactor location)        | Modules reshape: registry simplifies (no transforms peer); pipeline-execute becomes `format → embody`; cache disappears (disposability); EventBus migrates to internal-only. Recovered durables: name-enumeration, EventBus pattern, freeze discipline, cleanup-split lessons. REFACTOR-HANDOFF Step 11 decides specifics. |
-| Inc 8                | React wrapper scaffolding              | `lenses/orchestrator/study-lenses.tsx` + default-registry + editor stub (pre-refactor location) | Wrapper migrates to `orchestrate/` (Step 10); editor stub becomes `orchestrate/editor/` home base (Step 8); registry concept may dissolve.                                                                                                                                       |
-| Inc 9                | Toolbar with lens-picker, dispatch-effect, cache-hit reattach | 11 commits `fc3257c..228c04c`                            | Toolbar lens-picker SURVIVES as the Q-I/Q-III learner-driven exploration surface. `lens-switched` dispatch-effect SURVIVES (still fires on learner-driven switch — internal-only per F5). Cache-hit reattach DISSOLVES (disposability — lens state is per-mount, snippet change unmounts lenses).               |
+| Phase 1 (Inc 0–7b)   | Pure-TS substrate (registry, pipeline, state, EventBus, cache, reset, reset-all) | `lenses/*.ts` (10 modules, pre-refactor location)        | Substrate dissolved during Phase A migration + F1.A archival deletion. Recovered durables that survive into the new architecture: name-enumeration patterns (will resurface in F4 lens roster), EventBus pattern (F5 internal-only), freeze discipline (live in `@-utils/freeze.ts`), cleanup-split lessons (live in `orchestrate/DOCS.md` § Effect topology). |
+| Inc 8                | React wrapper scaffolding              | `lenses/orchestrator/study-lenses.tsx` + default-registry + editor stub (pre-refactor location) | Wrapper relocated to `orchestrate/orchestrator/` in Phase A (`5d6fc54`); F1.A then deleted that archival entirely. The new four-prop `<StudyLenses>` lives at `orchestrate/index.tsx`. The registry-as-type dissolved; the registry CONCEPT (mechanism for the orchestrator to enumerate lenses) survives, open-spec per F4 Phase 0. |
+| Inc 9                | Toolbar with lens-picker, dispatch-effect, cache-hit reattach | 11 commits `fc3257c..228c04c`                            | Toolbar lens-picker survives in concept; lands in L1. `lens-switched` dispatch-effect survives in concept; lands in F5 (internal-only EventBus). Cache-hit reattach dissolved (disposability principle — lens state is per-mount, snippet change unmounts lenses). |
 
-Test count pre-refactor: ~228 tests across 17 files. Expect
-substantial shifting during REFACTOR-HANDOFF Steps 3-11 (moves)
-and Step 5 (embody factory new tests). "Do NOT redo Phase 0,
-Inc-8, or Inc-9 work" reinterpreted: don't re-implement what the
-refactor migrates. New increments target `orchestrate/`
-and assume the post-refactor shape.
+Test count pre-F1: 359 tests across 27 files in `orchestrate/`
+(post-F1). Pre-existing test failures in `embody/lib/evaluating/`,
+`lenses/highlight/` (now deleted), and `snippetry/debug/` are
+out of WS3 scope.
 
 ## Lessons carried forward
 
@@ -247,16 +271,18 @@ increments:
    not the throw mechanism.
 3. **React 18 Strict Mode double-invokes effects on initial mount**.
    Any effect whose cleanup is destructive (dispose, clear) needs
-   to handle the fake-unmount cycle. Reference: the cleanup-split
-   discussion in `orchestrate/orchestrator/DOCS.md` §Why split
-   (relocated from pre-refactor `study-lenses/orchestrator/`).
+   to handle the fake-unmount cycle. The pre-refactor cleanup-split
+   rationale lives in git history at commits prior to F1.A
+   (`325c31e`); the discipline is captured in `orchestrate/DOCS.md`
+   § Effect topology.
 4. **vi.hoisted + vi.mock pattern** for spying on a factory's
    output: `const spy = vi.hoisted(() => vi.fn());` then
    `vi.mock(path, () => ({ default: () => ({ ...real(), method: spy }) }))`.
-   Reference:
-   `orchestrate/orchestrator/tests/study-lenses.async-cancel.test.tsx`
-   and `…/study-lenses.toolbar.test.tsx` (relocated from
-   pre-refactor `study-lenses/orchestrator/tests/`).
+   The F1 spy pattern at
+   `orchestrate/tests/study-lenses.test.tsx` § One uses `vi.spyOn`
+   on the embody namespace import for a similar effect. The
+   pre-refactor `vi.hoisted` example lives in git history at
+   commits prior to F1.A.
 5. **Cleanup-split rationale**: when an effect's cleanup runs on
    every re-run AND on unmount, separate "switch-cleanup" from
    "unmount-cleanup" into two effects. Even if
@@ -306,16 +332,34 @@ tier N-1 is complete.
 
 The base of the pyramid. Without this, no quadrant has a substrate.
 
-#### F1 — `<StudyLenses snippet>` end-to-end smoke
+#### F1 — `<StudyLenses snippet>` end-to-end smoke ✅ DONE
 
-Wire `orchestrate/`: take a `snippet` string prop → format
-pre-processing → `embody(snippet)` → frozen `Snippet` → mount
-`orchestrate/editor/` as home base with the embodiment as a prop. No
-recommender, no other lenses, no picker yet. Just the conceptual
-chain JEJ → NM → embody → editor flowing end-to-end.
+**Shipped** in commits `bd98648` → `abe70bb` (2026-05-06..07).
+The chain is alive: `<StudyLenses snippet …>` → `embody(snippet)`
+→ frozen `Snippet` (held via `useEmbodiment` custom hook +
+`useDebugValue` for DevTools observability) → editor home base
+mounts as a single React component (per AR-1 CP-1; no
+`embodiment` prop on the editor — that's lens-mode-only).
 
-Sandbox: a fence renders the editor; embodiment observable in
-React DevTools as a frozen `Snippet`.
+Two AR-1 deviations from the original spec are intentional:
+
+- **No format pre-processing.** `embody` validates format
+  compliance internally via `Snippet.validation.formatted`;
+  formatting is the learner's responsibility; the orchestrator
+  does not pre-format.
+- **No `embodiment` prop on the editor.** AR-1 CP-1 rejected
+  the prop because the editor is editor-mode-only and
+  embodiment is a lens-mode concept (F2+). F1 holds embodiment
+  internally for DevTools observability.
+
+The F1 mount-time guard (throw if `config` supplied with no
+resolved-default lens) is wired in `orchestrate/index.tsx` (search for `throw new Error`).
+
+Sandbox harness: `src/pages/study-lenses-smoke.tsx` mounts
+`<StudyLenses>` directly with hardcoded sentinel snippets;
+plugin-fence rendering remains gapped until B (Docusaurus plugin
+alignment) lands — see
+`./B-plugin-alignment.md`.
 
 #### F2 — Editor-vs-lens state machine
 
@@ -379,10 +423,11 @@ surfaces at the trigger moment; the lens displays whatever it
 displays for an unparseable embodiment (per its own
 error-surface contract).
 
-**Phase A note**: while the embody mock is in place
-(`REFACTOR-HANDOFF.md` § Step 5), the F3 sandbox drives the parse-
-error UX path by passing scenario sentinels (e.g. `embody("FAIL_AT_
-PARSE")`, `embody("FAIL_AT_TOKENIZE")`) instead of real source.
+**Phase A note**: while the embody mock is in place (see
+`EMBODY-IMPL-HANDOFF.md` for the Phase B re-typing roadmap), the F3
+sandbox drives the parse-error UX path by passing scenario
+sentinels (e.g. `embody("FAIL_AT_PARSE")`,
+`embody("FAIL_AT_TOKENIZE")`) instead of real source.
 The "type a snippet" sandbox flow that exercises real tokenization
 unblocks fully in Phase B when real `embody/lib/parse/` lands.
 Orchestrator code MUST NOT branch on the sentinel string identity —
@@ -392,12 +437,23 @@ the discriminator out.
 
 #### F4 — First trial lens against the new contract
 
-Implement one lens (parsons or blanks) at `lenses/<name>/`
-against the `embodiment`-prop contract: TS core + light React
-wrapper. Bootstraps a non-trivial registered set so Layer-I /
-Layer-II surfaces have something to enumerate / rank.
-Dependency-rule audit: lens never imports from `embody/` (top)
-or `orchestrate/` (top).
+Implement one lens at `lenses/<name>/` against the
+`embodiment`-prop contract: TS core + light React wrapper.
+Bootstraps a non-trivial registered set so Layer-I / Layer-II
+surfaces have something to enumerate / rank. Dependency-rule
+audit: lens never imports from `embody/` (top) or `orchestrate/`
+(top).
+
+**F4 ↔ WS4 reconciliation.** F4 is the orchestrator-side
+trial-lens increment (proves the `LensModule`-prop contract
+end-to-end inside `<StudyLenses>` so subsequent layers have
+something to enumerate). The lens chosen for F4 MAY OR MAY NOT
+be the same as WS4's first concrete migration. If WS4's
+highlight reshape ships before F4, F4 inherits highlight as its
+trial. If F4 ships first against parsons or blanks, WS4 lands
+additional lenses against the now-proven contract. The pyramid
+build-order requires only that *one lens exists* before L1;
+which one is operational, not architectural.
 
 Coordinate with `04-lens-migration.md` so one lens is finished
 end-to-end (TS core + React wrapper) before F4's sandbox
@@ -585,93 +641,35 @@ pedagogical priorities clarify.
 
 ### Cross-tier increments (orthogonal, can land at any tier boundary)
 
-- **Plugin alignment** (per Cross-handoff impact above): drop
+- **Plugin alignment (B)** (per Cross-handoff impact above): drop
   `transforms`, drop `lang`, rename `code` → `snippet`,
-  simplify fence syntax. Lands AFTER F1's prop contract
-  stabilizes; gates L7 / L8 which extend the plugin further.
-- **Dependency-rule CI lint** (per REFACTOR-HANDOFF Step 16):
-  catch violations going forward. Lands any time after F4.
-- **`study-lenses/` → `lenses/` rename audit**
-  (REFACTOR-HANDOFF Step 11): the plugin keeps its directory
-  name `src/plugins/study-lenses/` because "study-lenses" is
-  the public user-facing concept. Audit needed at the
-  boundary to confirm.
+  simplify fence syntax, emit `configs` from the `lenses.json`
+  cascade. F1's prop contract has stabilized — B is the
+  next-session cross-tier work that closes the plugin-emit gap;
+  gates L7 / L8 which extend the plugin further. Starter prompt
+  at `./B-plugin-alignment.md`.
+- **Dependency-rule CI lint**: catch violations going forward.
+  Lands any time after F4. (Pre-refactor REFACTOR-HANDOFF Step 16
+  outlined this; the file self-deleted in `4526dc3`.)
+- **`study-lenses/` → `lenses/` rename audit** (closed during
+  Phase A migration; the plugin keeps its directory name
+  `src/plugins/study-lenses/` because "study-lenses" is the
+  public user-facing concept; B's session re-confirms during
+  plugin-emit changes).
 
-### First step: detailed Phase 0 for Foundation tier (F1)
+### First step (historical): F1 Phase 0 closed
 
-The post-refactor `orchestrate/` is a fresh module.
-Every Phase 0 question from the OLD handoff (where the toolbar
-sits, how to enumerate lens names, how to wrap state
-transitions, etc.) is moot — those concerns are at Layer I
-(L1), not Foundation. New Phase 0 questions for F1 (the
-smoke-test of the JEJ → NM → embody → editor chain):
-
-- The `<StudyLenses snippet lens? config? configs?>` prop
-  contract: what's the TypeScript shape? `Readonly<{ snippet:
-  string; lens?: string; config?: LensConfig; configs?:
-  Record<string, LensConfig>; }>` is the obvious starting point
-  but `embody/types.ts` may want the snippet pre-typed (a
-  branded type? a `Source` opaque?). `configs` may carry a
-  reserved `default` key for the cascade-declared default lens
-  (the resolution order is `lens` prop → `configs.default` →
-  none).
-- Pre-processing pipeline: format ONLY (per locked decision)
-  or format + a passthrough hook for downstream pipelines?
-  Where does the formatter live? `embody/lib/formatting/`
-  (per Step 3) or `orchestrate/lib/`?
-- Effect topology: with React handling component reconciliation
-  (lenses are React components, not framework-agnostic mounts),
-  is the wrapper effectively a single `useEffect` running
-  embody on prop / edit change? Or are multiple effects needed
-  (one for embody-on-trigger, one for picker-mode-switch, one
-  for event dispatch)?
-- Error / status surfacing: `Snippet.status.{tokenized, parsed,
-  created}` per `embody/types.ts` gate field availability. Does
-  the orchestrator surface a status banner for partial-
-  embodiment cases, or do lenses each handle their own gating?
-- State shape: editor-as-only-writer means snippet text is in
-  the orchestrator's state; embodiment is derived. Lazy
-  embodiment per F3 says we build it on need rather than on
-  edit; how is the cached-embodiment-since-last-edit stored?
-  Memo? Ref? Discrete state field?
-- Test environment: vitest + jsdom for `orchestrate/`
-  tests; `embody()` integration tests likely need real
-  evaluation engines (Worker + SharedArrayBuffer) which jsdom
-  doesn't support — those go in `.browser.test.ts` files under
-  playwright-chromium per AGENTS.md "environment boundary"
-  exception.
-- **Selection-surface unification** (specific to L1 + L5
-  arriving): picker and recommender both feed the same
-  lens-mount machinery. What is the unified internal contract?
-  Likely both produce `(lensName: string, config?: LensConfig)`
-  tuples that feed a single `mountLens()` path. Confirm before
-  either surface is built.
-- **Educator override layering**: the per-fence `lens`
-  attribute, the per-directory `lenses.json` cascade, and the
-  per-snippet `@study-lens` directive all need a precedence
-  order (most-specific wins is the obvious default). Confirm
-  before the picker default ordering and the recommender
-  ranking are wired.
-- **Locked four-prop API**: `<StudyLenses snippet: string lens?:
-  string config?: LensConfig configs?: Record<string,
-  LensConfig>>`. The README and DOCS were updated in Round-2 to
-  match (replacing earlier sketches of `recommendedLens` /
-  `lensSequence`). F1's Phase 0 confirms no stale references
-  survive in `README.md` / `DOCS.md` and types the contract in
-  `orchestrate/types.ts`.
-- **Q-IV per-snippet sequences are deferred entirely** (user
-  decision; see Layer IV above). F1's Phase 0 doesn't need to
-  resolve sequence routing — auto-recommended Q-II tours cover
-  the use case.
-- **Recommender contract is snippet-fit only** (per `DOCS.md`
-  §Pedagogical grounding §Recommender). The *engine itself* is
-  owned by `02-analysis-and-recommender.md`; this handoff only
-  consumes its output. Confirm during L5/L6 that no
-  learner-state input sneaks in via the consumption path.
+F1 Phase 0 closed in commit `bd98648` (2026-05-06): four-prop API
+typed in `orchestrate/types.ts`, READMEs/DOCS updated for the
+locked decisions (no format pre-processing; editor as React
+component per AR-1 CP-1; F1 mount-time guard owned by F1, not
+deferred). The original Phase 0 question list lives in git
+history at commit `bd98648^` for reference. Future increments
+(F2+, B, L1+) run their own Phase 0 cycles per AGENTS.md.
 
 ### Substrate hooks already wired (post-refactor)
 
-After REFACTOR-HANDOFF executes, the orchestrator has access to:
+The orchestrator has access to:
 
 - `embody(code) → Snippet` from `embody/index.ts` — the factory.
 - `embody/types.ts` — `Snippet`, `Status`, `Streams`, etc. types
@@ -714,7 +712,7 @@ New, specific to the post-refactor layout:
 - **`embodiment` parameter name** wherever a function takes a
   Snippet instance.
 - **Dependency rules** per `DOCS.md` § Dependency rules; CI lint
-  check recommended (REFACTOR-HANDOFF Step 16).
+  check recommended (carry-forward from pre-refactor work).
 
 ## After this increment list
 
@@ -723,24 +721,30 @@ Forward-looking, beyond F1-F5 + L1-L8:
 - Trial lens migration (highlight, parsons, blanks, trace-table,
   variables, ask, etc.) — each lens is its own session, planned
   in `04-lens-migration.md`.
-- Sandbox.html smoke-test harness (REFACTOR-HANDOFF Step 15 —
-  flagged as separate ticket).
+- Sandbox.html smoke-test harness (separate ticket; F1's
+  per-page sandbox at `src/pages/study-lenses-smoke.tsx` covers
+  the smoke goal in the meantime).
 - Per-snippet study-tour reactivation (Q-IV Layer IV) if a
   future curriculum need surfaces.
 - Outbound LMS event protocol when a concrete integration
   target exists.
-- Cross-cutting: a CI dependency-rule check (per REFACTOR-HANDOFF
-  Step 16) catches violations going forward.
+- Cross-cutting: a CI dependency-rule check catches violations
+  going forward (carry-forward from pre-refactor work).
 
 ## What this handoff does NOT cover
 
-- Executing REFACTOR-HANDOFF.md Steps 1-16 (separate effort).
-- Any source code under `study-lenses/` (pre-refactor); the
-  11 Inc-9 commits stay as shipped.
-- Updates to `00-master-plan.md`, `01-NM-components.md`,
-  `02-analysis-and-recommender.md`, `04-lens-migration.md`, or
-  `development-guide.md` — flagged for separate sessions.
-- F1's contract design in detail. That's a Phase 0 done in the
-  session that picks up this handoff post-refactor.
-- Speculation about lens shapes that the refactor will
-  determine (parsons / blanks contracts, etc.).
+- Phase A migration mechanics (closed; `REFACTOR-HANDOFF.md`
+  self-deleted in `4526dc3`).
+- Any source code under `study-lenses/` (pre-refactor; deleted
+  in Phase A migration).
+- Cross-handoff updates to `00-master-plan.md`,
+  `04-lens-migration.md`, `development-guide.md` are kept current
+  via batched docs sweeps (the post-F1+C sweep ran 2026-05-07).
+  `01-NM-components.md` and `02-analysis-and-recommender.md`
+  remain to be touched at next-relevant-session boundaries.
+- F1's contract design (closed in commit `bd98648` Phase 0; see
+  the "First step (historical)" section above for the pointer).
+  Future increments (F2+, B, L1+) run their own Phase 0s.
+- Speculation about specific lens shapes (parsons / blanks
+  internals, etc.) — those are WS4 concerns per
+  `04-lens-migration.md`.

@@ -12,11 +12,11 @@ Before starting, read these files in full (do not skim):
   `./00-master-plan.md` (in this directory)
 - **Orchestrator contracts** (Work Stream 3 output -- the LensModule
   interface each lens must implement):
-  Read the `lenses/types.ts` file once Work Stream 3 has defined it.
-  Until then, the contract signatures in this document are authoritative.
+  Read `lenses/types.ts` (canonical post-F1; live on `main`).
 - **Orchestrator DOCS.md** (Work Stream 3 output -- how the orchestrator
   renders lenses):
-  Read once available.
+  Read [`../orchestrate/DOCS.md`](../orchestrate/DOCS.md) — the
+  authoritative consumer-side contract.
 - **Notional machine** (for understanding what NM components each lens
   exercises):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/notional-machine.md`
@@ -35,14 +35,17 @@ This work stream implements individual lenses against the `LensModule`
 contract defined by Work Stream 3. Each lens is a self-contained exercise
 renderer that plugs into the orchestrator.
 
-This work is **parallelizable** -- once the orchestrator proves the contract
-with the trial lens (`highlight`, done in Work Stream 3), multiple
-lenses can be built independently by separate agents. Note: `editor`
-is **not a lens** in the post-refactor architecture — it lives at
-`orchestrate/editor/` as the orchestrator's home base (per
-[`../REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md) Step 8 and
-[`../lenses/README.md`](../lenses/README.md)). The editor's CodeMirror
-6 implementation is migrated by WS3, not by this work stream.
+This work is **parallelizable** -- with F1's `<StudyLenses>`
+four-prop API stable on `main` (commits `bd98648`–`abe70bb`,
+2026-05-06..07), lenses can be built independently against the
+`LensModule` contract by separate agents. Note: `editor` is **not
+a lens** in the post-refactor architecture — it lives at
+`orchestrate/editor/` as the orchestrator's home base (single
+React component per F1.C / AR-1 CP-1; see
+[`../orchestrate/editor/README.md`](../orchestrate/editor/README.md)
+and [`../lenses/README.md`](../lenses/README.md)). The editor's
+CodeMirror 6 implementation is migrated by WS3, not by this work
+stream.
 
 ### Why it matters
 
@@ -205,25 +208,28 @@ The pure TS files (`core.ts`, `config.ts`, `applicable.ts`,
 `recommend.ts`) are testable without React. The React wrapper
 (`index.tsx`) is a thin shell.
 
-### Trial lens (done in Work Stream 3) + editor placement
+### Editor placement + highlight status
 
 **The editor is not a lens.** Post-refactor it lives at
-`orchestrate/editor/` (per
-[`../REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md) Step 8 +
-[`../lenses/README.md`](../lenses/README.md)) — the orchestrator's
-home base, the only writer of snippet state. CodeMirror 6, refactored
-from the V2 `study-lens-client.tsx`. WS3 owns this migration; this
-work stream does not touch it.
+`orchestrate/editor/` as the orchestrator's home base — single
+React component, the only writer of snippet state — per F1.C
+(commit `0d99212`). See
+[`../orchestrate/editor/README.md`](../orchestrate/editor/README.md)
+and [`../lenses/README.md`](../lenses/README.md). The CodeMirror 6
+implementation is migrated by WS3 (Inc 15+ per
+`../orchestrate/editor/DOCS.md` § Future direction); this work
+stream does not touch it.
 
-Work Stream 3 also builds **one trial lens** to prove the
-`LensModule` contract:
-
-1. **`highlight`** -- Read-only syntax-highlighted code view. Uses
-   Prism/CodeBlock. The first NEW lens built against the contract.
-   Lives at `lenses/highlight/`.
-
-You do NOT need to build the editor or `highlight`. They exist when
-you start.
+**The `highlight` lens exists as docs-only end-state.** Per the C
+cleanup commit (`abe70bb`), the legacy LensModule stub at
+`lenses/highlight/highlight.ts` was deleted along with its tests;
+the rewritten `lenses/highlight/{README,DOCS}.md` describe the
+post-refactor end-state (LensModule with `Component` +
+`applicableTo` + `recommend` against the `LensProps` contract).
+Source landing — the actual React component + pure-TS core — is
+WS4's first concrete migration and is on this work stream's
+backlog. You DO need to build it; the docs already specify the
+target shape.
 
 ### Lens design patterns
 
@@ -560,6 +566,12 @@ For each increment, follow the full TDD cycle from AGENTS.md:
 
 ### Suggested lens build order
 
+0. **highlight** -- position 0 per the C cleanup decision
+   (`abe70bb`): the legacy stub was deleted; docs-only end-state
+   at `lenses/highlight/{README,DOCS}.md` already specifies the
+   target shape (Tier 1 LensModule with `Component` rendering
+   colorized `<pre><code>`). WS4's first concrete migration is
+   bringing source back against the `LensProps` contract.
 1. **blanks** -- exercises the full Tier 2 path (AST-dependent).
    Validates that `applicableTo` correctly gates on `status.parsed`.
 2. **parsons** -- exercises Tier 1 (text-only). Simplest lens to

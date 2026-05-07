@@ -4,15 +4,22 @@ How to coordinate Claude Code agents across the 4 work streams defined in this
 directory. Written for you (the human coordinator) — not for the agents
 themselves.
 
-> **WS3 current status**: **Unblocked.** REFACTOR-HANDOFF.md
-> Steps 3, 5, 8, 9, 10, 11 complete and merged (commits `9f1db34`,
-> `9df535e`, `5d6fc54`, `8db59e6`, 2026-05-04..05). Steps 7, 12,
-> 14, 16 remain as the **post-migration sweep** — typecheck is
-> currently RED across `orchestrate/*` and `lenses/*`; the sweep
-> restores it. F1 (`<StudyLenses snippet>` smoke) starts once the
-> sweep is done. See `03-orchestrator-and-contracts.md` for the
-> increment list and `~/.claude/plans/next-session-post-phase-a-handoff.md`
-> for the sweep starter prompt.
+> **WS3 current status (2026-05-07)**: **F1 done.** Commits
+> `bd98648`–`abe70bb` (2026-05-06..07) shipped the four-prop
+> `<StudyLenses snippet lens? config? configs?>` component, the
+> `embody(snippet)` chain, the editor home base (single React
+> component per AR-1 CP-1), and the sandbox harness at
+> `src/pages/study-lenses-smoke.tsx`. C cleanup (`abe70bb`)
+> closed post-F1 inbox items: highlight legacy source deleted
+> (docs-only end-state remains); EMBODY-IMPL-HANDOFF status block
+> refreshed; DEV.md `.test.tsx` clause. Phase A migration is
+> closed (`REFACTOR-HANDOFF.md` self-deleted in `4526dc3`).
+>
+> **Next**: F2 (editor-vs-lens 2-mode state machine), or
+> in-parallel B (cross-tier Docusaurus plugin alignment) — see
+> `./B-plugin-alignment.md` for B's
+> starter prompt. F3-F5 + L1-L8 follow per the pyramid build-order
+> in `03-orchestrator-and-contracts.md`.
 
 ## How Claude Code sessions work
 
@@ -66,32 +73,38 @@ Then ask me questions before writing any code.
 - Agent modifying `lenses/types.ts` without asking you first
 - Agent making assumptions instead of asking questions
 - Large uncommitted changes (should be atomic commits per increment)
-- Agent referencing `/lenses/study/` code as ground truth (it's old)
+- Agent referencing the deleted `study-lenses/` directory as ground
+  truth (pre-Phase-A; gone in commit `5d6fc54`)
 
 ## Starting a new WS3 session
 
 ### Human pre-checks (do these BEFORE opening Claude Code)
 
-1. **Confirm REFACTOR-HANDOFF status.** Steps 3, 5, 8, 9, 10, 11
-   ARE merged (commits `9f1db34`, `9df535e`, `5d6fc54`, `8db59e6`).
-   Confirm via `git log --oneline | head -10`. If the
-   post-migration sweep (Step 7) hasn't started, open a session for
-   that first via
-   `~/.claude/plans/next-session-post-phase-a-handoff.md`.
+1. **Confirm F1 + C are on `main`.** Commits `bd98648`–`abe70bb`
+   (the F1 work + C cleanup) should be present. Confirm via
+   `git log --oneline -10`. Phase A migration closed in `4526dc3`
+   (`REFACTOR-HANDOFF.md` self-deleted).
 2. **Read `03-orchestrator-and-contracts.md` yourself** — the status
-   banner at the top tells you which F-tier or Layer increment is
-   next. Confirm the behavioral contract makes sense to you before
-   the agent starts.
+   banner at the top names what's done (F1) and what's next
+   (F2 / B / F3-F5 / L1-L8). Confirm the behavioral contract makes
+   sense to you before the agent starts.
 3. **Read `03-orchestrator-and-contracts-kickoff.md`** for the
-   per-session pre-checks, prompt template, and red-flag list.
-4. **Verify tests still pass**: `npx vitest run` scoped to the
-   package root. Note: only the embody mock test suite (102 tests)
-   is verified-green during the post-migration interval; other
-   tests are RED until the sweep lands.
-5. **Sandbox check (post-F1)**: once F1 lands, render a fence and
-   confirm `<StudyLenses>` receives the locked four-prop API
-   (`snippet`, `lens?`, `config?`, `configs?`) in React DevTools. The
-   plugin should NOT emit `transforms`, `code`, or `lang`.
+   per-session pre-checks, prompt template, and red-flag list. If
+   you're starting B (plugin alignment) instead of an 03 increment,
+   read `./B-plugin-alignment.md`.
+4. **Verify tests still pass** scoped to the increment's surface.
+   `npx vitest run src/lib/welcome-to-programming/just-enough/javascript/orchestrate/`
+   should be green (359 tests post-F1+C). Pre-existing red areas
+   in `embody/lib/evaluating/`, `lenses/highlight/` (now deleted),
+   and `snippetry/debug/` are out of WS3 scope.
+5. **Sandbox checkpoint** is per-increment, not pre-session. Each
+   user-observable increment ends with a sandbox checkpoint
+   (browser-verify the change in the dev server) before the
+   commit lands. F1's checkpoint shape was: render the harness
+   page at `src/pages/study-lenses-smoke.tsx`, confirm
+   `<StudyLenses>` mounts with the four-prop API in React
+   DevTools and the `useEmbodiment` debug value shows a frozen
+   `Snippet`. Each increment defines its own checkpoint.
 
 ### Prompt template (paste this verbatim to start the session)
 
@@ -106,11 +119,11 @@ from there at session start.
 - Do not paste the prompt and immediately leave — the agent will enter
   plan mode and ask alignment questions. Stay present for the first
   10 minutes.
-- Do not start a WS3 F1 session before the **post-migration sweep**
-  (REFACTOR-HANDOFF.md Step 7) lands. The structural moves are done;
-  the orchestrator code references deleted `study-lenses/types.ts`
-  imports and the analysis libs have pre-Step-7 signatures —
-  typecheck is RED. The sweep restores it.
+- Do not start a WS3 F2+ session without first reading the post-F1
+  state of `orchestrate/` (the four-prop `<StudyLenses>` is live
+  on `main`; F2 builds the editor-vs-lens 2-mode state machine on
+  top of it). Skipping this read leads agents to re-do F1 work
+  that already shipped.
 - Do not approve the agent's plan without reading the behavioral
   contract in the handoff yourself first.
 
@@ -119,6 +132,12 @@ from there at session start.
 ## Coordination between work streams
 
 ### Dependency graph
+
+The ASCII below is the **pre-F1 high-level WS topology** (kept for
+historical orientation). Post-F1 sub-flow within WS3 (F1 done; B
+and F2 pending; F3-F5 + L1-L8 ahead) lives in
+[`./00-master-plan.md`](./00-master-plan.md) § Inter-stream
+dependencies.
 
 ```text
 lib/evaluating/trace/syntax/  (standalone syntax tracer module)
@@ -132,16 +151,15 @@ WS3 (orchestrator + contracts) ────────────────�
          └──► WS4 (lens migration) ◄──────────────────────────┘
 ```
 
-- **WS3 status**: **Unblocked.** Structural moves landed
-  2026-05-04..05 (commits `9f1db34`, `9df535e`, `5d6fc54`,
-  `8db59e6`). The remaining REFACTOR-HANDOFF work is the
-  **post-migration sweep** (Steps 7, 12, 14, 16) — not "blocked",
-  but precursor work to F1. F1 starts after the sweep restores
-  typecheck-green. Read the status banner at the top of
-  `03-orchestrator-and-contracts.md` for the current increment;
-  read `03-orchestrator-and-contracts-kickoff.md` for pre-session
-  checks before opening a session. Sweep starter prompt at
-  `~/.claude/plans/next-session-post-phase-a-handoff.md`.
+- **WS3 status**: **F1 done; B + F2 pending.** Phase A migration
+  closed 2026-05-04..05; F1 shipped 2026-05-06..07 (commits
+  `bd98648`–`abe70bb`); C cleanup landed at `abe70bb`. Read the
+  status banner at the top of `03-orchestrator-and-contracts.md`
+  for the current state; read
+  `03-orchestrator-and-contracts-kickoff.md` for pre-session
+  checks before opening an 03 increment. B (cross-tier Docusaurus
+  plugin alignment) starter prompt at
+  `./B-plugin-alignment.md`.
 - **WS1 depends on the syntax tracer at
   `embody/lib/evaluating/trace/syntax/`** — its Phase 0 stabilized
   the `StepCategory` enum (the 3rd Block Model dimension). WS1 is
@@ -195,8 +213,9 @@ F1-F5 + L1-L8 increments.
   `lenses/types.ts` and ready for WS2
 - After WS3 Phase 0 completes: verify types.ts + contracts are stable before
   starting WS2 or WS4
-- After WS3 trial lenses (editor + highlight) work end-to-end: green light for
-  WS4 lens migration
+- After F1 (`<StudyLenses>` live on `main`) and B (Docusaurus
+  plugin emits the four-prop API): green light for WS4 lens
+  migration. F1 is done; B is the next-session task.
 - After any types.ts change: check all active streams
 
 ## Git strategy
@@ -296,20 +315,29 @@ If you use `isolation: "worktree"` for parallel agents:
 - Documentation updates
 - Git commits (additive only — per AGENTS.md)
 
-## The `lenses/` peer (post-refactor)
+## The `lenses/` peer (post-F1+C state)
 
-After the Phase A migration (commit `5d6fc54`, 2026-05-05), the
-`lenses/` peer holds individual lens implementations against the
-`LensModule` contract in `lenses/types.ts`. Currently:
+The `lenses/` peer holds individual lens implementations against
+the `LensModule` contract in `lenses/types.ts`. Currently:
 
-- `lenses/highlight/` — migrated as the Phase-A gate.
-- `lenses/types.ts` — canonical `LensModule` contract.
-- `lenses/DOCS.md`, `lenses/README.md` — peer architecture docs.
+- `lenses/highlight/{README,DOCS}.md` — docs-only end-state per
+  the C cleanup commit (`abe70bb`). The legacy LensModule stub
+  was deleted along with its tests; source landing (the actual
+  `Component` + pure-TS core) is WS4's first concrete migration.
+- `lenses/types.ts` — canonical `LensModule` contract (`name`,
+  `Component`, `config`, `applicableTo`, `recommend`).
+- `lenses/DOCS.md`, `lenses/README.md` — peer architecture docs;
+  parent `data-lens="<name>"` constraint added during C.
 
-The pre-refactor `study-lenses/` directory was deleted entirely in
-commit `5d6fc54`. WS4 lens migrations (parsons, blanks, trace-table,
-etc.) come from a richer-source project the user has, not from
-the deleted `study-lenses/`.
+**Editor is NOT a lens.** Per F1.C and the locked architecture,
+the editor lives at `orchestrate/editor/` as the orchestrator's
+home base (single React component; only writer of snippet
+state); it is not registered in any lens roster.
+
+The pre-refactor `study-lenses/` directory was deleted entirely
+during Phase A migration (`5d6fc54`). WS4 lens migrations
+(parsons, blanks, trace-table, etc.) come from a richer-source
+project the user has, not from the deleted `study-lenses/`.
 
 ## Quick reference: what's in `.planning-handoffs/`
 
@@ -318,7 +346,8 @@ the deleted `study-lenses/`.
 | `00-master-plan.md`                | Full architecture context (canonical reference)  |
 | `01-NM-components.md`              | WS1: wire `StepCategory` enum from the syntax tracer as the 3rd Block Model dimension |
 | `02-analysis-and-recommender.md`   | WS2: snippet analysis + recommendation engine    |
-| `03-orchestrator-and-contracts.md` | WS3: Increment 2 handoff (forward-looking only)  |
+| `03-orchestrator-and-contracts.md` | WS3: F1 shipped; F2-F5 + L1-L8 ahead (pyramid build-order). WS3 has no notes file by convention; cross-stream decisions land in this handoff or its kickoff sibling. |
+| `B-plugin-alignment.md`            | Cross-tier: Docusaurus plugin emit-shape alignment (post-F1; gates L7-L8) |
 | `04-lens-migration.md`             | WS4: individual lens implementations             |
 | `development-guide.md`             | This file (for the human, not for agents)        |
 | `*-notes.md`                       | Per-stream notes (created by agents during work) |

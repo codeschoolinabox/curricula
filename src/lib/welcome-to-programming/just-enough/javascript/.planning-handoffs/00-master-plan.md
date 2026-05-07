@@ -26,31 +26,54 @@ streams whose handoff files coordinate the implementation.
 | --- | --- | --- | --- |
 | **WS1** | [`01-NM-components.md`](./01-NM-components.md) | Wires the syntax tracer's `StepCategory` enum (10 unordered NM components) into the shared types as the 3rd Block Model dimension | Small; mostly done |
 | **WS2** | [`02-analysis-and-recommender.md`](./02-analysis-and-recommender.md) | Recommender (applicability filter + ranking engine, per Explorotron Figure 3) with internal analysis helpers. Pure TS, consumed by orchestrator | Phase 0 not yet started |
-| **WS3** | [`03-orchestrator-and-contracts.md`](./03-orchestrator-and-contracts.md) | Orchestrator + lens contracts (Foundation tier F1–F5; Layers I/II/III L1–L8) | **Unblocked.** REFACTOR-HANDOFF Steps 3, 5, 8, 9, 10, 11 complete (commits `9f1db34`, `9df535e`, `5d6fc54`, `8db59e6`, 2026-05-04..05). Steps 7, 12, 14, 16 remain as the **post-migration sweep**; F1 starts once the sweep restores typecheck-green. |
-| **WS4** | [`04-lens-migration.md`](./04-lens-migration.md) | Individual lens implementations against the LensModule contract | Parallelizable once WS3 trial lens lands. `highlight` already migrated as the Phase-A gate. |
+| **WS3** | [`03-orchestrator-and-contracts.md`](./03-orchestrator-and-contracts.md) | Orchestrator + lens contracts (Foundation tier F1–F5; Layers I/II/III L1–L8) | **F1 done** (commits `bd98648`–`abe70bb`, 2026-05-06..07): four-prop `<StudyLenses>` + mount guard + editor home base + sandbox harness. Phase A migration closed (`REFACTOR-HANDOFF.md` self-deleted in `4526dc3`). Next: F2 (editor-vs-lens 2-mode state machine), or in-parallel B (cross-tier Docusaurus plugin alignment) — see `./B-plugin-alignment.md`. F3-F5 + L1-L8 follow. |
+| **WS4** | [`04-lens-migration.md`](./04-lens-migration.md) | Individual lens implementations against the LensModule contract | Parallelizable once a lens has shipped against the contract. `highlight` exists as docs-only end-state at `lenses/highlight/{README,DOCS}.md` per C cleanup (`abe70bb`); source landing is part of WS4. |
 
 ## Inter-stream dependencies
 
 ```text
-REFACTOR-HANDOFF Phase A — structural moves COMPLETE (2026-05-04..05)
-                          — sweep + cleanup REMAINING (Steps 7, 12, 14, 16)
+Phase A migration COMPLETE (2026-05-04..05; REFACTOR-HANDOFF.md self-deleted in 4526dc3)
   │
   ▼
-WS1 (NM components / 3rd dim)
-  └─► WS2 (recommender consumes StepCategory + embodiment)
-        └─► WS3 (orchestrator's recommender panel surfaces the grid)
-              └─► WS4 (each lens implements applicableTo + recommend
-                       against the LensModule contract)
+WS3 F1 COMPLETE (2026-05-06..07; commits bd98648–abe70bb)
+  │   four-prop <StudyLenses> + editor home base + sandbox harness
+  │
+  ├─► WS3 B (cross-tier Docusaurus plugin alignment) — see
+  │   ./B-plugin-alignment.md
+  │     │
+  │     └ - - ▶ WS3 L7 + L8 (per-fence/per-directory ranking
+  │             override; B must land first per kickoff cadence)
+  │
+  ├─► WS3 F2-F5 (mode machine, lazy embody, trial lens, internal
+  │   bus) ──► WS3 L1-L6 (picker, panel, etc.)
+  │
+  └─► WS4 (each lens implements applicableTo + recommend against
+            the LensModule contract; highlight reshape lands here)
+
+WS1 (NM components / 3rd dim — `StepCategory` enum lands in
+                                 lenses/types.ts)
+   .  .  .  consumed-by  .  .  .
+   ▼              ▼               ▼
+  WS2          WS4            (WS3, only when an orchestrator
+(recommender) (lens         surface routes a StepCategory)
+              recommend()
+              cells)
 ```
 
-WS1 and WS3 can run in parallel until WS3 needs to wire WS1's enum
-into orchestrator types. WS3's structural prerequisites are now in
-place (`embody/`, `lenses/`, `orchestrate/` peer layout exists with
-populated subdirectories). The remaining REFACTOR-HANDOFF sweep
-(Step 7 analysis-lib signature change + supporting Step 12 / 14 /
-16 cleanup) is what restores typecheck-green and unblocks F1 dev.
-WS4 already has its trial lens (`highlight`) migrated; richer
-lenses migrate from a prior project.
+WS1 ships the `StepCategory` enum into `lenses/types.ts`; WS2's
+recommender and WS4 lens `recommend()` consume it; WS3's
+orchestrator surface uses it only when a recommendation flows
+through. WS1 and WS3 can run in parallel — WS1's deliverable
+lands *in* `lenses/types.ts` (the WS3-owned canonical contract)
+without a hard build-order dependency on WS3.
+
+WS3's structural prerequisites are in place (`embody/`,
+`lenses/`, `orchestrate/` peer layout populated; F1 four-prop API
+is stable); B is the post-F1 cross-tier task that closes the
+plugin-emit gap (see [`./B-plugin-alignment.md`](./B-plugin-alignment.md)).
+WS4 lens migrations (parsons, blanks, trace-table, etc.) come
+from a richer-source project the user has, not from the deleted
+`study-lenses/` directory.
 
 ## Pointers (where things live now)
 
@@ -58,7 +81,7 @@ lenses migrate from a prior project.
 | --- | --- |
 | Conceptual chain + four audiences + Pedagogical first principles | `../README.md` |
 | Architectural decisions (single-writer state, lens-as-mini-web-app, dependency rules, Block Model 3D space, Explorotron mapping) | `../DOCS.md` |
-| Structural-move recipe (lib split, study-lenses → lenses rename, etc.) | `../REFACTOR-HANDOFF.md` (Phase A migration executed 2026-05-04..05; Steps 7/12/14/16 remain as post-migration sweep) |
+| Structural-move recipe (lib split, study-lenses → lenses rename, etc.) | git history at commit `4526dc3^` (Phase A migration completed 2026-05-04..05; `REFACTOR-HANDOFF.md` self-deleted at end of Phase A) |
 | NM model (phases, scopes, bindings, evaluation) | `../notional-machine.md` |
 | Canonical type contract (Snippet, Event, RunInstance, etc.) | `../embody/types.ts` |
 | Embody architecture | `../embody/{README,DOCS}.md` |
@@ -128,7 +151,7 @@ separate doc-only commits when bandwidth allows.
   clarification in `DOCS.md` § Dependency rules and reference it
   from each peer's README.
 - **Mermaid the ASCII pyramid in 03** (AR-2 CP3) — convert the ASCII
-  quadrant + pyramid diagram in
-  `03-orchestrator-and-contracts.md:46-61` to a mermaid `flowchart`
-  diagram, matching the user's standing preference for mermaid over
-  ASCII.
+  quadrant + pyramid diagram in `03-orchestrator-and-contracts.md`
+  § Locked architectural decisions § Bedrock orienting principle to
+  a mermaid `flowchart` diagram, matching the user's standing
+  preference for mermaid over ASCII.

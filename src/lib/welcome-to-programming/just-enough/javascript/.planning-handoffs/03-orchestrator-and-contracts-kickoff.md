@@ -9,17 +9,17 @@
 
 ## Pre-session human checks (do these BEFORE opening the agent)
 
-1. **Confirm REFACTOR-HANDOFF.md status.** The 03 handoff's hard
-   prerequisite is that
-   [`REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md) Steps 1-16 are
-   executed and merged. If they are not, do NOT open a session for
-   03 — open one for REFACTOR-HANDOFF instead.
+1. **Confirm F1 + C are on `main`.** The Phase A migration closed
+   in commit `4526dc3` (`REFACTOR-HANDOFF.md` self-deleted). F1
+   shipped commits `bd98648`–`abe70bb` (2026-05-06..07); C cleanup
+   landed at `abe70bb`. Verify via `git log --oneline -10` and
+   confirm those commits are present on `main`.
 2. **Confirm WS2 recommender status if starting Layer II
    (L5/L6).** WS2
    ([`02-analysis-and-recommender.md`](./02-analysis-and-recommender.md))
    ships `orchestrate/lib/recommender/`; Layer II in the 03 handoff
    consumes it. If WS2's recommender doesn't exist yet, restrict
-   the session to Foundation tier (F1-F5) or Layer I (L1-L2).
+   the session to Foundation tier (F2-F5; F1 is shipped) or Layer I (L1-L2).
 3. **Verify the test suite is green before opening the session:**
 
    ```bash
@@ -28,14 +28,14 @@
 
    If anything is red, surface it before the agent starts code work.
 4. **Re-read the 03 handoff yourself** — confirm the increment
-   you're about to assign (one of F1-F5, L1-L2, L5-L8) matches the
+   you're about to assign (one of F2-F5, L1-L2, L5-L8; F1 is shipped) matches the
    current state of the codebase. The pyramid build-order rule is
    hard: don't skip a tier.
 
 ## Session prompt template (paste verbatim to start)
 
 Replace `<INCREMENT_ID>` with the specific F-number or L-number
-(e.g. `F1`, `L5`):
+(e.g. `F2`, `L5`):
 
 ```text
 Read .planning-handoffs/03-orchestrator-and-contracts.md in full
@@ -50,7 +50,9 @@ before doing anything else. Pay special attention to:
 
 Your task is increment <INCREMENT_ID>. Read the increment's
 description, its prerequisites, and the cross-handoff dependencies
-(REFACTOR-HANDOFF, WS2 recommender, plugin alignment if applicable).
+(WS2 recommender, plugin alignment via B's handoff at
+`./B-plugin-alignment.md` if
+applicable).
 
 Follow DEV.md and AGENTS.md discipline:
 
@@ -80,8 +82,10 @@ Start with plan mode.
    the quadrant + pyramid frame is mandatory context.
 4. [`../DOCS.md`](../DOCS.md) § Pedagogical grounding —
    architectural decisions with framework mapping.
-5. [`../REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md) — to confirm
-   prerequisite execution state.
+5. **F1 + C reference** — recent shipped state lives in commits
+   `bd98648`–`abe70bb` (orchestrator four-prop API + editor home
+   base + sandbox harness). The `./B-plugin-alignment.md`
+   B handoff summarizes what's done.
 6. The peer `README.md` + `DOCS.md` for the directory the
    increment will modify (e.g. `orchestrate/README.md`).
 7. [`02-analysis-and-recommender.md`](./02-analysis-and-recommender.md)
@@ -94,14 +98,15 @@ Start with plan mode.
 
 | Increment | Expected sessions | Notes                                                |
 | --------- | ----------------- | ---------------------------------------------------- |
-| F1        | 2                 | Phase 0 + Phase 1 implementation.                    |
+| ~~F1~~    | ~~2~~             | ✅ Shipped 2026-05-06..07 (commits `bd98648`–`abe70bb`). |
+| B         | 1                 | Cross-tier Docusaurus plugin alignment; see `./B-plugin-alignment.md`. |
 | F2        | 1                 |                                                      |
 | F3        | 1                 |                                                      |
 | F4        | 1                 | Coordinate with `04-lens-migration.md`.              |
 | F5        | 1                 |                                                      |
 | L1 + L2   | 1 combined        | Educator default rides the picker.                   |
 | L5 + L6   | 1 combined        | Only if WS2 recommender is ready.                    |
-| L7 + L8   | 1 combined        | Mostly plugin work.                                  |
+| L7 + L8   | 1 combined        | Mostly plugin work; depends on B having landed.      |
 
 Each session ends with a sandbox checkpoint if the increment is
 user-observable. Pause for human browser verification before
@@ -141,9 +146,11 @@ Stop the agent and redirect if you see:
 
 ## Coordination points with other handoffs
 
-- **[`REFACTOR-HANDOFF.md`](../REFACTOR-HANDOFF.md)** — prerequisite.
-  If a session uncovers a refactor bug, stop and surface it; don't
-  fix it in-line. The refactor is its own change.
+- **Phase A migration is closed.** `REFACTOR-HANDOFF.md`
+  self-deleted in commit `4526dc3` at end of Phase A. Structural
+  bugs surfaced during a session should still be flagged out (don't
+  fix in-line); the load-bearing constraints survived into
+  `EMBODY-IMPL-HANDOFF.md` § Constraints to honor.
 - **[`02-analysis-and-recommender.md`](./02-analysis-and-recommender.md)
   (WS2)** — produces `orchestrate/lib/recommender/`. Layer II in the
   03 handoff consumes it. Coordinate via `.planning-handoffs/`
@@ -152,12 +159,13 @@ Stop the agent and redirect if you see:
   individual lenses at `lenses/<name>/`. F4 (first trial lens)
   overlaps; coordinate so one lens is finished end-to-end (TS
   core + React wrapper) before F4's sandbox checkpoint.
-- **`src/plugins/study-lenses/`** — alignment work (drop
-  `transforms`, drop `lang`, rename `code` → `snippet`) is
-  cross-tier. Lands AFTER F1; gates L7-L8. Note that
-  REFACTOR-HANDOFF does NOT currently include plugin steps;
-  recommend adding new steps there OR creating a sibling
-  plugin-alignment handoff.
+- **`src/plugins/study-lenses/`** — alignment work is **B**
+  (drop `transforms`, drop `lang`, rename `code` → `snippet`,
+  adopt URL-style fence syntax, emit `configs` from the
+  `lenses.json` cascade). F1's prop contract has stabilized; B
+  is its own next-session task and gates L7-L8. Sibling
+  plugin-alignment handoff lives at
+  `./B-plugin-alignment.md`.
 
 ## What to do after the agent completes a session
 
