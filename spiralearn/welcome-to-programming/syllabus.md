@@ -50,24 +50,24 @@ The skills you build here are fundamentally human: communication, empathy,
 user-centered design thinking, the ability to hold a complex situation in view
 and make it work for real people. Those same human skills are exactly what keep
 you professionally relevant and personally capable in a world where machines
-handle more of the writing. Both **Frogramming** and deliberate **Vibetoading**
-have value beyond productivity: for the satisfaction of understanding a system
-deeply, for the new ways of thinking it opens up, and for the small programs
-you write just to explore, experiment, or surprise yourself. This course helps
-you build both at once.
+handle more of the writing. **An LLM can do many things FOR you. It cannot
+UNDERSTAND for you. This curriculum is built around that fact.** Both
+**Frogramming** and deliberate **Vibetoading** have value beyond productivity:
+for the satisfaction of understanding a system deeply, for the new ways of
+thinking it opens up, and for the small programs you write just to explore,
+experiment, or surprise yourself. This course helps you build both at once.
 
 - **Chapter 0. What is Programming?** Conceptual orientation before any code.
   You learn to see source code as communication that simultaneously addresses
   multiple audiences (developers, the computer, users, and agents) and
   understand why comprehension comes before production.
-- **Chapter 1. Developers.** Your first code and your first audience.
-  You learn to write comments and logs as intentional communication to
-  other developers — including future-you, who is a stranger by the time
-  they come back to this code. **Twinning the developer audience** is the
-  central skill of this chapter, naming what the long programming-culture
-  tradition of "writing for the next reader" has always been. Every small
-  choice in your code (a word, a placement, a method) is a micro-decision
-  that shapes how it reads.
+- **Chapter 1. Developers.** Your first code and your first audience. You learn
+  to write comments and logs as intentional communication to other developers —
+  including future-you, who is a stranger by the time they come back to this
+  code. **Twinning the developer audience** is the central skill of this
+  chapter, naming what the long programming-culture tradition of "writing for
+  the next reader" has always been. Every small choice in your code (a word, a
+  placement, a method) is a micro-decision that shapes how it reads.
 - **Chapter 2. Developers and Computers.** The computer becomes a full audience.
   You build an accurate mental model of JavaScript's notional machine (how it
   evaluates expressions, stores values, walks scope chains) and develop the
@@ -77,21 +77,20 @@ you build both at once.
   learn to write programs people interact with, where user-visible behavior
   becomes the anchor that all your reading, tracing, refactoring, and reviewing
   skills must preserve. Design thinking across the whole situation begins here.
-- **Chapter 4. Developers, Computers, Users, and Agents.** Source code is
-  the **UI** — the control panel through which a programmer operates the
-  notional machine. LLMs are an alternative way to operate that UI: you
-  delegate the typing while still owning the NM. Two conversational modes
-  fall out of this naturally — **NM-grounded** (Frogramming-with-
-  delegation: "make the NM declare a `const`, then enter a loop…") and
-  **user-grounded** (Vibetoading-with-delegation: "when the user clicks,
-  greet them by name…"). Same Frogrammer/Vibetoader spectrum, different
-  interface. Visual debuggers / embody / lenses are the _direct_ NM view
-  that complements the code text — letting you observe and predict the
-  machine even when you didn't write the code yourself. You learn what
-  makes LLM collaboration specifically different from human collaboration,
-  develop skills for evaluating and directing LLM output using everything
-  from Chapters 1–3, and build calibration for when to delegate and when
-  to do the work yourself.
+- **Chapter 4. Developers, Computers, Users, and Agents.** Source code is the
+  **UI** — the control panel through which a programmer operates the notional
+  machine. LLMs are an alternative way to operate that UI: you delegate the
+  typing while still owning the NM. Two conversational modes fall out of this
+  naturally — **NM-grounded** (Frogramming-with- delegation: "make the NM
+  declare a `const`, then enter a loop…") and **user-grounded**
+  (Vibetoading-with-delegation: "when the user clicks, greet them by name…").
+  Same Frogrammer/Vibetoader spectrum, different interface. Visual debuggers /
+  embody / lenses are the _direct_ NM view that complements the code text —
+  letting you observe and predict the machine even when you didn't write the
+  code yourself. You learn what makes LLM collaboration specifically different
+  from human collaboration, develop skills for evaluating and directing LLM
+  output using everything from Chapters 1–3, and build calibration for when to
+  delegate and when to do the work yourself.
 - **Chapter 5. Developers, Computers, Users, Agents, and You.** Training wheels
   come off. You Frogram for yourself through snippetry: small, complete,
   self-contained programs as an ongoing practice. You explore JavaScript's full
@@ -160,6 +159,68 @@ you build both at once.
 
 ## What to Expect
 
+**An LLM can do many things FOR you. It cannot UNDERSTAND for you.**
+Understanding lives in your head, not the model's. An LLM can write code,
+explain a concept, simulate a teacher. It can produce excellent surface-level
+descriptions of how a machine works, what a user wants, what your collaborators
+expect, what your software does in the world. What it cannot do is build any of
+those understandings in your head. The understandings this course develops — of
+the JavaScript machine, of users, of your fellow developers, of the LLM itself
+as a collaborator, of your code's place in larger systems — are non-delegable.
+They live in your head, or they don't live. You can outsource production. You
+cannot outsource comprehension.
+
+Human learning doesn't come from understanding explanations, even excellent
+ones. It happens through pedagogically-designed _experiences_: prediction that
+commits you to a model, surprise when the model breaks, careful sequencing so
+wrong models don't install in the first place, repetition that automates what
+was once deliberate, narrative that holds attention across difficult passages,
+metaphors used carefully and kept honest about where they break. Metaphors
+specifically deserve caution. A metaphor at the right level of abstraction —
+within your zone of proximal development, neither too far below your current
+understanding nor too far above — is a scaffold. A slightly wrong metaphor
+_installs_ a misconception, often invisibly, often expensive to remove later.
+Multiple metaphors used in the same course have to be aligned and
+non-contradictory or they undermine each other. An explanation — including a
+metaphorical one — is someone else's (or your own past self's) **crystallization
+of an experience already undergone**. The change happens IN you, through
+experiences only you can have.
+
+Here's the empowering version of this picture. What we call _expertise_ is, in
+large part, a library of past experiences automated through repetition.
+Cognitive scientists call this _automaticity_. An expert reaches good solutions
+instinctually because behind the scenes they're drawing on hundreds of
+predict-fail-correct cycles that have been compiled into reflex. A capable
+novice can find the same solutions, but slowly — through deliberate exploration
+— because they haven't accumulated those automations yet. Expertise isn't a
+different kind of mind; it's the same mind with more experience, automated. This
+is learnable, which is the whole point. It's also why expertise matters more,
+not less, when collaborating with LLMs: working productively with an alien mind
+requires an automated library of your own experiences to compare against, to
+calibrate from, and to check the LLM's output against. A learner without that
+library can't tell when the LLM is right, when it's wrong, or when it's
+confidently misleading them. The library is what lets you direct the alien
+instead of being directed by it.
+
+Two methodologies in this curriculum illustrate the principle in operation.
+**Fine-grained NM prediction-and-verification** — predict the chain of internal
+events the machine will produce, observe what it actually produces, correct your
+model when they diverge — is how the 🔬 Frogrammer builds the twin of the
+machine. (At professional scale this same methodology can manifest as code
+tests: predictions about behavior, automated against actual behavior, with the
+divergence as the signal.) **The design thinking process** — form hypotheses
+about what users need, do, and feel; prototype; observe real people encountering
+the prototype; correct your model when they diverge — is how the 🎨 Vibetoader
+builds the twin of users. The cycles run at different timescales — microseconds
+of internal-events for the machine twin, weeks of user contact for the user twin
+— but the structure is the same: predict, encounter, update. Two domains, two
+hats, two non-delegable practices. An LLM could narrate every step of either
+methodology. It cannot have the cycle _for_ you, in either domain. The cycle is
+the experience, and the experience is what builds the twin, and the twin _is_
+understanding.
+
+### Programming is collaborative communication
+
 **Programming is collaborative communication.** A single piece of source code
 simultaneously addresses multiple audiences: other developers who read it, a
 computer that evaluates it, users who experience it, and agents who collaborate
@@ -172,36 +233,40 @@ _notional machine_ — an imaginary model of how the computer carries out your
 instructions. Whether you're writing the code yourself or directing an LLM (or a
 human!) to write it for you, you can work two ways:
 
-- **🎨 The Vibetoader** works from user-visible behavior. _Does the button work?
-  Does the test pass? Does the page render?_ Iteration is on outcomes. The
-  machine underneath is a black box.
-- **🔬 The Frogrammer** works grounded in the notional machine itself. They
-  predict what the machine will do, evaluate output against that prediction,
-  and apply craft practices (testing, documentation, review, security)
-  intentionally — to mitigate risks their NM-awareness makes visible.
+- **🎨 The Vibetoader** works grounded in the user. They build a deep user-twin
+  through research, prototyping, and testing with real people, and intentionally
+  delegate the notional machine to an LLM, a collaborator, or familiar tools.
+- **🔬 The Frogrammer** works grounded in the notional machine. They build a
+  deep NM-twin through prediction, tracing, and verification, and may delegate
+  or do-at-lighter-touch user-research.
 
 Neither hat is better, and they're not a binary — Vibetoading and Frogramming
 are a spectrum, and most developers wear different hats on different tasks,
-different files, different moments. Vibetoading shines for prototyping,
-ideation, low-stakes work, and giving domain experts the power to solve their
-own problems. Frogramming is what holds up under stakes: production code,
-security-sensitive systems, anything multi-person or long-lived. This course
-teaches you to wear both hats deliberately — and especially to recognize which
-the moment is asking for.
+different files, different moments. Vibetoading shines for user-facing
+prototyping, ideation grounded in real people's needs, low-stakes work where the
+NM can be safely delegated, and giving domain experts the power to solve their
+own problems. Frogramming is what holds up under stakes that the NM-twin makes
+visible: production code, security-sensitive systems, anything multi-person or
+long-lived. This course teaches you to wear both hats deliberately — and
+especially to recognize which the moment is asking for.
 
-The Frogramming skill is harder to acquire and harder to delegate, so this
-course centers it. Once you understand what it means to _Frogram_, you can
-design your own NMs at the right abstraction for any system — a flowchart of
-cloud services, a state machine of UI components, or the JEJ NM at the bottom.
-The layer adapts; the skill is the same.
+Both hats shoulder a deep, non-delegable twin — a Frogrammer the notional
+machine, a Vibetoader the user. Neither's depth can be outsourced. This course
+teaches Frogramming in depth because the notional machine is what makes this a
+programming curriculum; design thinking and user research are taught at
+gesture-level (Chapter 3) with referrals out for the deeper practice. Once you
+understand what it means to _Frogram_, you can design your own NMs at the right
+abstraction for any system — a flowchart of cloud services, a state machine of
+UI components, or the JEJ NM at the bottom. The layer adapts; the skill is the
+same.
 
 **How do you build this predictive mastery? Four threads** run beneath the
 curriculum, progressively layering as the chapters advance:
 
 - **Twinning** (baseline): building an accurate mental model of a process
   outside your own mind. Each chapter asks you to twin a different process: the
-  🧑‍💻 _developer_ who reads your code (Ch1), the 💻 _computer_ that evaluates
-  it (Ch2), the _user_ who experiences it (Ch3), the 🤖 _agent_ you collaborate
+  🧑‍💻 _developer_ who reads your code (Ch1), the 💻 _computer_ that evaluates it
+  (Ch2), the _user_ who experiences it (Ch3), the 🤖 _agent_ you collaborate
   with (Ch4). You can't communicate well with something you don't understand.
   **Vibetoading prioritizes _twinning_ the user; Frogramming prioritizes
   _twinning_ the NM.**
@@ -247,11 +312,9 @@ exhaustive dependency list.
 **Study Lenses** is embedded directly in every page. Every code snippet has a
 full suite of lenses available: trace tables, variable highlighters, Parsons
 problems, flow charts, fill-in-the-blanks, and more. Exercises suggest lenses,
-but you're always free to use whichever helps you most. The just-enough/javascript
-tooling that powers Study Lenses implements the Explorotron pedagogical
-framework (Malaise & Signer, 2023) — see
-[`src/lib/welcome-to-programming/just-enough/javascript/README.md`](../../src/lib/welcome-to-programming/just-enough/javascript/README.md)
-§ Pedagogical first principles for the architectural mapping.
+but you're always free to use whichever helps you most. The
+just-enough/javascript tooling that powers Study Lenses implements the
+Explorotron pedagogical framework (Malaise & Signer, 2023).
 
 **JavaScript only** for now; Python track in development. Skill-level objectives
 are identical for both languages. JS is the primary track because it makes the
@@ -259,14 +322,150 @@ developer/user split _architecturally visible_: `console.log` lives in devtools
 (developer space), `prompt`/`alert`/`confirm` live in browser UI (user space).
 That separation is the curriculum's rhetorical model made concrete.
 
+[TOP](#welcome-to-frogramming---syllabus)
+
+---
+
+## How Learning Happens (and What It Means for This Course)
+
+**Not just a better explanation.** That five-word catchphrase has been part of
+this author's teaching practice since at least 2019 — long before LLMs, long
+before this curriculum reached its current form. It captures something specific:
+that effective teaching isn't a competition over which explanation is clearest.
+The new pressure LLMs put on this old principle is that LLMs are extraordinarily
+good at producing explanations — confident, fluent, customized, on demand. _If
+learning were the receipt of explanations, LLMs would have already solved it._
+They haven't, because it isn't.
+
+Cognitive scientists have studied this asymmetry for decades under the name
+**pedagogical sampling**: humans, from infancy onward, draw fundamentally
+different inferences from data chosen intentionally by a teacher than from data
+encountered at random or sampled by the learner themselves. The corollary is
+well-established in education research: **a curated curriculum is qualitatively
+different from free self-directed learning.** This is the structural reason an
+LLM responding to learner-directed prompts is closer to self-directed sampling
+than to pedagogical sampling. Its outputs may look intentional, but they aren't
+sampled for THIS learner's hypothesis space, this learner's sequence position,
+this learner's impending threshold concept. A curated curriculum is. Even a
+well-prompted LLM samples differently from a teacher who has modeled YOU. Some
+of what this course teaches you to twin — the notional machine, users, your
+fellow developers, the LLM itself as a collaborator — are not facts to be
+acquired but **ways of doing things**, and ways of doing things are learned
+through the doing.
+
+**The two-layer misconception mechanism.** Confident explanations install
+misconceptions when they substitute for experience — especially analogies that
+feel complete and that the learner can't run-and-verify in their head. LLMs
+amplify the risk because their explanations are extra-confident and
+analogy-rich. That's layer one. Layer two is sneakier: **log or UI-only
+self-checking installs misconceptions because many wrong models of the notional
+machine produce the right outputs, for a while.** A learner who self-checks only
+by output can carry a misconception for weeks, accumulate work that depends on
+it, and only discover the wrong model when something downstream breaks
+expensively — at which point the misconception has to be uninstalled along with
+everything that depended on it. This course's response to both layers:
+predict-and-verify at the level of **internal events** (scope walks, coercion
+cascades, binding lifecycle, prototype lookups). Internal-event predictions are
+much harder for a wrong model to falsely confirm. Take `'5' + 3` and `'5' - 3`
+as a small example: most learners can predict the outputs (`'53'` and `2`)
+long before they can predict the internal events — what the engine actually
+does, in what order. _As Evan put it in earlier teaching notes: "explaining a
+program in plain English is helpful, but it's easy to be a little bit wrong
+and not know it."_ Predicting the chain of
+internal events is what closes that gap.
+
+**Building Structure → AI Integration Threshold → Leveraging Structure.** The
+SOLO taxonomy from education research distinguishes Pre-, Uni-, Multi-,
+Relational-, and Extended-Abstract levels of conceptual integration —
+prestructural through to network-of-connected-concepts. A learner's relationship
+to a concept progresses through these levels at its own pace. Chapters 1–3 of
+this course are _weighted toward_ Building Structure (Pre/Uni/Multistructural —
+concepts isolated, models forming, no AI in the work). Chapter 4 is _weighted
+toward_ the threshold crossing (Relational — concepts connect; AI outputs become
+evaluable). Chapter 5 is _weighted toward_ Leveraging Structure (Extended
+Abstract — all quadrants of human-AI collaboration are viable; snippetry
+maintains the automated library — the _automaticity_ named in the opener —
+once full-codebase work no longer provides daily reps). Within any chapter, a learner is at varying SOLO levels for different
+concepts; the mapping is suggestive, not strict. The threshold matters because
+**AI cannot help when learners don't yet know what to verify.** Until you can
+recognize what to verify, an LLM's output is unevaluable from your seat — even
+if it happens to be correct.
+
+**Why Chapter 4 lands where it does.** Chapter ordering is a structural
+consequence of the principle. Until you have the twins (the NM-twin, the
+user-twin, the developer-twin), you can't evaluate AI output, direct it
+meaningfully, or recognize when it's confidently misleading you. There's a
+sharper way to put this: until you have the twins, you don't know what to ask
+the LLM well, and an LLM responding to ill-formed queries samples like random
+encounter, not like a teacher. Once the twins are running, your queries become
+well-posed enough that the LLM's responses approximate pedagogical sampling —
+and you have the model to verify them against. The threshold isn't sequential
+("we covered Ch1–3 first, now Ch4"); it's structural (pre-twin queries elicit
+non-pedagogical samples; post-twin queries elicit something closer to
+pedagogical samples that you can also evaluate). Once across the threshold, the
+LLM becomes a steerable participant. Chapter 4's structure — every section
+evaluating LLM output rather than producing it — is the operational mechanism
+that lets the chapter work safely. **Code is content, not deliverable** is the
+framing this section names for Ch4: AI-generated code is material to study, not
+work-product to ship, and that
+reframe is what keeps the chapter pedagogical rather than productivity-oriented.
+
+**The existing scaffolding, reread as instances of the principle.** Each piece
+of this curriculum's apparatus is **pedagogical sampling at a particular
+granularity**:
+
+- **PRIMM** (predict-run-investigate-modify-make) is pedagogical sampling at the
+  exercise level. The author's earlier (~2018) framing called this
+  _Read–Diagram–Modify–Create_ — same cycle, prior name. Continuity, not
+  reinvention.
+- The **Block Model** is pedagogical sampling at the code-element level — atoms,
+  blocks, relationships, macro structure × text-surface, execution, purpose.
+- The **spiral curriculum** is pedagogical sampling across language-feature
+  scales, accumulating into automaticity over time. _As Evan put it in 2018:
+  "that lovely moment where you no longer need to think to complete a task. Your
+  brain has built a network of Mental Models that it can fall back on to carry
+  out these routine tasks without increasing your cognitive load."_
+- **Cognitive Load Theory** (intrinsic / extraneous / germane) is why JEJ is
+  small — aggressive removal of extraneous load is itself a form of pedagogical
+  sampling, choosing not to put irrelevant complexity in front of the learner.
+- **Study Lenses** are pedagogical sampling at the internal-event level. They
+  reclaim the visibility Bret Victor wanted (mechanism made observable) at
+  exactly the granularity the misconception-mechanism requires.
+- **Just Enough JavaScript** is pedagogical sampling at the language-feature
+  surface — fewer features chosen deliberately, sequenced to prevent
+  misconceptions from installing.
+- **Errors-as-information** is pedagogical sampling at the moment of
+  model-divergence: the machine is honest, and an error is a surprise that
+  updates your model.
+- **Snippetry** (Ch5) is pedagogical sampling _for self_ — the learner becomes
+  their own pedagogical sampler for NM-maintenance once full-codebase work no
+  longer provides daily reps. Each snippet is a self-curated experience.
+
+The principle isn't introducing a new pedagogy; it's the why behind the
+curriculum's existing shape — and the through-line from the author's decade-old
+tagline to the cognitive-science taproot underneath.
+
+**The mastery contract, returning to the catchphrase.** Earlier in the course
+materials there's a sentence the author has kept canonical: _"You have only
+mastered a skill when you can complete its exercises without AI."_ That's the
+principle as a learning contract. AI is welcome at the work as soon as you have
+the twins to bring to the collaboration. Until then, AI is what you're using AS
+you build — not what you're using INSTEAD of building. Not just a better
+explanation. The work is yours, has always been yours, and will always be yours
+— that's what makes it worth doing.
+
+[TOP](#welcome-to-frogramming---syllabus)
+
 ---
 
 ## Why Learn to Frogram
 
 _Why learn to code when LLMs write code?_ Because designing computation is not
-the same work as writing the notation for it. Both matter. The design work is
-harder to delegate. And there are also reasons to program that aren't about
-productivity at all.
+the same work as writing the notation for it. Both matter. The design work —
+twinning the audiences your code addresses, whether the notional machine (a
+Frogrammer's depth) or the user (a Vibetoader's depth) — is non-delegable in
+either hat. LLMs handle notation; the design work is yours. And there are also
+reasons to program that aren't about productivity at all.
 
 ### What programming languages are
 
@@ -353,6 +552,12 @@ demand is a large part of what makes programming hard to learn and master.
 
 ### The LLM shift: a new participant in an old dance
 
+The principle that organizes everything below is named in § How Learning
+Happens: **understanding is the part of programming that cannot be delegated.**
+The four sub-points that follow — honest framing, verification limit, NM
+understanding matters more, the concrete Vibetoading/Frogramming difference —
+are consequences of that principle, applied to the LLM-shift specifically.
+
 Experienced collaborators who handle much of the notation — senior engineers,
 pair partners — have always been part of software. LLMs are a new kind of such
 collaborator: same role, different cognition. Chapter 4 develops the
@@ -388,13 +593,16 @@ and to evaluate whether the LLM delivered them. Without NM understanding, you
 can't direct the LLM meaningfully and you can't judge its output. The NM is
 what's being programmed — just via a new route.
 
-**This is the concrete difference between Vibetoading and Frogramming.** A
-Vibetoader produces code they can't predict — they iterate on visible behavior
-("does the button work?") without a model of what the machine is doing
-underneath. A Frogrammer can predict what the machine will do, evaluate whether
-the output matches intent, and diagnose divergence when it doesn't. With or
-without an LLM, prediction is the skill that separates Frogramming from
-Vibetoading. This course builds that skill.
+**This is the concrete difference between Vibetoading and Frogramming, applied
+to the LLM shift.** A Vibetoader directing an LLM iterates on user-visible
+behavior; their twin is the user, and the NM is operated by the LLM virtuoso. A
+Frogrammer directing an LLM still operates the NM through their twin, with the
+LLM doing the notation work. Both are engaged in genuine work; both shoulder a
+non-delegable twin; they delegate different audiences to the LLM. Same
+comparison, both-non-delegable framing. With or without an LLM, **predicting
+against the twin you shoulder** is the skill the course builds — NM-prediction
+for Frogramming, user-behavior prediction (through prototyping and testing with
+real people) for Vibetoading.
 
 This frame treats LLMs as authoring partners. Agentic systems where LLMs plan,
 execute, and modify state autonomously are a more complex picture deferred to
@@ -434,8 +642,8 @@ both at once. LLMs decompose his wish in an unexpected way:
 
 Study Lenses gives a slightly different solution to the visibility half of
 Victor's wish than he expressed in Learnable Programming: We will focus on
-visualizing the _internal mechanisms_ of your program's evaluation, not the final
-output.
+visualizing the _internal mechanisms_ of your program's evaluation, not the
+final output.
 
 ### Your instrument: JavaScript, and your practice instrument: Just Enough JavaScript
 
@@ -475,13 +683,13 @@ evaluates top-to-bottom), **small enough to understand** (you can hold the whole
 NM in your head at once and predict-trace-verify in full), **connected enough to
 inspire** (snippets allude to, vary on, and remix each other — nothing stands
 alone). It's also a natural home for deliberate Vibetoading — quick exploratory
-sketches where you choose to chase the outcome and skip the machine. Frogramming
-for mastery, exploration, aesthetic satisfaction, delight, surprise, discovery,
-and the new thoughts code lets you think — alongside or instead of programming
-for productivity. "You" is the fifth audience: students program for themselves,
-share with peers through a collaborative gist system that extends a living
-snippetry corpus, and explore JavaScript's full multi-paradigmatic range with
-training wheels off and real browser evaluation.
+sketches where you choose to chase the outcome and delegate the machine.
+Frogramming for mastery, exploration, aesthetic satisfaction, delight, surprise,
+discovery, and the new thoughts code lets you think — alongside or instead of
+programming for productivity. "You" is the fifth audience: students program for
+themselves, share with peers through a collaborative gist system that extends a
+living snippetry corpus, and explore JavaScript's full multi-paradigmatic range
+with training wheels off and real browser evaluation.
 
 ### The future beyond human-designed languages
 
@@ -513,15 +721,15 @@ above stand on their own.
 
 ### The mapping
 
-| Idea                   | Illustration                                                                                  |
-| ---------------------- | --------------------------------------------------------------------------------------------- |
-| The notional machine   | A **mechanical instrument** — plays the score blindly, deterministically                      |
-| Source code            | **The score** — notation the mechanism reads                                                  |
-| The designer           | **The composer** — holds computational intent, understands the instrument, knows the audience |
-| The implementer        | **The virtuoso** — masters notation and the controls; produces the score from direction       |
-| Users                  | **The audience** — concert-goers who react to the performance                                 |
-| Other developers       | **Co-composers** — fellow score-readers                                                       |
-| The computer evaluating | **The mechanism playing the score blindly at performance time**                              |
+| Idea                    | Illustration                                                                                  |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| The notional machine    | A **mechanical instrument** — plays the score blindly, deterministically                      |
+| Source code             | **The score** — notation the mechanism reads                                                  |
+| The designer            | **The composer** — holds computational intent, understands the instrument, knows the audience |
+| The implementer         | **The virtuoso** — masters notation and the controls; produces the score from direction       |
+| Users                   | **The audience** — concert-goers who react to the performance                                 |
+| Other developers        | **Co-composers** — fellow score-readers                                                       |
+| The computer evaluating | **The mechanism playing the score blindly at performance time**                               |
 
 ### Why a _mechanical_ instrument specifically
 
@@ -611,7 +819,10 @@ Chapter 4, which is about agents as named collaborators in the development
 process. The distinction matters: using an LLM to quiz yourself on trace tables
 is study support; asking an LLM to trace code for you is bypassing the skill
 you're trying to build. Available from Chapter 1 onward; revisited with new
-depth in Chapter 4.
+depth in Chapter 4. The line this section draws is the principle from § How
+Learning Happens applied to study sessions: an LLM can _support_ your experience
+of building the twin (good study partner) but cannot _produce_ it for you (bad
+code-generator-instead-of-you).
 
 ### Learning Expectations
 
@@ -629,26 +840,25 @@ context about your own learning journey.
 
 A small set of glyphs runs through this syllabus, each tied to a recurring
 concept. They appear inline at structural anchors — section headings, bold
-labels, table cells, audience lists — wherever the marked concept is the
-active subject. This is a **reading aid**, not a memorization task; ignore
-any symbol whose meaning isn't yet clear and come back to this key when
-needed.
+labels, table cells, audience lists — wherever the marked concept is the active
+subject. This is a **reading aid**, not a memorization task; ignore any symbol
+whose meaning isn't yet clear and come back to this key when needed.
 
-| Symbol | Concept | What it marks |
-| --- | --- | --- |
-| 🐸 | The course / both hats together | The umbrella. Frog/toad ambiguity is a feature: it carries both hats at once. Appears in the title and stays out of body text. |
-| 🔬 | Frogrammer | Development grounded in the notional machine — predict, trace, verify, apply craft practices intentionally. |
-| 🎨 | Vibetoader | Development grounded in user-visible behavior — iterate on outcomes, treat the machine underneath as a black box. |
-| 🧑 | Human | Used at active Human / AI distinctions. |
-| 🤖 | AI / Agent | Used both for "AI" (in the Human/AI distinction) and for "Agent" (the fourth audience). Same thing, two framings. |
-| 🧑‍💻 | Developer (audience) | The human who reads and writes code — Chapter 1's audience. |
-| 💻 | Computer (audience) | The machine that evaluates code — Chapter 2's audience. "Understanding the computer" = twinning the notional machine; the NM is the computer at our chosen level of abstraction. |
-| 💭 | Snippetry | Small, runnable, self-contained programs as ongoing practice. The thought-bubble glyph is borrowed from the snippetry source repo. |
+| Symbol | Concept                         | What it marks                                                                                                                                                                    |
+| ------ | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🐸     | The course / both hats together | The umbrella. Frog/toad ambiguity is a feature: it carries both hats at once. Appears in the title and stays out of body text.                                                   |
+| 🔬     | Frogrammer                      | Development grounded in the notional machine — predict, trace, verify, apply craft practices intentionally; shoulders the NM-twin, may delegate user-research.                   |
+| 🎨     | Vibetoader                      | Development grounded in the user — research, prototype, test with real people; shoulders the user-twin, may delegate the notional machine.                                       |
+| 🧑     | Human                           | Used at active Human / AI distinctions.                                                                                                                                          |
+| 🤖     | AI / Agent                      | Used both for "AI" (in the Human/AI distinction) and for "Agent" (the fourth audience). Same thing, two framings.                                                                |
+| 🧑‍💻     | Developer (audience)            | The human who reads and writes code — Chapter 1's audience.                                                                                                                      |
+| 💻     | Computer (audience)             | The machine that evaluates code — Chapter 2's audience. "Understanding the computer" = twinning the notional machine; the NM is the computer at our chosen level of abstraction. |
+| 💭     | Snippetry                       | Small, runnable, self-contained programs as ongoing practice. The thought-bubble glyph is borrowed from the snippetry source repo.                                               |
 
 **Flagged for later:** the User audience (Chapter 3) and the Notional Machine
-itself don't yet have locked symbols. Both will be picked once the rest of
-the symbology has been seen in rendered context — context will reveal what
-reads cleanly.
+itself don't yet have locked symbols. Both will be picked once the rest of the
+symbology has been seen in rendered context — context will reveal what reads
+cleanly.
 
 **Out of scope for the symbology:** the egg / chick / chicken progression
 markers (🥚🐣🐥🐔) used on learning objectives are a separate, established
@@ -696,18 +906,18 @@ Three human audiences read your code:
    not understand intent, only syntax and semantics. Throughout this course,
    "understanding the computer" means **twinning its notional machine** —
    building an accurate mental model of how the engine evaluates your code at
-   our chosen level of abstraction. The NM _is_ the computer for our
-   purposes (see § Notional machines below).
+   our chosen level of abstraction. The NM _is_ the computer for our purposes
+   (see § Notional machines below).
 3. **Users of the program** — they never see the code, but they experience its
    effects; their correctness is behavioral (does it do what I need?), not
    syntactic
 
 A fourth audience has recently arrived:
 
-4. **🤖 Agents (LLMs)** — they read and understand code differently from
-   humans; they can infer intent from examples, find patterns, suggest changes,
-   and help you write it. Writing _for and with_ agents is its own
-   communication skill, developed in Chapter 4.
+4. **🤖 Agents (LLMs)** — they read and understand code differently from humans;
+   they can infer intent from examples, find patterns, suggest changes, and help
+   you write it. Writing _for and with_ agents is its own communication skill,
+   developed in Chapter 4.
 
 The central skill this course teaches is writing code that **addresses all four
 audiences simultaneously**. Different chapters focus on different audiences
@@ -778,7 +988,11 @@ takes place in existing codebases. All of what programmers do is arrangement and
 variation — reading code, understanding it, modifying it, fitting new pieces
 into existing structures. This course teaches you to read and understand code
 first because that is what all programming work actually is. You will write
-programs throughout, but to verify understanding, not to demonstrate output.
+programs throughout, but to verify understanding, not to demonstrate output. The
+deeper reason — unpacked in § How Learning Happens — is that **understanding is
+the part of programming you cannot delegate.** Comprehension-first because
+comprehension is the experience-form of building the twin of the machine;
+production-first skips the experiences and installs nothing durable.
 
 **Three vocabulary distinctions worth having early:**
 
@@ -859,19 +1073,25 @@ in every moment of work, wears one of two hats. Both are real practices, both
 have their time, and most people wear both — sometimes within the same hour on
 the same project.
 
-**🎨 The Vibetoader** works from user-visible behavior. They iterate on
-outcomes: does the button work, does the test pass, does the page render? The
-notional machine underneath is a black box. They may use LLMs heavily or not
-at all; what defines the hat is that the code itself is incantation — a means
-to produce the behavior — rather than a model the developer is reasoning
-about.
+**🎨 The Vibetoader** works grounded in the user. They build a deep model of
+what users need, do, and experience — through research, prototyping, and testing
+with real people — and iterate that model when prototypes meet actual humans.
+The notional machine underneath is intentionally delegated: to an LLM virtuoso,
+to a colleague, or to whatever notation tooling is at hand. Code is the
+instrument that produces user-visible behavior, not the audience the Vibetoader
+is addressing in depth. They may use LLMs heavily or not at all; what defines
+the hat is the depth of the user-twin and the intentionality of the
+NM-delegation.
 
-**🔬 The Frogrammer** works grounded in the notional machine. They predict
-what the machine will do before they run anything, evaluate output against
-that prediction, and apply craft practices (testing, documentation, code
-review, security audits) intentionally — to mitigate specific risks their
-NM-awareness makes visible. They may use LLMs heavily or not at all; what
-defines the hat is the grounding.
+**🔬 The Frogrammer** works grounded in the notional machine. They build a deep
+model of what the machine will do — through prediction, tracing, and
+verification against actual evaluation — and iterate that model when traces
+diverge from predictions. They apply craft practices (testing, documentation,
+code review, security audits) intentionally, to mitigate specific risks their
+NM-awareness makes visible. User-research and design thinking they may delegate,
+do at lighter touch, or rely on a Vibetoader collaborator for. They may use LLMs
+heavily or not at all; what defines the hat is the depth of the NM-twin and the
+intentionality of any user-side delegation.
 
 **Spectrum, not binary.** A given developer doesn't _be_ a Vibetoader or a
 Frogrammer — they wear different hats on different tasks, files, moments. A
@@ -881,25 +1101,34 @@ part. The question is never "which kind of person are you?" — it's "which hat
 fits this moment?"
 
 **Why the twinning anchor cuts where it does.** Recall the four audiences from
-the threads: developer, computer, user, agent. Vibetoading prioritizes twinning
-the _user_ — the experiencer of behavior. Frogramming prioritizes twinning the
-_NM_ — the producer of behavior. Notice that the Vibetoader doesn't really twin
-the developer-reader either: code is a textual representation of the NM and its
-levers, and without NM-awareness there isn't much to read _for_ in the code
-itself. The Frogrammer, by contrast, cares deeply about code quality — both
-because the code represents the NM they understand, and because well-shaped code
-is what lets humans _and_ agents read, review, and extend the work over time (a
-point well-developed in agent-collaboration practice — see this org's
+the threads: developer, computer, user, agent. Both hats twin deeply, just
+different audiences. Vibetoading shoulders the _user-twin_ — the experiencer of
+behavior; their depth lives in research, prototyping, and design thinking with
+real people. Frogramming shoulders the _NM-twin_ — the producer of behavior;
+their depth lives in prediction, tracing, and verification. Each hat delegates
+the audience the other shoulders. Code itself sits between them: for the
+Frogrammer, code is the textual representation of the NM and its levers, and the
+developer-reader audience is a natural extension of NM-awareness — well-shaped
+code is what lets humans _and_ agents read, review, and extend the work over
+time (a point well-developed in agent-collaboration practice — see this org's
 `AGENTS.md`, Simon Willison's writing, and the broader engineering literature).
+For the Vibetoader, code is the instrument that produces user-visible behavior,
+and the developer-reader audience is delegated to whoever is operating the NM —
+a Frogrammer collaborator, an LLM virtuoso, or a future-self in different mode.
+Neither hat skips work; each invests it where it serves their twin best.
 
-**The cargo-cult test.** Process discipline (TDD, DDD, QA, security review,
-docs) doesn't determine which hat you're wearing — _intentionality_ does. When a
-Vibetoader does TDD, the tests are ceremonial: written because Process Says So,
-not because they target NM-visible risks. When a Frogrammer does TDD, the tests
-are intentional: they cover the specific edge cases the NM predicts will be
-surprising. Same activity, different ground. A Frogrammer can also skip tests on
-a throwaway script and still be Frogramming, because they know what they're
-skipping and why.
+**The cargo-cult test.** Process discipline (TDD, code review, docs, user
+research, A/B tests, usability studies) doesn't determine which hat you're
+wearing — _intentionality_ and _grounding_ do. When a Frogrammer does TDD, the
+tests target the specific edge cases their NM-awareness predicts will be
+surprising. When a Vibetoader runs an A/B test or a usability study, the test
+targets specific user-behavior hypotheses their user-twin predicts will be
+tested. Both are intentional; both serve the twin they shoulder. The cargo-cult
+mode — neither hat — is process performed because Process Says So, with no model
+of what the test or research is actually telling you. A Frogrammer can skip
+code-tests on a throwaway script and still be Frogramming, because they know
+what they're skipping and why. A Vibetoader can ship a quick prototype without
+user-testing first, knowing what they're skipping and why.
 
 **Vibetoading predates LLMs.** It's tempting to read the dichotomy as
 "vibing-with-LLMs vs. engineering-without". It isn't. Pattern-matching syntax
@@ -913,10 +1142,10 @@ The four-quadrant grid makes this concrete. Vibetoading vs. Frogramming is a
 stance about your relationship to the NM, _orthogonal_ to whether an LLM is in
 the loop:
 
-|                                    | **Humans-only**                                                                                                     | **LLM-collab**                                                                                                         |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **🎨 Vibetoading** (outcome-grounded) | Cargo-cult coding — copy-paste-tweak, hooks-rules-without-reconciliation, CSS by trial-and-error. _Pre-LLM vibing._ | Karpathy's _vibe coding_ — LLM writes, you don't read; outcomes are the only ground truth.                             |
-| **🔬 Frogramming** (NM-grounded)      | Traditional engineering — humans write notation grounded in NM-awareness, applying craft practices intentionally.   | Willison's _vibe engineering_ / _agentic engineering_ — LLM writes the notation; you direct and verify against the NM. |
+|                                    | **Humans-only**                                                                                                                                                                                                                                                                                                                             | **LLM-collab**                                                                                                                                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **🎨 Vibetoading** (user-grounded) | _Real Vibetoading, humans-only_: UX-research-led prototyping, design-thinking-driven iteration with real people; the NM is delegated to a collaborator or familiar tools. (Note: cargo-cult coding — copy-paste-tweak, hooks-rules-without-reconciliation, CSS by trial-and-error — is **not** Vibetoading; it's the no-twin failure mode.) | Karpathy's _vibe coding_ — LLM writes notation, you focus on user-visible outcomes; works only when paired with deep user-twin and willingness to read what the LLM produced enough to verify it. |
+| **🔬 Frogramming** (NM-grounded)   | Traditional engineering — humans write notation grounded in NM-awareness, applying craft practices intentionally.                                                                                                                                                                                                                           | Willison's _vibe engineering_ / _agentic engineering_ — LLM writes the notation; you direct and verify against the NM.                                                                            |
 
 #### Related vocabulary
 
@@ -942,17 +1171,21 @@ it.
 
 **Learning objectives for §0.3:**
 
-- 🥚 Distinguish Vibetoading from Frogramming by their grounding (visible
-  behavior vs. notional machine)
+- 🥚 Distinguish Vibetoading from Frogramming by which audience they twin in
+  depth (the user vs. the notional machine), and by what they intentionally
+  delegate
 - 🥚 Place a given workflow on the four-quadrant grid
 - 🥚 Recognize that vibing predates LLMs and give one pre-LLM example
 - 🐣 Identify when each hat is appropriate for a concrete scenario
-- 🐣 Distinguish cargo-cult process (process by ceremony) from intentional craft
-  practice (process targeting NM-visible risks)
+- 🐣 Distinguish cargo-cult process (process by ceremony, neither hat) from
+  intentional craft practice in either hat (process targeting risks the
+  shouldered twin makes visible)
 - 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
   it's right
-- 🐥 Articulate why this curriculum centers Frogramming while honoring
-  Vibetoading
+- 🐥 Articulate why this curriculum teaches Frogramming in depth (it's a
+  programming curriculum; the NM is the technical surface) while honoring
+  Vibetoading as an equally non-delegable practice (taught at gesture-level
+  here, with referrals out)
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -969,36 +1202,35 @@ of) ever hearing it performed. Code has the same property._
 
 ### Twinning the developer audience
 
-The central skill of this chapter is **twinning the 🧑‍💻 developer
-audience** — imagining who will read your code and writing for them, not
-for yourself-right-now. This is not a new practice; it is the explicit
-naming of something the programming community has always done:
+The central skill of this chapter is **twinning the 🧑‍💻 developer audience** —
+imagining who will read your code and writing for them, not for
+yourself-right-now. This is not a new practice; it is the explicit naming of
+something the programming community has always done:
 
 > _"Programs must be written for people to read, and only incidentally for
-> machines to execute."_
-> — Abelson & Sussman, _Structure and Interpretation of Computer Programs_
+> machines to execute."_ — Abelson & Sussman, _Structure and Interpretation of
+> Computer Programs_
 
 > _"Always code as if the guy who ends up maintaining your code will be a
-> violent psychopath who knows where you live."_
-> — John Woods (and a thousand undergraduate code-style lectures since)
+> violent psychopath who knows where you live."_ — John Woods (and a thousand
+> undergraduate code-style lectures since)
 
-The developer audience includes the obvious reader — a teammate
-maintaining your code — and the often-overlooked one: **future-you**.
-You-in-six-months is a stranger. You-in-ten-minutes is already on the
-way there. Twinning the developer audience means writing so that
-stranger can pick up where you left off without phoning you.
+The developer audience includes the obvious reader — a teammate maintaining your
+code — and the often-overlooked one: **future-you**. You-in-six-months is a
+stranger. You-in-ten-minutes is already on the way there. Twinning the developer
+audience means writing so that stranger can pick up where you left off without
+phoning you.
 
 This anticipates Chapter 5's "you" audience: by the time we promote
-yourself-as-a-distinct-audience, you've been twinning future-you all
-along.
+yourself-as-a-distinct-audience, you've been twinning future-you all along.
 
 ### Static vs. dynamic
 
 A foundational conceptual distinction is introduced here: not as a technical
 exercise but as orientation: **source code (static) vs. program evaluation
 (dynamic)**. Comments exist in the static text; logs are observed during
-evaluation. This sets up the **🧑‍💻** developer twin: the developer who reads
-your code sees the static text, not the runtime. Understanding this distinction is
+evaluation. This sets up the **🧑‍💻** developer twin: the developer who reads your
+code sees the static text, not the runtime. Understanding this distinction is
 prerequisite to understanding why comments and logs serve different purposes.
 
 The computer is not yet a full audience. Devtools console is developer space.
@@ -1527,39 +1759,44 @@ requires its own communication skills.
 
 ### Wrapping premise: code is the UI for the NM
 
-Up to now this course has framed code text as **what you write to talk to
-the four audiences**. There's a deeper way to see the same fact: source
-code is the **UI / control panel** through which a programmer operates
-the notional machine. Authoring code is _one_ way to operate that panel.
-Describing intent to an LLM is another. Either way, the NM is the thing
-the panel controls.
+You're now ready for the alien virtuoso because Chapters 1–3 gave you the
+experiences that built the twins. The principle from § How Learning Happens —
+that understanding is non-delegable — is what made the chapter ordering
+necessary. This chapter is where the LLM joins the work, with the twins already
+running.
 
-LLMs let you **delegate operation of the control panel** while still
-owning the machine. The same Frogrammer/Vibetoader spectrum from Ch0.3
-applies — but now to your conversation with the alien virtuoso, not just
-to your typing:
+Up to now this course has framed code text as **what you write to talk to the
+four audiences**. There's a deeper way to see the same fact: source code is the
+**UI / control panel** through which a programmer operates the notional machine.
+Authoring code is _one_ way to operate that panel. Describing intent to an LLM
+is another. Either way, the NM is the thing the panel controls.
 
-- 🔬 **NM-grounded conversation** (Frogramming-with-delegation) — "Make
-  the NM declare a `const balance = 0`, then enter a `while` loop that
-  decrements it until it hits zero." You specify behavior in NM terms.
-  You predict-trace-verify the LLM's output against the NM. The LLM
-  operates the panel for you; you stay grounded in the machine.
-- 🎨 **User-grounded conversation** (Vibetoading-with-delegation) —
-  "When the user types their amount and clicks OK, count down to zero
-  and tell them when it's done." You specify behavior in user-experience
-  terms. You evaluate against user outcomes; the machine is a black box.
+LLMs let you **delegate operation of the control panel** while still owning the
+machine. The same Frogrammer/Vibetoader spectrum from Ch0.3 applies — but now to
+your conversation with the alien virtuoso, not just to your typing:
 
-Both produce text in the same control panel; the difference is **which
-audience you twin during the conversation**. This is why every section
-below revisits a Ch1–Ch3 audience: agent communication is what you've
-already been doing, just refracted through the alien.
+- 🔬 **NM-grounded conversation** (Frogramming-with-delegation) — "Make the NM
+  declare a `const balance = 0`, then enter a `while` loop that decrements it
+  until it hits zero." You specify behavior in NM terms. You
+  predict-trace-verify the LLM's output against the NM. The LLM operates the
+  panel for you; you stay grounded in the machine.
+- 🎨 **User-grounded conversation** (Vibetoading-with-delegation) — "When the
+  user types their amount and clicks OK, count down to zero and tell them when
+  it's done." You specify behavior in user-experience terms. You evaluate
+  against user outcomes; the machine is intentionally delegated to the LLM
+  virtuoso.
 
-**The visual NM view (`embody/` + study lenses) becomes load-bearing
-here.** When you delegate the control panel, you can no longer rely on
-the act of typing to keep your NM understanding sharp. Visual debuggers
-let you observe, predict, and debug the machine _directly_ — the NM view
-that exists regardless of who (or what) wrote the code text. Frogramming
-with delegation is only sustainable if you keep the direct NM view alive.
+Both produce text in the same control panel; the difference is **which audience
+you twin during the conversation**. This is why every section below revisits a
+Ch1–Ch3 audience: agent communication is what you've already been doing, just
+refracted through the alien.
+
+**The visual NM view (`embody/` + study lenses) becomes load-bearing here.**
+When you delegate the control panel, you can no longer rely on the act of typing
+to keep your NM understanding sharp. Visual debuggers let you observe, predict,
+and debug the machine _directly_ — the NM view that exists regardless of who (or
+what) wrote the code text. Frogramming with delegation is only sustainable if
+you keep the direct NM view alive.
 
 ### 4.0 What is an LLM?
 
@@ -1710,12 +1947,14 @@ question of the curriculum:
 > Frogramming sharp — particularly my NM-fluency in a language — when
 > full-codebase work no longer provides the daily reps?
 
-Snippetry is the answer: small programs that exercise whole-program design at
-small scale while drilling an isolated concern — a language feature, a paradigm,
-an algorithm, the feel of a new notional machine, a user-experience miniature,
-or just for fun. Snippetry is also where deliberate Vibetoading lives in this
-course: low-stakes, outcome-only sketches you write because that hat fits the
-moment.
+Snippetry is the answer because it's the experience-form of NM-maintenance — the
+daily reps that keep the automated library of past experiences (from § How
+Learning Happens) alive once full-codebase work no longer provides them. Small
+programs that exercise whole-program design at small scale while drilling an
+isolated concern — a language feature, a paradigm, an algorithm, the feel of a
+new notional machine, a user-experience miniature, or just for fun. Snippetry is
+also where deliberate Vibetoading lives in this course: low-stakes,
+user-experience-led sketches you write because that hat fits the moment.
 
 The practice balances **broad exploration** and **productive constraint**.
 Students develop their own sense of which balance serves their learning and
