@@ -64,9 +64,7 @@ describe('<StudyLenses> — F1 smoke', () => {
 
 	describe('Many — non-success embody scenario', () => {
 		it('mounts without throwing for "FAIL_AT_PARSE" — F1 has no error UI', () => {
-			const { container } = render(
-				<StudyLenses snippet="FAIL_AT_PARSE" />,
-			);
+			const { container } = render(<StudyLenses snippet="FAIL_AT_PARSE" />);
 			const root = container.querySelector('[data-orchestrator-root]');
 			expect(root).not.toBeNull();
 		});
@@ -74,9 +72,9 @@ describe('<StudyLenses> — F1 smoke', () => {
 
 	describe('Exceptions — config supplied with no resolvable default', () => {
 		it('throws at mount when config is set, lens is unset, and configs has no default key', () => {
-			expect(() =>
-				render(<StudyLenses snippet="OK" config={{}} />),
-			).toThrow(/`config` requires a resolved default lens/);
+			expect(() => render(<StudyLenses snippet="OK" config={{}} />)).toThrow(
+				/`config` requires a resolved default lens/,
+			);
 		});
 	});
 

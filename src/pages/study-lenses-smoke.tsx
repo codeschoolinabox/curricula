@@ -45,11 +45,10 @@ export default function StudyLensesSmoke(): React.JSX.Element {
 			<main style={{ maxWidth: 720, margin: '2rem auto', padding: '0 1rem' }}>
 				<h1>study-lenses smoke (F1)</h1>
 				<p>
-					Hardcoded harness for the F1 chain. Plugin alignment is
-					post-F1 cross-tier work; this page mounts{' '}
-					<code>&lt;StudyLenses&gt;</code> directly. Open React DevTools
-					and inspect <code>StudyLenses</code> &rarr;{' '}
-					<code>useEmbodiment</code> debug value to see the frozen{' '}
+					Hardcoded harness for the F1 chain. Plugin alignment is post-F1
+					cross-tier work; this page mounts <code>&lt;StudyLenses&gt;</code>{' '}
+					directly. Open React DevTools and inspect <code>StudyLenses</code>{' '}
+					&rarr; <code>useEmbodiment</code> debug value to see the frozen{' '}
 					<code>Snippet</code>.
 				</p>
 				<p>
