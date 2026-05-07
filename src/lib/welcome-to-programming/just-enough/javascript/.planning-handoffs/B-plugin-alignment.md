@@ -124,17 +124,17 @@ Before opening the session:
    likely has tests that pin the OLD prop emission shape. B will
    need to update them; if there are tests, the agent should plan
    to migrate them in the same increment.
-4. **Decide commit shape ahead of time:**
-   - **Option A** (one big increment): all 4 changes in one
-     `refactor:` commit. Simpler git history.
-   - **Option B** (decomposed atomic commits): drop transforms
-     (its own commit) → drop lang (its own commit) → rename
-     code→snippet (its own commit) → URL-style fence syntax (its
-     own commit) → add configs (its own commit).
-   - The orchestrator handoff doesn't mandate. AGENTS.md "atomic
-     per behavior" leans toward Option B; user's
-     `feedback_batch_fix_now` could lean Option A. Either is
-     defensible. Surface during plan mode.
+4. **Commit shape: Option B (locked, user-confirmed 2026-05-07).**
+   Decomposed atomic commits, one per behavior:
+   1. Drop `transforms` attribute.
+   2. Drop `lang` attribute.
+   3. Rename `code` → `snippet`.
+   4. Adopt URL-style fence syntax (`js:lens?key=value,…`).
+   5. Emit `configs` cascade bundle from `lenses.json`.
+   Plus a Phase 0 docs commit at the front (lock the plugin
+   contract in `src/plugins/study-lenses/{README,DOCS}.md`)
+   and any AR-5 followup commits at the end. Each behavior gets
+   its own AR-3 + AR-4 cycle per AGENTS.md.
 
 ## Authoritative read-order (priority)
 
@@ -185,8 +185,9 @@ to:
   — your "done" criterion is "plugin emits the correct four-prop
   API shape, unit-tested" not "fences render in the browser."
 
-- The pre-session checks (decide commit shape ahead; review
-  existing plugin tests).
+- The pre-session checks. **Commit shape is locked: Option B
+  (decomposed atomic, one commit per behavior).** No need to
+  re-decide.
 
 Your task is B (Docusaurus plugin alignment). After reading the
 handoff:
@@ -197,9 +198,10 @@ handoff:
 
 2. Enter plan mode. Propose your Phase 0 (DDD: any docs / type
    updates needed for the plugin module first), then Phase 1 TDD
-   increments. Surface the commit-shape decision (Option A
-   one-big-refactor vs Option B decomposed atomic). Get my
-   ExitPlanMode approval before any execution.
+   increments per the locked Option B sequence (drop transforms →
+   drop lang → rename code→snippet → URL-style fence syntax →
+   emit configs cascade). Get my ExitPlanMode approval before any
+   execution.
 
 3. Follow DEV.md and AGENTS.md discipline: Phase 0 → AR-1 → types
    check → DOCS sketch (the plugin module's DOCS, if it has one)
@@ -287,9 +289,9 @@ Stop the agent and redirect if you see:
   deleted in `4526dc3`. The recommendation is moot; B is its own
   handoff (this file). Don't add steps to a deleted file.
 
-## What B's commit history will look like (sketch)
+## What B's commit history will look like (locked: Option B)
 
-If commit shape Option B (decomposed atomic), expect 5-7 commits:
+Decomposed atomic, one commit per behavior. Expect 5-7 commits:
 
 ```text
 docs: lock plugin alignment contract — flag B scope in
@@ -302,16 +304,9 @@ add: emit `configs` cascade bundle from lenses.json
 refactor: AR-5 followups for plugin alignment (if any)
 ```
 
-If commit shape Option A (one big refactor), expect 1-2 commits:
-
-```text
-docs: lock plugin alignment contract — flag B scope in
-       src/plugins/study-lenses/{README,DOCS}.md (Phase 0)
-refactor: align plugin emission to four-prop API + URL-style
-           fence syntax + configs cascade (B)
-```
-
-The agent should propose one in plan mode and get user approval.
+Each `add:` commit gets its own AR-3 (test strategy) → AR-4
+(implementation audit) cycle. AR-5 runs once at the end across
+the whole B diff.
 
 ## After B completes
 
