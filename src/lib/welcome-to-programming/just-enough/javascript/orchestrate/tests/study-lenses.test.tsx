@@ -85,4 +85,101 @@ describe('<StudyLenses> — F1 smoke', () => {
 			).toThrow(/Unknown embody mock scenario/);
 		});
 	});
+
+	// ─── B.7: minimal lens-mount path via static registry ───────────────
+
+	describe('B.7 — lens prop dispatches to a registered lens module', () => {
+		it('lens="debug-props" mounts the debug-props lens (root carries data-lens="debug-props")', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const lensRoot = container.querySelector('[data-lens="debug-props"]');
+			expect(lensRoot).not.toBeNull();
+		});
+
+		it('lens="debug-props" does NOT mount the editor home-base', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const editorHost = container.querySelector('[data-orchestrator-host]');
+			expect(editorHost).toBeNull();
+		});
+
+		it('lens="parsons" (NOT registered) → editor home-base mounts (F1+B silent-drop fallback)', () => {
+			const { container } = render(<StudyLenses snippet="OK" lens="parsons" />);
+			const editorHost = container.querySelector('[data-orchestrator-host]');
+			expect(editorHost).not.toBeNull();
+			const lensRoot = container.querySelector('[data-lens]');
+			expect(lensRoot).toBeNull();
+		});
+
+		it('debug-props lens receives the embodied Snippet and renders snippet.source.code', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const snippetPanel = container.querySelector(
+				'[data-debug-panel="snippet"] pre',
+			);
+			expect(snippetPanel?.textContent).toBe('OK');
+		});
+
+		it('config + configs deep-merge per the resolution chain (configs[lens] then config wins)', () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="OK"
+					lens="debug-props"
+					config={{ a: '1' }}
+					configs={{ 'debug-props': { b: '2' } }}
+				/>,
+			);
+			const configPanel = container.querySelector(
+				'[data-debug-panel="config"] pre',
+			);
+			expect(JSON.parse(configPanel!.textContent ?? 'null')).toEqual({
+				a: '1',
+				b: '2',
+			});
+		});
+
+		it('per-fence config overrides cascade configs[lens] for the same key', () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="OK"
+					lens="debug-props"
+					config={{ shared: 'fence-wins' }}
+					configs={{ 'debug-props': { shared: 'cascade-base' } }}
+				/>,
+			);
+			const configPanel = container.querySelector(
+				'[data-debug-panel="config"] pre',
+			);
+			expect(JSON.parse(configPanel!.textContent ?? 'null')).toEqual({
+				shared: 'fence-wins',
+			});
+		});
+
+		it('configs[lens] applies when config is absent (tier-1 cascade without tier-2 override)', () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="OK"
+					lens="debug-props"
+					configs={{ 'debug-props': { tier: 'one' } }}
+				/>,
+			);
+			const configPanel = container.querySelector(
+				'[data-debug-panel="config"] pre',
+			);
+			expect(JSON.parse(configPanel!.textContent ?? 'null')).toEqual({
+				tier: 'one',
+			});
+		});
+
+		it('unregistered lens with config does not throw and mounts editor (silent-drop documented in README)', () => {
+			expect(() =>
+				render(
+					<StudyLenses snippet="OK" lens="parsons" config={{ x: 'y' }} />,
+				),
+			).not.toThrow();
+		});
+	});
 });
