@@ -29,7 +29,12 @@ import type { Code, Root } from 'mdast';
 import type { VFile } from 'vfile';
 
 import type { StudyLensesJsxNode } from './code-block-to-jsx.js';
-import type { ResolvedConfig, RemarkPluginOptions, Sibling } from './types.js';
+import type {
+	LensName,
+	RemarkPluginOptions,
+	ResolvedConfig,
+	Sibling,
+} from './types.js';
 
 type Transformer = (tree: Root, file: VFile) => void;
 
@@ -205,12 +210,12 @@ function appendBottomEmbed(
 			meta: null,
 		};
 		const lensConfig = resolveEmittedLensConfig(config, sibling);
-		const jsx = codeBlockToJsx(
-			codeNode,
-			lensConfig === undefined
-				? { lens: sibling.lens }
-				: { lens: sibling.lens, lensConfig },
-		);
+		const cascadeConfigs = pickCascadeConfigs(config);
+		const jsx = codeBlockToJsx(codeNode, {
+			lens: sibling.lens,
+			...(lensConfig !== undefined ? { lensConfig } : {}),
+			...(cascadeConfigs !== undefined ? { configs: cascadeConfigs } : {}),
+		});
 		(tree.children as Array<unknown>).push(jsx);
 	}
 }
@@ -250,12 +255,12 @@ function appendTabsEmbed(
 			meta: null,
 		};
 		const lensConfig = resolveEmittedLensConfig(config, sibling);
-		const innerJsx = codeBlockToJsx(
-			inner,
-			lensConfig === undefined
-				? { lens: sibling.lens }
-				: { lens: sibling.lens, lensConfig },
-		);
+		const cascadeConfigs = pickCascadeConfigs(config);
+		const innerJsx = codeBlockToJsx(inner, {
+			lens: sibling.lens,
+			...(lensConfig !== undefined ? { lensConfig } : {}),
+			...(cascadeConfigs !== undefined ? { configs: cascadeConfigs } : {}),
+		});
 		return {
 			type: 'mdxJsxFlowElement' as const,
 			name: 'TabItem',
@@ -383,22 +388,27 @@ function transformFence(
 		}
 	}
 
-	// `exactOptionalPropertyTypes`: only include `lens` / `lensConfig` keys
-	// when defined (undefined values would not satisfy the optional-prop
-	// contract on `codeBlockToJsx`).
-	//
-	// The `{ lensConfig }`-only branch is structurally unreachable
-	// through `transformFence` because `lensConfig` is only assigned
-	// inside the `if (lens !== undefined)` block. It exists for the
-	// type-checker so a hypothetical future caller can pass
-	// `{ lensConfig }` alone (the `codeBlockToJsx` unit contract
-	// supports it).
-	if (lens !== undefined && lensConfig !== undefined) {
-		return codeBlockToJsx(node, { lens, lensConfig });
-	}
-	if (lens !== undefined) return codeBlockToJsx(node, { lens });
-	if (lensConfig !== undefined) return codeBlockToJsx(node, { lensConfig });
-	return codeBlockToJsx(node, {});
+	const cascadeConfigs = pickCascadeConfigs(config);
+	// `exactOptionalPropertyTypes`: build the params via conditional
+	// spread so undefined keys are omitted entirely rather than passed
+	// as `key: undefined`.
+	return codeBlockToJsx(node, {
+		...(lens !== undefined ? { lens } : {}),
+		...(lensConfig !== undefined ? { lensConfig } : {}),
+		...(cascadeConfigs !== undefined ? { configs: cascadeConfigs } : {}),
+	});
+}
+
+/**
+ * Returns the cascade's `lenses.*` map for emission as the `configs`
+ * attribute, or `undefined` when the cascade has no lens entries
+ * (per AR-1 locked decision 6: only emit `configs` when non-empty).
+ */
+function pickCascadeConfigs(
+	config: ResolvedConfig,
+): Readonly<Record<LensName, Readonly<Record<string, unknown>>>> | undefined {
+	if (Object.keys(config.lenses).length === 0) return undefined;
+	return config.lenses;
 }
 
 /**

@@ -115,17 +115,6 @@ parses all three and emits the resolved values onto the JSX node.
 > default seam (L2). Authors who hit this should consult React DevTools or the
 > sandbox debug-props lens to confirm the prop shape.
 
-> **F1 ↔ plugin alignment gap**: until the Docusaurus plugin alignment lands
-> (see
-> [`../.planning-handoffs/03-orchestrator-and-contracts.md`](../.planning-handoffs/03-orchestrator-and-contracts.md)
-> § Cross-handoff impact), the plugin still emits the pre-refactor prop shape
-> (`code`, `lens`, `lang`, `transforms`). F1's contract is the new four-prop API
-> (`snippet`, `lens?`, `config?`, `configs?`); the plugin's emitted shape will
-> not match during this window. Plugin-fence integration is post-F1 cross-tier
-> work; F1's sandbox checkpoint runs against an isolated harness page at
-> `src/pages/study-lenses-smoke.tsx` (Docusaurus auto- routes `src/pages/`)
-> which mounts `<StudyLenses>` directly, bypassing the plugin entirely.
-
 ### Per-lens config resolution chain
 
 For any lens the learner mounts (default or picker-switched), the final config

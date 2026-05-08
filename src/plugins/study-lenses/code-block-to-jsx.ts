@@ -61,7 +61,10 @@ type StudyLensesJsxNode = {
  *   `defaults[lang]` populated does NOT emit `lens`; only suffix /
  *   frontmatter / directive populate it). `lensConfig` is the per-lens
  *   resolved configuration, serialised as JSON onto the `config`
- *   attribute when present.
+ *   attribute when present. `configs` is the cascade `lenses.*` map
+ *   keyed by lens name, serialised as JSON onto the `configs` attribute
+ *   when non-empty (per AR-1 locked decision 6: only emit when
+ *   non-empty).
  * @returns A fresh `mdxJsxFlowElement` node with `name: 'StudyLenses'` and
  *   attribute values matching the plugin's component prop contract.
  *
@@ -78,9 +81,13 @@ function codeBlockToJsx(
 	{
 		lens,
 		lensConfig,
+		configs,
 	}: {
 		readonly lens?: LensName;
 		readonly lensConfig?: Readonly<Record<string, unknown>>;
+		readonly configs?: Readonly<
+			Record<LensName, Readonly<Record<string, unknown>>>
+		>;
 	},
 ): StudyLensesJsxNode {
 	const attributes: StudyLensesJsxAttribute[] = [
@@ -94,6 +101,13 @@ function codeBlockToJsx(
 			type: 'mdxJsxAttribute',
 			name: 'config',
 			value: JSON.stringify(lensConfig),
+		});
+	}
+	if (configs !== undefined && Object.keys(configs).length > 0) {
+		attributes.push({
+			type: 'mdxJsxAttribute',
+			name: 'configs',
+			value: JSON.stringify(configs),
 		});
 	}
 	return {

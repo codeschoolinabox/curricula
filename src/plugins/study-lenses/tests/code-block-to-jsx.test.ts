@@ -132,4 +132,54 @@ describe('codeBlockToJsx', () => {
 		const names = result.attributes.map((a) => a.name);
 		expect(names).toEqual(['snippet', 'config']);
 	});
+
+	// ─── B.5: configs cascade-bundle attribute ───────────────────────────
+
+	it('B.5: configs attribute emits as JSON-stringified value of the cascade lenses map', () => {
+		const node = makeCodeNode('let x = 1;', 'js');
+
+		const result = codeBlockToJsx(node, {
+			lens: 'study',
+			configs: { trace: { stepDelay: 500 }, parsons: { distractors: 4 } },
+		});
+
+		const configsAttr = result.attributes.find((a) => a.name === 'configs');
+		expect(configsAttr?.value).toBe(
+			JSON.stringify({
+				trace: { stepDelay: 500 },
+				parsons: { distractors: 4 },
+			}),
+		);
+	});
+
+	it('B.5: configs absent → no configs attribute emitted', () => {
+		const node = makeCodeNode('let x = 1;', 'js');
+
+		const result = codeBlockToJsx(node, { lens: 'study' });
+
+		const names = result.attributes.map((a) => a.name);
+		expect(names).not.toContain('configs');
+	});
+
+	it('B.5: configs empty `{}` → no configs attribute emitted (locked decision 6: only when non-empty)', () => {
+		const node = makeCodeNode('let x = 1;', 'js');
+
+		const result = codeBlockToJsx(node, { lens: 'study', configs: {} });
+
+		const names = result.attributes.map((a) => a.name);
+		expect(names).not.toContain('configs');
+	});
+
+	it('B.5: full four-prop emission shape (snippet + lens + config + configs)', () => {
+		const node = makeCodeNode('let x = 1;', 'js');
+
+		const result = codeBlockToJsx(node, {
+			lens: 'parsons',
+			lensConfig: { distractors: 4 },
+			configs: { parsons: { shuffleSeed: 42 } },
+		});
+
+		const names = result.attributes.map((a) => a.name);
+		expect(names).toEqual(['snippet', 'lens', 'config', 'configs']);
+	});
 });

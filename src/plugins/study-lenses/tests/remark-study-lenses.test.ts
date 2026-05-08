@@ -325,6 +325,10 @@ describe('createRemarkStudyLenses', () => {
 		expect(attrs.snippet).toBe(
 			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
 		);
+		// B.5: cascade lenses.* map flows verbatim onto `configs`.
+		expect(attrs.configs).toBe(
+			JSON.stringify({ parsons: { shuffleSeed: 42 } }),
+		);
 	});
 
 	it('D.16: trailing-placement directive behaves identically to leading-placement', () => {
@@ -344,6 +348,11 @@ describe('createRemarkStudyLenses', () => {
 		// Byte-exact: same stripped content regardless of directive placement.
 		expect(attrs.snippet).toBe(
 			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
+		);
+		// B.5: cascade lenses.* map flows verbatim onto `configs` (symmetric
+		// with leading-directive case at the embed-config-merge test above).
+		expect(attrs.configs).toBe(
+			JSON.stringify({ parsons: { shuffleSeed: 42 } }),
 		);
 	});
 
@@ -740,5 +749,68 @@ describe('createRemarkStudyLenses', () => {
 		expect(findStudyLensNode(tree.children)).toBeUndefined();
 		const codeNode = tree.children.find((n) => n.type === 'code');
 		expect(codeNode).toBeDefined();
+	});
+
+	// ─── B.5: configs cascade-bundle attribute ───────────────────────────
+
+	it('B.5: in-page fence emits `configs` attribute carrying the cascade lenses.* map', () => {
+		// Use embed-config-merge fixture (cascade has lenses.parsons.shuffleSeed=42).
+		const contentRoot = path.join(FIXTURES_DIR, 'embed-config-merge');
+		const transformer = createRemarkStudyLenses({ contentRoot });
+		const vfile = new VFile({
+			value: '```js:parsons\nlet x = 1;\n```\n',
+			path: path.join(contentRoot, 'index.md'),
+		});
+		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		transformer(tree, vfile);
+
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+		expect(attrs.lens).toBe('parsons');
+		expect(attrs.configs).toBe(
+			JSON.stringify({ parsons: { shuffleSeed: 42 } }),
+		);
+	});
+
+	it('B.5: in-page fence with empty cascade.lenses → no `configs` attribute', () => {
+		// configured-js fixture has no `lenses` map; configs should be absent.
+		const tree = parseStringInConfiguredJs('```js:trace\nlet x = 1;\n```\n');
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+		expect(attrs.lens).toBe('trace');
+		expect(attrs.configs).toBeUndefined();
+	});
+
+	it('B.5: appendTabsEmbed inner StudyLenses emits `configs` from cascade lenses.* map', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'embed-tabs-with-configs');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		const tabsNode = tree.children.at(-1) as unknown as {
+			type: string;
+			name?: string;
+			children?: ReadonlyArray<{
+				type: string;
+				name?: string;
+				children?: ReadonlyArray<{
+					type: string;
+					name?: string;
+					attributes?: ReadonlyArray<{ name: string; value: string }>;
+				}>;
+			}>;
+		};
+		expect(tabsNode.name).toBe('Tabs');
+		const tabItem = tabsNode.children?.[0];
+		expect(tabItem?.name).toBe('TabItem');
+		const innerJsx = tabItem?.children?.[0];
+		expect(innerJsx?.name).toBe('StudyLenses');
+		const innerAttrs = Object.fromEntries(
+			(innerJsx?.attributes ?? []).map((a) => [a.name, a.value]),
+		);
+		expect(innerAttrs.lens).toBe('parsons');
+		expect(innerAttrs.configs).toBe(
+			JSON.stringify({ parsons: { shuffleSeed: 42 } }),
+		);
 	});
 });

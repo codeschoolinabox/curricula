@@ -1,0 +1,7 @@
+{
+	"defaults": { "js": "study" },
+	"embedSiblings": { "mode": "tabs" },
+	"lenses": {
+		"parsons": { "shuffleSeed": 42 }
+	}
+}
