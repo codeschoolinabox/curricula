@@ -53,9 +53,16 @@ parentheses; sandbox-harness selectors use the key directly.
    `embodiment.validation.{formatted, isJeJ, isDeterministic, doesPause}` +
    `validation.violations` count. Verifies the embody-derived metadata flowed.
 4. **Config panel** (`config`) — `Object.entries(config)` rendered as a
-   key/value list (or empty-state when no config). Verifies the orchestrator's
-   resolution chain (`module.config() ⊕ configs[lens] ⊕ config`) produced the
-   expected merged bundle.
+   key/value list, OR an `(empty)` sentinel when the config is `undefined` OR an
+   explicit empty object `{}`. Verifies the orchestrator's resolution chain
+   (`module.config() ⊕ configs[lens] ⊕ config`) produced the expected merged
+   bundle. **Why `{}` collapses to `(empty)` rather than rendering as the JSON
+   `{}`**: the harness's primary verification surface is the React DevTools
+   props panel; the on-screen panel is a quick at-a-glance summary. When the
+   distinction between "no config supplied" and "config resolved to empty
+   object" matters (e.g. detecting an L2 resolution-chain bug that returns `{}`
+   instead of the correct bundle), the harness operator drills into DevTools.
+   The `(empty)` collapse keeps the visual surface clean for the common case.
 
 The contract is the `DisplayTree.panels: ReadonlyArray<Panel>` shape (where each
 panel carries `key`, `label`, `content` strings). The panel keys above are
