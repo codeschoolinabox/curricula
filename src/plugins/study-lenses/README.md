@@ -12,86 +12,45 @@ registered as `StudyLenses` in the swizzled
 [`src/theme/MDXComponents.js`](../../theme/MDXComponents.js).
 
 **Architectural framing:** this is a _bounded subsystem_ — its own
-documentation, domain model, and workflow conventions — but _not_ a physical
-npm package. It lives inside the Docusaurus site with no separate `package.json`
-or build step. Its `.ts` sources are loaded directly by `docusaurus.config.ts`
-via Docusaurus's native TypeScript config support.
+documentation, domain model, and workflow conventions — but _not_ a physical npm
+package. It lives inside the Docusaurus site with no separate `package.json` or
+build step. Its `.ts` sources are loaded directly by `docusaurus.config.ts` via
+Docusaurus's native TypeScript config support.
 
-## Status
+## Emitted JSX prop contract
 
-- Phase 0 (DDD + architectural sketch): **in progress**
-- Phase 1 (TDD increments): not started
-- Phase 2 (quality gate + AR-5): not started
+Every `<StudyLenses>` node this plugin emits carries the **four-prop public
+API** locked in the orchestrator at
+[`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md):
 
-Plan file: [`transient-puzzling-crane.md`](../../../../../.claude/plans/transient-puzzling-crane.md)
-(ambient; may not exist in every checkout).
+```jsx
+<StudyLenses
+  snippet={…}    // string source (the code in the fence)
+  lens?={…}      // resolved lens name (string) — Q-III educator default
+  config?={…}    // per-fence override for the resolved-default lens
+  configs?={…}   // cascade bundle keyed by lens name (lenses.json `lenses.*`)
+/>
+```
 
-## Plugin alignment to the locked four-prop API (TODO)
+The **only attributes the plugin ever emits** on a transformed `<StudyLenses>`
+node are `snippet`, `lens`, `config`, and `configs` (the latter three optional).
+`code`, `lang`, and `transforms` from the pre-Round-2 shape are gone — language
+is encoded by the fence head and consumed only at gate-time
+(configured-languages rule), and transforms are a lens-internal concern (no
+transforms tier in the architecture).
 
-> **⚠️ Drift notice — this plugin currently emits the V1 prop set
-> (`code`, `lens`, `lang`, optional `config`).** The locked
-> orchestrator API (Round-2 architecture, see
-> [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md))
-> is a **four-prop API**:
->
-> ```jsx
-> <StudyLenses
->   snippet={…}    // string source — was `code`, plus drop `lang`
->   lens?={…}      // resolved lens name (string)
->   config?={…}    // per-instance config for the resolved lens
->   configs?={…}   // map of lens-name → config from lenses.json cascade
-> />
-> ```
->
-> Plugin code does **not** match this yet. This section is the
-> alignment punch list for the next plugin commit:
->
-> 1. **Rename `code` → `snippet`** in
->    [`code-block-to-jsx.ts`](./code-block-to-jsx.ts).
-> 2. **Drop the `lang` prop entirely.** Language is encoded by the
->    fence head; the orchestrator does not branch on it.
-> 3. **Drop the `transforms` concept.** Transforms are now a
->    **lens-internal concern** — each lens decides what visual
->    transforms to apply (the `format` toolbar button, the
->    `loopGuard` pre-eval rewrite, etc.). The plugin must NOT emit a
->    `transforms` attribute, NOT parse comma-separated transform
->    chains in fence suffixes, and NOT carry transform names in
->    sibling-file directives. The glossary section "Lens suffix" and
->    the "Fence info string grammar" §below need rewriting against
->    the URL-style syntax (next item).
-> 4. **Adopt URL-style fence syntax** (replaces comma-chain syntax):
->
->    ```text
->    js                     → lens=cascade default, config={}
->    js:trace               → lens="trace", config={}
->    js:trace?stepDelay=500 → lens="trace", config={ stepDelay: 500 }
->    js:trace?cols=value,steps
->                          → lens="trace", config={ cols: ["value","steps"] }
->    ```
->
->    Query-string semantics:
->    - `?key=value` — string value
->    - `?key=v1,v2,v3` — array of strings (comma split)
->    - `?key` (no `=`) — boolean true
->    - `?key=&…` (empty value) — empty string ""
->
->    Numeric coercion happens at lens config time, not at parse time.
-> 5. **Add the new `configs` attribute.** Populated by the cascade
->    resolver: every lens config in the resolved
->    `lenses.*` map flows through to the orchestrator unchanged. The
->    orchestrator merges per the resolution chain
->    `module.config() ⊕ configs?.[lensName] ⊕ (lensName === resolvedDefault ? config : {})`.
->    See
->    [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md` § Per-lens config resolution chain](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md).
-> 6. **Keep `config`.** It carries the per-fence/per-sibling
->    overrides (the directive JSON or the fence query string),
->    applied **only to the resolved active lens** per the resolution
->    chain.
-> Until this alignment lands, the plugin is on the V1 prop set and
-> the orchestrator is on the four-prop set — the swap-in
-> `<StudyLenses>` from `orchestrate/` will reject the missing
-> `snippet` prop. The V1 mock component continues to work because
-> it reads the V1 props directly.
+The plugin populates the four props from three input surfaces:
+
+- **Fence info string** (URL-style; see § Fence info string grammar below) —
+  populates `lens` and contributes a per-fence override bundle that gets
+  deep-merged with the cascade's `lenses[lens]` entry, then emitted as `config`.
+- **Per-directory `lenses.json` cascade** (see § lenses.json schema) — its
+  `lenses.*` map flows verbatim into `configs`; its `defaults[lang]` populates
+  the `lens` prop when the fence's info string carries no `:suffix` and no
+  frontmatter override.
+- **Per-fence `@study-lens` directive in `.js` siblings** — educator-override
+  surface; populates the sibling's `lens` and a per-sibling override bundle that
+  gets deep-merged with the cascade's `lenses[lens]` and emitted as `config`.
 
 ## Glossary
 
@@ -99,32 +58,43 @@ The terms below are **ubiquitous** — they propagate verbatim into function
 signatures, type names, error messages, test descriptions, and JSDoc. Adding a
 synonym anywhere in the code is a bug.
 
-- **Lens** — a named rendering mode for a code sample. Opaque string
-  identifier. `study` is the **default meta-lens** — an editor with
-  run/format/trace/debug/socratize/lint buttons plus the ability to pop up
-  other lenses on the current editor code. Non-editor lenses (`highlight`,
-  `blanks`, `parsons`, etc.) are exercise-generators from the code. A fenced
-  code block with no lens suffix resolves to `study`.
+- **Lens** — a named rendering mode for a code sample. Opaque string identifier
+  the plugin treats as a name; the rendered React lens modules live in the
+  orchestrator-side `lenses/` peer (`highlight`, `blanks`, `parsons`,
+  `trace-table`, etc.). The `lens` attribute the plugin emits is populated, in
+  precedence order, from: per-fence `:suffix`, frontmatter `defaultLens`,
+  cascade `defaults[lang]`. A fenced code block with none of those resolved
+  emits no `lens` prop at all — what the orchestrator does with that absence is
+  its own concern (see
+  [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md)).
 - **Fenced code block** — a markdown code block delimited by triple backticks.
   The MDAST `code` node type. Standard CommonMark term.
-- **Code fence** — the triple-backtick delimiters themselves, as opposed to
-  the enclosed content.
+- **Code fence** — the triple-backtick delimiters themselves, as opposed to the
+  enclosed content.
 - **Info string** — the text on the opening fence line after the backticks
   (`js`, `js:highlight`, `python`). Standard CommonMark term.
 - **Language** — the identifier before the colon in an info string (`js`,
   `python`, `html`). Determines the default lens lookup.
-- **Configured language** — a language identifier that has a corresponding
-  key in the resolved configuration's `defaults` map. **Only configured
-  languages trigger fence transformation**; unconfigured languages (e.g.
-  `txt`, `bash`, `diff`) fall through to Docusaurus's default code-block
-  rendering. This avoids footguns like replacing an ASCII diagram in a
-  `txt` fence with a plaintext editor.
-- **Lens suffix** — the text after the colon in a fence info string. A
-  bare suffix names a single lens (`js:highlight`). A comma-separated
-  suffix names zero or more transforms followed by a terminal lens
-  (`js:format,loopGuard,editor` → transforms `[format, loopGuard]`, lens
-  `editor`). The last token is always the lens; earlier tokens are
-  transforms in authored order.
+- **Configured language** — a language identifier that has a corresponding key
+  in the resolved configuration's `defaults` map. **Only configured languages
+  trigger fence transformation**; unconfigured languages (e.g. `txt`, `bash`,
+  `diff`) fall through to Docusaurus's default code-block rendering. This avoids
+  footguns like replacing an ASCII diagram in a `txt` fence with a plaintext
+  editor.
+- **Lens suffix** — the text after the colon in a fence info string. A bare
+  suffix is a lens name (`js:highlight`). A suffix may carry a URL-style query
+  string for per-fence config overrides
+  (`js:trace?stepDelay=500&cols=value,steps`). See § Fence info string grammar.
+- **Query parameter** — one `key[=value]` pair in a fence info string's query
+  suffix. Multiple parameters are joined by `&`. Values are URL-semantic strings
+  at parse time (no numeric coercion); each lens coerces at config-read time as
+  needed.
+- **Cascade bundle** — the `lenses.*` map produced by the cascade resolver,
+  emitted verbatim onto the `configs` attribute. Keyed by lens name; values are
+  per-lens config objects.
+- **Resolved-default lens** — the lens that mounts when the picker first opens,
+  computed as `lens` prop → cascade `defaults[lang]` → none. Per-fence `config`
+  overrides apply to the resolved-default lens only.
 - **Cascade** — the root → leaf directory walk that collects and merges
   `lenses.json` files.
 - **Resolved config** — the frozen, deep-merged output of the cascade for a
@@ -138,77 +108,75 @@ synonym anywhere in the code is a bug.
   sibling-bearing page.
 - **Sibling-bearing page** — the learner-facing markdown file a directory
   renders as. Precedence: `index.md` if present; otherwise `README.md`. When
-  both exist, `README.md` is contributor-facing (GitHub-style, not rendered)
-  and `index.md` is the learner page (rendered, sibling-bearing).
+  both exist, `README.md` is contributor-facing (GitHub-style, not rendered) and
+  `index.md` is the learner page (rendered, sibling-bearing).
 - **Ignore prefix** — a directory-name prefix that causes the sibling walk to
   skip that entire subtree. Configured per-instance under
   `embedSiblings.ignorePrefixes`. Site-root config sets `["staging-"]`.
 - **Page boundary** — a nested sibling-bearing page encountered during the
   sibling walk. Descent halts at this boundary; files beyond belong to that
   other page.
-- **Exercise set** — a group of related exercises under a subchapter,
-  physically colocated in a directory whose name starts with a configured
-  **exercise-set prefix** (e.g. `sl-01-while-loops/`, `sl-02-do-while-loops/`
-  under a parent `control-flow/` chapter). Each exercise set is a
-  sibling-bearing page in its own right.
-- **Exercise-set prefix** — the directory-name prefix that marks a folder
-  as an exercise set. Configured at the content-root `lenses.json` under
-  the top-level `exerciseSetPrefixes` key. Site-wide convention: `sl-`.
-  Directories matching a prefix receive sidebar-label stripping (strip
-  prefix → strip numeric ordering → kebab-case to Title Case).
-- **Directive block** — a comment form (a line-comment run or a
-  block comment) in a sibling `.js` file that contains the
-  `@study-lens` tag. May appear in the file's leading comment block
-  (before any code) OR its trailing comment block (after the last
-  non-comment statement); middle-of-file placement is inert. The
-  directive block is parsed for lens name + optional JSON config, and
-  removed from the code that feeds into `<StudyLenses>` — learners see
-  only the exercise body.
-- **Leading comment block** — the contiguous prefix of a `.js` file
-  made of blank lines, an optional shebang, line comments, and block
-  comments, up to the first non-blank/non-comment/non-shebang line.
-- **Trailing comment block** — the mirror region at the end of a
-  `.js` file: blank lines, line comments, and block comments after
-  the last non-comment statement, through EOF.
-- **Sibling group** — a partition of a page's siblings by their first
-  path segment. Root-level files (no `/` in their label) form the
-  **root group**; files under a subdirectory share the subdirectory
-  name as their **group key**. Each group renders as a separate
-  `<Tabs>` element (tabs mode) or a separate block of `<StudyLenses>`
-  nodes (bottom mode), preceded by a heading.
-- **Group key** — the first path segment of a sibling's relative-path
-  label. Siblings sharing a group key are rendered together.
-  Root-level files have an empty group key.
-- **Group-relative label** — a sibling's label with its group-key
-  prefix stripped, used as the tab label within that group's `<Tabs>`.
-  Example: `sl-01-variables/01-declare` becomes tab label `01-declare`
-  inside the `Variables` group.
+- **Exercise set** — a group of related exercises under a subchapter, physically
+  colocated in a directory whose name starts with a configured **exercise-set
+  prefix** (e.g. `sl-01-while-loops/`, `sl-02-do-while-loops/` under a parent
+  `control-flow/` chapter). Each exercise set is a sibling-bearing page in its
+  own right.
+- **Exercise-set prefix** — the directory-name prefix that marks a folder as an
+  exercise set. Configured at the content-root `lenses.json` under the top-level
+  `exerciseSetPrefixes` key. Site-wide convention: `sl-`. Directories matching a
+  prefix receive sidebar-label stripping (strip prefix → strip numeric ordering
+  → kebab-case to Title Case).
+- **Directive block** — a comment form (a line-comment run or a block comment)
+  in a sibling `.js` file that contains the `@study-lens` tag. May appear in the
+  file's leading comment block (before any code) OR its trailing comment block
+  (after the last non-comment statement); middle-of-file placement is inert. The
+  directive block is parsed for lens name + optional JSON config, and removed
+  from the code that feeds into `<StudyLenses>` — learners see only the exercise
+  body.
+- **Leading comment block** — the contiguous prefix of a `.js` file made of
+  blank lines, an optional shebang, line comments, and block comments, up to the
+  first non-blank/non-comment/non-shebang line.
+- **Trailing comment block** — the mirror region at the end of a `.js` file:
+  blank lines, line comments, and block comments after the last non-comment
+  statement, through EOF.
+- **Sibling group** — a partition of a page's siblings by their first path
+  segment. Root-level files (no `/` in their label) form the **root group**;
+  files under a subdirectory share the subdirectory name as their **group key**.
+  Each group renders as a separate `<Tabs>` element (tabs mode) or a separate
+  block of `<StudyLenses>` nodes (bottom mode), preceded by a heading.
+- **Group key** — the first path segment of a sibling's relative-path label.
+  Siblings sharing a group key are rendered together. Root-level files have an
+  empty group key.
+- **Group-relative label** — a sibling's label with its group-key prefix
+  stripped, used as the tab label within that group's `<Tabs>`. Example:
+  `sl-01-variables/01-declare` becomes tab label `01-declare` inside the
+  `Variables` group.
 
 ## What this plugin does
 
-Three independent subsystems share one config file (`lenses.json`). They
-fire at different points in Docusaurus's build lifecycle:
+Three independent subsystems share one config file (`lenses.json`). They fire at
+different points in Docusaurus's build lifecycle:
 
 ### Subsystem 1 — Remark transformer (MDAST transformation)
 
-**Input:** the MDAST tree of a `.md`/`.mdx` file being compiled, plus the
-file's absolute path.
+**Input:** the MDAST tree of a `.md`/`.mdx` file being compiled, plus the file's
+absolute path.
 
 **Output:** the same tree, mutated in place, with two changes:
 
-1. Every fenced code block whose language is a **configured language**
-   (present in the resolved configuration's `defaults` map) is replaced by
-   an `mdxJsxFlowElement` node named `StudyLenses` with `code`, `lens`,
-   `lang`, and optional `config` attributes so that when the tree is
-   rendered the block becomes a `<StudyLenses>` React component.
+1. Every fenced code block whose language is a **configured language** (present
+   in the resolved configuration's `defaults` map) is replaced by an
+   `mdxJsxFlowElement` node named `StudyLenses` with the four-prop attribute set
+   (`snippet` always; `lens`, `config`, `configs` when applicable) so that when
+   the tree is rendered the block becomes a `<StudyLenses>` React component.
    Unconfigured languages pass through untouched.
 2. For sibling-bearing pages (the `index.md` when present in a directory,
    otherwise the `README.md`), any `.js` files found in the directory subtree
    (up to the next nested sibling-bearing page, skipping hidden dirs,
    `node_modules/`, and ignore-prefixed dirs; symlinks are not followed) are
-   appended to the tree. Siblings are **grouped by first path segment**
-   (see **Sibling group** in the glossary): root-level files form one group;
-   files under each subdirectory form their own group. Groups are emitted in
+   appended to the tree. Siblings are **grouped by first path segment** (see
+   **Sibling group** in the glossary): root-level files form one group; files
+   under each subdirectory form their own group. Groups are emitted in
    alphabetical order by group key; empty groups (no files after language
    filtering) are silently omitted.
 
@@ -217,9 +185,9 @@ file's absolute path.
    Docusaurus `<Tabs>` element wrapping one `<TabItem>` per sibling, each
    TabItem containing a single `<StudyLenses>`. Tab labels are
    **group-relative** (the group-key prefix is stripped). The plugin emits
-   Docusaurus's native `Tabs`/`TabItem` (from `@theme/`) rather than a
-   custom wrapper — this gives keyboard navigation, URL-hash tab persistence,
-   and `groupId` synchronization for free.
+   Docusaurus's native `Tabs`/`TabItem` (from `@theme/`) rather than a custom
+   wrapper — this gives keyboard navigation, URL-hash tab persistence, and
+   `groupId` synchronization for free.
 
    The root group's heading uses the configured `sectionHeading` (depth 2).
    Subdirectory group headings are prettified from the directory name using the
@@ -229,68 +197,80 @@ file's absolute path.
 
 ### Subsystem 2 — Lifecycle plugin (dev-server watching)
 
-Contributes `getPathsToWatch` globs so Docusaurus's dev server rebuilds
-MDX when `lenses.json` or any sibling `.js` file changes under a
-configured content root. No runtime behavior beyond this.
+Contributes `getPathsToWatch` globs so Docusaurus's dev server rebuilds MDX when
+`lenses.json` or any sibling `.js` file changes under a configured content root.
+No runtime behavior beyond this.
 
 ### Subsystem 3 — Sidebar-items generator factory (category-label rewrite)
 
 Returns a `sidebarItemsGenerator` function the author wires into each
-docs-instance's options. Strips configured `exerciseSetPrefixes` (e.g.
-`sl-`) + any numeric ordering + converts kebab-case to Title Case for
-matching sidebar categories; non-matching categories pass through
-unchanged, as do all doc and link items. Reads config through the same
-cascade resolver as Subsystem 1, so sidebar labels stay in sync with
-MDAST transforms.
+docs-instance's options. Strips configured `exerciseSetPrefixes` (e.g. `sl-`) +
+any numeric ordering + converts kebab-case to Title Case for matching sidebar
+categories; non-matching categories pass through unchanged, as do all doc and
+link items. Reads config through the same cascade resolver as Subsystem 1, so
+sidebar labels stay in sync with MDAST transforms.
 
-The `<StudyLenses>` component is registered as `StudyLenses` via the
-swizzled theme file at
-[`../../theme/MDXComponents.js`](../../theme/MDXComponents.js), alongside
-`Tabs` and `TabItem` (imported from `@theme/Tabs` and `@theme/TabItem` —
-they ship with `@docusaurus/theme-classic` but are NOT in the default
-`MDXComponents`, so the plugin's swizzle must add them for the emitted
-JSX to resolve). The orchestrator component lives at
+The `<StudyLenses>` component is registered as `StudyLenses` via the swizzled
+theme file at [`../../theme/MDXComponents.js`](../../theme/MDXComponents.js),
+alongside `Tabs` and `TabItem` (imported from `@theme/Tabs` and `@theme/TabItem`
+— they ship with `@docusaurus/theme-classic` but are NOT in the default
+`MDXComponents`, so the plugin's swizzle must add them for the emitted JSX to
+resolve). The orchestrator component lives at
 [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/).
 
 ## `lenses.json` schema
 
-Every `lenses.json` is a mergeable subset of the resolved config. Four
-top-level keys, all optional:
+Every `lenses.json` is a mergeable subset of the resolved config. Four top-level
+keys, all optional:
 
 ```json
 {
-  "defaults": {
-    "js": "study"
-  },
-  "embedSiblings": {
-    "mode": "tabs",
-    "ignorePrefixes": ["staging-"],
-    "sectionHeading": "Exercises"
-  },
-  "lenses": {
-    "study":     { "ask": false },
-    "highlight": { "ask": false, "debug": true }
-  },
-  "exerciseSetPrefixes": ["sl-"]
+	"defaults": {
+		"js": "study"
+	},
+	"embedSiblings": {
+		"mode": "tabs",
+		"ignorePrefixes": ["staging-"],
+		"sectionHeading": "Exercises"
+	},
+	"lenses": {
+		"study": { "ask": false },
+		"highlight": { "ask": false, "debug": true }
+	},
+	"exerciseSetPrefixes": ["sl-"]
 }
 ```
 
 - **`defaults`** maps a language identifier (not a file extension) to the lens
-  used when a fenced code block omits the lens suffix and when a sibling file
-  is embedded. **Only keys listed here trigger fence transformation** — this
-  is the "configured languages" rule. Adding `"py": "study"` opts Python in;
-  omitting `"py"` leaves Python fences as plain code blocks.
+  used when a fenced code block omits the lens suffix and when a sibling file is
+  embedded. **Only keys listed here trigger fence transformation** — this is the
+  "configured languages" rule. Adding `"py": "study"` opts Python in; omitting
+  `"py"` leaves Python fences as plain code blocks.
 - **`embedSiblings`** controls auto-embedding of sibling `.js` files:
   - `mode: "off"` disables embedding entirely.
   - `mode: "bottom"` appends each sibling as its own `<StudyLenses>` block.
-  - `mode: "tabs"` appends a single Docusaurus `<Tabs>` element wrapping
-    one `<TabItem>` per sibling; each TabItem contains one `<StudyLenses>`.
+  - `mode: "tabs"` appends a single Docusaurus `<Tabs>` element wrapping one
+    `<TabItem>` per sibling; each TabItem contains one `<StudyLenses>`.
   - `ignorePrefixes` is an array of directory-name prefixes to skip during the
-    sibling walk (e.g. `"staging-"` — matches `staging-foo/` and `staging-wip/`).
+    sibling walk (e.g. `"staging-"` — matches `staging-foo/` and
+    `staging-wip/`).
   - `sectionHeading` (optional) injects a depth-2 heading before the embed
     block. Set to `null` to omit.
-- **`lenses`** is an opaque per-lens configuration bag. V1 forwards lens config
-  as a JSON-stringified `config` prop to the component; V2 will consume it.
+- **`lenses`** is an opaque per-lens configuration bag, keyed by lens name. Its
+  values flow verbatim onto the emitted `configs` attribute (when non-empty);
+  the orchestrator merges them with module-default + per-fence overrides per the
+  resolution chain at
+  [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md` § Per-lens config resolution chain](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md).
+
+  **Lens-config value shape:** values inside `lenses.<lens-name>` are expected
+  to satisfy
+  [`LensConfig`](../../lib/welcome-to-programming/just-enough/javascript/lenses/types.ts)
+  — a flat record of primitives + primitive arrays. The plugin types them
+  loosely as `Record<string, unknown>` because the cascade resolver does not
+  validate against the lens-side schema; authors who supply richer values
+  (nested objects, callbacks, dates) get undefined behavior at the lens
+  boundary.
+
 - **`exerciseSetPrefixes`** is an array of directory-name prefixes that mark
   "exercise set" folders for **sidebar-label stripping**. When the sidebar
   generator encounters a category whose directory basename starts with any
@@ -298,34 +278,33 @@ top-level keys, all optional:
   ordering → kebab-case to Title Case (e.g. `sl-01-while-loops` →
   `"While Loops"`). Typical site-root value: `["sl-"]`.
 
-  **Edge cases (V1 contract, enforced in the sidebar generator — Module H):**
-
-  - Overlapping prefixes (`["sl-", "sl-0"]`): **first match wins**.
-    Matching order is the cascade-concatenation order (root-first, then
-    deeper); deduplication preserves first occurrence. In the example,
-    `sl-01-foo` matches `sl-` because the site-root entry is earlier in
-    the array.
+  **Edge cases (enforced in the sidebar generator):**
+  - Overlapping prefixes (`["sl-", "sl-0"]`): **first match wins**. Matching
+    order is the cascade-concatenation order (root-first, then deeper);
+    deduplication preserves first occurrence. In the example, `sl-01-foo`
+    matches `sl-` because the site-root entry is earlier in the array.
   - Empty residue after stripping (e.g. basename is exactly `"sl-"` or
     `"sl-01-"`): **fall back to the original basename** (no transformation),
     emit a single build-time warning so the author notices.
   - Empty string (`""`) in the array is a no-op at resolve time — if a
-    pathological config ever sets it, every directory would match and
-    the transform would strip zero characters. Module H guards against
+    pathological config ever sets it, every directory would match and the
+    transform would strip zero characters. The sidebar generator guards against
     this at the boundary it actually bites.
 
 **Cascade semantics:** child `lenses.json` files override parents.
 
-- `defaults` uses **shallow merge** (child key replaces parent key per language).
+- `defaults` uses **shallow merge** (child key replaces parent key per
+  language).
 - `embedSiblings` uses **deep merge with array concatenation**: scalar fields
   (`mode`, `sectionHeading`) are last-writer-wins; array fields
   (`ignorePrefixes`) are concatenated and deduplicated. This means setting
-  `ignorePrefixes: ["wip-"]` in a nested `lenses.json` _extends_ the
-  site-root's `["staging-"]` list rather than replacing it.
+  `ignorePrefixes: ["wip-"]` in a nested `lenses.json` _extends_ the site-root's
+  `["staging-"]` list rather than replacing it.
 - `lenses.*` uses **deep merge** (child keys extend parent keys within each
   named lens).
-- `exerciseSetPrefixes` uses **array concatenation** across the cascade
-  (same semantic as `embedSiblings.ignorePrefixes`). Nested `lenses.json`
-  additions extend rather than replace.
+- `exerciseSetPrefixes` uses **array concatenation** across the cascade (same
+  semantic as `embedSiblings.ignorePrefixes`). Nested `lenses.json` additions
+  extend rather than replace.
 
 ## Authoring conventions
 
@@ -346,8 +325,8 @@ during the sibling walk.
 ### Organizing exercise sets (sidebar-label stripping)
 
 To group a progression of exercises under a chapter, prefix each exercise-set
-directory with `sl-NN-` (where `NN` is a zero-padded sort position) and name
-the folder in kebab-case:
+directory with `sl-NN-` (where `NN` is a zero-padded sort position) and name the
+folder in kebab-case:
 
 ```text
 control-flow/
@@ -363,96 +342,93 @@ control-flow/
     └── 01-iteration.js
 ```
 
-The sidebar generator sees categories named `sl-01-while-loops` and rewrites
-the label to `"While Loops"` (strip `sl-`, strip `01-`, kebab-case to Title
-Case). Docusaurus's filesystem sort preserves the numeric ordering in the
-sidebar. Each exercise-set folder is itself a sibling-bearing page — its
-`README.md` is rendered as the learner page, and `.js` files inside it
-auto-embed per the `embedSiblings` config.
+The sidebar generator sees categories named `sl-01-while-loops` and rewrites the
+label to `"While Loops"` (strip `sl-`, strip `01-`, kebab-case to Title Case).
+Docusaurus's filesystem sort preserves the numeric ordering in the sidebar. Each
+exercise-set folder is itself a sibling-bearing page — its `README.md` is
+rendered as the learner page, and `.js` files inside it auto-embed per the
+`embedSiblings` config.
 
 If an author wants a different label (e.g. `"Classic While Loops"`), they
-provide a `_category_.json` or a `README.md` with `sidebar_label:` frontmatter
-— the transform only fires when the category label still matches the prefix
+provide a `_category_.json` or a `README.md` with `sidebar_label:` frontmatter —
+the transform only fires when the category label still matches the prefix
 pattern, so explicit overrides are automatically respected.
 
 ### Page boundaries
 
 Sibling discovery descends recursively from a sibling-bearing page's directory
-and stops at any nested sibling-bearing page. Each page "owns" the exercises
-in its subtree up to the next page boundary. To split a long exercise list
-across multiple rendered pages, drop `index.md` files at the split points.
+and stops at any nested sibling-bearing page. Each page "owns" the exercises in
+its subtree up to the next page boundary. To split a long exercise list across
+multiple rendered pages, drop `index.md` files at the split points.
 
 ### `README.md` vs `index.md`
 
 A directory's sibling-bearing page is `index.md` if present, otherwise
-`README.md`. When both are present in the same directory, `README.md` behaves
-as a normal GitHub README — contributor-facing, not rendered as a learner
-page, not sibling-bearing — and `index.md` takes over the learner-facing
-role. This lets authors keep contributor notes in `README.md` while opting
-into a dedicated learner page via `index.md`.
+`README.md`. When both are present in the same directory, `README.md` behaves as
+a normal GitHub README — contributor-facing, not rendered as a learner page, not
+sibling-bearing — and `index.md` takes over the learner-facing role. This lets
+authors keep contributor notes in `README.md` while opting into a dedicated
+learner page via `index.md`.
 
 Other `.md` files (e.g. `reference.md`, `notes.md`) are transformed for code
 fences like any markdown file, but they do not trigger sibling embeds.
 
 ### Gotcha: silent no-op for unconfigured languages
 
-If you drop a `.py` file next to an `index.md` expecting it to embed —
-but `py` isn't listed in `defaults` — **nothing happens, silently**. The
+If you drop a `.py` file next to an `index.md` expecting it to embed — but `py`
+isn't listed in `defaults` — **nothing happens, silently**. The
 configured-languages rule gates sibling discovery too. Same for a
-`` ```txt:highlight `` fence: no warning, just an unchanged plain code
-block.
+` ```txt:highlight ` fence: no warning, just an unchanged plain code block.
 
 This is deliberate (avoids the "ASCII-diagram-replaced-by-plaintext-editor"
-footgun), but easy to miss. If an exercise doesn't render, first check
-that its language is in `defaults` somewhere up the cascade. V1 does not
-emit a warning for this; a future lint pass may.
+footgun), but easy to miss. If an exercise doesn't render, first check that its
+language is in `defaults` somewhere up the cascade. The plugin does not emit a
+warning for this; a future lint pass may.
 
 ### Note: `rehype-raw` lowercases hast-element tag names in `.md` files
 
 If you're extending this plugin to emit a new component, use the
 `mdxJsxFlowElement` pattern (see `code-block-to-jsx.ts`) rather than the
-`data.hName` hast-name pattern. Docusaurus's `.md` pipeline runs
-`rehype-raw` before the MDX runtime; `rehype-raw`'s `passThrough` list
-(in `@docusaurus/mdx-loader/lib/processor.js`) covers MDX-specific node
-types (`mdxJsxFlowElement`, `mdxFlowExpression`, etc.) but NOT plain
-hast `element` nodes. A `code` MDAST node mutated with
-`data.hName = 'StudyLenses'` produces a hast element whose `tagName` is
-lowercased to `'studylens'` — `MDXComponents['StudyLenses']` is missed,
-the component never resolves, and the page renders a raw
-`<studylens>` DOM element.
+`data.hName` hast-name pattern. Docusaurus's `.md` pipeline runs `rehype-raw`
+before the MDX runtime; `rehype-raw`'s `passThrough` list (in
+`@docusaurus/mdx-loader/lib/processor.js`) covers MDX-specific node types
+(`mdxJsxFlowElement`, `mdxFlowExpression`, etc.) but NOT plain hast `element`
+nodes. A `code` MDAST node mutated with `data.hName = 'StudyLenses'` produces a
+hast element whose `tagName` is lowercased to `'studylens'` —
+`MDXComponents['StudyLenses']` is missed, the component never resolves, and the
+page renders a raw `<studylens>` DOM element.
 
 **What this plugin does:** every `<StudyLenses>` emission goes through
 `codeBlockToJsx`, which returns an `mdxJsxFlowElement` node with
 `name: 'StudyLenses'`. That covers in-page fences (`transformFence`),
-bottom-mode sibling embeds (`appendBottomEmbed`), AND the inner
-`<StudyLenses>` nested inside each `<TabItem>` in tabs-mode embeds
-(`appendTabsEmbed`). `mdxJsxFlowElement` IS in the `passThrough` list
-so the PascalCase `name` survives intact to the MDX runtime; no
-lowercase alias is needed in the swizzled MDXComponents.
+bottom-mode sibling embeds (`appendBottomEmbed`), AND the inner `<StudyLenses>`
+nested inside each `<TabItem>` in tabs-mode embeds (`appendTabsEmbed`).
+`mdxJsxFlowElement` IS in the `passThrough` list so the PascalCase `name`
+survives intact to the MDX runtime; no lowercase alias is needed in the swizzled
+MDXComponents.
 
 ### Manually-placed `<StudyLenses>` JSX
 
-If an author writes `<StudyLenses code={...} lens="..." />` directly in an `.mdx`
-file, the plugin leaves the JSX alone — it only visits MDAST `code` nodes.
-Fenced code blocks in the same file still get transformed.
+If an author writes `<StudyLenses snippet={...} lens="..." />` directly in an
+`.mdx` file, the plugin leaves the JSX alone — it only visits MDAST `code`
+nodes. Fenced code blocks in the same file still get transformed.
 
 ### Per-file lens overrides
 
-Authors can override the cascade default without creating a nested
-`lenses.json` file — useful when a single directory has a few files
-needing a different lens than the rest.
+Authors can override the cascade default without creating a nested `lenses.json`
+file — useful when a single directory has a few files needing a different lens
+than the rest.
 
-**In `.js` sibling files — `@study-lens` directive.** A **directive
-block** — a comment form containing the `@study-lens` tag — may
-declare the lens and an optional inline JSON config. The directive
-block may sit in either the file's **leading comment block** (before
-any code) OR its **trailing comment block** (after the last
-non-comment statement). Authors who prefer metadata at the top write
-directives at the top; authors who prefer to write the exercise first
-and tuck plumbing out of the way write them at the bottom.
+**In `.js` sibling files — `@study-lens` directive.** A **directive block** — a
+comment form containing the `@study-lens` tag — may declare the lens and an
+optional inline JSON config. The directive block may sit in either the file's
+**leading comment block** (before any code) OR its **trailing comment block**
+(after the last non-comment statement). Authors who prefer metadata at the top
+write directives at the top; authors who prefer to write the exercise first and
+tuck plumbing out of the way write them at the bottom.
 
-All forms below are accepted; `@study-lens <name>` is the tag
-(namespaced, hyphenated).
+All forms below are accepted; `@study-lens <name>` is the tag (namespaced,
+hyphenated).
 
 ```js
 // @study-lens parsons
@@ -465,20 +441,19 @@ All forms below are accepted; `@study-lens <name>` is the tag
  */
 ```
 
-**The directive block is stripped from the code that reaches
-`<StudyLenses>`.** Learners see only the exercise body, never the
-plumbing. Blank lines immediately between the stripped directive and
-the preserved code body are collapsed alongside the block, so you
-don't get a visual gap; blanks at the file's BOF/EOF edge are
-preserved.
+**The directive block is stripped from the code that reaches `<StudyLenses>`.**
+Learners see only the exercise body, never the plumbing. Blank lines immediately
+between the stripped directive and the preserved code body are collapsed
+alongside the block, so you don't get a visual gap; blanks at the file's BOF/EOF
+edge are preserved.
 
-**Middle-of-file placement is NOT supported.** A directive token
-surrounded by code on both sides is inert — reliably distinguishing
-a real directive from the same characters inside a string/regex/
-template literal would require a JS tokenizer.
+**Middle-of-file placement is NOT supported.** A directive token surrounded by
+code on both sides is inert — reliably distinguishing a real directive from the
+same characters inside a string/regex/ template literal would require a JS
+tokenizer.
 
-**Both-block placement throws.** If a `@study-lens` tag appears in
-BOTH the leading AND trailing comment block, the build fails with an
+**Both-block placement throws.** If a `@study-lens` tag appears in BOTH the
+leading AND trailing comment block, the build fails with an
 "ambiguous-placement" error naming the file. Pick one.
 
 **Contiguous `//` runs are atomic.** In
@@ -488,10 +463,10 @@ BOTH the leading AND trailing comment block, the build fails with an
 // @study-lens parsons
 ```
 
-the two `//` lines form one comment form and both are stripped when
-the directive is detected. If you want `// Author: Eve` to survive,
-separate it from the directive with a blank line — that breaks the
-run into two independent forms:
+the two `//` lines form one comment form and both are stripped when the
+directive is detected. If you want `// Author: Eve` to survive, separate it from
+the directive with a blank line — that breaks the run into two independent
+forms:
 
 ```js
 // Author: Eve
@@ -501,75 +476,110 @@ run into two independent forms:
 
 Now only the directive line is stripped.
 
-**Malformed JSON throws** with the file path in the error message —
-matching the cascade-resolver's behavior for malformed `lenses.json`.
+**Malformed JSON throws** with the file path in the error message — matching the
+cascade-resolver's behavior for malformed `lenses.json`.
 
-**In `.md` / `.mdx` files — frontmatter `defaultLens`.** Set a
-per-file default that every fence in the file picks up. Per-fence
-`:suffix` still wins.
+**In `.md` / `.mdx` files — frontmatter `defaultLens`.** Set a per-file default
+that every fence in the file picks up. Per-fence `:suffix` still wins.
 
 ```markdown
 ---
 defaultLens: highlight
 ---
 
-\`\`\`js
-// uses 'highlight' (frontmatter)
-\`\`\`
+\`\`\`js // uses 'highlight' (frontmatter) \`\`\`
 
-\`\`\`js:study
-// uses 'study' (explicit suffix wins)
-\`\`\`
+\`\`\`js:study // uses 'study' (explicit suffix wins) \`\`\`
 ```
 
-Read from `vfile.data.frontMatter.defaultLens`; Docusaurus
-pre-populates it before `beforeDefaultRemarkPlugins` runs. The
-configured-languages gate still applies — frontmatter cannot make an
-unconfigured language transform.
+Read from `vfile.data.frontMatter.defaultLens`; Docusaurus pre-populates it
+before `beforeDefaultRemarkPlugins` runs. The configured-languages gate still
+applies — frontmatter cannot make an unconfigured language transform.
 
-**Fence info string grammar (Option A):**
+**Fence info string grammar (URL-style):**
 
 ```text
-<lang>[:<token>(,<token>)*]
+<lang>[:<lens>[?<key>[=<value>]( &<key>[=<value>] )*]]
 ```
 
-- No suffix → lens from frontmatter or cascade default; no transforms.
-- One token → lens name; no transforms. (`js:editor`)
-- N tokens → last is lens, earlier are transforms in order.
-  (`js:format,loopGuard,editor` → transforms=[format,loopGuard], lens=editor)
-- Any empty token (leading/trailing/doubled comma) → fence left as plain
-  code block (malformed; not transformed).
+Examples:
+
+```text
+js                       → bare; emit no `lens`, no per-fence config
+js:trace                 → lens="trace"
+js:trace?stepDelay=500   → lens="trace"; config = {stepDelay: "500"}
+js:trace?cols=value,steps
+                         → lens="trace"; config = {cols: ["value","steps"]}
+js:trace?key             → lens="trace"; config = {key: true}    (no `=`)
+js:trace?key=            → lens="trace"; config = {key: ""}      (empty value)
+js:trace?a=1&b=2         → lens="trace"; config = {a: "1", b: "2"}
+```
+
+Query-parameter semantics (URL-semantic; no parse-time numeric coercion):
+
+- `?key=value` → string `"value"`.
+- `?key=v1,v2,v3` → array of strings `["v1","v2","v3"]`.
+- `?key` (no `=`) → boolean `true`.
+- `?key=` (empty value) → empty string `""`.
+- `?a=1&b=2` → multiple keys joined by `&`.
+
+The bare-`js` form emits **no `lens` prop** — the orchestrator resolves via
+cascade-bundle / editor-home-base fallback. A bare lens name with no query
+(`js:trace`) emits `lens` only and the cascade's `lenses[trace]` (if any) flows
+into both `config` and `configs[trace]`.
+
+When a query is present, the parsed query is **deep-merged over** the cascade's
+`lenses[lens]` and the result is emitted as `config`. The cascade's `lenses.*`
+map is **always** emitted (verbatim) as `configs` when non-empty — regardless of
+whether the fence carries a query. The orchestrator's resolution chain consumes
+both.
+
+Malformed info strings (bad lens name, malformed query, leading empty token
+after `:`, etc.) leave the fence as a plain code block (not transformed). Same
+robustness contract as the configured- languages rule's silent-skip behavior.
 
 **Precedence (authoritative):**
 
-Fenced code blocks inside `.md` / `.mdx`:
+Fenced code blocks inside `.md` / `.mdx` — `lens` resolution:
 
 ```text
-fence :suffix   >   frontmatter defaultLens   >   cascade defaults[lang]
+fence :suffix lens   >   frontmatter defaultLens   >   cascade defaults[lang]
 ```
 
-Sibling `.js` files:
+Sibling `.js` files — `lens` resolution:
 
 ```text
 file's @study-lens directive (leading OR trailing)   >   cascade defaults[lang]
 ```
 
-Lens config (both paths):
+Per-fence / per-sibling `config` (the override-for-resolved-default):
 
 ```text
-file's directive JSON   deep-merged over   cascade lenses[lens]
+parsed fence query  OR  directive JSON
+                  ↓ deep-merged over
+                  cascade lenses[lens]
+                  ↓ emitted as
+                  `config` attribute
 ```
 
-**Array-replace caveat.** The deep-merge replaces arrays rather than
-concatenating them. If the cascade has `lenses.highlight.markers =
-["a", "b"]` and a directive supplies `{"markers": ["c"]}`, the result
-is `{markers: ["c"]}` — NOT `["a", "b", "c"]`. If additive array
-behavior is needed, restate the full list in the directive.
+When `lens` resolves from frontmatter or cascade `defaults[lang]` (no `:suffix`,
+no per-fence query), the `config` attribute carries the cascade's `lenses[lens]`
+directly (no per-fence override layer).
 
-**Frontmatter cannot carry lens config.** Only the lens name. Authors
-who need per-lens config inside an `.md` page use a nested
-`lenses.json` in the surrounding directory. Asymmetric with `.js`
-siblings, but acceptable for V1.
+Cascade `lenses.*` map → emitted as `configs` attribute (verbatim, when
+non-empty).
+
+**Array-replace caveat.** The deep-merge replaces arrays rather than
+concatenating them. If the cascade has `lenses.highlight.markers = ["a", "b"]`
+and a directive supplies `{"markers": ["c"]}`, the result is `{markers: ["c"]}`
+— NOT `["a", "b", "c"]`. If additive array behavior is needed, restate the full
+list in the directive.
+
+**Frontmatter cannot carry lens config.** Only the lens name. Authors who need
+per-lens config inside an `.md` page use a nested `lenses.json` in the
+surrounding directory, OR put the per-fence override in the fence info string's
+URL-style query suffix (`js:trace?stepDelay=500`). Asymmetric with `.js`
+siblings.
 
 ## Types preview
 
@@ -581,44 +591,48 @@ type LensName = string;
 type LangName = string;
 
 type LensesConfigFile = Readonly<{
-  defaults?: Readonly<Record<LangName, LensName>>;
-  embedSiblings?: Readonly<Partial<EmbedSiblingsConfig>>;
-  lenses?: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
-  exerciseSetPrefixes?: ReadonlyArray<string>;
+	defaults?: Readonly<Record<LangName, LensName>>;
+	embedSiblings?: Readonly<Partial<EmbedSiblingsConfig>>;
+	lenses?: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
+	exerciseSetPrefixes?: ReadonlyArray<string>;
 }>;
 
 type EmbedSiblingsConfig = Readonly<{
-  mode: 'off' | 'bottom' | 'tabs';
-  ignorePrefixes: ReadonlyArray<string>;
-  sectionHeading: string | null;
+	mode: 'off' | 'bottom' | 'tabs';
+	ignorePrefixes: ReadonlyArray<string>;
+	sectionHeading: string | null;
 }>;
 
 type ResolvedConfig = Readonly<{
-  defaults: Readonly<Record<LangName, LensName>>;
-  embedSiblings: EmbedSiblingsConfig;
-  lenses: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
-  exerciseSetPrefixes: ReadonlyArray<string>;
+	defaults: Readonly<Record<LangName, LensName>>;
+	embedSiblings: EmbedSiblingsConfig;
+	lenses: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
+	exerciseSetPrefixes: ReadonlyArray<string>;
 }>;
 
 type Sibling = Readonly<{
-  absPath: string;
-  label: string;        // path relative to pageDir, without extension
-  code: string;
-  lang: LangName;
-  lens: LensName;       // directive-override > cascade default
-  lensConfig?: Readonly<Record<string, unknown>>;
-  // ^ directive's JSON body only (un-merged); cascade's `lenses[lens]`
-  //   is applied at emission time.
+	absPath: string;
+	label: string; // path relative to pageDir, without extension
+	code: string;
+	lang: LangName;
+	lens: LensName; // directive-override > cascade default
+	lensConfig?: Readonly<Record<string, unknown>>;
+	// ^ directive's JSON body only (un-merged); cascade's `lenses[lens]`
+	//   is applied at emission time.
 }>;
 
-// The props shape the plugin writes to hProperties; what <StudyLenses> receives.
-// `config` is serialization-tolerant (see § Config-prop serialization below):
+// The props shape the plugin emits onto a transformed `<StudyLenses>`
+// JSX node (the four-prop public API in
+// `orchestrate/types.ts:StudyLensesProps`). `config` and `configs` are
+// serialization-tolerant (see § Config-prop serialization below):
 // string (possibly JSON) OR object. Consumers parse via a shared util.
 type StudyLensesHastProps = Readonly<{
-  code: string;
-  lens: LensName;
-  lang: LangName;
-  config?: string | Readonly<Record<string, unknown>>;
+	snippet: string;
+	lens?: LensName;
+	config?: string | Readonly<Record<string, unknown>>;
+	configs?:
+		| string
+		| Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
 }>;
 
 // Tabs-mode emission uses Docusaurus's native <Tabs>/<TabItem> via
@@ -633,8 +647,8 @@ type LifecyclePluginOptions = Readonly<{ contentRoots: ReadonlyArray<string> }>;
 // production uses `contentRoot` (factory consults the cascade resolver
 // live); tests/in-memory callers inject a `resolvedConfig` directly.
 type SidebarGeneratorOptions =
-  | Readonly<{ contentRoot: string }>
-  | Readonly<{ resolvedConfig: ResolvedConfig }>;
+	| Readonly<{ contentRoot: string }>
+	| Readonly<{ resolvedConfig: ResolvedConfig }>;
 ```
 
 ### Config-prop serialization
@@ -642,8 +656,8 @@ type SidebarGeneratorOptions =
 `hProperties` on MDAST nodes serializes primitive values cleanly through the
 remark-rehype pipeline, but object-valued attributes may or may not round-trip
 to React props cleanly depending on the renderer. The plugin follows a
-**fallback-tolerant convention** so it works whichever way the pipeline
-happens to serialize:
+**fallback-tolerant convention** so it works whichever way the pipeline happens
+to serialize:
 
 1. If the lens config is `null`/`undefined`, omit the `config` prop entirely.
 2. If the environment serializes objects cleanly, pass the object directly.
@@ -652,9 +666,9 @@ happens to serialize:
 On the component side, a fallback-tolerant config parser decodes:
 
 1. If `input` is a non-null object → use directly.
-2. If `input` is a string → try `JSON.parse`. If it parses, use as object.
-   If it doesn't parse, use the raw string (some lenses accept a simple string
-   config; e.g. a parsons lens might take a `"freeform"` token).
+2. If `input` is a string → try `JSON.parse`. If it parses, use as object. If it
+   doesn't parse, use the raw string (some lenses accept a simple string config;
+   e.g. a parsons lens might take a `"freeform"` token).
 3. If `input` is `null`/`undefined`/anything else → treat as no config.
 
 The Phase 0.7 spike determines which branch of (2)/(3) the plugin takes on
@@ -666,36 +680,35 @@ Docusaurus 3.7; the component's parser is the same either way.
 - `ext-to-lang.ts` — tiny static map: `.js` → `js`, `.py` → `py`, etc.
 - `resolve-cascade.ts` — walks directories collecting `lenses.json` files,
   deep-merges them (with array-concat for `embedSiblings.ignorePrefixes`),
-  caches results keyed by `(contentRoot, absDir)` with mtime-based
-  invalidation. Returns `ResolvedConfig` (frozen).
+  caches results keyed by `(contentRoot, absDir)` with mtime-based invalidation.
+  Returns `ResolvedConfig` (frozen).
 - `discover-siblings.ts` — given a sibling-bearing page's directory +
   `ResolvedConfig`, walks downward stopping at page boundaries and
   ignore-prefixed dirs (also skipping hidden dirs, `node_modules/`; not
   following symlinks), returns `Sibling[]` (frozen).
 - `code-block-to-jsx.ts` — converts a `code` MDAST node into an
-  `mdxJsxFlowElement` node named `StudyLenses` with `code`, `lens`, `lang`,
-  and optional `config` attributes. All `<StudyLenses>` emission sites call
-  this single helper.
-- `remark-study-lenses.ts` — the remark plugin factory: guards, resolves
-  config, transforms fenced code blocks whose language is configured,
-  appends sibling embeds.
+  `mdxJsxFlowElement` node named `StudyLenses` with the four-prop attribute set
+  (`snippet` always; `lens`, `config`, `configs` when applicable). All
+  `<StudyLenses>` emission sites call this single helper.
+- `remark-study-lenses.ts` — the remark plugin factory: guards, resolves config,
+  transforms fenced code blocks whose language is configured, appends sibling
+  embeds.
 - `lifecycle-plugin.ts` — the Docusaurus lifecycle plugin: exposes
-  `getPathsToWatch` so dev-server rebuilds trigger on `lenses.json` or
-  sibling `.js` changes.
-- `prettify-dir-name.ts` — shared pipeline for converting a directory name
-  into a human-readable heading: strip exercise-set prefix → strip numeric
-  ordering → kebab-case to Title Case. Used by both the remark plugin (for
-  sibling group headings) and the sidebar generator (for category labels).
+  `getPathsToWatch` so dev-server rebuilds trigger on `lenses.json` or sibling
+  `.js` changes.
+- `prettify-dir-name.ts` — shared pipeline for converting a directory name into
+  a human-readable heading: strip exercise-set prefix → strip numeric ordering →
+  kebab-case to Title Case. Used by both the remark plugin (for sibling group
+  headings) and the sidebar generator (for category labels).
 - `sidebar-generator.ts` — `createStudySidebarGenerator({ contentRoot })`
-  factory; returns a Docusaurus `sidebarItemsGenerator` that rewrites
-  category labels for directories matching any `exerciseSetPrefixes`
-  entry via the shared `prettify-dir-name.ts` pipeline.
-- `index.ts` — re-exports the three entry points (remark factory,
-  lifecycle plugin, sidebar-generator factory) used by
-  `docusaurus.config.ts`.
-- No custom tabs-wrapper component. Tabs-mode embeds emit Docusaurus's
-  native `<Tabs>`/`<TabItem>` directly from the plugin as
-  `mdxJsxFlowElement` nodes; each `<TabItem>` contains one `<StudyLenses>`.
+  factory; returns a Docusaurus `sidebarItemsGenerator` that rewrites category
+  labels for directories matching any `exerciseSetPrefixes` entry via the shared
+  `prettify-dir-name.ts` pipeline.
+- `index.ts` — re-exports the three entry points (remark factory, lifecycle
+  plugin, sidebar-generator factory) used by `docusaurus.config.ts`.
+- No custom tabs-wrapper component. Tabs-mode embeds emit Docusaurus's native
+  `<Tabs>`/`<TabItem>` directly from the plugin as `mdxJsxFlowElement` nodes;
+  each `<TabItem>` contains one `<StudyLenses>`.
 - `tests/` — Vitest unit tests, co-located per DEV.md convention. On-disk
   fixture trees under `tests/fixtures/`.
 
@@ -710,7 +723,8 @@ Direct imports used by this plugin (all resolved from the site root
 - `@docusaurus/types` — `LoadContext`, `Plugin` types for the lifecycle piece.
 - Freeze utilities from [`../../lib/utils/freeze.ts`](../../lib/utils/freeze.ts)
   (`freezeInPlace`, `cloneAndFreeze`).
-- Deep-merge utility from [`../../lib/utils/deep-merge.ts`](../../lib/utils/deep-merge.ts).
+- Deep-merge utility from
+  [`../../lib/utils/deep-merge.ts`](../../lib/utils/deep-merge.ts).
 
 No runtime (non-build-time) dependencies: the plugin runs entirely during
 Docusaurus's build step.
@@ -725,14 +739,14 @@ For readers unfamiliar with Docusaurus:
 - **`MDXComponents`** — Docusaurus's global registry of React components
   available inside every `.md`/`.mdx` file without explicit imports. Adding a
   component here means `<MyComponent />` just works in any markdown page.
-- **Swizzling** — Docusaurus's term for ejecting a local copy of a theme file
-  so you can override it. `npx docusaurus swizzle @docusaurus/theme-classic
-  MDXComponents --eject` creates `src/theme/MDXComponents.js` as an editable
-  copy.
-- **Remark plugin** — a function that transforms MDAST (the markdown AST)
-  during Docusaurus's content compilation. Registered via
-  `beforeDefaultRemarkPlugins` (runs before Docusaurus's built-in transforms)
-  or `remarkPlugins` (runs after).
+- **Swizzling** — Docusaurus's term for ejecting a local copy of a theme file so
+  you can override it.
+  `npx docusaurus swizzle @docusaurus/theme-classic MDXComponents --eject`
+  creates `src/theme/MDXComponents.js` as an editable copy.
+- **Remark plugin** — a function that transforms MDAST (the markdown AST) during
+  Docusaurus's content compilation. Registered via `beforeDefaultRemarkPlugins`
+  (runs before Docusaurus's built-in transforms) or `remarkPlugins` (runs
+  after).
 - **Lifecycle plugin** — a Docusaurus plugin with hooks like `loadContent`,
   `contentLoaded`, `getPathsToWatch`. Our lifecycle plugin only implements
   `getPathsToWatch` so the dev server recompiles MDX when `lenses.json` or
@@ -740,6 +754,14 @@ For readers unfamiliar with Docusaurus:
 
 ## Links
 
-- **Up:** [site root README](../../../README.md) · [AGENTS.md](../../../AGENTS.md) · [DEV.md](../../../DEV.md)
+- **Up:** [site root README](../../../README.md) ·
+  [AGENTS.md](../../../AGENTS.md) · [DEV.md](../../../DEV.md)
 - **Parent:** [`src/plugins/README.md`](../README.md)
-- **Siblings (downstream, V2 target):** [`src/lib/welcome-to-programming/just-enough/javascript/components/lenses/study/`](../../lib/welcome-to-programming/just-enough/javascript/components/lenses/study/)
+- **Downstream consumer:**
+  [`src/lib/welcome-to-programming/just-enough/javascript/orchestrate/`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/)
+  — the orchestrator package whose `<StudyLenses>` component this plugin emits
+  JSX for.
+- **Lens contract:**
+  [`src/lib/welcome-to-programming/just-enough/javascript/lenses/`](../../lib/welcome-to-programming/just-enough/javascript/lenses/)
+  — individual lens implementations the orchestrator dispatches to (per the
+  resolved `lens` prop).

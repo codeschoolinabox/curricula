@@ -11,10 +11,10 @@
 
 - The `<StudyLenses>` component (`./index.tsx`).
 - The toolbar lens-picker, the Q-I always-on surface (`./toolbar.tsx`).
-- The recommendations panel UI shell, covering Q-II auto-paths
-  - Q-III ranking-overrides (`./recommendations-panel.tsx`); the recommender
-    engine itself lives in `./lib/recommender/`, owned by WS2. Q-IV (manual
-    study paths) is deferred entirely.
+- The recommendations panel UI shell, covering Q-II auto-paths plus Q-III
+  ranking-overrides (`./recommendations-panel.tsx`); the recommender engine
+  itself lives in `./lib/recommender/`, owned by WS2. Q-IV (manual study paths)
+  is deferred entirely.
 - The orchestrator-internal types (`./types.ts`): prop contract, 2-mode state
   machine, lazy-embodiment trigger policy, internal EventBus event taxonomy.
 
@@ -57,16 +57,22 @@ also owns; the orchestrator's primary export sits above them at the peer root.
 > variable names, no pseudocode (React API names like `useEffect` / `useState` /
 > `useRef` are acceptable as structural-mechanism references).
 
-> **End-state vs. F1 reality.** The diagrams below depict the steady-state
+> **End-state vs. F1 + B reality.** The diagrams below depict the steady-state
 > F2/F3/F5 architecture (mode discriminator, lens-mode subtree, lens-switched
-> dispatch, recommendations-panel branch). In F1 only the
-> `snippet → embody → editor-mount` path is wired. Specifically: no mode
-> discriminator (the editor is mounted unconditionally), no `onSnippetChange`
-> edge (F1 textarea is editable but does not propagate up), no lens-mode subtree
-> (F1 ships before F2), no panel-open path (F1 ships before L5), no internal-bus
-> dispatch (F1 ships before F5). The F1 effect topology is _"embody fires on
-> every snippet change, derived synchronously"_; F2-F5 narrow it. See
+> dispatch, recommendations-panel branch). In F1 + B the wired path is
+> `snippet → embody → {registered-lens-mount || editor-mount}` — when the `lens`
+> prop matches a registered key (currently only `debug-props`), the orchestrator
+> mounts that lens with `embodiment` + `resolvedConfig`; otherwise the editor
+> mounts unconditionally. Specifically still missing: full mode discriminator
+> (no editor↔lens transition, no `onSnippetChange` edge — the F1 textarea is
+> editable but does not propagate up), no panel-open path (ships before L5), no
+> internal-bus dispatch (ships before F5), only the single bootstrap registry
+> entry (F4 grows it). The F1+B effect topology is _"embody fires on every
+> snippet change, derived synchronously; lens dispatches when `lens` prop
+> matches a registered key"_; F2-F5 and L1-L8 narrow it further. See
 > [`../.planning-handoffs/03-orchestrator-and-contracts.md`](../.planning-handoffs/03-orchestrator-and-contracts.md)
+> and
+> [`../.planning-handoffs/B-plugin-alignment.md`](../.planning-handoffs/B-plugin-alignment.md)
 > for the per-increment narrowing schedule.
 
 ### Lifecycle modes
@@ -150,15 +156,25 @@ pipeline; lens authors don't compute it themselves.
 
 `resolvedDefault` resolution order:
 
-1. The `lens` prop (per-fence info-string `js:trace` or `@study-lens`
-   directive).
-2. `configs.default` (cascade-declared default in `lenses.json`).
-3. None — if no default resolves AND `config` is supplied, the orchestrator
+1. The `lens` prop (populated upstream by the plugin from per-fence `:suffix`,
+   frontmatter `defaultLens`, or cascade `defaults[lang]`, in that precedence;
+   or set directly by an MDX-author writing `<StudyLenses lens="…" />`).
+2. None — if no default resolves AND `config` is supplied, the orchestrator
    throws at mount with a clear message (per F1).
 
-`config` without `lens` prop: applies to the resolved default (which may come
-from the cascade rather than the prop). Use case: cascade declares the default;
-per-fence supplies a fence-level config for that default.
+`config` without `lens` prop is an error and trips the F1 mount-time guard. L2
+will extend the resolution order with a cascade-supplied default seam (currently
+deferred — `configs?.default`'s shape is undecided because the orchestrate prop
+type pins `configs?: Record<string, LensConfig>` and a lens-name-string default
+key collides with that. L2's Phase 0 settles the seam shape).
+
+**F1+B note on the resolution-chain formula.** At F1+B,
+`resolvedDefault === lens` always (no cascade-supplied default seam yet). The
+`lensName === resolvedDefault` guard in the formula simplifies to `true` for the
+only lens being mounted; it is preserved as decoration so the L2 extension is a
+one-line change once the cascade-supplied default seam lands. Implementing
+agents should write the formula with the decoration in place; AR-3/AR-4 will not
+flag the guard as redundant.
 
 Steady-state lifecycle:
 
@@ -184,6 +200,11 @@ mounted at any moment. Answers: "what's in React state, and what does the
 internal bus dispatch when?" Adds the mode discriminator + bus dispatch the
 prior diagram omitted; drops the recommendations panel (which doesn't sit in
 mode state).
+
+> **This diagram depicts the F2+ end-state.** At F1+B there is no `mode` state —
+> the orchestrator dispatches directly from `lens`-prop registry-membership
+> without a mode discriminator. See the F1+B narrowing block at the top of
+> §Architectural sketch for the partial-wiring shape.
 
 ```mermaid
 flowchart TD
@@ -263,22 +284,36 @@ cross-module picture is visible in one place.
 **Orchestrator-internal effect categories** (load-bearing names; specific deps
 and ordering pin during F1's Phase 0):
 
-> **F1 narrowing of this table.** F1 implements the **Embody trigger** only,
+> **F1 + B narrowing of this table.** F1 implements the **Embody trigger** only,
 > with a _broadened_ trigger condition: because F1 has no mode discriminator,
 > embody fires on every snippet change unconditionally, not only on mode → lens
-> transition. F2 narrows the trigger to the table's "mode → lens transition" row
-> shape once the discriminator lands; F3 refines further to lazy-on-need. The
-> other two categories (Lens-switch dispatch, Embodiment-on-edit invalidation)
-> are wired in F5 and F2 respectively. The exact React shape in F1 (`useMemo`
-> keyed on `snippet` vs. `useState`+`useEffect`) is an implementation choice
-> F1.B picks during TDD — the F1 contract pinned here is just _"a fresh
+> transition. The B work-stream (plugin alignment) adds the **Lens-mount
+> dispatch** category as a partial wiring of `lens` prop dispatch — a
+> single-entry static registry routes `lens="debug-props"` to the
+> [`debug-props` meta-lens](../lenses/debug-props/) for sandbox-harness
+> verification of the four-prop shape; any other `lens` value continues to mount
+> the editor (F1 narrowing). F2 narrows the embody trigger to the table's "mode
+> → lens transition" row shape once the discriminator lands; F3 refines further
+> to lazy-on-need; F4 grows the registry beyond the debug-props bootstrap entry.
+> The remaining categories (Lens-switch dispatch, Embodiment-on-edit
+> invalidation) are wired in F5 and F2 respectively. The exact React shape in F1
+> (`useMemo` keyed on `snippet` vs. `useState`+`useEffect`) is an implementation
+> choice F1.B picked during TDD — the F1 contract pinned here is just _"a fresh
 > `Snippet` is available on every snippet change, derived synchronously"_.
 
-| Category                            | Triggers on                           | What it does                                                            | Cleanup                                |
-| ----------------------------------- | ------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------- |
-| **Embody trigger**                  | mode → lens transition                | `embody(snippet)` → cache embodiment in state                           | None — embodiment is plain frozen data |
-| **Lens-switch dispatch**            | active-lens change while in lens mode | Fire `lens-switched` (payload `{ previous, next }`) on the internal bus | None                                   |
-| **Embodiment-on-edit invalidation** | snippet change while in editor mode   | Discard cached embodiment; next lens-open builds a fresh one            | None                                   |
+| Category                            | Triggers on                                                      | What it does                                                                                            | Cleanup                                |
+| ----------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| **Embody trigger** †                | mode → lens transition                                           | `embody(snippet)` → cache embodiment in state                                                           | None — embodiment is plain frozen data |
+| **Lens-mount dispatch** †           | render with `lens` matching a registered key (B bootstrap → F4+) | Mount `<LensModule.Component embodiment={…} config={resolvedConfig} />` instead of the editor home base | Per-lens React `useEffect` cleanups    |
+| **Lens-switch dispatch**            | active-lens change while in lens mode                            | Fire `lens-switched` (payload `{ previous, next }`) on the internal bus                                 | None                                   |
+| **Embodiment-on-edit invalidation** | snippet change while in editor mode                              | Discard cached embodiment; next lens-open builds a fresh one                                            | None                                   |
+
+† **F1+B reality**: the Embody-trigger row's "Triggers on" column depicts F2
+end-state. At F1+B, embody fires on every snippet change unconditionally (no
+mode discriminator yet); F2 narrows it to the listed shape. The Lens-mount
+dispatch reads the embodiment built by the broadened Embody trigger **in the
+same render** — same-render ordering eliminates the stale-embodiment race even
+without a mode discriminator. Both rows narrow as later increments land.
 
 **Neighbor effects (system-wide context, not orchestrator categories)**:
 
@@ -333,7 +368,7 @@ that target appears, the externalized protocol can be a curated subset of these.
   only; in Phase B they vanish (real tokenization replaces the discriminator)
   and any consumer code that branched on them silently breaks. See
   [`../embody/index.ts`](../embody/index.ts) JSDoc and
-  [`../REFACTOR-HANDOFF.md` § Step 5](../REFACTOR-HANDOFF.md).
+  [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md).
 - **Single-writer state.** Only [`./editor/`](./editor/) mutates snippet source.
   The orchestrator threads the editor's `onSnippetChange` callback into its
   state-update; lenses receive `embodiment` via props and have no mutation
@@ -532,8 +567,8 @@ look different but solve the same problems:
 Two new categories appear:
 
 - **Embody trigger** — replaces what used to happen inside the pre-refactor
-  `mountActiveLens` body (validate + execute pipeline
-  - lens.lens). Embody centralizes the substrate calls.
+  `mountActiveLens` body (validate, execute pipeline, lens.lens). Embody
+  centralizes the substrate calls.
 - **Embodiment-on-edit invalidation** — new because the pre-refactor design
   always had an active embodiment. Lazy embodiment requires explicit
   invalidation when the snippet changes.
@@ -545,10 +580,13 @@ What this peer owns is enumerated in
 **negative-space** boundaries — what looks like it might belong here but
 doesn't, plus the one load-bearing open-spec item.
 
-**Open-spec item the peer owns**: the **lens registry** mechanism (likely a
-static import-list of `LensModule` defaults; F4 Phase 0 settles whether it stays
-an import-list or grows a runtime `register()` API). Either way the registry
-lives at the peer's top level alongside the `<StudyLenses>` component.
+**Open-spec item the peer owns**: the **lens registry** mechanism. B
+bootstrapped a single-entry static map keyed by lens name
+(`{ "debug-props": DebugPropsLens }`) at the peer's top level for the
+sandbox-harness verification path; F4 Phase 0 settles whether the registry stays
+a static map, grows a runtime `register()` API, or refactors entirely when the
+first pedagogical trial lens lands. Either way the registry lives at the peer's
+top level alongside the `<StudyLenses>` component.
 
 This peer does NOT own:
 

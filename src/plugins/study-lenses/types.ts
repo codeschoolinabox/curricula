@@ -122,30 +122,38 @@ type Sibling = Readonly<{
 // ─── hast props (plugin → component interface) ──────────────
 
 /**
- * The prop shape the plugin writes to `data.hProperties` on a
- * transformed fenced code block node. Surfaces as React props on
- * `<StudyLenses>`.
+ * The prop shape the plugin emits onto a transformed
+ * `mdxJsxFlowElement(StudyLenses)` JSX node. Surfaces as React
+ * props on `<StudyLenses>` per the four-prop public API in
+ * `orchestrate/types.ts:StudyLensesProps`.
  *
- * @remarks `config` is serialization-tolerant — it arrives as either
- * a structured object (when the remark-rehype pipeline round-trips
- * objects cleanly) or a JSON-stringified representation (fallback).
- * Consumers decode via a fallback-tolerant config parser.
+ * @remarks `config` and `configs` are serialization-tolerant — each
+ * arrives as either a structured object (when the remark-rehype
+ * pipeline round-trips objects cleanly) or a JSON-stringified
+ * representation (fallback). Consumers decode via a fallback-tolerant
+ * config parser.
+ *
+ * @remarks The pre-Round-2 attributes `code`, `lang`, and
+ * `transforms` are gone. `snippet` replaces `code`; `lang` is consumed
+ * internally by the configured-languages gate in `transformFence` but
+ * never emitted onto the JSX node; `transforms` is dropped entirely
+ * (transforms are a lens-internal concern per the lenses peer's
+ * `DOCS.md` §Structural constraints, no transforms tier in the
+ * architecture).
  */
 type StudyLensesHastProps = Readonly<{
-	code: string;
-	lens: LensName;
-	lang: LangName;
+	snippet: string;
+	lens?: LensName;
 	config?: string | Readonly<Record<string, unknown>>;
-	/** Comma-separated ordered list of transform names (Option A). */
-	transforms?: string;
+	configs?:
+		| string
+		| Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
 }>;
 
-// Tabs-mode embeds now emit Docusaurus's native `<Tabs>`/`<TabItem>` via
+// Tabs-mode embeds emit Docusaurus's native `<Tabs>`/`<TabItem>` via
 // `mdxJsxFlowElement` nodes (see DOCS.md §Sibling-bearing page / Remark
 // transformer phase 4). No custom `StudyLensTabs` component, no
-// `tabsJson` JSON-string prop — the previous `StudyLensTab` and
-// `StudyLensTabsHastProps` types were deleted in the Phase 0 re-pass
-// commit that landed that decision.
+// `tabsJson` JSON-string prop.
 
 // ─── Plugin entry-point options ─────────────────────────────
 
