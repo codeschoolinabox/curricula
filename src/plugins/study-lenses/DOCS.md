@@ -33,10 +33,13 @@ to rewrite exercise-set category labels at sidebar-build time.
 
    **Suffix parsing (URL-style):**
    - Split the info string on `:` → `[lang, suffix]`.
-   - If `suffix` is absent (bare `js`): no `lens` prop emitted; the orchestrator
-     falls back via its own resolution chain. The plugin's frontmatter / cascade
-     `defaults[lang]` populate `lens` in this branch when present (precedence
-     below).
+   - If `suffix` is absent (bare `js`): the `lens` prop is populated ONLY by
+     frontmatter `defaultLens` (when present); cascade `defaults[lang]` does NOT
+     populate `lens` (per AR-1 locked decision 1 — the orchestrator resolves the
+     cascade-default seam via its own future `configs.default` machinery,
+     deferred to L2). When neither frontmatter nor a suffix resolves a lens, the
+     bare-fence emission carries no `lens` attribute; the orchestrator falls
+     back to the editor home base.
    - If `suffix` is present: split on `?` → `[lensName, query]`. Empty
      `lensName` → leave fence untouched (malformed). Otherwise `lensName`
      populates the `lens` attribute.
@@ -51,8 +54,10 @@ to rewrite exercise-set category labels at sidebar-build time.
      `config` attribute.
 
    **Lens resolution precedence** (populates the emitted `lens` attribute,
-   most-specific wins): fence `:suffix lensName` beats frontmatter `defaultLens`
-   beats cascade `defaults[lang]`. None resolved → no `lens` emitted.
+   most-specific wins): fence `:suffix lensName` beats frontmatter
+   `defaultLens`. Cascade `defaults[lang]` ONLY gates whether the fence
+   transforms (configured-languages rule); it does NOT populate `lens` (per AR-1
+   locked decision 1). None resolved → no `lens` emitted.
 
    **Emission shape**: the four-prop public API
    (`snippet, lens?, config?, configs?`). `snippet` always; `lens` when resolved

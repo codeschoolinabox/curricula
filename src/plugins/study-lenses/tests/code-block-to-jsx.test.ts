@@ -109,4 +109,27 @@ describe('codeBlockToJsx', () => {
 		expect(names).toContain('snippet');
 		expect(names).not.toContain('code');
 	});
+
+	// ─── B.4: lens optional in emission (bare-fence path) ────────────────
+
+	it('B.4: no lens supplied → emission contains only `snippet` attribute', () => {
+		const node = makeCodeNode('let x = 1;', 'js');
+
+		const result = codeBlockToJsx(node, {});
+
+		expect(result.attributes).toEqual([
+			{ type: 'mdxJsxAttribute', name: 'snippet', value: 'let x = 1;' },
+		]);
+		const names = result.attributes.map((a) => a.name);
+		expect(names).not.toContain('lens');
+	});
+
+	it('B.4: no lens supplied + lensConfig present → snippet + config (no lens)', () => {
+		const node = makeCodeNode('let x = 1;', 'js');
+
+		const result = codeBlockToJsx(node, { lensConfig: { ask: false } });
+
+		const names = result.attributes.map((a) => a.name);
+		expect(names).toEqual(['snippet', 'config']);
+	});
 });

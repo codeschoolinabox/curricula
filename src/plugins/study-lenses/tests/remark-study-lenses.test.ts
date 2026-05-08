@@ -116,7 +116,7 @@ describe('createRemarkStudyLenses', () => {
 		expect(codeNode?.data).toBeUndefined();
 	});
 
-	it('configured fence (defaults.js=study) → code node replaced by mdxJsxFlowElement StudyLenses', () => {
+	it('configured fence (defaults.js=study) → code node replaced by mdxJsxFlowElement StudyLenses with no `lens` attr (cascade default does NOT populate lens prop per locked decision 1)', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
 		const mdFile = path.join(contentRoot, 'index.md');
 
@@ -126,22 +126,21 @@ describe('createRemarkStudyLenses', () => {
 		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
 		expect(jsxNode?.name).toBe('StudyLenses');
 		expect(jsxNode?.children).toEqual([]);
-		expect(attrsOf(jsxNode)).toMatchObject({
-			snippet: 'let x = 1;',
-			lens: 'study',
-		});
+		const attrs = attrsOf(jsxNode);
+		expect(attrs.snippet).toBe('let x = 1;');
+		expect(attrs.lens).toBeUndefined();
 	});
 
-	it('cascade-driven default: defaults.js=highlight in lenses.json → plain ```js picks up highlight', () => {
+	it('cascade-driven default: defaults.js=highlight + plain ```js → fence transforms but no `lens` prop (locked decision 1)', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'cascade-defaults');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		expect(attrsOf(jsxNode)).toMatchObject({
-			lens: 'highlight',
-		});
+		const attrs = attrsOf(jsxNode);
+		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
+		expect(attrs.lens).toBeUndefined();
 	});
 
 	it('explicit suffix wins: ```js:highlight overrides defaults.js=study', () => {
@@ -156,16 +155,16 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
-	it('configured python: defaults.python=study + ```python → fence transforms with lens=study', () => {
+	it('configured python: defaults.python=study + ```python → fence transforms but no `lens` prop (locked decision 1)', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-python');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
 			contentRoot,
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		expect(attrsOf(jsxNode)).toMatchObject({
-			lens: 'study',
-		});
+		const attrs = attrsOf(jsxNode);
+		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
+		expect(attrs.lens).toBeUndefined();
 	});
 
 	it('mixed-language fences: configured ones transform, unconfigured + no-lang stay plain', () => {
@@ -413,10 +412,10 @@ describe('createRemarkStudyLenses', () => {
 		const replaced = tree.children[1] as unknown as StudyLensJsx;
 		expect(replaced.type).toBe('mdxJsxFlowElement');
 		expect(replaced.name).toBe('StudyLenses');
-		expect(attrsOf(replaced)).toMatchObject({
-			snippet: 'let x = 1;',
-			lens: 'study',
-		});
+		const replacedAttrs = attrsOf(replaced);
+		expect(replacedAttrs.snippet).toBe('let x = 1;');
+		// B.4: bare js fence emits no lens prop (locked decision 1).
+		expect(replacedAttrs.lens).toBeUndefined();
 	});
 
 	// ─── Grouped sibling embeds (D.17–D.20) ──────────────────────────────
@@ -571,11 +570,14 @@ describe('createRemarkStudyLenses', () => {
 		expect(JSON.stringify(tree)).toBe(before);
 	});
 
-	// ─── Option-A: comma-separated fence syntax ──────────────────────────
+	// ─── URL-style fence syntax (B.1 + B.4) ──────────────────────────────
 	//
-	// Tests use the `configured-js` fixture dir (defaults.js=study) with a
-	// synthetic vfile path so the cascade resolver finds the real lenses.json
-	// while the fence content comes from the parsed string directly.
+	// Tests use the `configured-js` fixture dir (defaults.js=study, no
+	// cascade `lenses.*` map) with a synthetic vfile path so the cascade
+	// resolver finds the real lenses.json while the fence content comes
+	// from the parsed string directly. The cascade-merge with non-empty
+	// `lenses[lens]` is exercised separately by the embed-config-merge
+	// fixture's sibling-directive tests (same `deepMerge` code path).
 
 	function parseStringInConfiguredJs(md: string): Root {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
@@ -589,7 +591,7 @@ describe('createRemarkStudyLenses', () => {
 		return tree;
 	}
 
-	it('B.2: integration — emitted JSX never carries a `lang` attribute (configured-js fence)', () => {
+	it('B.2+B.4: integration — emitted JSX never carries `lang` attr; bare js fence emits no `lens` attr (configured-js)', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
@@ -598,12 +600,12 @@ describe('createRemarkStudyLenses', () => {
 		const jsxNode = findStudyLensNode(tree.children);
 		const attrs = attrsOf(jsxNode);
 
-		expect(attrs.lens).toBe('study');
 		expect(attrs.snippet).toBe('let x = 1;');
+		expect(attrs.lens).toBeUndefined();
 		expect(attrs.lang).toBeUndefined();
 	});
 
-	it('B.2: integration — emitted JSX never carries a `lang` attribute (configured-python fence)', () => {
+	it('B.2+B.4: integration — emitted JSX never carries `lang` attr; bare python fence emits no `lens` attr (configured-python)', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-python');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
@@ -612,8 +614,8 @@ describe('createRemarkStudyLenses', () => {
 		const jsxNode = findStudyLensNode(tree.children);
 		const attrs = attrsOf(jsxNode);
 
-		expect(attrs.lens).toBe('study');
 		expect(attrs.snippet).toBe("print('hello')");
+		expect(attrs.lens).toBeUndefined();
 		expect(attrs.lang).toBeUndefined();
 	});
 
@@ -627,42 +629,112 @@ describe('createRemarkStudyLenses', () => {
 		expect(attrs.transforms).toBeUndefined();
 	});
 
-	it('B.1: js:format,editor → lens=editor, no transforms attribute, code survives', () => {
+	// ─── B.4: URL-style fence syntax parser ──────────────────────────────
+
+	it('B.4: bare `js` fence (no suffix) → no `lens` attr emitted, snippet survives', () => {
+		const tree = parseStringInConfiguredJs('```js\nlet x = 1;\n```\n');
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.snippet).toBe('let x = 1;');
+		expect(attrs.lens).toBeUndefined();
+	});
+
+	it('B.4: `js:trace` (lens, no query) → lens=trace, no per-fence config (cascade.lenses[trace] empty)', () => {
+		const tree = parseStringInConfiguredJs('```js:trace\nlet x = 1;\n```\n');
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('trace');
+		expect(attrs.config).toBeUndefined();
+	});
+
+	it('B.4: `js:trace?stepDelay=500` → lens=trace, config={stepDelay:"500"} (URL-semantic string, no numeric coercion)', () => {
 		const tree = parseStringInConfiguredJs(
-			'```js:format,editor\nlet x = 1;\n```\n',
+			'```js:trace?stepDelay=500\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
 		const attrs = attrsOf(jsxNode);
 
-		expect(attrs.lens).toBe('editor');
-		expect(attrs.snippet).toBe('let x = 1;');
-		expect(attrs.transforms).toBeUndefined();
+		expect(attrs.lens).toBe('trace');
+		expect(JSON.parse(attrs.config!)).toEqual({ stepDelay: '500' });
 	});
 
-	it('B.1: js:format,loopGuard,editor → lens=editor, no transforms attribute, code survives', () => {
+	it('B.4: `js:highlight?stepDelay=500` (different lens, same query) → lens=highlight, config={stepDelay:"500"} (parser is lens-agnostic)', () => {
 		const tree = parseStringInConfiguredJs(
-			'```js:format,loopGuard,editor\nlet x = 1;\n```\n',
+			'```js:highlight?stepDelay=500\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
 		const attrs = attrsOf(jsxNode);
 
-		expect(attrs.lens).toBe('editor');
-		expect(attrs.snippet).toBe('let x = 1;');
-		expect(attrs.transforms).toBeUndefined();
+		expect(attrs.lens).toBe('highlight');
+		expect(JSON.parse(attrs.config!)).toEqual({ stepDelay: '500' });
 	});
 
-	it('Option-A malformed: js:,editor (leading empty token) → fence NOT transformed', () => {
-		const tree = parseStringInConfiguredJs('```js:,editor\nlet x = 1;\n```\n');
+	it('B.4: `js:trace?cols=value,steps` → array of strings (comma-split inside a query value)', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:trace?cols=value,steps\nlet x = 1;\n```\n',
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
 
-		// No StudyLenses node emitted; original code node preserved
+		expect(attrs.lens).toBe('trace');
+		expect(JSON.parse(attrs.config!)).toEqual({ cols: ['value', 'steps'] });
+	});
+
+	it('B.4: `js:trace?key` (no `=`) → boolean true', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:trace?key\nlet x = 1;\n```\n',
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('trace');
+		expect(JSON.parse(attrs.config!)).toEqual({ key: true });
+	});
+
+	it('B.4: `js:trace?key=` (empty value) → empty string', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:trace?key=\nlet x = 1;\n```\n',
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('trace');
+		expect(JSON.parse(attrs.config!)).toEqual({ key: '' });
+	});
+
+	it('B.4: `js:trace?a=1&b=2` → multiple query keys joined by `&`', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:trace?a=1&b=2\nlet x = 1;\n```\n',
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('trace');
+		expect(JSON.parse(attrs.config!)).toEqual({ a: '1', b: '2' });
+	});
+
+	it('B.4: `js:trace?` (empty query) → lens=trace, no per-fence config', () => {
+		const tree = parseStringInConfiguredJs('```js:trace?\nlet x = 1;\n```\n');
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('trace');
+		expect(attrs.config).toBeUndefined();
+	});
+
+	it('B.4 malformed: `js:` (empty lens-name, no query) → fence NOT transformed', () => {
+		const tree = parseStringInConfiguredJs('```js:\nlet x = 1;\n```\n');
+
 		expect(findStudyLensNode(tree.children)).toBeUndefined();
 		const codeNode = tree.children.find((n) => n.type === 'code');
 		expect(codeNode).toBeDefined();
 	});
 
-	it('Option-A malformed: js:format,,editor (double comma) → fence NOT transformed', () => {
+	it('B.4 malformed: `js:?stepDelay=500` (empty lens-name with query) → fence NOT transformed', () => {
 		const tree = parseStringInConfiguredJs(
-			'```js:format,,editor\nlet x = 1;\n```\n',
+			'```js:?stepDelay=500\nlet x = 1;\n```\n',
 		);
 
 		expect(findStudyLensNode(tree.children)).toBeUndefined();

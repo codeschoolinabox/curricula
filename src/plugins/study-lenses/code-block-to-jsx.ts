@@ -54,8 +54,13 @@ type StudyLensesJsxNode = {
  *
  * @param codeNode - The source `code` MDAST node. Only `.value` is read;
  *   the node is NOT mutated — unlike `codeBlockToHast`.
- * @param params - `lens` is the resolved lens name; `lensConfig` is the
- *   per-lens cascade configuration, serialised as JSON onto the `config`
+ * @param params - `lens` (optional) is the resolved lens name when one
+ *   resolves from the fence's `:suffix`, frontmatter `defaultLens`, or
+ *   sibling `@study-lens` directive — omitted when no lens resolves
+ *   (per AR-1 locked decision 1: bare `js` fence with cascade
+ *   `defaults[lang]` populated does NOT emit `lens`; only suffix /
+ *   frontmatter / directive populate it). `lensConfig` is the per-lens
+ *   resolved configuration, serialised as JSON onto the `config`
  *   attribute when present.
  * @returns A fresh `mdxJsxFlowElement` node with `name: 'StudyLenses'` and
  *   attribute values matching the plugin's component prop contract.
@@ -74,14 +79,16 @@ function codeBlockToJsx(
 		lens,
 		lensConfig,
 	}: {
-		readonly lens: LensName;
+		readonly lens?: LensName;
 		readonly lensConfig?: Readonly<Record<string, unknown>>;
 	},
 ): StudyLensesJsxNode {
 	const attributes: StudyLensesJsxAttribute[] = [
 		{ type: 'mdxJsxAttribute', name: 'snippet', value: codeNode.value },
-		{ type: 'mdxJsxAttribute', name: 'lens', value: lens },
 	];
+	if (lens !== undefined) {
+		attributes.push({ type: 'mdxJsxAttribute', name: 'lens', value: lens });
+	}
 	if (lensConfig !== undefined) {
 		attributes.push({
 			type: 'mdxJsxAttribute',

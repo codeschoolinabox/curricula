@@ -45,9 +45,12 @@ The plugin populates the four props from three input surfaces:
   populates `lens` and contributes a per-fence override bundle that gets
   deep-merged with the cascade's `lenses[lens]` entry, then emitted as `config`.
 - **Per-directory `lenses.json` cascade** (see § lenses.json schema) — its
-  `lenses.*` map flows verbatim into `configs`; its `defaults[lang]` populates
-  the `lens` prop when the fence's info string carries no `:suffix` and no
-  frontmatter override.
+  `lenses.*` map flows verbatim into `configs`; its `defaults[lang]` ONLY gates
+  whether a fence in that language transforms at all (configured- languages
+  rule). It does NOT populate `lens` — only fence `:suffix` / frontmatter
+  `defaultLens` / sibling `@study-lens` directive populate `lens` (per AR-1
+  locked decision 1; the cascade-supplied default seam is deferred to the
+  orchestrator's L2 `configs.default` machinery).
 - **Per-fence `@study-lens` directive in `.js` siblings** — educator-override
   surface; populates the sibling's `lens` and a per-sibling override bundle that
   gets deep-merged with the cascade's `lenses[lens]` and emitted as `config`.
@@ -63,10 +66,13 @@ synonym anywhere in the code is a bug.
   orchestrator-side `lenses/` peer (`highlight`, `blanks`, `parsons`,
   `trace-table`, etc.). The `lens` attribute the plugin emits is populated, in
   precedence order, from: per-fence `:suffix`, frontmatter `defaultLens`,
-  cascade `defaults[lang]`. A fenced code block with none of those resolved
-  emits no `lens` prop at all — what the orchestrator does with that absence is
-  its own concern (see
-  [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md)).
+  sibling `@study-lens` directive (siblings only). Cascade `defaults[lang]` ONLY
+  gates whether a fence transforms (configured-languages rule) — it does NOT
+  populate `lens` (per AR-1 locked decision 1). A fenced code block with none of
+  those resolved emits no `lens` prop at all — the orchestrator resolves the
+  cascade-default seam via its own `configs.default` machinery (deferred to L2;
+  in F1+B the bare-fence case mounts the editor home base). See
+  [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md).
 - **Fenced code block** — a markdown code block delimited by triple backticks.
   The MDAST `code` node type. Standard CommonMark term.
 - **Code fence** — the triple-backtick delimiters themselves, as opposed to the

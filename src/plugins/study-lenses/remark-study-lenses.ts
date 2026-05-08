@@ -310,20 +310,30 @@ function resolveEmittedLensConfig(
  * configured in `config.defaults`. Unconfigured-language fences are
  * left alone (configured-languages rule).
  *
- * Lens resolution precedence (most-specific wins):
- *   fence `:suffix`   >   frontmatterDefaultLens   >   cascade `defaults[lang]`
+ * Lens resolution precedence (most-specific wins, populates the
+ * emitted `lens` attribute):
+ *   fence `:suffix` (URL-style lens name)  >  frontmatterDefaultLens  >  none
  *
- * The configured-languages gate fires at the outermost layer: the
- * fence's `lang` must be present in `config.defaults` for transformation
- * to happen AT ALL — frontmatter does not lift unconfigured languages.
+ * Cascade `defaults[lang]` ONLY gates whether the fence transforms;
+ * it does NOT populate `lens` (per AR-1 locked decision 1 — bare `js`
+ * fence with cascade defaults emits no `lens` prop; the orchestrator
+ * decides via `configs.default` → editor home base; cascade-supplied
+ * default seam is L2-deferred).
  *
- * Suffix parsing (transitional shape — comma-chain still parses; the
- * URL-style replacement lands in B.4): when a suffix contains commas
- * the last token is the lens. Any empty token (leading, trailing, or
- * doubled comma) rejects the fence as malformed — left as plain code.
- * Earlier comma tokens, if any, are discarded — the `transforms`
- * attribute is no longer emitted (per B.1; transforms are a
- * lens-internal concern).
+ * Suffix parsing (URL-style):
+ *   <lensName>[?<key>[=<value>]( &<key>[=<value>] )*]
+ *
+ *   - empty `lensName` (e.g. `js:` or `js:?key=value`) → fence
+ *     left untransformed (malformed).
+ *   - `lensName` populates the emitted `lens` attribute.
+ *   - query (when present) parses to a record of URL-semantic
+ *     values: string for `key=value`, array of strings for
+ *     `key=v1,v2,…`, boolean `true` for `key` (no `=`), empty string
+ *     for `key=` (empty value). No numeric coercion at parse time —
+ *     lenses coerce at config-read time.
+ *   - parsed query is deep-merged over `cascade.lenses[lensName]`
+ *     and emitted as the `config` attribute (per AR-1 locked
+ *     decision 5).
  */
 function transformFence(
 	node: Code,
@@ -333,24 +343,94 @@ function transformFence(
 	const info = node.lang;
 	if (info === null || info === undefined) return;
 
-	const [lang, suffix] = info.split(':', 2);
-	if (lang === undefined || lang === '') return;
+	const colonIndex = info.indexOf(':');
+	const lang = colonIndex === -1 ? info : info.slice(0, colonIndex);
+	const suffix = colonIndex === -1 ? undefined : info.slice(colonIndex + 1);
+	if (lang === '') return;
 
-	const cascadeDefaultLens = config.defaults[lang];
-	if (cascadeDefaultLens === undefined) return; // configured-languages rule
+	if (config.defaults[lang] === undefined) return; // configured-languages rule
 
-	let lens: string;
+	let lens: string | undefined;
+	let parsedQuery: Readonly<Record<string, unknown>> | undefined;
 
 	if (suffix !== undefined) {
-		const tokens = suffix.split(',');
-		if (tokens.some((t) => t === '')) return; // malformed: empty token
-		lens = tokens[tokens.length - 1]!;
+		const queryIndex = suffix.indexOf('?');
+		const lensName = queryIndex === -1 ? suffix : suffix.slice(0, queryIndex);
+		if (lensName === '') return; // malformed: empty lens name
+		lens = lensName;
+		if (queryIndex !== -1) {
+			const queryStr = suffix.slice(queryIndex + 1);
+			if (queryStr !== '') {
+				const parsed = parseFenceQuery(queryStr);
+				// Skip vacuous queries (e.g. `?&` or `?&&`) so the
+				// emitted `config` doesn't carry an empty object.
+				if (Object.keys(parsed).length > 0) parsedQuery = parsed;
+			}
+		}
 	} else {
-		lens = frontmatterDefaultLens ?? cascadeDefaultLens;
+		// Bare fence (no `:suffix`): only frontmatter populates `lens`.
+		// Cascade `defaults[lang]` does NOT populate it (locked decision 1).
+		lens = frontmatterDefaultLens;
 	}
 
-	const lensConfig = config.lenses[lens];
-	return codeBlockToJsx(node, { lens, lensConfig });
+	let lensConfig: Readonly<Record<string, unknown>> | undefined;
+	if (lens !== undefined) {
+		const cascadeLensConfig = config.lenses[lens];
+		if (parsedQuery !== undefined) {
+			lensConfig = deepMerge(cascadeLensConfig ?? {}, parsedQuery);
+		} else {
+			lensConfig = cascadeLensConfig;
+		}
+	}
+
+	// `exactOptionalPropertyTypes`: only include `lens` / `lensConfig` keys
+	// when defined (undefined values would not satisfy the optional-prop
+	// contract on `codeBlockToJsx`).
+	//
+	// The `{ lensConfig }`-only branch is structurally unreachable
+	// through `transformFence` because `lensConfig` is only assigned
+	// inside the `if (lens !== undefined)` block. It exists for the
+	// type-checker so a hypothetical future caller can pass
+	// `{ lensConfig }` alone (the `codeBlockToJsx` unit contract
+	// supports it).
+	if (lens !== undefined && lensConfig !== undefined) {
+		return codeBlockToJsx(node, { lens, lensConfig });
+	}
+	if (lens !== undefined) return codeBlockToJsx(node, { lens });
+	if (lensConfig !== undefined) return codeBlockToJsx(node, { lensConfig });
+	return codeBlockToJsx(node, {});
+}
+
+/**
+ * Parses a URL-style query string into a flat record of values. Each
+ * key/value pair is separated by `&`. Values follow URL-semantic
+ * conventions:
+ *   - `key=value` → string `"value"`
+ *   - `key=v1,v2,v3` → array of strings `["v1","v2","v3"]`
+ *   - `key` (no `=`) → boolean `true`
+ *   - `key=` (empty value) → empty string `""`
+ *
+ * No numeric coercion happens at parse time — every value is a string,
+ * an array of strings, or a boolean. Lenses coerce at config-read time.
+ */
+function parseFenceQuery(queryStr: string): Readonly<Record<string, unknown>> {
+	const out: Record<string, unknown> = {};
+	for (const part of queryStr.split('&')) {
+		if (part === '') continue;
+		const eqIndex = part.indexOf('=');
+		if (eqIndex === -1) {
+			out[part] = true;
+			continue;
+		}
+		const key = part.slice(0, eqIndex);
+		const rawValue = part.slice(eqIndex + 1);
+		if (rawValue.includes(',')) {
+			out[key] = rawValue.split(',');
+		} else {
+			out[key] = rawValue;
+		}
+	}
+	return out;
 }
 
 export default createRemarkStudyLenses;
