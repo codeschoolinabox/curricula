@@ -127,7 +127,7 @@ describe('createRemarkStudyLenses', () => {
 		expect(jsxNode?.name).toBe('StudyLenses');
 		expect(jsxNode?.children).toEqual([]);
 		expect(attrsOf(jsxNode)).toMatchObject({
-			code: 'let x = 1;',
+			snippet: 'let x = 1;',
 			lens: 'study',
 		});
 	});
@@ -197,11 +197,11 @@ describe('createRemarkStudyLenses', () => {
 		expect(appended.every((n) => n.type === 'mdxJsxFlowElement')).toBe(true);
 		expect(appended.every((n) => n.name === 'StudyLenses')).toBe(true);
 		expect(attrsOf(appended[0])).toMatchObject({
-			code: '// alpha sibling\nconst a = 1;\n',
+			snippet: '// alpha sibling\nconst a = 1;\n',
 			lens: 'study',
 		});
 		expect(attrsOf(appended[1])).toMatchObject({
-			code: '// beta sibling\nconst b = 2;\n',
+			snippet: '// beta sibling\nconst b = 2;\n',
 			lens: 'study',
 		});
 		// B.2: appendBottomEmbed path emits no `lang` attribute.
@@ -299,6 +299,9 @@ describe('createRemarkStudyLenses', () => {
 		);
 		expect(innerAttrs.lens).toBe('study');
 		expect(innerAttrs.lang).toBeUndefined();
+		// B.3: tabs-mode inner StudyLenses emits snippet (not code).
+		expect(innerAttrs.snippet).toBeDefined();
+		expect(innerAttrs.code).toBeUndefined();
 	});
 
 	it('embed-bottom deep-merges directive lensConfig over cascade lenses[lens]', () => {
@@ -320,7 +323,7 @@ describe('createRemarkStudyLenses', () => {
 		// Byte-exact: the directive JSDoc is stripped from the emitted
 		// code attribute. The fixture's exercise.js is a 6-line file;
 		// after strip only the `const puzzle = '...';\n` line remains.
-		expect(attrs.code).toBe(
+		expect(attrs.snippet).toBe(
 			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
 		);
 	});
@@ -340,7 +343,7 @@ describe('createRemarkStudyLenses', () => {
 			JSON.stringify({ shuffleSeed: 42, distractors: 4 }),
 		);
 		// Byte-exact: same stripped content regardless of directive placement.
-		expect(attrs.code).toBe(
+		expect(attrs.snippet).toBe(
 			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
 		);
 	});
@@ -376,6 +379,9 @@ describe('createRemarkStudyLenses', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
 		const transformer = createRemarkStudyLenses({ contentRoot });
 
+		// Intentionally uses the OLD `code` attribute name to verify the
+		// plugin does not rewrite author-placed JSX regardless of attribute
+		// name (back-compat preservation: pre-B.3 MDX files survive).
 		const jsxNode = {
 			type: 'mdxJsxFlowElement',
 			name: 'StudyLenses',
@@ -408,7 +414,7 @@ describe('createRemarkStudyLenses', () => {
 		expect(replaced.type).toBe('mdxJsxFlowElement');
 		expect(replaced.name).toBe('StudyLenses');
 		expect(attrsOf(replaced)).toMatchObject({
-			code: 'let x = 1;',
+			snippet: 'let x = 1;',
 			lens: 'study',
 		});
 	});
@@ -593,7 +599,7 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('study');
-		expect(attrs.code).toBe('let x = 1;');
+		expect(attrs.snippet).toBe('let x = 1;');
 		expect(attrs.lang).toBeUndefined();
 	});
 
@@ -607,7 +613,7 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('study');
-		expect(attrs.code).toBe("print('hello')");
+		expect(attrs.snippet).toBe("print('hello')");
 		expect(attrs.lang).toBeUndefined();
 	});
 
@@ -617,7 +623,7 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('editor');
-		expect(attrs.code).toBe('let x = 1;');
+		expect(attrs.snippet).toBe('let x = 1;');
 		expect(attrs.transforms).toBeUndefined();
 	});
 
@@ -629,7 +635,7 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('editor');
-		expect(attrs.code).toBe('let x = 1;');
+		expect(attrs.snippet).toBe('let x = 1;');
 		expect(attrs.transforms).toBeUndefined();
 	});
 
@@ -641,7 +647,7 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('editor');
-		expect(attrs.code).toBe('let x = 1;');
+		expect(attrs.snippet).toBe('let x = 1;');
 		expect(attrs.transforms).toBeUndefined();
 	});
 

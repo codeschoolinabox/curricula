@@ -25,14 +25,19 @@
 
 import type { Code } from 'mdast';
 
-import type { LensName } from './types.js';
+import type { LensName, StudyLensesHastProps } from './types.js';
 
 // Local type definitions — no external import from `mdast-util-mdx-jsx`
 // (consistent with the existing `appendTabsEmbed` inline `as const` casts
 // in `remark-study-lenses.ts`).
+//
+// `name` is narrowed to `keyof StudyLensesHastProps` so the contract type
+// in `./types.ts` is the single source of truth for emitted attribute
+// names — a typo or drift between the emission helper and the contract
+// fails at compile time.
 type StudyLensesJsxAttribute = {
 	type: 'mdxJsxAttribute';
-	name: string;
+	name: keyof StudyLensesHastProps;
 	value: string;
 };
 
@@ -74,7 +79,7 @@ function codeBlockToJsx(
 	},
 ): StudyLensesJsxNode {
 	const attributes: StudyLensesJsxAttribute[] = [
-		{ type: 'mdxJsxAttribute', name: 'code', value: codeNode.value },
+		{ type: 'mdxJsxAttribute', name: 'snippet', value: codeNode.value },
 		{ type: 'mdxJsxAttribute', name: 'lens', value: lens },
 	];
 	if (lensConfig !== undefined) {
