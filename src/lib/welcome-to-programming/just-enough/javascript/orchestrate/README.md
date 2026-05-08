@@ -69,12 +69,12 @@ are inseparable from the orchestrator because they ARE the orchestrator.
 Four props (per the locked decision in
 [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles)):
 
-| Prop      | Type                         | Required | Purpose                                                                                                                                                                                                                                                                                                 |
-| --------- | ---------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `snippet` | `string`                     | yes      | The code string. The orchestrator builds the embodiment internally — caller does NOT pre-build.                                                                                                                                                                                                         |
-| `lens`    | `string`                     | no       | Default-mounted lens name (Q-III seam). Learner can switch via picker. Populated upstream by the plugin from per-fence info-string `:suffix`, frontmatter `defaultLens`, or cascade `defaults[lang]`. Cascade-supplied default-via-`configs` is deferred to L2 (no `configs.default` round-trip today). |
-| `config`  | `LensConfig`                 | no       | Override applied to the **resolved-default lens** (the lens named in the `lens` prop). If `lens` is unset, supplying `config` is an error — the orchestrator throws at mount. L2 will extend this to also accept a cascade-supplied default-via-`configs` once that machinery lands.                    |
-| `configs` | `Record<string, LensConfig>` | no       | Cascade bundle keyed by lens name. The picker reads `configs[lensName]` when opening any lens. Populated verbatim by the Docusaurus plugin from the `lenses.json` directory cascade's `lenses.*` map (no filtering, no reserved keys at F1).                                                            |
+| Prop      | Type                         | Required | Purpose                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------- | ---------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `snippet` | `string`                     | yes      | The code string. The orchestrator builds the embodiment internally — caller does NOT pre-build.                                                                                                                                                                                                                                                                                                          |
+| `lens`    | `string`                     | no       | Default-mounted lens name (Q-III seam). Learner can switch via picker. Populated upstream by the plugin from per-fence info-string `:suffix`, frontmatter `defaultLens`, or sibling `@study-lens` directive. Cascade `defaults[lang]` is gate-only (it controls whether the fence transforms but does NOT populate `lens` per AR-1 locked decision 1); the cascade-supplied default seam is L2-deferred. |
+| `config`  | `LensConfig`                 | no       | Override applied to the **resolved-default lens** (the lens named in the `lens` prop). If `lens` is unset, supplying `config` is an error — the orchestrator throws at mount. The F1+B guard accepts a `configs?.default` entry as a third satisfier (L2-anticipating early-bind seam), though the resolution chain doesn't yet read it as a default-lens-name; L2 wires the resolution-chain side.      |
+| `configs` | `Record<string, LensConfig>` | no       | Cascade bundle keyed by lens name. The picker reads `configs[lensName]` when opening any lens. Populated verbatim by the Docusaurus plugin from the `lenses.json` directory cascade's `lenses.*` map (no filtering, no reserved keys at F1).                                                                                                                                                             |
 
 The `lens`, `config`, and `configs` props flow from per-fence info-string
 (`js:trace`), per-directory `lenses.json` cascade, and the optional per-fence
@@ -99,12 +99,17 @@ parses all three and emits the resolved values onto the JSX node.
 > cascade-resolution coverage including the cascade-supplied default seam. The
 > **mount-time guard** for "`config` supplied with no resolved default" lands in
 > **F1** (per handoff line 54: _"the orchestrator throws at mount with a clear
-> message — F1 implements"_): _if `config` is supplied AND `lens` is unset,
-> throw at mount_. L2 will extend this to also accept a cascade-supplied default
-> once that machinery lands. The guard's trigger condition is theoretically
-> untriggerable from any plugin-emitted fence today (the plugin never emits
-> `config` without `lens`); it bites only on manually-authored
-> `<StudyLenses config={…} />` JSX.
+> message — F1 implements"_): _if `config` is supplied AND `lens` is unset AND
+> `configs?.default` is unset, throw at mount_. The `configs?.default` clause is
+> an L2-anticipating early-bind seam — the guard accepts a `configs.default`
+> entry as a third satisfier today, though the resolution chain does not yet
+> read it as a default-lens-name (cascade-supplied default seam is L2-deferred;
+> a `configs.default = {…}` entry is treated as just another lens-keyed entry
+> with no special semantics). L2 wires the resolution-chain side of the seam.
+> The guard's trigger condition is theoretically untriggerable from any
+> plugin-emitted fence today (the plugin never emits `config` without `lens`,
+> and never emits a `configs.default` entry); it bites only on manually-
+> authored `<StudyLenses config={…} />` JSX without a satisfier.
 >
 > **Silent-drop case (deferred to L2/F4).** When `lens` is supplied but not in
 > the registry (e.g. `lens="parsons"` before F4 lands the trial lens), F1+B

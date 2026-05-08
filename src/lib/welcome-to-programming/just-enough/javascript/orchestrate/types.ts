@@ -67,10 +67,12 @@ import type { LensConfig } from '../lenses/types.js';
  *   learner can switch via the toolbar picker; this is just the
  *   initial selection.
  * - `config?` — override config applied to the resolved-default
- *   lens. The default may come from `lens` prop or from
- *   `configs[default]` (cascade declaration). When `lens` is unset
- *   AND `configs` declares no default, supplying `config` is an
- *   error — the orchestrator throws at mount.
+ *   lens (the lens named in the `lens` prop). When `lens` is unset,
+ *   supplying `config` is an error — the orchestrator throws at
+ *   mount. The cascade-supplied default seam (`configs.default` as
+ *   a lens-name carrier) is L2-deferred; the F1+B guard accepts a
+ *   `configs?.default` entry as a third satisfier but the resolution
+ *   chain doesn't yet read it as a default-lens-name.
  * - `configs?` — cascade bundle keyed by lens name. The picker uses
  *   `configs[lensName]` when opening any lens. Populated by the
  *   Docusaurus plugin from the `lenses.json` directory cascade.
@@ -216,9 +218,7 @@ type EventPayload<N extends EventName> = EventPayloadMap[N];
  * Listener callback shape. Listeners are invoked synchronously in
  * registration order when their event is dispatched.
  */
-type EventListener<N extends EventName> = (
-	payload: EventPayload<N>,
-) => void;
+type EventListener<N extends EventName> = (payload: EventPayload<N>) => void;
 
 /**
  * Per-instance typed pub/sub bus. Each orchestrator owns its own
@@ -237,10 +237,7 @@ type EventBus = Readonly<{
 		name: N,
 		listener: EventListener<N>,
 	): () => void;
-	unsubscribe<N extends EventName>(
-		name: N,
-		listener: EventListener<N>,
-	): void;
+	unsubscribe<N extends EventName>(name: N, listener: EventListener<N>): void;
 	clear(): void;
 }>;
 

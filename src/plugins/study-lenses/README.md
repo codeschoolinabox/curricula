@@ -99,8 +99,11 @@ synonym anywhere in the code is a bug.
   emitted verbatim onto the `configs` attribute. Keyed by lens name; values are
   per-lens config objects.
 - **Resolved-default lens** — the lens that mounts when the picker first opens,
-  computed as `lens` prop → cascade `defaults[lang]` → none. Per-fence `config`
-  overrides apply to the resolved-default lens only.
+  computed from the resolved `lens` attribute (which itself comes from per-fence
+  `:suffix`, frontmatter `defaultLens`, or sibling `@study-lens` directive).
+  Cascade `defaults[lang]` is gate-only — it does NOT populate `lens` (per AR-1
+  locked decision 1; the cascade-supplied default seam is L2-deferred).
+  Per-fence `config` overrides apply to the resolved-default lens only.
 - **Cascade** — the root → leaf directory walk that collects and merges
   `lenses.json` files.
 - **Resolved config** — the frozen, deep-merged output of the cascade for a
@@ -549,10 +552,14 @@ robustness contract as the configured- languages rule's silent-skip behavior.
 Fenced code blocks inside `.md` / `.mdx` — `lens` resolution:
 
 ```text
-fence :suffix lens   >   frontmatter defaultLens   >   cascade defaults[lang]
+fence :suffix lens   >   frontmatter defaultLens   >   none
+(cascade `defaults[lang]` is gate-only here — controls whether the
+ fence transforms but does NOT populate `lens` per AR-1 locked
+ decision 1; the cascade-supplied default seam is L2-deferred)
 ```
 
-Sibling `.js` files — `lens` resolution:
+Sibling `.js` files — `lens` resolution (asymmetric with fences — siblings
+always need a `lens` value because they always transform):
 
 ```text
 file's @study-lens directive (leading OR trailing)   >   cascade defaults[lang]
@@ -568,9 +575,9 @@ parsed fence query  OR  directive JSON
                   `config` attribute
 ```
 
-When `lens` resolves from frontmatter or cascade `defaults[lang]` (no `:suffix`,
-no per-fence query), the `config` attribute carries the cascade's `lenses[lens]`
-directly (no per-fence override layer).
+When `lens` resolves from frontmatter (no `:suffix`, no per-fence query) — or
+from sibling directive (for `.js` siblings) — the `config` attribute carries the
+cascade's `lenses[lens]` directly (no per-fence override layer).
 
 Cascade `lenses.*` map → emitted as `configs` attribute (verbatim, when
 non-empty).
@@ -677,8 +684,9 @@ On the component side, a fallback-tolerant config parser decodes:
    e.g. a parsons lens might take a `"freeform"` token).
 3. If `input` is `null`/`undefined`/anything else → treat as no config.
 
-The Phase 0.7 spike determines which branch of (2)/(3) the plugin takes on
-Docusaurus 3.7; the component's parser is the same either way.
+The plugin always JSON-stringifies object-valued attributes (`config` and
+`configs`); the consuming component's fallback-tolerant parser handles both
+string and object inputs identically.
 
 ## How to navigate the code
 

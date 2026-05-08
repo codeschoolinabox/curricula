@@ -111,10 +111,10 @@ flowchart TD
     Suffix -->|"split on '?'"| Query["query string?"]
 
     LensName -->|"empty / malformed"| Untransformed
-    LensName --> LensResolution["lens resolution<br/>(precedence: :suffix > frontmatter > cascade)"]
+    LensName --> LensResolution["lens resolution<br/>(fence: :suffix > frontmatter > none;<br/>sibling: directive > cascade defaults[lang])"]
     Frontmatter --> LensResolution
-    Cascade -->|"defaults[lang]"| LensResolution
-    Directive -->|"directive.lens"| LensResolution
+    Cascade -.->|"defaults[lang] (sibling-only;<br/>does NOT populate fence lens)"| LensResolution
+    Directive -->|"directive.lens (sibling)"| LensResolution
     LensResolution --> LensProp["lens (string?)"]
 
     Query -->|"URL-style key/value parse<br/>(strings, no numeric coercion)"| ParsedQuery["parsed query bundle"]

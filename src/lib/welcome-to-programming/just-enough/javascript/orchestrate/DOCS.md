@@ -157,8 +157,10 @@ pipeline; lens authors don't compute it themselves.
 `resolvedDefault` resolution order:
 
 1. The `lens` prop (populated upstream by the plugin from per-fence `:suffix`,
-   frontmatter `defaultLens`, or cascade `defaults[lang]`, in that precedence;
-   or set directly by an MDX-author writing `<StudyLenses lens="…" />`).
+   frontmatter `defaultLens`, or sibling `@study-lens` directive — cascade
+   `defaults[lang]` is gate-only and does NOT populate `lens` per AR-1 locked
+   decision 1; the cascade-supplied default seam is L2-deferred. Or set directly
+   by an MDX-author writing `<StudyLenses lens="…" />`).
 2. None — if no default resolves AND `config` is supplied, the orchestrator
    throws at mount with a clear message (per F1).
 
