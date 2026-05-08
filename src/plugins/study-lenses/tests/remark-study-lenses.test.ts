@@ -129,7 +129,6 @@ describe('createRemarkStudyLenses', () => {
 		expect(attrsOf(jsxNode)).toMatchObject({
 			code: 'let x = 1;',
 			lens: 'study',
-			lang: 'js',
 		});
 	});
 
@@ -142,7 +141,6 @@ describe('createRemarkStudyLenses', () => {
 		const jsxNode = findStudyLensNode(tree.children);
 		expect(attrsOf(jsxNode)).toMatchObject({
 			lens: 'highlight',
-			lang: 'js',
 		});
 	});
 
@@ -155,11 +153,10 @@ describe('createRemarkStudyLenses', () => {
 		const jsxNode = findStudyLensNode(tree.children);
 		expect(attrsOf(jsxNode)).toMatchObject({
 			lens: 'highlight',
-			lang: 'js',
 		});
 	});
 
-	it('configured python: defaults.python=study + ```python → transformed with lang=python', () => {
+	it('configured python: defaults.python=study + ```python → fence transforms with lens=study', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-python');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
@@ -168,7 +165,6 @@ describe('createRemarkStudyLenses', () => {
 		const jsxNode = findStudyLensNode(tree.children);
 		expect(attrsOf(jsxNode)).toMatchObject({
 			lens: 'study',
-			lang: 'python',
 		});
 	});
 
@@ -203,13 +199,14 @@ describe('createRemarkStudyLenses', () => {
 		expect(attrsOf(appended[0])).toMatchObject({
 			code: '// alpha sibling\nconst a = 1;\n',
 			lens: 'study',
-			lang: 'js',
 		});
 		expect(attrsOf(appended[1])).toMatchObject({
 			code: '// beta sibling\nconst b = 2;\n',
 			lens: 'study',
-			lang: 'js',
 		});
+		// B.2: appendBottomEmbed path emits no `lang` attribute.
+		expect(attrsOf(appended[0]).lang).toBeUndefined();
+		expect(attrsOf(appended[1]).lang).toBeUndefined();
 	});
 
 	it('README.md alone (no sibling index.md) → embeds applied', () => {
@@ -301,7 +298,7 @@ describe('createRemarkStudyLenses', () => {
 			(innerJsx?.attributes ?? []).map((a) => [a.name, a.value]),
 		);
 		expect(innerAttrs.lens).toBe('study');
-		expect(innerAttrs.lang).toBe('js');
+		expect(innerAttrs.lang).toBeUndefined();
 	});
 
 	it('embed-bottom deep-merges directive lensConfig over cascade lenses[lens]', () => {
@@ -364,12 +361,10 @@ describe('createRemarkStudyLenses', () => {
 		// Plain ```js fence: frontmatter wins over cascade (study → highlight)
 		expect(attrsOf(jsxNodes[0])).toMatchObject({
 			lens: 'highlight',
-			lang: 'js',
 		});
 		// ```js:study fence: explicit suffix beats frontmatter
 		expect(attrsOf(jsxNodes[1])).toMatchObject({
 			lens: 'study',
-			lang: 'js',
 		});
 	});
 
@@ -415,7 +410,6 @@ describe('createRemarkStudyLenses', () => {
 		expect(attrsOf(replaced)).toMatchObject({
 			code: 'let x = 1;',
 			lens: 'study',
-			lang: 'js',
 		});
 	});
 
@@ -588,6 +582,34 @@ describe('createRemarkStudyLenses', () => {
 		transformer(tree, vfile);
 		return tree;
 	}
+
+	it('B.2: integration — emitted JSX never carries a `lang` attribute (configured-js fence)', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('study');
+		expect(attrs.code).toBe('let x = 1;');
+		expect(attrs.lang).toBeUndefined();
+	});
+
+	it('B.2: integration — emitted JSX never carries a `lang` attribute (configured-python fence)', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'configured-python');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('study');
+		expect(attrs.code).toBe("print('hello')");
+		expect(attrs.lang).toBeUndefined();
+	});
 
 	it('B.1: js:editor (no comma) → lens=editor, no transforms attribute, code survives', () => {
 		const tree = parseStringInConfiguredJs('```js:editor\nlet x = 1;\n```\n');

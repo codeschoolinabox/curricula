@@ -208,8 +208,8 @@ function appendBottomEmbed(
 		const jsx = codeBlockToJsx(
 			codeNode,
 			lensConfig === undefined
-				? { lens: sibling.lens, lang: sibling.lang }
-				: { lens: sibling.lens, lang: sibling.lang, lensConfig },
+				? { lens: sibling.lens }
+				: { lens: sibling.lens, lensConfig },
 		);
 		(tree.children as Array<unknown>).push(jsx);
 	}
@@ -253,8 +253,8 @@ function appendTabsEmbed(
 		const innerJsx = codeBlockToJsx(
 			inner,
 			lensConfig === undefined
-				? { lens: sibling.lens, lang: sibling.lang }
-				: { lens: sibling.lens, lang: sibling.lang, lensConfig },
+				? { lens: sibling.lens }
+				: { lens: sibling.lens, lensConfig },
 		);
 		return {
 			type: 'mdxJsxFlowElement' as const,
@@ -350,7 +350,7 @@ function transformFence(
 	}
 
 	const lensConfig = config.lenses[lens];
-	return codeBlockToJsx(node, { lens, lang, lensConfig });
+	return codeBlockToJsx(node, { lens, lensConfig });
 }
 
 export default createRemarkStudyLenses;

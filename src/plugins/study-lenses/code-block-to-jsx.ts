@@ -25,7 +25,7 @@
 
 import type { Code } from 'mdast';
 
-import type { LangName, LensName } from './types.js';
+import type { LensName } from './types.js';
 
 // Local type definitions — no external import from `mdast-util-mdx-jsx`
 // (consistent with the existing `appendTabsEmbed` inline `as const` casts
@@ -49,33 +49,33 @@ type StudyLensesJsxNode = {
  *
  * @param codeNode - The source `code` MDAST node. Only `.value` is read;
  *   the node is NOT mutated — unlike `codeBlockToHast`.
- * @param params - `lens` is the resolved lens name; `lang` is the
- *   language identifier from the fence info string; `lensConfig` is the
+ * @param params - `lens` is the resolved lens name; `lensConfig` is the
  *   per-lens cascade configuration, serialised as JSON onto the `config`
  *   attribute when present.
  * @returns A fresh `mdxJsxFlowElement` node with `name: 'StudyLenses'` and
  *   attribute values matching the plugin's component prop contract.
  *
  * @remarks Transforms are a lens-internal concern (no transforms tier in
- * the architecture); the `transforms` attribute is never emitted. See
- * `./README.md` § Emitted JSX prop contract.
+ * the architecture); the `transforms` attribute is never emitted. The
+ * `lang` identifier is used only by the caller (`transformFence`) for
+ * the configured-languages gate; this function receives only `lens` and
+ * optional `lensConfig` and never threads `lang` into the emitted JSX —
+ * the orchestrator's embody pipeline auto-detects language from the
+ * snippet. See `./README.md` § Emitted JSX prop contract.
  */
 function codeBlockToJsx(
 	codeNode: Code,
 	{
 		lens,
-		lang,
 		lensConfig,
 	}: {
 		readonly lens: LensName;
-		readonly lang: LangName;
 		readonly lensConfig?: Readonly<Record<string, unknown>>;
 	},
 ): StudyLensesJsxNode {
 	const attributes: StudyLensesJsxAttribute[] = [
 		{ type: 'mdxJsxAttribute', name: 'code', value: codeNode.value },
 		{ type: 'mdxJsxAttribute', name: 'lens', value: lens },
-		{ type: 'mdxJsxAttribute', name: 'lang', value: lang },
 	];
 	if (lensConfig !== undefined) {
 		attributes.push({

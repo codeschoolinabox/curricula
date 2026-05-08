@@ -17,11 +17,11 @@ function makeCodeNode(value: string, lang: string | null = null): Code {
 }
 
 describe('codeBlockToJsx', () => {
-	it('lens + lang, no lensConfig → returns mdxJsxFlowElement with correct attributes; input node not mutated', () => {
+	it('lens, no lensConfig → returns mdxJsxFlowElement with correct attributes; input node not mutated', () => {
 		const node = makeCodeNode('let x = 1;', 'js');
 		const inputSnapshot = JSON.stringify(node);
 
-		const result = codeBlockToJsx(node, { lens: 'study', lang: 'js' });
+		const result = codeBlockToJsx(node, { lens: 'study' });
 
 		// returned node shape
 		expect(result.type).toBe('mdxJsxFlowElement');
@@ -30,7 +30,6 @@ describe('codeBlockToJsx', () => {
 		expect(result.attributes).toEqual([
 			{ type: 'mdxJsxAttribute', name: 'code', value: 'let x = 1;' },
 			{ type: 'mdxJsxAttribute', name: 'lens', value: 'study' },
-			{ type: 'mdxJsxAttribute', name: 'lang', value: 'js' },
 		]);
 		// input node NOT mutated
 		expect(JSON.stringify(node)).toBe(inputSnapshot);
@@ -42,14 +41,12 @@ describe('codeBlockToJsx', () => {
 
 		const result = codeBlockToJsx(node, {
 			lens: 'highlight',
-			lang: 'py',
 			lensConfig: { ask: false },
 		});
 
 		expect(result.attributes).toEqual([
 			{ type: 'mdxJsxAttribute', name: 'code', value: 'print("hi")' },
 			{ type: 'mdxJsxAttribute', name: 'lens', value: 'highlight' },
-			{ type: 'mdxJsxAttribute', name: 'lang', value: 'py' },
 			{ type: 'mdxJsxAttribute', name: 'config', value: '{"ask":false}' },
 		]);
 	});
@@ -57,35 +54,34 @@ describe('codeBlockToJsx', () => {
 	it('empty code value → code attribute has value ""', () => {
 		const node = makeCodeNode('', 'js');
 
-		const result = codeBlockToJsx(node, { lens: 'study', lang: 'js' });
+		const result = codeBlockToJsx(node, { lens: 'study' });
 
 		const codeAttr = result.attributes.find((a) => a.name === 'code');
 		expect(codeAttr?.value).toBe('');
 	});
 
-	// ─── B.1: transforms attribute is dropped from the emission contract ─
+	// ─── B.2: lang attribute is dropped from the emission contract ───────
 
-	it('B.1: emission carries no `transforms` attribute (lens + lang only when no lensConfig)', () => {
+	it('B.2: emission carries no `lang` attribute (no lensConfig variant)', () => {
 		const node = makeCodeNode('let x = 1;', 'js');
 
-		const result = codeBlockToJsx(node, { lens: 'editor', lang: 'js' });
+		const result = codeBlockToJsx(node, { lens: 'editor' });
 
 		const names = result.attributes.map((a) => a.name);
-		expect(names).toEqual(['code', 'lens', 'lang']);
-		expect(names).not.toContain('transforms');
+		expect(names).toEqual(['code', 'lens']);
+		expect(names).not.toContain('lang');
 	});
 
-	it('B.1: emission carries no `transforms` attribute (lensConfig still emits as `config`)', () => {
+	it('B.2: emission carries no `lang` attribute (lensConfig still emits as `config`)', () => {
 		const node = makeCodeNode('let x = 1;', 'js');
 
 		const result = codeBlockToJsx(node, {
 			lens: 'editor',
-			lang: 'js',
 			lensConfig: { ask: true },
 		});
 
 		const names = result.attributes.map((a) => a.name);
-		expect(names).toEqual(['code', 'lens', 'lang', 'config']);
-		expect(names).not.toContain('transforms');
+		expect(names).toEqual(['code', 'lens', 'config']);
+		expect(names).not.toContain('lang');
 	});
 });
