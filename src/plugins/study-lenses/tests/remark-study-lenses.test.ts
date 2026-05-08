@@ -68,7 +68,9 @@ type StudyLensJsx = {
 	children: [];
 };
 
-function findStudyLensNode(children: Root['children']): StudyLensJsx | undefined {
+function findStudyLensNode(
+	children: Root['children'],
+): StudyLensJsx | undefined {
 	return children.find(
 		(n) =>
 			(n as { type: string }).type === 'mdxJsxFlowElement' &&
@@ -77,7 +79,9 @@ function findStudyLensNode(children: Root['children']): StudyLensJsx | undefined
 }
 
 function attrsOf(node: StudyLensJsx | undefined): Record<string, string> {
-	return Object.fromEntries((node?.attributes ?? []).map((a) => [a.name, a.value]));
+	return Object.fromEntries(
+		(node?.attributes ?? []).map((a) => [a.name, a.value]),
+	);
 }
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
@@ -313,7 +317,9 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(appended);
 		expect(attrs.lens).toBe('parsons');
 		// Merged: cascade shuffleSeed=42 + directive distractors=4.
-		expect(attrs.config).toBe(JSON.stringify({ shuffleSeed: 42, distractors: 4 }));
+		expect(attrs.config).toBe(
+			JSON.stringify({ shuffleSeed: 42, distractors: 4 }),
+		);
 		// Byte-exact: the directive JSDoc is stripped from the emitted
 		// code attribute. The fixture's exercise.js is a 6-line file;
 		// after strip only the `const puzzle = '...';\n` line remains.
@@ -333,7 +339,9 @@ describe('createRemarkStudyLenses', () => {
 		expect(appended?.name).toBe('StudyLenses');
 		const attrs = attrsOf(appended);
 		expect(attrs.lens).toBe('parsons');
-		expect(attrs.config).toBe(JSON.stringify({ shuffleSeed: 42, distractors: 4 }));
+		expect(attrs.config).toBe(
+			JSON.stringify({ shuffleSeed: 42, distractors: 4 }),
+		);
 		// Byte-exact: same stripped content regardless of directive placement.
 		expect(attrs.code).toBe(
 			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
@@ -581,25 +589,29 @@ describe('createRemarkStudyLenses', () => {
 		return tree;
 	}
 
-	it('Option-A: js:editor (no comma) → lens=editor, no transforms attribute (regression baseline)', () => {
+	it('B.1: js:editor (no comma) → lens=editor, no transforms attribute, code survives', () => {
 		const tree = parseStringInConfiguredJs('```js:editor\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('editor');
+		expect(attrs.code).toBe('let x = 1;');
 		expect(attrs.transforms).toBeUndefined();
 	});
 
-	it('Option-A: js:format,editor → lens=editor, transforms=format', () => {
-		const tree = parseStringInConfiguredJs('```js:format,editor\nlet x = 1;\n```\n');
+	it('B.1: js:format,editor → lens=editor, no transforms attribute, code survives', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:format,editor\nlet x = 1;\n```\n',
+		);
 		const jsxNode = findStudyLensNode(tree.children);
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('editor');
-		expect(attrs.transforms).toBe('format');
+		expect(attrs.code).toBe('let x = 1;');
+		expect(attrs.transforms).toBeUndefined();
 	});
 
-	it('Option-A: js:format,loopGuard,editor → lens=editor, transforms=format,loopGuard', () => {
+	it('B.1: js:format,loopGuard,editor → lens=editor, no transforms attribute, code survives', () => {
 		const tree = parseStringInConfiguredJs(
 			'```js:format,loopGuard,editor\nlet x = 1;\n```\n',
 		);
@@ -607,7 +619,8 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('editor');
-		expect(attrs.transforms).toBe('format,loopGuard');
+		expect(attrs.code).toBe('let x = 1;');
+		expect(attrs.transforms).toBeUndefined();
 	});
 
 	it('Option-A malformed: js:,editor (leading empty token) → fence NOT transformed', () => {

@@ -43,13 +43,9 @@ type Transformer = (tree: Root, file: VFile) => void;
  * @returns A transformer function Docusaurus registers in
  *   `beforeDefaultRemarkPlugins` for each docs-instance plugin.
  */
-function createRemarkStudyLenses(
-	options: RemarkPluginOptions,
-): Transformer {
+function createRemarkStudyLenses(options: RemarkPluginOptions): Transformer {
 	if (options.contentRoot === '') {
-		throw new Error(
-			'createRemarkStudyLenses: contentRoot is required',
-		);
+		throw new Error('createRemarkStudyLenses: contentRoot is required');
 	}
 	const normalizedContentRoot = path.resolve(options.contentRoot);
 
@@ -60,10 +56,9 @@ function createRemarkStudyLenses(
 		if (!isUnder(normalizedFilePath, normalizedContentRoot)) return;
 
 		// 2. Resolve — pull the effective config for this file's directory.
-		const config = resolveCascade(
-			path.dirname(normalizedFilePath),
-			{ contentRoot: normalizedContentRoot },
-		);
+		const config = resolveCascade(path.dirname(normalizedFilePath), {
+			contentRoot: normalizedContentRoot,
+		});
 
 		// 2b. Read per-file frontmatter override (Docusaurus pre-populates
 		//     vfile.data.frontMatter before beforeDefaultRemarkPlugins runs).
@@ -87,10 +82,7 @@ function createRemarkStudyLenses(
 		// 4. Embed siblings — only for sibling-bearing pages.
 		if (!isSiblingBearingPageFile(normalizedFilePath)) return;
 		if (config.embedSiblings.mode === 'off') return;
-		const siblings = discoverSiblings(
-			path.dirname(normalizedFilePath),
-			config,
-		);
+		const siblings = discoverSiblings(path.dirname(normalizedFilePath), config);
 		if (siblings.length === 0) return;
 		const groups = groupSiblings(siblings);
 		for (const group of groups) {
@@ -325,11 +317,13 @@ function resolveEmittedLensConfig(
  * fence's `lang` must be present in `config.defaults` for transformation
  * to happen AT ALL — frontmatter does not lift unconfigured languages.
  *
- * Option-A comma-separated suffix: when a suffix contains commas the
- * last token is the lens and earlier tokens are transform names (in
- * order). Example: `js:format,loopGuard,editor` → transforms=[format,
- * loopGuard], lens=editor. Any empty token (leading, trailing, or
+ * Suffix parsing (transitional shape — comma-chain still parses; the
+ * URL-style replacement lands in B.4): when a suffix contains commas
+ * the last token is the lens. Any empty token (leading, trailing, or
  * doubled comma) rejects the fence as malformed — left as plain code.
+ * Earlier comma tokens, if any, are discarded — the `transforms`
+ * attribute is no longer emitted (per B.1; transforms are a
+ * lens-internal concern).
  */
 function transformFence(
 	node: Code,
@@ -346,20 +340,17 @@ function transformFence(
 	if (cascadeDefaultLens === undefined) return; // configured-languages rule
 
 	let lens: string;
-	let transforms: ReadonlyArray<string>;
 
 	if (suffix !== undefined) {
 		const tokens = suffix.split(',');
 		if (tokens.some((t) => t === '')) return; // malformed: empty token
 		lens = tokens[tokens.length - 1]!;
-		transforms = tokens.slice(0, -1);
 	} else {
 		lens = frontmatterDefaultLens ?? cascadeDefaultLens;
-		transforms = [];
 	}
 
 	const lensConfig = config.lenses[lens];
-	return codeBlockToJsx(node, { lens, lang, lensConfig, transforms });
+	return codeBlockToJsx(node, { lens, lang, lensConfig });
 }
 
 export default createRemarkStudyLenses;

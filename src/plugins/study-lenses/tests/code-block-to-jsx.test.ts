@@ -63,61 +63,29 @@ describe('codeBlockToJsx', () => {
 		expect(codeAttr?.value).toBe('');
 	});
 
-	// ─── Option-A: transforms param ───────────────────────────────────────
+	// ─── B.1: transforms attribute is dropped from the emission contract ─
 
-	it('transforms absent → no transforms attribute emitted', () => {
+	it('B.1: emission carries no `transforms` attribute (lens + lang only when no lensConfig)', () => {
 		const node = makeCodeNode('let x = 1;', 'js');
 
 		const result = codeBlockToJsx(node, { lens: 'editor', lang: 'js' });
 
-		expect(result.attributes.find((a) => a.name === 'transforms')).toBeUndefined();
+		const names = result.attributes.map((a) => a.name);
+		expect(names).toEqual(['code', 'lens', 'lang']);
+		expect(names).not.toContain('transforms');
 	});
 
-	it('transforms empty array → no transforms attribute emitted', () => {
-		const node = makeCodeNode('let x = 1;', 'js');
-
-		const result = codeBlockToJsx(node, { lens: 'editor', lang: 'js', transforms: [] });
-
-		expect(result.attributes.find((a) => a.name === 'transforms')).toBeUndefined();
-	});
-
-	it('transforms single entry → transforms attribute with that name', () => {
-		const node = makeCodeNode('let x = 1;', 'js');
-
-		const result = codeBlockToJsx(node, {
-			lens: 'editor',
-			lang: 'js',
-			transforms: ['format'],
-		});
-
-		const attr = result.attributes.find((a) => a.name === 'transforms');
-		expect(attr?.value).toBe('format');
-	});
-
-	it('transforms multiple entries → comma-joined string in attribute', () => {
-		const node = makeCodeNode('let x = 1;', 'js');
-
-		const result = codeBlockToJsx(node, {
-			lens: 'editor',
-			lang: 'js',
-			transforms: ['format', 'loopGuard'],
-		});
-
-		const attr = result.attributes.find((a) => a.name === 'transforms');
-		expect(attr?.value).toBe('format,loopGuard');
-	});
-
-	it('transforms attribute appears after config when both present', () => {
+	it('B.1: emission carries no `transforms` attribute (lensConfig still emits as `config`)', () => {
 		const node = makeCodeNode('let x = 1;', 'js');
 
 		const result = codeBlockToJsx(node, {
 			lens: 'editor',
 			lang: 'js',
 			lensConfig: { ask: true },
-			transforms: ['format'],
 		});
 
 		const names = result.attributes.map((a) => a.name);
-		expect(names).toEqual(['code', 'lens', 'lang', 'config', 'transforms']);
+		expect(names).toEqual(['code', 'lens', 'lang', 'config']);
+		expect(names).not.toContain('transforms');
 	});
 });
