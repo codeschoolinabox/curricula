@@ -371,8 +371,8 @@ as a small example: most learners can predict the outputs (`'53'` and `2`)
 long before they can predict the internal events — what the engine actually
 does, in what order. _As Evan put it in earlier teaching notes: "explaining a
 program in plain English is helpful, but it's easy to be a little bit wrong
-and not know it."_ Predicting the chain of
-internal events is what closes that gap.
+and not know it."_ Predicting the chain of internal events is what closes
+that gap.
 
 **Building Structure → AI Integration Threshold → Leveraging Structure.** The
 SOLO taxonomy from education research distinguishes Pre-, Uni-, Multi-,
@@ -383,16 +383,17 @@ this course are _weighted toward_ Building Structure (Pre/Uni/Multistructural �
 concepts isolated, models forming, no AI in the work). Chapter 4 is _weighted
 toward_ the threshold crossing (Relational — concepts connect; AI outputs become
 evaluable). Chapter 5 is _weighted toward_ Leveraging Structure (Extended
-Abstract — all quadrants of human-AI collaboration are viable; snippetry
-maintains the automated library — the _automaticity_ named in the opener —
-once full-codebase work no longer provides daily reps). Within any chapter, a learner is at varying SOLO levels for different
-concepts; the mapping is suggestive, not strict. The threshold matters because
+Abstract): all quadrants of human-AI collaboration become viable, and
+snippetry maintains the automated library (the _automaticity_ named in the
+opener) once full-codebase work no longer provides daily reps. Within any
+chapter, a learner is at varying SOLO levels for different concepts; the
+mapping is suggestive, not strict. The threshold matters because
 **AI cannot help when learners don't yet know what to verify.** Until you can
 recognize what to verify, an LLM's output is unevaluable from your seat — even
 if it happens to be correct.
 
-**Why Chapter 4 lands where it does.** Chapter ordering is a structural
-consequence of the principle. Until you have the twins (the NM-twin, the
+**Why Chapter 4 lands where it does.** Chapter ordering here isn't arbitrary —
+it's a structural consequence of the principle. Until you have the twins (the NM-twin, the
 user-twin, the developer-twin), you can't evaluate AI output, direct it
 meaningfully, or recognize when it's confidently misleading you. There's a
 sharper way to put this: until you have the twins, you don't know what to ask
@@ -406,9 +407,9 @@ pedagogical samples that you can also evaluate). Once across the threshold, the
 LLM becomes a steerable participant. Chapter 4's structure — every section
 evaluating LLM output rather than producing it — is the operational mechanism
 that lets the chapter work safely. **Code is content, not deliverable** is the
-framing this section names for Ch4: AI-generated code is material to study, not
-work-product to ship, and that
-reframe is what keeps the chapter pedagogical rather than productivity-oriented.
+framing this section names for Ch4: AI-generated code is material to study,
+not work-product to ship — which is what keeps the chapter pedagogical rather
+than productivity-oriented.
 
 **The existing scaffolding, reread as instances of the principle.** Each piece
 of this curriculum's apparatus is **pedagogical sampling at a particular
@@ -425,9 +426,10 @@ granularity**:
   "that lovely moment where you no longer need to think to complete a task. Your
   brain has built a network of Mental Models that it can fall back on to carry
   out these routine tasks without increasing your cognitive load."_
-- **Cognitive Load Theory** (intrinsic / extraneous / germane) is why JEJ is
-  small — aggressive removal of extraneous load is itself a form of pedagogical
-  sampling, choosing not to put irrelevant complexity in front of the learner.
+- **Cognitive Load Theory** (intrinsic / extraneous / germane) is pedagogical
+  sampling at the **cognitive-budget level** — choosing what NOT to put in
+  front of the learner is as much a sampling decision as choosing what to
+  include. This is why JEJ is deliberately small.
 - **Study Lenses** are pedagogical sampling at the internal-event level. They
   reclaim the visibility Bret Victor wanted (mechanism made observable) at
   exactly the granularity the misconception-mechanism requires.
@@ -448,9 +450,10 @@ tagline to the cognitive-science taproot underneath.
 **The mastery contract, returning to the catchphrase.** Earlier in the course
 materials there's a sentence the author has kept canonical: _"You have only
 mastered a skill when you can complete its exercises without AI."_ That's the
-principle as a learning contract. AI is welcome at the work as soon as you have
-the twins to bring to the collaboration. Until then, AI is what you're using AS
-you build — not what you're using INSTEAD of building. Not just a better
+principle as a learning contract. AI is welcome at the work as soon as you
+have the twins — NM-twin and user-twin alike — to bring to the collaboration.
+Until then, AI is what you're using AS you build — not what you're using
+INSTEAD of building. Not just a better
 explanation. The work is yours, has always been yours, and will always be yours
 — that's what makes it worth doing.
 
@@ -1165,9 +1168,8 @@ useful landmarks:
 Frogramming is broader than any of these — it's tool-agnostic and
 abstraction-level-agnostic. Vibe engineering and agentic engineering are flavors
 of LLM-collaborative Frogramming; traditional engineering is humans-only
-Frogramming; cargo-cult coding is humans-only Vibetoading. The house terms name
-the underlying stance; the wider vocabulary names specific working modes within
-it.
+Frogramming. The house terms name the underlying stance; the wider vocabulary
+names specific working modes within it.
 
 **Learning objectives for §0.3:**
 
@@ -1915,7 +1917,7 @@ moments.
 ### 🎨 4.6 Vibetoading
 
 - 🐣 Decompose a complex request into smaller, verifiable steps (by contrast
-  with unguided Vibetoading)
+  with cargo-cult vibing — no twin, no model)
 - 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
   it's right
 - 🐥 Evaluate code you didn't write or review during generation (PBSI autopsy)
