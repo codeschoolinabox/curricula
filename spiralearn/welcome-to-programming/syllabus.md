@@ -842,6 +842,11 @@ a choice that shapes how a stranger reads your work.
 
 The chapter's intellectual-agency move: _you have authorial choices._
 
+**Note** — the practice of writing for future-you is the opening of an
+arc the course closes in Ch5. Future-you is a stranger here; by Ch5,
+you-the-practitioner have become the audience you-the-learner started
+twinning. Same self, two angles of approach.
+
 **Full chapter content** — sub-sections 1.1 (Twinning the developer
 audience), 1.2 (Static vs dynamic), 1.3 (Comments), 1.4 (Logs), plus
 per-layer learning objectives — in
@@ -989,7 +994,9 @@ NM-twin probe. The Bakhtiarian-loop unification names this.
 
 **"You" is the fifth audience** — both singular (your own practice) and
 plural (sharing with and remixing from peers through the collaborative
-gist system).
+gist system). The arc that opened in Ch1 with _write for future-you, a
+stranger_ closes here as _write for yourself, the audience you are
+becoming_. Same self, end-to-end.
 
 The chapter's intellectual-agency move: _you can use programming as a
 tool for thought, on whatever problems and ideas interest you, for the

@@ -92,8 +92,8 @@ puzzle, not competing accounts.
 - **Polanyi** (_The Tacit Dimension_, 1966) names **knowing**, particularly
   _tacit knowing_: skilled competence drawing on a vast unarticulated
   background. _"We know more than we can tell."_ This grounds the mastery
-  contract — mastery is demonstrable competence (tacit), not explanatory
-  fluency (explicit).
+  contract — mastery is demonstrable competence (tacit), not explanatory fluency
+  (explicit).
 - **Friston** (active inference; contemporary cogsci) supplies the **mechanism**
   by which tacit knowing operates: a learner's generative model aligning,
   through prediction-and-update on the learner's own sensory stream, with the
@@ -196,7 +196,13 @@ part of the central domain.
 
 V and F are **substrate-agnostic bridging personae**. The framing extends from
 JS-in-browser to wearables, tangibles, embedded, embodied — anywhere a
-computational artifact gets designed and engineered.
+computational artifact gets designed and engineered.[^wtf-origin]
+
+[^wtf-origin]: The course's name has a happy origin: in an early planning
+    conversation someone noted that "Welcome to Programming" reads as "WtF."
+    The author leaned in. The whole curriculum's ontology — V/F as
+    Vibetoader/Frogrammer, the symbology, the playful tone — grew from that
+    joke.
 
 | Character         | Twin (non-delegable) | Bridging activity      | Substrate range                                                           |
 | ----------------- | -------------------- | ---------------------- | ------------------------------------------------------------------------- |
@@ -250,10 +256,10 @@ above:
 
 #### The twin / process 2×2
 
-|                       | **NM-twin: NO**                                                                                                  | **NM-twin: YES**                                                                                                  |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **User-twin: NO**     | **Pure process** — twin-less; follows checklists / patterns / steps without grounding in either twin             | **🔬 Frogrammer** — twins the NM (Ch2 develops this)                                                              |
-| **User-twin: YES**    | **🎨 Vibetoader** — twins the user (Ch3 develops this)                                                           | **The both-twins state** — the transcendent practice Ch4 (V + F operating alongside an LLM) and Ch5 (V + F merged in snippetry) develop in the learner |
+|                    | **NM-twin: NO**                                                                                      | **NM-twin: YES**                                                                                                                                       |
+| ------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **User-twin: NO**  | **Pure process** — twin-less; follows checklists / patterns / steps without grounding in either twin | **🔬 Frogrammer** — twins the NM (Ch2 develops this)                                                                                                   |
+| **User-twin: YES** | **🎨 Vibetoader** — twins the user (Ch3 develops this)                                               | **The both-twins state** — the transcendent practice Ch4 (V + F operating alongside an LLM) and Ch5 (V + F merged in snippetry) develop in the learner |
 
 Three of the four corners get curriculum-chapter mappings: Ch2 = F, Ch3 = V,
 Ch4 + Ch5 = both. The fourth corner (no twin) is the starting position the
@@ -282,8 +288,8 @@ rules rather than as guides loses the responsiveness their twin and automated
 experience provide.
 
 The healthy relationship: processes _afford_ structure; twins _do_ the work;
-experience automates the integration. _You have to understand the rules in
-order to break them._
+experience automates the integration. _You have to understand the rules in order
+to break them._
 
 #### Documentation as a both-hats case
 
@@ -360,38 +366,38 @@ of LLM-collaborative Frogramming.
 
 #### V/F dynamic — the Bakhtiarian loop
 
-V and F coordinate as a generative pair. Their dialogue is itself a pattern of
-mutual discovery.
+V and F engage iteratively, learning each other's craft as they go. V proposes
+use-case experiences (_"imagine an interaction where…"_); F discovers what the
+substrate affords (_"this becomes possible, and it also enables…"_). Each turn
+shifts what V can propose and what F can build. The exchange is open-ended —
+no fixed number of beats, no required rhythm. Over time, V and F merge in the
+practitioner; Ch5's snippetry is where the merging crystallizes into a single
+integrated practice (the both-twins corner of the §3 2×2, in its merged form).
 
-**4-beat exercise choreography (L2 territory)**:
+Engaging in these exchanges is how each side picks up the other's craft:
+V learns what's afford-able through F's iterative discoveries; F learns to
+read user-experience signals through V's iterative proposals. The dynamic
+recurs in historical pairs (Faraday/Maxwell, Mendel/breeders).
 
-1. **V proposes**: "imagine an interaction where…"
-2. **F responds**: "here's the data + computation that requires…"
-3. **F discovers**: "implementing that enables also Z…"
-4. **V interprets**: "if Z, then users could also…"
+#### V/F vs. Composer/Virtuoso/Mechanism/Audience cast
 
-Forward dialogue surfaces affordances neither saw alone. Concrete L2 exercises
-take this shape. The pattern recurs in historical pairs (Faraday/Maxwell,
-Mendel/breeders).
+The Composer/Virtuoso/Mechanism/Audience cast (§24) is **teaching apparatus**
+— explicitly not structural guide, explicitly not the canonical home for any
+learning objective. V and F are **practice-stances** the student inhabits and
+are tied to LOs. The two are **orthogonal**:
 
-#### V/F vs. Composer/Virtuoso/Mechanism/Audience cast (open)
-
-The Composer/Virtuoso/Mechanism/Audience cast (§24) is **teaching apparatus** —
-explicitly NOT structural guide. V and F are **practice-stances** the student
-inhabits. The relationship between the two reads (most likely) as orthogonal:
-
-- A _stance_ (V or F) and a _role_ (Composer / Virtuoso / Mechanism / Audience)
-  coexist in any moment of work
+- A _stance_ (V or F) and a _role_ (Composer / Virtuoso / Mechanism /
+  Audience) coexist in any moment of work
 - V/F say which audience the practitioner twins
 - Composer/Virtuoso say which phase of composition the practitioner is in
 
-Final relationship to be locked during chapters drafting.
+The metaphor exists to illustrate the practice; it is not the practice.
 
 #### V/F at the artifact layer — coordinated Translational Sprints
 
-The V/F symmetry operates at two layers — the student layer and the
-**artifact layer**, between the curriculum and the infrastructure that makes
-its pedagogy operational:
+The V/F symmetry operates at two layers — the student layer and the **artifact
+layer**, between the curriculum and the infrastructure that makes its pedagogy
+operational:
 
 | Layer        | V (physics / experiential)                                                      | F (engineering / technical)                                                           |
 | ------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -479,22 +485,22 @@ crystallizations of practice that come from named lineages.
 **Integrative frames** — one per cluster:
 
 - **Instructional-design clusters** (_cogsci mechanisms_ +
-  _course-construction_) → integrated by **4C/ID** (Van Merriënboer &
-  Kirschner, _Ten Steps to Complex Learning_) together with **Whole Game**
-  (Perkins, _Making Learning Whole_). Both are holistic-design responses to
-  atomistic instructional design — same commitment, two registers:
-  academic-operational (4C/ID's task classes, four components, ten steps) and
-  accessible-philosophical (Whole Game's _junior version of the whole_,
-  _making the game worth playing_, _working on the hard parts_). The
-  principles in these clusters are this curriculum's practitioner-form of those
-  commitments on a specific surface (JEJ + V/F + 5 layers + spiderweb).
+  _course-construction_) → integrated by **4C/ID** (Van Merriënboer & Kirschner,
+  _Ten Steps to Complex Learning_) together with **Whole Game** (Perkins,
+  _Making Learning Whole_). Both are holistic-design responses to atomistic
+  instructional design — same commitment, two registers: academic-operational
+  (4C/ID's task classes, four components, ten steps) and
+  accessible-philosophical (Whole Game's _junior version of the whole_, _making
+  the game worth playing_, _working on the hard parts_). The principles in these
+  clusters are this curriculum's practitioner-form of those commitments on a
+  specific surface (JEJ + V/F + 5 layers + spiderweb).
 - **Stance & values cluster** → integrated by **companion pedagogy**: the
   educator-as-companion lineage running through Open Education, community of
   practice, decolonised CS, and accessibility — the elewa.education / Greg
   Wilson / Mikhak-pedagogy line. The teacher walks alongside the learner rather
   than standing in front of them; authority is plural, distributed across
-  classroom, collegial, partnered, and discourse communities. 4C/ID is silent
-  on these.
+  classroom, collegial, partnered, and discourse communities. 4C/ID is silent on
+  these.
 
 **Transfer Paradox + Reusability Paradox — related but distinct principles**:
 
@@ -716,10 +722,9 @@ levels, PBIS, Block Model, SOLO Taxonomy) all benefit from being named.
 ### B.3 Stance & values
 
 How the curriculum approaches learners and community. Integrated by **companion
-pedagogy** — the educator-as-companion lineage that runs through Open
-Education, community of practice, decolonised CS, and accessibility. The
-teacher walks alongside the learner; authority is plural and the plural is
-wide.
+pedagogy** — the educator-as-companion lineage that runs through Open Education,
+community of practice, decolonised CS, and accessibility. The teacher walks
+alongside the learner; authority is plural and the plural is wide.
 
 | Principle                                    | Source                                            | Brief                                                                                                                                                                      |
 | -------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -918,6 +923,16 @@ more again.** Each layer is a complete exit point.
 | **L3** | Explore / Snippetry  | …the medium itself                         | Programming automaticity; exploring concepts/domains _through_ programming; self-directed exploration | snippetry, remixing, esoteric prompts (quines, wuzzles, cross-medium translations)                            |
 | **L4** | Wonder / Philosophy  | …the philosophical questions               | Understand world as information + embodied computation; generate interesting philosophical questions  | easter eggs in main text; side/footnotes; references; questions                                               |
 
+#### SOLO applies within each layer (not across)
+
+SOLO taxonomy (Pre-Structural / Uni-Structural / Multi-Structural / Relational
+/ Extended-Abstract) applies _within_ each layer, not across them. A learner
+at L0 can be Pre-Structural through Extended-Abstract on the NM; same span at
+L1, L2, L3, L4. The layers are _kinds_ of work; SOLO is _depth_ within each
+kind. The cross-product is a 5×5 reading: layer × SOLO-depth — useful for
+diagnosis and for designing exercises that meet a learner where they are at a
+given layer.
+
 #### Each layer's data thread (the red thread ramifies)
 
 | Layer | What "data" means at this layer                            |
@@ -935,13 +950,13 @@ Each of the 5 strands has a philosophy reading that opens at L4. These pair the
 operational work of the strand with a tradition that names what the strand is
 ultimately about.
 
-| Strand                     | L4 philosophy reading                                                                |
-| -------------------------- | ------------------------------------------------------------------------------------ |
-| Twinning                   | Active inference / Friston / Polanyi (tacit knowing as predictive alignment)         |
-| Decisions                  | Compositional voice / authorship / free will (small choices accumulating into style) |
-| Perspective stacking       | Phenomenology / point-of-view in fiction / Nagel's _What Is It Like…_                |
-| Whole rhetorical situation | Systems thinking / Bateson / cybernetics (the whole as the unit of analysis)         |
-| Affordances                | Gibson / embodied cognition / ecological psychology (perception as relational)       |
+| Strand                     | L4 philosophy reading                                                                                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Twinning                   | Active inference / Friston / Polanyi (tacit knowing as predictive alignment); self-twinning as theory of consciousness (the predictive model of self is the seat of self) |
+| Decisions                  | Compositional voice / authorship / free will (small choices accumulating into style)                                                                                      |
+| Perspective stacking       | Phenomenology / point-of-view in fiction / Nagel's _What Is It Like…_                                                                                                     |
+| Whole rhetorical situation | Systems thinking / Bateson / cybernetics (the whole as the unit of analysis)                                                                                              |
+| Affordances                | Gibson / embodied cognition / ecological psychology (perception as relational)                                                                                            |
 
 Open-ended development guide — readings deepen and shift; the table is a
 direction-finder, not a closed catalog.
@@ -1039,6 +1054,18 @@ part isn't enough; the fullest work holds the _whole_ situation in view.
   the conceit hold across iterations, contributors, contexts; or does it
   decohere as the situation evolves?).
 
+**The two-scale instrument reading.** The rhetorical situation has two scales,
+not one. The first instrument is the machine playing the score — predictable,
+deterministic, reading the code-as-notation literally. The second instrument
+is the user's experience of that machine playing — intangible, emergent,
+arising from the interaction between the parties (the user, the program, the
+context). The _concert_ — the experience-as-purpose, what the work ultimately
+serves — is what both V and F orient toward. Neither V nor F controls the
+concert directly: the user-experience takes place in the body of the user but
+arises from interaction; the work of both hats is to set up conditions that
+make the experience the program serves possible. (See §24 for the metaphor
+this reading extends; the metaphor illustrates, the strand does the teaching.)
+
 #### Affordances (5th strand, equal status)
 
 Connections between agent and environment. **An affordance is a relational
@@ -1083,10 +1110,10 @@ spiral pass.
 > through the actions and state of the user." — user, mid-conversation (round 5
 > era)
 
-**Substrate-is-not-inert sharpening**: the data thread doesn't just flow
-through layers — embody **crystallizes** its dynamic flow into a static-but-4D
-structure that makes all facets explorable. The data thread stitches everything
-together _because_ the substrate makes the motion legible.
+**Substrate-is-not-inert sharpening**: the data thread doesn't just flow through
+layers — embody **crystallizes** its dynamic flow into a static-but-4D structure
+that makes all facets explorable. The data thread stitches everything together
+_because_ the substrate makes the motion legible.
 
 #### Ch3 anchor (the data-flow loop)
 
@@ -1162,7 +1189,9 @@ alone.
 
 ### §17 AI-adoption model alignment with V/F
 
-The user's pre-existing AI-adoption model maps precisely onto V/F:
+A 4-level AI-adoption model developed by Evan Cole with collaborators Janet
+Tilstra and Josenne Peña maps precisely onto V/F. The model is the root
+inspiration for Ch4's shape:
 
 | AI-adoption level | What it captures                | V/F mapping                                                 |
 | ----------------- | ------------------------------- | ----------------------------------------------------------- |
@@ -1468,6 +1497,42 @@ flowchart LR
 This is what makes lenses powerful — they don't just _show_ the NM, they let
 learners _explore the motion the substrate makes legible_.
 
+#### Data's two boundaries: resolve and emit
+
+In JEJ's NM, data crosses two abstraction boundaries — both V/F-shared
+territory:
+
+```mermaid
+flowchart TB
+    subgraph vlevel["Visual-syntax level (software-speak)"]
+        vs["expressions, statements<br/>'control panel'<br/>what the learner SEES in code"]
+    end
+
+    subgraph blevel["Behind-the-scenes level (computational-speak)"]
+        bs["bindings, scopes, values, coercion<br/>'the machine'<br/>what JS actually IS"]
+    end
+
+    subgraph io["I/O Channels (host-provided)"]
+        console["Developer Console<br/>(dev space)<br/>console.log, debug, info, warn, error..."]
+        ui["User Interface<br/>(user space)<br/>alert, confirm, prompt"]
+    end
+
+    vs <-->|"**resolve** — bridge between viewing levels<br/>data flows here when an expression produces a value"| bs
+    bs <-->|"**emit** — bridge between computation and interaction<br/>data crosses out: console.* / alert<br/>data crosses in: prompt / confirm"| console
+    bs <-->|"**emit**"| ui
+```
+
+**Resolve** connects what the learner sees in code (V-friendly) to what the
+machine actually does (F-friendly). V reads the code; F traces the NM events;
+resolve is the bridge.
+
+**Emit** connects computation to interaction. V designs the user-facing
+dialog; F implements the call. Emit is where data crosses out of (or into) the
+program.
+
+Filtering only resolve events shows the complete data flow through a program
+— a useful pedagogical view in lens authoring.
+
 #### Two scopes
 
 The Explorotron framework operates at **two scales**:
@@ -1539,11 +1604,22 @@ counterpart analysis lives in `DGMD-E-1-artifacts/embodying-tcer/`.
 
 **First-class teaching apparatus.** Explicitly NOT structural guide. The
 metaphor illuminates moments; the spiral curriculum (§6) is the structural
-guide.
+guide. The metaphor is _not_ the canonical home for any learning objective —
+LOs live with V/F (§3) and the strands (§13).
 
 > _"When the metaphor serves the vision, use it. When it strains, drop it. The
 > vision stands on its own. The metaphor is illustration, not argument."_ —
 > `narrative/README.md`
+
+#### Two-scale instrument extension
+
+The metaphor extends naturally to a two-scale reading: the **first instrument**
+is the mechanical instrument playing the score (the NM evaluating code); the
+**second instrument** is the user's experience of the played piece (intangible,
+emergent, arising from interaction). The **concert** — the experience-as-
+purpose — is what V and F orient toward. This is illustration of the whole
+rhetorical situation strand (§13); the strand carries the learning objective,
+the metaphor carries the picture.
 
 #### The cast (six roles)
 
@@ -1699,29 +1775,6 @@ GEB tribute, not GEB-imitation. Captures the structural claim:
 For the deeper section / appendix only. For the attuned L4 reader who recognizes
 the parallel. Image creation is future task.
 
-#### Deeper section structure (outline)
-
-The deeper section / appendix is where L4 readings, references, and tributes
-live without crowding the body. Provisional outline:
-
-- **The mu-tribute** (this §26 image, once made)
-- **Predictive processing deeper grounding** — Andy Clark (_Surfing
-  Uncertainty_), Jakob Hohwy (_The Predictive Mind_), Karl Friston primary
-  sources; "minds work as predictive engines" as broad framing
-- **Polanyi's _The Tacit Dimension_** — supplement to §1 Principle 1
-- **Curriculum-as-Quine appendix** — the tooling-simplicity reflexive note
-- **Cybernetics side note** — Wiener, Bateson; the whole rhetorical situation
-  strand's L4 reading
-- **Strange-loops as L4 easter eggs** — Hofstadter; scattered references only,
-  not a foreground frame
-- **Gibson / ecological psychology** — affordances strand L4 reading
-- **The Bakhtiarian-loop historical pairs** (Faraday/Maxwell, Mendel/breeders)
-  — extended treatment for the engineering × physics co-evolution lineage
-- **Levin / Wolfram** — distant L4 cousins (computation in biology;
-  computational universe); easter eggs only, not load-bearing
-
-Body content for each is deferred; this is the structural promise.
-
 ---
 
 ### §27 Voice / style commitments
@@ -1739,7 +1792,7 @@ From `narrative/README.md` §25 and the user's `~/.claude/CLAUDE.md`.
   welcome when they serve. Respects the reader as an adult.
 - **Honest about uncertainty** — evidence-informed but not dogmatic. When
   something is conjecture, say so.
-- **Belgian/European-adjacent reserve** — dry realism, unwilling to oversell.
+- **Belgian self-depricating absurdism** — dry realism, unwilling to oversell.
   Not cold; not cynical. Measured.
 - **Second person common** — "you" is the reader.
 
@@ -1756,10 +1809,10 @@ From `narrative/README.md` §25 and the user's `~/.claude/CLAUDE.md`.
 The course is grounded experience-based instructional design. GEB is a respected
 influence; the structural guide is the spiderweb + spiral.
 
-**Crucial distinction**: _GEB hides much of its meaning in itself as a
-puzzle, requiring intellectual confidence to engage. WtF is designed
-pedagogically so it is eminently learnable and BUILDS intellectual confidence._
-This is the foundational divergence.
+**Crucial distinction**: _GEB hides much of its meaning in itself as a puzzle,
+requiring intellectual confidence to engage. WtF is designed pedagogically so it
+is eminently learnable and BUILDS intellectual confidence._ This is the
+foundational divergence.
 
 #### Beware lazy conflations
 
@@ -1821,8 +1874,8 @@ For the complete list with paths and relevance notes, see
 
 Most load-bearing:
 
-- `syllabus.md` — the existing course prose (the rich chapter bodies migrate
-  to `syllabus.chapters.md`; top-of-document framing stays in `syllabus.md`)
+- `syllabus.md` — the existing course prose (the rich chapter bodies migrate to
+  `syllabus.chapters.md`; top-of-document framing stays in `syllabus.md`)
 - `narrative/README.md` — composer/virtuoso/mechanism metaphor + 8 AI-collab
   skills + voice spec + visual asset set
 - `just-enough/javascript/README.md` + `DOCS.md` + `notional-machine.md`

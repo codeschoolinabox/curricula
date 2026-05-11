@@ -1238,6 +1238,17 @@ returns when the user cancels. Distinct from `undefined`, distinct from
 empty string. The first encounter teaches when each falsy value carries
 which signal.
 
+**The two-scale reading.** Up to now, the work has been about one
+instrument: the machine playing the score (the NM evaluating code).
+Chapter 3 reveals a second instrument: the user's experience of the
+played piece. The user's experience is _not_ under your direct control
+— it takes place in the body of the user, but it _arises from the
+interaction_ between the parties (the user, the program, the context).
+The work the program serves is the _concert_ — the experience that
+emerges when machine, audience, and context meet. Both V and F orient
+toward that concert; the design discipline of Ch3 is to set up
+conditions that make the experience the program serves possible.
+
 ### 3.2 Variable Program Behaviors
 
 **Input/output pairs as test cases** in the top-level doc comment extend
@@ -1380,8 +1391,14 @@ crutch is identified as a tool, not as essential infrastructure.
   loop grown into the dev↔NM↔user loop
 - 🐣 Operate the V/F coordination bridge: users' needs drive data
   shape; data shape supports flexible user experiences
-- 🐔 Apply the Bakhtiarian loop 4-beat for a small interaction: V
-  proposes → F responds → F discovers → V interprets
+- 🐔 Engage in V↔F coordination on a small interaction: propose a
+  use-case experience, discover what the NM affords, iterate. Notice
+  how each step changes what you can propose next — and how you start
+  picking up the other's craft along the way (the Bakhtiarian dynamic,
+  open-ended)
+- 🐔 Hold the two-scale reading: the machine plays the score (NM
+  evaluation); the user's experience arises from interaction; the
+  _concert_ is what your work serves
 
 ### Layer 3 — Snippetry
 
@@ -1427,6 +1444,15 @@ The chapter's intellectual-agency move: _you direct an alien intelligence —
 and you stay in charge of what gets built._ Twinning the LLM means twinning
 a process that twins what _you_ twin (the user, or the NM). Your job is to
 align — and to relish productive divergence.
+
+**Chapter 4's shape draws on a 4-level AI-adoption model** developed by
+Evan Cole with collaborators Janet Tilstra and Josenne Peña (the curriculum
+author's prior work). The model maps precisely onto V/F: Level 3 (behavioral
+— how AI acts in collaboration) is V's territory; Level 2 (cognitive — what
+AI knows / how it "thinks") is F's territory; Levels 1 (conceptual) and 0
+(physical) are scope-discipline, not blindness. The organizing line for the
+chapter: _you twin Level 2 in order to operate at Level 3_. See ontology §17
+for the full mapping.
 
 **The both-twins corner of the twin/process 2×2** (see
 `syllabus.ontology.md` §3): Ch4 develops the both-twins state in its
@@ -1973,6 +1999,12 @@ practice that builds the model AI can't have for you.
   tribute_ — the GEB-flavored image of V and F as mutual access
   points to a single merged practice. Recognize the parallel without
   the curriculum laboring it
+- 🐥 _(deeper section)_ Self-twinning as a theory of consciousness:
+  the predictive model of self is the seat of self. The arc you've
+  traveled — Ch1's write-for-future-you to Ch5's write-for-yourself-
+  the-audience-you-are-becoming — is the curriculum's operational
+  encounter with that idea (see ontology §12 L4 matrix, Twinning row,
+  and §15 Bildung arc)
 - 🐔 _(deeper section)_ The data-thread reading at full depth: the
   entire embodied phenomenon from theory to domain is data flowing
   through and changing the physical world — in theory changing the
