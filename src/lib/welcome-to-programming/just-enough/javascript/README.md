@@ -32,18 +32,20 @@ flowchart LR
     NM["Notional Machine<br/>(this is what learners twin)"]
     embody["embody/<br/>(operational data + event streams)"]
     lenses["lenses/<br/>(pedagogical perspectives)"]
-    JEJ --> NM --> embody --> lenses
+    orchestrate["orchestrate/<br/>(StudyLenses orchestrator)"]
+    JEJ --> NM --> embody --> lenses --> orchestrate
 ```
 
-| Layer            | What it is                                                         | File / dir                                     |
-| ---------------- | ------------------------------------------------------------------ | ---------------------------------------------- |
-| **JEJ**          | The language subset (what learners write)                          | [`reference.md`](./reference.md)               |
-| **NM**           | The conceptual evaluation model (the learning objective)           | [`notional-machine.md`](./notional-machine.md) |
-| **embody**       | The operational embodiment of the NM (frozen data + event streams) | [`embody/`](./embody/)                         |
-| **study lenses** | Pedagogical perspectives on the embodied NM                        | [`lenses/`](./lenses/)                         |
+| Layer            | What it is                                                                                                                         | File / dir                                     |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **JEJ**          | The language subset (what learners write)                                                                                          | [`reference.md`](./reference.md)               |
+| **NM**           | The conceptual evaluation model (the learning objective)                                                                           | [`notional-machine.md`](./notional-machine.md) |
+| **embody**       | The operational embodiment of the NM (frozen data + event streams)                                                                 | [`embody/`](./embody/)                         |
+| **study lenses** | Pedagogical perspectives on the embodied NM                                                                                        | [`lenses/`](./lenses/)                         |
+| **orchestrate**  | `<StudyLenses>` orchestrator + recommender + analysis helpers — the single-writer editor and snippet-scope Explorotron realization | [`orchestrate/`](./orchestrate/)               |
 
-Get the NM right and embody / lenses / curriculum follow. This package's
-internal directory structure mirrors the chain.
+Get the NM right and embody / lenses / orchestrate / curriculum follow. This
+package's internal directory structure mirrors the chain.
 
 [metaphor]: ../../../../spiralearn/welcome-to-programming/syllabus.md
 

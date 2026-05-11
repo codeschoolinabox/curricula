@@ -1,11 +1,10 @@
-# Welcome to Frogramming — Curriculum Ontology (v2)
+# Welcome to Frogramming — Curriculum Ontology
 
 > **Purpose**: this document is the substantive ontology of the WtF curriculum.
 > It captures the _conclusions_ of an extended thinking-together process — the
-> framework, not the conversation. It supersedes the earlier
-> `syllabus.ontology.md` (which it carries forward concentrically without loss)
-> and weaves in substance from `syllabus.md`, `narrative/README.md`, and the
-> `just-enough/javascript/` infrastructure documentation.
+> framework, not the conversation. It weaves substance from `syllabus.md`,
+> `narrative/README.md`, and the `just-enough/javascript/` infrastructure
+> documentation.
 >
 > **Companions** (siblings, by co-location):
 >
@@ -84,25 +83,33 @@ tasks; AI cannot have _your_ generative model align with the target system. The
 completed without AI, because mastery is the _having of the experience that
 builds the model_ — non-transferable.
 
-##### Three threads grounding the principle (structural sketch — needs user prose)
+##### Three threads grounding the principle
 
 The claim _"AI can't UNDERSTAND for you"_ sits at the intersection of three
-distinct strands of cognitive-science / philosophy. Each addresses a different
-layer of what "understanding" involves; they are pieces of one puzzle, not
-competing accounts.
+distinct strands of cognitive-science / philosophy. They are pieces of one
+puzzle, not competing accounts.
 
-- **Polanyi** (_The Tacit Dimension_, 1966) — names **knowing**, in particular
-  _tacit knowing_: skilled competence that draws on a vast unarticulated
-  background. _"We know more than we can tell."_ Polanyi grounds the mastery
-  contract specifically — mastery is demonstrable competence (tacit), not
-  explanatory fluency (explicit).
-- **Friston** (active inference; contemporary cogsci) — gives a **mechanism** by
-  which Polanyi's tacit knowing operates: predictive-model alignment with target
-  systems. Not a competing account; the mechanistic underwriting.
-- **Metacognition** (Hohwy, Fleming, and others in the Friston-adjacent field) —
-  addresses _how and how much people understand about what they know / skills
-  they demonstrate_. This is the awareness-of-knowing layer, distinct from both
-  the tacit knowing itself and the mechanism by which it operates.
+- **Polanyi** (_The Tacit Dimension_, 1966) names **knowing**, particularly
+  _tacit knowing_: skilled competence drawing on a vast unarticulated
+  background. _"We know more than we can tell."_ This grounds the mastery
+  contract — mastery is demonstrable competence (tacit), not explanatory
+  fluency (explicit).
+- **Friston** (active inference; contemporary cogsci) supplies the **mechanism**
+  by which tacit knowing operates: a learner's generative model aligning,
+  through prediction-and-update on the learner's own sensory stream, with the
+  target system. Not a competing account of knowing; the mechanistic
+  underwriting of it.
+- **Metacognition** (Hohwy, Fleming, and others in the Friston-adjacent field)
+  is the **awareness-of-knowing** layer — how (and how well) people understand
+  what they know and the skills they demonstrate. Distinct from both the tacit
+  knowing itself and the mechanism by which it operates.
+
+Together: an AI can write code, articulate explanations, even pass exercises.
+What it cannot do is run the prediction-and-update loop on _your_ sensory
+stream, build _your_ tacit competence, or grow _your_ awareness of what you do
+and don't know. Knowing, the mechanism that produces it, and the awareness of
+that mechanism are all first-person work. The curriculum is designed to make
+that work happen — and to make its results visible to the learner doing it.
 
 #### Principle 2 — Concepts are connections; connections are concepts
 
@@ -466,23 +473,28 @@ sits _inside_ the central domain rather than as two separate ATT tiers.
 ## Part B — Design principles
 
 The principles the curriculum is built **on** — _about_ the course, not _in_ the
-course for learners to learn.
+course for learners to learn. They are not an arbitrary list; they are
+crystallizations of practice that come from named lineages.
 
-**Integrative frames** (one per cluster — the user's design principles are not
-an arbitrary list):
+**Integrative frames** — one per cluster:
 
 - **Instructional-design clusters** (_cogsci mechanisms_ +
-  _course-construction_) → integrated by **4C/ID** (Van Merriënboer & Kirschner,
-  _Ten Steps to Complex Learning_) + **Whole Game** (Perkins). Both are
-  _holistic-design_ responses to atomistic instructional design —
-  academic-operational vs accessible- philosophical registers of the same
-  commitment. The principles in these clusters are this curriculum's
-  _practitioner-form_ of 4C/ID's commitments for this specific surface (JEJ +
-  V/F + 5 layers + spiderweb).
-- **Stance & values cluster** → integrated by **its own lineage**:
-  educator-as-companion, Open Education, community-of-practice, decolonised CS,
-  accessibility — the elewa.education / Greg Wilson / Mikhak-pedagogy line.
-  4C/ID is silent on these.
+  _course-construction_) → integrated by **4C/ID** (Van Merriënboer &
+  Kirschner, _Ten Steps to Complex Learning_) together with **Whole Game**
+  (Perkins, _Making Learning Whole_). Both are holistic-design responses to
+  atomistic instructional design — same commitment, two registers:
+  academic-operational (4C/ID's task classes, four components, ten steps) and
+  accessible-philosophical (Whole Game's _junior version of the whole_,
+  _making the game worth playing_, _working on the hard parts_). The
+  principles in these clusters are this curriculum's practitioner-form of those
+  commitments on a specific surface (JEJ + V/F + 5 layers + spiderweb).
+- **Stance & values cluster** → integrated by **companion pedagogy**: the
+  educator-as-companion lineage running through Open Education, community of
+  practice, decolonised CS, and accessibility — the elewa.education / Greg
+  Wilson / Mikhak-pedagogy line. The teacher walks alongside the learner rather
+  than standing in front of them; authority is plural, distributed across
+  classroom, collegial, partnered, and discourse communities. 4C/ID is silent
+  on these.
 
 **Transfer Paradox + Reusability Paradox — related but distinct principles**:
 
@@ -703,9 +715,11 @@ levels, PBIS, Block Model, SOLO Taxonomy) all benefit from being named.
 
 ### B.3 Stance & values
 
-How the curriculum approaches learners and community. Integrated by its own
-lineage (educator-as-companion / open community of practice — exact integrative
-name deferred).
+How the curriculum approaches learners and community. Integrated by **companion
+pedagogy** — the educator-as-companion lineage that runs through Open
+Education, community of practice, decolonised CS, and accessibility. The
+teacher walks alongside the learner; authority is plural and the plural is
+wide.
 
 | Principle                                    | Source                                            | Brief                                                                                                                                                                      |
 | -------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -913,6 +927,24 @@ more again.** Each layer is a complete exit point.
 | L2    | Intentional design of data flows for specific ends         |
 | L3    | Substrate for self-expression and exploration              |
 | L4    | Information + embodied computation as substrate of reality |
+
+#### L4 by strand — each strand's philosophy reading (open-ended development guide)
+
+L4 is not only easter-eggs-scattered-as-references; it is a structural promise.
+Each of the 5 strands has a philosophy reading that opens at L4. These pair the
+operational work of the strand with a tradition that names what the strand is
+ultimately about.
+
+| Strand                     | L4 philosophy reading                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| Twinning                   | Active inference / Friston / Polanyi (tacit knowing as predictive alignment)         |
+| Decisions                  | Compositional voice / authorship / free will (small choices accumulating into style) |
+| Perspective stacking       | Phenomenology / point-of-view in fiction / Nagel's _What Is It Like…_                |
+| Whole rhetorical situation | Systems thinking / Bateson / cybernetics (the whole as the unit of analysis)         |
+| Affordances                | Gibson / embodied cognition / ecological psychology (perception as relational)       |
+
+Open-ended development guide — readings deepen and shift; the table is a
+direction-finder, not a closed catalog.
 
 #### Substrate is not inert
 
@@ -1667,6 +1699,29 @@ GEB tribute, not GEB-imitation. Captures the structural claim:
 For the deeper section / appendix only. For the attuned L4 reader who recognizes
 the parallel. Image creation is future task.
 
+#### Deeper section structure (outline)
+
+The deeper section / appendix is where L4 readings, references, and tributes
+live without crowding the body. Provisional outline:
+
+- **The mu-tribute** (this §26 image, once made)
+- **Predictive processing deeper grounding** — Andy Clark (_Surfing
+  Uncertainty_), Jakob Hohwy (_The Predictive Mind_), Karl Friston primary
+  sources; "minds work as predictive engines" as broad framing
+- **Polanyi's _The Tacit Dimension_** — supplement to §1 Principle 1
+- **Curriculum-as-Quine appendix** — the tooling-simplicity reflexive note
+- **Cybernetics side note** — Wiener, Bateson; the whole rhetorical situation
+  strand's L4 reading
+- **Strange-loops as L4 easter eggs** — Hofstadter; scattered references only,
+  not a foreground frame
+- **Gibson / ecological psychology** — affordances strand L4 reading
+- **The Bakhtiarian-loop historical pairs** (Faraday/Maxwell, Mendel/breeders)
+  — extended treatment for the engineering × physics co-evolution lineage
+- **Levin / Wolfram** — distant L4 cousins (computation in biology;
+  computational universe); easter eggs only, not load-bearing
+
+Body content for each is deferred; this is the structural promise.
+
 ---
 
 ### §27 Voice / style commitments
@@ -1766,8 +1821,8 @@ For the complete list with paths and relevance notes, see
 
 Most load-bearing:
 
-- `syllabus.ontology.md` — the predecessor this document supersedes
-- `syllabus.md` — the existing course prose (read-only for the current redraft)
+- `syllabus.md` — the existing course prose (the rich chapter bodies migrate
+  to `syllabus.chapters.md`; top-of-document framing stays in `syllabus.md`)
 - `narrative/README.md` — composer/virtuoso/mechanism metaphor + 8 AI-collab
   skills + voice spec + visual asset set
 - `just-enough/javascript/README.md` + `DOCS.md` + `notional-machine.md`

@@ -114,46 +114,16 @@ experiment, or surprise yourself. This course helps you build both at once.
 - [Symbology](#symbology)
 - [Before You Begin](#before-you-begin)
 - [Chapter 0: What is Programming?](#chapter-0-what-is-programming)
-  - [0.1 The Rhetorics of Programming](#01-the-rhetorics-of-programming)
-  - [0.2 Positioning _Welcome to Frogramming_](#02-positioning-welcome-to-frogramming)
-  - [0.3 Two Hats: Vibetoading and Frogramming](#03-two-hats-vibetoading-and-frogramming)
 - [Chapter 1: Developers](#chapter-1-developers)
-  - [Comments](#comments)
-  - [Logs](#logs)
 - [Chapter 2: Developers and Computers](#chapter-2-developers-and-computers)
-  - [2.0 The Notional Machine](#20-the-notional-machine)
-  - [2.1 Running a Program](#21-running-a-program)
-  - [2.2 Expressions and Resolve](#22-expressions-and-resolve)
-  - [2.3 Values and Bindings](#23-values-and-bindings)
-  - [2.4 Statements and Control Flow](#24-statements-and-control-flow)
-  - [2.6 Prototype Chain](#26-prototype-chain)
-  - [2.8 Reading, Writing, Reviewing Code](#28-reading-writing-reviewing-code)
-  - [Computational Idioms (2A–2F)](#computational-idioms)
 - [Chapter 3: Developers, Computers, and Users](#chapter-3-developers-computers-and-users)
-  - [3.1 User Input and Output](#31-user-input-and-output)
-  - [3.2 Variable Program Behaviors](#32-variable-program-behaviors)
-  - [3.3 Validating User Input](#33-validating-user-input)
-  - [3.4 PBSI in User Programs](#34-pbsi-in-user-programs)
-  - [3.5 Developing Programs](#35-developing-programs)
-  - [3.6 Plaintext Programs](#36-plaintext-programs)
 - [Chapter 4: Developers, Computers, Users, and Agents](#chapter-4-developers-computers-users-and-agents)
-  - [4.0 What is an LLM?](#40-what-is-an-llm)
-  - [4.1 Collaborating in Prose](#41-collaborating-in-prose)
-  - [4.2 Agents and Developer Communication](#42-agents-and-developer-communication)
-  - [4.3 Agents and Computer Communication](#43-agents-and-computer-communication)
-  - [4.4 Agents and User Communication](#44-agents-and-user-communication)
-  - [4.5 Looking Back, Looking Forward](#45-looking-back-looking-forward)
-  - [4.6 Vibetoading](#46-vibetoading)
 - [Chapter 5: Developers, Computers, Users, Agents, and You](#chapter-5-developers-computers-users-agents-and-you)
-  - [5A. Training-Wheels-Off: Carrying Predictive Mastery](#5a-training-wheels-off-carrying-predictive-mastery)
-  - [5B. Extending the NM: New JS Territory](#5b-extending-the-nm-new-js-territory)
-  - [5C. Programming Paradigms](#5c-programming-paradigms)
-  - [5D. Snippetry as Practice](#5d-snippetry-as-practice)
-  - [5E. You as Audience](#5e-you-as-audience)
-  - [5F. Compositional Voice and Micro-Decisions](#5f-compositional-voice-and-micro-decisions)
-  - [5G. Self-Directed Learning](#5g-self-directed-learning)
-  - [5H. The Whole Rhetorical Situation](#5h-the-whole-rhetorical-situation)
-  - [5I. Capstone Reflections](#5i-capstone-reflections)
+
+> **Chapter bodies and learning objectives live in
+> [`syllabus.chapters.md`](./syllabus.chapters.md).** The chapter sections
+> below give the framing; the full sub-sections (0.1, 0.2, …, 5.5) and the
+> per-layer LO contracts are in the companion file.
 
 ---
 
@@ -289,7 +259,7 @@ curriculum, progressively layering as the chapters advance:
   _connect_, what the program is _for_, what the _user experiences_. Every
   chapter deepens your ability to hold more of these perspectives active at
   once. Study Lenses, trace, and socratizing automate different perspectives;
-  PBSI names them explicitly.
+  PBIS names them explicitly.
 
 - **The whole rhetorical situation** (enabled by the prior three): the entire
   software context — users, developers, computer, product, environment, and the
@@ -297,7 +267,7 @@ curriculum, progressively layering as the chapters advance:
   holds the _whole_ situation in view at once. This is where design thinking
   enters — rehearsing, workshopping, focus-testing, iterating across the full
   system, not just refining individual pieces. This thread emerges most strongly
-  in Chapter 3 (users, PBSI) and deepens through Chapter 5.
+  in Chapter 3 (users, PBIS) and deepens through Chapter 5.
 
 **The spiral (skills) and the ladder (audiences).** Each chapter adds an
 audience to the learner's awareness (the ladder: devs → +computer → +users →
@@ -580,8 +550,8 @@ _wrong thing correctly_. This makes certain practices _more_ important in an
 LLM-assisted workflow, not less: short iterations of user-visible behavior we
 can actually evaluate, human-evaluable acceptance criteria, testing discipline
 oriented toward visible behavior; Agile development vs Waterfall all over again!
-Chapter 3 (users, PBSI, visible behavior) carries particular weight for this
-reason.
+Chapter 3 (users, PBIS, visible behavior) carries particular weight for
+this reason.
 
 **NM understanding matters more now, not less.** LLMs can write the notation —
 pull the levers, work the controls — but the notional machine they're directing
@@ -715,14 +685,11 @@ to JavaScript.
 
 ## The Metaphor: Composer, Virtuoso, Instrument and Audience
 
-Throughout this course we'll illustrate these ideas using a consistent metaphor:
-**a mechanical instrument, a composer, a virtuoso, a score, and an audience**.
-The specific instrument varies across chapters — sometimes a pipe organ,
-sometimes a music box, sometimes a beat machine or a player piano — but the
-roles stay the same. If the metaphor doesn't click for you, the underlying ideas
-above stand on their own.
-
-### The mapping
+Throughout this course we illustrate the ideas above using a consistent
+metaphor: **a mechanical instrument, a composer, a virtuoso, a score, and
+an audience**. The instrument varies across chapters; the roles stay the
+same. If the metaphor doesn't click for you, the underlying ideas stand on
+their own.
 
 | Idea                    | Illustration                                                                                  |
 | ----------------------- | --------------------------------------------------------------------------------------------- |
@@ -734,67 +701,18 @@ above stand on their own.
 | Other developers        | **Co-composers** — fellow score-readers                                                       |
 | The computer evaluating | **The mechanism playing the score blindly at performance time**                               |
 
-### Why a _mechanical_ instrument specifically
+Chapter 2 studies the instrument's mechanism. Chapter 3 brings in the
+audience and design thinking. Chapter 4 teaches collaboration with the
+alien virtuoso (the LLM). Chapter 5 turns to the composer's daily
+practice — snippetry — and hints at alien composers emerging on the
+horizon.
 
-A mechanical instrument plays the score exactly as written — no human in the
-evaluation loop. This cleanly separates two phases: **composition**, where the
-composer and virtuoso collaborate iteratively on the score, and **performance**,
-where the mechanism plays blindly and deterministically. Matches how JavaScript
-evaluation works: at runtime, there is no performer-with-judgment to rescue a
-badly-notated passage.
-
-### Why _varying_ instruments
-
-Different instruments serve different moments, just like different programming
-languages. Organs for incrementally-layered visible mechanics; music boxes for
-single-note depth (cf. Ligeti's _Musica Ricercata_, which builds entire
-movements from one note, then two, then three); beat machines for contemporary
-accessibility; gamelan-with-karakuri for non-European automated traditions. The
-metaphor is the role structure, not any one instrument.
-
-### Why "virtuoso" specifically
-
-A virtuoso has technical mastery without owning the compositional vision. They
-mastered a different skillset from the composer — notation fluency, feel for the
-controls, idiom depth. Neither role is a failed version of the other. Composers
-can play; they just haven't mastered virtuoso-level motor patterns because
-they've mastered different things (theory, audience awareness, stylistic
-judgment). This maps cleanly onto the comprehension-before-production stance of
-this curriculum: you learn to read, trace, and evaluate code deeply; you write
-small programs to verify your understanding; but you don't need to automate
-fluent production because the virtuoso handles that.
-
-### Human virtuosos and alien virtuosos
-
-Both are real. Through Chapters 1–3, the virtuoso can often be usefully imagined
-as a **human** senior engineer — someone with fluent hands, deep idiom, and
-patience for collaborative work. Chapter 4 pivots to the **alien** virtuoso (an
-LLM) and develops what makes that collaboration specifically different: the
-jagged frontier, the asymmetric duet, the downstream-of-human cognition.
-
-### The cast
-
-- **The Composer** — your avatar when designing. Curious, earnest. Learns to
-  hear the music in their head before it plays.
-- **The Virtuoso** — human or alien. Dazzling technique, intimate with the
-  controls. The alien form sometimes plays what you said rather than what you
-  meant. More on that in Chapter 4.
-- **The Mechanism** — the mechanical instrument itself. Literal, indifferent,
-  stubborn. Plays exactly what's notated and nothing else. When the notation is
-  unplayable, it stops — honestly.
-- **The Audience** — reactive, emotional, unfiltered. They cheer, boo, throw
-  tomatoes or flowers.
-
-You'll meet them again as the curriculum unfolds. Historical cameos — Mozart
-writing reluctantly for mechanical organ, Bach studying Buxtehude, Ada Lovelace
-on the Analytical Engine — drop in as sidebars.
-
-### The metaphor across chapters
-
-Chapter 2 studies the instrument's mechanism. Chapter 3 brings in the audience
-and design thinking. Chapter 4 teaches collaboration with the alien virtuoso.
-Chapter 5 turns to the composer's daily practice — snippetry — and hints at
-alien composers emerging on the horizon.
+**The full treatment** of the cast (Composer, Virtuoso, Mechanism,
+Audience, Co-composers, Historical cameos), the human-vs-alien virtuoso
+split, the composition-vs-performance two-phase structure, the
+comprehension-before-production mapping, and the per-chapter
+instantiations lives in [`syllabus.ontology.md`](./syllabus.ontology.md)
+§24.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -802,38 +720,28 @@ alien composers emerging on the horizon.
 
 ## References
 
-These two resources are always available alongside the curriculum. Neither is a
-prerequisite: refer to them when you need them.
+Three resources are always available alongside the curriculum. None is a
+prerequisite; refer to them when you need them.
 
-### Just Enough JavaScript
+- **Just Enough JavaScript** — a curated subset of JavaScript: enough to
+  write imperative programs that interact with users through text and
+  numbers. Fewer features → more cognitive bandwidth for the concepts
+  that matter. See it as a companion reference, not a prerequisite.
+- **Studying with LLMs** — guidance and starter prompts for using LLM
+  assistants as _study partners_, not code generators, while working
+  through earlier chapters. Distinct from Chapter 4, which is about
+  agents as named collaborators in the development process. The
+  principle: an LLM can _support_ your experience of building the twin
+  but cannot _produce_ it for you.
+- **Learning Expectations** — a reference document for when you're in
+  the middle of something hard and want context for what you are
+  experiencing. Covers spiral curriculum design, threshold concepts,
+  liminal zone thinking, and the learning sequence.
 
-A curated subset of JavaScript: just enough to write imperative programs that
-interact with users through text and numbers. Within this small surface, entire
-domains open up: text processing, geometry, pattern matching, randomness, number
-crunching: all within single-page programs where every line is visible at once.
-The constraint is pedagogical: fewer features means more cognitive bandwidth for
-the concepts that matter. See it as a companion reference, not a prerequisite.
-
-### Studying with LLMs
-
-Guidance and starter prompts for using LLM assistants as _study partners_: not
-code generators: while working through earlier chapters. This is distinct from
-Chapter 4, which is about agents as named collaborators in the development
-process. The distinction matters: using an LLM to quiz yourself on trace tables
-is study support; asking an LLM to trace code for you is bypassing the skill
-you're trying to build. Available from Chapter 1 onward; revisited with new
-depth in Chapter 4. The line this section draws is the principle from § How
-Learning Happens applied to study sessions: an LLM can _support_ your experience
-of building the twin (good study partner) but cannot _produce_ it for you (bad
-code-generator-instead-of-you).
-
-### Learning Expectations
-
-A reference document for when you're in the middle of something hard and want
-context for what you are experiencing. Covers the big picture of spiral
-curriculum design, threshold concepts, liminal zone thinking, and the learning
-sequence. Not required reading before starting, but available whenever you need
-context about your own learning journey.
+**The full source-materials catalog** — academic lineages, design-
+principle sources, infrastructure documentation, prior-session handoffs
+— lives in [`syllabus.ontology.md`](./syllabus.ontology.md) under
+_Source materials_.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -890,304 +798,26 @@ convention for difficulty progression — not part of this set.
 No language features. Conceptual orientation only.
 
 _Metaphor anchor: **the recital as rhetorical situation** — an entire
-performance event with its audience, its performers, its instrument, and the
-score that ties them together._
+performance event with its audience, its performers, its instrument, and
+the score that ties them together._
 
-### 0.1 The Rhetorics of Programming
+The chapter introduces the rhetorical model of source code (writing for
+multiple audiences simultaneously: 🧑‍💻 developers, 💻 the computer,
+users, 🤖 agents), the **Vibetoading / Frogramming** distinction, and
+the positioning of WtF within the broader space of programming and
+computer science. _Vibing_ is named as a legitimate stance — building
+by feel, pre- and post-LLM. What distinguishes the V hat from no-twin
+vibing is the user-twin; what distinguishes the F hat from no-twin
+ceremony is the NM-twin. The full twin/process 2×2 lives in the
+ontology; here you meet the two hats and the four-quadrant grid (V/F ×
+humans-only / LLM-collab).
 
-When you write source code, you are not writing for a single reader. Like a
-recital — a performance event with its audience, its performers, its instrument,
-and the score — source code addresses multiple readers simultaneously, each with
-different needs and different ways of understanding.
+The chapter's intellectual-agency move: _you arrive here with a why, and
+the course is built to honor it._
 
-Three human audiences read your code:
-
-1. **🧑‍💻 Other developers** — they read your code to understand your intent,
-   learn your style, collaborate on changes, and maintain the work long after
-   you wrote it
-2. **💻 The computer** — it parses, interprets, or compiles your code; it does
-   not understand intent, only syntax and semantics. Throughout this course,
-   "understanding the computer" means **twinning its notional machine** —
-   building an accurate mental model of how the engine evaluates your code at
-   our chosen level of abstraction. The NM _is_ the computer for our purposes
-   (see § Notional machines below).
-3. **Users of the program** — they never see the code, but they experience its
-   effects; their correctness is behavioral (does it do what I need?), not
-   syntactic
-
-A fourth audience has recently arrived:
-
-4. **🤖 Agents (LLMs)** — they read and understand code differently from humans;
-   they can infer intent from examples, find patterns, suggest changes, and help
-   you write it. Writing _for and with_ agents is its own communication skill,
-   developed in Chapter 4.
-
-The central skill this course teaches is writing code that **addresses all four
-audiences simultaneously**. Different chapters focus on different audiences
-(hence the twinning: developer → computer → user → agent), but they all matter
-in real work.
-
----
-
-- 🥚 Articulate the three human audiences of source code: developers, the
-  computer, users
-- 🥚 Explain what it means for code to _address_ each audience simultaneously
-- 🥚 Describe the twinning progression across chapters: developer twin (Ch1) →
-  computer twin (Ch2) → user twin (Ch3) → agent twin (Ch4)
-- 🥚 Identify agents (LLMs) as a fourth audience: they read and understand code
-  differently from humans, and writing _for and with_ agents requires its own
-  communication skills (explored in Ch4)
-- 🥚 Describe why this course prioritizes comprehension before production
-- 🥚 Identify the four threads that run the whole curriculum: twinning,
-  decisions (micro and macro), perspective stacking, and the whole rhetorical
-  situation
-- 🐣 Explain the spiral curriculum: why revisiting concepts at increasing depth
-  produces deeper understanding than covering them once
-
-### 0.2 Positioning _Welcome to Frogramming_
-
-Programming is a large space. Before spending time inside one part of it, it
-helps to know roughly where that part is — and what it is not.
-
-The following distinctions are not knowledge to memorize. They are landmarks.
-You will encounter each one again as the course progresses, and what feels
-abstract now will become concrete. For now, use them as orientation.
-
-**What WtF is and what it isn't:**
-
-| This course                                                                                                                                                                                    | Not this course (yet)                                                                                                                                             |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Embodied computation** — learning to read, predict, and direct one specific notional machine through the notation it interprets. Embodied work makes theoretical work tractable and visible. | **Theory of computation** — the formal/mathematical framework defining what computation IS (Turing machines, lambda calculus, complexity classes). Begins in WtA. |
-| **Programming** — specific use cases, concrete inputs and outputs, particular implementations                                                                                                  | **Computer Science** — general classes of problems and algorithms, asymptotic analysis, formal proofs of correctness                                              |
-| **Local fluency** — expressions, bindings, scopes, control flow at the statement level                                                                                                         | **Global architecture** — system design, API boundaries, database schemas, how large codebases are organized                                                      |
-| **Comprehension before production** — you'll read and trace code before you write it; programs are written to verify understanding, not to demonstrate output                                  | **Production-first** — most courses have you writing immediately; output becomes the measure of understanding                                                     |
-| **Depth on a constrained surface** — Just Enough JavaScript offers few features deliberately                                                                                                   | **Breadth across many features** — JS has hundreds; covering all of them diffuses the focus needed to build a real mental model                                   |
-
-**How you will work:**
-
-| WtF's approach                                                                                                                                           | The common alternative                                                                           |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| **Errors as information** — the machine is honest; an error tells you precisely where what you specified and what the machine can interpret do not match | Errors as failure — something is broken                                                          |
-| **Read from code first** — you will spend real time as a code investigator before you write                                                              | Learn by writing — produce output to prove you understand                                        |
-| **Predict and check** — proactive and mechanistic; you will see what happens and update your model                                                       | Watch and explain — retroactive and justifying; post-hoc description of what you've already seen |
-
-**Where WtF fits in the larger journey:**
-
-| WtF                                                                                                                                                                                    | What follows                                                                                                                                 |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Learning to program** — build fluency in the embodied language of computation. Chapter 5 is the first pivot: snippetry is where you begin using programming to explore and discover. | **Programming to learn** — use programming as a tool to explore algorithms, complexity, paradigms, and domains (WtA, Trees, SoC, and beyond) |
-
-WtF is a prerequisite for any Spiralearn curriculum that requires computational
-thinking. What follows it: **Welcome to Algorithms** (algorithm strategies,
-step-counting, Big O), **Trees** (tree data structures → the DOM → browser event
-dispatch), **Separation of Concerns** (programs organized at scale across files
-and modules), and onward into specific domains, languages, and specializations.
-Trees and Separation of Concerns can be studied in either order depending on
-your goals; Trees-first provides conceptual grounding for the DOM, SoC-first
-reaches interactive pages sooner.
-
-A note on comprehension before production: all professional programming work
-takes place in existing codebases. All of what programmers do is arrangement and
-variation — reading code, understanding it, modifying it, fitting new pieces
-into existing structures. This course teaches you to read and understand code
-first because that is what all programming work actually is. You will write
-programs throughout, but to verify understanding, not to demonstrate output. The
-deeper reason — unpacked in § How Learning Happens — is that **understanding is
-the part of programming you cannot delegate.** Comprehension-first because
-comprehension is the experience-form of building the twin of the machine;
-production-first skips the experiences and installs nothing durable.
-
-**Three vocabulary distinctions worth having early:**
-
-| Term                     | What it means                                                                                                                                                                                                                                                          | In WtF                                                                                                                                                       |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Programming paradigm** | A design philosophy for organizing programs — how you decompose problems, structure solutions, manage state                                                                                                                                                            | Ch1–4 is imperative: sequences of statements, explicit control flow, mutable state. Functional, OOP, and declarative are deferred to Ch5.                    |
-| **Computational domain** | What you are computing _about_ — the thing in the world you are modeling. A programmer who understands medicine writes better medical software; one who understands finance builds better financial tools. Domain expertise is a separate axis from programming skill. | WtF is largely domain-agnostic by design — the same NM skills transfer to any domain.                                                                        |
-| **Computational idioms** | Types of operators and operations available within a programming language — how you manipulate values. Different languages emphasize different idioms; mastering an idiom means fluency with a category of operations.                                                 | Ch2's sections (2A–2F) are organized by idiom: logic, strings, numbers, pattern matching, bits, dates. Distinct from computational domains (subject matter). |
-| **Model of computation** | A formal mathematical framework defining what computation _is_ — Turing machines, lambda calculus, finite automata                                                                                                                                                     | Largely deferred to WtA and beyond                                                                                                                           |
-
-These three are orthogonal. You can write functional medical software or
-imperative medical software — the domain (medicine) is independent of the
-paradigm (functional/imperative). The model of computation is a different
-question again.
-
-One useful test: when you encounter a new concept, ask — is this about how I
-organize my program (paradigm)? About what I'm computing about (domain)? Or
-about what computation fundamentally is (model)?
-
-Two questions this taxonomy answers before you even ask them:
-
-- _"Why aren't we doing functional programming?"_ — Paradigm. Deferred to Ch5.
-- _"Why aren't we working on a specific project like a web app or game?"_ —
-  Domain. WtF is domain-agnostic by design.
-
-A note on JavaScript specifically: JS is a multi-paradigm language — it can
-_look_ like OOP, functional, or declarative code syntactically. But it runs one
-notional machine: procedural + prototypes. When you write "OOP-style" JS, the
-machine underneath is still producing the same events it always does — and the
-notional machine does not change. Languages designed _for_ a paradigm (Haskell,
-Smalltalk, Java) have genuinely different notional machines and different event
-vocabularies. This course teaches JS's actual machine. Understanding it gives
-you a stable base from which to see that paradigm choices are partly about which
-machine's event vocabulary you want to think in.
-
-**What the course constrains — and why:**
-
-Just Enough JavaScript is deliberately small. It excludes classes, most array
-methods, async/await, modules, destructuring, generators, and dozens of other
-features JS has. This is not an oversight. Fewer features means more cognitive
-bandwidth for the concepts that actually matter in Ch1–4: how the machine
-evaluates, how values and bindings behave, how control flow works.
-
-The constraints are temporary and intentional:
-
-- Ch5 lifts most of them
-- Welcome to Algorithms adds functions, arrays, and objects — and uses them to
-  study algorithms
-- Trees and Separation of Concerns add DOM manipulation, event handling, and
-  module structure
-
-If a feature you want is missing, the likely answer is: it is coming, and it
-will make more sense when it arrives because you have the foundation.
-
-**On architecture specifically:** WtF builds fluency at the level of
-expressions, statements, and small programs. It does not teach how programs are
-organized at scale — API boundaries, module systems, separation of concerns
-across files and services. That is a later skill, developed across Trees and
-Separation of Concerns and beyond.
-
-**Learning objectives for §0.2:**
-
-- 🥚 Use the positioning tables to locate WtF's scope within the broader space
-  of programming and computer science
-- 🥚 Explain what distinguishes a programming paradigm, a computational domain,
-  and a computational idiom, and give examples of each
-- 🥚 Understand why WtF constrains itself to Just Enough JavaScript and why
-  those constraints are temporary
-- 🥚 Recognize that architecture (organizing programs at scale) is a separate
-  skill, developed later in Trees and Separation of Concerns
-- 🐣 Articulate the differences between the vocabulary triangle terms and
-  explain their orthogonality (you can combine any paradigm with any domain)
-
-### 0.3 Two Hats: Vibetoading and Frogramming
-
-A foundational distinction this course returns to throughout: every developer,
-in every moment of work, wears one of two hats. Both are real practices, both
-have their time, and most people wear both — sometimes within the same hour on
-the same project.
-
-**🎨 The Vibetoader** works grounded in the user. They build a deep model of
-what users need, do, and experience — through research, prototyping, and testing
-with real people — and iterate that model when prototypes meet actual humans.
-The notional machine underneath is intentionally delegated: to an LLM virtuoso,
-to a colleague, or to whatever notation tooling is at hand. Code is the
-instrument that produces user-visible behavior, not the audience the Vibetoader
-is addressing in depth. They may use LLMs heavily or not at all; what defines
-the hat is the depth of the user-twin and the intentionality of the
-NM-delegation.
-
-**🔬 The Frogrammer** works grounded in the notional machine. They build a deep
-model of what the machine will do — through prediction, tracing, and
-verification against actual evaluation — and iterate that model when traces
-diverge from predictions. They apply craft practices (testing, documentation,
-code review, security audits) intentionally, to mitigate specific risks their
-NM-awareness makes visible. User-research and design thinking they may delegate,
-do at lighter touch, or rely on a Vibetoader collaborator for. They may use LLMs
-heavily or not at all; what defines the hat is the depth of the NM-twin and the
-intentionality of any user-side delegation.
-
-**Spectrum, not binary.** A given developer doesn't _be_ a Vibetoader or a
-Frogrammer — they wear different hats on different tasks, files, moments. A
-seasoned Frogrammer prototyping a UI tweak Vibetoads on purpose. A junior who
-genuinely understands the part of the NM they're touching is Frogramming on that
-part. The question is never "which kind of person are you?" — it's "which hat
-fits this moment?"
-
-**Why the twinning anchor cuts where it does.** Recall the four audiences from
-the threads: developer, computer, user, agent. Both hats twin deeply, just
-different audiences. Vibetoading shoulders the _user-twin_ — the experiencer of
-behavior; their depth lives in research, prototyping, and design thinking with
-real people. Frogramming shoulders the _NM-twin_ — the producer of behavior;
-their depth lives in prediction, tracing, and verification. Each hat delegates
-the audience the other shoulders. Code itself sits between them: for the
-Frogrammer, code is the textual representation of the NM and its levers, and the
-developer-reader audience is a natural extension of NM-awareness — well-shaped
-code is what lets humans _and_ agents read, review, and extend the work over
-time (a point well-developed in agent-collaboration practice — see this org's
-`AGENTS.md`, Simon Willison's writing, and the broader engineering literature).
-For the Vibetoader, code is the instrument that produces user-visible behavior,
-and the developer-reader audience is delegated to whoever is operating the NM —
-a Frogrammer collaborator, an LLM virtuoso, or a future-self in different mode.
-Neither hat skips work; each invests it where it serves their twin best.
-
-**The cargo-cult test.** Process discipline (TDD, code review, docs, user
-research, A/B tests, usability studies) doesn't determine which hat you're
-wearing — _intentionality_ and _grounding_ do. When a Frogrammer does TDD, the
-tests target the specific edge cases their NM-awareness predicts will be
-surprising. When a Vibetoader runs an A/B test or a usability study, the test
-targets specific user-behavior hypotheses their user-twin predicts will be
-tested. Both are intentional; both serve the twin they shoulder. The cargo-cult
-mode — neither hat — is process performed because Process Says So, with no model
-of what the test or research is actually telling you. A Frogrammer can skip
-code-tests on a throwaway script and still be Frogramming, because they know
-what they're skipping and why. A Vibetoader can ship a quick prototype without
-user-testing first, knowing what they're skipping and why.
-
-**Vibetoading predates LLMs.** It's tempting to read the dichotomy as
-"vibing-with-LLMs vs. engineering-without". It isn't. Pattern-matching syntax
-without understanding the underlying mechanism is older than LLMs by decades —
-copy-paste-tweak from Stack Overflow, React hooks rules without understanding
-reconciliation, CSS flexbox by trial-and-error, jQuery selectors without a DOM
-model, Rails magic accepted as opaque. LLMs amplified the practice; they didn't
-invent it.
-
-The four-quadrant grid makes this concrete. Vibetoading vs. Frogramming is a
-stance about your relationship to the NM, _orthogonal_ to whether an LLM is in
-the loop:
-
-|                                    | **Humans-only**                                                                                                                                                                                                                                                                                                                             | **LLM-collab**                                                                                                                                                                                    |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **🎨 Vibetoading** (user-grounded) | _Real Vibetoading, humans-only_: UX-research-led prototyping, design-thinking-driven iteration with real people; the NM is delegated to a collaborator or familiar tools. (Note: cargo-cult coding — copy-paste-tweak, hooks-rules-without-reconciliation, CSS by trial-and-error — is **not** Vibetoading; it's the no-twin failure mode.) | Karpathy's _vibe coding_ — LLM writes notation, you focus on user-visible outcomes; works only when paired with deep user-twin and willingness to read what the LLM produced enough to verify it. |
-| **🔬 Frogramming** (NM-grounded)   | Traditional engineering — humans write notation grounded in NM-awareness, applying craft practices intentionally.                                                                                                                                                                                                                           | Willison's _vibe engineering_ / _agentic engineering_ — LLM writes the notation; you direct and verify against the NM.                                                                            |
-
-#### Related vocabulary
-
-This course's house terms are **Vibetoading** and **Frogramming**. The wider
-discourse has its own vocabulary, and learners will encounter it; the most
-useful landmarks:
-
-- **Vibe coding** — coined by Andrej Karpathy. Originally narrow: building with
-  an LLM without reading or reviewing the code it writes.
-- **Vibe engineering** — Simon Willison's term for the disciplined counterpart:
-  seasoned engineers using LLMs while staying accountable for the code, with
-  testing, docs, planning, and review.
-- **Agentic engineering** — Willison, Addy Osmani, others. Specifically about
-  building with coding agents (Claude Code, Codex) that can execute and iterate
-  on their own output.
-
-Frogramming is broader than any of these — it's tool-agnostic and
-abstraction-level-agnostic. Vibe engineering and agentic engineering are flavors
-of LLM-collaborative Frogramming; traditional engineering is humans-only
-Frogramming. The house terms name the underlying stance; the wider vocabulary
-names specific working modes within it.
-
-**Learning objectives for §0.3:**
-
-- 🥚 Distinguish Vibetoading from Frogramming by which audience they twin in
-  depth (the user vs. the notional machine), and by what they intentionally
-  delegate
-- 🥚 Place a given workflow on the four-quadrant grid
-- 🥚 Recognize that vibing predates LLMs and give one pre-LLM example
-- 🐣 Identify when each hat is appropriate for a concrete scenario
-- 🐣 Distinguish cargo-cult process (process by ceremony, neither hat) from
-  intentional craft practice in either hat (process targeting risks the
-  shouldered twin makes visible)
-- 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
-  it's right
-- 🐥 Articulate why this curriculum teaches Frogramming in depth (it's a
-  programming curriculum; the NM is the technical surface) while honoring
-  Vibetoading as an equally non-delegable practice (taught at gesture-level
-  here, with referrals out)
+**Full chapter content** — sub-sections 0.1 (Rhetorics), 0.2
+(Positioning), 0.3 (Two Hats), plus per-layer learning objectives — in
+[`syllabus.chapters.md`](./syllabus.chapters.md) Ch0.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -1195,92 +825,27 @@ names specific working modes within it.
 
 ## Chapter 1: Developers
 
-Language features: comments, `console.log` and the full `console` API with
-string literals.
+Language features: comments, `console.log` and the full `console` API
+with string literals.
 
 _Metaphor anchor: **the score as inter-composer communication** — other
-composers read your score for intent and style, long before (or entirely instead
-of) ever hearing it performed. Code has the same property._
+composers read your score for intent and style, long before (or
+entirely instead of) ever hearing it performed._
 
-### Twinning the developer audience
+Your first code and your first audience. The 🧑‍💻 developer audience —
+including future-you, who is a stranger by the time they come back to
+this code. Twinning the developer audience is the central skill. You
+meet the **static vs dynamic** distinction (source code vs program
+evaluation), apply it to comments and logs, and start the discipline of
+**micro-decisions**: every word, every comment, every console method is
+a choice that shapes how a stranger reads your work.
 
-The central skill of this chapter is **twinning the 🧑‍💻 developer audience** —
-imagining who will read your code and writing for them, not for
-yourself-right-now. This is not a new practice; it is the explicit naming of
-something the programming community has always done:
+The chapter's intellectual-agency move: _you have authorial choices._
 
-> _"Programs must be written for people to read, and only incidentally for
-> machines to execute."_ — Abelson & Sussman, _Structure and Interpretation of
-> Computer Programs_
-
-> _"Always code as if the guy who ends up maintaining your code will be a
-> violent psychopath who knows where you live."_ — John Woods (and a thousand
-> undergraduate code-style lectures since)
-
-The developer audience includes the obvious reader — a teammate maintaining your
-code — and the often-overlooked one: **future-you**. You-in-six-months is a
-stranger. You-in-ten-minutes is already on the way there. Twinning the developer
-audience means writing so that stranger can pick up where you left off without
-phoning you.
-
-This anticipates Chapter 5's "you" audience: by the time we promote
-yourself-as-a-distinct-audience, you've been twinning future-you all along.
-
-### Static vs. dynamic
-
-A foundational conceptual distinction is introduced here: not as a technical
-exercise but as orientation: **source code (static) vs. program evaluation
-(dynamic)**. Comments exist in the static text; logs are observed during
-evaluation. This sets up the **🧑‍💻** developer twin: the developer who reads your
-code sees the static text, not the runtime. Understanding this distinction is
-prerequisite to understanding why comments and logs serve different purposes.
-
-The computer is not yet a full audience. Devtools console is developer space.
-
-### Comments
-
-- 🥚 Write comments that describe what a program should do and why\
-  _builds on: writing prose → writing intentional, purposeful notes inside code_
-- 🥚 Identify and apply comment conventions: inline (`//`), block (`/* */`),
-  doc-style (`/** */`), `*`-aligned block structure\
-  _builds on: reading formatted text → recognizing conventions → applying them_
-- 🥚 Understand "why not what": a comment explains the intent behind a line, not
-  what the line literally does
-- 🥚 **Micro-decisions in comments**: every choice (word selection, length,
-  placement, convention) shapes how a comment reads; notice the choices,
-  consider their effect on the developer-reader\
-  _builds on: writing prose → noticing that every word is a choice with a
-  consequence for the reader_
-- 🐥 Read and appreciate real comments from real codebases: funny, desperate,
-  poetic examples of developer-to-developer communication
-
-### Logs
-
-- 🥚 Source code (static) vs. program evaluation (dynamic): comments live in the
-  static text; logs are observed at runtime\
-  _builds on: reading comments as text → understanding that running code
-  produces a different, separate experience_
-- 🥚 The full `console` API: what each method communicates and when to reach for
-  it:
-  - **Output by intent**: `console.debug` (trace-level), `console.log`
-    (general), `console.info` (informational), `console.warn` (unexpected but
-    not broken), `console.error` (broken)
-  - **Asserting**: `console.assert(condition, message)` — silent when true, logs
-    an error when false
-  - **Counting**: `console.count(label)` / `console.countReset(label)` — named
-    counter tracking, useful in loops
-  - **Grouping**: `console.group(label)` / `console.groupCollapsed(label)` /
-    `console.groupEnd()` — collapsible indented output sections
-  - **Timing**: `console.time(label)` / `console.timeLog(label)` /
-    `console.timeEnd(label)` — named timer trio for rough measurement
-  - **Utility**: `console.clear()` — clears all console output
-- 🥚 When to use comments vs. logs: comments for reading the code; logs for
-  observing it run
-- 🥚 **Micro-decisions in logs**: which console method? what message? what data
-  included? Why `.info` and not `.log`? Is `.warn` ever appropriate here? Each
-  choice communicates different things to the developer watching the console\
-  _builds on: micro-decisions in comments → now applied to the runtime channel_
-- 🐣 Share code with others _(future feature: save-to-gist, pop-up sandbox)_
+**Full chapter content** — sub-sections 1.1 (Twinning the developer
+audience), 1.2 (Static vs dynamic), 1.3 (Comments), 1.4 (Logs), plus
+per-layer learning objectives — in
+[`syllabus.chapters.md`](./syllabus.chapters.md) Ch1.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -1288,355 +853,39 @@ The computer is not yet a full audience. Devtools console is developer space.
 
 ## Chapter 2: Developers and Computers
 
-_Metaphor anchor: **studying the instrument's mechanisms** — like an organ
-builder examining bellows, tracker action, registration, and combination action,
-you study how the JavaScript engine actually carries out your instructions._
+_Metaphor anchor: **studying the instrument's mechanisms** — like an
+organ builder examining bellows, tracker action, registration, and
+combination action, you study how the JavaScript engine actually
+carries out your instructions._
 
-The **💻** computer is now a full audience. The primary learning objective is
-**JavaScript's notional machine**: the mental model of how the JS engine
-evaluates your code. Other languages have their own notional machines; the
-discipline you develop here transfers. Programs produce output via logs and
-assertions but do not yet interact with users. `undefined` is encountered
-naturally through variables; `null` is held until Chapter 3 where `prompt()` can
-return it.
+The 💻 computer is now a full audience. The primary learning objective:
+**JavaScript's notional machine** — the mental model of how the JS
+engine evaluates your code, understood through a vocabulary of
+**evaluation events**. The chapter has two tracks:
 
-The chapter has two tracks:
+- **NM core (2.0–2.8)**: the machine itself — expressions, values,
+  bindings, scope chain, prototype chain, coercion, statements, and
+  reading/writing code. All required.
+- **Computational idioms (2A–2F)**: what you _do_ with the machine —
+  logic, strings, numbers, pattern matching, bits, dates. **2A and 2B
+  required.** Choose at least one from 2C–2E. 2F is optional.
 
-- **NM core (2.0–2.8)**: the machine itself: expressions, values, bindings,
-  scope chain, prototype chain, coercion, statements, and reading/writing code.
-  All required.
-- **Computational idioms (2A–2F)**: what you _do_ with the machine: logic and
-  truthiness, text processing, number crunching, pattern matching, bit
-  manipulation, date computation. **2A (Logic) and 2B (Strings) are required.**
-  Choose at least one from 2C–2E. 2F is optional.
+This is where **PBIS** lands (Purpose, Behavior, Implementation,
+Strategy — four perspectives for reading any program), **trace tables**
+and **predictive stepping** become routine, and the discipline of
+_predict-before-run_ becomes a habit. The substrate of the NM is not
+inert: `embody/` is a crystalline representation of the entire dynamic
+data lifecycle — a static 4D rendering of a 3D flowing river.
 
-### 2.0 The Notional Machine
+The chapter's intellectual-agency move: _you can predict what the
+machine will do, then verify it._
 
-Every programming language describes a machine. The machine JavaScript describes
-has a name: the **notional machine** (NM). You do not program JavaScript — you
-program the notional machine _using_ JavaScript.
-
-The NM is best understood as a machine that works through a fixed vocabulary of
-**evaluation events**: observable moments that occur in a specific order as your
-code runs. Each event has a type. Types have relationships. A given piece of
-syntax produces a predictable sequence of typed events. Learning the NM is
-learning this vocabulary — what categories of events exist, which events
-necessarily follow which, and which syntactic forms produce which sequences.
-
-The machine has two viewing levels:
-
-- **Visual-syntax level** — what you can see in the source code: expressions,
-  statements, the control panel you write to direct the machine
-- **Behind-the-scenes level** — what the machine is actually doing: binding
-  lifecycle, scope creation and chain-walking, value resolution, coercion,
-  errors
-
-Behind the scenes, the machine maintains **state** — values, bindings, scopes —
-that events read and mutate. The events are what happen; the state is what they
-happen to.
-
-**The further skill: decoupling syntax from events**
-
-Once you can think in events, a new ability becomes possible: you can specify
-_what you want the machine to do_ — describe a desired event sequence — before
-choosing the syntax that produces it. You can communicate that specification to
-another person, to the tracer, or to an LLM, and then evaluate whether what was
-produced actually achieves what you wanted.
-
-This is what "programming the machine directly" means. The syntax is notation
-for the machine; the events are what the machine actually speaks.
-
-**Errors**
-
-An error is not a personal failure and it is not the machine breaking. It is a
-specific event that fires because the machine encountered a specification it
-cannot interpret. The machine is being precisely honest: it found a mismatch
-between what was specified and what it can do. Errors are the notional machine's
-most useful output.
-
-Learning to read errors as information — rather than experiencing them as
-indictments — is a skill this chapter develops alongside everything else.
-
-**The tracer**
-
-Study Lenses' tracer captures the evaluation event stream: every
-behind-the-scenes moment as your code runs, as a structured sequence you can
-step through.
-
-Study Lenses' tracer serves two roles:
-
-1. **Training wheels** — while you are building your internal NM model, the
-   tracer makes visible what your mental model should eventually produce on its
-   own
-2. **Power tool** — when code is too complex to trace mentally, the tracer
-   extends your working memory, letting you attend to evaluation you could not
-   hold in your head alone
-
----
-
-### 2.1 Running a Program
-
-- 🥚 Static source code vs. dynamic evaluation: reading a file vs. running it\
-  _builds on: comments as static text → logs as runtime observation →
-  distinguishing the two clearly_
-- 🥚 **Evaluation events**: a running program produces an ordered stream of
-  observable moments; the tracer captures these automatically; trace tables
-  record them by hand\
-  _builds on: static/dynamic distinction → now naming the individual moments of
-  evaluation_
-- 🥚 Logging string literals to the console from programs that evaluate
-- 🥚 Fix errors: parse errors (creation phase) vs. runtime errors (evaluation
-  phase)\
-  _builds on: reading error messages → locating the source line → categorizing
-  the failure type_
-
-### 2.2 Expressions and Resolve
-
-- 🥚 Identify an expression as syntax that produces a value: operators,
-  literals, identifiers, calls, templates, property access, assignment
-- 🥚 Trace how a compound expression evaluates step by step: sub-expressions
-  resolve in order, precedence, parentheses
-- 🥚 **Resolve**: every expression produces exactly one value; the VM hands this
-  value back to the surrounding expression or statement
-- 🥚 All operators: arithmetic, comparison, equality, logical, negation,
-  `typeof`, grouping, compound assignment (`+=`, `-=`, etc.),
-  increment/decrement (`++`, `--`)
-- 🥚 **Implicit coercion**: the VM silently transforms types between operands
-  and operators (`'5' - 1`, `if ('hello')`); a _behind-the-scenes_ event,
-  invisible in the syntax\
-  _builds on: knowing individual types → predicting what happens when types mix
-  without being explicitly converted_
-- 🥚 **Asserting on expressions**: `console.assert(1 + 1 === 2)` as a claim
-  about what an expression resolves to; the program verifies the claim\
-  _builds on: logging to observe values → now making a predictive claim_
-- 🥚 Block scope as a container: empty `{}` blocks; code runs inside a scope;
-  scopes can nest
-- 🐣 Explicit type conversion vs. implicit coercion: `Number()`, `String()`,
-  `Boolean()`, `parseInt`/`parseFloat`: learner-visible syntax vs. VM-invisible
-  transformation
-
-### 2.3 Values and Bindings
-
-- 🥚 The binding lifecycle: declare → initialize → available → access / update\
-  _builds on: expressions that produce values → now storing and retrieving those
-  values in named memory slots_
-- 🥚 `let` vs `const`: what each allows and what it communicates to the reader
-- 🥚 Variable names as communication choices: naming conventions (camelCase,
-  snake*case, CONSTANT_CASE, PascalCase)\
-  \_builds on: micro-decisions in comments (Ch1) → the same intentionality now
-  applied to names*
-- 🥚 Log variable values to the console; observe state change over time\
-  _builds on: logging string literals (Ch1) → logging computed values →
-  observing state change_
-- 🥚 **Trace tables**: systematic notation of evaluation: declare/initialize/
-  access/update events for each binding, in steps-format and values-format\
-  _builds on: reading code → logging to observe state → writing down every read
-  and write in a table_
-- 🥚 **Predictive stepping with a debugger**: predict what happens next → step →
-  check → investigate\
-  _builds on: trace tables → now stepping one instruction at a time with a tool_
-- 🥚 **Scope chain walk**: when an identifier is read, the VM checks the current
-  (innermost) scope first, then its parent, up to the global environment; each
-  check is a miss (keep looking) or a hit (binding found)\
-  _builds on: block scope as container (2.2) → now seeing how the VM navigates
-  nested containers to find a name_
-- 🥚 Block scope with variables: `let` declared inside `{}` is not accessible
-  outside; scope chain walk makes this concrete
-- 🥚 **Asserting on bindings**: predict what a binding holds at a specific
-  point; write `console.assert` statements that must pass\
-  _builds on: asserting on expressions (2.2) → now asserting about stored state_
-- 🐣 Write code to satisfy assertions sprinkled through a script\
-  _builds on: reading assertions → predicting what code produces → now writing
-  the code to make the assertion true_
-
-[TOP](#welcome-to-programming-coded-for-humans--syllabus)
-
-### 2.4 Statements and Control Flow
-
-- 🥚 Conditionals: `if`/`else if`/`else`: reading and tracing branches\
-  _builds on: tracing linear programs → now tracing programs where evaluation
-  path depends on values_
-- 🥚 Ternary expressions: recognizing as a compact conditional form\
-  _builds on: reading if/else → recognizing ternary as equivalent → refactoring
-  between them_
-- 🥚 While loops, do-while loops, for loops, for-of loops: reading and tracing\
-  _builds on: tracing sequential evaluation → now tracing repeated evaluation_
-- 🥚 `break` and `continue`: recognizing and tracing their effect
-- 🐣 Refactoring between equivalent loop forms (while ↔ for, do-while ↔ while)\
-  _builds on: tracing loops → seeing structural equivalence → translating one
-  form to another_
-- 🐣 Block scope inside control flow: variables declared inside `if`/`while`
-  bodies; scope chain walk makes the boundary concrete
-
-### 2.6 Prototype Chain
-
-- 🐣 **Auto-boxing**: when a method is called on a primitive, the VM temporarily
-  wraps it in its constructor's object form (`'hello'` → `String` wrapper)\
-  _builds on: primitive types → now seeing that primitives gain methods through
-  a wrapping mechanism_
-- 🐣 **Prototype chain lookup**: one-hop lookup for primitives: value →
-  `Constructor.prototype` → method found; a _behind-the-scenes_ event parallel
-  to scope chain lookup\
-  _builds on: scope chain walk (2.3) → now a parallel lookup mechanism for
-  methods instead of names_
-- 🐣 Reading `str.toUpperCase()` as: look up `toUpperCase` on `String.prototype`
-  → call it with `str` as the receiver
-- 🐣 String methods are now available: all programs up to this point used only
-  operators and literals; methods become available once the lookup mechanism is
-  understood
-- 🐥 The same mechanism applies to Number methods (`(3.14).toFixed(2)`) and
-  RegExp methods (`/pattern/.test(str)`)
-
-### 2.8 Reading, Writing, Reviewing Code
-
-- 🥚 **PBSI Framework**: Purpose, Behavior, Strategy, Implementation: four
-  perspectives for reading any program simultaneously\
-  _builds on: reading comments → describing what code does → now naming four
-  distinct levels of description_
-- 🥚 "Why not what" comments applied to programs with logic: explaining strategy
-  and behavioral correlations\
-  _builds on: "why not what" in Ch1 → now grounded in PBSI vocabulary and
-  applied to more complex programs_
-- 🥚 **Logging strategies**: structured `console.log` placement: program
-  structure, variables, control flow\
-  _builds on: logging values (2.3) → now using logs as a deliberate, structured
-  debugging strategy_
-- 🐣 **Backtracing**: reasoning backwards from output to input\
-  _builds on: trace tables (2.3) → predictive stepping (2.3) → now reversing the
-  direction of analysis_
-- 🐣 **Describing programs**: close reading across all PBSI levels: zooming out
-  (purpose/behavior), zooming in (line-by-line), finding connections, labeling
-  goals\
-  _builds on: trace tables → PBSI framework → now a structured methodology
-  combining both_
-- 🐣 **Naming variables**: variable analysis → generic role-based names →
-  specific domain names → variable roles (fixed value, stepper, flag, gatherer,
-  holder, temporary)\
-  _builds on: variable names as communication (2.3) → now a structured analysis
-  methodology_
-- 🥚 **Linting**: recognizing and fixing style issues automatically\
-  _builds on: code conventions (Ch1) → now enforced by a tool_
-- 🐣 **Refactoring**: changing implementation or strategy without changing
-  program output (`console.log` output as the fixed point)\
-  _builds on: BSI variations → now a formal discipline: same behavior, different
-  code_
-- 🐣 **Code review**: structured template: behavior, goals, comments, linting,
-  variables\
-  _builds on: describing programs → naming variables → now applied as a review
-  of someone else's code_
-- 🐣 **Comparing programs**: same behavior, different approaches; developing an
-  eye for voice and readability tradeoffs\
-  _builds on: refactoring → code review → now noticing aesthetic and stylistic
-  choices within the language_
-
-[TOP](#welcome-to-programming-coded-for-humans--syllabus)
-
-### Computational Idioms
-
-These branches apply the notional machine through specific computational idioms.
-**2A and 2B are required.** Choose at least one from 2C–2E. 2F is optional.
-
-#### 2A: Logic and Truthiness 🥚
-
-Required. Foundation for reading conditional programs and understanding how
-values flow through boolean contexts.
-
-- 🥚 Truthiness and falsiness: every value is truthy or falsy; the six falsy
-  values (`false`, `0`, `''`, `null`, `undefined`, `NaN`)
-- 🥚 Short-circuit evaluation: `&&` stops at first falsy, `||` stops at first
-  truthy, `??` stops at first non-nullish; the expression resolves to the
-  stopping value, not necessarily a boolean
-- 🥚 Logical compound assignment: `&&=`, `||=`, `??=`
-- 🐣 Using short-circuit for default values and guard clauses\
-  _builds on: if/else (2.4) → recognizing short-circuit as a compact alternative
-  for simple conditional assignments_
-- 🐣 Refactoring between if/else, ternary, and short-circuit forms\
-  _builds on: PBSI refactoring → now applied to conditional expression forms_
-
-#### 2B: Strings 🥚
-
-Required. Needed for Chapter 3 user programs (`prompt`/`alert`/`confirm` work
-with strings). Builds directly on the prototype chain understanding from 2.6.
-
-- 🥚 String methods: measuring (`length`), accessing characters (`charAt`, `at`,
-  bracket notation), searching (`indexOf`, `includes`, `startsWith`,
-  `endsWith`), transforming (`toUpperCase`, `toLowerCase`, `trim`, `padStart`,
-  `padEnd`, `repeat`), extracting and replacing (`slice`, `replace`,
-  `replaceAll`, `split`)
-- 🥚 Template literals: readable alternative to concatenation; expression
-  interpolation\
-  _builds on: string concatenation → recognizing template literals as a more
-  readable alternative → refactoring between them_
-- 🥚 `String.fromCharCode` / `String.fromCodePoint`: character encoding; code
-  point ↔ character\
-  _builds on: string methods → seeing strings as sequences of encoded
-  characters_
-- 🐣 Optional chaining: `str?.method()` for values that might be null or
-  undefined
-- 🐣 Text processing programs: searching, transforming, extracting substrings\
-  _builds on: string methods → now composing them into full programs_
-
-#### 2C: Numbers and Math 🐣
-
-Choose at least one from 2C–2E.
-
-- 🥚 Math methods and constants: `Math.max`, `Math.min`, `Math.abs`,
-  `Math.floor`, `Math.ceil`, `Math.round`, `Math.random`, `Math.pow`,
-  `Math.sqrt`, `Math.PI`, `Math.E`
-- 🥚 Number helpers: `Number.isNaN`, `Number.isFinite`, `Number.isInteger`,
-  `parseInt`, `parseFloat`
-- 🥚 Number prototype methods: `toFixed(n)`, `toString(radix)`, `toPrecision`,
-  `toExponential`, `toLocaleString`
-- 🥚 **Floating point representation**: why `0.1 + 0.2 !== 0.3`; precision
-  limits of IEEE 754; when this matters and how to work around it\
-  _builds on: arithmetic operators → understanding what the VM actually stores
-  for a number literal_
-- 🥚 **BigInt**: integers without precision limits: `42n` literal syntax,
-  `BigInt()` constructor; `typeof` is `'bigint'`; can't mix with `number` in
-  arithmetic; integer division truncates\
-  _builds on: floating point limits → BigInt as the solution for exact large
-  integer arithmetic_
-- 🐣 Geometry and randomness programs
-- 🐣 Number crunching programs: accumulation, running totals, summarization
-
-#### 2D: Pattern Matching 🐔
-
-Choose at least one from 2C–2E.
-
-- 🐔 **Regular expressions**: pattern-matching computation: instead of
-  procedural string operations, declare the _shape_ of what you're looking for\
-  _builds on: string methods (2B) → recognizing that some problems are better
-  described as patterns than as sequences of operations_
-- 🐔 `/pattern/flags` literals, `.test()`, `.match()`, `.replace()` with regex
-- 🐔 **Computational micro-decisions**: regex vs. string methods: the choice is
-  not just what works but what _expresses the problem clearly_
-
-#### 2E: Integers and Bits 🐔
-
-Choose at least one from 2C–2E.
-
-- 🐔 **Bitwise operators**: computation at the bit level: numbers as binary
-  structures, not decimal values\
-  _builds on: arithmetic and numeric types → seeing that numbers have an inner
-  structure that can be directly manipulated_
-- 🐔 `&`, `|`, `^`, `~`, `<<`, `>>`, `>>>`: what each does at the bit level
-- 🐔 BigInt works with bitwise operators: see 2C for the BigInt introduction
-- 🐔 **Computational micro-decisions**: bitwise vs. arithmetic: the choice
-  expresses the problem's structure
-
-#### 2F: Dates 🐔
-
-Optional extra.
-
-- 🐔 `Date.now()`: current timestamp as a number (milliseconds since epoch)
-- 🐔 `new Date()`: the sole `new` exception in JEJ; creates a date object whose
-  methods all return primitives
-- 🐔 `Date.parse(str)`: parsing a date string to a timestamp
-- 🐔 Date instance methods: `getFullYear()`, `getMonth()` (0-indexed),
-  `getDate()`, `getHours()`, `getMinutes()`, `getSeconds()`,
-  `toLocaleDateString()`, `toLocaleTimeString()`, `toISOString()`
-- 🐔 Date computation programs: elapsed time, formatting, internationalization\
-  _builds on: numbers and arithmetic → now applied to time as a domain_
+**Full chapter content** — sub-sections 2.0 (The Notional Machine), 2.1
+(Running a Program), 2.2 (Expressions and Resolve), 2.3 (Values and
+Bindings), 2.4 (Statements and Control Flow), 2.6 (Prototype Chain),
+2.8 (Reading, Writing, Reviewing Code), 2A–2F (Computational Idioms),
+plus per-layer learning objectives — in
+[`syllabus.chapters.md`](./syllabus.chapters.md) Ch2.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -1644,104 +893,33 @@ Optional extra.
 
 ## Chapter 3: Developers, Computers, and Users
 
-_Metaphor anchor: **writing for an audience, the composer's design thinking** —
-the concert audience is real: they cheer, boo, throw tomatoes or flowers. The
-composer rehearses with the mechanism, workshops with virtuosos, and
-focus-groups with listeners. Design thinking across the whole situation._
+Language features: `prompt`, `alert`, `confirm`. All control flow
+features (`if`, `while`, `break`/`continue`) were introduced in Chapter
+2 and are now applied in programs where user interactions are the fixed
+behavioral anchors.
 
-Language features: `prompt`, `alert`, `confirm`. All control flow features
-(`if`, `while`, `break`/`continue`) were introduced in Chapter 2 and are now
-applied in programs where user interactions are the fixed behavioral anchors.
+_Metaphor anchor: **writing for an audience, the composer's design
+thinking** — the concert audience is real: they cheer, boo, throw
+tomatoes or flowers. Design thinking across the whole situation._
 
-All Chapter 2 skills: PBSI, naming variables, logging strategies, backtracing,
-refactoring, code review: are practiced here under a new constraint:
-user-visible behavior must be preserved.
+Users enter the picture. Programs interact via `prompt`, `alert`,
+`confirm`. User-visible behavior becomes the anchor that all prior
+reading, tracing, refactoring, and reviewing skills must preserve.
+**Design thinking across the whole situation begins here.** All Chapter
+2 skills — PBIS, naming variables, logging strategies, backtracing,
+refactoring, code review — are practiced under a new constraint:
+user-visible behavior must be preserved. The data-flow loop now grows
+past the Ch1→Ch2 dev↔NM loop into the full dev↔NM↔user loop.
 
-### 3.1 User Input and Output
+The chapter's intellectual-agency move: _you make programs for people
+who will never see your code, and the test of your work is whether it
+serves them._
 
-- 🥚 `prompt`, `alert`, `confirm`: user-facing I/O; devtools console is
-  developer space, these are user space\
-  _builds on: console.log for developers → now alert/prompt for users; the
-  rhetorical split becomes architecturally visible_
-- 🥚 Top-level doc comments: program name, purpose, and behavior\
-  _builds on: writing "why" comments → now structuring them as a full program
-  description for a reader_
-- 🥚 Writing simple programs that process user input or perform string/number
-  operations on it
-- 🥚 `null`: what `prompt()` returns when the user cancels; the first encounter
-  with null in a meaningful context
-
-### 3.2 Variable Program Behaviors
-
-- 🥚 Input/output pairs as test cases in the top-level doc comment\
-  _builds on: asserting about state (2.3) → now specifying expected outputs for
-  given inputs → documenting them_
-- 🥚 Test coverage: are all conditional paths covered by your test cases?
-- 🐣 **Fixing bugs**: code runs without error but produces wrong user-facing
-  behavior\
-  _builds on: fixing parse/runtime errors (2.1) → now the program runs but fails
-  user expectations_
-- 🐣 **Modifying programs**: one change at a time, predict, run, note the
-  result; user interactions as fixed points\
-  _builds on: refactoring in Ch2 (console.log as fixed point) → now user-visible
-  behavior is the anchor_
-
-### 3.3 Validating User Input
-
-- 🥚 **Program structure pattern**: input + validation (while loop) → logic
-  (conditional) → output\
-  _builds on: reading programs as flat sequences → recognizing distinct
-  structural phases_
-- 🥚 Getting numbers from users: cast to number, validate the cast, validate the
-  range
-- 🥚 Full user-story-based top-level comments\
-  _builds on: top-level doc comments (3.1) → now structured as a user story with
-  personas and scenarios_
-
-### 3.4 PBSI in User Programs
-
-- 🥚 BSI variations in user programs: same user-facing behavior, different
-  strategies and implementations\
-  _builds on: PBSI introduced in Ch2 → now applied to programs with a user
-  dimension_
-- 🥚 Input validation strategies and their tradeoffs: all-in-while-head, boolean
-  flag, do-while
-- 🐣 **Describing user programs**: PBSI close reading where Purpose is now "why
-  this exists for a user"\
-  _builds on: describing programs in Ch2 (developer-facing output) → now the
-  user's experience is part of the analysis_
-
-### 3.5 Developing Programs
-
-- 🐣 **Refactoring user programs**: changing code without changing user-visible
-  behavior\
-  _builds on: refactoring in Ch2 (console.log fixed point) → user interactions
-  now the fixed point_
-- 🐥 **Writing programs from spec**: graduated scaffolding: stepped examples →
-  starter code → spec + goals → spec only\
-  _builds on: modifying programs → refactoring → code review → now producing
-  programs independently_
-- 🐔 **Reverse engineering**: describe behavior → plan goals/strategy → write
-  code from an obfuscated program
-- 🐔 Writing programs from unstructured guidance (plain English, word problems,
-  your own ideas)
-
-### 3.6 Plaintext Programs
-
-_The IDE disappears. A plain text editor and a run button: nothing else. No
-lenses, no syntax highlighting, no autocomplete, no error highlighting._
-
-- 🐣 Reading and understanding programs without IDE assistance\
-  _builds on: all prior reading skills → now stripped of tooling that has been
-  scaffolding comprehension_
-- 🐣 Writing syntactically correct code without autocomplete or error
-  highlighting\
-  _builds on: all prior writing skills → now relying on internalized knowledge
-  rather than tool feedback_
-- 🐥 Appreciating concretely what IDE tools do: by experiencing their absence,
-  you understand what each tool was compensating for\
-  _builds on: using IDE tools throughout Ch1–3 → now understanding them as
-  scaffolding, not crutches_
+**Full chapter content** — sub-sections 3.1 (User Input and Output),
+3.2 (Variable Program Behaviors), 3.3 (Validating User Input), 3.4
+(PBIS in User Programs), 3.5 (Developing Programs), 3.6 (Plaintext
+Programs), plus per-layer learning objectives — in
+[`syllabus.chapters.md`](./syllabus.chapters.md) Ch3.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -1749,180 +927,38 @@ lenses, no syntax highlighting, no autocomplete, no error highlighting._
 
 ## Chapter 4: Developers, Computers, Users, and Agents
 
-_Metaphor anchor: **the composer-virtuoso asymmetric duet** — with an alien
-virtuoso this time. Dazzling, fast, pattern-rich, but cognitively distinct from
-human virtuosos. Collaboration is specifically different, and this chapter digs
-into why._
+No new language features. This chapter applies all Chapter 1–3 skills
+in collaboration with an LLM. 🤖 Agents are a fourth audience.
 
-No new language features. This chapter applies all Chapter 1–3 skills in
-collaboration with an LLM. 🤖 Agents are a fourth audience: they read and
-understand code differently from 🧑 humans, and writing _for and with_ them
-requires its own communication skills.
+_Metaphor anchor: **the composer-virtuoso asymmetric duet** — with an
+alien virtuoso this time. Dazzling, fast, pattern-rich, but cognitively
+distinct from human virtuosos._
 
-### Wrapping premise: code is the UI for the NM
+The wrapping premise: **code is the UI for the NM**. Source code is
+the control panel through which a programmer operates the notional
+machine. Authoring code is _one_ way to operate that panel; describing
+intent to an LLM is another. Either way, the NM is the thing the panel
+controls. LLMs let you **delegate operation of the control panel** while
+still owning the machine. Two LLM-conversation modes: 🔬 NM-grounded
+conversation (Frogramming-with-delegation) and 🎨 user-grounded
+conversation (Vibetoading-with-delegation). The visual NM view
+(`embody/` + study lenses) becomes load-bearing here: when you delegate
+the control panel, you can no longer rely on the act of typing to keep
+your NM understanding sharp.
 
-You're now ready for the alien virtuoso because Chapters 1–3 gave you the
-experiences that built the twins. The principle from § How Learning Happens —
-that understanding is non-delegable — is what made the chapter ordering
-necessary. This chapter is where the LLM joins the work, with the twins already
-running.
+This chapter develops the **both-twins state** in its LLM-collaborative
+form: V and F operating alongside an alien third intelligence (the 2×2
+in [`syllabus.ontology.md`](./syllabus.ontology.md) §3).
 
-Up to now this course has framed code text as **what you write to talk to the
-four audiences**. There's a deeper way to see the same fact: source code is the
-**UI / control panel** through which a programmer operates the notional machine.
-Authoring code is _one_ way to operate that panel. Describing intent to an LLM
-is another. Either way, the NM is the thing the panel controls.
+The chapter's intellectual-agency move: _you direct an alien
+intelligence — and you stay in charge of what gets built._
 
-LLMs let you **delegate operation of the control panel** while still owning the
-machine. The same Frogrammer/Vibetoader spectrum from Ch0.3 applies — but now to
-your conversation with the alien virtuoso, not just to your typing:
-
-- 🔬 **NM-grounded conversation** (Frogramming-with-delegation) — "Make the NM
-  declare a `const balance = 0`, then enter a `while` loop that decrements it
-  until it hits zero." You specify behavior in NM terms. You
-  predict-trace-verify the LLM's output against the NM. The LLM operates the
-  panel for you; you stay grounded in the machine.
-- 🎨 **User-grounded conversation** (Vibetoading-with-delegation) — "When the
-  user types their amount and clicks OK, count down to zero and tell them when
-  it's done." You specify behavior in user-experience terms. You evaluate
-  against user outcomes; the machine is intentionally delegated to the LLM
-  virtuoso.
-
-Both produce text in the same control panel; the difference is **which audience
-you twin during the conversation**. This is why every section below revisits a
-Ch1–Ch3 audience: agent communication is what you've already been doing, just
-refracted through the alien.
-
-**The visual NM view (`embody/` + study lenses) becomes load-bearing here.**
-When you delegate the control panel, you can no longer rely on the act of typing
-to keep your NM understanding sharp. Visual debuggers let you observe, predict,
-and debug the machine _directly_ — the NM view that exists regardless of who (or
-what) wrote the code text. Frogramming with delegation is only sustainable if
-you keep the direct NM view alive.
-
-### 4.0 What is an LLM?
-
-- 🥚 Explain why an LLM is not a database or keyword-lookup system
-- 🥚 Describe what "predicting the next token" means in practical terms
-- 🥚 Explain why the same prompt can produce different outputs (stochasticity)
-- 🐣 Describe at least 2 key differences between LLM "cognition" and human
-  reasoning
-- 🐣 Identify when an LLM is likely to be unreliable (the jagged frontier)
-- 🐥 Use the 4 Levels of Abstraction framework to discuss AI at the appropriate
-  level
-- 🐥 Explain the Gell-Mann Amnesia effect in the context of LLM output
-
-### 4.1 Collaborating in Prose
-
-- 🥚 Given an LLM response, hypothesize what patterns it might be matching
-- 🥚 Write clear, specific prompts that provide necessary context
-- 🐣 Ask the same question multiple ways and observe how outputs vary
-- 🐣 When a response isn't useful, identify what to change and observe the
-  effect
-- 🐣 Predict how changes to a prompt will affect LLM output, and test the
-  prediction\
-  _builds on: predictive stepping (2.2) → now applied to prompts instead of
-  programs_
-- 🐥 Explain why an LLM produced incorrect or unexpected output
-- 🐥 Reflect on when it helped to let the LLM lead vs. when you needed to drive
-
-### 4.2 Agents and Developer Communication
-
-_Revisits Chapter 1: comments, variable names: with an LLM collaborator._
-
-- 🥚 Read LLM-generated comments and evaluate whether they are helpful for
-  developers
-- 🥚 Read LLM-suggested variable names and evaluate whether they follow naming
-  conventions
-- 🐣 **Perspective-Take**: hypothesize what training patterns produced a
-  specific comment or name
-- 🐣 **Articulate**: write prompts that give the LLM enough context to generate
-  useful developer-facing output
-- 🐣 Draft structured comments for programs that don't exist yet, using the LLM
-  as a thinking partner
-- 🐥 **Calibrate**: where is the LLM reliable at developer-facing output? Where
-  does it fail?
-- 🐥 **Delegate**: is this a task where the LLM adds value, or does using it
-  undermine your learning?
-- 🐔 SOLO check-in: are you building structure (learning conventions) or
-  substituting the LLM for understanding?
-
-### 4.3 Agents and Computer Communication
-
-_Revisits Chapter 2: tracing, asserting: with an LLM collaborator._
-
-- 🥚 Trace LLM-generated code using predictive stepping and trace tables (Ch2
-  skills applied to unfamiliar code)
-- 🐣 Have the LLM trace code, then evaluate whether its traces correctly track
-  state
-- 🐣 Have the LLM explain code, then describe whether the explanation matches a
-  PBSI analysis
-- 🐣 **Perspective-Take**: LLMs often produce plausible-looking but wrong traces
-  : identify why
-- 🐥 **Calibrate**: LLMs are better at generating code than tracing it: use this
-  asymmetry deliberately
-- 🐥 Evaluate LLM-generated traces for correctness
-- 🐥 **Delegate**: when should you trace yourself vs. ask the LLM to trace?
-- 🐔 SOLO check-in: tracing is a foundation-building skill: skipping it removes
-  your ability to evaluate LLM output
-
-### 4.4 Agents and User Communication
-
-_Revisits Chapter 3: user programs: with an LLM collaborator._
-
-- 🥚 Read LLM-generated programs and identify what they do (using Ch1–3 skills)
-- 🐣 Apply full PBSI evaluation to LLM-generated programs
-- 🐣 Code review LLM-generated code using the established code review framework
-- 🐣 Design test cases for LLM-generated programs
-- 🐣 Describe gaps between your intent and LLM output using PBSI vocabulary
-- 🐥 Debug LLM-generated code: detect bugs, identify root causes, fix them
-- 🐥 Full documentation generation and review: interact with LLMs around the
-  full doc comment structure
-- 🐥 **Iterate**: full collaboration loop: prompt → evaluate → refine → repeat
-- 🐔 SOLO check-in (threshold moment): all collaboration approaches are now
-  available: choose based on your learning position
-
-### 4.5 Looking Back, Looking Forward
-
-Up to this point the LLM has done the notation work — writing the code — while
-you have done the design work. That's the authoring-partner frame, and it's the
-right one for finding your bearings. But it's a simplification of a moving
-target.
-
-**Agentic AI systems** are emerging — LLMs that don't just write notation but do
-design work too: planning, decomposing problems, making architectural choices,
-calling tools, modifying state autonomously. That's a more complex collaboration
-than the one this chapter covered. It doesn't replace your role so much as shift
-what you attend to — from writing the code to specifying observable outcomes
-that humans can still evaluate, directing a system that does more than
-transcribe. Flag this as territory for post-curriculum learning; _Welcome to
-Algorithms_ picks it up. Chapter 5 will return briefly to it in its closing
-moments.
-
-- 🐣 Given scenarios, identify which collaboration approach you'd use and why
-- 🐣 Articulate programming concepts precisely enough for an LLM to act on them
-- 🐥 Choose an appropriate collaboration approach based on your learning goals
-  (SOLO framework)
-- 🐥 Apply perspective-taking to evaluate LLM output in unfamiliar domains
-- 🐔 Delegate effectively: identify which parts of a task benefit from LLM
-  assistance vs. which undermine learning
-- 🐔 Compare LLM "theory of mind" to human theory of mind: what transfers, what
-  doesn't
-- 🐔 Recognize the emergence of **agentic AI systems** (LLMs doing design work,
-  not just notation) as a more complex development than the authoring-partner
-  frame covers, and flag it as territory for post-curriculum learning
-
-[TOP](#welcome-to-programming-coded-for-humans--syllabus)
-
-### 🎨 4.6 Vibetoading
-
-- 🐣 Decompose a complex request into smaller, verifiable steps (by contrast
-  with cargo-cult vibing — no twin, no model)
-- 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
-  it's right
-- 🐥 Evaluate code you didn't write or review during generation (PBSI autopsy)
-- 🐥 Identify where the jagged frontier manifested in a concrete collaboration
-- 🐔 Reflect on the difference between "it runs" and "I understand it"
+**Full chapter content** — sub-sections 4.0 (Wrapping premise), 4.1
+(What is an LLM?), 4.2 (Collaborating in Prose), 4.3 (Developer
+Communication), 4.4 (Computer Communication), 4.5 (User Communication),
+4.6 (Looking Forward), 4.7 (Vibetoading with the LLM), plus per-layer
+learning objectives — in [`syllabus.chapters.md`](./syllabus.chapters.md)
+Ch4.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -1930,228 +966,40 @@ moments.
 
 ## Chapter 5: Developers, Computers, Users, Agents, and You
 
-_Metaphor anchor: **the composer's daily practice** — small, complete pieces
-written for the composer's own practice. Variations on a theme, études on a
-single technique, sketchbook entries exploring an idea — Ligeti's Musica
-Ricercata, Beethoven's sketchbooks, Bach's inventions. A serious genre in its
-own right._
+_Metaphor anchor: **the composer's daily practice** — small, complete
+pieces written for the composer's own practice. Variations on a theme,
+études on a single technique, sketchbook entries exploring an idea —
+Ligeti's Musica Ricercata, Beethoven's sketchbooks, Bach's inventions._
 
-**In development.** Full chapter content is still being designed. The framing
-below is the intended shape.
+Training wheels come off. You Frogram for yourself through 💭
+**snippetry**: small, complete, self-contained programs as an ongoing
+practice. JavaScript's full multi-paradigmatic range opens up;
+compositional voice develops; Frogramming reveals value beyond
+productivity — for mastery, exploration, delight, the steady upkeep of
+one's craft, and the new thoughts it lets you think. Snippetry is the
+answer to _why write code when LLMs can write the notation_: it is the
+experience-form of NM-maintenance, the daily reps that keep your
+generative model alive once full-codebase work no longer provides them.
 
-### 💭 Overview
+This chapter develops the **both-twins state** in its merged form —
+V and F operating as a single integrated practice. Snippetry is where
+the two stances stop being separate hats and start being the same
+gesture: each small program is at once a user-twin sketch and an
+NM-twin probe. The Bakhtiarian-loop unification names this.
 
-Chapter 5 introduces **snippetry** as an ongoing practice — writing small,
-runnable, self-contained programs for their own sake. It answers a central
-question of the curriculum:
+**"You" is the fifth audience** — both singular (your own practice) and
+plural (sharing with and remixing from peers through the collaborative
+gist system).
 
-> Why write code when LLMs can write the notation? And how do I keep my
-> Frogramming sharp — particularly my NM-fluency in a language — when
-> full-codebase work no longer provides the daily reps?
+The chapter's intellectual-agency move: _you can use programming as a
+tool for thought, on whatever problems and ideas interest you, for the
+rest of your life._
 
-Snippetry is the answer because it's the experience-form of NM-maintenance — the
-daily reps that keep the automated library of past experiences (from § How
-Learning Happens) alive once full-codebase work no longer provides them. Small
-programs that exercise whole-program design at small scale while drilling an
-isolated concern — a language feature, a paradigm, an algorithm, the feel of a
-new notional machine, a user-experience miniature, or just for fun. Snippetry is
-also where deliberate Vibetoading lives in this course: low-stakes,
-user-experience-led sketches you write because that hat fits the moment.
-
-The practice balances **broad exploration** and **productive constraint**.
-Students develop their own sense of which balance serves their learning and
-their voice. There's no rigid split between types of snippet; the practice is
-about finding the balance that works for you right now, and letting it change as
-you grow.
-
-**"You" is the fifth audience.** Students have been programming for developers,
-the computer, users, and agents. Now they program for themselves — to learn,
-practice, think, stretch, explore, express, delight, and discover. "You" is both
-singular (your own practice) and plural (sharing with and remixing from peers
-through the collaborative gist system).
-
-> The best authors and the best JavaScript developers are those who obsess about
-> language, who explore and experiment with language every day and in doing so
-> develop their own style, their own idioms, and their own expression.
->
-> — [Angus Croll](https://anguscroll.com/),
-> [If Hemingway Wrote JavaScript](https://anguscroll.com/hemingway/)
-
-### The Notional Machine and Programming Paradigms
-
-**JavaScript is multi-paradigmatic.** Chapters 1–4 taught imperative
-programming. Chapter 5 is where students discover that the same language
-supports fundamentally different ways of thinking about computation: functional,
-object-oriented, declarative. Paradigm exploration is a core activity, not a
-sidebar.
-
-Once you understand programs as event streams, the paradigm distinctions become
-grounded in the same vocabulary. All paradigms run on a machine that produces
-evaluation events. What differs is the _relationship_ the programmer has to that
-event stream — how explicitly and in what terms the event sequence is specified:
-
-| Paradigm                                             | Relationship to the evaluation event stream                                                                                                       |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Imperative** (JS Ch1–4)                            | Explicit event sequence — every step specified. JS's actual NM vocabulary.                                                                        |
-| **OOP in JS** (Ch5)                                  | Syntactic organization on top of the same machine — method calls = prototype chain walk + function call events. A style, not a different machine. |
-| **OOP in purpose-built languages** (Java, Smalltalk) | Genuinely different NMs — message-send events, virtual dispatch. Different event vocabulary.                                                      |
-| **Functional in JS** (Ch5)                           | Compose transformations; the same machine generates events from function application. Same machine, different organization.                       |
-| **Declarative** (regex, SQL)                         | Specify the goal; delegate event generation. Maximum decoupling from the event sequence.                                                          |
-| **Event-driven** (JS Ch5 event loop)                 | External events — clicks, timers — enter the stream as first-class participants.                                                                  |
-
-Imperative programming — what you will learn in Chapters 1–4 — is explicit about
-the event sequence: every step is specified, every event directed. Other
-paradigms have different relationships to that stream. You will explore them in
-Chapter 5.
-
-**Looking further: Welcome to Algorithms**
-
-The evaluation event vocabulary you build in Ch2 is one conceptual bridge from
-embodied computing to CS. Welcome to Algorithms' step-counting and Big O
-analysis require the same cognitive habit — counting discrete operations —
-though the abstraction differs: evaluation events are implementation-level;
-algorithmic steps are defined relative to input size and are intentionally
-implementation-agnostic. The machine you learn here makes that work tractable
-and visible.
-
-### The training-wheels-off commitment
-
-Chapter 5 is where students **graduate from the scaffolded curriculum
-environment** into real browser evaluation with real consequences.
-
-**What comes off:**
-
-- **JEJ language-feature constraint** — students can use any and all JS language
-  features. Newly available: user-defined functions, closures, arrays, objects,
-  the event loop, classes, `async`/`await`, generators, `fetch`, `Promise`,
-  `Symbol`, `Proxy`, ES modules, DOM manipulation, Canvas, and everything else
-- **The web worker sandbox** — code runs directly in the browser (iframe). If
-  your program freezes, the page freezes. Real consequences, real environment.
-  Optional configurable loop guards are available but not enforced
-- **Enforced formatting** — format your code however you prefer
-- **Study Lenses NM visualizations** — the curriculum's tracer-based NM
-  visualizations are no longer the primary tool
-
-**What replaces it:**
-
-- **Full browser devtools debugging toolkit** — line breakpoints, conditional
-  breakpoints, logpoints, `debugger` statements, step over/into/out, scope
-  panel, watch expressions, call stack, pause on exceptions, DOM breakpoints,
-  event listener breakpoints, console in paused context. Students learn all of
-  it.
-- **External NM visualization tools** — open-in buttons for specialized tools
-  (loupe for event loop, promisees for Promises, etc.) with different notional
-  machine perspectives. Training wheels come off, but power tools are available
-- **Four sandbox modes** offering different constraints and affordances:
-  - **Script without HTML** — pure computation, closest to Chs 1–4
-  - **Module without HTML** — introduces ES module semantics
-  - **HTML file with a script tag** — DOM available, split view of code and
-    rendered page
-  - **HTML file with a module tag** — DOM + ES modules
-
-  Students learn to distinguish "pure" scripts (computation only) from scripts
-  embedded in a full page, and choose the mode that fits their snippet's needs.
-
-### The collaborative gist system
-
-Students can save snippets as gists, browse gists saved by other learners, and
-remix them. This makes Chapter 5 collaborative across all learners: your
-practice is your own, but it's enriched by what others are exploring. The remix
-workflow — take someone else's snippet, change its intent, make it yours — is a
-core snippetry activity.
-
-### Learning objectives
-
-#### 5A. Training-Wheels-Off: Carrying Predictive Mastery
-
-- 🥚 Trace code with the full browser devtools debugging toolkit: breakpoints,
-  conditional breakpoints, logpoints, `debugger` statements, step over/into/out,
-  scope panel, watch expressions, call stack, pause on exceptions, DOM
-  breakpoints (HTML modes), event listener breakpoints. Predict each step before
-  stepping
-- 🥚 Predict a program's complete behavior (output, final binding states, error
-  or no error) without stepping, then verify with a single run. The debugger is
-  scaffold; prediction without it is the graduation
-- 🐣 Use the devtools toolkit to isolate a bug: combine debugging features
-  strategically (conditional breakpoints, watch expressions, pause on
-  exceptions, logpoints) and describe divergence using NM vocabulary
-- 🐣 Choose and use external NM visualization tools (loupe, promisees, etc.) for
-  specific NM concepts; explain the tool choice and what it revealed
-
-#### 5B. Extending the NM: New JS Territory
-
-- 🥚 Extend your NM to a JS feature outside JEJ (your choice: functions, arrays,
-  objects, classes, async/await, generators, etc.). Read documentation, form a
-  prediction, write a snippet, verify, update your model
-- 🐣 Explore "the weird parts": find edge cases and surprising JS behaviors,
-  predict, verify, explain using NM concepts why the behavior occurs
-- 🐥 Extend your NM to a second unfamiliar feature; reflect on whether the
-  learning process was easier the second time and why
-- 🐔 Explore "historic" vs. "modern" JS: write the same thing using a historic
-  idiom and its modern equivalent, trace both, describe the NM differences
-
-#### 5C. Programming Paradigms
-
-- 🥚 Name the major programming paradigms JS supports (imperative, functional,
-  object-oriented, declarative) and identify which paradigm a given snippet uses
-- 🐣 Solve the same problem in two different paradigms; trace both and describe
-  how the NM behaves differently
-- 🐣 Implement the same paradigm with different features (e.g., functional style
-  with loops+variables vs. array methods; OOP with prototypes vs. classes)
-- 🐥 Translate a snippet between paradigms: preserve behavior, articulate what
-  changed at Strategy/Implementation (PBSI) and what stayed at Purpose/Behavior
-
-#### 💭 5D. Snippetry as Practice
-
-- 🥚 Write a snippet under a productive constraint (a single feature in 3 ways,
-  a specific error on purpose, one loop + zero conditionals, etc.)
-- 🥚 Read and trace a snippet from the corpus or a peer's gist that uses
-  unfamiliar JS; apply PBSI analysis
-- 🐣 Write a variation on an existing snippet: same purpose, different strategy;
-  articulate what changed and why
-- 🐣 Remix a peer's snippet: change its intent, not just implementation; make it
-  yours
-
-#### 5E. You as Audience
-
-- 🥚 Make yourself laugh: write a snippet whose output, structure, or concept
-  genuinely amuses you — not funny variable names, the humor lives in what the
-  program does
-- 🐣 Surprise yourself: write a snippet where you don't fully know what will
-  happen; describe what surprised you
-- 🐣 Discover something unexpected: encounter a behavior you didn't predict,
-  investigate it, explain it
-- 🐥 Impress yourself: write a snippet that does something you didn't think you
-  could do a month ago
-
-#### 5F. Compositional Voice and Micro-Decisions
-
-- 🥚 Identify at least 5 micro-decisions in a snippet and describe what each
-  communicates; name alternatives and how they'd change the voice
-- 🐣 Write the same program two ways that reveal different voices: same
-  behavior, different micro-decisions (the cat-detector corpus is a model)
-- 🐥 After writing 5+ snippets, identify your own recurring patterns with
-  specific examples
-
-#### 5G. Self-Directed Learning
-
-- 🥚 Choose your sandbox mode deliberately: explain the constraints and
-  affordances of each mode for a given snippet idea
-- 🐥 Design your own snippet prompt targeting a specific NM concept; interesting
-  enough that a peer would want to try it
-
-#### 5H. The Whole Rhetorical Situation
-
-- 🐣 Write a snippet for a specific audience beyond yourself; save as a gist
-- 🐥 Conduct a full self-review of one of your own snippets: PBSI,
-  micro-decisions, NM trace, voice reflection
-
-#### 5I. Capstone Reflections
-
-- 🐔 Articulate why Frogramming-for-its-own-sake remains valuable in an
-  LLM-assisted world — your answer, grounded in your experience
-- 🐔 Recognize that **agentic AI systems** (LLMs doing design work, not just
-  notation) are arriving; identify a concrete example and reflect on what it
-  means for the design-vs-notation split
+**Full chapter content** — paradigm exploration (imperative,
+functional, OOP, declarative), training-wheels-off devtools mastery,
+the collaborative gist system, the practice's balance of broad
+exploration and productive constraint, the closing look-forward to
+agentic AI, plus per-layer learning objectives — in
+[`syllabus.chapters.md`](./syllabus.chapters.md) Ch5.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
