@@ -157,16 +157,13 @@ describe('<StudyLenses> — F1 smoke', () => {
 			// contradicting value under `configs.defaults["debug-props"]` —
 			// if any future regression makes the orchestrator consult that
 			// key, the assertion would catch the wrong source winning.
-			// orchestrate StudyLensesProps.configs structurally requires
-			// just `lenses?` — TypeScript's exactOptionalPropertyTypes
-			// makes the declared shape strict; we cast to inject the
-			// L2-future seam key for the falsification test.
+			// The public `StudyLensesProps.configs` is maximally opaque
+			// (`Readonly<Record<string, unknown>>`), so this literal
+			// satisfies the type directly — no cast needed.
 			const contradicting = {
 				lenses: { 'debug-props': { onlySource: 'lenses-entry' } },
 				defaults: { 'debug-props': { onlySource: 'WRONG-from-defaults' } },
-			} as unknown as NonNullable<
-				React.ComponentProps<typeof StudyLenses>['configs']
-			>;
+			};
 			const { container } = render(
 				<StudyLenses snippet="OK" lens="debug-props" configs={contradicting} />,
 			);

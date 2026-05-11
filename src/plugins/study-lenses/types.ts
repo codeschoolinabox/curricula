@@ -128,7 +128,13 @@ type Sibling = Readonly<{
  * The prop shape the plugin emits onto a transformed
  * `mdxJsxFlowElement(StudyLenses)` JSX node. Surfaces as React
  * props on `<StudyLenses>` per the **three-prop public API** in
- * `orchestrate/types.ts:StudyLensesProps`.
+ * `orchestrate/types.ts:StudyLensesProps`. Note the asymmetry: the
+ * plugin's emission type is concrete (this `ResolvedConfig`-shaped
+ * `configs`), but the orchestrate-side public type is **maximally
+ * opaque** (`Readonly<Record<string, unknown>>`). The orchestrator
+ * makes its `lenses[lens]` lookup an internal structural assumption
+ * at the cast boundary inside `resolvePerLensConfig`, not a public
+ * type constraint.
  *
  * @remarks `configs` is emitted via an
  * `mdxJsxAttributeValueExpression` — MDX evaluates the estree

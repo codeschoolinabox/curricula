@@ -293,9 +293,14 @@ keys, all optional:
   boundary. Strictness is a **lens-prop-boundary** contract (the orchestrator
   casts to `LensConfig` after the two-tier resolution chain runs), not a
   compile-time guarantee at the `<StudyLenses>` public API. The orchestrate-
-  side `StudyLensesProps.configs.lenses` inner-value type is correspondingly
-  wider (`Record<string, unknown>`) so the public type signature reflects the
-  trust assumption honestly.
+  side `StudyLensesProps.configs` is correspondingly **maximally opaque**
+  (`Readonly<Record<string, unknown>>`, no declared `lenses` slot); the
+  orchestrator's `configs.lenses?.[lens]` lookup is an internal structural
+  assumption at the cast boundary inside `resolvePerLensConfig`, NOT a
+  constraint on the public type. The plugin's
+  `StudyLensesHastProps.configs: ResolvedConfig` emission type is concrete — the
+  asymmetry is intentional (plugin = strict emission, consumer = tolerant
+  accept).
 
 - **`exerciseSetPrefixes`** is an array of directory-name prefixes that mark
   "exercise set" folders for **sidebar-label stripping**. When the sidebar

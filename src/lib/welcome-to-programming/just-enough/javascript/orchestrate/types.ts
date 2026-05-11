@@ -62,6 +62,23 @@ import type { LensConfig } from '../lenses/types.js';
  * (one required, two optional) per the locked decision in
  * `../DOCS.md` § Public surface.
  *
+ * @remarks **`configs` typing — MAXIMALLY OPAQUE.** The public type
+ * makes NO statement about `configs`'s internal shape. Callers pass
+ * whatever the plugin emits today, or whatever a hand-written
+ * `<StudyLenses configs={…} />` JSX supplies. The orchestrator's
+ * INTERNAL `resolvePerLensConfig` makes ONE structural assumption —
+ * that the cascade exposes `lenses[lens]` for per-lens config lookup —
+ * at the cast boundary inside that function (with a runtime
+ * sanity check via `readCascadeLensEntry`). The public type carries
+ * no such assumption, so future cascade-shape evolution (L2 default-
+ * lens seam, etc.) doesn't require widening the public surface.
+ *
+ * The orchestrator's read of `configs.lenses[lens]` is a runtime
+ * trust point, not a compile-time guarantee. Strictness against
+ * the lens-side `LensConfig` is enforced at the lens-prop boundary
+ * (where the orchestrator's resolution chain casts after the deep-
+ * merge of tier 0 ⊕ tier 1).
+ *
  * @remarks
  * - `snippet` — the source string. The orchestrator builds the
  *   embodiment internally on lens-open (lazy). Caller does NOT
@@ -69,15 +86,17 @@ import type { LensConfig } from '../lenses/types.js';
  * - `lens?` — Q-III educator-supplied default-mount lens name. The
  *   learner can switch via the toolbar picker; this is just the
  *   initial selection.
- * - `configs?` — the **whole resolved cascade** (opaque passthrough)
- *   from the Docusaurus plugin's `lenses.json` directory walk.
- *   Per-fence URL-style query overrides and sibling `@study-lens`
- *   directive JSON overrides are **deep-merged INTO
- *   `configs.lenses[lens]`** at plugin emission time, so the
- *   orchestrator reads `configs.lenses?.[lens]` as the authoritative
- *   per-lens config. Other top-level keys (`defaults`,
- *   `embedSiblings`, `exerciseSetPrefixes`) are accepted but unused
- *   at F1+B (L2 may consume them).
+ * - `configs?` — opaque cascade passthrough (see § configs typing
+ *   above). The paragraphs that follow describe TODAY'S plugin
+ *   emission shape; they are descriptive observations, NOT type
+ *   constraints. The plugin emits the whole resolved cascade from
+ *   the `lenses.json` directory walk. Per-fence URL-style query
+ *   overrides and sibling `@study-lens` directive JSON overrides
+ *   are **deep-merged INTO `configs.lenses[lens]`** at plugin
+ *   emission time, so the orchestrator reads `configs.lenses?.[lens]`
+ *   as the authoritative per-lens config. Other top-level keys
+ *   (`defaults`, `embedSiblings`, `exerciseSetPrefixes`) are
+ *   accepted but unused at F1+B (L2 may consume them).
  *
  * **Resolution chain for any lens-name** (two tiers, post-3-prop
  * reshape):
@@ -104,32 +123,11 @@ import type { LensConfig } from '../lenses/types.js';
  * `lenses.json` cascade, then emits the **three props** onto the
  * rendered `<StudyLenses>` JSX node. See WS3 handoff § Cross-handoff
  * impact for the plugin-emit narrowing schedule.
- *
- * **`configs` typing.** The structural shape is the plugin's
- * `ResolvedConfig` (`{ defaults, embedSiblings, lenses, … }`); the
- * orchestrator types it loosely here as a record-with-`lenses` so
- * the plugin's exact `ResolvedConfig` shape stays a plugin-internal
- * detail. The orchestrator only reads `configs.lenses?.[lensName]`
- * for the per-lens config; other top-level keys (`defaults`,
- * `embedSiblings`, `exerciseSetPrefixes`) are accepted via
- * TypeScript's structural width-permissiveness and unused at F1+B.
- *
- * The inner per-lens value is typed as
- * `Readonly<Record<string, unknown>>` — **deliberately wider than
- * the lens-side `LensConfig`** — because the plugin's cascade
- * resolver does not validate against the lens-side schema (see
- * plugin README § `lenses.json` schema "Lens-config value shape").
- * Strictness is enforced at the lens-prop boundary (where the
- * orchestrator's resolution chain casts to `LensConfig` after
- * deep-merging tier 0 ⊕ tier 1) — a runtime trust point, not a
- * compile-time guarantee at the `<StudyLenses>` public API.
  */
 type StudyLensesProps = Readonly<{
 	snippet: string;
 	lens?: string;
-	configs?: Readonly<{
-		lenses?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
-	}>;
+	configs?: Readonly<Record<string, unknown>>;
 }>;
 
 // --- Internal mode state (2-state machine per WS3 F2) ---

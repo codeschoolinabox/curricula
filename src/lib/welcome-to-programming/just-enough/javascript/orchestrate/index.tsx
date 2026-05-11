@@ -78,13 +78,24 @@ function useEmbodiment(snippet: string): Snippet {
  * `configs.lenses[lens]` at plugin emission time, so there is no
  * separate per-fence-override tier on the orchestrator side.
  *
- * The cast to `LensConfig` at the return boundary is the
- * lens-prop-boundary trust point: the cascade resolver types per-lens
- * values loosely as `Record<string, unknown>`, but lens components
- * type their `config` prop as `LensConfig` (primitives + primitive
- * arrays). Authors who supply richer values via `lenses.json` get
- * undefined behavior at the lens boundary — per plugin README
- * § `lenses.json` schema "Lens-config value shape".
+ * **Opacity boundary cast.** The public `StudyLensesProps.configs`
+ * is typed maximally-opaque (`Readonly<Record<string, unknown>>`)
+ * — the type makes no statement about cascade internals. This
+ * function is the orchestrator's INTERNAL structural assumption
+ * point: it casts to `{ lenses?: Readonly<Record<string, unknown>> }`
+ * to look up `lenses[lensName]`. The cast is a runtime trust
+ * contract: if a caller hands the orchestrator a `configs` value
+ * that doesn't expose a `lenses` map (or whose `lenses[lens]` is
+ * not an object), the read returns `undefined` and the chain
+ * falls back to `module.config()` alone.
+ *
+ * **Lens-prop-boundary cast.** The return-side cast to `LensConfig`
+ * is the lens's strict-shape trust point: the cascade resolver
+ * types per-lens values loosely, but lens components type their
+ * `config` prop as `LensConfig` (primitives + primitive arrays).
+ * Authors who supply richer values via `lenses.json` get undefined
+ * behavior at the lens boundary — per plugin README § `lenses.json`
+ * schema "Lens-config value shape".
  */
 function resolvePerLensConfig(
 	module: LensModule,
@@ -92,8 +103,38 @@ function resolvePerLensConfig(
 	props: Pick<StudyLensesProps, 'configs'>,
 ): LensConfig {
 	const moduleDefault = module.config();
-	const cascadeForLens = props.configs?.lenses?.[lensName] ?? {};
+	const cascadeForLens = readCascadeLensEntry(props.configs, lensName) ?? {};
 	return deepMerge(moduleDefault, cascadeForLens as LensConfig);
+}
+
+/**
+ * Reads a per-lens config entry from an opaque `configs` value at the
+ * orchestrator's structural-assumption boundary.
+ *
+ * The public `StudyLensesProps.configs` type is
+ * `Readonly<Record<string, unknown>>` — it makes NO statement about
+ * cascade internals. This helper encapsulates the orchestrator-internal
+ * assumption that the cascade exposes `lenses[lensName]` for per-lens
+ * config lookup, and adds a runtime sanity check: a non-object value at
+ * `lenses[lensName]` (string, number, null, array) fails the lookup
+ * and the resolution chain falls back to `module.config()` alone.
+ *
+ * The runtime check makes the silent-fallback claim in the prop-table
+ * documentation actually robust — without it, a malformed
+ * `configs.lenses[lensName]` would feed a non-object into `deepMerge`
+ * and the lens would receive an undefined-behavior config.
+ */
+function readCascadeLensEntry(
+	cascade: Readonly<Record<string, unknown>> | undefined,
+	lensName: string,
+): Readonly<Record<string, unknown>> | undefined {
+	const asLensMap = cascade as
+		| Readonly<{ lenses?: Readonly<Record<string, unknown>> }>
+		| undefined;
+	const entry = asLensMap?.lenses?.[lensName];
+	return typeof entry === 'object' && entry !== null && !Array.isArray(entry)
+		? (entry as Readonly<Record<string, unknown>>)
+		: undefined;
 }
 
 export default function StudyLenses({

@@ -111,7 +111,7 @@ diagram).
 flowchart TD
     SnippetProp["snippet prop<br/>(string, required)"]
     LensProp["lens? prop<br/>(string, Q-III default)"]
-    ConfigsProp["configs? prop<br/>(whole resolved cascade, opaque;<br/>per-fence/sibling override pre-merged<br/>INTO configs.lenses[lens])"]
+    ConfigsProp["configs? prop<br/>(maximally opaque object;<br/>public type makes no statement)"]
 
     SnippetProp --> EditorPath
     SnippetProp -->|"embody, sync (lazy on lens-open)"| Embodiment["frozen Snippet<br/>(embodiment)"]
@@ -119,7 +119,7 @@ flowchart TD
     Embodiment --> LensPath
     Embodiment --> RecPath
     LensProp --> LensPath
-    ConfigsProp -->|"read configs.lenses?.[lens]"| LensPath
+    ConfigsProp -->|"internal cast: read configs.lenses?.[lens]"| LensPath
 
     EditorPath["editor mode<br/>(home base mounted; consumes snippet string only)"]
     LensPath["lens mode<br/>(active lens mounted with embodiment +<br/>resolved per-lens config)"]
@@ -153,6 +153,13 @@ in its pipeline; lens authors don't compute it themselves. There is no separate
 per-fence-override tier on the orchestrator side — the plugin pre-merges the
 URL-style query / directive JSON INTO `configs.lenses[lens]` before emission, so
 the cascade IS the merged truth.
+
+The `configs.lenses?.[lensName]` read is an **orchestrator-internal structural
+assumption**, NOT a constraint on the public `configs` type. The public type is
+maximally opaque (`Readonly<Record<string, unknown>>`); `resolvePerLensConfig`
+casts at the boundary to look up `lenses[lensName]`. If the supplied `configs`
+value doesn't expose a `lenses` map (or its `lenses[lensName]` isn't an object),
+tier 1 contributes nothing and the chain falls back to `module.config()` alone.
 
 `resolvedDefault` resolution order:
 
