@@ -1,12 +1,17 @@
 # Bakhtiar Mikhak Meeting Prep
 
-> User has a meeting with Bakhtiar Mikhak (Harvard Extension; DGMD E-1
-> instructor) to discuss the syllabus and the just-enough/javascript
-> infrastructure. The meeting was upcoming as of round 3-5; date TBD.
+> Meeting with Bakhtiar Mikhak (Harvard Extension; DGMD E-1 instructor) to
+> discuss the WtF syllabus and the just-enough/javascript infrastructure.
+> Date TBD.
 >
-> The 19 prior questions (Q-B1 to Q-B19) accumulated across rounds 1-4
-> are mostly obsolete after round 5's transformational reset. This file
-> consolidates a tighter, post-round-5 prep list.
+> **This file is a quick-wins refresh** of the post-R5 prep list, with
+> R6-R10 locks incorporated (companion pedagogy as stance & values
+> integrative lineage; Bakhtiarian loop as open-ended dynamic, not the
+> 4-beat my earlier framing imposed; AI-adoption model collaborators
+> named; two-scale instrument reading; both-twins state in the §3 2×2;
+> SOLO within each layer). **Substantive rethink of the questions —
+> what really matters to ask given the current state of the work — is
+> the next-session task; this file is the starting point.**
 
 ## Background context
 
@@ -42,21 +47,43 @@
 - **Does the V/F symmetry** (V twins user via design thinking; F twins
   NM via computational thinking) **map cleanly onto how you teach**
   collaboration between designers and engineers?
-- We've found that the user's **AI-adoption model** (Levels 0-3) **maps
-  precisely onto V/F at Levels 2-3**. Validating: does this resonate as
-  a deeper structural truth, or is it a coincidence we shouldn't lean
-  on?
-- Does **"twin Level 2 in order to operate at Level 3"** land as the Ch4
-  organizing principle for AI collaboration?
+- The **AI-adoption model** Evan developed with **Janet Tilstra and
+  Josenne Peña** (Levels 0-3) **maps precisely onto V/F at Levels 2-3**
+  and is the root inspiration for Ch4's shape. Validating: does this
+  resonate as a deeper structural truth, or is it a coincidence we
+  shouldn't lean on?
+- Does **"twin Level 2 (cognitive) in order to operate at Level 3
+  (behavioral)"** land as the Ch4 organizing principle for AI
+  collaboration?
 
 ### Computational thinking definition
 
 - **You have prior art on teaching computational thinking specifically.**
   How do you define/teach CT in DGMD E-1 context? We need a working
   definition that's grounded in practice, not just Wing 2006.
-- Does the **Bakhtiarian loop** (V proposes → F responds → F discovers →
-  V interprets) feel like a fair operationalization of how V and F
-  coordinate in your teaching?
+- The curriculum names the V/F coordination dynamic the **Bakhtiarian
+  loop** (after the engineering × physics co-evolution lineage you
+  introduced to Evan). It's framed as open-ended: V proposes use-case
+  experiences; F discovers what the substrate affords; each turn shifts
+  what the other can do; V and F learn each other's craft through the
+  iterations, building toward the merged practice Ch5 develops. **Does
+  the naming feel appropriate, or would you frame it differently?**
+
+### The thinking-vs-process distinction (R7)
+
+- The curriculum sharpens the bridging-activities definitions:
+  _twinning is what makes the bridging activity **thinking** rather than
+  mere **process**_. Design _thinking_ requires twinning the user;
+  without that, what's happening is _design process_ (wireframes,
+  personas, A/B tests as steps you follow) but not design _thinking_.
+  Same on F's side: computational _thinking_ vs computational _process_.
+  **Does this distinction match how you've seen designers and engineers
+  succeed/fail in DGMD E-1?**
+- The 2×2 of user-twin × NM-twin has four corners: pure process /
+  V-only / F-only / **both-twins state**. The both-twins state is what
+  Ch4 (with LLM) and Ch5 (in snippetry) develop. **Does the
+  both-twins-state framing read as the operational form of the
+  transcendence DGMD E-1 aims for?**
 
 ### Embody/lenses architectural pattern
 
@@ -64,7 +91,7 @@
   data to support interaction needs; build many flexible experiences
   consuming that data.** Does this sentence land for you?
 - We've concluded **lenses are F-pedagogy infrastructure** in WtF
-  specifically — they help learners *learn* F-territory. The
+  specifically — they help learners _learn_ F-territory. The
   architectural pattern is V/F-neutral; the application here is
   F-specific. Does this distinction match your read?
 - Where do **learners cross from V-grounded design to F-grounded
@@ -93,20 +120,27 @@ purpose, meta-objective, learning means, data thread.
   can complete its exercises without AI") is cousin to your pedagogy.
   Does it resonate with how you frame mastery?
 
-### Spiral curriculum + connection-making
+### Spiderweb + spiral + connection-making
 
-- We've surfaced **"concepts are connections; connections are concepts.
-  Learning is connection-making."** as a candidate foundational principle.
-  Does this rhyme with how you teach? Is it consistent with Bruner's
-  spiral curriculum as you'd interpret it?
-- The Bruner spiral image (in `narrative/assets/spiral-curriculum.png`)
-  is the chapter-structure guide. Are there spiral-curriculum practices
-  you'd recommend we ensure?
+- **"Concepts are connections; connections are concepts. Learning is
+  connection-making."** is now one of the two canonical foundational
+  principles (paired with _AI can't UNDERSTAND for you_). Does this
+  rhyme with how you teach?
+- The curriculum pairs **spiderweb** (topology — skills at center,
+  technologies as rings) with **spiral** (trajectory — a particular
+  path through the spiderweb with sequenced skill threads). The user's
+  definition of spiral is richer than Bruner's: a path, not just
+  depth-densification. **Does this paired framing match how you've
+  observed the structure work in practice?**
+- The two image assets (`narrative/assets/spiral-curriculum.png` and
+  `narrative/assets/curriculum-spider-web.svg`) are the same conceptual
+  object viewed differently. The 5 layers can be read as 5 different
+  spirals through the same web at 5 engagement depths.
 
 ### Snippetry + L3
 
 - **Snippetry as L3** (programming as tool for thought; "programming to
-  learn"; cross-medium translation prompts like *insomnicat.js*). Does
+  learn"; cross-medium translation prompts like _insomnicat.js_). Does
   this resonate as a mature-stage practice?
 - We're considering **esoteric snippet prompts** — quines, wuzzles,
   cross-medium translations alongside pragmatic ones. Does breadth feel
