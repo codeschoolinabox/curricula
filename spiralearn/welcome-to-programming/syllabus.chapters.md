@@ -2004,7 +2004,7 @@ practice that builds the model AI can't have for you.
   traveled — Ch1's write-for-future-you to Ch5's write-for-yourself-
   the-audience-you-are-becoming — is the curriculum's operational
   encounter with that idea (see ontology §12 L4 matrix, Twinning row,
-  and §15 Bildung arc)
+  and §15 self-twinning arc)
 - 🐔 _(deeper section)_ The data-thread reading at full depth: the
   entire embodied phenomenon from theory to domain is data flowing
   through and changing the physical world — in theory changing the
