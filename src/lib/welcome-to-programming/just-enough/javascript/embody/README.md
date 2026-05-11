@@ -8,17 +8,19 @@ embody is one rung of the conceptual chain (see
 [../README.md](../README.md)):
 
 ```text
-JEJ  →  NM  →  embody  →  study lenses
+JEJ  →  NM  →  embody  →  study lenses  →  orchestrate
 ```
 
 - The **NM** ([../notional-machine.md](../notional-machine.md)) defines
   what concepts exist (phases, scopes, bindings, coercion, …).
 - **embody** turns each JEJ snippet into a data object whose every field
   and event corresponds to one of those NM concepts.
-- The **orchestrator** (`orchestrate/`) consumes embody instances and
-  distributes the `embodiment` to mounted **lenses** via props. Lenses
-  never re-derive what embody exposes; they also do not import embody
-  directly — they receive `embodiment` from the orchestrator.
+- **Study lenses** consume `embodiment` to render pedagogical
+  perspectives on it.
+- **The orchestrator** (`orchestrate/`) distributes `embodiment` to
+  mounted lenses via props. Lenses never re-derive what embody exposes;
+  they also do not import embody directly — they receive `embodiment`
+  from the orchestrator.
 
 embody is **not** part of the package's public API. The public surface
 is the `<StudyLenses>` orchestrator component (see
