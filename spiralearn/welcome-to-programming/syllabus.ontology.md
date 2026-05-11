@@ -14,8 +14,8 @@
 > - `syllabus.md` — the existing prose course (read-only for the current
 >   redraft)
 >
-> **Status**: end-state document. Status / phase / hedging belong in the handoff
-> dir (`syllabus.ontologying-pre-compression-persistence/`), not here.
+> **Status**: end-state document. Status / phase / hedging belong in git
+> history (commit log), not here.
 >
 > **Voice**: reference-neutral; un-prose-y. Tables, lists, mermaid only where
 > relationships need it, `<details>`-wrapped visuals with relative-importance
@@ -910,9 +910,9 @@ can stay at or descend through. **A learner who stays at L1 graduates well; a
 learner who revisits at L3 finds more; a learner who re-encounters at L4 finds
 more again.** Each layer is a complete exit point.
 
-> **Meta learning objective unifying all 5 layers**: _intellectual agency_
-> (user, clauding-7). Each layer is intellectual agency at a different scale.
-> This is the through-line that connects the layers to the manifestos
+> **Meta learning objective unifying all 5 layers**: _intellectual agency_.
+> Each layer is intellectual agency at a different scale. This is the
+> through-line that connects the layers to the manifestos
 > (`syllabus.manifesto.{learners,authors,community}.md`).
 
 | Layer  | Frame                | Meta-objective (intellectual agency over…) | Primary objective                                                                                     | Learned through                                                                                               |
@@ -1868,21 +1868,16 @@ grounded data-flow examples; gestures at the philosophical with L4 easter eggs.
 
 ## Source materials
 
-For the complete list with paths and relevance notes, see
-`syllabus.ontologying-pre-compression-persistence/04-source-materials.md` and
-`syllabus.ontology-handoff/04-source-materials.md`.
-
 Most load-bearing:
 
-- `syllabus.md` — the existing course prose (the rich chapter bodies migrate to
-  `syllabus.chapters.md`; top-of-document framing stays in `syllabus.md`)
+- `syllabus.md` — top-of-document framing (TL;DR, What to Expect, How Learning
+  Happens, Why Learn to Frogram, Symbology, Before You Begin) + chapter
+  summaries; rich chapter bodies live in `syllabus.chapters.md`
 - `narrative/README.md` — composer/virtuoso/mechanism metaphor + 8 AI-collab
   skills + voice spec + visual asset set
 - `just-enough/javascript/README.md` + `DOCS.md` + `notional-machine.md`
   - `embody/README.md` + `lenses/README.md` + `orchestrate/README.md` — the JEJ
-    → NM → embody → lenses → orchestrator chain
-- `syllabus.ontology-handoff/` — the prior session's handoff
-- `syllabus.ontologying-pre-compression-persistence/` — this session's handoff
+    → NM → embody → lenses → orchestrate chain
 - User's `0--notes/pages/` First Principles trail (Wear Hats, Learner Trust,
   Open Education trail, Process Over Product, Full Complexity Max Simplicity,
   Explicitly Teach the Implicit, Name Things, Context is Content, Whole Game,

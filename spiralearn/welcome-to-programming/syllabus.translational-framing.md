@@ -134,9 +134,8 @@ assumptions, the next iteration shifts. This is ongoing, not a project phase.
 
 Operational implications:
 
-- The handoff dir (`syllabus.ontologying-pre-compression-persistence/`) records
-  what's been decided and what's still open, so the reflexive-revision history
-  is recoverable
+- Git history records what's been decided and what shifted across rounds, so
+  the reflexive-revision history is recoverable
 - Adaptation by forkers (per `syllabus.manifesto.authors.md`) is itself
   reflexive analysis — every adaptation is a new datum about what the
   framework's commitments do or don't carry
@@ -343,7 +342,6 @@ End-state document. Updates land here when:
 - Partner cohorts surface trading-zone insights worth recording at this layer
 - Reflexive analysis produces a meaningful revision
 
-Per AGENTS.md: status / phase / hedging belongs in handoff files
-(`syllabus.ontologying-pre-compression-persistence/`), not here. This document
-describes the _what_ — the curriculum's translational nature; not the _where we
-are right now_ on the work-stream.
+Per AGENTS.md: status / phase / hedging belongs in git history (commit log),
+not here. This document describes the _what_ — the curriculum's translational
+nature; not the _where we are right now_ on the work-stream.
