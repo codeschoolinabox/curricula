@@ -555,6 +555,11 @@ Query-parameter semantics (URL-semantic; no parse-time numeric coercion):
 - `?key` (no `=`) → boolean `true`.
 - `?key=` (empty value) → empty string `""`.
 - `?a=1&b=2` → multiple keys joined by `&`.
+- `?a=1&a=2` → `{a: "2"}` (duplicate key; last occurrence wins, no multi-value
+  accumulation — mechanically equivalent to
+  `Object.fromEntries(new URLSearchParams(queryStr))` for ASCII-safe keys).
+- `?a=1&&b=2` → `{a: "1", b: "2"}` (empty segments skipped; same leniency
+  applies to leading/trailing `&`).
 
 The bare-`js` form emits **no `lens` prop** — the orchestrator resolves via
 cascade-bundle / editor-home-base fallback. `configs` still ships the whole

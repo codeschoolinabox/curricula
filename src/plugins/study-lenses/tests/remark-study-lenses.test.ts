@@ -789,6 +789,79 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
+	// ─── B.4: CP-2 — duplicate-key and empty-segment edge cases ──────
+
+	it('B.4 CP-2: duplicate key — `js:trace?a=1&a=2` → last write wins (URLSearchParams-style)', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:trace?a=1&a=2\nlet x = 1;\n```\n',
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('trace');
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
+			a: '2',
+		});
+	});
+
+	it('B.4 CP-2: empty segment — `js:trace?a=1&&b=2` → empty segments skipped silently (lenient URL-parser)', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:trace?a=1&&b=2\nlet x = 1;\n```\n',
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('trace');
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
+			a: '1',
+			b: '2',
+		});
+	});
+
+	it('B.4 CP-2: duplicate key three times — `js:trace?a=1&a=2&a=3` → last write wins ({a:"3"})', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:trace?a=1&a=2&a=3\nlet x = 1;\n```\n',
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('trace');
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
+			a: '3',
+		});
+	});
+
+	it('B.4 CP-2: leading `&` — `js:trace?&a=1` → leading empty segment skipped', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:trace?&a=1\nlet x = 1;\n```\n',
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('trace');
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
+			a: '1',
+		});
+	});
+
+	it('B.4 CP-2: trailing `&` — `js:trace?a=1&` → trailing empty segment skipped', () => {
+		const tree = parseStringInConfiguredJs(
+			'```js:trace?a=1&\nlet x = 1;\n```\n',
+		);
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+
+		expect(attrs.lens).toBe('trace');
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
+			a: '1',
+		});
+	});
+
 	it('B.4: `js:trace?` (empty query) → lens=trace, no merged override on configs.lenses.trace', () => {
 		const tree = parseStringInConfiguredJs('```js:trace?\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);

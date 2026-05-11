@@ -415,6 +415,21 @@ function transformFence(
  *
  * No numeric coercion happens at parse time — every value is a string,
  * an array of strings, or a boolean. Lenses coerce at config-read time.
+ *
+ * @remarks
+ * - **Duplicate keys.** `?a=1&a=2` → `{a:"2"}`. The `&`-split is
+ *   iterated left-to-right and each subsequent assignment to the
+ *   same key overwrites the previous value — last occurrence wins.
+ *   No multi-value accumulation; the result is a flat record.
+ *   Mechanically equivalent to
+ *   `Object.fromEntries(new URLSearchParams(queryStr))` for
+ *   ASCII-safe keys (with the caveat that `URLSearchParams`
+ *   percent-decodes its inputs, which this parser does not — fence
+ *   queries are not URL-encoded).
+ * - **Empty segments.** `?a=1&&b=2` (repeated `&`) → `{a:"1", b:"2"}`.
+ *   The split-and-skip-empty loop quietly drops empty segments. Same
+ *   leniency applies to a leading `&` (`?&a=1`) or trailing `&`
+ *   (`?a=1&`). This matches lenient URL-parser behavior.
  */
 function parseFenceQuery(queryStr: string): Readonly<Record<string, unknown>> {
 	const out: Record<string, unknown> = {};
