@@ -209,58 +209,27 @@ in separate sessions:
   now consume `embodiment`; lens migration targets the TS-core + React-wrapper
   contract; recommender consumes `embodiment` and is the authoritative Layer-II
   engine.
-- **The Docusaurus plugin alignment is its own session (B).** The pre-refactor
-  migration (`REFACTOR-HANDOFF.md`, deleted in `4526dc3`) didn't cover plugin
-  work either. The plugin at `src/plugins/study-lenses/` currently produces
-  `<StudyLenses code lens lang config transforms>` (per `code-block-to-jsx.ts`);
-  the new orchestrator API is `<StudyLenses snippet lens? config? configs?>`.
-  Required plugin alignment:
-  - **Drop `transforms` attribute** entirely (no transforms tier).
-  - **Rename `code` → `snippet`** to match the new orchestrator prop.
-  - **Drop `lang` attribute** (embody auto-detects).
-  - **Adopt URL-style fence syntax**: `js:trace?stepDelay=500` parses to
-    `lens="trace"` + `config={ stepDelay: 500 }`. Bare `js:trace` is
-    `lens="trace"` only. Plain `js` is the default editor home base.
-    Comma-separated transforms parsing dies.
-  - **`lens` attribute survives** (Q-III seam — picker default). The learner can
-    still pick freely (Q-I).
-  - **`config` attribute survives** as the override for the resolved-default
-    lens. Q-IV per-snippet tours are deferred (see Layer IV below); no
-    `sequence` field needed.
-  - **NEW `configs` attribute**: the cascade bundle keyed by lens name. The
-    plugin populates this from the `lenses.json` directory cascade
-    (`resolve-cascade.ts`).
-  - **Per-fence `@study-lens` directive** at `parse-study-lens-directive.ts`
-    survives — Q-III educator- override surface.
-  - **`lenses.json` cascade** (`resolve-cascade.ts`) survives; its output now
-    flows into the new `configs` prop.
-  - **Plugin alignment is its own session.** B (the Docusaurus plugin alignment
-    work — drop `transforms`, drop `lang`, rename `code` → `snippet`, adopt
-    URL-style fence syntax, emit `configs` from the `lenses.json` cascade) lands
-    AFTER F1's prop contract stabilizes (which it has, post-F1) and gates L7/L8.
-    See `./B-plugin-alignment.md` for the B starter prompt. The plugin keeps its
-    directory name `src/plugins/study-lenses/` because "study-lenses" is the
-    public user-facing concept.
+- **Docusaurus plugin alignment (B) — CLOSED.** Shipped 2026-05-07..11 (commits
+  `8cec361`–`838ba35`). Final emission shape: three-prop API
+  (`snippet, lens?, configs?`) per the mid-flight reshape `df6a0e7`; per-fence
+  override is deep-merged INTO `configs.lenses[lens]` at plugin time. Lens-side
+  `LensProps` was NOT touched; the plugin keeps its `src/plugins/study-lenses/`
+  directory name. L7/L8 (per-fence/per-directory ranking-override directives)
+  now unblocked and can proceed against the stable contract. See archived
+  `./B-plugin-alignment.md` for the work-stream summary.
 
-## Historical: pre-refactor substrate (now superseded)
+## Historical: pre-refactor substrate (superseded)
 
 The Phase A migration (commits `9f1db34`–`5d6fc54`, 2026-05-04..05) relocated
 the pre-refactor `study-lenses/` source tree into the three-peer layout
-(`embody/`, `lenses/`, `orchestrate/`). F1.A then deleted the
-relocated-but-stale `orchestrate/orchestrator/` archival (12 source + 12 test
-files) when the new four-prop `<StudyLenses>` came online. The pre-refactor work
-in the table below is preserved as historical context; the dispositions are now
-actuals, not plans.
+(`embody/`, `lenses/`, `orchestrate/`); F1.A then deleted the relocated-but-
+stale `orchestrate/orchestrator/` archival when the new `<StudyLenses>` came
+online. Durable patterns that survived into the current architecture: name-
+enumeration (lands in F4), EventBus (F5, internal-only), freeze discipline
+(`@-utils/freeze.ts`), cleanup-split (`orchestrate/DOCS.md` § Effect topology).
 
-| Era                | Concern                                                                          | Files / commits                                                                                 | Disposition (now actual)                                                                                                                                                                                                                                                                                                                                       |
-| ------------------ | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase 1 (Inc 0–7b) | Pure-TS substrate (registry, pipeline, state, EventBus, cache, reset, reset-all) | `lenses/*.ts` (10 modules, pre-refactor location)                                               | Substrate dissolved during Phase A migration + F1.A archival deletion. Recovered durables that survive into the new architecture: name-enumeration patterns (will resurface in F4 lens roster), EventBus pattern (F5 internal-only), freeze discipline (live in `@-utils/freeze.ts`), cleanup-split lessons (live in `orchestrate/DOCS.md` § Effect topology). |
-| Inc 8              | React wrapper scaffolding                                                        | `lenses/orchestrator/study-lenses.tsx` + default-registry + editor stub (pre-refactor location) | Wrapper relocated to `orchestrate/orchestrator/` in Phase A (`5d6fc54`); F1.A then deleted that archival entirely. The new four-prop `<StudyLenses>` lives at `orchestrate/index.tsx`. The registry-as-type dissolved; the registry CONCEPT (mechanism for the orchestrator to enumerate lenses) survives, open-spec per F4 Phase 0.                           |
-| Inc 9              | Toolbar with lens-picker, dispatch-effect, cache-hit reattach                    | 11 commits `fc3257c..228c04c`                                                                   | Toolbar lens-picker survives in concept; lands in L1. `lens-switched` dispatch-effect survives in concept; lands in F5 (internal-only EventBus). Cache-hit reattach dissolved (disposability principle — lens state is per-mount, snippet change unmounts lenses).                                                                                             |
-
-Test count pre-F1: 359 tests across 27 files in `orchestrate/` (post-F1).
-Pre-existing test failures in `embody/lib/evaluating/`, `lenses/highlight/` (now
-deleted), and `snippetry/debug/` are out of WS3 scope.
+Pre-existing red areas out of WS3 scope: `embody/lib/evaluating/`,
+`lenses/highlight/` (deleted), `snippetry/debug/`.
 
 ## Lessons carried forward
 
@@ -334,55 +303,150 @@ The base of the pyramid. Without this, no quadrant has a substrate.
 
 #### F1 — `<StudyLenses snippet>` end-to-end smoke ✅ DONE
 
-**Shipped** in commits `bd98648` → `abe70bb` (2026-05-06..07). The chain is
-alive: `<StudyLenses snippet …>` → `embody(snippet)` → frozen `Snippet` (held
-via `useEmbodiment` custom hook + `useDebugValue` for DevTools observability) →
-editor home base mounts as a single React component (per AR-1 CP-1; no
-`embodiment` prop on the editor — that's lens-mode-only).
+Shipped 2026-05-06..07 (`bd98648`–`abe70bb`); see status banner + the
+overturn-note at the top of this handoff for the current contract. Two AR-1
+deviations from the original spec are intentional and load-bearing for F2+: no
+format pre-processing (the learner formats their own code; `embody` checks
+`Snippet.validation.formatted` internally); no `embodiment` prop on the editor
+(AR-1 CP-1 — embodiment is a lens-mode concept). The F1 mount-time guard
+dissolved during B's 3-prop reshape (`df6a0e7`); plugin-fence rendering shipped
+with B (sandbox at `spiralearn/sandbox/b-prop-shape/`).
 
-Two AR-1 deviations from the original spec are intentional:
-
-- **No format pre-processing.** `embody` validates format compliance internally
-  via `Snippet.validation.formatted`; formatting is the learner's
-  responsibility; the orchestrator does not pre-format.
-- **No `embodiment` prop on the editor.** AR-1 CP-1 rejected the prop because
-  the editor is editor-mode-only and embodiment is a lens-mode concept (F2+). F1
-  holds embodiment internally for DevTools observability.
-
-The F1 mount-time guard (throw if `config` supplied with no resolved-default
-lens) was wired in `orchestrate/index.tsx` in F1 and **dissolved during the
-3-prop reshape** (commit `df6a0e7`). With the `config` prop absorbed into
-`configs.lenses[lens]`, the guard has no trigger surface; see the overturn-note
-at the top of this handoff.
-
-Sandbox harness: `src/pages/study-lenses-smoke.tsx` mounts `<StudyLenses>`
-directly with hardcoded sentinel snippets; **plugin-fence rendering shipped with
-B** (commits `8cec361`–`838ba35`). Live verification page at
-`spiralearn/sandbox/b-prop-shape/`. See archived `./B-plugin-alignment.md` for
-the work-stream summary.
-
-#### F2 — Editor-vs-lens state machine
+#### F2 — Editor-vs-lens 2-mode state machine ← **NEXT STONE**
 
 The orchestrator's UI is in exactly one of two modes at a time:
 
 - **Editor mode**: `orchestrate/editor/` is mounted; the learner is editing the
-  snippet string. **No active lens, no embodiment** (yet). The toolbar's
-  lens-picker is visible; selecting a lens exits editor mode.
+  snippet string. **No active lens, no embodiment** (yet). The picker is
+  visible; selecting a lens exits editor mode.
 - **Lens mode**: a lens is active with a frozen embodiment + lens config bundle
-  as props. **The snippet is read-only while in lens mode** — the learner cannot
-  type. Switching to a different lens reuses the current embodiment if the
-  snippet hasn't changed (which it can't); switching to the editor disposes the
-  lens and drops back to editor mode.
+  as props. **The snippet is read-only while in lens mode**. Switching lenses
+  reuses the current embodiment; switching back to the editor disposes the lens.
 
-The mode switch from editor→lens is the moment the snippet is snapshotted.
-Returning editor→lens later (after edits) builds a NEW embodiment from the new
-snippet. Lens-internal UI state (parsons shuffle, blanks fills) is per-mount;
-never carried across mode switches. There is no concurrent "editor + lens"
-state.
+The mode switch from editor → lens is the moment the snippet is snapshotted.
+Returning editor → lens later (after edits) builds a NEW embodiment. Lens-
+internal UI state (parsons shuffle, blanks fills) is per-mount; never carried
+across mode switches. There is no concurrent "editor + lens" state.
 
-Sandbox: open editor; type; switch to a lens (snippet snapshot taken; embodiment
-built; lens mounts read-only); switch back to editor (lens disposes); type more;
-switch to a lens again (FRESH embodiment, fresh lens-internal state).
+##### F2 prerequisite state (on `main`)
+
+- F1 + B both shipped (see status banner). Lens-side `LensProps` is stable;
+  plugin emission is the three-prop API.
+- Editor today: 35-line single React component at `orchestrate/editor/index.tsx`
+  rendering `<textarea readOnly value={snippet}>`. The file's JSDoc already
+  declares "F2 adds the optional `onSnippetChange?(next: string)`" — F2's job is
+  to wire it.
+- Orchestrator's current dispatch (`orchestrate/index.tsx`) is registry-
+  membership-based: if `lens` matches a `LENS_REGISTRY` key, mount the lens;
+  otherwise mount the editor. No mode discriminator at runtime.
+- `OrchestratorState` discriminated union (`EditorModeState | LensModeState`) is
+  already typed in `orchestrate/types.ts` § Internal mode state (lines 141-173)
+  but is not consumed by the runtime. F2 wires it in.
+  `LensModeState.embodiment: Snippet` is the embodiment cache slot F2.4/F2.5
+  wire — already declared, just unused today.
+
+##### F2 deliverables (concrete contract changes)
+
+- Lift `readOnly` from the editor's textarea. The editor becomes writable in
+  editor mode.
+- Add `onSnippetChange?(next: string)` prop to `EditorComponent`. Snippet state
+  lives in `<StudyLenses>` (controlled component pattern).
+- Wire `mode: 'editor' | 'lens'` runtime state in `<StudyLenses>` consuming the
+  existing `OrchestratorState` discriminated union. The lens-prop remains the
+  transition trigger (a learner-clicks-picker trigger lands in F5+L1), but
+  dispatch flows through `setState({ mode, activeLens })` rather than a direct
+  registry lookup in the render path. The current registry-membership branch in
+  `orchestrate/index.tsx:118-128` is refactored, not removed.
+- Mode-routing: editor mode mounts `<EditorComponent>`; lens mode mounts the
+  registered lens module.
+- **Bidirectional transitions**: editor → lens (lens-prop becomes a registered
+  key) AND lens → editor (lens-prop unset or unregistered key) both update the
+  mode discriminator. The lens → editor transition disposes lens-internal UI
+  state per the disposability principle.
+- **Mode-transition embody trigger**: build `embodiment` only on editor → lens
+  transition (per F3's lazy embodiment principle — F2 implements the trigger
+  seam; F3 narrows it further). The existing snippet-change `useEmbodiment`
+  effect in `<StudyLenses>` (F1's unconditional embody) is REMOVED in F2.4 and
+  replaced with the transition-trigger version.
+- Snippet-edit invalidation: editing in editor mode invalidates any cached
+  embodiment; the next editor → lens transition rebuilds.
+- `ModeChangedPayload` type declaration in `types.ts` (the bus dispatch itself
+  lands in F5; F2's Phase 0 just locks the payload shape).
+
+##### F2 Phase 0 (DDD)
+
+1. **Glossary**: define "editor mode", "lens mode", "mode discriminator", "mode
+   transition" as ubiquitous terms in `orchestrate/README.md` glossary.
+2. **README spec**: rewrite `orchestrate/README.md` § Editor-vs-lens state
+   machine + `orchestrate/editor/README.md` to describe the new contract.
+3. **AR-1 (Opus, Design Challenge)**.
+4. **Types lock**: verify `OrchestratorState` reflects F2 requirements; may need
+   `EditorModeState` to carry the edit-callback wiring. Also lock the
+   `ModeChangedPayload` shape here (F5 will dispatch it; F2 declares it).
+5. **DOCS sketch**: update `orchestrate/DOCS.md` § Mode-gated state machine
+   (mermaid + prose) — remove the "F2+ end-state" hedge since F2 IS implementing
+   it.
+6. **AR-2 (Opus, Architectural Sketch Challenge)**.
+
+##### F2 Phase 1 (atomic TDD increments, in dependency order)
+
+1. **F2.1 — Lift readOnly + add onSnippetChange.** Editor accepts edits; emits
+   `onSnippetChange(value)` callback. Snippet state hoisted to `<StudyLenses>`;
+   editor is controlled.
+2. **F2.2 — Mode-discriminator state + editor → lens transition + payload
+   type.** Replace direct registry-dispatch with `mode` state; default
+   `'editor'`; transition to `'lens'` when `lens` prop matches a registered key.
+   The lens-prop is still the transition trigger; dispatch flows through
+   `setState({ mode: 'lens', activeLens: lens })`. Lock the `ModeChangedPayload`
+   type in `types.ts`.
+
+   **In-mode lens-switch deferred to F4** (the registry has one lens today —
+   `debug-props`; lens-mode → lens-mode switching cannot be exercised until F4
+   grows the registry. F2.2 keeps `activeLens` as a separate field on
+   `LensModeState` so the F4 extension is one-line).
+
+3. **F2.3 — Lens → editor return transition + lens-state disposal.** When `lens`
+   prop becomes unset or matches no registered key, transition to `'editor'`
+   mode and dispose lens-internal UI state per the disposability principle. Pair
+   with F2.2 to give the round-trip a complete TDD chain.
+4. **F2.4 — Mode-transition embody trigger.** Build embodiment on editor → lens
+   transition only. **Removes the existing snippet-change `useEmbodiment`
+   effect** in `<StudyLenses>` (F1's unconditional embody that runs on every
+   snippet change). Cache result in `LensModeState.embodiment`.
+5. **F2.5 — Snippet-edit invalidation.** Snippet change in editor mode
+   invalidates the cached `LensModeState.embodiment` slot; the next editor →
+   lens transition rebuilds.
+
+Each increment: RED → AR-3 → GREEN → AR-4 → atomic commit per locked decision
+D7.
+
+##### F2 sandbox checkpoint
+
+The picker UI lands in L1; until then, F2's sandbox uses **prop-driven
+toggling** — either extend `b-prop-shape/index.md` with multiple fences
+exercising different `lens=` prop values, or build a small dedicated toggle page
+that flips the `lens` prop between unset and `'debug-props'` on a button click.
+
+Verifier flow: open the sandbox; type into the editor (observe write enabled —
+F2.1); toggle to `lens="debug-props"` (mode switches to lens; embodiment built
+once — F2.2, F2.4); toggle back to unset (mode reverts; lens-internal UI state
+disposed — F2.3); type more (cache invalidated — F2.5); toggle to lens again
+(FRESH embodiment, fresh lens-internal state).
+
+##### F2 cross-handoff impact
+
+- Lens-side `LensProps` unchanged (`{ embodiment, config? }`).
+- Plugin emission unchanged (three-prop API stable).
+- Files touched:
+  - Code: `orchestrate/index.tsx`, `orchestrate/types.ts`,
+    `orchestrate/editor/index.tsx`.
+  - Docs: `orchestrate/README.md`, `orchestrate/DOCS.md`,
+    `orchestrate/editor/README.md`, `orchestrate/editor/DOCS.md`.
+  - Tests: editor-internal behavior tests in a NEW
+    `orchestrate/editor/tests/index.test.tsx` (the editor doesn't have a
+    `tests/` dir yet — F2 establishes it per the README/DOCS- per-directory
+    invariant). Orchestrator-level mode-transition tests extend the existing
+    `orchestrate/tests/study-lenses.test.tsx`.
 
 #### F3 — Lazy embodiment on need
 
@@ -603,27 +667,14 @@ tensions here are real — defer until pedagogical priorities clarify.
 
 ### Cross-tier increments (orthogonal, can land at any tier boundary)
 
-- **Plugin alignment (B)** (per Cross-handoff impact above): drop `transforms`,
-  drop `lang`, rename `code` → `snippet`, simplify fence syntax, emit `configs`
-  from the `lenses.json` cascade. F1's prop contract has stabilized — B is the
-  next-session cross-tier work that closes the plugin-emit gap; gates L7 / L8
-  which extend the plugin further. Starter prompt at `./B-plugin-alignment.md`.
+- **Plugin alignment (B) — CLOSED** 2026-05-07..11 (`8cec361`–`838ba35`).
+  Unblocks L7/L8. See archived `./B-plugin-alignment.md`.
 - **Dependency-rule CI lint**: catch violations going forward. Lands any time
   after F4. (Pre-refactor REFACTOR-HANDOFF Step 16 outlined this; the file
   self-deleted in `4526dc3`.)
 - **`study-lenses/` → `lenses/` rename audit** (closed during Phase A migration;
-  the plugin keeps its directory name `src/plugins/study-lenses/` because
-  "study-lenses" is the public user-facing concept; B's session re-confirms
-  during plugin-emit changes).
-
-### First step (historical): F1 Phase 0 closed
-
-F1 Phase 0 closed in commit `bd98648` (2026-05-06): four-prop API typed in
-`orchestrate/types.ts`, READMEs/DOCS updated for the locked decisions (no format
-pre-processing; editor as React component per AR-1 CP-1; F1 mount-time guard
-owned by F1, not deferred). The original Phase 0 question list lives in git
-history at commit `bd98648^` for reference. Future increments (F2+, B, L1+) run
-their own Phase 0 cycles per AGENTS.md.
+  the plugin keeps `src/plugins/study-lenses/` because "study-lenses" is the
+  public user-facing concept).
 
 ### Substrate hooks already wired (post-refactor)
 
@@ -690,12 +741,12 @@ Forward-looking, beyond F1-F5 + L1-L8:
 - Any source code under `study-lenses/` (pre-refactor; deleted in Phase A
   migration).
 - Cross-handoff updates to `00-master-plan.md`, `04-lens-migration.md`,
-  `development-guide.md` are kept current via batched docs sweeps (the post-F1+C
-  sweep ran 2026-05-07). `01-NM-components.md` and
-  `02-analysis-and-recommender.md` remain to be touched at next-relevant-session
-  boundaries.
-- F1's contract design (closed in commit `bd98648` Phase 0; see the "First step
-  (historical)" section above for the pointer). Future increments (F2+, B, L1+)
-  run their own Phase 0s.
+  `development-guide.md` are kept current via batched docs sweeps (most recent:
+  `95f51e7`, 2026-05-11, post-B-closure). `01-NM-components.md` and
+  `02-analysis-and-recommender.md` remain to be touched at next-relevant-
+  session boundaries.
+- F1's contract design (closed in commit `bd98648` Phase 0; details in git
+  history at `bd98648^`). Future increments (F2+, L1+) run their own Phase 0
+  cycles per AGENTS.md.
 - Speculation about specific lens shapes (parsons / blanks internals, etc.) —
   those are WS4 concerns per `04-lens-migration.md`.
