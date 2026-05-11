@@ -70,14 +70,6 @@ describe('<StudyLenses> — F1 smoke', () => {
 		});
 	});
 
-	describe('Exceptions — config supplied with no resolvable default', () => {
-		it('throws at mount when config is set, lens is unset, and configs has no default key', () => {
-			expect(() => render(<StudyLenses snippet="OK" config={{}} />)).toThrow(
-				/`config` requires a resolved default lens/,
-			);
-		});
-	});
-
 	describe('Exceptions — embody throws on unknown sentinel', () => {
 		it('propagates the embody throw — secondary confirmation that orchestrator calls embody(snippet)', () => {
 			expect(() =>
@@ -123,47 +115,12 @@ describe('<StudyLenses> — F1 smoke', () => {
 			expect(snippetPanel?.textContent).toBe('OK');
 		});
 
-		it('config + configs deep-merge per the resolution chain (configs[lens] then config wins)', () => {
+		it('C: configs.lenses[lens] applies — two-tier chain reads from configs.lenses[lens]', () => {
 			const { container } = render(
 				<StudyLenses
 					snippet="OK"
 					lens="debug-props"
-					config={{ a: '1' }}
-					configs={{ 'debug-props': { b: '2' } }}
-				/>,
-			);
-			const configPanel = container.querySelector(
-				'[data-debug-panel="config"] pre',
-			);
-			expect(JSON.parse(configPanel!.textContent ?? 'null')).toEqual({
-				a: '1',
-				b: '2',
-			});
-		});
-
-		it('per-fence config overrides cascade configs[lens] for the same key', () => {
-			const { container } = render(
-				<StudyLenses
-					snippet="OK"
-					lens="debug-props"
-					config={{ shared: 'fence-wins' }}
-					configs={{ 'debug-props': { shared: 'cascade-base' } }}
-				/>,
-			);
-			const configPanel = container.querySelector(
-				'[data-debug-panel="config"] pre',
-			);
-			expect(JSON.parse(configPanel!.textContent ?? 'null')).toEqual({
-				shared: 'fence-wins',
-			});
-		});
-
-		it('configs[lens] applies when config is absent (tier-1 cascade without tier-2 override)', () => {
-			const { container } = render(
-				<StudyLenses
-					snippet="OK"
-					lens="debug-props"
-					configs={{ 'debug-props': { tier: 'one' } }}
+					configs={{ lenses: { 'debug-props': { tier: 'one' } } }}
 				/>,
 			);
 			const configPanel = container.querySelector(
@@ -174,12 +131,59 @@ describe('<StudyLenses> — F1 smoke', () => {
 			});
 		});
 
-		it('unregistered lens with config does not throw and mounts editor (silent-drop documented in README)', () => {
-			expect(() =>
-				render(
-					<StudyLenses snippet="OK" lens="parsons" config={{ x: 'y' }} />,
-				),
-			).not.toThrow();
+		it('C: lens-not-in-registry → editor fallback (silent-drop)', () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="OK"
+					lens="parsons"
+					configs={{ lenses: { parsons: { x: 'y' } } }}
+				/>,
+			);
+			const editorHost = container.querySelector('[data-orchestrator-host]');
+			expect(editorHost).not.toBeNull();
+			const lensRoot = container.querySelector('[data-lens]');
+			expect(lensRoot).toBeNull();
 		});
+
+		// ─── C: opaque-boundary test (AR-3 Concern 4 pattern) ────────────────
+
+		it('C: opaque boundary — configs.defaults is NOT consulted as a fallback for per-lens config resolution', () => {
+			// The two-tier chain `module.config() ⊕ configs.lenses?.[lens]`
+			// MUST NOT reach into `configs.defaults` or other top-level
+			// cascade keys for the resolved per-lens config. This test
+			// FALSIFIES the buggy-impl scenario where `configs.lenses[lens]`
+			// is absent and the impl falls through to
+			// `configs.defaults[lens]` or similar. We deliberately seed a
+			// contradicting value under `configs.defaults["debug-props"]` —
+			// if any future regression makes the orchestrator consult that
+			// key, the assertion would catch the wrong source winning.
+			// orchestrate StudyLensesProps.configs structurally requires
+			// just `lenses?` — TypeScript's exactOptionalPropertyTypes
+			// makes the declared shape strict; we cast to inject the
+			// L2-future seam key for the falsification test.
+			const contradicting = {
+				lenses: { 'debug-props': { onlySource: 'lenses-entry' } },
+				defaults: { 'debug-props': { onlySource: 'WRONG-from-defaults' } },
+			} as unknown as NonNullable<
+				React.ComponentProps<typeof StudyLenses>['configs']
+			>;
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" configs={contradicting} />,
+			);
+			const configPanel = container.querySelector(
+				'[data-debug-panel="config"] pre',
+			);
+			expect(JSON.parse(configPanel!.textContent ?? 'null')).toEqual({
+				onlySource: 'lenses-entry',
+			});
+		});
+
+		// NOTE on merge-collision triangulation: a deep-merge test where
+		// `module.config()` provides a tier-0 baseline that conflicts with
+		// `configs.lenses[lens]`'s tier-1 entry would close the AR-3
+		// Concern 2 gap. Today `debug-props.module.config()` returns `{}`
+		// (no baseline keys), so the only registered lens at F1+B cannot
+		// support this test. Re-evaluate when F4 lands a lens with a
+		// non-empty default factory.
 	});
 });

@@ -35,11 +35,10 @@ to rewrite exercise-set category labels at sidebar-build time.
    - Split the info string on `:` → `[lang, suffix]`.
    - If `suffix` is absent (bare `js`): the `lens` prop is populated ONLY by
      frontmatter `defaultLens` (when present); cascade `defaults[lang]` does NOT
-     populate `lens` (per AR-1 locked decision 1 — the orchestrator resolves the
-     cascade-default seam via its own future `configs.default` machinery,
-     deferred to L2). When neither frontmatter nor a suffix resolves a lens, the
-     bare-fence emission carries no `lens` attribute; the orchestrator falls
-     back to the editor home base.
+     populate `lens` (per AR-1 locked decision 1 — the cascade-supplied default
+     seam is L2-deferred). When neither frontmatter nor a suffix resolves a
+     lens, the bare-fence emission carries no `lens` attribute; the orchestrator
+     falls back to the editor home base.
    - If `suffix` is present: split on `?` → `[lensName, query]`. Empty
      `lensName` → leave fence untouched (malformed). Otherwise `lensName`
      populates the `lens` attribute.
@@ -49,9 +48,9 @@ to rewrite exercise-set category labels at sidebar-build time.
      becomes boolean `true`; `key=` (empty value) becomes empty string `""`.
      **No numeric coercion at parse time** — every value is a string or array of
      strings. Lenses coerce at config-read time as needed.
-   - The parsed query is **deep-merged over** the cascade's `lenses[lens]` entry
-     (cascade wins as base; query overrides); the result populates the emitted
-     `config` attribute.
+   - The parsed query is **deep-merged INTO** the cascade's `lenses[lens]` entry
+     (cascade wins as base; query overrides). The merged entry rides inside the
+     whole-cascade `configs` attribute — there is no separate `config` prop.
 
    **Lens resolution precedence** (populates the emitted `lens` attribute,
    most-specific wins): fence `:suffix lensName` beats frontmatter
@@ -59,14 +58,13 @@ to rewrite exercise-set category labels at sidebar-build time.
    transforms (configured-languages rule); it does NOT populate `lens` (per AR-1
    locked decision 1). None resolved → no `lens` emitted.
 
-   **Emission shape**: the four-prop public API
-   (`snippet, lens?, config?, configs?`). `snippet` always; `lens` when resolved
-   (per the precedence above); `config` is emitted **only when `lens` resolved**
-   AND there's a per-fence override OR the cascade has a non-empty
-   `lenses[lens]` (when `lens` is unresolved, `config` is omitted regardless of
-   cascade contents — emitting a config without a resolved-default lens would
-   trip the orchestrator's F1 mount-time guard); `configs` when the cascade's
-   `lenses.*` map is non-empty.
+   **Emission shape**: the three-prop public API (`snippet, lens?, configs?`).
+   `snippet` always; `lens` when resolved (per the precedence above); `configs`
+   carries the whole resolved cascade verbatim, with any per-fence query or
+   sibling directive JSON already deep-merged into `configs.lenses[lens]`. When
+   a fence transforms, the cascade is structurally non-empty (defaults map
+   minimally populated for the configured language), so `configs` is always
+   emitted on transformed fences. No separate `config` prop exists.
 
 4. **Embed siblings** (sync; filesystem read) — only for sibling-bearing pages
    whose resolved configuration enables embedding. Collect the page's siblings,
@@ -96,7 +94,7 @@ to rewrite exercise-set category labels at sidebar-build time.
 flowchart TD
     Fence["fenced code block<br/>info-string + body"]
     Frontmatter["frontmatter<br/>defaultLens?"]
-    Cascade["resolved cascade<br/>(defaults, lenses.*)"]
+    Cascade["resolved cascade<br/>(defaults, embedSiblings,<br/>exerciseSetPrefixes, lenses)"]
     Directive["@study-lens directive<br/>(siblings only)"]
 
     Fence -->|"split on ':'"| Lang["lang"]
@@ -105,38 +103,46 @@ flowchart TD
 
     Lang -->|"defaults[lang] gate"| Configured{"configured?"}
     Configured -->|"no"| Untransformed["leave as plain code block"]
-    Configured -->|"yes"| LensResolution
+    Configured -->|"yes"| FenceLensResolution
 
     Suffix -->|"split on '?'"| LensName["lens name?"]
     Suffix -->|"split on '?'"| Query["query string?"]
 
     LensName -->|"empty / malformed"| Untransformed
-    LensName --> LensResolution["lens resolution<br/>(fence: :suffix > frontmatter > none;<br/>sibling: directive > cascade defaults[lang])"]
-    Frontmatter --> LensResolution
-    Cascade -.->|"defaults[lang] (sibling-only;<br/>does NOT populate fence lens)"| LensResolution
-    Directive -->|"directive.lens (sibling)"| LensResolution
-    LensResolution --> LensProp["lens (string?)"]
+    LensName --> FenceLensResolution["fence lens resolution<br/>(:suffix > frontmatter > none;<br/>cascade defaults[lang] is GATE-ONLY,<br/>does NOT populate lens)"]
+    Frontmatter --> FenceLensResolution
+    FenceLensResolution --> LensProp["lens (string?)"]
+
+    Directive -->|"directive.lens"| SiblingLensResolution["sibling lens resolution<br/>(directive > cascade defaults[lang])"]
+    Cascade -->|"defaults[lang]<br/>(authoritative for siblings only)"| SiblingLensResolution
+    SiblingLensResolution --> LensProp
 
     Query -->|"URL-style key/value parse<br/>(strings, no numeric coercion)"| ParsedQuery["parsed query bundle"]
     Directive -->|"directive.lensConfig (siblings)"| DirectiveJSON["directive JSON"]
-    Cascade -->|"lenses[lens]"| CascadeLens["cascade.lenses[lens]"]
-    CascadeLens -->|"deep-merge base"| ConfigBase
-    ParsedQuery -->|"deep-merge over"| ConfigBase
-    DirectiveJSON -->|"deep-merge over"| ConfigBase
-    ConfigBase["resolved config"]  --> ConfigProp["config (object, optional)"]
 
-    Cascade -->|"lenses.* (full map, verbatim)"| ConfigsProp["configs (Record&lt;lens, config&gt;, optional, when non-empty)"]
+    HasOverride{"has lens AND<br/>(query OR directive JSON)?"}
+    LensProp -.-> HasOverride
+    ParsedQuery -.-> HasOverride
+    DirectiveJSON -.-> HasOverride
+    Cascade --> HasOverride
+    HasOverride -->|"yes"| MergeStep["merge override INTO<br/>cascade.lenses[lens]<br/>(deep-merge; cascade is base;<br/>cascade is cloned first)"]
+    HasOverride -->|"no"| ConfigsProp
+    MergeStep --> ConfigsProp["configs (whole resolved cascade, opaque;<br/>lenses[lens] post-merge if override applied)"]
 
-    Snippet --> EmittedJSX["mdxJsxFlowElement(StudyLenses)<br/>{snippet, lens?, config?, configs?}"]
+    Snippet --> EmittedJSX["mdxJsxFlowElement(StudyLenses)<br/>{snippet, lens?, configs?}"]
     LensProp --> EmittedJSX
-    ConfigProp --> EmittedJSX
     ConfigsProp --> EmittedJSX
 ```
 
 The diagram is per-fence (in-page) and per-sibling (bottom-mode and tabs-mode
-embeds use the same emission helper, `codeBlockToJsx`). For sibling embeds, the
-directive flows on the right column. For in-page fences, the directive column is
-unused. Both paths converge on the same four-prop emitted JSX shape.
+embeds share a single emission helper). For sibling embeds the directive flows
+through the sibling-lens-resolution branch and contributes the override JSON;
+for in-page fences the suffix/frontmatter flows through the fence-lens-
+resolution branch and the URL-style query contributes the override. Both paths
+converge on the same three-prop emitted JSX shape — the cascade IS the merged
+truth, no parallel `config` prop. When no override applies (bare `js:trace`,
+sibling with no directive JSON, or `lens` unresolved), the cascade ships
+verbatim through the no-merge branch.
 
 ### Cascade resolver
 
@@ -207,11 +213,11 @@ unused. Both paths converge on the same four-prop emitted JSX shape.
    code** from the previous phase (or the raw file content if no directive was
    present). The resolved lens is the directive's declared lens when present,
    otherwise the cascade's `defaults[lang]`. When the directive carried a JSON
-   body, that body is attached raw as `sibling.lensConfig` — NOT pre-merged with
-   the cascade's `lenses[lens]`. The merge (directive over cascade) is performed
-   later, at the remark plugin's emission call site, so the cascade-only path
-   stays on its original flow. Sort the final collection alphabetically by
-   label.
+   body, that body is attached raw as `sibling.lensConfig`. The merge (directive
+   deep-merged INTO `cascade.lenses[lens]`) is performed later, at the remark
+   plugin's emission call site, so the cascade-only path stays on its original
+   flow. The merged result rides inside the whole-cascade `configs` attribute on
+   the emitted JSX. Sort the final collection alphabetically by label.
 
 5. **Freeze** (sync; pure) — deep-freeze the sibling collection before
    returning.
@@ -319,13 +325,14 @@ function.
   in MDXComponents. Tabs-mode composes the same JSX leaf: a top-level
   `mdxJsxFlowElement(Tabs)` contains one `mdxJsxFlowElement(TabItem)` per
   sibling, each TabItem containing a single `mdxJsxFlowElement(StudyLenses)`
-  leaf. The emitted attribute set is the **four-prop public API**
-  (`snippet, lens?, config?, configs?`) — never `code`, `lang`, or `transforms`
+  leaf. The emitted attribute set is the **three-prop public API**
+  (`snippet, lens?, configs?`) — never `code`, `lang`, `transforms`, or `config`
   (those are gone from the contract; see plugin README §Emitted JSX prop
-  contract). The `config` and `configs` attributes are fallback-tolerant —
-  object or JSON string at runtime, decoded by the consuming component — because
-  MDX attribute serialization has uncertain object round-trip semantics and the
-  contract leaves both shapes valid.
+  contract). `snippet` and `lens` are string-valued `mdxJsxAttribute` nodes;
+  `configs` is an `mdxJsxAttributeValueExpression`-valued attribute carrying
+  both the JSON source string AND a parsed estree program — MDX emits the estree
+  expression into the compiled JSX so the consumer React component receives a
+  real object at runtime (no consumer-side parser required).
 - **Group-relative tab labels.** In tabs-mode embeds, tab labels are
   group-relative — the group-key prefix is stripped from each sibling's label. A
   file `groupdir/01-intro.js` renders as tab label `01-intro`, not

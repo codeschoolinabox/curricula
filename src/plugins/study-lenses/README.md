@@ -19,7 +19,7 @@ Docusaurus's native TypeScript config support.
 
 ## Emitted JSX prop contract
 
-Every `<StudyLenses>` node this plugin emits carries the **four-prop public
+Every `<StudyLenses>` node this plugin emits carries the **three-prop public
 API** locked in the orchestrator at
 [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md):
 
@@ -27,33 +27,37 @@ API** locked in the orchestrator at
 <StudyLenses
   snippet={…}    // string source (the code in the fence)
   lens?={…}      // resolved lens name (string) — Q-III educator default
-  config?={…}    // per-fence override for the resolved-default lens
-  configs?={…}   // cascade bundle keyed by lens name (lenses.json `lenses.*`)
+  configs?={…}   // whole resolved cascade (opaque); per-fence/sibling
+                  // overrides are PRE-MERGED into configs.lenses[lens]
+                  // before emission. The orchestrator reads
+                  // configs.lenses?.[lens] for the per-lens config; no
+                  // separate `config` prop exists.
 />
 ```
 
 The **only attributes the plugin ever emits** on a transformed `<StudyLenses>`
-node are `snippet`, `lens`, `config`, and `configs` (the latter three optional).
-`code`, `lang`, and `transforms` from the pre-Round-2 shape are gone — language
-is encoded by the fence head and consumed only at gate-time
-(configured-languages rule), and transforms are a lens-internal concern (no
-transforms tier in the architecture).
+node are `snippet`, `lens`, and `configs` (the latter two optional). `config`,
+`code`, `lang`, and `transforms` from earlier prop-shape iterations are gone —
+the cascade IS the merged truth, and any per-fence override (URL-style query or
+sibling `@study-lens` directive JSON) is folded INTO `configs.lenses[lens]`
+before the JSX node is emitted.
 
-The plugin populates the four props from three input surfaces:
+The plugin populates the three props from three input surfaces:
 
 - **Fence info string** (URL-style; see § Fence info string grammar below) —
-  populates `lens` and contributes a per-fence override bundle that gets
-  deep-merged with the cascade's `lenses[lens]` entry, then emitted as `config`.
+  populates `lens` and contributes a per-fence override that gets deep-merged
+  INTO the cascade's `lenses[lens]` entry (which then ships as part of the
+  whole-cascade `configs` prop).
 - **Per-directory `lenses.json` cascade** (see § lenses.json schema) — its
-  `lenses.*` map flows verbatim into `configs`; its `defaults[lang]` ONLY gates
-  whether a fence in that language transforms at all (configured- languages
-  rule). It does NOT populate `lens` — only fence `:suffix` / frontmatter
-  `defaultLens` / sibling `@study-lens` directive populate `lens` (per AR-1
-  locked decision 1; the cascade-supplied default seam is deferred to the
-  orchestrator's L2 `configs.default` machinery).
+  `defaults[lang]` ONLY gates whether a fence in that language transforms at all
+  (configured-languages rule). It does NOT populate `lens` — only fence
+  `:suffix` / frontmatter `defaultLens` / sibling `@study-lens` directive
+  populate `lens` (per AR-1 locked decision 1; the cascade-supplied default seam
+  is L2-deferred). The whole resolved cascade ships verbatim as `configs` (with
+  per-fence/sibling overrides pre-merged into `configs.lenses[lens]`).
 - **Per-fence `@study-lens` directive in `.js` siblings** — educator-override
   surface; populates the sibling's `lens` and a per-sibling override bundle that
-  gets deep-merged with the cascade's `lenses[lens]` and emitted as `config`.
+  gets deep-merged INTO the cascade's `lenses[lens]` entry before emission.
 
 ## Glossary
 
@@ -69,9 +73,8 @@ synonym anywhere in the code is a bug.
   sibling `@study-lens` directive (siblings only). Cascade `defaults[lang]` ONLY
   gates whether a fence transforms (configured-languages rule) — it does NOT
   populate `lens` (per AR-1 locked decision 1). A fenced code block with none of
-  those resolved emits no `lens` prop at all — the orchestrator resolves the
-  cascade-default seam via its own `configs.default` machinery (deferred to L2;
-  in F1+B the bare-fence case mounts the editor home base). See
+  those resolved emits no `lens` prop at all — the cascade-supplied default seam
+  is L2-deferred; in F1+B the bare-fence case mounts the editor home base. See
   [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md).
 - **Fenced code block** — a markdown code block delimited by triple backticks.
   The MDAST `code` node type. Standard CommonMark term.
@@ -95,15 +98,20 @@ synonym anywhere in the code is a bug.
   suffix. Multiple parameters are joined by `&`. Values are URL-semantic strings
   at parse time (no numeric coercion); each lens coerces at config-read time as
   needed.
-- **Cascade bundle** — the `lenses.*` map produced by the cascade resolver,
-  emitted verbatim onto the `configs` attribute. Keyed by lens name; values are
-  per-lens config objects.
+- **Cascade bundle** — the **whole resolved cascade** produced by the cascade
+  resolver, emitted verbatim onto the `configs` attribute (opaque passthrough).
+  Includes top-level `defaults`, `embedSiblings`, `exerciseSetPrefixes`, and
+  `lenses`. The `lenses[lens]` sub-tree is the **final per-lens config** —
+  post-merge with any per-fence URL-style query OR sibling `@study-lens`
+  directive JSON override. There is no separate `config` prop; the cascade IS
+  the merged truth.
 - **Resolved-default lens** — the lens that mounts when the picker first opens,
-  computed from the resolved `lens` attribute (which itself comes from per-fence
-  `:suffix`, frontmatter `defaultLens`, or sibling `@study-lens` directive).
-  Cascade `defaults[lang]` is gate-only — it does NOT populate `lens` (per AR-1
-  locked decision 1; the cascade-supplied default seam is L2-deferred).
-  Per-fence `config` overrides apply to the resolved-default lens only.
+  computed from the resolved `lens` attribute. Precedence (fence side):
+  per-fence `:suffix` > frontmatter `defaultLens` > none. Sibling side:
+  directive > cascade `defaults[lang]`. Cascade `defaults[lang]` is gate-only on
+  fences and authoritative on siblings (per AR-1 locked decision 1; the
+  cascade-supplied default seam for fences is L2-deferred). See **Cascade
+  bundle** for how per-fence/sibling overrides ride inside `configs`.
 - **Cascade** — the root → leaf directory walk that collects and merges
   `lenses.json` files.
 - **Resolved config** — the frozen, deep-merged output of the cascade for a
@@ -175,10 +183,11 @@ absolute path.
 
 1. Every fenced code block whose language is a **configured language** (present
    in the resolved configuration's `defaults` map) is replaced by an
-   `mdxJsxFlowElement` node named `StudyLenses` with the four-prop attribute set
-   (`snippet` always; `lens`, `config`, `configs` when applicable) so that when
-   the tree is rendered the block becomes a `<StudyLenses>` React component.
-   Unconfigured languages pass through untouched.
+   `mdxJsxFlowElement` node named `StudyLenses` with the three-prop attribute
+   set (`snippet` and `configs` always on a transformed fence; `lens` when a
+   resolver hits) so that when the tree is rendered the block becomes a
+   `<StudyLenses>` React component. Unconfigured languages pass through
+   untouched.
 2. For sibling-bearing pages (the `index.md` when present in a directory,
    otherwise the `README.md`), any `.js` files found in the directory subtree
    (up to the next nested sibling-bearing page, skipping hidden dirs,
@@ -266,9 +275,12 @@ keys, all optional:
   - `sectionHeading` (optional) injects a depth-2 heading before the embed
     block. Set to `null` to omit.
 - **`lenses`** is an opaque per-lens configuration bag, keyed by lens name. Its
-  values flow verbatim onto the emitted `configs` attribute (when non-empty);
-  the orchestrator merges them with module-default + per-fence overrides per the
-  resolution chain at
+  values flow into `configs.lenses` on the emitted `configs` attribute.
+  Per-fence URL-style queries and sibling `@study-lens` directive JSON are
+  **deep-merged INTO `configs.lenses[lens]`** at emission time, so the
+  orchestrator sees a single source of truth: `configs.lenses?.[lens]`. The
+  orchestrator's resolution chain collapses to two tiers —
+  `module.config() ⊕ configs.lenses?.[lens]` — per
   [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md` § Per-lens config resolution chain](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md).
 
   **Lens-config value shape:** values inside `lenses.<lens-name>` are expected
@@ -278,7 +290,12 @@ keys, all optional:
   loosely as `Record<string, unknown>` because the cascade resolver does not
   validate against the lens-side schema; authors who supply richer values
   (nested objects, callbacks, dates) get undefined behavior at the lens
-  boundary.
+  boundary. Strictness is a **lens-prop-boundary** contract (the orchestrator
+  casts to `LensConfig` after the two-tier resolution chain runs), not a
+  compile-time guarantee at the `<StudyLenses>` public API. The orchestrate-
+  side `StudyLensesProps.configs.lenses` inner-value type is correspondingly
+  wider (`Record<string, unknown>`) so the public type signature reflects the
+  trust assumption honestly.
 
 - **`exerciseSetPrefixes`** is an array of directory-name prefixes that mark
   "exercise set" folders for **sidebar-label stripping**. When the sidebar
@@ -511,17 +528,19 @@ applies — frontmatter cannot make an unconfigured language transform.
 <lang>[:<lens>[?<key>[=<value>]( &<key>[=<value>] )*]]
 ```
 
-Examples:
+Examples (the per-fence override shown is what gets **merged INTO**
+`configs.lenses["trace"]` before emission):
 
 ```text
-js                       → bare; emit no `lens`, no per-fence config
-js:trace                 → lens="trace"
-js:trace?stepDelay=500   → lens="trace"; config = {stepDelay: "500"}
+js                       → bare; emit no `lens`, configs carries cascade as-is
+js:trace                 → lens="trace"; configs.lenses["trace"] = cascade entry
+js:trace?stepDelay=500   → lens="trace"; cascade.lenses["trace"] deep-merged
+                                          with {stepDelay: "500"}
 js:trace?cols=value,steps
-                         → lens="trace"; config = {cols: ["value","steps"]}
-js:trace?key             → lens="trace"; config = {key: true}    (no `=`)
-js:trace?key=            → lens="trace"; config = {key: ""}      (empty value)
-js:trace?a=1&b=2         → lens="trace"; config = {a: "1", b: "2"}
+                         → lens="trace"; deep-merged with {cols: ["value","steps"]}
+js:trace?key             → lens="trace"; deep-merged with {key: true}  (no `=`)
+js:trace?key=            → lens="trace"; deep-merged with {key: ""}    (empty val)
+js:trace?a=1&b=2         → lens="trace"; deep-merged with {a: "1", b: "2"}
 ```
 
 Query-parameter semantics (URL-semantic; no parse-time numeric coercion):
@@ -533,15 +552,13 @@ Query-parameter semantics (URL-semantic; no parse-time numeric coercion):
 - `?a=1&b=2` → multiple keys joined by `&`.
 
 The bare-`js` form emits **no `lens` prop** — the orchestrator resolves via
-cascade-bundle / editor-home-base fallback. A bare lens name with no query
-(`js:trace`) emits `lens` only and the cascade's `lenses[trace]` (if any) flows
-into both `config` and `configs[trace]`.
+cascade-bundle / editor-home-base fallback. `configs` still ships the whole
+resolved cascade unchanged.
 
-When a query is present, the parsed query is **deep-merged over** the cascade's
-`lenses[lens]` and the result is emitted as `config`. The cascade's `lenses.*`
-map is **always** emitted (verbatim) as `configs` when non-empty — regardless of
-whether the fence carries a query. The orchestrator's resolution chain consumes
-both.
+When a query is present, the parsed query is **deep-merged INTO** the cascade's
+`lenses[lens]` entry, and the resulting whole-cascade object (with the merged
+per-lens entry baked in) is emitted as the `configs` attribute. There is no
+parallel `config` prop — the cascade IS the merged truth.
 
 Malformed info strings (bad lens name, malformed query, leading empty token
 after `:`, etc.) leave the fence as a plain code block (not transformed). Same
@@ -565,22 +582,23 @@ always need a `lens` value because they always transform):
 file's @study-lens directive (leading OR trailing)   >   cascade defaults[lang]
 ```
 
-Per-fence / per-sibling `config` (the override-for-resolved-default):
+Per-fence / per-sibling override — merged INTO the cascade BEFORE emission:
 
 ```text
 parsed fence query  OR  directive JSON
-                  ↓ deep-merged over
-                  cascade lenses[lens]
-                  ↓ emitted as
-                  `config` attribute
+                  ↓ deep-merged into
+                  cascade.lenses[lens]
+                  ↓ shipped as part of
+                  the `configs` attribute (whole cascade, opaque)
 ```
 
-When `lens` resolves from frontmatter (no `:suffix`, no per-fence query) — or
-from sibling directive (for `.js` siblings) — the `config` attribute carries the
-cascade's `lenses[lens]` directly (no per-fence override layer).
+There is no separate `config` prop. When `lens` resolves from frontmatter (no
+`:suffix`, no per-fence query) — or from sibling directive with no JSON body —
+`configs.lenses[lens]` carries the cascade's entry unchanged.
 
-Cascade `lenses.*` map → emitted as `configs` attribute (verbatim, when
-non-empty).
+Cascade → emitted **whole** as the `configs` attribute (opaque, always emitted
+when a fence transforms; the per-lens override-merge happens in-place on the
+`lenses[lens]` sub-tree before emission).
 
 **Array-replace caveat.** The deep-merge replaces arrays rather than
 concatenating them. If the cascade has `lenses.highlight.markers = ["a", "b"]`
@@ -635,17 +653,18 @@ type Sibling = Readonly<{
 }>;
 
 // The props shape the plugin emits onto a transformed `<StudyLenses>`
-// JSX node (the four-prop public API in
-// `orchestrate/types.ts:StudyLensesProps`). `config` and `configs` are
-// serialization-tolerant (see § Config-prop serialization below):
-// string (possibly JSON) OR object. Consumers parse via a shared util.
+// JSX node (the three-prop public API in
+// `orchestrate/types.ts:StudyLensesProps`). `configs` is emitted via
+// `mdxJsxAttributeValueExpression` so MDX evaluates the estree
+// directly and the consumer React component receives a real object
+// (see § Config-prop serialization below — no consumer-side parser
+// needed). Per-fence URL-query / sibling directive JSON overrides are
+// deep-merged INTO `configs.lenses[lens]` at emission time — there is
+// no separate `config` prop.
 type StudyLensesHastProps = Readonly<{
 	snippet: string;
 	lens?: LensName;
-	config?: string | Readonly<Record<string, unknown>>;
-	configs?:
-		| string
-		| Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
+	configs?: ResolvedConfig;
 }>;
 
 // Tabs-mode emission uses Docusaurus's native <Tabs>/<TabItem> via
@@ -666,27 +685,32 @@ type SidebarGeneratorOptions =
 
 ### Config-prop serialization
 
-`hProperties` on MDAST nodes serializes primitive values cleanly through the
-remark-rehype pipeline, but object-valued attributes may or may not round-trip
-to React props cleanly depending on the renderer. The plugin follows a
-**fallback-tolerant convention** so it works whichever way the pipeline happens
-to serialize:
+The plugin emits `configs` as an **`mdxJsxAttributeValueExpression`** — an MDX
+AST node that carries both the JSON source string AND a parsed estree program.
+MDX's compiler emits the estree expression directly into the compiled JSX
+(`<StudyLenses configs={{…}} />`); the React component receives a real object at
+runtime, not a JSON string.
 
-1. If the lens config is `null`/`undefined`, omit the `config` prop entirely.
-2. If the environment serializes objects cleanly, pass the object directly.
-3. Otherwise, `JSON.stringify` the object and pass the string.
+1. The cascade is structurally non-empty on any transformed fence (the
+   configured-languages rule guarantees `defaults[lang]` is set, and the
+   built-in DEFAULTS fill ensures every top-level key is present), so `configs`
+   is **always emitted** on a transformed fence. Fences that don't transform
+   produce no `<StudyLenses>` node at all — there is no attribute to omit.
+2. The plugin builds the estree program via
+   [`estree-util-value-to-estree`](https://github.com/remcohaszing/estree-util-value-to-estree),
+   wraps it in an `ExpressionStatement` inside a `Program` node, and attaches it
+   as `data.estree` on the `mdxJsxAttributeValueExpression`. MDX prefers the
+   parsed program over the source string, so the JSON serialization is
+   structural — round-tripping is guaranteed.
 
-On the component side, a fallback-tolerant config parser decodes:
+No consumer-side parser is required. The orchestrator destructures `configs` as
+a plain object and reads `configs.lenses?.[lens]` directly. Manually-authored
+`<StudyLenses configs={{…}} />` JSX in `.mdx` files passes the same object shape
+through the same prop slot — same machinery, no special branch.
 
-1. If `input` is a non-null object → use directly.
-2. If `input` is a string → try `JSON.parse`. If it parses, use as object. If it
-   doesn't parse, use the raw string (some lenses accept a simple string config;
-   e.g. a parsons lens might take a `"freeform"` token).
-3. If `input` is `null`/`undefined`/anything else → treat as no config.
-
-The plugin always JSON-stringifies object-valued attributes (`config` and
-`configs`); the consuming component's fallback-tolerant parser handles both
-string and object inputs identically.
+`snippet` and `lens` remain string-valued attributes (the standard
+`mdxJsxAttribute` with a `value: string`). Only `configs` requires the
+expression-valued attribute because it carries structured data.
 
 ## How to navigate the code
 
@@ -701,8 +725,8 @@ string and object inputs identically.
   ignore-prefixed dirs (also skipping hidden dirs, `node_modules/`; not
   following symlinks), returns `Sibling[]` (frozen).
 - `code-block-to-jsx.ts` — converts a `code` MDAST node into an
-  `mdxJsxFlowElement` node named `StudyLenses` with the four-prop attribute set
-  (`snippet` always; `lens`, `config`, `configs` when applicable). All
+  `mdxJsxFlowElement` node named `StudyLenses` with the three-prop attribute set
+  (`snippet` and `configs` always; `lens` when a resolver hits). All
   `<StudyLenses>` emission sites call this single helper.
 - `remark-study-lenses.ts` — the remark plugin factory: guards, resolves config,
   transforms fenced code blocks whose language is configured, appends sibling
@@ -733,6 +757,17 @@ Direct imports used by this plugin (all resolved from the site root
 
 - `unist-util-visit` — MDAST tree traversal.
 - `@types/mdast`, `@types/unist` — MDAST/unist TypeScript types.
+- `@types/estree` — types for the estree `Program` / `Expression` nodes attached
+  to `mdxJsxAttributeValueExpression` value bodies (see `code-block-to-jsx.ts` §
+  `buildObjectAttribute`).
+- `estree-util-value-to-estree` — converts a runtime JS value (the resolved
+  cascade) into the estree expression MDX emits into the compiled JSX so the
+  consumer React component receives a real object (no consumer-side parser
+  needed). **Shipped transitively** via `@docusaurus/core` →
+  `@docusaurus/mdx-loader` → `estree-util-value-to-estree`; the plugin imports
+  it as a peer of MDX's own pipeline. If a future Docusaurus upgrade
+  restructures its MDX deps, this plugin needs to re-confirm the transitive
+  availability or declare it explicitly.
 - `fast-glob` — used by the lifecycle plugin to expand watch globs.
 - `@docusaurus/types` — `LoadContext`, `Plugin` types for the lifecycle piece.
 - Freeze utilities from [`../../lib/utils/freeze.ts`](../../lib/utils/freeze.ts)

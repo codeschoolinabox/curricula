@@ -1,0 +1,8 @@
+{
+	"lenses": {
+		"debug-props": {
+			"cascadeFlag": true,
+			"cascadeNote": "from b-prop-shape/lenses.json"
+		}
+	}
+}

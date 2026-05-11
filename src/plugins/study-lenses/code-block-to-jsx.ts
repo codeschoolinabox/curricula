@@ -19,11 +19,25 @@
  * the sole child of each `mdxJsxFlowElement(TabItem)`). Consolidating on
  * a single emission path removed the earlier need for a lowercase
  * `studylenses` alias in the swizzled MDXComponents; see the plugin
- * README's "history" note in the `@study-lens` override section for the
+ * README § `rehype-raw` lowercases hast-element tag names for the
  * backstory.
+ *
+ * @remarks WHY object attributes use `mdxJsxAttributeValueExpression`:
+ * MDX's `mdxJsxAttribute` with a string `value` renders as a string-valued
+ * JSX prop (`configs="..."`). To pass a structured object to the React
+ * component (`configs={{...}}`), the value must be an
+ * `mdxJsxAttributeValueExpression` carrying both the source code and the
+ * parsed estree program. MDX's compiler emits the estree expression
+ * directly into the compiled output; React receives a real object. This
+ * removes the wire-format mismatch that an earlier
+ * always-stringify-and-document-a-parser strategy created (see plugin
+ * README § Config-prop serialization).
  */
 
+import { valueToEstree } from 'estree-util-value-to-estree';
+
 import type { Code } from 'mdast';
+import type { Program } from 'estree';
 
 import type { LensName, StudyLensesHastProps } from './types.js';
 
@@ -35,11 +49,29 @@ import type { LensName, StudyLensesHastProps } from './types.js';
 // in `./types.ts` is the single source of truth for emitted attribute
 // names — a typo or drift between the emission helper and the contract
 // fails at compile time.
-type StudyLensesJsxAttribute = {
+//
+// Two attribute shapes: string-valued (snippet, lens) and
+// expression-valued (configs). The expression-valued shape carries the
+// estree program MDX evaluates to produce the object at runtime.
+type StudyLensesJsxStringAttribute = {
 	type: 'mdxJsxAttribute';
 	name: keyof StudyLensesHastProps;
 	value: string;
 };
+
+type StudyLensesJsxExpressionAttribute = {
+	type: 'mdxJsxAttribute';
+	name: keyof StudyLensesHastProps;
+	value: {
+		type: 'mdxJsxAttributeValueExpression';
+		value: string;
+		data: { estree: Program };
+	};
+};
+
+type StudyLensesJsxAttribute =
+	| StudyLensesJsxStringAttribute
+	| StudyLensesJsxExpressionAttribute;
 
 type StudyLensesJsxNode = {
 	type: 'mdxJsxFlowElement';
@@ -50,29 +82,29 @@ type StudyLensesJsxNode = {
 
 /**
  * Builds an `mdxJsxFlowElement` node representing `<StudyLenses>` from a
- * fenced code block and its resolved lens configuration.
+ * fenced code block and its resolved cascade.
  *
  * @param codeNode - The source `code` MDAST node. Only `.value` is read;
- *   the node is NOT mutated — unlike `codeBlockToHast`.
+ *   the node is NOT mutated.
  * @param params - `lens` (optional) is the resolved lens name when one
  *   resolves from the fence's `:suffix`, frontmatter `defaultLens`, or
  *   sibling `@study-lens` directive — omitted when no lens resolves
  *   (per AR-1 locked decision 1: bare `js` fence with cascade
  *   `defaults[lang]` populated does NOT emit `lens`; only suffix /
- *   frontmatter / directive populate it). `lensConfig` is the per-lens
- *   resolved configuration, serialised as JSON onto the `config`
- *   attribute when present. `configs` is the cascade `lenses.*` map
- *   keyed by lens name, serialised as JSON onto the `configs` attribute
- *   when non-empty (per AR-1 locked decision 6: only emit when
- *   non-empty).
+ *   frontmatter / directive populate it). `configs` is the **whole
+ *   resolved cascade** (opaque passthrough) with any per-fence/sibling
+ *   override already deep-merged INTO `configs.lenses[lens]` by the
+ *   caller; emitted as an `mdxJsxAttributeValueExpression` so the
+ *   consumer React component receives an object directly (no parser
+ *   needed at the consumer side).
  * @returns A fresh `mdxJsxFlowElement` node with `name: 'StudyLenses'` and
- *   attribute values matching the plugin's component prop contract.
+ *   attribute values matching the plugin's three-prop component contract.
  *
  * @remarks Transforms are a lens-internal concern (no transforms tier in
  * the architecture); the `transforms` attribute is never emitted. The
  * `lang` identifier is used only by the caller (`transformFence`) for
  * the configured-languages gate; this function receives only `lens` and
- * optional `lensConfig` and never threads `lang` into the emitted JSX —
+ * optional `configs` and never threads `lang` into the emitted JSX —
  * the orchestrator's embody pipeline auto-detects language from the
  * snippet. See `./README.md` § Emitted JSX prop contract.
  */
@@ -80,14 +112,10 @@ function codeBlockToJsx(
 	codeNode: Code,
 	{
 		lens,
-		lensConfig,
 		configs,
 	}: {
 		readonly lens?: LensName;
-		readonly lensConfig?: Readonly<Record<string, unknown>>;
-		readonly configs?: Readonly<
-			Record<LensName, Readonly<Record<string, unknown>>>
-		>;
+		readonly configs?: Readonly<Record<string, unknown>>;
 	},
 ): StudyLensesJsxNode {
 	const attributes: StudyLensesJsxAttribute[] = [
@@ -96,19 +124,8 @@ function codeBlockToJsx(
 	if (lens !== undefined) {
 		attributes.push({ type: 'mdxJsxAttribute', name: 'lens', value: lens });
 	}
-	if (lensConfig !== undefined) {
-		attributes.push({
-			type: 'mdxJsxAttribute',
-			name: 'config',
-			value: JSON.stringify(lensConfig),
-		});
-	}
-	if (configs !== undefined && Object.keys(configs).length > 0) {
-		attributes.push({
-			type: 'mdxJsxAttribute',
-			name: 'configs',
-			value: JSON.stringify(configs),
-		});
+	if (configs !== undefined) {
+		attributes.push(buildObjectAttribute('configs', configs));
 	}
 	return {
 		type: 'mdxJsxFlowElement',
@@ -118,5 +135,49 @@ function codeBlockToJsx(
 	};
 }
 
+/**
+ * Builds an expression-valued `mdxJsxAttribute` whose value is the
+ * estree representation of `obj`. MDX's compiler emits the estree
+ * program directly into the compiled JSX; the React component receives
+ * a real object (not a JSON string).
+ *
+ * The `value` field of the `mdxJsxAttributeValueExpression` is the
+ * source code MDX uses when no `data.estree` is present; we supply
+ * both so MDX prefers the parsed program. JSON-string source is valid
+ * JS object-literal syntax for JSON-compatible payloads, which matches
+ * what the cascade resolver produces.
+ */
+function buildObjectAttribute(
+	name: keyof StudyLensesHastProps,
+	obj: Readonly<Record<string, unknown>>,
+): StudyLensesJsxExpressionAttribute {
+	const sourceCode = JSON.stringify(obj);
+	const expression = valueToEstree(obj);
+	const program: Program = {
+		type: 'Program',
+		sourceType: 'module',
+		body: [
+			{
+				type: 'ExpressionStatement',
+				expression,
+			},
+		],
+	};
+	return {
+		type: 'mdxJsxAttribute',
+		name,
+		value: {
+			type: 'mdxJsxAttributeValueExpression',
+			value: sourceCode,
+			data: { estree: program },
+		},
+	};
+}
+
 export default codeBlockToJsx;
-export type { StudyLensesJsxAttribute, StudyLensesJsxNode };
+export type {
+	StudyLensesJsxAttribute,
+	StudyLensesJsxStringAttribute,
+	StudyLensesJsxExpressionAttribute,
+	StudyLensesJsxNode,
+};

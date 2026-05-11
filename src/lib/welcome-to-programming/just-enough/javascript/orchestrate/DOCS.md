@@ -111,8 +111,7 @@ diagram).
 flowchart TD
     SnippetProp["snippet prop<br/>(string, required)"]
     LensProp["lens? prop<br/>(string, Q-III default)"]
-    ConfigProp["config? prop<br/>(LensConfig, override<br/>for resolved-default lens)"]
-    ConfigsProp["configs? prop<br/>(Record&lt;string, LensConfig&gt;,<br/>cascade bundle by lens name)"]
+    ConfigsProp["configs? prop<br/>(whole resolved cascade, opaque;<br/>per-fence/sibling override pre-merged<br/>INTO configs.lenses[lens])"]
 
     SnippetProp --> EditorPath
     SnippetProp -->|"embody, sync (lazy on lens-open)"| Embodiment["frozen Snippet<br/>(embodiment)"]
@@ -120,8 +119,7 @@ flowchart TD
     Embodiment --> LensPath
     Embodiment --> RecPath
     LensProp --> LensPath
-    ConfigProp --> LensPath
-    ConfigsProp --> LensPath
+    ConfigsProp -->|"read configs.lenses?.[lens]"| LensPath
 
     EditorPath["editor mode<br/>(home base mounted; consumes snippet string only)"]
     LensPath["lens mode<br/>(active lens mounted with embodiment +<br/>resolved per-lens config)"]
@@ -146,13 +144,15 @@ For any lens the learner mounts, the final config feeding
 `<LensModule.Component config={…}>` is computed as:
 
 ```text
-resolved(lensName) = module.config()                                      // tier 0: lens defaults
-                   ⊕ configs?.[lensName]                                  // tier 1: cascade
-                   ⊕ (lensName === resolvedDefault ? config : {})         // tier 2: per-fence override
+resolved(lensName) = module.config()                  // tier 0: lens defaults
+                   ⊕ configs.lenses?.[lensName]       // tier 1: cascade (post-merge with per-fence/sibling override)
 ```
 
-`⊕` is **deep-merge-right-wins**. The orchestrator computes this in its
-pipeline; lens authors don't compute it themselves.
+`⊕` is **deep-merge-right-wins**. The orchestrator computes this two-tier chain
+in its pipeline; lens authors don't compute it themselves. There is no separate
+per-fence-override tier on the orchestrator side — the plugin pre-merges the
+URL-style query / directive JSON INTO `configs.lenses[lens]` before emission, so
+the cascade IS the merged truth.
 
 `resolvedDefault` resolution order:
 
@@ -161,22 +161,22 @@ pipeline; lens authors don't compute it themselves.
    `defaults[lang]` is gate-only and does NOT populate `lens` per AR-1 locked
    decision 1; the cascade-supplied default seam is L2-deferred. Or set directly
    by an MDX-author writing `<StudyLenses lens="…" />`).
-2. None — if no default resolves AND `config` is supplied, the orchestrator
-   throws at mount with a clear message (per F1).
+2. None — when no default resolves, the orchestrator mounts the editor home base
+   (no lens dispatch). There is no mount-time guard at F1+B; with no separate
+   `config` prop, the pre-3-prop guard has no trigger surface.
 
-`config` without `lens` prop is an error and trips the F1 mount-time guard. L2
-will extend the resolution order with a cascade-supplied default seam (currently
-deferred — `configs?.default`'s shape is undecided because the orchestrate prop
-type pins `configs?: Record<string, LensConfig>` and a lens-name-string default
-key collides with that. L2's Phase 0 settles the seam shape).
+L2 will extend the resolution order with a cascade-supplied default seam
+(currently deferred — the seam shape lives somewhere in `configs` itself; L2's
+Phase 0 settles the exact key, e.g. `configs.defaults` re-used or a dedicated
+`configs.defaultLens` slot).
 
 **F1+B note on the resolution-chain formula.** At F1+B,
 `resolvedDefault === lens` always (no cascade-supplied default seam yet). The
-`lensName === resolvedDefault` guard in the formula simplifies to `true` for the
-only lens being mounted; it is preserved as decoration so the L2 extension is a
-one-line change once the cascade-supplied default seam lands. Implementing
-agents should write the formula with the decoration in place; AR-3/AR-4 will not
-flag the guard as redundant.
+two-tier chain is the steady-state shape; L2 may add a third tier ONLY if the
+cascade-supplied default seam introduces a config layer (it likely does not —
+that seam concerns the default lens NAME, not its config). Implementing agents
+write the formula as two tiers; AR-3/AR-4 should not flag the absence of a
+tier-2 override-decoration.
 
 Steady-state lifecycle:
 
@@ -210,7 +210,7 @@ mode state).
 
 ```mermaid
 flowchart TD
-    Props["&lt;StudyLenses snippet=… lens?=… config?=… configs?=…&gt;"]
+    Props["&lt;StudyLenses snippet=… lens?=… configs?=…&gt;"]
 
     Props -->|"lazy state, sync read"| Mode["mode: editor | lens<br/>(initially editor)"]
     Props -->|"lazy state, sync read"| SnippetState["snippet: string<br/>(controlled by editor)"]
@@ -226,7 +226,7 @@ flowchart TD
     Mode -->|"lens mode"| LensMount["&lt;LensModule.Component<br/>embodiment config&gt;"]
     Embodiment --> LensMount
     LensProp["resolved lens name<br/>(from picker OR recommendations panel)"] --> LensMount
-    ConfigProp["resolved LensConfig"] --> LensMount
+    ResolvedConfig["resolved LensConfig<br/>(module.config() ⊕ configs.lenses?.[lens])"] --> LensMount
 
     Mode -->|"dispatch on mode change, sync"| InternalBus["lens-switched event<br/>(internal bus)"]
 
@@ -293,15 +293,16 @@ and ordering pin during F1's Phase 0):
 > dispatch** category as a partial wiring of `lens` prop dispatch — a
 > single-entry static registry routes `lens="debug-props"` to the
 > [`debug-props` meta-lens](../lenses/debug-props/) for sandbox-harness
-> verification of the four-prop shape; any other `lens` value continues to mount
-> the editor (F1 narrowing). F2 narrows the embody trigger to the table's "mode
-> → lens transition" row shape once the discriminator lands; F3 refines further
-> to lazy-on-need; F4 grows the registry beyond the debug-props bootstrap entry.
-> The remaining categories (Lens-switch dispatch, Embodiment-on-edit
-> invalidation) are wired in F5 and F2 respectively. The exact React shape in F1
-> (`useMemo` keyed on `snippet` vs. `useState`+`useEffect`) is an implementation
-> choice F1.B picked during TDD — the F1 contract pinned here is just _"a fresh
-> `Snippet` is available on every snippet change, derived synchronously"_.
+> verification of the three-prop shape; any other `lens` value continues to
+> mount the editor (F1 narrowing). F2 narrows the embody trigger to the table's
+> "mode → lens transition" row shape once the discriminator lands; F3 refines
+> further to lazy-on-need; F4 grows the registry beyond the debug-props
+> bootstrap entry. The remaining categories (Lens-switch dispatch,
+> Embodiment-on-edit invalidation) are wired in F5 and F2 respectively. The
+> exact React shape in F1 (`useMemo` keyed on `snippet` vs.
+> `useState`+`useEffect`) is an implementation choice F1.B picked during TDD —
+> the F1 contract pinned here is just _"a fresh `Snippet` is available on every
+> snippet change, derived synchronously"_.
 
 | Category                            | Triggers on                                                      | What it does                                                                                            | Cleanup                                |
 | ----------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------- |
@@ -356,10 +357,11 @@ that target appears, the externalized protocol can be a curated subset of these.
 
 ### Structural constraints
 
-- **Public surface is one component**: `<StudyLenses>`. Four props total — one
-  required (`snippet`), three optional (`lens?`, `config?`, `configs?`).
-  Everything else internal. See § Per-lens config resolution chain (above) for
-  how `config` + `configs` layer per lens.
+- **Public surface is one component**: `<StudyLenses>`. **Three props** total —
+  one required (`snippet`), two optional (`lens?`, `configs?`). Everything else
+  internal. See § Per-lens config resolution chain (above) for how
+  `configs.lenses[lens]` flows per lens. The pre-3-prop `config?` prop is
+  absorbed into `configs.lenses[lens]` at plugin emission time.
 - **No consumer-side sentinel branching.** During the Phase A embody mock,
   `embody(code)` accepts named-scenario sentinels (e.g. `"OK"`,
   `"FAIL_AT_PARSE"`, `"EVAL_TIMEOUT"`). Orchestrator code MUST NOT branch on
@@ -445,12 +447,12 @@ that target appears, the externalized protocol can be a curated subset of these.
 `orchestrate/` ships **the orchestrator side of Layers I-III** of the
 Explorotron pyramid (per `../README.md` § Pedagogical first principles):
 
-| Layer                              | What `orchestrate/` provides                                                              | Where it lives                                                                         |
-| ---------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Layer I (Lenses & defaults)        | Toolbar lens-picker dropdown over the registered lens roster                              | `orchestrate/toolbar.tsx` (planned)                                                    |
-| Layer II (Path generation)         | Recommendations panel UI consuming the WS2 recommender's filtered + ranked grid           | `orchestrate/recommendations-panel.tsx` (UI) + `orchestrate/lib/recommender/` (engine) |
-| Layer III (Manual recommendations) | `lens` + `config` prop seam pre-filled by per-fence info-string and `lenses.json` cascade | `orchestrate/index.tsx` (consumes the props)                                           |
-| Layer IV (Manual study paths)      | DEFERRED at snippet scope (per `03-orchestrator-and-contracts.md` § Layer IV)             | n/a                                                                                    |
+| Layer                              | What `orchestrate/` provides                                                                                                                           | Where it lives                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Layer I (Lenses & defaults)        | Toolbar lens-picker dropdown over the registered lens roster                                                                                           | `orchestrate/toolbar.tsx` (planned)                                                    |
+| Layer II (Path generation)         | Recommendations panel UI consuming the WS2 recommender's filtered + ranked grid                                                                        | `orchestrate/recommendations-panel.tsx` (UI) + `orchestrate/lib/recommender/` (engine) |
+| Layer III (Manual recommendations) | `lens` + `configs` prop seam pre-filled by per-fence info-string and `lenses.json` cascade (per-fence override pre-merged into `configs.lenses[lens]`) | `orchestrate/index.tsx` (consumes the props)                                           |
+| Layer IV (Manual study paths)      | DEFERRED at snippet scope (per `03-orchestrator-and-contracts.md` § Layer IV)                                                                          | n/a                                                                                    |
 
 The pyramid base (Progress modelling) and top (Monitored learning) are
 explicitly NOT owned by `orchestrate/` — those belong to the embedding LMS.

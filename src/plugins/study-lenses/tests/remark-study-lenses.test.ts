@@ -61,10 +61,21 @@ function parseAndTransform(
 
 // ─── Helpers for asserting mdxJsxFlowElement StudyLenses nodes ────────────────
 
+type MdxJsxAttributeValueExpression = {
+	type: 'mdxJsxAttributeValueExpression';
+	value: string;
+	data?: { estree?: unknown };
+};
+
+type StudyLensAttr = {
+	name: string;
+	value: string | MdxJsxAttributeValueExpression | null | undefined;
+};
+
 type StudyLensJsx = {
 	type: 'mdxJsxFlowElement';
 	name: 'StudyLenses';
-	attributes: ReadonlyArray<{ name: string; value: string }>;
+	attributes: ReadonlyArray<StudyLensAttr>;
 	children: [];
 };
 
@@ -78,9 +89,29 @@ function findStudyLensNode(
 	) as StudyLensJsx | undefined;
 }
 
+/**
+ * Flatten a `<StudyLenses>` node's attributes to a `{ name: string }`
+ * record where string-valued attributes (`snippet`, `lens`) return
+ * their `value` directly and the expression-valued attribute
+ * (`configs`) returns the SOURCE STRING the plugin built before
+ * wrapping it in the `mdxJsxAttributeValueExpression`.
+ *
+ * The `JSON.parse(attrs.configs!)` pattern in these tests works ONLY
+ * because `code-block-to-jsx.ts § buildObjectAttribute` happens to
+ * choose `JSON.stringify(obj)` as the source-code string today. The
+ * authoritative wire-format test lives at
+ * `tests/code-block-to-jsx.test.ts` (it codegens the estree via
+ * `astring` and evaluates that, exercising the real MDX-runtime
+ * path). If the source-shape strategy ever changes (e.g. payloads
+ * with `Date` values), these tests must navigate `data.estree`
+ * directly instead of going through `JSON.parse`.
+ */
 function attrsOf(node: StudyLensJsx | undefined): Record<string, string> {
 	return Object.fromEntries(
-		(node?.attributes ?? []).map((a) => [a.name, a.value]),
+		(node?.attributes ?? []).map((a) => {
+			if (a.value == null) return [a.name, ''];
+			return [a.name, typeof a.value === 'string' ? a.value : a.value.value];
+		}),
 	);
 }
 
@@ -303,7 +334,7 @@ describe('createRemarkStudyLenses', () => {
 		expect(innerAttrs.code).toBeUndefined();
 	});
 
-	it('embed-bottom deep-merges directive lensConfig over cascade lenses[lens]', () => {
+	it('C: embed-bottom deep-merges directive override INTO cascade.lenses[lens]', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'embed-config-merge');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
@@ -315,20 +346,23 @@ describe('createRemarkStudyLenses', () => {
 		expect(appended?.name).toBe('StudyLenses');
 		const attrs = attrsOf(appended);
 		expect(attrs.lens).toBe('parsons');
-		// Merged: cascade shuffleSeed=42 + directive distractors=4.
-		expect(attrs.config).toBe(
-			JSON.stringify({ shuffleSeed: 42, distractors: 4 }),
-		);
 		// Byte-exact: the directive JSDoc is stripped from the emitted
-		// code attribute. The fixture's exercise.js is a 6-line file;
+		// snippet attribute. The fixture's exercise.js is a 6-line file;
 		// after strip only the `const puzzle = '...';\n` line remains.
 		expect(attrs.snippet).toBe(
 			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
 		);
-		// B.5: cascade lenses.* map flows verbatim onto `configs`.
-		expect(attrs.configs).toBe(
-			JSON.stringify({ parsons: { shuffleSeed: 42 } }),
-		);
+		// C: no separate `config` prop — override merged INTO configs.lenses[lens].
+		expect(attrs.config).toBeUndefined();
+		// Dual-assertion (AR-3 BLOCKER 2 pattern): per-lens merged entry +
+		// top-level cascade key both present in the same `configs` payload.
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
+			shuffleSeed: 42,
+			distractors: 4,
+		});
+		// Top-level cascade key (`defaults`) survives the merge — opacity check.
+		expect(cascade.defaults).toBeDefined();
 	});
 
 	it('D.16: trailing-placement directive behaves identically to leading-placement', () => {
@@ -342,18 +376,18 @@ describe('createRemarkStudyLenses', () => {
 		expect(appended?.name).toBe('StudyLenses');
 		const attrs = attrsOf(appended);
 		expect(attrs.lens).toBe('parsons');
-		expect(attrs.config).toBe(
-			JSON.stringify({ shuffleSeed: 42, distractors: 4 }),
-		);
 		// Byte-exact: same stripped content regardless of directive placement.
 		expect(attrs.snippet).toBe(
 			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
 		);
-		// B.5: cascade lenses.* map flows verbatim onto `configs` (symmetric
-		// with leading-directive case at the embed-config-merge test above).
-		expect(attrs.configs).toBe(
-			JSON.stringify({ parsons: { shuffleSeed: 42 } }),
-		);
+		// C: no separate `config` prop; override merged INTO configs.lenses[lens].
+		expect(attrs.config).toBeUndefined();
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
+			shuffleSeed: 42,
+			distractors: 4,
+		});
+		expect(cascade.defaults).toBeDefined();
 	});
 
 	it('frontmatter defaultLens overrides cascade for plain fences; :suffix still wins', () => {
@@ -649,16 +683,25 @@ describe('createRemarkStudyLenses', () => {
 		expect(attrs.lens).toBeUndefined();
 	});
 
-	it('B.4: `js:trace` (lens, no query) → lens=trace, no per-fence config (cascade.lenses[trace] empty)', () => {
+	it('B.4: `js:trace` (lens, no query) → lens=trace; configs.lenses.trace is cascade entry (empty in configured-js fixture)', () => {
 		const tree = parseStringInConfiguredJs('```js:trace\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('trace');
+		// C: no separate `config` prop.
 		expect(attrs.config).toBeUndefined();
+		// configured-js fixture has no `lenses` cascade entries, so the
+		// trace entry didn't pre-exist and no override merged. The
+		// cascade is still emitted whole (configured-languages rule fires).
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(cascade.defaults).toBeDefined();
+		// No-merge witness: configs.lenses.trace stays undefined (no
+		// override input, no cascade entry to inherit).
+		expect((cascade.lenses as Record<string, unknown>).trace).toBeUndefined();
 	});
 
-	it('B.4: `js:trace?stepDelay=500` → lens=trace, config={stepDelay:"500"} (URL-semantic string, no numeric coercion)', () => {
+	it('B.4: `js:trace?stepDelay=500` → lens=trace; configs.lenses.trace = {stepDelay:"500"} (URL-semantic string, no numeric coercion)', () => {
 		const tree = parseStringInConfiguredJs(
 			'```js:trace?stepDelay=500\nlet x = 1;\n```\n',
 		);
@@ -666,10 +709,15 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('trace');
-		expect(JSON.parse(attrs.config!)).toEqual({ stepDelay: '500' });
+		expect(attrs.config).toBeUndefined();
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
+			stepDelay: '500',
+		});
+		expect(cascade.defaults).toBeDefined();
 	});
 
-	it('B.4: `js:highlight?stepDelay=500` (different lens, same query) → lens=highlight, config={stepDelay:"500"} (parser is lens-agnostic)', () => {
+	it('B.4: `js:highlight?stepDelay=500` (different lens, same query) → lens=highlight; configs.lenses.highlight = {stepDelay:"500"} (parser is lens-agnostic)', () => {
 		const tree = parseStringInConfiguredJs(
 			'```js:highlight?stepDelay=500\nlet x = 1;\n```\n',
 		);
@@ -677,10 +725,14 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('highlight');
-		expect(JSON.parse(attrs.config!)).toEqual({ stepDelay: '500' });
+		expect(attrs.config).toBeUndefined();
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).highlight).toEqual({
+			stepDelay: '500',
+		});
 	});
 
-	it('B.4: `js:trace?cols=value,steps` → array of strings (comma-split inside a query value)', () => {
+	it('B.4: `js:trace?cols=value,steps` → configs.lenses.trace.cols is array of strings (comma-split inside a query value)', () => {
 		const tree = parseStringInConfiguredJs(
 			'```js:trace?cols=value,steps\nlet x = 1;\n```\n',
 		);
@@ -688,10 +740,13 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('trace');
-		expect(JSON.parse(attrs.config!)).toEqual({ cols: ['value', 'steps'] });
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
+			cols: ['value', 'steps'],
+		});
 	});
 
-	it('B.4: `js:trace?key` (no `=`) → boolean true', () => {
+	it('B.4: `js:trace?key` (no `=`) → boolean true inside configs.lenses.trace', () => {
 		const tree = parseStringInConfiguredJs(
 			'```js:trace?key\nlet x = 1;\n```\n',
 		);
@@ -699,10 +754,13 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('trace');
-		expect(JSON.parse(attrs.config!)).toEqual({ key: true });
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
+			key: true,
+		});
 	});
 
-	it('B.4: `js:trace?key=` (empty value) → empty string', () => {
+	it('B.4: `js:trace?key=` (empty value) → empty string inside configs.lenses.trace', () => {
 		const tree = parseStringInConfiguredJs(
 			'```js:trace?key=\nlet x = 1;\n```\n',
 		);
@@ -710,7 +768,10 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('trace');
-		expect(JSON.parse(attrs.config!)).toEqual({ key: '' });
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
+			key: '',
+		});
 	});
 
 	it('B.4: `js:trace?a=1&b=2` → multiple query keys joined by `&`', () => {
@@ -721,16 +782,24 @@ describe('createRemarkStudyLenses', () => {
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('trace');
-		expect(JSON.parse(attrs.config!)).toEqual({ a: '1', b: '2' });
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
+			a: '1',
+			b: '2',
+		});
 	});
 
-	it('B.4: `js:trace?` (empty query) → lens=trace, no per-fence config', () => {
+	it('B.4: `js:trace?` (empty query) → lens=trace, no merged override on configs.lenses.trace', () => {
 		const tree = parseStringInConfiguredJs('```js:trace?\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);
 		const attrs = attrsOf(jsxNode);
 
 		expect(attrs.lens).toBe('trace');
 		expect(attrs.config).toBeUndefined();
+		// Empty query → no merge, configs.lenses.trace stays as cascade entry
+		// (in configured-js fixture: undefined since no lenses.trace exists).
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).trace).toBeUndefined();
 	});
 
 	it('B.4 malformed: `js:` (empty lens-name, no query) → fence NOT transformed', () => {
@@ -751,9 +820,9 @@ describe('createRemarkStudyLenses', () => {
 		expect(codeNode).toBeDefined();
 	});
 
-	// ─── B.5: configs cascade-bundle attribute ───────────────────────────
+	// ─── C: configs carries the whole resolved cascade (opaque) ──────────
 
-	it('B.5: in-page fence emits `configs` attribute carrying the cascade lenses.* map', () => {
+	it('C: in-page fence emits `configs` attribute carrying the WHOLE resolved cascade', () => {
 		// Use embed-config-merge fixture (cascade has lenses.parsons.shuffleSeed=42).
 		const contentRoot = path.join(FIXTURES_DIR, 'embed-config-merge');
 		const transformer = createRemarkStudyLenses({ contentRoot });
@@ -767,21 +836,32 @@ describe('createRemarkStudyLenses', () => {
 		const jsxNode = findStudyLensNode(tree.children);
 		const attrs = attrsOf(jsxNode);
 		expect(attrs.lens).toBe('parsons');
-		expect(attrs.configs).toBe(
-			JSON.stringify({ parsons: { shuffleSeed: 42 } }),
-		);
+		// Dual-assertion: per-lens entry survives + top-level cascade keys are
+		// present (opaque-passthrough check).
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
+			shuffleSeed: 42,
+		});
+		expect(cascade.defaults).toBeDefined();
+		// embedSiblings is always present post-DEFAULTS-fill.
+		expect(cascade.embedSiblings).toBeDefined();
 	});
 
-	it('B.5: in-page fence with empty cascade.lenses → no `configs` attribute', () => {
-		// configured-js fixture has no `lenses` map; configs should be absent.
+	it('C: in-page fence with no cascade `lenses.*` entries → `configs` still emitted (whole cascade is structurally non-empty)', () => {
+		// configured-js fixture has no `lenses` cascade entries; configs is
+		// still emitted because the cascade has `defaults` + DEFAULTS-fill.
 		const tree = parseStringInConfiguredJs('```js:trace\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);
 		const attrs = attrsOf(jsxNode);
 		expect(attrs.lens).toBe('trace');
-		expect(attrs.configs).toBeUndefined();
+		expect(attrs.configs).toBeDefined();
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(cascade.defaults).toBeDefined();
+		// configs.lenses?.[trace] is undefined — no cascade entry, no merge.
+		expect((cascade.lenses as Record<string, unknown>).trace).toBeUndefined();
 	});
 
-	it('B.5: appendTabsEmbed inner StudyLenses emits `configs` from cascade lenses.* map', () => {
+	it('C: appendTabsEmbed inner StudyLenses emits whole-cascade `configs`', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'embed-tabs-with-configs');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
@@ -793,11 +873,7 @@ describe('createRemarkStudyLenses', () => {
 			children?: ReadonlyArray<{
 				type: string;
 				name?: string;
-				children?: ReadonlyArray<{
-					type: string;
-					name?: string;
-					attributes?: ReadonlyArray<{ name: string; value: string }>;
-				}>;
+				children?: ReadonlyArray<StudyLensJsx>;
 			}>;
 		};
 		expect(tabsNode.name).toBe('Tabs');
@@ -805,12 +881,112 @@ describe('createRemarkStudyLenses', () => {
 		expect(tabItem?.name).toBe('TabItem');
 		const innerJsx = tabItem?.children?.[0];
 		expect(innerJsx?.name).toBe('StudyLenses');
-		const innerAttrs = Object.fromEntries(
-			(innerJsx?.attributes ?? []).map((a) => [a.name, a.value]),
-		);
+		const innerAttrs = attrsOf(innerJsx);
 		expect(innerAttrs.lens).toBe('parsons');
-		expect(innerAttrs.configs).toBe(
-			JSON.stringify({ parsons: { shuffleSeed: 42 } }),
-		);
+		const cascade = JSON.parse(innerAttrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
+			shuffleSeed: 42,
+		});
+		expect(cascade.defaults).toBeDefined();
+	});
+
+	// ─── C: cascade non-mutation invariant (AR-4 IMPORTANT Concern 2) ───
+
+	it('C: cascade non-mutation — two fences with different queries each get an independent merged cascade', () => {
+		// If mergeOverrideIntoCascade mutated the resolver's frozen
+		// cascade.lenses.parsons in-place, the second fence's emitted
+		// `configs.lenses.parsons` would carry the first fence's
+		// shuffleSeed value as its base. Test asserts the two fences
+		// produce structurally-independent merged cascades.
+		const contentRoot = path.join(FIXTURES_DIR, 'embed-config-merge');
+		const transformer = createRemarkStudyLenses({ contentRoot });
+		const vfile = new VFile({
+			value:
+				'```js:parsons?shuffleSeed=1\nlet a=1;\n```\n' +
+				'```js:parsons?shuffleSeed=2\nlet b=2;\n```\n',
+			path: path.join(contentRoot, 'index.md'),
+		});
+		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		transformer(tree, vfile);
+
+		// The embed-config-merge fixture also appends a sibling exercise.js
+		// — filter to in-page fences only (the first two StudyLenses
+		// children in tree order).
+		const jsxNodes = tree.children.filter(
+			(n) =>
+				(n as { type: string }).type === 'mdxJsxFlowElement' &&
+				(n as { name?: string }).name === 'StudyLenses',
+		) as unknown as StudyLensJsx[];
+		expect(jsxNodes.length).toBeGreaterThanOrEqual(2);
+		const c1 = JSON.parse(attrsOf(jsxNodes[0]!).configs!) as Record<
+			string,
+			unknown
+		>;
+		const c2 = JSON.parse(attrsOf(jsxNodes[1]!).configs!) as Record<
+			string,
+			unknown
+		>;
+		// Each fence's merged cascade carries ONLY its own override on
+		// top of the cascade base (shuffleSeed:42 in the fixture).
+		expect((c1.lenses as Record<string, unknown>).parsons).toEqual({
+			shuffleSeed: '1',
+		});
+		expect((c2.lenses as Record<string, unknown>).parsons).toEqual({
+			shuffleSeed: '2',
+		});
+	});
+
+	// ─── C: directive/query wins on conflict with cascade (AR-3 Concern 6) ──
+
+	it('C: fence query value WINS over a cascade lenses[lens] entry on the same key (directive-wins-conflict)', () => {
+		// embed-config-merge fixture has `lenses.parsons.shuffleSeed=42`.
+		// A fence `js:parsons?shuffleSeed=99` should produce a merged
+		// configs.lenses.parsons.shuffleSeed === "99" (URL-semantic
+		// string, no numeric coercion) — directive wins on the conflict.
+		const contentRoot = path.join(FIXTURES_DIR, 'embed-config-merge');
+		const transformer = createRemarkStudyLenses({ contentRoot });
+		const vfile = new VFile({
+			value: '```js:parsons?shuffleSeed=99\nlet x = 1;\n```\n',
+			path: path.join(contentRoot, 'index.md'),
+		});
+		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		transformer(tree, vfile);
+
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+		expect(attrs.lens).toBe('parsons');
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
+			shuffleSeed: '99',
+		});
+	});
+
+	// ─── C: opaque-boundary test (AR-3 BLOCKER 1 pattern) ────────────────
+
+	it('C: configs is opaque — unknown top-level cascade keys round-trip unchanged', () => {
+		// The embed-config-merge fixture cascade should survive structural
+		// round-trip via the configs prop. Even unknown top-level keys
+		// (anything beyond defaults/embedSiblings/lenses/exerciseSetPrefixes)
+		// must ship verbatim to satisfy the "pass it all blindly" contract.
+		const contentRoot = path.join(FIXTURES_DIR, 'embed-config-merge');
+		const transformer = createRemarkStudyLenses({ contentRoot });
+		const vfile = new VFile({
+			value: '```js:parsons\nlet x = 1;\n```\n',
+			path: path.join(contentRoot, 'index.md'),
+		});
+		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		transformer(tree, vfile);
+
+		const jsxNode = findStudyLensNode(tree.children);
+		const attrs = attrsOf(jsxNode);
+		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		// All four top-level keys from ResolvedConfig are present. Note:
+		// `exerciseSetPrefixes` is DEFAULTS-filled (the fixture omits
+		// it); this assertion verifies DEFAULTS-fill propagates into the
+		// emitted `configs` rather than being stripped at the boundary.
+		expect(cascade.defaults).toBeDefined();
+		expect(cascade.embedSiblings).toBeDefined();
+		expect(cascade.lenses).toBeDefined();
+		expect(cascade.exerciseSetPrefixes).toBeDefined();
 	});
 });

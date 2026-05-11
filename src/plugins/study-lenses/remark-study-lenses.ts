@@ -29,12 +29,7 @@ import type { Code, Root } from 'mdast';
 import type { VFile } from 'vfile';
 
 import type { StudyLensesJsxNode } from './code-block-to-jsx.js';
-import type {
-	LensName,
-	RemarkPluginOptions,
-	ResolvedConfig,
-	Sibling,
-} from './types.js';
+import type { RemarkPluginOptions, ResolvedConfig, Sibling } from './types.js';
 
 type Transformer = (tree: Root, file: VFile) => void;
 
@@ -209,12 +204,14 @@ function appendBottomEmbed(
 			value: sibling.code,
 			meta: null,
 		};
-		const lensConfig = resolveEmittedLensConfig(config, sibling);
-		const cascadeConfigs = pickCascadeConfigs(config);
+		const configs = mergeOverrideIntoCascade(
+			config,
+			sibling.lens,
+			sibling.lensConfig,
+		);
 		const jsx = codeBlockToJsx(codeNode, {
 			lens: sibling.lens,
-			...(lensConfig !== undefined ? { lensConfig } : {}),
-			...(cascadeConfigs !== undefined ? { configs: cascadeConfigs } : {}),
+			configs,
 		});
 		(tree.children as Array<unknown>).push(jsx);
 	}
@@ -254,12 +251,14 @@ function appendTabsEmbed(
 			value: sibling.code,
 			meta: null,
 		};
-		const lensConfig = resolveEmittedLensConfig(config, sibling);
-		const cascadeConfigs = pickCascadeConfigs(config);
+		const configs = mergeOverrideIntoCascade(
+			config,
+			sibling.lens,
+			sibling.lensConfig,
+		);
 		const innerJsx = codeBlockToJsx(inner, {
 			lens: sibling.lens,
-			...(lensConfig !== undefined ? { lensConfig } : {}),
-			...(cascadeConfigs !== undefined ? { configs: cascadeConfigs } : {}),
+			configs,
 		});
 		return {
 			type: 'mdxJsxFlowElement' as const,
@@ -294,20 +293,35 @@ function appendTabsEmbed(
 }
 
 /**
- * Deep-merges the directive's raw `lensConfig` (on the `Sibling`) over
- * the cascade's `lenses[lens]`. Returns `undefined` when both sides are
- * empty so the downstream `codeBlockToJsx` omits the `config` attribute.
+ * Returns a structurally-fresh `ResolvedConfig` whose `lenses[lensName]`
+ * entry is the deep-merge of the cascade's existing entry (base) over
+ * the supplied `override` (wins on conflict). When neither side
+ * contributes a `lensName` entry the cascade ships unchanged. The
+ * resolver's deep-frozen `ResolvedConfig` is NEVER mutated — only the
+ * `lenses` subtree is cloned (other top-level keys reference the
+ * frozen subtrees by-reference; they are immutable).
+ *
+ * The result rides as the whole-cascade `configs` attribute on the
+ * emitted `<StudyLenses>` JSX (the 3-prop reshape: per-fence/sibling
+ * override is folded INTO `configs.lenses[lens]` at emission time, no
+ * separate `config` prop).
  */
-function resolveEmittedLensConfig(
+function mergeOverrideIntoCascade(
 	config: ResolvedConfig,
-	sibling: Sibling,
-): Readonly<Record<string, unknown>> | undefined {
-	const cascade = config.lenses[sibling.lens];
-	const directive = sibling.lensConfig;
-	if (cascade === undefined && directive === undefined) return undefined;
-	if (directive === undefined) return cascade;
-	if (cascade === undefined) return directive;
-	return deepMerge(cascade, directive);
+	lensName: string | undefined,
+	override: Readonly<Record<string, unknown>> | undefined,
+): ResolvedConfig {
+	if (lensName === undefined || override === undefined) return config;
+	const cascadeEntry = config.lenses[lensName];
+	const mergedEntry =
+		cascadeEntry === undefined ? override : deepMerge(cascadeEntry, override);
+	return {
+		...config,
+		lenses: {
+			...config.lenses,
+			[lensName]: mergedEntry,
+		},
+	};
 }
 
 /**
@@ -320,10 +334,10 @@ function resolveEmittedLensConfig(
  *   fence `:suffix` (URL-style lens name)  >  frontmatterDefaultLens  >  none
  *
  * Cascade `defaults[lang]` ONLY gates whether the fence transforms;
- * it does NOT populate `lens` (per AR-1 locked decision 1 — bare `js`
- * fence with cascade defaults emits no `lens` prop; the orchestrator
- * decides via `configs.default` → editor home base; cascade-supplied
- * default seam is L2-deferred).
+ * it does NOT populate `lens` (per AR-1 locked decision 1; the
+ * cascade-supplied default seam is L2-deferred — at F1+B a bare fence
+ * with no resolved lens emits no `lens` prop and the orchestrator
+ * mounts the editor home base).
  *
  * Suffix parsing (URL-style):
  *   <lensName>[?<key>[=<value>]( &<key>[=<value>] )*]
@@ -336,9 +350,10 @@ function resolveEmittedLensConfig(
  *     `key=v1,v2,…`, boolean `true` for `key` (no `=`), empty string
  *     for `key=` (empty value). No numeric coercion at parse time —
  *     lenses coerce at config-read time.
- *   - parsed query is deep-merged over `cascade.lenses[lensName]`
- *     and emitted as the `config` attribute (per AR-1 locked
- *     decision 5).
+ *   - parsed query is deep-merged INTO `cascade.lenses[lensName]`
+ *     via `mergeOverrideIntoCascade`; the result rides inside the
+ *     whole-cascade `configs` attribute (3-prop reshape — no separate
+ *     `config` prop).
  */
 function transformFence(
 	node: Code,
@@ -367,8 +382,9 @@ function transformFence(
 			const queryStr = suffix.slice(queryIndex + 1);
 			if (queryStr !== '') {
 				const parsed = parseFenceQuery(queryStr);
-				// Skip vacuous queries (e.g. `?&` or `?&&`) so the
-				// emitted `config` doesn't carry an empty object.
+				// Skip vacuous queries (e.g. `?&` or `?&&`) so
+				// `configs.lenses[lens]` isn't overlaid with an empty
+				// merge (which would be a no-op but produces noise).
 				if (Object.keys(parsed).length > 0) parsedQuery = parsed;
 			}
 		}
@@ -378,37 +394,14 @@ function transformFence(
 		lens = frontmatterDefaultLens;
 	}
 
-	let lensConfig: Readonly<Record<string, unknown>> | undefined;
-	if (lens !== undefined) {
-		const cascadeLensConfig = config.lenses[lens];
-		if (parsedQuery !== undefined) {
-			lensConfig = deepMerge(cascadeLensConfig ?? {}, parsedQuery);
-		} else {
-			lensConfig = cascadeLensConfig;
-		}
-	}
-
-	const cascadeConfigs = pickCascadeConfigs(config);
+	const configs = mergeOverrideIntoCascade(config, lens, parsedQuery);
 	// `exactOptionalPropertyTypes`: build the params via conditional
 	// spread so undefined keys are omitted entirely rather than passed
 	// as `key: undefined`.
 	return codeBlockToJsx(node, {
 		...(lens !== undefined ? { lens } : {}),
-		...(lensConfig !== undefined ? { lensConfig } : {}),
-		...(cascadeConfigs !== undefined ? { configs: cascadeConfigs } : {}),
+		configs,
 	});
-}
-
-/**
- * Returns the cascade's `lenses.*` map for emission as the `configs`
- * attribute, or `undefined` when the cascade has no lens entries
- * (per AR-1 locked decision 6: only emit `configs` when non-empty).
- */
-function pickCascadeConfigs(
-	config: ResolvedConfig,
-): Readonly<Record<LensName, Readonly<Record<string, unknown>>>> | undefined {
-	if (Object.keys(config.lenses).length === 0) return undefined;
-	return config.lenses;
 }
 
 /**

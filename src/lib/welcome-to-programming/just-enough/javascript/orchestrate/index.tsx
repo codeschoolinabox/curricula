@@ -1,9 +1,8 @@
 /**
  * @file `<StudyLenses>` — the package's public API surface.
  *
- * **F1+B scope** (after B.7): four-prop component skeleton +
- * mount-time guard for `config` supplied without a resolved-default
- * lens + `embody(snippet)` chain wiring + editor home-base mount +
+ * **F1+B scope** (after the 3-prop reshape): three-prop component
+ * skeleton + `embody(snippet)` chain wiring + editor home-base mount +
  * single-entry static lens-registry dispatch (the `debug-props`
  * meta-lens) for sandbox-harness verification.
  *
@@ -14,22 +13,21 @@
  * block in the same file.
  *
  * **F1+B effect topology**:
- * - **Four-prop signature is the public contract.** Accepts
- *   `{ snippet, lens?, config?, configs? }`. Every prop typechecks
- *   and rounds-trips through the dispatch.
- * - **F1 mount-time guard.** If `config` is supplied AND `lens` is
- *   unset AND `configs?.default` is unset, throw at mount with a clear
- *   message (per WS3 handoff line 54). The cascade-supplied default
- *   seam (`configs.default`) is L2-deferred; today the guard reduces
- *   to "throw if `config` is supplied without `lens`."
+ * - **Three-prop signature is the public contract.** Accepts
+ *   `{ snippet, lens?, configs? }`. Every prop typechecks and round-
+ *   trips through the dispatch. The pre-3-prop F1 mount-time guard
+ *   (`config` supplied without a resolved-default lens → throw) is
+ *   gone: with no separate `config` prop, the guard has no trigger
+ *   surface. The cascade-supplied default seam is L2-deferred.
  * - **B partial lens dispatch.** When `lens` matches a key in
  *   `LENS_REGISTRY` (currently only `'debug-props'`), the orchestrator
  *   mounts that lens with the embodied `Snippet` + a resolved
- *   `LensConfig` (per the per-lens config resolution chain at
- *   `./README.md` § Per-lens config resolution chain). When `lens` is
- *   unset OR not in the registry, F1 narrowing applies: the editor
- *   home base mounts and any `config` supplied alongside an
- *   unregistered `lens` is silently dropped (the silent-drop case is
+ *   `LensConfig` (per the two-tier per-lens config resolution chain
+ *   `module.config() ⊕ configs.lenses?.[lens]` at `./README.md`
+ *   § Per-lens config resolution chain). When `lens` is unset OR not
+ *   in the registry, F1 narrowing applies: the editor home base
+ *   mounts and any `configs.lenses[lens]` supplied alongside an
+ *   unregistered `lens` is silently unused (the silent-drop case is
  *   surfaced in the README's F1 narrowing block).
  * - **No mode discriminator yet.** F2 introduces the editor-vs-lens
  *   2-mode state machine; today the dispatch is direct
@@ -70,49 +68,39 @@ function useEmbodiment(snippet: string): Snippet {
 }
 
 /**
- * Computes the per-lens resolved config per the chain at
+ * Computes the per-lens resolved config per the two-tier chain at
  * [`./README.md` § Per-lens config resolution chain]:
  *
- *     resolved(lens) = module.config()
- *                   ⊕ configs?.[lens]
- *                   ⊕ (lens === resolvedDefault ? config : {})
+ *     resolved(lens) = module.config() ⊕ configs.lenses?.[lens]
  *
- * `⊕` is deep-merge-right-wins. At F1+B `resolvedDefault === lens`
- * always (no cascade-supplied default seam yet); the conditional
- * decoration is preserved so L2's extension is a one-line change.
+ * `⊕` is deep-merge-right-wins. Per-fence URL-style queries and
+ * sibling `@study-lens` directive JSON are pre-merged INTO
+ * `configs.lenses[lens]` at plugin emission time, so there is no
+ * separate per-fence-override tier on the orchestrator side.
+ *
+ * The cast to `LensConfig` at the return boundary is the
+ * lens-prop-boundary trust point: the cascade resolver types per-lens
+ * values loosely as `Record<string, unknown>`, but lens components
+ * type their `config` prop as `LensConfig` (primitives + primitive
+ * arrays). Authors who supply richer values via `lenses.json` get
+ * undefined behavior at the lens boundary — per plugin README
+ * § `lenses.json` schema "Lens-config value shape".
  */
 function resolvePerLensConfig(
 	module: LensModule,
 	lensName: string,
-	props: Pick<StudyLensesProps, 'config' | 'configs'>,
+	props: Pick<StudyLensesProps, 'configs'>,
 ): LensConfig {
 	const moduleDefault = module.config();
-	const cascadeForLens = props.configs?.[lensName] ?? {};
-	// At F1+B, `resolvedDefault` IS `lensName` always — there is no
-	// cascade-supplied default seam yet (`configs.default` is L2-deferred).
-	// L2 replaces the right side of this assignment with the cascade-
-	// resolved default once that seam lands; the conditional below then
-	// becomes meaningful for non-default-lens mounts.
-	const resolvedDefault = lensName;
-	const perFence = lensName === resolvedDefault ? (props.config ?? {}) : {};
-	return deepMerge(deepMerge(moduleDefault, cascadeForLens), perFence);
+	const cascadeForLens = props.configs?.lenses?.[lensName] ?? {};
+	return deepMerge(moduleDefault, cascadeForLens as LensConfig);
 }
 
 export default function StudyLenses({
 	snippet,
 	lens,
-	config,
 	configs,
 }: StudyLensesProps): React.JSX.Element {
-	if (
-		config !== undefined &&
-		lens === undefined &&
-		configs?.default === undefined
-	) {
-		throw new Error(
-			'<StudyLenses>: `config` requires a resolved default lens. Set `lens={…}` or `configs.default={…}` (or omit `config`).',
-		);
-	}
 	// Embody chain. Wrapped in a custom hook so React DevTools surfaces
 	// the value via `useDebugValue` when inspecting `<StudyLenses>`.
 	// Memoized on snippet — a fresh Snippet is derived synchronously
@@ -129,7 +117,6 @@ export default function StudyLenses({
 	const registered = lens !== undefined ? LENS_REGISTRY[lens] : undefined;
 	if (registered !== undefined) {
 		const resolvedConfig = resolvePerLensConfig(registered, lens!, {
-			...(config !== undefined ? { config } : {}),
 			...(configs !== undefined ? { configs } : {}),
 		});
 		return (

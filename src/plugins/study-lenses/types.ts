@@ -112,9 +112,12 @@ type Sibling = Readonly<{
 	lens: LensName;
 	/**
 	 * Raw JSON config from the file's `@study-lens` directive, if any.
-	 * Stored un-merged; the cascade's `lenses[lens]` flows through its
-	 * original emission path, and the merge (directive-over-cascade)
-	 * happens at the call site (see Module D.15 in the plan file).
+	 * Stored un-merged at the sibling-walker boundary; the deep-merge
+	 * INTO `cascade.lenses[lens]` happens at the remark plugin's
+	 * emission call site, and the merged result rides inside the
+	 * whole-cascade `configs` attribute on the emitted JSX. See
+	 * `./DOCS.md` § Sibling walker step 4 (Annotate) and § Remark
+	 * transformer phase 3 (Emission shape) for the full flow.
 	 */
 	lensConfig?: Readonly<Record<string, unknown>>;
 }>;
@@ -124,30 +127,48 @@ type Sibling = Readonly<{
 /**
  * The prop shape the plugin emits onto a transformed
  * `mdxJsxFlowElement(StudyLenses)` JSX node. Surfaces as React
- * props on `<StudyLenses>` per the four-prop public API in
+ * props on `<StudyLenses>` per the **three-prop public API** in
  * `orchestrate/types.ts:StudyLensesProps`.
  *
- * @remarks `config` and `configs` are serialization-tolerant — each
- * arrives as either a structured object (when the remark-rehype
- * pipeline round-trips objects cleanly) or a JSON-stringified
- * representation (fallback). Consumers decode via a fallback-tolerant
- * config parser.
+ * @remarks `configs` is emitted via an
+ * `mdxJsxAttributeValueExpression` — MDX evaluates the estree
+ * directly and the consumer React component receives a real object
+ * (not a JSON string). No consumer-side parser is required. See
+ * `code-block-to-jsx.ts` § buildObjectAttribute for the wire format.
+ *
+ * @remarks `configs` carries the **whole resolved cascade** (the same
+ * shape as `ResolvedConfig` — `defaults`, `embedSiblings`,
+ * `exerciseSetPrefixes`, `lenses`). Any per-fence URL-style query OR
+ * sibling `@study-lens` directive JSON override is **deep-merged INTO
+ * `configs.lenses[lens]` at emission time**, so the orchestrator sees
+ * a single source of truth for the per-lens config:
+ * `configs.lenses?.[lens]`. There is no separate `config` prop — the
+ * cascade IS the merged truth (per the README's § Emitted JSX prop
+ * contract and the orchestrator's two-tier resolution chain
+ * `module.config() ⊕ configs.lenses?.[lens]`).
+ *
+ * @remarks **No mutation of the resolver's frozen output.** The
+ * resolver returns a deep-frozen `ResolvedConfig`. Before the
+ * override-merge runs, the relevant `lenses[lens]` subtree is
+ * **cloned** so the merge operates on a fresh object — the cached
+ * `ResolvedConfig` is never mutated. The emitted `configs` value is
+ * a structurally-fresh `ResolvedConfig`-shaped object whose
+ * `lenses[lens]` reflects the post-merge state; all other top-level
+ * keys reference the resolver's frozen subtrees by-reference (they
+ * are immutable anyway).
  *
  * @remarks The pre-Round-2 attributes `code`, `lang`, and
- * `transforms` are gone. `snippet` replaces `code`; `lang` is consumed
- * internally by the configured-languages gate in `transformFence` but
- * never emitted onto the JSX node; `transforms` is dropped entirely
- * (transforms are a lens-internal concern per the lenses peer's
- * `DOCS.md` §Structural constraints, no transforms tier in the
- * architecture).
+ * `transforms` are gone, and the pre-Round-3 `config` attribute is
+ * absorbed into `configs.lenses[lens]`. `snippet` replaces `code`;
+ * `lang` is consumed internally by the configured-languages gate in
+ * `transformFence` but never emitted onto the JSX node; `transforms`
+ * is dropped entirely (transforms are a lens-internal concern per the
+ * lenses peer's `DOCS.md` §Structural constraints).
  */
 type StudyLensesHastProps = Readonly<{
 	snippet: string;
 	lens?: LensName;
-	config?: string | Readonly<Record<string, unknown>>;
-	configs?:
-		| string
-		| Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
+	configs?: ResolvedConfig;
 }>;
 
 // Tabs-mode embeds emit Docusaurus's native `<Tabs>`/`<TabItem>` via
