@@ -8,7 +8,7 @@
 
 ## State as of last session close
 
-The redraft is committed across 13 commits on `main`. The canonical
+The redraft is committed across 16 commits on `main`. The canonical
 primary docs:
 
 ```
@@ -19,58 +19,20 @@ syllabus.translational-framing.md    TCER meta-artifact
 syllabus.manifesto.learners.md       why, for learners
 syllabus.manifesto.authors.md        why, for authors/forkers
 syllabus.manifesto.community.md      why, for partner communities
+syllabus.narrative.md                chapter-author companion (voice, cameos,
+                                     metaphor extensions, 8 AI-collab skills,
+                                     PL-future, deeper-section threads)
 syllabus.bakhtiar-meeting-prep.md    prep notes (refreshed for R6-R10 locks)
 ```
 
-Plus `narrative/README.md` (1956 lines) is pending supersession — see
-Task 1 below.
+Visual assets live at `assets/` (sibling to the syllabus docs).
 
-## Two tasks queued
+## One task queued
 
-### Task 1 — Narrative supersession
-
-**Goal**: replace `narrative/README.md` with a slimmer
-`syllabus.narrative.md` that holds only what didn't fold cleanly into
-canonical docs.
-
-**What's already decided** (Q-D1/D2/D3 locked end of R11):
-
-- **Name**: `syllabus.narrative.md`
-- **Drop**: the metaphor system itself (lives in ontology §24 now);
-  sections §2, §4, §5, §6, §7 (outdated four threads), §8, §12, §13,
-  §14, §15 (PBSI outdated), §20, §24 (now chapters.md Ch5), §26, §28
-- **Keep**: §1 (how-to-use), §3 (close-read per-sub-section), §10
-  (composer's critical ear → in metaphor-extensions section of new
-  file), §11, §16 (8 AI-collab skills), §17, §18, §19 (historical
-  cameos for chapter authors), §21, §22, §23 (PL-future), §25 (voice
-  spec), §27 (smaller connections for authors)
-- **Asset dir**: move `narrative/assets/` → `assets/` (no `syllabus.`
-  prefix per user direction; sanity-check this with user at session
-  start)
-- **§3 sub-sections**: close-read each individually against ontology
-  before keep/drop
-- **§10**: lands in a metaphor-extensions section of the new file,
-  alongside §11
-
-**Execution scope** (steps from plan file Round 11 Phase D):
-
-1. Read `narrative/README.md` fully (1956 lines)
-2. Close-read each "partial overlap with ontology" sub-section
-3. Excerpt the keep-sections into `syllabus.narrative.md` with light
-   editing for current vocabulary (threads→strands; PBSI→PBIS;
-   four threads→five strands; etc.)
-4. `git mv narrative/assets/ assets/`
-5. Grep canonical docs for `narrative/assets/` references; update all
-   to `assets/`
-6. Single commit: create `syllabus.narrative.md` + asset dir move +
-   reference updates
-7. Second commit: `git rm narrative/README.md`
-8. Surface to user any tensions surfaced during close-reading
-
-**Where to discuss before execution**: anything ambiguous in §3
-sub-section close-reads, §10's substance beyond ontology §23, §16's 8
-AI-collab skills (not all may be in ontology), §22's agile-visible
-discipline framing (partly in ontology §18).
+(Task 1 — Narrative supersession — landed end-of-session; see commits
+`eb2d4e4` and `eeed380`. `syllabus.narrative.md` is in the tree as a
+chapter-author companion; `narrative/` directory is gone; visual
+assets moved up to `assets/`.)
 
 ### Task 2 — Bakhtiar prep substantive curation
 
