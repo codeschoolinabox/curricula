@@ -132,8 +132,8 @@ purpose, meta-objective, learning means, data thread.
   definition of spiral is richer than Bruner's: a path, not just
   depth-densification. **Does this paired framing match how you've
   observed the structure work in practice?**
-- The two image assets (`narrative/assets/spiral-curriculum.png` and
-  `narrative/assets/curriculum-spider-web.svg`) are the same conceptual
+- The two image assets (`assets/spiral-curriculum.png` and
+  `assets/curriculum-spider-web.svg`) are the same conceptual
   object viewed differently. The 5 layers can be read as 5 different
   spirals through the same web at 5 engagement depths.
 

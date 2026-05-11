@@ -2042,7 +2042,7 @@ guide what each region of each chapter delivers.
   communities, mentors, cohort hosts
 - `syllabus.md` — the existing prose course (read-only for the current redraft)
 - `narrative/README.md` — the composer/virtuoso metaphor system
-- `narrative/assets/spiral-curriculum.png` and
-  `narrative/assets/curriculum-spider-web.svg` — the topology + trajectory views
+- `assets/spiral-curriculum.png` and
+  `assets/curriculum-spider-web.svg` — the topology + trajectory views
 - `just-enough/javascript/` — the JEJ → NM → embody → lenses → orchestrator
   infrastructure

@@ -437,8 +437,8 @@ meta-pattern.
 <details>
 <summary><b>Visualization: V/F + the rhetorical model</b> <i>(most load-bearing — existing asset)</i></summary>
 
-![The big picture — the rhetorical model](./narrative/assets/the-big-picture.png)
-![The big picture plus AI](./narrative/assets/the-big-picture-plus-ai.png)
+![The big picture — the rhetorical model](./assets/the-big-picture.png)
+![The big picture plus AI](./assets/the-big-picture-plus-ai.png)
 
 AI sits _outside_ the rhetorical circle — exactly the virtuoso's position in the
 teaching-apparatus cast (§24).
@@ -566,8 +566,8 @@ A **paired entry**, not two separate principles.
 <details>
 <summary><b>Visualization: spiderweb (topology) + spiral (trajectory)</b> <i>(most load-bearing — existing assets)</i></summary>
 
-- `narrative/assets/curriculum-spider-web.svg` — the spiderweb topology
-- `narrative/assets/spiral-curriculum.png` — Bruner-style spiral
+- `assets/curriculum-spider-web.svg` — the spiderweb topology
+- `assets/spiral-curriculum.png` — Bruner-style spiral
 
 These are the same conceptual object viewed differently.
 

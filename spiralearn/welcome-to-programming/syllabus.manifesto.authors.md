@@ -295,7 +295,7 @@ optional, and it builds intellectual confidence rather than gatekeeping it.**
 
 ### The visualizations
 
-The course has working visuals (`narrative/assets/*.{png,svg}`) and new ones
+The course has working visuals (`assets/*.{png,svg}`) and new ones
 welcome. Pull them in; create your own; render new ones inline. All wrapped in
 `<details>` blocks with relative-importance caveats (most load-bearing /
 supporting / optional extra angle). Visuals are increasingly load-bearing in the
