@@ -1,0 +1,17 @@
+I will review all 13 with comments when we exit plan mode 
+
+Strategic Forks:
+1. we will extract what can be ontologized form the current syllabus and weave it into one concentric document.  Syllabus.md will stay as prose, and will later be re-written once the full ontology is set 
+2. it's (a). later we will decide to keep it separate or merge back into syllabus.md.  note: for now syllabus.md is read-only 
+3. the layout comments are about the ultimate curriculum.  for now we will just have them each under subheaders like ## ChX. Layer yes
+4. it deserves its own space in the ontology, but not another full thread.  that's more of a "what to expect" or "how learning works" thing, it's _about_ the course but not _in_ the course for learners to learn 
+5. locks
+    #1. yes, canonize that connections are concepts and concepts are connections 
+    #3. we don't need titles yet, we can do that when we finalize the ontology
+    let's go with PBIS
+    #17. we introduce affordances as a thread on par with the others.  so in the ontology it's wherever the threads are, and inthe syllabus it will be a fifth bullet point 
+
+things you're not sure on yet:
+
+agree about how to handle the music metaphor
+

@@ -1,0 +1,53 @@
+# just-enough/javascript/
+
+you are right to place the orchestrator as a layer above lenses in the infrastructure ontology.  I left it out for simplicity but it belongs there.  it's what bridges from the infrastructure ontology to the Explorotron (un)guided/(un)curated ontology.  we should add the orchestrator in the JEJ->NM->embody->lenses->orchestrator chain (then after creating the ontology doc update j-e/j/ documentation as well). 
+we can leave the LMS layer out for now because it's beyond the quine-y / lens-y / web-standards-based content publication philosophy for the course 
+
+# New things i now see
+
+W1. I don't fully agree that we should sequence the conceptual/pedagogical bullet.  I think they are more different dimensions than a "stack" in taht sense 
+
+W2. now we're adding infrastructural elements, yes.  this is a critical principle that can be connected to the methodology-level learning objectives and the data red-thread. note:  ths substrate is not innert!  a) a key part of emobidments are the streams which represent the dynamics of data procesing in the NM and b) embodiments of the NM are crystalic representations of the entire dynamic data lifecycle of a program carefully crafted to make all facets exploreable and c) it only tells a small part of the computational side of the whole story of data flowing through the entire computational/human entwined system..  it's more like a static 4D rendering of a 3D lfowing river than "just" an innert substrate.
+
+W3. pedagogical sampling is about the learner's perception and experience of the examples/exercises/concepts/connections/etc they encounter in a setting they know was pedagogically designed.  so it's really more of a design principle behind everything about the course.  
+    which makes me think:  we should have a new category in our ontology:  design principles.  this would encompas pedagogical sampling, spiral curirculm, Explorotron model, course-as-quine, code is content, ...
+
+W4. yes.  this deserves a table in the ontology, marked as an open-ended development guide 
+
+W5. ok
+
+W6. it's not vibetoading/frogramming without twinning. this is integral to their definitions.  so if we do expand the table it needs to be clear the terms no longer apply.  which can be helpful to also define the terms by what thye _aren't_ 
+
+W7.  no.  too numerologyish. especially given that we're still exploring and defining these categories, I'm not married to any of these being perfect representations that are revealing a deeper "5" pattern.  and yes, too numerologyish 
+
+W8. yes!  this is the point of 4, for them to realize that what has been passed off as a (at more basic levels) an intro-to-programming course is actually a back door entry into epistomology, cognitive science, etc.  implicitly telling learners "you are actually half way there without knowing it. these realms are not out of your reach, they're just gatekept by vocabulary and publications. if you want to you can belong here too and whatever experience/background you bring with you is a unique advantage, not a handicap"
+    wait!   I think that could be layer 5 of the curriculum:  intellectual empowerment/agency/inclusion.  the deeper and ultimate "why" of all my professional teaching work up to this point.  
+        or is this deeper "why" the new layer 0 and everything else is bumped up a level?
+
+W9. nope.  the ontology is for WtF.  deeper courses are helpful thought experiements for course design to see where we're tapping into domething deeper or what concepts are in play that we didn't even notice, but they are not part of WtF's ontology 
+
+W10. table this for later, I'm not sold on it 
+
+
+# What you didn't read 
+
+read the R5 plan file.
+
+refresh youself on effective-learning/
+
+take a deeper peek through the notes, starting at "home" then using interesting internal links as your guide.  for example "first principles" will be useful to our new "design pricnples" ontology segment 
+
+
+# Where you'd like to go next 
+
+A. only reading what I mentioned above
+
+yes, it's a methodology for deciding what to teach. it belongs in the "design principles" section?
+
+
+
+# fair ...
+
+it's inside the ontology.  primarily it's the infrastructure under the pedagogy and inspired by the ontology's implications.  we can't separate infrastructure from pedagogy as you tried to - remember the whole V/F feedback loop?  affordances (F) and use cases (V) make each other possible.
+    from another perspective, everything in the ontology is underneath everything else at once.  
+
