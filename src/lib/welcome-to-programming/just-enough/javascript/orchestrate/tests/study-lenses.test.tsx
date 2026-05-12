@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -37,25 +37,48 @@ describe('<StudyLenses> — F1 smoke', () => {
 			expect(host?.value).toBe('OK');
 		});
 
-		it('re-renders the textarea value when the snippet prop changes (defeats hardcoding)', () => {
+		it('ignores subsequent changes to the snippet prop (initial-value-only seed)', () => {
+			// F2 contract: snippet prop seeds useState on first render only.
+			// Callers who want to swap the snippet after mount must remount
+			// via React key={…}. A re-render with a new snippet prop does NOT
+			// override the orchestrator's internal snippet state.
 			const { container, rerender } = render(<StudyLenses snippet="OK" />);
-			rerender(<StudyLenses snippet="FAIL_AT_TOKENIZE" />);
+			rerender(<StudyLenses snippet="CHANGED" />);
 			const host = container.querySelector<HTMLTextAreaElement>(
 				'[data-orchestrator-host]',
 			);
-			expect(host?.value).toBe('FAIL_AT_TOKENIZE');
+			expect(host?.value).toBe('OK');
+		});
+
+		it('typing into the editor updates the textarea value on next render (Interfaces — cross-file)', () => {
+			// Uses a non-throwing embody sentinel as the typed value: useEmbodiment
+			// (still present at F2.1; removed in F2.4) re-fires on internal snippet
+			// state change, so the typed value must be a sentinel embody handles
+			// without throwing. "FAIL_AT_PARSE" is a gracefully-handled error path,
+			// not the success path. The arbitrary-string constraint lifts at F2.4.
+			const { container } = render(<StudyLenses snippet="OK" />);
+			const host = container.querySelector<HTMLTextAreaElement>(
+				'[data-orchestrator-host]',
+			)!;
+			fireEvent.change(host, { target: { value: 'FAIL_AT_PARSE' } });
+			expect(host.value).toBe('FAIL_AT_PARSE');
 		});
 	});
 
 	describe('One — snippet flows into embody', () => {
-		it('calls embody with the exact snippet prop and re-fires on prop change (F1.B chain wiring)', () => {
+		it('calls embody with the initial snippet prop on mount; snippet prop changes do NOT re-fire embody (initial-value-only)', () => {
+			// F2 contract: snippet prop seeds useState once. The internal snippet
+			// state — not the prop — drives the embody chain. A re-render with a
+			// new prop does not change internal state, so embody does not re-fire.
+			// F2.4 will add the assertion that embody fires on a mode → lens
+			// transition once the discriminator lands.
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
 				const { rerender } = render(<StudyLenses snippet="OK" />);
 				expect(embodySpy).toHaveBeenLastCalledWith('OK');
+				const callsBefore = embodySpy.mock.calls.length;
 				rerender(<StudyLenses snippet="FAIL_AT_TOKENIZE" />);
-				expect(embodySpy).toHaveBeenLastCalledWith('FAIL_AT_TOKENIZE');
-				expect(embodySpy.mock.calls.length).toBeGreaterThanOrEqual(2);
+				expect(embodySpy.mock.calls.length).toBe(callsBefore);
 			} finally {
 				embodySpy.mockRestore();
 			}

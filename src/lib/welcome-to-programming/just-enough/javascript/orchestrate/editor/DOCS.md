@@ -19,7 +19,7 @@ mode it unmounts the editor and mounts a `<LensModule.Component>` instead (per
 
 | File        | Purpose                                                                                |
 | ----------- | -------------------------------------------------------------------------------------- |
-| `index.tsx` | React home-base component (default export). Renders the read-only host textarea in F1. |
+| `index.tsx` | React home-base component (default export). Renders the writable, orchestrator-controlled host textarea. |
 
 The previous draft of this DOCS framed the editor as a two-layer "React
 adapter + LensModule stub" module. AR-1 rejected that framing: the post-refactor

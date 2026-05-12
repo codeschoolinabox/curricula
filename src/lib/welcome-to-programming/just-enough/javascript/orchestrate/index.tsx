@@ -138,10 +138,15 @@ function readCascadeLensEntry(
 }
 
 export default function StudyLenses({
-	snippet,
+	snippet: snippetProp,
 	lens,
 	configs,
 }: StudyLensesProps): React.JSX.Element {
+	// Snippet state — seeded from prop on first render only (initial-value-only
+	// contract, per ./README.md § Public API). Subsequent prop changes are
+	// ignored; callers who need to swap the snippet must remount via key={…}.
+	const [snippet, setSnippet] = React.useState(snippetProp);
+
 	// Embody chain. Wrapped in a custom hook so React DevTools surfaces
 	// the value via `useDebugValue` when inspecting `<StudyLenses>`.
 	// Memoized on snippet — a fresh Snippet is derived synchronously
@@ -169,7 +174,7 @@ export default function StudyLenses({
 
 	return (
 		<div data-orchestrator-root>
-			<EditorComponent snippet={snippet} />
+			<EditorComponent snippet={snippet} onSnippetChange={setSnippet} />
 		</div>
 	);
 }
