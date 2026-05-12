@@ -1,39 +1,22 @@
 /**
  * @file `<StudyLenses>` — the package's public API surface.
  *
- * **F1+B scope** (after the 3-prop reshape): three-prop component
- * skeleton + `embody(snippet)` chain wiring + editor home-base mount +
- * single-entry static lens-registry dispatch (the `debug-props`
- * meta-lens) for sandbox-harness verification.
+ * **F2.2 scope**: introduces the `OrchestratorState` mode discriminator
+ * (`editor` | `lens`) as a `useState` slot. `deriveInitialMode` seeds the
+ * initial state synchronously from the `lens` and `configs` props; a
+ * `useEffect([lens, configs])` drives post-mount prop-change transitions.
+ * The render path branches on `state.mode` instead of the previous inline
+ * `registered !== undefined` check. Outward behavior is identical to F1+B.
  *
- * The chain: `snippet → embody(snippet) → frozen Snippet → either a
- * registered lens module's Component (when `lens` matches a registry
- * key) OR the editor home base (otherwise)`, per the locked decisions
- * in [`./README.md` § Public API](./README.md) and the F1 narrowing
- * block in the same file.
- *
- * **F1+B effect topology**:
- * - **Three-prop signature is the public contract.** Accepts
- *   `{ snippet, lens?, configs? }`. Every prop typechecks and round-
- *   trips through the dispatch. The pre-3-prop F1 mount-time guard
- *   (`config` supplied without a resolved-default lens → throw) is
- *   gone: with no separate `config` prop, the guard has no trigger
- *   surface. The cascade-supplied default seam is L2-deferred.
- * - **B partial lens dispatch.** When `lens` matches a key in
- *   `LENS_REGISTRY` (currently only `'debug-props'`), the orchestrator
- *   mounts that lens with the embodied `Snippet` + a resolved
- *   `LensConfig` (per the two-tier per-lens config resolution chain
- *   `module.config() ⊕ configs.lenses?.[lens]` at `./README.md`
- *   § Per-lens config resolution chain). When `lens` is unset OR not
- *   in the registry, F1 narrowing applies: the editor home base
- *   mounts and any `configs.lenses[lens]` supplied alongside an
- *   unregistered `lens` is silently unused (the silent-drop case is
- *   surfaced in the README's F1 narrowing block).
- * - **No mode discriminator yet.** F2 introduces the editor-vs-lens
- *   2-mode state machine; today the dispatch is direct
- *   (`lens-registered? → mount lens : mount editor`).
- * - **No format pre-processing.** `embody` checks format compliance.
- * - **Internal-only EventBus deferred to F5.** No events fire today.
+ * **F2.2 effect topology**:
+ * - **Snippet slot** — seeded from `snippetProp` at mount (initial-value-only
+ *   per F2.1). `setSnippet` is threaded into `EditorComponent`.
+ * - **Mode slot** — `useState<OrchestratorState>` initialized via
+ *   `deriveInitialMode`; driven post-mount by `useEffect([lens, configs])`.
+ * - **CachedEmbodiment slot** — NOT added at F2.2 (F2.5 scope).
+ * - **useEmbodiment** — still present and unconditional (removed in F2.4).
+ *   Provides the `Snippet` for the lens render branch.
+ * - **EventBus** — deferred to F5.
  */
 
 import React from 'react';
@@ -47,7 +30,11 @@ import debugPropsLens from '../lenses/debug-props/index.js';
 import type { LensConfig, LensModule } from '../lenses/types.js';
 
 import EditorComponent from './editor/index.js';
-import type { StudyLensesProps } from './types.js';
+import type {
+	LensModeState,
+	OrchestratorState,
+	StudyLensesProps,
+} from './types.js';
 
 /**
  * Single-entry static lens registry — the orchestrator's bootstrap
@@ -60,6 +47,29 @@ import type { StudyLensesProps } from './types.js';
 const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 	'debug-props': debugPropsLens,
 });
+
+/**
+ * Derives the initial `OrchestratorState` from the `lens` and `configs`
+ * props. Called once via the `useState` lazy initializer and again inside
+ * the `useEffect([lens, configs])` functional updater for prop-change
+ * transitions (with a same-state bail-out to avoid extra re-renders).
+ *
+ * Registered `lens` → `LensModeState`; unset or unregistered → `EditorModeState`.
+ */
+function deriveInitialMode(
+	lens: string | undefined,
+	configs: Pick<StudyLensesProps, 'configs'>['configs'],
+): OrchestratorState {
+	const registered = lens !== undefined ? LENS_REGISTRY[lens] : undefined;
+	if (registered !== undefined) {
+		return {
+			mode: 'lens',
+			activeLens: lens!,
+			resolvedConfig: resolvePerLensConfig(registered, lens!, { configs }),
+		} satisfies LensModeState;
+	}
+	return { mode: 'editor' };
+}
 
 function useEmbodiment(snippet: string): Snippet {
 	const embodiment = React.useMemo(() => embody(snippet), [snippet]);
@@ -142,32 +152,41 @@ export default function StudyLenses({
 	lens,
 	configs,
 }: StudyLensesProps): React.JSX.Element {
-	// Snippet state — seeded from prop on first render only (initial-value-only
-	// contract, per ./README.md § Public API). Subsequent prop changes are
-	// ignored; callers who need to swap the snippet must remount via key={…}.
+	// Snippet slot — seeded from prop at mount only (initial-value-only).
 	const [snippet, setSnippet] = React.useState(snippetProp);
 
-	// Embody chain. Wrapped in a custom hook so React DevTools surfaces
-	// the value via `useDebugValue` when inspecting `<StudyLenses>`.
-	// Memoized on snippet — a fresh Snippet is derived synchronously
-	// on every snippet change. Per `./DOCS.md` § F1+B narrowing of the
-	// effect-topology table, this broadened trigger fires
-	// unconditionally; F2 narrows it to mode → lens transitions once
-	// the discriminator lands.
+	// Mode slot — initialized synchronously via deriveInitialMode; driven
+	// post-mount by the useEffect below. F2.3 adds the explicit return-
+	// transition tests; F2.4 narrows the embody trigger.
+	const [state, setState] = React.useState<OrchestratorState>(() =>
+		deriveInitialMode(lens, configs),
+	);
+
+	// Prop-change mode transition. Skips initial mount (state is already
+	// correct from the lazy initializer); fires on every subsequent lens or
+	// configs change, applying the full derived state including a fresh
+	// resolvedConfig (so configs changes propagate to the lens component).
+	const isMountedRef = React.useRef(false);
+	React.useEffect(() => {
+		if (!isMountedRef.current) {
+			isMountedRef.current = true;
+			return;
+		}
+		setState(deriveInitialMode(lens, configs));
+	}, [lens, configs]);
+
+	// Embody chain — still unconditional at F2.2 (removed in F2.4).
+	// Memoized on snippet; provides the Snippet for the lens render branch.
 	const embodiment = useEmbodiment(snippet);
 
-	// B.7: lens-mount dispatch. When `lens` matches a registered key,
-	// route to that lens's React component with the embodied Snippet
-	// and a resolved per-lens config. When `lens` is unset OR not in
-	// the registry, F1 narrowing applies: the editor home base mounts.
-	const registered = lens !== undefined ? LENS_REGISTRY[lens] : undefined;
-	if (registered !== undefined) {
-		const resolvedConfig = resolvePerLensConfig(registered, lens!, {
-			...(configs !== undefined ? { configs } : {}),
-		});
+	if (state.mode === 'lens') {
+		const lensModule = LENS_REGISTRY[state.activeLens]!;
 		return (
 			<div data-orchestrator-root>
-				<registered.Component embodiment={embodiment} config={resolvedConfig} />
+				<lensModule.Component
+					embodiment={embodiment}
+					config={state.resolvedConfig}
+				/>
 			</div>
 		);
 	}

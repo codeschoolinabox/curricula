@@ -206,4 +206,69 @@ describe('<StudyLenses> — F1 smoke', () => {
 		// support this test. Re-evaluate when F4 lands a lens with a
 		// non-empty default factory.
 	});
+
+	// ─── F2.2: mode-discriminator state machine ──────────────────────────
+
+	describe('F2.2 — mode-discriminator (OrchestratorState)', () => {
+		describe('Zero/One — initial mode from props', () => {
+			it('mounts in editor mode when no lens prop (editor home-base present, no lens root)', () => {
+				const { container } = render(<StudyLenses snippet="OK" />);
+				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
+				expect(container.querySelector('[data-lens]')).toBeNull();
+			});
+
+			it('mounts directly in lens mode when lens="debug-props" (registered)', () => {
+				const { container } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(container.querySelector('[data-lens="debug-props"]')).not.toBeNull();
+				expect(container.querySelector('[data-orchestrator-host]')).toBeNull();
+			});
+
+			it('mounts in editor mode when lens="not-registered" (silent-drop fallback)', () => {
+				const { container } = render(
+					<StudyLenses snippet="OK" lens="not-registered" />,
+				);
+				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
+				expect(container.querySelector('[data-lens]')).toBeNull();
+			});
+		});
+
+		describe('Many — mode transitions on prop change', () => {
+			it('transitions editor → lens when lens prop changes from unset to "debug-props"', () => {
+				const { container, rerender } = render(<StudyLenses snippet="OK" />);
+				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
+				expect(container.querySelector('[data-lens]')).toBeNull();
+
+				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+
+				expect(container.querySelector('[data-lens="debug-props"]')).not.toBeNull();
+				expect(container.querySelector('[data-orchestrator-host]')).toBeNull();
+			});
+
+			it('transitions lens → editor when lens prop changes from "debug-props" to unset', () => {
+				const { container, rerender } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(container.querySelector('[data-lens="debug-props"]')).not.toBeNull();
+
+				rerender(<StudyLenses snippet="OK" />);
+
+				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
+				expect(container.querySelector('[data-lens]')).toBeNull();
+			});
+
+			it('transitions lens → editor when lens prop changes to an unregistered key', () => {
+				const { container, rerender } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(container.querySelector('[data-lens="debug-props"]')).not.toBeNull();
+
+				rerender(<StudyLenses snippet="OK" lens="not-registered" />);
+
+				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
+				expect(container.querySelector('[data-lens]')).toBeNull();
+			});
+		});
+	});
 });
