@@ -77,7 +77,7 @@ and the **3-prop reshape** that absorbs `config` into `configs.lenses[lens]`):
 
 | Prop      | Type                                                          | Required | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | --------- | ------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `snippet` | `string`                                                      | yes      | The code string. The orchestrator builds the embodiment internally — caller does NOT pre-build.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `snippet` | `string`                                                      | yes      | The code string, consumed as the **initial value** only. The orchestrator seeds an internal `useState(snippet)` on the first render and is the sole writer of snippet state thereafter; subsequent changes to the `snippet` prop are ignored. Callers who need to swap the snippet remotely should remount via React `key={…}`. The orchestrator builds the embodiment internally — caller does NOT pre-build.                                                                                                                                                                                                              |
 | `lens`    | `string`                                                      | no       | Default-mounted lens name (Q-III seam). Learner can switch via picker. Populated upstream by the plugin from per-fence info-string `:suffix`, frontmatter `defaultLens`, or sibling `@study-lens` directive. Cascade `defaults[lang]` is gate-only (it controls whether the fence transforms but does NOT populate `lens` per AR-1 locked decision 1); the cascade-supplied default seam is L2-deferred.                                                                                                                                                                                                                      |
 | `configs` | maximally opaque object (`Readonly<Record<string, unknown>>`) | no       | Opaque cascade passthrough — the public type makes no statement about internals. Today the plugin emits the whole resolved cascade from the `lenses.json` directory walk; per-fence URL-style queries and sibling `@study-lens` directive JSON overrides are deep-merged INTO `configs.lenses[lens]` at plugin emission time. The orchestrator's INTERNAL `resolvePerLensConfig` reads `configs.lenses?.[lens]` as a structural assumption at the cast boundary — that assumption is NOT a constraint on the public type, so future cascade-shape evolution (e.g. L2 default-lens seam) doesn't require widening the surface. |
 
@@ -88,40 +88,32 @@ three input surfaces and emits the resolved values onto the JSX node. There is
 no separate `config` prop; the per-fence/sibling override is folded into
 `configs.lenses[lens]` before emission, so the cascade IS the merged truth.
 
-> **F1 narrowing**: the three-prop signature is the public contract at the type
-> level today; `snippet` is wired to runtime behavior in F1, and `lens` is
-> partially wired against a single static-lens-registry entry (currently the
-> meta-lens `debug-props` — see
-> [`../lenses/debug-props/`](../lenses/debug-props/)) to support sandbox-harness
-> verification of the three-prop shape end-to-end. When `lens` matches a
-> registered key, the orchestrator mounts that lens with `embodiment` (built
-> from `snippet` per F1) plus the per-lens resolved config (per § Per-lens
-> config resolution chain). When `lens` is unset OR not in the registry, F1
-> narrowing applies (no lens dispatch; mount the editor home base). `configs` is
-> accepted on every render and consumed by the resolution chain when a
-> registered lens dispatches. Wider behavior arrives in later increments: F4
-> lands the first pedagogical trial lens (the registry grows beyond the
-> `debug-props` bootstrap entry); L1 adds picker UI that enumerates registry
-> entries; F2 wires editor → lens mode transitions; L2 wires full
-> cascade-resolution coverage including the cascade-supplied default seam — a
-> future hook inside `configs` (exact key shape L2-deferred; candidates include
-> re-using `configs.defaults[lang]` as a per-language default-lens-name source,
-> or adding a dedicated `configs.defaultLens` scalar slot) that may surface a
-> default-lens-name from the cascade itself.
->
-> The pre-3-prop **F1 mount-time guard** (`config` supplied without resolved
-> `lens` → throw at mount) is gone: with no separate `config` prop, the guard
-> has no trigger surface. The cascade-supplied default seam remains L2-deferred
-> — at F1+B, an unresolved `lens` simply mounts the editor home base.
+> **Dispatch path**: when `lens` matches a registered key, the orchestrator
+> initializes (or transitions to) **lens mode** with `embodiment` (built from
+> the internal snippet state via `embody()`) plus the per-lens resolved config
+> (per § Per-lens config resolution chain). When `lens` is unset OR not in the
+> registry, the orchestrator initializes (or transitions to) **editor mode**.
+> The mode discriminator and its transitions are described in § Editor-vs-lens
+> state machine; the build-or-reuse decision for `embodiment` is described in
+> the same section's § Cross-mode embodiment cache. The pre-3-prop F1
+> mount-time guard (`config` supplied without resolved `lens` → throw at mount)
+> is gone with the absorbed `config` prop. The registry is currently keyed by
+> the single meta-lens `debug-props` (see
+> [`../lenses/debug-props/`](../lenses/debug-props/)); F4 grows it with the
+> first pedagogical trial lens, and L1 adds a picker UI that enumerates
+> registry entries. L2 wires the cascade-supplied default-lens seam — a future
+> hook inside `configs` (exact key shape L2-deferred; candidates include
+> re-using `configs.defaults[lang]` as a per-language default-lens-name
+> source, or adding a dedicated `configs.defaultLens` scalar slot) that may
+> surface a default-lens-name from the cascade itself.
 >
 > **Silent-drop case (deferred to L2/F4).** When `lens` is supplied but not in
-> the registry (e.g. `lens="parsons"` before F4 lands the trial lens), F1+B
-> narrowing applies: the editor mounts and any `configs.lenses[lens]` entry
-> supplied alongside is silently unused. This is expected behavior at F1+B —
-> surfacing the unregistered-lens case as a build-time error or runtime warning
-> is gated on the registry-shape decision (F4 Phase 0) and the cascade-supplied
-> default seam (L2). Authors who hit this should consult React DevTools or the
-> sandbox debug-props lens to confirm the prop shape.
+> the registry (e.g. `lens="parsons"` before F4 lands the trial lens), the
+> orchestrator falls back to editor mode and any `configs.lenses[lens]` entry
+> supplied alongside is silently unused. This is expected behavior pending the
+> registry-shape decision (F4 Phase 0) and the cascade-supplied default seam
+> (L2). Authors who hit this should consult React DevTools or the sandbox
+> `debug-props` lens to confirm the prop shape.
 
 ### Per-lens config resolution chain
 
@@ -208,20 +200,90 @@ the independent escape hatch.
 
 ## Editor-vs-lens state machine
 
-Per
-[F2](../.planning-handoffs/03-orchestrator-and-contracts.md#f2--editor-vs-lens-state-machine):
-the UI is in exactly one of two modes at a time.
+The UI is in exactly one of two modes at a time; mode is selected by an
+internal **mode discriminator** stored in `useState<OrchestratorState>` and
+mutated only via well-defined **mode transitions**. See [`./types.ts`](./types.ts)
+for the discriminated-union state shape; see [`./DOCS.md` § Mode-gated state
+machine](./DOCS.md) for the architectural sketch.
 
-- **Editor mode** — the home base ([`./editor/`](./editor/)) is mounted. Learner
-  types into the snippet. No active lens, no embodiment. Picker is visible;
-  selecting a lens exits editor mode.
-- **Lens mode** — a lens is active with a frozen embodiment + lens config bundle
-  as props. Snippet is read-only; the learner cannot type. Switching lenses
-  reuses the current embodiment. Switching back to the editor disposes the lens.
+> F2 ships the mode discriminator and transitions but not the toolbar picker
+> UI (the picker lands in L1). Until L1, mode transitions are driven
+> exclusively by changes to the `lens` prop from the consumer — for the
+> sandbox checkpoint this is exercised via the
+> [`f2-mode-machine`](../../../../../spiralearn/sandbox/f2-mode-machine/)
+> toggle page; in curriculum pages the `lens` prop is statically supplied by
+> the Docusaurus plugin.
 
-Returning editor → lens later builds a NEW embodiment (per the lazy embodiment
-principle). Lens-internal UI state never carries across mode switches — the
-disposability principle.
+### Glossary (ubiquitous language)
+
+- **Editor mode** — the home base ([`./editor/`](./editor/)) is mounted. The
+  learner types into the snippet; the textarea is the source of truth for
+  `snippet`. No active lens, no embodiment displayed. (Picker will land in
+  L1; until then, the consumer toggles via the `lens` prop.)
+- **Lens mode** — a lens is active with a frozen `embodiment` + resolved
+  per-lens config as React props. The snippet is read-only (the textarea is
+  unmounted; the snippet behind the embodiment was snapshotted at the
+  transition). (Picker will land in L1 and stay visible in lens mode as the
+  Q-I autonomy guarantee.)
+- **Mode discriminator** — the `mode: 'editor' | 'lens'` field on
+  `OrchestratorState` that names which subtree the orchestrator renders.
+  Initial value is derived **synchronously** by `deriveInitialMode({ snippet,
+  lens, configs })` — a top-level helper that returns `{ state:
+  OrchestratorState; cache: CachedEmbodiment | null }` in a single pure pass.
+  Both `useState` lazy initializers (one for `state`, one for
+  `cachedEmbodiment`) project their respective field from the same call, so
+  the lens-mode case calls `embody(snippet)` exactly once at first render
+  and the lens-mode subtree paints on the first frame when the caller
+  supplies a registered `lens`.
+- **Mode transition** — a state-update that flips the discriminator. Two
+  transitions exist today: **editor → lens** (the `lens` prop changes to a
+  registered key — builds or reuses an embodiment; mounts the lens) and
+  **lens → editor** (the `lens` prop unsets or moves to an unregistered key —
+  disposes the lens; the cached embodiment survives the transition). In-mode
+  lens-switching (lens → lens) lands in F4 when the registry grows beyond
+  `debug-props`.
+
+### Cross-mode embodiment cache
+
+The orchestrator holds a single authoritative top-level state slot
+`cachedEmbodiment: { snippet: string; embodiment: Snippet } | null` alongside
+the mode-discriminator state. The cache is the orchestrator's
+**lazy-embodiment memo**: there is one storage location for the live
+embodiment; `LensModeState` carries only `activeLens` and `resolvedConfig`,
+and lens-mode rendering reads `cachedEmbodiment.embodiment` directly.
+
+**Coherence invariant** — whenever `state.mode === 'lens'`, the cache is
+non-null AND `cachedEmbodiment.snippet === currentSnippet`. The transition
+logic enforces this; types cannot.
+
+**Trigger semantics:**
+
+| Event | Cache effect | Mode effect |
+| --- | --- | --- |
+| Initial mount, `deriveInitialMode` returns lens mode | populate atomically with fresh `embody(snippet)` | `{ mode: 'lens', activeLens, resolvedConfig }` |
+| Initial mount, `deriveInitialMode` returns editor mode | `null` | `{ mode: 'editor' }` |
+| Editor → lens transition, `cache.snippet === currentSnippet` | reuse cached `embodiment`; no `embody()` call | `{ mode: 'lens', activeLens, resolvedConfig }` |
+| Editor → lens transition, cache stale or null | call `embody(currentSnippet)` once; populate cache | `{ mode: 'lens', activeLens, resolvedConfig }` |
+| Lens → editor transition | retain cache | `{ mode: 'editor' }` |
+| Snippet edit in editor mode | clear cache (`null`) | (no transition; stays in editor mode) |
+
+This makes a lens → editor → lens round-trip with no intervening edit a
+zero-`embody`-call operation, while a round-trip across an edit forces a
+fresh build.
+
+**Error policy:** `embody()` is sync and may throw on unknown sentinels (per
+[`../embody/index.ts`](../embody/index.ts) JSDoc — the Phase A mock's
+contract). If `embody()` throws during an editor → lens transition, the throw
+propagates out of the state-update — the mode transition does not commit, the
+cache is not written, and the orchestrator's render path is in whatever
+state React was in before the user-triggered re-render that fired the
+transition. Today's surfacing path is the React error boundary at the
+consumer site; F3 narrows this further by surfacing errors via
+`Snippet.status.parsed = false` / `Snippet.errors` rather than throwing.
+
+Lens-internal UI state never carries across mode switches — the
+disposability principle (per [`../README.md` § Pedagogical first
+principles](../README.md#pedagogical-first-principles) implication 5).
 
 ## Data attributes the DOM exposes
 

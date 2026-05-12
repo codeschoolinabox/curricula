@@ -4,46 +4,34 @@
  * taxonomy. Adapted from `study-lenses/types.ts:32-401` (the
  * pre-refactor orchestrator types).
  *
- * @remarks **What changed from the pre-refactor shape**:
- * - Replace the multi-prop `<StudyLenses code? lens? lensConfig?
- *   transforms? height? autoFocus? lenses>` API with the locked
- *   **three-prop API**: `<StudyLenses snippet lens? configs?>`
- *   (per `../DOCS.md` § Public surface). `configs` carries the whole
- *   resolved cascade; per-fence URL-style queries and sibling
- *   `@study-lens` directive JSON are deep-merged INTO
- *   `configs.lenses[lens]` at plugin emission time. Resolution chain
- *   collapses to two tiers:
- *   `resolved(lens) = module.config() ⊕ configs.lenses?.[lens]`.
- *   The pre-3-prop `config?` prop is absorbed; the F1 mount-time
- *   guard (`config` without resolved `lens` → throw) is gone with it.
- * - Drop `transforms` prop and `TransformModule`-related types
- *   entirely (no transforms tier in the new architecture).
- * - Replace `OrchestratorState`'s always-active-lens shape with a
- *   2-mode discriminated-union state (`editor` | `lens`), per WS3
- *   handoff F2.
- * - Add `embodiment` cache slot to lens-mode state — built lazily on
- *   editor → lens transition, invalidated on every snippet edit (per
- *   WS3 handoff F3).
- * - Drop `Registry` type — the lens registry shape is open-spec
- *   (likely a static import-list); F4 Phase 0 settles. This file
- *   pins only the orchestrator-side consumer of the registry, not
- *   the registry itself.
- * - Trim `EVENT_NAMES` to the post-refactor taxonomy: keep
- *   `lens-switched` (carries forward from Inc-9), add `mode-changed`
- *   (new for the 2-mode state machine). Defer `exercise-completed`,
- *   `lens-mount-error` to F5+.
- * - INTERNAL-only — no `subscribe` / `onEvent` prop on
+ * @remarks **Contract summary** (refer to `./README.md` and `./DOCS.md`
+ * for the prose; this file is the type-level expression):
+ * - Public API: three props (`snippet`, `lens?`, `configs?`). The
+ *   `snippet` prop is consumed as the **initial value only** — the
+ *   orchestrator seeds an internal `useState` on first render and is
+ *   the sole writer thereafter. Subsequent prop changes are ignored.
+ * - `configs` is maximally opaque (`Readonly<Record<string, unknown>>`);
+ *   the orchestrator's resolution chain (two tiers:
+ *   `module.config() ⊕ configs.lenses?.[lens]`) is an internal
+ *   structural assumption pinned at the cast boundary inside
+ *   `resolvePerLensConfig`.
+ * - Internal state is mode-discriminated (`editor` | `lens`).
+ * - The live embodiment lives in a single authoritative top-level
+ *   slot (`CachedEmbodiment | null`) ALONGSIDE the mode state — NOT
+ *   inside `LensModeState`. Lens-mode rendering reads the embodiment
+ *   from this slot. Cache survives `lens → editor` round-trips and is
+ *   cleared only on snippet edit in editor mode.
+ * - INTERNAL-only EventBus — no `subscribe` / `onEvent` prop on
  *   `<StudyLenses>` until a concrete LMS integration target appears
- *   (per WS3 handoff F5).
+ *   (per WS3 handoff F5). `lens-switched` (forward from Inc-9) and
+ *   `mode-changed` (new for the 2-mode state machine) are the only
+ *   event names today.
  *
  * **What survives unchanged**: the `EventBus` shape (typed
  * dispatch/subscribe/unsubscribe/clear), per-instance ownership
  * (each `<StudyLenses>` mount owns its own bus, no global registry).
  *
- * **TBD markers** — F1 Phase 0 locks these specifics:
- * - `OrchestratorState.lens.embodiment` may need a discriminator for
- *   "embody-in-flight" vs "embody-resolved" if F3 lifts the sync
- *   contract; sketched here as sync-only for now.
+ * **Open holes**:
  * - `LensSelectionSource` enumeration may grow with L5/L6 (panel
  *   click vs picker change vs keyboard shortcut).
  *
@@ -80,12 +68,18 @@ import type { LensConfig } from '../lenses/types.js';
  * merge of tier 0 ⊕ tier 1).
  *
  * @remarks
- * - `snippet` — the source string. The orchestrator builds the
- *   embodiment internally on lens-open (lazy). Caller does NOT
- *   pre-build.
+ * - `snippet` — the source string, consumed as the **initial value
+ *   only**. The orchestrator seeds an internal `useState(snippet)`
+ *   on the first render and is the sole writer thereafter;
+ *   subsequent changes to this prop are IGNORED. Callers who need
+ *   to swap the snippet remotely should remount via React `key={…}`.
+ *   The orchestrator builds the embodiment internally on lens-open
+ *   (lazy). Caller does NOT pre-build.
  * - `lens?` — Q-III educator-supplied default-mount lens name. The
- *   learner can switch via the toolbar picker; this is just the
- *   initial selection.
+ *   learner can switch via the toolbar picker (L1+); this is just
+ *   the initial selection. Changes to this prop AFTER mount drive
+ *   mode transitions (per `./README.md` § Editor-vs-lens state
+ *   machine).
  * - `configs?` — opaque cascade passthrough (see § configs typing
  *   above). The paragraphs that follow describe TODAY'S plugin
  *   emission shape; they are descriptive observations, NOT type
@@ -96,7 +90,7 @@ import type { LensConfig } from '../lenses/types.js';
  *   emission time, so the orchestrator reads `configs.lenses?.[lens]`
  *   as the authoritative per-lens config. Other top-level keys
  *   (`defaults`, `embedSiblings`, `exerciseSetPrefixes`) are
- *   accepted but unused at F1+B (L2 may consume them).
+ *   accepted but unused today (L2 may consume them).
  *
  * **Resolution chain for any lens-name** (two tiers, post-3-prop
  * reshape):
@@ -134,43 +128,82 @@ type StudyLensesProps = Readonly<{
 
 /**
  * Editor mode — home base mounted; learner edits the snippet
- * string. No active lens, no embodiment built. Picker is visible.
+ * string. No active lens.
  *
- * @remarks Per WS3 handoff F2 + `./DOCS.md` § Lifecycle modes.
+ * @remarks Per `./README.md` § Glossary. The live embodiment
+ * (if any survives from a prior lens-mode session) lives in the
+ * top-level `CachedEmbodiment` slot, NOT here — `EditorModeState`
+ * is intentionally minimal so the discriminator's only role is
+ * to name the rendered subtree.
+ *
+ * The edit callback (`onSnippetChange`) flows through
+ * `<EditorComponent>`'s prop surface and is wired up by the
+ * orchestrator at render time — not stored on this state.
  */
 type EditorModeState = Readonly<{
 	mode: 'editor';
 }>;
 
 /**
- * Lens mode — a lens is mounted with a frozen embodiment + config
- * bundle as React props. Snippet is read-only. Picker is still
- * visible (Q-I autonomy guarantee).
+ * Lens mode — a lens is mounted. Snippet is read-only.
  *
- * @remarks Per WS3 handoff F2 + F3. The `embodiment` is built lazily
- * on editor → lens transition and survives lens-mode switches; it's
- * invalidated only on snippet edit (which forces an editor → lens
- * round-trip to rebuild).
+ * @remarks Per `./README.md` § Glossary. The frozen embodiment is
+ * stored in the top-level `CachedEmbodiment` slot (single
+ * authoritative location); `LensModeState` carries only the
+ * orchestrator's lens-mode-specific bookkeeping. `activeLens` is
+ * a separate field (rather than implied by render-time prop
+ * inspection) so F4's in-mode lens-switching can change it
+ * without re-deriving from props.
+ *
+ * **Coherence invariant** (enforced by transition logic, not
+ * the type system): when `state.mode === 'lens'`, the
+ * orchestrator's `cachedEmbodiment` slot is non-null AND
+ * `cachedEmbodiment.snippet === currentSnippet`.
  */
 type LensModeState = Readonly<{
 	mode: 'lens';
 	activeLens: string;
-	embodiment: Snippet;
-	resolvedConfig: LensConfig | undefined;
+	resolvedConfig: LensConfig;
 }>;
 
 /**
  * The orchestrator's mode-discriminated state. Exactly one mode at
  * a time (no concurrent editor+lens rendering).
  *
- * @remarks The snippet string itself is owned separately (controlled
- * by the editor; lives in `<StudyLenses>`'s `useState` independent
- * of mode). When a snippet edit fires, it updates the snippet state
- * AND invalidates any cached embodiment in lens mode (forcing the
- * orchestrator to surface a "stale, please re-open lens" affordance
- * OR transition automatically — F3 Phase 0 picks).
+ * @remarks The snippet string and the cached embodiment are each
+ * owned in their own top-level state slot, separately from this
+ * union. See `CachedEmbodiment` and `./README.md` § Cross-mode
+ * embodiment cache for the cache contract.
  */
 type OrchestratorState = EditorModeState | LensModeState;
+
+/**
+ * The orchestrator's lazy-embodiment memo. Single authoritative
+ * storage location for the live `Snippet`; lens-mode rendering
+ * reads `cachedEmbodiment.embodiment` directly. Held in a
+ * separate top-level `useState` slot alongside
+ * `OrchestratorState`.
+ *
+ * @remarks Trigger semantics (per `./README.md` § Cross-mode
+ * embodiment cache):
+ *
+ * - Initial mount: populated atomically with `embody(snippet)` when
+ *   `deriveInitialMode` returns lens mode; `null` when it returns
+ *   editor mode.
+ * - Editor → lens transition: cache hit (`cache.snippet ===
+ *   currentSnippet`) reuses `cache.embodiment`; otherwise call
+ *   `embody(currentSnippet)` once and write the cache before
+ *   committing the mode flip.
+ * - Lens → editor transition: cache RETAINED (cross-mode survival).
+ * - Snippet edit in editor mode: cache cleared (`null`).
+ *
+ * `snippet` field carries the source string the cached `embodiment`
+ * was built from — equality check is string-identity (`===`).
+ */
+type CachedEmbodiment = Readonly<{
+	snippet: string;
+	embodiment: Snippet;
+}>;
 
 // --- Lens selection (where a switch came from) ---
 
@@ -178,9 +211,10 @@ type OrchestratorState = EditorModeState | LensModeState;
  * Source of a lens-selection event — useful for analytics, picker
  * highlighting logic, and (future) exercise-completion attribution.
  *
- * @remarks Sketched here; F1 Phase 0 may grow this enumeration as
- * L5/L6 land (panel click, keyboard shortcut, programmatic-prop
- * change, etc.).
+ * @remarks Sketched here; L5/L6 may grow this enumeration when they
+ * land (panel click, keyboard shortcut, programmatic-prop change,
+ * etc.). F5 is where the bus dispatch sites first compute and
+ * supply a value.
  */
 type LensSelectionSource = 'picker' | 'panel' | 'prop' | 'initial';
 
@@ -208,12 +242,14 @@ type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
  *
  * @remarks `previous` may be `null` on the very first lens-mount
  * (editor → lens transition); subsequent in-mode switches always
- * have a non-null previous.
+ * have a non-null previous. `source` is optional pending F5's
+ * dispatch-site enumeration — F5 may make it required when the bus
+ * wires up and every dispatch site has a defensible source value.
  */
 type LensSwitchedPayload = Readonly<{
 	previous: string | null;
 	next: string;
-	source: LensSelectionSource;
+	source?: LensSelectionSource;
 }>;
 
 /**
@@ -274,6 +310,7 @@ export type {
 	OrchestratorState,
 	EditorModeState,
 	LensModeState,
+	CachedEmbodiment,
 	LensSelectionSource,
 	EventName,
 	EventPayload,

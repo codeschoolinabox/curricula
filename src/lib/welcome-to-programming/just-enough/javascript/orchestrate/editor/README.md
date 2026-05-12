@@ -21,14 +21,16 @@ editor/
   README.md       (this — orientation + navigation)
   DOCS.md         architectural sketch + data flow
   index.tsx       React home-base component (default export)
+  tests/          vitest jsdom tests for the component
+    index.test.tsx
 ```
 
 The pre-refactor `editor.ts` LensModule stub and its dedicated `tests/`
 directory were deleted as part of F1.C; the React component at `index.tsx`
-replaces them. Coverage of the editor's behavior lives at the orchestrate level
-([`../tests/study-lenses.test.tsx`](../tests/study-lenses.test.tsx)) in F1; a
-dedicated unit test directory is deferred to Inc 15+ when CodeMirror's surface
-area makes isolated testing valuable.
+replaces them. F2 re-introduces `tests/index.test.tsx` for editor-internal
+behavior (write propagation, callback wiring). Orchestrator-level coverage
+that crosses the editor ↔ `<StudyLenses>` boundary lives at
+[`../tests/study-lenses.test.tsx`](../tests/study-lenses.test.tsx).
 
 ## Public API
 
@@ -39,19 +41,23 @@ The peer's default export is the React component at
 ```tsx
 import EditorComponent from './editor/index.js';
 
-// F1 prop surface — snippet only.
+// Display-only mount.
 <EditorComponent snippet="let x = 5;" />;
+
+// With edit propagation — the orchestrator passes its setSnippet wrapper.
+<EditorComponent
+  snippet="let x = 5;"
+  onSnippetChange={(next) => setSnippet(next)}
+/>;
 ```
 
-The component renders a `<textarea data-orchestrator-host readOnly>` whose
-`value` is bound to the `snippet` prop. F1 ships **read-only** — the textarea
-displays the snippet but rejects keystrokes at the browser level, since F1 has
-no path for edits to reach the orchestrator's snippet state. F2 lifts `readOnly`
-and adds the `onSnippetChange?` prop that wires the single-writer dispatch
-through; F3 may grow further props in lens-mode-adjacent code paths but the
-editor itself never receives `embodiment` (the editor is editor-mode-only — when
-the orchestrator transitions to lens mode, it hands off to a
-`<LensModule.Component>`, not to this editor).
+The component renders a `<textarea data-orchestrator-host>` whose `value` is
+bound to the `snippet` prop. The textarea is **writable**; an `onChange`
+handler fires the optional `onSnippetChange(next)` callback with the new
+textarea value. The orchestrator threads its `useState` setter through that
+callback, so the editor is the single writer of snippet state in the
+package. The editor never receives `embodiment` — that is a lens-mode concept
+and is passed to `<LensModule.Component>`, not to this editor.
 
 ## Why a single React component
 
@@ -67,9 +73,9 @@ single React component avoids two distinct mistakes:
   when CodeMirror lands.
 
 The replacement (Inc 15+) is a CodeMirror-backed React component at the same
-file path, with the same default export, that consumes the same `snippet` (+
-F2's `onSnippetChange?`) prop surface. The orchestrator's call site does not
-change.
+file path, with the same default export, that consumes the same
+`{ snippet, onSnippetChange? }` prop surface. The orchestrator's call site does
+not change.
 
 ## Conventions
 
@@ -77,20 +83,23 @@ Inherits all conventions from [`../README.md`](../README.md),
 [`../../README.md`](../../README.md), and the top-level `AGENTS.md`.
 Module-specific rules:
 
-- **Single-writer state.** F1 ships read-only display. Edit propagation (F2's
-  `onSnippetChange?`, eventually CodeMirror's debounced dispatch) flows out of
-  this component when it lands. No lens dispatches snippet edits.
+- **Single-writer state.** The editor is the single writer of snippet source.
+  The textarea's `onChange` handler fires `onSnippetChange(next)`; the
+  orchestrator threads its `useState` setter into that callback. No lens
+  dispatches snippet edits. (Inc 15+'s CodeMirror replacement debounces the
+  same dispatch.)
 - **One file owns the React surface.** `index.tsx` is the React home base. No
   second adapter layer; no DOM-level helper module in the load-bearing path.
 - **Default export.** The component is the default export of `index.tsx`, frozen
   via `freezeInPlace` if applicable.
-- **F1 prop surface is `{ snippet }` only; F1 ships read-only.** No `embodiment`
-  prop on the editor — per [`../DOCS.md`](../DOCS.md) § Lifecycle modes, editor
-  mode has no embodiment built. F2 lifts `readOnly` and adds `onSnippetChange?`;
-  the editor is never handed an embodiment because lens mode hands control off
-  to a `<LensModule.Component>`, not to this editor.
-- **Sync mount.** F1 ships sync. If Inc 15+'s CodeMirror needs async setup (e.g.
-  dynamic language-module loading), that lives inside the component
+- **Prop surface is `{ snippet, onSnippetChange? }`.** No `embodiment` prop on
+  the editor — per [`../DOCS.md`](../DOCS.md) § Lifecycle modes, editor mode has
+  no embodiment built. The editor is never handed an embodiment because lens
+  mode hands control off to a `<LensModule.Component>`, not to this editor.
+  `onSnippetChange` is optional so the component can also be mounted purely as
+  a display surface in tests / fixtures that don't need write propagation.
+- **Sync mount.** Today's mount is sync. If Inc 15+'s CodeMirror needs async
+  setup (e.g. dynamic language-module loading), that lives inside the component
   (`useEffect` + `React.lazy` + `<Suspense>`), not in the prop contract.
 
 ## Navigation
