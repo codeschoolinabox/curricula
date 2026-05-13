@@ -10,13 +10,17 @@
  *    textarea is gone. The embodiment panels (snippet, status, validation, config)
  *    should render.
  * 3. **Toggle back**: click "Toggle lens" again → editor returns; lens is gone.
- * 4. **Type between toggles** (F2.4 unlocks free-form typing): until F2.4
- *    removes the unconditional `useEmbodiment`, typing any non-sentinel text
- *    triggers an embody mock throw. Replace the textarea contents with another
- *    valid sentinel (e.g. `FAIL_AT_PARSE`) — value persists across the round
- *    trip (cursor position resets on re-mount, which is expected).
- * 5. **Cache invalidation** (F2.5 — not yet wired): after swapping sentinels,
- *    toggle to lens — embody should re-fire (confirmed in F2.5).
+ * 4. **Type between toggles**: free-form typing is fine — embody never fires
+ *    on keystrokes (F2.4 removed the unconditional `useEmbodiment`). Edits
+ *    persist in the textarea across the lens→editor round trip; cursor
+ *    position resets on re-mount, which is expected. To toggle the result
+ *    INTO a lens after typing, end on a known sentinel (e.g. `FAIL_AT_PARSE`)
+ *    so the embody mock can dispatch it on the next lens-open.
+ * 5. **Cache invalidation** (F2.5 wired): any edit eagerly clears the cached
+ *    embodiment, even an edit that is later undone back to the original
+ *    snippet. The next editor → lens transition always re-embodies after an
+ *    edit; toggling back-and-forth WITHOUT editing reuses the cached
+ *    embodiment (count stays at 1 across the round trip).
  *
  * The render counter in the header counts how many times the top-level wrapper
  * re-renders, giving a rough "did the state machine batch correctly" signal without

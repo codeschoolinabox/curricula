@@ -188,7 +188,7 @@ type OrchestratorState = EditorModeState | LensModeState;
  * embodiment cache):
  *
  * - Initial mount: populated atomically with `embody(snippet)` when
- *   `deriveInitialMode` returns lens mode; `null` when it returns
+ *   `deriveInitialState` returns lens mode; `null` when it returns
  *   editor mode.
  * - Editor → lens transition: cache hit (`cache.snippet ===
  *   currentSnippet`) reuses `cache.embodiment`; otherwise call

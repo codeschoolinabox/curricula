@@ -229,8 +229,8 @@ flowchart TD
     Props["&lt;StudyLenses snippet lens? configs?&gt;<br/>(initial render only)"]
 
     Props -->|"lazy useState init"| SnippetState["snippet (useState string)<br/>seeded from prop; ignored thereafter"]
-    Props -->|"lazy useState init via deriveInitialMode<br/>(projects .state)"| Mode["state: OrchestratorState<br/>(editor | lens; activeLens, resolvedConfig)"]
-    Props -->|"lazy useState init via deriveInitialMode<br/>(projects .cache)"| Cache["cachedEmbodiment<br/>({ snippet, embodiment } | null)<br/>(authoritative live-embodiment slot)"]
+    Props -->|"lazy useState init via deriveInitialState<br/>(projects .state)"| Mode["state: OrchestratorState<br/>(editor | lens; activeLens, resolvedConfig)"]
+    Props -->|"lazy useState init via deriveInitialState<br/>(projects .cache)"| Cache["cachedEmbodiment<br/>({ snippet, embodiment } | null)<br/>(authoritative live-embodiment slot)"]
 
     Mode -->|"mode === 'editor'"| EditorMount["&lt;EditorComponent<br/>snippet onSnippetChange&gt;"]
     SnippetState --> EditorMount
@@ -262,7 +262,7 @@ handler. The transition handler — invoked from the `lens`-prop-change effect
 cache is stale, then dispatches both setters in succession) — relies on
 React 18 auto-batching to fold the two updates into one commit:
 
-1. `deriveInitialMode({ snippet, lens, configs })` is the single-pass helper
+1. `deriveInitialState({ snippet, lens, configs })` is the single-pass helper
    that computes `{ state: OrchestratorState; cache: CachedEmbodiment | null }`
    from the initial props. Both `useState` lazy initializers project their
    respective field from the same call so the lens-mode case calls `embody()`

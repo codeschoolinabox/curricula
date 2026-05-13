@@ -210,8 +210,9 @@ machine](./DOCS.md) for the architectural sketch.
 > UI (the picker lands in L1). Until L1, mode transitions are driven
 > exclusively by changes to the `lens` prop from the consumer — for the
 > sandbox checkpoint this is exercised via the
-> [`f2-mode-machine`](../../../../../spiralearn/sandbox/f2-mode-machine/)
-> toggle page; in curriculum pages the `lens` prop is statically supplied by
+> [`f2-mode-machine`](../../../../../../src/pages/f2-mode-machine.tsx) toggle
+> page (Docusaurus auto-route `/spiralearn/f2-mode-machine` after `npm run
+> start`); in curriculum pages the `lens` prop is statically supplied by
 > the Docusaurus plugin.
 
 ### Glossary (ubiquitous language)
@@ -227,7 +228,7 @@ machine](./DOCS.md) for the architectural sketch.
   Q-I autonomy guarantee.)
 - **Mode discriminator** — the `mode: 'editor' | 'lens'` field on
   `OrchestratorState` that names which subtree the orchestrator renders.
-  Initial value is derived **synchronously** by `deriveInitialMode({ snippet,
+  Initial value is derived **synchronously** by `deriveInitialState({ snippet,
   lens, configs })` — a top-level helper that returns `{ state:
   OrchestratorState; cache: CachedEmbodiment | null }` in a single pure pass.
   Both `useState` lazy initializers (one for `state`, one for
@@ -260,8 +261,8 @@ logic enforces this; types cannot.
 
 | Event | Cache effect | Mode effect |
 | --- | --- | --- |
-| Initial mount, `deriveInitialMode` returns lens mode | populate atomically with fresh `embody(snippet)` | `{ mode: 'lens', activeLens, resolvedConfig }` |
-| Initial mount, `deriveInitialMode` returns editor mode | `null` | `{ mode: 'editor' }` |
+| Initial mount, `deriveInitialState` returns lens mode | populate atomically with fresh `embody(snippet)` | `{ mode: 'lens', activeLens, resolvedConfig }` |
+| Initial mount, `deriveInitialState` returns editor mode | `null` | `{ mode: 'editor' }` |
 | Editor → lens transition, `cache.snippet === currentSnippet` | reuse cached `embodiment`; no `embody()` call | `{ mode: 'lens', activeLens, resolvedConfig }` |
 | Editor → lens transition, cache stale or null | call `embody(currentSnippet)` once; populate cache | `{ mode: 'lens', activeLens, resolvedConfig }` |
 | Lens → editor transition | retain cache | `{ mode: 'editor' }` |

@@ -185,12 +185,15 @@ export default function StudyLenses({
 
 	// Ref shadow for cache — lets the mode-transition effect read the latest
 	// cache without depending on `snippet` (which would re-fire the effect on
-	// every keystroke). Updated during render; persists across effect ticks.
+	// every keystroke). Updated during render; only read inside post-commit
+	// effects (never during render), which keeps the StrictMode discarded-
+	// render case correct: the discarded render's write is overwritten by the
+	// committed render's write before any effect fires.
 	const cachedEmbodimentRef = React.useRef(cachedEmbodiment);
 	cachedEmbodimentRef.current = cachedEmbodiment;
 
-	// Ref shadow for snippet — same rationale: effect needs the current snippet
-	// for the cache-hit check, but should not re-fire on keystrokes.
+	// Ref shadow for snippet — same rationale and same read-only-in-effect
+	// invariant as cachedEmbodimentRef above.
 	const snippetRef = React.useRef(snippet);
 	snippetRef.current = snippet;
 
