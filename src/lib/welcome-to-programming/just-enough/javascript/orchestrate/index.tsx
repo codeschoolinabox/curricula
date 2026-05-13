@@ -1,21 +1,24 @@
 /**
  * @file `<StudyLenses>` — the package's public API surface.
  *
- * **F2.2 scope**: introduces the `OrchestratorState` mode discriminator
- * (`editor` | `lens`) as a `useState` slot. `deriveInitialMode` seeds the
- * initial state synchronously from the `lens` and `configs` props; a
- * `useEffect([lens, configs])` drives post-mount prop-change transitions.
- * The render path branches on `state.mode` instead of the previous inline
- * `registered !== undefined` check. Outward behavior is identical to F1+B.
+ * **F2.4 scope**: `embody()` fires only on mode → lens transitions, never on
+ * keystrokes. The `cachedEmbodiment` slot is the single embodiment store;
+ * `useEmbodiment` is gone. Cache is RETAINED across `lens → editor` round
+ * trips and reused on `editor → lens` when `cache.snippet === currentSnippet`
+ * (cache-hit shortcut). F2.5 will add edit invalidation so a snippet change
+ * in editor mode clears the cache.
  *
- * **F2.2 effect topology**:
+ * **F2.4 effect topology**:
  * - **Snippet slot** — seeded from `snippetProp` at mount (initial-value-only
  *   per F2.1). `setSnippet` is threaded into `EditorComponent`.
  * - **Mode slot** — `useState<OrchestratorState>` initialized via
- *   `deriveInitialMode`; driven post-mount by `useEffect([lens, configs])`.
- * - **CachedEmbodiment slot** — NOT added at F2.2 (F2.5 scope).
- * - **useEmbodiment** — still present and unconditional (removed in F2.4).
- *   Provides the `Snippet` for the lens render branch.
+ *   `deriveInitialState`; driven post-mount by `useEffect([lens, configs])`.
+ * - **CachedEmbodiment slot** — `useState<CachedEmbodiment | null>`, projected
+ *   from the same `deriveInitialState` call at first render (atomic init).
+ *   Populated on editor → lens, retained on lens → editor.
+ * - **Embody trigger** — fires inside the transition path only: at first
+ *   render when initial mode is lens, OR inside the prop-change effect when
+ *   transitioning editor → lens without a cache hit.
  * - **EventBus** — deferred to F5.
  */
 
@@ -24,13 +27,13 @@ import React from 'react';
 import deepMerge from '../../../../utils/deep-merge.js';
 
 import embody from '../embody/index.js';
-import type { Snippet } from '../embody/types.js';
 
 import debugPropsLens from '../lenses/debug-props/index.js';
 import type { LensConfig, LensModule } from '../lenses/types.js';
 
 import EditorComponent from './editor/index.js';
 import type {
+	CachedEmbodiment,
 	LensModeState,
 	OrchestratorState,
 	StudyLensesProps,
@@ -49,32 +52,36 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 });
 
 /**
- * Derives the initial `OrchestratorState` from the `lens` and `configs`
- * props. Called once via the `useState` lazy initializer and again inside
- * the `useEffect([lens, configs])` functional updater for prop-change
- * transitions (with a same-state bail-out to avoid extra re-renders).
+ * Single-pass initial derivation of `{ state, cache }` from the first-render
+ * props. Both `useState` lazy initializers project from a single call so
+ * `embody()` is invoked at most once at first render (in lens mode).
  *
- * Registered `lens` → `LensModeState`; unset or unregistered → `EditorModeState`.
+ * - Registered `lens` + `prevCache.snippet === snippet` → cache hit; reuse.
+ * - Registered `lens` + cache miss → call `embody(snippet)` once; fresh cache.
+ * - Unset or unregistered `lens` → editor mode; cache passes through unchanged
+ *   (callers seed `null` at mount; the post-mount effect retains the cache
+ *   across `lens → editor` transitions).
  */
-function deriveInitialMode(
+function deriveInitialState(
+	snippet: string,
 	lens: string | undefined,
 	configs: Pick<StudyLensesProps, 'configs'>['configs'],
-): OrchestratorState {
+	prevCache: CachedEmbodiment | null,
+): { state: OrchestratorState; cache: CachedEmbodiment | null } {
 	const registered = lens !== undefined ? LENS_REGISTRY[lens] : undefined;
 	if (registered !== undefined) {
-		return {
+		const cache: CachedEmbodiment =
+			prevCache !== null && prevCache.snippet === snippet
+				? prevCache
+				: { snippet, embodiment: embody(snippet) };
+		const state: LensModeState = {
 			mode: 'lens',
 			activeLens: lens!,
 			resolvedConfig: resolvePerLensConfig(registered, lens!, { configs }),
-		} satisfies LensModeState;
+		};
+		return { state, cache };
 	}
-	return { mode: 'editor' };
-}
-
-function useEmbodiment(snippet: string): Snippet {
-	const embodiment = React.useMemo(() => embody(snippet), [snippet]);
-	React.useDebugValue(embodiment);
-	return embodiment;
+	return { state: { mode: 'editor' }, cache: prevCache };
 }
 
 /**
@@ -155,36 +162,65 @@ export default function StudyLenses({
 	// Snippet slot — seeded from prop at mount only (initial-value-only).
 	const [snippet, setSnippet] = React.useState(snippetProp);
 
-	// Mode slot — initialized synchronously via deriveInitialMode; driven
-	// post-mount by the useEffect below. F2.3 adds the explicit return-
-	// transition tests; F2.4 narrows the embody trigger.
-	const [state, setState] = React.useState<OrchestratorState>(() =>
-		deriveInitialMode(lens, configs),
+	// Atomic init: derive both state and cache from a single call so embody()
+	// fires at most once at first render. The tuple is held in its own state
+	// slot for clarity; React never re-runs the lazy initializer.
+	const [initialDerived] = React.useState(() =>
+		deriveInitialState(snippetProp, lens, configs, null),
 	);
+	const [state, setState] = React.useState<OrchestratorState>(
+		initialDerived.state,
+	);
+	const [cachedEmbodiment, setCachedEmbodiment] = React.useState<
+		CachedEmbodiment | null
+	>(initialDerived.cache);
 
-	// Prop-change mode transition. Skips initial mount (state is already
-	// correct from the lazy initializer); fires on every subsequent lens or
-	// configs change, applying the full derived state including a fresh
-	// resolvedConfig (so configs changes propagate to the lens component).
+	// Ref shadow for cache — lets the mode-transition effect read the latest
+	// cache without depending on `snippet` (which would re-fire the effect on
+	// every keystroke). Updated during render; persists across effect ticks.
+	const cachedEmbodimentRef = React.useRef(cachedEmbodiment);
+	cachedEmbodimentRef.current = cachedEmbodiment;
+
+	// Ref shadow for snippet — same rationale: effect needs the current snippet
+	// for the cache-hit check, but should not re-fire on keystrokes.
+	const snippetRef = React.useRef(snippet);
+	snippetRef.current = snippet;
+
+	// Prop-change mode transition. Skips initial mount (state/cache already
+	// seeded); fires on lens or configs change only. Calls `setState` and
+	// `setCachedEmbodiment` sequentially — React 18 auto-batching folds them
+	// into a single commit (per DOCS § Atomic transition mechanism).
 	const isMountedRef = React.useRef(false);
 	React.useEffect(() => {
 		if (!isMountedRef.current) {
 			isMountedRef.current = true;
 			return;
 		}
-		setState(deriveInitialMode(lens, configs));
+		const next = deriveInitialState(
+			snippetRef.current,
+			lens,
+			configs,
+			cachedEmbodimentRef.current,
+		);
+		setState(next.state);
+		setCachedEmbodiment(next.cache);
 	}, [lens, configs]);
 
-	// Embody chain — still unconditional at F2.2 (removed in F2.4).
-	// Memoized on snippet; provides the Snippet for the lens render branch.
-	const embodiment = useEmbodiment(snippet);
-
 	if (state.mode === 'lens') {
+		// Invariant (enforced by transition logic): mode='lens' ⇒ cache non-null
+		// AND cache.snippet === current snippet. A null cache here means a
+		// transition path forgot to populate it — surface loudly rather than
+		// silently dereferencing.
+		if (cachedEmbodiment === null) {
+			throw new Error(
+				'orchestrator invariant violated: lens mode requires non-null cachedEmbodiment',
+			);
+		}
 		const lensModule = LENS_REGISTRY[state.activeLens]!;
 		return (
 			<div data-orchestrator-root>
 				<lensModule.Component
-					embodiment={embodiment}
+					embodiment={cachedEmbodiment.embodiment}
 					config={state.resolvedConfig}
 				/>
 			</div>

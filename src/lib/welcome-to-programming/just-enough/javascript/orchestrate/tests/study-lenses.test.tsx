@@ -51,34 +51,68 @@ describe('<StudyLenses> — F1 smoke', () => {
 		});
 
 		it('typing into the editor updates the textarea value on next render (Interfaces — cross-file)', () => {
-			// Uses a non-throwing embody sentinel as the typed value: useEmbodiment
-			// (still present at F2.1; removed in F2.4) re-fires on internal snippet
-			// state change, so the typed value must be a sentinel embody handles
-			// without throwing. "FAIL_AT_PARSE" is a gracefully-handled error path,
-			// not the success path. The arbitrary-string constraint lifts at F2.4.
 			const { container } = render(<StudyLenses snippet="OK" />);
 			const host = container.querySelector<HTMLTextAreaElement>(
 				'[data-orchestrator-host]',
 			)!;
-			fireEvent.change(host, { target: { value: 'FAIL_AT_PARSE' } });
-			expect(host.value).toBe('FAIL_AT_PARSE');
+			fireEvent.change(host, { target: { value: 'hello world' } });
+			expect(host.value).toBe('hello world');
 		});
 	});
 
-	describe('One — snippet flows into embody', () => {
-		it('calls embody with the initial snippet prop on mount; snippet prop changes do NOT re-fire embody (initial-value-only)', () => {
-			// F2 contract: snippet prop seeds useState once. The internal snippet
-			// state — not the prop — drives the embody chain. A re-render with a
-			// new prop does not change internal state, so embody does not re-fire.
-			// F2.4 will add the assertion that embody fires on a mode → lens
-			// transition once the discriminator lands.
+	describe('F2.4 — embody fires only on mode → lens transitions', () => {
+		it('embody is NOT called when mounting without a lens prop', () => {
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
-				const { rerender } = render(<StudyLenses snippet="OK" />);
-				expect(embodySpy).toHaveBeenLastCalledWith('OK');
-				const callsBefore = embodySpy.mock.calls.length;
-				rerender(<StudyLenses snippet="FAIL_AT_TOKENIZE" />);
-				expect(embodySpy.mock.calls.length).toBe(callsBefore);
+				render(<StudyLenses snippet="OK" />);
+				expect(embodySpy).not.toHaveBeenCalled();
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+
+		it('embody IS called exactly once on initial mount with a registered lens prop', () => {
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				render(<StudyLenses snippet="OK" lens="debug-props" />);
+				expect(embodySpy).toHaveBeenCalledOnce();
+				expect(embodySpy).toHaveBeenCalledWith('OK');
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+
+		it('embody fires ONCE total across an editor→lens→editor→lens round-trip with stable snippet (cache hit)', () => {
+			// Decisive test — kills any useMemo([snippet, lens]) fake-it impl:
+			// such an impl would re-fire embody on the second lens-open because
+			// lens went undefined → "debug-props" (dep value change). The cache
+			// slot with snippet-equality check is the only way to keep count=1
+			// across the round-trip when snippet hasn't changed.
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				const { rerender } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(embodySpy).toHaveBeenCalledOnce();
+				rerender(<StudyLenses snippet="OK" />);
+				expect(embodySpy).toHaveBeenCalledOnce();
+				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+				expect(embodySpy).toHaveBeenCalledOnce();
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+
+		it('embody is NOT re-called when typing into the editor (no mode transition)', () => {
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				const { container } = render(<StudyLenses snippet="OK" />);
+				const host = container.querySelector<HTMLTextAreaElement>(
+					'[data-orchestrator-host]',
+				)!;
+				fireEvent.change(host, { target: { value: 'arbitrary code, not a sentinel' } });
+				fireEvent.change(host, { target: { value: 'more arbitrary text' } });
+				expect(embodySpy).not.toHaveBeenCalled();
 			} finally {
 				embodySpy.mockRestore();
 			}
@@ -86,18 +120,32 @@ describe('<StudyLenses> — F1 smoke', () => {
 	});
 
 	describe('Many — non-success embody scenario', () => {
-		it('mounts without throwing for "FAIL_AT_PARSE" — F1 has no error UI', () => {
-			const { container } = render(<StudyLenses snippet="FAIL_AT_PARSE" />);
+		it('mounts without throwing for "FAIL_AT_PARSE" with debug-props lens', () => {
+			// F2.4: embody fires only on lens-mount, so we must mount with a lens
+			// to exercise the non-success path through the orchestrator.
+			const { container } = render(
+				<StudyLenses snippet="FAIL_AT_PARSE" lens="debug-props" />,
+			);
 			const root = container.querySelector('[data-orchestrator-root]');
 			expect(root).not.toBeNull();
 		});
 	});
 
 	describe('Exceptions — embody throws on unknown sentinel', () => {
-		it('propagates the embody throw — secondary confirmation that orchestrator calls embody(snippet)', () => {
+		it('propagates the embody throw on lens mount (transition-time error surface)', () => {
+			// F2.4: embody only fires on lens transitions. The throw surfaces at
+			// lens-mount time, not at editor-mode mount.
+			expect(() =>
+				render(<StudyLenses snippet="not_a_real_sentinel" lens="debug-props" />),
+			).toThrow(/Unknown embody mock scenario/);
+		});
+
+		it('does NOT propagate an embody throw at editor-mode mount with unknown sentinel', () => {
+			// Corollary: mounting without a lens with garbage input does NOT throw
+			// because embody is not called. The throw is deferred to transition-time.
 			expect(() =>
 				render(<StudyLenses snippet="not_a_real_sentinel" />),
-			).toThrow(/Unknown embody mock scenario/);
+			).not.toThrow();
 		});
 	});
 
