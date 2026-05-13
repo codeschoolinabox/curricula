@@ -37,17 +37,21 @@
  * in EMBODY_SCENARIOS?
  *   |
  *   |--- yes:
- *   |     |--- "OK"                  --> apex; all green; eval completes
- *   |     |--- "FAIL_AT_TOKENIZE"    --> tokenize fails; status all false
- *   |     |--- "FAIL_AT_PARSE"       --> parse fails; tokenized:T parsed:F
- *   |     |--- "FAIL_AT_CREATE"      --> create fails; parsed:T created:F
- *   |     |--- "VALIDATION_FAIL"     --> apex status; isJeJ:F + canned violation
- *   |     |--- "NON_DETERMINISTIC"   --> apex status; nonDeterminism.random:T
- *   |     |--- "PAUSES"              --> apex status; hasIo.user.total:1
- *   |     |--- "EVAL_ERROR"          --> apex status; run() outcome:'errored'
- *   |     |--- "EVAL_TIMEOUT"        --> apex status; run() outcome:'timed-out'
- *   |     |--- "EVAL_LIMIT"          --> apex status; run() outcome:'limit-exceeded'
- *   |     |--- "EVAL_CANCELLED"      --> apex status; run() outcome:'cancelled'
+ *   |     |--- "OK"                  --> apex leaf; all status true; eval completes
+ *   |     |--- "FAIL_AT_TOKENIZE"    --> tokenize-fail leaf; status all false
+ *   |     |--- "FAIL_AT_PARSE"       --> parse-fail leaf; tokenized:T, rest false
+ *   |     |--- "VALIDATION_FAIL"     --> validate-fail leaf; parsed:T, validated:F;
+ *   |     |                              canned violation; no streams.create or
+ *   |     |                              streams.evaluate
+ *   |     |--- "FAIL_AT_CREATE"      --> create-fail leaf; validated:T, created:F;
+ *   |     |                              streams.create has partial events; no
+ *   |     |                              streams.evaluate
+ *   |     |--- "NON_DETERMINISTIC"   --> apex leaf; nonDeterminism.random:T overlay
+ *   |     |--- "PAUSES"              --> apex leaf; hasIo.user.total:1 overlay
+ *   |     |--- "EVAL_ERROR"          --> apex leaf; run() outcome:'errored'
+ *   |     |--- "EVAL_TIMEOUT"        --> apex leaf; run() outcome:'timed-out'
+ *   |     |--- "EVAL_LIMIT"          --> apex leaf; run() outcome:'limit-exceeded'
+ *   |     |--- "EVAL_CANCELLED"      --> apex leaf; run() outcome:'cancelled'
  *   |
  *   |--- no:  real composition (per embody/lib/*; throws on input the
  *             non-scenario path does not yet handle — see
@@ -563,7 +567,64 @@ function buildFailAtParseSnippet(code: string): Snippet {
 	return deepFreezeInPlace(snippet);
 }
 
-/** Build the `FAIL_AT_CREATE` Snippet — parse OK, creation fails. `static` absent; `streams.evaluate` absent. */
+/** Build the `VALIDATION_FAIL` Snippet — parse OK, validate fails (isJeJ=false).
+ *  Carries `parse.ast`, `parse.comments`, `static`, and `validation` (with
+ *  violations populated). NO `streams.create` and NO `streams.evaluate` —
+ *  invalid JEJ programs don't run. `errors.phase = 'validate'`. */
+function buildValidateFailSnippet(code: string): Snippet {
+	const ast = makeStubProgram(code);
+	const initialScope = makeStubInitialScope();
+	const tokens = [makeStubToken(code)];
+	const staticAnalyses: StaticAnalyses = {
+		realm: makeStubRealm(),
+		initialScope,
+		bindings: [],
+		dependencies: [],
+		features: makeStubFeatures(),
+		metrics: makeStubMetrics(code, tokens.length),
+		controlFlow: makeStubControlFlow(),
+		nonDeterminism: makeStubNonDeterminism(),
+		hasIo: makeStubHasIo(0),
+	};
+	const violations = [makeStubViolation()];
+	const nd = staticAnalyses.nonDeterminism;
+	const validation: Validation = {
+		isJeJ: violations.length === 0,
+		isDeterministic: !(nd.random || nd.clock || nd.userInput || nd.locale),
+		doesPause: staticAnalyses.hasIo.user.total > 0,
+		formatted: true,
+		violations,
+	};
+	const snippet: Snippet = {
+		status: { tokenized: true, parsed: true, validated: false, created: false },
+		source: buildSource(code),
+		parse: {
+			tokens,
+			comments: [],
+			ast,
+			nodesByPath: { $: ast },
+			tokensByOffset: {},
+			nodesByOffset: { 0: ast },
+		},
+		static: staticAnalyses,
+		validation,
+		errors: {
+			phase: 'validate',
+			kind: 'ValidationError',
+			message: 'canned scenario: JEJ subset violations present',
+			loc: null,
+		},
+		streams: {
+			realm: emptyRealmStream,
+			parse: { tokenize: emptyTokenizeStream, parse: emptyParseStream },
+		},
+	};
+	return deepFreezeInPlace(snippet);
+}
+
+/** Build the `FAIL_AT_CREATE` Snippet — parse + validate OK, creation fails.
+ *  Carries clean `validation` (isJeJ=true), `streams.create` (empty —
+ *  partial events would land here in real composition), no `streams.evaluate`. */
 function buildFailAtCreateSnippet(code: string): Snippet {
 	const ast = makeStubProgram(code);
 	const snippet: Snippet = {
@@ -694,12 +755,6 @@ const APEX_OVERLAYS: Readonly<Record<string, ApexOverlay>> = Object.freeze({
 		hasIoUserTotal: 0,
 		evalOutcome: 'completed',
 	},
-	VALIDATION_FAIL: {
-		violations: [makeStubViolation()],
-		nonDeterminismOverride: {},
-		hasIoUserTotal: 0,
-		evalOutcome: 'completed',
-	},
 	NON_DETERMINISTIC: {
 		violations: [],
 		nonDeterminismOverride: { random: true },
@@ -763,6 +818,9 @@ function embody(code: string): Snippet {
 	}
 	if (code === 'FAIL_AT_PARSE') {
 		return buildFailAtParseSnippet(code);
+	}
+	if (code === 'VALIDATION_FAIL') {
+		return buildValidateFailSnippet(code);
 	}
 	if (code === 'FAIL_AT_CREATE') {
 		return buildFailAtCreateSnippet(code);

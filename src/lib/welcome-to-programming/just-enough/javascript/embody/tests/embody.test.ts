@@ -37,7 +37,7 @@ describe('embody', () => {
 			);
 		});
 
-		it('includes the apex overlays (VALIDATION_FAIL, NON_DETERMINISTIC, PAUSES)', () => {
+		it('includes VALIDATION_FAIL, NON_DETERMINISTIC, and PAUSES', () => {
 			expect(EMBODY_SCENARIOS).toEqual(
 				expect.arrayContaining([
 					'VALIDATION_FAIL',
@@ -245,12 +245,12 @@ describe('embody', () => {
 	});
 
 	describe('VALIDATION_FAIL', () => {
-		it('returns apex status (all true)', () => {
+		it('returns validate-fail status (parsed=true, validated=false, created=false)', () => {
 			expect(embody('VALIDATION_FAIL').status).toEqual({
 				tokenized: true,
 				parsed: true,
-				validated: true,
-				created: true,
+				validated: false,
+				created: false,
 			});
 		});
 
@@ -276,12 +276,42 @@ describe('embody', () => {
 			});
 		});
 
-		it('returns errors: null (validation is metadata, not an error gate)', () => {
-			expect(embody('VALIDATION_FAIL').errors).toBe(null);
+		it('retains parse.ast (Program node) — validate gate ran on top of parsed AST', () => {
+			expect(embody('VALIDATION_FAIL').parse.ast?.type).toBe('Program');
 		});
 
-		it('streams.evaluate is exposed (apex status)', () => {
-			expect(embody('VALIDATION_FAIL').streams.evaluate).toBeDefined();
+		it('retains parse.comments: [] — parse output preserved on validate-fail leaf', () => {
+			expect(embody('VALIDATION_FAIL').parse.comments).toEqual([]);
+		});
+
+		it('static is present (validate gate ran on top of static analyses)', () => {
+			expect(embody('VALIDATION_FAIL').static).toBeDefined();
+		});
+
+		it('validation.isDeterministic and validation.doesPause are boolean-typed', () => {
+			const v = embody('VALIDATION_FAIL').validation!;
+			expect(typeof v.isDeterministic).toBe('boolean');
+			expect(typeof v.doesPause).toBe('boolean');
+		});
+
+		it('validation.formatted is true (canned scenario default)', () => {
+			expect(embody('VALIDATION_FAIL').validation!.formatted).toBe(true);
+		});
+
+		it('errors has shape-valid EmbodyError with phase=validate', () => {
+			expect(embody('VALIDATION_FAIL').errors).toMatchObject({
+				phase: 'validate',
+				kind: expect.any(String),
+				message: expect.any(String),
+			});
+		});
+
+		it('streams.evaluate is NOT exposed (validate-fail leaf)', () => {
+			expect(embody('VALIDATION_FAIL').streams.evaluate).toBeUndefined();
+		});
+
+		it('streams.create is NOT exposed (validate-fail leaf)', () => {
+			expect(embody('VALIDATION_FAIL').streams.create).toBeUndefined();
 		});
 
 		it('returns a frozen Snippet', () => {
@@ -524,10 +554,9 @@ describe('embody', () => {
 			}).toThrow();
 		});
 
-		it('apex modes: runInstance is frozen', async () => {
+		it('apex modes: runInstance is frozen (7 apex scenarios; VALIDATION_FAIL is validate-fail leaf, no evaluate stream)', async () => {
 			const apexModes = [
 				'OK',
-				'VALIDATION_FAIL',
 				'NON_DETERMINISTIC',
 				'PAUSES',
 				'EVAL_ERROR',
