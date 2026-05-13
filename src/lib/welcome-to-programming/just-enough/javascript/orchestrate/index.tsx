@@ -1,16 +1,24 @@
 /**
  * @file `<StudyLenses>` — the package's public API surface.
  *
- * **F2.4 scope**: `embody()` fires only on mode → lens transitions, never on
- * keystrokes. The `cachedEmbodiment` slot is the single embodiment store;
- * `useEmbodiment` is gone. Cache is RETAINED across `lens → editor` round
- * trips and reused on `editor → lens` when `cache.snippet === currentSnippet`
- * (cache-hit shortcut). F2.5 will add edit invalidation so a snippet change
- * in editor mode clears the cache.
+ * **F2.5 scope**: edit invalidation. The snippet setter passed to
+ * `EditorComponent` is wrapped so that any snippet edit eagerly clears the
+ * `cachedEmbodiment` slot, per the cache contract documented in DOCS.md
+ * § Effect topology (Embodiment-on-edit invalidation row). This makes the
+ * editor → lens transition after an edit always re-embody, even if the
+ * learner happens to undo their edit back to the cached snippet value.
+ *
+ * **F2.4 scope** (preserved): `embody()` fires only on mode → lens
+ * transitions, never on keystrokes. The `cachedEmbodiment` slot is the
+ * single embodiment store; `useEmbodiment` is gone. Cache is RETAINED
+ * across `lens → editor` round trips and reused on `editor → lens` when
+ * `cache.snippet === currentSnippet` (cache-hit shortcut, observable only
+ * for the lens → editor → lens with no intervening edit case).
  *
  * **F2.4 effect topology**:
  * - **Snippet slot** — seeded from `snippetProp` at mount (initial-value-only
- *   per F2.1). `setSnippet` is threaded into `EditorComponent`.
+ *   per F2.1). `handleSnippetChange` (wrapping `setSnippet`) is threaded into
+ *   `EditorComponent`; the wrapper also clears `cachedEmbodiment` (F2.5).
  * - **Mode slot** — `useState<OrchestratorState>` initialized via
  *   `deriveInitialState`; driven post-mount by `useEffect([lens, configs])`.
  * - **CachedEmbodiment slot** — `useState<CachedEmbodiment | null>`, projected
@@ -206,6 +214,17 @@ export default function StudyLenses({
 		setCachedEmbodiment(next.cache);
 	}, [lens, configs]);
 
+	// F2.5: edit invalidation. Any snippet edit eagerly clears the cache so a
+	// subsequent editor → lens transition always re-embodies, per the cache
+	// contract documented in DOCS.md § Effect topology (Embodiment-on-edit
+	// invalidation row). Empty deps are safe: React guarantees setter identity
+	// is stable across renders. The two setters fire from a synthetic onChange
+	// event, so React 18 auto-batches them into a single commit.
+	const handleSnippetChange = React.useCallback((next: string) => {
+		setSnippet(next);
+		setCachedEmbodiment(null);
+	}, []);
+
 	if (state.mode === 'lens') {
 		// Invariant (enforced by transition logic): mode='lens' ⇒ cache non-null
 		// AND cache.snippet === current snippet. A null cache here means a
@@ -229,7 +248,7 @@ export default function StudyLenses({
 
 	return (
 		<div data-orchestrator-root>
-			<EditorComponent snippet={snippet} onSnippetChange={setSnippet} />
+			<EditorComponent snippet={snippet} onSnippetChange={handleSnippetChange} />
 		</div>
 	);
 }

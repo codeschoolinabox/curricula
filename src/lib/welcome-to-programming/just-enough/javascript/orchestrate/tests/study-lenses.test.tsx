@@ -119,6 +119,60 @@ describe('<StudyLenses> — F1 smoke', () => {
 		});
 	});
 
+	// ─── F2.5: edit-eager cache invalidation ──────────────────────────────
+
+	describe('F2.5 — edit invalidates the cache eagerly', () => {
+		it('type-then-undo → toggle to lens re-fires embody (cache cleared eagerly on edit, not restored by undo)', () => {
+			// Decisive test for F2.5 vs F2.4-cache-hit-only (per cache contract in
+			// DOCS.md § Effect topology — "Embodiment-on-edit invalidation" row):
+			// Under F2.4 alone, the cache-hit check would see snippet="OK" matches
+			// cache.snippet="OK" → cache hit → count stays 1.
+			// Under F2.5, the first edit eagerly clears the cache; subsequent
+			// "undo" edits leave cache null; toggle to lens → cache miss → embody.
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				const { container, rerender } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(embodySpy).toHaveBeenCalledOnce();
+
+				rerender(<StudyLenses snippet="OK" />);
+				const host = container.querySelector<HTMLTextAreaElement>(
+					'[data-orchestrator-host]',
+				)!;
+				fireEvent.change(host, { target: { value: 'FAIL_AT_PARSE' } });
+				fireEvent.change(host, { target: { value: 'OK' } });
+
+				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+				expect(embodySpy).toHaveBeenCalledTimes(2);
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+
+		it('edit + toggle re-fires embody with the new snippet (covers cache-miss path)', () => {
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				const { container, rerender } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(embodySpy).toHaveBeenCalledOnce();
+
+				rerender(<StudyLenses snippet="OK" />);
+				const host = container.querySelector<HTMLTextAreaElement>(
+					'[data-orchestrator-host]',
+				)!;
+				fireEvent.change(host, { target: { value: 'FAIL_AT_PARSE' } });
+
+				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+				expect(embodySpy).toHaveBeenCalledTimes(2);
+				expect(embodySpy).toHaveBeenLastCalledWith('FAIL_AT_PARSE');
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+	});
+
 	describe('Many — non-success embody scenario', () => {
 		it('mounts without throwing for "FAIL_AT_PARSE" with debug-props lens', () => {
 			// F2.4: embody fires only on lens-mount, so we must mount with a lens
