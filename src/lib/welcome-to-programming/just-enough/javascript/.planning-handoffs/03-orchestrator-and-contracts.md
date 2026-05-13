@@ -491,6 +491,25 @@ branch on the sentinel string identity — always branch on the resulting
 `Snippet`'s `status` / `errors` fields so the orchestrator works unchanged when
 Phase B switches the discriminator out.
 
+**Status (2026-05-13): F3 satisfied by F2 implementation; no separate F3
+increment ships.** F2.4 (transition-only embody trigger, deletion of the
+unconditional `useEmbodiment` useMemo, atomic `cachedEmbodiment` slot with
+cache-hit semantics on round-trip) plus F2.5 (eager edit invalidation via
+`handleSnippetChange` wrapper) jointly realize F3's "build embodiment only
+when downstream needs it" requirement. Evaluation-phase re-embodiment inside a
+mounted lens is **lens-internal** via `Snippet.streams.evaluate.*` (no
+orchestrator round-trip needed; the cached embodiment from mount is always
+fresh inside a lens-mode session because snippet state is frozen there). The
+sentinel-blindness invariant — orchestrator branches only on `Snippet.status`
+/ `Snippet.errors`, never on snippet content — was audited at zero violations.
+See [`../orchestrate/DOCS.md` § F3 — lazy embodiment realized] and
+[`../orchestrate/README.md` § Conventions] for the load-bearing claims and
+their commit-level evidence (`9bd7377`..`da3b6c3`). Sandbox empirical check:
+F2 sandbox at `src/pages/f2-mode-machine.tsx` exercises the F3 UX path under
+Phase A sentinels (type-then-toggle surfaces parse errors in debug-props
+panels); real-code sandbox flow unblocks under Phase B per the Phase A note
+above.
+
 #### F4 — First trial lens against the new contract
 
 Implement one lens at `lenses/<name>/` against the `embodiment`-prop contract:

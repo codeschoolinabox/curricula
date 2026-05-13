@@ -1,6 +1,13 @@
 /**
  * @file `<StudyLenses>` — the package's public API surface.
  *
+ * **F3 status** — lazy embodiment on need is satisfied by F2.4 (transition-only
+ * trigger) + F2.5 (eager edit invalidation). Evaluation phases inside a
+ * mounted lens are **lens-internal**: lenses call `Snippet.streams.evaluate.*`
+ * methods directly on the embodiment they hold; no orchestrator round-trip.
+ * See [`./DOCS.md` § F3 — lazy embodiment realized] for the full satisfaction
+ * analysis + sentinel-blindness invariant.
+ *
  * **F2.5 scope**: edit invalidation. The snippet setter passed to
  * `EditorComponent` is wrapped so that any snippet edit eagerly clears the
  * `cachedEmbodiment` slot, per the cache contract documented in DOCS.md
@@ -78,6 +85,12 @@ function deriveInitialState(
 ): { state: OrchestratorState; cache: CachedEmbodiment | null } {
 	const registered = lens !== undefined ? LENS_REGISTRY[lens] : undefined;
 	if (registered !== undefined) {
+		// Cache-key check: full-string identity, NOT a semantic content branch.
+		// The orchestrator's sentinel-blindness invariant (DOCS § F3 — lazy
+		// embodiment realized) forbids any substring / prefix / regex / pattern
+		// test against snippet content. This is the only snippet-string compare
+		// in the orchestrator, and it asks "same snippet I already embodied?",
+		// not "what does this code do?".
 		const cache: CachedEmbodiment =
 			prevCache !== null && prevCache.snippet === snippet
 				? prevCache

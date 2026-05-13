@@ -279,8 +279,15 @@ propagates out of the state-update — the mode transition does not commit, the
 cache is not written, and the orchestrator's render path is in whatever
 state React was in before the user-triggered re-render that fired the
 transition. Today's surfacing path is the React error boundary at the
-consumer site; F3 narrows this further by surfacing errors via
-`Snippet.status.parsed = false` / `Snippet.errors` rather than throwing.
+consumer site. The throw is a **Phase A mock artifact** — under the locked
+`embody(code): Snippet` contract, embody must return a valid `Snippet` (with
+`status.parsed = false` and populated `Snippet.errors` for unparseable input,
+per the `Snippet` type at [`../embody/types.ts`](../embody/types.ts)). Phase B
+(real `embody/lib/*` composition, per
+[`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md)) brings embody into
+compliance with that contract. F3 (orchestrator-side lazy embodiment) is
+independent of how `embody()` reports errors — it only governs **when**
+embody fires; error-reporting compliance is Phase B's domain.
 
 Lens-internal UI state never carries across mode switches — the
 disposability principle (per [`../README.md` § Pedagogical first
@@ -324,8 +331,36 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
   `subscribe` prop on `<StudyLenses>` until a concrete LMS integration target
   exists. Internal events (e.g. `lens-switched` from picker → orchestrator) are
   in scope.
-- **Lazy embodiment**. Per F3: build embodiment only when needed (lens-open,
-  evaluation trigger), never on every keystroke.
+- **Lazy embodiment** (F3 — satisfied by F2.4 + F2.5). Embodiment is built only
+  when downstream needs it: on editor → lens transition (F2.4 transition-only
+  trigger) and on evaluation phases inside a mounted lens. **Evaluation phases**
+  (run / predict / step) are lens-internal — the lens invokes
+  `embodiment.streams.evaluate.{run, intercept, trace.{syntax, semantics}}`
+  directly on the embodiment it already holds (see
+  [`../embody/types.ts § Streams`](../embody/types.ts) for the surface). No
+  orchestrator round-trip; the orchestrator does not mediate evaluation.
+  Edits in editor mode eagerly invalidate the cache (F2.5) so the next
+  lens-open always re-embodies after an edit. Never on every keystroke. See
+  [`./DOCS.md` § F3 — lazy embodiment realized](./DOCS.md). F3 introduced
+  no new domain terms; the glossary is unchanged.
+- **Sentinel-blind orchestrator** (F3 invariant). The orchestrator's transition
+  handler + cache layer never inspects `Snippet.source.code` content
+  semantically. (Sibling `orchestrate/lib/*` modules may operate on derived
+  strings — error messages, identifier autocomplete, AST-derived voices — but
+  never on raw snippet content for dispatch.) The handler may compare snippet
+  strings as **cache keys** via **full-string identity only**
+  (`prevCache.snippet === snippet`, answering "is this the same snippet I
+  already embodied?") — that's cache-validity, not semantic dispatch.
+  Substring / prefix / regex / pattern tests against snippet content are
+  forbidden **even when used to gate cache behavior** (e.g.
+  `if (snippet.startsWith("//"))` as a cache-bypass optimization is also a
+  violation). Branches that need to know what the code does consume only the
+  resulting `Snippet`'s `status` / `errors` fields (today, the orchestrator
+  does no such branching — it forwards the embodiment to lenses without
+  inspection). This invariant protects the orchestrator from drift when
+  Phase B replaces the sentinel discriminator (per
+  [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md) § Constraints:
+  "No consumer-side sentinel string branching").
 - **Disposable practice**. Per F2 + F4: lens-internal state is per-mount;
   snippet change unmounts the active lens; nothing carries across the edit.
 - **Dependency rules** (per [`../DOCS.md` § Dependency rules](../DOCS.md)):

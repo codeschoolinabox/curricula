@@ -300,10 +300,13 @@ lens:
   synchronously when given a snippet string outside its sentinel set. The
   throw propagates out of the transition handler, neither the mode flip nor
   the cache write commits (per § Atomic transition mechanism), and the React
-  error boundary at the consumer site surfaces the throw. F3 narrows this by
-  replacing the throw with a `Snippet` carrying `status.parsed=false`; the
-  steady-state contract above (embody does not throw) is the F3-and-beyond
-  promise.
+  error boundary at the consumer site surfaces the throw. This is a **Phase A
+  mock artifact** — the steady-state `embody(code): Snippet` contract above
+  forbids throws for any input. **Phase B** (real `embody/lib/*` composition,
+  per [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md)) brings embody
+  into contract compliance. F3 (orchestrator-side lazy embodiment) is
+  independent of this; it governs only **when** embody fires, not how embody
+  reports errors.
 - **Evaluation error inside a lens** — surfaces only when the lens's evaluation
   triggers (run / predict button), even if detectable statically. Per lens's own
   error-surface contract.
@@ -552,6 +555,85 @@ Evaluation errors appear at run/predict time (not statically). Per the
 lifelong-learning autonomy principle, this avoids intruding on the learner's
 typing with real-time syntax-error spam.
 
+### F3 — lazy embodiment realized
+
+F3's locked deliverable was "build embodiment only when downstream needs it"
+— specifically on (a) lens-open from editor and (b) evaluation phases inside
+a mounted lens, with no re-embody on keystrokes / no debounced re-embody / no
+speculative pre-build. **F3 is satisfied as of F2.5; no separate F3 increment
+ships.**
+
+**How each F3 deliverable is satisfied today:**
+
+- **Lens-open trigger** → F2.4's `deriveInitialState` transition path. Embody
+  fires once on editor → lens transition; cache-hit short-circuits round trips.
+- **Evaluation phases inside a mounted lens** → **lens-internal, not
+  orchestrator-mediated.** The `Snippet` returned by `embody()` exposes
+  `streams.evaluate.{run, intercept, trace.{syntax, semantics}}` (see
+  [`../embody/types.ts § Streams`](../embody/types.ts)). The lens has the
+  embodiment as a prop and calls these methods directly when the learner
+  clicks run / predict / step. No orchestrator round-trip. The cached
+  embodiment from mount is always fresh inside a lens-mode session because
+  snippet state is frozen there (the editor is unmounted; F2.1's
+  initial-value-only contract prevents external snippet mutation).
+- **No re-embody on keystrokes** → F2.4 removed the unconditional
+  `useEmbodiment` useMemo.
+- **Eager edit invalidation** → F2.5's `handleSnippetChange` wrapper clears
+  `cachedEmbodiment` on every edit, so a post-edit lens-open always
+  re-embodies (even after a type-then-undo back to the cached snippet).
+
+```mermaid
+flowchart LR
+  Editor["editor mode"] -- "lens prop becomes registered" --> Embody["embody(snippet)"]
+  Embody --> Cache["cachedEmbodiment"]
+  Cache --> Lens["lens component<br/>(holds Snippet via embodiment prop)"]
+  Lens -. "learner clicks run/predict/step" .-> Eval["embodiment.streams.evaluate.*<br/>(lens-internal — no orchestrator round-trip)"]
+  Eval -. "result" .-> Lens
+```
+
+*Dotted edges in this diagram depict lens-internal evaluation flow that
+bypasses the orchestrator entirely — distinct from the dotted-edge idiom
+used elsewhere in this file for side-effect / invalidation arrows.*
+
+**Sentinel-blindness invariant.** The orchestrator's transition handler +
+cache layer never inspects `Snippet.source.code` content semantically.
+(Sibling `orchestrate/lib/*` modules may operate on derived strings — error
+messages, identifier autocomplete, AST-derived voices — but never on raw
+snippet content for dispatch.) The handler MAY compare snippet strings as
+**cache keys** via **full-string identity only** (`prevCache.snippet ===
+snippet`, answering "is this the same snippet I already embodied?") —
+that's cache-validity, not semantic dispatch. Substring, prefix, regex, or
+pattern tests against snippet content are forbidden **even when used to gate
+cache behavior** (e.g. `if (snippet.startsWith("//"))` as a cache-bypass
+optimization is also a violation). Branches that need to know what the code
+does consume only the resulting `Snippet`'s `status` / `errors` fields —
+today, the orchestrator does no such branching; it forwards the embodiment
+to lenses without inspection.
+
+This invariant protects the orchestrator from drift when Phase B (per
+[`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md) § Constraints, "No
+consumer-side sentinel string branching") replaces the sentinel discriminator
+with real tokenization. The orchestrator works unchanged across the Phase A
+→ Phase B switchover.
+
+**What F3 did NOT add:**
+
+- No new domain terms (glossary unchanged).
+- No new contract types (`LensProps`, `OrchestratorState`, `CachedEmbodiment`,
+  all event payloads — unchanged from F2's locked shapes).
+- No new effect category — F2's four-category § Effect topology (Embody
+  trigger + Lens-mount dispatch + Lens-switch dispatch + Embodiment-on-edit
+  invalidation) already encodes F3's trigger discipline.
+- No new tests — F2's 384-test suite already covers the load-bearing F3
+  behaviors (embody fires only on transitions; cache-hit on round-trip;
+  edit-eager invalidation; no embody on typing). Evaluation phases are
+  lens-internal and have no orchestrator surface to test.
+- No sandbox change — the F2 sandbox at `src/pages/f2-mode-machine.tsx`
+  already exercises the F3 UX path under Phase A sentinels (type a sentinel
+  → toggle to lens → parse-error sentinel surfaces in debug-props' panels).
+  The "type arbitrary code" sandbox flow unblocks fully under Phase B per
+  the F3 handoff's Phase A note.
+
 ## Why internal-only EventBus
 
 The pre-refactor design implicitly assumed an LMS would consume events from the
@@ -659,9 +741,11 @@ This peer does NOT own:
 
 ## Future direction
 
-- The async-embody affordance (loading state during embody-on-trigger) lands in
-  F3 Phase 0 if needed. Sketch only — pin during F3 implementation. Until then:
-  embody is sync.
+- The async-embody affordance (loading state during embody-on-trigger) is **not
+  in scope** at the orchestrator level — F3 shipped with sync embody and the
+  contract above forbids async embody. If a future evaluation engine genuinely
+  needs async embodiment construction, that's a contract change reopening
+  § Lifecycle modes — not a tweak to today's sync transition handler.
 - The picker + panel coexistence visual design (overlapping? side-by-side? modal
   panel?) lands during L5's Phase 0 sandbox checkpoint.
 - Outbound LMS event protocol — designed when a concrete integration target
