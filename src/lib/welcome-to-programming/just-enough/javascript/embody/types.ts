@@ -375,10 +375,21 @@ interface Violation {
 	readonly loc: SourceLocation;
 }
 
+/** Output of the validate gate.
+ *  `isJeJ` is the gate criterion: `isJeJ === violations.length === 0`.
+ *  `isDeterministic` and `doesPause` are informational metadata for
+ *  consumers, NOT gate criteria — a non-deterministic or pausing program
+ *  still passes validation if it's a valid JEJ subset.
+ *
+ *  Derivation invariants (implementations MUST honor; not type-enforceable):
+ *  - `isJeJ === (violations.length === 0)`
+ *  - `isDeterministic === !(static.nonDeterminism.random || .clock || .userInput || .locale)`
+ *  - `doesPause === (static.hasIo.user.total > 0)`
+ *  Implementations MUST NOT write a value that contradicts the source. */
 interface Validation {
 	readonly isJeJ: boolean;
-	readonly isDeterministic: boolean; // = !any(nonDeterminism)
-	readonly doesPause: boolean; // = hasIo.user.total > 0
+	readonly isDeterministic: boolean; // = !any(nonDeterminism); metadata, not gate
+	readonly doesPause: boolean; // = hasIo.user.total > 0; metadata, not gate
 	readonly formatted: boolean;
 	readonly violations: ReadonlyArray<Violation>;
 }
@@ -387,7 +398,7 @@ interface Validation {
 // 6. ERRORS
 // ═════════════════════════════════════════════════════════════════════════════
 
-type EmbodyPhase = 'parse:tokenize' | 'parse:ast' | 'create' | 'evaluate';
+type EmbodyPhase = 'parse:tokenize' | 'parse:ast' | 'validate' | 'create' | 'evaluate';
 
 /** First-fail-wins error from any pre-evaluation gate. null when all gates passed. */
 interface EmbodyError {
@@ -408,7 +419,8 @@ interface EmbodyError {
 interface Status {
 	readonly tokenized: boolean; // tokenize succeeded
 	readonly parsed: boolean; // AST built (requires tokenized)
-	readonly created: boolean; // script-scope creation passed (requires parsed)
+	readonly validated: boolean; // JEJ validate passed — isJeJ === true (requires parsed)
+	readonly created: boolean; // script-scope creation passed (requires validated)
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -773,11 +785,19 @@ interface Streams {
 // ═════════════════════════════════════════════════════════════════════════════
 // 12. SNIPPET — top-level type
 //
-// `embody(code)` returns a Snippet. Field availability follows `status`:
-//   !tokenized → only source, parse.tokens (partial), errors, validation, streams.realm, streams.parse.tokenize
-//   !parsed    → + parse.tokens, errors, validation, streams.parse.parse
-//   !created   → + parse.ast, parse.comments, static, streams.create
+// `embody(code)` returns a Snippet. Field availability follows `status`,
+// which is a hard-gated staircase: each gate's failure produces a structurally
+// distinct shape leaf with downstream surfaces absent.
+//   !tokenized → only source, parse.tokens (partial), errors, streams.realm, streams.parse.tokenize
+//   !parsed    → + streams.parse.parse
+//   !validated → + parse.ast, parse.comments, static, validation
+//   !created   → + streams.create
 //    created   → + streams.evaluate
+//
+// Validation is a hard gate: failure means no streams.create and no
+// streams.evaluate (programs that aren't valid JEJ don't run). The five
+// gate-determined shape leaves are tokenize-fail, parse-fail,
+// validate-fail, create-fail, and apex.
 //
 // Lenses guard by checking status booleans before reaching for optional fields.
 // ═════════════════════════════════════════════════════════════════════════════
@@ -793,8 +813,9 @@ interface Snippet {
 	/** Static analyses. Present when status.parsed === true. */
 	readonly static?: StaticAnalyses;
 
-	/** Validation summary. Always present once tokenize succeeds. */
-	readonly validation: Validation;
+	/** Validation summary. Present when status.validated has been computed
+	 *  (i.e., parse succeeded — at validate-fail or beyond on the staircase). */
+	readonly validation?: Validation;
 
 	/** First-fail-wins error from any pre-evaluation gate. null when all gates passed. */
 	readonly errors: EmbodyError | null;

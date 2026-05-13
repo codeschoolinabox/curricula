@@ -152,24 +152,31 @@ UI is what the learner interacts with — its internal state
   `orchestrate/lib/*` or `@-utils`, but it does not declare a
   `transforms` field on its `LensModule` and the plugin does not
   emit a `transforms` attribute.
-- **No consumer-side sentinel branching on `embody` mock outputs.**
-  During Phase A, `embody(code)` is a mock dispatched by sentinel
-  comments (e.g. `/* MOCK_OK */`, `/* MOCK_PARSE_FAIL */`). Lens
-  code MUST NOT inspect the input string for sentinels; branch only
-  on the **shape** of the returned `Snippet` (e.g.
-  `embodiment.parsed === false`, `embodiment.validation.isJeJ`).
-  The sentinels disappear in Phase B; consumer code that branched
-  on them would silently break. See
-  [`../embody/index.ts`](../embody/index.ts) JSDoc + the
-  `EMBODY_MOCK_SCENARIOS` export for the full scenario list.
-- **Validation field derivation is fixed.** The `Snippet.validation`
-  fields `isDeterministic` and `doesPause` are **derived** from the
-  raw analyses on construction:
+- **No consumer-side branching on `embodiment.source.code`.**
+  `embody(code)` recognizes 11 named scenario keywords (`"OK"`,
+  `"FAIL_AT_PARSE"`, …) and dispatches a canned `Snippet` shape for
+  each. Lens code MUST NOT use `embodiment.source.code` as a branching
+  key — branch on the **shape** of the returned `Snippet` (e.g.
+  `embodiment.status.parsed === false`, `embodiment.validation.isJeJ`).
+  Lenses MAY *render* `source.code` (a source-display lens is
+  legitimate); using it as a discriminator is what the rule forbids.
+  See [`../embody/README.md` § Named scenarios](../embody/README.md)
+  and the `EMBODY_SCENARIOS` export for the full keyword list.
+- **Validation gate vs. validation metadata.** The validate gate
+  criterion is `validation.isJeJ` (i.e., `violations.length === 0`).
+  Failure means no `streams.create` and no `streams.evaluate` —
+  programs that aren't valid JEJ don't run. The fields
+  `validation.isDeterministic` and `validation.doesPause` are
+  **informational metadata, not gate criteria**: a non-deterministic
+  or pausing program is still a valid JEJ subset and passes the gate.
+  These two fields are **derived** from raw analyses:
   `isDeterministic = !any(nonDeterminism)`,
-  `doesPause = hasIo.user.total > 0`. Lens authors treat these as
+  `doesPause = hasIo.user.total > 0`. Lens authors treat them as
   read-only summaries; the underlying source of truth lives on
-  `nonDeterminism` and `hasIo`. Pinned in
-  [`../embody/types.ts`](../embody/types.ts) JSDoc.
+  `nonDeterminism` and `hasIo`. `Snippet.validation` is **optional**
+  (absent on tokenize-fail and parse-fail leaves where the validate
+  gate didn't run). Pinned in [`../embody/types.ts`](../embody/types.ts)
+  JSDoc.
 
 ### Out of scope
 

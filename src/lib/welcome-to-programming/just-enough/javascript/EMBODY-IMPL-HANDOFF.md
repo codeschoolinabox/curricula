@@ -4,8 +4,10 @@
 `REFACTOR-HANDOFF.md` self-deleted in commit `4526dc3`
 (2026-05-06, "Phase A complete"). The three-peer
 embody/lenses/orchestrate architecture is the running shape;
-the mock embodiment factory at `embody/index.ts` is live with
-11 named scenarios; F1 of the orchestrator pyramid landed
+the `embody()` factory at `embody/index.ts` is live with 11 named
+scenarios on the scenario-dispatch branch (canned-stub Snippet shapes
+per scenario) and a throw on non-scenario input pending real
+composition; F1 of the orchestrator pyramid landed
 across commits `bd98648`–`dd5e55b` (2026-05-06) bringing the
 new four-prop `<StudyLenses>` component online and clearing the
 pre-refactor `orchestrate/orchestrator/` archival. The
@@ -13,30 +15,35 @@ sandbox harness for direct orchestrator mounting lives at
 `src/pages/study-lenses-smoke.tsx`.
 
 Phase B re-types `embody/lib/*` modules in place per the locked
-decisions, replacing slices of the mock factory body with real
-composition one module at a time.
+decisions, replacing slices of the canned-stub body with real
+composition one module at a time. The named scenarios at the top of
+`embody/index.ts` are **permanent end-state** (per
+[`embody/README.md` § Named scenarios](./embody/README.md)); what Phase B
+replaces is the **throw-on-non-scenario** fallback with real composition
+that produces a shape-valid `Snippet` for arbitrary JEJ input.
 
-**Audience:** the agent (Claude or otherwise) that will replace
-the Phase-A mock with real `embody/lib/*` composition, one
-module at a time.
+**Audience:** the agent (Claude or otherwise) that will wire real
+`embody/lib/*` composition into the non-scenario branch of
+`embody/index.ts`, one module at a time.
 
 **Lifecycle:** delete this file after Phase B is done, verified,
 and merged. The companion `REFACTOR-HANDOFF.md` self-deleted at
 end of Phase A; this file follows the same pattern at end of
-Phase B. Both files were migration scaffolding, not permanent
+Phase B. Both files are migration scaffolding, not permanent
 docs.
 
-**Architectural narrative (mock-first split).** The two-phase
-refactor split the substrate work into a Phase-A move (relocate
-modules without re-typing — fast, mechanical, deletes the old
-locations) and a Phase-B re-typing pass (each module gets its
-own DDD cycle in its new home, picking up pedagogical clarity
-that the verbatim moves didn't). The mock factory at
-`embody/index.ts` is the load-bearing simplification — it
-keeps `embody(code) → Snippet` callable through Phase B while
-modules flip from stub to real one at a time. The contract
-every step here must satisfy is
-[`embody/types.ts`](./embody/types.ts).
+**Architectural narrative.** The two-phase refactor split the substrate
+work into a Phase-A move (relocate modules without re-typing — fast,
+mechanical, deletes the old locations) and a Phase-B re-typing pass
+(each module gets its own DDD cycle in its new home, picking up
+pedagogical clarity that the verbatim moves didn't). The
+canned-scenario branch at `embody/index.ts` is the load-bearing
+simplification — it keeps `embody(code) → Snippet` callable for the 11
+named scenarios through Phase B while real-composition modules flip
+from stub to real one at a time. The scenario branch itself does NOT
+disappear at end of Phase B (it's a permanent integration-testing
+fixture set); only the non-scenario throw is replaced. The contract
+every step here must satisfy is [`embody/types.ts`](./embody/types.ts).
 
 ## Constraints to honor
 
@@ -72,35 +79,54 @@ The Phase A constraints carry forward into Phase B:
 
 Phase B adds the following:
 
-- **Mock is the contract.** Every Phase-B step replaces some part of
-  the mock body with real composition; the **return type is
-  unchanged** (the mock's `Snippet` shape remains the contract). Any
-  type change to `embody/types.ts` is a separate doc commit with full
-  AR-1 + AR-2 — not an inline body change.
+- **Contract is the contract.** Every Phase-B step wires real
+  composition into the non-scenario branch of `embody/index.ts`; the
+  **return type is unchanged** (the locked `Snippet` shape remains the
+  contract). Any type change to `embody/types.ts` is a separate doc
+  commit with full AR-1 + AR-2 — not an inline body change.
 - **One module per increment.** Each `embody/lib/<module>/` lands as
   its own atomic commit with its own DDD cycle (Phase 0 → Phase 1
   TDD → Phase 2 AR-5). No "let me also fix the next module while I'm
-  here." The Phase A mock keeps `embody(code)` callable while modules
-  flip from stub to real one at a time.
+  here." The scenario branch keeps `embody(code)` callable for the 11
+  named scenarios while real-composition modules flip from stub to
+  real one at a time.
 - **Pedagogical re-typing is explicit.** Token and AST types from the
   acorn output are NOT relocated verbatim; each is re-evaluated as it
   moves into `embody/lib/parse/` and `embody/lib/ast/`. Pedagogical
   context (binding kinds, scope-chain hooks, NM-component
   annotations) gets first-class type representation. This is why the
-  Phase A mock can't be "implementation in disguise" — the real
-  internals need shape rework that the mock isn't blocking.
-- **No consumer-side sentinel string branching** (Phase A handoff
-  rule that survives into Phase B). Orchestrator and lens code MUST
-  NOT branch on the sentinel string identity (e.g. `if (snippet.
-  source.code === 'EVAL_TIMEOUT')`). Always branch on the resulting
-  `Snippet`'s `status` / `endReport` / `validation` fields. The
-  Phase-A mock's named scenarios (`OK`, `FAIL_AT_*`, `EVAL_*`, etc.)
-  exist only as inputs to `embody()` during Phase A dev; they
-  vanish in Phase B when real tokenization replaces the
-  discriminator. Any consumer that branches on a sentinel literal
-  silently breaks at the Phase B switchover. AR-4 / AR-5 audits
-  grep consumer code for sentinel literals and fail any non-test
+  scenario-branch canned stubs can't be "implementation in disguise"
+  — the real internals need shape rework that the stubs aren't
+  blocking.
+- **No consumer-side branching on `snippet.source.code`** (handoff rule
+  that aligns with the embody/orchestrate/lenses end-state docs).
+  Orchestrator and lens code MUST NOT use `source.code` content as a
+  branching key (e.g. `if (snippet.source.code === 'EVAL_TIMEOUT')`).
+  Always branch on the resulting `Snippet`'s `status` / `endReport` /
+  `validation` shape. Scenarios are producer-side inputs to `embody()`;
+  the Snippet shape is the consumer-side surface. Rendering
+  `source.code` verbatim is allowed; using it as a discriminator is
+  not. AR-4 / AR-5 audits grep consumer code for `source.code ===` /
+  substring tests against scenario keywords and fail any non-test
   occurrence.
+- **Hard-gated pipeline.** The construction pipeline is
+  `tokenize → parse → validate → create`. Each gate failure produces a
+  structurally distinct leaf (5 total: tokenize-fail, parse-fail,
+  validate-fail, create-fail, apex). Downstream surfaces (event
+  streams) are absent on leaves where the chain didn't complete:
+  validate-fail and earlier have no `streams.create` and no
+  `streams.evaluate`; create-fail has no `streams.evaluate`. Real-
+  composition modules wiring into the non-scenario branch MUST honor
+  this — no event streams for programs that won't run. The validate
+  gate criterion is `validation.isJeJ` (i.e., `violations.length ===
+  0`); `validation.isDeterministic` and `validation.doesPause` are
+  consumer-side metadata, NOT gate criteria.
+- **Runtime errors not embodied.** `streams.evaluate.*` outcomes
+  (`'errored'`, `'timed-out'`, `'limit-exceeded'`, `'cancelled'`)
+  live on `RunInstance.endReport`, not on the static Snippet. The
+  apex leaf is shape-identical across `OK` and `EVAL_*` scenarios;
+  the EVAL_* overlay is interpreted by `streams.evaluate.*` at call
+  time.
 
 ## Ordered steps
 
@@ -161,8 +187,9 @@ implementation against the re-typed surface. Each module is its own
 atomic increment with its own DDD/AR cycle.
 
 **Verify (per module):** TypeScript compiles; existing tests pass;
-the mock factory body now wires the module's real output for that
-module's slice of `Snippet`, while other slices remain mock-stub.
+the non-scenario branch in `embody/index.ts` now wires the module's
+real output for that module's slice of `Snippet`, while other slices
+remain canned-stub.
 
 ### Step B3 — Strip validation/freezing from `embody/lib/*`
 
@@ -171,11 +198,12 @@ wrappers and `Object.freeze` / `deepFreezeInPlace` calls at the
 module boundary. Keep internal
 correctness checks; only strip boundary defenses. The factory becomes
 the single freezing point — including for the not-yet-real-module
-slices (the mock kept freezing them, the real impl now does).
+slices on the non-scenario branch (canned stubs were freezing them
+before; real impl now does).
 
 **Verify:** `embody/lib/*` outputs are plain (mutable, unvalidated)
 data; the test suite still passes; `embody(code)` still returns a
-deep-frozen Snippet (factory-level freeze still works).
+deep-frozen Snippet on both branches (factory-level freeze still works).
 
 ### Step B4 — Validate new `embody/lib/parse/` against `parse-old/`
 
@@ -186,18 +214,22 @@ automated diff test), delete `embody/lib/parse-old/`.
 **Verify:** parity test passes; `parse-old/` removed; no remaining
 imports.
 
-### Step B5 — Replace mock factory body with real composition
+### Step B5 — Replace non-scenario canned stubs with real composition
 
-Once B1-B4 land enough modules that the mock factory is composing
-nothing of its own (every slice of the returned `Snippet` is sourced
-from a real `embody/lib/*` module): the factory IS the real thing.
+Once B1-B4 land enough modules that the non-scenario branch is
+composing nothing of its own (every slice of the non-scenario-branch
+`Snippet` is sourced from a real `embody/lib/*` module): the
+real-composition path is fully wired. The scenario branch is
+unaffected and stays as the canonical fixture set.
 This step is mostly verification:
 
-1. Confirm no mock fixtures or canned values remain in
-   `embody/index.ts`.
-2. Confirm `status.{tokenized, parsed, created}` flips correctly per
-   the real pipeline (tokenized fails → `parsed` and `created` both
-   `false`, etc.).
+1. Confirm no canned values remain in the non-scenario branch of
+   `embody/index.ts`. (The scenario branch keeps its canned shapes
+   permanently — that's by design, not residue.)
+2. Confirm `status.{tokenized, parsed, validated, created}` flips
+   correctly per the real pipeline (tokenized fails → `parsed`,
+   `validated`, and `created` all `false`; parsed fails → `validated`
+   and `created` false; etc.) on the non-scenario branch.
 3. Confirm the deep-freeze still passes on non-trivial fixtures.
 
 ### Step B6 — Delete originals at `javascript/lib/`
@@ -235,13 +267,15 @@ The static-side stream generators (`streams.realm()`,
 `streams.parse.tokenize()`, `streams.parse.parse()`,
 `streams.create()`) yield event-wrapped views over `embody/lib/*`
 outputs. Their return-type contracts are typed in `embody/types.ts`
-but the implementation lives only in the Phase A mock until this
-step lands the real ones.
+but the implementation lives only in the canned-stub generator
+surfaces (scenario branch) until this step lands the real ones for the
+non-scenario branch.
 
 For each generator: lock its return-type contract (DDD + AR-1),
 implement against `embody/lib/*` outputs, integrate into the factory.
-The mock's canned generator returns are replaced one generator at a
-time.
+The non-scenario canned generator returns are replaced one generator at
+a time. (Scenario-branch canned shapes stay; they're the permanent
+fixture set.)
 
 ### Step B9 — Final dependency-rule audit (Phase B side)
 
@@ -268,8 +302,10 @@ permanent record of how we got here.
 
 - [`embody/types.ts`](./embody/types.ts) — the `Snippet` contract
   every Phase-B step must satisfy on output.
-- [`embody/index.ts`](./embody/index.ts) — the Phase-A mock factory
-  whose body Phase B replaces module by module.
+- [`embody/index.ts`](./embody/index.ts) — the `embody()` factory.
+  Phase B wires real composition into the non-scenario branch module
+  by module; the scenario branch (named scenarios at the top of the
+  file) is permanent end-state.
 - [`DOCS.md`](./DOCS.md) § Locked decisions — the permanent record
   of architectural decisions the two-phase refactor implemented.
   REFACTOR-HANDOFF.md (Phase A's companion to this file) was

@@ -144,16 +144,16 @@ The full type declarations live in [`./types.ts`](./types.ts).
 
 ### Anti-patterns (durable rules)
 
-- **No consumer-side sentinel branching.** During the Phase A embody mock,
-  `embody(code)` accepts named-scenario sentinels (e.g. `"OK"`,
-  `"FAIL_AT_PARSE"`). Orchestrator code MUST NOT branch on
-  `snippet.source.code === "OK"` or any sentinel literal. Always branch on the
-  resulting `Snippet`'s `status.{tokenized,parsed,created}`, `errors`,
-  `validation`, and `endReport.outcome` fields. Sentinels are inputs to
-  `embody()` only; in Phase B they vanish (real tokenization replaces the
-  discriminator) and any consumer code that branched on them silently breaks.
-  See [`../embody/index.ts`](../embody/index.ts) JSDoc and
-  [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md).
+- **No consumer-side branching on `snippet.source.code`.** `embody(code)`
+  recognizes 11 named scenario keywords (`"OK"`, `"FAIL_AT_PARSE"`, …) and
+  dispatches a canned `Snippet` shape for each; these scenarios are a
+  permanent integration-testing fixture set. Orchestrator code MUST NOT use
+  `snippet.source.code` as a branching key — branch on the resulting
+  `Snippet`'s `status.{tokenized,parsed,validated,created}`, `errors`, `validation`,
+  and `endReport.outcome` shape instead. Rendering `source.code` verbatim
+  (e.g. a source-display lens) is fine; using it as a discriminator is not.
+  See [`../embody/README.md` § Named scenarios](../embody/README.md) and
+  [`../embody/index.ts`](../embody/index.ts) JSDoc.
 - **Single-writer state.** Only `orchestrate/editor/` mutates snippet source.
   Lenses are read-only views; they never mutate `embodiment` or call back into
   the editor.
@@ -272,22 +272,23 @@ This makes a lens → editor → lens round-trip with no intervening edit a
 zero-`embody`-call operation, while a round-trip across an edit forces a
 fresh build.
 
-**Error policy:** `embody()` is sync and may throw on unknown sentinels (per
-[`../embody/index.ts`](../embody/index.ts) JSDoc — the Phase A mock's
-contract). If `embody()` throws during an editor → lens transition, the throw
-propagates out of the state-update — the mode transition does not commit, the
-cache is not written, and the orchestrator's render path is in whatever
-state React was in before the user-triggered re-render that fired the
-transition. Today's surfacing path is the React error boundary at the
-consumer site. The throw is a **Phase A mock artifact** — under the locked
-`embody(code): Snippet` contract, embody must return a valid `Snippet` (with
-`status.parsed = false` and populated `Snippet.errors` for unparseable input,
-per the `Snippet` type at [`../embody/types.ts`](../embody/types.ts)). Phase B
-(real `embody/lib/*` composition, per
-[`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md)) brings embody into
-compliance with that contract. F3 (orchestrator-side lazy embodiment) is
-independent of how `embody()` reports errors — it only governs **when**
-embody fires; error-reporting compliance is Phase B's domain.
+**Error policy:** `embody()` is sync and currently throws on input that
+isn't a recognized scenario keyword (per
+[`../embody/index.ts`](../embody/index.ts) JSDoc). If `embody()` throws
+during an editor → lens transition, the throw propagates out of the
+state-update — the mode transition does not commit, the cache is not
+written, and the orchestrator's render path is in whatever state React
+was in before the user-triggered re-render that fired the transition.
+Today's surfacing path is the React error boundary at the consumer site.
+The throw is transient — under the locked `embody(code): Snippet`
+contract, embody must return a valid `Snippet` (with `status.parsed = false`
+and populated `Snippet.errors` for unparseable input, per the `Snippet`
+type at [`../embody/types.ts`](../embody/types.ts)). Real composition
+landing slice-by-slice per
+[`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md) brings the
+non-scenario path into compliance. F3 (orchestrator-side lazy embodiment)
+is independent of how `embody()` reports errors — it only governs **when**
+embody fires.
 
 Lens-internal UI state never carries across mode switches — the
 disposability principle (per [`../README.md` § Pedagogical first
@@ -343,7 +344,7 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
   lens-open always re-embodies after an edit. Never on every keystroke. See
   [`./DOCS.md` § F3 — lazy embodiment realized](./DOCS.md). F3 introduced
   no new domain terms; the glossary is unchanged.
-- **Sentinel-blind orchestrator** (F3 invariant). The orchestrator's transition
+- **Snippet-content-blind orchestrator** (F3 invariant). The orchestrator's transition
   handler + cache layer never inspects `Snippet.source.code` content
   semantically. (Sibling `orchestrate/lib/*` modules may operate on derived
   strings — error messages, identifier autocomplete, AST-derived voices — but
@@ -357,10 +358,10 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
   violation). Branches that need to know what the code does consume only the
   resulting `Snippet`'s `status` / `errors` fields (today, the orchestrator
   does no such branching — it forwards the embodiment to lenses without
-  inspection). This invariant protects the orchestrator from drift when
-  Phase B replaces the sentinel discriminator (per
-  [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md) § Constraints:
-  "No consumer-side sentinel string branching").
+  inspection). This invariant aligns with embody's anti-pattern (no
+  consumer-side branching on `snippet.source.code`) and persists as the
+  non-scenario real-composition path grows per
+  [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md).
 - **Disposable practice**. Per F2 + F4: lens-internal state is per-mount;
   snippet change unmounts the active lens; nothing carries across the edit.
 - **Dependency rules** (per [`../DOCS.md` § Dependency rules](../DOCS.md)):

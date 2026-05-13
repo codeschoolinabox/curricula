@@ -1,23 +1,23 @@
 import { describe, it, expect } from 'vitest';
 
-import embody, { EMBODY_MOCK_SCENARIOS } from '../index.js';
+import embody, { EMBODY_SCENARIOS } from '../index.js';
 
 describe('embody', () => {
-	describe('EMBODY_MOCK_SCENARIOS export', () => {
+	describe('EMBODY_SCENARIOS export', () => {
 		it('is a frozen array', () => {
-			expect(Object.isFrozen(EMBODY_MOCK_SCENARIOS)).toBe(true);
+			expect(Object.isFrozen(EMBODY_SCENARIOS)).toBe(true);
 		});
 
 		it('lists exactly 11 scenarios', () => {
-			expect(EMBODY_MOCK_SCENARIOS.length).toBe(11);
+			expect(EMBODY_SCENARIOS.length).toBe(11);
 		});
 
 		it('includes OK', () => {
-			expect(EMBODY_MOCK_SCENARIOS).toContain('OK');
+			expect(EMBODY_SCENARIOS).toContain('OK');
 		});
 
 		it('includes the three FAIL_AT_* stages', () => {
-			expect(EMBODY_MOCK_SCENARIOS).toEqual(
+			expect(EMBODY_SCENARIOS).toEqual(
 				expect.arrayContaining([
 					'FAIL_AT_TOKENIZE',
 					'FAIL_AT_PARSE',
@@ -27,7 +27,7 @@ describe('embody', () => {
 		});
 
 		it('includes the four EVAL_* outcomes', () => {
-			expect(EMBODY_MOCK_SCENARIOS).toEqual(
+			expect(EMBODY_SCENARIOS).toEqual(
 				expect.arrayContaining([
 					'EVAL_ERROR',
 					'EVAL_TIMEOUT',
@@ -38,7 +38,7 @@ describe('embody', () => {
 		});
 
 		it('includes the apex overlays (VALIDATION_FAIL, NON_DETERMINISTIC, PAUSES)', () => {
-			expect(EMBODY_MOCK_SCENARIOS).toEqual(
+			expect(EMBODY_SCENARIOS).toEqual(
 				expect.arrayContaining([
 					'VALIDATION_FAIL',
 					'NON_DETERMINISTIC',
@@ -51,7 +51,7 @@ describe('embody', () => {
 	describe('OK', () => {
 		it('returns status all true', () => {
 			const s = embody('OK');
-			expect(s.status).toEqual({ tokenized: true, parsed: true, created: true });
+			expect(s.status).toEqual({ tokenized: true, parsed: true, validated: true, created: true });
 		});
 
 		it('returns errors: null', () => {
@@ -84,19 +84,19 @@ describe('embody', () => {
 		});
 
 		it('returns validation.isJeJ: true', () => {
-			expect(embody('OK').validation.isJeJ).toBe(true);
+			expect(embody('OK').validation!.isJeJ).toBe(true);
 		});
 
 		it('returns validation.isDeterministic: true (no nonDeterminism)', () => {
-			expect(embody('OK').validation.isDeterministic).toBe(true);
+			expect(embody('OK').validation!.isDeterministic).toBe(true);
 		});
 
 		it('returns validation.doesPause: false (no IO)', () => {
-			expect(embody('OK').validation.doesPause).toBe(false);
+			expect(embody('OK').validation!.doesPause).toBe(false);
 		});
 
 		it('returns validation.violations: []', () => {
-			expect(embody('OK').validation.violations).toEqual([]);
+			expect(embody('OK').validation!.violations).toEqual([]);
 		});
 
 		it('exposes streams.evaluate', () => {
@@ -134,6 +134,7 @@ describe('embody', () => {
 			expect(embody('FAIL_AT_TOKENIZE').status).toEqual({
 				tokenized: false,
 				parsed: false,
+				validated: false,
 				created: false,
 			});
 		});
@@ -142,8 +143,8 @@ describe('embody', () => {
 			expect(embody('FAIL_AT_TOKENIZE').errors!.phase).toBe('parse:tokenize');
 		});
 
-		it('returns errors.message identifying the mock', () => {
-			expect(embody('FAIL_AT_TOKENIZE').errors!.message).toMatch(/mock/i);
+		it('returns errors.message identifying the canned scenario', () => {
+			expect(embody('FAIL_AT_TOKENIZE').errors!.message).toMatch(/canned scenario/i);
 		});
 
 		it('returns parse.tokens: []', () => {
@@ -174,10 +175,11 @@ describe('embody', () => {
 	});
 
 	describe('FAIL_AT_PARSE', () => {
-		it('returns tokenized: true, parsed: false, created: false', () => {
+		it('returns tokenized: true; rest false', () => {
 			expect(embody('FAIL_AT_PARSE').status).toEqual({
 				tokenized: true,
 				parsed: false,
+				validated: false,
 				created: false,
 			});
 		});
@@ -208,10 +210,11 @@ describe('embody', () => {
 	});
 
 	describe('FAIL_AT_CREATE', () => {
-		it('returns tokenized: true, parsed: true, created: false', () => {
+		it('returns tokenized: true, parsed: true, validated: true, created: false', () => {
 			expect(embody('FAIL_AT_CREATE').status).toEqual({
 				tokenized: true,
 				parsed: true,
+				validated: true,
 				created: false,
 			});
 		});
@@ -246,22 +249,23 @@ describe('embody', () => {
 			expect(embody('VALIDATION_FAIL').status).toEqual({
 				tokenized: true,
 				parsed: true,
+				validated: true,
 				created: true,
 			});
 		});
 
 		it('returns validation.isJeJ: false', () => {
-			expect(embody('VALIDATION_FAIL').validation.isJeJ).toBe(false);
+			expect(embody('VALIDATION_FAIL').validation!.isJeJ).toBe(false);
 		});
 
 		it('returns at least one violation', () => {
 			expect(
-				embody('VALIDATION_FAIL').validation.violations.length,
+				embody('VALIDATION_FAIL').validation!.violations.length,
 			).toBeGreaterThan(0);
 		});
 
 		it('first violation has shape-valid Violation fields', () => {
-			expect(embody('VALIDATION_FAIL').validation.violations[0]).toMatchObject({
+			expect(embody('VALIDATION_FAIL').validation!.violations[0]).toMatchObject({
 				kind: expect.any(String),
 				message: expect.any(String),
 				nodePath: expect.any(String),
@@ -297,11 +301,11 @@ describe('embody', () => {
 		});
 
 		it('derives validation.isDeterministic: false', () => {
-			expect(embody('NON_DETERMINISTIC').validation.isDeterministic).toBe(false);
+			expect(embody('NON_DETERMINISTIC').validation!.isDeterministic).toBe(false);
 		});
 
 		it('keeps validation.isJeJ: true', () => {
-			expect(embody('NON_DETERMINISTIC').validation.isJeJ).toBe(true);
+			expect(embody('NON_DETERMINISTIC').validation!.isJeJ).toBe(true);
 		});
 
 		it('returns a frozen Snippet', () => {
@@ -319,11 +323,11 @@ describe('embody', () => {
 		});
 
 		it('derives validation.doesPause: true', () => {
-			expect(embody('PAUSES').validation.doesPause).toBe(true);
+			expect(embody('PAUSES').validation!.doesPause).toBe(true);
 		});
 
 		it('keeps validation.isJeJ: true', () => {
-			expect(embody('PAUSES').validation.isJeJ).toBe(true);
+			expect(embody('PAUSES').validation!.isJeJ).toBe(true);
 		});
 
 		it('returns a frozen Snippet', () => {
@@ -435,7 +439,7 @@ describe('embody', () => {
 		});
 	});
 
-	describe('unknown sentinel handling', () => {
+	describe('unknown scenario handling', () => {
 		it('throws on unknown string input', () => {
 			expect(() => embody('FOO')).toThrow();
 		});
@@ -448,11 +452,11 @@ describe('embody', () => {
 			expect(() => embody('   ')).toThrow();
 		});
 
-		it('throws on a known sentinel with trailing newline', () => {
+		it('throws on a known scenario with trailing newline', () => {
 			expect(() => embody('OK\n')).toThrow();
 		});
 
-		it('throws on a sentinel as substring', () => {
+		it('throws on a scenario as substring', () => {
 			expect(() => embody('// OK in a comment')).toThrow();
 		});
 
@@ -495,7 +499,7 @@ describe('embody', () => {
 			}
 		}
 
-		for (const scenario of EMBODY_MOCK_SCENARIOS) {
+		for (const scenario of EMBODY_SCENARIOS) {
 			it(`${scenario}: Snippet is recursively frozen`, () => {
 				assertDeepFrozen(embody(scenario), scenario, new Set());
 			});
@@ -507,6 +511,7 @@ describe('embody', () => {
 				(s as { status: unknown }).status = {
 					tokenized: false,
 					parsed: false,
+					validated: false,
 					created: false,
 				};
 			}).toThrow();

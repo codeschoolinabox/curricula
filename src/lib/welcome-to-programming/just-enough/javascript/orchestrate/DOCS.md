@@ -295,18 +295,20 @@ lens:
   `errors` field, and `validation.{formatted, isJeJ, violations}` flags carry
   the diagnostic. The lens receives that embodiment and displays per its own
   error-surface contract. NOT surfaced while typing.
-- **Phase A note — `embody()` throws on unknown sentinels.** Today's embody
-  mock (per [`../embody/index.ts`](../embody/index.ts) JSDoc) throws
-  synchronously when given a snippet string outside its sentinel set. The
-  throw propagates out of the transition handler, neither the mode flip nor
-  the cache write commits (per § Atomic transition mechanism), and the React
-  error boundary at the consumer site surfaces the throw. This is a **Phase A
-  mock artifact** — the steady-state `embody(code): Snippet` contract above
-  forbids throws for any input. **Phase B** (real `embody/lib/*` composition,
-  per [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md)) brings embody
-  into contract compliance. F3 (orchestrator-side lazy embodiment) is
-  independent of this; it governs only **when** embody fires, not how embody
-  reports errors.
+- **Transient: `embody()` throws on unrecognized input.** Today's embody
+  (per [`../embody/index.ts`](../embody/index.ts) JSDoc) recognizes 11 named
+  scenario keywords and dispatches a canned `Snippet` shape for each; any
+  other input throws synchronously while the real-composition path is
+  incomplete. The throw propagates out of the transition handler, neither
+  the mode flip nor the cache write commits (per § Atomic transition
+  mechanism), and the React error boundary at the consumer site surfaces
+  the throw. The steady-state `embody(code): Snippet` contract above
+  forbids throws for any input; real composition lands slice-by-slice per
+  [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md) and brings embody
+  into contract compliance for non-scenario input. Scenario dispatch
+  itself is permanent (not scaffolding). F3 (orchestrator-side lazy
+  embodiment) is independent of this; it governs only **when** embody
+  fires, not how embody reports errors.
 - **Evaluation error inside a lens** — surfaces only when the lens's evaluation
   triggers (run / predict button), even if detectable statically. Per lens's own
   error-surface contract.
@@ -410,17 +412,19 @@ that target appears, the externalized protocol can be a curated subset of these.
   internal. See § Per-lens config resolution chain (above) for how
   `configs.lenses[lens]` flows per lens. The pre-3-prop `config?` prop is
   absorbed into `configs.lenses[lens]` at plugin emission time.
-- **No consumer-side sentinel branching.** During the Phase A embody mock,
-  `embody(code)` accepts named-scenario sentinels (e.g. `"OK"`,
-  `"FAIL_AT_PARSE"`, `"EVAL_TIMEOUT"`). Orchestrator code MUST NOT branch on
-  `snippet.source.code === "OK"` or any sentinel literal. Always branch on the
-  resulting `Snippet`'s `status.{tokenized, parsed, created}`, `errors`,
+- **No consumer-side branching on `snippet.source.code`.** `embody(code)`
+  recognizes 11 named scenario keywords (`"OK"`, `"FAIL_AT_PARSE"`,
+  `"EVAL_TIMEOUT"`, …) and dispatches a canned `Snippet` shape for each;
+  these scenarios are a permanent integration-testing fixture set (not
+  scaffolding). Orchestrator code MUST NOT use `snippet.source.code` as a
+  branching discriminator (`source.code === "OK"`, substring tests,
+  regex). Always branch on the resulting `Snippet`'s
+  `status.{tokenized, parsed, validated, created}`, `errors`,
   `validation.{isJeJ, isDeterministic, doesPause}`, and `endReport.outcome`
-  (from a resolved `streams.evaluate.run()`). Sentinels are inputs to `embody()`
-  only; in Phase B they vanish (real tokenization replaces the discriminator)
-  and any consumer code that branched on them silently breaks. See
-  [`../embody/index.ts`](../embody/index.ts) JSDoc and
-  [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md).
+  (from a resolved `streams.evaluate.run()`). Rendering `source.code`
+  verbatim (e.g. a source-display lens) is fine; using it as a key is not.
+  See [`../embody/README.md` § Named scenarios](../embody/README.md) and
+  [`../embody/index.ts`](../embody/index.ts) JSDoc.
 - **Single-writer state.** Only [`./editor/`](./editor/) mutates snippet source.
   The orchestrator threads the editor's `onSnippetChange` callback into its
   state-update; lenses receive `embodiment` via props and have no mutation
@@ -595,26 +599,30 @@ flowchart LR
 bypasses the orchestrator entirely — distinct from the dotted-edge idiom
 used elsewhere in this file for side-effect / invalidation arrows.*
 
-**Sentinel-blindness invariant.** The orchestrator's transition handler +
-cache layer never inspects `Snippet.source.code` content semantically.
-(Sibling `orchestrate/lib/*` modules may operate on derived strings — error
-messages, identifier autocomplete, AST-derived voices — but never on raw
-snippet content for dispatch.) The handler MAY compare snippet strings as
-**cache keys** via **full-string identity only** (`prevCache.snippet ===
-snippet`, answering "is this the same snippet I already embodied?") —
-that's cache-validity, not semantic dispatch. Substring, prefix, regex, or
-pattern tests against snippet content are forbidden **even when used to gate
-cache behavior** (e.g. `if (snippet.startsWith("//"))` as a cache-bypass
-optimization is also a violation). Branches that need to know what the code
-does consume only the resulting `Snippet`'s `status` / `errors` fields —
-today, the orchestrator does no such branching; it forwards the embodiment
-to lenses without inspection.
+**Snippet-content-blindness invariant.** The orchestrator's transition
+handler + cache layer never inspects `Snippet.source.code` content as a
+branching discriminator. (Sibling `orchestrate/lib/*` modules may operate
+on derived strings — error messages, identifier autocomplete, AST-derived
+voices — but never on raw snippet content for dispatch.) The handler MAY
+compare snippet strings as **cache keys** via **full-string identity only**
+(`prevCache.snippet === snippet`, answering "is this the same snippet I
+already embodied?") — that's cache-validity, not semantic dispatch.
+Substring, prefix, regex, or pattern tests against snippet content are
+forbidden **even when used to gate cache behavior** (e.g.
+`if (snippet.startsWith("//"))` as a cache-bypass optimization is also a
+violation). Branches that need to know what the code does consume only
+the resulting `Snippet`'s `status` / `errors` fields — today, the
+orchestrator does no such branching; it forwards the embodiment to lenses
+without inspection.
 
-This invariant protects the orchestrator from drift when Phase B (per
-[`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md) § Constraints, "No
-consumer-side sentinel string branching") replaces the sentinel discriminator
-with real tokenization. The orchestrator works unchanged across the Phase A
-→ Phase B switchover.
+This invariant aligns with [`../embody/README.md` § Named scenarios](../embody/README.md)
+anti-pattern note ("no consumer-side branching on `snippet.source.code`")
+and persists as embody's body grows real-composition slices on the
+non-scenario path (per
+[`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md) Step B1+).
+Scenario dispatch is a permanent producer-side affordance, not transitional
+scaffolding; the orchestrator stays blind to which path produced a given
+Snippet.
 
 **What F3 did NOT add:**
 
@@ -629,10 +637,11 @@ with real tokenization. The orchestrator works unchanged across the Phase A
   edit-eager invalidation; no embody on typing). Evaluation phases are
   lens-internal and have no orchestrator surface to test.
 - No sandbox change — the F2 sandbox at `src/pages/f2-mode-machine.tsx`
-  already exercises the F3 UX path under Phase A sentinels (type a sentinel
-  → toggle to lens → parse-error sentinel surfaces in debug-props' panels).
-  The "type arbitrary code" sandbox flow unblocks fully under Phase B per
-  the F3 handoff's Phase A note.
+  already exercises the F3 UX path under scenario dispatch (type a
+  scenario keyword → toggle to lens → parse-error scenario surfaces in
+  debug-props' panels). The "type arbitrary code" sandbox flow unblocks
+  fully once real composition for non-scenario input lands per
+  [`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md) Step B1+.
 
 ## Why internal-only EventBus
 

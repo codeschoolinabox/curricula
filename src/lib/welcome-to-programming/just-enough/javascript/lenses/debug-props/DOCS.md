@@ -46,14 +46,16 @@ parentheses; sandbox-harness selectors use the key directly.
    string the orchestrator embodied). Verifies `snippet` round-tripped through
    the plugin's emission and the orchestrator's `embody()` call.
 2. **Embodiment status panel** (`status`) —
-   `embodiment.status.{tokenized, parsed, created}` flags + `embodiment.errors`
-   count. Verifies the embodiment pipeline ran (and surfaces sentinel-mock
-   outcomes during Phase A embody, before Phase B real tokenization lands).
+   `embodiment.status.{tokenized, parsed, validated, created}` flags + `embodiment.errors`
+   count. Verifies the embodiment pipeline ran (and surfaces canned scenario
+   outcomes when a scenario keyword is in play; real composition for
+   non-scenario input lands per
+   [`../../EMBODY-IMPL-HANDOFF.md`](../../EMBODY-IMPL-HANDOFF.md)).
 3. **Validation panel** (`validation`) —
    `embodiment.validation.{formatted, isJeJ, isDeterministic, doesPause}` +
    `validation.violations` count. Verifies the embody-derived metadata flowed.
 4. **Config panel** (`config`) — `Object.entries(config)` rendered as a
-   key/value list, OR an `(empty)` sentinel when the config is `undefined` OR an
+   key/value list, OR an `(empty)` placeholder when the config is `undefined` OR an
    explicit empty object `{}`. Verifies the orchestrator's resolution chain
    (`module.config() ⊕ configs[lens] ⊕ config`) produced the expected merged
    bundle. **Why `{}` collapses to `(empty)` rather than rendering as the JSON
@@ -136,11 +138,12 @@ snippet changes or the lens switches.
   deep-frozen by the orchestrator anyway).
 - **Disposable practice.** No cross-mount state. No `localStorage`, no refs
   across mounts. React owns the lifecycle.
-- **No consumer-side sentinel branching on `embody` mock outputs.** During Phase
-  A, `embody(code)` is dispatched by sentinel comments; the lens code MUST NOT
-  inspect `embodiment.source.code` for sentinel literals. It only reads the
-  `Snippet`'s public shape (status flags, validation flags, errors count). Per
-  the lenses peer's invariant.
+- **No consumer-side branching on `embodiment.source.code`.** The lens
+  renders `source.code` verbatim in the snippet panel (a source-display
+  use case is legitimate) but MUST NOT use it as a branching key. It only
+  branches on the `Snippet`'s public shape (status flags, validation
+  flags, errors count). Per the lenses peer's invariant — see
+  [`../README.md`](../README.md).
 - **Display content is rendered as text, not interpreted as markup.** The
   wrapper renders panel content via `<pre>` (for multi-line stringified objects)
   or `<code>` (for inline values), never via `dangerouslySetInnerHTML`.
@@ -197,7 +200,7 @@ pages. Both behaviors are deliberate recommender-inertia.
 
 The lens owns its own `README.md`, `DOCS.md`, `types.ts`, source (`core.ts` +
 `index.tsx`), and tests. Cross-cutting lens conventions (two-layer split,
-`data-lens` invariant, `LensConfig` shape, embody mock anti-pattern) live in
+`data-lens` invariant, `LensConfig` shape, no-source.code-branching anti-pattern) live in
 [`../README.md`](../README.md) + [`../DOCS.md`](../DOCS.md); this lens inherits
 them.
 

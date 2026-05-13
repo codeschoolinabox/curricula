@@ -115,21 +115,25 @@ LensModule).
 Each lens belongs to one of three tiers based on what it needs from the
 embodiment. The tier determines what `applicableTo` returns.
 
-| Tier | What it needs                          | `applicableTo` returns      |
-| ---- | -------------------------------------- | --------------------------- |
-| 1    | Text only — no parse needed            | always `true`               |
-| 2    | Valid AST (no execution)               | `embodiment.status.parsed`  |
-| 3    | Valid parse AND evaluable script-scope | `embodiment.status.created` |
+| Tier | What it needs                          | `applicableTo` returns        |
+| ---- | -------------------------------------- | ----------------------------- |
+| 1    | Text only — no parse needed            | always `true`                 |
+| 2    | Valid AST (no execution)               | `embodiment.status.parsed`    |
+| 3    | Valid parse AND evaluable script-scope | `embodiment.status.created`   |
 
 Tier 1 lenses (parsons line-shuffling, copy-type, highlight) work even on
 syntactically-broken snippets. Tier 2 lenses (blanks, variables/scope, ask) need
-a valid AST. Tier 3 lenses (trace-table, run) need the snippet to be evaluable —
-i.e. the script-scope creation phase passed (per
-[`../embody/types.ts`](../embody/types.ts) §Status booleans).
+a valid AST — they ignore the JEJ-validity question and operate on the AST
+regardless. A Tier-2 lens that also wants JEJ-subset compliance gates on
+`embodiment.status.validated` instead. Tier 3 lenses (trace-table, run) need
+the snippet to be evaluable — i.e. all four gates passed (per
+[`../embody/types.ts`](../embody/types.ts) §Status booleans), which includes
+the validate gate; `embodiment.status.created` is the load-bearing flag since
+it implies validate passed.
 
-The `status` chain is monotonic by construction: `created` implies `parsed`
-implies `tokenized`. Lens-author logic only checks the field it cares about; the
-chain handles itself.
+The `status` chain is monotonic by construction: `created` implies
+`validated` implies `parsed` implies `tokenized`. Lens-author logic only
+checks the field it cares about; the chain handles itself.
 
 See
 [`../.planning-handoffs/04-lens-migration.md`](../.planning-handoffs/04-lens-migration.md)
@@ -156,15 +160,15 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
 - **Single-writer state**. Lenses are read-only views; they CANNOT mutate the
   snippet. Editing happens only in
   [`orchestrate/editor/`](../orchestrate/editor/).
-- **No consumer-side sentinel branching on `embody` mock outputs.** During Phase
-  A, `embody(code)` is a mock dispatched by sentinel comments (e.g.
-  `/* MOCK_OK */`, `/* MOCK_PARSE_FAIL */` — see
-  [`../embody/index.ts`](../embody/index.ts) JSDoc and
-  [`../embody/README.md` § Phase A — mock embody](../embody/README.md)). Lens
-  code must never inspect the input string for sentinels; branch only on the
-  **shape** of the returned `Snippet` (e.g. `embodiment.parsed === false`,
-  `embodiment.validation.isJeJ`). Sentinels are an internal mock dispatch
-  mechanism and disappear in Phase B.
+- **No consumer-side branching on `embodiment.source.code`.** `embody(code)`
+  recognizes 11 named scenario keywords (`"OK"`, `"FAIL_AT_PARSE"`, …) and
+  dispatches a canned `Snippet` shape for each (see
+  [`../embody/README.md` § Named scenarios](../embody/README.md)). Lens
+  code MUST NOT use `embodiment.source.code` as a branching key — branch
+  on the **shape** of the returned `Snippet` (e.g. `embodiment.status.parsed
+  === false`, `embodiment.validation.isJeJ`). Lenses MAY *render*
+  `source.code` (a source-display lens is legitimate); using it as a
+  discriminator is what the rule forbids.
 - **Transforms are a lens-internal concern, not a peer concept.** Round-2
   deleted the pre-refactor `transforms/` peer module. There is no shared
   "transform pipeline" between lenses + the orchestrator; each lens decides what
@@ -174,12 +178,17 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
   lens that uses them). The `<StudyLenses>` plugin must NOT emit a `transforms`
   attribute (see
   [`../../../../plugins/study-lenses/README.md` § Plugin alignment](../../../../plugins/study-lenses/README.md)).
-- **`Validation` derivation rules.** The `validation` fields `isDeterministic`
-  and `doesPause` are **derived** from the raw analyses, not raw fields a lens
-  can override: `isDeterministic = !any(nonDeterminism)` and
-  `doesPause = hasIo.user.total > 0`. Pinned in
-  [`../embody/types.ts`](../embody/types.ts) JSDoc; lens authors reading these
-  fields treat them as read-only summaries.
+- **`Validation` gate vs. metadata.** The validate gate criterion is
+  `validation.isJeJ` (i.e., `violations.length === 0`). Gate failure means
+  no `streams.create` and no `streams.evaluate`. The fields
+  `validation.isDeterministic` and `validation.doesPause` are **derived**
+  from raw analyses (`isDeterministic = !any(nonDeterminism)`,
+  `doesPause = hasIo.user.total > 0`) and are **informational metadata,
+  NOT gate criteria** — a non-deterministic or pausing program is still
+  a valid JEJ subset and passes the gate. `Snippet.validation` is
+  optional (absent on tokenize-fail / parse-fail leaves). Pinned in
+  [`../embody/types.ts`](../embody/types.ts) JSDoc; lens authors reading
+  these fields treat them as read-only summaries.
 - **`embodiment` parameter name** wherever a function takes a Snippet instance.
 - One default export per file (named function/const, then `export default`).
   `.js` extensions in imports.
