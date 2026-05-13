@@ -22,9 +22,9 @@
  *    edit; toggling back-and-forth WITHOUT editing reuses the cached
  *    embodiment (count stays at 1 across the round trip).
  *
- * The render counter in the header counts how many times the top-level wrapper
- * re-renders, giving a rough "did the state machine batch correctly" signal without
- * React DevTools.
+ * For accurate render-count measurement, use React DevTools Profiler —
+ * a page-rendered counter is unreliable under StrictMode and Docusaurus
+ * Layout re-render behavior.
  *
  * @vitest-skip — Docusaurus auto-routes `src/pages/*.tsx`; this is a
  * page, not a unit test.
@@ -37,8 +37,6 @@ import { StudyLenses } from '@site/src/lib/welcome-to-programming/just-enough/ja
 
 export default function F2ModeMachine(): React.JSX.Element {
 	const [lens, setLens] = React.useState<string | undefined>(undefined);
-	const renderCount = React.useRef(0);
-	renderCount.current += 1;
 
 	return (
 		<Layout
@@ -47,11 +45,6 @@ export default function F2ModeMachine(): React.JSX.Element {
 		>
 			<main style={{ maxWidth: 720, margin: '2rem auto', padding: '0 1rem' }}>
 				<h1>F2 mode machine sandbox</h1>
-				<p>
-					Render count: <strong>{renderCount.current}</strong> — resets on
-					full-page reload; tracks wrapper re-renders from toggle clicks.
-					<em> (×2 in Strict Mode dev — expect even numbers)</em>
-				</p>
 				<p>
 					<strong>Current mode:</strong>{' '}
 					<code>{lens !== undefined ? `lens="${lens}"` : 'editor (no lens)'}</code>
