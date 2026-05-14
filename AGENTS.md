@@ -640,6 +640,38 @@ of scope" upfront.
   WHOLE file for context. Don't have one agent read lines 1-100 and another
   read lines 100-200 of the same file. Assign whole files to agents.
 
+### Proactive persistence for long-running work
+
+Long collaborative sessions can hit compaction at unpredictable points.
+The harness compacts the conversation automatically when context fills,
+and the agent has no reliable signal that compaction is imminent. To
+keep multi-turn work resumable across a compaction boundary:
+
+- **Persist proactively at any natural checkpoint, not just when
+  compaction feels imminent.** Decisions made, drafts agreed, audit
+  findings settled, batch plans approved — write them down as they
+  land, while context is still fresh.
+- **The plan file's RESUMPTION POINT block is the durable handoff.**
+  At the top of the plan file (`~/.claude/plans/<plan-name>.md`),
+  maintain a "RESUMPTION POINT" section that captures: state at
+  pause, committed work, in-progress work, user decisions accumulated
+  in this session, and the next concrete steps with enough detail
+  that a freshly-compacted agent can pick up the work without
+  needing the prior conversation. Update it after each meaningful
+  checkpoint, not only on demand.
+- **What to persist:** (a) commit log with one-line summaries of
+  what each commit accomplished, (b) user decisions / refinements
+  that won't be obvious from the diff alone, (c) prose drafts that
+  haven't yet been written to canonical files, (d) AR-cycle status,
+  (e) explicit deferrals (what's out of scope and why), (f) untracked
+  scratch files the agent shouldn't accidentally commit.
+- **What NOT to persist:** running diffs, file contents (those are
+  recoverable via Read), or step-by-step tool transcripts.
+- **When compaction strikes mid-task:** the human can ask the
+  freshly-compacted agent to read the plan file's RESUMPTION POINT
+  block to recover state. If the agent did its job well, the handoff
+  cost is zero or near-zero.
+
 ## Adversarial Review Protocol
 
 The full protocol — agent prompt structure, verdict definitions, resolution
