@@ -191,7 +191,7 @@ describe('<StudyLenses> — F1 smoke', () => {
 			// lens-mount time, not at editor-mode mount.
 			expect(() =>
 				render(<StudyLenses snippet="not_a_real_sentinel" lens="debug-props" />),
-			).toThrow(/Unknown embody mock scenario/);
+			).toThrow(/Unknown embody scenario/);
 		});
 
 		it('does NOT propagate an embody throw at editor-mode mount with unknown sentinel', () => {
