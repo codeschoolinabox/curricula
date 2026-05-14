@@ -198,6 +198,95 @@ yours, and will always be yours — that's what makes it worth doing.
 
 ---
 
+## Using the 5 layers (§12 of ontology) in teaching
+
+The 5 layers (§12 of `syllabus.ontology.md`) are named there as the
+engagement depths a reader can stay at or descend through. This file
+carries the design principles for teaching with the layers:
+
+### SOLO applies within each layer (not across)
+
+SOLO taxonomy (Pre-Structural / Uni-Structural / Multi-Structural /
+Relational / Extended-Abstract) applies _within_ each layer, not across
+them. A learner at L0 can be Pre-Structural through Extended-Abstract on
+the NM; same span at L1, L2, L3, L4. The layers are _kinds_ of work;
+SOLO is _depth_ within each kind. The cross-product is a 5×5 reading:
+layer × SOLO-depth — useful for diagnosis and for designing exercises
+that meet a learner where they are at a given layer.
+
+### Architectural rules
+
+- **Each layer runs through each chapter.** This is NOT a chapter-by-layer
+  mapping; it's a 2D grid: chapters × layers.
+- **Platform-agnostic constraint**: pure markdown + Study Lenses. No special
+  platform features required.
+- **Layer architecture in markdown**:
+  - L0 / L1 = body prose (the chapter)
+  - L2 = sidebars + V/F dialogues; necessary for L2 reading; skippable for L1
+    reading
+  - L3 = end-of-chapter snippetry prompts
+  - L4 = footnotes / side notes / easter eggs / references; fully optional, for
+    the attuned reader
+
+### Layer titles (working candidates; not locked)
+
+Three styles brainstormed; defer until ontology stabilizes:
+
+- **Verb-style (action)**: Embody / Apply / Switch / Explore / Wonder
+- **Noun-style (state)**: Mastery / Rhetoric / Methodology / Snippetry /
+  Philosophy
+- **Hybrid (verb-as-name + noun-as-meta-objective)**: "Embody to gain Mastery";
+  "Apply to develop Rhetoric"; "Switch to gain Methodology"; "Explore through
+  Snippetry"; "Wonder at Philosophy"
+
+---
+
+## The pedagogical claim from Friston (ontology §16)
+
+Ontology §16 establishes Friston's "A Duet for One" framing — active
+inference applied to dyadic communication; understanding-as-alignment
+of generative models. The pedagogical consequence:
+
+> **AI generates; it doesn't twin. Your job is to twin the LLM AND what the LLM
+> is twinning, to detect and correct divergences — and to relish productive
+> divergences.**
+
+**Same skill, two layers**:
+
+- L2 = defensive (detect/correct misalignment; manage hallucinations)
+- L3 = offensive (use misalignment for creative discovery)
+
+---
+
+## Lenses, embody, and substrate ↔ pedagogy mutual constitution (ontology §24)
+
+The JEJ chain (`just-enough/javascript/` + `embody/` + Study Lenses +
+orchestrator) is named and described in ontology §24 as infrastructure.
+This file carries the principles by which that infrastructure is
+pedagogy-shaped:
+
+### Lenses are F-pedagogy infrastructure
+
+> _"Lenses are to help LEARN F territory; they are not a tool for V's."_
+
+The Mikhak data/interaction architectural pattern is V/F-neutral; the
+curriculum's _application_ of the pattern (embody-as-data, lenses-as-experience)
+is F-specific. Don't conflate the architectural pattern with the V/F mapping.
+
+### Substrate ↔ pedagogy mutual constitution
+
+The infrastructure _embodies_ the pedagogy:
+
+- lenses literally **are** the Frogrammer's magnifying glasses (ontology §3)
+- embody literally **is** the NM crystallized for exploration
+- the JEJ language constraint **is** the cognitive-load discipline (ontology §B.1)
+- the orchestrator **is** the Explorotron framework's snippet-scope realization
+
+The opposite is also true: the pedagogy is shaped by what the infrastructure can
+afford. V/F feedback loop in operational form.
+
+---
+
 ## Further sections (TBD — Wave 3 continuation)
 
 The following sections are scaffolded but await full prose development.

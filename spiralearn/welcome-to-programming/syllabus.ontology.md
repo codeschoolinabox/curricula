@@ -933,14 +933,9 @@ more again.** Each layer is a complete exit point.
 | **L3** | Explore / Snippetry  | …the medium itself                         | Programming automaticity; exploring concepts/domains _through_ programming; self-directed exploration | snippetry, remixing, esoteric prompts (quines, wuzzles, cross-medium translations)                            |
 | **L4** | Wonder / Philosophy  | …the philosophical questions               | Understand world as information + embodied computation; generate interesting philosophical questions  | easter eggs in main text; side/footnotes; references; questions                                               |
 
-#### SOLO applies within each layer (not across)
-
-SOLO taxonomy (Pre-Structural / Uni-Structural / Multi-Structural / Relational /
-Extended-Abstract) applies _within_ each layer, not across them. A learner at L0
-can be Pre-Structural through Extended-Abstract on the NM; same span at L1, L2,
-L3, L4. The layers are _kinds_ of work; SOLO is _depth_ within each kind. The
-cross-product is a 5×5 reading: layer × SOLO-depth — useful for diagnosis and
-for designing exercises that meet a learner where they are at a given layer.
+> **SOLO taxonomy applies _within_ each layer**, not across — see
+> `syllabus.pedagogy.md` "Using the 5 layers (§12) in teaching" for the
+> design principle.
 
 #### Each layer's data thread (the red thread ramifies)
 
@@ -981,30 +976,10 @@ dynamics explorable.
 This sharpens F's grounding: **F is grounded in the motion the substrate makes
 legible**, not in a static model.
 
-#### Architectural rules
-
-- **Each layer runs through each chapter.** This is NOT a chapter-by-layer
-  mapping; it's a 2D grid: chapters × layers.
-- **Platform-agnostic constraint**: pure markdown + Study Lenses. No special
-  platform features required.
-- **Layer architecture in markdown**:
-  - L0 / L1 = body prose (the chapter)
-  - L2 = sidebars + V/F dialogues; necessary for L2 reading; skippable for L1
-    reading
-  - L3 = end-of-chapter snippetry prompts
-  - L4 = footnotes / side notes / easter eggs / references; fully optional, for
-    the attuned reader
-
-#### Layer titles (working candidates; not locked)
-
-Three styles brainstormed; defer until ontology stabilizes:
-
-- **Verb-style (action)**: Embody / Apply / Switch / Explore / Wonder
-- **Noun-style (state)**: Mastery / Rhetoric / Methodology / Snippetry /
-  Philosophy
-- **Hybrid (verb-as-name + noun-as-meta-objective)**: "Embody to gain Mastery";
-  "Apply to develop Rhetoric"; "Switch to gain Methodology"; "Explore through
-  Snippetry"; "Wonder at Philosophy"
+> **Layer-architecture rendering rules** (each-layer-through-each-chapter,
+> platform-agnostic constraint, layer-by-markdown-affordance mapping) and
+> **layer-title brainstorming** (verb/noun/hybrid styles) — see
+> `syllabus.pedagogy.md` "Using the 5 layers (§12) in teaching."
 
 ---
 
@@ -1190,16 +1165,9 @@ alone.
 - ✓ **"active inference"** — usable but requires explanation; introduce as the
   dyadic-Friston frame in Ch4
 
-#### The pedagogical claim that follows
-
-> **AI generates; it doesn't twin. Your job is to twin the LLM AND what the LLM
-> is twinning, to detect and correct divergences — and to relish productive
-> divergences.**
-
-**Same skill, two layers**:
-
-- L2 = defensive (detect/correct misalignment; manage hallucinations)
-- L3 = offensive (use misalignment for creative discovery)
+> **The pedagogical claim that follows** (AI generates; it doesn't twin;
+> your job is to twin the LLM AND what the LLM is twinning) — see
+> `syllabus.pedagogy.md` "The pedagogical claim from Friston (ontology §16)."
 
 ---
 
@@ -1822,25 +1790,12 @@ Each lens depends on what it needs from the embodiment:
 
 The `status` chain is monotonic: `created` implies `parsed` implies `tokenized`.
 
-#### Lenses are F-pedagogy infrastructure
-
-> _"Lenses are to help LEARN F territory; they are not a tool for V's."_
-
-The Mikhak data/interaction architectural pattern is V/F-neutral; the
-curriculum's _application_ of the pattern (embody-as-data, lenses-as-experience)
-is F-specific. Don't conflate the architectural pattern with the V/F mapping.
-
-#### Substrate ↔ pedagogy mutual constitution
-
-The infrastructure _embodies_ the pedagogy:
-
-- lenses literally **are** the Frogrammer's magnifying glasses (§3)
-- embody literally **is** the NM crystallized for exploration
-- the JEJ language constraint **is** the cognitive-load discipline (§B.1)
-- the orchestrator **is** the Explorotron framework's snippet-scope realization
-
-The opposite is also true: the pedagogy is shaped by what the infrastructure can
-afford. V/F feedback loop in operational form.
+> **Lenses are F-pedagogy infrastructure** (the Mikhak data/interaction
+> pattern is V/F-neutral; the curriculum's _application_ of it is F-specific)
+> and **substrate ↔ pedagogy mutual constitution** (the infrastructure
+> embodies the pedagogy; the pedagogy is shaped by what the infrastructure
+> affords) — see `syllabus.pedagogy.md` "Lenses, embody, and substrate ↔
+> pedagogy mutual constitution (ontology §24)."
 
 #### V/F at the artifact layer
 
