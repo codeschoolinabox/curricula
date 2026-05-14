@@ -11,11 +11,23 @@
  * `data-debug-panel="<key>"` attribute. Sandbox-harness selectors target
  * panels by key; renaming or removing a panel is a contract change.
  *
+ * Panel-rendering follows the `Snippet` staircase from
+ * `../../embody/types.ts § Snippet` — each panel guards on the appropriate
+ * `embodiment.status.*` boolean (or on the presence of an optional field)
+ * before reading dependent data. The status panel shows the four
+ * `Status` booleans (`tokenized, parsed, validated, created`) plus the
+ * first-fail kind (`embodiment.errors?.kind ?? null`). The validation
+ * panel renders fields when `embodiment.validation !== undefined`
+ * (validate-fail leaf and beyond) and renders the gate-phrased
+ * `VALIDATION_ABSENT_PLACEHOLDER` otherwise (tokenize-fail and parse-fail
+ * leaves). See [`./DOCS.md` § Handling absent fields] for the staircase
+ * consumer convention.
+ *
  * @remarks Per the lenses peer's invariant, takes `embodiment` as the
  * parameter name (not `props.embodiment`). Reads only the public
  * `Snippet` shape (`source`, `status`, `validation`, `errors`) — no
  * branching on sentinel literals in `embodiment.source.code` (see
- * `../README.md` § Conventions).
+ * `../README.md` § Conventions inherited).
  */
 
 import type { Snippet } from '../../embody/types.js';
@@ -23,6 +35,18 @@ import type { Snippet } from '../../embody/types.js';
 import type { LensConfig } from '../types.js';
 
 import type { DisplayTree, Panel } from './types.js';
+
+/**
+ * Emitted by the validation panel when `embodiment.validation` is absent
+ * (tokenize-fail and parse-fail leaves per the embody staircase). The
+ * placeholder phrases the gate condition, not a counterfactual about what
+ * happened, so it reads correctly for both fail-leaves regardless of which
+ * gate actually failed. Mirrors the literal in
+ * `./tests/core.test.ts § VALIDATION_ABSENT_PLACEHOLDER` and the prose
+ * in `./README.md § Panel contract` + `./DOCS.md § Display derivation`.
+ */
+const VALIDATION_ABSENT_PLACEHOLDER =
+	'(validation absent — gated on parse success)';
 
 function deriveDisplayTree(
 	embodiment: Snippet,
@@ -41,6 +65,7 @@ function deriveDisplayTree(
 				{
 					tokenized: embodiment.status.tokenized,
 					parsed: embodiment.status.parsed,
+					validated: embodiment.status.validated,
 					created: embodiment.status.created,
 					errors: embodiment.errors === null ? null : embodiment.errors.kind,
 				},
@@ -51,17 +76,26 @@ function deriveDisplayTree(
 		{
 			key: 'validation',
 			label: 'validation (JeJ + determinism + IO)',
-			content: JSON.stringify(
-				{
-					formatted: embodiment.validation.formatted,
-					isJeJ: embodiment.validation.isJeJ,
-					isDeterministic: embodiment.validation.isDeterministic,
-					doesPause: embodiment.validation.doesPause,
-					violationCount: embodiment.validation.violations.length,
-				},
-				null,
-				2,
-			),
+			// `Snippet.validation` is optional — absent at tokenize-fail and
+			// parse-fail leaves per the embody staircase (see
+			// `../../embody/types.ts § Snippet`). Guard via presence check
+			// rather than a status-boolean read; if the contract ever tightens
+			// `validation?: Validation` to `validation: Validation | null`, the
+			// TypeScript compiler flags this deref site before runtime.
+			content:
+				embodiment.validation === undefined
+					? VALIDATION_ABSENT_PLACEHOLDER
+					: JSON.stringify(
+							{
+								formatted: embodiment.validation.formatted,
+								isJeJ: embodiment.validation.isJeJ,
+								isDeterministic: embodiment.validation.isDeterministic,
+								doesPause: embodiment.validation.doesPause,
+								violationCount: embodiment.validation.violations.length,
+							},
+							null,
+							2,
+						),
 		},
 		{
 			key: 'config',

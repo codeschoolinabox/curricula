@@ -60,6 +60,50 @@ helpful in development; never the right answer for a real curriculum page.
 - **Panel** — a labeled `<section>` element rendered for one display-tree field.
   Carries a `data-debug-panel="<key>"` attribute for sandbox-harness selectors.
 
+(No new domain terms in the embody-contract-conformance task — the "5 shape
+leaves" / "staircase" terminology stays in `embody/`'s vocabulary; debug-props
+just consumes it. See
+[`../../embody/README.md` § Named scenarios](../../embody/README.md) for the
+5-leaf catalog and [§ Panel contract](#panel-contract) below for how
+debug-props guards on it.)
+
+## Panel contract
+
+Panel content follows the `Snippet` staircase from
+[`../../embody/types.ts`](../../embody/types.ts). Each panel guards on the
+appropriate `embodiment.status.*` boolean (or equivalent presence check on
+an optional field) before reading optional fields:
+
+- **Snippet panel** — always renders (`source.code` is always present).
+- **Status panel** — always renders. Shows the four status booleans
+  (`tokenized, parsed, validated, created`) **plus the first-fail kind**
+  (`embodiment.errors.kind`, or `null` when all gates passed). The errors-kind
+  echo is a deliberate tag-along: `Snippet.errors` is a peer of `Snippet.status`
+  at the embody-contract level, and the harness wants both visible together
+  to verify the first-fail-wins gate semantics.
+- **Validation panel** — renders the validation flags
+  (`formatted, isJeJ, isDeterministic, doesPause`) + violations count **when
+  `embodiment.validation` is present** (validate-fail, create-fail, and apex
+  leaves). On tokenize-fail and parse-fail leaves, `validation` is absent per
+  the embody contract; the panel renders the placeholder
+  `(validation absent — gated on parse success)`. (See
+  [`./DOCS.md` § Display derivation](./DOCS.md) for the gate-phrasing
+  rationale.)
+- **Config panel** — always renders. When `config` is `undefined` OR an empty
+  object `{}`, content is the placeholder `(empty)` (see
+  [`./DOCS.md` § Display derivation](./DOCS.md) for the rationale on
+  collapsing both cases). Otherwise renders the resolved bundle.
+
+**Intentionally not surfaced**: `embodiment.static`, `embodiment.parse.*`, and
+`embodiment.streams.*`. Those fields are embody-graph concerns; debug-props's
+focus is the resolution-chain echo (snippet round-trip + status gates +
+validation summary + per-lens config), not a full embody-output inspector. A
+future `embody-graph` lens would own that surface.
+
+The panel keys (`snippet`, `status`, `validation`, `config`) are stable
+sandbox-harness selectors. Renaming or removing a panel is a contract change;
+adding a NEW panel (with a fresh key) is non-breaking.
+
 ## Public API
 
 The default export is a `LensModule` whose `Component` accepts the standard

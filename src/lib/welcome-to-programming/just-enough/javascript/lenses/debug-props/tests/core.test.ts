@@ -12,10 +12,20 @@ import type { Snippet } from '../../../embody/types.js';
 
 import type { LensConfig } from '../../types.js';
 
+/**
+ * Placeholder string emitted by the validation panel when
+ * `embodiment.validation` is absent (tokenize-fail and parse-fail leaves).
+ * MUST match the literal in `core.ts` exactly; drift is caught by both
+ * tokenize-fail and parse-fail placeholder tests below.
+ */
+const VALIDATION_ABSENT_PLACEHOLDER =
+	'(validation absent — gated on parse success)';
+
 function makeSnippet(overrides: Partial<Snippet> = {}): Snippet {
 	return {
 		source: { code: 'let x = 1;', offsets: [0] },
-		status: { tokenized: true, parsed: true, created: true },
+		// Apex leaf: all four status booleans true.
+		status: { tokenized: true, parsed: true, validated: true, created: true },
 		parse: {},
 		validation: {
 			isJeJ: true,
@@ -43,20 +53,21 @@ describe('deriveDisplayTree', () => {
 		expect(panel?.content).toBe('let x = 1;');
 	});
 
-	it('status panel content reflects status flags + error kind (errors=null → null)', () => {
+	it('status panel content reflects all four status flags + error kind (apex leaf; errors=null → null)', () => {
 		const tree = deriveDisplayTree(makeSnippet());
 		const panel = tree.panels.find((p) => p.key === 'status');
 		expect(JSON.parse(panel!.content)).toEqual({
 			tokenized: true,
 			parsed: true,
+			validated: true,
 			created: true,
 			errors: null,
 		});
 	});
 
-	it('status panel surfaces error kind when embodiment has an error', () => {
+	it('status panel surfaces error kind when embodiment has an error (parse-fail leaf)', () => {
 		const snippet = makeSnippet({
-			status: { tokenized: true, parsed: false, created: false },
+			status: { tokenized: true, parsed: false, validated: false, created: false },
 			errors: {
 				phase: 'parse:ast',
 				kind: 'SyntaxError',
@@ -69,16 +80,18 @@ describe('deriveDisplayTree', () => {
 		expect(JSON.parse(panel!.content)).toEqual({
 			tokenized: true,
 			parsed: false,
+			validated: false,
 			created: false,
 			errors: 'SyntaxError',
 		});
 	});
 
-	it('status panel reads `errors.kind` dynamically (e.g. ReferenceError from create-phase)', () => {
+	it('status panel reads `errors.kind` dynamically (e.g. ReferenceError from create-fail leaf)', () => {
 		// Triangulation: a second error-kind variant prevents a hardcoded
-		// 'SyntaxError' implementation from passing the suite.
+		// 'SyntaxError' implementation from passing the suite. Single-parse
+		// equality check on the whole status object pins all five fields.
 		const snippet = makeSnippet({
-			status: { tokenized: true, parsed: true, created: false },
+			status: { tokenized: true, parsed: true, validated: true, created: false },
 			errors: {
 				phase: 'create',
 				kind: 'ReferenceError',
@@ -88,11 +101,22 @@ describe('deriveDisplayTree', () => {
 		});
 		const tree = deriveDisplayTree(snippet);
 		const panel = tree.panels.find((p) => p.key === 'status');
-		expect(JSON.parse(panel!.content).errors).toBe('ReferenceError');
+		expect(JSON.parse(panel!.content)).toEqual({
+			tokenized: true,
+			parsed: true,
+			validated: true,
+			created: false,
+			errors: 'ReferenceError',
+		});
 	});
 
-	it('validation panel reflects all four boolean flags + violation count', () => {
+	it('validate-fail leaf: validation panel renders fields + status panel surfaces validate-phase error', () => {
+		// Staircase-coherent validate-fail leaf: parsed succeeded, validate
+		// gate failed (isJeJ=false), no streams.create / streams.evaluate.
+		// Exercises both the status panel (errors=ValidationError) and the
+		// validation panel (fields present with isJeJ=false) for this leaf.
 		const snippet = makeSnippet({
+			status: { tokenized: true, parsed: true, validated: false, created: false },
 			validation: {
 				isJeJ: false,
 				isDeterministic: false,
@@ -107,16 +131,79 @@ describe('deriveDisplayTree', () => {
 					{ kind: 'non-jej-construct', loc: null, message: 'foo' } as never,
 				],
 			},
+			errors: {
+				phase: 'validate',
+				kind: 'ValidationError',
+				message: 'snippet contains non-JeJ constructs',
+				loc: null,
+			},
 		});
 		const tree = deriveDisplayTree(snippet);
-		const panel = tree.panels.find((p) => p.key === 'validation');
-		expect(JSON.parse(panel!.content)).toEqual({
+
+		const statusPanel = tree.panels.find((p) => p.key === 'status');
+		expect(JSON.parse(statusPanel!.content)).toEqual({
+			tokenized: true,
+			parsed: true,
+			validated: false,
+			created: false,
+			errors: 'ValidationError',
+		});
+
+		const validationPanel = tree.panels.find((p) => p.key === 'validation');
+		expect(JSON.parse(validationPanel!.content)).toEqual({
 			formatted: false,
 			isJeJ: false,
 			isDeterministic: false,
 			doesPause: true,
 			violationCount: 2,
 		});
+	});
+
+	// Many — shape leaves with validation absent. The Snippet contract makes
+	// validation optional at tokenize-fail and parse-fail (validation is only
+	// computed once parse succeeds — see embody/types.ts § Snippet). The
+	// validation panel must render a gate-phrased placeholder rather than
+	// crash on undefined dereference.
+	it('validation panel renders placeholder for tokenize-fail leaf (validation absent)', () => {
+		const snippet = makeSnippet({
+			status: {
+				tokenized: false,
+				parsed: false,
+				validated: false,
+				created: false,
+			},
+			validation: undefined,
+			errors: {
+				phase: 'parse:tokenize',
+				kind: 'SyntaxError',
+				message: 'invalid character',
+				loc: null,
+			},
+		});
+		const tree = deriveDisplayTree(snippet);
+		const panel = tree.panels.find((p) => p.key === 'validation');
+		expect(panel?.content).toBe(VALIDATION_ABSENT_PLACEHOLDER);
+	});
+
+	it('validation panel renders placeholder for parse-fail leaf (validation absent)', () => {
+		const snippet = makeSnippet({
+			status: {
+				tokenized: true,
+				parsed: false,
+				validated: false,
+				created: false,
+			},
+			validation: undefined,
+			errors: {
+				phase: 'parse:ast',
+				kind: 'SyntaxError',
+				message: 'unexpected token',
+				loc: null,
+			},
+		});
+		const tree = deriveDisplayTree(snippet);
+		const panel = tree.panels.find((p) => p.key === 'validation');
+		expect(panel?.content).toBe(VALIDATION_ABSENT_PLACEHOLDER);
 	});
 
 	it('config panel says "(empty)" when no config is supplied', () => {

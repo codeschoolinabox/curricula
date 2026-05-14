@@ -42,18 +42,35 @@ The pure-TS core (`./core.ts`) consumes `LensProps` and returns a `DisplayTree`
 (per `./types.ts`). Each panel below is named with its `data-debug-panel` key in
 parentheses; sandbox-harness selectors use the key directly.
 
+> The sketch below describes the **post-refactor target shape**, aligned with
+> the current embody contract (see [`../../embody/types.ts § Snippet`]
+> (../../embody/types.ts)). The Refactor step of this increment updates `core.ts`
+> to match — the current implementation predates the `validated` status field
+> addition and the optional `Snippet.validation` shape, and crashes on
+> fail-leaf embodiments.
+
 1. **Snippet panel** (`snippet`) — `embodiment.source.code` (the raw source
    string the orchestrator embodied). Verifies `snippet` round-tripped through
    the plugin's emission and the orchestrator's `embody()` call.
 2. **Embodiment status panel** (`status`) —
-   `embodiment.status.{tokenized, parsed, validated, created}` flags + `embodiment.errors`
-   count. Verifies the embodiment pipeline ran (and surfaces canned scenario
-   outcomes when a scenario keyword is in play; real composition for
-   non-scenario input lands per
-   [`../../EMBODY-IMPL-HANDOFF.md`](../../EMBODY-IMPL-HANDOFF.md)).
-3. **Validation panel** (`validation`) —
+   `embodiment.status.{tokenized, parsed, validated, created}` flags + the
+   first-fail kind (`embodiment.errors?.kind ?? null`). Verifies the
+   embodiment pipeline ran (and surfaces canned scenario outcomes when a
+   scenario keyword is in play; real composition for non-scenario input
+   lands per [`../../EMBODY-IMPL-HANDOFF.md`](../../EMBODY-IMPL-HANDOFF.md)).
+   `Snippet.errors` is a peer of `Snippet.status` in the embody contract;
+   the panel echoes both together so the harness can verify the
+   first-fail-wins gate semantics at a glance.
+3. **Validation panel** (`validation`) — conditional rendering per the
+   `Snippet` staircase. When `embodiment.validation` is present (validate-fail,
+   create-fail, and apex leaves), the panel renders
    `embodiment.validation.{formatted, isJeJ, isDeterministic, doesPause}` +
-   `validation.violations` count. Verifies the embody-derived metadata flowed.
+   `validation.violations` count. When `embodiment.validation` is absent
+   (tokenize-fail and parse-fail leaves), the panel renders the placeholder
+   `(validation absent — gated on parse success)`. The placeholder phrases
+   the gate condition, not a counterfactual about what happened, so it reads
+   correctly for both fail-leaves regardless of which gate actually failed.
+   See [§ Handling absent fields](#handling-absent-fields) below.
 4. **Config panel** (`config`) — `Object.entries(config)` rendered as a
    key/value list, OR an `(empty)` placeholder when the config is `undefined` OR an
    explicit empty object `{}`. Verifies the orchestrator's resolution chain
@@ -71,6 +88,40 @@ panel carries `key`, `label`, `content` strings). The panel keys above are
 stable — sandbox-harness selectors target them by key, so renaming or removing a
 panel breaks the selectors and is a contract change. Adding a NEW panel (with a
 fresh key) is non-breaking.
+
+### Handling absent fields
+
+The `Snippet` contract (see
+[`../../embody/types.ts § Snippet`](../../embody/types.ts) and
+[`../../embody/README.md § Named scenarios`](../../embody/README.md) for the
+5-leaf shape catalog) marks several fields optional: `validation` and `static`
+are present only when their staircase gate has been computed, and certain
+`streams.*` sub-fields are present only at apex. Lenses that consume the
+embodiment guard on the appropriate `Snippet.status.*` boolean (or on the
+presence of the optional field itself) before reading dependent data.
+
+In `debug-props`:
+
+- **`embodiment.validation`** — the validation panel guards on
+  `embodiment.validation !== undefined`. The presence check is coherent with
+  the embody contract: `validation` is present at validate-fail and beyond
+  on the staircase (see the staircase comment in
+  [`../../embody/types.ts § Snippet`](../../embody/types.ts)). For absent
+  cases (tokenize-fail, parse-fail) the panel renders the gate-phrased
+  placeholder.
+- **`embodiment.errors`** — already nullable (`EmbodyError | null`) and
+  guarded inline at the status-panel summary site.
+- **`embodiment.static`, `embodiment.parse.*`, `embodiment.streams.*`** —
+  intentionally not surfaced by debug-props (see the panel-set rationale in
+  [`./README.md` § Panel contract](./README.md)). A future `embody-graph`
+  lens would own that surface.
+
+This pattern — "guard on `status.*` or on presence; render a gate-phrased
+placeholder when absent" — mirrors the staircase consumer convention from
+[`../../embody/DOCS.md § Data flow`](../../embody/DOCS.md). debug-props
+demonstrates the pattern; the cross-cutting "how lenses consume optional
+`Snippet` fields" guidance belongs at the lenses-peer level (see
+[`../DOCS.md`](../DOCS.md)) — not redefined inside one consumer.
 
 ### Mount lifecycle
 
@@ -98,10 +149,10 @@ flowchart TD
     Core --> Tree["DisplayTree<br/>{ panels: ReadonlyArray&lt;Panel&gt; }"]
 
     Tree -->|"render, sync"| Wrapper["React Component<br/>&lt;div data-lens=debug-props&gt;"]
-    Wrapper --> Panel1["&lt;section data-debug-panel=snippet&gt;"]
-    Wrapper --> Panel2["&lt;section data-debug-panel=status&gt;"]
-    Wrapper --> Panel3["&lt;section data-debug-panel=validation&gt;"]
-    Wrapper --> Panel4["&lt;section data-debug-panel=config&gt;"]
+    Wrapper --> Panel1["&lt;section data-debug-panel=snippet&gt;<br/>(always)"]
+    Wrapper --> Panel2["&lt;section data-debug-panel=status&gt;<br/>(always)"]
+    Wrapper --> Panel3["&lt;section data-debug-panel=validation&gt;<br/>(conditional on embodiment.validation)"]
+    Wrapper --> Panel4["&lt;section data-debug-panel=config&gt;<br/>(always)"]
 
     EmbodimentProp -->|"applicableTo, sync, pure"| Applicable["always true (Tier-1)"]
     EmbodimentProp -->|"recommend, sync, pure"| Recs["always [] (recommender-inert)"]
