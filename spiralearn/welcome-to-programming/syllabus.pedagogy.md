@@ -228,6 +228,36 @@ that meet a learner where they are at a given layer.
   - L4 = footnotes / side notes / easter eggs / references; fully optional, for
     the attuned reader
 
+### L4 as questioning, not theory-mastery
+
+L4 is the layer where the curriculum reaches the edge of confirmable
+science and crosses into frontierland between philosophy and evidence.
+The teaching contract changes accordingly:
+
+- **LOs are questionings, not facts.** A well-formed L4 learning
+  objective opens an inquiry the learner stays with — _"Notice X,"
+  "Encounter the question Y," "What would Z mean for W?"_ — not a
+  thesis to recite. The chapter L4 LO bullets across the curriculum
+  follow this form.
+- **The goal is not theory-currency.** L4 does not aim to bring
+  learners up to date with the latest names in active inference,
+  embodied cognition, or phenomenology. The named traditions (see
+  ontology §12 _L4 by strand_) are entry-points into the strand's
+  philosophical questioning, not destinations.
+- **Methodological rigour applies even at the frontier.** Questions
+  on the science-philosophy edge can be asked well or badly. Part of
+  L4's contract is teaching learners _how_ to ask big questions:
+  distinguishing the empirically testable from the genuinely open,
+  treating named traditions as positions to interrogate rather than
+  authorities to defer to, holding multiple framings simultaneously
+  without collapsing to one prematurely.
+- **Easter-egg form serves the stance.** L4's marginal placement
+  (footnotes / side notes / references; see _Architectural rules_
+  above) is a pedagogical signal: this is optional, attuned-reader
+  territory; engagement is invitation, not obligation. The form
+  itself models that the questions belong to the reader, not to the
+  curriculum.
+
 ### Layer titles (working candidates; not locked)
 
 Three styles brainstormed; defer until ontology stabilizes:

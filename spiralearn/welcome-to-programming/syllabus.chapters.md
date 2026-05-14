@@ -1692,9 +1692,10 @@ look similar from outside.
 - 🐔 Recognize the emergence of **agentic AI systems** (LLMs doing design work,
   not just notation) as a more complex development than the authoring-partner
   frame covers; flag as territory for post-curriculum learning
-- 🐥 _(deeper section)_ Friston's "A Duet for One" — _"understanding just IS the
-  alignment of generative models into a single coherent predictive process"_ —
-  applied to your conversations with the alien virtuoso
+- 🐥 _(deeper section)_ Encounter Friston's "A Duet for One" — _"understanding
+  just IS the alignment of generative models into a single coherent predictive
+  process"_ — and consider: does this framing illuminate your conversations
+  with the alien virtuoso, or strain when applied to a non-biological partner?
 - 🐔 Reflect on the difference between "it runs" and "I understand it" — the
   boundary the LLM tests every day
 

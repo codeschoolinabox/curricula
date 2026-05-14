@@ -675,7 +675,7 @@ more again.** Each layer is a complete exit point.
 | **L1** | Apply / Rhetoric     | …communicative production                  | Context-aware comprehension, discussion, production across three audiences                            | embody + static and analytical lenses, reflection questions, program comparison, case studies, process guides |
 | **L2** | Switch / Methodology | …methodology choice                        | Switch comfortably between V and F hats; comfort with design + computational thinking                 | process guides, case studies, open-ended exercises, discussion questions, external resources                  |
 | **L3** | Explore / Snippetry  | …the medium itself                         | Programming automaticity; exploring concepts/domains _through_ programming; self-directed exploration | snippetry, remixing, esoteric prompts (quines, wuzzles, cross-medium translations)                            |
-| **L4** | Wonder / Philosophy  | …the philosophical questions               | Understand world as information + embodied computation; generate interesting philosophical questions  | easter eggs in main text; side/footnotes; references; questions                                               |
+| **L4** | Wonder / Philosophy  | …the questions themselves                  | Inhabit the frontier where confirmable science gives way to philosophical questioning; ask the big questions with methodological rigour — not theory-mastery | easter eggs in main text; side/footnotes; references; open questions and methods for asking them              |
 
 > **SOLO taxonomy applies _within_ each layer**, not across — see
 > `syllabus.pedagogy.md` "Using the 5 layers (§12) in teaching" for the
@@ -689,7 +689,7 @@ more again.** Each layer is a complete exit point.
 | L1    | Multi-modal communicative flow (rhetorics, audiences)      |
 | L2    | Intentional design of data flows for specific ends         |
 | L3    | Substrate for self-expression and exploration              |
-| L4    | Information + embodied computation as substrate of reality |
+| L4    | Open question: information + embodied computation as substrate of reality? |
 
 #### L4 by strand — each strand's philosophy reading (open-ended development guide)
 
@@ -697,6 +697,15 @@ L4 is not only easter-eggs-scattered-as-references; it is a structural promise.
 Each of the 5 strands has a philosophy reading that opens at L4. These pair the
 operational work of the strand with a tradition that names what the strand is
 ultimately about.
+
+The named traditions are **entry-points into questioning, not a syllabus to
+master**. L4 reaches the edge of confirmable science and crosses into
+frontierland between philosophy and evidence. The goal is not bringing learners
+up to date with the latest names in active inference, embodied cognition, or
+phenomenology — those readings deepen and shift over time. The goal is to get
+learners **asking the big questions, and to do so with some rigour and
+methodology**. The traditions named below are positions to interrogate, not
+authorities to defer to.
 
 | Strand                     | L4 philosophy reading                                                                                                                                                     |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
