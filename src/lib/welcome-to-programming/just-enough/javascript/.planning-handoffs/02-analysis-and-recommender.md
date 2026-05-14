@@ -1,12 +1,11 @@
 # Work Stream 2: Snippet Analysis + Recommendation System
 
-> **Pivot resolved (see `01-NM-components.md`).** The 3rd Block Model
-> dimension is no longer an ordinal sub-language level progression. It
-> is the **unordered set of 10 NM components** sourced from the syntax
-> tracer's `StepCategory` enum at
-> `embody/lib/evaluating/trace/syntax/types.ts`. Analysis detects
-> categories via **static AST mapping** (no execution). Lens
-> recommendations may tag MULTIPLE categories per `Recommendation`.
+> **Pivot resolved (see `01-NM-components.md`).** The 3rd Block Model dimension
+> is no longer an ordinal sub-language level progression. It is the **unordered
+> set of 10 NM components** sourced from the syntax tracer's `StepCategory` enum
+> at `embody/lib/evaluating/trace/syntax/types.ts`. Analysis detects categories
+> via **static AST mapping** (no execution). Lens recommendations may tag
+> MULTIPLE categories per `Recommendation`.
 
 ## Prerequisites
 
@@ -17,68 +16,62 @@ Before starting, read these files in full (do not skim):
 - **DEV.md** (repo root):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/DEV.md`
 - **Master plan**: `./00-master-plan.md` (in this directory)
-- **Syntax tracer** (canonical source of the NM-components enum — the
-  3rd Block Model dimension):
+- **Syntax tracer** (canonical source of the NM-components enum — the 3rd Block
+  Model dimension):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/embody/lib/evaluating/trace/syntax/`
-  — read `PLAN.md` (Resolutions), `README.md` (categories table),
-  `types.ts` (`StepCategory` enum), `DOCS.md` (step-closing rules).
-- **Notional machine** (conceptual spec; operational implementation
-  is the syntax tracer above):
+  — read `PLAN.md` (Resolutions), `README.md` (categories table), `types.ts`
+  (`StepCategory` enum), `DOCS.md` (step-closing rules).
+- **Notional machine** (conceptual spec; operational implementation is the
+  syntax tracer above):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/notional-machine.md`
-- **Semantic tracer docs** (current implementation — the syntax tracer's
-  input; semantic layers, gate config):
+- **Semantic tracer docs** (current implementation — the syntax tracer's input;
+  semantic layers, gate config):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/embody/lib/evaluating/trace/semantics/`
   (README + DOCS). Historical references at
   `embody/lib/evaluating/.old-notes-for-reference-and-inspiration/tracer.md`.
 - **Recommender directory** (currently empty scaffolding — README only):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/orchestrate/lib/recommender/`
-- **Socratizing module** (prior art for snippet analysis; may later
-  consume the shared analysis):
+- **Socratizing module** (prior art for snippet analysis; may later consume the
+  shared analysis):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/orchestrate/lib/socratizing/`
 - **Validating module** (AST parsing for JEJ):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/embody/lib/validating/`
 - **Lenses DOCS.md** (current lens architecture):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/welcome-to-programming/just-enough/javascript/lenses/DOCS.md`
-- **NM components** (Work Stream 1 output, `01-NM-components.md`):
-  the 3rd Block Model dimension. The canonical enum
-  (`StepCategory`) lives in the syntax tracer; WS1 wires it into
-  `lenses/types.ts`. Read `01-NM-components.md` for
+- **NM components** (Work Stream 1 output, `01-NM-components.md`): the 3rd Block
+  Model dimension. The canonical enum (`StepCategory`) lives in the syntax
+  tracer; WS1 wires it into `lenses/types.ts`. Read `01-NM-components.md` for
   the contract.
 
 ## Context
 
-> **Path note.** The recommender lives at
-> `orchestrate/lib/recommender/` (relocated to its post-refactor
-> home in commit `9df535e`, 2026-05-04). This handoff specs the
-> module's impl against this path.
+> **Path note.** The recommender lives at `orchestrate/lib/recommender/`
+> (relocated to its post-refactor home in commit `9df535e`, 2026-05-04). This
+> handoff specs the module's impl against this path.
 
 ### What this work stream does
 
-This work stream builds one pure TS module:
-`orchestrate/lib/recommender/`. The recommender takes the frozen
-`embodiment` (a `Snippet` instance produced by `embody()`) plus the
-registered lens roster, runs each applicable lens's
-`recommend(embodiment)`, organizes the results into a
-`RecommendationGrid` indexed by the 3D Block Model dimensions, and
-returns it. Pure TS, no React, no DOM.
+This work stream builds one pure TS module: `orchestrate/lib/recommender/`. The
+recommender takes the frozen `embodiment` (a `Snippet` instance produced by
+`embody()`) plus the registered lens roster, runs each applicable lens's
+`recommend(embodiment)`, organizes the results into a `RecommendationGrid`
+indexed by the 3D Block Model dimensions, and returns it. Pure TS, no React, no
+DOM.
 
-Internal analysis helpers (NM-component detection, complexity signals,
-etc.) live alongside the recommender's entry-point inside
-`orchestrate/lib/recommender/`. There is **no separate
-`lib/analysis/` module and no `AnalysisReport` hand-off type**;
-analysis is the recommender's internal plumbing. Lens authors
-receive the frozen `embodiment` directly via
-`applicableTo(embodiment)` and `recommend(embodiment)` and read
-whatever embodiment surfaces they need (`parse.ast`, `status.*`,
-`static.features`).
+Internal analysis helpers (NM-component detection, complexity signals, etc.)
+live alongside the recommender's entry-point inside
+`orchestrate/lib/recommender/`. There is **no separate `lib/analysis/` module
+and no `AnalysisReport` hand-off type**; analysis is the recommender's internal
+plumbing. Lens authors receive the frozen `embodiment` directly via
+`applicableTo(embodiment)` and `recommend(embodiment)` and read whatever
+embodiment surfaces they need (`parse.ast`, `status.*`, `static.features`).
 
 The recommender does not re-parse code — it walks the already-frozen
-`embodiment.parse.ast`. Source-string input is the orchestrator's
-responsibility (it calls `embody(snippet)` before invoking the
-recommender).
+`embodiment.parse.ast`. Source-string input is the orchestrator's responsibility
+(it calls `embody(snippet)` before invoking the recommender).
 
-This is the implementation of Malaise & Signer (2023)'s Figure 3
-architecture (applicability filter + ranking engine); see
+This is the implementation of Malaise & Signer (2023)'s Figure 3 architecture
+(applicability filter + ranking engine); see
 [`../DOCS.md` § Recommender = Applicability filter + Ranking engine](../DOCS.md#recommender--applicability-filter--ranking-engine).
 
 ### Why it matters
@@ -107,11 +100,11 @@ RecommendationGrid (3D: level x scope x NM components)
 orchestrator renders recommendation UI
 ```
 
-The recommender's internal analysis runs **lazily** — only when the
-learner opens the recommendation panel, not on every keystroke. There is
-no separate `AnalysisReport` hand-off type; analysis is an internal
-helper inside `lib/recommender/`. Lenses receive the frozen `embodiment`
-directly via `applicableTo(embodiment)` and `recommend(embodiment)`.
+The recommender's internal analysis runs **lazily** — only when the learner
+opens the recommendation panel, not on every keystroke. There is no separate
+`AnalysisReport` hand-off type; analysis is an internal helper inside
+`lib/recommender/`. Lenses receive the frozen `embodiment` directly via
+`applicableTo(embodiment)` and `recommend(embodiment)`.
 
 ### The three-tier lens classification
 
@@ -145,39 +138,36 @@ lens's `recommend()` can gate on it.
 
 ### Recommender signals
 
-The recommender's internal analysis reads from the frozen `embodiment`.
-Each lens's `applicableTo(embodiment)` + `recommend(embodiment)` reads
-the same surfaces. The signals available:
+The recommender's internal analysis reads from the frozen `embodiment`. Each
+lens's `applicableTo(embodiment)` + `recommend(embodiment)` reads the same
+surfaces. The signals available:
 
 1. **Parse / eval status** -- `embodiment.status.{tokenized, parsed, created}`
-   booleans (per `embody/types.ts`). Gates the three-tier classification
-   above; `applicableTo` returns false when the relevant status is false.
+   booleans (per `embody/types.ts`). Gates the three-tier classification above;
+   `applicableTo` returns false when the relevant status is false.
 
 2. **Code length** -- Lines, characters, statements. Shorter snippets support
    higher blanks difficulty; parsons works best around 8-15 lines; trace tables
    become unwieldy past ~20 lines. Available via the embodiment's parse output.
 
-3. **NM components present** -- Which of the 10 syntax-tracer
-   categories appear in the code, detected via static AST mapping
-   (no execution). The canonical enum is `StepCategory` at
-   `embody/lib/evaluating/trace/syntax/types.ts`. Examples: snippet has only
-   `expression` + `resolve` → simpler lenses; has `write` +
-   `initialization` → trace tables high-value; has `scope` +
-   `control-flow` → variables lens relevant; has `emit` → execution-
-   focused lenses. NM components detected = the set of step
-   categories present in the snippet; this set is UNORDERED (no
-   ordinal level is derived from it).
+3. **NM components present** -- Which of the 10 syntax-tracer categories appear
+   in the code, detected via static AST mapping (no execution). The canonical
+   enum is `StepCategory` at `embody/lib/evaluating/trace/syntax/types.ts`.
+   Examples: snippet has only `expression` + `resolve` → simpler lenses; has
+   `write` + `initialization` → trace tables high-value; has `scope` +
+   `control-flow` → variables lens relevant; has `emit` → execution- focused
+   lenses. NM components detected = the set of step categories present in the
+   snippet; this set is UNORDERED (no ordinal level is derived from it).
 
 4. **Embodiment features** -- `embodiment.static.features` (per
-   `embody/types.ts:248-261`) is the canonical "what language features
-   does this snippet use" surface. Boolean record covering JEJ
-   constructs (variables, control-flow, IO calls, etc.). Drives both
-   WHICH lenses are relevant and WHAT CONFIG within each lens.
+   `embody/types.ts:248-261`) is the canonical "what language features does this
+   snippet use" surface. Boolean record covering JEJ constructs (variables,
+   control-flow, IO calls, etc.). Drives both WHICH lenses are relevant and WHAT
+   CONFIG within each lens.
 
-5. **Author overrides** -- `lenses.json` cascade or `@study-lens`
-   directives can constrain which lenses the recommender offers. The
-   free-exploration panel (Q-I dropdown) is always available regardless
-   of constraints.
+5. **Author overrides** -- `lenses.json` cascade or `@study-lens` directives can
+   constrain which lenses the recommender offers. The free-exploration panel
+   (Q-I dropdown) is always available regardless of constraints.
 
 ### The Recommendation type
 
@@ -212,61 +202,58 @@ organizes them into a 3D grid:
 
 - Dimension 1: **Level** (text surface, program execution, function/purpose)
 - Dimension 2: **Scope** (atoms, blocks, relations, macro)
-- Dimension 3: **NM components** (the 10 syntax-tracer categories
-  from `StepCategory`, unordered; see `01-NM-components.md`)
+- Dimension 3: **NM components** (the 10 syntax-tracer categories from
+  `StepCategory`, unordered; see `01-NM-components.md`)
 
 Not every cell needs filling -- only cells matching the code's features and
 available lens suggestions are populated.
 
 ### The socratizing refactor connection
 
-The `orchestrate/lib/socratizing/` module does its own snippet
-analysis to generate Socratic prompts. A future refactor (per
-`DOCS.md` § backlog) makes it consume the frozen `embodiment`
-directly — same single-source-of-truth pattern as the recommender.
-Both consume the embodiment; neither depends on a shared
-intermediate type. The recommender's internal analysis helpers may
-become reusable utilities under `orchestrate/lib/*` if a second
-consumer (socratizing) finds them useful, but that's a future-
-refactor concern, not WS2's scope.
+The `orchestrate/lib/socratizing/` module does its own snippet analysis to
+generate Socratic prompts. A future refactor (per `DOCS.md` § backlog) makes it
+consume the frozen `embodiment` directly — same single-source-of-truth pattern
+as the recommender. Both consume the embodiment; neither depends on a shared
+intermediate type. The recommender's internal analysis helpers may become
+reusable utilities under `orchestrate/lib/*` if a second consumer (socratizing)
+finds them useful, but that's a future- refactor concern, not WS2's scope.
 
 ### What's decided
 
 - Analysis is lazy (runs only when recommender panel opens)
 - Analysis is JEJ-only (no general JS analysis)
 - Recommender is pure utility (no UI, no React, no DOM)
-- Three-tier lens classification (text-only, AST-dependent, dynamic),
-  gated via `applicableTo(embodiment)` reading `status.{parsed,created}`
-- `applicableTo` + `recommend` both live on each lens (self-describing,
-  per `lenses/types.ts`). The recommender does NOT have hardcoded
-  knowledge of individual lenses.
-- Lenses receive the frozen `embodiment` directly; analysis is internal
-  to `orchestrate/lib/recommender/`, not a separate hand-off type.
-- 3D Block Model space organizes recommendations (level × scope × NM
-  components per WS1 + DOCS.md § 3D Block Model space).
-- **No transforms tier** — transforms are a lens-internal concern
-  (per DOCS.md § Locked decisions; lenses are stateful mini web apps).
+- Three-tier lens classification (text-only, AST-dependent, dynamic), gated via
+  `applicableTo(embodiment)` reading `status.{parsed,created}`
+- `applicableTo` + `recommend` both live on each lens (self-describing, per
+  `lenses/types.ts`). The recommender does NOT have hardcoded knowledge of
+  individual lenses.
+- Lenses receive the frozen `embodiment` directly; analysis is internal to
+  `orchestrate/lib/recommender/`, not a separate hand-off type.
+- 3D Block Model space organizes recommendations (level × scope × NM components
+  per WS1 + DOCS.md § 3D Block Model space).
+- **No transforms tier** — transforms are a lens-internal concern (per DOCS.md §
+  Locked decisions; lenses are stateful mini web apps).
 
 ### What's still open
 
 - Exact `RecommendationGrid` shape (to be defined during DDD)
 - Relevance score semantics (within-lens only? or cross-lens comparable?)
 - How to handle author overrides in the recommender (filter vs. reweight)
-- Whether the recommender's internal analysis should parse the AST itself
-  or reuse `embodiment.parse.ast` directly (most likely the latter — the
+- Whether the recommender's internal analysis should parse the AST itself or
+  reuse `embodiment.parse.ast` directly (most likely the latter — the
   embodiment's parse output is canonical and frozen)
 
 ## Dependencies
 
 ### This stream depends on
 
-- **Work Stream 1 (`01-NM-components.md`)**: supplies the 3rd Block
-  Model dimension (the `StepCategory` enum from the syntax tracer).
-  WS1 is small — it wires `StepCategory` into `lenses/types.ts`
-  and confirms the 10-category list. WS1 is ready now (the syntax
-  tracer's Phase 0 has stabilized the outer categories); WS2 can
-  start Phase 0 (DDD) immediately and consume the enum during
-  Phase 1 implementation.
+- **Work Stream 1 (`01-NM-components.md`)**: supplies the 3rd Block Model
+  dimension (the `StepCategory` enum from the syntax tracer). WS1 is small — it
+  wires `StepCategory` into `lenses/types.ts` and confirms the 10-category list.
+  WS1 is ready now (the syntax tracer's Phase 0 has stabilized the outer
+  categories); WS2 can start Phase 0 (DDD) immediately and consume the enum
+  during Phase 1 implementation.
 
 ### Other streams that depend on this
 
@@ -274,46 +261,42 @@ refactor concern, not WS2's scope.
   lazily when the recommendation panel opens. The orchestrator needs the
   `RecommendationGrid` type to render the spiral/grid UI.
 - **Work Stream 4 (Lens Migration)**: each lens implements
-  `applicableTo(embodiment)` and `recommend(embodiment)` against the
-  frozen `Snippet` type. Lens authors do NOT consume a separate
-  `AnalysisReport` — they read the embodiment's surfaces directly
-  (`status.*`, `parse.ast`, `static.features`). See
-  [`../lenses/types.ts`](../lenses/types.ts) for the canonical contract.
+  `applicableTo(embodiment)` and `recommend(embodiment)` against the frozen
+  `Snippet` type. Lens authors do NOT consume a separate `AnalysisReport` — they
+  read the embodiment's surfaces directly (`status.*`, `parse.ast`,
+  `static.features`). See [`../lenses/types.ts`](../lenses/types.ts) for the
+  canonical contract.
 
 ## Non-negotiable constraints
 
 From the master plan:
 
 1. **Pure TS, no React, no DOM.** The recommender lives in
-   `orchestrate/lib/recommender/`; it is consumed by the
-   orchestrator (React) but must be testable without React.
-2. **Lazy analysis.** The recommender's internal analysis runs only when
-   the recommendation panel opens, NOT on every edit.
+   `orchestrate/lib/recommender/`; it is consumed by the orchestrator (React)
+   but must be testable without React.
+2. **Lazy analysis.** The recommender's internal analysis runs only when the
+   recommendation panel opens, NOT on every edit.
 3. **Three-tier lens classification.** Lens-author-implemented
    `applicableTo(embodiment)` gates which lenses can be recommended via
-   `embodiment.status.{parsed,created}`. Text-only lenses always return
-   true. AST-dependent / dynamic lenses gate on the relevant status.
-4. **Self-describing lenses.** Each lens's `applicableTo` +
-   `recommend` declare its own applicability and relevance. The
-   recommender does NOT have hardcoded knowledge of individual lenses —
-   it collects from registered lenses.
+   `embodiment.status.{parsed,created}`. Text-only lenses always return true.
+   AST-dependent / dynamic lenses gate on the relevant status.
+4. **Self-describing lenses.** Each lens's `applicableTo` + `recommend` declare
+   its own applicability and relevance. The recommender does NOT have hardcoded
+   knowledge of individual lenses — it collects from registered lenses.
 5. **No implementation in plans.** Plans describe BEHAVIOR and INTENT.
    TypeScript type declarations are OK. Function bodies are not.
-6. **Deep freeze all return values.** `RecommendationGrid` must be
-   frozen before returning. The embodiment is already frozen by
-   `embody()`.
+6. **Deep freeze all return values.** `RecommendationGrid` must be frozen before
+   returning. The embodiment is already frozen by `embody()`.
 
 ## Phase 0 checklist (from AGENTS.md)
 
-The recommender is one module (`orchestrate/lib/recommender/`).
-Internal analysis helpers live alongside it. Complete every step in
-order. Do not skip any step. Do not start Phase 1 until all 7 steps
-are done.
+The recommender is one module (`orchestrate/lib/recommender/`). Internal
+analysis helpers live alongside it. Complete every step in order. Do not skip
+any step. Do not start Phase 1 until all 7 steps are done.
 
 ### Phase 0 for `orchestrate/lib/recommender/`
 
-- [ ] **0.1 Establish ubiquitous language** -- Key terms to define
-      precisely:
+- [ ] **0.1 Establish ubiquitous language** -- Key terms to define precisely:
   - RecommendationGrid (the output artifact, 3D structure)
   - Recommendation (individual lens suggestion with config)
   - Relevance score (0-1, meaning and comparability)
@@ -321,40 +304,37 @@ are done.
     NM-components dimension)
   - NM component detection (how components are identified from
     `embodiment.parse.ast`)
-  - Complexity signals (nesting depth, variable count, branch count) —
-    derived from the embodiment, internal to the recommender
-  - Author override (constraint on available recommendations)
-  Watch for: "feature" (overloaded term — NM component? syntax feature?
-  language feature?). The canonical "language feature" surface is
-  `embodiment.static.features`; reserve "NM component" for the 10
-  `StepCategory` set.
+  - Complexity signals (nesting depth, variable count, branch count) — derived
+    from the embodiment, internal to the recommender
+  - Author override (constraint on available recommendations) Watch for:
+    "feature" (overloaded term — NM component? syntax feature? language
+    feature?). The canonical "language feature" surface is
+    `embodiment.static.features`; reserve "NM component" for the 10
+    `StepCategory` set.
 
-- [ ] **0.2 Update README.md** -- for `orchestrate/lib/recommender/`.
-      What the module does, where it fits, what it owns, what it does
-      NOT own (lens-specific knowledge is the lens's job via
-      `applicableTo` + `recommend`).
+- [ ] **0.2 Update README.md** -- for `orchestrate/lib/recommender/`. What the
+      module does, where it fits, what it owns, what it does NOT own
+      (lens-specific knowledge is the lens's job via `applicableTo` +
+      `recommend`).
 
 - [ ] **0.3 AR-1 design challenge** -- Focus areas:
   - Is the recommender doing too much? (it should NOT own lens knowledge)
   - Is the 3D grid the right structure? Could a flat list suffice?
-  - Are the NM component names aligned with `notional-machine.md` and
-    the `StepCategory` enum at
-    `embody/lib/evaluating/trace/syntax/types.ts`?
-  - Provide: README, notional-machine.md, `lenses/types.ts`,
-    `embody/types.ts`.
+  - Are the NM component names aligned with `notional-machine.md` and the
+    `StepCategory` enum at `embody/lib/evaluating/trace/syntax/types.ts`?
+  - Provide: README, notional-machine.md, `lenses/types.ts`, `embody/types.ts`.
 
 - [ ] **0.4 Update types.ts** -- Confirm `RecommendationGrid` shape;
-      `Recommendation` and `BlockModelCell` are already in
-      `lenses/types.ts` and migrate to
-      `orchestrate/lib/recommender/types.ts` per that file's JSDoc.
+      `Recommendation` and `BlockModelCell` are already in `lenses/types.ts` and
+      migrate to `orchestrate/lib/recommender/types.ts` per that file's JSDoc.
 
-- [ ] **0.5 Write DOCS.md architectural sketch** -- Execution phases:
-      (1) collect applicable lenses via `applicableTo(embodiment)`,
-      (2) call `recommend(embodiment)` on each applicable lens,
-      (3) organize into 3D grid, (4) apply author overrides.
+- [ ] **0.5 Write DOCS.md architectural sketch** -- Execution phases: (1)
+      collect applicable lenses via `applicableTo(embodiment)`, (2) call
+      `recommend(embodiment)` on each applicable lens, (3) organize into 3D
+      grid, (4) apply author overrides.
 
-- [ ] **0.6 AR-2 sketch challenge** -- Is the sketch at the right
-      abstraction? Are phases the right granularity?
+- [ ] **0.6 AR-2 sketch challenge** -- Is the sketch at the right abstraction?
+      Are phases the right granularity?
 
 - [ ] **0.7 Review & resolve** -- Can you predict the implementation shape?
 
@@ -363,49 +343,45 @@ are done.
 ## Phase 1 increment plan
 
 The recommender consumes the frozen `embodiment` (a `Snippet`) and the
-registered lens roster. Internal analysis helpers extract whatever
-signals the recommender needs from `embodiment.parse.ast`,
-`embodiment.status.*`, and `embodiment.static.features`.
+registered lens roster. Internal analysis helpers extract whatever signals the
+recommender needs from `embodiment.parse.ast`, `embodiment.status.*`, and
+`embodiment.static.features`.
 
 ### Internal-analysis-helpers increments
 
-- [ ] **Increment 1**: NM-component detection -- `expression` +
-      `resolve` categories via static AST mapping. Input:
-      `embodiment.parse.ast`. Output: presence flags. ZOMBIES:
-      empty program, single literal, binary op.
-- [ ] **Increment 2**: NM-component detection -- `initialization` +
-      `for-init` + `write`. Variable declarations and reassignments.
-- [ ] **Increment 3**: NM-component detection -- `statement` +
-      `scope` + `control-flow`. Block boundaries and flow constructs.
-- [ ] **Increment 4**: NM-component detection -- `emit` + `error`.
-      I/O calls (prompt/alert/confirm/console.*) and error-prone
-      constructs.
-- [ ] **Increment 5**: Complexity signals. Nesting depth, variable
-      count, branch count.
-- [ ] **Increment 6**: `nmComponents` assembly -- union the
-      per-category presence flags into a single unordered set
-      matching the canonical `StepCategory` enum. No ordinal level
-      is derived.
+- [ ] **Increment 1**: NM-component detection -- `expression` + `resolve`
+      categories via static AST mapping. Input: `embodiment.parse.ast`. Output:
+      presence flags. ZOMBIES: empty program, single literal, binary op.
+- [ ] **Increment 2**: NM-component detection -- `initialization` + `for-init` +
+      `write`. Variable declarations and reassignments.
+- [ ] **Increment 3**: NM-component detection -- `statement` + `scope` +
+      `control-flow`. Block boundaries and flow constructs.
+- [ ] **Increment 4**: NM-component detection -- `emit` + `error`. I/O calls
+      (prompt/alert/confirm/console.\*) and error-prone constructs.
+- [ ] **Increment 5**: Complexity signals. Nesting depth, variable count, branch
+      count.
+- [ ] **Increment 6**: `nmComponents` assembly -- union the per-category
+      presence flags into a single unordered set matching the canonical
+      `StepCategory` enum. No ordinal level is derived.
 
 ### Recommender entry-point increments
 
-- [ ] **Increment 7**: Filter applicable lenses. Input: `embodiment` +
-      lens roster. Output: lenses where `applicableTo(embodiment) === true`.
-      ZOMBIES: empty roster, one applicable, mixed applicable/inapplicable.
+- [ ] **Increment 7**: Filter applicable lenses. Input: `embodiment` + lens
+      roster. Output: lenses where `applicableTo(embodiment) === true`. ZOMBIES:
+      empty roster, one applicable, mixed applicable/inapplicable.
 - [ ] **Increment 8**: Collect recommendations from a single applicable lens.
       Input: `embodiment` + one applicable lens. Output: that lens's
-      `recommend(embodiment)` output. ZOMBIES: lens returns empty array,
-      one recommendation, multiple.
+      `recommend(embodiment)` output. ZOMBIES: lens returns empty array, one
+      recommendation, multiple.
 - [ ] **Increment 9**: Collect from multiple applicable lenses. Verify
       deduplication and that all are queried.
 - [ ] **Increment 10**: Organize into 3D Block Model grid. Place each
       recommendation at its `blockModelCell` coordinates (level × scope ×
       nmComponents). ZOMBIES: empty grid, one cell, multiple cells.
-- [ ] **Increment 11**: Author overrides. Filter/constrain
-      recommendations based on override config (lenses.json + per-fence
-      `@study-lens` directives).
-- [ ] **Increment 12**: Full `RecommendationGrid` assembly. Integration
-      test with multiple lenses and a realistic embodiment.
+- [ ] **Increment 11**: Author overrides. Filter/constrain recommendations based
+      on override config (lenses.json + per-fence `@study-lens` directives).
+- [ ] **Increment 12**: Full `RecommendationGrid` assembly. Integration test
+      with multiple lenses and a realistic embodiment.
 
 For each increment, follow the full TDD cycle from AGENTS.md:
 
@@ -452,24 +428,22 @@ For each increment, follow the full TDD cycle from AGENTS.md:
 2. **Type checking**: `npm run type-check` -- no errors
 3. **Lint**: `npm run lint` -- clean
 4. **Integration test scenario**: Create a test with a realistic JEJ snippet
-   (e.g., `let x = 5; let y = x + 1; if (y > 3) { console.log(y); }`),
-   build the embodiment via `embody()`, then call the recommender with
-   the embodiment plus mock lenses that have `applicableTo` +
-   `recommend` functions, and verify the `RecommendationGrid` has
-   recommendations in the expected Block Model cells.
-5. **Parse error scenario**: Run the recommender on a syntactically
-   broken snippet (`status.parsed === false`); verify only Tier 1
-   (text-only) lenses pass `applicableTo` and end up in the grid.
-6. **Documentation review**: read README, DOCS.md, types.ts —
-   a developer can understand the full pipeline from embodiment to
-   recommendation grid without external context.
+   (e.g., `let x = 5; let y = x + 1; if (y > 3) { console.log(y); }`), build the
+   embodiment via `embody()`, then call the recommender with the embodiment plus
+   mock lenses that have `applicableTo` + `recommend` functions, and verify the
+   `RecommendationGrid` has recommendations in the expected Block Model cells.
+5. **Parse error scenario**: Run the recommender on a syntactically broken
+   snippet (`status.parsed === false`); verify only Tier 1 (text-only) lenses
+   pass `applicableTo` and end up in the grid.
+6. **Documentation review**: read README, DOCS.md, types.ts — a developer can
+   understand the full pipeline from embodiment to recommendation grid without
+   external context.
 
 ### What success looks like
 
 A fresh agent working on Work Stream 3 (orchestrator) can import the
-recommender, call it with an `embodiment` and registered lenses, and
-receive a `RecommendationGrid` to render. A fresh agent working on
-Work Stream 4 (lens migration) can import `Snippet` from
-`embody/types.ts` and implement `applicableTo(embodiment)` +
-`recommend(embodiment)` on each lens against the typed contract in
-`lenses/types.ts`.
+recommender, call it with an `embodiment` and registered lenses, and receive a
+`RecommendationGrid` to render. A fresh agent working on Work Stream 4 (lens
+migration) can import `Snippet` from `embody/types.ts` and implement
+`applicableTo(embodiment)` + `recommend(embodiment)` on each lens against the
+typed contract in `lenses/types.ts`.

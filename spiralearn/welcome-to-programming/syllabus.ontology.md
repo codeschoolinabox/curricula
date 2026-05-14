@@ -14,8 +14,8 @@
 > - `syllabus.md` — the existing prose course (read-only for the current
 >   redraft)
 >
-> **Status**: end-state document. Status / phase / hedging belong in git
-> history (commit log), not here.
+> **Status**: end-state document. Status / phase / hedging belong in git history
+> (commit log), not here.
 >
 > **Voice**: reference-neutral; un-prose-y. Tables, lists, mermaid only where
 > relationships need it, `<details>`-wrapped visuals with relative-importance
@@ -28,8 +28,8 @@
 
 - [Part A — Frame](#part-a--frame)
   - [§1 Foundational principles](#1-foundational-principles)
-  - [§2 Geometry — three domains, two bridging activities](#2-geometry--three-domains-two-bridging-activities)
-  - [§3 The characters — V and F](#3-the-characters--v-and-f)
+  - [§2 The characters — V and F](#2-the-characters--v-and-f)
+  - [§3 Geometry — three domains, two bridging activities](#3-geometry--three-domains-two-bridging-activities)
   - [§4 The 5-tier ATT](#4-the-5-tier-att)
 - [Part B — Design principles](#part-b--design-principles)
   - [B.1 Cogsci mechanisms](#b1-cogsci-mechanisms)
@@ -42,25 +42,26 @@
   - [§15 Self-twinning Bildung arc](#15-self-twinning-bildung-arc)
 - [Part D — Cogsci grounding](#part-d--cogsci-grounding)
   - [§16 Friston / predictive processing](#16-friston--predictive-processing)
-  - [§17 AI-adoption model alignment with V/F](#17-ai-adoption-model-alignment-with-vf)
+  - [§17 Strata of a software system — refining §3's geometry](#17-strata-of-a-software-system--refining-3s-geometry)
 - [Part E — The LLM shift](#part-e--the-llm-shift)
-  - [§18 Code-as-UI / verification limit / agentic emergence](#18-code-as-ui--verification-limit--agentic-emergence)
-  - [§19 Bret Victor decomposition](#19-bret-victor-decomposition)
+  - [§18 Substrate substitution at artifact-logic — what changes about the artifact](#18-substrate-substitution-at-artifact-logic--what-changes-about-the-artifact)
+  - [§19 The LLM shift, workflow-side — how AI participates in your work](#19-the-llm-shift-workflow-side--how-ai-participates-in-your-work)
+  - [§20 Bret Victor decomposition](#20-bret-victor-decomposition)
 - [Part F — Curriculum machinery](#part-f--curriculum-machinery)
-  - [§20 Reading frameworks — PBIS, static/dynamic](#20-reading-frameworks--pbis-staticdynamic)
-  - [§21 Computational vocabulary axes](#21-computational-vocabulary-axes)
-  - [§22 Chapter architecture](#22-chapter-architecture)
+  - [§21 Reading frameworks — PBIS, static/dynamic](#21-reading-frameworks--pbis-staticdynamic)
+  - [§22 Computational vocabulary axes](#22-computational-vocabulary-axes)
+  - [§23 Chapter architecture](#23-chapter-architecture)
 - [Part G — Infrastructure (the JEJ chain)](#part-g--infrastructure-the-jej-chain)
-  - [§23 JEJ → NM → embody → lenses → orchestrator](#23-jej--nm--embody--lenses--orchestrator)
+  - [§24 JEJ → NM → embody → lenses → orchestrator](#24-jej--nm--embody--lenses--orchestrator)
 - [Part H — Teaching apparatus](#part-h--teaching-apparatus)
-  - [§24 The composer/virtuoso/mechanism metaphor](#24-the-composervirtuosomechanism-metaphor)
-  - [§25 Symbology](#25-symbology)
+  - [§25 The composer/virtuoso/mechanism metaphor](#25-the-composervirtuosomechanism-metaphor)
+  - [§26 Symbology](#26-symbology)
 - [Part I — Honoring commitments](#part-i--honoring-commitments)
-  - [§26 The mu-tribute](#26-the-mu-tribute)
-  - [§27 Voice / style commitments](#27-voice--style-commitments)
-  - [§28 Structural commitments](#28-structural-commitments)
+  - [§27 The mu-tribute](#27-the-mu-tribute)
+  - [§28 Voice / style commitments](#28-voice--style-commitments)
+  - [§29 Structural commitments](#29-structural-commitments)
 - [Part J — Out of scope](#part-j--out-of-scope)
-  - [§29 What's deferred to follow-on courses](#29-whats-deferred-to-follow-on-courses)
+  - [§30 What's deferred to follow-on courses](#30-whats-deferred-to-follow-on-courses)
 - [Source materials](#source-materials)
 
 ---
@@ -145,64 +146,17 @@ unitary things).
 
 ---
 
-### §2 Geometry — three domains, two bridging activities
-
-```text
-domain  ←design thinking→  the computational artifact  ←computational thinking→  CS / theory
-   │             │                       │                          │                    │
- (V's       (V's bridge:            (where V and F           (F's bridge:              (F's
-  outer        practice              both engage —             practice                 outer
-  endpoint)    of design              software,                 of computational         endpoint)
-               thinking)              hardware,                 thinking)
-                                      hybrids)
-```
-
-#### Three domains (where things live)
-
-- **Domain** — the world. Users, contexts, situations, problems. V's outer
-  endpoint; deepens in _Welcome to Design_.
-- **The computational artifact** — what's made. Software, hardware, hybrids
-  (wearables, embedded, embodied). Both V and F engage it; this is the trading
-  zone where their practices structurally meet.
-- **CS / theory** — formal abstractions. Algorithms, complexity, correctness.
-  F's outer endpoint; deepens in _Welcome to Algorithms_.
-
-#### Two bridging activities (the thinking that traverses)
-
-- **Design thinking** — V's bridging activity. V twins the user; bridges domain
-  ↔ computational artifact through design thinking.
-- **Computational thinking** — F's bridging activity. F twins the NM (notional
-  machine of whatever artifact substrate is in play); bridges computational
-  artifact ↔ CS/theory through computational thinking.
-
-**Twinning is what makes the bridging activity _thinking_ rather than mere
-process.** Design _thinking_ requires twinning the user; without the user-twin,
-what's happening is _design process_ (wireframes, personas, A/B tests,
-design-thinking steps) but not design _thinking_. Same on F's side:
-_computational thinking_ requires twinning the NM; without the NM-twin, what's
-happening is _computational process_ (unit tests, patterns, refactoring moves)
-but not computational _thinking_. See §3 for the failure-mode elaboration.
-
-#### Hardware: in the mix; perpendicularity deferred
-
-Hardware lives **inside the computational artifact** with software and hybrids.
-Whether hardware is _also_ a perpendicular axis is deferred for later
-litigation. What matters now: hardware is in the mix; V and F both engage it as
-part of the central domain.
-
----
-
-### §3 The characters — V and F
+### §2 The characters — V and F
 
 V and F are **substrate-agnostic bridging personae**. The framing extends from
 JS-in-browser to wearables, tangibles, embedded, embodied — anywhere a
 computational artifact gets designed and engineered.[^wtf-origin]
 
-[^wtf-origin]: The course's name has a happy origin: in an early planning
-    conversation someone noted that "Welcome to Programming" reads as "WtF."
-    The author leaned in. The whole curriculum's ontology — V/F as
-    Vibetoader/Frogrammer, the symbology, the playful tone — grew from that
-    joke.
+[^wtf-origin]:
+    The course's name has a happy origin: in an early planning conversation
+    someone noted that "Welcome to Programming" reads as "WtF." The author
+    leaned in. The whole curriculum's ontology — V/F as Vibetoader/Frogrammer,
+    the symbology, the playful tone — grew from that joke.
 
 | Character         | Twin (non-delegable) | Bridging activity      | Substrate range                                                           |
 | ----------------- | -------------------- | ---------------------- | ------------------------------------------------------------------------- |
@@ -264,6 +218,15 @@ above:
 Three of the four corners get curriculum-chapter mappings: Ch2 = F, Ch3 = V,
 Ch4 + Ch5 = both. The fourth corner (no twin) is the starting position the
 curriculum brings learners _out of_.
+
+> **Flipside reading (with §17 artifact-faces).** The both-twins state names
+> the **perceiving** — one perceiver holding user-twin + NM-twin
+> simultaneously. §17 names the **perceived** — one artifact with two material
+> faces, artifact-logic (the F-face) + artifact-surface (the V-face). These
+> are flipsides of the same coin: dual-twinning is the perceiving, two-faced
+> artifact is the perceived; they co-constitute. §2 stays the canonical home
+> for the perceiver-side reading; §17 stays the canonical home for the
+> perceived-side reading.
 
 Note on _vibe coding_ (Karpathy): the term names LLM-mediated building without
 reading the code. It can be done with a user-twin (LLM-collaborative Vibetoading
@@ -369,25 +332,25 @@ of LLM-collaborative Frogramming.
 V and F engage iteratively, learning each other's craft as they go. V proposes
 use-case experiences (_"imagine an interaction where…"_); F discovers what the
 substrate affords (_"this becomes possible, and it also enables…"_). Each turn
-shifts what V can propose and what F can build. The exchange is open-ended —
-no fixed number of beats, no required rhythm. Over time, V and F merge in the
+shifts what V can propose and what F can build. The exchange is open-ended — no
+fixed number of beats, no required rhythm. Over time, V and F merge in the
 practitioner; Ch5's snippetry is where the merging crystallizes into a single
-integrated practice (the both-twins corner of the §3 2×2, in its merged form).
+integrated practice (the both-twins corner of the §2 2×2, in its merged form).
 
-Engaging in these exchanges is how each side picks up the other's craft:
-V learns what's afford-able through F's iterative discoveries; F learns to
-read user-experience signals through V's iterative proposals. The dynamic
-recurs in historical pairs (Faraday/Maxwell, Mendel/breeders).
+Engaging in these exchanges is how each side picks up the other's craft: V
+learns what's afford-able through F's iterative discoveries; F learns to read
+user-experience signals through V's iterative proposals. The dynamic recurs in
+historical pairs (Faraday/Maxwell, Mendel/breeders).
 
 #### V/F vs. Composer/Virtuoso/Mechanism/Audience cast
 
-The Composer/Virtuoso/Mechanism/Audience cast (§24) is **teaching apparatus**
-— explicitly not structural guide, explicitly not the canonical home for any
+The Composer/Virtuoso/Mechanism/Audience cast (§25) is **teaching apparatus** —
+explicitly not structural guide, explicitly not the canonical home for any
 learning objective. V and F are **practice-stances** the student inhabits and
 are tied to LOs. The two are **orthogonal**:
 
-- A _stance_ (V or F) and a _role_ (Composer / Virtuoso / Mechanism /
-  Audience) coexist in any moment of work
+- A _stance_ (V or F) and a _role_ (Composer / Virtuoso / Mechanism / Audience)
+  coexist in any moment of work
 - V/F say which audience the practitioner twins
 - Composer/Virtuoso say which phase of composition the practitioner is in
 
@@ -441,9 +404,56 @@ meta-pattern.
 ![The big picture plus AI](./assets/the-big-picture-plus-ai.png)
 
 AI sits _outside_ the rhetorical circle — exactly the virtuoso's position in the
-teaching-apparatus cast (§24).
+teaching-apparatus cast (§25).
 
 </details>
+
+---
+
+### §3 Geometry — three domains, two bridging activities
+
+```text
+domain  ←design thinking→  the computational artifact  ←computational thinking→  CS / theory
+   │             │                       │                          │                    │
+ (V's       (V's bridge:            (where V and F           (F's bridge:              (F's
+  outer        practice              both engage —             practice                 outer
+  endpoint)    of design              software,                 of computational         endpoint)
+               thinking)              hardware,                 thinking)
+                                      hybrids)
+```
+
+#### Three domains (where things live)
+
+- **Domain** — the world. Users, contexts, situations, problems. V's outer
+  endpoint; deepens in _Welcome to Design_.
+- **The computational artifact** — what's made. Software, hardware, hybrids
+  (wearables, embedded, embodied). Both V and F engage it; this is the trading
+  zone where their practices structurally meet.
+- **CS / theory** — formal abstractions. Algorithms, complexity, correctness.
+  F's outer endpoint; deepens in _Welcome to Algorithms_.
+
+#### Two bridging activities (the thinking that traverses)
+
+- **Design thinking** — V's bridging activity. V twins the user; bridges domain
+  ↔ computational artifact through design thinking.
+- **Computational thinking** — F's bridging activity. F twins the NM (notional
+  machine of whatever artifact substrate is in play); bridges computational
+  artifact ↔ CS/theory through computational thinking.
+
+**Twinning is what makes the bridging activity _thinking_ rather than mere
+process.** Design _thinking_ requires twinning the user; without the user-twin,
+what's happening is _design process_ (wireframes, personas, A/B tests,
+design-thinking steps) but not design _thinking_. Same on F's side:
+_computational thinking_ requires twinning the NM; without the NM-twin, what's
+happening is _computational process_ (unit tests, patterns, refactoring moves)
+but not computational _thinking_. See §2 for the failure-mode elaboration.
+
+#### Hardware: in the mix; perpendicularity deferred
+
+Hardware lives **inside the computational artifact** with software and hybrids.
+Whether hardware is _also_ a perpendicular axis is deferred for later
+litigation. What matters now: hardware is in the mix; V and F both engage it as
+part of the central domain.
 
 ---
 
@@ -661,7 +671,7 @@ Open Education + Forkability).
 
 **The Reusability Paradox is not a problem to solve — it's the productive
 tension the course lives inside.** `just-enough/javascript/` (the JEJ chain,
-§23) is the reusable infrastructure side; the manifesto / ontology / chapters
+§24) is the reusable infrastructure side; the manifesto / ontology / chapters
 are the opinionated content side. The course is what happens when the
 opinionated content uses the reusable infrastructure.
 
@@ -875,7 +885,7 @@ _artifact_ layer. This is the **engineering × physics co-evolution** Bakhtiar
 surfaced (Faraday/Maxwell-style mutual constitution).
 
 Cross-link: §3 V/F (student-layer + the corrective note that the artifact-layer
-V/F flips the surface-intuition mapping); §23 JEJ chain (the artifact-layer
+V/F flips the surface-intuition mapping); §24 JEJ chain (the artifact-layer
 mechanism in operation).
 
 #### §11-sept Translational Sprints (light touch)
@@ -910,9 +920,9 @@ can stay at or descend through. **A learner who stays at L1 graduates well; a
 learner who revisits at L3 finds more; a learner who re-encounters at L4 finds
 more again.** Each layer is a complete exit point.
 
-> **Meta learning objective unifying all 5 layers**: _intellectual agency_.
-> Each layer is intellectual agency at a different scale. This is the
-> through-line that connects the layers to the manifestos
+> **Meta learning objective unifying all 5 layers**: _intellectual agency_. Each
+> layer is intellectual agency at a different scale. This is the through-line
+> that connects the layers to the manifestos
 > (`syllabus.manifesto.{learners,authors,community}.md`).
 
 | Layer  | Frame                | Meta-objective (intellectual agency over…) | Primary objective                                                                                     | Learned through                                                                                               |
@@ -925,13 +935,12 @@ more again.** Each layer is a complete exit point.
 
 #### SOLO applies within each layer (not across)
 
-SOLO taxonomy (Pre-Structural / Uni-Structural / Multi-Structural / Relational
-/ Extended-Abstract) applies _within_ each layer, not across them. A learner
-at L0 can be Pre-Structural through Extended-Abstract on the NM; same span at
-L1, L2, L3, L4. The layers are _kinds_ of work; SOLO is _depth_ within each
-kind. The cross-product is a 5×5 reading: layer × SOLO-depth — useful for
-diagnosis and for designing exercises that meet a learner where they are at a
-given layer.
+SOLO taxonomy (Pre-Structural / Uni-Structural / Multi-Structural / Relational /
+Extended-Abstract) applies _within_ each layer, not across them. A learner at L0
+can be Pre-Structural through Extended-Abstract on the NM; same span at L1, L2,
+L3, L4. The layers are _kinds_ of work; SOLO is _depth_ within each kind. The
+cross-product is a 5×5 reading: layer × SOLO-depth — useful for diagnosis and
+for designing exercises that meet a learner where they are at a given layer.
 
 #### Each layer's data thread (the red thread ramifies)
 
@@ -1056,15 +1065,15 @@ part isn't enough; the fullest work holds the _whole_ situation in view.
 
 **The two-scale instrument reading.** The rhetorical situation has two scales,
 not one. The first instrument is the machine playing the score — predictable,
-deterministic, reading the code-as-notation literally. The second instrument
-is the user's experience of that machine playing — intangible, emergent,
-arising from the interaction between the parties (the user, the program, the
-context). The _concert_ — the experience-as-purpose, what the work ultimately
-serves — is what both V and F orient toward. Neither V nor F controls the
-concert directly: the user-experience takes place in the body of the user but
-arises from interaction; the work of both hats is to set up conditions that
-make the experience the program serves possible. (See §24 for the metaphor
-this reading extends; the metaphor illustrates, the strand does the teaching.)
+deterministic, reading the code-as-notation literally. The second instrument is
+the user's experience of that machine playing — intangible, emergent, arising
+from the interaction between the parties (the user, the program, the context).
+The _concert_ — the experience-as-purpose, what the work ultimately serves — is
+what both V and F orient toward. Neither V nor F controls the concert directly:
+the user-experience takes place in the body of the user but arises from
+interaction; the work of both hats is to set up conditions that make the
+experience the program serves possible. (See §25 for the metaphor this reading
+extends; the metaphor illustrates, the strand does the teaching.)
 
 #### Affordances (5th strand, equal status)
 
@@ -1079,6 +1088,12 @@ Equal status with the other four strands.
 The Mikhak loop is an _affordance-discovery dialogue_: F probes
 substrate-affordances; V probes user-affordances; their dialogue surfaces
 affordances neither saw alone.
+
+> _(See §17 for the universal-lens framing: F's lens and V's lens both travel
+> to read affordances at any stratum; F naturally probes
+> substrate-affordances anchored at artifact-logic, V naturally probes
+> user-affordances anchored at artifact-surface — but the Mikhak loop is the
+> strand-5 operationalization of lens-switching itself.)_
 
 #### Strands × Lenses cross-map (OPEN-ENDED DEVELOPMENT GUIDE)
 
@@ -1187,77 +1202,198 @@ alone.
 
 ---
 
-### §17 AI-adoption model alignment with V/F
+### §17 Strata of a software system — refining §3's geometry
 
-A 4-level AI-adoption model developed by Evan Cole with collaborators Janet
-Tilstra and Josenne Peña maps precisely onto V/F. The model is the root
-inspiration for Ch4's shape:
+§3 introduces the geometry coarsely: three domains (theory / artifact / domain)
+with V and F engaging the artifact through two bridging activities. This
+section refines that geometry into a stack of substrate strata while preserving
+§3's structure: the artifact-region splits into two faces (one per lens); the
+theory and domain regions each gain grain. V and F remain universal lenses;
+the natural twinning territory of each is the _characteristic_ range where they
+most often work, not a binding constraint.
 
-| AI-adoption level | What it captures                | V/F mapping                                                 |
-| ----------------- | ------------------------------- | ----------------------------------------------------------- |
-| 3. Behavioral ✓   | How AI acts in collaboration    | V's territory — twin behavior; design for the encounter     |
-| 2. "Cognitive" ✓  | What AI knows / how it "thinks" | F's territory — twin the NM; predictive-model the mechanism |
-| 1. Conceptual ✗   | Math & programming              | Below F's bridge — CS/theory; deferred to WtA               |
-| 0. Physical ✗     | Hardware & infrastructure       | Below the artifact — silicon; deferred entirely             |
+#### The strata
 
-**Ch4 organizing line**: _"you twin Level 2 (cognitive) in order to operate at
-Level 3 (behavioral)"_ — Fristonian and pedagogically meaningful.
+Drawn linearly for legibility; the stack is partially ordered. "Above" means
+_presupposes the substrate below has crystallized into stable ground_, not
+_depends only on the immediately lower stratum_. The categories are pedagogical
+handles, not metaphysical claims — arbitrary slices on a continuum, chosen for
+the minimal actionable mental model. We do not mark phase-changes between
+strata.
 
-- V converses with LLM, twinning at Level 3 (behavioral)
-- F converses with LLM, twinning at Level 2 (cognitive)
-- Both serve the duet; target differs
+**Theory-side (§3 right) — F's natural twinning territory extends through here
+ontologically; WtF defers practical work to follow-on courses:**
 
-**Levels 0–1 exclusion is scope-discipline**, not blindness. The same move WtF
-makes for V/F practice: don't go below the NM into compilation and silicon.
-Adopters / V/F-practitioners don't need those layers for _this_ purpose.
+1. **Platonic** — _Levin's Platonic Space (see §30)._ The informational
+   interpretation of the physical world; the philosophical commitment that the
+   material is _legible_ at all. Manifesto territory; the curriculum gestures
+   here only at L4 (Philosophy reading).
+2. **Physics / material.** Atoms, transistors, energy gradients. The physical
+   substrate. Deferred entirely.
+3. **Computing infrastructure.** Mathematics and formal systems made
+   operational — runtimes, OSs, networks, training/build/run support software.
+   Deferred to follow-on courses; named here so the student knows what sits
+   below.
+
+**Artifact-region (§3 center) — two faces of one artifact:**
+
+4. **Artifact-logic.** The F-face. What the artifact computes — conventional
+   algorithms, or a GenAI model. Same site, different substrate types. When a
+   Frogrammer says "twin the machine," the machine being twinned lives here: in
+   conventional software, the algorithmic logic; in AI-native software, the
+   GenAI model. The stance is the same; the substrate is different. §18
+   develops what changes when GenAI occupies this stratum.
+5. **Artifact-surface.** The V-face. What the artifact presents outward — UI,
+   APIs, programmatic and human-perceivable surfaces.
+
+Artifact-logic and artifact-surface are two distinct substrate kinds (an
+algorithm runs; a UI is painted), AND together they are the F-lens and V-lens
+readings of §3's center artifact — one artifact with two material faces, each
+face inviting its natural lens.
+
+> **Flipside reading (with §2 both-twins).** §2 names the **both-twins state**
+> — user-twin + NM-twin held simultaneously by one perceiver. §17 names the
+> **artifact's two faces** — artifact-logic + artifact-surface, two material
+> sides of one artifact. These are flipsides of the same coin: dual-twinning
+> is the perceiving, two-faced artifact is the perceived; they co-constitute.
+> §2 stays the canonical home for the perceiver-side reading; §17 stays the
+> canonical home for the perceived-side reading.
+
+**Domain-side (§3 left) — V's natural twinning territory extends through
+here:**
+
+6. **Interaction dynamics.** Human-system dynamics over time. Dialogue,
+   workflow, habituation, repair.
+7. **Systemic impacts.** Society and computing as a coupled system. What this
+   kind of artifact does, in aggregate, to the world it participates in.
+
+#### V and F: universal lenses with natural twinning territories
+
+V (Vibetoading) and F (Frogramming) are universal lenses — either can be worn
+on any artifact at any stratum. Each has a _natural twinning territory_ (the
+characteristic range where it most often works), derived from the kind of
+question each asks:
+
+- **F's lens** asks: _what does the artifact compute? what's its NM?_ F's
+  natural territory: **computing-infrastructure + artifact-logic** — the
+  substrate side of the stack where data-models live. Computational thinking
+  (§3's F-bridge) is what F does as it traverses this territory. WtF practices
+  F primarily at artifact-logic; computing-infrastructure is F-territory
+  ontologically but deferred to follow-on courses.
+- **V's lens** asks: _what does the artifact feel like? what does it afford
+  the person on the other side?_ V's natural territory: **artifact-surface +
+  interaction-dynamics + systemic-impacts** — the experience side of the stack
+  where embodied phenomena live. Design thinking (§3's V-bridge) is what V
+  does as it traverses this territory.
+
+The natural territories overlap at the artifact: artifact-logic is F's primary
+anchor; artifact-surface is V's. This is §3's "trading zone" made vertical.
+
+The lenses travel beyond their natural territories — F can rise into systemic
+impacts to read social affordances at a formal-systems level; V can drop into
+computing infrastructure to read substrate experience. The natural territories
+describe characteristic ranges, not constraints.
+
+#### Three axes — strata, strands, bridges
+
+The curriculum's geometry has three axes, each canonical in its own section,
+surfaced together here:
+
+| Axis        | Section            | Enumerates                                                              | Question it answers                          |
+| ----------- | ------------------ | ----------------------------------------------------------------------- | -------------------------------------------- |
+| **Strata**  | §17 (this section) | kinds of substrate where work happens                                   | _Where_ does the work sit?                   |
+| **Strands** | §13                | connection-types — stances applicable at any stratum                    | _What kind of connection_ is the learner making? |
+| **Bridges** | §3                 | V's and F's bridging activities (design thinking / computational thinking) | _How_ is the work read across strata?     |
+
+_"Bridges" is shorthand here for §3's formal noun "bridging activities"; §3
+uses the possessive form ("V's bridge", "F's bridge")._
+
+Plus the **data thread** (§14) running through everything — the word _data_
+deepening its semantics at each layer.
+
+The full geometry is _strata × strands × bridges_. We do not exhaustively map
+permutations; the geometry is a direction-finder, not a closed catalog.
+**Strands themselves are an open-ended catalog** (§13's strand × lens
+cross-map is explicitly an open development guide — some strand × lens cells
+have no existing lens yet); the triple's openness inherits from §13's. Each
+axis is canonical in its own section; §17 surfaces the cross-product so the
+reader can see all three at once.
+
+#### Optional reading: lens-changes between strata
+
+The transitions between strata can also be read as places where the productive
+lens shifts most legibly — the work of strand-Affordances (§13) and the
+composer/virtuoso/mechanism metaphor (§25) operationalize this reading. Listed
+here as a cross-frame; the strata and the universal-lens framing remain
+first-class on their own terms.
+
+#### Bridge to §18 and §19
+
+§18 develops what changes at the _artifact_-side when GenAI occupies the
+artifact-logic stratum: substrate substitution from deterministic to
+non-deterministic NM, the verification limit, agentic emergence. §19 develops
+the _workflow_-side: three positional roles AI can play relative to a human's
+work (study partner / dev collaborator / active component), with the
+depth-of-involvement and verification-target axes. Read §17 → §18 → §19 as the
+natural sequence: general strata → artifact-side AI consequences → workflow-
+side AI positions.
 
 ---
 
 ## Part E — The LLM shift
 
-### §18 Code-as-UI / verification limit / agentic emergence
+### §18 Substrate substitution at artifact-logic — what changes about the artifact
 
-#### Code is the UI for the NM
+§17 names the strata of a software system in general terms. §18 picks up at
+the **artifact-logic** stratum (§17 stratum 4) and develops what changes
+_about the artifact itself_ when a GenAI model substitutes for conventional
+algorithms as the substrate. §18 is the **artifact-side** of the LLM shift —
+what the artifact _becomes_. §19 is the **workflow-side** — where AI sits
+relative to a human's work.
 
-Source code is the **control panel** through which a programmer operates the NM.
-Authoring code is one way to operate that panel. Describing intent to an LLM is
-another. Either way, the NM is the thing the panel controls.
+§18's "NM" (notional machine) and §17's artifact-logic name the same site at
+different resolutions. Substrate substitution swaps a GenAI model into that
+site; the NM-twinning stance from §16 remains, but what's being twinned has
+different mechanical properties.
 
-LLMs let you **delegate operation of the control panel** while still owning the
-machine. Same V/F spectrum, two LLM-conversation modes:
+#### Substrate substitution: deterministic → non-deterministic
 
-- 🔬 **NM-grounded conversation** (Frogramming-with-delegation) — "Make the NM
-  declare a `const balance = 0`, then enter a `while` loop that decrements it
-  until it hits zero." You specify behavior in NM terms. You
-  predict-trace-verify the LLM's output against the NM.
-- 🎨 **User-grounded conversation** (Vibetoading-with-delegation) — "When the
-  user types their amount and clicks OK, count down to zero and tell them when
-  it's done." You specify behavior in user-experience terms.
+The fundamental mechanical shift at artifact-logic when GenAI replaces
+conventional algorithms:
 
-Both produce text in the same control panel; the difference is **which audience
-you twin during the conversation**.
+**Conventional artifact-logic is, _in its core data-transformation behavior_,
+deterministic.** Given input X, the algorithmic path that produces Y is
+predictable. Sources of non-determinism in conventional systems —
+`Math.random`, concurrency, network I/O timing, filesystem state, wall-clock
+dependencies — are **bounded and locatable**; you can name them, isolate them,
+mock them in tests. F's NM-twin works at this stratum because the NM is
+reproducible: the same input under the same observable conditions traces the
+same path through scope chains and value transformations.
 
-#### The visual NM view becomes load-bearing
+**GenAI artifact-logic is non-deterministic in a categorically different way:
+intrinsically.** Given input X, output is _sampled_ from a probability
+distribution shaped by the model's weights. The non-determinism isn't bounded
+to specific calls; it's a property of the substrate itself. F's NM-twin shifts
+from predicting a specific path to characterizing a _distribution of plausible
+outputs_; V's user-twin shifts to anticipating a _range of behaviors_ rather
+than a specific reaction.
 
-When you delegate the control panel, you can no longer rely on the act of typing
-to keep your NM understanding sharp. Visual debuggers (`embody/` + study lenses)
-let you observe, predict, and debug the machine _directly_ — the NM view that
-exists regardless of who (or what) wrote the code text. **Frogramming with
-delegation is only sustainable if you keep the direct NM view alive.**
-
-#### The architect/implementer division has always existed
-
-Software has always had a design-work / notation-work split: architect /
-implementer (Brooks), staff engineer / junior, consultant / in-house,
-design-phase / build-phase. LLMs are a new kind of collaborator: same role,
-different cognition.
+**This is the mechanical ground for the verification limit below.**
+Conventional artifact-logic can be verified pre-deployment by exercising
+input-output pairs and tracing internal events. GenAI artifact-logic resists
+this because the deployed behavior is a sampling process, not a function. The
+most consequential behaviors (rare outputs, drift over interaction histories)
+live in the tails. The verification limit isn't a missing tool; it's a
+property of the substrate.
 
 #### The verification limit
 
-We don't always understand what we direct. Even our tests may be out of our
-depth — it's possible to verify that a program does the _wrong thing correctly_.
-This makes certain practices _more_ important in an LLM-assisted workflow, not
-less:
+We don't always understand what we direct — and at GenAI artifact-logic, the
+substrate itself resists the kind of pre-deployment verification conventional
+software permits (per the deterministic → non-deterministic shift above). Even
+our tests may be out of our depth — it's possible to verify that a program does
+the _wrong thing correctly_. This makes certain practices _more_ important in
+an LLM-assisted workflow, not less:
 
 - Short iterations of user-visible behavior we can actually evaluate
 - Human-evaluable acceptance criteria
@@ -1267,38 +1403,167 @@ less:
 Chapter 3 (users, PBIS, visible behavior) carries particular weight for this
 reason.
 
-#### Honest framing
-
-LLMs are often better at notation than many humans — faster, broader repertoire,
-fewer typos. Pretending otherwise would be dishonest. But great Frogramming
-isn't only about productivity. Design judgment, context awareness, aesthetic and
-ethical taste aren't where LLMs excel. And Chapter 5 develops the case for
-Frogramming-for-its-own-sake.
-
 #### Agentic emergence (Ch4.5 and Ch5 closing)
 
-The authoring-partner frame (LLM = virtuoso) is a simplification. **Agentic AI
-systems** that plan, execute, call tools, modify state autonomously are
-emerging. That's a more complex collaboration — specifying observable outcomes
-humans can still evaluate becomes load-bearing. Flag as territory for
-post-curriculum learning.
+The authoring-partner frame (LLM = virtuoso, §19 Role 2) is a simplification.
+**Agentic AI systems** that plan, execute, call tools, modify state
+autonomously are emerging. That's a more complex collaboration (§19 Role 3
+territory) — specifying observable outcomes humans can still evaluate becomes
+load-bearing. Flag as territory for post-curriculum learning.
 
 #### The PL-future
 
-Currently, LLMs work with programming languages designed _for humans_. A future
-where LLMs design their own formally-provable languages is possible; those
-languages would likely defy our notions of "high-level" and "low-level" (which
-measure distance from _human_ cognitive convenience). If we can't read the code
-and can't evaluate the tests, user-visible behavior is what's left to check
-against — the agile-visible-discipline story intensifies further.
+Currently, LLMs work with programming languages designed _for humans_. A
+future where LLMs design their own formally-provable languages is possible;
+those languages would likely defy our notions of "high-level" and "low-level"
+(which measure distance from _human_ cognitive convenience). If we can't read
+the code and can't evaluate the tests, user-visible behavior is what's left to
+check against — the agile-visible-discipline story intensifies further.
 
 Even then, the programming languages we have now remain worth cherishing: for
-their humanity, for how they shape thinking, for the new thoughts they give us,
-and for our connection to computational history.
+their humanity, for how they shape thinking, for the new thoughts they give
+us, and for our connection to computational history.
 
 ---
 
-### §19 Bret Victor decomposition
+### §19 The LLM shift, workflow-side — how AI participates in your work
+
+§18 develops the _artifact-side_ of the LLM shift — what the artifact
+_becomes_ when GenAI is in artifact-logic. §19 develops the _workflow-side_ —
+where AI sits _relative to_ the human doing the work. These are orthogonal:
+§18's substrate-substitution and §19's positional-roles co-vary (Role 3 IS
+substrate substitution) but they answer different questions at different sites
+of analysis.
+
+#### Code is the UI for the NM
+
+Source code is the **control panel** through which a programmer operates the
+NM. Authoring code is one way to operate that panel. Describing intent to an
+LLM is another. Either way, the NM is the thing the panel controls.
+
+LLMs let you **delegate operation of the control panel** while still owning
+the machine. Same V/F spectrum, two LLM-conversation modes:
+
+- 🔬 **NM-grounded conversation** (Frogramming-with-delegation) — _"Make the
+  NM declare a `const balance = 0`, then enter a `while` loop that decrements
+  it until it hits zero."_ You specify behavior in NM terms. You
+  predict-trace-verify the LLM's output against the NM.
+- 🎨 **User-grounded conversation** (Vibetoading-with-delegation) — _"When the
+  user types their amount and clicks OK, count down to zero and tell them when
+  it's done."_ You specify behavior in user-experience terms.
+
+Both produce text in the same control panel; the difference is **which
+audience you twin during the conversation**.
+
+#### The visual NM view becomes load-bearing
+
+When you delegate the control panel, you can no longer rely on the act of
+typing to keep your NM understanding sharp. Visual debuggers (`embody/` +
+study lenses) let you observe, predict, and debug the machine _directly_ —
+the NM view that exists regardless of who (or what) wrote the code text.
+**Frogramming with delegation is only sustainable if you keep the direct NM
+view alive.**
+
+#### The architect/implementer division has always existed
+
+Software has always had a design-work / notation-work split: architect /
+implementer (Brooks), staff engineer / junior, consultant / in-house,
+design-phase / build-phase. LLMs are a new kind of collaborator: same role,
+different cognition.
+
+#### Honest framing
+
+LLMs are often better at notation than many humans — faster, broader
+repertoire, fewer typos. Pretending otherwise would be dishonest. But great
+Frogramming isn't only about productivity. Design judgment, context awareness,
+aesthetic and ethical taste aren't where LLMs excel. And Chapter 5 develops
+the case for Frogramming-for-its-own-sake.
+
+#### Three roles of agential AI
+
+The workflow framing above gestures at "AI as collaborator." More precisely:
+AI can hold **three distinct positional relationships** to a learner's work.
+They escalate in commitment; each subsequent role meaningfully presupposes
+some mastery of the prior.
+
+**Role 1 — Study partner.** AI sits in the learner's interaction-dynamics,
+alongside Study Lenses. The artifact being acted on is a _separate_ artifact
+the learner is studying (a snippet, a concept, someone else's code). AI is an
+external scaffold; it supports the learner's reading of the studied artifact
+but does not enter it.
+
+- **Depth in artifact:** indirect — through the developer's formation over
+  time. AI shapes the learner's mental models; those models then shape every
+  artifact the learner subsequently builds.
+- **Verification target:** the _explanation_. Can the learner verify what the
+  AI said about the artifact they're studying?
+
+**Role 2 — Design/development collaborator.** AI sits in the author's
+interaction-dynamics, during authorship. The artifact being acted on is the
+system being built. **AI is an external co-author; its _contribution_ enters
+the artifact (frozen at deploy), but the AI as live process does not.** The
+author chooses the mode: NM-grounded (F-flavored — operate the AI through F's
+lens, see "Code is the UI for the NM" above) or user-grounded (V-flavored —
+operate it through V's lens). Both modes deposit AI-influenced material into
+the deployed artifact, then freeze.
+
+- **Depth in artifact:** direct on creation; absent on operation. The AI's
+  fingerprint is in the deployed code (or design, or copy), but the AI itself
+  is not running there.
+- **Verification target:** the _contribution_, at deploy. Standard
+  pre-deployment verification applies _in form_ — but the verification limit
+  (§18's _"we don't always understand what we direct"_) still bites here when
+  the human evaluator delegated the cognition that produced the contribution.
+  Verifying that the AI's output does _what was asked_ doesn't establish that
+  what was asked was _what was needed_. The visual NM view and short
+  user-evaluable iterations (above) are how Role 2 keeps verification honest.
+
+**Role 3 — Active component.** AI sits **inside** the artifact's
+artifact-logic stratum, as a live process. The artifact contains the AI as a
+constituent part. AI is no longer external — its behavior IS the system's
+behavior at runtime.
+
+- **Depth in artifact:** internal to deployed behavior; **the AI as live
+  process is now in the artifact**, not just its contribution. The fingerprint
+  is live.
+- **Verification target:** running behavior, continuous, irreducibly partial.
+  **The §18 verification limit is at its sharpest here**, and now with a
+  _mechanical_ reason: the substrate is non-deterministic (§18's
+  substrate-substitution sub-section) AND the AI is live in artifact-logic
+  (this role). Pre-deployment verification can characterize the distribution
+  but cannot pin down production behavior.
+
+The three axes (positional, depth-of-involvement, verification target) align
+across all three roles. Read together they show the roles are real
+ontological distinctions, not arbitrary slices.
+
+#### Curriculum mapping
+
+**Ch0–3 quietly assume Role 1.** Every learner using AI to learn is in Role 1
+by default; the curriculum makes that engagement deliberate through Study
+Lenses + AI explanations + tutor patterns.
+
+**Ch4 foregrounds Role 2.** _In Ch4, AI is the development collaborator. The
+artifact being built is a conventional JEJ program; the AI is an external
+co-author, not artifact-logic substrate. You twin the AI as collaborator —
+F's lens (NM-grounded mode) reads the AI as a cognitive substrate you operate;
+V's lens (user-grounded mode) reads its behavioral surface and conversational
+affordances. The layers of AI-understanding (§17 + §18) help you read_
+**what** _you're twinning,_ **where** _it sits relative to your work, and_
+**how** _to operationalize the collaboration while building JEJ._
+
+**Ch5 remains in Role 2** with the snippets-surface expanded to **full JS**
+(not just JEJ). The student practices Role-2 collaboration on a broader
+programming language surface, building snippetry-as-craft.
+
+**Role 3 is deferred to WtA** (Welcome to Algorithms / follow-on courses),
+matching §25's existing deferral of agentic-component work. WtF teaches the
+framework so learners can recognize Role 3 when they encounter it, but does
+not teach Role-3 building.
+
+---
+
+### §20 Bret Victor decomposition
 
 [**_Learnable Programming_**](http://worrydream.com/LearnableProgramming/)
 wanted _less implementation toil_ AND _more powerful thinking tools_. LLMs
@@ -1318,7 +1583,7 @@ of evaluation, not the final output.
 
 ## Part F — Curriculum machinery
 
-### §20 Reading frameworks — PBIS, static/dynamic
+### §21 Reading frameworks — PBIS, static/dynamic
 
 #### PBIS — flexible vocabulary, not a sequence
 
@@ -1384,7 +1649,7 @@ productivity-oriented.
 
 ---
 
-### §21 Computational vocabulary axes
+### §22 Computational vocabulary axes
 
 Four orthogonal axes — distinct ways of carving the programming space:
 
@@ -1413,7 +1678,7 @@ in.**
 
 ---
 
-### §22 Chapter architecture
+### §23 Chapter architecture
 
 The audience ladder + skill spiral structure. The detailed chapter-by-chapter
 content lives in `syllabus.chapters.md`.
@@ -1426,8 +1691,8 @@ content lives in `syllabus.chapters.md`.
 | Ch1     | 🧑‍💻 Developers                     | comments + full `console` API                                                                 |
 | Ch2     | 💻 + Computer                     | NM core (2.0–2.8) + computational idioms (2A–2F: logic, strings, numbers, regex, bits, dates) |
 | Ch3     | + Users                           | `prompt`, `alert`, `confirm`; `null` first encounter                                          |
-| Ch4     | 🤖 + Agents                       | no new features (applies Ch1–3 with LLM collaborator)                                         |
-| Ch5     | + You                             | training wheels off — full JS                                                                 |
+| Ch4     | 🤖 + Agents                       | no new features (applies Ch1–3 with LLM collaborator — §19 Role 2: NM-grounded F-flavored, user-grounded V-flavored) |
+| Ch5     | + You                             | training wheels off — full JS (still §19 Role 2 with surface expanded)                       |
 
 #### Spiral (skills) vs ladder (audiences)
 
@@ -1451,13 +1716,13 @@ Each LO marks where a skill is _first introduced_, not where it ends.
 | Ch4     | the composer-virtuoso asymmetric duet (with an alien virtuoso) |
 | Ch5     | the composer's daily practice (Ligeti / Bach / sketches)       |
 
-(See §24 for the full metaphor system.)
+(See §25 for the full metaphor system.)
 
 ---
 
 ## Part G — Infrastructure (the JEJ chain)
 
-### §23 JEJ → NM → embody → lenses → orchestrator
+### §24 JEJ → NM → embody → lenses → orchestrator
 
 The infrastructural ontology that makes the pedagogy operational. Inside this
 ontology — _primarily infrastructure under the pedagogy, inspired by the
@@ -1526,12 +1791,11 @@ flowchart TB
 machine actually does (F-friendly). V reads the code; F traces the NM events;
 resolve is the bridge.
 
-**Emit** connects computation to interaction. V designs the user-facing
-dialog; F implements the call. Emit is where data crosses out of (or into) the
-program.
+**Emit** connects computation to interaction. V designs the user-facing dialog;
+F implements the call. Emit is where data crosses out of (or into) the program.
 
-Filtering only resolve events shows the complete data flow through a program
-— a useful pedagogical view in lens authoring.
+Filtering only resolve events shows the complete data flow through a program — a
+useful pedagogical view in lens authoring.
 
 #### Two scopes
 
@@ -1600,12 +1864,19 @@ counterpart analysis lives in `DGMD-E-1-artifacts/embodying-tcer/`.
 
 ## Part H — Teaching apparatus
 
-### §24 The composer/virtuoso/mechanism metaphor
+### §25 The composer/virtuoso/mechanism metaphor
 
 **First-class teaching apparatus.** Explicitly NOT structural guide. The
 metaphor illuminates moments; the spiral curriculum (§6) is the structural
-guide. The metaphor is _not_ the canonical home for any learning objective —
-LOs live with V/F (§3) and the strands (§13).
+guide. The metaphor is _not_ the canonical home for any learning objective — LOs
+live with V/F (§2) and the strands (§13).
+
+> **On V/F and the cast.** The composer / virtuoso / mechanism / audience cast
+> is an illustration of the V/F lens-pair (§2) and §17's strata, not a
+> separate ontological commitment. Composer ≈ V's lens on the artifact;
+> virtuoso ≈ F's lens on the artifact's notation-execution. The cast helps
+> the reader feel the V/F dialogue; it doesn't replace V/F as the canonical
+> framing.
 
 > _"When the metaphor serves the vision, use it. When it strains, drop it. The
 > vision stands on its own. The metaphor is illustration, not argument."_ —
@@ -1739,7 +2010,7 @@ illuminates; set it aside where it strains.
 
 ---
 
-### §25 Symbology
+### §26 Symbology
 
 | Symbol | Concept                         | What it marks                                                                                     |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- |
@@ -1763,7 +2034,7 @@ difficulty progression on learning objectives. Not part of this set.
 
 ## Part I — Honoring commitments
 
-### §26 The mu-tribute
+### §27 The mu-tribute
 
 A Vibetoading/Frogramming version of GEB's wholism/reductionism mu image
 ([reference](https://blog.p-petrov.com/assets/images/imgs_geb/mu.png)). Direct
@@ -1777,7 +2048,7 @@ the parallel. Image creation is future task.
 
 ---
 
-### §27 Voice / style commitments
+### §28 Voice / style commitments
 
 From `narrative/README.md` §25 and the user's `~/.claude/CLAUDE.md`.
 
@@ -1822,7 +2093,7 @@ not the same. Check before collapsing.
 
 ---
 
-### §28 Structural commitments
+### §29 Structural commitments
 
 - **Reign in wannabe-GEB.** Music as instructive metaphor for some moments, not
   structural guide.
@@ -1842,7 +2113,7 @@ not the same. Check before collapsing.
 
 ## Part J — Out of scope
 
-### §29 What's deferred to follow-on courses
+### §30 What's deferred to follow-on courses
 
 | Course                              | What it deepens                                                                                                                                                                                            | Bridging activity foregrounded |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |

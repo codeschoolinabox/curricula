@@ -729,7 +729,7 @@ hints at alien composers emerging on the horizon.
 Co-composers, Historical cameos), the human-vs-alien virtuoso split, the
 composition-vs-performance two-phase structure, the
 comprehension-before-production mapping, and the per-chapter instantiations
-lives in [`syllabus.ontology.md`](./syllabus.ontology.md) §24.
+lives in [`syllabus.ontology.md`](./syllabus.ontology.md) §25.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 

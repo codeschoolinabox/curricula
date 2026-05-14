@@ -14,7 +14,7 @@ readers can skim or dive.
 
 The metaphor system itself — composer / virtuoso / mechanism / audience
 cast, the full mapping, the two-phase composition-vs-execution structure
-— lives canonically in `syllabus.ontology.md` §24. This file carries
+— lives canonically in `syllabus.ontology.md` §25. This file carries
 _extensions_ and _illustrations_ that didn't fit the un-prose-y
 reference register of the ontology.
 
@@ -54,7 +54,7 @@ reference register of the ontology.
 - **The cast** (Composer, Virtuoso, Mechanism, Audience, Co-composers,
   Historical cameos) is **teaching apparatus**, explicitly NOT
   structural guide. Practice-stances and learning objectives live with
-  V/F (ontology §3) and the 5 strands (ontology §13). See ontology §24
+  V/F (ontology §2) and the 5 strands (ontology §13). See ontology §25
   for the canonical cast definition.
 
 ---
@@ -332,7 +332,7 @@ patterns from their training. This explains:
 ## 5. Metaphor extensions
 
 The canonical metaphor system (cast, mapping, two-phase
-composition-vs-execution) is in ontology §24. The extensions below are
+composition-vs-execution) is in ontology §25. The extensions below are
 illustrations the canonical reference doesn't carry — useful in
 chapter prose for animating specific moments.
 
@@ -464,7 +464,7 @@ the second instrument is the user's experience of the played piece
 experience-as-purpose — is what V and F orient toward.
 
 This extension lives canonically in ontology §13 (whole rhetorical
-situation strand). See ontology §24's two-scale extension note for the
+situation strand). See ontology §25's two-scale extension note for the
 metaphor-illustration form.
 
 ---
@@ -840,4 +840,4 @@ translational-framing) are the source of truth.
 The metaphor is load-bearing but not load-exclusive. Chapter authors
 should use the metaphor where it illuminates and set it aside where
 it strains. The vision (ontology §1-§2) stands without the metaphor;
-the metaphor (ontology §24) serves the vision.
+the metaphor (ontology §25) serves the vision.
