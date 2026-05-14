@@ -278,7 +278,9 @@ is F-specific. Don't conflate the architectural pattern with the V/F mapping.
 The infrastructure _embodies_ the pedagogy:
 
 - lenses literally **are** the Frogrammer's magnifying glasses (ontology §3)
-- embody literally **is** the NM crystallized for exploration
+- embody literally **is** the NM crystallized for exploration — _a static
+  4D rendering of a 3D flowing river_; the substrate is not inert, it makes
+  every facet of the data lifecycle's motion explorable
 - the JEJ language constraint **is** the cognitive-load discipline (see "B.1 Cogsci mechanisms" below)
 - the orchestrator **is** the Explorotron framework's snippet-scope realization
 

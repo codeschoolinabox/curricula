@@ -439,9 +439,11 @@ _(sparse at L3 in Ch0 — snippetry formalizes in Ch5)_
 Language features: comments, `console.log` and the full `console` API with
 string literals.
 
-_Metaphor anchor: **the score as inter-composer communication** — other
-composers read your score for intent and style, long before (or entirely instead
-of) ever hearing it performed. Code has the same property._
+### Metaphor anchor
+
+_**The score as inter-composer communication** — other composers read your
+score for intent and style, long before (or entirely instead of) ever
+hearing it performed. Code has the same property._
 
 ### Overview
 
@@ -478,6 +480,9 @@ phoning you.
 
 This anticipates Chapter 5's _"you"_ audience: by the time we promote
 yourself-as-a-distinct-audience, you've been twinning future-you all along.
+
+**Same self, two angles of approach.** Here you write for **you as an
+audience**; in Ch5 you'll write for **you as a human**.
 
 ### 1.2 Static vs. dynamic
 
@@ -597,9 +602,11 @@ _(sparse — Ch1 is dense at L1, light elsewhere)_
 
 ## Ch2 Developers and Computers
 
-_Metaphor anchor: **studying the instrument's mechanisms** — like an organ
-builder examining bellows, tracker action, registration, and combination action,
-you study how the JavaScript engine actually carries out your instructions._
+### Metaphor anchor
+
+_**Studying the instrument's mechanisms** — like an organ builder examining
+bellows, tracker action, registration, and combination action, you study
+how the JavaScript engine actually carries out your instructions._
 
 ### Overview
 
@@ -1166,10 +1173,12 @@ Language features: `prompt`, `alert`, `confirm`. All control flow features
 (`if`, `while`, `break`/`continue`) were introduced in Chapter 2 and are now
 applied in programs where user interactions are the fixed behavioral anchors.
 
-_Metaphor anchor: **writing for an audience, the composer's design thinking** —
-the concert audience is real: they cheer, boo, throw tomatoes or flowers. The
-composer rehearses with the mechanism, workshops with virtuosos, and
-focus-groups with listeners. Design thinking across the whole situation._
+### Metaphor anchor
+
+_**Writing for an audience, the composer's design thinking** — the concert
+audience is real: they cheer, boo, throw tomatoes or flowers. The composer
+rehearses with the mechanism, workshops with virtuosos, and focus-groups
+with listeners. Design thinking across the whole situation._
 
 ### Overview
 
@@ -1185,6 +1194,16 @@ user-visible behavior must be preserved.
 The chapter's intellectual-agency move: _you make programs for people who will
 never see your code, and the test of your work is whether it serves them._ The
 user-twin is the V-side of the V/F symmetry.
+
+**The second level of code audience.** Code has two audiences in any
+chapter, not one. The first is _deterministic_ — the NM, which evaluates
+code literally and predictably (F's territory). The second is
+_non-deterministic and emergent_ — the user's lived experience of what
+the NM produces. Both V and F write for the second audience; neither
+controls it directly. The NM is the instrument; the experience is the
+concert. The work of both hats is to set up conditions that make the
+experience the program serves possible. (Two-scale instrument reading —
+see ontology §13 strand-4 and `syllabus.metaphor.md` two-scale extension.)
 
 ### 3.1 User Input and Output
 
@@ -1383,9 +1402,11 @@ collaboration with an LLM. 🤖 Agents are a fourth audience: they read and
 understand code differently from 🧑 humans, and writing _for and with_ them
 requires its own communication skills.
 
-_Metaphor anchor: **the composer-virtuoso asymmetric duet** — with an alien
-virtuoso this time. Dazzling, fast, pattern-rich, but cognitively distinct from
-human virtuosos. Collaboration is specifically different, and this chapter digs
+### Metaphor anchor
+
+_**The composer-virtuoso asymmetric duet** — with an alien virtuoso this
+time. Dazzling, fast, pattern-rich, but cognitively distinct from human
+virtuosos. Collaboration is specifically different, and this chapter digs
 into why._
 
 ### Overview
@@ -1674,11 +1695,13 @@ look similar from outside.
 
 ## Ch5 Developers, Computers, Users, Agents, and You
 
-_Metaphor anchor: **the composer's daily practice** — small, complete pieces
-written for the composer's own practice. Variations on a theme, études on a
-single technique, sketchbook entries exploring an idea — Ligeti's Musica
-Ricercata, Beethoven's sketchbooks, Bach's inventions. A serious genre in its
-own right._
+### Metaphor anchor
+
+_**The composer's daily practice** — small, complete pieces written for
+the composer's own practice. Variations on a theme, études on a single
+technique, sketchbook entries exploring an idea — Ligeti's Musica
+Ricercata, Beethoven's sketchbooks, Bach's inventions. A serious genre
+in its own right._
 
 ### Overview
 
@@ -1695,6 +1718,10 @@ particularly my NM-fluency in a language — when full-codebase work no longer
 provides the daily reps?_ Snippetry is the experience-form of NM-maintenance —
 the daily reps that keep the automated library of past experiences alive once
 full-codebase work no longer provides them.
+
+**Arc closure.** The arc that opened in Ch1 with _write for future-you as
+an audience_ closes here as _write for yourself as a human_. Same self,
+end-to-end.
 
 The chapter's intellectual-agency move: _you can use programming as a tool for
 thought, on whatever problems and ideas interest you, for the rest of your
