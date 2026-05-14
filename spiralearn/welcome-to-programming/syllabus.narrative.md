@@ -54,7 +54,7 @@ reference register of the ontology.
 - **The cast** (Composer, Virtuoso, Mechanism, Audience, Co-composers,
   Historical cameos) is **teaching apparatus**, explicitly NOT
   structural guide. Practice-stances and learning objectives live with
-  V/F (ontology §2) and the 5 strands (ontology §13). See ontology §25
+  V/F (ontology §3) and the 5 strands (ontology §13). See ontology §25
   for the canonical cast definition.
 
 ---

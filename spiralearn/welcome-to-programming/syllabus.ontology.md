@@ -28,8 +28,8 @@
 
 - [Part A — Frame](#part-a--frame)
   - [§1 Foundational principles](#1-foundational-principles)
-  - [§2 The characters — V and F](#2-the-characters--v-and-f)
-  - [§3 Geometry — three domains, two bridging activities](#3-geometry--three-domains-two-bridging-activities)
+  - [§2 Geometry — three domains, two bridging activities](#2-geometry--three-domains-two-bridging-activities)
+  - [§3 The characters — V and F](#3-the-characters--v-and-f)
   - [§4 The 5-tier ATT](#4-the-5-tier-att)
 - [Part B — Design principles](#part-b--design-principles)
   - [B.1 Cogsci mechanisms](#b1-cogsci-mechanisms)
@@ -42,7 +42,7 @@
   - [§15 Self-twinning Bildung arc](#15-self-twinning-bildung-arc)
 - [Part D — Cogsci grounding](#part-d--cogsci-grounding)
   - [§16 Friston / predictive processing](#16-friston--predictive-processing)
-  - [§17 Strata of a software system — refining §3's geometry](#17-strata-of-a-software-system--refining-3s-geometry)
+  - [§17 Strata of a software system — refining §2's geometry](#17-strata-of-a-software-system--refining-2s-geometry)
 - [Part E — The LLM shift](#part-e--the-llm-shift)
   - [§18 Substrate substitution at artifact-logic — what changes about the artifact](#18-substrate-substitution-at-artifact-logic--what-changes-about-the-artifact)
   - [§19 The LLM shift, workflow-side — how AI participates in your work](#19-the-llm-shift-workflow-side--how-ai-participates-in-your-work)
@@ -146,7 +146,54 @@ unitary things).
 
 ---
 
-### §2 The characters — V and F
+### §2 Geometry — three domains, two bridging activities
+
+```text
+domain  ←design thinking→  the computational artifact  ←computational thinking→  CS / theory
+   │             │                       │                          │                    │
+ (V's       (V's bridge:            (where V and F           (F's bridge:              (F's
+  outer        practice              both engage —             practice                 outer
+  endpoint)    of design              software,                 of computational         endpoint)
+               thinking)              hardware,                 thinking)
+                                      hybrids)
+```
+
+#### Three domains (where things live)
+
+- **Domain** — the world. Users, contexts, situations, problems. V's outer
+  endpoint; deepens in _Welcome to Design_.
+- **The computational artifact** — what's made. Software, hardware, hybrids
+  (wearables, embedded, embodied). Both V and F engage it; this is the trading
+  zone where their practices structurally meet.
+- **CS / theory** — formal abstractions. Algorithms, complexity, correctness.
+  F's outer endpoint; deepens in _Welcome to Algorithms_.
+
+#### Two bridging activities (the thinking that traverses)
+
+- **Design thinking** — V's bridging activity. V twins the user; bridges domain
+  ↔ computational artifact through design thinking.
+- **Computational thinking** — F's bridging activity. F twins the NM (notional
+  machine of whatever artifact substrate is in play); bridges computational
+  artifact ↔ CS/theory through computational thinking.
+
+**Twinning is what makes the bridging activity _thinking_ rather than mere
+process.** Design _thinking_ requires twinning the user; without the user-twin,
+what's happening is _design process_ (wireframes, personas, A/B tests,
+design-thinking steps) but not design _thinking_. Same on F's side:
+_computational thinking_ requires twinning the NM; without the NM-twin, what's
+happening is _computational process_ (unit tests, patterns, refactoring moves)
+but not computational _thinking_. See §3 for the failure-mode elaboration.
+
+#### Hardware: in the mix; perpendicularity deferred
+
+Hardware lives **inside the computational artifact** with software and hybrids.
+Whether hardware is _also_ a perpendicular axis is deferred for later
+litigation. What matters now: hardware is in the mix; V and F both engage it as
+part of the central domain.
+
+---
+
+### §3 The characters — V and F
 
 V and F are **substrate-agnostic bridging personae**. The framing extends from
 JS-in-browser to wearables, tangibles, embedded, embodied — anywhere a
@@ -224,7 +271,7 @@ curriculum brings learners _out of_.
 > simultaneously. §17 names the **perceived** — one artifact with two material
 > faces, artifact-logic (the F-face) + artifact-surface (the V-face). These
 > are flipsides of the same coin: dual-twinning is the perceiving, two-faced
-> artifact is the perceived; they co-constitute. §2 stays the canonical home
+> artifact is the perceived; they co-constitute. §3 stays the canonical home
 > for the perceiver-side reading; §17 stays the canonical home for the
 > perceived-side reading.
 
@@ -335,7 +382,7 @@ substrate affords (_"this becomes possible, and it also enables…"_). Each turn
 shifts what V can propose and what F can build. The exchange is open-ended — no
 fixed number of beats, no required rhythm. Over time, V and F merge in the
 practitioner; Ch5's snippetry is where the merging crystallizes into a single
-integrated practice (the both-twins corner of the §2 2×2, in its merged form).
+integrated practice (the both-twins corner of the §3 2×2, in its merged form).
 
 Engaging in these exchanges is how each side picks up the other's craft: V
 learns what's afford-able through F's iterative discoveries; F learns to read
@@ -407,53 +454,6 @@ AI sits _outside_ the rhetorical circle — exactly the virtuoso's position in t
 teaching-apparatus cast (§25).
 
 </details>
-
----
-
-### §3 Geometry — three domains, two bridging activities
-
-```text
-domain  ←design thinking→  the computational artifact  ←computational thinking→  CS / theory
-   │             │                       │                          │                    │
- (V's       (V's bridge:            (where V and F           (F's bridge:              (F's
-  outer        practice              both engage —             practice                 outer
-  endpoint)    of design              software,                 of computational         endpoint)
-               thinking)              hardware,                 thinking)
-                                      hybrids)
-```
-
-#### Three domains (where things live)
-
-- **Domain** — the world. Users, contexts, situations, problems. V's outer
-  endpoint; deepens in _Welcome to Design_.
-- **The computational artifact** — what's made. Software, hardware, hybrids
-  (wearables, embedded, embodied). Both V and F engage it; this is the trading
-  zone where their practices structurally meet.
-- **CS / theory** — formal abstractions. Algorithms, complexity, correctness.
-  F's outer endpoint; deepens in _Welcome to Algorithms_.
-
-#### Two bridging activities (the thinking that traverses)
-
-- **Design thinking** — V's bridging activity. V twins the user; bridges domain
-  ↔ computational artifact through design thinking.
-- **Computational thinking** — F's bridging activity. F twins the NM (notional
-  machine of whatever artifact substrate is in play); bridges computational
-  artifact ↔ CS/theory through computational thinking.
-
-**Twinning is what makes the bridging activity _thinking_ rather than mere
-process.** Design _thinking_ requires twinning the user; without the user-twin,
-what's happening is _design process_ (wireframes, personas, A/B tests,
-design-thinking steps) but not design _thinking_. Same on F's side:
-_computational thinking_ requires twinning the NM; without the NM-twin, what's
-happening is _computational process_ (unit tests, patterns, refactoring moves)
-but not computational _thinking_. See §2 for the failure-mode elaboration.
-
-#### Hardware: in the mix; perpendicularity deferred
-
-Hardware lives **inside the computational artifact** with software and hybrids.
-Whether hardware is _also_ a perpendicular axis is deferred for later
-litigation. What matters now: hardware is in the mix; V and F both engage it as
-part of the central domain.
 
 ---
 
@@ -1202,12 +1202,12 @@ alone.
 
 ---
 
-### §17 Strata of a software system — refining §3's geometry
+### §17 Strata of a software system — refining §2's geometry
 
-§3 introduces the geometry coarsely: three domains (theory / artifact / domain)
+§2 introduces the geometry coarsely: three domains (theory / artifact / domain)
 with V and F engaging the artifact through two bridging activities. This
 section refines that geometry into a stack of substrate strata while preserving
-§3's structure: the artifact-region splits into two faces (one per lens); the
+§2's structure: the artifact-region splits into two faces (one per lens); the
 theory and domain regions each gain grain. V and F remain universal lenses;
 the natural twinning territory of each is the _characteristic_ range where they
 most often work, not a binding constraint.
@@ -1221,7 +1221,7 @@ handles, not metaphysical claims — arbitrary slices on a continuum, chosen for
 the minimal actionable mental model. We do not mark phase-changes between
 strata.
 
-**Theory-side (§3 right) — F's natural twinning territory extends through here
+**Theory-side (§2 right) — F's natural twinning territory extends through here
 ontologically; WtF defers practical work to follow-on courses:**
 
 1. **Platonic** — _Levin's Platonic Space (see §30)._ The informational
@@ -1235,7 +1235,7 @@ ontologically; WtF defers practical work to follow-on courses:**
    Deferred to follow-on courses; named here so the student knows what sits
    below.
 
-**Artifact-region (§3 center) — two faces of one artifact:**
+**Artifact-region (§2 center) — two faces of one artifact:**
 
 4. **Artifact-logic.** The F-face. What the artifact computes — conventional
    algorithms, or a GenAI model. Same site, different substrate types. When a
@@ -1248,18 +1248,18 @@ ontologically; WtF defers practical work to follow-on courses:**
 
 Artifact-logic and artifact-surface are two distinct substrate kinds (an
 algorithm runs; a UI is painted), AND together they are the F-lens and V-lens
-readings of §3's center artifact — one artifact with two material faces, each
+readings of §2's center artifact — one artifact with two material faces, each
 face inviting its natural lens.
 
-> **Flipside reading (with §2 both-twins).** §2 names the **both-twins state**
+> **Flipside reading (with §3 both-twins).** §3 names the **both-twins state**
 > — user-twin + NM-twin held simultaneously by one perceiver. §17 names the
 > **artifact's two faces** — artifact-logic + artifact-surface, two material
 > sides of one artifact. These are flipsides of the same coin: dual-twinning
 > is the perceiving, two-faced artifact is the perceived; they co-constitute.
-> §2 stays the canonical home for the perceiver-side reading; §17 stays the
+> §3 stays the canonical home for the perceiver-side reading; §17 stays the
 > canonical home for the perceived-side reading.
 
-**Domain-side (§3 left) — V's natural twinning territory extends through
+**Domain-side (§2 left) — V's natural twinning territory extends through
 here:**
 
 6. **Interaction dynamics.** Human-system dynamics over time. Dialogue,
@@ -1277,17 +1277,17 @@ question each asks:
 - **F's lens** asks: _what does the artifact compute? what's its NM?_ F's
   natural territory: **computing-infrastructure + artifact-logic** — the
   substrate side of the stack where data-models live. Computational thinking
-  (§3's F-bridge) is what F does as it traverses this territory. WtF practices
+  (§2's F-bridge) is what F does as it traverses this territory. WtF practices
   F primarily at artifact-logic; computing-infrastructure is F-territory
   ontologically but deferred to follow-on courses.
 - **V's lens** asks: _what does the artifact feel like? what does it afford
   the person on the other side?_ V's natural territory: **artifact-surface +
   interaction-dynamics + systemic-impacts** — the experience side of the stack
-  where embodied phenomena live. Design thinking (§3's V-bridge) is what V
+  where embodied phenomena live. Design thinking (§2's V-bridge) is what V
   does as it traverses this territory.
 
 The natural territories overlap at the artifact: artifact-logic is F's primary
-anchor; artifact-surface is V's. This is §3's "trading zone" made vertical.
+anchor; artifact-surface is V's. This is §2's "trading zone" made vertical.
 
 The lenses travel beyond their natural territories — F can rise into systemic
 impacts to read social affordances at a formal-systems level; V can drop into
@@ -1303,9 +1303,9 @@ surfaced together here:
 | ----------- | ------------------ | ----------------------------------------------------------------------- | -------------------------------------------- |
 | **Strata**  | §17 (this section) | kinds of substrate where work happens                                   | _Where_ does the work sit?                   |
 | **Strands** | §13                | connection-types — stances applicable at any stratum                    | _What kind of connection_ is the learner making? |
-| **Bridges** | §3                 | V's and F's bridging activities (design thinking / computational thinking) | _How_ is the work read across strata?     |
+| **Bridges** | §2                 | V's and F's bridging activities (design thinking / computational thinking) | _How_ is the work read across strata?     |
 
-_"Bridges" is shorthand here for §3's formal noun "bridging activities"; §3
+_"Bridges" is shorthand here for §2's formal noun "bridging activities"; §2
 uses the possessive form ("V's bridge", "F's bridge")._
 
 Plus the **data thread** (§14) running through everything — the word _data_
@@ -1869,10 +1869,10 @@ counterpart analysis lives in `DGMD-E-1-artifacts/embodying-tcer/`.
 **First-class teaching apparatus.** Explicitly NOT structural guide. The
 metaphor illuminates moments; the spiral curriculum (§6) is the structural
 guide. The metaphor is _not_ the canonical home for any learning objective — LOs
-live with V/F (§2) and the strands (§13).
+live with V/F (§3) and the strands (§13).
 
 > **On V/F and the cast.** The composer / virtuoso / mechanism / audience cast
-> is an illustration of the V/F lens-pair (§2) and §17's strata, not a
+> is an illustration of the V/F lens-pair (§3) and §17's strata, not a
 > separate ontological commitment. Composer ≈ V's lens on the artifact;
 > virtuoso ≈ F's lens on the artifact's notation-execution. The cast helps
 > the reader feel the V/F dialogue; it doesn't replace V/F as the canonical
