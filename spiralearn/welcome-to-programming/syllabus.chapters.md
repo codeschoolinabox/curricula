@@ -74,9 +74,11 @@
 
 No language features. Conceptual orientation only.
 
-_Metaphor anchor: **the recital as rhetorical situation** — an entire
-performance event with its audience, its performers, its instrument, and the
-score that ties them together._
+### Metaphor anchor
+
+_**The recital as rhetorical situation** — an entire performance event with
+its audience, its performers, its instrument, and the score that ties them
+together._
 
 ### Overview
 

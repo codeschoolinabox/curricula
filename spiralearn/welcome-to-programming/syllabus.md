@@ -113,7 +113,6 @@ experiment, or surprise yourself. This course helps you build both at once.
 - [References](#references)
 - [Symbology](#symbology)
 - [Before You Begin](#before-you-begin)
-- [Chapter 0: What is Programming?](#chapter-0-what-is-programming)
 - [Chapter 1: Developers](#chapter-1-developers)
 - [Chapter 2: Developers and Computers](#chapter-2-developers-and-computers)
 - [Chapter 3: Developers, Computers, and Users](#chapter-3-developers-computers-and-users)
@@ -698,35 +697,6 @@ convention for difficulty progression — not part of this set.
 - [ ] Skim the Just Enough JavaScript reference: same, just get a feel for the
       terrain
 - [ ] _(coming soon)_ Download the curriculum for offline study
-
-[TOP](#welcome-to-programming-coded-for-humans--syllabus)
-
----
-
-## Chapter 0: What is Programming?
-
-No language features. Conceptual orientation only.
-
-_Metaphor anchor: **the recital as rhetorical situation** — an entire
-performance event with its audience, its performers, its instrument, and the
-score that ties them together._
-
-The chapter introduces the rhetorical model of source code (writing for multiple
-audiences simultaneously: 🧑‍💻 developers, 💻 the computer, users, 🤖 agents), the
-**Vibetoading / Frogramming** distinction, and the positioning of WtF within the
-broader space of programming and computer science. _Vibing_ is named as a
-legitimate stance — building by feel, pre- and post-LLM. What distinguishes the
-V hat from no-twin vibing is the user-twin; what distinguishes the F hat from
-no-twin ceremony is the NM-twin. The full twin/process 2×2 lives in the
-ontology; here you meet the two hats and the four-quadrant grid (V/F ×
-humans-only / LLM-collab).
-
-The chapter's intellectual-agency move: _you arrive here with a why, and the
-course is built to honor it._
-
-**Full chapter content** — sub-sections 0.1 (Rhetorics), 0.2 (Positioning), 0.3
-(Two Hats), plus per-layer learning objectives — in
-[`syllabus.chapters.md`](./syllabus.chapters.md) Ch0.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
