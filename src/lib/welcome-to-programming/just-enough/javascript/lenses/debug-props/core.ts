@@ -20,14 +20,14 @@
  * panel renders fields when `embodiment.validation !== undefined`
  * (validate-fail leaf and beyond) and renders the gate-phrased
  * `VALIDATION_ABSENT_PLACEHOLDER` otherwise (tokenize-fail and parse-fail
- * leaves). See [`./DOCS.md` § Handling absent fields] for the staircase
+ * leaves). See `./DOCS.md` § Handling absent fields for the staircase
  * consumer convention.
  *
  * @remarks Per the lenses peer's invariant, takes `embodiment` as the
  * parameter name (not `props.embodiment`). Reads only the public
  * `Snippet` shape (`source`, `status`, `validation`, `errors`) — no
  * branching on sentinel literals in `embodiment.source.code` (see
- * `../README.md` § Conventions inherited).
+ * `./README.md` § Conventions inherited).
  */
 
 import type { Snippet } from '../../embody/types.js';
