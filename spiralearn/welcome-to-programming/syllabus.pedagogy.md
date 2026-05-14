@@ -258,10 +258,10 @@ of generative models. The pedagogical consequence:
 
 ---
 
-## Lenses, embody, and substrate ↔ pedagogy mutual constitution (ontology §24)
+## Lenses, embody, and substrate ↔ pedagogy mutual constitution (ontology §23)
 
 The JEJ chain (`just-enough/javascript/` + `embody/` + Study Lenses +
-orchestrator) is named and described in ontology §24 as infrastructure.
+orchestrator) is named and described in ontology §23 as infrastructure.
 This file carries the principles by which that infrastructure is
 pedagogy-shaped:
 
@@ -478,7 +478,7 @@ setting; the more contextual, the less reusable. Points outward toward
 
 **The Reusability Paradox is not a problem to solve — it's the
 productive tension the course lives inside.** `just-enough/javascript/`
-(the JEJ chain, ontology §24) is the reusable infrastructure side; the
+(the JEJ chain, ontology §23) is the reusable infrastructure side; the
 manifesto / ontology / chapters are the opinionated content side. The
 course is what happens when the opinionated content uses the reusable
 infrastructure.
@@ -571,6 +571,75 @@ plural and the plural is wide.
 The compact bulleted version of these principles also appears in
 "First Principles" above; the table here is the detailed source-and-brief
 catalog. Both are valid views of the same set of commitments.
+
+---
+
+## Reading frameworks — PBIS, static/dynamic (migrated from ontology §21)
+
+### PBIS — flexible vocabulary, not a sequence
+
+**PBIS** (canonical letter-order; **NOT PBSI**): Purpose / Behavior /
+Implementation / Strategy. Four meaningful vocabulary words applied at
+different zones, levels, and moments.
+
+- **Purpose** — context-encompassing. Why this exists, for whom, in
+  what world. Not "first in a sequence" but "the field everything else
+  operates within."
+- **Behavior** — what's observable; user-side effect AND
+  mechanism-side effect; same observable, two readings.
+- **Implementation** — the literal made-thing. Code, structure,
+  configuration, hardware choices.
+- **Strategy** — patterns and abstractions the implementation
+  instances. Can manifest at different levels (UI strategy,
+  algorithmic strategy, architectural strategy, user-research
+  strategy).
+
+**No canonical ordering.** P doesn't precede B doesn't precede I
+doesn't precede S. Different kinds of analysis foreground different
+vocabulary subsets. PBIS is a _vocabulary strand_, not a _sequence_.
+
+**No canonical "trading zone."** Any of P/B/S/I can be a meeting point
+depending on the moment.
+
+### PBIS through the metaphor (concentric scopes)
+
+From `narrative/README.md` §15: reading code well means holding all
+four layers simultaneously. Perspective stacking (ontology §13)
+operationalized.
+
+```text
+┌─── PURPOSE ─────────────────────────────────────┐
+│ (why the piece exists; who it's for)            │
+│  ┌── BEHAVIOR ──────────────────────────────┐   │
+│  │ (what the audience hears and feels)       │   │
+│  │  ┌── STRATEGY ────────────────────────┐   │   │
+│  │  │ (the compositional approach)        │   │   │
+│  │  │  ┌── IMPLEMENTATION ──────────┐    │   │   │
+│  │  │  │ (specific notes / score)    │    │   │   │
+│  │  │  └──────────────────────────────┘    │   │   │
+│  │  └────────────────────────────────────┘   │   │
+│  └──────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────┘
+```
+
+### Static vs Dynamic
+
+Foundational conceptual distinction (Ch1 introduces it):
+
+- **Static**: source code (text). Comments live here. Developer reads
+  this without running the program.
+- **Dynamic**: program evaluation (runtime). Logs are observed here.
+  The NM does its work here.
+
+Setting up the dev-twin: the developer who reads code sees the static
+text, not the runtime. Understanding this distinction is prerequisite
+to understanding why comments and logs serve different purposes.
+
+### Code is content, not deliverable (Ch4 framing)
+
+Cross-link to ontology §18. In Ch4, LLM-generated code is _material to
+study_, not work-product to ship. This is what keeps the chapter
+pedagogical rather than productivity-oriented.
 
 ---
 

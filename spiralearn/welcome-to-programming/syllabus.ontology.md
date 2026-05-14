@@ -46,20 +46,19 @@
   - [§19 The LLM shift, workflow-side — how AI participates in your work](#19-the-llm-shift-workflow-side--how-ai-participates-in-your-work)
   - [§20 Bret Victor decomposition](#20-bret-victor-decomposition)
 - [Part F — Curriculum machinery](#part-f--curriculum-machinery)
-  - [§21 Reading frameworks — PBIS, static/dynamic](#21-reading-frameworks--pbis-staticdynamic)
-  - [§22 Computational vocabulary axes](#22-computational-vocabulary-axes)
-  - [§23 Chapter architecture](#23-chapter-architecture)
+  - [§21 Computational vocabulary axes](#21-computational-vocabulary-axes)
+  - [§22 Chapter architecture](#22-chapter-architecture)
 - [Part G — Infrastructure (the JEJ chain)](#part-g--infrastructure-the-jej-chain)
-  - [§24 JEJ → NM → embody → lenses → orchestrator](#24-jej--nm--embody--lenses--orchestrator)
+  - [§23 JEJ → NM → embody → lenses → orchestrator](#23-jej--nm--embody--lenses--orchestrator)
 - [Part H — Teaching apparatus](#part-h--teaching-apparatus)
-  - [§25 The composer/virtuoso/mechanism metaphor](#25-the-composervirtuosomechanism-metaphor)
-  - [§26 Symbology](#26-symbology)
+  - [§24 The composer/virtuoso/mechanism metaphor](#24-the-composervirtuosomechanism-metaphor)
+  - [§25 Symbology](#25-symbology)
 - [Part I — Honoring commitments](#part-i--honoring-commitments)
-  - [§27 The mu-tribute](#27-the-mu-tribute)
-  - [§28 Voice / style commitments](#28-voice--style-commitments)
-  - [§29 Structural commitments](#29-structural-commitments)
+  - [§26 The mu-tribute](#26-the-mu-tribute)
+  - [§27 Voice / style commitments](#27-voice--style-commitments)
+  - [§28 Structural commitments](#28-structural-commitments)
 - [Part J — Out of scope](#part-j--out-of-scope)
-  - [§30 What's deferred to follow-on courses](#30-whats-deferred-to-follow-on-courses)
+  - [§29 What's deferred to follow-on courses](#29-whats-deferred-to-follow-on-courses)
 - [Source materials](#source-materials)
 
 ---
@@ -389,7 +388,7 @@ historical pairs (Faraday/Maxwell, Mendel/breeders).
 
 #### V/F vs. Composer/Virtuoso/Mechanism/Audience cast
 
-The Composer/Virtuoso/Mechanism/Audience cast (§25) is **teaching apparatus** —
+The Composer/Virtuoso/Mechanism/Audience cast (§24) is **teaching apparatus** —
 explicitly not structural guide, explicitly not the canonical home for any
 learning objective. V and F are **practice-stances** the student inhabits and
 are tied to LOs. The two are **orthogonal**:
@@ -449,7 +448,7 @@ meta-pattern.
 ![The big picture plus AI](./assets/the-big-picture-plus-ai.png)
 
 AI sits _outside_ the rhetorical circle — exactly the virtuoso's position in the
-teaching-apparatus cast (§25).
+teaching-apparatus cast (§24).
 
 </details>
 
@@ -630,7 +629,7 @@ _artifact_ layer. This is the **engineering × physics co-evolution** Bakhtiar
 surfaced (Faraday/Maxwell-style mutual constitution).
 
 Cross-link: §3 V/F (student-layer + the corrective note that the artifact-layer
-V/F flips the surface-intuition mapping); §24 JEJ chain (the artifact-layer
+V/F flips the surface-intuition mapping); §23 JEJ chain (the artifact-layer
 mechanism in operation).
 
 #### §11-sept Translational Sprints (light touch)
@@ -938,7 +937,7 @@ strata.
 **Theory-side (§2 right) — F's natural twinning territory extends through here
 ontologically; WtF defers practical work to follow-on courses:**
 
-1. **Platonic** — _Levin's Platonic Space (see §30)._ The informational
+1. **Platonic** — _Levin's Platonic Space (see §29)._ The informational
    interpretation of the physical world; the philosophical commitment that the
    material is _legible_ at all. Manifesto territory; the curriculum gestures
    here only at L4 (Philosophy reading).
@@ -1037,7 +1036,7 @@ reader can see all three at once.
 
 The transitions between strata can also be read as places where the productive
 lens shifts most legibly — the work of strand-Affordances (§13) and the
-composer/virtuoso/mechanism metaphor (§25 / `syllabus.metaphor.md`)
+composer/virtuoso/mechanism metaphor (§24 / `syllabus.metaphor.md`)
 operationalize this reading. Listed here as a cross-frame; the strata and
 the universal-lens framing remain first-class on their own terms.
 
@@ -1298,73 +1297,14 @@ of evaluation, not the final output.
 
 ## Part F — Curriculum machinery
 
-### §21 Reading frameworks — PBIS, static/dynamic
-
-#### PBIS — flexible vocabulary, not a sequence
-
-**PBIS** (canonical letter-order; **NOT PBSI**): Purpose / Behavior /
-Implementation / Strategy. Four meaningful vocabulary words applied at different
-zones, levels, and moments.
-
-- **Purpose** — context-encompassing. Why this exists, for whom, in what world.
-  Not "first in a sequence" but "the field everything else operates within."
-- **Behavior** — what's observable; user-side effect AND mechanism-side effect;
-  same observable, two readings.
-- **Implementation** — the literal made-thing. Code, structure, configuration,
-  hardware choices.
-- **Strategy** — patterns and abstractions the implementation instances. Can
-  manifest at different levels (UI strategy, algorithmic strategy, architectural
-  strategy, user-research strategy).
-
-**No canonical ordering.** P doesn't precede B doesn't precede I doesn't precede
-S. Different kinds of analysis foreground different vocabulary subsets. PBIS is
-a _vocabulary strand_, not a _sequence_.
-
-**No canonical "trading zone."** Any of P/B/S/I can be a meeting point depending
-on the moment.
-
-#### PBIS through the metaphor (concentric scopes)
-
-From `narrative/README.md` §15: reading code well means holding all four layers
-simultaneously. Perspective stacking (§13) operationalized.
-
-```text
-┌─── PURPOSE ─────────────────────────────────────┐
-│ (why the piece exists; who it's for)            │
-│  ┌── BEHAVIOR ──────────────────────────────┐   │
-│  │ (what the audience hears and feels)       │   │
-│  │  ┌── STRATEGY ────────────────────────┐   │   │
-│  │  │ (the compositional approach)        │   │   │
-│  │  │  ┌── IMPLEMENTATION ──────────┐    │   │   │
-│  │  │  │ (specific notes / score)    │    │   │   │
-│  │  │  └──────────────────────────────┘    │   │   │
-│  │  └────────────────────────────────────┘   │   │
-│  └──────────────────────────────────────────┘   │
-└──────────────────────────────────────────────────┘
-```
-
-#### Static vs Dynamic
-
-Foundational conceptual distinction (Ch1 introduces it):
-
-- **Static**: source code (text). Comments live here. Developer reads this
-  without running the program.
-- **Dynamic**: program evaluation (runtime). Logs are observed here. The NM does
-  its work here.
-
-Setting up the dev-twin: the developer who reads code sees the static text, not
-the runtime. Understanding this distinction is prerequisite to understanding why
-comments and logs serve different purposes.
-
-#### Code is content, not deliverable (Ch4 framing)
-
-Cross-link to §18. In Ch4, LLM-generated code is _material to study_, not
-work-product to ship. This is what keeps the chapter pedagogical rather than
-productivity-oriented.
+> **§21 Reading frameworks — PBIS, static/dynamic** moved to
+> `syllabus.pedagogy.md` "Reading frameworks — PBIS, static/dynamic
+> (migrated from ontology §21)." Subsequent sections (formerly §22–§30)
+> renumber down by 1 to fill the gap (now §21–§29).
 
 ---
 
-### §22 Computational vocabulary axes
+### §21 Computational vocabulary axes
 
 Four orthogonal axes — distinct ways of carving the programming space:
 
@@ -1393,7 +1333,7 @@ in.**
 
 ---
 
-### §23 Chapter architecture
+### §22 Chapter architecture
 
 The audience ladder + skill spiral structure. The detailed chapter-by-chapter
 content lives in `syllabus.chapters.md`.
@@ -1437,7 +1377,7 @@ Each LO marks where a skill is _first introduced_, not where it ends.
 
 ## Part G — Infrastructure (the JEJ chain)
 
-### §24 JEJ → NM → embody → lenses → orchestrator
+### §23 JEJ → NM → embody → lenses → orchestrator
 
 The infrastructural ontology that makes the pedagogy operational. Inside this
 ontology — _primarily infrastructure under the pedagogy, inspired by the
@@ -1540,7 +1480,7 @@ The `status` chain is monotonic: `created` implies `parsed` implies `tokenized`.
 > and **substrate ↔ pedagogy mutual constitution** (the infrastructure
 > embodies the pedagogy; the pedagogy is shaped by what the infrastructure
 > affords) — see `syllabus.pedagogy.md` "Lenses, embody, and substrate ↔
-> pedagogy mutual constitution (ontology §24)."
+> pedagogy mutual constitution (ontology §23)."
 
 #### V/F at the artifact layer
 
@@ -1566,7 +1506,7 @@ counterpart analysis lives in `DGMD-E-1-artifacts/embodying-tcer/`.
 
 ## Part H — Teaching apparatus
 
-### §25 The composer/virtuoso/mechanism metaphor
+### §24 The composer/virtuoso/mechanism metaphor
 
 The metaphor (composer / virtuoso / mechanism / audience) is **first-class
 teaching apparatus, explicitly NOT structural guide.** The metaphor
@@ -1588,7 +1528,7 @@ reign-in-wannabe-GEB — lives canonically in
 
 ---
 
-### §26 Symbology
+### §25 Symbology
 
 | Symbol | Concept                         | What it marks                                                                                     |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- |
@@ -1612,7 +1552,7 @@ difficulty progression on learning objectives. Not part of this set.
 
 ## Part I — Honoring commitments
 
-### §27 The mu-tribute
+### §26 The mu-tribute
 
 A Vibetoading/Frogramming version of GEB's wholism/reductionism mu image
 ([reference](https://blog.p-petrov.com/assets/images/imgs_geb/mu.png)). Direct
@@ -1626,7 +1566,7 @@ the parallel. Image creation is future task.
 
 ---
 
-### §28 Voice / style commitments
+### §27 Voice / style commitments
 
 From `narrative/README.md` §25 and the user's `~/.claude/CLAUDE.md`.
 
@@ -1671,7 +1611,7 @@ not the same. Check before collapsing.
 
 ---
 
-### §29 Structural commitments
+### §28 Structural commitments
 
 - **Reign in wannabe-GEB.** Music as instructive metaphor for some moments, not
   structural guide.
@@ -1691,7 +1631,7 @@ not the same. Check before collapsing.
 
 ## Part J — Out of scope
 
-### §30 What's deferred to follow-on courses
+### §29 What's deferred to follow-on courses
 
 | Course                              | What it deepens                                                                                                                                                                                            | Bridging activity foregrounded |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
