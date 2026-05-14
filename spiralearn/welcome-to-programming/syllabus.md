@@ -614,26 +614,16 @@ metaphor: **a mechanical instrument, a composer, a virtuoso, a score, and an
 audience**. The instrument varies across chapters; the roles stay the same. If
 the metaphor doesn't click for you, the underlying ideas stand on their own.
 
-| Idea                    | Illustration                                                                                  |
-| ----------------------- | --------------------------------------------------------------------------------------------- |
-| The notional machine    | A **mechanical instrument** — plays the score blindly, deterministically                      |
-| Source code             | **The score** — notation the mechanism reads                                                  |
-| The designer            | **The composer** — holds computational intent, understands the instrument, knows the audience |
-| The implementer         | **The virtuoso** — masters notation and the controls; produces the score from direction       |
-| Users                   | **The audience** — concert-goers who react to the performance                                 |
-| Other developers        | **Co-composers** — fellow score-readers                                                       |
-| The computer evaluating | **The mechanism playing the score blindly at performance time**                               |
-
 Chapter 2 studies the instrument's mechanism. Chapter 3 brings in the audience
 and design thinking. Chapter 4 teaches collaboration with the alien virtuoso
 (the LLM). Chapter 5 turns to the composer's daily practice — snippetry — and
 hints at alien composers emerging on the horizon.
 
-**The full treatment** of the cast (Composer, Virtuoso, Mechanism, Audience,
-Co-composers, Historical cameos), the human-vs-alien virtuoso split, the
-composition-vs-performance two-phase structure, the
-comprehension-before-production mapping, and the per-chapter instantiations
-lives in [`syllabus.ontology.md`](./syllabus.ontology.md) §25.
+The cast (six roles), the mapping to programming concepts, the two-scale
+instrument extension, the human-vs-alien virtuoso split, the
+composition-vs-performance two-phase structure, the composer-pedagogy
+parallels, the 8 AI-collaboration skills, and the per-chapter instantiations
+live canonically in [`syllabus.metaphor.md`](./syllabus.metaphor.md).
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 

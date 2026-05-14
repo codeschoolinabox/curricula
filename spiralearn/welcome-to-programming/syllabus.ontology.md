@@ -1072,8 +1072,9 @@ The _concert_ — the experience-as-purpose, what the work ultimately serves —
 what both V and F orient toward. Neither V nor F controls the concert directly:
 the user-experience takes place in the body of the user but arises from
 interaction; the work of both hats is to set up conditions that make the
-experience the program serves possible. (See §25 for the metaphor this reading
-extends; the metaphor illustrates, the strand does the teaching.)
+experience the program serves possible. (See `syllabus.metaphor.md` for the
+metaphor this reading extends; the metaphor illustrates, the strand does the
+teaching.)
 
 #### Affordances (5th strand, equal status)
 
@@ -1323,9 +1324,9 @@ reader can see all three at once.
 
 The transitions between strata can also be read as places where the productive
 lens shifts most legibly — the work of strand-Affordances (§13) and the
-composer/virtuoso/mechanism metaphor (§25) operationalize this reading. Listed
-here as a cross-frame; the strata and the universal-lens framing remain
-first-class on their own terms.
+composer/virtuoso/mechanism metaphor (§25 / `syllabus.metaphor.md`)
+operationalize this reading. Listed here as a cross-frame; the strata and
+the universal-lens framing remain first-class on their own terms.
 
 #### Bridge to §18 and §19
 
@@ -1557,9 +1558,10 @@ affordances. The layers of AI-understanding (§17 + §18) help you read_
 programming language surface, building snippetry-as-craft.
 
 **Role 3 is deferred to WtA** (Welcome to Algorithms / follow-on courses),
-matching §25's existing deferral of agentic-component work. WtF teaches the
-framework so learners can recognize Role 3 when they encounter it, but does
-not teach Role-3 building.
+matching the metaphor's existing alien-composers deferral (see
+`syllabus.metaphor.md` — "Alien composers (teased, deferred)"). WtF teaches
+the framework so learners can recognize Role 3 when they encounter it, but
+does not teach Role-3 building.
 
 ---
 
@@ -1716,7 +1718,7 @@ Each LO marks where a skill is _first introduced_, not where it ends.
 | Ch4     | the composer-virtuoso asymmetric duet (with an alien virtuoso) |
 | Ch5     | the composer's daily practice (Ligeti / Bach / sketches)       |
 
-(See §25 for the full metaphor system.)
+(See `syllabus.metaphor.md` for the full metaphor system.)
 
 ---
 
@@ -1866,147 +1868,23 @@ counterpart analysis lives in `DGMD-E-1-artifacts/embodying-tcer/`.
 
 ### §25 The composer/virtuoso/mechanism metaphor
 
-**First-class teaching apparatus.** Explicitly NOT structural guide. The
-metaphor illuminates moments; the spiral curriculum (§6) is the structural
-guide. The metaphor is _not_ the canonical home for any learning objective — LOs
-live with V/F (§3) and the strands (§13).
+The metaphor (composer / virtuoso / mechanism / audience) is **first-class
+teaching apparatus, explicitly NOT structural guide.** The metaphor
+illustrates the V/F lens-pair (§3) and §17's strata; it is not a separate
+ontological commitment. Composer ≈ V's lens on the artifact; virtuoso ≈ F's
+lens on the artifact's notation-execution. LOs live with V/F (§3) and the
+strands (§13), not with the cast.
 
-> **On V/F and the cast.** The composer / virtuoso / mechanism / audience cast
-> is an illustration of the V/F lens-pair (§3) and §17's strata, not a
-> separate ontological commitment. Composer ≈ V's lens on the artifact;
-> virtuoso ≈ F's lens on the artifact's notation-execution. The cast helps
-> the reader feel the V/F dialogue; it doesn't replace V/F as the canonical
-> framing.
+> _"When the metaphor serves the vision, use it. When it strains, drop it.
+> The vision stands on its own. The metaphor is illustration, not argument."_
+> — `narrative/README.md`
 
-> _"When the metaphor serves the vision, use it. When it strains, drop it. The
-> vision stands on its own. The metaphor is illustration, not argument."_ —
-> `narrative/README.md`
-
-#### Two-scale instrument extension
-
-The metaphor extends naturally to a two-scale reading: the **first instrument**
-is the mechanical instrument playing the score (the NM evaluating code); the
-**second instrument** is the user's experience of the played piece (intangible,
-emergent, arising from interaction). The **concert** — the experience-as-
-purpose — is what V and F orient toward. This is illustration of the whole
-rhetorical situation strand (§13); the strand carries the learning objective,
-the metaphor carries the picture.
-
-#### The cast (six roles)
-
-| Actor                 | Variants        | Role                                                                                |
-| --------------------- | --------------- | ----------------------------------------------------------------------------------- |
-| **The Composer**      | human or alien  | designs the computation; knows the instrument's capabilities; aware of the audience |
-| **The Virtuoso**      | human or alien  | notation mastery; feel for the controls; produces the score from direction          |
-| **The Mechanism**     | (always itself) | the mechanical instrument — plays the score blindly, deterministically              |
-| **The Audience**      | (human)         | concert-goers — react audibly (cheer, boo, throw tomatoes or flowers)               |
-| **Co-composers**      | (human)         | fellow score-readers — read each other's work for intent and style                  |
-| **Historical cameos** | (human)         | Mozart, Bach, Ligeti, Lovelace, Babbage — as sidebars                               |
-
-#### The mapping
-
-| Element         | Mechanical-instrument world                                       | Programming world                                           |
-| --------------- | ----------------------------------------------------------------- | ----------------------------------------------------------- |
-| The instrument  | A mechanical instrument (organ, music box, beat machine, gamelan) | The JS notional machine                                     |
-| The medium      | The score — notation the mechanism reads                          | Source code                                                 |
-| Actor 1         | The Composer (human or alien)                                     | Student (designer) — computational intent, NM understanding |
-| Actor 2         | The Virtuoso (human or alien)                                     | Implementer (often an LLM) — syntax, idioms, libraries      |
-| Listeners       | Concert audience + co-composers + the mechanism                   | Users + other developers + the computer                     |
-| Black-boxed     | Stops, combination actions — known by output                      | Built-in APIs — known by interface                          |
-| The whole event | The recital                                                       | The rhetorical situation                                    |
-
-#### Why mechanical specifically
-
-A mechanical instrument plays the score blindly at runtime — no human in the
-execution loop. Two phases cleanly separated:
-
-- **Composition phase**: composer + virtuoso collaborate iteratively on the
-  score. LLMs live here.
-- **Execution phase**: the mechanism plays the score exactly as written. No LLM,
-  no interpreter with judgment.
-
-Matches JS's deterministic execution. The precision in the score matters because
-there's no performer to rescue badly-notated passages.
-
-#### Why varying instruments
-
-Different instruments serve different moments. Improves cultural accessibility
-by not anchoring to European classical tradition:
-
-- Pipe and mechanical organs (introductory — visible mechanics)
-- Orchestrions, player pianos (scaling up)
-- Music boxes / one-note instruments (constraint-as-generative; Ligeti's _Musica
-  Ricercata_)
-- Drum machines and beat machines (contemporary, accessible)
-- MIDI sequencers (fully programmatic)
-- Gamelan with karakuri puppet mechanisms (non-European automated tradition)
-
-The rule: preserve composer/virtuoso/mechanism with automated execution. Within
-that, range widely.
-
-#### Why "virtuoso" specifically
-
-Technical mastery without ownership of compositional vision. Different automated
-skillset — notation fluency, idiom, instrument-specific knowledge. Direct analog
-to comprehension-before-production: students learn to read, trace, evaluate
-deeply; they write small programs to verify understanding; they don't need to
-automate fluent production because the virtuoso handles that.
-
-#### Human virtuoso vs alien virtuoso
-
-- **Human virtuoso (Ch1–3)** — senior engineer with fluent hands; deep idiom;
-  patience for collaborative work
-- **Alien virtuoso (Ch4)** — LLM. Dazzling, fast, pattern-rich, but weird.
-  Sometimes plays what you said rather than what you meant. Trained on millions
-  of human virtuosos but cognitively distinct.
-- **Alien composers (teased, deferred)** — agentic AI systems that do design
-  work, not just notation. Ch4.5 and Ch5 closing flag this; full treatment
-  deferred to WtA.
-
-#### Composer pedagogy mappings
-
-Musical composition training offers parallels to this curriculum's skills (from
-`narrative/README.md` §12):
-
-| Composer training                       | Curriculum parallel                                       |
-| --------------------------------------- | --------------------------------------------------------- |
-| Studying scores (hearing internally)    | **Read** — marking syntax, reading aloud                  |
-| Analyzing master composers' works       | **Describe** — PBIS, code review                          |
-| Transcribing performances               | **Trace tables**                                          |
-| Sight-reading exercises                 | Predictive stepping                                       |
-| Writing variations on a theme           | **Modify** — tracked changes to working programs          |
-| Counterpoint & harmony exercises        | Constrained exercises (fill-in-blanks, Parsons)           |
-| Arranging existing pieces               | **Refactoring, migration, porting**                       |
-| Reverse-engineering a performance       | **Reverse engineering** (Ch 3)                            |
-| Listening with score in hand            | Debugger with source visible; the composer's critical ear |
-| Workshopping with performers            | LLM collaboration (Ch 4)                                  |
-| Studying the instrument's mechanics     | NM deep dive (Ch 2)                                       |
-| Small-scale practice (sketches, drills) | **Snippetry** (Ch 5)                                      |
-
-#### The 8 AI-collaboration skills
-
-From `narrative/README.md` §16. Each has a specific composer-virtuoso activity:
-
-| Skill                | Composer-virtuoso activity                                                         |
-| -------------------- | ---------------------------------------------------------------------------------- |
-| **Perspective-Take** | Understanding the virtuoso's habits, blind spots, tendencies                       |
-| **Calibrate**        | Having the virtuoso play a known passage before trusting them with a difficult one |
-| **Articulate**       | Score annotations and verbal direction                                             |
-| **Iterate**          | Rehearsal with revision cycles                                                     |
-| **Delegate**         | Choosing what to notate precisely vs describe in prose                             |
-| **Read**             | Reviewing the virtuoso's transcription against your intent                         |
-| **Trace**            | Mentally playing through what the virtuoso wrote                                   |
-| **Describe**         | Naming the gap between what you heard and what you wanted                          |
-
-#### Reign in wannabe-GEB
-
-Music is an instructive metaphor for some moments, NOT a structural guide.
-_"Reign in the intellectual grandness."_ The course is grounded experience-based
-instructional design with explicit objectives. GEB is a respected influence; the
-structural guide is the spiderweb + spiral (§6).
-
-The metaphor is **load-bearing but not load-exclusive**. Use where it
-illuminates; set it aside where it strains.
+The full treatment — the cast (six roles), the mapping to programming
+concepts, the two-scale instrument extension, why-mechanical /
+why-varying-instruments / why-virtuoso, the human/alien virtuoso split, the
+composer-pedagogy parallels, the 8 AI-collaboration skills, and
+reign-in-wannabe-GEB — lives canonically in
+[`syllabus.metaphor.md`](./syllabus.metaphor.md).
 
 ---
 
