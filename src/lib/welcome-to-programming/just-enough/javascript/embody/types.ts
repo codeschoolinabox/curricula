@@ -788,8 +788,9 @@ interface Streams {
 // `embody(code)` returns a Snippet. Field availability follows `status`,
 // which is a hard-gated staircase: each gate's failure produces a structurally
 // distinct shape leaf with downstream surfaces absent.
-//   !tokenized → only source, parse.tokens (partial), errors, streams.realm, streams.parse.tokenize
-//   !parsed    → + streams.parse.parse
+//   !tokenized → source, parse.tokens (partial), errors, streams.realm, streams.parse.{tokenize, parse}
+//                (the type-paired parse stream yields no events when AST never built)
+//   !parsed    → + (no new fields; parse stream observable but yields no events)
 //   !validated → + parse.ast, parse.comments, static, validation
 //   !created   → + streams.create
 //    created   → + streams.evaluate

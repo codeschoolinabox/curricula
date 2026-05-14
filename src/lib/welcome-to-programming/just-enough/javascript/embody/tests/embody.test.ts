@@ -169,6 +169,18 @@ describe('embody', () => {
 			expect(typeof s.streams.parse?.tokenize).toBe('function');
 		});
 
+		it('omits streams.create (validate gate did not run)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').streams.create).toBeUndefined();
+		});
+
+		it('omits streams.evaluate (gate chain did not complete)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').streams.evaluate).toBeUndefined();
+		});
+
+		it('omits validation (validate gate did not run)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').validation).toBeUndefined();
+		});
+
 		it('returns a frozen Snippet', () => {
 			expect(Object.isFrozen(embody('FAIL_AT_TOKENIZE'))).toBe(true);
 		});
@@ -204,6 +216,18 @@ describe('embody', () => {
 			expect(embody('FAIL_AT_PARSE').streams.evaluate).toBeUndefined();
 		});
 
+		it('omits streams.create (validate gate did not run)', () => {
+			expect(embody('FAIL_AT_PARSE').streams.create).toBeUndefined();
+		});
+
+		it('omits streams.evaluate (gate chain did not complete)', () => {
+			expect(embody('FAIL_AT_PARSE').streams.evaluate).toBeUndefined();
+		});
+
+		it('omits validation (validate gate did not run)', () => {
+			expect(embody('FAIL_AT_PARSE').validation).toBeUndefined();
+		});
+
 		it('returns a frozen Snippet', () => {
 			expect(Object.isFrozen(embody('FAIL_AT_PARSE'))).toBe(true);
 		});
@@ -237,6 +261,10 @@ describe('embody', () => {
 
 		it('omits streams.evaluate (creation gate not passed)', () => {
 			expect(embody('FAIL_AT_CREATE').streams.evaluate).toBeUndefined();
+		});
+
+		it('exposes clean validation (isJeJ=true; validate gate passed before create failed)', () => {
+			expect(embody('FAIL_AT_CREATE').validation!.isJeJ).toBe(true);
 		});
 
 		it('returns a frozen Snippet', () => {

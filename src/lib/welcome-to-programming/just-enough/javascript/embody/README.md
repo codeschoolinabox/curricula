@@ -118,8 +118,8 @@ convention, with explicit `+` deltas.)
 
 | Leaf | Reached when | `Snippet.status` | Has | Missing |
 | --- | --- | --- | --- | --- |
-| **tokenize-fail** | tokenize fails | `tokenized=false` | source, partial `parse.tokens`, errors | `parse.ast`, `static`, `validation`, all downstream streams |
-| **parse-fail** | parse (AST-build) fails | `tokenized=true, parsed=false` | + full `parse.tokens`, `streams.parse.parse` | `parse.ast`, `static`, `validation`, `streams.create`, `streams.evaluate` |
+| **tokenize-fail** | tokenize fails | `tokenized=false` | source, partial `parse.tokens`, errors, `streams.realm`, `streams.parse.{tokenize, parse}` (parse stream yields no events) | `parse.ast`, `static`, `validation`, `streams.create`, `streams.evaluate` |
+| **parse-fail** | parse (AST-build) fails | `tokenized=true, parsed=false` | + full `parse.tokens` (the type-paired parse stream already exposed from tokenize-fail, still no AST to walk so emits nothing) | `parse.ast`, `static`, `validation`, `streams.create`, `streams.evaluate` |
 | **validate-fail** | `validation.isJeJ === false` | `parsed=true, validated=false` | + `parse.ast`, `parse.comments`, `static`, `validation` (with violations populated) | `streams.create`, `streams.evaluate` |
 | **create-fail** | script-scope creation fails | `validated=true, created=false` | + clean `validation` (isJeJ=true), `streams.create` (partial events up to the failure) | `streams.evaluate` |
 | **apex** | all gates pass | all true | + `streams.evaluate` (complete `streams.create` events) | — |

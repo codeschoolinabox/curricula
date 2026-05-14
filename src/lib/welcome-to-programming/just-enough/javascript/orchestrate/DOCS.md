@@ -186,10 +186,13 @@ Steady-state lifecycle:
 
 - `<StudyLenses>` ingests the `snippet` prop.
 - `embody()` turns the snippet directly into a frozen `Snippet` — lazy (built
-  when a lens or evaluation needs it). Format compliance is checked inside
-  `embody` and surfaced via `Snippet.validation.formatted` (boolean) plus
-  JEJ-subset violations on `Snippet.validation.violations`. The orchestrator
-  does NOT pre-format; formatting is the learner's responsibility.
+  when a lens or evaluation needs it). When the validate gate runs (i.e.,
+  `status.parsed === true`), format compliance surfaces via
+  `Snippet.validation?.formatted` and JEJ-subset violations via
+  `Snippet.validation?.violations`. `Snippet.validation` is optional (absent
+  on tokenize-fail and parse-fail leaves where the validate gate didn't
+  run). The orchestrator does NOT pre-format; formatting is the learner's
+  responsibility.
 - The orchestrator switches between **editor mode** (home base active, no lens)
   and **lens mode** (active lens mounted with embodiment + config props).
 - The toolbar lens-picker (Q-I) is always visible; the recommendations panel
@@ -291,9 +294,12 @@ lens:
 
 - **Validation / parse error at embody trigger** — surfaces in lens mode at the
   moment the trigger fires (lens-open from editor). `embody` does NOT throw; it
-  returns a `Snippet` whose `status.parsed=false` (or equivalent gates),
-  `errors` field, and `validation.{formatted, isJeJ, violations}` flags carry
-  the diagnostic. The lens receives that embodiment and displays per its own
+  returns a `Snippet` whose `status.{tokenized, parsed, validated, created}`
+  flags identify which gate failed and whose `errors` field (with
+  `errors.phase` ∈ `'parse:tokenize' | 'parse:ast' | 'validate' | 'create'`)
+  carries the gate-error diagnostic. When the validate gate runs (status.parsed
+  === true), `validation?.{formatted, isJeJ, violations}` carries JEJ-subset
+  diagnostics. The lens receives that embodiment and displays per its own
   error-surface contract. NOT surfaced while typing.
 - **Transient: `embody()` throws on unrecognized input.** Today's embody
   (per [`../embody/index.ts`](../embody/index.ts) JSDoc) recognizes 11 named
@@ -469,11 +475,11 @@ that target appears, the externalized protocol can be a curated subset of these.
 
 - **Embodiment construction details** — owned by [`../embody/`](../embody/). The
   orchestrator just calls `embody(snippet)` and consumes the returned `Snippet`.
-- **Format pre-processing** — `embody` checks format compliance via
-  `Snippet.validation.formatted` and surfaces JEJ-subset violations via
-  `Snippet.validation.violations`; the learner formats their own code; the
-  orchestrator does not pre-format. (Was sketched in earlier drafts; removed per
-  the user-confirmed Phase 0 decision.)
+- **Format pre-processing** — when the validate gate runs, `embody` checks
+  format compliance via `Snippet.validation?.formatted` and surfaces JEJ-subset
+  violations via `Snippet.validation?.violations`; the learner formats their
+  own code; the orchestrator does not pre-format. (Was sketched in earlier
+  drafts; removed per the user-confirmed Phase 0 decision.)
 - **Lens internals** — owned by [`../lenses/`](../lenses/). The orchestrator
   passes `embodiment` + `config` props; what the lens does inside is its own
   concern.

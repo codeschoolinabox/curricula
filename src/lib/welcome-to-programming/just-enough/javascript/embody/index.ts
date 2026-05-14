@@ -172,8 +172,8 @@ const EMBODY_SCENARIOS = Object.freeze([
 	'OK',
 	'FAIL_AT_TOKENIZE',
 	'FAIL_AT_PARSE',
-	'FAIL_AT_CREATE',
 	'VALIDATION_FAIL',
+	'FAIL_AT_CREATE',
 	'NON_DETERMINISTIC',
 	'PAUSES',
 	'EVAL_ERROR',
@@ -664,9 +664,11 @@ type ApexOverlay = {
 
 /**
  * Build an apex-status Snippet with the supplied overlay. All seven
- * apex-status scenarios (`OK`, `VALIDATION_FAIL`, `NON_DETERMINISTIC`,
- * `PAUSES`, `EVAL_ERROR`, `EVAL_TIMEOUT`, `EVAL_LIMIT`,
- * `EVAL_CANCELLED`) share this code path with different overlays.
+ * apex-status scenarios (`OK`, `NON_DETERMINISTIC`, `PAUSES`,
+ * `EVAL_ERROR`, `EVAL_TIMEOUT`, `EVAL_LIMIT`, `EVAL_CANCELLED`)
+ * share this code path with different overlays. `VALIDATION_FAIL`
+ * routes through `buildValidateFailSnippet` instead (validate-fail
+ * leaf, not apex).
  *
  * Eager `RunInstance` construction with back-ref wired to the snippet
  * identity; `deepFreezeInPlace(runInstance)` walks `.snippet` into
