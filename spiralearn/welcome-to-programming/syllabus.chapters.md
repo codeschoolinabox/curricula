@@ -1422,13 +1422,19 @@ you stay in charge of what gets built._ Twinning the LLM means twinning a
 process that twins what _you_ twin (the user, or the NM). Your job is to align —
 and to relish productive divergence.
 
-**Chapter 4's shape draws on a 4-level AI-adoption model** developed by Evan
-Cole with collaborators Janet Tilstra and Josenne Peña (the curriculum author's
-prior work). The model maps precisely onto V/F: Level 3 (behavioral — how AI
-acts in collaboration) is V's territory; Level 2 (cognitive — what AI knows /
-how it "thinks") is F's territory; Levels 1 (conceptual) and 0 (physical) are
-scope-discipline, not blindness. The organizing line for the chapter: _you twin
-Level 2 in order to operate at Level 3_. See ontology §17 for the full mapping.
+**Chapter 4's shape draws on a 4-level AI-adoption model** originally developed
+by Evan Cole with collaborators Janet Tilstra and Josenne Peña (the curriculum
+author's prior work). That model has since been refined into the framework now
+canonical in `syllabus.ontology.md`: the **§17 strata stack** (a general-systems
+view of where any system lives, with AI as one instance), **§18 substrate
+substitution** (deterministic → non-deterministic at artifact-logic), and **§19
+three roles of agential AI** (Role 1 study partner / Role 2 dev collaborator /
+Role 3 active component). **Chapter 4 = Role 2 (dev collaborator)** — Role 1
+already worked quietly across Ch0–3; Role 3 is deferred to later learning. The
+organizing line for the chapter: _you twin the AI as collaborator — F's lens
+reads it as cognitive substrate (NM-grounded mode); V's lens reads its
+behavioral surface (user-grounded mode); two modes of collaboration, one JEJ
+artifact under construction_. See ontology §19 for the canonical framework.
 
 **The both-twins corner of the twin/process 2×2** (see `syllabus.ontology.md`
 §3): Ch4 develops the both-twins state in its LLM-collaborative form — V and F
@@ -1619,8 +1625,8 @@ look similar from outside.
 - 🐣 Describe at least 2 key differences between LLM "cognition" and human
   reasoning
 - 🐣 Identify when an LLM is likely to be unreliable (the jagged frontier)
-- 🐥 Use the 4 Levels of Abstraction framework (AI-adoption model) to discuss AI
-  at the appropriate level
+- 🐥 Use the strata-and-roles framework (ontology §17 + §19) to discuss AI at
+  the appropriate position relative to your work
 - 🐥 Explain the Gell-Mann Amnesia effect in the context of LLM output
 - 🥚 Given an LLM response, hypothesize what patterns it might be matching
 - 🥚 Write clear, specific prompts that provide necessary context
@@ -1663,8 +1669,9 @@ look similar from outside.
   twin-grounded alternative to twin-ignored or twin-wrong LLM use)
 - 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
   it's right
-- 🐥 Apply the AI-adoption model: twin Level 2 (cognitive) to operate at Level 3
-  (behavioral)
+- 🐥 Apply §19 Role 2 (dev collaborator) to Ch4 work: twin the AI as
+  collaborator through F's lens (NM-grounded mode) or V's lens (user-grounded
+  mode)
 - 🐔 **Code is content, not deliverable** — AI-generated code is material to
   study, not work-product to ship
 
