@@ -228,6 +228,16 @@ that meet a learner where they are at a given layer.
   - L4 = footnotes / side notes / easter eggs / references; fully optional, for
     the attuned reader
 
+### V and F brought to life through narrative
+
+V and F are defined as personae in `syllabus.ontology.md` §3 — substrate-agnostic
+stances with temperaments and tells. The pedagogical device is to **bring them
+to life through story** at L2: dialogues, sidebars, exchanges where each speaks
+for themselves. Personification carries perspective more vividly than label
+alone; through dialogue, learners experience a stance rather than read about it.
+(See ontology §3's Achilles/Tortoise footnote for the literary precursor and §26
+for the MU tribute that honors the lineage.)
+
 ### L4 as questioning, not theory-mastery
 
 L4 is the layer where the curriculum reaches the edge of confirmable

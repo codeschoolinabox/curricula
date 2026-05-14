@@ -194,3 +194,6 @@ a respected influence; the structural guide is the spiderweb + spiral
 
 The metaphor is **load-bearing but not load-exclusive**. Use where it
 illuminates; set it aside where it strains.
+
+Ontology §26 carries the one direct GEB acknowledgment in the curriculum,
+as a bounded L4 section. Elsewhere, the reign-in holds.
