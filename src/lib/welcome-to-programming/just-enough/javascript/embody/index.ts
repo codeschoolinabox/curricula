@@ -798,35 +798,48 @@ const APEX_OVERLAYS: Readonly<Record<string, ApexOverlay>> = Object.freeze({
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Build a frozen `Snippet`. Recognized scenario keywords from
- * `EMBODY_SCENARIOS` dispatch to canned Snippet shapes; any other input
- * is routed to real composition via `embody/lib/*` (see
- * `EMBODY-IMPL-HANDOFF.md` for the per-module landing schedule).
+ * Build a frozen `Snippet`. Input is normalized via `trim().toUpperCase()`
+ * before scenario matching: leading/trailing whitespace and case
+ * differences are tolerated; internal whitespace, punctuation, and
+ * substrings are not. Recognized scenario keywords from `EMBODY_SCENARIOS`
+ * dispatch to canned Snippet shapes (`Snippet.source.code` holds the
+ * normalized form). Any other input is routed to real composition via
+ * `embody/lib/*` (see `EMBODY-IMPL-HANDOFF.md` for the per-module landing
+ * schedule).
  *
- * @param code - Source string. If a recognized scenario keyword, returns
- *   the canned Snippet for that scenario; otherwise routed to real
- *   composition.
+ * @param code - Source string. Normalized via `trim().toUpperCase()` for
+ *   scenario matching; raw form passed to real composition for non-scenario
+ *   input.
  * @returns A deep-frozen `Snippet` whose status / validation / static /
  *   eval outcome reflects the recognized scenario or real composition
  *   result.
- * @throws `Error` when `code` is neither a recognized scenario keyword
- *   nor recognizable by the real-composition path.
+ * @throws `TypeError` when `code` is not a string (`code.trim()` fails
+ *   fast at the boundary).
+ * @throws `Error` when normalized `code` is neither a recognized scenario
+ *   keyword nor recognizable by the real-composition path. The error
+ *   message preserves the raw (un-normalized) input.
  */
 function embody(code: string): Snippet {
-	if (code === 'FAIL_AT_TOKENIZE') {
-		return buildFailAtTokenizeSnippet(code);
+	// Normalize input for scenario-keyword matching: trim + uppercase.
+	// Non-string input fails fast at code.trim() (TypeError at boundary).
+	// On the scenario-dispatch branch, the normalized form becomes
+	// Snippet.source.code (canonical scenario identifier).
+	const normalized = code.trim().toUpperCase();
+
+	if (normalized === 'FAIL_AT_TOKENIZE') {
+		return buildFailAtTokenizeSnippet(normalized);
 	}
-	if (code === 'FAIL_AT_PARSE') {
-		return buildFailAtParseSnippet(code);
+	if (normalized === 'FAIL_AT_PARSE') {
+		return buildFailAtParseSnippet(normalized);
 	}
-	if (code === 'VALIDATION_FAIL') {
-		return buildValidateFailSnippet(code);
+	if (normalized === 'VALIDATION_FAIL') {
+		return buildValidateFailSnippet(normalized);
 	}
-	if (code === 'FAIL_AT_CREATE') {
-		return buildFailAtCreateSnippet(code);
+	if (normalized === 'FAIL_AT_CREATE') {
+		return buildFailAtCreateSnippet(normalized);
 	}
-	if (Object.hasOwn(APEX_OVERLAYS, code)) {
-		return buildApexSnippet(code, APEX_OVERLAYS[code]);
+	if (Object.hasOwn(APEX_OVERLAYS, normalized)) {
+		return buildApexSnippet(normalized, APEX_OVERLAYS[normalized]);
 	}
 	throw new Error(
 		`Unknown embody scenario: ${JSON.stringify(code)}. Expected one of: ${EMBODY_SCENARIOS.join(', ')}.`,

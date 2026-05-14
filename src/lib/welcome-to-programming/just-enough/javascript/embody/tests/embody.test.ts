@@ -482,10 +482,6 @@ describe('embody', () => {
 			expect(() => embody('   ')).toThrow();
 		});
 
-		it('throws on a known scenario with trailing newline', () => {
-			expect(() => embody('OK\n')).toThrow();
-		});
-
 		it('throws on a scenario as substring', () => {
 			expect(() => embody('// OK in a comment')).toThrow();
 		});
@@ -506,6 +502,74 @@ describe('embody', () => {
 
 		it('error message lists the expected scenarios', () => {
 			expect(() => embody('FOO')).toThrow(/Expected one of/);
+		});
+	});
+
+	describe('normalization (trim + uppercase before scenario match)', () => {
+		it('lowercased scenario keyword (ok) → matches OK scenario', () => {
+			expect(embody('ok').status.tokenized).toBe(true);
+		});
+
+		it('mixed-case scenario keyword (Ok) → matches OK scenario', () => {
+			expect(embody('Ok').status.tokenized).toBe(true);
+		});
+
+		it('lowercased non-OK scenario (fail_at_parse) → matches FAIL_AT_PARSE leaf', () => {
+			expect(embody('fail_at_parse').status).toEqual({
+				tokenized: true,
+				parsed: false,
+				validated: false,
+				created: false,
+			});
+		});
+
+		it('leading whitespace tolerated', () => {
+			expect(embody('  OK').status.tokenized).toBe(true);
+		});
+
+		it('trailing newline tolerated', () => {
+			expect(embody('OK\n').status.tokenized).toBe(true);
+		});
+
+		it('surrounding whitespace tolerated', () => {
+			expect(embody('  OK  \n').status.tokenized).toBe(true);
+		});
+
+		it('source.code holds normalized form on scenario branch (lowercase + whitespace)', () => {
+			expect(embody('  ok\n').source.code).toBe('OK');
+		});
+
+		it('source.code holds normalized form even for already-uppercase with whitespace (trim-only path)', () => {
+			expect(embody('  OK\n').source.code).toBe('OK');
+		});
+
+		it('internal whitespace is NOT a match (falls through to throw)', () => {
+			expect(() => embody('O K')).toThrow();
+		});
+
+		it('trailing punctuation is NOT a match (falls through to throw)', () => {
+			expect(() => embody('OK!')).toThrow();
+		});
+
+		it('scenario as substring is NOT a match', () => {
+			expect(() => embody('OK; var x = 1;')).toThrow();
+		});
+
+		it('throw message preserves raw input (not normalized) for non-matching input', () => {
+			expect(() => embody('O K')).toThrow(/O K/);
+		});
+
+		it('null input throws TypeError at boundary (trim() fails fast)', () => {
+			expect(() => embody(null as unknown as string)).toThrow(TypeError);
+		});
+
+		it('undefined input throws TypeError at boundary (trim() fails fast)', () => {
+			expect(() => embody(undefined as unknown as string)).toThrow(TypeError);
+		});
+
+		it('ast stub and source are length-consistent post-normalization', () => {
+			const s = embody('  OK\n');
+			expect(s.parse.ast?.end).toBe(s.source.code.length);
 		});
 	});
 
