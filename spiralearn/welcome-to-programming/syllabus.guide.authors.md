@@ -8,11 +8,18 @@
 >
 > - `syllabus.ontology.md` — the _what_ (reference framework)
 > - `syllabus.chapters.md` — the _how_ at chapter grain
-> - `syllabus.manifesto.learners.md` — the _why_ addressed to learners
-> - `syllabus.manifesto.community.md` — the _why_ addressed to partner
+> - `syllabus.guide.learners.md` — the _why_ addressed to learners
+> - `syllabus.guide.community.md` — the _why_ addressed to partner
 >   communities, mentors, cohort hosts
 >
 > **Status**: end-state document. Content is open to iteration.
+>
+> **Note**: the H1 heading still reads "A Manifesto for..." by design.
+> Filename renamed (`manifesto.{role}.md` → `guide.{role}.md`) in Wave 2
+> of the syllabus corpus restructure; title and prose register migrate
+> to "guide" form in Wave 3, when vision-flavored content moves into
+> `syllabus.manifesto.md` and this file gains its practical-guidance
+> register.
 
 ---
 

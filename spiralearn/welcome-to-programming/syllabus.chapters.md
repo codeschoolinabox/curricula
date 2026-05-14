@@ -2,14 +2,14 @@
 
 > **Purpose**: chapter-by-chapter redraft with 5-layer learning-objective grids,
 > drawing framing from `syllabus.ontology.md` and the intellectual-agency
-> meta-LO from `syllabus.manifesto.learners.md`. Six chapters (Ch0–Ch5), each
+> meta-LO from `syllabus.guide.learners.md`. Six chapters (Ch0–Ch5), each
 > with a unified overview + five layer-headed LO lists (`### Layer 0` through
 > `### Layer 4`).
 >
 > **Companions** (siblings, by co-location):
 >
 > - `syllabus.ontology.md` — the _what_ (reference voice)
-> - `syllabus.manifesto.{learners,authors,community}.md` — the _why_ per
+> - `syllabus.guide.{learners,authors,community}.md` — the _why_ per
 >   audience
 > - `syllabus.md` — the existing prose course (read-only)
 >
@@ -1948,10 +1948,10 @@ guide what each region of each chapter delivers.
 ## Cross-references
 
 - `syllabus.ontology.md` — the reference framework these chapters instantiate
-- `syllabus.manifesto.learners.md` — the _why_ addressed to learners
-- `syllabus.manifesto.authors.md` — the _why_ addressed to curriculum authors /
+- `syllabus.guide.learners.md` — the _why_ addressed to learners
+- `syllabus.guide.authors.md` — the _why_ addressed to curriculum authors /
   forkers / contributors
-- `syllabus.manifesto.community.md` — the _why_ addressed to partner
+- `syllabus.guide.community.md` — the _why_ addressed to partner
   communities, mentors, cohort hosts
 - `syllabus.md` — the existing prose course (read-only for the current redraft)
 - `narrative/README.md` — the composer/virtuoso metaphor system

@@ -7,7 +7,7 @@
 >
 > **Audience**: researchers, curriculum-author-collaborators, the TCER
 > community. Not learners. (Learners' manifesto is
-> `syllabus.manifesto.learners.md`; it does not mention TCER.)
+> `syllabus.guide.learners.md`; it does not mention TCER.)
 >
 > **Companions** (siblings by co-location):
 >
@@ -114,7 +114,7 @@ The fourth row is the load-bearing one for this document — see §5.
 **Partner cohorts are trading-zone work in TCER's technical sense, not
 user-tests.** The cohort host's experience is itself a research contribution;
 the curriculum's next iteration reflects what the cohort surfaced. See
-`syllabus.manifesto.community.md` for the register addressed to community
+`syllabus.guide.community.md` for the register addressed to community
 partners.
 
 ---
@@ -136,7 +136,7 @@ Operational implications:
 
 - Git history records what's been decided and what shifted across rounds, so
   the reflexive-revision history is recoverable
-- Adaptation by forkers (per `syllabus.manifesto.authors.md`) is itself
+- Adaptation by forkers (per `syllabus.guide.authors.md`) is itself
   reflexive analysis — every adaptation is a new datum about what the
   framework's commitments do or don't carry
 
@@ -243,7 +243,7 @@ curriculum's claim that _it is doing the innovation process it's teaching._
 
 This claim has consequences:
 
-- Adapting the curriculum (per `syllabus.manifesto.authors.md`) is V/F practice
+- Adapting the curriculum (per `syllabus.guide.authors.md`) is V/F practice
   at the artifact layer. Adapters are practitioners of the thing they're
   adapting.
 - The relationship between curriculum and embody isn't _consumer ↔
@@ -306,9 +306,9 @@ existing homes.
 
 | Audience                                        | What changes                                                                                                                                                                                                                                        |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Learners**                                    | Nothing in the learner-facing prose. The translational nature is invisible at the learning level. (See `syllabus.manifesto.learners.md`.)                                                                                                           |
-| **Curriculum authors / forkers / contributors** | Adaptation is trading-zone work in TCER's technical sense. The Evidence Tag System and reflexive-analysis discipline travel with the curriculum. See `syllabus.manifesto.authors.md`.                                                               |
-| **Partner communities, mentors, cohort hosts**  | Co-development IS translational research. Partner cohorts are not user-tests; they are trading zones. The community-of-makers and community-of-users are the same kind of relationship at different moments. See `syllabus.manifesto.community.md`. |
+| **Learners**                                    | Nothing in the learner-facing prose. The translational nature is invisible at the learning level. (See `syllabus.guide.learners.md`.)                                                                                                           |
+| **Curriculum authors / forkers / contributors** | Adaptation is trading-zone work in TCER's technical sense. The Evidence Tag System and reflexive-analysis discipline travel with the curriculum. See `syllabus.guide.authors.md`.                                                               |
+| **Partner communities, mentors, cohort hosts**  | Co-development IS translational research. Partner cohorts are not user-tests; they are trading zones. The community-of-makers and community-of-users are the same kind of relationship at different moments. See `syllabus.guide.community.md`. |
 | **Researchers**                                 | The curriculum is observable; learner artifacts are data; the framework is open for application and challenge. Reflexive analysis is welcome.                                                                                                       |
 | **TCER community**                              | This is an applied case study of the TCER framework, alongside `DGMD-E-1-artifacts/embodying-tcer/`. The curriculum + embody pair is one operational instance of _what a Translational Sprint at the educational-tool layer looks like_.            |
 

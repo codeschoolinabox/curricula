@@ -8,7 +8,7 @@
 >
 > **Companions** (siblings, by co-location):
 >
-> - `syllabus.manifesto.{learners,authors,community}.md` — the _why_ per
+> - `syllabus.guide.{learners,authors,community}.md` — the _why_ per
 >   audience
 > - `syllabus.chapters.md` — the _how_ at chapter grain (5-layer LO grid)
 > - `syllabus.md` — the existing prose course (read-only for the current
@@ -140,8 +140,8 @@ unitary things).
 
 > **On intellectual agency**: empowerment / intellectual confidence is the META
 > learning objective unifying the 5 layers (§12). It is _not_ a third
-> foundational principle in the ontology — that work belongs in the manifestos
-> (`syllabus.manifesto.{learners,authors,community}.md`). The two principles
+> foundational principle in the ontology — that work belongs in the guides
+> (`syllabus.guide.{learners,authors,community}.md`). The two principles
 > above are the curriculum's spine; intellectual agency is its purpose.
 
 ---
@@ -922,8 +922,8 @@ more again.** Each layer is a complete exit point.
 
 > **Meta learning objective unifying all 5 layers**: _intellectual agency_. Each
 > layer is intellectual agency at a different scale. This is the through-line
-> that connects the layers to the manifestos
-> (`syllabus.manifesto.{learners,authors,community}.md`).
+> that connects the layers to the guides
+> (`syllabus.guide.{learners,authors,community}.md`).
 
 | Layer  | Frame                | Meta-objective (intellectual agency over…) | Primary objective                                                                                     | Learned through                                                                                               |
 | ------ | -------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
