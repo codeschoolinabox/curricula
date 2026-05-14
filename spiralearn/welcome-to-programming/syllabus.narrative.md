@@ -4,7 +4,8 @@
 > narrative additions — voice spec, historical cameos, metaphor-flavored
 > illustrations, deeper-section threads — that didn't fold into the
 > canonical docs (`syllabus.md`, `syllabus.ontology.md`,
-> `syllabus.chapters.md`, the three manifestos,
+> `syllabus.chapters.md`, the three role-targeted guides
+> (`syllabus.guide.{learners,authors,community}.md`),
 > `syllabus.translational-framing.md`).
 
 Visual assets live at `./assets/` (sibling to this file at the

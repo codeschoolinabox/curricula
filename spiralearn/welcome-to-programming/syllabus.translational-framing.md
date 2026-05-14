@@ -14,8 +14,8 @@
 > - `syllabus.ontology.md` — the reference framework (§B.4 Research orientation
 >   is the in-ontology home of these principles)
 > - `syllabus.chapters.md` — chapter-by-chapter LO grids
-> - `syllabus.manifesto.{authors,community}.md` — the _why_ for those audiences,
->   with TCER vocabulary integrated
+> - `syllabus.guide.{authors,community}.md` — practical role-targeted
+>   guidance for those audiences, with TCER vocabulary integrated
 > - `syllabus.md` — learner-facing prose (no TCER vocabulary)
 > - `research-framing.md` (curriculum-level) and the repo-level
 >   `research-framing.md` — research-committee-owned evidence claims
@@ -296,7 +296,7 @@ linked emoji classify the evidence behind pedagogical claims:
 These tags are deployed inline in the per-chapter `research-framing.md` files
 (research committee-owned) and in `DGMD-E-1-artifacts/theory-to-requirements/`.
 **They are not yet deployed in the new syllabus artifacts**
-(`syllabus.ontology.md`, `syllabus.chapters.md`, `syllabus.manifesto.*.md`).
+(`syllabus.ontology.md`, `syllabus.chapters.md`, `syllabus.guide.*.md`).
 Deployment is deferred to a future pass; the evidence claims live in their
 existing homes.
 

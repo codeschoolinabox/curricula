@@ -112,6 +112,7 @@ experiment, or surprise yourself. This course helps you build both at once.
 - [The Metaphor: Composer, Virtuoso, Instrument and Audience](#the-metaphor-composer-virtuoso-instrument-and-audience)
 - [References](#references)
 - [Symbology](#symbology)
+- [Reading map: where to go for more depth](#reading-map-where-to-go-for-more-depth)
 - [Before You Begin](#before-you-begin)
 
 > **Chapter bodies and learning objectives live in
@@ -563,6 +564,78 @@ cleanly.
 **Out of scope for the symbology:** the egg / chick / chicken progression
 markers (🥚🐣🐥🐔) used on learning objectives are a separate, established
 convention for difficulty progression — not part of this set.
+
+[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+
+---
+
+## Reading map: where to go for more depth
+
+`syllabus.md` is the README of this directory — broad-audience, light, oriented
+to scope-and-goals. Each companion file owns one canonical home for a piece of
+the curriculum. The graph shows how they relate; the list below gives a
+one-line read of each.
+
+```mermaid
+graph TD
+    subgraph WT["What is taught"]
+        M[syllabus.manifesto.md]
+        O[syllabus.ontology.md]
+    end
+    subgraph HT["How it's taught"]
+        P[syllabus.pedagogy.md]
+        MT[syllabus.metaphor.md]
+    end
+    subgraph WH["Where the teaching happens"]
+        C[syllabus.chapters.md]
+        N[syllabus.narrative.md]
+    end
+    subgraph RO["Research orientation"]
+        T[syllabus.translational-framing.md]
+    end
+    subgraph RG["Role-targeted guidance"]
+        GL[syllabus.guide.learners.md]
+        GA[syllabus.guide.authors.md]
+        GC[syllabus.guide.community.md]
+    end
+
+    M -->|vision informs concepts| O
+    O -->|concepts → design principles| P
+    P -->|design principles → chapter shape| C
+    C -->|chapter content → journey| N
+    MT -->|illustrates concepts| O
+    MT -->|teaching apparatus deployed in| P
+    MT -->|narrative register for metaphor extensions| N
+    T -->|improves methods of| P
+    T -->|positions curriculum as artifact of| M
+    P -.->|principles enacted in practice| GL
+    P -.->|principles enacted in practice| GA
+    P -.->|principles enacted in practice| GC
+```
+
+**Per-file blurbs:**
+
+- **`syllabus.md`** — this file: README, scope-and-goals, reading map
+- **`syllabus.manifesto.md`** — the vision of computing and education this
+  curriculum stands on (the _why_)
+- **`syllabus.ontology.md`** — canonical concept reference: V/F, notional
+  machines, strata, strands, audiences, the whole _what_
+- **`syllabus.pedagogy.md`** — design principles for how the experience is
+  built (the _how-it's-taught_); reads as an ontology of pedagogical
+  principles
+- **`syllabus.metaphor.md`** — the composer / virtuoso / mechanism teaching
+  apparatus (illustrates concepts; not a structural guide)
+- **`syllabus.chapters.md`** — chapter bodies, sub-sections, and per-layer
+  learning-objective contracts in detail
+- **`syllabus.narrative.md`** — the learner's experiential arc through the
+  course; narrative-register overflow from metaphor.md (voice, cameos,
+  illustrations)
+- **`syllabus.translational-framing.md`** — curriculum-as-research
+  positioning and methods-improvement process (researcher /
+  author-collaborator audience)
+- **`syllabus.guide.learners.md` / `.authors.md` / `.community.md`** —
+  practical, role-targeted guidance (tooling, workflows, application of
+  design principles)
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
