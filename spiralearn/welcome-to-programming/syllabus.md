@@ -121,9 +121,9 @@ experiment, or surprise yourself. This course helps you build both at once.
 - [Chapter 5: Developers, Computers, Users, Agents, and You](#chapter-5-developers-computers-users-agents-and-you)
 
 > **Chapter bodies and learning objectives live in
-> [`syllabus.chapters.md`](./syllabus.chapters.md).** The chapter sections
-> below give the framing; the full sub-sections (0.1, 0.2, …, 5.5) and the
-> per-layer LO contracts are in the companion file.
+> [`syllabus.chapters.md`](./syllabus.chapters.md).** The chapter sections below
+> give the framing; the full sub-sections (0.1, 0.2, …, 5.5) and the per-layer
+> LO contracts are in the companion file.
 
 ---
 
@@ -230,7 +230,7 @@ abstraction for any system — a flowchart of cloud services, a state machine of
 UI components, or the JEJ NM at the bottom. The layer adapts; the skill is the
 same.
 
-**How do you build this predictive mastery? Four threads** run beneath the
+**How do you build this predictive mastery? Five strands** run beneath the
 curriculum, progressively layering as the chapters advance:
 
 - **Twinning** (baseline): building an accurate mental model of a process
@@ -266,8 +266,28 @@ curriculum, progressively layering as the chapters advance:
   purpose the code serves. Twinning each part isn't enough; the fullest work
   holds the _whole_ situation in view at once. This is where design thinking
   enters — rehearsing, workshopping, focus-testing, iterating across the full
-  system, not just refining individual pieces. This thread emerges most strongly
-  in Chapter 3 (users, PBIS) and deepens through Chapter 5.
+  system, not just refining individual pieces. This strand surfaces most
+  strongly in Chapter 3 (users, PBIS) and deepens through Chapter 5.
+
+- **Affordances**: any system — a language, an NM, a UI — is an
+  _affordance-space_, a set of relational possibilities between agent and
+  environment. A chair affords sitting, but only for organisms with the right
+  body; Lisp affords macros, Haskell affords laziness, JS affords
+  prototype-mutation. Learning JS isn't memorizing syntax — it's learning what
+  this affordance-space lets you do. The Mikhak loop is an _affordance-discovery
+  dialogue_: Frogramming probes substrate-affordances (what does the NM also
+  permit?); Vibetoading probes user-affordances (what does the UI also invite?);
+  the dialogue surfaces affordances neither hat saw alone. This strand runs
+  through every chapter and sharpens in Chapter 4 (agent collaboration) and
+  Chapter 5 (snippetry as affordance-play).
+
+**The data thread (the red thread).** Threading through and beneath all five
+strands is the word _data_ itself, accruing richer semantics at each layer —
+from theory (data as concept), to computation (data as bits exerting control on
+hardware), to interaction (data as the user's experience), to domain (data as
+the world the program changes). The strands are how the curriculum _teaches_;
+the data thread is what stitches it together — the same word deepening with
+every spiral pass.
 
 **The spiral (skills) and the ladder (audiences).** Each chapter adds an
 audience to the learner's awareness (the ladder: devs → +computer → +users →
@@ -286,11 +306,11 @@ but you're always free to use whichever helps you most. The
 just-enough/javascript tooling that powers Study Lenses implements the
 Explorotron pedagogical framework (Malaise & Signer, 2023).
 
-**JavaScript only** for now; Python track in development. Skill-level objectives
-are identical for both languages. JS is the primary track because it makes the
-developer/user split _architecturally visible_: `console.log` lives in devtools
-(developer space), `prompt`/`alert`/`confirm` live in browser UI (user space).
-That separation is the curriculum's rhetorical model made concrete.
+**JavaScript only**. JS is the primary track because it is a popular language
+that makes the developer/user split _architecturally visible_: `console.log`
+lives in devtools (developer space), `prompt`/`alert`/`confirm` live in browser
+UI (user space). That separation is the curriculum's rhetorical model made
+concrete.
 
 [TOP](#welcome-to-frogramming---syllabus)
 
@@ -337,12 +357,11 @@ everything that depended on it. This course's response to both layers:
 predict-and-verify at the level of **internal events** (scope walks, coercion
 cascades, binding lifecycle, prototype lookups). Internal-event predictions are
 much harder for a wrong model to falsely confirm. Take `'5' + 3` and `'5' - 3`
-as a small example: most learners can predict the outputs (`'53'` and `2`)
-long before they can predict the internal events — what the engine actually
-does, in what order. _As Evan put it in earlier teaching notes: "explaining a
-program in plain English is helpful, but it's easy to be a little bit wrong
-and not know it."_ Predicting the chain of internal events is what closes
-that gap.
+as a small example: most learners can predict the outputs (`'53'` and `2`) long
+before they can predict the internal events — what the engine actually does, in
+what order. _As Evan put it in earlier teaching notes: "explaining a program in
+plain English is helpful, but it's easy to be a little bit wrong and not know
+it."_ Predicting the chain of internal events is what closes that gap.
 
 **Building Structure → AI Integration Threshold → Leveraging Structure.** The
 SOLO taxonomy from education research distinguishes Pre-, Uni-, Multi-,
@@ -353,33 +372,32 @@ this course are _weighted toward_ Building Structure (Pre/Uni/Multistructural �
 concepts isolated, models forming, no AI in the work). Chapter 4 is _weighted
 toward_ the threshold crossing (Relational — concepts connect; AI outputs become
 evaluable). Chapter 5 is _weighted toward_ Leveraging Structure (Extended
-Abstract): all quadrants of human-AI collaboration become viable, and
-snippetry maintains the automated library (the _automaticity_ named in the
-opener) once full-codebase work no longer provides daily reps. Within any
-chapter, a learner is at varying SOLO levels for different concepts; the
-mapping is suggestive, not strict. The threshold matters because
-**AI cannot help when learners don't yet know what to verify.** Until you can
-recognize what to verify, an LLM's output is unevaluable from your seat — even
-if it happens to be correct.
+Abstract): all quadrants of human-AI collaboration become viable, and snippetry
+maintains the automated library (the _automaticity_ named in the opener) once
+full-codebase work no longer provides daily reps. Within any chapter, a learner
+is at varying SOLO levels for different concepts; the mapping is suggestive, not
+strict. The threshold matters because **AI cannot help when learners don't yet
+know what to verify.** Until you can recognize what to verify, an LLM's output
+is unevaluable from your seat — even if it happens to be correct.
 
 **Why Chapter 4 lands where it does.** Chapter ordering here isn't arbitrary —
-it's a structural consequence of the principle. Until you have the twins (the NM-twin, the
-user-twin, the developer-twin), you can't evaluate AI output, direct it
-meaningfully, or recognize when it's confidently misleading you. There's a
-sharper way to put this: until you have the twins, you don't know what to ask
-the LLM well, and an LLM responding to ill-formed queries samples like random
-encounter, not like a teacher. Once the twins are running, your queries become
-well-posed enough that the LLM's responses approximate pedagogical sampling —
-and you have the model to verify them against. The threshold isn't sequential
-("we covered Ch1–3 first, now Ch4"); it's structural (pre-twin queries elicit
-non-pedagogical samples; post-twin queries elicit something closer to
-pedagogical samples that you can also evaluate). Once across the threshold, the
-LLM becomes a steerable participant. Chapter 4's structure — every section
-evaluating LLM output rather than producing it — is the operational mechanism
-that lets the chapter work safely. **Code is content, not deliverable** is the
-framing this section names for Ch4: AI-generated code is material to study,
-not work-product to ship — which is what keeps the chapter pedagogical rather
-than productivity-oriented.
+it's a structural consequence of the principle. Until you have the twins (the
+NM-twin, the user-twin, the developer-twin), you can't evaluate AI output,
+direct it meaningfully, or recognize when it's confidently misleading you.
+There's a sharper way to put this: until you have the twins, you don't know what
+to ask the LLM well, and an LLM responding to ill-formed queries samples like
+random encounter, not like a teacher. Once the twins are running, your queries
+become well-posed enough that the LLM's responses approximate pedagogical
+sampling — and you have the model to verify them against. The threshold isn't
+sequential ("we covered Ch1–3 first, now Ch4"); it's structural (pre-twin
+queries elicit non-pedagogical samples; post-twin queries elicit something
+closer to pedagogical samples that you can also evaluate). Once across the
+threshold, the LLM becomes a steerable participant. Chapter 4's structure —
+every section evaluating LLM output rather than producing it — is the
+operational mechanism that lets the chapter work safely. **Code is content, not
+deliverable** is the framing this section names for Ch4: AI-generated code is
+material to study, not work-product to ship — which is what keeps the chapter
+pedagogical rather than productivity-oriented.
 
 **The existing scaffolding, reread as instances of the principle.** Each piece
 of this curriculum's apparatus is **pedagogical sampling at a particular
@@ -397,9 +415,9 @@ granularity**:
   brain has built a network of Mental Models that it can fall back on to carry
   out these routine tasks without increasing your cognitive load."_
 - **Cognitive Load Theory** (intrinsic / extraneous / germane) is pedagogical
-  sampling at the **cognitive-budget level** — choosing what NOT to put in
-  front of the learner is as much a sampling decision as choosing what to
-  include. This is why JEJ is deliberately small.
+  sampling at the **cognitive-budget level** — choosing what NOT to put in front
+  of the learner is as much a sampling decision as choosing what to include.
+  This is why JEJ is deliberately small.
 - **Study Lenses** are pedagogical sampling at the internal-event level. They
   reclaim the visibility Bret Victor wanted (mechanism made observable) at
   exactly the granularity the misconception-mechanism requires.
@@ -420,12 +438,11 @@ tagline to the cognitive-science taproot underneath.
 **The mastery contract, returning to the catchphrase.** Earlier in the course
 materials there's a sentence the author has kept canonical: _"You have only
 mastered a skill when you can complete its exercises without AI."_ That's the
-principle as a learning contract. AI is welcome at the work as soon as you
-have the twins — NM-twin and user-twin alike — to bring to the collaboration.
-Until then, AI is what you're using AS you build — not what you're using
-INSTEAD of building. Not just a better
-explanation. The work is yours, has always been yours, and will always be yours
-— that's what makes it worth doing.
+principle as a learning contract. AI is welcome at the work as soon as you have
+the twins — NM-twin and user-twin alike — to bring to the collaboration. Until
+then, AI is what you're using AS you build — not what you're using INSTEAD of
+building. Not just a better explanation. The work is yours, has always been
+yours, and will always be yours — that's what makes it worth doing.
 
 [TOP](#welcome-to-frogramming---syllabus)
 
@@ -550,8 +567,8 @@ _wrong thing correctly_. This makes certain practices _more_ important in an
 LLM-assisted workflow, not less: short iterations of user-visible behavior we
 can actually evaluate, human-evaluable acceptance criteria, testing discipline
 oriented toward visible behavior; Agile development vs Waterfall all over again!
-Chapter 3 (users, PBIS, visible behavior) carries particular weight for
-this reason.
+Chapter 3 (users, PBIS, visible behavior) carries particular weight for this
+reason.
 
 **NM understanding matters more now, not less.** LLMs can write the notation —
 pull the levers, work the controls — but the notional machine they're directing
@@ -629,9 +646,9 @@ for most of the curriculum. "Few options, many possibilities" — depth on a sma
 surface rather than skimming across a large one. This is a pedagogical
 constraint, not a permanent one.
 
-### What this course builds in you — the four threads
+### What this course builds in you — the five strands
 
-Four threads run beneath every chapter, each enabled by the ones before:
+Five strands run beneath every chapter, each enabled by the ones before:
 
 1. **Twinning** — accurate mental models of processes outside your mind
 2. **Decisions (micro and macro)** — every keyword, name, operator, structure
@@ -642,8 +659,11 @@ Four threads run beneath every chapter, each enabled by the ones before:
 4. **The whole rhetorical situation** — the entire software context: users,
    developers, computer, product, environment, purpose. Design thinking across
    the whole system.
+5. **Affordances** — every language, NM, and UI is an affordance-space; learning
+   to read what a system _also_ permits, not just what it asks for.
 
-Plus Study Lenses making the machine's work visible throughout.
+Plus the data thread — the word _data_ deepening at each layer — stitching all
+five together, and Study Lenses making the machine's work visible throughout.
 
 ### 💭 Snippetry
 
@@ -686,10 +706,9 @@ to JavaScript.
 ## The Metaphor: Composer, Virtuoso, Instrument and Audience
 
 Throughout this course we illustrate the ideas above using a consistent
-metaphor: **a mechanical instrument, a composer, a virtuoso, a score, and
-an audience**. The instrument varies across chapters; the roles stay the
-same. If the metaphor doesn't click for you, the underlying ideas stand on
-their own.
+metaphor: **a mechanical instrument, a composer, a virtuoso, a score, and an
+audience**. The instrument varies across chapters; the roles stay the same. If
+the metaphor doesn't click for you, the underlying ideas stand on their own.
 
 | Idea                    | Illustration                                                                                  |
 | ----------------------- | --------------------------------------------------------------------------------------------- |
@@ -701,18 +720,16 @@ their own.
 | Other developers        | **Co-composers** — fellow score-readers                                                       |
 | The computer evaluating | **The mechanism playing the score blindly at performance time**                               |
 
-Chapter 2 studies the instrument's mechanism. Chapter 3 brings in the
-audience and design thinking. Chapter 4 teaches collaboration with the
-alien virtuoso (the LLM). Chapter 5 turns to the composer's daily
-practice — snippetry — and hints at alien composers emerging on the
-horizon.
+Chapter 2 studies the instrument's mechanism. Chapter 3 brings in the audience
+and design thinking. Chapter 4 teaches collaboration with the alien virtuoso
+(the LLM). Chapter 5 turns to the composer's daily practice — snippetry — and
+hints at alien composers emerging on the horizon.
 
-**The full treatment** of the cast (Composer, Virtuoso, Mechanism,
-Audience, Co-composers, Historical cameos), the human-vs-alien virtuoso
-split, the composition-vs-performance two-phase structure, the
-comprehension-before-production mapping, and the per-chapter
-instantiations lives in [`syllabus.ontology.md`](./syllabus.ontology.md)
-§24.
+**The full treatment** of the cast (Composer, Virtuoso, Mechanism, Audience,
+Co-composers, Historical cameos), the human-vs-alien virtuoso split, the
+composition-vs-performance two-phase structure, the
+comprehension-before-production mapping, and the per-chapter instantiations
+lives in [`syllabus.ontology.md`](./syllabus.ontology.md) §24.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -723,25 +740,23 @@ instantiations lives in [`syllabus.ontology.md`](./syllabus.ontology.md)
 Three resources are always available alongside the curriculum. None is a
 prerequisite; refer to them when you need them.
 
-- **Just Enough JavaScript** — a curated subset of JavaScript: enough to
-  write imperative programs that interact with users through text and
-  numbers. Fewer features → more cognitive bandwidth for the concepts
-  that matter. See it as a companion reference, not a prerequisite.
-- **Studying with LLMs** — guidance and starter prompts for using LLM
-  assistants as _study partners_, not code generators, while working
-  through earlier chapters. Distinct from Chapter 4, which is about
-  agents as named collaborators in the development process. The
-  principle: an LLM can _support_ your experience of building the twin
-  but cannot _produce_ it for you.
-- **Learning Expectations** — a reference document for when you're in
-  the middle of something hard and want context for what you are
-  experiencing. Covers spiral curriculum design, threshold concepts,
-  liminal zone thinking, and the learning sequence.
+- **Just Enough JavaScript** — a curated subset of JavaScript: enough to write
+  imperative programs that interact with users through text and numbers. Fewer
+  features → more cognitive bandwidth for the concepts that matter. See it as a
+  companion reference, not a prerequisite.
+- **Studying with LLMs** — guidance and starter prompts for using LLM assistants
+  as _study partners_, not code generators, while working through earlier
+  chapters. Distinct from Chapter 4, which is about agents as named
+  collaborators in the development process. The principle: an LLM can _support_
+  your experience of building the twin but cannot _produce_ it for you.
+- **Learning Expectations** — a reference document for when you're in the middle
+  of something hard and want context for what you are experiencing. Covers
+  spiral curriculum design, threshold concepts, liminal zone thinking, and the
+  learning sequence.
 
-**The full source-materials catalog** — academic lineages, design-
-principle sources, infrastructure documentation, prior-session handoffs
-— lives in [`syllabus.ontology.md`](./syllabus.ontology.md) under
-_Source materials_.
+**The full source-materials catalog** — academic lineages, design- principle
+sources, infrastructure documentation, prior-session handoffs — lives in
+[`syllabus.ontology.md`](./syllabus.ontology.md) under _Source materials_.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -798,25 +813,24 @@ convention for difficulty progression — not part of this set.
 No language features. Conceptual orientation only.
 
 _Metaphor anchor: **the recital as rhetorical situation** — an entire
-performance event with its audience, its performers, its instrument, and
-the score that ties them together._
+performance event with its audience, its performers, its instrument, and the
+score that ties them together._
 
-The chapter introduces the rhetorical model of source code (writing for
-multiple audiences simultaneously: 🧑‍💻 developers, 💻 the computer,
-users, 🤖 agents), the **Vibetoading / Frogramming** distinction, and
-the positioning of WtF within the broader space of programming and
-computer science. _Vibing_ is named as a legitimate stance — building
-by feel, pre- and post-LLM. What distinguishes the V hat from no-twin
-vibing is the user-twin; what distinguishes the F hat from no-twin
-ceremony is the NM-twin. The full twin/process 2×2 lives in the
+The chapter introduces the rhetorical model of source code (writing for multiple
+audiences simultaneously: 🧑‍💻 developers, 💻 the computer, users, 🤖 agents), the
+**Vibetoading / Frogramming** distinction, and the positioning of WtF within the
+broader space of programming and computer science. _Vibing_ is named as a
+legitimate stance — building by feel, pre- and post-LLM. What distinguishes the
+V hat from no-twin vibing is the user-twin; what distinguishes the F hat from
+no-twin ceremony is the NM-twin. The full twin/process 2×2 lives in the
 ontology; here you meet the two hats and the four-quadrant grid (V/F ×
 humans-only / LLM-collab).
 
-The chapter's intellectual-agency move: _you arrive here with a why, and
-the course is built to honor it._
+The chapter's intellectual-agency move: _you arrive here with a why, and the
+course is built to honor it._
 
-**Full chapter content** — sub-sections 0.1 (Rhetorics), 0.2
-(Positioning), 0.3 (Two Hats), plus per-layer learning objectives — in
+**Full chapter content** — sub-sections 0.1 (Rhetorics), 0.2 (Positioning), 0.3
+(Two Hats), plus per-layer learning objectives — in
 [`syllabus.chapters.md`](./syllabus.chapters.md) Ch0.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
@@ -825,32 +839,30 @@ the course is built to honor it._
 
 ## Chapter 1: Developers
 
-Language features: comments, `console.log` and the full `console` API
-with string literals.
+Language features: comments, `console.log` and the full `console` API with
+string literals.
 
 _Metaphor anchor: **the score as inter-composer communication** — other
-composers read your score for intent and style, long before (or
-entirely instead of) ever hearing it performed._
+composers read your score for intent and style, long before (or entirely instead
+of) ever hearing it performed._
 
-Your first code and your first audience. The 🧑‍💻 developer audience —
-including future-you, who is a stranger by the time they come back to
-this code. Twinning the developer audience is the central skill. You
-meet the **static vs dynamic** distinction (source code vs program
-evaluation), apply it to comments and logs, and start the discipline of
-**micro-decisions**: every word, every comment, every console method is
-a choice that shapes how a stranger reads your work.
+Your first code and your first audience. The 🧑‍💻 developer audience — including
+future-you, who is a stranger by the time they come back to this code. Twinning
+the developer audience is the central skill. You meet the **static vs dynamic**
+distinction (source code vs program evaluation), apply it to comments and logs,
+and start the discipline of **micro-decisions**: every word, every comment,
+every console method is a choice that shapes how a stranger reads your work.
 
 The chapter's intellectual-agency move: _you have authorial choices._
 
-**Note** — the practice of writing for future-you is the opening of an
-arc the course closes in Ch5. Future-you is a stranger here; by Ch5,
-you-the-practitioner have become the audience you-the-learner started
-twinning. Same self, two angles of approach.
+**Note** — the practice of writing for future-you is the opening of an arc the
+course closes in Ch5. Future-you is a stranger here; by Ch5,
+you-the-practitioner have become the audience you-the-learner started twinning.
+Same self, two angles of approach.
 
-**Full chapter content** — sub-sections 1.1 (Twinning the developer
-audience), 1.2 (Static vs dynamic), 1.3 (Comments), 1.4 (Logs), plus
-per-layer learning objectives — in
-[`syllabus.chapters.md`](./syllabus.chapters.md) Ch1.
+**Full chapter content** — sub-sections 1.1 (Twinning the developer audience),
+1.2 (Static vs dynamic), 1.3 (Comments), 1.4 (Logs), plus per-layer learning
+objectives — in [`syllabus.chapters.md`](./syllabus.chapters.md) Ch1.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -858,39 +870,37 @@ per-layer learning objectives — in
 
 ## Chapter 2: Developers and Computers
 
-_Metaphor anchor: **studying the instrument's mechanisms** — like an
-organ builder examining bellows, tracker action, registration, and
-combination action, you study how the JavaScript engine actually
-carries out your instructions._
+_Metaphor anchor: **studying the instrument's mechanisms** — like an organ
+builder examining bellows, tracker action, registration, and combination action,
+you study how the JavaScript engine actually carries out your instructions._
 
 The 💻 computer is now a full audience. The primary learning objective:
-**JavaScript's notional machine** — the mental model of how the JS
-engine evaluates your code, understood through a vocabulary of
-**evaluation events**. The chapter has two tracks:
+**JavaScript's notional machine** — the mental model of how the JS engine
+evaluates your code, understood through a vocabulary of **evaluation events**.
+The chapter has two tracks:
 
-- **NM core (2.0–2.8)**: the machine itself — expressions, values,
-  bindings, scope chain, prototype chain, coercion, statements, and
-  reading/writing code. All required.
-- **Computational idioms (2A–2F)**: what you _do_ with the machine —
-  logic, strings, numbers, pattern matching, bits, dates. **2A and 2B
-  required.** Choose at least one from 2C–2E. 2F is optional.
+- **NM core (2.0–2.8)**: the machine itself — expressions, values, bindings,
+  scope chain, prototype chain, coercion, statements, and reading/writing code.
+  All required.
+- **Computational idioms (2A–2F)**: what you _do_ with the machine — logic,
+  strings, numbers, pattern matching, bits, dates. **2A and 2B required.**
+  Choose at least one from 2C–2E. 2F is optional.
 
-This is where **PBIS** lands (Purpose, Behavior, Implementation,
-Strategy — four perspectives for reading any program), **trace tables**
-and **predictive stepping** become routine, and the discipline of
-_predict-before-run_ becomes a habit. The substrate of the NM is not
-inert: `embody/` is a crystalline representation of the entire dynamic
-data lifecycle — a static 4D rendering of a 3D flowing river.
+This is where **PBIS** lands (Purpose, Behavior, Implementation, Strategy — four
+perspectives for reading any program), **trace tables** and **predictive
+stepping** become routine, and the discipline of _predict-before-run_ becomes a
+habit. The substrate of the NM is not inert: `embody/` is a crystalline
+representation of the entire dynamic data lifecycle — a static 4D rendering of a
+3D flowing river.
 
-The chapter's intellectual-agency move: _you can predict what the
-machine will do, then verify it._
+The chapter's intellectual-agency move: _you can predict what the machine will
+do, then verify it._
 
-**Full chapter content** — sub-sections 2.0 (The Notional Machine), 2.1
-(Running a Program), 2.2 (Expressions and Resolve), 2.3 (Values and
-Bindings), 2.4 (Statements and Control Flow), 2.6 (Prototype Chain),
-2.8 (Reading, Writing, Reviewing Code), 2A–2F (Computational Idioms),
-plus per-layer learning objectives — in
-[`syllabus.chapters.md`](./syllabus.chapters.md) Ch2.
+**Full chapter content** — sub-sections 2.0 (The Notional Machine), 2.1 (Running
+a Program), 2.2 (Expressions and Resolve), 2.3 (Values and Bindings), 2.4
+(Statements and Control Flow), 2.6 (Prototype Chain), 2.8 (Reading, Writing,
+Reviewing Code), 2A–2F (Computational Idioms), plus per-layer learning
+objectives — in [`syllabus.chapters.md`](./syllabus.chapters.md) Ch2.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -898,33 +908,29 @@ plus per-layer learning objectives — in
 
 ## Chapter 3: Developers, Computers, and Users
 
-Language features: `prompt`, `alert`, `confirm`. All control flow
-features (`if`, `while`, `break`/`continue`) were introduced in Chapter
-2 and are now applied in programs where user interactions are the fixed
-behavioral anchors.
+Language features: `prompt`, `alert`, `confirm`. All control flow features
+(`if`, `while`, `break`/`continue`) were introduced in Chapter 2 and are now
+applied in programs where user interactions are the fixed behavioral anchors.
 
-_Metaphor anchor: **writing for an audience, the composer's design
-thinking** — the concert audience is real: they cheer, boo, throw
-tomatoes or flowers. Design thinking across the whole situation._
+_Metaphor anchor: **writing for an audience, the composer's design thinking** —
+the concert audience is real: they cheer, boo, throw tomatoes or flowers. Design
+thinking across the whole situation._
 
-Users enter the picture. Programs interact via `prompt`, `alert`,
-`confirm`. User-visible behavior becomes the anchor that all prior
-reading, tracing, refactoring, and reviewing skills must preserve.
-**Design thinking across the whole situation begins here.** All Chapter
-2 skills — PBIS, naming variables, logging strategies, backtracing,
-refactoring, code review — are practiced under a new constraint:
-user-visible behavior must be preserved. The data-flow loop now grows
-past the Ch1→Ch2 dev↔NM loop into the full dev↔NM↔user loop.
+Users enter the picture. Programs interact via `prompt`, `alert`, `confirm`.
+User-visible behavior becomes the anchor that all prior reading, tracing,
+refactoring, and reviewing skills must preserve. **Design thinking across the
+whole situation begins here.** All Chapter 2 skills — PBIS, naming variables,
+logging strategies, backtracing, refactoring, code review — are practiced under
+a new constraint: user-visible behavior must be preserved. The data-flow loop
+now grows past the Ch1→Ch2 dev↔NM loop into the full dev↔NM↔user loop.
 
-The chapter's intellectual-agency move: _you make programs for people
-who will never see your code, and the test of your work is whether it
-serves them._
+The chapter's intellectual-agency move: _you make programs for people who will
+never see your code, and the test of your work is whether it serves them._
 
-**Full chapter content** — sub-sections 3.1 (User Input and Output),
-3.2 (Variable Program Behaviors), 3.3 (Validating User Input), 3.4
-(PBIS in User Programs), 3.5 (Developing Programs), 3.6 (Plaintext
-Programs), plus per-layer learning objectives — in
-[`syllabus.chapters.md`](./syllabus.chapters.md) Ch3.
+**Full chapter content** — sub-sections 3.1 (User Input and Output), 3.2
+(Variable Program Behaviors), 3.3 (Validating User Input), 3.4 (PBIS in User
+Programs), 3.5 (Developing Programs), 3.6 (Plaintext Programs), plus per-layer
+learning objectives — in [`syllabus.chapters.md`](./syllabus.chapters.md) Ch3.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -932,38 +938,36 @@ Programs), plus per-layer learning objectives — in
 
 ## Chapter 4: Developers, Computers, Users, and Agents
 
-No new language features. This chapter applies all Chapter 1–3 skills
-in collaboration with an LLM. 🤖 Agents are a fourth audience.
+No new language features. This chapter applies all Chapter 1–3 skills in
+collaboration with an LLM. 🤖 Agents are a fourth audience.
 
-_Metaphor anchor: **the composer-virtuoso asymmetric duet** — with an
-alien virtuoso this time. Dazzling, fast, pattern-rich, but cognitively
-distinct from human virtuosos._
+_Metaphor anchor: **the composer-virtuoso asymmetric duet** — with an alien
+virtuoso this time. Dazzling, fast, pattern-rich, but cognitively distinct from
+human virtuosos._
 
-The wrapping premise: **code is the UI for the NM**. Source code is
-the control panel through which a programmer operates the notional
-machine. Authoring code is _one_ way to operate that panel; describing
-intent to an LLM is another. Either way, the NM is the thing the panel
-controls. LLMs let you **delegate operation of the control panel** while
-still owning the machine. Two LLM-conversation modes: 🔬 NM-grounded
-conversation (Frogramming-with-delegation) and 🎨 user-grounded
-conversation (Vibetoading-with-delegation). The visual NM view
-(`embody/` + study lenses) becomes load-bearing here: when you delegate
-the control panel, you can no longer rely on the act of typing to keep
-your NM understanding sharp.
+The wrapping premise: **code is the UI for the NM**. Source code is the control
+panel through which a programmer operates the notional machine. Authoring code
+is _one_ way to operate that panel; describing intent to an LLM is another.
+Either way, the NM is the thing the panel controls. LLMs let you **delegate
+operation of the control panel** while still owning the machine. Two
+LLM-conversation modes: 🔬 NM-grounded conversation
+(Frogramming-with-delegation) and 🎨 user-grounded conversation
+(Vibetoading-with-delegation). The visual NM view (`embody/` + study lenses)
+becomes load-bearing here: when you delegate the control panel, you can no
+longer rely on the act of typing to keep your NM understanding sharp.
 
-This chapter develops the **both-twins state** in its LLM-collaborative
-form: V and F operating alongside an alien third intelligence (the 2×2
-in [`syllabus.ontology.md`](./syllabus.ontology.md) §3).
+This chapter develops the **both-twins state** in its LLM-collaborative form: V
+and F operating alongside an alien third intelligence (the 2×2 in
+[`syllabus.ontology.md`](./syllabus.ontology.md) §3).
 
-The chapter's intellectual-agency move: _you direct an alien
-intelligence — and you stay in charge of what gets built._
+The chapter's intellectual-agency move: _you direct an alien intelligence — and
+you stay in charge of what gets built._
 
-**Full chapter content** — sub-sections 4.0 (Wrapping premise), 4.1
-(What is an LLM?), 4.2 (Collaborating in Prose), 4.3 (Developer
-Communication), 4.4 (Computer Communication), 4.5 (User Communication),
-4.6 (Looking Forward), 4.7 (Vibetoading with the LLM), plus per-layer
-learning objectives — in [`syllabus.chapters.md`](./syllabus.chapters.md)
-Ch4.
+**Full chapter content** — sub-sections 4.0 (Wrapping premise), 4.1 (What is an
+LLM?), 4.2 (Collaborating in Prose), 4.3 (Developer Communication), 4.4
+(Computer Communication), 4.5 (User Communication), 4.6 (Looking Forward), 4.7
+(Vibetoading with the LLM), plus per-layer learning objectives — in
+[`syllabus.chapters.md`](./syllabus.chapters.md) Ch4.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -971,42 +975,39 @@ Ch4.
 
 ## Chapter 5: Developers, Computers, Users, Agents, and You
 
-_Metaphor anchor: **the composer's daily practice** — small, complete
-pieces written for the composer's own practice. Variations on a theme,
-études on a single technique, sketchbook entries exploring an idea —
-Ligeti's Musica Ricercata, Beethoven's sketchbooks, Bach's inventions._
+_Metaphor anchor: **the composer's daily practice** — small, complete pieces
+written for the composer's own practice. Variations on a theme, études on a
+single technique, sketchbook entries exploring an idea — Ligeti's Musica
+Ricercata, Beethoven's sketchbooks, Bach's inventions._
 
-Training wheels come off. You Frogram for yourself through 💭
-**snippetry**: small, complete, self-contained programs as an ongoing
-practice. JavaScript's full multi-paradigmatic range opens up;
-compositional voice develops; Frogramming reveals value beyond
-productivity — for mastery, exploration, delight, the steady upkeep of
-one's craft, and the new thoughts it lets you think. Snippetry is the
-answer to _why write code when LLMs can write the notation_: it is the
-experience-form of NM-maintenance, the daily reps that keep your
-generative model alive once full-codebase work no longer provides them.
+Training wheels come off. You Frogram for yourself through 💭 **snippetry**:
+small, complete, self-contained programs as an ongoing practice. JavaScript's
+full multi-paradigmatic range opens up; compositional voice develops;
+Frogramming reveals value beyond productivity — for mastery, exploration,
+delight, the steady upkeep of one's craft, and the new thoughts it lets you
+think. Snippetry is the answer to _why write code when LLMs can write the
+notation_: it is the experience-form of NM-maintenance, the daily reps that keep
+your generative model alive once full-codebase work no longer provides them.
 
-This chapter develops the **both-twins state** in its merged form —
-V and F operating as a single integrated practice. Snippetry is where
-the two stances stop being separate hats and start being the same
-gesture: each small program is at once a user-twin sketch and an
-NM-twin probe. The Bakhtiarian-loop unification names this.
+This chapter develops the **both-twins state** in its merged form — V and F
+operating as a single integrated practice. Snippetry is where the two stances
+stop being separate hats and start being the same gesture: each small program is
+at once a user-twin sketch and an NM-twin probe. The Bakhtiarian-loop
+unification names this.
 
-**"You" is the fifth audience** — both singular (your own practice) and
-plural (sharing with and remixing from peers through the collaborative
-gist system). The arc that opened in Ch1 with _write for future-you, a
-stranger_ closes here as _write for yourself, the audience you are
-becoming_. Same self, end-to-end.
+**"You" is the fifth audience** — both singular (your own practice) and plural
+(sharing with and remixing from peers through the collaborative gist system).
+The arc that opened in Ch1 with _write for future-you, a stranger_ closes here
+as _write for yourself, the audience you are becoming_. Same self, end-to-end.
 
-The chapter's intellectual-agency move: _you can use programming as a
-tool for thought, on whatever problems and ideas interest you, for the
-rest of your life._
+The chapter's intellectual-agency move: _you can use programming as a tool for
+thought, on whatever problems and ideas interest you, for the rest of your
+life._
 
-**Full chapter content** — paradigm exploration (imperative,
-functional, OOP, declarative), training-wheels-off devtools mastery,
-the collaborative gist system, the practice's balance of broad
-exploration and productive constraint, the closing look-forward to
-agentic AI, plus per-layer learning objectives — in
+**Full chapter content** — paradigm exploration (imperative, functional, OOP,
+declarative), training-wheels-off devtools mastery, the collaborative gist
+system, the practice's balance of broad exploration and productive constraint,
+the closing look-forward to agentic AI, plus per-layer learning objectives — in
 [`syllabus.chapters.md`](./syllabus.chapters.md) Ch5.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
