@@ -552,7 +552,8 @@ constraint, not a permanent one.
 
 ### What this course builds in you — the five strands
 
-Five strands run beneath every chapter, each enabled by the ones before:
+Five strands run beneath every chapter, each enabled by the ones before
+(canonical definitions in [`syllabus.ontology.md`](./syllabus.ontology.md) §13):
 
 1. **Twinning** — accurate mental models of processes outside your mind
 2. **Decisions (micro and macro)** — every keyword, name, operator, structure
