@@ -24,7 +24,7 @@ The composer/virtuoso/mechanism metaphor is rich enough to deserve its
 own home. Three principles govern its use:
 
 - **First-class teaching apparatus.** It illuminates moments.
-- **NOT structural guide.** The spiral curriculum (ontology §6) is the
+- **NOT structural guide.** The spiral curriculum (pedagogy §6) is the
   structural guide.
 - **Composer ≈ V's lens on the artifact**; **virtuoso ≈ F's lens on the
   artifact's notation-execution**. The cast is an illustration of the
@@ -190,7 +190,7 @@ Music is an instructive metaphor for some moments, NOT a structural
 guide. _"Reign in the intellectual grandness."_ The course is grounded
 experience-based instructional design with explicit objectives. GEB is
 a respected influence; the structural guide is the spiderweb + spiral
-(ontology §6).
+(pedagogy §6).
 
 The metaphor is **load-bearing but not load-exclusive**. Use where it
 illuminates; set it aside where it strains.

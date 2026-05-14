@@ -88,7 +88,7 @@ theoretical contributions to those phases.
 - **The translational imperative** — TCER warns against pressuring every piece
   of CER work to justify broader impacts. The curriculum does not require that
   every contribution to it serve immediate translation; the design principles
-  (§B.2 of `syllabus.ontology.md`) honor _Process Over Product_, which keeps the
+  (B.2 of `syllabus.pedagogy.md`) honor _Process Over Product_, which keeps the
   work pedagogically sound even when it's not immediately research-actionable.
 - **The pipeline misconception** — TCER warns that translation is _cyclical_,
   not linear. Theory → translation → practice is the wrong shape. The right

@@ -31,10 +31,8 @@
   - [§2 Geometry — three domains, two bridging activities](#2-geometry--three-domains-two-bridging-activities)
   - [§3 The characters — V and F](#3-the-characters--v-and-f)
   - [§4 The 5-tier ATT](#4-the-5-tier-att)
-- [Part B — Design principles](#part-b--design-principles)
-  - [B.1 Cogsci mechanisms](#b1-cogsci-mechanisms)
-  - [B.2 Course-construction](#b2-course-construction)
-  - [B.3 Stance & values](#b3-stance--values)
+- [Part B — Translational research positioning](#part-b--translational-research-positioning)
+  - [B.4 Research orientation](#b4-research-orientation)
 - [Part C — Pedagogical depth (orthogonal to chapter sequence)](#part-c--pedagogical-depth)
   - [§12 The 5 layers](#12-the-5-layers)
   - [§13 The 5 strands — equal status](#13-the-5-strands--equal-status)
@@ -124,7 +122,7 @@ viewed from different angles.
 
 The principle grounds:
 
-- The spiderweb curriculum + the spiral as traversal (§B.1 §6)
+- The spiderweb curriculum + the spiral as traversal (`syllabus.pedagogy.md` §6)
 - The 5 layers (§12) — depth = connection-density
 - The 5 strands (§13) — each strand is a _kind of connection_
 - The data thread (§14) — data flows through connections; connections shape what
@@ -486,274 +484,21 @@ sits _inside_ the central domain rather than as two separate ATT tiers.
 
 ---
 
-## Part B — Design principles
-
-The principles the curriculum is built **on** — _about_ the course, not _in_ the
-course for learners to learn. They are not an arbitrary list; they are
-crystallizations of practice that come from named lineages.
-
-**Integrative frames** — one per cluster:
-
-- **Instructional-design clusters** (_cogsci mechanisms_ +
-  _course-construction_) → integrated by **4C/ID** (Van Merriënboer & Kirschner,
-  _Ten Steps to Complex Learning_) together with **Whole Game** (Perkins,
-  _Making Learning Whole_). Both are holistic-design responses to atomistic
-  instructional design — same commitment, two registers: academic-operational
-  (4C/ID's task classes, four components, ten steps) and
-  accessible-philosophical (Whole Game's _junior version of the whole_, _making
-  the game worth playing_, _working on the hard parts_). The principles in these
-  clusters are this curriculum's practitioner-form of those commitments on a
-  specific surface (JEJ + V/F + 5 layers + spiderweb).
-- **Stance & values cluster** → integrated by **companion pedagogy**: the
-  educator-as-companion lineage running through Open Education, community of
-  practice, decolonised CS, and accessibility — the elewa.education / Greg
-  Wilson / Mikhak-pedagogy line. The teacher walks alongside the learner rather
-  than standing in front of them; authority is plural, distributed across
-  classroom, collegial, partnered, and discourse communities. 4C/ID is silent on
-  these.
-
-**Transfer Paradox + Reusability Paradox — related but distinct principles**:
-
-- **Transfer Paradox** (Van Merriënboer) — _pedagogy_ register. In §B.1.
-  _"Methods that work best for reaching isolated, specific objectives are not
-  best for reaching integrated objectives and transfer of learning."_
-- **Reusability Paradox** (Wiley) — _grouping and publishing_ register. In §B.2.
-  Smaller learning objects are more reusable; larger ones more pedagogically
-  coherent.
-
-Both name a productive tension of the same general shape, but the
-goal-being-optimized-against differs (transfer of learning vs shareability of
-artifacts). Different aspects of the same whole.
-
----
-
-### B.1 Cogsci mechanisms
-
-How the curriculum is designed to work _for the human mind learning_.
-
-#### §5 Pedagogical sampling
-
-Bayesian frame: humans, from infancy onward, draw fundamentally different
-inferences from data chosen intentionally by a teacher than from data
-encountered at random or sampled by the learner themselves.
-
-**A curated curriculum is qualitatively different from free self-directed
-learning.** An LLM responding to learner-directed prompts is closer to
-self-directed sampling than to pedagogical sampling. Some of what this course
-teaches you to twin (the notional machine, users, fellow developers, the LLM
-itself) are not facts to be acquired but _ways of doing things_, learned through
-the doing.
-
-Operates at multiple granularities:
-
-| Instance                                                     | Granularity                                                                                                |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| **PRIMM** (predict-run-investigate-modify-make)              | exercise level                                                                                             |
-| **Block Model**                                              | code-element level (atoms / blocks / relationships / macro-structure × text-surface / execution / purpose) |
-| **Spiral curriculum**                                        | language-feature scales, accumulating into automaticity                                                    |
-| **Cognitive Load Theory** (intrinsic / extraneous / germane) | cognitive-budget level                                                                                     |
-| **Study Lenses**                                             | internal-event level (what the NM is doing, made observable)                                               |
-| **Just Enough JavaScript**                                   | language-feature surface — fewer features chosen deliberately                                              |
-| **Errors-as-information**                                    | moment of model-divergence                                                                                 |
-| **Snippetry** (Ch5)                                          | pedagogical sampling _for self_ — the learner becomes their own pedagogical sampler                        |
-
-#### §6 The spiderweb curriculum + the spiral as traversal
-
-A **paired entry**, not two separate principles.
-
-- **Spiderweb** = the _structure_. Skills at the center (collaboration,
-  communication, code review, planning); technologies as concentric rings
-  outward (Markdown → HTML/CSS → JS → …); the skills thread through every ring.
-  _"Places collaboration, communication and other 'soft skills' unavoidably at
-  the center. Places social and ethical questions center stage."_ (user)
-- **Spiral** = a _traversal_ through the spiderweb. A particular path with
-  sequenced skill threads. Bruner's spiral is the depth- densification
-  mechanism; _this curriculum's spiral_ is the path-choice through the web.
-
-**Spiderweb = topology; spiral = trajectory.** The 5 layers (§12) can be read as
-5 different spirals through the same web at 5 engagement depths.
-
-<details>
-<summary><b>Visualization: spiderweb (topology) + spiral (trajectory)</b> <i>(most load-bearing — existing assets)</i></summary>
-
-- `assets/curriculum-spider-web.svg` — the spiderweb topology
-- `assets/spiral-curriculum.png` — Bruner-style spiral
-
-These are the same conceptual object viewed differently.
-
-</details>
-
-#### §7 The Explorotron framework
-
-Malaise & Signer (2023). The academic framework that `<StudyLenses>` realizes at
-snippet scope.
-
-**Two axes** (curated/uncurated × guided/unguided) → four quadrants:
-
-|              | **Uncurated**                                                     | **Curated**                                                 |
-| ------------ | ----------------------------------------------------------------- | ----------------------------------------------------------- |
-| **Unguided** | Q1 — learner pastes any snippet; default-fit lens recommendations | Q3 — curriculum author renders `<StudyLenses lens="..." />` |
-| **Guided**   | Q2 — auto-generated path through recommended lenses               | Q4 — full curated sequence (LMS-owned at curricular scope)  |
-
-**Pyramid** (Layer base → top):
-
-1. Progress modelling (system-wide learner state) — LMS-owned
-2. Lenses & defaults — `<StudyLenses>` Layer I
-3. Path generation (auto-recommender) — future work
-4. Manual recommendations (`lens` prop, per-fence cascade)
-5. Manually crafted paths — deferred at snippet scope
-6. Monitored learning (LMS-owned)
-
-**Three load-bearing principles** from the paper:
-
-- **Skill transfer** (Chiaburu & Marinova 2005) — learn skills in environments
-  close to where they'll be used. Lenses live in the same editor learners use
-  for real work.
-- **Expertise reversal** (Sweller et al. 2003) — scaffolding helps beginners but
-  hurts experts. Lenses peel away support by context.
-- **Lifelong-learning autonomy** — Quadrant I (uncurated/unguided) isn't a
-  fallback; it's the central pedagogical bet. The Frogrammer's magnifying-glass
-  kit is the embodied form.
-
-**Begel & Ko (2019) both-yes answer** — should technology "structure learning
-for learners" OR "teach learners to structure their own"? Both. Quadrants I + II
-support learners structuring their own; Quadrants III
-
-- IV support educators structuring it for them.
-
-#### §8 Threshold concepts + liminality
-
-From `effective-learning/05-being-in-between.md` and Meyer/Land. Five
-characteristics of threshold concepts:
-
-- **Transformative** — after mastery, you perceive the world in a new way
-- **Integrative** — the pattern used to weave thread into fabric
-- **Irreversible** — changes in how the mind processes information
-- **Bounded** — different approaches define different vocations
-- **Troublesome** — ways of doing things, not the thing you do
-
-**Liminal zone** = legitimate position, not failure. _"Be prepared to spend a
-lot of time floating between the certainty of old knowledge and the promise of
-new understanding."_
-
-Programming threshold concepts cited by the user (incomplete list): Source Code
-vs Runtime; Tracing Code; Variables and Pointers; Functions (definition vs
-execution; are objects AND executable procedures; scope vs context); OOP;
-Asynchronous Execution.
-
-#### §9 Transfer Paradox (separate from §10 — different operational meaning)
-
-> _"Methods that work best for reaching isolated, specific objectives are not
-> best for reaching integrated objectives and transfer of learning."_ — Van
-> Merriënboer & de Croock (1997)
-
-About _how learning transfers across contexts_. Holistic design (4C/ID) takes
-this into account by ensuring students confronted with new problems have BOTH
-specific knowledge for familiar aspects AND general abstract knowledge for
-unfamiliar aspects.
-
----
-
-### B.2 Course-construction
-
-How the curriculum's artifact is constructed and shaped.
-
-#### §10 Reusability Paradox (separate from §9 — different operational meaning)
-
-Wiley. _"Can you imagine wanting to teach some portion of this topic without
-teaching the other parts?"_ If no, all the subtopics belong to one learning
-object.
-
-About _how learning artifacts are bundled and shared_. The more reusable a
-learning object, the less educational in any specific setting; the more
-contextual, the less reusable. Points outward toward §B.3 stance & values (via
-Open Education + Forkability).
-
-**The Reusability Paradox is not a problem to solve — it's the productive
-tension the course lives inside.** `just-enough/javascript/` (the JEJ chain,
-§24) is the reusable infrastructure side; the manifesto / ontology / chapters
-are the opinionated content side. The course is what happens when the
-opinionated content uses the reusable infrastructure.
-
-#### §11 Course-as-Quine
-
-The curriculum's tooling simplicity (lenses.json, JS, markdown, Docusaurus +
-simple lens plugin) IS a pedagogical commitment.
-
-> **A learner who finishes the course has all the technical and conceptual
-> background to teach and extend the course.**
-
-Light mention in syllabus body as ethos. Remix instructions in course appendix.
-Forks mechanism deferred — first get one version out, reassess later.
-
-The platform-agnostic constraint (markdown + lenses) is consonant: anyone can
-fork from plain markdown.
-
-#### §12-bis Code is content / Code is the UI
-
-(Listed here for the design-principle-level claim; mechanism in §18.)
-
-Source code is _the control panel through which the programmer operates the NM_.
-LLM prompting is an alternative way to operate the same panel.
-
-Ch4 framing: **"code is content, not deliverable."** AI-generated code is
-material to study, not work-product to ship.
-
-The principle is shared between this ontology and `just-enough/javascript/`'s
-README — it's an org-wide commitment, not a Ch4-only flourish.
-
-#### §12-ter Full Complexity, Max Simplicity
-
-Start with all the large moving parts (rhetorics of programming, collaboration,
-the full system context) at simplest technical depth. 4CID-inspired.
-_Pebble-in-the-pond_ (Merrill) — content-centered start with a whole task at
-simplest depth.
-
-#### §12-quater Explicitly Teach the Implicit
-
-Name the skills experts take for granted. Don't leave implicit skills to chance
-trial-and-error. Both _supportive information_ (the variable, strategic parts)
-and _procedural information_ (the routine, rule-based parts) made explicit.
-
-#### §12-quinque Process Over Product
-
-Focus on the steps the learner takes, not the deliverable. Explicit processes
-accommodate learners of different levels in one room — same process applied to
-projects of different complexity.
-
-#### §12-sex Name Things
-
-Naming things — especially tiny things experienced programmers take for granted
-— legitimizes them as worth learning. Different levels of abstraction (ATT
-levels, PBIS, Block Model, SOLO Taxonomy) all benefit from being named.
-
----
-
-### B.3 Stance & values
-
-How the curriculum approaches learners and community. Integrated by **companion
-pedagogy** — the educator-as-companion lineage that runs through Open Education,
-community of practice, decolonised CS, and accessibility. The teacher walks
-alongside the learner; authority is plural and the plural is wide.
-
-| Principle                                    | Source                                            | Brief                                                                                                                                                                      |
-| -------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Learner Trust comes first**                | `Learner Trust.md`                                | Meet learners where they are. Trust as currency for asking learners to do hard, non-immediately-tangible work (reading, tracing, summarizing).                             |
-| **Open Education** (≠ Open Source)           | `Open Source !== Open Education.md`               | Open Education = OER + OEP that the _directly-involved_ (teachers, students, parents, employers) can realistically adapt and contextualize within their constraints.       |
-| **Open, Useful, Usable, Used**               | `Open, Useful, Usable, Used.md`                   | The four-test for open educational resources.                                                                                                                              |
-| **Learner-Accessible OER**                   | `Learner-Accessible OER.md`                       | The strongest form — materials a learner could realistically understand and modify for their context.                                                                      |
-| **Forkability**                              | `Forkability.md`                                  | The operational measure of the Open Source → Open Education transition. Barriers between "fork" button and adapting to your context.                                       |
-| **Context is Content**                       | `Context is Content.md`                           | Where and how a learner studies is itself a learning objective. Align study workflows with realistic workflows.                                                            |
-| **Wear Hats, not Titles**                    | `Wear Hats, not Titles.md`                        | Roles are situational, plural, context-dependent — not identity. V/F precursor.                                                                                            |
-| **Fluid roles**                              | `Making Best Practice Common Practice.md`         | learner / companion / teacher / accounta-buddy — every individual takes on most or all roles in the course of a single day. The course supports all four on equal footing. |
-| **Greg Wilson's Rules**                      | `Teaching Tech Together___The Rules.md`           | "Be kind: all else is details." / "Remember you are not your learners." / "Never teach alone." / "Make every mistake a lesson." / etc.                                     |
-| **Connections are Concepts (as method)**     | `Connections are Concepts.md`                     | The foundational principle as a methodology for deciding what to teach — when defining LOs, this framing helps you avoid hand-waving away tricky connecting concepts.      |
-| **Time is Importance**                       | `Time is Importance.md`                           | Making time for something sends the implicit message that it's important. Less can be more.                                                                                |
-| **Accessibility commitments**                | `Accessible Programming.md`                       | Spoons / disability accommodation; tabs-not-spaces for screen readers; blocks-based languages; programming and learning CS when legally blind.                             |
-| **Decolonised CS framing**                   | `Social Dreaming Together…` (SIGCSE 2023)         | Re-envisioning whose computing experiences shape the discipline.                                                                                                           |
-| **PRIMM-based micromaterials for inclusion** | `Breaking the Code of Inclusion.md` (FOSDEM 2023) | Open-source micromaterials supporting groups underrepresented in programming education.                                                                                    |
-
----
+## Part B — Translational research positioning
+
+The curriculum's research orientation — how it positions itself as a
+research artifact, and what that means for how it gets made and adapted.
+
+> **Note (Wave 3d-ii-a migration):** The design principles formerly in
+> Part B (§B.1 Cogsci mechanisms — §5 Pedagogical sampling, §6 Spiderweb
+> + spiral, §7 Explorotron framework, §8 Threshold concepts, §9 Transfer
+> Paradox; §B.2 Course-construction — §10 Reusability Paradox, §11
+> Course-as-Quine, §12-bis through §12-sex; and §B.3 Stance & values)
+> have moved to `syllabus.pedagogy.md` under "Design principles
+> (migrated from ontology Part B)." The translational research material
+> below (§B.4 + §11-bis through §11-sept) stays in ontology because it
+> describes the curriculum's research positioning rather than its
+> pedagogical design principles.
 
 ### B.4 Research orientation
 
@@ -806,8 +551,8 @@ The curriculum's trading zones (operational, not metaphorical):
 - The curriculum ↔ `lenses/embody` infrastructure (see §11-sex Tool-Theory
   Co-evolution)
 
-Connects directly to **community-as-making** (Part B.3 stance: the course is
-_made in community_, not just _for_ community). Partner cohorts are not
+Connects directly to **community-as-making** (`syllabus.pedagogy.md` B.3
+Stance & values: the course is _made in community_, not just _for_ community). Partner cohorts are not
 user-tests; they are trading-zone work in TCER's technical sense.
 
 **Related concept**: Susan Leigh Star's _boundary objects_ (1989) is a sibling
