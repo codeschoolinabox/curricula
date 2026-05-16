@@ -38,7 +38,6 @@
   - [§14 The data thread (the red thread)](#14-the-data-thread-the-red-thread)
   - [§15 Self-twinning Bildung arc](#15-self-twinning-bildung-arc)
 - [Part D — Cogsci grounding](#part-d--cogsci-grounding)
-  - [§16 Friston / predictive processing](#16-friston--predictive-processing)
   - [§17 Strata of a software system — refining §2's geometry](#17-strata-of-a-software-system--refining-2s-geometry)
 - [Part E — The LLM shift](#part-e--the-llm-shift)
   - [§18 Substrate substitution at artifact-logic — what changes about the artifact](#18-substrate-substitution-at-artifact-logic--what-changes-about-the-artifact)
@@ -123,8 +122,10 @@ The principle grounds:
 - The 5 strands (§13) — each strand is a _kind of connection_
 - The data thread (§14) — data flows through connections; connections shape what
   data can be
-- Twinning (§16) — building a generative model = building a connection-graph
-  that mirrors the target's
+- Twinning (the active-inference mechanism; canonical at
+  `syllabus.pedagogy.md` "The pedagogical claim from Friston") —
+  building a generative model = building a connection-graph that
+  mirrors the target's
 - Programming itself — a program is a connection-graph; programming is
   connection-making in code
 
@@ -613,7 +614,9 @@ your own mind that aligns with that process's actual behavior.
 - Ch4: 🤖 the agent (LLM) you collaborate with
 - Ch5: yourself as poly-perspective being
 
-**Cognitive-science grounding**: twinning IS active inference (§16).
+**Cognitive-science grounding**: twinning IS active inference
+(canonical at `syllabus.pedagogy.md` "The pedagogical claim from
+Friston").
 
 #### Decisions (micro and macro)
 
@@ -748,36 +751,6 @@ to Expect of `syllabus.chapters.md`.
 ---
 
 ## Part D — Cogsci grounding
-
-### §16 Friston / predictive processing
-
-**Friston's "A Duet for One"** — active inference applied to dyadic
-communication. Two aligned generative models behave as a single coupled
-inference system.
-
-> **"Understanding just IS the alignment of generative models into a single
-> coherent predictive process."**
-
-Applied to LLM-collaboration: the boundary between human reasoning and machine
-inference becomes porous; thought emerges at the _interface_, not within either
-alone.
-
-#### Language constraints
-
-- ❌ **"free energy"** — too jargon for the course body
-- ✓ **"alignment of generative models"** — clean replacement; survives across
-  substrates
-- ✓ **"predictive processing"** — broader cognitive-science framework (Andy
-  Clark, Jakob Hohwy) cited in deeper section as "how minds work as predictive
-  engines"
-- ✓ **"active inference"** — usable but requires explanation; introduce as the
-  dyadic-Friston frame in Ch4
-
-> **The pedagogical claim that follows** (AI generates; it doesn't twin; your
-> job is to twin the LLM AND what the LLM is twinning) — see
-> `syllabus.pedagogy.md` "The pedagogical claim from Friston (ontology §16)."
-
----
 
 ### §17 Strata of a software system — refining §2's geometry
 
@@ -928,7 +901,9 @@ work.
 
 §18's "NM" (notional machine) and §17's artifact-logic name the same site at
 different resolutions. Substrate substitution swaps a GenAI model into that
-site; the NM-twinning stance from §16 remains, but what's being twinned has
+site; the NM-twinning stance (the active-inference framing canonical at
+`syllabus.pedagogy.md` "The pedagogical claim from Friston") remains, but
+what's being twinned has
 different mechanical properties.
 
 #### Substrate substitution: deterministic → non-deterministic
@@ -1404,14 +1379,6 @@ influence; the structural guide is the spiderweb + spiral.
 requiring intellectual confidence to engage. WtF is designed pedagogically so it
 is eminently learnable and BUILDS intellectual confidence._ This is the
 foundational divergence.
-
-#### Beware lazy conflations
-
-Concepts with surface similarity often aren't the same operationally. Transfer
-Paradox (pedagogy) and Reusability Paradox (publishing/grouping) are related but
-not the same. Check before collapsing.
-
----
 
 ### §28 Structural commitments
 

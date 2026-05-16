@@ -284,11 +284,34 @@ Three styles brainstormed; defer until ontology stabilizes:
 
 ---
 
-## The pedagogical claim from Friston (ontology §16)
+## The pedagogical claim from Friston
 
-Ontology §16 establishes Friston's "A Duet for One" framing — active
-inference applied to dyadic communication; understanding-as-alignment
-of generative models. The pedagogical consequence:
+The cogsci grounding for the curriculum's twinning verb. **Karl Friston's
+"A Duet for One"** applies active inference to dyadic communication: two
+aligned generative models behave as a single coupled inference system.
+
+> **"Understanding just IS the alignment of generative models into a single
+> coherent predictive process."**
+
+Applied to LLM-collaboration: the boundary between human reasoning and
+machine inference becomes porous; thought emerges at the _interface_, not
+within either alone.
+
+### Language constraints
+
+The curriculum body translates Friston's machinery into reader-friendly
+vocabulary:
+
+- ❌ **"free energy"** — too jargon for the course body
+- ✓ **"alignment of generative models"** — clean replacement; survives
+  across substrates
+- ✓ **"predictive processing"** — broader cognitive-science framework
+  (Andy Clark, Jakob Hohwy) cited in deeper sections as "how minds work
+  as predictive engines"
+- ✓ **"active inference"** — usable but requires explanation; introduce
+  as the dyadic-Friston frame in Ch4
+
+### The pedagogical consequence
 
 > **AI generates; it doesn't twin. Your job is to twin the LLM AND what the LLM
 > is twinning, to detect and correct divergences — and to relish productive
@@ -373,6 +396,11 @@ principles**:
 Both name a productive tension of the same general shape, but the
 goal-being-optimized-against differs (transfer of learning vs
 shareability of artifacts). Different aspects of the same whole.
+
+> **Beware lazy conflations.** Concepts with surface similarity often
+> aren't the same operationally. Transfer Paradox (pedagogy) and
+> Reusability Paradox (publishing / grouping) are related but not the
+> same. Check before collapsing.
 
 ---
 
