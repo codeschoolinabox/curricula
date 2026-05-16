@@ -10,6 +10,8 @@
 >
 > - `syllabus.guide.{learners,authors,community}.md` — the _why_ per audience
 > - `syllabus.chapters.md` — the _how_ at chapter grain (5-layer LO grid)
+> - `syllabus.study-lenses.md` — the technical-reader companion describing
+>   the JEJ → NM → embody → lenses → orchestrator infrastructure chain
 > - `syllabus.md` — the existing prose course (read-only for the current
 >   redraft)
 >
@@ -45,8 +47,6 @@
 - [Part F — Curriculum machinery](#part-f--curriculum-machinery)
   - [§21 Computational vocabulary axes](#21-computational-vocabulary-axes)
   - [§22 Chapter architecture](#22-chapter-architecture)
-- [Part G — Infrastructure (the JEJ chain)](#part-g--infrastructure-the-jej-chain)
-  - [§23 JEJ → NM → embody → lenses → orchestrator](#23-jej--nm--embody--lenses--orchestrator)
 - [Part H — Teaching apparatus](#part-h--teaching-apparatus)
   - [§24 The composer/virtuoso/mechanism metaphor](#24-the-composervirtuosomechanism-metaphor)
   - [§25 Symbology](#25-symbology)
@@ -439,8 +439,10 @@ same trading zone, each shaping the other's next iteration.
 > **We are doing the innovation process we're teaching.**
 
 See `syllabus.translational-framing.md` §6 (Tool-Theory Co-evolution) and §7
-(V/F at the artifact layer) for the deeper analysis. The pattern recurses: V
-and F at the student layer; V and F at the artifact layer. Bakhtiar Mikhak's
+(V/F at the artifact layer) for the deeper analysis. The operational
+infrastructure itself — the JEJ → NM → embody → lenses → orchestrator chain
+— is described in `syllabus.study-lenses.md`. The pattern recurses: V and
+F at the student layer; V and F at the artifact layer. Bakhtiar Mikhak's
 _engineering × physics co-evolution_ names the meta-pattern: engineering
 practice (technical affordances) and theoretical/experiential practice
 mutually constitute each other, with neither downstream of the other. The
@@ -1030,9 +1032,10 @@ you twin during the conversation**.
 #### The visual NM view becomes load-bearing
 
 When you delegate the control panel, you can no longer rely on the act of typing
-to keep your NM understanding sharp. Visual debuggers (`embody/` + study lenses)
-let you observe, predict, and debug the machine _directly_ — the NM view that
-exists regardless of who (or what) wrote the code text. **Frogramming with
+to keep your NM understanding sharp. Visual debuggers (`embody/` and study
+lenses; see `syllabus.study-lenses.md` for the infrastructure) let you
+observe, predict, and debug the machine _directly_ — the NM view that exists
+regardless of who (or what) wrote the code text. **Frogramming with
 delegation is only sustainable if you keep the direct NM view alive.**
 
 #### The architect/implementer division has always existed
@@ -1228,136 +1231,6 @@ Each LO marks where a skill is _first introduced_, not where it ends.
 | Ch5     | the composer's daily practice (Ligeti / Bach / sketches)       |
 
 (See `syllabus.metaphor.md` for the full metaphor system.)
-
----
-
-## Part G — Infrastructure (the JEJ chain)
-
-### §23 JEJ → NM → embody → lenses → orchestrator
-
-The infrastructural ontology that makes the pedagogy operational. Inside this
-ontology — _primarily infrastructure under the pedagogy, inspired by the
-ontology's implications_. Inseparable from the pedagogy (V/F feedback:
-affordances ↔ use-cases mutually constitute each other).
-
-```mermaid
-flowchart LR
-    JEJ["JEJ<br/>(language subset)"]
-    NM["Notional Machine<br/>(this is what learners twin)"]
-    embody["embody/<br/>(operational data + event streams)"]
-    lenses["lenses/<br/>(pedagogical perspectives)"]
-    orchestrate["orchestrate/<br/>(StudyLenses orchestrator)"]
-    JEJ --> NM --> embody --> lenses --> orchestrate
-```
-
-> **LMS layer is OUT.** Beyond the Quine-y / lens-y / web-standards-based
-> content publication philosophy of this curriculum. Progress modelling and
-> monitored learning belong to whatever embedding LMS uses `<StudyLenses>`.
-
-| Layer            | What it is                                                                                                                    | File / dir                                   |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| **JEJ**          | The language subset (what learners write)                                                                                     | `just-enough/javascript/reference.md`        |
-| **NM**           | The conceptual evaluation model (the learning objective)                                                                      | `just-enough/javascript/notional-machine.md` |
-| **embody**       | The operational embodiment of the NM (frozen data + event streams) — _not inert; a static 4D rendering of a 3D flowing river_ | `just-enough/javascript/embody/`             |
-| **study lenses** | Pedagogical perspectives on the embodied NM — _the Frogrammer's kit of magnifying glasses_                                    | `just-enough/javascript/lenses/`             |
-| **orchestrate**  | `<StudyLenses>` orchestrator + recommender + analysis helpers — bridges from the JEJ chain to the Explorotron framework (§7)  | `just-enough/javascript/orchestrate/`        |
-
-#### Substrate is not inert
-
-`embody/` doesn't just hold data; it crystallizes the NM's dynamics:
-
-- (a) streams represent the dynamics of data processing in the NM
-- (b) embodiments are _carefully crafted to make all facets explorable_
-- (c) it tells one part of the computational/human entwined system's data story
-
-This is what makes lenses powerful — they don't just _show_ the NM, they let
-learners _explore the motion the substrate makes legible_.
-
-#### Data's two boundaries: resolve and emit
-
-In JEJ's NM, data crosses two abstraction boundaries — both V/F-shared
-territory:
-
-```mermaid
-flowchart TB
-    subgraph vlevel["Visual-syntax level (software-speak)"]
-        vs["expressions, statements<br/>'control panel'<br/>what the learner SEES in code"]
-    end
-
-    subgraph blevel["Behind-the-scenes level (computational-speak)"]
-        bs["bindings, scopes, values, coercion<br/>'the machine'<br/>what JS actually IS"]
-    end
-
-    subgraph io["I/O Channels (host-provided)"]
-        console["Developer Console<br/>(dev space)<br/>console.log, debug, info, warn, error..."]
-        ui["User Interface<br/>(user space)<br/>alert, confirm, prompt"]
-    end
-
-    vs <-->|"**resolve** — bridge between viewing levels<br/>data flows here when an expression produces a value"| bs
-    bs <-->|"**emit** — bridge between computation and interaction<br/>data crosses out: console.* / alert<br/>data crosses in: prompt / confirm"| console
-    bs <-->|"**emit**"| ui
-```
-
-**Resolve** connects what the learner sees in code (V-friendly) to what the
-machine actually does (F-friendly). V reads the code; F traces the NM events;
-resolve is the bridge.
-
-**Emit** connects computation to interaction. V designs the user-facing dialog;
-F implements the call. Emit is where data crosses out of (or into) the program.
-
-Filtering only resolve events shows the complete data flow through a program — a
-useful pedagogical view in lens authoring.
-
-#### Two scopes
-
-The Explorotron framework operates at **two scales**:
-
-- **Snippet scope** — one `<StudyLenses>` instance. _This package owns this
-  scope._
-- **Curricular scope** — the embedding LMS arranging instances. _LMS-owned._
-
-The four-prop public API (`snippet` / `lens` / `config` / `configs`) realizes
-the framework at snippet scope.
-
-#### Three-tier lens classification
-
-Each lens depends on what it needs from the embodiment:
-
-| Tier | What it needs                          | `applicableTo` returns      |
-| ---- | -------------------------------------- | --------------------------- |
-| 1    | Text only — no parse needed            | always `true`               |
-| 2    | Valid AST (no execution)               | `embodiment.status.parsed`  |
-| 3    | Valid parse AND evaluable script-scope | `embodiment.status.created` |
-
-The `status` chain is monotonic: `created` implies `parsed` implies `tokenized`.
-
-> **Lenses are F-pedagogy infrastructure** (the Mikhak data/interaction pattern
-> is V/F-neutral; the curriculum's _application_ of it is F-specific) and
-> **substrate ↔ pedagogy mutual constitution** (the infrastructure embodies the
-> pedagogy; the pedagogy is shaped by what the infrastructure affords) — see
-> `syllabus.pedagogy.md` "Lenses, embody, and substrate ↔ pedagogy mutual
-> constitution (ontology §23)."
-
-#### V/F at the artifact layer
-
-The student-layer / artifact-layer distinction from §3 lands here:
-
-- **`lenses/embody` is F at the artifact layer** — the engineering /
-  technical-affordances side. Theory-neutral infrastructure that makes the NM's
-  behind-the-scenes legible. Serves multiple pedagogies precisely because it's
-  NM-grounded rather than user-experience-opinionated.
-- **The curriculum is V at the artifact layer** — the experiential side. Design
-  thinking about the learner's experience of learning; opinionated content
-  authored to shape what the learner encounters and how.
-
-The two are in **coordinated Translational Sprints**
-(`syllabus.translational-framing.md` §8), two TCER artifacts mutually
-constituting each other. This is the **engineering × physics co-evolution**
-(Bakhtiar Mikhak; §3 lineage) operating at the artifact layer. **We are
-doing the innovation process we're teaching.**
-
-See `syllabus.translational-framing.md` for the deeper analysis. The embody-side
-counterpart analysis lives in `DGMD-E-1-artifacts/embodying-tcer/`.
 
 ---
 

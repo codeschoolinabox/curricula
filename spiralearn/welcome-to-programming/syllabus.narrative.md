@@ -6,7 +6,7 @@
 > canonical docs (`syllabus.md`, `syllabus.ontology.md`,
 > `syllabus.chapters.md`, the three role-targeted guides
 > (`syllabus.guide.{learners,authors,community}.md`),
-> `syllabus.translational-framing.md`).
+> `syllabus.translational-framing.md`, `syllabus.study-lenses.md`).
 
 Visual assets live at `./assets/` (sibling to this file at the
 welcome-to-programming/ level). All visualizations in this doc are

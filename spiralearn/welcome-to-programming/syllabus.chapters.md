@@ -11,6 +11,8 @@
 > - `syllabus.ontology.md` — the _what_ (reference voice)
 > - `syllabus.guide.{learners,authors,community}.md` — the _why_ per
 >   audience
+> - `syllabus.study-lenses.md` — the technical-reader companion for the
+>   infrastructure that delivers chapter content
 > - `syllabus.md` — the existing prose course (read-only)
 >
 > **Status**: end-state document. The previous chapter prose in `syllabus.md` is

@@ -13,6 +13,8 @@
 > - `syllabus.guide.learners.md` — the _why_ addressed to learners
 > - `syllabus.guide.authors.md` — the _why_ addressed to curriculum authors
 >   / forkers / contributors
+> - `syllabus.study-lenses.md` — the technical-reader companion for the
+>   infrastructure the curriculum runs on
 >
 > **Status**: end-state document. Content is open to iteration.
 >

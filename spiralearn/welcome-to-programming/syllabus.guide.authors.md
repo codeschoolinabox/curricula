@@ -11,6 +11,8 @@
 > - `syllabus.guide.learners.md` — the _why_ addressed to learners
 > - `syllabus.guide.community.md` — the _why_ addressed to partner
 >   communities, mentors, cohort hosts
+> - `syllabus.study-lenses.md` — the technical-reader companion for the
+>   JEJ → NM → embody → lenses → orchestrator infrastructure
 >
 > **Status**: end-state document. Content is open to iteration.
 >

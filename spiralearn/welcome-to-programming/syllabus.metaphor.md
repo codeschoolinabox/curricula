@@ -15,6 +15,8 @@
 >   for using the metaphor in instruction)
 > - `syllabus.narrative.md` — extensions and illustrations of the
 >   metaphor that didn't fit the un-prose-y reference register
+> - `syllabus.study-lenses.md` — the technical-reader companion
+>   (lenses are the "kit of magnifying glasses" 🔬 the Frogrammer carries)
 
 ---
 

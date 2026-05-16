@@ -11,6 +11,8 @@
 >   or adapt it
 > - `syllabus.guide.community.md` — the _why_ for partner communities,
 >   mentors, cohort hosts
+> - `syllabus.study-lenses.md` — the technical-reader companion (skip
+>   unless you want to peek inside the tooling)
 >
 > **Status**: end-state document. Content is open to iteration — the anchors
 > emerge through drafting and learner feedback.

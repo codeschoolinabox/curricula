@@ -17,6 +17,9 @@
 >   application of these principles per role
 > - `syllabus.translational-framing.md` — process for improving these
 >   methods over time
+> - `syllabus.study-lenses.md` — technical-reader companion for the JEJ
+>   → NM → embody → lenses → orchestrator infrastructure that embodies
+>   the pedagogy operationally
 
 ---
 
