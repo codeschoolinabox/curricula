@@ -8,14 +8,14 @@
 >
 > Companions (siblings, by co-location):
 >
-> - `syllabus.md` — the high-level orientation and reading map
-> - `syllabus.ontology.md` — the _what_ (concepts the metaphor
+> - `README.md` — the high-level orientation and reading map
+> - `ontology.md` — the _what_ (concepts the metaphor
 >   illustrates, especially §3 V/F, §8 strata, §6 strands)
-> - `syllabus.pedagogy.md` — the _how it's taught_ (design principles
+> - `pedagogy.md` — the _how it's taught_ (design principles
 >   for using the metaphor in instruction)
-> - `syllabus.narrative.md` — extensions and illustrations of the
+> - `narrative.md` — extensions and illustrations of the
 >   metaphor that didn't fit the un-prose-y reference register
-> - `syllabus.study-lenses.md` — the technical-reader companion
+> - `study-lenses.md` — the technical-reader companion
 >   (lenses are the "kit of magnifying glasses" 🔬 the Frogrammer carries)
 
 ---
@@ -41,8 +41,8 @@ own home. Three principles govern its use:
 
 ## The metaphor in one sentence
 
-Throughout this course we illustrate the ideas in `syllabus.md` and
-`syllabus.ontology.md` using a consistent metaphor: **a mechanical
+Throughout this course we illustrate the ideas in `README.md` and
+`ontology.md` using a consistent metaphor: **a mechanical
 instrument, a composer, a virtuoso, a score, and an audience.** The
 instrument varies across chapters; the roles stay the same. If the
 metaphor doesn't click for you, the underlying ideas stand on their

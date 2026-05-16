@@ -7,50 +7,79 @@
 >
 > Companions (siblings, by co-location):
 >
-> - `syllabus.md` — the high-level orientation and reading map
-> - `syllabus.ontology.md` — the _what_ (reference framework, the concepts)
-> - `syllabus.pedagogy.md` — the _how it's taught_ (design principles)
-> - `syllabus.chapters.md` — the chapters in detail
-> - `syllabus.narrative.md` — the journey learners go on
-> - `syllabus.metaphor.md` — composer/virtuoso/mechanism teaching apparatus
-> - `syllabus.guide.{learners,authors,community}.md` — practical guidance
+> - `README.md` — the high-level orientation and reading map
+> - `ontology.md` — the _what_ (reference framework, the concepts)
+> - `pedagogy.md` — the _how it's taught_ (design principles)
+> - `chapters.md` — the chapters in detail
+> - `narrative.md` — the journey learners go on
+> - `metaphor.md` — composer/virtuoso/mechanism teaching apparatus
+> - `guide.{learners,authors,community}.md` — practical guidance
 >   per role (tooling, workflows, application of design principles)
-> - `syllabus.translational-framing.md` — process for improving methods
+> - `translational-framing.md` — process for improving methods
 
 ---
 
 ## Why this file exists
 
-`syllabus.md` is a _path_ to the future this manifesto names.
-`syllabus.md` is light and pragmatic; this file is where the
+`README.md` is a _path_ to the future this manifesto names.
+`README.md` is light and pragmatic; this file is where the
 philosophical commitments live. Vision-of-the-future content goes here;
-design principles and teaching methods live in `syllabus.pedagogy.md`;
-concept-definitions live in `syllabus.ontology.md`.
+design principles and teaching methods live in `pedagogy.md`;
+concept-definitions live in `ontology.md`.
 
 The seams to peer files:
 
-- `syllabus.manifesto.md` ↔ `syllabus.md` = vision of the future ↔ a
+- `manifesto.md` ↔ `README.md` = vision of the future ↔ a
   path to that future
-- `syllabus.manifesto.md` ↔ `syllabus.narrative.md` = vision /
+- `manifesto.md` ↔ `narrative.md` = vision /
   commitments ↔ the learner's experiential arc
-- `syllabus.manifesto.md` ↔ `syllabus.pedagogy.md` = the vision ↔ the
+- `manifesto.md` ↔ `pedagogy.md` = the vision ↔ the
   design principles that serve it
-- `syllabus.manifesto.md` ↔ `syllabus.ontology.md` = the vision ↔ the
+- `manifesto.md` ↔ `ontology.md` = the vision ↔ the
   named concepts that operationalize it
 
 ---
 
 ## The vision
 
-**A translational research agenda to invest equal resources in the
-acceleration of human learning.**
+The future of computing is unwritten. We hope what comes will be more
+interactive, more embedded, more accessible, more adaptive, more
+makeable; less resource-intensive, less expensive; more learnable than
+what exists today. We hope it will challenge what we even imagine
+qualifies as computing. _We want a human future with technology, not a
+technological future with humans._
 
-That line is the spine. The sections below are elaborations: how
-software's architect/implementer division shaped the territory the
-curriculum operates in, how the LLM shift is a new chapter in an old
-dance, how Bret Victor's wish for _Learnable Programming_ decomposes
-unexpectedly in light of LLMs, and how the future beyond human-designed
-languages might look.
+Welcome to Frogramming is a course for that. The notation layer of
+software is changing quickly: LLMs already write a substantial share of
+the code being written, and the share is growing. What genAI directly
+threatens is _programming_ — the writing of notation. What survives the
+threat, and what this course builds, is _Frogramming_: the skill of
+understanding what a machine actually does, of predicting where
+notation succeeds and fails, of recovering when prediction and reality
+diverge. The course exists for people who want the skill set that keeps
+systems comprehensible as they become more pervasive, and the agency
+to shape how they're built. (Other non-delegable practices live
+alongside this one — user-grounded design, called _Vibetoading_ in the
+course's vocabulary — but those aren't directly threatened by genAI in
+the same way; the LLM-shift section below develops the distinction.)
+
+Tomorrow's technology must be built with today's, which is also the
+practical reason older technology is worth teaching. The warty old
+languages and tools don't become obsolete just because newer ones
+arrive — the new ones are built on the old, run on the old, and will
+be maintained by people who understand the old. We teach JavaScript at
+depth here even though JavaScript will not be the last programming
+language you ever encounter, because what you learn through JS — how
+to read a notional machine, how to predict it, how to recover when
+your prediction is wrong — is the part that travels.
+
+The sections below are the philosophical commitments this stance rests
+on: how software's architect / implementer division shaped the
+territory the curriculum operates in; how the LLM shift is a new
+chapter in an old dance; how Bret Victor's wish for _Learnable
+Programming_ decomposes unexpectedly in light of LLMs; and how the
+future beyond human-designed languages might look — including why
+Frogramming survives even that.
 
 ---
 
@@ -74,7 +103,7 @@ learn and master.
 ## The LLM shift: a new participant in an old dance
 
 The principle that organizes everything below is named in
-`syllabus.pedagogy.md` § How Learning Happens: **understanding is the
+`pedagogy.md` § How Learning Happens: **understanding is the
 part of programming that cannot be delegated.** The four sub-points
 that follow — honest framing, verification limit, NM understanding
 matters more, the concrete Vibetoading/Frogramming difference — are
@@ -191,3 +220,13 @@ Even then, the programming languages we have now remain worth
 cherishing: for their humanity, for how they shape thinking, for the
 new thoughts they give us, and for our connection to a computational
 history that runs from Jacquard looms to JavaScript.
+
+And Frogramming survives that future, too. A shift to alien-designed
+languages doesn't dissolve the notional machine; it just moves where
+the notation comes from. Twinning a notional machine — predicting it,
+reading code against the prediction, noticing where the prediction
+diverges from reality — remains the work, regardless of who is writing
+the notation. Notation-fluency may eventually belong to the alien
+virtuoso; the predict-and-twin practice stays yours.
+**Frogramming is the skill that will survive, not programming as
+traditionally defined.**

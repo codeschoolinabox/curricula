@@ -35,7 +35,10 @@ Each curriculum lives in its own directory under `spiralearn/`:
 
 ```text
 spiralearn/
-  welcome-to-programming/
+  welcome-to-frogramming/   (syllabus meta — README, ontology, pedagogy, etc.;
+                             chapter content migrates here from welcome-to-programming/)
+  welcome-to-programming/   (DEPRECATED — chapter content awaiting migration;
+                             unrouted in docusaurus.config.ts; do not add new content)
     0-what-is-programming/
     1-devs/
     2-devs-computers/

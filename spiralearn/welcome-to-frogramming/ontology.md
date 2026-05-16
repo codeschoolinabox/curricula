@@ -2,17 +2,17 @@
 
 > **Purpose**: this document is the substantive ontology of the WtF curriculum.
 > It captures the _conclusions_ of an extended thinking-together process — the
-> framework, not the conversation. It weaves substance from `syllabus.md`,
+> framework, not the conversation. It weaves substance from `README.md`,
 > `narrative/README.md`, and the `just-enough/javascript/` infrastructure
 > documentation.
 >
 > **Companions** (siblings, by co-location):
 >
-> - `syllabus.guide.{learners,authors,community}.md` — the _why_ per audience
-> - `syllabus.chapters.md` — the _how_ at chapter grain (5-layer LO grid)
-> - `syllabus.study-lenses.md` — the technical-reader companion describing
+> - `guide.{learners,authors,community}.md` — the _why_ per audience
+> - `chapters.md` — the _how_ at chapter grain (5-layer LO grid)
+> - `study-lenses.md` — the technical-reader companion describing
 >   the JEJ → NM → embody → lenses → orchestrator infrastructure chain
-> - `syllabus.md` — the existing prose course (read-only for the current
+> - `README.md` — the existing prose course (read-only for the current
 >   redraft)
 >
 > **Status**: end-state document. Status / phase / hedging belong in git history
@@ -108,13 +108,13 @@ viewed from different angles.
 
 The principle grounds:
 
-- The spiderweb curriculum + the spiral as traversal (`syllabus.pedagogy.md` §6)
+- The spiderweb curriculum + the spiral as traversal (`pedagogy.md` §6)
 - The 5 layers (§5) — depth = connection-density
 - The 5 strands (§6) — each strand is a _kind of connection_
 - The data thread (§7) — data flows through connections; connections shape what
   data can be
 - Twinning (the active-inference mechanism; canonical at
-  `syllabus.pedagogy.md` "The pedagogical claim from Friston") —
+  `pedagogy.md` "The pedagogical claim from Friston") —
   building a generative model = building a connection-graph that
   mirrors the target's
 - Programming itself — a program is a connection-graph; programming is
@@ -127,7 +127,7 @@ unitary things).
 > **On intellectual agency**: empowerment / intellectual confidence is the META
 > learning objective unifying the 5 layers (§5). It is _not_ a third
 > foundational principle in the ontology — that work belongs in the guides
-> (`syllabus.guide.{learners,authors,community}.md`). The two principles above
+> (`guide.{learners,authors,community}.md`). The two principles above
 > are the curriculum's spine; intellectual agency is its purpose.
 
 ---
@@ -401,7 +401,7 @@ historical pairs (Faraday/Maxwell, Mendel/breeders).
 #### V/F vs. Composer/Virtuoso/Mechanism/Audience cast
 
 The Composer/Virtuoso/Mechanism/Audience cast (canonical at
-`syllabus.metaphor.md`) is **teaching apparatus** —
+`metaphor.md`) is **teaching apparatus** —
 explicitly not structural guide, explicitly not the canonical home for any
 learning objective. V and F are **practice-stances** the student inhabits and
 are tied to LOs. The two are **orthogonal**:
@@ -426,15 +426,15 @@ operational:
 
 The two artifacts operate as **coordinated Translational Sprints** — two
 translational research artifacts (in TCER's sense — see
-`syllabus.translational-framing.md` §6 Tool-Theory Co-evolution) in the
+`translational-framing.md` §6 Tool-Theory Co-evolution) in the
 same trading zone, each shaping the other's next iteration.
 
 > **We are doing the innovation process we're teaching.**
 
-See `syllabus.translational-framing.md` §6 (Tool-Theory Co-evolution) and §7
+See `translational-framing.md` §6 (Tool-Theory Co-evolution) and §7
 (V/F at the artifact layer) for the deeper analysis. The operational
 infrastructure itself — the JEJ → NM → embody → lenses → orchestrator chain
-— is described in `syllabus.study-lenses.md`. The pattern recurses: V and
+— is described in `study-lenses.md`. The pattern recurses: V and
 F at the student layer; V and F at the artifact layer. Bakhtiar Mikhak's
 _engineering × physics co-evolution_ names the meta-pattern: engineering
 practice (technical affordances) and theoretical/experiential practice
@@ -456,16 +456,16 @@ artifact-layer V/F is one instance of that meta-pattern.
   the other. Same teacher who introduced the user to the data/interaction
   architectural pattern (which inspired embody/lenses) AND the
   _infrastructure-is-research-contribution_ claim (canonical at
-  `syllabus.translational-framing.md` §6).
+  `translational-framing.md` §6).
 
 <details>
 <summary><b>Visualization: V/F + the rhetorical model</b> <i>(most load-bearing — existing asset)</i></summary>
 
-![The big picture — the rhetorical model](./assets/the-big-picture.png)
-![The big picture plus AI](./assets/the-big-picture-plus-ai.png)
+![The big picture — the rhetorical model](../welcome-to-programming/assets/the-big-picture.png)
+![The big picture plus AI](../welcome-to-programming/assets/the-big-picture-plus-ai.png)
 
 AI sits _outside_ the rhetorical circle — exactly the virtuoso's position in the
-teaching-apparatus cast (`syllabus.metaphor.md`).
+teaching-apparatus cast (`metaphor.md`).
 
 </details>
 
@@ -514,7 +514,7 @@ more again.** Each layer is a complete exit point.
 > **Meta learning objective unifying all 5 layers**: _intellectual agency_. Each
 > layer is intellectual agency at a different scale. This is the through-line
 > that connects the layers to the guides
-> (`syllabus.guide.{learners,authors,community}.md`).
+> (`guide.{learners,authors,community}.md`).
 
 | Layer  | Frame                | Meta-objective (intellectual agency over…) | Primary objective                                                                                                                                            | Learned through                                                                                               |
 | ------ | -------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
@@ -525,7 +525,7 @@ more again.** Each layer is a complete exit point.
 | **L4** | Wonder / Philosophy  | …the questions themselves                  | Inhabit the frontier where confirmable science gives way to philosophical questioning; ask the big questions with methodological rigour — not theory-mastery | easter eggs in main text; side/footnotes; references; open questions and methods for asking them              |
 
 > **SOLO taxonomy applies _within_ each layer**, not across — see
-> `syllabus.pedagogy.md` "Using the 5 layers (§5) in teaching" for the design
+> `pedagogy.md` "Using the 5 layers (§5) in teaching" for the design
 > principle.
 
 #### Each layer's data thread (the red thread ramifies)
@@ -579,7 +579,7 @@ legible**, not in a static model.
 > **Layer-architecture rendering rules** (each-layer-through-each-chapter,
 > platform-agnostic constraint, layer-by-markdown-affordance mapping) and
 > **layer-title brainstorming** (verb/noun/hybrid styles) — see
-> `syllabus.pedagogy.md` "Using the 5 layers (§5) in teaching."
+> `pedagogy.md` "Using the 5 layers (§5) in teaching."
 
 ---
 
@@ -606,7 +606,7 @@ your own mind that aligns with that process's actual behavior.
 - Ch5: yourself as poly-perspective being
 
 **Cognitive-science grounding**: twinning IS active inference
-(canonical at `syllabus.pedagogy.md` "The pedagogical claim from
+(canonical at `pedagogy.md` "The pedagogical claim from
 Friston").
 
 #### Decisions (micro and macro)
@@ -649,7 +649,7 @@ The _concert_ — the experience-as-purpose, what the work ultimately serves —
 what both V and F orient toward. Neither V nor F controls the concert directly:
 the user-experience takes place in the body of the user but arises from
 interaction; the work of both hats is to set up conditions that make the
-experience the program serves possible. (See `syllabus.metaphor.md` for the
+experience the program serves possible. (See `metaphor.md` for the
 metaphor this reading extends; the metaphor illustrates, the strand does the
 teaching.)
 
@@ -843,7 +843,7 @@ see all three at once.
 
 The transitions between strata can also be read as places where the productive
 lens shifts most legibly — the work of strand-Affordances (§6) and the
-composer/virtuoso/mechanism metaphor (`syllabus.metaphor.md`) operationalize
+composer/virtuoso/mechanism metaphor (`metaphor.md`) operationalize
 this reading. Listed here as a cross-frame; the strata and the
 universal-lens framing remain first-class on their own terms.
 
@@ -874,7 +874,7 @@ work.
 §9's "NM" (notional machine) and §8's artifact-logic name the same site at
 different resolutions. Substrate substitution swaps a GenAI model into that
 site; the NM-twinning stance (the active-inference framing canonical at
-`syllabus.pedagogy.md` "The pedagogical claim from Friston") remains, but
+`pedagogy.md` "The pedagogical claim from Friston") remains, but
 what's being twinned has
 different mechanical properties.
 
@@ -980,7 +980,7 @@ you twin during the conversation**.
 
 When you delegate the control panel, you can no longer rely on the act of typing
 to keep your NM understanding sharp. Visual debuggers (`embody/` and study
-lenses; see `syllabus.study-lenses.md` for the infrastructure) let you
+lenses; see `study-lenses.md` for the infrastructure) let you
 observe, predict, and debug the machine _directly_ — the NM view that exists
 regardless of who (or what) wrote the code text. **Frogramming with
 delegation is only sustainable if you keep the direct NM view alive.**
@@ -1077,7 +1077,7 @@ language surface, building snippetry-as-craft.
 
 **Role 3 is deferred to WtA** (Welcome to Algorithms / follow-on courses),
 matching the metaphor's existing alien-composers deferral (see
-`syllabus.metaphor.md` — "Alien composers (teased, deferred)"). WtF teaches the
+`metaphor.md` — "Alien composers (teased, deferred)"). WtF teaches the
 framework so learners can recognize Role 3 when they encounter it, but does not
 teach Role-3 building.
 
@@ -1147,7 +1147,7 @@ traversing through its opposite.
 
 #### The drawing
 
-![Hofstadter's MU drawing — each pole resolves into MU through its opposite](./assets/mu.hofstadter.png)
+![Hofstadter's MU drawing — each pole resolves into MU through its opposite](../welcome-to-programming/assets/mu.hofstadter.png)
 
 The top-level **M** is HOLISM (whose letters are REDUCTIONISM, whose strokes are
 MU). The top-level **U** is REDUCTIONISM (whose letters are HOLISM, whose
@@ -1215,7 +1215,7 @@ mu; // frogram, vibetoad
   philosophy reading) — self-twinning as theory of consciousness, the recursion
   that twinning operationally enacts
 - The **audience-YOU-are-becoming** read of the chapter arc (canonical
-  at `syllabus.chapters.md` § "The audience YOU are becoming") — Ch1's
+  at `chapters.md` § "The audience YOU are becoming") — Ch1's
   write-for-future-you → Ch5's write-for-yourself-as-merged-V/F is the
   curriculum's lived descent
 - §8's **perceived/perceiver flipside** — dual-twinning is the perceiving, the
@@ -1227,9 +1227,9 @@ mu; // frogram, vibetoad
 
 Most load-bearing:
 
-- `syllabus.md` — top-of-document framing (TL;DR, What to Expect, How Learning
+- `README.md` — top-of-document framing (TL;DR, What to Expect, How Learning
   Happens, Why Learn to Frogram, Symbology, Before You Begin) + chapter
-  summaries; rich chapter bodies live in `syllabus.chapters.md`
+  summaries; rich chapter bodies live in `chapters.md`
 - `narrative/README.md` — composer/virtuoso/mechanism metaphor + 8 AI-collab
   skills + voice spec + visual asset set
 - `just-enough/javascript/README.md` + `DOCS.md` + `notional-machine.md`

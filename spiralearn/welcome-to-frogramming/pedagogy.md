@@ -1,23 +1,23 @@
 # Welcome to Frogramming — Pedagogy
 
 > The _design principles for the learning experience_ — how the concepts
-> named in `syllabus.ontology.md` get taught. Introduction order,
+> named in `ontology.md` get taught. Introduction order,
 > exercise patterns, scaffolding, when each concept lands in the
 > curriculum.
 >
 > Companions (siblings, by co-location):
 >
-> - `syllabus.md` — the high-level orientation and reading map
-> - `syllabus.ontology.md` — the _what_ (reference framework, the
+> - `README.md` — the high-level orientation and reading map
+> - `ontology.md` — the _what_ (reference framework, the
 >   concepts being taught)
-> - `syllabus.manifesto.md` — the vision this pedagogy serves
-> - `syllabus.chapters.md` — the chapters where this pedagogy operates
-> - `syllabus.narrative.md` — the journey learners go on
-> - `syllabus.guide.{learners,authors,community}.md` — practical
+> - `manifesto.md` — the vision this pedagogy serves
+> - `chapters.md` — the chapters where this pedagogy operates
+> - `narrative.md` — the journey learners go on
+> - `guide.{learners,authors,community}.md` — practical
 >   application of these principles per role
-> - `syllabus.translational-framing.md` — process for improving these
+> - `translational-framing.md` — process for improving these
 >   methods over time
-> - `syllabus.study-lenses.md` — technical-reader companion for the JEJ
+> - `study-lenses.md` — technical-reader companion for the JEJ
 >   → NM → embody → lenses → orchestrator infrastructure that embodies
 >   the pedagogy operationally
 
@@ -25,7 +25,7 @@
 
 ## Why this file exists
 
-`syllabus.ontology.md` owns naming and defining. This file owns
+`ontology.md` owns naming and defining. This file owns
 how-those-named-things-get-taught. The soft seam:
 
 - **Ontology** = concepts (what things ARE, how they relate)
@@ -203,7 +203,7 @@ yours, and will always be yours — that's what makes it worth doing.
 
 ## Using the 5 layers (§5 of ontology) in teaching
 
-The 5 layers (§5 of `syllabus.ontology.md`) are named there as the
+The 5 layers (§5 of `ontology.md`) are named there as the
 engagement depths a reader can stay at or descend through. This file
 carries the design principles for teaching with the layers:
 
@@ -233,7 +233,7 @@ that meet a learner where they are at a given layer.
 
 ### V and F brought to life through narrative
 
-V and F are defined as personae in `syllabus.ontology.md` §3 — substrate-agnostic
+V and F are defined as personae in `ontology.md` §3 — substrate-agnostic
 stances with temperaments and tells. The pedagogical device is to **bring them
 to life through story** at L2: dialogues, sidebars, exchanges where each speaks
 for themselves. Personification carries perspective more vividly than label
@@ -327,7 +327,7 @@ vocabulary:
 ## Lenses, embody, and substrate ↔ pedagogy mutual constitution
 
 The JEJ chain (`just-enough/javascript/` + `embody/` + Study Lenses +
-orchestrator) is named and described in `syllabus.study-lenses.md` as
+orchestrator) is named and described in `study-lenses.md` as
 infrastructure. This file carries the principles by which that
 infrastructure is pedagogy-shaped:
 
@@ -551,7 +551,7 @@ setting; the more contextual, the less reusable. Points outward toward
 
 **The Reusability Paradox is not a problem to solve — it's the
 productive tension the course lives inside.** `just-enough/javascript/`
-(the JEJ chain; see `syllabus.study-lenses.md`) is the reusable
+(the JEJ chain; see `study-lenses.md`) is the reusable
 infrastructure side; the manifesto / ontology / chapters are the
 opinionated content side. The
 course is what happens when the opinionated content uses the reusable
@@ -736,5 +736,5 @@ ontology↔pedagogy audit pass (3d):
 - Exercise patterns per strand (§6) and per stratum (§8)
 - Methods for introducing the three roles of agential AI (§10)
 - The pedagogy ↔ ontology seam, ongoing — the audit pass scheduled at
-  3d will move how-it's-taught content from `syllabus.ontology.md`
+  3d will move how-it's-taught content from `ontology.md`
   into the appropriate sections of this file

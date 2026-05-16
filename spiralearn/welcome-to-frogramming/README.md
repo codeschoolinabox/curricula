@@ -116,7 +116,7 @@ experiment, or surprise yourself. This course helps you build both at once.
 - [Before You Begin](#before-you-begin)
 
 > **Chapter bodies and learning objectives live in
-> [`syllabus.chapters.md`](./syllabus.chapters.md).** The TL;DR chapter
+> [`chapters.md`](./chapters.md).** The TL;DR chapter
 > bullets above are the syllabus-level chapter coverage; the full
 > per-chapter content (Overview, sub-sections 0.1, 0.2, …, 5.5, and the
 > per-layer LO contracts) is in the companion file.
@@ -342,7 +342,7 @@ the chapter work safely, and how each existing piece of scaffolding (PRIMM,
 Block Model, spiral curriculum, Cognitive Load Theory, Study Lenses, Just
 Enough JavaScript, errors-as-information, snippetry) reads as pedagogical
 sampling at a different granularity — lives canonically in
-[`syllabus.pedagogy.md`](./syllabus.pedagogy.md).
+[`pedagogy.md`](./pedagogy.md).
 
 [TOP](#welcome-to-frogramming---syllabus)
 
@@ -361,7 +361,7 @@ The deeper _why_ — the vision of computing this curriculum stands on, how
 software's design / notation split shaped the territory long before LLMs, how
 the LLM shift fits in that history, and what futures might lie beyond
 human-designed languages — lives in
-[`syllabus.manifesto.md`](./syllabus.manifesto.md). This section gives the
+[`manifesto.md`](./manifesto.md). This section gives the
 scope-and-goals view: what the course teaches and why those choices serve a
 learner trying to program well today.
 
@@ -448,7 +448,7 @@ constraint, not a permanent one.
 ### What this course builds in you — the five strands
 
 Five strands run beneath every chapter, each enabled by the ones before
-(canonical definitions in [`syllabus.ontology.md`](./syllabus.ontology.md) §13):
+(canonical definitions in [`ontology.md`](./ontology.md) §13):
 
 1. **Twinning** — accurate mental models of processes outside your mind
 2. **Decisions (micro and macro)** — every keyword, name, operator, structure
@@ -504,7 +504,7 @@ The cast (six roles), the mapping to programming concepts, the two-scale
 instrument extension, the human-vs-alien virtuoso split, the
 composition-vs-performance two-phase structure, the composer-pedagogy
 parallels, the 8 AI-collaboration skills, and the per-chapter instantiations
-live canonically in [`syllabus.metaphor.md`](./syllabus.metaphor.md).
+live canonically in [`metaphor.md`](./metaphor.md).
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -531,7 +531,7 @@ prerequisite; refer to them when you need them.
 
 **The full source-materials catalog** — academic lineages, design- principle
 sources, infrastructure documentation, prior-session handoffs — lives in
-[`syllabus.ontology.md`](./syllabus.ontology.md) under _Source materials_.
+[`ontology.md`](./ontology.md) under _Source materials_.
 
 [TOP](#welcome-to-programming-coded-for-humans--syllabus)
 
@@ -571,7 +571,7 @@ convention for difficulty progression — not part of this set.
 
 ## Reading map: where to go for more depth
 
-`syllabus.md` is the README of this directory — broad-audience, light, oriented
+`README.md` is the README of this directory — broad-audience, light, oriented
 to scope-and-goals. Each companion file owns one canonical home for a piece of
 the curriculum. The graph shows how they relate; the list below gives a
 one-line read of each.
@@ -579,24 +579,24 @@ one-line read of each.
 ```mermaid
 graph TD
     subgraph WT["What is taught"]
-        M[syllabus.manifesto.md]
-        O[syllabus.ontology.md]
+        M[manifesto.md]
+        O[ontology.md]
     end
     subgraph HT["How it's taught"]
-        P[syllabus.pedagogy.md]
-        MT[syllabus.metaphor.md]
+        P[pedagogy.md]
+        MT[metaphor.md]
     end
     subgraph WH["Where the teaching happens"]
-        C[syllabus.chapters.md]
-        N[syllabus.narrative.md]
+        C[chapters.md]
+        N[narrative.md]
     end
     subgraph RO["Research orientation"]
-        T[syllabus.translational-framing.md]
+        T[translational-framing.md]
     end
     subgraph RG["Role-targeted guidance"]
-        GL[syllabus.guide.learners.md]
-        GA[syllabus.guide.authors.md]
-        GC[syllabus.guide.community.md]
+        GL[guide.learners.md]
+        GA[guide.authors.md]
+        GC[guide.community.md]
     end
 
     M -->|vision informs concepts| O
@@ -615,25 +615,25 @@ graph TD
 
 **Per-file blurbs:**
 
-- **`syllabus.md`** — this file: README, scope-and-goals, reading map
-- **`syllabus.manifesto.md`** — the vision of computing and education this
+- **`README.md`** — this file: README, scope-and-goals, reading map
+- **`manifesto.md`** — the vision of computing and education this
   curriculum stands on (the _why_)
-- **`syllabus.ontology.md`** — canonical concept reference: V/F, notional
+- **`ontology.md`** — canonical concept reference: V/F, notional
   machines, strata, strands, audiences, the whole _what_
-- **`syllabus.pedagogy.md`** — design principles for how the experience is
+- **`pedagogy.md`** — design principles for how the experience is
   built (the _how-it's-taught_); reads as an ontology of pedagogical
   principles
-- **`syllabus.metaphor.md`** — the composer / virtuoso / mechanism teaching
+- **`metaphor.md`** — the composer / virtuoso / mechanism teaching
   apparatus (illustrates concepts; not a structural guide)
-- **`syllabus.chapters.md`** — chapter bodies, sub-sections, and per-layer
+- **`chapters.md`** — chapter bodies, sub-sections, and per-layer
   learning-objective contracts in detail
-- **`syllabus.narrative.md`** — the learner's experiential arc through the
+- **`narrative.md`** — the learner's experiential arc through the
   course; narrative-register overflow from metaphor.md (voice, cameos,
   illustrations)
-- **`syllabus.translational-framing.md`** — curriculum-as-research
+- **`translational-framing.md`** — curriculum-as-research
   positioning and methods-improvement process (researcher /
   author-collaborator audience)
-- **`syllabus.guide.learners.md` / `.authors.md` / `.community.md`** —
+- **`guide.learners.md` / `.authors.md` / `.community.md`** —
   practical, role-targeted guidance (tooling, workflows, application of
   design principles)
 

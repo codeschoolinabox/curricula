@@ -3,10 +3,10 @@
 > Author-facing companion to the canonical curriculum docs. Holds the
 > narrative additions — voice spec, historical cameos, metaphor-flavored
 > illustrations, deeper-section threads — that didn't fold into the
-> canonical docs (`syllabus.md`, `syllabus.ontology.md`,
-> `syllabus.chapters.md`, the three role-targeted guides
-> (`syllabus.guide.{learners,authors,community}.md`),
-> `syllabus.translational-framing.md`, `syllabus.study-lenses.md`).
+> canonical docs (`README.md`, `ontology.md`,
+> `chapters.md`, the three role-targeted guides
+> (`guide.{learners,authors,community}.md`),
+> `translational-framing.md`, `study-lenses.md`).
 
 Visual assets live at `./assets/` (sibling to this file at the
 welcome-to-programming/ level). All visualizations in this doc are
@@ -15,7 +15,7 @@ readers can skim or dive.
 
 The metaphor system itself — composer / virtuoso / mechanism / audience
 cast, the full mapping, the two-phase composition-vs-execution structure
-— lives canonically in `syllabus.metaphor.md`. This file carries
+— lives canonically in `metaphor.md`. This file carries
 _extensions_ and _illustrations_ that didn't fit the un-prose-y
 reference register of the ontology.
 
@@ -56,7 +56,7 @@ reference register of the ontology.
   Historical cameos) is **teaching apparatus**, explicitly NOT
   structural guide. Practice-stances and learning objectives live with
   V/F (ontology §3) and the 5 strands (ontology §6). See
-  `syllabus.metaphor.md` for the canonical cast definition.
+  `metaphor.md` for the canonical cast definition.
 
 ---
 
@@ -297,21 +297,21 @@ Each skill has a specific moment in the collaborative loop.
 <details>
 <summary><b>Visualization: collaboration decision tree</b> <i>(supporting)</i></summary>
 
-![AI collaboration decision tree — when/how to collaborate](./assets/decision-tree.svg)
+![AI collaboration decision tree — when/how to collaborate](../welcome-to-programming/assets/decision-tree.svg)
 
 </details>
 
 <details>
 <summary><b>Visualization: AI learning progression</b> <i>(supporting)</i></summary>
 
-![AI integration progression across chapters](./assets/learning-progression.svg)
+![AI integration progression across chapters](../welcome-to-programming/assets/learning-progression.svg)
 
 </details>
 
 <details>
 <summary><b>Visualization: SOLO integration</b> <i>(supporting)</i></summary>
 
-![SOLO mapping to AI collaboration readiness](./assets/solo-integration.svg)
+![SOLO mapping to AI collaboration readiness](../welcome-to-programming/assets/solo-integration.svg)
 
 </details>
 
@@ -333,7 +333,7 @@ patterns from their training. This explains:
 ## 5. Metaphor extensions
 
 The canonical metaphor system (cast, mapping, two-phase
-composition-vs-execution) is in `syllabus.metaphor.md`. The extensions below are
+composition-vs-execution) is in `metaphor.md`. The extensions below are
 illustrations the canonical reference doesn't carry — useful in
 chapter prose for animating specific moments.
 
@@ -465,7 +465,7 @@ the second instrument is the user's experience of the played piece
 experience-as-purpose — is what V and F orient toward.
 
 This extension lives canonically in ontology §6 (whole rhetorical
-situation strand). See `syllabus.metaphor.md`'s two-scale extension note
+situation strand). See `metaphor.md`'s two-scale extension note
 for the metaphor-illustration form.
 
 ---
@@ -841,4 +841,4 @@ translational-framing) are the source of truth.
 The metaphor is load-bearing but not load-exclusive. Chapter authors
 should use the metaphor where it illuminates and set it aside where
 it strains. The vision (ontology §1-§2) stands without the metaphor;
-the metaphor (`syllabus.metaphor.md`) serves the vision.
+the metaphor (`metaphor.md`) serves the vision.

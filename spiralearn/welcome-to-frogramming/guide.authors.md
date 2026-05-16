@@ -6,12 +6,12 @@
 >
 > Companions (siblings, by co-location):
 >
-> - `syllabus.ontology.md` — the _what_ (reference framework)
-> - `syllabus.chapters.md` — the _how_ at chapter grain
-> - `syllabus.guide.learners.md` — the _why_ addressed to learners
-> - `syllabus.guide.community.md` — the _why_ addressed to partner
+> - `ontology.md` — the _what_ (reference framework)
+> - `chapters.md` — the _how_ at chapter grain
+> - `guide.learners.md` — the _why_ addressed to learners
+> - `guide.community.md` — the _why_ addressed to partner
 >   communities, mentors, cohort hosts
-> - `syllabus.study-lenses.md` — the technical-reader companion for the
+> - `study-lenses.md` — the technical-reader companion for the
 >   JEJ → NM → embody → lenses → orchestrator infrastructure
 >
 > **Status**: end-state document. Content is open to iteration.
@@ -20,7 +20,7 @@
 > Filename renamed (`manifesto.{role}.md` → `guide.{role}.md`) in Wave 2
 > of the syllabus corpus restructure; title and prose register migrate
 > to "guide" form in Wave 3, when vision-flavored content moves into
-> `syllabus.manifesto.md` and this file gains its practical-guidance
+> `manifesto.md` and this file gains its practical-guidance
 > register.
 
 ---
@@ -358,7 +358,7 @@ implications matter when you fork or adapt:
 For the deeper analysis — including the _engineering × physics co-evolution_
 lineage that grounds the V/F symmetry, the Tool-Theory Co-evolution claim, and
 the relationship between the curriculum and `lenses/embody` — see
-`syllabus.translational-framing.md`.
+`translational-framing.md`.
 
 If TCER is new vocabulary for you, that document and the repo-level
 `research-framing.md` are where to start.

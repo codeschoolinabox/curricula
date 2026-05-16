@@ -7,19 +7,19 @@
 >
 > **Audience**: researchers, curriculum-author-collaborators, the TCER
 > community. Not learners. (Learners' manifesto is
-> `syllabus.guide.learners.md`; it does not mention TCER.)
+> `guide.learners.md`; it does not mention TCER.)
 >
 > **Companions** (siblings by co-location):
 >
-> - `syllabus.ontology.md` — the curriculum's concept reference
+> - `ontology.md` — the curriculum's concept reference
 >   framework (concept-only after the Wave-3d-ii migration; the
 >   research-orientation principles formerly in ontology Part B are
 >   now canonical here)
-> - `syllabus.chapters.md` — chapter-by-chapter LO grids
-> - `syllabus.guide.{authors,community}.md` — practical role-targeted
+> - `chapters.md` — chapter-by-chapter LO grids
+> - `guide.{authors,community}.md` — practical role-targeted
 >   guidance for those audiences, with TCER vocabulary integrated
-> - `syllabus.md` — learner-facing prose (no TCER vocabulary)
-> - `syllabus.study-lenses.md` — technical-reader companion describing
+> - `README.md` — learner-facing prose (no TCER vocabulary)
+> - `study-lenses.md` — technical-reader companion describing
 >   the JEJ → NM → embody → lenses → orchestrator infrastructure chain
 >   (V/F at the artifact layer's F-side, in operational form)
 > - `research-framing.md` (curriculum-level) and the repo-level
@@ -76,7 +76,7 @@ The curriculum operates primarily in:
 
 | TCER Phase                               | What the curriculum does                                                                                            | Continuum            |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| **3.B\*** Practitioner-facing guidelines | Synthesizes research into actionable teaching content. `syllabus.md`, `syllabus.chapters.md` deliver this register. | PT (Practice Theory) |
+| **3.B\*** Practitioner-facing guidelines | Synthesizes research into actionable teaching content. `README.md`, `chapters.md` deliver this register. | PT (Practice Theory) |
 | **4.A\*** Evidence-based prototype       | The curriculum IS the intervention. Running it generates the data.                                                  | PD (Practice Design) |
 | **4.B\*** User feedback & reports        | Teaching it generates research data (exercise artifacts, cohort feedback, partner-community observations).          | RD (Research Design) |
 
@@ -93,7 +93,7 @@ theoretical contributions to those phases.
 - **The translational imperative** — TCER warns against pressuring every piece
   of CER work to justify broader impacts. The curriculum does not require that
   every contribution to it serve immediate translation; the design principles
-  (B.2 of `syllabus.pedagogy.md`) honor _Process Over Product_, which keeps the
+  (B.2 of `pedagogy.md`) honor _Process Over Product_, which keeps the
   work pedagogically sound even when it's not immediately research-actionable.
 - **The pipeline misconception** — TCER warns that translation is _cyclical_,
   not linear. Theory → translation → practice is the wrong shape. The right
@@ -119,7 +119,7 @@ The fourth row is the load-bearing one for this document — see §5.
 **Partner cohorts are trading-zone work in TCER's technical sense, not
 user-tests.** The cohort host's experience is itself a research contribution;
 the curriculum's next iteration reflects what the cohort surfaced. See
-`syllabus.guide.community.md` for the register addressed to community
+`guide.community.md` for the register addressed to community
 partners.
 
 **Related concept**: Susan Leigh Star's _boundary objects_ (1989) is a
@@ -152,7 +152,7 @@ Operational implications:
 
 - Git history records what's been decided and what shifted across rounds, so
   the reflexive-revision history is recoverable
-- Adaptation by forkers (per `syllabus.guide.authors.md`) is itself
+- Adaptation by forkers (per `guide.authors.md`) is itself
   reflexive analysis — every adaptation is a new datum about what the
   framework's commitments do or don't carry
 
@@ -205,7 +205,7 @@ across many curricula; the curriculum optimizes for pedagogical coherence in its
 specific setting.
 
 This is not a contradiction. It is the trading-zone in operational form. See §5
-of `syllabus.ontology.md` for the related **Transfer Paradox** (Van Merriënboer)
+of `ontology.md` for the related **Transfer Paradox** (Van Merriënboer)
 — about how learning transfers, distinct from how artifacts are bundled.
 
 ---
@@ -231,7 +231,7 @@ embody's construction.
 The curriculum is in the same position for pedagogical research. Writing the
 curriculum has surfaced design principles, integrations, and tensions that
 weren't visible before the writing. The 4C/ID + Whole Game integration of
-design principles (now canonical in `syllabus.pedagogy.md` § "Design
+design principles (now canonical in `pedagogy.md` § "Design
 principles") became visible only when the principles were named alongside
 each other. The intellectual-agency-as-meta-LO recognition emerged through
 chapter-drafting, not as a prior conclusion.
@@ -272,7 +272,7 @@ curriculum's claim that _it is doing the innovation process it's teaching._
 
 This claim has consequences:
 
-- Adapting the curriculum (per `syllabus.guide.authors.md`) is V/F practice
+- Adapting the curriculum (per `guide.authors.md`) is V/F practice
   at the artifact layer. Adapters are practitioners of the thing they're
   adapting.
 - The relationship between curriculum and embody isn't _consumer ↔
@@ -325,7 +325,7 @@ linked emoji classify the evidence behind pedagogical claims:
 These tags are deployed inline in the per-chapter `research-framing.md` files
 (research committee-owned) and in `DGMD-E-1-artifacts/theory-to-requirements/`.
 **They are not yet deployed in the new syllabus artifacts**
-(`syllabus.ontology.md`, `syllabus.chapters.md`, `syllabus.guide.*.md`).
+(`ontology.md`, `chapters.md`, `guide.*.md`).
 Deployment is deferred to a future pass; the evidence claims live in their
 existing homes.
 
@@ -335,9 +335,9 @@ existing homes.
 
 | Audience                                        | What changes                                                                                                                                                                                                                                        |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Learners**                                    | Nothing in the learner-facing prose. The translational nature is invisible at the learning level. (See `syllabus.guide.learners.md`.)                                                                                                           |
-| **Curriculum authors / forkers / contributors** | Adaptation is trading-zone work in TCER's technical sense. The Evidence Tag System and reflexive-analysis discipline travel with the curriculum. See `syllabus.guide.authors.md`.                                                               |
-| **Partner communities, mentors, cohort hosts**  | Co-development IS translational research. Partner cohorts are not user-tests; they are trading zones. The community-of-makers and community-of-users are the same kind of relationship at different moments. See `syllabus.guide.community.md`. |
+| **Learners**                                    | Nothing in the learner-facing prose. The translational nature is invisible at the learning level. (See `guide.learners.md`.)                                                                                                           |
+| **Curriculum authors / forkers / contributors** | Adaptation is trading-zone work in TCER's technical sense. The Evidence Tag System and reflexive-analysis discipline travel with the curriculum. See `guide.authors.md`.                                                               |
+| **Partner communities, mentors, cohort hosts**  | Co-development IS translational research. Partner cohorts are not user-tests; they are trading zones. The community-of-makers and community-of-users are the same kind of relationship at different moments. See `guide.community.md`. |
 | **Researchers**                                 | The curriculum is observable; learner artifacts are data; the framework is open for application and challenge. Reflexive analysis is welcome.                                                                                                       |
 | **TCER community**                              | This is an applied case study of the TCER framework, alongside `DGMD-E-1-artifacts/embodying-tcer/`. The curriculum + embody pair is one operational instance of _what a Translational Sprint at the educational-tool layer looks like_.            |
 

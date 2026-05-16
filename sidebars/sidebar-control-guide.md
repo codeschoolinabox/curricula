@@ -14,7 +14,7 @@ There are three layers of sidebar control, from coarsest to finest:
 
 ## Layer 1 — Chapter-level: edit the sidebar config
 
-**File:** `sidebars/welcome-to-programming.mjs`
+**File:** `sidebars/welcome-to-frogramming.mjs`
 
 Each chapter is an explicit block. To hide a chapter, comment it out:
 
@@ -36,9 +36,9 @@ To change chapter order, reorder the blocks.
 
 **File:** `docusaurus.config.ts`
 
-The `exclude` array inside the `welcome-to-programming` plugin config takes glob
+The `exclude` array inside the `welcome-to-frogramming` plugin config takes glob
 patterns (micromatch syntax). Matches are relative to
-`spiralearn/welcome-to-programming/`.
+`spiralearn/welcome-to-frogramming/`.
 
 ```js
 exclude: [
@@ -76,7 +76,7 @@ global pattern.
 
 | What you want to hide                   | Use                                                                 |
 | --------------------------------------- | ------------------------------------------------------------------- |
-| One whole chapter                       | Comment out its block in `sidebars/welcome-to-programming.mjs`      |
+| One whole chapter                       | Comment out its block in `sidebars/welcome-to-frogramming.mjs`      |
 | All files named `teaching-tips.md`      | Add `'**/teaching-tips.md'` to `exclude` in `docusaurus.config.ts`  |
 | One specific file, keep editing it      | Add `draft: true` to its front-matter                               |
 | A folder that's not a top-level chapter | Add `'path/to/folder/**'` to `exclude`                              |

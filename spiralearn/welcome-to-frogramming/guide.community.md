@@ -8,12 +8,12 @@
 >
 > Companions (siblings, by co-location):
 >
-> - `syllabus.ontology.md` — the _what_ (reference framework)
-> - `syllabus.chapters.md` — the _how_ at chapter grain
-> - `syllabus.guide.learners.md` — the _why_ addressed to learners
-> - `syllabus.guide.authors.md` — the _why_ addressed to curriculum authors
+> - `ontology.md` — the _what_ (reference framework)
+> - `chapters.md` — the _how_ at chapter grain
+> - `guide.learners.md` — the _why_ addressed to learners
+> - `guide.authors.md` — the _why_ addressed to curriculum authors
 >   / forkers / contributors
-> - `syllabus.study-lenses.md` — the technical-reader companion for the
+> - `study-lenses.md` — the technical-reader companion for the
 >   infrastructure the curriculum runs on
 >
 > **Status**: end-state document. Content is open to iteration.
@@ -22,7 +22,7 @@
 > Filename renamed (`manifesto.{role}.md` → `guide.{role}.md`) in Wave 2
 > of the syllabus corpus restructure; title and prose register migrate
 > to "guide" form in Wave 3, when vision-flavored content moves into
-> `syllabus.manifesto.md` and this file gains its practical-guidance
+> `manifesto.md` and this file gains its practical-guidance
 > register.
 
 ---
@@ -190,7 +190,7 @@ what they're trying to learn.
 
 ### A set of design principles you can hold up to your context
 
-The design principles in `syllabus.pedagogy.md` § "Design principles"
+The design principles in `pedagogy.md` § "Design principles"
 are _named_ so that they can be evaluated, adapted, or rejected. Open Education, Learner Trust comes
 first, Context is Content, Process Over Product, Explicitly Teach the Implicit,
 Full Complexity Max Simplicity, Connections are Concepts as method, Wear Hats
@@ -281,7 +281,7 @@ A few practical implications:
   adaptations don't need to scale. Some feedback loops are slow. The cyclical
   shape is honest.
 
-For the deeper analysis, see `syllabus.translational-framing.md`. For the
+For the deeper analysis, see `translational-framing.md`. For the
 embody-side companion, see `DGMD-E-1-artifacts/embodying-tcer/`.
 
 The framework is the user's own (Cole-Malaise-Signer 2023). Yoshi Malaise and

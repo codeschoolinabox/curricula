@@ -1,22 +1,22 @@
 # Welcome to Frogramming — Chapters
 
 > **Purpose**: chapter-by-chapter redraft with 5-layer learning-objective grids,
-> drawing framing from `syllabus.ontology.md` and the intellectual-agency
-> meta-LO from `syllabus.guide.learners.md`. Six chapters (Ch0–Ch5), each
+> drawing framing from `ontology.md` and the intellectual-agency
+> meta-LO from `guide.learners.md`. Six chapters (Ch0–Ch5), each
 > with a unified overview + five layer-headed LO lists (`### Layer 0` through
 > `### Layer 4`).
 >
 > **Companions** (siblings, by co-location):
 >
-> - `syllabus.ontology.md` — the _what_ (reference voice)
-> - `syllabus.guide.{learners,authors,community}.md` — the _why_ per
+> - `ontology.md` — the _what_ (reference voice)
+> - `guide.{learners,authors,community}.md` — the _why_ per
 >   audience
-> - `syllabus.study-lenses.md` — the technical-reader companion for the
+> - `study-lenses.md` — the technical-reader companion for the
 >   infrastructure that delivers chapter content
-> - `syllabus.md` — the existing prose course (read-only)
+> - `README.md` — the existing prose course (read-only)
 >
-> **Status**: end-state document. The previous chapter prose in `syllabus.md` is
-> read-only; this file is the chapter-level redraft that a future `syllabus.md`
+> **Status**: end-state document. The previous chapter prose in `README.md` is
+> read-only; this file is the chapter-level redraft that a future `README.md`
 > rewrite will draw from.
 
 ---
@@ -35,7 +35,7 @@
 | L3    | Snippetry   | the medium itself           |
 | L4    | Philosophy  | the philosophical questions |
 
-(Cross-reference `syllabus.ontology.md` §5.)
+(Cross-reference `ontology.md` §5.)
 
 ### What to expect from this file
 
@@ -116,7 +116,7 @@ overview block, not repeated per layer):
 | Ch5     | the composer's daily practice (Ligeti / Bach / sketches)       |
 
 The metaphor system is **teaching apparatus, explicitly NOT structural
-guide** — see `syllabus.metaphor.md` for the canonical treatment.
+guide** — see `metaphor.md` for the canonical treatment.
 
 ---
 
@@ -236,7 +236,7 @@ variation — reading code, understanding it, modifying it, fitting new pieces
 into existing structures. This course teaches you to read and understand code
 first because that is what all programming work actually is. You will write
 programs throughout, but to verify understanding, not to demonstrate output. The
-deeper reason — unpacked in syllabus.md § How Learning Happens — is that
+deeper reason — unpacked in README.md § How Learning Happens — is that
 **understanding is the part of programming you cannot delegate.**
 Comprehension-first because comprehension is the experience-form of building the
 twin of the machine; production-first skips the experiences and installs nothing
@@ -335,7 +335,7 @@ you follow) but not design _thinking_. Same on F's side: _computational
 thinking_ requires twinning the NM; without the NM-twin, what's happening is
 _computational process_ (unit tests, refactoring moves, patterns followed) but
 not computational _thinking_. The full elaboration — the twin/process 2×2, the
-failure-mode categories — lives in `syllabus.ontology.md` §3.
+failure-mode categories — lives in `ontology.md` §3.
 
 **Spectrum, not binary.** A given developer doesn't _be_ a Vibetoader or a
 Frogrammer — they wear different hats on different tasks, files, moments. A
@@ -1253,7 +1253,7 @@ the NM produces. Both V and F write for the second audience; neither
 controls it directly. The NM is the instrument; the experience is the
 concert. The work of both hats is to set up conditions that make the
 experience the program serves possible. (Two-scale instrument reading —
-see ontology §6 strand-4 and `syllabus.metaphor.md` two-scale extension.)
+see ontology §6 strand-4 and `metaphor.md` two-scale extension.)
 
 ### 3.1 User Input and Output
 
@@ -1462,7 +1462,7 @@ into why._
 ### Overview
 
 You're now ready for the alien virtuoso because Chapters 1–3 gave you the
-experiences that built the twins. The principle from syllabus.md § How Learning
+experiences that built the twins. The principle from README.md § How Learning
 Happens — that understanding is non-delegable — is what made the chapter
 ordering necessary. This chapter is where the LLM joins the work, with the twins
 already running.
@@ -1475,7 +1475,7 @@ and to relish productive divergence.
 **Chapter 4's shape draws on a 4-level AI-adoption model** originally developed
 by Evan Cole with collaborators Janet Tilstra and Josenne Peña (the curriculum
 author's prior work). That model has since been refined into the framework now
-canonical in `syllabus.ontology.md`: the **§8 strata stack** (a general-systems
+canonical in `ontology.md`: the **§8 strata stack** (a general-systems
 view of where any system lives, with AI as one instance), **§9 substrate
 substitution** (deterministic → non-deterministic at artifact-logic), and **§10
 three roles of agential AI** (Role 1 study partner / Role 2 dev collaborator /
@@ -1486,7 +1486,7 @@ reads it as cognitive substrate (NM-grounded mode); V's lens reads its
 behavioral surface (user-grounded mode); two modes of collaboration, one JEJ
 artifact under construction_. See ontology §10 for the canonical framework.
 
-**The both-twins corner of the twin/process 2×2** (see `syllabus.ontology.md`
+**The both-twins corner of the twin/process 2×2** (see `ontology.md`
 §3): Ch4 develops the both-twins state in its LLM-collaborative form — V and F
 operating together alongside an alien third intelligence. The user-twin and the
 NM-twin both stay yours; what gets delegated is the production of the code that
@@ -1787,7 +1787,7 @@ life._ Snippetry is how the Frogrammer keeps the NM alive between full-codebase
 projects — and how the Vibetoader sketches quick experiences without the weight
 of production.
 
-**The both-twins corner of the twin/process 2×2** (see `syllabus.ontology.md`
+**The both-twins corner of the twin/process 2×2** (see `ontology.md`
 §3): Ch5 develops the both-twins state in its merged form — V and F operating as
 a single integrated practice. Snippetry is where the two stances stop being
 separate hats and start being the same gesture: each small program is at once a
@@ -2019,7 +2019,7 @@ for you.
 
 How to use this file's 5-layer structure:
 
-- **Body prose of `syllabus.md`** carries **L0 and L1** — the chapter's primary
+- **Body prose of `README.md`** carries **L0 and L1** — the chapter's primary
   content
 - **Sidebars + V/F dialogues** carry **L2** — necessary for L2 reading;
   skippable for L1 reading
@@ -2027,20 +2027,20 @@ How to use this file's 5-layer structure:
 - **Footnotes, side notes, easter eggs, references** carry **L4** — fully
   optional, for the attuned reader
 
-When this file is later folded back into the prose `syllabus.md`, the LOs above
+When this file is later folded back into the prose `README.md`, the LOs above
 guide what each region of each chapter delivers.
 
 ---
 
 ## Cross-references
 
-- `syllabus.ontology.md` — the reference framework these chapters instantiate
-- `syllabus.guide.learners.md` — the _why_ addressed to learners
-- `syllabus.guide.authors.md` — the _why_ addressed to curriculum authors /
+- `ontology.md` — the reference framework these chapters instantiate
+- `guide.learners.md` — the _why_ addressed to learners
+- `guide.authors.md` — the _why_ addressed to curriculum authors /
   forkers / contributors
-- `syllabus.guide.community.md` — the _why_ addressed to partner
+- `guide.community.md` — the _why_ addressed to partner
   communities, mentors, cohort hosts
-- `syllabus.md` — the existing prose course (read-only for the current redraft)
+- `README.md` — the existing prose course (read-only for the current redraft)
 - `narrative/README.md` — the composer/virtuoso metaphor system
 - `assets/spiral-curriculum.png` and `assets/curriculum-spider-web.svg` — the
   topology + trajectory views

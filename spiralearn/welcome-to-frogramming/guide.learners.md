@@ -5,13 +5,13 @@
 >
 > Companions (siblings, by co-location):
 >
-> - `syllabus.ontology.md` — the _what_ (reference framework)
-> - `syllabus.chapters.md` — the _how_ at chapter grain
-> - `syllabus.guide.authors.md` — the _why_ for the people who teach with it
+> - `ontology.md` — the _what_ (reference framework)
+> - `chapters.md` — the _how_ at chapter grain
+> - `guide.authors.md` — the _why_ for the people who teach with it
 >   or adapt it
-> - `syllabus.guide.community.md` — the _why_ for partner communities,
+> - `guide.community.md` — the _why_ for partner communities,
 >   mentors, cohort hosts
-> - `syllabus.study-lenses.md` — the technical-reader companion (skip
+> - `study-lenses.md` — the technical-reader companion (skip
 >   unless you want to peek inside the tooling)
 >
 > **Status**: end-state document. Content is open to iteration — the anchors
@@ -21,7 +21,7 @@
 > Filename renamed (`manifesto.{role}.md` → `guide.{role}.md`) in Wave 2
 > of the syllabus corpus restructure; title and prose register migrate
 > to "guide" form in Wave 3, when vision-flavored content moves into
-> `syllabus.manifesto.md` and this file gains its practical-guidance
+> `manifesto.md` and this file gains its practical-guidance
 > register.
 
 ---

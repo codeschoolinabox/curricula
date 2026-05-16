@@ -10,14 +10,14 @@
 >
 > **Companions** (siblings, by co-location):
 >
-> - `syllabus.md` — top-of-document learner orientation
-> - `syllabus.ontology.md` — the concepts learners learn
-> - `syllabus.pedagogy.md` — design principles; carries the Explorotron
+> - `README.md` — top-of-document learner orientation
+> - `ontology.md` — the concepts learners learn
+> - `pedagogy.md` — design principles; carries the Explorotron
 >   framework (§7) + lenses-as-F-pedagogy-infrastructure framing
-> - `syllabus.translational-framing.md` — V/F at the artifact layer
+> - `translational-framing.md` — V/F at the artifact layer
 >   (`lenses/embody` is F at the artifact layer); coordinated Translational
 >   Sprints (the deeper analysis lives there)
-> - `syllabus.metaphor.md` — the composer/virtuoso/mechanism metaphor;
+> - `metaphor.md` — the composer/virtuoso/mechanism metaphor;
 >   lenses are the Frogrammer's "kit of magnifying glasses" 🔬
 > - Source-code documentation: canonical technical contracts at
 >   [`src/lib/welcome-to-programming/just-enough/javascript/README.md`](../../src/lib/welcome-to-programming/just-enough/javascript/README.md)
@@ -230,7 +230,7 @@ through which the programmer operates the NM. Authoring code is one
 way to operate that panel; describing intent to an LLM is another.
 Either way, the NM is the thing the panel controls — and it can also
 be observed directly through visual debuggers / embody / lenses,
-bypassing the panel entirely. (Cross-reference `syllabus.ontology.md`
+bypassing the panel entirely. (Cross-reference `ontology.md`
 §9 / §10 for the canonical curriculum treatment of this framing.)
 
 **Two data boundaries** organize the NM. Data crosses them in defined
@@ -534,7 +534,7 @@ The deeper treatment — the three load-bearing paper principles
 (skill transfer / expertise reversal / lifelong-learning autonomy)
 and Begel & Ko (2019)'s "both-yes" answer to _structure-learning-for vs.
 teach-learners-to-structure_ — lives canonically in
-`syllabus.pedagogy.md` §7. This section names the framework and points
+`pedagogy.md` §7. This section names the framework and points
 there.
 
 ---
@@ -589,7 +589,7 @@ layer.
 The deeper analysis — including the Faraday/Maxwell-style mutual
 constitution, the trading-zone reading, and the V/F symmetry recurring
 at the artifact scale — lives canonically in
-`syllabus.translational-framing.md` §6 (Tool-Theory Co-evolution) and
+`translational-framing.md` §6 (Tool-Theory Co-evolution) and
 §7 (V/F at the artifact layer). This section names the structural
 claim and points there; the cross-reference is load-bearing for the
 curriculum's TCER positioning.
@@ -600,7 +600,7 @@ curriculum's TCER positioning.
 
 The intellectual lineage of Study Lenses. Entries split into two
 registers: **canonical here** (entries with no other home in the
-syllabus.\* family — this file is their first canonical mention) and
+curriculum's file family — this file is their first canonical mention) and
 **pointers** (entries canonical elsewhere; brief acknowledgment + see-X).
 
 **Canonical here:**
@@ -660,7 +660,7 @@ syllabus.\* family — this file is their first canonical mention) and
 
 **Cross-document anchors:**
 
-- `syllabus.ontology.md` — concepts learners learn (V/F, twinning, NM, layers, strands)
-- `syllabus.pedagogy.md` §7 — Explorotron framework canonical treatment
-- `syllabus.translational-framing.md` §6–§7 — V/F at the artifact layer + Tool-Theory Co-evolution canonical treatment
-- `syllabus.metaphor.md` — composer/virtuoso/mechanism metaphor (lenses as the Frogrammer's "kit of magnifying glasses")
+- `ontology.md` — concepts learners learn (V/F, twinning, NM, layers, strands)
+- `pedagogy.md` §7 — Explorotron framework canonical treatment
+- `translational-framing.md` §6–§7 — V/F at the artifact layer + Tool-Theory Co-evolution canonical treatment
+- `metaphor.md` — composer/virtuoso/mechanism metaphor (lenses as the Frogrammer's "kit of magnifying glasses")
