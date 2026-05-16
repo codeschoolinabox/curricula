@@ -44,15 +44,8 @@
   - [§20 Bret Victor decomposition](#20-bret-victor-decomposition)
 - [Part F — Curriculum machinery](#part-f--curriculum-machinery)
   - [§21 Computational vocabulary axes](#21-computational-vocabulary-axes)
-- [Part H — Teaching apparatus](#part-h--teaching-apparatus)
-  - [§24 The composer/virtuoso/mechanism metaphor](#24-the-composervirtuosomechanism-metaphor)
-  - [§25 Symbology](#25-symbology)
 - [Part I — Honoring commitments](#part-i--honoring-commitments)
   - [§26 The mu-tribute](#26-the-mu-tribute)
-  - [§27 Voice / style commitments](#27-voice--style-commitments)
-  - [§28 Structural commitments](#28-structural-commitments)
-- [Part J — Out of scope](#part-j--out-of-scope)
-  - [§29 What's deferred to follow-on courses](#29-whats-deferred-to-follow-on-courses)
 - [Source materials](#source-materials)
 
 ---
@@ -407,7 +400,8 @@ historical pairs (Faraday/Maxwell, Mendel/breeders).
 
 #### V/F vs. Composer/Virtuoso/Mechanism/Audience cast
 
-The Composer/Virtuoso/Mechanism/Audience cast (§24) is **teaching apparatus** —
+The Composer/Virtuoso/Mechanism/Audience cast (canonical at
+`syllabus.metaphor.md`) is **teaching apparatus** —
 explicitly not structural guide, explicitly not the canonical home for any
 learning objective. V and F are **practice-stances** the student inhabits and
 are tied to LOs. The two are **orthogonal**:
@@ -471,7 +465,7 @@ artifact-layer V/F is one instance of that meta-pattern.
 ![The big picture plus AI](./assets/the-big-picture-plus-ai.png)
 
 AI sits _outside_ the rhetorical circle — exactly the virtuoso's position in the
-teaching-apparatus cast (§24).
+teaching-apparatus cast (`syllabus.metaphor.md`).
 
 </details>
 
@@ -508,8 +502,7 @@ sits _inside_ the central domain rather than as two separate ATT tiers.
 
 ## Part C — Pedagogical depth
 
-Orthogonal to chapter sequence. The 5 layers, 5 strands, data thread, Bildung
-arc.
+Orthogonal to chapter sequence. The 5 layers, 5 strands, the data thread.
 
 ### §12 The 5 layers
 
@@ -752,10 +745,11 @@ strata.
 **Theory-side (§2 right) — F's natural twinning territory extends through here
 ontologically; WtF defers practical work to follow-on courses:**
 
-1. **Platonic** — _Levin's Platonic Space (see §29)._ The informational
+1. **Platonic** — _Levin's Platonic Space._ The informational
    interpretation of the physical world; the philosophical commitment that the
    material is _legible_ at all. Manifesto territory; the curriculum gestures
-   here only at L4 (Philosophy reading).
+   here only at L4 (Philosophy reading). Deferred entirely to follow-on
+   courses ("third course" frontier territory in Spiralearn's roadmap).
 2. **Physics / material.** Atoms, transistors, energy gradients. The physical
    substrate. Deferred entirely.
 3. **Computing infrastructure.** Mathematics and formal systems made operational
@@ -849,8 +843,8 @@ see all three at once.
 
 The transitions between strata can also be read as places where the productive
 lens shifts most legibly — the work of strand-Affordances (§13) and the
-composer/virtuoso/mechanism metaphor (§24 / `syllabus.metaphor.md`)
-operationalize this reading. Listed here as a cross-frame; the strata and the
+composer/virtuoso/mechanism metaphor (`syllabus.metaphor.md`) operationalize
+this reading. Listed here as a cross-frame; the strata and the
 universal-lens framing remain first-class on their own terms.
 
 #### Bridge to §18 and §19
@@ -1109,13 +1103,6 @@ of evaluation, not the final output.
 
 ## Part F — Curriculum machinery
 
-> **§21 Reading frameworks — PBIS, static/dynamic** moved to
-> `syllabus.pedagogy.md` "Reading frameworks — PBIS, static/dynamic (migrated
-> from ontology §21)." Subsequent sections (formerly §22–§30) renumber down by 1
-> to fill the gap (now §21–§29).
-
----
-
 ### §21 Computational vocabulary axes
 
 Four orthogonal axes — distinct ways of carving the programming space:
@@ -1142,51 +1129,6 @@ vocabularies.
 
 **Paradigm choices are partly about which event vocabulary you want to think
 in.**
-
----
-
-## Part H — Teaching apparatus
-
-### §24 The composer/virtuoso/mechanism metaphor
-
-The metaphor (composer / virtuoso / mechanism / audience) is **first-class
-teaching apparatus, explicitly NOT structural guide.** The metaphor illustrates
-the V/F lens-pair (§3) and §17's strata; it is not a separate ontological
-commitment. Composer ≈ V's lens on the artifact; virtuoso ≈ F's lens on the
-artifact's notation-execution. LOs live with V/F (§3) and the strands (§13), not
-with the cast.
-
-> _"When the metaphor serves the vision, use it. When it strains, drop it. The
-> vision stands on its own. The metaphor is illustration, not argument."_ —
-> `narrative/README.md`
-
-The full treatment — the cast (six roles), the mapping to programming concepts,
-the two-scale instrument extension, why-mechanical / why-varying-instruments /
-why-virtuoso, the human/alien virtuoso split, the composer-pedagogy parallels,
-the 8 AI-collaboration skills, and reign-in-wannabe-GEB — lives canonically in
-[`syllabus.metaphor.md`](./syllabus.metaphor.md).
-
----
-
-### §25 Symbology
-
-| Symbol | Concept                         | What it marks                                                                                     |
-| ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- |
-| 🐸     | The course / both hats together | The umbrella. Frog/toad ambiguity carries both hats at once.                                      |
-| 🔬     | Frogrammer                      | Development grounded in the notional machine.                                                     |
-| 🎨     | Vibetoader                      | Development grounded in the user.                                                                 |
-| 🧑     | Human                           | At active Human / AI distinctions.                                                                |
-| 🤖     | AI / Agent                      | Both for "AI" (Human/AI distinction) and "Agent" (fourth audience).                               |
-| 🧑‍💻     | Developer (audience)            | The human who reads and writes code — Ch1's audience.                                             |
-| 💻     | Computer (audience)             | The machine that evaluates code — Ch2's audience. NM is the computer at our level of abstraction. |
-| 💭     | Snippetry                       | Small, runnable, self-contained programs as ongoing practice.                                     |
-
-**Flagged for later**: the User audience (Ch3) and the Notional Machine itself
-don't yet have locked symbols. Both will be picked once the rest of the
-symbology has been seen in rendered context.
-
-**Out of scope for this set**: 🥚🐣🐥🐔 — separate, established convention for
-difficulty progression on learning objectives. Not part of this set.
 
 ---
 
@@ -1278,87 +1220,6 @@ mu; // frogram, vibetoad
   curriculum's lived descent
 - §17's **perceived/perceiver flipside** — dual-twinning is the perceiving, the
   two-faced artifact is the perceived; co-constitution at the artifact stratum
-
----
-
-### §27 Voice / style commitments
-
-From `narrative/README.md` §25 and the user's `~/.claude/CLAUDE.md`.
-
-#### The voice we're aiming for
-
-- **Dry base** — state ideas directly, without performance. No excessive
-  enthusiasm, no motivational language, no marketing speak.
-- **Middle-band playfulness** — characters can appear; historical cameos can
-  have personality; a warm aside is welcome; cultural literacy can peek through.
-  NOT full Poignant-Guide weirdness. A thoughtful teacher with dry wit.
-- **Cultured and quietly warm** — references (musical, historical, literary)
-  welcome when they serve. Respects the reader as an adult.
-- **Honest about uncertainty** — evidence-informed but not dogmatic. When
-  something is conjecture, say so.
-- **Belgian self-depricating absurdism** — dry realism, unwilling to oversell.
-  Not cold; not cynical. Measured.
-- **Second person common** — "you" is the reader.
-
-#### What to avoid
-
-- Hyperbole ("amazing", "incredible", "blazing")
-- False confidence ("this will definitely work")
-- Sycophantic agreement ("Great question!")
-- Enthusiasm not backed by evidence
-- Overexplaining — trust the reader
-
-#### Reign in wannabe-GEB
-
-The course is grounded experience-based instructional design. GEB is a respected
-influence; the structural guide is the spiderweb + spiral.
-
-**Crucial distinction**: _GEB hides much of its meaning in itself as a puzzle,
-requiring intellectual confidence to engage. WtF is designed pedagogically so it
-is eminently learnable and BUILDS intellectual confidence._ This is the
-foundational divergence.
-
-### §28 Structural commitments
-
-- **Reign in wannabe-GEB.** Music as instructive metaphor for some moments, not
-  structural guide.
-- **Spiderweb + spiral as chapter-structure guide.** Topology + trajectory.
-- **Each layer runs through each chapter** (not chapter-by-layer).
-- **Markdown + Study Lenses; no special platform features.**
-- **Two foundational principles** are non-negotiable; intellectual agency is
-  meta-LO, not a third principle.
-- **V and F are substrate-agnostic** with non-delegable twins (user / NM).
-- **The data thread ramifies through 5 layers** — one word, growing semantics.
-- **PBIS** (not PBSI). Flexible vocabulary, not sequence.
-- **Strands** (not threads) for the 5; thread reserved for data.
-- **Authority is plural and wide.** Classroom + collegial + partnered +
-  discourse communities.
-
----
-
-## Part J — Out of scope
-
-### §29 What's deferred to follow-on courses
-
-| Course                              | What it deepens                                                                                                                                                                                            | Bridging activity foregrounded |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| **Welcome to Algorithms** (WtA)     | F's deeper waters toward CS/theory; algorithm strategy, complexity, formal correctness                                                                                                                     | computational thinking         |
-| **Welcome to Design** (placeholder) | V's deeper waters toward domain; UX research, ethnography, design systems                                                                                                                                  | design thinking                |
-| **Third course** (TBD name)         | Exotic computation territory; _"fractal border of philosophy and science"_; slime molds designing subway systems; Levin's Platonic Space; _"what is life, what is consciousness, are we all computations"_ | both — Media Lab dreamland     |
-| **Trees**                           | Tree data structures → the DOM → browser event dispatch                                                                                                                                                    | architectural                  |
-| **Separation of Concerns**          | Programs organized at scale across files and modules                                                                                                                                                       | architectural                  |
-
-The third course is where philosophy can run free. WtF stays at the level of
-grounded data-flow examples; gestures at the philosophical with L4 easter eggs.
-
-**Within WtF's scope** but explicitly out-of-frame for this ontology:
-
-- Other Spiralearn courses (deeper courses are thought experiments for WtF's
-  design, not part of WtF's ontology)
-- LMS layer of the JEJ chain (beyond the Quine-y / lens-y / web-standards
-  philosophy)
-- Cybernetics as body content (referenced as side/footnote only)
-- Strange-loops as foreground (kept as L4 easter eggs only)
 
 ---
 

@@ -190,8 +190,8 @@ what they're trying to learn.
 
 ### A set of design principles you can hold up to your context
 
-The design principles in `syllabus.ontology.md` Part B are _named_ so that they
-can be evaluated, adapted, or rejected. Open Education, Learner Trust comes
+The design principles in `syllabus.pedagogy.md` § "Design principles"
+are _named_ so that they can be evaluated, adapted, or rejected. Open Education, Learner Trust comes
 first, Context is Content, Process Over Product, Explicitly Teach the Implicit,
 Full Complexity Max Simplicity, Connections are Concepts as method, Wear Hats
 not Titles, Fluid Roles, Greg Wilson's rules, the Reusability Paradox, the

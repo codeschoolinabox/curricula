@@ -324,12 +324,12 @@ vocabulary:
 
 ---
 
-## Lenses, embody, and substrate ↔ pedagogy mutual constitution (ontology §23)
+## Lenses, embody, and substrate ↔ pedagogy mutual constitution
 
 The JEJ chain (`just-enough/javascript/` + `embody/` + Study Lenses +
-orchestrator) is named and described in ontology §23 as infrastructure.
-This file carries the principles by which that infrastructure is
-pedagogy-shaped:
+orchestrator) is named and described in `syllabus.study-lenses.md` as
+infrastructure. This file carries the principles by which that
+infrastructure is pedagogy-shaped:
 
 ### Lenses are F-pedagogy infrastructure
 
@@ -551,8 +551,9 @@ setting; the more contextual, the less reusable. Points outward toward
 
 **The Reusability Paradox is not a problem to solve — it's the
 productive tension the course lives inside.** `just-enough/javascript/`
-(the JEJ chain, ontology §23) is the reusable infrastructure side; the
-manifesto / ontology / chapters are the opinionated content side. The
+(the JEJ chain; see `syllabus.study-lenses.md`) is the reusable
+infrastructure side; the manifesto / ontology / chapters are the
+opinionated content side. The
 course is what happens when the opinionated content uses the reusable
 infrastructure.
 
