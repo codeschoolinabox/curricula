@@ -10,7 +10,7 @@
 >
 > - `syllabus.md` — the high-level orientation and reading map
 > - `syllabus.ontology.md` — the _what_ (concepts the metaphor
->   illustrates, especially §3 V/F, §17 strata, §13 strands)
+>   illustrates, especially §3 V/F, §8 strata, §6 strands)
 > - `syllabus.pedagogy.md` — the _how it's taught_ (design principles
 >   for using the metaphor in instruction)
 > - `syllabus.narrative.md` — extensions and illustrations of the
@@ -30,7 +30,7 @@ own home. Three principles govern its use:
   structural guide.
 - **Composer ≈ V's lens on the artifact**; **virtuoso ≈ F's lens on the
   artifact's notation-execution**. The cast is an illustration of the
-  V/F lens-pair (ontology §3) and §17's strata, not a separate
+  V/F lens-pair (ontology §3) and §8's strata, not a separate
   ontological commitment.
 
 > _"When the metaphor serves the vision, use it. When it strains, drop
@@ -74,7 +74,7 @@ evaluating code); the **second instrument** is the user's experience of
 the played piece (intangible, emergent, arising from interaction). The
 **concert** — the experience-as-purpose — is what V and F orient
 toward. This is illustration of the whole rhetorical situation strand
-(ontology §13); the strand carries the learning objective, the metaphor
+(ontology §6); the strand carries the learning objective, the metaphor
 carries the picture.
 
 ## The cast (six roles)
@@ -153,7 +153,7 @@ because the virtuoso handles that.
 ## Composer pedagogy mappings
 
 Musical composition training offers parallels to this curriculum's
-skills (from `narrative/README.md` §12):
+skills (from `narrative/README.md` §5):
 
 | Composer training                       | Curriculum parallel                                       |
 | --------------------------------------- | --------------------------------------------------------- |
@@ -197,5 +197,5 @@ a respected influence; the structural guide is the spiderweb + spiral
 The metaphor is **load-bearing but not load-exclusive**. Use where it
 illuminates; set it aside where it strains.
 
-Ontology §26 carries the one direct GEB acknowledgment in the curriculum,
+Ontology §13 carries the one direct GEB acknowledgment in the curriculum,
 as a bounded L4 section. Elsewhere, the reign-in holds.

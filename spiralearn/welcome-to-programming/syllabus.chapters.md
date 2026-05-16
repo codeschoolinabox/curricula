@@ -35,7 +35,7 @@
 | L3    | Snippetry   | the medium itself           |
 | L4    | Philosophy  | the philosophical questions |
 
-(Cross-reference `syllabus.ontology.md` §12.)
+(Cross-reference `syllabus.ontology.md` §5.)
 
 ### What to expect from this file
 
@@ -1253,7 +1253,7 @@ the NM produces. Both V and F write for the second audience; neither
 controls it directly. The NM is the instrument; the experience is the
 concert. The work of both hats is to set up conditions that make the
 experience the program serves possible. (Two-scale instrument reading —
-see ontology §13 strand-4 and `syllabus.metaphor.md` two-scale extension.)
+see ontology §6 strand-4 and `syllabus.metaphor.md` two-scale extension.)
 
 ### 3.1 User Input and Output
 
@@ -1475,16 +1475,16 @@ and to relish productive divergence.
 **Chapter 4's shape draws on a 4-level AI-adoption model** originally developed
 by Evan Cole with collaborators Janet Tilstra and Josenne Peña (the curriculum
 author's prior work). That model has since been refined into the framework now
-canonical in `syllabus.ontology.md`: the **§17 strata stack** (a general-systems
-view of where any system lives, with AI as one instance), **§18 substrate
-substitution** (deterministic → non-deterministic at artifact-logic), and **§19
+canonical in `syllabus.ontology.md`: the **§8 strata stack** (a general-systems
+view of where any system lives, with AI as one instance), **§9 substrate
+substitution** (deterministic → non-deterministic at artifact-logic), and **§10
 three roles of agential AI** (Role 1 study partner / Role 2 dev collaborator /
 Role 3 active component). **Chapter 4 = Role 2 (dev collaborator)** — Role 1
 already worked quietly across Ch0–3; Role 3 is deferred to later learning. The
 organizing line for the chapter: _you twin the AI as collaborator — F's lens
 reads it as cognitive substrate (NM-grounded mode); V's lens reads its
 behavioral surface (user-grounded mode); two modes of collaboration, one JEJ
-artifact under construction_. See ontology §19 for the canonical framework.
+artifact under construction_. See ontology §10 for the canonical framework.
 
 **The both-twins corner of the twin/process 2×2** (see `syllabus.ontology.md`
 §3): Ch4 develops the both-twins state in its LLM-collaborative form — V and F
@@ -1675,7 +1675,7 @@ look similar from outside.
 - 🐣 Describe at least 2 key differences between LLM "cognition" and human
   reasoning
 - 🐣 Identify when an LLM is likely to be unreliable (the jagged frontier)
-- 🐥 Use the strata-and-roles framework (ontology §17 + §19) to discuss AI at
+- 🐥 Use the strata-and-roles framework (ontology §8 + §10) to discuss AI at
   the appropriate position relative to your work
 - 🐥 Explain the Gell-Mann Amnesia effect in the context of LLM output
 - 🥚 Given an LLM response, hypothesize what patterns it might be matching
@@ -1719,7 +1719,7 @@ look similar from outside.
   twin-grounded alternative to twin-ignored or twin-wrong LLM use)
 - 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
   it's right
-- 🐥 Apply §19 Role 2 (dev collaborator) to Ch4 work: twin the AI as
+- 🐥 Apply §10 Role 2 (dev collaborator) to Ch4 work: twin the AI as
   collaborator through F's lens (NM-grounded mode) or V's lens (user-grounded
   mode)
 - 🐔 **Code is content, not deliverable** — AI-generated code is material to
@@ -2003,7 +2003,7 @@ for you.
   predictive model of self is the seat of self. The arc you've traveled — Ch1's
   write-for-future-you to Ch5's write-for-yourself-
   the-audience-you-are-becoming — is the curriculum's operational encounter with
-  that idea (see ontology §12 L4 matrix, Twinning row, and the Preamble's
+  that idea (see ontology §5 L4 matrix, Twinning row, and the Preamble's
   "audience YOU are becoming" table)
 - 🐔 _(deeper section)_ The data-thread reading at full depth: the entire
   embodied phenomenon from theory to domain is data flowing through and changing

@@ -231,7 +231,7 @@ way to operate that panel; describing intent to an LLM is another.
 Either way, the NM is the thing the panel controls — and it can also
 be observed directly through visual debuggers / embody / lenses,
 bypassing the panel entirely. (Cross-reference `syllabus.ontology.md`
-§18 / §19 for the canonical curriculum treatment of this framing.)
+§9 / §10 for the canonical curriculum treatment of this framing.)
 
 **Two data boundaries** organize the NM. Data crosses them in defined
 directions; both are V/F-shared territory.
@@ -624,7 +624,7 @@ syllabus.\* family — this file is their first canonical mention) and
 - **Bret Victor — Learnable Programming** (2012). Victor wanted _less
   implementation toil_ AND _more powerful thinking tools_. Study Lenses
   reclaims the visibility wish at the **internal mechanism** of
-  evaluation, not the final output. _Canonical: ontology §20._
+  evaluation, not the final output. _Canonical: ontology §11._
 - **Bakhtiar Mikhak — "Building infrastructure IS research contribution."**
   The teaching that grounds V/F at the artifact layer; the engineering
   × physics co-evolution insight. _Canonical: translational-framing.md §6 and §10 of this file._

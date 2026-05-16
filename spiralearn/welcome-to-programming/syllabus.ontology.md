@@ -32,20 +32,20 @@
   - [§2 Geometry — three domains, two bridging activities](#2-geometry--three-domains-two-bridging-activities)
   - [§3 The characters — V and F](#3-the-characters--v-and-f)
   - [§4 The 5-tier ATT](#4-the-5-tier-att)
-- [Part C — Pedagogical depth (orthogonal to chapter sequence)](#part-c--pedagogical-depth)
-  - [§12 The 5 layers](#12-the-5-layers)
-  - [§13 The 5 strands — equal status](#13-the-5-strands--equal-status)
-  - [§14 The data thread (the red thread)](#14-the-data-thread-the-red-thread)
-- [Part D — Cogsci grounding](#part-d--cogsci-grounding)
-  - [§17 Strata of a software system — refining §2's geometry](#17-strata-of-a-software-system--refining-2s-geometry)
-- [Part E — The LLM shift](#part-e--the-llm-shift)
-  - [§18 Substrate substitution at artifact-logic — what changes about the artifact](#18-substrate-substitution-at-artifact-logic--what-changes-about-the-artifact)
-  - [§19 The LLM shift, workflow-side — how AI participates in your work](#19-the-llm-shift-workflow-side--how-ai-participates-in-your-work)
-  - [§20 Bret Victor decomposition](#20-bret-victor-decomposition)
-- [Part F — Curriculum machinery](#part-f--curriculum-machinery)
-  - [§21 Computational vocabulary axes](#21-computational-vocabulary-axes)
-- [Part I — Honoring commitments](#part-i--honoring-commitments)
-  - [§26 The mu-tribute](#26-the-mu-tribute)
+- [Part B — Pedagogical depth (orthogonal to chapter sequence)](#part-b--pedagogical-depth)
+  - [§5 The 5 layers](#5-the-5-layers)
+  - [§6 The 5 strands — equal status](#6-the-5-strands--equal-status)
+  - [§7 The data thread (the red thread)](#7-the-data-thread-the-red-thread)
+- [Part C — Cogsci grounding](#part-c--cogsci-grounding)
+  - [§8 Strata of a software system — refining §2's geometry](#8-strata-of-a-software-system--refining-2s-geometry)
+- [Part D — The LLM shift](#part-d--the-llm-shift)
+  - [§9 Substrate substitution at artifact-logic — what changes about the artifact](#9-substrate-substitution-at-artifact-logic--what-changes-about-the-artifact)
+  - [§10 The LLM shift, workflow-side — how AI participates in your work](#10-the-llm-shift-workflow-side--how-ai-participates-in-your-work)
+  - [§11 Bret Victor decomposition](#11-bret-victor-decomposition)
+- [Part E — Curriculum machinery](#part-e--curriculum-machinery)
+  - [§12 Computational vocabulary axes](#12-computational-vocabulary-axes)
+- [Part F — Honoring commitments](#part-f--honoring-commitments)
+  - [§13 The mu-tribute](#13-the-mu-tribute)
 - [Source materials](#source-materials)
 
 ---
@@ -109,9 +109,9 @@ viewed from different angles.
 The principle grounds:
 
 - The spiderweb curriculum + the spiral as traversal (`syllabus.pedagogy.md` §6)
-- The 5 layers (§12) — depth = connection-density
-- The 5 strands (§13) — each strand is a _kind of connection_
-- The data thread (§14) — data flows through connections; connections shape what
+- The 5 layers (§5) — depth = connection-density
+- The 5 strands (§6) — each strand is a _kind of connection_
+- The data thread (§7) — data flows through connections; connections shape what
   data can be
 - Twinning (the active-inference mechanism; canonical at
   `syllabus.pedagogy.md` "The pedagogical claim from Friston") —
@@ -125,7 +125,7 @@ connection-graph built) and **atomic-fact memorization** (concepts mistaken for
 unitary things).
 
 > **On intellectual agency**: empowerment / intellectual confidence is the META
-> learning objective unifying the 5 layers (§12). It is _not_ a third
+> learning objective unifying the 5 layers (§5). It is _not_ a third
 > foundational principle in the ontology — that work belongs in the guides
 > (`syllabus.guide.{learners,authors,community}.md`). The two principles above
 > are the curriculum's spine; intellectual agency is its purpose.
@@ -266,13 +266,13 @@ Three of the four corners get curriculum-chapter mappings: Ch2 = F, Ch3 = V,
 Ch4 + Ch5 = both. The fourth corner (no twin) is the starting position the
 curriculum brings learners _out of_.
 
-> **Flipside reading (with §17 artifact-faces).** The both-twins state names the
-> **perceiving** — one perceiver holding user-twin + NM-twin simultaneously. §17
+> **Flipside reading (with §8 artifact-faces).** The both-twins state names the
+> **perceiving** — one perceiver holding user-twin + NM-twin simultaneously. §8
 > names the **perceived** — one artifact with two material faces, artifact-logic
 > (the F-face) + artifact-surface (the V-face). These are flipsides of the same
 > coin: dual-twinning is the perceiving, two-faced artifact is the perceived;
 > they co-constitute. §3 stays the canonical home for the perceiver-side
-> reading; §17 stays the canonical home for the perceived-side reading.
+> reading; §8 stays the canonical home for the perceived-side reading.
 
 Note on _vibe coding_ (Karpathy): the term names LLM-mediated building without
 reading the code. It can be done with a user-twin (LLM-collaborative Vibetoading
@@ -391,7 +391,7 @@ merged form).
     whose iterative dialogue **is** the medium of inquiry. V and F's dialogue
     carries the same temperament — open-ended exchange between contrasting
     groundings, neither one resolving the other, both reshaping what the next
-    turn can hold. See §26 for the MU tribute that honors this lineage directly.
+    turn can hold. See §13 for the MU tribute that honors this lineage directly.
 
 Engaging in these exchanges is how each side picks up the other's craft: V
 learns what's afford-able through F's iterative discoveries; F learns to read
@@ -500,11 +500,11 @@ sits _inside_ the central domain rather than as two separate ATT tiers.
 
 ---
 
-## Part C — Pedagogical depth
+## Part B — Pedagogical depth
 
 Orthogonal to chapter sequence. The 5 layers, 5 strands, the data thread.
 
-### §12 The 5 layers
+### §5 The 5 layers
 
 Each chapter runs ALL 5 layers. The layers are _engagement depths_ the reader
 can stay at or descend through. **A learner who stays at L1 graduates well; a
@@ -525,7 +525,7 @@ more again.** Each layer is a complete exit point.
 | **L4** | Wonder / Philosophy  | …the questions themselves                  | Inhabit the frontier where confirmable science gives way to philosophical questioning; ask the big questions with methodological rigour — not theory-mastery | easter eggs in main text; side/footnotes; references; open questions and methods for asking them              |
 
 > **SOLO taxonomy applies _within_ each layer**, not across — see
-> `syllabus.pedagogy.md` "Using the 5 layers (§12) in teaching" for the design
+> `syllabus.pedagogy.md` "Using the 5 layers (§5) in teaching" for the design
 > principle.
 
 #### Each layer's data thread (the red thread ramifies)
@@ -579,17 +579,17 @@ legible**, not in a static model.
 > **Layer-architecture rendering rules** (each-layer-through-each-chapter,
 > platform-agnostic constraint, layer-by-markdown-affordance mapping) and
 > **layer-title brainstorming** (verb/noun/hybrid styles) — see
-> `syllabus.pedagogy.md` "Using the 5 layers (§12) in teaching."
+> `syllabus.pedagogy.md` "Using the 5 layers (§5) in teaching."
 
 ---
 
-### §13 The 5 strands — equal status
+### §6 The 5 strands — equal status
 
 Strands are the _connection-types_ the curriculum tracks. Each strand represents
 one _way of making connections_ the learner is being trained to recognize and
 produce.
 
-> **Vocabulary note**: "thread" is reserved for the _data thread_ (§14) — the
+> **Vocabulary note**: "thread" is reserved for the _data thread_ (§7) — the
 > red thread that stitches everything together. The 5 below are **strands**.
 
 #### Twinning
@@ -667,7 +667,7 @@ The Mikhak loop is an _affordance-discovery dialogue_: F probes
 substrate-affordances; V probes user-affordances; their dialogue surfaces
 affordances neither saw alone.
 
-> _(See §17 for the universal-lens framing: F's lens and V's lens both travel to
+> _(See §8 for the universal-lens framing: F's lens and V's lens both travel to
 > read affordances at any stratum; F naturally probes substrate-affordances
 > anchored at artifact-logic, V naturally probes user-affordances anchored at
 > artifact-surface — but the Mikhak loop is the strand-5 operationalization of
@@ -690,10 +690,10 @@ Marked as an **open-ended development guide** — not a closed catalog.
 
 ---
 
-### §14 The data thread (the red thread)
+### §7 The data thread (the red thread)
 
 The data thread is the SAME word with increasingly rich semantics across the 5
-layers (see §12). The student's understanding of _what data IS_ deepens at every
+layers (see §5). The student's understanding of _what data IS_ deepens at every
 spiral pass.
 
 > "The entire embodied phenomenon from theory to domain is data flowing through
@@ -721,9 +721,9 @@ referenced as side/footnote, not in body.
 
 ---
 
-## Part D — Cogsci grounding
+## Part C — Cogsci grounding
 
-### §17 Strata of a software system — refining §2's geometry
+### §8 Strata of a software system — refining §2's geometry
 
 §2 introduces the geometry coarsely: three domains (theory / artifact / domain)
 with V and F engaging the artifact through two bridging activities. This section
@@ -762,7 +762,7 @@ ontologically; WtF defers practical work to follow-on courses:**
    algorithms, or a GenAI model. Same site, different substrate types. When a
    Frogrammer says "twin the machine," the machine being twinned lives here: in
    conventional software, the algorithmic logic; in AI-native software, the
-   GenAI model. The stance is the same; the substrate is different. §18 develops
+   GenAI model. The stance is the same; the substrate is different. §9 develops
    what changes when GenAI occupies this stratum.
 5. **Artifact-surface.** The V-face. What the artifact presents outward — UI,
    APIs, programmatic and human-perceivable surfaces.
@@ -773,11 +773,11 @@ readings of §2's center artifact — one artifact with two material faces, each
 face inviting its natural lens.
 
 > **Flipside reading (with §3 both-twins).** §3 names the **both-twins state** —
-> user-twin + NM-twin held simultaneously by one perceiver. §17 names the
+> user-twin + NM-twin held simultaneously by one perceiver. §8 names the
 > **artifact's two faces** — artifact-logic + artifact-surface, two material
 > sides of one artifact. These are flipsides of the same coin: dual-twinning is
 > the perceiving, two-faced artifact is the perceived; they co-constitute. §3
-> stays the canonical home for the perceiver-side reading; §17 stays the
+> stays the canonical home for the perceiver-side reading; §8 stays the
 > canonical home for the perceived-side reading.
 
 **Domain-side (§2 left) — V's natural twinning territory extends through here:**
@@ -821,57 +821,57 @@ surfaced together here:
 
 | Axis        | Section            | Enumerates                                                                 | Question it answers                              |
 | ----------- | ------------------ | -------------------------------------------------------------------------- | ------------------------------------------------ |
-| **Strata**  | §17 (this section) | kinds of substrate where work happens                                      | _Where_ does the work sit?                       |
-| **Strands** | §13                | connection-types — stances applicable at any stratum                       | _What kind of connection_ is the learner making? |
+| **Strata**  | §8 (this section) | kinds of substrate where work happens                                      | _Where_ does the work sit?                       |
+| **Strands** | §6                | connection-types — stances applicable at any stratum                       | _What kind of connection_ is the learner making? |
 | **Bridges** | §2                 | V's and F's bridging activities (design thinking / computational thinking) | _How_ is the work read across strata?            |
 
 _"Bridges" is shorthand here for §2's formal noun "bridging activities"; §2 uses
 the possessive form ("V's bridge", "F's bridge")._
 
-Plus the **data thread** (§14) running through everything — the word _data_
+Plus the **data thread** (§7) running through everything — the word _data_
 deepening its semantics at each layer.
 
 The full geometry is _strata × strands × bridges_. We do not exhaustively map
 permutations; the geometry is a direction-finder, not a closed catalog.
-**Strands themselves are an open-ended catalog** (§13's strand × lens cross-map
+**Strands themselves are an open-ended catalog** (§6's strand × lens cross-map
 is explicitly an open development guide — some strand × lens cells have no
-existing lens yet); the triple's openness inherits from §13's. Each axis is
-canonical in its own section; §17 surfaces the cross-product so the reader can
+existing lens yet); the triple's openness inherits from §6's. Each axis is
+canonical in its own section; §8 surfaces the cross-product so the reader can
 see all three at once.
 
 #### Optional reading: lens-changes between strata
 
 The transitions between strata can also be read as places where the productive
-lens shifts most legibly — the work of strand-Affordances (§13) and the
+lens shifts most legibly — the work of strand-Affordances (§6) and the
 composer/virtuoso/mechanism metaphor (`syllabus.metaphor.md`) operationalize
 this reading. Listed here as a cross-frame; the strata and the
 universal-lens framing remain first-class on their own terms.
 
-#### Bridge to §18 and §19
+#### Bridge to §9 and §10
 
-§18 develops what changes at the _artifact_-side when GenAI occupies the
+§9 develops what changes at the _artifact_-side when GenAI occupies the
 artifact-logic stratum: substrate substitution from deterministic to
-non-deterministic NM, the verification limit, agentic emergence. §19 develops
+non-deterministic NM, the verification limit, agentic emergence. §10 develops
 the _workflow_-side: three positional roles AI can play relative to a human's
 work (study partner / dev collaborator / active component), with the
-depth-of-involvement and verification-target axes. Read §17 → §18 → §19 as the
+depth-of-involvement and verification-target axes. Read §8 → §9 → §10 as the
 natural sequence: general strata → artifact-side AI consequences → workflow-
 side AI positions.
 
 ---
 
-## Part E — The LLM shift
+## Part D — The LLM shift
 
-### §18 Substrate substitution at artifact-logic — what changes about the artifact
+### §9 Substrate substitution at artifact-logic — what changes about the artifact
 
-§17 names the strata of a software system in general terms. §18 picks up at the
-**artifact-logic** stratum (§17 stratum 4) and develops what changes _about the
+§8 names the strata of a software system in general terms. §9 picks up at the
+**artifact-logic** stratum (§8 stratum 4) and develops what changes _about the
 artifact itself_ when a GenAI model substitutes for conventional algorithms as
-the substrate. §18 is the **artifact-side** of the LLM shift — what the artifact
-_becomes_. §19 is the **workflow-side** — where AI sits relative to a human's
+the substrate. §9 is the **artifact-side** of the LLM shift — what the artifact
+_becomes_. §10 is the **workflow-side** — where AI sits relative to a human's
 work.
 
-§18's "NM" (notional machine) and §17's artifact-logic name the same site at
+§9's "NM" (notional machine) and §8's artifact-logic name the same site at
 different resolutions. Substrate substitution swaps a GenAI model into that
 site; the NM-twinning stance (the active-inference framing canonical at
 `syllabus.pedagogy.md` "The pedagogical claim from Friston") remains, but
@@ -926,9 +926,9 @@ reason.
 
 #### Agentic emergence (Ch4.5 and Ch5 closing)
 
-The authoring-partner frame (LLM = virtuoso, §19 Role 2) is a simplification.
+The authoring-partner frame (LLM = virtuoso, §10 Role 2) is a simplification.
 **Agentic AI systems** that plan, execute, call tools, modify state autonomously
-are emerging. That's a more complex collaboration (§19 Role 3 territory) —
+are emerging. That's a more complex collaboration (§10 Role 3 territory) —
 specifying observable outcomes humans can still evaluate becomes load-bearing.
 Flag as territory for post-curriculum learning.
 
@@ -947,12 +947,12 @@ and for our connection to computational history.
 
 ---
 
-### §19 The LLM shift, workflow-side — how AI participates in your work
+### §10 The LLM shift, workflow-side — how AI participates in your work
 
-§18 develops the _artifact-side_ of the LLM shift — what the artifact _becomes_
-when GenAI is in artifact-logic. §19 develops the _workflow-side_ — where AI
-sits _relative to_ the human doing the work. These are orthogonal: §18's
-substrate-substitution and §19's positional-roles co-vary (Role 3 IS substrate
+§9 develops the _artifact-side_ of the LLM shift — what the artifact _becomes_
+when GenAI is in artifact-logic. §10 develops the _workflow-side_ — where AI
+sits _relative to_ the human doing the work. These are orthogonal: §9's
+substrate-substitution and §10's positional-roles co-vary (Role 3 IS substrate
 substitution) but they answer different questions at different sites of
 analysis.
 
@@ -1033,7 +1033,7 @@ artifact, then freeze.
   not running there.
 - **Verification target:** the _contribution_, at deploy. Standard
   pre-deployment verification applies _in form_ — but the verification limit
-  (§18's _"we don't always understand what we direct"_) still bites here when
+  (§9's _"we don't always understand what we direct"_) still bites here when
   the human evaluator delegated the cognition that produced the contribution.
   Verifying that the AI's output does _what was asked_ doesn't establish that
   what was asked was _what was needed_. The visual NM view and short
@@ -1046,8 +1046,8 @@ AI is no longer external — its behavior IS the system's behavior at runtime.
 - **Depth in artifact:** internal to deployed behavior; **the AI as live process
   is now in the artifact**, not just its contribution. The fingerprint is live.
 - **Verification target:** running behavior, continuous, irreducibly partial.
-  **The §18 verification limit is at its sharpest here**, and now with a
-  _mechanical_ reason: the substrate is non-deterministic (§18's
+  **The §9 verification limit is at its sharpest here**, and now with a
+  _mechanical_ reason: the substrate is non-deterministic (§9's
   substrate-substitution sub-section) AND the AI is live in artifact-logic (this
   role). Pre-deployment verification can characterize the distribution but
   cannot pin down production behavior.
@@ -1067,7 +1067,7 @@ artifact being built is a conventional JEJ program; the AI is an external
 co-author, not artifact-logic substrate. You twin the AI as collaborator — F's
 lens (NM-grounded mode) reads the AI as a cognitive substrate you operate; V's
 lens (user-grounded mode) reads its behavioral surface and conversational
-affordances. The layers of AI-understanding (§17 + §18) help you read_ **what**
+affordances. The layers of AI-understanding (§8 + §9) help you read_ **what**
 _you're twinning,_ **where** _it sits relative to your work, and_ **how** _to
 operationalize the collaboration while building JEJ._
 
@@ -1083,7 +1083,7 @@ teach Role-3 building.
 
 ---
 
-### §20 Bret Victor decomposition
+### §11 Bret Victor decomposition
 
 [**_Learnable Programming_**](http://worrydream.com/LearnableProgramming/)
 wanted _less implementation toil_ AND _more powerful thinking tools_. LLMs
@@ -1101,9 +1101,9 @@ of evaluation, not the final output.
 
 ---
 
-## Part F — Curriculum machinery
+## Part E — Curriculum machinery
 
-### §21 Computational vocabulary axes
+### §12 Computational vocabulary axes
 
 Four orthogonal axes — distinct ways of carving the programming space:
 
@@ -1132,9 +1132,9 @@ in.**
 
 ---
 
-## Part I — Honoring commitments
+## Part F — Honoring commitments
 
-### §26 The mu-tribute
+### §13 The mu-tribute
 
 #### MU in one paragraph
 
@@ -1211,14 +1211,14 @@ mu; // frogram, vibetoad
 - §3 V/F lens-pair, especially the **Bakhtiarian loop** subsection and its
   Achilles/Tortoise footnote — the iterative dynamic V/F carry and its literary
   lineage
-- §13 the **Twinning strand** (with §12's L4-by-strand table for its
+- §6 the **Twinning strand** (with §5's L4-by-strand table for its
   philosophy reading) — self-twinning as theory of consciousness, the recursion
   that twinning operationally enacts
 - The **audience-YOU-are-becoming** read of the chapter arc (canonical
   at `syllabus.chapters.md` § "The audience YOU are becoming") — Ch1's
   write-for-future-you → Ch5's write-for-yourself-as-merged-V/F is the
   curriculum's lived descent
-- §17's **perceived/perceiver flipside** — dual-twinning is the perceiving, the
+- §8's **perceived/perceiver flipside** — dual-twinning is the perceiving, the
   two-faced artifact is the perceived; co-constitution at the artifact stratum
 
 ---
