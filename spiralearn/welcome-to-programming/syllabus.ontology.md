@@ -30,8 +30,6 @@
   - [§2 Geometry — three domains, two bridging activities](#2-geometry--three-domains-two-bridging-activities)
   - [§3 The characters — V and F](#3-the-characters--v-and-f)
   - [§4 The 5-tier ATT](#4-the-5-tier-att)
-- [Part B — Translational research positioning](#part-b--translational-research-positioning)
-  - [B.4 Research orientation](#b4-research-orientation)
 - [Part C — Pedagogical depth (orthogonal to chapter sequence)](#part-c--pedagogical-depth)
   - [§12 The 5 layers](#12-the-5-layers)
   - [§13 The 5 strands — equal status](#13-the-5-strands--equal-status)
@@ -237,6 +235,20 @@ What fails is each hat's _realm process without its realm thinking_:
   black-box unit tests, not structural / glass-box tests; using patterns subtly
   incompatible with the underlying language / framework.
 
+#### The predict-and-twin practice (the verb form of the twin)
+
+Twinning is the stance; **the predict-and-twin practice** is the activity that
+builds and maintains it. The loop: predict what the twinned process will do,
+observe what it actually does, notice where prediction and reality diverge,
+update the twin. F runs the loop with the NM as object — predicting evaluation
+steps, reading code against the prediction, noticing where the runtime
+diverges. V runs the same loop with the user as object — predicting how users
+will interact with a prototype, observing how real users actually behave,
+noticing where the model breaks. Either way, the practice is the verb form of
+the twin: what you actually do when you twin. The phrase "twinning the NM"
+and the phrase "running the predict-and-twin practice with the NM" name the
+same activity from different sides.
+
 #### Twin-failure categories (apply equally to V and F)
 
 These are the _kinds_ of twin breakdown that produce the failure-mode symptoms
@@ -420,18 +432,19 @@ operational:
 | **Artifact** | **the curriculum** (design thinking about the learner's experience of learning) | **`lenses/embody`** (engineered technical affordances that make NM-territory legible) |
 
 The two artifacts operate as **coordinated Translational Sprints** — two
-translational research artifacts (in TCER's sense; see §11-sex) in the same
-trading zone, each shaping the other's next iteration.
+translational research artifacts (in TCER's sense — see
+`syllabus.translational-framing.md` §6 Tool-Theory Co-evolution) in the
+same trading zone, each shaping the other's next iteration.
 
 > **We are doing the innovation process we're teaching.**
 
-See §11-sex Tool-Theory Co-evolution and `syllabus.translational-framing.md` for
-the deeper analysis. The pattern recurses: V and F at the student layer; V and F
-at the artifact layer. Bakhtiar Mikhak's _engineering × physics co-evolution_
-names the meta-pattern: engineering practice (technical affordances) and
-theoretical/experiential practice mutually constitute each other, with neither
-downstream of the other. The artifact-layer V/F is one instance of that
-meta-pattern.
+See `syllabus.translational-framing.md` §6 (Tool-Theory Co-evolution) and §7
+(V/F at the artifact layer) for the deeper analysis. The pattern recurses: V
+and F at the student layer; V and F at the artifact layer. Bakhtiar Mikhak's
+_engineering × physics co-evolution_ names the meta-pattern: engineering
+practice (technical affordances) and theoretical/experiential practice
+mutually constitute each other, with neither downstream of the other. The
+artifact-layer V/F is one instance of that meta-pattern.
 
 #### Lineage (precursors in the user's prior writing + deeper)
 
@@ -447,7 +460,8 @@ meta-pattern.
   practice and theoretical practice shape each other; neither is downstream of
   the other. Same teacher who introduced the user to the data/interaction
   architectural pattern (which inspired embody/lenses) AND the
-  _infrastructure-is-research- contribution_ claim (§11-sex).
+  _infrastructure-is-research-contribution_ claim (canonical at
+  `syllabus.translational-framing.md` §6).
 
 <details>
 <summary><b>Visualization: V/F + the rhetorical model</b> <i>(most load-bearing — existing asset)</i></summary>
@@ -488,176 +502,6 @@ The original 3-tier ATT's "Code Speak" decomposes — but into _artifact speak_ 
 a single layer that internally splits into static (code-as-text) and dynamic
 (machine internals / NM events). The static/dynamic split is preserved; it just
 sits _inside_ the central domain rather than as two separate ATT tiers.
-
----
-
-## Part B — Translational research positioning
-
-The curriculum's research orientation — how it positions itself as a research
-artifact, and what that means for how it gets made and adapted.
-
-> **Note (Wave 3d-ii-a migration):** The design principles formerly in Part B
-> (§B.1 Cogsci mechanisms — §5 Pedagogical sampling, §6 Spiderweb
->
-> - spiral, §7 Explorotron framework, §8 Threshold concepts, §9 Transfer
->   Paradox; §B.2 Course-construction — §10 Reusability Paradox, §11
->   Course-as-Quine, §12-bis through §12-sex; and §B.3 Stance & values) have
->   moved to `syllabus.pedagogy.md` under "Design principles (migrated from
->   ontology Part B)." The translational research material below (§B.4 + §11-bis
->   through §11-sept) stays in ontology because it describes the curriculum's
->   research positioning rather than its pedagogical design principles.
-
-### B.4 Research orientation
-
-How the curriculum positions itself as a research artifact, and what that means
-for how it gets made and adapted. _Distinct from the instructional-design
-clusters above (B.1 + B.2) and from the values cluster (B.3) — these principles
-govern the curriculum's relationship to research, not its relationship to
-learners._
-
-See the companion `syllabus.translational-framing.md` for the deeper analysis.
-This sub-grouping carries the working principles.
-
-#### §11-bis TCER positioning
-
-The curriculum is a **translational research artifact** in the sense of Cole,
-Malaise & Signer (2023), _Computing Education Research as a Translational
-Transdiscipline_ (SIGCSE 2023). It is not _informed by_ research — it _is_
-research, conducted by making and teaching, with artifacts that can be studied
-and refined.
-
-Operating positions on the translational continuum:
-
-| TCER Phase                               | What the curriculum does                              | Continuum            |
-| ---------------------------------------- | ----------------------------------------------------- | -------------------- |
-| **3.B\*** Practitioner-facing guidelines | Synthesizes research into actionable teaching content | PT (Practice Theory) |
-| **4.A\*** Evidence-based prototype       | The curriculum IS the intervention                    | PD (Practice Design) |
-| **4.B\*** User feedback & reports        | Teaching it generates research data                   | RD (Research Design) |
-
-All three are trading zones (marked \*); see §11-ter.
-
-**Two traps named by TCER, both to avoid**:
-
-- **The translational imperative** — pressuring all work to justify broader
-  impacts
-- **The pipeline misconception** — translation is _cyclical_, not linear
-
-#### §11-ter Trading zones
-
-From Galison (1997), applied to CER by TCER. Places where people from different
-traditions coordinate locally on specific problems without needing to agree
-globally on methodology or philosophy.
-
-The curriculum's trading zones (operational, not metaphorical):
-
-- The curriculum committee ↔ research committee coordination at the evidence-tag
-  level (📐 translations, 🧪 extensions)
-- Partner cohorts (including the Palestinian-community prototype cohort) ↔
-  curriculum committee, where adaptation feedback shapes next iterations
-- The author ↔ the discourse community (citation, response, extension)
-- The curriculum ↔ `lenses/embody` infrastructure (see §11-sex Tool-Theory
-  Co-evolution)
-
-Connects directly to **community-as-making** (`syllabus.pedagogy.md` B.3 Stance
-& values: the course is _made in community_, not just _for_ community). Partner
-cohorts are not user-tests; they are trading-zone work in TCER's technical
-sense.
-
-**Related concept**: Susan Leigh Star's _boundary objects_ (1989) is a sibling
-concept in the science-studies literature, often paired with Galison's trading
-zones. Boundary objects are _plastic enough_ to adapt to local needs of
-different communities AND _robust enough_ to maintain common identity across
-them. `lenses/embody` is a boundary object in this sense — theory-neutral
-infrastructure that multiple pedagogies can consume. The per-chapter
-`research-framing.md` files and the Evidence Tag System (🔬 / 📐 / 🧪) they
-deploy operate as boundary-object protocols: shared formats that let curriculum
-and research committees coordinate without needing to agree globally.
-
-#### §11-quater Reflexive Analysis & Action
-
-A _core TCER principle_, not a footnote: the curriculum reflexively analyzes how
-research findings reshape its design, and learners' artifacts feed back as
-research data that may reshape the theoretical frameworks. Questioning and
-refining the analysis is itself doing translational research.
-
-Two registers:
-
-1. **Author/committee-side** — explicit revision of design decisions when new
-   evidence arrives or when partner-cohort experience contradicts prior
-   assumptions
-2. **Learner-artifact-side** — exercise outputs, traces, gist submissions become
-   research data observable to anyone who wishes to study them
-
-**Temporal modes** (Schön, _The Reflective Practitioner_, 1983): both
-_reflection-in-action_ (mid-doing, during the work) and _reflection-on-action_
-(after-doing, on the finished artifact) apply here. The author/committee-side
-register encompasses both modes; the learner-artifact-side register operates
-primarily as reflection-on-action over time, with reflection-in-action available
-when the artifacts are produced live in cohort settings.
-
-#### §11-quinque Pedagogy Wins
-
-When pedagogical effectiveness and research observability conflict, **pedagogy
-wins. Always.**
-
-Exercises are designed for learning first; their research value comes from
-natural byproducts, not additional instrumentation burden on learners. No
-assessment steps that interrupt learning flow just to generate data. No
-content-density increases for observability when they overload learners.
-
-Connects (with tension) to embody's _Pure data, no methods_ principle: **embody
-is theory-neutral infrastructure; the curriculum is opinionated content using
-that infrastructure.** This is the **Reusability Paradox** (§10) and **Transfer
-Paradox** (§9) operating together at the artifact level.
-
-#### §11-sex Tool-Theory Co-evolution
-
-> **"Building infrastructure IS research contribution."** — Bakhtiar Mikhak (the
-> same teacher who introduced the user to the _engineering × physics
-> co-evolution_ that underlies the deeper V/F relationship; see §3 lineage).
-
-The CERN-for-physics analogy: measurement infrastructure creates the theoretical
-insights it later validates. Tools and theory mutually constitute each other;
-neither is downstream of the other.
-
-**The curriculum's instantiation of this pattern** (see §3 V/F at the artifact
-layer for the full V/F mapping):
-
-- **`lenses/embody`** is the engineering side (F at the artifact layer) —
-  technical affordances that make NM-territory legible
-- **The curriculum** is the experiential / theoretical side (V at the artifact
-  layer) — design thinking about the learner's experience of learning
-- They operate as **coordinated Translational Sprints** — two translational
-  research artifacts in the same trading zone, each shaping the other's next
-  iteration
-
-> **We are doing the innovation process we're teaching.**
-
-The V/F symmetry the curriculum teaches at the _student_ layer recurs at the
-_artifact_ layer. This is the **engineering × physics co-evolution** Bakhtiar
-surfaced (Faraday/Maxwell-style mutual constitution).
-
-Cross-link: §3 V/F (student-layer + the corrective note that the artifact-layer
-V/F flips the surface-intuition mapping); §23 JEJ chain (the artifact-layer
-mechanism in operation).
-
-#### §11-sept Translational Sprints (light touch)
-
-> _"TCER tells you WHAT; Translational Sprints tell you HOW."_
-
-A complementary methodology that operationalizes TCER. The 6-stage cyclical
-process is documented in
-`DGMD-E-1-artifacts/embodying-tcer/8-agile-cer-connection/` and is out-of-scope
-for this ontology to detail. What matters at this layer:
-
-- The curriculum's iterative development pattern (alumni co-development,
-  cohort-shaped revisions, ongoing reflexive analysis)
-- The relationship between the curriculum and `lenses/embody` is itself a
-  Translational Sprint pair
-- Adaptation by curriculum authors / forkers / contributors is a Translational
-  Sprint contribution, not a passive consumption
-
-Acknowledged here; detailed elsewhere.
 
 ---
 
@@ -1506,10 +1350,11 @@ The student-layer / artifact-layer distinction from §3 lands here:
   thinking about the learner's experience of learning; opinionated content
   authored to shape what the learner encounters and how.
 
-The two are in **coordinated Translational Sprints** (§11-sept), two TCER
-artifacts mutually constituting each other. This is the **engineering × physics
-co-evolution** (Bakhtiar Mikhak; §3 lineage) operating at the artifact layer.
-**We are doing the innovation process we're teaching.**
+The two are in **coordinated Translational Sprints**
+(`syllabus.translational-framing.md` §8), two TCER artifacts mutually
+constituting each other. This is the **engineering × physics co-evolution**
+(Bakhtiar Mikhak; §3 lineage) operating at the artifact layer. **We are
+doing the innovation process we're teaching.**
 
 See `syllabus.translational-framing.md` for the deeper analysis. The embody-side
 counterpart analysis lives in `DGMD-E-1-artifacts/embodying-tcer/`.

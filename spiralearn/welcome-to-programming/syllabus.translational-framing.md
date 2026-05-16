@@ -11,12 +11,17 @@
 >
 > **Companions** (siblings by co-location):
 >
-> - `syllabus.ontology.md` — the reference framework (§B.4 Research orientation
->   is the in-ontology home of these principles)
+> - `syllabus.ontology.md` — the curriculum's concept reference
+>   framework (concept-only after the Wave-3d-ii migration; the
+>   research-orientation principles formerly in ontology Part B are
+>   now canonical here)
 > - `syllabus.chapters.md` — chapter-by-chapter LO grids
 > - `syllabus.guide.{authors,community}.md` — practical role-targeted
 >   guidance for those audiences, with TCER vocabulary integrated
 > - `syllabus.md` — learner-facing prose (no TCER vocabulary)
+> - `syllabus.study-lenses.md` — technical-reader companion describing
+>   the JEJ → NM → embody → lenses → orchestrator infrastructure chain
+>   (V/F at the artifact layer's F-side, in operational form)
 > - `research-framing.md` (curriculum-level) and the repo-level
 >   `research-framing.md` — research-committee-owned evidence claims
 
@@ -117,6 +122,17 @@ the curriculum's next iteration reflects what the cohort surfaced. See
 `syllabus.guide.community.md` for the register addressed to community
 partners.
 
+**Related concept**: Susan Leigh Star's _boundary objects_ (1989) is a
+sibling concept in the science-studies literature, often paired with
+Galison's trading zones. Boundary objects are _plastic enough_ to adapt
+to local needs of different communities AND _robust enough_ to maintain
+common identity across them. `lenses/embody` is a boundary object in
+this sense — theory-neutral infrastructure that multiple pedagogies can
+consume. The per-chapter `research-framing.md` files and the Evidence
+Tag System (🔬 / 📐 / 🧪) they deploy operate as boundary-object
+protocols: shared formats that let curriculum and research committees
+coordinate without needing to agree globally.
+
 ---
 
 ## 4. Reflexive Analysis & Action
@@ -150,6 +166,18 @@ of good pedagogy_, not as a result of instrumentation burden on learners.
 The data is research-quality because the artifacts are pedagogically-shaped:
 real programs from real learners doing real work, not synthetic exercises
 designed to be observable.
+
+### 4.3 Temporal modes — reflection-in-action and reflection-on-action
+
+Both temporal registers from Schön's _The Reflective Practitioner_
+(1983) apply across §4.1 and §4.2: **reflection-in-action** (mid-doing,
+during the work) and **reflection-on-action** (after-doing, on the
+finished artifact). The author/committee-side register encompasses both
+modes — design decisions are revised live during cohort cycles AND
+analyzed afterward across iterations. The learner-artifact-side
+register operates primarily as reflection-on-action over time, with
+reflection-in-action available when the artifacts are produced live in
+cohort settings.
 
 ---
 
@@ -202,10 +230,11 @@ embody's construction.
 
 The curriculum is in the same position for pedagogical research. Writing the
 curriculum has surfaced design principles, integrations, and tensions that
-weren't visible before the writing. The 4C/ID + Whole Game integration of design
-principles (Part B of the ontology) became visible only when the principles were
-named alongside each other. The intellectual-agency-as-meta-LO recognition
-emerged through chapter-drafting, not as a prior conclusion.
+weren't visible before the writing. The 4C/ID + Whole Game integration of
+design principles (now canonical in `syllabus.pedagogy.md` § "Design
+principles") became visible only when the principles were named alongside
+each other. The intellectual-agency-as-meta-LO recognition emerged through
+chapter-drafting, not as a prior conclusion.
 
 **Tool-Theory Co-evolution names this: tool and theory mutually constitute each
 other; neither is downstream of the other.**
@@ -327,8 +356,6 @@ existing homes.
 - **Repo-level research framing**: `0-curricula/research-framing.md`
 - **Per-chapter research framings**: each chapter directory has its own
   `research-framing.md` (most-detailed: Ch4's, on Human-AI collaboration)
-- **`syllabus.ontology.md` §B.4** — the in-ontology working principles version
-  of this document's claims
 
 ---
 
