@@ -9,7 +9,7 @@
 > `translational-framing.md`, `study-lenses.md`).
 
 Visual assets live at `./assets/` (sibling to this file at the
-welcome-to-programming/ level). All visualizations in this doc are
+welcome-to-frogramming/ level). All visualizations in this doc are
 wrapped in `<details>` blocks with relative-importance caveats so
 readers can skim or dive.
 
@@ -297,21 +297,21 @@ Each skill has a specific moment in the collaborative loop.
 <details>
 <summary><b>Visualization: collaboration decision tree</b> <i>(supporting)</i></summary>
 
-![AI collaboration decision tree — when/how to collaborate](../welcome-to-programming/assets/decision-tree.svg)
+![AI collaboration decision tree — when/how to collaborate](./assets/decision-tree.svg)
 
 </details>
 
 <details>
 <summary><b>Visualization: AI learning progression</b> <i>(supporting)</i></summary>
 
-![AI integration progression across chapters](../welcome-to-programming/assets/learning-progression.svg)
+![AI integration progression across chapters](./assets/learning-progression.svg)
 
 </details>
 
 <details>
 <summary><b>Visualization: SOLO integration</b> <i>(supporting)</i></summary>
 
-![SOLO mapping to AI collaboration readiness](../welcome-to-programming/assets/solo-integration.svg)
+![SOLO mapping to AI collaboration readiness](./assets/solo-integration.svg)
 
 </details>
 

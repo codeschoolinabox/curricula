@@ -484,7 +484,7 @@ themselves, share with peers through a collaborative gist system that extends a
 living snippetry corpus, and explore JavaScript's full multi-paradigmatic range
 with training wheels off and real browser evaluation.
 
-[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+[TOP](#welcome-to-frogramming---syllabus)
 
 ---
 
@@ -506,7 +506,7 @@ composition-vs-performance two-phase structure, the composer-pedagogy
 parallels, the 8 AI-collaboration skills, and the per-chapter instantiations
 live canonically in [`metaphor.md`](./metaphor.md).
 
-[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+[TOP](#welcome-to-frogramming---syllabus)
 
 ---
 
@@ -533,7 +533,7 @@ prerequisite; refer to them when you need them.
 sources, infrastructure documentation, prior-session handoffs — lives in
 [`ontology.md`](./ontology.md) under _Source materials_.
 
-[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+[TOP](#welcome-to-frogramming---syllabus)
 
 ---
 
@@ -565,7 +565,7 @@ cleanly.
 markers (🥚🐣🐥🐔) used on learning objectives are a separate, established
 convention for difficulty progression — not part of this set.
 
-[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+[TOP](#welcome-to-frogramming---syllabus)
 
 ---
 
@@ -637,7 +637,7 @@ graph TD
   practical, role-targeted guidance (tooling, workflows, application of
   design principles)
 
-[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+[TOP](#welcome-to-frogramming---syllabus)
 
 ---
 
@@ -651,6 +651,6 @@ graph TD
       terrain
 - [ ] _(coming soon)_ Download the curriculum for offline study
 
-[TOP](#welcome-to-programming-coded-for-humans--syllabus)
+[TOP](#welcome-to-frogramming---syllabus)
 
 ---

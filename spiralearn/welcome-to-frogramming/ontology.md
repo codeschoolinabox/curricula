@@ -461,8 +461,8 @@ artifact-layer V/F is one instance of that meta-pattern.
 <details>
 <summary><b>Visualization: V/F + the rhetorical model</b> <i>(most load-bearing — existing asset)</i></summary>
 
-![The big picture — the rhetorical model](../welcome-to-programming/assets/the-big-picture.png)
-![The big picture plus AI](../welcome-to-programming/assets/the-big-picture-plus-ai.png)
+![The big picture — the rhetorical model](./assets/the-big-picture.png)
+![The big picture plus AI](./assets/the-big-picture-plus-ai.png)
 
 AI sits _outside_ the rhetorical circle — exactly the virtuoso's position in the
 teaching-apparatus cast (`metaphor.md`).
@@ -1147,7 +1147,7 @@ traversing through its opposite.
 
 #### The drawing
 
-![Hofstadter's MU drawing — each pole resolves into MU through its opposite](../welcome-to-programming/assets/mu.hofstadter.png)
+![Hofstadter's MU drawing — each pole resolves into MU through its opposite](./assets/mu.hofstadter.png)
 
 The top-level **M** is HOLISM (whose letters are REDUCTIONISM, whose strokes are
 MU). The top-level **U** is REDUCTIONISM (whose letters are HOLISM, whose
