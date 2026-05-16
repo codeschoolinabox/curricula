@@ -7,7 +7,7 @@ A build-time Docusaurus plugin that pre-processes markdown content in the
 
 The `<StudyLenses>` emitted by the plugin is rendered by the orchestrator
 component at
-[`src/lib/welcome-to-programming/just-enough/javascript/orchestrate/`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/),
+[`src/lib/just-enough/javascript/orchestrate/`](../../lib/just-enough/javascript/orchestrate/),
 registered as `StudyLenses` in the swizzled
 [`src/theme/MDXComponents.js`](../../theme/MDXComponents.js).
 
@@ -21,7 +21,7 @@ Docusaurus's native TypeScript config support.
 
 Every `<StudyLenses>` node this plugin emits carries the **three-prop public
 API** locked in the orchestrator at
-[`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md):
+[`../../lib/just-enough/javascript/orchestrate/README.md`](../../lib/just-enough/javascript/orchestrate/README.md):
 
 ```jsx
 <StudyLenses
@@ -75,7 +75,7 @@ synonym anywhere in the code is a bug.
   populate `lens` (per AR-1 locked decision 1). A fenced code block with none of
   those resolved emits no `lens` prop at all — the cascade-supplied default seam
   is L2-deferred; in F1+B the bare-fence case mounts the editor home base. See
-  [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md).
+  [`../../lib/just-enough/javascript/orchestrate/README.md`](../../lib/just-enough/javascript/orchestrate/README.md).
 - **Fenced code block** — a markdown code block delimited by triple backticks.
   The MDAST `code` node type. Standard CommonMark term.
 - **Code fence** — the triple-backtick delimiters themselves, as opposed to the
@@ -234,7 +234,7 @@ alongside `Tabs` and `TabItem` (imported from `@theme/Tabs` and `@theme/TabItem`
 — they ship with `@docusaurus/theme-classic` but are NOT in the default
 `MDXComponents`, so the plugin's swizzle must add them for the emitted JSX to
 resolve). The orchestrator component lives at
-[`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/).
+[`../../lib/just-enough/javascript/orchestrate/`](../../lib/just-enough/javascript/orchestrate/).
 
 ## `lenses.json` schema
 
@@ -281,11 +281,11 @@ keys, all optional:
   orchestrator sees a single source of truth: `configs.lenses?.[lens]`. The
   orchestrator's resolution chain collapses to two tiers —
   `module.config() ⊕ configs.lenses?.[lens]` — per
-  [`../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md` § Per-lens config resolution chain](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/README.md).
+  [`../../lib/just-enough/javascript/orchestrate/README.md` § Per-lens config resolution chain](../../lib/just-enough/javascript/orchestrate/README.md).
 
   **Lens-config value shape:** values inside `lenses.<lens-name>` are expected
   to satisfy
-  [`LensConfig`](../../lib/welcome-to-programming/just-enough/javascript/lenses/types.ts)
+  [`LensConfig`](../../lib/just-enough/javascript/lenses/types.ts)
   — a flat record of primitives + primitive arrays. The plugin types them
   loosely as `Record<string, unknown>` because the cascade resolver does not
   validate against the lens-side schema; authors who supply richer values
@@ -817,10 +817,10 @@ For readers unfamiliar with Docusaurus:
   [AGENTS.md](../../../AGENTS.md) · [DEV.md](../../../DEV.md)
 - **Parent:** [`src/plugins/README.md`](../README.md)
 - **Downstream consumer:**
-  [`src/lib/welcome-to-programming/just-enough/javascript/orchestrate/`](../../lib/welcome-to-programming/just-enough/javascript/orchestrate/)
+  [`src/lib/just-enough/javascript/orchestrate/`](../../lib/just-enough/javascript/orchestrate/)
   — the orchestrator package whose `<StudyLenses>` component this plugin emits
   JSX for.
 - **Lens contract:**
-  [`src/lib/welcome-to-programming/just-enough/javascript/lenses/`](../../lib/welcome-to-programming/just-enough/javascript/lenses/)
+  [`src/lib/just-enough/javascript/lenses/`](../../lib/just-enough/javascript/lenses/)
   — individual lens implementations the orchestrator dispatches to (per the
   resolved `lens` prop).

@@ -33,7 +33,7 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import { StudyLenses } from '@site/src/lib/welcome-to-programming/just-enough/javascript/index.js';
+import { StudyLenses } from '@site/src/lib/just-enough/javascript/index.js';
 
 export default function F2ModeMachine(): React.JSX.Element {
 	const [lens, setLens] = React.useState<string | undefined>(undefined);

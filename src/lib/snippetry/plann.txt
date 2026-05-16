@@ -1,0 +1,30 @@
+search by
+    language feature 
+    text
+    type 
+
+processing before saving 
+    count of all node types: { nodeName: number }
+    comment tags?  // tags: _, _, ...
+
+metadata 
+    language features 
+    tags 
+    remixes 
+    remixee 
+    type (script|module|documentScript)
+
+saving & searching 
+    can people save without account?  yes to snippetry gists.  with account, to their own gists
+    can people search and remix locally without one?  yah
+
+evalling
+    - all iframe-sandboxed in the thread for full JS features
+    - no safe-guards against crashing
+    - convenience options 
+        loop guards 
+        debugger injection 
+    script 
+    module 
+    html+script
+    html+module

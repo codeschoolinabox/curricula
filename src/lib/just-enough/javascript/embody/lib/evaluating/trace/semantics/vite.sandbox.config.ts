@@ -1,0 +1,28 @@
+/**
+ * @file Vite dev server config for the trace sandbox.
+ *
+ * Adds COOP/COEP headers required for SharedArrayBuffer
+ * (needed for worker-based trace with SAB+Atomics I/O traps).
+ *
+ * Usage: npx vite --config src/lib/just-enough/javascript/evaluating/trace/vite.sandbox.config.ts
+ */
+
+import path from 'node:path';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+	// WHY this root: sandbox.html imports from ../../api/ (validate, format, trace).
+	// The root must include both evaluating/ and api/ directories.
+	root: 'src/lib/just-enough/javascript',
+	resolve: {
+		alias: {
+			'@utils': path.resolve('src/lib/utils'),
+		},
+	},
+	server: {
+		headers: {
+			'Cross-Origin-Opener-Policy': 'same-origin',
+			'Cross-Origin-Embedder-Policy': 'require-corp',
+		},
+	},
+});
