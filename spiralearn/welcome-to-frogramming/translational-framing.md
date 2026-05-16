@@ -204,9 +204,9 @@ sides of the **Reusability Paradox** (Wiley) — embody optimizes for reusabilit
 across many curricula; the curriculum optimizes for pedagogical coherence in its
 specific setting.
 
-This is not a contradiction. It is the trading-zone in operational form. See §5
-of `ontology.md` for the related **Transfer Paradox** (Van Merriënboer)
-— about how learning transfers, distinct from how artifacts are bundled.
+This is not a contradiction. It is the trading-zone in operational form. See
+`pedagogy.md` §9 for the related **Transfer Paradox** (Van Merriënboer) —
+about how learning transfers, distinct from how artifacts are bundled.
 
 ---
 

@@ -1,4 +1,4 @@
-import deepFreezeInPlace from '../../../../../../../../utils/deep-freeze-in-place.js';
+import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import generators from './generators.js';
 
 import type { SourceLocation, TraceEvent } from '../types.js';

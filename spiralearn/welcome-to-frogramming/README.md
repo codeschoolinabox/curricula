@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# 🐸 Welcome to Frogramming - Syllabus
+# 🐸 Welcome to Frogramming - Syllabus {#welcome-to-frogramming---syllabus}
 
 > The best authors and the best JavaScript developers are those who obsess about
 > language, who explore and experiment with language every day and in doing so
@@ -448,7 +448,7 @@ constraint, not a permanent one.
 ### What this course builds in you — the five strands
 
 Five strands run beneath every chapter, each enabled by the ones before
-(canonical definitions in [`ontology.md`](./ontology.md) §13):
+(canonical definitions in [`ontology.md`](./ontology.md) §6):
 
 1. **Twinning** — accurate mental models of processes outside your mind
 2. **Decisions (micro and macro)** — every keyword, name, operator, structure
@@ -465,7 +465,7 @@ Five strands run beneath every chapter, each enabled by the ones before
 Plus the data thread — the word _data_ deepening at each layer — stitching all
 five together, and Study Lenses making the machine's work visible throughout.
 
-### 💭 Snippetry
+### 💭 Snippetry {#snippetry}
 
 Chapter 5 introduces **snippetry** — writing small, runnable, self-contained
 programs as an ongoing practice. The answer to "why write code when I'm no

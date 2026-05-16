@@ -648,7 +648,7 @@ catalog. Both are valid views of the same set of commitments.
 
 ---
 
-## Reading frameworks — PBIS, static/dynamic (migrated from ontology §12)
+## Reading frameworks — PBIS, static/dynamic
 
 ### PBIS — flexible vocabulary, not a sequence
 

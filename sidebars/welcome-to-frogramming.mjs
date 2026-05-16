@@ -26,7 +26,7 @@ const sidebars = {
 				'guide.learners',
 				'guide.authors',
 				'guide.community',
-				'guide.teachers',
+				// 'guide.teachers' — placeholder file empty; re-add when content lands
 			],
 		},
 	],

@@ -121,7 +121,7 @@ const config: Config = {
 		// --- Welcome to Frogramming curriculum ---
 		// The legacy spiralearn/welcome-to-programming/ tree is deprecated
 		// (still in the repo for now; chapter content will migrate into
-		// welcome-to-frogramming/ over time, see syllabus.guide.authors).
+		// welcome-to-frogramming/ over time, see guide.authors.md).
 		[
 			'@docusaurus/plugin-content-docs',
 			{
