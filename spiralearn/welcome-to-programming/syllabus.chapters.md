@@ -70,6 +70,54 @@
 | Ch4     | 🤖 + Agents                       | no new features (Ch1–3 applied with LLM collaborator) |
 | Ch5     | + You                             | training wheels off — full JS                         |
 
+### The audience YOU are becoming
+
+The student is themselves an audience throughout the curriculum, at
+increasing levels of recursion. This is the audience ladder read from
+the inside — the YOU-becoming reading of the same arc. Each chapter
+adds a perspective future-you must hold. The course teaches the student
+to BECOME a poly-perspective self.
+
+| Chapter | Future-you is…                                                                  |
+| ------- | ------------------------------------------------------------------------------- |
+| Ch1     | future-you reads code (basic dev-reader)                                        |
+| Ch2     | future-you traces NM (added perspective: NM)                                    |
+| Ch3     | future-you considers users (added perspective: user)                            |
+| Ch4     | future-you collaborates with LLMs as a duet (first conscious perspective-stack) |
+| Ch5     | future-you snippets-as-merged-V/F (perspective-stacked-singularity)             |
+
+### Spiral (skills) vs ladder (audiences)
+
+Two dimensions organize the chapter sequence:
+
+- The **ladder** (chapter sequence) adds an audience to the learner's
+  awareness — one new audience per chapter (developers → computer →
+  users → agents → self).
+- The **spiral** (within each chapter) revisits skills at increasing
+  depth: read → trace → describe → modify → write. Bruner's spiral
+  curriculum operationalized at the skill scale.
+
+Study Lenses generates exercises that drive the spiral at the
+exercise level. Each LO marks where a skill is _first introduced_, not
+where it ends.
+
+### Per-chapter metaphor anchors
+
+Each chapter has a single metaphor anchor (named once in each chapter's
+overview block, not repeated per layer):
+
+| Chapter | Metaphor anchor                                                |
+| ------- | -------------------------------------------------------------- |
+| Ch0     | the recital as rhetorical situation                            |
+| Ch1     | the score as inter-composer communication                      |
+| Ch2     | studying the instrument's mechanism                            |
+| Ch3     | writing for the audience; the composer's design thinking       |
+| Ch4     | the composer-virtuoso asymmetric duet (with an alien virtuoso) |
+| Ch5     | the composer's daily practice (Ligeti / Bach / sketches)       |
+
+The metaphor system is **teaching apparatus, explicitly NOT structural
+guide** — see `syllabus.metaphor.md` for the canonical treatment.
+
 ---
 
 ## Ch0 What is Programming?
@@ -1955,8 +2003,8 @@ for you.
   predictive model of self is the seat of self. The arc you've traveled — Ch1's
   write-for-future-you to Ch5's write-for-yourself-
   the-audience-you-are-becoming — is the curriculum's operational encounter with
-  that idea (see ontology §12 L4 matrix, Twinning row, and §15 self-twinning
-  arc)
+  that idea (see ontology §12 L4 matrix, Twinning row, and the Preamble's
+  "audience YOU are becoming" table)
 - 🐔 _(deeper section)_ The data-thread reading at full depth: the entire
   embodied phenomenon from theory to domain is data flowing through and changing
   the physical world — in theory changing the thinker, in computation exerting

@@ -36,7 +36,6 @@
   - [§12 The 5 layers](#12-the-5-layers)
   - [§13 The 5 strands — equal status](#13-the-5-strands--equal-status)
   - [§14 The data thread (the red thread)](#14-the-data-thread-the-red-thread)
-  - [§15 Self-twinning Bildung arc](#15-self-twinning-bildung-arc)
 - [Part D — Cogsci grounding](#part-d--cogsci-grounding)
   - [§17 Strata of a software system — refining §2's geometry](#17-strata-of-a-software-system--refining-2s-geometry)
 - [Part E — The LLM shift](#part-e--the-llm-shift)
@@ -45,7 +44,6 @@
   - [§20 Bret Victor decomposition](#20-bret-victor-decomposition)
 - [Part F — Curriculum machinery](#part-f--curriculum-machinery)
   - [§21 Computational vocabulary axes](#21-computational-vocabulary-axes)
-  - [§22 Chapter architecture](#22-chapter-architecture)
 - [Part H — Teaching apparatus](#part-h--teaching-apparatus)
   - [§24 The composer/virtuoso/mechanism metaphor](#24-the-composervirtuosomechanism-metaphor)
   - [§25 Symbology](#25-symbology)
@@ -730,26 +728,6 @@ referenced as side/footnote, not in body.
 
 ---
 
-### §15 Self-twinning Bildung arc
-
-The student is themselves the audience throughout the curriculum, but at
-increasing levels of recursion. This thread runs alongside the audience-ladder;
-it's the _audience-YOU-are-becoming_ read of the same arc.
-
-| Chapter | Future-you is…                                                                  |
-| ------- | ------------------------------------------------------------------------------- |
-| Ch1     | future-you reads code (basic dev-reader)                                        |
-| Ch2     | future-you traces NM (added perspective: NM)                                    |
-| Ch3     | future-you considers users (added perspective: user)                            |
-| Ch4     | future-you collaborates with LLMs as a duet (first conscious perspective-stack) |
-| Ch5     | future-you snippets-as-merged-V/F (perspective-stacked-singularity)             |
-
-Each chapter adds a perspective the future-you must hold. The course teaches the
-student to BECOME a poly-perspective self. Worth surfacing explicitly in §What
-to Expect of `syllabus.chapters.md`.
-
----
-
 ## Part D — Cogsci grounding
 
 ### §17 Strata of a software system — refining §2's geometry
@@ -1167,48 +1145,6 @@ in.**
 
 ---
 
-### §22 Chapter architecture
-
-The audience ladder + skill spiral structure. The detailed chapter-by-chapter
-content lives in `syllabus.chapters.md`.
-
-#### The audience ladder
-
-| Chapter | Adds audience                     | Language features introduced                                                                                         |
-| ------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Ch0     | (conceptual orientation; no code) | —                                                                                                                    |
-| Ch1     | 🧑‍💻 Developers                     | comments + full `console` API                                                                                        |
-| Ch2     | 💻 + Computer                     | NM core (2.0–2.8) + computational idioms (2A–2F: logic, strings, numbers, regex, bits, dates)                        |
-| Ch3     | + Users                           | `prompt`, `alert`, `confirm`; `null` first encounter                                                                 |
-| Ch4     | 🤖 + Agents                       | no new features (applies Ch1–3 with LLM collaborator — §19 Role 2: NM-grounded F-flavored, user-grounded V-flavored) |
-| Ch5     | + You                             | training wheels off — full JS (still §19 Role 2 with surface expanded)                                               |
-
-#### Spiral (skills) vs ladder (audiences)
-
-Two dimensions:
-
-- The **ladder** (chapter sequence) adds an audience to the learner's awareness
-- The **spiral** (within each chapter) revisits skills at increasing depth: read
-  → trace → describe → modify → write
-
-Study Lenses generates exercises that drive the spiral at the exercise level.
-Each LO marks where a skill is _first introduced_, not where it ends.
-
-#### Per-chapter metaphor anchors (teaching apparatus, not structural)
-
-| Chapter | Metaphor anchor                                                |
-| ------- | -------------------------------------------------------------- |
-| Ch0     | the recital as rhetorical situation                            |
-| Ch1     | the score as inter-composer communication                      |
-| Ch2     | studying the instrument's mechanism                            |
-| Ch3     | writing for the audience; the composer's design thinking       |
-| Ch4     | the composer-virtuoso asymmetric duet (with an alien virtuoso) |
-| Ch5     | the composer's daily practice (Ligeti / Bach / sketches)       |
-
-(See `syllabus.metaphor.md` for the full metaphor system.)
-
----
-
 ## Part H — Teaching apparatus
 
 ### §24 The composer/virtuoso/mechanism metaphor
@@ -1336,8 +1272,10 @@ mu; // frogram, vibetoad
 - §13 the **Twinning strand** (with §12's L4-by-strand table for its
   philosophy reading) — self-twinning as theory of consciousness, the recursion
   that twinning operationally enacts
-- §15 the **self-twinning Bildung arc** — Ch1's write-for-future-you → Ch5's
-  write-for-yourself-as-merged-V/F is the curriculum's lived descent
+- The **audience-YOU-are-becoming** read of the chapter arc (canonical
+  at `syllabus.chapters.md` § "The audience YOU are becoming") — Ch1's
+  write-for-future-you → Ch5's write-for-yourself-as-merged-V/F is the
+  curriculum's lived descent
 - §17's **perceived/perceiver flipside** — dual-twinning is the perceiving, the
   two-faced artifact is the perceived; co-constitution at the artifact stratum
 
