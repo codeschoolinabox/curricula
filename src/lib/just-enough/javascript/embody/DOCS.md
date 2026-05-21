@@ -449,11 +449,6 @@ live editor passes scenario keywords through transparently. See
 [`./README.md` § Named scenarios](./README.md) for the consumer-facing
 description and [`./index.ts`](./index.ts) JSDoc for the dispatch mechanism.
 
-> **Note on `index.ts` phase naming.** `index.ts` currently uses the legacy
-> phase name spellings (`'validate'`, `'create'`, `'evaluate'`) that predate the
-> rename in `types.ts`. The `types.ts` contract is authoritative. `index.ts` will
-> be updated when its lib/\* slice lands in a later DDD session.
-
 Why scenario dispatch is kept inside `embody()` rather than split into a sibling
 fixture module: keeping the surface single-import for consumers, avoiding the
 dual-import burden across the orchestrator, lenses, and tests. The trade-off is

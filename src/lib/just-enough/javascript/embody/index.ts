@@ -41,11 +41,10 @@
  *   |     |--- "FAIL_AT_TOKENIZE"    --> tokenize-fail leaf; status all false
  *   |     |--- "FAIL_AT_PARSE"       --> parse-fail leaf; tokenized:T, rest false
  *   |     |--- "VALIDATION_FAIL"     --> validate-fail leaf; parsed:T, validated:F;
- *   |     |                              canned violation; no streams.create or
- *   |     |                              streams.evaluate
+ *   |     |                              canned violation; creation null;
+ *   |     |                              evaluation no-op (not-runnable)
  *   |     |--- "FAIL_AT_CREATE"      --> create-fail leaf; validated:T, created:F;
- *   |     |                              streams.create has partial events; no
- *   |     |                              streams.evaluate
+ *   |     |                              creation null; evaluation no-op
  *   |     |--- "NON_DETERMINISTIC"   --> apex leaf; nonDeterminism.random:T overlay
  *   |     |--- "PAUSES"              --> apex leaf; hasIo.user.total:1 overlay
  *   |     |--- "EVAL_ERROR"          --> apex leaf; run() outcome:'errored'
@@ -58,11 +57,11 @@
  *             EMBODY-IMPL-HANDOFF.md)
  *   |
  *   v
- * assemble Snippet per types.ts § 12 staircase
+ * assemble Snippet per types.ts § 14 staircase
  *   |
  *   v
  * deepFreezeInPlace — single freeze pass; visited-set cycle guard
- * handles the runInstance.snippet back-ref in apex-status modes
+ * handles the runInstance.snippet back-ref in all scenarios
  *   |
  *   v
  * frozen Snippet
@@ -75,7 +74,7 @@
  *
  * - `FAIL_AT_<STAGE>` — the named stage's status flag is false.
  *   `FAIL_AT_TOKENIZE` sets `status.tokenized: false`; subsequent
- *   stages cascade-false per types.ts § 12 staircase.
+ *   stages cascade-false per types.ts § 14 staircase.
  * - `EVAL_<OUTCOME>` — apex `status.*: true`, but `run()` resolves to
  *   a frozen `RunInstance` whose `endReport.outcome` is the named
  *   outcome (`'errored' | 'timed-out' | 'limit-exceeded' | 'cancelled'`).
@@ -95,7 +94,7 @@
  * - The canned `Violation` for `VALIDATION_FAIL`, the eval-failure
  *   `EmbodyError` shapes, and the create-fail `errors.kind` are all
  *   canned-shape; downstream tests should branch on the named
- *   field (e.g. `errors.phase === 'create'`, `validation.violations.
+ *   field (e.g. `errors.phase === 'creation'`, `validation.violations.
  *   length > 0`, `endReport.outcome === 'errored'`) rather than on
  *   specific kind/message/path values.
  *
@@ -128,32 +127,42 @@ import type { Node as AcornNode } from 'acorn';
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import type {
-	AugmentedASTNode,
-	AugmentedToken,
-	BindingEvent,
-	BuiltinBinding,
+	Analysis,
+	AnyNMEvent,
+	BindingNMEvent,
+	CommentNMEvent,
 	ControlFlow,
+	CreationData,
+	CreationEntwined,
+	Distribution,
 	EmbodyError,
 	EndReport,
 	EvaluateHandle,
 	EvaluateOptions,
-	Event,
+	EvaluationEvents,
+	EvaluationPhase,
+	EventsView,
 	Features,
 	HasIo,
-	InitialScope,
 	Metrics,
-	Distribution,
-	NodeEvent,
+	NodeNMEvent,
 	NonDeterminism,
-	Realm,
-	RealmBindingEvent,
+	ParseASTData,
+	ParseASTEntwined,
+	ParseASTPhase,
+	RealmData,
+	RealmEntwined,
+	RealmNMEvent,
+	RealmPhase,
 	RunInstance,
-	Scope,
-	ScopeEvent,
+	ScopeEntwined,
+	ScopeNMEvent,
 	Snippet,
 	Source,
-	StaticAnalyses,
-	TokenEvent,
+	TokenizeData,
+	TokenizeEntwined,
+	TokenizePhase,
+	TokenNMEvent,
 	Validation,
 	Violation,
 } from './types.js';
@@ -193,70 +202,34 @@ function buildSource(code: string): Source {
 	return { code, offsets: [0] };
 }
 
-/** Empty realm-bindings generator. Yields nothing. */
-function* emptyRealmStream(): Generator<RealmBindingEvent> {
+/** Empty realm-events generator. Yields nothing. */
+function* emptyRealmStream(): Generator<RealmNMEvent> {
 	// intentionally empty — scenario dispatch emits no events on this stream
 }
 
-/** Empty token-events generator. Yields nothing. */
-function* emptyTokenizeStream(): Generator<TokenEvent> {
+/** Empty tokenize-events generator. Yields nothing. */
+function* emptyTokenizeStream(): Generator<TokenNMEvent | CommentNMEvent> {
 	// intentionally empty — scenario dispatch emits no events on this stream
 }
 
 /** Empty AST-node-events generator. Yields nothing. */
-function* emptyParseStream(): Generator<NodeEvent> {
+function* emptyParseStream(): Generator<NodeNMEvent> {
 	// intentionally empty — scenario dispatch emits no events on this stream
 }
 
-/** Empty create-stream — yields no scope or binding events. */
-function* emptyCreateStream(): Generator<ScopeEvent | BindingEvent> {
+/** Empty creation-events generator. Yields nothing. */
+function* emptyCreateStream(): Generator<ScopeNMEvent | BindingNMEvent> {
 	// intentionally empty — scenario dispatch emits no events on this stream
 }
 
 /** Empty async event stream for `EvaluateHandle`. Yields nothing, completes immediately. */
-async function* emptyEvaluateAsyncIterator(): AsyncGenerator<Event> {
+async function* emptyEvaluateAsyncIterator(): AsyncGenerator<AnyNMEvent> {
 	// intentionally empty — scenario dispatch emits no events on this stream
 }
 
 /** No-op cancel for `EvaluateHandle`. Scenario dispatch does not schedule cancellation. */
 function noOpCancel(): void {
 	// intentional no-op
-}
-
-/**
- * Build a single stub `AugmentedToken` representing the synthetic eof
- * marker for `code`. The label `'eof'` is chosen so `innermostNode:
- * null` complies with the contract comment at types.ts line 92
- * ("null only for 'eof'"). Per-call fresh `TokenType` literal honors
- * DOCS.md § "Per-instance, no shared state".
- */
-function makeStubToken(code: string): AugmentedToken {
-	return {
-		type: {
-			label: 'eof',
-			keyword: undefined,
-			beforeExpr: false,
-			startsExpr: false,
-			isAssign: false,
-			binop: null,
-			prefix: false,
-			postfix: false,
-		},
-		value: undefined,
-		start: code.length,
-		end: code.length,
-		loc: {
-			start: { line: 1, column: code.length },
-			end: { line: 1, column: code.length },
-		},
-		text: '',
-		index: 0,
-		innermostNode: null,
-		innermostPath: null,
-		prevToken: null,
-		nextToken: null,
-		leadingGap: null,
-	};
 }
 
 /** Build a zero-default `Distribution` — open-hole stub per DOCS.md § Open holes. */
@@ -352,84 +325,65 @@ function makeStubHasIo(userTotal = 0): HasIo {
 	};
 }
 
-/** Construct a `BuiltinBinding` for the canned realm-binding tables below. */
-function builtin(
-	name: string,
-	category: BuiltinBinding['category'],
-	origin: BuiltinBinding['origin'],
-): BuiltinBinding {
-	return { name, category, origin };
-}
-
 /**
- * Build a stub `Realm` carrying the canonical ECMA-262 intrinsics and
- * standard HTML host bindings (per types.ts § 3 lines 215-218). The
- * set is enumerated by types.ts and is therefore not an open hole.
+ * Build stub cross-phase `Analysis` (was `StaticAnalyses`). `realm` and
+ * `initialScope` are no longer part of `Analysis` — they live on
+ * `RealmPhase` and `CreationPhase` respectively.
  */
-function makeStubRealm(): Realm {
-	const objectRegister: BuiltinBinding['category'] = 'object-register';
-	const callable: BuiltinBinding['category'] = 'function';
-	const constant: BuiltinBinding['category'] = 'constant';
-	const ecmaOrigin: BuiltinBinding['origin'] = 'ecma';
-	const hostOrigin: BuiltinBinding['origin'] = 'host';
+function makeStubAnalysis(
+	code: string,
+	tokensCount: number,
+	nonDeterminismOverride: Partial<NonDeterminism> = {},
+	hasIoUserTotal = 0,
+): Analysis {
 	return {
-		intrinsics: {
-			Math: builtin('Math', objectRegister, ecmaOrigin),
-			Date: builtin('Date', objectRegister, ecmaOrigin),
-			Number: builtin('Number', objectRegister, ecmaOrigin),
-			String: builtin('String', objectRegister, ecmaOrigin),
-			Boolean: builtin('Boolean', callable, ecmaOrigin),
-			parseInt: builtin('parseInt', callable, ecmaOrigin),
-			parseFloat: builtin('parseFloat', callable, ecmaOrigin),
-			Infinity: builtin('Infinity', constant, ecmaOrigin),
-			NaN: builtin('NaN', constant, ecmaOrigin),
-			undefined: builtin('undefined', constant, ecmaOrigin),
-		},
-		host: {
-			console: builtin('console', objectRegister, hostOrigin),
-			alert: builtin('alert', callable, hostOrigin),
-			prompt: builtin('prompt', callable, hostOrigin),
-			confirm: builtin('confirm', callable, hostOrigin),
-		},
+		bindings: [],
+		dependencies: [],
+		features: makeStubFeatures(),
+		metrics: makeStubMetrics(code, tokensCount),
+		controlFlow: makeStubControlFlow(),
+		nonDeterminism: makeStubNonDeterminism(nonDeterminismOverride),
+		hasIo: makeStubHasIo(hasIoUserTotal),
 	};
 }
 
-/** Build a stub `InitialScope` — kind 'script', empty bindings, no outer. */
-function makeStubInitialScope(): InitialScope {
-	return { kind: 'script', bindings: [], outer: null, nodePath: '$' };
+/** Minimal plain-object acorn token for `raw.tokens` on the parse-fail leaf. */
+function makeStubRawToken(code: string): unknown {
+	return { type: { label: 'eof' }, value: undefined, start: code.length, end: code.length };
 }
 
 /**
- * Build the stub `AugmentedASTNode` (Program root) for apex-status
- * scenarios. `acornNode` is a manual literal coerced to acorn's
- * `Node` type; the real-composition branch emits real acorn output
- * for non-scenario inputs.
+ * Minimal `AcornNode` (Program root) for `raw.ast` on parse-success leaves.
+ * The real-composition branch emits real acorn output for non-scenario inputs.
  */
-function makeStubProgram(code: string): AugmentedASTNode {
-	const acornNode = {
-		type: 'Program',
-		start: 0,
-		end: code.length,
-		body: [],
-		sourceType: 'script',
-	} as unknown as AcornNode;
+function makeStubAcornNode(code: string): AcornNode {
+	return { type: 'Program', start: 0, end: code.length, body: [], sourceType: 'script' } as unknown as AcornNode;
+}
+
+/** Build a stub `RealmPhase` — data/entwined are placeholder open holes. */
+function makeStubRealmPhase(): RealmPhase {
 	return {
-		type: 'Program',
-		start: 0,
-		end: code.length,
-		loc: {
-			start: { line: 1, column: 0 },
-			end: { line: 1, column: code.length },
-		},
-		path: '$',
-		text: code,
-		parent: null,
-		children: [],
-		tokens: [],
-		comments: [],
-		firstToken: null,
-		lastToken: null,
-		acornNode,
+		data: {} as RealmData,
+		entwined: {} as RealmEntwined,
+		events: emptyRealmStream,
+	};
+}
+
+/** Build a stub `TokenizePhase` — data/entwined are placeholder open holes. */
+function makeStubTokenizePhase(): TokenizePhase {
+	return {
+		data: {} as TokenizeData,
+		entwined: {} as TokenizeEntwined,
+		events: emptyTokenizeStream,
+	};
+}
+
+/** Build a stub `ParseASTPhase` — data/entwined are placeholder open holes. */
+function makeStubParseASTPhase(): ParseASTPhase {
+	return {
+		data: {} as ParseASTData,
+		entwined: {} as ParseASTEntwined,
+		events: emptyParseStream,
 	};
 }
 
@@ -442,19 +396,47 @@ function makeStubEvaluateHandle(runInstance: RunInstance): EvaluateHandle {
 	};
 }
 
+/** Build the `EvaluationEvents` surface bound to a given `RunInstance`. */
+function makeEvaluationEvents(runInstance: RunInstance): EvaluationEvents {
+	return {
+		run: (_options?: EvaluateOptions): Promise<RunInstance> =>
+			Promise.resolve(runInstance),
+		intercept: (_options?: EvaluateOptions): EvaluateHandle =>
+			makeStubEvaluateHandle(runInstance),
+		trace: {
+			variables: (_options?: EvaluateOptions): EvaluateHandle =>
+				makeStubEvaluateHandle(runInstance),
+			syntax: (_options?: EvaluateOptions): EvaluateHandle =>
+				makeStubEvaluateHandle(runInstance),
+			semantics: (_options?: EvaluateOptions): EvaluateHandle =>
+				makeStubEvaluateHandle(runInstance),
+		},
+	};
+}
+
+/** No-op run result for non-apex leaves — evaluation gate was never passed. */
+const NOT_RUNNABLE_REPORT: EndReport = Object.freeze({ ok: false, error: null, outcome: 'not-runnable' } as EndReport);
+
+/**
+ * Wire the snippet back-ref into a RunInstance before the freeze pass.
+ * The mutation is intentional and contained to the construction window —
+ * the RunInstance is not observable before `deepFreezeInPlace` seals it.
+ */
+function wireSnippetBackReference(ri: RunInstance, snippet: Snippet): void {
+	// eslint-disable-next-line functional/immutable-data, functional/prefer-readonly-type
+	(ri as { snippet: Snippet }).snippet = snippet;
+}
+
 /**
  * Build a `RunInstance` shell with the supplied `endReport`. The
- * `snippet` back-ref is wired up after the outer Snippet is
- * constructed; see `buildApexSnippet` for the assignment.
+ * `snippet` back-ref is wired after the outer Snippet is constructed;
+ * see each scenario builder for the assignment + freeze pass.
  */
-function makeStubRunInstance(
-	initialScope: Scope,
-	endReport: EndReport,
-): RunInstance {
+function makeStubRunInstance(endReport: EndReport): RunInstance {
 	return {
 		events: [],
 		endReport,
-		finalEnvironment: initialScope,
+		finalEnvironment: {} as unknown as ScopeEntwined,
 		runMetrics: { steps: 0, durationMs: 0, iterationCount: 0 },
 		snippet: undefined as unknown as Snippet,
 	};
@@ -467,7 +449,7 @@ function makeStubRunInstance(
  */
 function makeEvalError(outcome: EndReport['outcome']): EmbodyError {
 	return {
-		phase: 'evaluate',
+		phase: 'evaluation',
 		kind: 'EvalError',
 		message: `canned scenario: evaluate-phase ${outcome}`,
 		loc: null,
@@ -510,8 +492,8 @@ function makeStubViolation(): Violation {
 
 /**
  * Build the clean `validation` summary attached to the `FAIL_AT_CREATE`
- * leaf. Tokenize-fail and parse-fail leaves omit `validation` entirely
- * (validate gate never ran). All five fields explicit per types.ts § 5;
+ * leaf. Tokenize-fail and parse-fail leaves carry `validation: null`
+ * (validate gate never ran). All five fields explicit per types.ts § 12;
  * shape-valid clean defaults (isJeJ=true) since the create-fail leaf
  * reached the validate gate and passed.
  */
@@ -525,133 +507,178 @@ function buildStageFailValidation(): Validation {
 	};
 }
 
-/** Build the `FAIL_AT_TOKENIZE` Snippet — status all false; no validation
- *  field (validate gate never ran). */
+/** Build the `FAIL_AT_TOKENIZE` Snippet — status all false; raw all null. */
 function buildFailAtTokenizeSnippet(code: string): Snippet {
+	const realmPhase = makeStubRealmPhase();
+	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
+	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
+	const eventsView: EventsView = {
+		realm: realmPhase.events,
+		tokenize: emptyTokenizeStream,
+		parseAST: emptyParseStream,
+		creation: emptyCreateStream,
+		evaluation: evaluationEvents,
+	};
 	const snippet: Snippet = {
 		status: { tokenized: false, parsed: false, validated: false, created: false },
 		source: buildSource(code),
-		parse: { tokens: [] },
+		raw: { tokens: null, ast: null, comments: null },
 		errors: {
 			phase: 'parse:tokenize',
 			kind: 'SyntaxError',
 			message: 'canned scenario: tokenize-phase failure',
 			loc: null,
 		},
-		streams: {
-			realm: emptyRealmStream,
-			parse: { tokenize: emptyTokenizeStream, parse: emptyParseStream },
-		},
+		analysis: null,
+		validation: null,
+		realm: realmPhase,
+		tokenize: null,
+		parseAST: null,
+		creation: null,
+		evaluation: evaluationPhase,
+		events: eventsView,
 	};
-	return deepFreezeInPlace(snippet);
+	wireSnippetBackReference(runInstance, snippet);
+	deepFreezeInPlace(runInstance);
+	return snippet;
 }
 
-/** Build the `FAIL_AT_PARSE` Snippet — tokenize OK, parse fails; no
- *  validation field (validate gate never ran). */
+/** Build the `FAIL_AT_PARSE` Snippet — tokenize OK, parse fails; raw.ast null. */
 function buildFailAtParseSnippet(code: string): Snippet {
+	const realmPhase = makeStubRealmPhase();
+	const tokenizePhase = makeStubTokenizePhase();
+	const rawTokens: ReadonlyArray<unknown> = [makeStubRawToken(code)];
+	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
+	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
+	const eventsView: EventsView = {
+		realm: realmPhase.events,
+		tokenize: tokenizePhase.events,
+		parseAST: emptyParseStream,
+		creation: emptyCreateStream,
+		evaluation: evaluationEvents,
+	};
 	const snippet: Snippet = {
 		status: { tokenized: true, parsed: false, validated: false, created: false },
 		source: buildSource(code),
-		parse: { tokens: [makeStubToken(code)] },
+		raw: { tokens: rawTokens, ast: null, comments: null },
 		errors: {
 			phase: 'parse:ast',
 			kind: 'SyntaxError',
 			message: 'canned scenario: parse-phase failure',
 			loc: null,
 		},
-		streams: {
-			realm: emptyRealmStream,
-			parse: { tokenize: emptyTokenizeStream, parse: emptyParseStream },
-		},
+		analysis: null,
+		validation: null,
+		realm: realmPhase,
+		tokenize: tokenizePhase,
+		parseAST: null,
+		creation: null,
+		evaluation: evaluationPhase,
+		events: eventsView,
 	};
-	return deepFreezeInPlace(snippet);
+	wireSnippetBackReference(runInstance, snippet);
+	deepFreezeInPlace(runInstance);
+	return snippet;
 }
 
 /** Build the `VALIDATION_FAIL` Snippet — parse OK, validate fails (isJeJ=false).
- *  Carries `parse.ast`, `parse.comments`, `static`, and `validation` (with
- *  violations populated). NO `streams.create` and NO `streams.evaluate` —
- *  invalid JEJ programs don't run. `errors.phase = 'validate'`. */
+ *  Carries `raw.ast`, `raw.comments`, `analysis`, and `validation` (with
+ *  violations populated). Creation null. Evaluation is always present but
+ *  no-op (outcome: 'not-runnable'). `errors.phase = 'validation'`. */
 function buildValidateFailSnippet(code: string): Snippet {
-	const ast = makeStubProgram(code);
-	const initialScope = makeStubInitialScope();
-	const tokens = [makeStubToken(code)];
-	const staticAnalyses: StaticAnalyses = {
-		realm: makeStubRealm(),
-		initialScope,
-		bindings: [],
-		dependencies: [],
-		features: makeStubFeatures(),
-		metrics: makeStubMetrics(code, tokens.length),
-		controlFlow: makeStubControlFlow(),
-		nonDeterminism: makeStubNonDeterminism(),
-		hasIo: makeStubHasIo(0),
-	};
+	const realmPhase = makeStubRealmPhase();
+	const tokenizePhase = makeStubTokenizePhase();
+	const parseASTPhase = makeStubParseASTPhase();
+	const rawTokens: ReadonlyArray<unknown> = [makeStubRawToken(code)];
+	const rawAst = makeStubAcornNode(code);
 	const violations = [makeStubViolation()];
-	const nd = staticAnalyses.nonDeterminism;
+	const analysis = makeStubAnalysis(code, rawTokens.length);
+	const nd = analysis.nonDeterminism;
 	const validation: Validation = {
 		isJeJ: violations.length === 0,
 		isDeterministic: !(nd.random || nd.clock || nd.userInput || nd.locale),
-		doesPause: staticAnalyses.hasIo.user.total > 0,
+		doesPause: analysis.hasIo.user.total > 0,
 		formatted: true,
 		violations,
+	};
+	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
+	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
+	const eventsView: EventsView = {
+		realm: realmPhase.events,
+		tokenize: tokenizePhase.events,
+		parseAST: parseASTPhase.events,
+		creation: emptyCreateStream,
+		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
 		status: { tokenized: true, parsed: true, validated: false, created: false },
 		source: buildSource(code),
-		parse: {
-			tokens,
-			comments: [],
-			ast,
-			nodesByPath: { $: ast },
-			tokensByOffset: {},
-			nodesByOffset: { 0: ast },
-		},
-		static: staticAnalyses,
-		validation,
+		raw: { tokens: rawTokens, ast: rawAst, comments: [] },
 		errors: {
-			phase: 'validate',
+			phase: 'validation',
 			kind: 'ValidationError',
 			message: 'canned scenario: JEJ subset violations present',
 			loc: null,
 		},
-		streams: {
-			realm: emptyRealmStream,
-			parse: { tokenize: emptyTokenizeStream, parse: emptyParseStream },
-		},
+		analysis,
+		validation,
+		realm: realmPhase,
+		tokenize: tokenizePhase,
+		parseAST: parseASTPhase,
+		creation: null,
+		evaluation: evaluationPhase,
+		events: eventsView,
 	};
-	return deepFreezeInPlace(snippet);
+	wireSnippetBackReference(runInstance, snippet);
+	deepFreezeInPlace(runInstance);
+	return snippet;
 }
 
 /** Build the `FAIL_AT_CREATE` Snippet — parse + validate OK, creation fails.
- *  Carries clean `validation` (isJeJ=true), `streams.create` (empty —
- *  partial events would land here in real composition), no `streams.evaluate`. */
+ *  Carries `analysis` (validate gate ran), clean `validation` (isJeJ=true),
+ *  and `creation: null` (failed). Evaluation no-op. */
 function buildFailAtCreateSnippet(code: string): Snippet {
-	const ast = makeStubProgram(code);
+	const realmPhase = makeStubRealmPhase();
+	const tokenizePhase = makeStubTokenizePhase();
+	const parseASTPhase = makeStubParseASTPhase();
+	const rawTokens: ReadonlyArray<unknown> = [makeStubRawToken(code)];
+	const rawAst = makeStubAcornNode(code);
+	const analysis = makeStubAnalysis(code, rawTokens.length);
+	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
+	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
+	const eventsView: EventsView = {
+		realm: realmPhase.events,
+		tokenize: tokenizePhase.events,
+		parseAST: parseASTPhase.events,
+		creation: emptyCreateStream,
+		evaluation: evaluationEvents,
+	};
 	const snippet: Snippet = {
 		status: { tokenized: true, parsed: true, validated: true, created: false },
 		source: buildSource(code),
-		parse: {
-			tokens: [makeStubToken(code)],
-			comments: [],
-			ast,
-			nodesByPath: { $: ast },
-			tokensByOffset: {},
-			nodesByOffset: { 0: ast },
-		},
-		validation: buildStageFailValidation(),
+		raw: { tokens: rawTokens, ast: rawAst, comments: [] },
 		errors: {
-			phase: 'create',
+			phase: 'creation',
 			kind: 'SyntaxError',
 			message: 'canned scenario: create-phase failure',
 			loc: null,
 		},
-		streams: {
-			realm: emptyRealmStream,
-			parse: { tokenize: emptyTokenizeStream, parse: emptyParseStream },
-			create: emptyCreateStream,
-		},
+		analysis,
+		validation: buildStageFailValidation(),
+		realm: realmPhase,
+		tokenize: tokenizePhase,
+		parseAST: parseASTPhase,
+		creation: null,
+		evaluation: evaluationPhase,
+		events: eventsView,
 	};
-	return deepFreezeInPlace(snippet);
+	wireSnippetBackReference(runInstance, snippet);
+	deepFreezeInPlace(runInstance);
+	return snippet;
 }
 
 /** Apex overlay parameters — the orthogonal axes one apex-status scenario can flip. */
@@ -676,71 +703,56 @@ type ApexOverlay = {
  * set guard.
  */
 function buildApexSnippet(code: string, overlay: ApexOverlay): Snippet {
-	const ast = makeStubProgram(code);
-	const initialScope = makeStubInitialScope();
-	const tokens = [makeStubToken(code)];
-	const staticAnalyses: StaticAnalyses = {
-		realm: makeStubRealm(),
-		initialScope,
-		bindings: [],
-		dependencies: [],
-		features: makeStubFeatures(),
-		metrics: makeStubMetrics(code, tokens.length),
-		controlFlow: makeStubControlFlow(),
-		nonDeterminism: makeStubNonDeterminism(overlay.nonDeterminismOverride),
-		hasIo: makeStubHasIo(overlay.hasIoUserTotal),
+	const realmPhase = makeStubRealmPhase();
+	const tokenizePhase = makeStubTokenizePhase();
+	const parseASTPhase = makeStubParseASTPhase();
+	const creationPhase = {
+		data: {} as CreationData,
+		entwined: {} as CreationEntwined,
+		events: emptyCreateStream,
 	};
-	const runInstance = makeStubRunInstance(
-		initialScope,
-		makeApexEndReport(overlay.evalOutcome),
+	const rawTokens: ReadonlyArray<unknown> = [makeStubRawToken(code)];
+	const rawAst = makeStubAcornNode(code);
+	const analysis = makeStubAnalysis(
+		code,
+		rawTokens.length,
+		overlay.nonDeterminismOverride,
+		overlay.hasIoUserTotal,
 	);
-	const nd = staticAnalyses.nonDeterminism;
+	const nd = analysis.nonDeterminism;
 	const validation: Validation = {
 		isJeJ: overlay.violations.length === 0,
 		// Derive per types.ts lines 380-381.
 		isDeterministic: !(nd.random || nd.clock || nd.userInput || nd.locale),
-		doesPause: staticAnalyses.hasIo.user.total > 0,
+		doesPause: analysis.hasIo.user.total > 0,
 		formatted: true,
 		violations: overlay.violations,
+	};
+	const runInstance = makeStubRunInstance(makeApexEndReport(overlay.evalOutcome));
+	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
+	const eventsView: EventsView = {
+		realm: realmPhase.events,
+		tokenize: tokenizePhase.events,
+		parseAST: parseASTPhase.events,
+		creation: creationPhase.events,
+		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
 		status: { tokenized: true, parsed: true, validated: true, created: true },
 		source: buildSource(code),
-		parse: {
-			tokens,
-			comments: [],
-			ast,
-			nodesByPath: { $: ast },
-			tokensByOffset: {},
-			nodesByOffset: { 0: ast },
-		},
-		static: staticAnalyses,
-		validation,
+		raw: { tokens: rawTokens, ast: rawAst, comments: [] },
 		errors: null,
-		streams: {
-			realm: emptyRealmStream,
-			parse: { tokenize: emptyTokenizeStream, parse: emptyParseStream },
-			create: emptyCreateStream,
-			evaluate: {
-				run: (_options?: EvaluateOptions): Promise<RunInstance> =>
-					Promise.resolve(runInstance),
-				intercept: (_options?: EvaluateOptions): EvaluateHandle =>
-					makeStubEvaluateHandle(runInstance),
-				trace: {
-					syntax: (_options?: EvaluateOptions): EvaluateHandle =>
-						makeStubEvaluateHandle(runInstance),
-					semantics: (_options?: EvaluateOptions): EvaluateHandle =>
-						makeStubEvaluateHandle(runInstance),
-				},
-			},
-		},
+		analysis,
+		validation,
+		realm: realmPhase,
+		tokenize: tokenizePhase,
+		parseAST: parseASTPhase,
+		creation: creationPhase,
+		evaluation: evaluationPhase,
+		events: eventsView,
 	};
-	// Wire the back-ref before freezing. The mutation is intentional
-	// and contained to the construction window — neither the snippet
-	// nor the runInstance is observable in its pre-freeze state.
-	// eslint-disable-next-line functional/immutable-data
-	(runInstance as { snippet: Snippet }).snippet = snippet;
-
+	wireSnippetBackReference(runInstance, snippet);
 	// Freeze the runInstance first; its walk includes runInstance.snippet
 	// which freezes the entire snippet graph in one pass. The visited-set
 	// cycle guard inside `@utils/deep-freeze-in-place` prevents infinite
@@ -812,7 +824,7 @@ const APEX_OVERLAYS: Readonly<Record<string, ApexOverlay>> = Object.freeze({
  * @param code - Source string. Normalized via `trim().toUpperCase()` for
  *   scenario matching; raw form passed to real composition for non-scenario
  *   input.
- * @returns A deep-frozen `Snippet` whose status / validation / static /
+ * @returns A deep-frozen `Snippet` whose status / validation / analysis /
  *   eval outcome reflects the recognized scenario or real composition
  *   result.
  * @throws `TypeError` when `code` is not a string (`code.trim()` fails

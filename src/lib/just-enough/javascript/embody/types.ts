@@ -655,7 +655,7 @@ interface EvaluateHandle extends AsyncIterable<AnyNMEvent> {
 interface EndReport {
 	readonly ok:      boolean;
 	readonly error:   EmbodyError | null;
-	readonly outcome: 'completed' | 'errored' | 'timed-out' | 'cancelled' | 'limit-exceeded';
+	readonly outcome: 'completed' | 'errored' | 'timed-out' | 'cancelled' | 'limit-exceeded' | 'not-runnable';
 }
 
 interface RunMetrics {

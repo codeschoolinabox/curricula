@@ -58,21 +58,16 @@ describe('embody', () => {
 			expect(embody('OK').errors).toBe(null);
 		});
 
-		it('returns parse.ast as a Program node', () => {
-			expect(embody('OK').parse.ast?.type).toBe('Program');
+		it('returns raw.ast as a Program node', () => {
+			expect(embody('OK').raw.ast?.type).toBe('Program');
 		});
 
-		it('returns parse.comments: []', () => {
-			expect(embody('OK').parse.comments).toEqual([]);
+		it('returns raw.comments: []', () => {
+			expect(embody('OK').raw.comments).toEqual([]);
 		});
 
-		it('returns static defined with shape-valid sub-objects', () => {
-			expect(embody('OK').static).toMatchObject({
-				realm: expect.objectContaining({
-					intrinsics: expect.any(Object),
-					host: expect.any(Object),
-				}),
-				initialScope: expect.objectContaining({ kind: 'script' }),
+		it('analysis is defined with shape-valid sub-objects', () => {
+			expect(embody('OK').analysis).toMatchObject({
 				bindings: expect.any(Array),
 				dependencies: expect.any(Array),
 				features: expect.objectContaining({ usesShortCircuit: false }),
@@ -99,28 +94,28 @@ describe('embody', () => {
 			expect(embody('OK').validation!.violations).toEqual([]);
 		});
 
-		it('exposes streams.evaluate', () => {
-			expect(embody('OK').streams.evaluate).toBeDefined();
+		it('exposes events.evaluation', () => {
+			expect(embody('OK').events.evaluation).toBeDefined();
 		});
 
-		it('streams.evaluate.run() resolves to RunInstance with outcome completed', async () => {
-			const ri = await embody('OK').streams.evaluate!.run();
+		it('events.evaluation.run() resolves to RunInstance with outcome completed', async () => {
+			const ri = await embody('OK').events.evaluation.run();
 			expect(ri.endReport.outcome).toBe('completed');
 		});
 
-		it('streams.evaluate.run() resolves to RunInstance with ok: true', async () => {
-			const ri = await embody('OK').streams.evaluate!.run();
+		it('events.evaluation.run() resolves to RunInstance with ok: true', async () => {
+			const ri = await embody('OK').events.evaluation.run();
 			expect(ri.endReport.ok).toBe(true);
 		});
 
-		it('streams.evaluate.run() resolved RunInstance has events: []', async () => {
-			const ri = await embody('OK').streams.evaluate!.run();
+		it('events.evaluation.run() resolved RunInstance has events: []', async () => {
+			const ri = await embody('OK').events.evaluation.run();
 			expect(ri.events).toEqual([]);
 		});
 
 		it('back-ref RunInstance.snippet === embodiment (identity)', async () => {
 			const s = embody('OK');
-			const ri = await s.streams.evaluate!.run();
+			const ri = await s.events.evaluation.run();
 			expect(ri.snippet).toBe(s);
 		});
 
@@ -147,38 +142,47 @@ describe('embody', () => {
 			expect(embody('FAIL_AT_TOKENIZE').errors!.message).toMatch(/canned scenario/i);
 		});
 
-		it('returns parse.tokens: []', () => {
-			expect(embody('FAIL_AT_TOKENIZE').parse.tokens).toEqual([]);
+		it('returns raw.tokens: null (tokenize did not complete)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').raw.tokens).toBeNull();
 		});
 
-		it('returns no parse.ast', () => {
-			expect(embody('FAIL_AT_TOKENIZE').parse.ast).toBeUndefined();
+		it('returns raw.ast: null (tokenize did not complete)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').raw.ast).toBeNull();
 		});
 
-		it('returns no static (not parsed)', () => {
-			expect(embody('FAIL_AT_TOKENIZE').static).toBeUndefined();
+		it('returns analysis: null (not parsed)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').analysis).toBeNull();
 		});
 
-		it('omits streams.evaluate (gate not passed)', () => {
-			expect(embody('FAIL_AT_TOKENIZE').streams.evaluate).toBeUndefined();
+		it('evaluation is always present; outcome is not-runnable', async () => {
+			const ri = await embody('FAIL_AT_TOKENIZE').events.evaluation.run();
+			expect(ri.endReport.outcome).toBe('not-runnable');
 		});
 
-		it('exposes streams.realm and streams.parse.tokenize', () => {
+		it('exposes events.realm and events.tokenize as callable generators', () => {
 			const s = embody('FAIL_AT_TOKENIZE');
-			expect(typeof s.streams.realm).toBe('function');
-			expect(typeof s.streams.parse?.tokenize).toBe('function');
+			expect(typeof s.events.realm).toBe('function');
+			expect(typeof s.events.tokenize).toBe('function');
 		});
 
-		it('omits streams.create (validate gate did not run)', () => {
-			expect(embody('FAIL_AT_TOKENIZE').streams.create).toBeUndefined();
+		it('tokenize is null (staircase: tokenize gate failed)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').tokenize).toBeNull();
 		});
 
-		it('omits streams.evaluate (gate chain did not complete)', () => {
-			expect(embody('FAIL_AT_TOKENIZE').streams.evaluate).toBeUndefined();
+		it('parseAST is null (staircase: tokenize gate failed)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').parseAST).toBeNull();
 		});
 
-		it('omits validation (validate gate did not run)', () => {
-			expect(embody('FAIL_AT_TOKENIZE').validation).toBeUndefined();
+		it('raw.comments is null (pre-parse)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').raw.comments).toBeNull();
+		});
+
+		it('creation is null (validate gate did not run)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').creation).toBeNull();
+		});
+
+		it('validation is null (validate gate did not run)', () => {
+			expect(embody('FAIL_AT_TOKENIZE').validation).toBeNull();
 		});
 
 		it('returns a frozen Snippet', () => {
@@ -200,32 +204,41 @@ describe('embody', () => {
 			expect(embody('FAIL_AT_PARSE').errors!.phase).toBe('parse:ast');
 		});
 
-		it('returns parse.tokens populated (length > 0)', () => {
-			expect(embody('FAIL_AT_PARSE').parse.tokens!.length).toBeGreaterThan(0);
+		it('returns raw.tokens populated (length > 0)', () => {
+			expect(embody('FAIL_AT_PARSE').raw.tokens!.length).toBeGreaterThan(0);
 		});
 
-		it('returns no parse.ast (parse failed)', () => {
-			expect(embody('FAIL_AT_PARSE').parse.ast).toBeUndefined();
+		it('returns raw.ast: null (parse failed)', () => {
+			expect(embody('FAIL_AT_PARSE').raw.ast).toBeNull();
 		});
 
-		it('returns no static (parse failed)', () => {
-			expect(embody('FAIL_AT_PARSE').static).toBeUndefined();
+		it('returns analysis: null (parse failed)', () => {
+			expect(embody('FAIL_AT_PARSE').analysis).toBeNull();
 		});
 
-		it('omits streams.evaluate', () => {
-			expect(embody('FAIL_AT_PARSE').streams.evaluate).toBeUndefined();
+		it('evaluation is always present; outcome is not-runnable', async () => {
+			const ri = await embody('FAIL_AT_PARSE').events.evaluation.run();
+			expect(ri.endReport.outcome).toBe('not-runnable');
 		});
 
-		it('omits streams.create (validate gate did not run)', () => {
-			expect(embody('FAIL_AT_PARSE').streams.create).toBeUndefined();
+		it('tokenize is non-null (staircase: tokenize gate passed)', () => {
+			expect(embody('FAIL_AT_PARSE').tokenize).toBeDefined();
 		});
 
-		it('omits streams.evaluate (gate chain did not complete)', () => {
-			expect(embody('FAIL_AT_PARSE').streams.evaluate).toBeUndefined();
+		it('parseAST is null (staircase: parse gate failed)', () => {
+			expect(embody('FAIL_AT_PARSE').parseAST).toBeNull();
 		});
 
-		it('omits validation (validate gate did not run)', () => {
-			expect(embody('FAIL_AT_PARSE').validation).toBeUndefined();
+		it('raw.comments is null (pre-parse)', () => {
+			expect(embody('FAIL_AT_PARSE').raw.comments).toBeNull();
+		});
+
+		it('creation is null (validate gate did not run)', () => {
+			expect(embody('FAIL_AT_PARSE').creation).toBeNull();
+		});
+
+		it('validation is null (validate gate did not run)', () => {
+			expect(embody('FAIL_AT_PARSE').validation).toBeNull();
 		});
 
 		it('returns a frozen Snippet', () => {
@@ -243,24 +256,30 @@ describe('embody', () => {
 			});
 		});
 
-		it('returns errors.phase: create', () => {
-			expect(embody('FAIL_AT_CREATE').errors!.phase).toBe('create');
+		it('returns errors.phase: creation', () => {
+			expect(embody('FAIL_AT_CREATE').errors!.phase).toBe('creation');
 		});
 
-		it('returns parse.ast populated (Program node)', () => {
-			expect(embody('FAIL_AT_CREATE').parse.ast?.type).toBe('Program');
+		it('returns raw.ast populated (Program node)', () => {
+			expect(embody('FAIL_AT_CREATE').raw.ast?.type).toBe('Program');
 		});
 
-		it('returns no static (creation failed)', () => {
-			expect(embody('FAIL_AT_CREATE').static).toBeUndefined();
+		it('analysis is present (validate gate ran before creation failed)', () => {
+			expect(embody('FAIL_AT_CREATE').analysis).toBeDefined();
 		});
 
-		it('exposes streams.create', () => {
-			expect(typeof embody('FAIL_AT_CREATE').streams.create).toBe('function');
+		it('tokenize and parseAST are non-null (staircase: both gates passed)', () => {
+			expect(embody('FAIL_AT_CREATE').tokenize).toBeDefined();
+			expect(embody('FAIL_AT_CREATE').parseAST).toBeDefined();
 		});
 
-		it('omits streams.evaluate (creation gate not passed)', () => {
-			expect(embody('FAIL_AT_CREATE').streams.evaluate).toBeUndefined();
+		it('creation is null (creation gate failed)', () => {
+			expect(embody('FAIL_AT_CREATE').creation).toBeNull();
+		});
+
+		it('evaluation is always present; outcome is not-runnable (create-fail leaf)', async () => {
+			const ri = await embody('FAIL_AT_CREATE').events.evaluation.run();
+			expect(ri.endReport.outcome).toBe('not-runnable');
 		});
 
 		it('exposes clean validation (isJeJ=true; validate gate passed before create failed)', () => {
@@ -304,16 +323,16 @@ describe('embody', () => {
 			});
 		});
 
-		it('retains parse.ast (Program node) — validate gate ran on top of parsed AST', () => {
-			expect(embody('VALIDATION_FAIL').parse.ast?.type).toBe('Program');
+		it('retains raw.ast (Program node) — validate gate ran on top of parsed AST', () => {
+			expect(embody('VALIDATION_FAIL').raw.ast?.type).toBe('Program');
 		});
 
-		it('retains parse.comments: [] — parse output preserved on validate-fail leaf', () => {
-			expect(embody('VALIDATION_FAIL').parse.comments).toEqual([]);
+		it('retains raw.comments: [] — parse output preserved on validate-fail leaf', () => {
+			expect(embody('VALIDATION_FAIL').raw.comments).toEqual([]);
 		});
 
-		it('static is present (validate gate ran on top of static analyses)', () => {
-			expect(embody('VALIDATION_FAIL').static).toBeDefined();
+		it('analysis is present (validate gate ran on top of parsed code)', () => {
+			expect(embody('VALIDATION_FAIL').analysis).toBeDefined();
 		});
 
 		it('validation.isDeterministic and validation.doesPause are boolean-typed', () => {
@@ -326,20 +345,26 @@ describe('embody', () => {
 			expect(embody('VALIDATION_FAIL').validation!.formatted).toBe(true);
 		});
 
-		it('errors has shape-valid EmbodyError with phase=validate', () => {
+		it('errors has shape-valid EmbodyError with phase=validation', () => {
 			expect(embody('VALIDATION_FAIL').errors).toMatchObject({
-				phase: 'validate',
+				phase: 'validation',
 				kind: expect.any(String),
 				message: expect.any(String),
 			});
 		});
 
-		it('streams.evaluate is NOT exposed (validate-fail leaf)', () => {
-			expect(embody('VALIDATION_FAIL').streams.evaluate).toBeUndefined();
+		it('evaluation is always present; outcome is not-runnable (validate-fail leaf)', async () => {
+			const ri = await embody('VALIDATION_FAIL').events.evaluation.run();
+			expect(ri.endReport.outcome).toBe('not-runnable');
 		});
 
-		it('streams.create is NOT exposed (validate-fail leaf)', () => {
-			expect(embody('VALIDATION_FAIL').streams.create).toBeUndefined();
+		it('tokenize and parseAST are non-null (staircase: both gates passed before validate failed)', () => {
+			expect(embody('VALIDATION_FAIL').tokenize).toBeDefined();
+			expect(embody('VALIDATION_FAIL').parseAST).toBeDefined();
+		});
+
+		it('creation is null (validate-fail leaf)', () => {
+			expect(embody('VALIDATION_FAIL').creation).toBeNull();
 		});
 
 		it('returns a frozen Snippet', () => {
@@ -352,8 +377,8 @@ describe('embody', () => {
 			expect(embody('NON_DETERMINISTIC').status.created).toBe(true);
 		});
 
-		it('returns static.nonDeterminism.random: true', () => {
-			expect(embody('NON_DETERMINISTIC').static!.nonDeterminism.random).toBe(
+		it('returns analysis.nonDeterminism.random: true', () => {
+			expect(embody('NON_DETERMINISTIC').analysis!.nonDeterminism.random).toBe(
 				true,
 			);
 		});
@@ -376,8 +401,8 @@ describe('embody', () => {
 			expect(embody('PAUSES').status.created).toBe(true);
 		});
 
-		it('returns static.hasIo.user.total: 1', () => {
-			expect(embody('PAUSES').static!.hasIo.user.total).toBe(1);
+		it('returns analysis.hasIo.user.total: 1', () => {
+			expect(embody('PAUSES').analysis!.hasIo.user.total).toBe(1);
 		});
 
 		it('derives validation.doesPause: true', () => {
@@ -398,19 +423,19 @@ describe('embody', () => {
 			expect(embody('EVAL_ERROR').status.created).toBe(true);
 		});
 
-		it('streams.evaluate.run() resolves with endReport.ok: false', async () => {
-			const ri = await embody('EVAL_ERROR').streams.evaluate!.run();
+		it('events.evaluation.run() resolves with endReport.ok: false', async () => {
+			const ri = await embody('EVAL_ERROR').events.evaluation.run();
 			expect(ri.endReport.ok).toBe(false);
 		});
 
-		it('streams.evaluate.run() resolves with outcome: errored', async () => {
-			const ri = await embody('EVAL_ERROR').streams.evaluate!.run();
+		it('events.evaluation.run() resolves with outcome: errored', async () => {
+			const ri = await embody('EVAL_ERROR').events.evaluation.run();
 			expect(ri.endReport.outcome).toBe('errored');
 		});
 
-		it('streams.evaluate.run() resolves with endReport.error.phase: evaluate', async () => {
-			const ri = await embody('EVAL_ERROR').streams.evaluate!.run();
-			expect(ri.endReport.error?.phase).toBe('evaluate');
+		it('events.evaluation.run() resolves with endReport.error.phase: evaluation', async () => {
+			const ri = await embody('EVAL_ERROR').events.evaluation.run();
+			expect(ri.endReport.error?.phase).toBe('evaluation');
 		});
 
 		it('Snippet-level errors stays null (errors gate is pre-evaluation)', () => {
@@ -419,50 +444,50 @@ describe('embody', () => {
 	});
 
 	describe('EVAL_TIMEOUT', () => {
-		it('streams.evaluate.run() resolves with outcome: timed-out', async () => {
-			const ri = await embody('EVAL_TIMEOUT').streams.evaluate!.run();
+		it('events.evaluation.run() resolves with outcome: timed-out', async () => {
+			const ri = await embody('EVAL_TIMEOUT').events.evaluation.run();
 			expect(ri.endReport.outcome).toBe('timed-out');
 		});
 
-		it('streams.evaluate.run() resolves with endReport.ok: false', async () => {
-			const ri = await embody('EVAL_TIMEOUT').streams.evaluate!.run();
+		it('events.evaluation.run() resolves with endReport.ok: false', async () => {
+			const ri = await embody('EVAL_TIMEOUT').events.evaluation.run();
 			expect(ri.endReport.ok).toBe(false);
 		});
 	});
 
 	describe('EVAL_LIMIT', () => {
-		it('streams.evaluate.run() resolves with outcome: limit-exceeded', async () => {
-			const ri = await embody('EVAL_LIMIT').streams.evaluate!.run();
+		it('events.evaluation.run() resolves with outcome: limit-exceeded', async () => {
+			const ri = await embody('EVAL_LIMIT').events.evaluation.run();
 			expect(ri.endReport.outcome).toBe('limit-exceeded');
 		});
 
-		it('streams.evaluate.run() resolves with endReport.ok: false', async () => {
-			const ri = await embody('EVAL_LIMIT').streams.evaluate!.run();
+		it('events.evaluation.run() resolves with endReport.ok: false', async () => {
+			const ri = await embody('EVAL_LIMIT').events.evaluation.run();
 			expect(ri.endReport.ok).toBe(false);
 		});
 	});
 
 	describe('EVAL_CANCELLED', () => {
-		it('streams.evaluate.run() resolves with outcome: cancelled', async () => {
-			const ri = await embody('EVAL_CANCELLED').streams.evaluate!.run();
+		it('events.evaluation.run() resolves with outcome: cancelled', async () => {
+			const ri = await embody('EVAL_CANCELLED').events.evaluation.run();
 			expect(ri.endReport.outcome).toBe('cancelled');
 		});
 
-		it('streams.evaluate.run() resolves with endReport.ok: false', async () => {
-			const ri = await embody('EVAL_CANCELLED').streams.evaluate!.run();
+		it('events.evaluation.run() resolves with endReport.ok: false', async () => {
+			const ri = await embody('EVAL_CANCELLED').events.evaluation.run();
 			expect(ri.endReport.ok).toBe(false);
 		});
 	});
 
-	describe('streams.evaluate.intercept and trace.* (apex modes)', () => {
+	describe('events.evaluation.intercept and trace.* (apex modes)', () => {
 		it('intercept returns an EvaluateHandle with .result and .cancel', () => {
-			const handle = embody('OK').streams.evaluate!.intercept();
+			const handle = embody('OK').events.evaluation.intercept();
 			expect(handle.result).toBeInstanceOf(Promise);
 			expect(typeof handle.cancel).toBe('function');
 		});
 
 		it('intercept async-iterates zero events', async () => {
-			const handle = embody('OK').streams.evaluate!.intercept();
+			const handle = embody('OK').events.evaluation.intercept();
 			const collected: unknown[] = [];
 			for await (const event of handle) {
 				collected.push(event);
@@ -471,29 +496,39 @@ describe('embody', () => {
 		});
 
 		it('cancel() returns undefined (no-op)', () => {
-			const handle = embody('OK').streams.evaluate!.intercept();
+			const handle = embody('OK').events.evaluation.intercept();
 			expect(handle.cancel()).toBeUndefined();
 		});
 
 		it('intercept .result resolves to the same canned RunInstance run() returns', async () => {
 			const s = embody('OK');
-			const handleResult = await s.streams.evaluate!.intercept().result;
-			const runResult = await s.streams.evaluate!.run();
+			const handleResult = await s.events.evaluation.intercept().result;
+			const runResult = await s.events.evaluation.run();
 			expect(handleResult).toBe(runResult);
 		});
 
 		it('trace.syntax returns a shape-conformant EvaluateHandle', () => {
-			expect(embody('OK').streams.evaluate!.trace.syntax()).toMatchObject({
+			expect(embody('OK').events.evaluation.trace.syntax()).toMatchObject({
 				result: expect.any(Promise),
 				cancel: expect.any(Function),
 			});
 		});
 
 		it('trace.semantics returns a shape-conformant EvaluateHandle', () => {
-			expect(embody('OK').streams.evaluate!.trace.semantics()).toMatchObject({
+			expect(embody('OK').events.evaluation.trace.semantics()).toMatchObject({
 				result: expect.any(Promise),
 				cancel: expect.any(Function),
 			});
+		});
+
+		it('events.evaluation === evaluation.events (reference-identical across both axes)', () => {
+			const s = embody('OK');
+			expect(s.events.evaluation).toBe(s.evaluation.events);
+		});
+
+		it('events.realm === realm.events (reference-identical across both axes)', () => {
+			const s = embody('OK');
+			expect(s.events.realm).toBe(s.realm.events);
 		});
 	});
 
@@ -597,7 +632,7 @@ describe('embody', () => {
 
 		it('ast stub and source are length-consistent post-normalization', () => {
 			const s = embody('  OK\n');
-			expect(s.parse.ast?.end).toBe(s.source.code.length);
+			expect(s.raw.ast?.end).toBe(s.source.code.length);
 		});
 	});
 
@@ -639,14 +674,14 @@ describe('embody', () => {
 			}).toThrow();
 		});
 
-		it('mutating snippet.parse.tokens throws in strict mode', () => {
+		it('mutating snippet.raw.tokens throws in strict mode', () => {
 			const s = embody('OK');
 			expect(() => {
-				(s.parse as { tokens: unknown[] }).tokens = [];
+				(s.raw as { tokens: unknown }).tokens = [];
 			}).toThrow();
 		});
 
-		it('apex modes: runInstance is frozen (7 apex scenarios; VALIDATION_FAIL is validate-fail leaf, no evaluate stream)', async () => {
+		it('apex modes: runInstance is frozen (7 apex scenarios; VALIDATION_FAIL is validate-fail leaf)', async () => {
 			const apexModes = [
 				'OK',
 				'NON_DETERMINISTIC',
@@ -657,17 +692,17 @@ describe('embody', () => {
 				'EVAL_CANCELLED',
 			] as const;
 			for (const mode of apexModes) {
-				const ri = await embody(mode).streams.evaluate!.run();
+				const ri = await embody(mode).events.evaluation.run();
 				expect(Object.isFrozen(ri)).toBe(true);
 			}
 		});
 
 		it('cycle freeze does not stack-overflow (back-ref reaches itself)', async () => {
 			const s = embody('OK');
-			const ri = await s.streams.evaluate!.run();
+			const ri = await s.events.evaluation.run();
 			// Reaching this assertion means the cycle was traversed safely
 			// during construction-time freeze.
-			expect(ri.snippet.streams.evaluate).toBeDefined();
+			expect(ri.snippet.events.evaluation).toBeDefined();
 		});
 	});
 });
