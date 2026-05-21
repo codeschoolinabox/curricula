@@ -532,42 +532,6 @@ describe('embody', () => {
 		});
 	});
 
-	describe('unknown scenario handling', () => {
-		it('throws on unknown string input', () => {
-			expect(() => embody('FOO')).toThrow();
-		});
-
-		it('throws on empty string', () => {
-			expect(() => embody('')).toThrow();
-		});
-
-		it('throws on whitespace-only input', () => {
-			expect(() => embody('   ')).toThrow();
-		});
-
-		it('throws on a scenario as substring', () => {
-			expect(() => embody('// OK in a comment')).toThrow();
-		});
-
-		it('throws on a real-looking JS source string', () => {
-			expect(() => embody('let x = 1;')).toThrow();
-		});
-
-		it('throws on prototype-chain names (toString, __proto__, constructor)', () => {
-			expect(() => embody('toString')).toThrow();
-			expect(() => embody('__proto__')).toThrow();
-			expect(() => embody('constructor')).toThrow();
-		});
-
-		it('error message names the unknown input', () => {
-			expect(() => embody('FOO')).toThrow(/FOO/);
-		});
-
-		it('error message lists the expected scenarios', () => {
-			expect(() => embody('FOO')).toThrow(/Expected one of/);
-		});
-	});
-
 	describe('normalization (trim + uppercase before scenario match)', () => {
 		it('lowercased scenario keyword (ok) → matches OK scenario', () => {
 			expect(embody('ok').status.tokenized).toBe(true);
@@ -606,22 +570,6 @@ describe('embody', () => {
 			expect(embody('  OK\n').source.code).toBe('OK');
 		});
 
-		it('internal whitespace is NOT a match (falls through to throw)', () => {
-			expect(() => embody('O K')).toThrow();
-		});
-
-		it('trailing punctuation is NOT a match (falls through to throw)', () => {
-			expect(() => embody('OK!')).toThrow();
-		});
-
-		it('scenario as substring is NOT a match', () => {
-			expect(() => embody('OK; var x = 1;')).toThrow();
-		});
-
-		it('throw message preserves raw input (not normalized) for non-matching input', () => {
-			expect(() => embody('O K')).toThrow(/O K/);
-		});
-
 		it('null input throws TypeError at boundary (trim() fails fast)', () => {
 			expect(() => embody(null as unknown as string)).toThrow(TypeError);
 		});
@@ -633,6 +581,59 @@ describe('embody', () => {
 		it('ast stub and source are length-consistent post-normalization', () => {
 			const s = embody('  OK\n');
 			expect(s.raw.ast?.end).toBe(s.source.code.length);
+		});
+	});
+
+	describe('real composition — source', () => {
+		// Non-scenario input goes to real composition; source.code holds the raw
+		// (un-normalized) string. source.offsets[0] is always 0; subsequent
+		// entries are the character index of each newline's successor.
+
+		it('source.code holds the raw input string (not normalized)', () => {
+			// 'hello world' normalizes to 'HELLO WORLD' — neither is a scenario key.
+			expect(embody('hello world').source.code).toBe('hello world');
+		});
+
+		// Zero-A: empty string → single entry [0].
+		it('offsets is [0] for the empty string (zero-A)', () => {
+			expect(embody('').source.offsets).toEqual([0]);
+		});
+
+		// Zero-B: non-empty, no newlines → also [0]; rules out empty-string special-case.
+		it('offsets is [0] for a non-empty single-line string (zero-B)', () => {
+			expect(embody('hello').source.offsets).toEqual([0]);
+		});
+
+		// One: the length test rules out the [0] stub; the value pin rules out [0, anything-but-1].
+		// The value pin is the real triangulation constraint — both tests are needed.
+		it('offsets has length 2 for a string with exactly one newline (one)', () => {
+			expect(embody('\n').source.offsets).toHaveLength(2);
+		});
+
+		it('offsets[1] is 1 when the first character is a newline — value pin (one)', () => {
+			expect(embody('\n').source.offsets[1]).toBe(1);
+		});
+
+		// Many: multiple newlines produce one entry per line start.
+		it('offsets reflects all line-start positions for multi-line input (many)', () => {
+			// 'a\nb\nc': \n at index 1 → offset 2; \n at index 3 → offset 4
+			expect(embody('a\nb\nc').source.offsets).toEqual([0, 2, 4]);
+		});
+
+		it('offsets handles consecutive newlines correctly (many-consecutive)', () => {
+			// '\n\n': \n at 0 → offset 1; \n at 1 → offset 2
+			expect(embody('\n\n').source.offsets).toEqual([0, 1, 2]);
+		});
+
+		// Boundaries: trailing newline creates an entry for the empty last "line".
+		it('offsets includes entry for the character after a trailing newline', () => {
+			// 'a\n': \n at index 1 → next-line starts at index 2
+			expect(embody('a\n').source.offsets).toEqual([0, 2]);
+		});
+
+		// CRLF line endings deliberately deferred — add explicit skip to document.
+		it.skip('CRLF line endings (\\r\\n) — deferred; offsets contract is LF-only for now', () => {
+			// If ever implemented: 'a\r\nb' should produce [0, 3] not [0, 2, 3].
 		});
 	});
 
@@ -661,6 +662,10 @@ describe('embody', () => {
 				assertDeepFrozen(embody(scenario), scenario, new Set());
 			});
 		}
+
+		it('real composition stub is recursively frozen', () => {
+			assertDeepFrozen(embody('hello world'), 'real-comp', new Set());
+		});
 
 		it('mutating snippet.status throws in strict mode', () => {
 			const s = embody('OK');

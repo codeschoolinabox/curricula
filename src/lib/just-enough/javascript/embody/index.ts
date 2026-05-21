@@ -52,9 +52,9 @@
  *   |     |--- "EVAL_LIMIT"          --> apex leaf; run() outcome:'limit-exceeded'
  *   |     |--- "EVAL_CANCELLED"      --> apex leaf; run() outcome:'cancelled'
  *   |
- *   |--- no:  real composition (per embody/lib/*; throws on input the
- *             non-scenario path does not yet handle — see
- *             EMBODY-IMPL-HANDOFF.md)
+ *   |--- no:  real composition — pre-acorn stub (status all false,
+ *             raw all null, errors null). Acorn run wires in at
+ *             Increment 2 (see EMBODY-IMPL-HANDOFF.md)
  *   |
  *   v
  * assemble Snippet per types.ts § 14 staircase
@@ -197,9 +197,44 @@ type EmbodyScenario = (typeof EMBODY_SCENARIOS)[number];
 // Helpers — shape-valid stubs reused across scenarios.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Build a `Source` from the input string. */
+/** Build a `Source` from the input string. Used by scenario dispatch only. */
 function buildSource(code: string): Source {
 	return { code, offsets: [0] };
+}
+
+/**
+ * Compute the character index of the start of each line in `code`.
+ *
+ * `result[0]` is always `0`. `result[n]` is the character index of the
+ * first character of line `n+1` — i.e. one past the nth `\n`. A string
+ * with no `\n` produces `[0]`. A trailing `\n` pushes one extra entry
+ * for the (empty) final line.
+ */
+function computeLineOffsets(code: string): ReadonlyArray<number> {
+	// Iterate by code point (for-of) but track code-unit position via
+	// char.length — non-BMP characters (emoji) take 2 code units.
+	// acorn ranges and JS string indices are code-unit based, so offsets
+	// must match. '\n' is always BMP (char.length === 1).
+	let codeUnitPosition = 0;
+	let offsets: ReadonlyArray<number> = [0];
+	for (const char of code) {
+		if (char === '\n') {
+			offsets = [...offsets, codeUnitPosition + 1];
+		}
+		codeUnitPosition += char.length;
+	}
+	return offsets;
+}
+
+/**
+ * Build a `Source` from the raw (un-normalized) real-composition input.
+ *
+ * Unlike `buildSource` (which stores the normalized scenario key),
+ * this function stores the original `code` string verbatim and computes
+ * accurate line-start `offsets` via `computeLineOffsets`.
+ */
+function buildRealCompositionSource(code: string): Source {
+	return { code, offsets: computeLineOffsets(code) };
 }
 
 /** Empty realm-events generator. Yields nothing. */
@@ -808,6 +843,48 @@ const APEX_OVERLAYS: Readonly<Record<string, ApexOverlay>> = Object.freeze({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Real-composition helpers (incrementally filled — see EMBODY-IMPL-HANDOFF.md).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Build the pre-acorn real-composition stub.
+ *
+ * Called by `embody()` for non-scenario input. `status` is all false,
+ * `raw` is all null, `errors` is null — no acorn run has happened yet.
+ * Increment 2 replaces this body with the acorn-run result dispatch.
+ */
+function buildRealCompositionStubSnippet(source: Source): Snippet {
+	const realmPhase = makeStubRealmPhase();
+	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
+	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
+	const eventsView: EventsView = {
+		realm: realmPhase.events,
+		tokenize: emptyTokenizeStream,
+		parseAST: emptyParseStream,
+		creation: emptyCreateStream,
+		evaluation: evaluationEvents,
+	};
+	const snippet: Snippet = {
+		status: { tokenized: false, parsed: false, validated: false, created: false },
+		source,
+		raw: { tokens: null, ast: null, comments: null },
+		errors: null,
+		analysis: null,
+		validation: null,
+		realm: realmPhase,
+		tokenize: null,
+		parseAST: null,
+		creation: null,
+		evaluation: evaluationPhase,
+		events: eventsView,
+	};
+	wireSnippetBackReference(runInstance, snippet);
+	deepFreezeInPlace(runInstance);
+	return snippet;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Scenario-dispatch entry point.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -829,9 +906,6 @@ const APEX_OVERLAYS: Readonly<Record<string, ApexOverlay>> = Object.freeze({
  *   result.
  * @throws `TypeError` when `code` is not a string (`code.trim()` fails
  *   fast at the boundary).
- * @throws `Error` when normalized `code` is neither a recognized scenario
- *   keyword nor recognizable by the real-composition path. The error
- *   message preserves the raw (un-normalized) input.
  */
 function embody(code: string): Snippet {
 	// Normalize input for scenario-keyword matching: trim + uppercase.
@@ -855,9 +929,7 @@ function embody(code: string): Snippet {
 	if (Object.hasOwn(APEX_OVERLAYS, normalized)) {
 		return buildApexSnippet(normalized, APEX_OVERLAYS[normalized]);
 	}
-	throw new Error(
-		`Unknown embody scenario: ${JSON.stringify(code)}. Expected one of: ${EMBODY_SCENARIOS.join(', ')}.`,
-	);
+	return buildRealCompositionStubSnippet(buildRealCompositionSource(code));
 }
 
 export default embody;
