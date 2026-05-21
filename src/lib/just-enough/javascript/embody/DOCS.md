@@ -210,7 +210,7 @@ non-nullable). Their behavior varies by leaf:
 | Leaf | `run()` | `intercept()` / `trace.*()` |
 | - | - | - |
 | `apex` | Spawns a worker; returns a full `RunInstance` | Spawns a worker; emits events live |
-| any non-apex leaf | Returns a no-op `RunInstance`: `events: []`, `endReport.outcome: 'not-runnable'`, error references `snippet.errors` | Returns a no-op handle; emits nothing |
+| any non-apex leaf | Returns a no-op `RunInstance`: `events: []`, `endReport.outcome: 'not-runnable'`, `endReport.error: null` (gate failure is on `snippet.errors`) | Returns a no-op handle; emits nothing |
 
 No worker is spawned for non-apex leaves. `endReport.outcome: 'not-runnable'`
 indicates the call was not executed due to a gate failure, not a runtime error.
@@ -501,7 +501,7 @@ ECMA-262 abstract operation:
 | `RealmPhase`                              | Realm setup                                    | `InitializeHostDefinedRealm` (§9.6)                                                 |
 | `RealmBindingData (category='intrinsic')` | ECMA intrinsics                                | `SetDefaultGlobalBindings` (§9.3.4)                                                 |
 | `RealmBindingData (category='host')`      | Host bindings                                  | HTML host hook                                                                      |
-| `ParseASTEntwined`                        | Parse output                                   | `ParseScript` (§16.1.5)                                                             |
+| `ParseASTEntwined`                        | Parse output                                   | `ParseModule` (§16.2.4)                                                             |
 | `CreationEntwined`                        | Creation phase                                 | `GlobalDeclarationInstantiation` (§16.1.7)                                          |
 | `RunInstance`                             | Evaluation                                     | ScriptEvaluation (§16.1.6) + BlockDeclarationInstantiation (§14.2.3)               |
 | `BindingStatus = 'tdz'`                   | Uninitialized binding                          | §9.1.1.1.1                                                                          |

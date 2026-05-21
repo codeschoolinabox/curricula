@@ -530,6 +530,31 @@ describe('embody', () => {
 			const s = embody('OK');
 			expect(s.events.realm).toBe(s.realm.events);
 		});
+
+		it('events.tokenize === tokenize.events (reference-identical across both axes)', () => {
+			const s = embody('OK');
+			expect(s.events.tokenize).toBe(s.tokenize!.events);
+		});
+
+		it('events.parseAST === parseAST.events (reference-identical across both axes)', () => {
+			const s = embody('OK');
+			expect(s.events.parseAST).toBe(s.parseAST!.events);
+		});
+
+		it('events.creation === creation.events (reference-identical across both axes)', () => {
+			const s = embody('OK');
+			expect(s.events.creation).toBe(s.creation!.events);
+		});
+
+		it('events.tokenize === tokenize.events for real-composition apex (reference-identical)', () => {
+			const s = embody('let x = 1');
+			expect(s.events.tokenize).toBe(s.tokenize!.events);
+		});
+
+		it('events.parseAST === parseAST.events for real-composition apex (reference-identical)', () => {
+			const s = embody('let x = 1');
+			expect(s.events.parseAST).toBe(s.parseAST!.events);
+		});
 	});
 
 	describe('normalization (trim + uppercase before scenario match)', () => {
@@ -582,6 +607,28 @@ describe('embody', () => {
 			const s = embody('  OK\n');
 			expect(s.raw.ast?.end).toBe(s.source.code.length);
 		});
+
+		// Prototype-chain guard: Object.hasOwn prevents __proto__ / toString /
+		// constructor from matching a scenario key, so they route to real composition.
+		it("'__proto__' routes to real composition — Object.hasOwn guard prevents prototype-chain match", () => {
+			expect(embody('__proto__').source.code).toBe('__proto__');
+		});
+
+		it("'toString' routes to real composition (not a scenario key)", () => {
+			expect(embody('toString').source.code).toBe('toString');
+		});
+
+		it("'constructor' routes to real composition (not a scenario key)", () => {
+			expect(embody('constructor').source.code).toBe('constructor');
+		});
+
+		// Typo guard: scenario-keyword-shaped strings that are not recognized
+		// keys route to real composition rather than throwing. The input is
+		// unambiguous JS (a valid identifier reference) and routes to apex.
+		it("'FAIL_TO_TOKENIZE' (typo) routes to real composition without throwing", () => {
+			expect(() => embody('FAIL_TO_TOKENIZE')).not.toThrow();
+			expect(embody('FAIL_TO_TOKENIZE').source.code).toBe('FAIL_TO_TOKENIZE');
+		});
 	});
 
 	describe('real composition — source', () => {
@@ -631,9 +678,13 @@ describe('embody', () => {
 			expect(embody('a\n').source.offsets).toEqual([0, 2]);
 		});
 
-		// CRLF line endings deliberately deferred — add explicit skip to document.
-		it.skip('CRLF line endings (\\r\\n) — deferred; offsets contract is LF-only for now', () => {
-			// If ever implemented: 'a\r\nb' should produce [0, 3] not [0, 2, 3].
+		// When implemented: embody('a\r\nb').source.offsets should be [0, 3] not [0, 2, 3].
+		it.todo(String.raw`CRLF line endings (\r\n) — deferred; offsets contract is LF-only for now`);
+
+		// Non-BMP: emoji (😀, U+1F600) is 2 code units; offset must track code-unit position.
+		it('offsets tracks code-unit position for non-BMP characters before a newline', () => {
+			// '😀\n': emoji at code-units 0–1; \n at code-unit 2 → next line at 3.
+			expect(embody('😀\n').source.offsets).toEqual([0, 3]);
 		});
 	});
 
@@ -661,6 +712,10 @@ describe('embody', () => {
 
 		it('sets raw.ast to a non-null object for valid JS', () => {
 			expect(embody('').raw.ast).not.toBeNull();
+		});
+
+		it("sets raw.ast.type to 'Program' for valid JS (real-composition apex)", () => {
+			expect(embody('let x = 1').raw.ast?.type).toBe('Program');
 		});
 
 		it('sets raw.comments to a non-null array for valid JS', () => {
@@ -696,6 +751,15 @@ describe('embody', () => {
 			expect(embody("'unterminated").errors?.cause).toBeDefined();
 		});
 
+		it("sets errors.kind to 'SyntaxError' for tokenize failure", () => {
+			expect(embody("'unterminated").errors!.kind).toBe('SyntaxError');
+		});
+
+		it('errors.loc has identical start and end for tokenize failure (point location — acorn has no end)', () => {
+			const loc = embody("'unterminated").errors!.loc!;
+			expect(loc.start).toEqual(loc.end);
+		});
+
 		it('sets status all false for tokenize failure', () => {
 			expect(embody("'unterminated").status).toEqual({
 				tokenized: false,
@@ -725,6 +789,15 @@ describe('embody', () => {
 
 		it('sets errors.cause to the original error object for parse failure', () => {
 			expect(embody('const').errors?.cause).toBeDefined();
+		});
+
+		it("sets errors.kind to 'SyntaxError' for parse failure", () => {
+			expect(embody('const').errors!.kind).toBe('SyntaxError');
+		});
+
+		it('errors.loc has identical start and end for parse failure (point location — acorn has no end)', () => {
+			const loc = embody('const').errors!.loc!;
+			expect(loc.start).toEqual(loc.end);
 		});
 
 		it('sets status all false except tokenized for parse failure', () => {

@@ -135,6 +135,7 @@ import type {
 	ControlFlow,
 	CreationData,
 	CreationEntwined,
+	CreationPhase,
 	Distribution,
 	EmbodyError,
 	EndReport,
@@ -198,7 +199,8 @@ type EmbodyScenario = (typeof EMBODY_SCENARIOS)[number];
 // Helpers — shape-valid stubs reused across scenarios.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Build a `Source` from the input string. Used by scenario dispatch only. */
+/** Build a `Source` from the input string. Used by scenario dispatch only.
+ * offsets: [0] is correct here — scenario keys never contain `\n`. */
 function buildSource(code: string): Source {
 	return { code, offsets: [0] };
 }
@@ -349,7 +351,7 @@ function makeStubNonDeterminism(
  *
  * For the `PAUSES` scenario, `user.total: 1` is set. This is the
  * smallest value that makes `Validation.doesPause` derive to `true`
- * per types.ts line 381. Per-method counts (alert/confirm/prompt)
+ * per types.ts § Validation. Per-method counts (alert/confirm/prompt)
  * remain omitted; if a lens needs to differentiate the IO source,
  * add `PAUSES_PROMPT` / `PAUSES_ALERT` modes on demand.
  */
@@ -420,6 +422,15 @@ function makeStubParseASTPhase(): ParseASTPhase {
 		data: {} as ParseASTData,
 		entwined: {} as ParseASTEntwined,
 		events: emptyParseStream,
+	};
+}
+
+/** Build a stub `CreationPhase` — data/entwined are placeholder open holes. */
+function makeStubCreationPhase(): CreationPhase {
+	return {
+		data: {} as CreationData,
+		entwined: {} as CreationEntwined,
+		events: emptyCreateStream,
 	};
 }
 
@@ -742,11 +753,7 @@ function buildApexSnippet(code: string, overlay: ApexOverlay): Snippet {
 	const realmPhase = makeStubRealmPhase();
 	const tokenizePhase = makeStubTokenizePhase();
 	const parseASTPhase = makeStubParseASTPhase();
-	const creationPhase = {
-		data: {} as CreationData,
-		entwined: {} as CreationEntwined,
-		events: emptyCreateStream,
-	};
+	const creationPhase = makeStubCreationPhase();
 	const rawTokens: ReadonlyArray<unknown> = [makeStubRawToken(code)];
 	const rawAst = makeStubAcornNode(code);
 	const analysis = makeStubAnalysis(
@@ -758,7 +765,7 @@ function buildApexSnippet(code: string, overlay: ApexOverlay): Snippet {
 	const nd = analysis.nonDeterminism;
 	const validation: Validation = {
 		isJeJ: overlay.violations.length === 0,
-		// Derive per types.ts lines 380-381.
+		// Derive per types.ts § Validation.
 		isDeterministic: !(nd.random || nd.clock || nd.userInput || nd.locale),
 		doesPause: analysis.hasIo.user.total > 0,
 		formatted: true,
@@ -868,7 +875,7 @@ type AcornRunResult =
 function runAcorn(code: string): AcornRunResult {
 	let tokens: ReadonlyArray<unknown> = [];
 	try {
-		tokens = [...acornTokenizer(code, { ecmaVersion: 'latest' })];
+		tokens = [...acornTokenizer(code, { ecmaVersion: 'latest', sourceType: 'module' })];
 	} catch (tokenizeError: unknown) {
 		return { ok: false, tokenizeFailed: true, error: tokenizeError };
 	}
