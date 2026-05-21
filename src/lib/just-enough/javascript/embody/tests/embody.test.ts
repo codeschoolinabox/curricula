@@ -637,6 +637,118 @@ describe('embody', () => {
 		});
 	});
 
+	describe('real composition — raw, status, errors', () => {
+		// The three acorn-run outcome branches:
+		//   apex (ok)          — valid JS: raw.tokens + ast + comments non-null; status.tokenized + parsed true; errors null
+		//   parse:tokenize     — tokenizer throws: raw all null; status all false; errors.phase 'parse:tokenize'
+		//   parse:ast          — tokenizer ok, parser throws: raw.tokens non-null; ast + comments null; status.parsed false
+		//
+		// Inputs chosen to be unambiguous:
+		//   valid   → '' (empty program, always parseable)
+		//   tok-fail → "'unterminated" (unterminated string literal; tokenizer throws)
+		//   prs-fail → 'const' (incomplete declaration; tokenizer succeeds, parser throws)
+
+		// Zero: empty string → valid JS → apex path.
+		it('sets raw.tokens to a non-null array for valid JS (zero: empty program)', () => {
+			expect(embody('').raw.tokens).not.toBeNull();
+		});
+
+		// One: non-trivial program produces multiple tokens — forces real accumulation.
+		// (acorn's EOF token is the done:true sentinel and is not collected by spread)
+		it('sets raw.tokens to multiple tokens for a multi-token program (let x = 1)', () => {
+			expect(embody('let x = 1').raw.tokens!.length).toBeGreaterThan(1);
+		});
+
+		it('sets raw.ast to a non-null object for valid JS', () => {
+			expect(embody('').raw.ast).not.toBeNull();
+		});
+
+		it('sets raw.comments to a non-null array for valid JS', () => {
+			expect(embody('').raw.comments).not.toBeNull();
+		});
+
+		it('sets status.tokenized to true for valid JS', () => {
+			expect(embody('').status.tokenized).toBe(true);
+		});
+
+		it('sets status.parsed to true for valid JS', () => {
+			expect(embody('').status.parsed).toBe(true);
+		});
+
+		it('sets errors to null for valid JS', () => {
+			expect(embody('').errors).toBeNull();
+		});
+
+		// Tokenize-fail: unterminated string literal; tokenizer throws before any token.
+		it("sets errors.phase to 'parse:tokenize' for tokenize failure", () => {
+			expect(embody("'unterminated").errors?.phase).toBe('parse:tokenize');
+		});
+
+		it('sets errors.message to a non-empty string for tokenize failure', () => {
+			expect(embody("'unterminated").errors!.message.length).toBeGreaterThan(0);
+		});
+
+		it('sets errors.loc to a non-null location for tokenize failure', () => {
+			expect(embody("'unterminated").errors?.loc).not.toBeNull();
+		});
+
+		it('sets errors.cause to the original error object for tokenize failure', () => {
+			expect(embody("'unterminated").errors?.cause).toBeDefined();
+		});
+
+		it('sets status all false for tokenize failure', () => {
+			expect(embody("'unterminated").status).toEqual({
+				tokenized: false,
+				parsed: false,
+				validated: false,
+				created: false,
+			});
+		});
+
+		it('sets raw.tokens to null for tokenize failure', () => {
+			expect(embody("'unterminated").raw.tokens).toBeNull();
+		});
+
+		// Parse-fail: 'const' keyword alone; tokenizer succeeds, parser throws.
+		// This is the critical discriminator: same failure mode, different gate.
+		it("sets errors.phase to 'parse:ast' for parse failure", () => {
+			expect(embody('const').errors?.phase).toBe('parse:ast');
+		});
+
+		it('sets errors.message to a non-empty string for parse failure', () => {
+			expect(embody('const').errors!.message.length).toBeGreaterThan(0);
+		});
+
+		it('sets errors.loc to a non-null location for parse failure', () => {
+			expect(embody('const').errors?.loc).not.toBeNull();
+		});
+
+		it('sets errors.cause to the original error object for parse failure', () => {
+			expect(embody('const').errors?.cause).toBeDefined();
+		});
+
+		it('sets status all false except tokenized for parse failure', () => {
+			expect(embody('const').status).toEqual({
+				tokenized: true,
+				parsed: false,
+				validated: false,
+				created: false,
+			});
+		});
+
+		it('sets raw.tokens to a non-null array for parse failure (tokenize succeeded)', () => {
+			expect(embody('const').raw.tokens).not.toBeNull();
+		});
+
+		it('sets raw.ast to null for parse failure', () => {
+			expect(embody('const').raw.ast).toBeNull();
+		});
+
+		it('sets raw.comments to null for parse failure', () => {
+			expect(embody('const').raw.comments).toBeNull();
+		});
+	});
+
 	describe('deep-freeze invariants (cross-mode)', () => {
 		// Walk every reachable plain-object property and assert each is frozen.
 		// Skips functions (the @utils/deep-freeze-in-place utility does not
