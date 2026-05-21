@@ -15,8 +15,8 @@ JEJ  →  NM  →  embody  →  study lenses  →  orchestrate
   what concepts exist (phases, scopes, bindings, coercion, …).
 - **embody** turns each JEJ snippet into a data object whose every field
   and event corresponds to one of those NM concepts.
-- **Study lenses** consume `embodiment` to render pedagogical
-  perspectives on it.
+- **Study lenses** consume `embodiment` to render pedagogical perspectives
+  on it.
 - **The orchestrator** (`orchestrate/`) distributes `embodiment` to
   mounted lenses via props. Lenses never re-derive what embody exposes;
   they also do not import embody directly — they receive `embodiment`
@@ -30,44 +30,159 @@ internal data layer that `<StudyLenses>` builds on.
 Embody decides nothing about pedagogy. The contract is *accuracy*. Lenses
 choose what to teach.
 
+## Glossary
+
+This module uses a three-layer vocabulary for NM entities. Terms are
+defined here; types are in [`types.ts`](./types.ts).
+
+**Data** — Layer 1. Pure data describing an NM entity in isolation —
+kind, value, range, name. No cross-references to other entities. Type
+names follow `<Kind>Data`: `TokenData`, `NodeData`, `ScopeData`,
+`CommentData`, `RealmBindingData`, `ScriptBindingData`. Accessed via
+`.data` on any phase object.
+
+**Entwined** — Layer 2. Wraps data and adds typed cross-references to
+other entwined entities (parent nodes, containing scope, adjacent
+tokens). This is the graph. Type names follow `<Kind>Entwined`:
+`TokenEntwined`, `NodeEntwined`, `ScopeEntwined`, `CommentEntwined`,
+`RealmBindingEntwined`, `ScriptBindingEntwined`. Accessed via `.entwined`
+on any phase object.
+
+**NMEvent** — Layer 3. A moment in the program's lifetime. Wraps an
+entwined entity and adds `phase`, `step`, `prev`/`next` chain links, and
+`relations` (bookending pairs, correlated events). Type names follow
+`<Kind>NMEvent`: `TokenNMEvent`, `CommentNMEvent`, `NodeNMEvent`,
+`ScopeNMEvent`, etc. Access pattern within an event:
+`event.entwined.data.kind`.
+
+**Three-layer framework** — The design principle (Data → Entwined →
+NMEvent). Every NM component has all three layers, no exceptions. Layers
+are composed by wrapping, not extension.
+
+**Crystallized data** — The static, frozen portion of a snippet: tokens,
+comments, AST, scopes, analysis, validation. Computed pre-run and
+deterministic across calls. Lives on `snippet.*` phase objects.
+
+**Living stream** — An event-stream replay of the snippet's lifetime from
+realm through evaluation. Calling a stream generator replays crystallized
+data as ordered events. Tokenization-the-verb is as dynamic as runtime
+from the stream-consumer's perspective.
+
+**Bookending event** — Events that come in opener/closer pairs around a
+structural construct (NodeEnterNMEvent/NodeExitNMEvent, scope push/pop,
+…). The pair is exposed via `.relations` on each event in the pair.
+
+**Correlated event** — Any event linked to another by structural meaning;
+exposed via `.relations`. Link targets are getters (frozen-emit constraint:
+the linked event may not exist when the opener is emitted).
+
+**Layer-first event access** — `snippet.events.tokenize()` is equivalent
+to `snippet.tokenize?.events()` but always safe — returns an empty
+generator when the phase is null, never throws. Only the `.events` axis
+has this layer-first access. The `.data` and `.entwined` layers are
+phase-first only.
+
 ## What you get from `embody(code)`
 
 ```text
 const snippet = embody(code);
 ```
 
-`snippet` is a frozen `Snippet` (see [`types.ts`](./types.ts) for the
-canonical contract) with:
+`snippet` is a frozen `Snippet` (see [`types.ts`](./types.ts)) with a
+two-dimensional property grid:
 
-- **Status booleans** — independent hard gates (`tokenized`, `parsed`,
-  `validated`, `created`) that lenses check before reaching for fields
-- **Source** — the input string + a line-offsets index for `loc` lookups
-- **Parse output** — entwined frozen graph: tokens, AST, comments,
-  cross-reference indexes
-- **Static analyses** — realm, initial scope, bindings, dependencies,
-  features, metrics (length distributions + structural counts),
-  control flow, non-determinism sources, I/O usage
-- **Validation summary** — `isJeJ`, `isDeterministic`, `doesPause`,
+- **Phase axis** — spec-grounded JS lifecycle phases: `realm`, `tokenize`,
+  `parseAST`, `creation`, `evaluation`
+- **Layer axis** — three layers: `.data` (L1), `.entwined` (L2),
+  `.events` (L3)
+
+```text
+                   realm          tokenize          parseAST          creation          evaluation
+.data         RealmData       TokenizeData      ParseASTData      CreationData      (none — dynamic)
+.entwined     RealmEntwined   TokenizeEntwined  ParseASTEntwined  CreationEntwined  (none — dynamic)
+.events       events()        events()          events()          events()          events.{ run, intercept, trace.* }
+```
+
+Phase-first access:
+
+```ts
+snippet.realm.data           // RealmData
+snippet.tokenize.entwined    // TokenizeEntwined — entwined tokens + comments
+snippet.parseAST.events()    // Generator<NodeNMEvent>
+snippet.creation.data        // CreationData — static scopes + bindings
+snippet.evaluation.events.run()  // Promise<RunInstance>
+```
+
+Layer-first access — **events only** (the `.data` and `.entwined` layers
+are phase-first only):
+
+```ts
+snippet.events.realm()          // === snippet.realm.events() — always safe
+snippet.events.tokenize()       // safe even if snippet.tokenize === null; yields nothing
+snippet.events.evaluation.run() // === snippet.evaluation.events.run()
+```
+
+**Nullable phase objects.** `tokenize`, `parseAST`, and `creation` are
+`Phase | null`; null when the corresponding status flag is false. `realm`
+and `evaluation` are always present. Gate on `snippet.status` before
+reaching for nullable phase objects.
+
+**Evaluation exception.** `snippet.evaluation` has only `.events` — no
+`.data` or `.entwined`. Evaluation data is fully dynamic and lives only
+on `RunInstance` events; nothing is crystallized. Static analyses *about*
+evaluation (reachability, control-flow predictions) live on
+`snippet.analysis`, not on `snippet.evaluation`.
+
+**Cross-phase flat fields** (not on the grid):
+
+- **`source`** — `{ code, offsets }` — input string + line-offsets index
+  for `loc` lookups
+- **`status`** — `{ tokenized, parsed, validated, created }` — hard-gate
+  booleans; check before reaching for nullable phase objects
+- **`errors`** — first-fail-wins error from any pre-evaluation gate, or
+  `null`
+- **`analysis`** — cross-phase derived analyses: `bindings`,
+  `dependencies`, `features`, `metrics`, `controlFlow`, `nonDeterminism`,
+  `hasIo`
+- **`validation`** — gate output: `isJeJ`, `isDeterministic`, `doesPause`,
   `formatted`, `violations`
-- **Errors** — first-fail-wins error from any pre-evaluation gate
-- **Streams** — a-la-carte event-stream generators per lifecycle phase
+- **`raw`** — flat Acorn provenance: `{ tokens, ast, comments }` — raw
+  Acorn output verbatim
 
-## Streams (the only callable surface)
+`analysis` and `validation` are cross-phase gate outputs, not grid phases.
+They are present from `validate-fail` onward (see § Pipeline and shape
+leaves below).
 
-Generators are the only callable thing on a Snippet. Static-side
-generators iterate pre-computed frozen data; evaluate-side generators run
-a Worker live.
+## Events (the only callable surface)
 
-| Stream | Returns | Purpose |
-| --- | --- | --- |
-| `streams.realm()` | `Generator<RealmBindingEvent>` | Iterate realm bindings alphabetically — "what's in the world?" |
-| `streams.parse.tokenize()` | `Generator<TokenEvent>` | Token events from the cached token array |
-| `streams.parse.parse()` | `Generator<NodeEvent>` | AST traversal events in parse order |
-| `streams.create()` | `Generator<ScopeEvent \| BindingEvent>` | Script-scope creation events |
-| `streams.evaluate.run(opts?)` | `Promise<RunInstance>` | End-report only (no event stream) |
-| `streams.evaluate.intercept(opts?)` | `EvaluateHandle` | I/O + error events (live worker) |
-| `streams.evaluate.trace.syntax(opts?)` | `EvaluateHandle` | + NM step events |
-| `streams.evaluate.trace.semantics(opts?)` | `EvaluateHandle` | + finer-grained internals |
+Generators are the only callable thing on a Snippet. Static-side generators
+iterate pre-computed frozen data; evaluate-side generators run a Worker live.
+
+| Stream | Phase-first access | Returns | Purpose |
+| --- | --- | --- | --- |
+| realm | `snippet.realm.events()` | `Generator<RealmNMEvent>` | Realm setup — intrinsics scope then host scope |
+| tokenize | `snippet.tokenize?.events()` | `Generator<TokenNMEvent \| CommentNMEvent>` | Tokens + comments interleaved in source order |
+| parseAST | `snippet.parseAST?.events()` | `Generator<NodeNMEvent>` | AST traversal — bookended enter/exit pairs |
+| creation | `snippet.creation?.events()` | `Generator<ScopeNMEvent \| BindingNMEvent>` | Script-scope creation events |
+| evaluate.run | `snippet.evaluation.events.run(opts?)` | `Promise<RunInstance>` | End-report only (no event stream) |
+| evaluate.intercept | `snippet.evaluation.events.intercept(opts?)` | `EvaluateHandle` | I/O + error events (live worker) |
+| evaluate.trace.variables | `snippet.evaluation.events.trace.variables(opts?)` | `EvaluateHandle` | + light variables-only instrumentation |
+| evaluate.trace.syntax | `snippet.evaluation.events.trace.syntax(opts?)` | `EvaluateHandle` | + NM step events |
+| evaluate.trace.semantics | `snippet.evaluation.events.trace.semantics(opts?)` | `EvaluateHandle` | + finer-grained internals |
+
+`RealmNMEvent` discriminates by `kind: 'intrinsics-created' | 'host-created'`.
+`NodeNMEvent` discriminates by `kind: 'enter' | 'exit'` (bookended pairs
+linked via `.relations`).
+
+Static-phase stream functions are also reachable via layer-first access —
+`snippet.events.realm()`, `snippet.events.tokenize()`, etc. —
+reference-identical to the phase-first functions. `snippet.events.evaluation`
+is reference-identical to `snippet.evaluation.events`.
+
+Layer-first stream access is **always safe** — `snippet.events.tokenize()`
+never throws even if `snippet.tokenize` is null; it returns an empty
+generator. Phase-first access (`snippet.tokenize?.events()`) requires
+optional chaining for nullable phases.
 
 Evaluate-tier events are a flat discriminated union; tiers are filter
 whitelists, not type-narrowed subsets. Each call returns a `RunInstance`
@@ -75,21 +190,22 @@ with the events that fired plus an end-report.
 
 ## Load-bearing principles (do not violate without explicit decision)
 
-1. **Pure data, no methods.** Every embody surface is data: frozen
-   objects, arrays, primitives. Generators are the only callable surface
-   (event streams are inherently iterated). No `query()`, `dispose()`,
-   `clone*()`, or accessor methods.
+1. **Pure data, no methods.** Every embody surface is data: frozen objects,
+   arrays, primitives. Generators are the only callable surface (event
+   streams are inherently iterated). No `query()`, `dispose()`, `clone*()`,
+   or accessor methods.
 2. **No Maps/Sets at the public surface.** `Object.freeze` doesn't freeze
-   them; pedagogy prefers ground-truth shapes. Use plain objects and
-   arrays.
+   them; pedagogy prefers ground-truth shapes. Use `Record<string, T>` for
+   indexes and `ReadonlyArray<T>` for sequences.
 3. **Strict immutability.** Single deep-freeze at end of construction.
    Consumers wanting a mutable copy `structuredClone` themselves.
 4. **Per-instance, no shared state.** No module-level cache, no
-   cross-instance communication. One `embody(code)` knows nothing of
-   others.
+   cross-instance communication. One `embody(code)` knows nothing of others.
 5. **Spec-aligned, learner-named.** Names follow the NM body (learner-
-   friendly); spec correspondence is in `../notional-machine.md` § Spec
-   correspondence appendix.
+   friendly); spec correspondence is in `../notional-machine.md`.
+6. **`event.bindings` is a Proxy.** The one exception to "pure frozen data":
+   this field walks the current scope chain at access time and is documented
+   as a computed view. Enumeration and mutation are not supported.
 
 ## Named scenarios
 
@@ -97,40 +213,42 @@ with the events that fired plus an end-report.
 strings (after normalization) that bypass real composition and return a
 deterministic canned `Snippet` shape per named scenario. These canned
 scenarios are a **permanent integration-testing fixture set** kept inside
-`embody()` because the orchestrator, lenses, and recommender all need a
-way to drive every reachable Snippet shape without crafting real JS that
-happens to produce that shape. Tests and sandbox harnesses are the
-primary consumers; the live editor passes them through transparently,
-which is acceptable because the resulting Snippet is shape-valid.
+`embody()` because the orchestrator, lenses, and recommender all need a way
+to drive every reachable Snippet shape without crafting real JS that happens
+to produce that shape. Tests and sandbox harnesses are the primary consumers;
+the live editor passes them through transparently, which is acceptable because
+the resulting Snippet is shape-valid.
 
 ### Pipeline and shape leaves
 
-The construction pipeline is a hard-gated staircase: **tokenize → parse →
-validate → create**. Each gate can fail, producing a structurally
-distinct embodiment shape. Failure means downstream surfaces are absent
-(no event streams for programs that won't run). Five total **shape
-leaves** result:
+The construction pipeline is a hard-gated staircase:
+**realm → tokenize → parse → validate → create**. Realm always passes.
+Each subsequent gate can fail, producing a structurally distinct embodiment
+shape.
 
-The "Has" column accumulates top-to-bottom: each row's contents include
-all prior rows' contents plus the listed additions. (The staircase
-comment in [`types.ts`](./types.ts) Snippet JSDoc carries the same
-convention, with explicit `+` deltas.)
+The "Phase objects present" column lists which `snippet.*` phase objects are
+non-null. `evaluation` is always present (events always callable, though may
+yield nothing when prior phases failed).
 
-| Leaf | Reached when | `Snippet.status` | Has | Missing |
+| Leaf | Reached when | `Snippet.status` | Phase objects present | Phase objects null |
 | --- | --- | --- | --- | --- |
-| **tokenize-fail** | tokenize fails | `tokenized=false` | source, partial `parse.tokens`, errors, `streams.realm`, `streams.parse.{tokenize, parse}` (parse stream yields no events) | `parse.ast`, `static`, `validation`, `streams.create`, `streams.evaluate` |
-| **parse-fail** | parse (AST-build) fails | `tokenized=true, parsed=false` | + full `parse.tokens` (the type-paired parse stream already exposed from tokenize-fail, still no AST to walk so emits nothing) | `parse.ast`, `static`, `validation`, `streams.create`, `streams.evaluate` |
-| **validate-fail** | `validation.isJeJ === false` | `parsed=true, validated=false` | + `parse.ast`, `parse.comments`, `static`, `validation` (with violations populated) | `streams.create`, `streams.evaluate` |
-| **create-fail** | script-scope creation fails | `validated=true, created=false` | + clean `validation` (isJeJ=true), `streams.create` (partial events up to the failure) | `streams.evaluate` |
-| **apex** | all gates pass | all true | + `streams.evaluate` (complete `streams.create` events) | — |
+| **tokenize-fail** | tokenize fails | `tokenized=false` | `realm`, `evaluation` | `tokenize`, `parseAST`, `creation` |
+| **parse-fail** | AST-build fails | `tokenized=true, parsed=false` | `realm`, `tokenize`, `evaluation` | `parseAST`, `creation` |
+| **validate-fail** | `validation.isJeJ === false` | `parsed=true, validated=false` | `realm`, `tokenize`, `parseAST`, `evaluation` | `creation` |
+| **create-fail** | script-scope creation fails | `validated=true, created=false` | `realm`, `tokenize`, `parseAST`, `evaluation` | `creation` |
+| **apex** | all gates pass | all `true` | all phases | — |
 
-Validation is a **hard gate**, not a metadata field: a program that fails
-JEJ validation produces no `streams.create` and no `streams.evaluate`
-(invalid programs don't run). The gate criterion is `isJeJ`
-(`violations.length === 0`); `validation.isDeterministic` and
-`validation.doesPause` are **informational metadata** for consumers, not
-gate criteria — a non-deterministic or user-pausing program is still a
-valid JEJ subset and passes the gate.
+`snippet.analysis` and `snippet.validation` (cross-phase flat fields) are
+present from `validate-fail` onward.
+
+`snippet.events.tokenize()`, `snippet.events.parseAST()`, etc. are always
+callable via layer-first access; null or absent phases yield empty generators.
+
+Validation is a **hard gate**, not a metadata field: a program that fails JEJ
+validation produces no `creation` phase object and no evaluate-tier events.
+`validation.isDeterministic` and `validation.doesPause` are informational
+metadata for consumers, not gate criteria — a non-deterministic or
+user-pausing program is still valid JEJ and passes the gate.
 
 ### Scenario → leaf mapping
 
@@ -146,26 +264,23 @@ non-scenario path traverses the actual pipeline.
 | `OK` | apex | — |
 | `NON_DETERMINISTIC` | apex | `nonDeterminism.random=true` (informational, not a gate failure) |
 | `PAUSES` | apex | `hasIo.user.total=1` (informational, not a gate failure) |
-| `EVAL_ERROR` | apex | `streams.evaluate.run()` outcome `'errored'` |
-| `EVAL_TIMEOUT` | apex | `streams.evaluate.run()` outcome `'timed-out'` |
-| `EVAL_LIMIT` | apex | `streams.evaluate.run()` outcome `'limit-exceeded'` |
-| `EVAL_CANCELLED` | apex | `streams.evaluate.run()` outcome `'cancelled'` |
+| `EVAL_ERROR` | apex | `evaluation.events.run()` outcome `'errored'` |
+| `EVAL_TIMEOUT` | apex | `evaluation.events.run()` outcome `'timed-out'` |
+| `EVAL_LIMIT` | apex | `evaluation.events.run()` outcome `'limit-exceeded'` |
+| `EVAL_CANCELLED` | apex | `evaluation.events.run()` outcome `'cancelled'` |
 
-`EVAL_*` overlays don't change the Snippet's structural shape (still
-apex); they're interpreted by `streams.evaluate.*` at call time to force
-the canned outcome on `RunInstance.endReport`. Runtime errors are not
-embodied in the static `Snippet` — they're per-call outcomes on
-`RunInstance`.
+`EVAL_*` overlays don't change the Snippet's structural shape (still apex);
+they're interpreted by `evaluation.events.*` at call time to force the canned
+outcome on `RunInstance.endReport`. Runtime errors are not embodied in the
+static `Snippet` — they're per-call outcomes on `RunInstance`.
 
-**Normalization rule.** Input is passed through `trim().toUpperCase()`
-before the scenario match. Leading and trailing whitespace (including
-newlines and other Unicode whitespace stripped by `String.prototype.trim`)
-and case differences are tolerated. Internal whitespace, punctuation, and
-substrings are not. Scenarios are ASCII; `toUpperCase()` is treated as
-locale-independent for the match. Non-string input (`null`, `undefined`,
-objects) throws at the boundary — `code.trim()` fails fast on non-string.
-Empty-string-after-trim is not a scenario and falls through to real
-composition.
+**Normalization rule.** Input is passed through `trim().toUpperCase()` before
+the scenario match. Leading and trailing whitespace (including newlines and
+other Unicode whitespace stripped by `String.prototype.trim`) and case
+differences are tolerated. Internal whitespace, punctuation, and substrings
+are not. Non-string input (`null`, `undefined`, objects) throws at the
+boundary — `code.trim()` fails fast on non-string. Empty-string-after-trim is
+not a scenario and falls through to real composition.
 
 ```typescript
 import embody from './embody/index.js';
@@ -181,15 +296,15 @@ embody('let x = 1;');
 embody('O K');            // internal whitespace — not a scenario match
 ```
 
-On the scenario-dispatch branch, `Snippet.source.code` holds the
-**normalized** form (the canonical scenario identifier). Non-scenario
-inputs preserve their raw form through real tokenization.
+On the scenario-dispatch branch, `snippet.source.code` holds the
+**normalized** form (the canonical scenario identifier). Non-scenario inputs
+preserve their raw form through real tokenization.
 
-`EMBODY_SCENARIOS` is exported as a frozen array of the 11 valid
-scenario keywords for use in test fixtures and sandbox demos. The named
-scenarios cover: `OK`, `FAIL_AT_TOKENIZE`, `FAIL_AT_PARSE`,
-`FAIL_AT_CREATE`, `VALIDATION_FAIL`, `NON_DETERMINISTIC`, `PAUSES`,
-`EVAL_ERROR`, `EVAL_TIMEOUT`, `EVAL_LIMIT`, `EVAL_CANCELLED`.
+`EMBODY_SCENARIOS` is exported as a frozen array of the 11 valid scenario
+keywords for use in test fixtures and sandbox demos. The named scenarios
+cover: `OK`, `FAIL_AT_TOKENIZE`, `FAIL_AT_PARSE`, `FAIL_AT_CREATE`,
+`VALIDATION_FAIL`, `NON_DETERMINISTIC`, `PAUSES`, `EVAL_ERROR`,
+`EVAL_TIMEOUT`, `EVAL_LIMIT`, `EVAL_CANCELLED`.
 
 > **Anti-pattern: no consumer-side branching on `snippet.source.code`.**
 > Consumers (lenses, orchestrator, recommender, …) MUST NOT use
@@ -223,12 +338,17 @@ Every `embody/types.ts` shape corresponds to a concept in `notional-machine.md`:
 | embody type | NM concept |
 | --- | --- |
 | `Source` | Phase 0 — source code (string + offsets) |
-| `ParseGraph`, `AugmentedToken`, `AugmentedASTNode` | Phase 1 — parse output (tokens + AST) |
-| `Realm`, `BuiltinBinding` | Realm setup (intrinsics + host bindings) |
-| `InitialScope`, `Scope`, `Binding`, `BindingStatus` | Scopes + binding lifecycle (tdz → initialized → dead) |
-| `Event` (flat union) | Lifecycle event categories |
+| `TokenData`, `TokenEntwined` | Phase 1 — token data (kind, value, range) + token graph node (prev/next, innermostNode) |
+| `CommentData`, `CommentEntwined` | Phase 1 — comment data (kind, range) + comment graph placement |
+| `NodeData`, `NodeEntwined` | Phase 2 — AST node data (type, loc, key fields) + graph node (parent, children, keyToken) |
+| `ScopeData`, `ScopeEntwined` | Scope lifecycle — intrinsics/host/script/block/for-iteration |
+| `RealmBindingData`, `RealmBindingEntwined` | Realm setup — intrinsic + host built-in bindings |
+| `ScriptBindingData`, `ScriptBindingEntwined` | Script/block binding lifecycle (tdz → initialized → dead) |
+| `ScopeTreeNode` | Static scope tree — predicted block/for-iteration scopes under a script scope |
+| `NMEvent` (flat discriminated union) | Lifecycle event base — phase / step / chain / relations |
 | `RunInstance` | One evaluation of a snippet |
-| `Validation`, `NonDeterminism`, `HasIo` | Snippet-level metadata |
+| `Validation`, `NonDeterminism`, `HasIo` | Snippet-level gate output + informational metadata |
+| `Analysis` | Cross-phase derived analyses |
 
 If you're unsure what something means, the NM doc is upstream of the
 types — read the prose, then come back to the type.
