@@ -6,16 +6,12 @@
  * and return. Never throws — any internal failure produces a generic
  * fallback.
  *
- * Step 7 of the JEJ refactor (`REFACTOR-HANDOFF.md`) replaced the
- * `(source: string, error, options?)` signature with
- * `(embodiment: Snippet, error, options?)`. The entry now reads source
- * + AST off the frozen embodiment; in Phase A the embody factory is a
- * named-scenario mock, so AST-dependent suggestion paths
- * (`generateSuggestion`'s `collectDeclaredNames` "did you mean" branch
- * and `isPromptRelated` branch in `extract-context.ts`) silently
- * degrade to `undefined` against the mock's stub `Program` (`body:
- * []`). Phase B's real `embody/lib/parse/` reinstates the AST and
- * these suggestions resume working without code change here.
+ * Reads source + AST off the frozen embodiment. AST-dependent suggestion
+ * paths (`generateSuggestion`'s `collectDeclaredNames` "did you mean"
+ * branch and `isPromptRelated` branch in `extract-context.ts`) require
+ * a non-null `embodiment.raw.ast`; on tokenize-fail or parse-fail leaves
+ * they fall back to `undefined` without affecting the interpreted error
+ * structure.
  */
 
 import type { Node } from 'acorn';
@@ -81,24 +77,18 @@ function buildFallback(
  *
  * @param embodiment - The frozen `Snippet` whose source + AST provide
  *   context for interpretation. Source is read from
- *   `embodiment.source.code`; AST is read from
- *   `embodiment.parse.ast.acornNode` only when `embodiment.status.parsed
- *   === true` AND `embodiment.parse.ast` is defined (the `Partial<ParseGraph>`
- *   contract on `Snippet.parse` lets the field be missing independent
- *   of the boolean).
+ *   `embodiment.source.code`; AST is read from `embodiment.raw.ast`
+ *   when `embodiment.status.parsed === true`.
  * @param error - Raw error information (name, message, line, column).
  *   Decoupled from `EmbodyError` so callers can pass either the
  *   embodiment's pre-evaluation gate error (`embodiment.errors`) or a
  *   runtime evaluation error (`runInstance.endReport.error` from a
- *   resolved `streams.evaluate.run()`); callers adapt
+ *   resolved `snippet.evaluation.events.run()`); callers adapt
  *   `EmbodyError → ErrorInput` at the call site.
  * @param options - Optional context (phase: 'parse' | 'runtime').
- *   Phase B alignment deferred: align with `EmbodyPhase`'s 4-value
- *   taxonomy (`parse:tokenize | parse:ast | create | evaluate`).
- *   Current mapping: `parse:tokenize | parse:ast → 'parse'`;
- *   `evaluate → 'runtime'`; `create → 'parse'` (semantically a
- *   parse-error from the learner's perspective; AST exists but
- *   script-scope creation failed).
+ *   The 2-value public split collapses the 5 internal `EmbodyPhase`
+ *   values: anything before evaluation surfaces as `'parse'` to the
+ *   learner; runtime errors during evaluation surface as `'runtime'`.
  * @returns A frozen `ErrorInterpretation` with markdown fields
  *
  * @remarks Never throws. If the error cannot be matched to a known
@@ -121,19 +111,12 @@ function interpretError(
 	{ phase }: InterpretOptions = {},
 ): ErrorInterpretation {
 	try {
-		// 1. Read AST from embodiment (when parsed). The dual guard is
-		// load-bearing: `Snippet.parse` is `Partial<ParseGraph>`, so
-		// `parse.ast` may be absent independent of `status.parsed`.
-		// eslint-disable-next-line sonarjs/todo-tag -- intentional Phase B deferral marker per AR-1 verdict; the mandated `TODO(phase-b):` token names what real embody internals will unlock without a code change here.
-		// TODO(phase-b): The Phase A mock's stub Program has body: [],
-		// so `generateSuggestion`'s AST-dependent paths
-		// (`collectDeclaredNames` "did you mean" + `isPromptRelated`)
-		// silently degrade to undefined. Phase B's real
-		// `embody/lib/parse/` reinstates the AST; suggestions resume
-		// working without code change here.
+		// 1. Read AST from embodiment (when parsed).
+		// Per embody contract: status.parsed === true ⇒ raw.ast !== null;
+		// the truthy `&& raw.ast` is type-narrowing for the consumer.
 		const ast: Node | null =
-			embodiment.status.parsed && embodiment.parse.ast
-				? embodiment.parse.ast.acornNode
+			embodiment.status.parsed && embodiment.raw.ast
+				? embodiment.raw.ast
 				: null;
 
 		// 2. Extract context from error + source + AST
