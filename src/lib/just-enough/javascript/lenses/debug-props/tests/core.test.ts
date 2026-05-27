@@ -6,6 +6,7 @@
 
 import { describe, expect, it } from 'vitest';
 
+import embody from '../../../embody/index.js';
 import deriveDisplayTree from '../core.js';
 
 import type { Snippet } from '../../../embody/types.js';
@@ -22,22 +23,13 @@ const VALIDATION_ABSENT_PLACEHOLDER =
 	'(validation absent — gated on parse success)';
 
 function makeSnippet(overrides: Partial<Snippet> = {}): Snippet {
-	return {
-		source: { code: 'let x = 1;', offsets: [0] },
-		// Apex leaf: all four status booleans true.
-		status: { tokenized: true, parsed: true, validated: true, created: true },
-		parse: {},
-		validation: {
-			isJeJ: true,
-			isDeterministic: true,
-			doesPause: false,
-			formatted: true,
-			violations: [],
-		},
-		errors: null,
-		streams: { realm: undefined as never },
-		...overrides,
-	} as Snippet;
+	// Base: the canonical apex Snippet via the 'OK' scenario sentinel. Real
+	// composition (non-scenario input) currently produces `validated: false,
+	// created: false` because validation + creation gates aren't yet wired
+	// post-Phase-B, so a real-comp base can't serve as the "apex leaf" the
+	// tests below assert against. Overrides shallow-spread on top to
+	// construct alternate leaves (parse-fail, tokenize-fail, validate-fail).
+	return { ...embody('OK'), ...overrides };
 }
 
 describe('deriveDisplayTree', () => {
@@ -50,7 +42,7 @@ describe('deriveDisplayTree', () => {
 	it('snippet panel content is the embodiment source code verbatim', () => {
 		const tree = deriveDisplayTree(makeSnippet());
 		const panel = tree.panels.find((p) => p.key === 'snippet');
-		expect(panel?.content).toBe('let x = 1;');
+		expect(panel?.content).toBe('OK');
 	});
 
 	it('status panel content reflects all four status flags + error kind (apex leaf; errors=null → null)', () => {
