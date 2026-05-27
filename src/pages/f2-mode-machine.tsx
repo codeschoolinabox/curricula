@@ -5,15 +5,15 @@
  * after `npm run start` — note the Docusaurus `baseUrl: '/spiralearn/'`
  * prefix per `docusaurus.config.ts`):
  *
- * 1. **Initial state**: the editor textarea is visible (`data-orchestrator-host`);
- *    no lens panel is present.
+ * 1. **Initial state**: the CodeMirror editor is visible (`data-orchestrator-host`
+ *    on the host `<div>`); no lens panel is present.
  * 2. **Toggle to lens**: click "Toggle lens" → `debug-props` lens panel appears;
- *    textarea is gone. The embodiment panels (snippet, status, validation, config)
+ *    the editor is gone. The embodiment panels (snippet, status, validation, config)
  *    should render.
  * 3. **Toggle back**: click "Toggle lens" again → editor returns; lens is gone.
  * 4. **Type between toggles**: free-form typing is fine — embody never fires
  *    on keystrokes (F2.4 removed the unconditional `useEmbodiment`). Edits
- *    persist in the textarea across the lens→editor round trip; cursor
+ *    persist in the editor across the lens→editor round trip; cursor
  *    position resets on re-mount, which is expected. To toggle the result
  *    INTO a lens after typing, end on a known sentinel (e.g. `FAIL_AT_PARSE`)
  *    so the embody mock can dispatch it on the next lens-open.

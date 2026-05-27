@@ -9,11 +9,14 @@
 // No StrictMode-wrapped test is included. testing-library/react does not
 // auto-wrap in `<React.StrictMode>`, and the cancellation mechanism the
 // implementation uses (cancelledRef in the mount effect, checked inside
-// the createEditor `.then` callbacks) is already exercised by the
+// the createEditor `.then` callbacks) is partially exercised by the
 // rejection-path test in the "Exceptions — factory rejection" describe
-// block (which forces the cancelledRef.current check to fire before
-// setMountError). Adding a real StrictMode wrapper test is possible but
-// not load-bearing given that coverage.
+// block, which routes through the cancelledRef.current check on the way
+// to setMountError (cancelledRef is false in that test, so only the
+// falsy branch evaluates — the cancelled=true branch remains untested;
+// an explicit StrictMode-or-quick-unmount test is the only way to
+// exercise it). Adding such a test is possible but not load-bearing
+// at the current scope.
 
 import { EditorView } from '@codemirror/view';
 import { render, waitFor } from '@testing-library/react';
