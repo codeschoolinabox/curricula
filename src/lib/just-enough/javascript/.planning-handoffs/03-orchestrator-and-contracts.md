@@ -324,7 +324,7 @@ format pre-processing (the learner formats their own code; `embody` checks
 dissolved during B's 3-prop reshape (`df6a0e7`); plugin-fence rendering shipped
 with B (sandbox at `spiralearn/sandbox/b-prop-shape/`).
 
-#### F2 — Editor-vs-lens 2-mode state machine ← **NEXT STONE**
+#### F2 — Editor-vs-lens 2-mode state machine ✅ DONE (2026-05-13)
 
 The orchestrator's UI is in exactly one of two modes at a time:
 
