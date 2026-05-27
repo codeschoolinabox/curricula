@@ -1,11 +1,42 @@
 // @vitest-environment jsdom
 
-import { fireEvent, render } from '@testing-library/react';
+import { EditorView } from '@codemirror/view';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import * as embodyModule from '../../embody/index.js';
 import StudyLenses from '../index.js';
+
+/**
+ * Resolves to the CodeMirror EditorView mounted inside the orchestrator's
+ * editor home-base (the host `<div data-orchestrator-host>` contains a
+ * `.cm-content` element after async mount completes).
+ */
+async function findMountedEditorView(container: HTMLElement): Promise<EditorView> {
+	const cmContent = await waitFor(() => {
+		const element = container.querySelector('.cm-content');
+		if (!element) throw new Error('CodeMirror content element not yet mounted');
+		return element as HTMLElement;
+	});
+	const view = EditorView.findFromDOM(cmContent);
+	if (!view) throw new Error('EditorView.findFromDOM returned null');
+	return view;
+}
+
+/**
+ * Simulate a user typing the given content into the editor. Replaces the
+ * entire document via a CM dispatch (matching what `userEvent.type` would
+ * eventually trigger) and runs the dispatch inside React's `act` so the
+ * resulting setState round-trip commits before the next assertion.
+ */
+function typeInto(view: EditorView, content: string): void {
+	act(() => {
+		view.dispatch({
+			changes: { from: 0, to: view.state.doc.length, insert: content },
+		});
+	});
+}
 
 describe('<StudyLenses> — F1 smoke', () => {
 	describe('Zero — root mount', () => {
@@ -23,40 +54,37 @@ describe('<StudyLenses> — F1 smoke', () => {
 			expect(host).not.toBeNull();
 		});
 
-		it('the host element is a <textarea>', () => {
+		it('the host element is a <div> (CodeMirror EditorView container)', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
 			const host = container.querySelector('[data-orchestrator-host]');
-			expect(host?.tagName).toBe('TEXTAREA');
+			expect(host?.tagName).toBe('DIV');
 		});
 
-		it('the textarea value reflects the snippet prop on initial mount', () => {
+		it('the live document content reflects the snippet prop on initial mount', async () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
-			const host = container.querySelector<HTMLTextAreaElement>(
-				'[data-orchestrator-host]',
-			);
-			expect(host?.value).toBe('OK');
+			const view = await findMountedEditorView(container);
+			expect(view.state.doc.toString()).toBe('OK');
 		});
 
-		it('ignores subsequent changes to the snippet prop (initial-value-only seed)', () => {
+		it('ignores subsequent changes to the snippet prop (initial-value-only seed)', async () => {
 			// F2 contract: snippet prop seeds useState on first render only.
 			// Callers who want to swap the snippet after mount must remount
 			// via React key={…}. A re-render with a new snippet prop does NOT
 			// override the orchestrator's internal snippet state.
 			const { container, rerender } = render(<StudyLenses snippet="OK" />);
+			const view = await findMountedEditorView(container);
 			rerender(<StudyLenses snippet="CHANGED" />);
-			const host = container.querySelector<HTMLTextAreaElement>(
-				'[data-orchestrator-host]',
-			);
-			expect(host?.value).toBe('OK');
+			// Even after the rerender, the editor's content is the
+			// orchestrator-owned snippet state seeded at first render — not
+			// the new prop value.
+			expect(view.state.doc.toString()).toBe('OK');
 		});
 
-		it('typing into the editor updates the textarea value on next render (Interfaces — cross-file)', () => {
+		it('typing into the editor updates the live document on next render (Interfaces — cross-file)', async () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
-			const host = container.querySelector<HTMLTextAreaElement>(
-				'[data-orchestrator-host]',
-			)!;
-			fireEvent.change(host, { target: { value: 'hello world' } });
-			expect(host.value).toBe('hello world');
+			const view = await findMountedEditorView(container);
+			typeInto(view, 'hello world');
+			expect(view.state.doc.toString()).toBe('hello world');
 		});
 	});
 
@@ -103,15 +131,13 @@ describe('<StudyLenses> — F1 smoke', () => {
 			}
 		});
 
-		it('embody is NOT re-called when typing into the editor (no mode transition)', () => {
+		it('embody is NOT re-called when typing into the editor (no mode transition)', async () => {
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
 				const { container } = render(<StudyLenses snippet="OK" />);
-				const host = container.querySelector<HTMLTextAreaElement>(
-					'[data-orchestrator-host]',
-				)!;
-				fireEvent.change(host, { target: { value: 'arbitrary code, not a sentinel' } });
-				fireEvent.change(host, { target: { value: 'more arbitrary text' } });
+				const view = await findMountedEditorView(container);
+				typeInto(view, 'arbitrary code, not a sentinel');
+				typeInto(view, 'more arbitrary text');
 				expect(embodySpy).not.toHaveBeenCalled();
 			} finally {
 				embodySpy.mockRestore();
@@ -122,7 +148,7 @@ describe('<StudyLenses> — F1 smoke', () => {
 	// ─── F2.5: edit-eager cache invalidation ──────────────────────────────
 
 	describe('F2.5 — edit invalidates the cache eagerly', () => {
-		it('type-then-undo → toggle to lens re-fires embody (cache cleared eagerly on edit, not restored by undo)', () => {
+		it('type-then-undo → toggle to lens re-fires embody (cache cleared eagerly on edit, not restored by undo)', async () => {
 			// Decisive test for F2.5 vs F2.4-cache-hit-only (per cache contract in
 			// DOCS.md § Effect topology — "Embodiment-on-edit invalidation" row):
 			// Under F2.4 alone, the cache-hit check would see snippet="OK" matches
@@ -137,11 +163,9 @@ describe('<StudyLenses> — F1 smoke', () => {
 				expect(embodySpy).toHaveBeenCalledOnce();
 
 				rerender(<StudyLenses snippet="OK" />);
-				const host = container.querySelector<HTMLTextAreaElement>(
-					'[data-orchestrator-host]',
-				)!;
-				fireEvent.change(host, { target: { value: 'FAIL_AT_PARSE' } });
-				fireEvent.change(host, { target: { value: 'OK' } });
+				const view = await findMountedEditorView(container);
+				typeInto(view, 'FAIL_AT_PARSE');
+				typeInto(view, 'OK');
 
 				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
 				expect(embodySpy).toHaveBeenCalledTimes(2);
@@ -150,7 +174,7 @@ describe('<StudyLenses> — F1 smoke', () => {
 			}
 		});
 
-		it('edit + toggle re-fires embody with the new snippet (covers cache-miss path)', () => {
+		it('edit + toggle re-fires embody with the new snippet (covers cache-miss path)', async () => {
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
 				const { container, rerender } = render(
@@ -159,10 +183,8 @@ describe('<StudyLenses> — F1 smoke', () => {
 				expect(embodySpy).toHaveBeenCalledOnce();
 
 				rerender(<StudyLenses snippet="OK" />);
-				const host = container.querySelector<HTMLTextAreaElement>(
-					'[data-orchestrator-host]',
-				)!;
-				fireEvent.change(host, { target: { value: 'FAIL_AT_PARSE' } });
+				const view = await findMountedEditorView(container);
+				typeInto(view, 'FAIL_AT_PARSE');
 
 				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
 				expect(embodySpy).toHaveBeenCalledTimes(2);
