@@ -13,11 +13,11 @@
  *
  * Panel-rendering follows the `Snippet` staircase from
  * `../../embody/types.ts § Snippet` — each panel guards on the appropriate
- * `embodiment.status.*` boolean (or on the presence of an optional field)
+ * `embodiment.status.*` boolean (or on a null check for a nullable field)
  * before reading dependent data. The status panel shows the four
  * `Status` booleans (`tokenized, parsed, validated, created`) plus the
  * first-fail kind (`embodiment.errors?.kind ?? null`). The validation
- * panel renders fields when `embodiment.validation !== undefined`
+ * panel renders fields when `embodiment.validation !== null`
  * (validate-fail leaf and beyond) and renders the gate-phrased
  * `VALIDATION_ABSENT_PLACEHOLDER` otherwise (tokenize-fail and parse-fail
  * leaves). See `./DOCS.md` § Handling absent fields for the staircase
@@ -76,14 +76,14 @@ function deriveDisplayTree(
 		{
 			key: 'validation',
 			label: 'validation (JeJ + determinism + IO)',
-			// `Snippet.validation` is optional — absent at tokenize-fail and
+			// `Snippet.validation` is nullable — null at tokenize-fail and
 			// parse-fail leaves per the embody staircase (see
-			// `../../embody/types.ts § Snippet`). Guard via presence check
-			// rather than a status-boolean read; if the contract ever tightens
-			// `validation?: Validation` to `validation: Validation | null`, the
-			// TypeScript compiler flags this deref site before runtime.
+			// `../../embody/types.ts § Snippet`). Guard via null check rather
+			// than a status-boolean read; the equivalence is structural
+			// (validate-fail-and-beyond ⇔ validation !== null) and the null
+			// check narrows the type at the deref sites below.
 			content:
-				embodiment.validation === undefined
+				embodiment.validation === null
 					? VALIDATION_ABSENT_PLACEHOLDER
 					: JSON.stringify(
 							{

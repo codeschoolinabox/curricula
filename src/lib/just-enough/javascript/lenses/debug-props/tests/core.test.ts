@@ -160,10 +160,10 @@ describe('deriveDisplayTree', () => {
 	});
 
 	// Many — shape leaves with validation absent. The Snippet contract makes
-	// validation optional at tokenize-fail and parse-fail (validation is only
+	// validation nullable at tokenize-fail and parse-fail (validation is only
 	// computed once parse succeeds — see embody/types.ts § Snippet). The
 	// validation panel must render a gate-phrased placeholder rather than
-	// crash on undefined dereference.
+	// crash on null dereference.
 	it('validation panel renders placeholder for tokenize-fail leaf (validation absent)', () => {
 		const snippet = makeSnippet({
 			status: {
@@ -172,7 +172,7 @@ describe('deriveDisplayTree', () => {
 				validated: false,
 				created: false,
 			},
-			validation: undefined,
+			validation: null,
 			errors: {
 				phase: 'parse:tokenize',
 				kind: 'SyntaxError',
@@ -193,7 +193,7 @@ describe('deriveDisplayTree', () => {
 				validated: false,
 				created: false,
 			},
-			validation: undefined,
+			validation: null,
 			errors: {
 				phase: 'parse:ast',
 				kind: 'SyntaxError',
