@@ -109,19 +109,14 @@ function walkAndAnalyze(
  * means "include everything."
  *
  * Returns `{ ok: false }` when the embodiment has no parsed AST
- * (i.e. `status.parsed === false` or `parse.ast` is absent).
+ * (i.e. `status.parsed === false` or `raw.ast` is null).
  *
- * Phase B alignment deferred: real acorn AST unlocks full analyzer
- * coverage. Phase A mock returns a stub Program with `body: []` —
- * all analyzers return zero questions. Per-analyzer coverage lives
- * in the sibling test files, which call acorn directly via local helpers.
- *
- * Analyzers receive `embodiment.parse.ast.acornNode` (raw acorn `Node`),
- * not the augmented graph. `extract-location.ts` and all analyzer files
- * in `analyzers/` operate on raw acorn nodes — no change needed in Phase A.
+ * Analyzers receive `embodiment.raw.ast` (raw acorn `Node`), not the
+ * augmented graph. `extract-location.ts` and all analyzer files in
+ * `analyzers/` operate on raw acorn nodes.
  *
  * @param embodiment - Frozen Snippet from `embody()`. Source is read from
- *   `source.code`; AST from `parse.ast.acornNode` (when `status.parsed`).
+ *   `source.code`; AST from `raw.ast` (when `status.parsed`).
  * @param config - Optional filtering configuration.
  * @returns A frozen `MicroDecisionResult`.
  */
@@ -132,12 +127,12 @@ function analyzeMicroDecisions(
 	// 1. Read source from embodiment
 	const source = embodiment.source.code;
 
-	// 2. Read AST from embodiment (when parsed)
-	// Per embody contract: status.parsed === false implies errors !== null.
-	// Defensive fallback below fires only if mock violates that contract.
+	// 2. Read AST from embodiment (when parsed).
+	// Per embody contract: status.parsed === true ⇒ raw.ast !== null;
+	// the truthy `&& raw.ast` is type-narrowing for the consumer.
 	const ast: Node | null =
-		embodiment.status.parsed && embodiment.parse.ast
-			? embodiment.parse.ast.acornNode
+		embodiment.status.parsed && embodiment.raw.ast
+			? embodiment.raw.ast
 			: null;
 
 	if (ast === null) {
