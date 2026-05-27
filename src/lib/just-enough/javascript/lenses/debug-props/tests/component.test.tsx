@@ -7,31 +7,19 @@
  * root.
  */
 
+import { render, cleanup } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { render, cleanup } from '@testing-library/react';
 
+import embody from '../../../embody/index.js';
+import type { Snippet } from '../../../embody/types.js';
 import debugPropsLens from '../index.js';
 
-import type { Snippet } from '../../../embody/types.js';
 
 afterEach(cleanup);
 
 function makeSnippet(): Snippet {
-	return {
-		source: { code: 'let x = 1;', offsets: [0] },
-		status: { tokenized: true, parsed: true, created: true },
-		parse: {},
-		validation: {
-			isJeJ: true,
-			isDeterministic: true,
-			doesPause: false,
-			formatted: true,
-			violations: [],
-		},
-		errors: null,
-		streams: { realm: undefined as never },
-	} as Snippet;
+	return embody('let x = 1;');
 }
 
 describe('debug-props lens — LensModule shape', () => {
@@ -76,9 +64,10 @@ describe('debug-props lens — Component rendering', () => {
 		const { container } = render(
 			<debugPropsLens.Component embodiment={makeSnippet()} />,
 		);
+		// eslint-disable-next-line unicorn/prefer-spread -- Pitfall #14: Babel emits unstable code for [...iterable] under the Docusaurus build pipeline. Keep Array.from on NodeList iterators.
 		const keys = Array.from(
-			container.querySelectorAll('[data-debug-panel]'),
-		).map((el) => el.getAttribute('data-debug-panel'));
+			container.querySelectorAll<HTMLElement>('[data-debug-panel]'),
+		).map((element) => element.dataset.debugPanel);
 		expect(keys).toEqual(['snippet', 'status', 'validation', 'config']);
 	});
 
