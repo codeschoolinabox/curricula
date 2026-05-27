@@ -104,10 +104,10 @@ bd98648  docs: lock F1 orchestrator contract — drop format
     `highlight/` placeholder), `orchestrate/` (React-aware peer + the public
     API).
 - **`<StudyLenses>` four-prop API is LIVE on main** at
-  `src/lib/just-enough/javascript/orchestrate/index.tsx`.
-  Surface: `<StudyLenses snippet lens? config? configs?>`. F1 wires `snippet` to
-  runtime; the other three are accepted but not yet wired except for the F1
-  mount-time guard (throw if `config` is supplied with no resolved default).
+  `src/lib/just-enough/javascript/orchestrate/index.tsx`. Surface:
+  `<StudyLenses snippet lens? config? configs?>`. F1 wires `snippet` to runtime;
+  the other three are accepted but not yet wired except for the F1 mount-time
+  guard (throw if `config` is supplied with no resolved default).
 - **Editor home base is a single React component** at
   `orchestrate/editor/index.tsx` per AR-1 CP-1. Read-only textarea in F1; F2
   lifts `readOnly` and adds `onSnippetChange?`.
@@ -208,19 +208,19 @@ The agent should read these in order before any code changes:
    — especially lines 175-216 (Cross-handoff impact / plugin alignment), lines
    309-319 (F1 spec the plugin emits against), lines 50-65 (locked four-prop
    API + URL-style fence syntax spec).
-3. **`src/lib/just-enough/javascript/orchestrate/README.md`**
-   — especially the "F1 narrowing" block and the "F1 ↔ plugin alignment gap"
-   callout (lines ~84-109). This explains exactly what gap B closes.
-4. **`src/lib/just-enough/javascript/orchestrate/types.ts`**
-   — `StudyLensesProps` (lines 96-101) is the contract the plugin emits against.
+3. **`src/lib/just-enough/javascript/orchestrate/README.md`** — especially the
+   "F1 narrowing" block and the "F1 ↔ plugin alignment gap" callout (lines
+   ~84-109). This explains exactly what gap B closes.
+4. **`src/lib/just-enough/javascript/orchestrate/types.ts`** —
+   `StudyLensesProps` (lines 96-101) is the contract the plugin emits against.
 5. **`src/plugins/study-lenses/`** (entire directory) — the plugin to be
    modified. Read all of `code-block-to-jsx.ts`,
    `parse-study-lens-directive.ts`, `resolve-cascade.ts`, and any tests / index
    files.
 6. **`src/lib/just-enough/javascript/AGENTS.md`** +
-   **`src/lib/just-enough/javascript/DEV.md`** —
-   workflow + conventions (DDD, AR ceremony, `feedback_no_branches`,
-   `feedback_docs_get_full_AR`, `feedback_ar_ceremony_mandatory`).
+   **`src/lib/just-enough/javascript/DEV.md`** — workflow + conventions (DDD, AR
+   ceremony, `feedback_no_branches`, `feedback_docs_get_full_AR`,
+   `feedback_ar_ceremony_mandatory`).
 7. **`src/theme/MDXComponents.js`** — F1 fixed this consumer's import path; B
    should not regress it.
 
@@ -322,7 +322,8 @@ Stop the agent and redirect if you see:
 - **WS2 (recommender)** at `.planning-handoffs/02-analysis-and-recommender.md`
   is independent; B does not need to coordinate.
 - **WS4 (lens migration)** at `.planning-handoffs/04-lens-migration.md` is
-  independent; the highlight source coming back later is WS4's concern, not B's.
+  independent; the annotate-lens source coming back later (formerly `highlight`;
+  renamed during WS4 Phase 0) is WS4's concern, not B's.
 
 ## Out of scope for B (deferred)
 
@@ -331,8 +332,8 @@ Stop the agent and redirect if you see:
   fences-with-real-JEJ still throw post-B.
 - **F2** (editor-vs-lens 2-mode state machine) — separate session.
 - **L1+** (toolbar / picker / panel) — separate sessions; gated on F2.
-- **Lens implementations** (highlight source, parsons, blanks, etc.) — separate
-  WS4 sessions.
+- **Lens implementations** (annotate source — formerly highlight — parsons,
+  blanks, etc.) — separate WS4 sessions.
 - **The handoff file itself** at
   `.planning-handoffs/03-orchestrator-and-contracts.md` § Cross- handoff impact
   recommends "REFACTOR-HANDOFF.md should gain new steps for plugin alignment" —
@@ -377,6 +378,7 @@ Or, in parallel-track:
   `.planning-handoffs/02-analysis-and-recommender.md`. Unblocks L5/L6 once it
   ships.
 - **WS4 lens migration Phase 0** — `.planning-handoffs/04-lens-migration.md`.
-  Lands real lenses one at a time (highlight, parsons, blanks, …).
+  Lands real lenses one at a time (annotate — formerly highlight — parsons,
+  blanks, …).
 - **Phase B embody** — `EMBODY-IMPL-HANDOFF.md`. Unblocks real JEJ source
   rendering in fences.

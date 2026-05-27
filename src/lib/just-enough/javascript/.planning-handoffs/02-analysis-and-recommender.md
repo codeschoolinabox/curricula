@@ -114,14 +114,18 @@ Each lens falls into one of three tiers based on what it needs from the code:
 available, even with syntax errors.
 
 - parsons (line shuffling)
-- highlight (annotation)
-- copy-type (writeme)
+- annotate (annotation workbench; formerly `highlight`, renamed during WS4 Phase
+  0 — see `04-lens-migration.md` § Editor placement + annotate lens status)
+- copy-type (write-from-memory)
 
 **Tier 2: AST-dependent static** -- Needs a valid parse but no execution. Syntax
 errors -> relevance 0.
 
 - blanks (token removal)
+- dropdowns (token replacement w/ multiple-choice)
 - variables (scope analysis)
+- writeme (write-from-template; uses `embodiment.raw.comments` to extract the
+  comment-only template — promoted from Tier 1 during WS4 Phase 0)
 - ask (question generation)
 
 **Tier 3: Dynamic** -- Needs valid parse AND execution. Syntax errors ->

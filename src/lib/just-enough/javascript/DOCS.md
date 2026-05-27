@@ -18,9 +18,8 @@ after the work is done).
 
 ## Directory layout
 
-Three peers under `javascript/` mirror the conceptual chain. The
-implementation peer (`orchestrate/`) wires everything together for the
-learner.
+Three peers under `javascript/` mirror the conceptual chain. The implementation
+peer (`orchestrate/`) wires everything together for the learner.
 
 ```text
 javascript/
@@ -99,44 +98,45 @@ Concretely a lens receives `embodiment` as a prop and:
 There is **no separate `transforms/` or `remix/` peer.** Anything that produces
 a derivative snippet for an exercise is a lens concern.
 
-**Lenses are pure exercise renderers in this sense:** a lens renders
-its exercise UI + its own config panel — and nothing else. No
-toolbar, no lens-switching, no snippet state management, no
-pre-processing. All that infrastructure is the orchestrator's. The
-**trial / Phase-1 lens roster** (the validated-first set; the full
-migration roadmap covers more lenses — see
+**Lenses are pure exercise renderers in this sense:** a lens renders its
+exercise UI + its own config panel — and nothing else. No toolbar, no
+lens-switching, no snippet state management, no pre-processing. All that
+infrastructure is the orchestrator's. The **trial / Phase-1 lens roster** (the
+validated-first set; the full migration roadmap covers more lenses — see
 [`.planning-handoffs/04-lens-migration.md`](./.planning-handoffs/04-lens-migration.md)):
 
-- `editor` — CodeMirror editor (lives in `orchestrate/editor/`, not
-  `lenses/`). The default home base; the only writer of snippet state.
-- `blanks` — fill-in-the-blank UI. Reads embodiment, renders blanked
-  code + input fields + difficulty config panel.
-- `parsons` — drag-and-drop UI. Reads embodiment, renders shuffled
-  lines.
-- `highlight` — read-only annotated code view.
-- `trace-table` — split view: code display + manual trace table +
-  [check] button. Validates predictions against the JEJ tracer's
-  ground truth. Different configs for steps / values / operators
-  (see `.planning-handoffs/04-lens-migration.md` § lens design
-  patterns for the multi-variant pattern).
+- `editor` — CodeMirror editor (lives in `orchestrate/editor/`, not `lenses/`).
+  The default home base; the only writer of snippet state.
+- `blanks` — fill-in-the-blank UI. Reads embodiment, renders blanked code +
+  input fields + difficulty config panel.
+- `parsons` — drag-and-drop UI. Reads embodiment, renders shuffled lines.
+- `annotate` — annotation workbench over code or generated flowchart; toggles
+  between two views without losing annotations on either. Formerly `highlight`
+  (renamed during WS4 Phase 0; see `.planning-handoffs/04-lens-migration.md` §
+  Editor placement + annotate lens status).
+- `trace-table` — split view: code display + manual trace table + [check]
+  button. Validates predictions against the JEJ tracer's ground truth. Different
+  configs for steps / values / operators (see
+  `.planning-handoffs/04-lens-migration.md` § lens design patterns for the
+  multi-variant pattern).
 
 Each lens is self-describing via the `LensModule` contract in
 [`lenses/types.ts`](./lenses/types.ts):
 
 ```ts
 type LensModule = Readonly<{
-  name: string;
-  Component: ComponentType<LensProps>;             // React component reference
-  config: (overrides?: Partial<LensConfig>) => LensConfig;
-  applicableTo: (embodiment: Snippet) => boolean;  // cheap O(1) gate
-  recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
+	name: string;
+	Component: ComponentType<LensProps>; // React component reference
+	config: (overrides?: Partial<LensConfig>) => LensConfig;
+	applicableTo: (embodiment: Snippet) => boolean; // cheap O(1) gate
+	recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
 }>;
 ```
 
-`applicableTo` is a fast pure boolean (parse-failed snippet → `false`
-for AST-dependent lenses); `recommend` is the richer relevance
-computation that runs only on already-applicable lenses. Splitting
-them keeps the recommender's applicability-filter pass cheap.
+`applicableTo` is a fast pure boolean (parse-failed snippet → `false` for
+AST-dependent lenses); `recommend` is the richer relevance computation that runs
+only on already-applicable lenses. Splitting them keeps the recommender's
+applicability-filter pass cheap.
 
 ### Formatting is orchestrate pre-processing (formatting only)
 
@@ -173,8 +173,7 @@ a hard guarantee, not a politeness. Consumers wanting a mutable working copy
 
 ### Three evaluation-engine isolation models
 
-Each engine in `embody/lib/evaluating/` serves a different pedagogical
-purpose:
+Each engine in `embody/lib/evaluating/` serves a different pedagogical purpose:
 
 - **run** — Web Worker. No traps. Returns a final report. Cheapest; used when
   learners just want "did it work?"
@@ -225,130 +224,119 @@ cannot be added. JEJ is the ceiling, not the floor.
 
 ## Pedagogical grounding
 
-This package's architecture implements the framework described in
-Malaise & Signer (2023), _Explorotron: An IDE Extension for Guided and
-Independent Code Exploration and Learning_, Koli Calling '23.
+This package's architecture implements the framework described in Malaise &
+Signer (2023), _Explorotron: An IDE Extension for Guided and Independent Code
+Exploration and Learning_, Koli Calling '23.
 [`README.md` § Pedagogical first principles](./README.md#pedagogical-first-principles)
-has the conceptual narrative; this section maps each architectural
-decision to the framework.
+has the conceptual narrative; this section maps each architectural decision to
+the framework.
 
 ### Philosophy
 
 Five principles shape the architecture:
 
-- **Peel-away design.** Lenses are training wheels on a bike, not a
-  tricycle. They layer support on top of a real dev environment; as
-  learners progress they peel away layers to reveal the full
-  environment underneath. Lenses never change how the language or
-  environment works.
-- **Learner autonomy.** Educators _suggest_ lenses; learners are
-  always free to choose their own or bypass lenses entirely. The
-  free-form lens dropdown inside `<StudyLenses>` is always available
-  regardless of what config was passed in.
-- **All code is content.** Any JS file can be studied with lenses —
-  not just curriculum-curated snippets. This is Quadrant I (uncurated
-  / unguided) of the Explorotron framework, and it's the core
-  pedagogical bet on lifelong-learning autonomy.
-- **Web-standard syntax only.** No proprietary formats. JEJ programs
-  are valid JavaScript that runs anywhere; lenses operate on the same
-  source.
-- **Idea, not implementation.** Study Lenses is a design principle
-  adaptable to different host environments (browser, IDE, static
-  site). This package is the browser embodiment.
+- **Peel-away design.** Lenses are training wheels on a bike, not a tricycle.
+  They layer support on top of a real dev environment; as learners progress they
+  peel away layers to reveal the full environment underneath. Lenses never
+  change how the language or environment works.
+- **Learner autonomy.** Educators _suggest_ lenses; learners are always free to
+  choose their own or bypass lenses entirely. The free-form lens dropdown inside
+  `<StudyLenses>` is always available regardless of what config was passed in.
+- **All code is content.** Any JS file can be studied with lenses — not just
+  curriculum-curated snippets. This is Quadrant I (uncurated / unguided) of the
+  Explorotron framework, and it's the core pedagogical bet on lifelong-learning
+  autonomy.
+- **Web-standard syntax only.** No proprietary formats. JEJ programs are valid
+  JavaScript that runs anywhere; lenses operate on the same source.
+- **Idea, not implementation.** Study Lenses is a design principle adaptable to
+  different host environments (browser, IDE, static site). This package is the
+  browser embodiment.
 
 ### Recommender = Applicability filter + Ranking engine
 
-The paper's Figure 3 architecture (applicability filter → ranking
-engine → recommended lenses) is the implementation contract for
+The paper's Figure 3 architecture (applicability filter → ranking engine →
+recommended lenses) is the implementation contract for
 [`orchestrate/lib/recommender/`](#categorization-rationale-which-lib-modules-go-where).
-**Snippet-fit only** — the recommender takes an embodiment and a
-roster of lens plugins, runs applicability gates, ranks by snippet-fit,
-returns recommended lenses. No learner state. ZPD-targeting at the
-curricular scope is the embedding LMS's job (it picks which snippet
-to render); we do not see learner state inside our recommender.
+**Snippet-fit only** — the recommender takes an embodiment and a roster of lens
+plugins, runs applicability gates, ranks by snippet-fit, returns recommended
+lenses. No learner state. ZPD-targeting at the curricular scope is the embedding
+LMS's job (it picks which snippet to render); we do not see learner state inside
+our recommender.
 
 ### Pyramid layers — the fractal claim
 
-The framework's pyramid applies at two scopes. We own the snippet
-scope; the LMS owns the curricular scope.
+The framework's pyramid applies at two scopes. We own the snippet scope; the LMS
+owns the curricular scope.
 
-| Pyramid layer | Snippet scope (us) | Curricular scope (LMS) |
-| --- | --- | --- |
-| Base — Progress modelling | _(n/a)_ | Learner state / knowledge graph / ZPD positioning |
-| Layer I — Lenses & defaults | `orchestrate/lib/recommender/` ranks by snippet-fit; `lenses/` are the plugins | _(subsumed)_ |
-| Layer II — Path generation | Open spec — auto-generated lens path on one snippet (3D Block × NM in draft) | Sequence of `<StudyLenses>` instances across snippets |
-| Layer III — Manual recommendations | `lens` prop: "open in this lens first" (per-fence `js:trace?…` or directory `lenses.json` cascade) | LMS picks the curated snippet |
-| Layer IV — Manually crafted paths | **Deferred** — Q-IV at snippet scope is owned by the LMS; auto-recommended Q-II tours suffice for in-snippet guidance. Future shape (5th prop / meta-key in `configs` / directory-level setting) is intentionally undecided. | Full curriculum sequence |
-| Top — Monitored learning | _(n/a)_ | Grade reports, LMS integration, cheating detection |
+| Pyramid layer                      | Snippet scope (us)                                                                                                                                                                                                           | Curricular scope (LMS)                                |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Base — Progress modelling          | _(n/a)_                                                                                                                                                                                                                      | Learner state / knowledge graph / ZPD positioning     |
+| Layer I — Lenses & defaults        | `orchestrate/lib/recommender/` ranks by snippet-fit; `lenses/` are the plugins                                                                                                                                               | _(subsumed)_                                          |
+| Layer II — Path generation         | Open spec — auto-generated lens path on one snippet (3D Block × NM in draft)                                                                                                                                                 | Sequence of `<StudyLenses>` instances across snippets |
+| Layer III — Manual recommendations | `lens` prop: "open in this lens first" (per-fence `js:trace?…` or directory `lenses.json` cascade)                                                                                                                           | LMS picks the curated snippet                         |
+| Layer IV — Manually crafted paths  | **Deferred** — Q-IV at snippet scope is owned by the LMS; auto-recommended Q-II tours suffice for in-snippet guidance. Future shape (5th prop / meta-key in `configs` / directory-level setting) is intentionally undecided. | Full curriculum sequence                              |
+| Top — Monitored learning           | _(n/a)_                                                                                                                                                                                                                      | Grade reports, LMS integration, cheating detection    |
 
 ### 3D Block Model space
 
-The Block Model of Program Comprehension (Schulte 2008) — referenced
-in the curriculum's `exercise-types.md` — describes comprehension
-across two dimensions. We extend it to **three** as the recommender's
-organizing space:
+The Block Model of Program Comprehension (Schulte 2008) — referenced in the
+curriculum's `exercise-types.md` — describes comprehension across two
+dimensions. We extend it to **three** as the recommender's organizing space:
 
 1. **Level** — text surface → program execution → function/purpose
 2. **Scope** — atoms → blocks → relations → macro
 3. **NM components** — the 10 step categories from the syntax tracer's
    `StepCategory` enum (`expression`, `resolve`, `statement`, `scope`,
-   `control-flow`, `initialization`, `for-init`, `write`, `emit`,
-   `error`). **Unordered set** — no ordinal "level" is derived from
-   this dimension.
+   `control-flow`, `initialization`, `for-init`, `write`, `emit`, `error`).
+   **Unordered set** — no ordinal "level" is derived from this dimension.
 
-The third dimension is unordered for a deliberate reason: NM
-components don't compose into a single learning progression. A snippet
-with `expression` + `resolve` isn't "earlier" than one with
-`scope` + `control-flow`; they're different teaching opportunities.
-The spiral comes from **(a)** lens-config variation across snippets
-(a `blanks` lens configured for keywords vs. operators vs.
-control-flow reads differently at each configuration) and **(b)**
-curriculum-author-imposed ordering of category-filtered
-recommendations, chosen pedagogically rather than enforced by the NM
-model.
+The third dimension is unordered for a deliberate reason: NM components don't
+compose into a single learning progression. A snippet with `expression` +
+`resolve` isn't "earlier" than one with `scope` + `control-flow`; they're
+different teaching opportunities. The spiral comes from **(a)** lens-config
+variation across snippets (a `blanks` lens configured for keywords vs. operators
+vs. control-flow reads differently at each configuration) and **(b)**
+curriculum-author-imposed ordering of category-filtered recommendations, chosen
+pedagogically rather than enforced by the NM model.
 
-The recommender folds the three dimensions into the
-`RecommendationGrid`: each cell is `{level, scope, nmComponents}`
-populated only where the snippet × available lenses intersect. A
-short snippet with no loops won't have trace-table options; a
-literal-only snippet won't have variables-lens options.
+The recommender folds the three dimensions into the `RecommendationGrid`: each
+cell is `{level, scope, nmComponents}` populated only where the snippet ×
+available lenses intersect. A short snippet with no loops won't have trace-table
+options; a literal-only snippet won't have variables-lens options.
 
 WS1 (`.planning-handoffs/01-NM-components.md`) is the implementation
-pave-the-way: it wires `StepCategory` into the shared types and ties
-the syntax tracer's enum to Block-model cells. This DOCS section
-sets the direction; that handoff covers the implementation specifics.
+pave-the-way: it wires `StepCategory` into the shared types and ties the syntax
+tracer's enum to Block-model cells. This DOCS section sets the direction; that
+handoff covers the implementation specifics.
 
 ### What we explicitly do NOT own
 
-- **System-wide learner state, knowledge graph, ZPD positioning.**
-  Learner profiles live in the embedding LMS. Our recommender ranks
-  by snippet-fit; we never see who the learner is.
-- **Multi-snippet path arrangement.** The LMS decides which snippet
-  to render next. `<StudyLenses>` is a stepping stone, not a path.
-- **Grade reports / LMS integration / cheating detection.** Top of
-  the pyramid; LMS responsibility.
-- **A data-emit protocol from `<StudyLenses>` back to the LMS.**
-  Deferred until a concrete integration target exists; out of scope
-  for now.
+- **System-wide learner state, knowledge graph, ZPD positioning.** Learner
+  profiles live in the embedding LMS. Our recommender ranks by snippet-fit; we
+  never see who the learner is.
+- **Multi-snippet path arrangement.** The LMS decides which snippet to render
+  next. `<StudyLenses>` is a stepping stone, not a path.
+- **Grade reports / LMS integration / cheating detection.** Top of the pyramid;
+  LMS responsibility.
+- **A data-emit protocol from `<StudyLenses>` back to the LMS.** Deferred until
+  a concrete integration target exists; out of scope for now.
 
 ### How architectural decisions implement framework principles
 
-- **Single-writer state model + lens-as-mini-web-app** — derived from
-  the paper's principle that lenses provide "views on a file that
-  focus on learning or exploring certain aspects." Lenses produce the
-  view; only the editor mutates the snippet.
-- **`<StudyLenses>` as the public surface** — derived from the
-  skill-transfer principle: learners use the same component for
-  curriculum content and for any code they paste in (Quadrant I of
-  the framework).
-- **Lens plugins receive `embodiment` via props (no peer imports)** —
-  derived from the modularity needs of an extensible lens roster:
-  new lenses contributed independently must be wireable without
-  reaching into embody internals.
-- **`embody/lib/*` returns raw data; `embody()` deep-freezes once** —
-  derived from the centralization needed when many downstream
-  consumers (lenses, the editor, the recommender) all read the same
-  snippet representation. One source of truth, frozen at the seam.
+- **Single-writer state model + lens-as-mini-web-app** — derived from the
+  paper's principle that lenses provide "views on a file that focus on learning
+  or exploring certain aspects." Lenses produce the view; only the editor
+  mutates the snippet.
+- **`<StudyLenses>` as the public surface** — derived from the skill-transfer
+  principle: learners use the same component for curriculum content and for any
+  code they paste in (Quadrant I of the framework).
+- **Lens plugins receive `embodiment` via props (no peer imports)** — derived
+  from the modularity needs of an extensible lens roster: new lenses contributed
+  independently must be wireable without reaching into embody internals.
+- **`embody/lib/*` returns raw data; `embody()` deep-freezes once** — derived
+  from the centralization needed when many downstream consumers (lenses, the
+  editor, the recommender) all read the same snippet representation. One source
+  of truth, frozen at the seam.
 
 ## Dependency rules (one-way)
 
@@ -367,36 +355,37 @@ embody/       orchestrate/   ←    embody/  +  lenses/
 
 Concrete:
 
-- `embody/` may import from `embody/lib/*` and `@-utils`. Never from `orchestrate/`
-  or `lenses/`.
+- `embody/` may import from `embody/lib/*` and `@-utils`. Never from
+  `orchestrate/` or `lenses/`.
 - `embody/lib/*` may import from sibling `embody/lib/*` and `@-utils`. Never
   from `embody/` (top), `orchestrate/`, or `lenses/`.
 - `lenses/<lens>/*` may import from sibling lens-internal files,
   `orchestrate/lib/*`, and `@-utils`. Receives `embodiment` via props from the
   orchestrator. Never imports from `embody/` or `orchestrate/` (top).
-- `orchestrate/` may import from `orchestrate/lib/*`, `embody/`, `lenses/`, `@-utils`.
-- `orchestrate/lib/*` may import from sibling `orchestrate/lib/*`, `embody/` (consume
-  embodiment instances), `@-utils`. Never from `lenses/`.
+- `orchestrate/` may import from `orchestrate/lib/*`, `embody/`, `lenses/`,
+  `@-utils`.
+- `orchestrate/lib/*` may import from sibling `orchestrate/lib/*`, `embody/`
+  (consume embodiment instances), `@-utils`. Never from `lenses/`.
 - `@-utils` may not import from anywhere else in `javascript/`.
 
 ## Categorization rationale (which `lib/*` modules go where)
 
-| Current path              | Target path                       | Why                                                            |
-| ------------------------- | --------------------------------- | -------------------------------------------------------------- |
-| `lib/parse-old/`          | `embody/lib/parse-old/` (temp)    | Legacy; reference for new `parse/`; deleted after parity       |
-| (new)                     | `embody/lib/parse/`               | Tokenize + AST-build → NM input                                |
-| `lib/ast/`                | `embody/lib/ast/`                 | AST utilities are NM-data shape                                |
-| `lib/validating/`         | `embody/lib/validating/`          | JEJ subset check → snippet metadata                            |
-| `lib/formatting/`         | `embody/lib/formatting/`          | JEJ formatting → snippet metadata                              |
-| `lib/evaluating/`         | `embody/lib/evaluating/`          | Evaluation engines that `embody.streams.evaluate.*` wrap       |
-| `lib/scope/`              | `embody/lib/scope/`               | Scope analysis → NM scope-chain understanding                  |
+| Current path              | Target path                           | Why                                                            |
+| ------------------------- | ------------------------------------- | -------------------------------------------------------------- |
+| `lib/parse-old/`          | `embody/lib/parse-old/` (temp)        | Legacy; reference for new `parse/`; deleted after parity       |
+| (new)                     | `embody/lib/parse/`                   | Tokenize + AST-build → NM input                                |
+| `lib/ast/`                | `embody/lib/ast/`                     | AST utilities are NM-data shape                                |
+| `lib/validating/`         | `embody/lib/validating/`              | JEJ subset check → snippet metadata                            |
+| `lib/formatting/`         | `embody/lib/formatting/`              | JEJ formatting → snippet metadata                              |
+| `lib/evaluating/`         | `embody/lib/evaluating/`              | Evaluation engines that `embody.streams.evaluate.*` wrap       |
+| `lib/scope/`              | `embody/lib/scope/`                   | Scope analysis → NM scope-chain understanding                  |
 | `lib/socratizing/`        | `orchestrate/lib/socratizing/`        | Socratic micro-decision analysis (orchestrator-level pedagogy) |
 | `lib/jej-documentation/`  | `orchestrate/lib/jej-documentation/`  | JEJ docs for editor tooltips                                   |
 | `lib/completing/`         | `orchestrate/lib/completing/`         | Autocomplete (editor concern)                                  |
 | `lib/editing/`            | `orchestrate/lib/editing/`            | Editor integration                                             |
 | `lib/error-interpreting/` | `orchestrate/lib/error-interpreting/` | Learner-friendly error messages (editor concern)               |
 | `lib/recommender/`        | `orchestrate/lib/recommender/`        | Exercise recommender; consumes embodiment after refactor       |
-| Cross-cutting infra       | stays at `src/lib/utils/`         | Used by all peers via @-alias                                  |
+| Cross-cutting infra       | stays at `src/lib/utils/`             | Used by all peers via @-alias                                  |
 
 The full step-by-step move sequence is in
 [`REFACTOR-HANDOFF.md`](./REFACTOR-HANDOFF.md).
@@ -404,15 +393,15 @@ The full step-by-step move sequence is in
 ## Public API: `<StudyLenses>` (orchestrator-primary, not embody-primary)
 
 The package's public interface is the **`<StudyLenses>`** React component
-exported from `orchestrate/`. `index.ts` re-exports it. Consumers
-mount `<StudyLenses snippet={…} />`; everything else (embody, lenses,
-editor, analysis libs) is internal implementation.
+exported from `orchestrate/`. `index.ts` re-exports it. Consumers mount
+`<StudyLenses snippet={…} />`; everything else (embody, lenses, editor, analysis
+libs) is internal implementation.
 
-embody is **not** part of the public surface. It is the operational data
-layer the orchestrator consumes. Lens authors and curriculum authors don't
-import `embody` directly — they ship lens plugins that the orchestrator
-mounts under `<StudyLenses>`, and lens plugins receive `embodiment` via
-props from the orchestrator.
+embody is **not** part of the public surface. It is the operational data layer
+the orchestrator consumes. Lens authors and curriculum authors don't import
+`embody` directly — they ship lens plugins that the orchestrator mounts under
+`<StudyLenses>`, and lens plugins receive `embodiment` via props from the
+orchestrator.
 
 embody architecture, data flow, and tradeoffs are documented in
 [`embody/DOCS.md`](./embody/DOCS.md). The `embody/lib/*` evaluation engines
@@ -428,8 +417,8 @@ embody architecture, data flow, and tradeoffs are documented in
 - **`snippet`** — code string. Orchestrator builds the embodiment internally.
 - **`lens`** — optional default-mount lens name (Q-III seam).
 - **`config`** — optional override for the resolved-default lens.
-- **`configs`** — optional cascade bundle keyed by lens name. The picker
-  reads `configs[lensName]` when opening any lens.
+- **`configs`** — optional cascade bundle keyed by lens name. The picker reads
+  `configs[lensName]` when opening any lens.
 
 **Resolved-default-lens resolution order**: `lens` prop → cascade default
 declaration in `configs` → none.
@@ -444,12 +433,12 @@ resolved(lensName) = module.config()                          // tier 0: lens de
 
 (`⊕` = deep-merge-right-wins.)
 
-`config=` without `lens=` applies to the resolved-default lens (the cascade
-may declare the default). If no default resolves at all, the orchestrator
-throws at mount.
+`config=` without `lens=` applies to the resolved-default lens (the cascade may
+declare the default). If no default resolves at all, the orchestrator throws at
+mount.
 
-**Per-fence info-string syntax** (URL-style; the Docusaurus plugin parses
-this and emits the props):
+**Per-fence info-string syntax** (URL-style; the Docusaurus plugin parses this
+and emits the props):
 
 ```text
 js                         → no lens (editor home base)
@@ -462,32 +451,30 @@ js:trace?cols=value,steps  → lens="trace", config={ cols: ["value","steps"] }
 [`.planning-handoffs/03-orchestrator-and-contracts.md`](./.planning-handoffs/03-orchestrator-and-contracts.md)
 for the full lock + plugin alignment.
 
-**Q-IV (per-snippet manual sequencing) is deferred.** The future shape (5th
-prop / meta-key in `configs` / directory-level setting) is intentionally
-undecided until Q-IV un-defers. The LMS owns curricular sequencing;
-auto-recommended Q-II tours suffice for in-snippet guidance.
+**Q-IV (per-snippet manual sequencing) is deferred.** The future shape (5th prop
+/ meta-key in `configs` / directory-level setting) is intentionally undecided
+until Q-IV un-defers. The LMS owns curricular sequencing; auto-recommended Q-II
+tours suffice for in-snippet guidance.
 
 ## Open holes in the contract
 
-The package contract intentionally leaves the following parts unspecified.
-Each gap is a deliberate choice — locking these would foreclose options
-that consumers' real use is needed to inform. Consumers should not rely on
-specific shapes within these gaps. Embody-internal contract gaps are
-documented in detail at
+The package contract intentionally leaves the following parts unspecified. Each
+gap is a deliberate choice — locking these would foreclose options that
+consumers' real use is needed to inform. Consumers should not rely on specific
+shapes within these gaps. Embody-internal contract gaps are documented in detail
+at
 [`embody/DOCS.md` § Open holes in the contract](./embody/DOCS.md#open-holes-in-the-contract);
 the package-level gaps below are the ones beyond the embody surface.
 
-- **embody `opts` config surface** — the contract leaves room for a
-  small downstream-consumer config surface (e.g., a remix-style lens
-  that wants to skip auto-format on its derivative source). The shape
-  is intentionally open until concrete consumer needs make the right
-  shape visible.
-- **Public API surface for `index.ts`** — `<StudyLenses>` is the
-  consumer-facing interface; `index.ts` also re-exports the legacy
-  named functions (`run`, `trace`, `validate`, `parse`, `format`,
-  `checkFormat`). The contract leaves the long-term place of those
-  legacy exports open — they may consolidate into `<StudyLenses>` or
-  remain alongside as a parallel surface.
+- **embody `opts` config surface** — the contract leaves room for a small
+  downstream-consumer config surface (e.g., a remix-style lens that wants to
+  skip auto-format on its derivative source). The shape is intentionally open
+  until concrete consumer needs make the right shape visible.
+- **Public API surface for `index.ts`** — `<StudyLenses>` is the consumer-facing
+  interface; `index.ts` also re-exports the legacy named functions (`run`,
+  `trace`, `validate`, `parse`, `format`, `checkFormat`). The contract leaves
+  the long-term place of those legacy exports open — they may consolidate into
+  `<StudyLenses>` or remain alongside as a parallel surface.
 
 ## Contributor guidelines
 
@@ -496,7 +483,7 @@ the package-level gaps below are the ones beyond the embody surface.
 - New types belong in `embody/types.ts` (canonical contract) or a peer's local
   types module. Don't add types elsewhere.
 - All public results deep-frozen. No exceptions.
-- Respect the dependency rules above. Lenses don't import from embody; orchestrate
-  distributes embodiment via props.
+- Respect the dependency rules above. Lenses don't import from embody;
+  orchestrate distributes embodiment via props.
 - Cross-doc links (`README` ↔ `notional-machine` ↔ peer `README`/`DOCS`) must
   stay alive after structural moves.

@@ -49,7 +49,8 @@ WS3 F1 COMPLETE (2026-05-06..07; commits bd98648–abe70bb)
   │   bus) ──► WS3 L1-L6 (picker, panel, etc.)
   │
   └─► WS4 (each lens implements applicableTo + recommend against
-            the LensModule contract; highlight reshape lands here)
+            the LensModule contract; annotate lens — formerly
+            highlight, renamed during WS4 Phase 0 — lands here)
 
 WS1 (NM components / 3rd dim — `StepCategory` enum lands in
                                  lenses/types.ts)
