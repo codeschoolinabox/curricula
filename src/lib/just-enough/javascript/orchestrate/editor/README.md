@@ -8,8 +8,9 @@ embodiment; the recommender is read-only; the toolbar picker selects but does
 not write.
 
 The home base lives at [`./index.tsx`](./index.tsx) as a single React function
-component. It is **not** a `LensModule` and is **not** registered in the lens
-registry — per
+component that mounts a CodeMirror `EditorView` via `useEffect`, using the
+[`../lib/editing/`](../lib/editing/) factory. It is **not** a `LensModule` and
+is **not** registered in the lens registry — per
 [`../DOCS.md` § Why the editor is a peer subdir, not a lens](../DOCS.md), the
 editor's home-base role is structurally distinct from the read-only lens role
 and the type system enforces that distinction.
@@ -25,11 +26,10 @@ editor/
     index.test.tsx
 ```
 
-The pre-refactor `editor.ts` LensModule stub and its dedicated `tests/`
-directory were deleted as part of F1.C; the React component at `index.tsx`
-replaces them. F2 re-introduces `tests/index.test.tsx` for editor-internal
-behavior (write propagation, callback wiring). Orchestrator-level coverage
-that crosses the editor ↔ `<StudyLenses>` boundary lives at
+Editor-internal tests at [`./tests/index.test.tsx`](./tests/index.test.tsx)
+cover mount, CodeMirror lifecycle, prop sync, and `onSnippetChange` wiring.
+Orchestrator-level coverage that crosses the editor ↔ `<StudyLenses>`
+boundary lives at
 [`../tests/study-lenses.test.tsx`](../tests/study-lenses.test.tsx).
 
 ## Public API
@@ -51,31 +51,43 @@ import EditorComponent from './editor/index.js';
 />;
 ```
 
-The component renders a `<textarea data-orchestrator-host>` whose `value` is
-bound to the `snippet` prop. The textarea is **writable**; an `onChange`
-handler fires the optional `onSnippetChange(next)` callback with the new
-textarea value. The orchestrator threads its `useState` setter through that
-callback, so the editor is the single writer of snippet state in the
-package. The editor never receives `embodiment` — that is a lens-mode concept
-and is passed to `<LensModule.Component>`, not to this editor.
+The component renders a `<div data-orchestrator-host>` and mounts a CodeMirror
+`EditorView` into it via `useEffect`. The `snippet` prop is the controlled
+initial-value and the source of truth for external sync — when it changes
+externally (e.g. lens → editor return), a sync effect writes `snippet` into
+the editor's `.content` (guarded by an equality check to avoid own-write
+echo). A CodeMirror update listener fires the optional `onSnippetChange(next)`
+callback when the learner types. The orchestrator threads its `useState`
+setter through that callback, so the editor is the single writer of snippet
+state in the package. The editor never receives `embodiment` — that is a
+lens-mode concept and is passed to `<LensModule.Component>`, not to this
+editor.
 
 ## Why a single React component
 
-The previous draft of these docs framed the editor as a "thin React adapter
-wrapping a `LensModule` stub". AR-1 rejected that framing — the legacy
-`editor.ts` does not satisfy the post-refactor `LensModule` contract, and the
-new architecture explicitly states the editor is **not a registered lens** (per
+The editor's role is structurally distinct from the read-only lens role —
+the type system enforces that distinction (per
 [`../DOCS.md`](../DOCS.md) § Why the editor is a peer subdir, not a lens). A
 single React component avoids two distinct mistakes:
 
-- It does not pretend the legacy stub is load-bearing API.
-- It does not introduce an adapter layer that would dissolve in Inc 15+ anyway
-  when CodeMirror lands.
+- It does not pretend a `LensModule` stub is load-bearing API for the home
+  base.
+- It does not introduce an adapter layer between React and CodeMirror; the
+  React component handles three lifecycle concerns directly:
+  - **Mount**: a `useEffect` calls `createEditor(snippet, { onChange })` and
+    stores the resolved `EditorInstance` in a ref.
+  - **Sync**: a second `useEffect` watches the `snippet` prop; when it
+    changes externally and `snippet !== editor.content`, it writes
+    `editor.content = snippet`. The equality guard prevents own-write
+    echo from the orchestrator's setState round-trip.
+  - **Destroy**: the mount effect's cleanup calls `editor.destroy()`
+    (idempotent per the editing/ contract); a `cancelled` flag inside
+    the effect closure gates a late-resolving `createEditor` promise
+    so a unit-then-remounted component never holds a stale instance.
 
-The replacement (Inc 15+) is a CodeMirror-backed React component at the same
-file path, with the same default export, that consumes the same
-`{ snippet, onSnippetChange? }` prop surface. The orchestrator's call site does
-not change.
+The component delegates the CodeMirror setup (extensions, language modules,
+keybindings) to the [`../lib/editing/`](../lib/editing/) factory; the React
+component owns only the lifecycle integration above.
 
 ## Conventions
 
@@ -84,23 +96,41 @@ Inherits all conventions from [`../README.md`](../README.md),
 Module-specific rules:
 
 - **Single-writer state.** The editor is the single writer of snippet source.
-  The textarea's `onChange` handler fires `onSnippetChange(next)`; the
-  orchestrator threads its `useState` setter into that callback. No lens
-  dispatches snippet edits. (Inc 15+'s CodeMirror replacement debounces the
-  same dispatch.)
+  CodeMirror's update listener fires `onSnippetChange(next)`; the orchestrator
+  threads its `useState` setter into that callback. No lens dispatches
+  snippet edits. **Each keystroke must produce exactly one `onSnippetChange`
+  invocation, synchronously inside the CodeMirror update transaction** —
+  F2.5's eager cache invalidation depends on the 1:1 keystroke-to-setState
+  mapping. No debouncing, no batching.
 - **One file owns the React surface.** `index.tsx` is the React home base. No
-  second adapter layer; no DOM-level helper module in the load-bearing path.
-- **Default export.** The component is the default export of `index.tsx`, frozen
-  via `freezeInPlace` if applicable.
+  second adapter layer; the CodeMirror integration lives entirely inside the
+  component via `useEffect`, delegating setup to
+  [`../lib/editing/`](../lib/editing/).
+- **Default export.** The component is the default export of `index.tsx`.
 - **Prop surface is `{ snippet, onSnippetChange? }`.** No `embodiment` prop on
   the editor — per [`../DOCS.md`](../DOCS.md) § Lifecycle modes, editor mode has
   no embodiment built. The editor is never handed an embodiment because lens
   mode hands control off to a `<LensModule.Component>`, not to this editor.
   `onSnippetChange` is optional so the component can also be mounted purely as
   a display surface in tests / fixtures that don't need write propagation.
-- **Sync mount.** Today's mount is sync. If Inc 15+'s CodeMirror needs async
-  setup (e.g. dynamic language-module loading), that lives inside the component
-  (`useEffect` + `React.lazy` + `<Suspense>`), not in the prop contract.
+- **Async mount via `useEffect`.** CodeMirror's `createEditor` factory is async
+  (dynamic language-module loading). The `useEffect` returns a cleanup that
+  calls `editor.destroy()` for StrictMode-safe teardown; an in-flight mount
+  whose promise resolves after unmount is gated by a `cancelled` flag inside
+  the effect.
+- **Prop-change-during-mount race.** If the `snippet` prop changes between
+  the component's first render and the `createEditor` promise resolving,
+  the in-flight mount uses the original `initialCode`; the post-mount sync
+  effect writes the latest `snippet` prop value into `editor.content` once
+  mount completes (one extra dispatch on initial mount, equality-guarded
+  thereafter). This keeps the React component declarative without
+  cancelling and restarting in-flight mounts.
+- **Render-on-rejection policy.** If `createEditor` rejects (e.g. CM
+  construction throws), the mount effect catches the rejection and stores
+  it in a fallback state slot. The component then renders a minimal error
+  notice — a `<div data-orchestrator-host data-orchestrator-error>` so the
+  selector test surface stays consistent. The error message and the
+  underlying cause are written to the console.
 
 ## Navigation
 
@@ -112,8 +142,8 @@ Module-specific rules:
   [`../../lenses/types.ts`](../../lenses/types.ts).
 - **Embodiment contract:** [`../../embody/types.ts`](../../embody/types.ts) (the
   editor does not consume `Snippet`; lenses do).
-- **Replacement plan:** Increments 15+ in
-  [`../../.planning-handoffs/04-lens-migration.md`](../../.planning-handoffs/04-lens-migration.md).
+- **CodeMirror factory:** [`../lib/editing/README.md`](../lib/editing/README.md)
+  documents the `createEditor` factory's options + lifecycle contract.
 - **Increment phases (F1 / F2 / F3):**
   [`../../.planning-handoffs/03-orchestrator-and-contracts.md`](../../.planning-handoffs/03-orchestrator-and-contracts.md)
   § Foundation tier.

@@ -24,14 +24,20 @@ pure data shapes and CodeMirror types. Callbacks never import CodeMirror.
 3. **Middleware/plugin registry**: Rejected — we have a small, known set of
    extension points, not an open plugin system.
 
-## No Parse Guard
+## No Analysis at Construction
 
-`createEditor` reads only `embodiment.source.code` from the Snippet. It
-deliberately does not check `status.parsed`, `parse.ast`, or `errors`. The
-editor's role is display-and-edit; whether the source parsed is irrelevant to
-opening it for editing. CodeMirror runs its own tokenizer (independent of
-acorn) for syntax highlighting. Even `embody('FAIL_AT_TOKENIZE')` produces a
-working editor whose initial content is the (failed) source string.
+`createEditor` takes an `initialCode: string` directly — no embodiment, no
+AST, no validation. The editor's role is display-and-edit; whether the
+source parses is irrelevant to opening it for editing. CodeMirror runs its
+own tokenizer (independent of acorn) for syntax highlighting. Callers
+passing arbitrary strings (including malformed code) get a working editor
+whose initial content is exactly that string.
+
+The factory does not couple to embody's lifecycle. Consumers that DO have
+a `Snippet` (lenses displaying a frozen embodiment in CM, future
+analysis-driven flows) pass `embodiment.source.code` at the call site.
+Consumers that DON'T (the orchestrator's editor home base — by the F2
+"no embody in editor mode" invariant) pass the snippet string directly.
 
 ## Statefulness Exception
 
@@ -47,10 +53,18 @@ frozen lookup table.
 ## Async Factory
 
 `createEditor` is an async factory — it returns `Promise<EditorInstance>`.
-Dynamic language loading and `new EditorView(...)` construction happen
+Dynamic language loading, `new EditorView(...)` construction, and
+`updateListener` registration (for the `onChange` callback) all happen
 before the promise resolves, so the resolved instance is fully initialized
 and all methods are unconditionally safe to call. No lazy-init guards, no
 silent-no-op pre-init pathways, no promise-based init machinery.
+
+If `onChange` is supplied in options, every `docChanged` transaction fires
+it synchronously inside the update listener with the new document content
+as a plain string. This is the factory's single change-notification
+surface — there is no other event, observable, or callback that fires on
+document mutation. Consumers building a 1:1 transaction-to-state contract
+(e.g. the orchestrator's F2.5 cache invalidation) build on it directly.
 
 ## Post-destroy semantics
 

@@ -111,6 +111,17 @@ type CompletionCallback = (prefix: string) => readonly CompletionItem[];
  */
 type FormatResultCallback = (result: FormatResult) => void;
 
+/**
+ * Receives the editor's new content on every `docChanged` transaction.
+ *
+ * @remarks Fires synchronously inside CodeMirror's update listener with
+ * the full document as a plain string. Each keystroke produces exactly
+ * one invocation — no batching, no debouncing. Consumers depending on a
+ * 1:1 keystroke-to-callback mapping (e.g. the orchestrator's F2.5
+ * cache invalidation) can rely on this contract.
+ */
+type OnChangeCallback = (next: string) => void;
+
 // ─── Editor configuration ───────────────────────────────────
 
 /**
@@ -120,7 +131,7 @@ type FormatResultCallback = (result: FormatResult) => void;
  * defaults (plaintext language, tab indentation, no callbacks).
  * Callbacks are pure functions — they receive plain data and return
  * plain data. The editor wraps them into CM extensions internally.
- * Content comes from the required `embodiment: Snippet` first argument
+ * Content comes from the required `initialCode: string` first argument
  * to `createEditor` — not from this type.
  */
 type EditorOptions = {
@@ -139,6 +150,7 @@ type EditorOptions = {
 	readonly docLookup?: DocLookupCallback;
 	readonly completions?: CompletionCallback;
 	readonly onFormat?: FormatResultCallback;
+	readonly onChange?: OnChangeCallback;
 };
 
 // ─── Editor instance ────────────────────────────────────────
@@ -157,7 +169,7 @@ type EditorOptions = {
 type EditorInstance = {
 	content: string;
 	readonly el: HTMLElement;
-	/** Restores editor content to `embodiment.source.code` (captured at factory time). */
+	/** Restores editor content to the `initialCode` captured at factory time. */
 	readonly reset: () => void;
 	readonly format: () => void;
 	readonly check: () => readonly LintDiagnostic[];
@@ -179,4 +191,5 @@ export type {
 	FormatResultCallback,
 	LintDiagnostic,
 	LinterCallback,
+	OnChangeCallback,
 };

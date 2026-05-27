@@ -34,81 +34,177 @@ stub at `./editor.ts` was deleted as part of F1.C.
 
 ```mermaid
 flowchart TD
-    Snippet["snippet (useState string)<br/>top-level orchestrator slot"]
-    Mode["state.mode === 'editor'<br/>(OrchestratorState; carries no snippet field)"]
-    Snippet -->|"snippet (string)"| Editor["&lt;EditorComponent<br/>snippet onSnippetChange? /&gt;<br/>(index.tsx)"]
-    Mode -->|"gates mount"| Editor
-    Snippet -->|"setSnippet (callback)"| Editor
-    Editor -->|"renders JSX"| Host["&lt;textarea<br/>data-orchestrator-host<br/>value={snippet}<br/>onChange={…} /&gt;"]
-    Host -->|"DOM"| Browser["browser-rendered<br/>writable surface"]
-    Host -->|"learner keystroke<br/>(onChange event)"| Editor
-    Editor -->|"onSnippetChange(next)"| Snippet
+    SnippetState["snippet (string)<br/>orchestrator-owned state"]
+    InitialSeed["initial source<br/>(string captured at mount)"]
+    LiveDoc["live document<br/>(CM-internal mutable state)"]
+    ChangeNotif["change notification<br/>(next: string)"]
+    SnippetState -->|"mount, async (one-time per mount)"| InitialSeed
+    InitialSeed -->|"factory resolves, document constructed"| LiveDoc
+    LiveDoc -->|"docChanged transaction, sync"| ChangeNotif
+    ChangeNotif -->|"schedules state update; re-render"| SnippetState
+    SnippetState -.->|"external prop change,<br/>equality-guarded write"| LiveDoc
 ```
 
-The `Snippet` and `Mode` slots are **separate top-level `useState` slots** in
-the orchestrator (not fields on a single state object). The editor mounts when
-`Mode === 'editor'`, reads `Snippet` for its `value` prop, and writes through
-`onSnippetChange`.
+The orchestrator's snippet state seeds the live document at mount; from
+then on, the document is the mutable source of truth for editor content
+and the orchestrator state is the immutable propagated truth. Every
+`docChanged` transaction inside the live document produces one change
+notification carrying the new content as a plain string; the editor
+component routes that notification through to the orchestrator's state
+setter (the `onSnippetChange` prop). The single-writer invariant is
+preserved because no other surface mutates the snippet state.
 
-The cycle `OrchestratorState → Editor → Host → Editor → OrchestratorState` is
-the single-writer dispatch loop: the textarea's `onChange` event is the only
-write surface for `snippet` state in the entire package. Lenses are read-only
-views; the picker selects but does not write; the recommender ranks but does
-not write.
+The dashed loopback is the external-sync path. When the snippet state
+changes from outside the editor's own write loop (e.g. lens → editor
+return with the original snippet preserved), the prop-sync effect writes
+the new value into the live document — guarded by an equality check so
+the round-trip from the editor's own writes does not echo back.
+
+Domain terms used above (and their concrete shapes are pinned in
+[`../lib/editing/types.ts`](../lib/editing/types.ts)): the **editor
+handle** — `EditorInstance` per the editing/ types — is the React
+component's reference to the live document; the **factory** is
+[`createEditor`](../lib/editing/create-editor.ts) (async).
 
 ### Execution phases
 
-1. **Mount** — orchestrator is in editor mode; renders
-   `<EditorComponent snippet={…} onSnippetChange={setSnippet} />`. The
-   component returns its JSX body containing
-   `<textarea data-orchestrator-host value={snippet} onChange={…}>`. React
-   mounts the textarea natively. No `useRef`-managed DOM mount, no manual
-   `appendChild`.
-2. **Learner keystroke** — the textarea's `onChange` event fires; the
-   component's handler invokes `onSnippetChange(e.target.value)`. The
-   orchestrator's `setSnippet` setter receives the new value, React schedules
-   a re-render of `<StudyLenses>`, and the editor re-renders with the new
-   `snippet` prop. (Per the orchestrator's snippet-edit invalidation rule,
-   the cross-mode embodiment cache is cleared at the same setState.)
-3. **Mode transition (editor → lens)** — orchestrator's mode discriminator
-   moves to `'lens'`. React unmounts `<EditorComponent>` entirely and mounts
-   `<LensModule.Component>` in its place. Any `useEffect` cleanups inside the
-   editor run as part of the unmount.
-4. **Mode transition (lens → editor)** — symmetric. React unmounts the lens
-   and mounts a fresh `<EditorComponent>` against the orchestrator's
-   (preserved) snippet state. Editor-internal state (cursor position, scroll)
-   is per-mount; nothing carries across.
+1. **Mount initiation (async, fires once per mount)** — orchestrator is
+   in editor mode; the editor component renders an empty host div and
+   schedules a mount effect. The effect invokes the editing/ factory
+   with the current snippet string (as initial source) and the
+   editor's change-notification callback. A cancellation flag, scoped
+   to the effect closure, marks whether the effect has been cleaned up
+   while the factory's promise is still in flight.
+2. **Mount resolution** — three disjoint outcomes:
+   - **Success** — the factory's promise resolves; the cancellation
+     flag is checked first. If still active, the resolved editor
+     handle (`EditorInstance` per
+     [`../lib/editing/types.ts`](../lib/editing/types.ts)) is stored
+     for later sync and destroy. If the flag has been raised, the
+     factory's output is destroyed immediately so no zombie editor
+     leaks into the DOM.
+   - **Cancellation** — React tore down the component before the
+     factory resolved (typical under StrictMode's intentional
+     mount-then-unmount cycle). The flag is raised by the cleanup
+     function; the success path above handles the late arrival.
+   - **Rejection** — the factory's promise rejects with a construction
+     error. The component stores the rejection in a fallback state
+     slot and renders a minimal error notice (see
+     § Render-on-rejection).
+3. **Learner edit (sync inside transaction)** — the live document
+   accepts an edit through CodeMirror's input pipeline; the registered
+   update listener fires once per `docChanged` transaction with the
+   new document content as a plain string. The change-notification
+   callback the factory was given is the editor component's
+   pass-through to `onSnippetChange`, so the orchestrator's state
+   setter receives the new value. React schedules a re-render of the
+   orchestrator subtree; per the orchestrator's snippet-edit
+   invalidation rule, the cross-mode embodiment cache is cleared at
+   the same setState (F2.5).
+4. **Prop sync (external write)** — when the snippet state changes
+   from outside the editor's own write loop (e.g. lens → editor
+   return with the original snippet preserved), a second effect
+   watching the snippet prop writes the new value into the live
+   document — but only when the editor handle is resolved AND the
+   prop value differs from the document's current content. Both
+   guards are load-bearing: the resolved-handle check prevents a
+   no-op crash during the gap between component mount and factory
+   resolution; the equality check prevents the orchestrator's own
+   round-trip from echoing back into the document.
+5. **Mode transition (editor → lens)** — orchestrator's mode
+   discriminator moves to `'lens'`. React unmounts the editor
+   component entirely. The mount effect's cleanup runs the editor
+   handle's destroy method (idempotent per the editing/ contract),
+   tearing down the live document and releasing CodeMirror's
+   internal DOM. The lens component mounts in the editor's place.
+6. **Mode transition (lens → editor)** — symmetric. React unmounts
+   the lens and mounts a fresh editor component against the
+   orchestrator's (preserved) snippet state, kicking off a new mount
+   cycle. Editor-internal state (cursor position, scroll, undo
+   history) is per-mount; nothing carries across.
 
 ### Structural constraints
 
-- **Writable textarea, single-writer dispatch.** The textarea is writable. Its
-  `onChange` handler is the **only** path that updates snippet state in the
-  package — the orchestrator threads its `useState` setter through
-  `onSnippetChange`, and lenses are read-only views. The component is
-  controlled by the orchestrator (`value={snippet}` is bound to the
-  orchestrator's `useState`); the textarea never owns the snippet on its own.
-- **No `embodiment` prop on the editor — ever.** The editor is editor-mode-only.
-  Per [`../DOCS.md` § Lifecycle modes](../DOCS.md), editor mode has no
-  embodiment displayed. Embodiment is a lens-mode concept and is passed to
-  `<LensModule.Component>`, not to this editor.
-- **No `LensModule` registration.** The editor is not enumerated by the picker,
-  not ranked by the recommender, not present in the lens registry. The
-  orchestrator imports the component directly.
-- **Sync mount today.** The current implementation is a synchronous JSX body —
-  no async setup, no `Promise<…>` mount API. Inc 15+'s CodeMirror replacement
-  may need async language-module loading; that async lives **inside the
-  component** (`useEffect` + `React.lazy` + `<Suspense>`) and does not change
-  the prop contract.
-- **Single host element.** The component renders **one**
-  `<textarea data-orchestrator-host>` directly. The data attribute is the test /
-  dev-sandbox handle for "this is the home base surface". (If Inc 15+ needs to
-  wrap CodeMirror in a containing `<div>`, the data attribute moves to whichever
-  element is the outermost stable handle.)
+- **CodeMirror live document, single-writer dispatch.** The CodeMirror
+  update listener is the **only** path that updates snippet state in the
+  package — the orchestrator threads its state setter through the
+  editor's `onSnippetChange` prop, the editor component passes it as
+  the change-notification callback to the factory, and lenses are
+  read-only views. Each `docChanged` transaction produces exactly one
+  change-notification invocation (1:1 transaction-to-callback, no
+  batching, no debouncing). F2.5's invariant — every edit invalidates
+  the cache before lens-mode re-entry — is satisfied because every
+  edit produces at least one such transaction. (CodeMirror semantics:
+  multi-cursor edits, paste, undo, and programmatic dispatches each
+  produce one transaction covering N character changes; IME
+  composition can produce zero transactions for several keystrokes
+  followed by one covering the composed grapheme. The contract is
+  transaction-based, not keystroke-based.)
+- **No `embodiment` prop on the editor — ever.** The editor is
+  editor-mode-only. Per [`../DOCS.md` § Lifecycle modes](../DOCS.md), editor
+  mode has no embodiment built. Embodiment is a lens-mode concept and is
+  passed to `<LensModule.Component>`, not to this editor. The `createEditor`
+  factory accepts `(initialCode: string, options)` precisely so the editor
+  home base doesn't need to fabricate a Snippet wrapper.
+- **No `LensModule` registration.** The editor is not enumerated by the
+  picker, not ranked by the recommender, not present in the lens registry.
+  The orchestrator imports the component directly.
+- **Async mount via `useEffect`.** `createEditor` is async (dynamic
+  language-module loading). The mount effect's cleanup calls
+  `editor.destroy()` for StrictMode-safe teardown. The async surface lives
+  **inside the component**, never in the prop contract — `<EditorComponent>`
+  is always renderable synchronously; the CodeMirror DOM appears after the
+  promise resolves (typically <10ms).
+- **Prop-change-during-mount race.** If `snippet` changes between first
+  render and the `createEditor` promise resolving, the in-flight mount uses
+  the original `initialCode`; the post-mount prop-sync effect writes the
+  latest `snippet` value into `editor.content` once mount completes (one
+  extra dispatch on initial mount, equality-guarded thereafter).
+- **Single host element.** The component renders one host element
+  carrying the `data-orchestrator-host` attribute; CodeMirror's live
+  document mounts into it. The data attribute is the test /
+  dev-sandbox handle for "this is the home base surface".
+  CodeMirror's content element is a child of the host; consumer code
+  reading editor content via DOM should target the editor handle's
+  `.content` property (the public API), not the host's descendants.
+- **Sync-effect resilience.** The prop-sync effect must no-op when
+  the editor handle is not yet resolved. This is the load-bearing
+  guard for the StrictMode-double-mount × prop-change-during-mount
+  intersection: if the snippet prop changes between the first
+  StrictMode mount (cancelled) and the second mount's factory
+  resolution, the sync effect may fire against a still-null handle.
+  Without the resolved-handle check, the effect would crash.
 - **`onSnippetChange` is optional.** Components mounted purely as display
   surfaces (in tests, fixtures, or future read-only flows) may omit the
-  callback; the textarea remains writable at the browser level but typed
-  characters do not propagate anywhere. The orchestrator always passes the
-  callback in production.
+  callback; when omitted, the `onChange` option is not passed to
+  `createEditor`, so the update listener fires no consumer callback —
+  CodeMirror still accepts edits at the DOM level but typed characters
+  do not propagate to any parent state. The orchestrator always passes
+  the callback in production.
+
+### Render-on-rejection
+
+If `createEditor` rejects (e.g. CodeMirror construction throws on a
+malformed extension), the mount effect catches the rejection and stores
+the error in a fallback state slot. The component then renders a minimal
+error notice — a host element carrying both `data-orchestrator-host` and
+`data-orchestrator-error` attributes (`[data-orchestrator-host][data-orchestrator-error]`
+as a CSS selector). Preserving the host attribute means test / sandbox
+selectors still locate the surface. The underlying error is also logged
+to the console for diagnosis. The orchestrator's mode machine is
+unaffected; the learner can still toggle to lens mode and back to attempt
+a fresh mount.
+
+### Caller migration
+
+Downstream consumers that read editor content via DOM queries against
+`[data-orchestrator-host]` (specifically the orchestrator-level
+cross-boundary tests at
+[`../tests/study-lenses.test.tsx`](../tests/study-lenses.test.tsx))
+must migrate from `HTMLTextAreaElement.value` reads to either the
+editor handle's `.content` property (when an `EditorInstance` is
+available) or DOM queries against CodeMirror's content element (when
+only the DOM is available). That rewrite is part of E2's deliverable.
 
 ### Out of scope
 
@@ -123,19 +219,24 @@ not write.
   `onSnippetChange`. The editor never holds local snippet state of its own
   (no uncontrolled fallback).
 
-## Replacement contract
+## External contract
 
-The CodeMirror-backed home base (Inc 15+) MUST keep:
+The home-base component holds the following surface invariant. Internal
+implementation may evolve (extension stack, future callback wiring,
+diagnostics linter) without changing these:
 
-- **Same file path:** [`./index.tsx`](./index.tsx).
-- **Same default export shape:** a React function component.
-- **Same prop surface:** `{ snippet, onSnippetChange? }`.
-- **Same data attribute on the host element:** `data-orchestrator-host`.
+- **File path:** [`./index.tsx`](./index.tsx).
+- **Default export shape:** a React function component.
+- **Prop surface:** `{ snippet, onSnippetChange? }`.
+- **Data attribute on the host element:** `data-orchestrator-host`. The
+  host is the `<div>` element that CodeMirror's `EditorView` mounts into.
+  When rendering an error fallback (per § Render-on-rejection), the same
+  attribute lives on the error notice element so selectors stay
+  consistent.
 
-When CodeMirror lands the orchestrator's call site does not change. The
-component's internal implementation swaps from a plain `<textarea>` body to a
-CodeMirror `EditorView` mounted via `useEffect`; everything outside the
-component is invariant.
+The orchestrator's call site in [`../index.tsx`](../index.tsx) reads the
+prop surface only; internal CodeMirror details are not part of the
+orchestrator's contract surface.
 
 ## Module ownership
 
@@ -151,17 +252,22 @@ Consumers:
 No other consumers. Lenses do not consume the editor; the recommender does not
 consume it; the toolbar does not consume it.
 
-## Future direction
+## Deferred callback wiring
 
-When the CodeMirror replacement lands (Inc 15+):
+The CodeMirror factory at [`../lib/editing/`](../lib/editing/) exposes
+slots for `linters`, `docLookup`, `completions`, and `format` callbacks
+(plus the wired `onChange`). The home-base component currently wires only
+`onChange`. The other slots are intentionally unwired:
 
-- The component body switches from a `<textarea>` JSX child to a
-  `<div ref={hostRef} data-orchestrator-host />` plus a `useEffect` that
-  constructs `new EditorView({ parent: hostRef.current, … })` and returns its
-  `destroy()` as the effect cleanup.
-- The `onSnippetChange` wiring becomes a CodeMirror update listener that
-  debounces and dispatches.
-- The unit tests at [`./tests/`](./tests/) grow alongside the expanded
-  surface area (cursor management, language modules, validation linter).
-- This DOCS.md grows a "CodeMirror integration" section describing the
-  extension stack and the `validation.*`-driven diagnostics linter.
+- `linters` — wires once an analysis adapter exists to convert
+  `embodiment.errors` and `embodiment.validation.violations` into
+  `LintDiagnostic[]`. The editor would need to receive an embodiment for
+  this, which conflicts with the F2 "no embody in editor mode" invariant
+  unless a different feed (live re-parse) is plumbed in. Open design
+  question.
+- `docLookup` — requires `orchestrate/lib/jej-documentation/` (does not
+  yet exist).
+- `completions` — requires `orchestrate/lib/completing/` (does not yet
+  exist).
+- `format` — requires a chosen formatter (Prettier-based or JeJ-canonical
+  per the validation gate's `formatted` field).

@@ -33,25 +33,36 @@ tooltips, markers) but does not know what the feedback means.
 loading and CodeMirror `EditorView` construction. The resolved instance is
 fully initialized; all methods are unconditionally safe to call.
 
+The first argument is the initial source code as a plain string. The editor
+takes no other knowledge of the snippet — no AST, no parse status, no
+validation. CodeMirror runs its own tokenizer for syntax highlighting.
+
 Bare editor (no callbacks):
 
 ```ts
 import createEditor from './create-editor.js';
-import embody from '../../../embody/index.js';
 
-// Phase A: embody() accepts named scenarios. Phase B: accepts any source string.
-// The editor renders embodiment.source.code either way.
-const editor = await createEditor(embody('OK'), { language: 'javascript' });
+const editor = await createEditor('let x = 5;', { language: 'javascript' });
 document.body.appendChild(editor.el);
+```
+
+With an onChange listener (single-writer dispatch surface):
+
+```ts
+import createEditor from './create-editor.js';
+
+const editor = await createEditor('let x = 5;', {
+  language: 'javascript',
+  onChange: (next) => console.log('user edited:', next),
+});
 ```
 
 With linting and doc lookup callbacks:
 
 ```ts
 import createEditor from './create-editor.js';
-import embody from '../../../embody/index.js';
 
-const editor = await createEditor(embody('OK'), {
+const editor = await createEditor('let x = 5;', {
   language: 'javascript',
   linters: [myLinterFn],
   docLookup: myDocFn,
@@ -67,13 +78,21 @@ editor.destroy();
 The editor accepts pure functions as callbacks. It wraps them into CodeMirror
 extensions internally. Callbacks never see or return CodeMirror types.
 
-| Callback      | Signature                      | Wraps into                   |
-| ------------- | ------------------------------ | ---------------------------- |
-| `format`      | `(code) => formattedCode`      | `editor.dispatch()`         |
-| `linters[n]`  | `(code) => LintDiagnostic[]`   | `linter()` + `lintGutter()` |
-| `docLookup`   | `(word) => DocEntry \| null`   | `hoverTooltip()`            |
-| `completions` | `(prefix) => CompletionItem[]` | `autocompletion()`          |
-| `onFormat`    | `(result) => void`             | Called after format          |
+| Callback      | Signature                      | Wraps into                                  |
+| ------------- | ------------------------------ | ------------------------------------------- |
+| `onChange`    | `(next: string) => void`       | `EditorView.updateListener.of(...)`         |
+| `format`      | `(code) => formattedCode`      | `editor.dispatch()`                         |
+| `linters[n]`  | `(code) => LintDiagnostic[]`   | `linter()` + `lintGutter()`                 |
+| `docLookup`   | `(word) => DocEntry \| null`   | `hoverTooltip()`                            |
+| `completions` | `(prefix) => CompletionItem[]` | `autocompletion()`                          |
+| `onFormat`    | `(result) => void`             | Called after format                         |
+
+`onChange` fires **synchronously** inside each `docChanged` transaction with
+the new document content as a plain string. It is the single mechanism by
+which consumers receive learner edits. Each keystroke produces exactly one
+`onChange` invocation — no batching, no debouncing — which is load-bearing
+for the orchestrator's F2.5 cache-invalidation invariant
+(see [`../../editor/README.md`](../../editor/README.md) § Conventions).
 
 See `DOCS.md` for architecture decisions and data shape definitions.
 See `types.ts` for all type definitions.
