@@ -3,8 +3,8 @@
  *
  * **F3 status** — lazy embodiment on need is satisfied by F2.4 (transition-only
  * trigger) + F2.5 (eager edit invalidation). Evaluation phases inside a
- * mounted lens are **lens-internal**: lenses call `Snippet.streams.evaluate.*`
- * methods directly on the embodiment they hold; no orchestrator round-trip.
+ * mounted lens are **lens-internal**: lenses call `snippet.evaluation.events.*`
+ * directly on the embodiment they hold; no orchestrator round-trip.
  * See [`./DOCS.md` § F3 — lazy embodiment realized] for the full satisfaction
  * analysis + sentinel-blindness invariant.
  *
@@ -98,7 +98,7 @@ function deriveInitialState(
 		const state: LensModeState = {
 			mode: 'lens',
 			activeLens: lens!,
-			resolvedConfig: resolvePerLensConfig(registered, lens!, { configs }),
+			resolvedConfig: resolvePerLensConfig(registered, lens!, configs),
 		};
 		return { state, cache };
 	}
@@ -138,10 +138,10 @@ function deriveInitialState(
 function resolvePerLensConfig(
 	module: LensModule,
 	lensName: string,
-	props: Pick<StudyLensesProps, 'configs'>,
+	configs: Readonly<Record<string, unknown>> | undefined,
 ): LensConfig {
 	const moduleDefault = module.config();
-	const cascadeForLens = readCascadeLensEntry(props.configs, lensName) ?? {};
+	const cascadeForLens = readCascadeLensEntry(configs, lensName) ?? {};
 	return deepMerge(moduleDefault, cascadeForLens as LensConfig);
 }
 
