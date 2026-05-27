@@ -56,8 +56,12 @@ function EditorComponent({
 	onSnippetChangeRef.current = onSnippetChange;
 
 	// Stable `onChange` callback passed to createEditor at mount time.
-	// Reads the LATEST `onSnippetChange` via the ref so prop updates take
-	// effect without re-mounting CodeMirror.
+	// The ref-shadow indirection (`onSnippetChangeRef`) absorbs
+	// consumer-side callback identity changes during the mount lifetime
+	// without re-mounting CodeMirror: a parent that re-renders with a
+	// new `onSnippetChange` reference (rare under the orchestrator's
+	// stable useCallback, but common for ad-hoc test fixtures) still
+	// gets its latest callback invoked on every transaction.
 	const onChangeCallback = React.useCallback(function notifyParent(next: string): void {
 		onSnippetChangeRef.current?.(next);
 	}, []);

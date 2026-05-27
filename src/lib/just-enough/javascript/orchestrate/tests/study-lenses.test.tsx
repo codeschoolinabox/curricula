@@ -25,10 +25,12 @@ async function findMountedEditorView(container: HTMLElement): Promise<EditorView
 }
 
 /**
- * Simulate a user typing the given content into the editor. Replaces the
- * entire document via a CM dispatch (matching what `userEvent.type` would
- * eventually trigger) and runs the dispatch inside React's `act` so the
- * resulting setState round-trip commits before the next assertion.
+ * Simulate a user edit by replacing the entire document via a single CM
+ * dispatch, wrapped in React's `act` so the resulting setState round-trip
+ * commits before the next assertion. Not equivalent to `userEvent.type`
+ * (which would emit one transaction per keystroke) — the F2.4 / F2.5
+ * cross-boundary tests assert cache-invalidation + embody-call count,
+ * NOT per-keystroke transaction count, so single-dispatch suffices.
  */
 function typeInto(view: EditorView, content: string): void {
 	act(() => {

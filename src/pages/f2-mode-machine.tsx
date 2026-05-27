@@ -1,8 +1,9 @@
 /**
  * @file F2.3 sandbox harness for the editor-vs-lens 2-mode state machine.
  *
- * **What to verify** (open `http://localhost:3000/f2-mode-machine` after
- * `npm run start`):
+ * **What to verify** (open `http://localhost:3000/spiralearn/f2-mode-machine`
+ * after `npm run start` — note the Docusaurus `baseUrl: '/spiralearn/'`
+ * prefix per `docusaurus.config.ts`):
  *
  * 1. **Initial state**: the editor textarea is visible (`data-orchestrator-host`);
  *    no lens panel is present.
