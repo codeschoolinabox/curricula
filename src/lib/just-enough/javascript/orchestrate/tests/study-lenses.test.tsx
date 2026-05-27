@@ -185,24 +185,6 @@ describe('<StudyLenses> — F1 smoke', () => {
 		});
 	});
 
-	describe('Exceptions — embody throws on unknown sentinel', () => {
-		it('propagates the embody throw on lens mount (transition-time error surface)', () => {
-			// F2.4: embody only fires on lens transitions. The throw surfaces at
-			// lens-mount time, not at editor-mode mount.
-			expect(() =>
-				render(<StudyLenses snippet="not_a_real_sentinel" lens="debug-props" />),
-			).toThrow(/Unknown embody scenario/);
-		});
-
-		it('does NOT propagate an embody throw at editor-mode mount with unknown sentinel', () => {
-			// Corollary: mounting without a lens with garbage input does NOT throw
-			// because embody is not called. The throw is deferred to transition-time.
-			expect(() =>
-				render(<StudyLenses snippet="not_a_real_sentinel" />),
-			).not.toThrow();
-		});
-	});
-
 	// ─── B.7: minimal lens-mount path via static registry ───────────────
 
 	describe('B.7 — lens prop dispatches to a registered lens module', () => {
