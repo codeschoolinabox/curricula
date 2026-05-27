@@ -28,16 +28,16 @@
 > see its preamble for the work-stream summary. F3-F5 + L1-L8 follow per the
 > pyramid build-order below.
 >
-> **F2 COMPLETE (2026-05-13) — F3 also satisfied by F2 implementation.**
-> (The F3 section below notes this explicitly.)
+> **F2 COMPLETE (2026-05-13) — F3 also satisfied by F2 implementation.** (The F3
+> section below notes this explicitly.)
 >
 > **Embody Phase B shipped (2026-05-21):** Commits `434ce9c`–`943c666`.
 > `Snippet.parse`, `Snippet.static`, and `Snippet.streams` **no longer exist**.
-> New shape: `source · raw · status · errors · realm/tokenize/parseAST/creation/
-> evaluation (phase axis) · events.* (layer-first)`. Evaluation surface moved to
-> `snippet.evaluation.events.*` (`trace.variables` added). Three orchestrator-lib
-> files have stale `.parse.ast` references (TypeScript errors); see
-> § Embody Phase B impact before starting any new work.
+> New shape:
+> `source · raw · status · errors · realm/tokenize/parseAST/creation/ evaluation (phase axis) · events.* (layer-first)`.
+> Evaluation surface moved to `snippet.evaluation.events.*` (`trace.variables`
+> added). Three orchestrator-lib files have stale `.parse.ast` references
+> (TypeScript errors); see § Embody Phase B impact before starting any new work.
 >
 > This handoff was rewritten end-to-end after the package's top-level docs
 > (`README.md`, `DOCS.md`) locked in the **embody / lenses / orchestrate
@@ -73,8 +73,8 @@ Per `javascript/README.md` § Pedagogical first principles and
 > — it documents what was LOCKED at planning time + why; the overturn documents
 > that the lock was revised. **For the current contract, trust the code-side
 > ground truth**:
-> `src/lib/just-enough/javascript/orchestrate/{README,DOCS,types.ts}`
-> and `src/plugins/study-lenses/{README,DOCS,types.ts}`.
+> `src/lib/just-enough/javascript/orchestrate/{README,DOCS,types.ts}` and
+> `src/plugins/study-lenses/{README,DOCS,types.ts}`.
 
 - **Four-prop public API**:
   `<StudyLenses snippet={…} lens={…}? config={…}? configs={…}? />`. `snippet` is
@@ -505,19 +505,19 @@ branch on `Snippet.status` / `Snippet.errors`, never on snippet string identity.
 increment ships.** F2.4 (transition-only embody trigger, deletion of the
 unconditional `useEmbodiment` useMemo, atomic `cachedEmbodiment` slot with
 cache-hit semantics on round-trip) plus F2.5 (eager edit invalidation via
-`handleSnippetChange` wrapper) jointly realize F3's "build embodiment only
-when downstream needs it" requirement. Evaluation-phase re-embodiment inside a
+`handleSnippetChange` wrapper) jointly realize F3's "build embodiment only when
+downstream needs it" requirement. Evaluation-phase re-embodiment inside a
 mounted lens is **lens-internal** via `snippet.evaluation.events.*` (no
-orchestrator round-trip needed; the cached embodiment from mount is always
-fresh inside a lens-mode session because snippet state is frozen there). The
-sentinel-blindness invariant — orchestrator branches only on `Snippet.status`
-/ `Snippet.errors`, never on snippet content — was audited at zero violations.
-See [`../orchestrate/DOCS.md` § F3 — lazy embodiment realized] and
-[`../orchestrate/README.md` § Conventions] for the load-bearing claims and
-their commit-level evidence (`9bd7377`..`da3b6c3`). Sandbox empirical check:
-F2 sandbox at `src/pages/f2-mode-machine.tsx` exercises the F3 UX path — with
-Phase B live, the real-code sandbox flow (type-then-toggle surfacing real parse
-errors in debug-props panels) is now unblocked.
+orchestrator round-trip needed; the cached embodiment from mount is always fresh
+inside a lens-mode session because snippet state is frozen there). The
+sentinel-blindness invariant — orchestrator branches only on `Snippet.status` /
+`Snippet.errors`, never on snippet content — was audited at zero violations. See
+[`../orchestrate/DOCS.md` § F3 — lazy embodiment realized] and
+[`../orchestrate/README.md` § Conventions] for the load-bearing claims and their
+commit-level evidence (`9bd7377`..`da3b6c3`). Sandbox empirical check: F2
+sandbox at `src/pages/f2-mode-machine.tsx` exercises the F3 UX path — with Phase
+B live, the real-code sandbox flow (type-then-toggle surfacing real parse errors
+in debug-props panels) is now unblocked.
 
 #### F4 — First trial lens against the new contract
 
@@ -529,11 +529,12 @@ audit: lens never imports from `embody/` (top) or `orchestrate/` (top).
 **F4 ↔ WS4 reconciliation.** F4 is the orchestrator-side trial-lens increment
 (proves the `LensModule`-prop contract end-to-end inside `<StudyLenses>` so
 subsequent layers have something to enumerate). The lens chosen for F4 MAY OR
-MAY NOT be the same as WS4's first concrete migration. If WS4's highlight
-reshape ships before F4, F4 inherits highlight as its trial. If F4 ships first
-against parsons or blanks, WS4 lands additional lenses against the now-proven
-contract. The pyramid build-order requires only that _one lens exists_ before
-L1; which one is operational, not architectural.
+MAY NOT be the same as WS4's first concrete migration. If WS4's `annotate` lens
+(formerly `highlight`; renamed during WS4 Phase 0) ships before F4, F4 inherits
+it as its trial. If F4 ships first against parsons or blanks, WS4 lands
+additional lenses against the now-proven contract. The pyramid build-order
+requires only that _one lens exists_ before L1; which one is operational, not
+architectural.
 
 Coordinate with `04-lens-migration.md` so one lens is finished end-to-end (TS
 core + React wrapper) before F4's sandbox checkpoint.
@@ -709,7 +710,9 @@ tensions here are real — defer until pedagogical priorities clarify.
 The orchestrator has access to:
 
 - `embody(code) → Snippet` from `embody/index.ts` — the factory.
-- `embody/types.ts` — `Snippet · Status (4 booleans: tokenized/parsed/validated/created) · Source · RawAcorn · EmbodyError · EvaluationEvents (run/intercept/trace.*)` types (canonical contract).
+- `embody/types.ts` —
+  `Snippet · Status (4 booleans: tokenized/parsed/validated/created) · Source · RawAcorn · EmbodyError · EvaluationEvents (run/intercept/trace.*)`
+  types (canonical contract).
 - `orchestrate/lib/recommender/` — analysis of an embodiment to lens
   recommendations (WS2 deliverable).
 - `orchestrate/lib/socratizing/`, `completing/`, `editing/`,
@@ -721,8 +724,8 @@ The orchestrator has access to:
 
 ### Embody Phase B impact
 
-Shipped 2026-05-21 (commits `434ce9c`–`943c666`). `Snippet.parse`, `Snippet.static`,
-and `Snippet.streams` **no longer exist**. New Snippet shape:
+Shipped 2026-05-21 (commits `434ce9c`–`943c666`). `Snippet.parse`,
+`Snippet.static`, and `Snippet.streams` **no longer exist**. New Snippet shape:
 
 ```ts
 // Flat fields (always present)
@@ -741,33 +744,42 @@ snippet.analysis · snippet.validation
 snippet.events.{realm, tokenize, parseAST, creation, evaluation}
 ```
 
-**New evaluation surface** (lens-callable, always present even on non-apex leaves):
+**New evaluation surface** (lens-callable, always present even on non-apex
+leaves):
 
 - `snippet.evaluation.events.run(opts?)` — was: `snippet.streams.evaluate.run()`
-- `snippet.evaluation.events.intercept(opts?)` — was: `snippet.streams.evaluate.intercept()`
-- `snippet.evaluation.events.trace.variables(opts?)` — **new**, wasn't in old API
-- `snippet.evaluation.events.trace.syntax(opts?)` — was: `snippet.streams.evaluate.trace.syntax()`
-- `snippet.evaluation.events.trace.semantics(opts?)` — was: `snippet.streams.evaluate.trace.semantics()`
+- `snippet.evaluation.events.intercept(opts?)` — was:
+  `snippet.streams.evaluate.intercept()`
+- `snippet.evaluation.events.trace.variables(opts?)` — **new**, wasn't in old
+  API
+- `snippet.evaluation.events.trace.syntax(opts?)` — was:
+  `snippet.streams.evaluate.trace.syntax()`
+- `snippet.evaluation.events.trace.semantics(opts?)` — was:
+  `snippet.streams.evaluate.trace.semantics()`
 
 Non-apex leaves return a no-op RunInstance: `endReport.outcome: 'not-runnable'`;
-`endReport.error: null`. Gate failure reason is on `snippet.errors`, not the RunInstance.
+`endReport.error: null`. Gate failure reason is on `snippet.errors`, not the
+RunInstance.
 
 **Null guards required:**
 
-- `snippet.analysis` — `null` on real-comp until `lib/parse/` DDD ships; always null-guard in orchestrator code
+- `snippet.analysis` — `null` on real-comp until `lib/parse/` DDD ships; always
+  null-guard in orchestrator code
 - `snippet.validation` — same
 
-**`embody()` no longer throws** on non-scenario input. Phase B routes all input to real
-composition (acorn tokenize → parse → apex or tokenize-fail or parse-fail leaf). The
-old error boundary for the non-scenario throw path is now unreachable.
+**`embody()` no longer throws** on non-scenario input. Phase B routes all input
+to real composition (acorn tokenize → parse → apex or tokenize-fail or
+parse-fail leaf). The old error boundary for the non-scenario throw path is now
+unreachable.
 
-**Pre-existing TypeScript errors** (not in WS3 scope — fix as a prerequisite mechanical-rename commit before F4+):
+**Pre-existing TypeScript errors** (not in WS3 scope — fix as a prerequisite
+mechanical-rename commit before F4+):
 
-| File | Stale reference | Fix direction |
-| ---- | --------------- | ------------- |
-| `orchestrate/lib/socratizing/analyze-micro-decisions.ts:139` | `embodiment.parse.ast` | `embodiment.raw.ast` (interim) |
-| `orchestrate/lib/error-interpreting/interpret-error.ts:135` | `embodiment.parse.ast` | Same |
-| `lenses/debug-props/core.ts:90–94` | `embodiment.validation` (non-null assumed) | Add null guard |
+| File                                                         | Stale reference                            | Fix direction                  |
+| ------------------------------------------------------------ | ------------------------------------------ | ------------------------------ |
+| `orchestrate/lib/socratizing/analyze-micro-decisions.ts:139` | `embodiment.parse.ast`                     | `embodiment.raw.ast` (interim) |
+| `orchestrate/lib/error-interpreting/interpret-error.ts:135`  | `embodiment.parse.ast`                     | Same                           |
+| `lenses/debug-props/core.ts:90–94`                           | `embodiment.validation` (non-null assumed) | Add null guard                 |
 
 ### Conventions to enforce
 
@@ -801,7 +813,7 @@ New, specific to the post-refactor layout:
 
 Forward-looking, beyond F1-F5 + L1-L8:
 
-- Trial lens migration (highlight, parsons, blanks, trace-table, variables, ask,
+- Trial lens migration (annotate, parsons, blanks, trace-table, variables, ask,
   etc.) — each lens is its own session, planned in `04-lens-migration.md`.
 - Sandbox.html smoke-test harness (separate ticket; F1's per-page sandbox at
   `src/pages/study-lenses-smoke.tsx` covers the smoke goal in the meantime).

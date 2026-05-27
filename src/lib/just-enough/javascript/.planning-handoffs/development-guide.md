@@ -94,10 +94,10 @@ Then ask me questions before writing any code.
    handoff is now archived (work-stream closed); see its preamble for the
    work-stream summary.
 4. **Verify tests still pass** scoped to the increment's surface.
-   `npx vitest run src/lib/just-enough/javascript/orchestrate/`
-   should be green (359 tests post-F1+C). Pre-existing red areas in
-   `embody/lib/evaluating/`, `lenses/highlight/` (now deleted), and
-   `snippetry/debug/` are out of WS3 scope.
+   `npx vitest run src/lib/just-enough/javascript/orchestrate/` should be green
+   (359 tests post-F1+C). Pre-existing red areas in `embody/lib/evaluating/`,
+   `lenses/highlight/` (now deleted), and `snippetry/debug/` are out of WS3
+   scope.
 5. **Sandbox checkpoint** is per-increment, not pre-session. Each
    user-observable increment ends with a sandbox checkpoint (browser-verify the
    change in the dev server) before the commit lands. F1's checkpoint shape was:
@@ -315,10 +315,12 @@ If you use `isolation: "worktree"` for parallel agents:
 The `lenses/` peer holds individual lens implementations against the
 `LensModule` contract in `lenses/types.ts`. Currently:
 
-- `lenses/highlight/{README,DOCS}.md` — docs-only end-state per the C cleanup
-  commit (`abe70bb`). The legacy LensModule stub was deleted along with its
-  tests; source landing (the actual `Component` + pure-TS core) is WS4's first
-  concrete migration.
+- `lenses/annotate/{README,DOCS}.md` — Phase 0 docs for WS4's first concrete
+  migration (formerly `lenses/highlight/`; renamed during WS4 Phase 0 because
+  the lens does annotation-on-top-of-display, not token highlighting). The
+  legacy LensModule stub at the original path was deleted in the C cleanup
+  commit (`abe70bb`); source landing (the actual `Component` + pure-TS core)
+  follows Phase 0 commit.
 - `lenses/types.ts` — canonical `LensModule` contract (`name`, `Component`,
   `config`, `applicableTo`, `recommend`).
 - `lenses/DOCS.md`, `lenses/README.md` — peer architecture docs; parent

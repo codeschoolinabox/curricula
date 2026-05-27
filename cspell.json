@@ -39,7 +39,15 @@
 		"Vibetoader",
 		"Vibetoads",
 		"snippetry",
-		"agentic"
+		"agentic",
+		"writeme",
+		"parsons",
+		"acorn",
+		"prismjs",
+		"unparseable",
+		"mousedown",
+		"mousemove",
+		"mouseup"
 	],
 	"ignorePaths": [
 		"node_modules",

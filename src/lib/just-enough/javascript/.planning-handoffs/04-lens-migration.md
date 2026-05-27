@@ -135,7 +135,7 @@ available, even with syntax errors.
 | Lens      | What it does                           | Tier reason          |
 | --------- | -------------------------------------- | -------------------- |
 | parsons   | Line shuffling (drag-and-drop reorder) | Only needs line text |
-| highlight | Read-only annotated code view          | Renders text as-is   |
+| annotate  | Annotation surface (code or flowchart) | Renders text as-is   |
 | copy-type | Write-from-memory exercise             | Only needs raw text  |
 
 **Tier 2: AST-dependent static** -- Needs valid parse, no execution.
@@ -198,7 +198,7 @@ lenses/
 The pure TS files (`core.ts`, `config.ts`, `applicable.ts`, `recommend.ts`) are
 testable without React. The React wrapper (`index.tsx`) is a thin shell.
 
-### Editor placement + highlight status
+### Editor placement + annotate lens status
 
 **The editor is not a lens.** Post-refactor it lives at `orchestrate/editor/` as
 the orchestrator's home base — single React component, the only writer of
@@ -208,14 +208,16 @@ snippet state — per F1.C (commit `0d99212`). See
 migrated by WS3 (Inc 15+ per `../orchestrate/editor/DOCS.md` § Future
 direction); this work stream does not touch it.
 
-**The `highlight` lens exists as docs-only end-state.** Per the C cleanup commit
-(`abe70bb`), the legacy LensModule stub at `lenses/highlight/highlight.ts` was
-deleted along with its tests; the rewritten `lenses/highlight/{README,DOCS}.md`
-describe the post-refactor end-state (LensModule with `Component` +
-`applicableTo` + `recommend` against the `LensProps` contract). Source landing —
-the actual React component + pure-TS core — is WS4's first concrete migration
-and is on this work stream's backlog. You DO need to build it; the docs already
-specify the target shape.
+**The `annotate` lens is WS4's first concrete migration.** It supersedes the
+pre-refactor `highlight` placeholder. The legacy LensModule stub at
+`lenses/highlight/highlight.ts` was deleted in the C cleanup commit (`abe70bb`);
+the hypothetical `lenses/highlight/{README,DOCS}.md` placeholder (post-refactor
+end-state sketch) was renamed to `lenses/annotate/` during WS4 Phase 0 because
+the lens does annotation-on-top-of-display (code-view, flowchart-view,
+pen/eraser/note tools), not token highlighting. See
+[`../lenses/annotate/README.md`](../lenses/annotate/README.md) and
+[`../lenses/annotate/DOCS.md`](../lenses/annotate/DOCS.md) for the current
+target shape.
 
 ### Lens design patterns
 
@@ -250,16 +252,17 @@ The same pattern applies to other lenses:
 
 - `blanks` may suggest variants for keywords vs. identifiers vs. operators
   (different `tokenTypes` configs).
-- `highlight` may suggest variants for control-flow highlighting vs. scope-chain
-  highlighting vs. coercion-points highlighting.
+- `annotate` may suggest variants emphasizing different views (code-view-default
+  vs. flowchart-view-default) depending on the snippet's control-flow
+  complexity.
 - A future `flowchart` lens may suggest pretty-print variants (sequential vs.
   branched vs. compact).
 
 **Predict-then-compare flow.** Many lenses (especially trace-table) follow this
 shape: learner fills a prediction → clicks [check] → the lens runs the JEJ
-evaluator (via `snippet.evaluation.events.*`) → validates the prediction
-against ground truth → renders feedback. Reusable across any lens that has a
-verifiable answer.
+evaluator (via `snippet.evaluation.events.*`) → validates the prediction against
+ground truth → renders feedback. Reusable across any lens that has a verifiable
+answer.
 
 **Tier-gated availability.** Lenses declare their tier (text-only,
 AST-dependent, dynamic) — see § Three-tier lens classification above. The
@@ -433,11 +436,10 @@ src/lib/just-enough/javascript/
   end-to-end.
 - **Work Stream 2 (Analysis + Recommender)**: each lens's
   `recommend(embodiment)` reads from the frozen `Snippet` directly
-  (`embodiment.raw.ast`, `embodiment.status.*`). Analysis is an internal
-  helper inside `orchestrate/lib/recommender/`, not a separate hand-off type —
-  there is no `AnalysisReport` for lenses to consume. WS2's shape only matters
-  for the recommender entry point, not for individual lens `recommend()`
-  functions.
+  (`embodiment.raw.ast`, `embodiment.status.*`). Analysis is an internal helper
+  inside `orchestrate/lib/recommender/`, not a separate hand-off type — there is
+  no `AnalysisReport` for lenses to consume. WS2's shape only matters for the
+  recommender entry point, not for individual lens `recommend()` functions.
 - **Work Stream 1 (`01-NM-components.md`)**: supplies the 3rd Block Model
   dimension — the syntax tracer's `StepCategory` enum at
   `embody/lib/evaluating/trace/syntax/types.ts`. A lens's `recommend()` uses
@@ -578,11 +580,14 @@ For each increment, follow the full TDD cycle from AGENTS.md:
 
 ### Suggested lens build order
 
-0. **highlight** -- position 0 per the C cleanup decision (`abe70bb`): the
-   legacy stub was deleted; docs-only end-state at
-   `lenses/highlight/{README,DOCS}.md` already specifies the target shape (Tier
-   1 LensModule with `Component` rendering colorized `<pre><code>`). WS4's first
-   concrete migration is bringing source back against the `LensProps` contract.
+0. **annotate** -- position 0; migrated from the pre-refactor
+   `HighlightLens.jsx` and renamed during WS4 Phase 0 (the lens does
+   annotation-on-top-of-display over code or generated flowchart, not token
+   highlighting). The legacy `lenses/highlight/highlight.ts` stub was deleted in
+   the C cleanup commit (`abe70bb`); the placeholder DDD was rewritten + renamed
+   to `lenses/annotate/{README,DOCS}.md` to match the working surface. Tier 1
+   LensModule with two views (code, flowchart), three tools (pen, eraser, note),
+   `recommend: () => []` for v1.
 1. **blanks** -- exercises the full Tier 2 path (AST-dependent). Validates that
    `applicableTo` correctly gates on `status.parsed`.
 2. **parsons** -- exercises Tier 1 (text-only). Simplest lens to implement.
@@ -655,13 +660,13 @@ Lenses that run code (predict-then-compare, run, trace-table) call into
 `snippet.evaluation.events.*`. Quick reference (canonical at
 [`../embody/types.ts`](../embody/types.ts)):
 
-| Surface                                                    | Returns                | When to use                                 |
-| ---------------------------------------------------------- | ---------------------- | ------------------------------------------- |
-| `snippet.evaluation.events.run(opts?)`                     | `Promise<RunInstance>` | Just-want-the-final-result; no event stream |
-| `snippet.evaluation.events.intercept(opts?)`               | `EvaluateHandle`       | Async iteration over IO + final state       |
-| `snippet.evaluation.events.trace.variables(opts?)`         | `EvaluateHandle`       | Variable-level semantic trace events        |
-| `snippet.evaluation.events.trace.syntax(opts?)`            | `EvaluateHandle`       | Step-by-step syntax-tracer events           |
-| `snippet.evaluation.events.trace.semantics(opts?)`         | `EvaluateHandle`       | Finer-grained semantic events               |
+| Surface                                            | Returns                | When to use                                 |
+| -------------------------------------------------- | ---------------------- | ------------------------------------------- |
+| `snippet.evaluation.events.run(opts?)`             | `Promise<RunInstance>` | Just-want-the-final-result; no event stream |
+| `snippet.evaluation.events.intercept(opts?)`       | `EvaluateHandle`       | Async iteration over IO + final state       |
+| `snippet.evaluation.events.trace.variables(opts?)` | `EvaluateHandle`       | Variable-level semantic trace events        |
+| `snippet.evaluation.events.trace.syntax(opts?)`    | `EvaluateHandle`       | Step-by-step syntax-tracer events           |
+| `snippet.evaluation.events.trace.semantics(opts?)` | `EvaluateHandle`       | Finer-grained semantic events               |
 
 `EvaluateOptions` (per `embody/types.ts:725-738`) carries:
 
