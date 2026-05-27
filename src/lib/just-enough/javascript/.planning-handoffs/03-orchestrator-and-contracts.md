@@ -493,15 +493,13 @@ mode; switch to a lens; the format/parse error surfaces at the trigger moment;
 the lens displays whatever it displays for an unparseable embodiment (per its
 own error-surface contract).
 
-**Phase A note**: while the embody mock is in place (see
-`EMBODY-IMPL-HANDOFF.md` for the Phase B re-typing roadmap), the F3 sandbox
-drives the parse-error UX path by passing scenario sentinels (e.g.
-`embody("FAIL_AT_PARSE")`, `embody("FAIL_AT_TOKENIZE")`) instead of real source.
-The "type a snippet" sandbox flow that exercises real tokenization unblocks
-fully in Phase B when real `embody/lib/parse/` lands. Orchestrator code MUST NOT
-branch on the sentinel string identity — always branch on the resulting
-`Snippet`'s `status` / `errors` fields so the orchestrator works unchanged when
-Phase B switches the discriminator out.
+**Phase B shipped (2026-05-21):** Real composition is live. The F3 sandbox can
+now drive the parse-error UX path with real source — `embody()` routes non-
+scenario input to acorn (tokenize → parse), returning `tokenize-fail` or
+`parse-fail` Snippets with `snippet.errors` populated. Scenario sentinels
+(`embody("FAIL_AT_PARSE")`, `embody("FAIL_AT_TOKENIZE")`) still work unchanged.
+The sentinel-blindness invariant remains load-bearing: orchestrator code MUST
+branch on `Snippet.status` / `Snippet.errors`, never on snippet string identity.
 
 **Status (2026-05-13): F3 satisfied by F2 implementation; no separate F3
 increment ships.** F2.4 (transition-only embody trigger, deletion of the
@@ -517,10 +515,9 @@ sentinel-blindness invariant — orchestrator branches only on `Snippet.status`
 See [`../orchestrate/DOCS.md` § F3 — lazy embodiment realized] and
 [`../orchestrate/README.md` § Conventions] for the load-bearing claims and
 their commit-level evidence (`9bd7377`..`da3b6c3`). Sandbox empirical check:
-F2 sandbox at `src/pages/f2-mode-machine.tsx` exercises the F3 UX path under
-Phase A sentinels (type-then-toggle surfaces parse errors in debug-props
-panels); real-code sandbox flow unblocks under Phase B per the Phase A note
-above.
+F2 sandbox at `src/pages/f2-mode-machine.tsx` exercises the F3 UX path — with
+Phase B live, the real-code sandbox flow (type-then-toggle surfacing real parse
+errors in debug-props panels) is now unblocked.
 
 #### F4 — First trial lens against the new contract
 
