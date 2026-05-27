@@ -59,7 +59,7 @@ export default function F2ModeMachine(): React.JSX.Element {
 					Toggle lens ({lens !== undefined ? 'lens → editor' : 'editor → lens'})
 				</button>
 				<div>
-					<StudyLenses snippet="OK" lens={lens} />
+					<StudyLenses snippet="OK" {...(lens !== undefined ? { lens } : {})} />
 				</div>
 			</main>
 		</Layout>
