@@ -272,21 +272,15 @@ This makes a lens → editor → lens round-trip with no intervening edit a
 zero-`embody`-call operation, while a round-trip across an edit forces a
 fresh build.
 
-**Error policy:** `embody()` is sync and currently throws on input that
-isn't a recognized scenario keyword (per
-[`../embody/index.ts`](../embody/index.ts) JSDoc). If `embody()` throws
-during an editor → lens transition, the throw propagates out of the
-state-update — the mode transition does not commit, the cache is not
-written, and the orchestrator's render path is in whatever state React
-was in before the user-triggered re-render that fired the transition.
-Today's surfacing path is the React error boundary at the consumer site.
-The throw is transient — under the locked `embody(code): Snippet`
-contract, embody must return a valid `Snippet` (with `status.parsed = false`
-and populated `Snippet.errors` for unparseable input, per the `Snippet`
-type at [`../embody/types.ts`](../embody/types.ts)). Real composition
-landing slice-by-slice per
-[`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md) brings the
-non-scenario path into compliance. F3 (orchestrator-side lazy embodiment)
+**Error policy:** `embody()` is sync. For any `string` input it returns a
+fully-shaped `Snippet` — it no longer throws on parse-phase failure (Phase B,
+2026-05-21). Non-scenario input routes to real composition — acorn tokenizes and
+parses the code, producing an apex `Snippet` (valid JS) or a non-apex leaf
+(`tokenize-fail` or `parse-fail`). Non-apex leaves carry `snippet.errors` with
+the failure detail; they still return a fully-shaped `Snippet` with a no-op
+evaluation phase (`snippet.evaluation.events.run()` resolves to a `RunInstance`
+with `endReport.outcome: 'not-runnable'`). The previous error-boundary path for
+non-scenario throws is now unreachable. F3 (orchestrator-side lazy embodiment)
 is independent of how `embody()` reports errors — it only governs **when**
 embody fires.
 
@@ -336,9 +330,9 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
   when downstream needs it: on editor → lens transition (F2.4 transition-only
   trigger) and on evaluation phases inside a mounted lens. **Evaluation phases**
   (run / predict / step) are lens-internal — the lens invokes
-  `embodiment.streams.evaluate.{run, intercept, trace.{syntax, semantics}}`
+  `snippet.evaluation.events.{run, intercept, trace.variables, trace.syntax, trace.semantics}`
   directly on the embodiment it already holds (see
-  [`../embody/types.ts § Streams`](../embody/types.ts) for the surface). No
+  [`../embody/types.ts § EvaluationEvents`](../embody/types.ts) for the surface). No
   orchestrator round-trip; the orchestrator does not mediate evaluation.
   Edits in editor mode eagerly invalidate the cache (F2.5) so the next
   lens-open always re-embodies after an edit. Never on every keystroke. See
