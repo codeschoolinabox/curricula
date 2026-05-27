@@ -77,6 +77,7 @@ function EditorComponent({
 		// run); the guard exists for TS narrowing of the union type.
 		if (host) void createEditor(snippetRef.current, {
 			parent: host,
+			language: 'javascript',
 			onChange: onChangeCallback,
 		}).then(
 			function onMounted(instance) {
