@@ -159,7 +159,10 @@ component's reference to the live document; the **factory** is
   render and the `createEditor` promise resolving, the in-flight mount uses
   the original `initialCode`; the post-mount prop-sync effect writes the
   latest `snippet` value into `editor.content` once mount completes (one
-  extra dispatch on initial mount, equality-guarded thereafter).
+  extra dispatch on initial mount, equality-guarded thereafter). The
+  catch-up write fires `onSnippetChange` once with the new content —
+  orchestrator round-trip is benign (idempotent setState), but
+  side-effecting consumers (analytics, logging) should de-dupe by content.
 - **Single host element.** The component renders one host element
   carrying the `data-orchestrator-host` attribute; CodeMirror's live
   document mounts into it. The data attribute is the test /

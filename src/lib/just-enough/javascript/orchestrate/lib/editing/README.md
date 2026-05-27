@@ -21,7 +21,7 @@ tooltips, markers) but does not know what the feedback means.
 | File                    | Purpose                                      |
 | ----------------------- | -------------------------------------------- |
 | `types.ts`              | All types, callback signatures, data shapes  |
-| `create-editor.ts`      | `createEditor(embodiment, options)` factory  |
+| `create-editor.ts`      | `createEditor(initialCode, options)` factory |
 | `detect-language.ts`    | File extension to language mapping (pure)    |
 | `build-extensions.ts`   | CodeMirror extension builder (internal)      |
 | `build-tooltip-dom.ts`  | Tooltip DOM construction (internal)          |
