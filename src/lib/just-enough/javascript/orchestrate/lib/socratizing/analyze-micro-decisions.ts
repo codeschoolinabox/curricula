@@ -129,7 +129,8 @@ function analyzeMicroDecisions(
 
 	// 2. Read AST from embodiment (when parsed).
 	// Per embody contract: status.parsed === true ⇒ raw.ast !== null;
-	// the truthy `&& raw.ast` is type-narrowing for the consumer.
+	// the `&& raw.ast` check is structurally redundant given the contract
+	// but type-narrows for the compiler.
 	const ast: Node | null =
 		embodiment.status.parsed && embodiment.raw.ast
 			? embodiment.raw.ast

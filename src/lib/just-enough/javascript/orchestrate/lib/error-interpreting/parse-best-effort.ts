@@ -5,10 +5,9 @@
  * `null` if neither succeeds. Retained as a test-fixture builder
  * for `tests/parse-best-effort.test.ts`,
  * `tests/find-node-at-line.test.ts`, and
- * `tests/extract-context.test.ts`. Not used by any production
- * module after the Step 7 sweep — the entry now reads its AST
- * directly from `embodiment.parse.ast.acornNode`. Deletion
- * deferred to a follow-up commit.
+ * `tests/extract-context.test.ts`. Production-side
+ * `interpret-error.ts` reads its AST directly from
+ * `embodiment.raw.ast`.
  */
 
 import { parse, type Program } from 'acorn';

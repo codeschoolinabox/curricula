@@ -155,10 +155,9 @@ function isPromptRelated(node: Node): boolean {
  *
  * @param error - The error to analyze
  * @param source - The JEJ program source code
- * @param ast - Pre-parsed AST (or `null` if parsing failed). Loosened
- *   from `Program | null` to `Node | null` per the Step 7 sweep so the
- *   entry can pass `embodiment.parse.ast.acornNode` (typed as the
- *   broader `AcornNode`) without an extra cast.
+ * @param ast - Pre-parsed AST (or `null` if parsing failed). Typed as
+ *   `Node | null` so the entry can pass `embodiment.raw.ast` (typed as
+ *   `AcornNode | null`) without an extra cast.
  * @returns A frozen `ErrorContext` with all available fields
  */
 function extractContext(
