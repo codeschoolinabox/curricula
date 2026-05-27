@@ -257,7 +257,7 @@ The same pattern applies to other lenses:
 
 **Predict-then-compare flow.** Many lenses (especially trace-table) follow this
 shape: learner fills a prediction → clicks [check] → the lens runs the JEJ
-evaluator (via embodiment's `streams.evaluate.*`) → validates the prediction
+evaluator (via `snippet.evaluation.events.*`) → validates the prediction
 against ground truth → renders feedback. Reusable across any lens that has a
 verifiable answer.
 
@@ -433,7 +433,7 @@ src/lib/just-enough/javascript/
   end-to-end.
 - **Work Stream 2 (Analysis + Recommender)**: each lens's
   `recommend(embodiment)` reads from the frozen `Snippet` directly
-  (`embodiment.parse.ast`, `embodiment.status.*`). Analysis is an internal
+  (`embodiment.raw.ast`, `embodiment.status.*`). Analysis is an internal
   helper inside `orchestrate/lib/recommender/`, not a separate hand-off type —
   there is no `AnalysisReport` for lenses to consume. WS2's shape only matters
   for the recommender entry point, not for individual lens `recommend()`
@@ -652,15 +652,16 @@ in-progress UI state is intentionally disposable, per the locked architecture.
 ## Streams primer for lens authors
 
 Lenses that run code (predict-then-compare, run, trace-table) call into
-`embodiment.streams.evaluate.*`. Quick reference (canonical at
+`snippet.evaluation.events.*`. Quick reference (canonical at
 [`../embody/types.ts`](../embody/types.ts)):
 
-| Surface                                   | Returns                | When to use                                 |
-| ----------------------------------------- | ---------------------- | ------------------------------------------- |
-| `streams.evaluate.run(opts?)`             | `Promise<RunInstance>` | Just-want-the-final-result; no event stream |
-| `streams.evaluate.intercept(opts?)`       | `EvaluateHandle`       | Async iteration over IO + final state       |
-| `streams.evaluate.trace.syntax(opts?)`    | `EvaluateHandle`       | Step-by-step syntax-tracer events           |
-| `streams.evaluate.trace.semantics(opts?)` | `EvaluateHandle`       | Finer-grained semantic events               |
+| Surface                                                    | Returns                | When to use                                 |
+| ---------------------------------------------------------- | ---------------------- | ------------------------------------------- |
+| `snippet.evaluation.events.run(opts?)`                     | `Promise<RunInstance>` | Just-want-the-final-result; no event stream |
+| `snippet.evaluation.events.intercept(opts?)`               | `EvaluateHandle`       | Async iteration over IO + final state       |
+| `snippet.evaluation.events.trace.variables(opts?)`         | `EvaluateHandle`       | Variable-level semantic trace events        |
+| `snippet.evaluation.events.trace.syntax(opts?)`            | `EvaluateHandle`       | Step-by-step syntax-tracer events           |
+| `snippet.evaluation.events.trace.semantics(opts?)`         | `EvaluateHandle`       | Finer-grained semantic events               |
 
 `EvaluateOptions` (per `embody/types.ts:725-738`) carries:
 
@@ -679,7 +680,7 @@ The predict-then-compare flow:
 
 1. Learner fills a prediction in the lens UI.
 2. Learner clicks [check].
-3. Lens calls `embodiment.streams.evaluate.run({ io: pinnedMocks })` (or
+3. Lens calls `snippet.evaluation.events.run({ io: pinnedMocks })` (or
    `.trace.syntax()` for step-level prediction lenses).
 4. Lens compares the result to the prediction.
 5. Lens renders feedback.

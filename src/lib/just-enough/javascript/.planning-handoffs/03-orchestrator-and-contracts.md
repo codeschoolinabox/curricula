@@ -28,6 +28,17 @@
 > see its preamble for the work-stream summary. F3-F5 + L1-L8 follow per the
 > pyramid build-order below.
 >
+> **F2 COMPLETE (2026-05-13) — F3 also satisfied by F2 implementation.**
+> (The F3 section below notes this explicitly.)
+>
+> **Embody Phase B shipped (2026-05-21):** Commits `434ce9c`–`943c666`.
+> `Snippet.parse`, `Snippet.static`, and `Snippet.streams` **no longer exist**.
+> New shape: `source · raw · status · errors · realm/tokenize/parseAST/creation/
+> evaluation (phase axis) · events.* (layer-first)`. Evaluation surface moved to
+> `snippet.evaluation.events.*` (`trace.variables` added). Three orchestrator-lib
+> files have stale `.parse.ast` references (TypeScript errors); see
+> § Embody Phase B impact before starting any new work.
+>
 > This handoff was rewritten end-to-end after the package's top-level docs
 > (`README.md`, `DOCS.md`) locked in the **embody / lenses / orchestrate
 > three-peer architecture** and integrated the **Explorotron quadrant +
@@ -291,6 +302,7 @@ These survive the architectural change and inform the new increments:
 | #14 (NEW) Babel iterator-spread emit                      | Yes; affects the whole package.                                   | Use `Array.from`, not `[...iterable]`.                                |
 | #15 (NEW) React event-handler throws                      | Yes.                                                              | Don't assert via `.toThrow` on `fireEvent` — React swallows.          |
 | #16 (NEW) Strict-mode fake-unmount                        | Yes; relevant to any effect with destructive cleanup.             | Test under `<React.StrictMode>` if your effect has dispose semantics. |
+| #17 (NEW) Stale `snippet.parse.ast` references            | Yes; 3 orchestrator-lib files have TypeScript errors.             | Use `embodiment.raw.ast` (interim). Fix in rename commit before F4.   |
 
 ## Your task
 
@@ -497,7 +509,7 @@ unconditional `useEmbodiment` useMemo, atomic `cachedEmbodiment` slot with
 cache-hit semantics on round-trip) plus F2.5 (eager edit invalidation via
 `handleSnippetChange` wrapper) jointly realize F3's "build embodiment only
 when downstream needs it" requirement. Evaluation-phase re-embodiment inside a
-mounted lens is **lens-internal** via `Snippet.streams.evaluate.*` (no
+mounted lens is **lens-internal** via `snippet.evaluation.events.*` (no
 orchestrator round-trip needed; the cached embodiment from mount is always
 fresh inside a lens-mode session because snippet state is frozen there). The
 sentinel-blindness invariant — orchestrator branches only on `Snippet.status`
@@ -700,8 +712,7 @@ tensions here are real — defer until pedagogical priorities clarify.
 The orchestrator has access to:
 
 - `embody(code) → Snippet` from `embody/index.ts` — the factory.
-- `embody/types.ts` — `Snippet`, `Status`, `Streams`, etc. types (canonical
-  contract).
+- `embody/types.ts` — `Snippet · Status (4 booleans: tokenized/parsed/validated/created) · Source · RawAcorn · EmbodyError · EvaluationEvents (run/intercept/trace.*)` types (canonical contract).
 - `orchestrate/lib/recommender/` — analysis of an embodiment to lens
   recommendations (WS2 deliverable).
 - `orchestrate/lib/socratizing/`, `completing/`, `editing/`,
@@ -710,6 +721,56 @@ The orchestrator has access to:
 - `orchestrate/editor/` — the editor home-base component.
 - `lenses/<name>/` — each lens self-contained: TS core + React wrapper, takes
   `embodiment` via props.
+
+### Embody Phase B impact
+
+Shipped 2026-05-21 (commits `434ce9c`–`943c666`). `Snippet.parse`, `Snippet.static`,
+and `Snippet.streams` **no longer exist**. New Snippet shape:
+
+```ts
+// Flat fields (always present)
+snippet.source          // Source { code: string; offsets: ReadonlyArray<number> }
+snippet.raw             // RawAcorn { tokens, ast, comments } — null until gate passes
+snippet.status          // Status { tokenized, parsed, validated, created }
+snippet.errors          // EmbodyError | null
+
+// Phase axis (nullable until the corresponding gate passes)
+snippet.realm · snippet.tokenize · snippet.parseAST · snippet.creation · snippet.evaluation
+
+// Derived (null on real-comp until lib/parse/ + lib/validating/ land)
+snippet.analysis · snippet.validation
+
+// Layer-first axis (event streams — always callable)
+snippet.events.{realm, tokenize, parseAST, creation, evaluation}
+```
+
+**New evaluation surface** (lens-callable, always present even on non-apex leaves):
+
+- `snippet.evaluation.events.run(opts?)` — was: `snippet.streams.evaluate.run()`
+- `snippet.evaluation.events.intercept(opts?)` — was: `snippet.streams.evaluate.intercept()`
+- `snippet.evaluation.events.trace.variables(opts?)` — **new**, wasn't in old API
+- `snippet.evaluation.events.trace.syntax(opts?)` — was: `snippet.streams.evaluate.trace.syntax()`
+- `snippet.evaluation.events.trace.semantics(opts?)` — was: `snippet.streams.evaluate.trace.semantics()`
+
+Non-apex leaves return a no-op RunInstance: `endReport.outcome: 'not-runnable'`;
+`endReport.error: null`. Gate failure reason is on `snippet.errors`, not the RunInstance.
+
+**Null guards required:**
+
+- `snippet.analysis` — `null` on real-comp until `lib/parse/` DDD ships; always null-guard in orchestrator code
+- `snippet.validation` — same
+
+**`embody()` no longer throws** on non-scenario input. Phase B routes all input to real
+composition (acorn tokenize → parse → apex or tokenize-fail or parse-fail leaf). The
+old error boundary for the non-scenario throw path is now unreachable.
+
+**Pre-existing TypeScript errors** (not in WS3 scope — fix as a prerequisite mechanical-rename commit before F4+):
+
+| File | Stale reference | Fix direction |
+| ---- | --------------- | ------------- |
+| `orchestrate/lib/socratizing/analyze-micro-decisions.ts:139` | `embodiment.parse.ast` | `embodiment.raw.ast` (interim) |
+| `orchestrate/lib/error-interpreting/interpret-error.ts:135` | `embodiment.parse.ast` | Same |
+| `lenses/debug-props/core.ts:90–94` | `embodiment.validation` (non-null assumed) | Add null guard |
 
 ### Conventions to enforce
 
