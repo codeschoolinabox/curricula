@@ -11,23 +11,22 @@
  * @module create-editor
  */
 
-import { EditorView } from '@codemirror/view';
 import { setDiagnostics } from '@codemirror/lint';
+import { EditorView } from '@codemirror/view';
 
 import buildExtensions from './build-extensions.js';
 import { toCMDiagnostic, runLinterCallbacks } from './to-cm-diagnostic.js';
 
-import type { Snippet } from '../../../embody/types.js';
 import type { EditorOptions, EditorInstance, LintDiagnostic } from './types.js';
 
 /**
  * Create a CodeMirror editor instance for editing code.
  *
  * @remarks Accepts pure function callbacks for linting, hover docs,
- * completions, and formatting. The editor wraps these into CodeMirror
- * extensions internally — callbacks never touch CM types. After
- * `destroy()`, the returned instance remains callable but becomes a
- * dead sentinel (content='', methods no-op).
+ * completions, formatting, and change notification. The editor wraps
+ * these into CodeMirror extensions internally — callbacks never touch
+ * CM types. After `destroy()`, the returned instance remains callable
+ * but becomes a dead sentinel (content='', methods no-op).
  *
  * The returned promise **rejects** if CodeMirror construction fails
  * (e.g., malformed extensions, EditorView constructor throws). Callers
@@ -35,18 +34,17 @@ import type { EditorOptions, EditorInstance, LintDiagnostic } from './types.js';
  * for an example pattern. Language-loading errors are swallowed inside
  * `buildExtensions` (warned + editor continues without highlighting).
  *
- * Reads only `embodiment.source.code` from the Snippet. Does not consult
- * `status.parsed`, `parse.ast`, or `errors` — the editor's role is
- * display-and-edit; whether the source parsed is irrelevant to opening it
- * for editing. CodeMirror runs its own tokenizer independently. Even an
- * embodiment whose tokenize/parse failed produces a working editor.
+ * Takes only the `initialCode` as a plain string; the factory does not
+ * consult any AST, parse status, or validation. The editor's role is
+ * display-and-edit; whether the source parses is irrelevant to opening
+ * it for editing. CodeMirror runs its own tokenizer independently. Any
+ * arbitrary string (including malformed code) produces a working editor.
  *
- * @param embodiment - Frozen Snippet from `embody()`; source read from
- *   `embodiment.source.code`.
+ * @param initialCode - Initial document content as a plain string.
  * @param options - Editor configuration and callbacks
  * @returns A promise resolving to a fully-initialized editor instance.
  */
-async function createEditor(embodiment: Snippet, {
+async function createEditor(initialCode: string, {
 	language,
 	indentChar = '\t',
 	tabSize = 4,
@@ -56,8 +54,8 @@ async function createEditor(embodiment: Snippet, {
 	docLookup,
 	completions,
 	onFormat,
+	onChange,
 }: EditorOptions = {}): Promise<EditorInstance> {
-	const initialCode = embodiment.source.code;
 	const el: HTMLElement = parent ?? document.createElement('div');
 	const resolvedLanguage = language ?? 'plaintext';
 
@@ -71,14 +69,35 @@ async function createEditor(embodiment: Snippet, {
 		...(completions ? { completions } : {}),
 	});
 
-	// 2. Construct the CM EditorView — the returned instance is post-init.
+	// 2. If onChange is supplied, wire an updateListener that fires it on
+	// every docChanged transaction. Consumer throws are caught + warned so
+	// a misbehaving onChange cannot destabilize CM's update cycle (matches
+	// the format / linter error contract — see DOCS.md § Error Handling).
+	// The `onChange?.` inside notifyOnChange is structurally redundant
+	// (the listener is registered only when onChange is truthy) but TS
+	// doesn't narrow the destructured optional binding into the nested
+	// function declaration, so the optional chain is required for type
+	// soundness.
+	function notifyOnChange(update: import('@codemirror/view').ViewUpdate): void {
+		if (!update.docChanged) return;
+		try {
+			onChange?.(update.state.doc.toString());
+		} catch (error: unknown) {
+			console.warn('onChange callback threw:', error);
+		}
+	}
+	const onChangeExtensions = onChange
+		? [EditorView.updateListener.of(notifyOnChange)]
+		: [];
+
+	// 3. Construct the CM EditorView — the returned instance is post-init.
 	const editor = new EditorView({
 		doc: initialCode,
 		parent: el,
-		extensions,
+		extensions: [...extensions, ...onChangeExtensions],
 	});
 
-	// 3. Destroyed sentinel — short-circuits methods after destroy().
+	// 4. Destroyed sentinel — short-circuits methods after destroy().
 	let destroyed = false;
 
 	// runFormat / runCheck are `function` declarations so they can be passed

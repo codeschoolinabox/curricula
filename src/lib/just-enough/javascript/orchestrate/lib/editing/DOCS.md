@@ -102,6 +102,12 @@ invocations in try/catch:
 - **Format callback throws**: warning logged, editor state unchanged
 - **Linter callback throws**: warning logged, that linter skipped, others run
 - **Linter returns non-array**: silently ignored
+- **onChange callback throws**: warning logged, CodeMirror update cycle
+  continues, document state unchanged from CM's perspective. A misbehaving
+  consumer of `onChange` cannot destabilize the editor. Consumers depending
+  on F2.5-style invariants where every transaction must reach downstream
+  state (the orchestrator's cache invalidation) should write their
+  `onChange` defensively, since a swallowed throw breaks that propagation.
 
 `toCMDiagnostic` clamps line/column values to valid document ranges to prevent
 crashes from out-of-range diagnostics.

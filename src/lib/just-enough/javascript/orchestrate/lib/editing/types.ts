@@ -115,10 +115,21 @@ type FormatResultCallback = (result: FormatResult) => void;
  * Receives the editor's new content on every `docChanged` transaction.
  *
  * @remarks Fires synchronously inside CodeMirror's update listener with
- * the full document as a plain string. Each keystroke produces exactly
- * one invocation — no batching, no debouncing. Consumers depending on a
- * 1:1 keystroke-to-callback mapping (e.g. the orchestrator's F2.5
- * cache invalidation) can rely on this contract.
+ * the full document as a plain string. Each docChanged transaction
+ * produces exactly one invocation — no batching, no debouncing.
+ * Consumers depending on a 1:1 transaction-to-callback mapping (e.g.
+ * the orchestrator's F2.5 cache invalidation) can rely on this
+ * contract.
+ *
+ * **Re-entrancy constraint.** Do NOT dispatch synchronously back into
+ * the editor from inside this callback (e.g. `editor.content = ...`
+ * or any path that invokes `view.dispatch(...)`). CodeMirror prohibits
+ * nested dispatches and will throw `"Calls to EditorView.dispatch are
+ * not allowed while the view is updating"`. The editor catches that
+ * throw at the boundary and warns, so the editor stays alive, but the
+ * re-dispatched change does not land. Defer any in-callback editor
+ * writes via `queueMicrotask` or `setTimeout(..., 0)` if you need to
+ * react to an edit by writing back.
  */
 type OnChangeCallback = (next: string) => void;
 
