@@ -137,6 +137,11 @@ the data flow:
 - **parse-program.ts** — acorn invocation. Produces `Program | ParseError`.
 - **get-child-nodes.ts** — generic ESTree child walker. Used internally
   by `parse(code)` for the with-statement detection in Phase 2.
+- **get-child-nodes-with-path.ts** — path-tracking child walker. Same
+  traversal rules as `get-child-nodes.ts`, but pairs each child with the
+  JSONPath segment (`'init'`, `'body[0]'`) that reaches it. The
+  validation walkers (`lib/validating/`) use it to assign
+  `Violation.nodePath`.
 - **parse.ts** (planned, Phase 1a) — public entry. Implements the three
   execution phases above using the two primitives.
 

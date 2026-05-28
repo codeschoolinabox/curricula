@@ -28,6 +28,14 @@ Use them consistently.
 - **getChildNodes** — generic ESTree child node walker. Replaces the need
   for an `acorn-walk` dependency. Used internally by parse, validating,
   scope, and socratizing.
+- **getChildNodesWithPath** — the path-tracking companion to
+  `getChildNodes`. Returns each direct child paired with its JSONPath
+  `segment` (`'init'` for an object-valued property, `'body[0]'` for an
+  array element). The validation walkers use it to build
+  `Violation.nodePath`. See **ChildWithPath**.
+- **ChildWithPath** — a `{ child, segment }` pair produced by
+  `getChildNodesWithPath`. `segment` is one JSONPath step; a walker joins
+  it onto a parent path with `'.'`.
 - **ParseError** — the low-level shape produced by `parseProgram` on
   failure: `{ message, location: { line, column } }`. Frozen.
 - **ParseResult** — the public value returned by `parse(code)`. A
@@ -54,9 +62,10 @@ Use them consistently.
 
 | File                | Purpose                                                            |
 | ------------------- | ------------------------------------------------------------------ |
-| `types.ts`          | `ParseError`, `ParseResult`, `ParseResultError`                    |
+| `types.ts`          | `ParseError`, `ParseResult`, `ParseResultError`, `ChildWithPath`   |
 | `parse-program.ts`  | Acorn wrapper: `parseProgram(source, sourceType?)`                 |
 | `get-child-nodes.ts`| Generic ESTree child walker: `getChildNodes(node)`                 |
+| `get-child-nodes-with-path.ts` | Path-tracking child walker: `getChildNodesWithPath(node)` |
 | `parse.ts` (Phase 1a) | Public entry: `parse(code): ParseResult`                         |
 | `tests/`            | Unit tests for each source file                                    |
 
