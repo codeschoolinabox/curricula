@@ -1,10 +1,7 @@
 /**
- * @file LensModule defaults for the `annotate` lens — exposes the
- * `config` factory that resolves educator-supplied overrides against
- * the three documented defaults. Subsequent increments grow this file
- * with `applicableTo` and `recommend`, assembled alongside `config` in
- * the file's default-exported record. The React wrapper (`./index.tsx`)
- * imports the record to populate the `LensModule` literal at
+ * @file LensModule defaults for the `annotate` lens — the pure-TS
+ * functions (`config`, `applicableTo`, `recommend`) that the React
+ * wrapper (`./index.tsx`) splices into its `LensModule` literal at
  * `Object.freeze` time.
  *
  * @remarks Per the lenses peer's two-layer module convention, `core.ts`
@@ -12,7 +9,7 @@
  * `./tests/core.test.ts`).
  */
 
-import type { LensConfig } from '../types.js';
+import type { LensConfig, Snippet } from '../types.js';
 
 /**
  * Resolves the annotate lens's per-mount config — applies the three
@@ -58,6 +55,32 @@ function config(overrides?: Partial<LensConfig>): LensConfig {
 	}) as LensConfig;
 }
 
-const annotateCore = { config };
+/**
+ * The annotate lens's applicability gate — always returns `true`
+ * because the lens is **Tier 1** per `../README.md` § Three-tier
+ * classification: code-view + drawing + notes work on any source
+ * string, parseable or not. The flowchart-view is a Tier-2 sub-feature
+ * surfaced at the toggle-button's `disabled` state inside the wrapper,
+ * not at this gate.
+ *
+ * @remarks The orchestrator's recommender calls `applicableTo` as the
+ * cheap O(1) filter before the richer `recommend()` ranking. For
+ * Tier 1 lenses the gate is `() => true` at the `LensModule` surface
+ * (see `../debug-props/index.tsx` for the inline-literal precedent);
+ * here it is a named-function declaration so the core stays
+ * unit-testable in vitest without jsdom.
+ *
+ * @param _embodiment - The frozen `Snippet` the orchestrator considers
+ *   surfacing this lens for. Ignored (Tier 1).
+ * @returns `true` for every snippet.
+ */
+function applicableTo(_embodiment: Snippet): boolean {
+	return true;
+}
+
+// Intentionally unfrozen — `./index.tsx` calls `Object.freeze` on the
+// composed `LensModule` literal at construction time, which is the
+// consumer-facing freeze boundary.
+const annotateCore = { config, applicableTo };
 
 export default annotateCore;

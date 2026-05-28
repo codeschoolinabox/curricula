@@ -1,13 +1,20 @@
 /**
  * @file Pure-TS tests for the `annotate` lens core. No React, no jsdom.
- * ZOMBIES coverage of the `config()` defaults + override + freeze
- * contract per `../README.md` § Public API and `../DOCS.md` § Phase 1
- * Mount + resolve config.
+ * ZOMBIES coverage of the LensModule-defaults trio (`config`,
+ * `applicableTo`, `recommend`) per `../README.md` § Public API and
+ * `../DOCS.md` § Architectural sketch.
  */
 
 import { describe, expect, it } from 'vitest';
 
+import embody from '../../../embody/index.js';
+import type { Snippet } from '../../../embody/types.js';
 import core from '../core.js';
+
+
+function makeSnippet(overrides: Partial<Snippet> = {}): Snippet {
+	return { ...embody('OK'), ...overrides };
+}
 
 describe('annotate core', () => {
 	describe('config', () => {
@@ -124,6 +131,31 @@ describe('annotate core', () => {
 					(resolved as { colorize: boolean }).colorize = false;
 				}).toThrow();
 			});
+		});
+	});
+
+	describe('applicableTo (Tier 1 — always applies)', () => {
+		it('returns true for the apex snippet', () => {
+			expect(core.applicableTo(makeSnippet())).toBe(true);
+		});
+
+		it('returns true for a parse-fail snippet (Tier 1 ignores parse status)', () => {
+			const parseFail = makeSnippet({
+				status: {
+					tokenized: true,
+					parsed: false,
+					validated: false,
+					created: false,
+				},
+				validation: null,
+				errors: {
+					phase: 'parse:ast',
+					kind: 'SyntaxError',
+					message: 'unexpected token',
+					loc: null,
+				},
+			});
+			expect(core.applicableTo(parseFail)).toBe(true);
 		});
 	});
 });
