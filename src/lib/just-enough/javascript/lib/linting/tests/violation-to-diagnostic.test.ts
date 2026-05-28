@@ -24,7 +24,10 @@ describe('violationToDiagnostic', () => {
 		it('line is start.line, not end.line, on a multi-line range', () => {
 			const d = violationToDiagnostic(
 				fakeViolation({
-					location: { start: { line: 3, column: 0 }, end: { line: 5, column: 1 } },
+					location: {
+						start: { line: 3, column: 0 },
+						end: { line: 5, column: 1 },
+					},
 				}),
 			);
 			expect(d.line).toBe(3);
@@ -38,7 +41,10 @@ describe('violationToDiagnostic', () => {
 		it('endLine comes from location.end.line', () => {
 			const d = violationToDiagnostic(
 				fakeViolation({
-					location: { start: { line: 3, column: 0 }, end: { line: 5, column: 1 } },
+					location: {
+						start: { line: 3, column: 0 },
+						end: { line: 5, column: 1 },
+					},
 				}),
 			);
 			expect(d.endLine).toBe(5);
@@ -52,7 +58,10 @@ describe('violationToDiagnostic', () => {
 		it('endColumn is end.column, not end.line, on a multi-line range', () => {
 			const d = violationToDiagnostic(
 				fakeViolation({
-					location: { start: { line: 3, column: 0 }, end: { line: 5, column: 1 } },
+					location: {
+						start: { line: 3, column: 0 },
+						end: { line: 5, column: 1 },
+					},
 				}),
 			);
 			expect(d.endColumn).toBe(1);

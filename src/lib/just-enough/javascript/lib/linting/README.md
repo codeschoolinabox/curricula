@@ -185,11 +185,13 @@ Inherits all conventions from [`../README.md`](../README.md),
   (`to = lineStart + endColumn`), so the adapter copies `end.line` /
   `end.column` straight through — both ends are exclusive, they match.
 - **Source `'JEJ'`.** The optional `source` field is set to the
-  constant `'JEJ'` so the editor's tooltip can attribute the
-  diagnostic to the JEJ language gate rather than (e.g.) a third-party
-  ESLint or TypeScript source. Emit it as a single named module
-  constant (it is used on both the violation and parse-error paths) to
-  satisfy `sonarjs/no-duplicate-string`.
+  literal `'JEJ'` so the editor's tooltip can attribute the diagnostic
+  to the JEJ language gate rather than (e.g.) a third-party ESLint or
+  TypeScript source. It appears once per file — the rejection path sets
+  it in `violation-to-diagnostic.ts`, the parse-error path in
+  `lint-jej.ts` — so `sonarjs/no-duplicate-string` (which fires at 3+
+  occurrences in one file) does not apply; inlining the literal is the
+  convention-compliant choice (internal files take no named exports).
 
 ## Navigation
 
