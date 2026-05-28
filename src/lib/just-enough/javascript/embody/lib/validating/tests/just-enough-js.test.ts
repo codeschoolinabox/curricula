@@ -112,7 +112,8 @@ describe('justEnoughJs', () => {
 		const validate = justEnoughJs.nodes.VariableDeclaration as NodeValidator;
 
 		it('allows let', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'VariableDeclaration',
 					kind: 'let',
@@ -123,7 +124,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('allows const', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'VariableDeclaration',
 					kind: 'const',
@@ -134,7 +136,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('rejects var', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'VariableDeclaration',
 					kind: 'var',
@@ -146,7 +149,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('allows multi-declaration (let a, b)', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'VariableDeclaration',
 					kind: 'let',
@@ -157,7 +161,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('allows multi-declaration with const', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'VariableDeclaration',
 					kind: 'const',
@@ -172,7 +177,8 @@ describe('justEnoughJs', () => {
 		const validate = justEnoughJs.nodes.IfStatement as NodeValidator;
 
 		it('allows if with block consequent and no alternate', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'IfStatement',
 					consequent: fakeBlockStatement(),
@@ -183,7 +189,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('allows if/else with block consequent and block alternate', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'IfStatement',
 					consequent: fakeBlockStatement(),
@@ -194,7 +201,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('allows if/else if (alternate is IfStatement)', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'IfStatement',
 					consequent: fakeBlockStatement(),
@@ -205,7 +213,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('rejects braceless consequent', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'IfStatement',
 					consequent: { type: 'ExpressionStatement' },
@@ -217,7 +226,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('rejects braceless alternate', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'IfStatement',
 					consequent: fakeBlockStatement(),
@@ -232,7 +242,8 @@ describe('justEnoughJs', () => {
 		const validate = justEnoughJs.nodes.WhileStatement as NodeValidator;
 
 		it('allows while with block body', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'WhileStatement',
 					body: fakeBlockStatement(),
@@ -242,7 +253,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('rejects braceless body', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'WhileStatement',
 					body: { type: 'ExpressionStatement' },
@@ -257,7 +269,8 @@ describe('justEnoughJs', () => {
 		const validate = justEnoughJs.nodes.ForOfStatement as NodeValidator;
 
 		it('allows for-of with block body and const head', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'ForOfStatement',
 					body: fakeBlockStatement(),
@@ -268,7 +281,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('rejects braceless body', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'ForOfStatement',
 					body: { type: 'ExpressionStatement' },
@@ -280,7 +294,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('accepts let in for-of head', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'ForOfStatement',
 					body: fakeBlockStatement(),
@@ -291,7 +306,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('returns rejection (not warning) when body is braceless even with let head', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'ForOfStatement',
 					body: { type: 'ExpressionStatement' },
@@ -307,7 +323,8 @@ describe('justEnoughJs', () => {
 		const validate = justEnoughJs.nodes.MemberExpression as NodeValidator;
 
 		it('allows computed access (bracket indexing)', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'MemberExpression',
 					computed: true,
@@ -318,7 +335,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('allows non-computed access to allowed property name', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'MemberExpression',
 					computed: false,
@@ -329,7 +347,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('allows non-computed access to log', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'MemberExpression',
 					computed: false,
@@ -340,7 +359,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('rejects non-computed access to disallowed property name', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'MemberExpression',
 					computed: false,
@@ -352,7 +372,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('rejects non-computed access to warn', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'MemberExpression',
 					computed: false,
@@ -367,7 +388,8 @@ describe('justEnoughJs', () => {
 		const validate = justEnoughJs.nodes.CallExpression as NodeValidator;
 
 		it('allows call with non-computed callee', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'CallExpression',
 					callee: {
@@ -381,7 +403,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('allows call with identifier callee', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'CallExpression',
 					callee: { type: 'Identifier', name: 'alert' },
@@ -391,7 +414,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('rejects call with computed MemberExpression callee', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'CallExpression',
 					callee: {
@@ -424,7 +448,8 @@ describe('justEnoughJs', () => {
 
 		for (const op of allowedOperators) {
 			it(`allows ${op} to Identifier`, () => {
-				const result = callRule(validate,
+				const result = callRule(
+					validate,
 					fakeNode({
 						type: 'AssignmentExpression',
 						operator: op,
@@ -439,7 +464,8 @@ describe('justEnoughJs', () => {
 
 		for (const op of bitwiseAssignmentOperators) {
 			it(`allows ${op}`, () => {
-				const result = callRule(validate,
+				const result = callRule(
+					validate,
 					fakeNode({
 						type: 'AssignmentExpression',
 						operator: op,
@@ -451,7 +477,8 @@ describe('justEnoughJs', () => {
 		}
 
 		it('rejects property assignment with =', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'AssignmentExpression',
 					operator: '=',
@@ -466,7 +493,8 @@ describe('justEnoughJs', () => {
 		});
 
 		it('rejects property assignment with compound operator', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'AssignmentExpression',
 					operator: '+=',
@@ -484,28 +512,32 @@ describe('justEnoughJs', () => {
 		const validate = justEnoughJs.nodes.UpdateExpression as NodeValidator;
 
 		it('allows prefix ++', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'UpdateExpression', operator: '++', prefix: true }),
 			);
 			expect(result).toBe(true);
 		});
 
 		it('allows postfix ++', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'UpdateExpression', operator: '++', prefix: false }),
 			);
 			expect(result).toBe(true);
 		});
 
 		it('allows prefix --', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'UpdateExpression', operator: '--', prefix: true }),
 			);
 			expect(result).toBe(true);
 		});
 
 		it('allows postfix --', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'UpdateExpression', operator: '--', prefix: false }),
 			);
 			expect(result).toBe(true);
@@ -532,7 +564,8 @@ describe('justEnoughJs', () => {
 
 		for (const op of allowed) {
 			it(`allows ${op}`, () => {
-				const result = callRule(validate,
+				const result = callRule(
+					validate,
 					fakeNode({ type: 'BinaryExpression', operator: op }),
 				);
 				expect(result).toBe(true);
@@ -540,14 +573,16 @@ describe('justEnoughJs', () => {
 		}
 
 		it('rejects ==', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'BinaryExpression', operator: '==' }),
 			);
 			expect(result).not.toBe(true);
 		});
 
 		it('rejects !=', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'BinaryExpression', operator: '!=' }),
 			);
 			expect(result).not.toBe(true);
@@ -558,21 +593,24 @@ describe('justEnoughJs', () => {
 		const validate = justEnoughJs.nodes.LogicalExpression as NodeValidator;
 
 		it('allows &&', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'LogicalExpression', operator: '&&' }),
 			);
 			expect(result).toBe(true);
 		});
 
 		it('allows ||', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'LogicalExpression', operator: '||' }),
 			);
 			expect(result).toBe(true);
 		});
 
 		it('allows ??', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'LogicalExpression', operator: '??' }),
 			);
 			expect(result).toBe(true);
@@ -583,35 +621,40 @@ describe('justEnoughJs', () => {
 		const validate = justEnoughJs.nodes.UnaryExpression as NodeValidator;
 
 		it('allows typeof', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'UnaryExpression', operator: 'typeof' }),
 			);
 			expect(result).toBe(true);
 		});
 
 		it('allows !', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'UnaryExpression', operator: '!' }),
 			);
 			expect(result).toBe(true);
 		});
 
 		it('allows - (unary minus)', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'UnaryExpression', operator: '-' }),
 			);
 			expect(result).toBe(true);
 		});
 
 		it('allows void (easter egg)', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'UnaryExpression', operator: 'void' }),
 			);
 			expect(result).toBe(true);
 		});
 
 		it('rejects delete', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({ type: 'UnaryExpression', operator: 'delete' }),
 			);
 			expect(result).not.toBe(true);
@@ -622,27 +665,40 @@ describe('justEnoughJs', () => {
 		const validate = justEnoughJs.nodes.Literal as NodeValidator;
 
 		it('allows string literals', () => {
-			const result = callRule(validate,fakeNode({ type: 'Literal', value: 'hello' }));
+			const result = callRule(
+				validate,
+				fakeNode({ type: 'Literal', value: 'hello' }),
+			);
 			expect(result).toBe(true);
 		});
 
 		it('allows number literals', () => {
-			const result = callRule(validate,fakeNode({ type: 'Literal', value: 42 }));
+			const result = callRule(
+				validate,
+				fakeNode({ type: 'Literal', value: 42 }),
+			);
 			expect(result).toBe(true);
 		});
 
 		it('allows boolean literals', () => {
-			const result = callRule(validate,fakeNode({ type: 'Literal', value: true }));
+			const result = callRule(
+				validate,
+				fakeNode({ type: 'Literal', value: true }),
+			);
 			expect(result).toBe(true);
 		});
 
 		it('allows null', () => {
-			const result = callRule(validate,fakeNode({ type: 'Literal', value: null }));
+			const result = callRule(
+				validate,
+				fakeNode({ type: 'Literal', value: null }),
+			);
 			expect(result).toBe(true);
 		});
 
 		it('allows regex literals', () => {
-			const result = callRule(validate,
+			const result = callRule(
+				validate,
 				fakeNode({
 					type: 'Literal',
 					value: /abc/,
@@ -653,7 +709,10 @@ describe('justEnoughJs', () => {
 		});
 
 		it('rejects bigint literals', () => {
-			const result = callRule(validate,fakeNode({ type: 'Literal', bigint: '42' }));
+			const result = callRule(
+				validate,
+				fakeNode({ type: 'Literal', bigint: '42' }),
+			);
 			expect(result).not.toBe(true);
 		});
 	});
