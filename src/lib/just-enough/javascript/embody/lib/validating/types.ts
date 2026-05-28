@@ -31,8 +31,12 @@ type SourcePosition = {
  * Start and end positions of a source range.
  *
  * @remarks Defines the span of source code where a violation was
- * found. Both `start` and `end` are inclusive — for single-token
- * violations (like an operator) they may be identical or nearly so.
+ * found, copied verbatim from acorn's `loc` (with `locations: true`).
+ * Per acorn's convention, `start` is the position of the first
+ * character and `end` is **exclusive** — it points one past the last
+ * character (e.g. the identifier `x` at column 4 has `end.column` 5).
+ * A consumer rendering a half-open `[start, end)` range needs no
+ * adjustment; one wanting an inclusive last position subtracts one.
  */
 type SourceRange = {
 	readonly start: SourcePosition;

@@ -21,9 +21,9 @@ Its canonical shape (owned by
 [`../../embody/lib/validating/types.ts`](../../embody/lib/validating/types.ts)):
 `{ nodeType, message, severity, location, nodePath }`, where `location`
 is a `SourceRange` (`{ start: { line, column }, end: { line, column } }`,
-line 1-based, column 0-based, **both endpoints inclusive**),
-`severity` is always `'rejection'`, and `nodePath` is the offending
-node's JSONPath.
+line 1-based, column 0-based; copied from acorn, so `end` is
+**exclusive** — one past the last character), `severity` is always
+`'rejection'`, and `nodePath` is the offending node's JSONPath.
 
 **LintDiagnostic** — a single editor-shaped diagnostic, consumed by
 [`../../orchestrate/lib/editing/`](../../orchestrate/lib/editing/). Its
@@ -178,11 +178,12 @@ Inherits all conventions from [`../README.md`](../README.md),
   `'rejection'` → CodeMirror's `'error'` internally. The adapter's
   actual work is flattening `location` (`start`/`end` → `line` /
   `column` / `endLine` / `endColumn`); parse-error diagnostics get
-  `severity: 'error'`. `SourceRange.end` is inclusive — the L1
-  adapter increment must confirm whether `LintDiagnostic.endColumn`
-  is inclusive or exclusive (per
-  [`to-cm-diagnostic.ts`](../../orchestrate/lib/editing/to-cm-diagnostic.ts))
-  and adjust by one if needed, rather than assuming.
+  `severity: 'error'`. **No endpoint adjustment.** `SourceRange.end`
+  is acorn-exclusive (one past the last character), and
+  [`to-cm-diagnostic.ts`](../../orchestrate/lib/editing/to-cm-diagnostic.ts)
+  treats `LintDiagnostic.endColumn` as an exclusive offset
+  (`to = lineStart + endColumn`), so the adapter copies `end.line` /
+  `end.column` straight through — both ends are exclusive, they match.
 - **Source `'JEJ'`.** The optional `source` field is set to the
   constant `'JEJ'` so the editor's tooltip can attribute the
   diagnostic to the JEJ language gate rather than (e.g.) a third-party

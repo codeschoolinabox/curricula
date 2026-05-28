@@ -82,11 +82,11 @@ flowchart TD
   range (start + end); a parse failure carries a flat point (line +
   column, no span). The adapter handles them separately — it does not
   assume every finding has a range.
-- **Endpoint convention is pass-through.** A rejection's source range
-  endpoints are inclusive; the emitted `endLine`/`endColumn` carry that
-  inclusive convention unchanged. Any inclusive→exclusive adjustment
-  for CodeMirror is the consumer's responsibility (see Out of scope) —
-  the adapter does not pre-adjust.
+- **Endpoint convention is pass-through, no adjustment.** A rejection's
+  source range `end` is acorn-exclusive (one past the last character),
+  and `to-cm-diagnostic` treats `endColumn` as an exclusive offset
+  (`to = lineStart + endColumn`). Both ends are exclusive, so the
+  adapter copies `end` straight through — no ±1.
 - **Diagnostics drop AST-navigation fields.** A rejection's node type
   and node path are not part of the editor's diagnostic shape; the
   adapter omits them. They remain on the validation result for other
@@ -104,10 +104,9 @@ flowchart TD
   the editor home base's job (`orchestrate/editor/`); this module is a
   pure, peer-independent producer.
 - **The CodeMirror conversion.** Translating the editor diagnostic to a
-  CodeMirror `Diagnostic` (including any inclusive→exclusive endpoint
-  adjustment) is owned by `orchestrate/lib/editing/`'s
-  `to-cm-diagnostic`; this module produces the editor-shaped
-  `LintDiagnostic` only.
+  CodeMirror `Diagnostic` (line/column → absolute char offset, range
+  clamping) is owned by `orchestrate/lib/editing/`'s `to-cm-diagnostic`;
+  this module produces the editor-shaped `LintDiagnostic` only.
 - **Custom language levels.** This feed always validates against the
   Just Enough JavaScript level; per-exercise subsets are not
   configurable here.
