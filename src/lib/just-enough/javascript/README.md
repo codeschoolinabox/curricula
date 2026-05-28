@@ -193,6 +193,7 @@ The folder layout mirrors the conceptual chain:
 | [`embody/`](./embody/)                         | Programmatic embodiment of the NM                 |
 | [`lenses/`](./lenses/)                         | Pedagogical views on the embodied NM              |
 | [`orchestrate/`](./orchestrate/)               | `<StudyLenses>` orchestrator + analysis helpers   |
+| [`lib/`](./lib/)                               | JeJ-aware shared adapters (peer-independent)      |
 | `sandbox-programs/`                            | Test fixtures (may be moved later)                |
 
 (`.planning-handoff/` is a temporary dev artifact — intentionally not documented
