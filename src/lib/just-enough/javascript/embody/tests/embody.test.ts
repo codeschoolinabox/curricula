@@ -312,14 +312,15 @@ describe('embody', () => {
 		});
 
 		it('first violation has shape-valid Violation fields', () => {
-			expect(embody('VALIDATION_FAIL').validation!.violations[0]).toMatchObject({
-				kind: expect.any(String),
-				message: expect.any(String),
-				nodePath: expect.any(String),
-				loc: expect.objectContaining({
-					start: expect.any(Object),
-					end: expect.any(Object),
-				}),
+			expect(embody('VALIDATION_FAIL').validation!.violations[0]).toStrictEqual({
+				nodeType: 'FunctionDeclaration',
+				message: 'canned scenario: JEJ does not allow function declarations',
+				severity: 'rejection',
+				nodePath: '$.body[0]',
+				location: {
+					start: { line: 1, column: 0 },
+					end: { line: 1, column: 1 },
+				},
 			});
 		});
 

@@ -27,6 +27,11 @@
 
 import type { Node as AcornNode } from 'acorn';
 
+// `Violation` is owned by the validating pipeline (it is what produces
+// violations). Re-exported below so `Snippet.validation.violations` and
+// consumers can import it from the embody-level types module.
+import type { Violation } from './lib/validating/types.js';
+
 // ═════════════════════════════════════════════════════════════════════════════
 // 1. SOURCE LOCATION PRIMITIVES
 // ═════════════════════════════════════════════════════════════════════════════
@@ -804,13 +809,10 @@ interface Analysis {
 // 12. VALIDATION
 // ═════════════════════════════════════════════════════════════════════════════
 
-/** A reason the snippet is outside the JEJ subset. */
-interface Violation {
-	readonly kind:     string; // e.g. "FunctionDeclaration", "ArrayExpression"
-	readonly message:  string;
-	readonly nodePath: JSONPath;
-	readonly loc:      SourceLocation;
-}
+// `Violation` is imported from `./lib/validating/types.js` (the
+// validating pipeline owns the canonical shape: nodeType / message /
+// severity / location / nodePath). `Validation.violations` below uses
+// it; the PUBLIC EXPORTS block re-exports it.
 
 /**
  * Output of the validate gate. `isJeJ` is the gate criterion.

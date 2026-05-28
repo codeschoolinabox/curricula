@@ -523,10 +523,11 @@ function makeApexEndReport(outcome: EndReport['outcome']): EndReport {
  */
 function makeStubViolation(): Violation {
 	return {
-		kind: 'FunctionDeclaration',
+		nodeType: 'FunctionDeclaration',
 		message: 'canned scenario: JEJ does not allow function declarations',
+		severity: 'rejection',
 		nodePath: '$.body[0]',
-		loc: {
+		location: {
 			start: { line: 1, column: 0 },
 			end: { line: 1, column: 1 },
 		},
