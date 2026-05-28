@@ -153,10 +153,11 @@ hover via `event.target.closest( '[data-flowchart-node]')`.
   `<pre><code>` when `false`. No editing — the code is read-only per the lenses
   peer's single-writer invariant.
 - **flowchart view** — generates an SVG flowchart from `embodiment.source.code`
-  using `js2flowchart`'s `convertCodeToSvg` (async; `maxDepth: 50`). While
-  generation is in flight, an inline loading state renders. On parse failure, an
-  inline error state renders (NOT a retry — the same source will fail the same
-  way; the flowchart-toggle is the way back to code-view).
+  using `js2flowchart`'s `convertCodeToSvg`. The call is synchronous; the lens
+  wraps it in a Promise so the wrapper can render a loading state while
+  generation is in flight. On parse failure, an inline error state renders (NOT
+  a retry — the same source will fail the same way; the flowchart-toggle is the
+  way back to code-view).
 - The view toggle is a single button on the toolbar. The button is **disabled**
   when `embodiment.status.parsed === false` so a learner cannot toggle into a
   guaranteed-failing flowchart-view in the first place. The annotation overlay
