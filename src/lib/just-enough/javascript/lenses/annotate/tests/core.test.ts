@@ -158,4 +158,33 @@ describe('annotate core', () => {
 			expect(core.applicableTo(parseFail)).toBe(true);
 		});
 	});
+
+	describe('recommend (WS2-deferred placeholder — always empty)', () => {
+		it('returns an empty array for the apex snippet', () => {
+			expect(core.recommend(makeSnippet())).toEqual([]);
+		});
+
+		it('returns an empty array for a parse-fail snippet', () => {
+			const parseFail = makeSnippet({
+				status: {
+					tokenized: true,
+					parsed: false,
+					validated: false,
+					created: false,
+				},
+				validation: null,
+				errors: {
+					phase: 'parse:ast',
+					kind: 'SyntaxError',
+					message: 'unexpected token',
+					loc: null,
+				},
+			});
+			expect(core.recommend(parseFail)).toEqual([]);
+		});
+
+		it('returned array is frozen', () => {
+			expect(Object.isFrozen(core.recommend(makeSnippet()))).toBe(true);
+		});
+	});
 });
