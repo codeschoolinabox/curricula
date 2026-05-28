@@ -36,6 +36,11 @@ Use them consistently.
 - **ChildWithPath** — a `{ child, segment }` pair produced by
   `getChildNodesWithPath`. `segment` is one JSONPath step; a walker joins
   it onto a parent path with `'.'`.
+- **buildNodePathMap** — builds a `Map<Node, string>` from every node in
+  an AST to its full Program-rooted JSONPath, in one traversal. The
+  validation walkers look up a node's path here (instead of threading a
+  path argument through their recursion) when stamping
+  `Violation.nodePath`.
 - **ParseError** — the low-level shape produced by `parseProgram` on
   failure: `{ message, location: { line, column } }`. Frozen.
 - **ParseResult** — the public value returned by `parse(code)`. A
@@ -66,6 +71,7 @@ Use them consistently.
 | `parse-program.ts`  | Acorn wrapper: `parseProgram(source, sourceType?)`                 |
 | `get-child-nodes.ts`| Generic ESTree child walker: `getChildNodes(node)`                 |
 | `get-child-nodes-with-path.ts` | Path-tracking child walker: `getChildNodesWithPath(node)` |
+| `build-node-path-map.ts` | Node-to-JSONPath map: `buildNodePathMap(root)`                |
 | `parse.ts` (Phase 1a) | Public entry: `parse(code): ParseResult`                         |
 | `tests/`            | Unit tests for each source file                                    |
 
