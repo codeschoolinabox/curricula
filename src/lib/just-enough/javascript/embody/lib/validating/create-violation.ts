@@ -19,6 +19,12 @@ import type { SourceRange, Violation } from './types.js';
  *   instead (e.g. `"'var' declarations are not allowed — use 'let'"`).
  * @param location - Source range where the violation was found.
  *   Copied and frozen — the caller's object is not retained.
+ * @param nodePath - JSONPath rooted at the Program node identifying
+ *   the offending node (e.g. `'$.body[0].declarations[0]'`). Required:
+ *   the collecting walkers look it up from `buildNodePathMap` and pass
+ *   it here (validators receive it as their second argument and
+ *   forward it). No default — a missing path is a programming error,
+ *   not a degraded-but-valid state.
  * @param severity - Always `'rejection'`. All violations block execution.
  * @returns A deeply frozen {@link Violation}.
  */
@@ -26,6 +32,7 @@ function createViolation(
 	nodeType: string,
 	message: string,
 	location: SourceRange,
+	nodePath: string,
 	severity: 'rejection' = 'rejection',
 ): Violation {
 	return Object.freeze({
@@ -36,6 +43,7 @@ function createViolation(
 			start: Object.freeze({ ...location.start }),
 			end: Object.freeze({ ...location.end }),
 		}),
+		nodePath,
 	});
 }
 

@@ -1,11 +1,11 @@
 import type { Node } from 'acorn';
 
+import buildNodePathMap from '../parse-old/build-node-path-map.js';
+import getChildNodes from '../parse-old/get-child-nodes.js';
 import buildScope from '../scope/build-scope.js';
 import type { ScopeInfo } from '../scope/types.js';
 
 import createViolation from './create-violation.js';
-import getChildNodes from '../parse-old/get-child-nodes.js';
-
 import type { Violation } from './types.js';
 
 /** Known JavaScript built-in globals. Identifiers in this set that are NOT
@@ -105,9 +105,10 @@ function checkUndeclaredGlobals(
 	allowedGlobals: ReadonlySet<string>,
 ): readonly Violation[] {
 	const analysis = buildScope(ast);
+	const nodePathMap = buildNodePathMap(ast);
 	const violations: Violation[] = [];
 
-	walkForGlobals(ast, analysis.root, allowedGlobals, violations, false);
+	walkForGlobals(ast, analysis.root, allowedGlobals, violations, false, nodePathMap);
 
 	return Object.freeze(violations);
 }
@@ -126,6 +127,12 @@ function checkUndeclaredGlobals(
  * `with` statement bodies. `with` introduces dynamic scope —
  * static analysis can't know what properties the `with` object
  * injects, so we suppress checks inside the body.
+ *
+ * `nodePathMap` is forwarded unchanged through the recursion; the
+ * Identifier case looks up the offending node's `Violation.nodePath`
+ * from it. The map (a constant) is threaded rather than a computed
+ * path so this walk's scope-aware, non-uniform recursion stays
+ * unchanged apart from the single lookup.
  */
 function walkForGlobals(
 	node: Node,
@@ -133,13 +140,14 @@ function walkForGlobals(
 	allowedGlobals: ReadonlySet<string>,
 	violations: Violation[],
 	insideWith: boolean,
+	nodePathMap: ReadonlyMap<Node, string>,
 ): void {
 	const record = node as unknown as Record<string, unknown>;
 
 	switch (node.type) {
 		case 'Program': {
 			for (const child of getChildNodes(node)) {
-				walkForGlobals(child, scope, allowedGlobals, violations, insideWith);
+				walkForGlobals(child, scope, allowedGlobals, violations, insideWith, nodePathMap);
 			}
 			break;
 		}
@@ -153,6 +161,7 @@ function walkForGlobals(
 					allowedGlobals,
 					violations,
 					insideWith,
+					nodePathMap,
 				);
 			}
 			break;
@@ -161,11 +170,11 @@ function walkForGlobals(
 		case 'WithStatement': {
 			// Walk the object expression in the current scope (it's a read)
 			const object = record.object as Node;
-			walkForGlobals(object, scope, allowedGlobals, violations, insideWith);
+			walkForGlobals(object, scope, allowedGlobals, violations, insideWith, nodePathMap);
 
 			// Walk the body with insideWith = true
 			const body = record.body as Node;
-			walkForGlobals(body, scope, allowedGlobals, violations, true);
+			walkForGlobals(body, scope, allowedGlobals, violations, true, nodePathMap);
 			break;
 		}
 
@@ -174,7 +183,7 @@ function walkForGlobals(
 
 			// Walk the right-hand side (iterable) in the PARENT scope
 			const right = record.right as Node;
-			walkForGlobals(right, scope, allowedGlobals, violations, insideWith);
+			walkForGlobals(right, scope, allowedGlobals, violations, insideWith, nodePathMap);
 
 			// Walk the body in the for-of scope
 			const body = record.body as Node;
@@ -187,6 +196,7 @@ function walkForGlobals(
 						allowedGlobals,
 						violations,
 						insideWith,
+						nodePathMap,
 					);
 				}
 			} else {
@@ -196,6 +206,7 @@ function walkForGlobals(
 					allowedGlobals,
 					violations,
 					insideWith,
+					nodePathMap,
 				);
 			}
 			break;
@@ -204,7 +215,7 @@ function walkForGlobals(
 		case 'VariableDeclaration': {
 			// Only walk init expressions — ids are declarations, not references.
 			// Scope tracking is handled by buildScope.
-			const declarators = record.declarations as Node[];
+			const declarators = record.declarations as readonly Node[];
 			for (const declarator of declarators) {
 				const declRecord = declarator as unknown as Record<
 					string,
@@ -218,6 +229,7 @@ function walkForGlobals(
 						allowedGlobals,
 						violations,
 						insideWith,
+						nodePathMap,
 					);
 				}
 			}
@@ -227,7 +239,7 @@ function walkForGlobals(
 		case 'MemberExpression': {
 			// Walk the object — it's a reference
 			const object = record.object as Node;
-			walkForGlobals(object, scope, allowedGlobals, violations, insideWith);
+			walkForGlobals(object, scope, allowedGlobals, violations, insideWith, nodePathMap);
 
 			// Only walk the property if computed (bracket access)
 			const computed = record.computed as boolean;
@@ -239,6 +251,7 @@ function walkForGlobals(
 					allowedGlobals,
 					violations,
 					insideWith,
+					nodePathMap,
 				);
 			}
 			// Non-computed property names are NOT identifier references
@@ -252,11 +265,11 @@ function walkForGlobals(
 			const computed = record.computed as boolean;
 			if (computed) {
 				const key = record.key as Node;
-				walkForGlobals(key, scope, allowedGlobals, violations, insideWith);
+				walkForGlobals(key, scope, allowedGlobals, violations, insideWith, nodePathMap);
 			}
 			// Always walk the value — it's an expression
 			const value = record.value as Node;
-			walkForGlobals(value, scope, allowedGlobals, violations, insideWith);
+			walkForGlobals(value, scope, allowedGlobals, violations, insideWith, nodePathMap);
 			break;
 		}
 
@@ -279,13 +292,18 @@ function walkForGlobals(
 				break;
 			}
 
-			// Known JS global NOT in allowedGlobals → rejection
+			// Known JS global NOT in allowedGlobals → rejection.
+			// The offending identifier is reachable from the ast the map
+			// was built from, so the path lookup is always present
+			// (cf. `node.loc!` in extractLocation).
 			if (KNOWN_JS_GLOBALS.has(name)) {
+				const nodePath = nodePathMap.get(node)!;
 				violations.push(
 					createViolation(
 						'Identifier',
 						`'${name}' is not available at this language level`,
 						extractLocation(node),
+						nodePath,
 					),
 				);
 			}
@@ -302,6 +320,7 @@ function walkForGlobals(
 					allowedGlobals,
 					violations,
 					insideWith,
+					nodePathMap,
 				);
 			}
 			break;
@@ -313,7 +332,7 @@ function walkForGlobals(
  * Extracts a source range from an acorn node's `loc` property.
  */
 function extractLocation(node: Node) {
-	const loc = node.loc;
+	const {loc} = node;
 	if (loc) {
 		return {
 			start: { line: loc.start.line, column: loc.start.column },

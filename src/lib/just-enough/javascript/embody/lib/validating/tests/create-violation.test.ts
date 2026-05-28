@@ -9,6 +9,7 @@ describe('createViolation', () => {
 				'FunctionDeclaration',
 				'FunctionDeclaration is not allowed',
 				{ start: { line: 1, column: 0 }, end: { line: 1, column: 20 } },
+				'$.body[0]',
 			);
 			expect(violation.nodeType).toBe('FunctionDeclaration');
 		});
@@ -18,6 +19,7 @@ describe('createViolation', () => {
 				'FunctionDeclaration',
 				'FunctionDeclaration is not allowed',
 				{ start: { line: 1, column: 0 }, end: { line: 1, column: 20 } },
+				'$.body[0]',
 			);
 			expect(violation.message).toBe('FunctionDeclaration is not allowed');
 		});
@@ -31,6 +33,7 @@ describe('createViolation', () => {
 				'ForStatement',
 				'ForStatement is not allowed',
 				location,
+				'$.body[0]',
 			);
 			expect(violation.location).toStrictEqual(location);
 		});
@@ -42,6 +45,7 @@ describe('createViolation', () => {
 				'FunctionDeclaration',
 				'FunctionDeclaration is not allowed',
 				{ start: { line: 1, column: 0 }, end: { line: 1, column: 20 } },
+				'$.body[0]',
 			);
 			expect(violation.severity).toBe('rejection');
 		});
@@ -51,9 +55,22 @@ describe('createViolation', () => {
 				'BinaryExpression',
 				"Binary operator '==' is not allowed",
 				{ start: { line: 1, column: 0 }, end: { line: 1, column: 10 } },
+				'$.body[0].declarations[0].init',
 				'rejection',
 			);
 			expect(violation.severity).toBe('rejection');
+		});
+	});
+
+	describe('nodePath', () => {
+		it('preserves the given path', () => {
+			const violation = createViolation(
+				'VariableDeclaration',
+				"'var' declarations are not allowed",
+				{ start: { line: 1, column: 0 }, end: { line: 1, column: 10 } },
+				'$.body[0].declarations[0]',
+			);
+			expect(violation.nodePath).toBe('$.body[0].declarations[0]');
 		});
 	});
 
@@ -63,6 +80,7 @@ describe('createViolation', () => {
 				'SwitchStatement',
 				'SwitchStatement is not allowed',
 				{ start: { line: 1, column: 0 }, end: { line: 1, column: 10 } },
+				'$.body[0]',
 			);
 			expect(Object.isFrozen(violation)).toBe(true);
 		});
@@ -72,6 +90,7 @@ describe('createViolation', () => {
 				'SwitchStatement',
 				'SwitchStatement is not allowed',
 				{ start: { line: 1, column: 0 }, end: { line: 1, column: 10 } },
+				'$.body[0]',
 			);
 			expect(Object.isFrozen(violation.location)).toBe(true);
 		});
@@ -81,6 +100,7 @@ describe('createViolation', () => {
 				'SwitchStatement',
 				'SwitchStatement is not allowed',
 				{ start: { line: 1, column: 0 }, end: { line: 1, column: 10 } },
+				'$.body[0]',
 			);
 			expect(Object.isFrozen(violation.location.start)).toBe(true);
 			expect(Object.isFrozen(violation.location.end)).toBe(true);

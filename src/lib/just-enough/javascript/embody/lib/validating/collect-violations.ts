@@ -1,8 +1,9 @@
 import type { Node } from 'acorn';
 
-import createViolation from './create-violation.js';
+import buildNodePathMap from '../parse-old/build-node-path-map.js';
 import getChildNodes from '../parse-old/get-child-nodes.js';
 
+import createViolation from './create-violation.js';
 import type { NodeRule, Violation } from './types.js';
 
 /**
@@ -36,7 +37,8 @@ function collectViolations(
 	nodes: Readonly<Record<string, NodeRule>>,
 ): readonly Violation[] {
 	const violations: Violation[] = [];
-	walk(ast, nodes, violations);
+	const nodePathMap = buildNodePathMap(ast);
+	walk(ast, nodes, violations, nodePathMap);
 	return Object.freeze(violations);
 }
 
@@ -47,12 +49,21 @@ function collectViolations(
  * @remarks Mutates the `violations` array for performance — avoids
  * allocating intermediate arrays at each recursion level. The caller
  * ({@link collectViolations}) freezes the final array.
+ *
+ * `nodePathMap` is forwarded unchanged through the recursion; each
+ * node's `Violation.nodePath` is looked up from it. Threading the map
+ * (a constant) rather than a computed path keeps the walk identical to
+ * its pre-nodePath shape apart from the lookup.
  */
 function walk(
 	node: Node,
 	nodes: Readonly<Record<string, NodeRule>>,
 	violations: Violation[],
+	nodePathMap: ReadonlyMap<Node, string>,
 ): void {
+	// every walked node is reachable from the ast the map was built from,
+	// so the lookup is always present (cf. `node.loc!` in extractLocation)
+	const nodePath = nodePathMap.get(node)!;
 	const rule = nodes[node.type];
 
 	if (rule === undefined) {
@@ -62,6 +73,7 @@ function walk(
 				node.type,
 				`'${node.type}' is not allowed at this language level`,
 				extractLocation(node),
+				nodePath,
 			),
 		);
 	} else if (rule === false) {
@@ -71,11 +83,12 @@ function walk(
 				node.type,
 				`'${node.type}' is explicitly forbidden at this language level`,
 				extractLocation(node),
+				nodePath,
 			),
 		);
 	} else if (rule !== true) {
-		// NodeValidator function — call it
-		const result = rule(node);
+		// NodeValidator function — call it with the node's path
+		const result = rule(node, nodePath);
 		if (result !== true) {
 			violations.push(result);
 		}
@@ -88,7 +101,7 @@ function walk(
 
 	// always recurse into children to catch nested violations
 	for (const child of getChildNodes(node)) {
-		walk(child, nodes, violations);
+		walk(child, nodes, violations, nodePathMap);
 	}
 }
 
@@ -100,7 +113,7 @@ function walk(
  * but guards against unexpected edge cases.
  */
 function extractLocation(node: Node) {
-	const loc = node.loc;
+	const {loc} = node;
 	if (loc) {
 		return {
 			start: { line: loc.start.line, column: loc.start.column },

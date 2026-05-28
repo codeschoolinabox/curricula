@@ -5,7 +5,7 @@ AST analysis. Ships with a pre-built "Just Enough JavaScript" level for the
 Welcome to Programming curriculum.
 
 Consumes the parse primitives (`parseProgram`, `getChildNodes`) from
-[`../parse/`](../parse/README.md). Provides the `validate(code)` public entry
+[`../parse-old/`](../parse-old/README.md). Provides the `validate(code)` public entry
 (see Structure below).
 
 ## Purpose
@@ -18,7 +18,7 @@ _which_ subset to use — that belongs to the curriculum or tool that consumes i
 
 ```text
 source string
-  → parseProgram(source, 'module')         — from ../parse/parse-program.ts
+  → parseProgram(source, 'module')         — from ../parse-old/parse-program.ts
   → collectViolations(ast, nodes)          — recursive walk, allowlist lookup
   → checkUndeclaredGlobals(ast, config)    — scope analysis
   → ValidationReport { isValid, violations, source, levelName }
@@ -42,7 +42,7 @@ The `LanguageLevel` object controls everything:
 | ----------------------------- | ------------------------------------------------------------- |
 | `types.ts`                    | Domain types: Violation, ValidationReport, BaseResult, etc.   |
 | `validate-program.ts`         | Building block: `validateProgram(source, level)` → ValidationReport |
-| `validate.ts` (Phase 1a)      | Public entry: `validate(code)` → frozen `BaseResult`          |
+| `validate.ts`                 | Public entry: `validate(code)` → frozen `BaseResult`          |
 | `collect-violations.ts`       | Recursive AST walk + allowlist checking                       |
 | `create-violation.ts`         | Violation factory (with severity)                             |
 | `just-enough-js.ts`           | Pre-built "Just Enough JS" LanguageLevel config               |
@@ -51,13 +51,13 @@ The `LanguageLevel` object controls everything:
 | `tests/`                      | Unit tests                                                    |
 
 Files moved out: `parse-program.ts` and `get-child-nodes.ts` now live in
-[`../parse/`](../parse/README.md). `ParseError` type also moved there.
+[`../parse-old/`](../parse-old/README.md). `ParseError` type also moved there.
 
 ## Glossary additions
 
 These terms join the existing `Violation` / `ValidationReport` /
 `LanguageLevel` vocabulary; they are produced by the public
-`validate(code)` entry (Phase 1a).
+`validate(code)` entry.
 
 - **BaseResult** — frozen `{ ok, error?, rejections? }` returned by
   `validate(code)`. The `ok` boolean is the primary success signal;
@@ -80,6 +80,17 @@ These terms join the existing `Violation` / `ValidationReport` /
 - **Rejection** — a `Violation` with `severity: 'rejection'`. All
   violations are rejections in this module (no informational
   warnings).
+- **nodePath** — a JSONPath string rooted at the Program node
+  (e.g. `'$.body[0].declarations[0]'`) carried on every `Violation`,
+  identifying the offending AST node. Lets consumers navigate from
+  a violation back to its node for structured tooling (lens
+  highlighting, editor diagnostics). Both collecting walkers
+  (`collect-violations`, `check-undeclared-globals`) build a node →
+  path map once via `buildNodePathMap` (in `../parse-old/`) and look
+  up each offending node's path from it; `NodeValidator`s receive the
+  path as their second argument and forward it to `createViolation`
+  (a required argument — no default). Matches the `nodePath`
+  convention used by the tracer and `embody/types.ts`.
 
 ### When to use `BaseResult` vs `ValidationReport`
 
@@ -93,7 +104,7 @@ consumers:
 
 ## Public API
 
-### `validate(code)` (planned — Phase 1a)
+### `validate(code)`
 
 ```ts
 function validate(code: string): BaseResult;
@@ -108,7 +119,7 @@ Public entry. Returns a frozen `BaseResult`. Never throws.
 - `{ ok: false, rejections: [...] }` — code parses but contains
   language-level violations (e.g. `var`, `for-in`, etc.).
 
-Internally composes `parseProgram` (`../parse/`) and
+Internally composes `parseProgram` (`../parse-old/`) and
 `collectViolations` / `checkUndeclaredGlobals` (this module). The
 `with`-statement script-mode fallback in `validate-program.ts`
 remains; `validate(code)` inherits it.
@@ -253,6 +264,6 @@ Synchronous (recast format check is sync).
 ## Navigation
 
 - [DOCS.md](./DOCS.md) — design decisions and rationale
-- [../parse/README.md](../parse/README.md) — parse primitives this module
+- [../parse-old/README.md](../parse-old/README.md) — parse primitives this module
   consumes
 - [../reference.md](../reference.md) — learner-facing language cheat sheet

@@ -17,7 +17,7 @@ invisible.
 
 ```text
 source string
-  → parseProgram(source, 'module')                              — from ../parse/parse-program.ts
+  → parseProgram(source, 'module')                              — from ../parse-old/parse-program.ts
   → AST  ─→  collectViolations(ast, nodes)         (independent pass)
         └─→  checkUndeclaredGlobals(ast, config)  (independent pass)
   → concat violations
@@ -30,17 +30,31 @@ single frozen `violations` array; neither pass observes the other's
 results. (Earlier drafts of this doc described a linear chain — that
 was wrong; the source has always run both passes independently.)
 
+Both passes also assign **`Violation.nodePath`** — the JSONPath
+(rooted at the Program node, e.g. `'$.body[0].declarations[0]'`)
+identifying the offending node. Each pass builds a node → path map
+once via `buildNodePathMap` (`../parse-old/`) and looks up an offending
+node's path from it by reference, rather than threading a computed path
+through the (scope-aware, non-uniform) recursion. The path is a
+**required** argument to `createViolation`: the walker passes it for
+self-constructed violations (missing / forbidden node types), and
+`NodeValidator`s receive it as their second argument
+(`(node, nodePath) => true | Violation`) and forward it. There is no
+default — a violation without a path would be a programming error, and
+the map is built from the same AST the walk traverses, so every
+offending node's path is present.
+
 `parseProgram` and the AST traversal helper `getChildNodes` live in
-[`../parse/`](../parse/README.md); this module imports them as building
+[`../parse-old/`](../parse-old/README.md); this module imports them as building
 blocks. The `with`-statement script-mode fallback is implemented twice —
 once in `validate-program.ts` (for the validation pipeline) and once in
-`../parse/parse.ts` (for the public `parse(code)` API).
+`../parse-old/parse.ts` (for the public `parse(code)` API).
 
 All violations are rejections — there are no informational warnings.
 
 ### Public entry: result shaping
 
-`validate(code)` (Phase 1a) is the public entry. It wraps the
+`validate(code)` is the public entry. It wraps the
 pipeline above with result-shape transformation:
 
 ```mermaid
@@ -198,9 +212,9 @@ assignment is not allowed."
 ## Module boundaries
 
 - `validating/` imports parse primitives (`parseProgram`, `getChildNodes`,
-  `ParseError`) from `../parse/`. No other cross-module imports.
+  `ParseError`) from `../parse-old/`. No other cross-module imports.
 - The ESLint `boundaries` plugin enforces a DAG between modules
-- No acorn-walk dependency — `getChildNodes` (in `../parse/`) is a simple
+- No acorn-walk dependency — `getChildNodes` (in `../parse-old/`) is a simple
   recursive walker
 
 ### File roles

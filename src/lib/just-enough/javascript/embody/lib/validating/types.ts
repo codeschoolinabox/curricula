@@ -45,7 +45,8 @@ type SourceRange = {
  * A single language level violation found in the source.
  *
  * @remarks Contains enough information for a consumer to display
- * a meaningful message with source location context.
+ * a meaningful message with source location context AND to locate
+ * the offending node in the AST.
  *
  * - `nodeType` is the ESTree node type string (e.g.
  *   `'VariableDeclaration'`, `'BinaryExpression'`)
@@ -53,6 +54,13 @@ type SourceRange = {
  *   the disallowed construct and suggests the allowed alternative
  * - `severity` is always `'rejection'` — all violations block execution
  * - `location` gives the exact source span for highlighting
+ * - `nodePath` is a JSONPath rooted at the Program node identifying
+ *   the offending node (e.g. `'$.body[0].declarations[0]'`). The
+ *   collecting walker assigns it; consumers that need to navigate
+ *   the AST to the violation (lens highlighting, structured
+ *   tooling) read it directly. Matches the `nodePath` convention
+ *   used elsewhere in the package (the tracer's event identity,
+ *   `embody/types.ts` § Source location primitives).
  *
  * All fields are readonly. Violation objects are always frozen.
  */
@@ -61,6 +69,7 @@ type Violation = {
 	readonly message: string;
 	readonly severity: 'rejection';
 	readonly location: SourceRange;
+	readonly nodePath: string;
 };
 
 // ─── Validation report ───────────────────────────────────────
@@ -163,15 +172,21 @@ type BaseResult<E = ParseResultError | FormattingResultError> = {
  * Validators that need specific properties (like `kind`,
  * `operator`, or `computed`) should narrow via property checks.
  *
+ * The `nodePath` parameter is the offending node's Program-rooted
+ * JSONPath, supplied by the collecting walker (looked up from
+ * `buildNodePathMap`). Validators forward it to `createViolation`
+ * so every `Violation` carries its position — validators check
+ * legality, the walker knows position.
+ *
  * @example
  * ```ts
- * const validateAssignment: NodeValidator = (node) => {
+ * const validateAssignment: NodeValidator = (node, nodePath) => {
  *   const op = (node as any).operator;
- *   return op === '=' ? true : createViolation(...);
+ *   return op === '=' ? true : createViolation(..., nodePath);
  * };
  * ```
  */
-type NodeValidator = (node: Node) => true | Violation;
+type NodeValidator = (node: Node, nodePath: string) => true | Violation;
 
 /**
  * A rule for a single node type in a language level.

@@ -5,7 +5,7 @@ import createViolation from './create-violation.js';
 import type { LanguageLevel, NodeRule, Violation } from './types.js';
 
 // -- constraint validators --
-// Each validator is a NodeValidator: (node: Node) => true | Violation.
+// Each validator is a NodeValidator: (node: Node, nodePath: string) => true | Violation.
 // They inspect node-specific properties (kind, operator, etc.) that
 // acorn's minimal Node type doesn't expose, so we cast through
 // Record<string, unknown> to access them safely.
@@ -18,7 +18,7 @@ import type { LanguageLevel, NodeRule, Violation } from './types.js';
  * can explore the expressiveness and readability trade-offs of declaring
  * multiple variables in a single statement.
  */
-function validateVariableDeclaration(node: Node): true | Violation {
+function validateVariableDeclaration(node: Node, nodePath: string): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	const kind = record.kind as string;
 
@@ -27,6 +27,7 @@ function validateVariableDeclaration(node: Node): true | Violation {
 			'VariableDeclaration',
 			`'${kind}' declarations are not allowed — use 'let' or 'const'`,
 			extractLocation(node),
+			nodePath,
 		);
 	}
 
@@ -74,7 +75,7 @@ const ALLOWED_ASSIGNMENT_OPERATORS = new Set([
  *    case. This prevents learners from accidentally overwriting
  *    built-in methods (e.g. `console.log = 5`).
  */
-function validateAssignmentExpression(node: Node): true | Violation {
+function validateAssignmentExpression(node: Node, nodePath: string): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	const operator = record.operator as string;
 	const left = record.left as { type: string };
@@ -84,6 +85,7 @@ function validateAssignmentExpression(node: Node): true | Violation {
 			'AssignmentExpression',
 			`Assignment operator '${operator}' is not allowed`,
 			extractLocation(node),
+			nodePath,
 		);
 	}
 
@@ -96,6 +98,7 @@ function validateAssignmentExpression(node: Node): true | Violation {
 			'AssignmentExpression',
 			'You can only assign to variables — property assignment is not allowed',
 			extractLocation(node),
+			nodePath,
 		);
 	}
 
@@ -109,7 +112,7 @@ function validateAssignmentExpression(node: Node): true | Violation {
  * forms are allowed. The `prefix` boolean on the node distinguishes
  * them but is not constrained — any combination is valid JeJ.
  */
-function validateUpdateExpression(node: Node): true | Violation {
+function validateUpdateExpression(node: Node, nodePath: string): true | Violation {
 	const operator = (node as unknown as Record<string, unknown>)
 		.operator as string;
 	if (operator === '++' || operator === '--') return true;
@@ -117,6 +120,7 @@ function validateUpdateExpression(node: Node): true | Violation {
 		'UpdateExpression',
 		`Update operator '${operator}' is not allowed`,
 		extractLocation(node),
+		nodePath,
 	);
 }
 
@@ -156,7 +160,7 @@ const ALLOWED_BINARY_OPERATORS = new Set([
  * {@link ALLOWED_BINARY_OPERATORS}. The violation message includes
  * the rejected operator so learners know exactly what's wrong.
  */
-function validateBinaryExpression(node: Node): true | Violation {
+function validateBinaryExpression(node: Node, nodePath: string): true | Violation {
 	const operator = (node as unknown as Record<string, unknown>)
 		.operator as string;
 	if (ALLOWED_BINARY_OPERATORS.has(operator)) return true;
@@ -164,6 +168,7 @@ function validateBinaryExpression(node: Node): true | Violation {
 		'BinaryExpression',
 		`Binary operator '${operator}' is not allowed`,
 		extractLocation(node),
+		nodePath,
 	);
 }
 
@@ -181,7 +186,7 @@ const ALLOWED_LOGICAL_OPERATORS = new Set(['&&', '||', '??']);
  *
  * @remarks Checks against {@link ALLOWED_LOGICAL_OPERATORS}.
  */
-function validateLogicalExpression(node: Node): true | Violation {
+function validateLogicalExpression(node: Node, nodePath: string): true | Violation {
 	const operator = (node as unknown as Record<string, unknown>)
 		.operator as string;
 	if (ALLOWED_LOGICAL_OPERATORS.has(operator)) return true;
@@ -189,6 +194,7 @@ function validateLogicalExpression(node: Node): true | Violation {
 		'LogicalExpression',
 		`Logical operator '${operator}' is not allowed`,
 		extractLocation(node),
+		nodePath,
 	);
 }
 
@@ -208,7 +214,7 @@ const ALLOWED_UNARY_OPERATORS = new Set(['typeof', '!', '-', '~', 'void']);
  *
  * @remarks Checks against {@link ALLOWED_UNARY_OPERATORS}.
  */
-function validateUnaryExpression(node: Node): true | Violation {
+function validateUnaryExpression(node: Node, nodePath: string): true | Violation {
 	const operator = (node as unknown as Record<string, unknown>)
 		.operator as string;
 	if (ALLOWED_UNARY_OPERATORS.has(operator)) return true;
@@ -216,6 +222,7 @@ function validateUnaryExpression(node: Node): true | Violation {
 		'UnaryExpression',
 		`Unary operator '${operator}' is not allowed`,
 		extractLocation(node),
+		nodePath,
 	);
 }
 
@@ -229,13 +236,14 @@ function validateUnaryExpression(node: Node): true | Violation {
  * outside JeJ's scope. Regular string, number, boolean, null, and
  * undefined literals all pass.
  */
-function validateLiteral(node: Node): true | Violation {
+function validateLiteral(node: Node, nodePath: string): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	if (record.bigint !== undefined) {
 		return createViolation(
 			'Literal',
 			'BigInt literals are not allowed',
 			extractLocation(node),
+			nodePath,
 		);
 	}
 	return true;
@@ -251,7 +259,7 @@ function validateLiteral(node: Node): true | Violation {
  * `BlockStatement` (else with braces), or an `IfStatement`
  * (else-if chain).
  */
-function validateIfStatement(node: Node): true | Violation {
+function validateIfStatement(node: Node, nodePath: string): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	const consequent = record.consequent as { type: string };
 	const alternate = record.alternate as { type: string } | null;
@@ -261,6 +269,7 @@ function validateIfStatement(node: Node): true | Violation {
 			'IfStatement',
 			'if/else bodies must use curly braces `{}`',
 			extractLocation(node),
+			nodePath,
 		);
 	}
 
@@ -273,6 +282,7 @@ function validateIfStatement(node: Node): true | Violation {
 			'IfStatement',
 			'if/else bodies must use curly braces `{}`',
 			extractLocation(node),
+			nodePath,
 		);
 	}
 
@@ -285,7 +295,7 @@ function validateIfStatement(node: Node): true | Violation {
  * @remarks Same reasoning as {@link validateIfStatement} — braceless
  * loops are error-prone for beginners.
  */
-function validateWhileStatement(node: Node): true | Violation {
+function validateWhileStatement(node: Node, nodePath: string): true | Violation {
 	const body = (node as unknown as Record<string, unknown>).body as {
 		type: string;
 	};
@@ -295,6 +305,7 @@ function validateWhileStatement(node: Node): true | Violation {
 			'WhileStatement',
 			'while body must use curly braces `{}`',
 			extractLocation(node),
+			nodePath,
 		);
 	}
 
@@ -308,7 +319,7 @@ function validateWhileStatement(node: Node): true | Violation {
  * if/while). Both `let` and `const` are accepted for the iteration
  * variable head.
  */
-function validateForOfStatement(node: Node): true | Violation {
+function validateForOfStatement(node: Node, nodePath: string): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	const body = record.body as { type: string };
 
@@ -317,6 +328,7 @@ function validateForOfStatement(node: Node): true | Violation {
 			'ForOfStatement',
 			'for-of body must use curly braces `{}`',
 			extractLocation(node),
+			nodePath,
 		);
 	}
 
@@ -326,7 +338,7 @@ function validateForOfStatement(node: Node): true | Violation {
 /**
  * Validates a do-while statement: block body required.
  */
-function validateDoWhileStatement(node: Node): true | Violation {
+function validateDoWhileStatement(node: Node, nodePath: string): true | Violation {
 	const body = (node as unknown as Record<string, unknown>).body as {
 		type: string;
 	};
@@ -336,6 +348,7 @@ function validateDoWhileStatement(node: Node): true | Violation {
 			'DoWhileStatement',
 			'do-while body must use curly braces `{}`',
 			extractLocation(node),
+			nodePath,
 		);
 	}
 
@@ -345,7 +358,7 @@ function validateDoWhileStatement(node: Node): true | Violation {
 /**
  * Validates a for statement: block body required.
  */
-function validateForStatement(node: Node): true | Violation {
+function validateForStatement(node: Node, nodePath: string): true | Violation {
 	const body = (node as unknown as Record<string, unknown>).body as {
 		type: string;
 	};
@@ -355,6 +368,7 @@ function validateForStatement(node: Node): true | Violation {
 			'ForStatement',
 			'for body must use curly braces `{}`',
 			extractLocation(node),
+			nodePath,
 		);
 	}
 
@@ -374,8 +388,8 @@ function validateForStatement(node: Node): true | Violation {
  */
 function createMemberValidator(
 	allowedNames: ReadonlySet<string>,
-): (node: Node) => true | Violation {
-	return function validateMemberExpression(node: Node): true | Violation {
+): (node: Node, nodePath: string) => true | Violation {
+	return function validateMemberExpression(node: Node, nodePath: string): true | Violation {
 		const record = node as unknown as Record<string, unknown>;
 		const computed = record.computed as boolean;
 
@@ -388,6 +402,7 @@ function createMemberValidator(
 			'MemberExpression',
 			`Property '.${property.name}' is not allowed at this language level`,
 			extractLocation(node),
+			nodePath,
 		);
 	};
 }
@@ -402,7 +417,7 @@ function createMemberValidator(
  * that pattern. Regular calls (identifier callee, non-computed
  * member callee) pass through.
  */
-function validateCallExpression(node: Node): true | Violation {
+function validateCallExpression(node: Node, nodePath: string): true | Violation {
 	const callee = (node as unknown as Record<string, unknown>).callee as {
 		type: string;
 		computed?: boolean;
@@ -413,6 +428,7 @@ function validateCallExpression(node: Node): true | Violation {
 			'CallExpression',
 			'Computed method calls are not allowed — use dot notation',
 			extractLocation(node),
+			nodePath,
 		);
 	}
 
