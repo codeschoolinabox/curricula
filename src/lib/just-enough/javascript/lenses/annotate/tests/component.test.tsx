@@ -9,7 +9,7 @@
 
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import embody from '../../../embody/index.js';
 import type { Snippet } from '../../../embody/types.js';
@@ -17,6 +17,7 @@ import annotateLens from '../index.js';
 
 
 afterEach(cleanup);
+afterEach(() => vi.restoreAllMocks());
 
 function makeSnippet(): Snippet {
 	return embody('let x = 1;');
@@ -439,4 +440,74 @@ describe('annotate lens — drawing overlay', () => {
 	});
 
 	it.todo('preserves annotations across a view toggle (Inc 7c)');
+});
+
+describe('annotate lens — clear all', () => {
+	it('renders a clear-all button', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		expect(container.querySelector('[data-clear-all]')).not.toBeNull();
+	});
+
+	it('prompts for confirmation when clear-all is clicked', () => {
+		const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(false);
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		fireEvent.click(container.querySelector('[data-clear-all]') as Element);
+		expect(confirmSpy).toHaveBeenCalledOnce();
+	});
+
+	it('clears the active view strokes when the action is confirmed', () => {
+		vi.spyOn(globalThis, 'confirm').mockReturnValue(true);
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		drawStroke(getOverlay(container), [
+			[10, 10],
+			[11, 11],
+		]);
+		fireEvent.click(container.querySelector('[data-clear-all]') as Element);
+		expect(
+			container.querySelector('svg.annotate-drawing-overlay polyline'),
+		).toBeNull();
+	});
+
+	it('clears every stroke (not just the first) when confirmed', () => {
+		vi.spyOn(globalThis, 'confirm').mockReturnValue(true);
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		const overlay = getOverlay(container);
+		drawStroke(overlay, [
+			[10, 10],
+			[11, 11],
+		]);
+		drawStroke(overlay, [
+			[20, 20],
+			[21, 21],
+		]);
+		fireEvent.click(container.querySelector('[data-clear-all]') as Element);
+		expect(
+			container.querySelectorAll('svg.annotate-drawing-overlay polyline'),
+		).toHaveLength(0);
+	});
+
+	it('keeps the strokes when the action is not confirmed', () => {
+		vi.spyOn(globalThis, 'confirm').mockReturnValue(false);
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		drawStroke(getOverlay(container), [
+			[10, 10],
+			[11, 11],
+		]);
+		fireEvent.click(container.querySelector('[data-clear-all]') as Element);
+		expect(
+			container.querySelector('svg.annotate-drawing-overlay polyline'),
+		).not.toBeNull();
+	});
+
+	it.todo('clear-all leaves the inactive view untouched (Inc 7c)');
 });

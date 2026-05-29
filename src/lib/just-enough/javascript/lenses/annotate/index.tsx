@@ -239,6 +239,16 @@ const AnnotateComponent: ComponentType<LensProperties> =
 			setAnnotationsByView(eraseFrom);
 		}
 
+		// Wipes both strokes and notes of the active view (after a
+		// confirmation); the inactive view's set is left untouched by
+		// `clearView`.
+		function clearActiveView(): void {
+			if (!globalThis.confirm('Clear all annotations on this view?')) return;
+			setAnnotationsByView((previous) =>
+				annotationOps.clearView(previous, viewMode),
+			);
+		}
+
 		return (
 			<div data-lens="annotate" data-view-mode={viewMode}>
 				<div className="annotate-toolbar" data-tool={tool}>
@@ -269,6 +279,13 @@ const AnnotateComponent: ComponentType<LensProperties> =
 							/>
 						);
 					})}
+					<button
+						type="button"
+						data-clear-all="true"
+						onClick={clearActiveView}
+					>
+						Clear all
+					</button>
 				</div>
 				<main className="annotate-main" data-view-mode={viewMode}>
 					{viewMode === 'code' && (
