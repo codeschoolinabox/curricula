@@ -10,7 +10,7 @@
  * `./core.js`; the wrapper owns only the per-mount UI state and rendering.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { freezeInPlace } from '@utils/freeze.js';
@@ -18,11 +18,14 @@ import { freezeInPlace } from '@utils/freeze.js';
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import annotateCore from './core.js';
+import deriveCodeSpanTree from './render-code.js';
 import type { ViewMode } from './types.js';
+
+import './annotate.css';
 
 
 const AnnotateComponent: ComponentType<LensProperties> =
-	function AnnotateComponent({ config }) {
+	function AnnotateComponent({ embodiment, config }) {
 		const resolved = annotateCore.config(config);
 		// Clamp to a valid ViewMode: `config()` returns the open `LensConfig`,
 		// so an educator override could carry any string. Anything other than
@@ -31,9 +34,41 @@ const AnnotateComponent: ComponentType<LensProperties> =
 			resolved.defaultView === 'flowchart' ? 'flowchart' : 'code';
 		const [viewMode] = useState<ViewMode>(initialView);
 
+		// Colorize is default-on: only an explicit `false` disables Prism
+		// tokenization, so a malformed value keeps the documented default.
+		const colorize = resolved.colorize !== false;
+		const codeTree = useMemo(
+			() => deriveCodeSpanTree(embodiment.source.code, colorize),
+			[embodiment.source.code, colorize],
+		);
+
 		return (
 			<div data-lens="annotate" data-view-mode={viewMode}>
-				<main data-view-mode={viewMode} />
+				<main data-view-mode={viewMode}>
+					{viewMode === 'code' && (
+						<pre>
+							<code>
+								{codeTree.lines.map(function renderLine(line, lineIndex) {
+									return (
+										<React.Fragment key={lineIndex}>
+											{lineIndex > 0 && '\n'}
+											{line.map(function renderSpan(span, spanIndex) {
+												return (
+													<span
+														key={`${lineIndex}-${spanIndex}`}
+														className={span.className}
+													>
+														{span.text}
+													</span>
+												);
+											})}
+										</React.Fragment>
+									);
+								})}
+							</code>
+						</pre>
+					)}
+				</main>
 			</div>
 		);
 	};

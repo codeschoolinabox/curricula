@@ -95,3 +95,65 @@ describe('annotate lens — Component rendering', () => {
 		).toBe('code');
 	});
 });
+
+describe('annotate lens — code view', () => {
+	it('renders a <pre><code> for the code view', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		expect(container.querySelector('pre code')).not.toBeNull();
+	});
+
+	it('renders the snippet source as the code text', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		expect(container.querySelector('pre')?.textContent).toBe('let x = 1;');
+	});
+
+	it('joins multiple source lines with newlines in the code text', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={embody('let x = 1;\nlet y = 2;')} />,
+		);
+		expect(container.querySelector('pre')?.textContent).toBe(
+			'let x = 1;\nlet y = 2;',
+		);
+	});
+
+	it('colorize on (default) classes the "let" keyword as a Prism token', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		expect(container.querySelector('.token.keyword')).not.toBeNull();
+	});
+
+	it('colorize off renders plain spans with no Prism token classes', () => {
+		const { container } = render(
+			<annotateLens.Component
+				embodiment={makeSnippet()}
+				config={{ colorize: false }}
+			/>,
+		);
+		expect(container.querySelector('.token')).toBeNull();
+	});
+
+	it('colorize off still renders a span (plain, empty className)', () => {
+		const { container } = render(
+			<annotateLens.Component
+				embodiment={makeSnippet()}
+				config={{ colorize: false }}
+			/>,
+		);
+		expect(container.querySelector('pre code span')?.className).toBe('');
+	});
+
+	it('colorize off still renders the source text', () => {
+		const { container } = render(
+			<annotateLens.Component
+				embodiment={makeSnippet()}
+				config={{ colorize: false }}
+			/>,
+		);
+		expect(container.querySelector('pre')?.textContent).toBe('let x = 1;');
+	});
+});

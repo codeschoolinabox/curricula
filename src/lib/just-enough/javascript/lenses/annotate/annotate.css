@@ -1,0 +1,65 @@
+/*
+ * Default Prism theme for the `annotate` lens code-view, scoped to
+ * `[data-lens="annotate"]` so it colors the lens's own token spans
+ * without leaking into Docusaurus's global code blocks. The spans carry
+ * `token <type…>` classes from `render-code.ts` (which mirror
+ * prism-react-renderer's getTokenProps className); this stylesheet maps
+ * those classes to a light-theme palette. Per `./DOCS.md` § Future
+ * direction, the theme is hard-coded to one default; per-config theme
+ * selection is deferred.
+ */
+
+[data-lens='annotate'] pre {
+	margin: 0;
+	padding: 1rem;
+	overflow: auto;
+	background: #f5f2f0;
+	border-radius: 4px;
+}
+
+[data-lens='annotate'] pre code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.9rem;
+	white-space: pre;
+	color: #393a34;
+}
+
+[data-lens='annotate'] .token.comment {
+	color: #708090;
+	font-style: italic;
+}
+
+[data-lens='annotate'] .token.punctuation {
+	color: #999;
+}
+
+[data-lens='annotate'] .token.keyword,
+[data-lens='annotate'] .token.control-flow {
+	color: #07a;
+}
+
+[data-lens='annotate'] .token.string {
+	color: #690;
+}
+
+[data-lens='annotate'] .token.number,
+[data-lens='annotate'] .token.boolean {
+	color: #905;
+}
+
+[data-lens='annotate'] .token.operator {
+	color: #9a6e3a;
+}
+
+[data-lens='annotate'] .token.function {
+	color: #dd4a68;
+}
+
+[data-lens='annotate'] .token.builtin,
+[data-lens='annotate'] .token.class-name {
+	color: #e90;
+}
+
+[data-lens='annotate'] .token.property {
+	color: #905;
+}
