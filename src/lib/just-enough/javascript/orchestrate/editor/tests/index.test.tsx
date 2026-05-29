@@ -18,6 +18,7 @@
 // exercise it). Adding such a test is possible but not load-bearing
 // at the current scope.
 
+import { forEachDiagnostic, forceLinting } from '@codemirror/lint';
 import { EditorView } from '@codemirror/view';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -39,6 +40,20 @@ async function findMountedEditorView(container: HTMLElement): Promise<EditorView
 	const view = EditorView.findFromDOM(cmContent);
 	if (!view) throw new Error('EditorView.findFromDOM returned null');
 	return view;
+}
+
+/**
+ * Counts the lint diagnostics currently held in the editor's lint state
+ * field. Reads CM's diagnostic state directly (via `forEachDiagnostic`)
+ * rather than scraping gutter-marker DOM, so the assertion does not depend
+ * on jsdom rendering CodeMirror's layout-measured gutter.
+ */
+function countDiagnostics(view: EditorView): number {
+	let count = 0;
+	forEachDiagnostic(view.state, () => {
+		count += 1;
+	});
+	return count;
 }
 
 describe('<EditorComponent> — CodeMirror lifecycle', () => {
@@ -150,6 +165,37 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 				expect(view.state.doc.toString()).toBe('typed');
 			});
 			expect(spy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('Linting — JEJ diagnostics surface and clear on edit', () => {
+		it('a JEJ-violating edit surfaces a diagnostic; a clean edit clears it', async () => {
+			// Proves the editor wires the real `lintJej` callback end-to-end:
+			// `var` (banned in JEJ) yields at least one diagnostic; editing to
+			// `let` (valid JEJ) clears it. The pair is decisive — a no-linter
+			// wiring never produces the first diagnostic; an always-on stub
+			// never clears it; a lint-once-at-mount wiring never re-evaluates
+			// the second edit. `forceLinting` bypasses CM's debounce, and
+			// diagnostics are read from lint state, not gutter DOM (which jsdom
+			// does not lay out).
+			const { container } = render(<EditorComponent snippet="OK" />);
+			const view = await findMountedEditorView(container);
+
+			view.dispatch({
+				changes: { from: 0, to: view.state.doc.length, insert: 'var x = 5;' },
+			});
+			forceLinting(view);
+			await waitFor(() => {
+				expect(countDiagnostics(view)).toBeGreaterThan(0);
+			});
+
+			view.dispatch({
+				changes: { from: 0, to: view.state.doc.length, insert: 'let x = 5;' },
+			});
+			forceLinting(view);
+			await waitFor(() => {
+				expect(countDiagnostics(view)).toBe(0);
+			});
 		});
 	});
 

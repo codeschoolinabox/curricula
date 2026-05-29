@@ -211,10 +211,12 @@ only the DOM is available). That rewrite is part of E2's deliverable.
 
 ### Out of scope
 
-- **Embodiment-aware diagnostics** — the editor never receives an embodiment.
-  CodeMirror in-editor diagnostics (Inc 15+) will consume `validation.*` /
-  `errors.*` from a `Snippet` only if a future contract change passes the
-  embodiment in lens mode (out of scope for the editor itself).
+- **Embodiment-/execution-driven diagnostics** — the editor never receives an
+  embodiment, so diagnostics that require runtime evaluation (e.g. evaluation
+  errors, or anything derived from a `Snippet`'s `validation.*` / `errors.*`)
+  remain out of scope; they belong to lens mode, which owns the embodiment.
+  Static JEJ diagnostics are a *different* feed and **are** wired — see
+  § Deferred callback wiring → `linters`.
 - **Recommend-time analysis** — the editor is not a lens; it has no
   `recommend()` surface. Recommendations belong to lens modules.
 - **Snippet ownership beyond mount-time seed.** The orchestrator owns snippet
@@ -259,15 +261,20 @@ consume it; the toolbar does not consume it.
 
 The CodeMirror factory at [`../lib/editing/`](../lib/editing/) exposes
 slots for `linters`, `docLookup`, `completions`, and `format` callbacks
-(plus the wired `onChange`). The home-base component currently wires only
-`onChange`. The other slots are intentionally unwired:
+(plus the wired `onChange`). The home-base component wires `onChange` and
+`linters`:
 
-- `linters` — wires once an analysis adapter exists to convert
-  `embodiment.errors` and `embodiment.validation.violations` into
-  `LintDiagnostic[]`. The editor would need to receive an embodiment for
-  this, which conflicts with the F2 "no embody in editor mode" invariant
-  unless a different feed (live re-parse) is plumbed in. Open design
-  question.
+- `linters` — **wired** to [`lintJej`](../../lib/linting/lint-jej.ts) from
+  the JEJ-package [`lib/linting/`](../../lib/linting/) module. The original
+  open design question (embodiment-derived diagnostics vs. a live re-parse)
+  resolved in favor of the **validation feed**: `lintJej` calls
+  [`validate(code)`](../../embody/lib/validating/validate.ts) directly — a
+  pure parse + JEJ-subset walk that constructs no `Snippet` — so the F2 "no
+  embody in editor mode" invariant holds (the editor still never receives an
+  embodiment). See [`lib/linting/DOCS.md`](../../lib/linting/DOCS.md).
+
+The remaining slots are intentionally unwired:
+
 - `docLookup` — requires `orchestrate/lib/jej-documentation/` (does not
   yet exist).
 - `completions` — requires `orchestrate/lib/completing/` (does not yet

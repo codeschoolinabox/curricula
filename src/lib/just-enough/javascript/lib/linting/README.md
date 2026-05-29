@@ -203,6 +203,6 @@ Inherits all conventions from [`../README.md`](../README.md),
   [`../../orchestrate/lib/editing/`](../../orchestrate/lib/editing/).
 - **F2 invariant statement:**
   [`../../orchestrate/editor/DOCS.md`](../../orchestrate/editor/DOCS.md)
-  § Structural constraints. (When this module is wired into the editor,
-  that file's § Deferred callback wiring entry for `linters` should be
-  updated from "open design question" to point here.)
+  § Structural constraints. That file's § Deferred callback wiring entry
+  for `linters` points back here — the editor wires `lintJej` via the
+  validation feed (no embodiment).
