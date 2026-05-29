@@ -85,8 +85,11 @@ implementation must maintain; consumers never see them.
   follow-up PR migrates `lib/validating/` to consume `lib/ast/parse/`
   and at that point validation can stamp the tag on each node. v1
   ships without this slot.
-- **trap**, **wrap**, **nodePath** → `lib/evaluating/intercept/`'s
-  domain. We expose `parent`/`children`/`tokens` directly on each
-  node rather than via a side-Map.
+- **trap**, **wrap** → `lib/evaluating/intercept/`'s domain. At this
+  layer we expose `parent`/`children`/`tokens` directly on each node
+  rather than via a side-Map, and this low-level parse `AstNode` carries
+  no node-path. Canonical **node-path** identity and the `byPath` index
+  live one layer up, at the embody entwined layer (`NodeEntwined.path` +
+  `ParseASTEntwined.byPath`).
 - **source-map generation**, **format check** — not in scope for
   this module.

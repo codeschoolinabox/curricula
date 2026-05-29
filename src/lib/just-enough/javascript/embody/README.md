@@ -48,6 +48,30 @@ tokens). This is the graph. Type names follow `<Kind>Entwined`:
 `RealmBindingEntwined`, `ScriptBindingEntwined`. Accessed via `.entwined`
 on any phase object.
 
+**NodePath** — A dot-style path string identifying an AST node by its position
+from the Program root: `$` for Program, then dot-joined ESTree property keys and
+numeric array indices, e.g. `$.body.0.declarations.0.init`. The canonical
+node-identity format embody defines; validating, intercept, and trace all
+identify nodes by it. Injective — every node has a unique NodePath, so `byPath`
+holds exactly one entry per node. Stored on every node as `NodeEntwined.path`
+(referenced as `nodePath` on analysis/violations, `innermostPath` on tokens —
+all `NodePath`-typed); postMessage-safe for crossing the worker boundary.
+
+**byPath** — A frozen `Record<NodePath, NodeEntwined>` on `parseAST.entwined`
+mapping each node's `path` to that node. The canonical O(1) resolution from a
+path string (carried by an event, or persisted by a lens) back to its entwined
+node. Holds the same node references as the tree — an entry-point *into* the
+graph, not a copy.
+
+**byOffset** — A frozen `ReadonlyArray<NodeEntwined>` on `parseAST.entwined`
+indexed by source character offset; each slot holds the deepest node whose span
+covers that offset (deepest-wins). Every offset in `[0, source.length)` resolves
+to at least the Program root — never a hole; `offset === source.length` (EOF) is
+out of bounds; zero-width nodes (`start === end`) are unreachable (use `byPath`).
+Resolve a `(line, column)` to an offset via
+`source.offsets[line - 1] + column` (column is 0-based), then index this array —
+O(1) `(line, column) → node`. The positional counterpart to `byPath`.
+
 **NMEvent** — Layer 3. A moment in the program's lifetime. Wraps an
 entwined entity and adds `phase`, `step`, `prev`/`next` chain links, and
 `relations` (bookending pairs, correlated events). Type names follow
@@ -196,7 +220,9 @@ with the events that fired plus an end-report.
    or accessor methods.
 2. **No Maps/Sets at the public surface.** `Object.freeze` doesn't freeze
    them; pedagogy prefers ground-truth shapes. Use `Record<string, T>` for
-   indexes and `ReadonlyArray<T>` for sequences.
+   indexes and `ReadonlyArray<T>` for sequences. embody ships the canonical
+   node-identity/position indexes (`parseAST.entwined.byPath` / `.byOffset`);
+   lenses build only *pedagogy-specific* groupings on top.
 3. **Strict immutability.** Single deep-freeze at end of construction.
    Consumers wanting a mutable copy `structuredClone` themselves.
 4. **Per-instance, no shared state.** No module-level cache, no

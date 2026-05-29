@@ -99,6 +99,17 @@ entities (the token's `innermostNode`, the scope's `outer`, the node's
 Entwined cross-refs form a static graph — built mutably during factory
 construction and deep-frozen as a unit.
 
+The parse phase's entwined aggregate (`ParseASTEntwined`) also carries two
+canonical lookup indexes — `byPath` (`Record<NodePath, NodeEntwined>`) and
+`byOffset` (`ReadonlyArray<NodeEntwined>` by source offset) — that resolve an
+*outside identity* (a path string carried on an event; a cursor offset) into the
+ref-graph. They hold the same node references as the tree (entry-points, not
+copies), so they cost a pointer + key per node, no data duplication. `NodePath`
+(dot form) is the shared node-identity *format* across validating/intercept/trace;
+the indexes themselves remain per-context (intercept's `astByPath`, trace's `ast`
+are separate maps over their own `ASTNode`) — unifying the indexes, not just the
+format, is future work.
+
 **L3 — NMEvent**: an entwined entity in temporal context. Adds `phase`, `step`
 (per-stream position), the `prev`/`next` chain, `loc`, `relations`
 (category-specific correlated events), and `bindings` (scope-chain Proxy). Every
@@ -115,7 +126,7 @@ via `snippet.events.*`.
 | ------------ | -------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------- |
 | `realm`      | RealmData (ScopeData x2, RealmBindingData)         | RealmEntwined (ScopeEntwined x2, RealmBindingEntwined)  | RealmNMEvent (intrinsics-created, host-created) |
 | `tokenize`   | TokenizeData (TokenData[], CommentData[])          | TokenizeEntwined (TokenEntwined[], CommentEntwined[])   | TokenNMEvent \| CommentNMEvent                  |
-| `parseAST`   | ParseASTData (NodeData root)                       | ParseASTEntwined (NodeEntwined root)                    | NodeNMEvent (enter \| exit pairs)               |
+| `parseAST`   | ParseASTData (NodeData root)                       | ParseASTEntwined (byPath/byOffset; root → lib/parse/)   | NodeNMEvent (enter \| exit pairs)               |
 | `creation`   | CreationData (ScopeData forest, ScriptBindingData) | CreationEntwined (ScopeEntwined, ScriptBindingEntwined) | ScopeNMEvent \| BindingNMEvent                  |
 | `evaluation` | (no static data)                                   | (no static data)                                        | ResolveEvent, CoerceEvent, ... (RunInstance)    |
 
@@ -257,8 +268,10 @@ cannot be precomputed at event-freeze time.
 
 `Object.freeze` doesn't freeze Maps or Sets — `frozenObj.someMap.clear()`
 silently succeeds. Pedagogy also prefers ground-truth shapes: indexes are plain
-`Record<K, V>`, sequences are arrays. Lenses build their own Maps internally if
-they want O(1) lookup.
+`Record<K, V>`, sequences are arrays. embody provides the canonical
+node-identity/position indexes (`parseAST.entwined.byPath`, `.byOffset`) as a
+frozen `Record` and `Array`; lenses build their own *pedagogy-specific*
+groupings internally if they want a different O(1) lookup.
 
 ### Per-instance, no shared state
 
@@ -564,8 +577,11 @@ These are explicitly not responsibilities of `embody/`:
   calls, even for identical source.
 - **Mutation or clone-on-access APIs** — consumers that need a mutable copy
   `structuredClone()` themselves.
-- **Lens-specific indexes** — lenses build their own data structures from the
-  `events` generators.
+- **Lens-specific (pedagogy) indexes** — groupings like "all `if` statements" or
+  "nodes touched at step N" are the lens's job, built from the `events`
+  generators. The canonical node-identity/position indexes
+  (`parseAST.entwined.byPath` / `.byOffset`) ARE provided — see § Three-layer
+  framework.
 - **LMS / learner-state modeling** — embody decides nothing about teaching; that
   is the lens and recommender layer.
 - **Pedagogical decisions** — what to show, when to show it, how to interpret it

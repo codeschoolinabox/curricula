@@ -36,8 +36,15 @@ import type { Violation } from './lib/validating/types.js';
 // 1. SOURCE LOCATION PRIMITIVES
 // ═════════════════════════════════════════════════════════════════════════════
 
-/** A JSONPath string rooted at the Program node. e.g. "$.body[0].declarations[0].init". */
-type JSONPath = string;
+/**
+ * Dot-delimited node-path rooted at the Program node; array indices are bare
+ * segments, e.g. "$.body.0.declarations.0.init". The canonical node-identity
+ * format across embody (validating, intercept, trace). NOT RFC-9535 JSONPath —
+ * a lodash-style dotted path; postMessage-safe for crossing the worker boundary.
+ * Injective over an AST — every node has a unique NodePath, so `byPath` holds
+ * exactly one entry per node.
+ */
+type NodePath = string;
 
 interface SourcePosition {
 	readonly line: number;   // 1-based
@@ -127,7 +134,7 @@ type BindingStatus = 'tdz' | 'initialized' | 'dead';
 interface TokenEntwined {
 	readonly data:          TokenData;
 	readonly innermostNode: NodeEntwined | null;
-	readonly innermostPath: JSONPath | null;
+	readonly innermostPath: NodePath | null;
 	readonly prevToken:     TokenEntwined | null;
 	readonly nextToken:     TokenEntwined | null;
 	/** Whitespace/gap in source between prevToken.end and this token's start. */
@@ -137,7 +144,7 @@ interface TokenEntwined {
 interface CommentEntwined {
 	readonly data:          CommentData;
 	readonly innermostNode: NodeEntwined | null;
-	readonly innermostPath: JSONPath | null;
+	readonly innermostPath: NodePath | null;
 	readonly prevToken:     TokenEntwined | null;
 	readonly nextToken:     TokenEntwined | null;
 }
@@ -152,7 +159,7 @@ interface NodeEntwined {
 	/** Semantic anchor token (e.g. `if` for IfStatement, operator for BinaryExpression). */
 	readonly keyToken:   TokenEntwined | null;
 	readonly comments:   ReadonlyArray<CommentEntwined>; // contained within span
-	readonly path:       JSONPath;
+	readonly path:       NodePath;
 }
 
 interface ScopeEntwined {
@@ -243,8 +250,34 @@ interface RealmEntwined {}
 /** @todo fields locked in lib/parse/ DDD — tokens: ReadonlyArray<TokenEntwined>; comments: ReadonlyArray<CommentEntwined> */
 interface TokenizeEntwined {}
 
-/** @todo fields locked in lib/parse/ DDD — root: NodeEntwined */
-interface ParseASTEntwined {}
+/**
+ * @todo `root: NodeEntwined` — locked in lib/parse/ DDD (NOT this round).
+ *
+ * `byPath`/`byOffset` are contract-locked here; the lib/parse/ entwine pass
+ * BUILDS them (single walk, same frozen node refs as the tree — no copy).
+ * Both are canonical, domain-general entry-points into the ref-graph; lenses
+ * still build their own pedagogy-specific groupings (out of scope here).
+ */
+interface ParseASTEntwined {
+	/**
+	 * Every node keyed by its `NodePath` — O(1) resolution from a path string
+	 * (carried on a worker event, or persisted by a lens) back to its entwined
+	 * node. Holds the same node references as the tree; an entry-point INTO the
+	 * graph, not a copy.
+	 */
+	readonly byPath: Readonly<Record<NodePath, NodeEntwined>>;
+	/**
+	 * Indexed by source character offset; each slot is the deepest node whose
+	 * span covers that offset (deepest-wins). Every offset in `[0, source.length)`
+	 * resolves to at least the Program root — never a hole; an inter-token gap
+	 * (whitespace/comment) resolves to its innermost enclosing node. Zero-width
+	 * nodes (`start === end`) cover no offset and are unreachable here — use
+	 * `byPath`. `offset === source.length` (EOF) is out of bounds. Resolve a
+	 * `(line, column)` via `Source.offsets[line - 1] + column` (column 0-based),
+	 * then index this array, for O(1) `(line, column) → node`.
+	 */
+	readonly byOffset: ReadonlyArray<NodeEntwined>;
+}
 
 /** @todo fields locked in lib/scope/ DDD — script ScopeEntwined (with .scopeTree); ScriptBindingEntwined records */
 interface CreationEntwined {}
@@ -691,14 +724,14 @@ interface BindingDeclaration {
 	readonly name:     string;
 	readonly kind:     'let' | 'const';
 	readonly scope:    'script' | 'block' | 'for-iteration';
-	readonly nodePath: JSONPath;
+	readonly nodePath: NodePath;
 	readonly loc:      SourceLocation;
 }
 
 /** Realm-level names referenced by the snippet (alias-resolved). */
 interface DependencyReference {
 	readonly name:      string;
-	readonly callsites: ReadonlyArray<{ readonly nodePath: JSONPath; readonly loc: SourceLocation }>;
+	readonly callsites: ReadonlyArray<{ readonly nodePath: NodePath; readonly loc: SourceLocation }>;
 }
 
 /** Boolean record of language-feature usage. Drives curriculum-aware lens selection. */
@@ -746,9 +779,9 @@ interface Metrics {
 }
 
 interface ControlFlow {
-	readonly branches:  ReadonlyArray<{ readonly nodePath: JSONPath; readonly kind: 'if' | 'ternary'; readonly loc: SourceLocation }>;
-	readonly breaks:    ReadonlyArray<{ readonly nodePath: JSONPath; readonly loc: SourceLocation }>;
-	readonly continues: ReadonlyArray<{ readonly nodePath: JSONPath; readonly loc: SourceLocation }>;
+	readonly branches:  ReadonlyArray<{ readonly nodePath: NodePath; readonly kind: 'if' | 'ternary'; readonly loc: SourceLocation }>;
+	readonly breaks:    ReadonlyArray<{ readonly nodePath: NodePath; readonly loc: SourceLocation }>;
+	readonly continues: ReadonlyArray<{ readonly nodePath: NodePath; readonly loc: SourceLocation }>;
 }
 
 interface NonDeterminism {
@@ -904,7 +937,7 @@ interface Snippet {
 
 export type {
 	// source
-	JSONPath,
+	NodePath,
 	SourcePosition,
 	SourceLocation,
 	Source,
