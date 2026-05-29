@@ -216,15 +216,19 @@ type NodeRule = true | false | NodeValidator;
  * `allowedGlobals` lists identifier names that don't need a
  * `let`/`const` declaration (e.g. `console`, `alert`).
  *
- * `allowedMemberNames` lists property names permitted in
- * non-computed dot access (e.g. `length`, `toLowerCase`).
+ * `blockedMemberNames` lists property names FORBIDDEN in non-computed
+ * dot access (e.g. `split`, `constructor`); every other name passes.
+ * This allow-all-except-blocklist model is the inverse of an allowlist
+ * — it lets the validator track reference.md's "all String methods
+ * except split/match/matchAll" framing without enumerating the full
+ * permitted surface.
  *
  * @example
  * ```ts
  * const myLevel: LanguageLevel = Object.freeze({
  *   name: 'My Subset',
  *   allowedGlobals: Object.freeze(new Set(['console'])),
- *   allowedMemberNames: Object.freeze(new Set(['log'])),
+ *   blockedMemberNames: Object.freeze(new Set(['split', 'constructor'])),
  *   nodes: Object.freeze({
  *     Program: true,
  *     ExpressionStatement: true,
@@ -236,7 +240,7 @@ type NodeRule = true | false | NodeValidator;
 type LanguageLevel = {
 	readonly name: string;
 	readonly allowedGlobals?: ReadonlySet<string>;
-	readonly allowedMemberNames?: ReadonlySet<string>;
+	readonly blockedMemberNames?: ReadonlySet<string>;
 	readonly nodes: Readonly<Record<string, NodeRule>>;
 };
 

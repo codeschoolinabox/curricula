@@ -63,21 +63,28 @@ describe('justEnoughJs', () => {
 			expect(justEnoughJs.allowedGlobals.has('parseFloat')).toBe(true);
 		});
 
-		it('has a frozen allowedMemberNames Set', () => {
-			expect(justEnoughJs.allowedMemberNames).toBeInstanceOf(Set);
-			expect(Object.isFrozen(justEnoughJs.allowedMemberNames)).toBe(true);
+		it('has a frozen blockedMemberNames Set', () => {
+			expect(justEnoughJs.blockedMemberNames).toBeInstanceOf(Set);
+			expect(Object.isFrozen(justEnoughJs.blockedMemberNames)).toBe(true);
 		});
 
-		it('includes expected member names', () => {
-			expect(justEnoughJs.allowedMemberNames.has('length')).toBe(true);
-			expect(justEnoughJs.allowedMemberNames.has('toLowerCase')).toBe(true);
-			expect(justEnoughJs.allowedMemberNames.has('log')).toBe(true);
+		it('blocks array-returning string methods', () => {
+			expect(justEnoughJs.blockedMemberNames.has('split')).toBe(true);
+			expect(justEnoughJs.blockedMemberNames.has('match')).toBe(true);
+			expect(justEnoughJs.blockedMemberNames.has('matchAll')).toBe(true);
 		});
 
-		it('excludes disallowed member names', () => {
-			expect(justEnoughJs.allowedMemberNames.has('match')).toBe(false);
-			expect(justEnoughJs.allowedMemberNames.has('split')).toBe(false);
-			expect(justEnoughJs.allowedMemberNames.has('warn')).toBe(false);
+		it('blocks reflection / prototype-escape names', () => {
+			expect(justEnoughJs.blockedMemberNames.has('constructor')).toBe(true);
+			expect(justEnoughJs.blockedMemberNames.has('__proto__')).toBe(true);
+			expect(justEnoughJs.blockedMemberNames.has('call')).toBe(true);
+		});
+
+		it('does not block ordinary or newly-allowed names', () => {
+			expect(justEnoughJs.blockedMemberNames.has('length')).toBe(false);
+			expect(justEnoughJs.blockedMemberNames.has('toLowerCase')).toBe(false);
+			expect(justEnoughJs.blockedMemberNames.has('warn')).toBe(false);
+			expect(justEnoughJs.blockedMemberNames.has('toString')).toBe(false);
 		});
 	});
 
@@ -371,7 +378,7 @@ describe('justEnoughJs', () => {
 			expect(result).toHaveProperty('nodeType', 'MemberExpression');
 		});
 
-		it('rejects non-computed access to warn', () => {
+		it('allows non-computed access to warn (not blocklisted)', () => {
 			const result = callRule(
 				validate,
 				fakeNode({
@@ -380,7 +387,59 @@ describe('justEnoughJs', () => {
 					property: { type: 'Identifier', name: 'warn' },
 				}),
 			);
+			expect(result).toBe(true);
+		});
+
+		it('allows non-computed access to charAt (newly allowed by inversion)', () => {
+			const result = callRule(
+				validate,
+				fakeNode({
+					type: 'MemberExpression',
+					computed: false,
+					property: { type: 'Identifier', name: 'charAt' },
+				}),
+			);
+			expect(result).toBe(true);
+		});
+
+		// Decisive allow-all probe: charCodeAt was never in the old member
+		// allowlist and is not blocklisted. A widened-allowlist impl cannot
+		// pass this without re-listing all of String.prototype.
+		it('allows non-computed access to charCodeAt (never listed — proves allow-all)', () => {
+			const result = callRule(
+				validate,
+				fakeNode({
+					type: 'MemberExpression',
+					computed: false,
+					property: { type: 'Identifier', name: 'charCodeAt' },
+				}),
+			);
+			expect(result).toBe(true);
+		});
+
+		it('allows non-computed access to toString (intentionally not blocked)', () => {
+			const result = callRule(
+				validate,
+				fakeNode({
+					type: 'MemberExpression',
+					computed: false,
+					property: { type: 'Identifier', name: 'toString' },
+				}),
+			);
+			expect(result).toBe(true);
+		});
+
+		it('rejects non-computed access to constructor (reflection escape)', () => {
+			const result = callRule(
+				validate,
+				fakeNode({
+					type: 'MemberExpression',
+					computed: false,
+					property: { type: 'Identifier', name: 'constructor' },
+				}),
+			);
 			expect(result).not.toBe(true);
+			expect(result).toHaveProperty('nodeType', 'MemberExpression');
 		});
 	});
 

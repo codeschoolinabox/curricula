@@ -40,7 +40,7 @@ function validateVariableDeclaration(node: Node, nodePath: string): true | Viola
  * @remarks Includes `=` (initialization and reassignment) plus
  * compound operators that combine arithmetic or logic with
  * assignment. Compound forms are shorthand — `x += 1` is
- * equivalent to `x = x + 1`. Excludes bitwise assignments
+ * equivalent to `x = x + 1`. Includes bitwise-compound assignments
  * (`&=`, `|=`, `^=`, `<<=`, `>>=`, `>>>=`). Note: `++`/`--` are
  * `UpdateExpression` nodes, not `AssignmentExpression`.
  */
@@ -125,11 +125,13 @@ function validateUpdateExpression(node: Node, nodePath: string): true | Violatio
 }
 
 /**
- * Binary operators allowed in JeJ: equality, comparison, arithmetic, and membership.
+ * Binary operators allowed in JeJ: equality, comparison, arithmetic,
+ * bitwise, and membership.
  *
  * @remarks Deliberately excludes `==`, `!=` (loose equality is a
- * beginner trap), bitwise operators (`&`, `|`, `^`, `<<`, `>>`),
- * and `instanceof` (class-based concept not in JeJ).
+ * beginner trap) and `instanceof` (class-based concept not in JeJ).
+ * Bitwise operators (`&`, `|`, `^`, `<<`, `>>`, `>>>`) and `in` ARE
+ * included (reference.md bitwise + membership sections).
  */
 const ALLOWED_BINARY_OPERATORS = new Set([
 	'===',
@@ -203,9 +205,9 @@ function validateLogicalExpression(node: Node, nodePath: string): true | Violati
  *
  * @remarks `typeof` is essential for type checking in exercises.
  * `!` (logical NOT) and `-` (numeric negation) are basic operators.
- * `void` is an easter egg — not in reference.md.
- * Excludes `+` (unary plus — confusing type coercion), `~` (bitwise
- * NOT), and `delete`.
+ * `~` (bitwise NOT) is allowed (reference.md bitwise section). `void`
+ * is an easter egg — not in reference.md. Excludes `+` (unary plus —
+ * confusing type coercion) and `delete`.
  */
 const ALLOWED_UNARY_OPERATORS = new Set(['typeof', '!', '-', '~', 'void']);
 
@@ -376,18 +378,21 @@ function validateForStatement(node: Node, nodePath: string): true | Violation {
 }
 
 /**
- * Creates a member expression validator that checks property names
- * against a provided allowlist.
+ * Creates a member expression validator that rejects property names on
+ * a provided blocklist (allow-all-except-blocklist).
  *
- * @remarks Factory pattern — derives the allowed set from the
+ * @remarks Factory pattern — derives the blocked set from the
  * {@link LanguageLevel} config rather than duplicating it as a
  * module-level constant. No type checking — `.log` on a string is
  * a runtime error, not our problem. We only check the property name.
  *
- * Computed access (bracket indexing) is always allowed.
+ * Non-computed dot access to a blocklisted name is a violation; every
+ * other dot name passes. Computed access (bracket indexing) is always
+ * allowed and never gated — see DOCS.md § Member model (accepted
+ * residual hole).
  */
 function createMemberValidator(
-	allowedNames: ReadonlySet<string>,
+	blockedNames: ReadonlySet<string>,
 ): (node: Node, nodePath: string) => true | Violation {
 	return function validateMemberExpression(node: Node, nodePath: string): true | Violation {
 		const record = node as unknown as Record<string, unknown>;
@@ -396,11 +401,11 @@ function createMemberValidator(
 		if (computed) return true;
 
 		const property = record.property as { type: string; name: string };
-		if (allowedNames.has(property.name)) return true;
+		if (!blockedNames.has(property.name)) return true;
 
 		return createViolation(
 			'MemberExpression',
-			`Property '.${property.name}' is not allowed at this language level`,
+			`Property '.${property.name}' is not available at this language level`,
 			extractLocation(node),
 			nodePath,
 		);
@@ -457,92 +462,37 @@ function extractLocation(node: Node) {
 // -- the language level --
 
 /**
- * Allowed property names for non-computed member expressions.
+ * Property names FORBIDDEN in non-computed member expressions.
  *
  * @remarks Single source of truth — used by both the
  * {@link createMemberValidator} factory and exposed on the
- * {@link LanguageLevel} config for external consumers.
+ * {@link LanguageLevel} config for external consumers. Two tiers:
+ * array-returning string methods reference.md excludes (arrays are out
+ * of JeJ scope), and reflection / prototype-escape names with no JeJ
+ * use. Every name NOT listed here passes dot access
+ * (allow-all-except-blocklist). `toString` / `valueOf` are intentionally
+ * absent — reference.md allows them (e.g. `(255).toString(16)`). See
+ * DOCS.md § Member model.
  */
-const ALLOWED_MEMBER_NAMES: ReadonlySet<string> = Object.freeze(
+const BLOCKED_MEMBER_NAMES: ReadonlySet<string> = Object.freeze(
 	new Set([
-		// string methods
-		'toLowerCase',
-		'toUpperCase',
-		'includes',
-		'replaceAll',
-		'trim',
-		'trimStart',
-		'trimEnd',
-		'indexOf',
-		'slice',
-		'at',
-		'concat',
-		'repeat',
-		'padStart',
-		'padEnd',
-		'startsWith',
-		'endsWith',
-		'search',
-		'replace',
-		// string/readable properties
-		'length',
-		// console methods
-		'log',
-		'assert',
-		// Number static methods
-		'isNaN',
-		'isInteger',
-		'isFinite',
-		// Math constants
-		'PI',
-		'E',
-		'SQRT2',
-		'SQRT1_2',
-		'LN2',
-		'LN10',
-		'LOG2E',
-		'LOG10E',
-		// Math rounding
-		'round',
-		'floor',
-		'ceil',
-		'trunc',
-		// Math core
-		'abs',
-		'sign',
-		'sqrt',
-		'cbrt',
-		'pow',
-		'hypot',
-		'min',
-		'max',
-		'random',
-		// Math logarithmic/exponential
-		'log',
-		'log2',
-		'log10',
-		'exp',
-		'expm1',
-		'log1p',
-		// Math trigonometry
-		'sin',
-		'cos',
-		'tan',
-		'asin',
-		'acos',
-		'atan',
-		'atan2',
-		// Math hyperbolic
-		'sinh',
-		'cosh',
-		'tanh',
-		'asinh',
-		'acosh',
-		'atanh',
-		// Math low-level
-		'fround',
-		'imul',
-		'clz32',
+		// array-returning string methods — arrays are out of JeJ scope
+		'split',
+		'match',
+		'matchAll',
+		// reflection / prototype-escape names — no JeJ use
+		'constructor',
+		'__proto__',
+		'prototype',
+		'call',
+		'apply',
+		'bind',
+		'__defineGetter__',
+		'__defineSetter__',
+		'__lookupGetter__',
+		'__lookupSetter__',
+		'caller',
+		'arguments',
 	]),
 );
 
@@ -590,7 +540,7 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		]),
 	),
 
-	allowedMemberNames: ALLOWED_MEMBER_NAMES,
+	blockedMemberNames: BLOCKED_MEMBER_NAMES,
 
 	nodes: Object.freeze({
 		// unconditionally allowed — structural nodes with no
@@ -625,7 +575,7 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		DoWhileStatement: validateDoWhileStatement,
 		ForStatement: validateForStatement,
 		ForOfStatement: validateForOfStatement,
-		MemberExpression: createMemberValidator(ALLOWED_MEMBER_NAMES),
+		MemberExpression: createMemberValidator(BLOCKED_MEMBER_NAMES),
 		CallExpression: validateCallExpression,
 		AssignmentExpression: validateAssignmentExpression,
 		UpdateExpression: validateUpdateExpression,

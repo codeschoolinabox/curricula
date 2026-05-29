@@ -464,16 +464,12 @@ describe('integration: disallowed methods', () => {
 		expect(v).toBeDefined();
 	});
 
-	it('rejects .charAt()', () => {
+	it('allows .charAt() (not blocklisted)', () => {
 		const report = validateProgram(
 			'let x = "hi";\nlet y = x.charAt(0);\nconsole.log(y);\n',
 			justEnoughJs,
 		);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find(
-			(v) => v.nodeType === 'MemberExpression' && v.message.includes('charAt'),
-		);
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
 	});
 
 	it('allows .search()', () => {
@@ -492,13 +488,9 @@ describe('integration: disallowed methods', () => {
 		expect(report.isValid).toBe(true);
 	});
 
-	it('rejects console.error', () => {
+	it('allows console.error (not blocklisted)', () => {
 		const report = validateProgram('console.error("oops");\n', justEnoughJs);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find(
-			(v) => v.nodeType === 'MemberExpression' && v.message.includes('error'),
-		);
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
 	});
 });
 
