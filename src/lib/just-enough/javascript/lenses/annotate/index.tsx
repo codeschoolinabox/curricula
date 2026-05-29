@@ -24,6 +24,7 @@ import deriveFlowchartSvg from './render-flowchart.js';
 import type {
 	AnnotationsByView,
 	FlowchartSvg,
+	Note,
 	Point,
 	Stroke,
 	Tool,
@@ -182,10 +183,15 @@ const AnnotateComponent: ComponentType<LensProperties> =
 		const [currentStroke, setCurrentStroke] = useState<
 			ReadonlyArray<Point> | null
 		>(null);
+		const [noteDialog, setNoteDialog] = useState<{
+			readonly position: Point;
+		} | null>(null);
+		const [noteText, setNoteText] = useState('');
 
 		const eraserRadius =
 			typeof resolved.eraserRadius === 'number' ? resolved.eraserRadius : 20;
 		const activeStrokes = annotationsByView[viewMode].strokes;
+		const activeNotes = annotationsByView[viewMode].notes;
 
 		function pointFromEvent(event: React.MouseEvent<SVGSVGElement>): Point {
 			const rect = event.currentTarget.getBoundingClientRect();
@@ -239,6 +245,42 @@ const AnnotateComponent: ComponentType<LensProperties> =
 			setAnnotationsByView(eraseFrom);
 		}
 
+		function openNoteAt(event: React.MouseEvent<SVGSVGElement>): void {
+			if (tool !== 'note') return;
+			setNoteText('');
+			setNoteDialog({ position: pointFromEvent(event) });
+		}
+
+		// The overlay's single click handler dispatches by tool; pen uses the
+		// mouse down/move/up sequence instead.
+		function handleOverlayClick(event: React.MouseEvent<SVGSVGElement>): void {
+			eraseAt(event);
+			openNoteAt(event);
+		}
+
+		// Discard empty / whitespace-only notes — an empty positioned box is
+		// not a useful annotation (parallel to the single-point stroke discard).
+		function saveNote(): void {
+			if (noteDialog && noteText.trim() !== '') {
+				const note: Note = {
+					id: crypto.randomUUID(),
+					position: noteDialog.position,
+					text: noteText,
+					color,
+				};
+				setAnnotationsByView((previous) =>
+					annotationOps.addNote(previous, viewMode, note),
+				);
+			}
+			setNoteDialog(null);
+			setNoteText('');
+		}
+
+		function cancelNote(): void {
+			setNoteDialog(null);
+			setNoteText('');
+		}
+
 		// Wipes both strokes and notes of the active view (after a
 		// confirmation); the inactive view's set is left untouched by
 		// `clearView`.
@@ -265,6 +307,13 @@ const AnnotateComponent: ComponentType<LensProperties> =
 						onClick={() => setTool('eraser')}
 					>
 						Eraser
+					</button>
+					<button
+						type="button"
+						data-tool-select="note"
+						onClick={() => setTool('note')}
+					>
+						Note
 					</button>
 					{PALETTE.map(function renderSwatch(swatch) {
 						return (
@@ -322,7 +371,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 						onMouseDown={startStroke}
 						onMouseMove={extendStroke}
 						onMouseUp={finishStroke}
-						onClick={eraseAt}
+						onClick={handleOverlayClick}
 					>
 						{activeStrokes.map(function renderSavedStroke(stroke) {
 							return (
@@ -342,6 +391,48 @@ const AnnotateComponent: ComponentType<LensProperties> =
 							/>
 						)}
 					</svg>
+					{activeNotes.map(function renderNote(note) {
+						return (
+							<div
+								key={note.id}
+								className="annotate-note"
+								data-note-color={note.color}
+								style={{
+									left: `${note.position.x}px`,
+									top: `${note.position.y}px`,
+									borderColor: note.color,
+								}}
+							>
+								{note.text}
+							</div>
+						);
+					})}
+					{noteDialog && (
+						<div
+							className="annotate-note-dialog"
+							data-note-dialog="true"
+							style={{
+								left: `${noteDialog.position.x}px`,
+								top: `${noteDialog.position.y}px`,
+							}}
+						>
+							<textarea
+								aria-label="note text"
+								value={noteText}
+								onChange={(event) => setNoteText(event.target.value)}
+							/>
+							<button type="button" data-note-save="true" onClick={saveNote}>
+								Save
+							</button>
+							<button
+								type="button"
+								data-note-cancel="true"
+								onClick={cancelNote}
+							>
+								Cancel
+							</button>
+						</div>
+					)}
 				</main>
 			</div>
 		);

@@ -511,3 +511,181 @@ describe('annotate lens — clear all', () => {
 
 	it.todo('clear-all leaves the inactive view untouched (Inc 7c)');
 });
+
+describe('annotate lens — notes', () => {
+	it('the toolbar offers a note tool', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		expect(container.querySelector('[data-tool-select="note"]')).not.toBeNull();
+	});
+
+	it('selecting the note tool sets data-tool to "note"', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		expect(
+			container.querySelector<HTMLElement>('[data-tool]')?.dataset.tool,
+		).toBe('note');
+	});
+
+	it('clicking with the note tool opens a dialog with a textarea', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		expect(container.querySelector('[data-note-dialog] textarea')).not.toBeNull();
+	});
+
+	it('saving a note commits it with the typed text', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		fireEvent.change(
+			container.querySelector('[data-note-dialog] textarea') as Element,
+			{ target: { value: 'hello' } },
+		);
+		fireEvent.click(container.querySelector('[data-note-save]') as Element);
+		expect(container.querySelector('.annotate-note')?.textContent).toBe('hello');
+	});
+
+	it('saving dismisses the dialog', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		fireEvent.change(
+			container.querySelector('[data-note-dialog] textarea') as Element,
+			{ target: { value: 'hello' } },
+		);
+		fireEvent.click(container.querySelector('[data-note-save]') as Element);
+		expect(container.querySelector('[data-note-dialog]')).toBeNull();
+	});
+
+	it('cancelling dismisses the dialog without committing a note', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		fireEvent.change(
+			container.querySelector('[data-note-dialog] textarea') as Element,
+			{ target: { value: 'hi' } },
+		);
+		fireEvent.click(container.querySelector('[data-note-cancel]') as Element);
+		expect(container.querySelector('[data-note-dialog]')).toBeNull();
+	});
+
+	it('cancelling leaves no saved note', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		fireEvent.click(container.querySelector('[data-note-cancel]') as Element);
+		expect(container.querySelector('.annotate-note')).toBeNull();
+	});
+
+	it('a committed note carries the active color', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		const swatches =
+			container.querySelectorAll<HTMLElement>('[data-color-swatch]');
+		const secondColor = swatches[1].dataset.colorSwatch;
+		fireEvent.click(swatches[1]);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		fireEvent.change(
+			container.querySelector('[data-note-dialog] textarea') as Element,
+			{ target: { value: 'hi' } },
+		);
+		fireEvent.click(container.querySelector('[data-note-save]') as Element);
+		expect(
+			container.querySelector<HTMLElement>('.annotate-note')?.dataset.noteColor,
+		).toBe(secondColor);
+	});
+
+	it('a committed note is positioned at the click point', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		fireEvent.change(
+			container.querySelector('[data-note-dialog] textarea') as Element,
+			{ target: { value: 'hi' } },
+		);
+		fireEvent.click(container.querySelector('[data-note-save]') as Element);
+		expect(container.querySelector<HTMLElement>('.annotate-note')?.style.left).toBe(
+			'30px',
+		);
+	});
+
+	it('commits multiple notes independently', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		fireEvent.change(
+			container.querySelector('[data-note-dialog] textarea') as Element,
+			{ target: { value: 'first' } },
+		);
+		fireEvent.click(container.querySelector('[data-note-save]') as Element);
+		fireEvent.click(getOverlay(container), { clientX: 60, clientY: 80 });
+		fireEvent.change(
+			container.querySelector('[data-note-dialog] textarea') as Element,
+			{ target: { value: 'second' } },
+		);
+		fireEvent.click(container.querySelector('[data-note-save]') as Element);
+		expect(container.querySelectorAll('.annotate-note')).toHaveLength(2);
+	});
+
+	it('discards a save with empty text', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		fireEvent.click(container.querySelector('[data-note-save]') as Element);
+		expect(container.querySelector('.annotate-note')).toBeNull();
+	});
+
+	it('reopening the dialog starts with an empty textarea', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		fireEvent.change(
+			container.querySelector('[data-note-dialog] textarea') as Element,
+			{ target: { value: 'stale' } },
+		);
+		fireEvent.click(container.querySelector('[data-note-cancel]') as Element);
+		fireEvent.click(getOverlay(container), { clientX: 60, clientY: 80 });
+		expect(
+			container.querySelector<HTMLTextAreaElement>('[data-note-dialog] textarea')
+				?.value,
+		).toBe('');
+	});
+
+	it('clicking inside the dialog does not reset the typed text', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'note');
+		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
+		const textarea = container.querySelector(
+			'[data-note-dialog] textarea',
+		) as Element;
+		fireEvent.change(textarea, { target: { value: 'keep me' } });
+		fireEvent.click(textarea);
+		expect((textarea as HTMLTextAreaElement).value).toBe('keep me');
+	});
+});

@@ -88,6 +88,9 @@
 
 [data-lens='annotate'] .annotate-main {
 	position: relative;
+	/* Own the stacking order so the note dialog (z-index 2) sits above the
+	   drawing overlay (z-index 1) regardless of ancestor stacking contexts. */
+	isolation: isolate;
 }
 
 /* pointer-events: all so the overlay captures drawing across the whole
@@ -96,6 +99,7 @@
 [data-lens='annotate'] .annotate-drawing-overlay {
 	position: absolute;
 	inset: 0;
+	z-index: 1;
 	width: 100%;
 	height: 100%;
 	pointer-events: all;
@@ -106,4 +110,41 @@
 	stroke-width: 2.5;
 	stroke-linecap: round;
 	stroke-linejoin: round;
+}
+
+/* ─── Notes overlay + note-input dialog (Inc 7b) ─────────────────── */
+
+/* Saved notes are display-only; pointer-events: none so they never
+   block drawing on the overlay beneath. */
+[data-lens='annotate'] .annotate-note {
+	position: absolute;
+	max-width: 200px;
+	padding: 2px 6px;
+	font-size: 0.8rem;
+	background: #fff8e1;
+	border: 2px solid #888;
+	border-radius: 3px;
+	pointer-events: none;
+	white-space: pre-wrap;
+}
+
+/* The dialog sits above the drawing overlay (rendered after it) and
+   captures its own pointer events. */
+[data-lens='annotate'] .annotate-note-dialog {
+	position: absolute;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 6px;
+	background: #fff;
+	border: 1px solid #888;
+	border-radius: 4px;
+	box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+}
+
+[data-lens='annotate'] .annotate-note-dialog textarea {
+	min-width: 160px;
+	min-height: 48px;
+	font-family: inherit;
 }
