@@ -443,49 +443,9 @@ describe('justEnoughJs', () => {
 		});
 	});
 
-	describe('CallExpression constraint', () => {
-		const validate = justEnoughJs.nodes.CallExpression as NodeValidator;
-
-		it('allows call with non-computed callee', () => {
-			const result = callRule(
-				validate,
-				fakeNode({
-					type: 'CallExpression',
-					callee: {
-						type: 'MemberExpression',
-						computed: false,
-						property: { type: 'Identifier', name: 'log' },
-					},
-				}),
-			);
-			expect(result).toBe(true);
-		});
-
-		it('allows call with identifier callee', () => {
-			const result = callRule(
-				validate,
-				fakeNode({
-					type: 'CallExpression',
-					callee: { type: 'Identifier', name: 'alert' },
-				}),
-			);
-			expect(result).toBe(true);
-		});
-
-		it('rejects call with computed MemberExpression callee', () => {
-			const result = callRule(
-				validate,
-				fakeNode({
-					type: 'CallExpression',
-					callee: {
-						type: 'MemberExpression',
-						computed: true,
-						property: { type: 'Literal', value: 'toLowerCase' },
-					},
-				}),
-			);
-			expect(result).not.toBe(true);
-			expect(result).toHaveProperty('nodeType', 'CallExpression');
+	describe('CallExpression', () => {
+		it('is unconditionally allowed', () => {
+			expect(justEnoughJs.nodes.CallExpression).toBe(true);
 		});
 	});
 

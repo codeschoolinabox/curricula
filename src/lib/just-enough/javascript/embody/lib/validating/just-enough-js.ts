@@ -412,34 +412,6 @@ function createMemberValidator(
 	};
 }
 
-/**
- * Validates a call expression: rejects computed member calls like
- * `str['toLowerCase']()`.
- *
- * @remarks Computed method calls are a way to circumvent the
- * property name allowlist — the string `'toLowerCase'` isn't
- * visible as a property name in the AST. This validator catches
- * that pattern. Regular calls (identifier callee, non-computed
- * member callee) pass through.
- */
-function validateCallExpression(node: Node, nodePath: string): true | Violation {
-	const callee = (node as unknown as Record<string, unknown>).callee as {
-		type: string;
-		computed?: boolean;
-	};
-
-	if (callee.type === 'MemberExpression' && callee.computed === true) {
-		return createViolation(
-			'CallExpression',
-			'Computed method calls are not allowed — use dot notation',
-			extractLocation(node),
-			nodePath,
-		);
-	}
-
-	return true;
-}
-
 // -- location helper --
 
 /**
@@ -557,6 +529,10 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		TemplateElement: true,
 		ConditionalExpression: true,
 		ChainExpression: true,
+		// CallExpression is unconditionally allowed — reference.md permits
+		// computed calls (`Math[method]()`), so calls are not gated. The
+		// member blocklist governs dot access (DOCS.md § Member model).
+		CallExpression: true,
 		// WHY: preserveParens in parser creates ParenthesizedExpression
 		// nodes. Allowing them here lets `(a + b) * c` pass validation
 		// and gives trace visualization anchor nodes for grouping.
@@ -576,7 +552,6 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		ForStatement: validateForStatement,
 		ForOfStatement: validateForOfStatement,
 		MemberExpression: createMemberValidator(BLOCKED_MEMBER_NAMES),
-		CallExpression: validateCallExpression,
 		AssignmentExpression: validateAssignmentExpression,
 		UpdateExpression: validateUpdateExpression,
 		BinaryExpression: validateBinaryExpression,

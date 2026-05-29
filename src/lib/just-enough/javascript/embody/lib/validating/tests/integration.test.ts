@@ -222,14 +222,25 @@ describe('integration: common student mistakes', () => {
 		expect(v).toBeDefined();
 	});
 
-	it('catches computed method calls', () => {
+	it('allows computed method calls', () => {
 		const report = validateProgram(
 			'let x = "hi"; x["toLowerCase"]();',
 			justEnoughJs,
 		);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find((v) => v.nodeType === 'CallExpression');
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
+	});
+
+	it('allows a guarded dynamic computed call (reference.md pattern)', () => {
+		const report = validateProgram(
+			'let method = "round";\nif (method in Math) {\n  Math[method](3.7);\n}\n',
+			justEnoughJs,
+		);
+		expect(report.isValid).toBe(true);
+	});
+
+	it('computed access bypasses the member blocklist (accepted residual hole)', () => {
+		const report = validateProgram('let x = "hi"; x["split"]("");', justEnoughJs);
+		expect(report.isValid).toBe(true);
 	});
 });
 
