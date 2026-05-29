@@ -55,9 +55,13 @@ jsdom) plus the wrapper end-to-end (jsdom + `@testing-library/react`).
    (frozen `Snippet`) and `config` (frozen `LensConfig`) via props. The wrapper
    reads three known config fields (`colorize`, `defaultView`, `eraserRadius`)
    with documented defaults; other fields are preserved but ignored. Initial
-   per-mount state seeds: active view from `config.defaultView`, active tool =
-   `pen`, active color = the first entry of the six-swatch palette (a
-   module-level constant in `index.tsx`; not config-driven in v1 — see
+   per-mount state seeds: active view from `config.defaultView`, **clamped to
+   `code` when `config.defaultView === 'flowchart'` but
+   `embodiment.status.parsed === false`** (so a parse-failing snippet never
+   mounts straight into a guaranteed-failing flowchart-view); active tool = the
+   resolved view's default (`pen` for code-view, `select` for flowchart-view);
+   active color = the first entry of the six-swatch palette (a module-level
+   constant in `index.tsx`; not config-driven in v1 — see
    [Future direction](#future-direction)), empty annotation sets for both views,
    no in-progress stroke, no note dialog, no selected flowchart node.
 
@@ -96,13 +100,22 @@ jsdom) plus the wrapper end-to-end (jsdom + `@testing-library/react`).
 4. **Handle interaction** (per learner event) — pen / eraser / note handlers
    update the active view's `AnnotationSet` immutably, producing a new
    `AnnotationsByView` whose inactive entry is reference-identical to the prior
-   frame (the **toggle-preserves-annotations** invariant lives here). View
-   toggle updates `viewMode` and the `data-view-mode` attribute; both
-   `AnnotationSet`s remain in state untouched. Flowchart-node click updates
+   frame (the **toggle-preserves-annotations** invariant lives here). The active
+   tool gates which surface receives pointer events: for `pen`/`eraser`/`note`
+   the drawing overlay captures events (`pointer-events: all`); for `select` the
+   overlay yields (`pointer-events: none`) so clicks fall through to the
+   flowchart container, where React event delegation resolves the clicked node
+   via `closest('[data-flowchart-node]')`. View toggle updates `viewMode` and
+   the `data-view-mode` attribute, resets the active tool to the new view's
+   default (`pen` for code, `select` for flowchart), and clears `selectedNodeId`;
+   both `AnnotationSet`s remain in state untouched. Flowchart-node click (only
+   reachable while `select` is active and the overlay is yielding) updates
    `selectedNodeId`; flowchart-node hover is purely visual (CSS `:hover` on
    `[data-flowchart-node]`, no state change). `selectedNodeId` clears to `null`
-   on view-toggle and on snippet-change (so a stale highlight from a prior
-   flowchart-view session doesn't linger when the learner returns).
+   on view-toggle (the toggle handler); on snippet-change the whole mount is
+   discarded and re-seeded (Phase 5), so that reset is structural — not an
+   explicit clear — and a stale highlight never lingers when the learner
+   returns.
 
 5. **Unmount** (React-driven) — orchestrator unmounts when the snippet changes
    or the learner exits the lens. Annotation sets, in-progress stroke, and
@@ -133,6 +146,7 @@ flowchart TD
     CodeTree --> Render["wrapper render"]
     SvgState --> Render
     State -->|"annotationsByView[viewMode]"| Overlay["drawing + notes overlay"]
+    State -->|"tool → overlay pointer-events<br/>(select ⇒ yields)"| Overlay
     State -->|"selectedNodeId"| Highlight["selected-node CSS rule<br/>(data-flowchart-node match)"]
     Overlay --> Render
     Highlight --> Render
@@ -143,10 +157,10 @@ flowchart TD
     Annotations -->|"new AnnotationsByView"| Mutation["setState<br/>(inactive view ref-identical)"]
     Mutation --> State
 
-    DOM -->|"view-toggle"| ToggleIn["viewMode swap<br/>(state-only; annotation sets untouched;<br/>selectedNodeId cleared)"]
+    DOM -->|"view-toggle"| ToggleIn["viewMode swap<br/>(state-only; annotation sets untouched;<br/>tool reset to view default;<br/>selectedNodeId cleared)"]
     ToggleIn --> State
 
-    DOM -->|"flowchart-node click"| Select["selectedNodeId update"]
+    DOM -->|"flowchart-node click<br/>(tool=select; overlay yields)"| Select["selectedNodeId update"]
     Select --> State
 ```
 
@@ -185,7 +199,29 @@ state-only too** — visual selection is a CSS rule keyed on the
   container handles click + hover via
   `event.target.closest('[data-flowchart-node]')`. **No direct DOM mutation
   outside React event handlers**; the post-inject pass only _tags_ elements with
-  `data-*` attributes so React can later route events.
+  `data-*` attributes so React can later route events. Node ids are **positional**
+  (the tagger assigns the SVG-walk index as `data-flowchart-node="<n>"`). Because
+  ids `0, 1, 2…` are reused across different flowcharts, `selectedNodeId` MUST be
+  cleared on view-toggle and is structurally reset on snippet-change (remount) —
+  otherwise a stale id could match a _different_ node on a freshly generated SVG.
+- **Overlay pointer-events are tool-gated, not conditionally rendered.** The
+  drawing overlay captures pointer events (`pointer-events: all`) for the
+  drawing/annotation tools (`pen`, `eraser`, `note`) and yields them
+  (`pointer-events: none`) when the active tool is `select`, so a flowchart-node
+  click reaches the container for `closest('[data-flowchart-node]')` delegation.
+  Tool-gating the overlay (toggling `pointer-events`, never unmounting it) keeps
+  saved strokes painted over the flowchart while `select` inspects the nodes
+  beneath them. The gate is **keyed off the `data-tool` attribute** (a CSS rule
+  setting `pointer-events: none` on the overlay when `data-tool="select"`), not
+  inline style — so it rides the already-load-bearing `data-tool` hook.
+  **Testability note:** jsdom has no layout/hit-testing engine, so real
+  `pointer-events` fall-through is NOT exercised by the wrapper suite. The
+  jsdom-testable contract is two-part: (a) the active tool is observable on the
+  `data-tool` attribute (and the overlay's resolved `pointer-events` flips with
+  it); (b) the flowchart container's delegated click handler maps a click fired
+  **directly at** a tagged `[data-flowchart-node]` element to a `selectedNodeId`
+  update. True fall-through hit-testing is a real-browser / manual-verification
+  concern, covered by the 🔍 sandbox checkpoint, not the jsdom suite.
 - **Tier-1 classification.** `applicableTo` always returns `true`; code-view +
   drawing + notes work on any source string. The flowchart-view is a Tier-2
   sub-feature internally — the flowchart-toggle button has `disabled` (and

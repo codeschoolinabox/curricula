@@ -1,7 +1,8 @@
 /**
  * @file Domain model for the `annotate` lens — an annotation surface
- * over the snippet with two views (code, flowchart) and three tools
- * (pen, eraser, note). The learner toggles views without losing
+ * over the snippet with two views (code, flowchart) and four tools:
+ * three annotation tools (pen, eraser, note) plus one inspection tool
+ * (select). The learner toggles views without losing
  * annotations on either; both annotation sets persist for the lifetime
  * of one mount and are discarded together when the snippet changes.
  *
@@ -55,14 +56,27 @@
 type ViewMode = 'code' | 'flowchart';
 
 /**
- * Active annotation tool. The tool determines what learner mouse
- * events do over the active view.
+ * Active tool. The tool determines what learner mouse events do over
+ * the active view. `pen`, `eraser`, and `note` are the
+ * drawing/annotation tools (active over either view); `select` is the
+ * flowchart-node inspection tool — clicking a flowchart node selects it
+ * (visual outline) so the learner can correlate a control-flow construct
+ * with the source line they marked up in code-view.
+ *
+ * @remarks The active tool **defaults per view**: code-view enters with
+ * `pen` (drawing is the primary code interaction); flowchart-view enters
+ * with `select` (node inspection is the primary flowchart interaction).
+ * The learner can switch tools within either view — e.g. switch to `pen`
+ * to draw on the flowchart. While `select` is active the drawing overlay
+ * yields pointer events so clicks reach the flowchart container, where
+ * React event delegation resolves the node via
+ * `closest('[data-flowchart-node]')`.
  *
  * @remarks Pre-refactor tool catalog also included `arrow`, `circle`,
  * and a line-level `highlight`; those were stubbed-and-deferred and
  * are not in the v1 catalog. Restoration is a per-tool follow-up.
  */
-type Tool = 'pen' | 'eraser' | 'note';
+type Tool = 'pen' | 'eraser' | 'note' | 'select';
 
 // ─── Annotation primitives ──────────────────────────────────
 
