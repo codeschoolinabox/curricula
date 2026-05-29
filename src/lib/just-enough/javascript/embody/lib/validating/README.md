@@ -29,8 +29,9 @@ The `LanguageLevel` object controls everything:
 - `name` — identifies the level in reports (e.g. `"Just Enough JavaScript"`)
 - `allowedGlobals` — `ReadonlySet<string>` of identifier names that don't need a
   `let`/`const` declaration (e.g. `console`, `alert`, `String`)
-- `allowedMemberNames` — `ReadonlySet<string>` of property names allowed in
-  non-computed member expressions (e.g. `length`, `toLowerCase`, `log`)
+- `blockedMemberNames` — `ReadonlySet<string>` of property names FORBIDDEN in
+  non-computed member expressions (e.g. `split`, `constructor`); every other
+  name passes (allow-all-except-blocklist)
 - `nodes` — `Record<string, NodeRule>` where each key is an ESTree node type and
   each value is: `true` (unconditionally allowed), `false` (explicitly
   forbidden), or a `NodeValidator` function for constraint checking. Missing
@@ -91,6 +92,22 @@ These terms join the existing `Violation` / `ValidationReport` /
   path as their second argument and forward it to `createViolation`
   (a required argument — no default). Matches the `nodePath`
   convention used by the tracer and `embody/types.ts`.
+- **Blocked member name** — a property name in
+  `LanguageLevel.blockedMemberNames`. Non-computed dot access to a
+  blocked name (`x.split`, `x.constructor`) is a rejection; every other
+  dot name passes. This allow-all-except-blocklist model is the inverse
+  of an allowlist — chosen so the validator tracks reference.md's "all
+  String methods except split/match/matchAll" framing without
+  enumerating the full permitted surface.
+- **Date-only `new`** — `NewExpression` is allowed only when the callee
+  is the identifier `Date` (`new Date(...)`). reference.md states
+  `new Date()` is the sole use of `new` in JeJ; every other `new` is a
+  rejection.
+- **Computed access vs computed call** — bracket access (`x[k]`,
+  `Math[method]`) and computed method calls (`Math[method]()`) both
+  pass. The member blocklist governs only non-computed dot access, so
+  surface integrity is scoped to dot access; computed access is not
+  gated (an accepted residual hole — see DOCS.md § Member model).
 
 ### When to use `BaseResult` vs `ValidationReport`
 
@@ -187,37 +204,47 @@ violations because `IfStatement.consequent`/`.alternate` must be
 
 **Operators**:
 
-- Binary: `===`, `!==`, `+`, `-`, `*`, `/`, `%`, `**`, `>`, `<`, `>=`, `<=`
+- Binary: `===`, `!==`, `+`, `-`, `*`, `/`, `%`, `**`, `>`, `<`, `>=`, `<=`,
+  bitwise `&`, `|`, `^`, `<<`, `>>`, `>>>`, and `in`
 - Logical: `&&`, `||`, `??`
-- Unary: `typeof`, `!`, `-`
+- Unary: `typeof`, `!`, `-`, `~`, `void`
+- Update: `++`, `--` (prefix and postfix)
 - Ternary: `? :` (ConditionalExpression)
-- Assignment: `=` only (to variables only, not properties)
+- Assignment: `=` plus compound `+=`, `-=`, `*=`, `/=`, `%=`, `**=`, `??=`,
+  `||=`, `&&=`, and bitwise-compound `&=`, `|=`, `^=`, `<<=`, `>>=`, `>>>=`
+  (all to variables only, not properties)
 - Optional chaining: `?.` (ChainExpression)
+- `new`: only `new Date(...)` — the sole `new` in JeJ
 
 **Grouping**: Parentheses `()` for controlling operator precedence. Parsed with
 `preserveParens: true` so `ParenthesizedExpression` nodes appear in the AST
 (provides anchor points for trace visualization). Unconditionally allowed.
 
-**Literals**: string, number, boolean, null, undefined, template literals. Regex
-and BigInt literals are violations.
+**Literals**: string, number, boolean, null, undefined, template literals, regex
+literals, and BigInt literals (`42n`). Every literal form JeJ can produce is
+allowed.
 
 **Expressions**: member access (dot and bracket), function calls, identifiers,
 template literals, parenthesized expressions.
 
-**Member access constraints**: Bracket access (`arr[0]`) always passes. Dot
-access (`.foo`) only passes if the property name is in `allowedMemberNames`.
+**Member access constraints**: Bracket/computed access (`arr[0]`,
+`Math[method]`) always passes. Dot access (`.foo`) passes unless the property
+name is in `blockedMemberNames` (allow-all-except-blocklist).
 
-**Call constraints**: Computed method calls (`str['toLowerCase']()`) are
-violations — only dot-access calls are allowed.
+**Call constraints**: Computed method calls (`Math[method](3.7)`) are allowed —
+`reference.md` shows them as valid JeJ. The member blocklist governs only
+non-computed dot access; computed access (literal or dynamic) is not gated (see
+DOCS.md § Member model for the accepted residual hole).
 
-**Module mode**: Always parses as `sourceType: 'module'` (gives strict mode for
-free).
+**Module mode**: parses `sourceType: 'module'` by default (strict mode for
+free). Sole exception: the `with`-statement easter egg falls back to script mode
+(see § Input-boundary behavior).
 
 ### Scope analysis
 
 The scope analyzer tracks `let`/`const` declarations per block scope and flags
-known JavaScript built-in globals (e.g. `Math`, `Date`, `document`) that are
-not in the language level's `allowedGlobals` set. Unknown identifiers (typos,
+known JavaScript built-in globals (e.g. `document`, `fetch`, `setTimeout`) that
+are not in the language level's `allowedGlobals` set. Unknown identifiers (typos,
 user-invented names) are not flagged — they produce `ReferenceError` at runtime.
 
 Scope model is simplified for JeJ's subset — no functions, catch clauses, or
@@ -228,17 +255,16 @@ not checked.
 
 These AST node types are NOT in the allowed list and always produce rejections:
 
-- `UpdateExpression` (`++`, `--`)
 - `ThrowStatement`
-- `NewExpression`
-- `FunctionDeclaration`, `ArrowFunctionExpression`
+- `FunctionDeclaration`, `ArrowFunctionExpression`, `FunctionExpression`
 - `ClassDeclaration`
+- `new` with any constructor other than `Date` — `new Date(...)` is allowed;
+  `new Foo()`, `new RegExp(...)` are rejections
 - Property assignment (`obj.prop = value`, `arr[0] = value`)
 - Any other ESTree node type not in the allowlist
 
-Some (loop guards via `UpdateExpression`) appear in reference.md under "Syntax
-You'll See (But Not Write)" — they are injected by tools, not written by
-learners.
+`UpdateExpression` (`++`, `--`) IS allowed — reference.md teaches it. (An earlier
+version of this doc listed it as blocked; that was drift between code and docs.)
 
 ## API
 

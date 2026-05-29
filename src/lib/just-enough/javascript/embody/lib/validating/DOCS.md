@@ -52,7 +52,7 @@ once in `validate-program.ts` (for the validation pipeline) and once in
 
 All violations are rejections — there are no informational warnings.
 
-### Public entry: result shaping
+## Data flow
 
 `validate(code)` is the public entry. It wraps the
 pipeline above with result-shape transformation:
@@ -88,7 +88,7 @@ the narrow default.
 
 All terminal results are deep-frozen (utility, not shown).
 
-#### Out of scope
+### Out of scope
 
 - **Format gate** — `validate(code)` does **not** call `checkFormat`.
   `FormattingResultError` is in the `BaseResult.error` union only so
@@ -109,11 +109,12 @@ All terminal results are deep-frozen (utility, not shown).
   display, mapping `line`/`column` to editor coordinates, deciding
   what to show learners on each `error.kind`.
 
-### Scope analysis model
+## Scope analysis model
 
-JeJ has no functions, no catch clauses, no classes, no `with`. Only
+JeJ's taught surface has no functions, catch clauses, or classes. Only
 `let`/`const` in blocks, for-of heads, and `Program`-level. This dramatically
-simplifies scope analysis compared to general JavaScript.
+simplifies scope analysis compared to general JavaScript. (`with` survives only
+as an undocumented easter egg — see decision #6.)
 
 **Scope boundaries:** `Program`, `BlockStatement`, `ForOfStatement`
 
@@ -143,28 +144,46 @@ fix suggestions.
 
 3. **Injectable configuration.** `validateProgram` takes the `LanguageLevel` as
    an argument rather than hardcoding it. Different exercises can use different
-   subsets. `allowedGlobals` and `allowedMemberNames` are `ReadonlySet<string>`
+   subsets. `allowedGlobals` and `blockedMemberNames` are `ReadonlySet<string>`
    for the same reason — injectable, not hardcoded.
 
 4. **No type checking.** `.log` called on a string is a runtime error, not a
-   static validation concern. We check property _names_ against an allowlist,
-   not the _types_ of their receivers.
+   static validation concern. We check property _names_ against a blocklist
+   (`blockedMemberNames`), not the _types_ of their receivers — any name not on
+   the blocklist passes regardless of receiver.
 
 5. **No callee identity checking.** `let f = alert; f()` is valid (alert is in
    allowedGlobals, f is declared). We don't track that f "is" alert.
    MemberExpression property name checking + undeclared globals analysis covers
    the important cases without alias tracking.
 
-6. **Scope analysis simplified for JeJ.** No functions means no function scope,
-   no hoisting, no parameters, no closures. No catch/class/with means fewer
-   binding forms. This is a feature, not a limitation — the scope model matches
-   exactly what JeJ learners can write.
+   _Exception — `new Date()`._ `validateNewExpression` checks
+   `callee.name === 'Date'` (reference.md:882-884 makes `new Date()` the sole
+   permitted `new`). This is a syntactic name check, not identity/alias
+   tracking — `let Date = Math; new Date()` passes the validator and throws at
+   runtime, which is acceptable: the realm is disposable and the check serves
+   pedagogical surface, consistent with the name-not-type philosophy of
+   decision #4.
 
-7. **Always module mode.** `sourceType: 'module'` is hardcoded in
+6. **Scope analysis simplified for JeJ.** No functions means no function scope,
+   no hoisting, no parameters, no closures. No catch or class means fewer
+   binding forms. (`with` survives as an easter egg; when present it forces a
+   script-mode parse in `validate-program.ts` and the scope analyzer skips
+   global checks inside its body via `insideWith`, since dynamic scope defeats
+   static analysis.) This is a feature, not a limitation — the scope model
+   matches exactly what JeJ learners can write.
+
+7. **Module mode by default.** `sourceType: 'module'` is passed by
    `validateProgram` (the pipeline entry point). `parseProgram` itself accepts
-   `sourceType` as a parameter for flexibility, but the pipeline always passes
-   `'module'`. Module mode provides strict mode for free and matches how modern
-   JS applications work.
+   `sourceType` as a parameter for flexibility. Module mode provides strict mode
+   for free and matches how modern JS applications work. Sole exception: the
+   `with`-statement easter egg falls back to script mode (decision #6).
+
+8. **Literals = allow-all.** `nodes.Literal: true` (no validator). reference.md
+   sanctions every literal form JeJ produces: string, number, boolean, null,
+   undefined, template, regex, and BigInt (`42n`; reference.md:3131-3197). An
+   earlier `validateLiteral` rejected BigInt — drift; its doc-comment also
+   wrongly claimed it rejected regex (it never did). Both removed.
 
 ## Why preserveParens is enabled
 
@@ -186,13 +205,71 @@ generic `getChildNodes` walker handles wrapper nodes automatically.
 blocks property assignment (`obj.prop = value`, `arr[0] = value`) while allowing
 variable assignment (`x = 5`).
 
-**Rationale:** JeJ has no object literals, no array constructors, no `new` — there
-is zero valid use case for assigning to a property. Allowing it risks learners
-accidentally overwriting built-in methods (`console.log = 5`) or creating
-confusing patterns with no pedagogical value.
+**Rationale:** JeJ has no object literals and no array constructors; the only
+`new` is `new Date()` (which yields a Date whose methods all return primitives).
+There is still no object or array to assign a property into. Allowing property
+assignment would risk learners accidentally overwriting built-in methods
+(`console.log = 5`) or creating confusing patterns with no pedagogical value.
 
 The error message is clear: "You can only assign to variables — property
 assignment is not allowed."
+
+## Member model: allow-all-except-blocklist
+
+JeJ's member-access policy is a **blocklist**, not an allowlist: any
+non-computed property name passes unless it is in `BLOCKED_MEMBER_NAMES`. This
+mirrors reference.md's framing ("all `String.prototype` methods except
+`split`/`match`/`matchAll`") without enumerating the full permitted surface —
+every console / Number / Date / String method reference.md sanctions would
+otherwise need listing and re-syncing on every reference.md change.
+
+The blocklist has two tiers:
+
+- **Array-returning string methods** reference.md excludes because arrays are
+  out of JeJ scope: `split`, `match`, `matchAll`.
+- **Reflection / prototype-escape names** with no JeJ use: `constructor`,
+  `__proto__`, `prototype`, `call`, `apply`, `bind`, `__defineGetter__`,
+  `__defineSetter__`, `__lookupGetter__`, `__lookupSetter__`, `caller`,
+  `arguments`.
+
+`toString` and `valueOf` are deliberately NOT blocked — reference.md allows them
+(e.g. `(255).toString(16)`).
+
+Consequence of the inversion: every other property name — including
+primitive-returning methods absent from reference.md (`charCodeAt`, `normalize`,
+`localeCompare`, …) — now passes dot access. This is intended; reference.md
+explicitly sanctions un-listed String/Math methods (reference.md:1916). The
+blocklist is not an exhaustive "dangerous names" fence — it is the minimal set
+needed to honor the array-type exclusion and keep the prototype graph off the
+_dot-access_ surface.
+
+### Accepted residual hole (computed access)
+
+The blocklist governs only **non-computed** dot access. Computed access —
+`x['split']`, `x['constructor']`, `Math[method]` — is not gated, because
+reference.md requires dynamic computed calls (`Math[method](3.7)` inside
+`if (method in Math)`) and the validator is purely syntactic (no type info to
+tell a safe dynamic dispatch from an escape). So a learner can reach a blocked
+name through brackets (`x['split']()`).
+
+This is **accepted**, not a defect. The JeJ realm is a disposable Web Worker
+with no host capabilities injected (only dialog traps), and `eval` is already an
+allowed easter egg — arbitrary code is reachable regardless. The blocklist
+exists for **pedagogical-surface integrity** (keeping dot access within the
+taught surface), not as a security sandbox.
+
+There is a learner-experience asymmetry worth naming: `x.split()` is rejected
+with a clear message, but `x['split']()` (or optional-computed `x?.['split']()`)
+passes silently — a learner could "escape" a dot rejection by switching to
+brackets and get no feedback. We accept it because (a) reference.md never teaches
+bracket access as an alternative to a blocked dot method; the only computed
+access it teaches is `Math[method]()` guarded by `in` (reference.md:1948-1967),
+so a learner reaching `x['split']` is already off the taught path; and (b)
+closing it would need the type-aware analysis the validator deliberately lacks
+(decision #4). The surface-integrity guarantee is therefore scoped to _dot
+access only_. Gating computed string-literal keys (`x['split']`) was considered
+and deliberately declined (Option B) to keep the model simple — do not add it
+later without revisiting that decision.
 
 ## What this module deliberately does NOT do
 
@@ -220,11 +297,11 @@ assignment is not allowed."
 ### File roles
 
 **`just-enough-js.ts`** — The pre-built "Just Enough JavaScript" language level
-configuration. Defines `allowedGlobals`, `allowedMemberNames`, and the `nodes`
+configuration. Defines `allowedGlobals`, `blockedMemberNames`, and the `nodes`
 allowlist with constraint validators. This is the single source of truth for
-what JeJ permits — it must match `reference.md`. The `ALLOWED_MEMBER_NAMES` Set
+what JeJ permits — it must match `reference.md`. The `BLOCKED_MEMBER_NAMES` Set
 is defined once and referenced by both the `createMemberValidator` factory (for
-runtime checking) and the `allowedMemberNames` config field (for external
+runtime checking) and the `blockedMemberNames` config field (for external
 consumers).
 
 **`check-undeclared-globals.ts`** — Scope analysis pass. Walks the AST
