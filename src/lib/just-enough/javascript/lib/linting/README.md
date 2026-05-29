@@ -10,7 +10,7 @@ This module is the **adapter** between
 produces `Violation[]` against the JEJ subset) and
 [`../../orchestrate/lib/editing/`](../../orchestrate/lib/editing/)
 (which consumes `LintDiagnostic[]` to render CodeMirror gutter markers
-+ hover tooltips). It is callable from any peer that wants JEJ-aware
+and hover tooltips). It is callable from any peer that wants JEJ-aware
 diagnostics over a snippet string.
 
 ## Glossary

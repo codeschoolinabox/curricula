@@ -61,7 +61,7 @@ flowchart TD
     Outcome -->|"parses, has rejections"| Rejections
     Outcome -->|"parses, no rejections"| Clean
     ParseErr -->|"synthesize one point diagnostic<br/>severity = error"| Diagnostics
-    Rejections -->|"map each 1:1<br/>flatten inclusive range, severity passthrough"| Diagnostics
+    Rejections -->|"map each 1:1<br/>flatten range (end exclusive), severity passthrough"| Diagnostics
     Clean -->|"empty array"| Diagnostics
 ```
 
