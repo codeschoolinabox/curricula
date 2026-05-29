@@ -130,11 +130,11 @@ describe('validate', () => {
 	});
 
 	describe('scope analysis pass is wired in', () => {
-		it('rejects undeclared global Date (covers Globals branch)', () => {
-			// Date is a known JS global but not in JeJ's allowedGlobals
-			// (Math/console/alert/etc. are; Date is not). Failing this test
-			// means checkUndeclaredGlobals was bypassed.
-			const result = validate('let x = Date;\n');
+		it('rejects an undeclared known global (covers Globals branch)', () => {
+			// fetch is a known JS global but not in JeJ's allowedGlobals
+			// (Math/console/alert/Date/etc. are; fetch is not). Failing this
+			// test means checkUndeclaredGlobals was bypassed.
+			const result = validate('let x = fetch;\n');
 			expect(result.ok).toBe(false);
 			expect(result.rejections).toBeDefined();
 		});

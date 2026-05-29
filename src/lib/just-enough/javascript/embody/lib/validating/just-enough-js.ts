@@ -412,6 +412,29 @@ function createMemberValidator(
 	};
 }
 
+/**
+ * Validates a new expression: only `new Date(...)` is allowed.
+ *
+ * @remarks reference.md makes `new Date()` the sole use of `new` in JeJ
+ * (it yields a Date whose methods return primitives). Any other
+ * constructor (`new Foo()`, `new RegExp(...)`) is rejected. This is a
+ * syntactic name check on the callee identifier, not identity tracking
+ * (see DOCS.md decision #5).
+ */
+function validateNewExpression(node: Node, nodePath: string): true | Violation {
+	const callee = (node as unknown as Record<string, unknown>).callee as {
+		type: string;
+		name?: string;
+	};
+	if (callee.type === 'Identifier' && callee.name === 'Date') return true;
+	return createViolation(
+		'NewExpression',
+		"'new' is only allowed with Date (new Date()) at this language level",
+		extractLocation(node),
+		nodePath,
+	);
+}
+
 // -- location helper --
 
 /**
@@ -503,6 +526,8 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 			'Boolean',
 			'Math',
 			'RegExp',
+			'Date',
+			'BigInt',
 			'parseInt',
 			'parseFloat',
 			'undefined',
@@ -552,6 +577,7 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		ForStatement: validateForStatement,
 		ForOfStatement: validateForOfStatement,
 		MemberExpression: createMemberValidator(BLOCKED_MEMBER_NAMES),
+		NewExpression: validateNewExpression,
 		AssignmentExpression: validateAssignmentExpression,
 		UpdateExpression: validateUpdateExpression,
 		BinaryExpression: validateBinaryExpression,

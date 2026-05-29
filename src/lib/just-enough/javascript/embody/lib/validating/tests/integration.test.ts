@@ -288,11 +288,12 @@ describe('integration: scope analysis', () => {
 	});
 
 	it('known global after block scope still rejected', () => {
-		const source = 'if (true) { let Date = 1;\nconsole.log(Date); }\nDate;\n';
+		const source =
+			'if (true) { let document = 1;\nconsole.log(document); }\ndocument;\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(false);
 		const v = report.violations.find(
-			(v) => v.severity === 'rejection' && v.message.includes("'Date'"),
+			(v) => v.severity === 'rejection' && v.message.includes("'document'"),
 		);
 		expect(v).toBeDefined();
 	});
@@ -331,6 +332,26 @@ describe('integration: allowed globals coverage', () => {
 
 	it('accepts Boolean as a value', () => {
 		const source = 'let b = Boolean;\nconsole.log(b);\n';
+		const report = validateProgram(source, justEnoughJs);
+		expect(report.isValid).toBe(true);
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
+		expect(rejections).toHaveLength(0);
+	});
+
+	it('accepts Date as a value', () => {
+		const source = 'let d = Date;\nconsole.log(d);\n';
+		const report = validateProgram(source, justEnoughJs);
+		expect(report.isValid).toBe(true);
+		const rejections = report.violations.filter(
+			(v) => v.severity === 'rejection',
+		);
+		expect(rejections).toHaveLength(0);
+	});
+
+	it('accepts BigInt as a value', () => {
+		const source = 'let b = BigInt;\nconsole.log(b);\n';
 		const report = validateProgram(source, justEnoughJs);
 		expect(report.isValid).toBe(true);
 		const rejections = report.violations.filter(
@@ -408,18 +429,6 @@ describe('integration: allowed member names coverage', () => {
 });
 
 describe('integration: disallowed globals', () => {
-	it('flags Date as undeclared', () => {
-		const report = validateProgram(
-			'let x = Date;\nconsole.log(x);\n',
-			justEnoughJs,
-		);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find(
-			(v) => v.severity === 'rejection' && v.message.includes('Date'),
-		);
-		expect(v).toBeDefined();
-	});
-
 	it('flags fetch as undeclared', () => {
 		const report = validateProgram('fetch("url");\n', justEnoughJs);
 		expect(report.isValid).toBe(false);
@@ -502,6 +511,46 @@ describe('integration: disallowed methods', () => {
 	it('allows console.error (not blocklisted)', () => {
 		const report = validateProgram('console.error("oops");\n', justEnoughJs);
 		expect(report.isValid).toBe(true);
+	});
+});
+
+describe('integration: new expression (Date only)', () => {
+	it('allows new Date()', () => {
+		const report = validateProgram('let now = new Date();\n', justEnoughJs);
+		expect(report.isValid).toBe(true);
+	});
+
+	it('allows new Date with an argument', () => {
+		const report = validateProgram(
+			"let d = new Date('2025-12-25');\n",
+			justEnoughJs,
+		);
+		expect(report.isValid).toBe(true);
+	});
+
+	it('rejects new with a non-Date constructor', () => {
+		const report = validateProgram('let f = new Foo();\n', justEnoughJs);
+		expect(report.isValid).toBe(false);
+		expect(
+			report.violations.some(
+				(violation) => violation.nodeType === 'NewExpression',
+			),
+		).toBe(true);
+	});
+
+	it('still flags a blocked construct inside new Date arguments', () => {
+		const report = validateProgram(
+			'let d = new Date("a".split(","));\n',
+			justEnoughJs,
+		);
+		expect(report.isValid).toBe(false);
+		expect(
+			report.violations.some(
+				(violation) =>
+					violation.nodeType === 'MemberExpression' &&
+					violation.message.includes('split'),
+			),
+		).toBe(true);
 	});
 });
 

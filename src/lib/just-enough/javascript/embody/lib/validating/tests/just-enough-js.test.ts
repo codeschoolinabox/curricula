@@ -63,6 +63,11 @@ describe('justEnoughJs', () => {
 			expect(justEnoughJs.allowedGlobals.has('parseFloat')).toBe(true);
 		});
 
+		it('includes Date and BigInt globals', () => {
+			expect(justEnoughJs.allowedGlobals.has('Date')).toBe(true);
+			expect(justEnoughJs.allowedGlobals.has('BigInt')).toBe(true);
+		});
+
 		it('has a frozen blockedMemberNames Set', () => {
 			expect(justEnoughJs.blockedMemberNames).toBeInstanceOf(Set);
 			expect(Object.isFrozen(justEnoughJs.blockedMemberNames)).toBe(true);
@@ -446,6 +451,72 @@ describe('justEnoughJs', () => {
 	describe('CallExpression', () => {
 		it('is unconditionally allowed', () => {
 			expect(justEnoughJs.nodes.CallExpression).toBe(true);
+		});
+	});
+
+	describe('NewExpression constraint', () => {
+		const validate = justEnoughJs.nodes.NewExpression as NodeValidator;
+
+		it('is wired as a validator function', () => {
+			expect(typeof justEnoughJs.nodes.NewExpression).toBe('function');
+		});
+
+		it('allows new Date()', () => {
+			const result = callRule(
+				validate,
+				fakeNode({
+					type: 'NewExpression',
+					callee: { type: 'Identifier', name: 'Date' },
+				}),
+			);
+			expect(result).toBe(true);
+		});
+
+		it('rejects new with a non-Date identifier callee', () => {
+			const result = callRule(
+				validate,
+				fakeNode({
+					type: 'NewExpression',
+					callee: { type: 'Identifier', name: 'Foo' },
+				}),
+			);
+			expect(result).not.toBe(true);
+			expect(result).toHaveProperty('nodeType', 'NewExpression');
+		});
+
+		it('rejects new RegExp()', () => {
+			const result = callRule(
+				validate,
+				fakeNode({
+					type: 'NewExpression',
+					callee: { type: 'Identifier', name: 'RegExp' },
+				}),
+			);
+			expect(result).not.toBe(true);
+		});
+
+		it('rejects new with a non-identifier callee', () => {
+			const result = callRule(
+				validate,
+				fakeNode({
+					type: 'NewExpression',
+					callee: { type: 'MemberExpression', computed: false },
+				}),
+			);
+			expect(result).not.toBe(true);
+		});
+
+		// Forces the `callee.type === 'Identifier'` guard: a non-Identifier
+		// callee that nonetheless carries name 'Date' must still reject.
+		it('rejects a non-Identifier callee even when it carries name Date', () => {
+			const result = callRule(
+				validate,
+				fakeNode({
+					type: 'NewExpression',
+					callee: { type: 'CallExpression', name: 'Date' },
+				}),
+			);
+			expect(result).not.toBe(true);
 		});
 	});
 
