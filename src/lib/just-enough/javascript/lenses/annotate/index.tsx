@@ -17,12 +17,60 @@ import { freezeInPlace } from '@utils/freeze.js';
 
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
+import annotationOps from './annotations.js';
 import annotateCore from './core.js';
 import deriveCodeSpanTree from './render-code.js';
 import deriveFlowchartSvg from './render-flowchart.js';
-import type { FlowchartSvg, ViewMode } from './types.js';
+import type {
+	AnnotationsByView,
+	FlowchartSvg,
+	Point,
+	Stroke,
+	Tool,
+	ViewMode,
+} from './types.js';
 
 import './annotate.css';
+
+/**
+ * The fixed six-swatch drawing palette. Module-level (not config-driven
+ * in v1 — per `./DOCS.md` § Future direction); the active color defaults
+ * to the first entry.
+ */
+const PALETTE: ReadonlyArray<string> = [
+	'#e63946',
+	'#f4a261',
+	'#e9c46a',
+	'#2a9d8f',
+	'#457b9d',
+	'#6d597a',
+];
+
+// Frozen so the shared module-level initial-state reference can never be
+// mutated; the annotations ops return new objects rather than mutating.
+const EMPTY_ANNOTATIONS: AnnotationsByView = freezeInPlace({
+	code: { strokes: [], notes: [] },
+	flowchart: { strokes: [], notes: [] },
+});
+
+/** Serializes a point array to an SVG `<polyline points>` string. */
+function pointsToString(points: ReadonlyArray<Point>): string {
+	return points.map((point) => `${point.x},${point.y}`).join(' ');
+}
+
+/**
+ * Whether any point of `stroke` lies within `radius` pixels of `point`
+ * (the eraser hit-test).
+ */
+function isStrokeNearPoint(
+	stroke: Stroke,
+	point: Point,
+	radius: number,
+): boolean {
+	return stroke.points.some(
+		(p) => Math.hypot(p.x - point.x, p.y - point.y) <= radius,
+	);
+}
 
 /**
  * Renders the flowchart-view's loading / error / ready state. The ready
@@ -127,9 +175,102 @@ const AnnotateComponent: ComponentType<LensProperties> =
 			[flowchart],
 		);
 
+		const [annotationsByView, setAnnotationsByView] =
+			useState<AnnotationsByView>(EMPTY_ANNOTATIONS);
+		const [tool, setTool] = useState<Tool>('pen');
+		const [color, setColor] = useState<string>(PALETTE[0]);
+		const [currentStroke, setCurrentStroke] = useState<
+			ReadonlyArray<Point> | null
+		>(null);
+
+		const eraserRadius =
+			typeof resolved.eraserRadius === 'number' ? resolved.eraserRadius : 20;
+		const activeStrokes = annotationsByView[viewMode].strokes;
+
+		function pointFromEvent(event: React.MouseEvent<SVGSVGElement>): Point {
+			const rect = event.currentTarget.getBoundingClientRect();
+			return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+		}
+
+		function startStroke(event: React.MouseEvent<SVGSVGElement>): void {
+			if (tool !== 'pen') return;
+			setCurrentStroke([pointFromEvent(event)]);
+		}
+
+		function extendStroke(event: React.MouseEvent<SVGSVGElement>): void {
+			if (tool !== 'pen' || !currentStroke) return;
+			const point = pointFromEvent(event);
+			setCurrentStroke((previous) => (previous ? [...previous, point] : [point]));
+		}
+
+		// Discard taps (fewer than two points) — a single point is not a
+		// visible freehand stroke, and committing it would leave an invisible
+		// artifact in the annotation set.
+		function finishStroke(): void {
+			if (tool === 'pen' && currentStroke && currentStroke.length >= 2) {
+				const stroke: Stroke = {
+					id: crypto.randomUUID(),
+					points: currentStroke,
+					color,
+				};
+				setAnnotationsByView((previous) =>
+					annotationOps.addStroke(previous, viewMode, stroke),
+				);
+			}
+			setCurrentStroke(null);
+		}
+
+		function eraseAt(event: React.MouseEvent<SVGSVGElement>): void {
+			if (tool !== 'eraser') return;
+			const point = pointFromEvent(event);
+			// Functional update reading `previous` so rapid clicks compose
+			// safely; returns the same reference (React bails the re-render)
+			// when nothing lies within the radius.
+			function eraseFrom(previous: AnnotationsByView): AnnotationsByView {
+				const erasedIds = previous[viewMode].strokes
+					.filter((stroke) => isStrokeNearPoint(stroke, point, eraserRadius))
+					.map((stroke) => stroke.id);
+				let next = previous;
+				for (const id of erasedIds) {
+					next = annotationOps.removeStroke(next, viewMode, id);
+				}
+				return next;
+			}
+			setAnnotationsByView(eraseFrom);
+		}
+
 		return (
 			<div data-lens="annotate" data-view-mode={viewMode}>
-				<main data-view-mode={viewMode}>
+				<div className="annotate-toolbar" data-tool={tool}>
+					<button
+						type="button"
+						data-tool-select="pen"
+						onClick={() => setTool('pen')}
+					>
+						Pen
+					</button>
+					<button
+						type="button"
+						data-tool-select="eraser"
+						onClick={() => setTool('eraser')}
+					>
+						Eraser
+					</button>
+					{PALETTE.map(function renderSwatch(swatch) {
+						return (
+							<button
+								key={swatch}
+								type="button"
+								className="annotate-swatch"
+								aria-label={`color ${swatch}`}
+								data-color-swatch={swatch}
+								style={{ background: swatch }}
+								onClick={() => setColor(swatch)}
+							/>
+						);
+					})}
+				</div>
+				<main className="annotate-main" data-view-mode={viewMode}>
 					{viewMode === 'code' && (
 						<pre>
 							<code>
@@ -155,6 +296,35 @@ const AnnotateComponent: ComponentType<LensProperties> =
 					)}
 					{viewMode === 'flowchart' &&
 						renderFlowchartView(flowchart, flowchartReference)}
+					{/* The overlay captures pointer events across the whole view
+					    for drawing. In flowchart-view this currently sits over the
+					    SVG; Inc 7c (flowchart-node selection) must gate this so
+					    node clicks reach the tagged `data-flowchart-node` groups. */}
+					<svg
+						className="annotate-drawing-overlay"
+						onMouseDown={startStroke}
+						onMouseMove={extendStroke}
+						onMouseUp={finishStroke}
+						onClick={eraseAt}
+					>
+						{activeStrokes.map(function renderSavedStroke(stroke) {
+							return (
+								<polyline
+									key={stroke.id}
+									points={pointsToString(stroke.points)}
+									stroke={stroke.color}
+									fill="none"
+								/>
+							);
+						})}
+						{currentStroke && (
+							<polyline
+								points={pointsToString(currentStroke)}
+								stroke={color}
+								fill="none"
+							/>
+						)}
+					</svg>
 				</main>
 			</div>
 		);

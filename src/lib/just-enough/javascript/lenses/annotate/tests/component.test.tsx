@@ -7,7 +7,7 @@
  * § UI structure and `../DOCS.md` § Phase 3 Render.
  */
 
-import { cleanup, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -20,6 +20,26 @@ afterEach(cleanup);
 
 function makeSnippet(): Snippet {
 	return embody('let x = 1;');
+}
+
+function drawStroke(overlay: Element, points: Array<[number, number]>): void {
+	const [first, ...rest] = points;
+	fireEvent.mouseDown(overlay, { clientX: first[0], clientY: first[1] });
+	for (const [x, y] of rest) {
+		fireEvent.mouseMove(overlay, { clientX: x, clientY: y });
+	}
+	const last = points.at(-1) ?? first;
+	fireEvent.mouseUp(overlay, { clientX: last[0], clientY: last[1] });
+}
+
+function getOverlay(container: HTMLElement): Element {
+	return container.querySelector('svg.annotate-drawing-overlay') as Element;
+}
+
+function selectTool(container: HTMLElement, tool: string): void {
+	fireEvent.click(
+		container.querySelector(`[data-tool-select="${tool}"]`) as Element,
+	);
 }
 
 describe('annotate lens — LensModule shape', () => {
@@ -223,4 +243,200 @@ describe('annotate lens — flowchart view', () => {
 			).not.toBeNull();
 		});
 	});
+});
+
+describe('annotate lens — drawing overlay', () => {
+	it('toolbar defaults to the pen tool', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		expect(
+			container.querySelector<HTMLElement>('[data-tool]')?.dataset.tool,
+		).toBe('pen');
+	});
+
+	it('renders six color swatch buttons', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		expect(container.querySelectorAll('[data-color-swatch]')).toHaveLength(6);
+	});
+
+	it('selecting the eraser tool sets data-tool to "eraser"', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		selectTool(container, 'eraser');
+		expect(
+			container.querySelector<HTMLElement>('[data-tool]')?.dataset.tool,
+		).toBe('eraser');
+	});
+
+	it('renders a drawing overlay svg', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		expect(getOverlay(container)).not.toBeNull();
+	});
+
+	it('a pen stroke (down → move → up) commits a polyline', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		drawStroke(getOverlay(container), [
+			[5, 5],
+			[15, 25],
+		]);
+		expect(
+			container.querySelector('svg.annotate-drawing-overlay polyline'),
+		).not.toBeNull();
+	});
+
+	it('the committed polyline carries the bounding-rect coordinates', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		drawStroke(getOverlay(container), [
+			[5, 5],
+			[15, 25],
+		]);
+		expect(
+			container
+				.querySelector('svg.annotate-drawing-overlay polyline')
+				?.getAttribute('points'),
+		).toBe('5,5 15,25');
+	});
+
+	it('an in-progress stroke renders during the gesture (before mouseup)', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		const overlay = getOverlay(container);
+		fireEvent.mouseDown(overlay, { clientX: 5, clientY: 5 });
+		fireEvent.mouseMove(overlay, { clientX: 15, clientY: 25 });
+		expect(
+			container.querySelectorAll('svg.annotate-drawing-overlay polyline'),
+		).toHaveLength(1);
+	});
+
+	it('a single-point tap (down → up, no move) commits no stroke', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		drawStroke(getOverlay(container), [[5, 5]]);
+		expect(
+			container.querySelector('svg.annotate-drawing-overlay polyline'),
+		).toBeNull();
+	});
+
+	it('a committed stroke uses the active color', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		const swatchColor =
+			container.querySelector<HTMLElement>('[data-color-swatch]')?.dataset
+				.colorSwatch;
+		drawStroke(getOverlay(container), [
+			[1, 1],
+			[2, 2],
+		]);
+		expect(
+			container
+				.querySelector('svg.annotate-drawing-overlay polyline')
+				?.getAttribute('stroke'),
+		).toBe(swatchColor);
+	});
+
+	it('a selected color swatch is used for the next stroke', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		const swatches =
+			container.querySelectorAll<HTMLElement>('[data-color-swatch]');
+		const secondColor = swatches[1].dataset.colorSwatch;
+		fireEvent.click(swatches[1]);
+		drawStroke(getOverlay(container), [
+			[1, 1],
+			[2, 2],
+		]);
+		expect(
+			container
+				.querySelector('svg.annotate-drawing-overlay polyline')
+				?.getAttribute('stroke'),
+		).toBe(secondColor);
+	});
+
+	it('the eraser removes a saved stroke clicked within the radius', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		const overlay = getOverlay(container);
+		drawStroke(overlay, [
+			[10, 10],
+			[11, 11],
+		]);
+		selectTool(container, 'eraser');
+		fireEvent.click(overlay, { clientX: 12, clientY: 12 });
+		expect(
+			container.querySelector('svg.annotate-drawing-overlay polyline'),
+		).toBeNull();
+	});
+
+	it('the eraser leaves a stroke outside the radius untouched', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		const overlay = getOverlay(container);
+		drawStroke(overlay, [
+			[10, 10],
+			[11, 11],
+		]);
+		selectTool(container, 'eraser');
+		fireEvent.click(overlay, { clientX: 200, clientY: 200 });
+		expect(
+			container.querySelector('svg.annotate-drawing-overlay polyline'),
+		).not.toBeNull();
+	});
+
+	it('the eraser removes every stroke within the radius', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		const overlay = getOverlay(container);
+		drawStroke(overlay, [
+			[10, 10],
+			[11, 11],
+		]);
+		drawStroke(overlay, [
+			[13, 13],
+			[14, 14],
+		]);
+		selectTool(container, 'eraser');
+		fireEvent.click(overlay, { clientX: 12, clientY: 12 });
+		expect(
+			container.querySelectorAll('svg.annotate-drawing-overlay polyline'),
+		).toHaveLength(0);
+	});
+
+	it('the eraser removes only the strokes within the radius', () => {
+		const { container } = render(
+			<annotateLens.Component embodiment={makeSnippet()} />,
+		);
+		const overlay = getOverlay(container);
+		drawStroke(overlay, [
+			[10, 10],
+			[11, 11],
+		]);
+		drawStroke(overlay, [
+			[100, 100],
+			[101, 101],
+		]);
+		selectTool(container, 'eraser');
+		fireEvent.click(overlay, { clientX: 12, clientY: 12 });
+		expect(
+			container.querySelectorAll('svg.annotate-drawing-overlay polyline'),
+		).toHaveLength(1);
+	});
+
+	it.todo('preserves annotations across a view toggle (Inc 7c)');
 });

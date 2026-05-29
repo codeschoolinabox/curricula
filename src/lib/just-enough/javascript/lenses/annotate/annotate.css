@@ -63,3 +63,47 @@
 [data-lens='annotate'] .token.property {
 	color: #905;
 }
+
+/* ─── Toolbar + drawing overlay (Inc 7a) ─────────────────────────── */
+
+[data-lens='annotate'] .annotate-toolbar {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+[data-lens='annotate'] .annotate-toolbar [data-tool-select] {
+	cursor: pointer;
+}
+
+[data-lens='annotate'] .annotate-swatch {
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	border: 1px solid #888;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+[data-lens='annotate'] .annotate-main {
+	position: relative;
+}
+
+/* pointer-events: all so the overlay captures drawing across the whole
+   view. In flowchart-view this overlays the SVG; Inc 7c must gate this so
+   flowchart-node clicks reach the tagged data-flowchart-node groups. */
+[data-lens='annotate'] .annotate-drawing-overlay {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: all;
+}
+
+[data-lens='annotate'] .annotate-drawing-overlay polyline {
+	fill: none;
+	stroke-width: 2.5;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
