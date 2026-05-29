@@ -11,6 +11,14 @@
  * fails to parse; this module catches it and resolves to the `error`
  * variant rather than rejecting, so the wrapper renders an inline error
  * state instead of handling a rejected Promise.
+ *
+ * @remarks SECURITY: `convertCodeToSvg` is called with NO second
+ * (print-config) argument. Its default render path escapes source-derived
+ * text (node labels, titles) via `xml-escape`, so the SVG the wrapper
+ * injects with `dangerouslySetInnerHTML` carries no learner-controlled
+ * markup. Do NOT pass `{ debug: true }` — js2flowchart's debug render
+ * path interpolates a source-derived node id into an SVG `<text>` WITHOUT
+ * escaping, which would open an injection surface.
  */
 
 import { convertCodeToSvg } from 'js2flowchart';

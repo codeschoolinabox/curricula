@@ -7,7 +7,7 @@
  * § UI structure and `../DOCS.md` § Phase 3 Render.
  */
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -155,5 +155,72 @@ describe('annotate lens — code view', () => {
 			/>,
 		);
 		expect(container.querySelector('pre')?.textContent).toBe('let x = 1;');
+	});
+});
+
+describe('annotate lens — flowchart view', () => {
+	it('does not render the code view when the view is flowchart', () => {
+		const { container } = render(
+			<annotateLens.Component
+				embodiment={makeSnippet()}
+				config={{ defaultView: 'flowchart' }}
+			/>,
+		);
+		expect(container.querySelector('pre code')).toBeNull();
+	});
+
+	it('renders the generated SVG for a parseable snippet', async () => {
+		const { container } = render(
+			<annotateLens.Component
+				embodiment={embody('function f() { return 1; }')}
+				config={{ defaultView: 'flowchart' }}
+			/>,
+		);
+		await waitFor(() => {
+			expect(container.querySelector('svg')).not.toBeNull();
+		});
+	});
+
+	it('tags flowchart node groups with data-flowchart-node after inject', async () => {
+		const { container } = render(
+			<annotateLens.Component
+				embodiment={embody('function f() { return 1; }')}
+				config={{ defaultView: 'flowchart' }}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelectorAll('[data-flowchart-node]').length,
+			).toBeGreaterThan(0);
+		});
+	});
+
+	it('tags the <g> node-group so a shape resolves via closest (7c delegation)', async () => {
+		const { container } = render(
+			<annotateLens.Component
+				embodiment={embody('function f() { return 1; }')}
+				config={{ defaultView: 'flowchart' }}
+			/>,
+		);
+		await waitFor(() => {
+			const tagged = container
+				.querySelector('rect')
+				?.closest('[data-flowchart-node]');
+			expect(tagged?.tagName.toLowerCase()).toBe('g');
+		});
+	});
+
+	it('renders an inline error state for an unparseable snippet', async () => {
+		const { container } = render(
+			<annotateLens.Component
+				embodiment={embody('const x = (((')}
+				config={{ defaultView: 'flowchart' }}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-flowchart-status="error"]'),
+			).not.toBeNull();
+		});
 	});
 });
