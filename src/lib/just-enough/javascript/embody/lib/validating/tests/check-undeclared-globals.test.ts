@@ -291,21 +291,21 @@ describe('checkUndeclaredGlobals', () => {
 			const ast = parseSource('Math;');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			const v = violations.find((v) => v.message.includes('Math'));
-			expect(v?.nodePath).toBe('$.body[0].expression');
+			expect(v?.nodePath).toBe('$.body.0.expression');
 		});
 
 		it('stamps a global reached through the init walker route', () => {
 			const ast = parseSource('const x = Math;');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			const v = violations.find((v) => v.message.includes('Math'));
-			expect(v?.nodePath).toBe('$.body[0].declarations[0].init');
+			expect(v?.nodePath).toBe('$.body.0.declarations.0.init');
 		});
 
 		it('stamps a nested identifier path', () => {
 			const ast = parseSource('{ Date; }');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			const v = violations.find((v) => v.message.includes('Date'));
-			expect(v?.nodePath).toBe('$.body[0].body[0].expression');
+			expect(v?.nodePath).toBe('$.body.0.body.0.expression');
 		});
 	});
 

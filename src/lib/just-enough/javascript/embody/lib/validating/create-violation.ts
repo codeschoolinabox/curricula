@@ -19,8 +19,8 @@ import type { SourceRange, Violation } from './types.js';
  *   instead (e.g. `"'var' declarations are not allowed — use 'let'"`).
  * @param location - Source range where the violation was found.
  *   Copied and frozen — the caller's object is not retained.
- * @param nodePath - JSONPath rooted at the Program node identifying
- *   the offending node (e.g. `'$.body[0].declarations[0]'`). Required:
+ * @param nodePath - NodePath rooted at the Program node identifying
+ *   the offending node (e.g. `'$.body.0.declarations.0'`). Required:
  *   the collecting walkers look it up from `buildNodePathMap` and pass
  *   it here (validators receive it as their second argument and
  *   forward it). No default — a missing path is a programming error,

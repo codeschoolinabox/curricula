@@ -58,8 +58,8 @@ type SourceRange = {
  *   the disallowed construct and suggests the allowed alternative
  * - `severity` is always `'rejection'` — all violations block execution
  * - `location` gives the exact source span for highlighting
- * - `nodePath` is a JSONPath rooted at the Program node identifying
- *   the offending node (e.g. `'$.body[0].declarations[0]'`). The
+ * - `nodePath` is a NodePath rooted at the Program node identifying
+ *   the offending node (e.g. `'$.body.0.declarations.0'`). The
  *   collecting walker assigns it; consumers that need to navigate
  *   the AST to the violation (lens highlighting, structured
  *   tooling) read it directly. Matches the `nodePath` convention
@@ -177,7 +177,7 @@ type BaseResult<E = ParseResultError | FormattingResultError> = {
  * `operator`, or `computed`) should narrow via property checks.
  *
  * The `nodePath` parameter is the offending node's Program-rooted
- * JSONPath, supplied by the collecting walker (looked up from
+ * NodePath, supplied by the collecting walker (looked up from
  * `buildNodePathMap`). Validators forward it to `createViolation`
  * so every `Violation` carries its position — validators check
  * legality, the walker knows position.

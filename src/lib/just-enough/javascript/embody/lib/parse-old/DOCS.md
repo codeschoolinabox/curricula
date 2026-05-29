@@ -139,11 +139,11 @@ the data flow:
   by `parse(code)` for the with-statement detection in Phase 2.
 - **get-child-nodes-with-path.ts** — path-tracking child walker. Same
   traversal rules as `get-child-nodes.ts`, but pairs each child with the
-  JSONPath segment (`'init'`, `'body[0]'`) that reaches it. The
+  NodePath segment (`'init'`, `'body.0'`) that reaches it. The
   validation walkers (`lib/validating/`) use it to assign
   `Violation.nodePath`.
 - **build-node-path-map.ts** — builds a `Map<Node, string>` of every
-  node to its full Program-rooted JSONPath in one traversal (via
+  node to its full Program-rooted NodePath in one traversal (via
   `get-child-nodes-with-path`). Lets the validation walkers look up a
   node's path by reference instead of threading a path argument through
   their (sometimes scope-aware, non-uniform) recursion.

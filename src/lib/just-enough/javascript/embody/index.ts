@@ -526,7 +526,9 @@ function makeStubViolation(): Violation {
 		nodeType: 'FunctionDeclaration',
 		message: 'canned scenario: JEJ does not allow function declarations',
 		severity: 'rejection',
-		nodePath: '$.body[0]',
+		// '$.body.0' = first top-level statement; matches what collectViolations
+		// emits for a real `function foo() {}` (keep congruent if this changes).
+		nodePath: '$.body.0',
 		location: {
 			start: { line: 1, column: 0 },
 			end: { line: 1, column: 1 },

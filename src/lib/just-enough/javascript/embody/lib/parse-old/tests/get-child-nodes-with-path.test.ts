@@ -48,16 +48,16 @@ describe('getChildNodesWithPath', () => {
 	});
 
 	describe('array-valued properties', () => {
-		it('segments two Program statements as body[0] and body[1]', () => {
+		it('segments two Program statements as body.0 and body.1', () => {
 			const ast = parseToAst('let x = 1; let y = 2;');
 			const segments = getChildNodesWithPath(ast).map((c) => c.segment);
-			expect(segments).toEqual(['body[0]', 'body[1]']);
+			expect(segments).toEqual(['body.0', 'body.1']);
 		});
 
-		it('segments a single BlockStatement body element as body[0]', () => {
+		it('segments a single BlockStatement body element as body.0', () => {
 			const ast = parseToAst('{ let a = 1; }');
 			const segments = getChildNodesWithPath(ast.body[0]).map((c) => c.segment);
-			expect(segments).toEqual(['body[0]']);
+			expect(segments).toEqual(['body.0']);
 		});
 	});
 
@@ -66,7 +66,7 @@ describe('getChildNodesWithPath', () => {
 			const ast = parseToAst('foo(1, 2);');
 			const [{ child: callExpr }] = getChildNodesWithPath(ast.body[0]);
 			const segments = getChildNodesWithPath(callExpr).map((c) => c.segment);
-			expect(segments).toEqual(['callee', 'arguments[0]', 'arguments[1]']);
+			expect(segments).toEqual(['callee', 'arguments.0', 'arguments.1']);
 		});
 	});
 
@@ -75,14 +75,14 @@ describe('getChildNodesWithPath', () => {
 			const ast = parseToAst('[1, , 3];');
 			const [{ child: arrayExpr }] = getChildNodesWithPath(ast.body[0]);
 			const segments = getChildNodesWithPath(arrayExpr).map((c) => c.segment);
-			expect(segments).toEqual(['elements[0]', 'elements[2]']);
+			expect(segments).toEqual(['elements.0', 'elements.2']);
 		});
 
 		it('keeps the source index when a leading element is a hole', () => {
 			const ast = parseToAst('[, 5];');
 			const [{ child: arrayExpr }] = getChildNodesWithPath(ast.body[0]);
 			const segments = getChildNodesWithPath(arrayExpr).map((c) => c.segment);
-			expect(segments).toEqual(['elements[1]']);
+			expect(segments).toEqual(['elements.1']);
 		});
 	});
 

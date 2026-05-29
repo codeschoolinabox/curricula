@@ -316,7 +316,7 @@ describe('embody', () => {
 				nodeType: 'FunctionDeclaration',
 				message: 'canned scenario: JEJ does not allow function declarations',
 				severity: 'rejection',
-				nodePath: '$.body[0]',
+				nodePath: '$.body.0',
 				location: {
 					start: { line: 1, column: 0 },
 					end: { line: 1, column: 1 },

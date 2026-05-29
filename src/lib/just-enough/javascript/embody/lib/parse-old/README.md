@@ -29,15 +29,15 @@ Use them consistently.
   for an `acorn-walk` dependency. Used internally by parse, validating,
   scope, and socratizing.
 - **getChildNodesWithPath** — the path-tracking companion to
-  `getChildNodes`. Returns each direct child paired with its JSONPath
-  `segment` (`'init'` for an object-valued property, `'body[0]'` for an
+  `getChildNodes`. Returns each direct child paired with its NodePath
+  `segment` (`'init'` for an object-valued property, `'body.0'` for an
   array element). The validation walkers use it to build
   `Violation.nodePath`. See **ChildWithPath**.
 - **ChildWithPath** — a `{ child, segment }` pair produced by
-  `getChildNodesWithPath`. `segment` is one JSONPath step; a walker joins
+  `getChildNodesWithPath`. `segment` is one NodePath step; a walker joins
   it onto a parent path with `'.'`.
 - **buildNodePathMap** — builds a `Map<Node, string>` from every node in
-  an AST to its full Program-rooted JSONPath, in one traversal. The
+  an AST to its full Program-rooted NodePath, in one traversal. The
   validation walkers look up a node's path here (instead of threading a
   path argument through their recursion) when stamping
   `Violation.nodePath`.
@@ -71,7 +71,7 @@ Use them consistently.
 | `parse-program.ts`  | Acorn wrapper: `parseProgram(source, sourceType?)`                 |
 | `get-child-nodes.ts`| Generic ESTree child walker: `getChildNodes(node)`                 |
 | `get-child-nodes-with-path.ts` | Path-tracking child walker: `getChildNodesWithPath(node)` |
-| `build-node-path-map.ts` | Node-to-JSONPath map: `buildNodePathMap(root)`                |
+| `build-node-path-map.ts` | Node-to-NodePath map: `buildNodePathMap(root)`                |
 | `parse.ts` (Phase 1a) | Public entry: `parse(code): ParseResult`                         |
 | `tests/`            | Unit tests for each source file                                    |
 

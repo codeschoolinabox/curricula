@@ -18,16 +18,16 @@ import type { Node, Program } from 'acorn';
  * it from its parent.
  *
  * @remarks Produced by `getChildNodesWithPath`. The `segment` is a
- * single JSONPath step in the package's convention: `'init'` for an
- * object-valued property, `'body[0]'` for an element of an
- * array-valued property. The bracket index is the element's position
+ * single NodePath step in the package's convention: `'init'` for an
+ * object-valued property, `'body.0'` for an element of an
+ * array-valued property. The dot index is the element's position
  * in the source array, so a null array hole (e.g. the gap in the
  * sparse array `[1, , 3]`) is omitted without shifting later
- * siblings' indices (`'elements[0]'`, `'elements[2]'`). A null
+ * siblings' indices (`'elements.0'`, `'elements.2'`). A null
  * object-valued property (e.g. an absent `IfStatement.alternate`) is
  * simply not emitted — it has no segment at all. A walker composes a
  * full Program-rooted path by joining `parentPath` and `segment` with
- * `'.'` (e.g. `'$' + '.' + 'body[0]'` → `'$.body[0]'`).
+ * `'.'` (e.g. `'$' + '.' + 'body.0'` → `'$.body.0'`).
  */
 type ChildWithPath = {
 	readonly child: Node;

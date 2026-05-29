@@ -81,8 +81,8 @@ These terms join the existing `Violation` / `ValidationReport` /
 - **Rejection** — a `Violation` with `severity: 'rejection'`. All
   violations are rejections in this module (no informational
   warnings).
-- **nodePath** — a JSONPath string rooted at the Program node
-  (e.g. `'$.body[0].declarations[0]'`) carried on every `Violation`,
+- **nodePath** — a NodePath string rooted at the Program node
+  (e.g. `'$.body.0.declarations.0'`) carried on every `Violation`,
   identifying the offending AST node. Lets consumers navigate from
   a violation back to its node for structured tooling (lens
   highlighting, editor diagnostics). Both collecting walkers

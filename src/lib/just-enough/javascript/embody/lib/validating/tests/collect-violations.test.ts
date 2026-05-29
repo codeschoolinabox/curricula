@@ -153,21 +153,21 @@ describe('collectViolations', () => {
 		it('a top-level validator violation gets its body index', () => {
 			const ast = parseToAst('var x = 5;');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			expect(violations[0].nodePath).toBe('$.body[0]');
+			expect(violations[0].nodePath).toBe('$.body.0');
 		});
 
 		it('a self-constructed (missing-from-allowlist) violation gets its path', () => {
 			const ast = parseToAst('function foo() {}');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
 			const fn = violations.find((v) => v.nodeType === 'FunctionDeclaration');
-			expect(fn?.nodePath).toBe('$.body[0]');
+			expect(fn?.nodePath).toBe('$.body.0');
 		});
 
 		it('a nested self-constructed violation gets its full path', () => {
 			const ast = parseToAst('{ function foo() {} }');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
 			const fn = violations.find((v) => v.nodeType === 'FunctionDeclaration');
-			expect(fn?.nodePath).toBe('$.body[0].body[0]');
+			expect(fn?.nodePath).toBe('$.body.0.body.0');
 		});
 
 		it('a false-rule (explicitly forbidden) violation gets its path', () => {
@@ -178,21 +178,21 @@ describe('collectViolations', () => {
 			};
 			const violations = collectViolations(ast, noLetLevel);
 			const v = violations.find((v) => v.nodeType === 'VariableDeclaration');
-			expect(v?.nodePath).toBe('$.body[0]');
+			expect(v?.nodePath).toBe('$.body.0');
 		});
 
 		it('a nested validator violation gets its full path', () => {
 			const ast = parseToAst('{ var y = 2; }');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
 			const v = violations.find((v) => v.nodeType === 'VariableDeclaration');
-			expect(v?.nodePath).toBe('$.body[0].body[0]');
+			expect(v?.nodePath).toBe('$.body.0.body.0');
 		});
 
 		it('a deeply nested validator violation gets its full path', () => {
 			const ast = parseToAst('let x = 1 == 2;');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
 			const v = violations.find((v) => v.nodeType === 'BinaryExpression');
-			expect(v?.nodePath).toBe('$.body[0].declarations[0].init');
+			expect(v?.nodePath).toBe('$.body.0.declarations.0.init');
 		});
 	});
 

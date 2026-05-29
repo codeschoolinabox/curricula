@@ -30,8 +30,8 @@ single frozen `violations` array; neither pass observes the other's
 results. (Earlier drafts of this doc described a linear chain — that
 was wrong; the source has always run both passes independently.)
 
-Both passes also assign **`Violation.nodePath`** — the JSONPath
-(rooted at the Program node, e.g. `'$.body[0].declarations[0]'`)
+Both passes also assign **`Violation.nodePath`** — the NodePath
+(rooted at the Program node, e.g. `'$.body.0.declarations.0'`)
 identifying the offending node. Each pass builds a node → path map
 once via `buildNodePathMap` (`../parse-old/`) and looks up an offending
 node's path from it by reference, rather than threading a computed path

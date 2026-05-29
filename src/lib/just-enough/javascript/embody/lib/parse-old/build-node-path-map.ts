@@ -3,13 +3,13 @@ import type { Node } from 'acorn';
 import getChildNodesWithPath from './get-child-nodes-with-path.js';
 
 /**
- * Builds a lookup from every node in an AST to its JSONPath string,
+ * Builds a lookup from every node in an AST to its NodePath string,
  * rooted at the Program node.
  *
  * @remarks One generic traversal (via `getChildNodesWithPath`) records
  * each node's full Program-rooted path: the root is `'$'`, and each
  * child's path is its parent's path joined to the child's segment with
- * `'.'` (e.g. `'$.body[0].declarations[0]'`).
+ * `'.'` (e.g. `'$.body.0.declarations.0'`).
  *
  * Decouples path computation from violation detection: the validation
  * walkers traverse the AST their own way (allowlist checks,
@@ -21,7 +21,7 @@ import getChildNodesWithPath from './get-child-nodes-with-path.js';
  * validation pass and discard it (transient, like `getChildNodes`).
  *
  * @param root - The AST root (typically a `Program` node).
- * @returns A map from each reachable node to its JSONPath string.
+ * @returns A map from each reachable node to its NodePath string.
  */
 function buildNodePathMap(root: Node): ReadonlyMap<Node, string> {
 	const map = new Map<Node, string>();
