@@ -469,7 +469,7 @@ describe('integration: disallowed globals', () => {
 	});
 });
 
-describe('integration: disallowed methods', () => {
+describe('integration: member-method policy (blocklist)', () => {
 	it('rejects .split()', () => {
 		const report = validateProgram(
 			'let x = "hi";\nlet y = x.split("");\nconsole.log(y);\n',
