@@ -632,6 +632,15 @@ describe('justEnoughJs', () => {
 			);
 			expect(result).toBe(true);
 		});
+
+		it('rejects an unrecognized update operator', () => {
+			const result = callRule(
+				validate,
+				fakeNode({ type: 'UpdateExpression', operator: '+++', prefix: true }),
+			);
+			expect(result).not.toBe(true);
+			expect(result).toHaveProperty('nodeType', 'UpdateExpression');
+		});
 	});
 
 	describe('BinaryExpression constraint', () => {
@@ -751,59 +760,9 @@ describe('justEnoughJs', () => {
 		});
 	});
 
-	describe('Literal constraint', () => {
-		const validate = justEnoughJs.nodes.Literal as NodeValidator;
-
-		it('allows string literals', () => {
-			const result = callRule(
-				validate,
-				fakeNode({ type: 'Literal', value: 'hello' }),
-			);
-			expect(result).toBe(true);
-		});
-
-		it('allows number literals', () => {
-			const result = callRule(
-				validate,
-				fakeNode({ type: 'Literal', value: 42 }),
-			);
-			expect(result).toBe(true);
-		});
-
-		it('allows boolean literals', () => {
-			const result = callRule(
-				validate,
-				fakeNode({ type: 'Literal', value: true }),
-			);
-			expect(result).toBe(true);
-		});
-
-		it('allows null', () => {
-			const result = callRule(
-				validate,
-				fakeNode({ type: 'Literal', value: null }),
-			);
-			expect(result).toBe(true);
-		});
-
-		it('allows regex literals', () => {
-			const result = callRule(
-				validate,
-				fakeNode({
-					type: 'Literal',
-					value: /abc/,
-					regex: { pattern: 'abc', flags: '' },
-				}),
-			);
-			expect(result).toBe(true);
-		});
-
-		it('rejects bigint literals', () => {
-			const result = callRule(
-				validate,
-				fakeNode({ type: 'Literal', bigint: '42' }),
-			);
-			expect(result).not.toBe(true);
+	describe('Literal', () => {
+		it('is unconditionally allowed (all JeJ literal forms, incl. regex and bigint)', () => {
+			expect(justEnoughJs.nodes.Literal).toBe(true);
 		});
 	});
 

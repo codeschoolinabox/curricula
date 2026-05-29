@@ -173,11 +173,9 @@ describe('integration: common student mistakes', () => {
 		expect(v).toBeDefined();
 	});
 
-	it('catches ++ operator', () => {
+	it('allows ++ operator', () => {
 		const report = validateProgram('let x = 0; x++;', justEnoughJs);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find((v) => v.nodeType === 'UpdateExpression');
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
 	});
 
 	it('allows += operator (compound assignment)', () => {
@@ -554,12 +552,27 @@ describe('integration: new expression (Date only)', () => {
 	});
 });
 
+describe('integration: regex and bigint literals', () => {
+	it('allows a regex literal', () => {
+		const report = validateProgram('let re = /abc/g;\n', justEnoughJs);
+		expect(report.isValid).toBe(true);
+	});
+
+	it('allows a bigint literal', () => {
+		const report = validateProgram('let big = 42n;\n', justEnoughJs);
+		expect(report.isValid).toBe(true);
+	});
+
+	it('allows bigint arithmetic', () => {
+		const report = validateProgram('let sum = 10n + 20n;\n', justEnoughJs);
+		expect(report.isValid).toBe(true);
+	});
+});
+
 describe('integration: disallowed operators', () => {
-	it('rejects -- operator', () => {
+	it('allows -- operator', () => {
 		const report = validateProgram('let x = 1;\nx--;\n', justEnoughJs);
-		expect(report.isValid).toBe(false);
-		const v = report.violations.find((v) => v.nodeType === 'UpdateExpression');
-		expect(v).toBeDefined();
+		expect(report.isValid).toBe(true);
 	});
 
 	it('allows >> operator', () => {

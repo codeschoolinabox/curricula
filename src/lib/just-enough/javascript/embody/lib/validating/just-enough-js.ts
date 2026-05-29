@@ -229,29 +229,6 @@ function validateUnaryExpression(node: Node, nodePath: string): true | Violation
 }
 
 /**
- * Validates that a literal is a basic type (string, number, boolean,
- * null, undefined).
- *
- * @remarks Rejects regex literals (`/pattern/flags` — acorn marks
- * these with a `regex` property) and BigInt literals (`123n` — acorn
- * marks these with a `bigint` property). Both are advanced features
- * outside JeJ's scope. Regular string, number, boolean, null, and
- * undefined literals all pass.
- */
-function validateLiteral(node: Node, nodePath: string): true | Violation {
-	const record = node as unknown as Record<string, unknown>;
-	if (record.bigint !== undefined) {
-		return createViolation(
-			'Literal',
-			'BigInt literals are not allowed',
-			extractLocation(node),
-			nodePath,
-		);
-	}
-	return true;
-}
-
-/**
  * Validates that an if statement uses block bodies (curly braces).
  *
  * @remarks Braceless control flow is dangerous for beginners —
@@ -552,6 +529,10 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		EmptyStatement: true,
 		TemplateLiteral: true,
 		TemplateElement: true,
+		// All literal forms JeJ can produce are allowed: string, number,
+		// boolean, null, undefined, regex, and BigInt (42n). reference.md
+		// sanctions every form, so there is no per-literal constraint.
+		Literal: true,
 		ConditionalExpression: true,
 		ChainExpression: true,
 		// CallExpression is unconditionally allowed — reference.md permits
@@ -583,7 +564,6 @@ const justEnoughJs: LanguageLevel = Object.freeze({
 		BinaryExpression: validateBinaryExpression,
 		LogicalExpression: validateLogicalExpression,
 		UnaryExpression: validateUnaryExpression,
-		Literal: validateLiteral,
 	} satisfies Record<string, NodeRule>),
 });
 
