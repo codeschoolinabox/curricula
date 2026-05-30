@@ -673,6 +673,28 @@ describe('<StudyLenses> — F5b.5 prop-driven lens → editor transition', () =>
 	});
 });
 
+describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () => {
+	describe('Zero — toolbar is present in editor mode', () => {
+		it('rendering without a lens prop shows the [data-orchestrator-toolbar] element', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			expect(
+				container.querySelector('[data-orchestrator-toolbar]'),
+			).not.toBeNull();
+		});
+	});
+
+	describe('One — toolbar is also present in lens mode', () => {
+		it('rendering with lens="debug-props" still shows the [data-orchestrator-toolbar] element', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-toolbar]'),
+			).not.toBeNull();
+		});
+	});
+});
+
 describe('<StudyLenses> — F5b.6 prop-driven in-mode lens-switch (lens → lens)', () => {
 	describe('Interface — only lens-switched dispatches on in-mode lens switch', () => {
 		it('lens-switched fires with non-null previous and source: prop', () => {

@@ -57,6 +57,7 @@ import type { LensConfig, LensModule } from '../lenses/types.js';
 
 import EditorComponent from './editor/index.js';
 import createEventBus from './event-bus.js';
+import Toolbar from './toolbar.js';
 import type {
 	CachedEmbodiment,
 	EventBus,
@@ -344,6 +345,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			const lensModule = LENS_REGISTRY[state.activeLens]!;
 			return (
 				<div data-orchestrator-root>
+					<Toolbar />
 					<lensModule.Component
 						embodiment={cachedEmbodiment.embodiment}
 						config={state.resolvedConfig}
@@ -354,6 +356,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 
 		return (
 			<div data-orchestrator-root>
+				<Toolbar />
 				<EditorComponent
 					snippet={snippet}
 					onSnippetChange={handleSnippetChange}
