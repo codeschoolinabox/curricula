@@ -180,4 +180,78 @@ describe('completeJej', () => {
 			expect(labels).not.toContain('eval');
 		});
 	});
+
+	describe('scope-aware locals — Inc B', () => {
+		describe('single declaration', () => {
+			it('contains x as a local for `let x = 5`', () => {
+				const result = completeJej({
+					prefix: 'x',
+					precedingText: '',
+					fullText: 'let x = 5',
+				});
+				const xItem = result.find((candidate) => candidate.label === 'x');
+				expect(xItem).toEqual({ label: 'x', type: 'local' });
+			});
+		});
+
+		describe('multiple declarations', () => {
+			it('contains both x and y for `let x = 5; const y = 10`', () => {
+				const items = completeJej({
+					prefix: '',
+					precedingText: '',
+					fullText: 'let x = 5; const y = 10',
+				}).filter((candidate) => candidate.label === 'x' || candidate.label === 'y');
+				expect(items).toEqual([
+					{ label: 'x', type: 'local' },
+					{ label: 'y', type: 'local' },
+				]);
+			});
+		});
+
+		describe('shadowed declarations (insertion-order dedup)', () => {
+			it('inner-shadowing x appears once (outer wins per allDeclarations insertion order)', () => {
+				const xItems = completeJej({
+					prefix: 'x',
+					precedingText: '',
+					fullText: 'let x = 1; { let x = 2 }',
+				}).filter((candidate) => candidate.label === 'x');
+				expect(xItems).toHaveLength(1);
+			});
+		});
+
+		describe('no declarations in snippet', () => {
+			it('emits only keywords + globals, no locals', () => {
+				const result = completeJej({
+					prefix: 'co',
+					precedingText: '',
+					fullText: 'console.log(42)',
+				});
+				expect(
+					result.every((candidate) => candidate.type !== 'local'),
+				).toBe(true);
+			});
+		});
+
+		describe('parse-error graceful degradation', () => {
+			it('keywords still come through on broken code', () => {
+				const labels = completeJej({
+					prefix: 'le',
+					precedingText: '',
+					fullText: 'let',
+				}).map((candidate) => candidate.label);
+				expect(labels).toContain('let');
+			});
+		});
+
+		describe('rejected-but-parsed code', () => {
+			it('learner identifiers from `var x = 1` appear as locals', () => {
+				const xItem = completeJej({
+					prefix: 'x',
+					precedingText: '',
+					fullText: 'var x = 1',
+				}).find((candidate) => candidate.label === 'x');
+				expect(xItem).toEqual({ label: 'x', type: 'local' });
+			});
+		});
+	});
 });

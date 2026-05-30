@@ -48,11 +48,19 @@ level rather than inside `orchestrate/` or `embody/`.
      the regex and falls through to the Identifier branch (see
      § Structural constraints).
    - **Identifier** (otherwise): emit the keyword set ∪ JEJ-allowed
-     globals (excluding easter eggs) ∪ scope-chain locals collected
-     by walking [`buildScope(ast)`](../../embody/lib/scope/build-scope.ts)
-     from the cursor-enclosing scope outward — but **only when AST
-     is present**. Parse-failure code skips the locals union and
-     emits keywords + globals only.
+     globals (excluding easter eggs) ∪ scope-tree locals collected
+     from
+     [`buildScope(ast).allDeclarations`](../../embody/lib/scope/build-scope.ts)
+     — but **only when AST is present**. Inc B uses the
+     `allDeclarations` union (every declaration in every scope of
+     the program) rather than cursor-enclosing-scope walking, which
+     would require a `cursorOffset` parameter on `CompletionRequest`
+     that this sprint does not introduce. Trade-off: over-permissive
+     in nested-block scenarios (a learner sees a sibling block's
+     local even when not in scope at the cursor) — acceptable for
+     JEJ-page-sized snippets where most declarations are top-level.
+     Cursor-aware refinement is deferred. Parse-failure code skips
+     the locals union and emits keywords + globals only.
    The result is a `readonly Suggestion[]` — each item has a `label`
    and a `source` indicating which sub-collector emitted it.
 

@@ -4,16 +4,21 @@
  * single `CompletionCallback` driving CodeMirror's autocompletion
  * extension. See DOCS.md for the full sketch.
  *
- * Inc A: identifier branch only — keywords + JEJ-allowed globals,
+ * Increment history:
+ * - Inc A — identifier branch with keywords + JEJ-allowed globals,
  *   plus blocked-marker synthesis for stumbling-list labels not in
- *   the JEJ surface. No AST inspection, no scope locals, no
- *   dot-receiver branch.
- * Inc B: adds the validate-and-parse phase + scope-aware locals.
- * Inc C: adds the dot-receiver context branch + curated member union.
+ *   the JEJ surface.
+ * - Inc B — adds the Validate phase via `validate(fullText)` and
+ *   scope-aware locals via `buildScope(ast).allDeclarations`
+ *   (over-permissive: union of every declaration in every scope,
+ *   no cursor-position awareness).
+ * - Inc C (future) — adds the dot-receiver context branch + curated
+ *   member union.
  */
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
+import validate from '../../embody/lib/validating/validate.js';
 import type {
 	CompletionItem,
 	CompletionRequest,
@@ -37,12 +42,13 @@ import markBlocked from './mark-blocked.js';
  *   appear with source-derived `type` AND `info`.
  */
 function completeJej(request: CompletionRequest): readonly CompletionItem[] {
-	const suggestions = collectJejSurface(request);
+	const validation = validate(request.fullText);
+	const suggestions = collectJejSurface(request, validation.ast);
 	const items = markBlocked(suggestions);
 	const prefixLower = request.prefix.toLowerCase();
-	const filtered = items.filter((item) =>
-		item.label.toLowerCase().startsWith(prefixLower),
-	);
+	const filtered = items.filter(function matchesPrefix(item) {
+		return item.label.toLowerCase().startsWith(prefixLower);
+	});
 	return deepFreezeInPlace(filtered);
 }
 
