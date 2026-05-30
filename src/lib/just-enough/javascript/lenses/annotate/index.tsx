@@ -109,9 +109,14 @@ const AnnotateComponent: ComponentType<LensProperties> =
 		// Clamp to a valid ViewMode: `config()` returns the open `LensConfig`,
 		// so an educator override could carry any string. Anything other than
 		// 'flowchart' degrades to 'code' (the always-applicable Tier-1 view).
+		// Parse-gate: 'flowchart' also degrades to 'code' for an unparseable
+		// snippet, so a learner never mounts into a guaranteed-failing
+		// flowchart-view (per `./DOCS.md` § Phase 1).
 		const initialView: ViewMode =
-			resolved.defaultView === 'flowchart' ? 'flowchart' : 'code';
-		const [viewMode] = useState<ViewMode>(initialView);
+			resolved.defaultView === 'flowchart' && embodiment.status.parsed
+				? 'flowchart'
+				: 'code';
+		const [viewMode, setViewMode] = useState<ViewMode>(initialView);
 
 		// Colorize is default-on: only an explicit `false` disables Prism
 		// tokenization, so a malformed value keeps the documented default.
@@ -148,7 +153,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 		);
 
 		// Post-inject tagging: walk the freshly injected SVG and tag each node
-		// group with `data-flowchart-node` so React event delegation (Inc 7c)
+		// group with `data-flowchart-node` so React event delegation (Inc 7d)
 		// resolves clicks via `closest('[data-flowchart-node]')`. The one
 		// permitted DOM mutation — attribute-tagging only, never structural.
 		useEffect(
@@ -291,6 +296,16 @@ const AnnotateComponent: ComponentType<LensProperties> =
 			);
 		}
 
+		// State-only viewMode swap: both per-view annotation sets are untouched
+		// (the toggle-preserves-annotations invariant). Guarded on status.parsed
+		// so a click on the disabled toggle is a no-op even where the host fires
+		// click on disabled buttons. The active tool persists across the toggle;
+		// the per-view default-tool reset is Inc 7d.
+		function toggleView(): void {
+			if (!embodiment.status.parsed) return;
+			setViewMode((previous) => (previous === 'code' ? 'flowchart' : 'code'));
+		}
+
 		return (
 			<div data-lens="annotate" data-view-mode={viewMode}>
 				<div className="annotate-toolbar" data-tool={tool}>
@@ -330,6 +345,15 @@ const AnnotateComponent: ComponentType<LensProperties> =
 					})}
 					<button
 						type="button"
+						data-view-toggle="true"
+						disabled={!embodiment.status.parsed}
+						aria-disabled={embodiment.status.parsed ? undefined : 'true'}
+						onClick={toggleView}
+					>
+						{viewMode === 'code' ? 'Flowchart' : 'Code'}
+					</button>
+					<button
+						type="button"
 						data-clear-all="true"
 						onClick={clearActiveView}
 					>
@@ -364,7 +388,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 						renderFlowchartView(flowchart, flowchartReference)}
 					{/* The overlay captures pointer events across the whole view
 					    for drawing. In flowchart-view this currently sits over the
-					    SVG; Inc 7c (flowchart-node selection) must gate this so
+					    SVG; Inc 7d (flowchart-node selection) must gate this so
 					    node clicks reach the tagged `data-flowchart-node` groups. */}
 					<svg
 						className="annotate-drawing-overlay"

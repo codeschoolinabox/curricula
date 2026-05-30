@@ -231,18 +231,19 @@ describe('annotate lens — flowchart view', () => {
 		});
 	});
 
-	it('renders an inline error state for an unparseable snippet', async () => {
+	it('clamps to code-view for an unparseable snippet even when defaultView is flowchart', () => {
 		const { container } = render(
 			<annotateLens.Component
 				embodiment={embody('const x = (((')}
 				config={{ defaultView: 'flowchart' }}
 			/>,
 		);
-		await waitFor(() => {
-			expect(
-				container.querySelector('[data-flowchart-status="error"]'),
-			).not.toBeNull();
-		});
+		// AR-1 initial-view parse-gate: an unparseable snippet never mounts into
+		// the (guaranteed-failing) flowchart-view, so no flowchart generation is
+		// attempted and the code-view renders instead. The flowchart-failure
+		// error branch is covered in component-flowchart-lifecycle.test.tsx.
+		expect(container.querySelector('pre code')).not.toBeNull();
+		expect(container.querySelector('[data-flowchart-status]')).toBeNull();
 	});
 });
 
@@ -439,7 +440,6 @@ describe('annotate lens — drawing overlay', () => {
 		).toHaveLength(1);
 	});
 
-	it.todo('preserves annotations across a view toggle (Inc 7c)');
 });
 
 describe('annotate lens — clear all', () => {
@@ -509,7 +509,6 @@ describe('annotate lens — clear all', () => {
 		).not.toBeNull();
 	});
 
-	it.todo('clear-all leaves the inactive view untouched (Inc 7c)');
 });
 
 describe('annotate lens — notes', () => {

@@ -9,7 +9,7 @@
  * for the SVG / error paths.
  */
 
-import { cleanup, render } from '@testing-library/react';
+import { act, cleanup, render } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -69,5 +69,32 @@ describe('annotate flowchart view — async lifecycle', () => {
 
 		expect(errorSpy).not.toHaveBeenCalled();
 		errorSpy.mockRestore();
+	});
+
+	it('renders the inline error state when generation resolves to error', async () => {
+		// The flowchart-view is only reachable for a parseable snippet (the
+		// initial-view clamp + disabled toggle gate it on status.parsed), so the
+		// error branch covers a snippet js2flowchart itself fails to render —
+		// exercised here by resolving the mocked generator to an error result.
+		const { container } = render(
+			<annotateLens.Component
+				embodiment={embody('function f() {}')}
+				config={{ defaultView: 'flowchart' }}
+			/>,
+		);
+		expect(resolvers.length).toBeGreaterThan(0);
+
+		await act(async () => {
+			for (const resolve of resolvers) {
+				resolve({ status: 'error', message: 'generation failed' });
+			}
+			// Flush the generator Promise's .then so the error setState commits
+			// inside act (the resolve above only schedules the microtask).
+			await Promise.resolve();
+		});
+
+		expect(
+			container.querySelector('[data-flowchart-status="error"]')?.textContent,
+		).toBe('generation failed');
 	});
 });
