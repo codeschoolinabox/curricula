@@ -302,6 +302,41 @@ describe('completeJej', () => {
 				}).find((item) => item.label === 'match');
 				expect(matchItem?.type).toBe('blocked');
 			});
+
+			it('prefix `con` on dot context emits constructor as blocked (from BLOCKED_MEMBER_NAMES)', () => {
+				const item = completeJej({
+					prefix: 'con',
+					precedingText: 'str.',
+					fullText: '',
+				}).find((c) => c.label === 'constructor');
+				expect(item).toMatchObject({
+					label: 'constructor',
+					type: 'blocked',
+					detail: '(not in JEJ)',
+					apply: 'noop',
+				});
+			});
+
+			it('prefix `__proto__` on dot context emits __proto__ as blocked', () => {
+				const item = completeJej({
+					prefix: '__proto__',
+					precedingText: 'obj.',
+					fullText: '',
+				}).find((c) => c.label === '__proto__');
+				expect(item?.type).toBe('blocked');
+			});
+		});
+
+		describe('whitespace around dot detected', () => {
+			it('`str . ` (space before AND after dot) detected as dot-receiver context', () => {
+				const result = completeJej({
+					prefix: '',
+					precedingText: 'str . ',
+					fullText: '',
+				});
+				const memberItems = result.filter((item) => item.type === 'member');
+				expect(memberItems.length).toBeGreaterThan(0);
+			});
 		});
 
 		describe('identifier-context suppression of member-only labels (regression guard)', () => {

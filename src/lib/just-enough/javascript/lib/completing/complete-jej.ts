@@ -57,7 +57,7 @@ import markBlocked from './mark-blocked.js';
 function isDotReceiverContext(precedingText: string): boolean {
 	const trimmed = precedingText.trimEnd();
 	if (!trimmed.endsWith('.')) return false;
-	const beforeDot = trimmed.slice(0, -1);
+	const beforeDot = trimmed.slice(0, -1).trimEnd();
 	let cursor = beforeDot.length;
 	while (cursor > 0 && isIdentifierContinue(beforeDot.charAt(cursor - 1))) {
 		cursor -= 1;

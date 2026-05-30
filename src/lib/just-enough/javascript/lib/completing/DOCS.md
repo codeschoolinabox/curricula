@@ -71,17 +71,23 @@ level rather than inside `orchestrate/` or `embody/`.
      (keep the source-derived `type` — this is the **advisory** case,
      used for JEJ-valid labels with a teaching caveat like `new` and
      `null`). Otherwise pass through with `type` from `source`.
-   - **(b) Synthesize blocked items** for stumbling-list labels NOT
-     in the input suggestions: each becomes
-     `{label, type: 'blocked', detail: '(not in JEJ)', info: stumble.info, apply: 'noop'}`.
-     This is what makes typing `va` show `var` (a JEJ-blocked label)
-     as a blocked completion even though `var` is not in the JEJ
-     surface — the synthesis adds it so the pedagogical signal can
-     fire. For Inc C, this synthesis step is extended to also
-     synthesize labels from
+   - **(b) Synthesize blocked items** from a context-dispatched
+     source: in **identifier context**, iterate the curated
+     stumbling-list (skipping member-only entries like `split` and
+     `match` so they don't surface when a learner types `sp`
+     expecting a keyword/global); in **dot-receiver context**,
+     iterate the validator's
      [`BLOCKED_MEMBER_NAMES`](../../embody/lib/validating/just-enough-js.ts)
-     in dot-receiver context (with `info` if curated, generic marker
-     otherwise).
+     set (so blocked dot names like `.constructor`, `.__proto__`,
+     `.call`, plus `.split` and `.match` all surface with
+     pedagogical markers), attaching curated `info` from the
+     stumbling-list when present. Each synthesized item becomes
+     `{label, type: 'blocked', detail: '(not in JEJ)', info?: stumble.info, apply: 'noop'}`.
+     This is what makes typing `va` show `var` (a JEJ-blocked label)
+     as a blocked completion in identifier context, and `str.con`
+     show `constructor` as a blocked completion in dot context —
+     in both cases the synthesis adds the label so the pedagogical
+     signal can fire, even though neither is in the JEJ surface.
 
    Then prefix-filter the combined result case-insensitively
    (`label.toLowerCase().startsWith(prefix.toLowerCase())`) and

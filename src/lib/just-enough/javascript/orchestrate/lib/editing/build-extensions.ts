@@ -8,24 +8,22 @@
  * @module build-extensions
  */
 
-import { EditorView, keymap, hoverTooltip } from '@codemirror/view';
-import { EditorState } from '@codemirror/state';
-import { basicSetup } from 'codemirror';
-import { oneDark } from '@codemirror/theme-one-dark';
 import { autocompletion, closeCompletion } from '@codemirror/autocomplete';
-import { linter, lintGutter } from '@codemirror/lint';
-import { indentUnit } from '@codemirror/language';
 import { indentWithTab } from '@codemirror/commands';
-
+import { indentUnit } from '@codemirror/language';
+import { linter, lintGutter } from '@codemirror/lint';
+import { EditorState } from '@codemirror/state';
 import type { Extension } from '@codemirror/state';
+import { oneDark } from '@codemirror/theme-one-dark';
+import { EditorView, keymap, hoverTooltip } from '@codemirror/view';
+import { basicSetup } from 'codemirror';
 
-import { toCMDiagnostic, runLinterCallbacks } from './to-cm-diagnostic.js';
 import buildInfoDom from './build-info-dom.js';
 import buildTooltipDom from './build-tooltip-dom.js';
-
+import { toCMDiagnostic, runLinterCallbacks } from './to-cm-diagnostic.js';
 import type {
 	LinterCallback,
-	DocLookupCallback,
+	DocLookupCallback as DocumentLookupCallback,
 	CompletionCallback,
 } from './types.js';
 
@@ -58,13 +56,25 @@ const CM_FUNCTION_NAMES: Readonly<Record<string, string>> = Object.freeze({
 	openqasm2: 'javascript',
 });
 
+// ─── Helpers ────────────────────────────────────────────────
+
+/**
+ * Apply-callback for completion items carrying the `apply: 'noop'`
+ * sentinel — dismisses the popup on Enter without inserting the
+ * label. JEJ-aware adapters use this to surface blocked vocabulary
+ * pedagogically without the keystroke landing.
+ */
+function dismissPopup(view: EditorView): void {
+	closeCompletion(view);
+}
+
 // ─── Options type (private to this module) ──────────────────
 
 type BuildExtensionsOptions = {
 	readonly indentChar: string;
 	readonly tabSize: number;
 	readonly linterCallbacks?: readonly LinterCallback[];
-	readonly docLookup?: DocLookupCallback;
+	readonly docLookup?: DocumentLookupCallback;
 	readonly completions?: CompletionCallback;
 	readonly runFormat?: () => void;
 };
@@ -89,14 +99,14 @@ async function buildExtensions(
 		runFormat,
 	}: BuildExtensionsOptions = {} as BuildExtensionsOptions,
 ): Promise<Extension[]> {
-	const extensions: Extension[] = [];
-
 	// 1. Core setup — basicSetup includes bracket matching, search,
 	//    fold gutter, highlight selection, and close brackets
-	extensions.push(basicSetup);
-	extensions.push(oneDark);
-	extensions.push(indentUnit.of(indentChar));
-	extensions.push(EditorState.tabSize.of(tabSize));
+	const extensions: Extension[] = [
+		basicSetup,
+		oneDark,
+		indentUnit.of(indentChar),
+		EditorState.tabSize.of(tabSize),
+	];
 
 	// 2. Dynamic language support
 	await loadLanguageExtension(language, extensions);
@@ -112,20 +122,20 @@ async function buildExtensions(
 					(d) => toCMDiagnostic(view.state.doc, d),
 				);
 			}),
+			lintGutter(),
 		);
-		extensions.push(lintGutter());
 	}
 
 	// 4. Doc lookup callback → hoverTooltip()
 	if (docLookup) {
 		extensions.push(
-			hoverTooltip(function docHover(view: EditorView, pos: number) {
+			hoverTooltip(function documentHover(view: EditorView, pos: number) {
 				const word = view.state.wordAt(pos);
 				if (!word) return null;
 
 				const text = view.state.sliceDoc(word.from, word.to);
-				const doc = docLookup(text);
-				if (!doc) return null;
+				const document = docLookup(text);
+				if (!document) return null;
 
 				return {
 					pos: word.from,
@@ -133,7 +143,7 @@ async function buildExtensions(
 					above: true,
 					create() {
 						// perf: skip freeze — DOM element, inherently mutable
-						return { dom: buildTooltipDom(text, doc) };
+						return { dom: buildTooltipDom(text, document) };
 					},
 				};
 			}),
@@ -159,7 +169,7 @@ async function buildExtensions(
 
 						return {
 							from: word.from,
-							options: items.map(function toCompletion(i) {
+							options: items.map(function toCompletion(index) {
 								// exactOptionalPropertyTypes: only set fields when defined
 								const completion: {
 									label: string;
@@ -167,17 +177,15 @@ async function buildExtensions(
 									detail?: string;
 									info?: () => HTMLElement;
 									apply?: (view: EditorView) => void;
-								} = { label: i.label };
-								if (i.type != null) completion.type = i.type;
-								if (i.detail != null) completion.detail = i.detail;
-								if (i.info != null) {
-									const infoText = i.info;
+								} = { label: index.label };
+								if (index.type != null) completion.type = index.type;
+								if (index.detail != null) completion.detail = index.detail;
+								if (index.info != null) {
+									const infoText = index.info;
 									completion.info = () => buildInfoDom(infoText);
 								}
-								if (i.apply === 'noop') {
-									completion.apply = (view: EditorView) => {
-										closeCompletion(view);
-									};
+								if (index.apply === 'noop') {
+									completion.apply = dismissPopup;
 								}
 								return completion;
 							}),
@@ -214,18 +222,18 @@ async function loadLanguageExtension(language: string, extensions: Extension[]):
 	if (!loader) return;
 
 	try {
-		const pkg = await loader();
-		const fnName = CM_FUNCTION_NAMES[language];
-		if (!fnName) return;
+		const package_ = await loader();
+		const functionName = CM_FUNCTION_NAMES[language];
+		if (!functionName) return;
 
-		const langFn = (pkg as Record<string, unknown>)[fnName];
+		const langFunction = (package_ as Record<string, unknown>)[functionName];
 		// cast: CM lang packages export a function returning Extension; we verify with typeof guard
-		if (typeof langFn === 'function') {
-			extensions.push((langFn as () => Extension)());
+		if (typeof langFunction === 'function') {
+			extensions.push((langFunction as () => Extension)());
 		}
-	} catch (err: unknown) {
+	} catch (error: unknown) {
 		// Language loading is non-critical — editor works without highlighting
-		console.warn(`Failed to load language support for ${language}:`, err);
+		console.warn(`Failed to load language support for ${language}:`, error);
 	}
 }
 

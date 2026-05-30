@@ -137,13 +137,14 @@ Behavior:
   label matches the prefix.
 - **Bare identifier context, AST available** → above ∪ scope-chain
   locals at the cursor position (`type: 'local'`).
-- **Dot-receiver context** (the regex
-  `/([A-Za-z_$][\w$]*)\s*\.\s*$/` matches `precedingText`) → the
-  curated member-name union (`type: 'member'`); blocked dot names
-  from
+- **Dot-receiver context** (`precedingText` ends with
+  `<identifier>.` after stripping whitespace on either side of the
+  dot) → the curated member-name union (`type: 'member'`); blocked
+  dot names from
   [`BLOCKED_MEMBER_NAMES`](../../embody/lib/validating/just-enough-js.ts)
-  (e.g. `.split`, `.constructor`) appear as blocked items with
-  curated info when present in the stumbling-list.
+  (e.g. `.split`, `.constructor`, `.__proto__`, `.call`) appear as
+  blocked items with curated info when present in the stumbling-list
+  (`split`, `match`) or a generic `(not in JEJ)` marker otherwise.
 - **Chained dot context** (`str.charAt(0).`) → falls through to the
   identifier branch (no dot suggestions; keywords + globals + locals
   shown). Single-level dot-receiver only.
@@ -161,17 +162,21 @@ input.
 
 ### Edge cases
 
-- **Easter eggs suppressed.** `eval` (allowed global, easter egg),
-  `void` (allowed unary, easter egg), `LabeledStatement`,
-  `SequenceExpression`, `WithStatement` (allowed nodes, easter eggs)
-  — none appear in the suggestion list. Learners can still type them
+- **Easter eggs suppressed.** Of the validator's allowed-but-
+  undocumented constructs, only `eval` reaches the surface union
+  (via `allowedGlobals`) and is actively filtered out. The other
+  easter eggs (`void` as a unary operator, plus the node-level
+  `LabeledStatement`, `SequenceExpression`, `WithStatement`) never
+  enter the suggestion union to begin with — `void` isn't in the
+  keyword or global lists, and node-level constructs aren't tokens
+  that completion ever sees. Learners can still type any of them
   manually; the language level continues to accept them. See
   Conventions § Easter eggs are suppressed for the rule that makes
-  this load-bearing (this Edge case describes the runtime behavior;
-  the Convention forbids future maintainers from "fixing" it).
-- **Whitespace around dot.** `'str . '` (whitespace before/after
-  the dot) is detected as dot-receiver context — the regex
-  tolerates `\s*`.
+  the `eval` filter load-bearing.
+- **Whitespace around dot.** `'str . '` (whitespace before and/or
+  after the dot) is detected as dot-receiver context — the
+  detection trims whitespace on both sides of the dot before
+  verifying that an identifier precedes it.
 - **Already-past-the-dot** (`str.split` typed in full) → the prefix
   is `split` and the precedingText ends with `str.`, so the
   dot-receiver branch fires and `split` is marked blocked from the

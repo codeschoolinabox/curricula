@@ -22,40 +22,25 @@
  * in `complete-jej.ts`; this function is overlay-only.
  */
 
+import justEnoughJs from '../../embody/lib/validating/just-enough-js.js';
 import type { CompletionItem } from '../../orchestrate/lib/editing/types.js';
 
 import STUMBLING_LIST from './stumbling-list.js';
-import type { Suggestion } from './types.js';
+import type { StumblingEntry, Suggestion } from './types.js';
 
 /**
  * Stumbling-list labels that describe DOT-MEMBER access (`.split`,
- * `.match`). Synthesize ONLY in dot-receiver context — surfacing them
- * in identifier context would be a false pedagogical positive when a
+ * `.match`). Their pass-through-and-synthesize behavior in dot
+ * context is handled by the dot-context synthesizer's iteration over
+ * `justEnoughJs.blockedMemberNames` (which includes them); in
+ * identifier context, the identifier-context synthesizer skips them
+ * via this set so they don't surface as blocked completions when a
  * learner types `sp` or `ma` for a keyword or global.
  */
 const MEMBER_ONLY_LABELS: ReadonlySet<string> = new Set(['split', 'match']);
 
-/**
- * Stumbling-list labels that describe IDENTIFIER-position keywords or
- * constructs (`var`, `function`, `class`, etc.). Synthesize ONLY in
- * identifier context — surfacing them in dot-receiver context would
- * be a false positive when a learner types `va` after `str.`
- * expecting a `valueOf`-like member.
- */
-const IDENTIFIER_ONLY_LABELS: ReadonlySet<string> = new Set([
-	'var',
-	'function',
-	'class',
-	'new',
-	'=>',
-	'this',
-	'null',
-	'throw',
-	'try',
-	'import',
-	'async',
-	'await',
-]);
+/** `detail` text attached to every synthesized blocked completion. */
+const BLOCKED_DETAIL = '(not in JEJ)';
 
 /**
  * Convert each `Suggestion` to a `CompletionItem`, attaching blocked
@@ -96,32 +81,69 @@ function markBlocked(
 		},
 	);
 
-	// Step 2: synthesize blocked items for stumbles not in input.
-	// MEMBER_ONLY_LABELS (`.split`, `.match`) synthesize ONLY in
-	// dot-receiver context — Inc A's identifier branch skips them
-	// (a learner typing `sp` for a keyword/global hasn't expressed
-	// any intent toward `.split`); Inc C's dot-receiver branch
-	// includes them so the pedagogical signal fires on `str.sp`.
-	const synthesized: readonly CompletionItem[] = STUMBLING_LIST
+	// Step 2: synthesize blocked items. The two contexts emit from
+	// different sources: identifier context iterates the curated
+	// stumbling-list (so `var`, `class`, `function`, etc. surface as
+	// blocked when learners type toward them); dot-receiver context
+	// iterates the validator's blockedMemberNames set (so blocked
+	// dot names like `.constructor`, `.__proto__`, `.call`, plus
+	// `.split` and `.match` surface as blocked), attaching curated
+	// info from the stumbling-list when present.
+	const synthesized: readonly CompletionItem[] = inDotContext
+		? synthesizeDotBlocked(inputLabels, stumblingByLabel)
+		: synthesizeIdentifierBlocked(inputLabels);
+
+	return [...passthrough, ...synthesized];
+}
+
+function synthesizeDotBlocked(
+	inputLabels: ReadonlySet<string>,
+	stumblingByLabel: ReadonlyMap<string, StumblingEntry>,
+): readonly CompletionItem[] {
+	const blockedMembers = justEnoughJs.blockedMemberNames ?? new Set<string>();
+	return [...blockedMembers]
+		.filter(function notInInput(name) {
+			return !inputLabels.has(name);
+		})
+		.map(function asBlockedMember(name): CompletionItem {
+			const stumble = stumblingByLabel.get(name);
+			if (stumble) {
+				return {
+					label: name,
+					type: 'blocked',
+					detail: BLOCKED_DETAIL,
+					info: stumble.info,
+					apply: 'noop',
+				};
+			}
+			return {
+				label: name,
+				type: 'blocked',
+				detail: BLOCKED_DETAIL,
+				apply: 'noop',
+			};
+		});
+}
+
+function synthesizeIdentifierBlocked(
+	inputLabels: ReadonlySet<string>,
+): readonly CompletionItem[] {
+	return STUMBLING_LIST
 		.filter(function notInInput(stumble) {
 			return !inputLabels.has(stumble.label);
 		})
-		.filter(function applyContextGuard(stumble) {
-			if (MEMBER_ONLY_LABELS.has(stumble.label)) return inDotContext;
-			if (IDENTIFIER_ONLY_LABELS.has(stumble.label)) return !inDotContext;
-			return true;
+		.filter(function notMemberOnly(stumble) {
+			return !MEMBER_ONLY_LABELS.has(stumble.label);
 		})
 		.map(function asBlocked(stumble): CompletionItem {
 			return {
 				label: stumble.label,
 				type: 'blocked',
-				detail: '(not in JEJ)',
+				detail: BLOCKED_DETAIL,
 				info: stumble.info,
 				apply: 'noop',
 			};
 		});
-
-	return [...passthrough, ...synthesized];
 }
 
 export default markBlocked;
