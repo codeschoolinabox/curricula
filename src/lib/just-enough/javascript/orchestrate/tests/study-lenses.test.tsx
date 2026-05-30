@@ -602,3 +602,73 @@ describe('<StudyLenses> — F5b.4 prop-driven editor → lens transition', () =>
 		});
 	});
 });
+
+describe('<StudyLenses> — F5b.5 prop-driven lens → editor transition', () => {
+	describe('Boundary — only mode-changed dispatches on lens → editor', () => {
+		it('mode-changed fires with {from: lens, to: editor}', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+				dispatchSpy.mockClear();
+				rerender(<StudyLenses snippet="OK" />);
+				expect(dispatchSpy).toHaveBeenCalledWith('mode-changed', {
+					from: 'lens',
+					to: 'editor',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('lens-switched does NOT dispatch on the lens → editor transition', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+				dispatchSpy.mockClear();
+				rerender(<StudyLenses snippet="OK" />);
+				expect(dispatchSpy).not.toHaveBeenCalledWith(
+					'lens-switched',
+					expect.anything(),
+				);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('the prop-driven lens → editor transition dispatches exactly once under React StrictMode', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(
+					<React.StrictMode>
+						<StudyLenses snippet="OK" lens="debug-props" />
+					</React.StrictMode>,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+				dispatchSpy.mockClear();
+				rerender(
+					<React.StrictMode>
+						<StudyLenses snippet="OK" />
+					</React.StrictMode>,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(1);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+	});
+});
