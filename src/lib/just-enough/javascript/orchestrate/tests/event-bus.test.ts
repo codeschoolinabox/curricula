@@ -276,4 +276,119 @@ describe('createEventBus', () => {
 			}
 		});
 	});
+
+	describe('Interface — re-entrant dispatch and mid-dispatch mutation', () => {
+		it('inner dispatch completes before the outer dispatch resumes (depth-first)', () => {
+			const calls: string[] = [];
+			const bus = createEventBus();
+			bus.subscribe('lens-switched', function outerA() {
+				calls.push('outer-A');
+				bus.dispatch('mode-changed', { from: 'editor', to: 'lens' });
+				calls.push('outer-A-after-inner');
+			});
+			bus.subscribe('mode-changed', function innerListener() {
+				calls.push('inner');
+			});
+			bus.subscribe('lens-switched', function outerB() {
+				calls.push('outer-B');
+			});
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(calls).toEqual([
+				'outer-A',
+				'inner',
+				'outer-A-after-inner',
+				'outer-B',
+			]);
+		});
+
+		it('a listener that subscribes a new listener mid-dispatch does not cause the new listener to fire in the same dispatch', () => {
+			const bus = createEventBus();
+			const lateJoiner = vi.fn();
+			bus.subscribe('lens-switched', function subscribesLateJoiner() {
+				bus.subscribe('lens-switched', lateJoiner);
+			});
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(lateJoiner).not.toHaveBeenCalled();
+		});
+
+		it('a listener that unsubscribes a sibling mid-dispatch does not prevent the sibling from firing in the current dispatch', () => {
+			const bus = createEventBus();
+			const sibling = vi.fn();
+			bus.subscribe('lens-switched', function unsubscribesSibling() {
+				bus.unsubscribe('lens-switched', sibling);
+			});
+			bus.subscribe('lens-switched', sibling);
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(sibling).toHaveBeenCalledTimes(1);
+		});
+
+		it('a thrown listener inside an inner dispatch does not abort the outer dispatch loop', () => {
+			const bus = createEventBus();
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			try {
+				const subsequentOuter = vi.fn();
+				bus.subscribe('lens-switched', function outerListener() {
+					bus.dispatch('mode-changed', { from: 'editor', to: 'lens' });
+				});
+				bus.subscribe('mode-changed', function innerThrower() {
+					throw new Error('inner boom');
+				});
+				bus.subscribe('lens-switched', subsequentOuter);
+				bus.dispatch('lens-switched', {
+					previous: null,
+					next: 'test-lens',
+					source: 'initial',
+				});
+				expect(subsequentOuter).toHaveBeenCalledTimes(1);
+			} finally {
+				warn.mockRestore();
+			}
+		});
+
+		it('a re-entrant same-event dispatch takes its own snapshot at inner-dispatch time', () => {
+			const calls: string[] = [];
+			const bus = createEventBus();
+			let alreadyReDispatched = false;
+			function lateJoiner(): void {
+				calls.push('lateJoiner');
+			}
+			bus.subscribe('lens-switched', function outerListener() {
+				calls.push('outer-pre');
+				if (!alreadyReDispatched) {
+					alreadyReDispatched = true;
+					bus.subscribe('lens-switched', lateJoiner);
+					bus.dispatch('lens-switched', {
+						previous: null,
+						next: 'inner',
+						source: 'initial',
+					});
+				}
+				calls.push('outer-post');
+			});
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'outer',
+				source: 'initial',
+			});
+			expect(calls).toEqual([
+				'outer-pre',
+				'outer-pre',
+				'outer-post',
+				'lateJoiner',
+				'outer-post',
+			]);
+		});
+	});
 });

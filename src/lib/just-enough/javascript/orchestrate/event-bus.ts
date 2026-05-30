@@ -70,15 +70,21 @@ function createEventBus(): EventBus {
 
 	const bus: EventBus = {
 		dispatch<N extends EventName>(name: N, payload: EventPayload<N>): void {
-			const listeners = listenersByEvent[name];
-			// F5a.6 will snapshot listeners (Array.from) before iterating
-			// to satisfy the depth-first re-entrancy contract — listeners
-			// that call bus.subscribe (adds a new listener) or
-			// bus.unsubscribe (removes a sibling listener) from inside
-			// their own body currently mutate this Set mid-iteration per
-			// the JS Set iterator spec.
+			// Snapshot listeners at dispatch time — each call to dispatch
+			// captures its own array independent of any in-flight mutations.
+			// Listeners that subscribe new listeners or unsubscribe siblings
+			// from inside their own body affect only future dispatches, not
+			// the in-flight loop. Re-entrant dispatches take their own
+			// snapshot at inner-dispatch time, so the depth-first contract
+			// holds per-call rather than per-root.
+			const listeners = [...listenersByEvent[name]];
 			for (const listener of listeners) {
 				try {
+					// Cast is safe: each Set in ListenerStore only ever holds
+					// EventListener<N> for its own key, by construction at the
+					// subscribe boundary. TypeScript can't narrow through a
+					// generic indexed access on the discriminated record, so
+					// the cast bridges the gap.
 					(listener as EventListener<N>)(payload);
 				} catch (error) {
 					console.warn(
