@@ -210,6 +210,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 		// Snippet slot — seeded from prop at mount only (initial-value-only).
 		const [snippet, setSnippet] = React.useState(snippetProp);
 
+		// F5b.2 initial-mount dispatch guard. Survives StrictMode's
+		// mount → cleanup → remount cycle so the dispatch fires exactly once
+		// per real mount, not once per discarded-render pair.
+		const initialDispatchFiredRef = React.useRef(false);
+
 		// Atomic init: derive both state and cache from a single call so embody()
 		// fires at most once at first render. The tuple is held in its own state
 		// slot for clarity; React never re-runs the lazy initializer.
@@ -235,6 +240,27 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 		// invariant as cachedEmbodimentRef above.
 		const snippetRef = React.useRef(snippet);
 		snippetRef.current = snippet;
+
+		// F5b.2 initial-mount dispatch. If the first commit landed in lens
+		// mode, dispatch mode-changed(editor→lens) then
+		// lens-switched(null → activeLens, 'initial') on the per-instance
+		// bus. Editor-mode initial mount dispatches nothing — there is no
+		// transition to announce. The fire-once guard
+		// (`initialDispatchFiredRef`) keeps the dispatch idempotent under
+		// React StrictMode's discarded-mount cycle.
+		React.useEffect(() => {
+			if (initialDispatchFiredRef.current) return;
+			const initialState = initialDerived.state;
+			if (initialState.mode !== 'lens') return;
+			initialDispatchFiredRef.current = true;
+			const bus = busRef.current!;
+			bus.dispatch('mode-changed', { from: 'editor', to: 'lens' });
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: initialState.activeLens,
+				source: 'initial',
+			});
+		}, []);
 
 		// Prop-change mode transition. Skips initial mount (state/cache already
 		// seeded); fires on lens or configs change only. Calls `setState` and

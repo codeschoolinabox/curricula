@@ -6,8 +6,10 @@ import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import * as embodyModule from '../../embody/index.js';
+import * as eventBusModule from '../event-bus.js';
 import StudyLenses from '../index.js';
 import type { StudyLensesHandle } from '../index.js';
+import type { EventBus } from '../types.js';
 
 /**
  * Resolves to the CodeMirror EditorView mounted inside the orchestrator's
@@ -408,6 +410,100 @@ describe('<StudyLenses> — F5b.1 bus instance', () => {
 			render(<StudyLenses snippet="OK" ref={refA} />);
 			render(<StudyLenses snippet="OK" ref={refB} />);
 			expect(refA.current!.bus).not.toBe(refB.current!.bus);
+		});
+	});
+});
+
+function createSpyBus(): { bus: EventBus; dispatchSpy: ReturnType<typeof vi.fn> } {
+	const dispatchSpy = vi.fn();
+	const bus: EventBus = Object.freeze({
+		dispatch: dispatchSpy,
+		subscribe: () => () => {},
+		unsubscribe: () => {},
+		clear: () => {},
+	});
+	return { bus, dispatchSpy };
+}
+
+describe('<StudyLenses> — F5b.2 initial-mount dispatch (lens mode)', () => {
+	describe('Zero — initial mount in editor mode dispatches nothing', () => {
+		it('rendering without a lens prop produces no bus dispatch', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				render(<StudyLenses snippet="OK" />);
+				expect(dispatchSpy).not.toHaveBeenCalled();
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+	});
+
+	describe('One — initial mount in lens mode dispatches both bus events', () => {
+		it('mode-changed fires with {from: editor, to: lens}', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				render(<StudyLenses snippet="OK" lens="debug-props" />);
+				expect(dispatchSpy).toHaveBeenCalledWith('mode-changed', {
+					from: 'editor',
+					to: 'lens',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('lens-switched fires with {previous: null, next: debug-props, source: initial}', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				render(<StudyLenses snippet="OK" lens="debug-props" />);
+				expect(dispatchSpy).toHaveBeenCalledWith('lens-switched', {
+					previous: null,
+					next: 'debug-props',
+					source: 'initial',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('mode-changed dispatches before lens-switched (deterministic ordering)', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				render(<StudyLenses snippet="OK" lens="debug-props" />);
+				const eventNames = dispatchSpy.mock.calls.map((args) => args[0]);
+				expect(eventNames).toEqual(['mode-changed', 'lens-switched']);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('dispatches exactly twice under React StrictMode (fire-once guard)', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				render(
+					<React.StrictMode>
+						<StudyLenses snippet="OK" lens="debug-props" />
+					</React.StrictMode>,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+			} finally {
+				factorySpy.mockRestore();
+			}
 		});
 	});
 });
