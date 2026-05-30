@@ -506,4 +506,19 @@ describe('<StudyLenses> — F5b.2 initial-mount dispatch (lens mode)', () => {
 			}
 		});
 	});
+
+	describe('Boundary — initial mount with an unregistered lens prop dispatches nothing', () => {
+		it('rendering with lens="not-registered" silently falls back to editor mode and dispatches no bus event', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				render(<StudyLenses snippet="OK" lens="not-registered" />);
+				expect(dispatchSpy).not.toHaveBeenCalled();
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+	});
 });
