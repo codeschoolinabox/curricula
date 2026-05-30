@@ -44,4 +44,61 @@ describe('createEventBus', () => {
 			expect(listener).toHaveBeenCalledWith({ from: 'editor', to: 'lens' });
 		});
 	});
+
+	describe('Many — multiple listeners on the same event', () => {
+		it('listeners fire in registration order', () => {
+			const calls: string[] = [];
+			const bus = createEventBus();
+			bus.subscribe('lens-switched', function listenerA() {
+				calls.push('A');
+			});
+			bus.subscribe('lens-switched', function listenerB() {
+				calls.push('B');
+			});
+			bus.subscribe('lens-switched', function listenerC() {
+				calls.push('C');
+			});
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(calls).toEqual(['A', 'B', 'C']);
+		});
+
+		it('subscribing the same listener twice does not duplicate invocations', () => {
+			const bus = createEventBus();
+			const listener = vi.fn();
+			bus.subscribe('lens-switched', listener);
+			bus.subscribe('lens-switched', listener);
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(listener).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe('Many — listeners spanning multiple events', () => {
+		it('dispatching mode-changed invokes the mode-changed listener', () => {
+			const bus = createEventBus();
+			const lensSwitchedListener = vi.fn();
+			const modeChangedListener = vi.fn();
+			bus.subscribe('lens-switched', lensSwitchedListener);
+			bus.subscribe('mode-changed', modeChangedListener);
+			bus.dispatch('mode-changed', { from: 'editor', to: 'lens' });
+			expect(modeChangedListener).toHaveBeenCalledTimes(1);
+		});
+
+		it('dispatching mode-changed does not invoke a lens-switched listener', () => {
+			const bus = createEventBus();
+			const lensSwitchedListener = vi.fn();
+			const modeChangedListener = vi.fn();
+			bus.subscribe('lens-switched', lensSwitchedListener);
+			bus.subscribe('mode-changed', modeChangedListener);
+			bus.dispatch('mode-changed', { from: 'editor', to: 'lens' });
+			expect(lensSwitchedListener).not.toHaveBeenCalled();
+		});
+	});
 });
