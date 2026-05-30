@@ -11,7 +11,7 @@
  *
  * Lifecycle per [`./DOCS.md` § Execution phases](./DOCS.md):
  *   1. Mount initiation — host `<div>` renders; `useEffect` calls
- *      `createEditor(snippet, { parent, language, linters, onChange })`.
+ *      `createEditor(snippet, { parent, language, linters, format, onChange })`.
  *   2. Mount resolution — success → store editor handle; cancellation →
  *      destroy the late-arriving instance; rejection → render fallback
  *      with `data-orchestrator-error`.
