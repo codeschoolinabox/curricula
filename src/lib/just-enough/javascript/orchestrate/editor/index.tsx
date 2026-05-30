@@ -11,7 +11,7 @@
  *
  * Lifecycle per [`./DOCS.md` § Execution phases](./DOCS.md):
  *   1. Mount initiation — host `<div>` renders; `useEffect` calls
- *      `createEditor(snippet, { parent, language, linters, format, onChange })`.
+ *      `createEditor(snippet, { parent, language, linters, format, completions, onChange })`.
  *   2. Mount resolution — success → store editor handle; cancellation →
  *      destroy the late-arriving instance; rejection → render fallback
  *      with `data-orchestrator-error`.
@@ -24,6 +24,7 @@
 
 import React from 'react';
 
+import completeJej from '../../lib/completing/complete-jej.js';
 import formatJej from '../../lib/formatting-editor/format-jej.js';
 import lintJej from '../../lib/linting/lint-jej.js';
 import createEditor from '../lib/editing/create-editor.js';
@@ -86,6 +87,7 @@ function EditorComponent({
 			language: 'javascript',
 			linters: [lintJej],
 			format: formatJej,
+			completions: completeJej,
 			onChange: onChangeCallback,
 		}).then(
 			function onMounted(instance) {

@@ -262,7 +262,7 @@ consume it; the toolbar does not consume it.
 The CodeMirror factory at [`../lib/editing/`](../lib/editing/) exposes
 slots for `linters`, `docLookup`, `completions`, and `format` callbacks
 (plus the wired `onChange`). The home-base component wires `onChange`,
-`linters`, and `format`:
+`linters`, `format`, and `completions`:
 
 - `linters` — **wired** to [`lintJej`](../../lib/linting/lint-jej.ts) from
   the JEJ-package [`lib/linting/`](../../lib/linting/) module. The original
@@ -289,9 +289,27 @@ slots for `linters`, `docLookup`, `completions`, and `format` callbacks
   [`build-extensions.ts`](../lib/editing/build-extensions.ts). See
   [`lib/formatting-editor/DOCS.md`](../../lib/formatting-editor/DOCS.md).
 
-The remaining slots are intentionally unwired:
+- `completions` — **wired** to
+  [`completeJej`](../../lib/completing/complete-jej.ts) from the
+  JEJ-package [`lib/completing/`](../../lib/completing/) module.
+  Substantive JEJ-aware adapter composing the validation feed, scope
+  analysis at the cursor, regex-based dot-receiver context detection,
+  and a curated 14-entry stumbling-list into a single
+  `CompletionCallback`. Identifier context: keywords ∪ JEJ-allowed
+  globals (minus easter-egg `eval`) ∪ scope-tree locals via
+  [`buildScope`](../../embody/lib/scope/build-scope.ts).
+  Dot-receiver context: a curated 28-entry member union (no
+  type inference). Blocked tokens (`var`, `class`, `function`, etc.)
+  surface in the popup with `type: 'blocked'`, `detail: '(not in
+  JEJ)'`, a curated `info` tooltip, and `apply: 'noop'` so the
+  keystroke does not insert blocked text — the linter (above)
+  catches the manual override. Driven through the Phase 0
+  contract widening that gave `CompletionCallback` its
+  `CompletionRequest` argument and `CompletionItem` its
+  `info`/`apply` fields. See
+  [`lib/completing/DOCS.md`](../../lib/completing/DOCS.md).
+
+The remaining slot is intentionally unwired:
 
 - `docLookup` — requires `orchestrate/lib/jej-documentation/` (does not
   yet exist).
-- `completions` — requires `orchestrate/lib/completing/` (does not yet
-  exist).

@@ -243,6 +243,44 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 		});
 	});
 
+	describe('Completing — completions callback wired to completeJej', () => {
+		it('passes completeJej as the completions option to createEditor', async () => {
+			// Same contract-test pattern as the Formatting block above —
+			// pins the integration seam (does EditorComponent pass
+			// completions: completeJej?) without exercising the keymap or
+			// the completion popup. The editing factory's own test suite
+			// covers the CompletionRequest → CompletionItem chain end-to-end;
+			// the adapter's unit tests cover the JEJ-aware behavior.
+			vi.resetModules();
+			const createEditorMock = vi.fn(() =>
+				Promise.resolve({
+					destroy: () => {},
+					content: '',
+				} as unknown as EditorInstance),
+			);
+			vi.doMock('../../lib/editing/create-editor.js', () => ({
+				default: createEditorMock,
+			}));
+			try {
+				const { default: EditorComponentMocked } = await import('../index.js');
+				const { default: expectedCompleteJej } = await import(
+					'../../../lib/completing/complete-jej.js'
+				);
+				render(<EditorComponentMocked snippet="let x=5;" />);
+
+				await waitFor(() => {
+					expect(createEditorMock).toHaveBeenCalledWith(
+						expect.any(String),
+						expect.objectContaining({ completions: expectedCompleteJej }),
+					);
+				});
+			} finally {
+				vi.doUnmock('../../lib/editing/create-editor.js');
+				vi.resetModules();
+			}
+		});
+	});
+
 	describe('Cleanup — unmount tears down CodeMirror', () => {
 		it('destroys the live document on unmount', async () => {
 			const { container, unmount } = render(<EditorComponent snippet="OK" />);

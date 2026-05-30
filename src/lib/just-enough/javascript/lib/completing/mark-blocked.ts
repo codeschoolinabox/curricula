@@ -29,14 +29,33 @@ import type { Suggestion } from './types.js';
 
 /**
  * Stumbling-list labels that describe DOT-MEMBER access (`.split`,
- * `.match`). They live in the same curated table as the
- * identifier-context blocked tokens, but they MUST NOT synthesize in
- * identifier context — a learner typing `sp` or `ma` for a keyword
- * or global has not expressed any intent toward `.split`, and
- * surfacing those labels as blocked here would be a false pedagogical
- * positive. Inc C's dot-receiver branch is where these synthesize.
+ * `.match`). Synthesize ONLY in dot-receiver context — surfacing them
+ * in identifier context would be a false pedagogical positive when a
+ * learner types `sp` or `ma` for a keyword or global.
  */
 const MEMBER_ONLY_LABELS: ReadonlySet<string> = new Set(['split', 'match']);
+
+/**
+ * Stumbling-list labels that describe IDENTIFIER-position keywords or
+ * constructs (`var`, `function`, `class`, etc.). Synthesize ONLY in
+ * identifier context — surfacing them in dot-receiver context would
+ * be a false positive when a learner types `va` after `str.`
+ * expecting a `valueOf`-like member.
+ */
+const IDENTIFIER_ONLY_LABELS: ReadonlySet<string> = new Set([
+	'var',
+	'function',
+	'class',
+	'new',
+	'=>',
+	'this',
+	'null',
+	'throw',
+	'try',
+	'import',
+	'async',
+	'await',
+]);
 
 /**
  * Convert each `Suggestion` to a `CompletionItem`, attaching blocked
@@ -47,7 +66,10 @@ const MEMBER_ONLY_LABELS: ReadonlySet<string> = new Set(['split', 'match']);
  * @returns Read-only array of completion items, NOT yet
  *   prefix-filtered or frozen.
  */
-function markBlocked(suggestions: readonly Suggestion[]): readonly CompletionItem[] {
+function markBlocked(
+	suggestions: readonly Suggestion[],
+	inDotContext = false,
+): readonly CompletionItem[] {
 	const stumblingByLabel = new Map(
 		STUMBLING_LIST.map(function indexByLabel(entry) {
 			return [entry.label, entry] as const;
@@ -75,14 +97,19 @@ function markBlocked(suggestions: readonly Suggestion[]): readonly CompletionIte
 	);
 
 	// Step 2: synthesize blocked items for stumbles not in input.
-	// Skip MEMBER_ONLY_LABELS (`.split`, `.match`) — they synthesize
-	// in Inc C's dot-receiver branch, not here.
+	// MEMBER_ONLY_LABELS (`.split`, `.match`) synthesize ONLY in
+	// dot-receiver context — Inc A's identifier branch skips them
+	// (a learner typing `sp` for a keyword/global hasn't expressed
+	// any intent toward `.split`); Inc C's dot-receiver branch
+	// includes them so the pedagogical signal fires on `str.sp`.
 	const synthesized: readonly CompletionItem[] = STUMBLING_LIST
 		.filter(function notInInput(stumble) {
 			return !inputLabels.has(stumble.label);
 		})
-		.filter(function notMemberOnly(stumble) {
-			return !MEMBER_ONLY_LABELS.has(stumble.label);
+		.filter(function applyContextGuard(stumble) {
+			if (MEMBER_ONLY_LABELS.has(stumble.label)) return inDotContext;
+			if (IDENTIFIER_ONLY_LABELS.has(stumble.label)) return !inDotContext;
+			return true;
 		})
 		.map(function asBlocked(stumble): CompletionItem {
 			return {

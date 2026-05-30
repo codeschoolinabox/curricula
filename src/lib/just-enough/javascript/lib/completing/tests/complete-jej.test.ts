@@ -254,4 +254,107 @@ describe('completeJej', () => {
 			});
 		});
 	});
+
+	describe('dot-member context — Inc C', () => {
+		describe('curated member union emitted on dot-receiver', () => {
+			it('precedingText `str.` + empty prefix emits at least one member item', () => {
+				const result = completeJej({
+					prefix: '',
+					precedingText: 'str.',
+					fullText: 'let str = "hi"',
+				});
+				const memberItems = result.filter((item) => item.type === 'member');
+				expect(memberItems.length).toBeGreaterThan(0);
+			});
+
+			it('prefix `to` on dot context returns toString, toUpperCase, toLowerCase, toFixed', () => {
+				const labels = completeJej({
+					prefix: 'to',
+					precedingText: 'str.',
+					fullText: 'let str = "hi"',
+				}).map((item) => item.label);
+				expect(labels).toEqual(
+					expect.arrayContaining([
+						'toString',
+						'toUpperCase',
+						'toLowerCase',
+						'toFixed',
+					]),
+				);
+			});
+		});
+
+		describe('member-only blocked synthesis in dot context', () => {
+			it('prefix `sp` on dot context emits split as type blocked', () => {
+				const splitItem = completeJej({
+					prefix: 'sp',
+					precedingText: 'str.',
+					fullText: '',
+				}).find((item) => item.label === 'split');
+				expect(splitItem?.type).toBe('blocked');
+			});
+
+			it('prefix `ma` on dot context emits match as type blocked', () => {
+				const matchItem = completeJej({
+					prefix: 'ma',
+					precedingText: 'str.',
+					fullText: '',
+				}).find((item) => item.label === 'match');
+				expect(matchItem?.type).toBe('blocked');
+			});
+		});
+
+		describe('identifier-context suppression of member-only labels (regression guard)', () => {
+			it('prefix `sp` in identifier context does NOT emit split', () => {
+				const labels = completeJej({
+					prefix: 'sp',
+					precedingText: '',
+					fullText: '',
+				}).map((item) => item.label);
+				expect(labels).not.toContain('split');
+			});
+		});
+
+		describe('dot-context suppression of identifier-only labels (regression guard)', () => {
+			it('prefix `va` in dot context does NOT emit var', () => {
+				const labels = completeJej({
+					prefix: 'va',
+					precedingText: 'str.',
+					fullText: '',
+				}).map((item) => item.label);
+				expect(labels).not.toContain('var');
+			});
+
+			it('prefix `cl` in dot context does NOT emit class', () => {
+				const labels = completeJej({
+					prefix: 'cl',
+					precedingText: 'str.',
+					fullText: '',
+				}).map((item) => item.label);
+				expect(labels).not.toContain('class');
+			});
+		});
+
+		describe('chained dot-access falls through to identifier context', () => {
+			it('precedingText `str.charAt(0).` emits no member items', () => {
+				const result = completeJej({
+					prefix: '',
+					precedingText: 'str.charAt(0).',
+					fullText: '',
+				});
+				expect(result.every((item) => item.type !== 'member')).toBe(true);
+			});
+		});
+
+		describe('dot-context result is frozen', () => {
+			it('the returned array is frozen', () => {
+				const result = completeJej({
+					prefix: '',
+					precedingText: 'str.',
+					fullText: '',
+				});
+				expect(Object.isFrozen(result)).toBe(true);
+			});
+		});
+	});
 });

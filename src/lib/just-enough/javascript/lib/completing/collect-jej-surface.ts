@@ -9,8 +9,9 @@
  * - Inc B — adds ∪ scope-tree locals from
  *   `buildScope(ast).allDeclarations`, dedup'd by name and skipping
  *   collisions with keywords/globals (language vocabulary wins).
- * - Inc C (future) — adds a dot-receiver branch emitting a curated
- *   member union.
+ * - Inc C — adds a dot-receiver branch emitting a curated ~28-entry
+ *   member union (no receiver-type inference; same list for `str.`,
+ *   `(5).`, `Math.`, etc.).
  */
 
 import type { Program } from 'acorn';
@@ -43,6 +44,44 @@ const KEYWORDS: readonly string[] = [
 const SUPPRESSED_GLOBALS: ReadonlySet<string> = new Set(['eval']);
 
 /**
+ * Curated member-name union emitted in dot-receiver context. One
+ * union for all receivers (no type inference — `str.`, `(5).`,
+ * `Math.`, `console.` all show the same list). Pedagogically
+ * scannable; 28 commonly-useful names from `String`, `Number`,
+ * and `Math` that JEJ allows.
+ */
+const CURATED_MEMBERS: readonly string[] = [
+	'length',
+	'toString',
+	'valueOf',
+	'charAt',
+	'charCodeAt',
+	'slice',
+	'substring',
+	'toUpperCase',
+	'toLowerCase',
+	'indexOf',
+	'includes',
+	'startsWith',
+	'endsWith',
+	'repeat',
+	'trim',
+	'concat',
+	'replace',
+	'replaceAll',
+	'toFixed',
+	'toPrecision',
+	'abs',
+	'floor',
+	'ceil',
+	'round',
+	'max',
+	'min',
+	'pow',
+	'sqrt',
+];
+
+/**
  * Collect the JEJ-allowed suggestion union for the given completion
  * request.
  *
@@ -54,7 +93,14 @@ const SUPPRESSED_GLOBALS: ReadonlySet<string> = new Set(['eval']);
 function collectJejSurface(
 	_request: CompletionRequest,
 	ast?: Program,
+	inDotContext = false,
 ): readonly Suggestion[] {
+	if (inDotContext) {
+		return CURATED_MEMBERS.map(function asMember(label) {
+			return { label, source: 'member' as const };
+		});
+	}
+
 	const keywordLabels = new Set(KEYWORDS);
 	const allowedGlobals = justEnoughJs.allowedGlobals ?? new Set<string>();
 
