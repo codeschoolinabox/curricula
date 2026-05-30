@@ -261,8 +261,8 @@ consume it; the toolbar does not consume it.
 
 The CodeMirror factory at [`../lib/editing/`](../lib/editing/) exposes
 slots for `linters`, `docLookup`, `completions`, and `format` callbacks
-(plus the wired `onChange`). The home-base component wires `onChange` and
-`linters`:
+(plus the wired `onChange`). The home-base component wires `onChange`,
+`linters`, and `format`:
 
 - `linters` — **wired** to [`lintJej`](../../lib/linting/lint-jej.ts) from
   the JEJ-package [`lib/linting/`](../../lib/linting/) module. The original
@@ -273,11 +273,25 @@ slots for `linters`, `docLookup`, `completions`, and `format` callbacks
   embody in editor mode" invariant holds (the editor still never receives an
   embodiment). See [`lib/linting/DOCS.md`](../../lib/linting/DOCS.md).
 
+- `format` — **wired** to
+  [`formatJej`](../../lib/formatting-editor/format-jej.ts) from the
+  JEJ-package [`lib/formatting-editor/`](../../lib/formatting-editor/)
+  module. Thin delegating wrapper around the canonical formatter
+  [`format()`](../../embody/lib/formatting/format.ts) — the same
+  Prettier-standalone function the runtime gate
+  [`checkFormat`](../../embody/lib/formatting/check-format.ts) validates
+  against. The original "Prettier-based or JeJ-canonical" design question
+  resolved in favor of **single source of truth**: what the editor formats
+  is byte-identical to what `isJej` considers canonical, by construction.
+  No JEJ-subset gate at this boundary — any parseable JS gets formatted;
+  the linter (above) surfaces JEJ violations. Learner triggers via
+  `Ctrl-Shift-f` / `Cmd-Shift-f` registered in
+  [`build-extensions.ts`](../lib/editing/build-extensions.ts). See
+  [`lib/formatting-editor/DOCS.md`](../../lib/formatting-editor/DOCS.md).
+
 The remaining slots are intentionally unwired:
 
 - `docLookup` — requires `orchestrate/lib/jej-documentation/` (does not
   yet exist).
 - `completions` — requires `orchestrate/lib/completing/` (does not yet
   exist).
-- `format` — requires a chosen formatter (Prettier-based or JeJ-canonical
-  per the validation gate's `formatted` field).

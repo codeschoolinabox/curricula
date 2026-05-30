@@ -24,6 +24,7 @@ import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import type { EditorInstance } from '../../lib/editing/types.js';
 import EditorComponent from '../index.js';
 
 /**
@@ -196,6 +197,48 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 			await waitFor(() => {
 				expect(countDiagnostics(view)).toBe(0);
 			});
+		});
+	});
+
+	describe('Formatting — format callback wired to formatJej', () => {
+		it('passes formatJej as the format option to createEditor', async () => {
+			// Proves the editor home base wires the JEJ-canonical formatter as
+			// the CodeMirror format callback. The editing factory's own test
+			// suite (orchestrate/lib/editing/tests/create-editor.test.ts)
+			// verifies the format → dispatch → onChange chain end-to-end with
+			// a synchronous format callback; the keymap-→-async-Prettier path
+			// is unstable under jsdom's async-microtask interaction with
+			// Prettier standalone. Testing the wiring contract directly (does
+			// EditorComponent pass `format: formatJej`?) is the right level of
+			// fidelity for the home-base test: it pins the integration seam
+			// the home base owns, while the editing factory owns the runtime
+			// behavior.
+			vi.resetModules();
+			const createEditorMock = vi.fn(() =>
+				Promise.resolve({
+					destroy: () => {},
+					content: '',
+				} as unknown as EditorInstance),
+			);
+			vi.doMock('../../lib/editing/create-editor.js', () => ({
+				default: createEditorMock,
+			}));
+			try {
+				const { default: EditorComponentMocked } = await import('../index.js');
+				const { default: expectedFormatJej } = await import(
+					'../../../lib/formatting-editor/format-jej.js'
+				);
+				render(<EditorComponentMocked snippet="let x=5;" />);
+
+				await waitFor(() => {
+					expect(createEditorMock).toHaveBeenCalled();
+				});
+				const [, options] = createEditorMock.mock.calls[0];
+				expect(options.format).toBe(expectedFormatJej);
+			} finally {
+				vi.doUnmock('../../lib/editing/create-editor.js');
+				vi.resetModules();
+			}
 		});
 	});
 

@@ -24,6 +24,7 @@
 
 import React from 'react';
 
+import formatJej from '../../lib/formatting-editor/format-jej.js';
 import lintJej from '../../lib/linting/lint-jej.js';
 import createEditor from '../lib/editing/create-editor.js';
 
@@ -84,6 +85,7 @@ function EditorComponent({
 			parent: host,
 			language: 'javascript',
 			linters: [lintJej],
+			format: formatJej,
 			onChange: onChangeCallback,
 		}).then(
 			function onMounted(instance) {
