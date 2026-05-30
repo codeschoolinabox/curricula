@@ -14,8 +14,9 @@ orchestrate/
   types.ts                   <StudyLenses> prop contract + state shape + INTERNAL EventBus events
 
   index.tsx                  the <StudyLenses> component
-  toolbar.tsx                lens-picker dropdown (planned, L1)
-  recommendations-panel.tsx  recommendations panel UI (planned, L5)
+  event-bus.ts               createEventBus() — per-instance internal pub/sub
+  toolbar.tsx                lens-picker dropdown + edit-return button
+  recommendations-panel.tsx  recommendations panel UI (Q-II / Q-III)
   tests/                     vitest jsdom tests (per-increment)
 
   editor/                    default home base — only writer of snippet state
@@ -182,10 +183,26 @@ same lens-mount machinery (per
 [`../README.md` § Pedagogical first principles](../README.md#pedagogical-first-principles)
 implication 1):
 
-1. **Toolbar lens-picker dropdown** (Q-I learner-driven exploration
-   - Q-III educator-supplied default). Always visible; learner can switch to ANY
-     registered lens at any time. Default-selected option comes from the `lens`
-     prop.
+1. **Toolbar** (Q-I learner-driven exploration + Q-III educator-supplied default).
+   Always visible above the active surface in BOTH editor and lens mode. The
+   toolbar shell is invariant; its contents are mode-aware:
+   - **Lens-picker dropdown** — a `<select>` over the registered lenses
+     (`LENS_REGISTRY`). One `<option>` per registry entry; editor is NOT a
+     picker option. The first option is a non-selectable sentinel
+     (`<option value="" disabled selected>— select a lens —</option>`) that
+     reads as the picker value in editor mode. Default-selected resolution:
+     `lens` prop is a registry entry → that lens; otherwise → the sentinel
+     (neutral picker state). Selecting any non-sentinel option transitions
+     the orchestrator to lens mode for that lens.
+   - **Edit button** — a `<button data-orchestrator-edit-button>` that
+     appears ONLY when `state.mode === 'lens'`. Clicking dispatches
+     `mode-changed({ from: 'lens', to: 'editor' })` on the internal bus and
+     transitions the orchestrator back to editor home base; it does NOT
+     dispatch `lens-switched` (no lens is being selected — the active lens
+     is being unmounted). Editor home base is the only surface that mutates
+     snippet content; the edit button is the affordance that returns a
+     learner there from a lens-mode session. The editor-mode tree exposes no
+     edit-return affordance because no transition is needed.
 2. **Recommendations panel** (Q-II auto-generated paths; Q-III educator-curated
    ranking overrides extend it via WS3 increments L7/L8). Opens via toolbar
    button. Renders the WS2 recommender's filtered + ranked grid (3D Block
@@ -195,8 +212,32 @@ implication 1):
    § Layer IV.
 
 The picker is the lifelong-learning autonomy guarantee: it's NEVER hidden. The
-recommendations panel is additive — it offers the guided path; the picker offers
-the independent escape hatch.
+edit button is the read-only-view escape: a lens-mode session can always
+return to editor home base without consulting the picker. The recommendations
+panel is additive — it offers the guided path; the picker offers the
+independent escape hatch.
+
+## INTERNAL EventBus
+
+Each `<StudyLenses>` mount owns an isolated `EventBus` instance (see
+[`./types.ts`](./types.ts) § `EventBus`). The bus coordinates
+**intra-component** events — picker selections notifying the orchestrator of
+mode changes, sandbox test subscribers verifying transitions, future
+analytics hooks — and is internal-only: no DOM registry, no global, no
+`subscribe` / `onEvent` prop on the public `<StudyLenses>` surface.
+
+### Why internal-only
+
+A LMS-facing `subscribe` prop on `<StudyLenses>` (or an `onEvent` callback)
+would lock the internal event taxonomy as a public contract. The bus is
+internal because the event taxonomy is not yet a public surface;
+externalizing it requires a separate, narrower protocol designed against a
+concrete host's needs — not the raw internal bus.
+
+See [`./DOCS.md`](./DOCS.md) § Internal event taxonomy for the full event
+list, dispatch sites, contract (per-instance / synchronous / caught throws
+/ depth-first re-entrancy / typed), and the dispatch-ordering rule
+(mode-changed before lens-switched within the same React commit).
 
 ## Editor-vs-lens state machine
 
@@ -206,14 +247,17 @@ mutated only via well-defined **mode transitions**. See [`./types.ts`](./types.t
 for the discriminated-union state shape; see [`./DOCS.md` § Mode-gated state
 machine](./DOCS.md) for the architectural sketch.
 
-> F2 ships the mode discriminator and transitions but not the toolbar picker
-> UI (the picker lands in L1). Until L1, mode transitions are driven
-> exclusively by changes to the `lens` prop from the consumer — for the
-> sandbox checkpoint this is exercised via the
-> [`f2-mode-machine`](../../../../../../src/pages/f2-mode-machine.tsx) toggle
-> page (Docusaurus auto-route `/spiralearn/f2-mode-machine` after `npm run
-> start`); in curriculum pages the `lens` prop is statically supplied by
-> the Docusaurus plugin.
+> **Picker-vs-prop ownership.** Mode transitions are driven by three sources:
+> (a) the `lens` prop changing (consumer-driven; the
+> `useEffect([lens, configs])` path), (b) the toolbar picker selection
+> (learner-driven), and (c) the toolbar edit button (learner-driven). All
+> three route through the same internal transition handler — there is no
+> second source of truth for `state.activeLens`. On conflict, the most-recent
+> write wins: a subsequent `lens` prop change from the consumer overrides a
+> prior picker selection. Consumers SHOULD memoize `configs` to avoid
+> clobbering learner picker selections on unrelated parent re-renders: the
+> same `lens` value paired with a NEW `configs` object identity counts as a
+> consumer write and re-runs the transition.
 
 ### Glossary (ubiquitous language)
 
@@ -236,13 +280,67 @@ machine](./DOCS.md) for the architectural sketch.
   the lens-mode case calls `embody(snippet)` exactly once at first render
   and the lens-mode subtree paints on the first frame when the caller
   supplies a registered `lens`.
-- **Mode transition** — a state-update that flips the discriminator. Two
-  transitions exist today: **editor → lens** (the `lens` prop changes to a
-  registered key — builds or reuses an embodiment; mounts the lens) and
-  **lens → editor** (the `lens` prop unsets or moves to an unregistered key —
-  disposes the lens; the cached embodiment survives the transition). In-mode
-  lens-switching (lens → lens) lands in F4 when the registry grows beyond
-  `debug-props`.
+- **Mode transition** — a state-update that flips the discriminator. Three
+  transitions exist: **editor → lens** (a registered lens is selected via
+  the `lens` prop or the picker — builds or reuses an embodiment; mounts the
+  lens), **lens → editor** (the `lens` prop unsets, moves to an unregistered
+  key, or the edit button is clicked — disposes the lens; the cached
+  embodiment survives), and **lens → lens** (the picker selects a different
+  registered lens or the `lens` prop changes to a different registered key
+  while in lens mode — same embodiment is fed to the new lens; no mode
+  change). The transition logic is centralized in a single internal handler
+  shared by the prop-change effect, the picker handler, and the edit-button
+  handler.
+- **Toolbar** — the always-visible affordance container at the top of the
+  active surface. Owns the lens-picker dropdown and (in lens mode only) the
+  edit-return button. Mounted in both editor and lens mode; its contents are
+  mode-aware.
+- **Lens-picker** (or just **picker**) — the toolbar's `<select>` over the
+  registered lenses (`LENS_REGISTRY` entries). One `<option>` per registered
+  lens name plus a non-selectable sentinel first option; editor is not a
+  picker option. Selecting a non-sentinel option transitions the orchestrator
+  to lens mode for that lens.
+- **Registry / registered lens** — the orchestrator's lens-dispatch lookup
+  exposed as `LENS_REGISTRY`, keyed by `LensModule.name`. The picker
+  enumerates registry entries; the active lens (in lens mode) is always a
+  registry entry. The recommender (`lib/recommender/`) consumes the same set
+  for ranking.
+- **Active lens** — when `state.mode === 'lens'`, the lens name currently
+  mounted. Stored as `state.activeLens`. The picker `value` derives from this;
+  the edit button's visibility derives from `state.mode === 'lens'`.
+- **Edit return** — the orchestrator-state transition from lens mode back to
+  editor mode, driven by the toolbar's edit button. The button dispatches
+  `mode-changed({ from: 'lens', to: 'editor' })` on the internal bus; it
+  does NOT dispatch `lens-switched` (no lens is being selected — the active
+  lens is being unmounted). The cached embodiment is retained per F2.4 /
+  F2.5. The button is conditionally rendered (lens mode only); the editor-
+  mode tree exposes no edit-return affordance because no transition is
+  needed.
+- **Neutral picker state** — what the picker renders in editor mode. The
+  first `<option>` is a non-selectable sentinel
+  (`<option value="" disabled selected>— select a lens —</option>`) that
+  reads as the picker's `value`. The remaining `<option>`s enumerate the
+  registered lenses. Selecting any non-sentinel option transitions to lens
+  mode for that lens; the sentinel itself cannot be re-selected by the
+  learner.
+- **Dispatch** — calling `bus.dispatch(eventName, payload)` to notify all
+  listeners registered for that event. Synchronous; listeners execute in
+  registration order.
+- **Subscribe** — registering a listener for an event via
+  `bus.subscribe(eventName, listener)`. Returns a teardown function that
+  removes the listener when called.
+- **Listener** — a function passed to `bus.subscribe` that receives the
+  dispatched payload for its event. Listeners that throw are caught and
+  warned (`console.warn`); subsequent listeners still fire.
+- **Payload** — the typed value passed to `bus.dispatch` and received by
+  listeners. Each `EventName` has exactly one payload shape via the
+  `EventPayloadMap` type-level mapping.
+- **Event name** — a member of the `EventName` union (`'lens-switched'` |
+  `'mode-changed'`). Each name has a fixed payload shape; new names land
+  alongside their payloads in `types.ts`.
+- **Re-entrant dispatch** — a listener dispatches another event (or the same
+  event) inside its own handler. Depth-first: the nested dispatch runs to
+  completion before the outer dispatch's next listener fires.
 
 ### Cross-mode embodiment cache
 
@@ -301,6 +399,7 @@ and sandbox harnesses know what to expect across the pyramid.
 | `data-orchestrator-host`                  | The host element where the active surface mounts (F1: a `<textarea>` for the editor home base; later increments may use a wrapping container when the surface needs one) | F1       | Tests + sandbox locate where the active surface mounts.      |
 | `data-orchestrator-toolbar`               | The toolbar `<nav>`                                                                                                                                                      | L1       | Tests + sandbox locate the toolbar without depending on tag. |
 | `data-orchestrator-lens-picker`           | The toolbar `<select>`                                                                                                                                                   | L1       | Tests + sandbox locate the dropdown.                         |
+| `data-orchestrator-edit-button`           | The toolbar `<button>` that returns to editor mode (rendered only when `state.mode === 'lens'`)                                                                          | L1       | Tests + sandbox locate the edit-return affordance.           |
 | `data-orchestrator-recommendations-panel` | The recommendations panel container                                                                                                                                      | L5       | Tests + sandbox locate the panel.                            |
 
 **Directory → type/attribute asymmetry.** The directory is named `orchestrate/`
@@ -320,12 +419,10 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
 
 - **Single-writer state**. Only [`./editor/`](./editor/) mutates snippet source.
   The orchestrator routes the edit-callback through; lenses are read-only views.
-- **Internal-only EventBus**. Per
-  [`../.planning-handoffs/03-orchestrator-and-contracts.md`](../.planning-handoffs/03-orchestrator-and-contracts.md)
-  F5: the orchestrator's bus is for intra-component coordination. No outbound
-  `subscribe` prop on `<StudyLenses>` until a concrete LMS integration target
-  exists. Internal events (e.g. `lens-switched` from picker → orchestrator) are
-  in scope.
+- **Internal-only EventBus** (see § INTERNAL EventBus above for the full
+  contract). The orchestrator's bus coordinates intra-component events; each
+  `<StudyLenses>` mount owns a per-instance bus. No outbound `subscribe`
+  prop on `<StudyLenses>` until a concrete LMS integration target appears.
 - **Lazy embodiment** (F3 — satisfied by F2.4 + F2.5). Embodiment is built only
   when downstream needs it: on editor → lens transition (F2.4 transition-only
   trigger) and on evaluation phases inside a mounted lens. **Evaluation phases**

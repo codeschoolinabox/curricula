@@ -242,9 +242,13 @@ type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
  *
  * @remarks `previous` may be `null` on the very first lens-mount
  * (editor → lens transition); subsequent in-mode switches always
- * have a non-null previous. `source` is optional pending F5's
- * dispatch-site enumeration — F5 may make it required when the bus
- * wires up and every dispatch site has a defensible source value.
+ * have a non-null previous. `source` is optional because the
+ * orchestrator does not require subscribers to discriminate by
+ * source: subscribers that care about provenance (analytics, future
+ * audit) read the field; subscribers that only care about the
+ * lens-mount transition ignore it. Each dispatch site that can
+ * compute a defensible `LensSelectionSource` supplies one; sites
+ * without a meaningful source omit it.
  */
 type LensSwitchedPayload = Readonly<{
 	previous: string | null;
