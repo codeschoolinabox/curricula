@@ -672,3 +672,96 @@ describe('<StudyLenses> — F5b.5 prop-driven lens → editor transition', () =>
 		});
 	});
 });
+
+describe('<StudyLenses> — F5b.6 prop-driven in-mode lens-switch (lens → lens)', () => {
+	describe('Interface — only lens-switched dispatches on in-mode lens switch', () => {
+		it('lens-switched fires with non-null previous and source: prop', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(
+					<StudyLenses snippet="OK" lens="annotate" />,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+				dispatchSpy.mockClear();
+				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+				expect(dispatchSpy).toHaveBeenCalledWith('lens-switched', {
+					previous: 'annotate',
+					next: 'debug-props',
+					source: 'prop',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('mode-changed does NOT dispatch on in-mode lens switch (mode stays lens)', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(
+					<StudyLenses snippet="OK" lens="annotate" />,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+				dispatchSpy.mockClear();
+				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+				expect(dispatchSpy).not.toHaveBeenCalledWith(
+					'mode-changed',
+					expect.anything(),
+				);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('the prop-driven in-mode lens switch dispatches exactly once under React StrictMode', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(
+					<React.StrictMode>
+						<StudyLenses snippet="OK" lens="annotate" />
+					</React.StrictMode>,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+				dispatchSpy.mockClear();
+				rerender(
+					<React.StrictMode>
+						<StudyLenses snippet="OK" lens="debug-props" />
+					</React.StrictMode>,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(1);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('a second consecutive in-mode switch carries the first switch target as previous', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(
+					<StudyLenses snippet="OK" lens="annotate" />,
+				);
+				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+				dispatchSpy.mockClear();
+				rerender(<StudyLenses snippet="OK" lens="annotate" />);
+				expect(dispatchSpy).toHaveBeenCalledWith('lens-switched', {
+					previous: 'debug-props',
+					next: 'annotate',
+					source: 'prop',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+	});
+});

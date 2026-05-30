@@ -34,7 +34,15 @@
  * - **Embody trigger** — fires inside the transition path only: at first
  *   render when initial mode is lens, OR inside the prop-change effect when
  *   transitioning editor → lens without a cache hit.
- * - **EventBus** — deferred to F5.
+ * - **EventBus** — per-instance bus owned by a `useRef`, exposed via
+ *   `forwardRef` + `useImperativeHandle` for tests. Initial-mount dispatch
+ *   fires from a one-time post-commit `useEffect([])` when the first commit
+ *   lands in lens mode (`source: 'initial'`). Prop-driven transitions
+ *   dispatch from the `useEffect([lens, configs])` body after the state
+ *   setters fire, diffing against a `prevStateRef` and emitting
+ *   `mode-changed` + `lens-switched(source: 'prop')` per the DOCS.md
+ *   dispatch-ordering rule. See `./event-bus.ts` for the bus runtime and
+ *   `./DOCS.md` § Internal event taxonomy for the full contract.
  */
 
 import React from 'react';
