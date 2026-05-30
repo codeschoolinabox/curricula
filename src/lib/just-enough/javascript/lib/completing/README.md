@@ -122,8 +122,15 @@ The result is a deeply frozen array.
 
 Behavior:
 
-- **Empty input** → empty array (no prefix, no preceding text, no
-  snippet to parse).
+- **Prefix matches nothing in the JEJ surface** (e.g. `'zz'`,
+  `'qqq'`) → empty array. The completer is a pure function of the
+  request; the editor's own short-circuit at the editing factory
+  filters out empty-implicit-prefix invocations before they reach
+  this callback, but an explicit Ctrl-Space with empty prefix
+  reaches the callback and is treated as "show me everything
+  matching prefix `''`" — which under the case-insensitive
+  `startsWith` filter is every JEJ-allowed identifier at the
+  cursor position.
 - **Bare identifier context, no AST** (parse failed) → keywords ∪
   JEJ-allowed globals, prefix-filtered (case-insensitive); blocked
   tokens (`var`, `class`, etc.) appear as blocked items if their

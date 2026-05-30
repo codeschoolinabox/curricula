@@ -56,19 +56,28 @@ level rather than inside `orchestrate/` or `embody/`.
    The result is a `readonly Suggestion[]` — each item has a `label`
    and a `source` indicating which sub-collector emitted it.
 
-4. **Mark blocked and freeze** (sync, pure) — overlay the
-   [`BLOCKED_MEMBER_NAMES`](../../embody/lib/validating/just-enough-js.ts)
-   set and the curated stumbling-list onto the suggestions. Three
-   paths: (a) suggestion label is **in the blocklist** → `type:
-   'blocked'`, `detail: '(not in JEJ)'`, `apply: 'noop'`, and `info`
-   from the stumbling-list if present (generic marker only
-   otherwise); (b) suggestion label is **in the stumbling-list but
-   NOT in the blocklist** (the `null` advisory case) → keep source
-   `type`, attach `info` from the stumbling-list, NO blocked marker
-   and NO `apply: 'noop'`; (c) **otherwise** → pass through with
-   `type` from `source`. Then prefix-filter the result
-   case-insensitively (`label.toLowerCase().startsWith(prefix.toLowerCase())`)
-   and deep-freeze the returned array. The freeze happens at the
+4. **Mark blocked and freeze** (sync, pure) — overlay the curated
+   stumbling-list onto the JEJ-surface in two steps:
+   - **(a) For each input suggestion**: if its label appears in the
+     stumbling-list, attach the curated `info` to the existing item
+     (keep the source-derived `type` — this is the **advisory** case,
+     used for JEJ-valid labels with a teaching caveat like `new` and
+     `null`). Otherwise pass through with `type` from `source`.
+   - **(b) Synthesize blocked items** for stumbling-list labels NOT
+     in the input suggestions: each becomes
+     `{label, type: 'blocked', detail: '(not in JEJ)', info: stumble.info, apply: 'noop'}`.
+     This is what makes typing `va` show `var` (a JEJ-blocked label)
+     as a blocked completion even though `var` is not in the JEJ
+     surface — the synthesis adds it so the pedagogical signal can
+     fire. For Inc C, this synthesis step is extended to also
+     synthesize labels from
+     [`BLOCKED_MEMBER_NAMES`](../../embody/lib/validating/just-enough-js.ts)
+     in dot-receiver context (with `info` if curated, generic marker
+     otherwise).
+
+   Then prefix-filter the combined result case-insensitively
+   (`label.toLowerCase().startsWith(prefix.toLowerCase())`) and
+   deep-freeze the returned array. The freeze happens at the
    orchestrator's return boundary in
    [`complete-jej.ts`](./complete-jej.ts), not inside
    [`mark-blocked.ts`](./mark-blocked.ts).
