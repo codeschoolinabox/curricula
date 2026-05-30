@@ -56,7 +56,7 @@ import type {
 } from './types.js';
 
 /**
- * Single-entry static lens registry — the orchestrator's bootstrap
+ * Static lens registry — the orchestrator's bootstrap
  * dispatch surface for B.7. Keyed by `LensModule.name`. F4 grows the
  * registry with the first pedagogical trial lens; the shape decision
  * (static map vs. runtime `register()` API) is open-spec at the
