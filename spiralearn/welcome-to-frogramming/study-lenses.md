@@ -102,7 +102,7 @@ flowchart LR
 | 1 | **JEJ** | The curated language subset learners write within | Source code valid against the JEJ grammar | [`reference.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/reference.md) |
 | 2 | **NM** | The conceptual evaluation model JEJ programs run on — _what learners twin_ | A bounded mental machine: scopes, bindings, values, coercion, control flow, two I/O channels (developer console + user dialogs) | [`notional-machine.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/notional-machine.md) |
 | 3 | **`embody/`** | The operational embodiment of the NM — `embody(code)` turns a JEJ source string into a frozen-data + event-stream object whose every field maps to an NM concept | A `Snippet` value: source + parse + static analyses + validation + streams (callable generators per lifecycle phase) | [`embody/`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/embody/) |
-| 4 | **`lenses/`** | Pedagogical perspectives on the embodied NM — the Frogrammer's kit of magnifying glasses 🔬 | One self-contained "mini web app" per lens: takes `embodiment` + optional config; renders a learning exercise (highlight, blanks, parsons, trace-table, ...) | [`lenses/`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/lenses/) |
+| 4 | **`lenses/`** | Pedagogical perspectives on the embodied NM — the Frogrammer's kit of magnifying glasses 🔬 | One self-contained "mini web app" per lens: takes `embodiment` + optional config; renders a learning exercise (annotate, blanks, parsons, trace-table, ...) | [`lenses/`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/lenses/) |
 | 5 | **`orchestrate/`** | The `<StudyLenses>` React component + recommender + analysis helpers; wires the chain together for the learner | The package's public surface — one component to mount; everything else internal | [`orchestrate/`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/orchestrate/) |
 
 Each layer's contract sits at the boundary between it and the next:
@@ -378,7 +378,7 @@ logic only checks the field it cares about.
 
 | Tier | What it needs | `applicableTo` returns | Example lenses |
 | --- | --- | --- | --- |
-| 1 | Text only — no parse needed | always `true` | `parsons` (line shuffling), `copy-type`, `highlight` |
+| 1 | Text only — no parse needed | always `true` | `parsons` (line shuffling), `copy-type`, `annotate` |
 | 2 | Valid AST (no execution required) | `embodiment.status.parsed` | `blanks`, variables/scope, ask |
 | 3 | Valid parse AND evaluable script-scope | `embodiment.status.created` | `trace-table`, `run` |
 
@@ -396,7 +396,7 @@ required.
 | Lens | Tier | What it does |
 | --- | --- | --- |
 | `editor` | (home base, not a lens — lives in `orchestrate/editor/`) | The always-present surface where the learner types. The only writer of snippet state. |
-| `highlight` | 1 | Read-only annotated code view |
+| `annotate` | 1 | Read-only annotated code view |
 | `parsons` | 1 | Drag-and-drop line ordering |
 | `blanks` | 2 | Fill-in-the-blank exercise |
 | `trace-table` | 3 | Split view — code + manual trace table + check button; predictions validated against tracer ground truth |
