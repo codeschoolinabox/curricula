@@ -231,10 +231,11 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 				render(<EditorComponentMocked snippet="let x=5;" />);
 
 				await waitFor(() => {
-					expect(createEditorMock).toHaveBeenCalled();
+					expect(createEditorMock).toHaveBeenCalledWith(
+						expect.any(String),
+						expect.objectContaining({ format: expectedFormatJej }),
+					);
 				});
-				const [, options] = createEditorMock.mock.calls[0];
-				expect(options.format).toBe(expectedFormatJej);
 			} finally {
 				vi.doUnmock('../../lib/editing/create-editor.js');
 				vi.resetModules();
