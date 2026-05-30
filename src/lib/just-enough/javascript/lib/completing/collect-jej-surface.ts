@@ -110,7 +110,12 @@ function collectJejSurface(
 		},
 	);
 
-	const globalSuggestions: readonly Suggestion[] = [...allowedGlobals]
+	// `Array.from(<Set>)` instead of `[...<Set>]` — the Docusaurus/Babel
+	// transpile pipeline mangles iterable spread to a one-element array
+	// wrapping the iterable. Array.from uses the iterable protocol via a
+	// different code path that survives the transpile.
+	// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
+	const globalSuggestions: readonly Suggestion[] = Array.from(allowedGlobals)
 		.filter(function isJejGlobal(label) {
 			return !SUPPRESSED_GLOBALS.has(label) && !keywordLabels.has(label);
 		})
@@ -142,7 +147,8 @@ function collectLocals(
 	const declaredNames = analysis.allDeclarations.map(function pickName(declaration) {
 		return declaration.name;
 	});
-	const uniqueNames = [...new Set(declaredNames)].filter(
+	// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
+	const uniqueNames = Array.from(new Set(declaredNames)).filter(
 		function isVisibleLocal(name) {
 			return !keywordLabels.has(name) && !allowedGlobals.has(name);
 		},

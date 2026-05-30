@@ -55,7 +55,6 @@ javascript/
       completing/               autocomplete (editor concern)
       editing/                  editor integration (editor concern)
       error-interpreting/       learner-friendly error messages (editor concern)
-      jej-documentation/        JEJ docs for editor tooltips (editor concern)
       socratizing/              Socratic micro-decision analysis
 
   sandbox-programs/             test fixtures
@@ -380,7 +379,7 @@ Concrete:
 | `lib/evaluating/`         | `embody/lib/evaluating/`              | Evaluation engines that `embody.streams.evaluate.*` wrap       |
 | `lib/scope/`              | `embody/lib/scope/`                   | Scope analysis → NM scope-chain understanding                  |
 | `lib/socratizing/`        | `orchestrate/lib/socratizing/`        | Socratic micro-decision analysis (orchestrator-level pedagogy) |
-| `lib/jej-documentation/`  | `orchestrate/lib/jej-documentation/`  | JEJ docs for editor tooltips                                   |
+| (new)                     | `lib/documenting/`                    | JEJ docs for editor tooltips (landed at JEJ-peer `lib/`)       |
 | `lib/completing/`         | `orchestrate/lib/completing/`         | Autocomplete (editor concern)                                  |
 | `lib/editing/`            | `orchestrate/lib/editing/`            | Editor integration                                             |
 | `lib/error-interpreting/` | `orchestrate/lib/error-interpreting/` | Learner-friendly error messages (editor concern)               |

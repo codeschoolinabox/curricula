@@ -26,11 +26,8 @@ orchestrate/
     README.md                (index — links to per-lib READMEs/DOCS)
     recommender/             WS2 (02-analysis-and-recommender.md) owns
     socratizing/             Socratic micro-decision analysis
-    completing/              autocomplete (editor concern)
     editing/                 editor integration helpers (CodeMirror wrapper)
     error-interpreting/      learner-friendly error messages
-    jej-documentation/       JEJ docs for editor tooltips
-    analysis/                snippet analysis report (WS2)
 ```
 
 The peer follows a **primary-export-at-top-level** convention: `<StudyLenses>`
@@ -48,8 +45,9 @@ The two subdirs map to separable concerns:
   snippet state.
 - **`lib/`** — pure-TS analysis utilities every consumer can call with an
   `embodiment` as input. The recommender lives here (WS2 owns it); the editor
-  consumes the others (completing, editing, error-interpreting,
-  jej-documentation, socratizing).
+  consumes the others (editing, error-interpreting, socratizing).
+  The JEJ-aware editor adapters (`completing`, `documenting`, `formatting-editor`,
+  `linting`) live at the JEJ-package [`lib/`](../lib/) peer, not here.
 
 Everything else (the `<StudyLenses>` component, mode state, lens dispatch,
 picker UI, panel UI, internal EventBus) lives at the peer's top level — these

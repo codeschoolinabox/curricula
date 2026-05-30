@@ -406,7 +406,7 @@ import {
 | `lib/error-interpreting/` | Learner-friendly error message translation                                                                                                       |
 | `lib/socratizing/`        | Socratic code analysis (micro-decisions)                                                                                                         |
 | `lib/scope/`              | Scope analysis utilities                                                                                                                         |
-| `lib/jej-documentation/`  | JEJ documentation generation for editor support                                                                                                  |
+| `lib/documenting/`        | JEJ docLookup adapter for hover tooltips (editor support)                                                                                        |
 | `components/`             | UI components (V2 lens components, migration source)                                                                                             |
 | `index.ts`                | Package entry — exports the `<StudyLenses>` orchestrator component (primary surface) + legacy named functions                                    |
 | `api/`                    | Legacy directory; trace/run/debug-related types remain here pending parallel migration. The validate/parse/format/default migration is complete. |

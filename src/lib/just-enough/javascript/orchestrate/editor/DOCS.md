@@ -264,8 +264,7 @@ consume it; the toolbar does not consume it.
 
 The CodeMirror factory at [`../lib/editing/`](../lib/editing/) exposes
 slots for `linters`, `docLookup`, `completions`, and `format` callbacks
-(plus the wired `onChange`). The home-base component wires `onChange`,
-`linters`, `format`, and `completions`:
+(plus the wired `onChange`). All four callback slots are now wired:
 
 - `linters` — **wired** to [`lintJej`](../../lib/linting/lint-jej.ts) from
   the JEJ-package [`lib/linting/`](../../lib/linting/) module. The original
@@ -312,7 +311,18 @@ slots for `linters`, `docLookup`, `completions`, and `format` callbacks
   `info`/`apply` fields. See
   [`lib/completing/DOCS.md`](../../lib/completing/DOCS.md).
 
-The remaining slot is intentionally unwired:
-
-- `docLookup` — requires `orchestrate/lib/jej-documentation/` (does not
-  yet exist).
+- `docLookup` — **wired** to
+  [`documentJej`](../../lib/documenting/document-jej.ts) from the
+  JEJ-package [`lib/documenting/`](../../lib/documenting/) module.
+  Pure table lookup against a module-level frozen partition (16 JEJ
+  keywords, 16 JEJ-allowed globals, 28 curated member methods, 12
+  blocked-stumble entries). Blocked stumbles carry full pedagogical
+  content (description + example + whenToUse + commonMistakes)
+  flagged via `category: 'not in JEJ'` — JEJ scopes the editor's
+  positive surface, not the learner's universe. The advisory
+  stumbles (`null`, `new`) live in the keyword partition with
+  their caveats woven into `whenToUse` and `commonMistakes`. The
+  surface mirrors the completer's `KEYWORDS`, `allowedGlobals` (minus
+  `SUPPRESSED_GLOBALS`), and `CURATED_MEMBERS`; a drift-guard test
+  in `lib/documenting/tests/` asserts the keysets stay in sync.
+  See [`lib/documenting/DOCS.md`](../../lib/documenting/DOCS.md).

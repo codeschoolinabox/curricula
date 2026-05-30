@@ -23,8 +23,7 @@
 - [`./editor/`](./editor/) — the home-base editor, the only writer of snippet
   state.
 - [`./lib/`](./lib/) — the pure-TS analysis libs every consumer uses
-  (recommender, socratizing, completing, editing, error-interpreting,
-  jej-documentation, analysis).
+  (recommender, socratizing, editing, error-interpreting, analysis).
 
 [`embody/`](../embody/) and [`lenses/`](../lenses/) are pure-TS peers;
 `orchestrate/` is where React enters and where the learner-facing experience is
@@ -919,8 +918,7 @@ This peer does NOT own:
 - The `embody()` factory or its substrate (lives in [`../embody/`](../embody/)).
 - Specific lens implementations (live in [`../lenses/`](../lenses/)).
 - Per-lib content for the analysis libs — owned by WS2 (recommender, analysis)
-  and per-lib sessions (socratizing, completing, editing, error-interpreting,
-  jej-documentation).
+  and per-lib sessions (socratizing, editing, error-interpreting).
 - The Docusaurus plugin's prop emission contract (lives in
   `src/plugins/study-lenses/`; alignment is flagged in
   `03-orchestrator-and-contracts.md` Cross-handoff impact).

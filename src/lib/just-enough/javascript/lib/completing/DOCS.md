@@ -175,8 +175,8 @@ flowchart TD
 - **Dot-receiver chain handling.** Single-level dot only; chains
   (`x.y().z.`) fall through to the identifier branch.
 - **Documentation lookup** (hover tooltips). Different callback
-  (`docLookup`), different adapter (future
-  `lib/jej-documentation/`).
+  (`docLookup`), different adapter at
+  [`../documenting/`](../documenting/).
 - **Per-exercise / per-level configurable surfaces.** The
   language-level config is the only language level; per-exercise
   curation is not in scope.

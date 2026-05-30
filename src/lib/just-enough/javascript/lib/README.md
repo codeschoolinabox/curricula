@@ -24,6 +24,8 @@ lib/
   README.md              (this — orientation + navigation)
   completing/            completion-callback adapter: JeJ-curated
                          suggestions with blocked-marker overlay
+  documenting/           docLookup-callback adapter: JEJ-aware
+                         hover documentation
   formatting-editor/     format-callback adapter: JeJ canonical
                          formatting delegated to the runtime formatter
   linting/               validation-feed adapter: JeJ violations
@@ -31,8 +33,6 @@ lib/
 ```
 
 Adapters land here as the package's tooling needs expand.
-Documentation lookup (hover tooltips for keywords) is a likely
-future inhabitant.
 
 ## Why a separate peer
 
@@ -79,6 +79,10 @@ top-level `AGENTS.md` / `DEV.md`. Module-specific rules:
   - [`./completing/README.md`](./completing/README.md) —
     completion-callback adapter with JEJ-curated suggestions and a
     blocked-marker overlay.
+  - [`./documenting/README.md`](./documenting/README.md) —
+    docLookup-callback adapter with a curated JEJ-aware hover-doc
+    table (keywords, allowed globals, curated members, plus
+    blocked-stumble entries badged `not in JEJ`).
   - [`./formatting-editor/README.md`](./formatting-editor/README.md) —
     format-callback adapter delegating to the canonical formatter.
   - [`./linting/README.md`](./linting/README.md) — validation-feed

@@ -101,7 +101,11 @@ function synthesizeDotBlocked(
 	stumblingByLabel: ReadonlyMap<string, StumblingEntry>,
 ): readonly CompletionItem[] {
 	const blockedMembers = justEnoughJs.blockedMemberNames ?? new Set<string>();
-	return [...blockedMembers]
+	// `Array.from(<Set>)` instead of `[...<Set>]` — the Docusaurus/Babel
+	// transpile pipeline mangles iterable spread to a one-element array
+	// wrapping the iterable (see collect-jej-surface.ts for context).
+	// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
+	return Array.from(blockedMembers)
 		.filter(function notInInput(name) {
 			return !inputLabels.has(name);
 		})

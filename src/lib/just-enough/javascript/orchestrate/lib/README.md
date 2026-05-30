@@ -16,9 +16,7 @@ this index.
 | `recommender/` | Applicability filter + Ranking engine. Consumes `embodiment` directly (analysis is internal helpers, not a separate hand-off type); produces ranked `Recommendation` arrays organized into a `RecommendationGrid`. |
 | `socratizing/` | Socratic micro-decision analysis. Returns questions about the snippet. |
 | `editing/` | CodeMirror integration helpers — `createEditor()` factory, callback API. |
-| `completing/` | Autocomplete (editor concern). |
 | `error-interpreting/` | Learner-friendly error message translation. |
-| `jej-documentation/` | JEJ docs for editor tooltips. |
 
 ## Locked input shape
 

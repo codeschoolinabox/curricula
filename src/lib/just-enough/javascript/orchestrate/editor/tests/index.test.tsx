@@ -281,6 +281,44 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 		});
 	});
 
+	describe('Documenting — docLookup callback wired to documentJej', () => {
+		it('passes documentJej as the docLookup option to createEditor', async () => {
+			// Same contract-test pattern as the Formatting and Completing
+			// blocks above — pins the integration seam (does EditorComponent
+			// pass docLookup: documentJej?) without exercising hover delay
+			// or the tooltip DOM. The editing factory's own test suite
+			// covers the hoverTooltip → DocEntry → DOM chain; the adapter's
+			// unit tests cover the JEJ-aware table lookup behavior.
+			vi.resetModules();
+			const createEditorMock = vi.fn(() =>
+				Promise.resolve({
+					destroy: () => {},
+					content: '',
+				} as unknown as EditorInstance),
+			);
+			vi.doMock('../../lib/editing/create-editor.js', () => ({
+				default: createEditorMock,
+			}));
+			try {
+				const { default: EditorComponentMocked } = await import('../index.js');
+				const { default: expectedDocumentJej } = await import(
+					'../../../lib/documenting/document-jej.js'
+				);
+				render(<EditorComponentMocked snippet="let x=5;" />);
+
+				await waitFor(() => {
+					expect(createEditorMock).toHaveBeenCalledWith(
+						expect.any(String),
+						expect.objectContaining({ docLookup: expectedDocumentJej }),
+					);
+				});
+			} finally {
+				vi.doUnmock('../../lib/editing/create-editor.js');
+				vi.resetModules();
+			}
+		});
+	});
+
 	describe('Cleanup — unmount tears down CodeMirror', () => {
 		it('destroys the live document on unmount', async () => {
 			const { container, unmount } = render(<EditorComponent snippet="OK" />);
