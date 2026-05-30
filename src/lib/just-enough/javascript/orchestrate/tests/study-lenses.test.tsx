@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import * as embodyModule from '../../embody/index.js';
 import StudyLenses from '../index.js';
+import type { StudyLensesHandle } from '../index.js';
 
 /**
  * Resolves to the CodeMirror EditorView mounted inside the orchestrator's
@@ -377,6 +378,36 @@ describe('<StudyLenses> — F1 smoke', () => {
 				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
 				expect(container.querySelector('[data-lens]')).toBeNull();
 			});
+		});
+	});
+});
+
+describe('<StudyLenses> — F5b.1 bus instance', () => {
+	describe('Zero — forwarded ref exposes the bus', () => {
+		it('the ref handle carries a bus with a callable dispatch method', () => {
+			const ref = React.createRef<StudyLensesHandle>();
+			render(<StudyLenses snippet="OK" ref={ref} />);
+			expect(typeof ref.current?.bus.dispatch).toBe('function');
+		});
+	});
+
+	describe('One — bus identity is stable across re-renders', () => {
+		it('a re-render with the same props keeps the bus reference identical', () => {
+			const ref = React.createRef<StudyLensesHandle>();
+			const { rerender } = render(<StudyLenses snippet="OK" ref={ref} />);
+			const initialBus = ref.current!.bus;
+			rerender(<StudyLenses snippet="OK" ref={ref} />);
+			expect(ref.current!.bus).toBe(initialBus);
+		});
+	});
+
+	describe('Boundary — two mounted instances have distinct buses', () => {
+		it('the ref from mount A and the ref from mount B carry different bus objects', () => {
+			const refA = React.createRef<StudyLensesHandle>();
+			const refB = React.createRef<StudyLensesHandle>();
+			render(<StudyLenses snippet="OK" ref={refA} />);
+			render(<StudyLenses snippet="OK" ref={refB} />);
+			expect(refA.current!.bus).not.toBe(refB.current!.bus);
 		});
 	});
 });
