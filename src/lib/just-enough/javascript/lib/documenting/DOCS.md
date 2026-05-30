@@ -188,10 +188,12 @@ flowchart TD
   - Each category file (`keywords.ts`, `globals.ts`, `members.ts`)
     exports its label keyset (e.g. `KEYWORD_LABELS: ReadonlySet<string>`)
     alongside its entry data.
-  - Assertions: `KEYWORD_LABELS === new Set(KEYWORDS)`,
-    `GLOBAL_LABELS === new Set([...allowedGlobals].filter(g => !SUPPRESSED_GLOBALS.has(g)))`,
-    `MEMBER_LABELS === new Set(CURATED_MEMBERS)` (set equality,
-    order-independent).
+  - Assertions use set-content equality (NOT `===`, which compares
+    Set references and always fails). The vitest-friendly form is to
+    sort both sides into arrays and `toEqual`:
+    `expect([...KEYWORD_LABELS].sort()).toEqual([...KEYWORDS].sort())`,
+    `expect([...GLOBAL_LABELS].sort()).toEqual([...allowedGlobals].filter(g => !SUPPRESSED_GLOBALS.has(g)).sort())`,
+    `expect([...MEMBER_LABELS].sort()).toEqual([...CURATED_MEMBERS].sort())`.
   - Failure messages name the upstream file plus the fix
     instruction: "Drift detected — `KEYWORDS` in
     `collect-jej-surface.ts` changed. Add the matching `DocEntry`
