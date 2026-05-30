@@ -30,7 +30,12 @@
 
 import { freezeInPlace } from '../../../utils/freeze.js';
 
-import type { EventBus } from './types.js';
+import type {
+	EventBus,
+	EventListener,
+	EventName,
+	EventPayload,
+} from './types.js';
 
 /**
  * Creates a new per-instance EventBus.
@@ -39,24 +44,58 @@ import type { EventBus } from './types.js';
  * synchronous no-op. Two `createEventBus()` calls produce isolated bus
  * instances that do not share listeners.
  *
- * @remarks The returned bus is intentionally not frozen — `subscribe` and
- * `unsubscribe` mutate the internal listener store. The bus's reference
- * identity is stable for the lifetime of the holding `useRef`; callers
- * should treat the bus value as a long-lived handle, not a per-render
- * value.
+ * @remarks The bus's method properties are frozen (stable references for
+ * the lifetime of the holding `useRef`). The internal listener store is a
+ * closure variable, NOT a property on the bus object, so `freezeInPlace`
+ * does not prevent listener registration — see the file-level `@remarks`
+ * for the stateful-pattern exception.
  */
 function createEventBus(): EventBus {
+	// Mutable listener store — closure variable per the stateful-pattern
+	// exception (DEV.md § 8). Per-event-name Sets keep listener registration
+	// type-safe (each Set is typed against its specific event's listener
+	// signature). Set semantics make re-subscribing the same listener
+	// idempotent — the Listener identity-based registration contract in
+	// DOCS.md § Internal event taxonomy § Contract.
+	type ListenerStore = {
+		// eslint-disable-next-line functional/prefer-readonly-type -- stateful bus per DEV.md § 8
+		'lens-switched': Set<EventListener<'lens-switched'>>;
+		// eslint-disable-next-line functional/prefer-readonly-type -- stateful bus per DEV.md § 8
+		'mode-changed': Set<EventListener<'mode-changed'>>;
+	};
+	const listenersByEvent: ListenerStore = {
+		'lens-switched': new Set(),
+		'mode-changed': new Set(),
+	};
+
 	const bus: EventBus = {
-		// Fake It: listener store absent at F5a.1; F5a.2 introduces real dispatch.
-		dispatch() {},
-		// Fake It: no registration; F5a.2 introduces real subscribe + teardown.
-		subscribe() {
-			return function noopTeardown() {};
+		dispatch<N extends EventName>(name: N, payload: EventPayload<N>): void {
+			const listeners = listenersByEvent[name];
+			// F5a.6 will snapshot listeners (Array.from) before iterating
+			// to satisfy the depth-first re-entrancy contract — new
+			// listeners added mid-iteration are currently observable by
+			// the same dispatch cycle per the JS Set iterator spec.
+			for (const listener of listeners) {
+				(listener as EventListener<N>)(payload);
+			}
 		},
+		subscribe<N extends EventName>(
+			name: N,
+			listener: EventListener<N>,
+		): () => void {
+			// eslint-disable-next-line functional/immutable-data, functional/prefer-readonly-type -- stateful bus per DEV.md § 8
+			(listenersByEvent[name] as Set<EventListener<N>>).add(listener);
+			// Fake It: teardown stays no-op; F5a.4 introduces real removal.
+			return noopTeardown;
+		},
+		// Fake It: F5a.4 introduces real unsubscribe.
 		unsubscribe() {},
+		// Fake It: F5a.8 introduces real clear.
 		clear() {},
 	};
 	return freezeInPlace(bus);
 }
+
+function noopTeardown(): void {}
 
 export default createEventBus;
