@@ -101,4 +101,80 @@ describe('createEventBus', () => {
 			expect(lensSwitchedListener).not.toHaveBeenCalled();
 		});
 	});
+
+	describe('Boundary — unsubscribe', () => {
+		it('unsubscribed listener does not fire on subsequent dispatch', () => {
+			const bus = createEventBus();
+			const listener = vi.fn();
+			bus.subscribe('lens-switched', listener);
+			bus.unsubscribe('lens-switched', listener);
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(listener).not.toHaveBeenCalled();
+		});
+
+		it('unsubscribing one listener does not affect a concurrently subscribed listener', () => {
+			const bus = createEventBus();
+			const listenerA = vi.fn();
+			const listenerB = vi.fn();
+			bus.subscribe('lens-switched', listenerA);
+			bus.subscribe('lens-switched', listenerB);
+			bus.unsubscribe('lens-switched', listenerA);
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(listenerB).toHaveBeenCalledTimes(1);
+		});
+
+		it('the teardown returned from subscribe removes the listener', () => {
+			const bus = createEventBus();
+			const listener = vi.fn();
+			const teardown = bus.subscribe('lens-switched', listener);
+			teardown();
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(listener).not.toHaveBeenCalled();
+		});
+
+		it('calling the teardown twice does not re-register the listener', () => {
+			const bus = createEventBus();
+			const listener = vi.fn();
+			const teardown = bus.subscribe('lens-switched', listener);
+			teardown();
+			teardown();
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(listener).not.toHaveBeenCalled();
+		});
+
+		it('unsubscribing a listener that was never registered does not throw', () => {
+			const bus = createEventBus();
+			const listener = vi.fn();
+			expect(() => bus.unsubscribe('lens-switched', listener)).not.toThrow();
+		});
+
+		it('unsubscribing a listener from a different event than it was registered to does not remove it', () => {
+			const bus = createEventBus();
+			const listener = vi.fn();
+			bus.subscribe('lens-switched', listener);
+			bus.unsubscribe('mode-changed', listener);
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(listener).toHaveBeenCalledTimes(1);
+		});
+	});
 });

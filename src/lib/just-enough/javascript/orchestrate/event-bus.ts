@@ -72,9 +72,11 @@ function createEventBus(): EventBus {
 		dispatch<N extends EventName>(name: N, payload: EventPayload<N>): void {
 			const listeners = listenersByEvent[name];
 			// F5a.6 will snapshot listeners (Array.from) before iterating
-			// to satisfy the depth-first re-entrancy contract — new
-			// listeners added mid-iteration are currently observable by
-			// the same dispatch cycle per the JS Set iterator spec.
+			// to satisfy the depth-first re-entrancy contract — listeners
+			// that call bus.subscribe (adds a new listener) or
+			// bus.unsubscribe (removes a sibling listener) from inside
+			// their own body currently mutate this Set mid-iteration per
+			// the JS Set iterator spec.
 			for (const listener of listeners) {
 				(listener as EventListener<N>)(payload);
 			}
@@ -85,17 +87,28 @@ function createEventBus(): EventBus {
 		): () => void {
 			// eslint-disable-next-line functional/immutable-data, functional/prefer-readonly-type -- stateful bus per DEV.md § 8
 			(listenersByEvent[name] as Set<EventListener<N>>).add(listener);
-			// Fake It: teardown stays no-op; F5a.4 introduces real removal.
-			return noopTeardown;
+			// Per-call teardown closure: captures (name, listener) so the
+			// caller's `useEffect` cleanup can drop the registration.
+			// Set.delete is idempotent — calling teardown twice removes
+			// the listener on the first call and is a no-op on the second
+			// (Listener identity-based registration contract).
+			function teardown(): void {
+				// eslint-disable-next-line functional/immutable-data, functional/prefer-readonly-type -- stateful bus per DEV.md § 8
+				(listenersByEvent[name] as Set<EventListener<N>>).delete(listener);
+			}
+			return teardown;
 		},
-		// Fake It: F5a.4 introduces real unsubscribe.
-		unsubscribe() {},
+		unsubscribe<N extends EventName>(
+			name: N,
+			listener: EventListener<N>,
+		): void {
+			// eslint-disable-next-line functional/immutable-data, functional/prefer-readonly-type -- stateful bus per DEV.md § 8
+			(listenersByEvent[name] as Set<EventListener<N>>).delete(listener);
+		},
 		// Fake It: F5a.8 introduces real clear.
 		clear() {},
 	};
 	return freezeInPlace(bus);
 }
-
-function noopTeardown(): void {}
 
 export default createEventBus;
