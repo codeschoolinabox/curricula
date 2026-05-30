@@ -78,7 +78,14 @@ function createEventBus(): EventBus {
 			// their own body currently mutate this Set mid-iteration per
 			// the JS Set iterator spec.
 			for (const listener of listeners) {
-				(listener as EventListener<N>)(payload);
+				try {
+					(listener as EventListener<N>)(payload);
+				} catch (error) {
+					console.warn(
+						`EventBus: listener for "${name}" threw; subsequent listeners still fire`,
+						error,
+					);
+				}
 			}
 		},
 		subscribe<N extends EventName>(

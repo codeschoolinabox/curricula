@@ -177,4 +177,103 @@ describe('createEventBus', () => {
 			expect(listener).toHaveBeenCalledTimes(1);
 		});
 	});
+
+	describe('Exception — thrown listener', () => {
+		it('throw inside a listener does not propagate to the dispatch caller', () => {
+			const bus = createEventBus();
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			try {
+				bus.subscribe('lens-switched', function thrower() {
+					throw new Error('boom');
+				});
+				expect(() =>
+					bus.dispatch('lens-switched', {
+						previous: null,
+						next: 'test-lens',
+						source: 'initial',
+					}),
+				).not.toThrow();
+			} finally {
+				warn.mockRestore();
+			}
+		});
+
+		it('throw inside a listener triggers a console.warn', () => {
+			const bus = createEventBus();
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			try {
+				bus.subscribe('lens-switched', function thrower() {
+					throw new Error('boom');
+				});
+				bus.dispatch('lens-switched', {
+					previous: null,
+					next: 'test-lens',
+					source: 'initial',
+				});
+				expect(warn).toHaveBeenCalledTimes(1);
+			} finally {
+				warn.mockRestore();
+			}
+		});
+
+		it('console.warn receives the thrown error as an argument', () => {
+			const bus = createEventBus();
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			const error = new Error('boom');
+			try {
+				bus.subscribe('lens-switched', function thrower() {
+					throw error;
+				});
+				bus.dispatch('lens-switched', {
+					previous: null,
+					next: 'test-lens',
+					source: 'initial',
+				});
+				expect(warn).toHaveBeenCalledWith(expect.anything(), error);
+			} finally {
+				warn.mockRestore();
+			}
+		});
+
+		it('a thrown listener does not prevent subsequent listeners from firing', () => {
+			const bus = createEventBus();
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			try {
+				const subsequent = vi.fn();
+				bus.subscribe('lens-switched', function thrower() {
+					throw new Error('boom');
+				});
+				bus.subscribe('lens-switched', subsequent);
+				bus.dispatch('lens-switched', {
+					previous: null,
+					next: 'test-lens',
+					source: 'initial',
+				});
+				expect(subsequent).toHaveBeenCalledTimes(1);
+			} finally {
+				warn.mockRestore();
+			}
+		});
+
+		it('two thrown listeners produce two console.warn calls', () => {
+			const bus = createEventBus();
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			try {
+				bus.subscribe('lens-switched', function throwerA() {
+					throw new Error('boom A');
+				});
+				bus.subscribe('lens-switched', function throwerB() {
+					throw new Error('boom B');
+				});
+				bus.dispatch('lens-switched', {
+					previous: null,
+					next: 'test-lens',
+					source: 'initial',
+				});
+				expect(warn).toHaveBeenCalledTimes(2);
+			} finally {
+				warn.mockRestore();
+			}
+		});
+	});
 });
