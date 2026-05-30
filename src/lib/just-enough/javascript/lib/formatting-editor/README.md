@@ -83,7 +83,7 @@ Behavior:
 
 - **Empty input** → empty string.
 - **Already-formatted JEJ-canonical input** → returned unchanged
-  (idempotence: `formatJej(await formatJej(code))` equals
+  (idempotence: `await formatJej(await formatJej(code))` equals
   `await formatJej(code)`).
 - **Unformatted parseable input** → returned reflowed to JEJ-canonical
   form (tabs, 80-column, single quotes, semicolons, blank-line
