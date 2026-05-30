@@ -22,13 +22,15 @@ libraries (`embody/lib/*`, `orchestrate/lib/*`). The distinction:
 ```text
 lib/
   README.md              (this — orientation + navigation)
+  formatting-editor/     format-callback adapter: JeJ canonical
+                         formatting delegated to the runtime formatter
   linting/               validation-feed adapter: JeJ violations
                          shaped as editor lint diagnostics
 ```
 
-`linting/` is the first inhabitant. Additional JeJ-aware adapters
-(e.g. documentation lookup, completion sources) land here as the
-package's tooling needs expand.
+Adapters land here as the package's tooling needs expand.
+Documentation lookup and completion sources are likely future
+inhabitants.
 
 ## Why a separate peer
 
@@ -61,13 +63,18 @@ top-level `AGENTS.md` / `DEV.md`. Module-specific rules:
 - **Each module is its own DDD cycle.** README + DOCS + types per
   module, Phase 0 AR ceremony per new module.
 - **Pure-function default.** Modules under `lib/` produce shapes,
-  not side effects. State, async, and DOM ownership stay in the
-  peers that consume the adapters.
+  not side effects. Async is permitted when an upstream dependency
+  is async (e.g. Prettier inside the canonical formatter); the
+  pure-function intent — no I/O, no observable side effects, no
+  hidden state — still holds. Mutable state and DOM ownership stay
+  in the peers that consume the adapters.
 
 ## Navigation
 
 - **Parent peer index:** [`../README.md`](../README.md).
 - **Conceptual chain:** [`../README.md`](../README.md) § The story.
 - **Current inhabitants:**
-  [`./linting/README.md`](./linting/README.md) — validation-feed
-  adapter for editor lint diagnostics.
+  - [`./formatting-editor/README.md`](./formatting-editor/README.md) —
+    format-callback adapter delegating to the canonical formatter.
+  - [`./linting/README.md`](./linting/README.md) — validation-feed
+    adapter for editor lint diagnostics.
