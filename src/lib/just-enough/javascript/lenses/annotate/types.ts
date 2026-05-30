@@ -1,8 +1,7 @@
 /**
  * @file Domain model for the `annotate` lens — an annotation surface
- * over the snippet with two views (code, flowchart) and four tools:
- * three annotation tools (pen, eraser, note) plus one inspection tool
- * (select). The learner toggles views without losing
+ * over the snippet with two views (code, flowchart) and three tools
+ * (pen, eraser, note). The learner toggles views without losing
  * annotations on either; both annotation sets persist for the lifetime
  * of one mount and are discarded together when the snippet changes.
  *
@@ -13,16 +12,8 @@
  *   renders.
  * - The React wrapper (`./index.tsx`) composes the cores, owns the
  *   per-mount UI state (active view, active tool, active color,
- *   in-progress stroke, note-input dialog, selected flowchart node),
- *   and dispatches user interaction events.
- *
- * @remarks Per-mount wrapper state that does NOT need a named type
- * here: `selectedNodeId: string | null` (transient UI selection on a
- * flowchart node — see `./DOCS.md` § Phase 3 + § Structural
- * constraints). The structural constraint that selection is rendered
- * via a CSS rule keyed on `data-flowchart-node`, never via
- * `element.style` mutation, is enforced at the wrapper layer; no
- * type-level enforcement at this surface.
+ *   in-progress stroke, note-input dialog), and dispatches user
+ *   interaction events.
  *
  * @remarks The lens does NOT mutate `embodiment` (deep-frozen per the
  * `embody/` contract) or `config`. Annotation sets exist only in
@@ -56,27 +47,18 @@
 type ViewMode = 'code' | 'flowchart';
 
 /**
- * Active tool. The tool determines what learner mouse events do over
- * the active view. `pen`, `eraser`, and `note` are the
- * drawing/annotation tools (active over either view); `select` is the
- * flowchart-node inspection tool — clicking a flowchart node selects it
- * (visual outline) so the learner can correlate a control-flow construct
- * with the source line they marked up in code-view.
- *
- * @remarks The active tool **defaults per view**: code-view enters with
- * `pen` (drawing is the primary code interaction); flowchart-view enters
- * with `select` (node inspection is the primary flowchart interaction).
- * The learner can switch tools within either view — e.g. switch to `pen`
- * to draw on the flowchart. While `select` is active the drawing overlay
- * yields pointer events so clicks reach the flowchart container, where
- * React event delegation resolves the node via
- * `closest('[data-flowchart-node]')`.
+ * Active annotation tool. The tool determines what learner mouse
+ * events do over the active view.
  *
  * @remarks Pre-refactor tool catalog also included `arrow`, `circle`,
  * and a line-level `highlight`; those were stubbed-and-deferred and
- * are not in the v1 catalog. Restoration is a per-tool follow-up.
+ * are not in the v1 catalog. A flowchart-node `select` (inspection)
+ * tool was specified in the early Phase 0 contract and partially
+ * implemented in Inc 7d, then deferred along with flowchart-node →
+ * source-line correlation as a named follow-up (see `./README.md`
+ * § Future direction). Restoration is per-feature follow-up.
  */
-type Tool = 'pen' | 'eraser' | 'note' | 'select';
+type Tool = 'pen' | 'eraser' | 'note';
 
 // ─── Annotation primitives ──────────────────────────────────
 

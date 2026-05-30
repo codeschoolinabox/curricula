@@ -198,10 +198,11 @@ describe('annotate lens — view toggle', () => {
 			[5, 5],
 			[15, 25],
 		]);
-		// toggle to flowchart, draw there. The flowchart mock never resolves, so
+		// toggle to flowchart, draw there. The flowchart mock never resolves so
 		// the view holds its loading state; the overlay is rendered regardless of
-		// flowchart status (index.tsx renders it unconditionally), so this stroke
-		// genuinely commits to the flowchart view's set.
+		// flowchart status, so this stroke genuinely commits to the flowchart
+		// view's set. Tool persists across the toggle (still pen), so drawStroke
+		// commits a real stroke.
 		fireEvent.click(getToggle(container));
 		drawStroke(getOverlay(container), [
 			[40, 40],

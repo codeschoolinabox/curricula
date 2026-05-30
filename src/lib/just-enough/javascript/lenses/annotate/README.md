@@ -1,11 +1,10 @@
 # lenses/annotate
 
 The `annotate` lens — an annotation surface over the snippet, supporting two
-views (syntax-highlighted code OR generated flowchart), three annotation tools
-(freehand pen, eraser, positioned text notes), and a flowchart-node select tool
-(click a node to outline it). The learner can switch between code-view and
-flowchart-view within a single mount **without losing annotations** on either
-view; both annotation sets persist for the lifetime of
+views (syntax-highlighted code OR generated flowchart) and three annotation
+tools (freehand pen, eraser, positioned text notes). The learner can switch
+between code-view and flowchart-view within a single mount **without losing
+annotations** on either view; both annotation sets persist for the lifetime of
 the mount and are discarded together when the snippet changes (per the lenses
 peer's [disposable-practice contract](../README.md#conventions)).
 
@@ -79,31 +78,20 @@ learners build comprehension by walking the source line-by-line while others
 build it by tracing the control-flow graph. Letting them toggle without losing
 their pen marks means the annotation surface serves both reading strategies.
 
-Flowchart nodes are **clickable while the `select` tool is active** (React event
-delegation): clicking a node outlines it so the learner can correlate a
-control-flow construct in the flowchart with the source line they just marked up
-in code-view. Flowchart-view enters with `select` active by default, so this
-correlation is the primary flowchart interaction. Without this interactivity the
-flowchart would be a static picture; the click-correlation is what earns the
-toggle's complexity.
+v1 ships the flowchart as a **static visual** the learner can pen-draw and
+note on (the same affordances as code-view). Clicking a flowchart node to
+correlate it with the source line marked up in code-view is the natural next
+step (see [Future direction](#future-direction)) but is deferred until the
+flowchart-node → source-position mapping is built.
 
 ## Glossary
 
 - **View** — one of the two representations of the snippet the lens renders:
   `code` (syntax-highlighted source) or `flowchart` (SVG flow-chart generated
   from the source).
-- **Tool** — the active interaction mode. One of `pen` (freehand stroke),
+- **Tool** — the active annotation interaction. One of `pen` (freehand stroke),
   `eraser` (remove strokes near the click), `note` (create a positioned text
-  note), or `select` (flowchart-node inspection — click a node to outline it,
-  correlating a control-flow construct with the source line marked up in
-  code-view). Tools partition into two kinds: **annotation tools** (`pen`,
-  `eraser`, `note` — the drawing overlay captures their events) and **inspection
-  tools** (`select` — the overlay yields so events reach the view beneath). This
-  partition, not the tool name, drives overlay event capture. The active tool
-  **defaults per view**: code-view enters with `pen` (drawing is the primary code
-  interaction), flowchart-view enters with `select` (node inspection is the
-  primary flowchart interaction). The learner can switch tools freely within
-  either view; toggling the view resets the tool to that view's default.
+  note).
 - **Stroke** — one continuous pen-down → pen-up draw, recorded as an ordered
   point array + color. (Prior-art name: `drawingPath`. The rename clarifies that
   a stroke is _one gesture_; an SVG `<path>` or `<polyline>` is the element
@@ -140,8 +128,10 @@ them is a contract change.
 
 Flowchart nodes carry `data-flowchart-node` attributes (added by a
 post-SVG-inject `useEffect` that walks the rendered SVG and tags candidate
-elements). React event delegation on the flowchart container handles click +
-hover via `event.target.closest( '[data-flowchart-node]')`.
+elements). These are **forward-ready infrastructure with no consumer in v1**
+— the deferred flowchart-node → source-line correlation feature (see
+[Future direction](#future-direction)) is what would route node clicks via
+`event.target.closest('[data-flowchart-node]')` delegation.
 
 ## Tool contract
 
@@ -154,18 +144,11 @@ hover via `event.target.closest( '[data-flowchart-node]')`.
 - **note** — `click` opens a note-input dialog at the click position with an
   empty textarea. The dialog is dismissed by Save (commits a note into the
   active view's annotation set with the current color) or Cancel.
-- **select** — the flowchart-node **inspection** tool (adds no annotation). While
-  `select` is active, a `click` on a flowchart node outlines it so the learner
-  can correlate it with a code-view annotation; saved strokes stay painted over
-  the flowchart. Switching to `pen`/`eraser`/`note` restores drawing on the
-  flowchart. (The overlay event-capture gating and the node-resolution mechanism
-  live in [`./DOCS.md` § Structural constraints](./DOCS.md) — the contract here
-  is behavioral: an inspection tool routes clicks to node selection, not to
-  drawing.)
-- The active tool **defaults per view**: code-view enters with `pen`,
-  flowchart-view enters with `select`. Toggling the view resets the active tool
-  to the new view's default (and clears any selected node); within a view the
-  learner can switch tools freely.
+- The active tool persists across a view-toggle: switch to eraser in code-view,
+  toggle to flowchart-view, eraser is still active. Both views accept all three
+  tools. Rationale: the toggle is for changing what the learner is annotating,
+  not what they're annotating with — kicking them back to pen on every view
+  switch would interrupt an in-progress annotation gesture.
 - The `clear-all` button on the toolbar wipes BOTH strokes and notes of the
   active view after a confirmation. The inactive view's annotation set is
   untouched.
@@ -185,14 +168,12 @@ hover via `event.target.closest( '[data-flowchart-node]')`.
 - The view toggle is a single button on the toolbar. The button is **disabled**
   when `embodiment.status.parsed === false` so a learner cannot toggle into a
   guaranteed-failing flowchart-view in the first place. The annotation overlay
-  reattaches to the newly active view's annotation set when the toggle succeeds,
-  the active tool resets to the new view's default (`pen` for code, `select` for
-  flowchart), and any selected flowchart node is cleared.
+  reattaches to the newly active view's annotation set when the toggle succeeds.
 - **Initial view is parse-gated.** When `config.defaultView === 'flowchart'` but
-  `embodiment.status.parsed === false`, the initial view degrades to `code` (and
-  the initial tool to `pen`), so a learner never lands in a guaranteed-failing
-  flowchart-view on mount. Together with the disabled toggle, an unparseable
-  snippet is code-view-only for the mount's lifetime.
+  `embodiment.status.parsed === false`, the initial view degrades to `code`, so
+  a learner never lands in a guaranteed-failing flowchart-view on mount.
+  Together with the disabled toggle, an unparseable snippet is code-view-only
+  for the mount's lifetime.
 
 ## What this lens does NOT do (lens-specific drops only)
 
@@ -260,9 +241,21 @@ Tests split: `tests/render-code.test.ts`, `tests/render-flowchart.test.ts`,
 - **Tool extensions** — `arrow` and `circle` were stubbed in the prior art
   ("coming soon"); the line-level `highlight` tool was half-implemented and
   dropped at migration. Restoration is its own increment per tool.
-- **Keyboard node selection** — v1's `select` tool is mouse-`click`-only;
-  flowchart nodes are not yet keyboard-focusable/selectable. Keyboard-reachable
-  node inspection is deferred (named here rather than left silently absent).
+- **Flowchart-node → source-line correlation.** A `select` (inspection) tool was
+  specified in early Phase 0 and partially implemented in Inc 7d, then deferred.
+  The intended interaction — clicking a flowchart node jumps to (or previews)
+  the matching source line, building the cognitive link between syntactic source
+  and semantic flow — is the pedagogical payoff that justifies bringing the tool
+  back. It needs a flowchart-node → AST-position mapping (`js2flowchart` doesn't
+  expose source positions on its nodes; the mapping has to come from walking
+  embody's entwined-AST positions in parallel with the flow tree). The
+  `data-flowchart-node` tagger that the wrapper ships is forward-ready
+  infrastructure for this; the deferred increment wires the click handler and
+  the correlation UI. Caveat: the current positional `data-flowchart-node` ids
+  are a v1 placeholder — the correlation feature will likely need a stable
+  node identity derived from the AST walk, not DOM walk order over
+  `rect, polygon, circle` (which isn't guaranteed stable across `js2flowchart`
+  versions or re-parses).
 - **Per-config Prism theme** — Prism theme is hard-coded to one default;
   per-config theme selection is deferred.
 

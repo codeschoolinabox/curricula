@@ -82,6 +82,7 @@ function isStrokeNearPoint(
 function renderFlowchartView(
 	flowchart: FlowchartSvg,
 	containerReference: React.RefObject<HTMLDivElement | null>,
+	html: { readonly __html: string },
 ): React.JSX.Element {
 	if (flowchart.status === 'loading') {
 		return <div data-flowchart-status="loading">Generating flowchart…</div>;
@@ -93,15 +94,19 @@ function renderFlowchartView(
 			</div>
 		);
 	}
+	// The `html` object is memoized in the wrapper: React's reconciler compares
+	// dangerouslySetInnerHTML by prop OBJECT identity, so an inline literal here
+	// would re-set innerHTML on every parent render and blow away the
+	// data-flowchart-node attributes the tagger applied (forward-ready
+	// infrastructure for the deferred correlation feature).
 	return (
 		<div
 			data-flowchart-status="ready"
 			ref={containerReference}
-			dangerouslySetInnerHTML={{ __html: flowchart.svg }}
+			dangerouslySetInnerHTML={html}
 		/>
 	);
 }
-
 
 const AnnotateComponent: ComponentType<LensProperties> =
 	function AnnotateComponent({ embodiment, config }) {
@@ -130,6 +135,17 @@ const AnnotateComponent: ComponentType<LensProperties> =
 			status: 'loading',
 		});
 		const flowchartReference = useRef<HTMLDivElement>(null);
+		// Memoize the dangerouslySetInnerHTML object across renders. React's
+		// reconciler compares this prop by object identity, so a fresh literal
+		// per render would re-apply innerHTML every wrapper re-render and wipe
+		// the post-inject `data-flowchart-node` tags. Tied to flowchart so a new
+		// SVG string properly triggers a re-injection.
+		const flowchartHtml = useMemo(
+			() => ({
+				__html: flowchart.status === 'ready' ? flowchart.svg : '',
+			}),
+			[flowchart],
+		);
 
 		// Generate the flowchart only while it is the active view. The
 		// `cancelled` flag (set by the cleanup) drops a resolved-after-unmount
@@ -153,8 +169,9 @@ const AnnotateComponent: ComponentType<LensProperties> =
 		);
 
 		// Post-inject tagging: walk the freshly injected SVG and tag each node
-		// group with `data-flowchart-node` so React event delegation (Inc 7d)
-		// resolves clicks via `closest('[data-flowchart-node]')`. The one
+		// group with `data-flowchart-node` (positional ids). Forward-ready
+		// infrastructure for the deferred flowchart-node → source-line correlation
+		// feature (see README § Future direction); no consumer in v1. The one
 		// permitted DOM mutation — attribute-tagging only, never structural.
 		useEffect(
 			function tagFlowchartNodes() {
@@ -299,8 +316,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 		// State-only viewMode swap: both per-view annotation sets are untouched
 		// (the toggle-preserves-annotations invariant). Guarded on status.parsed
 		// so a click on the disabled toggle is a no-op even where the host fires
-		// click on disabled buttons. The active tool persists across the toggle;
-		// the per-view default-tool reset is Inc 7d.
+		// click on disabled buttons. The active tool persists across the toggle.
 		function toggleView(): void {
 			if (!embodiment.status.parsed) return;
 			setViewMode((previous) => (previous === 'code' ? 'flowchart' : 'code'));
@@ -385,11 +401,16 @@ const AnnotateComponent: ComponentType<LensProperties> =
 						</pre>
 					)}
 					{viewMode === 'flowchart' &&
-						renderFlowchartView(flowchart, flowchartReference)}
-					{/* The overlay captures pointer events across the whole view
-					    for drawing. In flowchart-view this currently sits over the
-					    SVG; Inc 7d (flowchart-node selection) must gate this so
-					    node clicks reach the tagged `data-flowchart-node` groups. */}
+						renderFlowchartView(
+							flowchart,
+							flowchartReference,
+							flowchartHtml,
+						)}
+					{/* The overlay captures pointer events for drawing across both
+					    views. The flowchart-node tagger pre-positions `[data-flowchart-
+					    node]` ids on the SVG; v1 has no consumer for them (the deferred
+					    correlation feature would gate the overlay here and route node
+					    clicks via closest delegation — see DOCS § Structural constraints). */}
 					<svg
 						className="annotate-drawing-overlay"
 						onMouseDown={startStroke}

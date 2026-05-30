@@ -58,12 +58,11 @@ jsdom) plus the wrapper end-to-end (jsdom + `@testing-library/react`).
    per-mount state seeds: active view from `config.defaultView`, **clamped to
    `code` when `config.defaultView === 'flowchart'` but
    `embodiment.status.parsed === false`** (so a parse-failing snippet never
-   mounts straight into a guaranteed-failing flowchart-view); active tool = the
-   resolved view's default (`pen` for code-view, `select` for flowchart-view);
-   active color = the first entry of the six-swatch palette (a module-level
-   constant in `index.tsx`; not config-driven in v1 — see
+   mounts straight into a guaranteed-failing flowchart-view); active tool =
+   `pen`; active color = the first entry of the six-swatch palette (a
+   module-level constant in `index.tsx`; not config-driven in v1 — see
    [Future direction](#future-direction)), empty annotation sets for both views,
-   no in-progress stroke, no note dialog, no selected flowchart node.
+   no in-progress stroke, no note dialog.
 
 2. **Derive view content** (per render, lazy by view) —
    - Code-view: pure sync derivation from `embodiment.source.code` +
@@ -87,35 +86,20 @@ jsdom) plus the wrapper end-to-end (jsdom + `@testing-library/react`).
    view's content, the drawing overlay (saved strokes + in-progress), the notes
    overlay, and the note-input dialog when active. Flowchart nodes carry
    `data-flowchart-node="<id>"` attributes added by a post-SVG-inject
-   `useEffect` (the only permitted DOM mutation, and only for attribute-tagging
-   — never structural mutation; React reconciles the SVG container's children
-   from the SVG string). React event delegation on the flowchart container
-   handles click + hover. The currently selected flowchart node (per-mount state
-   `selectedNodeId: string | null`) is rendered visually via a CSS rule keyed on
-   `data-flowchart-node=<selectedNodeId>` — **NOT** by mutating
-   `element.style.outline` (which is what the pre-refactor code did via DOM
-   mutation outside React; explicitly forbidden by the disposable-practice +
-   React-reconciliation rules).
+   `useEffect` — forward-ready infrastructure for the deferred flowchart-node →
+   source-line correlation feature (see [Future direction](#future-direction)).
+   No consumer in v1; the only permitted DOM mutation is attribute-tagging,
+   never structural — React reconciles the SVG container's children from the
+   SVG string.
 
 4. **Handle interaction** (per learner event) — pen / eraser / note handlers
    update the active view's `AnnotationSet` immutably, producing a new
    `AnnotationsByView` whose inactive entry is reference-identical to the prior
-   frame (the **toggle-preserves-annotations** invariant lives here). The active
-   tool gates which surface receives pointer events: for `pen`/`eraser`/`note`
-   the drawing overlay captures events (`pointer-events: all`); for `select` the
-   overlay yields (`pointer-events: none`) so clicks fall through to the
-   flowchart container, where React event delegation resolves the clicked node
-   via `closest('[data-flowchart-node]')`. View toggle updates `viewMode` and
-   the `data-view-mode` attribute, resets the active tool to the new view's
-   default (`pen` for code, `select` for flowchart), and clears `selectedNodeId`;
-   both `AnnotationSet`s remain in state untouched. Flowchart-node click (only
-   reachable while `select` is active and the overlay is yielding) updates
-   `selectedNodeId`; flowchart-node hover is purely visual (CSS `:hover` on
-   `[data-flowchart-node]`, no state change). `selectedNodeId` clears to `null`
-   on view-toggle (the toggle handler); on snippet-change the whole mount is
-   discarded and re-seeded (Phase 5), so that reset is structural — not an
-   explicit clear — and a stale highlight never lingers when the learner
-   returns.
+   frame (the **toggle-preserves-annotations** invariant lives here). View
+   toggle updates `viewMode` and the `data-view-mode` attribute; both
+   `AnnotationSet`s remain in state untouched, and the active tool persists
+   across the toggle (the learner can keep drawing in the new view without
+   re-picking the tool).
 
 5. **Unmount** (React-driven) — orchestrator unmounts when the snippet changes
    or the learner exits the lens. Annotation sets, in-progress stroke, and
@@ -134,7 +118,7 @@ flowchart TD
     Props -->|"applicableTo, sync, pure"| Gate["true (Tier 1)"]
     Props -->|"recommend, sync, pure"| Recs["[] (WS2-deferred)"]
 
-    ResolvedConfig --> State["per-mount state<br/>{ viewMode, tool, color,<br/>annotationsByView,<br/>currentStroke,<br/>noteDialog,<br/>selectedNodeId }"]
+    ResolvedConfig --> State["per-mount state<br/>{ viewMode, tool, color,<br/>annotationsByView,<br/>currentStroke,<br/>noteDialog }"]
 
     State -->|"viewMode?"| ViewDecision{active view?}
     ViewDecision -->|"code"| Code["render-code<br/>(sync, pure)<br/>source.code + colorize"]
@@ -146,22 +130,16 @@ flowchart TD
     CodeTree --> Render["wrapper render"]
     SvgState --> Render
     State -->|"annotationsByView[viewMode]"| Overlay["drawing + notes overlay"]
-    State -->|"tool → overlay pointer-events<br/>(select ⇒ yields)"| Overlay
-    State -->|"selectedNodeId"| Highlight["selected-node CSS rule<br/>(data-flowchart-node match)"]
     Overlay --> Render
-    Highlight --> Render
 
-    Render --> DOM["&lt;div data-lens=annotate&gt;<br/>+ overlay SVG<br/>+ note dialog?<br/>+ data-flowchart-node tagged SVG"]
+    Render --> DOM["&lt;div data-lens=annotate&gt;<br/>+ overlay SVG<br/>+ note dialog?<br/>+ data-flowchart-node tagged SVG<br/>(forward-ready, no consumer in v1)"]
 
     DOM -->|"pen / eraser / note events"| Annotations["annotations.ts ops<br/>(pure: add / remove / clear,<br/>scoped to active view)"]
     Annotations -->|"new AnnotationsByView"| Mutation["setState<br/>(inactive view ref-identical)"]
     Mutation --> State
 
-    DOM -->|"view-toggle"| ToggleIn["viewMode swap<br/>(state-only; annotation sets untouched;<br/>tool reset to view default;<br/>selectedNodeId cleared)"]
+    DOM -->|"view-toggle"| ToggleIn["viewMode swap<br/>(state-only; annotation sets untouched;<br/>active tool persists)"]
     ToggleIn --> State
-
-    DOM -->|"flowchart-node click<br/>(tool=select; overlay yields)"| Select["selectedNodeId update"]
-    Select --> State
 ```
 
 The diagram is per-mount. The orchestrator (upstream) supplies `embodiment` and
@@ -169,10 +147,7 @@ The diagram is per-mount. The orchestrator (upstream) supplies `embodiment` and
 render loop reads state, lazily derives the active view's content, emits DOM;
 the event handlers feed state updates back through `annotations.ts`. **Both
 annotation sets persist across `viewMode` swaps** — the toggle node is
-state-only, no annotation-set transformation runs. **Selected flowchart node is
-state-only too** — visual selection is a CSS rule keyed on the
-`data-flowchart-node` attribute matching `selectedNodeId`, never
-`element.style.outline` mutation.
+state-only, no annotation-set transformation runs.
 
 ### Structural constraints
 
@@ -194,34 +169,16 @@ state-only too** — visual selection is a CSS rule keyed on the
   sandbox-harness selectors. Per the lenses peer's invariant.
 - **`data-view-mode="<view>"` and `data-tool="<tool>"`** on the main area and
   toolbar. Sandbox-harness selectors + CSS hooks.
-- **`data-flowchart-node` on each tagged flowchart SVG element.** Added by a
-  post-inject `useEffect` that walks the SVG. React event delegation on the
-  container handles click + hover via
-  `event.target.closest('[data-flowchart-node]')`. **No direct DOM mutation
+- **`data-flowchart-node` on each tagged flowchart SVG element — forward-ready
+  infrastructure for the deferred flowchart-node → source-line correlation
+  feature; no consumer in v1.** A post-inject `useEffect` walks the SVG and
+  assigns positional ids (`data-flowchart-node="<n>"`). **No direct DOM mutation
   outside React event handlers**; the post-inject pass only _tags_ elements with
-  `data-*` attributes so React can later route events. Node ids are **positional**
-  (the tagger assigns the SVG-walk index as `data-flowchart-node="<n>"`). Because
-  ids `0, 1, 2…` are reused across different flowcharts, `selectedNodeId` MUST be
-  cleared on view-toggle and is structurally reset on snippet-change (remount) —
-  otherwise a stale id could match a _different_ node on a freshly generated SVG.
-- **Overlay pointer-events are tool-gated, not conditionally rendered.** The
-  drawing overlay captures pointer events (`pointer-events: all`) for the
-  drawing/annotation tools (`pen`, `eraser`, `note`) and yields them
-  (`pointer-events: none`) when the active tool is `select`, so a flowchart-node
-  click reaches the container for `closest('[data-flowchart-node]')` delegation.
-  Tool-gating the overlay (toggling `pointer-events`, never unmounting it) keeps
-  saved strokes painted over the flowchart while `select` inspects the nodes
-  beneath them. The gate is **keyed off the `data-tool` attribute** (a CSS rule
-  setting `pointer-events: none` on the overlay when `data-tool="select"`), not
-  inline style — so it rides the already-load-bearing `data-tool` hook.
-  **Testability note:** jsdom has no layout/hit-testing engine, so real
-  `pointer-events` fall-through is NOT exercised by the wrapper suite. The
-  jsdom-testable contract is two-part: (a) the active tool is observable on the
-  `data-tool` attribute (and the overlay's resolved `pointer-events` flips with
-  it); (b) the flowchart container's delegated click handler maps a click fired
-  **directly at** a tagged `[data-flowchart-node]` element to a `selectedNodeId`
-  update. True fall-through hit-testing is a real-browser / manual-verification
-  concern, covered by the 🔍 sandbox checkpoint, not the jsdom suite.
+  `data-*` attributes — never structural mutation. The wrapper also memoizes
+  the flowchart's `dangerouslySetInnerHTML` prop object so React's reconciler
+  doesn't re-apply `innerHTML` on every wrapper render (which would wipe these
+  tags); the memo depends on `flowchart` state so a freshly generated SVG
+  correctly re-injects.
 - **Tier-1 classification.** `applicableTo` always returns `true`; code-view +
   drawing + notes work on any source string. The flowchart-view is a Tier-2
   sub-feature internally — the flowchart-toggle button has `disabled` (and
@@ -232,16 +189,10 @@ state-only too** — visual selection is a CSS rule keyed on the
 - **Toggle-preserves-annotations invariant.** Every interaction handler that
   updates `annotationsByView` returns a new `AnnotationsByView` whose inactive
   entry is reference-identical to the prior frame. The view-toggle handler
-  updates only `viewMode` (and clears `selectedNodeId`), not
-  `annotationsByView`. Tested at the `annotations.ts` core level (reference
-  identity) AND at the wrapper level (mount → draw on code → toggle to flowchart
-  → toggle back → assert stroke present).
-- **Selected-flowchart-node visual is React-rendered, not DOM-mutated.**
-  `selectedNodeId` is per-mount React state; visual selection is a CSS rule
-  keyed on the `data-flowchart-node` attribute matching `selectedNodeId`. The
-  pre-refactor pattern (`element.style.outline = '…'` from inside an event
-  handler) is forbidden — the post-inject `useEffect` may only TAG SVG elements
-  with `data-flowchart-node`, never mutate their style or structure.
+  updates only `viewMode`, not `annotationsByView`. Tested at the
+  `annotations.ts` core level (reference identity) AND at the wrapper level
+  (mount → draw on code → toggle to flowchart → toggle back → assert stroke
+  present).
 - **Read-only views.** The lens never mutates `embodiment` or `config` (both
   deep-frozen anyway). It never dispatches snippet edits.
 - **Disposable practice.** No `localStorage`, no module-level cache, no refs
@@ -315,6 +266,12 @@ surface. The rationale:
 - The single-lens scope is still cohesive: "an annotation workbench for any
   representation of the snippet." Adding a third view (e.g. AST tree) in the
   future is an additive change inside this lens, not a new lens.
+- The deferred **flowchart-node → source-line correlation** (see README §
+  Future direction) is the cross-view affordance that makes "one lens" pay off
+  pedagogically — clicking a flowchart node would jump to / outline the matching
+  source line. Two separate lenses couldn't deliver that hand-off; one-lens
+  with two views can. The `data-flowchart-node` tagger that the wrapper ships
+  is the carrying infrastructure for that future increment.
 
 The internal modular split (`render-code` / `render-flowchart` / `annotations`
 as separate files) keeps each subsystem testable in isolation and preserves the

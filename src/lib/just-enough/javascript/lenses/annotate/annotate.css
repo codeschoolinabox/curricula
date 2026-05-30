@@ -94,8 +94,9 @@
 }
 
 /* pointer-events: all so the overlay captures drawing across the whole
-   view. In flowchart-view this overlays the SVG; Inc 7c must gate this so
-   flowchart-node clicks reach the tagged data-flowchart-node groups. */
+   view (both code-view and flowchart-view). In flowchart-view this sits
+   over the SVG; the deferred flowchart-node correlation feature would
+   gate this so node clicks reach the tagged data-flowchart-node groups. */
 [data-lens='annotate'] .annotate-drawing-overlay {
 	position: absolute;
 	inset: 0;
