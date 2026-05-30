@@ -118,8 +118,12 @@ function createEventBus(): EventBus {
 			// eslint-disable-next-line functional/immutable-data, functional/prefer-readonly-type -- stateful bus per DEV.md § 8
 			(listenersByEvent[name] as Set<EventListener<N>>).delete(listener);
 		},
-		// Fake It: F5a.8 introduces real clear.
-		clear() {},
+		clear(): void {
+			// eslint-disable-next-line functional/immutable-data -- stateful bus per DEV.md § 8
+			listenersByEvent['lens-switched'].clear();
+			// eslint-disable-next-line functional/immutable-data -- stateful bus per DEV.md § 8
+			listenersByEvent['mode-changed'].clear();
+		},
 	};
 	return freezeInPlace(bus);
 }

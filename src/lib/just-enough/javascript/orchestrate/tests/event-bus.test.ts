@@ -440,4 +440,61 @@ describe('createEventBus', () => {
 			expect(shared).toHaveBeenCalledTimes(2);
 		});
 	});
+
+	describe('Simple — clear', () => {
+		it('after clear, a previously subscribed lens-switched listener does not fire', () => {
+			const bus = createEventBus();
+			const listener = vi.fn();
+			bus.subscribe('lens-switched', listener);
+			bus.clear();
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(listener).not.toHaveBeenCalled();
+		});
+
+		it('after clear, a previously subscribed mode-changed listener does not fire', () => {
+			const bus = createEventBus();
+			const listener = vi.fn();
+			bus.subscribe('mode-changed', listener);
+			bus.clear();
+			bus.dispatch('mode-changed', { from: 'editor', to: 'lens' });
+			expect(listener).not.toHaveBeenCalled();
+		});
+
+		it('clear on a bus with no listeners does not throw', () => {
+			const bus = createEventBus();
+			expect(() => bus.clear()).not.toThrow();
+		});
+
+		it('after clear, a newly subscribed listener fires on subsequent dispatch', () => {
+			const bus = createEventBus();
+			bus.clear();
+			const listener = vi.fn();
+			bus.subscribe('lens-switched', listener);
+			bus.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(listener).toHaveBeenCalledTimes(1);
+		});
+
+		it('clear on bus A does not remove a listener registered on bus B', () => {
+			const busA = createEventBus();
+			const busB = createEventBus();
+			const shared = vi.fn();
+			busA.subscribe('lens-switched', shared);
+			busB.subscribe('lens-switched', shared);
+			busA.clear();
+			busB.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(shared).toHaveBeenCalledTimes(1);
+		});
+	});
 });
