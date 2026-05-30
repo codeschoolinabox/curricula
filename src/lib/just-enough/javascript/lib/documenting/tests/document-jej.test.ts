@@ -6,6 +6,7 @@ import {
 	SUPPRESSED_GLOBALS,
 	CURATED_MEMBERS,
 } from '../../completing/collect-jej-surface.js';
+import { BLOCKED_STUMBLES } from '../../completing/stumbling-list.js';
 
 import documentJej from '../document-jej.js';
 import DOC_TABLE, { assembleDocTable } from '../doc-table.js';
@@ -150,30 +151,9 @@ describe('drift guard against upstream JEJ surface', () => {
 		);
 	});
 
-	it('NOT_IN_JEJ_LABELS equals the 12 blocked stumbles from stumbling-list', () => {
-		// stumbling-list.ts mixes blocked (12) + advisory (2) entries
-		// with no separate exported keyset for the blocked partition.
-		// This 12-entry hardcode is intentional: any addition to the
-		// blocked partition requires a manual update both here and in
-		// not-in-jej.ts. Exporting a BLOCKED_STUMBLES set from
-		// stumbling-list.ts would be cleaner but is out of scope for
-		// this sprint (it touches lib/completing/).
-		const expectedBlocked = [
-			'var',
-			'function',
-			'class',
-			'=>',
-			'this',
-			'throw',
-			'try',
-			'import',
-			'async',
-			'await',
-			'split',
-			'match',
-		];
+	it('NOT_IN_JEJ_LABELS equals the blocked-stumble partition of stumbling-list', () => {
 		expect([...NOT_IN_JEJ_LABELS].sort()).toEqual(
-			expectedBlocked.sort(),
+			[...BLOCKED_STUMBLES].sort(),
 		);
 	});
 });

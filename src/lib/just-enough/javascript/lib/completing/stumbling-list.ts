@@ -18,6 +18,12 @@
  * The voice mirrors the validator's violation messages in
  * `embody/lib/validating/just-enough-js.ts` — terse, specific, "at
  * this language level" framing, no apologies.
+ *
+ * The blocked/advisory partition is encoded by `ADVISORY_STUMBLES`
+ * below — anything in `STUMBLING_LIST` whose label is not in
+ * `ADVISORY_STUMBLES` is treated as blocked. The derived
+ * `BLOCKED_STUMBLES` export consumes this rule for downstream
+ * drift-guard tests in `lib/documenting/tests/`.
  */
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
@@ -84,3 +90,31 @@ const STUMBLING_LIST: readonly StumblingEntry[] = deepFreezeInPlace([
 ] as readonly StumblingEntry[]);
 
 export default STUMBLING_LIST;
+
+/**
+ * Labels in `STUMBLING_LIST` that JEJ **allows** but flags with a teaching
+ * caveat (the "advisory" partition described in this file's @file doc).
+ * The completer does not branch on this — both kinds of stumble flow
+ * through the same `info`-attached suggestion path. The export exists so
+ * downstream modules (e.g. `lib/documenting/`) can derive the
+ * complementary `BLOCKED_STUMBLES` set without re-hardcoding the
+ * partition.
+ */
+const ADVISORY_STUMBLES: ReadonlySet<string> = new Set(['null', 'new']);
+
+/**
+ * Labels in `STUMBLING_LIST` that JEJ **rejects** (the "blocked stumble"
+ * partition). Derived from `STUMBLING_LIST` minus `ADVISORY_STUMBLES`,
+ * so adding a new blocked entry to `STUMBLING_LIST` automatically grows
+ * this set; adding a new advisory entry requires a one-line update to
+ * `ADVISORY_STUMBLES` above. Consumed by `lib/documenting/` to assert
+ * keyset equivalence between its `not-in-jej.ts` partition and the
+ * stumbling-list partition.
+ */
+export const BLOCKED_STUMBLES: ReadonlySet<string> = new Set(
+	STUMBLING_LIST.map(function pickLabel(entry) {
+		return entry.label;
+	}).filter(function notAdvisory(label) {
+		return !ADVISORY_STUMBLES.has(label);
+	}),
+);

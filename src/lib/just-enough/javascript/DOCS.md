@@ -380,7 +380,9 @@ Concrete:
 | `lib/scope/`              | `embody/lib/scope/`                   | Scope analysis → NM scope-chain understanding                  |
 | `lib/socratizing/`        | `orchestrate/lib/socratizing/`        | Socratic micro-decision analysis (orchestrator-level pedagogy) |
 | (new)                     | `lib/documenting/`                    | JEJ docs for editor tooltips (landed at JEJ-peer `lib/`)       |
-| `lib/completing/`         | `orchestrate/lib/completing/`         | Autocomplete (editor concern)                                  |
+| (new)                     | `lib/formatting-editor/`              | JEJ format-callback adapter (landed at JEJ-peer `lib/`)        |
+| (new)                     | `lib/linting/`                        | JEJ lint-diagnostic adapter (landed at JEJ-peer `lib/`)        |
+| `lib/completing/`         | `lib/completing/`                     | Autocomplete (landed at JEJ-peer `lib/`)                       |
 | `lib/editing/`            | `orchestrate/lib/editing/`            | Editor integration                                             |
 | `lib/error-interpreting/` | `orchestrate/lib/error-interpreting/` | Learner-friendly error messages (editor concern)               |
 | `lib/recommender/`        | `orchestrate/lib/recommender/`        | Exercise recommender; consumes embodiment after refactor       |

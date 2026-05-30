@@ -395,21 +395,28 @@ import {
 
 ## Internal lib structure
 
-| Path                      | Purpose                                                                                                                                          |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `lib/parse-old/`          | `parse(code)` public entry + parse primitives (acorn wrapper, AST walker)                                                                        |
-| `lib/validating/`         | `validate(code)` public entry + AST-based validation pipeline                                                                                    |
-| `lib/formatting/`         | `format(code)` and `checkFormat(code)` — recast-based                                                                                            |
-| `lib/evaluating/`         | Evaluation engines — trace (Aran), run (Worker), intercept (Worker)                                                                              |
-| `lib/editing/`            | Editor integration (completions, hints)                                                                                                          |
-| `lib/completing/`         | Code completion                                                                                                                                  |
-| `lib/error-interpreting/` | Learner-friendly error message translation                                                                                                       |
-| `lib/socratizing/`        | Socratic code analysis (micro-decisions)                                                                                                         |
-| `lib/scope/`              | Scope analysis utilities                                                                                                                         |
-| `lib/documenting/`        | JEJ docLookup adapter for hover tooltips (editor support)                                                                                        |
-| `components/`             | UI components (V2 lens components, migration source)                                                                                             |
-| `index.ts`                | Package entry — exports the `<StudyLenses>` orchestrator component (primary surface) + legacy named functions                                    |
-| `api/`                    | Legacy directory; trace/run/debug-related types remain here pending parallel migration. The validate/parse/format/default migration is complete. |
+The package is partitioned across three peers — `embody/`, `lenses/`,
+`orchestrate/` — plus the JEJ-aware adapter `lib/` peer that sits
+between them. Each peer's `lib/` subdirectory has its own README
+listing its inhabitants:
+
+| Path                                       | Inhabitants                                                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| [`./lib/`](./lib/)                         | JEJ-aware editor adapters: `completing/`, `documenting/`, `formatting-editor/`, `linting/`                   |
+| [`./embody/lib/`](./embody/lib/)           | Embodiment-pipeline internals: `ast/`, `parse/`, `validating/`, `formatting/`, `evaluating/`, `scope/`       |
+| [`./orchestrate/lib/`](./orchestrate/lib/) | Orchestrator-internal helpers: `editing/`, `error-interpreting/`, `recommender/`, `socratizing/`             |
+
+Top-level (not under any `lib/`):
+
+| Path             | Purpose                                                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `components/`    | UI components (V2 lens components, migration source)                                                                                             |
+| `index.ts`       | Package entry — exports the `<StudyLenses>` orchestrator component (primary surface) + legacy named functions                                    |
+| `api/`           | Legacy directory; trace/run/debug-related types remain here pending parallel migration. The validate/parse/format/default migration is complete. |
+
+For the migration rationale (why each `lib/*` module ended up at its
+current peer rather than at top-level), see
+[`DOCS.md` § Categorization rationale](./DOCS.md).
 
 ## Result shape
 
