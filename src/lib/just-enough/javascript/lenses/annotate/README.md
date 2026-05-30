@@ -242,7 +242,8 @@ Tests split: `tests/render-code.test.ts`, `tests/render-flowchart.test.ts`,
   ("coming soon"); the line-level `highlight` tool was half-implemented and
   dropped at migration. Restoration is its own increment per tool.
 - **Flowchart-node → source-line correlation.** A `select` (inspection) tool was
-  specified in early Phase 0 and partially implemented in Inc 7d, then deferred.
+  specified in early Phase 0 and partially implemented during this WS4 batch,
+  then deferred.
   The intended interaction — clicking a flowchart node jumps to (or previews)
   the matching source line, building the cognitive link between syntactic source
   and semantic flow — is the pedagogical payoff that justifies bringing the tool

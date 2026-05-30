@@ -216,7 +216,7 @@ describe('annotate lens — flowchart view', () => {
 		});
 	});
 
-	it('tags the <g> node-group so a shape resolves via closest (7c delegation)', async () => {
+	it('tags the <g> node-group so a shape resolves via closest (forward-ready for deferred correlation)', async () => {
 		const { container } = render(
 			<annotateLens.Component
 				embodiment={embody('function f() { return 1; }')}

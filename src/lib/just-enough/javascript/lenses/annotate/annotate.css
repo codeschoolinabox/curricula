@@ -64,7 +64,7 @@
 	color: #905;
 }
 
-/* ─── Toolbar + drawing overlay (Inc 7a) ─────────────────────────── */
+/* ─── Toolbar + drawing overlay ─────────────────────────────────── */
 
 [data-lens='annotate'] .annotate-toolbar {
 	display: flex;
@@ -113,7 +113,7 @@
 	stroke-linejoin: round;
 }
 
-/* ─── Notes overlay + note-input dialog (Inc 7b) ─────────────────── */
+/* ─── Notes overlay + note-input dialog ─────────────────────────── */
 
 /* Saved notes are display-only; pointer-events: none so they never
    block drawing on the overlay beneath. */

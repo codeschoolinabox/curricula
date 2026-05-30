@@ -209,11 +209,12 @@ state-only, no annotation-set transformation runs.
 - **Display content is rendered safely.** Code spans render as plain text inside
   `<code>`; never `dangerouslySetInnerHTML`. Flowchart SVG is the one exception:
   `js2flowchart` returns SVG markup as a string, so the wrapper uses
-  `dangerouslySetInnerHTML` on the flowchart-container element — and the
-  post-inject `useEffect` adds `data-flowchart-node` attributes for React event
-  delegation rather than direct DOM listeners. The SVG comes from a trusted
-  local library; no learner-controlled content reaches
-  `dangerouslySetInnerHTML`.
+  `dangerouslySetInnerHTML` on the flowchart-container element. The SVG comes
+  from a trusted local library; no learner-controlled content reaches
+  `dangerouslySetInnerHTML`. The post-inject `useEffect` adds
+  `data-flowchart-node` attributes as forward-ready infrastructure for the
+  deferred correlation feature (no v1 consumer; see the tagger bullet above
+  and § Out of scope).
 
 ### Out of scope
 

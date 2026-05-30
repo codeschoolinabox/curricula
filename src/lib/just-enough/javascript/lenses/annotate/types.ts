@@ -54,9 +54,10 @@ type ViewMode = 'code' | 'flowchart';
  * and a line-level `highlight`; those were stubbed-and-deferred and
  * are not in the v1 catalog. A flowchart-node `select` (inspection)
  * tool was specified in the early Phase 0 contract and partially
- * implemented in Inc 7d, then deferred along with flowchart-node →
- * source-line correlation as a named follow-up (see `./README.md`
- * § Future direction). Restoration is per-feature follow-up.
+ * implemented during this WS4 batch, then deferred along with the
+ * flowchart-node → source-line correlation feature as a named
+ * follow-up (see `./README.md` § Future direction). Restoration is
+ * per-feature follow-up.
  */
 type Tool = 'pen' | 'eraser' | 'note';
 
