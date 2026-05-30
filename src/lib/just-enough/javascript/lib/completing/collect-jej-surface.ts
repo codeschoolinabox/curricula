@@ -22,7 +22,7 @@ import type { CompletionRequest } from '../../orchestrate/lib/editing/types.js';
 
 import type { Suggestion } from './types.js';
 
-const KEYWORDS: readonly string[] = [
+export const KEYWORDS: readonly string[] = [
 	'let',
 	'const',
 	'if',
@@ -41,7 +41,7 @@ const KEYWORDS: readonly string[] = [
 	'in',
 ];
 
-const SUPPRESSED_GLOBALS: ReadonlySet<string> = new Set(['eval']);
+export const SUPPRESSED_GLOBALS: ReadonlySet<string> = new Set(['eval']);
 
 /**
  * Curated member-name union emitted in dot-receiver context. One
@@ -50,7 +50,7 @@ const SUPPRESSED_GLOBALS: ReadonlySet<string> = new Set(['eval']);
  * scannable; 28 commonly-useful names from `String`, `Number`,
  * and `Math` that JEJ allows.
  */
-const CURATED_MEMBERS: readonly string[] = [
+export const CURATED_MEMBERS: readonly string[] = [
 	'length',
 	'toString',
 	'valueOf',
