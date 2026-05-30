@@ -22,6 +22,8 @@ libraries (`embody/lib/*`, `orchestrate/lib/*`). The distinction:
 ```text
 lib/
   README.md              (this — orientation + navigation)
+  completing/            completion-callback adapter: JeJ-curated
+                         suggestions with blocked-marker overlay
   formatting-editor/     format-callback adapter: JeJ canonical
                          formatting delegated to the runtime formatter
   linting/               validation-feed adapter: JeJ violations
@@ -29,8 +31,8 @@ lib/
 ```
 
 Adapters land here as the package's tooling needs expand.
-Documentation lookup and completion sources are likely future
-inhabitants.
+Documentation lookup (hover tooltips for keywords) is a likely
+future inhabitant.
 
 ## Why a separate peer
 
@@ -74,6 +76,9 @@ top-level `AGENTS.md` / `DEV.md`. Module-specific rules:
 - **Parent peer index:** [`../README.md`](../README.md).
 - **Conceptual chain:** [`../README.md`](../README.md) § The story.
 - **Current inhabitants:**
+  - [`./completing/README.md`](./completing/README.md) —
+    completion-callback adapter with JEJ-curated suggestions and a
+    blocked-marker overlay.
   - [`./formatting-editor/README.md`](./formatting-editor/README.md) —
     format-callback adapter delegating to the canonical formatter.
   - [`./linting/README.md`](./linting/README.md) — validation-feed

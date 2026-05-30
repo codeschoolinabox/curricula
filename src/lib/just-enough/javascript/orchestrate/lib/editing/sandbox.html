@@ -112,8 +112,10 @@
 	<body>
 		<h1>Editor Sandbox</h1>
 		<p class="hint">
-			Hover JS keywords for docs. Type for completions. Cmd/Ctrl-Shift-F
-			to format. JeJ violations appear as red markers in the gutter.
+			Hover JS keywords for docs. Type for completions (try 'va' for
+			the blocked-item demo — appears in popup with explanation,
+			Enter dismisses without inserting). Cmd/Ctrl-Shift-F to
+			format. JeJ violations appear as red markers in the gutter.
 		</p>
 
 		<div class="controls">
@@ -285,7 +287,7 @@ console.log(greeting, add(count, 8));
 
 			// ─── Completions (hardcoded — no JeJ equivalent) ───────
 
-			function getCompletions(prefix) {
+			function getCompletions({ prefix }) {
 				const builtins = [
 					'console',
 					'log',
@@ -306,13 +308,28 @@ console.log(greeting, add(count, 8));
 				];
 				if (!prefix) return [];
 				const lower = prefix.toLowerCase();
-				return builtins
+				const matches = builtins
 					.filter(function matchPrefix(name) {
 						return name.startsWith(lower);
 					})
 					.map(function toItem(name) {
 						return { label: name, type: 'keyword' };
 					});
+				// Blocked-item demo: surface 'var' with tooltip + no-op apply.
+				// Mirrors the lib/completing/ adapter's blocked-marker overlay so
+				// the contract widening can be eyeballed end-to-end.
+				const blockedDemo = 'var'.startsWith(lower)
+					? [
+							{
+								label: 'var',
+								type: 'blocked',
+								detail: '(not in JEJ)',
+								info: "'var' declarations are not allowed at this language level — use 'let' or 'const'.",
+								apply: 'noop',
+							},
+						]
+					: [];
+				return [...matches, ...blockedDemo];
 			}
 
 			// ─── State ─────────────────────────────────────────────

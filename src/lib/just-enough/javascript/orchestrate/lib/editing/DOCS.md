@@ -146,6 +146,24 @@ from this data.
 }
 ```
 
+### CompletionRequest
+
+Passed to the `completions` callback. Structured rather than just a
+prefix string so JEJ-aware callers can detect dot-receiver context and
+run validate/scope analysis without learning about CodeMirror internals.
+Named "request" (not "context") because CodeMirror's own `CompletionContext`
+is a CM-internal type with `.state` / `.pos` / `.matchBefore()` methods —
+exposing that shape to the JEJ side would leak the CM boundary; the
+editor translates it into this plain-data form.
+
+```js
+{
+  prefix: string,         // bare word-fragment under the cursor
+  precedingText: string,  // line text from line-start to prefix-start
+  fullText: string,       // entire document
+}
+```
+
 ### CompletionItem
 
 Returned by the `completions` callback.
@@ -153,10 +171,24 @@ Returned by the `completions` callback.
 ```js
 {
   label: string,
-  type?: string,      // 'function', 'variable', 'keyword', etc.
+  type?: string,    // 'function', 'variable', 'keyword', 'blocked', etc.
   detail?: string,
+  info?: string,    // markdown-flavored single-paragraph prose
+  apply?: 'noop',   // sentinel — see below
 }
 ```
+
+`info` is single-paragraph prose; the editor lifts it into a styled DOM
+tooltip via `build-info-dom.ts` (mirroring `build-tooltip-dom.ts` for
+hover docs). `apply: 'noop'` asks CodeMirror to dismiss the popup on
+Enter instead of inserting the label — used together with `type:
+'blocked'` so callers can surface vocabulary in the popup as
+warning-only items (the learner sees them, learns why via `info`, but
+the keystroke does not land). The sentinel translates to a
+`closeCompletion(view)` call inside the editor; JEJ-aware adapters
+never see the CodeMirror function. See
+[`../../../lib/completing/`](../../../lib/completing/) for the
+JEJ-pedagogical use of these fields.
 
 ### FormatResult
 
@@ -178,7 +210,8 @@ The editor was split into single-concept files during TypeScript conversion:
 - `create-editor.ts` — slim factory, mutable closures, public API
 - `detect-language.ts` — pure extension-to-language mapping
 - `build-extensions.ts` — CM extension builder, language loaders
-- `build-tooltip-dom.ts` — tooltip DOM construction from DocEntry
+- `build-tooltip-dom.ts` — hover-doc tooltip DOM construction from DocEntry
+- `build-info-dom.ts` — completion-`info` DOM construction from prose string
 - `to-cm-diagnostic.ts` — LintDiagnostic to CM Diagnostic translation
 
 ## Language Detection

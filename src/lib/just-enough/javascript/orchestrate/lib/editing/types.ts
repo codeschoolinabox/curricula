@@ -65,12 +65,44 @@ type DocEntry = {
 };
 
 /**
+ * What the editor hands to a completion callback.
+ *
+ * @remarks `prefix` is the bare word-fragment under the cursor
+ * (the editor extracts it by matching word characters before the
+ * cursor). `precedingText` is the text on the current line from
+ * line-start to the prefix-start — callers use it for dot-receiver
+ * context detection without seeing CodeMirror types. `fullText` is
+ * the entire snippet, available for callbacks that need to parse or
+ * do scope analysis.
+ *
+ * Named "request" rather than "context" so the JEJ-side adapters
+ * stay CM-blind; the editor translates CM's internal
+ * `CompletionContext` into this shape.
+ */
+type CompletionRequest = {
+	readonly prefix: string;
+	readonly precedingText: string;
+	readonly fullText: string;
+};
+
+/**
  * A single item in the autocompletion dropdown.
+ *
+ * @remarks `type === 'blocked'` is a JEJ-pedagogical sentinel for
+ * items that appear in the popup but represent constructs outside
+ * the language level. `apply === 'noop'` is a sentinel that asks
+ * the editor to dismiss the popup on Enter instead of inserting the
+ * label — used together with `'blocked'` so a learner can see the
+ * blocked vocabulary without the keystroke landing. `info` is
+ * markdown-flavored single-paragraph prose; the editor lifts it
+ * into a DOM tooltip.
  */
 type CompletionItem = {
 	readonly label: string;
 	readonly type?: string;
 	readonly detail?: string;
+	readonly info?: string;
+	readonly apply?: 'noop';
 };
 
 /**
@@ -102,9 +134,15 @@ type LinterCallback = (code: string) => readonly LintDiagnostic[];
 type DocLookupCallback = (word: string) => DocEntry | null;
 
 /**
- * Returns completion items matching a typed prefix.
+ * Returns completion items matching the request's prefix.
+ *
+ * @remarks The callback is JEJ-blind from the editor's perspective —
+ * it receives a structured `CompletionRequest` (built from
+ * CodeMirror's internal context) and returns plain shape data. The
+ * editor lifts `apply: 'noop'` and `info` strings into CM-side
+ * behavior internally.
  */
-type CompletionCallback = (prefix: string) => readonly CompletionItem[];
+type CompletionCallback = (req: CompletionRequest) => readonly CompletionItem[];
 
 /**
  * Receives the result of a format operation.
@@ -192,6 +230,7 @@ type EditorInstance = {
 export type {
 	CompletionCallback,
 	CompletionItem,
+	CompletionRequest,
 	DetectedLanguage,
 	DocEntry,
 	DocLookupCallback,

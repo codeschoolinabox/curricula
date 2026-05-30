@@ -24,7 +24,8 @@ tooltips, markers) but does not know what the feedback means.
 | `create-editor.ts`      | `createEditor(initialCode, options)` factory |
 | `detect-language.ts`    | File extension to language mapping (pure)    |
 | `build-extensions.ts`   | CodeMirror extension builder (internal)      |
-| `build-tooltip-dom.ts`  | Tooltip DOM construction (internal)          |
+| `build-tooltip-dom.ts`  | Hover-doc tooltip DOM construction (internal)|
+| `build-info-dom.ts`     | Completion-`info` DOM construction (internal)|
 | `to-cm-diagnostic.ts`   | Diagnostic data translation (internal)       |
 
 ## Usage
@@ -84,7 +85,7 @@ extensions internally. Callbacks never see or return CodeMirror types.
 | `format`      | `(code) => formattedCode`      | `editor.dispatch()`                         |
 | `linters[n]`  | `(code) => LintDiagnostic[]`   | `linter()` + `lintGutter()`                 |
 | `docLookup`   | `(word) => DocEntry \| null`   | `hoverTooltip()`                            |
-| `completions` | `(prefix) => CompletionItem[]` | `autocompletion()`                          |
+| `completions` | `(req) => CompletionItem[]`    | `autocompletion()`                          |
 | `onFormat`    | `(result) => void`             | Called after format                         |
 
 `onChange` fires **synchronously** inside each `docChanged` transaction with
@@ -93,6 +94,20 @@ which consumers receive learner edits. Each keystroke produces exactly one
 `onChange` invocation — no batching, no debouncing — which is load-bearing
 for the orchestrator's F2.5 cache-invalidation invariant
 (see [`../../editor/README.md`](../../editor/README.md) § Conventions).
+
+`completions` receives a structured `CompletionRequest`
+(`{prefix, precedingText, fullText}`) rather than just the word prefix, so
+JEJ-aware callers can detect dot-receiver context and run the validate/scope
+analysis they need without learning about CodeMirror internals. Returned
+`CompletionItem`s can opt into two JEJ-pedagogical extensions: `info?:
+string` (markdown-flavored prose surfaced as a styled DOM tooltip via
+`build-info-dom.ts`) and `apply?: 'noop'` (a sentinel that asks CodeMirror
+to dismiss the popup on Enter instead of inserting the label — used for
+items the popup surfaces as warnings rather than insertions). Both
+extensions are JEJ-blind on the editor side: the editor knows how to honor
+the sentinel and lift the prose into DOM; it does not know what makes the
+item "warning-worthy". The JEJ semantics live in the caller
+(see [`../../../lib/completing/`](../../../lib/completing/)).
 
 See `DOCS.md` for architecture decisions and data shape definitions.
 See `types.ts` for all type definitions.

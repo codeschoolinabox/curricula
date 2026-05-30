@@ -12,7 +12,7 @@ import { EditorView, keymap, hoverTooltip } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { autocompletion } from '@codemirror/autocomplete';
+import { autocompletion, closeCompletion } from '@codemirror/autocomplete';
 import { linter, lintGutter } from '@codemirror/lint';
 import { indentUnit } from '@codemirror/language';
 import { indentWithTab } from '@codemirror/commands';
@@ -20,6 +20,7 @@ import { indentWithTab } from '@codemirror/commands';
 import type { Extension } from '@codemirror/state';
 
 import { toCMDiagnostic, runLinterCallbacks } from './to-cm-diagnostic.js';
+import buildInfoDom from './build-info-dom.js';
 import buildTooltipDom from './build-tooltip-dom.js';
 
 import type {
@@ -151,15 +152,33 @@ async function buildExtensions(
 						}
 
 						const prefix = context.state.sliceDoc(word.from, word.to);
-						const items = completions(prefix);
+						const lineStart = context.state.doc.lineAt(word.from).from;
+						const precedingText = context.state.sliceDoc(lineStart, word.from);
+						const fullText = context.state.doc.toString();
+						const items = completions({ prefix, precedingText, fullText });
 
 						return {
 							from: word.from,
 							options: items.map(function toCompletion(i) {
-								// exactOptionalPropertyTypes: only set type/detail when defined
-								const completion: { label: string; type?: string; detail?: string } = { label: i.label };
+								// exactOptionalPropertyTypes: only set fields when defined
+								const completion: {
+									label: string;
+									type?: string;
+									detail?: string;
+									info?: () => HTMLElement;
+									apply?: (view: EditorView) => void;
+								} = { label: i.label };
 								if (i.type != null) completion.type = i.type;
 								if (i.detail != null) completion.detail = i.detail;
+								if (i.info != null) {
+									const infoText = i.info;
+									completion.info = () => buildInfoDom(infoText);
+								}
+								if (i.apply === 'noop') {
+									completion.apply = (view: EditorView) => {
+										closeCompletion(view);
+									};
+								}
 								return completion;
 							}),
 						};
