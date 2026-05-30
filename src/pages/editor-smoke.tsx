@@ -1,7 +1,8 @@
 /**
  * @file Editor smoke page — mounts `<EditorComponent>` standalone so a
- * developer can eyeball the three wired callbacks (`lintJej`,
- * `formatJej`, `completeJej`) on the live Docusaurus site.
+ * developer can eyeball the four wired callbacks (`lintJej`,
+ * `formatJej`, `completeJej`, `documentJej`) on the live Docusaurus
+ * site.
  *
  * Deep-imports `<EditorComponent>` from `orchestrate/editor/index.js`
  * rather than going through `<StudyLenses>` so the smoke surface isolates
@@ -23,7 +24,10 @@
  *    semicolons, ≤80-col wrap).
  * 4. Type after a `.` or press `Ctrl-Space` — `completeJej` surfaces the
  *    curated member union; blocked tokens carry `(not in JEJ)` tooltips.
- * 5. Watch the browser console — `[editor-smoke] onSnippetChange:` logs
+ * 5. Hover over a keyword or global (e.g. `let`, `Math`, `console`) —
+ *    `documentJej` surfaces a doc tooltip with description, example,
+ *    and pedagogical guidance.
+ * 6. Watch the browser console — `[editor-smoke] onSnippetChange:` logs
  *    once per `docChanged` transaction (1:1 per the editor's
  *    transaction-to-callback contract).
  *
@@ -74,6 +78,11 @@ function EditorSmoke(): React.JSX.Element {
 						<code>completeJej</code> — type after a <code>.</code> or press{' '}
 						<kbd>Ctrl-Space</kbd> for the curated member union; blocked tokens
 						carry tooltips.
+					</li>
+					<li>
+						<code>documentJej</code> — hover over a keyword or global (e.g.{' '}
+						<code>let</code>, <code>Math</code>, <code>console</code>) for a doc
+						tooltip with description, example, and pedagogical guidance.
 					</li>
 				</ul>
 				<div style={{ marginTop: '1.5rem' }}>

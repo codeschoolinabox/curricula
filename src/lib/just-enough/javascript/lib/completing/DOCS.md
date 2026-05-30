@@ -236,3 +236,15 @@ flowchart TD
   rationale: JEJ-aware code produces prose; the editor produces
   DOM. The lift happens once, in `build-info-dom.ts` next to the
   existing `build-tooltip-dom.ts` (which lifts hover-doc data).
+- **Set-iterable spread is replaced with `Array.from(<Set>)`.** The
+  Docusaurus/Babel transpile pipeline mistranspiles `[...<Set>]`
+  to a one-element array wrapping the Set (broken in the dev/build
+  bundle; correct in vitest, which uses a different transform).
+  Three sites use `Array.from(<Set>)` with `eslint-disable-next-line
+  unicorn/prefer-spread` so the linter's auto-fix doesn't re-introduce
+  the bug: `collect-jej-surface.ts` lines 117 (allowedGlobals) and
+  150 (declaredNames-Set), `mark-blocked.ts` line 107 (blockedMembers).
+  Array spread (`[...arr1, ...arr2]`) is unaffected — only Set-iterable
+  spread mistranspiles. If the bundler is ever migrated off Docusaurus
+  (or the root cause is fixed in the Babel preset), audit these three
+  sites and revert to spread syntax.
