@@ -5,6 +5,27 @@
 > in [`04-lens-migration.md`](./04-lens-migration.md); this handoff is the final
 > wiring step that publishes the lens to the orchestrator's dispatch surface.
 
+## Read these first (mandatory)
+
+Before you touch any file, read:
+
+1. [`AGENTS.md`](../../../../../AGENTS.md) at the repo root — the project's
+   non-negotiable invariants and the agent workflow conventions (TDD ceremony,
+   commit discipline, "end-state docs only" rule, the `--no-verify` policy for
+   the pre-existing markdownlint debt). This ticket is small enough that the
+   full TDD ceremony does not apply, but the invariants do.
+2. [`DEV.md`](../../../../../DEV.md) at the repo root — the Adversarial Review
+   Protocol (AR-1 through AR-5). For this registration ticket, no AR cycle is
+   expected: it's a 2-line wiring change against a lens that already passed
+   AR-5 (Opus, PROCEED). If your verification surfaces anything that requires
+   a contract change or new behavior (it shouldn't), stop and re-read DEV.md
+   before proceeding — the project mandates the appropriate AR cycle for any
+   non-trivial change.
+3. This handoff in full, top to bottom.
+
+If anything in (1), (2), or (3) contradicts your instinct on how to proceed,
+follow (1) and (2). They are the ground truth for working in this repo.
+
 ## Context (5 lines)
 
 The WS4 batch migrated the `annotate` lens (renamed from `highlight` at Phase 0
