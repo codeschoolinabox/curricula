@@ -522,3 +522,83 @@ describe('<StudyLenses> — F5b.2 initial-mount dispatch (lens mode)', () => {
 		});
 	});
 });
+
+describe('<StudyLenses> — F5b.4 prop-driven editor → lens transition', () => {
+	describe('Many — both bus events dispatch on prop-driven editor→lens transition', () => {
+		it('mode-changed fires with {from: editor, to: lens}', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(<StudyLenses snippet="OK" />);
+				expect(dispatchSpy).not.toHaveBeenCalled();
+				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+				expect(dispatchSpy).toHaveBeenCalledWith('mode-changed', {
+					from: 'editor',
+					to: 'lens',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('lens-switched fires with {previous: null, next: debug-props, source: prop}', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(<StudyLenses snippet="OK" />);
+				expect(dispatchSpy).not.toHaveBeenCalled();
+				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+				expect(dispatchSpy).toHaveBeenCalledWith('lens-switched', {
+					previous: null,
+					next: 'debug-props',
+					source: 'prop',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('mode-changed dispatches before lens-switched on the prop-driven transition', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(<StudyLenses snippet="OK" />);
+				expect(dispatchSpy).not.toHaveBeenCalled();
+				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+				const eventNames = dispatchSpy.mock.calls.map((args) => args[0]);
+				expect(eventNames).toEqual(['mode-changed', 'lens-switched']);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('the prop-driven transition dispatches exactly twice under React StrictMode', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { rerender } = render(
+					<React.StrictMode>
+						<StudyLenses snippet="OK" />
+					</React.StrictMode>,
+				);
+				expect(dispatchSpy).not.toHaveBeenCalled();
+				rerender(
+					<React.StrictMode>
+						<StudyLenses snippet="OK" lens="debug-props" />
+					</React.StrictMode>,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+	});
+});

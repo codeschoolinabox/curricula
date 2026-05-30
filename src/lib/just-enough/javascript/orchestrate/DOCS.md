@@ -483,7 +483,7 @@ shapes live in [`./types.ts`](./types.ts) (`EventBus`, `EventName`,
 
 | Event           | Fires on                                                                                      | Payload                                                                                              | Notes                                                                                                                                            |
 | --------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `lens-switched` | active-lens transition: editor → lens with a registered lens, or in-mode lens switch          | `{ previous: string \| null; next: string; source?: LensSelectionSource }`                           | `previous` is `null` only on the very first editor → lens mount. `source` is optional; supplied when the dispatch site has a defensible value.   |
+| `lens-switched` | active-lens transition: editor → lens with a registered lens, or in-mode lens switch          | `{ previous: string \| null; next: string; source?: LensSelectionSource }`                           | `previous` is `null` on any editor → lens transition (initial mount or prop-driven), since editor mode has no prior active lens. In-mode lens switches always carry a non-null `previous`. `source` is optional; supplied when the dispatch site has a defensible value. |
 | `mode-changed`  | editor ↔ lens mode transition                                                                 | `{ from: 'editor' \| 'lens'; to: 'editor' \| 'lens' }`                                               | Dispatched before `lens-switched` in the same React commit when both apply (editor → lens transitions). Edit-return dispatches `mode-changed` alone.|
 
 The `EventName` union and `EventPayloadMap` in [`./types.ts`](./types.ts) are
@@ -510,8 +510,9 @@ Initial mount in lens mode dispatches both events from a one-time
 post-commit effect (`useEffect([])` that observes the first-commit state),
 in standard order: `mode-changed({ from: 'editor', to: 'lens' })` first,
 then `lens-switched({ previous: null, next: state.activeLens, source: 'initial' })`.
-This is the only execution path where `previous: null` is reachable on
-`lens-switched`.
+This is the only execution path that uses `source: 'initial'`; any other
+editor → lens transition (prop-driven, picker, panel) also reports
+`previous: null` but with its own `source` value.
 
 Initial mount in editor mode dispatches nothing — the system simply IS in
 editor mode from frame one; no transition has occurred.

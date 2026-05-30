@@ -262,10 +262,23 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			});
 		}, []);
 
+		// F5b prop-change diff seed. Tracks the most-recently committed state
+		// so the prop-change effect can compute mode + activeLens transitions
+		// for bus dispatch. Seeded to the initial state at mount and updated
+		// after every transition. Read inside post-commit effects only.
+		const prevStateRef = React.useRef<OrchestratorState>(initialDerived.state);
+
 		// Prop-change mode transition. Skips initial mount (state/cache already
 		// seeded); fires on lens or configs change only. Calls `setState` and
 		// `setCachedEmbodiment` sequentially — React 18 auto-batching folds them
 		// into a single commit (per DOCS § Atomic transition mechanism).
+		//
+		// F5b.4-F5b.6: after the state setters fire, the transition handler
+		// diffs prevStateRef against the just-computed `next.state` and
+		// dispatches mode-changed (when mode flipped) and lens-switched (when
+		// next is lens mode and the activeLens differs from the previous lens
+		// reading). Both use source: 'prop'. Dispatch ordering: mode-changed
+		// before lens-switched within the same React commit per DOCS contract.
 		const isMountedRef = React.useRef(false);
 		React.useEffect(() => {
 			if (!isMountedRef.current) {
@@ -280,6 +293,23 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			);
 			setState(next.state);
 			setCachedEmbodiment(next.cache);
+
+			const prev = prevStateRef.current;
+			const bus = busRef.current!;
+			if (prev.mode !== next.state.mode) {
+				bus.dispatch('mode-changed', { from: prev.mode, to: next.state.mode });
+			}
+			if (next.state.mode === 'lens') {
+				const previousLens = prev.mode === 'lens' ? prev.activeLens : null;
+				if (previousLens !== next.state.activeLens) {
+					bus.dispatch('lens-switched', {
+						previous: previousLens,
+						next: next.state.activeLens,
+						source: 'prop',
+					});
+				}
+			}
+			prevStateRef.current = next.state;
 		}, [lens, configs]);
 
 		// F2.5: edit invalidation. Any snippet edit eagerly clears the cache so a
