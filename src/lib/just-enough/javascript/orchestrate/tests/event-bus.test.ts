@@ -391,4 +391,53 @@ describe('createEventBus', () => {
 			]);
 		});
 	});
+
+	describe('Boundary — per-instance isolation', () => {
+		it('a listener subscribed on bus A does not fire when bus B dispatches', () => {
+			const busA = createEventBus();
+			const busB = createEventBus();
+			const listenerOnA = vi.fn();
+			busA.subscribe('lens-switched', listenerOnA);
+			busB.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(listenerOnA).not.toHaveBeenCalled();
+		});
+
+		it('clearing or unsubscribing on bus A does not affect bus B', () => {
+			const busA = createEventBus();
+			const busB = createEventBus();
+			const listenerOnB = vi.fn();
+			busB.subscribe('lens-switched', listenerOnB);
+			busA.clear();
+			busA.unsubscribe('lens-switched', listenerOnB);
+			busB.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(listenerOnB).toHaveBeenCalledTimes(1);
+		});
+
+		it('the same listener subscribed on two buses fires once per dispatch on each', () => {
+			const busA = createEventBus();
+			const busB = createEventBus();
+			const shared = vi.fn();
+			busA.subscribe('lens-switched', shared);
+			busB.subscribe('lens-switched', shared);
+			busA.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			busB.dispatch('lens-switched', {
+				previous: null,
+				next: 'test-lens',
+				source: 'initial',
+			});
+			expect(shared).toHaveBeenCalledTimes(2);
+		});
+	});
 });
