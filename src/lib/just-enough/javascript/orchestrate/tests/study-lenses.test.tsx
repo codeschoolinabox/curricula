@@ -16,7 +16,9 @@ import type { EventBus } from '../types.js';
  * editor home-base (the host `<div data-orchestrator-host>` contains a
  * `.cm-content` element after async mount completes).
  */
-async function findMountedEditorView(container: HTMLElement): Promise<EditorView> {
+async function findMountedEditorView(
+	container: HTMLElement,
+): Promise<EditorView> {
 	const cmContent = await waitFor(() => {
 		const element = container.querySelector('.cm-content');
 		if (!element) throw new Error('CodeMirror content element not yet mounted');
@@ -324,7 +326,9 @@ describe('<StudyLenses> — F1 smoke', () => {
 		describe('Zero/One — initial mode from props', () => {
 			it('mounts in editor mode when no lens prop (editor home-base present, no lens root)', () => {
 				const { container } = render(<StudyLenses snippet="OK" />);
-				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
+				expect(
+					container.querySelector('[data-orchestrator-host]'),
+				).not.toBeNull();
 				expect(container.querySelector('[data-lens]')).toBeNull();
 			});
 
@@ -332,7 +336,9 @@ describe('<StudyLenses> — F1 smoke', () => {
 				const { container } = render(
 					<StudyLenses snippet="OK" lens="debug-props" />,
 				);
-				expect(container.querySelector('[data-lens="debug-props"]')).not.toBeNull();
+				expect(
+					container.querySelector('[data-lens="debug-props"]'),
+				).not.toBeNull();
 				expect(container.querySelector('[data-orchestrator-host]')).toBeNull();
 			});
 
@@ -340,7 +346,9 @@ describe('<StudyLenses> — F1 smoke', () => {
 				const { container } = render(
 					<StudyLenses snippet="OK" lens="not-registered" />,
 				);
-				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
+				expect(
+					container.querySelector('[data-orchestrator-host]'),
+				).not.toBeNull();
 				expect(container.querySelector('[data-lens]')).toBeNull();
 			});
 		});
@@ -348,12 +356,16 @@ describe('<StudyLenses> — F1 smoke', () => {
 		describe('Many — mode transitions on prop change', () => {
 			it('transitions editor → lens when lens prop changes from unset to "debug-props"', () => {
 				const { container, rerender } = render(<StudyLenses snippet="OK" />);
-				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
+				expect(
+					container.querySelector('[data-orchestrator-host]'),
+				).not.toBeNull();
 				expect(container.querySelector('[data-lens]')).toBeNull();
 
 				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
 
-				expect(container.querySelector('[data-lens="debug-props"]')).not.toBeNull();
+				expect(
+					container.querySelector('[data-lens="debug-props"]'),
+				).not.toBeNull();
 				expect(container.querySelector('[data-orchestrator-host]')).toBeNull();
 			});
 
@@ -361,11 +373,15 @@ describe('<StudyLenses> — F1 smoke', () => {
 				const { container, rerender } = render(
 					<StudyLenses snippet="OK" lens="debug-props" />,
 				);
-				expect(container.querySelector('[data-lens="debug-props"]')).not.toBeNull();
+				expect(
+					container.querySelector('[data-lens="debug-props"]'),
+				).not.toBeNull();
 
 				rerender(<StudyLenses snippet="OK" />);
 
-				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
+				expect(
+					container.querySelector('[data-orchestrator-host]'),
+				).not.toBeNull();
 				expect(container.querySelector('[data-lens]')).toBeNull();
 			});
 
@@ -373,11 +389,15 @@ describe('<StudyLenses> — F1 smoke', () => {
 				const { container, rerender } = render(
 					<StudyLenses snippet="OK" lens="debug-props" />,
 				);
-				expect(container.querySelector('[data-lens="debug-props"]')).not.toBeNull();
+				expect(
+					container.querySelector('[data-lens="debug-props"]'),
+				).not.toBeNull();
 
 				rerender(<StudyLenses snippet="OK" lens="not-registered" />);
 
-				expect(container.querySelector('[data-orchestrator-host]')).not.toBeNull();
+				expect(
+					container.querySelector('[data-orchestrator-host]'),
+				).not.toBeNull();
 				expect(container.querySelector('[data-lens]')).toBeNull();
 			});
 		});
@@ -414,7 +434,10 @@ describe('<StudyLenses> — F5b.1 bus instance', () => {
 	});
 });
 
-function createSpyBus(): { bus: EventBus; dispatchSpy: ReturnType<typeof vi.fn> } {
+function createSpyBus(): {
+	bus: EventBus;
+	dispatchSpy: ReturnType<typeof vi.fn>;
+} {
 	const dispatchSpy = vi.fn();
 	const bus: EventBus = Object.freeze({
 		dispatch: dispatchSpy,
@@ -700,8 +723,8 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			const options = container.querySelectorAll(
 				'[data-orchestrator-lens-picker] option',
 			);
-			const values = [...options].map((option) =>
-				(option as HTMLOptionElement).value,
+			const values = Array.from(options).map(
+				(option) => (option as HTMLOptionElement).value,
 			);
 			expect(values).toEqual(['', 'annotate', 'debug-props']);
 		});

@@ -82,12 +82,9 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 
 /**
  * Registered lens names, in registration order. Stable reference passed
- * to `<Toolbar
-					lensNames={LENS_NAMES}
-					pickerValue={pickerValue}
-					onLensSelect={handleLensSelect}
-				/>` so the picker's option list
- * doesn't recompute per render.
+ * to `<Toolbar lensNames={LENS_NAMES} ... />` so the picker's option
+ * list doesn't recompute per render. Insertion order is preserved by
+ * the ES2015+ `Object.keys` spec for string-keyed properties.
  */
 const LENS_NAMES: readonly string[] = Object.freeze(Object.keys(LENS_REGISTRY));
 
@@ -394,12 +391,12 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			return (
 				<div data-orchestrator-root>
 					<Toolbar
-					lensNames={LENS_NAMES}
-					pickerValue={pickerValue}
-					onLensSelect={handleLensSelect}
-					editButtonVisible={state.mode === 'lens'}
-					onEditReturn={handleEditReturn}
-				/>
+						lensNames={LENS_NAMES}
+						pickerValue={pickerValue}
+						onLensSelect={handleLensSelect}
+						editButtonVisible={state.mode === 'lens'}
+						onEditReturn={handleEditReturn}
+					/>
 					<lensModule.Component
 						embodiment={cachedEmbodiment.embodiment}
 						config={state.resolvedConfig}
@@ -408,13 +405,18 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			);
 		}
 
+		// editor-mode branch: state.mode === 'editor' by exhaustion (the
+		// lens-mode branch above returned). The edit button is unconditionally
+		// hidden in editor mode per the L1 contract; passing `false` directly
+		// (rather than `state.mode === 'lens'`) makes the type-narrowed branch
+		// explicit at this call site.
 		return (
 			<div data-orchestrator-root>
 				<Toolbar
 					lensNames={LENS_NAMES}
 					pickerValue={pickerValue}
 					onLensSelect={handleLensSelect}
-					editButtonVisible={state.mode === 'lens'}
+					editButtonVisible={false}
 					onEditReturn={handleEditReturn}
 				/>
 				<EditorComponent

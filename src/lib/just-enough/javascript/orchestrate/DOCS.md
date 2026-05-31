@@ -381,7 +381,7 @@ flowchart TD
 
 **Picker neutral state.** When `state.mode === 'editor'`, the picker's `value`
 is the empty string and the first `<option>` is a non-selectable sentinel
-(`<option value="" disabled selected>— select a lens —</option>`). The
+(`<option value="" disabled hidden>— select a lens —</option>`). The
 remaining options enumerate the registered lenses. Selecting any non-sentinel
 option transitions to lens mode for that lens; the sentinel itself cannot be
 re-selected.

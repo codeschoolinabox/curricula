@@ -187,7 +187,7 @@ implication 1):
    - **Lens-picker dropdown** — a `<select>` over the registered lenses
      (`LENS_REGISTRY`). One `<option>` per registry entry; editor is NOT a
      picker option. The first option is a non-selectable sentinel
-     (`<option value="" disabled selected>— select a lens —</option>`) that
+     (`<option value="" disabled hidden>— select a lens —</option>`) that
      reads as the picker value in editor mode. Default-selected resolution:
      `lens` prop is a registry entry → that lens; otherwise → the sentinel
      (neutral picker state). Selecting any non-sentinel option transitions
@@ -316,7 +316,7 @@ machine](./DOCS.md) for the architectural sketch.
   needed.
 - **Neutral picker state** — what the picker renders in editor mode. The
   first `<option>` is a non-selectable sentinel
-  (`<option value="" disabled selected>— select a lens —</option>`) that
+  (`<option value="" disabled hidden>— select a lens —</option>`) that
   reads as the picker's `value`. The remaining `<option>`s enumerate the
   registered lenses. Selecting any non-sentinel option transitions to lens
   mode for that lens; the sentinel itself cannot be re-selected by the
