@@ -252,7 +252,8 @@ function position(
 	classifierMap: ReadonlyMap<number, TokenCategory>,
 	enabledCategories: ReadonlySet<TokenCategory>,
 ): ReadonlyArray<EligibleToken> {
-	const eligible: readonly EligibleToken[] = [];
+	// eslint-disable-next-line functional/prefer-readonly-type -- local mutable builder; return type is ReadonlyArray
+	const eligible: EligibleToken[] = [];
 	for (const token of tokens) {
 		const category = classifierMap.get(token.start);
 		if (category === undefined || !enabledCategories.has(category)) continue;
@@ -280,7 +281,8 @@ function select(
 	seed: number,
 ): ReadonlyArray<Blank> {
 	const threshold = Math.max(0, Math.min(100, difficulty)) / 100;
-	const blanks: readonly Blank[] = [];
+	// eslint-disable-next-line functional/prefer-readonly-type -- local mutable builder; return type is ReadonlyArray
+	const blanks: Blank[] = [];
 	let state = seed >>> 0;
 	for (const token of eligible) {
 		const draw = nextRandom(state);
@@ -326,7 +328,8 @@ function buildFragments(
 	source: string,
 	blanks: ReadonlyArray<Blank>,
 ): ReadonlyArray<DisplayFragment> {
-	const fragments: readonly DisplayFragment[] = [];
+	// eslint-disable-next-line functional/prefer-readonly-type -- local mutable builder; return type is ReadonlyArray
+	const fragments: DisplayFragment[] = [];
 	let cursor = 0;
 	for (const blank of blanks) {
 		if (blank.start > cursor) {
