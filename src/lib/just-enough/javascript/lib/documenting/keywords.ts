@@ -5,7 +5,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		description:
 			'Declares a block-scoped variable whose value can change.',
 		example: 'let count = 0;\ncount = count + 1;',
-		category: 'variables',
+		isJEJ: true,
 		whenToUse: 'When the value will be reassigned later.',
 		commonMistakes: [
 			"Redeclaration in the same scope: 'let x = 1; let x = 2;' is an error.",
@@ -15,7 +15,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		description:
 			'Declares a block-scoped name whose binding cannot change.',
 		example: 'const name = "Alice";',
-		category: 'variables',
+		isJEJ: true,
 		whenToUse: 'When the binding should not be reassigned.',
 		commonMistakes: [
 			"Trying to reassign: 'const x = 1; x = 2;' is an error.",
@@ -24,7 +24,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	if: {
 		description: 'Runs a block only when its condition is true.',
 		example: 'if (age >= 18) {\n\tconsole.log("adult");\n}',
-		category: 'control-flow',
+		isJEJ: true,
 		whenToUse: 'To choose whether a block runs at all.',
 		commonMistakes: [
 			"Writing '=' (assignment) instead of '===' or '==' in the condition.",
@@ -34,7 +34,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	else: {
 		description: 'Pairs with `if` to run a block when the condition was false.',
 		example: 'if (x > 0) {\n\t// positive\n} else {\n\t// zero or negative\n}',
-		category: 'control-flow',
+		isJEJ: true,
 		whenToUse: 'To handle the "otherwise" branch of an if.',
 		commonMistakes: [
 			"Putting 'else' on its own line without an 'if' before — 'else' is never standalone.",
@@ -44,7 +44,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		description:
 			'Repeats a block a controlled number of times, with an init, a condition, and an update step.',
 		example: 'for (let i = 0; i < 5; i++) {\n\tconsole.log(i);\n}',
-		category: 'control-flow',
+		isJEJ: true,
 		whenToUse:
 			'When you know (or can compute) how many iterations you need.',
 		commonMistakes: [
@@ -55,7 +55,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	while: {
 		description: 'Repeats a block as long as its condition stays true.',
 		example: 'let n = 10;\nwhile (n > 0) {\n\tn = n - 1;\n}',
-		category: 'control-flow',
+		isJEJ: true,
 		whenToUse: "When the number of iterations isn't known up front.",
 		commonMistakes: [
 			'Forgetting to change the condition inside the body — produces an infinite loop.',
@@ -65,7 +65,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		description:
 			'Repeats a block at least once, then keeps going while a condition is true.',
 		example: 'let answer;\ndo {\n\tanswer = prompt("Yes or no?");\n} while (answer !== "yes" && answer !== "no");',
-		category: 'control-flow',
+		isJEJ: true,
 		whenToUse:
 			"When the body must run at least once before its condition is checked.",
 		commonMistakes: [
@@ -76,7 +76,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		description:
 			'Stops the nearest enclosing loop immediately, jumping past it.',
 		example: 'for (let i = 0; i < 10; i++) {\n\tif (i === 3) break;\n}',
-		category: 'control-flow',
+		isJEJ: true,
 		whenToUse:
 			'To exit a loop early when you find what you were looking for.',
 		commonMistakes: [
@@ -87,7 +87,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		description:
 			'Skips the rest of this iteration and continues with the next one.',
 		example: 'for (let i = 0; i < 5; i++) {\n\tif (i % 2 === 0) continue;\n\tconsole.log(i);\n}',
-		category: 'control-flow',
+		isJEJ: true,
 		whenToUse: 'To skip a single iteration without leaving the loop.',
 		commonMistakes: [
 			"Confusing 'continue' with 'break' — 'continue' keeps looping, 'break' exits.",
@@ -96,7 +96,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	return: {
 		description:
 			'Hands a value back from a function and exits the function immediately.',
-		category: 'control-flow',
+		isJEJ: true,
 		whenToUse:
 			'In modern JavaScript, to produce the result of a function. JEJ runs as a flat script and uses no functions, so `return` has no standalone form at this language level — the keyword is recognised but you would not write it.',
 		commonMistakes: [
@@ -108,14 +108,14 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	true: {
 		description: 'The boolean literal for "yes / on".',
 		example: 'const isReady = true;',
-		category: 'literal',
+		isJEJ: true,
 		whenToUse:
 			'When you need to assert a positive condition without computing one.',
 	},
 	false: {
 		description: 'The boolean literal for "no / off".',
 		example: 'const isDone = false;',
-		category: 'literal',
+		isJEJ: true,
 		whenToUse:
 			'When you need to assert a negative condition without computing one.',
 	},
@@ -123,7 +123,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		description:
 			'The literal value meaning "intentionally no value here".',
 		example: 'let chosen = null; // not picked yet',
-		category: 'literal',
+		isJEJ: true,
 		whenToUse:
 			"Available, but 'undefined' is the conventional 'no value' marker in JEJ. Use 'null' only when you deliberately need to distinguish \"set to nothing\" from \"never set\".",
 		commonMistakes: [
@@ -135,7 +135,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		description:
 			'Calls a constructor function and returns the newly-built object.',
 		example: 'const today = new Date();',
-		category: 'operator',
+		isJEJ: true,
 		whenToUse:
 			"In JEJ, 'new' is only allowed with 'Date' (e.g. 'new Date()'). No other constructors are available at this language level.",
 		commonMistakes: [
@@ -147,7 +147,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		description:
 			'Returns a lowercase string naming the type of its operand: "string", "number", "bigint", "boolean", "undefined", "object", or "function".',
 		example: 'typeof "hello"; // "string"\ntypeof 42;      // "number"',
-		category: 'operator',
+		isJEJ: true,
 		whenToUse: "To check what kind of value you're holding.",
 		commonMistakes: [
 			"Expecting 'typeof null' to be 'null' — it's actually 'object' (a famous JavaScript quirk).",
@@ -158,7 +158,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		description:
 			'Tests whether a property name exists on an object (or somewhere in its prototype chain).',
 		example: 'const point = { x: 1, y: 2 };\n"x" in point; // true',
-		category: 'operator',
+		isJEJ: true,
 		whenToUse:
 			"To check for the presence of a named property when you don't care about its value. The right-hand side must be an object.",
 		commonMistakes: [

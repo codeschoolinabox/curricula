@@ -46,12 +46,12 @@ function buildTooltipDom(word: string, doc: DocEntry): HTMLElement {
 		'font-weight: bold; color: #9cdcfe; font-size: 13px;';
 	title.textContent = word;
 
-	if (doc.category) {
+	if (doc.isJEJ === false) {
 		const badge = document.createElement('span');
 		badge.style.cssText =
 			'background: #3c3c3c; color: #d4d4d4; padding: 2px 6px; ' +
 			'border-radius: 3px; font-size: 10px; margin-left: 8px;';
-		badge.textContent = doc.category;
+		badge.textContent = 'not in JEJ';
 		title.appendChild(badge);
 	}
 

@@ -6,10 +6,21 @@ The editor home base needs a hover-tooltip data source that knows the
 JEJ language level. `lib/documenting/` is the adapter: a curated
 word→DocEntry table covering the JEJ surface (keywords, allowed
 globals, curated member methods) plus the blocked-stumble set, with
-full pedagogical entries marked via the `'not in JEJ'` category
-badge. See [`./README.md`](./README.md) for the domain glossary,
-public API, voice rationale, the JEJ-scopes-the-editor-not-the-learner
-premise, and the relationship to the completer and reference.md.
+full pedagogical entries flagged via `isJEJ: false` and grounded by
+a `whyNotInJej` field naming the specific NM components the feature
+would extend or reflect over.
+
+This module is also the **single source of truth for non-JEJ
+documentation** across the editor. The hover surface (`docLookup`)
+consumes `DocEntry` entries directly. The autocomplete surface
+(`completions`, via [`../completing/mark-blocked.ts`](../completing/mark-blocked.ts))
+sources its blocked-item content from the same table. Both surfaces
+show identical pedagogical material; only the CodeMirror affordance
+differs.
+
+See [`./README.md`](./README.md) for the domain glossary, public API,
+voice rationale, the JEJ-scopes-the-editor-not-the-learner premise,
+and the relationship to the completer and reference.md.
 
 ## Architectural sketch
 
@@ -49,15 +60,22 @@ no embodiment construction. (Sibling comparisons live in
 flowchart TD
     Word["hovered word<br/>(plain string)"]
     Hit{"word in lookup table?"}
-    Entry["frozen DocEntry reference<br/>(description + optional fields +<br/>category — incl. 'not in JEJ')"]
+    Entry["frozen DocEntry reference<br/>(description + isJEJ + optional fields<br/>incl. whyNotInJej on isJEJ: false)"]
     Null["null<br/>(unknown word)"]
-    Table[["frozen lookup table<br/>(union of four partitions:<br/>keywords / globals / members / not-in-JEJ)"]]
+    Table[["frozen lookup table<br/>(union of four partitions:<br/>keywords / globals / members / not-in-JEJ;<br/>~85 entries total)"]]
 
     Word -->|"single bare token,<br/>no parent context"| Hit
     Hit -->|"hit"| Entry
     Hit -->|"miss"| Null
     Table -.->|"backing store<br/>(frozen at module load)"| Hit
 ```
+
+The not-in-JEJ partition's `DocEntry` values are also referenced by
+the autocomplete surface
+([`../completing/mark-blocked.ts`](../completing/mark-blocked.ts)) when
+synthesizing blocked completion items — same reference, same frozen
+data, different CodeMirror affordance. That cross-module data flow is
+sketched in `../completing/DOCS.md`.
 
 ### Structural constraints
 
@@ -89,6 +107,15 @@ flowchart TD
   carries a runtime guard for absent or malformed entries that
   documenting must not exercise. A shape test asserts every
   authored entry has a non-empty string `description`.
+- **Every entry has a boolean `isJEJ`; every `isJEJ: false` entry
+  has a non-empty `whyNotInJej`.** The DocEntry type makes `isJEJ`
+  required at compile-time, but a shape test asserts each entry in
+  the assembled table carries the boolean at runtime — protection
+  against JS-side patches or programmatic table assembly that
+  bypasses the type check. The companion assertion (whyNotInJej
+  present and non-empty when isJEJ is false) is the
+  load-bearing invariant the README's "set only on isJEJ: false
+  entries" claim relies on.
 - **Duplicate keys rejected at load.** The table assembly throws
   at module load if the four category partitions share a key. No
   runtime collision is possible — the table is a partition by
@@ -150,23 +177,19 @@ flowchart TD
   reference.md / MDN rejection rationale.
 
 - **Full content for blocked tokens, not stub + badge.** Blocked-
-  stumble entries carry the same five-field richness as allowed
-  entries. The `category: 'not in JEJ'` value is the visible
-  boundary marker; the rest of the entry teaches the feature
-  properly. This differs from the completer's blocked items, which
-  carry `apply: 'noop'` plus a single-paragraph `info` field — and
-  the difference is intentional. The completer popup, even when
-  it opens passively, opens **in the act of editing**; its curated
-  `info` blob can lean on that frame ("you typed `class`; here's
-  why JEJ rejects it"). Hover is the only **standalone teaching
-  surface** in editor mode — the only callback the editor invokes
-  without the learner having signaled intent through typing. The
-  cursor landing on `class` in pasted code, tutorial text, or
-  someone else's snippet carries no preceding-keystroke context.
-  The hover content must teach the construct on its own. The
-  documenting adapter therefore does NOT depend on the completer's
-  `info` strings — those are reach-toward prose, not stand-alone
-  pedagogy.
+  stumble entries carry the same six-field richness as allowed
+  entries (`description`, `isJEJ`, `example`, `whenToUse`,
+  `commonMistakes`, `whyNotInJej`). `isJEJ: false` drives the UI's
+  "not in JEJ" badge; the rest of the entry teaches the feature
+  properly. The same `DocEntry` is delivered to both surfaces — hover
+  (`docLookup`) and autocomplete (`completions` via `mark-blocked.ts`,
+  which sets the new `CompletionItem.entry?: DocEntry` field). Hover
+  is still the canonical **standalone teaching surface** (the only
+  callback the editor invokes without the learner having signaled
+  intent through typing), but the autocomplete popup now receives the
+  same depth — a learner hovering on `class` in pasted code and a
+  learner typing `cl` toward an autocomplete suggestion both see the
+  identical pedagogical content.
 
 - **Mirror surface (KEYWORDS, allowedGlobals, CURATED_MEMBERS),
   with drift-guard test, not shared module.** The doc-table's
@@ -180,24 +203,29 @@ flowchart TD
   asserts that documenting's per-category keyset exports equal
   them. Spec for the test:
 
-  - Imports `KEYWORDS`, `SUPPRESSED_GLOBALS`, `CURATED_MEMBERS`
-    from `../completing/collect-jej-surface.ts`; imports
-    `allowedGlobals` (a `ReadonlySet<string>`) from
-    `../../embody/lib/validating/just-enough-js.ts` (path resolved
-    relative to documenting/'s own location: `../../embody/...`).
-  - Each category file (`keywords.ts`, `globals.ts`, `members.ts`)
-    exports its label keyset (e.g. `KEYWORD_LABELS: ReadonlySet<string>`)
-    alongside its entry data.
-  - Assertions use set-content equality (NOT `===`, which compares
-    Set references and always fails). The vitest-friendly form is to
-    sort both sides into arrays and `toEqual`:
-    `expect([...KEYWORD_LABELS].sort()).toEqual([...KEYWORDS].sort())`,
-    `expect([...GLOBAL_LABELS].sort()).toEqual([...allowedGlobals].filter(g => !SUPPRESSED_GLOBALS.has(g)).sort())`,
-    `expect([...MEMBER_LABELS].sort()).toEqual([...CURATED_MEMBERS].sort())`.
+  - Three allowed-surface partitions mirror upstream sources in
+    `../completing/collect-jej-surface.ts` (`KEYWORDS`,
+    `CURATED_MEMBERS`) and
+    `../../embody/lib/validating/just-enough-js.ts`
+    (`allowedGlobals` minus `SUPPRESSED_GLOBALS`'s `eval`).
+  - The blocked-surface dot-member partition mirrors upstream
+    `BLOCKED_MEMBER_NAMES` in
+    `../../embody/lib/validating/just-enough-js.ts` (the 15 entries:
+    array-returning string methods `split`/`match`/`matchAll` and
+    the reflection/prototype-escape names). The identifier-context
+    partition of blocked tokens (10 entries: `var`, `function`,
+    `class`, `=>`, `this`, `throw`, `try`, `import`, `async`,
+    `await`) has no single upstream source — it is curated
+    authorially for the curriculum, not derived from a validator
+    constant — and is therefore exempt from the drift-guard.
+  - Each category file exports its label keyset (e.g.
+    `KEYWORD_LABELS`, `BLOCKED_MEMBER_LABELS`) alongside its entry
+    data. Assertions use set-content equality (sort + toEqual, since
+    Set reference comparison always fails).
   - Failure messages name the upstream file plus the fix
-    instruction: "Drift detected — `KEYWORDS` in
-    `collect-jej-surface.ts` changed. Add the matching `DocEntry`
-    to `keywords.ts` (or remove the now-orphaned entry)."
+    instruction (e.g. "Drift detected — `BLOCKED_MEMBER_NAMES` in
+    `just-enough-js.ts` changed. Add the matching `DocEntry` to
+    `not-in-jej.ts` or remove the now-orphaned entry.").
 
   A counter-proposal — factor `KEYWORDS` / `CURATED_MEMBERS` into a
   shared module both `completing/` and `documenting/` import — is
@@ -231,13 +259,12 @@ flowchart TD
 
 - **Advisory stumbles housed in the allowed section.** `null` and
   `new` are JEJ-allowed (they are not blocked at the language
-  level), so their entries live in `keywords.ts`, not under
-  `'not in JEJ'`. Their caveat prose is lifted from
-  [`../completing/stumbling-list.ts`](../completing/stumbling-list.ts)
-  entries `'null'` and `'new'` and woven into `whenToUse` or
-  `commonMistakes`. Misplacing them under `'not in JEJ'` would
-  teach the wrong language-level boundary — `null` is available,
-  just advisory; `new` is available specifically with `Date`.
+  level), so their entries live in `keywords.ts` with `isJEJ: true`,
+  not under `not-in-jej.ts`. Their caveat prose is woven into
+  `whenToUse` or `commonMistakes`. Misplacing them under
+  `not-in-jej.ts` would teach the wrong language-level boundary —
+  `null` is available, just advisory; `new` is available
+  specifically with `Date`.
 
 - **Stale-reference cleanup is in scope for this sprint.** The
   module's placement decision (`lib/documenting/`, not

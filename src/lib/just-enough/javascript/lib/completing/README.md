@@ -9,6 +9,13 @@ that learners commonly reach for surfaced as **marker + tooltip +
 no-op-apply** items so the popup explains the language-level boundary
 instead of silently filtering.
 
+Blocked-item tooltip content is sourced from
+[`../documenting/not-in-jej.ts`](../documenting/not-in-jej.ts) — the
+single source of truth for non-JEJ docs across both the autocomplete
+popup and the hover (`docLookup`) surface. The same `DocEntry` (with
+its `whyNotInJej` field tying the exclusion to JEJ's notional-machine
+boundary) appears in both contexts.
+
 This module is the **adapter** between the JEJ-validation feed at
 [`../../embody/lib/validating/`](../../embody/lib/validating/) (and
 the scope analysis it shares with
@@ -35,16 +42,21 @@ context detection). `fullText` is the entire snippet (used by
 translates CM's `CompletionContext` into this shape.
 
 **Completion item** — what the completer returns. Shape (owned by
-[`../../orchestrate/lib/editing/types.ts`](../../orchestrate/lib/editing/types.ts),
-widened in Phase 0 of this sprint to add `info?` and `apply?`):
-`{ label, type?, detail?, info?, apply? }`.
-`type === 'blocked'` is the JEJ-pedagogical sentinel for items that
-appear in the popup but represent constructs outside the language
-level. `apply === 'noop'` is the sentinel that asks CodeMirror to
-dismiss the popup on Enter instead of inserting the label — the
-learner must type the blocked text manually to override (and the
-linter catches it). `info` is markdown-flavored single-paragraph
-prose that the editing layer lifts to a DOM tooltip.
+[`../../orchestrate/lib/editing/types.ts`](../../orchestrate/lib/editing/types.ts)):
+`{ label, type?, detail?, info?, entry?, apply? }`.
+`type` is CodeMirror's icon-rendering hint (`'keyword'`, `'global'`,
+`'local'`, `'member'`, etc.). `apply === 'noop'` is the sentinel that
+asks CodeMirror to dismiss the popup on Enter instead of inserting the
+label — the learner must type the blocked text manually to override
+(and the linter catches it). `entry` is a `DocEntry` (the same shape
+the hover surface returns), sourced from
+[`../documenting/not-in-jej.ts`](../documenting/not-in-jej.ts) when
+the item is a blocked stumble; the editing layer's
+[`build-info-dom.ts`](../../orchestrate/lib/editing/build-info-dom.ts)
+lifts it to a structured DOM tooltip — the same renderer the hover
+surface uses. `info` remains a string fallback for non-JEJ consumers;
+the JEJ adapter never sets `info`. The UI derives the "not in JEJ"
+badge from `entry.isJEJ === false`.
 
 **Completion feed** — the path from snippet text → frozen completion
 items. The adapter calls
@@ -54,12 +66,15 @@ present) for scope analysis via
 [`buildScope`](../../embody/lib/scope/build-scope.ts), composes the
 union of JEJ-allowed tokens at the cursor position (keywords ∪
 JEJ-allowed globals ∪ scope-chain locals in identifier context; the
-curated member union in dot-receiver context), then overlays
-[`BLOCKED_MEMBER_NAMES`](../../embody/lib/validating/just-enough-js.ts)
-and the curated stumbling-list to mark — not filter — the JEJ-blocked
-labels. No [`Snippet`](../../embody/types.ts) is constructed; the F2
-"no embody in editor mode" boundary that the lint adapter preserves
-applies here.
+curated member union in dot-receiver context), then overlays the
+blocked-label set
+[`NOT_IN_JEJ_LABELS`](../documenting/not-in-jej.ts) exported by
+`../documenting/` (which itself enumerates the 10 identifier-context
+plus 15 dot-member-context entries from
+[`BLOCKED_MEMBER_NAMES`](../../embody/lib/validating/just-enough-js.ts))
+to mark — not filter — the JEJ-blocked labels. No
+[`Snippet`](../../embody/types.ts) is constructed; the F2 "no embody
+in editor mode" boundary that the lint adapter preserves applies here.
 
 ## Performance
 
@@ -80,25 +95,27 @@ caching is needed at JEJ sizes.
 lib/completing/
   README.md                       (this — orientation + navigation)
   DOCS.md                         architectural sketch + Mermaid data flow
-  types.ts                        Suggestion + StumblingEntry
-  stumbling-list.ts               curated 14 entries: token → info prose
+  types.ts                        Suggestion
   collect-jej-surface.ts          request + validation result → Suggestion[]
   mark-blocked.ts                 overlay → readonly CompletionItem[]
   complete-jej.ts                 orchestrator: validate → collect → mark → freeze
   tests/
-    stumbling-list.test.ts
     collect-jej-surface.test.ts
     mark-blocked.test.ts
     complete-jej.test.ts
 ```
 
+Non-JEJ pedagogical content (the `info`/`entry` for blocked items)
+lives in `../documenting/not-in-jej.ts` — this module imports
+`NOT_IN_JEJ_ENTRIES` and `NOT_IN_JEJ_LABELS` rather than carrying its
+own copy.
+
 `types.ts` exists here (unlike
 [`../linting/`](../linting/) and
 [`../formatting-editor/`](../formatting-editor/), which both skip it)
-because **`StumblingEntry`** is JEJ-internal vocabulary with no home
-in the editing-layer's types. `Suggestion` (the intermediate shape
-threaded between `collect-jej-surface` and `mark-blocked`) is also
-defined here.
+because `Suggestion` — the intermediate shape threaded between
+`collect-jej-surface` and `mark-blocked` — is JEJ-internal vocabulary
+with no home in the editing-layer's types.
 
 ## Public API
 
@@ -142,20 +159,23 @@ Behavior:
   dot) → the curated member-name union (`type: 'member'`); blocked
   dot names from
   [`BLOCKED_MEMBER_NAMES`](../../embody/lib/validating/just-enough-js.ts)
-  (e.g. `.split`, `.constructor`, `.__proto__`, `.call`) appear as
-  blocked items with curated info when present in the stumbling-list
-  (`split`, `match`) or a generic `(not in JEJ)` marker otherwise.
+  (15 entries: `.split`, `.match`, `.matchAll`, `.constructor`,
+  `.__proto__`, `.prototype`, `.call`, `.apply`, `.bind`, `.caller`,
+  `.arguments`, `.__defineGetter__`/`__defineSetter__`/`__lookupGetter__`/`__lookupSetter__`)
+  appear as blocked items, each with the rich `DocEntry` from
+  [`../documenting/not-in-jej.ts`](../documenting/not-in-jej.ts).
 - **Chained dot context** (`str.charAt(0).`) → falls through to the
   identifier branch (no dot suggestions; keywords + globals + locals
   shown). Single-level dot-receiver only.
-- **Blocked item that's also a curated stumble** → `type: 'blocked'`,
-  `detail: '(not in JEJ)'`, `info` from the stumbling-list,
-  `apply: 'noop'`. (`null` is the one allowed-but-curated case —
-  info-attached but not marked blocked, since `null` is JEJ-valid;
-  the curated entry teaches "use `undefined` instead" without
-  blocking the keystroke.)
-- **Blocked item that's NOT in the curated stumbling list** → same
-  blocked marker but without `info` (generic `(not in JEJ)` only).
+- **Blocked item** → `entry` set to the `DocEntry` from
+  [`../documenting/not-in-jej.ts`](../documenting/not-in-jej.ts) for
+  that label (covering the full identifier-context + dot-member-context
+  vocabulary; 25 entries with `isJEJ: false`), `apply: 'noop'`. The
+  UI derives the "not in JEJ" badge from `entry.isJEJ === false`.
+  (`null` is the one allowed-but-curated case — its DocEntry lives
+  under [`../documenting/keywords.ts`](../documenting/keywords.ts) as
+  an advisory stumble with `isJEJ: true`; the entry teaches "use
+  `undefined` instead" without blocking the keystroke.)
 
 The function never throws. `validate(code)` never throws for string
 input.
@@ -179,8 +199,8 @@ input.
   verifying that an identifier precedes it.
 - **Already-past-the-dot** (`str.split` typed in full) → the prefix
   is `split` and the precedingText ends with `str.`, so the
-  dot-receiver branch fires and `split` is marked blocked from the
-  stumbling-list overlay.
+  dot-receiver branch fires and `split` is marked blocked via the
+  `NOT_IN_JEJ_LABELS` overlay.
 - **Bare `.`** (no receiver before the dot) → identifier branch
   (no dot suggestions). Pathological but safe.
 - **Parse-error code with prior valid locals.** Once parsing fails,
@@ -283,6 +303,15 @@ Inherits all conventions from [`../README.md`](../README.md),
   shared-parse optimization should first measure on production-
   sized JEJ snippets — at expected sizes, the optimization is
   premature.
+- **Blocked-item content sources from `../documenting/`.** The
+  completer's blocked-item synthesis looks up the corresponding
+  `DocEntry` in [`../documenting/not-in-jej.ts`](../documenting/not-in-jej.ts)
+  and renders it through the same DOM lift the hover surface uses.
+  This module owns the *positive* JEJ surface (keywords + globals +
+  curated members + scope-chain locals) and the *blocked-marker
+  overlay* mechanism; it does NOT own the non-JEJ content prose.
+  Editing the curriculum's non-JEJ pedagogical content happens in
+  `../documenting/not-in-jej.ts`, not here.
 
 ## Navigation
 

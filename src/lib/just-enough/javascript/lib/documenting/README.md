@@ -3,13 +3,23 @@
 JEJ-aware hover documentation shaped as the editor's docLookup
 callback. Given a hovered word, returns a frozen `DocEntry` describing
 the token — JEJ keywords, JEJ-allowed globals, the curated member
-surface, and the stumbling-list set of JEJ-blocked tokens carrying
-full pedagogical content under a `'not in JEJ'` category badge.
+surface, and every JEJ-blocked token carrying full pedagogical content,
+flagged via `isJEJ: false` and grounded in JEJ's notional-machine
+boundary via a `whyNotInJej` field.
+
+This module is the **single source of truth for non-JEJ documentation**
+across the editor: hover (`docLookup`) consumes `DocEntry` entries
+directly; autocompletion (`completions`, via
+[`../completing/mark-blocked.ts`](../completing/mark-blocked.ts))
+sources its blocked-item content from the same `DocEntry` table. Both
+surfaces show the same rich content — hover on `var` and autocomplete
+on `va` produce identical pedagogical material, just delivered through
+different CodeMirror affordances.
 
 This module is the **adapter** between the JEJ language level (the
 keyword / global / member surface used by
-[`../completing/`](../completing/) and the stumbling-list of common
-reaches outside JEJ) and
+[`../completing/`](../completing/) and the JEJ-blocked vocabulary the
+curriculum addresses pedagogically) and
 [`../../orchestrate/lib/editing/`](../../orchestrate/lib/editing/)
 (which consumes a `DocLookupCallback` to drive CodeMirror's
 `hoverTooltip()` extension). It is callable from any peer that wants
@@ -19,10 +29,36 @@ JEJ-aware hover docs over a bare word.
 
 **DocEntry** — what the callback returns. Shape (owned by
 [`../../orchestrate/lib/editing/types.ts`](../../orchestrate/lib/editing/types.ts)):
-`{ description; example?; category?; commonMistakes?; whenToUse? }`.
-Only `description` is required; the editing layer's DOM lift
+`{ description; isJEJ; example?; commonMistakes?; whenToUse?; whyNotInJej? }`.
+`description` and `isJEJ` are required; the editing layer's DOM lift
 ([`../../orchestrate/lib/editing/build-tooltip-dom.ts`](../../orchestrate/lib/editing/build-tooltip-dom.ts))
-conditionally renders the optional fields.
+conditionally renders the optional fields. Badge text (e.g. "not in JEJ"
+on `isJEJ: false` entries) is computed by the UI, not stored on the
+entry.
+
+**`isJEJ`** — required boolean signaling structural in/out for JEJ.
+`true` for keywords, JEJ-allowed globals, curated members, and advisory
+stumbles (`null`, `new` — JEJ-valid with caveats). `false` for every
+blocked entry — identifier-context (`var`, `function`, `class`, `=>`,
+`this`, `throw`, `try`, `import`, `async`, `await`) and
+dot-member-context (the 15 entries in `BLOCKED_MEMBER_NAMES`).
+
+**`whyNotInJej`** — notional-machine-grounded explanation of why a
+feature is excluded. Set only on `isJEJ: false` entries. Names the
+specific NM components the feature would extend, rely on, or reflect
+over — see [`../../notional-machine.md`](../../notional-machine.md)
+for the canonical NM (scope chain, prototype chain, call stack,
+execution context, host bindings, value-type set). Grounded in JEJ's
+in/exclusion criteria: **audience-reach minimalism** (the language
+includes just enough to address users via `prompt`/`alert`/`confirm`,
+devs via `console.*`, and the computer via the NM; agents are read as
+code-side audiences alongside devs per the "alien virtuoso" framing in
+[`metaphor.md`](../../../../../spiralearn/welcome-to-frogramming/metaphor.md))
+and **compact NM with rich computational idioms** (imperative paradigm
+per [`ontology.md` §13](../../../../../spiralearn/welcome-to-frogramming/ontology.md);
+primitive-only value-type set; rich methods on `String` / `Number` /
+`Math` / `Date` / regex). Distinct from `whenToUse` (modern-JS usage)
+and `commonMistakes` (pitfalls when reaching anyway).
 
 **DocLookupCallback** — the editor's callback slot, owned by
 [`../../orchestrate/lib/editing/types.ts`](../../orchestrate/lib/editing/types.ts):
@@ -46,23 +82,30 @@ collect-jej-surface); the 28 curated member methods come from
 `CURATED_MEMBERS` in collect-jej-surface.
 
 **Blocked stumble** — outside the JEJ surface; the language level
-rejects the construct entirely. The 12 entries come from the
-"blocked stumbles" partition of the completer's
-[stumbling-list](../completing/stumbling-list.ts) (see its
-file-doc): `var`, `function`, `class`, `=>`, `this`, `throw`,
-`try`, `import`, `async`, `await`, `split`, `match`. Each gets a
-`DocEntry` with `category: 'not in JEJ'` plus the same field
-richness as an allowed entry.
+rejects the construct entirely. Covers the full JEJ-blocked vocabulary
+in two partitions (25 entries total). The identifier-context partition
+(10 entries: `var`, `function`, `class`, `=>`, `this`, `throw`, `try`,
+`import`, `async`, `await`) addresses keywords learners type when
+reaching for non-JEJ paradigms. The dot-member-context partition (15
+entries — the full content of `BLOCKED_MEMBER_NAMES` in
+[`../../embody/lib/validating/just-enough-js.ts`](../../embody/lib/validating/just-enough-js.ts):
+`split`, `match`, `matchAll`, `constructor`, `__proto__`, `prototype`,
+`call`, `apply`, `bind`, `caller`, `arguments`, `__defineGetter__`,
+`__defineSetter__`, `__lookupGetter__`, `__lookupSetter__`) covers
+array-returning string methods (out of JEJ's primitive-only value-type
+set) and the prototype-machinery reflection surface (JEJ's NM exposes
+the prototype chain as a *resolution mechanism* for method lookup but
+does not teach reflective access to it). Each entry carries
+`isJEJ: false` plus the full DocEntry field set — including
+`whyNotInJej` — at the same depth as allowed entries.
 
 **Advisory stumble** — IN the JEJ surface but carries a teaching
 caveat. The 2 entries are `new` ("only allowed with `Date`") and
 `null` ("`undefined` is the conventional 'no value' marker; use
 `null` only when you deliberately need to distinguish 'set to
-nothing' from 'never set'"). These live under the allowed
-keyword/global sections of the doc table (not under `'not in
-JEJ'`); their caveat prose is woven into `whenToUse` or
-`commonMistakes`, lifted from the stumbling-list `info` field
-verbatim or paraphrased to fit the hover-entry voice.
+nothing' from 'never set'"). These live in `keywords.ts` with
+`isJEJ: true` and the caveat woven into `whenToUse` or
+`commonMistakes`.
 
 **Voice** — editor-side inline whisper, not reference-document prose.
 The voice and scope are deliberately decoupled from
@@ -70,13 +113,12 @@ The voice and scope are deliberately decoupled from
 learner / agent-facing reference) and from MDN-style external
 sources. Entries are concise (one to two sentences per field).
 
-**`'not in JEJ'` badge** — the value of `category` for every blocked
-entry. The editing layer renders `category` as a small badge above
-the description; the value is opaque to the editing layer. Blocked
-entries carry the same field richness as allowed ones — the badge
-communicates the JEJ boundary without diminishing the pedagogical
-content. JEJ scopes the editor's positive surface, not the learner's
-universe.
+**`'not in JEJ'` badge** — UI-rendered when `isJEJ: false`. The DOM
+lift derives the badge text from the boolean; DocEntry does not store
+display text. Blocked entries carry the same field richness as allowed
+ones — the badge communicates the boundary without diminishing the
+pedagogical content. JEJ scopes the editor's positive surface, not the
+learner's universe.
 
 ## Performance
 
@@ -98,11 +140,13 @@ lib/documenting/
   README.md                       (this — orientation + navigation)
   DOCS.md                         architectural sketch + Mermaid data flow
   document-jej.ts                 entry-point: (word) → DocEntry | null
-  doc-table.ts                    assembles category sections + freezes
+  doc-table.ts                    assembles per-file sections + freezes
   keywords.ts                     16 keywords + 2 advisory stumbles
   globals.ts                      16 JEJ-allowed globals
   members.ts                      28 curated member methods
-  not-in-jej.ts                   12 blocked-stumble entries
+  not-in-jej.ts                   25 blocked-stumble entries
+                                  (10 identifier + 15 dot-member)
+                                  + NOT_IN_JEJ_LABELS export
   tests/
     document-jej.test.ts
 ```
@@ -144,31 +188,26 @@ Behavior:
   table) → `null`.
 - **JEJ keyword** (`let`, `const`, `if`, `else`, `for`, `while`,
   `do`, `break`, `continue`, `return`, `true`, `false`, `null`,
-  `new`, `typeof`, `in`) → `DocEntry` carrying a JEJ-positive
-  category (e.g. `'variables'`, `'control-flow'`, `'operators'`).
-  `null` and `new` are advisory stumbles: their entries live here,
-  not under `'not in JEJ'`, but their caveats from
-  [`../completing/stumbling-list.ts`](../completing/stumbling-list.ts)
-  are woven in (see Glossary § Advisory stumble).
+  `new`, `typeof`, `in`) → `DocEntry` with `isJEJ: true`. `null` and
+  `new` are advisory stumbles with their caveats woven into
+  `whenToUse` or `commonMistakes`.
 - **JEJ-allowed global** (`console`, `Math`, `String`, `Number`,
   `Boolean`, `Date`, `RegExp`, `BigInt`, `parseInt`, `parseFloat`,
   `alert`, `confirm`, `prompt`, `undefined`, `NaN`, `Infinity`) →
-  `DocEntry` carrying a JEJ-positive category (e.g. `'i/o'`,
-  `'built-in object'`, `'type conversion'`).
+  `DocEntry` with `isJEJ: true`.
 - **Curated member method** (the 28-entry surface mirrored from
   [`../completing/collect-jej-surface.ts`](../completing/collect-jej-surface.ts)
   `CURATED_MEMBERS`: String / Number / Math methods like `charAt`,
-  `toFixed`, `floor`) → `DocEntry` carrying a method-context
-  category (e.g. `'string method'`, `'math method'`).
-- **Blocked stumble** (the 12-entry "blocked stumbles" partition of
-  the stumbling-list: `var`, `function`, `class`, `=>`, `this`,
-  `throw`, `try`, `import`, `async`, `await`, `split`, `match`)
-  → `DocEntry` carrying the same field richness as an allowed entry
-  (`description`, `example`, `whenToUse`, `commonMistakes`), with
-  `category: 'not in JEJ'` as the visible boundary marker.
-  `commonMistakes` includes the JEJ-replacement guidance ("use `let`
-  or `const` instead of `var`") woven into the feature's pedagogy,
-  not as a hand-wave.
+  `toFixed`, `floor`) → `DocEntry` with `isJEJ: true`.
+- **Blocked stumble** (25 entries: 10 identifier-context — `var`,
+  `function`, `class`, `=>`, `this`, `throw`, `try`, `import`,
+  `async`, `await` — plus 15 dot-member-context from
+  `BLOCKED_MEMBER_NAMES`) → `DocEntry` with `isJEJ: false` and the
+  full field set (`description`, `example`, `whenToUse`,
+  `commonMistakes`, `whyNotInJej`). `commonMistakes` includes the
+  JEJ-replacement guidance ("use `let` or `const` instead of `var`")
+  woven into the feature's pedagogy. `whyNotInJej` names the specific
+  NM components the feature would require.
 - **Member name shared across host types in real JavaScript.** At
   authoring time, only the JEJ-curated receiver-context is added to
   the table. `slice` has a String entry (the JEJ-curated method);
@@ -207,27 +246,27 @@ The function never throws.
   widening would update the callback to receive
   `(word, parentContext?)` — surface to the user before doing so.
 - **`null` / `true` / `false` are keywords, not globals.** Their
-  entries live in `keywords.ts`. `null`'s entry carries the advisory
-  caveat from `stumbling-list.ts` (prefer `undefined` as the
-  conventional 'no value' marker); `null` is not blocked, just
-  discouraged outside specific cases.
+  entries live in `keywords.ts` with `isJEJ: true`. `null`'s entry
+  carries the advisory caveat woven into `whenToUse` (prefer
+  `undefined` as the conventional 'no value' marker); `null` is not
+  blocked, just discouraged outside specific cases.
 - **`function` is fully blocked, including arrow form.** JEJ has
   **no functions of any kind** — declarations (`function foo(){}`),
   expressions (`const f = function(){}`), and arrows
   (`const f = () => {}`) are all rejected by the language level.
-  The stumbling-list's `function` entry says "JEJ runs as a flat
+  The `not-in-jej.ts` entry for `function` says "JEJ runs as a flat
   script. Reach for inline expressions; if you find yourself
   repeating, that's a sign the exercise scope is wrong." The
   separate `=>` entry says "JEJ programs do not define functions."
-  Both get full hover entries under `'not in JEJ'` teaching the
-  feature plus the JEJ-rationale; neither steers the learner toward
-  the other ("use arrow functions instead of `function`" would be
-  pedagogically wrong here).
+  Both get full entries with `isJEJ: false` teaching the feature plus
+  the JEJ-rationale; neither steers the learner toward the other
+  ("use arrow functions instead of `function`" would be pedagogically
+  wrong here).
 - **`new` is allowed only with `Date`.** `new` has a JEJ-allowed
   entry in `keywords.ts` (since the keyword itself isn't rejected)
-  but its `whenToUse` / `commonMistakes` carries the advisory
-  caveat from `stumbling-list.ts` ("only allowed with `Date`, e.g.
-  `new Date()`; no other constructors are available").
+  with `isJEJ: true` and its `whenToUse` / `commonMistakes`
+  describing the Date-only carve-out ("only allowed with `Date`,
+  e.g. `new Date()`; no other constructors are available").
 - **Easter eggs not documented.** Validator-allowed but
   curriculum-suppressed constructs (`eval`, `void`,
   `LabeledStatement`, `SequenceExpression`, `WithStatement`) get no
@@ -293,16 +332,19 @@ trivially here — the adapter has no path into `embody()` to begin
 with.
 
 Relationship to the completer
-([`../completing/`](../completing/)): the two are **complementary,
-not overlapping**. The completer's `info` field carries
-single-paragraph prose for the 14 stumbling-list entries that the
-completer surfaces (the curated subset of blocked tokens learners
-auto-complete toward); the rest of the JEJ surface — keywords,
-globals, methods — gets no `info` prose from the completer. The
-hover adapter covers the *entire* JEJ surface plus the blocked set
-with full multi-field entries, callable on hover regardless of
-whether the learner is reaching toward the token via completion or
-encountering it at rest in existing code.
+([`../completing/`](../completing/)): the documenting module is the
+**source of truth** for non-JEJ docs; the completer consumes from it.
+[`../completing/mark-blocked.ts`](../completing/mark-blocked.ts), when
+synthesizing blocked completion items, looks up the corresponding
+`DocEntry` in this module's table and renders the same field set
+the hover surface shows. Hovering on `var` and autocompleting toward
+`va` produce identical pedagogical content; the curriculum maintains
+one set of prose, not two parallel ones. The completer's role is the
+prospective shaping (what to suggest at the cursor); this module's
+role is the canonical content. The lift to DOM happens in the editing
+layer ([`build-tooltip-dom.ts`](../../orchestrate/lib/editing/build-tooltip-dom.ts)
+and [`build-info-dom.ts`](../../orchestrate/lib/editing/build-info-dom.ts))
+— both renderers consume a `DocEntry`.
 
 Relationship to [`../../reference.md`](../../reference.md): the
 reference is the comprehensive doc — prose, code tables,
@@ -337,11 +379,11 @@ and `DEV.md`. Module-specific rules:
   is sized for a hover popup, not a documentation page.
 - **Blocked is full content + badge, not stub + badge.** Blocked-
   token entries carry the same field richness as allowed ones.
-  `category: 'not in JEJ'` is the visible boundary marker; the
-  rest of the entry teaches the feature. Stub entries
-  (`description` only, with "not in JEJ" boilerplate) are not
-  acceptable. This rule is load-bearing for the pedagogical
-  premise that JEJ scopes the editor, not the learner.
+  `isJEJ: false` drives the UI's boundary badge; the rest of the
+  entry teaches the feature. Stub entries (`description` only, with
+  "not in JEJ" boilerplate) are not acceptable. This rule is
+  load-bearing for the pedagogical premise that JEJ scopes the
+  editor, not the learner.
 - **Hardcoded curated table.** The table is not generated from
   `reference.md`, MDN, TypeScript declarations, or any external
   source. The voice and the scope are deliberately decoupled from
@@ -358,13 +400,11 @@ and `DEV.md`. Module-specific rules:
   [`../completing/complete-jej.ts`](../completing/complete-jej.ts),
   which builds a fresh array per call and freezes that — there the
   pipeline composes new objects every invocation.
-- **Advisory stumbles live in the allowed section.** `null` and
-  `new` are JEJ-allowed (they are not blocked at the language
-  level), so their entries belong in `keywords.ts`, not under
-  `'not in JEJ'`. Their caveat prose (lifted from
-  `stumbling-list.ts` entries `'null'` and `'new'`) goes into
-  `whenToUse` or `commonMistakes`. Misplacing them under
-  `'not in JEJ'` would teach the wrong language-level boundary.
+- **Advisory stumbles live in `keywords.ts`.** `null` and `new` are
+  JEJ-allowed (not blocked at the language level), so their entries
+  carry `isJEJ: true` with their caveat prose woven into `whenToUse`
+  or `commonMistakes`. Misplacing them under `not-in-jej.ts` would
+  teach the wrong language-level boundary.
 - **Easter eggs are suppressed.** Validator-allowed but
   curriculum-suppressed constructs (`eval`, `void`,
   `LabeledStatement`, `SequenceExpression`, `WithStatement`) get
@@ -391,9 +431,9 @@ and `DEV.md`. Module-specific rules:
   [`../formatting-editor/README.md`](../formatting-editor/README.md)
   (format-callback adapter for the canonical formatter), and
   [`../completing/README.md`](../completing/README.md) (completion
-  source with curated stumbling-list overlay) — the prior three
-  inhabitants of this peer, sharing the same lib/-boundary
-  rationale and ZOMBIES test convention.
+  source, consumes DocEntry content from this module for blocked
+  items) — the prior three inhabitants of this peer, sharing the
+  same lib/-boundary rationale and ZOMBIES test convention.
 - **JEJ keyword / global / member surface (source of truth):**
   [`../completing/collect-jej-surface.ts`](../completing/collect-jej-surface.ts)
   (allowed lists + `CURATED_MEMBERS`) and
@@ -401,7 +441,8 @@ and `DEV.md`. Module-specific rules:
   (`allowedGlobals`, `BLOCKED_MEMBER_NAMES`). The doc table mirrors
   these at authoring time; future surface changes require manual
   re-sync.
-- **Curated stumbling-list (source of blocked entries):**
-  [`../completing/stumbling-list.ts`](../completing/stumbling-list.ts).
-  Hover adapter's blocked-entries cover the same set with the full
-  pedagogical-content expansion described above.
+- **Blocked-label set (source of truth):** `NOT_IN_JEJ_LABELS`
+  exported from `./not-in-jej.ts` — the set of all 25 labels
+  covered. Consumed by `../completing/mark-blocked.ts` when
+  synthesizing blocked completion items. The completer iterates this
+  set; the content comes from `NOT_IN_JEJ_ENTRIES`.

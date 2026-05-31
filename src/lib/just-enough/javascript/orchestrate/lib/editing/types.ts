@@ -53,15 +53,22 @@ type LintDiagnostic = {
  * Documentation entry for a hovered keyword.
  *
  * @remarks The editor builds a styled tooltip DOM from this data.
- * Only `description` is required — all other fields are rendered
+ * `description` and `isJEJ` are required; optional fields are rendered
  * conditionally when present.
+ *
+ * `isJEJ` is the structural in/out boundary for the JEJ language
+ * level. The UI derives the "not in JEJ" badge from `isJEJ: false`;
+ * DocEntry does not store display text. Set `whyNotInJej` only on
+ * `isJEJ: false` entries — see `lib/documenting/README.md` § Glossary
+ * for the field's pedagogical scope.
  */
 type DocEntry = {
 	readonly description: string;
+	readonly isJEJ: boolean;
 	readonly example?: string;
-	readonly category?: string;
 	readonly commonMistakes?: readonly string[];
 	readonly whenToUse?: string;
+	readonly whyNotInJej?: string;
 };
 
 /**
@@ -88,20 +95,26 @@ type CompletionRequest = {
 /**
  * A single item in the autocompletion dropdown.
  *
- * @remarks `type === 'blocked'` is a JEJ-pedagogical sentinel for
- * items that appear in the popup but represent constructs outside
- * the language level. `apply === 'noop'` is a sentinel that asks
- * the editor to dismiss the popup on Enter instead of inserting the
- * label — used together with `'blocked'` so a learner can see the
- * blocked vocabulary without the keystroke landing. `info` is
- * markdown-flavored single-paragraph prose; the editor lifts it
- * into a DOM tooltip.
+ * @remarks `apply === 'noop'` is a sentinel that asks the editor to
+ * dismiss the popup on Enter instead of inserting the label — used so
+ * a learner can see the blocked vocabulary without the keystroke
+ * landing.
+ *
+ * `info` is markdown-flavored single-paragraph prose for adapters
+ * that produce plain-text tooltips (e.g. non-JEJ adapters). `entry`
+ * is a structured `DocEntry` carrying the same shape the hover
+ * surface returns; the editor's autocompletion lift prefers `entry`
+ * when present (rich rendering with `description` / `example` /
+ * `whenToUse` / `commonMistakes` / `whyNotInJej` sections + an
+ * isJEJ-derived badge) and falls back to `info` otherwise. The JEJ
+ * adapter sets `entry` for blocked items and leaves `info` unset.
  */
 type CompletionItem = {
 	readonly label: string;
 	readonly type?: string;
 	readonly detail?: string;
 	readonly info?: string;
+	readonly entry?: DocEntry;
 	readonly apply?: 'noop';
 };
 

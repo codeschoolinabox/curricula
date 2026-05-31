@@ -7,14 +7,19 @@ JEJ language level: positively (what can the learner reach for?) and
 pedagogically (when the learner reaches for something outside JEJ,
 explain why instead of silently filtering). `lib/completing/` is the
 adapter that composes the validation feed
-([`../../embody/lib/validating/`](../../embody/lib/validating/)) and
+([`../../embody/lib/validating/`](../../embody/lib/validating/)),
 scope analysis
-([`../../embody/lib/scope/`](../../embody/lib/scope/)) with a curated
-stumbling-list of common-mistake tokens into a single
+([`../../embody/lib/scope/`](../../embody/lib/scope/)), and the
+non-JEJ doc table from
+[`../documenting/`](../documenting/) into a single
 `CompletionCallback` that drives CodeMirror's autocompletion
-extension. See [`./README.md`](./README.md) for the domain glossary,
-public API, and the rationale for living at the JEJ-package `lib/`
-level rather than inside `orchestrate/` or `embody/`.
+extension. The non-JEJ pedagogical content for blocked completion
+items is sourced from `../documenting/not-in-jej.ts` — this module
+owns the positive JEJ surface (keywords / globals / curated members /
+scope-chain locals) and the blocked-marker overlay mechanism, NOT the
+prose itself. See [`./README.md`](./README.md) for the domain
+glossary, public API, and the rationale for living at the JEJ-package
+`lib/` level rather than inside `orchestrate/` or `embody/`.
 
 ## Architectural sketch
 
@@ -64,30 +69,35 @@ level rather than inside `orchestrate/` or `embody/`.
    The result is a `readonly Suggestion[]` — each item has a `label`
    and a `source` indicating which sub-collector emitted it.
 
-4. **Mark blocked and freeze** (sync, pure) — overlay the curated
-   stumbling-list onto the JEJ-surface in two steps:
-   - **(a) For each input suggestion**: if its label appears in the
-     stumbling-list, attach the curated `info` to the existing item
-     (keep the source-derived `type` — this is the **advisory** case,
-     used for JEJ-valid labels with a teaching caveat like `new` and
-     `null`). Otherwise pass through with `type` from `source`.
+4. **Mark blocked** (sync, pure) — overlay the blocked-label set
+   from the documenting module onto the JEJ-surface in two steps:
+   - **(a) For each input suggestion**: pass through with the
+     source-derived type. (Advisory caveats for `null` and `new`
+     live as their keyword entries in the documenting module; this
+     phase no longer attaches per-suggestion info to JEJ-valid
+     items.)
    - **(b) Synthesize blocked items** from a context-dispatched
-     source: in **identifier context**, iterate the curated
-     stumbling-list (skipping member-only entries like `split` and
-     `match` so they don't surface when a learner types `sp`
-     expecting a keyword/global); in **dot-receiver context**,
-     iterate the validator's
-     [`BLOCKED_MEMBER_NAMES`](../../embody/lib/validating/just-enough-js.ts)
-     set (so blocked dot names like `.constructor`, `.__proto__`,
-     `.call`, plus `.split` and `.match` all surface with
-     pedagogical markers), attaching curated `info` from the
-     stumbling-list when present. Each synthesized item becomes
-     `{label, type: 'blocked', detail: '(not in JEJ)', info?: stumble.info, apply: 'noop'}`.
-     This is what makes typing `va` show `var` (a JEJ-blocked label)
-     as a blocked completion in identifier context, and `str.con`
-     show `constructor` as a blocked completion in dot context —
-     in both cases the synthesis adds the label so the pedagogical
-     signal can fire, even though neither is in the JEJ surface.
+     source: in **identifier context**, the 10 identifier-context
+     labels (curated keywords learners type at statement-start); in
+     **dot-receiver context**, the 15-entry blocked-member-name set
+     from the validator (array-returning string methods +
+     reflection/prototype-escape names). Each synthesized item
+     carries the rich `DocEntry` from the documenting module by
+     reference (the same frozen object the hover surface returns),
+     plus a "noop" apply sentinel. The UI derives the "not in JEJ"
+     badge from the entry's `isJEJ === false`. This is what makes
+     typing `va` show `var` as a blocked completion in identifier
+     context, and `str.con` show `constructor` as a blocked
+     completion in dot context — in both cases the synthesis adds
+     the label with the full pedagogical content from documenting,
+     even though neither is in the JEJ surface.
+
+5. **Filter and freeze** (sync, pure) — case-insensitively
+   prefix-filter the combined suggestion set (a typo'd `LET` still
+   surfaces `let`), then deep-freeze the resulting array on the
+   orchestrator's return boundary. The freeze guarantee covers the
+   array; entry references inside are already module-load-frozen
+   upstream in documenting.
 
    Then prefix-filter the combined result case-insensitively
    (`label.toLowerCase().startsWith(prefix.toLowerCase())`) and
@@ -100,29 +110,31 @@ level rather than inside `orchestrate/` or `embody/`.
 
 ```mermaid
 flowchart TD
-    Req["completion request<br/>{prefix, precedingText, fullText}"]
-    Val{"validate(fullText)<br/>parse + JEJ check"}
-    Ctx{"precedingText context"}
-    DotCtx["dot-receiver context<br/>(receiver-dot regex matches)"]
-    IdentCtx["identifier context<br/>(otherwise)"]
-    AstQ{"AST available?"}
-    SurfaceDot["curated member union<br/>(label, source = member)"]
-    SurfaceAst["keywords ∪ globals ∪ locals<br/>(source ∈ {keyword, global, local})"]
-    SurfaceNoAst["keywords ∪ globals<br/>(source ∈ {keyword, global})"]
-    Marked["overlay BLOCKED_MEMBER_NAMES<br/>+ curated stumbling-list"]
-    Items["completion items<br/>(prefix-filtered, frozen,<br/>type / detail / info / apply)"]
+    Req["completion request<br/>(prefix + line-prefix + full snippet)"]
+    Val{"validation result<br/>(clean / rejected / parse-failure)"}
+    Ctx{"line-prefix context<br/>shape"}
+    DotCtx["dot-receiver shape<br/>(receiver identifier + dot)"]
+    IdentCtx["identifier shape<br/>(bare word prefix)"]
+    AstQ{"AST present in validation?"}
+    SurfaceDot["curated member-union suggestions<br/>(source = member)"]
+    SurfaceAst["keyword + global + scope-local suggestions"]
+    SurfaceNoAst["keyword + global suggestions"]
+    BlockedDocs[("non-JEJ DocEntry partition<br/>(frozen, from documenting)")]
+    Marked2["overlaid suggestion set<br/>(blocked items carry rich DocEntry<br/>by reference)"]
+    Items["frozen, prefix-filtered<br/>completion items"]
 
     Req --> Val --> Ctx
     Ctx -->|"dot receiver"| DotCtx
     Ctx -->|"bare identifier"| IdentCtx
     DotCtx --> SurfaceDot
     IdentCtx --> AstQ
-    AstQ -->|"yes (validate returned .ast)"| SurfaceAst
-    AstQ -->|"no (parse error — .ast is null)"| SurfaceNoAst
-    SurfaceDot --> Marked
-    SurfaceAst --> Marked
-    SurfaceNoAst --> Marked
-    Marked --> Items
+    AstQ -->|"yes"| SurfaceAst
+    AstQ -->|"no (parse failure)"| SurfaceNoAst
+    SurfaceDot -->|"blocked-label overlay"| Marked2
+    SurfaceAst -->|"blocked-label overlay"| Marked2
+    SurfaceNoAst -->|"blocked-label overlay"| Marked2
+    BlockedDocs -.->|"DocEntry by reference<br/>(no clone, no spread)"| Marked2
+    Marked2 -->|"case-insensitive prefix filter, deep-freeze"| Items
 ```
 
 ### Structural constraints
@@ -159,6 +171,14 @@ flowchart TD
 - **No receiver-type inference.** Every dot-context yields the same
   curated member union. A future receiver-aware refinement is out
   of scope; the union is small enough to be pedagogically scannable.
+- **Blocked-item content is consumed by reference, not copied.**
+  The `entry` field on a blocked `CompletionItem` is the same
+  frozen `DocEntry` object the hover surface returns from the
+  documenting module. This module does not spread, clone, or
+  modify the entry. Both surfaces hold the same reference; the
+  deep-freeze guarantee from documenting's load-time table freeze
+  covers the autocomplete renderer as well as the hover renderer.
+  No per-call entry-allocation, no risk of cross-surface drift.
 
 ### Out of scope
 
@@ -183,26 +203,34 @@ flowchart TD
 
 ## Decisions
 
-- **Four files, not two.** Unlike
+- **Three files, not two.** Unlike
   [`../linting/`](../linting/), which split a 1:1 shape translator
   (`violation-to-diagnostic`) from an outcome dispatcher
-  (`lint-jej`), this module has four distinct responsibilities:
-  **orchestration** (`complete-jej.ts` — threads phases 1→2→3→4
+  (`lint-jej`), this module has three distinct responsibilities:
+  **orchestration** (`complete-jej.ts` — threads phases 1→2→3→4→5
   and owns the freeze boundary at the return), **JEJ-surface
-  collection** (`collect-jej-surface.ts` — phase 3), **blocked
-  overlay** (`mark-blocked.ts` — phase 4 mark step), and the
-  **curated data table** (`stumbling-list.ts` — no phase; pure
-  data consumed by mark). Each source file is independently
-  testable; `stumbling-list` is data-only and worth a separate
-  file so curated-prose edits don't churn the overlay logic.
+  collection** (`collect-jej-surface.ts` — phase 3), and **blocked
+  overlay** (`mark-blocked.ts` — phase 4 mark step). The curated
+  data table moved out: non-JEJ pedagogical content lives in
+  [`../documenting/not-in-jej.ts`](../documenting/not-in-jej.ts) as
+  the single source of truth for both surfaces (hover + autocomplete).
+  This module imports `NOT_IN_JEJ_ENTRIES` and `NOT_IN_JEJ_LABELS`
+  rather than carrying its own copy.
+
+  **Transient state during the unified-docs sprint.** A
+  `stumbling-list.ts` file currently exists in this module
+  alongside the three above; it is deleted as part of the sprint's
+  final wiring increment, with its content already migrated upstream
+  to `../documenting/not-in-jej.ts` (blocked entries) and
+  `../documenting/keywords.ts` (advisory `null` / `new` caveats).
+  Until that increment lands, the sketch describes the target shape;
+  the current directory carries the obsolete file.
 - **`types.ts` is present.** Unlike linting and formatting-editor
   (which both skip it), this module owns cross-file JEJ vocabulary
   that belongs in neither the editing-layer's types nor a single
   source file. `Suggestion` is threaded between
   `collect-jej-surface` and `mark-blocked`, so it has to live in a
-  shared location. `StumblingEntry` co-locates with it as a
-  module-internal type table consumed by the curated-list and
-  overlay code.
+  shared location.
 - **Prefix-filter is case-insensitive.** Comparison is
   `label.toLowerCase().startsWith(prefix.toLowerCase())`. Locked
   at sketch time: typos should not silently gate completion
@@ -232,10 +260,16 @@ flowchart TD
   the sentinel to a `closeCompletion(view)` call when wiring the
   CodeMirror `Completion`. JEJ adapters never see the CodeMirror
   function or import `@codemirror/autocomplete`.
-- **`info` is a `string`, lifted to DOM in editing/.** Same
-  rationale: JEJ-aware code produces prose; the editor produces
-  DOM. The lift happens once, in `build-info-dom.ts` next to the
-  existing `build-tooltip-dom.ts` (which lifts hover-doc data).
+- **`info` vs `entry` on CompletionItem.** The editing-layer's
+  `CompletionItem` type carries both `info?: string` (legacy plain-
+  paragraph slot for non-JEJ adapters) and `entry?: DocEntry`
+  (rich-content slot for JEJ-aware adapters). The JEJ adapter sets
+  `entry` for blocked items and leaves `info` unset; the editing
+  layer's renderer dispatches on shape, preferring `entry` when
+  present. This is the additive widening that lets the autocomplete
+  popup show the same DocEntry the hover surface returns, without
+  breaking the public `CompletionCallback` contract for future
+  non-JEJ consumers.
 - **Set-iterable spread is replaced with `Array.from(<Set>)`.** The
   Docusaurus/Babel transpile pipeline mistranspiles `[...<Set>]`
   to a one-element array wrapping the Set (broken in the dev/build

@@ -77,8 +77,8 @@ describe('documentJej', () => {
 			expect(documentJej('var')).not.toBeNull();
 		});
 
-		it("var entry category equals 'not in JEJ'", () => {
-			expect(documentJej('var')?.category).toBe('not in JEJ');
+		it('var entry isJEJ is false', () => {
+			expect(documentJej('var')?.isJEJ).toBe(false);
 		});
 
 		it('var entry has non-empty description', () => {
@@ -168,15 +168,15 @@ describe('shape compliance — field presence across the full table', () => {
 		expect(entriesWithEmptyDescription).toEqual([]);
 	});
 
-	it("every blocked entry has category 'not in JEJ'", () => {
-		const blockedWithWrongCategory = [...NOT_IN_JEJ_LABELS]
+	it('every blocked entry has isJEJ: false', () => {
+		const blockedWithWrongFlag = [...NOT_IN_JEJ_LABELS]
 			.map(function withEntry(word: string) {
 				return { word, entry: documentJej(word) };
 			})
-			.filter(function categoryNotInJej({ entry }) {
-				return entry?.category !== 'not in JEJ';
+			.filter(function notFalse({ entry }) {
+				return entry?.isJEJ !== false;
 			});
-		expect(blockedWithWrongCategory).toEqual([]);
+		expect(blockedWithWrongFlag).toEqual([]);
 	});
 
 	it('every blocked entry has at least 2 of (example, whenToUse, commonMistakes) populated', () => {
@@ -206,8 +206,8 @@ describe('advisory stumble caveats live in keyword section', () => {
 		expect(documentJej('null')).not.toBeNull();
 	});
 
-	it("null entry is NOT categorized as 'not in JEJ'", () => {
-		expect(documentJej('null')?.category).not.toBe('not in JEJ');
+	it('null entry has isJEJ: true (not blocked)', () => {
+		expect(documentJej('null')?.isJEJ).toBe(true);
 	});
 
 	it('null entry carries its advisory caveat in whenToUse or commonMistakes', () => {
@@ -221,8 +221,8 @@ describe('advisory stumble caveats live in keyword section', () => {
 		expect(documentJej('new')).not.toBeNull();
 	});
 
-	it("new entry is NOT categorized as 'not in JEJ'", () => {
-		expect(documentJej('new')?.category).not.toBe('not in JEJ');
+	it('new entry has isJEJ: true (not blocked)', () => {
+		expect(documentJej('new')?.isJEJ).toBe(true);
 	});
 
 	it('new entry carries its advisory caveat in whenToUse or commonMistakes', () => {
