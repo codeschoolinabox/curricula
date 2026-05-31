@@ -802,6 +802,57 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 		});
 	});
 
+	describe('L1.7 — selecting a different lens from the picker (in-mode lens switch)', () => {
+		it('selecting "debug-props" while lens="annotate" dispatches lens-switched({previous: "annotate", next: "debug-props", source: "picker"})', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(
+					<StudyLenses snippet="OK" lens="annotate" />,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+				dispatchSpy.mockClear();
+				const picker = container.querySelector(
+					'[data-orchestrator-lens-picker]',
+				) as HTMLSelectElement;
+				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				expect(dispatchSpy).toHaveBeenCalledWith('lens-switched', {
+					previous: 'annotate',
+					next: 'debug-props',
+					source: 'picker',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('the in-mode picker switch does NOT dispatch mode-changed (mode stays "lens")', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(
+					<StudyLenses snippet="OK" lens="annotate" />,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+				dispatchSpy.mockClear();
+				const picker = container.querySelector(
+					'[data-orchestrator-lens-picker]',
+				) as HTMLSelectElement;
+				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				expect(dispatchSpy).not.toHaveBeenCalledWith(
+					'mode-changed',
+					expect.anything(),
+				);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+	});
+
 	describe('L1.5 — picker value in lens mode', () => {
 		it('the picker value equals the active lens name when lens="debug-props"', () => {
 			const { container } = render(
