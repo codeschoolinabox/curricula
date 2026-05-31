@@ -382,9 +382,12 @@ flowchart TD
 **Picker neutral state.** When `state.mode === 'editor'`, the picker's `value`
 is the empty string and the first `<option>` is a non-selectable sentinel
 (`<option value="" disabled hidden>— select a lens —</option>`). The
-remaining options enumerate the registered lenses. Selecting any non-sentinel
-option transitions to lens mode for that lens; the sentinel itself cannot be
-re-selected.
+remaining options enumerate the registered lenses in **registration order**
+— the insertion order of `LENS_REGISTRY`'s keys per the ES2015+ `Object.keys`
+spec for string-keyed properties. Future increments may layer a curated or
+applicability-filtered order on top, but the default is the registration
+order. Selecting any non-sentinel option transitions to lens mode for that
+lens; the sentinel itself cannot be re-selected.
 
 **Edit-button visibility.** The edit button is conditionally rendered: it
 appears only when `state.mode === 'lens'`. The editor-mode tree exposes no
@@ -535,7 +538,7 @@ The `source` value on `lens-switched` is pinned per site:
 | Initial-mount post-commit effect (`useEffect([])`)       | `mode-changed(editor → lens)` + `lens-switched(null → next)` | `'initial'`                 |
 | Prop-change effect (`useEffect([lens, configs])` post-mount) | `mode-changed` + `lens-switched` as applicable           | `'prop'`                    |
 | Picker `onChange` handler                                | `mode-changed` + `lens-switched` as applicable              | `'picker'`                  |
-| Edit-button `onClick` handler                            | `mode-changed(lens → editor)` only                          | n/a (no `lens-switched`)    |
+| Edit-button `onClick` handler                            | `mode-changed(lens → editor)` only                          | n/a (no `lens-switched`); the handler still supplies `source: 'edit-button'` for consistency with `LensSelectionSource` and for future analytics attribution. |
 
 The recommendations panel (L5, owned by [`./recommendations-panel.tsx`])
 routes through the same transition handler and dispatches with

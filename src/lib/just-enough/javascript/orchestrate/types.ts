@@ -211,12 +211,28 @@ type CachedEmbodiment = Readonly<{
  * Source of a lens-selection event — useful for analytics, picker
  * highlighting logic, and (future) exercise-completion attribution.
  *
- * @remarks Sketched here; L5/L6 may grow this enumeration when they
- * land (panel click, keyboard shortcut, programmatic-prop change,
- * etc.). F5 is where the bus dispatch sites first compute and
- * supply a value.
+ * @remarks Each dispatch site supplies one of these values when the
+ * site has a defensible source attribution. Current enumeration:
+ * - `'initial'` — the one-time post-commit `useEffect([])` that fires
+ *   when first render lands in lens mode.
+ * - `'prop'` — the prop-change effect (`useEffect([lens, configs])`)
+ *   that fires when an external consumer changes the lens prop.
+ * - `'picker'` — the toolbar lens-picker `<select>`'s `onChange`
+ *   handler.
+ * - `'edit-button'` — the toolbar's edit-return `<button>`'s `onClick`
+ *   handler. This site does NOT dispatch `lens-switched` (no lens is
+ *   being selected — the active lens is being unmounted), so the
+ *   source value is observable only via analytics that subscribe to a
+ *   future `mode-changed` `source` field, or via lint-style
+ *   enforcement that every dispatch site supplies a value.
+ * - `'panel'` — L5 recommendations-panel cell click (deferred).
  */
-type LensSelectionSource = 'picker' | 'panel' | 'prop' | 'initial';
+type LensSelectionSource =
+	| 'picker'
+	| 'panel'
+	| 'prop'
+	| 'initial'
+	| 'edit-button';
 
 // --- INTERNAL EventBus taxonomy ---
 

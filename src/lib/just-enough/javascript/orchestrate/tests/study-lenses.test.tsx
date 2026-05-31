@@ -1050,6 +1050,27 @@ describe('<StudyLenses> — L1.8 + L1.9 + L1.10 edit-return button', () => {
 				container.querySelector('[data-lens="debug-props"]'),
 			).not.toBeNull();
 		});
+
+		it('the edit-return → picker-reopen round trip with stable snippet is a cache-hit (embody fires once total)', () => {
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				const { container } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(embodySpy).toHaveBeenCalledTimes(1);
+				const editButton = container.querySelector(
+					'[data-orchestrator-edit-button]',
+				) as HTMLButtonElement;
+				fireEvent.click(editButton);
+				const picker = container.querySelector(
+					'[data-orchestrator-lens-picker]',
+				) as HTMLSelectElement;
+				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				expect(embodySpy).toHaveBeenCalledTimes(1);
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
 	});
 });
 

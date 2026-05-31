@@ -352,11 +352,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 		// `deriveInitialState` through the editor branch; `applyTransition`
 		// then dispatches `mode-changed({from: 'lens', to: 'editor'})` and
 		// skips `lens-switched` because next.state.mode !== 'lens'. The
-		// source argument is unused for this path (no lens-switched fires)
-		// but `'picker'` keeps the LensSelectionSource value semantically
-		// adjacent to the toolbar.
+		// `'edit-button'` source value is unused on this dispatch path
+		// (no lens-switched fires) but is the semantically correct
+		// attribution per `LensSelectionSource`.
 		function handleEditReturn(): void {
-			applyTransition(undefined, 'picker');
+			applyTransition(undefined, 'edit-button');
 		}
 
 		// F2.5: edit invalidation. Any snippet edit eagerly clears the cache so a
