@@ -62,6 +62,7 @@ import type {
 	CachedEmbodiment,
 	EventBus,
 	LensModeState,
+	LensSelectionSource,
 	OrchestratorState,
 	StudyLensesProps,
 } from './types.js';
@@ -81,7 +82,11 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 
 /**
  * Registered lens names, in registration order. Stable reference passed
- * to `<Toolbar lensNames={LENS_NAMES} pickerValue={pickerValue} />` so the picker's option list
+ * to `<Toolbar
+					lensNames={LENS_NAMES}
+					pickerValue={pickerValue}
+					onLensSelect={handleLensSelect}
+				/>` so the picker's option list
  * doesn't recompute per render.
  */
 const LENS_NAMES: readonly string[] = Object.freeze(Object.keys(LENS_REGISTRY));
@@ -284,26 +289,19 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 		// after every transition. Read inside post-commit effects only.
 		const prevStateRef = React.useRef<OrchestratorState>(initialDerived.state);
 
-		// Prop-change mode transition. Skips initial mount (state/cache already
-		// seeded); fires on lens or configs change only. Calls `setState` and
-		// `setCachedEmbodiment` sequentially — React 18 auto-batching folds them
-		// into a single commit (per DOCS § Atomic transition mechanism).
-		//
-		// F5b.4-F5b.6: after the state setters fire, the transition handler
-		// diffs prevStateRef against the just-computed `next.state` and
-		// dispatches mode-changed (when mode flipped) and lens-switched (when
-		// next is lens mode and the activeLens differs from the previous lens
-		// reading). Both use source: 'prop'. Dispatch ordering: mode-changed
-		// before lens-switched within the same React commit per DOCS contract.
-		const isMountedRef = React.useRef(false);
-		React.useEffect(() => {
-			if (!isMountedRef.current) {
-				isMountedRef.current = true;
-				return;
-			}
+		// Shared transition handler. Both the prop-change effect (`source:
+		// 'prop'`) and the picker (`source: 'picker'`, L1.6+) route through
+		// this single helper so the diff/dispatch contract is enforced in
+		// one place. Reads snippet + cache from refs to avoid re-firing the
+		// prop-change effect on every snippet keystroke; reads `configs`
+		// from the live closure so each call captures the current cascade.
+		function applyTransition(
+			nextLens: string | undefined,
+			source: LensSelectionSource,
+		): void {
 			const next = deriveInitialState(
 				snippetRef.current,
-				lens,
+				nextLens,
 				configs,
 				cachedEmbodimentRef.current,
 			);
@@ -321,12 +319,36 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 					bus.dispatch('lens-switched', {
 						previous: previousLens,
 						next: next.state.activeLens,
-						source: 'prop',
+						source,
 					});
 				}
 			}
 			prevStateRef.current = next.state;
+		}
+
+		// Prop-change mode transition. Skips initial mount (state/cache already
+		// seeded); fires on lens or configs change only. Calls `applyTransition`
+		// with `source: 'prop'`. The state setters land in a single React 18
+		// commit; the dispatches fire synchronously after.
+		const isMountedRef = React.useRef(false);
+		React.useEffect(() => {
+			if (!isMountedRef.current) {
+				isMountedRef.current = true;
+				return;
+			}
+			applyTransition(lens, 'prop');
+			// `applyTransition` closes over the current render's `configs`
+			// and the stable refs; no extra dep needed beyond [lens, configs].
+			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, [lens, configs]);
+
+		// L1.6: picker-driven transitions. The picker passes the chosen lens
+		// name; the handler routes through the shared transition logic with
+		// `source: 'picker'`. The sentinel (empty string) is filtered at the
+		// toolbar boundary so this handler only ever sees real lens names.
+		function handleLensSelect(name: string): void {
+			applyTransition(name, 'picker');
+		}
 
 		// F2.5: edit invalidation. Any snippet edit eagerly clears the cache so a
 		// subsequent editor → lens transition always re-embodies, per the cache
@@ -359,7 +381,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			const lensModule = LENS_REGISTRY[state.activeLens]!;
 			return (
 				<div data-orchestrator-root>
-					<Toolbar lensNames={LENS_NAMES} pickerValue={pickerValue} />
+					<Toolbar
+					lensNames={LENS_NAMES}
+					pickerValue={pickerValue}
+					onLensSelect={handleLensSelect}
+				/>
 					<lensModule.Component
 						embodiment={cachedEmbodiment.embodiment}
 						config={state.resolvedConfig}
@@ -370,7 +396,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 
 		return (
 			<div data-orchestrator-root>
-				<Toolbar lensNames={LENS_NAMES} pickerValue={pickerValue} />
+				<Toolbar
+					lensNames={LENS_NAMES}
+					pickerValue={pickerValue}
+					onLensSelect={handleLensSelect}
+				/>
 				<EditorComponent
 					snippet={snippet}
 					onSnippetChange={handleSnippetChange}

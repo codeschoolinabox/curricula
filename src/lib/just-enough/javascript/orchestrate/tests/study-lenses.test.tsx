@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { EditorView } from '@codemirror/view';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -725,6 +725,80 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 				'[data-orchestrator-lens-picker]',
 			) as HTMLSelectElement | null;
 			expect(picker?.value).toBe('');
+		});
+	});
+
+	describe('L1.6 — selecting a lens from the picker (editor → lens)', () => {
+		it('selecting "debug-props" from editor mode dispatches mode-changed({from: editor, to: lens})', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(<StudyLenses snippet="OK" />);
+				expect(dispatchSpy).not.toHaveBeenCalled();
+				const picker = container.querySelector(
+					'[data-orchestrator-lens-picker]',
+				) as HTMLSelectElement;
+				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				expect(dispatchSpy).toHaveBeenCalledWith('mode-changed', {
+					from: 'editor',
+					to: 'lens',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('selecting "debug-props" from editor mode dispatches lens-switched(null → debug-props, picker)', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(<StudyLenses snippet="OK" />);
+				expect(dispatchSpy).not.toHaveBeenCalled();
+				const picker = container.querySelector(
+					'[data-orchestrator-lens-picker]',
+				) as HTMLSelectElement;
+				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				expect(dispatchSpy).toHaveBeenCalledWith('lens-switched', {
+					previous: null,
+					next: 'debug-props',
+					source: 'picker',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('mode-changed dispatches before lens-switched on the picker-driven transition', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(<StudyLenses snippet="OK" />);
+				const picker = container.querySelector(
+					'[data-orchestrator-lens-picker]',
+				) as HTMLSelectElement;
+				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				const eventNames = dispatchSpy.mock.calls.map((args) => args[0]);
+				expect(eventNames).toEqual(['mode-changed', 'lens-switched']);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('selecting "debug-props" from editor mode mounts the debug-props lens', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			const picker = container.querySelector(
+				'[data-orchestrator-lens-picker]',
+			) as HTMLSelectElement;
+			fireEvent.change(picker, { target: { value: 'debug-props' } });
+			expect(
+				container.querySelector('[data-lens="debug-props"]'),
+			).not.toBeNull();
 		});
 	});
 

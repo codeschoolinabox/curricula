@@ -36,6 +36,14 @@ type ToolbarProps = Readonly<{
 	 * registered lens name selects that option (lens mode).
 	 */
 	pickerValue: string;
+
+	/**
+	 * Called when the learner selects a registered lens. The argument is
+	 * the chosen lens name (never the sentinel's empty string — Toolbar
+	 * filters that case). The parent routes the call into the shared
+	 * orchestrator transition handler with `source: 'picker'`.
+	 */
+	onLensSelect: (name: string) => void;
 }>;
 
 /**
@@ -43,22 +51,27 @@ type ToolbarProps = Readonly<{
  *
  * @param lensNames - Registered lens names to expose in the picker.
  * @param pickerValue - The currently-selected picker value (state-derived).
+ * @param onLensSelect - Called with the chosen lens name on picker change.
  */
 function Toolbar({
 	lensNames,
 	pickerValue,
+	onLensSelect,
 }: ToolbarProps): React.JSX.Element {
-	// onChange is a no-op until L1.6 wires the picker-selection handler;
-	// React requires an onChange on a controlled <select> to suppress the
-	// read-only warning.
-	function noopOnChange(): void {}
+	function handlePickerChange(
+		event: React.ChangeEvent<HTMLSelectElement>,
+	): void {
+		const next = event.target.value;
+		if (next === '') return;
+		onLensSelect(next);
+	}
 	return (
 		<nav data-orchestrator-toolbar>
 			<select
 				data-orchestrator-lens-picker
 				aria-label="Lens picker"
 				value={pickerValue}
-				onChange={noopOnChange}
+				onChange={handlePickerChange}
 			>
 				<option value="" disabled hidden>
 					— select a lens —
