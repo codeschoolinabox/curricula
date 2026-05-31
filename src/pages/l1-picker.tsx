@@ -3,20 +3,22 @@
  *
  * Open `http://localhost:3000/spiralearn/l1-picker` after `npm run start`.
  *
- * **What to verify at each L1 increment:**
+ * Both panels mount `<StudyLenses>` with the same snippet; the top panel
+ * starts in editor mode, the bottom in lens mode (`lens="debug-props"`).
+ * Toolbar contents are state-derived in both panels:
  *
- * - **L1.2** (this commit): the toolbar shell — a `<nav
- *   data-orchestrator-toolbar>` element — is rendered above the active
- *   surface in both the editor-mode `<StudyLenses>` instance below and
- *   the lens-mode one. The shell is currently empty; subsequent
- *   increments add the picker dropdown and the conditional edit button.
- * - **L1.4**: the picker neutral state shows a sentinel-first option
- *   (`— select a lens —`) in editor mode; selecting a registered lens
- *   transitions the orchestrator to lens mode.
- * - **L1.6 / L1.7**: picker selections dispatch `mode-changed` then
+ * - **Lens-picker dropdown** — a `<select data-orchestrator-lens-picker>`
+ *   carrying a non-selectable sentinel (`— select a lens —`) followed by
+ *   one `<option>` per entry in `LENS_REGISTRY`, in registration order.
+ *   Selecting a lens transitions the orchestrator to lens mode for that
+ *   lens and dispatches `mode-changed` then
  *   `lens-switched(source: 'picker')` on the internal bus.
- * - **L1.9 / L1.10**: an edit button appears only in lens mode; clicking
- *   it returns to editor mode.
+ * - **Edit-return button** — a `<button data-orchestrator-edit-button>`
+ *   labelled "Edit code" that appears only when `state.mode === 'lens'`.
+ *   Clicking it returns to editor mode and dispatches
+ *   `mode-changed({from: 'lens', to: 'editor'}, source: 'edit-button')`;
+ *   `lens-switched` is NOT dispatched (no lens is being selected, the
+ *   active lens is being unmounted).
  *
  * @vitest-skip — Docusaurus auto-routes `src/pages/*.tsx`; this is a
  * page, not a unit test.
@@ -31,15 +33,14 @@ export default function L1Picker(): React.JSX.Element {
 	return (
 		<Layout
 			title="L1 picker"
-			description="L1 sandbox — toolbar lens-picker visible in both editor and lens modes"
+			description="L1 sandbox — toolbar lens-picker + edit-return button"
 		>
 			<main style={{ maxWidth: 720, margin: '2rem auto', padding: '0 1rem' }}>
 				<h1>L1 picker sandbox</h1>
 				<p>
-					The toolbar (currently just an empty <code>&lt;nav&gt;</code> shell at
-					L1.2) should appear above the active surface in both panels below.
-					Subsequent L1 increments will add the picker dropdown and the
-					conditional edit button.
+					Each panel renders a fully-wired toolbar above its active surface.
+					The picker enumerates the registered lenses (sentinel first); the
+					edit-return button appears only in lens mode.
 				</p>
 				<h2>Editor mode (no lens prop)</h2>
 				<StudyLenses snippet="OK" />
