@@ -877,6 +877,34 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 	});
 });
 
+describe('<StudyLenses> — L1.11 external lens prop change re-syncs picker value', () => {
+	describe('Many+Interface — most-recent write wins after a picker-driven selection', () => {
+		it('after picker selects "annotate", an external lens="debug-props" prop change moves the picker to "debug-props"', () => {
+			const { container, rerender } = render(<StudyLenses snippet="OK" />);
+			const picker = container.querySelector(
+				'[data-orchestrator-lens-picker]',
+			) as HTMLSelectElement;
+			fireEvent.change(picker, { target: { value: 'annotate' } });
+			expect(picker.value).toBe('annotate');
+			rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+			expect(picker.value).toBe('debug-props');
+		});
+
+		it('after picker selects "annotate", an external lens=undefined prop change resets the picker to the sentinel', () => {
+			const { container, rerender } = render(
+				<StudyLenses snippet="OK" lens="annotate" />,
+			);
+			const picker = container.querySelector(
+				'[data-orchestrator-lens-picker]',
+			) as HTMLSelectElement;
+			fireEvent.change(picker, { target: { value: 'debug-props' } });
+			expect(picker.value).toBe('debug-props');
+			rerender(<StudyLenses snippet="OK" />);
+			expect(picker.value).toBe('');
+		});
+	});
+});
+
 describe('<StudyLenses> — L1.8 + L1.9 + L1.10 edit-return button', () => {
 	describe('L1.8 — Zero: editor mode hides the edit button', () => {
 		it('rendering without a lens prop shows no [data-orchestrator-edit-button] element', () => {
