@@ -30,14 +30,17 @@ config shape, ubiquitous language, UI structure, validation rule).
 3. **Derive display + blanks** (sync, pure) — four sub-steps composing
    two input-stream walks (the "two-pass" constraint, per § Structural
    constraints) plus the downstream selection and interleaving:
-   - **Classify** (AST walk) — walk the embodiment's AST. For each
-     eligible category in the resolved `tokenCategories` set, emit a
-     classification entry keyed on the token's start-offset (unique
-     per Acorn's token convention), valued by the `TokenCategory`.
-     For keywords, the AST node shape gates surface-ability (e.g.
-     `else` only when the parent conditional has an alternate branch).
-     Input: AST + resolved category set. Output: a
-     `Map<number, TokenCategory>` (start-offset → category).
+   - **Classify** (token-stream walk + AST override) — walks the raw
+     token stream once, classifying each token by text-match against
+     the lens's `KEYWORDS` set (catches `let`, `of`, etc. that Acorn
+     lexes as `name` because they are contextual keywords) and by
+     Acorn token-type rules (`name` → `identifiers`, literal labels
+     → `literals`, operator-type flags → `operators`). Then walks
+     the AST to **override** Identifier and Literal positions
+     (handles `true`/`false`/`null` → `literals` and `let`-as-
+     variable-name → `identifiers`). Inputs: AST, raw token stream,
+     source string. Output: a `Map<number, TokenCategory>` (start-
+     offset → category) covering every classifiable token.
    - **Position** (token-stream walk) — walk the raw token stream
      once. For each token, look up its category in the classifier
      map. Tokens not in the map are skipped. Tokens found yield an

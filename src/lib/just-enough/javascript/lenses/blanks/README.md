@@ -194,28 +194,45 @@ at different cells with different configs.
 
 ## Token categorization
 
-Token categorization is a **two-pass derivation** combining the AST and
-the raw token stream:
+Token categorization is a **two-pass derivation** combining the raw
+token stream and the AST:
 
-1. **Classify (AST walk).** Walk `embodiment.raw.ast` (Acorn `Program`) to
-   build a category map keyed by source range: `Identifier` nodes →
-   `identifiers`; `Literal` nodes → `literals`; operator-bearing nodes →
-   `operators`; keyword-bearing syntactic positions (via the parent node's
-   shape: `IfStatement.alternate ≠ null` ⇒ the `else` token is
-   classifiable as `keywords`; `ForOfStatement` ⇒ the `for` AND `of`
-   tokens are; etc.) → `keywords`.
-2. **Position (token-stream walk).** Walk `embodiment.raw.tokens` (Acorn
-   tokens) once. For each token, look up its category by source range
-   against the classifier output. The token gives the authoritative
-   position-and-text; the AST gives the category.
+1. **Classify (token-stream walk + AST override).** Walks
+   `embodiment.raw.tokens` once, classifying each token by:
+   - **Keyword text match** — if the token's source slice is in the
+     lens's known `KEYWORDS` set (`let`, `const`, `if`, `else`, `for`,
+     `of`, `return`, etc.), category `keywords`. Text match (not
+     `tok.type.keyword`) is load-bearing because Acorn lexes
+     **contextual keywords** (`let`, `of`, `async`, `await`, `static`)
+     as `name` tokens — the parser disambiguates by position. Text
+     match catches them uniformly.
+   - **Identifier** — `tok.type.label === 'name'` → category
+     `identifiers`.
+   - **Literal** — `tok.type.label` in `{num, string, regexp}` →
+     category `literals`.
+   - **Operator** — token type carries `binop`, `isAssign`, `prefix`,
+     or `postfix` flags → category `operators`.
+   - Anything else (punctuation, etc.) is skipped.
 
-Why two passes: not every keyword corresponds to the **start** of an AST
-node (e.g. `else`, `extends`, `of`, `case`, `default`, `catch`,
-`finally`, `in`, `instanceof`). Acorn's token stream lexes every
-syntactic marker including these; the AST walk identifies which of them
-the lens should surface for blanking based on the surrounding node's
-shape. The token stream's positions are what the lens's display fragments
-use to interleave `<input>` elements with verbatim text.
+   After the token pass, walks `embodiment.raw.ast` (Acorn `Program`)
+   to **override** Identifier and Literal positions: `Identifier` nodes
+   force `identifiers` (handles `let` used as a variable name, which
+   text-match would have classified as `keywords`); `Literal` nodes
+   force `literals` (handles `true`/`false`/`null`, which text-match
+   would have classified as `keywords`).
+
+2. **Position (token-stream walk).** Walks tokens in source order. For
+   each token, looks up its category in the classifier map produced by
+   step 1. Tokens not in the map are skipped (not classifiable); tokens
+   whose category is not in `config.tokenCategories` are skipped (the
+   educator-supplied filter).
+
+Why two passes (not just one over tokens): the AST override pass is
+load-bearing for the inverse-direction classifications listed above —
+`true` and `let`-as-variable would otherwise be miscategorized. The
+keyword catalogue is unconditional (every `else`, `of`, etc. in source
+is eligible for blanking) because such keywords only appear in source
+when syntactically valid; no further AST gating is needed.
 
 Both passes run only when `embodiment.status.parsed === true` (gated by
 `applicableTo`). The chain `parsed ⇒ tokenized` (per
