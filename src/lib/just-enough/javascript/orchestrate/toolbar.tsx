@@ -44,6 +44,21 @@ type ToolbarProps = Readonly<{
 	 * orchestrator transition handler with `source: 'picker'`.
 	 */
 	onLensSelect: (name: string) => void;
+
+	/**
+	 * Whether to render the edit-return button. Derived by the parent
+	 * from `state.mode === 'lens'`; the button is the learner's
+	 * affordance to leave a read-only lens session and return to editor
+	 * home base.
+	 */
+	editButtonVisible: boolean;
+
+	/**
+	 * Called when the learner clicks the edit-return button. The parent
+	 * routes the call into the shared orchestrator transition handler
+	 * which dispatches `mode-changed({from: 'lens', to: 'editor'})`.
+	 */
+	onEditReturn: () => void;
 }>;
 
 /**
@@ -57,6 +72,8 @@ function Toolbar({
 	lensNames,
 	pickerValue,
 	onLensSelect,
+	editButtonVisible,
+	onEditReturn,
 }: ToolbarProps): React.JSX.Element {
 	function handlePickerChange(
 		event: React.ChangeEvent<HTMLSelectElement>,
@@ -82,6 +99,15 @@ function Toolbar({
 					</option>
 				))}
 			</select>
+			{editButtonVisible ? (
+				<button
+					type="button"
+					data-orchestrator-edit-button
+					onClick={onEditReturn}
+				>
+					Edit code
+				</button>
+			) : null}
 		</nav>
 	);
 }

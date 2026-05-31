@@ -9,20 +9,38 @@ import Toolbar from '../toolbar.js';
 describe('<Toolbar>', () => {
 	describe('Zero — empty shell', () => {
 		it('renders an element matching [data-orchestrator-toolbar]', () => {
-			const { container } = render(<Toolbar lensNames={[]} pickerValue="" onLensSelect={() => {}} />);
+			const { container } = render(<Toolbar
+				lensNames={[]}
+				pickerValue=""
+				onLensSelect={() => {}}
+				editButtonVisible={false}
+				onEditReturn={() => {}}
+			/>);
 			expect(
 				container.querySelector('[data-orchestrator-toolbar]'),
 			).not.toBeNull();
 		});
 
 		it('the toolbar element is a <nav>', () => {
-			const { container } = render(<Toolbar lensNames={[]} pickerValue="" onLensSelect={() => {}} />);
+			const { container } = render(<Toolbar
+				lensNames={[]}
+				pickerValue=""
+				onLensSelect={() => {}}
+				editButtonVisible={false}
+				onEditReturn={() => {}}
+			/>);
 			const toolbar = container.querySelector('[data-orchestrator-toolbar]');
 			expect(toolbar?.tagName).toBe('NAV');
 		});
 
 		it('the picker holds the sentinel even with an empty lensNames array', () => {
-			const { container } = render(<Toolbar lensNames={[]} pickerValue="" onLensSelect={() => {}} />);
+			const { container } = render(<Toolbar
+				lensNames={[]}
+				pickerValue=""
+				onLensSelect={() => {}}
+				editButtonVisible={false}
+				onEditReturn={() => {}}
+			/>);
 			const options = container.querySelectorAll(
 				'[data-orchestrator-lens-picker] option',
 			);
@@ -32,14 +50,26 @@ describe('<Toolbar>', () => {
 
 	describe('Many — one <option> per registered lens', () => {
 		it('the toolbar contains a <select data-orchestrator-lens-picker>', () => {
-			const { container } = render(<Toolbar lensNames={['a', 'b', 'c']} pickerValue="" onLensSelect={() => {}} />);
+			const { container } = render(<Toolbar
+				lensNames={['a', 'b', 'c']}
+				pickerValue=""
+				onLensSelect={() => {}}
+				editButtonVisible={false}
+				onEditReturn={() => {}}
+			/>);
 			expect(
 				container.querySelector('[data-orchestrator-lens-picker]'),
 			).not.toBeNull();
 		});
 
 		it('the picker element is a <select>', () => {
-			const { container } = render(<Toolbar lensNames={['a', 'b', 'c']} pickerValue="" onLensSelect={() => {}} />);
+			const { container } = render(<Toolbar
+				lensNames={['a', 'b', 'c']}
+				pickerValue=""
+				onLensSelect={() => {}}
+				editButtonVisible={false}
+				onEditReturn={() => {}}
+			/>);
 			const picker = container.querySelector(
 				'[data-orchestrator-lens-picker]',
 			);
@@ -47,7 +77,13 @@ describe('<Toolbar>', () => {
 		});
 
 		it('the picker carries an aria-label so it has an accessible name', () => {
-			const { container } = render(<Toolbar lensNames={['a', 'b', 'c']} pickerValue="" onLensSelect={() => {}} />);
+			const { container } = render(<Toolbar
+				lensNames={['a', 'b', 'c']}
+				pickerValue=""
+				onLensSelect={() => {}}
+				editButtonVisible={false}
+				onEditReturn={() => {}}
+			/>);
 			const picker = container.querySelector(
 				'[data-orchestrator-lens-picker]',
 			);
@@ -55,7 +91,13 @@ describe('<Toolbar>', () => {
 		});
 
 		it('the first <option> is a disabled sentinel with value=""', () => {
-			const { container } = render(<Toolbar lensNames={['a', 'b', 'c']} pickerValue="" onLensSelect={() => {}} />);
+			const { container } = render(<Toolbar
+				lensNames={['a', 'b', 'c']}
+				pickerValue=""
+				onLensSelect={() => {}}
+				editButtonVisible={false}
+				onEditReturn={() => {}}
+			/>);
 			const firstOption = container.querySelector(
 				'[data-orchestrator-lens-picker] option',
 			) as HTMLOptionElement | null;
@@ -66,7 +108,13 @@ describe('<Toolbar>', () => {
 		});
 
 		it('the lens <option>s follow the sentinel, in input order, with matching value and label', () => {
-			const { container } = render(<Toolbar lensNames={['a', 'b', 'c']} pickerValue="" onLensSelect={() => {}} />);
+			const { container } = render(<Toolbar
+				lensNames={['a', 'b', 'c']}
+				pickerValue=""
+				onLensSelect={() => {}}
+				editButtonVisible={false}
+				onEditReturn={() => {}}
+			/>);
 			const options = container.querySelectorAll(
 				'[data-orchestrator-lens-picker] option',
 			);
@@ -85,7 +133,13 @@ describe('<Toolbar>', () => {
 	describe('Controlled value — pickerValue prop governs selection', () => {
 		it('pickerValue="" yields picker.value === ""', () => {
 			const { container } = render(
-				<Toolbar lensNames={['a', 'b']} pickerValue="" onLensSelect={() => {}} />,
+				<Toolbar
+					lensNames={['a', 'b']}
+					pickerValue=""
+					onLensSelect={() => {}}
+					editButtonVisible={false}
+					onEditReturn={() => {}}
+				/>,
 			);
 			const picker = container.querySelector(
 				'[data-orchestrator-lens-picker]',
@@ -95,7 +149,13 @@ describe('<Toolbar>', () => {
 
 		it('pickerValue="a" yields picker.value === "a"', () => {
 			const { container } = render(
-				<Toolbar lensNames={['a', 'b']} pickerValue="a" onLensSelect={() => {}} />,
+				<Toolbar
+					lensNames={['a', 'b']}
+					pickerValue="a"
+					onLensSelect={() => {}}
+					editButtonVisible={false}
+					onEditReturn={() => {}}
+				/>,
 			);
 			const picker = container.querySelector(
 				'[data-orchestrator-lens-picker]',
@@ -112,6 +172,8 @@ describe('<Toolbar>', () => {
 					lensNames={['a', 'b']}
 					pickerValue=""
 					onLensSelect={onLensSelect}
+					editButtonVisible={false}
+					onEditReturn={() => {}}
 				/>,
 			);
 			const picker = container.querySelector(
@@ -128,6 +190,8 @@ describe('<Toolbar>', () => {
 					lensNames={['a']}
 					pickerValue="a"
 					onLensSelect={onLensSelect}
+					editButtonVisible={true}
+					onEditReturn={() => {}}
 				/>,
 			);
 			const picker = container.querySelector(
@@ -135,6 +199,73 @@ describe('<Toolbar>', () => {
 			) as HTMLSelectElement;
 			fireEvent.change(picker, { target: { value: '' } });
 			expect(onLensSelect).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('Edit-return button — visible only when editButtonVisible is true', () => {
+		it('editButtonVisible=false renders no [data-orchestrator-edit-button] element', () => {
+			const { container } = render(
+				<Toolbar
+					lensNames={['a']}
+					pickerValue=""
+					onLensSelect={() => {}}
+					editButtonVisible={false}
+					onEditReturn={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-edit-button]'),
+			).toBeNull();
+		});
+
+		it('editButtonVisible=true renders a <button data-orchestrator-edit-button>', () => {
+			const { container } = render(
+				<Toolbar
+					lensNames={['a']}
+					pickerValue="a"
+					onLensSelect={() => {}}
+					editButtonVisible={true}
+					onEditReturn={() => {}}
+				/>,
+			);
+			const editButton = container.querySelector(
+				'[data-orchestrator-edit-button]',
+			);
+			expect(editButton?.tagName).toBe('BUTTON');
+		});
+
+		it('the edit button has accessible text content ("Edit code")', () => {
+			const { container } = render(
+				<Toolbar
+					lensNames={['a']}
+					pickerValue="a"
+					onLensSelect={() => {}}
+					editButtonVisible={true}
+					onEditReturn={() => {}}
+				/>,
+			);
+			const editButton = container.querySelector(
+				'[data-orchestrator-edit-button]',
+			);
+			expect(editButton?.textContent).toBe('Edit code');
+		});
+
+		it('clicking the edit button calls onEditReturn', () => {
+			const onEditReturn = vi.fn();
+			const { container } = render(
+				<Toolbar
+					lensNames={['a']}
+					pickerValue="a"
+					onLensSelect={() => {}}
+					editButtonVisible={true}
+					onEditReturn={onEditReturn}
+				/>,
+			);
+			const editButton = container.querySelector(
+				'[data-orchestrator-edit-button]',
+			) as HTMLButtonElement;
+			fireEvent.click(editButton);
+			expect(onEditReturn).toHaveBeenCalledTimes(1);
 		});
 	});
 });

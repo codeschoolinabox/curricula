@@ -877,6 +877,131 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 	});
 });
 
+describe('<StudyLenses> — L1.8 + L1.9 + L1.10 edit-return button', () => {
+	describe('L1.8 — Zero: editor mode hides the edit button', () => {
+		it('rendering without a lens prop shows no [data-orchestrator-edit-button] element', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			expect(
+				container.querySelector('[data-orchestrator-edit-button]'),
+			).toBeNull();
+		});
+	});
+
+	describe('L1.9 — One: lens mode shows the edit button', () => {
+		it('rendering with lens="debug-props" shows the [data-orchestrator-edit-button] element', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-edit-button]'),
+			).not.toBeNull();
+		});
+
+		it('the edit element is a <button>', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const editButton = container.querySelector(
+				'[data-orchestrator-edit-button]',
+			);
+			expect(editButton?.tagName).toBe('BUTTON');
+		});
+	});
+
+	describe('L1.10 — Interface: clicking the edit button returns to editor mode', () => {
+		it('the click dispatches mode-changed({from: lens, to: editor})', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+				dispatchSpy.mockClear();
+				const editButton = container.querySelector(
+					'[data-orchestrator-edit-button]',
+				) as HTMLButtonElement;
+				fireEvent.click(editButton);
+				expect(dispatchSpy).toHaveBeenCalledWith('mode-changed', {
+					from: 'lens',
+					to: 'editor',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('the click does NOT dispatch lens-switched (no lens is being selected)', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(
+					<StudyLenses snippet="OK" lens="debug-props" />,
+				);
+				expect(dispatchSpy).toHaveBeenCalledTimes(2);
+				dispatchSpy.mockClear();
+				const editButton = container.querySelector(
+					'[data-orchestrator-edit-button]',
+				) as HTMLButtonElement;
+				fireEvent.click(editButton);
+				expect(dispatchSpy).not.toHaveBeenCalledWith(
+					'lens-switched',
+					expect.anything(),
+				);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('after the click, the editor home base is mounted ([data-orchestrator-host] present)', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const editButton = container.querySelector(
+				'[data-orchestrator-edit-button]',
+			) as HTMLButtonElement;
+			fireEvent.click(editButton);
+			expect(
+				container.querySelector('[data-orchestrator-host]'),
+			).not.toBeNull();
+		});
+
+		it('after the click, the edit button is no longer rendered (state is back in editor mode)', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const editButton = container.querySelector(
+				'[data-orchestrator-edit-button]',
+			) as HTMLButtonElement;
+			fireEvent.click(editButton);
+			expect(
+				container.querySelector('[data-orchestrator-edit-button]'),
+			).toBeNull();
+		});
+
+		it('after clicking edit, opening a lens via the picker re-mounts the lens (state machine is re-entrant)', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const editButton = container.querySelector(
+				'[data-orchestrator-edit-button]',
+			) as HTMLButtonElement;
+			fireEvent.click(editButton);
+			const picker = container.querySelector(
+				'[data-orchestrator-lens-picker]',
+			) as HTMLSelectElement;
+			fireEvent.change(picker, { target: { value: 'debug-props' } });
+			expect(
+				container.querySelector('[data-lens="debug-props"]'),
+			).not.toBeNull();
+		});
+	});
+});
+
 describe('<StudyLenses> — F5b.6 prop-driven in-mode lens-switch (lens → lens)', () => {
 	describe('Interface — only lens-switched dispatches on in-mode lens switch', () => {
 		it('lens-switched fires with non-null previous and source: prop', () => {

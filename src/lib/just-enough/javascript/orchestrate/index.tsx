@@ -350,6 +350,18 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			applyTransition(name, 'picker');
 		}
 
+		// L1.10: edit-return transitions. The toolbar's edit button drives
+		// `lens → editor`. Passing `undefined` as the lens target routes
+		// `deriveInitialState` through the editor branch; `applyTransition`
+		// then dispatches `mode-changed({from: 'lens', to: 'editor'})` and
+		// skips `lens-switched` because next.state.mode !== 'lens'. The
+		// source argument is unused for this path (no lens-switched fires)
+		// but `'picker'` keeps the LensSelectionSource value semantically
+		// adjacent to the toolbar.
+		function handleEditReturn(): void {
+			applyTransition(undefined, 'picker');
+		}
+
 		// F2.5: edit invalidation. Any snippet edit eagerly clears the cache so a
 		// subsequent editor → lens transition always re-embodies, per the cache
 		// contract documented in DOCS.md § Effect topology (Embodiment-on-edit
@@ -385,6 +397,8 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 					lensNames={LENS_NAMES}
 					pickerValue={pickerValue}
 					onLensSelect={handleLensSelect}
+					editButtonVisible={state.mode === 'lens'}
+					onEditReturn={handleEditReturn}
 				/>
 					<lensModule.Component
 						embodiment={cachedEmbodiment.embodiment}
@@ -400,6 +414,8 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 					lensNames={LENS_NAMES}
 					pickerValue={pickerValue}
 					onLensSelect={handleLensSelect}
+					editButtonVisible={state.mode === 'lens'}
+					onEditReturn={handleEditReturn}
 				/>
 				<EditorComponent
 					snippet={snippet}
