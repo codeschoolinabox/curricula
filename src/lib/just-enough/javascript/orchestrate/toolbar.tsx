@@ -28,20 +28,37 @@ type ToolbarProps = Readonly<{
 	 * but the picker treats the array as the authoritative roster.
 	 */
 	lensNames: readonly string[];
+
+	/**
+	 * The picker's currently-selected value, derived by the parent from
+	 * orchestrator state: `state.mode === 'lens' ? state.activeLens : ''`.
+	 * The empty string selects the disabled sentinel (editor mode); a
+	 * registered lens name selects that option (lens mode).
+	 */
+	pickerValue: string;
 }>;
 
 /**
  * Renders the toolbar shell and the lens-picker dropdown.
  *
  * @param lensNames - Registered lens names to expose in the picker.
+ * @param pickerValue - The currently-selected picker value (state-derived).
  */
-function Toolbar({ lensNames }: ToolbarProps): React.JSX.Element {
+function Toolbar({
+	lensNames,
+	pickerValue,
+}: ToolbarProps): React.JSX.Element {
+	// onChange is a no-op until L1.6 wires the picker-selection handler;
+	// React requires an onChange on a controlled <select> to suppress the
+	// read-only warning.
+	function noopOnChange(): void {}
 	return (
 		<nav data-orchestrator-toolbar>
 			<select
 				data-orchestrator-lens-picker
 				aria-label="Lens picker"
-				defaultValue=""
+				value={pickerValue}
+				onChange={noopOnChange}
 			>
 				<option value="" disabled hidden>
 					— select a lens —

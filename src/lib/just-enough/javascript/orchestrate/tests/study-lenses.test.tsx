@@ -706,6 +706,50 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			expect(values).toEqual(['', 'annotate', 'debug-props']);
 		});
 	});
+
+	describe('L1.4 — picker value in editor mode', () => {
+		it('the picker value is the empty string when there is no lens prop', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			const picker = container.querySelector(
+				'[data-orchestrator-lens-picker]',
+			) as HTMLSelectElement | null;
+			expect(picker?.value).toBe('');
+		});
+
+		it('the picker value re-syncs to "" after a lens → editor transition', () => {
+			const { container, rerender } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			rerender(<StudyLenses snippet="OK" />);
+			const picker = container.querySelector(
+				'[data-orchestrator-lens-picker]',
+			) as HTMLSelectElement | null;
+			expect(picker?.value).toBe('');
+		});
+	});
+
+	describe('L1.5 — picker value in lens mode', () => {
+		it('the picker value equals the active lens name when lens="debug-props"', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const picker = container.querySelector(
+				'[data-orchestrator-lens-picker]',
+			) as HTMLSelectElement | null;
+			expect(picker?.value).toBe('debug-props');
+		});
+
+		it('the picker value re-syncs to the new active lens after an in-mode lens switch', () => {
+			const { container, rerender } = render(
+				<StudyLenses snippet="OK" lens="annotate" />,
+			);
+			rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+			const picker = container.querySelector(
+				'[data-orchestrator-lens-picker]',
+			) as HTMLSelectElement | null;
+			expect(picker?.value).toBe('debug-props');
+		});
+	});
 });
 
 describe('<StudyLenses> — F5b.6 prop-driven in-mode lens-switch (lens → lens)', () => {

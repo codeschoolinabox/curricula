@@ -81,7 +81,7 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 
 /**
  * Registered lens names, in registration order. Stable reference passed
- * to `<Toolbar lensNames={LENS_NAMES} />` so the picker's option list
+ * to `<Toolbar lensNames={LENS_NAMES} pickerValue={pickerValue} />` so the picker's option list
  * doesn't recompute per render.
  */
 const LENS_NAMES: readonly string[] = Object.freeze(Object.keys(LENS_REGISTRY));
@@ -339,6 +339,13 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			setCachedEmbodiment(null);
 		}, []);
 
+		// L1.4 + L1.5: picker value is derived from state, NOT held in a
+		// local picker-side state slot. State remains the single source of
+		// truth (per README § Picker-vs-prop ownership). Lens mode shows the
+		// active lens name; editor mode shows the empty string, which the
+		// sentinel option carries.
+		const pickerValue = state.mode === 'lens' ? state.activeLens : '';
+
 		if (state.mode === 'lens') {
 			// Invariant (enforced by transition logic): mode='lens' ⇒ cache non-null
 			// AND cache.snippet === current snippet. A null cache here means a
@@ -352,7 +359,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			const lensModule = LENS_REGISTRY[state.activeLens]!;
 			return (
 				<div data-orchestrator-root>
-					<Toolbar lensNames={LENS_NAMES} />
+					<Toolbar lensNames={LENS_NAMES} pickerValue={pickerValue} />
 					<lensModule.Component
 						embodiment={cachedEmbodiment.embodiment}
 						config={state.resolvedConfig}
@@ -363,7 +370,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 
 		return (
 			<div data-orchestrator-root>
-				<Toolbar lensNames={LENS_NAMES} />
+				<Toolbar lensNames={LENS_NAMES} pickerValue={pickerValue} />
 				<EditorComponent
 					snippet={snippet}
 					onSnippetChange={handleSnippetChange}
