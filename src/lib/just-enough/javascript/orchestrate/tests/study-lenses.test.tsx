@@ -718,7 +718,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 	});
 
 	describe('L1.3 — picker enumerates the LENS_REGISTRY', () => {
-		it('the picker has the sentinel followed by one <option> per registered lens (annotate, debug-props)', () => {
+		it('the picker has the sentinel followed by one <option> per registered lens (annotate, blanks, debug-props)', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
 			const options = container.querySelectorAll(
 				'[data-orchestrator-lens-picker] option',
@@ -726,7 +726,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			const values = Array.from(options).map(
 				(option) => (option as HTMLOptionElement).value,
 			);
-			expect(values).toEqual(['', 'annotate', 'debug-props']);
+			expect(values).toEqual(['', 'annotate', 'blanks', 'debug-props']);
 		});
 	});
 
