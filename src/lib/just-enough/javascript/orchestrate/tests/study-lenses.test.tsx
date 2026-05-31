@@ -693,6 +693,19 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			).not.toBeNull();
 		});
 	});
+
+	describe('L1.3 — picker enumerates the LENS_REGISTRY', () => {
+		it('the picker has the sentinel followed by one <option> per registered lens (annotate, debug-props)', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			const options = container.querySelectorAll(
+				'[data-orchestrator-lens-picker] option',
+			);
+			const values = [...options].map((option) =>
+				(option as HTMLOptionElement).value,
+			);
+			expect(values).toEqual(['', 'annotate', 'debug-props']);
+		});
+	});
 });
 
 describe('<StudyLenses> — F5b.6 prop-driven in-mode lens-switch (lens → lens)', () => {

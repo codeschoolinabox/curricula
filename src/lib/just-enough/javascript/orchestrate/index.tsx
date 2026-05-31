@@ -80,6 +80,13 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 });
 
 /**
+ * Registered lens names, in registration order. Stable reference passed
+ * to `<Toolbar lensNames={LENS_NAMES} />` so the picker's option list
+ * doesn't recompute per render.
+ */
+const LENS_NAMES: readonly string[] = Object.freeze(Object.keys(LENS_REGISTRY));
+
+/**
  * Single-pass initial derivation of `{ state, cache }` from the first-render
  * props. Both `useState` lazy initializers project from a single call so
  * `embody()` is invoked at most once at first render (in lens mode).
@@ -345,7 +352,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			const lensModule = LENS_REGISTRY[state.activeLens]!;
 			return (
 				<div data-orchestrator-root>
-					<Toolbar />
+					<Toolbar lensNames={LENS_NAMES} />
 					<lensModule.Component
 						embodiment={cachedEmbodiment.embodiment}
 						config={state.resolvedConfig}
@@ -356,7 +363,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 
 		return (
 			<div data-orchestrator-root>
-				<Toolbar />
+				<Toolbar lensNames={LENS_NAMES} />
 				<EditorComponent
 					snippet={snippet}
 					onSnippetChange={handleSnippetChange}
