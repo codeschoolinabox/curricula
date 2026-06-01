@@ -222,6 +222,43 @@ describe('parsons lens — drag-and-drop reorder', () => {
 		const afterOrder = rowOrder(container);
 		expect(afterOrder).toEqual(beforeOrder);
 	});
+
+	it('drop with out-of-range fromIndex (corrupt dataTransfer) is a no-op', () => {
+		// Defensive: a cross-origin drag or third-party source could
+		// put a garbage value into dataTransfer.text/plain. The reorder
+		// guard at index.tsx should reject and leave row order intact.
+		const { container } = renderParsons('a;\nb;\nc;');
+		const beforeOrder = rowOrder(container);
+		const targetRow = container.querySelectorAll<HTMLLIElement>(
+			'[data-parsons-row]',
+		)[1];
+		const dataTransfer = makeDataTransfer();
+		// Skip dragStart — simulate an unsolicited drop with corrupt
+		// fromIndex in the payload. The handler reads draggingIndex
+		// state (null since no dragStart) then falls back to
+		// dataTransfer.getData('text/plain'), which returns '' → NaN
+		// → Number.isFinite guard fires; setRowOrder is skipped.
+		fireEvent.drop(targetRow, { dataTransfer });
+		const afterOrder = rowOrder(container);
+		expect(afterOrder).toEqual(beforeOrder);
+	});
+
+	it('drop with explicit out-of-range index value rejects via reorder guard', () => {
+		const { container } = renderParsons('a;\nb;\nc;');
+		const beforeOrder = rowOrder(container);
+		const targetRow = container.querySelectorAll<HTMLLIElement>(
+			'[data-parsons-row]',
+		)[1];
+		const dataTransfer = makeDataTransfer();
+		// Manually set a corrupt fromIndex into the dataTransfer
+		// payload. The handler's parseInt path is the only one that
+		// could deliver it; the reorder guard then rejects on
+		// fromIndex >= rows.length.
+		dataTransfer.setData('text/plain', '999');
+		fireEvent.drop(targetRow, { dataTransfer });
+		const afterOrder = rowOrder(container);
+		expect(afterOrder).toEqual(beforeOrder);
+	});
 });
 
 describe('parsons lens — unpinned seed (per-mount random)', () => {
