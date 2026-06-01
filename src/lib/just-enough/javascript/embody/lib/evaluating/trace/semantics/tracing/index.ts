@@ -29,7 +29,7 @@ import {
 import instrument from './instrument.js';
 
 import type { TraceEvent } from './types.js';
-import type { TraceResult } from '../../../../../api/types.js';
+import type { TraceResult } from '../types.js';
 
 // --- Message types ---
 
