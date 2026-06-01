@@ -16,9 +16,12 @@
  * - **Edit-return button** — a `<button data-orchestrator-edit-button>`
  *   labelled "Edit code" that appears only when `state.mode === 'lens'`.
  *   Clicking it returns to editor mode and dispatches
- *   `mode-changed({from: 'lens', to: 'editor'}, source: 'edit-button')`;
- *   `lens-switched` is NOT dispatched (no lens is being selected, the
- *   active lens is being unmounted).
+ *   `mode-changed({from: 'lens', to: 'editor'})`; `lens-switched` is NOT
+ *   dispatched (no lens is being selected, the active lens is being
+ *   unmounted). The internal `applyTransition` call passes
+ *   `source: 'edit-button'` for analytics-style attribution, but
+ *   `ModeChangedPayload` carries only `{from, to}`, so the source is not
+ *   observable on the bus today.
  *
  * @vitest-skip — Docusaurus auto-routes `src/pages/*.tsx`; this is a
  * page, not a unit test.
