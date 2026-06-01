@@ -968,7 +968,7 @@ quick reference:
 4. Run quality checks before each commit:
 
 ```bash
-npm run validate  # lint + type-check + test
+npm run validate  # typecheck + format check + lint + test
 ```
 
 ### 3. Conventions Checklist
@@ -1415,7 +1415,7 @@ For each behavioral increment:
     > Audit](#ar-4-implementation-audit) below for focus areas, including
     > structural quality and Fake It residue checks.
 
-13. **Quality checks** — `npm test && npm run lint && npm run type-check`
+13. **Quality checks** — `npm test && npm run lint && npm run typecheck`
 14. **Verify docs match implementation** — update README.md and DOCS.md if
     behavior or structure changed during TDD
 15. **Atomic commit** — one behavior per commit
@@ -1477,7 +1477,7 @@ are green is the exact failure mode they exist to prevent.
 After all increments are complete, before prompting the human to commit:
 
 1. **Run full quality checks** —
-   `npm test && npm run lint && npm run type-check`
+   `npm test && npm run lint && npm run typecheck`
 2. **Adversarial Pre-Merge Review (AR-5)** — Spawn a separate reviewer agent to
    review the full changeset. See [§ AR-5: Pre-Merge
    Review](#ar-5-pre-merge-review) below for focus areas. Provide the full
@@ -1721,14 +1721,14 @@ This codebase uses a three-tool pipeline for code quality:
 # Check for violations
 npm run lint           # ESLint
 npm run format:check   # Prettier
-npm run type-check     # TypeScript
+npm run typecheck     # TypeScript
 
 # Auto-fix what's fixable
 npm run lint:fix       # ESLint auto-fix
 npm run format         # Prettier auto-format
 
 # Run all checks at once
-npm run validate       # lint + type-check + test
+npm run validate       # typecheck + format check + lint + test
 ```
 
 ### Pre-commit Hooks
@@ -1773,7 +1773,7 @@ See [eslint.config.js](./eslint.config.js) for full configuration.
 
 ### TypeScript Strict Mode
 
-All TypeScript strict checks are enabled. Run `npm run type-check` to verify.
+All TypeScript strict checks are enabled. Run `npm run typecheck` to verify.
 
 ### Manual Review Conventions
 
