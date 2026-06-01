@@ -23,6 +23,10 @@ export default tseslint.config(
 			'src/lib/sl-trace-js-aran-legacy/src/record/legacy-aran-trace/**',
 			// Test snippet JS files — exercise inputs, not source code
 			'src/lib/sl-trace-js-aran-legacy/src/record/tests/test-snippets/**',
+			// Vendored blanks lens internals (blankenate, no-paste-extension,
+			// url-config, evaluate-correctness) — JS→TS mechanical converts of
+			// the legacy implementation; idiomatic V2 style is a follow-up.
+			'src/lib/just-enough/javascript/lenses/blanks/lib/**',
 			// Per-package scaffolding (will be removed after Phase 7)
 			'src/lib/*/node_modules/**',
 			'src/lib/*/dist/**',
