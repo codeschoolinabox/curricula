@@ -173,12 +173,14 @@ Inherits all conventions from [`../README.md`](../README.md),
   [`embody()`](../../embody/index.ts) or anything under
   `../../embody/lib/evaluating/` (the execution path). The F2
   invariant rests on this boundary.
-- **Severity needs no translation.** Both `Violation` and
-  `LintDiagnostic` use `'rejection'`; the editing/ module maps
-  `'rejection'` → CodeMirror's `'error'` internally. The adapter's
-  actual work is flattening `location` (`start`/`end` → `line` /
-  `column` / `endLine` / `endColumn`); parse-error diagnostics get
-  `severity: 'error'`. **No endpoint adjustment.** `SourceRange.end`
+- **Severity needs no translation at this layer.** Both `Violation`
+  and `LintDiagnostic` use `'rejection'`; the editing/ module maps
+  `'rejection'` → CodeMirror's `'warning'` internally (teaching-
+  boundary signal — yellow/orange gutter marker — not a syntax
+  error). The adapter's actual work is flattening `location`
+  (`start`/`end` → `line` / `column` / `endLine` / `endColumn`);
+  parse-error diagnostics get `severity: 'error'` and stay red in
+  CodeMirror. **No endpoint adjustment.** `SourceRange.end`
   is acorn-exclusive (one past the last character), and
   [`to-cm-diagnostic.ts`](../../orchestrate/lib/editing/to-cm-diagnostic.ts)
   treats `LintDiagnostic.endColumn` as an exclusive offset

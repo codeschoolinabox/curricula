@@ -100,7 +100,9 @@ function extractToken(
 	}
 
 	// Arrow function — the '=>' may be embedded in a larger slice
-	if (slice.includes('=>') && NOT_IN_JEJ_LABELS.has('=>')) return '=>';
+	// (e.g. `(a, b) => a + b`). The label '=>' is a stable member of
+	// NOT_IN_JEJ_LABELS, so no membership check is needed.
+	if (slice.includes('=>')) return '=>';
 
 	// Last identifier — strips MemberExpression prefix (e.g. 'str.split' → 'split')
 	// eslint-disable-next-line sonarjs/slow-regex -- anchored end-of-string pattern; O(n) in the engine despite the linter heuristic

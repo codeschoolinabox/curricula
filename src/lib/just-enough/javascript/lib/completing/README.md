@@ -45,21 +45,20 @@ translates CM's `CompletionContext` into this shape.
 [`../../orchestrate/lib/editing/types.ts`](../../orchestrate/lib/editing/types.ts)):
 `{ label, type?, detail?, info?, entry?, apply? }`.
 `type` is CodeMirror's icon-rendering hint (`'keyword'`, `'global'`,
-`'local'`, `'member'`, etc.). `apply === 'noop'` is the sentinel that
-asks CodeMirror to dismiss the popup on Enter instead of inserting the
-label — the learner must type the blocked text manually to override
-(and the linter catches it). `entry` is a `DocEntry` (the same shape
-the hover surface returns), sourced from
-[`../documenting/not-in-jej.ts`](../documenting/not-in-jej.ts) when
-the item is a blocked stumble; the editing layer dispatches on shape
-and lifts `entry` through
-[`build-tooltip-dom.ts`](../../orchestrate/lib/editing/build-tooltip-dom.ts)
-— literally the same function the hover surface calls. `info`
-remains a plain-string fallback for non-JEJ consumers (lifted through
-the simpler
-[`build-info-dom.ts`](../../orchestrate/lib/editing/build-info-dom.ts));
-the JEJ adapter never sets `info`. The UI derives the "not in JEJ"
-badge from `entry.isJEJ === false`.
+`'local'`, `'member'`, etc.). `detail` renders inline next to the label
+in the dropdown row — blocked items set `detail: '(not in JEJ)'` as a
+lightweight in-flow flag. `apply === 'noop'` is the sentinel that asks
+CodeMirror to dismiss the popup on Enter instead of inserting the label —
+the learner must type the blocked text manually to override (and the
+linter catches it). `info` and `entry` are alternative info-callback
+payloads the editing-layer dispatches between (`entry` takes
+precedence, lifted through `build-tooltip-dom.ts`; `info` is the
+plain-string fallback through `build-info-dom.ts`). The JEJ adapter
+leaves BOTH unset on blocked items: rich pedagogical content surfaces
+through the linter's gutter-warning hover and the docLookup word-hover,
+not through the autocomplete popup info-callback — keeping the typing
+flow uncluttered. The `entry` field is scaffolding for future adapters
+that may want a rich autocomplete-popup tooltip.
 
 **Completion feed** — the path from snippet text → frozen completion
 items. The adapter calls
@@ -170,15 +169,17 @@ Behavior:
 - **Chained dot context** (`str.charAt(0).`) → falls through to the
   identifier branch (no dot suggestions; keywords + globals + locals
   shown). Single-level dot-receiver only.
-- **Blocked item** → `entry` set to the `DocEntry` from
-  [`../documenting/not-in-jej.ts`](../documenting/not-in-jej.ts) for
-  that label (covering the full identifier-context + dot-member-context
-  vocabulary; 25 entries with `isJEJ: false`), `apply: 'noop'`. The
-  UI derives the "not in JEJ" badge from `entry.isJEJ === false`.
-  (`null` is the one allowed-but-curated case — its DocEntry lives
+- **Blocked item** → `detail: '(not in JEJ)'` inline flag in the
+  dropdown row, `type: 'blocked'`, `apply: 'noop'`. No `entry`
+  payload — rich `DocEntry` content surfaces through the linter's
+  gutter-warning hover and through the word-hover docLookup
+  callback, not through the autocomplete popup. (Per
+  [`../documenting/not-in-jej.ts`](../documenting/not-in-jej.ts),
+  the 25 blocked labels span identifier-context + dot-member-context.)
+  `null` is the one allowed-but-curated case — its DocEntry lives
   under [`../documenting/keywords.ts`](../documenting/keywords.ts) as
   an advisory stumble with `isJEJ: true`; the entry teaches "use
-  `undefined` instead" without blocking the keystroke.)
+  `undefined` instead" without blocking the keystroke.
 
 The function never throws. `validate(code)` never throws for string
 input.

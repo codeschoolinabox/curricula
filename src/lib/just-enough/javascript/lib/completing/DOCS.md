@@ -114,8 +114,8 @@ flowchart TD
     SurfaceDot["curated member-union suggestions<br/>(source = member)"]
     SurfaceAst["keyword + global + scope-local suggestions"]
     SurfaceNoAst["keyword + global suggestions"]
-    BlockedDocs[("non-JEJ DocEntry partition<br/>(frozen, from documenting)")]
-    Marked2["overlaid suggestion set<br/>(blocked items carry rich DocEntry<br/>by reference)"]
+    BlockedLabels[("NOT_IN_JEJ_LABELS<br/>(from documenting)")]
+    Marked2["overlaid suggestion set<br/>(blocked items: detail '(not in JEJ)' inline,<br/>no entry payload)"]
     Items["frozen, prefix-filtered<br/>completion items"]
 
     Req --> Val --> Ctx
@@ -128,9 +128,15 @@ flowchart TD
     SurfaceDot -->|"blocked-label overlay"| Marked2
     SurfaceAst -->|"blocked-label overlay"| Marked2
     SurfaceNoAst -->|"blocked-label overlay"| Marked2
-    BlockedDocs -.->|"DocEntry by reference<br/>(no clone, no spread)"| Marked2
+    BlockedLabels -.->|"membership check (which labels to flag)"| Marked2
     Marked2 -->|"case-insensitive prefix filter, deep-freeze"| Items
 ```
+
+The rich `DocEntry` payload (the multi-section content for each
+blocked label) is consumed elsewhere — by the linter's
+gutter-warning hover (via `LintDiagnostic.entry`) and by the editor's
+word-hover docLookup. The autocomplete popup carries only the
+inline `(not in JEJ)` flag, keeping the typing flow uncluttered.
 
 ### Structural constraints
 
