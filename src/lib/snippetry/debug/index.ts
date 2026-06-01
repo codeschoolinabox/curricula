@@ -38,46 +38,7 @@
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import guardLoops from './guard-loops/guard-loops.js';
-
-/**
- * A single recorded occurrence during a debug run. Currently the debug
- * engine emits only error events (success yields nothing); the type is
- * shaped as a union so future event kinds can be added without churn.
- */
-type DebugEvent = {
-	readonly event: 'error';
-	readonly name: string;
-	readonly message: string;
-};
-
-/**
- * The value returned by the debug async generator after iteration completes.
- * Success carries an empty logs array; failures carry the classified error
- * and any emitted DebugEvents.
- */
-type DebugResult =
-	| {
-			readonly ok: true;
-			readonly logs: readonly DebugEvent[];
-	  }
-	| {
-			readonly ok: false;
-			readonly error:
-				| {
-						readonly kind: 'iteration-limit';
-						readonly name: string;
-						readonly message: string;
-						readonly phase: 'execution';
-						readonly limit: number;
-				  }
-				| {
-						readonly kind: 'javascript';
-						readonly name: string;
-						readonly message: string;
-						readonly phase: 'creation';
-				  };
-			readonly logs: readonly DebugEvent[];
-	  };
+import type { DebugEvent, DebugResult } from './types.js';
 
 /**
  * CSS to position the iframe offscreen. The iframe must exist in the DOM
