@@ -13,18 +13,20 @@ Educational content for learning to program, powered by
 
 ## Available Scripts
 
-| Script                  | What it does                          |
-| ----------------------- | ------------------------------------- |
-| `npm start`             | Launch Docusaurus dev server          |
-| `npm run build`         | Build static site for deployment      |
-| `npm run lint`          | Run all linters                       |
-| `npm run format`        | Auto-format all files                 |
-| `npm run validate`      | Format check + full lint (runs in CI) |
-| `npm run lint:js`       | ESLint on JS/MJS/JSX files            |
-| `npm run lint:md`       | markdownlint on Markdown files        |
-| `npm run lint:mdx`      | ESLint + MDX plugin on MDX files      |
-| `npm run lint:names`    | ls-lint for file/directory naming     |
-| `npm run lint:spelling` | cspell spell-check across all content |
+| Script                  | What it does                                     |
+| ----------------------- | ------------------------------------------------ |
+| `npm start`             | Launch Docusaurus dev server                     |
+| `npm run build`         | Build static site for deployment                 |
+| `npm run typecheck`     | TypeScript type check (tsc --noEmit)             |
+| `npm test`              | Run vitest test suite                            |
+| `npm run lint`          | Run all linters                                  |
+| `npm run format`        | Auto-format all files                            |
+| `npm run validate`      | typecheck + format check + lint + test (CI gate) |
+| `npm run lint:js`       | ESLint on JS/MJS/JSX/TS/TSX files                |
+| `npm run lint:md`       | markdownlint on Markdown files                   |
+| `npm run lint:mdx`      | ESLint + MDX plugin on MDX files                 |
+| `npm run lint:names`    | ls-lint for file/directory naming                |
+| `npm run lint:spelling` | cspell spell-check across all content            |
 
 ## Content Structure
 
