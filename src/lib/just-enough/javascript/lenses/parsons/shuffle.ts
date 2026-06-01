@@ -77,7 +77,7 @@ function fisherYates(
 		const draw = nextRandom(state);
 		state = draw.nextState;
 		const swap = Math.floor(draw.value * (index + 1));
-		// eslint-disable-next-line functional/immutable-data -- local mutable builder; Fisher-Yates swap
+		// eslint-disable-next-line functional/prefer-readonly-type -- Fisher-Yates swap requires mutable tuple destructuring
 		[result[index], result[swap]] = [result[swap], result[index]] as [Row, Row];
 	}
 	return result;

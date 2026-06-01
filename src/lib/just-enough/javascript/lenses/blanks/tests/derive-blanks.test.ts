@@ -18,6 +18,32 @@ const ALL_CATEGORIES: ReadonlyArray<TokenCategory> = [
 ];
 
 describe('deriveBlanks', () => {
+	describe('defensive paths (production-gated by applicableTo)', () => {
+		// `applicableTo` gates derive-blanks on `status.parsed`, so these
+		// branches are unreachable in production. Tests pin the
+		// defensive contract so a future caller without the gate gets
+		// graceful degradation rather than a crash.
+		it('parse-fail embodiment (ast === null) → empty derivation', () => {
+			const derivation = deriveBlanks(
+				embody('FAIL_AT_PARSE'),
+				100,
+				ALL_CATEGORIES,
+				1,
+			);
+			expect(derivation.blanks).toEqual([]);
+		});
+
+		it('tokenize-fail embodiment (tokens === null) → empty derivation', () => {
+			const derivation = deriveBlanks(
+				embody('FAIL_AT_TOKENIZE'),
+				100,
+				ALL_CATEGORIES,
+				1,
+			);
+			expect(derivation.blanks).toEqual([]);
+		});
+	});
+
 	describe('degenerate inputs', () => {
 		it('empty source → empty fragments and empty blanks', () => {
 			const derivation = deriveBlanks(embody(''), 100, ALL_CATEGORIES, 1);

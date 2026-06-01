@@ -34,22 +34,6 @@ type Row = {
 	readonly originalIndex: number;
 };
 
-// ─── Validation result ──────────────────────────────────────
-
-/**
- * Per-row correctness state.
- *
- * - `'correct'` — the row's current position equals its
- *   `originalIndex`.
- * - `'incorrect'` — the row's current position differs from its
- *   `originalIndex`.
- *
- * @remarks No `'unfilled'` state (compare to `blanks`'s
- * `Correctness`): every row always has a current position, so there
- * is nothing equivalent to an empty `<input>`.
- */
-type Correctness = 'correct' | 'incorrect';
-
 // ─── Per-lens config narrowing ──────────────────────────────
 
 /**
@@ -74,4 +58,4 @@ type ParsonsLensConfig = {
 
 // ─── Exports ────────────────────────────────────────────────
 
-export type { Row, Correctness, ParsonsLensConfig };
+export type { Row, ParsonsLensConfig };

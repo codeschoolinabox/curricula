@@ -81,8 +81,9 @@ describe('parsons lens — rendered surface', () => {
 
 	it('every row carries data-row-original-index', () => {
 		const { container } = renderParsons('a;\nb;\nc;');
-		const rows = container.querySelectorAll<HTMLLIElement>(
-			'[data-parsons-row]',
+		// eslint-disable-next-line unicorn/prefer-spread -- NodeList iteration; Babel emits unstable code per annotate Pitfall #14
+		const rows = Array.from(
+			container.querySelectorAll<HTMLLIElement>('[data-parsons-row]'),
 		);
 		for (const row of rows) {
 			expect(row.dataset.rowOriginalIndex).toBeDefined();
@@ -91,8 +92,9 @@ describe('parsons lens — rendered surface', () => {
 
 	it('every row is draggable', () => {
 		const { container } = renderParsons('a;\nb;\nc;');
-		const rows = container.querySelectorAll<HTMLLIElement>(
-			'[data-parsons-row]',
+		// eslint-disable-next-line unicorn/prefer-spread -- NodeList iteration; Babel emits unstable code per annotate Pitfall #14
+		const rows = Array.from(
+			container.querySelectorAll<HTMLLIElement>('[data-parsons-row]'),
 		);
 		for (const row of rows) {
 			expect(row.draggable).toBe(true);
