@@ -129,6 +129,10 @@ export default function createExecution<TEvent, TResult>(
 			returnResult.then(
 				function onCancelResult(iterResult) {
 					done = true;
+					// Spec: generator.return() resolves with done:true, so
+					// iterResult.value is TResult, not TEvent. Guard narrows
+					// the IteratorResult<TEvent, TResult> union for TS.
+					if (!iterResult.done) return;
 					resolvedResult = iterResult.value;
 					hasResult = true;
 					if (resolveResultPromise) {
