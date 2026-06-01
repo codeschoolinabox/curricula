@@ -30,7 +30,10 @@
     // Allow duplicate headings in sibling sections
     "MD024": { "siblings_only": true },
     // Allow multiple top-level headings
-    "MD025": false
+    "MD025": false,
+    // Allow hard tabs inside fenced code blocks (curriculum JS samples
+    // legitimately use tabs to match Prettier's useTabs: true)
+    "MD010": { "code_blocks": false }
   },
   "ignores": ["node_modules/**", "build/**", ".docusaurus/**"],
   "globs": ["**/*.md"]
