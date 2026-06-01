@@ -54,6 +54,7 @@ import embody from '../embody/index.js';
 import annotateLens from '../lenses/annotate/index.js';
 import blanksLens from '../lenses/blanks/index.js';
 import debugPropsLens from '../lenses/debug-props/index.js';
+import parsonsLens from '../lenses/parsons/index.js';
 import type { LensConfig, LensModule } from '../lenses/types.js';
 
 import EditorComponent from './editor/index.js';
@@ -80,6 +81,7 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 	annotate: annotateLens,
 	blanks: blanksLens,
 	'debug-props': debugPropsLens,
+	parsons: parsonsLens,
 });
 
 /**

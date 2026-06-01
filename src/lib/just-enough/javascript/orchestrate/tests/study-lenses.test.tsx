@@ -233,8 +233,10 @@ describe('<StudyLenses> — F1 smoke', () => {
 			expect(editorHost).toBeNull();
 		});
 
-		it('lens="parsons" (NOT registered) → editor home-base mounts (F1+B silent-drop fallback)', () => {
-			const { container } = render(<StudyLenses snippet="OK" lens="parsons" />);
+		it('lens="trace-table" (NOT registered) → editor home-base mounts (F1+B silent-drop fallback)', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="trace-table" />,
+			);
 			const editorHost = container.querySelector('[data-orchestrator-host]');
 			expect(editorHost).not.toBeNull();
 			const lensRoot = container.querySelector('[data-lens]');
@@ -271,8 +273,8 @@ describe('<StudyLenses> — F1 smoke', () => {
 			const { container } = render(
 				<StudyLenses
 					snippet="OK"
-					lens="parsons"
-					configs={{ lenses: { parsons: { x: 'y' } } }}
+					lens="trace-table"
+					configs={{ lenses: { 'trace-table': { x: 'y' } } }}
 				/>,
 			);
 			const editorHost = container.querySelector('[data-orchestrator-host]');
@@ -718,7 +720,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 	});
 
 	describe('L1.3 — picker enumerates the LENS_REGISTRY', () => {
-		it('the picker has the sentinel followed by one <option> per registered lens (annotate, blanks, debug-props)', () => {
+		it('the picker has the sentinel followed by one <option> per registered lens (annotate, blanks, debug-props, parsons)', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
 			const options = container.querySelectorAll(
 				'[data-orchestrator-lens-picker] option',
@@ -726,7 +728,13 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			const values = Array.from(options).map(
 				(option) => (option as HTMLOptionElement).value,
 			);
-			expect(values).toEqual(['', 'annotate', 'blanks', 'debug-props']);
+			expect(values).toEqual([
+				'',
+				'annotate',
+				'blanks',
+				'debug-props',
+				'parsons',
+			]);
 		});
 	});
 
