@@ -8,10 +8,8 @@ Educational content for learning to program, powered by
 ## Getting Started
 
 1. Clone this repository
-2. Install [Ruff](https://docs.astral.sh/ruff/installation/) for Python linting
-   (optional)
-3. Run `npm install`
-4. Run `npm start` to launch the dev server
+2. Run `npm install`
+3. Run `npm start` to launch the dev server
 
 ## Available Scripts
 
@@ -25,7 +23,6 @@ Educational content for learning to program, powered by
 | `npm run lint:js`       | ESLint on JS/MJS/JSX files            |
 | `npm run lint:md`       | markdownlint on Markdown files        |
 | `npm run lint:mdx`      | ESLint + MDX plugin on MDX files      |
-| `npm run lint:py`       | Ruff check on Python files            |
 | `npm run lint:names`    | ls-lint for file/directory naming     |
 | `npm run lint:spelling` | cspell spell-check across all content |
 
