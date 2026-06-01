@@ -80,7 +80,7 @@ describe('completeJej', () => {
 
 	describe('blocked stumbling — synthesized for labels NOT in JEJ surface', () => {
 		describe('prefix matches "var" exactly', () => {
-			it('emits a blocked item with the curated info and apply: noop', () => {
+			it('emits a blocked item with the rich DocEntry and apply: noop', () => {
 				const result = completeJej({
 					prefix: 'var',
 					precedingText: '',
@@ -93,8 +93,9 @@ describe('completeJej', () => {
 					detail: '(not in JEJ)',
 					apply: 'noop',
 				});
-				expect(typeof variableItem?.info).toBe('string');
-				expect(variableItem?.info?.length ?? 0).toBeGreaterThan(0);
+				expect(variableItem?.entry?.isJEJ).toBe(false);
+				expect(variableItem?.entry?.description).toBeTruthy();
+				expect(variableItem?.entry?.whyNotInJej).toBeTruthy();
 			});
 		});
 
@@ -121,37 +122,33 @@ describe('completeJej', () => {
 		});
 	});
 
-	describe('advisory stumbling — JEJ-valid with curated info', () => {
+	describe('advisory stumbling — JEJ-valid keywords without blocked markers', () => {
+		// Advisory caveats for null/new are surfaced on hover (their
+		// documenting/keywords.ts entries); the autocomplete adapter no
+		// longer attaches per-suggestion info to JEJ-valid items.
 		describe('null advisory', () => {
-			it('appears with source-derived type keyword and curated info', () => {
+			it('appears with source-derived type keyword and no blocked marker', () => {
 				const item = completeJej({
 					prefix: 'nu',
 					precedingText: '',
 					fullText: '',
 				}).find((candidate) => candidate.label === 'null');
 				expect(item).toMatchObject({ label: 'null', type: 'keyword' });
-				expect(typeof item?.info).toBe('string');
-			});
-
-			it('does not carry apply: noop (advisory keystroke lands normally)', () => {
-				const item = completeJej({
-					prefix: 'nu',
-					precedingText: '',
-					fullText: '',
-				}).find((candidate) => candidate.label === 'null');
 				expect(item?.apply).toBeUndefined();
+				expect(item?.entry).toBeUndefined();
 			});
 		});
 
 		describe('new advisory', () => {
-			it('appears with source-derived type keyword and curated info', () => {
+			it('appears with source-derived type keyword and no blocked marker', () => {
 				const item = completeJej({
 					prefix: 'ne',
 					precedingText: '',
 					fullText: '',
 				}).find((candidate) => candidate.label === 'new');
 				expect(item).toMatchObject({ label: 'new', type: 'keyword' });
-				expect(typeof item?.info).toBe('string');
+				expect(item?.apply).toBeUndefined();
+				expect(item?.entry).toBeUndefined();
 			});
 		});
 	});

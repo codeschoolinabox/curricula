@@ -1,53 +1,46 @@
 /**
- * @file Overlay the curated stumbling-list onto the raw JEJ-surface
- * suggestions. Two-step process per DOCS.md § Execution phases /
- * Mark blocked:
+ * @file Overlay JEJ-blocked labels onto the raw JEJ-surface
+ * suggestions per DOCS.md § Execution phases / Mark blocked.
  *
- * 1. **Pass-through with optional info attachment** — for each input
- *    suggestion, keep its `source`-derived `type`; if its label
- *    appears in the stumbling-list, attach the curated `info` (the
- *    advisory case, used for JEJ-valid labels like `new` and `null`
- *    that carry a teaching caveat).
+ * Synthesizes blocked CompletionItem entries from the
+ * `documenting/not-in-jej.ts` table — the single source of truth for
+ * non-JEJ pedagogical content. Identifier context emits the 10
+ * identifier-shaped labels (`var`, `function`, `class`, `=>`,
+ * `this`, `throw`, `try`, `import`, `async`, `await`); dot-receiver
+ * context emits the 15 dot-member-shaped labels (`.split`,
+ * `.constructor`, `.__proto__`, etc.) — the validator's
+ * `BLOCKED_MEMBER_NAMES` set.
  *
- * 2. **Blocked synthesis** — for each stumbling-list label NOT in
- *    the input suggestions, emit a synthesized blocked item with
- *    `type: 'blocked'`, `detail: '(not in JEJ)'`, `info` from the
- *    stumbling-list, and `apply: 'noop'`. This is what surfaces
- *    `var`/`class`/`function`/etc. in the popup when a learner
- *    types toward them — they are not in JEJ, so the JEJ surface
- *    never includes them; synthesis adds them so the pedagogical
- *    signal can fire.
+ * Each synthesized blocked item carries the rich `DocEntry` from the
+ * documenting module by reference (no clone, no spread); the
+ * editing-layer renderer (`build-tooltip-dom.ts`) lifts it to a
+ * structured tooltip identical to the hover surface. The UI derives
+ * the "not in JEJ" badge from `entry.isJEJ === false`.
  *
  * Prefix-filtering and freezing happen at the orchestrator boundary
  * in `complete-jej.ts`; this function is overlay-only.
  */
 
 import justEnoughJs from '../../embody/lib/validating/just-enough-js.js';
+import NOT_IN_JEJ_ENTRIES, {
+	NOT_IN_JEJ_LABELS,
+} from '../documenting/not-in-jej.js';
 import type { CompletionItem } from '../../orchestrate/lib/editing/types.js';
 
-import STUMBLING_LIST from './stumbling-list.js';
-import type { StumblingEntry, Suggestion } from './types.js';
-
-/**
- * Stumbling-list labels that describe DOT-MEMBER access (`.split`,
- * `.match`). Their pass-through-and-synthesize behavior in dot
- * context is handled by the dot-context synthesizer's iteration over
- * `justEnoughJs.blockedMemberNames` (which includes them); in
- * identifier context, the identifier-context synthesizer skips them
- * via this set so they don't surface as blocked completions when a
- * learner types `sp` or `ma` for a keyword or global.
- */
-const MEMBER_ONLY_LABELS: ReadonlySet<string> = new Set(['split', 'match']);
+import type { Suggestion } from './types.js';
 
 /** `detail` text attached to every synthesized blocked completion. */
 const BLOCKED_DETAIL = '(not in JEJ)';
 
 /**
- * Convert each `Suggestion` to a `CompletionItem`, attaching blocked
- * markers + curated info where applicable, and synthesize blocked
- * items for stumbling-list labels not present in the input.
+ * Convert each `Suggestion` to a `CompletionItem` (pass-through) and
+ * synthesize blocked items for JEJ-blocked labels not present in the
+ * input.
  *
  * @param suggestions - Raw JEJ-surface suggestions.
+ * @param inDotContext - True when the completion request is in
+ *   dot-receiver context; selects the dot-member partition for
+ *   synthesis.
  * @returns Read-only array of completion items, NOT yet
  *   prefix-filtered or frozen.
  */
@@ -55,42 +48,26 @@ function markBlocked(
 	suggestions: readonly Suggestion[],
 	inDotContext = false,
 ): readonly CompletionItem[] {
-	const stumblingByLabel = new Map(
-		STUMBLING_LIST.map(function indexByLabel(entry) {
-			return [entry.label, entry] as const;
-		}),
-	);
 	const inputLabels = new Set(
 		suggestions.map(function pickLabel(suggestion) {
 			return suggestion.label;
 		}),
 	);
 
-	// Step 1: pass-through with optional info attachment.
+	// Step 1: pass-through with source-derived type. Advisory caveats
+	// for `null` and `new` (JEJ-valid keywords with teaching caveats)
+	// live in `documenting/keywords.ts`; this phase does not attach
+	// info to JEJ-valid items.
 	const passthrough: readonly CompletionItem[] = suggestions.map(
-		function withOptionalInfo(suggestion): CompletionItem {
-			const stumble = stumblingByLabel.get(suggestion.label);
-			if (stumble) {
-				return {
-					label: suggestion.label,
-					type: suggestion.source,
-					info: stumble.info,
-				};
-			}
+		function withType(suggestion): CompletionItem {
 			return { label: suggestion.label, type: suggestion.source };
 		},
 	);
 
-	// Step 2: synthesize blocked items. The two contexts emit from
-	// different sources: identifier context iterates the curated
-	// stumbling-list (so `var`, `class`, `function`, etc. surface as
-	// blocked when learners type toward them); dot-receiver context
-	// iterates the validator's blockedMemberNames set (so blocked
-	// dot names like `.constructor`, `.__proto__`, `.call`, plus
-	// `.split` and `.match` surface as blocked), attaching curated
-	// info from the stumbling-list when present.
+	// Step 2: synthesize blocked items. Each carries the rich
+	// DocEntry from documenting/not-in-jej.ts by reference.
 	const synthesized: readonly CompletionItem[] = inDotContext
-		? synthesizeDotBlocked(inputLabels, stumblingByLabel)
+		? synthesizeDotBlocked(inputLabels)
 		: synthesizeIdentifierBlocked(inputLabels);
 
 	return [...passthrough, ...synthesized];
@@ -98,7 +75,6 @@ function markBlocked(
 
 function synthesizeDotBlocked(
 	inputLabels: ReadonlySet<string>,
-	stumblingByLabel: ReadonlyMap<string, StumblingEntry>,
 ): readonly CompletionItem[] {
 	const blockedMembers = justEnoughJs.blockedMemberNames ?? new Set<string>();
 	// `Array.from(<Set>)` instead of `[...<Set>]` — the Docusaurus/Babel
@@ -110,20 +86,11 @@ function synthesizeDotBlocked(
 			return !inputLabels.has(name);
 		})
 		.map(function asBlockedMember(name): CompletionItem {
-			const stumble = stumblingByLabel.get(name);
-			if (stumble) {
-				return {
-					label: name,
-					type: 'blocked',
-					detail: BLOCKED_DETAIL,
-					info: stumble.info,
-					apply: 'noop',
-				};
-			}
 			return {
 				label: name,
 				type: 'blocked',
 				detail: BLOCKED_DETAIL,
+				entry: NOT_IN_JEJ_ENTRIES[name],
 				apply: 'noop',
 			};
 		});
@@ -132,19 +99,21 @@ function synthesizeDotBlocked(
 function synthesizeIdentifierBlocked(
 	inputLabels: ReadonlySet<string>,
 ): readonly CompletionItem[] {
-	return STUMBLING_LIST
-		.filter(function notInInput(stumble) {
-			return !inputLabels.has(stumble.label);
+	const blockedMembers = justEnoughJs.blockedMemberNames ?? new Set<string>();
+	// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
+	return Array.from(NOT_IN_JEJ_LABELS)
+		.filter(function isIdentifierContext(label) {
+			return !blockedMembers.has(label);
 		})
-		.filter(function notMemberOnly(stumble) {
-			return !MEMBER_ONLY_LABELS.has(stumble.label);
+		.filter(function notInInput(label) {
+			return !inputLabels.has(label);
 		})
-		.map(function asBlocked(stumble): CompletionItem {
+		.map(function asBlocked(label): CompletionItem {
 			return {
-				label: stumble.label,
+				label,
 				type: 'blocked',
 				detail: BLOCKED_DETAIL,
-				info: stumble.info,
+				entry: NOT_IN_JEJ_ENTRIES[label],
 				apply: 'noop',
 			};
 		});
