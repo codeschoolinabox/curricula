@@ -6,7 +6,15 @@
  * trace wrappers. Wire-up only — do not add logic here.
  */
 
+// @ts-expect-error — Phase 3 migration remnant: the @study-lenses/tracing
+// dependency has not been vendored or added to package.json. This file
+// has no consumers in the current tree (semantics/ is WIP per
+// EMBODY-IMPL-HANDOFF.md Phase B2), so the dangling import is
+// intentionally suppressed rather than fixed. When the dependency is
+// resolved — either by inlining the wrapper or adding the package —
+// remove this annotation alongside the fix.
 import tracing from '@study-lenses/tracing';
+// @ts-expect-error — see above; same Phase 3 remnant.
 import type { RecordFunction } from '@study-lenses/tracing';
 
 import id from './id.js';
