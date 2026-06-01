@@ -27,8 +27,7 @@
 // TraceEvent, ASTNode, nodePath, SourceLocation from the sibling semantic
 // tracer at ../semantics/. `TraceConfig` lives in `../semantics/config.types.ts`;
 // the other types need locating + possibly re-exporting from
-// `../semantics/index.ts`.
-import type { TraceConfig } from '../semantics/config.types.js';
+// `../semantics/index.ts`. Import the named types when a use site lands.
 type TraceEvent = unknown;      // TODO: locate in ../semantics/
 type ASTNode = unknown;         // TODO: locate in ../semantics/
 type nodePath = string;         // TODO: confirm in ../semantics/
