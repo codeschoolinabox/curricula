@@ -169,6 +169,180 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		whyNotInJej:
 			"A method that searches a string for a pattern and returns the matches as an array. You have used string methods that return primitives: `.toUpperCase` returns a string, `.indexOf` returns a number, `.includes` returns a boolean. `.match` is the same shape of method call, but its return value is an _array_ — and JEJ's value-type set is primitives only. Arrays are a different value-type that opens up in a new language level with a new notional machine; `.match` waits for that level.",
 	},
+	matchAll: {
+		description:
+			'String method that returns all regex matches as an iterator over result arrays. Requires the `g` flag on the regex.',
+		example: '"abcabc".matchAll(/a/g); // iterator over { 0: \'a\', index: 0 }, { 0: \'a\', index: 3 }',
+		isJEJ: false,
+		whenToUse:
+			"In modern JavaScript, when you need every regex match plus its position. JEJ does not use iterators or arrays — `.matchAll` returns both, so it is outside this language level.",
+		commonMistakes: [
+			"Reaching for '.matchAll' at this language level — JEJ has no arrays or iterators.",
+			"Forgetting the required `g` flag — `'abc'.matchAll(/a/)` throws TypeError.",
+		],
+		whyNotInJej:
+			"A method that returns all regex matches as an iterator over result arrays. You have used string methods that return primitives: `.toUpperCase` returns a string, `.indexOf` returns a number, `.includes` returns a boolean. `.matchAll` is the same shape of method call, but its return value is an _iterator_ yielding arrays — neither of which JEJ has. JEJ's value-type set is primitives only. Iterators and arrays open up in a new language level with a new notional machine; `.matchAll` waits for that level.",
+	},
+	constructor: {
+		description:
+			"A reference to the function that produced this value. `'hello'.constructor === String`, `(0).constructor === Number`, etc.",
+		example: "'hello'.constructor; // String\n(0).constructor; // Number",
+		isJEJ: false,
+		whenToUse:
+			"In modern JavaScript, for runtime reflection — checking what kind of value you have. JEJ does not use code-level reflection; type-by-type behavior is decided by which method you call.",
+		commonMistakes: [
+			"Reaching for '.constructor' at this language level — JEJ treats values by what they let you do (their methods), not by introspecting which class produced them.",
+		],
+		whyNotInJej:
+			"Every string, number, and built-in object in JEJ has a `.constructor` reference that points back at the function the language used to make it internally. You've used the prototype chain to find methods — `.toUpperCase` on a string, `.toFixed` on a number. `.constructor` walks the same chain but to ask about its own structure rather than to find a method. JEJ teaches the chain as a tool you use; `.constructor` treats the chain as a thing you inspect — _reflection_: code that asks about code, a programming pattern that opens up in a new language level with a new notional machine.",
+	},
+	// `__proto__` as a bare object-literal key is the special
+	// prototype-setter form in JS, not a regular property. Using
+	// computed-property syntax (`['__proto__']`) creates a normal
+	// property named `__proto__` instead.
+	['__proto__']: {
+		description:
+			"An older getter/setter exposing the prototype of a value — the next link in the prototype chain. Modern equivalents: `Object.getPrototypeOf` and `Object.setPrototypeOf`.",
+		example: "'hello'.__proto__; // String.prototype",
+		isJEJ: false,
+		whenToUse:
+			"Almost never in modern JavaScript — `Object.getPrototypeOf` is the standard read. Mutating `__proto__` is especially discouraged for performance and clarity reasons.",
+		commonMistakes: [
+			"Reaching for '.__proto__' at this language level — JEJ teaches the prototype chain as a method-lookup walk, not as a thing you reach in to manipulate.",
+		],
+		whyNotInJej:
+			"A direct handle on the next link in the prototype chain — the object the language consults when a method is not found on the value itself. You have seen the prototype chain at work when `'hi'.toUpperCase` is found on `String.prototype`. `__proto__` lets your code grab that link directly, read it, or even replace it. JEJ teaches the chain as part of the machinery the language uses; `__proto__` opens up _reflection_ on that machinery — a programming pattern that comes with a new language level and a new notional machine.",
+	},
+	prototype: {
+		description:
+			"A property on constructor functions that holds the object new instances inherit from. `String.prototype` holds methods like `.toUpperCase` that strings inherit.",
+		example: 'String.prototype; // { toUpperCase, slice, ... }\nNumber.prototype; // { toFixed, ... }',
+		isJEJ: false,
+		whenToUse:
+			"In modern JavaScript, when defining or extending classes and prototype objects. JEJ programs do not define classes, and built-in `.prototype` objects are not reached into directly — methods are called through the value, not through `String.prototype.toUpperCase.call(value)`.",
+		commonMistakes: [
+			"Reaching for '.prototype' at this language level — JEJ uses the prototype chain implicitly (via method calls); it does not expose `.prototype` as a learner-side surface.",
+		],
+		whyNotInJej:
+			"The bag of methods every value of a given type inherits from. When you call `'hi'.toUpperCase()`, the language looks at `String.prototype` because strings inherit from it. `.prototype` lets your code grab that bag directly to read it, add to it, or rebuild it. JEJ teaches the prototype chain as the look-up the language performs for you; `.prototype` is the same chain as a thing you can hand-modify — a reflection-and-mutation pattern that opens up in a new language level with a new notional machine.",
+	},
+	call: {
+		description:
+			"Calls a function with a specified `this` value and arguments listed one-by-one. `f.call(thisArg, a, b)` is `f(a, b)` but with `this` set to `thisArg`.",
+		example: 'Math.max.call(null, 1, 2, 3); // 3',
+		isJEJ: false,
+		whenToUse:
+			"In modern JavaScript, when you need to call a method with a different `this` than its natural receiver. JEJ has no user-defined functions; built-in functions are called directly.",
+		commonMistakes: [
+			"Reaching for '.call' at this language level — JEJ does not redirect function calls.",
+		],
+		whyNotInJej:
+			"A way to call a function while explicitly setting its `this` binding to a value of your choice. JEJ does not give you user-defined functions to call this way, and the built-in functions you do use (`Math.max`, `parseInt`, etc.) do not depend on a `this` for their work. The `this`-rebinding machinery exists at the language level — but it has no learner-side use until you can define your own functions and methods, which opens up in a new language level with a new notional machine.",
+	},
+	apply: {
+		description:
+			"Calls a function with a specified `this` value and arguments given as an array. `f.apply(thisArg, [a, b])` is `f(a, b)` but with `this` set to `thisArg`.",
+		example: 'Math.max.apply(null, [1, 2, 3]); // 3',
+		isJEJ: false,
+		whenToUse:
+			"In modern JavaScript, when you have arguments already in an array. The modern replacement is spread: `Math.max(...args)`.",
+		commonMistakes: [
+			"Reaching for '.apply' at this language level — JEJ has no arrays to pass and no user functions to rebind.",
+		],
+		whyNotInJej:
+			"The same idea as `.call`, but with arguments handed in as an array. JEJ has no user-defined functions to rebind and no arrays to pass to begin with. The machinery exists at the language level but has no learner-side use until both functions and arrays come into reach — which opens up in a new language level with a new notional machine.",
+	},
+	bind: {
+		description:
+			"Returns a new function with `this` pre-bound to a value and (optionally) arguments pre-set. `f.bind(thisArg, a)` is a new function whose call site can omit `this` and `a`.",
+		example: "const greetAlice = greet.bind(null, 'Alice');",
+		isJEJ: false,
+		whenToUse:
+			"In modern JavaScript, when handing a method to a callback that would otherwise lose its natural `this`. Mostly superseded by arrow functions, which inherit `this` from their surrounding scope.",
+		commonMistakes: [
+			"Reaching for '.bind' at this language level — JEJ does not bind functions to specific receivers.",
+		],
+		whyNotInJej:
+			"A way to create a new function pre-configured with a specific `this` and (optionally) some arguments. JEJ has no user-defined functions to bind. The function-shaping machinery exists at the language level but has no learner-side use without user-defined functions, which open up in a new language level with a new notional machine.",
+	},
+	caller: {
+		description:
+			"A non-standard, deprecated property on functions that pointed at the function which invoked the current one. Throws in strict mode.",
+		example: '// f.caller — deprecated; do not use',
+		isJEJ: false,
+		whenToUse:
+			"Never in modern JavaScript — `.caller` is deprecated, throws in strict mode, and was never standardized. Modern call-stack inspection happens via stack traces on `Error` instances.",
+		commonMistakes: [
+			"Reaching for '.caller' at this language level — it is deprecated everywhere, not just JEJ.",
+		],
+		whyNotInJej:
+			"A deprecated reference that pointed at the function which invoked the current one. JEJ has no user-defined functions, so there is no caller-side to reference, and the property is removed from JavaScript in strict-mode code anyway. Even in older JavaScript, reaching for `.caller` is discouraged; modern call-stack inspection happens through error-stack-trace reads. Both function-call machinery and call-stack reflection open up in a new language level with a new notional machine.",
+	},
+	arguments: {
+		description:
+			"An array-like object available inside every non-arrow function holding all arguments passed in.",
+		example: 'function sum() { return arguments[0] + arguments[1]; }',
+		isJEJ: false,
+		whenToUse:
+			"In modern JavaScript, the rest-parameter syntax `function sum(...nums)` replaces `arguments` in nearly every case.",
+		commonMistakes: [
+			"Reaching for 'arguments' at this language level — JEJ has no functions, so there is no function-body interior to look at.",
+		],
+		whyNotInJej:
+			"An automatic array-like object every function-body had access to before rest-parameters existed, holding the arguments passed in. JEJ has no user-defined functions — there is no function-body interior to look at. The machinery exists at the language level for built-in functions but has no learner-side use without your own function bodies, which open up in a new language level with a new notional machine.",
+	},
+	__defineGetter__: {
+		description:
+			"An older method that adds a getter function to an object — code that runs when a property is read. Modern replacement: `Object.defineProperty(obj, name, { get })`.",
+		example: "obj.__defineGetter__('full', function () { return this.first + this.last; });",
+		isJEJ: false,
+		whenToUse:
+			"Almost never in modern JavaScript — `Object.defineProperty` is the standard and clearer way. Reach for getters when property access should run code, not just return stored data.",
+		commonMistakes: [
+			"Reaching for '.__defineGetter__' at this language level — JEJ does not use property-descriptor manipulation.",
+		],
+		whyNotInJej:
+			"An older method that lets code make a property act like a function — reading `obj.full` runs a function instead of returning a stored value. JEJ properties always return what was stored; there is no machinery on the learner side for code-on-property-access. Property descriptors and getters/setters open up in a new language level with a new notional machine.",
+	},
+	__defineSetter__: {
+		description:
+			"An older method that adds a setter function to an object — code that runs when a property is written. Modern replacement: `Object.defineProperty(obj, name, { set })`.",
+		example: "obj.__defineSetter__('name', function (v) { this._name = v.trim(); });",
+		isJEJ: false,
+		whenToUse:
+			"Almost never in modern JavaScript — `Object.defineProperty` is the standard. Reach for setters when property assignment should run code, e.g. validation.",
+		commonMistakes: [
+			"Reaching for '.__defineSetter__' at this language level — JEJ does not use property-descriptor manipulation.",
+		],
+		whyNotInJej:
+			"The setter sibling of `__defineGetter__` — assigning to a property runs a function instead of storing the value. JEJ properties always store what was assigned; there is no machinery on the learner side for code-on-property-assignment. Property descriptors and getters/setters open up in a new language level with a new notional machine.",
+	},
+	__lookupGetter__: {
+		description:
+			"An older method that returns the getter function (if any) attached to a property — the inverse of `.__defineGetter__`.",
+		example: "obj.__lookupGetter__('full'); // returns the getter function or undefined",
+		isJEJ: false,
+		whenToUse:
+			"Almost never — `Object.getOwnPropertyDescriptor(obj, name).get` is the modern equivalent. Used when introspecting whether a property is a getter or stored data.",
+		commonMistakes: [
+			"Reaching for '.__lookupGetter__' at this language level — JEJ does not introspect property descriptors.",
+		],
+		whyNotInJej:
+			"An older method for inspecting whether a property is backed by a getter function. JEJ does not have getters in learner-side code, and does not let learner-side code peek at how a property was set up. Property-descriptor reflection opens up in a new language level with a new notional machine.",
+	},
+	__lookupSetter__: {
+		description:
+			"An older method that returns the setter function (if any) attached to a property — the inverse of `.__defineSetter__`.",
+		example: "obj.__lookupSetter__('name'); // returns the setter function or undefined",
+		isJEJ: false,
+		whenToUse:
+			"Almost never — `Object.getOwnPropertyDescriptor(obj, name).set` is the modern equivalent.",
+		commonMistakes: [
+			"Reaching for '.__lookupSetter__' at this language level — JEJ does not introspect property descriptors.",
+		],
+		whyNotInJej:
+			"The setter sibling of `__lookupGetter__` — inspecting whether a property's assignment is backed by a setter function. JEJ does not have setters or property-descriptor reflection in learner-side code. The descriptor-introspection machinery opens up in a new language level with a new notional machine.",
+	},
 };
 
 export default NOT_IN_JEJ_ENTRIES;

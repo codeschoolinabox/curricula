@@ -6,7 +6,6 @@ import {
 	SUPPRESSED_GLOBALS,
 	CURATED_MEMBERS,
 } from '../../completing/collect-jej-surface.js';
-import { BLOCKED_STUMBLES } from '../../completing/stumbling-list.js';
 
 import documentJej from '../document-jej.js';
 import DOC_TABLE, { assembleDocTable } from '../doc-table.js';
@@ -151,10 +150,18 @@ describe('drift guard against upstream JEJ surface', () => {
 		);
 	});
 
-	it('NOT_IN_JEJ_LABELS equals the blocked-stumble partition of stumbling-list', () => {
-		expect([...NOT_IN_JEJ_LABELS].sort()).toEqual(
-			[...BLOCKED_STUMBLES].sort(),
+	it('NOT_IN_JEJ_LABELS includes every BLOCKED_MEMBER_NAMES entry (dot-member partition drift-guard)', () => {
+		// The 15 dot-member entries in not-in-jej.ts mirror the
+		// validator's BLOCKED_MEMBER_NAMES constant. The 10
+		// identifier-context entries are curated authorially and have
+		// no upstream constant; they are not asserted here.
+		const blockedMemberNames = [...justEnoughJs.blockedMemberNames];
+		const missing = blockedMemberNames.filter(
+			function notInDocs(name: string) {
+				return !NOT_IN_JEJ_LABELS.has(name);
+			},
 		);
+		expect(missing).toEqual([]);
 	});
 });
 
