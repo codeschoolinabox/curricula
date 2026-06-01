@@ -11,20 +11,25 @@
 import type { Text } from '@codemirror/state';
 import type { Diagnostic } from '@codemirror/lint';
 
+import buildTooltipDom from './build-tooltip-dom.js';
 import type { LintDiagnostic, LinterCallback } from './types.js';
 
 /**
  * Convert a {@link LintDiagnostic} to a CodeMirror {@link Diagnostic}.
  *
  * @remarks Clamps line/column to valid document ranges. Maps
- * `'rejection'` severity to `'error'` for JeJ compatibility.
+ * `'rejection'` severity to `'warning'` (signaling teaching-boundary
+ * rather than syntax error). When the diagnostic carries an `entry`
+ * payload (rich DocEntry), wires `renderMessage` to lift it through
+ * `buildTooltipDom` — same renderer the hover surface uses.
  *
  * @param doc - CodeMirror document (Text instance)
  * @param diagnostic - LintDiagnostic from a callback
  * @returns CodeMirror Diagnostic
  */
 function toCMDiagnostic(doc: Text, diagnostic: LintDiagnostic): Diagnostic {
-	const { line, column, endLine, endColumn, severity, message, source } = diagnostic;
+	const { line, column, endLine, endColumn, severity, message, source, entry } =
+		diagnostic;
 
 	// Clamp line to valid range (1-based, doc.lines is max)
 	const clampedLine = Math.max(1, Math.min(line || 1, doc.lines));
@@ -42,14 +47,30 @@ function toCMDiagnostic(doc: Text, diagnostic: LintDiagnostic): Diagnostic {
 	}
 
 	// perf: skip freeze — CM may mutate diagnostic objects internally
-	// JeJ uses 'rejection' for errors — map to CM's 'error' severity
-	return {
+	// JeJ uses 'rejection' for subset violations — map to CM's
+	// 'warning' severity (teaching boundary, not syntax error)
+	const cmSeverity: Diagnostic['severity'] =
+		severity === 'rejection' ? 'warning' : severity;
+	const result: Diagnostic = {
 		from,
 		to,
-		severity: severity === 'rejection' ? 'error' : severity,
+		severity: cmSeverity,
 		message: message || '',
 		source: source || '',
 	};
+
+	// When the JEJ-aware linter attaches a rich DocEntry, lift it
+	// through buildTooltipDom on hover. The token name shown in the
+	// tooltip header is the doc-slice at the diagnostic's range.
+	if (entry != null) {
+		const token = doc.sliceString(from, to);
+		// perf: skip freeze — Diagnostic is CM-internal, mutable by CM
+		result.renderMessage = function renderRichMessage(): Node {
+			return buildTooltipDom(token, entry);
+		};
+	}
+
+	return result;
 }
 
 /**

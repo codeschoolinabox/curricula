@@ -43,35 +43,27 @@ describe('markBlocked', () => {
 				expect(variableItem?.type).toBe('blocked');
 			});
 
-			it('does not set detail (badge is derived from entry.isJEJ in the UI)', () => {
-				expect(variableItem?.detail).toBeUndefined();
+			it('has inline detail "(not in JEJ)"', () => {
+				expect(variableItem?.detail).toBe('(not in JEJ)');
 			});
 
 			it('has apply noop', () => {
 				expect(variableItem?.apply).toBe('noop');
 			});
 
-			it('carries the rich DocEntry from documenting/not-in-jej.ts', () => {
-				expect(variableItem?.entry).toBeDefined();
-				expect(variableItem?.entry?.isJEJ).toBe(false);
-				expect(variableItem?.entry?.description).toBeTruthy();
-			});
-
-			it('carries the whyNotInJej rationale', () => {
-				expect(typeof variableItem?.entry?.whyNotInJej).toBe('string');
-				expect((variableItem?.entry?.whyNotInJej ?? '').length).toBeGreaterThan(
-					0,
-				);
+			it('does NOT carry an entry payload (rich content lives in the linter/hover surfaces)', () => {
+				expect(variableItem?.entry).toBeUndefined();
 			});
 		});
 
 		it.each(['var', 'function', 'class', '=>', 'this', 'throw', 'try', 'import', 'async', 'await'])(
-			'%s appears as blocked when not in input',
+			'%s appears as blocked with inline (not in JEJ) detail',
 			(label) => {
 				const result = markBlocked([]);
 				const item = result.find((candidate) => candidate.label === label);
 				expect(item?.type).toBe('blocked');
-				expect(item?.entry?.isJEJ).toBe(false);
+				expect(item?.detail).toBe('(not in JEJ)');
+				expect(item?.entry).toBeUndefined();
 			},
 		);
 
@@ -95,13 +87,13 @@ describe('markBlocked', () => {
 
 	describe('blocked synthesis — dot-context', () => {
 		it.each(['split', 'match', 'matchAll', 'constructor', '__proto__', 'prototype', 'call', 'apply', 'bind', 'caller', 'arguments'])(
-			'%s appears as blocked in dot-receiver context',
+			'%s appears as blocked in dot-receiver context with inline detail',
 			(label) => {
 				const result = markBlocked([], true);
 				const item = result.find((candidate) => candidate.label === label);
 				expect(item?.type).toBe('blocked');
-				expect(item?.entry?.isJEJ).toBe(false);
-				expect(item?.entry?.whyNotInJej).toBeTruthy();
+				expect(item?.detail).toBe('(not in JEJ)');
+				expect(item?.entry).toBeUndefined();
 			},
 		);
 

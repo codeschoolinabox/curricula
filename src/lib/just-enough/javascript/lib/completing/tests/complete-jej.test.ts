@@ -90,12 +90,10 @@ describe('completeJej', () => {
 				expect(variableItem).toMatchObject({
 					label: 'var',
 					type: 'blocked',
+					detail: '(not in JEJ)',
 					apply: 'noop',
 				});
-				expect(variableItem?.detail).toBeUndefined();
-				expect(variableItem?.entry?.isJEJ).toBe(false);
-				expect(variableItem?.entry?.description).toBeTruthy();
-				expect(variableItem?.entry?.whyNotInJej).toBeTruthy();
+				expect(variableItem?.entry).toBeUndefined();
 			});
 		});
 
@@ -309,9 +307,10 @@ describe('completeJej', () => {
 				expect(item).toMatchObject({
 					label: 'constructor',
 					type: 'blocked',
+					detail: '(not in JEJ)',
 					apply: 'noop',
 				});
-				expect(item?.entry?.isJEJ).toBe(false);
+				expect(item?.entry).toBeUndefined();
 			});
 
 			it('prefix `__proto__` on dot context emits __proto__ as blocked', () => {

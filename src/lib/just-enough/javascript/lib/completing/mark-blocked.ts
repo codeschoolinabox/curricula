@@ -2,20 +2,17 @@
  * @file Overlay JEJ-blocked labels onto the raw JEJ-surface
  * suggestions per DOCS.md § Execution phases / Mark blocked.
  *
- * Synthesizes blocked CompletionItem entries from the
- * `documenting/not-in-jej.ts` table — the single source of truth for
- * non-JEJ pedagogical content. Identifier context emits the 10
- * identifier-shaped labels (`var`, `function`, `class`, `=>`,
- * `this`, `throw`, `try`, `import`, `async`, `await`); dot-receiver
- * context emits the 15 dot-member-shaped labels (`.split`,
- * `.constructor`, `.__proto__`, etc.) — the validator's
- * `BLOCKED_MEMBER_NAMES` set.
- *
- * Each synthesized blocked item carries the rich `DocEntry` from the
- * documenting module by reference (no clone, no spread); the
- * editing-layer renderer (`build-tooltip-dom.ts`) lifts it to a
- * structured tooltip identical to the hover surface. The UI derives
- * the "not in JEJ" badge from `entry.isJEJ === false`.
+ * Synthesizes blocked CompletionItem entries with an inline
+ * `(not in JEJ)` detail flag — CodeMirror renders it next to the
+ * label in the dropdown row. Rich pedagogical content (the full
+ * DocEntry) lives in the linter's gutter-warning hover and in the
+ * editor's word-hover (`documentJej`), not in the autocomplete
+ * popup; this keeps the typing flow uncluttered with depth on
+ * demand. Identifier context emits the 10 identifier-shaped labels
+ * (`var`, `function`, `class`, `=>`, `this`, `throw`, `try`,
+ * `import`, `async`, `await`); dot-receiver context emits the 15
+ * dot-member-shaped labels (`.split`, `.constructor`,
+ * `.__proto__`, etc.) — the validator's `BLOCKED_MEMBER_NAMES` set.
  *
  * Prefix-filtering and freezing happen at the orchestrator boundary
  * in `complete-jej.ts`; this function is overlay-only.
@@ -23,11 +20,12 @@
 
 import justEnoughJs from '../../embody/lib/validating/just-enough-js.js';
 import type { CompletionItem } from '../../orchestrate/lib/editing/types.js';
-import NOT_IN_JEJ_ENTRIES, {
-	NOT_IN_JEJ_LABELS,
-} from '../documenting/not-in-jej.js';
+import { NOT_IN_JEJ_LABELS } from '../documenting/not-in-jej.js';
 
 import type { Suggestion } from './types.js';
+
+/** `detail` text shown inline next to the label in the dropdown row. */
+const BLOCKED_DETAIL = '(not in JEJ)';
 
 /**
  * Convert each `Suggestion` to a `CompletionItem` (pass-through) and
@@ -61,8 +59,10 @@ function markBlocked(
 		},
 	);
 
-	// Step 2: synthesize blocked items. Each carries the rich
-	// DocEntry from documenting/not-in-jej.ts by reference.
+	// Step 2: synthesize blocked items with the inline detail flag.
+	// The rich DocEntry is surfaced through the linter's gutter-hover
+	// (see lib/linting/lint-jej.ts) and the word-hover docLookup
+	// callback — NOT through the autocomplete-popup info-callback.
 	const synthesized: readonly CompletionItem[] = inDotContext
 		? synthesizeDotBlocked(inputLabels)
 		: synthesizeIdentifierBlocked(inputLabels);
@@ -74,9 +74,6 @@ function synthesizeDotBlocked(
 	inputLabels: ReadonlySet<string>,
 ): readonly CompletionItem[] {
 	const blockedMembers = justEnoughJs.blockedMemberNames ?? new Set<string>();
-	// `Array.from(<Set>)` instead of `[...<Set>]` — the Docusaurus/Babel
-	// transpile pipeline mangles iterable spread to a one-element array
-	// wrapping the iterable (see collect-jej-surface.ts for context).
 	// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
 	return Array.from(blockedMembers)
 		.filter(function notInInput(name) {
@@ -86,7 +83,7 @@ function synthesizeDotBlocked(
 			return {
 				label: name,
 				type: 'blocked',
-				entry: NOT_IN_JEJ_ENTRIES[name],
+				detail: BLOCKED_DETAIL,
 				apply: 'noop',
 			};
 		});
@@ -108,7 +105,7 @@ function synthesizeIdentifierBlocked(
 			return {
 				label,
 				type: 'blocked',
-				entry: NOT_IN_JEJ_ENTRIES[label],
+				detail: BLOCKED_DETAIL,
 				apply: 'noop',
 			};
 		});

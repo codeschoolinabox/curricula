@@ -36,8 +36,14 @@ type DetectedLanguage =
  *
  * @remarks Lines are 1-based, columns are 0-based — matching
  * acorn's output and the JeJ `Violation` type. The `'rejection'`
- * severity is mapped to CM's `'error'` internally, allowing JeJ
- * validators to serve as linter callbacks without adaptation.
+ * severity is mapped to CM's `'warning'` internally, signaling a
+ * teaching-boundary rather than a syntax error.
+ *
+ * `entry` is an optional rich-content payload for the hover tooltip
+ * over the diagnostic's gutter marker. When present, the editing
+ * layer replaces the plain-message render with a structured DOM
+ * lifted from the DocEntry (same renderer the hover surface uses).
+ * JEJ-aware linters set it; non-JEJ linters can leave it unset.
  */
 type LintDiagnostic = {
 	readonly line: number;
@@ -47,6 +53,7 @@ type LintDiagnostic = {
 	readonly severity: 'error' | 'warning' | 'rejection';
 	readonly message: string;
 	readonly source?: string;
+	readonly entry?: DocEntry;
 };
 
 /**
