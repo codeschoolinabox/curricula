@@ -6,3 +6,9 @@ src/lib/sl-trace-js-aran-legacy/record/legacy-aran-trace
 
 # Intentionally-malformed test fixture (exercises parse-error handling)
 src/plugins/study-lenses/tests/fixtures/malformed-json/lenses.json
+
+# Deprecated curriculum tree (per README: "unrouted in docusaurus.config.ts;
+# do not add new content"). Contains intentional-syntax-error pedagogical
+# files (parsons distractors, JS-with-blanks); prettier choking on them
+# pollutes format:check signal.
+spiralearn/welcome-to-programming/
