@@ -6,8 +6,8 @@
  *
  * Increment history:
  * - Inc A — identifier branch with keywords + JEJ-allowed globals,
- *   plus blocked-marker synthesis for stumbling-list labels not in
- *   the JEJ surface.
+ *   plus blocked-marker synthesis for non-JEJ labels not in the JEJ
+ *   surface (sourced from `../documenting/not-in-jej.ts`).
  * - Inc B — adds the Validate phase via `validate(fullText)` and
  *   scope-aware locals via `buildScope(ast).allDeclarations`
  *   (over-permissive: union of every declaration in every scope,
