@@ -37,8 +37,8 @@ and teaching approach.
 
 ## Subsections
 
-- [2.1: Running a Program](./2.1-running-a-program.md)
-- [2.2: Program State](./2.2-program-state.md)
-- [2.3: Asserting](./2.3-asserting.md)
-- [2.4: Just Enough Types and Operators](./2.4-types-and-operators.md)
-- [2.5: Be the Computer](./2.5-be-the-computer.md)
+- [2.1: Running a Program](./2-1-running-a-program.md)
+- [2.2: Program State](./2-2-program-state.md)
+- [2.3: Asserting](./2-3-asserting.md)
+- [2.4: Just Enough Types and Operators](./2-4-types-and-operators.md)
+- [2.5: Be the Computer](./2-5-be-the-computer.md)
