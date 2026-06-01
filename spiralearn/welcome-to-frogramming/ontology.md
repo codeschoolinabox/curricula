@@ -30,7 +30,7 @@
   - [§1 Foundational principles](#1-foundational-principles)
   - [§2 The rhetorical situation](#2-the-rhetorical-situation)
     - [§2.1 You Can't Un-See It](#21-you-cant-un-see-it)
-  - [§3 Geometry — three domains, two bridging activities](#3-geometry--three-domains-two-bridging-activities)
+  - [§3 Geometry — five chain-points, two bridging practices](#3-geometry--five-chain-points-two-bridging-practices)
   - [§4 The characters — V and F](#4-the-characters--v-and-f)
   - [§5 The 5-tier ATT](#5-the-5-tier-att)
 - [Part B — Pedagogical depth (orthogonal to chapter sequence)](#part-b--pedagogical-depth)
@@ -38,7 +38,7 @@
   - [§7 The 5 strands — equal status](#7-the-5-strands--equal-status)
   - [§8 The data thread (the red thread)](#8-the-data-thread-the-red-thread)
 - [Part C — Cogsci grounding](#part-c--cogsci-grounding)
-  - [§9 Strata of a software system — refining §3's geometry](#9-strata-of-a-software-system--refining-3s-geometry)
+  - [§9 Lenses of a system — levels of reductionism and holism](#9-lenses-of-a-system--levels-of-reductionism-and-holism)
 - [Part D — The LLM shift](#part-d--the-llm-shift)
   - [§10 Substrate substitution at artifact-logic — what changes about the artifact](#10-substrate-substitution-at-artifact-logic--what-changes-about-the-artifact)
   - [§11 The LLM shift, workflow-side — how AI participates in your work](#11-the-llm-shift-workflow-side--how-ai-participates-in-your-work)
@@ -183,8 +183,8 @@ step into but the structure that makes both orientations meaningful.
 
 **Relationship to sibling sections:**
 
-- §3 (Geometry): the inner structure of the situation — three domains, two
-  bridging activities
+- §3 (Geometry): the inner structure of the situation — five chain-points,
+  two bridging practices (V and F traverse the chain)
 - §4 (Characters V/F): the learner's two orientational stances within the
   Development Team node — V leftward (user arc), F downward (machine arc); see
   §4 for the 2×2 and failure modes
@@ -245,55 +245,67 @@ the harm occurs — which actor made which assumption, which relationship was
 ignored, which outer-circle question nobody answered.
 
 **How substrate decisions introduce these harms.** Many enter not through UI
-choices but through decisions made entirely in the substrate — character encoding,
-data types, field-size constraints, storage models. These appear to sit purely in
-F's affordance space: _what can the machine represent?_ A competent F making a
-technically sound decision (e.g., using UCS-2, capping field length to 50 bytes,
-defaulting to ASCII) may never see the user-space consequence of that choice.
+choices but through decisions made entirely in the substrate — character
+encoding, data types, field-size constraints, storage models. These appear to
+sit purely in F's affordance space: _what can the machine represent?_ A
+competent F making a technically sound decision (e.g., using UCS-2, capping
+field length to 50 bytes, defaulting to ASCII) may never see the user-space
+consequence of that choice.
 
 The failure is not F's twinning work — F may be reading the machine precisely.
 The failure is the **absent coordination between affordance spaces**: F probing
 substrate-affordances without V probing the corresponding user-affordances. When
 that cross-space dialogue doesn't run, substrate constraints silently foreclose
 user-space possibilities — a real user's name doesn't fit the field, a character
-set isn't supported, a date format assumes a calendar system the user doesn't use.
+set isn't supported, a date format assumes a calendar system the user doesn't
+use.
 
 _(See §7 — Affordances strand — for the Mikhak loop: the affordance-discovery
 dialogue between F and V that surfaces what neither sees alone.)_
 
 ---
 
-### §3 Geometry — three domains, two bridging activities
+### §3 Geometry — five chain-points, two bridging practices
 
-```text
-domain  ←design thinking→  the computational artifact  ←computational thinking→  CS / theory
-   │             │                       │                          │                    │
- (V's       (V's bridge:            (where V and F           (F's bridge:              (F's
-  outer        practice              both engage —             practice                 outer
-  endpoint)    of design              software,                 of computational         endpoint)
-               thinking)              hardware,                 thinking)
-                                      hybrids)
+```mermaid
+flowchart LR
+    C[real-world context] <--> U[user] <--> A[computational artifact] <--> NM[notional machine] <--> CS[CS / theory]
 ```
 
-#### Three domains (where things live)
+The curriculum's geometry is a five-point chain. WtF's working range is the
+inner three; the outer two are reach-points the curriculum gestures at and
+follow-on courses develop.
 
-- **Domain** — the world. Users, contexts, situations, problems. V's outer
-  endpoint; deepens in _Welcome to Design_.
-- **The computational artifact** — what's made. Software, hardware, hybrids
+#### The five chain-points
+
+- **Real-world context** — the world the user inhabits. Contexts, situations,
+  problems, sociocultural surrounds. Reach-point here; follow-on-deepening
+  territory for _Welcome to Design_. Load-bearing in §2's rhetorical situation
+  (where its outer ring carries this work).
+- **User** — the person or population the artifact is built for. V's twin (§4)
+  — the grounded particular V is building a generative model of.
+- **Computational artifact** — what's made. Software, hardware, hybrids
   (wearables, embedded, embodied). Both V and F engage it; this is the trading
   zone where their practices structurally meet.
-- **CS / theory** — formal abstractions. Algorithms, complexity, correctness.
-  F's outer endpoint; deepens in _Welcome to Algorithms_.
+- **Notional machine** — the cognitive model of how a computational artifact
+  behaves. F's twin (§4) — the grounded particular F is building a generative
+  model of.
+- **CS / theory** — formal abstractions of computation. Algorithms,
+  complexity, correctness, type theory, formal verification. Reach-point here;
+  follow-on-deepening territory for _Welcome to Algorithms_.
 
-#### Two bridging activities (the thinking that traverses)
+#### Two bridging practices — V and F traverse the chain
 
-- **Design thinking** — V's bridging activity. V twins the user; bridges domain
-  ↔ computational artifact through design thinking.
-- **Computational thinking** — F's bridging activity. F twins the NM (notional
-  machine of whatever artifact substrate is in play); bridges computational
-  artifact ↔ CS/theory through computational thinking.
+Each of V and F has a practice that **traverses** part of the chain. The
+practices overlap at the central chain-point — the computational artifact —
+which is §3's trading zone where V and F structurally meet.
 
-**Twinning is what makes the bridging activity _thinking_ rather than mere
+- **Design thinking** — V's practice. Traverses _real-world context ↔ user ↔
+  artifact_. V's working range across the chain.
+- **Computational thinking** — F's practice. Traverses _artifact ↔ NM ↔
+  CS/theory_. F's working range across the chain.
+
+**Twinning is what makes the bridging practice _thinking_ rather than mere
 process.** Design _thinking_ requires twinning the user; without the user-twin,
 what's happening is _design process_ (wireframes, personas, A/B tests,
 design-thinking steps) but not design _thinking_. Same on F's side:
@@ -301,12 +313,38 @@ _computational thinking_ requires twinning the NM; without the NM-twin, what's
 happening is _computational process_ (unit tests, patterns, refactoring moves)
 but not computational _thinking_. See §4 for the failure-mode elaboration.
 
+#### Course geometry — sliding windows of three
+
+The three Spiralearn courses sit on the chain as overlapping windows of three
+adjacent chain-points:
+
+| Course                       | Chain window                                    |
+| ---------------------------- | ----------------------------------------------- |
+| _Welcome to Design_          | real-world context ↔ user ↔ artifact            |
+| **_Welcome to Frogramming_** | user ↔ artifact ↔ notional machine              |
+| _Welcome to Algorithms_      | artifact ↔ notional machine ↔ CS / theory       |
+
+Shared edges between adjacent windows are curriculum hand-off points. Each
+course's focus is the circuit its window traces — the lateral motion V, F, or
+both run between its window's chain-points.
+
+#### Bakhtiarian loops — the chain's lateral motion
+
+V and F traverse the chain iteratively (the V/F dynamic developed in §4): V
+proposes use-case experiences; F discovers substrate-affordances; each turn
+reshapes what the next can hold. This iterative traversal forms **Bakhtiarian
+loops** — plural deliberately; different grains of loop run between different
+parts of the chain, between adjacent points and across course-windows. See §4
+(V/F dialogue), §7 (affordance-loop strand operationalization), and §14 (the
+MU recursive-traversal pattern) for the grain-distinctions. WtF's central
+loop is the user ↔ artifact ↔ NM circuit — its own three-point window.
+
 #### Hardware: in the mix; perpendicularity deferred
 
 Hardware lives **inside the computational artifact** with software and hybrids.
 Whether hardware is _also_ a perpendicular axis is deferred for later
 litigation. What matters now: hardware is in the mix; V and F both engage it as
-part of the central domain.
+part of the central chain-point.
 
 ---
 
@@ -322,10 +360,10 @@ computational artifact gets designed and engineered.[^wtf-origin]
     leaned in. The whole curriculum's ontology — V/F as Vibetoader/Frogrammer,
     the symbology, the playful tone — grew from that joke.
 
-| Character         | Twin (non-delegable) | Bridging activity      | Substrate range                                                           |
-| ----------------- | -------------------- | ---------------------- | ------------------------------------------------------------------------- |
-| 🎨 **Vibetoader** | the user             | design thinking        | software, hardware, hybrids — anywhere a user experience needs designing  |
-| 🔬 **Frogrammer** | the NM               | computational thinking | software, hardware, hybrids — anywhere a notional machine needs designing |
+| Character         | Twin (non-delegable)              | Bridging practice      | Substrate range                                                           |
+| ----------------- | --------------------------------- | ---------------------- | ------------------------------------------------------------------------- |
+| 🎨 **Vibetoader** | the user (§3 chain-point 2)       | design thinking        | software, hardware, hybrids — anywhere a user experience needs designing  |
+| 🔬 **Frogrammer** | the NM (§3 chain-point 4)         | computational thinking | software, hardware, hybrids — anywhere a notional machine needs designing |
 
 #### Defined-by-twinning, defined-by-what-they-aren't
 
@@ -397,13 +435,14 @@ Three of the four corners get curriculum-chapter mappings: Ch2 = F, Ch3 = V,
 Ch4 + Ch5 = both. The fourth corner (no twin) is the starting position the
 curriculum brings learners _out of_.
 
-> **Flipside reading (with §9 artifact-faces).** The both-twins state names the
-> **perceiving** — one perceiver holding user-twin + NM-twin simultaneously. §9
-> names the **perceived** — one artifact with two material faces, artifact-logic
-> (the F-face) + artifact-surface (the V-face). These are flipsides of the same
-> coin: dual-twinning is the perceiving, two-faced artifact is the perceived;
-> they co-constitute. §4 stays the canonical home for the perceiver-side
-> reading; §9 stays the canonical home for the perceived-side reading.
+> **Flipside reading (with §9 two-lens reading).** The both-twins state names
+> the **practitioner-side** — one practitioner holding V's twin (user) + F's
+> twin (NM) simultaneously. §9 names the **lens-reading-side** — the central
+> artifact read through two analytical lenses, artifact-logic (F's anchor
+> lens) + artifact-surface (V's anchor lens). These are flipsides of the same
+> activity: dual-twinning is the practitioner-side perceiving; the two-lens
+> reading is what the lenses surface. §4 stays the canonical home for the
+> practitioner-side; §9 stays the canonical home for the lens-reading-side.
 
 Note on _vibe coding_ (Karpathy): the term names LLM-mediated building without
 reading the code. It can be done with a user-twin (LLM-collaborative Vibetoading
@@ -515,6 +554,13 @@ F merge in the practitioner; Ch5's snippetry is where the merging crystallizes
 into a single integrated practice (the both-twins corner of the §4 2×2, in its
 merged form).
 
+The loop's **geometric home is §3's chain**: V and F traverse the chain
+laterally, running iterative exchange between V's twin-position (user) and F's
+twin-position (NM) through the central artifact. WtF's central loop is exactly
+that three-point circuit; loops at other grains (adjacent-pair, course-window,
+meta-pattern) run across other parts of the chain — see §7 for the strand-5
+operationalization and §14 for the MU recursive-traversal pattern.
+
 [^achilles-tortoise]:
     Achilles and Tortoise (Hofstadter, _Gödel, Escher, Bach_, 1979 — themselves
     descended from Lewis Carroll's "What the Tortoise Said to Achilles," 1895)
@@ -603,30 +649,47 @@ teaching-apparatus cast (`metaphor.md`).
 
 ### §5 The 5-tier ATT
 
-The Cunningham et al. 2012 Abstraction Transition Taxonomy had 3 levels (English
-/ Code / CS Speak). The revised model has 5: each of the three domains, plus
-each of the two bridging activities, has its own **linguistic register** — its
-_speak_.
+The Abstraction Transition Taxonomy names the linguistic registers — the
+vocabularies, phrasings, and notations practitioners use to talk about what
+lives at each chain-point. Each tier is a _-speak_ : a register practitioners
+emit when their attention is at a given chain-point and they're describing,
+predicting, or designing what lives there. The five tiers correspond 1:1 to
+§3's five chain-points.
 
-| Column                         | Type                          | Speak (linguistic register)                                                                                   | Who works it                                  |
-| ------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| **Domain**                     | domain (where)                | **Domain speak** — English about users, world, contexts; user stories in domain vocabulary                    | V's outer; deepens in _Welcome to Design_     |
-| (V's bridge)                   | bridging activity (how)       | **Design speak** — sketches, personas, user stories-as-design, wireframes, storyboards, design-system specs   | 🎨 V (design thinking)                        |
-| **The computational artifact** | domain (where — the artifact) | **Artifact speak** — code-as-text + machine internals; static + dynamic faces of the made-thing               | both V and F engage                           |
-| (F's bridge)                   | bridging activity (how)       | **Computational speak** — algorithmic reasoning, big-O, complexity arguments, correctness in operational form | 🔬 F (computational thinking)                 |
-| **CS / theory**                | domain (where)                | **CS speak** — formal proofs, theory, complexity classes, lambda calculus, formal verification                | F's outer; deepens in _Welcome to Algorithms_ |
+| Tier                       | Speak (linguistic register)                                                                                                                                                  | Who works it                                        |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| **Real-world context**     | **Context-speak** — English about world, situations, communities, sociocultural conditions; user-research and ethnographic vocabulary                                        | V's reach-point; deepens in _Welcome to Design_     |
+| **User**                   | **User-speak** — personas, user stories, journey and interaction vocabulary, accessibility registers; what V emits when twinning a user                                      | 🎨 V (V's twin-position)                            |
+| **Computational artifact** | **Artifact-speak** — code-as-text + machine internals; static (code text) and dynamic (NM events) faces of the made-thing                                                    | both V and F engage                                 |
+| **Notional machine**       | **NM-speak** — operational vocabulary: events, scopes, evaluation steps, predict-trace-verify language; what F emits when twinning an NM                                     | 🔬 F (F's twin-position)                            |
+| **CS / theory**            | **CS-speak** — formal proofs, complexity classes, type theory, lambda calculus, formal verification                                                                          | F's reach-point; deepens in _Welcome to Algorithms_ |
 
-**Bridging activities ARE linguistic registers in real practice.** Design speak
-(sketches/personas/stories) and computational speak
-(algorithmic-reasoning/big-O) are recognized professional languages. The 5-tier
-ATT names them as ATT levels because they are.
+#### Bridging practices traverse tier-subsets
 
-#### Code Speak's fate (decomposition)
+The two bridging practices (§3) are not tiers themselves — they are cross-cutting
+movements that **traverse** subsets of tiers, emitting vocabulary at multiple
+tiers as they range across them. They overlap at artifact-speak, §3's trading
+zone where V and F structurally meet.
 
-The original 3-tier ATT's "Code Speak" decomposes — but into _artifact speak_ as
-a single layer that internally splits into static (code-as-text) and dynamic
-(machine internals / NM events). The static/dynamic split is preserved; it just
-sits _inside_ the central domain rather than as two separate ATT tiers.
+- **Design thinking** traverses _context-speak ↔ user-speak ↔ artifact-speak_.
+  Its working vocabularies include sketches, personas, user stories,
+  wireframes, storyboards, design-system specs, user-research notation —
+  emitted at different tiers along its range (wireframes and storyboards near
+  artifact-speak; personas and user-research notation near user-speak and
+  context-speak).
+- **Computational thinking** traverses _artifact-speak ↔ NM-speak ↔ CS-speak_.
+  Its working vocabularies include algorithmic reasoning, operational
+  tracing, big-O arguments, correctness vocabulary — emitted at different
+  tiers along its range (operational tracing near NM-speak; big-O and formal
+  correctness near CS-speak).
+
+#### Artifact-speak's static and dynamic faces
+
+Artifact-speak contains two register-modes within a single tier: a **static
+face** (code-as-text — what's read on the page) and a **dynamic face** (machine
+internals / NM events — what's read at runtime). Both faces belong to
+artifact-speak; the split sits inside the central tier rather than between
+tiers.
 
 ---
 
@@ -799,24 +862,34 @@ The Mikhak loop is an _affordance-discovery dialogue_: F probes
 substrate-affordances; V probes user-affordances; their dialogue surfaces
 affordances neither saw alone.
 
-> _(See §9 for the universal-lens framing: F's lens and V's lens both travel to
-> read affordances at any stratum; F naturally probes substrate-affordances
-> anchored at artifact-logic, V naturally probes user-affordances anchored at
-> artifact-surface — but the Mikhak loop is the strand-5 operationalization of
-> lens-switching itself.)_
+**Geometric home — §3's chain.** The Mikhak loop's geometric home is §3: V
+probes affordances anchored at the user-side of the chain; F probes affordances
+anchored at the NM-side; their dialogue traverses the central artifact and
+surfaces affordances neither sees alone. WtF's Mikhak loop is exactly the
+user ↔ artifact ↔ NM circuit — strand-5's operationalization of §3's lateral
+motion.
 
-#### Strands × Lenses cross-map (OPEN-ENDED DEVELOPMENT GUIDE)
+> _(See §9 for the lens-traversal framing: V and F traverse the §9 lenses
+> (analytical levels), each naturally anchoring at a particular lens — F at
+> artifact-logic, V at artifact-surface — but probing affordances across the
+> range. The Mikhak loop is the strand-5 operationalization of this cross-lens
+> dialogue.)_
 
-Each strand has a different lens-affinity. Some cells suggest lenses that don't
-yet exist — gaps in the lens catalog are surfaced by the mapping itself.
+#### Strands × Study-lenses cross-map (OPEN-ENDED DEVELOPMENT GUIDE)
 
-| Strand                     | Lenses with strong affinity             | Gaps to consider                                                |
-| -------------------------- | --------------------------------------- | --------------------------------------------------------------- |
-| Twinning                   | trace-table; predictive stepping; debug | —                                                               |
-| Decisions                  | blanks; parsons; code review templates  | a "decision-tree" lens that surfaces micro-decisions?           |
-| Perspective stacking       | highlight; scope-walk; ask              | a multi-perspective lens that shows several reads side by side? |
-| Whole rhetorical situation | (no existing lens directly serves this) | rhetorical-situation lens? — open development question          |
-| Affordances                | (no existing lens directly serves this) | affordance-space lens? — what could the NM also do?             |
+_("Study-lenses" here refers to the JEJ technical infrastructure — see
+`study-lenses.md` — not §9's analytical lenses or V's/F's cognitive lenses.)_
+
+Each strand has a different study-lens-affinity. Some cells suggest study-lenses
+that don't yet exist — gaps in the catalog are surfaced by the mapping itself.
+
+| Strand                     | Study-lenses with strong affinity       | Gaps to consider                                                  |
+| -------------------------- | --------------------------------------- | ----------------------------------------------------------------- |
+| Twinning                   | trace-table; predictive stepping; debug | —                                                                 |
+| Decisions                  | blanks; parsons; code review templates  | a decision-tree study-lens that surfaces micro-decisions?         |
+| Perspective stacking       | highlight; scope-walk; ask              | a multi-perspective study-lens — several reads side-by-side?      |
+| Whole rhetorical situation | (no existing study-lens serves this)    | rhetorical-situation study-lens? — open development question      |
+| Affordances                | (no existing study-lens serves this)    | affordance-space study-lens? — what could the NM also do?         |
 
 Marked as an **open-ended development guide** — not a closed catalog.
 
@@ -855,140 +928,153 @@ referenced as side/footnote, not in body.
 
 ## Part C — Cogsci grounding
 
-### §9 Strata of a software system — refining §3's geometry
+### §9 Lenses of a system — levels of reductionism and holism
 
-§3 introduces the geometry coarsely: three domains (theory / artifact / domain)
-with V and F engaging the artifact through two bridging activities. This section
-refines that geometry into a stack of substrate strata while preserving §3's
-structure: the artifact-region splits into two faces (one per lens); the theory
-and domain regions each gain grain. V and F remain universal lenses; the natural
-twinning territory of each is the _characteristic_ range where they most often
-work, not a binding constraint.
+A system can be read from many analytical positions: zoomed all the way in to
+physics, zoomed out to systemic impacts, anchored mid-stack at the artifact
+itself. §9 names the **lenses** through which a system can be understood,
+discussed, or designed — a partially-ordered range running from most reductive
+(the substrate is what matters) to most holistic (the whole-in-context is what
+matters). The range runs between the two poles §14's MU traverses: HOLISM and
+REDUCTIONISM, each pole resolving into MU through enough levels of its
+opposite.
 
-#### The strata
+This axis is **independent of §3's chain**: §3's chain enumerates
+curriculum-relevant skill+knowledge sites; §9's lenses enumerate analytical
+levels at which any system can be read. The two axes rhyme but answer different
+questions.
 
-Drawn linearly for legibility; the stack is partially ordered. "Above" means
-_presupposes the substrate below has crystallized into stable ground_, not
-_depends only on the immediately lower stratum_. The categories are pedagogical
-handles, not metaphysical claims — arbitrary slices on a continuum, chosen for
-the minimal actionable mental model. We do not mark phase-changes between
-strata.
+> _Term hygiene._ "Lens" appears in three other senses in the doc — V's lens
+> and F's lens (the practitioner cognitive twin-stance, §4 + §7); study lenses
+> (the JEJ technical infrastructure, `study-lenses.md`); and the §7 strand ×
+> lens cross-map (referring to study lenses). The §9 "lens" is distinct from
+> all three: an **analytical lens-position along the H↔R gradient**.
+> Cross-references disambiguate inline where the senses sit close together.
 
-**Theory-side (§3 right) — F's natural twinning territory extends through here
+#### The lenses
+
+Drawn linearly for legibility; the range is partially ordered. "Above" means
+_presupposes the lens below has crystallized into stable ground_, not _depends
+only on the immediately lower lens_. The categories are pedagogical handles,
+not metaphysical claims — arbitrary slices on a continuum, chosen for the
+minimal actionable mental model. We do not mark phase-changes between lenses.
+
+**Theory-side (most reductive) — F's natural reach extends through here
 ontologically; WtF defers practical work to follow-on courses:**
 
-1. **Platonic** — _Levin's Platonic Space._ The informational interpretation of
-   the physical world; the philosophical commitment that the material is
-   _legible_ at all. Manifesto territory; the curriculum gestures here only at
-   L4 (Philosophy reading). Deferred entirely to follow-on courses ("third
-   course" frontier territory in Spiralearn's roadmap).
-2. **Physics / material.** Atoms, transistors, energy gradients. The physical
-   substrate. Deferred entirely.
-3. **Computing infrastructure.** Mathematics and formal systems made operational
-   — runtimes, OSs, networks, training/build/run support software. Deferred to
-   follow-on courses; named here so the student knows what sits below.
+- **(1) Platonic** — _Levin's Platonic Space._ The informational interpretation
+  of the physical world; the philosophical commitment that the material is
+  _legible_ at all. Manifesto territory; the curriculum gestures here only at
+  L4 (Philosophy reading). Deferred entirely to follow-on courses ("third
+  course" frontier territory in Spiralearn's roadmap).
+- **(2) Physics / material** — atoms, transistors, energy gradients. The
+  physical substrate. Deferred entirely.
+- **(3) Computing infrastructure** — mathematics and formal systems made
+  operational: runtimes, OSs, networks, training/build/run support software.
+  Deferred to follow-on courses; named here so the student knows what sits
+  below.
 
-**Artifact-region (§3 center) — two faces of one artifact:**
+**Artifact-region — two lens-readings of the central artifact:**
 
-4. **Artifact-logic.** The F-face. What the artifact computes — conventional
-   algorithms, or a GenAI model. Same site, different substrate types. When a
-   Frogrammer says "twin the machine," the machine being twinned lives here: in
-   conventional software, the algorithmic logic; in AI-native software, the
-   GenAI model. The stance is the same; the substrate is different. §10 develops
-   what changes when GenAI occupies this stratum.
-5. **Artifact-surface.** The V-face. What the artifact presents outward — UI,
-   APIs, programmatic and human-perceivable surfaces.
+- **(4) Artifact-logic** — the F-anchor lens. What the artifact computes:
+  conventional algorithms, or a GenAI model. Same site, different substrate
+  types. When a Frogrammer says "twin the machine," the machine being twinned
+  is read through this lens: in conventional software, the algorithmic logic;
+  in AI-native software, the GenAI model. The stance is the same; the
+  substrate is different. §10 develops what changes when GenAI occupies this
+  lens-position.
+- **(5) Artifact-surface** — the V-anchor lens. What the artifact presents
+  outward: UI, APIs, programmatic and human-perceivable surfaces.
 
-Artifact-logic and artifact-surface are two distinct substrate kinds (an
-algorithm runs; a UI is painted), AND together they are the F-lens and V-lens
-readings of §3's center artifact — one artifact with two material faces, each
-face inviting its natural lens.
+Artifact-logic and artifact-surface are two distinct lens-readings (an
+algorithm runs; a UI is painted) of §3's central chain-point — one artifact
+read through two analytical lenses, each lens inviting its natural
+practitioner-stance.
 
-> **Flipside reading (with §4 both-twins).** §4 names the **both-twins state** —
-> user-twin + NM-twin held simultaneously by one perceiver. §9 names the
-> **artifact's two faces** — artifact-logic + artifact-surface, two material
-> sides of one artifact. These are flipsides of the same coin: dual-twinning is
-> the perceiving, two-faced artifact is the perceived; they co-constitute. §4
-> stays the canonical home for the perceiver-side reading; §9 stays the
-> canonical home for the perceived-side reading.
+> **Flipside reading (with §4 both-twins).** §4 names the **both-twins state**
+> — V's twin (user) + F's twin (NM) held simultaneously by one practitioner.
+> §9 names the **two-lens reading** of the central artifact — artifact-logic +
+> artifact-surface, the same artifact read through two analytical lenses. These
+> are flipsides of the same activity: dual-twinning is the practitioner-side
+> perceiving; the two-lens reading is what the lenses surface. §4 stays the
+> canonical home for the practitioner-side; §9 stays the canonical home for
+> the lens-reading-side.
 
-**Domain-side (§3 left) — V's natural twinning territory extends through here:**
+**Domain-side (most holistic) — V's natural reach extends through here:**
 
-6. **Interaction dynamics.** Human-system dynamics over time. Dialogue,
-   workflow, habituation, repair.
-7. **Systemic impacts.** Society and computing as a coupled system. What this
-   kind of artifact does, in aggregate, to the world it participates in.
+- **(6) Interaction dynamics** — human-system dynamics over time. Dialogue,
+  workflow, habituation, repair.
+- **(7) Systemic impacts** — society and computing as a coupled system. What
+  this kind of artifact does, in aggregate, to the world it participates in.
 
-#### V and F: universal lenses with natural twinning territories
+#### V and F traverse lenses; each has a natural anchor-lens
 
-V (Vibetoading) and F (Frogramming) are universal lenses — either can be worn on
-any artifact at any stratum. Each has a _natural twinning territory_ (the
-characteristic range where it most often works), derived from the kind of
+V (Vibetoading) and F (Frogramming) are practitioner cognitive stances; both
+stances can travel across §9's lens range. Each has a **natural anchor-lens**
+(the lens where it most often anchors and reads from), derived from the kind of
 question each asks:
 
-- **F's lens** asks: _what does the artifact compute? what's its NM?_ F's
-  natural territory: **computing-infrastructure + artifact-logic** — the
-  substrate side of the stack where data-models live. Computational thinking
-  (§3's F-bridge) is what F does as it traverses this territory. WtF practices F
-  primarily at artifact-logic; computing-infrastructure is F-territory
-  ontologically but deferred to follow-on courses.
-- **V's lens** asks: _what does the artifact feel like? what does it afford the
-  person on the other side?_ V's natural territory: **artifact-surface +
-  interaction-dynamics + systemic-impacts** — the experience side of the stack
-  where embodied phenomena live. Design thinking (§3's V-bridge) is what V does
-  as it traverses this territory.
+- **F asks**: _what does the artifact compute? what's its NM?_ F's anchor-lens:
+  **artifact-logic** — where computation-as-substrate is most legible. F's
+  reach extends down into computing-infrastructure (substrate beneath the
+  artifact) — ontologically F-territory, deferred to follow-on courses in WtF.
+- **V asks**: _what does the artifact feel like? what does it afford the
+  person on the other side?_ V's anchor-lens: **artifact-surface** — where the
+  artifact's outward presentation lives. V's reach extends up into
+  interaction-dynamics and systemic-impacts — the experience side of the lens
+  range where embodied phenomena live.
 
-The natural territories overlap at the artifact: artifact-logic is F's primary
-anchor; artifact-surface is V's. This is §3's "trading zone" made vertical.
+The two anchor-lenses meet at the central artifact — F at artifact-logic, V at
+artifact-surface. This is §3's "trading zone" read through the lens stack.
 
-The lenses travel beyond their natural territories — F can rise into systemic
+Either practitioner can travel beyond their anchor — F can rise into systemic
 impacts to read social affordances at a formal-systems level; V can drop into
-computing infrastructure to read substrate experience. The natural territories
+computing infrastructure to read substrate experience. The natural anchors
 describe characteristic ranges, not constraints.
 
-#### Three axes — strata, strands, bridges
+#### Three independent axes — chain, strands, lenses
 
-The curriculum's geometry has three axes, each canonical in its own section,
-surfaced together here:
+The curriculum's geometry has three independent axes, each canonical in its
+own section, surfaced together here. They answer three different kinds of
+question:
 
-| Axis        | Section           | Enumerates                                                                 | Question it answers                              |
-| ----------- | ----------------- | -------------------------------------------------------------------------- | ------------------------------------------------ |
-| **Strata**  | §9 (this section) | kinds of substrate where work happens                                      | _Where_ does the work sit?                       |
-| **Strands** | §7                | connection-types — stances applicable at any stratum                       | _What kind of connection_ is the learner making? |
-| **Bridges** | §3                | V's and F's bridging activities (design thinking / computational thinking) | _How_ is the work read across strata?            |
+| Axis        | Section           | Enumerates                                                                  | Question it answers                                              |
+| ----------- | ----------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Chain**   | §3                | chain-positions — sites of skill+knowledge along the curriculum's geometry  | _Where_ does the work sit?                                       |
+| **Strands** | §7                | connection-types — kinds of connection-making the learner is doing          | _What kind of connection_ is the learner making?                 |
+| **Lenses**  | §9 (this section) | analytical lens-positions along the H↔R gradient                            | _At what H↔R level_ is the system being read?                    |
 
-_"Bridges" is shorthand here for §3's formal noun "bridging activities"; §3 uses
-the possessive form ("V's bridge", "F's bridge")._
+The three axes are of three different _kinds_ — chain-positions (sites),
+connection-types (relations), analytical-levels (zooms) — and they don't
+co-vary in a closed way. Plus the **data thread** (§8) running through
+everything, with the word _data_ deepening its semantics at each layer (§6).
 
-Plus the **data thread** (§8) running through everything — the word _data_
-deepening its semantics at each layer.
-
-The full geometry is _strata × strands × bridges_. We do not exhaustively map
+The full geometry is _chain × strands × lenses_. We do not exhaustively map
 permutations; the geometry is a direction-finder, not a closed catalog.
 **Strands themselves are an open-ended catalog** (§7's strand × lens cross-map
-is explicitly an open development guide — some strand × lens cells have no
-existing lens yet); the triple's openness inherits from §7's. Each axis is
-canonical in its own section; §9 surfaces the cross-product so the reader can
-see all three at once.
+is explicitly an open development guide — some strand × study-lens cells have
+no existing study-lens yet); the triple's openness inherits from §7's. Each
+axis is canonical in its own section; §9 surfaces the cross-product so the
+reader can see all three at once.
 
-#### Optional reading: lens-changes between strata
+#### Transitions between lenses
 
-The transitions between strata can also be read as places where the productive
-lens shifts most legibly — the work of strand-Affordances (§7) and the
-composer/virtuoso/mechanism metaphor (`metaphor.md`) operationalize this
-reading. Listed here as a cross-frame; the strata and the universal-lens framing
-remain first-class on their own terms.
+The transitions between adjacent lenses can also be read as places where the
+productive lens-shift is most legible — the work of strand-Affordances (§7)
+and the composer/virtuoso/mechanism metaphor (`metaphor.md`) operationalize
+this reading. Listed here as a cross-frame; the lenses and the
+practitioner-traversal framing remain first-class on their own terms.
 
 #### Bridge to §10 and §11
 
 §10 develops what changes at the _artifact_-side when GenAI occupies the
-artifact-logic stratum: substrate substitution from deterministic to
+artifact-logic lens-position: substrate substitution from deterministic to
 non-deterministic NM, the verification limit, agentic emergence. §11 develops
 the _workflow_-side: three positional roles AI can play relative to a human's
 work (study partner / dev collaborator / active component), with the
 depth-of-involvement and verification-target axes. Read §9 → §10 → §11 as the
-natural sequence: general strata → artifact-side AI consequences → workflow-
-side AI positions.
+natural sequence: general lenses → artifact-side AI consequences →
+workflow-side AI positions.
 
 ---
 
@@ -996,15 +1082,15 @@ side AI positions.
 
 ### §10 Substrate substitution at artifact-logic — what changes about the artifact
 
-§9 names the strata of a software system in general terms. §10 picks up at the
-**artifact-logic** stratum (§9 stratum 4) and develops what changes _about the
-artifact itself_ when a GenAI model substitutes for conventional algorithms as
-the substrate. §10 is the **artifact-side** of the LLM shift — what the artifact
-_becomes_. §11 is the **workflow-side** — where AI sits relative to a human's
-work.
+§9 names the analytical lenses through which a system can be read. §10 picks
+up at the **artifact-logic** lens (§9 lens 4) and develops what changes _about
+the artifact itself_ when a GenAI model substitutes for conventional algorithms
+as the substrate read through that lens. §10 is the **artifact-side** of the
+LLM shift — what the artifact _becomes_. §11 is the **workflow-side** — where
+AI sits relative to a human's work.
 
-§10's "NM" (notional machine) and §9's artifact-logic name the same site at
-different resolutions. Substrate substitution swaps a GenAI model into that
+§10's "NM" (notional machine) and §9's artifact-logic lens read the same site
+at different resolutions. Substrate substitution swaps a GenAI model into that
 site; the NM-twinning stance (the active-inference framing canonical at
 `pedagogy.md` "The pedagogical claim from Friston") remains, but what's being
 twinned has different mechanical properties.
@@ -1019,7 +1105,7 @@ deterministic.** Given input X, the algorithmic path that produces Y is
 predictable. Sources of non-determinism in conventional systems — `Math.random`,
 concurrency, network I/O timing, filesystem state, wall-clock dependencies — are
 **bounded and locatable**; you can name them, isolate them, mock them in tests.
-F's NM-twin works at this stratum because the NM is reproducible: the same input
+F's NM-twin works at this lens because the NM is reproducible: the same input
 under the same observable conditions traces the same path through scope chains
 and value transformations.
 
@@ -1170,8 +1256,8 @@ artifact, then freeze.
   what was asked was _what was needed_. The visual NM view and short
   user-evaluable iterations (above) are how Role 2 keeps verification honest.
 
-**Role 3 — Active component.** AI sits **inside** the artifact's artifact-logic
-stratum, as a live process. The artifact contains the AI as a constituent part.
+**Role 3 — Active component.** AI sits **inside** the artifact as the
+substrate §9's artifact-logic lens reads — a live process. The artifact contains the AI as a constituent part.
 AI is no longer external — its behavior IS the system's behavior at runtime.
 
 - **Depth in artifact:** internal to deployed behavior; **the AI as live process
@@ -1347,8 +1433,10 @@ mu; // frogram, vibetoad
 - The **audience-YOU-are-becoming** read of the chapter arc (canonical at
   `chapters.md` § "The audience YOU are becoming") — Ch1's write-for-future-you
   → Ch5's write-for-yourself-as-merged-V/F is the curriculum's lived descent
-- §9's **perceived/perceiver flipside** — dual-twinning is the perceiving, the
-  two-faced artifact is the perceived; co-constitution at the artifact stratum
+- §9's **practitioner-side / lens-reading-side flipside** — dual-twinning is
+  the practitioner-side perceiving; the artifact's two-lens reading
+  (artifact-logic + artifact-surface) is what the lenses surface;
+  co-constitution at the central artifact
 
 ---
 

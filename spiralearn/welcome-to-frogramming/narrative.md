@@ -55,7 +55,7 @@ reference register of the ontology.
 - **The cast** (Composer, Virtuoso, Mechanism, Audience, Co-composers,
   Historical cameos) is **teaching apparatus**, explicitly NOT
   structural guide. Practice-stances and learning objectives live with
-  V/F (ontology §3) and the 5 strands (ontology §6). See
+  V/F (ontology §4) and the 5 strands (ontology §7). See
   `metaphor.md` for the canonical cast definition.
 
 ---
@@ -456,7 +456,7 @@ Chapter 3's reverse-engineering, modify-programs, and refactoring
 skills all live in the arrangement-and-variation domain. Snippetry
 (Ch5) is explicitly greenfield _at small scale_.
 
-### The two-scale instrument reading (carries from ontology §6)
+### The two-scale instrument reading (carries from ontology §7)
 
 The whole rhetorical situation has two scales, not one. The first
 instrument is the machine playing the score (the NM evaluating code);
@@ -464,7 +464,7 @@ the second instrument is the user's experience of the played piece
 (intangible, emergent, arising from interaction). The _concert_ — the
 experience-as-purpose — is what V and F orient toward.
 
-This extension lives canonically in ontology §6 (whole rhetorical
+This extension lives canonically in ontology §7 (whole rhetorical
 situation strand). See `metaphor.md`'s two-scale extension note
 for the metaphor-illustration form.
 

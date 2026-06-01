@@ -3,14 +3,15 @@
 > The teaching apparatus — composer, virtuoso, mechanism, audience —
 > through which the curriculum illuminates moments. **First-class
 > teaching apparatus, explicitly NOT structural guide.** The metaphor
-> illustrates the V/F lens-pair and the strata of a software system; it
-> is not a separate ontological commitment.
+> illustrates the V/F lens-pair as the two-lens reading of the central
+> artifact; it is not a separate ontological commitment.
 >
 > Companions (siblings, by co-location):
 >
 > - `README.md` — the high-level orientation and reading map
 > - `ontology.md` — the _what_ (concepts the metaphor
->   illustrates, especially §3 V/F, §8 strata, §6 strands)
+>   illustrates, especially §4 V/F characters, §9 lenses (the two-lens
+>   reading of the artifact), §7 strands)
 > - `pedagogy.md` — the _how it's taught_ (design principles
 >   for using the metaphor in instruction)
 > - `narrative.md` — extensions and illustrations of the
@@ -29,9 +30,10 @@ own home. Three principles govern its use:
 - **NOT structural guide.** The spiral curriculum (pedagogy §6) is the
   structural guide.
 - **Composer ≈ V's lens on the artifact**; **virtuoso ≈ F's lens on the
-  artifact's notation-execution**. The cast is an illustration of the
-  V/F lens-pair (ontology §3) and §8's strata, not a separate
-  ontological commitment.
+  artifact's notation-execution**. The cast is an illustration of V's
+  and F's stances (ontology §4) reading the artifact through its two
+  lenses (ontology §9 — artifact-logic + artifact-surface), not a
+  separate ontological commitment.
 
 > _"When the metaphor serves the vision, use it. When it strains, drop
 > it. The vision stands on its own. The metaphor is illustration, not
@@ -74,7 +76,7 @@ evaluating code); the **second instrument** is the user's experience of
 the played piece (intangible, emergent, arising from interaction). The
 **concert** — the experience-as-purpose — is what V and F orient
 toward. This is illustration of the whole rhetorical situation strand
-(ontology §6); the strand carries the learning objective, the metaphor
+(ontology §7); the strand carries the learning objective, the metaphor
 carries the picture.
 
 ## The cast (six roles)

@@ -328,14 +328,14 @@ do at lighter touch, or rely on a Vibetoader collaborator for. They may use LLMs
 heavily or not at all; what defines the hat is the depth of the NM-twin and the
 intentionality of any user-side delegation.
 
-**Twinning is what makes the bridging activity _thinking_ rather than mere
+**Twinning is what makes the bridging practice _thinking_ rather than mere
 process.** Design _thinking_ requires twinning the user; without the user-twin,
 what's happening is _design process_ (wireframes, personas, A/B tests as steps
 you follow) but not design _thinking_. Same on F's side: _computational
 thinking_ requires twinning the NM; without the NM-twin, what's happening is
 _computational process_ (unit tests, refactoring moves, patterns followed) but
 not computational _thinking_. The full elaboration — the twin/process 2×2, the
-failure-mode categories — lives in `ontology.md` §3.
+failure-mode categories — lives in `ontology.md` §4.
 
 **Spectrum, not binary.** A given developer doesn't _be_ a Vibetoader or a
 Frogrammer — they wear different hats on different tasks, files, moments. A
@@ -368,7 +368,7 @@ targets specific user-behavior hypotheses their user-twin predicts will be
 tested. Both are intentional; both serve the twin they shoulder. The failure
 mode is process performed because Process Says So, with no model of what the
 test or research is actually telling you — this is the no-twin corner of the
-practice grid in ontology §3, sometimes called _ceremony-without-twin_ (F-side)
+practice grid in ontology §4, sometimes called _ceremony-without-twin_ (F-side)
 or _design-process-without-user-twin_ (V-side). The fix is upstream, in the
 twin.
 
@@ -389,7 +389,7 @@ the loop:
 
 |                                    | **Humans-only**                                                                                                                                                                                                                                                                                   | **LLM-collab**                                                                                                                                                                                    |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **🎨 Vibetoading** (user-grounded) | Real Vibetoading, humans-only: user-research-led prototyping, design-thinking-driven iteration with real people; the NM is delegated to a collaborator or familiar tools. (Note: pattern-matching without a user-twin is **not** Vibetoading; it's the no-twin corner of the 2×2 in ontology §3.) | Karpathy's _vibe coding_ — LLM writes notation, you focus on user-visible outcomes; works only when paired with deep user-twin and willingness to read what the LLM produced enough to verify it. |
+| **🎨 Vibetoading** (user-grounded) | Real Vibetoading, humans-only: user-research-led prototyping, design-thinking-driven iteration with real people; the NM is delegated to a collaborator or familiar tools. (Note: pattern-matching without a user-twin is **not** Vibetoading; it's the no-twin corner of the 2×2 in ontology §4.) | Karpathy's _vibe coding_ — LLM writes notation, you focus on user-visible outcomes; works only when paired with deep user-twin and willingness to read what the LLM produced enough to verify it. |
 | **🔬 Frogramming** (NM-grounded)   | Traditional engineering — humans write notation grounded in NM-awareness, applying craft practices intentionally.                                                                                                                                                                                 | Willison's _vibe engineering_ / _agentic engineering_ — LLM writes the notation; you direct and verify against the NM.                                                                            |
 
 #### Related vocabulary
@@ -1075,7 +1075,7 @@ time as a domain.
 
 ### Layer 2 — Methodology
 
-- 🥚 Wear the F hat consciously: predict-trace-verify is _F's bridging activity_
+- 🥚 Wear the F hat consciously: predict-trace-verify is _F's bridging practice_
   operationalized
 - 🐣 Recognize that the tracer is **both training wheels AND power tool** —
   extends working memory beyond what can be held in head
@@ -1193,7 +1193,7 @@ _(sparse)_
 
 ### Layer 2 — Methodology
 
-- 🥚 Wear the F hat consciously: predict-trace-verify is _F's bridging activity_
+- 🥚 Wear the F hat consciously: predict-trace-verify is _F's bridging practice_
   operationalized
 - 🐣 Recognize that the tracer is **both training wheels AND power tool** —
   extends working memory beyond what can be held in head
@@ -1253,7 +1253,7 @@ the NM produces. Both V and F write for the second audience; neither
 controls it directly. The NM is the instrument; the experience is the
 concert. The work of both hats is to set up conditions that make the
 experience the program serves possible. (Two-scale instrument reading —
-see ontology §6 strand-4 and `metaphor.md` two-scale extension.)
+see ontology §7 strand-4 and `metaphor.md` two-scale extension.)
 
 ### 3.1 User Input and Output
 
@@ -1411,7 +1411,7 @@ identified as a tool, not as essential infrastructure.
 
 ### Layer 2 — Methodology
 
-- 🥚 Wear the V hat consciously: prototype-test-iterate is V's bridging activity
+- 🥚 Wear the V hat consciously: prototype-test-iterate is V's bridging practice
   operationalized — even on tiny user programs
 - 🥚 The **data-flow loop** anchor: _"The program's data enters the user through
   their eyes via a prompt; the user processes it and transforms it into a
@@ -1475,19 +1475,20 @@ and to relish productive divergence.
 **Chapter 4's shape draws on a 4-level AI-adoption model** originally developed
 by Evan Cole with collaborators Janet Tilstra and Josenne Peña (the curriculum
 author's prior work). That model has since been refined into the framework now
-canonical in `ontology.md`: the **§8 strata stack** (a general-systems
-view of where any system lives, with AI as one instance), **§9 substrate
-substitution** (deterministic → non-deterministic at artifact-logic), and **§10
-three roles of agential AI** (Role 1 study partner / Role 2 dev collaborator /
-Role 3 active component). **Chapter 4 = Role 2 (dev collaborator)** — Role 1
-already worked quietly across Ch0–3; Role 3 is deferred to later learning. The
-organizing line for the chapter: _you twin the AI as collaborator — F's lens
-reads it as cognitive substrate (NM-grounded mode); V's lens reads its
-behavioral surface (user-grounded mode); two modes of collaboration, one JEJ
-artifact under construction_. See ontology §10 for the canonical framework.
+canonical in `ontology.md`: the **§9 lenses** (a general-systems view
+of analytical levels at which any system can be read, with AI as one instance),
+**§10 substrate substitution** (deterministic → non-deterministic at
+artifact-logic), and **§11 three roles of agential AI** (Role 1 study partner /
+Role 2 dev collaborator / Role 3 active component). **Chapter 4 = Role 2 (dev
+collaborator)** — Role 1 already worked quietly across Ch0–3; Role 3 is
+deferred to later learning. The organizing line for the chapter: _you twin the
+AI as collaborator — F's lens reads it as cognitive substrate (NM-grounded
+mode); V's lens reads its behavioral surface (user-grounded mode); two modes
+of collaboration, one JEJ artifact under construction_. See ontology §11 for
+the canonical framework.
 
 **The both-twins corner of the twin/process 2×2** (see `ontology.md`
-§3): Ch4 develops the both-twins state in its LLM-collaborative form — V and F
+§4): Ch4 develops the both-twins state in its LLM-collaborative form — V and F
 operating together alongside an alien third intelligence. The user-twin and the
 NM-twin both stay yours; what gets delegated is the production of the code that
 satisfies both.
@@ -1649,7 +1650,7 @@ moment calls for it. Evaluate code you didn't write or review during generation
 collaboration. Reflect on the difference between _"it runs"_ and _"I understand
 it"_ — the boundary the LLM tests every day.
 
-The failure mode here is twin-ignored (no user-twin, no NM-twin) — what the §3
+The failure mode here is twin-ignored (no user-twin, no NM-twin) — what the §4
 2×2 calls the no-twin corner. Vibetoading-with-LLMs done with a user-twin is
 V-corner work; done without any twin is the no-twin corner, not Vibetoading. The
 distinction matters because the practice that works and the practice that decays
@@ -1675,7 +1676,7 @@ look similar from outside.
 - 🐣 Describe at least 2 key differences between LLM "cognition" and human
   reasoning
 - 🐣 Identify when an LLM is likely to be unreliable (the jagged frontier)
-- 🐥 Use the strata-and-roles framework (ontology §8 + §10) to discuss AI at
+- 🐥 Use the lenses-and-roles framework (ontology §9 + §11) to discuss AI at
   the appropriate position relative to your work
 - 🐥 Explain the Gell-Mann Amnesia effect in the context of LLM output
 - 🥚 Given an LLM response, hypothesize what patterns it might be matching
@@ -1736,7 +1737,7 @@ look similar from outside.
 
 - 🐣 Compare LLM "theory of mind" to human theory of mind: what transfers, what
   doesn't
-- 🐥 Locate LLM-collaborative work on the twin/process 2×2 (see ontology §3):
+- 🐥 Locate LLM-collaborative work on the twin/process 2×2 (see ontology §4):
   what determines whether a given collaboration session lands in the both-twins
   corner or slides toward pure process
 - 🐔 Recognize the emergence of **agentic AI systems** (LLMs doing design work,
@@ -1788,7 +1789,7 @@ projects — and how the Vibetoader sketches quick experiences without the weigh
 of production.
 
 **The both-twins corner of the twin/process 2×2** (see `ontology.md`
-§3): Ch5 develops the both-twins state in its merged form — V and F operating as
+§4): Ch5 develops the both-twins state in its merged form — V and F operating as
 a single integrated practice. Snippetry is where the two stances stop being
 separate hats and start being the same gesture: each small program is at once a
 user-twin sketch and an NM-twin probe. The Bakhtiarian-loop unification names
@@ -1955,7 +1956,7 @@ for you.
   snippets as both at once, toward a purpose of your choosing
 - 🐥 Recognize when V and F merge in your own practice (the Bakhtiarian-loop
   unification — the merged form of the both-twins corner from the twin/process
-  2×2 in ontology §3)
+  2×2 in ontology §4)
 
 ### Layer 3 — Snippetry
 
@@ -2003,7 +2004,7 @@ for you.
   predictive model of self is the seat of self. The arc you've traveled — Ch1's
   write-for-future-you to Ch5's write-for-yourself-
   the-audience-you-are-becoming — is the curriculum's operational encounter with
-  that idea (see ontology §5 L4 matrix, Twinning row, and the Preamble's
+  that idea (see ontology §6 L4 matrix, Twinning row, and the Preamble's
   "audience YOU are becoming" table)
 - 🐔 _(deeper section)_ The data-thread reading at full depth: the entire
   embodied phenomenon from theory to domain is data flowing through and changing

@@ -201,7 +201,7 @@ yours, and will always be yours — that's what makes it worth doing.
 
 ---
 
-## Using the 5 layers (§5 of ontology) in teaching
+## Using the 5 layers (§6 of ontology) in teaching
 
 The 5 layers (§5 of `ontology.md`) are named there as the
 engagement depths a reader can stay at or descend through. This file
@@ -233,12 +233,12 @@ that meet a learner where they are at a given layer.
 
 ### V and F brought to life through narrative
 
-V and F are defined as personae in `ontology.md` §3 — substrate-agnostic
+V and F are defined as personae in `ontology.md` §4 — substrate-agnostic
 stances with temperaments and tells. The pedagogical device is to **bring them
 to life through story** at L2: dialogues, sidebars, exchanges where each speaks
 for themselves. Personification carries perspective more vividly than label
 alone; through dialogue, learners experience a stance rather than read about it.
-(See ontology §3's Achilles/Tortoise footnote for the literary precursor and §13
+(See ontology §4's Achilles/Tortoise footnote for the literary precursor and §14
 for the MU tribute that honors the lineage.)
 
 ### L4 as questioning, not theory-mastery
@@ -255,7 +255,7 @@ The teaching contract changes accordingly:
 - **The goal is not theory-currency.** L4 does not aim to bring
   learners up to date with the latest names in active inference,
   embodied cognition, or phenomenology. The named traditions (see
-  ontology §5 _L4 by strand_) are entry-points into the strand's
+  ontology §6 _L4 by strand_) are entry-points into the strand's
   philosophical questioning, not destinations.
 - **Methodological rigour applies even at the frontier.** Questions
   on the science-philosophy edge can be asked well or badly. Part of
@@ -343,7 +343,7 @@ is F-specific. Don't conflate the architectural pattern with the V/F mapping.
 
 The infrastructure _embodies_ the pedagogy:
 
-- lenses literally **are** the Frogrammer's magnifying glasses (ontology §3)
+- lenses literally **are** the Frogrammer's magnifying glasses (ontology §4)
 - embody literally **is** the NM crystallized for exploration — _a static
   4D rendering of a 3D flowing river_; the substrate is not inert, it makes
   every facet of the data lifecycle's motion explorable
@@ -575,7 +575,7 @@ anyone can fork from plain markdown.
 #### §12-bis Code is content / Code is the UI
 
 (Listed here for the design-principle-level claim; mechanism in
-ontology §9.)
+ontology §11.)
 
 Source code is _the control panel through which the programmer
 operates the NM_. LLM prompting is an alternative way to operate the
@@ -678,7 +678,7 @@ depending on the moment.
 ### PBIS through the metaphor (concentric scopes)
 
 From `narrative/README.md` §15: reading code well means holding all
-four layers simultaneously. Perspective stacking (ontology §6)
+four layers simultaneously. Perspective stacking (ontology §7)
 operationalized.
 
 ```text
@@ -711,7 +711,7 @@ to understanding why comments and logs serve different purposes.
 
 ### Code is content, not deliverable (Ch4 framing)
 
-Cross-link to ontology §9. In Ch4, LLM-generated code is _material to
+Cross-link to ontology §11. In Ch4, LLM-generated code is _material to
 study_, not work-product to ship. This is what keeps the chapter
 pedagogical rather than productivity-oriented.
 
@@ -733,8 +733,8 @@ ontology↔pedagogy audit pass (3d):
   when developed)
 - Sequence: when each concept first lands (the ladder), how it deepens
   (the spiral)
-- Exercise patterns per strand (§6) and per stratum (§8)
-- Methods for introducing the three roles of agential AI (§10)
+- Exercise patterns per strand (§7) and per lens (§9)
+- Methods for introducing the three roles of agential AI (§11)
 - The pedagogy ↔ ontology seam, ongoing — the audit pass scheduled at
   3d will move how-it's-taught content from `ontology.md`
   into the appropriate sections of this file

@@ -231,7 +231,7 @@ way to operate that panel; describing intent to an LLM is another.
 Either way, the NM is the thing the panel controls — and it can also
 be observed directly through visual debuggers / embody / lenses,
 bypassing the panel entirely. (Cross-reference `ontology.md`
-§9 / §10 for the canonical curriculum treatment of this framing.)
+§10 / §11 for the canonical curriculum treatment of this framing.)
 
 **Two data boundaries** organize the NM. Data crosses them in defined
 directions; both are V/F-shared territory.
@@ -569,7 +569,7 @@ literal-only snippet won't have variables-lens options.
 
 ## 10. V/F at the artifact layer
 
-The student-layer / artifact-layer distinction from ontology §3 lands
+The student-layer / artifact-layer distinction from ontology §4 lands
 here:
 
 - **`lenses/embody` is F at the artifact layer** — engineering /
@@ -624,7 +624,7 @@ curriculum's file family — this file is their first canonical mention) and
 - **Bret Victor — Learnable Programming** (2012). Victor wanted _less
   implementation toil_ AND _more powerful thinking tools_. Study Lenses
   reclaims the visibility wish at the **internal mechanism** of
-  evaluation, not the final output. _Canonical: ontology §11._
+  evaluation, not the final output. _Canonical: ontology §12._
 - **Bakhtiar Mikhak — "Building infrastructure IS research contribution."**
   The teaching that grounds V/F at the artifact layer; the engineering
   × physics co-evolution insight. _Canonical: translational-framing.md §6 and §10 of this file._
