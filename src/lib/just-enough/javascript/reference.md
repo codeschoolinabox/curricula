@@ -281,8 +281,6 @@ Each tab represents one level of indentation so you should add a tab each time
 you enter a `{ }` block. Indentation isn't _required_ in JavaScript, but it
 makes your code so much easier to read that we'll pretend it is required!
 
-<!-- markdownlint-disable MD010 -->
-
 ```js
 if (condition) {
 	let name = prompt('enter your name');
@@ -291,8 +289,6 @@ if (condition) {
 	}
 }
 ```
-
-<!-- markdownlint-enable MD010 -->
 
 ### Semicolons
 
@@ -1430,8 +1426,6 @@ you decide what gets evaluated first.
 <tr>
 <td>
 
-<!-- markdownlint-disable MD010 -->
-
 ```js
 // without parentheses — * happens first
 2 + 3 * 4; // 14
@@ -1446,8 +1440,6 @@ if ((age >= 18 && hasTicket) || age < 5) {
 	// ...
 }
 ```
-
-<!-- markdownlint-enable MD010 -->
 
 </td>
 <td>
@@ -2284,8 +2276,6 @@ overwritten each time:
 <tr>
 <td>
 
-<!-- markdownlint-disable MD010 -->
-
 ```js
 let value = 10;
 
@@ -2310,8 +2300,6 @@ value %= 3; // 0.5
 value = value ** 2; // 0.25
 value **= 2; // 0.0625
 ```
-
-<!-- markdownlint-enable MD010 -->
 
 </td>
 <td>
@@ -2350,8 +2338,6 @@ evaluated if needed:
 <tr>
 <td>
 
-<!-- markdownlint-disable MD010 -->
-
 ```js
 let name = null;
 
@@ -2373,8 +2359,6 @@ name = 'Alice';
 name &&= name.toUpperCase(); // 'ALICE'
 // same as: name = name && name.toUpperCase()
 ```
-
-<!-- markdownlint-enable MD010 -->
 
 </td>
 <td>
@@ -2463,8 +2447,6 @@ write back:
 <tr>
 <td>
 
-<!-- markdownlint-disable MD010 -->
-
 ```js
 let flags = 0b1010;
 
@@ -2477,8 +2459,6 @@ bits <<= 2; // 16 — left shift
 bits >>= 1; // 8 — right shift
 bits >>>= 1; // 4 — unsigned right shift
 ```
-
-<!-- markdownlint-enable MD010 -->
 
 </td>
 <td>
