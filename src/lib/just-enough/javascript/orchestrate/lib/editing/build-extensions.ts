@@ -180,7 +180,16 @@ async function buildExtensions(
 								} = { label: index.label };
 								if (index.type != null) completion.type = index.type;
 								if (index.detail != null) completion.detail = index.detail;
-								if (index.info != null) {
+								// Prefer the rich-DocEntry path when the adapter
+								// supplies an `entry`; otherwise fall back to the
+								// plain-paragraph `info` string. The two surfaces
+								// (autocomplete popup, hover tooltip) render the
+								// same DocEntry through buildTooltipDom.
+								if (index.entry != null) {
+									const docEntry = index.entry;
+									const label = index.label;
+									completion.info = () => buildTooltipDom(label, docEntry);
+								} else if (index.info != null) {
 									const infoText = index.info;
 									completion.info = () => buildInfoDom(infoText);
 								}

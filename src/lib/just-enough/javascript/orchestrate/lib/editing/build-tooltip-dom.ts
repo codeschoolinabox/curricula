@@ -112,6 +112,20 @@ function buildTooltipDom(word: string, doc: DocEntry): HTMLElement {
 		content.appendChild(when);
 	}
 
+	// 6. Why not in JEJ (only present on isJEJ: false entries)
+	if (doc.whyNotInJej) {
+		const whyLabel = document.createElement('div');
+		whyLabel.style.cssText =
+			'font-weight: bold; color: #c586c0; font-size: 11px; margin: 6px 0 2px 0;';
+		whyLabel.textContent = 'Why not in JEJ:';
+		content.appendChild(whyLabel);
+
+		const why = document.createElement('div');
+		why.style.cssText = 'color: #c586c0; font-size: 11px;';
+		why.textContent = doc.whyNotInJej;
+		content.appendChild(why);
+	}
+
 	container.appendChild(content);
 	// perf: skip freeze — DOM element, inherently mutable
 	return container;
