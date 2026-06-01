@@ -179,6 +179,17 @@ describe('shape compliance — field presence across the full table', () => {
 		expect(blockedWithWrongFlag).toEqual([]);
 	});
 
+	it('every blocked entry has a non-empty whyNotInJej', () => {
+		const blockedWithoutWhy = [...NOT_IN_JEJ_LABELS]
+			.map(function withEntry(word: string) {
+				return { word, entry: documentJej(word) };
+			})
+			.filter(function missingWhy({ entry }) {
+				return !entry?.whyNotInJej?.trim();
+			});
+		expect(blockedWithoutWhy).toEqual([]);
+	});
+
 	it('every blocked entry has at least 2 of (example, whenToUse, commonMistakes) populated', () => {
 		// Content quality (real pedagogical prose vs stub placeholders)
 		// is enforced by AR-4 code review, not by this assertion.

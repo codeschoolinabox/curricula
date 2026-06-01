@@ -13,6 +13,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			'Function-scope vs block-scope confusion: var leaks past the nearest block, which let does not.',
 			"Re-declaration without notice: 'var x = 1; var x = 2;' silently works with var but is rejected by let.",
 		],
+		whyNotInJej:
+			"An older way to declare a variable that JEJ does not use. `var` changes three things compared to `let` and `const`: the name can be used before its declaration appears in the code (sometimes called \"hoisting\"), `{ }` blocks do not bound where the name is visible, and re-declaring the same name produces no error. JEJ keeps one declaration model — `let` and `const`, with `{ }` block boundaries and the TDZ rule you have already seen — so the scope chain stays simple. `var` would mean two parallel rules to track for the same idea.",
 	},
 	function: {
 		description:
@@ -25,6 +27,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			"Reaching for 'function' at this language level — JEJ has no functions; reach for inline expressions and loops instead.",
 			"Confusing function declarations (hoisted) with function expressions ('const f = function () {}', not hoisted) — both are outside JEJ.",
 		],
+		whyNotInJej:
+			"A way to package some statements under a name so you can run them many times with different inputs. To support that, the machine has to keep track of where each call came from, what was passed in, and where to return when the call finishes. JEJ programs run as one flat sequence — there's never a \"somewhere to come back to.\" Defining your own functions opens up a new language level with a new notional machine.",
 	},
 	class: {
 		description:
@@ -37,6 +41,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			"Reaching for 'class' at this language level — JEJ does not introduce user-defined types.",
 			'Treating class as the only way to organize state — primitives + literals cover the JEJ exercise space.',
 		],
+		whyNotInJej:
+			"A way to define your own type — a template that produces objects with their own data and methods. JEJ's value set is the primitives plus a fixed group of built-in objects (Math, String, Number, Date, etc.). User-defined types do not exist at this language level. Adding `class` would introduce object-creation machinery, the `this` binding, your own prototype chain entries, and inheritance relationships between your types — opening up a new language level with a new notional machine.",
 	},
 	'=>': {
 		description:
@@ -49,6 +55,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			"Reaching for '=>' at this language level — arrow functions ARE functions, and JEJ has none.",
 			"Confusing the arrow with greater-than-or-equal '>=' — typing 'a => b' when you meant 'a >= b'.",
 		],
+		whyNotInJej:
+			"Another way to define a function — the arrow expression. `(a, b) => a + b` is shorthand for a function. Since JEJ has no user-defined functions of any shape, arrow form is also out: the call-and-return bookkeeping the machine would need does not exist at this language level. Both `function` declarations and `=>` expressions open up the same new language level with a new notional machine.",
 	},
 	this: {
 		description:
@@ -61,6 +69,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			"Reaching for 'this' at this language level — there's nothing for it to point at.",
 			"Confusing 'this' in arrow vs regular functions — arrows inherit it from the enclosing scope; regular functions get it from the call site.",
 		],
+		whyNotInJej:
+			"A reference to the receiver — the value before the dot in a method call. JEJ has receivers: when you write `'hello'.toUpperCase()`, `'hello'` is the receiver, and the `this` machinery internally points at it while `.toUpperCase` runs. But user code in JEJ never sits inside a method or function body, so there is nowhere for your code to read `this` from. It is machinery without an anchor at this language level — meaningful when you can define methods, invisible when you cannot. Defining methods opens up a new language level with a new notional machine.",
 	},
 	throw: {
 		description:
@@ -73,6 +83,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			"Reaching for 'throw' at this language level — JEJ programs do not handle exceptions.",
 			"Throwing a string ('throw \"oops\"') instead of an Error — the stack trace is lost.",
 		],
+		whyNotInJej:
+			"A way to raise a signal that immediately jumps out of the current sequence and looks for `try`/`catch` to handle it (also not in JEJ). JEJ handles errors with one rule: a runtime error stops the program and surfaces in the dev console with its location. `throw` adds a second control-flow channel — one path for normal flow, another for raised signals — and learning when to use which opens up a new language level with a new notional machine.",
 	},
 	try: {
 		description:
@@ -85,6 +97,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			"Reaching for 'try/catch' at this language level — JEJ has no exception handling.",
 			'Catching errors only to ignore them silently — at this level, you would write a guard before the operation instead.',
 		],
+		whyNotInJej:
+			"The other half of `throw` (also not in JEJ). `try { ... } catch (e) { ... }` is the way code says \"if a `throw` happens inside this block, jump here.\" JEJ has one control-flow path — errors stop the program in the dev console — so the second path that `try`/`catch` and `throw` set up has nothing to enable. Two parallel control-flow paths open up in a new language level with a new notional machine.",
 	},
 	import: {
 		description:
@@ -97,6 +111,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			"Reaching for 'import' at this language level — JEJ is single-file.",
 			"Confusing static 'import' with dynamic 'import()' — they're different syntactic forms.",
 		],
+		whyNotInJej:
+			"A way to bring names from another file into the current one. JEJ programs are a single file with a single scope chain; names come from your script plus the built-in globals (Math, console, prompt, etc.). `import` adds a second name-source that resolves through a module system rather than through your script's scope chain. JEJ keeps name resolution to one chain — the look-up walks you predict are the ones that run. Modules open up a new language level with a new notional machine.",
 	},
 	async: {
 		description:
@@ -108,6 +124,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		commonMistakes: [
 			"Reaching for 'async' at this language level — there are no functions, and no awaiting.",
 		],
+		whyNotInJej:
+			"A marker on a function that makes it return a Promise — a value standing in for a result that has not arrived yet. JEJ does not have user-defined functions, and it also does not have Promises: JEJ programs are synchronous, meaning the next instruction runs immediately after the current one. Adding `async` would require both the function machinery (call/return bookkeeping) and the Promise machinery (a pending-result value-type with its own state), opening up a new language level with a new notional machine.",
 	},
 	await: {
 		description:
@@ -120,6 +138,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			"Reaching for 'await' at this language level — JEJ is synchronous.",
 			"Using 'await' outside an async function — that's a syntax error in regular modules.",
 		],
+		whyNotInJej:
+			"The other half of `async`. Inside an `async` function, `await someValue` pauses the function until `someValue`'s pending result arrives, then resumes with the resolved value. JEJ programs run synchronously — every line runs to completion before the next, no pausing-and-resuming — so there is nothing for `await` to pause inside. Both `async` and `await` open up a new language level with a new notional machine for asynchronous code.",
 	},
 	split: {
 		description:
@@ -132,6 +152,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			"Reaching for '.split' at this language level — JEJ has no arrays.",
 			'Forgetting that an empty separator splits into characters: "abc".split("") is ["a","b","c"].',
 		],
+		whyNotInJej:
+			"A method that breaks a string into pieces and returns them as an array. You have used string methods that return primitives: `.toUpperCase` returns a string, `.indexOf` returns a number, `.includes` returns a boolean. `.split` is the same shape of method call, but its return value is an _array_ — and JEJ's value-type set is primitives only (string, number, boolean, BigInt, `null`, `undefined`). Arrays are a different value-type that opens up in a new language level with a new notional machine; `.split` waits for that level.",
 	},
 	match: {
 		description:
@@ -144,6 +166,8 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			"Reaching for '.match' at this language level — its return shape is array-based.",
 			"Expecting a non-null return for 'no match' — match returns null, not an empty array.",
 		],
+		whyNotInJej:
+			"A method that searches a string for a pattern and returns the matches as an array. You have used string methods that return primitives: `.toUpperCase` returns a string, `.indexOf` returns a number, `.includes` returns a boolean. `.match` is the same shape of method call, but its return value is an _array_ — and JEJ's value-type set is primitives only. Arrays are a different value-type that opens up in a new language level with a new notional machine; `.match` waits for that level.",
 	},
 };
 
