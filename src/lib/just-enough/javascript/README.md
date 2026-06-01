@@ -324,7 +324,7 @@ import { StudyLenses } from './index.js';
 <StudyLenses
   snippet={`let x = 5;`}
   lens="trace"
-  configs={{ trace: { stepDelay: 500 }, blanks: { difficulty: 2 } }}
+  configs={{ trace: { stepDelay: 500 }, annotate: { defaultView: 'code' } }}
 />
 ```
 

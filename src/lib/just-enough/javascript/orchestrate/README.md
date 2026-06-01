@@ -60,8 +60,8 @@ are inseparable from the orchestrator because they ARE the orchestrator.
 <StudyLenses snippet={X} lens="trace" />
 <StudyLenses
   snippet={X}
-  lens="parsons"
-  configs={{ lenses: { parsons: { difficulty: 'easy' } } }}
+  lens="annotate"
+  configs={{ lenses: { annotate: { defaultView: 'code' } } }}
 />
 ```
 

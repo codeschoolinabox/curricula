@@ -31,10 +31,7 @@ lenses/
   types.ts               LensModule contract + LensProps + LensConfig
   debug-props/           meta-lens: renders received LensProps as panels
   annotate/              annotation surface over code or generated flowchart
-  parsons/               drag-and-drop ordering exercise
-  blanks/                fill-in-the-blank exercise
-  trace-table/           predict-then-compare execution trace
-  …
+  …                      (additional lenses land per `.planning-handoffs/04-lens-migration.md`)
 ```
 
 The editor is **not a lens** — it lives at

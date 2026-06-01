@@ -44,7 +44,7 @@ javascript/
 
   lenses/                       stateful "mini web app" plugins
     README.md, DOCS.md
-    parsons/, blanks/, trace-table/, …  (each lens self-contained)
+    annotate/, debug-props/, …  (each lens self-contained; more land per `.planning-handoffs/04-lens-migration.md`)
 
   orchestrate/                  orchestrator + default editor + analysis libs
     README.md, DOCS.md
@@ -106,9 +106,6 @@ validated-first set; the full migration roadmap covers more lenses — see
 
 - `editor` — CodeMirror editor (lives in `orchestrate/editor/`, not `lenses/`).
   The default home base; the only writer of snippet state.
-- `blanks` — fill-in-the-blank UI. Reads embodiment, renders blanked code +
-  input fields + difficulty config panel.
-- `parsons` — drag-and-drop UI. Reads embodiment, renders shuffled lines.
 - `annotate` — annotation workbench over code or generated flowchart; toggles
   between two views without losing annotations on either. Formerly `highlight`
   (renamed during WS4 Phase 0; see `.planning-handoffs/04-lens-migration.md` §
@@ -118,6 +115,10 @@ validated-first set; the full migration roadmap covers more lenses — see
   configs for steps / values / operators (see
   `.planning-handoffs/04-lens-migration.md` § lens design patterns for the
   multi-variant pattern).
+
+Additional pedagogical lenses (`blanks` fill-in-the-blank, `parsons`
+line-ordering, …) land per the per-lens sessions in
+[`.planning-handoffs/04-lens-migration.md`](./.planning-handoffs/04-lens-migration.md).
 
 Each lens is self-describing via the `LensModule` contract in
 [`lenses/types.ts`](./lenses/types.ts):
