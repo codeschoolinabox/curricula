@@ -36,7 +36,7 @@ function buildTooltipDom(word: string, doc: DocEntry): HTMLElement {
 
 	const content = document.createElement('div');
 
-	// 1. Header with term and category
+	// 1. Header with term and JEJ-boundary badge (derived from isJEJ)
 	const header = document.createElement('div');
 	header.style.cssText =
 		'border-bottom: 1px solid #464647; padding-bottom: 6px; margin-bottom: 8px;';

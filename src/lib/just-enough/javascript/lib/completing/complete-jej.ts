@@ -1,8 +1,8 @@
 /**
- * @file JEJ-aware completion source. Orchestrates the four-phase
- * pipeline (Receive → Validate → Collect → Mark+Freeze) into a
- * single `CompletionCallback` driving CodeMirror's autocompletion
- * extension. See DOCS.md for the full sketch.
+ * @file JEJ-aware completion source. Orchestrates the five-phase
+ * pipeline (Receive → Validate → Collect → Mark → Filter+Freeze)
+ * into a single `CompletionCallback` driving CodeMirror's
+ * autocompletion extension. See DOCS.md for the full sketch.
  *
  * Increment history:
  * - Inc A — identifier branch with keywords + JEJ-allowed globals,
@@ -29,19 +29,6 @@ import collectJejSurface from './collect-jej-surface.js';
 import markBlocked from './mark-blocked.js';
 
 
-/**
- * Produce the JEJ-curated completion list for a single completion
- * request.
- *
- * @param req - Structured request from the editing factory:
- *   `{prefix, precedingText, fullText}`.
- * @returns Deep-frozen array of completion items, prefix-filtered
- *   case-insensitively. Blocked tokens appear in the list with
- *   `type: 'blocked'`, `detail`, `info`, and `apply: 'noop'` per
- *   the language-level pedagogy; allowed tokens appear with `type`
- *   from their source. Advisory tokens (currently `new` and `null`)
- *   appear with source-derived `type` AND `info`.
- */
 /**
  * Whether `precedingText` ends with `<identifier>.` (allowing
  * trailing whitespace after the dot). Chained access (`x.y().`)
@@ -77,6 +64,22 @@ function isIdentifierContinue(char: string): boolean {
 	return IDENTIFIER_CONTINUE_RE.test(char);
 }
 
+/**
+ * Produce the JEJ-curated completion list for a single completion
+ * request.
+ *
+ * @param request - Structured request from the editing factory:
+ *   `{prefix, precedingText, fullText}`.
+ * @returns Deep-frozen array of completion items, prefix-filtered
+ *   case-insensitively. Blocked tokens appear with `type: 'blocked'`,
+ *   `detail`, `entry: DocEntry` (carrying the rich pedagogical
+ *   content from `../documenting/not-in-jej.ts`), and
+ *   `apply: 'noop'`. Allowed tokens appear with `type` from their
+ *   source. Advisory tokens (`new`, `null`) appear with
+ *   source-derived `type` only — no per-suggestion `info`/`entry`;
+ *   their pedagogical caveats live in their `keywords.ts`
+ *   DocEntries and surface on hover.
+ */
 function completeJej(request: CompletionRequest): readonly CompletionItem[] {
 	const validation = validate(request.fullText);
 	const inDotContext = isDotReceiverContext(request.precedingText);

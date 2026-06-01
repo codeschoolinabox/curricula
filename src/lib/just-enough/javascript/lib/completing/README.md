@@ -51,10 +51,13 @@ label — the learner must type the blocked text manually to override
 (and the linter catches it). `entry` is a `DocEntry` (the same shape
 the hover surface returns), sourced from
 [`../documenting/not-in-jej.ts`](../documenting/not-in-jej.ts) when
-the item is a blocked stumble; the editing layer's
-[`build-info-dom.ts`](../../orchestrate/lib/editing/build-info-dom.ts)
-lifts it to a structured DOM tooltip — the same renderer the hover
-surface uses. `info` remains a string fallback for non-JEJ consumers;
+the item is a blocked stumble; the editing layer dispatches on shape
+and lifts `entry` through
+[`build-tooltip-dom.ts`](../../orchestrate/lib/editing/build-tooltip-dom.ts)
+— literally the same function the hover surface calls. `info`
+remains a plain-string fallback for non-JEJ consumers (lifted through
+the simpler
+[`build-info-dom.ts`](../../orchestrate/lib/editing/build-info-dom.ts));
 the JEJ adapter never sets `info`. The UI derives the "not in JEJ"
 badge from `entry.isJEJ === false`.
 

@@ -220,8 +220,8 @@ console.log(greeting, add(count, 8));
 					let: {
 						description:
 							'Creates a block-scoped variable that can be reassigned',
+						isJEJ: true,
 						example: 'let age = 25;\nage = 26;',
-						category: 'variables',
 						commonMistakes: [
 							'Redeclaration: let x = 1; let x = 2; // Error!',
 						],
@@ -230,42 +230,45 @@ console.log(greeting, add(count, 8));
 					const: {
 						description:
 							'Creates a block-scoped constant that cannot be reassigned',
+						isJEJ: true,
 						example: 'const name = "Alice";',
-						category: 'variables',
 						whenToUse: 'When the value should never change',
 					},
 					function: {
 						description: 'Declares a reusable block of code',
+						isJEJ: false,
 						example:
 							'function greet(name) {\n\treturn "Hello, " + name;\n}',
-						category: 'functions',
 						commonMistakes: [
 							'Forgetting return statement',
 							'Calling without parentheses',
 						],
-						whenToUse: 'When you need to reuse code',
+						whenToUse:
+							'In modern JavaScript, when you need to reuse code',
+						whyNotInJej:
+							'A way to package some statements under a name so you can run them with different inputs. JEJ programs run as one flat sequence — defining your own functions opens up a new language level with a new notional machine.',
 					},
 					console: {
 						description:
 							'Browser/Node.js object for debugging and output',
+						isJEJ: true,
 						example: 'console.log("Hello!");',
-						category: 'debugging',
 						whenToUse:
 							'For debugging and seeing what your code does',
 					},
 					return: {
 						description:
 							'Sends a value back from a function and exits',
+						isJEJ: true,
 						example: 'function add(a, b) {\n\treturn a + b;\n}',
-						category: 'functions',
 						commonMistakes: ['Code after return never runs'],
 						whenToUse: 'To send results back from functions',
 					},
 					if: {
 						description:
 							'Executes code only when a condition is true',
+						isJEJ: true,
 						example: 'if (age >= 18) {\n\tconsole.log("adult");\n}',
-						category: 'control-flow',
 						commonMistakes: [
 							'Using = instead of === in condition',
 						],
@@ -274,9 +277,9 @@ console.log(greeting, add(count, 8));
 					},
 					for: {
 						description: 'Repeats code a specific number of times',
+						isJEJ: true,
 						example:
 							'for (let i = 0; i < 5; i++) {\n\tconsole.log(i);\n}',
-						category: 'control-flow',
 						commonMistakes: ['Off-by-one errors'],
 						whenToUse:
 							'When you know exactly how many times to repeat',

@@ -342,9 +342,10 @@ the hover surface shows. Hovering on `var` and autocompleting toward
 one set of prose, not two parallel ones. The completer's role is the
 prospective shaping (what to suggest at the cursor); this module's
 role is the canonical content. The lift to DOM happens in the editing
-layer ([`build-tooltip-dom.ts`](../../orchestrate/lib/editing/build-tooltip-dom.ts)
-and [`build-info-dom.ts`](../../orchestrate/lib/editing/build-info-dom.ts))
-— both renderers consume a `DocEntry`.
+layer's [`build-tooltip-dom.ts`](../../orchestrate/lib/editing/build-tooltip-dom.ts)
+— both surfaces call this function with the same `DocEntry`
+arguments. (`build-info-dom.ts` is the legacy plain-string renderer;
+the JEJ adapter does not exercise it.)
 
 Relationship to [`../../reference.md`](../../reference.md): the
 reference is the comprehensive doc — prose, code tables,

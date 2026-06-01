@@ -172,7 +172,7 @@ sketched in `../completing/DOCS.md`.
 
 ## Decisions
 
-- **Curated, not extracted.** The ~72 entries are hand-authored.
+- **Curated, not extracted.** The ~85 entries are hand-authored.
   See README § Conventions for the voice convention and the
   reference.md / MDN rejection rationale.
 
@@ -240,7 +240,7 @@ sketched in `../completing/DOCS.md`.
   is the unit the drift-guard test compares against its upstream
   source. Per-category files make the test simple and load-bearing
   rather than requiring four-from-one decomposition inside the
-  test. The pragmatic reason: with ~72 entries × multi-line
+  test. The pragmatic reason: with ~85 entries × multi-line
   examples × multi-field `commonMistakes` arrays, single-file size
   would also likely exceed readability and force a refactor split
   mid-sprint — but the alignment-with-drift-guard reason is the

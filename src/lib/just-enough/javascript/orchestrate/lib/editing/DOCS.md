@@ -134,17 +134,25 @@ Returned by linter callbacks. Aligns with JeJ's `Violation` type. The
 ### DocEntry
 
 Returned by the `docLookup` callback. The editor builds a styled tooltip DOM
-from this data.
+from this data. Also consumed by the `completions` callback's per-item
+`entry` field (see CompletionItem below) — both surfaces share the same
+shape and the same DOM lift in `build-tooltip-dom.ts`.
 
 ```js
 {
   description: string,
+  isJEJ: boolean,         // structural in/out boundary; drives the badge
   example?: string,
-  category?: string,
   commonMistakes?: string[],
   whenToUse?: string,
+  whyNotInJej?: string,   // set only on isJEJ: false entries
 }
 ```
+
+`isJEJ === false` triggers the UI's "not in JEJ" badge; the
+DocEntry does not store display text. `whyNotInJej` is the
+notional-machine-grounded exclusion rationale and renders as its own
+section in the tooltip when present.
 
 ### CompletionRequest
 
@@ -174,14 +182,18 @@ Returned by the `completions` callback.
   type?: string,    // 'function', 'variable', 'keyword', 'blocked', etc.
   detail?: string,
   info?: string,    // markdown-flavored single-paragraph prose
+  entry?: DocEntry, // structured rich payload (see DocEntry above)
   apply?: 'noop',   // sentinel — see below
 }
 ```
 
-`info` is single-paragraph prose; the editor lifts it into a styled DOM
-tooltip via `build-info-dom.ts` (mirroring `build-tooltip-dom.ts` for
-hover docs). `apply: 'noop'` asks CodeMirror to dismiss the popup on
-Enter instead of inserting the label — used together with `type:
+When both `info` and `entry` are present, the editing factory prefers
+`entry` and lifts it through `build-tooltip-dom.ts` — the same renderer
+the hover surface uses. `info` is the legacy plain-paragraph fallback,
+lifted through `build-info-dom.ts`. JEJ-aware adapters set `entry` for
+blocked items and leave `info` unset. `apply: 'noop'` asks CodeMirror
+to dismiss the popup on Enter instead of inserting the label — used
+together with `type:
 'blocked'` so callers can surface vocabulary in the popup as
 warning-only items (the learner sees them, learns why via `info`, but
 the keystroke does not land). The sentinel translates to a

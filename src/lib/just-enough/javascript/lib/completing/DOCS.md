@@ -95,16 +95,11 @@ glossary, public API, and the rationale for living at the JEJ-package
 5. **Filter and freeze** (sync, pure) — case-insensitively
    prefix-filter the combined suggestion set (a typo'd `LET` still
    surfaces `let`), then deep-freeze the resulting array on the
-   orchestrator's return boundary. The freeze guarantee covers the
-   array; entry references inside are already module-load-frozen
-   upstream in documenting.
-
-   Then prefix-filter the combined result case-insensitively
-   (`label.toLowerCase().startsWith(prefix.toLowerCase())`) and
-   deep-freeze the returned array. The freeze happens at the
    orchestrator's return boundary in
-   [`complete-jej.ts`](./complete-jej.ts), not inside
-   [`mark-blocked.ts`](./mark-blocked.ts).
+   [`complete-jej.ts`](./complete-jej.ts) (not inside
+   [`mark-blocked.ts`](./mark-blocked.ts)). The freeze guarantee
+   covers the array; entry references inside are already
+   module-load-frozen upstream in documenting.
 
 ### Data flow
 
@@ -216,15 +211,6 @@ flowchart TD
   the single source of truth for both surfaces (hover + autocomplete).
   This module imports `NOT_IN_JEJ_ENTRIES` and `NOT_IN_JEJ_LABELS`
   rather than carrying its own copy.
-
-  **Transient state during the unified-docs sprint.** A
-  `stumbling-list.ts` file currently exists in this module
-  alongside the three above; it is deleted as part of the sprint's
-  final wiring increment, with its content already migrated upstream
-  to `../documenting/not-in-jej.ts` (blocked entries) and
-  `../documenting/keywords.ts` (advisory `null` / `new` caveats).
-  Until that increment lands, the sketch describes the target shape;
-  the current directory carries the obsolete file.
 - **`types.ts` is present.** Unlike linting and formatting-editor
   (which both skip it), this module owns cross-file JEJ vocabulary
   that belongs in neither the editing-layer's types nor a single
