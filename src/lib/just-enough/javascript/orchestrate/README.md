@@ -306,6 +306,12 @@ machine](./DOCS.md) for the architectural sketch.
 - **Active lens** — when `state.mode === 'lens'`, the lens name currently
   mounted. Stored as `state.activeLens`. The picker `value` derives from this;
   the edit button's visibility derives from `state.mode === 'lens'`.
+- **Edit button** — the toolbar affordance (`<button data-orchestrator-edit-button>`
+  labelled "Edit code") that triggers an edit return. Rendered conditionally:
+  visible only when `state.mode === 'lens'`; not present in the editor-mode
+  DOM at all (no disabled/hidden fallback — the affordance is absent because
+  no transition is needed). Distinct from the **edit return** entry below,
+  which describes the transition the button drives.
 - **Edit return** — the orchestrator-state transition from lens mode back to
   editor mode, driven by the toolbar's edit button. The button dispatches
   `mode-changed({ from: 'lens', to: 'editor' })` on the internal bus; it

@@ -32,8 +32,15 @@
  * (each `<StudyLenses>` mount owns its own bus, no global registry).
  *
  * **Open holes**:
- * - `LensSelectionSource` enumeration may grow with L5/L6 (panel
- *   click vs picker change vs keyboard shortcut).
+ * - `LensSelectionSource` may still grow with L5/L6: `'panel'` is
+ *   typed but unwired (recommendations-panel cell click, deferred);
+ *   a keyboard-shortcut source could land alongside. Extensions are
+ *   gated — see the policy block on the union itself.
+ * - `'edit-button'` is typed (the toolbar edit-return click site
+ *   computes it) but not externally observable today, because
+ *   `ModeChangedPayload` carries only `{from, to}`. A future
+ *   `ModeChangedPayload.source` extension would surface it; until
+ *   then it exists for completeness and test introspection.
  *
  * @remarks This file is the orchestrator's INTERNAL contract.
  * Public surface is just `StudyLensesProps`. Everything else is
@@ -211,8 +218,7 @@ type CachedEmbodiment = Readonly<{
  * Source of a lens-selection event — useful for analytics, picker
  * highlighting logic, and (future) exercise-completion attribution.
  *
- * @remarks Each dispatch site supplies one of these values when the
- * site has a defensible source attribution. Current enumeration:
+ * @remarks Current enumeration (each value pinned to a dispatch site):
  * - `'initial'` — the one-time post-commit `useEffect([])` that fires
  *   when first render lands in lens mode.
  * - `'prop'` — the prop-change effect (`useEffect([lens, configs])`)
@@ -220,12 +226,19 @@ type CachedEmbodiment = Readonly<{
  * - `'picker'` — the toolbar lens-picker `<select>`'s `onChange`
  *   handler.
  * - `'edit-button'` — the toolbar's edit-return `<button>`'s `onClick`
- *   handler. This site does NOT dispatch `lens-switched` (no lens is
- *   being selected — the active lens is being unmounted), so the
- *   source value is observable only via analytics that subscribe to a
- *   future `mode-changed` `source` field, or via lint-style
- *   enforcement that every dispatch site supplies a value.
- * - `'panel'` — L5 recommendations-panel cell click (deferred).
+ *   handler. This site does NOT dispatch `lens-switched`; the source
+ *   value is computed by `applyTransition` but never reaches a bus
+ *   subscriber (see the "Open holes" note on `ModeChangedPayload`).
+ * - `'panel'` — L5 recommendations-panel cell click (deferred; typed
+ *   but no dispatch site exists yet).
+ *
+ * **Extension policy.** Adding a value to this union requires:
+ * 1. An AR-1 design review (this is a contract, not an implementation
+ *    detail — silent widening has caused alignment drift before).
+ * 2. A defensible dispatch site that supplies the value at runtime.
+ * 3. A `README.md` glossary entry naming the affordance the value
+ *    represents.
+ * Only the human can waive the AR-1 step. Agents do not self-waive.
  */
 type LensSelectionSource =
 	| 'picker'
