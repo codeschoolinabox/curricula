@@ -43,8 +43,8 @@ describe('markBlocked', () => {
 				expect(variableItem?.type).toBe('blocked');
 			});
 
-			it('has detail (not in JEJ)', () => {
-				expect(variableItem?.detail).toBe('(not in JEJ)');
+			it('does not set detail (badge is derived from entry.isJEJ in the UI)', () => {
+				expect(variableItem?.detail).toBeUndefined();
 			});
 
 			it('has apply noop', () => {

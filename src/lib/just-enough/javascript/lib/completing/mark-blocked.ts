@@ -29,9 +29,6 @@ import NOT_IN_JEJ_ENTRIES, {
 
 import type { Suggestion } from './types.js';
 
-/** `detail` text attached to every synthesized blocked completion. */
-const BLOCKED_DETAIL = '(not in JEJ)';
-
 /**
  * Convert each `Suggestion` to a `CompletionItem` (pass-through) and
  * synthesize blocked items for JEJ-blocked labels not present in the
@@ -89,7 +86,6 @@ function synthesizeDotBlocked(
 			return {
 				label: name,
 				type: 'blocked',
-				detail: BLOCKED_DETAIL,
 				entry: NOT_IN_JEJ_ENTRIES[name],
 				apply: 'noop',
 			};
@@ -112,7 +108,6 @@ function synthesizeIdentifierBlocked(
 			return {
 				label,
 				type: 'blocked',
-				detail: BLOCKED_DETAIL,
 				entry: NOT_IN_JEJ_ENTRIES[label],
 				apply: 'noop',
 			};
