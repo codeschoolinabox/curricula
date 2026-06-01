@@ -1,7 +1,7 @@
 import type { ShortCircuitingOperatorEvent, ValueRepresentation } from '../../types.js';
 
 type ShortCircuitingParams = {
-	readonly operator: '&&' | '||' | '??' | '?:';
+	readonly operator: '&&' | '||' | '??';
 	readonly left: ValueRepresentation;
 	readonly right?: ValueRepresentation;
 	readonly result: ValueRepresentation;

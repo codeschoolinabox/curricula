@@ -20,7 +20,7 @@ function createJumpEvent({
 	readonly label?: string;
 }): Omit<JumpEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	return {
-		category: 'controlFlow',
+		category: 'jump',
 		event: 'jump',
 		kind,
 		target,

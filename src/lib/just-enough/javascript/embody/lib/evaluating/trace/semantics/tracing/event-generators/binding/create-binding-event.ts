@@ -49,7 +49,7 @@ function createBindingEvent({
 	}
 
 	return {
-		category: 'binding',
+		category: 'variable',
 		kind,
 		event,
 		name,

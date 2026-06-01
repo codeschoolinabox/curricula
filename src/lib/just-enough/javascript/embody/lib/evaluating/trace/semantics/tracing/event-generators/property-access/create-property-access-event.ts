@@ -33,7 +33,7 @@ function createPropertyAccessEvent({
 	}
 
 	return {
-		category: 'propertyAccess',
+		category: 'property',
 		kind,
 		object,
 		key,

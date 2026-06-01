@@ -57,7 +57,7 @@ function createAssignmentOperatorEvent({
 	const coercionOccurred = coercedOperands !== undefined && hasCoercion(operands, coercedOperands);
 
 	return {
-		category: 'operator',
+		category: 'assignment',
 		kind: 'assignment',
 		operator,
 		target,
