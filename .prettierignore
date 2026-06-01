@@ -3,3 +3,6 @@ node_modules
 build
 .docusaurus
 src/lib/sl-trace-js-aran-legacy/record/legacy-aran-trace
+
+# Intentionally-malformed test fixture (exercises parse-error handling)
+src/plugins/study-lenses/tests/fixtures/malformed-json/lenses.json
