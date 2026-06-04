@@ -15,17 +15,18 @@
  * replaces the legacy `lib/api/types.ts` aggregation.
  */
 
-import type {
-	ConsoleMethod,
-	Execution,
-	InterceptEvent,
-} from '../shared/types.js';
+import type { ParseResultError } from '../../parse-old/types.js';
 import type {
 	BaseResult,
 	FormattingResultError,
 	Violation,
 } from '../../validating/types.js';
-import type { ParseResultError } from '../../parse-old/types.js';
+import type {
+	ConsoleMethod,
+	Execution,
+	InterceptEvent,
+} from '../shared/types.js';
+
 import type { ASTNode, LinkedInterceptEvent } from './link/types.js';
 
 // ─── Result error types (engine-owned) ───────────────────────
@@ -175,7 +176,7 @@ type InterceptResult = BaseResult<InterceptResultError> & {
  */
 type IoConsole = {
 	readonly [K in ConsoleMethod]?: (
-		...args: readonly unknown[]
+		...arguments_: readonly unknown[]
 	) => void | Promise<void>;
 };
 

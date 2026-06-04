@@ -1,7 +1,6 @@
 import type { Node } from 'acorn';
 
 import createViolation from './create-violation.js';
-
 import type { LanguageLevel, NodeRule, Violation } from './types.js';
 
 // -- constraint validators --
@@ -84,7 +83,7 @@ function validateAssignmentExpression(
 ): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	const operator = record.operator as string;
-	const left = record.left as { type: string };
+	const left = record.left as { readonly type: string };
 
 	if (!ALLOWED_ASSIGNMENT_OPERATORS.has(operator)) {
 		return createViolation(
@@ -258,8 +257,8 @@ function validateUnaryExpression(
  */
 function validateIfStatement(node: Node, nodePath: string): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
-	const consequent = record.consequent as { type: string };
-	const alternate = record.alternate as { type: string } | null;
+	const consequent = record.consequent as { readonly type: string };
+	const alternate = record.alternate as { readonly type: string } | null;
 
 	if (consequent.type !== 'BlockStatement') {
 		return createViolation(
@@ -297,7 +296,7 @@ function validateWhileStatement(
 	nodePath: string,
 ): true | Violation {
 	const body = (node as unknown as Record<string, unknown>).body as {
-		type: string;
+		readonly type: string;
 	};
 
 	if (body.type !== 'BlockStatement') {
@@ -324,7 +323,7 @@ function validateForOfStatement(
 	nodePath: string,
 ): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
-	const body = record.body as { type: string };
+	const body = record.body as { readonly type: string };
 
 	if (body.type !== 'BlockStatement') {
 		return createViolation(
@@ -346,7 +345,7 @@ function validateDoWhileStatement(
 	nodePath: string,
 ): true | Violation {
 	const body = (node as unknown as Record<string, unknown>).body as {
-		type: string;
+		readonly type: string;
 	};
 
 	if (body.type !== 'BlockStatement') {
@@ -366,7 +365,7 @@ function validateDoWhileStatement(
  */
 function validateForStatement(node: Node, nodePath: string): true | Violation {
 	const body = (node as unknown as Record<string, unknown>).body as {
-		type: string;
+		readonly type: string;
 	};
 
 	if (body.type !== 'BlockStatement') {
@@ -407,7 +406,7 @@ function createMemberValidator(
 
 		if (computed) return true;
 
-		const property = record.property as { type: string; name: string };
+		const property = record.property as { readonly type: string; readonly name: string };
 		if (!blockedNames.has(property.name)) return true;
 
 		return createViolation(
@@ -430,8 +429,8 @@ function createMemberValidator(
  */
 function validateNewExpression(node: Node, nodePath: string): true | Violation {
 	const callee = (node as unknown as Record<string, unknown>).callee as {
-		type: string;
-		name?: string;
+		readonly type: string;
+		readonly name?: string;
 	};
 	if (callee.type === 'Identifier' && callee.name === 'Date') return true;
 	return createViolation(

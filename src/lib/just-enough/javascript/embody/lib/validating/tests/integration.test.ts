@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
-import validateProgram from '../validate-program.js';
 import justEnoughJs from '../just-enough-js.js';
+import validateProgram from '../validate-program.js';
 
 describe('integration: valid Just Enough JS programs', () => {
 	it('accepts a program using all allowed features', () => {
@@ -250,11 +250,11 @@ describe('integration: location accuracy', () => {
 		const source = `let x = 5;
 var y = 10;`;
 		const report = validateProgram(source, justEnoughJs);
-		const varViolation = report.violations.find((v) =>
+		const variableViolation = report.violations.find((v) =>
 			v.message.includes('var'),
 		);
-		expect(varViolation).toBeDefined();
-		expect(varViolation!.location.start.line).toBe(2);
+		expect(variableViolation).toBeDefined();
+		expect(variableViolation!.location.start.line).toBe(2);
 	});
 });
 

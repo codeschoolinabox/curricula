@@ -18,7 +18,7 @@ import type { SourceRange } from '../../../embody/lib/validating/types.js';
  * @returns A frozen SourceRange.
  */
 function extractLocation(node: Node): SourceRange {
-	const loc = node.loc;
+	const {loc} = node;
 	if (loc) {
 		return Object.freeze({
 			start: Object.freeze({ line: loc.start.line, column: loc.start.column }),

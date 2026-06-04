@@ -125,10 +125,10 @@ import type { LensConfig } from '../lenses/types.js';
  * rendered `<StudyLenses>` JSX node. See WS3 handoff § Cross-handoff
  * impact for the plugin-emit narrowing schedule.
  */
-type StudyLensesProps = Readonly<{
-	snippet: string;
-	lens?: string;
-	configs?: Readonly<Record<string, unknown>>;
+type StudyLensesProperties = Readonly<{
+	readonly snippet: string;
+	readonly lens?: string;
+	readonly configs?: Readonly<Record<string, unknown>>;
 }>;
 
 // --- Internal mode state (2-state machine per WS3 F2) ---
@@ -148,7 +148,7 @@ type StudyLensesProps = Readonly<{
  * orchestrator at render time — not stored on this state.
  */
 type EditorModeState = Readonly<{
-	mode: 'editor';
+	readonly mode: 'editor';
 }>;
 
 /**
@@ -168,9 +168,9 @@ type EditorModeState = Readonly<{
  * `cachedEmbodiment.snippet === currentSnippet`.
  */
 type LensModeState = Readonly<{
-	mode: 'lens';
-	activeLens: string;
-	resolvedConfig: LensConfig;
+	readonly mode: 'lens';
+	readonly activeLens: string;
+	readonly resolvedConfig: LensConfig;
 }>;
 
 /**
@@ -208,8 +208,8 @@ type OrchestratorState = EditorModeState | LensModeState;
  * was built from — equality check is string-identity (`===`).
  */
 type CachedEmbodiment = Readonly<{
-	snippet: string;
-	embodiment: Snippet;
+	readonly snippet: string;
+	readonly embodiment: Snippet;
 }>;
 
 // --- Lens selection (where a switch came from) ---
@@ -280,9 +280,9 @@ type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
  * without a meaningful source omit it.
  */
 type LensSwitchedPayload = Readonly<{
-	previous: string | null;
-	next: string;
-	source?: LensSelectionSource;
+	readonly previous: string | null;
+	readonly next: string;
+	readonly source?: LensSelectionSource;
 }>;
 
 /**
@@ -295,8 +295,8 @@ type LensSwitchedPayload = Readonly<{
  * deterministic order (mode-changed before lens-switched).
  */
 type ModeChangedPayload = Readonly<{
-	from: 'editor' | 'lens';
-	to: 'editor' | 'lens';
+	readonly from: 'editor' | 'lens';
+	readonly to: 'editor' | 'lens';
 }>;
 
 /**
@@ -305,8 +305,8 @@ type ModeChangedPayload = Readonly<{
  * to constrain payload types per event name.
  */
 type EventPayloadMap = Readonly<{
-	'lens-switched': LensSwitchedPayload;
-	'mode-changed': ModeChangedPayload;
+	readonly 'lens-switched': LensSwitchedPayload;
+	readonly 'mode-changed': ModeChangedPayload;
 }>;
 
 type EventPayload<N extends EventName> = EventPayloadMap[N];
@@ -339,7 +339,7 @@ type EventBus = Readonly<{
 }>;
 
 export type {
-	StudyLensesProps,
+	StudyLensesProperties as StudyLensesProps,
 	OrchestratorState,
 	EditorModeState,
 	LensModeState,

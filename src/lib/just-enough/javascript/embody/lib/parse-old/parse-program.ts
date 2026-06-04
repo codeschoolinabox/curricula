@@ -56,8 +56,8 @@ function parseProgram(
  */
 function createParseError(error: unknown): ParseError {
 	const acornError = error as {
-		message?: string;
-		loc?: { line: number; column: number };
+		readonly message?: string;
+		readonly loc?: { readonly line: number; readonly column: number };
 	};
 
 	return Object.freeze({

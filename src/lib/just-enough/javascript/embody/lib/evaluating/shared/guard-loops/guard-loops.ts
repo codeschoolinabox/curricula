@@ -27,8 +27,8 @@
  * computed offsets — no recast.print, so formatting is fully preserved.
  */
 
-import * as recast from 'recast';
 import { walk } from 'estree-walker';
+import * as recast from 'recast';
 
 import type { GuardResult, LoopType } from './types.js';
 
@@ -39,11 +39,11 @@ import type { GuardResult, LoopType } from './types.js';
  * @param source - The full source code string
  * @returns Array where index N is the character offset of line N's first char
  */
-function computeLineStartOffsets(source: string): number[] {
+function computeLineStartOffsets(source: string): readonly number[] {
 	const offsets = [0];
-	for (let i = 0; i < source.length; i++) {
-		if (source[i] === '\n') {
-			offsets.push(i + 1);
+	for (let index = 0; index < source.length; index++) {
+		if (source[index] === '\n') {
+			offsets.push(index + 1);
 		}
 	}
 	return offsets;
@@ -68,23 +68,23 @@ type AstPosition = { readonly line: number; readonly column: number };
 function toOffset(
 	pos: AstPosition,
 	code: string,
-	lineStarts: number[],
+	lineStarts: readonly number[],
 ): number {
 	const TAB_WIDTH = 4;
 	const lineStart = lineStarts[pos.line - 1];
 	let visualCol = 0;
-	let idx = lineStart;
+	let index = lineStart;
 
 	while (visualCol < pos.column) {
-		if (code[idx] === '\t') {
+		if (code[index] === '\t') {
 			visualCol += TAB_WIDTH - (visualCol % TAB_WIDTH);
 		} else {
 			visualCol++;
 		}
-		idx++;
+		index++;
 	}
 
-	return idx;
+	return index;
 }
 
 /**
@@ -130,14 +130,14 @@ const GUARDED_LOOP_TYPES: readonly LoopType[] = [
 
 function guardLoops(code: string, maxIterations: number): GuardResult {
 	const ast = recast.parse(code);
-	const loops: CollectedLoop[] = collectLoops(ast);
+	const loops: readonly CollectedLoop[] = collectLoops(ast);
 
 	if (loops.length === 0) {
 		return { code, loopCount: 0 };
 	}
 
 	const lineStarts = computeLineStartOffsets(code);
-	const insertions: Insertion[] = loops.flatMap((loop, index) =>
+	const insertions: readonly Insertion[] = loops.flatMap((loop, index) =>
 		planLoopInsertions(loop, index + 1, maxIterations, code, lineStarts),
 	);
 
@@ -158,8 +158,8 @@ function guardLoops(code: string, maxIterations: number): GuardResult {
  * GUARDED_LOOP_TYPES. Classification happens here so later phases can dispatch
  * on loopType without re-reading AST node types.
  */
-function collectLoops(ast: unknown): CollectedLoop[] {
-	const loops: CollectedLoop[] = [];
+function collectLoops(ast: unknown): readonly CollectedLoop[] {
+	const loops: readonly CollectedLoop[] = [];
 	(walk as (node: unknown, walker: Record<string, unknown>) => void)(ast, {
 		enter(node: Record<string, unknown>) {
 			// Only guard loops whose body is a BlockStatement. Brace-less
@@ -181,7 +181,7 @@ function collectLoops(ast: unknown): CollectedLoop[] {
 }
 
 function isBlockStatement(node: Record<string, unknown> | undefined): boolean {
-	return node !== undefined && node.type === 'BlockStatement';
+	return node?.type === 'BlockStatement';
 }
 
 function isGuardedLoopType(nodeType: unknown): nodeType is LoopType {
@@ -205,8 +205,8 @@ function planLoopInsertions(
 	id: number,
 	maxIterations: number,
 	code: string,
-	lineStarts: number[],
-): Insertion[] {
+	lineStarts: readonly number[],
+): readonly Insertion[] {
 	const { loopType, node } = loop;
 
 	const guardOffset = toOffset(node.body.loc.start, code, lineStarts) + 1;

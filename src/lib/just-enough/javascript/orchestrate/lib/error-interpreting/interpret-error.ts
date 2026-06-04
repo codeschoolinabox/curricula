@@ -58,8 +58,8 @@ function buildFallback(
 	return deepFreezeInPlace({
 		whatWentWrong: `A \`${error.name}\` occurred: ${error.message}`,
 		howToFix:
-			'Check the error message carefully and review your code ' +
-			(error.line ? `around line ${error.line}.` : 'for issues.'),
+			`Check the error message carefully and review your code ${ 
+			error.line ? `around line ${error.line}.` : 'for issues.'}`,
 		likelyMisunderstanding:
 			'This error does not have a specific explanation yet. ' +
 			'The error message itself is your best guide.',

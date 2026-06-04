@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
 import matchExplanation from '../match-explanation.js';
-
 import type { ExplanationPattern } from '../types.js';
 
 const PATTERNS: readonly ExplanationPattern[] = Object.freeze([

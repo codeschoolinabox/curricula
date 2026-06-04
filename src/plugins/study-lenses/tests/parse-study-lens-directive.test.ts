@@ -21,67 +21,67 @@ describe('parseStudyLensDirective', () => {
 	});
 
 	it('file with no directive → null', () => {
-		const src = "'use strict';\nconst x = 1;\n";
-		expect(parseStudyLensDirective(src, P)).toBeNull();
+		const source = "'use strict';\nconst x = 1;\n";
+		expect(parseStudyLensDirective(source, P)).toBeNull();
 	});
 
 	it('line comment directive, lens only → lens captured', () => {
-		const src = '// @study-lens parsons\nconst x = 1;\n';
-		expect(parseStudyLensDirective(src, P)?.directive).toEqual({
+		const source = '// @study-lens parsons\nconst x = 1;\n';
+		expect(parseStudyLensDirective(source, P)?.directive).toEqual({
 			lens: 'parsons',
 		});
 	});
 
 	it('JSDoc single-line directive, lens only → lens captured', () => {
-		const src = '/** @study-lens parsons */\nconst x = 1;\n';
-		expect(parseStudyLensDirective(src, P)?.directive).toEqual({
+		const source = '/** @study-lens parsons */\nconst x = 1;\n';
+		expect(parseStudyLensDirective(source, P)?.directive).toEqual({
 			lens: 'parsons',
 		});
 	});
 
 	it('line comment directive with JSON body → lens + lensConfig captured', () => {
-		const src = '// @study-lens parsons {"distractors": 4}\n';
-		expect(parseStudyLensDirective(src, P)?.directive).toEqual({
+		const source = '// @study-lens parsons {"distractors": 4}\n';
+		expect(parseStudyLensDirective(source, P)?.directive).toEqual({
 			lens: 'parsons',
 			lensConfig: { distractors: 4 },
 		});
 	});
 
 	it('JSDoc multi-line block with JSON body on separate line → parsed', () => {
-		const src = [
+		const source = [
 			'/**',
 			' * @study-lens parsons',
 			' * {"distractors": 4}',
 			' */',
 			'const x = 1;',
 		].join('\n');
-		expect(parseStudyLensDirective(src, P)?.directive).toEqual({
+		expect(parseStudyLensDirective(source, P)?.directive).toEqual({
 			lens: 'parsons',
 			lensConfig: { distractors: 4 },
 		});
 	});
 
 	it('`use strict` on line 1 ends the leading block → directive not found', () => {
-		const src = "'use strict';\n// @study-lens parsons\n";
+		const source = "'use strict';\n// @study-lens parsons\n";
 		// Note: under the new parser, the `// @study-lens parsons` line is
 		// now in the TRAILING block (after the last code line), so it IS
 		// detected. This is a behavior change from the old leading-only
 		// parser. The test is updated to reflect the new semantics.
-		expect(parseStudyLensDirective(src, P)?.directive).toEqual({
+		expect(parseStudyLensDirective(source, P)?.directive).toEqual({
 			lens: 'parsons',
 		});
 	});
 
 	it('blank lines between comments do NOT end the block', () => {
-		const src = '// banner\n\n// @study-lens parsons\nconst x = 1;\n';
-		expect(parseStudyLensDirective(src, P)?.directive).toEqual({
+		const source = '// banner\n\n// @study-lens parsons\nconst x = 1;\n';
+		expect(parseStudyLensDirective(source, P)?.directive).toEqual({
 			lens: 'parsons',
 		});
 	});
 
 	it('malformed JSON body → throws with file path in message', () => {
-		const src = '/** @study-lens parsons {bad: json} */\n';
-		expect(() => parseStudyLensDirective(src, P)).toThrow(
+		const source = '/** @study-lens parsons {bad: json} */\n';
+		expect(() => parseStudyLensDirective(source, P)).toThrow(
 			/Malformed @study-lens config JSON in .*fixture\.js/,
 		);
 	});
@@ -89,14 +89,14 @@ describe('parseStudyLensDirective', () => {
 	// ─── New tests: strip behavior ──────────────────────────────────────────
 
 	it('single-line `//` directive → strippedCode is code body only', () => {
-		const src = '// @study-lens parsons\nconst x = 1;\n';
-		expect(parseStudyLensDirective(src, P)?.strippedCode).toBe(
+		const source = '// @study-lens parsons\nconst x = 1;\n';
+		expect(parseStudyLensDirective(source, P)?.strippedCode).toBe(
 			'const x = 1;\n',
 		);
 	});
 
 	it('multi-line JSDoc block directive → entire block removed, trailing newline preserved', () => {
-		const src = [
+		const source = [
 			'/**',
 			' * @study-lens parsons',
 			' * {"distractors": 4}',
@@ -104,47 +104,47 @@ describe('parseStudyLensDirective', () => {
 			"const puzzle = 'x';",
 			'',
 		].join('\n');
-		expect(parseStudyLensDirective(src, P)?.strippedCode).toBe(
+		expect(parseStudyLensDirective(source, P)?.strippedCode).toBe(
 			"const puzzle = 'x';\n",
 		);
 	});
 
 	it('preserves non-directive leading `//` comment separated by blank line', () => {
-		const src = '// Author: Eve\n\n// @study-lens parsons\nconst x = 1;\n';
+		const source = '// Author: Eve\n\n// @study-lens parsons\nconst x = 1;\n';
 		// The blank between the comments makes them separate line-runs;
 		// only the directive-bearing run is stripped.
-		expect(parseStudyLensDirective(src, P)?.strippedCode).toBe(
+		expect(parseStudyLensDirective(source, P)?.strippedCode).toBe(
 			'// Author: Eve\n\nconst x = 1;\n',
 		);
 	});
 
 	it('contiguous `//` run is atomic: intro AND directive stripped together', () => {
-		const src = '// Author: Eve\n// @study-lens parsons\nconst x = 1;\n';
+		const source = '// Author: Eve\n// @study-lens parsons\nconst x = 1;\n';
 		// No blank between the two `//` lines → they form ONE line-run
 		// comment form, and the whole run is stripped when it contains
 		// the tag.
-		expect(parseStudyLensDirective(src, P)?.strippedCode).toBe(
+		expect(parseStudyLensDirective(source, P)?.strippedCode).toBe(
 			'const x = 1;\n',
 		);
 	});
 
 	it('shebang preserved when directive appears after it', () => {
-		const src =
+		const source =
 			'#!/usr/bin/env node\n/** @study-lens parsons */\nconst x = 1;\n';
-		expect(parseStudyLensDirective(src, P)?.strippedCode).toBe(
+		expect(parseStudyLensDirective(source, P)?.strippedCode).toBe(
 			'#!/usr/bin/env node\nconst x = 1;\n',
 		);
 	});
 
 	it('trailing line-comment directive → directive parsed, code body preserved with trailing newline', () => {
-		const src = 'const x = 1;\n// @study-lens parsons\n';
-		const result = parseStudyLensDirective(src, P);
+		const source = 'const x = 1;\n// @study-lens parsons\n';
+		const result = parseStudyLensDirective(source, P);
 		expect(result?.directive).toEqual({ lens: 'parsons' });
 		expect(result?.strippedCode).toBe('const x = 1;\n');
 	});
 
 	it('trailing JSDoc block directive → stripped, trailing newline preserved', () => {
-		const src = [
+		const source = [
 			"const puzzle = 'x';",
 			'',
 			'/**',
@@ -153,7 +153,7 @@ describe('parseStudyLensDirective', () => {
 			' */',
 			'',
 		].join('\n');
-		const result = parseStudyLensDirective(src, P);
+		const result = parseStudyLensDirective(source, P);
 		expect(result?.directive).toEqual({
 			lens: 'parsons',
 			lensConfig: { distractors: 4 },
@@ -162,13 +162,13 @@ describe('parseStudyLensDirective', () => {
 	});
 
 	it('both leading AND trailing directive → throws ambiguous-placement', () => {
-		const src = [
+		const source = [
 			'// @study-lens parsons',
 			'const x = 1;',
 			'// @study-lens highlight',
 			'',
 		].join('\n');
-		expect(() => parseStudyLensDirective(src, P)).toThrow(
+		expect(() => parseStudyLensDirective(source, P)).toThrow(
 			/Ambiguous @study-lens placement in .*fixture\.js/,
 		);
 	});
@@ -177,33 +177,33 @@ describe('parseStudyLensDirective', () => {
 		// Leading directive has malformed JSON; trailing directive has
 		// valid tag. Both-present check should throw ambiguous-placement
 		// (not malformed-JSON) because presence detection precedes parse.
-		const src = [
+		const source = [
 			'/** @study-lens parsons {bad: json} */',
 			'const x = 1;',
 			'// @study-lens highlight',
 			'',
 		].join('\n');
-		expect(() => parseStudyLensDirective(src, P)).toThrow(
+		expect(() => parseStudyLensDirective(source, P)).toThrow(
 			/Ambiguous @study-lens placement/,
 		);
 	});
 
 	it('blank-line collapse around leading strip preserves BOF padding, drops interior blank', () => {
-		const src = '\n/** @study-lens parsons */\n\nconst x = 1;\n';
+		const source = '\n/** @study-lens parsons */\n\nconst x = 1;\n';
 		// The blank before the directive sits at the file edge (BOF side)
 		// → preserved. The blank between directive and code body is
 		// interior → collapsed with the stripped form.
-		expect(parseStudyLensDirective(src, P)?.strippedCode).toBe(
+		expect(parseStudyLensDirective(source, P)?.strippedCode).toBe(
 			'\nconst x = 1;\n',
 		);
 	});
 
 	it('blank-line collapse around trailing strip preserves EOF padding, drops interior blank', () => {
-		const src = 'const x = 1;\n\n/** @study-lens parsons */\n';
+		const source = 'const x = 1;\n\n/** @study-lens parsons */\n';
 		// The blank between code body and directive is interior →
 		// collapsed. The trailing newline after the directive sits at
 		// the EOF edge → preserved.
-		expect(parseStudyLensDirective(src, P)?.strippedCode).toBe(
+		expect(parseStudyLensDirective(source, P)?.strippedCode).toBe(
 			'const x = 1;\n',
 		);
 	});
@@ -212,12 +212,12 @@ describe('parseStudyLensDirective', () => {
 		// The mid-file `// @study-lens parsons` is surrounded by code on
 		// both sides, so it belongs to neither leading nor trailing
 		// comment block. Parser returns null; the directive is inert.
-		const src = [
+		const source = [
 			'const a = 1;',
 			'// @study-lens parsons',
 			'const b = 2;',
 			'',
 		].join('\n');
-		expect(parseStudyLensDirective(src, P)).toBeNull();
+		expect(parseStudyLensDirective(source, P)).toBeNull();
 	});
 });

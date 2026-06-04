@@ -25,9 +25,10 @@
  * ```
  */
 
-import validateProgram from './validate-program.js';
-import justEnoughJs from './just-enough-js.js';
 import checkFormat from '../formatting/check-format.js';
+
+import justEnoughJs from './just-enough-js.js';
+import validateProgram from './validate-program.js';
 
 export default async function isJej(code: string): Promise<boolean> {
 	const report = validateProgram(code, justEnoughJs);

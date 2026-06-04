@@ -22,7 +22,7 @@ function findNodeAtLine(ast: Node, line: number): Node | undefined {
 	// walk visits nodes depth-first — later matches are deeper
 	walk(ast as any, {
 		enter(node: any) {
-			if (node.loc && node.loc.start.line === line) {
+			if (node.loc?.start.line === line) {
 				deepest = node as Node;
 			}
 		},

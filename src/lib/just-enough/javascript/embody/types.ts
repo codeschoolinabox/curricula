@@ -46,18 +46,18 @@ import type { Violation } from './lib/validating/types.js';
  */
 type NodePath = string;
 
-interface SourcePosition {
+type SourcePosition = {
 	readonly line: number; // 1-based
 	readonly column: number; // 0-based
 }
 
-interface SourceLocation {
+type SourceLocation = {
 	readonly start: SourcePosition;
 	readonly end: SourcePosition;
 }
 
 /** The source string + a precomputed line-offsets index for O(1) loc lookup. */
-interface Source {
+type Source = {
 	readonly code: string;
 	/** offsets[n] = char offset of the first char of line n+1; offsets[0] === 0. */
 	readonly offsets: ReadonlyArray<number>;
@@ -71,7 +71,7 @@ interface Source {
  * Flat Acorn output verbatim. Lives on snippet.raw. Fields are null until the
  * corresponding gate passes: tokens after tokenize, ast + comments after parse.
  */
-interface RawAcorn {
+type RawAcorn = {
 	readonly tokens: ReadonlyArray<unknown> | null; // Acorn Token[]; null before tokenize
 	readonly ast: AcornNode | null; // Acorn Program; null before parse
 	readonly comments: ReadonlyArray<unknown> | null; // Acorn Comment[]; null before parse
@@ -86,16 +86,16 @@ interface RawAcorn {
 // ═════════════════════════════════════════════════════════════════════════════
 
 /** @todo fields locked in lib/parse/ DDD — pure token data (kind, value, range, text) */
-interface TokenData {}
+type TokenData = {}
 
 /** @todo fields locked in lib/parse/ DDD — pure comment data (kind, range, text) */
-interface CommentData {}
+type CommentData = {}
 
 /** @todo fields locked in lib/parse/ DDD — pure AST node data (type, loc, acorn fields) */
-interface NodeData {}
+type NodeData = {}
 
 /** Pure scope identity data — no cross-references. */
-interface ScopeData {
+type ScopeData = {
 	readonly kind: 'intrinsics' | 'host' | 'script' | 'block' | 'for-iteration';
 	/** Isolated data for each binding in this scope (no cross-refs). */
 	readonly bindings: Readonly<Record<string, BindingData>>;
@@ -104,7 +104,7 @@ interface ScopeData {
 type BindingData = RealmBindingData | ScriptBindingData;
 
 /** Pure data for a realm-level (intrinsic or host) binding. */
-interface RealmBindingData {
+type RealmBindingData = {
 	readonly category: 'intrinsic' | 'host';
 	readonly name: string;
 	readonly valueCategory: 'object-register' | 'function' | 'constant';
@@ -112,7 +112,7 @@ interface RealmBindingData {
 }
 
 /** Pure data for a script/block/for-iteration binding. */
-interface ScriptBindingData {
+type ScriptBindingData = {
 	readonly category: 'script' | 'block' | 'for-iteration';
 	readonly name: string;
 	readonly kind: 'let' | 'const';
@@ -131,7 +131,7 @@ type BindingStatus = 'tdz' | 'initialized' | 'dead';
 // and deep-frozen once at the end. Consumers see only the frozen graph.
 // ═════════════════════════════════════════════════════════════════════════════
 
-interface TokenEntwined {
+type TokenEntwined = {
 	readonly data: TokenData;
 	readonly innermostNode: NodeEntwined | null;
 	readonly innermostPath: NodePath | null;
@@ -141,7 +141,7 @@ interface TokenEntwined {
 	readonly leadingGap: string | null;
 }
 
-interface CommentEntwined {
+type CommentEntwined = {
 	readonly data: CommentData;
 	readonly innermostNode: NodeEntwined | null;
 	readonly innermostPath: NodePath | null;
@@ -149,7 +149,7 @@ interface CommentEntwined {
 	readonly nextToken: TokenEntwined | null;
 }
 
-interface NodeEntwined {
+type NodeEntwined = {
 	readonly data: NodeData;
 	readonly parent: NodeEntwined | null; // null only for Program
 	readonly children: ReadonlyArray<NodeEntwined>;
@@ -162,7 +162,7 @@ interface NodeEntwined {
 	readonly path: NodePath;
 }
 
-interface ScopeEntwined {
+type ScopeEntwined = {
 	readonly data: ScopeData;
 	readonly outer: ScopeEntwined | null; // null at intrinsics root
 	readonly astNode: NodeEntwined | null; // null for realm scopes
@@ -175,7 +175,7 @@ interface ScopeEntwined {
 	readonly scopeTree?: ReadonlyArray<ScopeTreeNode>;
 }
 
-interface ScopeTreeNode {
+type ScopeTreeNode = {
 	readonly kind: 'block' | 'for-iteration';
 	readonly astNode: NodeEntwined;
 	readonly declaredBindings: ReadonlyArray<DeclarationInfo>;
@@ -183,18 +183,18 @@ interface ScopeTreeNode {
 	readonly children: ReadonlyArray<ScopeTreeNode>;
 }
 
-interface DeclarationInfo {
+type DeclarationInfo = {
 	readonly name: string;
 	readonly kind: 'let' | 'const';
 	readonly declarationNode: NodeEntwined;
 }
 
-interface RealmBindingEntwined {
+type RealmBindingEntwined = {
 	readonly data: RealmBindingData;
 	readonly scope: ScopeEntwined; // containing intrinsics or host scope
 }
 
-interface ScriptBindingEntwined {
+type ScriptBindingEntwined = {
 	readonly data: ScriptBindingData;
 	readonly declarationNode: NodeEntwined;
 	readonly scope: ScopeEntwined;
@@ -209,7 +209,7 @@ type Binding = RealmBindingEntwined | ScriptBindingEntwined;
  * this is a computed view, not crystallized data. Enumeration and mutation
  * are not supported.
  */
-interface BindingLookup {
+type BindingLookup = {
 	readonly [name: string]: BindingState;
 }
 
@@ -236,16 +236,16 @@ type BindingState =
 // ═════════════════════════════════════════════════════════════════════════════
 
 /** @todo fields locked in lib/scope/ DDD — realm scope data (kind + binding data records) */
-interface RealmData {}
+type RealmData = {}
 
 /** @todo fields locked in lib/parse/ DDD — tokens: ReadonlyArray<TokenData>; comments: ReadonlyArray<CommentData> */
-interface TokenizeData {}
+type TokenizeData = {}
 
 /** @todo fields locked in lib/parse/ DDD — root: NodeData (tree root) */
-interface ParseASTData {}
+type ParseASTData = {}
 
 /** @todo fields locked in lib/scope/ DDD — scope data forest + script binding data records */
-interface CreationData {}
+type CreationData = {}
 
 // ═════════════════════════════════════════════════════════════════════════════
 // 6. PHASE-LEVEL ENTWINED AGGREGATES (L2 per phase)
@@ -255,10 +255,10 @@ interface CreationData {}
 // ═════════════════════════════════════════════════════════════════════════════
 
 /** @todo fields locked in lib/scope/ DDD — intrinsics ScopeEntwined + host ScopeEntwined + RealmBindingEntwined records */
-interface RealmEntwined {}
+type RealmEntwined = {}
 
 /** @todo fields locked in lib/parse/ DDD — tokens: ReadonlyArray<TokenEntwined>; comments: ReadonlyArray<CommentEntwined> */
-interface TokenizeEntwined {}
+type TokenizeEntwined = {}
 
 /**
  * @todo `root: NodeEntwined` — locked in lib/parse/ DDD (NOT this round).
@@ -268,7 +268,7 @@ interface TokenizeEntwined {}
  * Both are canonical, domain-general entry-points into the ref-graph; lenses
  * still build their own pedagogy-specific groupings (out of scope here).
  */
-interface ParseASTEntwined {
+type ParseASTEntwined = {
 	/**
 	 * Every node keyed by its `NodePath` — O(1) resolution from a path string
 	 * (carried on a worker event, or persisted by a lens) back to its entwined
@@ -290,7 +290,7 @@ interface ParseASTEntwined {
 }
 
 /** @todo fields locked in lib/scope/ DDD — script ScopeEntwined (with .scopeTree); ScriptBindingEntwined records */
-interface CreationEntwined {}
+type CreationEntwined = {}
 
 // ═════════════════════════════════════════════════════════════════════════════
 // 7. PHASE INTERFACES
@@ -300,32 +300,32 @@ interface CreationEntwined {}
 // realm and evaluation which are always present.
 // ═════════════════════════════════════════════════════════════════════════════
 
-interface RealmPhase {
+type RealmPhase = {
 	readonly data: RealmData;
 	readonly entwined: RealmEntwined;
 	readonly events: () => Generator<RealmNMEvent>;
 }
 
-interface TokenizePhase {
+type TokenizePhase = {
 	readonly data: TokenizeData;
 	readonly entwined: TokenizeEntwined;
 	readonly events: () => Generator<TokenNMEvent | CommentNMEvent>;
 }
 
-interface ParseASTPhase {
+type ParseASTPhase = {
 	readonly data: ParseASTData;
 	readonly entwined: ParseASTEntwined;
 	readonly events: () => Generator<NodeNMEvent>;
 }
 
-interface CreationPhase {
+type CreationPhase = {
 	readonly data: CreationData;
 	readonly entwined: CreationEntwined;
 	readonly events: () => Generator<ScopeNMEvent | BindingNMEvent>;
 }
 
 /** Evaluation has no static .data or .entwined — evaluation is fully dynamic. */
-interface EvaluationPhase {
+type EvaluationPhase = {
 	readonly events: EvaluationEvents;
 }
 
@@ -337,7 +337,7 @@ interface EvaluationPhase {
 // generators, never throw.
 // ═════════════════════════════════════════════════════════════════════════════
 
-interface EventsView {
+type EventsView = {
 	readonly realm: () => Generator<RealmNMEvent>;
 	readonly tokenize: () => Generator<TokenNMEvent | CommentNMEvent>;
 	readonly parseAST: () => Generator<NodeNMEvent>;
@@ -345,13 +345,13 @@ interface EventsView {
 	readonly evaluation: EvaluationEvents;
 }
 
-interface EvaluationEvents {
-	readonly run: (opts?: EvaluateOptions) => Promise<RunInstance>;
-	readonly intercept: (opts?: EvaluateOptions) => EvaluateHandle;
+type EvaluationEvents = {
+	readonly run: (options?: EvaluateOptions) => Promise<RunInstance>;
+	readonly intercept: (options?: EvaluateOptions) => EvaluateHandle;
 	readonly trace: {
-		readonly variables: (opts?: EvaluateOptions) => EvaluateHandle;
-		readonly syntax: (opts?: EvaluateOptions) => EvaluateHandle;
-		readonly semantics: (opts?: EvaluateOptions) => EvaluateHandle;
+		readonly variables: (options?: EvaluateOptions) => EvaluateHandle;
+		readonly syntax: (options?: EvaluateOptions) => EvaluateHandle;
+		readonly semantics: (options?: EvaluateOptions) => EvaluateHandle;
 	};
 }
 
@@ -398,7 +398,7 @@ type EventCategory =
 	| 'emit' // evaluation — I/O (console.*, alert, prompt, confirm)
 	| 'error'; // evaluation — runtime errors
 
-interface NMEvent {
+type NMEvent = {
 	readonly phase: NMEventPhase;
 	readonly category: EventCategory;
 	readonly kind: string; // narrowed per concrete type
@@ -413,7 +413,7 @@ interface NMEvent {
 
 // ─── Realm events ─────────────────────────────────────────────────────────────
 
-interface IntrinsicsCreatedNMEvent extends NMEvent {
+type IntrinsicsCreatedNMEvent = {
 	readonly phase: 'realm';
 	readonly category: 'realm';
 	readonly kind: 'intrinsics-created';
@@ -421,9 +421,9 @@ interface IntrinsicsCreatedNMEvent extends NMEvent {
 		readonly scope: ScopeEntwined;
 		readonly bindings: Readonly<Record<string, RealmBindingEntwined>>;
 	};
-}
+} & NMEvent
 
-interface HostCreatedNMEvent extends NMEvent {
+type HostCreatedNMEvent = {
 	readonly phase: 'realm';
 	readonly category: 'realm';
 	readonly kind: 'host-created';
@@ -431,61 +431,61 @@ interface HostCreatedNMEvent extends NMEvent {
 		readonly scope: ScopeEntwined;
 		readonly bindings: Readonly<Record<string, RealmBindingEntwined>>;
 	};
-}
+} & NMEvent
 
 type RealmNMEvent = IntrinsicsCreatedNMEvent | HostCreatedNMEvent;
 
 // ─── Tokenize events ──────────────────────────────────────────────────────────
 
-interface TokenNMEvent extends NMEvent {
+type TokenNMEvent = {
 	readonly phase: 'parse:tokenize';
 	readonly category: 'token';
 	readonly kind: 'token';
 	readonly entwined: TokenEntwined;
-}
+} & NMEvent
 
-interface CommentNMEvent extends NMEvent {
+type CommentNMEvent = {
 	readonly phase: 'parse:tokenize';
 	readonly category: 'comment';
 	readonly kind: 'line' | 'block';
 	readonly entwined: CommentEntwined;
-}
+} & NMEvent
 
 // ─── ParseAST events ──────────────────────────────────────────────────────────
 
-interface NodeEnterNMEvent extends NMEvent {
+type NodeEnterNMEvent = {
 	readonly phase: 'parse:ast';
 	readonly category: 'node';
 	readonly kind: 'enter';
 	readonly entwined: NodeEntwined;
 	readonly relations: { get pair(): NodeExitNMEvent }; // getter: frozen-emit constraint
-}
+} & NMEvent
 
-interface NodeExitNMEvent extends NMEvent {
+type NodeExitNMEvent = {
 	readonly phase: 'parse:ast';
 	readonly category: 'node';
 	readonly kind: 'exit';
 	readonly entwined: NodeEntwined;
 	readonly relations: { get pair(): NodeEnterNMEvent }; // getter: frozen-emit constraint
-}
+} & NMEvent
 
 type NodeNMEvent = NodeEnterNMEvent | NodeExitNMEvent;
 
 // ─── Creation events ──────────────────────────────────────────────────────────
 
-interface ScopePushNMEvent extends NMEvent {
+type ScopePushNMEvent = {
 	readonly phase: 'creation';
 	readonly category: 'scope';
 	readonly kind: 'push';
 	readonly entwined: { readonly scope: ScopeEntwined };
-}
+} & NMEvent
 
-interface BindingDeclareNMEvent extends NMEvent {
+type BindingDeclareNMEvent = {
 	readonly phase: 'creation';
 	readonly category: 'binding';
 	readonly kind: 'declare';
 	readonly entwined: { readonly binding: ScriptBindingEntwined };
-}
+} & NMEvent
 
 /** Creation-phase scope events (push only during creation). */
 type ScopeNMEvent = ScopePushNMEvent;
@@ -500,15 +500,15 @@ type BindingNMEvent = BindingDeclareNMEvent;
 
 type ScopePopReason = 'normal' | 'break' | 'continue' | 'error' | 'limit';
 
-interface RuntimeScopeNMEvent extends NMEvent {
+type RuntimeScopeNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'scope';
 	readonly kind: 'push' | 'pop';
 	readonly entwined: { readonly scope: ScopeEntwined } | null; // TBD per eval DDD
 	readonly reason?: ScopePopReason; // required on 'pop'
-}
+} & NMEvent
 
-interface RuntimeBindingNMEvent extends NMEvent {
+type RuntimeBindingNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'binding';
 	readonly kind: 'declare' | 'initialize' | 'access' | 'update';
@@ -516,27 +516,27 @@ interface RuntimeBindingNMEvent extends NMEvent {
 	readonly bindingName: string;
 	readonly priorValue?: unknown;
 	readonly nextValue?: unknown;
-}
+} & NMEvent
 
-interface ScriptNMEvent extends NMEvent {
+type ScriptNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'script';
 	readonly kind: 'enter' | 'exit';
 	readonly entwined: NodeEntwined | null;
 	readonly reason?: ScopePopReason; // present on 'exit'
-}
+} & NMEvent
 
-interface ScopeChainStep {
+type ScopeChainStep = {
 	readonly scope: ScopeEntwined;
 	readonly hit: boolean;
 }
 
-interface ProtoChainStep {
+type ProtoChainStep = {
 	readonly object: unknown;
 	readonly hit: boolean;
 }
 
-interface ExpressionNMEvent extends NMEvent {
+type ExpressionNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'expression';
 	readonly kind:
@@ -551,14 +551,14 @@ interface ExpressionNMEvent extends NMEvent {
 	readonly result: unknown;
 	/** For postfix update: the OLD value returned (per ECMA-262 §13.4.3). */
 	readonly returnedValue?: unknown;
-}
+} & NMEvent
 
 /**
  * The bridge between visual-syntax and behind-the-scenes levels.
  * scopeChainWalk and protoChainWalk make the chain-walk observable — the
  * "two chains, same shape" insight is unreachable without these.
  */
-interface ResolveNMEvent extends NMEvent {
+type ResolveNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'resolve';
 	readonly kind:
@@ -576,7 +576,7 @@ interface ResolveNMEvent extends NMEvent {
 	readonly result: { readonly type: string; readonly value: unknown };
 	readonly scopeChainWalk?: ReadonlyArray<ScopeChainStep>;
 	readonly protoChainWalk?: ReadonlyArray<ProtoChainStep>;
-}
+} & NMEvent
 
 /**
  * Coercion as a first-class event category. ECMA-spec-aligned:
@@ -587,7 +587,7 @@ interface ResolveNMEvent extends NMEvent {
  *   → ToString×2 (if either result is string) → ToNumeric×2 (otherwise).
  * Operator event fires after coercions complete.
  */
-interface CoerceNMEvent extends NMEvent {
+type CoerceNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'coerce';
 	readonly kind: 'ToPrimitive' | 'ToString' | 'ToNumeric' | 'ToBoolean';
@@ -595,17 +595,17 @@ interface CoerceNMEvent extends NMEvent {
 	readonly hint?: 'default' | 'string' | 'number';
 	readonly from: { readonly type: string; readonly value: unknown };
 	readonly to: { readonly type: string; readonly value: unknown };
-}
+} & NMEvent
 
-interface StatementNMEvent extends NMEvent {
+type StatementNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'statement';
 	readonly kind: 'enter' | 'exit';
 	readonly entwined: NodeEntwined | null;
 	readonly reason?: ScopePopReason;
-}
+} & NMEvent
 
-interface ControlFlowNMEvent extends NMEvent {
+type ControlFlowNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'control-flow';
 	readonly kind:
@@ -617,25 +617,25 @@ interface ControlFlowNMEvent extends NMEvent {
 		| 'break'
 		| 'continue';
 	readonly entwined: NodeEntwined | null;
-}
+} & NMEvent
 
-interface InitializationNMEvent extends NMEvent {
+type InitializationNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'initialization';
 	readonly kind: 'binding';
 	readonly entwined: NodeEntwined | null;
 	readonly bindingName: string;
 	readonly value: unknown;
-}
+} & NMEvent
 
-interface ForInitNMEvent extends NMEvent {
+type ForInitNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'for-init';
 	readonly kind: 'init';
 	readonly entwined: NodeEntwined | null;
-}
+} & NMEvent
 
-interface WriteNMEvent extends NMEvent {
+type WriteNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'write';
 	readonly kind: 'assignment';
@@ -643,9 +643,9 @@ interface WriteNMEvent extends NMEvent {
 	readonly bindingName: string;
 	readonly priorValue: unknown;
 	readonly nextValue: unknown;
-}
+} & NMEvent
 
-interface EmitNMEvent extends NMEvent {
+type EmitNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'emit';
 	readonly kind: 'console' | 'alert' | 'confirm' | 'prompt';
@@ -653,16 +653,16 @@ interface EmitNMEvent extends NMEvent {
 	readonly method?: string; // for console.*: 'log', 'warn', etc.
 	readonly args: ReadonlyArray<unknown>;
 	readonly returnValue?: unknown; // for confirm/prompt
-}
+} & NMEvent
 
-interface ErrorNMEvent extends NMEvent {
+type ErrorNMEvent = {
 	readonly phase: 'evaluation';
 	readonly category: 'error';
 	readonly kind: 'ReferenceError' | 'TypeError' | 'RangeError' | 'SyntaxError';
 	readonly entwined: NodeEntwined | null;
 	readonly errorName: string;
 	readonly message: string;
-}
+} & NMEvent
 
 /** The flat NMEvent discriminated union. */
 type AnyNMEvent =
@@ -696,7 +696,7 @@ type TierName =
 	| 'trace.syntax'
 	| 'trace.semantics';
 
-interface TierFilters {
+type TierFilters = {
 	readonly run: ReadonlyArray<EventCategory>; // [] — no events
 	readonly intercept: ReadonlyArray<EventCategory>; // emit, error
 	readonly 'trace.variables': ReadonlyArray<EventCategory>; // intercept + binding (values)
@@ -708,26 +708,26 @@ interface TierFilters {
 // 10. EVALUATE-SIDE INFRASTRUCTURE
 // ═════════════════════════════════════════════════════════════════════════════
 
-interface EvaluateOptions {
+type EvaluateOptions = {
 	readonly seconds?: number;
 	readonly iterations?: number;
 	readonly io?: IoMocks;
 }
 
-interface IoMocks {
+type IoMocks = {
 	readonly alert?: (message: string) => void;
 	readonly confirm?: (message: string) => boolean;
 	readonly prompt?: (message: string, defaultValue?: string) => string | null;
-	readonly console?: Partial<Record<string, (...args: unknown[]) => void>>;
+	readonly console?: Partial<Record<string, (...arguments_: readonly unknown[]) => void>>;
 }
 
 /** Async iterable + .result Promise for live-streamed evaluate tiers. */
-interface EvaluateHandle extends AsyncIterable<AnyNMEvent> {
+type EvaluateHandle = {
 	readonly result: Promise<RunInstance>;
 	readonly cancel: () => void;
-}
+} & AsyncIterable<AnyNMEvent>
 
-interface EndReport {
+type EndReport = {
 	readonly ok: boolean;
 	readonly error: EmbodyError | null;
 	readonly outcome:
@@ -739,7 +739,7 @@ interface EndReport {
 		| 'not-runnable';
 }
 
-interface RunMetrics {
+type RunMetrics = {
 	readonly steps: number;
 	readonly durationMs: number;
 	readonly iterationCount: number;
@@ -750,7 +750,7 @@ interface RunMetrics {
  * graph by identity (no per-run clone). Runtime errors are NOT embodied in the
  * static Snippet — they're per-call outcomes on RunInstance.endReport.
  */
-interface RunInstance {
+type RunInstance = {
 	readonly events: ReadonlyArray<AnyNMEvent>;
 	readonly endReport: EndReport;
 	readonly finalEnvironment: ScopeEntwined;
@@ -763,7 +763,7 @@ interface RunInstance {
 // ═════════════════════════════════════════════════════════════════════════════
 
 /** Source location of a single let/const declaration. */
-interface BindingDeclaration {
+type BindingDeclaration = {
 	readonly name: string;
 	readonly kind: 'let' | 'const';
 	readonly scope: 'script' | 'block' | 'for-iteration';
@@ -772,7 +772,7 @@ interface BindingDeclaration {
 }
 
 /** Realm-level names referenced by the snippet (alias-resolved). */
-interface DependencyReference {
+type DependencyReference = {
 	readonly name: string;
 	readonly callsites: ReadonlyArray<{
 		readonly nodePath: NodePath;
@@ -781,7 +781,7 @@ interface DependencyReference {
 }
 
 /** Boolean record of language-feature usage. Drives curriculum-aware lens selection. */
-interface Features {
+type Features = {
 	readonly usesShortCircuit: boolean; // && || ??
 	readonly usesOptionalChaining: boolean;
 	readonly usesCoercionPlus: boolean; // any `+` with mixed/string operands
@@ -797,7 +797,7 @@ interface Features {
 }
 
 /** Min/max/mean/median over a sample. */
-interface Distribution {
+type Distribution = {
 	readonly min: number;
 	readonly max: number;
 	readonly mean: number;
@@ -805,7 +805,7 @@ interface Distribution {
 	readonly samples: ReadonlyArray<number>;
 }
 
-interface Metrics {
+type Metrics = {
 	readonly source: { readonly chars: number; readonly lines: number };
 	readonly tokens: number;
 	readonly nodes: number;
@@ -828,7 +828,7 @@ interface Metrics {
 	readonly maxNestingDepth: number;
 }
 
-interface ControlFlow {
+type ControlFlow = {
 	readonly branches: ReadonlyArray<{
 		readonly nodePath: NodePath;
 		readonly kind: 'if' | 'ternary';
@@ -844,14 +844,14 @@ interface ControlFlow {
 	}>;
 }
 
-interface NonDeterminism {
+type NonDeterminism = {
 	readonly random: boolean; // Math.random()
 	readonly clock: boolean; // Date.now(), new Date()
 	readonly userInput: boolean; // prompt, confirm
 	readonly locale: boolean; // toLocale*, Date.parse, localeCompare
 }
 
-interface HasIo {
+type HasIo = {
 	readonly user: {
 		readonly total: number;
 		readonly alert?: number;
@@ -888,7 +888,7 @@ interface HasIo {
  * status.parsed === true). Replaces the old StaticAnalyses — realm and
  * initialScope are now accessible via snippet.realm.* (phase-based access).
  */
-interface Analysis {
+type Analysis = {
 	readonly bindings: ReadonlyArray<BindingDeclaration>;
 	readonly dependencies: ReadonlyArray<DependencyReference>;
 	readonly features: Features;
@@ -917,7 +917,7 @@ interface Analysis {
  *   isDeterministic  === !(nonDeterminism.random || .clock || .userInput || .locale)
  *   doesPause        === hasIo.user.total > 0
  */
-interface Validation {
+type Validation = {
 	readonly isJeJ: boolean;
 	readonly isDeterministic: boolean; // metadata, not gate
 	readonly doesPause: boolean; // metadata, not gate
@@ -942,7 +942,7 @@ type EmbodyPhase =
 	| 'creation'
 	| 'evaluation';
 
-interface EmbodyError {
+type EmbodyError = {
 	readonly phase: EmbodyPhase;
 	readonly kind: string;
 	readonly message: string;
@@ -950,7 +950,7 @@ interface EmbodyError {
 	readonly cause?: unknown;
 }
 
-interface Status {
+type Status = {
 	readonly tokenized: boolean;
 	readonly parsed: boolean;
 	readonly validated: boolean;
@@ -976,7 +976,7 @@ interface Status {
 // .data and .entwined are phase-first only (snippet.<phase>.data/entwined).
 // ═════════════════════════════════════════════════════════════════════════════
 
-interface Snippet {
+type Snippet = {
 	// ── cross-phase flat (not on the phase×layer grid) ──
 	readonly source: Source;
 	readonly status: Status;
@@ -1124,7 +1124,7 @@ export type {
 	Analysis,
 
 	// validation
-	Violation,
+	
 	Validation,
 
 	// errors & status
@@ -1135,3 +1135,5 @@ export type {
 	// top-level
 	Snippet,
 };
+
+export {type Violation} from './lib/validating/types.js';

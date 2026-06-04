@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-type ToolbarProps = Readonly<{
+type ToolbarProperties = Readonly<{
 	/**
 	 * The registered lens names, in registration order. The picker
 	 * renders one `<option value={name}>{name}</option>` per entry. The
@@ -27,7 +27,7 @@ type ToolbarProps = Readonly<{
 	 * future increments may filter (e.g. by `applicableTo(embodiment)`)
 	 * but the picker treats the array as the authoritative roster.
 	 */
-	lensNames: readonly string[];
+	readonly lensNames: readonly string[];
 
 	/**
 	 * The picker's currently-selected value, derived by the parent from
@@ -35,7 +35,7 @@ type ToolbarProps = Readonly<{
 	 * The empty string selects the disabled sentinel (editor mode); a
 	 * registered lens name selects that option (lens mode).
 	 */
-	pickerValue: string;
+	readonly pickerValue: string;
 
 	/**
 	 * Called when the learner selects a registered lens. The argument is
@@ -43,7 +43,7 @@ type ToolbarProps = Readonly<{
 	 * filters that case). The parent routes the call into the shared
 	 * orchestrator transition handler with `source: 'picker'`.
 	 */
-	onLensSelect: (name: string) => void;
+	readonly onLensSelect: (name: string) => void;
 
 	/**
 	 * Whether to render the edit-return button. Derived by the parent
@@ -51,14 +51,14 @@ type ToolbarProps = Readonly<{
 	 * affordance to leave a read-only lens session and return to editor
 	 * home base.
 	 */
-	editButtonVisible: boolean;
+	readonly editButtonVisible: boolean;
 
 	/**
 	 * Called when the learner clicks the edit-return button. The parent
 	 * routes the call into the shared orchestrator transition handler
 	 * which dispatches `mode-changed({from: 'lens', to: 'editor'})`.
 	 */
-	onEditReturn: () => void;
+	readonly onEditReturn: () => void;
 }>;
 
 /**
@@ -74,7 +74,7 @@ function Toolbar({
 	onLensSelect,
 	editButtonVisible,
 	onEditReturn,
-}: ToolbarProps): React.JSX.Element {
+}: ToolbarProperties): React.JSX.Element {
 	function handlePickerChange(
 		event: React.ChangeEvent<HTMLSelectElement>,
 	): void {

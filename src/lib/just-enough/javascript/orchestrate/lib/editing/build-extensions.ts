@@ -98,10 +98,10 @@ async function buildExtensions(
 		completions,
 		runFormat,
 	}: BuildExtensionsOptions = {} as BuildExtensionsOptions,
-): Promise<Extension[]> {
+): Promise<readonly Extension[]> {
 	// 1. Core setup — basicSetup includes bracket matching, search,
 	//    fold gutter, highlight selection, and close brackets
-	const extensions: Extension[] = [
+	const extensions: readonly Extension[] = [
 		basicSetup,
 		oneDark,
 		indentUnit.of(indentChar),
@@ -172,11 +172,11 @@ async function buildExtensions(
 							options: items.map(function toCompletion(index) {
 								// exactOptionalPropertyTypes: only set fields when defined
 								const completion: {
-									label: string;
-									type?: string;
-									detail?: string;
-									info?: () => HTMLElement;
-									apply?: (view: EditorView) => void;
+									readonly label: string;
+									readonly type?: string;
+									readonly detail?: string;
+									readonly info?: () => HTMLElement;
+									readonly apply?: (view: EditorView) => void;
 								} = { label: index.label };
 								if (index.type != null) completion.type = index.type;
 								if (index.detail != null) completion.detail = index.detail;
@@ -186,9 +186,9 @@ async function buildExtensions(
 								// (autocomplete popup, hover tooltip) render the
 								// same DocEntry through buildTooltipDom.
 								if (index.entry != null) {
-									const docEntry = index.entry;
-									const label = index.label;
-									completion.info = () => buildTooltipDom(label, docEntry);
+									const documentEntry = index.entry;
+									const {label} = index;
+									completion.info = () => buildTooltipDom(label, documentEntry);
 								} else if (index.info != null) {
 									const infoText = index.info;
 									completion.info = () => buildInfoDom(infoText);
@@ -228,7 +228,7 @@ async function buildExtensions(
 
 async function loadLanguageExtension(
 	language: string,
-	extensions: Extension[],
+	extensions: readonly Extension[],
 ): Promise<void> {
 	const loader = CM_LOADERS[language as keyof typeof CM_LOADERS];
 	if (!loader) return;

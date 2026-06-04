@@ -28,21 +28,21 @@ describe('freezeInPlace — Zero', () => {
 	});
 
 	it('returns undefined as-is', () => {
-		expect(freezeInPlace(undefined)).toBe(undefined);
+		expect(freezeInPlace()).toBe(undefined);
 	});
 
 	it('returns an empty object frozen in place', () => {
-		const obj = {};
-		const result = freezeInPlace(obj);
-		expect(result).toBe(obj);
-		expect(Object.isFrozen(obj)).toBe(true);
+		const object = {};
+		const result = freezeInPlace(object);
+		expect(result).toBe(object);
+		expect(Object.isFrozen(object)).toBe(true);
 	});
 
 	it('returns an empty array frozen in place', () => {
-		const arr: unknown[] = [];
-		const result = freezeInPlace(arr);
-		expect(result).toBe(arr);
-		expect(Object.isFrozen(arr)).toBe(true);
+		const array: unknown[] = [];
+		const result = freezeInPlace(array);
+		expect(result).toBe(array);
+		expect(Object.isFrozen(array)).toBe(true);
 	});
 });
 
@@ -60,65 +60,65 @@ describe('freezeInPlace — One (primitives and single-key objects)', () => {
 	});
 
 	it('freezes a single-key object in place', () => {
-		const obj = { a: 1 };
-		freezeInPlace(obj);
-		expect(Object.isFrozen(obj)).toBe(true);
+		const object = { a: 1 };
+		freezeInPlace(object);
+		expect(Object.isFrozen(object)).toBe(true);
 	});
 
 	it('returns the same reference (identity preservation)', () => {
-		const obj = { a: 1 };
-		expect(freezeInPlace(obj)).toBe(obj);
+		const object = { a: 1 };
+		expect(freezeInPlace(object)).toBe(object);
 	});
 });
 
 describe('freezeInPlace — Many (nested structures)', () => {
 	it('freezes nested objects in place', () => {
 		const nested = { inner: 1 };
-		const obj = { nested };
-		freezeInPlace(obj);
-		expect(Object.isFrozen(obj.nested)).toBe(true);
+		const object = { nested };
+		freezeInPlace(object);
+		expect(Object.isFrozen(object.nested)).toBe(true);
 	});
 
 	it('freezes deeply nested objects (4 levels)', () => {
-		const obj = { a: { b: { c: { d: 1 } } } };
-		freezeInPlace(obj);
-		expect(Object.isFrozen(obj.a.b.c)).toBe(true);
+		const object = { a: { b: { c: { d: 1 } } } };
+		freezeInPlace(object);
+		expect(Object.isFrozen(object.a.b.c)).toBe(true);
 	});
 
 	it('freezes arrays in place', () => {
-		const arr = [1, 2, 3];
-		freezeInPlace(arr);
-		expect(Object.isFrozen(arr)).toBe(true);
+		const array = [1, 2, 3];
+		freezeInPlace(array);
+		expect(Object.isFrozen(array)).toBe(true);
 	});
 
 	it('freezes nested arrays', () => {
-		const obj = { items: [1, 2, 3] };
-		freezeInPlace(obj);
-		expect(Object.isFrozen(obj.items)).toBe(true);
+		const object = { items: [1, 2, 3] };
+		freezeInPlace(object);
+		expect(Object.isFrozen(object.items)).toBe(true);
 	});
 
 	it('freezes objects inside arrays', () => {
-		const arr = [{ a: 1 }, { b: 2 }];
-		freezeInPlace(arr);
-		expect(Object.isFrozen(arr[0])).toBe(true);
-		expect(Object.isFrozen(arr[1])).toBe(true);
+		const array = [{ a: 1 }, { b: 2 }];
+		freezeInPlace(array);
+		expect(Object.isFrozen(array[0])).toBe(true);
+		expect(Object.isFrozen(array[1])).toBe(true);
 	});
 
 	it('preserves inner references (same nested ref as before)', () => {
 		const nested = { value: 1 };
-		const obj = { nested };
-		freezeInPlace(obj);
-		expect(obj.nested).toBe(nested);
+		const object = { nested };
+		freezeInPlace(object);
+		expect(object.nested).toBe(nested);
 	});
 });
 
 describe('freezeInPlace — Boundaries (circular refs + already-frozen)', () => {
 	it('handles circular references without infinite recursion', () => {
 		type Cyclic = { value: number; self?: Cyclic };
-		const obj: Cyclic = { value: 1 };
-		obj.self = obj;
-		expect(() => freezeInPlace(obj)).not.toThrow();
-		expect(Object.isFrozen(obj)).toBe(true);
+		const object: Cyclic = { value: 1 };
+		object.self = object;
+		expect(() => freezeInPlace(object)).not.toThrow();
+		expect(Object.isFrozen(object)).toBe(true);
 	});
 
 	it('handles parent back-references (ASTNode-style)', () => {
@@ -137,46 +137,46 @@ describe('freezeInPlace — Boundaries (circular refs + already-frozen)', () => 
 	});
 
 	it('handles a deeply-frozen object without error', () => {
-		const obj = { nested: Object.freeze({ value: 1 }) };
-		Object.freeze(obj);
-		expect(() => freezeInPlace(obj)).not.toThrow();
+		const object = { nested: Object.freeze({ value: 1 }) };
+		Object.freeze(object);
+		expect(() => freezeInPlace(object)).not.toThrow();
 	});
 });
 
 describe('freezeInPlace — Interfaces (immutability contract)', () => {
 	it('prevents property modification', () => {
-		const obj = freezeInPlace({ value: 1 });
+		const object = freezeInPlace({ value: 1 });
 		expect(() => {
-			(obj as { value: number }).value = 2;
+			(object as { value: number }).value = 2;
 		}).toThrow();
 	});
 
 	it('prevents property addition', () => {
-		const obj = freezeInPlace({ a: 1 });
+		const object = freezeInPlace({ a: 1 });
 		expect(() => {
-			(obj as Record<string, number>).b = 2;
+			(object as Record<string, number>).b = 2;
 		}).toThrow();
 	});
 
 	it('prevents property deletion', () => {
-		const obj = freezeInPlace({ a: 1 });
+		const object = freezeInPlace({ a: 1 });
 		expect(() => {
-			delete (obj as { a?: number }).a;
+			delete (object as { a?: number }).a;
 		}).toThrow();
 	});
 
 	it('prevents nested property modification', () => {
-		const obj = freezeInPlace({ outer: { inner: 1 } });
+		const object = freezeInPlace({ outer: { inner: 1 } });
 		expect(() => {
-			(obj.outer as { inner: number }).inner = 2;
+			(object.outer as { inner: number }).inner = 2;
 		}).toThrow();
 	});
 
 	it('prevents array push', () => {
-		const arr = freezeInPlace([1, 2, 3]);
+		const array = freezeInPlace([1, 2, 3]);
 		expect(() => {
 			// @ts-expect-error — testing that runtime rejects mutation on frozen readonly
-			arr.push(4);
+			array.push(4);
 		}).toThrow();
 	});
 });
@@ -191,12 +191,12 @@ describe('cloneAndFreeze — Zero', () => {
 	});
 
 	it('returns undefined as-is', () => {
-		expect(cloneAndFreeze(undefined)).toBe(undefined);
+		expect(cloneAndFreeze()).toBe(undefined);
 	});
 
 	it('returns a frozen empty object clone', () => {
-		const obj = {};
-		const result = cloneAndFreeze(obj);
+		const object = {};
+		const result = cloneAndFreeze(object);
 		expect(Object.isFrozen(result)).toBe(true);
 	});
 });
@@ -215,34 +215,34 @@ describe('cloneAndFreeze — One (primitives and single-key)', () => {
 	});
 
 	it('freezes a single-key object clone', () => {
-		const obj = { a: 1 };
-		const frozen = cloneAndFreeze(obj);
+		const object = { a: 1 };
+		const frozen = cloneAndFreeze(object);
 		expect(Object.isFrozen(frozen)).toBe(true);
 	});
 });
 
 describe('cloneAndFreeze — Many (nested structures)', () => {
 	it('freezes nested objects in the clone', () => {
-		const obj = { outer: { inner: 1 } };
-		const frozen = cloneAndFreeze(obj);
+		const object = { outer: { inner: 1 } };
+		const frozen = cloneAndFreeze(object);
 		expect(Object.isFrozen(frozen.outer)).toBe(true);
 	});
 
 	it('freezes deeply nested objects (4 levels) in the clone', () => {
-		const obj = { a: { b: { c: { d: 1 } } } };
-		const frozen = cloneAndFreeze(obj);
+		const object = { a: { b: { c: { d: 1 } } } };
+		const frozen = cloneAndFreeze(object);
 		expect(Object.isFrozen(frozen.a.b.c)).toBe(true);
 	});
 
 	it('freezes arrays in the clone', () => {
-		const arr = [1, 2, 3];
-		const frozen = cloneAndFreeze(arr);
+		const array = [1, 2, 3];
+		const frozen = cloneAndFreeze(array);
 		expect(Object.isFrozen(frozen)).toBe(true);
 	});
 
 	it('freezes objects inside arrays in the clone', () => {
-		const arr = [{ a: 1 }, { b: 2 }];
-		const frozen = cloneAndFreeze(arr);
+		const array = [{ a: 1 }, { b: 2 }];
+		const frozen = cloneAndFreeze(array);
 		expect(Object.isFrozen(frozen[0])).toBe(true);
 		expect(Object.isFrozen(frozen[1])).toBe(true);
 	});
@@ -250,21 +250,21 @@ describe('cloneAndFreeze — Many (nested structures)', () => {
 
 describe('cloneAndFreeze — Boundaries (original preservation)', () => {
 	it('returns a different reference (not the same object)', () => {
-		const obj = { a: 1 };
-		const frozen = cloneAndFreeze(obj);
-		expect(frozen).not.toBe(obj);
+		const object = { a: 1 };
+		const frozen = cloneAndFreeze(object);
+		expect(frozen).not.toBe(object);
 	});
 
 	it('does NOT freeze the original top-level object', () => {
-		const obj = { a: 1 };
-		cloneAndFreeze(obj);
-		expect(Object.isFrozen(obj)).toBe(false);
+		const object = { a: 1 };
+		cloneAndFreeze(object);
+		expect(Object.isFrozen(object)).toBe(false);
 	});
 
 	it('does NOT freeze the original nested objects', () => {
-		const obj = { outer: { inner: 1 } };
-		cloneAndFreeze(obj);
-		expect(Object.isFrozen(obj.outer)).toBe(false);
+		const object = { outer: { inner: 1 } };
+		cloneAndFreeze(object);
+		expect(Object.isFrozen(object.outer)).toBe(false);
 	});
 
 	it('allows mutation of original after cloning + freezing', () => {
@@ -284,9 +284,9 @@ describe('cloneAndFreeze — Boundaries (original preservation)', () => {
 	});
 
 	it('clone is structurally equal to original at call time', () => {
-		const obj = { a: 1, b: [2, 3], c: { d: 4 } };
-		const frozen = cloneAndFreeze(obj);
-		expect(frozen).toEqual(obj);
+		const object = { a: 1, b: [2, 3], c: { d: 4 } };
+		const frozen = cloneAndFreeze(object);
+		expect(frozen).toEqual(object);
 	});
 });
 
@@ -335,11 +335,11 @@ describe('cloneAndFreeze — Interfaces (immutability contract)', () => {
 
 describe('freeze utilities — ownership contract comparison', () => {
 	it('freezeInPlace returns SAME reference; cloneAndFreeze returns DIFFERENT', () => {
-		const obj = { a: 1 };
-		const inPlaceResult = freezeInPlace({ ...obj });
-		expect(inPlaceResult).not.toBe(obj); // we passed a spread, so new ref
-		const cloneResult = cloneAndFreeze(obj);
-		expect(cloneResult).not.toBe(obj);
+		const object = { a: 1 };
+		const inPlaceResult = freezeInPlace({ ...object });
+		expect(inPlaceResult).not.toBe(object); // we passed a spread, so new ref
+		const cloneResult = cloneAndFreeze(object);
+		expect(cloneResult).not.toBe(object);
 		// The real test: passing the same reference in
 		const keep = { x: 1 };
 		expect(freezeInPlace(keep)).toBe(keep);

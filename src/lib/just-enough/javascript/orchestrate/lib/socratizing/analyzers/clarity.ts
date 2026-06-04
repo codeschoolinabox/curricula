@@ -10,10 +10,8 @@
 import type { Node } from 'acorn';
 
 import type { ScopeAnalysis } from '../../../../embody/lib/scope/types.js';
-
 import createCodeQuestion from '../create-code-question.js';
 import extractLocation from '../extract-location.js';
-
 import type { AnalyzerEntry, CodeQuestion } from '../types.js';
 
 import getRecord from './get-record.js';
@@ -34,7 +32,7 @@ function nestedConditions(
 		return null;
 	}
 
-	const body = getRecord(consequent).body as Node[];
+	const body = getRecord(consequent).body as readonly Node[];
 	const hasNestedIf = body.some((stmt) => stmt.type === 'IfStatement');
 	if (!hasNestedIf) {
 		return null;
@@ -214,8 +212,8 @@ function simpleIfElse(
 		return null;
 	}
 
-	const conBody = getRecord(consequent).body as Node[];
-	const altBody = getRecord(alternate).body as Node[];
+	const conBody = getRecord(consequent).body as readonly Node[];
+	const altBody = getRecord(alternate).body as readonly Node[];
 
 	if (conBody.length !== 1 || altBody.length !== 1) {
 		return null;

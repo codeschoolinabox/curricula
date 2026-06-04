@@ -9,10 +9,8 @@
 import type { Node } from 'acorn';
 
 import type { ScopeAnalysis } from '../../../../embody/lib/scope/types.js';
-
 import createCodeQuestion from '../create-code-question.js';
 import extractLocation from '../extract-location.js';
-
 import type { CodeQuestion, ProgramAnalyzerEntry } from '../types.js';
 
 import collectNodes from './collect-nodes.js';
@@ -29,7 +27,7 @@ function readAloud(
 	_scope: ScopeAnalysis,
 	_source: string,
 ): readonly CodeQuestion[] {
-	const body = getRecord(ast).body as Node[];
+	const body = getRecord(ast).body as readonly Node[];
 	if (!body || body.length < 2) {
 		return [];
 	}

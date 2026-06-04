@@ -22,18 +22,24 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import checkFormat from '../../formatting/check-format.js';
-import validateProgram from '../../validating/validate-program.js';
 import justEnoughJs from '../../validating/just-enough-js.js';
-
-import buildLocationIndex from './link/build-location-index.js';
-import lookupNodePath from './link/lookup-node-path.js';
-import wrapCallExpressions from './wrap-call-expressions.js';
-
+import validateProgram from '../../validating/validate-program.js';
+import guardLoops from '../shared/guard-loops/guard-loops.js';
 import type {
 	ConsoleMethod,
 	InterceptEvent,
 	ErrorEvent as RunErrorEvent,
 } from '../shared/types.js';
+
+import createWorkerScript from './create-worker-script.js';
+import buildLocationIndex from './link/build-location-index.js';
+import lookupNodePath from './link/lookup-node-path.js';
+import type {
+	ASTNode,
+	LinkedInterceptEvent,
+	LocationIndex,
+	NodePathSource,
+} from './link/types.js';
 import type {
 	IoMocks,
 	IoRequestMessage,
@@ -44,15 +50,6 @@ import type {
 	InterceptOutcome,
 	WorkerOutbound,
 } from './types.js';
-import type {
-	ASTNode,
-	LinkedInterceptEvent,
-	LocationIndex,
-	NodePathSource,
-} from './link/types.js';
-
-import createWorkerScript from './create-worker-script.js';
-import guardLoops from '../shared/guard-loops/guard-loops.js';
 import {
 	BUFFER_SIZE,
 	CONTROL_INDEX,
@@ -66,6 +63,7 @@ import {
 	writePromptResponse,
 	writeResumeSignal,
 } from './worker-protocol.js';
+import wrapCallExpressions from './wrap-call-expressions.js';
 
 // --- Internal message types for the queue ---
 
@@ -122,7 +120,7 @@ const CONSOLE_METHODS: readonly ConsoleMethod[] = [
 
 type ResolvedConsole = Record<
 	ConsoleMethod,
-	(...args: readonly unknown[]) => Promise<void>
+	(...arguments_: readonly unknown[]) => Promise<void>
 >;
 
 type ResolvedIo = {
@@ -147,42 +145,42 @@ function buildResolvedIo(io?: IoMocks): ResolvedIo {
 	for (const method of CONSOLE_METHODS) {
 		const mock = io?.console?.[method];
 		if (mock) {
-			resolvedConsole[method] = async (...args) => {
-				await mock(...args);
+			resolvedConsole[method] = async (...arguments_) => {
+				await mock(...arguments_);
 			};
 		} else {
-			const nativeFn = (
-				console as unknown as Record<ConsoleMethod, (...a: unknown[]) => void>
+			const nativeFunction = (
+				console as unknown as Record<ConsoleMethod, (...a: readonly unknown[]) => void>
 			)[method];
-			resolvedConsole[method] = async (...args) => {
-				// eslint-disable-next-line no-console
-				nativeFn?.(...args);
+			resolvedConsole[method] = async (...arguments_) => {
+				 
+				nativeFunction?.(...arguments_);
 			};
 		}
 	}
 
 	return {
 		prompt: io?.prompt
-			? async (msg, def) => io.prompt!(msg, def)
-			: async (msg, def) =>
-					// eslint-disable-next-line no-alert
-					def === undefined ? window.prompt(msg) : window.prompt(msg, def),
+			? async (message, def) => io.prompt!(message, def)
+			: async (message, def) =>
+					 
+					def === undefined ? globalThis.prompt(message) : globalThis.prompt(message, def),
 
 		alert: io?.alert
-			? async (msg) => {
-					await io.alert!(msg);
+			? async (message) => {
+					await io.alert!(message);
 				}
-			: async (msg) => {
-					// eslint-disable-next-line no-alert
-					window.alert(msg);
+			: async (message) => {
+					 
+					globalThis.alert(message);
 				},
 
 		confirm: io?.confirm
-			? async (msg) => io.confirm!(msg)
-			: async (msg) => {
-					// eslint-disable-next-line no-alert
-					return window.confirm(msg);
-				},
+			? async (message) => io.confirm!(message)
+			: async (message) => 
+					 
+					 globalThis.confirm(message)
+				,
 
 		console: resolvedConsole,
 	};
@@ -225,21 +223,21 @@ function enrichEvent(
 	event: InterceptEvent,
 	locationIndex: LocationIndex | null,
 ): LinkedInterceptEvent {
-	const incomingNodePath = (event as { nodePath?: string | null }).nodePath;
+	const incomingNodePath = (event as { readonly nodePath?: string | null }).nodePath;
 
 	// Branch 1: worker stamped nodePath via __$ic — instrumented path.
 	if (typeof incomingNodePath === 'string' && locationIndex !== null) {
 		const node = locationIndex.astByPath.get(incomingNodePath);
 		const enriched = event as InterceptEvent & {
-			nodePath: string | null;
-			nodePathSource: NodePathSource;
-			node: ASTNode | null;
-			loc: {
-				start: { line: number; column: number };
-				end: { line: number; column: number };
+			readonly nodePath: string | null;
+			readonly nodePathSource: NodePathSource;
+			readonly node: ASTNode | null;
+			readonly loc: {
+				readonly start: { readonly line: number; readonly column: number };
+				readonly end: { readonly line: number; readonly column: number };
 			} | null;
-			callee: ASTNode | null;
-			calleePath: string | null;
+			readonly callee: ASTNode | null;
+			readonly calleePath: string | null;
 		};
 		enriched.nodePath = incomingNodePath;
 		enriched.nodePathSource = 'instrumented';
@@ -248,11 +246,11 @@ function enrichEvent(
 		// Direct callee navigation: only meaningful when node is a
 		// CallExpression (the wrapped happy path). For non-call nodes
 		// (residual error path), callee/calleePath stay null.
-		if (node && node.type === 'CallExpression') {
-			const calleeRef = (node as unknown as { callee: ASTNode | undefined })
+		if (node?.type === 'CallExpression') {
+			const calleeReference = (node as unknown as { readonly callee: ASTNode | undefined })
 				.callee;
-			enriched.callee = calleeRef ?? null;
-			enriched.calleePath = calleeRef ? calleeRef.syntaxId : null;
+			enriched.callee = calleeReference ?? null;
+			enriched.calleePath = calleeReference ? calleeReference.syntaxId : null;
 		} else {
 			enriched.callee = null;
 			enriched.calleePath = null;
@@ -261,28 +259,28 @@ function enrichEvent(
 		// Replaces what the post-completion `link()` step used to do; now
 		// happens inline so consumers see populated back-refs mid-stream.
 		if (node !== undefined) {
-			(node.events as LinkedInterceptEvent[]).push(
+			(node.events).push(
 				enriched as unknown as LinkedInterceptEvent,
 			);
 		}
 		return enriched as unknown as LinkedInterceptEvent;
 	}
 
-	const line = (event as { line?: number }).line;
-	const column = (event as { column?: number }).column;
+	const {line} = (event as { readonly line?: number });
+	const {column} = (event as { readonly column?: number });
 
 	// Branch 3: no AST OR no usable position — no-ast.
 	if (locationIndex === null || line === undefined || column === undefined) {
 		const enriched = event as InterceptEvent & {
-			nodePath: string | null;
-			nodePathSource: NodePathSource;
-			node: ASTNode | null;
-			loc: {
-				start: { line: number; column: number };
-				end: { line: number; column: number };
+			readonly nodePath: string | null;
+			readonly nodePathSource: NodePathSource;
+			readonly node: ASTNode | null;
+			readonly loc: {
+				readonly start: { readonly line: number; readonly column: number };
+				readonly end: { readonly line: number; readonly column: number };
 			} | null;
-			callee: ASTNode | null;
-			calleePath: string | null;
+			readonly callee: ASTNode | null;
+			readonly calleePath: string | null;
 		};
 		enriched.nodePath = null;
 		enriched.nodePathSource = 'no-ast';
@@ -297,15 +295,15 @@ function enrichEvent(
 	const lookup = lookupNodePath(locationIndex, line, column);
 	const node = locationIndex.astByPath.get(lookup.nodePath);
 	const enriched = event as InterceptEvent & {
-		nodePath: string;
-		nodePathSource: NodePathSource;
-		node: ASTNode | null;
-		loc: {
-			start: { line: number; column: number };
-			end: { line: number; column: number };
+		readonly nodePath: string;
+		readonly nodePathSource: NodePathSource;
+		readonly node: ASTNode | null;
+		readonly loc: {
+			readonly start: { readonly line: number; readonly column: number };
+			readonly end: { readonly line: number; readonly column: number };
 		} | null;
-		callee: ASTNode | null;
-		calleePath: string | null;
+		readonly callee: ASTNode | null;
+		readonly calleePath: string | null;
 	};
 	enriched.nodePath = lookup.nodePath;
 	enriched.nodePathSource = lookup.source;
@@ -314,18 +312,18 @@ function enrichEvent(
 	// Same CallExpression discriminator as Branch 1; residual lookups
 	// usually land on non-call nodes (e.g. MemberExpression for
 	// `let x = null.foo;`), in which case callee/calleePath stay null.
-	if (node && node.type === 'CallExpression') {
-		const calleeRef = (node as unknown as { callee: ASTNode | undefined })
+	if (node?.type === 'CallExpression') {
+		const calleeReference = (node as unknown as { readonly callee: ASTNode | undefined })
 			.callee;
-		enriched.callee = calleeRef ?? null;
-		enriched.calleePath = calleeRef ? calleeRef.syntaxId : null;
+		enriched.callee = calleeReference ?? null;
+		enriched.calleePath = calleeReference ? calleeReference.syntaxId : null;
 	} else {
 		enriched.callee = null;
 		enriched.calleePath = null;
 	}
 	// Push back-ref into node.events[] for residual-path attribution.
 	if (node !== undefined) {
-		(node.events as LinkedInterceptEvent[]).push(
+		(node.events).push(
 			enriched as unknown as LinkedInterceptEvent,
 		);
 	}
@@ -352,34 +350,34 @@ function buildEarlyResult(
 	const ok =
 		outcome === 'complete' || outcome === 'cancel' || outcome === 'fail';
 	const linked = events.map((e) => {
-		const ev = e as {
-			node: ASTNode | null;
-			callee: ASTNode | null;
-			calleePath: string | null;
+		const event = e as {
+			readonly node: ASTNode | null;
+			readonly callee: ASTNode | null;
+			readonly calleePath: string | null;
 		};
-		ev.node = null;
-		ev.callee = null;
-		ev.calleePath = null;
+		event.node = null;
+		event.callee = null;
+		event.calleePath = null;
 		return e as unknown as LinkedInterceptEvent;
 	});
 	// Wire prev/next as plain frozen properties — for one-shot finalization
 	// the neighbor is known at build time, so accessor backing isn't needed.
 	// Same observable shape as the streaming-path appendEvent helper.
-	for (let i = 0; i < linked.length; i++) {
-		const ev = linked[i] as {
-			prev: LinkedInterceptEvent | null;
-			next: LinkedInterceptEvent | null;
+	for (let index = 0; index < linked.length; index++) {
+		const event = linked[index] as {
+			readonly prev: LinkedInterceptEvent | null;
+			readonly next: LinkedInterceptEvent | null;
 		};
-		ev.prev = i > 0 ? (linked[i - 1] ?? null) : null;
-		ev.next = i + 1 < linked.length ? (linked[i + 1] ?? null) : null;
-		Object.freeze(linked[i]);
+		event.prev = index > 0 ? (linked[index - 1] ?? null) : null;
+		event.next = index + 1 < linked.length ? (linked[index + 1] ?? null) : null;
+		Object.freeze(linked[index]);
 	}
 	return deepFreezeInPlace({
 		ok,
 		outcome,
 		events: linked,
-		...(error !== undefined ? { error } : {}),
-		...(reason !== undefined ? { reason } : {}),
+		...(error === undefined ? {} : { error }),
+		...(reason === undefined ? {} : { reason }),
 		code,
 		options,
 		ast: null as Readonly<Record<string, ASTNode>> | null,
@@ -389,11 +387,11 @@ function buildEarlyResult(
 
 // --- Internal error helper ---
 
-function makeInternalError(err: unknown, step: number): RunErrorEvent {
+function makeInternalError(error: unknown, step: number): RunErrorEvent {
 	return {
 		event: 'error',
 		name: 'InternalError',
-		message: err instanceof Error ? err.message : String(err),
+		message: error instanceof Error ? error.message : String(error),
 		phase: 'execution',
 		step,
 	};
@@ -534,21 +532,21 @@ function createInterceptGenerator(
 	let setTailNext: ((next: LinkedInterceptEvent) => void) | null = null;
 
 	function appendEvent(
-		eventsArray: LinkedInterceptEvent[],
+		eventsArray: readonly LinkedInterceptEvent[],
 		enriched: LinkedInterceptEvent,
 	): void {
-		const prevRef = eventListTail; // captured at define time, stable
-		let nextRef: LinkedInterceptEvent | null = null;
+		const previousReference = eventListTail; // captured at define time, stable
+		let nextReference: LinkedInterceptEvent | null = null;
 		Object.defineProperty(enriched, 'prev', {
 			get(): LinkedInterceptEvent | null {
-				return prevRef;
+				return previousReference;
 			},
 			enumerable: true,
 			configurable: false,
 		});
 		Object.defineProperty(enriched, 'next', {
 			get(): LinkedInterceptEvent | null {
-				return nextRef;
+				return nextReference;
 			},
 			enumerable: true,
 			configurable: false,
@@ -558,7 +556,7 @@ function createInterceptGenerator(
 		// Update tail state for the next iteration.
 		eventListTail = enriched;
 		setTailNext = (n) => {
-			nextRef = n;
+			nextReference = n;
 		};
 		eventsArray.push(enriched);
 		// Safe: prev/next are accessor properties; data fields were all
@@ -569,7 +567,7 @@ function createInterceptGenerator(
 	// Queue + cancel plumbing — lives in the outer closure so cancel()
 	// can reach wakeDequeue regardless of where the generator body is
 	// suspended (before first iterate, mid-await, or mid-yield).
-	const queue: QueueMessage[] = [];
+	const queue: readonly QueueMessage[] = [];
 	let resolveWaiting: (() => void) | null = null;
 	// Termination cause — first-write-wins. All paths that end a run
 	// (consumer cancel, for-await break, wall-clock timeout, worker error,
@@ -588,7 +586,7 @@ function createInterceptGenerator(
 	// 'cancel' as a possibility. Centralizing the widening cast keeps
 	// future readers from forgetting it and accidentally losing a branch.
 	function getTerminationKind(): TerminationCause['kind'] | undefined {
-		return (terminationCause as TerminationCause | null)?.kind;
+		return (terminationCause)?.kind;
 	}
 
 	function wakeDequeue(): void {
@@ -608,8 +606,8 @@ function createInterceptGenerator(
 		}
 	}
 
-	function enqueue(msg: QueueMessage): void {
-		queue.push(msg);
+	function enqueue(message: QueueMessage): void {
+		queue.push(message);
 		if (resolveWaiting !== null) {
 			resolveWaiting();
 			resolveWaiting = null;
@@ -618,10 +616,10 @@ function createInterceptGenerator(
 
 	function dequeue(): Promise<QueueMessage> {
 		if (queue.length > 0) {
-			return Promise.resolve(queue.shift()!);
+			return Promise.resolve(queue.shift());
 		}
 		return new Promise<QueueMessage>((resolve) => {
-			resolveWaiting = () => resolve(queue.shift()!);
+			resolveWaiting = () => resolve(queue.shift());
 		});
 	}
 
@@ -703,9 +701,9 @@ function createInterceptGenerator(
 					kind: 'formatting',
 				});
 			}
-		} catch (err: unknown) {
-			const message = err instanceof Error ? err.message : String(err);
-			const name = err instanceof Error ? err.name : 'Error';
+		} catch (error: unknown) {
+			const message = error instanceof Error ? error.message : String(error);
+			const name = error instanceof Error ? error.name : 'Error';
 			const errorEvent: RunErrorEvent = {
 				event: 'error',
 				name,
@@ -758,7 +756,7 @@ function createInterceptGenerator(
 		// Trap functions inside the worker read __currentPath at fire time,
 		// avoiding Error.stack parsing entirely. Lines preserved 1:1.
 		// parsedProgram is non-null here because validation passed.
-		let execCode = wrapCallExpressions(parsedProgram!, code);
+		let execCode = wrapCallExpressions(parsedProgram, code);
 
 		// 3b. Apply loop guards if iterations limit is configured. Operates
 		// on the INSTRUMENTED source — guard regex matches loop syntax which
@@ -787,10 +785,10 @@ function createInterceptGenerator(
 		let worker: Worker;
 		try {
 			worker = new Worker(url);
-		} catch (err: unknown) {
+		} catch (error: unknown) {
 			URL.revokeObjectURL(url);
 			const message =
-				err instanceof Error ? err.message : 'Failed to create Worker';
+				error instanceof Error ? error.message : 'Failed to create Worker';
 			const errorEvent: RunErrorEvent = {
 				event: 'error',
 				name: 'WorkerError',
@@ -895,11 +893,11 @@ function createInterceptGenerator(
 		writePauseEngaged(views);
 		startTimeout();
 
-		const events: LinkedInterceptEvent[] = [];
+		const events: readonly LinkedInterceptEvent[] = [];
 
 		try {
 			while (true) {
-				const msg = await dequeue();
+				const message = await dequeue();
 
 				// Termination check — first-write-wins via setTermination.
 				// Whichever path got there first (cancel, timeout, worker-error)
@@ -931,8 +929,8 @@ function createInterceptGenerator(
 				}
 
 				// 8a. Streamed event — route IO callback, yield to consumer
-				if (msg.type === 'event') {
-					const event = msg.event;
+				if (message.type === 'event') {
+					const {event} = message;
 					const enriched = enrichEvent(event, locationIndex);
 					appendEvent(events, enriched);
 
@@ -947,11 +945,11 @@ function createInterceptGenerator(
 					if (event.event === 'console') {
 						try {
 							await resolvedIo.console[event.method](...event.args);
-						} catch (err) {
+						} catch (error) {
 							appendEvent(
 								events,
 								enrichEvent(
-									makeInternalError(err, events.length + 1),
+									makeInternalError(error, events.length + 1),
 									locationIndex,
 								),
 							);
@@ -988,16 +986,16 @@ function createInterceptGenerator(
 				}
 
 				// 8b. I/O request — await callback, write response, wake worker
-				if (msg.type === 'io-request') {
+				if (message.type === 'io-request') {
 					pauseTimeout();
 					try {
-						await handleIoRequest(msg as IoRequestMessage, views, resolvedIo);
+						await handleIoRequest(message, views, resolvedIo);
 						Atomics.notify(views.control, CONTROL_INDEX);
-					} catch (err) {
+					} catch (error) {
 						appendEvent(
 							events,
 							enrichEvent(
-								makeInternalError(err, events.length + 1),
+								makeInternalError(error, events.length + 1),
 								locationIndex,
 							),
 						);
@@ -1008,19 +1006,19 @@ function createInterceptGenerator(
 				}
 
 				// 8c. Complete — break out of loop
-				if (msg.type === 'complete') {
+				if (message.type === 'complete') {
 					break;
 				}
 
 				// 8d. Worker error — record and break
-				if (msg.type === 'worker-error') {
+				if (message.type === 'worker-error') {
 					appendEvent(
 						events,
 						enrichEvent(
 							{
 								event: 'error',
 								name: 'WorkerError',
-								message: msg.message,
+								message: message.message,
 								phase: 'execution',
 								step: events.length + 1,
 							},
@@ -1067,7 +1065,7 @@ function createInterceptGenerator(
 	const origNext = gen.next.bind(gen);
 	Object.defineProperty(gen, 'next', {
 		value: async function interceptingNext(
-			...args: Parameters<typeof origNext>
+			...arguments_: Parameters<typeof origNext>
 		): Promise<IteratorResult<InterceptEvent, InterceptResult>> {
 			// WHY the isDone short-circuit: after for-await-break,
 			// interceptingReturn drove the body to completion and captured
@@ -1079,7 +1077,7 @@ function createInterceptGenerator(
 			if (isDone) {
 				return { value: settledResult!, done: true };
 			}
-			const res = await origNext(...args);
+			const res = await origNext(...arguments_);
 			// WHY the res.value !== undefined guard: the underlying
 			// AsyncGenerator can emit {done:true, value:undefined} when
 			// it has been aborted externally (e.g. .return() bypassing
@@ -1087,7 +1085,7 @@ function createInterceptGenerator(
 			// undefined — interceptingReturn captures it authoritatively.
 			if (res.done && res.value !== undefined) {
 				isDone = true;
-				settledResult = res.value as InterceptResult;
+				settledResult = res.value;
 			}
 			return res;
 		},
@@ -1121,10 +1119,10 @@ function createInterceptGenerator(
 			}
 			if (terminationCause === null) cancel();
 			while (!isDone) {
-				const res = await origNext(undefined);
+				const res = await origNext();
 				if (res.done && res.value !== undefined) {
 					isDone = true;
-					settledResult = res.value as InterceptResult;
+					settledResult = res.value;
 					break;
 				}
 			}
@@ -1214,12 +1212,12 @@ function createInterceptGenerator(
 			// SAME LinkedInterceptEvent references the live iteration
 			// yielded — this is the replay-identity invariant.
 			const settled = settledResult;
-			const events: readonly LinkedInterceptEvent[] = settled.events;
+			const {events} = settled;
 			let index = 0;
 			return {
 				next(): Promise<IteratorResult<LinkedInterceptEvent, InterceptResult>> {
 					if (index < events.length) {
-						return Promise.resolve({ value: events[index++]!, done: false });
+						return Promise.resolve({ value: events[index++], done: false });
 					}
 					return Promise.resolve({ value: settled, done: true });
 				},
@@ -1264,19 +1262,19 @@ function createInterceptGenerator(
  * catches and surfaces as InternalError.
  */
 async function handleIoRequest(
-	msg: IoRequestMessage,
+	message: IoRequestMessage,
 	views: ReturnType<typeof createBufferViews>,
 	resolvedIo: ResolvedIo,
 ): Promise<void> {
-	const dialogMessage = String(msg.args[0] ?? '');
+	const dialogMessage = String(message.args[0] ?? '');
 
-	if (msg.name === 'alert') {
+	if (message.name === 'alert') {
 		await resolvedIo.alert(dialogMessage);
 		writeAlertResponse(views);
 		return;
 	}
 
-	if (msg.name === 'confirm') {
+	if (message.name === 'confirm') {
 		const result = await resolvedIo.confirm(dialogMessage);
 		writeConfirmResponse(views, result);
 		return;
@@ -1284,7 +1282,7 @@ async function handleIoRequest(
 
 	// msg.name === 'prompt'
 	const defaultValue =
-		msg.args.length > 1 ? String(msg.args[1] ?? '') : undefined;
+		message.args.length > 1 ? String(message.args[1] ?? '') : undefined;
 	const result = await resolvedIo.prompt(dialogMessage, defaultValue);
 	writePromptResponse(views, result);
 }
@@ -1327,19 +1325,19 @@ function buildResult(
 
 	// Compute visitCounts from linked events. nodePath:null events
 	// (no-ast / no-location) don't count toward any node.
-	const visitCountsObj: Record<string, number> = {};
-	for (const ev of events) {
-		if (ev.nodePath !== null) {
-			visitCountsObj[ev.nodePath] = (visitCountsObj[ev.nodePath] ?? 0) + 1;
+	const visitCountsObject: Record<string, number> = {};
+	for (const event of events) {
+		if (event.nodePath !== null) {
+			visitCountsObject[event.nodePath] = (visitCountsObject[event.nodePath] ?? 0) + 1;
 		}
 	}
 
 	const baseFields = {
-		events: events,
+		events,
 		code,
 		options,
 		ast,
-		visitCounts: visitCountsObj as Readonly<Record<string, number>>,
+		visitCounts: visitCountsObject as Readonly<Record<string, number>>,
 	};
 
 	if (terminationCause?.kind === 'cancel') {
@@ -1369,7 +1367,7 @@ function buildResult(
 					kind: 'timeout' as const,
 					name: errorEvent.name,
 					message: errorEvent.message,
-					...(errorEvent.line !== undefined ? { line: errorEvent.line } : {}),
+					...(errorEvent.line === undefined ? {} : { line: errorEvent.line }),
 					// Timeout fires only during worker execution; the type narrows
 					// to the literal 'execution'. Construction-phase errors take a
 					// different path (kind: 'javascript' below).
@@ -1395,7 +1393,7 @@ function buildResult(
 					kind: 'iteration-limit' as const,
 					name: errorEvent.name,
 					message: errorEvent.message,
-					...(errorEvent.line !== undefined ? { line: errorEvent.line } : {}),
+					...(errorEvent.line === undefined ? {} : { line: errorEvent.line }),
 					// Loop-guard RangeErrors are thrown inside running worker code,
 					// never during construction. Type narrows to literal 'execution'.
 					phase: 'execution' as const,
@@ -1412,7 +1410,7 @@ function buildResult(
 				kind: 'javascript' as const,
 				name: errorEvent.name,
 				message: errorEvent.message,
-				...(errorEvent.line !== undefined ? { line: errorEvent.line } : {}),
+				...(errorEvent.line === undefined ? {} : { line: errorEvent.line }),
 				phase: errorEvent.phase,
 			},
 			...baseFields,
@@ -1431,11 +1429,11 @@ function buildResult(
  */
 function findErrorEvent(
 	events: readonly LinkedInterceptEvent[],
-): (RunErrorEvent & { nodePath: string | null }) | undefined {
-	for (let i = events.length - 1; i >= 0; i--) {
-		const entry = events[i];
+): (RunErrorEvent & { readonly nodePath: string | null }) | undefined {
+	for (let index = events.length - 1; index >= 0; index--) {
+		const entry = events[index];
 		if (entry.event === 'error') {
-			return entry as RunErrorEvent & { nodePath: string | null };
+			return entry as RunErrorEvent & { readonly nodePath: string | null };
 		}
 	}
 	return undefined;

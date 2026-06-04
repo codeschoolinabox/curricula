@@ -24,22 +24,22 @@ import type {
 // ─── Mutable internal types ────────────────────────────────
 
 type MutableDeclaration = {
-	name: string;
-	kind: 'let' | 'const';
-	node: Node;
-	initNode: Node | null;
-	readCount: number;
-	writeCount: number;
-	scopeDepth: number;
+	readonly name: string;
+	readonly kind: 'let' | 'const';
+	readonly node: Node;
+	readonly initNode: Node | null;
+	readonly readCount: number;
+	readonly writeCount: number;
+	readonly scopeDepth: number;
 };
 
 type MutableScope = {
-	kind: ScopeKind;
-	node: Node;
-	parent: MutableScope | null;
-	declarations: Map<string, MutableDeclaration>;
-	children: MutableScope[];
-	depth: number;
+	readonly kind: ScopeKind;
+	readonly node: Node;
+	readonly parent: MutableScope | null;
+	readonly declarations: ReadonlyMap<string, MutableDeclaration>;
+	readonly children: readonly MutableScope[];
+	readonly depth: number;
 };
 
 // ─── Scope chain helpers ───────────────────────────────────
@@ -147,7 +147,7 @@ function walkScope(
 			if (left.type === 'VariableDeclaration') {
 				const leftRecord = left as unknown as Record<string, unknown>;
 				const kind = leftRecord.kind as 'let' | 'const';
-				const declarators = leftRecord.declarations as Node[];
+				const declarators = leftRecord.declarations as readonly Node[];
 				if (declarators.length > 0) {
 					const declarator = declarators[0] as unknown as Record<
 						string,
@@ -181,7 +181,7 @@ function walkScope(
 
 		case 'VariableDeclaration': {
 			const kind = record.kind as 'let' | 'const';
-			const declarators = record.declarations as Node[];
+			const declarators = record.declarations as readonly Node[];
 			for (const declarator of declarators) {
 				const declRecord = declarator as unknown as Record<string, unknown>;
 				const id = declRecord.id as Node;
@@ -305,7 +305,7 @@ function walkScope(
  */
 function convertScope(
 	mutable: MutableScope,
-	allDeclarations: DeclarationInfo[],
+	allDeclarations: readonly DeclarationInfo[],
 ): ScopeInfo {
 	const declarations = new Map<string, DeclarationInfo>();
 	for (const [name, decl] of mutable.declarations) {
@@ -336,7 +336,7 @@ function convertScope(
 
 	// Patch parent pointers on children
 	for (const child of children) {
-		(child as { parent: ScopeInfo | null }).parent = scope;
+		(child as { readonly parent: ScopeInfo | null }).parent = scope;
 	}
 
 	return scope;
@@ -388,7 +388,7 @@ function buildScope(ast: Node): ScopeAnalysis {
 
 	walkScope(ast, rootScope, false, false);
 
-	const allDeclarations: DeclarationInfo[] = [];
+	const allDeclarations: readonly DeclarationInfo[] = [];
 	const root = convertScope(rootScope, allDeclarations);
 
 	freezeScopeTree(root);

@@ -1,11 +1,11 @@
-let text = 'hello';
-let len = text?.length;
+const text = 'hello';
+const len = text?.length;
 console.log(len);
 
-let empty = null;
-let safe = empty?.length;
+const empty = null;
+const safe = empty?.length;
 console.log(safe);
 
-let undef = undefined;
-let alsoSafe = undef?.length;
+const undef = undefined;
+const alsoSafe = undef?.length;
 console.log(alsoSafe);

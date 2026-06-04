@@ -1,6 +1,6 @@
-import type { DocEntry } from '../../orchestrate/lib/editing/types.js';
+import type { DocEntry as DocumentEntry } from '../../orchestrate/lib/editing/types.js';
 
-const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
+const KEYWORD_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 	let: {
 		description: 'Declares a block-scoped variable whose value can change.',
 		example: 'let count = 0;\ncount = count + 1;',

@@ -60,7 +60,7 @@ function prettifyDirName(
 function toTitleCase(s: string): string {
 	return s
 		.split('-')
-		.map((seg) => (seg === '' ? seg : seg[0]!.toUpperCase() + seg.slice(1)))
+		.map((seg) => (seg === '' ? seg : seg[0].toUpperCase() + seg.slice(1)))
 		.join(' ');
 }
 

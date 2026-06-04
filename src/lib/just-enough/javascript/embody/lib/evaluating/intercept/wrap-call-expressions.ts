@@ -37,7 +37,7 @@ function isAcornNode(value: unknown): value is Node {
 	return (
 		typeof value === 'object' &&
 		value !== null &&
-		typeof (value as { type?: unknown }).type === 'string'
+		typeof (value as { readonly type?: unknown }).type === 'string'
 	);
 }
 
@@ -56,7 +56,7 @@ type CallChild = {
 function findTopmostCallDescendants(
 	node: Node,
 	basePath: string,
-	results: CallChild[],
+	results: readonly CallChild[],
 ): void {
 	for (const key of Object.keys(node)) {
 		if (META_KEYS.has(key)) continue;
@@ -64,10 +64,9 @@ function findTopmostCallDescendants(
 		const value = (node as unknown as Record<string, unknown>)[key];
 
 		if (Array.isArray(value)) {
-			for (let i = 0; i < value.length; i++) {
-				const item = value[i];
+			for (const [index, item] of value.entries()) {
 				if (isAcornNode(item)) {
-					const childPath = `${basePath}.${key}.${i}`;
+					const childPath = `${basePath}.${key}.${index}`;
 					if (item.type === 'CallExpression') {
 						results.push({ node: item, path: childPath });
 					} else {
@@ -96,26 +95,26 @@ function rewriteCallExpression(
 	path: string,
 	source: string,
 ): string {
-	const inner: CallChild[] = [];
+	const inner: readonly CallChild[] = [];
 	findTopmostCallDescendants(node, path, inner);
 	inner.sort(
 		(a, b) =>
-			(a.node as { start: number }).start - (b.node as { start: number }).start,
+			(a.node as { readonly start: number }).start - (b.node as { readonly start: number }).start,
 	);
 
-	const nodeStart = (node as { start: number }).start;
-	const nodeEnd = (node as { end: number }).end;
+	const nodeStart = (node as { readonly start: number }).start;
+	const nodeEnd = (node as { readonly end: number }).end;
 
 	let result = '';
-	let i = nodeStart;
+	let index = nodeStart;
 	for (const child of inner) {
-		const childStart = (child.node as { start: number }).start;
-		const childEnd = (child.node as { end: number }).end;
-		result += source.slice(i, childStart);
+		const childStart = (child.node as { readonly start: number }).start;
+		const childEnd = (child.node as { readonly end: number }).end;
+		result += source.slice(index, childStart);
 		result += rewriteCallExpression(child.node, child.path, source);
-		i = childEnd;
+		index = childEnd;
 	}
-	result += source.slice(i, nodeEnd);
+	result += source.slice(index, nodeEnd);
 
 	return `${HELPER_NAME}(${JSON.stringify(path)}, () => ${result})`;
 }
@@ -125,23 +124,23 @@ function rewriteCallExpression(
  * source string. Lines are preserved 1:1 with the input.
  */
 function wrapCallExpressions(program: Program, source: string): string {
-	const topmost: CallChild[] = [];
+	const topmost: readonly CallChild[] = [];
 	findTopmostCallDescendants(program, '$', topmost);
 	topmost.sort(
 		(a, b) =>
-			(a.node as { start: number }).start - (b.node as { start: number }).start,
+			(a.node as { readonly start: number }).start - (b.node as { readonly start: number }).start,
 	);
 
 	let result = '';
-	let i = 0;
+	let index = 0;
 	for (const child of topmost) {
-		const childStart = (child.node as { start: number }).start;
-		const childEnd = (child.node as { end: number }).end;
-		result += source.slice(i, childStart);
+		const childStart = (child.node as { readonly start: number }).start;
+		const childEnd = (child.node as { readonly end: number }).end;
+		result += source.slice(index, childStart);
 		result += rewriteCallExpression(child.node, child.path, source);
-		i = childEnd;
+		index = childEnd;
 	}
-	result += source.slice(i);
+	result += source.slice(index);
 
 	return result;
 }

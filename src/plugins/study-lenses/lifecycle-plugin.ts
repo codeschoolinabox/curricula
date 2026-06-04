@@ -14,11 +14,11 @@ import path from 'node:path';
 
 import type { LifecyclePluginOptions } from './types.js';
 
-type LoadContext = Readonly<{ siteDir: string }>;
+type LoadContext = Readonly<{ readonly siteDir: string }>;
 
 type StudyLensesPlugin = Readonly<{
-	name: string;
-	getPathsToWatch: () => ReadonlyArray<string>;
+	readonly name: string;
+	readonly getPathsToWatch: () => ReadonlyArray<string>;
 }>;
 
 /**

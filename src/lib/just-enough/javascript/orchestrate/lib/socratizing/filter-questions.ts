@@ -53,7 +53,7 @@ function passesMultiValueFilter(
  */
 function passesRangeFilter(
 	question: CodeQuestion,
-	range: { start: number; end: number } | undefined,
+	range: { readonly start: number; readonly end: number } | undefined,
 ): boolean {
 	if (range === undefined) {
 		return true;
@@ -115,7 +115,7 @@ function filterQuestions(
 	questions: readonly CodeQuestion[],
 	config: MicroDecisionConfig,
 ): readonly CodeQuestion[] {
-	const result: CodeQuestion[] = [];
+	const result: readonly CodeQuestion[] = [];
 
 	for (const question of questions) {
 		// 1. Kind filter (single-value)
@@ -186,15 +186,15 @@ function filterQuestions(
 
 		// If register filtering removed some entries, create a new
 		// CodeQuestion with the pruned array
-		if (filteredQuestions !== question.questions) {
+		if (filteredQuestions === question.questions) {
+			result.push(question);
+		} else {
 			result.push(
 				Object.freeze({
 					...question,
 					questions: Object.freeze(filteredQuestions),
 				}),
 			);
-		} else {
-			result.push(question);
 		}
 	}
 

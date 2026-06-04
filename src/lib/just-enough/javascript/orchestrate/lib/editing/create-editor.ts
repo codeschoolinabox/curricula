@@ -16,7 +16,6 @@ import { EditorView } from '@codemirror/view';
 
 import buildExtensions from './build-extensions.js';
 import { toCMDiagnostic, runLinterCallbacks } from './to-cm-diagnostic.js';
-
 import type { EditorOptions, EditorInstance, LintDiagnostic } from './types.js';
 
 /**
@@ -59,7 +58,7 @@ async function createEditor(
 		onChange,
 	}: EditorOptions = {},
 ): Promise<EditorInstance> {
-	const el: HTMLElement = parent ?? document.createElement('div');
+	const element: HTMLElement = parent ?? document.createElement('div');
 	const resolvedLanguage = language ?? 'plaintext';
 
 	// 1. Resolve language + build extensions (async — dynamic imports).
@@ -96,7 +95,7 @@ async function createEditor(
 	// 3. Construct the CM EditorView — the returned instance is post-init.
 	const editor = new EditorView({
 		doc: initialCode,
-		parent: el,
+		parent: element,
 		extensions: [...extensions, ...onChangeExtensions],
 	});
 
@@ -131,8 +130,8 @@ async function createEditor(
 			if (onFormat) {
 				onFormat({ original, formatted, changed });
 			}
-		} catch (err: unknown) {
-			console.warn('Format callback threw:', err);
+		} catch (error: unknown) {
+			console.warn('Format callback threw:', error);
 		}
 	}
 
@@ -176,7 +175,7 @@ async function createEditor(
 			});
 		},
 
-		el,
+		el: element,
 
 		reset(): void {
 			if (destroyed) return;

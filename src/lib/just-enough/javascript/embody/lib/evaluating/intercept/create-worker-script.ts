@@ -24,7 +24,7 @@
  * main thread writes a response to the SAB.
  */
 function createWorkerScript(): string {
-	return `"use strict";
+	return String.raw`"use strict";
 
 // --- SAB layout constants (duplicated from worker-protocol.ts) ---
 
@@ -262,7 +262,7 @@ self.onmessage = function (e) {
     try {
       var prefix = msg.scriptMode
         ? loopDeclarations
-        : ('"use strict"; ' + loopDeclarations + '\\n');
+        : ('"use strict"; ' + loopDeclarations + '\n');
       fn = new Function('console', 'alert', 'confirm', 'prompt', '__$ic', prefix + msg.code);
     } catch (err) {
       var errorEvent = {
@@ -319,10 +319,10 @@ self.onmessage = function (e) {
 // (+1 line in non-scriptMode) so the returned line matches user source.
 function extractPositionFromError(err) {
   if (!err || !err.stack) return undefined;
-  const lines = err.stack.split('\\n');
+  const lines = err.stack.split('\n');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const match = line.match(/:(\\d+):(\\d+)\\)?$/);
+    const match = line.match(/:(\d+):(\d+)\)?$/);
     if (match) {
       const lineNum = parseInt(match[1], 10);
       const colNum = parseInt(match[2], 10);

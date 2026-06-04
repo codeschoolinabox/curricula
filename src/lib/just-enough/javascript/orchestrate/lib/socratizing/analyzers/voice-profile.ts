@@ -15,12 +15,10 @@
 
 import type { Node } from 'acorn';
 
-import type { ScopeAnalysis } from '../../../../embody/lib/scope/types.js';
 import getChildNodes from '../../../../embody/lib/parse-old/get-child-nodes.js';
-
+import type { ScopeAnalysis } from '../../../../embody/lib/scope/types.js';
 import createCodeQuestion from '../create-code-question.js';
 import extractLocation from '../extract-location.js';
-
 import type { CodeQuestion, ProgramAnalyzerEntry } from '../types.js';
 
 import collectNodes from './collect-nodes.js';
@@ -29,12 +27,12 @@ import getRecord from './get-record.js';
 // ─── Metrics ───────────────────────────────────────────────
 
 type VoiceMetrics = {
-	avgNameLength: number;
-	hasTemplateLiterals: boolean;
-	hasNullishCoalescing: boolean;
-	hasOptionalChaining: boolean;
-	maxNestingDepth: number;
-	totalStatements: number;
+	readonly avgNameLength: number;
+	readonly hasTemplateLiterals: boolean;
+	readonly hasNullishCoalescing: boolean;
+	readonly hasOptionalChaining: boolean;
+	readonly maxNestingDepth: number;
+	readonly totalStatements: number;
 };
 
 const statementTypes: ReadonlySet<string> = new Set([
@@ -64,7 +62,7 @@ function collectMetrics(ast: Node, scope: ScopeAnalysis): VoiceMetrics {
 	const hasTemplateLiterals = collectNodes(
 		ast,
 		new Set(['TemplateLiteral']),
-	).some((node) => (getRecord(node).expressions as Node[]).length > 0);
+	).some((node) => (getRecord(node).expressions as readonly Node[]).length > 0);
 
 	const hasNullishCoalescing = collectNodes(
 		ast,
@@ -111,7 +109,7 @@ function voiceProfile(
 		return [];
 	}
 
-	const traits: string[] = [];
+	const traits: readonly string[] = [];
 	if (metrics.avgNameLength > 6) {
 		traits.push('descriptive naming');
 	} else if (metrics.avgNameLength > 0 && metrics.avgNameLength <= 3) {

@@ -10,14 +10,12 @@
 import type { Node } from 'acorn';
 
 import type { ScopeAnalysis } from '../../../../embody/lib/scope/types.js';
-
 import createCodeQuestion from '../create-code-question.js';
 import extractLocation from '../extract-location.js';
-
 import type { AnalyzerEntry, CodeQuestion } from '../types.js';
 
-import getRecord from './get-record.js';
 import getIdentifierName from './get-identifier-name.js';
+import getRecord from './get-record.js';
 
 // ─── Helpers ───────────────────────────────────────────────
 
@@ -58,7 +56,7 @@ function letVsConst(
 		return null;
 	}
 
-	const declarators = record.declarations as Node[];
+	const declarators = record.declarations as readonly Node[];
 	for (const declarator of declarators) {
 		const id = getRecord(declarator).id as Node;
 		const name = getIdentifierName(id);
@@ -125,7 +123,7 @@ function namingDescriptiveness(
 		return null;
 	}
 
-	const declarators = getRecord(node).declarations as Node[];
+	const declarators = getRecord(node).declarations as readonly Node[];
 	for (const declarator of declarators) {
 		const id = getRecord(declarator).id as Node;
 		const name = getIdentifierName(id);
@@ -175,7 +173,7 @@ function stringConstruction(
 	_source: string,
 ): CodeQuestion | null {
 	if (node.type === 'TemplateLiteral') {
-		const exprs = getRecord(node).expressions as Node[];
+		const exprs = getRecord(node).expressions as readonly Node[];
 		if (exprs.length === 0) {
 			return null;
 		}
@@ -413,7 +411,7 @@ function forOfIteratorNaming(
 		return null;
 	}
 
-	const declarators = getRecord(left).declarations as Node[];
+	const declarators = getRecord(left).declarations as readonly Node[];
 	if (declarators.length === 0) {
 		return null;
 	}

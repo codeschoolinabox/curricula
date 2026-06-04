@@ -1,6 +1,6 @@
-import type { DocEntry } from '../../orchestrate/lib/editing/types.js';
+import type { DocEntry as DocumentEntry } from '../../orchestrate/lib/editing/types.js';
 
-const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocEntry>> = {
+const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 	var: {
 		description:
 			"JavaScript's older variable-declaration keyword. Function-scoped, hoisted, allows redeclaration.",

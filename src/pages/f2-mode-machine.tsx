@@ -37,7 +37,7 @@ import React from 'react';
 import { StudyLenses } from '@site/src/lib/just-enough/javascript/index.js';
 
 export default function F2ModeMachine(): React.JSX.Element {
-	const [lens, setLens] = React.useState<string | undefined>(undefined);
+	const [lens, setLens] = React.useState<string | undefined>();
 
 	return (
 		<Layout
@@ -49,20 +49,20 @@ export default function F2ModeMachine(): React.JSX.Element {
 				<p>
 					<strong>Current mode:</strong>{' '}
 					<code>
-						{lens !== undefined ? `lens="${lens}"` : 'editor (no lens)'}
+						{lens === undefined ? 'editor (no lens)' : `lens="${lens}"`}
 					</code>
 				</p>
 				<button
 					type="button"
 					onClick={() =>
-						setLens((l) => (l !== undefined ? undefined : 'debug-props'))
+						setLens((l) => (l === undefined ? 'debug-props' : undefined))
 					}
 					style={{ marginBottom: '1rem' }}
 				>
-					Toggle lens ({lens !== undefined ? 'lens → editor' : 'editor → lens'})
+					Toggle lens ({lens === undefined ? 'editor → lens' : 'lens → editor'})
 				</button>
 				<div>
-					<StudyLenses snippet="OK" {...(lens !== undefined ? { lens } : {})} />
+					<StudyLenses snippet="OK" {...(lens === undefined ? {} : { lens })} />
 				</div>
 			</main>
 		</Layout>

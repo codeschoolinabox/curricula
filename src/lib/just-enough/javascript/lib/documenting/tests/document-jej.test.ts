@@ -6,11 +6,10 @@ import {
 	SUPPRESSED_GLOBALS,
 	CURATED_MEMBERS,
 } from '../../completing/collect-jej-surface.js';
-
+import DOC_TABLE, { assembleDocTable as assembleDocumentTable } from '../doc-table.js';
 import documentJej from '../document-jej.js';
-import DOC_TABLE, { assembleDocTable } from '../doc-table.js';
-import { KEYWORD_LABELS } from '../keywords.js';
 import { GLOBAL_LABELS } from '../globals.js';
+import { KEYWORD_LABELS } from '../keywords.js';
 import { MEMBER_LABELS } from '../members.js';
 import { NOT_IN_JEJ_LABELS } from '../not-in-jej.js';
 
@@ -89,7 +88,7 @@ describe('documentJej', () => {
 describe('assembleDocTable', () => {
 	it('rejects duplicate keys across category partitions with a throw', () => {
 		expect(function callAssembleWithDuplicates() {
-			assembleDocTable(
+			assembleDocumentTable(
 				{ let: { description: 'first', isJEJ: true } },
 				{ let: { description: 'second', isJEJ: true } },
 			);
@@ -98,7 +97,7 @@ describe('assembleDocTable', () => {
 
 	it('names the duplicate key in the error message', () => {
 		expect(function callAssembleWithDuplicates() {
-			assembleDocTable(
+			assembleDocumentTable(
 				{ collidingWord: { description: 'first', isJEJ: true } },
 				{ collidingWord: { description: 'second', isJEJ: true } },
 			);

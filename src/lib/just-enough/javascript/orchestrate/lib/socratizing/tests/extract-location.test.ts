@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import { parse } from 'acorn';
 import type { Node } from 'acorn';
+import { describe, it, expect } from 'vitest';
 
 import extractLocation from '../extract-location.js';
 
@@ -21,7 +21,7 @@ describe('extractLocation', () => {
 		it('extracts location from a simple variable declaration', () => {
 			const ast = parseSource('let x = 5;');
 			// The first statement in the body
-			const decl = (ast as unknown as { body: Node[] }).body[0]!;
+			const decl = (ast as unknown as { body: Node[] }).body[0];
 			const loc = extractLocation(decl);
 
 			expect(loc.start).toStrictEqual({ line: 1, column: 0 });
@@ -31,7 +31,7 @@ describe('extractLocation', () => {
 		it('extracts location from a node on a later line', () => {
 			const source = 'let x = 1;\nlet y = 2;';
 			const ast = parseSource(source);
-			const secondDecl = (ast as unknown as { body: Node[] }).body[1]!;
+			const secondDecl = (ast as unknown as { body: Node[] }).body[1];
 			const loc = extractLocation(secondDecl);
 
 			expect(loc.start.line).toBe(2);
@@ -60,7 +60,7 @@ describe('extractLocation', () => {
 	describe('acorn location conventions', () => {
 		it('line numbers are 1-based', () => {
 			const ast = parseSource('let x = 5;');
-			const decl = (ast as unknown as { body: Node[] }).body[0]!;
+			const decl = (ast as unknown as { body: Node[] }).body[0];
 			const loc = extractLocation(decl);
 
 			expect(loc.start.line).toBe(1);
@@ -68,7 +68,7 @@ describe('extractLocation', () => {
 
 		it('column numbers are 0-based', () => {
 			const ast = parseSource('let x = 5;');
-			const decl = (ast as unknown as { body: Node[] }).body[0]!;
+			const decl = (ast as unknown as { body: Node[] }).body[0];
 			const loc = extractLocation(decl);
 
 			expect(loc.start.column).toBe(0);

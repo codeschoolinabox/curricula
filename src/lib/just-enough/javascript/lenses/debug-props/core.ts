@@ -31,7 +31,6 @@
  */
 
 import type { Snippet } from '../../embody/types.js';
-
 import type { LensConfig } from '../types.js';
 
 import type { DisplayTree, Panel } from './types.js';
@@ -52,7 +51,7 @@ function deriveDisplayTree(
 	embodiment: Snippet,
 	config?: LensConfig,
 ): DisplayTree {
-	const panels: Panel[] = [
+	const panels: readonly Panel[] = [
 		{
 			key: 'snippet',
 			label: 'snippet (source code)',

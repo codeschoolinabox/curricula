@@ -1,17 +1,17 @@
+import { Text } from '@codemirror/state';
 import { describe, it, expect } from 'vitest';
 
-import { Text } from '@codemirror/state';
 
 import { toCMDiagnostic } from '../to-cm-diagnostic.js';
-import type { DocEntry, LintDiagnostic } from '../types.js';
+import type { DocEntry as DocumentEntry, LintDiagnostic } from '../types.js';
 
-const SAMPLE_ENTRY: DocEntry = Object.freeze({
+const SAMPLE_ENTRY: DocumentEntry = Object.freeze({
 	description: 'sample',
 	isJEJ: false,
 	whyNotInJej: 'sample rationale',
 });
 
-function makeDoc(content: string): Text {
+function makeDocument(content: string): Text {
 	return Text.of(content.split('\n'));
 }
 
@@ -24,7 +24,7 @@ describe('toCMDiagnostic', () => {
 				severity: 'rejection',
 				message: 'sample',
 			};
-			const cm = toCMDiagnostic(makeDoc('var x = 5;'), diag);
+			const cm = toCMDiagnostic(makeDocument('var x = 5;'), diag);
 			expect(cm.severity).toBe('warning');
 		});
 
@@ -35,7 +35,7 @@ describe('toCMDiagnostic', () => {
 				severity: 'error',
 				message: 'sample',
 			};
-			const cm = toCMDiagnostic(makeDoc('let x = ;'), diag);
+			const cm = toCMDiagnostic(makeDocument('let x = ;'), diag);
 			expect(cm.severity).toBe('error');
 		});
 
@@ -46,7 +46,7 @@ describe('toCMDiagnostic', () => {
 				severity: 'warning',
 				message: 'sample',
 			};
-			const cm = toCMDiagnostic(makeDoc('x;'), diag);
+			const cm = toCMDiagnostic(makeDocument('x;'), diag);
 			expect(cm.severity).toBe('warning');
 		});
 	});
@@ -62,7 +62,7 @@ describe('toCMDiagnostic', () => {
 				message: 'sample',
 				entry: SAMPLE_ENTRY,
 			};
-			const cm = toCMDiagnostic(makeDoc('var x = 5;'), diag);
+			const cm = toCMDiagnostic(makeDocument('var x = 5;'), diag);
 			expect(cm.renderMessage).toBeDefined();
 		});
 
@@ -73,7 +73,7 @@ describe('toCMDiagnostic', () => {
 				severity: 'rejection',
 				message: 'sample',
 			};
-			const cm = toCMDiagnostic(makeDoc('var x = 5;'), diag);
+			const cm = toCMDiagnostic(makeDocument('var x = 5;'), diag);
 			expect(cm.renderMessage).toBeUndefined();
 		});
 
@@ -92,7 +92,7 @@ describe('toCMDiagnostic', () => {
 				severity: 'rejection',
 				message: 'sample',
 			};
-			const cm = toCMDiagnostic(makeDoc('var x = 5;'), diag);
+			const cm = toCMDiagnostic(makeDocument('var x = 5;'), diag);
 			expect(cm.from).toBeGreaterThanOrEqual(0);
 			expect(cm.to).toBeGreaterThanOrEqual(cm.from);
 		});
@@ -106,7 +106,7 @@ describe('toCMDiagnostic', () => {
 				severity: 'rejection',
 				message: "'var' declarations are not allowed at this language level",
 			};
-			const cm = toCMDiagnostic(makeDoc('var x = 5;'), diag);
+			const cm = toCMDiagnostic(makeDocument('var x = 5;'), diag);
 			expect(cm.message).toBe(
 				"'var' declarations are not allowed at this language level",
 			);
@@ -120,7 +120,7 @@ describe('toCMDiagnostic', () => {
 				message: 'sample',
 				source: 'JEJ',
 			};
-			const cm = toCMDiagnostic(makeDoc('var x = 5;'), diag);
+			const cm = toCMDiagnostic(makeDocument('var x = 5;'), diag);
 			expect(cm.source).toBe('JEJ');
 		});
 	});

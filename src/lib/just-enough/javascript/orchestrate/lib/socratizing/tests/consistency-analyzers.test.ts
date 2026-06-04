@@ -1,9 +1,8 @@
-import { describe, it, expect } from 'vitest';
 import { parse } from 'acorn';
 import type { Node } from 'acorn';
+import { describe, it, expect } from 'vitest';
 
 import buildScope from '../../../../embody/lib/scope/build-scope.js';
-
 import consistencyAnalyzers from '../analyzers/consistency.js';
 import type { CodeQuestion, ProgramAnalyzer } from '../types.js';
 
@@ -17,11 +16,11 @@ function parseSource(source: string): Node {
 
 function analyzeProgram(
 	source: string,
-	analyzerFn: ProgramAnalyzer,
+	analyzerFunction: ProgramAnalyzer,
 ): readonly CodeQuestion[] {
 	const ast = parseSource(source);
 	const scope = buildScope(ast);
-	return analyzerFn(ast, scope, source);
+	return analyzerFunction(ast, scope, source);
 }
 
 function getAnalyzer(id: string): ProgramAnalyzer {

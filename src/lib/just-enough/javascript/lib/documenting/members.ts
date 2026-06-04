@@ -1,6 +1,6 @@
-import type { DocEntry } from '../../orchestrate/lib/editing/types.js';
+import type { DocEntry as DocumentEntry } from '../../orchestrate/lib/editing/types.js';
 
-const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
+const MEMBER_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 	length: {
 		description: 'The number of characters in a string.',
 		example: '"hello".length; // 5',

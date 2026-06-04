@@ -2,7 +2,7 @@ for (const character of 'hello') {
 	console.log(character);
 }
 
-let word = 'world';
+const word = 'world';
 let reversed = '';
 
 for (const c of word) {

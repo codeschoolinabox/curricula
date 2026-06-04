@@ -25,7 +25,6 @@
 
 import prettifyDirName from './prettify-dir-name.js';
 import resolveCascade from './resolve-cascade.js';
-
 import type { ResolvedConfig, SidebarGeneratorOptions } from './types.js';
 
 /**
@@ -33,18 +32,18 @@ import type { ResolvedConfig, SidebarGeneratorOptions } from './types.js';
  * Not typed with the Docusaurus `SidebarItemsGenerator` directly to
  * avoid tight coupling to a specific minor version's type exports.
  */
-type StudySidebarGenerator = (args: {
+type StudySidebarGenerator = (arguments_: {
 	readonly defaultSidebarItemsGenerator: (
-		args: unknown,
+		arguments_: unknown,
 	) => Promise<ReadonlyArray<unknown>>;
 	readonly [k: string]: unknown;
 }) => Promise<ReadonlyArray<unknown>>;
 
 type SidebarItemLike = Readonly<{
-	type?: string;
-	label?: string;
-	items?: ReadonlyArray<unknown>;
-	[k: string]: unknown;
+	readonly type?: string;
+	readonly label?: string;
+	readonly items?: ReadonlyArray<unknown>;
+	readonly [k: string]: unknown;
 }>;
 
 function createStudySidebarGenerator(
@@ -57,8 +56,8 @@ function createStudySidebarGenerator(
 					contentRoot: options.contentRoot,
 				});
 
-	return async function studySidebarGenerator(args) {
-		const items = await args.defaultSidebarItemsGenerator(args);
+	return async function studySidebarGenerator(arguments_) {
+		const items = await arguments_.defaultSidebarItemsGenerator(arguments_);
 		if (config.exerciseSetPrefixes.length === 0) return items;
 		return transformItems(items, config.exerciseSetPrefixes);
 	};
@@ -78,12 +77,12 @@ function transformItems(
 ): ReadonlyArray<unknown> {
 	return items.map((item) => {
 		if (typeof item !== 'object' || item === null) return item;
-		const i = item as SidebarItemLike;
-		if (i.type !== 'category') return item;
+		const index = item as SidebarItemLike;
+		if (index.type !== 'category') return item;
 		const rewrittenChildren =
-			i.items !== undefined ? transformItems(i.items, prefixes) : i.items;
-		const rewrittenLabel = transformLabel(i.label ?? '', prefixes);
-		return { ...i, label: rewrittenLabel, items: rewrittenChildren };
+			index.items === undefined ? index.items : transformItems(index.items, prefixes);
+		const rewrittenLabel = transformLabel(index.label ?? '', prefixes);
+		return { ...index, label: rewrittenLabel, items: rewrittenChildren };
 	});
 }
 

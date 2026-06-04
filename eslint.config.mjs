@@ -32,6 +32,19 @@ export default tseslint.config(
 			// types, deleted-but-still-emitted FunctionReturnEvent, etc.).
 			// Re-include when Step B7 lands.
 			'src/lib/just-enough/javascript/embody/lib/evaluating/trace/semantics/**',
+			// Test fixtures are intentional inputs (some malformed, some
+			// using legacy syntax) — ESLint rules don't apply to them.
+			'**/tests/fixtures/**',
+			// Deprecated curriculum tree (per README: unrouted in
+			// docusaurus.config.ts; do not add new content). Files here
+			// teach JS concepts (e.g. 'declaring-and-initializing.js'
+			// using `let`) — ESLint autofix is pedagogically wrong.
+			// Mirrors the .prettierignore exclusion from Sprint 2.7.
+			'spiralearn/welcome-to-programming/**',
+			// Sandbox plugin-fixtures contain pedagogical snippets used as
+			// test inputs (single-line `let x = 1;` to demonstrate the
+			// 'declare' concept). Autofix to const defeats the demo.
+			'spiralearn/sandbox/**',
 			// Per-package scaffolding (will be removed after Phase 7)
 			'src/lib/*/node_modules/**',
 			'src/lib/*/dist/**',

@@ -37,6 +37,7 @@
  */
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
+
 import guardLoops from './guard-loops/guard-loops.js';
 import type { DebugEvent, DebugResult } from './types.js';
 
@@ -95,7 +96,7 @@ async function* createDebugGenerator(
 	const wrapper = document.createElement('div');
 	wrapper.id = callId;
 	wrapper.style.display = 'none';
-	document.body.appendChild(wrapper);
+	document.body.append(wrapper);
 
 	const iframe = document.createElement('iframe');
 	iframe.style.cssText = IFRAME_HIDDEN_STYLES;
@@ -112,7 +113,7 @@ async function* createDebugGenerator(
 
 			window.addEventListener('message', onMessage);
 
-			iframe.onload = () => {
+			iframe.addEventListener('load', () => {
 				const iframeDocument = iframe.contentDocument;
 
 				if (!iframeDocument) {
@@ -131,14 +132,14 @@ async function* createDebugGenerator(
 				doneScript.type = 'module';
 				doneScript.textContent = `window.parent.postMessage('${callId}', '*');\n`;
 
-				iframeDocument.body.appendChild(codeScript);
-				iframeDocument.body.appendChild(doneScript);
-			};
+				iframeDocument.body.append(codeScript);
+				iframeDocument.body.append(doneScript);
+			});
 
-			wrapper.appendChild(iframe);
+			wrapper.append(iframe);
 		});
-	} catch (err: unknown) {
-		const error = err instanceof Error ? err : new Error(String(err));
+	} catch (error_: unknown) {
+		const error = error_ instanceof Error ? error_ : new Error(String(error_));
 		const errorEvent: DebugEvent = {
 			event: 'error',
 			name: error.name,

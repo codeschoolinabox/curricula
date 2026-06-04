@@ -7,11 +7,9 @@
 import { describe, expect, it } from 'vitest';
 
 import embody from '../../../embody/index.js';
-import deriveDisplayTree from '../core.js';
-
 import type { Snippet } from '../../../embody/types.js';
-
 import type { LensConfig } from '../../types.js';
+import deriveDisplayTree from '../core.js';
 
 /**
  * Placeholder string emitted by the validation panel when

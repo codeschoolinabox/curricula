@@ -25,7 +25,7 @@ import type { Node } from 'acorn';
  *   `BlockStatement.body`, children appear in source order.
  */
 function getChildNodes(node: Node): readonly Node[] {
-	const children: Node[] = [];
+	const children: readonly Node[] = [];
 
 	for (const key of Object.keys(node)) {
 		// skip metadata properties that aren't child nodes

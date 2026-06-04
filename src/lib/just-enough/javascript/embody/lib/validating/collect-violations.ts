@@ -36,7 +36,7 @@ function collectViolations(
 	ast: Node,
 	nodes: Readonly<Record<string, NodeRule>>,
 ): readonly Violation[] {
-	const violations: Violation[] = [];
+	const violations: readonly Violation[] = [];
 	const nodePathMap = buildNodePathMap(ast);
 	walk(ast, nodes, violations, nodePathMap);
 	return Object.freeze(violations);
@@ -58,7 +58,7 @@ function collectViolations(
 function walk(
 	node: Node,
 	nodes: Readonly<Record<string, NodeRule>>,
-	violations: Violation[],
+	violations: readonly Violation[],
 	nodePathMap: ReadonlyMap<Node, string>,
 ): void {
 	// every walked node is reachable from the ast the map was built from,

@@ -54,8 +54,8 @@ function lookupNodePath(
 
 function containsPosition(
 	loc: {
-		start: { line: number; column: number };
-		end: { line: number; column: number };
+		readonly start: { readonly line: number; readonly column: number };
+		readonly end: { readonly line: number; readonly column: number };
 	},
 	line: number,
 	column: number,
@@ -70,8 +70,8 @@ function containsPosition(
 }
 
 function approxSize(loc: {
-	start: { line: number; column: number };
-	end: { line: number; column: number };
+	readonly start: { readonly line: number; readonly column: number };
+	readonly end: { readonly line: number; readonly column: number };
 }): number {
 	// Coarse "source area" proxy. Multi-line nodes weighted heavily so a
 	// single-line CallExpression always beats a wrapping multi-line block.

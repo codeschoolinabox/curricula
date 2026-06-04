@@ -1,8 +1,8 @@
-let greeting = 'hello';
+const greeting = 'hello';
 const pi = 3.14;
 let count = 0;
 count = 1;
-let a = 1,
+const a = 1,
 	b = 2;
 console.log(greeting);
 console.log(pi);

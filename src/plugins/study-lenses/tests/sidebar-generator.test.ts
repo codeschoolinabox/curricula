@@ -11,7 +11,6 @@ import { describe, expect, it, vi } from 'vitest';
 
 import DEFAULTS from '../defaults.js';
 import createStudySidebarGenerator from '../sidebar-generator.js';
-
 import type { ResolvedConfig } from '../types.js';
 
 function configWith(prefixes: ReadonlyArray<string>): ResolvedConfig {
@@ -28,7 +27,7 @@ function cat(label: string, items: ReadonlyArray<unknown> = []): unknown {
 	return { type: 'category', label, items };
 }
 
-function doc(id: string, label: string): unknown {
+function document(id: string, label: string): unknown {
 	return { type: 'doc', id, label };
 }
 
@@ -79,7 +78,7 @@ describe('createStudySidebarGenerator', () => {
 
 	it('nested: matching child inside non-matching parent → child transforms, parent untouched', async () => {
 		const items = [
-			cat('chapter-one', [cat('sl-01-while-loops'), doc('note', 'Note')]),
+			cat('chapter-one', [cat('sl-01-while-loops'), document('note', 'Note')]),
 		];
 		const result = await runGenerator(configWith(['sl-']), items);
 		const parent = result[0] as { label: string; items: Array<unknown> };
@@ -108,7 +107,7 @@ describe('createStudySidebarGenerator', () => {
 	});
 
 	it('doc-item labels inside a matched category are not transformed by this module', async () => {
-		const items = [cat('sl-01-while-loops', [doc('lesson', 'The Lesson')])];
+		const items = [cat('sl-01-while-loops', [document('lesson', 'The Lesson')])];
 		const result = await runGenerator(configWith(['sl-']), items);
 		const transformed = result[0] as { label: string; items: Array<unknown> };
 		expect(transformed.label).toBe('While Loops');

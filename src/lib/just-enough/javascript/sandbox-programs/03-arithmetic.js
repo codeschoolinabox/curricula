@@ -1,9 +1,9 @@
-let sum = 10 + 3;
-let diff = 10 - 3;
-let product = 10 * 3;
-let quotient = 10 / 3;
-let remainder = 10 % 3;
-let power = 2 ** 8;
+const sum = 10 + 3;
+const diff = 10 - 3;
+const product = 10 * 3;
+const quotient = 10 / 3;
+const remainder = 10 % 3;
+const power = 2 ** 8;
 console.log(sum);
 console.log(diff);
 console.log(product);

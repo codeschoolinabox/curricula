@@ -27,18 +27,10 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import checkFormat from '../../formatting/check-format.js';
-import guardLoops from '../shared/guard-loops/guard-loops.js';
 import validate from '../../validating/validate.js';
+import guardLoops from '../shared/guard-loops/guard-loops.js';
 
 import createWorkerScript from './create-worker-script.js';
-import {
-	BUFFER_SIZE,
-	CONTROL_INDEX,
-	createBufferViews,
-	writeAlertResponse,
-	writeConfirmResponse,
-	writePromptResponse,
-} from './worker-protocol.js';
 import type {
 	CompleteMessage,
 	IoMocks,
@@ -50,6 +42,14 @@ import type {
 	RunResult,
 	WorkerOutbound,
 } from './types.js';
+import {
+	BUFFER_SIZE,
+	CONTROL_INDEX,
+	createBufferViews,
+	writeAlertResponse,
+	writeConfirmResponse,
+	writePromptResponse,
+} from './worker-protocol.js';
 
 // --- Internal termination state (first-write-wins) ---
 
@@ -101,14 +101,14 @@ type ResolvedIo = {
 function buildResolvedIo(io?: IoMocks): ResolvedIo {
 	return {
 		prompt: io?.prompt
-			? async (msg, def) => io.prompt!(msg, def)
-			: async (msg, def) => globalThis.prompt!(msg, def),
+			? async (message, def) => io.prompt!(message, def)
+			: async (message, def) => globalThis.prompt(message, def),
 		alert: io?.alert
-			? async (msg) => await io.alert!(msg)
-			: async (msg) => await globalThis.alert!(msg),
+			? async (message) => await io.alert!(message)
+			: async (message) => await globalThis.alert(message),
 		confirm: io?.confirm
-			? async (msg) => io.confirm!(msg)
-			: async (msg) => globalThis.confirm!(msg),
+			? async (message) => io.confirm!(message)
+			: async (message) => globalThis.confirm(message),
 	};
 }
 
@@ -130,22 +130,22 @@ const DEFAULT_SECONDS = 5;
 const ITERATION_LIMIT_MESSAGE_RE = /^Loop \d+ exceeded \d+ iterations\.?/;
 
 function classifyCompleteError(
-	err: NonNullable<CompleteMessage['error']>,
+	error: NonNullable<CompleteMessage['error']>,
 	maxIterations: number | undefined,
 ): RunResult {
 	if (
 		maxIterations !== undefined &&
-		err.name === 'RangeError' &&
-		ITERATION_LIMIT_MESSAGE_RE.test(err.message)
+		error.name === 'RangeError' &&
+		ITERATION_LIMIT_MESSAGE_RE.test(error.message)
 	) {
 		return {
 			ok: false,
 			outcome: 'iteration-limit',
 			error: {
 				kind: 'iteration-limit',
-				name: err.name,
-				message: err.message,
-				...(err.line !== undefined ? { line: err.line } : {}),
+				name: error.name,
+				message: error.message,
+				...(error.line === undefined ? {} : { line: error.line }),
 				phase: 'execution',
 				limit: maxIterations,
 			},
@@ -153,10 +153,10 @@ function classifyCompleteError(
 	}
 	const jsError: JavaScriptResultError = {
 		kind: 'javascript',
-		name: err.name,
-		message: err.message,
-		...(err.line !== undefined ? { line: err.line } : {}),
-		phase: err.phase,
+		name: error.name,
+		message: error.message,
+		...(error.line === undefined ? {} : { line: error.line }),
+		phase: error.phase,
 	};
 	return {
 		ok: false,
@@ -178,10 +178,10 @@ function classifyCompleteError(
 function createRunHandle(code: string, options?: RunOptions): RunHandle {
 	const resolvedOptions: ResolvedRunOptions = Object.freeze({
 		seconds: options?.seconds ?? DEFAULT_SECONDS,
-		...(options?.iterations !== undefined
-			? { iterations: options.iterations }
-			: {}),
-		...(options?.io !== undefined ? { io: options.io } : {}),
+		...(options?.iterations === undefined
+			? {}
+			: { iterations: options.iterations }),
+		...(options?.io === undefined ? {} : { io: options.io }),
 	});
 
 	const maxSeconds = resolvedOptions.seconds;
@@ -204,7 +204,7 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 	// Phase 1: parse + JeJ validate (single parse pass; ast threaded
 	// through via the validate refactor)
 	const validation = validate(code);
-	const ast = validation.ast;
+	const {ast} = validation;
 
 	if (!validation.ok) {
 		// Two flavors: parse error (no ast) or rejections (ast set).
@@ -337,22 +337,22 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 		});
 	}
 
-	async function handleIoRequest(msg: IoRequestMessage): Promise<void> {
+	async function handleIoRequest(message: IoRequestMessage): Promise<void> {
 		if (terminationCause !== undefined) return;
 		if (views === null) return;
 		pauseTimer();
 		pendingIo = true;
 		try {
 			let value: string | null | boolean | undefined;
-			if (msg.name === 'prompt') {
+			if (message.name === 'prompt') {
 				value = await resolvedIo.prompt(
-					msg.args[0] as string,
-					msg.args[1] as string | undefined,
+					message.args[0] as string,
+					message.args[1] as string | undefined,
 				);
-			} else if (msg.name === 'confirm') {
-				value = await resolvedIo.confirm(msg.args[0] as string);
+			} else if (message.name === 'confirm') {
+				value = await resolvedIo.confirm(message.args[0] as string);
 			} else {
-				await resolvedIo.alert(msg.args[0] as string);
+				await resolvedIo.alert(message.args[0] as string);
 				value = undefined;
 			}
 
@@ -375,16 +375,16 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 			}
 
 			if (worker === null || workerTerminated) return;
-			if (msg.name === 'prompt') {
+			if (message.name === 'prompt') {
 				writePromptResponse(views, value as string | null);
-			} else if (msg.name === 'confirm') {
+			} else if (message.name === 'confirm') {
 				writeConfirmResponse(views, value as boolean);
 			} else {
 				writeAlertResponse(views);
 			}
 			Atomics.notify(views.control, CONTROL_INDEX);
 			startTimer();
-		} catch (err) {
+		} catch (error) {
 			pendingIo = false;
 			if (!setTermination({ kind: 'io-error' })) return;
 			terminate();
@@ -393,8 +393,8 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 				outcome: 'error',
 				error: {
 					kind: 'javascript',
-					name: err instanceof Error ? err.name : 'Error',
-					message: err instanceof Error ? err.message : String(err),
+					name: error instanceof Error ? error.name : 'Error',
+					message: error instanceof Error ? error.message : String(error),
 					phase: 'execution',
 				},
 				...(ast ? { ast } : {}),
@@ -433,7 +433,7 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 					const guarded = guardLoops(code, maxIterations);
 					processedCode = guarded.code;
 					loopCount = guarded.loopCount;
-				} catch (err) {
+				} catch (error) {
 					// guardLoops parses internally; if it throws (shouldn't,
 					// since validate already parsed successfully), surface as
 					// a creation-phase javascript error.
@@ -442,8 +442,8 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 						outcome: 'error',
 						error: {
 							kind: 'javascript',
-							name: err instanceof Error ? err.name : 'Error',
-							message: err instanceof Error ? err.message : String(err),
+							name: error instanceof Error ? error.name : 'Error',
+							message: error instanceof Error ? error.message : String(error),
 							phase: 'creation',
 						},
 						...(ast ? { ast } : {}),
@@ -480,13 +480,13 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 			}
 
 			worker.onmessage = (e: MessageEvent<WorkerOutbound>) => {
-				const msg = e.data;
+				const message = e.data;
 				if (terminationCause !== undefined) return;
-				if (msg.type === 'complete') {
-					if (msg.error) {
+				if (message.type === 'complete') {
+					if (message.error) {
 						if (!setTermination({ kind: 'worker-error' })) return;
 						terminate();
-						const classified = classifyCompleteError(msg.error, maxIterations);
+						const classified = classifyCompleteError(message.error, maxIterations);
 						settle({
 							...classified,
 							...(ast ? { ast } : {}),
@@ -502,8 +502,8 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 					}
 					return;
 				}
-				if (msg.type === 'io-request') {
-					void handleIoRequest(msg);
+				if (message.type === 'io-request') {
+					void handleIoRequest(message);
 				}
 			};
 
@@ -532,7 +532,7 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 				loopCount,
 			});
 			startTimer();
-		} catch (err) {
+		} catch (error) {
 			if (settled) return;
 			if (!setTermination({ kind: 'worker-error' })) return;
 			terminate();
@@ -541,8 +541,8 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 				outcome: 'error',
 				error: {
 					kind: 'javascript',
-					name: err instanceof Error ? err.name : 'Error',
-					message: err instanceof Error ? err.message : String(err),
+					name: error instanceof Error ? error.name : 'Error',
+					message: error instanceof Error ? error.message : String(error),
 					phase: 'creation',
 				},
 				...(ast ? { ast } : {}),

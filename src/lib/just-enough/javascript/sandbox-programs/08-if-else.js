@@ -1,4 +1,4 @@
-let score = 75;
+const score = 75;
 
 if (score >= 90) {
 	console.log('A');
@@ -10,8 +10,8 @@ if (score >= 90) {
 	console.log('F');
 }
 
-let isRaining = true;
-let hasUmbrella = false;
+const isRaining = true;
+const hasUmbrella = false;
 
 if (isRaining && !hasUmbrella) {
 	console.log('get wet');

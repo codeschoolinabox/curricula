@@ -1,12 +1,12 @@
-let x = 'outer';
+const x = 'outer';
 console.log(x);
 
 {
-	let x = 'inner';
+	const x = 'inner';
 	console.log(x);
 
 	{
-		let x = 'deep';
+		const x = 'deep';
 		console.log(x);
 	}
 

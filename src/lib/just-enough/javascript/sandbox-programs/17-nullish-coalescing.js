@@ -1,7 +1,7 @@
-let a = null ?? 'default';
-let b = undefined ?? 'fallback';
-let c = 0 ?? 'not this';
-let d = '' ?? 'not this either';
+const a = null ?? 'default';
+const b = undefined ?? 'fallback';
+const c = 0 ?? 'not this';
+const d = '' ?? 'not this either';
 console.log(a);
 console.log(b);
 console.log(c);

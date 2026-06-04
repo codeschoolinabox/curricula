@@ -79,9 +79,9 @@ import type { Snippet } from '../embody/types.js';
  * REFACTOR-HANDOFF Step 9.
  */
 type BlockModelCell = Readonly<{
-	level: 'surface' | 'execution' | 'function';
-	scope: 'atoms' | 'blocks' | 'relations' | 'macro';
-	nmComponents?: ReadonlyArray<string>;
+	readonly level: 'surface' | 'execution' | 'function';
+	readonly scope: 'atoms' | 'blocks' | 'relations' | 'macro';
+	readonly nmComponents?: ReadonlyArray<string>;
 }>;
 
 /**
@@ -94,11 +94,11 @@ type BlockModelCell = Readonly<{
  * everything else survives.
  */
 type Recommendation = Readonly<{
-	lens: string;
-	config: LensConfig;
-	relevance: number;
-	blockModelCell: BlockModelCell;
-	label: string;
+	readonly lens: string;
+	readonly config: LensConfig;
+	readonly relevance: number;
+	readonly blockModelCell: BlockModelCell;
+	readonly label: string;
 }>;
 
 // --- Lens config (survives unchanged from pre-refactor) ---
@@ -138,9 +138,9 @@ type LensConfig = Readonly<Record<string, SerializableValue>>;
  * `useState` / `useReducer` — never persisted across mount cycles.
  * See `../README.md` § Disposable practice.
  */
-type LensProps = Readonly<{
-	embodiment: Snippet;
-	config?: LensConfig;
+type LensProperties = Readonly<{
+	readonly embodiment: Snippet;
+	readonly config?: LensConfig;
 }>;
 
 // --- LensModule (the contract every lens satisfies) ---
@@ -184,18 +184,18 @@ type LensProps = Readonly<{
  * (dynamic) lenses return `embodiment.status.created`.
  */
 type LensModule = Readonly<{
-	name: string;
-	Component: ComponentType<LensProps>;
-	config: (overrides?: Partial<LensConfig>) => LensConfig;
-	applicableTo: (embodiment: Snippet) => boolean;
-	recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
+	readonly name: string;
+	readonly Component: ComponentType<LensProperties>;
+	readonly config: (overrides?: Partial<LensConfig>) => LensConfig;
+	readonly applicableTo: (embodiment: Snippet) => boolean;
+	readonly recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
 }>;
 
 export type {
 	SerializablePrimitive,
 	SerializableValue,
 	LensConfig,
-	LensProps,
+	LensProperties as LensProps,
 	LensModule,
 	BlockModelCell,
 	Recommendation,

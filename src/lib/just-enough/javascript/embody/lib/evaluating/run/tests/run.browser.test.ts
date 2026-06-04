@@ -9,7 +9,6 @@
 import { describe, expect, it } from 'vitest';
 
 import format from '../../../formatting/format.js';
-
 import run from '../run.js';
 
 function sleep(ms: number): Promise<void> {

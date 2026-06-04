@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import type { Node } from 'acorn';
+import { describe, it, expect } from 'vitest';
 
 import justEnoughJs from '../just-enough-js.js';
 import type { NodeValidator } from '../types.js';
@@ -17,12 +17,12 @@ if (!allowedGlobals || !blockedMemberNames) {
 }
 
 // -- helper: create a minimal fake node for testing validators --
-function fakeNode(props: Record<string, unknown>): Node {
+function fakeNode(properties: Record<string, unknown>): Node {
 	return {
 		start: 0,
 		end: 1,
 		loc: { start: { line: 1, column: 0 }, end: { line: 1, column: 1 } },
-		...props,
+		...properties,
 	} as Node;
 }
 

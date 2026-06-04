@@ -20,9 +20,9 @@ import type { Program } from 'acorn';
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import justEnoughJs from './just-enough-js.js';
+import type { BaseResult } from './types.js';
 import validateProgram from './validate-program.js';
 
-import type { BaseResult } from './types.js';
 
 /**
  * Validates a program against the full Just Enough JavaScript level.

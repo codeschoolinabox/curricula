@@ -56,24 +56,24 @@ type Binding = unknown;
  * TODO (Resolution 22): per-step environment delta format.
  * Candidate fields: scopesEntered, scopesLeft, bindingChanges[].
  */
-type EnvDiff = unknown;
+type EnvironmentDiff = unknown;
 
 // ─── Session ──────────────────────────────────────────────────────────
 
 type CreationErrorKind = 'parse' | 'validate' | 'instrument';
 
 type CreationError = Readonly<{
-	kind: CreationErrorKind;
-	message: string;
-	location?: SourceLocation;
+	readonly kind: CreationErrorKind;
+	readonly message: string;
+	readonly location?: SourceLocation;
 }>;
 
 type R4bErrorName = 'ReferenceError' | 'TypeError' | 'RangeError';
 
 type R4bError = Readonly<{
-	phase: 'execution';
-	name: R4bErrorName;
-	message: string;
+	readonly phase: 'execution';
+	readonly name: R4bErrorName;
+	readonly message: string;
 }>;
 
 /**
@@ -82,7 +82,7 @@ type R4bError = Readonly<{
  * `complete()`.
  */
 type NMSession = Readonly<{
-	source: string;
+	readonly source: string;
 
 	/**
 	 * Construction-phase AST. Fresh NM-owned copy with `dagRole` +
@@ -90,27 +90,27 @@ type NMSession = Readonly<{
 	 * `visits`, or `stepIndices` — execution hasn't happened.
 	 * Null iff `creationError` is populated.
 	 */
-	ast: NMASTNode | null;
+	readonly ast: NMASTNode | null;
 
 	/**
 	 * The initial environment (pre-execution). Null iff creationError.
 	 * TODO: type as `Environment | null` once Environment is finalized.
 	 */
-	initialEnvironment: Environment | null;
+	readonly initialEnvironment: Environment | null;
 
 	/**
 	 * Populated on R4a failure (parse / JEJ-validate / instrument).
 	 * When present, ast and initialEnvironment are null and steps is
 	 * empty.
 	 */
-	creationError: CreationError | null;
+	readonly creationError: CreationError | null;
 
 	/**
 	 * The step stream. Pull with `for await`. Each yield is a
 	 * `StreamYield` carrying a LiveStep (which mutates as events
 	 * arrive) + the step's envDiff.
 	 */
-	steps: AsyncIterable<StreamYield>;
+	readonly steps: AsyncIterable<StreamYield>;
 
 	/**
 	 * Resolves with the finalized NMTraceResult when the stream
@@ -127,31 +127,31 @@ type NMSession = Readonly<{
 }>;
 
 type StreamYield = Readonly<{
-	step: LiveStep;
-	envDiff: EnvDiff;
+	readonly step: LiveStep;
+	readonly envDiff: EnvironmentDiff;
 }>;
 
 type NMTraceResult = Readonly<{
-	ok: boolean;
+	readonly ok: boolean;
 
 	/**
 	 * Finalization-phase AST. Fresh copy (distinct object from
 	 * `session.ast`) with events[] + visits + stepIndices populated
 	 * per node. In-memory cycles OK; strip for serialization.
 	 */
-	ast: NMASTNode;
+	readonly ast: NMASTNode;
 
-	steps: readonly Step[];
+	readonly steps: readonly Step[];
 
 	/** TODO: type once Environment is finalized. */
-	initialEnvironment: Environment;
+	readonly initialEnvironment: Environment;
 	/** TODO: type once Environment is finalized. */
-	finalEnvironment: Environment;
+	readonly finalEnvironment: Environment;
 
 	/** Node paths where `visits > 0`. */
-	coverage: ReadonlySet<nodePath>;
+	readonly coverage: ReadonlySet<nodePath>;
 
-	error?: R4bError | 'timeout' | 'iteration-limit' | 'cancelled';
+	readonly error?: R4bError | 'timeout' | 'iteration-limit' | 'cancelled';
 }>;
 
 // ─── NM-owned AST ─────────────────────────────────────────────────────
@@ -169,13 +169,13 @@ type DagKind = string; // TODO: enumerate per node type
  */
 type NMASTNode = ASTNode &
 	Readonly<{
-		dagRole: DagRole;
-		dagKind?: DagKind;
+		readonly dagRole: DagRole;
+		readonly dagKind?: DagKind;
 
 		// Populated only on result.ast:
-		events?: readonly TraceEvent[];
-		visits?: number;
-		stepIndices?: readonly number[];
+		readonly events?: readonly TraceEvent[];
+		readonly visits?: number;
+		readonly stepIndices?: readonly number[];
 	}>;
 
 // ─── Step discriminant + shared fields ────────────────────────────────
@@ -197,9 +197,9 @@ type StepCategory =
 	| 'error';
 
 type StepBase = Readonly<{
-	category: StepCategory;
+	readonly category: StepCategory;
 	/** AST reference: the node visited at this step. */
-	dagNodePath: nodePath;
+	readonly dagNodePath: nodePath;
 	/**
 	 * Text reference: the transition-specific moment.
 	 * For multi-transition steps (statement enter/exit; scope
@@ -207,17 +207,17 @@ type StepBase = Readonly<{
 	 * `ast[dagNodePath].loc`. For single-moment steps, equals the
 	 * AST node's loc.
 	 */
-	loc: SourceLocation;
+	readonly loc: SourceLocation;
 	/**
 	 * Raw tracer events aggregated into this step. Populated only
 	 * when `NMConfig.semanticEvents` is true; otherwise undefined.
 	 */
-	events?: readonly TraceEvent[];
+	readonly events?: readonly TraceEvent[];
 	/**
 	 * Environment delta for this step.
 	 * TODO: type once EnvDiff is finalized.
 	 */
-	envDiff: EnvDiff;
+	readonly envDiff: EnvironmentDiff;
 }>;
 
 // ─── Source / Destination refs (for ResolveStep) ──────────────────────
@@ -231,20 +231,20 @@ type SourceKind =
 	| 'template-output'
 	| 'io-input';
 
-type SourceRef = Readonly<{
-	kind: SourceKind;
+type SourceReference = Readonly<{
+	readonly kind: SourceKind;
 	/** AST-position loc for rendering arrows. Always populated. */
-	loc: SourceLocation;
+	readonly loc: SourceLocation;
 	/** The value that flowed from this source. */
-	value: unknown;
+	readonly value: unknown;
 	/**
 	 * Step index of the expression step that produced this value.
 	 * Undefined when the producer is gated off or primordial
 	 * (literal, pre-hoisted global).
 	 */
-	stepIndex?: number;
+	readonly stepIndex?: number;
 	/** Tracer-level provenance (valueId chain). */
-	valueId?: number;
+	readonly valueId?: number;
 }>;
 
 type DestinationKind =
@@ -256,23 +256,23 @@ type DestinationKind =
 	| 'emit'
 	| 'sink';
 
-type DestinationRef = Readonly<{
-	kind: DestinationKind;
+type DestinationReference = Readonly<{
+	readonly kind: DestinationKind;
 	/** AST-position loc for rendering arrows. Always populated. */
-	loc: SourceLocation;
+	readonly loc: SourceLocation;
 	/**
 	 * Step index of the consuming step. Undefined when the consumer
 	 * is gated off or the destination is a sink.
 	 */
-	stepIndex?: number;
+	readonly stepIndex?: number;
 	/**
 	 * Kind-specific positional metadata. E.g., operand-input carries
 	 * `operandIndex`; arg-input carries `argIndex`.
 	 */
-	role?: Readonly<{
-		operandIndex?: number;
-		argIndex?: number;
-		interpolationIndex?: number;
+	readonly role?: Readonly<{
+		readonly operandIndex?: number;
+		readonly argIndex?: number;
+		readonly interpolationIndex?: number;
 	}>;
 }>;
 
@@ -293,89 +293,89 @@ type CoercionContext =
  * `semanticEvents: true`.
  */
 type CoercionRecord = readonly Readonly<{
-	from: unknown;
-	to: unknown;
-	context: CoercionContext;
+	readonly from: unknown;
+	readonly to: unknown;
+	readonly context: CoercionContext;
 }>[];
 
 // ─── Expression steps ─────────────────────────────────────────────────
 
 type LiteralExpressionStep = StepBase &
 	Readonly<{
-		category: 'expression';
-		kind: 'literal';
-		value: unknown;
+		readonly category: 'expression';
+		readonly kind: 'literal';
+		readonly value: unknown;
 	}>;
 
 type IdentifierExpressionStep = StepBase &
 	Readonly<{
-		category: 'expression';
-		kind: 'identifier';
-		value: unknown;
+		readonly category: 'expression';
+		readonly kind: 'identifier';
+		readonly value: unknown;
 		/**
 		 * Populated when the identifier resolves to a binding. Absent
 		 * when the identifier resolves to a pre-hoisted global (register).
 		 * TODO (Q3b, Phase 0.1): confirm this flag model vs. a separate
 		 * 'register-read' kind.
 		 */
-		binding?: Readonly<{
-			name: string;
-			scopePath: nodePath;
-			version: number;
+		readonly binding?: Readonly<{
+			readonly name: string;
+			readonly scopePath: nodePath;
+			readonly version: number;
 		}>;
 		/** True for pre-hoisted global reads (Math, prompt, etc.). */
-		register?: true;
+		readonly register?: true;
 	}>;
 
 type PropertyExpressionStep = StepBase &
 	Readonly<{
-		category: 'expression';
-		kind: 'property';
-		object: unknown;
-		propertyName: string;
-		value: unknown;
+		readonly category: 'expression';
+		readonly kind: 'property';
+		readonly object: unknown;
+		readonly propertyName: string;
+		readonly value: unknown;
 		/* Proto-chain walk events in `.events[]` when semanticEvents on. */
 	}>;
 
 type OperatorExpressionStep = StepBase &
 	Readonly<{
-		category: 'expression';
-		kind: 'operator';
-		operator: string; // '+', '<', '===', '&&', '=', '+=', '++', 'typeof', '!', 'in', ...
-		operands: readonly unknown[];
+		readonly category: 'expression';
+		readonly kind: 'operator';
+		readonly operator: string; // '+', '<', '===', '&&', '=', '+=', '++', 'typeof', '!', 'in', ...
+		readonly operands: readonly unknown[];
 		/**
 		 * Dual-representation with events. Property carries representCoercion-style
 		 * parallel array; standalone coercion events also in `.events[]`
 		 * when semanticEvents: true.
 		 */
-		coercion?: CoercionRecord;
-		result: unknown;
+		readonly coercion?: CoercionRecord;
+		readonly result: unknown;
 		/**
 		 * For short-circuit operators (`&&`, `||`, `??`). RHS is skipped
 		 * entirely; no RHS resolves/steps fire.
 		 */
-		shortCircuited?: Readonly<{
-			skippedSide: 'rhs';
-			skippedNodePath: nodePath;
+		readonly shortCircuited?: Readonly<{
+			readonly skippedSide: 'rhs';
+			readonly skippedNodePath: nodePath;
 		}>;
 	}>;
 
 type CallExpressionStep = StepBase &
 	Readonly<{
-		category: 'expression';
-		kind: 'call';
-		callee: unknown;
-		args: readonly unknown[];
-		result: unknown;
+		readonly category: 'expression';
+		readonly kind: 'call';
+		readonly callee: unknown;
+		readonly args: readonly unknown[];
+		readonly result: unknown;
 	}>;
 
 type TemplateExpressionStep = StepBase &
 	Readonly<{
-		category: 'expression';
-		kind: 'template';
-		staticParts: readonly string[];
-		interpolations: readonly unknown[];
-		result: string;
+		readonly category: 'expression';
+		readonly kind: 'template';
+		readonly staticParts: readonly string[];
+		readonly interpolations: readonly unknown[];
+		readonly result: string;
 	}>;
 
 type ExpressionStep =
@@ -396,13 +396,13 @@ type ExpressionStep =
  */
 type ResolveStep = StepBase &
 	Readonly<{
-		category: 'resolve';
+		readonly category: 'resolve';
 		/** Single kind; the category itself is the discriminant. */
-		kind: 'resolve';
-		from: SourceRef;
-		to: DestinationRef;
-		value: unknown;
-		valueId?: number;
+		readonly kind: 'resolve';
+		readonly from: SourceReference;
+		readonly to: DestinationReference;
+		readonly value: unknown;
+		readonly valueId?: number;
 	}>;
 
 // ─── Terminal steps ───────────────────────────────────────────────────
@@ -414,26 +414,26 @@ type InitializationKind = 'initialization'; // placeholder
 
 type InitializationStep = StepBase &
 	Readonly<{
-		category: 'initialization';
-		kind: InitializationKind;
+		readonly category: 'initialization';
+		readonly kind: InitializationKind;
 		/** Binding being initialized. */
-		bindingName: string;
-		bindingKind: 'let' | 'const';
+		readonly bindingName: string;
+		readonly bindingKind: 'let' | 'const';
 		/** The initial value. Present for inline initializers; absent
 		 *  for `let x;` without init. */
-		value?: unknown;
+		readonly value?: unknown;
 		/** Back-ref to the incoming resolve when resolves are on. */
-		sourceResolveIndex?: number;
+		readonly sourceResolveIndex?: number;
 	}>;
 
 type ForInitStep = StepBase &
 	Readonly<{
-		category: 'for-init';
-		kind: 'for-init'; // TODO: confirm single kind
-		bindingName: string;
-		bindingKind: 'let' | 'const';
-		value: unknown;
-		sourceResolveIndex?: number;
+		readonly category: 'for-init';
+		readonly kind: 'for-init'; // TODO: confirm single kind
+		readonly bindingName: string;
+		readonly bindingKind: 'let' | 'const';
+		readonly value: unknown;
+		readonly sourceResolveIndex?: number;
 	}>;
 
 /**
@@ -443,16 +443,16 @@ type WriteKind = 'simple' | 'compound';
 
 type WriteStep = StepBase &
 	Readonly<{
-		category: 'write';
-		kind: WriteKind;
+		readonly category: 'write';
+		readonly kind: WriteKind;
 		/** Target binding. */
-		target: Readonly<{
-			name: string;
-			scopePath: nodePath;
-			version: number;
+		readonly target: Readonly<{
+			readonly name: string;
+			readonly scopePath: nodePath;
+			readonly version: number;
 		}>;
-		value: unknown;
-		sourceResolveIndex?: number;
+		readonly value: unknown;
+		readonly sourceResolveIndex?: number;
 	}>;
 
 /**
@@ -463,45 +463,45 @@ type EmitKind = string; // placeholder
 
 type EmitStep = StepBase &
 	Readonly<{
-		category: 'emit';
-		kind: EmitKind;
+		readonly category: 'emit';
+		readonly kind: EmitKind;
 		/** The emitted value. */
-		payload: unknown;
-		channel: 'user' | 'dev';
-		method: string; // prompt / alert / confirm / console.log / ...
-		sourceResolveIndex?: number;
+		readonly payload: unknown;
+		readonly channel: 'user' | 'dev';
+		readonly method: string; // prompt / alert / confirm / console.log / ...
+		readonly sourceResolveIndex?: number;
 	}>;
 
 type ErrorStep = StepBase &
 	Readonly<{
-		category: 'error';
-		kind: R4bErrorName;
-		error: R4bError;
+		readonly category: 'error';
+		readonly kind: R4bErrorName;
+		readonly error: R4bError;
 	}>;
 
 // ─── Structural steps ─────────────────────────────────────────────────
 
 type StatementStep = StepBase &
 	Readonly<{
-		category: 'statement';
-		kind: 'enter' | 'exit';
-		exitReason?: 'normal' | 'break' | 'continue' | 'error';
+		readonly category: 'statement';
+		readonly kind: 'enter' | 'exit';
+		readonly exitReason?: 'normal' | 'break' | 'continue' | 'error';
 	}>;
 
 type ScopeStep = StepBase &
 	Readonly<{
-		category: 'scope';
-		kind: 'create' | 'leave';
-		scopeKind: 'script' | 'block';
+		readonly category: 'scope';
+		readonly kind: 'create' | 'leave';
+		readonly scopeKind: 'script' | 'block';
 		/**
 		 * For 'create' transitions: the hoisted bindings that entered
 		 * TDZ at this moment (one binding-declare event per hoisted
 		 * binding).
 		 */
-		hoistedBindings?: readonly Readonly<{
-			name: string;
-			kind: 'let' | 'const';
-			declaredAt: nodePath;
+		readonly hoistedBindings?: readonly Readonly<{
+			readonly name: string;
+			readonly kind: 'let' | 'const';
+			readonly declaredAt: nodePath;
 		}>[];
 	}>;
 
@@ -516,14 +516,14 @@ type ControlFlowKind =
 
 type ControlFlowStep = StepBase &
 	Readonly<{
-		category: 'control-flow';
-		kind: ControlFlowKind;
+		readonly category: 'control-flow';
+		readonly kind: ControlFlowKind;
 		/** For conditional-test and loop-iter-start: the test value. */
-		testValue?: unknown;
+		readonly testValue?: unknown;
 		/** For conditional-test: the branch decision. */
-		decision?: 'truthy' | 'falsy';
+		readonly decision?: 'truthy' | 'falsy';
 		/** For loop-iter-*: the iteration number. */
-		iteration?: number;
+		readonly iteration?: number;
 	}>;
 
 // ─── Step union ───────────────────────────────────────────────────────
@@ -557,9 +557,9 @@ type LiveStep = Step &
 		/** Inner pull stream for raw tracer events within this step.
 		 *  `events` on the Step itself is populated from this stream on
 		 *  close (when semanticEvents is true). */
-		events$: AsyncIterable<TraceEvent>;
+		readonly events$: AsyncIterable<TraceEvent>;
 		/** Resolves when the step closes, with the frozen Step. */
-		done: Promise<Step>;
+		readonly done: Promise<Step>;
 	}>;
 
 // ─── NMConfig ─────────────────────────────────────────────────────────
@@ -574,74 +574,74 @@ type LiveStep = Step &
  */
 type NMConfig = Readonly<{
 	/** Expression-step category gate. Nested for finer control. */
-	expressions?:
+	readonly expressions?:
 		| boolean
 		| Readonly<{
-				literals?: boolean;
-				identifiers?: boolean;
-				properties?: boolean;
-				operators?: boolean;
-				calls?: boolean;
-				templates?: boolean;
+				readonly literals?: boolean;
+				readonly identifiers?: boolean;
+				readonly properties?: boolean;
+				readonly operators?: boolean;
+				readonly calls?: boolean;
+				readonly templates?: boolean;
 		  }>;
 
 	/** Resolve-edge gate with co-gating behavior. */
-	resolves?:
+	readonly resolves?:
 		| boolean
 		| Readonly<{
 				/** Default true: resolves co-emit with their transformation.
 				 *  False: resolves emit standalone (pure data-flow trace). */
-				dependent?: boolean;
+				readonly dependent?: boolean;
 		  }>;
 
-	statementSteps?: boolean;
-	scopeSteps?: boolean;
-	controlFlowSteps?: boolean;
-	initializationSteps?: boolean;
-	forInitSteps?: boolean;
-	writeSteps?: boolean;
-	emitSteps?: boolean;
+	readonly statementSteps?: boolean;
+	readonly scopeSteps?: boolean;
+	readonly controlFlowSteps?: boolean;
+	readonly initializationSteps?: boolean;
+	readonly forInitSteps?: boolean;
+	readonly writeSteps?: boolean;
+	readonly emitSteps?: boolean;
 	/** Errors essentially always on — gate retained for symmetry. */
-	errorSteps?: boolean;
+	readonly errorSteps?: boolean;
 
 	/**
 	 * When false, `step.events[]` is undefined; tracer emits only
 	 * minimum events for top-layer step fields.
 	 */
-	semanticEvents?: boolean;
+	readonly semanticEvents?: boolean;
 
 	/** Passthrough to tracer. Seconds timeout; default 5. */
-	seconds?: number;
+	readonly seconds?: number;
 	/** Passthrough to tracer. Loop iteration limit. */
-	iterations?: number;
+	readonly iterations?: number;
 	/** TODO (Resolution 4): range filtering, Phase 1+ extension. */
-	range?: Readonly<{ start: SourceLocation; end: SourceLocation }>;
+	readonly range?: Readonly<{ readonly start: SourceLocation; readonly end: SourceLocation }>;
 
 	/**
 	 * Consumer-supplied I/O functions passed through to tracer.
 	 * The NM layer doesn't implement these; it just forwards.
 	 * See PLAN.md §Phase 0-A for the tracer contract.
 	 */
-	io?: Readonly<{
-		prompt?: (message: string, placeholder?: string) => Promise<string | null>;
-		alert?: (message: string) => Promise<void>;
-		confirm?: (message: string) => Promise<boolean>;
-		console?: Readonly<{
-			log?: (...args: unknown[]) => Promise<void>;
-			warn?: (...args: unknown[]) => Promise<void>;
-			error?: (...args: unknown[]) => Promise<void>;
-			info?: (...args: unknown[]) => Promise<void>;
-			debug?: (...args: unknown[]) => Promise<void>;
-			assert?: (condition: boolean, ...args: unknown[]) => Promise<void>;
-			count?: (label?: string) => Promise<void>;
-			countReset?: (label?: string) => Promise<void>;
-			group?: (label?: string) => Promise<void>;
-			groupCollapsed?: (label?: string) => Promise<void>;
-			groupEnd?: () => Promise<void>;
-			time?: (label?: string) => Promise<void>;
-			timeLog?: (label?: string, ...args: unknown[]) => Promise<void>;
-			timeEnd?: (label?: string) => Promise<void>;
-			clear?: () => Promise<void>;
+	readonly io?: Readonly<{
+		readonly prompt?: (message: string, placeholder?: string) => Promise<string | null>;
+		readonly alert?: (message: string) => Promise<void>;
+		readonly confirm?: (message: string) => Promise<boolean>;
+		readonly console?: Readonly<{
+			readonly log?: (...arguments_: readonly unknown[]) => Promise<void>;
+			readonly warn?: (...arguments_: readonly unknown[]) => Promise<void>;
+			readonly error?: (...arguments_: readonly unknown[]) => Promise<void>;
+			readonly info?: (...arguments_: readonly unknown[]) => Promise<void>;
+			readonly debug?: (...arguments_: readonly unknown[]) => Promise<void>;
+			readonly assert?: (condition: boolean, ...arguments_: readonly unknown[]) => Promise<void>;
+			readonly count?: (label?: string) => Promise<void>;
+			readonly countReset?: (label?: string) => Promise<void>;
+			readonly group?: (label?: string) => Promise<void>;
+			readonly groupCollapsed?: (label?: string) => Promise<void>;
+			readonly groupEnd?: () => Promise<void>;
+			readonly time?: (label?: string) => Promise<void>;
+			readonly timeLog?: (label?: string, ...arguments_: readonly unknown[]) => Promise<void>;
+			readonly timeEnd?: (label?: string) => Promise<void>;
+			readonly clear?: () => Promise<void>;
 		}>;
 	}>;
 }>;
@@ -679,8 +679,8 @@ export type {
 
 	// Resolve edge
 	ResolveStep,
-	SourceRef,
-	DestinationRef,
+	SourceReference as SourceRef,
+	DestinationReference as DestinationRef,
 	SourceKind,
 	DestinationKind,
 
@@ -705,5 +705,5 @@ export type {
 	Environment,
 	Scope,
 	Binding,
-	EnvDiff,
+	EnvironmentDiff as EnvDiff,
 };

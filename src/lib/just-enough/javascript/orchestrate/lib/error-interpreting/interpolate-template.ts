@@ -17,9 +17,9 @@ function interpolateTemplate(
 	template: string,
 	context: Readonly<Record<string, string>>,
 ): string {
-	return template.replace(/\{\{(\w+)\}\}/g, (original, key: string) => {
+	return template.replaceAll(/\{\{(\w+)\}\}/g, (original, key: string) => {
 		const value = context[key];
-		return value !== undefined ? value : original;
+		return value === undefined ? original : value;
 	});
 }
 

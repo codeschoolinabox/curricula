@@ -42,12 +42,12 @@ describe('buildLocationIndex', () => {
 
 		it('preserves array children at their original indices', () => {
 			const index = indexFor('console.log(1, 2);');
-			const arg0 = index.astByPath.get('$.body.0.expression.arguments.0');
-			const arg1 = index.astByPath.get('$.body.0.expression.arguments.1');
-			expect(arg0).toBeDefined();
-			expect(arg1).toBeDefined();
-			expect(arg0!.type).toBe('Literal');
-			expect(arg1!.type).toBe('Literal');
+			const argument0 = index.astByPath.get('$.body.0.expression.arguments.0');
+			const argument1 = index.astByPath.get('$.body.0.expression.arguments.1');
+			expect(argument0).toBeDefined();
+			expect(argument1).toBeDefined();
+			expect(argument0!.type).toBe('Literal');
+			expect(argument1!.type).toBe('Literal');
 		});
 
 		it('attaches source slices matching the input range', () => {
@@ -98,19 +98,19 @@ describe('buildLocationIndex', () => {
 			expect(callExpr.type).toBe('CallExpression');
 			// CallExpression children: [callee MemberExpression, argument Literal]
 			expect(callExpr.children.length).toBe(2);
-			expect(callExpr.children[0]!.type).toBe('MemberExpression');
-			expect(callExpr.children[1]!.type).toBe('Literal');
+			expect(callExpr.children[0].type).toBe('MemberExpression');
+			expect(callExpr.children[1].type).toBe('Literal');
 		});
 
 		it('children entries are the SAME ASTNode references as named slots', () => {
 			const index = indexFor('console.log(1);');
 			const callExpr = index.astByPath.get('$.body.0.expression')!;
-			const callee = (callExpr as unknown as { callee: unknown }).callee;
-			const argsArray = (callExpr as unknown as { arguments: unknown[] })
+			const {callee} = (callExpr as unknown as { callee: unknown });
+			const argumentsArray = (callExpr as unknown as { arguments: unknown[] })
 				.arguments;
 			// children[0] === .callee, children[1] === .arguments[0]
 			expect(callExpr.children[0]).toBe(callee);
-			expect(callExpr.children[1]).toBe(argsArray[0]);
+			expect(callExpr.children[1]).toBe(argumentsArray[0]);
 		});
 
 		it('Program root children include every top-level statement', () => {
@@ -135,11 +135,11 @@ describe('buildLocationIndex', () => {
 			const index = indexFor('console.log(1, 2, 3);');
 			const callExpr = index.astByPath.get('$.body.0.expression')!;
 			// children: [callee, arg0, arg1, arg2] — left-to-right by source position
-			for (let i = 1; i < callExpr.children.length; i++) {
-				const prev = callExpr.children[i - 1]!;
-				const curr = callExpr.children[i]!;
-				expect(curr.loc.start.column).toBeGreaterThanOrEqual(
-					prev.loc.start.column,
+			for (let index_ = 1; index_ < callExpr.children.length; index_++) {
+				const previous = callExpr.children[index_ - 1];
+				const current = callExpr.children[index_];
+				expect(current.loc.start.column).toBeGreaterThanOrEqual(
+					previous.loc.start.column,
 				);
 			}
 		});
@@ -153,13 +153,13 @@ describe('buildLocationIndex', () => {
 			const tl = index.astByPath.get('$.body.0.declarations.0.init')!;
 			expect(tl.type).toBe('TemplateLiteral');
 			expect(tl.children.length).toBe(3);
-			expect(tl.children[0]!.type).toBe('TemplateElement');
-			expect(tl.children[1]!.type).toBe('Identifier');
-			expect(tl.children[2]!.type).toBe('TemplateElement');
+			expect(tl.children[0].type).toBe('TemplateElement');
+			expect(tl.children[1].type).toBe('Identifier');
+			expect(tl.children[2].type).toBe('TemplateElement');
 			// Strict ascending by column — interleave proven, no ties.
-			for (let i = 1; i < tl.children.length; i++) {
-				expect(tl.children[i]!.loc.start.column).toBeGreaterThan(
-					tl.children[i - 1]!.loc.start.column,
+			for (let index_ = 1; index_ < tl.children.length; index_++) {
+				expect(tl.children[index_].loc.start.column).toBeGreaterThan(
+					tl.children[index_ - 1].loc.start.column,
 				);
 			}
 		});

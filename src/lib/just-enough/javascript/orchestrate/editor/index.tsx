@@ -29,20 +29,19 @@ import documentJej from '../../lib/documenting/document-jej.js';
 import formatJej from '../../lib/formatting-editor/format-jej.js';
 import lintJej from '../../lib/linting/lint-jej.js';
 import createEditor from '../lib/editing/create-editor.js';
-
 import type { EditorInstance } from '../lib/editing/types.js';
 
-type EditorComponentProps = Readonly<{
-	snippet: string;
-	onSnippetChange?: (next: string) => void;
+type EditorComponentProperties = Readonly<{
+	readonly snippet: string;
+	readonly onSnippetChange?: (next: string) => void;
 }>;
 
 function EditorComponent({
 	snippet,
 	onSnippetChange,
-}: EditorComponentProps): React.JSX.Element {
-	const hostRef = React.useRef<HTMLDivElement | null>(null);
-	const editorRef = React.useRef<EditorInstance | null>(null);
+}: EditorComponentProperties): React.JSX.Element {
+	const hostReference = React.useRef<HTMLDivElement | null>(null);
+	const editorReference = React.useRef<EditorInstance | null>(null);
 	const [mountError, setMountError] = React.useState<unknown>(null);
 
 	// Ref shadow for the latest `snippet` prop — read inside the mount
@@ -50,14 +49,14 @@ function EditorComponent({
 	// DOCS.md § Structural constraints. The mount-effect deps array is
 	// empty so the closure-captured `snippet` is the first-render value;
 	// the ref carries the latest.
-	const snippetRef = React.useRef(snippet);
-	snippetRef.current = snippet;
+	const snippetReference = React.useRef(snippet);
+	snippetReference.current = snippet;
 
 	// Ref shadow for the latest `onSnippetChange` callback — invoked via
 	// `onChangeCallback` so consumer-side callback identity changes are
 	// honored without unmount/remount.
-	const onSnippetChangeRef = React.useRef(onSnippetChange);
-	onSnippetChangeRef.current = onSnippetChange;
+	const onSnippetChangeReference = React.useRef(onSnippetChange);
+	onSnippetChangeReference.current = onSnippetChange;
 
 	// Stable `onChange` callback passed to createEditor at mount time.
 	// The ref-shadow indirection (`onSnippetChangeRef`) absorbs
@@ -69,7 +68,7 @@ function EditorComponent({
 	const onChangeCallback = React.useCallback(function notifyParent(
 		next: string,
 	): void {
-		onSnippetChangeRef.current?.(next);
+		onSnippetChangeReference.current?.(next);
 	}, []);
 
 	// Mount effect — fires once per mount. The cancellation flag (ref,
@@ -80,13 +79,13 @@ function EditorComponent({
 	// function expression (not arrow) because useEffect's callback body
 	// requires a block.
 	React.useEffect(function mountEffect() {
-		const cancelledRef = { current: false };
-		const host = hostRef.current;
+		const cancelledReference = { current: false };
+		const host = hostReference.current;
 		// host is virtually always populated by the time useEffect fires
 		// (React's ref attach happens between render commit and effect
 		// run); the guard exists for TS narrowing of the union type.
 		if (host)
-			void createEditor(snippetRef.current, {
+			void createEditor(snippetReference.current, {
 				parent: host,
 				language: 'javascript',
 				linters: [lintJej],
@@ -96,11 +95,11 @@ function EditorComponent({
 				onChange: onChangeCallback,
 			}).then(
 				function onMounted(instance) {
-					if (cancelledRef.current) {
+					if (cancelledReference.current) {
 						instance.destroy();
 						return;
 					}
-					editorRef.current = instance;
+					editorReference.current = instance;
 					// Race recovery: if `snippet` prop changed between mount
 					// initiation and resolution, write the latest into the live
 					// document now. The post-mount sync effect would not re-fire
@@ -113,22 +112,22 @@ function EditorComponent({
 					// for content the user never typed. Under the orchestrator's
 					// wiring this is benign (it re-sets the same state); side-
 					// effecting consumers (logging, analytics) should de-dupe.
-					if (instance.content !== snippetRef.current) {
-						instance.content = snippetRef.current;
+					if (instance.content !== snippetReference.current) {
+						instance.content = snippetReference.current;
 					}
 				},
 				function onMountRejected(error: unknown) {
-					if (cancelledRef.current) return;
+					if (cancelledReference.current) return;
 					console.warn('createEditor rejected:', error);
 					setMountError(error);
 				},
 			);
 
 		return function cleanup() {
-			cancelledRef.current = true;
-			if (editorRef.current) {
-				editorRef.current.destroy();
-				editorRef.current = null;
+			cancelledReference.current = true;
+			if (editorReference.current) {
+				editorReference.current.destroy();
+				editorReference.current = null;
 			}
 		};
 	}, []);
@@ -140,7 +139,7 @@ function EditorComponent({
 	// own-write echo guard for the orchestrator setState round-trip).
 	React.useEffect(
 		function snippetSyncEffect() {
-			const editor = editorRef.current;
+			const editor = editorReference.current;
 			if (!editor) return;
 			if (editor.content === snippet) return;
 			editor.content = snippet;
@@ -162,7 +161,7 @@ function EditorComponent({
 		<div
 			aria-label="Code snippet editor"
 			data-orchestrator-host
-			ref={hostRef}
+			ref={hostReference}
 		/>
 	);
 }

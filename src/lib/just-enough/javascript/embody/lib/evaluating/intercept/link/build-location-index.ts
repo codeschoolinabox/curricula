@@ -37,14 +37,14 @@ function isAcornNode(value: unknown): value is Node {
 	return (
 		typeof value === 'object' &&
 		value !== null &&
-		typeof (value as { type?: unknown }).type === 'string'
+		typeof (value as { readonly type?: unknown }).type === 'string'
 	);
 }
 
 function cloneLoc(loc: Node['loc']): SourceLocation {
 	const safeLoc = loc as {
-		start: { line: number; column: number };
-		end: { line: number; column: number };
+		readonly start: { readonly line: number; readonly column: number };
+		readonly end: { readonly line: number; readonly column: number };
 	};
 	return {
 		start: { line: safeLoc.start.line, column: safeLoc.start.column },
@@ -66,18 +66,18 @@ function walk(
 	parent: ASTNode | null,
 	path: string,
 	source: string,
-	astByPath: Map<string, ASTNode>,
-	exactStarts: Map<string, string>,
+	astByPath: ReadonlyMap<string, ASTNode>,
+	exactStarts: ReadonlyMap<string, string>,
 ): ASTNode {
-	const start = (acornNode as { start: number }).start;
-	const end = (acornNode as { end: number }).end;
+	const {start} = (acornNode as { readonly start: number });
+	const {end} = (acornNode as { readonly end: number });
 
 	// `children` is mutable until the result is frozen; we push every
 	// direct AST descendant here in source order so consumers have a
 	// generic walk path that doesn't require knowing ESTree property
 	// names per node type. The same ASTNode references are also stored
 	// under their named slots (.body, .callee, .arguments, etc.) below.
-	const childrenList: ASTNode[] = [];
+	const childrenList: readonly ASTNode[] = [];
 
 	const astNode = {
 		syntaxId: path,
@@ -102,11 +102,10 @@ function walk(
 		const value = (acornNode as unknown as Record<string, unknown>)[key];
 
 		if (Array.isArray(value)) {
-			const childArray: unknown[] = [];
-			for (let i = 0; i < value.length; i++) {
-				const item = value[i];
+			const childArray: readonly unknown[] = [];
+			for (const [index, item] of value.entries()) {
 				if (isAcornNode(item)) {
-					const childPath = `${path}.${key}.${i}`;
+					const childPath = `${path}.${key}.${index}`;
 					const childAstNode = walk(
 						item,
 						astNode,

@@ -1,8 +1,8 @@
-let name = 'world';
-let greeting = `hello ${name}`;
+const name = 'world';
+const greeting = `hello ${name}`;
 console.log(greeting);
 
-let a = 3;
-let b = 4;
-let equation = `${a} + ${b} = ${a + b}`;
+const a = 3;
+const b = 4;
+const equation = `${a} + ${b} = ${a + b}`;
 console.log(equation);

@@ -119,14 +119,14 @@ describe('discoverSiblings', () => {
 
 	it('safety exclusions: skips node_modules, hidden dirs, and does not follow symlinks', () => {
 		// Dynamic fixture — symlinks don't travel cleanly through git.
-		const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-B11-'));
-		onTestFinished(() => fs.rmSync(tmp, { recursive: true, force: true }));
+		const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-B11-'));
+		onTestFinished(() => fs.rmSync(temporary, { recursive: true, force: true }));
 
-		fs.writeFileSync(path.join(tmp, 'kept.js'), '// kept');
-		fs.mkdirSync(path.join(tmp, 'node_modules'));
-		fs.writeFileSync(path.join(tmp, 'node_modules', 'junk.js'), '// skip');
-		fs.mkdirSync(path.join(tmp, '.hidden'));
-		fs.writeFileSync(path.join(tmp, '.hidden', 'junk.js'), '// skip');
+		fs.writeFileSync(path.join(temporary, 'kept.js'), '// kept');
+		fs.mkdirSync(path.join(temporary, 'node_modules'));
+		fs.writeFileSync(path.join(temporary, 'node_modules', 'junk.js'), '// skip');
+		fs.mkdirSync(path.join(temporary, '.hidden'));
+		fs.writeFileSync(path.join(temporary, '.hidden', 'junk.js'), '// skip');
 
 		// Symlink pointing at an external directory that ALSO has a .js file.
 		const symTarget = fs.mkdtempSync(
@@ -139,7 +139,7 @@ describe('discoverSiblings', () => {
 			path.join(symTarget, 'via-symlink.js'),
 			'// should not be followed',
 		);
-		fs.symlinkSync(symTarget, path.join(tmp, 'sym-link'), 'dir');
+		fs.symlinkSync(symTarget, path.join(temporary, 'sym-link'), 'dir');
 
 		const config = {
 			...DEFAULTS,
@@ -147,7 +147,7 @@ describe('discoverSiblings', () => {
 			defaults: { js: 'study' },
 		};
 
-		const result = discoverSiblings(tmp, config);
+		const result = discoverSiblings(temporary, config);
 
 		expect(result.map((s) => s.label)).toEqual(['kept']);
 	});

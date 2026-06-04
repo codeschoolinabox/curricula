@@ -39,20 +39,20 @@ describe('deepClone', () => {
 		});
 
 		it('arrow function → returns the same function reference', () => {
-			const fn = () => 42;
-			expect(deepClone(fn)).toBe(fn);
+			const function_ = () => 42;
+			expect(deepClone(function_)).toBe(function_);
 		});
 
 		it('async function → returns the same function reference', () => {
-			async function asyncFn() {}
-			expect(deepClone(asyncFn)).toBe(asyncFn);
+			async function asyncFunction() {}
+			expect(deepClone(asyncFunction)).toBe(asyncFunction);
 		});
 
 		it('returned function is callable and behaves identically', () => {
 			function double(x: number) {
 				return x * 2;
 			}
-			expect((deepClone(double) as typeof double)(3)).toBe(6);
+			expect((deepClone(double))(3)).toBe(6);
 		});
 
 		it('function inside array → same reference at same index', () => {
@@ -62,36 +62,36 @@ describe('deepClone', () => {
 
 	describe('objects containing functions', () => {
 		it('function property in cloned object is the same reference', () => {
-			function fn() {}
-			expect(deepClone({ transform: fn }).transform).toBe(fn);
+			function function_() {}
+			expect(deepClone({ transform: function_ }).transform).toBe(function_);
 		});
 
 		it('cloned object with function property is a different object reference', () => {
-			function fn() {}
-			const original = { transform: fn };
+			function function_() {}
+			const original = { transform: function_ };
 			expect(deepClone(original)).not.toBe(original);
 		});
 
 		it('first of multiple function properties is the same reference', () => {
-			function fn1() {}
-			function fn2() {}
-			expect(deepClone({ fn1, fn2 }).fn1).toBe(fn1);
+			function function1() {}
+			function function2() {}
+			expect(deepClone({ fn1: function1, fn2: function2 }).fn1).toBe(function1);
 		});
 
 		it('second of multiple function properties is the same reference', () => {
-			function fn1() {}
-			function fn2() {}
-			expect(deepClone({ fn1, fn2 }).fn2).toBe(fn2);
+			function function1() {}
+			function function2() {}
+			expect(deepClone({ fn1: function1, fn2: function2 }).fn2).toBe(function2);
 		});
 
 		it('primitive sibling property is cloned by value', () => {
-			function fn() {}
-			expect(deepClone({ fn, count: 42 }).count).toBe(42);
+			function function_() {}
+			expect(deepClone({ fn: function_, count: 42 }).count).toBe(42);
 		});
 
 		it('function value in Map → same reference', () => {
-			function fn() {}
-			expect(deepClone(new Map([['fn', fn]])).get('fn')).toBe(fn);
+			function function_() {}
+			expect(deepClone(new Map([['fn', function_]])).get('fn')).toBe(function_);
 		});
 	});
 

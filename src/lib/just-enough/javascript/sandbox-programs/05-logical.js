@@ -1,8 +1,8 @@
-let both = true && false;
-let either = true || false;
-let fallback = null ?? 'default';
-let negated = !true;
-let ternary = 5 > 3 ? 'yes' : 'no';
+const both = true && false;
+const either = true || false;
+const fallback = null ?? 'default';
+const negated = !true;
+const ternary = 5 > 3 ? 'yes' : 'no';
 console.log(both);
 console.log(either);
 console.log(fallback);

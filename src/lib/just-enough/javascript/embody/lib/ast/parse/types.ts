@@ -21,11 +21,11 @@
  * `parse.ts` (Phase 1).
  */
 
-import type { Node, Program } from 'acorn';
+import type { Node,  } from 'acorn';
 
 import type { StepCategory } from '../../evaluating/trace/syntax/types.js';
-import type { CommentEvent, TokenEvent } from '../tokenize/types.js';
 import type { BaseError, BaseEvent, SyncExecution } from '../shared/types.js';
+import type { CommentEvent, TokenEvent } from '../tokenize/types.js';
 
 // ─── AST node — acorn Node enriched with entwining fields ────
 
@@ -273,7 +273,7 @@ type ParseHandle = SyncExecution<ParseEvent, ParseResult> & {
 
 // ─── Re-export of acorn Program for consumer convenience ─────
 
-export type { Program };
+
 
 // ─── Exports ─────────────────────────────────────────────────
 
@@ -289,3 +289,5 @@ export type {
 	ParseResult,
 	ParseHandle,
 };
+
+export {type Program} from 'acorn';

@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import { parse } from 'acorn';
 import type { Program } from 'acorn';
+import { describe, it, expect } from 'vitest';
 
 import collectViolations from '../collect-violations.js';
 import justEnoughJs from '../just-enough-js.js';
@@ -46,10 +46,10 @@ describe('collectViolations', () => {
 		it('flags FunctionDeclaration (not in allowlist)', () => {
 			const ast = parseToAst('function foo() {}');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const funcViolation = violations.find(
+			const functionViolation = violations.find(
 				(v) => v.nodeType === 'FunctionDeclaration',
 			);
-			expect(funcViolation).toBeDefined();
+			expect(functionViolation).toBeDefined();
 		});
 
 		it('allows += assignment operator (compound assignment)', () => {
@@ -74,15 +74,15 @@ describe('collectViolations', () => {
 		it('finds violations inside if bodies', () => {
 			const ast = parseToAst('if (true) { var x = 1; }');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const varViolation = violations.find((v) => v.message.includes('var'));
-			expect(varViolation).toBeDefined();
+			const variableViolation = violations.find((v) => v.message.includes('var'));
+			expect(variableViolation).toBeDefined();
 		});
 
 		it('finds violations inside while loops', () => {
 			const ast = parseToAst('while (true) { var i = 0; }');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const varViolation = violations.find((v) => v.message.includes('var'));
-			expect(varViolation).toBeDefined();
+			const variableViolation = violations.find((v) => v.message.includes('var'));
+			expect(variableViolation).toBeDefined();
 		});
 	});
 
@@ -117,10 +117,10 @@ describe('collectViolations', () => {
 		it('produces no violations for object literal inside with', () => {
 			const ast = parseToAst('with ({ x: 1 }) {}');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const objViolation = violations.find(
+			const objectViolation = violations.find(
 				(v) => v.nodeType === 'ObjectExpression',
 			);
-			expect(objViolation).toBeUndefined();
+			expect(objectViolation).toBeUndefined();
 		});
 
 		it('produces no violations for any syntax inside with', () => {
@@ -138,10 +138,10 @@ describe('collectViolations', () => {
 		it('still rejects ObjectExpression outside with', () => {
 			const ast = parseToAst('let x = ({ y: 1 });');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const objViolation = violations.find(
+			const objectViolation = violations.find(
 				(v) => v.nodeType === 'ObjectExpression',
 			);
-			expect(objViolation).toBeDefined();
+			expect(objectViolation).toBeDefined();
 		});
 	});
 
@@ -155,15 +155,15 @@ describe('collectViolations', () => {
 		it('a self-constructed (missing-from-allowlist) violation gets its path', () => {
 			const ast = parseToAst('function foo() {}');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const fn = violations.find((v) => v.nodeType === 'FunctionDeclaration');
-			expect(fn?.nodePath).toBe('$.body.0');
+			const function_ = violations.find((v) => v.nodeType === 'FunctionDeclaration');
+			expect(function_?.nodePath).toBe('$.body.0');
 		});
 
 		it('a nested self-constructed violation gets its full path', () => {
 			const ast = parseToAst('{ function foo() {} }');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
-			const fn = violations.find((v) => v.nodeType === 'FunctionDeclaration');
-			expect(fn?.nodePath).toBe('$.body.0.body.0');
+			const function_ = violations.find((v) => v.nodeType === 'FunctionDeclaration');
+			expect(function_?.nodePath).toBe('$.body.0.body.0');
 		});
 
 		it('a false-rule (explicitly forbidden) violation gets its path', () => {

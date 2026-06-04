@@ -40,8 +40,8 @@ import type { Execution } from './types.js';
  * @returns An Execution object
  */
 export default function createExecution<TEvent, TResult>(
-	generatorFn: () => AsyncGenerator<TEvent, TResult>,
-	cancelFn: () => void,
+	generatorFunction: () => AsyncGenerator<TEvent, TResult>,
+	cancelFunction: () => void,
 ): Execution<TEvent, TResult> {
 	let generator: AsyncGenerator<TEvent, TResult> | null = null;
 	let done = false;
@@ -60,7 +60,7 @@ export default function createExecution<TEvent, TResult>(
 	// Lazily create the generator
 	function getGenerator(): AsyncGenerator<TEvent, TResult> {
 		if (generator === null) {
-			generator = generatorFn();
+			generator = generatorFunction();
 		}
 		return generator;
 	}
@@ -140,10 +140,10 @@ export default function createExecution<TEvent, TResult>(
 						resolveResultPromise = null;
 					}
 				},
-				function onCancelError(err) {
+				function onCancelError(error) {
 					done = true;
 					if (rejectResultPromise) {
-						rejectResultPromise(err);
+						rejectResultPromise(error);
 						rejectResultPromise = null;
 					}
 				},
@@ -160,7 +160,7 @@ export default function createExecution<TEvent, TResult>(
 			}
 		}
 
-		cancelFn();
+		cancelFunction();
 	}
 
 	// First iteration: live generator. Second+: replay from cache.

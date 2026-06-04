@@ -49,12 +49,17 @@ The plugin populates the three props from three input surfaces:
   INTO the cascade's `lenses[lens]` entry (which then ships as part of the
   whole-cascade `configs` prop).
 - **Per-directory `lenses.json` cascade** (see § lenses.json schema) — its
-  `defaults[lang]` ONLY gates whether a fence in that language transforms at all
-  (configured-languages rule). It does NOT populate `lens` — only fence
-  `:suffix` / frontmatter `defaultLens` / sibling `@study-lens` directive
-  populate `lens` (per AR-1 locked decision 1; the cascade-supplied default seam
-  is L2-deferred). The whole resolved cascade ships verbatim as `configs` (with
-  per-fence/sibling overrides pre-merged into `configs.lenses[lens]`).
+  `defaults[lang]` does **double duty**: (1) gates whether a fence in that
+  language transforms at all (configured-languages rule) and (2) when the
+  fence is bare (no `:suffix`, no frontmatter `defaultLens`), supplies the
+  default lens that the orchestrator mounts. The per-language slot is a
+  `LensName | null`: a non-null entry enables transformation for the
+  language AND supplies the default; `null` explicitly suppresses ancestor
+  enablement for that subtree (fences go untransformed); a missing key
+  means no ancestor configured the language. See § Default-lens
+  precedence chain for ordering. The whole resolved cascade ships verbatim
+  as `configs` (with per-fence/sibling overrides pre-merged into
+  `configs.lenses[lens]`).
 - **Per-fence `@study-lens` directive in `.js` siblings** — educator-override
   surface; populates the sibling's `lens` and a per-sibling override bundle that
   gets deep-merged INTO the cascade's `lenses[lens]` entry before emission.
@@ -69,12 +74,12 @@ synonym anywhere in the code is a bug.
   the plugin treats as a name; the rendered React lens modules live in the
   orchestrator-side `lenses/` peer (`highlight`, `blanks`, `parsons`,
   `trace-table`, etc.). The `lens` attribute the plugin emits is populated, in
-  precedence order, from: per-fence `:suffix`, frontmatter `defaultLens`,
-  sibling `@study-lens` directive (siblings only). Cascade `defaults[lang]` ONLY
-  gates whether a fence transforms (configured-languages rule) — it does NOT
-  populate `lens` (per AR-1 locked decision 1). A fenced code block with none of
-  those resolved emits no `lens` prop at all — the cascade-supplied default seam
-  is L2-deferred; in F1+B the bare-fence case mounts the editor home base. See
+  precedence order (fence side), from: per-fence `:suffix`, frontmatter
+  `defaultLens`, cascade `defaults[fenceLang]` (the cascade default lens),
+  and finally none (editor mode). Sibling side: directive then cascade
+  `defaults[lang]`. See § Default-lens precedence chain for the full
+  ordering and the **subtree deconfiguration** semantics of an explicit
+  `null` value.
   [`../../lib/just-enough/javascript/orchestrate/README.md`](../../lib/just-enough/javascript/orchestrate/README.md).
 - **Fenced code block** — a markdown code block delimited by triple backticks.
   The MDAST `code` node type. Standard CommonMark term.
@@ -85,11 +90,18 @@ synonym anywhere in the code is a bug.
 - **Language** — the identifier before the colon in an info string (`js`,
   `python`, `html`). Determines the default lens lookup.
 - **Configured language** — a language identifier that has a corresponding key
-  in the resolved configuration's `defaults` map. **Only configured languages
-  trigger fence transformation**; unconfigured languages (e.g. `txt`, `bash`,
-  `diff`) fall through to Docusaurus's default code-block rendering. This avoids
-  footguns like replacing an ASCII diagram in a `txt` fence with a plaintext
-  editor.
+  in the resolved configuration's `defaults` map **with a non-null value**.
+  Note: configured-ness is **directory-relative** — the resolved cascade
+  varies per directory, so a language `L` can be configured in one subtree
+  (an ancestor `lenses.json` opted it in) and simultaneously unconfigured in
+  a child subtree (a deeper `lenses.json` suppressed it via `null`). When a
+  test or function signature says "configured language," it always means
+  "configured in the resolved cascade for the fence's directory."
+  **Only configured languages trigger fence transformation**; unconfigured
+  languages — whether the key is absent OR the key is present with explicit
+  `null` (see **Subtree deconfiguration**) — fall through to Docusaurus's
+  default code-block rendering. This avoids footguns like replacing an ASCII
+  diagram in a `txt` fence with a plaintext editor.
 - **Lens suffix** — the text after the colon in a fence info string. A bare
   suffix is a lens name (`js:highlight`). A suffix may carry a URL-style query
   string for per-fence config overrides
@@ -105,13 +117,35 @@ synonym anywhere in the code is a bug.
   post-merge with any per-fence URL-style query OR sibling `@study-lens`
   directive JSON override. There is no separate `config` prop; the cascade IS
   the merged truth.
-- **Resolved-default lens** — the lens that mounts when the picker first opens,
-  computed from the resolved `lens` attribute. Precedence (fence side):
-  per-fence `:suffix` > frontmatter `defaultLens` > none. Sibling side:
-  directive > cascade `defaults[lang]`. Cascade `defaults[lang]` is gate-only on
-  fences and authoritative on siblings (per AR-1 locked decision 1; the
-  cascade-supplied default seam for fences is L2-deferred). See **Cascade
-  bundle** for how per-fence/sibling overrides ride inside `configs`.
+- **Resolved-default lens** — the lens the orchestrator mounts at first render,
+  computed by running the **default-lens precedence chain** against the fence's
+  (or sibling's) inputs. The orchestrator is indifferent to which tier won —
+  it sees only the final resolved value on the emitted `lens` attribute. See
+  **Default-lens precedence chain** for the ordering and **Cascade bundle**
+  for how per-fence/sibling overrides ride inside `configs`.
+- **Cascade default lens** — the value of `defaults[fenceLang]` in the
+  resolved cascade for a fence's directory. When non-null, supplies the
+  `lens` prop the orchestrator mounts on a bare ``` ```js ``` fence (no
+  `:suffix`, no frontmatter `defaultLens`). Resolves via the cascade walk
+  (root → leaf, child wins per-language). Subject to **subtree
+  deconfiguration** (child `null` suppresses ancestor enablement).
+- **Default-lens precedence chain** — the fence-side ordering by which the
+  plugin populates the emitted `lens` attribute. Fence: per-fence `:suffix`
+  > frontmatter `defaultLens` > cascade `defaults[fenceLang]` (when
+  non-null) > none (editor mode). Sibling: `@study-lens` directive >
+  cascade `defaults[lang]`. The chain runs only **after** the
+  configured-languages gate passes — if the fence's language is unconfigured
+  (key absent OR explicit `null`), the fence is left as a plain code block
+  and the chain doesn't run.
+- **Subtree deconfiguration** — an explicit `null` value at a child
+  `lenses.json`'s `defaults[lang]` slot that suppresses an ancestor's
+  enablement of that language for the subtree. Functionally equivalent to
+  "no entry" (fences in the subtree go untransformed), but declaratively
+  expresses the override. Use case: a parent `lenses.json` enables JS
+  site-wide; an experimental subtree opts out via `{"defaults": {"js": null}}`
+  so its JS fences render as raw code blocks. The cascade merge at
+  `resolve-cascade.ts:199` propagates null correctly via the existing
+  shallow spread.
 - **Cascade** — the root → leaf directory walk that collects and merges
   `lenses.json` files.
 - **Resolved config** — the frozen, deep-merged output of the cascade for a
@@ -259,11 +293,18 @@ keys, all optional:
 }
 ```
 
-- **`defaults`** maps a language identifier (not a file extension) to the lens
-  used when a fenced code block omits the lens suffix and when a sibling file is
-  embedded. **Only keys listed here trigger fence transformation** — this is the
-  "configured languages" rule. Adding `"py": "study"` opts Python in; omitting
-  `"py"` leaves Python fences as plain code blocks.
+- **`defaults`** maps a language identifier (not a file extension) to the
+  default lens for that language. Type: `Readonly<Record<LangName, LensName | null>>`.
+  - Non-null entry (e.g. `"js": "study"`): opts the language in. Bare fences
+    in that language transform AND default to that lens; suffix and
+    frontmatter still override (see § Default-lens precedence chain).
+  - Explicit `null` (e.g. `"js": null`): **subtree deconfiguration**. A child
+    `lenses.json` can suppress an ancestor's enablement — fences in that
+    subtree go untransformed (raw code blocks).
+  - Omitted key: language was never enabled at any ancestor level; fences
+    pass through Docusaurus's default code-block rendering.
+  Authoring guidance: `"py": "study"` opts Python in site-wide; an
+  experimental subdirectory can opt out with `"py": null`.
 - **`embedSiblings`** controls auto-embedding of sibling `.js` files:
   - `mode: "off"` disables embedding entirely.
   - `mode: "bottom"` appends each sibling as its own `<StudyLenses>` block.
@@ -324,7 +365,9 @@ keys, all optional:
 **Cascade semantics:** child `lenses.json` files override parents.
 
 - `defaults` uses **shallow merge** (child key replaces parent key per
-  language).
+  language). Null values propagate through the merge: a child `{"js": null}`
+  overrides parent's `{"js": "annotate"}` to land at `{"js": null}` in the
+  resolved config — see **Subtree deconfiguration** in the Glossary.
 - `embedSiblings` uses **deep merge with array concatenation**: scalar fields
   (`mode`, `sectionHeading`) are last-writer-wins; array fields
   (`ignorePrefixes`) are concatenated and deduplicated. This means setting
@@ -578,10 +621,12 @@ robustness contract as the configured- languages rule's silent-skip behavior.
 Fenced code blocks inside `.md` / `.mdx` — `lens` resolution:
 
 ```text
-fence :suffix lens   >   frontmatter defaultLens   >   none
-(cascade `defaults[lang]` is gate-only here — controls whether the
- fence transforms but does NOT populate `lens` per AR-1 locked
- decision 1; the cascade-supplied default seam is L2-deferred)
+fence :suffix lens   >   frontmatter defaultLens   >   cascade defaults[fenceLang]   >   none
+(cascade `defaults[fenceLang]` does double duty: gates whether the
+ fence transforms AND, when non-null, supplies the bare-fence default
+ lens. Explicit `null` value = subtree deconfiguration: the gate fails
+ and the fence is untransformed, same as the language never being
+ enabled. L2 reverses prior locked-decision-1.)
 ```
 
 Sibling `.js` files — `lens` resolution (asymmetric with fences — siblings

@@ -33,13 +33,13 @@ describe('AST entwining (browser, end-to-end)', () => {
 			const result = await createInterceptGenerator(VALID_FIXTURE);
 			expect(result.ast).not.toBeNull();
 			expect(result.ast!['$']).toBeDefined();
-			expect(result.ast!['$']!.type).toBe('Program');
+			expect(result.ast!['$'].type).toBe('Program');
 		});
 
 		it('contains every CallExpression as a navigable AST node', async () => {
 			const result = await createInterceptGenerator(VALID_FIXTURE);
 			const callPaths = Object.keys(result.ast!).filter(
-				(p) => result.ast![p]!.type === 'CallExpression',
+				(p) => result.ast![p].type === 'CallExpression',
 			);
 			expect(callPaths.length).toBe(2);
 		});
@@ -60,7 +60,7 @@ describe('AST entwining (browser, end-to-end)', () => {
 		it('node.events back-ref includes the event', async () => {
 			const result = await createInterceptGenerator(VALID_FIXTURE);
 			const consoleEvent = result.events.find((e) => e.event === 'console')!;
-			const node = result.ast![consoleEvent.nodePath!]!;
+			const node = result.ast![consoleEvent.nodePath!];
 			expect(node.events).toContain(consoleEvent);
 		});
 
@@ -73,13 +73,13 @@ describe('AST entwining (browser, end-to-end)', () => {
 		it('node.children entries are the SAME references as named slots (e2e via public engine)', async () => {
 			const result = await createInterceptGenerator('console.log(1);\n');
 			const callPath = '$.body.0.expression';
-			const callExpr = result.ast![callPath]!;
+			const callExpr = result.ast![callPath];
 			expect(callExpr.type).toBe('CallExpression');
-			const callee = (callExpr as unknown as { callee: unknown }).callee;
-			const argsArray = (callExpr as unknown as { arguments: unknown[] })
+			const {callee} = (callExpr as unknown as { callee: unknown });
+			const argumentsArray = (callExpr as unknown as { arguments: unknown[] })
 				.arguments;
 			expect(callExpr.children[0]).toBe(callee);
-			expect(callExpr.children[1]).toBe(argsArray[0]);
+			expect(callExpr.children[1]).toBe(argumentsArray[0]);
 		});
 
 		it('result.ast is the SAME reference as the resolved handle.ast', async () => {
@@ -92,8 +92,8 @@ describe('AST entwining (browser, end-to-end)', () => {
 		it('event.node is non-null at emission time (mid-stream, before completion)', async () => {
 			const handle = createInterceptGenerator(VALID_FIXTURE);
 			const liveNodes: unknown[] = [];
-			for await (const ev of handle) {
-				if (ev.event === 'console') liveNodes.push(ev.node);
+			for await (const event of handle) {
+				if (event.event === 'console') liveNodes.push(event.node);
 			}
 			expect(liveNodes.length).toBeGreaterThan(0);
 			for (const n of liveNodes) expect(n).not.toBeNull();
@@ -113,7 +113,7 @@ describe('AST entwining (browser, end-to-end)', () => {
 			if (typeof SharedArrayBuffer !== 'undefined') return;
 			const result = await createInterceptGenerator('console.log(1);\n');
 			expect(result.events.length).toBeGreaterThan(0);
-			const errorEvent = result.events[0]!;
+			const errorEvent = result.events[0];
 			expect(errorEvent.event).toBe('error');
 			expect(errorEvent.nodePathSource).toBe('no-ast');
 			expect(errorEvent.node).toBeNull();
@@ -173,7 +173,7 @@ describe('AST entwining (browser, end-to-end)', () => {
 			const result = await createInterceptGenerator(code, { iterations: 5 });
 			expect(result.outcome).toBe('complete');
 			const consoleEvent = result.events.find((e) => e.event === 'console')!;
-			const node = result.ast![consoleEvent.nodePath!]!;
+			const node = result.ast![consoleEvent.nodePath!];
 			expect(node.events.length).toBe(3);
 			expect(Object.isFrozen(node)).toBe(true);
 		});
@@ -224,7 +224,7 @@ describe('AST entwining (browser, end-to-end)', () => {
 			await handle.result;
 			const ast = await handle.ast;
 			expect(ast).not.toBeNull();
-			expect(ast!['$']!.type).toBe('Program');
+			expect(ast!['$'].type).toBe('Program');
 		});
 
 		it('handle.ast resolves to null on validation failure', async () => {
@@ -247,57 +247,57 @@ describe('AST entwining (browser, end-to-end)', () => {
 		it('result.events[0].prev === null and last event.next === null on complete run', async () => {
 			const result = await createInterceptGenerator(VALID_FIXTURE);
 			expect(result.events.length).toBeGreaterThan(1);
-			expect(result.events[0]!.prev).toBeNull();
-			expect(result.events[result.events.length - 1]!.next).toBeNull();
+			expect(result.events[0].prev).toBeNull();
+			expect(result.events.at(-1)!.next).toBeNull();
 		});
 
 		it('result.events[i].next === result.events[i + 1] (forward links)', async () => {
 			const result = await createInterceptGenerator(VALID_FIXTURE);
-			for (let i = 0; i < result.events.length - 1; i++) {
-				expect(result.events[i]!.next).toBe(result.events[i + 1]);
+			for (let index = 0; index < result.events.length - 1; index++) {
+				expect(result.events[index].next).toBe(result.events[index + 1]);
 			}
 		});
 
 		it('result.events[i].prev === result.events[i - 1] (backward links)', async () => {
 			const result = await createInterceptGenerator(VALID_FIXTURE);
-			for (let i = 1; i < result.events.length; i++) {
-				expect(result.events[i]!.prev).toBe(result.events[i - 1]);
+			for (let index = 1; index < result.events.length; index++) {
+				expect(result.events[index].prev).toBe(result.events[index - 1]);
 			}
 		});
 
 		it('event.prev wired at emission time (mid-stream observation)', async () => {
 			const handle = createInterceptGenerator(VALID_FIXTURE);
 			const seen: unknown[] = [];
-			for await (const ev of handle) {
+			for await (const event of handle) {
 				if (seen.length > 0) {
-					expect(ev.prev).toBe(seen[seen.length - 1]);
+					expect(event.prev).toBe(seen.at(-1));
 				} else {
-					expect(ev.prev).toBeNull();
+					expect(event.prev).toBeNull();
 				}
-				seen.push(ev);
+				seen.push(event);
 			}
 		});
 
 		it('event is Object.freeze-immutable at yield time', async () => {
 			const handle = createInterceptGenerator(VALID_FIXTURE);
-			for await (const ev of handle) {
-				expect(Object.isFrozen(ev)).toBe(true);
+			for await (const event of handle) {
+				expect(Object.isFrozen(event)).toBe(true);
 			}
 		});
 
 		it('replay yields the SAME prev/next references as the live iteration', async () => {
 			const handle = createInterceptGenerator(VALID_FIXTURE);
 			const live: unknown[] = [];
-			for await (const ev of handle) live.push(ev);
+			for await (const event of handle) live.push(event);
 			const replayed: unknown[] = [];
-			for await (const ev of handle) replayed.push(ev);
-			for (let i = 0; i < live.length; i++) {
-				expect(replayed[i]).toBe(live[i]);
-				expect((replayed[i] as { prev: unknown }).prev).toBe(
-					(live[i] as { prev: unknown }).prev,
+			for await (const event of handle) replayed.push(event);
+			for (const [index, element] of live.entries()) {
+				expect(replayed[index]).toBe(element);
+				expect((replayed[index] as { prev: unknown }).prev).toBe(
+					(element as { prev: unknown }).prev,
 				);
-				expect((replayed[i] as { next: unknown }).next).toBe(
-					(live[i] as { next: unknown }).next,
+				expect((replayed[index] as { next: unknown }).next).toBe(
+					(element as { next: unknown }).next,
 				);
 			}
 		});
@@ -311,7 +311,7 @@ describe('AST entwining (browser, end-to-end)', () => {
 			].join('\n');
 			const result = await createInterceptGenerator(code);
 			expect(result.outcome).toBe('error');
-			expect(result.events[result.events.length - 1]!.next).toBeNull();
+			expect(result.events.at(-1)!.next).toBeNull();
 		});
 	});
 
@@ -319,14 +319,14 @@ describe('AST entwining (browser, end-to-end)', () => {
 		it('linked events preserve identity across re-iteration', async () => {
 			const handle = createInterceptGenerator(VALID_FIXTURE);
 			const firstPass: unknown[] = [];
-			for await (const ev of handle) firstPass.push(ev);
+			for await (const event of handle) firstPass.push(event);
 
 			const secondPass: unknown[] = [];
-			for await (const ev of handle) secondPass.push(ev);
+			for await (const event of handle) secondPass.push(event);
 
 			expect(secondPass.length).toBe(firstPass.length);
-			for (let i = 0; i < firstPass.length; i++) {
-				expect(secondPass[i]).toBe(firstPass[i]);
+			for (const [index, element] of firstPass.entries()) {
+				expect(secondPass[index]).toBe(element);
 			}
 		});
 	});
@@ -335,8 +335,8 @@ describe('AST entwining (browser, end-to-end)', () => {
 		it('result.events[i].step === i + 1 (1-indexed, contiguous)', async () => {
 			const result = await createInterceptGenerator(VALID_FIXTURE);
 			expect(result.events.length).toBeGreaterThan(0);
-			for (let i = 0; i < result.events.length; i++) {
-				expect(result.events[i]!.step).toBe(i + 1);
+			for (let index = 0; index < result.events.length; index++) {
+				expect(result.events[index].step).toBe(index + 1);
 			}
 		});
 
@@ -352,20 +352,20 @@ describe('AST entwining (browser, end-to-end)', () => {
 			const result = await createInterceptGenerator(code, { iterations: 5 });
 			expect(result.outcome).toBe('complete');
 			const consoleEvent = result.events.find((e) => e.event === 'console')!;
-			const node = result.ast![consoleEvent.nodePath!]!;
+			const node = result.ast![consoleEvent.nodePath!];
 			expect(node.events.length).toBe(3);
-			for (let i = 1; i < node.events.length; i++) {
-				expect(node.events[i]!.step).toBeGreaterThan(node.events[i - 1]!.step);
+			for (let index = 1; index < node.events.length; index++) {
+				expect(node.events[index].step).toBeGreaterThan(node.events[index - 1].step);
 			}
 		});
 
 		it('step matches between result.events and node.events back-refs', async () => {
 			const result = await createInterceptGenerator(VALID_FIXTURE);
-			for (const ev of result.events) {
-				if (ev.nodePath === null) continue;
-				const node = result.ast![ev.nodePath]!;
-				const backref = node.events.find((e) => e.step === ev.step);
-				expect(backref).toBe(ev);
+			for (const event of result.events) {
+				if (event.nodePath === null) continue;
+				const node = result.ast![event.nodePath];
+				const backref = node.events.find((e) => e.step === event.step);
+				expect(backref).toBe(event);
 			}
 		});
 
@@ -429,36 +429,36 @@ describe('AST entwining (browser, end-to-end)', () => {
 			});
 			const events: typeof handle extends AsyncIterable<infer E> ? E[] : never =
 				[];
-			for await (const ev of handle) events.push(ev);
+			for await (const event of handle) events.push(event);
 			const result = await handle.result;
 			expect(result.outcome).toBe('complete');
-			const promptEv = result.events.find((e) => e.event === 'prompt');
-			expect(promptEv).toBeDefined();
-			expect(promptEv!.callee).not.toBeNull();
-			expect(promptEv!.callee!.type).toBe('Identifier');
-			expect(promptEv!.callee!.source).toBe('prompt');
+			const promptEvent = result.events.find((e) => e.event === 'prompt');
+			expect(promptEvent).toBeDefined();
+			expect(promptEvent!.callee).not.toBeNull();
+			expect(promptEvent!.callee!.type).toBe('Identifier');
+			expect(promptEvent!.callee!.source).toBe('prompt');
 		});
 
 		it('console.log(...) event has callee.type === MemberExpression, source === "console.log"', async () => {
 			const result = await createInterceptGenerator('console.log(1);\n');
 			expect(result.outcome).toBe('complete');
-			const ev = result.events[0]!;
-			expect(ev.callee).not.toBeNull();
-			expect(ev.callee!.type).toBe('MemberExpression');
-			expect(ev.callee!.source).toBe('console.log');
+			const event = result.events[0];
+			expect(event.callee).not.toBeNull();
+			expect(event.callee!.type).toBe('MemberExpression');
+			expect(event.callee!.source).toBe('console.log');
 		});
 
 		it('calleePath === nodePath + ".callee" for direct trap calls', async () => {
 			const result = await createInterceptGenerator('console.log(1);\n');
-			const ev = result.events[0]!;
-			expect(ev.calleePath).toBe(`${ev.nodePath}.callee`);
+			const event = result.events[0];
+			expect(event.calleePath).toBe(`${event.nodePath}.callee`);
 		});
 
 		it('callee is the SAME reference as event.node.callee (single source of truth)', async () => {
 			const result = await createInterceptGenerator('console.log(1);\n');
-			const ev = result.events[0]!;
-			const nodeCallee = (ev.node as unknown as { callee: unknown }).callee;
-			expect(ev.callee).toBe(nodeCallee);
+			const event = result.events[0];
+			const nodeCallee = (event.node as unknown as { callee: unknown }).callee;
+			expect(event.callee).toBe(nodeCallee);
 		});
 
 		it('no-ast events (validation failure) → callee: null, calleePath: null', async () => {

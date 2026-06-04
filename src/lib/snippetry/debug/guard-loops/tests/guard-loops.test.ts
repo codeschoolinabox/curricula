@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import * as recast from 'recast';
+import { describe, expect, it } from 'vitest';
 
 import guardLoops from '../guard-loops.js';
 
@@ -53,9 +53,9 @@ describe('guardLoops', () => {
 			const guarded = guardLoops(code, 3) as string;
 			try {
 				new Function(guarded)();
-			} catch (e: any) {
-				expect(e).toBeInstanceOf(RangeError);
-				expect(e.message).toContain('Loop 1 exceeded 3 iterations.');
+			} catch (error: any) {
+				expect(error).toBeInstanceOf(RangeError);
+				expect(error.message).toContain('Loop 1 exceeded 3 iterations.');
 			}
 		});
 
@@ -109,8 +109,8 @@ describe('guardLoops', () => {
 		it('produces exactly one guard per while loop', () => {
 			const code = 'while (true) {\n  break;\n}';
 			const result = guardLoops(code, 100) as string;
-			const guardVarCount = (result.match(/let loop/g) || []).length;
-			expect(guardVarCount).toBe(1);
+			const guardVariableCount = (result.match(/let loop/g) || []).length;
+			expect(guardVariableCount).toBe(1);
 		});
 	});
 });

@@ -185,12 +185,12 @@ describe('cancel', () => {
 
 	it('cancel before iteration prevents generator execution', async () => {
 		let generatorCreated = false;
-		const genFn = async function* (): AsyncGenerator<string, MockResult> {
+		const genFunction = async function* (): AsyncGenerator<string, MockResult> {
 			generatorCreated = true;
 			yield 'a';
 			return { ok: true, logs: ['a'] };
 		};
-		const execution = createExecution(genFn, noop);
+		const execution = createExecution(genFunction, noop);
 
 		execution.cancel();
 		await execution.result;
@@ -211,7 +211,7 @@ describe('cancel', () => {
 	});
 
 	it('break in for-await resolves .result without hanging', async () => {
-		const items = Array.from({ length: 100 }, (_, i) => `event-${i}`);
+		const items = Array.from({ length: 100 }, (_, index) => `event-${index}`);
 		const result = { ok: true, logs: items };
 		const execution = createExecution(createMockGen(items, result), noop);
 
@@ -227,15 +227,15 @@ describe('cancel', () => {
 	});
 
 	it('cancelFn is called on cancel', () => {
-		const cancelFn = vi.fn();
+		const cancelFunction = vi.fn();
 		const execution = createExecution(
 			createMockGen([], { ok: true, logs: [] }),
-			cancelFn,
+			cancelFunction,
 		);
 
 		execution.cancel();
 
-		expect(cancelFn).toHaveBeenCalledOnce();
+		expect(cancelFunction).toHaveBeenCalledOnce();
 	});
 });
 
@@ -296,10 +296,10 @@ describe('replay', () => {
 
 describe('edge cases', () => {
 	it('immediate-return generator (no yields) resolves correctly', async () => {
-		const genFn = async function* (): AsyncGenerator<string, MockResult> {
+		const genFunction = async function* (): AsyncGenerator<string, MockResult> {
 			return { ok: true, logs: [] };
 		};
-		const execution = createExecution(genFn, noop);
+		const execution = createExecution(genFunction, noop);
 
 		const result = await execution;
 
@@ -307,10 +307,10 @@ describe('edge cases', () => {
 	});
 
 	it('generator that throws rejects .result', async () => {
-		const genFn = async function* (): AsyncGenerator<string, MockResult> {
+		const genFunction = async function* (): AsyncGenerator<string, MockResult> {
 			throw new Error('generator blew up');
 		};
-		const execution = createExecution(genFn, noop);
+		const execution = createExecution(genFunction, noop);
 
 		await expect(execution.result).rejects.toThrow(
 			'Execution generator threw unexpectedly',

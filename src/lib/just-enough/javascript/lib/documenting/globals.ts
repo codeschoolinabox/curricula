@@ -1,6 +1,6 @@
-import type { DocEntry } from '../../orchestrate/lib/editing/types.js';
+import type { DocEntry as DocumentEntry } from '../../orchestrate/lib/editing/types.js';
 
-const GLOBAL_ENTRIES: Readonly<Record<string, DocEntry>> = {
+const GLOBAL_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 	console: {
 		description:
 			'Built-in object for writing diagnostic output to the host log.',
@@ -69,11 +69,11 @@ const GLOBAL_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	RegExp: {
 		description:
 			'Built-in for regular-expression patterns. Most code uses the literal form `/pattern/flags`.',
-		example: 'const word = /\\w+/;',
+		example: String.raw`const word = /\w+/;`,
 		isJEJ: true,
 		whenToUse: 'For matching patterns within strings.',
 		commonMistakes: [
-			'Escaping issues when building from a string: \'new RegExp("\\\\d")\' for one literal backslash before d.',
+			String.raw`Escaping issues when building from a string: 'new RegExp("\\d")' for one literal backslash before d.`,
 		],
 	},
 	BigInt: {

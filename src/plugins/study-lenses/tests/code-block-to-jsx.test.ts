@@ -11,11 +11,11 @@
  * just emits whatever `configs` it receives, opaquely.
  */
 
+import type { Code } from 'mdast';
 import { describe, expect, it } from 'vitest';
 
 import codeBlockToJsx from '../code-block-to-jsx.js';
 
-import type { Code } from 'mdast';
 
 function makeCodeNode(value: string, lang: string | null = null): Code {
 	return { type: 'code', value, lang, meta: null };
@@ -46,8 +46,8 @@ describe('codeBlockToJsx', () => {
 
 		const result = codeBlockToJsx(node, { lens: 'study' });
 
-		const snippetAttr = result.attributes.find((a) => a.name === 'snippet');
-		expect(snippetAttr?.value).toBe('');
+		const snippetAttribute = result.attributes.find((a) => a.name === 'snippet');
+		expect(snippetAttribute?.value).toBe('');
 	});
 
 	// ─── B.2: lang attribute is dropped from the emission contract ───────
@@ -105,11 +105,11 @@ describe('codeBlockToJsx', () => {
 			configs: wholeCascade,
 		});
 
-		const configsAttr = result.attributes.find((a) => a.name === 'configs');
-		expect(configsAttr).toBeDefined();
+		const configsAttribute = result.attributes.find((a) => a.name === 'configs');
+		expect(configsAttribute).toBeDefined();
 		// Expression-valued attribute, not a plain string.
-		expect(typeof configsAttr?.value).toBe('object');
-		const exprValue = configsAttr?.value as {
+		expect(typeof configsAttribute?.value).toBe('object');
+		const exprValue = configsAttribute?.value as {
 			type: string;
 			value: string;
 			data?: { estree?: { type: string; body: ReadonlyArray<unknown> } };
@@ -152,8 +152,8 @@ describe('codeBlockToJsx', () => {
 			configs: cascadeWithUnknownKeys,
 		});
 
-		const configsAttr = result.attributes.find((a) => a.name === 'configs');
-		const sourceCode = (configsAttr?.value as { value: string }).value;
+		const configsAttribute = result.attributes.find((a) => a.name === 'configs');
+		const sourceCode = (configsAttribute?.value as { value: string }).value;
 		expect(sourceCode).toBe(JSON.stringify(cascadeWithUnknownKeys));
 	});
 
@@ -180,12 +180,12 @@ describe('codeBlockToJsx', () => {
 		// Deep-freeze the input so valueToEstree takes the
 		// `Object.defineProperties`-wrapping path (mirrors what the
 		// resolver produces).
-		const deepFreeze = (obj: unknown): unknown => {
-			if (obj !== null && typeof obj === 'object') {
-				for (const v of Object.values(obj)) deepFreeze(v);
-				Object.freeze(obj);
+		const deepFreeze = (object: unknown): unknown => {
+			if (object !== null && typeof object === 'object') {
+				for (const v of Object.values(object)) deepFreeze(v);
+				Object.freeze(object);
 			}
-			return obj;
+			return object;
 		};
 		const original = deepFreeze({
 			defaults: { js: 'study' },
@@ -198,8 +198,8 @@ describe('codeBlockToJsx', () => {
 
 		const node = makeCodeNode('let x = 1;', 'js');
 		const result = codeBlockToJsx(node, { lens: 'trace', configs: original });
-		const configsAttr = result.attributes.find((a) => a.name === 'configs');
-		const exprValue = configsAttr?.value as {
+		const configsAttribute = result.attributes.find((a) => a.name === 'configs');
+		const exprValue = configsAttribute?.value as {
 			type: string;
 			value: string;
 			data: {
@@ -219,7 +219,7 @@ describe('codeBlockToJsx', () => {
 		// frozen-input `Object.defineProperties`-wrapping CallExpression
 		// shape, not the simpler ObjectExpression that plain-object
 		// inputs produce.
-		const estreeExpression = exprValue.data.estree.body[0]!.expression;
+		const estreeExpression = exprValue.data.estree.body[0].expression;
 		const codeFromEstree = generate(estreeExpression as never);
 		const fromEstree = new Function(`return (${codeFromEstree})`)();
 		expect(fromEstree).toEqual(original);

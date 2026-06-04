@@ -33,12 +33,14 @@ to rewrite exercise-set category labels at sidebar-build time.
 
    **Suffix parsing (URL-style):**
    - Split the info string on `:` → `[lang, suffix]`.
-   - If `suffix` is absent (bare `js`): the `lens` prop is populated ONLY by
-     frontmatter `defaultLens` (when present); cascade `defaults[lang]` does NOT
-     populate `lens` (per AR-1 locked decision 1 — the cascade-supplied default
-     seam is L2-deferred). When neither frontmatter nor a suffix resolves a
-     lens, the bare-fence emission carries no `lens` attribute; the orchestrator
-     falls back to the editor home base.
+   - If `suffix` is absent (bare `js`): the `lens` prop is populated by the
+     **default-lens precedence chain** — frontmatter `defaultLens` first,
+     then (when no frontmatter) cascade `defaults[fenceLang]` as the
+     **cascade default lens**. When neither frontmatter nor the cascade
+     entry resolves a lens, the bare-fence emission carries no `lens`
+     attribute; the orchestrator falls back to the editor home base. (L2
+     reverses prior locked-decision-1; the cascade default lens is now
+     the fence-side third tier.)
    - If `suffix` is present: split on `?` → `[lensName, query]`. Empty
      `lensName` → leave fence untouched (malformed). Otherwise `lensName`
      populates the `lens` attribute.
@@ -53,10 +55,11 @@ to rewrite exercise-set category labels at sidebar-build time.
      whole-cascade `configs` attribute — there is no separate `config` prop.
 
    **Lens resolution precedence** (populates the emitted `lens` attribute,
-   most-specific wins): fence `:suffix lensName` beats frontmatter
-   `defaultLens`. Cascade `defaults[lang]` ONLY gates whether the fence
-   transforms (configured-languages rule); it does NOT populate `lens` (per AR-1
-   locked decision 1). None resolved → no `lens` emitted.
+   most-specific wins): fence `:suffix lensName` > frontmatter `defaultLens`
+   > cascade `defaults[fenceLang]` (the cascade default lens) > none. The
+   gate runs BEFORE the precedence chain: if `defaults[fenceLang]` is
+   absent or explicit `null` (**subtree deconfiguration**), the fence is
+   left untransformed and the chain does not run.
 
    **Emission shape**: the three-prop public API (`snippet, lens?, configs?`).
    `snippet` always; `lens` when resolved (per the precedence above); `configs`
@@ -101,7 +104,7 @@ flowchart TD
     Fence -->|"split on ':'"| Suffix["suffix?"]
     Fence -->|"body"| Snippet["snippet (string)"]
 
-    Lang -->|"defaults[lang] gate"| Configured{"configured?"}
+    Lang -->|"defaults[lang] gate<br/>(== null fails: absent OR<br/>explicit null = subtree deconfig)"| Configured{"configured?"}
     Configured -->|"no"| Untransformed["leave as plain code block"]
     Configured -->|"yes"| FenceLensResolution
 
@@ -109,12 +112,13 @@ flowchart TD
     Suffix -->|"split on '?'"| Query["query string?"]
 
     LensName -->|"empty / malformed"| Untransformed
-    LensName --> FenceLensResolution["fence lens resolution<br/>(:suffix > frontmatter > none;<br/>cascade defaults[lang] is GATE-ONLY,<br/>does NOT populate lens)"]
+    LensName --> FenceLensResolution["fence lens resolution<br/>(:suffix > frontmatter ><br/>cascade defaults[fenceLang] > none)"]
     Frontmatter --> FenceLensResolution
+    Cascade -->|"defaults[fenceLang]<br/>(cascade default lens — L2)"| FenceLensResolution
     FenceLensResolution --> LensProp["lens (string?)"]
 
     Directive -->|"directive.lens"| SiblingLensResolution["sibling lens resolution<br/>(directive > cascade defaults[lang])"]
-    Cascade -->|"defaults[lang]<br/>(authoritative for siblings only)"| SiblingLensResolution
+    Cascade -->|"defaults[lang]<br/>(authoritative for siblings)"| SiblingLensResolution
     SiblingLensResolution --> LensProp
 
     Query -->|"URL-style key/value parse<br/>(strings, no numeric coercion)"| ParsedQuery["parsed query bundle"]

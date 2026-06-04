@@ -17,12 +17,13 @@
 import React from 'react';
 import type { ComponentType } from 'react';
 
+import type { LensConfig, LensModule, LensProps as LensProperties, Snippet } from '../types.js';
+
 import deriveDisplayTree from './core.js';
 
-import type { LensConfig, LensModule, LensProps, Snippet } from '../types.js';
 
-const DebugPropsComponent: ComponentType<LensProps> =
-	function DebugPropsComponent({ embodiment, config }) {
+const DebugPropertiesComponent: ComponentType<LensProperties> =
+	function DebugPropertiesComponent_({ embodiment, config }) {
 		const tree = deriveDisplayTree(embodiment, config);
 		return (
 			<div data-lens="debug-props">
@@ -38,10 +39,10 @@ const DebugPropsComponent: ComponentType<LensProps> =
 		);
 	};
 
-const debugPropsLens: LensModule = Object.freeze({
+const debugPropertiesLens: LensModule = Object.freeze({
 	name: 'debug-props',
-	Component: DebugPropsComponent,
-	config: function debugPropsConfig(
+	Component: DebugPropertiesComponent,
+	config: function debugPropertiesConfig(
 		overrides?: Partial<LensConfig>,
 	): LensConfig {
 		// `Partial<LensConfig>` admits `undefined` values under
@@ -50,14 +51,14 @@ const debugPropsLens: LensModule = Object.freeze({
 		// freeze guards downstream mutation; the cast acknowledges the
 		// type contract requires the caller to not pass `undefined`
 		// values (TypeScript prevents at the call site).
-		return Object.freeze({ ...(overrides ?? {}) }) as LensConfig;
+		return Object.freeze({ ...overrides }) as LensConfig;
 	},
-	applicableTo: function debugPropsApplicableTo(_embodiment: Snippet): boolean {
+	applicableTo: function debugPropertiesApplicableTo(_embodiment: Snippet): boolean {
 		return true;
 	},
-	recommend: function debugPropsRecommend(_embodiment: Snippet) {
+	recommend: function debugPropertiesRecommend(_embodiment: Snippet) {
 		return [];
 	},
 });
 
-export default debugPropsLens;
+export default debugPropertiesLens;

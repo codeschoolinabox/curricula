@@ -136,10 +136,10 @@ describe('markBlocked', () => {
 		it('var does not double-emit when already in suggestions', () => {
 			const input: readonly Suggestion[] = [{ label: 'var', source: 'local' }];
 			const result = markBlocked(input);
-			const varItems = result.filter((candidate) => candidate.label === 'var');
-			expect(varItems).toHaveLength(1);
+			const variableItems = result.filter((candidate) => candidate.label === 'var');
+			expect(variableItems).toHaveLength(1);
 			// passthrough wins; type stays as source-derived
-			expect(varItems[0]?.type).toBe('local');
+			expect(variableItems[0]?.type).toBe('local');
 		});
 	});
 });

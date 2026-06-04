@@ -18,13 +18,13 @@
  * gain a corresponding node.
  */
 
-import deepFreeze from '@utils/deep-freeze.js';
-import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
-
-import parseProgram from './parse-program.js';
-import getChildNodes from './get-child-nodes.js';
-
 import type { Node } from 'acorn';
+
+import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
+import deepFreeze from '@utils/deep-freeze.js';
+
+import getChildNodes from './get-child-nodes.js';
+import parseProgram from './parse-program.js';
 import type { ParseResult } from './types.js';
 
 /**
@@ -88,8 +88,8 @@ function hasWithStatement(node: Node): boolean {
 
 /** Converts a `parseProgram` ParseError into the API-shape error. */
 function buildParseResultError(parseError: {
-	message: string;
-	location: { line: number; column: number };
+	readonly message: string;
+	readonly location: { readonly line: number; readonly column: number };
 }) {
 	return {
 		kind: 'parse' as const,

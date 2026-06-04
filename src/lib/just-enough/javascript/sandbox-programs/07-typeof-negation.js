@@ -1,9 +1,9 @@
-let t1 = typeof 'hello';
-let t2 = typeof 42;
-let t3 = typeof true;
-let t4 = typeof undefined;
-let neg = -5;
-let bitNot = ~7;
+const t1 = typeof 'hello';
+const t2 = typeof 42;
+const t3 = typeof true;
+const t4 = typeof undefined;
+const neg = -5;
+const bitNot = ~7;
 console.log(t1);
 console.log(t2);
 console.log(t3);

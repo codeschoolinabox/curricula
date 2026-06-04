@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import { parse } from 'acorn';
 import type { Node } from 'acorn';
+import { describe, it, expect } from 'vitest';
 
 import buildScope from '../build-scope.js';
 import type { DeclarationInfo, ScopeAnalysis } from '../types.js';

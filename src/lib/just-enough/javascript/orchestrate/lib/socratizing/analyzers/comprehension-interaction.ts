@@ -8,14 +8,12 @@
 import type { Node } from 'acorn';
 
 import type { ScopeAnalysis } from '../../../../embody/lib/scope/types.js';
-
 import createCodeQuestion from '../create-code-question.js';
 import extractLocation from '../extract-location.js';
-
 import type { AnalyzerEntry, CodeQuestion } from '../types.js';
 
-import getRecord from './get-record.js';
 import getIdentifierName from './get-identifier-name.js';
+import getRecord from './get-record.js';
 
 // ─── 1. prompt-return-value ────────────────────────────────
 

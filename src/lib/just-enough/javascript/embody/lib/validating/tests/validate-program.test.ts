@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
-import validateProgram from '../validate-program.js';
 import justEnoughJs from '../just-enough-js.js';
+import validateProgram from '../validate-program.js';
 
 describe('validateProgram', () => {
 	describe('valid programs', () => {

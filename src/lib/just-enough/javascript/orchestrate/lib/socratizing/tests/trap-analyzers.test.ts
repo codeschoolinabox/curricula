@@ -1,10 +1,9 @@
-import { describe, it, expect } from 'vitest';
 import { parse } from 'acorn';
 import type { Node } from 'acorn';
+import { describe, it, expect } from 'vitest';
 
-import buildScope from '../../../../embody/lib/scope/build-scope.js';
 import getChildNodes from '../../../../embody/lib/parse-old/get-child-nodes.js';
-
+import buildScope from '../../../../embody/lib/scope/build-scope.js';
 import trapAnalyzers from '../analyzers/trap.js';
 import type { CodeQuestion, PointAnalyzer } from '../types.js';
 
@@ -16,13 +15,13 @@ function parseSource(source: string): Node {
 	});
 }
 
-function analyzeAll(source: string, analyzerFn: PointAnalyzer): CodeQuestion[] {
+function analyzeAll(source: string, analyzerFunction: PointAnalyzer): CodeQuestion[] {
 	const ast = parseSource(source);
 	const scope = buildScope(ast);
 	const results: CodeQuestion[] = [];
 
 	function walk(node: Node): void {
-		const result = analyzerFn(node, scope, source);
+		const result = analyzerFunction(node, scope, source);
 		if (result !== null) {
 			results.push(result);
 		}

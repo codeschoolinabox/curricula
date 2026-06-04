@@ -48,11 +48,9 @@
 import React from 'react';
 
 import deepMerge from '../../../utils/deep-merge.js';
-
 import embody from '../embody/index.js';
-
 import annotateLens from '../lenses/annotate/index.js';
-import debugPropsLens from '../lenses/debug-props/index.js';
+import debugPropertiesLens from '../lenses/debug-props/index.js';
 import type { LensConfig, LensModule } from '../lenses/types.js';
 
 import EditorComponent from './editor/index.js';
@@ -64,7 +62,7 @@ import type {
 	LensModeState,
 	LensSelectionSource,
 	OrchestratorState,
-	StudyLensesProps,
+	StudyLensesProps as StudyLensesProperties,
 } from './types.js';
 
 /**
@@ -77,7 +75,7 @@ import type {
  */
 const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 	annotate: annotateLens,
-	'debug-props': debugPropsLens,
+	'debug-props': debugPropertiesLens,
 });
 
 /**
@@ -102,10 +100,10 @@ const LENS_NAMES: readonly string[] = Object.freeze(Object.keys(LENS_REGISTRY));
 function deriveInitialState(
 	snippet: string,
 	lens: string | undefined,
-	configs: Pick<StudyLensesProps, 'configs'>['configs'],
-	prevCache: CachedEmbodiment | null,
-): { state: OrchestratorState; cache: CachedEmbodiment | null } {
-	const registered = lens !== undefined ? LENS_REGISTRY[lens] : undefined;
+	configs: Pick<StudyLensesProperties, 'configs'>['configs'],
+	previousCache: CachedEmbodiment | null,
+): { readonly state: OrchestratorState; readonly cache: CachedEmbodiment | null } {
+	const registered = lens === undefined ? undefined : LENS_REGISTRY[lens];
 	if (registered !== undefined) {
 		// Cache-key check: full-string identity, NOT a semantic content branch.
 		// The orchestrator's sentinel-blindness invariant (DOCS § F3 — lazy
@@ -114,8 +112,8 @@ function deriveInitialState(
 		// in the orchestrator, and it asks "same snippet I already embodied?",
 		// not "what does this code do?".
 		const cache: CachedEmbodiment =
-			prevCache !== null && prevCache.snippet === snippet
-				? prevCache
+			previousCache !== null && previousCache.snippet === snippet
+				? previousCache
 				: { snippet, embodiment: embody(snippet) };
 		const state: LensModeState = {
 			mode: 'lens',
@@ -124,7 +122,7 @@ function deriveInitialState(
 		};
 		return { state, cache };
 	}
-	return { state: { mode: 'editor' }, cache: prevCache };
+	return { state: { mode: 'editor' }, cache: previousCache };
 }
 
 /**
@@ -189,7 +187,7 @@ function readCascadeLensEntry(
 	lensName: string,
 ): Readonly<Record<string, unknown>> | undefined {
 	const asLensMap = cascade as
-		| Readonly<{ lenses?: Readonly<Record<string, unknown>> }>
+		| Readonly<{ readonly lenses?: Readonly<Record<string, unknown>> }>
 		| undefined;
 	const entry = asLensMap?.lenses?.[lensName];
 	return typeof entry === 'object' && entry !== null && !Array.isArray(entry)
@@ -209,35 +207,35 @@ function readCascadeLensEntry(
  * if it ever lands, will be a separate prop designed against a concrete
  * host's needs — not the raw internal bus.
  */
-type StudyLensesHandle = Readonly<{ bus: EventBus }>;
+type StudyLensesHandle = Readonly<{ readonly bus: EventBus }>;
 
-const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
+const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 	function StudyLenses(
-		{ snippet: snippetProp, lens, configs },
-		ref,
+		{ snippet: snippetProperty, lens, configs },
+		reference,
 	): React.JSX.Element {
 		// Per-instance EventBus — created lazily so re-renders don't construct
 		// a throwaway bus on every render. The ref slot holds the same bus for
 		// the full lifetime of the mount.
-		const busRef = React.useRef<EventBus | null>(null);
-		if (busRef.current === null) {
-			busRef.current = createEventBus();
+		const busReference = React.useRef<EventBus | null>(null);
+		if (busReference.current === null) {
+			busReference.current = createEventBus();
 		}
-		React.useImperativeHandle(ref, () => ({ bus: busRef.current! }), []);
+		React.useImperativeHandle(reference, () => ({ bus: busReference.current! }), []);
 
 		// Snippet slot — seeded from prop at mount only (initial-value-only).
-		const [snippet, setSnippet] = React.useState(snippetProp);
+		const [snippet, setSnippet] = React.useState(snippetProperty);
 
 		// F5b.2 initial-mount dispatch guard. Survives StrictMode's
 		// mount → cleanup → remount cycle so the dispatch fires exactly once
 		// per real mount, not once per discarded-render pair.
-		const initialDispatchFiredRef = React.useRef(false);
+		const initialDispatchFiredReference = React.useRef(false);
 
 		// Atomic init: derive both state and cache from a single call so embody()
 		// fires at most once at first render. The tuple is held in its own state
 		// slot for clarity; React never re-runs the lazy initializer.
 		const [initialDerived] = React.useState(() =>
-			deriveInitialState(snippetProp, lens, configs, null),
+			deriveInitialState(snippetProperty, lens, configs, null),
 		);
 		const [state, setState] = React.useState<OrchestratorState>(
 			initialDerived.state,
@@ -251,13 +249,13 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 		// effects (never during render), which keeps the StrictMode discarded-
 		// render case correct: the discarded render's write is overwritten by the
 		// committed render's write before any effect fires.
-		const cachedEmbodimentRef = React.useRef(cachedEmbodiment);
-		cachedEmbodimentRef.current = cachedEmbodiment;
+		const cachedEmbodimentReference = React.useRef(cachedEmbodiment);
+		cachedEmbodimentReference.current = cachedEmbodiment;
 
 		// Ref shadow for snippet — same rationale and same read-only-in-effect
 		// invariant as cachedEmbodimentRef above.
-		const snippetRef = React.useRef(snippet);
-		snippetRef.current = snippet;
+		const snippetReference = React.useRef(snippet);
+		snippetReference.current = snippet;
 
 		// F5b.2 initial-mount dispatch. If the first commit landed in lens
 		// mode, dispatch mode-changed(editor→lens) then
@@ -267,11 +265,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 		// (`initialDispatchFiredRef`) keeps the dispatch idempotent under
 		// React StrictMode's discarded-mount cycle.
 		React.useEffect(() => {
-			if (initialDispatchFiredRef.current) return;
+			if (initialDispatchFiredReference.current) return;
 			const initialState = initialDerived.state;
 			if (initialState.mode !== 'lens') return;
-			initialDispatchFiredRef.current = true;
-			const bus = busRef.current!;
+			initialDispatchFiredReference.current = true;
+			const bus = busReference.current!;
 			bus.dispatch('mode-changed', { from: 'editor', to: 'lens' });
 			bus.dispatch('lens-switched', {
 				previous: null,
@@ -284,7 +282,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 		// so the prop-change effect can compute mode + activeLens transitions
 		// for bus dispatch. Seeded to the initial state at mount and updated
 		// after every transition. Read inside post-commit effects only.
-		const prevStateRef = React.useRef<OrchestratorState>(initialDerived.state);
+		const previousStateReference = React.useRef<OrchestratorState>(initialDerived.state);
 
 		// Shared transition handler. Both the prop-change effect (`source:
 		// 'prop'`) and the picker (`source: 'picker'`, L1.6+) route through
@@ -297,21 +295,21 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 			source: LensSelectionSource,
 		): void {
 			const next = deriveInitialState(
-				snippetRef.current,
+				snippetReference.current,
 				nextLens,
 				configs,
-				cachedEmbodimentRef.current,
+				cachedEmbodimentReference.current,
 			);
 			setState(next.state);
 			setCachedEmbodiment(next.cache);
 
-			const prev = prevStateRef.current;
-			const bus = busRef.current!;
-			if (prev.mode !== next.state.mode) {
-				bus.dispatch('mode-changed', { from: prev.mode, to: next.state.mode });
+			const previous = previousStateReference.current;
+			const bus = busReference.current!;
+			if (previous.mode !== next.state.mode) {
+				bus.dispatch('mode-changed', { from: previous.mode, to: next.state.mode });
 			}
 			if (next.state.mode === 'lens') {
-				const previousLens = prev.mode === 'lens' ? prev.activeLens : null;
+				const previousLens = previous.mode === 'lens' ? previous.activeLens : null;
 				if (previousLens !== next.state.activeLens) {
 					bus.dispatch('lens-switched', {
 						previous: previousLens,
@@ -320,17 +318,17 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 					});
 				}
 			}
-			prevStateRef.current = next.state;
+			previousStateReference.current = next.state;
 		}
 
 		// Prop-change mode transition. Skips initial mount (state/cache already
 		// seeded); fires on lens or configs change only. Calls `applyTransition`
 		// with `source: 'prop'`. The state setters land in a single React 18
 		// commit; the dispatches fire synchronously after.
-		const isMountedRef = React.useRef(false);
+		const isMountedReference = React.useRef(false);
 		React.useEffect(() => {
-			if (!isMountedRef.current) {
-				isMountedRef.current = true;
+			if (!isMountedReference.current) {
+				isMountedReference.current = true;
 				return;
 			}
 			applyTransition(lens, 'prop');
@@ -387,7 +385,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProps>(
 					'orchestrator invariant violated: lens mode requires non-null cachedEmbodiment',
 				);
 			}
-			const lensModule = LENS_REGISTRY[state.activeLens]!;
+			const lensModule = LENS_REGISTRY[state.activeLens];
 			return (
 				<div data-orchestrator-root>
 					<Toolbar

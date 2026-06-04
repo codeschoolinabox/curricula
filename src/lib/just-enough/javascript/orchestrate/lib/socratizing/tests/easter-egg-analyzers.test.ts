@@ -1,10 +1,9 @@
-import { describe, it, expect } from 'vitest';
 import { parse } from 'acorn';
 import type { Node } from 'acorn';
+import { describe, it, expect } from 'vitest';
 
-import buildScope from '../../../../embody/lib/scope/build-scope.js';
 import getChildNodes from '../../../../embody/lib/parse-old/get-child-nodes.js';
-
+import buildScope from '../../../../embody/lib/scope/build-scope.js';
 import easterEggAnalyzers from '../analyzers/easter-egg.js';
 import type { CodeQuestion, PointAnalyzer } from '../types.js';
 
@@ -21,7 +20,7 @@ function parseSource(
 
 function analyzeAll(
 	source: string,
-	analyzerFn: PointAnalyzer,
+	analyzerFunction: PointAnalyzer,
 	sourceType: 'module' | 'script' = 'module',
 ): CodeQuestion[] {
 	const ast = parseSource(source, sourceType);
@@ -29,7 +28,7 @@ function analyzeAll(
 	const results: CodeQuestion[] = [];
 
 	function walk(node: Node): void {
-		const result = analyzerFn(node, scope, source);
+		const result = analyzerFunction(node, scope, source);
 		if (result !== null) {
 			results.push(result);
 		}

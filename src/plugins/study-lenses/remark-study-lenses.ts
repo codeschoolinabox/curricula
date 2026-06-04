@@ -18,17 +18,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import deepMerge from '../../lib/utils/deep-merge.js';
-
-import codeBlockToJsx from './code-block-to-jsx.js';
-import discoverSiblings from './discover-siblings.js';
-import prettifyDirName from './prettify-dir-name.js';
-import resolveCascade from './resolve-cascade.js';
-
 import type { Code, Root } from 'mdast';
 import type { VFile } from 'vfile';
 
+import deepMerge from '../../lib/utils/deep-merge.js';
+
+import codeBlockToJsx from './code-block-to-jsx.js';
 import type { StudyLensesJsxNode } from './code-block-to-jsx.js';
+import discoverSiblings from './discover-siblings.js';
+import prettifyDirName from './prettify-dir-name.js';
+import resolveCascade from './resolve-cascade.js';
 import type { RemarkPluginOptions, ResolvedConfig, Sibling } from './types.js';
 
 type Transformer = (tree: Root, file: VFile) => void;
@@ -72,11 +71,11 @@ function createRemarkStudyLenses(options: RemarkPluginOptions): Transformer {
 				: undefined;
 
 		// 3. Transform — rewrite fences whose language is configured.
-		for (let i = 0; i < tree.children.length; i++) {
-			const node = tree.children[i];
-			if (node === undefined || node.type !== 'code') continue;
+		for (let index = 0; index < tree.children.length; index++) {
+			const node = tree.children[index];
+			if (node?.type !== 'code') continue;
 			const jsx = transformFence(node, config, frontmatterDefaultLens);
-			if (jsx !== undefined) (tree.children as Array<unknown>)[i] = jsx;
+			if (jsx !== undefined) (tree.children as ReadonlyArray<unknown>)[index] = jsx;
 		}
 
 		// 4. Embed siblings — only for sibling-bearing pages.
@@ -160,16 +159,16 @@ function isSiblingBearingPageFile(absFilePath: string): boolean {
  */
 function groupSiblings(
 	siblings: ReadonlyArray<Sibling>,
-): ReadonlyArray<{ groupKey: string; members: ReadonlyArray<Sibling> }> {
-	const map = new Map<string, Sibling[]>();
+): ReadonlyArray<{ readonly groupKey: string; readonly members: ReadonlyArray<Sibling> }> {
+	const map = new Map<string, readonly Sibling[]>();
 	for (const s of siblings) {
-		const slashIdx = s.label.indexOf('/');
-		const key = slashIdx === -1 ? '' : s.label.slice(0, slashIdx);
-		const arr = map.get(key);
-		if (arr !== undefined) arr.push(s);
-		else map.set(key, [s]);
+		const slashIndex = s.label.indexOf('/');
+		const key = slashIndex === -1 ? '' : s.label.slice(0, slashIndex);
+		const array = map.get(key);
+		if (array === undefined) {map.set(key, [s]);}
+		else {array.push(s);}
 	}
-	const groups: Array<{ groupKey: string; members: ReadonlyArray<Sibling> }> =
+	const groups: ReadonlyArray<{ readonly groupKey: string; readonly members: ReadonlyArray<Sibling> }> =
 		[];
 	// Root group first (if it exists and is non-empty).
 	const root = map.get('');
@@ -213,7 +212,7 @@ function appendBottomEmbed(
 			lens: sibling.lens,
 			configs,
 		});
-		(tree.children as Array<unknown>).push(jsx);
+		(tree.children as ReadonlyArray<unknown>).push(jsx);
 	}
 }
 
@@ -289,7 +288,7 @@ function appendTabsEmbed(
 	// Cast: the `mdxJsxFlowElement` node type is provided by mdast-util-mdx-jsx
 	// (the MDX MDAST extension). Docusaurus's processor allows these via
 	// `rehype-raw`'s passThrough list in .md mode and natively in .mdx mode.
-	(tree.children as Array<unknown>).push(tabs);
+	(tree.children as ReadonlyArray<unknown>).push(tabs);
 }
 
 /**
@@ -373,25 +372,25 @@ function transformFence(
 	let lens: string | undefined;
 	let parsedQuery: Readonly<Record<string, unknown>> | undefined;
 
-	if (suffix !== undefined) {
+	if (suffix === undefined) {
+		// Bare fence (no `:suffix`): only frontmatter populates `lens`.
+		// Cascade `defaults[lang]` does NOT populate it (locked decision 1).
+		lens = frontmatterDefaultLens;
+	} else {
 		const queryIndex = suffix.indexOf('?');
 		const lensName = queryIndex === -1 ? suffix : suffix.slice(0, queryIndex);
 		if (lensName === '') return; // malformed: empty lens name
 		lens = lensName;
 		if (queryIndex !== -1) {
-			const queryStr = suffix.slice(queryIndex + 1);
-			if (queryStr !== '') {
-				const parsed = parseFenceQuery(queryStr);
+			const queryString = suffix.slice(queryIndex + 1);
+			if (queryString !== '') {
+				const parsed = parseFenceQuery(queryString);
 				// Skip vacuous queries (e.g. `?&` or `?&&`) so
 				// `configs.lenses[lens]` isn't overlaid with an empty
 				// merge (which would be a no-op but produces noise).
 				if (Object.keys(parsed).length > 0) parsedQuery = parsed;
 			}
 		}
-	} else {
-		// Bare fence (no `:suffix`): only frontmatter populates `lens`.
-		// Cascade `defaults[lang]` does NOT populate it (locked decision 1).
-		lens = frontmatterDefaultLens;
 	}
 
 	const configs = mergeOverrideIntoCascade(config, lens, parsedQuery);
@@ -399,7 +398,7 @@ function transformFence(
 	// spread so undefined keys are omitted entirely rather than passed
 	// as `key: undefined`.
 	return codeBlockToJsx(node, {
-		...(lens !== undefined ? { lens } : {}),
+		...(lens === undefined ? {} : { lens }),
 		configs,
 	});
 }
@@ -431,9 +430,9 @@ function transformFence(
  *   leniency applies to a leading `&` (`?&a=1`) or trailing `&`
  *   (`?a=1&`). This matches lenient URL-parser behavior.
  */
-function parseFenceQuery(queryStr: string): Readonly<Record<string, unknown>> {
+function parseFenceQuery(queryString: string): Readonly<Record<string, unknown>> {
 	const out: Record<string, unknown> = {};
-	for (const part of queryStr.split('&')) {
+	for (const part of queryString.split('&')) {
 		if (part === '') continue;
 		const eqIndex = part.indexOf('=');
 		if (eqIndex === -1) {

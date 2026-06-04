@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
-import filterQuestions from '../filter-questions.js';
 import createCodeQuestion from '../create-code-question.js';
+import filterQuestions from '../filter-questions.js';
 import type { CodeQuestion, CodeQuestionInput } from '../types.js';
 
 // ─── Test helper ────────────────────────────────────────────
@@ -48,7 +48,7 @@ describe('filterQuestions', () => {
 				kind: { comprehension: false },
 			});
 			expect(result).toHaveLength(1);
-			expect(result[0]!.kind).toBe('micro-decision');
+			expect(result[0].kind).toBe('micro-decision');
 		});
 
 		it('filters out micro-decision questions when microDecision is false', () => {
@@ -59,7 +59,7 @@ describe('filterQuestions', () => {
 				kind: { microDecision: false },
 			});
 			expect(result).toHaveLength(1);
-			expect(result[0]!.kind).toBe('comprehension');
+			expect(result[0].kind).toBe('comprehension');
 		});
 	});
 
@@ -212,8 +212,8 @@ describe('filterQuestions', () => {
 				register: { comparative: false },
 			});
 			expect(result).toHaveLength(1);
-			expect(result[0]!.questions).toHaveLength(1);
-			expect(result[0]!.questions[0]!.register).toBe('open');
+			expect(result[0].questions).toHaveLength(1);
+			expect(result[0].questions[0].register).toBe('open');
 		});
 
 		it('removes the entire CodeQuestion if all entries are pruned', () => {
@@ -240,7 +240,7 @@ describe('filterQuestions', () => {
 				register: { comparative: false },
 			});
 			expect(result).toHaveLength(1);
-			expect(result[0]!.questions).toHaveLength(2);
+			expect(result[0].questions).toHaveLength(2);
 		});
 	});
 
@@ -294,9 +294,9 @@ describe('filterQuestions', () => {
 
 			// Pass in unsorted order
 			const result = filterQuestions([late, early, mid], {});
-			expect(result[0]!.id).toBe('early');
-			expect(result[1]!.id).toBe('mid');
-			expect(result[2]!.id).toBe('late');
+			expect(result[0].id).toBe('early');
+			expect(result[1].id).toBe('mid');
+			expect(result[2].id).toBe('late');
 		});
 	});
 

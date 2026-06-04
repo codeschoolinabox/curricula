@@ -15,14 +15,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import type { Root } from 'mdast';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { VFile } from 'vfile';
+import { describe, expect, it } from 'vitest';
 
 import createRemarkStudyLenses from '../remark-study-lenses.js';
 
-import type { Root } from 'mdast';
 
 const FIXTURES_DIR = path.resolve(
 	import.meta.dirname,
@@ -54,7 +54,7 @@ function parseAndTransform(
 		data: frontMatter === undefined ? {} : { frontMatter },
 	});
 	const parser = unified().use(remarkParse);
-	const tree = parser.parse(vfile) as Root;
+	const tree = parser.parse(vfile);
 	transformer(tree, vfile);
 	return tree;
 }
@@ -67,7 +67,7 @@ type MdxJsxAttributeValueExpression = {
 	data?: { estree?: unknown };
 };
 
-type StudyLensAttr = {
+type StudyLensAttribute = {
 	name: string;
 	value: string | MdxJsxAttributeValueExpression | null | undefined;
 };
@@ -75,7 +75,7 @@ type StudyLensAttr = {
 type StudyLensJsx = {
 	type: 'mdxJsxFlowElement';
 	name: 'StudyLenses';
-	attributes: ReadonlyArray<StudyLensAttr>;
+	attributes: ReadonlyArray<StudyLensAttribute>;
 	children: [];
 };
 
@@ -106,7 +106,7 @@ function findStudyLensNode(
  * with `Date` values), these tests must navigate `data.estree`
  * directly instead of going through `JSON.parse`.
  */
-function attrsOf(node: StudyLensJsx | undefined): Record<string, string> {
+function attributesOf(node: StudyLensJsx | undefined): Record<string, string> {
 	return Object.fromEntries(
 		(node?.attributes ?? []).map((a) => {
 			if (a.value == null) return [a.name, ''];
@@ -125,7 +125,7 @@ describe('createRemarkStudyLenses', () => {
 			value: '```js\nlet x=1;\n```\n',
 			path: '/totally/unrelated/path/file.md',
 		});
-		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		const tree = unified().use(remarkParse).parse(vfile);
 		const before = JSON.stringify(tree);
 
 		transformer(tree, vfile);
@@ -157,9 +157,9 @@ describe('createRemarkStudyLenses', () => {
 		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
 		expect(jsxNode?.name).toBe('StudyLenses');
 		expect(jsxNode?.children).toEqual([]);
-		const attrs = attrsOf(jsxNode);
-		expect(attrs.snippet).toBe('let x = 1;');
-		expect(attrs.lens).toBeUndefined();
+		const attributes = attributesOf(jsxNode);
+		expect(attributes.snippet).toBe('let x = 1;');
+		expect(attributes.lens).toBeUndefined();
 	});
 
 	it('cascade-driven default: defaults.js=highlight + plain ```js → fence transforms but no `lens` prop (locked decision 1)', () => {
@@ -169,9 +169,9 @@ describe('createRemarkStudyLenses', () => {
 			contentRoot,
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
-		expect(attrs.lens).toBeUndefined();
+		expect(attributes.lens).toBeUndefined();
 	});
 
 	it('explicit suffix wins: ```js:highlight overrides defaults.js=study', () => {
@@ -181,7 +181,7 @@ describe('createRemarkStudyLenses', () => {
 			contentRoot,
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		expect(attrsOf(jsxNode)).toMatchObject({
+		expect(attributesOf(jsxNode)).toMatchObject({
 			lens: 'highlight',
 		});
 	});
@@ -193,9 +193,9 @@ describe('createRemarkStudyLenses', () => {
 			contentRoot,
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
-		expect(attrs.lens).toBeUndefined();
+		expect(attributes.lens).toBeUndefined();
 	});
 
 	it('mixed-language fences: configured ones transform, unconfigured + no-lang stay plain', () => {
@@ -211,9 +211,9 @@ describe('createRemarkStudyLenses', () => {
 		// txt (unconfigured) and no-lang fences remain as plain code nodes
 		const remainingCodeNodes = tree.children.filter((n) => n.type === 'code');
 		expect(remainingCodeNodes).toHaveLength(2);
-		remainingCodeNodes.forEach((n) => {
+		for (const n of remainingCodeNodes) {
 			expect((n as { data?: unknown }).data).toBeUndefined();
-		});
+		}
 	});
 
 	it('embed bottom: index.md + two .js siblings → two mdxJsxFlowElement StudyLenses nodes appended', () => {
@@ -226,17 +226,17 @@ describe('createRemarkStudyLenses', () => {
 		const appended = tree.children.slice(-2) as unknown as StudyLensJsx[];
 		expect(appended.every((n) => n.type === 'mdxJsxFlowElement')).toBe(true);
 		expect(appended.every((n) => n.name === 'StudyLenses')).toBe(true);
-		expect(attrsOf(appended[0])).toMatchObject({
+		expect(attributesOf(appended[0])).toMatchObject({
 			snippet: '// alpha sibling\nconst a = 1;\n',
 			lens: 'study',
 		});
-		expect(attrsOf(appended[1])).toMatchObject({
+		expect(attributesOf(appended[1])).toMatchObject({
 			snippet: '// beta sibling\nconst b = 2;\n',
 			lens: 'study',
 		});
 		// B.2: appendBottomEmbed path emits no `lang` attribute.
-		expect(attrsOf(appended[0]).lang).toBeUndefined();
-		expect(attrsOf(appended[1]).lang).toBeUndefined();
+		expect(attributesOf(appended[0]).lang).toBeUndefined();
+		expect(attributesOf(appended[1]).lang).toBeUndefined();
 	});
 
 	it('README.md alone (no sibling index.md) → embeds applied', () => {
@@ -313,25 +313,25 @@ describe('createRemarkStudyLenses', () => {
 		expect(tabItems).toHaveLength(2);
 
 		// First TabItem's attributes carry value + label from the sibling.
-		const firstAttrs = Object.fromEntries(
+		const firstAttributes = Object.fromEntries(
 			(tabItems[0]?.attributes ?? []).map((a) => [a.name, a.value]),
 		);
-		expect(firstAttrs.value).toBe('01-alpha');
-		expect(firstAttrs.label).toBe('01-alpha');
+		expect(firstAttributes.value).toBe('01-alpha');
+		expect(firstAttributes.label).toBe('01-alpha');
 
 		// First TabItem's sole child is a StudyLenses mdxJsxFlowElement
 		// (same emission shape as root-level fences and bottom-mode embeds).
 		const innerJsx = tabItems[0]?.children?.[0];
 		expect(innerJsx?.type).toBe('mdxJsxFlowElement');
 		expect(innerJsx?.name).toBe('StudyLenses');
-		const innerAttrs = Object.fromEntries(
+		const innerAttributes = Object.fromEntries(
 			(innerJsx?.attributes ?? []).map((a) => [a.name, a.value]),
 		);
-		expect(innerAttrs.lens).toBe('study');
-		expect(innerAttrs.lang).toBeUndefined();
+		expect(innerAttributes.lens).toBe('study');
+		expect(innerAttributes.lang).toBeUndefined();
 		// B.3: tabs-mode inner StudyLenses emits snippet (not code).
-		expect(innerAttrs.snippet).toBeDefined();
-		expect(innerAttrs.code).toBeUndefined();
+		expect(innerAttributes.snippet).toBeDefined();
+		expect(innerAttributes.code).toBeUndefined();
 	});
 
 	it('C: embed-bottom deep-merges directive override INTO cascade.lenses[lens]', () => {
@@ -344,19 +344,19 @@ describe('createRemarkStudyLenses', () => {
 		const appended = tree.children.at(-1) as unknown as StudyLensJsx;
 		expect(appended?.type).toBe('mdxJsxFlowElement');
 		expect(appended?.name).toBe('StudyLenses');
-		const attrs = attrsOf(appended);
-		expect(attrs.lens).toBe('parsons');
+		const attributes = attributesOf(appended);
+		expect(attributes.lens).toBe('parsons');
 		// Byte-exact: the directive JSDoc is stripped from the emitted
 		// snippet attribute. The fixture's exercise.js is a 6-line file;
 		// after strip only the `const puzzle = '...';\n` line remains.
-		expect(attrs.snippet).toBe(
+		expect(attributes.snippet).toBe(
 			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
 		);
 		// C: no separate `config` prop — override merged INTO configs.lenses[lens].
-		expect(attrs.config).toBeUndefined();
+		expect(attributes.config).toBeUndefined();
 		// Dual-assertion (AR-3 BLOCKER 2 pattern): per-lens merged entry +
 		// top-level cascade key both present in the same `configs` payload.
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
 			shuffleSeed: 42,
 			distractors: 4,
@@ -374,15 +374,15 @@ describe('createRemarkStudyLenses', () => {
 		const appended = tree.children.at(-1) as unknown as StudyLensJsx;
 		expect(appended?.type).toBe('mdxJsxFlowElement');
 		expect(appended?.name).toBe('StudyLenses');
-		const attrs = attrsOf(appended);
-		expect(attrs.lens).toBe('parsons');
+		const attributes = attributesOf(appended);
+		expect(attributes.lens).toBe('parsons');
 		// Byte-exact: same stripped content regardless of directive placement.
-		expect(attrs.snippet).toBe(
+		expect(attributes.snippet).toBe(
 			"const puzzle = 'shuffleSeed inherited from cascade; distractors from directive';\n",
 		);
 		// C: no separate `config` prop; override merged INTO configs.lenses[lens].
-		expect(attrs.config).toBeUndefined();
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.config).toBeUndefined();
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
 			shuffleSeed: 42,
 			distractors: 4,
@@ -404,11 +404,11 @@ describe('createRemarkStudyLenses', () => {
 		) as unknown as StudyLensJsx[];
 
 		// Plain ```js fence: frontmatter wins over cascade (study → highlight)
-		expect(attrsOf(jsxNodes[0])).toMatchObject({
+		expect(attributesOf(jsxNodes[0])).toMatchObject({
 			lens: 'highlight',
 		});
 		// ```js:study fence: explicit suffix beats frontmatter
-		expect(attrsOf(jsxNodes[1])).toMatchObject({
+		expect(attributesOf(jsxNodes[1])).toMatchObject({
 			lens: 'study',
 		});
 	});
@@ -455,10 +455,10 @@ describe('createRemarkStudyLenses', () => {
 		const replaced = tree.children[1] as unknown as StudyLensJsx;
 		expect(replaced.type).toBe('mdxJsxFlowElement');
 		expect(replaced.name).toBe('StudyLenses');
-		const replacedAttrs = attrsOf(replaced);
-		expect(replacedAttrs.snippet).toBe('let x = 1;');
+		const replacedAttributes = attributesOf(replaced);
+		expect(replacedAttributes.snippet).toBe('let x = 1;');
 		// B.4: bare js fence emits no lens prop (locked decision 1).
-		expect(replacedAttrs.lens).toBeUndefined();
+		expect(replacedAttributes.lens).toBeUndefined();
 	});
 
 	// ─── Grouped sibling embeds (D.17–D.20) ──────────────────────────────
@@ -605,7 +605,7 @@ describe('createRemarkStudyLenses', () => {
 			contentRoot: FIXTURES_DIR,
 		});
 		const vfile = new VFile({ value: '# hi\n\n```js\nlet x=1;\n```\n' });
-		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		const tree = unified().use(remarkParse).parse(vfile);
 		const before = JSON.stringify(tree);
 
 		transformer(tree, vfile);
@@ -629,7 +629,7 @@ describe('createRemarkStudyLenses', () => {
 			value: md,
 			path: path.join(contentRoot, 'index.md'),
 		});
-		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		const tree = unified().use(remarkParse).parse(vfile);
 		transformer(tree, vfile);
 		return tree;
 	}
@@ -641,11 +641,11 @@ describe('createRemarkStudyLenses', () => {
 			contentRoot,
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.snippet).toBe('let x = 1;');
-		expect(attrs.lens).toBeUndefined();
-		expect(attrs.lang).toBeUndefined();
+		expect(attributes.snippet).toBe('let x = 1;');
+		expect(attributes.lens).toBeUndefined();
+		expect(attributes.lang).toBeUndefined();
 	});
 
 	it('B.2+B.4: integration — emitted JSX never carries `lang` attr; bare python fence emits no `lens` attr (configured-python)', () => {
@@ -655,21 +655,21 @@ describe('createRemarkStudyLenses', () => {
 			contentRoot,
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.snippet).toBe("print('hello')");
-		expect(attrs.lens).toBeUndefined();
-		expect(attrs.lang).toBeUndefined();
+		expect(attributes.snippet).toBe("print('hello')");
+		expect(attributes.lens).toBeUndefined();
+		expect(attributes.lang).toBeUndefined();
 	});
 
 	it('B.1: js:editor (no comma) → lens=editor, no transforms attribute, code survives', () => {
 		const tree = parseStringInConfiguredJs('```js:editor\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('editor');
-		expect(attrs.snippet).toBe('let x = 1;');
-		expect(attrs.transforms).toBeUndefined();
+		expect(attributes.lens).toBe('editor');
+		expect(attributes.snippet).toBe('let x = 1;');
+		expect(attributes.transforms).toBeUndefined();
 	});
 
 	// ─── B.4: URL-style fence syntax parser ──────────────────────────────
@@ -677,24 +677,24 @@ describe('createRemarkStudyLenses', () => {
 	it('B.4: bare `js` fence (no suffix) → no `lens` attr emitted, snippet survives', () => {
 		const tree = parseStringInConfiguredJs('```js\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.snippet).toBe('let x = 1;');
-		expect(attrs.lens).toBeUndefined();
+		expect(attributes.snippet).toBe('let x = 1;');
+		expect(attributes.lens).toBeUndefined();
 	});
 
 	it('B.4: `js:trace` (lens, no query) → lens=trace; configs.lenses.trace is cascade entry (empty in configured-js fixture)', () => {
 		const tree = parseStringInConfiguredJs('```js:trace\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
+		expect(attributes.lens).toBe('trace');
 		// C: no separate `config` prop.
-		expect(attrs.config).toBeUndefined();
+		expect(attributes.config).toBeUndefined();
 		// configured-js fixture has no `lenses` cascade entries, so the
 		// trace entry didn't pre-exist and no override merged. The
 		// cascade is still emitted whole (configured-languages rule fires).
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect(cascade.defaults).toBeDefined();
 		// No-merge witness: configs.lenses.trace stays undefined (no
 		// override input, no cascade entry to inherit).
@@ -706,11 +706,11 @@ describe('createRemarkStudyLenses', () => {
 			'```js:trace?stepDelay=500\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		expect(attrs.config).toBeUndefined();
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('trace');
+		expect(attributes.config).toBeUndefined();
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
 			stepDelay: '500',
 		});
@@ -722,11 +722,11 @@ describe('createRemarkStudyLenses', () => {
 			'```js:highlight?stepDelay=500\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('highlight');
-		expect(attrs.config).toBeUndefined();
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('highlight');
+		expect(attributes.config).toBeUndefined();
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).highlight).toEqual({
 			stepDelay: '500',
 		});
@@ -737,10 +737,10 @@ describe('createRemarkStudyLenses', () => {
 			'```js:trace?cols=value,steps\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('trace');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
 			cols: ['value', 'steps'],
 		});
@@ -751,10 +751,10 @@ describe('createRemarkStudyLenses', () => {
 			'```js:trace?key\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('trace');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
 			key: true,
 		});
@@ -765,10 +765,10 @@ describe('createRemarkStudyLenses', () => {
 			'```js:trace?key=\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('trace');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
 			key: '',
 		});
@@ -779,10 +779,10 @@ describe('createRemarkStudyLenses', () => {
 			'```js:trace?a=1&b=2\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('trace');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
 			a: '1',
 			b: '2',
@@ -796,10 +796,10 @@ describe('createRemarkStudyLenses', () => {
 			'```js:trace?a=1&a=2\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('trace');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
 			a: '2',
 		});
@@ -810,10 +810,10 @@ describe('createRemarkStudyLenses', () => {
 			'```js:trace?a=1&&b=2\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('trace');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
 			a: '1',
 			b: '2',
@@ -825,10 +825,10 @@ describe('createRemarkStudyLenses', () => {
 			'```js:trace?a=1&a=2&a=3\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('trace');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
 			a: '3',
 		});
@@ -839,10 +839,10 @@ describe('createRemarkStudyLenses', () => {
 			'```js:trace?&a=1\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('trace');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
 			a: '1',
 		});
@@ -853,10 +853,10 @@ describe('createRemarkStudyLenses', () => {
 			'```js:trace?a=1&\nlet x = 1;\n```\n',
 		);
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		expect(attributes.lens).toBe('trace');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toEqual({
 			a: '1',
 		});
@@ -865,13 +865,13 @@ describe('createRemarkStudyLenses', () => {
 	it('B.4: `js:trace?` (empty query) → lens=trace, no merged override on configs.lenses.trace', () => {
 		const tree = parseStringInConfiguredJs('```js:trace?\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
+		const attributes = attributesOf(jsxNode);
 
-		expect(attrs.lens).toBe('trace');
-		expect(attrs.config).toBeUndefined();
+		expect(attributes.lens).toBe('trace');
+		expect(attributes.config).toBeUndefined();
 		// Empty query → no merge, configs.lenses.trace stays as cascade entry
 		// (in configured-js fixture: undefined since no lenses.trace exists).
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).trace).toBeUndefined();
 	});
 
@@ -903,15 +903,15 @@ describe('createRemarkStudyLenses', () => {
 			value: '```js:parsons\nlet x = 1;\n```\n',
 			path: path.join(contentRoot, 'index.md'),
 		});
-		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		const tree = unified().use(remarkParse).parse(vfile);
 		transformer(tree, vfile);
 
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
-		expect(attrs.lens).toBe('parsons');
+		const attributes = attributesOf(jsxNode);
+		expect(attributes.lens).toBe('parsons');
 		// Dual-assertion: per-lens entry survives + top-level cascade keys are
 		// present (opaque-passthrough check).
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
 			shuffleSeed: 42,
 		});
@@ -925,10 +925,10 @@ describe('createRemarkStudyLenses', () => {
 		// still emitted because the cascade has `defaults` + DEFAULTS-fill.
 		const tree = parseStringInConfiguredJs('```js:trace\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
-		expect(attrs.lens).toBe('trace');
-		expect(attrs.configs).toBeDefined();
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		const attributes = attributesOf(jsxNode);
+		expect(attributes.lens).toBe('trace');
+		expect(attributes.configs).toBeDefined();
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect(cascade.defaults).toBeDefined();
 		// configs.lenses?.[trace] is undefined — no cascade entry, no merge.
 		expect((cascade.lenses as Record<string, unknown>).trace).toBeUndefined();
@@ -954,9 +954,9 @@ describe('createRemarkStudyLenses', () => {
 		expect(tabItem?.name).toBe('TabItem');
 		const innerJsx = tabItem?.children?.[0];
 		expect(innerJsx?.name).toBe('StudyLenses');
-		const innerAttrs = attrsOf(innerJsx);
-		expect(innerAttrs.lens).toBe('parsons');
-		const cascade = JSON.parse(innerAttrs.configs!) as Record<string, unknown>;
+		const innerAttributes = attributesOf(innerJsx);
+		expect(innerAttributes.lens).toBe('parsons');
+		const cascade = JSON.parse(innerAttributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
 			shuffleSeed: 42,
 		});
@@ -979,7 +979,7 @@ describe('createRemarkStudyLenses', () => {
 				'```js:parsons?shuffleSeed=2\nlet b=2;\n```\n',
 			path: path.join(contentRoot, 'index.md'),
 		});
-		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		const tree = unified().use(remarkParse).parse(vfile);
 		transformer(tree, vfile);
 
 		// The embed-config-merge fixture also appends a sibling exercise.js
@@ -991,11 +991,11 @@ describe('createRemarkStudyLenses', () => {
 				(n as { name?: string }).name === 'StudyLenses',
 		) as unknown as StudyLensJsx[];
 		expect(jsxNodes.length).toBeGreaterThanOrEqual(2);
-		const c1 = JSON.parse(attrsOf(jsxNodes[0]!).configs!) as Record<
+		const c1 = JSON.parse(attributesOf(jsxNodes[0]).configs) as Record<
 			string,
 			unknown
 		>;
-		const c2 = JSON.parse(attrsOf(jsxNodes[1]!).configs!) as Record<
+		const c2 = JSON.parse(attributesOf(jsxNodes[1]).configs) as Record<
 			string,
 			unknown
 		>;
@@ -1022,13 +1022,13 @@ describe('createRemarkStudyLenses', () => {
 			value: '```js:parsons?shuffleSeed=99\nlet x = 1;\n```\n',
 			path: path.join(contentRoot, 'index.md'),
 		});
-		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		const tree = unified().use(remarkParse).parse(vfile);
 		transformer(tree, vfile);
 
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
-		expect(attrs.lens).toBe('parsons');
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		const attributes = attributesOf(jsxNode);
+		expect(attributes.lens).toBe('parsons');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		expect((cascade.lenses as Record<string, unknown>).parsons).toEqual({
 			shuffleSeed: '99',
 		});
@@ -1047,12 +1047,12 @@ describe('createRemarkStudyLenses', () => {
 			value: '```js:parsons\nlet x = 1;\n```\n',
 			path: path.join(contentRoot, 'index.md'),
 		});
-		const tree = unified().use(remarkParse).parse(vfile) as Root;
+		const tree = unified().use(remarkParse).parse(vfile);
 		transformer(tree, vfile);
 
 		const jsxNode = findStudyLensNode(tree.children);
-		const attrs = attrsOf(jsxNode);
-		const cascade = JSON.parse(attrs.configs!) as Record<string, unknown>;
+		const attributes = attributesOf(jsxNode);
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
 		// All four top-level keys from ResolvedConfig are present. Note:
 		// `exerciseSetPrefixes` is DEFAULTS-filled (the fixture omits
 		// it); this assertion verifies DEFAULTS-fill propagates into the

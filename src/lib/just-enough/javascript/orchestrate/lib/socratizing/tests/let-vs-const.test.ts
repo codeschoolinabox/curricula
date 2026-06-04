@@ -1,10 +1,9 @@
-import { describe, it, expect } from 'vitest';
 import { parse } from 'acorn';
 import type { Node } from 'acorn';
+import { describe, it, expect } from 'vitest';
 
-import buildScope from '../../../../embody/lib/scope/build-scope.js';
 import getChildNodes from '../../../../embody/lib/parse-old/get-child-nodes.js';
-
+import buildScope from '../../../../embody/lib/scope/build-scope.js';
 import voiceAnalyzers from '../analyzers/voice.js';
 import type { CodeQuestion } from '../types.js';
 

@@ -46,8 +46,8 @@ describe('createInterceptGenerator replay (browser)', () => {
 			const replayed: unknown[] = [];
 			for await (const event of gen) replayed.push(event);
 			expect(replayed.length).toBe(live.length);
-			for (let i = 0; i < live.length; i++) {
-				expect(replayed[i]).toBe(live[i]);
+			for (const [index, element] of live.entries()) {
+				expect(replayed[index]).toBe(element);
 			}
 		});
 	});
@@ -103,8 +103,8 @@ describe('createInterceptGenerator replay (browser)', () => {
 			const replayed: unknown[] = [];
 			for await (const event of gen) replayed.push(event);
 			expect(replayed.length).toBe(live.length);
-			for (let i = 0; i < live.length; i++) {
-				expect(replayed[i]).toBe(live[i]);
+			for (const [index, element] of live.entries()) {
+				expect(replayed[index]).toBe(element);
 			}
 		});
 
@@ -131,8 +131,8 @@ describe('createInterceptGenerator replay (browser)', () => {
 			const second: unknown[] = [];
 			for await (const event of gen) second.push(event);
 			expect(second.length).toBe(first.length);
-			for (let i = 0; i < first.length; i++) {
-				expect(second[i]).toBe(first[i]);
+			for (const [index, element] of first.entries()) {
+				expect(second[index]).toBe(element);
 			}
 		});
 	});

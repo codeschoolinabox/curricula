@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
 import embody from '../../../../embody/index.js';
-
 import analyzeMicroDecisions from '../analyze-micro-decisions.js';
 
 // Phase B followup: Phase A reduces these tests to "pipeline shape" only because
