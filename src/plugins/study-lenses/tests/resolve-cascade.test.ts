@@ -56,6 +56,32 @@ describe('resolveCascade', () => {
 		});
 	});
 
+	it('L2.6: explicit null in child lenses.json suppresses parent enablement (subtree deconfiguration)', () => {
+		const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-L26-'));
+		onTestFinished(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
+
+		// Parent enables JS site-wide.
+		fs.writeFileSync(
+			path.join(tmpDir, 'lenses.json'),
+			JSON.stringify({ defaults: { js: 'study' } }),
+		);
+		// Child suppresses JS for its subtree.
+		const childDir = path.join(tmpDir, 'subtree');
+		fs.mkdirSync(childDir);
+		fs.writeFileSync(
+			path.join(childDir, 'lenses.json'),
+			JSON.stringify({ defaults: { js: null } }),
+		);
+
+		// Single-level: parse + freeze does not coerce null.
+		const parentResult = resolveCascade(tmpDir, { contentRoot: tmpDir });
+		expect(parentResult.defaults.js).toBe('study');
+
+		// Two-level: child null wins over parent 'study' in the shallow merge.
+		const childResult = resolveCascade(childDir, { contentRoot: tmpDir });
+		expect(childResult.defaults.js).toBeNull();
+	});
+
 	it('repeat call with unchanged inputs → returns same frozen reference (cache hit)', () => {
 		const fixture = path.join(FIXTURES_DIR, 'cache-hit');
 
