@@ -4,6 +4,18 @@ import type { Node } from 'acorn';
 import justEnoughJs from '../just-enough-js.js';
 import type { NodeValidator } from '../types.js';
 
+// LanguageLevel declares allowedGlobals + blockedMemberNames as optional,
+// but the justEnoughJs literal always populates them. Destructure here so
+// the rest of the file can use them without repeated null-narrowing; the
+// throw enforces the test-file invariant.
+const { allowedGlobals, blockedMemberNames } = justEnoughJs;
+if (!allowedGlobals || !blockedMemberNames) {
+	throw new Error(
+		'just-enough-js.test.ts requires allowedGlobals and ' +
+			'blockedMemberNames to be populated.',
+	);
+}
+
 // -- helper: create a minimal fake node for testing validators --
 function fakeNode(props: Record<string, unknown>): Node {
 	return {
@@ -36,60 +48,60 @@ describe('justEnoughJs', () => {
 		});
 
 		it('has a frozen allowedGlobals Set', () => {
-			expect(justEnoughJs.allowedGlobals).toBeInstanceOf(Set);
-			expect(Object.isFrozen(justEnoughJs.allowedGlobals)).toBe(true);
+			expect(allowedGlobals).toBeInstanceOf(Set);
+			expect(Object.isFrozen(allowedGlobals)).toBe(true);
 		});
 
 		it('includes expected globals', () => {
-			expect(justEnoughJs.allowedGlobals.has('console')).toBe(true);
-			expect(justEnoughJs.allowedGlobals.has('alert')).toBe(true);
-			expect(justEnoughJs.allowedGlobals.has('undefined')).toBe(true);
+			expect(allowedGlobals.has('console')).toBe(true);
+			expect(allowedGlobals.has('alert')).toBe(true);
+			expect(allowedGlobals.has('undefined')).toBe(true);
 		});
 
 		it('includes eval as easter egg global', () => {
-			expect(justEnoughJs.allowedGlobals.has('eval')).toBe(true);
+			expect(allowedGlobals.has('eval')).toBe(true);
 		});
 
 		it('excludes disallowed globals', () => {
-			expect(justEnoughJs.allowedGlobals.has('document')).toBe(false);
-			expect(justEnoughJs.allowedGlobals.has('window')).toBe(false);
-			expect(justEnoughJs.allowedGlobals.has('Array')).toBe(false);
+			expect(allowedGlobals.has('document')).toBe(false);
+			expect(allowedGlobals.has('window')).toBe(false);
+			expect(allowedGlobals.has('Array')).toBe(false);
 		});
 
 		it('includes Math and RegExp globals', () => {
-			expect(justEnoughJs.allowedGlobals.has('Math')).toBe(true);
-			expect(justEnoughJs.allowedGlobals.has('RegExp')).toBe(true);
-			expect(justEnoughJs.allowedGlobals.has('parseInt')).toBe(true);
-			expect(justEnoughJs.allowedGlobals.has('parseFloat')).toBe(true);
+			expect(allowedGlobals.has('Math')).toBe(true);
+			expect(allowedGlobals.has('RegExp')).toBe(true);
+			expect(allowedGlobals.has('parseInt')).toBe(true);
+			expect(allowedGlobals.has('parseFloat')).toBe(true);
 		});
 
 		it('includes Date and BigInt globals', () => {
-			expect(justEnoughJs.allowedGlobals.has('Date')).toBe(true);
-			expect(justEnoughJs.allowedGlobals.has('BigInt')).toBe(true);
+			expect(allowedGlobals.has('Date')).toBe(true);
+			expect(allowedGlobals.has('BigInt')).toBe(true);
 		});
 
 		it('has a frozen blockedMemberNames Set', () => {
-			expect(justEnoughJs.blockedMemberNames).toBeInstanceOf(Set);
-			expect(Object.isFrozen(justEnoughJs.blockedMemberNames)).toBe(true);
+			expect(blockedMemberNames).toBeInstanceOf(Set);
+			expect(Object.isFrozen(blockedMemberNames)).toBe(true);
 		});
 
 		it('blocks array-returning string methods', () => {
-			expect(justEnoughJs.blockedMemberNames.has('split')).toBe(true);
-			expect(justEnoughJs.blockedMemberNames.has('match')).toBe(true);
-			expect(justEnoughJs.blockedMemberNames.has('matchAll')).toBe(true);
+			expect(blockedMemberNames.has('split')).toBe(true);
+			expect(blockedMemberNames.has('match')).toBe(true);
+			expect(blockedMemberNames.has('matchAll')).toBe(true);
 		});
 
 		it('blocks reflection / prototype-escape names', () => {
-			expect(justEnoughJs.blockedMemberNames.has('constructor')).toBe(true);
-			expect(justEnoughJs.blockedMemberNames.has('__proto__')).toBe(true);
-			expect(justEnoughJs.blockedMemberNames.has('call')).toBe(true);
+			expect(blockedMemberNames.has('constructor')).toBe(true);
+			expect(blockedMemberNames.has('__proto__')).toBe(true);
+			expect(blockedMemberNames.has('call')).toBe(true);
 		});
 
 		it('does not block ordinary or newly-allowed names', () => {
-			expect(justEnoughJs.blockedMemberNames.has('length')).toBe(false);
-			expect(justEnoughJs.blockedMemberNames.has('toLowerCase')).toBe(false);
-			expect(justEnoughJs.blockedMemberNames.has('warn')).toBe(false);
-			expect(justEnoughJs.blockedMemberNames.has('toString')).toBe(false);
+			expect(blockedMemberNames.has('length')).toBe(false);
+			expect(blockedMemberNames.has('toLowerCase')).toBe(false);
+			expect(blockedMemberNames.has('warn')).toBe(false);
+			expect(blockedMemberNames.has('toString')).toBe(false);
 		});
 	});
 
