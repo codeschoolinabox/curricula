@@ -147,7 +147,7 @@ describe('createRemarkStudyLenses', () => {
 		expect(codeNode?.data).toBeUndefined();
 	});
 
-	it('configured fence (defaults.js=study) → code node replaced by mdxJsxFlowElement StudyLenses with no `lens` attr (cascade default does NOT populate lens prop per locked decision 1)', () => {
+	it('configured fence (defaults.js=study) → code node replaced by mdxJsxFlowElement StudyLenses with `lens` from cascade default', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
 		const mdFile = path.join(contentRoot, 'index.md');
 
@@ -159,19 +159,7 @@ describe('createRemarkStudyLenses', () => {
 		expect(jsxNode?.children).toEqual([]);
 		const attributes = attributesOf(jsxNode);
 		expect(attributes.snippet).toBe('let x = 1;');
-		expect(attributes.lens).toBeUndefined();
-	});
-
-	it('cascade-driven default: defaults.js=highlight + plain ```js → fence transforms but no `lens` prop (locked decision 1)', () => {
-		const contentRoot = path.join(FIXTURES_DIR, 'cascade-defaults');
-		const tree = parseAndTransform(
-			path.join(contentRoot, 'index.md'),
-			contentRoot,
-		);
-		const jsxNode = findStudyLensNode(tree.children);
-		const attributes = attributesOf(jsxNode);
-		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
-		expect(attributes.lens).toBeUndefined();
+		expect(attributes.lens).toBe('study');
 	});
 
 	it('explicit suffix wins: ```js:highlight overrides defaults.js=study', () => {
@@ -186,7 +174,7 @@ describe('createRemarkStudyLenses', () => {
 		});
 	});
 
-	it('configured python: defaults.python=study + ```python → fence transforms but no `lens` prop (locked decision 1)', () => {
+	it('configured python: defaults.python=study + ```python → fence transforms with `lens` from cascade default', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-python');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
@@ -195,7 +183,7 @@ describe('createRemarkStudyLenses', () => {
 		const jsxNode = findStudyLensNode(tree.children);
 		const attributes = attributesOf(jsxNode);
 		expect(jsxNode?.type).toBe('mdxJsxFlowElement');
-		expect(attributes.lens).toBeUndefined();
+		expect(attributes.lens).toBe('study');
 	});
 
 	it('mixed-language fences: configured ones transform, unconfigured + no-lang stay plain', () => {
@@ -390,6 +378,22 @@ describe('createRemarkStudyLenses', () => {
 		expect(cascade.defaults).toBeDefined();
 	});
 
+	it('L2.1: bare fence in cascade-defaults (defaults.js=highlight) emits lens="highlight" with cascade configs intact', () => {
+		const contentRoot = path.join(FIXTURES_DIR, 'cascade-defaults');
+		const tree = parseAndTransform(
+			path.join(contentRoot, 'index.md'),
+			contentRoot,
+		);
+		const node = findStudyLensNode(tree.children);
+		expect(node).toBeDefined();
+		const attributes = attributesOf(node);
+		expect(attributes.lens).toBe('highlight');
+		const cascade = JSON.parse(attributes.configs) as Record<string, unknown>;
+		expect((cascade.defaults as Record<string, unknown>).js).toBe(
+			'highlight',
+		);
+	});
+
 	it('frontmatter defaultLens overrides cascade for plain fences; :suffix still wins', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'frontmatter-default-lens');
 		const tree = parseAndTransform(
@@ -457,8 +461,9 @@ describe('createRemarkStudyLenses', () => {
 		expect(replaced.name).toBe('StudyLenses');
 		const replacedAttributes = attributesOf(replaced);
 		expect(replacedAttributes.snippet).toBe('let x = 1;');
-		// B.4: bare js fence emits no lens prop (locked decision 1).
-		expect(replacedAttributes.lens).toBeUndefined();
+		// L2: bare js fence in configured-js (defaults.js=study) emits
+		// lens from cascade default.
+		expect(replacedAttributes.lens).toBe('study');
 	});
 
 	// ─── Grouped sibling embeds (D.17–D.20) ──────────────────────────────
@@ -634,7 +639,7 @@ describe('createRemarkStudyLenses', () => {
 		return tree;
 	}
 
-	it('B.2+B.4: integration — emitted JSX never carries `lang` attr; bare js fence emits no `lens` attr (configured-js)', () => {
+	it('B.2 integration — emitted JSX never carries `lang` attr; bare js fence emits `lens` from cascade default (configured-js)', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-js');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
@@ -644,11 +649,11 @@ describe('createRemarkStudyLenses', () => {
 		const attributes = attributesOf(jsxNode);
 
 		expect(attributes.snippet).toBe('let x = 1;');
-		expect(attributes.lens).toBeUndefined();
+		expect(attributes.lens).toBe('study');
 		expect(attributes.lang).toBeUndefined();
 	});
 
-	it('B.2+B.4: integration — emitted JSX never carries `lang` attr; bare python fence emits no `lens` attr (configured-python)', () => {
+	it('B.2 integration — emitted JSX never carries `lang` attr; bare python fence emits `lens` from cascade default (configured-python)', () => {
 		const contentRoot = path.join(FIXTURES_DIR, 'configured-python');
 		const tree = parseAndTransform(
 			path.join(contentRoot, 'index.md'),
@@ -658,7 +663,7 @@ describe('createRemarkStudyLenses', () => {
 		const attributes = attributesOf(jsxNode);
 
 		expect(attributes.snippet).toBe("print('hello')");
-		expect(attributes.lens).toBeUndefined();
+		expect(attributes.lens).toBe('study');
 		expect(attributes.lang).toBeUndefined();
 	});
 
@@ -674,13 +679,14 @@ describe('createRemarkStudyLenses', () => {
 
 	// ─── B.4: URL-style fence syntax parser ──────────────────────────────
 
-	it('B.4: bare `js` fence (no suffix) → no `lens` attr emitted, snippet survives', () => {
+	it('B.4: bare `js` fence (no suffix) → `lens` from cascade default emitted, snippet survives', () => {
 		const tree = parseStringInConfiguredJs('```js\nlet x = 1;\n```\n');
 		const jsxNode = findStudyLensNode(tree.children);
 		const attributes = attributesOf(jsxNode);
 
 		expect(attributes.snippet).toBe('let x = 1;');
-		expect(attributes.lens).toBeUndefined();
+		// configured-js has defaults.js=study → cascade default lens.
+		expect(attributes.lens).toBe('study');
 	});
 
 	it('B.4: `js:trace` (lens, no query) → lens=trace; configs.lenses.trace is cascade entry (empty in configured-js fixture)', () => {

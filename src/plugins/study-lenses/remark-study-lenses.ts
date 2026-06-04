@@ -28,6 +28,7 @@ import type { StudyLensesJsxNode } from './code-block-to-jsx.js';
 import discoverSiblings from './discover-siblings.js';
 import prettifyDirName from './prettify-dir-name.js';
 import resolveCascade from './resolve-cascade.js';
+import type { LensName } from './types.js';
 import type { RemarkPluginOptions, ResolvedConfig, Sibling } from './types.js';
 
 type Transformer = (tree: Root, file: VFile) => void;
@@ -324,19 +325,34 @@ function mergeOverrideIntoCascade(
 }
 
 /**
+ * Resolves the emitted `lens` attribute for a fence after the
+ * configured-languages gate has passed. Total post-gate signature: the
+ * `cascadeDefault` argument is the gate-narrowed `LensName` (never null
+ * or undefined here — the caller returned early on absent / null
+ * cascade entries). Precedence: suffix > frontmatter > cascade default.
+ */
+function resolveLensForFence(
+	suffix: LensName | undefined,
+	frontmatter: LensName | undefined,
+	cascadeDefault: LensName,
+): LensName {
+	return suffix ?? frontmatter ?? cascadeDefault;
+}
+
+/**
  * Rewrites one fenced-code-block MDAST node if its language is
  * configured in `config.defaults`. Unconfigured-language fences are
  * left alone (configured-languages rule).
  *
  * Lens resolution precedence (most-specific wins, populates the
- * emitted `lens` attribute):
- *   fence `:suffix` (URL-style lens name)  >  frontmatterDefaultLens  >  none
+ * emitted `lens` attribute) — runs only after the configured-languages
+ * gate passes (`config.defaults[lang]` non-null):
+ *   fence `:suffix`  >  frontmatterDefaultLens  >  cascade `defaults[fenceLang]`
  *
- * Cascade `defaults[lang]` ONLY gates whether the fence transforms;
- * it does NOT populate `lens` (per AR-1 locked decision 1; the
- * cascade-supplied default seam is L2-deferred — at F1+B a bare fence
- * with no resolved lens emits no `lens` prop and the orchestrator
- * mounts the editor home base).
+ * The cascade-default tier is the **cascade default lens** (L2; reverses
+ * the prior locked-decision-1). When the gate fails — absent key or
+ * explicit `null` (subtree deconfiguration) — the fence is left
+ * untransformed and the precedence chain does not run.
  *
  * Suffix parsing (URL-style):
  *   <lensName>[?<key>[=<value>]( &<key>[=<value>] )*]
@@ -367,20 +383,20 @@ function transformFence(
 	const suffix = colonIndex === -1 ? undefined : info.slice(colonIndex + 1);
 	if (lang === '') return;
 
-	if (config.defaults[lang] === undefined) return; // configured-languages rule
+	const cascadeDefault = config.defaults[lang];
+	// Configured-languages rule + gate-semantics parity (see DOCS.md
+	// §Structural constraints). `== null` covers absent key today AND
+	// explicit `null` after L2.6 widens the map-value type.
+	if (cascadeDefault == null) return;
 
-	let lens: string | undefined;
+	let suffixLens: string | undefined;
 	let parsedQuery: Readonly<Record<string, unknown>> | undefined;
 
-	if (suffix === undefined) {
-		// Bare fence (no `:suffix`): only frontmatter populates `lens`.
-		// Cascade `defaults[lang]` does NOT populate it (locked decision 1).
-		lens = frontmatterDefaultLens;
-	} else {
+	if (suffix !== undefined) {
 		const queryIndex = suffix.indexOf('?');
 		const lensName = queryIndex === -1 ? suffix : suffix.slice(0, queryIndex);
 		if (lensName === '') return; // malformed: empty lens name
-		lens = lensName;
+		suffixLens = lensName;
 		if (queryIndex !== -1) {
 			const queryString = suffix.slice(queryIndex + 1);
 			if (queryString !== '') {
@@ -393,14 +409,14 @@ function transformFence(
 		}
 	}
 
+	const lens = resolveLensForFence(
+		suffixLens,
+		frontmatterDefaultLens,
+		cascadeDefault,
+	);
+
 	const configs = mergeOverrideIntoCascade(config, lens, parsedQuery);
-	// `exactOptionalPropertyTypes`: build the params via conditional
-	// spread so undefined keys are omitted entirely rather than passed
-	// as `key: undefined`.
-	return codeBlockToJsx(node, {
-		...(lens === undefined ? {} : { lens }),
-		configs,
-	});
+	return codeBlockToJsx(node, { lens, configs });
 }
 
 /**

@@ -98,7 +98,11 @@ function walk(
 		const lang = EXT_TO_LANG[extension];
 		if (lang === undefined) continue;
 		const cascadeLens = config.defaults[lang];
-		if (cascadeLens === undefined) continue;
+		// Gate-semantics parity with the fence-side gate at
+		// `remark-study-lenses.ts` (see DOCS.md §Structural constraints).
+		// `== null` covers absent key today AND explicit `null` after L2.6
+		// widens the map-value type.
+		if (cascadeLens == null) continue;
 		const labelPath = path.relative(pageDir, absPath);
 		const label = labelPath.slice(0, -extension.length).split(path.sep).join('/');
 		const rawContent = fs.readFileSync(absPath, 'utf8');
