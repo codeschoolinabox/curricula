@@ -314,6 +314,12 @@ export default tseslint.config(
 			// convey meaning that bare `string` doesn't. Per DEV.md, types
 			// live with their domain meaning. Downgrade from error to off.
 			'sonarjs/redundant-type-aliases': 'off',
+			// Validators legitimately return 'true | Violation' (predicate
+			// pattern: true means valid, Violation object means invalid
+			// with details). The rule forbids this and would require
+			// wrapping everything in Result-like objects — over-engineering
+			// for what's already a clear, narrow union.
+			'sonarjs/function-return-type': 'off',
 
 			// --- Naming conventions ---
 			camelcase: [
