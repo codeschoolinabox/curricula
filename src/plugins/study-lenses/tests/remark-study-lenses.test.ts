@@ -13,13 +13,14 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 import type { Root } from 'mdast';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { VFile } from 'vfile';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished } from 'vitest';
 
 import createRemarkStudyLenses from '../remark-study-lenses.js';
 
@@ -376,6 +377,38 @@ describe('createRemarkStudyLenses', () => {
 			distractors: 4,
 		});
 		expect(cascade.defaults).toBeDefined();
+	});
+
+	it('L2.7: fence-side gate — child lenses.json with defaults.js=null suppresses parent enablement; bare js fence is untransformed', () => {
+		const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-L27-'));
+		onTestFinished(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
+
+		// Parent enables JS.
+		fs.writeFileSync(
+			path.join(tmpDir, 'lenses.json'),
+			JSON.stringify({ defaults: { js: 'study' } }),
+		);
+		// Child suppresses JS for its subtree.
+		const childDir = path.join(tmpDir, 'subtree');
+		fs.mkdirSync(childDir);
+		fs.writeFileSync(
+			path.join(childDir, 'lenses.json'),
+			JSON.stringify({ defaults: { js: null } }),
+		);
+		// Bare js fence in the child subtree.
+		const childMdPath = path.join(childDir, 'index.md');
+		fs.writeFileSync(childMdPath, '```js\nlet x = 1;\n```\n');
+
+		const source = fs.readFileSync(childMdPath, 'utf8');
+		const transformer = createRemarkStudyLenses({ contentRoot: tmpDir });
+		const vfile = new VFile({ value: source, path: childMdPath });
+		const tree = unified().use(remarkParse).parse(vfile);
+		transformer(tree, vfile);
+
+		// Fence stays as a plain code block — no StudyLenses replacement.
+		expect(findStudyLensNode(tree.children)).toBeUndefined();
+		const codeNode = tree.children.find((n) => n.type === 'code');
+		expect(codeNode).toBeDefined();
 	});
 
 	it('L2.1: bare fence in cascade-defaults (defaults.js=highlight) emits lens="highlight" with cascade configs intact', () => {
