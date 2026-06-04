@@ -25,11 +25,12 @@ to rewrite exercise-set category labels at sidebar-build time.
    fully-populated, deep-frozen configuration structure.
 
 3. **Transform fenced code blocks** (sync; in-place AST mutation) — for every
-   fenced code block whose language identifier is present in the resolved
-   configuration's `defaults` (a **configured language**), rewrite the node in
-   place so that downstream rendering produces the plugin's React component.
-   Fences whose language is absent from `defaults` are left untouched and fall
-   through to Docusaurus's default rendering.
+   fenced code block whose language identifier is **configured (a non-null
+   entry) in** the resolved configuration's `defaults` (a **configured
+   language**), rewrite the node in place so that downstream rendering produces
+   the plugin's React component. Fences whose language is **absent from or
+   null in** `defaults` (the latter case = **subtree deconfiguration**) are
+   left untouched and fall through to Docusaurus's default rendering.
 
    **Suffix parsing (URL-style):**
    - Split the info string on `:` → `[lang, suffix]`.
@@ -299,7 +300,8 @@ function.
   configured. Configurable text, fixed depth.
 - **Configured-languages rule.** Fence transformation and sibling
   lens-assignment both consult the resolved configuration's `defaults`. A
-  language with no entry in `defaults` is not transformed and is not scanned for
+  language with **no entry, or an explicit `null` entry** (subtree
+  deconfiguration), in `defaults` is not transformed and is not scanned for
   siblings — even if the fence carries an explicit `:lens` suffix. An explicit
   suffix cannot conjure a lens for an unconfigured language. **Sharp edge:**
   this silently discards author intent (the `txt:highlight` case gets no
@@ -307,6 +309,14 @@ function.
   "ASCII-diagram in `txt` fence becomes plaintext editor" footgun, and forces an
   explicit opt-in step when introducing a new language into the lens ecosystem.
   A future lint pass could warn on suffix-without-default; not in V1.
+- **Gate-semantics parity.** Both consumer call sites of `config.defaults[lang]`
+  — the remark Transform phase (fence-side at `remark-study-lenses.ts:371`)
+  and the sibling walker's Enumerate phase (sibling-side at
+  `discover-siblings.ts:101`) — apply identical gate semantics: absent key
+  and explicit-null value are both skip outcomes (checked via `== null`).
+  A divergence between the two would mean the same `lenses.json` produces
+  inconsistent fence-transformation and sibling-discovery results in the
+  same subtree.
 - **Sidebar-generator idempotence.** The label rewrite fires only when the
   received label still starts with a configured prefix. Running the generator a
   second time on its own output produces no further changes — the first pass
@@ -385,3 +395,8 @@ function.
 - Explicit per-exercise-set label overrides via configuration. Authors override
   labels through standard Docusaurus mechanisms (`_category_.json` or
   `sidebar_label:` frontmatter) — the transform automatically defers to those.
+- Build-time validation that a `defaults[lang]: null` entry actually overrides
+  an ancestor enablement. An inert null (no ancestor enabled the language) is
+  silently equivalent to omitting the key — the gate skips the fence either
+  way. A future lint pass could warn on null entries that don't override
+  anything; not in L2.
