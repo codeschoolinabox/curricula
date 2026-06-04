@@ -85,7 +85,7 @@ describe('deriveDisplayTree', () => {
 		const snippet = makeSnippet({
 			status: { tokenized: true, parsed: true, validated: true, created: false },
 			errors: {
-				phase: 'create',
+				phase: 'creation',
 				kind: 'ReferenceError',
 				message: 'x is not defined',
 				loc: null,
@@ -124,7 +124,7 @@ describe('deriveDisplayTree', () => {
 				],
 			},
 			errors: {
-				phase: 'validate',
+				phase: 'validation',
 				kind: 'ValidationError',
 				message: 'snippet contains non-JeJ constructs',
 				loc: null,

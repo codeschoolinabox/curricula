@@ -90,8 +90,8 @@ describe('assembleDocTable', () => {
 	it('rejects duplicate keys across category partitions with a throw', () => {
 		expect(function callAssembleWithDuplicates() {
 			assembleDocTable(
-				{ let: { description: 'first' } },
-				{ let: { description: 'second' } },
+				{ let: { description: 'first', isJEJ: true } },
+				{ let: { description: 'second', isJEJ: true } },
 			);
 		}).toThrow(/duplicate key/i);
 	});
@@ -99,8 +99,8 @@ describe('assembleDocTable', () => {
 	it('names the duplicate key in the error message', () => {
 		expect(function callAssembleWithDuplicates() {
 			assembleDocTable(
-				{ collidingWord: { description: 'first' } },
-				{ collidingWord: { description: 'second' } },
+				{ collidingWord: { description: 'first', isJEJ: true } },
+				{ collidingWord: { description: 'second', isJEJ: true } },
 			);
 		}).toThrow(/collidingWord/);
 	});
@@ -135,8 +135,10 @@ describe('drift guard against upstream JEJ surface', () => {
 	});
 
 	it('GLOBAL_LABELS matches allowedGlobals minus SUPPRESSED_GLOBALS and minus KEYWORDS', () => {
+		const { allowedGlobals } = justEnoughJs;
+		if (!allowedGlobals) throw new Error('justEnoughJs.allowedGlobals must be populated');
 		const keywordSet = new Set(KEYWORDS);
-		const expected = [...justEnoughJs.allowedGlobals].filter(
+		const expected = [...allowedGlobals].filter(
 			function notSuppressedOrKeyword(g: string) {
 				return !SUPPRESSED_GLOBALS.has(g) && !keywordSet.has(g);
 			},
@@ -155,7 +157,11 @@ describe('drift guard against upstream JEJ surface', () => {
 		// validator's BLOCKED_MEMBER_NAMES constant. The 10
 		// identifier-context entries are curated authorially and have
 		// no upstream constant; they are not asserted here.
-		const blockedMemberNames = [...justEnoughJs.blockedMemberNames];
+		const { blockedMemberNames: justEnoughJsBlockedMembers } = justEnoughJs;
+		if (!justEnoughJsBlockedMembers) {
+			throw new Error('justEnoughJs.blockedMemberNames must be populated');
+		}
+		const blockedMemberNames = [...justEnoughJsBlockedMembers];
 		const missing = blockedMemberNames.filter(
 			function notInDocs(name: string) {
 				return !NOT_IN_JEJ_LABELS.has(name);

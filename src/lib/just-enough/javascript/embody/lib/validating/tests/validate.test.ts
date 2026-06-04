@@ -17,18 +17,21 @@ describe('validate', () => {
 
 		it('includes error name and message', () => {
 			const result = validate('let = ;');
-			expect(result.error!.name).toBe('SyntaxError');
-			expect(result.error!.message).toBeTruthy();
+			if (result.error?.kind !== 'parse') throw new Error('expected parse error');
+			expect(result.error.name).toBe('SyntaxError');
+			expect(result.error.message).toBeTruthy();
 		});
 
 		it('includes line in parse error', () => {
 			const result = validate('let = ;');
-			expect(result.error!.line).toBeTypeOf('number');
+			if (result.error?.kind !== 'parse') throw new Error('expected parse error');
+			expect(result.error.line).toBeTypeOf('number');
 		});
 
 		it('includes column in parse error', () => {
 			const result = validate('let = ;');
-			expect(result.error!.column).toBeTypeOf('number');
+			if (result.error?.kind !== 'parse') throw new Error('expected parse error');
+			expect(result.error.column).toBeTypeOf('number');
 		});
 
 		it('does not set rejections for parse errors', () => {
