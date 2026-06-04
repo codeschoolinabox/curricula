@@ -119,7 +119,7 @@ export default tseslint.config(
 		},
 		languageOptions: {
 			parserOptions: {
-				project: './tsconfig.lint.json',
+				project: './tsconfig.json',
 			},
 		},
 		settings: {

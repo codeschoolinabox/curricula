@@ -24,6 +24,9 @@
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": [
+    "node_modules",
+    "build",
+    ".docusaurus",
     "**/legacy-aran-trace/**",
     "src/lib/just-enough/javascript/embody/lib/evaluating/trace/semantics/**"
   ]
