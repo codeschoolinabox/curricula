@@ -261,6 +261,46 @@ For each `EventCategory` in `embody/types.ts`:
 4. Update consumers (any analysis lib reading `embodiment.streams.evaluate.*().events`)
    to the locked shape.
 
+**Current state (deferred — excluded from gates).**
+`embody/lib/evaluating/trace/semantics/` is currently excluded from
+`tsconfig.json`, `tsconfig.lint.json`, `eslint.config.mjs` ignores, and
+both vitest workspaces (commits `4f8981f`, `1673d7f`, `37e747f`,
+`30edd8b`). The exclusions were landed because an AR-1 design challenge
+surfaced five systemic blockers that are Step B7 work, not Phase B2
+typecheck cleanup:
+
+1. The `category: 'controlFlow'` split (into `'conditional' | 'loop' |
+   'jump'`) is system-wide — touches generators, advice files, namespace
+   keys, and tests. Only partially landed.
+2. The "missing" event types (`BranchEvent`, `DoEvent`, `IterationEvent`,
+   etc.) are NOT one-to-one mappings to the new `ConditionalEvent` /
+   `LoopEvent` — they carry semantic fields the redesign doesn't yet
+   have (e.g., `IterationEvent.iterationVariable`, `TestEvent.result:
+   boolean`).
+3. `FunctionReturnEvent` is deliberately deleted by design (per
+   `types.ts:419`: "ResolveEvent(kind:'call') carries the return
+   value"), but the runtime still emits it from `apply-around.ts:182-187`.
+   Fixing requires the full removal cascade (generator + advice + config
+   gate + test).
+4. Stripping `value` / `result` fields from expression events
+   (`LiteralEvent`, `PureOperatorEvent`, etc.) would silently drop trace
+   value transport because the paired `emitResolve` machinery isn't
+   built yet — there is no `createResolveEvent` generator, no `resolve:`
+   namespace key in `generators.ts`, no `emitResolve` helper.
+5. `LinkedTraceEvent` is genuinely missing from `types.ts`, and
+   `BaseEvent` shape disagrees with the documented wire-safe shape
+   (types.ts has `node: ASTNode`; DOCS describe `nodePath + type + loc +
+   source` for postMessage safety).
+6. `ControlFlowStructure` has no canonical equivalent in `types.ts` to
+   redirect to.
+
+**First act of Step B7:** remove the exclusions in `tsconfig.json`,
+`tsconfig.lint.json`, `eslint.config.mjs`, and `vitest.workspace.ts`.
+Then let the resulting failures (24 typecheck + ~265 lint + N test) drive
+the redesign category-by-category with full DDD + AR-1 per the four
+steps above. The AR-1 review of these blockers (session `af0e7c7b7a6123f2d`)
+has detailed counter-proposals for each.
+
 ### Step B8 — Lock generator surfaces
 
 The static-side stream generators (`streams.realm()`,
