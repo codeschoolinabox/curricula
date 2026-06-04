@@ -45,6 +45,7 @@ describe('guardLoops', () => {
 		it('guarded code throws RangeError when limit exceeded', () => {
 			const code = 'let i = 0;\nwhile (true) {\n  i++;\n}';
 			const guarded = guardLoops(code, 5) as string;
+			// eslint-disable-next-line sonarjs/code-eval, @typescript-eslint/no-implied-eval -- intentional: testing that guard-loops correctly injects iteration limits into executable code
 			expect(() => new Function(guarded)()).toThrow(RangeError);
 		});
 
@@ -52,6 +53,7 @@ describe('guardLoops', () => {
 			const code = 'let i = 0;\nwhile (i < 100) {\n  i++;\n}';
 			const guarded = guardLoops(code, 3) as string;
 			try {
+				// eslint-disable-next-line sonarjs/code-eval, @typescript-eslint/no-implied-eval -- intentional: testing guard-loops injection at runtime
 				new Function(guarded)();
 			} catch (error: any) {
 				expect(error).toBeInstanceOf(RangeError);

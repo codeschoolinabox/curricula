@@ -210,6 +210,7 @@ describe('codeBlockToJsx', () => {
 		// Path 1: source-string fallback (the value MDX uses when
 		// data.estree is missing — JSON.stringify output, valid JS
 		// object-literal syntax for JSON-shaped payloads).
+		// eslint-disable-next-line sonarjs/code-eval, @typescript-eslint/no-implied-eval -- intentional: evaluating MDX-emitted source string to verify it round-trips
 		const fromSource = new Function(`return (${exprValue.value})`)();
 		expect(fromSource).toEqual(original);
 
@@ -221,6 +222,7 @@ describe('codeBlockToJsx', () => {
 		// inputs produce.
 		const estreeExpression = exprValue.data.estree.body[0].expression;
 		const codeFromEstree = generate(estreeExpression as never);
+		// eslint-disable-next-line sonarjs/code-eval, @typescript-eslint/no-implied-eval -- intentional: evaluating astring-generated code to verify estree round-trip
 		const fromEstree = new Function(`return (${codeFromEstree})`)();
 		expect(fromEstree).toEqual(original);
 	});
