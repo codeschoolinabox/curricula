@@ -101,7 +101,7 @@ describe('createInterceptGenerator outcome classification (browser)', () => {
 		it.each([
 			{
 				label: 'complete → ok:true',
-				codeLoader: async () => 'let x = 1;\n',
+				codeLoader: async (): Promise<string> => 'let x = 1;\n',
 				options: undefined as never,
 				expectedOutcome: 'complete' as const,
 				expectedOk: true,
@@ -123,7 +123,7 @@ describe('createInterceptGenerator outcome classification (browser)', () => {
 			},
 			{
 				label: 'error (format-reject) → ok:false',
-				codeLoader: async () => 'let x=1;\n',
+				codeLoader: async (): Promise<string> => 'let x=1;\n',
 				options: undefined as never,
 				expectedOutcome: 'error' as const,
 				expectedOk: false,

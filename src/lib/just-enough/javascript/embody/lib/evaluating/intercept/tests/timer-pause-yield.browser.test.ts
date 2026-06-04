@@ -35,7 +35,7 @@ describe('createInterceptGenerator timer pauses during yield (browser)', () => {
 		it('timer fires timeout within remainingMs when no traps are hit', async () => {
 			const code = await format('while (true) { let x = 1; }\n');
 			const result = await createInterceptGenerator(code, { seconds: 0.1 });
-			if (result.ok) throw new Error('expected ok:false');
+			if (result.ok || !result.error) throw new Error('expected ok:false with error');
 			expect(result.error.kind).toBe('timeout');
 		});
 	});
