@@ -676,7 +676,7 @@ type LensName = string;
 type LangName = string;
 
 type LensesConfigFile = Readonly<{
-	defaults?: Readonly<Record<LangName, LensName>>;
+	defaults?: Readonly<Record<LangName, LensName | null>>;
 	embedSiblings?: Readonly<Partial<EmbedSiblingsConfig>>;
 	lenses?: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
 	exerciseSetPrefixes?: ReadonlyArray<string>;
@@ -689,7 +689,7 @@ type EmbedSiblingsConfig = Readonly<{
 }>;
 
 type ResolvedConfig = Readonly<{
-	defaults: Readonly<Record<LangName, LensName>>;
+	defaults: Readonly<Record<LangName, LensName | null>>;
 	embedSiblings: EmbedSiblingsConfig;
 	lenses: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
 	exerciseSetPrefixes: ReadonlyArray<string>;

@@ -310,10 +310,11 @@ function.
   explicit opt-in step when introducing a new language into the lens ecosystem.
   A future lint pass could warn on suffix-without-default; not in V1.
 - **Gate-semantics parity.** Both consumer call sites of `config.defaults[lang]`
-  — the remark Transform phase (fence-side at `remark-study-lenses.ts:371`)
-  and the sibling walker's Enumerate phase (sibling-side at
-  `discover-siblings.ts:101`) — apply identical gate semantics: absent key
-  and explicit-null value are both skip outcomes (checked via `== null`).
+  — the remark Transform phase (fence-side, inside `transformFence` in
+  `remark-study-lenses.ts`) and the sibling walker's Enumerate phase
+  (sibling-side, inside `walk` in `discover-siblings.ts`) — apply identical
+  gate semantics: absent key and explicit-null value are both skip outcomes
+  (checked via `== null`).
   A divergence between the two would mean the same `lenses.json` produces
   inconsistent fence-transformation and sibling-discovery results in the
   same subtree.

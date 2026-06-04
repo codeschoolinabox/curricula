@@ -96,10 +96,11 @@ type ResolvedConfig = Readonly<{
 	/**
 	 * Post-cascade per-language default-lens map. Same shape as
 	 * `LensesConfigFile.defaults` but required (filled from `DEFAULTS`'s
-	 * empty seed if no `lenses.json` ever sets it). Consumers at
-	 * `remark-study-lenses.ts:386` and `discover-siblings.ts:101` apply
-	 * gate-semantics parity (`== null`) to handle absent and null
-	 * uniformly. See `./README.md` § Configured-language entries.
+	 * empty seed if no `lenses.json` ever sets it). Both consumers
+	 * (`transformFence` in `remark-study-lenses.ts` and `walk` in
+	 * `discover-siblings.ts`) apply gate-semantics parity (`== null`) to
+	 * handle absent and null uniformly. See `./README.md` § Configured-
+	 * language entries.
 	 */
 	readonly defaults: Readonly<Record<LangName, LensName | null>>;
 	readonly embedSiblings: EmbedSiblingsConfig;

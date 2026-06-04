@@ -65,8 +65,8 @@ import type { LensConfig } from '../lenses/types.js';
  * that the cascade exposes `lenses[lens]` for per-lens config lookup —
  * at the cast boundary inside that function (with a runtime
  * sanity check via `readCascadeLensEntry`). The public type carries
- * no such assumption, so future cascade-shape evolution (L2 default-
- * lens seam, etc.) doesn't require widening the public surface.
+ * no such assumption — the per-lens lookup at `configs.lenses?.[lens]`
+ * is the only structural assumption the orchestrator carries.
  *
  * The orchestrator's read of `configs.lenses[lens]` is a runtime
  * trust point, not a compile-time guarantee. Strictness against
@@ -96,8 +96,10 @@ import type { LensConfig } from '../lenses/types.js';
  *   are **deep-merged INTO `configs.lenses[lens]`** at plugin
  *   emission time, so the orchestrator reads `configs.lenses?.[lens]`
  *   as the authoritative per-lens config. Other top-level keys
- *   (`defaults`, `embedSiblings`, `exerciseSetPrefixes`) are
- *   accepted but unused today (L2 may consume them).
+ *   (`defaults`, `embedSiblings`, `exerciseSetPrefixes`) are accepted
+ *   but unused — the orchestrator does not read `configs.defaults`
+ *   at all; it is consumed plugin-side during JSX emission per the
+ *   default-lens precedence chain.
  *
  * **Resolution chain for any lens-name** (two tiers, post-3-prop
  * reshape):

@@ -96,23 +96,19 @@ no separate `config` prop; the per-fence/sibling override is folded into
 > state machine; the build-or-reuse decision for `embodiment` is described in
 > the same section's § Cross-mode embodiment cache. The pre-3-prop F1 mount-time
 > guard (`config` supplied without resolved `lens` → throw at mount) is gone
-> with the absorbed `config` prop. The registry is currently keyed by the single
-> meta-lens `debug-props` (see
-> [`../lenses/debug-props/`](../lenses/debug-props/)); F4 grows it with the
-> first pedagogical trial lens, and L1 adds a picker UI that enumerates registry
-> entries. L2 wires the cascade-supplied default-lens seam — a future hook
-> inside `configs` (exact key shape L2-deferred; candidates include re-using
-> `configs.defaults[lang]` as a per-language default-lens-name source, or adding
-> a dedicated `configs.defaultLens` scalar slot) that may surface a
-> default-lens-name from the cascade itself.
+> with the absorbed `config` prop. The cascade-supplied default-lens seam
+> is sourced from `configs.defaults[fenceLang]` (per the plugin's
+> default-lens precedence chain in
+> [`src/plugins/study-lenses/README.md` § Default-lens precedence chain](../../../../plugins/study-lenses/README.md));
+> the orchestrator itself reads only the resolved `lens` prop and is
+> indifferent to which precedence tier supplied it.
 >
-> **Silent-drop case (deferred to L2/F4).** When `lens` is supplied but not in
-> the registry (e.g. `lens="parsons"` before F4 lands the trial lens), the
-> orchestrator falls back to editor mode and any `configs.lenses[lens]` entry
-> supplied alongside is silently unused. This is expected behavior pending the
-> registry-shape decision (F4 Phase 0) and the cascade-supplied default seam
-> (L2). Authors who hit this should consult React DevTools or the sandbox
-> `debug-props` lens to confirm the prop shape.
+> **Silent-drop case.** When `lens` is supplied but not in the registry
+> (e.g. an authoring typo or a lens that has not yet been registered),
+> the orchestrator falls back to editor mode and any `configs.lenses[lens]`
+> entry supplied alongside is silently unused. Authors who hit this should
+> consult React DevTools or the sandbox `debug-props` lens to confirm the
+> prop shape.
 
 ### Per-lens config resolution chain
 
