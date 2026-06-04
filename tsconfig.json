@@ -25,8 +25,6 @@
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": [
     "**/legacy-aran-trace/**",
-    "**/*.test.ts",
-    "**/*.test.js",
     "src/lib/just-enough/javascript/embody/lib/evaluating/trace/semantics/**"
   ]
 }
