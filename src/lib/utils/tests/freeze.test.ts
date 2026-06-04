@@ -175,6 +175,7 @@ describe('freezeInPlace — Interfaces (immutability contract)', () => {
 	it('prevents array push', () => {
 		const arr = freezeInPlace([1, 2, 3]);
 		expect(() => {
+			// @ts-expect-error — testing that runtime rejects mutation on frozen readonly
 			arr.push(4);
 		}).toThrow();
 	});
@@ -314,6 +315,7 @@ describe('cloneAndFreeze — Interfaces (immutability contract)', () => {
 	it('prevents array push on the cloned array', () => {
 		const frozen = cloneAndFreeze([1, 2, 3]);
 		expect(() => {
+			// @ts-expect-error — testing that runtime rejects mutation on frozen readonly
 			frozen.push(4);
 		}).toThrow();
 	});
@@ -321,6 +323,7 @@ describe('cloneAndFreeze — Interfaces (immutability contract)', () => {
 	it('prevents array element modification on the cloned array', () => {
 		const frozen = cloneAndFreeze([1, 2, 3]);
 		expect(() => {
+			// @ts-expect-error — testing that runtime rejects mutation on frozen readonly
 			frozen[0] = 99;
 		}).toThrow();
 	});

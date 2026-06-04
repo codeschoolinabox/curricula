@@ -116,6 +116,7 @@ describe('deepFreezeInPlace', () => {
 		it('prevents array push', () => {
 			const array = deepFreezeInPlace([1, 2, 3]);
 			expect(() => {
+				// @ts-expect-error — testing that runtime rejects mutation on frozen readonly
 				array.push(4);
 			}).toThrow();
 		});

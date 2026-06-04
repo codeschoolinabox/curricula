@@ -9,6 +9,7 @@ describe('deepFreeze', () => {
 		});
 
 		it('returns undefined as-is', () => {
+			// @ts-expect-error — testing zero-arg behavior; value undefined
 			expect(deepFreeze()).toBe(undefined);
 		});
 
@@ -117,6 +118,7 @@ describe('deepFreeze', () => {
 		it('prevents array push on frozen copy', () => {
 			const frozen = deepFreeze([1, 2, 3]);
 			expect(() => {
+				// @ts-expect-error — testing that runtime rejects mutation on frozen readonly
 				frozen.push(4);
 			}).toThrow();
 		});
@@ -124,6 +126,7 @@ describe('deepFreeze', () => {
 		it('prevents array element modification on frozen copy', () => {
 			const frozen = deepFreeze([1, 2, 3]);
 			expect(() => {
+				// @ts-expect-error — testing that runtime rejects mutation on frozen readonly
 				frozen[0] = 99;
 			}).toThrow();
 		});

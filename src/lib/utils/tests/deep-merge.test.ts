@@ -17,6 +17,7 @@ describe('deepMerge', () => {
 
 		it('should return user value for null/undefined', () => {
 			expect(deepMerge({ a: 1 }, null)).toBe(null);
+			// @ts-expect-error — testing one-arg behavior; user undefined returns undefined
 			expect(deepMerge({ a: 1 })).toBe(undefined);
 			expect(deepMerge(null, { a: 1 })).toEqual({ a: 1 });
 			expect(deepMerge(undefined, { a: 1 })).toEqual({ a: 1 });
@@ -84,6 +85,7 @@ describe('deepMerge', () => {
 			const result = deepMerge(base, user);
 
 			expect(result.a.b.c.d.e.f).toBe(2);
+			// @ts-expect-error — deepMerge's return type doesn't widen base; 'g' is added at runtime
 			expect(result.a.b.c.d.e.g).toBe(3);
 		});
 	});
@@ -144,7 +146,8 @@ describe('deepMerge', () => {
 			const user = { a: { b: 1 } };
 			const result = deepMerge(base, user);
 
-			expect(result.a.b).toBe(1);
+			// deepMerge widens base.a from null to user's object at runtime
+			expect((result.a as unknown as { b: number }).b).toBe(1);
 		});
 	});
 
@@ -186,11 +189,15 @@ describe('deepMerge', () => {
 	describe('Edge Cases', () => {
 		it('should handle circular references in input without infinite loop', () => {
 			const base = { a: 1 };
-			const user = { b: 2 };
+			const user: { b: number; self?: unknown } = { b: 2 };
 			user.self = user; // circular reference
 
 			// Should not hang or crash
-			const result = deepMerge(base, user);
+			const result = deepMerge(base, user) as {
+				a: number;
+				b: number;
+				self?: unknown;
+			};
 			expect(result.a).toBe(1);
 			expect(result.b).toBe(2);
 			expect(result.self).toBe(user);

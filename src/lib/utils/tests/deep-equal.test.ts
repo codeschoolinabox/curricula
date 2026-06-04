@@ -33,10 +33,12 @@ describe('deepEqual', () => {
 		});
 
 		it('returns true for undefined equal to undefined', () => {
+			// @ts-expect-error — testing zero-arg behavior; both params undefined
 			expect(deepEqual()).toBe(true);
 		});
 
 		it('returns false for null vs undefined', () => {
+			// @ts-expect-error — testing one-arg behavior; second param undefined
 			expect(deepEqual(null)).toBe(false);
 		});
 
