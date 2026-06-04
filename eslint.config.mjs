@@ -266,6 +266,10 @@ export default tseslint.config(
 			// docs, planned work, AR-deferred items). Downgrade from error
 			// to warn so they don't gate validation.
 			'sonarjs/todo-tag': 'warn',
+			// Domain-named string aliases (NodePath, LensName, LangName)
+			// convey meaning that bare `string` doesn't. Per DEV.md, types
+			// live with their domain meaning. Downgrade from error to off.
+			'sonarjs/redundant-type-aliases': 'off',
 
 			// --- Naming conventions ---
 			camelcase: [
