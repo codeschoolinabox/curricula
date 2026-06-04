@@ -3,7 +3,7 @@ import { parse } from 'acorn';
 import type { Node } from 'acorn';
 
 import buildScope from '../build-scope.js';
-import type { DeclarationInfo, ScopeAnalysis, ScopeInfo } from '../types.js';
+import type { DeclarationInfo, ScopeAnalysis } from '../types.js';
 
 // ─── Test helper ────────────────────────────────────────────
 

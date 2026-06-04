@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 
 import filterQuestions from '../filter-questions.js';
 import createCodeQuestion from '../create-code-question.js';
-import type { CodeQuestion, CodeQuestionInput, MicroDecisionConfig } from '../types.js';
+import type { CodeQuestion, CodeQuestionInput } from '../types.js';
 
 // ─── Test helper ────────────────────────────────────────────
 

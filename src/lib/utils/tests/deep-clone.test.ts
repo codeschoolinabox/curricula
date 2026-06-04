@@ -16,6 +16,7 @@ describe('deepClone', () => {
 		});
 
 		it('returns undefined as-is', () => {
+			// @ts-expect-error — testing zero-arg behavior; value undefined
 			expect(deepClone()).toBeUndefined();
 		});
 

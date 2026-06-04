@@ -63,6 +63,7 @@ describe('isPlainObject', () => {
 		});
 
 		it('returns false for undefined', () => {
+			// @ts-expect-error — testing zero-arg behavior; value undefined
 			expect(isPlainObject()).toBe(false);
 		});
 

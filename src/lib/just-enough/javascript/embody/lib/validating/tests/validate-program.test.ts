@@ -2,8 +2,6 @@ import { describe, it, expect } from 'vitest';
 
 import validateProgram from '../validate-program.js';
 import justEnoughJs from '../just-enough-js.js';
-import createViolation from '../create-violation.js';
-import type { LanguageLevel } from '../types.js';
 
 describe('validateProgram', () => {
 	describe('valid programs', () => {
