@@ -6,27 +6,32 @@ describe('parseProgram', () => {
 	describe('successful parsing', () => {
 		it('returns a Program node for valid JS', () => {
 			const result = parseProgram('let x = 5;');
+			if ('message' in result) throw new Error('expected Program, got ParseError');
 			expect(result.type).toBe('Program');
 		});
 
 		it('includes location data on the Program node', () => {
 			const result = parseProgram('let x = 5;');
+			if ('message' in result) throw new Error('expected Program, got ParseError');
 			expect(result.loc).toBeDefined();
 			expect(result.loc!.start.line).toBe(1);
 		});
 
 		it('defaults to script sourceType', () => {
 			const result = parseProgram('let x = 5;');
+			if ('message' in result) throw new Error('expected Program, got ParseError');
 			expect(result.sourceType).toBe('script');
 		});
 
 		it('respects module sourceType', () => {
 			const result = parseProgram('let x = 5;', 'module');
+			if ('message' in result) throw new Error('expected Program, got ParseError');
 			expect(result.sourceType).toBe('module');
 		});
 
 		it('parses an empty string as a valid empty program', () => {
 			const result = parseProgram('');
+			if ('message' in result) throw new Error('expected Program, got ParseError');
 			expect(result.type).toBe('Program');
 			expect(result.body).toHaveLength(0);
 		});
