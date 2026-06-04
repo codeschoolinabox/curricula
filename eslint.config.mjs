@@ -434,6 +434,10 @@ export default tseslint.config(
 			'arrow-body-style': 'off',
 			'sonarjs/no-duplicate-string': 'off',
 			'unicorn/consistent-function-scoping': 'off',
+			// Tests naturally access different facets of a fixture across
+			// many it() blocks; forcing one upfront destructure hurts
+			// readability and isn't idiomatic.
+			'unicorn/consistent-destructuring': 'off',
 			// Tests use 'const v = list.find((v) => ...)' patterns where the
 			// outer var and inner callback param share a name (throwaway
 			// short locals). Production code keeps the rule on.
