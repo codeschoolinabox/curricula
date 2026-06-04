@@ -250,6 +250,10 @@ export default tseslint.config(
 			'sonarjs/nested-control-flow': 'error',
 			'sonarjs/expression-complexity': 'error',
 			'sonarjs/no-inverted-boolean-check': 'error',
+			// TODOs are legitimate task markers in this codebase (handoff
+			// docs, planned work, AR-deferred items). Downgrade from error
+			// to warn so they don't gate validation.
+			'sonarjs/todo-tag': 'warn',
 
 			// --- Naming conventions ---
 			camelcase: [
