@@ -5,6 +5,7 @@
     "node_modules",
     "build",
     ".docusaurus",
-    "**/legacy-aran-trace/**"
+    "**/legacy-aran-trace/**",
+    "src/lib/just-enough/javascript/embody/lib/evaluating/trace/semantics/**"
   ]
 }
