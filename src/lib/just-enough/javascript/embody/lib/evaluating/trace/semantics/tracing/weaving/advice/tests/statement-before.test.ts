@@ -17,7 +17,11 @@ function makeTag(overrides: Partial<JejTag> = {}): JejTag {
 
 function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 	return {
-		creationStep: 1, depth: 0, kind: 'module', structure: null, structureStep: null,
+		creationStep: 1,
+		depth: 0,
+		kind: 'module',
+		structure: null,
+		structureStep: null,
 		variables: {},
 		...overrides,
 	};
@@ -25,13 +29,21 @@ function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 
 function makeState(overrides: Partial<TracerState> = {}): TracerState {
 	return {
-		trace: [], step: 5,
+		trace: [],
+		step: 5,
 		scopeStack: [
 			makeScope(),
-			makeScope({ creationStep: 3, depth: 1, kind: 'block', structure: 'while' }),
+			makeScope({
+				creationStep: 3,
+				depth: 1,
+				kind: 'block',
+				structure: 'while',
+			}),
 		],
 		iterationCounters: {},
-		lastExpressionResult: null, previousExpressionResult: null, lastReadValues: {},
+		lastExpressionResult: null,
+		previousExpressionResult: null,
+		lastReadValues: {},
 		config: {
 			controlFlow: { kind: { loops: { while: true } }, events: { jump: true } },
 		},
@@ -59,7 +71,13 @@ describe('statementBefore', () => {
 
 		it('event has correct target', () => {
 			const state = makeState();
-			statementBefore(state, 'jump', 'break', null, makeTag({ jumpTarget: 'while' }));
+			statementBefore(
+				state,
+				'jump',
+				'break',
+				null,
+				makeTag({ jumpTarget: 'while' }),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.target).toBe('while');
 		});

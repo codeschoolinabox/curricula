@@ -1,4 +1,8 @@
-import type { PureOperatorEvent, PureOperatorSubkind, ValueRepresentation } from '../../types.js';
+import type {
+	PureOperatorEvent,
+	PureOperatorSubkind,
+	ValueRepresentation,
+} from '../../types.js';
 
 type PureOperatorParams = {
 	readonly subkind: PureOperatorSubkind;
@@ -26,7 +30,11 @@ function hasCoercion(
 		if (original.type !== coercedValue.type) return true;
 
 		// compare value field when both have it
-		if ('value' in original && 'value' in coercedValue && original.value !== coercedValue.value) {
+		if (
+			'value' in original &&
+			'value' in coercedValue &&
+			original.value !== coercedValue.value
+		) {
 			return true;
 		}
 	}
@@ -41,21 +49,21 @@ function hasCoercion(
  * @returns Domain-specific fields for a PureOperatorEvent
  * @throws {Error} If operands is empty
  */
-function createPureOperatorEvent({
-	subkind,
-	operator,
-	operands,
-	result,
-	coercedOperands,
-}: PureOperatorParams = {} as PureOperatorParams): Omit<
-	PureOperatorEvent,
-	'step' | 'semantics' | 'loc' | 'node' | 'source'
-> {
+function createPureOperatorEvent(
+	{
+		subkind,
+		operator,
+		operands,
+		result,
+		coercedOperands,
+	}: PureOperatorParams = {} as PureOperatorParams,
+): Omit<PureOperatorEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (!operands || operands.length === 0) {
 		throw new Error('createPureOperatorEvent: operands must be non-empty');
 	}
 
-	const coercionOccurred = coercedOperands !== undefined && hasCoercion(operands, coercedOperands);
+	const coercionOccurred =
+		coercedOperands !== undefined && hasCoercion(operands, coercedOperands);
 
 	return {
 		category: 'operator',

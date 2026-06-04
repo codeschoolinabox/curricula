@@ -34,7 +34,9 @@ function makeState(overrides: Partial<TracerState> = {}): TracerState {
 		eventStep: 0,
 		scopeStack: [makeScope()],
 		iterationCounters: {},
-		lastExpressionResult: null, previousExpressionResult: null, lastReadValues: {},
+		lastExpressionResult: null,
+		previousExpressionResult: null,
+		lastReadValues: {},
 		config: {
 			bindings: {
 				kind: { let: true, const: true },
@@ -74,7 +76,14 @@ describe('blockDeclaration', () => {
 
 		it('skips Aran parameters', () => {
 			const state = makeState();
-			blockDeclaration(state, { 'catch.error': null, x: 5 }, 'Program', 'module', 'bare', makeTag());
+			blockDeclaration(
+				state,
+				{ 'catch.error': null, x: 5 },
+				'Program',
+				'module',
+				'bare',
+				makeTag(),
+			);
 			expect(state.scopeStack[0].variables['catch.error']).toBeUndefined();
 			expect(state.scopeStack[0].variables.x).toBeDefined();
 		});
@@ -92,7 +101,9 @@ describe('blockDeclaration', () => {
 
 		it('does not emit when bindings kind is disabled', () => {
 			const state = makeState({
-				config: { bindings: { kind: { let: false }, events: { declare: true } } },
+				config: {
+					bindings: { kind: { let: false }, events: { declare: true } },
+				},
 			});
 			blockDeclaration(state, { x: 5 }, 'Program', 'module', 'bare', makeTag());
 			expect(state.trace).toHaveLength(0);
@@ -100,7 +111,9 @@ describe('blockDeclaration', () => {
 
 		it('does not emit when declare event is disabled', () => {
 			const state = makeState({
-				config: { bindings: { kind: { let: true }, events: { declare: false } } },
+				config: {
+					bindings: { kind: { let: true }, events: { declare: false } },
+				},
 			});
 			blockDeclaration(state, { x: 5 }, 'Program', 'module', 'bare', makeTag());
 			expect(state.trace).toHaveLength(0);
@@ -129,7 +142,14 @@ describe('blockDeclaration', () => {
 		it('does not emit initialize for deadzone (symbol) values', () => {
 			const state = makeState();
 			const deadzone = Symbol('aran.deadzone');
-			blockDeclaration(state, { x: deadzone }, 'Program', 'module', 'bare', makeTag());
+			blockDeclaration(
+				state,
+				{ x: deadzone },
+				'Program',
+				'module',
+				'bare',
+				makeTag(),
+			);
 			const initEvents = (state.trace as Record<string, unknown>[]).filter(
 				(e) => e.event === 'initialize',
 			);
@@ -139,7 +159,14 @@ describe('blockDeclaration', () => {
 		it('does not emit available for deadzone values', () => {
 			const state = makeState();
 			const deadzone = Symbol('aran.deadzone');
-			blockDeclaration(state, { x: deadzone }, 'Program', 'module', 'bare', makeTag());
+			blockDeclaration(
+				state,
+				{ x: deadzone },
+				'Program',
+				'module',
+				'bare',
+				makeTag(),
+			);
 			const availEvents = (state.trace as Record<string, unknown>[]).filter(
 				(e) => e.event === 'available',
 			);
@@ -149,7 +176,14 @@ describe('blockDeclaration', () => {
 		it('still emits declare for deadzone values', () => {
 			const state = makeState();
 			const deadzone = Symbol('aran.deadzone');
-			blockDeclaration(state, { x: deadzone }, 'Program', 'module', 'bare', makeTag());
+			blockDeclaration(
+				state,
+				{ x: deadzone },
+				'Program',
+				'module',
+				'bare',
+				makeTag(),
+			);
 			const declareEvents = (state.trace as Record<string, unknown>[]).filter(
 				(e) => e.event === 'declare',
 			);
@@ -160,7 +194,14 @@ describe('blockDeclaration', () => {
 	describe('multiple variables', () => {
 		it('handles multiple variables in one frame', () => {
 			const state = makeState();
-			blockDeclaration(state, { x: 5, y: 10 }, 'Program', 'module', 'bare', makeTag());
+			blockDeclaration(
+				state,
+				{ x: 5, y: 10 },
+				'Program',
+				'module',
+				'bare',
+				makeTag(),
+			);
 			expect(state.scopeStack[0].variables.x).toBeDefined();
 			expect(state.scopeStack[0].variables.y).toBeDefined();
 		});

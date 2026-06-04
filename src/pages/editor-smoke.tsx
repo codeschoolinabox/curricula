@@ -47,22 +47,21 @@ function logSnippetChange(next: string): void {
 function EditorSmoke(): React.JSX.Element {
 	const [snippet, setSnippet] = React.useState<string>('');
 
-	const handleSnippetChange = React.useCallback(
-		function notifyParent(next: string): void {
-			setSnippet(next);
-			logSnippetChange(next);
-		},
-		[],
-	);
+	const handleSnippetChange = React.useCallback(function notifyParent(
+		next: string,
+	): void {
+		setSnippet(next);
+		logSnippetChange(next);
+	}, []);
 
 	return (
 		<Layout title="editor smoke" description="EditorComponent smoke harness">
 			<main style={{ maxWidth: 720, margin: '2rem auto', padding: '0 1rem' }}>
 				<h1>editor smoke</h1>
 				<p>
-					Smoke surface for <code>&lt;EditorComponent&gt;</code>. Type into
-					the editor below to exercise the three wired callbacks. Open the
-					browser console to watch <code>onSnippetChange</code> log once per{' '}
+					Smoke surface for <code>&lt;EditorComponent&gt;</code>. Type into the
+					editor below to exercise the three wired callbacks. Open the browser
+					console to watch <code>onSnippetChange</code> log once per{' '}
 					<code>docChanged</code> transaction.
 				</p>
 				<ul>

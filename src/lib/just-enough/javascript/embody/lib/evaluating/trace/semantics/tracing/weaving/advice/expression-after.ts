@@ -10,7 +10,12 @@
  * Also resets iteration counter when a loop test evaluates false.
  */
 
-import { isLiteralEnabled, isBindingGateOpen, isControlFlowGateOpen, isOperatorEnabled } from './gating.js';
+import {
+	isLiteralEnabled,
+	isBindingGateOpen,
+	isControlFlowGateOpen,
+	isOperatorEnabled,
+} from './gating.js';
 import emitEvent from './emit-event.js';
 import lookupVariable from './lookup-variable.js';
 import representValue from '../../represent-value/represent-value.js';
@@ -58,7 +63,10 @@ function expressionAfter(
 			// store read value for compound assignment operands (effect-before needs it)
 			state.lastReadValues[varName] = result;
 
-			if (lookup && isBindingGateOpen(state.config, lookup.info.kind, 'read', varName)) {
+			if (
+				lookup &&
+				isBindingGateOpen(state.config, lookup.info.kind, 'read', varName)
+			) {
 				emitEvent(state, tag, 'expression', 'bindings.read', {
 					kind: lookup.info.kind,
 					event: 'read',
@@ -77,9 +85,8 @@ function expressionAfter(
 			const currentScope = state.scopeStack[state.scopeStack.length - 1];
 
 			if (isControlFlowGateOpen(state.config, kind, 'test')) {
-				const coercion = typeof result !== 'boolean'
-					? representValue(boolResult)
-					: undefined;
+				const coercion =
+					typeof result !== 'boolean' ? representValue(boolResult) : undefined;
 
 				emitEvent(state, tag, 'expression', 'controlFlow.test', {
 					kind,
@@ -106,7 +113,9 @@ function expressionAfter(
 				// when not short-circuited: left = previousExpressionResult
 				//   (the test sub-expression set lastExpressionResult, then the branch
 				//    sub-expression overwrote it — previousExpressionResult holds the test value)
-				const leftValue = shortCircuited ? result : state.previousExpressionResult;
+				const leftValue = shortCircuited
+					? result
+					: state.previousExpressionResult;
 
 				emitEvent(state, tag, 'expression', 'operators.shortCircuiting', {
 					operator,

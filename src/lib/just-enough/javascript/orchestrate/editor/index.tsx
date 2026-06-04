@@ -66,7 +66,9 @@ function EditorComponent({
 	// new `onSnippetChange` reference (rare under the orchestrator's
 	// stable useCallback, but common for ad-hoc test fixtures) still
 	// gets its latest callback invoked on every transaction.
-	const onChangeCallback = React.useCallback(function notifyParent(next: string): void {
+	const onChangeCallback = React.useCallback(function notifyParent(
+		next: string,
+	): void {
 		onSnippetChangeRef.current?.(next);
 	}, []);
 
@@ -83,43 +85,44 @@ function EditorComponent({
 		// host is virtually always populated by the time useEffect fires
 		// (React's ref attach happens between render commit and effect
 		// run); the guard exists for TS narrowing of the union type.
-		if (host) void createEditor(snippetRef.current, {
-			parent: host,
-			language: 'javascript',
-			linters: [lintJej],
-			format: formatJej,
-			completions: completeJej,
-			docLookup: documentJej,
-			onChange: onChangeCallback,
-		}).then(
-			function onMounted(instance) {
-				if (cancelledRef.current) {
-					instance.destroy();
-					return;
-				}
-				editorRef.current = instance;
-				// Race recovery: if `snippet` prop changed between mount
-				// initiation and resolution, write the latest into the live
-				// document now. The post-mount sync effect would not re-fire
-				// (its deps array depends on `snippet`, and React already
-				// re-rendered before mount resolved — by the time we get
-				// here, the prop change has already been committed and
-				// React's sync effect ran while editorRef was still null).
-				// Note: this write triggers `onChange` (via CM's updateListener),
-				// so a consumer-provided `onSnippetChange` will see one call
-				// for content the user never typed. Under the orchestrator's
-				// wiring this is benign (it re-sets the same state); side-
-				// effecting consumers (logging, analytics) should de-dupe.
-				if (instance.content !== snippetRef.current) {
-					instance.content = snippetRef.current;
-				}
-			},
-			function onMountRejected(error: unknown) {
-				if (cancelledRef.current) return;
-				console.warn('createEditor rejected:', error);
-				setMountError(error);
-			},
-		);
+		if (host)
+			void createEditor(snippetRef.current, {
+				parent: host,
+				language: 'javascript',
+				linters: [lintJej],
+				format: formatJej,
+				completions: completeJej,
+				docLookup: documentJej,
+				onChange: onChangeCallback,
+			}).then(
+				function onMounted(instance) {
+					if (cancelledRef.current) {
+						instance.destroy();
+						return;
+					}
+					editorRef.current = instance;
+					// Race recovery: if `snippet` prop changed between mount
+					// initiation and resolution, write the latest into the live
+					// document now. The post-mount sync effect would not re-fire
+					// (its deps array depends on `snippet`, and React already
+					// re-rendered before mount resolved — by the time we get
+					// here, the prop change has already been committed and
+					// React's sync effect ran while editorRef was still null).
+					// Note: this write triggers `onChange` (via CM's updateListener),
+					// so a consumer-provided `onSnippetChange` will see one call
+					// for content the user never typed. Under the orchestrator's
+					// wiring this is benign (it re-sets the same state); side-
+					// effecting consumers (logging, analytics) should de-dupe.
+					if (instance.content !== snippetRef.current) {
+						instance.content = snippetRef.current;
+					}
+				},
+				function onMountRejected(error: unknown) {
+					if (cancelledRef.current) return;
+					console.warn('createEditor rejected:', error);
+					setMountError(error);
+				},
+			);
 
 		return function cleanup() {
 			cancelledRef.current = true;
@@ -135,12 +138,15 @@ function EditorComponent({
 	// guard per DOCS.md § Structural constraints — Sync-effect resilience).
 	// Skips when the prop already matches the live document content (the
 	// own-write echo guard for the orchestrator setState round-trip).
-	React.useEffect(function snippetSyncEffect() {
-		const editor = editorRef.current;
-		if (!editor) return;
-		if (editor.content === snippet) return;
-		editor.content = snippet;
-	}, [snippet]);
+	React.useEffect(
+		function snippetSyncEffect() {
+			const editor = editorRef.current;
+			if (!editor) return;
+			if (editor.content === snippet) return;
+			editor.content = snippet;
+		},
+		[snippet],
+	);
 
 	if (mountError !== null) {
 		return (

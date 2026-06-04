@@ -98,7 +98,10 @@ function rewriteCallExpression(
 ): string {
 	const inner: CallChild[] = [];
 	findTopmostCallDescendants(node, path, inner);
-	inner.sort((a, b) => (a.node as { start: number }).start - (b.node as { start: number }).start);
+	inner.sort(
+		(a, b) =>
+			(a.node as { start: number }).start - (b.node as { start: number }).start,
+	);
 
 	const nodeStart = (node as { start: number }).start;
 	const nodeEnd = (node as { end: number }).end;
@@ -124,7 +127,10 @@ function rewriteCallExpression(
 function wrapCallExpressions(program: Program, source: string): string {
 	const topmost: CallChild[] = [];
 	findTopmostCallDescendants(program, '$', topmost);
-	topmost.sort((a, b) => (a.node as { start: number }).start - (b.node as { start: number }).start);
+	topmost.sort(
+		(a, b) =>
+			(a.node as { start: number }).start - (b.node as { start: number }).start,
+	);
 
 	let result = '';
 	let i = 0;

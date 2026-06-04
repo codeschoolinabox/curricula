@@ -49,7 +49,10 @@ describe('createTraceEvent', () => {
 				{
 					subkind: 'arithmetic',
 					operator: '-',
-					operands: [{ type: 'number', value: 5 }, { type: 'number', value: 3 }],
+					operands: [
+						{ type: 'number', value: 5 },
+						{ type: 'number', value: 3 },
+					],
 					result: { type: 'number', value: 2 },
 				},
 			);
@@ -72,7 +75,12 @@ describe('createTraceEvent', () => {
 
 		it('controlFlow.test', () => {
 			const event = createTraceEvent(
-				{ ...metadata, semantics: 'statement' as const, node: 'IfStatement', source: 'if (x)' },
+				{
+					...metadata,
+					semantics: 'statement' as const,
+					node: 'IfStatement',
+					source: 'if (x)',
+				},
 				'controlFlow.test',
 				{
 					kind: 'conditional',
@@ -88,15 +96,15 @@ describe('createTraceEvent', () => {
 
 	describe('errors', () => {
 		it('throws on invalid path', () => {
-			expect(() =>
-				createTraceEvent(metadata, 'nonexistent.path', {}),
-			).toThrow('no generator found');
+			expect(() => createTraceEvent(metadata, 'nonexistent.path', {})).toThrow(
+				'no generator found',
+			);
 		});
 
 		it('throws on partial path (resolves to object, not function)', () => {
-			expect(() =>
-				createTraceEvent(metadata, 'operators.pure', {}),
-			).toThrow('no generator found');
+			expect(() => createTraceEvent(metadata, 'operators.pure', {})).toThrow(
+				'no generator found',
+			);
 		});
 	});
 });

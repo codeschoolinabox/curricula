@@ -15,25 +15,60 @@ import type { TraceEvent } from '../types.js';
 const ALL_ENABLED: Record<string, unknown> = {
 	bindings: {
 		kind: { let: true, const: true, global: true },
-		events: { declare: true, initialize: true, available: true, assign: true, read: true },
+		events: {
+			declare: true,
+			initialize: true,
+			available: true,
+			assign: true,
+			read: true,
+		},
 	},
 	propertyAccess: { dot: true, bracket: true, optionalChaining: true },
 	operators: {
 		pure: {
-			arithmetic: true, addition: true, comparison: true, typeof: true,
-			negation: { logical: true, bitwise: true }, bitwise: true,
+			arithmetic: true,
+			addition: true,
+			comparison: true,
+			typeof: true,
+			negation: { logical: true, bitwise: true },
+			bitwise: true,
 		},
-		shortCircuiting: true, assignment: true,
+		shortCircuiting: true,
+		assignment: true,
 	},
-	literals: { string: true, boolean: true, number: true, undefined: true, null: true, regex: true },
+	literals: {
+		string: true,
+		boolean: true,
+		number: true,
+		undefined: true,
+		null: true,
+		regex: true,
+	},
 	templates: { begin: true, evaluation: true, end: true },
 	scopes: {
 		kind: { script: true, block: true, module: true },
-		events: { create: true, enter: true, interrupt: true, completion: true, leave: true },
+		events: {
+			create: true,
+			enter: true,
+			interrupt: true,
+			completion: true,
+			leave: true,
+		},
 	},
 	controlFlow: {
-		kind: { conditionals: true, loops: { while: true, doWhile: true, for: true, forOf: true } },
-		events: { test: true, branch: true, iteration: true, jump: true, do: true, initialize: true, increment: true },
+		kind: {
+			conditionals: true,
+			loops: { while: true, doWhile: true, for: true, forOf: true },
+		},
+		events: {
+			test: true,
+			branch: true,
+			iteration: true,
+			jump: true,
+			do: true,
+			initialize: true,
+			increment: true,
+		},
 	},
 	functions: { call: true, return: true },
 	with: true,
@@ -112,9 +147,13 @@ describe('createTracingGenerator', () => {
 		it('events match Layer 2 expectations for let x = 5', async () => {
 			const { events } = await drainGenerator('let x = 5;\n');
 			const bindingForX = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).name === 'x',
 			);
-			const eventTypes = bindingForX.map((e) => (e as Record<string, unknown>).event);
+			const eventTypes = bindingForX.map(
+				(e) => (e as Record<string, unknown>).event,
+			);
 
 			expect(eventTypes).toContain('declare');
 			expect(eventTypes).toContain('initialize');
@@ -179,7 +218,11 @@ describe('createTracingGenerator', () => {
 
 	describe('streaming', () => {
 		it('events arrive one at a time (not batched)', async () => {
-			const gen = createTracingGenerator('let x = 5;\nlet y = 10;\n', ALL_ENABLED, 5000);
+			const gen = createTracingGenerator(
+				'let x = 5;\nlet y = 10;\n',
+				ALL_ENABLED,
+				5000,
+			);
 			const steps: number[] = [];
 
 			let next = await gen.next();
@@ -197,7 +240,11 @@ describe('createTracingGenerator', () => {
 
 	describe('no timeout', () => {
 		it('maxMs null means no timeout', async () => {
-			const { result } = await drainGenerator('let x = 5;\n', ALL_ENABLED, null);
+			const { result } = await drainGenerator(
+				'let x = 5;\n',
+				ALL_ENABLED,
+				null,
+			);
 			const r = result as Record<string, unknown>;
 			expect(r.ok).toBe(true);
 		});

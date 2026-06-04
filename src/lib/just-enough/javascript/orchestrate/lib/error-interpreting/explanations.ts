@@ -22,7 +22,6 @@ import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import type { ExplanationPattern } from './types.js';
 
-
 // ─── Parse errors ───────────────────────────────────────────
 
 const PARSE_ERRORS: readonly ExplanationPattern[] = [

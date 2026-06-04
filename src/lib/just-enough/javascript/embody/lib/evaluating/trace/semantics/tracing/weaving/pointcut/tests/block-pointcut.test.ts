@@ -13,7 +13,11 @@ describe('blockPointcut', () => {
 		it('matches block inside WhileStatement', () => {
 			const result = blockPointcut(
 				{ tag },
-				{ type: 'WhileStatement', test: { type: 'ReadExpression', tag }, body: { tag } },
+				{
+					type: 'WhileStatement',
+					test: { type: 'ReadExpression', tag },
+					body: { tag },
+				},
 				null,
 			);
 			expect(result).not.toBeNull();
@@ -31,24 +35,40 @@ describe('blockPointcut', () => {
 
 	describe('scope kind derivation', () => {
 		it('Program module → scopeKind module', () => {
-			const result = blockPointcut({ tag }, { type: 'Program', kind: 'module' }, null);
+			const result = blockPointcut(
+				{ tag },
+				{ type: 'Program', kind: 'module' },
+				null,
+			);
 			expect(result[1]).toBe('module');
 		});
 
 		it('Program script → scopeKind script', () => {
-			const result = blockPointcut({ tag }, { type: 'Program', kind: 'script' }, null);
+			const result = blockPointcut(
+				{ tag },
+				{ type: 'Program', kind: 'script' },
+				null,
+			);
 			expect(result[1]).toBe('script');
 		});
 
 		it('ClosureExpression → scopeKind closure', () => {
-			const result = blockPointcut({ tag }, { type: 'ClosureExpression' }, null);
+			const result = blockPointcut(
+				{ tag },
+				{ type: 'ClosureExpression' },
+				null,
+			);
 			expect(result[1]).toBe('closure');
 		});
 
 		it('WhileStatement → scopeKind block', () => {
 			const result = blockPointcut(
 				{ tag },
-				{ type: 'WhileStatement', test: { type: 'ReadExpression', tag }, body: { tag } },
+				{
+					type: 'WhileStatement',
+					test: { type: 'ReadExpression', tag },
+					body: { tag },
+				},
 				null,
 			);
 			expect(result[1]).toBe('block');
@@ -59,7 +79,11 @@ describe('blockPointcut', () => {
 		it('WhileStatement → segmentKind while', () => {
 			const result = blockPointcut(
 				{ tag },
-				{ type: 'WhileStatement', test: { type: 'ReadExpression', tag }, body: { tag } },
+				{
+					type: 'WhileStatement',
+					test: { type: 'ReadExpression', tag },
+					body: { tag },
+				},
 				null,
 			);
 			expect(result[2]).toBe('while');
@@ -95,7 +119,11 @@ describe('blockPointcut', () => {
 
 	describe('point data shape', () => {
 		it('returns [parentType, scopeKind, segmentKind, tag, label]', () => {
-			const result = blockPointcut({ tag }, { type: 'Program', kind: 'module' }, null);
+			const result = blockPointcut(
+				{ tag },
+				{ type: 'Program', kind: 'module' },
+				null,
+			);
 			expect(result).toHaveLength(5);
 			expect(result[0]).toBe('Program');
 			expect(result[3]).toBe(tag);

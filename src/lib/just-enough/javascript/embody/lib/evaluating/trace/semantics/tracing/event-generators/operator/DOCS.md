@@ -4,14 +4,15 @@
 
 The split follows runtime semantics:
 
-- **Pure**: always evaluates all operands, produces a new value, no side effects.
-  The `subkind` field distinguishes arithmetic, addition, comparison, typeof,
-  negation (logical/bitwise), and bitwise operators.
+- **Pure**: always evaluates all operands, produces a new value, no side
+  effects. The `subkind` field distinguishes arithmetic, addition, comparison,
+  typeof, negation (logical/bitwise), and bitwise operators.
 - **Short-circuiting**: may skip evaluating the right operand. `shortCircuited`
   flag indicates whether this happened. When true, `right` is absent.
 - **Assignment**: mutates a binding. `operands` contains [currentValue, rhs] for
   compound, [rhs] for plain `=`. Logical compound assignments (??=, ||=, &&=)
-  may short-circuit — the `shortCircuited` flag indicates no assignment occurred.
+  may short-circuit — the `shortCircuited` flag indicates no assignment
+  occurred.
 
 ## Coercion comparison
 

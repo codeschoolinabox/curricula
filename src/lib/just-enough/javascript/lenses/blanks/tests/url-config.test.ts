@@ -145,15 +145,13 @@ describe('parseHash — pure', () => {
 describe('serializeConfig — pure', () => {
 	describe('One — single field per call (triangulation)', () => {
 		it('serializes difficulty alone', () => {
-			expect(urlConfig.serializeConfig({ difficulty: 0 })).toBe(
-				'difficulty:0',
-			);
+			expect(urlConfig.serializeConfig({ difficulty: 0 })).toBe('difficulty:0');
 		});
 
 		it('serializes contentTypes alone (join with +)', () => {
-			expect(
-				urlConfig.serializeConfig({ contentTypes: ['literals'] }),
-			).toBe('types:literals');
+			expect(urlConfig.serializeConfig({ contentTypes: ['literals'] })).toBe(
+				'types:literals',
+			);
 		});
 
 		it('serializes viewMode alone', () => {
@@ -235,10 +233,7 @@ describe('write — side-effecting', () => {
 
 	it('produces a hash that round-trips back through read', () => {
 		const scope = makeStubScope('');
-		urlConfig.write(
-			{ difficulty: 75, contentTypes: ['identifiers'] },
-			scope,
-		);
+		urlConfig.write({ difficulty: 75, contentTypes: ['identifiers'] }, scope);
 		expect(urlConfig.read(scope)).toEqual({
 			difficulty: 75,
 			contentTypes: ['identifiers'],

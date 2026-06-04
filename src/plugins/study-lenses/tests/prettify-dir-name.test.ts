@@ -24,9 +24,7 @@ describe('prettifyDirName', () => {
 	});
 
 	it('empty prefixes → numeric strip + Title Case only', () => {
-		expect(prettifyDirName('sl-01-while-loops', [])).toBe(
-			'Sl 01 While Loops',
-		);
+		expect(prettifyDirName('sl-01-while-loops', [])).toBe('Sl 01 While Loops');
 	});
 
 	it('empty residue after strip → returns original unchanged', () => {

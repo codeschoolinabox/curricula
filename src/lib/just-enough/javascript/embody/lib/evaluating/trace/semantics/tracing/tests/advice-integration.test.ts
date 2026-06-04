@@ -44,10 +44,11 @@ function traceInNode(
 	}
 
 	const events: TraceEvent[] = [];
-	(globalThis as Record<string, unknown>).__jej_onEvent =
-		function collectEvent(event: TraceEvent): void {
-			events.push(event);
-		};
+	(globalThis as Record<string, unknown>).__jej_onEvent = function collectEvent(
+		event: TraceEvent,
+	): void {
+		events.push(event);
+	};
 
 	// eslint-disable-next-line no-new-func
 	new Function(instrumentedCode)();
@@ -69,25 +70,60 @@ afterEach(cleanupGlobals);
 const ALL_ENABLED: Record<string, unknown> = {
 	bindings: {
 		kind: { let: true, const: true, global: true },
-		events: { declare: true, initialize: true, available: true, assign: true, read: true },
+		events: {
+			declare: true,
+			initialize: true,
+			available: true,
+			assign: true,
+			read: true,
+		},
 	},
 	propertyAccess: { dot: true, bracket: true, optionalChaining: true },
 	operators: {
 		pure: {
-			arithmetic: true, addition: true, comparison: true, typeof: true,
-			negation: { logical: true, bitwise: true }, bitwise: true,
+			arithmetic: true,
+			addition: true,
+			comparison: true,
+			typeof: true,
+			negation: { logical: true, bitwise: true },
+			bitwise: true,
 		},
-		shortCircuiting: true, assignment: true,
+		shortCircuiting: true,
+		assignment: true,
 	},
-	literals: { string: true, boolean: true, number: true, undefined: true, null: true, regex: true },
+	literals: {
+		string: true,
+		boolean: true,
+		number: true,
+		undefined: true,
+		null: true,
+		regex: true,
+	},
 	templates: { begin: true, evaluation: true, end: true },
 	scopes: {
 		kind: { script: true, block: true, module: true },
-		events: { create: true, enter: true, interrupt: true, completion: true, leave: true },
+		events: {
+			create: true,
+			enter: true,
+			interrupt: true,
+			completion: true,
+			leave: true,
+		},
 	},
 	controlFlow: {
-		kind: { conditionals: true, loops: { while: true, doWhile: true, for: true, forOf: true } },
-		events: { test: true, branch: true, iteration: true, jump: true, do: true, initialize: true, increment: true },
+		kind: {
+			conditionals: true,
+			loops: { while: true, doWhile: true, for: true, forOf: true },
+		},
+		events: {
+			test: true,
+			branch: true,
+			iteration: true,
+			jump: true,
+			do: true,
+			initialize: true,
+			increment: true,
+		},
 	},
 	functions: { call: true, return: true },
 	with: true,
@@ -137,9 +173,13 @@ describe('advice integration', () => {
 		it('let declaration produces declare + initialize + available', () => {
 			const events = traceInNode('let x = 5;\n', ALL_ENABLED);
 			const bindingForX = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).name === 'x',
 			);
-			const eventTypes = bindingForX.map((e) => (e as Record<string, unknown>).event);
+			const eventTypes = bindingForX.map(
+				(e) => (e as Record<string, unknown>).event,
+			);
 
 			expect(eventTypes).toContain('declare');
 			expect(eventTypes).toContain('initialize');
@@ -149,7 +189,10 @@ describe('advice integration', () => {
 		it('let binding has kind "let"', () => {
 			const events = traceInNode('let x = 5;\n', ALL_ENABLED);
 			const declareEvent = events.find(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'declare' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'declare' &&
+					(e as Record<string, unknown>).name === 'x',
 			);
 
 			expect((declareEvent as Record<string, unknown>).kind).toBe('let');
@@ -158,7 +201,10 @@ describe('advice integration', () => {
 		it('const binding has kind "const"', () => {
 			const events = traceInNode('const y = 10;\n', ALL_ENABLED);
 			const declareEvent = events.find(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'declare' && (e as Record<string, unknown>).name === 'y',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'declare' &&
+					(e as Record<string, unknown>).name === 'y',
 			);
 
 			expect((declareEvent as Record<string, unknown>).kind).toBe('const');
@@ -167,7 +213,10 @@ describe('advice integration', () => {
 		it('initialize event has correct value', () => {
 			const events = traceInNode('let x = 5;\n', ALL_ENABLED);
 			const initEvent = events.find(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'initialize' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'initialize' &&
+					(e as Record<string, unknown>).name === 'x',
 			) as Record<string, unknown>;
 
 			expect(initEvent).toBeDefined();
@@ -177,7 +226,10 @@ describe('advice integration', () => {
 		it('reassignment produces assign event (not initialize)', () => {
 			const events = traceInNode('let x = 1;\nx = 2;\n', ALL_ENABLED);
 			const assignEvents = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'assign' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'assign' &&
+					(e as Record<string, unknown>).name === 'x',
 			);
 
 			expect(assignEvents.length).toBeGreaterThan(0);
@@ -186,7 +238,10 @@ describe('advice integration', () => {
 		it('variable read produces read event', () => {
 			const events = traceInNode('let x = 1;\nlet y = x;\n', ALL_ENABLED);
 			const readEvent = events.find(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'read' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'read' &&
+					(e as Record<string, unknown>).name === 'x',
 			);
 
 			expect(readEvent).toBeDefined();
@@ -201,7 +256,9 @@ describe('advice integration', () => {
 		it('arithmetic operator produces event', () => {
 			const events = traceInNode('let x = 1 + 2;\n', ALL_ENABLED);
 			const addEvent = events.find(
-				(e) => e.category === 'operator' && (e as Record<string, unknown>).operator === '+',
+				(e) =>
+					e.category === 'operator' &&
+					(e as Record<string, unknown>).operator === '+',
 			);
 			expect(addEvent).toBeDefined();
 		});
@@ -209,15 +266,22 @@ describe('advice integration', () => {
 		it('comparison operator produces event', () => {
 			const events = traceInNode('let x = 1 === 1;\n', ALL_ENABLED);
 			const compEvent = events.find(
-				(e) => e.category === 'operator' && (e as Record<string, unknown>).operator === '===',
+				(e) =>
+					e.category === 'operator' &&
+					(e as Record<string, unknown>).operator === '===',
 			);
 			expect(compEvent).toBeDefined();
 		});
 
 		it('typeof produces event', () => {
-			const events = traceInNode('let x = 5;\nlet y = typeof x;\n', ALL_ENABLED);
+			const events = traceInNode(
+				'let x = 5;\nlet y = typeof x;\n',
+				ALL_ENABLED,
+			);
 			const typeofEvent = events.find(
-				(e) => e.category === 'operator' && (e as Record<string, unknown>).operator === 'typeof',
+				(e) =>
+					e.category === 'operator' &&
+					(e as Record<string, unknown>).operator === 'typeof',
 			);
 			expect(typeofEvent).toBeDefined();
 		});
@@ -231,7 +295,9 @@ describe('advice integration', () => {
 		it('number literal', () => {
 			const events = traceInNode('let x = 42;\n', ALL_ENABLED);
 			const numLiteral = events.find(
-				(e) => e.category === 'literal' && (e as Record<string, unknown>).kind === 'number',
+				(e) =>
+					e.category === 'literal' &&
+					(e as Record<string, unknown>).kind === 'number',
 			);
 			expect(numLiteral).toBeDefined();
 		});
@@ -239,7 +305,9 @@ describe('advice integration', () => {
 		it('string literal', () => {
 			const events = traceInNode('let x = "hello";\n', ALL_ENABLED);
 			const strLiteral = events.find(
-				(e) => e.category === 'literal' && (e as Record<string, unknown>).kind === 'string',
+				(e) =>
+					e.category === 'literal' &&
+					(e as Record<string, unknown>).kind === 'string',
 			);
 			expect(strLiteral).toBeDefined();
 		});
@@ -247,7 +315,9 @@ describe('advice integration', () => {
 		it('boolean literal', () => {
 			const events = traceInNode('let x = true;\n', ALL_ENABLED);
 			const boolLiteral = events.find(
-				(e) => e.category === 'literal' && (e as Record<string, unknown>).kind === 'boolean',
+				(e) =>
+					e.category === 'literal' &&
+					(e as Record<string, unknown>).kind === 'boolean',
 			);
 			expect(boolLiteral).toBeDefined();
 		});
@@ -261,7 +331,9 @@ describe('advice integration', () => {
 		it('module-level scope produces create + enter + completion + leave', () => {
 			const events = traceInNode('let x = 5;\n', ALL_ENABLED);
 			const scopeEvents = events.filter((e) => e.category === 'scope');
-			const scopeEventTypes = scopeEvents.map((e) => (e as Record<string, unknown>).event);
+			const scopeEventTypes = scopeEvents.map(
+				(e) => (e as Record<string, unknown>).event,
+			);
 
 			expect(scopeEventTypes).toContain('create');
 			expect(scopeEventTypes).toContain('enter');
@@ -272,11 +344,16 @@ describe('advice integration', () => {
 		it('block scope has correct depth', () => {
 			const events = traceInNode('{\n  let x = 1;\n}\n', ALL_ENABLED);
 			const blockCreates = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'create' && (e as Record<string, unknown>).kind === 'block',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'create' &&
+					(e as Record<string, unknown>).kind === 'block',
 			);
 
 			expect(blockCreates.length).toBeGreaterThan(0);
-			expect((blockCreates[0] as Record<string, unknown>).depth).toBeGreaterThan(0);
+			expect(
+				(blockCreates[0] as Record<string, unknown>).depth,
+			).toBeGreaterThan(0);
 		});
 	});
 
@@ -303,7 +380,9 @@ describe('advice integration', () => {
 				ALL_ENABLED,
 			);
 			const iterEvents = events.filter(
-				(e) => e.category === 'controlFlow' && (e as Record<string, unknown>).event === 'iteration',
+				(e) =>
+					e.category === 'controlFlow' &&
+					(e as Record<string, unknown>).event === 'iteration',
 			);
 			expect(iterEvents.length).toBeGreaterThan(0);
 		});
@@ -326,7 +405,9 @@ describe('advice integration', () => {
 				ALL_ENABLED,
 			);
 			const jumpEvents = events.filter(
-				(e) => e.category === 'controlFlow' && (e as Record<string, unknown>).event === 'jump',
+				(e) =>
+					e.category === 'controlFlow' &&
+					(e as Record<string, unknown>).event === 'jump',
 			);
 			expect(jumpEvents.length).toBeGreaterThan(0);
 		});
@@ -361,7 +442,9 @@ describe('advice integration', () => {
 				ALL_ENABLED,
 			);
 			const templateEvents = events.filter((e) => e.category === 'template');
-			const templateTypes = templateEvents.map((e) => (e as Record<string, unknown>).event);
+			const templateTypes = templateEvents.map(
+				(e) => (e as Record<string, unknown>).event,
+			);
 
 			expect(templateTypes).toContain('begin');
 			expect(templateTypes).toContain('evaluation');
@@ -379,15 +462,25 @@ describe('advice integration', () => {
 				...ALL_ENABLED,
 				bindings: {
 					kind: { let: false, const: true, global: true },
-					events: { declare: true, initialize: true, available: true, assign: true, read: true },
+					events: {
+						declare: true,
+						initialize: true,
+						available: true,
+						assign: true,
+						read: true,
+					},
 				},
 			};
 			const events = traceInNode('let x = 5;\nconst y = 10;\n', config);
 			const letBindings = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).kind === 'let',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).kind === 'let',
 			);
 			const constBindings = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).kind === 'const',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).kind === 'const',
 			);
 
 			expect(letBindings.length).toBe(0);
@@ -399,15 +492,25 @@ describe('advice integration', () => {
 				...ALL_ENABLED,
 				bindings: {
 					kind: { let: true, const: true, global: true },
-					events: { declare: true, initialize: true, available: true, assign: true, read: false },
+					events: {
+						declare: true,
+						initialize: true,
+						available: true,
+						assign: true,
+						read: false,
+					},
 				},
 			};
 			const events = traceInNode('let x = 1;\nlet y = x;\n', config);
 			const readEvents = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'read',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'read',
 			);
 			const declareEvents = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'declare',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'declare',
 			);
 
 			expect(readEvents.length).toBe(0);
@@ -417,14 +520,25 @@ describe('advice integration', () => {
 		it('disabling literals.string removes string literal events', () => {
 			const config = {
 				...ALL_ENABLED,
-				literals: { string: false, number: true, boolean: true, undefined: true, null: true, regex: true },
+				literals: {
+					string: false,
+					number: true,
+					boolean: true,
+					undefined: true,
+					null: true,
+					regex: true,
+				},
 			};
 			const events = traceInNode('let x = "hello";\nlet y = 42;\n', config);
 			const stringLiterals = events.filter(
-				(e) => e.category === 'literal' && (e as Record<string, unknown>).kind === 'string',
+				(e) =>
+					e.category === 'literal' &&
+					(e as Record<string, unknown>).kind === 'string',
 			);
 			const numberLiterals = events.filter(
-				(e) => e.category === 'literal' && (e as Record<string, unknown>).kind === 'number',
+				(e) =>
+					e.category === 'literal' &&
+					(e as Record<string, unknown>).kind === 'number',
 			);
 
 			expect(stringLiterals.length).toBe(0);
@@ -441,10 +555,14 @@ describe('advice integration', () => {
 				config,
 			);
 			const callEvents = events.filter(
-				(e) => e.category === 'function' && (e as Record<string, unknown>).event === 'call',
+				(e) =>
+					e.category === 'function' &&
+					(e as Record<string, unknown>).event === 'call',
 			);
 			const returnEvents = events.filter(
-				(e) => e.category === 'function' && (e as Record<string, unknown>).event === 'return',
+				(e) =>
+					e.category === 'function' &&
+					(e as Record<string, unknown>).event === 'return',
 			);
 
 			expect(callEvents.length).toBe(0);

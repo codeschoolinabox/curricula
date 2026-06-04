@@ -6,7 +6,10 @@ and after their code. The learner steps through their program in DevTools.
 ## API
 
 ```ts
-function debug(code: string, maxIterations?: number): AsyncGenerator<DebugEvent, DebugResult>
+function debug(
+	code: string,
+	maxIterations?: number,
+): AsyncGenerator<DebugEvent, DebugResult>;
 ```
 
 - `maxIterations` — optional. If provided, body-injection loop guards throw
@@ -14,9 +17,9 @@ function debug(code: string, maxIterations?: number): AsyncGenerator<DebugEvent,
   supported (iframe shares main thread — no `worker.terminate()` available).
 - **Yields** — 0-1 `DebugEvent` (only on error: RangeError from loop guard or
   iframe access error)
-- **Returns** — `DebugResult` discriminated union: `{ ok: true, logs: [] }`
-  on success, or `{ ok: false, error: {...}, logs: [...] }` with the
-  classified error on failure. Frozen via `deepFreezeInPlace` before return.
+- **Returns** — `DebugResult` discriminated union: `{ ok: true, logs: [] }` on
+  success, or `{ ok: false, error: {...}, logs: [...] }` with the classified
+  error on failure. Frozen via `deepFreezeInPlace` before return.
 
 Wrapped by `createExecution` at a higher layer to produce an
 `Execution<DebugEvent, DebugResult>` with PromiseLike backward compatibility.
@@ -38,10 +41,10 @@ No DOM artifacts remain after execution completes.
 
 ## Structure
 
-| Path        | Purpose                                  |
-| ----------- | ---------------------------------------- |
-| `index.ts`  | Debug generator engine entry point       |
-| `types.ts`  | DebugEvent + DebugResult type exports    |
+| Path       | Purpose                               |
+| ---------- | ------------------------------------- |
+| `index.ts` | Debug generator engine entry point    |
+| `types.ts` | DebugEvent + DebugResult type exports |
 
 Loop guard injection uses `guard-loops/` from `../shared/guard-loops/` — the
 body-injection strategy (visible in DevTools).

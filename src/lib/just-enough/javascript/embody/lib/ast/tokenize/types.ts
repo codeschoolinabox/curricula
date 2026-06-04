@@ -17,11 +17,7 @@
  * `tokenize.ts` (Phase 1).
  */
 
-import type {
-	BaseError,
-	BaseEvent,
-	SyncExecution,
-} from '../shared/types.js';
+import type { BaseError, BaseEvent, SyncExecution } from '../shared/types.js';
 
 // ─── Yielded event variants ──────────────────────────────────
 

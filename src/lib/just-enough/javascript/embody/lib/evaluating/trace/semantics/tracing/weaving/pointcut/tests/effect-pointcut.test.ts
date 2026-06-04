@@ -5,7 +5,12 @@ import createEffectPointcut from '../effect-pointcut.js';
 const baseLoc = { start: { line: 1, column: 0 }, end: { line: 1, column: 5 } };
 
 function makeTag(overrides = {}) {
-	return { loc: baseLoc, node: 'AssignmentExpression', source: 'x = 5', ...overrides };
+	return {
+		loc: baseLoc,
+		node: 'AssignmentExpression',
+		source: 'x = 5',
+		...overrides,
+	};
 }
 
 describe('createEffectPointcut', () => {
@@ -27,7 +32,11 @@ describe('createEffectPointcut', () => {
 				operators: { assignment: true },
 			});
 			const result = pointcut(
-				{ type: 'WriteEffect', tag: makeTag({ operator: '+=' }), variable: 'x' },
+				{
+					type: 'WriteEffect',
+					tag: makeTag({ operator: '+=' }),
+					variable: 'x',
+				},
 				null,
 				null,
 			);

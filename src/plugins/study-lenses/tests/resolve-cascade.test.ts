@@ -113,7 +113,9 @@ describe('resolveCascade', () => {
 		// only the chapter contributions. Then we add a lenses.json at root;
 		// a subsequent resolve must see the expanded tracked set and fold
 		// both files.
-		const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-A6set-'));
+		const tmpDir = fs.mkdtempSync(
+			path.join(os.tmpdir(), 'study-lenses-A6set-'),
+		);
 		onTestFinished(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 		const chapterDir = path.join(tmpDir, 'chapter');
 		fs.mkdirSync(chapterDir);
@@ -138,9 +140,9 @@ describe('resolveCascade', () => {
 	});
 
 	it('empty contentRoot → throws (prevents silent cwd aliasing before cache lands)', () => {
-		expect(() =>
-			resolveCascade('/some/abs/path', { contentRoot: '' }),
-		).toThrow('contentRoot is required');
+		expect(() => resolveCascade('/some/abs/path', { contentRoot: '' })).toThrow(
+			'contentRoot is required',
+		);
 	});
 
 	it('exerciseSetPrefixes concatenates across cascade (root + child, deduped, root-first)', () => {
@@ -168,9 +170,9 @@ describe('resolveCascade', () => {
 	it('malformed lenses.json → throws with offending file path in message', () => {
 		const fixture = path.join(FIXTURES_DIR, 'malformed-json');
 
-		expect(() =>
-			resolveCascade(fixture, { contentRoot: fixture }),
-		).toThrow(/Malformed lenses\.json at .*malformed-json\/lenses\.json/);
+		expect(() => resolveCascade(fixture, { contentRoot: fixture })).toThrow(
+			/Malformed lenses\.json at .*malformed-json\/lenses\.json/,
+		);
 	});
 
 	it('lenses.json at root AND target but not intermediate → both files applied, no crash on missing intermediate', () => {

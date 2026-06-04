@@ -129,7 +129,8 @@ describe('parseStudyLensDirective', () => {
 	});
 
 	it('shebang preserved when directive appears after it', () => {
-		const src = '#!/usr/bin/env node\n/** @study-lens parsons */\nconst x = 1;\n';
+		const src =
+			'#!/usr/bin/env node\n/** @study-lens parsons */\nconst x = 1;\n';
 		expect(parseStudyLensDirective(src, P)?.strippedCode).toBe(
 			'#!/usr/bin/env node\nconst x = 1;\n',
 		);
@@ -212,9 +213,9 @@ describe('parseStudyLensDirective', () => {
 		// both sides, so it belongs to neither leading nor trailing
 		// comment block. Parser returns null; the directive is inert.
 		const src = [
-			"const a = 1;",
+			'const a = 1;',
 			'// @study-lens parsons',
-			"const b = 2;",
+			'const b = 2;',
 			'',
 		].join('\n');
 		expect(parseStudyLensDirective(src, P)).toBeNull();

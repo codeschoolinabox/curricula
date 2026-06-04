@@ -59,7 +59,11 @@ describe('createTracingGenerator prep failure — Zero', () => {
 
 describe('createTracingGenerator prep failure — One', () => {
 	it('returns failure with "expected code to be a string" when code is a number', async () => {
-		const gen = createTracingGenerator(42 as unknown as string, undefined, null);
+		const gen = createTracingGenerator(
+			42 as unknown as string,
+			undefined,
+			null,
+		);
 		const firstStep = await gen.next();
 		const result = firstStep.value as {
 			ok: boolean;
@@ -71,7 +75,11 @@ describe('createTracingGenerator prep failure — One', () => {
 	});
 
 	it('returns failure with "got object" when code is an object', async () => {
-		const gen = createTracingGenerator({} as unknown as string, undefined, null);
+		const gen = createTracingGenerator(
+			{} as unknown as string,
+			undefined,
+			null,
+		);
 		const firstStep = await gen.next();
 		const result = firstStep.value as {
 			ok: boolean;
@@ -155,11 +163,7 @@ describe('createTracingGenerator prep failure — Boundaries', () => {
 	});
 
 	it('returns failure when iterations is 0', async () => {
-		const gen = createTracingGenerator(
-			'let x = 5;',
-			{ iterations: 0 },
-			null,
-		);
+		const gen = createTracingGenerator('let x = 5;', { iterations: 0 }, null);
 		const firstStep = await gen.next();
 		const result = firstStep.value as {
 			ok: boolean;
@@ -171,11 +175,7 @@ describe('createTracingGenerator prep failure — Boundaries', () => {
 	});
 
 	it('returns failure when iterations is negative', async () => {
-		const gen = createTracingGenerator(
-			'let x = 5;',
-			{ iterations: -1 },
-			null,
-		);
+		const gen = createTracingGenerator('let x = 5;', { iterations: -1 }, null);
 		const firstStep = await gen.next();
 		const result = firstStep.value as {
 			ok: boolean;
@@ -331,11 +331,7 @@ describe('createTracingGenerator prep failure — Exceptions', () => {
 	});
 
 	it('.next() resolves with ok:false on semantic violation', async () => {
-		const gen = createTracingGenerator(
-			'let x = 5;',
-			{ iterations: -1 },
-			null,
-		);
+		const gen = createTracingGenerator('let x = 5;', { iterations: -1 }, null);
 		const step = await gen.next();
 		expect((step.value as { ok: boolean }).ok).toBe(false);
 	});

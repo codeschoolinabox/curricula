@@ -41,8 +41,8 @@ const GLOBAL_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		isJEJ: true,
 		whenToUse: 'To force a value to its numeric form.',
 		commonMistakes: [
-			"Returning NaN for unparseable strings: 'Number(\"hello\")' is NaN, not 0.",
-			"Confusing with 'parseInt' / 'parseFloat' — Number(\"3px\") is NaN, parseInt(\"3px\") is 3.",
+			'Returning NaN for unparseable strings: \'Number("hello")\' is NaN, not 0.',
+			'Confusing with \'parseInt\' / \'parseFloat\' — Number("3px") is NaN, parseInt("3px") is 3.',
 		],
 	},
 	Boolean: {
@@ -73,7 +73,7 @@ const GLOBAL_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		isJEJ: true,
 		whenToUse: 'For matching patterns within strings.',
 		commonMistakes: [
-			"Escaping issues when building from a string: 'new RegExp(\"\\\\d\")' for one literal backslash before d.",
+			'Escaping issues when building from a string: \'new RegExp("\\\\d")\' for one literal backslash before d.',
 		],
 	},
 	BigInt: {
@@ -98,8 +98,7 @@ const GLOBAL_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		],
 	},
 	parseFloat: {
-		description:
-			'Reads a floating-point number from the start of a string.',
+		description: 'Reads a floating-point number from the start of a string.',
 		example: 'parseFloat("3.14em"); // 3.14',
 		isJEJ: true,
 		whenToUse: 'To extract a leading float from a string.',
@@ -124,7 +123,7 @@ const GLOBAL_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		isJEJ: true,
 		whenToUse: 'For a quick yes/no decision from the user during practice.',
 		commonMistakes: [
-			"Forgetting the boolean return — 'confirm(\"x\");' alone discards the answer.",
+			'Forgetting the boolean return — \'confirm("x");\' alone discards the answer.',
 		],
 	},
 	prompt: {
@@ -132,10 +131,9 @@ const GLOBAL_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			'Shows a modal text-input dialog and returns the entered string, or null if cancelled.',
 		example: 'const name = prompt("What is your name?");',
 		isJEJ: true,
-		whenToUse:
-			'For a quick free-form input from the user during practice.',
+		whenToUse: 'For a quick free-form input from the user during practice.',
 		commonMistakes: [
-			"Treating the result as a number — prompt always returns a string (or null); convert with Number() or parseInt() if you need a number.",
+			'Treating the result as a number — prompt always returns a string (or null); convert with Number() or parseInt() if you need a number.',
 			"Forgetting the null on cancel — 'prompt(...)' returns null when the user dismisses the dialog.",
 		],
 	},

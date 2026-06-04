@@ -123,8 +123,7 @@ function isTrackedUnchanged(
 	if (before.length !== now.length) return false;
 	return before.every(
 		(entry, index) =>
-			entry.path === now[index]?.path &&
-			entry.mtime === now[index]?.mtime,
+			entry.path === now[index]?.path && entry.mtime === now[index]?.mtime,
 	);
 }
 
@@ -173,8 +172,7 @@ function readLensesFile(configPath: string): LensesConfigFile {
 	try {
 		return JSON.parse(raw) as LensesConfigFile;
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : String(error);
+		const message = error instanceof Error ? error.message : String(error);
 		throw new Error(`Malformed lenses.json at ${configPath}: ${message}`);
 	}
 }

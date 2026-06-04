@@ -17,7 +17,11 @@ function makeTag(overrides: Partial<JejTag> = {}): JejTag {
 
 function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 	return {
-		creationStep: 1, depth: 0, kind: 'module', structure: null, structureStep: null,
+		creationStep: 1,
+		depth: 0,
+		kind: 'module',
+		structure: null,
+		structureStep: null,
 		variables: { x: { kind: 'let', declarationStep: 2, initialized: true } },
 		...overrides,
 	};
@@ -25,8 +29,14 @@ function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 
 function makeState(overrides: Partial<TracerState> = {}): TracerState {
 	return {
-		trace: [], step: 3, eventStep: 0, scopeStack: [makeScope()], iterationCounters: {},
-		previousExpressionResult: null, lastReadValues: {}, lastExpressionResult: 5,
+		trace: [],
+		step: 3,
+		eventStep: 0,
+		scopeStack: [makeScope()],
+		iterationCounters: {},
+		previousExpressionResult: null,
+		lastReadValues: {},
+		lastExpressionResult: 5,
 		config: {
 			bindings: { kind: { let: true }, events: { assign: true } },
 			operators: { assignment: true },
@@ -55,7 +65,9 @@ describe('effectAfter', () => {
 
 		it('does not emit when binding gate is closed', () => {
 			const state = makeState({
-				config: { bindings: { kind: { let: false }, events: { assign: true } } },
+				config: {
+					bindings: { kind: { let: false }, events: { assign: true } },
+				},
 			});
 			effectAfter(state, 'x', makeTag());
 			expect(state.trace).toHaveLength(0);

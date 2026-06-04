@@ -118,8 +118,8 @@ async function buildExtensions(
 				const code = view.state.doc.toString();
 				if (!code.trim()) return [];
 
-				return runLinterCallbacks(linterCallbacks, code).map(
-					(d) => toCMDiagnostic(view.state.doc, d),
+				return runLinterCallbacks(linterCallbacks, code).map((d) =>
+					toCMDiagnostic(view.state.doc, d),
 				);
 			}),
 			lintGutter(),
@@ -226,7 +226,10 @@ async function buildExtensions(
 
 // ─── Helpers ────────────────────────────────────────────────
 
-async function loadLanguageExtension(language: string, extensions: Extension[]): Promise<void> {
+async function loadLanguageExtension(
+	language: string,
+	extensions: Extension[],
+): Promise<void> {
 	const loader = CM_LOADERS[language as keyof typeof CM_LOADERS];
 	if (!loader) return;
 

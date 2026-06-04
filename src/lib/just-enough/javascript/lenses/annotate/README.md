@@ -78,11 +78,11 @@ learners build comprehension by walking the source line-by-line while others
 build it by tracing the control-flow graph. Letting them toggle without losing
 their pen marks means the annotation surface serves both reading strategies.
 
-v1 ships the flowchart as a **static visual** the learner can pen-draw and
-note on (the same affordances as code-view). Clicking a flowchart node to
-correlate it with the source line marked up in code-view is the natural next
-step (see [Future direction](#future-direction)) but is deferred until the
-flowchart-node → source-position mapping is built.
+v1 ships the flowchart as a **static visual** the learner can pen-draw and note
+on (the same affordances as code-view). Clicking a flowchart node to correlate
+it with the source line marked up in code-view is the natural next step (see
+[Future direction](#future-direction)) but is deferred until the flowchart-node
+→ source-position mapping is built.
 
 ## Glossary
 
@@ -128,8 +128,8 @@ them is a contract change.
 
 Flowchart nodes carry `data-flowchart-node` attributes (added by a
 post-SVG-inject `useEffect` that walks the rendered SVG and tags candidate
-elements). These are **forward-ready infrastructure with no consumer in v1**
-— the deferred flowchart-node → source-line correlation feature (see
+elements). These are **forward-ready infrastructure with no consumer in v1** —
+the deferred flowchart-node → source-line correlation feature (see
 [Future direction](#future-direction)) is what would route node clicks via
 `event.target.closest('[data-flowchart-node]')` delegation.
 
@@ -243,20 +243,19 @@ Tests split: `tests/render-code.test.ts`, `tests/render-flowchart.test.ts`,
   dropped at migration. Restoration is its own increment per tool.
 - **Flowchart-node → source-line correlation.** A `select` (inspection) tool was
   specified in early Phase 0 and partially implemented during this WS4 batch,
-  then deferred.
-  The intended interaction — clicking a flowchart node jumps to (or previews)
-  the matching source line, building the cognitive link between syntactic source
-  and semantic flow — is the pedagogical payoff that justifies bringing the tool
-  back. It needs a flowchart-node → AST-position mapping (`js2flowchart` doesn't
-  expose source positions on its nodes; the mapping has to come from walking
-  embody's entwined-AST positions in parallel with the flow tree). The
-  `data-flowchart-node` tagger that the wrapper ships is forward-ready
-  infrastructure for this; the deferred increment wires the click handler and
-  the correlation UI. Caveat: the current positional `data-flowchart-node` ids
-  are a v1 placeholder — the correlation feature will likely need a stable
-  node identity derived from the AST walk, not DOM walk order over
-  `rect, polygon, circle` (which isn't guaranteed stable across `js2flowchart`
-  versions or re-parses).
+  then deferred. The intended interaction — clicking a flowchart node jumps to
+  (or previews) the matching source line, building the cognitive link between
+  syntactic source and semantic flow — is the pedagogical payoff that justifies
+  bringing the tool back. It needs a flowchart-node → AST-position mapping
+  (`js2flowchart` doesn't expose source positions on its nodes; the mapping has
+  to come from walking embody's entwined-AST positions in parallel with the flow
+  tree). The `data-flowchart-node` tagger that the wrapper ships is
+  forward-ready infrastructure for this; the deferred increment wires the click
+  handler and the correlation UI. Caveat: the current positional
+  `data-flowchart-node` ids are a v1 placeholder — the correlation feature will
+  likely need a stable node identity derived from the AST walk, not DOM walk
+  order over `rect, polygon, circle` (which isn't guaranteed stable across
+  `js2flowchart` versions or re-parses).
 - **Per-config Prism theme** — Prism theme is hard-coded to one default;
   per-config theme selection is deferred.
 

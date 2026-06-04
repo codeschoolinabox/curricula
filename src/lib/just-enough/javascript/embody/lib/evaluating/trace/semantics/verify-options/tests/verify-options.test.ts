@@ -47,7 +47,9 @@ describe('verifyOptions', () => {
 	// --- invalid cases (should throw) ---
 
 	it('throws Error when start > end', () => {
-		expect(() => verifyOptions({ range: { start: 10, end: 5 } })).toThrow(Error);
+		expect(() => verifyOptions({ range: { start: 10, end: 5 } })).toThrow(
+			Error,
+		);
 	});
 
 	it('includes start and end values in error message', () => {

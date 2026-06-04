@@ -76,10 +76,16 @@ function programPaths(
 	_scope: ScopeAnalysis,
 	_source: string,
 ): readonly CodeQuestion[] {
-	const hasBranching = collectNodes(
-		ast,
-		new Set(['IfStatement', 'ConditionalExpression', 'WhileStatement', 'ForOfStatement']),
-	).length > 0;
+	const hasBranching =
+		collectNodes(
+			ast,
+			new Set([
+				'IfStatement',
+				'ConditionalExpression',
+				'WhileStatement',
+				'ForOfStatement',
+			]),
+		).length > 0;
 
 	if (!hasBranching) {
 		return [];
@@ -153,8 +159,7 @@ function audiencePerspectiveTaking(
 			levels: ['goals', 'userExperience'],
 			location: extractLocation(ast),
 			nodeType: 'Program',
-			context:
-				'This program interacts with the **user** through dialog boxes.',
+			context: 'This program interacts with the **user** through dialog boxes.',
 			questions: [
 				{
 					register: 'open',

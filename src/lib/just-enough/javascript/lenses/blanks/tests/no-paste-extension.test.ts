@@ -10,7 +10,9 @@ describe('noPasteExtension', () => {
 		});
 
 		it('returns an array with at least two members (keymap + DOM handler)', () => {
-			expect((noPasteExtension() as readonly unknown[]).length).toBeGreaterThanOrEqual(2);
+			expect(
+				(noPasteExtension() as readonly unknown[]).length,
+			).toBeGreaterThanOrEqual(2);
 		});
 	});
 

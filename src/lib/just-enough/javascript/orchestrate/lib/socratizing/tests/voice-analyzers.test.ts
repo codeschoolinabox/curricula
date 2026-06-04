@@ -225,10 +225,7 @@ describe('voice analyzers', () => {
 		const analyze = getAnalyzer('operator-choice');
 
 		it('fires on ===', () => {
-			const results = analyzeAll(
-				'const x = 5;\nconst eq = x === 5;',
-				analyze,
-			);
+			const results = analyzeAll('const x = 5;\nconst eq = x === 5;', analyze);
 			expect(results).toHaveLength(1);
 		});
 
@@ -241,10 +238,7 @@ describe('voice analyzers', () => {
 		});
 
 		it('does not fire on < or >', () => {
-			const results = analyzeAll(
-				'const x = 5;\nconst lt = x < 10;',
-				analyze,
-			);
+			const results = analyzeAll('const x = 5;\nconst lt = x < 10;', analyze);
 			expect(results).toHaveLength(0);
 		});
 	});

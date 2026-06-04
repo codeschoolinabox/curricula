@@ -1,4 +1,7 @@
-import type { ShortCircuitingOperatorEvent, ValueRepresentation } from '../../types.js';
+import type {
+	ShortCircuitingOperatorEvent,
+	ValueRepresentation,
+} from '../../types.js';
 
 type ShortCircuitingParams = {
 	readonly operator: '&&' | '||' | '??';
@@ -15,13 +18,15 @@ type ShortCircuitingParams = {
  * @returns Domain-specific fields for a ShortCircuitingOperatorEvent
  * @throws {Error} If shortCircuited with right present, or not shortCircuited without right
  */
-function createShortCircuitingOperatorEvent({
-	operator,
-	left,
-	right,
-	result,
-	shortCircuited,
-}: ShortCircuitingParams = {} as ShortCircuitingParams): Omit<
+function createShortCircuitingOperatorEvent(
+	{
+		operator,
+		left,
+		right,
+		result,
+		shortCircuited,
+	}: ShortCircuitingParams = {} as ShortCircuitingParams,
+): Omit<
 	ShortCircuitingOperatorEvent,
 	'step' | 'semantics' | 'loc' | 'node' | 'source'
 > {

@@ -47,8 +47,7 @@ describe('format', () => {
 		});
 
 		it('collapses 3+ consecutive blank lines to one', async () => {
-			const input =
-				'function a() {}\n\n\n\nfunction b() {}\n';
+			const input = 'function a() {}\n\n\n\nfunction b() {}\n';
 			const result = await format(input);
 			expect(result).not.toMatch(/\n\n\n/);
 			expect(result).toContain('}\n\nfunction b()');
@@ -85,9 +84,7 @@ describe('format', () => {
 		});
 
 		it('is idempotent on input with preserved blank lines', async () => {
-			const once = await format(
-				'function a() {}\n\nfunction b() {}\n',
-			);
+			const once = await format('function a() {}\n\nfunction b() {}\n');
 			const twice = await format(once);
 			expect(twice).toBe(once);
 		});

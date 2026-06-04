@@ -42,11 +42,7 @@
 
 import { freezeInPlace } from '@utils/freeze.js';
 
-import type {
-	Blank,
-	BlankCorrectness,
-	EvaluationResult,
-} from '../types.js';
+import type { Blank, BlankCorrectness, EvaluationResult } from '../types.js';
 
 const PLACEHOLDER = '__';
 
@@ -122,7 +118,11 @@ function evaluateCorrectness(
 
 	// Leading anchor must be a prefix of learnerCode.
 	if (!learnerCode.startsWith(anchors[0]!)) {
-		return mapBackToBlankOrder(blanks, sortedBlanks, allUnfilledTexts(sortedBlanks));
+		return mapBackToBlankOrder(
+			blanks,
+			sortedBlanks,
+			allUnfilledTexts(sortedBlanks),
+		);
 	}
 
 	const learnerTexts: Array<string | null> = sortedBlanks.map(() => null);
@@ -132,10 +132,7 @@ function evaluateCorrectness(
 	while (i < sortedBlanks.length) {
 		// Group consecutive blanks separated by empty inter-anchors.
 		let groupEnd = i;
-		while (
-			groupEnd < sortedBlanks.length - 1 &&
-			anchors[groupEnd + 1] === ''
-		) {
+		while (groupEnd < sortedBlanks.length - 1 && anchors[groupEnd + 1] === '') {
 			groupEnd += 1;
 		}
 		const nextAnchor = anchors[groupEnd + 1]!;
@@ -194,9 +191,7 @@ function evaluateCorrectness(
 	return mapBackToBlankOrder(blanks, sortedBlanks, learnerTexts);
 }
 
-function allUnfilledTexts(
-	blanks: ReadonlyArray<Blank>,
-): Array<string | null> {
+function allUnfilledTexts(blanks: ReadonlyArray<Blank>): Array<string | null> {
 	return blanks.map(() => null);
 }
 

@@ -5,15 +5,14 @@ phases. Written for you (the human coordinator) — not for the agents themselve
 
 ## What this directory is for
 
-The syntax tracer at `lib/evaluating/trace/syntax/` is a **JEJ NM
-syntax-level tracer of the semantic-level tracer** (sibling at
-`../semantics/`). It aggregates raw semantic-tracer events into NM-step
-categories mapping to visible syntactic units, plus one data-flow-edge
-category (resolves), so lens authors write against NM semantics instead
-of raw events.
+The syntax tracer at `lib/evaluating/trace/syntax/` is a **JEJ NM syntax-level
+tracer of the semantic-level tracer** (sibling at `../semantics/`). It
+aggregates raw semantic-tracer events into NM-step categories mapping to visible
+syntactic units, plus one data-flow-edge category (resolves), so lens authors
+write against NM semantics instead of raw events.
 
-Both tracers are independently exportable — semantics is the core, syntax
-is an abstraction layer on top.
+Both tracers are independently exportable — semantics is the core, syntax is an
+abstraction layer on top.
 
 The plan for this work is in [PLAN.md](./PLAN.md). It contains:
 
@@ -59,8 +58,8 @@ Each Claude Code session is a **fresh start**. The agent has:
 
 **Implications:**
 
-- Everything an agent needs must be **in the repo** — not in your head, not in
-  a prior conversation, not in `~/.claude/`
+- Everything an agent needs must be **in the repo** — not in your head, not in a
+  prior conversation, not in `~/.claude/`
 - Long design sessions degrade fast. This plan was iterated across multiple
   sessions with a compaction midway. Prefer shorter focused sessions with
   frequent commits.
@@ -102,12 +101,12 @@ open, ask me questions. Do NOT write or edit any code before I've answered.
    - Terminal-step kind enums (initialization, write, emit, error kinds).
 3. Agent enters **Phase 0-A** — tracer doc updates (prompt signature, I/O mock
    API, event-timing footnote, operandSteps flagged as under-discussion).
-4. Agent refines **Phase 0** artifacts: update types.ts stubs to concrete
-   types, flesh out DOCS.md's NMConfig → TraceConfig mapping table, run AR-1
-   and AR-2, address verdicts.
+4. Agent refines **Phase 0** artifacts: update types.ts stubs to concrete types,
+   flesh out DOCS.md's NMConfig → TraceConfig mapping table, run AR-1 and AR-2,
+   address verdicts.
 5. You review Phase 0 artifacts and approve (0.7 + 0.8 commit).
-6. Agent enters **Phase 1** — ~26 TDD increments, one commit each (AR-3 +
-   AR-4 per increment per AGENTS.md).
+6. Agent enters **Phase 1** — ~26 TDD increments, one commit each (AR-3 + AR-4
+   per increment per AGENTS.md).
 7. You spot-check along the way.
 8. Agent does **Phase 2** — AR-5 pre-merge review.
 9. You do final review and approve the commit/merge.
@@ -117,8 +116,8 @@ open, ask me questions. Do NOT write or edit any code before I've answered.
 - Agent skipping Phase 0.1 open items and jumping to types.ts edits — stop it;
   it'll guess at Environment shape or NMConfig tree and lock in wrong choices.
 - Agent skipping adversarial reviews (AR-0A, AR-1, AR-2, AR-3, AR-4, AR-5).
-- Agent modifying the ARCHIVE canvas in PLAN.md — it's historical;
-  Resolutions supersede. Edits belong in Resolutions.
+- Agent modifying the ARCHIVE canvas in PLAN.md — it's historical; Resolutions
+  supersede. Edits belong in Resolutions.
 - Agent treating deferred items (Environment shape, NMConfig tree, Q3b,
   terminal-kinds) as settled — these need YOUR input first.
 - Agent removing dual-representation patterns (coercion as property + events;
@@ -128,8 +127,8 @@ open, ask me questions. Do NOT write or edit any code before I've answered.
   edge-based ResolveStep with singular `.from`/`.to`.
 - Agent proposing "pure helpers" (provenance, envPrefix, bindingTimeline) —
   explicitly rejected per Resolution 20.
-- Agent conflating tracer concerns with NM-layer concerns — the NM layer
-  PASSES THROUGH I/O mocks; it does not implement them (consumer concern).
+- Agent conflating tracer concerns with NM-layer concerns — the NM layer PASSES
+  THROUGH I/O mocks; it does not implement them (consumer concern).
 - Agent writing tests AFTER implementation (not TDD).
 - Large uncommitted changes (should be atomic commits per increment).
 
@@ -169,8 +168,8 @@ Draft from Phase 0.4 stub:
 }
 ```
 
-Check against tracer's `TraceConfig.options` structure for naming
-consistency. AST-aware vocabulary per Resolution 23.
+Check against tracer's `TraceConfig.options` structure for naming consistency.
+AST-aware vocabulary per Resolution 23.
 
 ### 3. Q3b — register-read decision
 
@@ -207,16 +206,16 @@ The NM layer is built on top of the semantic tracer. Phase 0-A makes small
 additions to tracer docs (at `just-enough/javascript/tracer.md`,
 `tracer.architecture.md`, `tracer.walkthroughs.md`):
 
-- `io: { prompt, alert, confirm, console }` field on `TraceConfig`.
-  `prompt` takes `(message: string, placeholder?: string)` per the spec.
-- Event-timing footnote: mocked vs native I/O have identical event sequences
-  but different wall-time (mocks gate inter-event gaps via main-thread await).
+- `io: { prompt, alert, confirm, console }` field on `TraceConfig`. `prompt`
+  takes `(message: string, placeholder?: string)` per the spec.
+- Event-timing footnote: mocked vs native I/O have identical event sequences but
+  different wall-time (mocks gate inter-event gaps via main-thread await).
 - `operandSteps: number[]` on operator events — **flagged as under-discussion,
   dispatcher-layer**; NOT committed in this DDD. Needs a separate tracer-side
   RFC.
 
-**Rule:** if the agent wants to modify the tracer spec beyond Phase 0-A's
-scope, STOP. Tracer changes need a separate RFC.
+**Rule:** if the agent wants to modify the tracer spec beyond Phase 0-A's scope,
+STOP. Tracer changes need a separate RFC.
 
 ## Git strategy
 
@@ -232,14 +231,14 @@ nm/phase-1-<other>
 ### Commit conventions
 
 - Each TDD increment = one atomic commit (Phase 1).
-- Phase 0-A tracer doc updates: separate commit (`docs: add tracer I/O mock
-  configuration spec`).
-- Phase 0 DDD completion: commit after 0.8 (`docs: establish trace/syntax
-  domain model and architectural sketch`).
+- Phase 0-A tracer doc updates: separate commit
+  (`docs: add tracer I/O mock configuration spec`).
+- Phase 0 DDD completion: commit after 0.8
+  (`docs: establish trace/syntax domain model and architectural sketch`).
 - Commit messages per AGENTS.md: `add:`, `docs:`, `fix:`, `refactor:`.
 - Commit after EVERY passing increment in Phase 1 — don't batch.
-- If the agent's session ends mid-work: commit what's done with a
-  `checkpoint:` prefix so the next session can pick up.
+- If the agent's session ends mid-work: commit what's done with a `checkpoint:`
+  prefix so the next session can pick up.
 
 ### Merge order
 
@@ -276,8 +275,8 @@ The agent should update these before ending a session:
 1. A notes file `notes.md` in this directory (decisions made, current state,
    what's next, any deviations from PLAN.md).
 2. Git commits (all completed increments).
-3. PLAN.md Resolutions (if the plan changed during implementation — additions
-   go as new numbered Resolutions; amendments annotate existing ones).
+3. PLAN.md Resolutions (if the plan changed during implementation — additions go
+   as new numbered Resolutions; amendments annotate existing ones).
 
 The NEXT agent picks up by reading: PLAN.md + notes.md + git log.
 
@@ -300,8 +299,8 @@ If you use `isolation: "worktree"` for parallel agents:
   - DOCS.md should be readable together and predict the implementation).
 - **Review adversarial-review verdicts** — if AR-1, AR-2, AR-3, AR-4, or AR-5
   flags CONSIDER or PAUSE, you decide how to respond.
-- **Spot-check TDD increments** — verify tests are meaningful, not
-  tautological; verify Fake-It-first followed by real implementation.
+- **Spot-check TDD increments** — verify tests are meaningful, not tautological;
+  verify Fake-It-first followed by real implementation.
 - **Decide on deferred items** as they surface.
 - **Verify no backwards-incompatible changes** to the tracer contract beyond
   Phase 0-A.
@@ -317,21 +316,21 @@ If you use `isolation: "worktree"` for parallel agents:
 
 ## Quick reference: what's in `lib/evaluating/trace/syntax/`
 
-| File                   | Purpose                                              |
-| ---------------------- | ---------------------------------------------------- |
-| `PLAN.md`              | Full DDD plan (Resolutions + phases + ARCHIVE)       |
-| `development-guide.md` | This file (for you, not for agents)                  |
-| `README.md`            | Phase 0.2 output — module README with diagrams/tables|
-| `DOCS.md`              | Phase 0.5 output — architectural sketch              |
-| `types.ts`             | Phase 0.4 output — public types (partial; stubs flagged) |
-| `notes.md`             | Created by agent during work — decisions/blockers    |
-| `nm.ts`, `aggregate-steps/`, etc. | Phase 1 implementation files (not yet)    |
+| File                              | Purpose                                                  |
+| --------------------------------- | -------------------------------------------------------- |
+| `PLAN.md`                         | Full DDD plan (Resolutions + phases + ARCHIVE)           |
+| `development-guide.md`            | This file (for you, not for agents)                      |
+| `README.md`                       | Phase 0.2 output — module README with diagrams/tables    |
+| `DOCS.md`                         | Phase 0.5 output — architectural sketch                  |
+| `types.ts`                        | Phase 0.4 output — public types (partial; stubs flagged) |
+| `notes.md`                        | Created by agent during work — decisions/blockers        |
+| `nm.ts`, `aggregate-steps/`, etc. | Phase 1 implementation files (not yet)                   |
 
 ## One last note
 
 This DDD was iterated hard — 40+ rounds, one context compaction, multiple
-adversarial agent reviews. Treat the Resolutions as load-bearing. When a
-fresh agent wants to change a Resolution: they need a compelling reason AND
-your approval, not a fresh opinion. The ARCHIVE canvas in PLAN.md explains
-why each Resolution is what it is — read it when you want the history, skip
-it when you want the decision.
+adversarial agent reviews. Treat the Resolutions as load-bearing. When a fresh
+agent wants to change a Resolution: they need a compelling reason AND your
+approval, not a fresh opinion. The ARCHIVE canvas in PLAN.md explains why each
+Resolution is what it is — read it when you want the history, skip it when you
+want the decision.

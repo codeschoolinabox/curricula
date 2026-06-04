@@ -366,7 +366,10 @@ function buildEarlyResult(
 	// the neighbor is known at build time, so accessor backing isn't needed.
 	// Same observable shape as the streaming-path appendEvent helper.
 	for (let i = 0; i < linked.length; i++) {
-		const ev = linked[i] as { prev: LinkedInterceptEvent | null; next: LinkedInterceptEvent | null };
+		const ev = linked[i] as {
+			prev: LinkedInterceptEvent | null;
+			next: LinkedInterceptEvent | null;
+		};
 		ev.prev = i > 0 ? (linked[i - 1] ?? null) : null;
 		ev.next = i + 1 < linked.length ? (linked[i + 1] ?? null) : null;
 		Object.freeze(linked[i]);
@@ -537,12 +540,16 @@ function createInterceptGenerator(
 		const prevRef = eventListTail; // captured at define time, stable
 		let nextRef: LinkedInterceptEvent | null = null;
 		Object.defineProperty(enriched, 'prev', {
-			get(): LinkedInterceptEvent | null { return prevRef; },
+			get(): LinkedInterceptEvent | null {
+				return prevRef;
+			},
 			enumerable: true,
 			configurable: false,
 		});
 		Object.defineProperty(enriched, 'next', {
-			get(): LinkedInterceptEvent | null { return nextRef; },
+			get(): LinkedInterceptEvent | null {
+				return nextRef;
+			},
 			enumerable: true,
 			configurable: false,
 		});
@@ -550,7 +557,9 @@ function createInterceptGenerator(
 		if (setTailNext !== null) setTailNext(enriched);
 		// Update tail state for the next iteration.
 		eventListTail = enriched;
-		setTailNext = (n) => { nextRef = n; };
+		setTailNext = (n) => {
+			nextRef = n;
+		};
 		eventsArray.push(enriched);
 		// Safe: prev/next are accessor properties; data fields were all
 		// set by enrichEvent before appendEvent ran.

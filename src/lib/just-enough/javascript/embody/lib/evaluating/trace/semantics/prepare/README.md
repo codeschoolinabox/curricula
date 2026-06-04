@@ -7,8 +7,8 @@ canonical schema, runs cross-field semantic checks, and returns the prepared
 config ready for execution.
 
 Both the streaming path (`api/trace.ts`) and any batch consumer get identical
-prep without duplicating the logic, because the tracer itself is the single
-call site.
+prep without duplicating the logic, because the tracer itself is the single call
+site.
 
 ## Pipeline
 
@@ -25,16 +25,16 @@ prepareForTrace(code, config?)
 
 ## Files
 
-| File | Purpose |
-| --- | --- |
-| `prepare-for-trace.ts` | Main entry point — orchestrates the pipeline |
-| `prepare-config.ts` | 3-stage wrapper: expand → fill → validate |
-| `expand-shorthand.ts` | Recursive boolean-shorthand expander |
-| `fill-defaults.ts` | AJV-backed default filling |
-| `validate-config.ts` | AJV-backed schema validation |
-| `verify-options.ts` | Cross-field semantic checks (range, iterations, seconds) |
-| `ajv.ts` | CJS/ESM interop wrapper for `ajv/dist/2020.js` |
-| `types.ts` | `PreparedTraceInput` + `JSONSchema` types |
+| File                   | Purpose                                                  |
+| ---------------------- | -------------------------------------------------------- |
+| `prepare-for-trace.ts` | Main entry point — orchestrates the pipeline             |
+| `prepare-config.ts`    | 3-stage wrapper: expand → fill → validate                |
+| `expand-shorthand.ts`  | Recursive boolean-shorthand expander                     |
+| `fill-defaults.ts`     | AJV-backed default filling                               |
+| `validate-config.ts`   | AJV-backed schema validation                             |
+| `verify-options.ts`    | Cross-field semantic checks (range, iterations, seconds) |
+| `ajv.ts`               | CJS/ESM interop wrapper for `ajv/dist/2020.js`           |
+| `types.ts`             | `PreparedTraceInput` + `JSONSchema` types                |
 
 ## Error handling
 
@@ -43,11 +43,12 @@ Every step throws a plain `Error` with a descriptive message. JEJ has no shared
 argument / schema / semantic errors. A later sprint may promote to dedicated
 classes.
 
-The tracer (`createTracingGenerator`) catches these errors and wraps them into
-a failure `TraceResult` with `ok: false` and `phase: 'creation'`.
+The tracer (`createTracingGenerator`) catches these errors and wraps them into a
+failure `TraceResult` with `ok: false` and `phase: 'creation'`.
 
 ## Navigation
 
 - [DOCS.md](./DOCS.md) — architectural sketch, design decisions
-- [../tracing/index.ts](../tracing/index.ts) — the tracer that calls `prepareForTrace`
+- [../tracing/index.ts](../tracing/index.ts) — the tracer that calls
+  `prepareForTrace`
 - [../README.md](../README.md) — trace module overview

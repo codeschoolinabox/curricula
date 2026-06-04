@@ -85,7 +85,9 @@ describe('buildLocationIndex', () => {
 			const index = indexFor('let x = 1;\nlet y = 2;');
 			expect(index.exactStarts.has('1:0')).toBe(true);
 			expect(index.exactStarts.has('2:0')).toBe(true);
-			expect(index.exactStarts.get('1:0')).not.toBe(index.exactStarts.get('2:0'));
+			expect(index.exactStarts.get('1:0')).not.toBe(
+				index.exactStarts.get('2:0'),
+			);
 		});
 	});
 
@@ -104,7 +106,8 @@ describe('buildLocationIndex', () => {
 			const index = indexFor('console.log(1);');
 			const callExpr = index.astByPath.get('$.body.0.expression')!;
 			const callee = (callExpr as unknown as { callee: unknown }).callee;
-			const argsArray = (callExpr as unknown as { arguments: unknown[] }).arguments;
+			const argsArray = (callExpr as unknown as { arguments: unknown[] })
+				.arguments;
 			// children[0] === .callee, children[1] === .arguments[0]
 			expect(callExpr.children[0]).toBe(callee);
 			expect(callExpr.children[1]).toBe(argsArray[0]);
@@ -147,9 +150,7 @@ describe('buildLocationIndex', () => {
 			// grouped (all quasis, then all expressions, or vice-versa).
 			// `children` must reflect source order: quasi, expr, quasi.
 			const index = indexFor('let s = `hello ${name} world`;');
-			const tl = index.astByPath.get(
-				'$.body.0.declarations.0.init',
-			)!;
+			const tl = index.astByPath.get('$.body.0.declarations.0.init')!;
 			expect(tl.type).toBe('TemplateLiteral');
 			expect(tl.children.length).toBe(3);
 			expect(tl.children[0]!.type).toBe('TemplateElement');

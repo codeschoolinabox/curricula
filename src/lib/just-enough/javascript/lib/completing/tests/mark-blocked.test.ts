@@ -33,7 +33,9 @@ describe('markBlocked', () => {
 	describe('blocked synthesis — identifier-context', () => {
 		describe('var (JEJ-blocked declaration)', () => {
 			const result = markBlocked([]);
-			const variableItem = result.find((candidate) => candidate.label === 'var');
+			const variableItem = result.find(
+				(candidate) => candidate.label === 'var',
+			);
 
 			it('appears as a synthesized item', () => {
 				expect(variableItem).toBeDefined();
@@ -56,16 +58,24 @@ describe('markBlocked', () => {
 			});
 		});
 
-		it.each(['var', 'function', 'class', '=>', 'this', 'throw', 'try', 'import', 'async', 'await'])(
-			'%s appears as blocked with inline (not in JEJ) detail',
-			(label) => {
-				const result = markBlocked([]);
-				const item = result.find((candidate) => candidate.label === label);
-				expect(item?.type).toBe('blocked');
-				expect(item?.detail).toBe('(not in JEJ)');
-				expect(item?.entry).toBeUndefined();
-			},
-		);
+		it.each([
+			'var',
+			'function',
+			'class',
+			'=>',
+			'this',
+			'throw',
+			'try',
+			'import',
+			'async',
+			'await',
+		])('%s appears as blocked with inline (not in JEJ) detail', (label) => {
+			const result = markBlocked([]);
+			const item = result.find((candidate) => candidate.label === label);
+			expect(item?.type).toBe('blocked');
+			expect(item?.detail).toBe('(not in JEJ)');
+			expect(item?.entry).toBeUndefined();
+		});
 
 		it.each(['new', 'null'])(
 			'%s does NOT appear as blocked (advisory stumbles live in documenting/keywords.ts)',
@@ -80,13 +90,27 @@ describe('markBlocked', () => {
 			'%s does NOT appear in identifier-context (dot-member partition)',
 			(label) => {
 				const result = markBlocked([]);
-				expect(result.find((candidate) => candidate.label === label)).toBeUndefined();
+				expect(
+					result.find((candidate) => candidate.label === label),
+				).toBeUndefined();
 			},
 		);
 	});
 
 	describe('blocked synthesis — dot-context', () => {
-		it.each(['split', 'match', 'matchAll', 'constructor', '__proto__', 'prototype', 'call', 'apply', 'bind', 'caller', 'arguments'])(
+		it.each([
+			'split',
+			'match',
+			'matchAll',
+			'constructor',
+			'__proto__',
+			'prototype',
+			'call',
+			'apply',
+			'bind',
+			'caller',
+			'arguments',
+		])(
 			'%s appears as blocked in dot-receiver context with inline detail',
 			(label) => {
 				const result = markBlocked([], true);
@@ -101,7 +125,9 @@ describe('markBlocked', () => {
 			'%s does NOT appear in dot-context (identifier partition)',
 			(label) => {
 				const result = markBlocked([], true);
-				expect(result.find((candidate) => candidate.label === label)).toBeUndefined();
+				expect(
+					result.find((candidate) => candidate.label === label),
+				).toBeUndefined();
 			},
 		);
 	});

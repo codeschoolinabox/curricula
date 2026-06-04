@@ -31,9 +31,7 @@ describe('checkFormat', () => {
 	});
 
 	it('returns formatted true for code with preserved blank lines (formatted output)', async () => {
-		const code = await format(
-			'function a() {}\n\nfunction b() {}\n',
-		);
+		const code = await format('function a() {}\n\nfunction b() {}\n');
 		const result = await checkFormat(code);
 		expect(result.formatted).toBe(true);
 	});

@@ -1,18 +1,16 @@
 # Welcome to Frogramming — Chapters
 
 > **Purpose**: chapter-by-chapter redraft with 5-layer learning-objective grids,
-> drawing framing from `ontology.md` and the intellectual-agency
-> meta-LO from `guide.learners.md`. Six chapters (Ch0–Ch5), each
-> with a unified overview + five layer-headed LO lists (`### Layer 0` through
-> `### Layer 4`).
+> drawing framing from `ontology.md` and the intellectual-agency meta-LO from
+> `guide.learners.md`. Six chapters (Ch0–Ch5), each with a unified overview +
+> five layer-headed LO lists (`### Layer 0` through `### Layer 4`).
 >
 > **Companions** (siblings, by co-location):
 >
 > - `ontology.md` — the _what_ (reference voice)
-> - `guide.{learners,authors,community}.md` — the _why_ per
->   audience
-> - `study-lenses.md` — the technical-reader companion for the
->   infrastructure that delivers chapter content
+> - `guide.{learners,authors,community}.md` — the _why_ per audience
+> - `study-lenses.md` — the technical-reader companion for the infrastructure
+>   that delivers chapter content
 > - `README.md` — the existing prose course (read-only)
 >
 > **Status**: end-state document. The previous chapter prose in `README.md` is
@@ -72,11 +70,10 @@
 
 ### The audience YOU are becoming
 
-The student is themselves an audience throughout the curriculum, at
-increasing levels of recursion. This is the audience ladder read from
-the inside — the YOU-becoming reading of the same arc. Each chapter
-adds a perspective future-you must hold. The course teaches the student
-to BECOME a poly-perspective self.
+The student is themselves an audience throughout the curriculum, at increasing
+levels of recursion. This is the audience ladder read from the inside — the
+YOU-becoming reading of the same arc. Each chapter adds a perspective future-you
+must hold. The course teaches the student to BECOME a poly-perspective self.
 
 | Chapter | Future-you is…                                                                  |
 | ------- | ------------------------------------------------------------------------------- |
@@ -90,21 +87,20 @@ to BECOME a poly-perspective self.
 
 Two dimensions organize the chapter sequence:
 
-- The **ladder** (chapter sequence) adds an audience to the learner's
-  awareness — one new audience per chapter (developers → computer →
-  users → agents → self).
-- The **spiral** (within each chapter) revisits skills at increasing
-  depth: read → trace → describe → modify → write. Bruner's spiral
-  curriculum operationalized at the skill scale.
+- The **ladder** (chapter sequence) adds an audience to the learner's awareness
+  — one new audience per chapter (developers → computer → users → agents →
+  self).
+- The **spiral** (within each chapter) revisits skills at increasing depth: read
+  → trace → describe → modify → write. Bruner's spiral curriculum
+  operationalized at the skill scale.
 
-Study Lenses generates exercises that drive the spiral at the
-exercise level. Each LO marks where a skill is _first introduced_, not
-where it ends.
+Study Lenses generates exercises that drive the spiral at the exercise level.
+Each LO marks where a skill is _first introduced_, not where it ends.
 
 ### Per-chapter metaphor anchors
 
-Each chapter has a single metaphor anchor (named once in each chapter's
-overview block, not repeated per layer):
+Each chapter has a single metaphor anchor (named once in each chapter's overview
+block, not repeated per layer):
 
 | Chapter | Metaphor anchor                                                |
 | ------- | -------------------------------------------------------------- |
@@ -115,8 +111,8 @@ overview block, not repeated per layer):
 | Ch4     | the composer-virtuoso asymmetric duet (with an alien virtuoso) |
 | Ch5     | the composer's daily practice (Ligeti / Bach / sketches)       |
 
-The metaphor system is **teaching apparatus, explicitly NOT structural
-guide** — see `metaphor.md` for the canonical treatment.
+The metaphor system is **teaching apparatus, explicitly NOT structural guide** —
+see `metaphor.md` for the canonical treatment.
 
 ---
 
@@ -126,8 +122,8 @@ No language features. Conceptual orientation only.
 
 ### Metaphor anchor
 
-_**The recital as rhetorical situation** — an entire performance event with
-its audience, its performers, its instrument, and the score that ties them
+_**The recital as rhetorical situation** — an entire performance event with its
+audience, its performers, its instrument, and the score that ties them
 together._
 
 ### Overview
@@ -491,9 +487,9 @@ string literals.
 
 ### Metaphor anchor
 
-_**The score as inter-composer communication** — other composers read your
-score for intent and style, long before (or entirely instead of) ever
-hearing it performed. Code has the same property._
+_**The score as inter-composer communication** — other composers read your score
+for intent and style, long before (or entirely instead of) ever hearing it
+performed. Code has the same property._
 
 ### Overview
 
@@ -655,8 +651,8 @@ _(sparse — Ch1 is dense at L1, light elsewhere)_
 ### Metaphor anchor
 
 _**Studying the instrument's mechanisms** — like an organ builder examining
-bellows, tracker action, registration, and combination action, you study
-how the JavaScript engine actually carries out your instructions._
+bellows, tracker action, registration, and combination action, you study how the
+JavaScript engine actually carries out your instructions._
 
 ### Overview
 
@@ -1227,8 +1223,8 @@ applied in programs where user interactions are the fixed behavioral anchors.
 
 _**Writing for an audience, the composer's design thinking** — the concert
 audience is real: they cheer, boo, throw tomatoes or flowers. The composer
-rehearses with the mechanism, workshops with virtuosos, and focus-groups
-with listeners. Design thinking across the whole situation._
+rehearses with the mechanism, workshops with virtuosos, and focus-groups with
+listeners. Design thinking across the whole situation._
 
 ### Overview
 
@@ -1245,14 +1241,13 @@ The chapter's intellectual-agency move: _you make programs for people who will
 never see your code, and the test of your work is whether it serves them._ The
 user-twin is the V-side of the V/F symmetry.
 
-**The second level of code audience.** Code has two audiences in any
-chapter, not one. The first is _deterministic_ — the NM, which evaluates
-code literally and predictably (F's territory). The second is
-_non-deterministic and emergent_ — the user's lived experience of what
-the NM produces. Both V and F write for the second audience; neither
-controls it directly. The NM is the instrument; the experience is the
-concert. The work of both hats is to set up conditions that make the
-experience the program serves possible. (Two-scale instrument reading —
+**The second level of code audience.** Code has two audiences in any chapter,
+not one. The first is _deterministic_ — the NM, which evaluates code literally
+and predictably (F's territory). The second is _non-deterministic and emergent_
+— the user's lived experience of what the NM produces. Both V and F write for
+the second audience; neither controls it directly. The NM is the instrument; the
+experience is the concert. The work of both hats is to set up conditions that
+make the experience the program serves possible. (Two-scale instrument reading —
 see ontology §7 strand-4 and `metaphor.md` two-scale extension.)
 
 ### 3.1 User Input and Output
@@ -1454,10 +1449,9 @@ requires its own communication skills.
 
 ### Metaphor anchor
 
-_**The composer-virtuoso asymmetric duet** — with an alien virtuoso this
-time. Dazzling, fast, pattern-rich, but cognitively distinct from human
-virtuosos. Collaboration is specifically different, and this chapter digs
-into why._
+_**The composer-virtuoso asymmetric duet** — with an alien virtuoso this time.
+Dazzling, fast, pattern-rich, but cognitively distinct from human virtuosos.
+Collaboration is specifically different, and this chapter digs into why._
 
 ### Overview
 
@@ -1475,22 +1469,22 @@ and to relish productive divergence.
 **Chapter 4's shape draws on a 4-level AI-adoption model** originally developed
 by Evan Cole with collaborators Janet Tilstra and Josenne Peña (the curriculum
 author's prior work). That model has since been refined into the framework now
-canonical in `ontology.md`: the **§9 lenses** (a general-systems view
-of analytical levels at which any system can be read, with AI as one instance),
+canonical in `ontology.md`: the **§9 lenses** (a general-systems view of
+analytical levels at which any system can be read, with AI as one instance),
 **§10 substrate substitution** (deterministic → non-deterministic at
 artifact-logic), and **§11 three roles of agential AI** (Role 1 study partner /
 Role 2 dev collaborator / Role 3 active component). **Chapter 4 = Role 2 (dev
-collaborator)** — Role 1 already worked quietly across Ch0–3; Role 3 is
-deferred to later learning. The organizing line for the chapter: _you twin the
-AI as collaborator — F's lens reads it as cognitive substrate (NM-grounded
-mode); V's lens reads its behavioral surface (user-grounded mode); two modes
-of collaboration, one JEJ artifact under construction_. See ontology §11 for
-the canonical framework.
+collaborator)** — Role 1 already worked quietly across Ch0–3; Role 3 is deferred
+to later learning. The organizing line for the chapter: _you twin the AI as
+collaborator — F's lens reads it as cognitive substrate (NM-grounded mode); V's
+lens reads its behavioral surface (user-grounded mode); two modes of
+collaboration, one JEJ artifact under construction_. See ontology §11 for the
+canonical framework.
 
-**The both-twins corner of the twin/process 2×2** (see `ontology.md`
-§4): Ch4 develops the both-twins state in its LLM-collaborative form — V and F
-operating together alongside an alien third intelligence. The user-twin and the
-NM-twin both stay yours; what gets delegated is the production of the code that
+**The both-twins corner of the twin/process 2×2** (see `ontology.md` §4): Ch4
+develops the both-twins state in its LLM-collaborative form — V and F operating
+together alongside an alien third intelligence. The user-twin and the NM-twin
+both stay yours; what gets delegated is the production of the code that
 satisfies both.
 
 ### 4.0 Wrapping premise — code is the UI for the NM
@@ -1676,8 +1670,8 @@ look similar from outside.
 - 🐣 Describe at least 2 key differences between LLM "cognition" and human
   reasoning
 - 🐣 Identify when an LLM is likely to be unreliable (the jagged frontier)
-- 🐥 Use the lenses-and-roles framework (ontology §9 + §11) to discuss AI at
-  the appropriate position relative to your work
+- 🐥 Use the lenses-and-roles framework (ontology §9 + §11) to discuss AI at the
+  appropriate position relative to your work
 - 🐥 Explain the Gell-Mann Amnesia effect in the context of LLM output
 - 🥚 Given an LLM response, hypothesize what patterns it might be matching
 - 🥚 Write clear, specific prompts that provide necessary context
@@ -1745,8 +1739,8 @@ look similar from outside.
   frame covers; flag as territory for post-curriculum learning
 - 🐥 _(deeper section)_ Encounter Friston's "A Duet for One" — _"understanding
   just IS the alignment of generative models into a single coherent predictive
-  process"_ — and consider: does this framing illuminate your conversations
-  with the alien virtuoso, or strain when applied to a non-biological partner?
+  process"_ — and consider: does this framing illuminate your conversations with
+  the alien virtuoso, or strain when applied to a non-biological partner?
 - 🐔 Reflect on the difference between "it runs" and "I understand it" — the
   boundary the LLM tests every day
 
@@ -1756,11 +1750,10 @@ look similar from outside.
 
 ### Metaphor anchor
 
-_**The composer's daily practice** — small, complete pieces written for
-the composer's own practice. Variations on a theme, études on a single
-technique, sketchbook entries exploring an idea — Ligeti's Musica
-Ricercata, Beethoven's sketchbooks, Bach's inventions. A serious genre
-in its own right._
+_**The composer's daily practice** — small, complete pieces written for the
+composer's own practice. Variations on a theme, études on a single technique,
+sketchbook entries exploring an idea — Ligeti's Musica Ricercata, Beethoven's
+sketchbooks, Bach's inventions. A serious genre in its own right._
 
 ### Overview
 
@@ -1778,9 +1771,8 @@ provides the daily reps?_ Snippetry is the experience-form of NM-maintenance —
 the daily reps that keep the automated library of past experiences alive once
 full-codebase work no longer provides them.
 
-**Arc closure.** The arc that opened in Ch1 with _write for future-you as
-an audience_ closes here as _write for yourself as a human_. Same self,
-end-to-end.
+**Arc closure.** The arc that opened in Ch1 with _write for future-you as an
+audience_ closes here as _write for yourself as a human_. Same self, end-to-end.
 
 The chapter's intellectual-agency move: _you can use programming as a tool for
 thought, on whatever problems and ideas interest you, for the rest of your
@@ -1788,12 +1780,12 @@ life._ Snippetry is how the Frogrammer keeps the NM alive between full-codebase
 projects — and how the Vibetoader sketches quick experiences without the weight
 of production.
 
-**The both-twins corner of the twin/process 2×2** (see `ontology.md`
-§4): Ch5 develops the both-twins state in its merged form — V and F operating as
-a single integrated practice. Snippetry is where the two stances stop being
-separate hats and start being the same gesture: each small program is at once a
-user-twin sketch and an NM-twin probe. The Bakhtiarian-loop unification names
-this in operational terms.
+**The both-twins corner of the twin/process 2×2** (see `ontology.md` §4): Ch5
+develops the both-twins state in its merged form — V and F operating as a single
+integrated practice. Snippetry is where the two stances stop being separate hats
+and start being the same gesture: each small program is at once a user-twin
+sketch and an NM-twin probe. The Bakhtiarian-loop unification names this in
+operational terms.
 
 > The best authors and the best JavaScript developers are those who obsess about
 > language, who explore and experiment with language every day and in doing so
@@ -2037,10 +2029,10 @@ guide what each region of each chapter delivers.
 
 - `ontology.md` — the reference framework these chapters instantiate
 - `guide.learners.md` — the _why_ addressed to learners
-- `guide.authors.md` — the _why_ addressed to curriculum authors /
-  forkers / contributors
-- `guide.community.md` — the _why_ addressed to partner
-  communities, mentors, cohort hosts
+- `guide.authors.md` — the _why_ addressed to curriculum authors / forkers /
+  contributors
+- `guide.community.md` — the _why_ addressed to partner communities, mentors,
+  cohort hosts
 - `README.md` — the existing prose course (read-only for the current redraft)
 - `narrative/README.md` — the composer/virtuoso metaphor system
 - `assets/spiral-curriculum.png` and `assets/curriculum-spider-web.svg` — the

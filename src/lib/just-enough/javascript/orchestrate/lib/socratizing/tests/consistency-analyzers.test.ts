@@ -15,7 +15,10 @@ function parseSource(source: string): Node {
 	});
 }
 
-function analyzeProgram(source: string, analyzerFn: ProgramAnalyzer): readonly CodeQuestion[] {
+function analyzeProgram(
+	source: string,
+	analyzerFn: ProgramAnalyzer,
+): readonly CodeQuestion[] {
 	const ast = parseSource(source);
 	const scope = buildScope(ast);
 	return analyzerFn(ast, scope, source);

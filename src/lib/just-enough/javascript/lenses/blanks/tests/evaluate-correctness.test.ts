@@ -313,9 +313,8 @@ describe('evaluateCorrectness', () => {
 				[blank('b0', 'x', 4, 5)],
 				'let x = 1;',
 			);
-			const status: BlankCorrectness | undefined = result.correctnessMap.get(
-				'b0',
-			);
+			const status: BlankCorrectness | undefined =
+				result.correctnessMap.get('b0');
 			expect(status).toBe('unfilled');
 		});
 

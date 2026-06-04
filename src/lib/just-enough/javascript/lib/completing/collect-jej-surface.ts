@@ -144,9 +144,11 @@ function collectLocals(
 	allowedGlobals: ReadonlySet<string>,
 ): readonly Suggestion[] {
 	const analysis = buildScope(ast);
-	const declaredNames = analysis.allDeclarations.map(function pickName(declaration) {
-		return declaration.name;
-	});
+	const declaredNames = analysis.allDeclarations.map(
+		function pickName(declaration) {
+			return declaration.name;
+		},
+	);
 	// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
 	const uniqueNames = Array.from(new Set(declaredNames)).filter(
 		function isVisibleLocal(name) {

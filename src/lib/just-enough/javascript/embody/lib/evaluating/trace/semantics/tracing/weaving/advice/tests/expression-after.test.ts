@@ -16,7 +16,11 @@ function makeTag(overrides: Partial<JejTag> = {}): JejTag {
 
 function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 	return {
-		creationStep: 1, depth: 0, kind: 'module', structure: null, structureStep: null,
+		creationStep: 1,
+		depth: 0,
+		kind: 'module',
+		structure: null,
+		structureStep: null,
 		variables: { x: { kind: 'let', declarationStep: 2, initialized: true } },
 		...overrides,
 	};
@@ -24,13 +28,27 @@ function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 
 function makeState(overrides: Partial<TracerState> = {}): TracerState {
 	return {
-		trace: [], step: 3, scopeStack: [makeScope()], iterationCounters: {},
+		trace: [],
+		step: 3,
+		scopeStack: [makeScope()],
+		iterationCounters: {},
 		lastExpressionResult: null,
-		previousExpressionResult: null, lastReadValues: {},
+		previousExpressionResult: null,
+		lastReadValues: {},
 		config: {
-			literals: { string: true, number: true, boolean: true, null: true, undefined: true, regex: true },
+			literals: {
+				string: true,
+				number: true,
+				boolean: true,
+				null: true,
+				undefined: true,
+				regex: true,
+			},
 			bindings: { kind: { let: true, const: true }, events: { read: true } },
-			controlFlow: { kind: { conditionals: true, loops: { while: true } }, events: { test: true } },
+			controlFlow: {
+				kind: { conditionals: true, loops: { while: true } },
+				events: { test: true },
+			},
 			operators: { shortCircuiting: true },
 		},
 		...overrides,
@@ -40,12 +58,22 @@ function makeState(overrides: Partial<TracerState> = {}): TracerState {
 describe('expressionAfter', () => {
 	describe('always returns result', () => {
 		it('returns the result value', () => {
-			const result = expressionAfter(makeState(), 'hello', 'literal', makeTag({ literalKind: 'string' }));
+			const result = expressionAfter(
+				makeState(),
+				'hello',
+				'literal',
+				makeTag({ literalKind: 'string' }),
+			);
 			expect(result).toBe('hello');
 		});
 
 		it('returns result when config is empty', () => {
-			const result = expressionAfter(makeState({ config: {} }), 42, 'literal', makeTag({ literalKind: 'number' }));
+			const result = expressionAfter(
+				makeState({ config: {} }),
+				42,
+				'literal',
+				makeTag({ literalKind: 'number' }),
+			);
 			expect(result).toBe(42);
 		});
 
@@ -64,7 +92,12 @@ describe('expressionAfter', () => {
 
 		it('stores result even when config is empty', () => {
 			const state = makeState({ config: {} });
-			expressionAfter(state, 'hello', 'literal', makeTag({ literalKind: 'string' }));
+			expressionAfter(
+				state,
+				'hello',
+				'literal',
+				makeTag({ literalKind: 'string' }),
+			);
 			expect(state.lastExpressionResult).toBe('hello');
 		});
 	});
@@ -72,7 +105,12 @@ describe('expressionAfter', () => {
 	describe('literal discriminant', () => {
 		it('emits LiteralEvent for string', () => {
 			const state = makeState();
-			expressionAfter(state, 'hello', 'literal', makeTag({ literalKind: 'string' }));
+			expressionAfter(
+				state,
+				'hello',
+				'literal',
+				makeTag({ literalKind: 'string' }),
+			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.category).toBe('literal');
@@ -81,14 +119,24 @@ describe('expressionAfter', () => {
 
 		it('emits LiteralEvent for number', () => {
 			const state = makeState();
-			expressionAfter(state, 42, 'literal', makeTag({ literalKind: 'number', node: 'Literal', source: '42' }));
+			expressionAfter(
+				state,
+				42,
+				'literal',
+				makeTag({ literalKind: 'number', node: 'Literal', source: '42' }),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.kind).toBe('number');
 		});
 
 		it('does not emit when literal kind is disabled', () => {
 			const state = makeState({ config: { literals: { string: false } } });
-			expressionAfter(state, 'hello', 'literal', makeTag({ literalKind: 'string' }));
+			expressionAfter(
+				state,
+				'hello',
+				'literal',
+				makeTag({ literalKind: 'string' }),
+			);
 			expect(state.trace).toHaveLength(0);
 		});
 	});
@@ -96,7 +144,13 @@ describe('expressionAfter', () => {
 	describe('read discriminant', () => {
 		it('emits BindingEvent(read)', () => {
 			const state = makeState();
-			expressionAfter(state, 5, 'read', 'x', makeTag({ node: 'Identifier', source: 'x' }));
+			expressionAfter(
+				state,
+				5,
+				'read',
+				'x',
+				makeTag({ node: 'Identifier', source: 'x' }),
+			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.category).toBe('binding');
@@ -105,27 +159,47 @@ describe('expressionAfter', () => {
 
 		it('includes variable name', () => {
 			const state = makeState();
-			expressionAfter(state, 5, 'read', 'x', makeTag({ node: 'Identifier', source: 'x' }));
+			expressionAfter(
+				state,
+				5,
+				'read',
+				'x',
+				makeTag({ node: 'Identifier', source: 'x' }),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.name).toBe('x');
 		});
 
 		it('includes scopeCreationStep from lookup', () => {
 			const state = makeState();
-			expressionAfter(state, 5, 'read', 'x', makeTag({ node: 'Identifier', source: 'x' }));
+			expressionAfter(
+				state,
+				5,
+				'read',
+				'x',
+				makeTag({ node: 'Identifier', source: 'x' }),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.scopeCreationStep).toBe(1);
 		});
 
 		it('includes declarationStep from lookup', () => {
 			const state = makeState();
-			expressionAfter(state, 5, 'read', 'x', makeTag({ node: 'Identifier', source: 'x' }));
+			expressionAfter(
+				state,
+				5,
+				'read',
+				'x',
+				makeTag({ node: 'Identifier', source: 'x' }),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.declarationStep).toBe(2);
 		});
 
 		it('does not emit when binding gate is closed', () => {
-			const state = makeState({ config: { bindings: { kind: { let: false }, events: { read: true } } } });
+			const state = makeState({
+				config: { bindings: { kind: { let: false }, events: { read: true } } },
+			});
 			expressionAfter(state, 5, 'read', 'x', makeTag());
 			expect(state.trace).toHaveLength(0);
 		});
@@ -140,7 +214,13 @@ describe('expressionAfter', () => {
 	describe('test discriminant', () => {
 		it('emits TestEvent', () => {
 			const state = makeState();
-			expressionAfter(state, true, 'test', 'conditional', makeTag({ node: 'IfStatement', source: 'y > 5' }));
+			expressionAfter(
+				state,
+				true,
+				'test',
+				'conditional',
+				makeTag({ node: 'IfStatement', source: 'y > 5' }),
+			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.category).toBe('controlFlow');
@@ -177,21 +257,45 @@ describe('expressionAfter', () => {
 		it('deletes iteration counter on false loop test', () => {
 			const state = makeState();
 			state.iterationCounters['5:0'] = 3;
-			expressionAfter(state, false, 'test', 'while', makeTag({ loc: { start: { line: 5, column: 0 }, end: { line: 5, column: 20 } } }));
+			expressionAfter(
+				state,
+				false,
+				'test',
+				'while',
+				makeTag({
+					loc: { start: { line: 5, column: 0 }, end: { line: 5, column: 20 } },
+				}),
+			);
 			expect(state.iterationCounters['5:0']).toBeUndefined();
 		});
 
 		it('does not delete iteration counter on true loop test', () => {
 			const state = makeState();
 			state.iterationCounters['5:0'] = 3;
-			expressionAfter(state, true, 'test', 'while', makeTag({ loc: { start: { line: 5, column: 0 }, end: { line: 5, column: 20 } } }));
+			expressionAfter(
+				state,
+				true,
+				'test',
+				'while',
+				makeTag({
+					loc: { start: { line: 5, column: 0 }, end: { line: 5, column: 20 } },
+				}),
+			);
 			expect(state.iterationCounters['5:0']).toBe(3);
 		});
 
 		it('does not delete counter for conditional tests', () => {
 			const state = makeState();
 			state.iterationCounters['5:0'] = 3;
-			expressionAfter(state, false, 'test', 'conditional', makeTag({ loc: { start: { line: 5, column: 0 }, end: { line: 5, column: 20 } } }));
+			expressionAfter(
+				state,
+				false,
+				'test',
+				'conditional',
+				makeTag({
+					loc: { start: { line: 5, column: 0 }, end: { line: 5, column: 20 } },
+				}),
+			);
 			expect(state.iterationCounters['5:0']).toBe(3);
 		});
 	});
@@ -242,7 +346,13 @@ describe('expressionAfter', () => {
 		});
 
 		it('still returns result', () => {
-			const result = expressionAfter(makeState(), 'result', 'shortCircuiting', '&&', makeTag());
+			const result = expressionAfter(
+				makeState(),
+				'result',
+				'shortCircuiting',
+				'&&',
+				makeTag(),
+			);
 			expect(result).toBe('result');
 		});
 	});

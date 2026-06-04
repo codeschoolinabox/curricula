@@ -20,8 +20,7 @@ Aran advice → wrapper(metadata, generatorPath, payload) → frozen TraceEvent
   metadata and a generator path
 - **Downstream**: The step tracker receives frozen `TraceEvent` objects and adds
   step numbers
-- **Types**: All event shapes defined in
-  [`../types.ts`](../types.ts)
+- **Types**: All event shapes defined in [`../types.ts`](../types.ts)
 - **Config**: Generator paths mirror
   [`../../options.schema.json`](../../options.schema.json)
 

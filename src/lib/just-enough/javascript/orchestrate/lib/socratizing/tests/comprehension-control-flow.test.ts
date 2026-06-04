@@ -153,10 +153,7 @@ describe('comprehension control flow analyzers', () => {
 		});
 
 		it('has correct metadata', () => {
-			const results = analyzeAll(
-				'if (true) { } else { }',
-				analyze,
-			);
+			const results = analyzeAll('if (true) { } else { }', analyze);
 			expect(results[0].id).toBe('else-branch-purpose');
 			expect(results[0].kind).toBe('comprehension');
 			expect(results[0].category).toBe('clarity');

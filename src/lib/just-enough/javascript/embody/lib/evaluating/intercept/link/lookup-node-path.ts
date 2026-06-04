@@ -53,7 +53,10 @@ function lookupNodePath(
 }
 
 function containsPosition(
-	loc: { start: { line: number; column: number }; end: { line: number; column: number } },
+	loc: {
+		start: { line: number; column: number };
+		end: { line: number; column: number };
+	},
 	line: number,
 	column: number,
 ): boolean {
@@ -62,8 +65,7 @@ function containsPosition(
 		loc.start.line < line ||
 		(loc.start.line === line && loc.start.column <= column);
 	const beforeEnd =
-		loc.end.line > line ||
-		(loc.end.line === line && loc.end.column > column);
+		loc.end.line > line || (loc.end.line === line && loc.end.column > column);
 	return afterStart && beforeEnd;
 }
 

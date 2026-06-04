@@ -237,7 +237,10 @@ describe('integration: common student mistakes', () => {
 	});
 
 	it('computed access bypasses the member blocklist (accepted residual hole)', () => {
-		const report = validateProgram('let x = "hi"; x["split"]("");', justEnoughJs);
+		const report = validateProgram(
+			'let x = "hi"; x["split"]("");',
+			justEnoughJs,
+		);
 		expect(report.isValid).toBe(true);
 	});
 });
@@ -492,7 +495,7 @@ describe('integration: member-method policy (blocklist)', () => {
 
 	it('allows .search()', () => {
 		const report = validateProgram(
-			'let x = \'hi\';\nlet y = x.search(\'h\');\nconsole.log(y);\n',
+			"let x = 'hi';\nlet y = x.search('h');\nconsole.log(y);\n",
 			justEnoughJs,
 		);
 		expect(report.isValid).toBe(true);
@@ -500,7 +503,7 @@ describe('integration: member-method policy (blocklist)', () => {
 
 	it('allows .replace()', () => {
 		const report = validateProgram(
-			'let x = \'hi\';\nlet y = x.replace(\'h\', \'b\');\nconsole.log(y);\n',
+			"let x = 'hi';\nlet y = x.replace('h', 'b');\nconsole.log(y);\n",
 			justEnoughJs,
 		);
 		expect(report.isValid).toBe(true);

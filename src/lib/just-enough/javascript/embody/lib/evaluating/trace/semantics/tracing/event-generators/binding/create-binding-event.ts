@@ -29,23 +29,26 @@ const EVENTS_WITH_VALUE = new Set<BindingEventType>([
  * @returns Domain-specific fields for a BindingEvent
  * @throws {Error} If name is empty or value missing on events that require it
  */
-function createBindingEvent({
-	kind,
-	event,
-	name,
-	scopeCreationStep,
-	declarationStep,
-	value,
-	explicit,
-}: BindingParams = {} as BindingParams): Omit<
-	BindingEvent,
-	'step' | 'semantics' | 'loc' | 'node' | 'source'
-> {
+function createBindingEvent(
+	{
+		kind,
+		event,
+		name,
+		scopeCreationStep,
+		declarationStep,
+		value,
+		explicit,
+	}: BindingParams = {} as BindingParams,
+): Omit<BindingEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (!name) {
-		throw new Error('createBindingEvent: name is required and must be non-empty');
+		throw new Error(
+			'createBindingEvent: name is required and must be non-empty',
+		);
 	}
 	if (EVENTS_WITH_VALUE.has(event) && value === undefined) {
-		throw new Error(`createBindingEvent: value is required for '${event}' events`);
+		throw new Error(
+			`createBindingEvent: value is required for '${event}' events`,
+		);
 	}
 
 	return {

@@ -35,12 +35,12 @@ function createExpressionPointcut(config: Record<string, unknown>) {
 	const bindingEvents = (bindings.events ?? {}) as Record<string, unknown>;
 	const operators = (config.operators ?? {}) as Record<string, unknown>;
 	const controlFlow = (config.controlFlow ?? {}) as Record<string, unknown>;
-	const controlFlowEvents = (controlFlow.events ?? {}) as Record<string, unknown>;
+	const controlFlowEvents = (controlFlow.events ?? {}) as Record<
+		string,
+		unknown
+	>;
 
-	function isInTestPosition(
-		node: ExpressionNode,
-		parent: ParentNode,
-	): boolean {
+	function isInTestPosition(node: ExpressionNode, parent: ParentNode): boolean {
 		// WHY tag identity, not node identity: our wrapPointcut creates shallow
 		// copies of node and parent. parent.test (original Aran reference) and
 		// node (our copy) are different objects. Tag identity works because
@@ -75,7 +75,11 @@ function createExpressionPointcut(config: Record<string, unknown>) {
 		// ReadExpression → BindingEvent(read)
 		// Skip Aran internal parameters — only user variables produce binding events
 		if (node.type === 'ReadExpression') {
-			if (bindingEvents.read && node.variable && !ARAN_PARAMETERS.has(node.variable)) {
+			if (
+				bindingEvents.read &&
+				node.variable &&
+				!ARAN_PARAMETERS.has(node.variable)
+			) {
 				return ['read', node.variable, node.tag];
 			}
 			return null;

@@ -2,10 +2,10 @@
 
 ## Why a shared scope module
 
-The previous scope analysis lived inside `validating/check-undeclared-globals.ts`
-and tracked only declaration existence for undeclared-global detection. The
-micro-decisions module needs richer data: read counts, write counts, and init
-expressions for each variable.
+The previous scope analysis lived inside
+`validating/check-undeclared-globals.ts` and tracked only declaration existence
+for undeclared-global detection. The micro-decisions module needs richer data:
+read counts, write counts, and init expressions for each variable.
 
 Rather than build a second independent scope walker, this module extracts scope
 analysis into a shared dependency. Both consumers get a single source of truth
@@ -54,8 +54,8 @@ handles that concern separately.
   declaration. Excludes declaration sites themselves and property names in
   non-computed member expressions.
 - **Write**: An `Identifier` as the left-hand side of an `AssignmentExpression`
-  that resolves to a declaration. The initial value in a `VariableDeclarator`
-  is NOT counted as a write — it's tracked separately as the `initNode`.
+  that resolves to a declaration. The initial value in a `VariableDeclarator` is
+  NOT counted as a write — it's tracked separately as the `initNode`.
 
 This distinction matters for micro-decisions: a `let` with zero writes after
 declaration could be `const`.

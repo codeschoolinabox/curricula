@@ -44,36 +44,36 @@ parentheses; sandbox-harness selectors use the key directly.
 
 > The sketch below describes the **post-refactor target shape**, aligned with
 > the current embody contract (see [`../../embody/types.ts § Snippet`]
-> (../../embody/types.ts)). The Refactor step of this increment updates `core.ts`
-> to match — the current implementation predates the `validated` status field
-> addition and the optional `Snippet.validation` shape, and crashes on
-> fail-leaf embodiments.
+> (../../embody/types.ts)). The Refactor step of this increment updates
+> `core.ts` to match — the current implementation predates the `validated`
+> status field addition and the optional `Snippet.validation` shape, and crashes
+> on fail-leaf embodiments.
 
 1. **Snippet panel** (`snippet`) — `embodiment.source.code` (the raw source
    string the orchestrator embodied). Verifies `snippet` round-tripped through
    the plugin's emission and the orchestrator's `embody()` call.
 2. **Embodiment status panel** (`status`) —
    `embodiment.status.{tokenized, parsed, validated, created}` flags + the
-   first-fail kind (`embodiment.errors?.kind ?? null`). Verifies the
-   embodiment pipeline ran (and surfaces canned scenario outcomes when a
-   scenario keyword is in play; real composition for non-scenario input
-   lands per [`../../EMBODY-IMPL-HANDOFF.md`](../../EMBODY-IMPL-HANDOFF.md)).
-   `Snippet.errors` is a peer of `Snippet.status` in the embody contract;
-   the panel echoes both together so the harness can verify the
-   first-fail-wins gate semantics at a glance.
-3. **Validation panel** (`validation`) — conditional rendering per the
-   `Snippet` staircase. When `embodiment.validation` is present (validate-fail,
+   first-fail kind (`embodiment.errors?.kind ?? null`). Verifies the embodiment
+   pipeline ran (and surfaces canned scenario outcomes when a scenario keyword
+   is in play; real composition for non-scenario input lands per
+   [`../../EMBODY-IMPL-HANDOFF.md`](../../EMBODY-IMPL-HANDOFF.md)).
+   `Snippet.errors` is a peer of `Snippet.status` in the embody contract; the
+   panel echoes both together so the harness can verify the first-fail-wins gate
+   semantics at a glance.
+3. **Validation panel** (`validation`) — conditional rendering per the `Snippet`
+   staircase. When `embodiment.validation` is present (validate-fail,
    create-fail, and apex leaves), the panel renders
    `embodiment.validation.{formatted, isJeJ, isDeterministic, doesPause}` +
    `validation.violations` count. When `embodiment.validation` is absent
    (tokenize-fail and parse-fail leaves), the panel renders the placeholder
-   `(validation absent — gated on parse success)`. The placeholder phrases
-   the gate condition, not a counterfactual about what happened, so it reads
-   correctly for both fail-leaves regardless of which gate actually failed.
-   See [§ Handling absent fields](#handling-absent-fields) below.
+   `(validation absent — gated on parse success)`. The placeholder phrases the
+   gate condition, not a counterfactual about what happened, so it reads
+   correctly for both fail-leaves regardless of which gate actually failed. See
+   [§ Handling absent fields](#handling-absent-fields) below.
 4. **Config panel** (`config`) — `Object.entries(config)` rendered as a
-   key/value list, OR an `(empty)` placeholder when the config is `undefined` OR an
-   explicit empty object `{}`. Verifies the orchestrator's resolution chain
+   key/value list, OR an `(empty)` placeholder when the config is `undefined` OR
+   an explicit empty object `{}`. Verifies the orchestrator's resolution chain
    (`module.config() ⊕ configs[lens] ⊕ config`) produced the expected merged
    bundle. **Why `{}` collapses to `(empty)` rather than rendering as the JSON
    `{}`**: the harness's primary verification surface is the React DevTools
@@ -103,18 +103,17 @@ presence of the optional field itself) before reading dependent data.
 In `debug-props`:
 
 - **`embodiment.validation`** — the validation panel guards on
-  `embodiment.validation !== undefined`. The presence check is coherent with
-  the embody contract: `validation` is present at validate-fail and beyond
-  on the staircase (see the staircase comment in
-  [`../../embody/types.ts § Snippet`](../../embody/types.ts)). For absent
-  cases (tokenize-fail, parse-fail) the panel renders the gate-phrased
-  placeholder.
-- **`embodiment.errors`** — already nullable (`EmbodyError | null`) and
-  guarded inline at the status-panel summary site.
+  `embodiment.validation !== undefined`. The presence check is coherent with the
+  embody contract: `validation` is present at validate-fail and beyond on the
+  staircase (see the staircase comment in
+  [`../../embody/types.ts § Snippet`](../../embody/types.ts)). For absent cases
+  (tokenize-fail, parse-fail) the panel renders the gate-phrased placeholder.
+- **`embodiment.errors`** — already nullable (`EmbodyError | null`) and guarded
+  inline at the status-panel summary site.
 - **`embodiment.static`, `embodiment.parse.*`, `embodiment.streams.*`** —
   intentionally not surfaced by debug-props (see the panel-set rationale in
-  [`./README.md` § Panel contract](./README.md)). A future `embody-graph`
-  lens would own that surface.
+  [`./README.md` § Panel contract](./README.md)). A future `embody-graph` lens
+  would own that surface.
 
 This pattern — "guard on `status.*` or on presence; render a gate-phrased
 placeholder when absent" — mirrors the staircase consumer convention from
@@ -189,12 +188,11 @@ snippet changes or the lens switches.
   deep-frozen by the orchestrator anyway).
 - **Disposable practice.** No cross-mount state. No `localStorage`, no refs
   across mounts. React owns the lifecycle.
-- **No consumer-side branching on `embodiment.source.code`.** The lens
-  renders `source.code` verbatim in the snippet panel (a source-display
-  use case is legitimate) but MUST NOT use it as a branching key. It only
-  branches on the `Snippet`'s public shape (status flags, validation
-  flags, errors count). Per the lenses peer's invariant — see
-  [`../README.md`](../README.md).
+- **No consumer-side branching on `embodiment.source.code`.** The lens renders
+  `source.code` verbatim in the snippet panel (a source-display use case is
+  legitimate) but MUST NOT use it as a branching key. It only branches on the
+  `Snippet`'s public shape (status flags, validation flags, errors count). Per
+  the lenses peer's invariant — see [`../README.md`](../README.md).
 - **Display content is rendered as text, not interpreted as markup.** The
   wrapper renders panel content via `<pre>` (for multi-line stringified objects)
   or `<code>` (for inline values), never via `dangerouslySetInnerHTML`.
@@ -251,9 +249,9 @@ pages. Both behaviors are deliberate recommender-inertia.
 
 The lens owns its own `README.md`, `DOCS.md`, `types.ts`, source (`core.ts` +
 `index.tsx`), and tests. Cross-cutting lens conventions (two-layer split,
-`data-lens` invariant, `LensConfig` shape, no-source.code-branching anti-pattern) live in
-[`../README.md`](../README.md) + [`../DOCS.md`](../DOCS.md); this lens inherits
-them.
+`data-lens` invariant, `LensConfig` shape, no-source.code-branching
+anti-pattern) live in [`../README.md`](../README.md) +
+[`../DOCS.md`](../DOCS.md); this lens inherits them.
 
 ## Future direction
 

@@ -18,9 +18,9 @@ import validateConfig from './validate-config.js';
  * @throws OptionsInvalidError when validation fails
  */
 function prepareConfig(data: unknown, schema: JSONSchema): unknown {
-  const expanded = expandShorthand(data, schema);
-  const filled = fillDefaults(expanded, schema);
-  return validateConfig(filled, schema);
+	const expanded = expandShorthand(data, schema);
+	const filled = fillDefaults(expanded, schema);
+	return validateConfig(filled, schema);
 }
 
 export default prepareConfig;

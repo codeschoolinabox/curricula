@@ -386,36 +386,36 @@ Snippet embodiment
   -> MicroDecisionResult
 ```
 
-The entry reads source and AST directly from the embodiment — it does not
-parse internally. Embodiments whose `status.parsed` is false return
+The entry reads source and AST directly from the embodiment — it does not parse
+internally. Embodiments whose `status.parsed` is false return
 `{ ok: false, error }` using the embodiment's error message and location.
-Embodiments with `status.parsed: true` return `{ ok: true, questions }`
-(empty array with Phase A stub AST; full question set in Phase B).
+Embodiments with `status.parsed: true` return `{ ok: true, questions }` (empty
+array with Phase A stub AST; full question set in Phase B).
 
 ## Structure
 
-| File                                      | Purpose                                     |
-| ----------------------------------------- | ------------------------------------------- |
-| `types.ts`                                | All domain types                            |
-| `analyze-micro-decisions.ts`              | Main entry point                            |
+| File                                      | Purpose                                                          |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| `types.ts`                                | All domain types                                                 |
+| `analyze-micro-decisions.ts`              | Main entry point                                                 |
 | `parse-source.ts`                         | Acorn parse helper used only by sibling tests; deletion deferred |
-| `create-code-question.ts`                 | Factory: builds and freezes each question   |
-| `extract-location.ts`                     | Location extraction from acorn nodes        |
-| `filter-questions.ts`                     | Config-based filtering (post-generation)    |
-| `analyzers/voice.ts`                      | 10 voice micro-decision analyzers           |
-| `analyzers/clarity.ts`                    | 5 clarity micro-decision analyzers          |
-| `analyzers/consistency.ts`                | 4 consistency (program-level) analyzers     |
-| `analyzers/caution.ts`                    | 5 caution micro-decision analyzers          |
-| `analyzers/trap.ts`                       | 2 trap micro-decision analyzers             |
-| `analyzers/easter-egg.ts`                 | 6 easter-egg micro-decision analyzers       |
-| `analyzers/voice-profile.ts`              | 1 voice profile (program-level)             |
-| `analyzers/comprehension-variables.ts`    | 3 comprehension (variables)                 |
-| `analyzers/comprehension-data.ts`         | 2 comprehension (data types/literals)       |
-| `analyzers/comprehension-operators.ts`    | 3 comprehension (operators)                 |
-| `analyzers/comprehension-control-flow.ts` | 4 comprehension (if/while/for-of)           |
-| `analyzers/comprehension-interaction.ts`  | 3 comprehension (prompt/alert/console.log)  |
-| `analyzers/comprehension-generic.ts`      | 2 comprehension (program-level: read-aloud) |
-| `tests/`                                  | Unit and integration tests                  |
+| `create-code-question.ts`                 | Factory: builds and freezes each question                        |
+| `extract-location.ts`                     | Location extraction from acorn nodes                             |
+| `filter-questions.ts`                     | Config-based filtering (post-generation)                         |
+| `analyzers/voice.ts`                      | 10 voice micro-decision analyzers                                |
+| `analyzers/clarity.ts`                    | 5 clarity micro-decision analyzers                               |
+| `analyzers/consistency.ts`                | 4 consistency (program-level) analyzers                          |
+| `analyzers/caution.ts`                    | 5 caution micro-decision analyzers                               |
+| `analyzers/trap.ts`                       | 2 trap micro-decision analyzers                                  |
+| `analyzers/easter-egg.ts`                 | 6 easter-egg micro-decision analyzers                            |
+| `analyzers/voice-profile.ts`              | 1 voice profile (program-level)                                  |
+| `analyzers/comprehension-variables.ts`    | 3 comprehension (variables)                                      |
+| `analyzers/comprehension-data.ts`         | 2 comprehension (data types/literals)                            |
+| `analyzers/comprehension-operators.ts`    | 3 comprehension (operators)                                      |
+| `analyzers/comprehension-control-flow.ts` | 4 comprehension (if/while/for-of)                                |
+| `analyzers/comprehension-interaction.ts`  | 3 comprehension (prompt/alert/console.log)                       |
+| `analyzers/comprehension-generic.ts`      | 2 comprehension (program-level: read-aloud)                      |
+| `tests/`                                  | Unit and integration tests                                       |
 
 ## Navigation
 

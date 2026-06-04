@@ -11,7 +11,6 @@ import embody from '../../../embody/index.js';
 import type { Snippet } from '../../../embody/types.js';
 import core from '../core.js';
 
-
 function makeSnippet(overrides: Partial<Snippet> = {}): Snippet {
 	return { ...embody('OK'), ...overrides };
 }

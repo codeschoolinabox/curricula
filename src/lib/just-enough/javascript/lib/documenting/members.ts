@@ -24,7 +24,7 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	},
 	valueOf: {
 		description:
-			"Returns the primitive value of an object (rarely called directly; JavaScript invokes it during coercion).",
+			'Returns the primitive value of an object (rarely called directly; JavaScript invokes it during coercion).',
 		example: '(42).valueOf(); // 42',
 		isJEJ: true,
 		whenToUse:
@@ -34,8 +34,7 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		],
 	},
 	charAt: {
-		description:
-			'Returns the single character at the given index of a string.',
+		description: 'Returns the single character at the given index of a string.',
 		example: '"hello".charAt(0); // "h"',
 		isJEJ: true,
 		whenToUse:
@@ -53,9 +52,7 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		isJEJ: true,
 		whenToUse:
 			'When you need the numeric encoding of a character (for arithmetic comparisons, for example).',
-		commonMistakes: [
-			'Returning NaN for out-of-range indices, not an error.',
-		],
+		commonMistakes: ['Returning NaN for out-of-range indices, not an error.'],
 	},
 	slice: {
 		description:
@@ -73,30 +70,25 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			'Returns a substring between two indices; swaps arguments if start > end.',
 		example: '"hello".substring(1, 4); // "ell"',
 		isJEJ: true,
-		whenToUse:
-			'Mostly redundant with slice; slice is the conventional choice.',
+		whenToUse: 'Mostly redundant with slice; slice is the conventional choice.',
 		commonMistakes: [
 			'Negative indices clamp to 0 rather than counting from the end, unlike slice.',
 		],
 	},
 	toUpperCase: {
-		description:
-			'Returns a copy of the string with all characters uppercased.',
+		description: 'Returns a copy of the string with all characters uppercased.',
 		example: '"hello".toUpperCase(); // "HELLO"',
 		isJEJ: true,
-		whenToUse:
-			'For case-insensitive comparisons or normalizing display.',
+		whenToUse: 'For case-insensitive comparisons or normalizing display.',
 		commonMistakes: [
 			'Strings are immutable — toUpperCase returns a new string; the original is unchanged.',
 		],
 	},
 	toLowerCase: {
-		description:
-			'Returns a copy of the string with all characters lowercased.',
+		description: 'Returns a copy of the string with all characters lowercased.',
 		example: '"HELLO".toLowerCase(); // "hello"',
 		isJEJ: true,
-		whenToUse:
-			'For case-insensitive comparisons or normalizing display.',
+		whenToUse: 'For case-insensitive comparisons or normalizing display.',
 		commonMistakes: [
 			'Strings are immutable — toLowerCase returns a new string; the original is unchanged.',
 		],
@@ -113,15 +105,12 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		],
 	},
 	includes: {
-		description:
-			'Returns true if the string contains the given substring.',
+		description: 'Returns true if the string contains the given substring.',
 		example: '"hello".includes("ell"); // true',
 		isJEJ: true,
 		whenToUse:
 			"When you only care whether the substring exists — clearer than 'indexOf(...) !== -1'.",
-		commonMistakes: [
-			'Case-sensitive — "Hello".includes("hello") is false.',
-		],
+		commonMistakes: ['Case-sensitive — "Hello".includes("hello") is false.'],
 	},
 	startsWith: {
 		description: 'Returns true if the string begins with the given prefix.',
@@ -152,8 +141,7 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			'Returns the string with leading and trailing whitespace removed.',
 		example: '"  hi  ".trim(); // "hi"',
 		isJEJ: true,
-		whenToUse:
-			'For cleaning up user input before parsing or comparing it.',
+		whenToUse: 'For cleaning up user input before parsing or comparing it.',
 		commonMistakes: [
 			'Strings are immutable — trim returns a new string; the original is unchanged.',
 		],
@@ -165,22 +153,20 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		whenToUse:
 			"Mostly redundant with the '+' operator or template literals; the + operator is the conventional choice.",
 		commonMistakes: [
-			"Forgetting that concat doesn't insert a separator: '\"a\".concat(\"b\")' is \"ab\", not \"a b\".",
+			'Forgetting that concat doesn\'t insert a separator: \'"a".concat("b")\' is "ab", not "a b".',
 		],
 	},
 	replace: {
-		description:
-			"Returns a copy of the string with the FIRST match replaced.",
+		description: 'Returns a copy of the string with the FIRST match replaced.',
 		example: '"hello".replace("l", "L"); // "heLlo"',
 		isJEJ: true,
 		whenToUse: 'For one-shot substitutions.',
 		commonMistakes: [
-			"Replacing all occurrences — replace replaces only the first; use replaceAll for every match.",
+			'Replacing all occurrences — replace replaces only the first; use replaceAll for every match.',
 		],
 	},
 	replaceAll: {
-		description:
-			'Returns a copy of the string with every match replaced.',
+		description: 'Returns a copy of the string with every match replaced.',
 		example: '"hello".replaceAll("l", "L"); // "heLLo"',
 		isJEJ: true,
 		whenToUse: 'For global substitutions.',
@@ -202,7 +188,7 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	},
 	toPrecision: {
 		description:
-			"Returns a string with the number formatted to a total of N significant digits.",
+			'Returns a string with the number formatted to a total of N significant digits.',
 		example: '(123.456).toPrecision(4); // "123.5"',
 		isJEJ: true,
 		whenToUse:
@@ -213,8 +199,7 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		],
 	},
 	abs: {
-		description:
-			'Returns the absolute (non-negative) value of its argument.',
+		description: 'Returns the absolute (non-negative) value of its argument.',
 		example: 'Math.abs(-7); // 7',
 		isJEJ: true,
 		whenToUse: 'To strip the sign of a number.',
@@ -262,7 +247,8 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		whenToUse: 'To pick the lowest of several known values.',
 	},
 	pow: {
-		description: 'Returns the first argument raised to the power of the second.',
+		description:
+			'Returns the first argument raised to the power of the second.',
 		example: 'Math.pow(2, 10); // 1024',
 		isJEJ: true,
 		whenToUse:
@@ -273,9 +259,7 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		example: 'Math.sqrt(16); // 4',
 		isJEJ: true,
 		whenToUse: 'For square roots.',
-		commonMistakes: [
-			'Returning NaN for negative inputs, not an error.',
-		],
+		commonMistakes: ['Returning NaN for negative inputs, not an error.'],
 	},
 };
 

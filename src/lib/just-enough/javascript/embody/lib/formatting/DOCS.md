@@ -2,24 +2,24 @@
 
 ## Why Prettier (async tradeoff acknowledged)
 
-Prettier is the canonical JavaScript formatter and preserves blank lines
-between statements (Prettier collapses 1+ consecutive blank lines to 1). This
-matches the "blank lines as paragraph breaks" convention documented in
-`DEV.md §12` and used throughout this codebase.
+Prettier is the canonical JavaScript formatter and preserves blank lines between
+statements (Prettier collapses 1+ consecutive blank lines to 1). This matches
+the "blank lines as paragraph breaks" convention documented in `DEV.md §12` and
+used throughout this codebase.
 
 The tradeoff: `prettier/standalone` is async-only (`Promise<string>`). This
 makes `format()`, `checkFormat()`, and `isJej()` async too. Since the
 execution-side of the library is already async (`run.result` is a Promise,
 `intercept` is an async generator, IO mocks are all async), making
-static-analysis async too just removes an artificial sync island — it does
-not introduce a fundamentally new asynchronicity.
+static-analysis async too just removes an artificial sync island — it does not
+introduce a fundamentally new asynchronicity.
 
 The previous implementation used `recast.prettyPrint()` (sync) but
 unconditionally stripped all blank lines between statements, which made the
 formatter actively hostile to the project's "paragraph breaks" convention.
 Recast has no setting to preserve blank lines (they're not AST nodes), and
-workarounds (sentinel comments, AST-walks) were judged to be permanent
-technical debt without enough payoff.
+workarounds (sentinel comments, AST-walks) were judged to be permanent technical
+debt without enough payoff.
 
 `recast` is still a project dependency for AST loop-guard injection
 (`evaluating/run/guard-loops`). It is no longer used for formatting.
@@ -32,9 +32,9 @@ should work on this code — helping them clean up formatting while they fix
 validation errors. Restricting formatting to JeJ-only code would force learners
 to fix everything at once instead of incrementally.
 
-The pipeline reflects this: `format()` parses but does not validate. `validate()`
-checks JeJ compliance but does not format. They are independent tools that help
-learners reach the execution gate from different angles.
+The pipeline reflects this: `format()` parses but does not validate.
+`validate()` checks JeJ compliance but does not format. They are independent
+tools that help learners reach the execution gate from different angles.
 
 ## Why no options parameter
 
@@ -51,9 +51,9 @@ try-catch patterns and break the consistent API style.
 `trace`, `debug`): unformatted code returns
 `{ ok: false, error: { kind: 'formatting' } }`. No try-catch needed.
 
-(Earlier drafts also fed `JejProgram.isFormatted` on a code-object factory;
-that factory was removed as YAGNI bloat — superseded by the `<StudyLenses>`
-container component.)
+(Earlier drafts also fed `JejProgram.isFormatted` on a code-object factory; that
+factory was removed as YAGNI bloat — superseded by the `<StudyLenses>` container
+component.)
 
 ## Why `checkFormat` returns `{ formatted: true }` on Prettier failure
 
@@ -77,8 +77,8 @@ degradation philosophy as `format()` returning the original code on failure.
 
 ## Extracted from `evaluating/debug/format/`
 
-This module was previously located inside `evaluating/debug/format/` because only
-the debug engine used formatting (to clean up code after loop guard injection).
-With the format gate (formatting required before execution), formatting is a
-standalone concern used by the pipeline, the code object, and the public API.
-The debug engine no longer calls `format()` internally.
+This module was previously located inside `evaluating/debug/format/` because
+only the debug engine used formatting (to clean up code after loop guard
+injection). With the format gate (formatting required before execution),
+formatting is a standalone concern used by the pipeline, the code object, and
+the public API. The debug engine no longer calls `format()` internally.

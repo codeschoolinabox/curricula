@@ -19,10 +19,14 @@ describe('templates gating', () => {
 		const config = withOverride(ALL_ENABLED, 'templates.begin', false);
 		const { events } = await drainGenerator(CODE, config);
 		const beginEvents = events.filter(
-			(e) => e.category === 'template' && (e as Record<string, unknown>).event === 'begin',
+			(e) =>
+				e.category === 'template' &&
+				(e as Record<string, unknown>).event === 'begin',
 		);
 		const endEvents = events.filter(
-			(e) => e.category === 'template' && (e as Record<string, unknown>).event === 'end',
+			(e) =>
+				e.category === 'template' &&
+				(e as Record<string, unknown>).event === 'end',
 		);
 
 		expect(beginEvents.length).toBe(0);
@@ -33,10 +37,14 @@ describe('templates gating', () => {
 		const config = withOverride(ALL_ENABLED, 'templates.evaluation', false);
 		const { events } = await drainGenerator(CODE, config);
 		const evalEvents = events.filter(
-			(e) => e.category === 'template' && (e as Record<string, unknown>).event === 'evaluation',
+			(e) =>
+				e.category === 'template' &&
+				(e as Record<string, unknown>).event === 'evaluation',
 		);
 		const beginEvents = events.filter(
-			(e) => e.category === 'template' && (e as Record<string, unknown>).event === 'begin',
+			(e) =>
+				e.category === 'template' &&
+				(e as Record<string, unknown>).event === 'begin',
 		);
 
 		expect(evalEvents.length).toBe(0);
@@ -47,10 +55,14 @@ describe('templates gating', () => {
 		const config = withOverride(ALL_ENABLED, 'templates.end', false);
 		const { events } = await drainGenerator(CODE, config);
 		const endEvents = events.filter(
-			(e) => e.category === 'template' && (e as Record<string, unknown>).event === 'end',
+			(e) =>
+				e.category === 'template' &&
+				(e as Record<string, unknown>).event === 'end',
 		);
 		const beginEvents = events.filter(
-			(e) => e.category === 'template' && (e as Record<string, unknown>).event === 'begin',
+			(e) =>
+				e.category === 'template' &&
+				(e as Record<string, unknown>).event === 'begin',
 		);
 
 		expect(endEvents.length).toBe(0);
@@ -66,10 +78,14 @@ describe('scopes gating', () => {
 			const config = withOverride(ALL_ENABLED, 'scopes.kind.module', false);
 			const { events } = await drainGenerator(CODE, config);
 			const moduleScopes = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).kind === 'module',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).kind === 'module',
 			);
 			const blockScopes = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).kind === 'block',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).kind === 'block',
 			);
 
 			expect(moduleScopes.length).toBe(0);
@@ -80,7 +96,9 @@ describe('scopes gating', () => {
 			const config = withOverride(ALL_ENABLED, 'scopes.kind.block', false);
 			const { events } = await drainGenerator(CODE, config);
 			const blockScopes = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).kind === 'block',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).kind === 'block',
 			);
 
 			expect(blockScopes.length).toBe(0);
@@ -93,7 +111,9 @@ describe('scopes gating', () => {
 			const config = withOverride(ALL_ENABLED, 'scopes.kind.block', false);
 			const { events } = await drainGenerator('let x = 5;\n', config);
 			const moduleScopes = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).kind === 'module',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).kind === 'module',
 			);
 
 			expect(moduleScopes.length).toBe(0);
@@ -112,10 +132,14 @@ describe('scopes gating', () => {
 			const config = withOverride(ALL_ENABLED, 'scopes.events.create', false);
 			const { events } = await drainGenerator(CODE, config);
 			const createEvents = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'create',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'create',
 			);
 			const enterEvents = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'enter',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'enter',
 			);
 
 			expect(createEvents.length).toBe(0);
@@ -126,10 +150,14 @@ describe('scopes gating', () => {
 			const config = withOverride(ALL_ENABLED, 'scopes.events.enter', false);
 			const { events } = await drainGenerator(CODE, config);
 			const enterEvents = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'enter',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'enter',
 			);
 			const createEvents = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'create',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'create',
 			);
 
 			expect(enterEvents.length).toBe(0);
@@ -137,13 +165,21 @@ describe('scopes gating', () => {
 		});
 
 		it('disabling scopes.events.completion removes completion events', async () => {
-			const config = withOverride(ALL_ENABLED, 'scopes.events.completion', false);
+			const config = withOverride(
+				ALL_ENABLED,
+				'scopes.events.completion',
+				false,
+			);
 			const { events } = await drainGenerator(CODE, config);
 			const completionEvents = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'completion',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'completion',
 			);
 			const createEvents = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'create',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'create',
 			);
 
 			expect(completionEvents.length).toBe(0);
@@ -154,10 +190,14 @@ describe('scopes gating', () => {
 			const config = withOverride(ALL_ENABLED, 'scopes.events.leave', false);
 			const { events } = await drainGenerator(CODE, config);
 			const leaveEvents = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'leave',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'leave',
 			);
 			const createEvents = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'create',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'create',
 			);
 
 			expect(leaveEvents.length).toBe(0);
@@ -165,15 +205,24 @@ describe('scopes gating', () => {
 		});
 
 		it('disabling scopes.events.interrupt removes interrupt events', async () => {
-			const config = withOverride(ALL_ENABLED, 'scopes.events.interrupt', false);
+			const config = withOverride(
+				ALL_ENABLED,
+				'scopes.events.interrupt',
+				false,
+			);
 			const { events } = await drainGenerator(
-				'for (let i = 0; i < 3; i = i + 1) {\n  if (i === 1) {\n    break;\n  }\n}\n', config,
+				'for (let i = 0; i < 3; i = i + 1) {\n  if (i === 1) {\n    break;\n  }\n}\n',
+				config,
 			);
 			const interruptEvents = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'interrupt',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'interrupt',
 			);
 			const createEvents = events.filter(
-				(e) => e.category === 'scope' && (e as Record<string, unknown>).event === 'create',
+				(e) =>
+					e.category === 'scope' &&
+					(e as Record<string, unknown>).event === 'create',
 			);
 
 			expect(interruptEvents.length).toBe(0);

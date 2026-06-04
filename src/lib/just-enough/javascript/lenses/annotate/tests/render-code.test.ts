@@ -38,9 +38,9 @@ describe('deriveCodeSpanTree', () => {
 		});
 
 		it('nested spans are frozen (deep)', () => {
-			expect(
-				Object.isFrozen(deriveCodeSpanTree('x', true).lines[0][0]),
-			).toBe(true);
+			expect(Object.isFrozen(deriveCodeSpanTree('x', true).lines[0][0])).toBe(
+				true,
+			);
 		});
 
 		it('colorize-off path is also frozen', () => {

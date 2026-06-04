@@ -15,18 +15,18 @@ entry is clearly labeled with an `id` field.
 
 Students produce broken code. The module must never crash. The entry function
 reads its AST from the embodiment (`embodiment.parse.ast.acornNode` when
-`status.parsed && parse.ast` is truthy); when the AST is absent (the
-embodiment didn't reach the parse phase, or `Partial<ParseGraph>` left
-`parse.ast` undefined), the module falls back to regex/string pattern
-matching on the error message and source text. AST analysis, when available,
-provides richer context — detecting `prompt()` calls for null TypeErrors,
-collecting declared names for "did you mean" suggestions on ReferenceErrors.
+`status.parsed && parse.ast` is truthy); when the AST is absent (the embodiment
+didn't reach the parse phase, or `Partial<ParseGraph>` left `parse.ast`
+undefined), the module falls back to regex/string pattern matching on the error
+message and source text. AST analysis, when available, provides richer context —
+detecting `prompt()` calls for null TypeErrors, collecting declared names for
+"did you mean" suggestions on ReferenceErrors.
 
 In Phase A, the embody mock ships a stub `Program` with `body: []`, so
-AST-dependent suggestion paths silently degrade to `undefined` against any
-apex embodiment; the message-regex paths remain intact. Phase B's real
-`embody/lib/parse/` reinstates a fully populated AST and these
-suggestions resume working without code change here.
+AST-dependent suggestion paths silently degrade to `undefined` against any apex
+embodiment; the message-regex paths remain intact. Phase B's real
+`embody/lib/parse/` reinstates a fully populated AST and these suggestions
+resume working without code change here.
 
 ## Why `{{placeholder}}` interpolation
 
@@ -53,7 +53,7 @@ Explanation content draws from known novice misconception categories:
 | Misconception                       | Source                  | Applies to                     |
 | ----------------------------------- | ----------------------- | ------------------------------ |
 | "Variables exist by naming"         | Sorva 2012              | ReferenceError: not defined    |
-| "Assignment is symmetric"           | Sorva 2012              | SyntaxError: `5 = x`          |
+| "Assignment is symmetric"           | Sorva 2012              | SyntaxError: `5 = x`           |
 | "All operations work on all values" | Kaczmarczyk et al. 2010 | TypeError: null/undefined      |
 | "prompt() always returns a string"  | Common in JEJ context   | TypeError on null after prompt |
 | "const means value never changes"   | Qian & Lehman 2017      | TypeError: const assignment    |

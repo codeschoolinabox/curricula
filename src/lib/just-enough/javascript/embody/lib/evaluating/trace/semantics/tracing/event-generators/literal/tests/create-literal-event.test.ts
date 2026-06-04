@@ -57,32 +57,44 @@ describe('createLiteralEvent', () => {
 				kind: 'null',
 				value: { type: 'object', value: null, isNull: true },
 			});
-			expect(event.value).toEqual({ type: 'object', value: null, isNull: true });
+			expect(event.value).toEqual({
+				type: 'object',
+				value: null,
+				isNull: true,
+			});
 		});
 
 		it('regex literal', () => {
-			const value: RegExpValue = { type: 'regexp', pattern: '\\d+', flags: 'g' };
+			const value: RegExpValue = {
+				type: 'regexp',
+				pattern: '\\d+',
+				flags: 'g',
+			};
 			const event = createLiteralEvent({ kind: 'regex', value });
 			expect(event.value).toEqual(value);
 		});
 	});
 
 	describe('all literal kinds', () => {
-		it.each(['string', 'boolean', 'number', 'undefined', 'null', 'regex'] as const)(
-			'%s kind is accepted',
-			(kind) => {
-				const values = {
-					string: { type: 'string' as const, value: '' },
-					boolean: { type: 'boolean' as const, value: false },
-					number: { type: 'number' as const, value: 0 },
-					undefined: { type: 'undefined' as const },
-					null: { type: 'object' as const, value: null, isNull: true as const },
-					regex: { type: 'regexp' as const, pattern: '', flags: '' },
-				};
-				const event = createLiteralEvent({ kind, value: values[kind] });
-				expect(event.kind).toBe(kind);
-			},
-		);
+		it.each([
+			'string',
+			'boolean',
+			'number',
+			'undefined',
+			'null',
+			'regex',
+		] as const)('%s kind is accepted', (kind) => {
+			const values = {
+				string: { type: 'string' as const, value: '' },
+				boolean: { type: 'boolean' as const, value: false },
+				number: { type: 'number' as const, value: 0 },
+				undefined: { type: 'undefined' as const },
+				null: { type: 'object' as const, value: null, isNull: true as const },
+				regex: { type: 'regexp' as const, pattern: '', flags: '' },
+			};
+			const event = createLiteralEvent({ kind, value: values[kind] });
+			expect(event.kind).toBe(kind);
+		});
 	});
 
 	describe('errors', () => {

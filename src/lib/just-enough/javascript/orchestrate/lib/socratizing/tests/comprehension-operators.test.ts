@@ -56,10 +56,7 @@ describe('comprehension operator analyzers', () => {
 		const analyze = getAnalyzer('comparison-result');
 
 		it('fires on === comparison', () => {
-			const results = analyzeAll(
-				'const x = 5;\nconst eq = x === 5;',
-				analyze,
-			);
+			const results = analyzeAll('const x = 5;\nconst eq = x === 5;', analyze);
 			expect(results).toHaveLength(1);
 		});
 
@@ -72,10 +69,7 @@ describe('comprehension operator analyzers', () => {
 		});
 
 		it('fires on < comparison', () => {
-			const results = analyzeAll(
-				'const x = 3;\nconst lt = x < 10;',
-				analyze,
-			);
+			const results = analyzeAll('const x = 3;\nconst lt = x < 10;', analyze);
 			expect(results).toHaveLength(1);
 		});
 
@@ -85,10 +79,7 @@ describe('comprehension operator analyzers', () => {
 		});
 
 		it('has correct metadata', () => {
-			const results = analyzeAll(
-				'const x = 5;\nconst eq = x === 5;',
-				analyze,
-			);
+			const results = analyzeAll('const x = 5;\nconst eq = x === 5;', analyze);
 			expect(results[0].id).toBe('comparison-result');
 			expect(results[0].kind).toBe('comprehension');
 			expect(results[0].category).toBe('clarity');
@@ -139,26 +130,17 @@ describe('comprehension operator analyzers', () => {
 		const analyze = getAnalyzer('arithmetic-result');
 
 		it('fires on numeric addition', () => {
-			const results = analyzeAll(
-				'const a = 3;\nconst b = a + 2;',
-				analyze,
-			);
+			const results = analyzeAll('const a = 3;\nconst b = a + 2;', analyze);
 			expect(results).toHaveLength(1);
 		});
 
 		it('fires on subtraction', () => {
-			const results = analyzeAll(
-				'const a = 10;\nconst b = a - 3;',
-				analyze,
-			);
+			const results = analyzeAll('const a = 10;\nconst b = a - 3;', analyze);
 			expect(results).toHaveLength(1);
 		});
 
 		it('fires on modulo', () => {
-			const results = analyzeAll(
-				'const a = 10;\nconst b = a % 3;',
-				analyze,
-			);
+			const results = analyzeAll('const a = 10;\nconst b = a % 3;', analyze);
 			expect(results).toHaveLength(1);
 		});
 
@@ -171,18 +153,12 @@ describe('comprehension operator analyzers', () => {
 		});
 
 		it('does not fire on comparison operators', () => {
-			const results = analyzeAll(
-				'const x = 5;\nconst lt = x < 10;',
-				analyze,
-			);
+			const results = analyzeAll('const x = 5;\nconst lt = x < 10;', analyze);
 			expect(results).toHaveLength(0);
 		});
 
 		it('has correct metadata', () => {
-			const results = analyzeAll(
-				'const a = 3;\nconst b = a + 2;',
-				analyze,
-			);
+			const results = analyzeAll('const a = 3;\nconst b = a + 2;', analyze);
 			expect(results[0].id).toBe('arithmetic-result');
 			expect(results[0].kind).toBe('comprehension');
 			expect(results[0].category).toBe('clarity');
@@ -194,18 +170,12 @@ describe('comprehension operator analyzers', () => {
 		const analyze = getAnalyzer('operator-swap');
 
 		it('fires on === comparisons', () => {
-			const results = analyzeAll(
-				'const x = 5;\nconst eq = x === 5;',
-				analyze,
-			);
+			const results = analyzeAll('const x = 5;\nconst eq = x === 5;', analyze);
 			expect(results).toHaveLength(1);
 		});
 
 		it('fires on < comparisons', () => {
-			const results = analyzeAll(
-				'const x = 3;\nconst lt = x < 10;',
-				analyze,
-			);
+			const results = analyzeAll('const x = 3;\nconst lt = x < 10;', analyze);
 			expect(results).toHaveLength(1);
 		});
 

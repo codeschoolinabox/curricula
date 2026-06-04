@@ -284,16 +284,15 @@ keys, all optional:
   [`../../lib/just-enough/javascript/orchestrate/README.md` § Per-lens config resolution chain](../../lib/just-enough/javascript/orchestrate/README.md).
 
   **Lens-config value shape:** values inside `lenses.<lens-name>` are expected
-  to satisfy
-  [`LensConfig`](../../lib/just-enough/javascript/lenses/types.ts)
-  — a flat record of primitives + primitive arrays. The plugin types them
-  loosely as `Record<string, unknown>` because the cascade resolver does not
-  validate against the lens-side schema; authors who supply richer values
-  (nested objects, callbacks, dates) get undefined behavior at the lens
-  boundary. Strictness is a **lens-prop-boundary** contract (the orchestrator
-  casts to `LensConfig` after the two-tier resolution chain runs), not a
-  compile-time guarantee at the `<StudyLenses>` public API. The orchestrate-
-  side `StudyLensesProps.configs` is correspondingly **maximally opaque**
+  to satisfy [`LensConfig`](../../lib/just-enough/javascript/lenses/types.ts) —
+  a flat record of primitives + primitive arrays. The plugin types them loosely
+  as `Record<string, unknown>` because the cascade resolver does not validate
+  against the lens-side schema; authors who supply richer values (nested
+  objects, callbacks, dates) get undefined behavior at the lens boundary.
+  Strictness is a **lens-prop-boundary** contract (the orchestrator casts to
+  `LensConfig` after the two-tier resolution chain runs), not a compile-time
+  guarantee at the `<StudyLenses>` public API. The orchestrate- side
+  `StudyLensesProps.configs` is correspondingly **maximally opaque**
   (`Readonly<Record<string, unknown>>`, no declared `lenses` slot); the
   orchestrator's `configs.lenses?.[lens]` lookup is an internal structural
   assumption at the cast boundary inside `resolvePerLensConfig`, NOT a

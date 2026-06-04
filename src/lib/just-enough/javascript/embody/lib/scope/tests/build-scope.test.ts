@@ -193,9 +193,7 @@ describe('buildScope', () => {
 		});
 
 		it('creates child scopes for if/else', () => {
-			const ast = parseSource(
-				'if (true) { let a = 1; } else { let b = 2; }',
-			);
+			const ast = parseSource('if (true) { let a = 1; } else { let b = 2; }');
 			const analysis = buildScope(ast);
 
 			expect(analysis.root.children).toHaveLength(2);
@@ -309,9 +307,7 @@ describe('buildScope', () => {
 
 	describe('variable shadowing', () => {
 		it('tracks shadowed variables as separate declarations', () => {
-			const ast = parseSource(
-				'let x = 1;\nif (true) { let x = 2; }',
-			);
+			const ast = parseSource('let x = 1;\nif (true) { let x = 2; }');
 			const analysis = buildScope(ast);
 
 			// Two separate declarations of 'x'
@@ -349,9 +345,7 @@ describe('buildScope', () => {
 		});
 
 		it('resolves condition reads to outer scope', () => {
-			const ast = parseSource(
-				'let i = 0;\nwhile (i < 3) {\n  i = i + 1;\n}',
-			);
+			const ast = parseSource('let i = 0;\nwhile (i < 3) {\n  i = i + 1;\n}');
 			const analysis = buildScope(ast);
 
 			const decl = findDecl(analysis, 'i')!;
@@ -404,9 +398,7 @@ describe('buildScope', () => {
 		});
 
 		it('handles ternary expressions with reads', () => {
-			const ast = parseSource(
-				'let x = true;\nlet y = x ? "yes" : "no";',
-			);
+			const ast = parseSource('let x = true;\nlet y = x ? "yes" : "no";');
 			const analysis = buildScope(ast);
 
 			expect(findDecl(analysis, 'x')!.readCount).toBe(1);

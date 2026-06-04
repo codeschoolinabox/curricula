@@ -82,14 +82,21 @@ describe('validateProgram', () => {
 	describe('severity affects isValid', () => {
 		it('is invalid when there are rejection-severity violations', () => {
 			const report = validateProgram('var x = 5;', justEnoughJs);
-			const rejections = report.violations.filter((v) => v.severity === 'rejection');
+			const rejections = report.violations.filter(
+				(v) => v.severity === 'rejection',
+			);
 			expect(rejections.length).toBeGreaterThan(0);
 			expect(report.isValid).toBe(false);
 		});
 
 		it('var declaration produces rejection-severity violations', () => {
-			const report = validateProgram('var x = 5;\nconsole.log(x);', justEnoughJs);
-			const rejections = report.violations.filter((v) => v.severity === 'rejection');
+			const report = validateProgram(
+				'var x = 5;\nconsole.log(x);',
+				justEnoughJs,
+			);
+			const rejections = report.violations.filter(
+				(v) => v.severity === 'rejection',
+			);
 			expect(rejections.length).toBeGreaterThan(0);
 			expect(rejections[0].nodeType).toBe('VariableDeclaration');
 		});

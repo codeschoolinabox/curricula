@@ -179,7 +179,9 @@ function handleMessage(e: MessageEvent): void {
 		// (functions aren't serializable). block-setup (first hook to fire)
 		// picks up this global and sets state.onEvent from it. All subsequent
 		// hooks inherit onEvent because block-setup returns the state.
-		(globalThis as Record<string, unknown>).__jej_onEvent = function onEvent(event: unknown): void {
+		(globalThis as Record<string, unknown>).__jej_onEvent = function onEvent(
+			event: unknown,
+		): void {
 			postMessage({ type: 'entry', entry: event });
 			checkPause();
 		};

@@ -11,14 +11,14 @@ import type { JSONSchema } from './types.js';
 
 /** Configured Ajv instance for default filling */
 const ajv = new Ajv({
-  useDefaults: true,
-  coerceTypes: true,
-  removeAdditional: true,
-  allErrors: true,
-  strict: false,
-  // WHY: options.schema.json declares $schema draft-2020-12 but AJV 8
-  // default only supports draft-07. The schema uses no 2020-12 features.
-  validateSchema: false,
+	useDefaults: true,
+	coerceTypes: true,
+	removeAdditional: true,
+	allErrors: true,
+	strict: false,
+	// WHY: options.schema.json declares $schema draft-2020-12 but AJV 8
+	// default only supports draft-07. The schema uses no 2020-12 features.
+	validateSchema: false,
 });
 
 /**
@@ -29,17 +29,17 @@ const ajv = new Ajv({
  * @returns New options object with all defaults filled (never mutates input)
  */
 function fillDefaults(options: unknown, schema: JSONSchema): unknown {
-  // Handle null/undefined by starting with empty object
-  const input = options === null || options === undefined ? {} : options;
+	// Handle null/undefined by starting with empty object
+	const input = options === null || options === undefined ? {} : options;
 
-  // Deep clone to ensure immutability
-  const clone = structuredClone(input);
+	// Deep clone to ensure immutability
+	const clone = structuredClone(input);
 
-  // Compile schema and apply defaults
-  const validate = ajv.compile(schema);
-  validate(clone);
+	// Compile schema and apply defaults
+	const validate = ajv.compile(schema);
+	validate(clone);
 
-  return clone;
+	return clone;
 }
 
 export default fillDefaults;

@@ -5,19 +5,28 @@ import createTemplateBeginEvent from '../create-template-begin-event.js';
 describe('createTemplateBeginEvent', () => {
 	describe('category and event', () => {
 		it('category is template', () => {
-			const event = createTemplateBeginEvent({ strings: ['hello'], expressionCount: 0 });
+			const event = createTemplateBeginEvent({
+				strings: ['hello'],
+				expressionCount: 0,
+			});
 			expect(event.category).toBe('template');
 		});
 
 		it('event is begin', () => {
-			const event = createTemplateBeginEvent({ strings: ['hello'], expressionCount: 0 });
+			const event = createTemplateBeginEvent({
+				strings: ['hello'],
+				expressionCount: 0,
+			});
 			expect(event.event).toBe('begin');
 		});
 	});
 
 	describe('fields', () => {
 		it('no expressions — strings has 1 part', () => {
-			const event = createTemplateBeginEvent({ strings: ['hello'], expressionCount: 0 });
+			const event = createTemplateBeginEvent({
+				strings: ['hello'],
+				expressionCount: 0,
+			});
 			expect(event.strings).toEqual(['hello']);
 			expect(event.expressionCount).toBe(0);
 		});

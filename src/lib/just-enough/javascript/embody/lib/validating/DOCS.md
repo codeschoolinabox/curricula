@@ -24,38 +24,36 @@ source string
   → ValidationReport { isValid, violations, source, levelName, scriptMode? }
 ```
 
-`collectViolations` and `checkUndeclaredGlobals` are two **independent
-pure passes** over the same AST. Their outputs are concatenated into a
-single frozen `violations` array; neither pass observes the other's
-results. (Earlier drafts of this doc described a linear chain — that
-was wrong; the source has always run both passes independently.)
+`collectViolations` and `checkUndeclaredGlobals` are two **independent pure
+passes** over the same AST. Their outputs are concatenated into a single frozen
+`violations` array; neither pass observes the other's results. (Earlier drafts
+of this doc described a linear chain — that was wrong; the source has always run
+both passes independently.)
 
-Both passes also assign **`Violation.nodePath`** — the NodePath
-(rooted at the Program node, e.g. `'$.body.0.declarations.0'`)
-identifying the offending node. Each pass builds a node → path map
-once via `buildNodePathMap` (`../parse-old/`) and looks up an offending
-node's path from it by reference, rather than threading a computed path
-through the (scope-aware, non-uniform) recursion. The path is a
-**required** argument to `createViolation`: the walker passes it for
+Both passes also assign **`Violation.nodePath`** — the NodePath (rooted at the
+Program node, e.g. `'$.body.0.declarations.0'`) identifying the offending node.
+Each pass builds a node → path map once via `buildNodePathMap` (`../parse-old/`)
+and looks up an offending node's path from it by reference, rather than
+threading a computed path through the (scope-aware, non-uniform) recursion. The
+path is a **required** argument to `createViolation`: the walker passes it for
 self-constructed violations (missing / forbidden node types), and
 `NodeValidator`s receive it as their second argument
-(`(node, nodePath) => true | Violation`) and forward it. There is no
-default — a violation without a path would be a programming error, and
-the map is built from the same AST the walk traverses, so every
-offending node's path is present.
+(`(node, nodePath) => true | Violation`) and forward it. There is no default — a
+violation without a path would be a programming error, and the map is built from
+the same AST the walk traverses, so every offending node's path is present.
 
 `parseProgram` and the AST traversal helper `getChildNodes` live in
 [`../parse-old/`](../parse-old/README.md); this module imports them as building
-blocks. The `with`-statement script-mode fallback is implemented twice —
-once in `validate-program.ts` (for the validation pipeline) and once in
+blocks. The `with`-statement script-mode fallback is implemented twice — once in
+`validate-program.ts` (for the validation pipeline) and once in
 `../parse-old/parse.ts` (for the public `parse(code)` API).
 
 All violations are rejections — there are no informational warnings.
 
 ## Data flow
 
-`validate(code)` is the public entry. It wraps the
-pipeline above with result-shape transformation:
+`validate(code)` is the public entry. It wraps the pipeline above with
+result-shape transformation:
 
 ```mermaid
 flowchart TD
@@ -70,44 +68,40 @@ flowchart TD
 `validate(code)` produces one of three terminal `BaseResult` shapes:
 
 - `{ ok: true }` — code passes parse and language-level validation.
-- `{ ok: false, error: ParseResultError }` — code did not parse.
-  The `ParseResultError` flattens `ValidationReport.parseError`'s
-  nested `location` to top-level `line` and `column` fields and
-  hardcodes `name: 'SyntaxError'`. Information is preserved; the
-  shape is flatter for ergonomic top-level access.
-- `{ ok: false, rejections: Violation[] }` — code parsed but
-  contained language-level violations.
+- `{ ok: false, error: ParseResultError }` — code did not parse. The
+  `ParseResultError` flattens `ValidationReport.parseError`'s nested `location`
+  to top-level `line` and `column` fields and hardcodes `name: 'SyntaxError'`.
+  Information is preserved; the shape is flatter for ergonomic top-level access.
+- `{ ok: false, rejections: Violation[] }` — code parsed but contained
+  language-level violations.
 
 The terminal node above carries the explicit generic
-`BaseResult<ParseResultError | FormattingResultError>` to make the
-composition seam visible. The `E` type parameter is what execution
-wrappers widen — `lib/evaluating/intercept/intercept.ts` returns
-`BaseResult<ResultError> & { logs?: ... }`, supplying its own
-broader error union from `api/types.ts`. This module always returns
-the narrow default.
+`BaseResult<ParseResultError | FormattingResultError>` to make the composition
+seam visible. The `E` type parameter is what execution wrappers widen —
+`lib/evaluating/intercept/intercept.ts` returns
+`BaseResult<ResultError> & { logs?: ... }`, supplying its own broader error
+union from `api/types.ts`. This module always returns the narrow default.
 
 All terminal results are deep-frozen (utility, not shown).
 
 ### Out of scope
 
 - **Format gate** — `validate(code)` does **not** call `checkFormat`.
-  `FormattingResultError` is in the `BaseResult.error` union only so
-  downstream execution wrappers can return that error kind through a
-  shared shape; `validate.ts` never produces it.
-- **scriptMode surfacing** — when the `with`-statement fallback is
-  used internally by `validate-program.ts`, the resulting
-  `ValidationReport.scriptMode: true` flag is **dropped** by the
-  shaper. `BaseResult` has no `scriptMode` field. Tools that need
-  this signal should call `parse(code)` (which exposes `scriptMode`)
-  or `validateProgram` (which exposes `ValidationReport.scriptMode`)
-  directly.
+  `FormattingResultError` is in the `BaseResult.error` union only so downstream
+  execution wrappers can return that error kind through a shared shape;
+  `validate.ts` never produces it.
+- **scriptMode surfacing** — when the `with`-statement fallback is used
+  internally by `validate-program.ts`, the resulting
+  `ValidationReport.scriptMode: true` flag is **dropped** by the shaper.
+  `BaseResult` has no `scriptMode` field. Tools that need this signal should
+  call `parse(code)` (which exposes `scriptMode`) or `validateProgram` (which
+  exposes `ValidationReport.scriptMode`) directly.
 - **Caller-supplied LanguageLevel** — `validate(code)` always uses
-  `justEnoughJs`. Custom levels go through `validateProgram(source,
-  level)`.
+  `justEnoughJs`. Custom levels go through `validateProgram(source, level)`.
 - **Async boundary** — synchronous throughout. No I/O.
-- **Caller responsibilities** — formatting `error.message` for
-  display, mapping `line`/`column` to editor coordinates, deciding
-  what to show learners on each `error.kind`.
+- **Caller responsibilities** — formatting `error.message` for display, mapping
+  `line`/`column` to editor coordinates, deciding what to show learners on each
+  `error.kind`.
 
 ## Scope analysis model
 
@@ -159,11 +153,10 @@ fix suggestions.
 
    _Exception — `new Date()`._ `validateNewExpression` checks
    `callee.name === 'Date'` (reference.md:882-884 makes `new Date()` the sole
-   permitted `new`). This is a syntactic name check, not identity/alias
-   tracking — `let Date = Math; new Date()` passes the validator and throws at
-   runtime, which is acceptable: the realm is disposable and the check serves
-   pedagogical surface, consistent with the name-not-type philosophy of
-   decision #4.
+   permitted `new`). This is a syntactic name check, not identity/alias tracking
+   — `let Date = Math; new Date()` passes the validator and throws at runtime,
+   which is acceptable: the realm is disposable and the check serves pedagogical
+   surface, consistent with the name-not-type philosophy of decision #4.
 
 6. **Scope analysis simplified for JeJ.** No functions means no function scope,
    no hoisting, no parameters, no closures. No catch or class means fewer
@@ -189,8 +182,8 @@ fix suggestions.
 
 Acorn's `preserveParens: true` option emits `ParenthesizedExpression` nodes in
 the ESTree AST for every parenthesized expression (e.g., `(a + b) * c`). Without
-this option, parentheses are syntactically transparent — acorn produces the inner
-expression node with correct precedence but no wrapper.
+this option, parentheses are syntactically transparent — acorn produces the
+inner expression node with correct precedence but no wrapper.
 
 We enable it for trace visualization: when the Aran tracer emits
 `parenthesis.enter`/`parenthesis.leave` events, the UI needs an ESTree node to
@@ -261,15 +254,15 @@ taught surface), not as a security sandbox.
 There is a learner-experience asymmetry worth naming: `x.split()` is rejected
 with a clear message, but `x['split']()` (or optional-computed `x?.['split']()`)
 passes silently — a learner could "escape" a dot rejection by switching to
-brackets and get no feedback. We accept it because (a) reference.md never teaches
-bracket access as an alternative to a blocked dot method; the only computed
-access it teaches is `Math[method]()` guarded by `in` (reference.md:1948-1967),
-so a learner reaching `x['split']` is already off the taught path; and (b)
-closing it would need the type-aware analysis the validator deliberately lacks
-(decision #4). The surface-integrity guarantee is therefore scoped to _dot
-access only_. Gating computed string-literal keys (`x['split']`) was considered
-and deliberately declined (Option B) to keep the model simple — do not add it
-later without revisiting that decision.
+brackets and get no feedback. We accept it because (a) reference.md never
+teaches bracket access as an alternative to a blocked dot method; the only
+computed access it teaches is `Math[method]()` guarded by `in`
+(reference.md:1948-1967), so a learner reaching `x['split']` is already off the
+taught path; and (b) closing it would need the type-aware analysis the validator
+deliberately lacks (decision #4). The surface-integrity guarantee is therefore
+scoped to _dot access only_. Gating computed string-literal keys (`x['split']`)
+was considered and deliberately declined (Option B) to keep the model simple —
+do not add it later without revisiting that decision.
 
 ## What this module deliberately does NOT do
 

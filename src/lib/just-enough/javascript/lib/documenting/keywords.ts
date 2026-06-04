@@ -2,8 +2,7 @@ import type { DocEntry } from '../../orchestrate/lib/editing/types.js';
 
 const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	let: {
-		description:
-			'Declares a block-scoped variable whose value can change.',
+		description: 'Declares a block-scoped variable whose value can change.',
 		example: 'let count = 0;\ncount = count + 1;',
 		isJEJ: true,
 		whenToUse: 'When the value will be reassigned later.',
@@ -12,14 +11,11 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 		],
 	},
 	const: {
-		description:
-			'Declares a block-scoped name whose binding cannot change.',
+		description: 'Declares a block-scoped name whose binding cannot change.',
 		example: 'const name = "Alice";',
 		isJEJ: true,
 		whenToUse: 'When the binding should not be reassigned.',
-		commonMistakes: [
-			"Trying to reassign: 'const x = 1; x = 2;' is an error.",
-		],
+		commonMistakes: ["Trying to reassign: 'const x = 1; x = 2;' is an error."],
 	},
 	if: {
 		description: 'Runs a block only when its condition is true.',
@@ -45,8 +41,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			'Repeats a block a controlled number of times, with an init, a condition, and an update step.',
 		example: 'for (let i = 0; i < 5; i++) {\n\tconsole.log(i);\n}',
 		isJEJ: true,
-		whenToUse:
-			'When you know (or can compute) how many iterations you need.',
+		whenToUse: 'When you know (or can compute) how many iterations you need.',
 		commonMistakes: [
 			"Off-by-one: 'i <= length' often goes one past the end; use 'i < length'.",
 			"Forgetting the update step — 'for (let i = 0; i < n;) {}' loops forever.",
@@ -64,21 +59,19 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	do: {
 		description:
 			'Repeats a block at least once, then keeps going while a condition is true.',
-		example: 'let answer;\ndo {\n\tanswer = prompt("Yes or no?");\n} while (answer !== "yes" && answer !== "no");',
+		example:
+			'let answer;\ndo {\n\tanswer = prompt("Yes or no?");\n} while (answer !== "yes" && answer !== "no");',
 		isJEJ: true,
 		whenToUse:
-			"When the body must run at least once before its condition is checked.",
-		commonMistakes: [
-			"Forgetting the trailing semicolon after 'while (...)'.",
-		],
+			'When the body must run at least once before its condition is checked.',
+		commonMistakes: ["Forgetting the trailing semicolon after 'while (...)'."],
 	},
 	break: {
 		description:
 			'Stops the nearest enclosing loop immediately, jumping past it.',
 		example: 'for (let i = 0; i < 10; i++) {\n\tif (i === 3) break;\n}',
 		isJEJ: true,
-		whenToUse:
-			'To exit a loop early when you find what you were looking for.',
+		whenToUse: 'To exit a loop early when you find what you were looking for.',
 		commonMistakes: [
 			"Using 'break' outside a loop — it only stops loops (and switch, which JEJ doesn't use).",
 		],
@@ -86,7 +79,8 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 	continue: {
 		description:
 			'Skips the rest of this iteration and continues with the next one.',
-		example: 'for (let i = 0; i < 5; i++) {\n\tif (i % 2 === 0) continue;\n\tconsole.log(i);\n}',
+		example:
+			'for (let i = 0; i < 5; i++) {\n\tif (i % 2 === 0) continue;\n\tconsole.log(i);\n}',
 		isJEJ: true,
 		whenToUse: 'To skip a single iteration without leaving the loop.',
 		commonMistakes: [
@@ -120,8 +114,7 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocEntry>> = {
 			'When you need to assert a negative condition without computing one.',
 	},
 	null: {
-		description:
-			'The literal value meaning "intentionally no value here".',
+		description: 'The literal value meaning "intentionally no value here".',
 		example: 'let chosen = null; // not picked yet',
 		isJEJ: true,
 		whenToUse:

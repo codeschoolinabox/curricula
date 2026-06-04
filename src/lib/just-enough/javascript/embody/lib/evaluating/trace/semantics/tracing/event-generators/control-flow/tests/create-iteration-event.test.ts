@@ -4,7 +4,11 @@ import createIterationEvent from '../create-iteration-event.js';
 
 describe('createIterationEvent', () => {
 	it('basic while iteration', () => {
-		const event = createIterationEvent({ kind: 'while', index: 0, scopeCreationStep: 3 });
+		const event = createIterationEvent({
+			kind: 'while',
+			index: 0,
+			scopeCreationStep: 3,
+		});
 		expect(event.category).toBe('controlFlow');
 		expect(event.event).toBe('iteration');
 	});
@@ -24,7 +28,11 @@ describe('createIterationEvent', () => {
 	});
 
 	it('forOf fields absent for non-forOf', () => {
-		const event = createIterationEvent({ kind: 'for', index: 2, scopeCreationStep: 3 });
+		const event = createIterationEvent({
+			kind: 'for',
+			index: 2,
+			scopeCreationStep: 3,
+		});
 		expect(event).not.toHaveProperty('iterable');
 		expect(event).not.toHaveProperty('iterationValue');
 		expect(event).not.toHaveProperty('iterationVariable');

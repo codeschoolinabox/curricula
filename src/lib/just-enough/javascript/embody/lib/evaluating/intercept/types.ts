@@ -257,8 +257,7 @@ type InterceptOptions = {
  * Mode 1 and Mode 2 must not be mixed on the same handle — see
  * JSDoc on `createInterceptGenerator` for why.
  */
-type InterceptHandle =
-	AsyncGenerator<LinkedInterceptEvent, InterceptResult> &
+type InterceptHandle = AsyncGenerator<LinkedInterceptEvent, InterceptResult> &
 	Execution<LinkedInterceptEvent, InterceptResult> & {
 		/**
 		 * Stop the run and attach a structured rejection payload.

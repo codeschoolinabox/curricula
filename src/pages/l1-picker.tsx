@@ -41,8 +41,8 @@ export default function L1Picker(): React.JSX.Element {
 			<main style={{ maxWidth: 720, margin: '2rem auto', padding: '0 1rem' }}>
 				<h1>L1 picker sandbox</h1>
 				<p>
-					Each panel renders a fully-wired toolbar above its active surface.
-					The picker enumerates the registered lenses (sentinel first); the
+					Each panel renders a fully-wired toolbar above its active surface. The
+					picker enumerates the registered lenses (sentinel first); the
 					edit-return button appears only in lens mode.
 				</p>
 				<h2>Editor mode (no lens prop)</h2>

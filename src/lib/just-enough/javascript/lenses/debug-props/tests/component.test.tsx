@@ -15,7 +15,6 @@ import embody from '../../../embody/index.js';
 import type { Snippet } from '../../../embody/types.js';
 import debugPropsLens from '../index.js';
 
-
 afterEach(cleanup);
 
 function makeSnippet(): Snippet {

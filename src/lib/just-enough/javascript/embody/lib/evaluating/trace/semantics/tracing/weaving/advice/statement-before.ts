@@ -42,7 +42,6 @@ function statementBefore(state: TracerState, ...point: unknown[]): void {
 	const targetScopeCreationStep = loopMatch.creationStep;
 
 	if (isControlFlowGateOpen(state.config, target, 'jump')) {
-
 		emitEvent(state, tag, 'statement', 'controlFlow.jump', {
 			kind: jumpKind,
 			target,

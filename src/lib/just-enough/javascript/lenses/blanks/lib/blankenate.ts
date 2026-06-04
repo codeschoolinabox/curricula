@@ -25,10 +25,7 @@
 
 import * as acorn from 'acorn';
 
-import type {
-	Blank,
-	BlankenateResult,
-} from '../types.js';
+import type { Blank, BlankenateResult } from '../types.js';
 
 /**
  * The wrapper-internal boolean map derived from `ContentType[]` on
@@ -134,7 +131,11 @@ function blankenate(
 		if (!node || typeof node !== 'object') return;
 
 		// Blank identifiers
-		if (config.identifiers && node.type === 'Identifier' && Math.random() < probability) {
+		if (
+			config.identifiers &&
+			node.type === 'Identifier' &&
+			Math.random() < probability
+		) {
 			blankedTokens.push({
 				start: node.start,
 				end: node.end,
@@ -163,7 +164,10 @@ function blankenate(
 			let keywordName = '';
 
 			// Check different node types that can contain keywords
-			if (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') {
+			if (
+				node.type === 'FunctionDeclaration' ||
+				node.type === 'FunctionExpression'
+			) {
 				keywordFound = true;
 				keywordName = 'function';
 			} else if (node.type === 'IfStatement') {
@@ -288,7 +292,10 @@ function blankenate(
 				}
 			}
 
-			if (operatorStart !== -1 && (node.operator || node.type === 'VariableDeclarator')) {
+			if (
+				operatorStart !== -1 &&
+				(node.operator || node.type === 'VariableDeclarator')
+			) {
 				blankedTokens.push({
 					start: operatorStart,
 					end: operatorStart + node.operator.length,
@@ -300,7 +307,11 @@ function blankenate(
 
 		// Recursively walk child nodes
 		for (const key in node) {
-			if (key === 'parent' || key === 'leadingComments' || key === 'trailingComments')
+			if (
+				key === 'parent' ||
+				key === 'leadingComments' ||
+				key === 'trailingComments'
+			)
 				continue;
 			const child = node[key];
 			if (Array.isArray(child)) {
@@ -334,7 +345,9 @@ function blankenate(
 
 		// Replace with blank placeholder
 		blankedCode =
-			blankedCode.substring(0, token.start) + blank + blankedCode.substring(token.end);
+			blankedCode.substring(0, token.start) +
+			blank +
+			blankedCode.substring(token.end);
 	}
 
 	// Freeze the returned object + blanks array. The wrapper memoizes

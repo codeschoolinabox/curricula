@@ -12,8 +12,8 @@ finds `while` loops, and injects:
 2. A check at the top of each loop body (`if (++loop1 > max) throw ...`)
 
 Loops are numbered in reading order (outer before inner). If a loop exceeds the
-configured iteration limit, a `RangeError` is thrown at runtime — preventing browser
-freezes in educational contexts.
+configured iteration limit, a `RangeError` is thrown at runtime — preventing
+browser freezes in educational contexts.
 
 `for-of` loops are not guarded — they iterate finite collections and cannot
 produce infinite loops.

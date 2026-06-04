@@ -78,10 +78,7 @@ describe('caution analyzers', () => {
 		});
 
 		it('does not fire on block with statements', () => {
-			const results = analyzeAll(
-				'if (true) { console.log("hi"); }',
-				analyze,
-			);
+			const results = analyzeAll('if (true) { console.log("hi"); }', analyze);
 			expect(results).toHaveLength(0);
 		});
 	});

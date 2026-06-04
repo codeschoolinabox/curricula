@@ -35,8 +35,8 @@ The transformation uses two passes instead of a single walker callback:
 
 1. **Collect** — walk the AST with `enter`, recording each `WhileStatement` and
    its parent. Pre-order traversal gives reading order (outer before inner).
-2. **Apply** — iterate collected loops in reverse source order, inserting guards.
-   Reverse iteration keeps `parent.body.splice()` indices stable.
+2. **Apply** — iterate collected loops in reverse source order, inserting
+   guards. Reverse iteration keeps `parent.body.splice()` indices stable.
 
 ## AST Mutation Pattern
 

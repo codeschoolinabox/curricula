@@ -42,7 +42,10 @@ function isAcornNode(value: unknown): value is Node {
 }
 
 function cloneLoc(loc: Node['loc']): SourceLocation {
-	const safeLoc = loc as { start: { line: number; column: number }; end: { line: number; column: number } };
+	const safeLoc = loc as {
+		start: { line: number; column: number };
+		end: { line: number; column: number };
+	};
 	return {
 		start: { line: safeLoc.start.line, column: safeLoc.start.column },
 		end: { line: safeLoc.end.line, column: safeLoc.end.column },

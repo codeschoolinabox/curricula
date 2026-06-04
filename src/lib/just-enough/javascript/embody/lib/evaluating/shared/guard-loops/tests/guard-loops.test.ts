@@ -47,8 +47,7 @@ describe('guardLoops', () => {
 		});
 
 		it('does not shift line numbers', () => {
-			const code =
-				'let x = 0;\nwhile (x < 10) {\n\tx++;\n}\nconsole.log(x);\n';
+			const code = 'let x = 0;\nwhile (x < 10) {\n\tx++;\n}\nconsole.log(x);\n';
 			const result = guardLoops(code, MAX);
 			const lines = result.code.split('\n');
 			// Line 1: let x = 0;
@@ -84,8 +83,7 @@ describe('guardLoops', () => {
 		});
 
 		it('outer loop gets lower number than inner', () => {
-			const code =
-				'while (a) {\n\twhile (b) {\n\t\tb++;\n\t}\n\ta++;\n}\n';
+			const code = 'while (a) {\n\twhile (b) {\n\t\tb++;\n\t}\n\ta++;\n}\n';
 			const result = guardLoops(code, MAX);
 			const firstGuard = result.code.indexOf('++loop1');
 			const secondGuard = result.code.indexOf('++loop2');
@@ -96,8 +94,7 @@ describe('guardLoops', () => {
 	describe('for-of coverage', () => {
 		describe('single for-of', () => {
 			it('injects guard after opening brace', () => {
-				const code =
-					'for (const item of items) {\n\tconsole.log(item);\n}\n';
+				const code = 'for (const item of items) {\n\tconsole.log(item);\n}\n';
 				const result = guardLoops(code, MAX);
 				expect(result.code).toContain(
 					`{ if (++loop1 > ${MAX}) throw new RangeError`,
@@ -105,29 +102,25 @@ describe('guardLoops', () => {
 			});
 
 			it('injects counter reset after closing brace', () => {
-				const code =
-					'for (const item of items) {\n\tconsole.log(item);\n}\n';
+				const code = 'for (const item of items) {\n\tconsole.log(item);\n}\n';
 				const result = guardLoops(code, MAX);
 				expect(result.code).toContain('} loop1 = 0;');
 			});
 
 			it('returns loopCount 1', () => {
-				const code =
-					'for (const item of items) {\n\tconsole.log(item);\n}\n';
+				const code = 'for (const item of items) {\n\tconsole.log(item);\n}\n';
 				const result = guardLoops(code, MAX);
 				expect(result.loopCount).toBe(1);
 			});
 
 			it('preserves original for-of header unchanged', () => {
-				const code =
-					'for (const item of items) {\n\tconsole.log(item);\n}\n';
+				const code = 'for (const item of items) {\n\tconsole.log(item);\n}\n';
 				const result = guardLoops(code, MAX);
 				expect(result.code).toContain('for (const item of items) {');
 			});
 
 			it('handles destructuring head', () => {
-				const code =
-					'for (const [k, v] of entries) {\n\tlog(k, v);\n}\n';
+				const code = 'for (const [k, v] of entries) {\n\tlog(k, v);\n}\n';
 				const result = guardLoops(code, MAX);
 				expect(result.code).toContain('++loop1');
 				expect(result.loopCount).toBe(1);
@@ -147,16 +140,10 @@ describe('guardLoops', () => {
 					// Long iterable. The guard fires based on iteration count,
 					// not iterable length — defensive coverage's whole point.
 					const items = Array.from({ length: 1000 }, (_, i) => i);
-					const code =
-						'for (const n of items) { executed.push(loop1); }\n';
+					const code = 'for (const n of items) { executed.push(loop1); }\n';
 					const result = guardLoops(code, max);
 					// eslint-disable-next-line no-new-func
-					const fn = new Function(
-						'loop1',
-						'items',
-						'executed',
-						result.code,
-					);
+					const fn = new Function('loop1', 'items', 'executed', result.code);
 					expect(() => fn(0, items, executed)).toThrow(RangeError);
 					expect(executed).toEqual(expected);
 				},
@@ -171,11 +158,7 @@ describe('guardLoops', () => {
 
 			// Pass loop1 as a parameter initialized to 0
 			// eslint-disable-next-line no-new-func
-			const fn = new Function(
-				'loop1',
-				'x',
-				result.code + '\nreturn x;',
-			);
+			const fn = new Function('loop1', 'x', result.code + '\nreturn x;');
 			const finalX = fn(0, 0);
 			expect(finalX).toBe(3);
 		});
@@ -241,10 +224,7 @@ describe('guardLoops', () => {
 			[1, 'if (++loop1 > 1)'],
 			[100, 'if (++loop1 > 100)'],
 		])('maxIterations = %i → template contains %p', (max, expected) => {
-			const result = guardLoops(
-				'while (true) {\n\tx++;\n}\n',
-				max,
-			);
+			const result = guardLoops('while (true) {\n\tx++;\n}\n', max);
 			expect(result.code).toContain(expected);
 		});
 
@@ -259,8 +239,7 @@ describe('guardLoops', () => {
 			'maxIterations = %i runs body %p times before throwing',
 			(max, expected) => {
 				const executed: number[] = [];
-				const code =
-					'while (true) { executed.push(loop1); }\n';
+				const code = 'while (true) { executed.push(loop1); }\n';
 				const result = guardLoops(code, max);
 				// eslint-disable-next-line no-new-func
 				const fn = new Function('loop1', 'executed', result.code);
@@ -444,10 +423,7 @@ describe('guardLoops', () => {
 					[1, 'if (++loop1 > 1)'],
 					[100, 'if (++loop1 > 100)'],
 				])('maxIterations = %i → template contains %p', (max, expected) => {
-					const result = guardLoops(
-						'do {\n\tx++;\n} while (true);\n',
-						max,
-					);
+					const result = guardLoops('do {\n\tx++;\n} while (true);\n', max);
 					expect(result.code).toContain(expected);
 				});
 
@@ -460,8 +436,7 @@ describe('guardLoops', () => {
 					'maxIterations = %i runs do-body %p times before throwing',
 					(max, expected) => {
 						const executed: number[] = [];
-						const code =
-							'do { executed.push(loop1); } while (true);\n';
+						const code = 'do { executed.push(loop1); } while (true);\n';
 						const result = guardLoops(code, max);
 						// eslint-disable-next-line no-new-func
 						const fn = new Function('loop1', 'executed', result.code);

@@ -29,7 +29,8 @@ describe('createInterceptGenerator EVENT_READY timer-guard (browser)', () => {
 		it('timer fires timeout within remainingMs when no trap is hit', async () => {
 			const code = await format('while (true) { let x = 1; }\n');
 			const result = await createInterceptGenerator(code, { seconds: 0.1 });
-			if (result.ok || !result.error) throw new Error('expected ok:false with error');
+			if (result.ok || !result.error)
+				throw new Error('expected ok:false with error');
 			expect(result.error.kind).toBe('timeout');
 		});
 	});
@@ -47,7 +48,8 @@ describe('createInterceptGenerator EVENT_READY timer-guard (browser)', () => {
 					},
 				},
 			});
-			if (result.ok || !result.error) throw new Error('expected ok:false with error');
+			if (result.ok || !result.error)
+				throw new Error('expected ok:false with error');
 			expect(result.error.kind).toBe('timeout');
 		});
 
@@ -68,7 +70,8 @@ describe('createInterceptGenerator EVENT_READY timer-guard (browser)', () => {
 					},
 				},
 			});
-			if (result.ok || !result.error) throw new Error('expected ok:false with error');
+			if (result.ok || !result.error)
+				throw new Error('expected ok:false with error');
 			expect(result.error.kind).toBe('timeout');
 			// budget(100ms) / charge(5ms) = 20 events, plus epsilon
 			// for the worker-active deduction occasionally rounding

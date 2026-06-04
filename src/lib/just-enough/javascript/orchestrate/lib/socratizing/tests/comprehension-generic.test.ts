@@ -45,10 +45,7 @@ describe('comprehension generic analyzers', () => {
 		const analyze = getAnalyzer('read-aloud');
 
 		it('fires on programs with 2 or more statements', () => {
-			const results = analyzeProgram(
-				'const x = 5;\nconst y = 10;',
-				analyze,
-			);
+			const results = analyzeProgram('const x = 5;\nconst y = 10;', analyze);
 			expect(results).toHaveLength(1);
 		});
 
@@ -63,10 +60,7 @@ describe('comprehension generic analyzers', () => {
 		});
 
 		it('has correct metadata', () => {
-			const results = analyzeProgram(
-				'const x = 5;\nconst y = 10;',
-				analyze,
-			);
+			const results = analyzeProgram('const x = 5;\nconst y = 10;', analyze);
 			expect(results[0].id).toBe('read-aloud');
 			expect(results[0].kind).toBe('comprehension');
 			expect(results[0].category).toBe('clarity');
@@ -110,10 +104,7 @@ describe('comprehension generic analyzers', () => {
 		});
 
 		it('has correct metadata', () => {
-			const results = analyzeProgram(
-				'if (true) { alert("yes"); }',
-				analyze,
-			);
+			const results = analyzeProgram('if (true) { alert("yes"); }', analyze);
 			expect(results[0].id).toBe('program-paths');
 			expect(results[0].kind).toBe('comprehension');
 			expect(results[0].category).toBe('clarity');
@@ -133,18 +124,12 @@ describe('comprehension generic analyzers', () => {
 		});
 
 		it('fires on programs with alert() calls', () => {
-			const results = analyzeProgram(
-				'alert("Hello!");',
-				analyze,
-			);
+			const results = analyzeProgram('alert("Hello!");', analyze);
 			expect(results).toHaveLength(1);
 		});
 
 		it('does not fire on programs without interaction calls', () => {
-			const results = analyzeProgram(
-				'const x = 5;\nconst y = x + 1;',
-				analyze,
-			);
+			const results = analyzeProgram('const x = 5;\nconst y = x + 1;', analyze);
 			expect(results).toHaveLength(0);
 		});
 	});

@@ -77,10 +77,7 @@ describe('trap analyzers', () => {
 		});
 
 		it('fires on if (0)', () => {
-			const results = analyzeAll(
-				'if (0) { console.log("never"); }',
-				analyze,
-			);
+			const results = analyzeAll('if (0) { console.log("never"); }', analyze);
 			expect(results).toHaveLength(1);
 		});
 
@@ -98,24 +95,21 @@ describe('trap analyzers', () => {
 
 		it('fires on if with empty body from semicolon', () => {
 			// `if (true);` parses the semicolon as an EmptyStatement body
-			const results = analyzeAll('if (true);\nconsole.log("runs always");', analyze);
+			const results = analyzeAll(
+				'if (true);\nconsole.log("runs always");',
+				analyze,
+			);
 			expect(results).toHaveLength(1);
 			expect(results[0].category).toBe('trap');
 		});
 
 		it('fires on while with empty body from semicolon', () => {
-			const results = analyzeAll(
-				'let x = true;\nwhile (x);',
-				analyze,
-			);
+			const results = analyzeAll('let x = true;\nwhile (x);', analyze);
 			expect(results).toHaveLength(1);
 		});
 
 		it('does not fire on normal if with block body', () => {
-			const results = analyzeAll(
-				'if (true) { console.log("ok"); }',
-				analyze,
-			);
+			const results = analyzeAll('if (true) { console.log("ok"); }', analyze);
 			expect(results).toHaveLength(0);
 		});
 	});

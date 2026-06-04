@@ -1,7 +1,7 @@
 # Pointcut Functions
 
-One function per Aran flexible hook category. Each inspects an AranLang node
-and returns either `null` (skip) or `Json[]` point data (intercept).
+One function per Aran flexible hook category. Each inspects an AranLang node and
+returns either `null` (skip) or `Json[]` point data (intercept).
 
 ## Files
 
@@ -12,8 +12,8 @@ and returns either `null` (skip) or `Json[]` point data (intercept).
   property access, function calls, and templates all route through here.
 - `effect-pointcut.ts` — WriteEffect (assignments), ConditionalEffect (logical
   compound assignments ??=/||=/&&=)
-- `block-pointcut.ts` — ALL blocks (always matches — scope tracking is
-  always needed). Returns parent type, parent kind, and tag.
+- `block-pointcut.ts` — ALL blocks (always matches — scope tracking is always
+  needed). Returns parent type, parent kind, and tag.
 - `statement-pointcut.ts` — BreakStatement (jumps), WhileStatement (iterations,
   loop guards), IfStatement (branches)
 

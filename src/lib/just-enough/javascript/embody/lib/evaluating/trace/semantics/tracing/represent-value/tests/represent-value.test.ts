@@ -9,7 +9,10 @@ describe('representValue', () => {
 		});
 
 		it('value is the string', () => {
-			expect(representValue('hello')).toEqual({ type: 'string', value: 'hello' });
+			expect(representValue('hello')).toEqual({
+				type: 'string',
+				value: 'hello',
+			});
 		});
 
 		it('empty string', () => {
@@ -27,11 +30,19 @@ describe('representValue', () => {
 		});
 
 		it('negative number has isNegative', () => {
-			expect(representValue(-5)).toEqual({ type: 'number', value: -5, isNegative: true });
+			expect(representValue(-5)).toEqual({
+				type: 'number',
+				value: -5,
+				isNegative: true,
+			});
 		});
 
 		it('NaN has isNaN', () => {
-			expect(representValue(NaN)).toEqual({ type: 'number', value: NaN, isNaN: true });
+			expect(representValue(NaN)).toEqual({
+				type: 'number',
+				value: NaN,
+				isNaN: true,
+			});
 		});
 
 		it('Infinity has isInfinity', () => {
@@ -79,7 +90,11 @@ describe('representValue', () => {
 
 	describe('null', () => {
 		it('type is object with isNull', () => {
-			expect(representValue(null)).toEqual({ type: 'object', value: null, isNull: true });
+			expect(representValue(null)).toEqual({
+				type: 'object',
+				value: null,
+				isNull: true,
+			});
 		});
 	});
 
@@ -88,7 +103,11 @@ describe('representValue', () => {
 			function foo(a: number, b: number) {
 				return a + b;
 			}
-			expect(representValue(foo)).toEqual({ type: 'function', name: 'foo', arity: 2 });
+			expect(representValue(foo)).toEqual({
+				type: 'function',
+				name: 'foo',
+				arity: 2,
+			});
 		});
 
 		it('anonymous function', () => {
@@ -101,7 +120,11 @@ describe('representValue', () => {
 
 		it('arrow function', () => {
 			const fn = (x: number) => x;
-			expect(representValue(fn)).toEqual({ type: 'function', name: 'fn', arity: 1 });
+			expect(representValue(fn)).toEqual({
+				type: 'function',
+				name: 'fn',
+				arity: 1,
+			});
 		});
 	});
 
@@ -125,11 +148,19 @@ describe('representValue', () => {
 
 	describe('fallback', () => {
 		it('plain object falls back to null representation', () => {
-			expect(representValue({})).toEqual({ type: 'object', value: null, isNull: true });
+			expect(representValue({})).toEqual({
+				type: 'object',
+				value: null,
+				isNull: true,
+			});
 		});
 
 		it('array falls back to null representation', () => {
-			expect(representValue([1, 2])).toEqual({ type: 'object', value: null, isNull: true });
+			expect(representValue([1, 2])).toEqual({
+				type: 'object',
+				value: null,
+				isNull: true,
+			});
 		});
 	});
 });

@@ -172,7 +172,7 @@ function unusedVariable(
 		if (id.type !== 'Identifier') {
 			continue;
 		}
-		const name = (getRecord(id)).name as string;
+		const name = getRecord(id).name as string;
 
 		const declInfo = scope.allDeclarations.find(
 			(d) => d.name === name && d.node === id,

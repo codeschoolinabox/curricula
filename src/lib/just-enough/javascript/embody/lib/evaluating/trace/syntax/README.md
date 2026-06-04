@@ -2,23 +2,22 @@
 
 The **JEJ NM syntax-level tracer of the semantic-level tracer**.
 
-Sibling to [`../semantics/`](../semantics/) (the semantic-level tracer).
-Both tracers are independently exportable — semantics is the core, syntax
-is an abstraction layer on top. The syntax tracer consumes the semantic
-tracer's event stream + entwined AST and produces NM-level steps mapping
-to visible syntactic units.
+Sibling to [`../semantics/`](../semantics/) (the semantic-level tracer). Both
+tracers are independently exportable — semantics is the core, syntax is an
+abstraction layer on top. The syntax tracer consumes the semantic tracer's event
+stream + entwined AST and produces NM-level steps mapping to visible syntactic
+units.
 
-Takes raw semantic-tracer events and aggregates them into a stream of
-NM-level steps that map to visible syntactic units of a JEJ program. The
-tracer's output is fine-grained value-movement and lookup events; the NM
-layer's output is coarser — each step corresponds to something a learner can
-point at in their source code (expressions, statements, scope transitions,
-terminals), plus one edge category for data-flow resolves between those
-steps.
+Takes raw semantic-tracer events and aggregates them into a stream of NM-level
+steps that map to visible syntactic units of a JEJ program. The tracer's output
+is fine-grained value-movement and lookup events; the NM layer's output is
+coarser — each step corresponds to something a learner can point at in their
+source code (expressions, statements, scope transitions, terminals), plus one
+edge category for data-flow resolves between those steps.
 
 > **Status.** Phase 0 DDD artifact. Types and architectural sketch drafted;
-> Environment/NMConfig/terminal-kind details stubbed pending resolution of
-> Phase 0.1 open items. See [PLAN.md](./PLAN.md) §Handoff §What's still open.
+> Environment/NMConfig/terminal-kind details stubbed pending resolution of Phase
+> 0.1 open items. See [PLAN.md](./PLAN.md) §Handoff §What's still open.
 
 ## Where it fits
 
@@ -49,18 +48,18 @@ steps.
 **Inputs at the boundary:** a source string (a JEJ program) + an NMConfig
 (category gates, semantic-event gate, I/O mocks, timeout).
 
-**Outputs at the boundary:** an `NMSession` with eager properties
-(`source`, `ast`, `initialEnvironment`, `creationError`) available
-synchronously; a streaming `AsyncIterable<StreamYield>` of LiveSteps; and a
-`complete()` promise resolving to an `NMTraceResult` with the final entwined
-`result.ast` + full step sequence + env state + coverage.
+**Outputs at the boundary:** an `NMSession` with eager properties (`source`,
+`ast`, `initialEnvironment`, `creationError`) available synchronously; a
+streaming `AsyncIterable<StreamYield>` of LiveSteps; and a `complete()` promise
+resolving to an `NMTraceResult` with the final entwined `result.ast` + full step
+sequence + env state + coverage.
 
 The NM layer **owns**: step aggregation per category, AST tagging, envDiff
 computation, step-stream lifecycle, binding-write tracking.
 
 The NM layer **does not own**: code execution (that's the tracer), lens
-rendering (consumers), JEJ language validation (upstream), raw event
-emission (tracer), or I/O dialog UI (consumer's `io` config).
+rendering (consumers), JEJ language validation (upstream), raw event emission
+(tracer), or I/O dialog UI (consumer's `io` config).
 
 ## Glossary
 
@@ -68,8 +67,8 @@ emission (tracer), or I/O dialog UI (consumer's `io` config).
 construction (parse + tag), streaming (event → step aggregation), and
 finalization. Pure: recomputes on each call; no caching.
 
-**AST (NM view)** — the parsed tree with `dagRole` + `dagKind` tags per
-node. Two reading conventions over the same data:
+**AST (NM view)** — the parsed tree with `dagRole` + `dagKind` tags per node.
+Two reading conventions over the same data:
 
 - Syntax-tree view (traverse parent/children) — what the learner sees.
 - Data-flow view (read `dagRole`) — source / transformation / destination /
@@ -81,27 +80,26 @@ node. Two reading conventions over the same data:
 **Expression step** — category `expression`. A syntactically pointable
 value-producer at an AST Expression node. Six kinds mirror AST node types:
 `literal`, `identifier`, `property`, `operator`, `call`, `template`. Each
-carries output value + transformation detail. Operator steps optionally
-carry a `.coercion` property (dual representation with events in `.events[]`).
+carries output value + transformation detail. Operator steps optionally carry a
+`.coercion` property (dual representation with events in `.events[]`).
 
-**Resolve step** — category `resolve`. A data-flow EDGE between nodes.
-Carries `.from: SourceRef` + `.to: DestinationRef` + `.value` + `.loc`.
-AST-position locs on both ends so consumers render arrows even when
-neighbor nodes are gated off. NOT a value-producer.
+**Resolve step** — category `resolve`. A data-flow EDGE between nodes. Carries
+`.from: SourceRef` + `.to: DestinationRef` + `.value` + `.loc`. AST-position
+locs on both ends so consumers render arrows even when neighbor nodes are gated
+off. NOT a value-producer.
 
-**Terminal step** — category `initialization` / `for-init` / `write` /
-`emit` / `error`. Where a value ends its flow. Carries back-ref
-`sourceResolveIndex?: number` to the incoming resolve (when resolves are
-on), plus `.value` / `.result` properties for coarse consumers. Side-effects
-of expression steps (I/O emit from a call; binding-update from an
-assignment) become their own terminal steps with back-refs.
+**Terminal step** — category `initialization` / `for-init` / `write` / `emit` /
+`error`. Where a value ends its flow. Carries back-ref
+`sourceResolveIndex?: number` to the incoming resolve (when resolves are on),
+plus `.value` / `.result` properties for coarse consumers. Side-effects of
+expression steps (I/O emit from a call; binding-update from an assignment)
+become their own terminal steps with back-refs.
 
-**Structural step** — category `statement` / `scope` / `control-flow`.
-Syntactic frames around value-producing work. Not value-carrying, but
-pointable.
+**Structural step** — category `statement` / `scope` / `control-flow`. Syntactic
+frames around value-producing work. Not value-carrying, but pointable.
 
-**LiveStep** — a step in its streaming / mutable form. Fields fill as
-events arrive. `.events: AsyncIterable<TraceEvent>` for inner pull.
+**LiveStep** — a step in its streaming / mutable form. Fields fill as events
+arrive. `.events: AsyncIterable<TraceEvent>` for inner pull.
 `.done: Promise<Step>` resolves at close with a frozen step.
 
 **envDiff** — the delta applied to the environment at one step.
@@ -111,31 +109,31 @@ pre-execution.
 
 **Runtime error** (R4b) — execution-phase error during a step.
 
-**NMConfig** — config passed to `nm()`. Category gates (which step kinds
-emit), `semanticEvents` gate, I/O mocks passthrough, timeout/iteration
-limits.
+**NMConfig** — config passed to `nm()`. Category gates (which step kinds emit),
+`semanticEvents` gate, I/O mocks passthrough, timeout/iteration limits.
 
 ## Step categories
 
-Every step is classified STRUCTURALLY as a **node** (value producer or
-terminal destination or syntactic frame) or an **edge** (data-flow resolve).
-Nodes are syntactically pointable in the learner's source code; edges span
-between nodes, carrying AST-position locs on both sides.
+Every step is classified STRUCTURALLY as a **node** (value producer or terminal
+destination or syntactic frame) or an **edge** (data-flow resolve). Nodes are
+syntactically pointable in the learner's source code; edges span between nodes,
+carrying AST-position locs on both sides.
 
-| Category         | Role               | Kinds (draft)                                               |
-| ---------------- | ------------------ | ----------------------------------------------------------- |
-| `expression`     | node (producer)    | `literal`, `identifier`, `property`, `operator`, `call`, `template` |
-| `resolve`        | edge               | single kind (data-flow edge)                                |
-| `statement`      | node (structural)  | `enter`, `exit`                                             |
-| `scope`          | node (structural)  | `create`, `leave`                                           |
-| `control-flow`   | node (structural)  | `conditional-test`, `branch-entry`, `loop-iter-start`, `loop-iter-end`, `break`, `continue`, `loop-exit` |
-| `initialization` | node (terminal)    | TBD — see [PLAN.md](./PLAN.md) open items                   |
-| `for-init`       | node (terminal)    | TBD                                                         |
-| `write`          | node (terminal)    | TBD — `simple` vs `compound`?                               |
-| `emit`           | node (terminal)    | TBD — per-method vs per-channel?                            |
-| `error`          | node (terminal)    | TBD — per-error-type?                                       |
+| Category         | Role              | Kinds (draft)                                                                                            |
+| ---------------- | ----------------- | -------------------------------------------------------------------------------------------------------- |
+| `expression`     | node (producer)   | `literal`, `identifier`, `property`, `operator`, `call`, `template`                                      |
+| `resolve`        | edge              | single kind (data-flow edge)                                                                             |
+| `statement`      | node (structural) | `enter`, `exit`                                                                                          |
+| `scope`          | node (structural) | `create`, `leave`                                                                                        |
+| `control-flow`   | node (structural) | `conditional-test`, `branch-entry`, `loop-iter-start`, `loop-iter-end`, `break`, `continue`, `loop-exit` |
+| `initialization` | node (terminal)   | TBD — see [PLAN.md](./PLAN.md) open items                                                                |
+| `for-init`       | node (terminal)   | TBD                                                                                                      |
+| `write`          | node (terminal)   | TBD — `simple` vs `compound`?                                                                            |
+| `emit`           | node (terminal)   | TBD — per-method vs per-channel?                                                                         |
+| `error`          | node (terminal)   | TBD — per-error-type?                                                                                    |
 
 **Terminal kind details are open** (PLAN.md §Handoff §What's still open
+
 # 4). Sketches here are drafts to be finalized.
 
 ## Node vs edge classification
@@ -161,18 +159,18 @@ between nodes, carrying AST-position locs on both sides.
             └──────────────────────────────────────────────────────────────┘
 ```
 
-**Why edges vs nodes matters:** each node is a visible syntactic unit; each
-edge is a data-flow arrow. Env-visible sub-events (binding-access,
-scope-lookup, proto-chain-walk) are INTRA-NODE details (they ride in the
-owning node's `.events[]`); they are NOT their own categories. Coercion is
-also intra-node (a property on operator expressions) but intentionally
-dual-represented: as `.coercion` on the operator step AND as standalone
-coercion events in `.events[]` when `semanticEvents: true`.
+**Why edges vs nodes matters:** each node is a visible syntactic unit; each edge
+is a data-flow arrow. Env-visible sub-events (binding-access, scope-lookup,
+proto-chain-walk) are INTRA-NODE details (they ride in the owning node's
+`.events[]`); they are NOT their own categories. Coercion is also intra-node (a
+property on operator expressions) but intentionally dual-represented: as
+`.coercion` on the operator step AND as standalone coercion events in
+`.events[]` when `semanticEvents: true`.
 
 ## Example: `let y = 1 + x * 2;`
 
-Assuming `x` is already initialized to `3`, full-fidelity trace (all
-categories on, `resolves.dependent: true`):
+Assuming `x` is already initialized to `3`, full-fidelity trace (all categories
+on, `resolves.dependent: true`):
 
 ```text
 step  category          kind              notes
@@ -189,13 +187,13 @@ step  category          kind              notes
   9   statement         exit              VariableDeclaration
 ```
 
-With `expressions: false, resolves: {dependent: false}`, only resolves
-between AST-position locs fire — consumers render data-flow arrows without
-seeing transformation detail.
+With `expressions: false, resolves: {dependent: false}`, only resolves between
+AST-position locs fire — consumers render data-flow arrows without seeing
+transformation detail.
 
 With `resolves: false` (coarse mode), no resolves at all; InitializationStep
-carries `.value = 7` directly; upstream operations are invisible at the
-step level.
+carries `.value = 7` directly; upstream operations are invisible at the step
+level.
 
 ## Session lifecycle
 
@@ -249,8 +247,8 @@ stripped for serialization via replacer or helper.
 - Step aggregation per category (per-kind close rules).
 - AST tagging (dagRole / dagKind per node).
 - envDiff computation per step.
-- Binding-write tracking (`Map<valueId, nearest-surviving-producing-step>`
-  for provenance fallback per Resolution 15).
+- Binding-write tracking (`Map<valueId, nearest-surviving-producing-step>` for
+  provenance fallback per Resolution 15).
 - Stream lifecycle (outer AsyncIterable, per-step inner streams, cancel
   cascade).
 - Finalization (merging into `result.ast`, freezing state).
@@ -261,30 +259,29 @@ stripped for serialization via replacer or helper.
 - Lens rendering — consumers (study-lenses system and lens authors).
 - JEJ language validation — upstream (`lib/validating/`).
 - Raw event emission — tracer.
-- I/O dialog UI — consumer supplies async functions via `NMConfig.io`; the
-  NM layer passes through to tracer; tracer dispatches main-thread awaits.
+- I/O dialog UI — consumer supplies async functions via `NMConfig.io`; the NM
+  layer passes through to tracer; tracer dispatches main-thread awaits.
 - Snippet analysis / recommender — separate `lib/analysis/` and
   `lib/recommender/` modules.
 
 ## Navigation
 
-| Path                    | Purpose                                            |
-| ----------------------- | -------------------------------------------------- |
-| [PLAN.md](./PLAN.md)    | Full DDD plan, Resolutions, design canvas archive  |
-| [development-guide.md](./development-guide.md) | Coordinator guide for future sessions |
-| [DOCS.md](./DOCS.md)    | Architectural sketch — execution phases + tables   |
-| [types.ts](./types.ts)  | Public types (partial; stubs flagged)              |
+| Path                                           | Purpose                                           |
+| ---------------------------------------------- | ------------------------------------------------- |
+| [PLAN.md](./PLAN.md)                           | Full DDD plan, Resolutions, design canvas archive |
+| [development-guide.md](./development-guide.md) | Coordinator guide for future sessions             |
+| [DOCS.md](./DOCS.md)                           | Architectural sketch — execution phases + tables  |
+| [types.ts](./types.ts)                         | Public types (partial; stubs flagged)             |
 
 ## Links
 
 - Sibling: [../semantics/](../semantics/) — the semantic tracer (core engine)
-- Parent: [../../../../README.md](../../../../README.md) — JEJ language level overview
+- Parent: [../../../../README.md](../../../../README.md) — JEJ language level
+  overview
 - NM spec: [../../../../notional-machine.md](../../../../notional-machine.md)
-- Semantic tracer docs:
-  [../../../../tracer.md](../../../../tracer.md),
+- Semantic tracer docs: [../../../../tracer.md](../../../../tracer.md),
   [../../../../tracer.architecture.md](../../../../tracer.architecture.md),
   [../../../../tracer.walkthroughs.md](../../../../tracer.walkthroughs.md)
-- Syllabus (pedagogical framing):
-  `../../../../../syllabus.md`
+- Syllabus (pedagogical framing): `../../../../../syllabus.md`
 - Study-lenses context:
   [../../../../.planning-handoffs/00-master-plan.md](../../../../.planning-handoffs/00-master-plan.md)

@@ -28,9 +28,7 @@ describe('createFunctionCallEvent', () => {
 		});
 
 		it('args are preserved', () => {
-			const args = [
-				{ type: 'number' as const, value: 3.7 },
-			];
+			const args = [{ type: 'number' as const, value: 3.7 }];
 			const event = createFunctionCallEvent({ name: 'Math.floor', args });
 			expect(event.args).toEqual(args);
 		});

@@ -70,7 +70,10 @@ describe('batch consumption (await)', () => {
 describe('step-through (for await)', () => {
 	it('yields all events from generator', async () => {
 		const result = { ok: true, logs: ['a', 'b', 'c'] };
-		const execution = createExecution(createMockGen(['a', 'b', 'c'], result), noop);
+		const execution = createExecution(
+			createMockGen(['a', 'b', 'c'], result),
+			noop,
+		);
 		const collected: string[] = [];
 
 		for await (const event of execution) {
@@ -82,7 +85,10 @@ describe('step-through (for await)', () => {
 
 	it('events arrive in order', async () => {
 		const result = { ok: true, logs: ['first', 'second', 'third'] };
-		const execution = createExecution(createMockGen(['first', 'second', 'third'], result), noop);
+		const execution = createExecution(
+			createMockGen(['first', 'second', 'third'], result),
+			noop,
+		);
 		const collected: string[] = [];
 
 		for await (const event of execution) {
@@ -127,8 +133,12 @@ describe('PromiseLike (.then)', () => {
 		const result = { ok: true, logs: ['a'] };
 		const execution = createExecution(createMockGen(['a'], result), noop);
 
-		const r1 = await new Promise<MockResult>((resolve) => { execution.then(resolve); });
-		const r2 = await new Promise<MockResult>((resolve) => { execution.then(resolve); });
+		const r1 = await new Promise<MockResult>((resolve) => {
+			execution.then(resolve);
+		});
+		const r2 = await new Promise<MockResult>((resolve) => {
+			execution.then(resolve);
+		});
 
 		expect(r1).toBe(r2);
 	});
@@ -140,7 +150,10 @@ describe('PromiseLike (.then)', () => {
 
 describe('.result property', () => {
 	it('.result is a Promise', () => {
-		const execution = createExecution(createMockGen([], { ok: true, logs: [] }), noop);
+		const execution = createExecution(
+			createMockGen([], { ok: true, logs: [] }),
+			noop,
+		);
 
 		expect(execution.result).toBeInstanceOf(Promise);
 	});
@@ -161,7 +174,10 @@ describe('.result property', () => {
 
 describe('cancel', () => {
 	it('.cancel() is idempotent', () => {
-		const execution = createExecution(createMockGen(['a'], { ok: true, logs: ['a'] }), noop);
+		const execution = createExecution(
+			createMockGen(['a'], { ok: true, logs: ['a'] }),
+			noop,
+		);
 		execution.cancel();
 
 		expect(() => execution.cancel()).not.toThrow();
@@ -183,7 +199,10 @@ describe('cancel', () => {
 	});
 
 	it('cancel before iteration resolves .result to undefined', async () => {
-		const execution = createExecution(createMockGen(['a'], { ok: true, logs: ['a'] }), noop);
+		const execution = createExecution(
+			createMockGen(['a'], { ok: true, logs: ['a'] }),
+			noop,
+		);
 		execution.cancel();
 
 		const result = await execution.result;
@@ -209,7 +228,10 @@ describe('cancel', () => {
 
 	it('cancelFn is called on cancel', () => {
 		const cancelFn = vi.fn();
-		const execution = createExecution(createMockGen([], { ok: true, logs: [] }), cancelFn);
+		const execution = createExecution(
+			createMockGen([], { ok: true, logs: [] }),
+			cancelFn,
+		);
 
 		execution.cancel();
 
@@ -290,7 +312,9 @@ describe('edge cases', () => {
 		};
 		const execution = createExecution(genFn, noop);
 
-		await expect(execution.result).rejects.toThrow('Execution generator threw unexpectedly');
+		await expect(execution.result).rejects.toThrow(
+			'Execution generator threw unexpectedly',
+		);
 	});
 
 	it('.result accessed during live iteration resolves after completion', async () => {

@@ -44,19 +44,25 @@ describe('isScopeGateOpen', () => {
 
 	// One — minimal correct config
 	it('returns true when both kind and event are enabled', () => {
-		const config = { scopes: { kind: { block: true }, events: { create: true } } };
+		const config = {
+			scopes: { kind: { block: true }, events: { create: true } },
+		};
 		expect(isScopeGateOpen(config, 'block', 'create')).toBe(true);
 	});
 
 	// Boundaries
 	it('returns false when kind is disabled', () => {
-		const config = { scopes: { kind: { block: false }, events: { create: true } } };
+		const config = {
+			scopes: { kind: { block: false }, events: { create: true } },
+		};
 		expect(isScopeGateOpen(config, 'block', 'create')).toBe(false);
 	});
 
 	// Interfaces — non-boolean coercion (!! converts truthy/falsy values)
 	it('returns true when kind and event are truthy non-boolean values', () => {
-		const config = { scopes: { kind: { block: 'yes' }, events: { enter: 'true' } } };
+		const config = {
+			scopes: { kind: { block: 'yes' }, events: { enter: 'true' } },
+		};
 		expect(isScopeGateOpen(config, 'block', 'enter')).toBe(true);
 	});
 
@@ -66,7 +72,9 @@ describe('isScopeGateOpen', () => {
 	});
 
 	it('returns false when event is disabled', () => {
-		const config = { scopes: { kind: { block: true }, events: { create: false } } };
+		const config = {
+			scopes: { kind: { block: true }, events: { create: false } },
+		};
 		expect(isScopeGateOpen(config, 'block', 'create')).toBe(false);
 	});
 
@@ -77,7 +85,9 @@ describe('isScopeGateOpen', () => {
 
 	// Simple — realistic JEJ shape
 	it('realistic: scopes.block.enter enabled', () => {
-		const config = { scopes: { kind: { block: true }, events: { enter: true } } };
+		const config = {
+			scopes: { kind: { block: true }, events: { enter: true } },
+		};
 		expect(isScopeGateOpen(config, 'block', 'enter')).toBe(true);
 	});
 
@@ -104,36 +114,52 @@ describe('isBindingGateOpen', () => {
 
 	// One — minimal correct config
 	it('returns true when both kind and event are enabled, no filter', () => {
-		const config = { bindings: { kind: { let: true }, events: { declare: true } } };
+		const config = {
+			bindings: { kind: { let: true }, events: { declare: true } },
+		};
 		expect(isBindingGateOpen(config, 'let', 'declare')).toBe(true);
 	});
 
 	// Boundaries
 	it('returns false when kind is disabled', () => {
-		const config = { bindings: { kind: { let: false }, events: { read: true } } };
+		const config = {
+			bindings: { kind: { let: false }, events: { read: true } },
+		};
 		expect(isBindingGateOpen(config, 'let', 'read')).toBe(false);
 	});
 
 	it('returns false when event is disabled', () => {
-		const config = { bindings: { kind: { let: true }, events: { read: false } } };
+		const config = {
+			bindings: { kind: { let: true }, events: { read: false } },
+		};
 		expect(isBindingGateOpen(config, 'let', 'read')).toBe(false);
 	});
 
 	it('returns true when filter is empty (no restriction)', () => {
-		const config = { bindings: { kind: { let: true }, events: { read: true }, filter: [] } };
+		const config = {
+			bindings: { kind: { let: true }, events: { read: true }, filter: [] },
+		};
 		expect(isBindingGateOpen(config, 'let', 'read', 'x')).toBe(true);
 	});
 
 	it('returns true when varName is in filter', () => {
 		const config = {
-			bindings: { kind: { let: true }, events: { read: true }, filter: ['x', 'y'] },
+			bindings: {
+				kind: { let: true },
+				events: { read: true },
+				filter: ['x', 'y'],
+			},
 		};
 		expect(isBindingGateOpen(config, 'let', 'read', 'x')).toBe(true);
 	});
 
 	it('returns false when varName is NOT in filter', () => {
 		const config = {
-			bindings: { kind: { let: true }, events: { read: true }, filter: ['x', 'y'] },
+			bindings: {
+				kind: { let: true },
+				events: { read: true },
+				filter: ['x', 'y'],
+			},
 		};
 		expect(isBindingGateOpen(config, 'let', 'read', 'z')).toBe(false);
 	});
@@ -155,7 +181,9 @@ describe('isControlFlowGateOpen', () => {
 	});
 
 	it('returns false when controlFlow is missing', () => {
-		expect(isControlFlowGateOpen({ scopes: {} }, 'while', 'iteration')).toBe(false);
+		expect(isControlFlowGateOpen({ scopes: {} }, 'while', 'iteration')).toBe(
+			false,
+		);
 	});
 
 	// One — conditional uses kind.conditionals, not kind.loops
@@ -169,7 +197,10 @@ describe('isControlFlowGateOpen', () => {
 	// One — loop uses kind.loops[flowKind]
 	it('returns true for while loop when loops.while and event are enabled', () => {
 		const config = {
-			controlFlow: { kind: { loops: { while: true } }, events: { iteration: true } },
+			controlFlow: {
+				kind: { loops: { while: true } },
+				events: { iteration: true },
+			},
 		};
 		expect(isControlFlowGateOpen(config, 'while', 'iteration')).toBe(true);
 	});
@@ -177,7 +208,10 @@ describe('isControlFlowGateOpen', () => {
 	// Boundaries
 	it('returns false when loop kind is disabled', () => {
 		const config = {
-			controlFlow: { kind: { loops: { while: false } }, events: { iteration: true } },
+			controlFlow: {
+				kind: { loops: { while: false } },
+				events: { iteration: true },
+			},
 		};
 		expect(isControlFlowGateOpen(config, 'while', 'iteration')).toBe(false);
 	});
@@ -203,7 +237,10 @@ describe('isControlFlowGateOpen', () => {
 	// Simple
 	it('realistic: for loop iteration enabled', () => {
 		const config = {
-			controlFlow: { kind: { loops: { for: true } }, events: { iteration: true } },
+			controlFlow: {
+				kind: { loops: { for: true } },
+				events: { iteration: true },
+			},
 		};
 		expect(isControlFlowGateOpen(config, 'for', 'iteration')).toBe(true);
 	});
@@ -235,16 +272,22 @@ describe('isLiteralEnabled', () => {
 
 	// One
 	it('returns true when the literal kind is enabled', () => {
-		expect(isLiteralEnabled({ literals: { string: true } }, 'string')).toBe(true);
+		expect(isLiteralEnabled({ literals: { string: true } }, 'string')).toBe(
+			true,
+		);
 	});
 
 	// Boundaries
 	it('returns false when the literal kind is explicitly disabled', () => {
-		expect(isLiteralEnabled({ literals: { string: false } }, 'string')).toBe(false);
+		expect(isLiteralEnabled({ literals: { string: false } }, 'string')).toBe(
+			false,
+		);
 	});
 
 	it('returns false when asking for a different kind than what is enabled', () => {
-		expect(isLiteralEnabled({ literals: { string: true } }, 'number')).toBe(false);
+		expect(isLiteralEnabled({ literals: { string: true } }, 'number')).toBe(
+			false,
+		);
 	});
 
 	// Many — all JEJ-relevant literal kinds
@@ -267,19 +310,26 @@ describe('isTemplateEnabled', () => {
 
 	// One
 	it('returns true when the event type is enabled', () => {
-		expect(isTemplateEnabled({ templates: { begin: true } }, 'begin')).toBe(true);
+		expect(isTemplateEnabled({ templates: { begin: true } }, 'begin')).toBe(
+			true,
+		);
 	});
 
 	// Boundaries
 	it('returns false when a different event type is requested', () => {
-		expect(isTemplateEnabled({ templates: { begin: true } }, 'evaluation')).toBe(false);
+		expect(
+			isTemplateEnabled({ templates: { begin: true } }, 'evaluation'),
+		).toBe(false);
 	});
 
 	// Many — all template event types
-	it.each(['begin', 'evaluation', 'end'])('template event %s is respected', (eventType) => {
-		const config = { templates: { [eventType]: true } };
-		expect(isTemplateEnabled(config, eventType)).toBe(true);
-	});
+	it.each(['begin', 'evaluation', 'end'])(
+		'template event %s is respected',
+		(eventType) => {
+			const config = { templates: { [eventType]: true } };
+			expect(isTemplateEnabled(config, eventType)).toBe(true);
+		},
+	);
 });
 
 // ─── isFunctionEnabled ────────────────────────────────────────────────────────
@@ -297,7 +347,9 @@ describe('isFunctionEnabled', () => {
 
 	// One — return (WHY: functions.return is checked in isAnyApplyEnabled)
 	it('returns true when return is enabled', () => {
-		expect(isFunctionEnabled({ functions: { return: true } }, 'return')).toBe(true);
+		expect(isFunctionEnabled({ functions: { return: true } }, 'return')).toBe(
+			true,
+		);
 	});
 
 	// Boundaries — filter
@@ -327,12 +379,16 @@ describe('isPropertyAccessEnabled', () => {
 
 	// One
 	it('returns true when the access kind is enabled', () => {
-		expect(isPropertyAccessEnabled({ propertyAccess: { dot: true } }, 'dot')).toBe(true);
+		expect(
+			isPropertyAccessEnabled({ propertyAccess: { dot: true } }, 'dot'),
+		).toBe(true);
 	});
 
 	// Boundaries — filter
 	it('returns true when filter matches propertyName', () => {
-		const config = { propertyAccess: { dot: true, filter: ['length', 'push'] } };
+		const config = {
+			propertyAccess: { dot: true, filter: ['length', 'push'] },
+		};
 		expect(isPropertyAccessEnabled(config, 'dot', 'length')).toBe(true);
 	});
 
@@ -395,12 +451,16 @@ describe('isOperatorEnabled', () => {
 	});
 
 	it('returns false when operator NOT in filter', () => {
-		const config = { operators: { pure: { arithmetic: true }, filter: ['+', '-'] } };
+		const config = {
+			operators: { pure: { arithmetic: true }, filter: ['+', '-'] },
+		};
 		expect(isOperatorEnabled(config, 'pure.arithmetic', '*')).toBe(false);
 	});
 
 	it('returns true when operator IS in filter', () => {
-		const config = { operators: { pure: { arithmetic: true }, filter: ['+', '-'] } };
+		const config = {
+			operators: { pure: { arithmetic: true }, filter: ['+', '-'] },
+		};
 		expect(isOperatorEnabled(config, 'pure.arithmetic', '+')).toBe(true);
 	});
 
@@ -433,15 +493,21 @@ describe('isAnyExpressionEnabled', () => {
 	);
 
 	it('returns true when bindings.events.read is enabled', () => {
-		expect(isAnyExpressionEnabled({ bindings: { events: { read: true } } })).toBe(true);
+		expect(
+			isAnyExpressionEnabled({ bindings: { events: { read: true } } }),
+		).toBe(true);
 	});
 
 	it('returns true when operators.shortCircuiting is enabled', () => {
-		expect(isAnyExpressionEnabled({ operators: { shortCircuiting: true } })).toBe(true);
+		expect(
+			isAnyExpressionEnabled({ operators: { shortCircuiting: true } }),
+		).toBe(true);
 	});
 
 	it('returns true when controlFlow.events.test is enabled', () => {
-		expect(isAnyExpressionEnabled({ controlFlow: { events: { test: true } } })).toBe(true);
+		expect(
+			isAnyExpressionEnabled({ controlFlow: { events: { test: true } } }),
+		).toBe(true);
 	});
 
 	// Many — multiple enabled at once
@@ -484,7 +550,9 @@ describe('isAnyApplyEnabled', () => {
 	});
 
 	it('returns true when operators.pure.arithmetic is enabled', () => {
-		expect(isAnyApplyEnabled({ operators: { pure: { arithmetic: true } } })).toBe(true);
+		expect(
+			isAnyApplyEnabled({ operators: { pure: { arithmetic: true } } }),
+		).toBe(true);
 	});
 
 	it('returns true when propertyAccess.dot is enabled', () => {
@@ -498,7 +566,9 @@ describe('isAnyApplyEnabled', () => {
 	// Boundaries — negation sub-paths
 	it('returns true when operators.pure.negation.logical is enabled', () => {
 		expect(
-			isAnyApplyEnabled({ operators: { pure: { negation: { logical: true } } } }),
+			isAnyApplyEnabled({
+				operators: { pure: { negation: { logical: true } } },
+			}),
 		).toBe(true);
 	});
 
@@ -508,11 +578,17 @@ describe('isAnyApplyEnabled', () => {
 		['pure.comparison', { operators: { pure: { comparison: true } } }],
 		['pure.typeof', { operators: { pure: { typeof: true } } }],
 		['pure.bitwise', { operators: { pure: { bitwise: true } } }],
-		['negation.bitwise', { operators: { pure: { negation: { bitwise: true } } } }],
+		[
+			'negation.bitwise',
+			{ operators: { pure: { negation: { bitwise: true } } } },
+		],
 		['operators.shortCircuiting', { operators: { shortCircuiting: true } }],
 		['operators.assignment', { operators: { assignment: true } }],
 		['propertyAccess.bracket', { propertyAccess: { bracket: true } }],
-		['propertyAccess.optionalChaining', { propertyAccess: { optionalChaining: true } }],
+		[
+			'propertyAccess.optionalChaining',
+			{ propertyAccess: { optionalChaining: true } },
+		],
 		['templates.evaluation', { templates: { evaluation: true } }],
 		['templates.end', { templates: { end: true } }],
 	] as const)('returns true when %s is enabled', (_label, config) => {
@@ -539,17 +615,23 @@ describe('isAnyEffectEnabled', () => {
 
 	// One — assign
 	it('returns true when bindings.events.assign is enabled', () => {
-		expect(isAnyEffectEnabled({ bindings: { events: { assign: true } } })).toBe(true);
+		expect(isAnyEffectEnabled({ bindings: { events: { assign: true } } })).toBe(
+			true,
+		);
 	});
 
 	// One — initialize (WHY: TDZ variables — initialize fires even when assign is disabled)
 	it('returns true when bindings.events.initialize is enabled', () => {
-		expect(isAnyEffectEnabled({ bindings: { events: { initialize: true } } })).toBe(true);
+		expect(
+			isAnyEffectEnabled({ bindings: { events: { initialize: true } } }),
+		).toBe(true);
 	});
 
 	// One — available (same WHY as initialize: TDZ lifecycle)
 	it('returns true when bindings.events.available is enabled', () => {
-		expect(isAnyEffectEnabled({ bindings: { events: { available: true } } })).toBe(true);
+		expect(
+			isAnyEffectEnabled({ bindings: { events: { available: true } } }),
+		).toBe(true);
 	});
 
 	// One — operators.assignment
@@ -586,12 +668,16 @@ describe('isAnyStatementEnabled', () => {
 
 	// One
 	it('returns true when controlFlow.events.jump is enabled', () => {
-		expect(isAnyStatementEnabled({ controlFlow: { events: { jump: true } } })).toBe(true);
+		expect(
+			isAnyStatementEnabled({ controlFlow: { events: { jump: true } } }),
+		).toBe(true);
 	});
 
 	// Boundaries — other events do NOT activate statement hook
 	it('returns false when controlFlow.events.test is enabled but not jump', () => {
-		expect(isAnyStatementEnabled({ controlFlow: { events: { test: true } } })).toBe(false);
+		expect(
+			isAnyStatementEnabled({ controlFlow: { events: { test: true } } }),
+		).toBe(false);
 	});
 
 	// Simple
@@ -615,7 +701,9 @@ describe('isAnyScopeDispatchEnabled', () => {
 		'returns true when scopes.events.%s is enabled',
 		(eventType) => {
 			expect(
-				isAnyScopeDispatchEnabled({ scopes: { events: { [eventType]: true } } }),
+				isAnyScopeDispatchEnabled({
+					scopes: { events: { [eventType]: true } },
+				}),
 			).toBe(true);
 		},
 	);

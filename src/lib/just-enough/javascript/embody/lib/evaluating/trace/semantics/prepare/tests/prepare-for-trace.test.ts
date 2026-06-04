@@ -131,27 +131,35 @@ describe('prepareForTrace', () => {
 
 		describe('boolean shorthand expansion (recursive)', () => {
 			it('{ resolve: true } expands to dependent/provenance/kinds all true', () => {
-				const result = prepareForTrace('let x = 5;', { options: { resolve: true } });
+				const result = prepareForTrace('let x = 5;', {
+					options: { resolve: true },
+				});
 				const resolve = result.options['resolve'] as Record<string, unknown>;
 				expect(resolve['dependent']).toBe(true);
 			});
 
 			it('{ resolve: true } expands kinds.variable to true', () => {
-				const result = prepareForTrace('let x = 5;', { options: { resolve: true } });
+				const result = prepareForTrace('let x = 5;', {
+					options: { resolve: true },
+				});
 				const resolve = result.options['resolve'] as Record<string, unknown>;
 				const kinds = resolve['kinds'] as Record<string, unknown>;
 				expect(kinds['variable']).toBe(true);
 			});
 
 			it('{ resolve: false } expands kinds.variable to false', () => {
-				const result = prepareForTrace('let x = 5;', { options: { resolve: false } });
+				const result = prepareForTrace('let x = 5;', {
+					options: { resolve: false },
+				});
 				const resolve = result.options['resolve'] as Record<string, unknown>;
 				const kinds = resolve['kinds'] as Record<string, unknown>;
 				expect(kinds['variable']).toBe(false);
 			});
 
 			it('{ resolve: false } sets dependent to false', () => {
-				const result = prepareForTrace('let x = 5;', { options: { resolve: false } });
+				const result = prepareForTrace('let x = 5;', {
+					options: { resolve: false },
+				});
 				const resolve = result.options['resolve'] as Record<string, unknown>;
 				expect(resolve['dependent']).toBe(false);
 			});
@@ -160,7 +168,10 @@ describe('prepareForTrace', () => {
 				const result = prepareForTrace('let x = 5;', {
 					options: { statements: true },
 				});
-				const statements = result.options['statements'] as Record<string, unknown>;
+				const statements = result.options['statements'] as Record<
+					string,
+					unknown
+				>;
 				const whileLoop = statements['while'] as Record<string, unknown>;
 				expect(whileLoop['test']).toBe(true);
 			});
@@ -169,7 +180,10 @@ describe('prepareForTrace', () => {
 				const result = prepareForTrace('let x = 5;', {
 					options: { statements: false },
 				});
-				const statements = result.options['statements'] as Record<string, unknown>;
+				const statements = result.options['statements'] as Record<
+					string,
+					unknown
+				>;
 				const whileLoop = statements['while'] as Record<string, unknown>;
 				expect(whileLoop['test']).toBe(false);
 			});
@@ -241,7 +255,9 @@ describe('prepareForTrace', () => {
 			});
 
 			it('accepts positive iterations', () => {
-				expect(() => prepareForTrace('let x = 5;', { iterations: 100 })).not.toThrow();
+				expect(() =>
+					prepareForTrace('let x = 5;', { iterations: 100 }),
+				).not.toThrow();
 			});
 		});
 	});
@@ -276,7 +292,9 @@ describe('prepareForTrace', () => {
 
 	describe('idempotency', () => {
 		it('double-prep produces same options shape', () => {
-			const result1 = prepareForTrace('let x = 5;', { options: { resolve: true } });
+			const result1 = prepareForTrace('let x = 5;', {
+				options: { resolve: true },
+			});
 			// Treat result1.options as the input to a second prep via config.options
 			const result2 = prepareForTrace('let x = 5;', {
 				options: result1.options as unknown as Record<string, unknown>,

@@ -101,17 +101,22 @@ function walk(
 		const cascadeLens = config.defaults[lang];
 		if (cascadeLens === undefined) continue;
 		const labelPath = path.relative(pageDir, absPath);
-		const label = labelPath
-			.slice(0, -ext.length)
-			.split(path.sep)
-			.join('/');
+		const label = labelPath.slice(0, -ext.length).split(path.sep).join('/');
 		const rawContent = fs.readFileSync(absPath, 'utf8');
 		const match = parseStudyLensDirective(rawContent, absPath);
 		const code = match?.strippedCode ?? rawContent;
 		const lens = match?.directive.lens ?? cascadeLens;
-		const sibling: Sibling = match?.directive.lensConfig !== undefined
-			? { absPath, label, code, lang, lens, lensConfig: match.directive.lensConfig }
-			: { absPath, label, code, lang, lens };
+		const sibling: Sibling =
+			match?.directive.lensConfig !== undefined
+				? {
+						absPath,
+						label,
+						code,
+						lang,
+						lens,
+						lensConfig: match.directive.lensConfig,
+					}
+				: { absPath, label, code, lang, lens };
 		out.push(sibling);
 	}
 }

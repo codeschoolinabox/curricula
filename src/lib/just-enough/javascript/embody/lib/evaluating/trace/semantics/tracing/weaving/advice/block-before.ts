@@ -41,12 +41,17 @@ function blockBefore(
 			creationStep: current.creationStep,
 			...(parent !== undefined && { parentCreationStep: parent.creationStep }),
 			...(current.structure !== null && { structure: current.structure }),
-			...(current.structureStep !== null && { structureStep: current.structureStep }),
+			...(current.structureStep !== null && {
+				structureStep: current.structureStep,
+			}),
 		});
 	}
 
 	// 2. BranchEvent for then/else
-	if (segmentKind === 'then' && isControlFlowGateOpen(state.config, 'conditional', 'branch')) {
+	if (
+		segmentKind === 'then' &&
+		isControlFlowGateOpen(state.config, 'conditional', 'branch')
+	) {
 		emitEvent(state, tag, 'statement', 'controlFlow.branch', {
 			branch: 'consequent',
 			scopeCreationStep: current.creationStep,
@@ -54,7 +59,10 @@ function blockBefore(
 		});
 	}
 
-	if (segmentKind === 'else' && isControlFlowGateOpen(state.config, 'conditional', 'branch')) {
+	if (
+		segmentKind === 'else' &&
+		isControlFlowGateOpen(state.config, 'conditional', 'branch')
+	) {
 		emitEvent(state, tag, 'statement', 'controlFlow.branch', {
 			branch: 'alternate',
 			scopeCreationStep: current.creationStep,
@@ -84,7 +92,10 @@ function blockBefore(
 		state.iterationCounters[counterKey] += 1;
 
 		// conditionally: emit DoEvent for do-while
-		if (loopKind === 'doWhile' && isControlFlowGateOpen(state.config, 'doWhile', 'do')) {
+		if (
+			loopKind === 'doWhile' &&
+			isControlFlowGateOpen(state.config, 'doWhile', 'do')
+		) {
 			emitEvent(state, tag, 'statement', 'controlFlow.do', {
 				scopeCreationStep: current.creationStep,
 				...(label !== null && { label }),
@@ -93,7 +104,10 @@ function blockBefore(
 
 		// loop guard (always active, independent of controlFlow config)
 		const maxIterations = state.config.maxIterations as number | undefined;
-		if (maxIterations !== undefined && state.iterationCounters[counterKey] > maxIterations) {
+		if (
+			maxIterations !== undefined &&
+			state.iterationCounters[counterKey] > maxIterations
+		) {
 			throw new RangeError(`Maximum iterations (${maxIterations}) exceeded`);
 		}
 	}

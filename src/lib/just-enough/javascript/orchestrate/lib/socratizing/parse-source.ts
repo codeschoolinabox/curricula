@@ -135,9 +135,7 @@ function parseSource(source: string): ParseResult {
 			ok: false,
 			error: {
 				message:
-					error instanceof Error
-						? error.message
-						: 'Failed to parse source',
+					error instanceof Error ? error.message : 'Failed to parse source',
 				...(location ? { location } : {}),
 			},
 		};

@@ -30,7 +30,7 @@ function labeledStatement(
 	}
 
 	const label = getRecord(node).label as Node;
-	const name = (getRecord(label)).name as string;
+	const name = getRecord(label).name as string;
 
 	return createCodeQuestion({
 		id: 'labeled-statement',

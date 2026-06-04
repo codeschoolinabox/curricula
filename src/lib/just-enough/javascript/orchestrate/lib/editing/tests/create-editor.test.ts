@@ -182,7 +182,9 @@ describe('createEditor', () => {
 			// throws are caught at the editor boundary and surfaced via
 			// console.warn so a misbehaving onChange consumer does not
 			// destabilize CodeMirror's update cycle.
-			const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+			const warnSpy = vi
+				.spyOn(console, 'warn')
+				.mockImplementation(() => undefined);
 			try {
 				const editor = await createEditor('OK', {
 					onChange: () => {

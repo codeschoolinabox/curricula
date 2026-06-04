@@ -10,9 +10,7 @@
  * (`'instrumented'`, `'enclosing-fallback'`, `'no-ast'`) and their semantics.
  */
 
-import type {
-	InterceptEvent,
-} from '../../shared/types.js';
+import type { InterceptEvent } from '../../shared/types.js';
 
 // ─── Source location (mirrors acorn / trace) ─────────────────
 

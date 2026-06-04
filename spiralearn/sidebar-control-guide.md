@@ -74,9 +74,9 @@ global pattern.
 
 ## Quick Decision Guide
 
-| What you want to hide                   | Use                                                                 |
-| --------------------------------------- | ------------------------------------------------------------------- |
-| One whole chapter                       | Comment out its block in `sidebars/welcome-to-frogramming.mjs`      |
-| All files named `teaching-tips.md`      | Add `'**/teaching-tips.md'` to `exclude` in `docusaurus.config.ts`  |
-| One specific file, keep editing it      | Add `draft: true` to its front-matter                               |
-| A folder that's not a top-level chapter | Add `'path/to/folder/**'` to `exclude`                              |
+| What you want to hide                   | Use                                                                |
+| --------------------------------------- | ------------------------------------------------------------------ |
+| One whole chapter                       | Comment out its block in `sidebars/welcome-to-frogramming.mjs`     |
+| All files named `teaching-tips.md`      | Add `'**/teaching-tips.md'` to `exclude` in `docusaurus.config.ts` |
+| One specific file, keep editing it      | Add `draft: true` to its front-matter                              |
+| A folder that's not a top-level chapter | Add `'path/to/folder/**'` to `exclude`                             |

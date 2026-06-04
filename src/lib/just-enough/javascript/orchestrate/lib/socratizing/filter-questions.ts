@@ -133,9 +133,7 @@ function filterQuestions(
 		if (
 			!passesSingleValueFilter(
 				question.feature,
-				config.features as
-					| Record<string, boolean | undefined>
-					| undefined,
+				config.features as Record<string, boolean | undefined> | undefined,
 			)
 		) {
 			continue;
@@ -145,9 +143,7 @@ function filterQuestions(
 		if (
 			!passesMultiValueFilter(
 				question.levels,
-				config.levels as
-					| Record<string, boolean | undefined>
-					| undefined,
+				config.levels as Record<string, boolean | undefined> | undefined,
 			)
 		) {
 			continue;
@@ -157,9 +153,7 @@ function filterQuestions(
 		if (
 			!passesMultiValueFilter(
 				question.audiences,
-				config.audiences as
-					| Record<string, boolean | undefined>
-					| undefined,
+				config.audiences as Record<string, boolean | undefined> | undefined,
 			)
 		) {
 			continue;
@@ -169,9 +163,7 @@ function filterQuestions(
 		if (
 			!passesSingleValueFilter(
 				question.category,
-				config.categories as
-					| Record<string, boolean | undefined>
-					| undefined,
+				config.categories as Record<string, boolean | undefined> | undefined,
 				CATEGORY_KEY_MAP,
 			)
 		) {
@@ -186,9 +178,7 @@ function filterQuestions(
 		// 7. Register filter (prunes individual entries)
 		const filteredQuestions = filterByRegister(
 			question.questions,
-			config.register as
-				| Record<string, boolean | undefined>
-				| undefined,
+			config.register as Record<string, boolean | undefined> | undefined,
 		);
 		if (filteredQuestions === null) {
 			continue;

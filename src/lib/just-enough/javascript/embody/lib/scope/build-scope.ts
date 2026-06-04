@@ -183,10 +183,7 @@ function walkScope(
 			const kind = record.kind as 'let' | 'const';
 			const declarators = record.declarations as Node[];
 			for (const declarator of declarators) {
-				const declRecord = declarator as unknown as Record<
-					string,
-					unknown
-				>;
+				const declRecord = declarator as unknown as Record<string, unknown>;
 				const id = declRecord.id as Node;
 				const init = declRecord.init as Node | null;
 

@@ -1,25 +1,22 @@
 # Welcome to Frogramming — Pedagogy
 
-> The _design principles for the learning experience_ — how the concepts
-> named in `ontology.md` get taught. Introduction order,
-> exercise patterns, scaffolding, when each concept lands in the
-> curriculum.
+> The _design principles for the learning experience_ — how the concepts named
+> in `ontology.md` get taught. Introduction order, exercise patterns,
+> scaffolding, when each concept lands in the curriculum.
 >
 > Companions (siblings, by co-location):
 >
 > - `README.md` — the high-level orientation and reading map
-> - `ontology.md` — the _what_ (reference framework, the
->   concepts being taught)
+> - `ontology.md` — the _what_ (reference framework, the concepts being taught)
 > - `manifesto.md` — the vision this pedagogy serves
 > - `chapters.md` — the chapters where this pedagogy operates
 > - `narrative.md` — the journey learners go on
-> - `guide.{learners,authors,community}.md` — practical
->   application of these principles per role
-> - `translational-framing.md` — process for improving these
->   methods over time
-> - `study-lenses.md` — technical-reader companion for the JEJ
->   → NM → embody → lenses → orchestrator infrastructure that embodies
->   the pedagogy operationally
+> - `guide.{learners,authors,community}.md` — practical application of these
+>   principles per role
+> - `translational-framing.md` — process for improving these methods over time
+> - `study-lenses.md` — technical-reader companion for the JEJ → NM → embody →
+>   lenses → orchestrator infrastructure that embodies the pedagogy
+>   operationally
 
 ---
 
@@ -29,27 +26,25 @@
 how-those-named-things-get-taught. The soft seam:
 
 - **Ontology** = concepts (what things ARE, how they relate)
-- **Pedagogy** = how those concepts get taught (methods, sequence,
-  exercises, design principles)
+- **Pedagogy** = how those concepts get taught (methods, sequence, exercises,
+  design principles)
 - **Guide.authors** = practical application of these principles +
   tooling/workflows
 
 ## First Principles
 
 This pedagogy is rooted in a set of First Principles (anchored in
-`0---the-big-idea/00--evancole-be/0--notes/pages/First Principles.md`).
-They are presented at **flat equal status** — each principle has a
-role, and the principles fit together; no principle is named "primary"
-or "central."
+`0---the-big-idea/00--evancole-be/0--notes/pages/First Principles.md`). They are
+presented at **flat equal status** — each principle has a role, and the
+principles fit together; no principle is named "primary" or "central."
 
-Initial principle set (to be developed in Wave 3 with full prose per
-principle):
+Initial principle set (to be developed in Wave 3 with full prose per principle):
 
 - How education, design, and computing exist with the world
-  - Software is written by someone, for a purpose. Be that someone,
-    choose your purpose.
-  - All computing is embedded in rhetorical situations that it in turn
-    helps to define. There is no escape.
+  - Software is written by someone, for a purpose. Be that someone, choose your
+    purpose.
+  - All computing is embedded in rhetorical situations that it in turn helps to
+    define. There is no escape.
   - The best designs come from participation, empathy, and humility.
   - Design around the lives of your learners, don't expect the inverse.
   - Everyone has something to teach and something to learn.
@@ -203,19 +198,18 @@ yours, and will always be yours — that's what makes it worth doing.
 
 ## Using the 5 layers (§6 of ontology) in teaching
 
-The 5 layers (§5 of `ontology.md`) are named there as the
-engagement depths a reader can stay at or descend through. This file
-carries the design principles for teaching with the layers:
+The 5 layers (§5 of `ontology.md`) are named there as the engagement depths a
+reader can stay at or descend through. This file carries the design principles
+for teaching with the layers:
 
 ### SOLO applies within each layer (not across)
 
-SOLO taxonomy (Pre-Structural / Uni-Structural / Multi-Structural /
-Relational / Extended-Abstract) applies _within_ each layer, not across
-them. A learner at L0 can be Pre-Structural through Extended-Abstract on
-the NM; same span at L1, L2, L3, L4. The layers are _kinds_ of work;
-SOLO is _depth_ within each kind. The cross-product is a 5×5 reading:
-layer × SOLO-depth — useful for diagnosis and for designing exercises
-that meet a learner where they are at a given layer.
+SOLO taxonomy (Pre-Structural / Uni-Structural / Multi-Structural / Relational /
+Extended-Abstract) applies _within_ each layer, not across them. A learner at L0
+can be Pre-Structural through Extended-Abstract on the NM; same span at L1, L2,
+L3, L4. The layers are _kinds_ of work; SOLO is _depth_ within each kind. The
+cross-product is a 5×5 reading: layer × SOLO-depth — useful for diagnosis and
+for designing exercises that meet a learner where they are at a given layer.
 
 ### Architectural rules
 
@@ -233,43 +227,39 @@ that meet a learner where they are at a given layer.
 
 ### V and F brought to life through narrative
 
-V and F are defined as personae in `ontology.md` §4 — substrate-agnostic
-stances with temperaments and tells. The pedagogical device is to **bring them
-to life through story** at L2: dialogues, sidebars, exchanges where each speaks
-for themselves. Personification carries perspective more vividly than label
-alone; through dialogue, learners experience a stance rather than read about it.
-(See ontology §4's Achilles/Tortoise footnote for the literary precursor and §14
-for the MU tribute that honors the lineage.)
+V and F are defined as personae in `ontology.md` §4 — substrate-agnostic stances
+with temperaments and tells. The pedagogical device is to **bring them to life
+through story** at L2: dialogues, sidebars, exchanges where each speaks for
+themselves. Personification carries perspective more vividly than label alone;
+through dialogue, learners experience a stance rather than read about it. (See
+ontology §4's Achilles/Tortoise footnote for the literary precursor and §14 for
+the MU tribute that honors the lineage.)
 
 ### L4 as questioning, not theory-mastery
 
-L4 is the layer where the curriculum reaches the edge of confirmable
-science and crosses into frontierland between philosophy and evidence.
-The teaching contract changes accordingly:
+L4 is the layer where the curriculum reaches the edge of confirmable science and
+crosses into frontierland between philosophy and evidence. The teaching contract
+changes accordingly:
 
-- **LOs are questionings, not facts.** A well-formed L4 learning
-  objective opens an inquiry the learner stays with — _"Notice X,"
-  "Encounter the question Y," "What would Z mean for W?"_ — not a
-  thesis to recite. The chapter L4 LO bullets across the curriculum
-  follow this form.
-- **The goal is not theory-currency.** L4 does not aim to bring
-  learners up to date with the latest names in active inference,
-  embodied cognition, or phenomenology. The named traditions (see
-  ontology §6 _L4 by strand_) are entry-points into the strand's
-  philosophical questioning, not destinations.
-- **Methodological rigour applies even at the frontier.** Questions
-  on the science-philosophy edge can be asked well or badly. Part of
-  L4's contract is teaching learners _how_ to ask big questions:
-  distinguishing the empirically testable from the genuinely open,
-  treating named traditions as positions to interrogate rather than
-  authorities to defer to, holding multiple framings simultaneously
-  without collapsing to one prematurely.
-- **Easter-egg form serves the stance.** L4's marginal placement
-  (footnotes / side notes / references; see _Architectural rules_
-  above) is a pedagogical signal: this is optional, attuned-reader
-  territory; engagement is invitation, not obligation. The form
-  itself models that the questions belong to the reader, not to the
-  curriculum.
+- **LOs are questionings, not facts.** A well-formed L4 learning objective opens
+  an inquiry the learner stays with — _"Notice X," "Encounter the question Y,"
+  "What would Z mean for W?"_ — not a thesis to recite. The chapter L4 LO
+  bullets across the curriculum follow this form.
+- **The goal is not theory-currency.** L4 does not aim to bring learners up to
+  date with the latest names in active inference, embodied cognition, or
+  phenomenology. The named traditions (see ontology §6 _L4 by strand_) are
+  entry-points into the strand's philosophical questioning, not destinations.
+- **Methodological rigour applies even at the frontier.** Questions on the
+  science-philosophy edge can be asked well or badly. Part of L4's contract is
+  teaching learners _how_ to ask big questions: distinguishing the empirically
+  testable from the genuinely open, treating named traditions as positions to
+  interrogate rather than authorities to defer to, holding multiple framings
+  simultaneously without collapsing to one prematurely.
+- **Easter-egg form serves the stance.** L4's marginal placement (footnotes /
+  side notes / references; see _Architectural rules_ above) is a pedagogical
+  signal: this is optional, attuned-reader territory; engagement is invitation,
+  not obligation. The form itself models that the questions belong to the
+  reader, not to the curriculum.
 
 ### Layer titles (working candidates; not locked)
 
@@ -286,16 +276,16 @@ Three styles brainstormed; defer until ontology stabilizes:
 
 ## The pedagogical claim from Friston
 
-The cogsci grounding for the curriculum's twinning verb. **Karl Friston's
-"A Duet for One"** applies active inference to dyadic communication: two
-aligned generative models behave as a single coupled inference system.
+The cogsci grounding for the curriculum's twinning verb. **Karl Friston's "A
+Duet for One"** applies active inference to dyadic communication: two aligned
+generative models behave as a single coupled inference system.
 
 > **"Understanding just IS the alignment of generative models into a single
 > coherent predictive process."**
 
-Applied to LLM-collaboration: the boundary between human reasoning and
-machine inference becomes porous; thought emerges at the _interface_, not
-within either alone.
+Applied to LLM-collaboration: the boundary between human reasoning and machine
+inference becomes porous; thought emerges at the _interface_, not within either
+alone.
 
 ### Language constraints
 
@@ -303,13 +293,13 @@ The curriculum body translates Friston's machinery into reader-friendly
 vocabulary:
 
 - ❌ **"free energy"** — too jargon for the course body
-- ✓ **"alignment of generative models"** — clean replacement; survives
-  across substrates
-- ✓ **"predictive processing"** — broader cognitive-science framework
-  (Andy Clark, Jakob Hohwy) cited in deeper sections as "how minds work
-  as predictive engines"
-- ✓ **"active inference"** — usable but requires explanation; introduce
-  as the dyadic-Friston frame in Ch4
+- ✓ **"alignment of generative models"** — clean replacement; survives across
+  substrates
+- ✓ **"predictive processing"** — broader cognitive-science framework (Andy
+  Clark, Jakob Hohwy) cited in deeper sections as "how minds work as predictive
+  engines"
+- ✓ **"active inference"** — usable but requires explanation; introduce as the
+  dyadic-Friston frame in Ch4
 
 ### The pedagogical consequence
 
@@ -327,9 +317,9 @@ vocabulary:
 ## Lenses, embody, and substrate ↔ pedagogy mutual constitution
 
 The JEJ chain (`just-enough/javascript/` + `embody/` + Study Lenses +
-orchestrator) is named and described in `study-lenses.md` as
-infrastructure. This file carries the principles by which that
-infrastructure is pedagogy-shaped:
+orchestrator) is named and described in `study-lenses.md` as infrastructure.
+This file carries the principles by which that infrastructure is
+pedagogy-shaped:
 
 ### Lenses are F-pedagogy infrastructure
 
@@ -344,10 +334,11 @@ is F-specific. Don't conflate the architectural pattern with the V/F mapping.
 The infrastructure _embodies_ the pedagogy:
 
 - lenses literally **are** the Frogrammer's magnifying glasses (ontology §4)
-- embody literally **is** the NM crystallized for exploration — _a static
-  4D rendering of a 3D flowing river_; the substrate is not inert, it makes
-  every facet of the data lifecycle's motion explorable
-- the JEJ language constraint **is** the cognitive-load discipline (see "B.1 Cogsci mechanisms" below)
+- embody literally **is** the NM crystallized for exploration — _a static 4D
+  rendering of a 3D flowing river_; the substrate is not inert, it makes every
+  facet of the data lifecycle's motion explorable
+- the JEJ language constraint **is** the cognitive-load discipline (see "B.1
+  Cogsci mechanisms" below)
 - the orchestrator **is** the Explorotron framework's snippet-scope realization
 
 The opposite is also true: the pedagogy is shaped by what the infrastructure can
@@ -357,50 +348,46 @@ afford. V/F feedback loop in operational form.
 
 ## Design principles (migrated from ontology Part B)
 
-The principles the curriculum is built **on** — _about_ the course, not
-_in_ the course for learners to learn. They are not an arbitrary list;
-they are crystallizations of practice that come from named lineages.
+The principles the curriculum is built **on** — _about_ the course, not _in_ the
+course for learners to learn. They are not an arbitrary list; they are
+crystallizations of practice that come from named lineages.
 
 **Integrative frames** — one per cluster:
 
 - **Instructional-design clusters** (_cogsci mechanisms_ +
-  _course-construction_) → integrated by **4C/ID** (Van Merriënboer &
-  Kirschner, _Ten Steps to Complex Learning_) together with **Whole
-  Game** (Perkins, _Making Learning Whole_). Both are holistic-design
-  responses to atomistic instructional design — same commitment, two
-  registers: academic-operational (4C/ID's task classes, four
-  components, ten steps) and accessible-philosophical (Whole Game's
-  _junior version of the whole_, _making the game worth playing_,
-  _working on the hard parts_). The principles in these clusters are
-  this curriculum's practitioner-form of those commitments on a
+  _course-construction_) → integrated by **4C/ID** (Van Merriënboer & Kirschner,
+  _Ten Steps to Complex Learning_) together with **Whole Game** (Perkins,
+  _Making Learning Whole_). Both are holistic-design responses to atomistic
+  instructional design — same commitment, two registers: academic-operational
+  (4C/ID's task classes, four components, ten steps) and
+  accessible-philosophical (Whole Game's _junior version of the whole_, _making
+  the game worth playing_, _working on the hard parts_). The principles in these
+  clusters are this curriculum's practitioner-form of those commitments on a
   specific surface (JEJ + V/F + 5 layers + spiderweb).
-- **Stance & values cluster** → integrated by **companion pedagogy**:
-  the educator-as-companion lineage running through Open Education,
-  community of practice, decolonised CS, and accessibility — the
-  elewa.education / Greg Wilson / Mikhak-pedagogy line. The teacher
-  walks alongside the learner rather than standing in front of them;
-  authority is plural, distributed across classroom, collegial,
-  partnered, and discourse communities. 4C/ID is silent on these.
+- **Stance & values cluster** → integrated by **companion pedagogy**: the
+  educator-as-companion lineage running through Open Education, community of
+  practice, decolonised CS, and accessibility — the elewa.education / Greg
+  Wilson / Mikhak-pedagogy line. The teacher walks alongside the learner rather
+  than standing in front of them; authority is plural, distributed across
+  classroom, collegial, partnered, and discourse communities. 4C/ID is silent on
+  these.
 
-**Transfer Paradox + Reusability Paradox — related but distinct
-principles**:
+**Transfer Paradox + Reusability Paradox — related but distinct principles**:
 
-- **Transfer Paradox** (Van Merriënboer) — _pedagogy_ register. In
-  §B.1. _"Methods that work best for reaching isolated, specific
-  objectives are not best for reaching integrated objectives and
-  transfer of learning."_
-- **Reusability Paradox** (Wiley) — _grouping and publishing_ register.
-  In §B.2. Smaller learning objects are more reusable; larger ones more
-  pedagogically coherent.
+- **Transfer Paradox** (Van Merriënboer) — _pedagogy_ register. In §B.1.
+  _"Methods that work best for reaching isolated, specific objectives are not
+  best for reaching integrated objectives and transfer of learning."_
+- **Reusability Paradox** (Wiley) — _grouping and publishing_ register. In §B.2.
+  Smaller learning objects are more reusable; larger ones more pedagogically
+  coherent.
 
 Both name a productive tension of the same general shape, but the
-goal-being-optimized-against differs (transfer of learning vs
-shareability of artifacts). Different aspects of the same whole.
+goal-being-optimized-against differs (transfer of learning vs shareability of
+artifacts). Different aspects of the same whole.
 
-> **Beware lazy conflations.** Concepts with surface similarity often
-> aren't the same operationally. Transfer Paradox (pedagogy) and
-> Reusability Paradox (publishing / grouping) are related but not the
-> same. Check before collapsing.
+> **Beware lazy conflations.** Concepts with surface similarity often aren't the
+> same operationally. Transfer Paradox (pedagogy) and Reusability Paradox
+> (publishing / grouping) are related but not the same. Check before collapsing.
 
 ---
 
@@ -410,16 +397,16 @@ How the curriculum is designed to work _for the human mind learning_.
 
 #### §5 Pedagogical sampling
 
-Bayesian frame: humans, from infancy onward, draw fundamentally
-different inferences from data chosen intentionally by a teacher than
-from data encountered at random or sampled by the learner themselves.
+Bayesian frame: humans, from infancy onward, draw fundamentally different
+inferences from data chosen intentionally by a teacher than from data
+encountered at random or sampled by the learner themselves.
 
-**A curated curriculum is qualitatively different from free
-self-directed learning.** An LLM responding to learner-directed prompts
-is closer to self-directed sampling than to pedagogical sampling. Some
-of what this course teaches you to twin (the notional machine, users,
-fellow developers, the LLM itself) are not facts to be acquired but
-_ways of doing things_, learned through the doing.
+**A curated curriculum is qualitatively different from free self-directed
+learning.** An LLM responding to learner-directed prompts is closer to
+self-directed sampling than to pedagogical sampling. Some of what this course
+teaches you to twin (the notional machine, users, fellow developers, the LLM
+itself) are not facts to be acquired but _ways of doing things_, learned through
+the doing.
 
 Operates at multiple granularities:
 
@@ -439,19 +426,16 @@ Operates at multiple granularities:
 A **paired entry**, not two separate principles.
 
 - **Spiderweb** = the _structure_. Skills at the center (collaboration,
-  communication, code review, planning); technologies as concentric
-  rings outward (Markdown → HTML/CSS → JS → …); the skills thread
-  through every ring. _"Places collaboration, communication and other
-  'soft skills' unavoidably at the center. Places social and ethical
-  questions center stage."_ (user)
-- **Spiral** = a _traversal_ through the spiderweb. A particular path
-  with sequenced skill threads. Bruner's spiral is the
-  depth-densification mechanism; _this curriculum's spiral_ is the
-  path-choice through the web.
+  communication, code review, planning); technologies as concentric rings
+  outward (Markdown → HTML/CSS → JS → …); the skills thread through every ring.
+  _"Places collaboration, communication and other 'soft skills' unavoidably at
+  the center. Places social and ethical questions center stage."_ (user)
+- **Spiral** = a _traversal_ through the spiderweb. A particular path with
+  sequenced skill threads. Bruner's spiral is the depth-densification mechanism;
+  _this curriculum's spiral_ is the path-choice through the web.
 
-**Spiderweb = topology; spiral = trajectory.** The 5 layers (ontology
-§5) can be read as 5 different spirals through the same web at 5
-engagement depths.
+**Spiderweb = topology; spiral = trajectory.** The 5 layers (ontology §5) can be
+read as 5 different spirals through the same web at 5 engagement depths.
 
 <details>
 <summary><b>Visualization: spiderweb (topology) + spiral (trajectory)</b> <i>(most load-bearing — existing assets)</i></summary>
@@ -465,8 +449,8 @@ These are the same conceptual object viewed differently.
 
 #### §7 The Explorotron framework
 
-Malaise & Signer (2023). The academic framework that `<StudyLenses>`
-realizes at snippet scope.
+Malaise & Signer (2023). The academic framework that `<StudyLenses>` realizes at
+snippet scope.
 
 **Two axes** (curated/uncurated × guided/unguided) → four quadrants:
 
@@ -486,51 +470,50 @@ realizes at snippet scope.
 
 **Three load-bearing principles** from the paper:
 
-- **Skill transfer** (Chiaburu & Marinova 2005) — learn skills in
-  environments close to where they'll be used. Lenses live in the same
-  editor learners use for real work.
-- **Expertise reversal** (Sweller et al. 2003) — scaffolding helps
-  beginners but hurts experts. Lenses peel away support by context.
-- **Lifelong-learning autonomy** — Quadrant I (uncurated/unguided)
-  isn't a fallback; it's the central pedagogical bet. The Frogrammer's
-  magnifying-glass kit is the embodied form.
+- **Skill transfer** (Chiaburu & Marinova 2005) — learn skills in environments
+  close to where they'll be used. Lenses live in the same editor learners use
+  for real work.
+- **Expertise reversal** (Sweller et al. 2003) — scaffolding helps beginners but
+  hurts experts. Lenses peel away support by context.
+- **Lifelong-learning autonomy** — Quadrant I (uncurated/unguided) isn't a
+  fallback; it's the central pedagogical bet. The Frogrammer's magnifying-glass
+  kit is the embodied form.
 
-**Begel & Ko (2019) both-yes answer** — should technology "structure
-learning for learners" OR "teach learners to structure their own"?
-Both. Quadrants I + II support learners structuring their own;
-Quadrants III + IV support educators structuring it for them.
+**Begel & Ko (2019) both-yes answer** — should technology "structure learning
+for learners" OR "teach learners to structure their own"? Both. Quadrants I + II
+support learners structuring their own; Quadrants III + IV support educators
+structuring it for them.
 
 #### §8 Threshold concepts + liminality
 
 From `effective-learning/05-being-in-between.md` and Meyer/Land. Five
 characteristics of threshold concepts:
 
-- **Transformative** — after mastery, you perceive the world in a new
-  way
+- **Transformative** — after mastery, you perceive the world in a new way
 - **Integrative** — the pattern used to weave thread into fabric
 - **Irreversible** — changes in how the mind processes information
 - **Bounded** — different approaches define different vocations
 - **Troublesome** — ways of doing things, not the thing you do
 
-**Liminal zone** = legitimate position, not failure. _"Be prepared to
-spend a lot of time floating between the certainty of old knowledge
-and the promise of new understanding."_
+**Liminal zone** = legitimate position, not failure. _"Be prepared to spend a
+lot of time floating between the certainty of old knowledge and the promise of
+new understanding."_
 
-Programming threshold concepts cited by the user (incomplete list):
-Source Code vs Runtime; Tracing Code; Variables and Pointers; Functions
-(definition vs execution; are objects AND executable procedures; scope
-vs context); OOP; Asynchronous Execution.
+Programming threshold concepts cited by the user (incomplete list): Source Code
+vs Runtime; Tracing Code; Variables and Pointers; Functions (definition vs
+execution; are objects AND executable procedures; scope vs context); OOP;
+Asynchronous Execution.
 
 #### §9 Transfer Paradox (separate from §10 — different operational meaning)
 
-> _"Methods that work best for reaching isolated, specific objectives
-> are not best for reaching integrated objectives and transfer of
-> learning."_ — Van Merriënboer & de Croock (1997)
+> _"Methods that work best for reaching isolated, specific objectives are not
+> best for reaching integrated objectives and transfer of learning."_ — Van
+> Merriënboer & de Croock (1997)
 
-About _how learning transfers across contexts_. Holistic design (4C/ID)
-takes this into account by ensuring students confronted with new
-problems have BOTH specific knowledge for familiar aspects AND general
-abstract knowledge for unfamiliar aspects.
+About _how learning transfers across contexts_. Holistic design (4C/ID) takes
+this into account by ensuring students confronted with new problems have BOTH
+specific knowledge for familiar aspects AND general abstract knowledge for
+unfamiliar aspects.
 
 ---
 
@@ -540,90 +523,81 @@ How the curriculum's artifact is constructed and shaped.
 
 #### §10 Reusability Paradox (separate from §9 — different operational meaning)
 
-Wiley. _"Can you imagine wanting to teach some portion of this topic
-without teaching the other parts?"_ If no, all the subtopics belong to
-one learning object.
+Wiley. _"Can you imagine wanting to teach some portion of this topic without
+teaching the other parts?"_ If no, all the subtopics belong to one learning
+object.
 
-About _how learning artifacts are bundled and shared_. The more
-reusable a learning object, the less educational in any specific
-setting; the more contextual, the less reusable. Points outward toward
-§B.3 stance & values (via Open Education + Forkability).
+About _how learning artifacts are bundled and shared_. The more reusable a
+learning object, the less educational in any specific setting; the more
+contextual, the less reusable. Points outward toward §B.3 stance & values (via
+Open Education + Forkability).
 
-**The Reusability Paradox is not a problem to solve — it's the
-productive tension the course lives inside.** `just-enough/javascript/`
-(the JEJ chain; see `study-lenses.md`) is the reusable
-infrastructure side; the manifesto / ontology / chapters are the
-opinionated content side. The
-course is what happens when the opinionated content uses the reusable
-infrastructure.
+**The Reusability Paradox is not a problem to solve — it's the productive
+tension the course lives inside.** `just-enough/javascript/` (the JEJ chain; see
+`study-lenses.md`) is the reusable infrastructure side; the manifesto / ontology
+/ chapters are the opinionated content side. The course is what happens when the
+opinionated content uses the reusable infrastructure.
 
 #### §11 Course-as-Quine
 
-The curriculum's tooling simplicity (lenses.json, JS, markdown,
-Docusaurus + simple lens plugin) IS a pedagogical commitment.
+The curriculum's tooling simplicity (lenses.json, JS, markdown, Docusaurus +
+simple lens plugin) IS a pedagogical commitment.
 
-> **A learner who finishes the course has all the technical and
-> conceptual background to teach and extend the course.**
+> **A learner who finishes the course has all the technical and conceptual
+> background to teach and extend the course.**
 
-Light mention in syllabus body as ethos. Remix instructions in course
-appendix. Forks mechanism deferred — first get one version out,
-reassess later.
+Light mention in syllabus body as ethos. Remix instructions in course appendix.
+Forks mechanism deferred — first get one version out, reassess later.
 
-The platform-agnostic constraint (markdown + lenses) is consonant:
-anyone can fork from plain markdown.
+The platform-agnostic constraint (markdown + lenses) is consonant: anyone can
+fork from plain markdown.
 
 #### §12-bis Code is content / Code is the UI
 
-(Listed here for the design-principle-level claim; mechanism in
-ontology §11.)
+(Listed here for the design-principle-level claim; mechanism in ontology §11.)
 
-Source code is _the control panel through which the programmer
-operates the NM_. LLM prompting is an alternative way to operate the
-same panel.
+Source code is _the control panel through which the programmer operates the NM_.
+LLM prompting is an alternative way to operate the same panel.
 
-Ch4 framing: **"code is content, not deliverable."** AI-generated code
-is material to study, not work-product to ship.
+Ch4 framing: **"code is content, not deliverable."** AI-generated code is
+material to study, not work-product to ship.
 
-The principle is shared between this curriculum and
-`just-enough/javascript/`'s README — it's an org-wide commitment, not a
-Ch4-only flourish.
+The principle is shared between this curriculum and `just-enough/javascript/`'s
+README — it's an org-wide commitment, not a Ch4-only flourish.
 
 #### §12-ter Full Complexity, Max Simplicity
 
-Start with all the large moving parts (rhetorics of programming,
-collaboration, the full system context) at simplest technical depth.
-4CID-inspired. _Pebble-in-the-pond_ (Merrill) — content-centered start
-with a whole task at simplest depth.
+Start with all the large moving parts (rhetorics of programming, collaboration,
+the full system context) at simplest technical depth. 4CID-inspired.
+_Pebble-in-the-pond_ (Merrill) — content-centered start with a whole task at
+simplest depth.
 
 #### §12-quater Explicitly Teach the Implicit
 
-Name the skills experts take for granted. Don't leave implicit skills
-to chance trial-and-error. Both _supportive information_ (the
-variable, strategic parts) and _procedural information_ (the routine,
-rule-based parts) made explicit.
+Name the skills experts take for granted. Don't leave implicit skills to chance
+trial-and-error. Both _supportive information_ (the variable, strategic parts)
+and _procedural information_ (the routine, rule-based parts) made explicit.
 
 #### §12-quinque Process Over Product
 
-Focus on the steps the learner takes, not the deliverable. Explicit
-processes accommodate learners of different levels in one room — same
-process applied to projects of different complexity.
+Focus on the steps the learner takes, not the deliverable. Explicit processes
+accommodate learners of different levels in one room — same process applied to
+projects of different complexity.
 
 #### §12-sex Name Things
 
-Naming things — especially tiny things experienced programmers take
-for granted — legitimizes them as worth learning. Different levels of
-abstraction (ATT levels, PBIS, Block Model, SOLO Taxonomy) all benefit
-from being named.
+Naming things — especially tiny things experienced programmers take for granted
+— legitimizes them as worth learning. Different levels of abstraction (ATT
+levels, PBIS, Block Model, SOLO Taxonomy) all benefit from being named.
 
 ---
 
 ### B.3 Stance & values
 
-How the curriculum approaches learners and community. Integrated by
-**companion pedagogy** — the educator-as-companion lineage that runs
-through Open Education, community of practice, decolonised CS, and
-accessibility. The teacher walks alongside the learner; authority is
-plural and the plural is wide.
+How the curriculum approaches learners and community. Integrated by **companion
+pedagogy** — the educator-as-companion lineage that runs through Open Education,
+community of practice, decolonised CS, and accessibility. The teacher walks
+alongside the learner; authority is plural and the plural is wide.
 
 | Principle                                    | Source                                            | Brief                                                                                                                                                                      |
 | -------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -642,9 +616,9 @@ plural and the plural is wide.
 | **Decolonised CS framing**                   | `Social Dreaming Together…` (SIGCSE 2023)         | Re-envisioning whose computing experiences shape the discipline.                                                                                                           |
 | **PRIMM-based micromaterials for inclusion** | `Breaking the Code of Inclusion.md` (FOSDEM 2023) | Open-source micromaterials supporting groups underrepresented in programming education.                                                                                    |
 
-The compact bulleted version of these principles also appears in
-"First Principles" above; the table here is the detailed source-and-brief
-catalog. Both are valid views of the same set of commitments.
+The compact bulleted version of these principles also appears in "First
+Principles" above; the table here is the detailed source-and-brief catalog. Both
+are valid views of the same set of commitments.
 
 ---
 
@@ -653,33 +627,30 @@ catalog. Both are valid views of the same set of commitments.
 ### PBIS — flexible vocabulary, not a sequence
 
 **PBIS** (canonical letter-order; **NOT PBSI**): Purpose / Behavior /
-Implementation / Strategy. Four meaningful vocabulary words applied at
-different zones, levels, and moments.
+Implementation / Strategy. Four meaningful vocabulary words applied at different
+zones, levels, and moments.
 
-- **Purpose** — context-encompassing. Why this exists, for whom, in
-  what world. Not "first in a sequence" but "the field everything else
-  operates within."
-- **Behavior** — what's observable; user-side effect AND
-  mechanism-side effect; same observable, two readings.
-- **Implementation** — the literal made-thing. Code, structure,
-  configuration, hardware choices.
-- **Strategy** — patterns and abstractions the implementation
-  instances. Can manifest at different levels (UI strategy,
-  algorithmic strategy, architectural strategy, user-research
-  strategy).
+- **Purpose** — context-encompassing. Why this exists, for whom, in what world.
+  Not "first in a sequence" but "the field everything else operates within."
+- **Behavior** — what's observable; user-side effect AND mechanism-side effect;
+  same observable, two readings.
+- **Implementation** — the literal made-thing. Code, structure, configuration,
+  hardware choices.
+- **Strategy** — patterns and abstractions the implementation instances. Can
+  manifest at different levels (UI strategy, algorithmic strategy, architectural
+  strategy, user-research strategy).
 
-**No canonical ordering.** P doesn't precede B doesn't precede I
-doesn't precede S. Different kinds of analysis foreground different
-vocabulary subsets. PBIS is a _vocabulary strand_, not a _sequence_.
+**No canonical ordering.** P doesn't precede B doesn't precede I doesn't precede
+S. Different kinds of analysis foreground different vocabulary subsets. PBIS is
+a _vocabulary strand_, not a _sequence_.
 
-**No canonical "trading zone."** Any of P/B/S/I can be a meeting point
-depending on the moment.
+**No canonical "trading zone."** Any of P/B/S/I can be a meeting point depending
+on the moment.
 
 ### PBIS through the metaphor (concentric scopes)
 
-From `narrative/README.md` §15: reading code well means holding all
-four layers simultaneously. Perspective stacking (ontology §7)
-operationalized.
+From `narrative/README.md` §15: reading code well means holding all four layers
+simultaneously. Perspective stacking (ontology §7) operationalized.
 
 ```text
 ┌─── PURPOSE ─────────────────────────────────────┐
@@ -700,41 +671,40 @@ operationalized.
 
 Foundational conceptual distinction (Ch1 introduces it):
 
-- **Static**: source code (text). Comments live here. Developer reads
-  this without running the program.
-- **Dynamic**: program evaluation (runtime). Logs are observed here.
-  The NM does its work here.
+- **Static**: source code (text). Comments live here. Developer reads this
+  without running the program.
+- **Dynamic**: program evaluation (runtime). Logs are observed here. The NM does
+  its work here.
 
-Setting up the dev-twin: the developer who reads code sees the static
-text, not the runtime. Understanding this distinction is prerequisite
-to understanding why comments and logs serve different purposes.
+Setting up the dev-twin: the developer who reads code sees the static text, not
+the runtime. Understanding this distinction is prerequisite to understanding why
+comments and logs serve different purposes.
 
 ### Code is content, not deliverable (Ch4 framing)
 
-Cross-link to ontology §11. In Ch4, LLM-generated code is _material to
-study_, not work-product to ship. This is what keeps the chapter
-pedagogical rather than productivity-oriented.
+Cross-link to ontology §11. In Ch4, LLM-generated code is _material to study_,
+not work-product to ship. This is what keeps the chapter pedagogical rather than
+productivity-oriented.
 
 ---
 
 ## Further sections (TBD — Wave 3 continuation)
 
-The following sections are scaffolded but await full prose development.
-The skeleton commits in Wave 2 listed them as Wave-3 targets; this
-commit (3a) lands the first one (How Learning Happens). The remaining
-items below will be developed in subsequent Wave-3 commits and in the
-ontology↔pedagogy audit pass (3d):
+The following sections are scaffolded but await full prose development. The
+skeleton commits in Wave 2 listed them as Wave-3 targets; this commit (3a) lands
+the first one (How Learning Happens). The remaining items below will be
+developed in subsequent Wave-3 commits and in the ontology↔pedagogy audit pass
+(3d):
 
 - Scaffolding patterns: PRIMM, Block Model, PBIS (Purpose / Behavior /
-  Implementation / Strategy — the four-level reading framework
-  introduced in Ch3), Study Lenses, Cognitive Load, JEJ,
-  errors-as-information, Snippetry (the names are introduced in the
-  scaffolding bullets above; full per-pattern treatment lives here
-  when developed)
-- Sequence: when each concept first lands (the ladder), how it deepens
-  (the spiral)
+  Implementation / Strategy — the four-level reading framework introduced in
+  Ch3), Study Lenses, Cognitive Load, JEJ, errors-as-information, Snippetry (the
+  names are introduced in the scaffolding bullets above; full per-pattern
+  treatment lives here when developed)
+- Sequence: when each concept first lands (the ladder), how it deepens (the
+  spiral)
 - Exercise patterns per strand (§7) and per lens (§9)
 - Methods for introducing the three roles of agential AI (§11)
-- The pedagogy ↔ ontology seam, ongoing — the audit pass scheduled at
-  3d will move how-it's-taught content from `ontology.md`
-  into the appropriate sections of this file
+- The pedagogy ↔ ontology seam, ongoing — the audit pass scheduled at 3d will
+  move how-it's-taught content from `ontology.md` into the appropriate sections
+  of this file

@@ -46,13 +46,13 @@ Examples:
   `coercion: {type:'boolean', value:true}`, `result: true`
 - `while (count)` where count is 3 → `value: {type:'number', value:3}`,
   `coercion: {type:'boolean', value:true}`, `result: true`
-- `if (true)` → `value: {type:'boolean', value:true}`, no coercion field
-  (value is already boolean), `result: true`
+- `if (true)` → `value: {type:'boolean', value:true}`, no coercion field (value
+  is already boolean), `result: true`
 - `for (;i < 5;)` where `i < 5` evaluates to `true` → no coercion (comparison
   already produces a boolean)
 
 ## All events carry scopeCreationStep
 
 Every control flow event references the scope it belongs to via
-`scopeCreationStep`. This enables consumers to correlate control flow events with
-their enclosing scope without relying on trace ordering.
+`scopeCreationStep`. This enables consumers to correlate control flow events
+with their enclosing scope without relying on trace ordering.

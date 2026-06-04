@@ -1,9 +1,10 @@
 # Handoff: Register the `annotate` lens into `LENS_REGISTRY`
 
-> **Scope**: a tactical ticket (~2 edits to one file, one commit). NOT a planning
-> stream. The WS4 lens-migration stream that produced the `annotate` lens lives
-> in [`04-lens-migration.md`](./04-lens-migration.md); this handoff is the final
-> wiring step that publishes the lens to the orchestrator's dispatch surface.
+> **Scope**: a tactical ticket (~2 edits to one file, one commit). NOT a
+> planning stream. The WS4 lens-migration stream that produced the `annotate`
+> lens lives in [`04-lens-migration.md`](./04-lens-migration.md); this handoff
+> is the final wiring step that publishes the lens to the orchestrator's
+> dispatch surface.
 
 ## Read these first (mandatory)
 
@@ -16,9 +17,9 @@ Before you touch any file, read:
    full TDD ceremony does not apply, but the invariants do.
 2. [`DEV.md`](../../../../../DEV.md) at the repo root — the Adversarial Review
    Protocol (AR-1 through AR-5). For this registration ticket, no AR cycle is
-   expected: it's a 2-line wiring change against a lens that already passed
-   AR-5 (Opus, PROCEED). If your verification surfaces anything that requires
-   a contract change or new behavior (it shouldn't), stop and re-read DEV.md
+   expected: it's a 2-line wiring change against a lens that already passed AR-5
+   (Opus, PROCEED). If your verification surfaces anything that requires a
+   contract change or new behavior (it shouldn't), stop and re-read DEV.md
    before proceeding — the project mandates the appropriate AR cycle for any
    non-trivial change.
 3. This handoff in full, top to bottom.
@@ -32,10 +33,11 @@ The WS4 batch migrated the `annotate` lens (renamed from `highlight` at Phase 0
 because the lens does annotation-on-top-of-display, not token highlighting) to
 the new lenses-peer `LensModule` contract. The lens is **shippable** — AR-5
 (Opus, pre-merge) returned PROCEED on 2026-05-29; 136 annotate tests pass; tsc
-+ eslint clean for the annotate slice. But the lens is **not yet routable**:
-`orchestrate/index.tsx`'s `LENS_REGISTRY` only contains `debug-props`, so a
-`lens="annotate"` fence currently dispatches to the "unrecognized lens"
-fallback. This handoff wires it in.
+
+- eslint clean for the annotate slice. But the lens is **not yet routable**:
+  `orchestrate/index.tsx`'s `LENS_REGISTRY` only contains `debug-props`, so a
+  `lens="annotate"` fence currently dispatches to the "unrecognized lens"
+  fallback. This handoff wires it in.
 
 After registration, the orchestrator's L1 picker has its first non-trivial
 two-member roster, and F4's "first trial pedagogical lens against the new
@@ -43,7 +45,8 @@ two-member roster, and F4's "first trial pedagogical lens against the new
 
 ## The work (two edits, one file)
 
-**File**: [`src/lib/just-enough/javascript/orchestrate/index.tsx`](../orchestrate/index.tsx)
+**File**:
+[`src/lib/just-enough/javascript/orchestrate/index.tsx`](../orchestrate/index.tsx)
 
 ### Edit 1 — add the import
 
@@ -61,7 +64,7 @@ alphabetized so the order is `'annotate'` before `'debug-props'`):
 
 ```tsx
 const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
-	'annotate': annotateLens,
+	annotate: annotateLens,
 	'debug-props': debugPropsLens,
 });
 ```
@@ -109,15 +112,15 @@ existing `tsc --noEmit` pass on the annotate slice).
 
    Then open `http://localhost:3000/annotate-preview` — this is the dev harness
    the lens-migration batch already shipped. It mounts `annotateLens.Component`
-   directly (bypassing the registry) so it confirms the lens itself renders.
-   For the **registered-path** check, find any `lens="annotate"` fence in the
-   docs (or add one to a scratch `.md` page in `src/pages/`) and confirm the
+   directly (bypassing the registry) so it confirms the lens itself renders. For
+   the **registered-path** check, find any `lens="annotate"` fence in the docs
+   (or add one to a scratch `.md` page in `src/pages/`) and confirm the
    orchestrator dispatches to the new lens instead of the fallback.
 
 ## Commit
 
-Suggested message (adjust if your conventions differ — the repo uses
-`add:` / `docs:` / `refactor:` prefixes per recent git log):
+Suggested message (adjust if your conventions differ — the repo uses `add:` /
+`docs:` / `refactor:` prefixes per recent git log):
 
 ```
 add: register annotate lens in LENS_REGISTRY
@@ -136,8 +139,8 @@ trial pedagogical lens" milestone is satisfied.
 
 The repo uses `--no-verify` for git commits per
 [[project_markdownlint_gate_curricula]] (pre-existing markdownlint debt blocks
-the pre-commit hook). If your session has been configured otherwise, follow
-that configuration.
+the pre-commit hook). If your session has been configured otherwise, follow that
+configuration.
 
 ## Out of scope — DO NOT touch in this commit
 
@@ -149,11 +152,11 @@ that configuration.
   typecheck-red areas; out of scope per the WS3/WS4 handoff.
 - **`src/lib/just-enough/javascript/clauding.{1,2,3,4}.{txt,js}`** — untracked
   scratch files owned by the user.
-- **Parallel-session work-in-progress** that may appear in `git status` —
-  e.g. `embody/lib/validating/*` modifications, untracked `orchestrate/editor/
-  sandbox.html`, `lib/formatting-editor/*`. **Stage ONLY the orchestrate/
-  index.tsx change.** If you see other modified files you didn't make, flag
-  them to the user and leave them alone.
+- **Parallel-session work-in-progress** that may appear in `git status` — e.g.
+  `embody/lib/validating/*` modifications, untracked
+  `orchestrate/editor/ sandbox.html`, `lib/formatting-editor/*`. **Stage ONLY
+  the orchestrate/ index.tsx change.** If you see other modified files you
+  didn't make, flag them to the user and leave them alone.
 
 ## Pointers for deeper context (read only if a question comes up)
 
@@ -166,32 +169,32 @@ that configuration.
 - [`src/lib/just-enough/javascript/lenses/annotate/index.tsx`](../lenses/annotate/index.tsx)
   — the React wrapper that default-exports the frozen `LensModule` you're
   importing.
-- [`src/lib/just-enough/javascript/lenses/types.ts`](../lenses/types.ts)
-  — the `LensModule` contract the lens implements.
-- [`04-lens-migration.md`](./04-lens-migration.md) — the WS4 stream plan
-  this ticket completes.
+- [`src/lib/just-enough/javascript/lenses/types.ts`](../lenses/types.ts) — the
+  `LensModule` contract the lens implements.
+- [`04-lens-migration.md`](./04-lens-migration.md) — the WS4 stream plan this
+  ticket completes.
 
 ## What is deferred (so you don't try to "finish" it)
 
 The annotate lens documents one deferred follow-up in
 [`lenses/annotate/README.md` § Future direction](../lenses/annotate/README.md):
 **Flowchart-node → source-line correlation**. A `select` tool + node-click
-selection was built during the WS4 batch and reverted (commit `a225004`)
-because the visual-only highlight was too thin without a real source-position
-mapping. The real correlation needs a flowchart-node → AST-position walk
-(`js2flowchart` doesn't expose source positions; the mapping has to come from
-embody's entwined-AST positions). The wrapper still ships the
-`data-flowchart-node` post-inject tagger as forward-ready infrastructure
-(documented as "no v1 consumer") plus a memoized
-`dangerouslySetInnerHTML` prop object (a real React-reconciler bug fix
-discovered during the reverted increment). **Do not try to wire this up as
-part of registration.** It's a future increment with its own AR cycle.
+selection was built during the WS4 batch and reverted (commit `a225004`) because
+the visual-only highlight was too thin without a real source-position mapping.
+The real correlation needs a flowchart-node → AST-position walk (`js2flowchart`
+doesn't expose source positions; the mapping has to come from embody's
+entwined-AST positions). The wrapper still ships the `data-flowchart-node`
+post-inject tagger as forward-ready infrastructure (documented as "no v1
+consumer") plus a memoized `dangerouslySetInnerHTML` prop object (a real
+React-reconciler bug fix discovered during the reverted increment). **Do not try
+to wire this up as part of registration.** It's a future increment with its own
+AR cycle.
 
 ## Open questions you should NOT answer unilaterally
 
 - **Picker UX**: with the registry growing to 2 entries, the L1 picker is now
-  non-trivial. If there's a UI affordance to surface ("two lenses available
-  for this snippet"), that's a WS3 product decision, not a registration step.
+  non-trivial. If there's a UI affordance to surface ("two lenses available for
+  this snippet"), that's a WS3 product decision, not a registration step.
 - **Default lens**: currently `debug-props` was the only registry member, so
   there's no precedent for which lens picks if a fence omits `lens=`. This may
   surface during testing. If it does, ask the user — don't pick a default.

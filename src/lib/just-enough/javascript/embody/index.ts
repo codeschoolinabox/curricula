@@ -387,7 +387,12 @@ function makeStubAnalysis(
 
 /** Minimal plain-object acorn token for `raw.tokens` on the parse-fail leaf. */
 function makeStubRawToken(code: string): unknown {
-	return { type: { label: 'eof' }, value: undefined, start: code.length, end: code.length };
+	return {
+		type: { label: 'eof' },
+		value: undefined,
+		start: code.length,
+		end: code.length,
+	};
 }
 
 /**
@@ -395,7 +400,13 @@ function makeStubRawToken(code: string): unknown {
  * The real-composition branch emits real acorn output for non-scenario inputs.
  */
 function makeStubAcornNode(code: string): AcornNode {
-	return { type: 'Program', start: 0, end: code.length, body: [], sourceType: 'script' } as unknown as AcornNode;
+	return {
+		type: 'Program',
+		start: 0,
+		end: code.length,
+		body: [],
+		sourceType: 'script',
+	} as unknown as AcornNode;
 }
 
 /** Build a stub `RealmPhase` — data/entwined are placeholder open holes. */
@@ -462,7 +473,11 @@ function makeEvaluationEvents(runInstance: RunInstance): EvaluationEvents {
 }
 
 /** No-op run result for non-apex leaves — evaluation gate was never passed. */
-const NOT_RUNNABLE_REPORT: EndReport = Object.freeze({ ok: false, error: null, outcome: 'not-runnable' } as EndReport);
+const NOT_RUNNABLE_REPORT: EndReport = Object.freeze({
+	ok: false,
+	error: null,
+	outcome: 'not-runnable',
+} as EndReport);
 
 /**
  * Wire the snippet back-ref into a RunInstance before the freeze pass.
@@ -571,7 +586,12 @@ function buildFailAtTokenizeSnippet(code: string): Snippet {
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
-		status: { tokenized: false, parsed: false, validated: false, created: false },
+		status: {
+			tokenized: false,
+			parsed: false,
+			validated: false,
+			created: false,
+		},
 		source: buildSource(code),
 		raw: { tokens: null, ast: null, comments: null },
 		errors: {
@@ -610,7 +630,12 @@ function buildFailAtParseSnippet(code: string): Snippet {
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
-		status: { tokenized: true, parsed: false, validated: false, created: false },
+		status: {
+			tokenized: true,
+			parsed: false,
+			validated: false,
+			created: false,
+		},
 		source: buildSource(code),
 		raw: { tokens: rawTokens, ast: null, comments: null },
 		errors: {
@@ -774,7 +799,9 @@ function buildApexSnippet(code: string, overlay: ApexOverlay): Snippet {
 		formatted: true,
 		violations: overlay.violations,
 	};
-	const runInstance = makeStubRunInstance(makeApexEndReport(overlay.evalOutcome));
+	const runInstance = makeStubRunInstance(
+		makeApexEndReport(overlay.evalOutcome),
+	);
 	const evaluationEvents = makeEvaluationEvents(runInstance);
 	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
 	const eventsView: EventsView = {
@@ -859,9 +886,23 @@ const APEX_OVERLAYS: Readonly<Record<string, ApexOverlay>> = Object.freeze({
 
 /** Internal result union from the two-stage acorn run. */
 type AcornRunResult =
-	| { readonly ok: true; readonly tokens: ReadonlyArray<unknown>; readonly ast: AcornNode; readonly comments: ReadonlyArray<unknown> }
-	| { readonly ok: false; readonly tokenizeFailed: true; readonly error: unknown }
-	| { readonly ok: false; readonly tokenizeFailed: false; readonly error: unknown; readonly tokens: ReadonlyArray<unknown> };
+	| {
+			readonly ok: true;
+			readonly tokens: ReadonlyArray<unknown>;
+			readonly ast: AcornNode;
+			readonly comments: ReadonlyArray<unknown>;
+	  }
+	| {
+			readonly ok: false;
+			readonly tokenizeFailed: true;
+			readonly error: unknown;
+	  }
+	| {
+			readonly ok: false;
+			readonly tokenizeFailed: false;
+			readonly error: unknown;
+			readonly tokens: ReadonlyArray<unknown>;
+	  };
 
 /**
  * Run acorn in two stages to discriminate tokenize-fail from parse-fail.
@@ -878,7 +919,9 @@ type AcornRunResult =
 function runAcorn(code: string): AcornRunResult {
 	let tokens: ReadonlyArray<unknown> = [];
 	try {
-		tokens = [...acornTokenizer(code, { ecmaVersion: 'latest', sourceType: 'module' })];
+		tokens = [
+			...acornTokenizer(code, { ecmaVersion: 'latest', sourceType: 'module' }),
+		];
 	} catch (tokenizeError: unknown) {
 		return { ok: false, tokenizeFailed: true, error: tokenizeError };
 	}
@@ -904,15 +947,24 @@ function runAcorn(code: string): AcornRunResult {
  * acorn's error position is a point (no end), so `start` and `end` are
  * set to the same `{line, column}` value (degenerate zero-width span).
  */
-function extractAcornError(error: unknown, phase: 'parse:tokenize' | 'parse:ast'): EmbodyError {
-	const acornError = error as { readonly message?: string; readonly loc?: { readonly line: number; readonly column: number } };
+function extractAcornError(
+	error: unknown,
+	phase: 'parse:tokenize' | 'parse:ast',
+): EmbodyError {
+	const acornError = error as {
+		readonly message?: string;
+		readonly loc?: { readonly line: number; readonly column: number };
+	};
 	const acornLoc = acornError.loc;
 	return {
 		phase,
 		kind: 'SyntaxError',
 		message: acornError.message ?? 'Acorn parse failure',
 		loc: acornLoc
-			? { start: { line: acornLoc.line, column: acornLoc.column }, end: { line: acornLoc.line, column: acornLoc.column } }
+			? {
+					start: { line: acornLoc.line, column: acornLoc.column },
+					end: { line: acornLoc.line, column: acornLoc.column },
+				}
 			: null,
 		cause: error,
 	};
@@ -932,7 +984,12 @@ function buildTokenizeFailRealSnippet(source: Source, error: unknown): Snippet {
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
-		status: { tokenized: false, parsed: false, validated: false, created: false },
+		status: {
+			tokenized: false,
+			parsed: false,
+			validated: false,
+			created: false,
+		},
 		source,
 		raw: { tokens: null, ast: null, comments: null },
 		errors: extractAcornError(error, 'parse:tokenize'),
@@ -951,7 +1008,11 @@ function buildTokenizeFailRealSnippet(source: Source, error: unknown): Snippet {
 }
 
 /** Build a real-composition parse-fail Snippet — tokenized true; ast null; raw.tokens present. */
-function buildParseFailRealSnippet(source: Source, tokens: ReadonlyArray<unknown>, error: unknown): Snippet {
+function buildParseFailRealSnippet(
+	source: Source,
+	tokens: ReadonlyArray<unknown>,
+	error: unknown,
+): Snippet {
 	const realmPhase = makeStubRealmPhase();
 	const tokenizePhase = makeStubTokenizePhase();
 	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
@@ -965,7 +1026,12 @@ function buildParseFailRealSnippet(source: Source, tokens: ReadonlyArray<unknown
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
-		status: { tokenized: true, parsed: false, validated: false, created: false },
+		status: {
+			tokenized: true,
+			parsed: false,
+			validated: false,
+			created: false,
+		},
 		source,
 		raw: { tokens, ast: null, comments: null },
 		errors: extractAcornError(error, 'parse:ast'),
@@ -1073,7 +1139,12 @@ function embody(code: string): Snippet {
 	const source = buildRealCompositionSource(code);
 	const acornResult = runAcorn(code);
 	if (acornResult.ok) {
-		return buildApexRealSnippet(source, acornResult.tokens, acornResult.ast, acornResult.comments);
+		return buildApexRealSnippet(
+			source,
+			acornResult.tokens,
+			acornResult.ast,
+			acornResult.comments,
+		);
 	}
 	return acornResult.tokenizeFailed
 		? buildTokenizeFailRealSnippet(source, acornResult.error)

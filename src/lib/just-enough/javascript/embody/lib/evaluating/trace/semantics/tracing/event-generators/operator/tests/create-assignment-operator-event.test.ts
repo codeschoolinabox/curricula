@@ -19,7 +19,10 @@ describe('createAssignmentOperatorEvent', () => {
 			const event = createAssignmentOperatorEvent({
 				operator: '+=',
 				target: 'x',
-				operands: [{ type: 'number', value: 10 }, { type: 'number', value: 5 }],
+				operands: [
+					{ type: 'number', value: 10 },
+					{ type: 'number', value: 5 },
+				],
 				result: { type: 'number', value: 15 },
 				scopeCreationStep: 0,
 			});
@@ -45,7 +48,10 @@ describe('createAssignmentOperatorEvent', () => {
 			const event = createAssignmentOperatorEvent({
 				operator: '+=',
 				target: 'count',
-				operands: [{ type: 'number', value: 10 }, { type: 'number', value: 5 }],
+				operands: [
+					{ type: 'number', value: 10 },
+					{ type: 'number', value: 5 },
+				],
 				result: { type: 'number', value: 15 },
 				scopeCreationStep: 0,
 			});
@@ -58,7 +64,10 @@ describe('createAssignmentOperatorEvent', () => {
 			const event = createAssignmentOperatorEvent({
 				operator: '+=',
 				target: 'x',
-				operands: [{ type: 'number', value: 1 }, { type: 'number', value: 2 }],
+				operands: [
+					{ type: 'number', value: 1 },
+					{ type: 'number', value: 2 },
+				],
 				result: { type: 'number', value: 3 },
 				scopeCreationStep: 0,
 			});
@@ -69,10 +78,16 @@ describe('createAssignmentOperatorEvent', () => {
 			const event = createAssignmentOperatorEvent({
 				operator: '+=',
 				target: 'x',
-				operands: [{ type: 'string', value: 'hi' }, { type: 'number', value: 5 }],
+				operands: [
+					{ type: 'string', value: 'hi' },
+					{ type: 'number', value: 5 },
+				],
 				result: { type: 'string', value: 'hi5' },
 				scopeCreationStep: 0,
-				coercedOperands: [{ type: 'string', value: 'hi' }, { type: 'string', value: '5' }],
+				coercedOperands: [
+					{ type: 'string', value: 'hi' },
+					{ type: 'string', value: '5' },
+				],
 			});
 			expect(event.coercion).toBeDefined();
 		});

@@ -1,4 +1,7 @@
-import type { AssignmentOperatorEvent, ValueRepresentation } from '../../types.js';
+import type {
+	AssignmentOperatorEvent,
+	ValueRepresentation,
+} from '../../types.js';
 
 type AssignmentParams = {
 	readonly operator: string;
@@ -23,7 +26,11 @@ function hasCoercion(
 		const original = operands[i];
 		const coercedValue = coerced[i];
 		if (original.type !== coercedValue.type) return true;
-		if ('value' in original && 'value' in coercedValue && original.value !== coercedValue.value) {
+		if (
+			'value' in original &&
+			'value' in coercedValue &&
+			original.value !== coercedValue.value
+		) {
 			return true;
 		}
 	}
@@ -38,23 +45,28 @@ function hasCoercion(
  * @returns Domain-specific fields for an AssignmentOperatorEvent
  * @throws {Error} If target is empty
  */
-function createAssignmentOperatorEvent({
-	operator,
-	target,
-	operands,
-	result,
-	scopeCreationStep,
-	coercedOperands,
-	shortCircuited,
-}: AssignmentParams = {} as AssignmentParams): Omit<
+function createAssignmentOperatorEvent(
+	{
+		operator,
+		target,
+		operands,
+		result,
+		scopeCreationStep,
+		coercedOperands,
+		shortCircuited,
+	}: AssignmentParams = {} as AssignmentParams,
+): Omit<
 	AssignmentOperatorEvent,
 	'step' | 'semantics' | 'loc' | 'node' | 'source'
 > {
 	if (!target) {
-		throw new Error('createAssignmentOperatorEvent: target is required and must be non-empty');
+		throw new Error(
+			'createAssignmentOperatorEvent: target is required and must be non-empty',
+		);
 	}
 
-	const coercionOccurred = coercedOperands !== undefined && hasCoercion(operands, coercedOperands);
+	const coercionOccurred =
+		coercedOperands !== undefined && hasCoercion(operands, coercedOperands);
 
 	return {
 		category: 'assignment',

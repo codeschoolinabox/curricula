@@ -11,7 +11,9 @@ function makeState(): TracerState {
 		step: 0,
 		scopeStack: [],
 		iterationCounters: {},
-		lastExpressionResult: null, previousExpressionResult: null, lastReadValues: {},
+		lastExpressionResult: null,
+		previousExpressionResult: null,
+		lastReadValues: {},
 		config: { literals: { string: true } },
 	};
 }
@@ -86,7 +88,10 @@ describe('emitEvent', () => {
 
 	it('increments step for each call', () => {
 		const state = makeState();
-		const payload = { kind: 'string' as const, value: { type: 'string' as const, value: 'a' } };
+		const payload = {
+			kind: 'string' as const,
+			value: { type: 'string' as const, value: 'a' },
+		};
 		emitEvent(state, makeTag(), 'expression', 'literals.string', payload);
 		emitEvent(state, makeTag(), 'expression', 'literals.string', payload);
 		expect(state.step).toBe(2);
@@ -106,7 +111,9 @@ describe('emitEvent', () => {
 	it('onEvent receives the same event as trace', () => {
 		const state = makeState();
 		let receivedEvent: unknown = null;
-		state.onEvent = (event) => { receivedEvent = event; };
+		state.onEvent = (event) => {
+			receivedEvent = event;
+		};
 		emitEvent(state, makeTag(), 'expression', 'literals.string', {
 			kind: 'string',
 			value: { type: 'string', value: 'hi' },

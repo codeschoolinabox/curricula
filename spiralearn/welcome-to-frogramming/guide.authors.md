@@ -9,19 +9,18 @@
 > - `ontology.md` — the _what_ (reference framework)
 > - `chapters.md` — the _how_ at chapter grain
 > - `guide.learners.md` — the _why_ addressed to learners
-> - `guide.community.md` — the _why_ addressed to partner
->   communities, mentors, cohort hosts
-> - `study-lenses.md` — the technical-reader companion for the
->   JEJ → NM → embody → lenses → orchestrator infrastructure
+> - `guide.community.md` — the _why_ addressed to partner communities, mentors,
+>   cohort hosts
+> - `study-lenses.md` — the technical-reader companion for the JEJ → NM → embody
+>   → lenses → orchestrator infrastructure
 >
 > **Status**: end-state document. Content is open to iteration.
 >
-> **Note**: the H1 heading still reads "A Manifesto for..." by design.
-> Filename renamed (`manifesto.{role}.md` → `guide.{role}.md`) in Wave 2
-> of the syllabus corpus restructure; title and prose register migrate
-> to "guide" form in Wave 3, when vision-flavored content moves into
-> `manifesto.md` and this file gains its practical-guidance
-> register.
+> **Note**: the H1 heading still reads "A Manifesto for..." by design. Filename
+> renamed (`manifesto.{role}.md` → `guide.{role}.md`) in Wave 2 of the syllabus
+> corpus restructure; title and prose register migrate to "guide" form in Wave
+> 3, when vision-flavored content moves into `manifesto.md` and this file gains
+> its practical-guidance register.
 
 ---
 
@@ -304,11 +303,11 @@ optional, and it builds intellectual confidence rather than gatekeeping it.**
 
 ### The visualizations
 
-The course has working visuals (`assets/*.{png,svg}`) and new ones
-welcome. Pull them in; create your own; render new ones inline. All wrapped in
-`<details>` blocks with relative-importance caveats (most load-bearing /
-supporting / optional extra angle). Visuals are increasingly load-bearing in the
-curriculum's future state.
+The course has working visuals (`assets/*.{png,svg}`) and new ones welcome. Pull
+them in; create your own; render new ones inline. All wrapped in `<details>`
+blocks with relative-importance caveats (most load-bearing / supporting /
+optional extra angle). Visuals are increasingly load-bearing in the curriculum's
+future state.
 
 ---
 

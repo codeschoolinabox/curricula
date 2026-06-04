@@ -207,7 +207,10 @@ function simpleIfElse(
 	}
 
 	// Both branches must be blocks with exactly one statement
-	if (consequent.type !== 'BlockStatement' || alternate.type !== 'BlockStatement') {
+	if (
+		consequent.type !== 'BlockStatement' ||
+		alternate.type !== 'BlockStatement'
+	) {
 		return null;
 	}
 

@@ -70,7 +70,9 @@ describe('expandShorthand — One', () => {
 			type: 'object',
 			properties: { enabled: { type: 'boolean' } },
 		};
-		expect(expandShorthand({ enabled: true }, schema)).toEqual({ enabled: true });
+		expect(expandShorthand({ enabled: true }, schema)).toEqual({
+			enabled: true,
+		});
 	});
 
 	it('expands `true` for an object-typed schema field with a single boolean leaf', () => {
@@ -379,9 +381,9 @@ describe('expandShorthand — Simple (JEJ-realistic)', () => {
 				},
 			},
 		};
-		expect(
-			expandShorthand({ resolve: { kinds: false } }, schema),
-		).toEqual({ resolve: { kinds: { variable: false, literal: false } } });
+		expect(expandShorthand({ resolve: { kinds: false } }, schema)).toEqual({
+			resolve: { kinds: { variable: false, literal: false } },
+		});
 	});
 
 	it('{ statements: true } recursively fills while/for/doWhile leaves', () => {

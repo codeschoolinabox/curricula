@@ -116,10 +116,10 @@ experiment, or surprise yourself. This course helps you build both at once.
 - [Before You Begin](#before-you-begin)
 
 > **Chapter bodies and learning objectives live in
-> [`chapters.md`](./chapters.md).** The TL;DR chapter
-> bullets above are the syllabus-level chapter coverage; the full
-> per-chapter content (Overview, sub-sections 0.1, 0.2, …, 5.5, and the
-> per-layer LO contracts) is in the companion file.
+> [`chapters.md`](./chapters.md).** The TL;DR chapter bullets above are the
+> syllabus-level chapter coverage; the full per-chapter content (Overview,
+> sub-sections 0.1, 0.2, …, 5.5, and the per-layer LO contracts) is in the
+> companion file.
 
 ---
 
@@ -319,19 +319,18 @@ which explanation is clearest — it's a structured curation of experiences.
 Cognitive science calls this **pedagogical sampling**: learners draw
 fundamentally different inferences from data chosen intentionally by a teacher
 than from data encountered at random or sampled by themselves. LLMs are
-extraordinarily good at producing explanations on demand, but explanations
-alone don't teach because learning is what happens through _doing_, not
-through receiving. _If learning were the receipt of explanations, LLMs would
-have already solved it._ They haven't, because it isn't.
+extraordinarily good at producing explanations on demand, but explanations alone
+don't teach because learning is what happens through _doing_, not through
+receiving. _If learning were the receipt of explanations, LLMs would have
+already solved it._ They haven't, because it isn't.
 
-**AI cannot help when learners don't yet know what to verify.** Until you
-have the twins (NM-twin, user-twin, developer-twin), you can't evaluate AI
-output, direct it meaningfully, or recognize when it's confidently misleading
-you. This is the structural reason Chapter 4 lands where it does — not as a
-sequential "we did Ch1–3 first" but as a threshold-crossing once you have
-something to verify against. **You have only mastered a skill when you can
-complete its exercises without AI.** That's the principle as a learning
-contract.
+**AI cannot help when learners don't yet know what to verify.** Until you have
+the twins (NM-twin, user-twin, developer-twin), you can't evaluate AI output,
+direct it meaningfully, or recognize when it's confidently misleading you. This
+is the structural reason Chapter 4 lands where it does — not as a sequential "we
+did Ch1–3 first" but as a threshold-crossing once you have something to verify
+against. **You have only mastered a skill when you can complete its exercises
+without AI.** That's the principle as a learning contract.
 
 The deeper unpacking — pedagogical sampling and the curated-vs-self-directed
 asymmetry, the two-layer misconception mechanism (confident explanations +
@@ -339,10 +338,9 @@ output-only self-checking), the SOLO-taxonomy progression from Building
 Structure → AI Integration Threshold → Leveraging Structure, why Chapter 4's
 structure (every section evaluating LLM output rather than producing it) makes
 the chapter work safely, and how each existing piece of scaffolding (PRIMM,
-Block Model, spiral curriculum, Cognitive Load Theory, Study Lenses, Just
-Enough JavaScript, errors-as-information, snippetry) reads as pedagogical
-sampling at a different granularity — lives canonically in
-[`pedagogy.md`](./pedagogy.md).
+Block Model, spiral curriculum, Cognitive Load Theory, Study Lenses, Just Enough
+JavaScript, errors-as-information, snippetry) reads as pedagogical sampling at a
+different granularity — lives canonically in [`pedagogy.md`](./pedagogy.md).
 
 [TOP](#welcome-to-frogramming---syllabus)
 
@@ -360,10 +358,9 @@ reasons to program that aren't about productivity at all.
 The deeper _why_ — the vision of computing this curriculum stands on, how
 software's design / notation split shaped the territory long before LLMs, how
 the LLM shift fits in that history, and what futures might lie beyond
-human-designed languages — lives in
-[`manifesto.md`](./manifesto.md). This section gives the
-scope-and-goals view: what the course teaches and why those choices serve a
-learner trying to program well today.
+human-designed languages — lives in [`manifesto.md`](./manifesto.md). This
+section gives the scope-and-goals view: what the course teaches and why those
+choices serve a learner trying to program well today.
 
 ### What programming languages are
 
@@ -502,9 +499,9 @@ hints at alien composers emerging on the horizon.
 
 The cast (six roles), the mapping to programming concepts, the two-scale
 instrument extension, the human-vs-alien virtuoso split, the
-composition-vs-performance two-phase structure, the composer-pedagogy
-parallels, the 8 AI-collaboration skills, and the per-chapter instantiations
-live canonically in [`metaphor.md`](./metaphor.md).
+composition-vs-performance two-phase structure, the composer-pedagogy parallels,
+the 8 AI-collaboration skills, and the per-chapter instantiations live
+canonically in [`metaphor.md`](./metaphor.md).
 
 [TOP](#welcome-to-frogramming---syllabus)
 
@@ -571,10 +568,10 @@ convention for difficulty progression — not part of this set.
 
 ## Reading map: where to go for more depth
 
-`README.md` is the README of this directory — broad-audience, light, oriented
-to scope-and-goals. Each companion file owns one canonical home for a piece of
-the curriculum. The graph shows how they relate; the list below gives a
-one-line read of each.
+`README.md` is the README of this directory — broad-audience, light, oriented to
+scope-and-goals. Each companion file owns one canonical home for a piece of the
+curriculum. The graph shows how they relate; the list below gives a one-line
+read of each.
 
 ```mermaid
 graph TD
@@ -616,26 +613,22 @@ graph TD
 **Per-file blurbs:**
 
 - **`README.md`** — this file: README, scope-and-goals, reading map
-- **`manifesto.md`** — the vision of computing and education this
-  curriculum stands on (the _why_)
-- **`ontology.md`** — canonical concept reference: V/F, notional
-  machines, strata, strands, audiences, the whole _what_
-- **`pedagogy.md`** — design principles for how the experience is
-  built (the _how-it's-taught_); reads as an ontology of pedagogical
-  principles
-- **`metaphor.md`** — the composer / virtuoso / mechanism teaching
-  apparatus (illustrates concepts; not a structural guide)
+- **`manifesto.md`** — the vision of computing and education this curriculum
+  stands on (the _why_)
+- **`ontology.md`** — canonical concept reference: V/F, notional machines,
+  strata, strands, audiences, the whole _what_
+- **`pedagogy.md`** — design principles for how the experience is built (the
+  _how-it's-taught_); reads as an ontology of pedagogical principles
+- **`metaphor.md`** — the composer / virtuoso / mechanism teaching apparatus
+  (illustrates concepts; not a structural guide)
 - **`chapters.md`** — chapter bodies, sub-sections, and per-layer
   learning-objective contracts in detail
-- **`narrative.md`** — the learner's experiential arc through the
-  course; narrative-register overflow from metaphor.md (voice, cameos,
-  illustrations)
-- **`translational-framing.md`** — curriculum-as-research
-  positioning and methods-improvement process (researcher /
-  author-collaborator audience)
-- **`guide.learners.md` / `.authors.md` / `.community.md`** —
-  practical, role-targeted guidance (tooling, workflows, application of
-  design principles)
+- **`narrative.md`** — the learner's experiential arc through the course;
+  narrative-register overflow from metaphor.md (voice, cameos, illustrations)
+- **`translational-framing.md`** — curriculum-as-research positioning and
+  methods-improvement process (researcher / author-collaborator audience)
+- **`guide.learners.md` / `.authors.md` / `.community.md`** — practical,
+  role-targeted guidance (tooling, workflows, application of design principles)
 
 [TOP](#welcome-to-frogramming---syllabus)
 

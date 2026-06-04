@@ -27,7 +27,11 @@ const stroke: Stroke = {
 	color: '#ff0000',
 };
 
-const stroke2: Stroke = { id: 's2', points: [{ x: 2, y: 2 }], color: '#0000ff' };
+const stroke2: Stroke = {
+	id: 's2',
+	points: [{ x: 2, y: 2 }],
+	color: '#0000ff',
+};
 
 const note: Note = {
 	id: 'n1',

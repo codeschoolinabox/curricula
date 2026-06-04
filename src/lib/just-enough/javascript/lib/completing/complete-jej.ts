@@ -28,7 +28,6 @@ import type {
 import collectJejSurface from './collect-jej-surface.js';
 import markBlocked from './mark-blocked.js';
 
-
 /**
  * Whether `precedingText` ends with `<identifier>.` (allowing
  * trailing whitespace after the dot). Chained access (`x.y().`)

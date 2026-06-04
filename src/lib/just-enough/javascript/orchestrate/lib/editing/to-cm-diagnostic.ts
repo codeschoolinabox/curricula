@@ -40,7 +40,10 @@ function toCMDiagnostic(doc: Text, diagnostic: LintDiagnostic): Diagnostic {
 	if (endLine != null) {
 		const clampedEndLine = Math.max(1, Math.min(endLine, doc.lines));
 		const endLineInfo = doc.line(clampedEndLine);
-		to = Math.min(endLineInfo.from + (endColumn != null ? endColumn : column || 0), endLineInfo.to);
+		to = Math.min(
+			endLineInfo.from + (endColumn != null ? endColumn : column || 0),
+			endLineInfo.to,
+		);
 	} else {
 		// Highlight at least one character
 		to = Math.min(from + 1, lineInfo.to);
@@ -80,7 +83,10 @@ function toCMDiagnostic(doc: Text, diagnostic: LintDiagnostic): Diagnostic {
  * @param code - Current editor content
  * @returns Combined diagnostics from all linters
  */
-function runLinterCallbacks(callbacks: readonly LinterCallback[], code: string): LintDiagnostic[] {
+function runLinterCallbacks(
+	callbacks: readonly LinterCallback[],
+	code: string,
+): LintDiagnostic[] {
 	const results: LintDiagnostic[] = [];
 
 	for (const fn of callbacks) {

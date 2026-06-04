@@ -16,7 +16,11 @@ function makeTag(overrides: Partial<JejTag> = {}): JejTag {
 
 function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 	return {
-		creationStep: 1, depth: 0, kind: 'module', structure: null, structureStep: null,
+		creationStep: 1,
+		depth: 0,
+		kind: 'module',
+		structure: null,
+		structureStep: null,
 		variables: {},
 		...overrides,
 	};
@@ -24,10 +28,24 @@ function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 
 function makeState(overrides: Partial<TracerState> = {}): TracerState {
 	return {
-		trace: [], step: 2, scopeStack: [makeScope()], iterationCounters: {},
-		lastExpressionResult: null, previousExpressionResult: null, lastReadValues: {},
+		trace: [],
+		step: 2,
+		scopeStack: [makeScope()],
+		iterationCounters: {},
+		lastExpressionResult: null,
+		previousExpressionResult: null,
+		lastReadValues: {},
 		config: {
-			operators: { pure: { arithmetic: true, addition: true, comparison: true, typeof: true, negation: { logical: true, bitwise: true }, bitwise: true } },
+			operators: {
+				pure: {
+					arithmetic: true,
+					addition: true,
+					comparison: true,
+					typeof: true,
+					negation: { logical: true, bitwise: true },
+					bitwise: true,
+				},
+			},
 			propertyAccess: { dot: true, bracket: true },
 			functions: { call: true, return: true },
 			templates: { begin: true, evaluation: true, end: true },
@@ -37,7 +55,11 @@ function makeState(overrides: Partial<TracerState> = {}): TracerState {
 }
 
 // helpers simulating Aran intrinsic functions
-function fakeBinaryOp(operator: string, left: unknown, right: unknown): unknown {
+function fakeBinaryOp(
+	operator: string,
+	left: unknown,
+	right: unknown,
+): unknown {
 	if (operator === '+') return (left as number) + (right as number);
 	if (operator === '===') return left === right;
 	return undefined;
@@ -57,13 +79,27 @@ describe('applyAround', () => {
 	describe('always returns call result', () => {
 		it('returns Reflect.apply result', () => {
 			const callee = (a: number, b: number) => a + b;
-			const result = applyAround(makeState(), callee, undefined, [2, 3], 'call', makeTag());
+			const result = applyAround(
+				makeState(),
+				callee,
+				undefined,
+				[2, 3],
+				'call',
+				makeTag(),
+			);
 			expect(result).toBe(5);
 		});
 
 		it('returns result even when config is empty', () => {
 			const callee = () => 42;
-			const result = applyAround(makeState({ config: {} }), callee, undefined, [], 'call', makeTag());
+			const result = applyAround(
+				makeState({ config: {} }),
+				callee,
+				undefined,
+				[],
+				'call',
+				makeTag(),
+			);
 			expect(result).toBe(42);
 		});
 	});
@@ -80,7 +116,14 @@ describe('applyAround', () => {
 	describe('binary operator (aran.performBinaryOperation)', () => {
 		it('emits PureOperatorEvent for +', () => {
 			const state = makeState();
-			applyAround(state, fakeBinaryOp, undefined, ['+', 2, 3], 'aran.performBinaryOperation', makeTag());
+			applyAround(
+				state,
+				fakeBinaryOp,
+				undefined,
+				['+', 2, 3],
+				'aran.performBinaryOperation',
+				makeTag(),
+			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.category).toBe('operator');
@@ -90,7 +133,14 @@ describe('applyAround', () => {
 
 		it('emits comparison subkind for ===', () => {
 			const state = makeState();
-			applyAround(state, fakeBinaryOp, undefined, ['===', 1, 1], 'aran.performBinaryOperation', makeTag({ source: '1 === 1' }));
+			applyAround(
+				state,
+				fakeBinaryOp,
+				undefined,
+				['===', 1, 1],
+				'aran.performBinaryOperation',
+				makeTag({ source: '1 === 1' }),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.subkind).toBe('comparison');
 		});
@@ -98,28 +148,56 @@ describe('applyAround', () => {
 		it('includes coercion when types differ for +', () => {
 			const state = makeState();
 			// '3' + 4 → coercion: both become strings
-			applyAround(state, fakeBinaryOp, undefined, ['+', '3', 4], 'aran.performBinaryOperation', makeTag());
+			applyAround(
+				state,
+				fakeBinaryOp,
+				undefined,
+				['+', '3', 4],
+				'aran.performBinaryOperation',
+				makeTag(),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.coercion).toBeDefined();
 		});
 
 		it('no coercion for === (strict)', () => {
 			const state = makeState();
-			applyAround(state, fakeBinaryOp, undefined, ['===', 1, '1'], 'aran.performBinaryOperation', makeTag());
+			applyAround(
+				state,
+				fakeBinaryOp,
+				undefined,
+				['===', 1, '1'],
+				'aran.performBinaryOperation',
+				makeTag(),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.coercion).toBeUndefined();
 		});
 
 		it('no coercion when types match for +', () => {
 			const state = makeState();
-			applyAround(state, fakeBinaryOp, undefined, ['+', 2, 3], 'aran.performBinaryOperation', makeTag());
+			applyAround(
+				state,
+				fakeBinaryOp,
+				undefined,
+				['+', 2, 3],
+				'aran.performBinaryOperation',
+				makeTag(),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.coercion).toBeUndefined();
 		});
 
 		it('does not emit when config is disabled', () => {
 			const state = makeState({ config: {} });
-			applyAround(state, fakeBinaryOp, undefined, ['+', 2, 3], 'aran.performBinaryOperation', makeTag());
+			applyAround(
+				state,
+				fakeBinaryOp,
+				undefined,
+				['+', 2, 3],
+				'aran.performBinaryOperation',
+				makeTag(),
+			);
 			expect(state.trace).toHaveLength(0);
 		});
 	});
@@ -127,14 +205,28 @@ describe('applyAround', () => {
 	describe('unary operator (aran.performUnaryOperation)', () => {
 		it('emits PureOperatorEvent for !', () => {
 			const state = makeState();
-			applyAround(state, fakeUnaryOp, undefined, ['!', true], 'aran.performUnaryOperation', makeTag({ source: '!true' }));
+			applyAround(
+				state,
+				fakeUnaryOp,
+				undefined,
+				['!', true],
+				'aran.performUnaryOperation',
+				makeTag({ source: '!true' }),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.subkind).toBe('negation.logical');
 		});
 
 		it('emits typeof subkind', () => {
 			const state = makeState();
-			applyAround(state, fakeUnaryOp, undefined, ['typeof', 'hello'], 'aran.performUnaryOperation', makeTag({ source: 'typeof x' }));
+			applyAround(
+				state,
+				fakeUnaryOp,
+				undefined,
+				['typeof', 'hello'],
+				'aran.performUnaryOperation',
+				makeTag({ source: 'typeof x' }),
+			);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.subkind).toBe('typeof');
 		});
@@ -144,7 +236,14 @@ describe('applyAround', () => {
 		it('emits PropertyAccessEvent', () => {
 			const state = makeState();
 			const obj = { length: 5 };
-			applyAround(state, fakeGetProp, undefined, [obj, 'length'], 'aran.getValueProperty', makeTag({ accessKind: 'dot', source: 'str.length' }));
+			applyAround(
+				state,
+				fakeGetProp,
+				undefined,
+				[obj, 'length'],
+				'aran.getValueProperty',
+				makeTag({ accessKind: 'dot', source: 'str.length' }),
+			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.category).toBe('propertyAccess');
@@ -155,8 +254,17 @@ describe('applyAround', () => {
 	describe('function call (call)', () => {
 		it('emits FunctionCallEvent and FunctionReturnEvent', () => {
 			const state = makeState();
-			const callee = function myFunc(x: number) { return x * 2; };
-			applyAround(state, callee, undefined, [5], 'call', makeTag({ source: 'myFunc(5)' }));
+			const callee = function myFunc(x: number) {
+				return x * 2;
+			};
+			applyAround(
+				state,
+				callee,
+				undefined,
+				[5],
+				'call',
+				makeTag({ source: 'myFunc(5)' }),
+			);
 			expect(state.trace).toHaveLength(2);
 			const callEvent = state.trace[0] as Record<string, unknown>;
 			const returnEvent = state.trace[1] as Record<string, unknown>;
@@ -166,7 +274,9 @@ describe('applyAround', () => {
 
 		it('call event has function name', () => {
 			const state = makeState();
-			const callee = function myFunc() { return 1; };
+			const callee = function myFunc() {
+				return 1;
+			};
 			applyAround(state, callee, undefined, [], 'call', makeTag());
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.name).toBe('myFunc');
@@ -181,10 +291,16 @@ describe('applyAround', () => {
 		});
 
 		it('does not emit when functions.call is disabled', () => {
-			const state = makeState({ config: { functions: { call: false, return: true } } });
-			const callee = function f() { return 1; };
+			const state = makeState({
+				config: { functions: { call: false, return: true } },
+			});
+			const callee = function f() {
+				return 1;
+			};
 			applyAround(state, callee, undefined, [], 'call', makeTag());
-			const callEvents = (state.trace as Record<string, unknown>[]).filter((e) => e.event === 'call');
+			const callEvents = (state.trace as Record<string, unknown>[]).filter(
+				(e) => e.event === 'call',
+			);
 			expect(callEvents).toHaveLength(0);
 		});
 	});
@@ -192,40 +308,59 @@ describe('applyAround', () => {
 	describe('template literal (template)', () => {
 		it('emits TemplateBeginEvent', () => {
 			const state = makeState();
-			const concat = function concat(...parts: string[]) { return parts.join(''); };
+			const concat = function concat(...parts: string[]) {
+				return parts.join('');
+			};
 			const tag = makeTag({
 				templateStrings: ['hello ', ' world'],
 				templateExpressionCount: 1,
 				source: '`hello ${name} world`',
 			});
-			applyAround(state, concat, '', ['hello ', 'Bob', ' world'], 'template', tag);
-			const beginEvents = (state.trace as Record<string, unknown>[]).filter((e) => e.event === 'begin');
+			applyAround(
+				state,
+				concat,
+				'',
+				['hello ', 'Bob', ' world'],
+				'template',
+				tag,
+			);
+			const beginEvents = (state.trace as Record<string, unknown>[]).filter(
+				(e) => e.event === 'begin',
+			);
 			expect(beginEvents).toHaveLength(1);
 		});
 
 		it('emits TemplateEvaluationEvent per expression', () => {
 			const state = makeState();
-			const concat = function concat(...parts: string[]) { return parts.join(''); };
+			const concat = function concat(...parts: string[]) {
+				return parts.join('');
+			};
 			const tag = makeTag({
 				templateStrings: ['a', 'b', 'c'],
 				templateExpressionCount: 2,
 				source: '`a${x}b${y}c`',
 			});
 			applyAround(state, concat, '', ['a', 10, 'b', 20, 'c'], 'template', tag);
-			const evalEvents = (state.trace as Record<string, unknown>[]).filter((e) => e.event === 'evaluation');
+			const evalEvents = (state.trace as Record<string, unknown>[]).filter(
+				(e) => e.event === 'evaluation',
+			);
 			expect(evalEvents).toHaveLength(2);
 		});
 
 		it('emits TemplateEndEvent', () => {
 			const state = makeState();
-			const concat = function concat(...parts: string[]) { return parts.join(''); };
+			const concat = function concat(...parts: string[]) {
+				return parts.join('');
+			};
 			const tag = makeTag({
 				templateStrings: ['hello ', ''],
 				templateExpressionCount: 1,
 				source: '`hello ${name}`',
 			});
 			applyAround(state, concat, '', ['hello ', 'Bob', ''], 'template', tag);
-			const endEvents = (state.trace as Record<string, unknown>[]).filter((e) => e.event === 'end');
+			const endEvents = (state.trace as Record<string, unknown>[]).filter(
+				(e) => e.event === 'end',
+			);
 			expect(endEvents).toHaveLength(1);
 		});
 	});
@@ -234,13 +369,27 @@ describe('applyAround', () => {
 		it('does not emit events for aran.toPropertyKey', () => {
 			const state = makeState();
 			const callee = (x: unknown) => String(x);
-			applyAround(state, callee, undefined, ['foo'], 'aran.toPropertyKey', makeTag());
+			applyAround(
+				state,
+				callee,
+				undefined,
+				['foo'],
+				'aran.toPropertyKey',
+				makeTag(),
+			);
 			expect(state.trace).toHaveLength(0);
 		});
 
 		it('still returns the call result', () => {
 			const callee = (x: unknown) => String(x);
-			const result = applyAround(makeState(), callee, undefined, ['foo'], 'aran.toPropertyKey', makeTag());
+			const result = applyAround(
+				makeState(),
+				callee,
+				undefined,
+				['foo'],
+				'aran.toPropertyKey',
+				makeTag(),
+			);
 			expect(result).toBe('foo');
 		});
 	});
@@ -248,10 +397,20 @@ describe('applyAround', () => {
 	describe('global variable read (aran.readGlobalVariable)', () => {
 		it('emits BindingEvent(read) with kind global', () => {
 			const state = makeState({
-				config: { ...makeState().config, bindings: { kind: { global: true }, events: { read: true } } },
+				config: {
+					...makeState().config,
+					bindings: { kind: { global: true }, events: { read: true } },
+				},
 			});
 			const fakeRead = (name: string) => ({ fake: name });
-			applyAround(state, fakeRead, undefined, ['Math'], 'aran.readGlobalVariable', makeTag({ source: 'Math' }));
+			applyAround(
+				state,
+				fakeRead,
+				undefined,
+				['Math'],
+				'aran.readGlobalVariable',
+				makeTag({ source: 'Math' }),
+			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.category).toBe('binding');
@@ -262,16 +421,32 @@ describe('applyAround', () => {
 
 		it('does not emit when bindings.kind.global is disabled', () => {
 			const state = makeState({
-				config: { bindings: { kind: { global: false }, events: { read: true } } },
+				config: {
+					bindings: { kind: { global: false }, events: { read: true } },
+				},
 			});
 			const fakeRead = (name: string) => ({ fake: name });
-			applyAround(state, fakeRead, undefined, ['Math'], 'aran.readGlobalVariable', makeTag());
+			applyAround(
+				state,
+				fakeRead,
+				undefined,
+				['Math'],
+				'aran.readGlobalVariable',
+				makeTag(),
+			);
 			expect(state.trace).toHaveLength(0);
 		});
 
 		it('still returns the call result', () => {
 			const fakeRead = () => 42;
-			const result = applyAround(makeState(), fakeRead, undefined, ['x'], 'aran.readGlobalVariable', makeTag());
+			const result = applyAround(
+				makeState(),
+				fakeRead,
+				undefined,
+				['x'],
+				'aran.readGlobalVariable',
+				makeTag(),
+			);
 			expect(result).toBe(42);
 		});
 	});
@@ -279,10 +454,20 @@ describe('applyAround', () => {
 	describe('global variable write (aran.writeGlobalVariableStrict)', () => {
 		it('emits BindingEvent(assign) with kind global', () => {
 			const state = makeState({
-				config: { ...makeState().config, bindings: { kind: { global: true }, events: { assign: true } } },
+				config: {
+					...makeState().config,
+					bindings: { kind: { global: true }, events: { assign: true } },
+				},
 			});
 			const fakeWrite = () => undefined;
-			applyAround(state, fakeWrite, undefined, ['x'], 'aran.writeGlobalVariableStrict', makeTag({ source: 'x = 5' }));
+			applyAround(
+				state,
+				fakeWrite,
+				undefined,
+				['x'],
+				'aran.writeGlobalVariableStrict',
+				makeTag({ source: 'x = 5' }),
+			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.event).toBe('assign');
@@ -294,7 +479,14 @@ describe('applyAround', () => {
 		it('emits PureOperatorEvent for typeof', () => {
 			const state = makeState();
 			const fakeTypeof = () => 'number';
-			applyAround(state, fakeTypeof, undefined, ['x'], 'aran.typeofGlobalVariable', makeTag({ source: 'typeof x' }));
+			applyAround(
+				state,
+				fakeTypeof,
+				undefined,
+				['x'],
+				'aran.typeofGlobalVariable',
+				makeTag({ source: 'typeof x' }),
+			);
 			expect(state.trace).toHaveLength(1);
 			const event = state.trace[0] as Record<string, unknown>;
 			expect(event.category).toBe('operator');

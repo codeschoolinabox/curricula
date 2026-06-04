@@ -7,16 +7,18 @@ import type { WithEvent, ValueRepresentation } from '../../types.js';
  * @returns Domain-specific fields for a WithEvent
  * @throws {Error} If event or object is missing
  */
-function createWithEvent({
-	event,
-	object,
-}: {
-	readonly event: 'enter' | 'leave';
-	readonly object: ValueRepresentation;
-} = {} as {
-	readonly event: 'enter' | 'leave';
-	readonly object: ValueRepresentation;
-}): Omit<WithEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+function createWithEvent(
+	{
+		event,
+		object,
+	}: {
+		readonly event: 'enter' | 'leave';
+		readonly object: ValueRepresentation;
+	} = {} as {
+		readonly event: 'enter' | 'leave';
+		readonly object: ValueRepresentation;
+	},
+): Omit<WithEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (!event) {
 		throw new Error('createWithEvent: event is required');
 	}

@@ -8,7 +8,10 @@ describe('createPureOperatorEvent', () => {
 			const event = createPureOperatorEvent({
 				subkind: 'arithmetic',
 				operator: '+',
-				operands: [{ type: 'number', value: 2 }, { type: 'number', value: 3 }],
+				operands: [
+					{ type: 'number', value: 2 },
+					{ type: 'number', value: 3 },
+				],
 				result: { type: 'number', value: 5 },
 			});
 			expect(event.category).toBe('operator');
@@ -18,7 +21,10 @@ describe('createPureOperatorEvent', () => {
 			const event = createPureOperatorEvent({
 				subkind: 'comparison',
 				operator: '===',
-				operands: [{ type: 'number', value: 1 }, { type: 'number', value: 1 }],
+				operands: [
+					{ type: 'number', value: 1 },
+					{ type: 'number', value: 1 },
+				],
 				result: { type: 'boolean', value: true },
 			});
 			expect(event.kind).toBe('pure');
@@ -37,7 +43,10 @@ describe('createPureOperatorEvent', () => {
 
 	describe('operands and result', () => {
 		it('preserves operands', () => {
-			const operands = [{ type: 'number' as const, value: 10 }, { type: 'number' as const, value: 3 }];
+			const operands = [
+				{ type: 'number' as const, value: 10 },
+				{ type: 'number' as const, value: 3 },
+			];
 			const event = createPureOperatorEvent({
 				subkind: 'arithmetic',
 				operator: '%',
@@ -64,14 +73,20 @@ describe('createPureOperatorEvent', () => {
 			const event = createPureOperatorEvent({
 				subkind: 'arithmetic',
 				operator: '-',
-				operands: [{ type: 'number', value: 5 }, { type: 'number', value: 3 }],
+				operands: [
+					{ type: 'number', value: 5 },
+					{ type: 'number', value: 3 },
+				],
 				result: { type: 'number', value: 2 },
 			});
 			expect(event).not.toHaveProperty('coercion');
 		});
 
 		it('absent when coerced values match originals', () => {
-			const operands = [{ type: 'number' as const, value: 5 }, { type: 'number' as const, value: 3 }];
+			const operands = [
+				{ type: 'number' as const, value: 5 },
+				{ type: 'number' as const, value: 3 },
+			];
 			const event = createPureOperatorEvent({
 				subkind: 'arithmetic',
 				operator: '-',
@@ -86,9 +101,15 @@ describe('createPureOperatorEvent', () => {
 			const event = createPureOperatorEvent({
 				subkind: 'addition',
 				operator: '+',
-				operands: [{ type: 'string', value: '3' }, { type: 'number', value: 4 }],
+				operands: [
+					{ type: 'string', value: '3' },
+					{ type: 'number', value: 4 },
+				],
 				result: { type: 'string', value: '34' },
-				coercedOperands: [{ type: 'string', value: '3' }, { type: 'string', value: '4' }],
+				coercedOperands: [
+					{ type: 'string', value: '3' },
+					{ type: 'string', value: '4' },
+				],
 			});
 			expect(event.coercion).toEqual([
 				{ type: 'string', value: '3' },

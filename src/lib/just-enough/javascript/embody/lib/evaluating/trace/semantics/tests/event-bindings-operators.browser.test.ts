@@ -16,18 +16,29 @@ describe('binding event correctness', () => {
 		it('produces declare then initialize then available in that order', async () => {
 			const { events } = await drainGenerator('let x = 5;\n', ALL_ENABLED);
 			const xEvents = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).name === 'x',
 			);
-			const eventTypes = xEvents.map((e) => (e as Record<string, unknown>).event);
+			const eventTypes = xEvents.map(
+				(e) => (e as Record<string, unknown>).event,
+			);
 
-			expect(eventTypes.indexOf('declare')).toBeLessThan(eventTypes.indexOf('initialize'));
-			expect(eventTypes.indexOf('initialize')).toBeLessThan(eventTypes.indexOf('available'));
+			expect(eventTypes.indexOf('declare')).toBeLessThan(
+				eventTypes.indexOf('initialize'),
+			);
+			expect(eventTypes.indexOf('initialize')).toBeLessThan(
+				eventTypes.indexOf('available'),
+			);
 		});
 
 		it('declare event has kind let', async () => {
 			const { events } = await drainGenerator('let x = 5;\n', ALL_ENABLED);
 			const declare = events.find(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'declare' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'declare' &&
+					(e as Record<string, unknown>).name === 'x',
 			) as Record<string, unknown>;
 
 			expect(declare.kind).toBe('let');
@@ -36,7 +47,10 @@ describe('binding event correctness', () => {
 		it('initialize event carries value { type: number, value: 5 }', async () => {
 			const { events } = await drainGenerator('let x = 5;\n', ALL_ENABLED);
 			const init = events.find(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'initialize' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'initialize' &&
+					(e as Record<string, unknown>).name === 'x',
 			) as Record<string, unknown>;
 
 			expect(init.value).toEqual({ type: 'number', value: 5 });
@@ -45,7 +59,9 @@ describe('binding event correctness', () => {
 		it('initialize and available share the same declarationStep', async () => {
 			const { events } = await drainGenerator('let x = 5;\n', ALL_ENABLED);
 			const xEvents = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).name === 'x',
 			) as Record<string, unknown>[];
 			const init = xEvents.find((e) => e.event === 'initialize')!;
 			const available = xEvents.find((e) => e.event === 'available')!;
@@ -59,7 +75,9 @@ describe('binding event correctness', () => {
 		it('all binding events have kind const', async () => {
 			const { events } = await drainGenerator('const y = 10;\n', ALL_ENABLED);
 			const yEvents = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).name === 'y',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).name === 'y',
 			) as Record<string, unknown>[];
 
 			for (const event of yEvents) {
@@ -70,18 +88,29 @@ describe('binding event correctness', () => {
 
 	describe('reassignment', () => {
 		it('produces assign event for the reassigned variable', async () => {
-			const { events } = await drainGenerator('let x = 1;\nx = 2;\n', ALL_ENABLED);
+			const { events } = await drainGenerator(
+				'let x = 1;\nx = 2;\n',
+				ALL_ENABLED,
+			);
 			const assigns = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'assign' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'assign' &&
+					(e as Record<string, unknown>).name === 'x',
 			);
 
 			expect(assigns.length).toBeGreaterThan(0);
 		});
 
 		it('assign event shares declarationStep with initialize', async () => {
-			const { events } = await drainGenerator('let x = 1;\nx = 2;\n', ALL_ENABLED);
+			const { events } = await drainGenerator(
+				'let x = 1;\nx = 2;\n',
+				ALL_ENABLED,
+			);
 			const xEvents = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).name === 'x',
 			) as Record<string, unknown>[];
 			const init = xEvents.find((e) => e.event === 'initialize')!;
 			const assign = xEvents.find((e) => e.event === 'assign')!;
@@ -92,18 +121,30 @@ describe('binding event correctness', () => {
 
 	describe('variable read', () => {
 		it('read event exists when variable is referenced', async () => {
-			const { events } = await drainGenerator('let x = 1;\nlet y = x;\n', ALL_ENABLED);
+			const { events } = await drainGenerator(
+				'let x = 1;\nlet y = x;\n',
+				ALL_ENABLED,
+			);
 			const reads = events.filter(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'read' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'read' &&
+					(e as Record<string, unknown>).name === 'x',
 			);
 
 			expect(reads.length).toBeGreaterThan(0);
 		});
 
 		it('read event carries the current value', async () => {
-			const { events } = await drainGenerator('let x = 1;\nlet y = x;\n', ALL_ENABLED);
+			const { events } = await drainGenerator(
+				'let x = 1;\nlet y = x;\n',
+				ALL_ENABLED,
+			);
 			const read = events.find(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'read' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'read' &&
+					(e as Record<string, unknown>).name === 'x',
 			) as Record<string, unknown>;
 
 			expect(read.value).toEqual({ type: 'number', value: 1 });
@@ -116,7 +157,10 @@ describe('binding event correctness', () => {
 			// even without an initializer. The value is the TDZ symbol (null).
 			const { events } = await drainGenerator('let x;\n', ALL_ENABLED);
 			const init = events.find(
-				(e) => e.category === 'binding' && (e as Record<string, unknown>).event === 'initialize' && (e as Record<string, unknown>).name === 'x',
+				(e) =>
+					e.category === 'binding' &&
+					(e as Record<string, unknown>).event === 'initialize' &&
+					(e as Record<string, unknown>).name === 'x',
 			) as Record<string, unknown>;
 
 			expect(init.explicit).toBe(true);
@@ -129,7 +173,9 @@ describe('operator event correctness', () => {
 		it('addition has operands [1, 2] and result 3', async () => {
 			const { events } = await drainGenerator('let x = 1 + 2;\n', ALL_ENABLED);
 			const opEvent = events.find(
-				(e) => e.category === 'operator' && (e as Record<string, unknown>).operator === '+',
+				(e) =>
+					e.category === 'operator' &&
+					(e as Record<string, unknown>).operator === '+',
 			) as Record<string, unknown>;
 
 			expect(opEvent.kind).toBe('pure');
@@ -144,7 +190,9 @@ describe('operator event correctness', () => {
 		it('subtraction is arithmetic subkind with result 2', async () => {
 			const { events } = await drainGenerator('let x = 5 - 3;\n', ALL_ENABLED);
 			const opEvent = events.find(
-				(e) => e.category === 'operator' && (e as Record<string, unknown>).operator === '-',
+				(e) =>
+					e.category === 'operator' &&
+					(e as Record<string, unknown>).operator === '-',
 			) as Record<string, unknown>;
 
 			expect(opEvent.subkind).toBe('arithmetic');
@@ -152,9 +200,14 @@ describe('operator event correctness', () => {
 		});
 
 		it('strict equality is comparison subkind with boolean result', async () => {
-			const { events } = await drainGenerator('let x = 5 === 5;\n', ALL_ENABLED);
+			const { events } = await drainGenerator(
+				'let x = 5 === 5;\n',
+				ALL_ENABLED,
+			);
 			const opEvent = events.find(
-				(e) => e.category === 'operator' && (e as Record<string, unknown>).operator === '===',
+				(e) =>
+					e.category === 'operator' &&
+					(e as Record<string, unknown>).operator === '===',
 			) as Record<string, unknown>;
 
 			expect(opEvent.subkind).toBe('comparison');
@@ -162,9 +215,14 @@ describe('operator event correctness', () => {
 		});
 
 		it('logical negation has result false for true input', async () => {
-			const { events } = await drainGenerator('let x = true;\nlet y = !x;\n', ALL_ENABLED);
+			const { events } = await drainGenerator(
+				'let x = true;\nlet y = !x;\n',
+				ALL_ENABLED,
+			);
 			const opEvent = events.find(
-				(e) => e.category === 'operator' && (e as Record<string, unknown>).operator === '!',
+				(e) =>
+					e.category === 'operator' &&
+					(e as Record<string, unknown>).operator === '!',
 			) as Record<string, unknown>;
 
 			expect(opEvent.subkind).toBe('negation.logical');
@@ -174,9 +232,14 @@ describe('operator event correctness', () => {
 		it('compound += decomposes into pure addition', async () => {
 			// WHY pure not assignment: Aran decomposes x += 2 into read(x) + add + write(x).
 			// The operator event is a pure addition, not an assignment operator.
-			const { events } = await drainGenerator('let x = 1;\nx += 2;\n', ALL_ENABLED);
+			const { events } = await drainGenerator(
+				'let x = 1;\nx += 2;\n',
+				ALL_ENABLED,
+			);
 			const ops = events.filter(
-				(e) => e.category === 'operator' && (e as Record<string, unknown>).operator === '+',
+				(e) =>
+					e.category === 'operator' &&
+					(e as Record<string, unknown>).operator === '+',
 			) as Record<string, unknown>[];
 
 			expect(ops.length).toBeGreaterThan(0);
@@ -186,9 +249,15 @@ describe('operator event correctness', () => {
 
 	describe('short-circuiting operators', () => {
 		it('OR with truthy left short-circuits: no right field', async () => {
-			const { events } = await drainGenerator('let x = true || false;\n', ALL_ENABLED);
+			const { events } = await drainGenerator(
+				'let x = true || false;\n',
+				ALL_ENABLED,
+			);
 			const opEvent = events.find(
-				(e) => e.category === 'operator' && (e as Record<string, unknown>).kind === 'shortCircuiting' && (e as Record<string, unknown>).operator === '||',
+				(e) =>
+					e.category === 'operator' &&
+					(e as Record<string, unknown>).kind === 'shortCircuiting' &&
+					(e as Record<string, unknown>).operator === '||',
 			) as Record<string, unknown>;
 
 			expect(opEvent.shortCircuited).toBe(true);
@@ -197,9 +266,15 @@ describe('operator event correctness', () => {
 		});
 
 		it('OR with falsy left still produces result true', async () => {
-			const { events } = await drainGenerator('let x = false || true;\n', ALL_ENABLED);
+			const { events } = await drainGenerator(
+				'let x = false || true;\n',
+				ALL_ENABLED,
+			);
 			const opEvent = events.find(
-				(e) => e.category === 'operator' && (e as Record<string, unknown>).kind === 'shortCircuiting' && (e as Record<string, unknown>).operator === '||',
+				(e) =>
+					e.category === 'operator' &&
+					(e as Record<string, unknown>).kind === 'shortCircuiting' &&
+					(e as Record<string, unknown>).operator === '||',
 			) as Record<string, unknown>;
 
 			expect(opEvent).toBeDefined();

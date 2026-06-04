@@ -140,9 +140,7 @@ describe('let-vs-const analyzer', () => {
 		});
 
 		it('does not fire when let is reassigned from an inner scope', () => {
-			const results = analyzeAll(
-				'let x = 1;\nif (true) { x = 2; }',
-			);
+			const results = analyzeAll('let x = 1;\nif (true) { x = 2; }');
 			expect(results).toHaveLength(0);
 		});
 

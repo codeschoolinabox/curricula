@@ -17,7 +17,11 @@ function makeTag(overrides: Partial<JejTag> = {}): JejTag {
 
 function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 	return {
-		creationStep: 1, depth: 0, kind: 'module', structure: null, structureStep: null,
+		creationStep: 1,
+		depth: 0,
+		kind: 'module',
+		structure: null,
+		structureStep: null,
 		variables: { x: { kind: 'let', declarationStep: 2, initialized: true } },
 		...overrides,
 	};
@@ -25,8 +29,13 @@ function makeScope(overrides: Partial<ScopeInfo> = {}): ScopeInfo {
 
 function makeState(overrides: Partial<TracerState> = {}): TracerState {
 	return {
-		trace: [], step: 3, scopeStack: [makeScope()], iterationCounters: {},
-		previousExpressionResult: null, lastReadValues: {}, lastExpressionResult: 5,
+		trace: [],
+		step: 3,
+		scopeStack: [makeScope()],
+		iterationCounters: {},
+		previousExpressionResult: null,
+		lastReadValues: {},
+		lastExpressionResult: 5,
 		config: {
 			bindings: { kind: { let: true }, events: { assign: true } },
 			operators: { assignment: true },
@@ -52,7 +61,11 @@ describe('effectBefore', () => {
 
 	describe('compound assignment (+=, -=, etc.)', () => {
 		it('emits AssignmentOperatorEvent for compound assignment', () => {
-			const state = makeState({ previousExpressionResult: null, lastReadValues: {}, lastExpressionResult: 10 });
+			const state = makeState({
+				previousExpressionResult: null,
+				lastReadValues: {},
+				lastExpressionResult: 10,
+			});
 			effectBefore(state, 'x', makeTag({ operator: '+=', source: 'x += 5' }));
 			const opEvents = (state.trace as Record<string, unknown>[]).filter(
 				(e) => e.category === 'operator' && e.kind === 'assignment',
@@ -66,7 +79,9 @@ describe('effectBefore', () => {
 					bindings: { kind: { let: true }, events: { assign: true } },
 					operators: { assignment: false },
 				},
-				previousExpressionResult: null, lastReadValues: {}, lastExpressionResult: 10,
+				previousExpressionResult: null,
+				lastReadValues: {},
+				lastExpressionResult: 10,
 			});
 			effectBefore(state, 'x', makeTag({ operator: '+=', source: 'x += 5' }));
 			const opEvents = (state.trace as Record<string, unknown>[]).filter(

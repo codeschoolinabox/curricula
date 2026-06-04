@@ -30,7 +30,8 @@ function blockSetup(
 		// on the state. Since block-setup RETURNS state, all subsequent hooks
 		// inherit onEvent.
 		if (!state.onEvent && typeof globalThis !== 'undefined') {
-			const globalCallback = (globalThis as Record<string, unknown>).__jej_onEvent;
+			const globalCallback = (globalThis as Record<string, unknown>)
+				.__jej_onEvent;
 			if (typeof globalCallback === 'function') {
 				state.onEvent = globalCallback as (event: unknown) => void;
 			}
@@ -49,9 +50,13 @@ function blockSetup(
 				event: 'create',
 				depth: current.depth,
 				creationStep: current.creationStep,
-				...(parent !== undefined && { parentCreationStep: parent.creationStep }),
+				...(parent !== undefined && {
+					parentCreationStep: parent.creationStep,
+				}),
 				...(current.structure !== null && { structure: current.structure }),
-				...(current.structureStep !== null && { structureStep: current.structureStep }),
+				...(current.structureStep !== null && {
+					structureStep: current.structureStep,
+				}),
 			});
 		}
 	} catch {

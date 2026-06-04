@@ -41,10 +41,7 @@ import type { PreparedTraceInput } from './types.js';
  * @throws Error if `config.options` fails JSON Schema validation
  * @throws Error if cross-field semantic constraints are violated (range start > end, etc.)
  */
-function prepareForTrace(
-	code: unknown,
-	config?: unknown,
-): PreparedTraceInput {
+function prepareForTrace(code: unknown, config?: unknown): PreparedTraceInput {
 	// 1. Validate code type (sync)
 	if (typeof code !== 'string') {
 		throw new Error(

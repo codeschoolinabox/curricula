@@ -44,18 +44,21 @@ import type { EditorOptions, EditorInstance, LintDiagnostic } from './types.js';
  * @param options - Editor configuration and callbacks
  * @returns A promise resolving to a fully-initialized editor instance.
  */
-async function createEditor(initialCode: string, {
-	language,
-	indentChar = '\t',
-	tabSize = 4,
-	parent,
-	format,
-	linters: linterCallbacks,
-	docLookup,
-	completions,
-	onFormat,
-	onChange,
-}: EditorOptions = {}): Promise<EditorInstance> {
+async function createEditor(
+	initialCode: string,
+	{
+		language,
+		indentChar = '\t',
+		tabSize = 4,
+		parent,
+		format,
+		linters: linterCallbacks,
+		docLookup,
+		completions,
+		onFormat,
+		onChange,
+	}: EditorOptions = {},
+): Promise<EditorInstance> {
 	const el: HTMLElement = parent ?? document.createElement('div');
 	const resolvedLanguage = language ?? 'plaintext';
 
@@ -146,8 +149,8 @@ async function createEditor(initialCode: string, {
 		const currentCode = editor.state.doc.toString();
 		const allDiagnostics = runLinterCallbacks(linterCallbacks, currentCode);
 
-		const cmDiagnostics = allDiagnostics.map(
-			(d) => toCMDiagnostic(editor.state.doc, d),
+		const cmDiagnostics = allDiagnostics.map((d) =>
+			toCMDiagnostic(editor.state.doc, d),
 		);
 
 		editor.dispatch(setDiagnostics(editor.state, cmDiagnostics));

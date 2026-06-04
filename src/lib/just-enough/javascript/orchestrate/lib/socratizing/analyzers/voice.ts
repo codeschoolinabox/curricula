@@ -23,9 +23,23 @@ import getIdentifierName from './get-identifier-name.js';
 
 /** Known string methods available in JeJ. */
 const STRING_METHODS: ReadonlySet<string> = new Set([
-	'toLowerCase', 'toUpperCase', 'includes', 'startsWith', 'endsWith',
-	'slice', 'trim', 'trimStart', 'trimEnd', 'replace', 'replaceAll',
-	'repeat', 'padStart', 'padEnd', 'charAt', 'indexOf', 'lastIndexOf',
+	'toLowerCase',
+	'toUpperCase',
+	'includes',
+	'startsWith',
+	'endsWith',
+	'slice',
+	'trim',
+	'trimStart',
+	'trimEnd',
+	'replace',
+	'replaceAll',
+	'repeat',
+	'padStart',
+	'padEnd',
+	'charAt',
+	'indexOf',
+	'lastIndexOf',
 ]);
 
 // ─── 1. let-vs-const ──────────────────────────────────────
@@ -79,7 +93,9 @@ function letVsConst(
 				{
 					register: 'pointed',
 					text: `How many times is '${name}' reassigned after its declaration?`,
-					hints: ['Check for assignment operators (=) with this variable on the left side.'],
+					hints: [
+						'Check for assignment operators (=) with this variable on the left side.',
+					],
 				},
 				{
 					register: 'comparative',

@@ -9,8 +9,8 @@ structures.
 
 ### deep-clone
 
-Creates a deep copy of any JavaScript value. Handles nested objects, arrays,
-and special types (Date, RegExp, Set, Map) while detecting circular references.
+Creates a deep copy of any JavaScript value. Handles nested objects, arrays, and
+special types (Date, RegExp, Set, Map) while detecting circular references.
 
 Functions (including async functions and class constructors) are passed through
 by reference — the clone contains the same callable function as the original.

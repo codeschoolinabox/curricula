@@ -8,7 +8,10 @@ import getChildNodes from '../../../../embody/lib/parse-old/get-child-nodes.js';
 import easterEggAnalyzers from '../analyzers/easter-egg.js';
 import type { CodeQuestion, PointAnalyzer } from '../types.js';
 
-function parseSource(source: string, sourceType: 'module' | 'script' = 'module'): Node {
+function parseSource(
+	source: string,
+	sourceType: 'module' | 'script' = 'module',
+): Node {
 	return parse(source, {
 		ecmaVersion: 'latest',
 		sourceType,
@@ -16,7 +19,11 @@ function parseSource(source: string, sourceType: 'module' | 'script' = 'module')
 	});
 }
 
-function analyzeAll(source: string, analyzerFn: PointAnalyzer, sourceType: 'module' | 'script' = 'module'): CodeQuestion[] {
+function analyzeAll(
+	source: string,
+	analyzerFn: PointAnalyzer,
+	sourceType: 'module' | 'script' = 'module',
+): CodeQuestion[] {
 	const ast = parseSource(source, sourceType);
 	const scope = buildScope(ast);
 	const results: CodeQuestion[] = [];
@@ -52,7 +59,10 @@ describe('easter-egg analyzers', () => {
 		const analyze = getAnalyzer('labeled-statement');
 
 		it('fires on labeled statements', () => {
-			const results = analyzeAll('loop: while (true) { console.log("hi"); }', analyze);
+			const results = analyzeAll(
+				'loop: while (true) { console.log("hi"); }',
+				analyze,
+			);
 			expect(results).toHaveLength(1);
 			expect(results[0].category).toBe('easter-egg');
 		});
@@ -76,7 +86,10 @@ describe('easter-egg analyzers', () => {
 		const analyze = getAnalyzer('comma-operator');
 
 		it('fires on sequence expressions', () => {
-			const results = analyzeAll('let x = 0;\nlet y = 0;\nx = (y = 1, 2);', analyze);
+			const results = analyzeAll(
+				'let x = 0;\nlet y = 0;\nx = (y = 1, 2);',
+				analyze,
+			);
 			expect(results).toHaveLength(1);
 		});
 	});
@@ -85,7 +98,11 @@ describe('easter-egg analyzers', () => {
 		const analyze = getAnalyzer('with-statement');
 
 		it('fires on with statements', () => {
-			const results = analyzeAll('with (console) { log("hi"); }', analyze, 'script');
+			const results = analyzeAll(
+				'with (console) { log("hi"); }',
+				analyze,
+				'script',
+			);
 			expect(results).toHaveLength(1);
 		});
 	});
@@ -103,7 +120,10 @@ describe('easter-egg analyzers', () => {
 		const analyze = getAnalyzer('optional-chaining');
 
 		it('fires on ?. operator', () => {
-			const results = analyzeAll('const x = null;\nconst y = x?.toString();', analyze);
+			const results = analyzeAll(
+				'const x = null;\nconst y = x?.toString();',
+				analyze,
+			);
 			expect(results).toHaveLength(1);
 		});
 	});

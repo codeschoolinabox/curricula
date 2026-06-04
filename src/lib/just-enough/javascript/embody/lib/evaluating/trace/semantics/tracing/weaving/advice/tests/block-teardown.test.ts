@@ -31,7 +31,9 @@ function makeState(overrides: Partial<TracerState> = {}): TracerState {
 		step: 1,
 		scopeStack: [makeScope()],
 		iterationCounters: {},
-		lastExpressionResult: null, previousExpressionResult: null, lastReadValues: {},
+		lastExpressionResult: null,
+		previousExpressionResult: null,
+		lastReadValues: {},
 		config: {
 			scopes: { kind: { module: true, block: true }, events: { leave: true } },
 		},
@@ -73,7 +75,9 @@ describe('blockTeardown', () => {
 
 		it('does not emit when scope kind is disabled', () => {
 			const state = makeState({
-				config: { scopes: { kind: { module: false }, events: { leave: true } } },
+				config: {
+					scopes: { kind: { module: false }, events: { leave: true } },
+				},
 			});
 			blockTeardown(state, 'Program', 'module', 'bare', makeTag());
 			expect(state.trace).toHaveLength(0);
@@ -81,7 +85,9 @@ describe('blockTeardown', () => {
 
 		it('does not emit when leave event is disabled', () => {
 			const state = makeState({
-				config: { scopes: { kind: { module: true }, events: { leave: false } } },
+				config: {
+					scopes: { kind: { module: true }, events: { leave: false } },
+				},
 			});
 			blockTeardown(state, 'Program', 'module', 'bare', makeTag());
 			expect(state.trace).toHaveLength(0);

@@ -3,8 +3,8 @@
 ## Why flexible weave
 
 Aran offers two weave modes. We use **flexible** because it provides
-statement/effect/expression-level hooks that standard lacks, giving us room
-to grow the trace as pedagogical needs evolve.
+statement/effect/expression-level hooks that standard lacks, giving us room to
+grow the trace as pedagogical needs evolve.
 
 ## Aran constraints
 
@@ -12,7 +12,11 @@ These are hard requirements from Aran's flexible weave API:
 
 1. **point[] must be Json[]** — pointcut return values are serialized into the
    instrumented code. No functions, Maps, class instances, or circular objects.
-2. **initial_state must be expressible as generated code** — Aran reconstructs `initialState` at weave time using code generation (not `JSON.parse/stringify`). Only JSON-compatible primitives, plain arrays, and plain objects work. `Map`, `Set`, class instances, and functions are rejected.
+2. **initial_state must be expressible as generated code** — Aran reconstructs
+   `initialState` at weave time using code generation (not
+   `JSON.parse/stringify`). Only JSON-compatible primitives, plain arrays, and
+   plain objects work. `Map`, `Set`, class instances, and functions are
+   rejected.
 3. **expression@after is a value transformer** — advice MUST return the result
    value or the program breaks.
 4. **apply@around replaces execution** — advice MUST call Reflect.apply and
@@ -26,9 +30,10 @@ Aran desugars JS into AranLang IR, erasing original syntax. Tags carry ESTree
 metadata that survives desugaring:
 
 - `loc`, `node` (ESTree type), `source` — always present
-- `operator`, `loopKind`, `bindingKind`, `accessKind`, `literalKind`, `prefix` — present
-  only on relevant ESTree constructs. `prefix` on `UpdateExpression`: `true` = `++x`/`--x`,
-  `false` = `x++`/`x--`. Used by pointcut to gate `expression.operators.increment.prefix`/`.postfix`.
+- `operator`, `loopKind`, `bindingKind`, `accessKind`, `literalKind`, `prefix` —
+  present only on relevant ESTree constructs. `prefix` on `UpdateExpression`:
+  `true` = `++x`/`--x`, `false` = `x++`/`x--`. Used by pointcut to gate
+  `expression.operators.increment.prefix`/`.postfix`.
 
 The tag is a single type (Aran's Atom.Tag is one type parameter for all nodes).
 The `node` field serves as runtime discriminant for sparse optional fields.
@@ -47,13 +52,14 @@ need rich JejTag objects. The solution uses three phases:
 
 2. **Pointcut wrapping** (during `createAspect()`): Each pointcut function is
    wrapped to resolve hash strings → JejTag objects before calling the original
-   pointcut. Resolution is **shallow with a whitelist**: `node.tag`, `parent.tag`,
-   `root.tag`, plus the known nested positions used in identity comparisons:
-   `parent.then?.tag`, `parent.else?.tag`, `parent.try?.tag`, `parent.catch?.tag`,
-   `parent.finally?.tag`. The same Map lookup (`tagMap.get(hash)`) is used for
-   all resolutions, preserving object identity for `===` comparisons in pointcuts
-   like `block-pointcut.ts`. No recursive walking — the whitelist is finite and
-   verified by grep against all pointcut files.
+   pointcut. Resolution is **shallow with a whitelist**: `node.tag`,
+   `parent.tag`, `root.tag`, plus the known nested positions used in identity
+   comparisons: `parent.then?.tag`, `parent.else?.tag`, `parent.try?.tag`,
+   `parent.catch?.tag`, `parent.finally?.tag`. The same Map lookup
+   (`tagMap.get(hash)`) is used for all resolutions, preserving object identity
+   for `===` comparisons in pointcuts like `block-pointcut.ts`. No recursive
+   walking — the whitelist is finite and verified by grep against all pointcut
+   files.
 
 3. **Runtime** (in advice): The pointcut return array contains the resolved
    JejTag object (not the hash string). Aran JSON-serializes this into the
@@ -94,8 +100,10 @@ TracerState is Json-serializable (Aran requirement). Contains:
 - `scopeStack[]` — scope nesting for depth/creation tracking
 - `iterationCounters{}` — per-loop iteration counts (keyed by source location)
 - `lastExpressionResult` — most recent expression result (for assignment values)
-- `previousExpressionResult` — prior expression result (for short-circuit recovery)
-- `lastReadValues{}` — last read values per variable (for compound assignment operands)
+- `previousExpressionResult` — prior expression result (for short-circuit
+  recovery)
+- `lastReadValues{}` — last read values per variable (for compound assignment
+  operands)
 - `config{}` — user's config for conditional dispatch
 - `onEvent?` — streaming callback (set by worker, not Json-serializable)
 
@@ -135,38 +143,42 @@ contiguous steps for step-by-step visualization.
 
 ## ASTNode lifecycle
 
-ASTNodes are built during `instrument()` with `events: []` and `visits: 0`.
-They are **NOT frozen at instrument time** — they stay mutable until `link()`
-completes after execution (when `.events[]` and `.visits` are populated and frozen).
+ASTNodes are built during `instrument()` with `events: []` and `visits: 0`. They
+are **NOT frozen at instrument time** — they stay mutable until `link()`
+completes after execution (when `.events[]` and `.visits` are populated and
+frozen).
 
-`TraceEvent.nodePath` stores a **nodePath string** — not an ASTNode. Advice emits
-events via `emitExpression(state, tag, nodePath, category, data)` and
+`TraceEvent.nodePath` stores a **nodePath string** — not an ASTNode. Advice
+emits events via `emitExpression(state, tag, nodePath, category, data)` and
 `emitResolve(state, tag, nodePath, kind, value)`. Both keep events wire-safe.
 
-`block@throwing` advice on the outermost block calls `emitError(state, tag, nodePath, error)`
-then returns the error (re-throws). Location is approximate (last emitted nodePath).
-Gated by `config.errors !== false`.
+`block@throwing` advice on the outermost block calls
+`emitError(state, tag, nodePath, error)` then returns the error (re-throws).
+Location is approximate (last emitted nodePath). Gated by
+`config.errors !== false`.
 
 Two-way linking (`ASTNode.events[]`) is built **post-execution** by the internal
 `link()` — never during execution. Advice never writes to ASTNode objects.
 
-Cycle guard: `deepFreezeInPlace` uses a `visited: Set` to handle both `ASTNode.parent`
-and `events[i].node` circular refs (both formed after `link()`).
+Cycle guard: `deepFreezeInPlace` uses a `visited: Set` to handle both
+`ASTNode.parent` and `events[i].node` circular refs (both formed after
+`link()`).
 
 ## Pointcut → advice data flow
 
 Pointcut functions inspect AranLang nodes at weave time (static). They extract
 node type, tag data, and variable names, then return this as a Json[] point
-array. At runtime, the advice function receives `(state, ...builtinArgs,
-...pointData)` and uses the point data to determine which event to create.
+array. At runtime, the advice function receives
+`(state, ...builtinArgs, ...pointData)` and uses the point data to determine
+which event to create.
 
 ## Aspect assembly
 
 `create-aspect.ts` reads the user's config and builds an Aran flexible aspect
-object. Each aspect entry maps an advice global variable name to a `{ kind,
-pointcut, advice }` triple. Config-disabled features produce no aspect entries
-(zero overhead). Scope tracking hooks are always included because binding events
-need scope references even when scope events are disabled.
+object. Each aspect entry maps an advice global variable name to a
+`{ kind, pointcut, advice }` triple. Config-disabled features produce no aspect
+entries (zero overhead). Scope tracking hooks are always included because
+binding events need scope references even when scope events are disabled.
 
 ## Loop guards
 
@@ -184,31 +196,45 @@ and checks against maxSeconds. Simpler and more accurate than in-advice timing.
 
 ## Co-gating discriminant
 
-> **Intended design** — the current pointcuts use simple semantic discriminants only. The co-gating discriminant system below describes the pointcut rewrite target: once implemented, pointcuts will return both a semantic discriminant and a co-gating discriminant per intercepted node.
+> **Intended design** — the current pointcuts use simple semantic discriminants
+> only. The co-gating discriminant system below describes the pointcut rewrite
+> target: once implemented, pointcuts will return both a semantic discriminant
+> and a co-gating discriminant per intercepted node.
 
 Pointcut functions will make two decisions per intercepted node at weave time:
 
-1. **What to intercept** (semantic discriminant) — `'literal'`, `'read'`, `'shortCircuiting'`, etc. One per intercepted node type.
-2. **How to emit** (co-gating discriminant) — one of four values encoding the co-gating decision made from config at weave time.
+1. **What to intercept** (semantic discriminant) — `'literal'`, `'read'`,
+   `'shortCircuiting'`, etc. One per intercepted node type.
+2. **How to emit** (co-gating discriminant) — one of four values encoding the
+   co-gating decision made from config at weave time.
 
-| Co-gating discriminant | What advice does | When pointcut returns it |
-| --- | --- | --- |
-| `'expression+resolve'` | calls `emitExpression` then `emitResolve` | expression gate ON + resolve gate ON + `resolve.dependent: true` |
-| `'expression-only'` | calls `emitExpression`, skips `emitResolve` | expression gate ON + resolve gate OFF for this kind |
-| `'resolve-only'` | calls `emitResolve`, skips `emitExpression` | expression gate OFF + `resolve.dependent: false` |
-| `'skip'` | emits nothing; advice returns immediately | all relevant gates off (or expression OFF + `dependent: true`) |
+| Co-gating discriminant | What advice does                            | When pointcut returns it                                         |
+| ---------------------- | ------------------------------------------- | ---------------------------------------------------------------- |
+| `'expression+resolve'` | calls `emitExpression` then `emitResolve`   | expression gate ON + resolve gate ON + `resolve.dependent: true` |
+| `'expression-only'`    | calls `emitExpression`, skips `emitResolve` | expression gate ON + resolve gate OFF for this kind              |
+| `'resolve-only'`       | calls `emitResolve`, skips `emitExpression` | expression gate OFF + `resolve.dependent: false`                 |
+| `'skip'`               | emits nothing; advice returns immediately   | all relevant gates off (or expression OFF + `dependent: true`)   |
 
-**Zero runtime overhead for disabled gates**: the discriminant is decided at weave time. A node with discriminant `'skip'` has no advice call injected into the instrumented code — no runtime check, no function invocation at all.
+**Zero runtime overhead for disabled gates**: the discriminant is decided at
+weave time. A node with discriminant `'skip'` has no advice call injected into
+the instrumented code — no runtime check, no function invocation at all.
 
-**Why four values, not boolean flags**: a boolean pair `(emitExpression, emitResolve)` would require two runtime checks per event. A single discriminant string allows a single `switch` with no boolean logic at runtime.
+**Why four values, not boolean flags**: a boolean pair
+`(emitExpression, emitResolve)` would require two runtime checks per event. A
+single discriminant string allows a single `switch` with no boolean logic at
+runtime.
 
-**Co-gating suppression** (`RESOLVE_ONLY_COGATED` profile): when `expression: false` and `resolve.dependent: true` (the default), the pointcut returns `'skip'` for every node — resolves are suppressed because their paired expression events are also suppressed. This profile produces zero events despite `resolve: true` being set.
+**Co-gating suppression** (`RESOLVE_ONLY_COGATED` profile): when
+`expression: false` and `resolve.dependent: true` (the default), the pointcut
+returns `'skip'` for every node — resolves are suppressed because their paired
+expression events are also suppressed. This profile produces zero events despite
+`resolve: true` being set.
 
 **Config scenarios**:
 
-| Config | Discriminant returned |
-| --- | --- |
-| Default (`ALL_ON`) | most nodes → `'expression+resolve'` |
-| `expression: false, resolve: { dependent: false }` | `'resolve-only'` |
-| `expression: false, resolve: { dependent: true }` | `'skip'` (co-gated + suppressed) |
-| `expression: true, resolve: false` | `'expression-only'` |
+| Config                                             | Discriminant returned               |
+| -------------------------------------------------- | ----------------------------------- |
+| Default (`ALL_ON`)                                 | most nodes → `'expression+resolve'` |
+| `expression: false, resolve: { dependent: false }` | `'resolve-only'`                    |
+| `expression: false, resolve: { dependent: true }`  | `'skip'` (co-gated + suppressed)    |
+| `expression: true, resolve: false`                 | `'expression-only'`                 |

@@ -59,7 +59,12 @@ describe('deriveDisplayTree', () => {
 
 	it('status panel surfaces error kind when embodiment has an error (parse-fail leaf)', () => {
 		const snippet = makeSnippet({
-			status: { tokenized: true, parsed: false, validated: false, created: false },
+			status: {
+				tokenized: true,
+				parsed: false,
+				validated: false,
+				created: false,
+			},
 			errors: {
 				phase: 'parse:ast',
 				kind: 'SyntaxError',
@@ -83,7 +88,12 @@ describe('deriveDisplayTree', () => {
 		// 'SyntaxError' implementation from passing the suite. Single-parse
 		// equality check on the whole status object pins all five fields.
 		const snippet = makeSnippet({
-			status: { tokenized: true, parsed: true, validated: true, created: false },
+			status: {
+				tokenized: true,
+				parsed: true,
+				validated: true,
+				created: false,
+			},
 			errors: {
 				phase: 'creation',
 				kind: 'ReferenceError',
@@ -108,7 +118,12 @@ describe('deriveDisplayTree', () => {
 		// Exercises both the status panel (errors=ValidationError) and the
 		// validation panel (fields present with isJeJ=false) for this leaf.
 		const snippet = makeSnippet({
-			status: { tokenized: true, parsed: true, validated: false, created: false },
+			status: {
+				tokenized: true,
+				parsed: true,
+				validated: false,
+				created: false,
+			},
 			validation: {
 				isJeJ: false,
 				isDeterministic: false,

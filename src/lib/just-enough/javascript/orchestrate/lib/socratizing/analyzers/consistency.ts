@@ -82,20 +82,24 @@ function mixedStringConstruction(
 	_scope: ScopeAnalysis,
 	_source: string,
 ): readonly CodeQuestion[] {
-	const hasTemplateLiteral = collectNodes(ast, new Set(['TemplateLiteral']))
-		.some((node) => (getRecord(node).expressions as Node[]).length > 0);
+	const hasTemplateLiteral = collectNodes(
+		ast,
+		new Set(['TemplateLiteral']),
+	).some((node) => (getRecord(node).expressions as Node[]).length > 0);
 
-	const hasConcatenation = collectNodes(ast, new Set(['BinaryExpression']))
-		.some((node) => {
-			const record = getRecord(node);
-			if (record.operator !== '+') return false;
-			const left = record.left as Node;
-			const right = record.right as Node;
-			return (
-				(left.type === 'Literal' && typeof getRecord(left).value === 'string') ||
-				(right.type === 'Literal' && typeof getRecord(right).value === 'string')
-			);
-		});
+	const hasConcatenation = collectNodes(
+		ast,
+		new Set(['BinaryExpression']),
+	).some((node) => {
+		const record = getRecord(node);
+		if (record.operator !== '+') return false;
+		const left = record.left as Node;
+		const right = record.right as Node;
+		return (
+			(left.type === 'Literal' && typeof getRecord(left).value === 'string') ||
+			(right.type === 'Literal' && typeof getRecord(right).value === 'string')
+		);
+	});
 
 	if (!hasTemplateLiteral || !hasConcatenation) {
 		return [];
@@ -141,10 +145,7 @@ function mixedEquality(
 	_scope: ScopeAnalysis,
 	_source: string,
 ): readonly CodeQuestion[] {
-	const comparisonNodes = collectNodes(
-		ast,
-		new Set(['BinaryExpression']),
-	);
+	const comparisonNodes = collectNodes(ast, new Set(['BinaryExpression']));
 
 	const hasStrict = comparisonNodes.some((node) => {
 		const op = getRecord(node).operator as string;

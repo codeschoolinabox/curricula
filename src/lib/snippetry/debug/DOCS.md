@@ -5,8 +5,8 @@
 The debug engine is rewritten as an async generator for API consistency with run
 and trace. However, the generator is minimal:
 
-- Yields 0-1 events (only on error — RangeError from loop guard or iframe
-  access error)
+- Yields 0-1 events (only on error — RangeError from loop guard or iframe access
+  error)
 - No SAB pause protocol (iframe, not Worker)
 - Returns when the iframe's completion `postMessage` arrives
 - Empty/whitespace code: yields nothing, returns immediately
@@ -58,12 +58,12 @@ while (condition) {
 This is different from the run engine's comma-in-condition approach. The reason:
 learners see their code in the DevTools Sources panel during debugging. Separate
 `let loopN` declarations and `if (++loopN > max)` checks are readable and easy
-to understand. The compact comma-in-condition form (`while (++loop1 > max &&
-guard(1), cond)`) would be confusing to see mid-debug.
+to understand. The compact comma-in-condition form
+(`while (++loop1 > max && guard(1), cond)`) would be confusing to see mid-debug.
 
 The line-number shift from body injection is acceptable here because debug error
-messages are less critical — the learner is stepping through code in DevTools and
-can see exactly where things are.
+messages are less critical — the learner is stepping through code in DevTools
+and can see exactly where things are.
 
 Loop guard injection uses the shared `guard-loops/` module from
 `../shared/guard-loops/`, which supports both injection strategies.

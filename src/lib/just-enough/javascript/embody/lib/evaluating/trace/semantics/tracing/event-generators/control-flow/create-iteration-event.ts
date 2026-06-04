@@ -1,4 +1,8 @@
-import type { IterationEvent, LoopKind, ValueRepresentation } from '../../types.js';
+import type {
+	IterationEvent,
+	LoopKind,
+	ValueRepresentation,
+} from '../../types.js';
 
 type IterationParams = {
 	readonly kind: LoopKind;
@@ -16,24 +20,25 @@ type IterationParams = {
  *
  * @throws {Error} If index < 0 or forOf fields don't co-occur
  */
-function createIterationEvent({
-	kind,
-	index,
-	scopeCreationStep,
-	iterable,
-	iterationValue,
-	iterationVariable,
-	label,
-}: IterationParams = {} as IterationParams): Omit<
-	IterationEvent,
-	'step' | 'semantics' | 'loc' | 'node' | 'source'
-> {
+function createIterationEvent(
+	{
+		kind,
+		index,
+		scopeCreationStep,
+		iterable,
+		iterationValue,
+		iterationVariable,
+		label,
+	}: IterationParams = {} as IterationParams,
+): Omit<IterationEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (index < 0) {
 		throw new Error('createIterationEvent: index must be >= 0');
 	}
 
 	const forOfFields = [iterable, iterationValue, iterationVariable];
-	const forOfPresent = forOfFields.filter((field) => field !== undefined).length;
+	const forOfPresent = forOfFields.filter(
+		(field) => field !== undefined,
+	).length;
 	if (forOfPresent > 0 && forOfPresent < 3) {
 		throw new Error(
 			'createIterationEvent: iterable, iterationValue, and iterationVariable must all be present or all absent',

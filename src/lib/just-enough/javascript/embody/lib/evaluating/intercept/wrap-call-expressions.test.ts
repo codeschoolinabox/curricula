@@ -53,7 +53,12 @@ describe('wrapCallExpressions', () => {
 
 	describe('lines preserved', () => {
 		it('keeps the same number of newlines as input', () => {
-			const input = ['console.log(1);', 'console.log(2);', 'console.log(3);', ''].join('\n');
+			const input = [
+				'console.log(1);',
+				'console.log(2);',
+				'console.log(3);',
+				'',
+			].join('\n');
 			const out = parseAndWrap(input);
 			const inLines = input.split('\n').length;
 			const outLines = out.split('\n').length;
@@ -92,7 +97,9 @@ describe('wrapCallExpressions', () => {
 		});
 
 		it('wraps a call inside a while loop body', () => {
-			const out = parseAndWrap('let i = 0;\nwhile (i < 3) {\n\tconsole.log(i);\n\ti = i + 1;\n}');
+			const out = parseAndWrap(
+				'let i = 0;\nwhile (i < 3) {\n\tconsole.log(i);\n\ti = i + 1;\n}',
+			);
 			// CallExpression in body.1.body.body.0.expression
 			expect(out).toContain('console.log(i)');
 			expect(out).toContain(`${HELPER_NAME}(`);

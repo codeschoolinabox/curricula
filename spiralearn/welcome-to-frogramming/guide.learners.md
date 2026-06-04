@@ -7,22 +7,20 @@
 >
 > - `ontology.md` — the _what_ (reference framework)
 > - `chapters.md` — the _how_ at chapter grain
-> - `guide.authors.md` — the _why_ for the people who teach with it
->   or adapt it
-> - `guide.community.md` — the _why_ for partner communities,
->   mentors, cohort hosts
-> - `study-lenses.md` — the technical-reader companion (skip
->   unless you want to peek inside the tooling)
+> - `guide.authors.md` — the _why_ for the people who teach with it or adapt it
+> - `guide.community.md` — the _why_ for partner communities, mentors, cohort
+>   hosts
+> - `study-lenses.md` — the technical-reader companion (skip unless you want to
+>   peek inside the tooling)
 >
 > **Status**: end-state document. Content is open to iteration — the anchors
 > emerge through drafting and learner feedback.
 >
-> **Note**: the H1 heading still reads "A Manifesto for..." by design.
-> Filename renamed (`manifesto.{role}.md` → `guide.{role}.md`) in Wave 2
-> of the syllabus corpus restructure; title and prose register migrate
-> to "guide" form in Wave 3, when vision-flavored content moves into
-> `manifesto.md` and this file gains its practical-guidance
-> register.
+> **Note**: the H1 heading still reads "A Manifesto for..." by design. Filename
+> renamed (`manifesto.{role}.md` → `guide.{role}.md`) in Wave 2 of the syllabus
+> corpus restructure; title and prose register migrate to "guide" form in Wave
+> 3, when vision-flavored content moves into `manifesto.md` and this file gains
+> its practical-guidance register.
 
 ---
 
@@ -306,72 +304,66 @@ Tools available to you throughout:
 
 ### The four exercise markers
 
-Throughout this course, exercises carry one of four markers. They mark
-priority — and serve as a self-assessment tool for gauging where you are with
-each skill:
+Throughout this course, exercises carry one of four markers. They mark priority
+— and serve as a self-assessment tool for gauging where you are with each skill:
 
 - 🥚 — **Required.** The base skills you need to move on. You don't need to
   finish all of them, but you should feel confident you _could_ with enough
   time.
 - 🐣 — **In progress.** You have started all of these and feel you could
   complete them with more time. With effort, you can get through.
-- 🐥 — **Surveyed.** You have studied the examples and started some.
-  Big-picture understanding, but not yet confident completing them
-  independently.
-- 🐔 — **Extension.** Not required but related. For when you have finished
-  🥚, 🐣, 🐥 and want to push further without losing focus on the main
-  objectives.
+- 🐥 — **Surveyed.** You have studied the examples and started some. Big-picture
+  understanding, but not yet confident completing them independently.
+- 🐔 — **Extension.** Not required but related. For when you have finished 🥚,
+  🐣, 🐥 and want to push further without losing focus on the main objectives.
 
-When you finish a section, ask yourself: am I at 🥚 (I could do this
-reliably)? 🐣 (I could with more time)? 🐥 (I have the shape of it)? Use
-this to decide where to spend more time before moving on. (In Chapter 4
-you will encounter the same self-assessment frame as a tool for deciding
-when it makes sense to delegate a programming task to an LLM — and when
-it doesn't.)
+When you finish a section, ask yourself: am I at 🥚 (I could do this reliably)?
+🐣 (I could with more time)? 🐥 (I have the shape of it)? Use this to decide
+where to spend more time before moving on. (In Chapter 4 you will encounter the
+same self-assessment frame as a tool for deciding when it makes sense to
+delegate a programming task to an LLM — and when it doesn't.)
 
 ---
 
 ## What discomfort means
 
-Some of what this course teaches is hard in a specific way. The hardness
-isn't a problem to fix; it's a signal that you're in the right place.
+Some of what this course teaches is hard in a specific way. The hardness isn't a
+problem to fix; it's a signal that you're in the right place.
 
 **The liminal zone.** Between _"I don't understand this"_ and _"I understand
-this"_ is a third state. Researchers call it the **liminal zone**: you are
-in transition, things feel unstable, your predictions are wrong in ways
-you cannot fully account for yet.
+this"_ is a third state. Researchers call it the **liminal zone**: you are in
+transition, things feel unstable, your predictions are wrong in ways you cannot
+fully account for yet.
 
-You will spend time here, especially in Chapter 2. Two states to
-distinguish:
+You will spend time here, especially in Chapter 2. Two states to distinguish:
 
 - **Stuck** — you cannot form a prediction at all. The concepts are too
   unfamiliar. This is a signal: you need more input. Reread the reference
   material. Trace a simpler example. Ask for help.
 - **In the zone** — you can form predictions, but they keep being wrong in
-  specific, interesting ways. _This is the liminal zone. This is the work.
-  Stay in it._
+  specific, interesting ways. _This is the liminal zone. This is the work. Stay
+  in it._
 
-The discomfort of being in the zone is not a sign that you are doing it
-wrong. It is a sign that one of programming's threshold concepts is
-forming — and that it will be transformative when it does.
+The discomfort of being in the zone is not a sign that you are doing it wrong.
+It is a sign that one of programming's threshold concepts is forming — and that
+it will be transformative when it does.
 
-**Chapter 2 specifically.** Chapter 2 is the hardest part of this course.
-We know this. You will know it too. The programs are small and abstract.
-The exercises feel mechanical. You are learning the machine before you
-can build anything visible with it — which means the work feels
-disconnected from results for longer than you might expect.
+**Chapter 2 specifically.** Chapter 2 is the hardest part of this course. We
+know this. You will know it too. The programs are small and abstract. The
+exercises feel mechanical. You are learning the machine before you can build
+anything visible with it — which means the work feels disconnected from results
+for longer than you might expect.
 
-This is temporary and intentional. The machine literacy you build in
-Chapter 2 is the foundation every subsequent chapter stands on. Chapters
-3, 4, and 5 become tractable because of what you build here. _Welcome to
-Algorithms_ becomes tractable because of what you build here. Push
-through.
+This is temporary and intentional. The machine literacy you build in Chapter 2
+is the foundation every subsequent chapter stands on. Chapters 3, 4, and 5
+become tractable because of what you build here. _Welcome to Algorithms_ becomes
+tractable because of what you build here. Push through.
 
-**Being wrong is information.** Make falsifiable predictions. The more
-specific the prediction, the more useful the feedback when you turn out
-to be wrong about it. Find the exact point where your prediction and the
-machine's behavior diverged — that point names the gap in your model.
-That's the location of the next thing to learn.
+**Being wrong is information.** Make falsifiable predictions. The more specific
+the prediction, the more useful the feedback when you turn out to be wrong about
+it. Find the exact point where your prediction and the machine's behavior
+diverged — that point names the gap in your model. That's the location of the
+next thing to learn.
 
 ---
 

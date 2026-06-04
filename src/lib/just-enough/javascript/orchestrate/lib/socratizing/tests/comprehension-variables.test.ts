@@ -88,10 +88,7 @@ describe('comprehension variable analyzers', () => {
 		const analyze = getAnalyzer('what-value-stored');
 
 		it('fires on a declaration with a non-literal initializer', () => {
-			const results = analyzeAll(
-				'const x = 5;\nconst y = x + 1;',
-				analyze,
-			);
+			const results = analyzeAll('const x = 5;\nconst y = x + 1;', analyze);
 			expect(results).toHaveLength(1);
 		});
 
@@ -106,10 +103,7 @@ describe('comprehension variable analyzers', () => {
 		});
 
 		it('has correct metadata', () => {
-			const results = analyzeAll(
-				'const x = 5;\nconst y = x + 1;',
-				analyze,
-			);
+			const results = analyzeAll('const x = 5;\nconst y = x + 1;', analyze);
 			expect(results[0].id).toBe('what-value-stored');
 			expect(results[0].kind).toBe('comprehension');
 			expect(results[0].category).toBe('clarity');

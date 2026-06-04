@@ -396,26 +396,25 @@ import {
 ## Internal lib structure
 
 The package is partitioned across three peers — `embody/`, `lenses/`,
-`orchestrate/` — plus the JEJ-aware adapter `lib/` peer that sits
-between them. Each peer's `lib/` subdirectory has its own README
-listing its inhabitants:
+`orchestrate/` — plus the JEJ-aware adapter `lib/` peer that sits between them.
+Each peer's `lib/` subdirectory has its own README listing its inhabitants:
 
-| Path                                       | Inhabitants                                                                                                  |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| [`./lib/`](./lib/)                         | JEJ-aware editor adapters: `completing/`, `documenting/`, `formatting-editor/`, `linting/`                   |
-| [`./embody/lib/`](./embody/lib/)           | Embodiment-pipeline internals: `ast/`, `parse/`, `validating/`, `formatting/`, `evaluating/`, `scope/`       |
-| [`./orchestrate/lib/`](./orchestrate/lib/) | Orchestrator-internal helpers: `editing/`, `error-interpreting/`, `recommender/`, `socratizing/`             |
+| Path                                       | Inhabitants                                                                                            |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| [`./lib/`](./lib/)                         | JEJ-aware editor adapters: `completing/`, `documenting/`, `formatting-editor/`, `linting/`             |
+| [`./embody/lib/`](./embody/lib/)           | Embodiment-pipeline internals: `ast/`, `parse/`, `validating/`, `formatting/`, `evaluating/`, `scope/` |
+| [`./orchestrate/lib/`](./orchestrate/lib/) | Orchestrator-internal helpers: `editing/`, `error-interpreting/`, `recommender/`, `socratizing/`       |
 
 Top-level (not under any `lib/`):
 
-| Path             | Purpose                                                                                                                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `components/`    | UI components (V2 lens components, migration source)                                                                                             |
-| `index.ts`       | Package entry — exports the `<StudyLenses>` orchestrator component (primary surface) + legacy named functions                                    |
-| `api/`           | Legacy directory; trace/run/debug-related types remain here pending parallel migration. The validate/parse/format/default migration is complete. |
+| Path          | Purpose                                                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `components/` | UI components (V2 lens components, migration source)                                                                                             |
+| `index.ts`    | Package entry — exports the `<StudyLenses>` orchestrator component (primary surface) + legacy named functions                                    |
+| `api/`        | Legacy directory; trace/run/debug-related types remain here pending parallel migration. The validate/parse/format/default migration is complete. |
 
-For the migration rationale (why each `lib/*` module ended up at its
-current peer rather than at top-level), see
+For the migration rationale (why each `lib/*` module ended up at its current
+peer rather than at top-level), see
 [`DOCS.md` § Categorization rationale](./DOCS.md).
 
 ## Result shape

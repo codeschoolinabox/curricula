@@ -172,7 +172,12 @@ export type BaseEvent = {
 //   declare → initialize (explicit: true/false) → available
 
 export type BindingKind = 'let' | 'const' | 'global';
-export type BindingEventType = 'declare' | 'initialize' | 'available' | 'read' | 'update';
+export type BindingEventType =
+	| 'declare'
+	| 'initialize'
+	| 'available'
+	| 'read'
+	| 'update';
 
 export type BindingEvent = BaseEvent & {
 	readonly category: 'variable';
@@ -288,7 +293,13 @@ export type OperatorEvent = PureOperatorEvent | ShortCircuitingOperatorEvent;
 // Config: expression.literals.{string,boolean,number,undefined,null,regex}
 // Followed by ResolveEvent (kind: 'literal') carrying the literal value.
 
-export type LiteralKind = 'string' | 'boolean' | 'number' | 'undefined' | 'null' | 'regex';
+export type LiteralKind =
+	| 'string'
+	| 'boolean'
+	| 'number'
+	| 'undefined'
+	| 'null'
+	| 'regex';
 
 export type LiteralEvent = BaseEvent & {
 	readonly category: 'literal';
@@ -324,7 +335,10 @@ export type TemplateEndEvent = BaseEvent & {
 	readonly beginStep: number;
 };
 
-export type TemplateEvent = TemplateBeginEvent | TemplateEvaluationEvent | TemplateEndEvent;
+export type TemplateEvent =
+	| TemplateBeginEvent
+	| TemplateEvaluationEvent
+	| TemplateEndEvent;
 
 // ============================================================================
 // 6. Scope Events
@@ -334,7 +348,12 @@ export type TemplateEvent = TemplateBeginEvent | TemplateEvaluationEvent | Templ
 // gated by scopes.{script,block}.declare.
 
 export type ScopeKind = 'script' | 'block';
-export type ScopeEventType = 'create' | 'enter' | 'interrupt' | 'completion' | 'leave';
+export type ScopeEventType =
+	| 'create'
+	| 'enter'
+	| 'interrupt'
+	| 'completion'
+	| 'leave';
 
 export type ScopeEvent = BaseEvent & {
 	readonly category: 'scope';
@@ -377,10 +396,10 @@ export type LoopEvent = BaseEvent & {
 	readonly category: 'loop';
 	readonly kind: LoopKind;
 	readonly event:
-		| 'test'      // condition evaluated (while, doWhile, for)
+		| 'test' // condition evaluated (while, doWhile, for)
 		| 'iteration' // loop body entered
-		| 'do'        // doWhile only: body execution marker
-		| 'setup'     // for only: initialization phase
+		| 'do' // doWhile only: body execution marker
+		| 'setup' // for only: initialization phase
 		| 'increment'; // for only: update phase
 	/** Test condition value (on 'test'), forOf element (on 'iteration' for forOf) */
 	readonly value?: ValueRepresentation;
@@ -452,16 +471,16 @@ export type WithEvent = BaseEvent & {
 //   - apply@around:     binary/unary ops, property access, calls, templates
 
 export type ResolveKind =
-	| 'variable'    // Identifier (variable read)
-	| 'literal'     // Literal node (any primitive kind)
-	| 'operator'    // BinaryExpression / UnaryExpression (arithmetic, comparison, typeof, negation, bitwise, in, void)
-	| 'shortCircuit'// LogicalExpression (&&, ||, ??) — distinct ESTree node from BinaryExpression
+	| 'variable' // Identifier (variable read)
+	| 'literal' // Literal node (any primitive kind)
+	| 'operator' // BinaryExpression / UnaryExpression (arithmetic, comparison, typeof, negation, bitwise, in, void)
+	| 'shortCircuit' // LogicalExpression (&&, ||, ??) — distinct ESTree node from BinaryExpression
 	| 'conditional' // ConditionalExpression (ternary a ? b : c)
-	| 'assignment'  // AssignmentExpression (=, +=, -=, etc.)
-	| 'increment'   // UpdateExpression (++/--)
-	| 'property'    // MemberExpression (dot / bracket / optionalChaining)
-	| 'call'        // CallExpression (return value of the call)
-	| 'template';   // TemplateLiteral (final assembled string)
+	| 'assignment' // AssignmentExpression (=, +=, -=, etc.)
+	| 'increment' // UpdateExpression (++/--)
+	| 'property' // MemberExpression (dot / bracket / optionalChaining)
+	| 'call' // CallExpression (return value of the call)
+	| 'template'; // TemplateLiteral (final assembled string)
 
 export type ResolveEvent = BaseEvent & {
 	/** Narrows BaseEvent.semantics — ResolveEvent always belongs to the data layer */

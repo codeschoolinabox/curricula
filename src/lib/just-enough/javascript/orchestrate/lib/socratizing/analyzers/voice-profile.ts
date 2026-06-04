@@ -61,13 +61,18 @@ function computeMaxNesting(node: Node, depth: number): number {
 }
 
 function collectMetrics(ast: Node, scope: ScopeAnalysis): VoiceMetrics {
-	const hasTemplateLiterals = collectNodes(ast, new Set(['TemplateLiteral']))
-		.some((node) => (getRecord(node).expressions as Node[]).length > 0);
+	const hasTemplateLiterals = collectNodes(
+		ast,
+		new Set(['TemplateLiteral']),
+	).some((node) => (getRecord(node).expressions as Node[]).length > 0);
 
-	const hasNullishCoalescing = collectNodes(ast, new Set(['LogicalExpression']))
-		.some((node) => getRecord(node).operator === '??');
+	const hasNullishCoalescing = collectNodes(
+		ast,
+		new Set(['LogicalExpression']),
+	).some((node) => getRecord(node).operator === '??');
 
-	const hasOptionalChaining = collectNodes(ast, new Set(['ChainExpression'])).length > 0;
+	const hasOptionalChaining =
+		collectNodes(ast, new Set(['ChainExpression'])).length > 0;
 
 	const totalStatements = collectNodes(ast, statementTypes).length;
 
@@ -112,7 +117,11 @@ function voiceProfile(
 	} else if (metrics.avgNameLength > 0 && metrics.avgNameLength <= 3) {
 		traits.push('terse naming');
 	}
-	if (metrics.hasTemplateLiterals || metrics.hasNullishCoalescing || metrics.hasOptionalChaining) {
+	if (
+		metrics.hasTemplateLiterals ||
+		metrics.hasNullishCoalescing ||
+		metrics.hasOptionalChaining
+	) {
 		traits.push('modern idioms');
 	}
 	if (metrics.maxNestingDepth >= 2) {
@@ -133,8 +142,7 @@ function voiceProfile(
 			levels: ['goals'],
 			location: extractLocation(ast),
 			nodeType: 'Program',
-			context:
-				`The aggregate of all micro-decisions shapes this program's voice. ${traitDescription}`,
+			context: `The aggregate of all micro-decisions shapes this program's voice. ${traitDescription}`,
 			questions: [
 				{
 					register: 'open',

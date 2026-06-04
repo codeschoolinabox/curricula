@@ -89,8 +89,8 @@ jsdom) plus the wrapper end-to-end (jsdom + `@testing-library/react`).
    `useEffect` — forward-ready infrastructure for the deferred flowchart-node →
    source-line correlation feature (see [Future direction](#future-direction)).
    No consumer in v1; the only permitted DOM mutation is attribute-tagging,
-   never structural — React reconciles the SVG container's children from the
-   SVG string.
+   never structural — React reconciles the SVG container's children from the SVG
+   string.
 
 4. **Handle interaction** (per learner event) — pen / eraser / note handlers
    update the active view's `AnnotationSet` immutably, producing a new
@@ -174,8 +174,8 @@ state-only, no annotation-set transformation runs.
   feature; no consumer in v1.** A post-inject `useEffect` walks the SVG and
   assigns positional ids (`data-flowchart-node="<n>"`). **No direct DOM mutation
   outside React event handlers**; the post-inject pass only _tags_ elements with
-  `data-*` attributes — never structural mutation. The wrapper also memoizes
-  the flowchart's `dangerouslySetInnerHTML` prop object so React's reconciler
+  `data-*` attributes — never structural mutation. The wrapper also memoizes the
+  flowchart's `dangerouslySetInnerHTML` prop object so React's reconciler
   doesn't re-apply `innerHTML` on every wrapper render (which would wipe these
   tags); the memo depends on `flowchart` state so a freshly generated SVG
   correctly re-injects.
@@ -213,8 +213,8 @@ state-only, no annotation-set transformation runs.
   from a trusted local library; no learner-controlled content reaches
   `dangerouslySetInnerHTML`. The post-inject `useEffect` adds
   `data-flowchart-node` attributes as forward-ready infrastructure for the
-  deferred correlation feature (no v1 consumer; see the tagger bullet above
-  and § Out of scope).
+  deferred correlation feature (no v1 consumer; see the tagger bullet above and
+  § Out of scope).
 
 ### Out of scope
 
@@ -267,12 +267,12 @@ surface. The rationale:
 - The single-lens scope is still cohesive: "an annotation workbench for any
   representation of the snippet." Adding a third view (e.g. AST tree) in the
   future is an additive change inside this lens, not a new lens.
-- The deferred **flowchart-node → source-line correlation** (see README §
-  Future direction) is the cross-view affordance that makes "one lens" pay off
+- The deferred **flowchart-node → source-line correlation** (see README § Future
+  direction) is the cross-view affordance that makes "one lens" pay off
   pedagogically — clicking a flowchart node would jump to / outline the matching
-  source line. Two separate lenses couldn't deliver that hand-off; one-lens
-  with two views can. The `data-flowchart-node` tagger that the wrapper ships
-  is the carrying infrastructure for that future increment.
+  source line. Two separate lenses couldn't deliver that hand-off; one-lens with
+  two views can. The `data-flowchart-node` tagger that the wrapper ships is the
+  carrying infrastructure for that future increment.
 
 The internal modular split (`render-code` / `render-flowchart` / `annotations`
 as separate files) keeps each subsystem testable in isolation and preserves the

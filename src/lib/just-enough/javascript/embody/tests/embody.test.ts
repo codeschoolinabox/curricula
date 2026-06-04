@@ -51,7 +51,12 @@ describe('embody', () => {
 	describe('OK', () => {
 		it('returns status all true', () => {
 			const s = embody('OK');
-			expect(s.status).toEqual({ tokenized: true, parsed: true, validated: true, created: true });
+			expect(s.status).toEqual({
+				tokenized: true,
+				parsed: true,
+				validated: true,
+				created: true,
+			});
 		});
 
 		it('returns errors: null', () => {
@@ -139,7 +144,9 @@ describe('embody', () => {
 		});
 
 		it('returns errors.message identifying the canned scenario', () => {
-			expect(embody('FAIL_AT_TOKENIZE').errors!.message).toMatch(/canned scenario/i);
+			expect(embody('FAIL_AT_TOKENIZE').errors!.message).toMatch(
+				/canned scenario/i,
+			);
 		});
 
 		it('returns raw.tokens: null (tokenize did not complete)', () => {
@@ -312,16 +319,18 @@ describe('embody', () => {
 		});
 
 		it('first violation has shape-valid Violation fields', () => {
-			expect(embody('VALIDATION_FAIL').validation!.violations[0]).toStrictEqual({
-				nodeType: 'FunctionDeclaration',
-				message: 'canned scenario: JEJ does not allow function declarations',
-				severity: 'rejection',
-				nodePath: '$.body.0',
-				location: {
-					start: { line: 1, column: 0 },
-					end: { line: 1, column: 1 },
+			expect(embody('VALIDATION_FAIL').validation!.violations[0]).toStrictEqual(
+				{
+					nodeType: 'FunctionDeclaration',
+					message: 'canned scenario: JEJ does not allow function declarations',
+					severity: 'rejection',
+					nodePath: '$.body.0',
+					location: {
+						start: { line: 1, column: 0 },
+						end: { line: 1, column: 1 },
+					},
 				},
-			});
+			);
 		});
 
 		it('retains raw.ast (Program node) — validate gate ran on top of parsed AST', () => {
@@ -385,7 +394,9 @@ describe('embody', () => {
 		});
 
 		it('derives validation.isDeterministic: false', () => {
-			expect(embody('NON_DETERMINISTIC').validation!.isDeterministic).toBe(false);
+			expect(embody('NON_DETERMINISTIC').validation!.isDeterministic).toBe(
+				false,
+			);
 		});
 
 		it('keeps validation.isJeJ: true', () => {
@@ -680,7 +691,9 @@ describe('embody', () => {
 		});
 
 		// When implemented: embody('a\r\nb').source.offsets should be [0, 3] not [0, 2, 3].
-		it.todo(String.raw`CRLF line endings (\r\n) — deferred; offsets contract is LF-only for now`);
+		it.todo(
+			String.raw`CRLF line endings (\r\n) — deferred; offsets contract is LF-only for now`,
+		);
 
 		// Non-BMP: emoji (😀, U+1F600) is 2 code units; offset must track code-unit position.
 		it('offsets tracks code-unit position for non-BMP characters before a newline', () => {
@@ -829,7 +842,11 @@ describe('embody', () => {
 		// freeze functions; their internals are opaque to Object.freeze
 		// anyway and the public surface contract is "data is frozen,
 		// generators are pure").
-		function assertDeepFrozen(value: unknown, path: string, visited: Set<object>): void {
+		function assertDeepFrozen(
+			value: unknown,
+			path: string,
+			visited: Set<object>,
+		): void {
 			if (value === null || typeof value !== 'object') {
 				return;
 			}
@@ -838,7 +855,9 @@ describe('embody', () => {
 			}
 			visited.add(value);
 			expect(Object.isFrozen(value)).toBe(true);
-			for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+			for (const [key, child] of Object.entries(
+				value as Record<string, unknown>,
+			)) {
 				assertDeepFrozen(child, `${path}.${key}`, visited);
 			}
 		}

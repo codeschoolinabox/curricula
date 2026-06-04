@@ -36,7 +36,9 @@ function verifyOptions(options: unknown): void {
 	// Constraint 2: iterations must be positive when present
 	const { iterations } = config;
 	if (typeof iterations === 'number' && iterations <= 0) {
-		throw new Error(`iterations (${String(iterations)}) must be a positive number`);
+		throw new Error(
+			`iterations (${String(iterations)}) must be a positive number`,
+		);
 	}
 
 	// Constraint 3: seconds must be positive when present

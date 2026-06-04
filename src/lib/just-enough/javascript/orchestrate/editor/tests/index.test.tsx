@@ -32,7 +32,9 @@ import EditorComponent from '../index.js';
  * element. Waits for CodeMirror's async mount to complete (the `.cm-content`
  * element appears in the DOM only after `createEditor`'s promise resolves).
  */
-async function findMountedEditorView(container: HTMLElement): Promise<EditorView> {
+async function findMountedEditorView(
+	container: HTMLElement,
+): Promise<EditorView> {
 	const cmContent = await waitFor(() => {
 		const element = container.querySelector('.cm-content');
 		if (!element) throw new Error('CodeMirror content element not yet mounted');
@@ -225,9 +227,8 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 			}));
 			try {
 				const { default: EditorComponentMocked } = await import('../index.js');
-				const { default: expectedFormatJej } = await import(
-					'../../../lib/formatting-editor/format-jej.js'
-				);
+				const { default: expectedFormatJej } =
+					await import('../../../lib/formatting-editor/format-jej.js');
 				render(<EditorComponentMocked snippet="let x=5;" />);
 
 				await waitFor(() => {
@@ -263,9 +264,8 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 			}));
 			try {
 				const { default: EditorComponentMocked } = await import('../index.js');
-				const { default: expectedCompleteJej } = await import(
-					'../../../lib/completing/complete-jej.js'
-				);
+				const { default: expectedCompleteJej } =
+					await import('../../../lib/completing/complete-jej.js');
 				render(<EditorComponentMocked snippet="let x=5;" />);
 
 				await waitFor(() => {
@@ -301,9 +301,8 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 			}));
 			try {
 				const { default: EditorComponentMocked } = await import('../index.js');
-				const { default: expectedDocumentJej } = await import(
-					'../../../lib/documenting/document-jej.js'
-				);
+				const { default: expectedDocumentJej } =
+					await import('../../../lib/documenting/document-jej.js');
 				render(<EditorComponentMocked snippet="let x=5;" />);
 
 				await waitFor(() => {

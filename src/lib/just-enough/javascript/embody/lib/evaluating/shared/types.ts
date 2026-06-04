@@ -45,8 +45,7 @@
  * @typeParam TEvent - The event type yielded during execution
  * @typeParam TResult - The final result type
  */
-type Execution<TEvent, TResult> =
-	AsyncIterable<TEvent> &
+type Execution<TEvent, TResult> = AsyncIterable<TEvent> &
 	PromiseLike<TResult> & {
 		/** Promise that resolves when execution completes.
 		 * Same Promise that PromiseLike delegates to. */
@@ -93,12 +92,25 @@ type EngineConfig = {
  * dumper, not our semantic trace engine.
  */
 type ConsoleMethod =
-	| 'log' | 'debug' | 'info' | 'warn' | 'error'
-	| 'assert' | 'table' | 'dir' | 'dirxml'
-	| 'group' | 'groupCollapsed' | 'groupEnd'
-	| 'count' | 'countReset'
-	| 'time' | 'timeEnd' | 'timeLog'
-	| 'trace' | 'clear';
+	| 'log'
+	| 'debug'
+	| 'info'
+	| 'warn'
+	| 'error'
+	| 'assert'
+	| 'table'
+	| 'dir'
+	| 'dirxml'
+	| 'group'
+	| 'groupCollapsed'
+	| 'groupEnd'
+	| 'count'
+	| 'countReset'
+	| 'time'
+	| 'timeEnd'
+	| 'timeLog'
+	| 'trace'
+	| 'clear';
 
 // ─── Run events ──────────────────────────────────────────────
 

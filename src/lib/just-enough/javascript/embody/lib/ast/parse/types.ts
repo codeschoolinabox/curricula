@@ -24,15 +24,8 @@
 import type { Node, Program } from 'acorn';
 
 import type { StepCategory } from '../../evaluating/trace/syntax/types.js';
-import type {
-	CommentEvent,
-	TokenEvent,
-} from '../tokenize/types.js';
-import type {
-	BaseError,
-	BaseEvent,
-	SyncExecution,
-} from '../shared/types.js';
+import type { CommentEvent, TokenEvent } from '../tokenize/types.js';
+import type { BaseError, BaseEvent, SyncExecution } from '../shared/types.js';
 
 // ─── AST node — acorn Node enriched with entwining fields ────
 

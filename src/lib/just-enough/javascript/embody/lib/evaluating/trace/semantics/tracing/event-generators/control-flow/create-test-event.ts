@@ -1,4 +1,8 @@
-import type { TestEvent, ControlFlowKind, ValueRepresentation } from '../../types.js';
+import type {
+	TestEvent,
+	ControlFlowKind,
+	ValueRepresentation,
+} from '../../types.js';
 
 /**
  * Creates a TestEvent for condition evaluation in control flow.
@@ -6,28 +10,30 @@ import type { TestEvent, ControlFlowKind, ValueRepresentation } from '../../type
  * @param params - kind, tested value, boolean result, optional coercion, scope ref, label
  * @returns Domain-specific fields for a TestEvent
  */
-function createTestEvent({
-	kind,
-	value,
-	result,
-	coercion,
-	scopeCreationStep,
-	label,
-}: {
-	readonly kind: ControlFlowKind;
-	readonly value: ValueRepresentation;
-	readonly result: boolean;
-	readonly coercion?: ValueRepresentation;
-	readonly scopeCreationStep: number;
-	readonly label?: string;
-} = {} as {
-	readonly kind: ControlFlowKind;
-	readonly value: ValueRepresentation;
-	readonly result: boolean;
-	readonly coercion?: ValueRepresentation;
-	readonly scopeCreationStep: number;
-	readonly label?: string;
-}): Omit<TestEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+function createTestEvent(
+	{
+		kind,
+		value,
+		result,
+		coercion,
+		scopeCreationStep,
+		label,
+	}: {
+		readonly kind: ControlFlowKind;
+		readonly value: ValueRepresentation;
+		readonly result: boolean;
+		readonly coercion?: ValueRepresentation;
+		readonly scopeCreationStep: number;
+		readonly label?: string;
+	} = {} as {
+		readonly kind: ControlFlowKind;
+		readonly value: ValueRepresentation;
+		readonly result: boolean;
+		readonly coercion?: ValueRepresentation;
+		readonly scopeCreationStep: number;
+		readonly label?: string;
+	},
+): Omit<TestEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	return {
 		category: 'controlFlow',
 		event: 'test',

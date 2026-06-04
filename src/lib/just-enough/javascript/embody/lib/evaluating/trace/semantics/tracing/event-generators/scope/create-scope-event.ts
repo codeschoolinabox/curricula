@@ -23,19 +23,18 @@ type ScopeParams = {
  * @returns Domain-specific fields for a ScopeEvent
  * @throws {Error} If depth < 0 or structure/structureStep don't co-occur
  */
-function createScopeEvent({
-	kind,
-	event,
-	depth,
-	creationStep,
-	parentCreationStep,
-	structure,
-	structureStep,
-	label,
-}: ScopeParams = {} as ScopeParams): Omit<
-	ScopeEvent,
-	'step' | 'semantics' | 'loc' | 'node' | 'source'
-> {
+function createScopeEvent(
+	{
+		kind,
+		event,
+		depth,
+		creationStep,
+		parentCreationStep,
+		structure,
+		structureStep,
+		label,
+	}: ScopeParams = {} as ScopeParams,
+): Omit<ScopeEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (depth < 0) {
 		throw new Error('createScopeEvent: depth must be >= 0');
 	}

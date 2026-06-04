@@ -57,7 +57,9 @@ const LANGUAGE_MAP: Readonly<Record<string, DetectedLanguage>> = Object.freeze({
  * @param file - File metadata with optional extension
  * @returns Language identifier (e.g. 'javascript', 'python', 'plaintext')
  */
-function detectLanguage({ ext }: { readonly ext?: string } = {}): DetectedLanguage {
+function detectLanguage({
+	ext,
+}: { readonly ext?: string } = {}): DetectedLanguage {
 	if (!ext) return 'plaintext';
 
 	return LANGUAGE_MAP[ext.toLowerCase()] ?? 'plaintext';

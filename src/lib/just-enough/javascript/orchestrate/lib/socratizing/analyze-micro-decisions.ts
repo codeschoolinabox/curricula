@@ -62,7 +62,11 @@ const POINT_ANALYZERS: ReadonlyArray<{
 const PROGRAM_ANALYZERS: ReadonlyArray<{
 	id: string;
 	analyze: ProgramAnalyzer;
-}> = [...consistencyAnalyzers, ...comprehensionGenericAnalyzers, ...voiceProfileAnalyzers];
+}> = [
+	...consistencyAnalyzers,
+	...comprehensionGenericAnalyzers,
+	...voiceProfileAnalyzers,
+];
 
 // ─── AST walk ──────────────────────────────────────────────
 
@@ -87,9 +91,7 @@ function walkAndAnalyze(
 			errors.push({
 				analyzerId: id,
 				message:
-					error instanceof Error
-						? error.message
-						: 'Unknown analyzer error',
+					error instanceof Error ? error.message : 'Unknown analyzer error',
 			});
 		}
 	}
@@ -132,9 +134,7 @@ function analyzeMicroDecisions(
 	// the `&& raw.ast` check is structurally redundant given the contract
 	// but type-narrows for the compiler.
 	const ast: Node | null =
-		embodiment.status.parsed && embodiment.raw.ast
-			? embodiment.raw.ast
-			: null;
+		embodiment.status.parsed && embodiment.raw.ast ? embodiment.raw.ast : null;
 
 	if (ast === null) {
 		const embodyError = embodiment.errors;
@@ -142,7 +142,9 @@ function analyzeMicroDecisions(
 			ok: false as const,
 			error: {
 				message: embodyError?.message ?? 'Snippet did not produce an AST',
-				...(embodyError?.loc != null ? { location: embodyError.loc.start } : {}),
+				...(embodyError?.loc != null
+					? { location: embodyError.loc.start }
+					: {}),
 			},
 		});
 	}
@@ -165,9 +167,7 @@ function analyzeMicroDecisions(
 			errors.push({
 				analyzerId: id,
 				message:
-					error instanceof Error
-						? error.message
-						: 'Unknown analyzer error',
+					error instanceof Error ? error.message : 'Unknown analyzer error',
 			});
 		}
 	}

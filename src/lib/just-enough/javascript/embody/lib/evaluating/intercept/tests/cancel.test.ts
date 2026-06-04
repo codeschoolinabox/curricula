@@ -103,9 +103,7 @@ describe('createInterceptGenerator cancel', () => {
 		it('result property is not writable', () => {
 			const gen = createInterceptGenerator('let x = 1;\n');
 			expect(() => {
-				(gen as { result: Promise<unknown> }).result = Promise.resolve(
-					null,
-				);
+				(gen as { result: Promise<unknown> }).result = Promise.resolve(null);
 			}).toThrow();
 		});
 	});
@@ -194,6 +192,5 @@ describe('createInterceptGenerator cancel', () => {
 				expect(result.outcome).toBe('cancel');
 			});
 		});
-
 	});
 });

@@ -57,11 +57,11 @@ For each `let`/`const` declaration:
 
 ## Structure
 
-| File              | Purpose                                          |
-| ----------------- | ------------------------------------------------ |
-| `types.ts`        | Domain types: ScopeInfo, DeclarationInfo, etc.   |
-| `build-scope.ts`  | Pure function: AST -> ScopeAnalysis              |
-| `tests/`          | Unit tests                                       |
+| File             | Purpose                                        |
+| ---------------- | ---------------------------------------------- |
+| `types.ts`       | Domain types: ScopeInfo, DeclarationInfo, etc. |
+| `build-scope.ts` | Pure function: AST -> ScopeAnalysis            |
+| `tests/`         | Unit tests                                     |
 
 ## API
 
@@ -80,5 +80,5 @@ declarations with their reference counts.
 - [DOCS.md](./DOCS.md) — design decisions and rationale
 - [../validating/README.md](../validating/README.md) — validation module
   (consumer)
-- [../micro-decisions/README.md](../micro-decisions/README.md) —
-  micro-decisions module (consumer)
+- [../micro-decisions/README.md](../micro-decisions/README.md) — micro-decisions
+  module (consumer)

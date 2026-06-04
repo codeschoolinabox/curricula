@@ -113,7 +113,7 @@ function walk(
  * but guards against unexpected edge cases.
  */
 function extractLocation(node: Node) {
-	const {loc} = node;
+	const { loc } = node;
 	if (loc) {
 		return {
 			start: { line: loc.start.line, column: loc.start.column },

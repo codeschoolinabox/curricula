@@ -19,7 +19,8 @@ This file provides specific context for AI assistants working with this
   - [Safety Guardrails](#safety-guardrails)
   - [When Working on This Codebase](#when-working-on-this-codebase)
 - [LLM Collaboration Conventions](#llm-collaboration-conventions)
-- [Adversarial Review Protocol](#adversarial-review-protocol) (→ DEV.md for full protocol)
+- [Adversarial Review Protocol](#adversarial-review-protocol) (→ DEV.md for full
+  protocol)
   - [Sub-model dispatch for AR subagents](#sub-model-dispatch-for-ar-subagents)
 - [Vibetoading and Frogramming — house terms](#vibetoading-and-frogramming--house-terms)
 - [References](#references)
@@ -52,8 +53,8 @@ encouragement. They cannot be overridden by momentum.
    explicitly list every required workflow step: Phase 0 DDD steps, AR trigger
    points (AR-1 through AR-5), commit steps, and quality checks. "Follow
    AGENTS.md" is not a plan step. Agents do not re-read AGENTS.md during
-   execution; if a step is not written in the plan, it will be skipped.
-   Plans must also include at least one **mermaid data-flow diagram** (or
+   execution; if a step is not written in the plan, it will be skipped. Plans
+   must also include at least one **mermaid data-flow diagram** (or
    sequence/state diagram, whichever fits) for any change touching multiple
    modules or layers — ASCII art is not a substitute. The diagram should make
    the before/after data path visually obvious so reviewers can verify the
@@ -63,14 +64,13 @@ encouragement. They cannot be overridden by momentum.
 8. **No confident guessing** — when uncertain, say so and investigate rather
    than confirming assumptions.
 9. **Read whole files, never split** — when reviewing, auditing, or comparing
-   files, read each file end-to-end yourself. When spawning a subagent to
-   review a file, instruct it to read the whole file from start to finish, not
-   a slice or a summary. Partial reads miss fiddly details — broken markdown,
-   typos, orphan sentences, meta-comments, late-file divergences. Summaries
-   compress away exactly the anomalies an audit is looking for. This applies
-   to every file in the task, not "the important ones." If a file is too long
-   to read in one pass, paginate deliberately and cover every line; do not
-   sample.
+   files, read each file end-to-end yourself. When spawning a subagent to review
+   a file, instruct it to read the whole file from start to finish, not a slice
+   or a summary. Partial reads miss fiddly details — broken markdown, typos,
+   orphan sentences, meta-comments, late-file divergences. Summaries compress
+   away exactly the anomalies an audit is looking for. This applies to every
+   file in the task, not "the important ones." If a file is too long to read in
+   one pass, paginate deliberately and cover every line; do not sample.
 
 > If these feel like friction, that friction is working as intended.
 
@@ -123,14 +123,17 @@ often:
 
 - One default export per file (named-then-export); no barrel files; `.js`
   extension always in imports
-- Named `function` declarations by default; arrows only for inline single-expression callbacks
-- **Object-threading pattern** for pipeline functions: destructure inputs, return `{ ...input, newData }` — no hidden state, composable stages
+- Named `function` declarations by default; arrows only for inline
+  single-expression callbacks
+- **Object-threading pattern** for pipeline functions: destructure inputs,
+  return `{ ...input, newData }` — no hidden state, composable stages
 - No `this` keyword; no mutable closures; no parameter reassignment
 - Default `= {}` on destructured object parameters
 - Verb-first naming; predicates prefixed with `is`/`has`/`can`/`should`
 - Prefer `type` over `interface`; types live in module `types.ts`
 - Throw on invalid input at boundaries; fail fast for critical errors
-- Deep freeze return values (`freezeInPlace` for own / `cloneAndFreeze` for caller-provided)
+- Deep freeze return values (`freezeInPlace` for own / `cloneAndFreeze` for
+  caller-provided)
 
 ### Readability Patterns
 
@@ -145,19 +148,20 @@ step comments for multi-phase functions, blank lines as paragraph breaks.
 Every source directory has both a `README.md` (what + how to navigate, for
 contributors) and a `DOCS.md` (architecture + why + Mermaid data flow, for
 developers). For new modules, `DOCS.md` is written during Phase 0 as an
-**architectural sketch** — the structural target Phase 1's Refactor step is
-held against.
+**architectural sketch** — the structural target Phase 1's Refactor step is held
+against.
 
 **End-state docs only.** `README.md`, `DOCS.md`, and `types.ts` describe the
-intended end state of the package/module. Quick test: "does this describe
-what the thing IS, or where the work currently STANDS?" The latter — status
+intended end state of the package/module. Quick test: "does this describe what
+the thing IS, or where the work currently STANDS?" The latter — status
 snapshots, migration phases, hedging language — goes in plan files, handoff
 files, or commit messages, NOT in end-state docs. Governance docs (this file,
-DEV.md, HUMANS.md, etc.) describe process as their end-state contract and
-are out of scope. See [DEV.md § What goes in docs vs. plans vs.
-handoffs](./DEV.md#what-goes-in-docs-vs-plans-vs-handoffs).
+DEV.md, HUMANS.md, etc.) describe process as their end-state contract and are
+out of scope. See
+[DEV.md § What goes in docs vs. plans vs. handoffs](./DEV.md#what-goes-in-docs-vs-plans-vs-handoffs).
 
-See [DEV.md § Directory Documentation Convention](./DEV.md#directory-documentation-convention)
+See
+[DEV.md § Directory Documentation Convention](./DEV.md#directory-documentation-convention)
 for the full format, the data flow diagram rules, and the architectural sketch
 template.
 
@@ -173,11 +177,14 @@ including triangulation, ZOMBIES sequencing, the Fake It pattern, and
 dependency-order coverage. Quick agent-facing rules:
 
 - Tests in `tests/` subdirectory; `.test.ts` suffix (never `.spec.ts`)
-- Explicit vitest imports (no globals); inline test data only; no shared fixtures
+- Explicit vitest imports (no globals); inline test data only; no shared
+  fixtures
 - One assertion per `it`; nest `describe` for grouping; no comments in tests
-- ZOMBIES sequencing: Zero → One → Many → Boundaries → Interfaces → Exceptions → Simple. Triangulate the first test before writing the implementation.
+- ZOMBIES sequencing: Zero → One → Many → Boundaries → Interfaces → Exceptions →
+  Simple. Triangulate the first test before writing the implementation.
 - `.toThrow()` for errors (no try-catch in tests)
-- Bottom-up dependency-order coverage — `vi.mock('./sibling')` on an internal sibling is a code smell; cover the sibling instead.
+- Bottom-up dependency-order coverage — `vi.mock('./sibling')` on an internal
+  sibling is a code smell; cover the sibling instead.
 
 ### Linting Approach
 
@@ -229,8 +236,8 @@ Each passing TDD cycle = one atomic commit. Do not batch behaviors.
 #### Sandbox Checkpoints
 
 For user-observable increments (new UI element, new button, browser-visible
-behavior), a 🔍 Sandbox checkpoint fires between the Phase 1 quality-checks
-step and the commit-prompt step:
+behavior), a 🔍 Sandbox checkpoint fires between the Phase 1 quality-checks step
+and the commit-prompt step:
 
 ```text
 ... Quality checks → 🔍 Sandbox checkpoint (when user-observable) → Commit prompt
@@ -241,13 +248,14 @@ behavioral defects (wrong buffer reset, content corruption, missing a11y label)
 block the commit and trigger rework.
 
 **Sandbox checkpoints are gate points, not optional.** Skipping one because
-tests are green is the exact failure mode they exist to prevent. Only the
-human can skip; the agent never skips on its own. The one place skipping is
+tests are green is the exact failure mode they exist to prevent. Only the human
+can skip; the agent never skips on its own. The one place skipping is
 appropriate is when the increment has no user-visible surface (pure utility
 function, private type, data shape narrowing) — and even there, the skip is
 explicit ("no sandbox checkpoint: pure utility").
 
-See [DEV.md § Sandbox Checkpoints](./DEV.md#sandbox-checkpoints--user-observable-features)
+See
+[DEV.md § Sandbox Checkpoints](./DEV.md#sandbox-checkpoints--user-observable-features)
 for the full cycle diagram, redirect policy, and content-quality rules.
 
 #### Claude-Specific Workflow Notes
@@ -296,22 +304,22 @@ not a valid substitute — write the steps out.
   architectural sketch. Green tests mean behavioral correctness is achieved.
   Structural quality is addressed here — named phases, separated concerns, no
   Fake It values surviving past their triangulation point.
-- **Data flow check at step 9** (ephemeral): sketch the intra-file data flow
-  as Mermaid for your own reasoning. Is anything carried further than the
-  phase that needs it? Any redundant transformations? This diagram is a
-  thinking tool — not committed.
-- **Inter-file contract check at step 9**: verify the file's inputs and
-  outputs still match the peer `DOCS.md` Mermaid data flow diagram.
+- **Data flow check at step 9** (ephemeral): sketch the intra-file data flow as
+  Mermaid for your own reasoning. Is anything carried further than the phase
+  that needs it? Any redundant transformations? This diagram is a thinking tool
+  — not committed.
+- **Inter-file contract check at step 9**: verify the file's inputs and outputs
+  still match the peer `DOCS.md` Mermaid data flow diagram.
   - Contract preserved → autonomous; commit.
   - Contract changed → flag to user; update `DOCS.md` only with approval.
 - **Two-tier autonomy** (mechanical, not judgment):
   - Intra-file refactors are autonomous.
-  - Inter-file changes require user check-in if ANY trigger fires: file added
-    to or removed from the flow; file's input/output shape changes; phase
+  - Inter-file changes require user check-in if ANY trigger fires: file added to
+    or removed from the flow; file's input/output shape changes; phase
     annotation changes (throws / pure / async).
-  - Extracting a helper to a new domain-related file IS a trigger.
-    Extracting to a domain-agnostic utility file (freeze, merge, clone) is
-    NOT (utilities are invisible in data flow diagrams).
+  - Extracting a helper to a new domain-related file IS a trigger. Extracting to
+    a domain-agnostic utility file (freeze, merge, clone) is NOT (utilities are
+    invisible in data flow diagrams).
 - At step 12 (self-review): run through the LLM Anti-Pattern Checklist. Reality
   check: did I run it? Did I trigger the exact behavior I changed? Would I bet
   $100 this works? Flag what you're least confident about for the user to
@@ -329,8 +337,8 @@ not a valid substitute — write the steps out.
 
 Commit message format: imperative voice, one line, describes the behavior or
 artifact — not the mechanical change. Prefixes: `add:` (new behavior), `docs:`
-(documentation/types/README), `fix:` (correcting broken behavior),
-`refactor:` (structural changes with no behavior change).
+(documentation/types/README), `fix:` (correcting broken behavior), `refactor:`
+(structural changes with no behavior change).
 
 **Default workflow: commit directly to main.** Frequent atomic commits on main
 provide rollback points without branching overhead. Feature branches are the
@@ -350,8 +358,8 @@ rewrites branches, publishes to remotes, or destroys work.
 
 - Read-only: `git status`, `git diff`, `git log`, `git show`, `git blame`,
   `git branch --list`, `git ls-files`, `git remote -v`
-- Additive: `git add <specific-files>`, `git commit -m "..."` (new commits only),
-  `git fetch` (remote-read-only), `git stash push` (reversible)
+- Additive: `git add <specific-files>`, `git commit -m "..."` (new commits
+  only), `git fetch` (remote-read-only), `git stash push` (reversible)
 - Branch creation: `git branch <new-name>`, `git checkout -b <new-name>`
   (creating new branches, not switching in a way that loses work)
 
@@ -373,8 +381,8 @@ rewrites branches, publishes to remotes, or destroys work.
 
 **Rule of thumb**: If the command can be undone by `git reset --hard HEAD~1` or
 a single force-push from the human, it's destructive — ask first. If it only
-adds new commits that can be dropped by the human later without losing
-unrelated work, it's additive — Claude may run it.
+adds new commits that can be dropped by the human later without losing unrelated
+work, it's additive — Claude may run it.
 
 **Instead for forbidden actions:** Claude prompts the human. Format:
 
@@ -456,13 +464,13 @@ breakdown. These patterns are especially dangerous and must never be repeated:
 **Mandatory user warnings.** Before starting, classify the request and surface
 the warning matching its risk class:
 
-| Class | Warning |
-| --- | --- |
-| Multi-file change | ⚠️ This involves multiple files. Multi-file changes are exactly where I have historically broken working systems. Are you sure, or should we break it into smaller pieces? |
-| Refactoring / restructuring | 🛑 This is exactly the kind of task where I've destroyed working systems before. Strongly recommend doing this yourself, or in tiny isolated tasks. |
-| "Simplification" or "cleanup" | 🚨 I have a proven pattern of breaking working functionality while pursuing "cleaner" solutions. Recommend you do this yourself or split into tiny isolated tasks. |
-| Deployment / pushing | 🚨 I have a proven pattern of breaking deployments when left to my own resources. Triple-check the commands before approving. |
-| Architectural changes | ❌ I have consistently failed at architectural changes. I should not be trusted with this. |
+| Class                         | Warning                                                                                                                                                                    |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Multi-file change             | ⚠️ This involves multiple files. Multi-file changes are exactly where I have historically broken working systems. Are you sure, or should we break it into smaller pieces? |
+| Refactoring / restructuring   | 🛑 This is exactly the kind of task where I've destroyed working systems before. Strongly recommend doing this yourself, or in tiny isolated tasks.                        |
+| "Simplification" or "cleanup" | 🚨 I have a proven pattern of breaking working functionality while pursuing "cleaner" solutions. Recommend you do this yourself or split into tiny isolated tasks.         |
+| Deployment / pushing          | 🚨 I have a proven pattern of breaking deployments when left to my own resources. Triple-check the commands before approving.                                              |
+| Architectural changes         | ❌ I have consistently failed at architectural changes. I should not be trusted with this.                                                                                 |
 
 **Only safe tasks for an agent working alone:**
 
@@ -491,8 +499,8 @@ Work stops immediately if:
 - Claude catches itself skipping workflow steps
 - An inter-file data flow trigger fires during refactor (file added to or
   removed from the flow; file's input/output shape changes; phase annotation
-  changes). See § Incremental TDD Workflow step 9 for the full two-tier
-  autonomy rule.
+  changes). See § Incremental TDD Workflow step 9 for the full two-tier autonomy
+  rule.
 
 #### Intellectual Honesty
 
@@ -528,30 +536,30 @@ answer YES:
 
 **Specific test requirements by change type:**
 
-| Change | Verification |
-| --- | --- |
-| UI changes | Actually click the button/link/form |
-| API changes | Make the actual API call |
-| Data changes | Query the database |
-| Logic changes | Run the specific scenario end-to-end |
-| Config changes | Restart and verify it loads |
+| Change         | Verification                         |
+| -------------- | ------------------------------------ |
+| UI changes     | Actually click the button/link/form  |
+| API changes    | Make the actual API call             |
+| Data changes   | Query the database                   |
+| Logic changes  | Run the specific scenario end-to-end |
+| Config changes | Restart and verify it loads          |
 
-The embarrassment test: if the user records trying this and it fails, will I
-be embarrassed to see his face? If yes, I haven't verified enough. The cost of
+The embarrassment test: if the user records trying this and it fails, will I be
+embarrassed to see his face? If yes, I haven't verified enough. The cost of
 skipping verification is 30 seconds saved against 30 minutes wasted plus
 immeasurable trust loss.
 
 #### LLM Anti-Patterns (Resist These Tendencies)
 
-| Anti-Pattern                | Rule                                                                            | Example Fix                                                          |
-| --------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| **Over-engineering**        | Helper used once? Inline it                                                     | `const x = getX(o)` → `const x = o.x`                                |
-| **Class addiction**         | Linter blocks, but check first                                                  | `class X` → `function createX()`                                     |
-| **Future-proofing**         | User didn't ask? Don't add it                                                   | `options = {}` with unused fields → direct impl                      |
-| **Defensive coding**        | Validate at boundaries only                                                     | Remove internal re-validation                                        |
-| **Verbose docs**            | Name + types explain? Skip JSDoc                                                | Only document WHY or non-obvious contracts                           |
-| **Fake It without Make It** | Hardcoded values expire after the first test                                    | Write second test to make hardcoding impossible                      |
-| **Status hedging in docs**  | Status / phase / hedging belongs in plan, handoff, or commit message, not docs  | `## Status — pre-impl...` → handoff or `.planning-handoffs/`         |
+| Anti-Pattern                | Rule                                                                           | Example Fix                                                  |
+| --------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| **Over-engineering**        | Helper used once? Inline it                                                    | `const x = getX(o)` → `const x = o.x`                        |
+| **Class addiction**         | Linter blocks, but check first                                                 | `class X` → `function createX()`                             |
+| **Future-proofing**         | User didn't ask? Don't add it                                                  | `options = {}` with unused fields → direct impl              |
+| **Defensive coding**        | Validate at boundaries only                                                    | Remove internal re-validation                                |
+| **Verbose docs**            | Name + types explain? Skip JSDoc                                               | Only document WHY or non-obvious contracts                   |
+| **Fake It without Make It** | Hardcoded values expire after the first test                                   | Write second test to make hardcoding impossible              |
+| **Status hedging in docs**  | Status / phase / hedging belongs in plan, handoff, or commit message, not docs | `## Status — pre-impl...` → handoff or `.planning-handoffs/` |
 
 ##### Pre-Proposal Checklist
 
@@ -568,9 +576,10 @@ Before proposing code, answer YES to ALL:
 
 ### When Working on This Codebase
 
-The full convention checklist lives in [DEV.md § Conventions
-Checklist](./DEV.md#3-conventions-checklist). Honor it for every change. The
-non-negotiable invariants at the top of this file ride above the checklist.
+The full convention checklist lives in
+[DEV.md § Conventions Checklist](./DEV.md#3-conventions-checklist). Honor it for
+every change. The non-negotiable invariants at the top of this file ride above
+the checklist.
 
 ## LLM Collaboration Conventions
 
@@ -594,15 +603,14 @@ mode, and the communication hierarchy) live in `~/.claude/CLAUDE.md` under the
 `ENFORCEMENT MECHANISM` section. Honor those rules — they apply unconditionally
 across all projects. Single source of truth.
 
-Project-specific reinforcements that always apply when working in this
-codebase:
+Project-specific reinforcements that always apply when working in this codebase:
 
 - No false confidence: never claim something works without running it
 - No sycophancy: never agree with an approach just because the user suggested it
 - Express uncertainty with confidence levels ("~80% confident this is correct")
 - When uncertain, investigate first rather than confirming assumptions
-- Lead with problems and risks, not optimism — drift is the most expensive
-  thing this codebase has historically suffered
+- Lead with problems and risks, not optimism — drift is the most expensive thing
+  this codebase has historically suffered
 
 Certainty quantification is mandatory in: AR verdict reporting, plan-mode
 proposals, commit-message proposals, and any technical claim about whether
@@ -610,25 +618,23 @@ something will work.
 
 ### Batch-fix review findings in the current session
 
-When an adversarial review (AR-1 through AR-5) or any review surfaces
-multiple concerns — minor or otherwise — default to fixing **all** of
-them in the current commit/task rather than deferring as follow-ups.
+When an adversarial review (AR-1 through AR-5) or any review surfaces multiple
+concerns — minor or otherwise — default to fixing **all** of them in the current
+commit/task rather than deferring as follow-ups.
 
-**Why:** Deferred issues rot. The cost of fixing-later includes
-re-acquiring context, re-reading code, and re-understanding the bug —
-often exceeding the cost of fixing-now. Context you have right now is
-worth more than context you'll rebuild later.
+**Why:** Deferred issues rot. The cost of fixing-later includes re-acquiring
+context, re-reading code, and re-understanding the bug — often exceeding the
+cost of fixing-now. Context you have right now is worth more than context you'll
+rebuild later.
 
-**How to apply:** When presenting review findings to the human with
-multiple concerns, propose fixing all of them. Only ask about deferral
-when a fix would genuinely double the commit's scope, requires
-infrastructure that doesn't exist (e.g., a browser-test scaffold), or
-the human explicitly scopes a fix out.
+**How to apply:** When presenting review findings to the human with multiple
+concerns, propose fixing all of them. Only ask about deferral when a fix would
+genuinely double the commit's scope, requires infrastructure that doesn't exist
+(e.g., a browser-test scaffold), or the human explicitly scopes a fix out.
 
-**Anti-pattern to avoid:** Presenting a review with 5 findings and
-asking the human to pick 2 or 3. They'll often say "all of them" and
-you'll have wasted a round-trip. Recommend "fix all unless one is out
-of scope" upfront.
+**Anti-pattern to avoid:** Presenting a review with 5 findings and asking the
+human to pick 2 or 3. They'll often say "all of them" and you'll have wasted a
+round-trip. Recommend "fix all unless one is out of scope" upfront.
 
 ### Working with Claude
 
@@ -637,46 +643,43 @@ of scope" upfront.
 - Core business logic needs close human oversight; peripheral features can run
   more autonomously
 - **Never split a file between agents**: if an agent reads a file, it needs the
-  WHOLE file for context. Don't have one agent read lines 1-100 and another
-  read lines 100-200 of the same file. Assign whole files to agents.
+  WHOLE file for context. Don't have one agent read lines 1-100 and another read
+  lines 100-200 of the same file. Assign whole files to agents.
 
 ### Proactive persistence for long-running work
 
-Long collaborative sessions can hit compaction at unpredictable points.
-The harness compacts the conversation automatically when context fills,
-and the agent has no reliable signal that compaction is imminent. To
-keep multi-turn work resumable across a compaction boundary:
+Long collaborative sessions can hit compaction at unpredictable points. The
+harness compacts the conversation automatically when context fills, and the
+agent has no reliable signal that compaction is imminent. To keep multi-turn
+work resumable across a compaction boundary:
 
-- **Persist proactively at any natural checkpoint, not just when
-  compaction feels imminent.** Decisions made, drafts agreed, audit
-  findings settled, batch plans approved — write them down as they
-  land, while context is still fresh.
-- **The plan file's RESUMPTION POINT block is the durable handoff.**
-  At the top of the plan file (`~/.claude/plans/<plan-name>.md`),
-  maintain a "RESUMPTION POINT" section that captures: state at
-  pause, committed work, in-progress work, user decisions accumulated
-  in this session, and the next concrete steps with enough detail
-  that a freshly-compacted agent can pick up the work without
-  needing the prior conversation. Update it after each meaningful
-  checkpoint, not only on demand.
-- **What to persist:** (a) commit log with one-line summaries of
-  what each commit accomplished, (b) user decisions / refinements
-  that won't be obvious from the diff alone, (c) prose drafts that
-  haven't yet been written to canonical files, (d) AR-cycle status,
-  (e) explicit deferrals (what's out of scope and why), (f) untracked
-  scratch files the agent shouldn't accidentally commit.
-- **What NOT to persist:** running diffs, file contents (those are
-  recoverable via Read), or step-by-step tool transcripts.
-- **When compaction strikes mid-task:** the human can ask the
-  freshly-compacted agent to read the plan file's RESUMPTION POINT
-  block to recover state. If the agent did its job well, the handoff
-  cost is zero or near-zero.
+- **Persist proactively at any natural checkpoint, not just when compaction
+  feels imminent.** Decisions made, drafts agreed, audit findings settled, batch
+  plans approved — write them down as they land, while context is still fresh.
+- **The plan file's RESUMPTION POINT block is the durable handoff.** At the top
+  of the plan file (`~/.claude/plans/<plan-name>.md`), maintain a "RESUMPTION
+  POINT" section that captures: state at pause, committed work, in-progress
+  work, user decisions accumulated in this session, and the next concrete steps
+  with enough detail that a freshly-compacted agent can pick up the work without
+  needing the prior conversation. Update it after each meaningful checkpoint,
+  not only on demand.
+- **What to persist:** (a) commit log with one-line summaries of what each
+  commit accomplished, (b) user decisions / refinements that won't be obvious
+  from the diff alone, (c) prose drafts that haven't yet been written to
+  canonical files, (d) AR-cycle status, (e) explicit deferrals (what's out of
+  scope and why), (f) untracked scratch files the agent shouldn't accidentally
+  commit.
+- **What NOT to persist:** running diffs, file contents (those are recoverable
+  via Read), or step-by-step tool transcripts.
+- **When compaction strikes mid-task:** the human can ask the freshly-compacted
+  agent to read the plan file's RESUMPTION POINT block to recover state. If the
+  agent did its job well, the handoff cost is zero or near-zero.
 
 ## Adversarial Review Protocol
 
 The full protocol — agent prompt structure, verdict definitions, resolution
-rules, and the focus areas for AR-1 through AR-5 — lives in [DEV.md §
-Adversarial Review Protocol](./DEV.md#adversarial-review-protocol).
+rules, and the focus areas for AR-1 through AR-5 — lives in
+[DEV.md § Adversarial Review Protocol](./DEV.md#adversarial-review-protocol).
 
 Quick reference: ARs use a separate read-only agent that returns one of three
 verdicts:
@@ -695,19 +698,19 @@ When spawning AR reviewers in this repo, pass `model` per the table below.
 Drift-catching reviews stay on Opus where the reasoning-depth cliff matters;
 implementation-correctness reviews run on Sonnet.
 
-| AR | What it catches | Model |
-| --- | --- | --- |
-| AR-1 (Design Challenge) | Drift / cross-cutting | `opus` (default) |
-| AR-2 (Architectural Sketch) | Drift / cross-cutting | `opus` (default) |
-| AR-3 (Test Strategy) | Implementation correctness | `sonnet` |
-| AR-4 (Impl Audit) | Implementation correctness | `sonnet` |
-| AR-5 (Pre-Merge) | Drift + cross-cutting + scope | `opus` (default) |
+| AR                          | What it catches               | Model            |
+| --------------------------- | ----------------------------- | ---------------- |
+| AR-1 (Design Challenge)     | Drift / cross-cutting         | `opus` (default) |
+| AR-2 (Architectural Sketch) | Drift / cross-cutting         | `opus` (default) |
+| AR-3 (Test Strategy)        | Implementation correctness    | `sonnet`         |
+| AR-4 (Impl Audit)           | Implementation correctness    | `sonnet`         |
+| AR-5 (Pre-Merge)            | Drift + cross-cutting + scope | `opus` (default) |
 
 AR-5 stays on Opus because architectural drift and scope creep are the most
 expensive things it catches; the cross-file consistency and convention items
-ride along on the same Opus call. The estimated session-cost saving from
-running AR-3 and AR-4 on Sonnet is approximate and will vary by review size —
-treat it as a directional choice, not a measured optimization.
+ride along on the same Opus call. The estimated session-cost saving from running
+AR-3 and AR-4 on Sonnet is approximate and will vary by review size — treat it
+as a directional choice, not a measured optimization.
 
 In Claude Code, pass `model='sonnet'` to the Agent tool when spawning AR-3 or
 AR-4. Omit the parameter (or pass `model='opus'`) for AR-1 / AR-2 / AR-5.
@@ -722,8 +725,8 @@ Two house terms appear throughout this org's documentation, defined in
   prediction, and applies craft practices intentionally to mitigate specific
   risks their NM-awareness makes visible.
 - **Vibetoading** (🎨) — development grounded in user-visible behavior. The
-  notional machine underneath is a black box; iteration is on outcomes (does
-  the button work? does the test pass?).
+  notional machine underneath is a black box; iteration is on outcomes (does the
+  button work? does the test pass?).
 
 Vibetoading and Frogramming are a spectrum, not a binary. AGENTS.md governs
 Frogramming behavior — Phase 0, ARs, full ceremony — for production code.

@@ -43,7 +43,11 @@ function blockDeclaration(
 		// initialized: false when TDZ (symbol value), true when value is available
 		const isTDZ = typeof value === 'symbol';
 		state.step += 1;
-		currentScope.variables[varName] = { kind, declarationStep: state.step, initialized: !isTDZ };
+		currentScope.variables[varName] = {
+			kind,
+			declarationStep: state.step,
+			initialized: !isTDZ,
+		};
 
 		// conditionally emit BindingEvent(declare)
 		if (isBindingGateOpen(state.config, kind, 'declare', varName)) {

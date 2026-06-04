@@ -213,16 +213,16 @@ get feedback about what to fix:
 
 ### Program Type: Strict Mode Script
 
-Your programs run as strict mode scripts. The learning environment
-automatically adds `"use strict"` at the top of your code before running it
-— you don't need to write it yourself.
+Your programs run as strict mode scripts. The learning environment automatically
+adds `"use strict"` at the top of your code before running it — you don't need
+to write it yourself.
 
 Strict mode catches common mistakes JavaScript normally allows silently:
 
 - Using a variable before declaring it throws a `ReferenceError` instead of
   silently creating a global
-- Assigning to a read-only value throws a `TypeError` instead of silently
-  doing nothing
+- Assigning to a read-only value throws a `TypeError` instead of silently doing
+  nothing
 
 <table>
 
@@ -248,11 +248,10 @@ _N/A in PseudoCode_
 <summary>Fun fact: module mode</summary>
 <br>
 
-Modern JavaScript applications often use `<script type="module">` in HTML,
-which also enables strict mode automatically — plus `import`/`export` for
-splitting code across files. JEJ programs skip the module system (arrays and
-imports are out of scope here). You get the same strict error-checking with
-less machinery.
+Modern JavaScript applications often use `<script type="module">` in HTML, which
+also enables strict mode automatically — plus `import`/`export` for splitting
+code across files. JEJ programs skip the module system (arrays and imports are
+out of scope here). You get the same strict error-checking with less machinery.
 
 </details>
 

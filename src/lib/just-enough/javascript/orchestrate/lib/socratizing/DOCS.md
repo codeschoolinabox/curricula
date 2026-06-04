@@ -68,8 +68,8 @@ modes.
 
 ### BLOCK model
 
-Each question is tagged with one or more BLOCK cells (Schulte 2008). This
-serves two purposes:
+Each question is tagged with one or more BLOCK cells (Schulte 2008). This serves
+two purposes:
 
 1. **For the learning environment**: Filter questions by BLOCK cell to target
    specific comprehension areas. If a learner struggles with `atom x execution`
@@ -77,10 +77,10 @@ serves two purposes:
 2. **For the curriculum team**: Audit question coverage across all 12 cells.
    Gaps indicate areas where the tool doesn't yet support comprehension.
 
-The consumer-facing `levels` field linearizes the 12-cell matrix into five
-named levels: `syntax`, `semantics`, `connections`, `goals`, `userExperience`.
-The raw `block` cells are retained in each question for auditing. Consumers
-filter by `levels`; the curriculum team audits by `block`.
+The consumer-facing `levels` field linearizes the 12-cell matrix into five named
+levels: `syntax`, `semantics`, `connections`, `goals`, `userExperience`. The raw
+`block` cells are retained in each question for auditing. Consumers filter by
+`levels`; the curriculum team audits by `block`.
 
 ### PBSI vocabulary
 
@@ -115,10 +115,10 @@ voice --- clarity --- consistency --- caution --- trap --- easter-egg
   pure style                                          exploration
 ```
 
-**voice** and **easter-egg** are about expression — finding your voice, exploring
-the language. **clarity** and **consistency** are about communication — making
-code readable and coherent. **caution** and **trap** are about correctness —
-patterns that are likely mistakes.
+**voice** and **easter-egg** are about expression — finding your voice,
+exploring the language. **clarity** and **consistency** are about communication
+— making code readable and coherent. **caution** and **trap** are about
+correctness — patterns that are likely mistakes.
 
 Easter eggs get their own category rather than being folded into voice because
 they involve undocumented features. The learner is exploring territory not
@@ -148,9 +148,9 @@ Weimer (2010) showed that identifier naming, expression structure, and program
 organization predict readability — these are the features we measure.
 
 The voice profile produces a macro-level question with `kind: 'micro-decision'`
-and questions like "Reading this program as a whole, what words would you use
-to describe its character?" This invites reflection on the aggregate effect of
-many small choices.
+and questions like "Reading this program as a whole, what words would you use to
+describe its character?" This invites reflection on the aggregate effect of many
+small choices.
 
 ## Analyzer architecture
 
@@ -171,15 +171,14 @@ results into a single flat array.
 
 ### Error isolation
 
-Each analyzer is called inside a try-catch. If one analyzer throws, it's
-skipped and its error is collected into the `analyzerErrors` field of the
-result. The remaining analyzers continue. This keeps the function pure — no
-`console.warn` side effects — while giving consumers visibility into what failed
-when needed.
+Each analyzer is called inside a try-catch. If one analyzer throws, it's skipped
+and its error is collected into the `analyzerErrors` field of the result. The
+remaining analyzers continue. This keeps the function pure — no `console.warn`
+side effects — while giving consumers visibility into what failed when needed.
 
 `analyzerErrors` appears only on the `{ ok: true }` branch, never on
-`{ ok: false }`. Parse failures occur before any analyzers run, so there are
-no analyzer errors to collect in that case.
+`{ ok: false }`. Parse failures occur before any analyzers run, so there are no
+analyzer errors to collect in that case.
 
 ### Why one file per category
 
@@ -203,8 +202,8 @@ Key adaptations for JeJ:
 - **Dropped**: all function-declaration questions (JeJ has no function
   declarations, parameters, or arrow functions), switch/case, do-while, for-in,
   array/object literals
-- **Adapted**: function-call questions → method-call questions (`.toLowerCase()`,
-  `.includes()`, `console.log()` etc.)
+- **Adapted**: function-call questions → method-call questions
+  (`.toLowerCase()`, `.includes()`, `console.log()` etc.)
 - **Kept**: variable questions, operator questions, if/while/for-of questions,
   data literal questions, user interaction questions
 
@@ -219,17 +218,17 @@ Level mapping from `ask/` to this module:
 
 ### From `qlcjs`
 
-The `qlcjs` MCQ generator demonstrated the prepare/generate architecture and
-the pattern of question preparers returning lazy generators. This module uses
-a simpler eager model (analyzers return results directly), but the category-
+The `qlcjs` MCQ generator demonstrated the prepare/generate architecture and the
+pattern of question preparers returning lazy generators. This module uses a
+simpler eager model (analyzers return results directly), but the category-
 as-file-grouping pattern and the type discipline around question shapes are
 inherited from qlcjs.
 
 ### From `hinting--prior-art-for-inspiration/`
 
 The prior warning collector flagged beginner mistakes. Every detection from the
-prior art appears here as a caution, trap, or easter-egg question, reframed as
-a question rather than a warning. The AST walking pattern and the node-type
+prior art appears here as a caution, trap, or easter-egg question, reframed as a
+question rather than a warning. The AST walking pattern and the node-type
 dispatch approach are adapted from `collect-warnings.ts`.
 
 ## Filtering architecture
@@ -252,7 +251,7 @@ value must appear in the enabled set. Example: if `features.controlFlow` is
 `'controlFlow'` (or any other enabled feature) pass.
 
 **Multi-value fields** (`levels`, `audiences`): the question's array must
-*intersect* the enabled set — at least one of the question's values must match
+_intersect_ the enabled set — at least one of the question's values must match
 an enabled toggle.
 
 ```text
@@ -281,14 +280,14 @@ After filtering:
   9. Cap at config.count if config.count > 0
 ```
 
-**AND between groups**: all applicable filters must pass independently.
-**OR within groups**: within a multi-value field, any match is sufficient.
+**AND between groups**: all applicable filters must pass independently. **OR
+within groups**: within a multi-value field, any match is sufficient.
 
 **All-false group**: if a consumer explicitly disables all toggles in a group
 (e.g., `features: { variables: false, data: false, ... }`), NO questions pass
-that group — the result is an empty array. This is different from *omitting*
-the group entirely (which means "no filter, include all"). An all-false group
-is a valid way to request zero questions.
+that group — the result is an empty array. This is different from _omitting_ the
+group entirely (which means "no filter, include all"). An all-false group is a
+valid way to request zero questions.
 
 **Omitted group**: if a config key is absent (e.g., `config.levels` is
 `undefined`), that filter is skipped entirely — all questions pass it.
@@ -310,15 +309,16 @@ analyzers against the AST. In Phase A, the mock AST has `body: []` so all
 analyzers return zero questions — graceful degradation, not a crash.
 
 `parse-source.ts` is retained only for its own unit test
-(`tests/parse-source.test.ts`). The analyzer test files do not import it —
-they call `acorn.parse()` directly via their own local helpers. The production
-entry does not call it after the Step 7 sweep. Deletion (along with the
-self-test) is deferred to a follow-up commit.
+(`tests/parse-source.test.ts`). The analyzer test files do not import it — they
+call `acorn.parse()` directly via their own local helpers. The production entry
+does not call it after the Step 7 sweep. Deletion (along with the self-test) is
+deferred to a follow-up commit.
 
 **Phase B followup:** when real parsing is wired into `embody()`, the analyzer
-test files should migrate their local `acorn.parse()` helpers to `embody(source)`
-to stay in alignment with the production path. Until then, the per-analyzer
-coverage remains accurate (real AST, real source, direct analyzer calls).
+test files should migrate their local `acorn.parse()` helpers to
+`embody(source)` to stay in alignment with the production path. Until then, the
+per-analyzer coverage remains accurate (real AST, real source, direct analyzer
+calls).
 
 ## What this module deliberately does NOT do
 

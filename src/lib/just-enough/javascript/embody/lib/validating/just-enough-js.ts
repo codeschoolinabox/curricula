@@ -18,7 +18,10 @@ import type { LanguageLevel, NodeRule, Violation } from './types.js';
  * can explore the expressiveness and readability trade-offs of declaring
  * multiple variables in a single statement.
  */
-function validateVariableDeclaration(node: Node, nodePath: string): true | Violation {
+function validateVariableDeclaration(
+	node: Node,
+	nodePath: string,
+): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	const kind = record.kind as string;
 
@@ -75,7 +78,10 @@ const ALLOWED_ASSIGNMENT_OPERATORS = new Set([
  *    case. This prevents learners from accidentally overwriting
  *    built-in methods (e.g. `console.log = 5`).
  */
-function validateAssignmentExpression(node: Node, nodePath: string): true | Violation {
+function validateAssignmentExpression(
+	node: Node,
+	nodePath: string,
+): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	const operator = record.operator as string;
 	const left = record.left as { type: string };
@@ -112,7 +118,10 @@ function validateAssignmentExpression(node: Node, nodePath: string): true | Viol
  * forms are allowed. The `prefix` boolean on the node distinguishes
  * them but is not constrained — any combination is valid JeJ.
  */
-function validateUpdateExpression(node: Node, nodePath: string): true | Violation {
+function validateUpdateExpression(
+	node: Node,
+	nodePath: string,
+): true | Violation {
 	const operator = (node as unknown as Record<string, unknown>)
 		.operator as string;
 	if (operator === '++' || operator === '--') return true;
@@ -162,7 +171,10 @@ const ALLOWED_BINARY_OPERATORS = new Set([
  * {@link ALLOWED_BINARY_OPERATORS}. The violation message includes
  * the rejected operator so learners know exactly what's wrong.
  */
-function validateBinaryExpression(node: Node, nodePath: string): true | Violation {
+function validateBinaryExpression(
+	node: Node,
+	nodePath: string,
+): true | Violation {
 	const operator = (node as unknown as Record<string, unknown>)
 		.operator as string;
 	if (ALLOWED_BINARY_OPERATORS.has(operator)) return true;
@@ -188,7 +200,10 @@ const ALLOWED_LOGICAL_OPERATORS = new Set(['&&', '||', '??']);
  *
  * @remarks Checks against {@link ALLOWED_LOGICAL_OPERATORS}.
  */
-function validateLogicalExpression(node: Node, nodePath: string): true | Violation {
+function validateLogicalExpression(
+	node: Node,
+	nodePath: string,
+): true | Violation {
 	const operator = (node as unknown as Record<string, unknown>)
 		.operator as string;
 	if (ALLOWED_LOGICAL_OPERATORS.has(operator)) return true;
@@ -216,7 +231,10 @@ const ALLOWED_UNARY_OPERATORS = new Set(['typeof', '!', '-', '~', 'void']);
  *
  * @remarks Checks against {@link ALLOWED_UNARY_OPERATORS}.
  */
-function validateUnaryExpression(node: Node, nodePath: string): true | Violation {
+function validateUnaryExpression(
+	node: Node,
+	nodePath: string,
+): true | Violation {
 	const operator = (node as unknown as Record<string, unknown>)
 		.operator as string;
 	if (ALLOWED_UNARY_OPERATORS.has(operator)) return true;
@@ -274,7 +292,10 @@ function validateIfStatement(node: Node, nodePath: string): true | Violation {
  * @remarks Same reasoning as {@link validateIfStatement} — braceless
  * loops are error-prone for beginners.
  */
-function validateWhileStatement(node: Node, nodePath: string): true | Violation {
+function validateWhileStatement(
+	node: Node,
+	nodePath: string,
+): true | Violation {
 	const body = (node as unknown as Record<string, unknown>).body as {
 		type: string;
 	};
@@ -298,7 +319,10 @@ function validateWhileStatement(node: Node, nodePath: string): true | Violation 
  * if/while). Both `let` and `const` are accepted for the iteration
  * variable head.
  */
-function validateForOfStatement(node: Node, nodePath: string): true | Violation {
+function validateForOfStatement(
+	node: Node,
+	nodePath: string,
+): true | Violation {
 	const record = node as unknown as Record<string, unknown>;
 	const body = record.body as { type: string };
 
@@ -317,7 +341,10 @@ function validateForOfStatement(node: Node, nodePath: string): true | Violation 
 /**
  * Validates a do-while statement: block body required.
  */
-function validateDoWhileStatement(node: Node, nodePath: string): true | Violation {
+function validateDoWhileStatement(
+	node: Node,
+	nodePath: string,
+): true | Violation {
 	const body = (node as unknown as Record<string, unknown>).body as {
 		type: string;
 	};
@@ -371,7 +398,10 @@ function validateForStatement(node: Node, nodePath: string): true | Violation {
 function createMemberValidator(
 	blockedNames: ReadonlySet<string>,
 ): (node: Node, nodePath: string) => true | Violation {
-	return function validateMemberExpression(node: Node, nodePath: string): true | Violation {
+	return function validateMemberExpression(
+		node: Node,
+		nodePath: string,
+	): true | Violation {
 		const record = node as unknown as Record<string, unknown>;
 		const computed = record.computed as boolean;
 

@@ -124,17 +124,13 @@ describe('collectViolations', () => {
 		});
 
 		it('produces no violations for any syntax inside with', () => {
-			const ast = parseToAst(
-				'with ({ x: 1 }) { function foo() {} }',
-			);
+			const ast = parseToAst('with ({ x: 1 }) { function foo() {} }');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
 			expect(violations).toHaveLength(0);
 		});
 
 		it('produces no violations for nested with inside with', () => {
-			const ast = parseToAst(
-				'with ({}) { with ({}) { function foo() {} } }',
-			);
+			const ast = parseToAst('with ({}) { with ({}) { function foo() {} } }');
 			const violations = collectViolations(ast, justEnoughJs.nodes);
 			expect(violations).toHaveLength(0);
 		});

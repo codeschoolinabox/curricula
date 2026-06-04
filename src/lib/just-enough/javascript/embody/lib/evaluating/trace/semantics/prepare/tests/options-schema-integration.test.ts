@@ -316,26 +316,23 @@ describe('recursive shorthand expansion', () => {
 
 describe('fine-grained overrides', () => {
 	it('{ resolve: { provenance: false } } preserves provenance false', () => {
-		const resolve = prep({ resolve: { provenance: false } })['resolve'] as Record<
-			string,
-			unknown
-		>;
+		const resolve = prep({ resolve: { provenance: false } })[
+			'resolve'
+		] as Record<string, unknown>;
 		expect(resolve['provenance']).toBe(false);
 	});
 
 	it('{ resolve: { provenance: false } } still defaults dependent true', () => {
-		const resolve = prep({ resolve: { provenance: false } })['resolve'] as Record<
-			string,
-			unknown
-		>;
+		const resolve = prep({ resolve: { provenance: false } })[
+			'resolve'
+		] as Record<string, unknown>;
 		expect(resolve['dependent']).toBe(true);
 	});
 
 	it('{ resolve: { dependent: false } } preserves dependent false', () => {
-		const resolve = prep({ resolve: { dependent: false } })['resolve'] as Record<
-			string,
-			unknown
-		>;
+		const resolve = prep({ resolve: { dependent: false } })[
+			'resolve'
+		] as Record<string, unknown>;
 		expect(resolve['dependent']).toBe(false);
 	});
 

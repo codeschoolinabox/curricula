@@ -6,7 +6,9 @@ stream the tracer emits.
 See [notional-machine.md](./notional-machine.md) for component definitions and
 [tracer.md](./tracer.md) for the config structure and event shape.
 
-**Note**: these walkthroughs communicate the general event model and patterns. Some details may be missing or incorrect as the event architecture evolves — the tracer implementation is the authoritative source.
+**Note**: these walkthroughs communicate the general event model and patterns.
+Some details may be missing or incorrect as the event architecture evolves — the
+tracer implementation is the authoritative source.
 
 ## Dual-event convention
 

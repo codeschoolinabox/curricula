@@ -38,10 +38,10 @@ caller's responsibility because:
 
 ## Coercion strategy
 
-Generators that support coercion (`PureOperatorEvent`, `AssignmentOperatorEvent`)
-receive an optional `coercedOperands` array alongside `operands`. The generator
-compares each pair — if any differ, the full `coercion` array is included. If
-all match, the field is omitted.
+Generators that support coercion (`PureOperatorEvent`,
+`AssignmentOperatorEvent`) receive an optional `coercedOperands` array alongside
+`operands`. The generator compares each pair — if any differ, the full
+`coercion` array is included. If all match, the field is omitted.
 
 The coercion values come from Aran's advice, which has access to the actual
 runtime coerced values. This avoids duplicating JS coercion logic in the

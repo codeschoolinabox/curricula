@@ -117,14 +117,14 @@ describe('documentJej — immutability', () => {
 	});
 
 	it('every entry with a commonMistakes array has it frozen', () => {
-		const entriesWithUnfrozenMistakes = Object.entries(
-			DOC_TABLE,
-		).filter(function unfrozen([_word, entry]) {
-			return (
-				entry.commonMistakes !== undefined &&
-				!Object.isFrozen(entry.commonMistakes)
-			);
-		});
+		const entriesWithUnfrozenMistakes = Object.entries(DOC_TABLE).filter(
+			function unfrozen([_word, entry]) {
+				return (
+					entry.commonMistakes !== undefined &&
+					!Object.isFrozen(entry.commonMistakes)
+				);
+			},
+		);
 		expect(entriesWithUnfrozenMistakes).toEqual([]);
 	});
 });
@@ -136,20 +136,19 @@ describe('drift guard against upstream JEJ surface', () => {
 
 	it('GLOBAL_LABELS matches allowedGlobals minus SUPPRESSED_GLOBALS and minus KEYWORDS', () => {
 		const { allowedGlobals } = justEnoughJs;
-		if (!allowedGlobals) throw new Error('justEnoughJs.allowedGlobals must be populated');
+		if (!allowedGlobals)
+			throw new Error('justEnoughJs.allowedGlobals must be populated');
 		const keywordSet = new Set(KEYWORDS);
-		const expected = [...allowedGlobals].filter(
-			function notSuppressedOrKeyword(g: string) {
-				return !SUPPRESSED_GLOBALS.has(g) && !keywordSet.has(g);
-			},
-		);
+		const expected = [...allowedGlobals].filter(function notSuppressedOrKeyword(
+			g: string,
+		) {
+			return !SUPPRESSED_GLOBALS.has(g) && !keywordSet.has(g);
+		});
 		expect([...GLOBAL_LABELS].sort()).toEqual(expected.sort());
 	});
 
 	it('MEMBER_LABELS matches CURATED_MEMBERS from collect-jej-surface', () => {
-		expect([...MEMBER_LABELS].sort()).toEqual(
-			[...CURATED_MEMBERS].sort(),
-		);
+		expect([...MEMBER_LABELS].sort()).toEqual([...CURATED_MEMBERS].sort());
 	});
 
 	it('NOT_IN_JEJ_LABELS includes every BLOCKED_MEMBER_NAMES entry (dot-member partition drift-guard)', () => {
@@ -162,22 +161,20 @@ describe('drift guard against upstream JEJ surface', () => {
 			throw new Error('justEnoughJs.blockedMemberNames must be populated');
 		}
 		const blockedMemberNames = [...justEnoughJsBlockedMembers];
-		const missing = blockedMemberNames.filter(
-			function notInDocs(name: string) {
-				return !NOT_IN_JEJ_LABELS.has(name);
-			},
-		);
+		const missing = blockedMemberNames.filter(function notInDocs(name: string) {
+			return !NOT_IN_JEJ_LABELS.has(name);
+		});
 		expect(missing).toEqual([]);
 	});
 });
 
 describe('shape compliance — field presence across the full table', () => {
 	it('every entry has a non-empty description', () => {
-		const entriesWithEmptyDescription = Object.entries(
-			DOC_TABLE,
-		).filter(function isEmpty([_word, entry]) {
-			return !entry.description.trim();
-		});
+		const entriesWithEmptyDescription = Object.entries(DOC_TABLE).filter(
+			function isEmpty([_word, entry]) {
+				return !entry.description.trim();
+			},
+		);
 		expect(entriesWithEmptyDescription).toEqual([]);
 	});
 

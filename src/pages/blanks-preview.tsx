@@ -20,7 +20,8 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-const SAMPLE = 'function classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}';
+const SAMPLE =
+	'function classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}';
 
 export default function BlanksPreview(): React.JSX.Element {
 	const [code, setCode] = React.useState<string>(SAMPLE);
@@ -33,9 +34,9 @@ export default function BlanksPreview(): React.JSX.Element {
 					The blanks lens is being rebuilt faithfully from the legacy
 					implementation. This page will grow as increments 6a–6j land:
 					CodeMirror with <code>__</code> placeholders, view-mode toggle,
-					difficulty slider, content-type checkboxes, correctness wiring,
-					editor header, hints panel, URL config, and the Ask Me button
-					backed by <code>socratizing/</code>.
+					difficulty slider, content-type checkboxes, correctness wiring, editor
+					header, hints panel, URL config, and the Ask Me button backed by{' '}
+					<code>socratizing/</code>.
 				</p>
 
 				<label style={{ display: 'block', marginBottom: 8 }}>
@@ -59,8 +60,8 @@ export default function BlanksPreview(): React.JSX.Element {
 						fontStyle: 'italic',
 					}}
 				>
-					Lens not yet mounted. Awaiting Increment 6a (CodeMirror in
-					read-only blankenated mode).
+					Lens not yet mounted. Awaiting Increment 6a (CodeMirror in read-only
+					blankenated mode).
 				</div>
 			</main>
 		</Layout>

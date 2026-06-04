@@ -32,9 +32,7 @@ import type { BaseResult } from './types.js';
  *   acorn `Program` when parsing succeeded. The `ast` field is
  *   undefined only when parse itself failed.
  */
-function validate(
-	code: string,
-): BaseResult & { readonly ast?: Program } {
+function validate(code: string): BaseResult & { readonly ast?: Program } {
 	const report = validateProgram(code, justEnoughJs);
 
 	// 1. Parse error — code is not valid syntax

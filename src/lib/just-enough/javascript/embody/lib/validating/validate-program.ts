@@ -88,10 +88,7 @@ function validateProgram(
 		? checkUndeclaredGlobals(ast, languageLevel.allowedGlobals)
 		: [];
 
-	const violations = Object.freeze([
-		...nodeViolations,
-		...scopeViolations,
-	]);
+	const violations = Object.freeze([...nodeViolations, ...scopeViolations]);
 
 	// 4. Build report
 	const report: ValidationReport = {

@@ -22,7 +22,9 @@ function makeState(scopeStack: ScopeInfo[]): TracerState {
 		step: 0,
 		scopeStack,
 		iterationCounters: {},
-		lastExpressionResult: null, previousExpressionResult: null, lastReadValues: {},
+		lastExpressionResult: null,
+		previousExpressionResult: null,
+		lastReadValues: {},
 		config: {},
 	};
 }
@@ -50,7 +52,9 @@ describe('lookupVariable', () => {
 
 	it('returns declarationStep', () => {
 		const scope = makeScope({
-			variables: { x: { kind: 'const', declarationStep: 10, initialized: true } },
+			variables: {
+				x: { kind: 'const', declarationStep: 10, initialized: true },
+			},
 		});
 		const state = makeState([scope]);
 		expect(lookupVariable(state, 'x')!.info.declarationStep).toBe(10);
@@ -90,7 +94,9 @@ describe('lookupVariable', () => {
 		const inner = makeScope({
 			creationStep: 5,
 			depth: 1,
-			variables: { y: { kind: 'const', declarationStep: 6, initialized: true } },
+			variables: {
+				y: { kind: 'const', declarationStep: 6, initialized: true },
+			},
 		});
 		const state = makeState([outer, inner]);
 		const result = lookupVariable(state, 'x');

@@ -728,11 +728,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			const values = Array.from(options).map(
 				(option) => (option as HTMLOptionElement).value,
 			);
-			expect(values).toEqual([
-				'',
-				'annotate',
-				'debug-props',
-			]);
+			expect(values).toEqual(['', 'annotate', 'debug-props']);
 		});
 	});
 

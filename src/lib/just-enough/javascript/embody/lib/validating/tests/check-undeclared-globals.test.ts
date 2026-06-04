@@ -183,8 +183,8 @@ describe('checkUndeclaredGlobals', () => {
 				'for (const Date of "hi") { console.log(Date); }\nDate;',
 			);
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
-			const dateViolations = violations.filter(
-				(v) => v.message.includes("'Date'"),
+			const dateViolations = violations.filter((v) =>
+				v.message.includes("'Date'"),
 			);
 			// WHY: exactly 1 — only the Date AFTER the loop, not inside
 			expect(dateViolations).toHaveLength(1);
@@ -225,14 +225,11 @@ describe('checkUndeclaredGlobals', () => {
 			const undeclared = violations.filter((v) => v.severity === 'rejection');
 			expect(undeclared).toHaveLength(0);
 		});
-
 	});
 
 	describe('with statement — scope suppression', () => {
 		it('does not reject known global inside with body', () => {
-			const ast = parseSourceScript(
-				'with ({}) { Map; }',
-			);
+			const ast = parseSourceScript('with ({}) { Map; }');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			const v = violations.find(
 				(v) => v.severity === 'rejection' && v.message.includes("'Map'"),
@@ -241,9 +238,7 @@ describe('checkUndeclaredGlobals', () => {
 		});
 
 		it('does not flag deeply nested identifiers inside with body', () => {
-			const ast = parseSourceScript(
-				'with ({}) { if (true) { JSON; } }',
-			);
+			const ast = parseSourceScript('with ({}) { if (true) { JSON; } }');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			const v = violations.find(
 				(v) => v.severity === 'rejection' && v.message.includes("'JSON'"),
@@ -252,9 +247,7 @@ describe('checkUndeclaredGlobals', () => {
 		});
 
 		it('still rejects known globals outside with body', () => {
-			const ast = parseSourceScript(
-				'with ({}) { console.log("hi"); }\nMath;',
-			);
+			const ast = parseSourceScript('with ({}) { console.log("hi"); }\nMath;');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			const v = violations.find(
 				(v) => v.severity === 'rejection' && v.message.includes("'Math'"),
@@ -263,9 +256,7 @@ describe('checkUndeclaredGlobals', () => {
 		});
 
 		it('does not reject known global inside with body', () => {
-			const ast = parseSourceScript(
-				'with ({}) { Math.random(); }',
-			);
+			const ast = parseSourceScript('with ({}) { Math.random(); }');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			const v = violations.find(
 				(v) => v.severity === 'rejection' && v.message.includes("'Math'"),
@@ -283,7 +274,6 @@ describe('checkUndeclaredGlobals', () => {
 			);
 			expect(undeclared).toHaveLength(0);
 		});
-
 	});
 
 	describe('assigns nodePath to each violation', () => {
@@ -317,9 +307,7 @@ describe('checkUndeclaredGlobals', () => {
 		});
 
 		it('returns empty array for clean program', () => {
-			const ast = parseSource(
-				'let x = 1;\nconsole.log(x);',
-			);
+			const ast = parseSource('let x = 1;\nconsole.log(x);');
 			const violations = checkUndeclaredGlobals(ast, ALLOWED_GLOBALS);
 			expect(violations).toHaveLength(0);
 		});

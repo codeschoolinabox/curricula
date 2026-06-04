@@ -31,7 +31,11 @@ describe('createFunctionReturnEvent', () => {
 		});
 
 		it('value is preserved', () => {
-			const value = { type: 'object' as const, value: null, isNull: true as const };
+			const value = {
+				type: 'object' as const,
+				value: null,
+				isNull: true as const,
+			};
 			const event = createFunctionReturnEvent({ name: 'prompt', value });
 			expect(event.value).toEqual(value);
 		});
@@ -45,7 +49,9 @@ describe('createFunctionReturnEvent', () => {
 		});
 
 		it('throws on missing value', () => {
-			expect(() => createFunctionReturnEvent({ name: 'test' } as any)).toThrow();
+			expect(() =>
+				createFunctionReturnEvent({ name: 'test' } as any),
+			).toThrow();
 		});
 	});
 });

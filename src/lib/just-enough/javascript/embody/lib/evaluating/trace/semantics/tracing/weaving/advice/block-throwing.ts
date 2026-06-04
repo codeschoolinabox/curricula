@@ -31,9 +31,13 @@ function blockThrowing(
 				event: 'interrupt',
 				depth: current.depth,
 				creationStep: current.creationStep,
-				...(parent !== undefined && { parentCreationStep: parent.creationStep }),
+				...(parent !== undefined && {
+					parentCreationStep: parent.creationStep,
+				}),
 				...(current.structure !== null && { structure: current.structure }),
-				...(current.structureStep !== null && { structureStep: current.structureStep }),
+				...(current.structureStep !== null && {
+					structureStep: current.structureStep,
+				}),
 			});
 		}
 	} catch {

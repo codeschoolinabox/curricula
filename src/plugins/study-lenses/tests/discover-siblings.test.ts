@@ -120,9 +120,7 @@ describe('discoverSiblings', () => {
 	it('safety exclusions: skips node_modules, hidden dirs, and does not follow symlinks', () => {
 		// Dynamic fixture — symlinks don't travel cleanly through git.
 		const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-B11-'));
-		onTestFinished(() =>
-			fs.rmSync(tmp, { recursive: true, force: true }),
-		);
+		onTestFinished(() => fs.rmSync(tmp, { recursive: true, force: true }));
 
 		fs.writeFileSync(path.join(tmp, 'kept.js'), '// kept');
 		fs.mkdirSync(path.join(tmp, 'node_modules'));

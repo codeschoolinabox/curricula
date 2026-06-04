@@ -856,78 +856,67 @@ function createConfig(options: UserOptions = {}): ResolvedConfig { ... }
 
 #### What goes in docs vs. plans vs. handoffs
 
-**Scope.** This rule governs **package/module documentation** —
-`README.md`, `DOCS.md`, `types.ts` files inside source directories.
-**Governance docs** (`AGENTS.md`, `CLAUDE.md`, `HUMANS.md`, this
-file, `CONTRIBUTING.md`, `CODE-OF-CONDUCT.md`) describe process
-AS their end-state contract — workflow rules, AR ceremony, plan
-discipline — and are out of scope.
+**Scope.** This rule governs **package/module documentation** — `README.md`,
+`DOCS.md`, `types.ts` files inside source directories. **Governance docs**
+(`AGENTS.md`, `CLAUDE.md`, `HUMANS.md`, this file, `CONTRIBUTING.md`,
+`CODE-OF-CONDUCT.md`) describe process AS their end-state contract — workflow
+rules, AR ceremony, plan discipline — and are out of scope.
 
 Within scope, four kinds of documentation, with strict separation:
 
-- **End-state docs** (`README.md`, `DOCS.md`, `types.ts` per
-  source directory): describe the **intended end state** of the
-  package/module. What it IS, not where the work CURRENTLY
-  STANDS.
+- **End-state docs** (`README.md`, `DOCS.md`, `types.ts` per source directory):
+  describe the **intended end state** of the package/module. What it IS, not
+  where the work CURRENTLY STANDS.
   - Forbidden: status snapshots, migration-phase notes,
-    `(under active development)`, `(will be deprecated)`,
-    `(will be split)`, `implementation begins in phase X`,
-    `we tried Y, then migrated to X` narratives.
-  - Allowed: present-tense rationale (`X is shaped this way
-    because Y`), structural constraints (`this field is
-    intentionally left unspecified — locking it would foreclose
-    Z`), stability classifiers describing the current API tier
-    (`(experimental)`, `(deprecated)`, `(internal)` — labels
-    that classify what the API IS).
-  - **Architectural sketches** (a Phase 0 prospective `DOCS.md`)
-    ARE end-state docs — they describe the intended structural
-    target, written before code exists. The "Written Phase 0"
-    framing in the sketch template is a meta-comment to the
-    reader, not part of the contract.
-  - **Rationale framing matters**: "X is shaped this way because
-    Y has property Z" is end-state. "We considered Y, then chose
-    X" is past-tense process narrative — that goes in the commit
-    message or git history. The contract is in present tense.
-- **Plan files** (per-task scratchpad files; for the Claude Code
-  workflow these live at `~/.claude/plans/*.md`, other tools use
-  their own location): context, scope, AR cycles, open questions,
-  verification. Ephemeral; deleted or archived when the task
-  lands. May contain process narrative as long as it's pruned
-  aggressively (`HUMANS.md § Plan-clutter discipline` covers the
-  pruning).
+    `(under active development)`, `(will be deprecated)`, `(will be split)`,
+    `implementation begins in phase X`, `we tried Y, then migrated to X`
+    narratives.
+  - Allowed: present-tense rationale (`X is shaped this way because Y`),
+    structural constraints
+    (`this field is intentionally left unspecified — locking it would foreclose Z`),
+    stability classifiers describing the current API tier (`(experimental)`,
+    `(deprecated)`, `(internal)` — labels that classify what the API IS).
+  - **Architectural sketches** (a Phase 0 prospective `DOCS.md`) ARE end-state
+    docs — they describe the intended structural target, written before code
+    exists. The "Written Phase 0" framing in the sketch template is a
+    meta-comment to the reader, not part of the contract.
+  - **Rationale framing matters**: "X is shaped this way because Y has property
+    Z" is end-state. "We considered Y, then chose X" is past-tense process
+    narrative — that goes in the commit message or git history. The contract is
+    in present tense.
+- **Plan files** (per-task scratchpad files; for the Claude Code workflow these
+  live at `~/.claude/plans/*.md`, other tools use their own location): context,
+  scope, AR cycles, open questions, verification. Ephemeral; deleted or archived
+  when the task lands. May contain process narrative as long as it's pruned
+  aggressively (`HUMANS.md § Plan-clutter discipline` covers the pruning).
 - **Handoff files** (`*-HANDOFF.md` at repo or directory root,
-  `.planning-handoffs/*.md` including per-stream `*-notes.md`):
-  per-migration coordination scaffolding. Process info, ordered
-  steps, phase splits, status snapshots, cross-stream coordination
-  all live here. Most handoffs are deleted when their migration
-  completes; some (durable coordination guides like
-  `development-guide.md`) persist as the project's coordination
-  manual.
-- **Git history** (commit messages, `git log`, PR descriptions):
-  what was changed and why, captured at commit time. AR-cycle
-  history, rejected alternatives, prior attempts, "we tried Y
-  before X" narratives — all go here. Not in `DOCS.md`.
+  `.planning-handoffs/*.md` including per-stream `*-notes.md`): per-migration
+  coordination scaffolding. Process info, ordered steps, phase splits, status
+  snapshots, cross-stream coordination all live here. Most handoffs are deleted
+  when their migration completes; some (durable coordination guides like
+  `development-guide.md`) persist as the project's coordination manual.
+- **Git history** (commit messages, `git log`, PR descriptions): what was
+  changed and why, captured at commit time. AR-cycle history, rejected
+  alternatives, prior attempts, "we tried Y before X" narratives — all go here.
+  Not in `DOCS.md`.
 
-**Quick test (when amending an end-state doc):** "does this
-describe what the thing IS, or where the work currently STANDS?"
-The latter goes in a plan, handoff, or commit message.
+**Quick test (when amending an end-state doc):** "does this describe what the
+thing IS, or where the work currently STANDS?" The latter goes in a plan,
+handoff, or commit message.
 
-**Carve-outs.** CI/coverage badges in `README.md` are end-state
-representations of current quality (they update over time but
-describe what the package's quality IS); they're fine. Permanent
-dev/test infrastructure (sandbox programs, fixtures, test
-harnesses) is end-state content describing what the package
-contains. The forbidden thing is **lifecycle/migration/status
-narration** — not "this thing exists" but "this thing is currently
-in state X of Y".
+**Carve-outs.** CI/coverage badges in `README.md` are end-state representations
+of current quality (they update over time but describe what the package's
+quality IS); they're fine. Permanent dev/test infrastructure (sandbox programs,
+fixtures, test harnesses) is end-state content describing what the package
+contains. The forbidden thing is **lifecycle/migration/status narration** — not
+"this thing exists" but "this thing is currently in state X of Y".
 
-**Why this matters.** End-state docs are the canonical source of
-truth that consumers code against. Process talk in those docs
-rots — every "(will be deprecated)" / "(under active development)"
-note is a hostage to a future cleanup pass. Process talk also
-expands the surface a careful reader has to mentally subtract
-when reasoning about the current contract. Keep the process out
-of the contract.
+**Why this matters.** End-state docs are the canonical source of truth that
+consumers code against. Process talk in those docs rots — every "(will be
+deprecated)" / "(under active development)" note is a hostage to a future
+cleanup pass. Process talk also expands the surface a careful reader has to
+mentally subtract when reasoning about the current contract. Keep the process
+out of the contract.
 
 ### Test Organization
 
@@ -942,10 +931,10 @@ src/
 ```
 
 - Directory name: `tests/` (plural, always)
-- File suffix: `.test.ts` (never `.spec.ts`). `.test.tsx` is acceptable
-  for React component tests where JSX in `.ts` files is not supported by
-  the project's tsconfig (e.g. when the parent tsconfig sets
-  `jsx: 'preserve'` and only `.tsx` files allow JSX syntax).
+- File suffix: `.test.ts` (never `.spec.ts`). `.test.tsx` is acceptable for
+  React component tests where JSX in `.ts` files is not supported by the
+  project's tsconfig (e.g. when the parent tsconfig sets `jsx: 'preserve'` and
+  only `.tsx` files allow JSX syntax).
 - Root `/tests/` directory: integration test fixtures (not unit tests)
 
 ## Development Workflow
@@ -1284,9 +1273,9 @@ package? What does it own, and what lies outside its boundary?
   What does it return? What does it explicitly NOT handle?
 
 **0.3. Adversarial Design Challenge (AR-1)** — Spawn a separate reviewer agent
-to challenge the README spec before types lock the contract. See [§ Adversarial
-Review Protocol](#adversarial-review-protocol) below for prompt structure and
-verdict definitions.
+to challenge the README spec before types lock the contract. See
+[§ Adversarial Review Protocol](#adversarial-review-protocol) below for prompt
+structure and verdict definitions.
 
 Key DDD questions for AR-1:
 
@@ -1320,9 +1309,9 @@ passes all tests but doesn't reflect the sketch — wrong phases, collapsed
 concerns, missing boundaries — refactoring is not complete.
 
 **0.6. Adversarial Sketch Challenge (AR-2)** — Spawn a separate reviewer agent
-to challenge the architectural sketch before implementation begins. See [§ AR-2:
-Architectural Sketch Challenge](#ar-2-architectural-sketch-challenge) below for
-focus areas.
+to challenge the architectural sketch before implementation begins. See
+[§ AR-2: Architectural Sketch Challenge](#ar-2-architectural-sketch-challenge)
+below for focus areas.
 
 The sketch is the single most consequential document in the workflow — it is
 what the entire Refactor step is held against. A first-pass agent writing it
@@ -1353,9 +1342,9 @@ For each behavioral increment:
    impossible — before moving on.
 
    > **5b. Adversarial Test Challenge (AR-3)** — Spawn a separate reviewer agent
-   > to challenge the test strategy before implementing. See [§ AR-3: Test
-   > Strategy Challenge](#ar-3-test-strategy-challenge) below for focus areas,
-   > including the triangulation check.
+   > to challenge the test strategy before implementing. See
+   > [§ AR-3: Test Strategy Challenge](#ar-3-test-strategy-challenge) below for
+   > focus areas, including the triangulation check.
 
 6. **Lint checkpoint 2** — `npm run lint <test-file>`. Fix violations.
 7. **Implement** — minimal code to pass the test (Red → Green). **Fake It is
@@ -1411,9 +1400,9 @@ For each behavioral increment:
     junior-maintainable?
 
     > **12b. Adversarial Implementation Audit (AR-4)** — Spawn a separate
-    > reviewer agent to audit the implementation. See [§ AR-4: Implementation
-    > Audit](#ar-4-implementation-audit) below for focus areas, including
-    > structural quality and Fake It residue checks.
+    > reviewer agent to audit the implementation. See
+    > [§ AR-4: Implementation Audit](#ar-4-implementation-audit) below for focus
+    > areas, including structural quality and Fake It residue checks.
 
 13. **Quality checks** — `npm test && npm run lint && npm run typecheck`
 14. **Verify docs match implementation** — update README.md and DOCS.md if
@@ -1451,39 +1440,39 @@ At each checkpoint:
    - **Cosmetic redirect** (spacing, wording, affordance, visual polish) lands
      in the _next_ increment. Current commit still lands.
    - **Behavioral defect** (wrong buffer reset, content corruption, misfire,
-     missing a11y label, etc.) **blocks the commit** and triggers rework of
-     the current increment. Committing broken behavior to patch in the next
+     missing a11y label, etc.) **blocks the commit** and triggers rework of the
+     current increment. Committing broken behavior to patch in the next
      increment pollutes git history.
 
 **When to skip the checkpoint**: pure utility functions, private types, data
-shape narrowing, and other increments with no user-visible surface. These
-don't benefit from a dev-server round-trip; step i's green tests are enough.
+shape narrowing, and other increments with no user-visible surface. These don't
+benefit from a dev-server round-trip; step i's green tests are enough.
 
-**Checkpoint content quality**: the checkpoint description names a specific
-user action ("paste ugly JS, click Format") and a specific expected
-observation ("tabs / single quotes / semicolons / 80-col wrap"). Avoid
-vague phrasing like "verify the feature works". If you can't name what to
-look at, the increment probably isn't observable.
+**Checkpoint content quality**: the checkpoint description names a specific user
+action ("paste ugly JS, click Format") and a specific expected observation
+("tabs / single quotes / semicolons / 80-col wrap"). Avoid vague phrasing like
+"verify the feature works". If you can't name what to look at, the increment
+probably isn't observable.
 
-**Phase-level observation gates** (end-of-phase smoke tests in plan
-documents) use the same 🔍 marker for visual consistency — the semantics
-are identical, just fired at a coarser grain.
+**Phase-level observation gates** (end-of-phase smoke tests in plan documents)
+use the same 🔍 marker for visual consistency — the semantics are identical,
+just fired at a coarser grain.
 
-Checkpoints are **gate points, not optional**. Skipping one because tests
-are green is the exact failure mode they exist to prevent.
+Checkpoints are **gate points, not optional**. Skipping one because tests are
+green is the exact failure mode they exist to prevent.
 
 ### Phase 2: Pre-Merge Review
 
 After all increments are complete, before prompting the human to commit:
 
-1. **Run full quality checks** —
-   `npm test && npm run lint && npm run typecheck`
+1. **Run full quality checks** — `npm test && npm run lint && npm run typecheck`
 2. **Adversarial Pre-Merge Review (AR-5)** — Spawn a separate reviewer agent to
-   review the full changeset. See [§ AR-5: Pre-Merge
-   Review](#ar-5-pre-merge-review) below for focus areas. Provide the full
-   diff, modified files list, and the original task description.
-3. **Address PAUSE/CONSIDER items** — resolve concerns per [§ Resolution
-   Rules](#resolution-rules) below
+   review the full changeset. See
+   [§ AR-5: Pre-Merge Review](#ar-5-pre-merge-review) below for focus areas.
+   Provide the full diff, modified files list, and the original task
+   description.
+3. **Address PAUSE/CONSIDER items** — resolve concerns per
+   [§ Resolution Rules](#resolution-rules) below
 
 ### Session Handoff
 
@@ -1618,12 +1607,12 @@ Only when the human explicitly opts out.
 - Is the sketch consistent with the types defined in step 0.4? Do domain terms
   in the sketch map cleanly to types?
 - **Data flow**: Does the sketch's Mermaid flow diagram make sense? Is data
-  passed through phases that don't use it? Are any transformations redundant
-  — data restructured into an equivalent shape under a different name? Is the
-  data state at each phase boundary as slim as it could be? Does the diagram
-  use the ubiquitous language consistently? Are domain-agnostic utilities
-  (freeze, merge, clone) correctly omitted as invisible, and domain-related
-  functions correctly shown as nodes?
+  passed through phases that don't use it? Are any transformations redundant —
+  data restructured into an equivalent shape under a different name? Is the data
+  state at each phase boundary as slim as it could be? Does the diagram use the
+  ubiquitous language consistently? Are domain-agnostic utilities (freeze,
+  merge, clone) correctly omitted as invisible, and domain-related functions
+  correctly shown as nodes?
 
 **Provide to agent:** DOCS.md architectural sketch, README.md, types.ts
 
@@ -1649,9 +1638,9 @@ Only when the human explicitly opts out.
 - **Data flow coverage**: Do the tests exercise each data transition shown in
   the peer DOCS.md Mermaid flow diagram, or only end-to-end behavior? A suite
   that only covers start-to-finish can pass even when intermediate
-  transformations are broken in compensating ways. Each arrow in the flow
-  should have at least one test that would fail if that specific
-  transformation were removed or wrong.
+  transformations are broken in compensating ways. Each arrow in the flow should
+  have at least one test that would fail if that specific transformation were
+  removed or wrong.
 
 **Provide to agent:** The test file, the stub/types being tested, related
 existing tests, the peer DOCS.md data flow diagram
@@ -1678,15 +1667,16 @@ the human explicitly opts out.
 - Is error handling appropriate (validate at boundaries only)?
 - Would a junior developer understand this without explanation?
 - **Data flow**: Sketch the actual intra-file data flow as Mermaid (ephemeral,
-  not committed). Compare the file's inputs and outputs against the peer
-  DOCS.md Mermaid flow diagram for contract match. Is the intra-file flow
-  simpler or more complex than the sketch implied? Is anything carried
-  further than needed? Are there redundant transformations the sketch didn't
-  catch? If divergence, describe it in prose — the user decides whether the
-  implementation drifted or the sketch needs updating.
+  not committed). Compare the file's inputs and outputs against the peer DOCS.md
+  Mermaid flow diagram for contract match. Is the intra-file flow simpler or
+  more complex than the sketch implied? Is anything carried further than needed?
+  Are there redundant transformations the sketch didn't catch? If divergence,
+  describe it in prose — the user decides whether the implementation drifted or
+  the sketch needs updating.
 
 **Provide to agent:** The implementation file, its test file, types, the DOCS.md
-architectural sketch (including the Mermaid data flow diagram), any utilities used
+architectural sketch (including the Mermaid data flow diagram), any utilities
+used
 
 ### AR-5: Pre-Merge Review
 

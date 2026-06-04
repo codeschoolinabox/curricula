@@ -67,7 +67,11 @@ describe('pushScope', () => {
 		const state = makeState();
 		const result = pushScope(state, { kind: 'block', structure: null });
 		expect(result.variables).toEqual({});
-		result.variables['x'] = { kind: 'let', declarationStep: 1, initialized: false };
+		result.variables['x'] = {
+			kind: 'let',
+			declarationStep: 1,
+			initialized: false,
+		};
 		expect(result.variables['x']).toBeDefined();
 	});
 
@@ -208,7 +212,9 @@ describe('findNearestLoop', () => {
 
 	it('O: one loop scope, jumpTarget=null → derives target, returns { structure, creationStep }', () => {
 		const state = makeState({
-			scopeStack: [makeScope({ structure: 'while', structureStep: 1, creationStep: 1 })],
+			scopeStack: [
+				makeScope({ structure: 'while', structureStep: 1, creationStep: 1 }),
+			],
 		});
 		const result = findNearestLoop(state, null);
 		expect(result).not.toBeNull();

@@ -85,9 +85,10 @@ function logicalOperatorBehavior(
 		questions: [
 			{
 				register: 'pointed',
-				text: operator === '&&'
-					? 'Does the right side always get evaluated, or only sometimes?'
-					: 'When does JavaScript skip evaluating the right side?',
+				text:
+					operator === '&&'
+						? 'Does the right side always get evaluated, or only sometimes?'
+						: 'When does JavaScript skip evaluating the right side?',
 			},
 			{
 				register: 'open',
@@ -123,7 +124,8 @@ function arithmeticResult(
 		const right = getRecord(node).right as Node;
 		if (
 			(left.type === 'Literal' && typeof getRecord(left).value === 'string') ||
-			(right.type === 'Literal' && typeof getRecord(right).value === 'string') ||
+			(right.type === 'Literal' &&
+				typeof getRecord(right).value === 'string') ||
 			left.type === 'TemplateLiteral' ||
 			right.type === 'TemplateLiteral'
 		) {

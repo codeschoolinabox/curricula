@@ -30,9 +30,14 @@ function makeState(overrides: Partial<TracerState> = {}): TracerState {
 	return {
 		trace: [],
 		step: 2,
-		scopeStack: [makeScope(), makeScope({ creationStep: 2, depth: 1, kind: 'block' })],
+		scopeStack: [
+			makeScope(),
+			makeScope({ creationStep: 2, depth: 1, kind: 'block' }),
+		],
 		iterationCounters: {},
-		lastExpressionResult: null, previousExpressionResult: null, lastReadValues: {},
+		lastExpressionResult: null,
+		previousExpressionResult: null,
+		lastReadValues: {},
 		config: {
 			scopes: { kind: { block: true, module: true }, events: { enter: true } },
 			controlFlow: {
@@ -65,7 +70,13 @@ describe('blockBefore', () => {
 	describe('BranchEvent', () => {
 		it('emits consequent branch for then segment', () => {
 			const state = makeState();
-			blockBefore(state, 'IfStatement', 'block', 'then', makeTag({ node: 'IfStatement' }));
+			blockBefore(
+				state,
+				'IfStatement',
+				'block',
+				'then',
+				makeTag({ node: 'IfStatement' }),
+			);
 			const branchEvents = (state.trace as Record<string, unknown>[]).filter(
 				(e) => e.category === 'controlFlow' && e.event === 'branch',
 			);
@@ -75,7 +86,13 @@ describe('blockBefore', () => {
 
 		it('emits alternate branch for else segment', () => {
 			const state = makeState();
-			blockBefore(state, 'IfStatement', 'block', 'else', makeTag({ node: 'IfStatement' }));
+			blockBefore(
+				state,
+				'IfStatement',
+				'block',
+				'else',
+				makeTag({ node: 'IfStatement' }),
+			);
 			const branchEvents = (state.trace as Record<string, unknown>[]).filter(
 				(e) => e.event === 'branch',
 			);
@@ -95,7 +112,13 @@ describe('blockBefore', () => {
 	describe('IterationEvent', () => {
 		it('emits IterationEvent for while segment', () => {
 			const state = makeState();
-			blockBefore(state, 'WhileStatement', 'block', 'while', makeTag({ loopKind: 'while' }));
+			blockBefore(
+				state,
+				'WhileStatement',
+				'block',
+				'while',
+				makeTag({ loopKind: 'while' }),
+			);
 			const iterEvents = (state.trace as Record<string, unknown>[]).filter(
 				(e) => e.event === 'iteration',
 			);
@@ -104,7 +127,13 @@ describe('blockBefore', () => {
 
 		it('iteration index starts at 0', () => {
 			const state = makeState();
-			blockBefore(state, 'WhileStatement', 'block', 'while', makeTag({ loopKind: 'while' }));
+			blockBefore(
+				state,
+				'WhileStatement',
+				'block',
+				'while',
+				makeTag({ loopKind: 'while' }),
+			);
 			const iterEvents = (state.trace as Record<string, unknown>[]).filter(
 				(e) => e.event === 'iteration',
 			);
@@ -130,7 +159,13 @@ describe('blockBefore', () => {
 	describe('DoEvent', () => {
 		it('emits DoEvent for doWhile loops', () => {
 			const state = makeState();
-			blockBefore(state, 'WhileStatement', 'block', 'while', makeTag({ loopKind: 'doWhile' }));
+			blockBefore(
+				state,
+				'WhileStatement',
+				'block',
+				'while',
+				makeTag({ loopKind: 'doWhile' }),
+			);
 			const doEvents = (state.trace as Record<string, unknown>[]).filter(
 				(e) => e.event === 'do',
 			);
@@ -139,7 +174,13 @@ describe('blockBefore', () => {
 
 		it('does not emit DoEvent for while loops', () => {
 			const state = makeState();
-			blockBefore(state, 'WhileStatement', 'block', 'while', makeTag({ loopKind: 'while' }));
+			blockBefore(
+				state,
+				'WhileStatement',
+				'block',
+				'while',
+				makeTag({ loopKind: 'while' }),
+			);
 			const doEvents = (state.trace as Record<string, unknown>[]).filter(
 				(e) => e.event === 'do',
 			);
@@ -153,15 +194,17 @@ describe('blockBefore', () => {
 			const tag = makeTag({ loopKind: 'while' });
 			blockBefore(state, 'WhileStatement', 'block', 'while', tag);
 			blockBefore(state, 'WhileStatement', 'block', 'while', tag);
-			expect(() => blockBefore(state, 'WhileStatement', 'block', 'while', tag)).toThrow(
-				RangeError,
-			);
+			expect(() =>
+				blockBefore(state, 'WhileStatement', 'block', 'while', tag),
+			).toThrow(RangeError);
 		});
 
 		it('does not throw when under limit', () => {
 			const state = makeState({ config: { maxIterations: 10 } });
 			const tag = makeTag({ loopKind: 'while' });
-			expect(() => blockBefore(state, 'WhileStatement', 'block', 'while', tag)).not.toThrow();
+			expect(() =>
+				blockBefore(state, 'WhileStatement', 'block', 'while', tag),
+			).not.toThrow();
 		});
 
 		it('does not throw when maxIterations is not configured', () => {
@@ -169,7 +212,9 @@ describe('blockBefore', () => {
 			const tag = makeTag({ loopKind: 'while' });
 			blockBefore(state, 'WhileStatement', 'block', 'while', tag);
 			blockBefore(state, 'WhileStatement', 'block', 'while', tag);
-			expect(() => blockBefore(state, 'WhileStatement', 'block', 'while', tag)).not.toThrow();
+			expect(() =>
+				blockBefore(state, 'WhileStatement', 'block', 'while', tag),
+			).not.toThrow();
 		});
 	});
 });

@@ -28,10 +28,10 @@
 // tracer at ../semantics/. `TraceConfig` lives in `../semantics/config.types.ts`;
 // the other types need locating + possibly re-exporting from
 // `../semantics/index.ts`. Import the named types when a use site lands.
-type TraceEvent = unknown;      // TODO: locate in ../semantics/
-type ASTNode = unknown;         // TODO: locate in ../semantics/
-type nodePath = string;         // TODO: confirm in ../semantics/
-type SourceLocation = unknown;  // TODO: locate in ../semantics/
+type TraceEvent = unknown; // TODO: locate in ../semantics/
+type ASTNode = unknown; // TODO: locate in ../semantics/
+type nodePath = string; // TODO: confirm in ../semantics/
+type SourceLocation = unknown; // TODO: locate in ../semantics/
 
 // ─── Placeholder for deferred types ───────────────────────────────────
 
@@ -167,15 +167,16 @@ type DagKind = string; // TODO: enumerate per node type
  * In-memory parent/child reference cycles are kept for convenience
  * (Resolution 19); serialization callers strip via replacer.
  */
-type NMASTNode = ASTNode & Readonly<{
-	dagRole: DagRole;
-	dagKind?: DagKind;
+type NMASTNode = ASTNode &
+	Readonly<{
+		dagRole: DagRole;
+		dagKind?: DagKind;
 
-	// Populated only on result.ast:
-	events?: readonly TraceEvent[];
-	visits?: number;
-	stepIndices?: readonly number[];
-}>;
+		// Populated only on result.ast:
+		events?: readonly TraceEvent[];
+		visits?: number;
+		stepIndices?: readonly number[];
+	}>;
 
 // ─── Step discriminant + shared fields ────────────────────────────────
 
@@ -299,77 +300,83 @@ type CoercionRecord = readonly Readonly<{
 
 // ─── Expression steps ─────────────────────────────────────────────────
 
-type LiteralExpressionStep = StepBase & Readonly<{
-	category: 'expression';
-	kind: 'literal';
-	value: unknown;
-}>;
-
-type IdentifierExpressionStep = StepBase & Readonly<{
-	category: 'expression';
-	kind: 'identifier';
-	value: unknown;
-	/**
-	 * Populated when the identifier resolves to a binding. Absent
-	 * when the identifier resolves to a pre-hoisted global (register).
-	 * TODO (Q3b, Phase 0.1): confirm this flag model vs. a separate
-	 * 'register-read' kind.
-	 */
-	binding?: Readonly<{
-		name: string;
-		scopePath: nodePath;
-		version: number;
+type LiteralExpressionStep = StepBase &
+	Readonly<{
+		category: 'expression';
+		kind: 'literal';
+		value: unknown;
 	}>;
-	/** True for pre-hoisted global reads (Math, prompt, etc.). */
-	register?: true;
-}>;
 
-type PropertyExpressionStep = StepBase & Readonly<{
-	category: 'expression';
-	kind: 'property';
-	object: unknown;
-	propertyName: string;
-	value: unknown;
-	/* Proto-chain walk events in `.events[]` when semanticEvents on. */
-}>;
-
-type OperatorExpressionStep = StepBase & Readonly<{
-	category: 'expression';
-	kind: 'operator';
-	operator: string; // '+', '<', '===', '&&', '=', '+=', '++', 'typeof', '!', 'in', ...
-	operands: readonly unknown[];
-	/**
-	 * Dual-representation with events. Property carries representCoercion-style
-	 * parallel array; standalone coercion events also in `.events[]`
-	 * when semanticEvents: true.
-	 */
-	coercion?: CoercionRecord;
-	result: unknown;
-	/**
-	 * For short-circuit operators (`&&`, `||`, `??`). RHS is skipped
-	 * entirely; no RHS resolves/steps fire.
-	 */
-	shortCircuited?: Readonly<{
-		skippedSide: 'rhs';
-		skippedNodePath: nodePath;
+type IdentifierExpressionStep = StepBase &
+	Readonly<{
+		category: 'expression';
+		kind: 'identifier';
+		value: unknown;
+		/**
+		 * Populated when the identifier resolves to a binding. Absent
+		 * when the identifier resolves to a pre-hoisted global (register).
+		 * TODO (Q3b, Phase 0.1): confirm this flag model vs. a separate
+		 * 'register-read' kind.
+		 */
+		binding?: Readonly<{
+			name: string;
+			scopePath: nodePath;
+			version: number;
+		}>;
+		/** True for pre-hoisted global reads (Math, prompt, etc.). */
+		register?: true;
 	}>;
-}>;
 
-type CallExpressionStep = StepBase & Readonly<{
-	category: 'expression';
-	kind: 'call';
-	callee: unknown;
-	args: readonly unknown[];
-	result: unknown;
-}>;
+type PropertyExpressionStep = StepBase &
+	Readonly<{
+		category: 'expression';
+		kind: 'property';
+		object: unknown;
+		propertyName: string;
+		value: unknown;
+		/* Proto-chain walk events in `.events[]` when semanticEvents on. */
+	}>;
 
-type TemplateExpressionStep = StepBase & Readonly<{
-	category: 'expression';
-	kind: 'template';
-	staticParts: readonly string[];
-	interpolations: readonly unknown[];
-	result: string;
-}>;
+type OperatorExpressionStep = StepBase &
+	Readonly<{
+		category: 'expression';
+		kind: 'operator';
+		operator: string; // '+', '<', '===', '&&', '=', '+=', '++', 'typeof', '!', 'in', ...
+		operands: readonly unknown[];
+		/**
+		 * Dual-representation with events. Property carries representCoercion-style
+		 * parallel array; standalone coercion events also in `.events[]`
+		 * when semanticEvents: true.
+		 */
+		coercion?: CoercionRecord;
+		result: unknown;
+		/**
+		 * For short-circuit operators (`&&`, `||`, `??`). RHS is skipped
+		 * entirely; no RHS resolves/steps fire.
+		 */
+		shortCircuited?: Readonly<{
+			skippedSide: 'rhs';
+			skippedNodePath: nodePath;
+		}>;
+	}>;
+
+type CallExpressionStep = StepBase &
+	Readonly<{
+		category: 'expression';
+		kind: 'call';
+		callee: unknown;
+		args: readonly unknown[];
+		result: unknown;
+	}>;
+
+type TemplateExpressionStep = StepBase &
+	Readonly<{
+		category: 'expression';
+		kind: 'template';
+		staticParts: readonly string[];
+		interpolations: readonly unknown[];
+		result: string;
+	}>;
 
 type ExpressionStep =
 	| LiteralExpressionStep
@@ -387,15 +394,16 @@ type ExpressionStep =
  * AST-position locs on both ends so consumers render arrows even
  * when neighbor nodes are gated off.
  */
-type ResolveStep = StepBase & Readonly<{
-	category: 'resolve';
-	/** Single kind; the category itself is the discriminant. */
-	kind: 'resolve';
-	from: SourceRef;
-	to: DestinationRef;
-	value: unknown;
-	valueId?: number;
-}>;
+type ResolveStep = StepBase &
+	Readonly<{
+		category: 'resolve';
+		/** Single kind; the category itself is the discriminant. */
+		kind: 'resolve';
+		from: SourceRef;
+		to: DestinationRef;
+		value: unknown;
+		valueId?: number;
+	}>;
 
 // ─── Terminal steps ───────────────────────────────────────────────────
 
@@ -404,45 +412,48 @@ type ResolveStep = StepBase & Readonly<{
  */
 type InitializationKind = 'initialization'; // placeholder
 
-type InitializationStep = StepBase & Readonly<{
-	category: 'initialization';
-	kind: InitializationKind;
-	/** Binding being initialized. */
-	bindingName: string;
-	bindingKind: 'let' | 'const';
-	/** The initial value. Present for inline initializers; absent
-	 *  for `let x;` without init. */
-	value?: unknown;
-	/** Back-ref to the incoming resolve when resolves are on. */
-	sourceResolveIndex?: number;
-}>;
+type InitializationStep = StepBase &
+	Readonly<{
+		category: 'initialization';
+		kind: InitializationKind;
+		/** Binding being initialized. */
+		bindingName: string;
+		bindingKind: 'let' | 'const';
+		/** The initial value. Present for inline initializers; absent
+		 *  for `let x;` without init. */
+		value?: unknown;
+		/** Back-ref to the incoming resolve when resolves are on. */
+		sourceResolveIndex?: number;
+	}>;
 
-type ForInitStep = StepBase & Readonly<{
-	category: 'for-init';
-	kind: 'for-init'; // TODO: confirm single kind
-	bindingName: string;
-	bindingKind: 'let' | 'const';
-	value: unknown;
-	sourceResolveIndex?: number;
-}>;
+type ForInitStep = StepBase &
+	Readonly<{
+		category: 'for-init';
+		kind: 'for-init'; // TODO: confirm single kind
+		bindingName: string;
+		bindingKind: 'let' | 'const';
+		value: unknown;
+		sourceResolveIndex?: number;
+	}>;
 
 /**
  * TODO: finalize kinds — 'simple' vs 'compound' (for `+=` etc.)?
  */
 type WriteKind = 'simple' | 'compound';
 
-type WriteStep = StepBase & Readonly<{
-	category: 'write';
-	kind: WriteKind;
-	/** Target binding. */
-	target: Readonly<{
-		name: string;
-		scopePath: nodePath;
-		version: number;
+type WriteStep = StepBase &
+	Readonly<{
+		category: 'write';
+		kind: WriteKind;
+		/** Target binding. */
+		target: Readonly<{
+			name: string;
+			scopePath: nodePath;
+			version: number;
+		}>;
+		value: unknown;
+		sourceResolveIndex?: number;
 	}>;
-	value: unknown;
-	sourceResolveIndex?: number;
-}>;
 
 /**
  * TODO: finalize kinds — per-method (prompt, alert, confirm,
@@ -450,45 +461,49 @@ type WriteStep = StepBase & Readonly<{
  */
 type EmitKind = string; // placeholder
 
-type EmitStep = StepBase & Readonly<{
-	category: 'emit';
-	kind: EmitKind;
-	/** The emitted value. */
-	payload: unknown;
-	channel: 'user' | 'dev';
-	method: string; // prompt / alert / confirm / console.log / ...
-	sourceResolveIndex?: number;
-}>;
+type EmitStep = StepBase &
+	Readonly<{
+		category: 'emit';
+		kind: EmitKind;
+		/** The emitted value. */
+		payload: unknown;
+		channel: 'user' | 'dev';
+		method: string; // prompt / alert / confirm / console.log / ...
+		sourceResolveIndex?: number;
+	}>;
 
-type ErrorStep = StepBase & Readonly<{
-	category: 'error';
-	kind: R4bErrorName;
-	error: R4bError;
-}>;
+type ErrorStep = StepBase &
+	Readonly<{
+		category: 'error';
+		kind: R4bErrorName;
+		error: R4bError;
+	}>;
 
 // ─── Structural steps ─────────────────────────────────────────────────
 
-type StatementStep = StepBase & Readonly<{
-	category: 'statement';
-	kind: 'enter' | 'exit';
-	exitReason?: 'normal' | 'break' | 'continue' | 'error';
-}>;
+type StatementStep = StepBase &
+	Readonly<{
+		category: 'statement';
+		kind: 'enter' | 'exit';
+		exitReason?: 'normal' | 'break' | 'continue' | 'error';
+	}>;
 
-type ScopeStep = StepBase & Readonly<{
-	category: 'scope';
-	kind: 'create' | 'leave';
-	scopeKind: 'script' | 'block';
-	/**
-	 * For 'create' transitions: the hoisted bindings that entered
-	 * TDZ at this moment (one binding-declare event per hoisted
-	 * binding).
-	 */
-	hoistedBindings?: readonly Readonly<{
-		name: string;
-		kind: 'let' | 'const';
-		declaredAt: nodePath;
-	}>[];
-}>;
+type ScopeStep = StepBase &
+	Readonly<{
+		category: 'scope';
+		kind: 'create' | 'leave';
+		scopeKind: 'script' | 'block';
+		/**
+		 * For 'create' transitions: the hoisted bindings that entered
+		 * TDZ at this moment (one binding-declare event per hoisted
+		 * binding).
+		 */
+		hoistedBindings?: readonly Readonly<{
+			name: string;
+			kind: 'let' | 'const';
+			declaredAt: nodePath;
+		}>[];
+	}>;
 
 type ControlFlowKind =
 	| 'conditional-test'
@@ -499,16 +514,17 @@ type ControlFlowKind =
 	| 'break'
 	| 'continue';
 
-type ControlFlowStep = StepBase & Readonly<{
-	category: 'control-flow';
-	kind: ControlFlowKind;
-	/** For conditional-test and loop-iter-start: the test value. */
-	testValue?: unknown;
-	/** For conditional-test: the branch decision. */
-	decision?: 'truthy' | 'falsy';
-	/** For loop-iter-*: the iteration number. */
-	iteration?: number;
-}>;
+type ControlFlowStep = StepBase &
+	Readonly<{
+		category: 'control-flow';
+		kind: ControlFlowKind;
+		/** For conditional-test and loop-iter-start: the test value. */
+		testValue?: unknown;
+		/** For conditional-test: the branch decision. */
+		decision?: 'truthy' | 'falsy';
+		/** For loop-iter-*: the iteration number. */
+		iteration?: number;
+	}>;
 
 // ─── Step union ───────────────────────────────────────────────────────
 
@@ -536,14 +552,15 @@ type Step =
  * than snapshot. After `.done` resolves, the step is frozen —
  * consumer holds the resolved value.
  */
-type LiveStep = Step & Readonly<{
-	/** Inner pull stream for raw tracer events within this step.
-	 *  `events` on the Step itself is populated from this stream on
-	 *  close (when semanticEvents is true). */
-	events$: AsyncIterable<TraceEvent>;
-	/** Resolves when the step closes, with the frozen Step. */
-	done: Promise<Step>;
-}>;
+type LiveStep = Step &
+	Readonly<{
+		/** Inner pull stream for raw tracer events within this step.
+		 *  `events` on the Step itself is populated from this stream on
+		 *  close (when semanticEvents is true). */
+		events$: AsyncIterable<TraceEvent>;
+		/** Resolves when the step closes, with the frozen Step. */
+		done: Promise<Step>;
+	}>;
 
 // ─── NMConfig ─────────────────────────────────────────────────────────
 
@@ -557,21 +574,25 @@ type LiveStep = Step & Readonly<{
  */
 type NMConfig = Readonly<{
 	/** Expression-step category gate. Nested for finer control. */
-	expressions?: boolean | Readonly<{
-		literals?: boolean;
-		identifiers?: boolean;
-		properties?: boolean;
-		operators?: boolean;
-		calls?: boolean;
-		templates?: boolean;
-	}>;
+	expressions?:
+		| boolean
+		| Readonly<{
+				literals?: boolean;
+				identifiers?: boolean;
+				properties?: boolean;
+				operators?: boolean;
+				calls?: boolean;
+				templates?: boolean;
+		  }>;
 
 	/** Resolve-edge gate with co-gating behavior. */
-	resolves?: boolean | Readonly<{
-		/** Default true: resolves co-emit with their transformation.
-		 *  False: resolves emit standalone (pure data-flow trace). */
-		dependent?: boolean;
-	}>;
+	resolves?:
+		| boolean
+		| Readonly<{
+				/** Default true: resolves co-emit with their transformation.
+				 *  False: resolves emit standalone (pure data-flow trace). */
+				dependent?: boolean;
+		  }>;
 
 	statementSteps?: boolean;
 	scopeSteps?: boolean;

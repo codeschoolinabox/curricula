@@ -4,14 +4,14 @@ Integration tests for the trace module's config pipeline and event gating.
 
 ## Structure
 
-| File | Layer | Tests | Runner |
-| ---- | ----- | ----- | ------ |
-| `config-pipeline.test.ts` | 4a | 40 | Node |
-| `gating-bindings-property.browser.test.ts` | 4a | 14 | Browser |
-| `gating-operators-literals.browser.test.ts` | 4a | 16 | Browser |
-| `gating-templates-scopes.browser.test.ts` | 4a | 12 | Browser |
-| `gating-controlflow-functions.browser.test.ts` | 4a | 17 | Browser |
-| `test-helpers.ts` | — | — | Shared utility |
+| File                                           | Layer | Tests | Runner         |
+| ---------------------------------------------- | ----- | ----- | -------------- |
+| `config-pipeline.test.ts`                      | 4a    | 40    | Node           |
+| `gating-bindings-property.browser.test.ts`     | 4a    | 14    | Browser        |
+| `gating-operators-literals.browser.test.ts`    | 4a    | 16    | Browser        |
+| `gating-templates-scopes.browser.test.ts`      | 4a    | 12    | Browser        |
+| `gating-controlflow-functions.browser.test.ts` | 4a    | 17    | Browser        |
+| `test-helpers.ts`                              | —     | —     | Shared utility |
 
 ## Conventions
 
@@ -33,7 +33,8 @@ npm test             # Both
 ```
 
 Browser tests run with `fileParallelism: false` and `retry: 2` in
-`vitest.workspace.ts`. For parallel execution across separate Chromium instances:
+`vitest.workspace.ts`. For parallel execution across separate Chromium
+instances:
 
 ```sh
 npm run test:browser:parallel  # 3 shards, each in its own browser

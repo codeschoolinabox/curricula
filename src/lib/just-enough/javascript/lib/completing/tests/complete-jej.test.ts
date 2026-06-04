@@ -30,7 +30,9 @@ describe('completeJej', () => {
 				precedingText: '',
 				fullText: '',
 			}).map((item) => item.label);
-			expect(labels).toEqual(expect.arrayContaining(['const', 'console', 'continue']));
+			expect(labels).toEqual(
+				expect.arrayContaining(['const', 'console', 'continue']),
+			);
 		});
 	});
 
@@ -195,7 +197,9 @@ describe('completeJej', () => {
 					prefix: '',
 					precedingText: '',
 					fullText: 'let x = 5; const y = 10',
-				}).filter((candidate) => candidate.label === 'x' || candidate.label === 'y');
+				}).filter(
+					(candidate) => candidate.label === 'x' || candidate.label === 'y',
+				);
 				expect(items).toEqual([
 					{ label: 'x', type: 'local' },
 					{ label: 'y', type: 'local' },
@@ -221,9 +225,9 @@ describe('completeJej', () => {
 					precedingText: '',
 					fullText: 'console.log(42)',
 				});
-				expect(
-					result.every((candidate) => candidate.type !== 'local'),
-				).toBe(true);
+				expect(result.every((candidate) => candidate.type !== 'local')).toBe(
+					true,
+				);
 			});
 		});
 

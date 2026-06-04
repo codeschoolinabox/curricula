@@ -10,8 +10,8 @@
 import AjvDefault from 'ajv';
 
 const Ajv =
-  typeof AjvDefault === 'function'
-    ? AjvDefault
-    : ((AjvDefault as Record<string, unknown>)['default'] as typeof AjvDefault);
+	typeof AjvDefault === 'function'
+		? AjvDefault
+		: ((AjvDefault as Record<string, unknown>)['default'] as typeof AjvDefault);
 
 export default Ajv;

@@ -11,19 +11,18 @@
 > - `ontology.md` — the _what_ (reference framework)
 > - `chapters.md` — the _how_ at chapter grain
 > - `guide.learners.md` — the _why_ addressed to learners
-> - `guide.authors.md` — the _why_ addressed to curriculum authors
->   / forkers / contributors
-> - `study-lenses.md` — the technical-reader companion for the
->   infrastructure the curriculum runs on
+> - `guide.authors.md` — the _why_ addressed to curriculum authors / forkers /
+>   contributors
+> - `study-lenses.md` — the technical-reader companion for the infrastructure
+>   the curriculum runs on
 >
 > **Status**: end-state document. Content is open to iteration.
 >
-> **Note**: the H1 heading still reads "A Manifesto for..." by design.
-> Filename renamed (`manifesto.{role}.md` → `guide.{role}.md`) in Wave 2
-> of the syllabus corpus restructure; title and prose register migrate
-> to "guide" form in Wave 3, when vision-flavored content moves into
-> `manifesto.md` and this file gains its practical-guidance
-> register.
+> **Note**: the H1 heading still reads "A Manifesto for..." by design. Filename
+> renamed (`manifesto.{role}.md` → `guide.{role}.md`) in Wave 2 of the syllabus
+> corpus restructure; title and prose register migrate to "guide" form in Wave
+> 3, when vision-flavored content moves into `manifesto.md` and this file gains
+> its practical-guidance register.
 
 ---
 
@@ -190,8 +189,8 @@ what they're trying to learn.
 
 ### A set of design principles you can hold up to your context
 
-The design principles in `pedagogy.md` § "Design principles"
-are _named_ so that they can be evaluated, adapted, or rejected. Open Education, Learner Trust comes
+The design principles in `pedagogy.md` § "Design principles" are _named_ so that
+they can be evaluated, adapted, or rejected. Open Education, Learner Trust comes
 first, Context is Content, Process Over Product, Explicitly Teach the Implicit,
 Full Complexity Max Simplicity, Connections are Concepts as method, Wear Hats
 not Titles, Fluid Roles, Greg Wilson's rules, the Reusability Paradox, the
@@ -281,8 +280,8 @@ A few practical implications:
   adaptations don't need to scale. Some feedback loops are slow. The cyclical
   shape is honest.
 
-For the deeper analysis, see `translational-framing.md`. For the
-embody-side companion, see `DGMD-E-1-artifacts/embodying-tcer/`.
+For the deeper analysis, see `translational-framing.md`. For the embody-side
+companion, see `DGMD-E-1-artifacts/embodying-tcer/`.
 
 The framework is the user's own (Cole-Malaise-Signer 2023). Yoshi Malaise and
 Beat Signer also co-authored the Explorotron paper that the `lenses/embody`

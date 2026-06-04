@@ -77,8 +77,14 @@ describe('instrument', () => {
 		it('advice produces trace events during execution', () => {
 			const config = {
 				literals: { number: true },
-				bindings: { kind: { let: true }, events: { declare: true, initialize: true, available: true } },
-				scopes: { kind: { block: true }, events: { create: true, enter: true, leave: true } },
+				bindings: {
+					kind: { let: true },
+					events: { declare: true, initialize: true, available: true },
+				},
+				scopes: {
+					kind: { block: true },
+					events: { create: true, enter: true, leave: true },
+				},
 			};
 			const aspect = createAspect(config);
 			const result = instrument('let x = 5;\n', config);

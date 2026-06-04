@@ -124,7 +124,11 @@ function positionToOffset(
 ): number {
 	const lines = code.split('\n');
 	let offset = 0;
-	for (let index = 0; index < pos.line - 1 && index < lines.length; index += 1) {
+	for (
+		let index = 0;
+		index < pos.line - 1 && index < lines.length;
+		index += 1
+	) {
 		offset += (lines[index]?.length ?? 0) + 1;
 	}
 	return offset + pos.column;

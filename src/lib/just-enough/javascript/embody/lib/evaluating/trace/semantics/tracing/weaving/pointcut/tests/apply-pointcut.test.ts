@@ -26,7 +26,10 @@ describe('applyPointcut', () => {
 		it('returns non-null for intrinsic call', () => {
 			const node = {
 				tag,
-				callee: { type: 'IntrinsicExpression', intrinsic: 'aran.performBinaryOperation' },
+				callee: {
+					type: 'IntrinsicExpression',
+					intrinsic: 'aran.performBinaryOperation',
+				},
 			};
 			expect(applyPointcut(node, null, null)).not.toBeNull();
 		});
@@ -36,7 +39,10 @@ describe('applyPointcut', () => {
 		it('returns intrinsic name as discriminant for IntrinsicExpression callee', () => {
 			const node = {
 				tag,
-				callee: { type: 'IntrinsicExpression', intrinsic: 'aran.performBinaryOperation' },
+				callee: {
+					type: 'IntrinsicExpression',
+					intrinsic: 'aran.performBinaryOperation',
+				},
 			};
 			const [discriminant] = applyPointcut(node, null, null);
 			expect(discriminant).toBe('aran.performBinaryOperation');
@@ -45,7 +51,10 @@ describe('applyPointcut', () => {
 		it('returns tag as second element for intrinsic', () => {
 			const node = {
 				tag,
-				callee: { type: 'IntrinsicExpression', intrinsic: 'aran.getValueProperty' },
+				callee: {
+					type: 'IntrinsicExpression',
+					intrinsic: 'aran.getValueProperty',
+				},
 			};
 			const [, resultTag] = applyPointcut(node, null, null);
 			expect(resultTag).toBe(tag);

@@ -17,20 +17,23 @@ describe('validate', () => {
 
 		it('includes error name and message', () => {
 			const result = validate('let = ;');
-			if (result.error?.kind !== 'parse') throw new Error('expected parse error');
+			if (result.error?.kind !== 'parse')
+				throw new Error('expected parse error');
 			expect(result.error.name).toBe('SyntaxError');
 			expect(result.error.message).toBeTruthy();
 		});
 
 		it('includes line in parse error', () => {
 			const result = validate('let = ;');
-			if (result.error?.kind !== 'parse') throw new Error('expected parse error');
+			if (result.error?.kind !== 'parse')
+				throw new Error('expected parse error');
 			expect(result.error.line).toBeTypeOf('number');
 		});
 
 		it('includes column in parse error', () => {
 			const result = validate('let = ;');
-			if (result.error?.kind !== 'parse') throw new Error('expected parse error');
+			if (result.error?.kind !== 'parse')
+				throw new Error('expected parse error');
 			expect(result.error.column).toBeTypeOf('number');
 		});
 
@@ -109,9 +112,7 @@ describe('validate', () => {
 			const result = validate('console.log = 5;\n');
 			expect(result.ok).toBe(false);
 			expect(result.rejections).toBeDefined();
-			expect(result.rejections![0].message).toContain(
-				'property assignment',
-			);
+			expect(result.rejections![0].message).toContain('property assignment');
 		});
 
 		it('rejects computed property assignment', () => {

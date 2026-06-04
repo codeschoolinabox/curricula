@@ -36,7 +36,14 @@ function effectAfter(state: TracerState, ...point: unknown[]): void {
 			// Emit initialize + available events instead of assign.
 			lookup.info.initialized = true;
 
-			if (isBindingGateOpen(state.config, lookup.info.kind, 'initialize', variable)) {
+			if (
+				isBindingGateOpen(
+					state.config,
+					lookup.info.kind,
+					'initialize',
+					variable,
+				)
+			) {
 				emitEvent(state, tag, 'expression', 'bindings.initialize', {
 					kind: lookup.info.kind,
 					event: 'initialize',
@@ -48,7 +55,9 @@ function effectAfter(state: TracerState, ...point: unknown[]): void {
 				});
 			}
 
-			if (isBindingGateOpen(state.config, lookup.info.kind, 'available', variable)) {
+			if (
+				isBindingGateOpen(state.config, lookup.info.kind, 'available', variable)
+			) {
 				emitEvent(state, tag, 'expression', 'bindings.available', {
 					kind: lookup.info.kind,
 					event: 'available',
@@ -60,7 +69,9 @@ function effectAfter(state: TracerState, ...point: unknown[]): void {
 			}
 		} else {
 			// Subsequent write — this is a reassignment.
-			if (isBindingGateOpen(state.config, lookup.info.kind, 'assign', variable)) {
+			if (
+				isBindingGateOpen(state.config, lookup.info.kind, 'assign', variable)
+			) {
 				emitEvent(state, tag, 'expression', 'bindings.assign', {
 					kind: lookup.info.kind,
 					event: 'assign',

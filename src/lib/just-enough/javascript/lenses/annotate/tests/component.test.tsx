@@ -15,7 +15,6 @@ import embody from '../../../embody/index.js';
 import type { Snippet } from '../../../embody/types.js';
 import annotateLens from '../index.js';
 
-
 afterEach(cleanup);
 afterEach(() => vi.restoreAllMocks());
 
@@ -82,8 +81,7 @@ describe('annotate lens — Component rendering', () => {
 			<annotateLens.Component embodiment={makeSnippet()} />,
 		);
 		expect(
-			container
-				.querySelector<HTMLElement>('[data-lens="annotate"]')?.dataset
+			container.querySelector<HTMLElement>('[data-lens="annotate"]')?.dataset
 				.viewMode,
 		).toBe('code');
 	});
@@ -96,8 +94,7 @@ describe('annotate lens — Component rendering', () => {
 			/>,
 		);
 		expect(
-			container
-				.querySelector<HTMLElement>('[data-lens="annotate"]')?.dataset
+			container.querySelector<HTMLElement>('[data-lens="annotate"]')?.dataset
 				.viewMode,
 		).toBe('flowchart');
 	});
@@ -110,8 +107,7 @@ describe('annotate lens — Component rendering', () => {
 			/>,
 		);
 		expect(
-			container
-				.querySelector<HTMLElement>('[data-lens="annotate"]')?.dataset
+			container.querySelector<HTMLElement>('[data-lens="annotate"]')?.dataset
 				.viewMode,
 		).toBe('code');
 	});
@@ -335,9 +331,9 @@ describe('annotate lens — drawing overlay', () => {
 		const { container } = render(
 			<annotateLens.Component embodiment={makeSnippet()} />,
 		);
-		const swatchColor =
-			container.querySelector<HTMLElement>('[data-color-swatch]')?.dataset
-				.colorSwatch;
+		const swatchColor = container.querySelector<HTMLElement>(
+			'[data-color-swatch]',
+		)?.dataset.colorSwatch;
 		drawStroke(getOverlay(container), [
 			[1, 1],
 			[2, 2],
@@ -353,8 +349,9 @@ describe('annotate lens — drawing overlay', () => {
 		const { container } = render(
 			<annotateLens.Component embodiment={makeSnippet()} />,
 		);
-		const swatches =
-			container.querySelectorAll<HTMLElement>('[data-color-swatch]');
+		const swatches = container.querySelectorAll<HTMLElement>(
+			'[data-color-swatch]',
+		);
 		const secondColor = swatches[1].dataset.colorSwatch;
 		fireEvent.click(swatches[1]);
 		drawStroke(getOverlay(container), [
@@ -439,7 +436,6 @@ describe('annotate lens — drawing overlay', () => {
 			container.querySelectorAll('svg.annotate-drawing-overlay polyline'),
 		).toHaveLength(1);
 	});
-
 });
 
 describe('annotate lens — clear all', () => {
@@ -508,7 +504,6 @@ describe('annotate lens — clear all', () => {
 			container.querySelector('svg.annotate-drawing-overlay polyline'),
 		).not.toBeNull();
 	});
-
 });
 
 describe('annotate lens — notes', () => {
@@ -535,7 +530,9 @@ describe('annotate lens — notes', () => {
 		);
 		selectTool(container, 'note');
 		fireEvent.click(getOverlay(container), { clientX: 30, clientY: 40 });
-		expect(container.querySelector('[data-note-dialog] textarea')).not.toBeNull();
+		expect(
+			container.querySelector('[data-note-dialog] textarea'),
+		).not.toBeNull();
 	});
 
 	it('saving a note commits it with the typed text', () => {
@@ -549,7 +546,9 @@ describe('annotate lens — notes', () => {
 			{ target: { value: 'hello' } },
 		);
 		fireEvent.click(container.querySelector('[data-note-save]') as Element);
-		expect(container.querySelector('.annotate-note')?.textContent).toBe('hello');
+		expect(container.querySelector('.annotate-note')?.textContent).toBe(
+			'hello',
+		);
 	});
 
 	it('saving dismisses the dialog', () => {
@@ -594,8 +593,9 @@ describe('annotate lens — notes', () => {
 		const { container } = render(
 			<annotateLens.Component embodiment={makeSnippet()} />,
 		);
-		const swatches =
-			container.querySelectorAll<HTMLElement>('[data-color-swatch]');
+		const swatches = container.querySelectorAll<HTMLElement>(
+			'[data-color-swatch]',
+		);
 		const secondColor = swatches[1].dataset.colorSwatch;
 		fireEvent.click(swatches[1]);
 		selectTool(container, 'note');
@@ -621,9 +621,9 @@ describe('annotate lens — notes', () => {
 			{ target: { value: 'hi' } },
 		);
 		fireEvent.click(container.querySelector('[data-note-save]') as Element);
-		expect(container.querySelector<HTMLElement>('.annotate-note')?.style.left).toBe(
-			'30px',
-		);
+		expect(
+			container.querySelector<HTMLElement>('.annotate-note')?.style.left,
+		).toBe('30px');
 	});
 
 	it('commits multiple notes independently', () => {
@@ -669,8 +669,9 @@ describe('annotate lens — notes', () => {
 		fireEvent.click(container.querySelector('[data-note-cancel]') as Element);
 		fireEvent.click(getOverlay(container), { clientX: 60, clientY: 80 });
 		expect(
-			container.querySelector<HTMLTextAreaElement>('[data-note-dialog] textarea')
-				?.value,
+			container.querySelector<HTMLTextAreaElement>(
+				'[data-note-dialog] textarea',
+			)?.value,
 		).toBe('');
 	});
 

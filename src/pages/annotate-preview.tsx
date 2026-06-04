@@ -25,7 +25,8 @@ import embody from '@site/src/lib/just-enough/javascript/embody/index.js';
 import annotateLens from '@site/src/lib/just-enough/javascript/lenses/annotate/index.js';
 import type { ViewMode } from '@site/src/lib/just-enough/javascript/lenses/annotate/types.js';
 
-const SAMPLE = 'function classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}';
+const SAMPLE =
+	'function classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}';
 
 export default function AnnotatePreview(): React.JSX.Element {
 	const [code, setCode] = React.useState<string>(SAMPLE);

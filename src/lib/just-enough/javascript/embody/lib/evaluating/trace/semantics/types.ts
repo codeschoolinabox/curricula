@@ -16,10 +16,7 @@ import type {
 	FormattingResultError,
 } from '../../../validating/types.js';
 import type { ParseResultError } from '../../../parse-old/types.js';
-import type {
-	ASTNode,
-	TraceEvent,
-} from './tracing/types.js';
+import type { ASTNode, TraceEvent } from './tracing/types.js';
 import type { TraceOptions } from './config.types.js';
 
 // ─── Result error types (engine-owned) ───────────────────────
@@ -113,11 +110,7 @@ type TraceResultError =
  * - `'complete'` → `ok: true`
  * - `'timeout' | 'iteration-limit' | 'error'` → `ok: false`
  */
-type TraceOutcome =
-	| 'complete'
-	| 'timeout'
-	| 'iteration-limit'
-	| 'error';
+type TraceOutcome = 'complete' | 'timeout' | 'iteration-limit' | 'error';
 
 /**
  * Result from `trace()` — Aran instrumentation with structured events.

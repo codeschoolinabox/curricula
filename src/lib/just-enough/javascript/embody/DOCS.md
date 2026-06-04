@@ -34,9 +34,9 @@ flowchart TD
 
 Both paths converge on the same five-leaf shape catalog. **Scenario shortcuts**
 (the `dispatch → canned` branch) **construct the matching leaf shape directly**
-without running the upstream stages. Scenario dispatch is shape-construction, not
-pipeline-traversal — the canned Snippet is materialized from the scenario keyword,
-then frozen.
+without running the upstream stages. Scenario dispatch is shape-construction,
+not pipeline-traversal — the canned Snippet is materialized from the scenario
+keyword, then frozen.
 
 **Order of operations inside the pipeline:**
 
@@ -46,14 +46,15 @@ then frozen.
   `status.parsed === true`.
 - The validate stage then runs and produces `snippet.validation`. It does three
   things:
-  1. Reads the AST → derives `violations[]` → sets `isJeJ = violations.length === 0`
-     (the gate criterion).
+  1. Reads the AST → derives `violations[]` → sets
+     `isJeJ = violations.length === 0` (the gate criterion).
   2. Reads `analysis.nonDeterminism` → derives `isDeterministic` (metadata).
   3. Reads `analysis.hasIo.user.total` → derives `doesPause` (metadata).
 
-**Validation is a hard gate.** `violations.length > 0` sets `snippet.creation =
-null` and prevents evaluation — programs that aren't valid JEJ don't run. On
-validate-fail, `snippet.errors` carries `phase='validation'` (first-fail-wins).
+**Validation is a hard gate.** `violations.length > 0` sets
+`snippet.creation = null` and prevents evaluation — programs that aren't valid
+JEJ don't run. On validate-fail, `snippet.errors` carries `phase='validation'`
+(first-fail-wins).
 
 **Phase objects are nullable (Option A).** `snippet.tokenize`, `.parseAST`, and
 `.creation` are `PhaseType | null` — null when the corresponding status flag is
@@ -63,17 +64,19 @@ false. `snippet.realm` is always present (realm always passes).
 
 **`snippet.evaluation` is always callable.** On non-apex leaves, `run()` returns
 a no-op `RunInstance` with `events: []` and `endReport.outcome: 'not-runnable'`;
-no worker is spawned. See [Evaluation behavior across leaves](#evaluation-behavior-across-leaves).
+no worker is spawned. See
+[Evaluation behavior across leaves](#evaluation-behavior-across-leaves).
 
-**Runtime errors are NOT embodied.** Outcomes from `snippet.evaluation.events.run()`
-(timeout, cancellation, evaluation error) live on `RunInstance.endReport` per-call,
-not on the static Snippet. The apex leaf is shape-identical across `OK` and
-`EVAL_*` scenarios; the `EVAL_*` overlay is interpreted by the evaluate streams
-at call time.
+**Runtime errors are NOT embodied.** Outcomes from
+`snippet.evaluation.events.run()` (timeout, cancellation, evaluation error) live
+on `RunInstance.endReport` per-call, not on the static Snippet. The apex leaf is
+shape-identical across `OK` and `EVAL_*` scenarios; the `EVAL_*` overlay is
+interpreted by the evaluate streams at call time.
 
 Status booleans (`tokenized`, `parsed`, `validated`, `created`) gate which phase
 objects are non-null; lenses guard by checking the relevant boolean before
-reaching for optional fields. See [`types.ts`](./types.ts) for the full contract.
+reaching for optional fields. See [`types.ts`](./types.ts) for the full
+contract.
 
 ## Three-layer framework
 
@@ -102,13 +105,13 @@ construction and deep-frozen as a unit.
 The parse phase's entwined aggregate (`ParseASTEntwined`) also carries two
 canonical lookup indexes — `byPath` (`Record<NodePath, NodeEntwined>`) and
 `byOffset` (`ReadonlyArray<NodeEntwined>` by source offset) — that resolve an
-*outside identity* (a path string carried on an event; a cursor offset) into the
+_outside identity_ (a path string carried on an event; a cursor offset) into the
 ref-graph. They hold the same node references as the tree (entry-points, not
 copies), so they cost a pointer + key per node, no data duplication. `NodePath`
-(dot form) is the shared node-identity *format* across validating/intercept/trace;
-the indexes themselves remain per-context (intercept's `astByPath`, trace's `ast`
-are separate maps over their own `ASTNode`) — unifying the indexes, not just the
-format, is future work.
+(dot form) is the shared node-identity _format_ across
+validating/intercept/trace; the indexes themselves remain per-context
+(intercept's `astByPath`, trace's `ast` are separate maps over their own
+`ASTNode`) — unifying the indexes, not just the format, is future work.
 
 **L3 — NMEvent**: an entwined entity in temporal context. Adds `phase`, `step`
 (per-stream position), the `prev`/`next` chain, `loc`, `relations`
@@ -117,10 +120,10 @@ event carries one L2 payload via `.entwined`.
 
 ### EEE × NMPhase grid
 
-The grid IS the Snippet property structure. Phase objects live on `snippet.realm`,
-`snippet.tokenize`, etc.; each phase object exposes `.data` (L1), `.entwined`
-(L2), and `.events()` (L3 stream). Layer-first access is provided only for events
-via `snippet.events.*`.
+The grid IS the Snippet property structure. Phase objects live on
+`snippet.realm`, `snippet.tokenize`, etc.; each phase object exposes `.data`
+(L1), `.entwined` (L2), and `.events()` (L3 stream). Layer-first access is
+provided only for events via `snippet.events.*`.
 
 | Phase        | `.data` (L1)                                       | `.entwined` (L2)                                        | `.events()` (L3 stream)                         |
 | ------------ | -------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------- |
@@ -133,31 +136,31 @@ via `snippet.events.*`.
 `analysis` and `validation` are cross-phase gate outputs — flat fields on
 `Snippet`, not cells in the grid.
 
-**Evaluation is the exception to the 3-layer rule.** Its Data and Entwined layers
-collapse to nothing because evaluation state cannot be crystallized — every
-binding access, coercion, and identifier resolution depends on runtime execution
-context. Evaluation data lives on `RunInstance.events[].entwined` (pointing back
-to static entwined entities) and on event-local payloads (resolved values,
-coerced types). The static graph provides the structural skeleton; runtime
-execution fills in the values.
+**Evaluation is the exception to the 3-layer rule.** Its Data and Entwined
+layers collapse to nothing because evaluation state cannot be crystallized —
+every binding access, coercion, and identifier resolution depends on runtime
+execution context. Evaluation data lives on `RunInstance.events[].entwined`
+(pointing back to static entwined entities) and on event-local payloads
+(resolved values, coerced types). The static graph provides the structural
+skeleton; runtime execution fills in the values.
 
 ### Phase naming
 
 Three naming sets coexist; each serves a different role:
 
-| Naming set | Syntax | Values | Used in |
-| - | - | - | - |
-| Snippet field names | camelCase JS property | `realm`, `tokenize`, `parseAST`, `creation`, `evaluation` | `snippet.<phase>` access |
-| `NMEventPhase` strings | colon-grouped | `'realm'`, `'parse:tokenize'`, `'parse:ast'`, `'creation'`, `'evaluation'` | `event.phase` discriminator |
-| `EmbodyPhase` strings | colon-grouped + `'validation'` | `'parse:tokenize'`, `'parse:ast'`, `'validation'`, `'creation'`, `'evaluation'` | `snippet.errors.phase` |
+| Naming set             | Syntax                         | Values                                                                          | Used in                     |
+| ---------------------- | ------------------------------ | ------------------------------------------------------------------------------- | --------------------------- |
+| Snippet field names    | camelCase JS property          | `realm`, `tokenize`, `parseAST`, `creation`, `evaluation`                       | `snippet.<phase>` access    |
+| `NMEventPhase` strings | colon-grouped                  | `'realm'`, `'parse:tokenize'`, `'parse:ast'`, `'creation'`, `'evaluation'`      | `event.phase` discriminator |
+| `EmbodyPhase` strings  | colon-grouped + `'validation'` | `'parse:tokenize'`, `'parse:ast'`, `'validation'`, `'creation'`, `'evaluation'` | `snippet.errors.phase`      |
 
 The `parse:` prefix on `NMEventPhase` groups the two parse sub-phases under one
 namespace: `event.phase === 'parse:tokenize'`, not `'tokenize'`. `EmbodyPhase`
 adds `'validation'` (the validate gate can fail; it's error-worthy) and omits
 `'realm'` (realm always passes; no realm-phase error is possible).
 
-When filtering events: `events.filter(e => e.phase === 'parse:tokenize')`.
-When reading errors: `snippet.errors?.phase === 'validation'`.
+When filtering events: `events.filter(e => e.phase === 'parse:tokenize')`. When
+reading errors: `snippet.errors?.phase === 'validation'`.
 
 ### Coordinate-access pattern
 
@@ -178,21 +181,23 @@ snippet.events.tokenize()   // identical to snippet.tokenize?.events()
 `.data` and `.entwined` are phase-first only. Two reasons the layer-first
 shorthand is restricted to events:
 
-1. **An empty generator is a semantically safe no-op.** Iterating zero events from
-   a null phase is indistinguishable from "this phase ran but emitted nothing."
-   There is no analogous no-op for data access — `null` and "data that exists but
-   is empty" mean different things to a caller.
-2. **Stream consumers compose across phases.** A lens iterating all NMEvents from
-   realm through creation calls `snippet.events.realm()`, `snippet.events.tokenize()`,
-   etc. in sequence without null-checking each phase object. A lens reading
-   entwined data is inherently phase-specific — you want tokenize entwined or
-   parseAST entwined, never a merged view of all phases.
+1. **An empty generator is a semantically safe no-op.** Iterating zero events
+   from a null phase is indistinguishable from "this phase ran but emitted
+   nothing." There is no analogous no-op for data access — `null` and "data that
+   exists but is empty" mean different things to a caller.
+2. **Stream consumers compose across phases.** A lens iterating all NMEvents
+   from realm through creation calls `snippet.events.realm()`,
+   `snippet.events.tokenize()`, etc. in sequence without null-checking each
+   phase object. A lens reading entwined data is inherently phase-specific — you
+   want tokenize entwined or parseAST entwined, never a merged view of all
+   phases.
 
 ## 5-leaf staircase (field presence)
 
 Phase objects follow Option A — present when the phase completed, `null` when it
 did not. `analysis` and `validation` are null when `!status.parsed`; present
-whenever `status.parsed === true` (regardless of validation or creation outcome).
+whenever `status.parsed === true` (regardless of validation or creation
+outcome).
 
 | Leaf            | `realm` | `tokenize` | `parseAST` | `creation` | `evaluation`     | `analysis` | `validation` |
 | --------------- | ------- | ---------- | ---------- | ---------- | ---------------- | ---------- | ------------ |
@@ -218,9 +223,9 @@ Notes:
 `snippet.evaluation.events.*` methods are always callable (the phase object is
 non-nullable). Their behavior varies by leaf:
 
-| Leaf | `run()` | `intercept()` / `trace.*()` |
-| - | - | - |
-| `apex` | Spawns a worker; returns a full `RunInstance` | Spawns a worker; emits events live |
+| Leaf              | `run()`                                                                                                                                         | `intercept()` / `trace.*()`           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `apex`            | Spawns a worker; returns a full `RunInstance`                                                                                                   | Spawns a worker; emits events live    |
 | any non-apex leaf | Returns a no-op `RunInstance`: `events: []`, `endReport.outcome: 'not-runnable'`, `endReport.error: null` (gate failure is on `snippet.errors`) | Returns a no-op handle; emits nothing |
 
 No worker is spawned for non-apex leaves. `endReport.outcome: 'not-runnable'`
@@ -235,8 +240,8 @@ the only callable surface (event streams are inherently iterated). No `query()`,
 `dispose()`, `clone*()`, no accessor methods, no derived getters. Anything a
 lens "needs to do" is spelled out as iteration + filter over the data.
 
-**The narrow getter exception — frozen-emit constraint.** Two fields on `NMEvent`
-are declared as getters: `get prev(): NMEvent | null` and
+**The narrow getter exception — frozen-emit constraint.** Two fields on
+`NMEvent` are declared as getters: `get prev(): NMEvent | null` and
 `get next(): NMEvent | null`. The reason: events are emitted and frozen one at a
 time as the stream progresses; when an opener event is frozen, its successor has
 not yet been emitted, so `next` cannot be a plain data property. Getters look up
@@ -270,7 +275,7 @@ cannot be precomputed at event-freeze time.
 silently succeeds. Pedagogy also prefers ground-truth shapes: indexes are plain
 `Record<K, V>`, sequences are arrays. embody provides the canonical
 node-identity/position indexes (`parseAST.entwined.byPath`, `.byOffset`) as a
-frozen `Record` and `Array`; lenses build their own *pedagogy-specific*
+frozen `Record` and `Array`; lenses build their own _pedagogy-specific_
 groupings internally if they want a different O(1) lookup.
 
 ### Per-instance, no shared state
@@ -295,9 +300,10 @@ were preferred — each is data, no ceremony to narrow. Lenses guard by
 ### Snowball event tiers as filter whitelists
 
 Evaluate-side tiers (`run`, `intercept`, `trace.variables`, `trace.syntax`,
-`trace.semantics`) are not type-narrowed subsets — they are **filter predicates**
-over a single flat event discriminated union. Higher tiers strictly include more
-event categories. `run` is special: returns a `RunInstance` with no event tier.
+`trace.semantics`) are not type-narrowed subsets — they are **filter
+predicates** over a single flat event discriminated union. Higher tiers strictly
+include more event categories. `run` is special: returns a `RunInstance` with no
+event tier.
 
 This avoids the modeling smell of "run ⊂ intercept" being false (run emits no
 events at all). The flat union with filter whitelists is honest: one universe,
@@ -359,8 +365,8 @@ A consumer navigating bookended pairs can:
 - Use `event.next` — walk forward (may pass intervening nested events).
 
 `.relations` is loosely typed on the base `NMEvent`
-(`Readonly<Record<string, NMEvent | null>> | undefined`) and narrowed to concrete
-getter shapes on each concrete event type (e.g.,
+(`Readonly<Record<string, NMEvent | null>> | undefined`) and narrowed to
+concrete getter shapes on each concrete event type (e.g.,
 `NodeEnterNMEvent.relations: { get pair(): NodeExitNMEvent }`).
 
 ### Streams as living view on crystallized data
@@ -372,23 +378,25 @@ over data already present in the entwined graph.
 The static entwined graph (realm → creation phases) is **crystallized**:
 computed pre-run, frozen, deterministic. Streams replay the program's lifetime
 from realm through creation as a sequence of NMEvents, each wrapping an
-already-frozen Entwined entity with temporal context (step, prev/next, relations).
+already-frozen Entwined entity with temporal context (step, prev/next,
+relations).
 
 Evaluation streams (`snippet.evaluation.events.*`) differ: they run the JEJ
 program in a sandboxed worker and emit events in real time. Their payloads
 reference the same static entwined graph (same `NodeEntwined` instances) but add
-runtime-specific state (resolved values, binding transitions). Runtime state lives
-only on `RunInstance`.
+runtime-specific state (resolved values, binding transitions). Runtime state
+lives only on `RunInstance`.
 
 A stream is not the data — it is the temporal shape of the data. The same
 entwined graph can be traversed in multiple orderings (by phase, by category, by
 scope chain), all reading from the same frozen source.
 
-**Category overlap across phases.** `category: 'scope'` and `category: 'binding'`
-fire in both `creation` (static, one pass) and `evaluation` (dynamic, per-run).
-They carry different `kind` sets: `creation` scope events are `'push'`-only;
-`evaluation` scope events add `'pop'`. Filter by phase + category to
-disambiguate: `events.filter(e => e.phase === 'creation' && e.category === 'scope')`.
+**Category overlap across phases.** `category: 'scope'` and
+`category: 'binding'` fire in both `creation` (static, one pass) and
+`evaluation` (dynamic, per-run). They carry different `kind` sets: `creation`
+scope events are `'push'`-only; `evaluation` scope events add `'pop'`. Filter by
+phase + category to disambiguate:
+`events.filter(e => e.phase === 'creation' && e.category === 'scope')`.
 
 ### Static/runtime asymmetry
 
@@ -404,17 +412,17 @@ results into entwined objects. Evaluation events reference static entities via
 
 ### Reference equality
 
-Within one call to `embody(code)`, the static entwined graph has stable identity.
-The same `TokenEntwined` instance appears in `snippet.tokenize?.entwined`, in
-`NodeEntwined.tokens[]`, and in every `TokenNMEvent.entwined` that wraps it. All
-event streams and all `RunInstance`s from `snippet.evaluation.events.run()`
-reference the same entwined objects.
+Within one call to `embody(code)`, the static entwined graph has stable
+identity. The same `TokenEntwined` instance appears in
+`snippet.tokenize?.entwined`, in `NodeEntwined.tokens[]`, and in every
+`TokenNMEvent.entwined` that wraps it. All event streams and all `RunInstance`s
+from `snippet.evaluation.events.run()` reference the same entwined objects.
 
-Across two calls to `embody(code)` (even identical source), no identity guarantees
-hold — two embodiments produce distinct object graphs.
+Across two calls to `embody(code)` (even identical source), no identity
+guarantees hold — two embodiments produce distinct object graphs.
 
-Runtime event identity within a single `RunInstance` is stable, but not guaranteed
-to match across separate `run()` calls on the same snippet.
+Runtime event identity within a single `RunInstance` is stable, but not
+guaranteed to match across separate `run()` calls on the same snippet.
 
 ## Validation gate vs. validation metadata
 
@@ -423,7 +431,8 @@ program either is a valid JEJ subset or it isn't; the gate flips
 `status.validated` accordingly. Failure means `snippet.creation = null`;
 `snippet.evaluation.events.*` are still callable but return no-op RunInstances.
 
-Two `snippet.validation` fields are **metadata for consumers, NOT gate criteria**:
+Two `snippet.validation` fields are **metadata for consumers, NOT gate
+criteria**:
 
 ```text
 isDeterministic = !any(nonDeterminism)
@@ -509,16 +518,16 @@ embody is **ECMAScript-spec-aligned**. Every type and event in
 [`types.ts`](./types.ts) corresponds to an NM concept which corresponds to an
 ECMA-262 abstract operation:
 
-| embody                                    | NM concept                                     | ES2024 op                                                                           |
-| ----------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `RealmPhase`                              | Realm setup                                    | `InitializeHostDefinedRealm` (§9.6)                                                 |
-| `RealmBindingData (category='intrinsic')` | ECMA intrinsics                                | `SetDefaultGlobalBindings` (§9.3.4)                                                 |
-| `RealmBindingData (category='host')`      | Host bindings                                  | HTML host hook                                                                      |
-| `ParseASTEntwined`                        | Parse output                                   | `ParseModule` (§16.2.4)                                                             |
-| `CreationEntwined`                        | Creation phase                                 | `GlobalDeclarationInstantiation` (§16.1.7)                                          |
-| `RunInstance`                             | Evaluation                                     | ScriptEvaluation (§16.1.6) + BlockDeclarationInstantiation (§14.2.3)               |
-| `BindingStatus = 'tdz'`                   | Uninitialized binding                          | §9.1.1.1.1                                                                          |
-| `CoerceNMEvent kind`                      | ToPrimitive / ToString / ToNumeric / ToBoolean | §7.1                                                                                |
+| embody                                    | NM concept                                     | ES2024 op                                                            |
+| ----------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------- |
+| `RealmPhase`                              | Realm setup                                    | `InitializeHostDefinedRealm` (§9.6)                                  |
+| `RealmBindingData (category='intrinsic')` | ECMA intrinsics                                | `SetDefaultGlobalBindings` (§9.3.4)                                  |
+| `RealmBindingData (category='host')`      | Host bindings                                  | HTML host hook                                                       |
+| `ParseASTEntwined`                        | Parse output                                   | `ParseModule` (§16.2.4)                                              |
+| `CreationEntwined`                        | Creation phase                                 | `GlobalDeclarationInstantiation` (§16.1.7)                           |
+| `RunInstance`                             | Evaluation                                     | ScriptEvaluation (§16.1.6) + BlockDeclarationInstantiation (§14.2.3) |
+| `BindingStatus = 'tdz'`                   | Uninitialized binding                          | §9.1.1.1.1                                                           |
+| `CoerceNMEvent kind`                      | ToPrimitive / ToString / ToNumeric / ToBoolean | §7.1                                                                 |
 
 See `../notional-machine.md` § Spec correspondence appendix for the full mapping
 including JEJ-pedagogical splits, glossary bridges, and known imperfections.
@@ -550,8 +559,8 @@ use is needed to inform.
 - **Per-category evaluation event payloads** — the kinds within each category
   (`expression: 'literal' | 'identifier' | …`,
   `coerce: 'ToPrimitive' | 'ToString' | …`, etc.) are named in
-  [`types.ts`](./types.ts); the full payload shape per kind is intentionally open
-  so per-category emission detail is not premature.
+  [`types.ts`](./types.ts); the full payload shape per kind is intentionally
+  open so per-category emission detail is not premature.
 - **`validation.formatted`** — semantics TBD pending `lib/formatting/` DDD. The
   field exists on `Validation`; its meaning (e.g. "source was already in
   formatted form on entry" vs. "formatting was run and produced no diff") is not
@@ -573,8 +582,8 @@ These are explicitly not responsibilities of `embody/`:
 
 - **Caching** — any flavor (call-level, run-level, snippet-level) is out. Each
   `embody(code)` call constructs from scratch; each `run()` re-runs the worker.
-- **Cross-snippet identity** — no identity relationship between two `embody(code)`
-  calls, even for identical source.
+- **Cross-snippet identity** — no identity relationship between two
+  `embody(code)` calls, even for identical source.
 - **Mutation or clone-on-access APIs** — consumers that need a mutable copy
   `structuredClone()` themselves.
 - **Lens-specific (pedagogy) indexes** — groupings like "all `if` statements" or

@@ -4,20 +4,29 @@ import collectJejSurface from '../collect-jej-surface.js';
 
 describe('collectJejSurface', () => {
 	describe('keywords branch', () => {
-		it.each(['let', 'const', 'if', 'for', 'return', 'true', 'false', 'null', 'new', 'typeof', 'in'])(
-			'emits %s with source keyword',
-			(label) => {
-				const result = collectJejSurface({
-					prefix: '',
-					precedingText: '',
-					fullText: '',
-				});
-				expect(result.find((s) => s.label === label)).toEqual({
-					label,
-					source: 'keyword',
-				});
-			},
-		);
+		it.each([
+			'let',
+			'const',
+			'if',
+			'for',
+			'return',
+			'true',
+			'false',
+			'null',
+			'new',
+			'typeof',
+			'in',
+		])('emits %s with source keyword', (label) => {
+			const result = collectJejSurface({
+				prefix: '',
+				precedingText: '',
+				fullText: '',
+			});
+			expect(result.find((s) => s.label === label)).toEqual({
+				label,
+				source: 'keyword',
+			});
+		});
 	});
 
 	describe('globals branch', () => {

@@ -48,7 +48,9 @@ export default function F2ModeMachine(): React.JSX.Element {
 				<h1>F2 mode machine sandbox</h1>
 				<p>
 					<strong>Current mode:</strong>{' '}
-					<code>{lens !== undefined ? `lens="${lens}"` : 'editor (no lens)'}</code>
+					<code>
+						{lens !== undefined ? `lens="${lens}"` : 'editor (no lens)'}
+					</code>
 				</p>
 				<button
 					type="button"

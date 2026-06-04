@@ -30,14 +30,18 @@ function effectBefore(state: TracerState, ...point: unknown[]): void {
 	const isCompound = tag.operator !== undefined && tag.operator !== '=';
 
 	// compound assignment (+=, -=, etc.) — emit AssignmentOperatorEvent
-	if (isCompound && isOperatorEnabled(state.config, 'assignment', tag.operator)) {
+	if (
+		isCompound &&
+		isOperatorEnabled(state.config, 'assignment', tag.operator)
+	) {
 		const currentValue = state.lastReadValues[variable];
 		emitEvent(state, tag, 'expression', 'operators.assignment', {
 			operator: tag.operator,
 			target: variable,
-			operands: currentValue !== undefined
-				? [representValue(currentValue), representValue(assignedValue)]
-				: [representValue(assignedValue)],
+			operands:
+				currentValue !== undefined
+					? [representValue(currentValue), representValue(assignedValue)]
+					: [representValue(assignedValue)],
 			result: representValue(assignedValue),
 			scopeCreationStep: lookup.scope.creationStep,
 		});

@@ -33,7 +33,10 @@
  * console.log(frozen === obj);       // true — same reference
  * frozen.nested.value = 2;           // TypeError in strict mode
  */
-function deepFreezeInPlace<T>(value: T, visited = new Set<object>()): Readonly<T> {
+function deepFreezeInPlace<T>(
+	value: T,
+	visited = new Set<object>(),
+): Readonly<T> {
 	if (value === null || typeof value !== 'object') {
 		return value;
 	}

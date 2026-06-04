@@ -1,16 +1,15 @@
 # run — Trapless Engine
 
-Runs JeJ code in a Web Worker and returns final status only — no
-event stream, no logs, no console traps. The third evaluation engine,
-sibling to [intercept](../intercept/README.md) (which captures
-`console` + dialog events) and [trace](../trace/README.md) (which
-streams AST-level execution steps).
+Runs JeJ code in a Web Worker and returns final status only — no event stream,
+no logs, no console traps. The third evaluation engine, sibling to
+[intercept](../intercept/README.md) (which captures `console` + dialog events)
+and [trace](../trace/README.md) (which streams AST-level execution steps).
 
 ## When to use it
 
-Pick **`run`** when the consumer just needs to know whether a program
-ran cleanly — completed, timed out, hit an iteration limit, was
-cancelled, or threw. Typical shape:
+Pick **`run`** when the consumer just needs to know whether a program ran
+cleanly — completed, timed out, hit an iteration limit, was cancelled, or threw.
+Typical shape:
 
 ```ts
 const result = await run(code, { seconds: 5 });
@@ -21,9 +20,9 @@ if (result.ok) {
 }
 ```
 
-If you need to capture what the program logged, picked, or alerted —
-use **`intercept`**. If you need expression-level execution traces —
-use **`trace`**.
+If you need to capture what the program logged, picked, or alerted — use
+**`intercept`**. If you need expression-level execution traces — use
+**`trace`**.
 
 ## Public API
 
@@ -62,13 +61,12 @@ type RunResult = BaseResult<RunResultError> & {
 };
 ```
 
-`ok: true` iff `outcome === 'complete'`. On every other outcome,
-`ok: false` and (except for `'cancel'`) `error` carries a discriminated
-`RunResultError`.
+`ok: true` iff `outcome === 'complete'`. On every other outcome, `ok: false` and
+(except for `'cancel'`) `error` carries a discriminated `RunResultError`.
 
 The handle has no `for await`, no `Symbol.asyncIterator`, no `.fail()`.
-`await handle` resolves directly to the `RunResult` via the `.then`
-delegate that mirrors intercept's drain-on-await behavior.
+`await handle` resolves directly to the `RunResult` via the `.then` delegate
+that mirrors intercept's drain-on-await behavior.
 
 ## Consumer patterns
 
@@ -100,9 +98,8 @@ const result = await handle; // PromiseLike — same as .result
 
 ## Sync surface on the handle
 
-All sync-knowable data is on the handle at the moment `run()`
-returns. Useful for diagnostics, logging, or AST inspection without
-awaiting:
+All sync-knowable data is on the handle at the moment `run()` returns. Useful
+for diagnostics, logging, or AST inspection without awaiting:
 
 ```ts
 const handle = run('let x = 1;\n');
@@ -114,13 +111,13 @@ handle.options.iterations; // as-passed (no default)
 
 ## I/O fallback (parity with intercept)
 
-When learner code calls `prompt`/`alert`/`confirm` and the consumer
-**did not provide a mock for that dialog**, run falls back to the
-native browser dialog: `globalThis.prompt` / `globalThis.alert` /
-`globalThis.confirm`. Same behavior as intercept — no divergence.
+When learner code calls `prompt`/`alert`/`confirm` and the consumer **did not
+provide a mock for that dialog**, run falls back to the native browser dialog:
+`globalThis.prompt` / `globalThis.alert` / `globalThis.confirm`. Same behavior
+as intercept — no divergence.
 
-For headless or fire-and-forget contexts where a native dialog would
-hang, pass mocks for every dialog the program might call:
+For headless or fire-and-forget contexts where a native dialog would hang, pass
+mocks for every dialog the program might call:
 
 ```ts
 const result = await run(code, {
@@ -134,15 +131,15 @@ const result = await run(code, {
 
 ## What is NOT here
 
-- **No `console` traps.** Programs that call `console.log` write to
-  the worker's native console (visible in browser dev tools).
-  Captured logs are intercept's job.
+- **No `console` traps.** Programs that call `console.log` write to the worker's
+  native console (visible in browser dev tools). Captured logs are intercept's
+  job.
 - **No event stream.** No `for await`, no `Symbol.asyncIterator`.
 - **No `.fail(reason)`.** Cancel is the only mutator.
-- **No replay.** The result Promise is memoized but there's nothing
-  to replay (no events).
-- **No backwards-compatible positional `seconds` argument.** Always
-  pass options as an object: `run(code, { seconds: 5 })`.
+- **No replay.** The result Promise is memoized but there's nothing to replay
+  (no events).
+- **No backwards-compatible positional `seconds` argument.** Always pass options
+  as an object: `run(code, { seconds: 5 })`.
 
 ## Sandbox
 
@@ -152,10 +149,9 @@ A hand-test page exercises the full public API:
 npx vite --config src/lib/just-enough/javascript/embody/lib/evaluating/run/vite.sandbox.config.ts
 ```
 
-Then click `[run]` on the snippets to walk through each outcome
-variant. The page's status line surfaces `outcome` / `ok` /
-`error.kind` / `error.message`, and the full result object is logged
-to the dev-tools console as `[run result]`.
+Then click `[run]` on the snippets to walk through each outcome variant. The
+page's status line surfaces `outcome` / `ok` / `error.kind` / `error.message`,
+and the full result object is logged to the dev-tools console as `[run result]`.
 
 ## Tests
 
@@ -171,7 +167,7 @@ node ./node_modules/vitest/vitest.mjs run --project browser \
 
 - [intercept/](../intercept/) — engine that captures console + dialog events.
 - [trace/](../trace/) — engine that streams AST-level execution steps.
-- [shared/](../shared/) — cross-engine primitives (`Execution` factory,
-  SAB pause protocol, guard-loops).
-- [DOCS.md](./DOCS.md) — architecture, decisions, cancel state machine,
-  I/O default rationale.
+- [shared/](../shared/) — cross-engine primitives (`Execution` factory, SAB
+  pause protocol, guard-loops).
+- [DOCS.md](./DOCS.md) — architecture, decisions, cancel state machine, I/O
+  default rationale.

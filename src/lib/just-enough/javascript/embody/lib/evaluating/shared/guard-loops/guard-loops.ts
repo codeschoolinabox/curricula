@@ -180,9 +180,7 @@ function collectLoops(ast: unknown): CollectedLoop[] {
 	return loops;
 }
 
-function isBlockStatement(
-	node: Record<string, unknown> | undefined,
-): boolean {
+function isBlockStatement(node: Record<string, unknown> | undefined): boolean {
 	return node !== undefined && node.type === 'BlockStatement';
 }
 

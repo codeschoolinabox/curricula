@@ -50,7 +50,9 @@ describe('verifyOptions', () => {
 	// --- invalid cases (should throw) ---
 
 	it('throws Error when start > end', () => {
-		expect(() => verifyOptions({ range: { start: 10, end: 5 } })).toThrow(Error);
+		expect(() => verifyOptions({ range: { start: 10, end: 5 } })).toThrow(
+			Error,
+		);
 	});
 
 	it('includes start and end values in error message', () => {
@@ -61,7 +63,9 @@ describe('verifyOptions', () => {
 
 	describe('iterations constraint', () => {
 		it('does not throw when iterations is absent', () => {
-			expect(() => verifyOptions({ range: { start: 1, end: 10 } })).not.toThrow();
+			expect(() =>
+				verifyOptions({ range: { start: 1, end: 10 } }),
+			).not.toThrow();
 		});
 
 		it('does not throw when iterations is positive', () => {
@@ -83,7 +87,9 @@ describe('verifyOptions', () => {
 
 	describe('seconds constraint', () => {
 		it('does not throw when seconds is absent', () => {
-			expect(() => verifyOptions({ range: { start: 1, end: 10 } })).not.toThrow();
+			expect(() =>
+				verifyOptions({ range: { start: 1, end: 10 } }),
+			).not.toThrow();
 		});
 
 		it('does not throw when seconds is positive', () => {

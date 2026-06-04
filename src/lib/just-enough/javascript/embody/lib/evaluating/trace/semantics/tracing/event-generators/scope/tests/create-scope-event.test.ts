@@ -93,7 +93,12 @@ describe('createScopeEvent', () => {
 	describe('errors', () => {
 		it('throws on depth < 0', () => {
 			expect(() =>
-				createScopeEvent({ kind: 'block', event: 'create', depth: -1, creationStep: 0 }),
+				createScopeEvent({
+					kind: 'block',
+					event: 'create',
+					depth: -1,
+					creationStep: 0,
+				}),
 			).toThrow();
 		});
 

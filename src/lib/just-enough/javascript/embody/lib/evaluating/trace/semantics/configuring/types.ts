@@ -16,20 +16,20 @@
  * - minItems, maxItems for array length constraints
  */
 type JSONSchema = {
-  readonly $schema?: string;
-  readonly type?: string | readonly string[];
-  readonly properties?: Readonly<Record<string, JSONSchema>>;
-  readonly items?: JSONSchema;
-  readonly additionalProperties?: boolean | JSONSchema;
-  readonly required?: readonly string[];
-  readonly enum?: readonly unknown[];
-  readonly default?: unknown;
-  readonly minimum?: number;
-  readonly maximum?: number;
-  readonly minItems?: number;
-  readonly maxItems?: number;
-  readonly oneOf?: readonly JSONSchema[];
-  readonly description?: string;
+	readonly $schema?: string;
+	readonly type?: string | readonly string[];
+	readonly properties?: Readonly<Record<string, JSONSchema>>;
+	readonly items?: JSONSchema;
+	readonly additionalProperties?: boolean | JSONSchema;
+	readonly required?: readonly string[];
+	readonly enum?: readonly unknown[];
+	readonly default?: unknown;
+	readonly minimum?: number;
+	readonly maximum?: number;
+	readonly minItems?: number;
+	readonly maxItems?: number;
+	readonly oneOf?: readonly JSONSchema[];
+	readonly description?: string;
 };
 
 export type { JSONSchema };

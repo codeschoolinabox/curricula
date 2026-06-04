@@ -58,7 +58,10 @@ function extractUserLabel(label: string | undefined): string | null {
  */
 function createStatementPointcut(config: Record<string, unknown>) {
 	const controlFlow = (config.controlFlow ?? {}) as Record<string, unknown>;
-	const controlFlowEvents = (controlFlow.events ?? {}) as Record<string, unknown>;
+	const controlFlowEvents = (controlFlow.events ?? {}) as Record<
+		string,
+		unknown
+	>;
 
 	// perf: skip freeze — consumed by Aran's weaving machinery
 	function statementPointcut(

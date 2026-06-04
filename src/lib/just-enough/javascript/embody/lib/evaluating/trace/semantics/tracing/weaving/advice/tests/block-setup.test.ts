@@ -20,7 +20,9 @@ function makeState(overrides: Partial<TracerState> = {}): TracerState {
 		step: 0,
 		scopeStack: [],
 		iterationCounters: {},
-		lastExpressionResult: null, previousExpressionResult: null, lastReadValues: {},
+		lastExpressionResult: null,
+		previousExpressionResult: null,
+		lastReadValues: {},
 		config: {
 			scopes: { kind: { module: true, block: true }, events: { create: true } },
 		},
@@ -71,10 +73,26 @@ describe('blockSetup', () => {
 		});
 
 		it('scope has correct depth (1 for nested)', () => {
-			const state = makeState({ step: 1, scopeStack: [{
-				creationStep: 1, depth: 0, kind: 'module', structure: null, structureStep: null, variables: {},
-			}] });
-			blockSetup(state, 'IfStatement', 'block', 'then', makeTag({ structure: 'conditional' }));
+			const state = makeState({
+				step: 1,
+				scopeStack: [
+					{
+						creationStep: 1,
+						depth: 0,
+						kind: 'module',
+						structure: null,
+						structureStep: null,
+						variables: {},
+					},
+				],
+			});
+			blockSetup(
+				state,
+				'IfStatement',
+				'block',
+				'then',
+				makeTag({ structure: 'conditional' }),
+			);
 			expect(state.scopeStack[1].depth).toBe(1);
 		});
 
@@ -86,7 +104,13 @@ describe('blockSetup', () => {
 
 		it('scope has structure from tag', () => {
 			const state = makeState();
-			blockSetup(state, 'WhileStatement', 'block', 'while', makeTag({ structure: 'while' }));
+			blockSetup(
+				state,
+				'WhileStatement',
+				'block',
+				'while',
+				makeTag({ structure: 'while' }),
+			);
 			expect(state.scopeStack[0].structure).toBe('while');
 		});
 
@@ -126,7 +150,9 @@ describe('blockSetup', () => {
 
 		it('does not emit when scope kind is disabled', () => {
 			const state = makeState({
-				config: { scopes: { kind: { module: false }, events: { create: true } } },
+				config: {
+					scopes: { kind: { module: false }, events: { create: true } },
+				},
 			});
 			blockSetup(state, 'Program', 'module', 'bare', makeTag());
 			expect(state.trace).toHaveLength(0);
@@ -134,7 +160,9 @@ describe('blockSetup', () => {
 
 		it('does not emit when create event is disabled', () => {
 			const state = makeState({
-				config: { scopes: { kind: { module: true }, events: { create: false } } },
+				config: {
+					scopes: { kind: { module: true }, events: { create: false } },
+				},
 			});
 			blockSetup(state, 'Program', 'module', 'bare', makeTag());
 			expect(state.trace).toHaveLength(0);
@@ -151,7 +179,9 @@ describe('blockSetup', () => {
 		it('returns state even if dispatch throws', () => {
 			const state = makeState();
 			// force a throw by passing invalid generator path via broken config
-			state.config = { scopes: { kind: { module: true }, events: { create: true } } };
+			state.config = {
+				scopes: { kind: { module: true }, events: { create: true } },
+			};
 			// even with valid config, if something internal breaks, state is still returned
 			const result = blockSetup(state, 'Program', 'module', 'bare', makeTag());
 			expect(result).toBe(state);

@@ -1,4 +1,8 @@
-import type { LiteralEvent, LiteralKind, ValueRepresentation } from '../../types.js';
+import type {
+	LiteralEvent,
+	LiteralKind,
+	ValueRepresentation,
+} from '../../types.js';
 
 const VALID_KINDS = new Set<LiteralKind>([
 	'string',
@@ -16,16 +20,15 @@ const VALID_KINDS = new Set<LiteralKind>([
  * @returns The domain-specific fields for a LiteralEvent (without BaseEvent metadata)
  * @throws {Error} If kind or value is missing
  */
-function createLiteralEvent({
-	kind,
-	value,
-}: {
-	readonly kind: LiteralKind;
-	readonly value: ValueRepresentation;
-} = {} as { readonly kind: LiteralKind; readonly value: ValueRepresentation }): Omit<
-	LiteralEvent,
-	'step' | 'semantics' | 'loc' | 'node' | 'source'
-> {
+function createLiteralEvent(
+	{
+		kind,
+		value,
+	}: {
+		readonly kind: LiteralKind;
+		readonly value: ValueRepresentation;
+	} = {} as { readonly kind: LiteralKind; readonly value: ValueRepresentation },
+): Omit<LiteralEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
 	if (!kind || !VALID_KINDS.has(kind)) {
 		throw new Error(
 			`createLiteralEvent: kind must be one of ${Array.from(VALID_KINDS).join(', ')}`,

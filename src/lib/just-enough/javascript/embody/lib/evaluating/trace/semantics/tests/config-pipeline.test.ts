@@ -22,16 +22,29 @@ import type { JSONSchema } from '../configuring/types.js';
 describe('prepareConfig', () => {
 	describe('default filling', () => {
 		it('fills all 9 top-level keys for empty input', () => {
-			const result = prepareConfig({}, optionsSchema) as Record<string, unknown>;
+			const result = prepareConfig({}, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 
 			expect(Object.keys(result).sort()).toEqual([
-				'bindings', 'controlFlow', 'functions', 'literals',
-				'operators', 'propertyAccess', 'scopes', 'templates', 'with',
+				'bindings',
+				'controlFlow',
+				'functions',
+				'literals',
+				'operators',
+				'propertyAccess',
+				'scopes',
+				'templates',
+				'with',
 			]);
 		});
 
 		it('defaults bindings.kind.let to true', () => {
-			const result = prepareConfig({}, optionsSchema) as Record<string, unknown>;
+			const result = prepareConfig({}, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 			const bindings = result.bindings as Record<string, unknown>;
 			const kind = bindings.kind as Record<string, unknown>;
 
@@ -39,7 +52,10 @@ describe('prepareConfig', () => {
 		});
 
 		it('defaults bindings.kind.const to true', () => {
-			const result = prepareConfig({}, optionsSchema) as Record<string, unknown>;
+			const result = prepareConfig({}, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 			const bindings = result.bindings as Record<string, unknown>;
 			const kind = bindings.kind as Record<string, unknown>;
 
@@ -47,7 +63,10 @@ describe('prepareConfig', () => {
 		});
 
 		it('defaults operators.pure.arithmetic to true', () => {
-			const result = prepareConfig({}, optionsSchema) as Record<string, unknown>;
+			const result = prepareConfig({}, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 			const operators = result.operators as Record<string, unknown>;
 			const pure = operators.pure as Record<string, unknown>;
 
@@ -55,7 +74,10 @@ describe('prepareConfig', () => {
 		});
 
 		it('defaults controlFlow.kind.loops.while to true', () => {
-			const result = prepareConfig({}, optionsSchema) as Record<string, unknown>;
+			const result = prepareConfig({}, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 			const cf = result.controlFlow as Record<string, unknown>;
 			const kind = cf.kind as Record<string, unknown>;
 			const loops = kind.loops as Record<string, unknown>;
@@ -64,7 +86,10 @@ describe('prepareConfig', () => {
 		});
 
 		it('defaults filter arrays to empty', () => {
-			const result = prepareConfig({}, optionsSchema) as Record<string, unknown>;
+			const result = prepareConfig({}, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 			const bindings = result.bindings as Record<string, unknown>;
 
 			expect(bindings.filter).toEqual([]);
@@ -207,13 +232,19 @@ describe('prepareConfig', () => {
 
 	describe('edge cases', () => {
 		it('handles null input', () => {
-			const result = prepareConfig(null, optionsSchema) as Record<string, unknown>;
+			const result = prepareConfig(null, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 
 			expect(result).toHaveProperty('bindings');
 		});
 
 		it('handles undefined input', () => {
-			const result = prepareConfig(undefined, optionsSchema) as Record<string, unknown>;
+			const result = prepareConfig(undefined, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 
 			expect(result).toHaveProperty('bindings');
 		});
@@ -229,7 +260,10 @@ describe('expandShorthand', () => {
 		it('returns unchanged when field is already an object', () => {
 			const input = { literals: { string: true, number: false } };
 
-			const result = expandShorthand(input, optionsSchema) as Record<string, unknown>;
+			const result = expandShorthand(input, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 			const literals = result.literals as Record<string, unknown>;
 
 			expect(literals.string).toBe(true);
@@ -239,7 +273,10 @@ describe('expandShorthand', () => {
 		it('passes through non-boolean non-object values', () => {
 			const input = { bindings: { filter: ['x'] } };
 
-			const result = expandShorthand(input, optionsSchema) as Record<string, unknown>;
+			const result = expandShorthand(input, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 			const bindings = result.bindings as Record<string, unknown>;
 
 			expect(bindings.filter).toEqual(['x']);
@@ -250,7 +287,10 @@ describe('expandShorthand', () => {
 		it('expands mixed-type schema recursively (boolean leaves + object branches)', () => {
 			const input = { operators: false };
 
-			const result = expandShorthand(input, optionsSchema) as Record<string, unknown>;
+			const result = expandShorthand(input, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 			const operators = result.operators as Record<string, unknown>;
 			const pure = operators.pure as Record<string, unknown>;
 
@@ -261,7 +301,10 @@ describe('expandShorthand', () => {
 		it('omits filter arrays from expansion (fillDefaults handles them)', () => {
 			const input = { operators: false };
 
-			const result = expandShorthand(input, optionsSchema) as Record<string, unknown>;
+			const result = expandShorthand(input, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 			const operators = result.operators as Record<string, unknown>;
 
 			expect(operators).not.toHaveProperty('filter');
@@ -326,10 +369,10 @@ describe('fillDefaults', () => {
 
 	describe('preserves user values', () => {
 		it('preserves user-provided boolean over default', () => {
-			const result = fillDefaults(
-				{ with: false },
-				optionsSchema,
-			) as Record<string, unknown>;
+			const result = fillDefaults({ with: false }, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 
 			expect(result.with).toBe(false);
 		});
@@ -358,13 +401,19 @@ describe('fillDefaults', () => {
 
 	describe('edge cases', () => {
 		it('handles undefined input', () => {
-			const result = fillDefaults(undefined, optionsSchema) as Record<string, unknown>;
+			const result = fillDefaults(undefined, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 
 			expect(result).toHaveProperty('bindings');
 		});
 
 		it('handles null input', () => {
-			const result = fillDefaults(null, optionsSchema) as Record<string, unknown>;
+			const result = fillDefaults(null, optionsSchema) as Record<
+				string,
+				unknown
+			>;
 
 			expect(result).toHaveProperty('bindings');
 		});
@@ -394,17 +443,15 @@ describe('validateConfig', () => {
 
 	describe('invalid input', () => {
 		it('throws Error for wrong type', () => {
-			expect(() => validateConfig(
-				{ bindings: 'not an object' },
-				optionsSchema,
-			)).toThrow(Error);
+			expect(() =>
+				validateConfig({ bindings: 'not an object' }, optionsSchema),
+			).toThrow(Error);
 		});
 
 		it('error message includes field path', () => {
-			expect(() => validateConfig(
-				{ bindings: 'not an object' },
-				optionsSchema,
-			)).toThrow(/bindings/);
+			expect(() =>
+				validateConfig({ bindings: 'not an object' }, optionsSchema),
+			).toThrow(/bindings/);
 		});
 	});
 

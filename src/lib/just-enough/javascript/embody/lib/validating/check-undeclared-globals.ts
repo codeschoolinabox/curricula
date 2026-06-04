@@ -16,42 +16,120 @@ import type { Violation } from './types.js';
 const KNOWN_JS_GLOBALS: ReadonlySet<string> = Object.freeze(
 	new Set([
 		// Constructors / namespaces
-		'Object', 'Function', 'Array', 'Number', 'String', 'Boolean',
-		'Symbol', 'BigInt', 'Date', 'RegExp',
-		'Error', 'TypeError', 'RangeError', 'ReferenceError',
-		'SyntaxError', 'URIError', 'EvalError', 'AggregateError',
-		'Map', 'Set', 'WeakMap', 'WeakSet', 'WeakRef',
+		'Object',
+		'Function',
+		'Array',
+		'Number',
+		'String',
+		'Boolean',
+		'Symbol',
+		'BigInt',
+		'Date',
+		'RegExp',
+		'Error',
+		'TypeError',
+		'RangeError',
+		'ReferenceError',
+		'SyntaxError',
+		'URIError',
+		'EvalError',
+		'AggregateError',
+		'Map',
+		'Set',
+		'WeakMap',
+		'WeakSet',
+		'WeakRef',
 		'FinalizationRegistry',
-		'Promise', 'Proxy', 'Reflect', 'JSON', 'Math', 'Intl',
-		'ArrayBuffer', 'SharedArrayBuffer', 'DataView', 'Atomics',
-		'Int8Array', 'Uint8Array', 'Uint8ClampedArray',
-		'Int16Array', 'Uint16Array', 'Int32Array', 'Uint32Array',
-		'Float32Array', 'Float64Array', 'BigInt64Array', 'BigUint64Array',
-		'Iterator', 'AsyncIterator',
+		'Promise',
+		'Proxy',
+		'Reflect',
+		'JSON',
+		'Math',
+		'Intl',
+		'ArrayBuffer',
+		'SharedArrayBuffer',
+		'DataView',
+		'Atomics',
+		'Int8Array',
+		'Uint8Array',
+		'Uint8ClampedArray',
+		'Int16Array',
+		'Uint16Array',
+		'Int32Array',
+		'Uint32Array',
+		'Float32Array',
+		'Float64Array',
+		'BigInt64Array',
+		'BigUint64Array',
+		'Iterator',
+		'AsyncIterator',
 		// Global functions
-		'parseInt', 'parseFloat', 'isNaN', 'isFinite',
-		'encodeURI', 'encodeURIComponent', 'decodeURI',
+		'parseInt',
+		'parseFloat',
+		'isNaN',
+		'isFinite',
+		'encodeURI',
+		'encodeURIComponent',
+		'decodeURI',
 		'decodeURIComponent',
-		'escape', 'unescape', 'btoa', 'atob',
-		'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval',
-		'requestAnimationFrame', 'cancelAnimationFrame',
-		'queueMicrotask', 'structuredClone',
-		'fetch', 'AbortController', 'AbortSignal',
+		'escape',
+		'unescape',
+		'btoa',
+		'atob',
+		'setTimeout',
+		'setInterval',
+		'clearTimeout',
+		'clearInterval',
+		'requestAnimationFrame',
+		'cancelAnimationFrame',
+		'queueMicrotask',
+		'structuredClone',
+		'fetch',
+		'AbortController',
+		'AbortSignal',
 		// Browser globals
-		'window', 'self', 'globalThis', 'document', 'navigator',
-		'location', 'history', 'screen',
-		'localStorage', 'sessionStorage', 'indexedDB',
-		'XMLHttpRequest', 'Worker', 'WebSocket', 'EventSource',
+		'window',
+		'self',
+		'globalThis',
+		'document',
+		'navigator',
+		'location',
+		'history',
+		'screen',
+		'localStorage',
+		'sessionStorage',
+		'indexedDB',
+		'XMLHttpRequest',
+		'Worker',
+		'WebSocket',
+		'EventSource',
 		// DOM
-		'Element', 'HTMLElement', 'Node', 'NodeList',
-		'Event', 'CustomEvent',
-		'MutationObserver', 'IntersectionObserver', 'ResizeObserver',
+		'Element',
+		'HTMLElement',
+		'Node',
+		'NodeList',
+		'Event',
+		'CustomEvent',
+		'MutationObserver',
+		'IntersectionObserver',
+		'ResizeObserver',
 		// Web APIs
-		'URL', 'URLSearchParams', 'Headers', 'Request', 'Response',
-		'FormData', 'Blob', 'File', 'FileReader',
-		'TextEncoder', 'TextDecoder',
-		'crypto', 'performance',
-		'ReadableStream', 'WritableStream', 'TransformStream',
+		'URL',
+		'URLSearchParams',
+		'Headers',
+		'Request',
+		'Response',
+		'FormData',
+		'Blob',
+		'File',
+		'FileReader',
+		'TextEncoder',
+		'TextDecoder',
+		'crypto',
+		'performance',
+		'ReadableStream',
+		'WritableStream',
+		'TransformStream',
 	]),
 );
 
@@ -108,7 +186,14 @@ function checkUndeclaredGlobals(
 	const nodePathMap = buildNodePathMap(ast);
 	const violations: Violation[] = [];
 
-	walkForGlobals(ast, analysis.root, allowedGlobals, violations, false, nodePathMap);
+	walkForGlobals(
+		ast,
+		analysis.root,
+		allowedGlobals,
+		violations,
+		false,
+		nodePathMap,
+	);
 
 	return Object.freeze(violations);
 }
@@ -147,7 +232,14 @@ function walkForGlobals(
 	switch (node.type) {
 		case 'Program': {
 			for (const child of getChildNodes(node)) {
-				walkForGlobals(child, scope, allowedGlobals, violations, insideWith, nodePathMap);
+				walkForGlobals(
+					child,
+					scope,
+					allowedGlobals,
+					violations,
+					insideWith,
+					nodePathMap,
+				);
 			}
 			break;
 		}
@@ -170,11 +262,25 @@ function walkForGlobals(
 		case 'WithStatement': {
 			// Walk the object expression in the current scope (it's a read)
 			const object = record.object as Node;
-			walkForGlobals(object, scope, allowedGlobals, violations, insideWith, nodePathMap);
+			walkForGlobals(
+				object,
+				scope,
+				allowedGlobals,
+				violations,
+				insideWith,
+				nodePathMap,
+			);
 
 			// Walk the body with insideWith = true
 			const body = record.body as Node;
-			walkForGlobals(body, scope, allowedGlobals, violations, true, nodePathMap);
+			walkForGlobals(
+				body,
+				scope,
+				allowedGlobals,
+				violations,
+				true,
+				nodePathMap,
+			);
 			break;
 		}
 
@@ -183,7 +289,14 @@ function walkForGlobals(
 
 			// Walk the right-hand side (iterable) in the PARENT scope
 			const right = record.right as Node;
-			walkForGlobals(right, scope, allowedGlobals, violations, insideWith, nodePathMap);
+			walkForGlobals(
+				right,
+				scope,
+				allowedGlobals,
+				violations,
+				insideWith,
+				nodePathMap,
+			);
 
 			// Walk the body in the for-of scope
 			const body = record.body as Node;
@@ -217,10 +330,7 @@ function walkForGlobals(
 			// Scope tracking is handled by buildScope.
 			const declarators = record.declarations as readonly Node[];
 			for (const declarator of declarators) {
-				const declRecord = declarator as unknown as Record<
-					string,
-					unknown
-				>;
+				const declRecord = declarator as unknown as Record<string, unknown>;
 				const init = declRecord.init as Node | null;
 				if (init) {
 					walkForGlobals(
@@ -239,7 +349,14 @@ function walkForGlobals(
 		case 'MemberExpression': {
 			// Walk the object — it's a reference
 			const object = record.object as Node;
-			walkForGlobals(object, scope, allowedGlobals, violations, insideWith, nodePathMap);
+			walkForGlobals(
+				object,
+				scope,
+				allowedGlobals,
+				violations,
+				insideWith,
+				nodePathMap,
+			);
 
 			// Only walk the property if computed (bracket access)
 			const computed = record.computed as boolean;
@@ -265,11 +382,25 @@ function walkForGlobals(
 			const computed = record.computed as boolean;
 			if (computed) {
 				const key = record.key as Node;
-				walkForGlobals(key, scope, allowedGlobals, violations, insideWith, nodePathMap);
+				walkForGlobals(
+					key,
+					scope,
+					allowedGlobals,
+					violations,
+					insideWith,
+					nodePathMap,
+				);
 			}
 			// Always walk the value — it's an expression
 			const value = record.value as Node;
-			walkForGlobals(value, scope, allowedGlobals, violations, insideWith, nodePathMap);
+			walkForGlobals(
+				value,
+				scope,
+				allowedGlobals,
+				violations,
+				insideWith,
+				nodePathMap,
+			);
 			break;
 		}
 
@@ -332,7 +463,7 @@ function walkForGlobals(
  * Extracts a source range from an acorn node's `loc` property.
  */
 function extractLocation(node: Node) {
-	const {loc} = node;
+	const { loc } = node;
 	if (loc) {
 		return {
 			start: { line: loc.start.line, column: loc.start.column },

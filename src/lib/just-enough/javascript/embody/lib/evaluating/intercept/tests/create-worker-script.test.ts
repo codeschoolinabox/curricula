@@ -3,12 +3,25 @@ import { describe, expect, it } from 'vitest';
 import createWorkerScript from '../create-worker-script.js';
 
 const ALL_CONSOLE_METHODS = [
-	'log', 'debug', 'info', 'warn', 'error',
-	'assert', 'table', 'dir', 'dirxml',
-	'group', 'groupCollapsed', 'groupEnd',
-	'count', 'countReset',
-	'time', 'timeEnd', 'timeLog',
-	'trace', 'clear',
+	'log',
+	'debug',
+	'info',
+	'warn',
+	'error',
+	'assert',
+	'table',
+	'dir',
+	'dirxml',
+	'group',
+	'groupCollapsed',
+	'groupEnd',
+	'count',
+	'countReset',
+	'time',
+	'timeEnd',
+	'timeLog',
+	'trace',
+	'clear',
 ] as const;
 
 describe('createWorkerScript', () => {
@@ -164,7 +177,7 @@ describe('createWorkerScript', () => {
 			const script = createWorkerScript();
 			// For non-scriptMode: '"use strict"; ' + loopDeclarations + '\n'
 			expect(script).toContain('"use strict"; ');
-			expect(script).toContain("? loopDeclarations");
+			expect(script).toContain('? loopDeclarations');
 		});
 
 		it('scriptMode prefix uses only declarations (no "use strict" prefix)', () => {

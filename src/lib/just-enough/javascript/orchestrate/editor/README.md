@@ -28,9 +28,8 @@ editor/
 
 Editor-internal tests at [`./tests/index.test.tsx`](./tests/index.test.tsx)
 cover mount, CodeMirror lifecycle, prop sync, and `onSnippetChange` wiring.
-Orchestrator-level coverage that crosses the editor ↔ `<StudyLenses>`
-boundary lives at
-[`../tests/study-lenses.test.tsx`](../tests/study-lenses.test.tsx).
+Orchestrator-level coverage that crosses the editor ↔ `<StudyLenses>` boundary
+lives at [`../tests/study-lenses.test.tsx`](../tests/study-lenses.test.tsx).
 
 ## Public API
 
@@ -46,44 +45,42 @@ import EditorComponent from './editor/index.js';
 
 // With edit propagation — the orchestrator passes its setSnippet wrapper.
 <EditorComponent
-  snippet="let x = 5;"
-  onSnippetChange={(next) => setSnippet(next)}
+	snippet="let x = 5;"
+	onSnippetChange={(next) => setSnippet(next)}
 />;
 ```
 
 The component renders a `<div data-orchestrator-host>` and mounts a CodeMirror
 `EditorView` into it via `useEffect`. The `snippet` prop is the controlled
 initial-value and the source of truth for external sync — when it changes
-externally (e.g. lens → editor return), a sync effect writes `snippet` into
-the editor's `.content` (guarded by an equality check to avoid own-write
-echo). A CodeMirror update listener fires the optional `onSnippetChange(next)`
-callback when the learner types. The orchestrator threads its `useState`
-setter through that callback, so the editor is the single writer of snippet
-state in the package. The editor never receives `embodiment` — that is a
-lens-mode concept and is passed to `<LensModule.Component>`, not to this
-editor.
+externally (e.g. lens → editor return), a sync effect writes `snippet` into the
+editor's `.content` (guarded by an equality check to avoid own-write echo). A
+CodeMirror update listener fires the optional `onSnippetChange(next)` callback
+when the learner types. The orchestrator threads its `useState` setter through
+that callback, so the editor is the single writer of snippet state in the
+package. The editor never receives `embodiment` — that is a lens-mode concept
+and is passed to `<LensModule.Component>`, not to this editor.
 
 ## Why a single React component
 
-The editor's role is structurally distinct from the read-only lens role —
-the type system enforces that distinction (per
-[`../DOCS.md`](../DOCS.md) § Why the editor is a peer subdir, not a lens). A
-single React component avoids two distinct mistakes:
+The editor's role is structurally distinct from the read-only lens role — the
+type system enforces that distinction (per [`../DOCS.md`](../DOCS.md) § Why the
+editor is a peer subdir, not a lens). A single React component avoids two
+distinct mistakes:
 
-- It does not pretend a `LensModule` stub is load-bearing API for the home
-  base.
-- It does not introduce an adapter layer between React and CodeMirror; the
-  React component handles three lifecycle concerns directly:
+- It does not pretend a `LensModule` stub is load-bearing API for the home base.
+- It does not introduce an adapter layer between React and CodeMirror; the React
+  component handles three lifecycle concerns directly:
   - **Mount**: a `useEffect` calls `createEditor(snippet, { onChange })` and
     stores the resolved `EditorInstance` in a ref.
-  - **Sync**: a second `useEffect` watches the `snippet` prop; when it
-    changes externally and `snippet !== editor.content`, it writes
-    `editor.content = snippet`. The equality guard prevents own-write
-    echo from the orchestrator's setState round-trip.
-  - **Destroy**: the mount effect's cleanup calls `editor.destroy()`
-    (idempotent per the editing/ contract); a `cancelled` flag inside
-    the effect closure gates a late-resolving `createEditor` promise
-    so a unit-then-remounted component never holds a stale instance.
+  - **Sync**: a second `useEffect` watches the `snippet` prop; when it changes
+    externally and `snippet !== editor.content`, it writes
+    `editor.content = snippet`. The equality guard prevents own-write echo from
+    the orchestrator's setState round-trip.
+  - **Destroy**: the mount effect's cleanup calls `editor.destroy()` (idempotent
+    per the editing/ contract); a `cancelled` flag inside the effect closure
+    gates a late-resolving `createEditor` promise so a unit-then-remounted
+    component never holds a stale instance.
 
 The component delegates the CodeMirror setup (extensions, language modules,
 keybindings) to the [`../lib/editing/`](../lib/editing/) factory; the React
@@ -97,11 +94,11 @@ Module-specific rules:
 
 - **Single-writer state.** The editor is the single writer of snippet source.
   CodeMirror's update listener fires `onSnippetChange(next)`; the orchestrator
-  threads its `useState` setter into that callback. No lens dispatches
-  snippet edits. **Each keystroke must produce exactly one `onSnippetChange`
-  invocation, synchronously inside the CodeMirror update transaction** —
-  F2.5's eager cache invalidation depends on the 1:1 keystroke-to-setState
-  mapping. No debouncing, no batching.
+  threads its `useState` setter into that callback. No lens dispatches snippet
+  edits. **Each keystroke must produce exactly one `onSnippetChange` invocation,
+  synchronously inside the CodeMirror update transaction** — F2.5's eager cache
+  invalidation depends on the 1:1 keystroke-to-setState mapping. No debouncing,
+  no batching.
 - **One file owns the React surface.** `index.tsx` is the React home base. No
   second adapter layer; the CodeMirror integration lives entirely inside the
   component via `useEffect`, delegating setup to
@@ -111,26 +108,26 @@ Module-specific rules:
   the editor — per [`../DOCS.md`](../DOCS.md) § Lifecycle modes, editor mode has
   no embodiment built. The editor is never handed an embodiment because lens
   mode hands control off to a `<LensModule.Component>`, not to this editor.
-  `onSnippetChange` is optional so the component can also be mounted purely as
-  a display surface in tests / fixtures that don't need write propagation.
+  `onSnippetChange` is optional so the component can also be mounted purely as a
+  display surface in tests / fixtures that don't need write propagation.
 - **Async mount via `useEffect`.** CodeMirror's `createEditor` factory is async
   (dynamic language-module loading). The `useEffect` returns a cleanup that
   calls `editor.destroy()` for StrictMode-safe teardown; an in-flight mount
-  whose promise resolves after unmount is gated by a `cancelled` flag inside
-  the effect.
-- **Prop-change-during-mount race.** If the `snippet` prop changes between
-  the component's first render and the `createEditor` promise resolving,
-  the in-flight mount uses the original `initialCode`; the post-mount sync
-  effect writes the latest `snippet` prop value into `editor.content` once
-  mount completes (one extra dispatch on initial mount, equality-guarded
-  thereafter). This keeps the React component declarative without
-  cancelling and restarting in-flight mounts.
+  whose promise resolves after unmount is gated by a `cancelled` flag inside the
+  effect.
+- **Prop-change-during-mount race.** If the `snippet` prop changes between the
+  component's first render and the `createEditor` promise resolving, the
+  in-flight mount uses the original `initialCode`; the post-mount sync effect
+  writes the latest `snippet` prop value into `editor.content` once mount
+  completes (one extra dispatch on initial mount, equality-guarded thereafter).
+  This keeps the React component declarative without cancelling and restarting
+  in-flight mounts.
 - **Render-on-rejection policy.** If `createEditor` rejects (e.g. CM
-  construction throws), the mount effect catches the rejection and stores
-  it in a fallback state slot. The component then renders a minimal error
-  notice — a `<div data-orchestrator-host data-orchestrator-error>` so the
-  selector test surface stays consistent. The error message and the
-  underlying cause are written to the console.
+  construction throws), the mount effect catches the rejection and stores it in
+  a fallback state slot. The component then renders a minimal error notice — a
+  `<div data-orchestrator-host data-orchestrator-error>` so the selector test
+  surface stays consistent. The error message and the underlying cause are
+  written to the console.
 
 ## Navigation
 

@@ -21,17 +21,19 @@ User config + JS source
 ```
 
 - **Upstream**: User provides a config (options.schema.json) and JS source code
-- **This module**: Translates config into Aran weaving/advice, emits frozen `TraceEvent` objects
-- **Two-way linking**: `ASTNode.events[]` and `ASTNode.visits` are built by the internal `link()` post-execution — never by advice
+- **This module**: Translates config into Aran weaving/advice, emits frozen
+  `TraceEvent` objects
+- **Two-way linking**: `ASTNode.events[]` and `ASTNode.visits` are built by the
+  internal `link()` post-execution — never by advice
 
 ## Directory structure
 
-| Path | Purpose |
-| --- | --- |
-| `types.ts` | JejTag (AST metadata) and TracerState (runtime state) |
+| Path               | Purpose                                                    |
+| ------------------ | ---------------------------------------------------------- |
+| `types.ts`         | JejTag (AST metadata) and TracerState (runtime state)      |
 | `create-aspect.ts` | Main entry point — builds Aran flexible aspect from config |
-| `pointcut/` | One pointcut function per Aran hook category (5 files) |
-| `advice/` | Advice stubs — one per Aran hook category (5 files) |
+| `pointcut/`        | One pointcut function per Aran hook category (5 files)     |
+| `advice/`          | Advice stubs — one per Aran hook category (5 files)        |
 
 ## Key concepts
 

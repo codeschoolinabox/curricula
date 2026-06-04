@@ -74,10 +74,7 @@ describe('comprehension interaction analyzers', () => {
 		});
 
 		it('has correct metadata', () => {
-			const results = analyzeAll(
-				'const input = prompt("enter:");',
-				analyze,
-			);
+			const results = analyzeAll('const input = prompt("enter:");', analyze);
 			expect(results[0].id).toBe('prompt-return-value');
 			expect(results[0].kind).toBe('comprehension');
 			expect(results[0].category).toBe('clarity');
@@ -94,10 +91,7 @@ describe('comprehension interaction analyzers', () => {
 		});
 
 		it('does not fire on a prompt() call', () => {
-			const results = analyzeAll(
-				'const input = prompt("enter:");',
-				analyze,
-			);
+			const results = analyzeAll('const input = prompt("enter:");', analyze);
 			expect(results).toHaveLength(0);
 		});
 
@@ -127,10 +121,7 @@ describe('comprehension interaction analyzers', () => {
 		});
 
 		it('does not fire on a prompt() call', () => {
-			const results = analyzeAll(
-				'const input = prompt("enter:");',
-				analyze,
-			);
+			const results = analyzeAll('const input = prompt("enter:");', analyze);
 			expect(results).toHaveLength(0);
 		});
 

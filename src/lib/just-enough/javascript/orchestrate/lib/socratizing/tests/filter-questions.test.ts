@@ -6,7 +6,9 @@ import type { CodeQuestion, CodeQuestionInput } from '../types.js';
 
 // ─── Test helper ────────────────────────────────────────────
 
-function makeQuestion(overrides: Partial<CodeQuestionInput> = {}): CodeQuestion {
+function makeQuestion(
+	overrides: Partial<CodeQuestionInput> = {},
+): CodeQuestion {
 	return createCodeQuestion({
 		id: 'test-question',
 		kind: 'micro-decision',
@@ -154,7 +156,10 @@ describe('filterQuestions', () => {
 	describe('range filter', () => {
 		it('keeps a question whose location is inside the range', () => {
 			const q = makeQuestion({
-				location: { start: { line: 5, column: 0 }, end: { line: 10, column: 5 } },
+				location: {
+					start: { line: 5, column: 0 },
+					end: { line: 10, column: 5 },
+				},
 			});
 
 			const result = filterQuestions([q], {
@@ -165,7 +170,10 @@ describe('filterQuestions', () => {
 
 		it('removes a question whose location is entirely outside the range', () => {
 			const q = makeQuestion({
-				location: { start: { line: 5, column: 0 }, end: { line: 10, column: 5 } },
+				location: {
+					start: { line: 5, column: 0 },
+					end: { line: 10, column: 5 },
+				},
 			});
 
 			const result = filterQuestions([q], {
@@ -176,7 +184,10 @@ describe('filterQuestions', () => {
 
 		it('keeps a question that partially overlaps the range', () => {
 			const q = makeQuestion({
-				location: { start: { line: 5, column: 0 }, end: { line: 10, column: 5 } },
+				location: {
+					start: { line: 5, column: 0 },
+					end: { line: 10, column: 5 },
+				},
 			});
 
 			const result = filterQuestions([q], {
@@ -207,9 +218,7 @@ describe('filterQuestions', () => {
 
 		it('removes the entire CodeQuestion if all entries are pruned', () => {
 			const q = makeQuestion({
-				questions: [
-					{ register: 'comparative', text: 'only comparative' },
-				],
+				questions: [{ register: 'comparative', text: 'only comparative' }],
 			});
 
 			const result = filterQuestions([q], {
@@ -263,15 +272,24 @@ describe('filterQuestions', () => {
 		it('sorts questions by start line ascending', () => {
 			const late = makeQuestion({
 				id: 'late',
-				location: { start: { line: 10, column: 0 }, end: { line: 10, column: 5 } },
+				location: {
+					start: { line: 10, column: 0 },
+					end: { line: 10, column: 5 },
+				},
 			});
 			const early = makeQuestion({
 				id: 'early',
-				location: { start: { line: 2, column: 0 }, end: { line: 2, column: 5 } },
+				location: {
+					start: { line: 2, column: 0 },
+					end: { line: 2, column: 5 },
+				},
 			});
 			const mid = makeQuestion({
 				id: 'mid',
-				location: { start: { line: 5, column: 0 }, end: { line: 5, column: 5 } },
+				location: {
+					start: { line: 5, column: 0 },
+					end: { line: 5, column: 5 },
+				},
 			});
 
 			// Pass in unsorted order

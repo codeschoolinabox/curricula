@@ -202,9 +202,8 @@ const AnnotateComponent: ComponentType<LensProperties> =
 			useState<AnnotationsByView>(EMPTY_ANNOTATIONS);
 		const [tool, setTool] = useState<Tool>('pen');
 		const [color, setColor] = useState<string>(PALETTE[0]);
-		const [currentStroke, setCurrentStroke] = useState<
-			ReadonlyArray<Point> | null
-		>(null);
+		const [currentStroke, setCurrentStroke] =
+			useState<ReadonlyArray<Point> | null>(null);
 		const [noteDialog, setNoteDialog] = useState<{
 			readonly position: Point;
 		} | null>(null);
@@ -228,7 +227,9 @@ const AnnotateComponent: ComponentType<LensProperties> =
 		function extendStroke(event: React.MouseEvent<SVGSVGElement>): void {
 			if (tool !== 'pen' || !currentStroke) return;
 			const point = pointFromEvent(event);
-			setCurrentStroke((previous) => (previous ? [...previous, point] : [point]));
+			setCurrentStroke((previous) =>
+				previous ? [...previous, point] : [point],
+			);
 		}
 
 		// Discard taps (fewer than two points) — a single point is not a
@@ -368,11 +369,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 					>
 						{viewMode === 'code' ? 'Flowchart' : 'Code'}
 					</button>
-					<button
-						type="button"
-						data-clear-all="true"
-						onClick={clearActiveView}
-					>
+					<button type="button" data-clear-all="true" onClick={clearActiveView}>
 						Clear all
 					</button>
 				</div>
@@ -401,11 +398,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 						</pre>
 					)}
 					{viewMode === 'flowchart' &&
-						renderFlowchartView(
-							flowchart,
-							flowchartReference,
-							flowchartHtml,
-						)}
+						renderFlowchartView(flowchart, flowchartReference, flowchartHtml)}
 					{/* The overlay captures pointer events for drawing across both
 					    views. The flowchart-node tagger pre-positions `[data-flowchart-
 					    node]` ids on the SVG; v1 has no consumer for them (the deferred

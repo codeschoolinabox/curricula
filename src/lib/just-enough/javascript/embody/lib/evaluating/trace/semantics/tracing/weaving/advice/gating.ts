@@ -34,7 +34,10 @@ function asRecord(value: unknown): Record<string, unknown> {
 	return (value ?? {}) as Record<string, unknown>;
 }
 
-function passesFilter(config: Record<string, unknown>, itemName?: string): boolean {
+function passesFilter(
+	config: Record<string, unknown>,
+	itemName?: string,
+): boolean {
 	const filter = config.filter as unknown[] | undefined;
 	if (!filter || filter.length === 0) return true;
 	if (itemName === undefined) return true;
@@ -43,7 +46,11 @@ function passesFilter(config: Record<string, unknown>, itemName?: string): boole
 
 // --- 2D leaf gates ---
 
-function isScopeGateOpen(config: Config, scopeKind: string, eventType: string): boolean {
+function isScopeGateOpen(
+	config: Config,
+	scopeKind: string,
+	eventType: string,
+): boolean {
 	const scopes = asRecord(config.scopes);
 	const kind = asRecord(scopes.kind);
 	const events = asRecord(scopes.events);
@@ -59,7 +66,10 @@ function isBindingGateOpen(
 	const bindings = asRecord(config.bindings);
 	const kind = asRecord(bindings.kind);
 	const events = asRecord(bindings.events);
-	return !!(kind[bindingKind] && events[eventType]) && passesFilter(bindings, varName);
+	return (
+		!!(kind[bindingKind] && events[eventType]) &&
+		passesFilter(bindings, varName)
+	);
 }
 
 function isControlFlowGateOpen(
@@ -72,11 +82,17 @@ function isControlFlowGateOpen(
 	const events = asRecord(controlFlow.events);
 
 	if (flowKind === 'conditional') {
-		return !!(kind.conditionals && events[eventType]) && passesFilter(controlFlow, flowKind);
+		return (
+			!!(kind.conditionals && events[eventType]) &&
+			passesFilter(controlFlow, flowKind)
+		);
 	}
 
 	const loops = asRecord(kind.loops);
-	return !!(loops[flowKind] && events[eventType]) && passesFilter(controlFlow, flowKind);
+	return (
+		!!(loops[flowKind] && events[eventType]) &&
+		passesFilter(controlFlow, flowKind)
+	);
 }
 
 // --- Flat leaf gates ---
@@ -86,7 +102,11 @@ function isLiteralEnabled(config: Config, literalKind: string): boolean {
 	return !!literals[literalKind];
 }
 
-function isOperatorEnabled(config: Config, path: string, operatorName?: string): boolean {
+function isOperatorEnabled(
+	config: Config,
+	path: string,
+	operatorName?: string,
+): boolean {
 	const operators = asRecord(config.operators);
 	const segments = path.split('.');
 	let current: unknown = operators;
@@ -103,7 +123,9 @@ function isPropertyAccessEnabled(
 	propertyName?: string,
 ): boolean {
 	const propertyAccess = asRecord(config.propertyAccess);
-	return !!propertyAccess[accessKind] && passesFilter(propertyAccess, propertyName);
+	return (
+		!!propertyAccess[accessKind] && passesFilter(propertyAccess, propertyName)
+	);
 }
 
 function isFunctionEnabled(
@@ -132,7 +154,10 @@ function isAnyExpressionEnabled(config: Record<string, unknown>): boolean {
 	const bindingEvents = (bindings.events ?? {}) as Record<string, unknown>;
 	const operators = (config.operators ?? {}) as Record<string, unknown>;
 	const controlFlow = (config.controlFlow ?? {}) as Record<string, unknown>;
-	const controlFlowEvents = (controlFlow.events ?? {}) as Record<string, unknown>;
+	const controlFlowEvents = (controlFlow.events ?? {}) as Record<
+		string,
+		unknown
+	>;
 
 	return !!(
 		literals.string ||
@@ -155,7 +180,10 @@ function isAnyApplyEnabled(config: Record<string, unknown>): boolean {
 	const operators = (config.operators ?? {}) as Record<string, unknown>;
 	const pure = (operators.pure ?? {}) as Record<string, unknown>;
 	const negation = (pure.negation ?? {}) as Record<string, unknown>;
-	const propertyAccess = (config.propertyAccess ?? {}) as Record<string, unknown>;
+	const propertyAccess = (config.propertyAccess ?? {}) as Record<
+		string,
+		unknown
+	>;
 	const functions = (config.functions ?? {}) as Record<string, unknown>;
 	const templates = (config.templates ?? {}) as Record<string, unknown>;
 
@@ -207,7 +235,10 @@ function isAnyEffectEnabled(config: Record<string, unknown>): boolean {
  */
 function isAnyStatementEnabled(config: Record<string, unknown>): boolean {
 	const controlFlow = (config.controlFlow ?? {}) as Record<string, unknown>;
-	const controlFlowEvents = (controlFlow.events ?? {}) as Record<string, unknown>;
+	const controlFlowEvents = (controlFlow.events ?? {}) as Record<
+		string,
+		unknown
+	>;
 
 	return !!controlFlowEvents.jump;
 }

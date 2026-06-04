@@ -51,11 +51,10 @@ import type {
 
 type GlobalScope = {
 	readonly location: { hash: string };
-	readonly history: { replaceState: (state: unknown, title: string, url: string) => void };
-	readonly addEventListener: (
-		type: 'hashchange',
-		listener: () => void,
-	) => void;
+	readonly history: {
+		replaceState: (state: unknown, title: string, url: string) => void;
+	};
+	readonly addEventListener: (type: 'hashchange', listener: () => void) => void;
 	readonly removeEventListener: (
 		type: 'hashchange',
 		listener: () => void,
@@ -93,7 +92,7 @@ function getBlanksParamValue(hash: string): string | null {
 	if (!hash.startsWith('#?')) return null;
 	const queryString = hash.slice(2);
 	const match = queryString.match(/(?:^|&)blanks=([^&]*)/);
-	return match ? match[1] ?? null : null;
+	return match ? (match[1] ?? null) : null;
 }
 
 function parseHash(hash: string): Partial<BlanksLensConfig> {

@@ -26,7 +26,11 @@ import createAspect from './weaving/create-aspect.js';
 
 import type { JejTag } from './weaving/types.js';
 import type { TracerState } from './weaving/types.js';
-import type { SourceLocation, LoopKind, ControlFlowStructure } from './types.js';
+import type {
+	SourceLocation,
+	LoopKind,
+	ControlFlowStructure,
+} from './types.js';
 
 type InstrumentResult = {
 	readonly instrumentedCode: string;
@@ -91,9 +95,10 @@ function buildJejTag(
 		? { start: { ...node.loc.start }, end: { ...node.loc.end } }
 		: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } };
 
-	const source = (node.start !== undefined && node.end !== undefined)
-		? code.slice(node.start, node.end)
-		: '';
+	const source =
+		node.start !== undefined && node.end !== undefined
+			? code.slice(node.start, node.end)
+			: '';
 
 	const tag: Record<string, unknown> = {
 		loc,

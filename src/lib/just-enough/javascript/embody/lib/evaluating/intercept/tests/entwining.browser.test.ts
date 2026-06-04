@@ -125,9 +125,7 @@ describe('AST entwining (browser, end-to-end)', () => {
 			const result = await createInterceptGenerator(VALID_FIXTURE);
 			expect(Object.isFrozen(result.ast!['$'])).toBe(true);
 			// Cycle: parent ↔ child
-			const child = Object.values(result.ast!).find(
-				(n) => n.parent !== null,
-			);
+			const child = Object.values(result.ast!).find((n) => n.parent !== null);
 			expect(child).toBeDefined();
 			expect(Object.isFrozen(child!.parent!)).toBe(true);
 		});
@@ -166,7 +164,12 @@ describe('AST entwining (browser, end-to-end)', () => {
 
 		it('node.events accumulates back-refs through the frozen node (push survives shallow freeze)', async () => {
 			// 3 fires from the loop on the same console.log call expression.
-			const code = ['for (let i = 0; i < 3; i = i + 1) {', '\tconsole.log(i);', '}', ''].join('\n');
+			const code = [
+				'for (let i = 0; i < 3; i = i + 1) {',
+				'\tconsole.log(i);',
+				'}',
+				'',
+			].join('\n');
 			const result = await createInterceptGenerator(code, { iterations: 5 });
 			expect(result.outcome).toBe('complete');
 			const consoleEvent = result.events.find((e) => e.event === 'console')!;
@@ -300,7 +303,12 @@ describe('AST entwining (browser, end-to-end)', () => {
 		});
 
 		it('mid-stream truncation: tail.next === null (cancel/error semantics)', async () => {
-			const code = ['console.log(1);', 'console.log(2);', 'undefined();', ''].join('\n');
+			const code = [
+				'console.log(1);',
+				'console.log(2);',
+				'undefined();',
+				'',
+			].join('\n');
 			const result = await createInterceptGenerator(code);
 			expect(result.outcome).toBe('error');
 			expect(result.events[result.events.length - 1]!.next).toBeNull();
@@ -347,9 +355,7 @@ describe('AST entwining (browser, end-to-end)', () => {
 			const node = result.ast![consoleEvent.nodePath!]!;
 			expect(node.events.length).toBe(3);
 			for (let i = 1; i < node.events.length; i++) {
-				expect(node.events[i]!.step).toBeGreaterThan(
-					node.events[i - 1]!.step,
-				);
+				expect(node.events[i]!.step).toBeGreaterThan(node.events[i - 1]!.step);
 			}
 		});
 
@@ -421,9 +427,8 @@ describe('AST entwining (browser, end-to-end)', () => {
 			const handle = createInterceptGenerator(code, {
 				io: { prompt: () => 'x' },
 			});
-			const events: typeof handle extends AsyncIterable<infer E>
-				? E[]
-				: never = [];
+			const events: typeof handle extends AsyncIterable<infer E> ? E[] : never =
+				[];
 			for await (const ev of handle) events.push(ev);
 			const result = await handle.result;
 			expect(result.outcome).toBe('complete');

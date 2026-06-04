@@ -16,12 +16,12 @@ pages cover the lens itself + the registration wiring.
 
 What to verify visually (open the rendered page in the dev server):
 
-- A `<div data-lens="annotate" data-view-mode="…">` root renders below
-  (not the editor home base / `<textarea data-orchestrator-host>`).
-- React DevTools shows the mounted component is `annotate`'s React
-  `Component`, not the editor.
-- If the fence dispatches to the fallback instead of the `annotate` lens,
-  the registration commit (`0d91553`) did not take — re-check
+- A `<div data-lens="annotate" data-view-mode="…">` root renders below (not the
+  editor home base / `<textarea data-orchestrator-host>`).
+- React DevTools shows the mounted component is `annotate`'s React `Component`,
+  not the editor.
+- If the fence dispatches to the fallback instead of the `annotate` lens, the
+  registration commit (`0d91553`) did not take — re-check
   `orchestrate/index.tsx`'s `LENS_REGISTRY`.
 
 ```js:annotate

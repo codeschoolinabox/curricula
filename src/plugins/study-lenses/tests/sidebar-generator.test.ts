@@ -52,7 +52,9 @@ describe('createStudySidebarGenerator', () => {
 	it('category whose label does NOT match any prefix → left unchanged', async () => {
 		const items = [cat('0-what-is-programming'), cat('plain-label')];
 		const result = await runGenerator(configWith(['sl-']), items);
-		expect((result[0] as { label: string }).label).toBe('0-what-is-programming');
+		expect((result[0] as { label: string }).label).toBe(
+			'0-what-is-programming',
+		);
 		expect((result[1] as { label: string }).label).toBe('plain-label');
 	});
 

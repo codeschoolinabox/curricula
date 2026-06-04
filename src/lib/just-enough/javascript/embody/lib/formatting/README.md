@@ -22,8 +22,8 @@ function format(code: string): Promise<string>;
 ```
 
 - Asynchronous — Prettier standalone is async
-- Resolves to formatted code, or the original code unchanged if Prettier
-  throws (graceful degradation, e.g. on parse errors)
+- Resolves to formatted code, or the original code unchanged if Prettier throws
+  (graceful degradation, e.g. on parse errors)
 - No options parameter — always formats the JeJ way
 - Fixed config:
   `{ parser: 'babel', useTabs: true, tabWidth: 4, printWidth: 80, singleQuote: true, semi: true }`
@@ -41,8 +41,8 @@ function checkFormat(code: string): Promise<{ formatted: boolean }>;
 - Asynchronous — awaits `format` then compares output to input
   (`(await format(code)) === code`)
 - Resolves to `{ formatted: true }` if the code matches the expected format
-- Resolves to `{ formatted: true }` if Prettier throws (don't block on
-  formatter bugs)
+- Resolves to `{ formatted: true }` if Prettier throws (don't block on formatter
+  bugs)
 - Used as a pipeline gate by execution wrappers (`run`, `intercept`)
 
 ## Navigation
@@ -50,5 +50,5 @@ function checkFormat(code: string): Promise<{ formatted: boolean }>;
 - [DOCS.md](./DOCS.md) — design decisions and rationale
 - [../validating/README.md](../validating/README.md) — `validate(code)` and
   `isJej(code)` (the formatting + validation composition lives there)
-- [../evaluating/intercept/README.md](../evaluating/intercept/README.md) — `run()` uses
-  `checkFormat` as an execution gate
+- [../evaluating/intercept/README.md](../evaluating/intercept/README.md) —
+  `run()` uses `checkFormat` as an execution gate

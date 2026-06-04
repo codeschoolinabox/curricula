@@ -41,7 +41,8 @@ function promptReturnValue(
 		levels: ['semantics'],
 		location: extractLocation(node),
 		nodeType: node.type,
-		context: 'prompt() pauses the program and waits for the **user** to type something.',
+		context:
+			'prompt() pauses the program and waits for the **user** to type something.',
 		questions: [
 			{
 				register: 'pointed',

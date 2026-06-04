@@ -42,8 +42,7 @@ function buildTooltipDom(word: string, doc: DocEntry): HTMLElement {
 		'border-bottom: 1px solid #464647; padding-bottom: 6px; margin-bottom: 8px;';
 
 	const title = document.createElement('div');
-	title.style.cssText =
-		'font-weight: bold; color: #9cdcfe; font-size: 13px;';
+	title.style.cssText = 'font-weight: bold; color: #9cdcfe; font-size: 13px;';
 	title.textContent = word;
 
 	if (doc.isJEJ === false) {

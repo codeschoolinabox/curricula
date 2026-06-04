@@ -94,10 +94,4 @@ function findNearestLoop(
 	return null;
 }
 
-export {
-	pushScope,
-	popScope,
-	currentScope,
-	parentScope,
-	findNearestLoop,
-};
+export { pushScope, popScope, currentScope, parentScope, findNearestLoop };

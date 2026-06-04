@@ -7,7 +7,11 @@
  * Both must be Json-serializable (Aran requirement).
  */
 
-import type { SourceLocation, ControlFlowStructure, LoopKind } from '../types.js';
+import type {
+	SourceLocation,
+	ControlFlowStructure,
+	LoopKind,
+} from '../types.js';
 
 // ============================================================================
 // JejTag — ESTree metadata surviving Aran's desugaring

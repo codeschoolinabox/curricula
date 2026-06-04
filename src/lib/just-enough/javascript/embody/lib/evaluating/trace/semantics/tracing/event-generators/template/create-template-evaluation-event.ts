@@ -1,4 +1,7 @@
-import type { TemplateEvaluationEvent, ValueRepresentation } from '../../types.js';
+import type {
+	TemplateEvaluationEvent,
+	ValueRepresentation,
+} from '../../types.js';
 
 /**
  * Creates a TemplateEvaluationEvent for a ${} expression inside a template.
@@ -7,19 +10,24 @@ import type { TemplateEvaluationEvent, ValueRepresentation } from '../../types.j
  * @returns Domain-specific fields for a TemplateEvaluationEvent
  * @throws {Error} If index < 0
  */
-function createTemplateEvaluationEvent({
-	index,
-	value,
-	beginStep,
-}: {
-	readonly index: number;
-	readonly value: ValueRepresentation;
-	readonly beginStep: number;
-} = {} as {
-	readonly index: number;
-	readonly value: ValueRepresentation;
-	readonly beginStep: number;
-}): Omit<TemplateEvaluationEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+function createTemplateEvaluationEvent(
+	{
+		index,
+		value,
+		beginStep,
+	}: {
+		readonly index: number;
+		readonly value: ValueRepresentation;
+		readonly beginStep: number;
+	} = {} as {
+		readonly index: number;
+		readonly value: ValueRepresentation;
+		readonly beginStep: number;
+	},
+): Omit<
+	TemplateEvaluationEvent,
+	'step' | 'semantics' | 'loc' | 'node' | 'source'
+> {
 	if (index < 0) {
 		throw new Error('createTemplateEvaluationEvent: index must be >= 0');
 	}

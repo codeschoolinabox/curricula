@@ -31,7 +31,13 @@ not a stylistic choice.
 
 ## Navigation
 
-An event and its AST node are entwined the moment the event is emitted: `enrichEvent` (in [intercept.ts](intercept.ts)) resolves `event.node` and pushes the event into `node.events[]` before the `yield`, so consumers iterating live see fully-linked events without waiting for completion. Every event has a typed reference into `result.ast`, and every node has a back-ref array of the events that fired on it. The graph below names every navigation path; consumers pick whichever fits their use case.
+An event and its AST node are entwined the moment the event is emitted:
+`enrichEvent` (in [intercept.ts](intercept.ts)) resolves `event.node` and pushes
+the event into `node.events[]` before the `yield`, so consumers iterating live
+see fully-linked events without waiting for completion. Every event has a typed
+reference into `result.ast`, and every node has a back-ref array of the events
+that fired on it. The graph below names every navigation path; consumers pick
+whichever fits their use case.
 
 ```text
 result
@@ -60,24 +66,62 @@ result
                                             same references as appear in `children`
 ```
 
-**Named slots vs `.children`.** Named ESTree slots (`.body`, `.callee`, `.arguments`, `.expression`, …) give typed access once you've discriminated on `node.type`. `.children` is the generic walk path: the same `ASTNode` references, flattened in source order. Use named slots when you know the node type; use `.children` for type-agnostic traversal (e.g. a renderer that highlights every descendant of a clicked node).
+**Named slots vs `.children`.** Named ESTree slots (`.body`, `.callee`,
+`.arguments`, `.expression`, …) give typed access once you've discriminated on
+`node.type`. `.children` is the generic walk path: the same `ASTNode`
+references, flattened in source order. Use named slots when you know the node
+type; use `.children` for type-agnostic traversal (e.g. a renderer that
+highlights every descendant of a clicked node).
 
-**`event.callee` / `event.calleePath`.** Convenience accessors for the common case of "I have an event from a `console.log(...)` and want to underline just `console.log`, not `console.log(arg)`." Equivalent to `event.node.callee` / `event.node.callee.syntaxId`, but spelled directly on the event so consumers don't need to dispatch on `node.type` first. **Shared reference invariant**: `event.callee === event.node.callee`. Same object, no copy.
+**`event.callee` / `event.calleePath`.** Convenience accessors for the common
+case of "I have an event from a `console.log(...)` and want to underline just
+`console.log`, not `console.log(arg)`." Equivalent to `event.node.callee` /
+`event.node.callee.syntaxId`, but spelled directly on the event so consumers
+don't need to dispatch on `node.type` first. **Shared reference invariant**:
+`event.callee === event.node.callee`. Same object, no copy.
 
-**`.parent` (upward links).** Walk upward from any node to find a containing statement, declaration, or block. Note that `parent` forms a cycle with `children` / named slots; `JSON.stringify` will throw without a replacer. The result is deep-frozen with cycle handling — see [utils/deep-freeze-in-place.ts](../utils/deep-freeze-in-place.ts).
+**`.parent` (upward links).** Walk upward from any node to find a containing
+statement, declaration, or block. Note that `parent` forms a cycle with
+`children` / named slots; `JSON.stringify` will throw without a replacer. The
+result is deep-frozen with cycle handling — see
+[utils/deep-freeze-in-place.ts](../utils/deep-freeze-in-place.ts).
 
-**Freeze model.** AST nodes are `Object.freeze`-immutable from the moment they're built (shallow freeze applied at the end of each `walk(node)` in [link/build-location-index.ts](link/build-location-index.ts), after `children` is sorted into source order). Consumers can't reassign `node.events` or `node.children` — but the `events` array remains mutable so `enrichEvent` can push back-refs as events arrive. At completion, `deepFreezeInPlace` recursively freezes all sub-arrays, locking the graph fully. Events themselves are `Object.freeze`-immutable from yield time (see § event.prev / .next). Net result: the reachable graph from any consumer-held reference is structurally frozen from the moment it's reachable; specific mutable sub-arrays accumulate during the run before the final freeze.
+**Freeze model.** AST nodes are `Object.freeze`-immutable from the moment
+they're built (shallow freeze applied at the end of each `walk(node)` in
+[link/build-location-index.ts](link/build-location-index.ts), after `children`
+is sorted into source order). Consumers can't reassign `node.events` or
+`node.children` — but the `events` array remains mutable so `enrichEvent` can
+push back-refs as events arrive. At completion, `deepFreezeInPlace` recursively
+freezes all sub-arrays, locking the graph fully. Events themselves are
+`Object.freeze`-immutable from yield time (see § event.prev / .next). Net
+result: the reachable graph from any consumer-held reference is structurally
+frozen from the moment it's reachable; specific mutable sub-arrays accumulate
+during the run before the final freeze.
 
-**`event.prev` / `event.next` (doubly-linked timeline).** Every event is wired into a doubly-linked list — walk the timeline forward (`event.next.next…`) or backward (`event.prev.prev…`) without indexing through `result.events`. `prev` is captured at the moment the event is added to the list and is reference-stable; `next` is backed by an accessor that returns `null` until the next event arrives, then the next event reference. `null` at `next` therefore means "no event yet" OR "tail of stream" OR "tail of a truncated run" — discriminate via `result.outcome` (`complete` → tail; `cancel`/`fail`/`timeout`/`error` → truncation). Events are `Object.freeze`-immutable from yield time; the `next` accessor reads closure-held state that mutates as new events arrive, but the event object itself never changes shape.
+**`event.prev` / `event.next` (doubly-linked timeline).** Every event is wired
+into a doubly-linked list — walk the timeline forward (`event.next.next…`) or
+backward (`event.prev.prev…`) without indexing through `result.events`. `prev`
+is captured at the moment the event is added to the list and is
+reference-stable; `next` is backed by an accessor that returns `null` until the
+next event arrives, then the next event reference. `null` at `next` therefore
+means "no event yet" OR "tail of stream" OR "tail of a truncated run" —
+discriminate via `result.outcome` (`complete` → tail;
+`cancel`/`fail`/`timeout`/`error` → truncation). Events are
+`Object.freeze`-immutable from yield time; the `next` accessor reads
+closure-held state that mutates as new events arrive, but the event object
+itself never changes shape.
 
-**Single source of truth.** Every shared field name is the same object reference, never a copy:
+**Single source of truth.** Every shared field name is the same object
+reference, never a copy:
 
-- `event.node` ===  `result.ast[event.nodePath]`
-- `event.loc` ===  `event.node.loc`
-- `event.callee` ===  `event.node.callee`
-- `node.children[i]` ===  the corresponding named slot (e.g. `node.callee` or `node.arguments[k]`)
+- `event.node` === `result.ast[event.nodePath]`
+- `event.loc` === `event.node.loc`
+- `event.callee` === `event.node.callee`
+- `node.children[i]` === the corresponding named slot (e.g. `node.callee` or
+  `node.arguments[k]`)
 
-Consumers can compare by identity (`===`) without worrying about shallow vs deep equality.
+Consumers can compare by identity (`===`) without worrying about shallow vs deep
+equality.
 
 **Usage examples.**
 
