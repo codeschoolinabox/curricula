@@ -183,7 +183,7 @@ describe('discoverSiblings', () => {
 
 		const result = discoverSiblings(fixture, config);
 
-		expect(result.map((s) => s.label).sort()).toEqual([
+		expect(result.map((s) => s.label).toSorted((a, b) => a.localeCompare(b))).toEqual([
 			'keep',
 			'staging-wip/drop',
 		]);

@@ -179,7 +179,7 @@ function groupSiblings(
 	// Subdirectory groups in alphabetical order by key.
 	const sortedKeys = [...map.keys()]
 		.filter((k) => k !== '')
-		.sort((a, b) => a.localeCompare(b));
+		.toSorted((a, b) => a.localeCompare(b));
 	for (const key of sortedKeys) {
 		const members = map.get(key)!;
 		if (members.length > 0) groups.push({ groupKey: key, members });

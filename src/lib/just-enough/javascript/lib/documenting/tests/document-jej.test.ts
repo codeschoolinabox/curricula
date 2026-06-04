@@ -130,7 +130,7 @@ describe('documentJej — immutability', () => {
 
 describe('drift guard against upstream JEJ surface', () => {
 	it('KEYWORD_LABELS matches KEYWORDS from collect-jej-surface', () => {
-		expect([...KEYWORD_LABELS].sort()).toEqual([...KEYWORDS].sort());
+		expect([...KEYWORD_LABELS].toSorted((a, b) => a.localeCompare(b))).toEqual([...KEYWORDS].toSorted((a, b) => a.localeCompare(b)));
 	});
 
 	it('GLOBAL_LABELS matches allowedGlobals minus SUPPRESSED_GLOBALS and minus KEYWORDS', () => {
@@ -143,11 +143,11 @@ describe('drift guard against upstream JEJ surface', () => {
 		) {
 			return !SUPPRESSED_GLOBALS.has(g) && !keywordSet.has(g);
 		});
-		expect([...GLOBAL_LABELS].sort()).toEqual(expected.sort());
+		expect([...GLOBAL_LABELS].toSorted((a, b) => a.localeCompare(b))).toEqual(expected.toSorted((a, b) => a.localeCompare(b)));
 	});
 
 	it('MEMBER_LABELS matches CURATED_MEMBERS from collect-jej-surface', () => {
-		expect([...MEMBER_LABELS].sort()).toEqual([...CURATED_MEMBERS].sort());
+		expect([...MEMBER_LABELS].toSorted((a, b) => a.localeCompare(b))).toEqual([...CURATED_MEMBERS].toSorted((a, b) => a.localeCompare(b)));
 	});
 
 	it('NOT_IN_JEJ_LABELS includes every BLOCKED_MEMBER_NAMES entry (dot-member partition drift-guard)', () => {
