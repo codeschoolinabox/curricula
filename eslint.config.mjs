@@ -27,6 +27,11 @@ export default tseslint.config(
 			// url-config, evaluate-correctness) — JS→TS mechanical converts of
 			// the legacy implementation; idiomatic V2 style is a follow-up.
 			'src/lib/just-enough/javascript/lenses/blanks/lib/**',
+			// WIP tracer redesign — Phase B2 / Step B7 work deferred per
+			// EMBODY-IMPL-HANDOFF.md (system-wide category split, missing event
+			// types, deleted-but-still-emitted FunctionReturnEvent, etc.).
+			// Re-include when Step B7 lands.
+			'src/lib/just-enough/javascript/embody/lib/evaluating/trace/semantics/**',
 			// Per-package scaffolding (will be removed after Phase 7)
 			'src/lib/*/node_modules/**',
 			'src/lib/*/dist/**',
