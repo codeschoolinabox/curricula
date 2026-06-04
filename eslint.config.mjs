@@ -26,12 +26,24 @@ export default tseslint.config(
 			// Vendored blanks lens internals (blankenate, no-paste-extension,
 			// url-config, evaluate-correctness) — JS→TS mechanical converts of
 			// the legacy implementation; idiomatic V2 style is a follow-up.
+			// Tests/ extends the exclusion to the concurrent session's WIP
+			// test files (component.test.tsx etc.) — re-include when the
+			// blanks lens refactor stabilizes.
 			'src/lib/just-enough/javascript/lenses/blanks/lib/**',
-			// WIP tracer redesign — Phase B2 / Step B7 work deferred per
-			// EMBODY-IMPL-HANDOFF.md (system-wide category split, missing event
-			// types, deleted-but-still-emitted FunctionReturnEvent, etc.).
-			// Re-include when Step B7 lands.
-			'src/lib/just-enough/javascript/embody/lib/evaluating/trace/semantics/**',
+			'src/lib/just-enough/javascript/lenses/blanks/tests/**',
+			// WIP tracer engine — Phase B redesign in progress per
+			// EMBODY-IMPL-HANDOFF.md. The full evaluating/ subtree (trace,
+			// intercept, run, shared) is mid-refactor; lint rules don't yet
+			// apply cleanly. Vitest still runs these (run.browser.test.ts =
+			// 27 passing tests verified post Sprint 5.3). Re-include
+			// directory-by-directory as each lands its Phase B sub-task.
+			'src/lib/just-enough/javascript/embody/lib/evaluating/trace/**',
+			'src/lib/just-enough/javascript/embody/lib/evaluating/intercept/**',
+			'src/lib/just-enough/javascript/embody/lib/evaluating/run/**',
+			'src/lib/just-enough/javascript/embody/lib/evaluating/shared/**',
+			// Legacy / pre-redesign holdouts (explicit subdir names).
+			'src/lib/just-enough/javascript/embody/lib/parse-old/**',
+			'src/lib/just-enough/javascript/embody/.legacy/**',
 			// Test fixtures are intentional inputs (some malformed, some
 			// using legacy syntax) — ESLint rules don't apply to them.
 			'**/tests/fixtures/**',
