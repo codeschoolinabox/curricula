@@ -231,7 +231,51 @@ export default tseslint.config(
 			'unicorn/prefer-switch': 'off',
 			'unicorn/switch-case-braces': 'off',
 			'unicorn/prefer-ternary': 'off',
-			'prevent-abbreviations': 'off',
+			// `prevent-abbreviations`: keep ON but allowList the Node/React
+			// conventions this codebase legitimately uses (fs APIs: dir/ext;
+			// React: props; docs/refs/etc). The previous 'off' here used the
+			// wrong rule name ('prevent-abbreviations' instead of
+			// 'unicorn/prevent-abbreviations') so the rule was actually active.
+			'unicorn/prevent-abbreviations': [
+				'error',
+				{
+					allowList: {
+						// fs conventions (mkdir/readdir/__dirname) — *Dir
+						// suffix is the project's universal convention for
+						// directory-typed locals.
+						dir: true,
+						dirs: true,
+						dirname: true,
+						dirName: true,
+						pageDir: true,
+						currentDir: true,
+						absDir: true,
+						normalizedAbsDir: true,
+						isSiblingBearingPageDir: true,
+						tmpDir: true,
+						childDir: true,
+						chapterDir: true,
+						prettifyDirName: true,
+						// file-extension abbreviations
+						ext: true,
+						// React/JSX
+						props: true,
+						// documentation
+						doc: true,
+						docs: true,
+						Doc: true,
+						Docs: true,
+						DocTable: true,
+						assembleDocTable: true,
+						notInDocs: true,
+						// debug-properties pair name
+						debugPropsLens: true,
+						// general short identifiers used as locals
+						rel: true,
+						prev: true,
+					},
+				},
+			],
 			'unicorn/no-null': 'off',
 
 			// --- SonarJS ---
