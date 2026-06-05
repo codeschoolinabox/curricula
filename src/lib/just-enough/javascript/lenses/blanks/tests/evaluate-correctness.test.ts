@@ -287,6 +287,37 @@ describe('evaluateCorrectness', () => {
 			expect(result.correctnessMap.get('b0')).toBe('unfilled');
 			expect(result.correctnessMap.get('b1')).toBe('unfilled');
 		});
+
+		// AR-3 concern 4: delimiters make zero-width-anchor adjacency
+		// the COMMON case — `()`, `{}`, `[]` all produce two single-char
+		// delimiter blanks separated by an empty inter-anchor. Lock the
+		// adjacent-delimiter case (analogous to the i++ test above, but
+		// with two delimiter blanks instead of identifier+operator).
+		it('adjacent delimiter blanks correct: `f()` with `(` and `)` blanked', () => {
+			const result = evaluateCorrectness(
+				'f()',
+				[
+					blank('b0', '(', 1, 2, 'delimiter'),
+					blank('b1', ')', 2, 3, 'delimiter'),
+				],
+				'f()',
+			);
+			expect(result.correctnessMap.get('b0')).toBe('correct');
+			expect(result.correctnessMap.get('b1')).toBe('correct');
+		});
+
+		it('adjacent delimiter blanks: first-correct/second-incorrect (`f(]`)', () => {
+			const result = evaluateCorrectness(
+				'f(]',
+				[
+					blank('b0', '(', 1, 2, 'delimiter'),
+					blank('b1', ')', 2, 3, 'delimiter'),
+				],
+				'f()',
+			);
+			expect(result.correctnessMap.get('b0')).toBe('correct');
+			expect(result.correctnessMap.get('b1')).toBe('incorrect');
+		});
 	});
 
 	describe('Boundaries — score formula triangulation', () => {

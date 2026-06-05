@@ -38,11 +38,14 @@ import evaluateCorrectness from './lib/evaluate-correctness.js';
 import noPasteExtension from './lib/no-paste-extension.js';
 import type { BlankenateResult, ContentType, ViewMode } from './types.js';
 
+import './blanks.css';
+
 const ALL_CONTENT_TYPES: ReadonlyArray<ContentType> = [
 	'keywords',
 	'identifiers',
 	'operators',
 	'literals',
+	'delimiters',
 ];
 
 /**
@@ -58,6 +61,7 @@ function deriveContentTypeFlags(
 	identifiers: boolean;
 	operators: boolean;
 	literals: boolean;
+	delimiters: boolean;
 } {
 	const set = new Set(contentTypes);
 	return {
@@ -65,6 +69,7 @@ function deriveContentTypeFlags(
 		identifiers: set.has('identifiers'),
 		operators: set.has('operators'),
 		literals: set.has('literals'),
+		delimiters: set.has('delimiters'),
 	};
 }
 
@@ -164,13 +169,13 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 	const [difficulty, setDifficulty] = useState<number>(initialDifficulty);
 
 	// Inc 6f: contentTypes is now LOCAL state, seeded from the prop
-	// config (default = all four). The checkboxes mutate this directly;
+	// config (default = all five). The checkboxes mutate this directly;
 	// the blankenate useMemo deps include `contentTypes` so the blank
 	// set re-derives per toggle.
 	//
 	// Defensive: filter the prop-supplied array against ALL_CONTENT_TYPES
 	// rather than casting blindly. An educator config with a typo (e.g.
-	// `contentTypes: ['keywrds']`) degrades to the all-four default
+	// `contentTypes: ['keywrds']`) degrades to the all-five default
 	// element-by-element rather than silently breaking blankenate.
 	const initialContentTypes: ReadonlyArray<ContentType> = Array.isArray(
 		resolved.contentTypes,

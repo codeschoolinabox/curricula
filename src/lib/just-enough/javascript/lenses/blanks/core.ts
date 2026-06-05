@@ -22,16 +22,16 @@ import type { LensConfig, Recommendation, Snippet } from '../types.js';
 const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);
 
 /**
- * Resolves the blanks lens's per-mount config — applies the four
- * documented defaults and merges educator-supplied overrides on top
- * (overrides win). Unknown fields in `overrides` are preserved verbatim
- * (open-shape contract). The returned object is deep-frozen via
- * `freezeInPlace`.
+ * Resolves the blanks lens's per-mount config — applies the documented
+ * defaults for the four config fields and merges educator-supplied
+ * overrides on top (overrides win). Unknown fields in `overrides` are
+ * preserved verbatim (open-shape contract). The returned object is
+ * deep-frozen via `freezeInPlace`.
  *
  * @remarks Defaults per `./README.md` § Public API and the
  * `BlanksLensConfig` JSDoc:
  * - `difficulty` → `50`
- * - `contentTypes` → `['keywords', 'identifiers', 'operators', 'literals']`
+ * - `contentTypes` → `['keywords', 'identifiers', 'operators', 'literals', 'delimiters']`
  * - `viewMode` → `'blankenated'`
  * - `hintsLevel` → `'auto'`
  *
@@ -56,7 +56,13 @@ function config(overrides?: Partial<LensConfig>): LensConfig {
 	//    crosses that boundary.
 	return cloneAndFreeze({
 		difficulty: 50,
-		contentTypes: ['keywords', 'identifiers', 'operators', 'literals'],
+		contentTypes: [
+			'keywords',
+			'identifiers',
+			'operators',
+			'literals',
+			'delimiters',
+		],
 		viewMode: 'blankenated',
 		hintsLevel: 'auto',
 		...overrides,

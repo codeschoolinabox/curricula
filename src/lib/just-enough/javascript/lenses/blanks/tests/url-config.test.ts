@@ -201,6 +201,46 @@ describe('serializeConfig — pure', () => {
 		expect(parsed).toEqual(config);
 	});
 
+	// AR-4 BLOCKER fix (Inc 6.6 expansion): the `delimiters` content
+	// type was added to BlankType/ContentType + DELIMITER_LABELS +
+	// core.ts defaults, but `VALID_CONTENT_TYPES` in url-config.ts was
+	// missed in the original rename — silently dropping `delimiters`
+	// from any URL-persisted config. This round-trip test locks the
+	// fix and prevents regression: serialize a config containing
+	// `delimiters`, parse it back, assert the array is preserved.
+	it('round-trips `delimiters` content type through serialize/parse', () => {
+		const config = {
+			difficulty: 50,
+			contentTypes: ['delimiters'] as ReadonlyArray<'delimiters'>,
+			viewMode: 'blankenated' as const,
+			hintsLevel: 'auto' as const,
+		};
+		const serialized = urlConfig.serializeConfig(config);
+		const parsed = urlConfig.parseHash(`#?blanks=${serialized}`);
+		expect(parsed).toEqual(config);
+	});
+
+	it('round-trips all five content types through serialize/parse', () => {
+		const config = {
+			contentTypes: [
+				'keywords',
+				'identifiers',
+				'operators',
+				'literals',
+				'delimiters',
+			] as ReadonlyArray<
+				| 'keywords'
+				| 'identifiers'
+				| 'operators'
+				| 'literals'
+				| 'delimiters'
+			>,
+		};
+		const serialized = urlConfig.serializeConfig(config);
+		const parsed = urlConfig.parseHash(`#?blanks=${serialized}`);
+		expect(parsed).toEqual(config);
+	});
+
 	it('returns empty string for empty config', () => {
 		expect(urlConfig.serializeConfig({})).toBe('');
 	});

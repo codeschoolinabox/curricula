@@ -93,7 +93,7 @@ describe('blanks wrapper — Inc 6a', () => {
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
-					// Force-all-blanks via difficulty=100; all four content types
+					// Force-all-blanks via difficulty=100; all five content types
 					// default on, so every eligible token is blanked.
 					config={blanksLens.config({ difficulty: 100 })}
 				/>,
@@ -619,7 +619,7 @@ describe('blanks wrapper — Inc 6a', () => {
 	});
 
 	describe('content-type checkboxes — Inc 6f', () => {
-		it('renders four checkboxes, one per content type', () => {
+		it('renders five checkboxes, one per content type (Inc 6.6 adds delimiters)', () => {
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
@@ -638,16 +638,25 @@ describe('blanks wrapper — Inc 6a', () => {
 			expect(
 				container.querySelector('[data-content-type="literals"]'),
 			).not.toBeNull();
+			expect(
+				container.querySelector('[data-content-type="delimiters"]'),
+			).not.toBeNull();
 		});
 
-		it('all four checkboxes are checked by default (config.contentTypes = all four)', () => {
+		it('all five checkboxes are checked by default (config.contentTypes = all five)', () => {
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
 					config={blanksLens.config()}
 				/>,
 			);
-			const types = ['keywords', 'identifiers', 'operators', 'literals'];
+			const types = [
+				'keywords',
+				'identifiers',
+				'operators',
+				'literals',
+				'delimiters',
+			];
 			for (const type of types) {
 				const checkbox = container.querySelector(
 					`[data-content-type="${type}"]`,
@@ -678,8 +687,8 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('unchecking a category removes its blanks from the editor (re-derives blank set)', async () => {
-			// At difficulty=100 with all four categories, the editor doc
-			// contains __ placeholders. After unchecking ALL FOUR categories,
+			// At difficulty=100 with all five categories, the editor doc
+			// contains __ placeholders. After unchecking ALL FIVE categories,
 			// no eligible tokens remain → blank set is empty → no __ in doc.
 			const { container } = render(
 				<blanksLens.Component
@@ -696,6 +705,7 @@ describe('blanks wrapper — Inc 6a', () => {
 				'identifiers',
 				'operators',
 				'literals',
+				'delimiters',
 			]) {
 				const cb = container.querySelector(
 					`[data-content-type="${type}"]`,
@@ -750,6 +760,28 @@ describe('blanks wrapper — Inc 6a', () => {
 		// EditorState.changeFilter. This makes the whitespace-fragility
 		// bug architecturally unreachable (learner cannot corrupt the
 		// anchor segments by mistake).
+
+		// AR-3 concern 4 (Inc 6.6 expansion): the same StateField that
+		// powers the lock also drives the per-blank CSS border (Inc 6.6
+		// piggybacks on the existing `Decoration.mark({ class:
+		// 'cm-blank-placeholder', ... })`). A regression where the
+		// `provide: (f) => EditorView.decorations.from(f)` line gets
+		// dropped from the StateField would silently break visual
+		// decoration without breaking the lock. This test catches that.
+		it('every blank gets a `.cm-blank-placeholder` DOM marker (Inc 6.6 visual border)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(
+					container.querySelector('.cm-blank-placeholder'),
+				).not.toBeNull();
+			});
+		});
+
 		it('inserts inside a __ placeholder are ACCEPTED', async () => {
 			const { container } = render(
 				<blanksLens.Component
@@ -838,10 +870,25 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('inserts strictly OUTSIDE any __ placeholder (past the last blank) are REJECTED', async () => {
+			// Delimiters are intentionally excluded — with delimiters
+			// enabled, the trailing `;` becomes a placeholder, the doc
+			// ends with `__`, and CM6 `inclusive: true` absorbs the
+			// trailing insert (which is the documented, correct behavior
+			// for placeholder-end edits). Excluding delimiters leaves the
+			// trailing `;` as an anchor, so the test cleanly exercises
+			// "insert past final placeholder is rejected".
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('let x = 1;')}
-					config={blanksLens.config({ difficulty: 100 })}
+					config={blanksLens.config({
+						difficulty: 100,
+						contentTypes: [
+							'keywords',
+							'identifiers',
+							'operators',
+							'literals',
+						],
+					})}
 				/>,
 			);
 			await waitFor(() => {

@@ -7,8 +7,9 @@ read a snippet with selected tokens replaced by `__` placeholders inside a
 CodeMirror editor, type the missing tokens, and get per-blank correctness
 feedback (green / red / yellow) as they go. A difficulty slider scales the
 exercise across the novice → review spectrum (`p = difficulty / 100` per
-eligible token); four content-type checkboxes scope which token categories are
-eligible (keywords / identifiers / operators / literals); a view-mode toggle
+eligible token); five content-type checkboxes scope which token categories are
+eligible (keywords / identifiers / operators / literals / delimiters); a
+view-mode toggle
 gives the learner a peek at the complete source for self-check without losing
 their answers. An "Ask Me" button delegates to the `socratizing/` module for
 Socratic micro-decision / comprehension questions about the original source —
@@ -197,7 +198,7 @@ flowchart TD
     Editor -->|"docChanged"| LearnerCode["learnerCode<br/>(lens-local state;<br/>NEVER setSnippet)"]
     LearnerCode --> State
 
-    State -->|"learnerCode + blanks"| Eval[("evaluate-correctness<br/>(useEffect; sync, pure;<br/>position-aware per blank)")]
+    State -->|"learnerCode + blanks"| Eval[("evaluate-correctness<br/>(useMemo; sync, pure;<br/>position-aware per blank)")]
     Eval -->|"EvaluationResult"| Correctness["{ correctnessMap, total,<br/>correct, incorrect, unfilled, score }"]
     Correctness --> Render
 

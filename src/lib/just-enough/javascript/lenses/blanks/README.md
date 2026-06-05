@@ -5,8 +5,9 @@ snippet. The learner sees the source code with selected tokens replaced by `__`
 placeholders inside a CodeMirror editor; typing over the placeholders fills the
 blanks; per-blank correctness is computed live against the original code. A
 difficulty slider (0–100%) governs the probability that any eligible token is
-blanked; a four-checkbox content-type panel chooses which kinds of tokens are
-eligible (keywords / identifiers / operators / literals); a view-mode toggle
+blanked; a five-checkbox content-type panel chooses which kinds of tokens are
+eligible (keywords / identifiers / operators / literals / delimiters); a
+view-mode toggle
 switches between `blankenated` (editable, with `__` placeholders) and `complete`
 (read-only, original source).
 
@@ -58,9 +59,9 @@ Fields:
   spread through unchanged (open-shape contract). Fields the lens reads:
   - `difficulty?: number` (default `50`, range `0–100`) — per-token probability
     `p = difficulty / 100` of being blanked.
-  - `contentTypes?: ReadonlyArray<'keywords' | 'identifiers' | 'operators' | 'literals'>`
-    (default `['keywords', 'identifiers', 'operators', 'literals']`) — which
-    token categories are eligible to be blanked. Presence in the array =
+  - `contentTypes?: ReadonlyArray<'keywords' | 'identifiers' | 'operators' | 'literals' | 'delimiters'>`
+    (default `['keywords', 'identifiers', 'operators', 'literals', 'delimiters']`)
+    — which token categories are eligible to be blanked. Presence in the array =
     enabled. The wrapper derives a boolean map for per-render rendering; the
     config-level representation is the flat array to comply with
     `SerializableValue` (`LensConfig` admits only primitives and arrays of
@@ -92,10 +93,12 @@ well-established cloze-deletion technique in programming-education research
 (Denny et al. 2019). The difficulty slider lets the same source snippet generate
 exercises across the entire novice → review spectrum: at difficulty 20 the
 learner fills a few token holes (recognition); at difficulty 80 most of the
-structural keywords disappear (recall). The four content-type checkboxes let an
+structural keywords disappear (recall). The five content-type checkboxes let an
 educator tune which dimensions of the code the learner practices — keywords-only
 blanks emphasize control-flow vocabulary; identifiers-only blanks emphasize
-naming and scope; operators-only blanks emphasize semantics-of-symbols. The
+naming and scope; operators-only blanks emphasize semantics-of-symbols;
+delimiters-only blanks emphasize syntactic structure (parens, brackets,
+braces, `${`, semicolons, commas, dots). The
 view-mode toggle lets the learner peek at the complete source as a self-check
 without leaving the lens.
 
@@ -128,9 +131,10 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 - **`__` placeholder** — the two-underscore string the learner sees in place of
   a blanked token. Legal JavaScript identifier; the editor treats it as text the
   learner types over.
-- **Content type** — one of the four token categories
-  (`keywords / identifiers / operators / literals`). Stored in `config` as a
-  `ReadonlyArray<'keywords' | 'identifiers' | 'operators' | 'literals'>`
+- **Content type** — one of the five token categories
+  (`keywords / identifiers / operators / literals / delimiters`). Stored in
+  `config` as a
+  `ReadonlyArray<'keywords' | 'identifiers' | 'operators' | 'literals' | 'delimiters'>`
   (presence = enabled), mirroring the URL format's `types:keywords+identifiers`
   shape. The toolbar exposes a checkbox per category; unchecking removes that
   category from the array.
@@ -177,7 +181,7 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 ```text
 <div data-lens="blanks" data-view-mode="blankenated|complete" data-hints-level="easy|medium|hard">
   <header>                          — title + Ask Me button
-  <toolbar>                         — difficulty slider, 4 content-type checkboxes, view-mode toggle
+  <toolbar>                         — difficulty slider, 5 content-type checkboxes, view-mode toggle
   <editorHeader>                    — mode label + difficulty% + blanks count + remaining count
   <main>                            — CodeMirror EditorView (editable in blankenated, read-only in complete)
   <hintsPanel>                      — 3 tiers; per-blank correctness feedback
@@ -199,8 +203,9 @@ should anchor on the parent, not on the attribute change.
   `onChange`; the state updates immediately and the blank set re-derives on the
   next render. Score resets to unfilled when the set changes (the previous
   learner answers no longer correspond to the new blank positions).
-- **Content-type checkboxes** — four checkboxes (keywords / identifiers /
-  operators / literals). Toggle fires `onChange`; the state updates immediately
+- **Content-type checkboxes** — five checkboxes (keywords / identifiers /
+  operators / literals / delimiters). Toggle fires `onChange`; the state
+  updates immediately
   and the blank set re-derives on the next render. A checkbox set to `false`
   suppresses that token category from being eligible — even at difficulty 100,
   tokens of an unchecked category remain visible.
@@ -573,6 +578,24 @@ jsdom + `@testing-library/react`).
 - **Per-config Acorn `ecmaVersion`.** v1 hard-codes the legacy's
   `ecmaVersion: 2022`. An educator override may want a narrower or wider spec
   for specific exercises.
+- **`[diff hint]` toggle: split-view or ghost overlay against the original
+  source.** v1 ships per-blank CSS borders (a subtle background + outline on
+  each `__` decoration) so adjacent blanks are visually separable without
+  changing the placeholder character. For learners who need stronger scaffolding
+  on heavily-blanked snippets, a `[diff hint]` toggle would render a
+  side-by-side or ghost-text view of the complete source alongside the
+  blankenated editor — preserving the recall exercise while letting the learner
+  consult the original on demand. Likely a CodeMirror `Decoration.widget`
+  overlay or a second read-only view in a horizontal split. Pairs with the
+  view-mode toggle but is non-blocking (the learner can keep typing while the
+  hint is visible).
+- **Richer delimiter taxonomy.** v1 classifies every delimiter blank as
+  `type: 'delimiter'` (a single bucket). Block/object braces and
+  template-expression braces both blank as `}` from the same Acorn TokenType
+  (`tokTypes.braceR`); v1 does not sub-classify. A brace-context stack walking
+  the token stream could distinguish `template-close` from `block-close` for
+  per-sub-type visual treatment (e.g. different border colors) — useful if the
+  hints panel grows category-aware feedback.
 
 ## Conventions inherited
 

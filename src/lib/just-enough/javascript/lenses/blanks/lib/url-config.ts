@@ -66,6 +66,7 @@ const VALID_CONTENT_TYPES: ReadonlySet<ContentType> = new Set([
 	'identifiers',
 	'operators',
 	'literals',
+	'delimiters',
 ]);
 const VALID_VIEW_MODES: ReadonlySet<ViewMode> = new Set([
 	'blankenated',

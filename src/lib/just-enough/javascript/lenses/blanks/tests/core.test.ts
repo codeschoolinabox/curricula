@@ -16,12 +16,13 @@ describe('blanks core', () => {
 				expect(core.config().difficulty).toBe(50);
 			});
 
-			it('contentTypes defaults to all four categories', () => {
+			it('contentTypes defaults to all five categories (Inc 6.6 adds delimiters)', () => {
 				expect(core.config().contentTypes).toEqual([
 					'keywords',
 					'identifiers',
 					'operators',
 					'literals',
+					'delimiters',
 				]);
 			});
 

@@ -38,6 +38,10 @@ type ContentTypeFlags = {
 	readonly identifiers: boolean;
 	readonly operators: boolean;
 	readonly literals: boolean;
+	// Inc 6.6 extension: delimiter tokens (parens, brackets, braces,
+	// `${`, semicolons, commas, dots). Sourced from Acorn's token
+	// stream (not AST nodes — delimiters are not standalone nodes).
+	readonly delimiters: boolean;
 };
 
 // SL1 Blanks Generation Logic
@@ -104,6 +108,39 @@ const findOperatorPosition = (code: string, node: any): number => {
 	return -1;
 };
 
+// Inc 6.6: delimiter token labels Acorn emits. These are TokenType.label
+// values (acorn.tokTypes.parenL.label === '(' etc.).
+//
+// Brace nuance (template-literal disambiguation):
+// - `{` is unambiguous — Acorn's `tokTypes.braceL` (label `{`) is
+//   ONLY emitted for block/object braces. Template-expression opens
+//   are a separate token, `tokTypes.dollarBraceL` (label `${`), which
+//   covers both the `$` and `{` characters as one 2-char token.
+// - `}` is shared by block/object/template-expression close
+//   (`tokTypes.braceR`, label `}`). Both forms blank as `}`; the
+//   learner types `}` either way, so the label-only filter is
+//   pedagogically sound for blanking even without sub-classification.
+//   Richer taxonomy (template-close vs block-close) is a Future
+//   direction item (would require a brace-context stack walking the
+//   token stream).
+//
+// Excluded by design: ternary `?` / `:`, optional chaining `?.`,
+// arrow `=>`, spread `...`, and regex `/` are all distinct
+// TokenTypes with distinct labels, none of which are in this set.
+// See blankenate.test.ts "Inc 6.6 (5th content-type)" describe block.
+const DELIMITER_LABELS = new Set<string>([
+	'(',
+	')',
+	'{',
+	'}',
+	'${',
+	'[',
+	']',
+	';',
+	',',
+	'.',
+]);
+
 function blankenate(
 	code: string,
 	probability: number = 0.2,
@@ -112,19 +149,56 @@ function blankenate(
 		identifiers: true,
 		literals: false,
 		operators: false,
+		delimiters: false,
 	},
 ): BlankenateResult | null {
 	const blank = '__';
 
+	// Inc 6.6: collect Acorn tokens during parse for delimiter
+	// classification. AST walk handles identifier/literal/keyword/operator;
+	// the token stream handles the delimiters that have no standalone
+	// AST node.
+	const tokens: Array<{ type: any; value: any; start: number; end: number }> =
+		[];
+
 	let tree: any = null;
 	try {
-		tree = acorn.parse(code, { ecmaVersion: 2022, sourceType: 'module' });
+		tree = acorn.parse(code, {
+			ecmaVersion: 2022,
+			sourceType: 'module',
+			onToken: (token: any) => {
+				tokens.push({
+					type: token.type,
+					value: token.value,
+					start: token.start,
+					end: token.end,
+				});
+			},
+		});
 	} catch (err) {
 		console.error('Parse error:', err);
 		return null;
 	}
 
 	const blankedTokens: BlankedToken[] = [];
+
+	// Inc 6.6: walk the token stream for delimiters. Independent of the
+	// AST walk below — same probability check per token; same
+	// blankedTokens accumulator (sort + replace logic applies uniformly).
+	if (config.delimiters) {
+		for (const tok of tokens) {
+			const label =
+				tok.type && typeof tok.type.label === 'string' ? tok.type.label : '';
+			if (DELIMITER_LABELS.has(label) && Math.random() < probability) {
+				blankedTokens.push({
+					start: tok.start,
+					end: tok.end,
+					original: label,
+					type: 'delimiter',
+				});
+			}
+		}
+	}
 
 	// Simple AST walker for blanking
 	const walkNode = (node: any): void => {

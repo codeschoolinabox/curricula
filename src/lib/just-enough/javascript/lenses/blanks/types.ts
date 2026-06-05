@@ -47,10 +47,10 @@
 // ─── Token category + blank identity ────────────────────────
 
 /**
- * The four token categories `blankenate` recognizes.
+ * The five token categories `blankenate` recognizes.
  *
- * @remarks Sourced from the vendored algorithm's AST classification
- * (per `./lib/blankenate.ts`):
+ * @remarks Sourced from the vendored algorithm's AST + token-stream
+ * classification (per `./lib/blankenate.ts`):
  * - `identifier` — `Node.type === 'Identifier'` (variable names,
  *   parameter names, etc.).
  * - `literal` — `Node.type === 'Literal' | 'RegExpLiteral'` (strings,
@@ -61,8 +61,20 @@
  * - `operator` — `BinaryExpression.operator`,
  *   `AssignmentExpression.operator`, `UpdateExpression.operator`,
  *   `UnaryExpression.operator`, `VariableDeclarator` init `=`.
+ * - `delimiter` (Inc 6.6 extension; beyond legacy) —
+ *   syntactic delimiter tokens from Acorn's token stream:
+ *   `(`, `)`, `{`, `}`, `[`, `]`, `${`, `;`, `,`, `.`. The
+ *   template-expression opener `${` is treated as a single 2-char
+ *   token (Acorn's `tokTypes.dollarBraceL`); block-close and
+ *   template-close `}` are not distinguished for v1 (both blank as
+ *   `}`) — see `./lib/blankenate.ts` DELIMITER_LABELS rationale.
  */
-type BlankType = 'identifier' | 'literal' | 'keyword' | 'operator';
+type BlankType =
+	| 'identifier'
+	| 'literal'
+	| 'keyword'
+	| 'operator'
+	| 'delimiter';
 
 /**
  * One blanked position in the source.
@@ -126,16 +138,22 @@ type BlankenateResult = {
  * `types:keywords+identifiers` is the same array, joined with `+`.
  *
  * The relationship to `BlankType`:
- * - `'keywords' | 'identifiers' | 'operators' | 'literals'` (this
- *   type) is plural; one config-level flag turns the whole category
- *   on/off.
- * - `'identifier' | 'literal' | 'keyword' | 'operator'` (`BlankType`
- *   above) is singular; each `Blank` carries its singular type.
+ * - `'keywords' | 'identifiers' | 'operators' | 'literals' | 'delimiters'`
+ *   (this type) is plural; one config-level flag turns the whole
+ *   category on/off.
+ * - `'identifier' | 'literal' | 'keyword' | 'operator' | 'delimiter'`
+ *   (`BlankType` above) is singular; each `Blank` carries its singular
+ *   type.
  *
  * The plural / singular split mirrors the legacy's vocabulary
  * (legacy lines 30–36).
  */
-type ContentType = 'keywords' | 'identifiers' | 'operators' | 'literals';
+type ContentType =
+	| 'keywords'
+	| 'identifiers'
+	| 'operators'
+	| 'literals'
+	| 'delimiters';
 
 // ─── View mode ──────────────────────────────────────────────
 
@@ -245,7 +263,7 @@ type EvaluationResult = {
  *
  * @remarks Defaults (per `./README.md` § Public API):
  * - `difficulty` → `50`
- * - `contentTypes` → `['keywords', 'identifiers', 'operators', 'literals']`
+ * - `contentTypes` → `['keywords', 'identifiers', 'operators', 'literals', 'delimiters']`
  * - `viewMode` → `'blankenated'`
  * - `hintsLevel` → `'auto'`
  */
