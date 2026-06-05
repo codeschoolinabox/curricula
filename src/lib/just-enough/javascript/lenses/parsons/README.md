@@ -236,16 +236,17 @@ therefore specified concretely, and the **arrangement logic is a pure reducer**
   a left margin of `level * indentSize` spaces.
 - **Indent / outdent controls** (per placed line) increment / decrement the
   level; outdent floors at 0.
-- Indent level is learner state. Every line **starts at level 0** (legacy
-  parity: `init` zeroes all line indents, L1016 — lines begin flush-left and the
-  learner establishes nesting themselves). Thereafter the level is set by the
-  indent/outdent controls and **persists** across reorders and pool↔solution
-  moves — a line dragged back to the pool and re-placed keeps its level. (The
-  legacy set indent via horizontal drag-distance, `updateIndent` L1137; V2 uses
-  explicit buttons because native HTML5 DnD exposes no reliable
-  horizontal-offset signal — a deliberate divergence in _mechanism_, not in the
-  start-at-0 or persist behavior.) The level is graded against the model line's
-  normalized level.
+- Indent level is learner state. Every line **starts at level 0** when it enters
+  the solution (legacy parity: `init` zeroes all line indents, L1016 — lines
+  begin flush-left and the learner establishes nesting themselves). Thereafter
+  the level is set by the indent/outdent controls and **persists across reorders
+  within the solution column**. Returning a line to the pool drops its level
+  (the pool carries no indent — `Arrangement.pool` is a list of ids), so a line
+  dragged back and re-placed restarts at 0. (The legacy set indent via
+  horizontal drag-distance, `updateIndent` L1137; V2 uses explicit buttons
+  because native HTML5 DnD exposes no reliable horizontal-offset signal — a
+  deliberate divergence in _mechanism_.) The level is graded against the model
+  line's normalized level.
 - When `canIndent` is `false`, the controls are hidden,
   `data-can-indent="false"` is set, and indentation is excluded from grading and
   from the score.

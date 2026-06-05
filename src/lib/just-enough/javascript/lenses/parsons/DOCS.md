@@ -108,8 +108,9 @@ wrapper end-to-end (jsdom + `@testing-library/react`); tests live under `tests/`
    dispatches one pure action (`placeFromPool` / `reorderWithinSolution` /
    `returnToPool`). Indent/outdent controls dispatch `indent` / `outdent`. The
    reducer preserves the invariant that every line id is in exactly one of
-   `pool` / `solution`. Indent starts at 0 on placement and persists across
-   reorders and pool↔solution moves.
+   `pool` / `solution`. Indent starts at 0 on placement, persists across
+   reorders within the solution, and resets to 0 on a pool round-trip (the pool
+   stores no indent).
 
 4. **Evaluate** (per Check click, sync, pure) — clicking Check computes an
    `EvaluationResult`. Order correctness comes from `evaluate-line-order`, which
@@ -253,8 +254,9 @@ and evaluation die with the component instance (no URL state in v1).
 - **Arrangement invariant.** The reducer keeps every line id in exactly one of
   `pool` / `solution`. Tested in `tests/arrange.test.ts`.
 - **Indent semantics.** Model indent levels are relative nesting depths from
-  `normalizeIndents` (not raw spaces). Learner indent starts at 0 and persists.
-  Grading compares levels. `indentSize` is presentation-only.
+  `normalizeIndents` (not raw spaces). Learner indent starts at 0, persists
+  across reorders within the solution, and resets on a pool round-trip. Grading
+  compares levels. `indentSize` is presentation-only.
 - **Distractor cap is `min`, not the legacy overflow.** `parse-parsons` selects
   `min(maxDistractors, declared)` distractors — a deliberate non-propagation of
   the legacy `parseCode` `undefined`-push bug.

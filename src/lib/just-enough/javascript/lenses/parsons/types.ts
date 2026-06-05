@@ -95,10 +95,11 @@ export type ParsedParsons = Readonly<{
  * - `id` — references a `ParsonsLine.id`.
  * - `indent` — the **learner's** chosen indent level (non-negative integer).
  *   Starts at `0` when a line enters the solution (legacy parity: `init` zeroes
- *   all indents) and is changed only by the indent/outdent controls; it
- *   **persists** across reorders and pool↔solution moves. Compared against the
- *   referenced solution line's model `indent` by the indentation grader. Ignored
- *   when `config.canIndent` is `false`.
+ *   all indents) and is changed only by the indent/outdent controls; it persists
+ *   across reorders WITHIN the solution but resets to `0` on a pool round-trip
+ *   (the pool stores no indent — `Arrangement.pool` is a list of ids). Compared
+ *   against the referenced solution line's model `indent` by the indentation
+ *   grader. Ignored when `config.canIndent` is `false`.
  */
 export type PlacedLine = Readonly<{
 	id: string;
