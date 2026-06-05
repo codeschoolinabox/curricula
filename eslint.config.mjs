@@ -383,14 +383,11 @@ export default tseslint.config(
 	// --- Public API files: named exports allowed ---
 	{
 		files: [
-			'src/lib/*/src/index.ts',
-			'src/lib/*/index.ts',
-			// Plugin entry points (barrel re-exports of the plugin API)
-			'src/plugins/*/index.ts',
-			'src/plugins/*/index.tsx',
-			// Nested package roots (e.g. just-enough/javascript/orchestrate/index.tsx)
-			'src/lib/*/*/index.ts',
-			'src/lib/*/*/index.tsx',
+			// Entry points at any depth (barrel / public-API files).
+			'src/lib/**/index.ts',
+			'src/lib/**/index.tsx',
+			'src/plugins/**/index.ts',
+			'src/plugins/**/index.tsx',
 			// Domain-partition data files (documenting/, completing/) where
 			// each file exports one slice of a union. The collection's
 			// canonical structure is "many named exports per category".
