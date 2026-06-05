@@ -65,8 +65,8 @@ import type { LensConfig } from '../lenses/types.js';
  * that the cascade exposes `lenses[lens]` for per-lens config lookup —
  * at the cast boundary inside that function (with a runtime
  * sanity check via `readCascadeLensEntry`). The public type carries
- * no such assumption — the per-lens lookup at `configs.lenses?.[lens]`
- * is the only structural assumption the orchestrator carries.
+ * no such assumption, so future cascade-shape evolution (L2 default-
+ * lens seam, etc.) doesn't require widening the public surface.
  *
  * The orchestrator's read of `configs.lenses[lens]` is a runtime
  * trust point, not a compile-time guarantee. Strictness against
@@ -96,10 +96,8 @@ import type { LensConfig } from '../lenses/types.js';
  *   are **deep-merged INTO `configs.lenses[lens]`** at plugin
  *   emission time, so the orchestrator reads `configs.lenses?.[lens]`
  *   as the authoritative per-lens config. Other top-level keys
- *   (`defaults`, `embedSiblings`, `exerciseSetPrefixes`) are accepted
- *   but unused — the orchestrator does not read `configs.defaults`
- *   at all; it is consumed plugin-side during JSX emission per the
- *   default-lens precedence chain.
+ *   (`defaults`, `embedSiblings`, `exerciseSetPrefixes`) are
+ *   accepted but unused today (L2 may consume them).
  *
  * **Resolution chain for any lens-name** (two tiers, post-3-prop
  * reshape):
@@ -127,10 +125,10 @@ import type { LensConfig } from '../lenses/types.js';
  * rendered `<StudyLenses>` JSX node. See WS3 handoff § Cross-handoff
  * impact for the plugin-emit narrowing schedule.
  */
-type StudyLensesProperties = Readonly<{
-	readonly snippet: string;
-	readonly lens?: string;
-	readonly configs?: Readonly<Record<string, unknown>>;
+type StudyLensesProps = Readonly<{
+	snippet: string;
+	lens?: string;
+	configs?: Readonly<Record<string, unknown>>;
 }>;
 
 // --- Internal mode state (2-state machine per WS3 F2) ---
@@ -150,7 +148,7 @@ type StudyLensesProperties = Readonly<{
  * orchestrator at render time — not stored on this state.
  */
 type EditorModeState = Readonly<{
-	readonly mode: 'editor';
+	mode: 'editor';
 }>;
 
 /**
@@ -170,9 +168,9 @@ type EditorModeState = Readonly<{
  * `cachedEmbodiment.snippet === currentSnippet`.
  */
 type LensModeState = Readonly<{
-	readonly mode: 'lens';
-	readonly activeLens: string;
-	readonly resolvedConfig: LensConfig;
+	mode: 'lens';
+	activeLens: string;
+	resolvedConfig: LensConfig;
 }>;
 
 /**
@@ -210,8 +208,8 @@ type OrchestratorState = EditorModeState | LensModeState;
  * was built from — equality check is string-identity (`===`).
  */
 type CachedEmbodiment = Readonly<{
-	readonly snippet: string;
-	readonly embodiment: Snippet;
+	snippet: string;
+	embodiment: Snippet;
 }>;
 
 // --- Lens selection (where a switch came from) ---
@@ -282,9 +280,9 @@ type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
  * without a meaningful source omit it.
  */
 type LensSwitchedPayload = Readonly<{
-	readonly previous: string | null;
-	readonly next: string;
-	readonly source?: LensSelectionSource;
+	previous: string | null;
+	next: string;
+	source?: LensSelectionSource;
 }>;
 
 /**
@@ -297,8 +295,8 @@ type LensSwitchedPayload = Readonly<{
  * deterministic order (mode-changed before lens-switched).
  */
 type ModeChangedPayload = Readonly<{
-	readonly from: 'editor' | 'lens';
-	readonly to: 'editor' | 'lens';
+	from: 'editor' | 'lens';
+	to: 'editor' | 'lens';
 }>;
 
 /**
@@ -307,8 +305,8 @@ type ModeChangedPayload = Readonly<{
  * to constrain payload types per event name.
  */
 type EventPayloadMap = Readonly<{
-	readonly 'lens-switched': LensSwitchedPayload;
-	readonly 'mode-changed': ModeChangedPayload;
+	'lens-switched': LensSwitchedPayload;
+	'mode-changed': ModeChangedPayload;
 }>;
 
 type EventPayload<N extends EventName> = EventPayloadMap[N];
@@ -341,7 +339,7 @@ type EventBus = Readonly<{
 }>;
 
 export type {
-	StudyLensesProperties as StudyLensesProps,
+	StudyLensesProps,
 	OrchestratorState,
 	EditorModeState,
 	LensModeState,

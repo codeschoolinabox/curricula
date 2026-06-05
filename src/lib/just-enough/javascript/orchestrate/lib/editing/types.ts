@@ -53,7 +53,7 @@ type LintDiagnostic = {
 	readonly severity: 'error' | 'warning' | 'rejection';
 	readonly message: string;
 	readonly source?: string;
-	readonly entry?: DocumentEntry;
+	readonly entry?: DocEntry;
 };
 
 /**
@@ -69,7 +69,7 @@ type LintDiagnostic = {
  * `isJEJ: false` entries — see `lib/documenting/README.md` § Glossary
  * for the field's pedagogical scope.
  */
-type DocumentEntry = {
+type DocEntry = {
 	readonly description: string;
 	readonly isJEJ: boolean;
 	readonly example?: string;
@@ -121,7 +121,7 @@ type CompletionItem = {
 	readonly type?: string;
 	readonly detail?: string;
 	readonly info?: string;
-	readonly entry?: DocumentEntry;
+	readonly entry?: DocEntry;
 	readonly apply?: 'noop';
 };
 
@@ -151,7 +151,7 @@ type LinterCallback = (code: string) => readonly LintDiagnostic[];
 /**
  * Looks up documentation for a hovered word.
  */
-type DocumentLookupCallback = (word: string) => DocumentEntry | null;
+type DocLookupCallback = (word: string) => DocEntry | null;
 
 /**
  * Returns completion items matching the request's prefix.
@@ -162,7 +162,7 @@ type DocumentLookupCallback = (word: string) => DocumentEntry | null;
  * editor lifts `apply: 'noop'` and `info` strings into CM-side
  * behavior internally.
  */
-type CompletionCallback = (request: CompletionRequest) => readonly CompletionItem[];
+type CompletionCallback = (req: CompletionRequest) => readonly CompletionItem[];
 
 /**
  * Receives the result of a format operation.
@@ -216,7 +216,7 @@ type EditorOptions = {
 	readonly parent?: HTMLElement;
 	readonly format?: FormatCallback;
 	readonly linters?: readonly LinterCallback[];
-	readonly docLookup?: DocumentLookupCallback;
+	readonly docLookup?: DocLookupCallback;
 	readonly completions?: CompletionCallback;
 	readonly onFormat?: FormatResultCallback;
 	readonly onChange?: OnChangeCallback;
@@ -236,7 +236,7 @@ type EditorOptions = {
  * its contents are torn down — do not re-append it to a new parent.
  */
 type EditorInstance = {
-	readonly content: string;
+	content: string;
 	readonly el: HTMLElement;
 	/** Restores editor content to the `initialCode` captured at factory time. */
 	readonly reset: () => void;
@@ -252,8 +252,8 @@ export type {
 	CompletionItem,
 	CompletionRequest,
 	DetectedLanguage,
-	DocumentEntry as DocEntry,
-	DocumentLookupCallback as DocLookupCallback,
+	DocEntry,
+	DocLookupCallback,
 	EditorInstance,
 	EditorOptions,
 	FormatCallback,

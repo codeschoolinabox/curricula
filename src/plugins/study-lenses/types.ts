@@ -47,25 +47,16 @@ type LangName = string;
  * is needed.
  */
 type LensesConfigFile = Readonly<{
-	/**
-	 * Per-language default-lens slot. Non-null entry: enables the language
-	 * (configured-languages rule) AND supplies the default lens for bare
-	 * fences in that language. Explicit `null`: **subtree deconfiguration**
-	 * — a child `lenses.json` suppresses an ancestor's enablement; fences
-	 * in that subtree are untransformed. Missing key: language was never
-	 * enabled at any ancestor level. See `./README.md` § Default-lens
-	 * precedence chain.
-	 */
-	readonly defaults?: Readonly<Record<LangName, LensName | null>>;
-	readonly embedSiblings?: Readonly<Partial<EmbedSiblingsConfig>>;
-	readonly lenses?: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
+	defaults?: Readonly<Record<LangName, LensName>>;
+	embedSiblings?: Readonly<Partial<EmbedSiblingsConfig>>;
+	lenses?: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
 	/**
 	 * Directory-name prefixes that mark "exercise set" folders for
 	 * sidebar-label stripping (Module H). Merged across the cascade with
 	 * array concatenation — nested `lenses.json` files extend, they do
 	 * not replace.
 	 */
-	readonly exerciseSetPrefixes?: ReadonlyArray<string>;
+	exerciseSetPrefixes?: ReadonlyArray<string>;
 }>;
 
 // ─── Resolved configuration ─────────────────────────────────
@@ -79,9 +70,9 @@ type LensesConfigFile = Readonly<{
  * are last-writer-wins.
  */
 type EmbedSiblingsConfig = Readonly<{
-	readonly mode: 'off' | 'bottom' | 'tabs';
-	readonly ignorePrefixes: ReadonlyArray<string>;
-	readonly sectionHeading: string | null;
+	mode: 'off' | 'bottom' | 'tabs';
+	ignorePrefixes: ReadonlyArray<string>;
+	sectionHeading: string | null;
 }>;
 
 /**
@@ -93,19 +84,10 @@ type EmbedSiblingsConfig = Readonly<{
  * optional-chaining needed on the top-level keys.
  */
 type ResolvedConfig = Readonly<{
-	/**
-	 * Post-cascade per-language default-lens map. Same shape as
-	 * `LensesConfigFile.defaults` but required (filled from `DEFAULTS`'s
-	 * empty seed if no `lenses.json` ever sets it). Both consumers
-	 * (`transformFence` in `remark-study-lenses.ts` and `walk` in
-	 * `discover-siblings.ts`) apply gate-semantics parity (`== null`) to
-	 * handle absent and null uniformly. See `./README.md` § Configured-
-	 * language entries.
-	 */
-	readonly defaults: Readonly<Record<LangName, LensName | null>>;
-	readonly embedSiblings: EmbedSiblingsConfig;
-	readonly lenses: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
-	readonly exerciseSetPrefixes: ReadonlyArray<string>;
+	defaults: Readonly<Record<LangName, LensName>>;
+	embedSiblings: EmbedSiblingsConfig;
+	lenses: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
+	exerciseSetPrefixes: ReadonlyArray<string>;
 }>;
 
 // ─── Sibling discovery ──────────────────────────────────────
@@ -120,14 +102,14 @@ type ResolvedConfig = Readonly<{
  * `b/foo.js` become labels `a/foo` and `b/foo`).
  */
 type Sibling = Readonly<{
-	readonly absPath: string;
-	readonly label: string;
-	readonly code: string;
-	readonly lang: LangName;
+	absPath: string;
+	label: string;
+	code: string;
+	lang: LangName;
 	/**
 	 * Final resolved lens — directive's lens wins over cascade default.
 	 */
-	readonly lens: LensName;
+	lens: LensName;
 	/**
 	 * Raw JSON config from the file's `@study-lens` directive, if any.
 	 * Stored un-merged at the sibling-walker boundary; the deep-merge
@@ -137,7 +119,7 @@ type Sibling = Readonly<{
 	 * `./DOCS.md` § Sibling walker step 4 (Annotate) and § Remark
 	 * transformer phase 3 (Emission shape) for the full flow.
 	 */
-	readonly lensConfig?: Readonly<Record<string, unknown>>;
+	lensConfig?: Readonly<Record<string, unknown>>;
 }>;
 
 // ─── hast props (plugin → component interface) ──────────────
@@ -189,10 +171,10 @@ type Sibling = Readonly<{
  * is dropped entirely (transforms are a lens-internal concern per the
  * lenses peer's `DOCS.md` §Structural constraints).
  */
-type StudyLensesHastProperties = Readonly<{
-	readonly snippet: string;
-	readonly lens?: LensName;
-	readonly configs?: ResolvedConfig;
+type StudyLensesHastProps = Readonly<{
+	snippet: string;
+	lens?: LensName;
+	configs?: ResolvedConfig;
 }>;
 
 // Tabs-mode embeds emit Docusaurus's native `<Tabs>`/`<TabItem>` via
@@ -209,7 +191,7 @@ type StudyLensesHastProperties = Readonly<{
  * walks up only to this path).
  */
 type RemarkPluginOptions = Readonly<{
-	readonly contentRoot: string;
+	contentRoot: string;
 }>;
 
 /**
@@ -222,7 +204,7 @@ type RemarkPluginOptions = Readonly<{
  * instance receives in `docusaurus.config.ts`.
  */
 type LifecyclePluginOptions = Readonly<{
-	readonly contentRoots: ReadonlyArray<string>;
+	contentRoots: ReadonlyArray<string>;
 }>;
 
 /**
@@ -240,8 +222,8 @@ type LifecyclePluginOptions = Readonly<{
  * version. The implementing module imports it at the call site.
  */
 type SidebarGeneratorOptions =
-	| Readonly<{ readonly contentRoot: string }>
-	| Readonly<{ readonly resolvedConfig: ResolvedConfig }>;
+	| Readonly<{ contentRoot: string }>
+	| Readonly<{ resolvedConfig: ResolvedConfig }>;
 
 // ─── Exports ────────────────────────────────────────────────
 
@@ -255,5 +237,5 @@ export type {
 	ResolvedConfig,
 	SidebarGeneratorOptions,
 	Sibling,
-	StudyLensesHastProperties as StudyLensesHastProps,
+	StudyLensesHastProps,
 };

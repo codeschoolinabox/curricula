@@ -17,11 +17,11 @@
 
 import type { Node } from 'acorn';
 
-import type { ScopeAnalysis } from '../../../embody/lib/scope/types.js';
 import type {
 	SourcePosition,
 	SourceRange,
 } from '../../../embody/lib/validating/types.js';
+import type { ScopeAnalysis } from '../../../embody/lib/scope/types.js';
 
 // ─── Re-exports for consumer convenience ────────────────────
 
@@ -259,43 +259,43 @@ type CodeQuestion = {
  */
 type MicroDecisionConfig = {
 	/** Which kinds of questions to include. */
-	readonly kind?: {
-		readonly microDecision?: boolean;
-		readonly comprehension?: boolean;
+	kind?: {
+		microDecision?: boolean;
+		comprehension?: boolean;
 	};
 
 	/** Which JeJ language features to include. */
-	readonly features?: {
-		readonly variables?: boolean;
-		readonly data?: boolean;
-		readonly operators?: boolean;
-		readonly controlFlow?: boolean;
-		readonly functions?: boolean;
-		readonly userInteraction?: boolean;
-		readonly reading?: boolean;
+	features?: {
+		variables?: boolean;
+		data?: boolean;
+		operators?: boolean;
+		controlFlow?: boolean;
+		functions?: boolean;
+		userInteraction?: boolean;
+		reading?: boolean;
 	};
 
 	/** Which pedagogical levels to include. */
-	readonly levels?: {
-		readonly syntax?: boolean;
-		readonly semantics?: boolean;
-		readonly connections?: boolean;
-		readonly goals?: boolean;
-		readonly userExperience?: boolean;
+	levels?: {
+		syntax?: boolean;
+		semantics?: boolean;
+		connections?: boolean;
+		goals?: boolean;
+		userExperience?: boolean;
 	};
 
 	/** Which rhetorical audiences to include. */
-	readonly audiences?: {
-		readonly developers?: boolean;
-		readonly computer?: boolean;
-		readonly users?: boolean;
+	audiences?: {
+		developers?: boolean;
+		computer?: boolean;
+		users?: boolean;
 	};
 
 	/** Which question registers to include. */
-	readonly register?: {
-		readonly open?: boolean;
-		readonly pointed?: boolean;
-		readonly comparative?: boolean;
+	register?: {
+		open?: boolean;
+		pointed?: boolean;
+		comparative?: boolean;
 	};
 
 	/**
@@ -306,13 +306,13 @@ type MicroDecisionConfig = {
 	 * standard JS object key conventions. `filterQuestions` must map
 	 * `question.category === 'easter-egg'` to `config.categories.easterEgg`.
 	 */
-	readonly categories?: {
-		readonly voice?: boolean;
-		readonly clarity?: boolean;
-		readonly consistency?: boolean;
-		readonly caution?: boolean;
-		readonly trap?: boolean;
-		readonly easterEgg?: boolean;
+	categories?: {
+		voice?: boolean;
+		clarity?: boolean;
+		consistency?: boolean;
+		caution?: boolean;
+		trap?: boolean;
+		easterEgg?: boolean;
 	};
 
 	/**
@@ -321,9 +321,9 @@ type MicroDecisionConfig = {
 	 * overlaps the range are kept (any overlap, not full
 	 * containment).
 	 */
-	readonly range?: {
-		readonly start: number;
-		readonly end: number;
+	range?: {
+		start: number;
+		end: number;
 	};
 
 	/**
@@ -336,7 +336,7 @@ type MicroDecisionConfig = {
 	 * use omission to mean "no limit". Any positive integer caps the
 	 * result to that many questions.
 	 */
-	readonly count?: number;
+	count?: number;
 };
 
 // ─── Result type ─────────────────────────────────────────────

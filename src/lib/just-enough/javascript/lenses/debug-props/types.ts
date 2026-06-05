@@ -36,9 +36,9 @@
  * for objects; the raw string for primitive fields).
  */
 type Panel = Readonly<{
-	readonly key: string;
-	readonly label: string;
-	readonly content: string;
+	key: string;
+	label: string;
+	content: string;
 }>;
 
 /**
@@ -52,7 +52,7 @@ type Panel = Readonly<{
  * non-breaking change.
  */
 type DisplayTree = Readonly<{
-	readonly panels: ReadonlyArray<Panel>;
+	panels: ReadonlyArray<Panel>;
 }>;
 
 // ─── Exports ────────────────────────────────────────────────

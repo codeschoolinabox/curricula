@@ -30,7 +30,7 @@ type LoopGuardComponents = {
  */
 type ExtendedNode = Omit<Node, 'type'> & {
 	readonly type: string;
-	readonly generated?: boolean;
+	generated?: boolean;
 };
 
 export type { CodeInput, CodeOutput, LoopGuardComponents, ExtendedNode };
