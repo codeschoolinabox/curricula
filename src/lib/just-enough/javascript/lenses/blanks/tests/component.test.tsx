@@ -124,22 +124,8 @@ describe('blanks wrapper — Inc 6a', () => {
 			});
 		});
 
-		it('the editor state is read-only in Inc 6a (state.readOnly === true)', async () => {
-			const { container } = render(
-				<blanksLens.Component
-					embodiment={embody('OK')}
-					config={blanksLens.config()}
-				/>,
-			);
-			await waitFor(() => {
-				const cmContent = container.querySelector('.cm-content');
-				expect(cmContent).not.toBeNull();
-			});
-			const cmContent = container.querySelector('.cm-content') as HTMLElement;
-			const view = EditorView.findFromDOM(cmContent);
-			// CM6 EditorState.readOnly facet: true when editable=false.
-			expect(view?.state.readOnly).toBe(true);
-		});
+		// Read-only / editable state is mode-dependent now (Inc 6c):
+		// see the "editable mode + learnerCode state" describe block.
 	});
 
 	describe('view-mode toggle — Inc 6b', () => {
@@ -255,6 +241,164 @@ describe('blanks wrapper — Inc 6a', () => {
 				const text = container.querySelector('.cm-content')?.textContent ?? '';
 				expect(text).toContain('__');
 			});
+		});
+	});
+
+	describe('editable mode + learnerCode state — Inc 6c', () => {
+		it('the editor is EDITABLE in blankenated mode (state.readOnly === false)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			expect(view?.state.readOnly).toBe(false);
+		});
+
+		it('the editor is read-only in complete mode (state.readOnly === true)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ viewMode: 'complete' })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			expect(view?.state.readOnly).toBe(true);
+		});
+
+		it('typing into the editor updates the document (learnerCode)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			// Dispatch a programmatic insert at position 0; readOnly=false
+			// allows the dispatch to land.
+			view?.dispatch({
+				changes: { from: 0, insert: 'X' },
+			});
+			expect(view?.state.doc.toString().startsWith('X')).toBe(true);
+		});
+
+		it('toggle preserves learner edits: type → complete → blankenated → typed text is still there (AR-1 invariant)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			// Wait for initial editor mount.
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const initialContent = container.querySelector(
+				'.cm-content',
+			) as HTMLElement;
+			const initialView = EditorView.findFromDOM(initialContent);
+			// Type a learner edit: insert 'XYZ' at position 0.
+			initialView?.dispatch({ changes: { from: 0, insert: 'XYZ' } });
+			expect(initialView?.state.doc.toString().startsWith('XYZ')).toBe(true);
+
+			// Toggle to complete (which destroys the editor + recreates with
+			// originalCode).
+			const completeBtn = container.querySelector(
+				'[data-view-toggle="complete"]',
+			) as HTMLButtonElement;
+			fireEvent.click(completeBtn);
+			await waitFor(() => {
+				const root = container.querySelector('[data-lens="blanks"]');
+				expect(root?.getAttribute('data-view-mode')).toBe('complete');
+			});
+
+			// Toggle back to blankenated. The editor recreates; its document
+			// MUST be the learnerCode (XYZ-prefixed), not the original
+			// blankedCode.
+			const blankenatedBtn = container.querySelector(
+				'[data-view-toggle="blankenated"]',
+			) as HTMLButtonElement;
+			fireEvent.click(blankenatedBtn);
+			await waitFor(() => {
+				const root = container.querySelector('[data-lens="blanks"]');
+				expect(root?.getAttribute('data-view-mode')).toBe('blankenated');
+				const text =
+					container.querySelector('.cm-content')?.textContent ?? '';
+				expect(text.startsWith('XYZ')).toBe(true);
+			});
+		});
+
+		it('typing does NOT remount the EditorView (regression: Inc 6c displayCode-feedback bug)', async () => {
+			// REGRESSION TEST for the Inc 6c remount-per-keystroke bug.
+			// If the wrapper has `displayCode` in its useEffect deps and
+			// `displayCode` derives from `learnerCode` state that the
+			// updateListener feeds, every keystroke destroys+remounts the
+			// view. The browser loses focus → editor feels read-only after
+			// the first character.
+			//
+			// We can't detect "feels read-only" in jsdom. The structural
+			// signal is: the EditorView instance reference must be STABLE
+			// across keystroke-driven React re-renders. Capture it before
+			// + after a dispatch-and-wait cycle; same reference == no
+			// remount.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContentBefore = container.querySelector(
+				'.cm-content',
+			) as HTMLElement;
+			const viewBefore = EditorView.findFromDOM(cmContentBefore);
+			// Dispatch fires updateListener → setLearnerCode → React schedules
+			// a re-render. Wait for it to flush.
+			viewBefore?.dispatch({ changes: { from: 0, insert: 'X' } });
+			await waitFor(() => {
+				expect(viewBefore?.state.doc.toString().startsWith('X')).toBe(true);
+			});
+			// Re-query: the EditorView attached to the DOM after React has
+			// re-rendered. If a remount happened, findFromDOM returns a
+			// NEW view; if no remount, it returns the same reference.
+			const cmContentAfter = container.querySelector(
+				'.cm-content',
+			) as HTMLElement;
+			const viewAfter = EditorView.findFromDOM(cmContentAfter);
+			expect(viewAfter).toBe(viewBefore);
+		});
+
+		it('noPasteExtension is wired in blankenated mode (paste event preventDefault)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			// Synthesize a paste event with clipboard data; assert it is
+			// preventDefault'd by the extension.
+			const pasteEvent = new Event('paste', { bubbles: true, cancelable: true });
+			cmContent.dispatchEvent(pasteEvent);
+			expect(pasteEvent.defaultPrevented).toBe(true);
 		});
 	});
 

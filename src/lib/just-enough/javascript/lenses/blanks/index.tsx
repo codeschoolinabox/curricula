@@ -31,6 +31,7 @@ import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import blanksCore from './core.js';
 import blankenate from './lib/blankenate.js';
+import noPasteExtension from './lib/no-paste-extension.js';
 import type { ContentType, ViewMode } from './types.js';
 
 const ALL_CONTENT_TYPES: ReadonlyArray<ContentType> = [
@@ -81,12 +82,25 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 		: ALL_CONTENT_TYPES;
 
 	// View-mode state (Inc 6b). Seeded from config.viewMode (default
-	// 'blankenated' via blanksCore.config). The toggle preserves any
-	// learner state across mounts (Inc 6c onward) — disposable-practice
-	// governs unmount, not within-mount toggle (AR-1 lock).
+	// 'blankenated' via blanksCore.config). The toggle preserves the
+	// learner's in-progress edits across mode swaps (AR-1 lock —
+	// disposable-practice governs unmount, not within-mount toggle).
 	const initialViewMode: ViewMode =
 		resolved.viewMode === 'complete' ? 'complete' : 'blankenated';
 	const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
+
+	// Learner edits state (Inc 6c). null = no edits yet → editor uses
+	// blankedCode on first mount. Once the learner types, the
+	// updateListener captures the current doc into learnerCode; later
+	// toggles back to blankenated re-mount with learnerCode (not the
+	// original blankedCode) so in-progress work is preserved.
+	const [learnerCode, setLearnerCode] = useState<string | null>(null);
+	// Ref mirror of learnerCode — read by the EditorView-mount effect at
+	// mount-time. The effect MUST NOT have learnerCode in its dep array
+	// (would feedback-loop: keystroke → setLearnerCode → re-render →
+	// effect re-fires → view.destroy → lost focus → "feels read-only").
+	const learnerCodeRef = useRef<string | null>(learnerCode);
+	learnerCodeRef.current = learnerCode;
 
 	// Memoize the blankenate call on (source, resolved). `resolved` is
 	// itself memoized on `config`, so the dep chain is stable when the
@@ -102,7 +116,18 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 			),
 		// True minimal deps: `difficulty` and `contentTypes` are derived
 		// from `resolved` above; listing them separately would imply
-		// they can change independently of resolved (they cannot).
+		// they can change independently of resolved (they cannot — yet).
+		//
+		// TODO Inc 6e/6f: when the difficulty slider + content-type
+		// checkboxes introduce LOCAL state for these values (no longer
+		// prop-derived), this useMemo's deps must expand to include
+		// those local values. blankResult identity will then change on
+		// every slider/checkbox interaction → the mountEditorView
+		// effect remounts the view → learnerCodeRef.current still holds
+		// the old typed text but against the old blank positions.
+		// Per DOCS § Phase 2: "Re-derivation on settings change resets
+		// the correctness map" — Inc 6e/6f handlers must also clear
+		// learnerCode (setLearnerCode(null)) when settings change.
 		[embodiment.source.code, resolved],
 	);
 
@@ -116,35 +141,61 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 	// but the embodiment is still marked unparsed.
 	const showFallback = !embodiment.status.parsed || blankResult === null;
 
-	// View-mode drives which document the editor mounts on:
-	//   complete    → originalCode (no __, the verbatim source)
-	//   blankenated → blankedCode (with __ placeholders)
-	const displayCode =
-		blankResult === null
-			? embodiment.source.code
-			: viewMode === 'complete'
-				? blankResult.originalCode
-				: blankResult.blankedCode;
-
 	const editorContainer = useRef<HTMLDivElement | null>(null);
 	const editorView = useRef<EditorView | null>(null);
 
-	// Mount the CodeMirror EditorView once per (displayCode) change.
-	// Inc 6a: read-only blankenated mode. Inc 6b will add view-mode
-	// switching that destroys + recreates the view on toggle.
+	// Mount the CodeMirror EditorView. Destroy + recreate on STRUCTURAL
+	// changes only: viewMode flips, or blankResult re-derives (source /
+	// difficulty / contentTypes change). Per-keystroke `learnerCode`
+	// updates flow through the updateListener into React state but MUST
+	// NOT re-fire this effect — that would feedback-loop and destroy
+	// the EditorView mid-typing.
+	//
+	// Inc 6c:
+	//   - blankenated mode → editable, noPasteExtension wired,
+	//     updateListener captures learner edits into learnerCode state.
+	//   - complete mode → read-only, no paste extension, no listener
+	//     reaction to docChanged.
 	useEffect(
 		function mountEditorView() {
 			const host = editorContainer.current;
 			if (!host) return;
 
+			const isBlankenated = viewMode === 'blankenated';
+
+			// Derive the initial document INSIDE the effect closure so
+			// learnerCode is read from the ref (not state-as-dep). Toggle
+			// back to blankenated picks up the latest in-progress edits;
+			// fresh mount with no edits uses blankedCode.
+			const initialDoc =
+				blankResult === null
+					? embodiment.source.code
+					: isBlankenated
+						? (learnerCodeRef.current ?? blankResult.blankedCode)
+						: blankResult.originalCode;
+
+			const updateListener = EditorView.updateListener.of(function onUpdate(
+				update,
+			) {
+				if (!update.docChanged) return;
+				if (!isBlankenated) return;
+				// Mirror the learner's edit into local state. The wrapper's
+				// updateListener NEVER calls the orchestrator's snippet setter
+				// per the single-writer invariant (DOCS § Structural constraints
+				// "CodeMirror writes to local state, never to setSnippet").
+				setLearnerCode(update.state.doc.toString());
+			});
+
 			const state = EditorState.create({
-				doc: displayCode,
+				doc: initialDoc,
 				extensions: [
 					basicSetup,
 					javascript(),
 					oneDark,
-					EditorView.editable.of(false),
-					EditorState.readOnly.of(true),
+					EditorView.editable.of(isBlankenated),
+					EditorState.readOnly.of(!isBlankenated),
+					updateListener,
+					...(isBlankenated ? [noPasteExtension()] : []),
 				],
 			});
 			const view = new EditorView({ state, parent: host });
@@ -155,7 +206,13 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 				editorView.current = null;
 			};
 		},
-		[displayCode],
+		// Intentionally minimal deps: structural remounts only.
+		// learnerCode is read via ref above; including it here would
+		// recreate the regression bug fixed in Inc 6c.
+		// embodiment.source.code is captured via blankResult (memoized on
+		// embodiment.source.code + resolved); including it here directly
+		// would just duplicate the blankResult-driven remount path.
+		[viewMode, blankResult],
 	);
 
 	// Render: on null blankResult (defense-in-depth) render ONLY the
