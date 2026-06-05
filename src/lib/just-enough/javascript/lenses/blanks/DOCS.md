@@ -120,14 +120,20 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    `learnerCode` (the in-progress edits) or, on first-toggle-back, on
    `blankedCode` from the memoized blankenate result.
 
-4. **Evaluate correctness** (per learner edit, sync, pure) — when
-   `viewMode === 'blankenated'` and `blanks.length > 0`, a `useEffect` keyed on
-   `(learnerCode, blanks)` calls `evaluateCorrectness(learnerCode, blanks)`. The
-   evaluator returns `EvaluationResult` (`correctnessMap` + counts + score); the
-   wrapper stores them and the hints panel + editor header re-render. Position-
-   aware: each blank's `{start, end}` from `blankenate`'s output anchors a
-   per-position match against the learner's typed text. Fixes the legacy's two
-   bugs (substring-containment false positive; multi-blank-same-word tracking).
+4. **Evaluate correctness** (per learner edit, sync, pure) — a `useMemo`
+   keyed on `(learnerCode, blankResult)` calls
+   `evaluateCorrectness(currentDoc, blanks, originalCode)` where
+   `currentDoc = learnerCode ?? blankResult.blankedCode`. The evaluator
+   returns `EvaluationResult` (`correctnessMap` + counts + score); Inc 6d
+   surfaces the score in the JSX, and Inc 6h feeds `correctnessMap` to
+   the hints panel for the per-blank green/red/yellow visual. `useMemo`
+   (not `useEffect`): synchronous-pure computation belongs in the render
+   pass so the score updates atomically with the learner's keystroke —
+   no stale-score flicker frame. Position-aware: each blank's
+   `{start, end}` from `blankenate`'s output anchors a per-position
+   match against the learner's typed text. Fixes the legacy's two bugs
+   (substring-containment false positive; multi-blank-same-word
+   tracking).
 
 5. **Render** (sync) — the wrapper emits the root
    `<div data-lens="blanks" data-view-mode="blankenated|complete" data-hints-level="easy|medium|hard">`

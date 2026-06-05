@@ -8,13 +8,15 @@
  * root with toolbar, editor, editor header, hints panel, and Ask Me
  * button.
  *
- * **Current scope (Inc 6a + 6b):** wrapper mounts a CodeMirror
- * EditorView in read-only blankenated mode (6a) with a two-button
- * view-mode toggle (6b) that swaps between the blankenated and
- * complete (original-source) views. Both modes are read-only — Inc
- * 6c adds editable blankenated + noPasteExtension; Inc 6d adds
- * per-blank correctness wiring; 6e–6j add the slider, content-type
- * checkboxes, editor header, hints panel, URL config, and Ask Me.
+ * **Current scope (Inc 6a + 6b + 6c + 6d):** wrapper mounts a
+ * CodeMirror EditorView (6a), with a two-button view-mode toggle
+ * (6b), editable in blankenated mode with noPasteExtension wired
+ * (6c), and an aggregate score panel that updates per keystroke as
+ * the learner fills blanks (6d). The root currently emits
+ * `data-lens="blanks" data-view-mode={viewMode}`; `data-hints-level`
+ * is deferred to Inc 6h when the hints panel + tier resolution land.
+ * 6e–6j add the slider, content-type checkboxes, editor header, full
+ * hints panel with per-blank visual feedback, URL config, and Ask Me.
  */
 
 import { javascript } from '@codemirror/lang-javascript';
