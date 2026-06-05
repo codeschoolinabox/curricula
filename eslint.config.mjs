@@ -31,6 +31,13 @@ export default tseslint.config(
 			// blanks lens refactor stabilizes.
 			'src/lib/just-enough/javascript/lenses/blanks/lib/**',
 			'src/lib/just-enough/javascript/lenses/blanks/tests/**',
+			// Vendored parsons lens internals (lis, parse-parsons) — JS→TS
+			// mechanical converts of the legacy JSParsons implementation;
+			// idiomatic V2 style is a follow-up. Tests/ extends the
+			// exclusion to this session's WIP test files during the redo —
+			// re-include when the parsons lens refactor stabilizes.
+			'src/lib/just-enough/javascript/lenses/parsons/lib/**',
+			'src/lib/just-enough/javascript/lenses/parsons/tests/**',
 			// WIP tracer engine — Phase B redesign in progress per
 			// EMBODY-IMPL-HANDOFF.md. The full evaluating/ subtree (trace,
 			// intercept, run, shared) is mid-refactor; lint rules don't yet
