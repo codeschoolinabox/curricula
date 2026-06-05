@@ -402,6 +402,88 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
+	describe('correctness wiring + score display — Inc 6d', () => {
+		it('renders a [data-blanks-score] element on a parseable snippet at difficulty=100', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('[data-blanks-score]')).not.toBeNull();
+			});
+		});
+
+		it('initial score is 0% when blanks exist and learner has typed nothing', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				const scoreEl = container.querySelector('[data-blanks-score]');
+				expect(scoreEl?.textContent).toContain('0');
+			});
+		});
+
+		it('score is 100% when the learner has typed the originalCode verbatim', async () => {
+			// Dispatch a replace-all change to set the editor doc to the
+			// original source (proving all blanks are correct).
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			const originalCode = embody('OK').source.code;
+			view?.dispatch({
+				changes: {
+					from: 0,
+					to: view.state.doc.length,
+					insert: originalCode,
+				},
+			});
+			await waitFor(() => {
+				const scoreEl = container.querySelector('[data-blanks-score]');
+				expect(scoreEl?.textContent).toContain('100');
+			});
+		});
+
+		it('the score element exposes the numeric score via [data-blanks-score] attribute value', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				const scoreEl = container.querySelector('[data-blanks-score]');
+				// Initial: 0 (no edits, blanks present)
+				expect(scoreEl?.getAttribute('data-blanks-score')).toBe('0');
+			});
+		});
+
+		it('score is 100% when there are no blanks (vacuously complete) — difficulty=0', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 0 })}
+				/>,
+			);
+			await waitFor(() => {
+				const scoreEl = container.querySelector('[data-blanks-score]');
+				expect(scoreEl?.getAttribute('data-blanks-score')).toBe('100');
+			});
+		});
+	});
+
 	describe('the LensModule freeze contract', () => {
 		it('the default export is a frozen LensModule', () => {
 			expect(Object.isFrozen(blanksLens)).toBe(true);

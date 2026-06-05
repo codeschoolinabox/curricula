@@ -199,13 +199,13 @@ function filterQuestions(
 	}
 
 	// 8. Sort by source location (ascending line, then column)
-	result.sort((a, b) => {
+	result.sort((a, b) => bySourceLocation(a, b));
+
+	function bySourceLocation(a: CodeQuestion, b: CodeQuestion): number {
 		const lineDiff = a.location.start.line - b.location.start.line;
-		if (lineDiff !== 0) {
-			return lineDiff;
-		}
+		if (lineDiff !== 0) return lineDiff;
 		return a.location.start.column - b.location.start.column;
-	});
+	}
 
 	// 9. Cap at config.count if specified and > 0
 	if (config.count && config.count > 0 && result.length > config.count) {

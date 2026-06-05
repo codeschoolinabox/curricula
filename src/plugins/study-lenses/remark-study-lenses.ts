@@ -237,7 +237,9 @@ function appendTabsEmbed(
 	groupKey: string,
 	config: ResolvedConfig,
 ): void {
-	const tabItems = siblings.map((sibling) => {
+	const tabItems = siblings.map((sibling) => siblingToTabItem(sibling));
+
+	function siblingToTabItem(sibling: Sibling) {
 		// Within a group, labels are relative to the group — strip the
 		// `groupKey/` prefix so tabs read `01-declare`, not
 		// `sl-01-variables/01-declare`.
@@ -277,7 +279,7 @@ function appendTabsEmbed(
 			],
 			children: [innerJsx],
 		};
-	});
+	}
 
 	const tabs = {
 		type: 'mdxJsxFlowElement' as const,

@@ -88,7 +88,9 @@ function mixedStringConstruction(
 	const hasConcatenation = collectNodes(
 		ast,
 		new Set(['BinaryExpression']),
-	).some((node) => {
+	).some((node) => isStringConcatenation(node));
+
+	function isStringConcatenation(node: Node): boolean {
 		const record = getRecord(node);
 		if (record.operator !== '+') return false;
 		const left = record.left as Node;
@@ -97,7 +99,7 @@ function mixedStringConstruction(
 			(left.type === 'Literal' && typeof getRecord(left).value === 'string') ||
 			(right.type === 'Literal' && typeof getRecord(right).value === 'string')
 		);
-	});
+	}
 
 	if (!hasTemplateLiteral || !hasConcatenation) {
 		return [];
@@ -145,15 +147,18 @@ function mixedEquality(
 ): readonly CodeQuestion[] {
 	const comparisonNodes = collectNodes(ast, new Set(['BinaryExpression']));
 
-	const hasStrict = comparisonNodes.some((node) => {
+	const hasStrict = comparisonNodes.some((node) => isStrictEquality(node));
+	const hasLoose = comparisonNodes.some((node) => isLooseEquality(node));
+
+	function isStrictEquality(node: Node): boolean {
 		const op = getRecord(node).operator as string;
 		return op === '===' || op === '!==';
-	});
+	}
 
-	const hasLoose = comparisonNodes.some((node) => {
+	function isLooseEquality(node: Node): boolean {
 		const op = getRecord(node).operator as string;
 		return op === '==' || op === '!=';
-	});
+	}
 
 	if (!hasStrict || !hasLoose) {
 		return [];
@@ -205,7 +210,10 @@ function mixedConditionStyle(
 		new Set(['IfStatement', 'WhileStatement']),
 	);
 
-	const hasTruthyCheck = conditionalNodes.some((node) => {
+	const hasTruthyCheck = conditionalNodes.some((node) => isTruthyTest(node));
+	const hasExplicitCheck = conditionalNodes.some((node) => isExplicitComparisonTest(node));
+
+	function isTruthyTest(node: Node): boolean {
 		const test = getRecord(node).test as Node;
 		return (
 			test.type === 'Identifier' ||
@@ -213,16 +221,14 @@ function mixedConditionStyle(
 				getRecord(test).operator === '!' &&
 				(getRecord(test).argument as Node).type === 'Identifier')
 		);
-	});
+	}
 
-	const hasExplicitCheck = conditionalNodes.some((node) => {
+	function isExplicitComparisonTest(node: Node): boolean {
 		const test = getRecord(node).test as Node;
-		if (test.type !== 'BinaryExpression') {
-			return false;
-		}
+		if (test.type !== 'BinaryExpression') return false;
 		const op = getRecord(test).operator as string;
 		return op === '===' || op === '!==' || op === '==' || op === '!=';
-	});
+	}
 
 	if (!hasTruthyCheck || !hasExplicitCheck) {
 		return [];

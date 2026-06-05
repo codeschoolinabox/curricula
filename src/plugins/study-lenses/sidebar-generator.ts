@@ -75,7 +75,9 @@ function transformItems(
 	items: ReadonlyArray<unknown>,
 	prefixes: ReadonlyArray<string>,
 ): ReadonlyArray<unknown> {
-	return items.map((item) => {
+	return items.map((item) => rewriteCategoryItem(item));
+
+	function rewriteCategoryItem(item: unknown): unknown {
 		if (typeof item !== 'object' || item === null) return item;
 		const index = item as SidebarItemLike;
 		if (index.type !== 'category') return item;
@@ -83,7 +85,7 @@ function transformItems(
 			index.items === undefined ? index.items : transformItems(index.items, prefixes);
 		const rewrittenLabel = transformLabel(index.label ?? '', prefixes);
 		return { ...index, label: rewrittenLabel, items: rewrittenChildren };
-	});
+	}
 }
 
 /**

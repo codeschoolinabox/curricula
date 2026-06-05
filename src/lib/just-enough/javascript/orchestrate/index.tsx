@@ -264,7 +264,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// transition to announce. The fire-once guard
 		// (`initialDispatchFiredRef`) keeps the dispatch idempotent under
 		// React StrictMode's discarded-mount cycle.
-		React.useEffect(() => {
+		React.useEffect(function fireInitialLensDispatch() {
 			if (initialDispatchFiredReference.current) return;
 			const initialState = initialDerived.state;
 			if (initialState.mode !== 'lens') return;
@@ -326,7 +326,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// with `source: 'prop'`. The state setters land in a single React 18
 		// commit; the dispatches fire synchronously after.
 		const isMountedReference = React.useRef(false);
-		React.useEffect(() => {
+		React.useEffect(function applyLensPropTransition() {
 			if (!isMountedReference.current) {
 				isMountedReference.current = true;
 				return;
@@ -363,7 +363,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// invalidation row). Empty deps are safe: React guarantees setter identity
 		// is stable across renders. The two setters fire from a synthetic onChange
 		// event, so React 18 auto-batches them into a single commit.
-		const handleSnippetChange = React.useCallback((next: string) => {
+		const handleSnippetChange = React.useCallback(function handleSnippetChange(next: string) {
 			setSnippet(next);
 			setCachedEmbodiment(null);
 		}, []);

@@ -31,6 +31,7 @@ import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import blanksCore from './core.js';
 import blankenate from './lib/blankenate.js';
+import evaluateCorrectness from './lib/evaluate-correctness.js';
 import noPasteExtension from './lib/no-paste-extension.js';
 import type { ContentType, ViewMode } from './types.js';
 
@@ -144,6 +145,32 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 	const editorContainer = useRef<HTMLDivElement | null>(null);
 	const editorView = useRef<EditorView | null>(null);
 
+	// Inc 6d: per-blank correctness wiring + aggregate score display.
+	// evaluateCorrectness is pure; recomputes on learnerCode change
+	// (typing dispatches setLearnerCode) and on blankResult change
+	// (snippet / future-difficulty / future-content-types).
+	const evaluation = useMemo(() => {
+		if (blankResult === null) {
+			return { score: 100, total: 0, correct: 0, incorrect: 0, unfilled: 0 };
+		}
+		// The doc the learner is editing — learnerCode if they typed,
+		// blankedCode otherwise. evaluateCorrectness compares against
+		// blank.original at each anchor position.
+		const currentDoc = learnerCode ?? blankResult.blankedCode;
+		const result = evaluateCorrectness(
+			currentDoc,
+			blankResult.blanks,
+			blankResult.originalCode,
+		);
+		return {
+			score: result.score,
+			total: result.total,
+			correct: result.correct,
+			incorrect: result.incorrect,
+			unfilled: result.unfilled,
+		};
+	}, [learnerCode, blankResult]);
+
 	// Mount the CodeMirror EditorView. Destroy + recreate on STRUCTURAL
 	// changes only: viewMode flips, or blankResult re-derives (source /
 	// difficulty / contentTypes change). Per-keystroke `learnerCode`
@@ -251,6 +278,25 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 						</button>
 					</div>
 					<div ref={editorContainer} data-blanks-editor-host />
+					<div
+						data-blanks-score={String(evaluation.score)}
+						data-blanks-total={String(evaluation.total)}
+						data-blanks-correct={String(evaluation.correct)}
+						aria-live="polite"
+						style={{
+							padding: '0.5rem 0',
+							fontFamily: 'system-ui, sans-serif',
+							fontSize: '0.9rem',
+						}}
+					>
+						Score: {evaluation.score}%
+						{evaluation.total > 0 && (
+							<>
+								{' '}
+								({evaluation.correct} / {evaluation.total} blanks)
+							</>
+						)}
+					</div>
 				</>
 			)}
 		</div>

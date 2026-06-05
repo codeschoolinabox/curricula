@@ -135,14 +135,14 @@ function audiencePerspectiveTaking(
 	const interactionNames = new Set(['prompt', 'alert', 'confirm']);
 	const callNodes = collectNodes(ast, new Set(['CallExpression']));
 
-	const hasInteraction = callNodes.some((callNode) => {
+	const hasInteraction = callNodes.some((callNode) => isInteractionCall(callNode));
+
+	function isInteractionCall(callNode: Node): boolean {
 		const callee = getRecord(callNode).callee as Node;
-		if (callee.type === 'Identifier') {
-			const name = getRecord(callee).name as string;
-			return interactionNames.has(name);
-		}
-		return false;
-	});
+		if (callee.type !== 'Identifier') return false;
+		const name = getRecord(callee).name as string;
+		return interactionNames.has(name);
+	}
 
 	if (!hasInteraction) {
 		return [];

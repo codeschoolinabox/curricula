@@ -102,7 +102,7 @@ async function* createDebugGenerator(
 	iframe.style.cssText = IFRAME_HIDDEN_STYLES;
 
 	try {
-		await new Promise<void>((resolve, reject) => {
+		await new Promise<void>(function executor(resolve, reject) {
 			function onMessage(event: MessageEvent) {
 				if (event.source !== iframe.contentWindow) return;
 				if (event.data !== callId) return;
@@ -113,7 +113,7 @@ async function* createDebugGenerator(
 
 			window.addEventListener('message', onMessage);
 
-			iframe.addEventListener('load', () => {
+			iframe.addEventListener('load', function onIframeLoad() {
 				const iframeDocument = iframe.contentDocument;
 
 				if (!iframeDocument) {
