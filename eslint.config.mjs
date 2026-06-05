@@ -280,7 +280,12 @@ export default tseslint.config(
 
 			// --- SonarJS ---
 			...eslintPluginSonarJS.configs.recommended.rules,
-			'sonarjs/no-duplicate-string': 'error',
+			// Downgraded: metadata-heavy modules (socratizing analyzers,
+			// CodeQuestion configs) intentionally repeat tag literals
+			// ('micro-decision', category names, feature names) inline
+			// for self-documenting data definitions. Extracting to
+			// constants scatters what should read as a single record.
+			'sonarjs/no-duplicate-string': 'warn',
 			'sonarjs/no-identical-functions': 'error',
 			'sonarjs/cognitive-complexity': ['warn', 15],
 			'sonarjs/prefer-object-literal': 'error',
