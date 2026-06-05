@@ -325,6 +325,10 @@ export default tseslint.config(
 			// wrapping everything in Result-like objects — over-engineering
 			// for what's already a clear, narrow union.
 			'sonarjs/function-return-type': 'off',
+			// '=== undefined' on T|undefined unions is idiomatic TypeScript;
+			// sonarjs flags it as a 'different types comparison' but the
+			// runtime check is exactly the point of optional typing.
+			'sonarjs/different-types-comparison': 'off',
 
 			// --- Naming conventions ---
 			camelcase: [
