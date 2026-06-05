@@ -744,6 +744,151 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
+	describe('lock non-placeholder regions — Inc 6.5', () => {
+		// Locks the editable surface to the __ placeholder ranges only.
+		// Edits outside any blank's range are rejected via
+		// EditorState.changeFilter. This makes the whitespace-fragility
+		// bug architecturally unreachable (learner cannot corrupt the
+		// anchor segments by mistake).
+		it('inserts inside a __ placeholder are ACCEPTED', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			const docBefore = view!.state.doc.toString();
+			const firstBlank = docBefore.indexOf('__');
+			expect(firstBlank).toBeGreaterThanOrEqual(0); // sanity: there IS a __
+			// Insert INSIDE the placeholder (between the two underscores).
+			view!.dispatch({
+				changes: { from: firstBlank + 1, insert: 'X' },
+			});
+			expect(view!.state.doc.toString().length).toBe(docBefore.length + 1);
+		});
+
+		it('inserts at boundary positions (anchor chars) are absorbed into the adjacent blank (anchor preserved)', async () => {
+			// With inclusive:true, a position at the start or end of a
+			// blank range is considered "inside" that blank. An insert at
+			// the boundary becomes part of the blank's content — but the
+			// surrounding anchor character (e.g., the space between two
+			// __) is preserved verbatim. This is the load-bearing
+			// invariant: anchor segments are never corrupted, so the
+			// evaluator's anchor-split always succeeds.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('let x = 1;')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			const docBefore = view!.state.doc.toString();
+			// Insert at the first space (boundary between blank 1's end
+			// and the space). The insert lands; the space character
+			// must STILL be present in the resulting doc (anchor preserved).
+			const spaceIndex = docBefore.indexOf(' ');
+			expect(spaceIndex).toBeGreaterThanOrEqual(0);
+			view!.dispatch({
+				changes: { from: spaceIndex, insert: 'X' },
+			});
+			const docAfter = view!.state.doc.toString();
+			// The number of space characters is unchanged — the anchor
+			// is intact (the insert was absorbed into the adjacent blank,
+			// not into the anchor region).
+			const spacesBefore = (docBefore.match(/ /g) ?? []).length;
+			const spacesAfter = (docAfter.match(/ /g) ?? []).length;
+			expect(spacesAfter).toBe(spacesBefore);
+		});
+
+		it('inserts at the LEFT boundary (cursor at start of __) are ACCEPTED', async () => {
+			// AR-4 concern: CM6 RangeSet.between(from, to) uses strict
+			// overlap (decoFrom < to && decoTo > from). A pure-insert at
+			// position === decoFrom may fall through this check, silently
+			// rejecting the most common cursor position for learner typing.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('let x = 1;')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			const docBefore = view!.state.doc.toString();
+			const firstBlank = docBefore.indexOf('__');
+			expect(firstBlank).toBeGreaterThanOrEqual(0);
+			// Insert at the very START of the first __ (cursor position
+			// = decoration.from). With strict-overlap between(), this
+			// would silently reject. Fix expands query window leftward.
+			view!.dispatch({
+				changes: { from: firstBlank, insert: 'X' },
+			});
+			expect(view!.state.doc.toString().length).toBe(docBefore.length + 1);
+		});
+
+		it('inserts strictly OUTSIDE any __ placeholder (past the last blank) are REJECTED', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('let x = 1;')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			const docBefore = view!.state.doc.toString();
+			// Insert at the very end of the doc — past any blank range.
+			view!.dispatch({
+				changes: { from: docBefore.length, insert: 'TRAILING' },
+			});
+			expect(view!.state.doc.toString()).toBe(docBefore);
+		});
+
+		it('after a learner types into a placeholder, subsequent inserts at the typed position are still ACCEPTED', async () => {
+			// The blank range auto-extends via Decoration.mark to cover
+			// the typed text. Sequential typing within the same blank
+			// remains editable.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			const docBefore = view!.state.doc.toString();
+			const firstBlank = docBefore.indexOf('__');
+			// First insert: 'X' at firstBlank+1.
+			view!.dispatch({
+				changes: { from: firstBlank + 1, insert: 'X' },
+			});
+			const lenAfter1 = view!.state.doc.toString().length;
+			expect(lenAfter1).toBe(docBefore.length + 1);
+			// Second insert: 'Y' at firstBlank+2 (still inside the
+			// extended blank range, after the 'X' we just typed).
+			view!.dispatch({
+				changes: { from: firstBlank + 2, insert: 'Y' },
+			});
+			expect(view!.state.doc.toString().length).toBe(docBefore.length + 2);
+		});
+	});
+
 	describe('the LensModule freeze contract', () => {
 		it('the default export is a frozen LensModule', () => {
 			expect(Object.isFrozen(blanksLens)).toBe(true);

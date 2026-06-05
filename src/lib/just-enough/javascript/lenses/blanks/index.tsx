@@ -21,8 +21,9 @@
 
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { EditorState } from '@codemirror/state';
-import { EditorView } from '@codemirror/view';
+import { EditorState, StateField } from '@codemirror/state';
+import { Decoration, EditorView } from '@codemirror/view';
+import type { DecorationSet } from '@codemirror/view';
 import { basicSetup } from 'codemirror';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType } from 'react';
@@ -35,7 +36,7 @@ import blanksCore from './core.js';
 import blankenate from './lib/blankenate.js';
 import evaluateCorrectness from './lib/evaluate-correctness.js';
 import noPasteExtension from './lib/no-paste-extension.js';
-import type { ContentType, ViewMode } from './types.js';
+import type { BlankenateResult, ContentType, ViewMode } from './types.js';
 
 const ALL_CONTENT_TYPES: ReadonlyArray<ContentType> = [
 	'keywords',
@@ -65,6 +66,83 @@ function deriveContentTypeFlags(
 		operators: set.has('operators'),
 		literals: set.has('literals'),
 	};
+}
+
+/**
+ * Inc 6.5: lock non-placeholder regions.
+ *
+ * Builds two CodeMirror extensions for the blanks-editable surface:
+ *
+ * 1. A `StateField<DecorationSet>` holding one decoration mark per
+ *    blank placeholder. Marks are `inclusive: true` so edits at the
+ *    `from`/`to` boundary extend the range. CM auto-maps the
+ *    decoration set through doc changes — typing inside a blank
+ *    extends its range; deleting inside contracts it.
+ *
+ * 2. A `transactionFilter` that inspects each proposed change. If
+ *    the change `[fromA, toA]` does NOT lie entirely within some
+ *    blank's current range, the entire transaction is rejected.
+ *    This means:
+ *      - Inserts in the anchor (prefix / inter-blank / suffix) → REJECTED.
+ *      - Inserts inside a __ → ACCEPTED, blank range extends.
+ *      - Deletes inside a blank → ACCEPTED, range contracts.
+ *      - Deletes crossing a blank boundary → REJECTED.
+ *
+ * The whitespace-fragility bug becomes architecturally unreachable:
+ * the learner physically cannot edit the anchor segments.
+ */
+function buildLockExtensions(blankResult: BlankenateResult) {
+	// Compute placeholder positions in blankedCode coordinates.
+	// For blank i (sorted by start): placeholderStart_i = blank.start_i
+	// - sum(prev_j: blank.original_j.length - 2).
+	const sortedBlanks = [...blankResult.blanks].sort(
+		(a, b) => a.start - b.start,
+	);
+	const positions: Array<{ from: number; to: number }> = [];
+	let shift = 0;
+	for (const blank of sortedBlanks) {
+		const from = blank.start - shift;
+		positions.push({ from, to: from + 2 }); // __ is 2 chars
+		shift += blank.original.length - 2;
+	}
+
+	const blankMark = Decoration.mark({
+		class: 'cm-blank-placeholder',
+		inclusive: true,
+	});
+
+	const blanksField = StateField.define<DecorationSet>({
+		create() {
+			return Decoration.set(
+				positions.map((p) => blankMark.range(p.from, p.to)),
+			);
+		},
+		update(value, tr) {
+			return value.map(tr.changes);
+		},
+		provide: (f) => EditorView.decorations.from(f),
+	});
+
+	const lockFilter = EditorState.transactionFilter.of((tr) => {
+		if (!tr.docChanged) return tr;
+		const ranges = tr.startState.field(blanksField, false);
+		if (!ranges) return tr;
+		let allowed = true;
+		tr.changes.iterChanges((fromA, toA) => {
+			let withinSome = false;
+			ranges.between(fromA, toA, (decoFrom, decoTo) => {
+				if (fromA >= decoFrom && toA <= decoTo) {
+					withinSome = true;
+					return false; // stop iteration
+				}
+				return undefined;
+			});
+			if (!withinSome) allowed = false;
+		});
+		return allowed ? tr : [];
+	});
+
+	return [blanksField, lockFilter];
 }
 
 const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent({
@@ -265,6 +343,12 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 					EditorState.readOnly.of(!isBlankenated),
 					updateListener,
 					...(isBlankenated ? [noPasteExtension()] : []),
+					// Inc 6.5: lock non-placeholder regions. Only when in
+					// blankenated mode AND we have a blankResult (defense-
+					// in-depth fallback path doesn't render the editor).
+					...(isBlankenated && blankResult !== null
+						? buildLockExtensions(blankResult)
+						: []),
 				],
 			});
 			const view = new EditorView({ state, parent: host });
