@@ -152,7 +152,11 @@ function blankenate(
 		delimiters: false,
 	},
 ): BlankenateResult | null {
-	const blank = '__';
+	// Inc 6.7: length-matched placeholders. Each blank is replaced by
+	// `_` repeated original.length times (was fixed `'__'` regardless
+	// of original length). Cascades: blankedCode.length ===
+	// originalCode.length always; positions align 1:1 between the two;
+	// the wrapper's lock-shift arithmetic collapses to zero.
 
 	// Inc 6.6: collect Acorn tokens during parse for delimiter
 	// classification. AST walk handles identifier/literal/keyword/operator;
@@ -426,10 +430,10 @@ function blankenate(
 			end: token.end,
 		});
 
-		// Replace with blank placeholder
+		// Replace with length-matched blank placeholder (Inc 6.7).
 		blankedCode =
 			blankedCode.substring(0, token.start) +
-			blank +
+			'_'.repeat(token.original.length) +
 			blankedCode.substring(token.end);
 	}
 

@@ -1,15 +1,32 @@
 # lenses/blanks
 
 The `blanks` lens — a **fill-in-the-blank programming exercise** over a frozen
-snippet. The learner sees the source code with selected tokens replaced by `__`
-placeholders inside a CodeMirror editor; typing over the placeholders fills the
-blanks; per-blank correctness is computed live against the original code. A
-difficulty slider (0–100%) governs the probability that any eligible token is
+snippet. The learner sees the source code with selected tokens replaced by
+length-matched `_` placeholders (one `_` per character of the original token,
+preserving the token's width as a recognition-cue) inside a CodeMirror editor.
+Each blank behaves as a fixed-width fillable form field (Inc 6.7 overwrite-mode
+UX): typing at any position inside a blank OVERWRITES the char at that position
+(whether `_` or a previously-typed char); backspace replaces a typed char with
+`_`; total blank width never changes. This means a learner can fill in any
+order — typing `fun` then jumping to fill the end with `ion` yields `fun__ion`,
+and then typing `c`+`t` at the middle underscores yields `function`.
+
+**Directional compaction on `_` deletes.** When the learner backspaces or
+forward-deletes a `_` (not a typed char), the empty slot is compacted in the
+direction opposite to the freed space: backspace shifts right-text LEFT and
+pads a new `_` at the END of the blank (e.g., cursor at 3 in `he_lo`, backspace
+deletes the `_` at position 2 → `helo_`); Del shifts left-text RIGHT and pads
+a new `_` at the FRONT of the blank (e.g., cursor at 2 in `he_lo`, Del deletes
+the `_` at position 2 → `_helo`). This lets the learner compact scattered
+typed chars without having to re-type them.
+
+Per-blank correctness is computed live against the original code.
+
+A difficulty slider (0–100%) governs the probability that any eligible token is
 blanked; a five-checkbox content-type panel chooses which kinds of tokens are
 eligible (keywords / identifiers / operators / literals / delimiters); a
-view-mode toggle
-switches between `blankenated` (editable, with `__` placeholders) and `complete`
-(read-only, original source).
+view-mode toggle switches between `blankenated` (editable, with length-matched
+`_` placeholders) and `complete` (read-only, original source).
 
 **Blanks re-roll on settings change.** The vendored `blankenate` algorithm uses
 an AST walk (via Acorn) with bare `Math.random()` per eligible token — when the

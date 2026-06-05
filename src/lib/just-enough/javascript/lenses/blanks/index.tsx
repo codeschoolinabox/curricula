@@ -22,6 +22,7 @@
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorState, StateField } from '@codemirror/state';
+import type { ChangeSpec, Text } from '@codemirror/state';
 import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { basicSetup } from 'codemirror';
@@ -73,78 +74,250 @@ function deriveContentTypeFlags(
 	};
 }
 
+/* Inc 6.5 historical: lock non-placeholder regions via StateField +
+ * transactionFilter. Inc 6.6 added per-blank visual border via the
+ * `cm-blank-placeholder` decoration class. Both superseded by Inc 6.7
+ * (see JSDoc immediately below). */
 /**
- * Inc 6.5: lock non-placeholder regions.
+ * Inc 6.7: replaces Inc 6.5's static lock + static `cm-blank-placeholder`
+ * decoration with the fixed-width fillable-field UX:
  *
- * Builds two CodeMirror extensions for the blanks-editable surface:
+ * 1. **Length-matched positions** (sub-change A in `lib/blankenate.ts`).
+ *    Each blank's `[start, end)` in the source now matches its
+ *    `[from, to)` in the editor doc (no shift). Positions captured at
+ *    mount; never change because auto-pad preserves width.
  *
- * 1. A `StateField<DecorationSet>` holding one decoration mark per
- *    blank placeholder. Marks are `inclusive: true` so edits at the
- *    `from`/`to` boundary extend the range. CM auto-maps the
- *    decoration set through doc changes — typing inside a blank
- *    extends its range; deleting inside contracts it.
+ * 2. **Overwrite-mode transactionFilter** (sub-change B). Each
+ *    insert/delete inside a blank is rewritten as a single-change
+ *    overwrite — width preservation is structural (N→N chars per
+ *    rewrite), no trailing-underscore counting needed:
+ *    - Insert of N chars at P inside `[A, B)`: rewrite as
+ *      `{from: P, to: P + N, insert: insertText}` (OVERWRITES the
+ *      next N chars). Containment guard: `fromA >= p.from && fromA
+ *      + N <= p.to` — typing past the blank end is rejected.
+ *      Cursor → `P + N`.
+ *    - Delete of N chars in `[fromA, toA)`: rewrite as
+ *      `{from: fromA, to: toA, insert: '_'.repeat(N)}` (replaces
+ *      with `_`s, preserving width). Cursor → `fromA`. Note this
+ *      means backspace on a `_` is a no-op (replaces `_` with `_`).
+ *    - Replace (selection + type, both insertLen and deleteLen > 0):
+ *      explicit reject for v1.
+ *    - Out-of-blank changes: reject (anchor chars are immutable).
  *
- * 2. A `transactionFilter` that inspects each proposed change. If
- *    the change `[fromA, toA]` does NOT lie entirely within some
- *    blank's current range, the entire transaction is rejected.
- *    This means:
- *      - Inserts in the anchor (prefix / inter-blank / suffix) → REJECTED.
- *      - Inserts inside a __ → ACCEPTED, blank range extends.
- *      - Deletes inside a blank → ACCEPTED, range contracts.
- *      - Deletes crossing a blank boundary → REJECTED.
+ * 3. **Correctness-aware decoration class** (sub-change C). The
+ *    StateField rebuilds the DecorationSet per docChanged, deriving
+ *    each blank's class from its current content vs `blank.original`:
+ *    - `cm-blank-correct`: content === original
+ *    - `cm-blank-incorrect`: no `_` AND content !== original
+ *    - `cm-blank-unfilled`: any `_` remaining
  *
- * The whitespace-fragility bug becomes architecturally unreachable:
- * the learner physically cannot edit the anchor segments.
+ * The wrapper's `evaluateCorrectness` useMemo still computes the
+ * aggregate score for the side panel (unchanged). The StateField
+ * derives per-blank visual class independently — CM6-native, no
+ * React→CM6 effect plumbing for decoration updates.
  */
 function buildLockExtensions(blankResult: BlankenateResult) {
-	// Compute placeholder positions in blankedCode coordinates.
-	// For blank i (sorted by start): placeholderStart_i = blank.start_i
-	// - sum(prev_j: blank.original_j.length - 2).
+	// Inc 6.7 length-matched: doc positions === source positions
+	// because the placeholder is `_`.repeat(blank.original.length).
+	// Captured once at mount; auto-pad preserves blank widths so these
+	// positions never shift.
 	const sortedBlanks = [...blankResult.blanks].sort(
 		(a, b) => a.start - b.start,
 	);
-	const positions: Array<{ from: number; to: number }> = [];
-	let shift = 0;
-	for (const blank of sortedBlanks) {
-		const from = blank.start - shift;
-		positions.push({ from, to: from + 2 }); // __ is 2 chars
-		shift += blank.original.length - 2;
+	const positions = sortedBlanks.map((blank) => ({
+		from: blank.start,
+		to: blank.end,
+		original: blank.original,
+	}));
+
+	function deriveClass(content: string, original: string): string {
+		if (content === original) return 'cm-blank-correct';
+		if (content.includes('_')) return 'cm-blank-unfilled';
+		return 'cm-blank-incorrect';
 	}
 
-	const blankMark = Decoration.mark({
-		class: 'cm-blank-placeholder',
-		inclusive: true,
-	});
+	function buildDecorationSet(doc: Text): DecorationSet {
+		// Zero-width blanks (`original === ''`) are not pedagogically
+		// meaningful — they have no characters to fill. Skip them at
+		// decoration-set construction so the StateField never has to
+		// reason about empty ranges (which the autoPad rejection at
+		// "trailing underscores < insertLen" would silently confuse for
+		// a "blank is full" state). AR-4 Inc 6.7 guard.
+		return Decoration.set(
+			positions
+				.filter(({ from, to }) => to > from)
+				.map(({ from, to, original }) => {
+					const content = doc.sliceString(from, to);
+					const cls = deriveClass(content, original);
+					return Decoration.mark({ class: cls }).range(from, to);
+				}),
+			true,
+		);
+	}
 
 	const blanksField = StateField.define<DecorationSet>({
-		create() {
-			return Decoration.set(
-				positions.map((p) => blankMark.range(p.from, p.to)),
-			);
+		create(state) {
+			return buildDecorationSet(state.doc);
 		},
+		// Performance note (AR-4 Inc 6.7): rebuilds the entire
+		// DecorationSet from scratch on every docChanged transaction —
+		// O(N) per keystroke where N = blanks count. Fine at typical
+		// snippet sizes (5–20 blanks). At 100+ blanks per snippet the
+		// per-keystroke cost becomes measurable. Optimization path
+		// (when needed): consult `tr.changes.touchesRange(p.from, p.to)`
+		// per blank, reclassify only the touched blank(s), and call
+		// `value.map(tr.changes)` for the rest. Positions are stable
+		// (auto-pad preserves width), so position-mapping is identity.
 		update(value, tr) {
-			return value.map(tr.changes);
+			if (!tr.docChanged) return value;
+			return buildDecorationSet(tr.newDoc);
 		},
 		provide: (f) => EditorView.decorations.from(f),
 	});
 
+	// Multi-cursor caveat (AR-4 Inc 6.7): `iterChanges` may fire multiple
+	// times for one transaction (multi-cursor + simultaneous edit, or
+	// programmatic multi-change dispatch). `primarySelection` is
+	// overwritten by each iteration — only one cursor is returned even
+	// if two blanks were filled. In practice CM6 multi-cursor is
+	// uncommon for this use case (learners type single-char inserts via
+	// keyboard, and noPasteExtension blocks bulk paste), so the
+	// limitation is low risk. Worth surfacing if multi-cursor support
+	// is ever explicitly added.
+	//
+	// Inc 6.7 overwrite mode (user-directed UX refinement): each blank
+	// behaves as a fixed-width "form field". Typing at any position
+	// inside a blank OVERWRITES the char there (whether it's `_` or a
+	// previously-typed char). Backspace replaces the char-before-cursor
+	// with `_`. Delete-forward replaces the char-at-cursor with `_`.
+	// Width is preserved by construction (each rewrite is N→N chars,
+	// never net-zero-length-shift required). Replaces typing-as-consume-
+	// trailing-underscore from the earlier Inc 6.7 design.
 	const lockFilter = EditorState.transactionFilter.of((tr) => {
 		if (!tr.docChanged) return tr;
-		const ranges = tr.startState.field(blanksField, false);
-		if (!ranges) return tr;
+
+		const newChanges: ChangeSpec[] = [];
 		let allowed = true;
-		tr.changes.iterChanges((fromA, toA) => {
-			let withinSome = false;
-			ranges.between(fromA, toA, (decoFrom, decoTo) => {
-				if (fromA >= decoFrom && toA <= decoTo) {
-					withinSome = true;
-					return false; // stop iteration
+		let primarySelection: number | undefined;
+
+		tr.changes.iterChanges(
+			(fromA: number, toA: number, _fromB: number, _toB: number, inserted: Text) => {
+				const insertText = inserted.toString();
+				const insertLen = insertText.length;
+				const deleteLen = toA - fromA;
+
+				// Defensive (AR-4 Inc 6.7 MINOR 4): a zero-width no-op
+				// change (insertLen === 0 && deleteLen === 0) would
+				// produce a spurious cursor-set transaction. CM6
+				// usually prunes these before calling the filter, but
+				// IME and programmatic dispatches may not. Skip them.
+				if (insertLen === 0 && deleteLen === 0) return;
+
+				if (insertLen > 0 && deleteLen === 0) {
+					// Pure insert → overwrite the next `insertLen` chars
+					// starting at `fromA`. The OVERWRITE range
+					// `[fromA, fromA + insertLen)` must fit entirely
+					// inside a blank — typing past the blank end is
+					// rejected (would corrupt anchor text).
+					const overwriteEnd = fromA + insertLen;
+					const blank = positions.find(
+						(p) => fromA >= p.from && overwriteEnd <= p.to,
+					);
+					if (!blank) {
+						allowed = false;
+						return;
+					}
+					newChanges.push({
+						from: fromA,
+						to: overwriteEnd,
+						insert: insertText,
+					});
+					primarySelection = overwriteEnd;
+				} else if (insertLen === 0 && deleteLen > 0) {
+					// Pure delete → preserve blank width. The DELETE range
+					// `[fromA, toA)` must fit entirely inside a blank.
+					const blank = positions.find(
+						(p) => fromA >= p.from && toA <= p.to,
+					);
+					if (!blank) {
+						allowed = false;
+						return;
+					}
+
+					// Inc 6.7 directional compaction for deleting `_`s:
+					// when the deleted range is a single `_`, the
+					// deletion compacts typed chars in the direction
+					// opposite to the freed space. The direction is
+					// derived from the cursor position BEFORE the delete:
+					//
+					//   - cursor === toA → backspace (cursor was AFTER
+					//     the deleted char). Chars right of the `_`
+					//     shift left; new `_` pads at blank.to (end).
+					//     Cursor → fromA (standard backspace move).
+					//
+					//   - cursor === fromA → Del (cursor was AT the
+					//     deleted char). Chars left of the `_` shift
+					//     right; new `_` pads at blank.from (front).
+					//     Cursor → fromA + 1 (matches the rightward
+					//     shift of left-side text).
+					//
+					// Single-char-only: multi-char range deletes (e.g.
+					// programmatic) fall back to the in-place `_`
+					// replacement (no compaction) for simplicity.
+					const deletedContent = tr.startState.doc.sliceString(
+						fromA,
+						toA,
+					);
+					if (deleteLen === 1 && deletedContent === '_') {
+						const cursorBefore = tr.startState.selection.main.head;
+						if (cursorBefore === toA) {
+							// Backspace on `_`: shift right-text left, pad at end.
+							newChanges.push({ from: fromA, to: toA });
+							newChanges.push({ from: blank.to, insert: '_' });
+							primarySelection = fromA;
+						} else if (cursorBefore === fromA) {
+							// Del on `_`: shift left-text right, pad at front.
+							newChanges.push({ from: fromA, to: toA });
+							newChanges.push({ from: blank.from, insert: '_' });
+							primarySelection = fromA + 1;
+						} else {
+							// Cursor neither at fromA nor toA (programmatic
+							// or unusual): fall through to in-place replace.
+							newChanges.push({
+								from: fromA,
+								to: toA,
+								insert: '_',
+							});
+							primarySelection = fromA;
+						}
+					} else {
+						// Multi-char delete OR deleted content includes
+						// typed chars: in-place replace with `_`s.
+						newChanges.push({
+							from: fromA,
+							to: toA,
+							insert: '_'.repeat(deleteLen),
+						});
+						primarySelection = fromA;
+					}
+				} else {
+					// Replace (selection + type) — explicit reject for v1.
+					// Could be supported by combining the overwrite logic
+					// above with a length-mismatch guard, but defer.
+					allowed = false;
 				}
-				return undefined;
-			});
-			if (!withinSome) allowed = false;
-		});
-		return allowed ? tr : [];
+			},
+		);
+
+		if (!allowed) return [];
+
+		return {
+			changes: newChanges,
+			selection:
+				primarySelection === undefined
+					? undefined
+					: { anchor: primarySelection },
+		};
 	});
 
 	return [blanksField, lockFilter];

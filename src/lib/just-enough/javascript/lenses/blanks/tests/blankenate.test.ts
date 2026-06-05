@@ -45,12 +45,14 @@ describe('blankenate', () => {
 			expect(result?.blanks.length).toBeGreaterThanOrEqual(1);
 		});
 
-		it('replaces the single identifier with __ in the blanked source', () => {
+		it('replaces the single identifier with length-matched underscores in the blanked source (Inc 6.7)', () => {
 			const result = blankenate('let x = 1;', 1, {
 				...NO_TYPES,
 				identifiers: true,
 			});
-			expect(result?.blankedCode).toBe('let __ = 1;');
+			// Inc 6.7: placeholder is `_` repeated original.length times.
+			// `x` is 1 char, so the placeholder is `_` (not `__`).
+			expect(result?.blankedCode).toBe('let _ = 1;');
 		});
 
 		it('preserves the original code verbatim in originalCode', () => {
@@ -78,12 +80,13 @@ describe('blankenate', () => {
 			expect(blanks[0]!.start).toBeLessThan(blanks[1]!.start);
 		});
 
-		it('replaces both keywords with __ at the correct positions', () => {
+		it('replaces both keywords with length-matched underscores (Inc 6.7)', () => {
 			const result = blankenate('let x = 1; let y = 2;', 1, {
 				...NO_TYPES,
 				keywords: true,
 			});
-			expect(result?.blankedCode).toBe('__ x = 1; __ y = 2;');
+			// `let` is 3 chars, so each placeholder is `___` (3 underscores).
+			expect(result?.blankedCode).toBe('___ x = 1; ___ y = 2;');
 		});
 
 		it('preserves position integrity for every blank (not just the first)', () => {

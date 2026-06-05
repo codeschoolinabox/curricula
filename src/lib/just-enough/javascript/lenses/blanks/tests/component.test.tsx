@@ -24,6 +24,38 @@ import blanksLens from '../index.js';
 
 afterEach(cleanup);
 
+/**
+ * Inc 6.7 test helper: type `text` char-by-char into `view` starting at
+ * `startPos`. Each char is a separate transaction so the auto-pad
+ * transactionFilter runs once per char (mirrors the real keystroke
+ * stream). Required because Inc 6.7's filter rejects multi-char
+ * inserts (which previously allowed `dispatch({changes: {from, to,
+ * insert: longString}})` to "fill a blank in one shot").
+ *
+ * After each dispatch, the cursor's actual post-rewrite position is
+ * read from `view.state.selection.main.head` and used as the next
+ * insert position. The auto-pad sets `selection.anchor` to `from +
+ * insertLen` (per `buildLockExtensions`), so this works for any
+ * `startPos` — including positions in the middle of a partially
+ * filled blank. (Static `startPos + i` would only work coincidentally
+ * at blank boundaries; AR-3 fix.)
+ *
+ * Returns nothing — caller reads `view.state.doc.toString()` to verify.
+ */
+function typeIntoBlank(
+	view: EditorView,
+	text: string,
+	startPos: number,
+): void {
+	let cursor = startPos;
+	for (const ch of text) {
+		view.dispatch({
+			changes: { from: cursor, insert: ch },
+		});
+		cursor = view.state.selection.main.head;
+	}
+}
+
 describe('blanks wrapper — Inc 6a', () => {
 	describe('Zero — degenerate snippet does not crash', () => {
 		it('renders data-lens="blanks" without throwing on an unparseable snippet (defense-in-depth)', () => {
@@ -296,9 +328,13 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('toggle preserves learner edits: type → complete → blankenated → typed text is still there (AR-1 invariant)', async () => {
+			// Inc 6.7: use a longer source so 3 chars fit inside the blank.
+			// `hello` (5 chars) — a single identifier — becomes a 5-char
+			// blank at difficulty 100, with room for 'XYZ' plus 2 trailing
+			// underscores.
 			const { container } = render(
 				<blanksLens.Component
-					embodiment={embody('OK')}
+					embodiment={embody('hello')}
 					config={blanksLens.config({ difficulty: 100 })}
 				/>,
 			);
@@ -310,8 +346,11 @@ describe('blanks wrapper — Inc 6a', () => {
 				'.cm-content',
 			) as HTMLElement;
 			const initialView = EditorView.findFromDOM(initialContent);
-			// Type a learner edit: insert 'XYZ' at position 0.
-			initialView?.dispatch({ changes: { from: 0, insert: 'XYZ' } });
+			// Type a learner edit: 'XYZ' char-by-char at position 0
+			// (the start of the 5-char blank). Overwrite mode replaces
+			// the `_` at positions 0, 1, 2 with X, Y, Z → doc becomes
+			// `XYZ__`.
+			typeIntoBlank(initialView!, 'XYZ', 0);
 			expect(initialView?.state.doc.toString().startsWith('XYZ')).toBe(true);
 
 			// Toggle to complete (which destroys the editor + recreates with
@@ -429,8 +468,10 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('score is 100% when the learner has typed the originalCode verbatim', async () => {
-			// Dispatch a replace-all change to set the editor doc to the
-			// original source (proving all blanks are correct).
+			// Inc 6.7: type char-by-char into each blank instead of doing
+			// a single replace-all (which the auto-pad transactionFilter
+			// rejects — it only allows pure inserts and pure deletes
+			// inside blank ranges, not replace operations).
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
@@ -442,14 +483,9 @@ describe('blanks wrapper — Inc 6a', () => {
 			});
 			const cmContent = container.querySelector('.cm-content') as HTMLElement;
 			const view = EditorView.findFromDOM(cmContent);
-			const originalCode = embody('OK').source.code;
-			view?.dispatch({
-				changes: {
-					from: 0,
-					to: view.state.doc.length,
-					insert: originalCode,
-				},
-			});
+			// `OK` at difficulty 100: entire source becomes a 2-char
+			// blank `__`. Type 'OK' char-by-char at position 0.
+			typeIntoBlank(view!, 'OK', 0);
 			await waitFor(() => {
 				const scoreEl = container.querySelector('[data-blanks-score]');
 				expect(scoreEl?.textContent).toContain('100');
@@ -564,6 +600,9 @@ describe('blanks wrapper — Inc 6a', () => {
 			// because blankenate is non-deterministic at intermediate
 			// difficulty — the new blank set may be empty (total=0 →
 			// vacuously complete → score=100, masking the reset).
+			//
+			// Inc 6.7: type char-by-char to fill the blank (replace-all
+			// is rejected by the auto-pad filter).
 			const originalCode = embody('OK').source.code;
 			const { container } = render(
 				<blanksLens.Component
@@ -576,14 +615,9 @@ describe('blanks wrapper — Inc 6a', () => {
 			});
 			const cmContent = container.querySelector('.cm-content') as HTMLElement;
 			const view = EditorView.findFromDOM(cmContent);
-			// Replace doc with originalCode (learner "fills in everything").
-			view?.dispatch({
-				changes: {
-					from: 0,
-					to: view.state.doc.length,
-					insert: originalCode,
-				},
-			});
+			// Type originalCode ('OK') char-by-char at position 0
+			// (the start of the entire-source blank).
+			typeIntoBlank(view!, originalCode, 0);
 			await waitFor(() => {
 				const text = container.querySelector('.cm-content')?.textContent ?? '';
 				expect(text).toBe(originalCode);
@@ -719,6 +753,8 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('toggling a checkbox resets learnerCode (data-blanks-correct returns to 0)', async () => {
+			// Inc 6.7: type char-by-char (replace-all is rejected by
+			// auto-pad filter).
 			const originalCode = embody('OK').source.code;
 			const { container } = render(
 				<blanksLens.Component
@@ -731,13 +767,7 @@ describe('blanks wrapper — Inc 6a', () => {
 			});
 			const cmContent = container.querySelector('.cm-content') as HTMLElement;
 			const view = EditorView.findFromDOM(cmContent);
-			view?.dispatch({
-				changes: {
-					from: 0,
-					to: view.state.doc.length,
-					insert: originalCode,
-				},
-			});
+			typeIntoBlank(view!, originalCode, 0);
 			await waitFor(() => {
 				const text = container.querySelector('.cm-content')?.textContent ?? '';
 				expect(text).toBe(originalCode);
@@ -761,14 +791,15 @@ describe('blanks wrapper — Inc 6a', () => {
 		// bug architecturally unreachable (learner cannot corrupt the
 		// anchor segments by mistake).
 
-		// AR-3 concern 4 (Inc 6.6 expansion): the same StateField that
-		// powers the lock also drives the per-blank CSS border (Inc 6.6
-		// piggybacks on the existing `Decoration.mark({ class:
-		// 'cm-blank-placeholder', ... })`). A regression where the
-		// `provide: (f) => EditorView.decorations.from(f)` line gets
-		// dropped from the StateField would silently break visual
-		// decoration without breaking the lock. This test catches that.
-		it('every blank gets a `.cm-blank-placeholder` DOM marker (Inc 6.6 visual border)', async () => {
+		// Inc 6.7 (was AR-3 concern 4 for Inc 6.6): the same StateField
+		// that powers the lock also drives the per-blank decoration class
+		// (`cm-blank-unfilled` initially, transitioning to `cm-blank-correct`
+		// or `cm-blank-incorrect` as the learner types — Inc 6.7). A
+		// regression where the `provide: (f) => EditorView.decorations.from(f)`
+		// line gets dropped from the StateField would silently break the
+		// visual decoration without breaking the lock. This test catches
+		// that.
+		it('every blank gets a `.cm-blank-unfilled` DOM marker initially (Inc 6.7 correctness class)', async () => {
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
@@ -777,12 +808,12 @@ describe('blanks wrapper — Inc 6a', () => {
 			);
 			await waitFor(() => {
 				expect(
-					container.querySelector('.cm-blank-placeholder'),
+					container.querySelector('.cm-blank-unfilled'),
 				).not.toBeNull();
 			});
 		});
 
-		it('inserts inside a __ placeholder are ACCEPTED', async () => {
+		it('inserts inside an underscore placeholder are ACCEPTED (Inc 6.7 auto-pad preserves width)', async () => {
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
@@ -795,23 +826,26 @@ describe('blanks wrapper — Inc 6a', () => {
 			const cmContent = container.querySelector('.cm-content') as HTMLElement;
 			const view = EditorView.findFromDOM(cmContent);
 			const docBefore = view!.state.doc.toString();
-			const firstBlank = docBefore.indexOf('__');
-			expect(firstBlank).toBeGreaterThanOrEqual(0); // sanity: there IS a __
-			// Insert INSIDE the placeholder (between the two underscores).
+			const firstBlank = docBefore.indexOf('_');
+			expect(firstBlank).toBeGreaterThanOrEqual(0); // sanity: there IS a _
+			// Insert INSIDE the placeholder (after the first underscore).
 			view!.dispatch({
 				changes: { from: firstBlank + 1, insert: 'X' },
 			});
-			expect(view!.state.doc.toString().length).toBe(docBefore.length + 1);
+			// Inc 6.7: auto-pad preserves doc length; a trailing `_` is
+			// consumed instead of growing the doc.
+			expect(view!.state.doc.toString().length).toBe(docBefore.length);
+			// The 'X' is present at the typed position.
+			expect(view!.state.doc.toString()[firstBlank + 1]).toBe('X');
 		});
 
-		it('inserts at boundary positions (anchor chars) are absorbed into the adjacent blank (anchor preserved)', async () => {
-			// With inclusive:true, a position at the start or end of a
-			// blank range is considered "inside" that blank. An insert at
-			// the boundary becomes part of the blank's content — but the
-			// surrounding anchor character (e.g., the space between two
-			// __) is preserved verbatim. This is the load-bearing
-			// invariant: anchor segments are never corrupted, so the
-			// evaluator's anchor-split always succeeds.
+		it('inserts at anchor positions (between blanks) are REJECTED (anchors are immutable)', async () => {
+			// Inc 6.7 overwrite-mode: anchor segments (text between
+			// blanks) are immutable. An insert at a space character (an
+			// anchor) is outside every blank's range, so the containment
+			// check rejects it and the doc is unchanged. Lock the anchor-
+			// preservation invariant the evaluator's anchor-split depends
+			// on.
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('let x = 1;')}
@@ -824,28 +858,22 @@ describe('blanks wrapper — Inc 6a', () => {
 			const cmContent = container.querySelector('.cm-content') as HTMLElement;
 			const view = EditorView.findFromDOM(cmContent);
 			const docBefore = view!.state.doc.toString();
-			// Insert at the first space (boundary between blank 1's end
-			// and the space). The insert lands; the space character
-			// must STILL be present in the resulting doc (anchor preserved).
+			// Insert at the first space (anchor between blank 1 and blank 2).
 			const spaceIndex = docBefore.indexOf(' ');
 			expect(spaceIndex).toBeGreaterThanOrEqual(0);
 			view!.dispatch({
 				changes: { from: spaceIndex, insert: 'X' },
 			});
-			const docAfter = view!.state.doc.toString();
-			// The number of space characters is unchanged — the anchor
-			// is intact (the insert was absorbed into the adjacent blank,
-			// not into the anchor region).
-			const spacesBefore = (docBefore.match(/ /g) ?? []).length;
-			const spacesAfter = (docAfter.match(/ /g) ?? []).length;
-			expect(spacesAfter).toBe(spacesBefore);
+			// Doc unchanged: insert was rejected by the containment check.
+			expect(view!.state.doc.toString()).toBe(docBefore);
 		});
 
-		it('inserts at the LEFT boundary (cursor at start of __) are ACCEPTED', async () => {
-			// AR-4 concern: CM6 RangeSet.between(from, to) uses strict
-			// overlap (decoFrom < to && decoTo > from). A pure-insert at
-			// position === decoFrom may fall through this check, silently
-			// rejecting the most common cursor position for learner typing.
+		it('inserts at the LEFT boundary (cursor at start of placeholder) are ACCEPTED', async () => {
+			// AR-4 concern (Inc 6.5): a pure-insert at position ===
+			// decoration.from was at risk of silent rejection via the
+			// transactionFilter's containment check. Inc 6.7 keeps the
+			// containment check (`fromA >= p.from && toA <= p.to`); the
+			// boundary case `fromA === p.from` still satisfies the check.
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('let x = 1;')}
@@ -858,15 +886,16 @@ describe('blanks wrapper — Inc 6a', () => {
 			const cmContent = container.querySelector('.cm-content') as HTMLElement;
 			const view = EditorView.findFromDOM(cmContent);
 			const docBefore = view!.state.doc.toString();
-			const firstBlank = docBefore.indexOf('__');
+			const firstBlank = docBefore.indexOf('_');
 			expect(firstBlank).toBeGreaterThanOrEqual(0);
-			// Insert at the very START of the first __ (cursor position
-			// = decoration.from). With strict-overlap between(), this
-			// would silently reject. Fix expands query window leftward.
+			// Insert at the very START of the first placeholder (cursor
+			// position = decoration.from).
 			view!.dispatch({
 				changes: { from: firstBlank, insert: 'X' },
 			});
-			expect(view!.state.doc.toString().length).toBe(docBefore.length + 1);
+			// Inc 6.7 auto-pad: width preserved, X at the typed position.
+			expect(view!.state.doc.toString().length).toBe(docBefore.length);
+			expect(view!.state.doc.toString()[firstBlank]).toBe('X');
 		});
 
 		it('inserts strictly OUTSIDE any __ placeholder (past the last blank) are REJECTED', async () => {
@@ -904,10 +933,10 @@ describe('blanks wrapper — Inc 6a', () => {
 			expect(view!.state.doc.toString()).toBe(docBefore);
 		});
 
-		it('after a learner types into a placeholder, subsequent inserts at the typed position are still ACCEPTED', async () => {
-			// The blank range auto-extends via Decoration.mark to cover
-			// the typed text. Sequential typing within the same blank
-			// remains editable.
+		it('sequential typing within the same blank — both chars present, width preserved (Inc 6.7 auto-pad)', async () => {
+			// Inc 6.7: typing consumes trailing underscores instead of
+			// extending the blank. Both typed chars must be present in
+			// the doc; width must be preserved.
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
@@ -920,19 +949,545 @@ describe('blanks wrapper — Inc 6a', () => {
 			const cmContent = container.querySelector('.cm-content') as HTMLElement;
 			const view = EditorView.findFromDOM(cmContent);
 			const docBefore = view!.state.doc.toString();
-			const firstBlank = docBefore.indexOf('__');
-			// First insert: 'X' at firstBlank+1.
+			const firstBlank = docBefore.indexOf('_');
+			// First insert: 'X' at the start of the blank.
 			view!.dispatch({
-				changes: { from: firstBlank + 1, insert: 'X' },
+				changes: { from: firstBlank, insert: 'X' },
 			});
-			const lenAfter1 = view!.state.doc.toString().length;
-			expect(lenAfter1).toBe(docBefore.length + 1);
-			// Second insert: 'Y' at firstBlank+2 (still inside the
-			// extended blank range, after the 'X' we just typed).
+			expect(view!.state.doc.toString().length).toBe(docBefore.length);
+			expect(view!.state.doc.toString()[firstBlank]).toBe('X');
+			// Second insert: 'Y' immediately after the X (auto-pad
+			// consumes another trailing underscore).
 			view!.dispatch({
-				changes: { from: firstBlank + 2, insert: 'Y' },
+				changes: { from: firstBlank + 1, insert: 'Y' },
 			});
-			expect(view!.state.doc.toString().length).toBe(docBefore.length + 2);
+			expect(view!.state.doc.toString().length).toBe(docBefore.length);
+			expect(view!.state.doc.toString().slice(firstBlank, firstBlank + 2)).toBe(
+				'XY',
+			);
+		});
+	});
+
+	describe('fixed-width auto-pad — Inc 6.7', () => {
+		// Auto-pad rewrites each insert/delete inside a blank to preserve
+		// the blank's original width. Typing consumes trailing
+		// underscores; backspace re-inserts an underscore at the end.
+		// Doc length === originalCode.length always (Inc 6.7 invariant).
+
+		// Zero — no typing, blank state.
+		it('Zero: a fresh blank starts as N underscores matching original length', async () => {
+			// `hello` (5 chars) at difficulty 100 = single 5-char blank.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			expect(view!.state.doc.toString()).toBe('_____');
+		});
+
+		// One — single char typed.
+		it('One: typing a single char consumes one trailing underscore (width preserved)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'h', 0);
+			expect(view!.state.doc.toString()).toBe('h____');
+		});
+
+		// Many — sequential typing.
+		it('Many: sequential typing consumes underscores in order', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'he', 0);
+			expect(view!.state.doc.toString()).toBe('he___');
+			typeIntoBlank(view!, 'llo', 2);
+			expect(view!.state.doc.toString()).toBe('hello');
+		});
+
+		// Boundaries — typing past the blank end.
+		it('Boundaries: typing PAST the end of a blank is REJECTED (overwrite range outside blank)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hi')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'hi', 0);
+			expect(view!.state.doc.toString()).toBe('hi');
+			// Try to type at position 2 — the position immediately past
+			// the blank's end. Overwrite range [2, 3) is outside the
+			// blank [0, 2), so rejected.
+			view!.dispatch({ changes: { from: 2, insert: 'X' } });
+			expect(view!.state.doc.toString()).toBe('hi');
+		});
+
+		// Overwrite a typed char (Inc 6.7 overwrite-mode).
+		it('Overwrite: typing INSIDE a full blank replaces the existing char', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'hello', 0);
+			expect(view!.state.doc.toString()).toBe('hello');
+			// Type 'X' at position 0 — overwrites the 'h'.
+			view!.dispatch({ changes: { from: 0, insert: 'X' } });
+			expect(view!.state.doc.toString()).toBe('Xello');
+		});
+
+		// Overwrite at a middle underscore (user's `fun__ion` scenario).
+		it('Overwrite: typing at a middle `_` fills it without shifting other chars', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			// Manually construct a `h__lo` state by typing at non-contiguous
+			// positions (simulating the "fun__ion" scenario where the
+			// learner filled the start and end but skipped the middle).
+			view!.dispatch({ changes: { from: 0, insert: 'h' } }); // h____
+			view!.dispatch({ changes: { from: 3, insert: 'l' } }); // h__l_
+			view!.dispatch({ changes: { from: 4, insert: 'o' } }); // h__lo
+			expect(view!.state.doc.toString()).toBe('h__lo');
+			// Now fill the middle: type 'e' at position 1, then 'l' at 2.
+			view!.dispatch({ changes: { from: 1, insert: 'e' } });
+			expect(view!.state.doc.toString()).toBe('he_lo');
+			view!.dispatch({ changes: { from: 2, insert: 'l' } });
+			expect(view!.state.doc.toString()).toBe('hello');
+		});
+
+		// Backspace mirror.
+		it('Backspace from full state replaces the deleted char with `_` (width preserved)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'hello', 0);
+			expect(view!.state.doc.toString()).toBe('hello');
+			// Backspace one char (delete 'o' at position 4).
+			view!.dispatch({ changes: { from: 4, to: 5 } });
+			expect(view!.state.doc.toString()).toBe('hell_');
+		});
+
+		// Backspace at a position that's already `_`.
+		it('Backspace on an underscore (without prior cursor-set) falls through to no-op', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			// Doc is `_____` (all underscores). Dispatch a delete WITHOUT
+			// a prior cursor-set: cursor stays at the default (typically
+			// position 0). The directional-compaction filter checks
+			// `tr.startState.selection.main.head` to detect backspace vs
+			// Del; with cursor at 0 (neither fromA=4 nor toA=5), the
+			// filter falls through to the in-place `_` replacement. Doc
+			// is unchanged either way (replace `_` with `_`); the
+			// directional cases are exercised by the "Compaction:"
+			// tests below, which explicitly position the cursor first.
+			const before = view!.state.doc.toString();
+			view!.dispatch({ changes: { from: 4, to: 5 } });
+			expect(view!.state.doc.toString()).toBe(before);
+		});
+
+		// Cursor placement post-rewrite.
+		it('cursor placement: after typing, cursor advances by 1 to just past the typed char', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			view!.dispatch({ changes: { from: 0, insert: 'h' } });
+			expect(view!.state.selection.main.head).toBe(1);
+		});
+
+		// AR-3 BLOCKER 2: Replace operations (insert + delete in one change)
+		// are rejected by the filter (`insertLen > 0 && deleteLen > 0`
+		// branch). Lock the rejection with a direct test so a refactor that
+		// drops the `else` branch is caught.
+		it('Replace (selection+type) inside a blank is REJECTED', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			// Type one char first so position 0 has a non-underscore.
+			typeIntoBlank(view!, 'h', 0);
+			const before = view!.state.doc.toString();
+			// Try to replace [0, 1) with 'X' (insert + delete in one change).
+			view!.dispatch({ changes: { from: 0, to: 1, insert: 'X' } });
+			expect(view!.state.doc.toString()).toBe(before);
+		});
+
+		// Directional compaction (Inc 6.7 refinement): deleting a `_` in
+		// a fill-in compacts typed chars in the direction opposite to
+		// the freed space. Backspace shifts right-text left, padding at
+		// end; Del shifts left-text right, padding at front.
+		//
+		// Test setup pattern: dispatch `{selection: {anchor: P}}` FIRST,
+		// then dispatch `{changes: {from, to}}`. This separation is
+		// load-bearing — the filter reads `tr.startState.selection.main.head`
+		// to distinguish backspace (`head === toA`) from Del (`head ===
+		// fromA`). In production, CM6 keyboard handlers couple selection
+		// and changes in a single transaction, so the head is naturally
+		// at the right position; in tests we must explicitly position the
+		// cursor before the delete to simulate that.
+
+		it('Compaction: backspace on `_` in middle shifts right-text left, pads `_` at end', async () => {
+			// Set up `he_lo` state by typing at non-contiguous positions.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			view!.dispatch({ changes: { from: 0, insert: 'h' } });
+			view!.dispatch({ changes: { from: 1, insert: 'e' } });
+			view!.dispatch({ changes: { from: 3, insert: 'l' } });
+			view!.dispatch({ changes: { from: 4, insert: 'o' } });
+			expect(view!.state.doc.toString()).toBe('he_lo');
+			// Place cursor at position 3 (between `_` at 2 and `l` at 3).
+			view!.dispatch({ selection: { anchor: 3 } });
+			// Backspace at cursor 3 deletes `_` at position 2.
+			view!.dispatch({ changes: { from: 2, to: 3 } });
+			// Expected: right-text (`lo`) shifts left, new `_` at end.
+			expect(view!.state.doc.toString()).toBe('helo_');
+		});
+
+		it('Compaction: Del on `_` in middle shifts left-text right, pads `_` at front', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			view!.dispatch({ changes: { from: 0, insert: 'h' } });
+			view!.dispatch({ changes: { from: 1, insert: 'e' } });
+			view!.dispatch({ changes: { from: 3, insert: 'l' } });
+			view!.dispatch({ changes: { from: 4, insert: 'o' } });
+			expect(view!.state.doc.toString()).toBe('he_lo');
+			// Place cursor at position 2 (between `e` at 1 and `_` at 2).
+			view!.dispatch({ selection: { anchor: 2 } });
+			// Del at cursor 2 deletes `_` at position 2.
+			view!.dispatch({ changes: { from: 2, to: 3 } });
+			// Expected: left-text (`he`) shifts right, new `_` at front.
+			expect(view!.state.doc.toString()).toBe('_helo');
+		});
+
+		it('Compaction: backspace on `_` at end of blank leaves doc unchanged (pad-at-end re-adds)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'hel', 0);
+			expect(view!.state.doc.toString()).toBe('hel__');
+			// Cursor at end of blank (position 5).
+			view!.dispatch({ selection: { anchor: 5 } });
+			// Backspace deletes `_` at position 4.
+			view!.dispatch({ changes: { from: 4, to: 5 } });
+			// Pad at end: doc unchanged.
+			expect(view!.state.doc.toString()).toBe('hel__');
+		});
+
+		it('Compaction: Del on `_` at start of blank leaves doc unchanged (pad-at-front re-adds)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			// Set up `__llo` (skip first two positions).
+			view!.dispatch({ changes: { from: 2, insert: 'l' } });
+			view!.dispatch({ changes: { from: 3, insert: 'l' } });
+			view!.dispatch({ changes: { from: 4, insert: 'o' } });
+			expect(view!.state.doc.toString()).toBe('__llo');
+			// Cursor at start (position 0).
+			view!.dispatch({ selection: { anchor: 0 } });
+			// Del deletes `_` at position 0.
+			view!.dispatch({ changes: { from: 0, to: 1 } });
+			// Pad at front: doc unchanged.
+			expect(view!.state.doc.toString()).toBe('__llo');
+		});
+
+		// AR-3 IMPORTANT 3: multi-blank independence — filling one blank
+		// must not affect another blank's content or class. The `positions`
+		// array must correctly map each blank to its own range; off-by-one
+		// in the containment check would let blank 1's typing leak into
+		// blank 2.
+		it('Multi-blank: filling blank 1 leaves blank 2 untouched (independence)', async () => {
+			// `let x = 1;` at difficulty 100 with keywords + identifiers
+			// blanked: two blanks — `let` (3 chars) at [0,3), `x` (1 char)
+			// at [4,5). Fill blank 1 with `let`; verify blank 2 still has
+			// its `_`.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('let x = 1;')}
+					config={blanksLens.config({
+						difficulty: 100,
+						contentTypes: ['keywords', 'identifiers'],
+					})}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			// Initial doc: `___ _ = 1;` (3-char blank + space + 1-char
+			// blank + ` = 1;`).
+			expect(view!.state.doc.toString()).toBe('___ _ = 1;');
+			// Fill blank 1 (`let`) at position 0.
+			typeIntoBlank(view!, 'let', 0);
+			// Blank 1 now `let`; blank 2 still `_`.
+			expect(view!.state.doc.toString()).toBe('let _ = 1;');
+		});
+	});
+
+	describe('correctness-aware decoration class — Inc 6.7', () => {
+		// The StateField re-derives each blank's decoration class per
+		// transaction from its current content vs `blank.original`:
+		// - `cm-blank-unfilled`: any `_` remaining (initial state too)
+		// - `cm-blank-correct`: content === original (correctly filled)
+		// - `cm-blank-incorrect`: no `_` AND content !== original
+
+		it('Zero (initial): every blank carries `cm-blank-unfilled`', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-blank-unfilled')).not.toBeNull();
+			});
+			// No correct or incorrect classes on a fresh blank.
+			expect(container.querySelector('.cm-blank-correct')).toBeNull();
+			expect(container.querySelector('.cm-blank-incorrect')).toBeNull();
+		});
+
+		it('transition: filling correctly transitions class to `cm-blank-correct`', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'hello', 0);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-blank-correct')).not.toBeNull();
+			});
+			expect(container.querySelector('.cm-blank-unfilled')).toBeNull();
+			expect(container.querySelector('.cm-blank-incorrect')).toBeNull();
+		});
+
+		it('transition: filling fully wrong transitions class to `cm-blank-incorrect`', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			// Type 5 wrong chars (the whole blank is full, content !== 'hello').
+			typeIntoBlank(view!, 'wrong', 0);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-blank-incorrect')).not.toBeNull();
+			});
+			expect(container.querySelector('.cm-blank-correct')).toBeNull();
+			expect(container.querySelector('.cm-blank-unfilled')).toBeNull();
+		});
+
+		it('partial fill stays `cm-blank-unfilled` (any `_` remaining)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'hel', 0); // partial: 'hel__'
+			await waitFor(() => {
+				expect(container.querySelector('.cm-blank-unfilled')).not.toBeNull();
+			});
+			expect(container.querySelector('.cm-blank-correct')).toBeNull();
+		});
+
+		it('transition: backspace from correct returns to `cm-blank-unfilled`', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'hello', 0);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-blank-correct')).not.toBeNull();
+			});
+			// Backspace: doc becomes `hell_` → has `_` → unfilled.
+			view!.dispatch({ changes: { from: 4, to: 5 } });
+			await waitFor(() => {
+				expect(container.querySelector('.cm-blank-unfilled')).not.toBeNull();
+			});
+			expect(container.querySelector('.cm-blank-correct')).toBeNull();
+		});
+
+		// AR-3 MINOR 5: symmetry with correct → unfilled. Incorrect →
+		// unfilled via backspace must also work.
+		it('transition: backspace from incorrect returns to `cm-blank-unfilled`', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'wrong', 0);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-blank-incorrect')).not.toBeNull();
+			});
+			// Backspace: doc becomes `wron_` → has `_` → unfilled.
+			view!.dispatch({ changes: { from: 4, to: 5 } });
+			await waitFor(() => {
+				expect(container.querySelector('.cm-blank-unfilled')).not.toBeNull();
+			});
+			expect(container.querySelector('.cm-blank-incorrect')).toBeNull();
+		});
+
+		// AR-3 IMPORTANT 4: the side-panel score (computed by
+		// `evaluateCorrectness` in a React useMemo) and the in-editor
+		// CSS class (computed by `deriveClass` in the CM6 StateField)
+		// derive from the same source-of-truth (doc content vs
+		// blank.original) but via independent logic. A drift between
+		// them is the failure mode this test locks: filling correctly
+		// must yield BOTH score=100 AND `.cm-blank-correct` present.
+		it('Evaluator/StateField joint: correctly typed blank shows score=100 AND `.cm-blank-correct`', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'hello', 0);
+			await waitFor(() => {
+				// Both surfaces agree the blank is correct.
+				const scoreEl = container.querySelector('[data-blanks-score]');
+				expect(scoreEl?.textContent).toContain('100');
+				expect(container.querySelector('.cm-blank-correct')).not.toBeNull();
+			});
 		});
 	});
 

@@ -1,49 +1,45 @@
 /*
  * Per-blank visual decoration for the `blanks` lens. Scoped to
- * `[data-lens='blanks']` to avoid leaking into Docusaurus's global
- * code blocks or other lenses' CodeMirror surfaces.
+ * `[data-lens='blanks']`; layout-neutral (outline + background only,
+ * no padding/margin) to avoid cursor-position jumps in CM6's
+ * contenteditable spans.
  *
- * The `.cm-blank-placeholder` class is attached to each blank's
- * range via `Decoration.mark` in `index.tsx` (`buildLockExtensions`),
- * which is already load-bearing for the Inc 6.5 lock mechanism. We
- * piggyback on the same decoration set for the visual styling — no
- * second decoration set required.
+ * Inc 6.7 introduces three correctness states, derived per
+ * transaction from each blank's current content vs `blank.original`
+ * inside the wrapper's StateField (`buildLockExtensions`):
  *
- * Visual goal: make adjacent blanks (e.g. `(`+`)` from the
- * `delimiters` content-type, or any zero-width-anchor adjacency)
- * visually separable without changing the placeholder character.
- * The legacy used `__` (2 chars) per blank regardless of original
- * length, which made `__` runs ambiguous as to where one blank ends
- * and the next begins. A subtle background + 1px outline +
- * rounded corners gives each blank a distinct visual extent.
+ * - `.cm-blank-unfilled`: any `_` remaining (partially or fully
+ *   unfilled). Yellow background + amber outline — the "in progress"
+ *   look carried over from Inc 6.6.
+ * - `.cm-blank-correct`: content === original. No visible decoration
+ *   (transparent + no outline) so a correctly-filled blank fades
+ *   into the source — minimizing distraction once the learner has
+ *   solved that blank.
+ * - `.cm-blank-incorrect`: no `_` AND content !== original (fully
+ *   typed but wrong). Red tint + red outline — distinct from the
+ *   "in progress" yellow so the learner sees that the blank is
+ *   "complete but wrong" rather than "still being filled".
  *
- * `inclusive: true` on the decoration means the range extends as
- * the learner types into it — the border grows with the learner's
- * typed content, which is the desired UX (the box visually shows
- * the current extent of the blank-being-filled).
- *
- * Per-blank correctness coloring (green/red/yellow) is **deferred to
- * Inc 6h** (hints panel + per-blank visual feedback). When 6h lands
- * it will add a second decoration set carrying correctness classes
- * (e.g. `.cm-blank-correct`, `.cm-blank-incorrect`,
- * `.cm-blank-unfilled`) that layer on top of this base style.
+ * `outline-offset: 1px` (on the visible-decoration classes) pushes
+ * the outline outward so adjacent blanks have a visible gap without
+ * adding any actual horizontal spacing.
  */
 
-/*
- * Layout-neutral styling only: outline + background do NOT participate
- * in the box model (no layout shift in contenteditable spans). We
- * deliberately avoid `padding` and `margin` on inline spans inside
- * CM6's `.cm-content` — they cause cursor-position jumps and line-wrap
- * shifts in Firefox/WebKit (AR-4 finding, Inc 6.6 expansion).
- *
- * `outline-offset: 1px` pushes the outline outward by 1 pixel so
- * adjacent blanks have a visible gap between their outlines without
- * adding any actual horizontal spacing. `border-radius` is purely
- * visual and does not affect layout.
- */
-[data-lens='blanks'] .cm-blank-placeholder {
+[data-lens='blanks'] .cm-blank-unfilled {
 	background-color: rgba(255, 235, 153, 0.35);
 	outline: 1px solid rgba(180, 140, 0, 0.45);
+	outline-offset: 1px;
+	border-radius: 2px;
+}
+
+[data-lens='blanks'] .cm-blank-correct {
+	/* Transparent: a correctly-filled blank looks like normal source. */
+	background-color: transparent;
+}
+
+[data-lens='blanks'] .cm-blank-incorrect {
+	background-color: rgba(220, 60, 60, 0.18);
+	outline: 1px solid rgba(180, 30, 30, 0.55);
 	outline-offset: 1px;
 	border-radius: 2px;
 }

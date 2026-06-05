@@ -102,24 +102,40 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    on the Future direction list. Result shape per `BlankenateResult` (in
    `types.ts`) on success; `null` on internal parse failure (defense-in-depth —
    in production `applicableTo` gates this case out). The first paint already
-   shows `__` placeholders — no flicker between an empty editor and a populated
-   one. Re-derivation on settings change resets the correctness map; the wrapper
-   does NOT preserve correctness across re-rolls.
+   shows length-matched `_` placeholders (Inc 6.7: `_`.repeat(original.length)
+   — one underscore per character of the original token, preserving the token's
+   width as a recognition-cue) — no flicker between an empty editor and a
+   populated one. Re-derivation on settings change resets the correctness map;
+   the wrapper does NOT preserve correctness across re-rolls.
 
 3. **Wire CodeMirror** (per-mount, async-setup) — a mount effect instantiates
    the editor view configured with the standard JavaScript basicSetup, the
    codebase's editor theme, an editability flag driven by view mode, an update
-   listener that mirrors learner edits into local state, and (in blankenated
-   mode only) the no-paste extension. The update listener fires only when the
-   document changed AND view mode is blankenated; it **never** calls the
-   orchestrator's snippet setter — learner answers stay lens-local per the
-   single-writer invariant. On view-mode change, the wrapper recreates the
-   editor view (parity with legacy lines 310–338; see § Why recreate on toggle
-   below). Learner answers are **preserved** across the toggle: when toggling to
-   `'complete'` the editor mounts on `embodiment.source.code` (read-only, no
-   `__`); when toggling back to `'blankenated'` the editor mounts on
-   `learnerCode` (the in-progress edits) or, on first-toggle-back, on
-   `blankedCode` from the memoized blankenate result.
+   listener that mirrors learner edits into local state, the no-paste
+   extension (in blankenated mode only), and **(Inc 6.7) a `buildLockExtensions`
+   bundle** that adds two CodeMirror primitives:
+   (a) an `EditorState.transactionFilter` enforcing the fixed-width fillable-
+   field UX — typing at any position inside a blank OVERWRITES the char there
+   (whether `_` or a previously-typed char); backspace replaces the char-
+   before-cursor with `_`; **directional compaction on `_` deletes** — when
+   the deleted char is itself a `_`, the freed space is moved to the side
+   opposite to the editing motion (backspace pads `_` at blank end + shifts
+   right-text left; Del pads `_` at blank front + shifts left-text right);
+   out-of-blank edits and replace-with-selection operations are rejected;
+   and (b) a `StateField<DecorationSet>` that
+   re-derives each blank's correctness class per transaction from the doc
+   content vs `blank.original` (`cm-blank-correct` / `cm-blank-incorrect` /
+   `cm-blank-unfilled`) — see `blanks.css` for the per-class styling.
+   The update listener fires only when the document changed AND view mode is
+   blankenated; it **never** calls the orchestrator's snippet setter —
+   learner answers stay lens-local per the single-writer invariant. On
+   view-mode change, the wrapper recreates the editor view (parity with
+   legacy lines 310–338; see § Why recreate on toggle below). Learner answers
+   are **preserved** across the toggle: when toggling to `'complete'` the
+   editor mounts on `embodiment.source.code` (read-only, no `_`); when
+   toggling back to `'blankenated'` the editor mounts on `learnerCode` (the
+   in-progress edits) or, on first-toggle-back, on `blankedCode` from the
+   memoized blankenate result.
 
 4. **Evaluate correctness** (per learner edit, sync, pure) — a `useMemo`
    keyed on `(learnerCode, blankResult)` calls

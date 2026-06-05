@@ -112,7 +112,11 @@ type Blank = {
  * only in the defense-in-depth path (see `./README.md` § Edge cases).
  *
  * `blankedCode` is the source with each blank's `[start, end)` range
- * substituted by `'__'`. `blanks` is the registration-order array
+ * substituted by length-matched `_` (Inc 6.7: `_`.repeat(original.length)
+ * — one underscore per original character, preserving width).
+ * `blankedCode.length === originalCode.length` always; positions in
+ * `blanks[i].{start, end}` map 1:1 to positions in `blankedCode`.
+ * `blanks` is the registration-order array
  * (not position-order; position-aware operations should sort by
  * `start` as needed). `originalCode` is the input source verbatim —
  * preserved here so consumers don't have to plumb the embodiment.
