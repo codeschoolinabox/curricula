@@ -8,9 +8,9 @@
  *   data-view-mode attribute reflects active mode; editor content
  *   swaps between blankedCode and originalCode on toggle.
  *
- * Inc 6c–6j will add: editable blankenated + noPasteExtension,
- * per-blank correctness, difficulty slider, content-type checkboxes,
- * editor header, hints panel, URL config, Ask Me.
+ * Inc 6g–6j will add: editor header, hints panel, URL config, Ask Me.
+ * (Inc 6c editable+noPaste, 6d correctness wiring, 6e slider, 6f
+ * content-type checkboxes — landed.)
  */
 
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
@@ -615,6 +615,132 @@ describe('blanks wrapper — Inc 6a', () => {
 			const scoreEl = container.querySelector('[data-blanks-score]');
 			const correctAttribute = scoreEl?.getAttribute('data-blanks-correct');
 			expect(correctAttribute).toBe('0');
+		});
+	});
+
+	describe('content-type checkboxes — Inc 6f', () => {
+		it('renders four checkboxes, one per content type', () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			expect(
+				container.querySelector('[data-content-type="keywords"]'),
+			).not.toBeNull();
+			expect(
+				container.querySelector('[data-content-type="identifiers"]'),
+			).not.toBeNull();
+			expect(
+				container.querySelector('[data-content-type="operators"]'),
+			).not.toBeNull();
+			expect(
+				container.querySelector('[data-content-type="literals"]'),
+			).not.toBeNull();
+		});
+
+		it('all four checkboxes are checked by default (config.contentTypes = all four)', () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			const types = ['keywords', 'identifiers', 'operators', 'literals'];
+			for (const type of types) {
+				const checkbox = container.querySelector(
+					`[data-content-type="${type}"]`,
+				) as HTMLInputElement;
+				expect(checkbox.checked).toBe(true);
+			}
+		});
+
+		it('explicit config.contentTypes seeds only the listed categories as checked', () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({
+						contentTypes: ['keywords', 'identifiers'],
+					})}
+				/>,
+			);
+			const checked = (type: string): boolean =>
+				(
+					container.querySelector(
+						`[data-content-type="${type}"]`,
+					) as HTMLInputElement
+				).checked;
+			expect(checked('keywords')).toBe(true);
+			expect(checked('identifiers')).toBe(true);
+			expect(checked('operators')).toBe(false);
+			expect(checked('literals')).toBe(false);
+		});
+
+		it('unchecking a category removes its blanks from the editor (re-derives blank set)', async () => {
+			// At difficulty=100 with all four categories, the editor doc
+			// contains __ placeholders. After unchecking ALL FOUR categories,
+			// no eligible tokens remain → blank set is empty → no __ in doc.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				const text = container.querySelector('.cm-content')?.textContent ?? '';
+				expect(text).toContain('__');
+			});
+			for (const type of [
+				'keywords',
+				'identifiers',
+				'operators',
+				'literals',
+			]) {
+				const cb = container.querySelector(
+					`[data-content-type="${type}"]`,
+				) as HTMLInputElement;
+				fireEvent.click(cb);
+			}
+			await waitFor(() => {
+				const text = container.querySelector('.cm-content')?.textContent ?? '';
+				expect(text.includes('__')).toBe(false);
+			});
+		});
+
+		it('toggling a checkbox resets learnerCode (data-blanks-correct returns to 0)', async () => {
+			const originalCode = embody('OK').source.code;
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			view?.dispatch({
+				changes: {
+					from: 0,
+					to: view.state.doc.length,
+					insert: originalCode,
+				},
+			});
+			await waitFor(() => {
+				const text = container.querySelector('.cm-content')?.textContent ?? '';
+				expect(text).toBe(originalCode);
+			});
+			// Toggle off "literals" — learnerCode must reset.
+			const cb = container.querySelector(
+				'[data-content-type="literals"]',
+			) as HTMLInputElement;
+			fireEvent.click(cb);
+			await waitFor(() => {
+				const scoreEl = container.querySelector('[data-blanks-score]');
+				expect(scoreEl?.getAttribute('data-blanks-correct')).toBe('0');
+			});
 		});
 	});
 

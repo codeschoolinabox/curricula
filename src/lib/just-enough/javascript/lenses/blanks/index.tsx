@@ -84,9 +84,26 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 	// The slider mutates this directly; the blankenate useMemo deps now
 	// include `difficulty` so the blank set re-derives per drag.
 	const [difficulty, setDifficulty] = useState<number>(initialDifficulty);
-	const contentTypes = Array.isArray(resolved.contentTypes)
-		? (resolved.contentTypes as ReadonlyArray<ContentType>)
+
+	// Inc 6f: contentTypes is now LOCAL state, seeded from the prop
+	// config (default = all four). The checkboxes mutate this directly;
+	// the blankenate useMemo deps include `contentTypes` so the blank
+	// set re-derives per toggle.
+	//
+	// Defensive: filter the prop-supplied array against ALL_CONTENT_TYPES
+	// rather than casting blindly. An educator config with a typo (e.g.
+	// `contentTypes: ['keywrds']`) degrades to the all-four default
+	// element-by-element rather than silently breaking blankenate.
+	const initialContentTypes: ReadonlyArray<ContentType> = Array.isArray(
+		resolved.contentTypes,
+	)
+		? (resolved.contentTypes as ReadonlyArray<unknown>).filter(
+				(t): t is ContentType =>
+					(ALL_CONTENT_TYPES as ReadonlyArray<string>).includes(t as string),
+			)
 		: ALL_CONTENT_TYPES;
+	const [contentTypes, setContentTypes] =
+		useState<ReadonlyArray<ContentType>>(initialContentTypes);
 
 	// View-mode state (Inc 6b). Seeded from config.viewMode (default
 	// 'blankenated' via blanksCore.config). The toggle preserves the
@@ -121,14 +138,13 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 				difficulty / 100,
 				deriveContentTypeFlags(contentTypes),
 			),
-		// Inc 6e: difficulty is now local state, so it IS an independent
-		// signal for re-derivation. blankResult identity changes on every
-		// slider drag → the mountEditorView effect remounts the editor
-		// with the new blankedCode. The change handler also resets
-		// learnerCode (per DOCS § Phase 2: "Re-derivation on settings
-		// change resets the correctness map" — see `handleDifficultyChange`
-		// below).
-		// TODO Inc 6f: same wiring for contentTypes when checkboxes land.
+		// Inc 6e/6f: difficulty + contentTypes are LOCAL state, so each
+		// is an independent signal for re-derivation. blankResult identity
+		// changes on slider drag (6e) or checkbox toggle (6f) → the
+		// mountEditorView effect remounts the editor with the new
+		// blankedCode. The change handlers (handleDifficultyChange /
+		// handleContentTypeToggle) also reset learnerCode per DOCS § Phase 2:
+		// "Re-derivation on settings change resets the correctness map."
 		[embodiment.source.code, difficulty, contentTypes],
 	);
 
@@ -156,6 +172,18 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 	): void {
 		const next = Number(event.target.value);
 		setDifficulty(next);
+		setLearnerCode(null);
+	}
+
+	// Inc 6f: toggle a content-type category in/out of the eligible set.
+	// Same reset-learnerCode logic as the slider — the new blank set has
+	// different positions, so the old typed text no longer aligns.
+	function handleContentTypeToggle(type: ContentType): void {
+		setContentTypes((current) =>
+			current.includes(type)
+				? current.filter((t) => t !== type)
+				: [...current, type],
+		);
 		setLearnerCode(null);
 	}
 
@@ -302,6 +330,20 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 								aria-label="Blanks difficulty (0 to 100)"
 							/>
 						</label>
+						<fieldset data-content-types>
+							<legend>Eligible token categories</legend>
+							{ALL_CONTENT_TYPES.map((type) => (
+								<label key={type}>
+									<input
+										type="checkbox"
+										checked={contentTypes.includes(type)}
+										onChange={() => handleContentTypeToggle(type)}
+										data-content-type={type}
+									/>
+									{type}
+								</label>
+							))}
+						</fieldset>
 					</div>
 					<div ref={editorContainer} data-blanks-editor-host />
 					<div
