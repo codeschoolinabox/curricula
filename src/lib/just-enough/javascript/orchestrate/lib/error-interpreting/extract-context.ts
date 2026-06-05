@@ -66,7 +66,7 @@ function extractSourceLine(
  * Collects all declared variable names from the AST.
  */
 function collectDeclaredNames(ast: Node): readonly string[] {
-	const names: readonly string[] = [];
+	const names: string[] = [];
 
 	walk(ast as any, {
 		enter(node: any) {

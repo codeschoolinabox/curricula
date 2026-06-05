@@ -184,7 +184,7 @@ function checkUndeclaredGlobals(
 ): readonly Violation[] {
 	const analysis = buildScope(ast);
 	const nodePathMap = buildNodePathMap(ast);
-	const violations: readonly Violation[] = [];
+	const violations: Violation[] = [];
 
 	walkForGlobals(
 		ast,
@@ -223,7 +223,7 @@ function walkForGlobals(
 	node: Node,
 	scope: ScopeInfo,
 	allowedGlobals: ReadonlySet<string>,
-	violations: readonly Violation[],
+	violations: Violation[],
 	insideWith: boolean,
 	nodePathMap: ReadonlyMap<Node, string>,
 ): void {

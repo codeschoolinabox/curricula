@@ -27,7 +27,7 @@ import type { ChildWithPath } from './types.js';
  *   property-enumeration order (array elements in source order).
  */
 function getChildNodesWithPath(node: Node): readonly ChildWithPath[] {
-	const children: readonly ChildWithPath[] = [];
+	const children: ChildWithPath[] = [];
 	const record = node as unknown as Record<string, unknown>;
 
 	for (const key of Object.keys(node)) {
@@ -58,7 +58,7 @@ function arrayChildren(
 	key: string,
 	value: readonly unknown[],
 ): readonly ChildWithPath[] {
-	const result: readonly ChildWithPath[] = [];
+	const result: ChildWithPath[] = [];
 	for (const [index, item] of value.entries()) {
 		if (isNode(item)) {
 			result.push({ child: item, segment: `${key}.${index}` });

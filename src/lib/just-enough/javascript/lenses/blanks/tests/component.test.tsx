@@ -484,6 +484,115 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
+	describe('difficulty slider — Inc 6e', () => {
+		it('renders a difficulty slider [data-difficulty-slider] input (type=range)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				const slider = container.querySelector(
+					'[data-difficulty-slider]',
+				) as HTMLInputElement | null;
+				expect(slider).not.toBeNull();
+				expect(slider?.type).toBe('range');
+				expect(slider?.min).toBe('0');
+				expect(slider?.max).toBe('100');
+			});
+		});
+
+		it('initial slider value reflects config.difficulty (default 50)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				const slider = container.querySelector(
+					'[data-difficulty-slider]',
+				) as HTMLInputElement | null;
+				expect(slider?.value).toBe('50');
+			});
+		});
+
+		it('initial slider value reflects config.difficulty when explicit (e.g. 100)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				const slider = container.querySelector(
+					'[data-difficulty-slider]',
+				) as HTMLInputElement | null;
+				expect(slider?.value).toBe('100');
+			});
+		});
+
+		it('changing the slider value re-derives the blank set (editor doc changes)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 0 })}
+				/>,
+			);
+			// At difficulty=0, blanks=[] so the editor doc has NO __ markers.
+			await waitFor(() => {
+				const text = container.querySelector('.cm-content')?.textContent ?? '';
+				expect(text.includes('__')).toBe(false);
+			});
+			// Drag the slider to 100: blanks re-derive; doc gains __.
+			const slider = container.querySelector(
+				'[data-difficulty-slider]',
+			) as HTMLInputElement;
+			fireEvent.change(slider, { target: { value: '100' } });
+			await waitFor(() => {
+				const text = container.querySelector('.cm-content')?.textContent ?? '';
+				expect(text).toContain('__');
+			});
+		});
+
+		it('changing the slider resets learnerCode (score returns to 0)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			// Wait for editor mount, then dispatch a fake learner edit.
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			// Replace doc with originalCode → score becomes 100.
+			view?.dispatch({
+				changes: {
+					from: 0,
+					to: view.state.doc.length,
+					insert: embody('OK').source.code,
+				},
+			});
+			await waitFor(() => {
+				const scoreEl = container.querySelector('[data-blanks-score]');
+				expect(scoreEl?.getAttribute('data-blanks-score')).toBe('100');
+			});
+			// Drag the slider → learnerCode resets; new blanks unfilled; score = 0.
+			const slider = container.querySelector(
+				'[data-difficulty-slider]',
+			) as HTMLInputElement;
+			fireEvent.change(slider, { target: { value: '50' } });
+			await waitFor(() => {
+				const scoreEl = container.querySelector('[data-blanks-score]');
+				expect(scoreEl?.getAttribute('data-blanks-score')).toBe('0');
+			});
+		});
+	});
+
 	describe('the LensModule freeze contract', () => {
 		it('the default export is a frozen LensModule', () => {
 			expect(Object.isFrozen(blanksLens)).toBe(true);

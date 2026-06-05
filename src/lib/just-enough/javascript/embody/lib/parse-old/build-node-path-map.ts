@@ -36,7 +36,7 @@ function buildNodePathMap(root: Node): ReadonlyMap<Node, string> {
  * place — the map is transient, consumed within one validation pass
  * and then discarded.
  */
-function assignPaths(node: Node, path: string, map: ReadonlyMap<Node, string>): void {
+function assignPaths(node: Node, path: string, map: Map<Node, string>): void {
 	map.set(node, path);
 	for (const { child, segment } of getChildNodesWithPath(node)) {
 		assignPaths(child, `${path}.${segment}`, map);

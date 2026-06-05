@@ -18,17 +18,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import type { Code, Root } from 'mdast';
-import type { VFile } from 'vfile';
-
 import deepMerge from '../../lib/utils/deep-merge.js';
 
 import codeBlockToJsx from './code-block-to-jsx.js';
-import type { StudyLensesJsxNode } from './code-block-to-jsx.js';
 import discoverSiblings from './discover-siblings.js';
 import prettifyDirName from './prettify-dir-name.js';
 import resolveCascade from './resolve-cascade.js';
-import type { LensName } from './types.js';
+
+import type { Code, Root } from 'mdast';
+import type { VFile } from 'vfile';
+
+import type { StudyLensesJsxNode } from './code-block-to-jsx.js';
 import type { RemarkPluginOptions, ResolvedConfig, Sibling } from './types.js';
 
 type Transformer = (tree: Root, file: VFile) => void;
@@ -72,11 +72,11 @@ function createRemarkStudyLenses(options: RemarkPluginOptions): Transformer {
 				: undefined;
 
 		// 3. Transform — rewrite fences whose language is configured.
-		for (let index = 0; index < tree.children.length; index++) {
-			const node = tree.children[index];
-			if (node?.type !== 'code') continue;
+		for (let i = 0; i < tree.children.length; i++) {
+			const node = tree.children[i];
+			if (node === undefined || node.type !== 'code') continue;
 			const jsx = transformFence(node, config, frontmatterDefaultLens);
-			if (jsx !== undefined) (tree.children as ReadonlyArray<unknown>)[index] = jsx;
+			if (jsx !== undefined) (tree.children as Array<unknown>)[i] = jsx;
 		}
 
 		// 4. Embed siblings — only for sibling-bearing pages.
@@ -160,16 +160,16 @@ function isSiblingBearingPageFile(absFilePath: string): boolean {
  */
 function groupSiblings(
 	siblings: ReadonlyArray<Sibling>,
-): ReadonlyArray<{ readonly groupKey: string; readonly members: ReadonlyArray<Sibling> }> {
-	const map = new Map<string, readonly Sibling[]>();
+): ReadonlyArray<{ groupKey: string; members: ReadonlyArray<Sibling> }> {
+	const map = new Map<string, Sibling[]>();
 	for (const s of siblings) {
-		const slashIndex = s.label.indexOf('/');
-		const key = slashIndex === -1 ? '' : s.label.slice(0, slashIndex);
-		const array = map.get(key);
-		if (array === undefined) {map.set(key, [s]);}
-		else {array.push(s);}
+		const slashIdx = s.label.indexOf('/');
+		const key = slashIdx === -1 ? '' : s.label.slice(0, slashIdx);
+		const arr = map.get(key);
+		if (arr !== undefined) arr.push(s);
+		else map.set(key, [s]);
 	}
-	const groups: ReadonlyArray<{ readonly groupKey: string; readonly members: ReadonlyArray<Sibling> }> =
+	const groups: Array<{ groupKey: string; members: ReadonlyArray<Sibling> }> =
 		[];
 	// Root group first (if it exists and is non-empty).
 	const root = map.get('');
@@ -179,7 +179,7 @@ function groupSiblings(
 	// Subdirectory groups in alphabetical order by key.
 	const sortedKeys = [...map.keys()]
 		.filter((k) => k !== '')
-		.toSorted((a, b) => a.localeCompare(b));
+		.sort((a, b) => a.localeCompare(b));
 	for (const key of sortedKeys) {
 		const members = map.get(key)!;
 		if (members.length > 0) groups.push({ groupKey: key, members });
@@ -213,7 +213,7 @@ function appendBottomEmbed(
 			lens: sibling.lens,
 			configs,
 		});
-		(tree.children as ReadonlyArray<unknown>).push(jsx);
+		(tree.children as Array<unknown>).push(jsx);
 	}
 }
 
@@ -237,9 +237,7 @@ function appendTabsEmbed(
 	groupKey: string,
 	config: ResolvedConfig,
 ): void {
-	const tabItems = siblings.map((sibling) => siblingToTabItem(sibling));
-
-	function siblingToTabItem(sibling: Sibling) {
+	const tabItems = siblings.map((sibling) => {
 		// Within a group, labels are relative to the group — strip the
 		// `groupKey/` prefix so tabs read `01-declare`, not
 		// `sl-01-variables/01-declare`.
@@ -279,7 +277,7 @@ function appendTabsEmbed(
 			],
 			children: [innerJsx],
 		};
-	}
+	});
 
 	const tabs = {
 		type: 'mdxJsxFlowElement' as const,
@@ -291,7 +289,7 @@ function appendTabsEmbed(
 	// Cast: the `mdxJsxFlowElement` node type is provided by mdast-util-mdx-jsx
 	// (the MDX MDAST extension). Docusaurus's processor allows these via
 	// `rehype-raw`'s passThrough list in .md mode and natively in .mdx mode.
-	(tree.children as ReadonlyArray<unknown>).push(tabs);
+	(tree.children as Array<unknown>).push(tabs);
 }
 
 /**
@@ -327,34 +325,19 @@ function mergeOverrideIntoCascade(
 }
 
 /**
- * Resolves the emitted `lens` attribute for a fence after the
- * configured-languages gate has passed. Total post-gate signature: the
- * `cascadeDefault` argument is the gate-narrowed `LensName` (never null
- * or undefined here — the caller returned early on absent / null
- * cascade entries). Precedence: suffix > frontmatter > cascade default.
- */
-function resolveLensForFence(
-	suffix: LensName | undefined,
-	frontmatter: LensName | undefined,
-	cascadeDefault: LensName,
-): LensName {
-	return suffix ?? frontmatter ?? cascadeDefault;
-}
-
-/**
  * Rewrites one fenced-code-block MDAST node if its language is
  * configured in `config.defaults`. Unconfigured-language fences are
  * left alone (configured-languages rule).
  *
  * Lens resolution precedence (most-specific wins, populates the
- * emitted `lens` attribute) — runs only after the configured-languages
- * gate passes (`config.defaults[lang]` non-null):
- *   fence `:suffix`  >  frontmatterDefaultLens  >  cascade `defaults[fenceLang]`
+ * emitted `lens` attribute):
+ *   fence `:suffix` (URL-style lens name)  >  frontmatterDefaultLens  >  none
  *
- * The cascade-default tier is the **cascade default lens** (L2; reverses
- * the prior locked-decision-1). When the gate fails — absent key or
- * explicit `null` (subtree deconfiguration) — the fence is left
- * untransformed and the precedence chain does not run.
+ * Cascade `defaults[lang]` ONLY gates whether the fence transforms;
+ * it does NOT populate `lens` (per AR-1 locked decision 1; the
+ * cascade-supplied default seam is L2-deferred — at F1+B a bare fence
+ * with no resolved lens emits no `lens` prop and the orchestrator
+ * mounts the editor home base).
  *
  * Suffix parsing (URL-style):
  *   <lensName>[?<key>[=<value>]( &<key>[=<value>] )*]
@@ -385,40 +368,40 @@ function transformFence(
 	const suffix = colonIndex === -1 ? undefined : info.slice(colonIndex + 1);
 	if (lang === '') return;
 
-	const cascadeDefault = config.defaults[lang];
-	// Configured-languages rule + gate-semantics parity (see DOCS.md
-	// §Structural constraints). `== null` covers absent key today AND
-	// explicit `null` after L2.6 widens the map-value type.
-	if (cascadeDefault == null) return;
+	if (config.defaults[lang] === undefined) return; // configured-languages rule
 
-	let suffixLens: string | undefined;
+	let lens: string | undefined;
 	let parsedQuery: Readonly<Record<string, unknown>> | undefined;
 
 	if (suffix !== undefined) {
 		const queryIndex = suffix.indexOf('?');
 		const lensName = queryIndex === -1 ? suffix : suffix.slice(0, queryIndex);
 		if (lensName === '') return; // malformed: empty lens name
-		suffixLens = lensName;
+		lens = lensName;
 		if (queryIndex !== -1) {
-			const queryString = suffix.slice(queryIndex + 1);
-			if (queryString !== '') {
-				const parsed = parseFenceQuery(queryString);
+			const queryStr = suffix.slice(queryIndex + 1);
+			if (queryStr !== '') {
+				const parsed = parseFenceQuery(queryStr);
 				// Skip vacuous queries (e.g. `?&` or `?&&`) so
 				// `configs.lenses[lens]` isn't overlaid with an empty
 				// merge (which would be a no-op but produces noise).
 				if (Object.keys(parsed).length > 0) parsedQuery = parsed;
 			}
 		}
+	} else {
+		// Bare fence (no `:suffix`): only frontmatter populates `lens`.
+		// Cascade `defaults[lang]` does NOT populate it (locked decision 1).
+		lens = frontmatterDefaultLens;
 	}
 
-	const lens = resolveLensForFence(
-		suffixLens,
-		frontmatterDefaultLens,
-		cascadeDefault,
-	);
-
 	const configs = mergeOverrideIntoCascade(config, lens, parsedQuery);
-	return codeBlockToJsx(node, { lens, configs });
+	// `exactOptionalPropertyTypes`: build the params via conditional
+	// spread so undefined keys are omitted entirely rather than passed
+	// as `key: undefined`.
+	return codeBlockToJsx(node, {
+		...(lens !== undefined ? { lens } : {}),
+		configs,
+	});
 }
 
 /**
@@ -448,9 +431,9 @@ function transformFence(
  *   leniency applies to a leading `&` (`?&a=1`) or trailing `&`
  *   (`?a=1&`). This matches lenient URL-parser behavior.
  */
-function parseFenceQuery(queryString: string): Readonly<Record<string, unknown>> {
+function parseFenceQuery(queryStr: string): Readonly<Record<string, unknown>> {
 	const out: Record<string, unknown> = {};
-	for (const part of queryString.split('&')) {
+	for (const part of queryStr.split('&')) {
 		if (part === '') continue;
 		const eqIndex = part.indexOf('=');
 		if (eqIndex === -1) {

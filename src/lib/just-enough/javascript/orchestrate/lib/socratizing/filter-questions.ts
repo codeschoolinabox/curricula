@@ -53,7 +53,7 @@ function passesMultiValueFilter(
  */
 function passesRangeFilter(
 	question: CodeQuestion,
-	range: { readonly start: number; readonly end: number } | undefined,
+	range: { start: number; end: number } | undefined,
 ): boolean {
 	if (range === undefined) {
 		return true;
@@ -115,7 +115,7 @@ function filterQuestions(
 	questions: readonly CodeQuestion[],
 	config: MicroDecisionConfig,
 ): readonly CodeQuestion[] {
-	const result: readonly CodeQuestion[] = [];
+	const result: CodeQuestion[] = [];
 
 	for (const question of questions) {
 		// 1. Kind filter (single-value)
@@ -186,26 +186,26 @@ function filterQuestions(
 
 		// If register filtering removed some entries, create a new
 		// CodeQuestion with the pruned array
-		if (filteredQuestions === question.questions) {
-			result.push(question);
-		} else {
+		if (filteredQuestions !== question.questions) {
 			result.push(
 				Object.freeze({
 					...question,
 					questions: Object.freeze(filteredQuestions),
 				}),
 			);
+		} else {
+			result.push(question);
 		}
 	}
 
 	// 8. Sort by source location (ascending line, then column)
-	result.sort((a: CodeQuestion, b: CodeQuestion) => bySourceLocation(a, b));
-
-	function bySourceLocation(a: CodeQuestion, b: CodeQuestion): number {
+	result.sort((a, b) => {
 		const lineDiff = a.location.start.line - b.location.start.line;
-		if (lineDiff !== 0) return lineDiff;
+		if (lineDiff !== 0) {
+			return lineDiff;
+		}
 		return a.location.start.column - b.location.start.column;
-	}
+	});
 
 	// 9. Cap at config.count if specified and > 0
 	if (config.count && config.count > 0 && result.length > config.count) {

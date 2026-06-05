@@ -34,13 +34,13 @@
  */
 
 export type StudyLensDirective = Readonly<{
-	readonly lens: string;
-	readonly lensConfig?: Readonly<Record<string, unknown>>;
+	lens: string;
+	lensConfig?: Readonly<Record<string, unknown>>;
 }>;
 
 export type StudyLensDirectiveMatch = Readonly<{
-	readonly directive: StudyLensDirective;
-	readonly strippedCode: string;
+	directive: StudyLensDirective;
+	strippedCode: string;
 }>;
 
 type LineKind =
@@ -54,9 +54,9 @@ type LineKind =
 	| 'code';
 
 type CommentForm = Readonly<{
-	readonly kind: 'line-run' | 'block';
-	readonly startLine: number; // inclusive, 0-based
-	readonly endLine: number; // inclusive
+	kind: 'line-run' | 'block';
+	startLine: number; // inclusive, 0-based
+	endLine: number; // inclusive
 }>;
 
 /**
@@ -114,8 +114,8 @@ function parseStudyLensDirective(
 	const tagMatch = stripped.match(/@study-lens\s+(\S+)([\s\S]*)$/);
 	if (tagMatch === null) return null;
 
-	const lens = tagMatch[1];
-	const rest = tagMatch[2].trim();
+	const lens = tagMatch[1]!;
+	const rest = tagMatch[2]!.trim();
 
 	let directive: StudyLensDirective;
 	if (rest === '') {
@@ -124,8 +124,8 @@ function parseStudyLensDirective(
 		try {
 			const lensConfig = JSON.parse(rest) as Record<string, unknown>;
 			directive = { lens, lensConfig };
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
+		} catch (cause) {
+			const message = cause instanceof Error ? cause.message : String(cause);
 			throw new Error(
 				`Malformed @study-lens config JSON in ${absPath}: ${message}`,
 			);
@@ -138,10 +138,10 @@ function parseStudyLensDirective(
 
 /** Classifies each line of the file. Tracks block-comment state. */
 function classifyLines(lines: ReadonlyArray<string>): ReadonlyArray<LineKind> {
-	const kinds: readonly LineKind[] = [];
+	const kinds: LineKind[] = [];
 	let inBlockComment = false;
-	for (const [index, line] of lines.entries()) {
-		const trimmed = line.trim();
+	for (let i = 0; i < lines.length; i++) {
+		const trimmed = lines[i]!.trim();
 		if (inBlockComment) {
 			if (trimmed.includes('*/')) {
 				inBlockComment = false;
@@ -155,7 +155,7 @@ function classifyLines(lines: ReadonlyArray<string>): ReadonlyArray<LineKind> {
 			kinds.push('blank');
 			continue;
 		}
-		if (index === 0 && trimmed.startsWith('#!')) {
+		if (i === 0 && trimmed.startsWith('#!')) {
 			kinds.push('shebang');
 			continue;
 		}
@@ -187,13 +187,13 @@ function indexOfKind(
 	direction: 'forward' | 'backward',
 ): number {
 	if (direction === 'forward') {
-		for (const [index, kind_] of kinds.entries()) {
-			if (kind_ === kind) return index;
+		for (let i = 0; i < kinds.length; i++) {
+			if (kinds[i] === kind) return i;
 		}
 		return -1;
 	}
-	for (let index = kinds.length - 1; index >= 0; index--) {
-		if (kinds[index] === kind) return index;
+	for (let i = kinds.length - 1; i >= 0; i--) {
+		if (kinds[i] === kind) return i;
 	}
 	return -1;
 }
@@ -208,41 +208,41 @@ function enumerateForms(
 	start: number,
 	end: number,
 ): ReadonlyArray<CommentForm> {
-	const forms: readonly CommentForm[] = [];
+	const forms: CommentForm[] = [];
 	let lineRunStart = -1;
-	let index = start;
-	while (index < end) {
-		const k = kinds[index];
+	let i = start;
+	while (i < end) {
+		const k = kinds[i]!;
 		if (k === 'line-comment') {
-			if (lineRunStart < 0) lineRunStart = index;
-			index++;
+			if (lineRunStart < 0) lineRunStart = i;
+			i++;
 			continue;
 		}
 		if (lineRunStart >= 0) {
 			forms.push({
 				kind: 'line-run',
 				startLine: lineRunStart,
-				endLine: index - 1,
+				endLine: i - 1,
 			});
 			lineRunStart = -1;
 		}
 		if (k === 'single-line-block-comment') {
-			forms.push({ kind: 'block', startLine: index, endLine: index });
-			index++;
+			forms.push({ kind: 'block', startLine: i, endLine: i });
+			i++;
 			continue;
 		}
 		if (k === 'block-comment-open') {
-			let index_ = index + 1;
-			while (index_ < end && kinds[index_] !== 'block-comment-close') index_++;
-			if (index_ < end) {
-				forms.push({ kind: 'block', startLine: index, endLine: index_ });
-				index = index_ + 1;
+			let j = i + 1;
+			while (j < end && kinds[j] !== 'block-comment-close') j++;
+			if (j < end) {
+				forms.push({ kind: 'block', startLine: i, endLine: j });
+				i = j + 1;
 				continue;
 			}
 			// Unterminated block (shouldn't happen inside a well-formed
 			// leading/trailing region; fall through).
 		}
-		index++;
+		i++;
 	}
 	if (lineRunStart >= 0) {
 		forms.push({
@@ -292,17 +292,17 @@ function stripFormFromLines(
 	lines: ReadonlyArray<string>,
 	form: CommentForm,
 	isLeading: boolean,
-): readonly string[] {
+): string[] {
 	const before = lines.slice(0, form.startLine);
 	const after = lines.slice(form.endLine + 1);
 	if (isLeading) {
-		let index = 0;
-		while (index < after.length && after[index].trim() === '') index++;
-		return [...before, ...after.slice(index)];
+		let i = 0;
+		while (i < after.length && after[i]!.trim() === '') i++;
+		return [...before, ...after.slice(i)];
 	}
-	let index = before.length - 1;
-	while (index >= 0 && before[index].trim() === '') index--;
-	return [...before.slice(0, index + 1), ...after];
+	let j = before.length - 1;
+	while (j >= 0 && before[j]!.trim() === '') j--;
+	return [...before.slice(0, j + 1), ...after];
 }
 
 export default parseStudyLensDirective;

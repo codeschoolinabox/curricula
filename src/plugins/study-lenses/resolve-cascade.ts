@@ -18,6 +18,7 @@ import deepMerge from '../../lib/utils/deep-merge.js';
 import { freezeInPlace } from '../../lib/utils/freeze.js';
 
 import DEFAULTS from './defaults.js';
+
 import type { LensesConfigFile, LensName, ResolvedConfig } from './types.js';
 
 /**
@@ -25,11 +26,11 @@ import type { LensesConfigFile, LensName, ResolvedConfig } from './types.js';
  * at the time the walk ran. Used to revalidate cache entries against
  * the current filesystem state.
  */
-type TrackedFile = Readonly<{ readonly path: string; readonly mtime: number }>;
+type TrackedFile = Readonly<{ path: string; mtime: number }>;
 
 type CacheEntry = Readonly<{
-	readonly config: ResolvedConfig;
-	readonly tracked: ReadonlyArray<TrackedFile>;
+	config: ResolvedConfig;
+	tracked: ReadonlyArray<TrackedFile>;
 }>;
 
 /**
@@ -141,7 +142,7 @@ function walkCascade(
 	absDir: string,
 	contentRoot: string,
 ): ReadonlyArray<TrackedFile> {
-	const ancestors: ReadonlyArray<string> = [];
+	const ancestors: Array<string> = [];
 	let current = absDir;
 	// Second condition is a safety net — if the caller-trusted
 	// precondition "absDir under contentRoot" is violated, bail at
@@ -151,7 +152,7 @@ function walkCascade(
 		current = path.dirname(current);
 	}
 	ancestors.unshift(contentRoot);
-	const tracked: ReadonlyArray<TrackedFile> = [];
+	const tracked: Array<TrackedFile> = [];
 	for (const dir of ancestors) {
 		const candidate = path.join(dir, 'lenses.json');
 		const stat = fs.statSync(candidate, { throwIfNoEntry: false });
@@ -193,7 +194,7 @@ function foldFile(
 ): ResolvedConfig {
 	const fileEmbedSiblings = file.embedSiblings ?? {};
 	return {
-		defaults: { ...base.defaults, ...file.defaults },
+		defaults: { ...base.defaults, ...(file.defaults ?? {}) },
 		embedSiblings: {
 			// Scalar fields shallow-spread: child wins when present;
 			// child-undefined leaves parent value intact.

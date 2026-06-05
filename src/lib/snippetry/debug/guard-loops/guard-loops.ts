@@ -16,12 +16,12 @@
  * cannot produce infinite loops.
  */
 
-import type { Node } from 'estree';
-import { walk } from 'estree-walker';
 import * as recast from 'recast';
+import { walk } from 'estree-walker';
 
 import deepFreeze from '@utils/deep-freeze.js';
 
+import type { Node } from 'estree';
 
 import type {
 	CodeInput,
@@ -61,7 +61,7 @@ function generateLoopGuard(id: number, max: number): LoopGuardComponents {
  * be visually separated from the learner's original code for readability.
  */
 function insertBlankLinesAfterGuards(code: string): string {
-	return code.replaceAll(
+	return code.replace(
 		/(throw new RangeError\("Loop \d+ exceeded \d+ iterations\."\);)/g,
 		'$1\n',
 	);
@@ -101,7 +101,7 @@ function guardLoops(evalCode: CodeInput, maxIterations: number): CodeOutput {
 
 	// Pass 1: collect while loops in reading order (pre-order DFS).
 	// This gives outer loops lower numbers than inner loops.
-	const loops: ReadonlyArray<{ readonly node: any; readonly parent: any }> = [];
+	const loops: Array<{ node: any; parent: any }> = [];
 
 	(walk as any)(ast, {
 		enter(node: any, parent: any) {
@@ -115,21 +115,21 @@ function guardLoops(evalCode: CodeInput, maxIterations: number): CodeOutput {
 
 	// Pass 2: apply guards in reverse source order so splice indices stay stable.
 	// Each loop gets its reading-order number (i + 1).
-	for (let index = loops.length - 1; index >= 0; index--) {
-		const { variable, check } = generateLoopGuard(index + 1, maxIterations);
+	for (let i = loops.length - 1; i >= 0; i--) {
+		const { variable, check } = generateLoopGuard(i + 1, maxIterations);
 
 		// WHY: recast preserves source formatting via in-place AST mutation.
 		// New nodes would lose whitespace/comments. Exception to pure-functional
 		// convention.
-		loops[index].node.body.body.unshift(...check);
+		loops[i].node.body.body.unshift(...check);
 
-		const indexOfNode = loops[index].parent.body.indexOf(loops[index].node);
-		loops[index].parent.body.splice(indexOfNode, 0, variable);
+		const indexOfNode = loops[i].parent.body.indexOf(loops[i].node);
+		loops[i].parent.body.splice(indexOfNode, 0, variable);
 	}
 
 	return typeof evalCode === 'object'
 		? deepFreeze(ast as Node)
-		: insertBlankLinesAfterGuards(recast.print(ast).code);
+		: insertBlankLinesAfterGuards(recast.print(ast as any).code);
 }
 
 export default guardLoops;

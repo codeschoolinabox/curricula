@@ -409,29 +409,29 @@ describe('<StudyLenses> — F1 smoke', () => {
 describe('<StudyLenses> — F5b.1 bus instance', () => {
 	describe('Zero — forwarded ref exposes the bus', () => {
 		it('the ref handle carries a bus with a callable dispatch method', () => {
-			const reference = React.createRef<StudyLensesHandle>();
-			render(<StudyLenses snippet="OK" ref={reference} />);
-			expect(typeof reference.current?.bus.dispatch).toBe('function');
+			const ref = React.createRef<StudyLensesHandle>();
+			render(<StudyLenses snippet="OK" ref={ref} />);
+			expect(typeof ref.current?.bus.dispatch).toBe('function');
 		});
 	});
 
 	describe('One — bus identity is stable across re-renders', () => {
 		it('a re-render with the same props keeps the bus reference identical', () => {
-			const reference = React.createRef<StudyLensesHandle>();
-			const { rerender } = render(<StudyLenses snippet="OK" ref={reference} />);
-			const initialBus = reference.current!.bus;
-			rerender(<StudyLenses snippet="OK" ref={reference} />);
-			expect(reference.current!.bus).toBe(initialBus);
+			const ref = React.createRef<StudyLensesHandle>();
+			const { rerender } = render(<StudyLenses snippet="OK" ref={ref} />);
+			const initialBus = ref.current!.bus;
+			rerender(<StudyLenses snippet="OK" ref={ref} />);
+			expect(ref.current!.bus).toBe(initialBus);
 		});
 	});
 
 	describe('Boundary — two mounted instances have distinct buses', () => {
 		it('the ref from mount A and the ref from mount B carry different bus objects', () => {
-			const referenceA = React.createRef<StudyLensesHandle>();
-			const referenceB = React.createRef<StudyLensesHandle>();
-			render(<StudyLenses snippet="OK" ref={referenceA} />);
-			render(<StudyLenses snippet="OK" ref={referenceB} />);
-			expect(referenceA.current!.bus).not.toBe(referenceB.current!.bus);
+			const refA = React.createRef<StudyLensesHandle>();
+			const refB = React.createRef<StudyLensesHandle>();
+			render(<StudyLenses snippet="OK" ref={refA} />);
+			render(<StudyLenses snippet="OK" ref={refB} />);
+			expect(refA.current!.bus).not.toBe(refB.current!.bus);
 		});
 	});
 });
@@ -507,7 +507,7 @@ describe('<StudyLenses> — F5b.2 initial-mount dispatch (lens mode)', () => {
 				.mockReturnValue(bus);
 			try {
 				render(<StudyLenses snippet="OK" lens="debug-props" />);
-				const eventNames = dispatchSpy.mock.calls.map((arguments_) => arguments_[0]);
+				const eventNames = dispatchSpy.mock.calls.map((args) => args[0]);
 				expect(eventNames).toEqual(['mode-changed', 'lens-switched']);
 			} finally {
 				factorySpy.mockRestore();
@@ -596,7 +596,7 @@ describe('<StudyLenses> — F5b.4 prop-driven editor → lens transition', () =>
 				const { rerender } = render(<StudyLenses snippet="OK" />);
 				expect(dispatchSpy).not.toHaveBeenCalled();
 				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
-				const eventNames = dispatchSpy.mock.calls.map((arguments_) => arguments_[0]);
+				const eventNames = dispatchSpy.mock.calls.map((args) => args[0]);
 				expect(eventNames).toEqual(['mode-changed', 'lens-switched']);
 			} finally {
 				factorySpy.mockRestore();
@@ -725,7 +725,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			const options = container.querySelectorAll(
 				'[data-orchestrator-lens-picker] option',
 			);
-			const values = [...options].map(
+			const values = Array.from(options).map(
 				(option) => (option as HTMLOptionElement).value,
 			);
 			expect(values).toEqual(['', 'annotate', 'debug-props']);
@@ -737,7 +737,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			const { container } = render(<StudyLenses snippet="OK" />);
 			const picker = container.querySelector(
 				'[data-orchestrator-lens-picker]',
-			);
+			) as HTMLSelectElement | null;
 			expect(picker?.value).toBe('');
 		});
 
@@ -748,7 +748,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			rerender(<StudyLenses snippet="OK" />);
 			const picker = container.querySelector(
 				'[data-orchestrator-lens-picker]',
-			);
+			) as HTMLSelectElement | null;
 			expect(picker?.value).toBe('');
 		});
 	});
@@ -808,7 +808,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 					'[data-orchestrator-lens-picker]',
 				) as HTMLSelectElement;
 				fireEvent.change(picker, { target: { value: 'debug-props' } });
-				const eventNames = dispatchSpy.mock.calls.map((arguments_) => arguments_[0]);
+				const eventNames = dispatchSpy.mock.calls.map((args) => args[0]);
 				expect(eventNames).toEqual(['mode-changed', 'lens-switched']);
 			} finally {
 				factorySpy.mockRestore();
@@ -885,7 +885,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			);
 			const picker = container.querySelector(
 				'[data-orchestrator-lens-picker]',
-			);
+			) as HTMLSelectElement | null;
 			expect(picker?.value).toBe('debug-props');
 		});
 
@@ -896,7 +896,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			rerender(<StudyLenses snippet="OK" lens="debug-props" />);
 			const picker = container.querySelector(
 				'[data-orchestrator-lens-picker]',
-			);
+			) as HTMLSelectElement | null;
 			expect(picker?.value).toBe('debug-props');
 		});
 	});

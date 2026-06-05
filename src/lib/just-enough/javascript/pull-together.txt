@@ -1,0 +1,20 @@
+next sprint:
+- analyze state of handoff plan against DDD against codebase for baseline
+- MVP the orchestrator:
+    ! embodiment should build on keyup or debounce in editor so we have token/ast-level data for inline visualization/explanation of syntax or static semantic errors.  especially token-level visualizations for syntax errors
+    - editor live as orchestrator home base (with )
+        gutters: syntax errors, jej validation, linting warnings (, ... read git history, I feel there were stub utilites I don't see in the current tree)
+        completion suggestions including JEJ warnings 
+        full JS highlighting, auto-indent aligned with formatting, collapsing, ...
+    - lens selection panel (no smart recommendations yet)
+        migrate from s-l.ec.be -> annotate (done), ... the rest 
+        variable prediction (like pythontutor but with prediction, based on a new variables-only tracer built with naive instrumentation (not full aran))
+    - orchestrator panel (which remains visible above editor/lens-renders)
+        lens picker 
+        "run" (uses embodiment .intercept() with separate rendered user/dev interfaces)
+        format button + keyboard shortcut
+        socratize
+        toggle on/off editor support features (autocomplete, docs, gutters, etc.)
+- build out embodiment 
+    entwined data field 
+    tracers

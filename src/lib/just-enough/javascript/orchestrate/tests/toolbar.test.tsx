@@ -110,7 +110,7 @@ describe('<Toolbar>', () => {
 			);
 			const firstOption = container.querySelector(
 				'[data-orchestrator-lens-picker] option',
-			);
+			) as HTMLOptionElement | null;
 			expect({
 				value: firstOption?.value,
 				disabled: firstOption?.disabled,
@@ -130,7 +130,7 @@ describe('<Toolbar>', () => {
 			const options = container.querySelectorAll(
 				'[data-orchestrator-lens-picker] option',
 			);
-			const entries = [...options]
+			const entries = Array.from(options)
 				.slice(1)
 				.map((option) => ({
 					value: (option as HTMLOptionElement).value,

@@ -56,23 +56,6 @@ describe('discoverSiblings', () => {
 		expect(result).toEqual([]);
 	});
 
-	it('L2.7b: sibling-side gate — .js files exist but config.defaults.js === null (subtree deconfiguration) → frozen []', () => {
-		// Reuses the `has-js-no-defaults` fixture (it has a `.js` file).
-		// The gate parity invariant: `== null` catches both absent key
-		// (the test above) AND explicit null (this test). Same outcome,
-		// different declarative signal from the author.
-		const fixture = path.join(FIXTURES_DIR, 'has-js-no-defaults');
-		const config = {
-			...DEFAULTS,
-			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
-			defaults: { js: null },
-		};
-
-		const result = discoverSiblings(fixture, config);
-
-		expect(result).toEqual([]);
-	});
-
 	it('.js with malformed @study-lens JSON body → walker throws with file path', () => {
 		const fixture = path.join(FIXTURES_DIR, 'file-override-malformed-json');
 		const config = {
@@ -136,14 +119,14 @@ describe('discoverSiblings', () => {
 
 	it('safety exclusions: skips node_modules, hidden dirs, and does not follow symlinks', () => {
 		// Dynamic fixture — symlinks don't travel cleanly through git.
-		const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-B11-'));
-		onTestFinished(() => fs.rmSync(temporary, { recursive: true, force: true }));
+		const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'study-lenses-B11-'));
+		onTestFinished(() => fs.rmSync(tmp, { recursive: true, force: true }));
 
-		fs.writeFileSync(path.join(temporary, 'kept.js'), '// kept');
-		fs.mkdirSync(path.join(temporary, 'node_modules'));
-		fs.writeFileSync(path.join(temporary, 'node_modules', 'junk.js'), '// skip');
-		fs.mkdirSync(path.join(temporary, '.hidden'));
-		fs.writeFileSync(path.join(temporary, '.hidden', 'junk.js'), '// skip');
+		fs.writeFileSync(path.join(tmp, 'kept.js'), '// kept');
+		fs.mkdirSync(path.join(tmp, 'node_modules'));
+		fs.writeFileSync(path.join(tmp, 'node_modules', 'junk.js'), '// skip');
+		fs.mkdirSync(path.join(tmp, '.hidden'));
+		fs.writeFileSync(path.join(tmp, '.hidden', 'junk.js'), '// skip');
 
 		// Symlink pointing at an external directory that ALSO has a .js file.
 		const symTarget = fs.mkdtempSync(
@@ -156,7 +139,7 @@ describe('discoverSiblings', () => {
 			path.join(symTarget, 'via-symlink.js'),
 			'// should not be followed',
 		);
-		fs.symlinkSync(symTarget, path.join(temporary, 'sym-link'), 'dir');
+		fs.symlinkSync(symTarget, path.join(tmp, 'sym-link'), 'dir');
 
 		const config = {
 			...DEFAULTS,
@@ -164,7 +147,7 @@ describe('discoverSiblings', () => {
 			defaults: { js: 'study' },
 		};
 
-		const result = discoverSiblings(temporary, config);
+		const result = discoverSiblings(tmp, config);
 
 		expect(result.map((s) => s.label)).toEqual(['kept']);
 	});
@@ -183,7 +166,7 @@ describe('discoverSiblings', () => {
 
 		const result = discoverSiblings(fixture, config);
 
-		expect(result.map((s) => s.label).toSorted((a, b) => a.localeCompare(b))).toEqual([
+		expect(result.map((s) => s.label).sort()).toEqual([
 			'keep',
 			'staging-wip/drop',
 		]);

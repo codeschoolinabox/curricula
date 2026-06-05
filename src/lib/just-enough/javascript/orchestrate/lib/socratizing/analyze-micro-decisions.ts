@@ -7,32 +7,15 @@
  * union result.
  */
 
+import buildScope from '../../../embody/lib/scope/build-scope.js';
+import getChildNodes from '../../../embody/lib/parse-old/get-child-nodes.js';
 
 import type { Node } from 'acorn';
-
-import getChildNodes from '../../../embody/lib/parse-old/get-child-nodes.js';
-import buildScope from '../../../embody/lib/scope/build-scope.js';
 import type { ScopeAnalysis } from '../../../embody/lib/scope/types.js';
 import type { Snippet } from '../../../embody/types.js';
 
-
-
-// ─── Analyzer registry ─────────────────────────────────────
-
-import cautionAnalyzers from './analyzers/caution.js';
-import clarityAnalyzers from './analyzers/clarity.js';
-import comprehensionControlFlowAnalyzers from './analyzers/comprehension-control-flow.js';
-import comprehensionDataAnalyzers from './analyzers/comprehension-data.js';
-import comprehensionGenericAnalyzers from './analyzers/comprehension-generic.js';
-import comprehensionInteractionAnalyzers from './analyzers/comprehension-interaction.js';
-import comprehensionOperatorAnalyzers from './analyzers/comprehension-operators.js';
-import comprehensionVariableAnalyzers from './analyzers/comprehension-variables.js';
-import consistencyAnalyzers from './analyzers/consistency.js';
-import easterEggAnalyzers from './analyzers/easter-egg.js';
-import trapAnalyzers from './analyzers/trap.js';
-import voiceProfileAnalyzers from './analyzers/voice-profile.js';
-import voiceAnalyzers from './analyzers/voice.js';
 import filterQuestions from './filter-questions.js';
+
 import type {
 	AnalyzerError,
 	CodeQuestion,
@@ -42,10 +25,26 @@ import type {
 	ProgramAnalyzer,
 } from './types.js';
 
+// ─── Analyzer registry ─────────────────────────────────────
+
+import voiceAnalyzers from './analyzers/voice.js';
+import clarityAnalyzers from './analyzers/clarity.js';
+import cautionAnalyzers from './analyzers/caution.js';
+import trapAnalyzers from './analyzers/trap.js';
+import easterEggAnalyzers from './analyzers/easter-egg.js';
+import consistencyAnalyzers from './analyzers/consistency.js';
+import comprehensionVariableAnalyzers from './analyzers/comprehension-variables.js';
+import comprehensionControlFlowAnalyzers from './analyzers/comprehension-control-flow.js';
+import comprehensionInteractionAnalyzers from './analyzers/comprehension-interaction.js';
+import comprehensionOperatorAnalyzers from './analyzers/comprehension-operators.js';
+import comprehensionDataAnalyzers from './analyzers/comprehension-data.js';
+import comprehensionGenericAnalyzers from './analyzers/comprehension-generic.js';
+import voiceProfileAnalyzers from './analyzers/voice-profile.js';
+
 /** Point analyzers: each fires on every AST node. */
 const POINT_ANALYZERS: ReadonlyArray<{
-	readonly id: string;
-	readonly analyze: PointAnalyzer;
+	id: string;
+	analyze: PointAnalyzer;
 }> = [
 	...voiceAnalyzers,
 	...clarityAnalyzers,
@@ -61,8 +60,8 @@ const POINT_ANALYZERS: ReadonlyArray<{
 
 /** Program analyzers: each fires once on the full AST. */
 const PROGRAM_ANALYZERS: ReadonlyArray<{
-	readonly id: string;
-	readonly analyze: ProgramAnalyzer;
+	id: string;
+	analyze: ProgramAnalyzer;
 }> = [
 	...consistencyAnalyzers,
 	...comprehensionGenericAnalyzers,
@@ -78,9 +77,9 @@ function walkAndAnalyze(
 	node: Node,
 	scope: ScopeAnalysis,
 	source: string,
-	pointAnalyzers: ReadonlyArray<{ readonly id: string; readonly analyze: PointAnalyzer }>,
-	questions: readonly CodeQuestion[],
-	errors: readonly AnalyzerError[],
+	pointAnalyzers: ReadonlyArray<{ id: string; analyze: PointAnalyzer }>,
+	questions: CodeQuestion[],
+	errors: AnalyzerError[],
 ): void {
 	for (const { id, analyze } of pointAnalyzers) {
 		try {
@@ -143,9 +142,9 @@ function analyzeMicroDecisions(
 			ok: false as const,
 			error: {
 				message: embodyError?.message ?? 'Snippet did not produce an AST',
-				...(embodyError?.loc == null
-					? {}
-					: { location: embodyError.loc.start }),
+				...(embodyError?.loc != null
+					? { location: embodyError.loc.start }
+					: {}),
 			},
 		});
 	}
@@ -154,8 +153,8 @@ function analyzeMicroDecisions(
 	const scope = buildScope(ast);
 
 	// 4. Walk AST with point analyzers
-	const questions: readonly CodeQuestion[] = [];
-	const errors: readonly AnalyzerError[] = [];
+	const questions: CodeQuestion[] = [];
+	const errors: AnalyzerError[] = [];
 
 	walkAndAnalyze(ast, scope, source, POINT_ANALYZERS, questions, errors);
 

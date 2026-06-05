@@ -8,8 +8,8 @@
  * @module to-cm-diagnostic
  */
 
-import type { Diagnostic } from '@codemirror/lint';
 import type { Text } from '@codemirror/state';
+import type { Diagnostic } from '@codemirror/lint';
 
 import buildTooltipDom from './build-tooltip-dom.js';
 import type { LintDiagnostic, LinterCallback } from './types.js';
@@ -27,26 +27,26 @@ import type { LintDiagnostic, LinterCallback } from './types.js';
  * @param diagnostic - LintDiagnostic from a callback
  * @returns CodeMirror Diagnostic
  */
-function toCMDiagnostic(document: Text, diagnostic: LintDiagnostic): Diagnostic {
+function toCMDiagnostic(doc: Text, diagnostic: LintDiagnostic): Diagnostic {
 	const { line, column, endLine, endColumn, severity, message, source, entry } =
 		diagnostic;
 
 	// Clamp line to valid range (1-based, doc.lines is max)
-	const clampedLine = Math.max(1, Math.min(line || 1, document.lines));
-	const lineInfo = document.line(clampedLine);
+	const clampedLine = Math.max(1, Math.min(line || 1, doc.lines));
+	const lineInfo = doc.line(clampedLine);
 	const from = Math.min(lineInfo.from + (column || 0), lineInfo.to);
 
 	let to: number;
-	if (endLine == null) {
-		// Highlight at least one character
-		to = Math.min(from + 1, lineInfo.to);
-	} else {
-		const clampedEndLine = Math.max(1, Math.min(endLine, document.lines));
-		const endLineInfo = document.line(clampedEndLine);
+	if (endLine != null) {
+		const clampedEndLine = Math.max(1, Math.min(endLine, doc.lines));
+		const endLineInfo = doc.line(clampedEndLine);
 		to = Math.min(
-			endLineInfo.from + (endColumn == null ? column || 0 : endColumn),
+			endLineInfo.from + (endColumn != null ? endColumn : column || 0),
 			endLineInfo.to,
 		);
+	} else {
+		// Highlight at least one character
+		to = Math.min(from + 1, lineInfo.to);
 	}
 
 	// perf: skip freeze — CM may mutate diagnostic objects internally
@@ -66,7 +66,7 @@ function toCMDiagnostic(document: Text, diagnostic: LintDiagnostic): Diagnostic 
 	// through buildTooltipDom on hover. The token name shown in the
 	// tooltip header is the doc-slice at the diagnostic's range.
 	if (entry != null) {
-		const token = document.sliceString(from, to);
+		const token = doc.sliceString(from, to);
 		// perf: skip freeze — Diagnostic is CM-internal, mutable by CM
 		result.renderMessage = function renderRichMessage(): Node {
 			return buildTooltipDom(token, entry);
@@ -86,17 +86,17 @@ function toCMDiagnostic(document: Text, diagnostic: LintDiagnostic): Diagnostic 
 function runLinterCallbacks(
 	callbacks: readonly LinterCallback[],
 	code: string,
-): readonly LintDiagnostic[] {
-	const results: readonly LintDiagnostic[] = [];
+): LintDiagnostic[] {
+	const results: LintDiagnostic[] = [];
 
-	for (const function_ of callbacks) {
+	for (const fn of callbacks) {
 		try {
-			const linterResult = function_(code);
+			const linterResult = fn(code);
 			if (Array.isArray(linterResult)) {
 				results.push(...linterResult);
 			}
-		} catch (error: unknown) {
-			console.warn('Linter callback threw:', error);
+		} catch (err: unknown) {
+			console.warn('Linter callback threw:', err);
 		}
 	}
 

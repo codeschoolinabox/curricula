@@ -26,6 +26,7 @@ import { freezeInPlace } from '../../lib/utils/freeze.js';
 
 import EXT_TO_LANG from './ext-to-lang.js';
 import parseStudyLensDirective from './parse-study-lens-directive.js';
+
 import type { ResolvedConfig, Sibling } from './types.js';
 
 /**
@@ -50,7 +51,7 @@ function discoverSiblings(
 	if (config.embedSiblings.mode === 'off') {
 		return freezeInPlace([]);
 	}
-	const siblings: ReadonlyArray<Sibling> = [];
+	const siblings: Array<Sibling> = [];
 	walk(pageDir, pageDir, config, siblings);
 	// Sort by label for a stable, deterministic order across platforms —
 	// `readdirSync` order is filesystem-dependent (alphabetical on APFS,
@@ -71,7 +72,7 @@ function walk(
 	currentDir: string,
 	pageDir: string,
 	config: ResolvedConfig,
-	out: ReadonlyArray<Sibling>,
+	out: Array<Sibling>,
 ): void {
 	for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
 		const absPath = path.join(currentDir, entry.name);
@@ -94,32 +95,28 @@ function walk(
 			continue;
 		}
 		if (!entry.isFile()) continue;
-		const extension = path.extname(entry.name);
-		const lang = EXT_TO_LANG[extension];
+		const ext = path.extname(entry.name);
+		const lang = EXT_TO_LANG[ext];
 		if (lang === undefined) continue;
 		const cascadeLens = config.defaults[lang];
-		// Gate-semantics parity with the fence-side gate at
-		// `remark-study-lenses.ts` (see DOCS.md §Structural constraints).
-		// `== null` covers absent key today AND explicit `null` after L2.6
-		// widens the map-value type.
-		if (cascadeLens == null) continue;
+		if (cascadeLens === undefined) continue;
 		const labelPath = path.relative(pageDir, absPath);
-		const label = labelPath.slice(0, -extension.length).split(path.sep).join('/');
+		const label = labelPath.slice(0, -ext.length).split(path.sep).join('/');
 		const rawContent = fs.readFileSync(absPath, 'utf8');
 		const match = parseStudyLensDirective(rawContent, absPath);
 		const code = match?.strippedCode ?? rawContent;
 		const lens = match?.directive.lens ?? cascadeLens;
 		const sibling: Sibling =
-			match?.directive.lensConfig === undefined
-				? { absPath, label, code, lang, lens }
-				: {
+			match?.directive.lensConfig !== undefined
+				? {
 						absPath,
 						label,
 						code,
 						lang,
 						lens,
 						lensConfig: match.directive.lensConfig,
-					};
+					}
+				: { absPath, label, code, lang, lens };
 		out.push(sibling);
 	}
 }

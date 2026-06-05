@@ -34,11 +34,12 @@
  * README § Config-prop serialization).
  */
 
-import type { Program } from 'estree';
 import { valueToEstree } from 'estree-util-value-to-estree';
-import type { Code } from 'mdast';
 
-import type { LensName, StudyLensesHastProps as StudyLensesHastProperties } from './types.js';
+import type { Code } from 'mdast';
+import type { Program } from 'estree';
+
+import type { LensName, StudyLensesHastProps } from './types.js';
 
 // Local type definitions — no external import from `mdast-util-mdx-jsx`
 // (consistent with the existing `appendTabsEmbed` inline `as const` casts
@@ -53,18 +54,18 @@ import type { LensName, StudyLensesHastProps as StudyLensesHastProperties } from
 // expression-valued (configs). The expression-valued shape carries the
 // estree program MDX evaluates to produce the object at runtime.
 type StudyLensesJsxStringAttribute = {
-	readonly type: 'mdxJsxAttribute';
-	readonly name: keyof StudyLensesHastProperties;
-	readonly value: string;
+	type: 'mdxJsxAttribute';
+	name: keyof StudyLensesHastProps;
+	value: string;
 };
 
 type StudyLensesJsxExpressionAttribute = {
-	readonly type: 'mdxJsxAttribute';
-	readonly name: keyof StudyLensesHastProperties;
-	readonly value: {
-		readonly type: 'mdxJsxAttributeValueExpression';
-		readonly value: string;
-		readonly data: { readonly estree: Program };
+	type: 'mdxJsxAttribute';
+	name: keyof StudyLensesHastProps;
+	value: {
+		type: 'mdxJsxAttributeValueExpression';
+		value: string;
+		data: { estree: Program };
 	};
 };
 
@@ -73,10 +74,10 @@ type StudyLensesJsxAttribute =
 	| StudyLensesJsxExpressionAttribute;
 
 type StudyLensesJsxNode = {
-	readonly type: 'mdxJsxFlowElement';
-	readonly name: 'StudyLenses';
-	readonly attributes: readonly StudyLensesJsxAttribute[];
-	readonly children: readonly [];
+	type: 'mdxJsxFlowElement';
+	name: 'StudyLenses';
+	attributes: StudyLensesJsxAttribute[];
+	children: [];
 };
 
 /**
@@ -117,7 +118,7 @@ function codeBlockToJsx(
 		readonly configs?: Readonly<Record<string, unknown>>;
 	},
 ): StudyLensesJsxNode {
-	const attributes: readonly StudyLensesJsxAttribute[] = [
+	const attributes: StudyLensesJsxAttribute[] = [
 		{ type: 'mdxJsxAttribute', name: 'snippet', value: codeNode.value },
 	];
 	if (lens !== undefined) {
@@ -147,11 +148,11 @@ function codeBlockToJsx(
  * what the cascade resolver produces.
  */
 function buildObjectAttribute(
-	name: keyof StudyLensesHastProperties,
-	object: Readonly<Record<string, unknown>>,
+	name: keyof StudyLensesHastProps,
+	obj: Readonly<Record<string, unknown>>,
 ): StudyLensesJsxExpressionAttribute {
-	const sourceCode = JSON.stringify(object);
-	const expression = valueToEstree(object);
+	const sourceCode = JSON.stringify(obj);
+	const expression = valueToEstree(obj);
 	const program: Program = {
 		type: 'Program',
 		sourceType: 'module',
