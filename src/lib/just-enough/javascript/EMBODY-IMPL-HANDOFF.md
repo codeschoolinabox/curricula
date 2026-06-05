@@ -39,6 +39,21 @@ Phase B (it's a permanent integration-testing fixture set); only the
 non-scenario throw is replaced. The contract every step here must satisfy is
 [`embody/types.ts`](./embody/types.ts).
 
+## ⚠️ Pre-existing hazard — tsconfig excludes mask un-reverted autofix damage
+
+Before re-including any `embody/lib/evaluating/{intercept,run,shared}/**` or
+`parse-old/**` path in `tsconfig.json`'s `exclude`, revert its
+`prefer-readonly-type` autofix first. The Sprint 6.15 `eslint --fix` sweep
+(commit `0e05c5a`) added `readonly` / `ReadonlyArray` / `ReadonlyMap` to locals
+these files mutate (`.push`/`.sort`/`.set`) — e.g.
+`shared/guard-loops/guard-loops.ts:46` does `.push()` on a `readonly number[]`.
+The recovery (`a55d087`) hid ~21 such files behind the tsconfig `exclude`
+instead of reverting them, so they currently do **not** typecheck and will
+surface ~100 errors the moment they are un-excluded. Per-file recipe (safe now
+that `prefer-readonly-type` is `off` — commit `8295a67`):
+`git show 0e05c5a^:<file> > <file>`, then drop the path from `exclude`.
+Surfaced by the Sprint 6 post-mortem AR-5 (2026-06-05).
+
 ## Constraints to honor
 
 The Phase A constraints carry forward into Phase B:
