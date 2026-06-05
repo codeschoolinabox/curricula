@@ -8,6 +8,7 @@
       "@site": ["."],
       "@site/*": ["./*"]
     },
+    "lib": ["ESNext", "DOM"],
     "noEmit": true,
     "allowJs": false,
     "moduleResolution": "node",
