@@ -199,7 +199,7 @@ function filterQuestions(
 	}
 
 	// 8. Sort by source location (ascending line, then column)
-	result.sort((a, b) => bySourceLocation(a, b));
+	result.sort((a: CodeQuestion, b: CodeQuestion) => bySourceLocation(a, b));
 
 	function bySourceLocation(a: CodeQuestion, b: CodeQuestion): number {
 		const lineDiff = a.location.start.line - b.location.start.line;
