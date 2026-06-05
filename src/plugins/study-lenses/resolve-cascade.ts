@@ -18,7 +18,6 @@ import deepMerge from '../../lib/utils/deep-merge.js';
 import { freezeInPlace } from '../../lib/utils/freeze.js';
 
 import DEFAULTS from './defaults.js';
-
 import type { LensesConfigFile, LensName, ResolvedConfig } from './types.js';
 
 /**

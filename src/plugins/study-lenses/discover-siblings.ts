@@ -26,7 +26,6 @@ import { freezeInPlace } from '../../lib/utils/freeze.js';
 
 import EXT_TO_LANG from './ext-to-lang.js';
 import parseStudyLensDirective from './parse-study-lens-directive.js';
-
 import type { ResolvedConfig, Sibling } from './types.js';
 
 /**

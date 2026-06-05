@@ -18,17 +18,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import deepMerge from '../../lib/utils/deep-merge.js';
-
-import codeBlockToJsx from './code-block-to-jsx.js';
-import discoverSiblings from './discover-siblings.js';
-import prettifyDirName from './prettify-dir-name.js';
-import resolveCascade from './resolve-cascade.js';
-
 import type { Code, Root } from 'mdast';
 import type { VFile } from 'vfile';
 
+import deepMerge from '../../lib/utils/deep-merge.js';
+
+import codeBlockToJsx from './code-block-to-jsx.js';
 import type { StudyLensesJsxNode } from './code-block-to-jsx.js';
+import discoverSiblings from './discover-siblings.js';
+import prettifyDirName from './prettify-dir-name.js';
+import resolveCascade from './resolve-cascade.js';
 import type {
 	LensName,
 	RemarkPluginOptions,

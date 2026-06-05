@@ -8,8 +8,8 @@
  * @module to-cm-diagnostic
  */
 
-import type { Text } from '@codemirror/state';
 import type { Diagnostic } from '@codemirror/lint';
+import type { Text } from '@codemirror/state';
 
 import buildTooltipDom from './build-tooltip-dom.js';
 import type { LintDiagnostic, LinterCallback } from './types.js';

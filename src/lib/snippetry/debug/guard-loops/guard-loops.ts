@@ -16,12 +16,11 @@
  * cannot produce infinite loops.
  */
 
-import * as recast from 'recast';
+import type { Node } from 'estree';
 import { walk } from 'estree-walker';
+import * as recast from 'recast';
 
 import deepFreeze from '@utils/deep-freeze.js';
-
-import type { Node } from 'estree';
 
 import type {
 	CodeInput,

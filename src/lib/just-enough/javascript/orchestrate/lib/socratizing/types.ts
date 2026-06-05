@@ -17,11 +17,11 @@
 
 import type { Node } from 'acorn';
 
+import type { ScopeAnalysis } from '../../../embody/lib/scope/types.js';
 import type {
 	SourcePosition,
 	SourceRange,
 } from '../../../embody/lib/validating/types.js';
-import type { ScopeAnalysis } from '../../../embody/lib/scope/types.js';
 
 // ─── Re-exports for consumer convenience ────────────────────
 

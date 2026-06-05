@@ -34,10 +34,9 @@
  * README § Config-prop serialization).
  */
 
-import { valueToEstree } from 'estree-util-value-to-estree';
-
-import type { Code } from 'mdast';
 import type { Program } from 'estree';
+import { valueToEstree } from 'estree-util-value-to-estree';
+import type { Code } from 'mdast';
 
 import type { LensName, StudyLensesHastProps } from './types.js';
 

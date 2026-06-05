@@ -15,12 +15,10 @@
 
 import type { Node } from 'acorn';
 
-import type { ScopeAnalysis } from '../../../../embody/lib/scope/types.js';
 import getChildNodes from '../../../../embody/lib/parse-old/get-child-nodes.js';
-
+import type { ScopeAnalysis } from '../../../../embody/lib/scope/types.js';
 import createCodeQuestion from '../create-code-question.js';
 import extractLocation from '../extract-location.js';
-
 import type { CodeQuestion, ProgramAnalyzerEntry } from '../types.js';
 
 import collectNodes from './collect-nodes.js';
