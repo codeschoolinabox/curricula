@@ -56,6 +56,23 @@ describe('discoverSiblings', () => {
 		expect(result).toEqual([]);
 	});
 
+	it('L2.7b: sibling-side gate — .js files exist but config.defaults.js === null (subtree deconfiguration) → frozen []', () => {
+		// Reuses the `has-js-no-defaults` fixture (it has a `.js` file).
+		// The gate parity invariant: `== null` catches both absent key
+		// (the test above) AND explicit null (this test). Same outcome,
+		// different declarative signal from the author.
+		const fixture = path.join(FIXTURES_DIR, 'has-js-no-defaults');
+		const config = {
+			...DEFAULTS,
+			embedSiblings: { ...DEFAULTS.embedSiblings, mode: 'tabs' as const },
+			defaults: { js: null },
+		};
+
+		const result = discoverSiblings(fixture, config);
+
+		expect(result).toEqual([]);
+	});
+
 	it('.js with malformed @study-lens JSON body → walker throws with file path', () => {
 		const fixture = path.join(FIXTURES_DIR, 'file-override-malformed-json');
 		const config = {

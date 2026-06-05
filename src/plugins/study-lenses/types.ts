@@ -47,7 +47,15 @@ type LangName = string;
  * is needed.
  */
 type LensesConfigFile = Readonly<{
-	defaults?: Readonly<Record<LangName, LensName>>;
+	/**
+	 * Per-language default-lens slot. A non-null entry enables the language
+	 * (configured-languages rule) AND supplies the default lens for bare
+	 * fences in that language. An explicit `null` is **subtree
+	 * deconfiguration** — a child `lenses.json` suppresses an ancestor's
+	 * enablement; fences in that subtree are left untransformed. A missing
+	 * key means the language was never enabled at any ancestor level.
+	 */
+	defaults?: Readonly<Record<LangName, LensName | null>>;
 	embedSiblings?: Readonly<Partial<EmbedSiblingsConfig>>;
 	lenses?: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
 	/**
@@ -84,7 +92,15 @@ type EmbedSiblingsConfig = Readonly<{
  * optional-chaining needed on the top-level keys.
  */
 type ResolvedConfig = Readonly<{
-	defaults: Readonly<Record<LangName, LensName>>;
+	/**
+	 * Post-cascade per-language default-lens map. Same shape as
+	 * `LensesConfigFile.defaults` but required (filled from `DEFAULTS`'s
+	 * empty seed if no `lenses.json` ever sets it). The two consumer gates
+	 * — fence-side in `remark-study-lenses.ts` and sibling-side in
+	 * `discover-siblings.ts` — apply gate-semantics parity (`== null`) to
+	 * handle absent key and explicit `null` uniformly.
+	 */
+	defaults: Readonly<Record<LangName, LensName | null>>;
 	embedSiblings: EmbedSiblingsConfig;
 	lenses: Readonly<Record<LensName, Readonly<Record<string, unknown>>>>;
 	exerciseSetPrefixes: ReadonlyArray<string>;
