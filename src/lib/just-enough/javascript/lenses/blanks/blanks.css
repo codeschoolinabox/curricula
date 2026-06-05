@@ -43,3 +43,17 @@
 	outline-offset: 1px;
 	border-radius: 2px;
 }
+
+/*
+ * Inc 6g editor header: informational strip above the CodeMirror
+ * editor showing mode + difficulty% + blanks-total + blanks-remaining.
+ * Distinct from the toolbar (which holds controls); this is read-only
+ * status.
+ */
+[data-lens='blanks'] [data-blanks-editor-header] {
+	padding: 0.25rem 0.5rem;
+	font-family: system-ui, sans-serif;
+	font-size: 0.85rem;
+	color: #555;
+	border-bottom: 1px solid #ddd;
+}

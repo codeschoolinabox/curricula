@@ -48,11 +48,59 @@ describe('evaluateCorrectness', () => {
 			expect(result.correctnessMap.get('b0')).toBe('incorrect');
 		});
 
-		it('marks the blank unfilled when the __ placeholder remains', () => {
+		it('marks the blank unfilled when the legacy __ placeholder remains', () => {
 			const result = evaluateCorrectness(
 				'let __ = 1;', // learner has not typed anything
 				[blank('b0', 'x', 4, 5)],
 				'let x = 1;',
+			);
+			expect(result.correctnessMap.get('b0')).toBe('unfilled');
+		});
+
+		it('marks the blank unfilled when a length-matched underscore placeholder remains (Inc 6.7)', () => {
+			// Inc 6.7: placeholder is `_`.repeat(original.length), not
+			// the legacy two-char `__`. `looksUnfilled` must detect both.
+			const result = evaluateCorrectness(
+				'_____',
+				[blank('b0', 'hello', 0, 5)],
+				'hello',
+			);
+			expect(result.correctnessMap.get('b0')).toBe('unfilled');
+		});
+
+		it('marks the blank unfilled when partially typed (any `_` remaining)', () => {
+			const result = evaluateCorrectness(
+				'h___o',
+				[blank('b0', 'hello', 0, 5)],
+				'hello',
+			);
+			expect(result.correctnessMap.get('b0')).toBe('unfilled');
+		});
+
+		// AR-4 BLOCKER concern 1+2 (Inc 6g): identifiers whose `original`
+		// itself contains `_` (e.g. `_private`) must be correctly
+		// classified. The guard order in `buildResultFromTexts` checks
+		// `text === blank.original` BEFORE `looksUnfilled`, so:
+		// - Exact match `_private` → correct (the underscore in the
+		//   answer is treated as a typed char, not a placeholder).
+		// - Partial fill `_privat_` → unfilled (still has `_` chars
+		//   that AREN'T the answer's leading underscore; `looksUnfilled`
+		//   correctly fires).
+		// - All-underscore placeholder `________` → unfilled.
+		it('blank.original containing `_` — exact match is `correct` (guard-order check)', () => {
+			const result = evaluateCorrectness(
+				'let _private = 1;',
+				[blank('b0', '_private', 4, 12)],
+				'let _private = 1;',
+			);
+			expect(result.correctnessMap.get('b0')).toBe('correct');
+		});
+
+		it('blank.original containing `_` — partial fill is `unfilled`', () => {
+			const result = evaluateCorrectness(
+				'let _privat_ = 1;',
+				[blank('b0', '_private', 4, 12)],
+				'let _private = 1;',
 			);
 			expect(result.correctnessMap.get('b0')).toBe('unfilled');
 		});

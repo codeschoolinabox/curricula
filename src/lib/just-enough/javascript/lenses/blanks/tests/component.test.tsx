@@ -1491,6 +1491,218 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
+	describe('editor header — Inc 6g', () => {
+		// The editor header is an informational strip rendered above the
+		// CodeMirror editor (distinct from the toolbar's controls). It
+		// surfaces the active mode, current difficulty %, total blanks
+		// count, and remaining (unfilled) blanks count. Updates live as
+		// the learner fills blanks.
+
+		it('renders a `[data-blanks-editor-header]` element', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(
+					container.querySelector('[data-blanks-editor-header]'),
+				).not.toBeNull();
+			});
+		});
+
+		it('shows the active mode label', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				expect(header?.getAttribute('data-header-mode')).toBe('blankenated');
+				expect(header?.textContent ?? '').toMatch(/blankenated/i);
+			});
+			// Toggle to complete; mode label updates.
+			const completeBtn = container.querySelector(
+				'[data-view-toggle="complete"]',
+			) as HTMLButtonElement;
+			fireEvent.click(completeBtn);
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				expect(header?.getAttribute('data-header-mode')).toBe('complete');
+				expect(header?.textContent ?? '').toMatch(/complete/i);
+			});
+		});
+
+		it('shows the current difficulty percentage', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 75 })}
+				/>,
+			);
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				expect(header?.getAttribute('data-header-difficulty')).toBe('75');
+				expect(header?.textContent ?? '').toContain('75');
+			});
+		});
+
+		it('shows total blanks count and remaining (unfilled) count', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				// `hello` at difficulty 100 = 1 blank, 1 remaining (unfilled).
+				expect(header?.getAttribute('data-header-blanks-total')).toBe('1');
+				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('1');
+			});
+		});
+
+		it('remaining count decrements as the learner fills blanks correctly', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'hello', 0);
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('0');
+			});
+		});
+
+		// AR-3 concern 2: lock the semantics — `remaining` counts blanks
+		// with any `_` still present (i.e., `EvaluationResult.unfilled`).
+		// A fully-typed-but-wrong blank has zero `_` remaining, so it is
+		// NOT counted as "remaining". This is the documented behavior;
+		// the side-panel score independently shows correct/total for
+		// the "did you get it right" question.
+		it('remaining count does NOT count fully-typed-but-wrong blanks (locks unfilled semantics)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			// Fill with all-wrong chars: blank has 0 `_` remaining.
+			typeIntoBlank(view!, 'wrong', 0);
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('0');
+				expect(header?.getAttribute('data-header-blanks-total')).toBe('1');
+			});
+		});
+
+		// AR-3 concern 3: backspace from a correct fill re-introduces a
+		// `_`, so remaining must re-increment.
+		it('remaining count increments when learner backspaces from a correct fill', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			typeIntoBlank(view!, 'hello', 0);
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('0');
+			});
+			// Backspace one char: blank becomes `hell_` → has `_` → unfilled.
+			view!.dispatch({ selection: { anchor: 5 } });
+			view!.dispatch({ changes: { from: 4, to: 5 } });
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('1');
+			});
+		});
+
+		// AR-3 concern 5: hardcode-survival — `data-header-difficulty`
+		// must read reactively from the `difficulty` state variable, not
+		// from a prop snapshot. Drag the slider and assert the attribute
+		// updates.
+		it('data-header-difficulty updates live when the slider is dragged', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				expect(header?.getAttribute('data-header-difficulty')).toBe('100');
+			});
+			const slider = container.querySelector(
+				'[data-difficulty-slider]',
+			) as HTMLInputElement;
+			fireEvent.change(slider, { target: { value: '30' } });
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				expect(header?.getAttribute('data-header-difficulty')).toBe('30');
+			});
+		});
+
+		// AR-3 concern 6: Zero case — at difficulty 0 no blanks exist;
+		// header should show 0/0.
+		it('Zero: at difficulty 0 shows total=0 and remaining=0', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 0 })}
+				/>,
+			);
+			await waitFor(() => {
+				const header = container.querySelector(
+					'[data-blanks-editor-header]',
+				) as HTMLElement;
+				expect(header?.getAttribute('data-header-blanks-total')).toBe('0');
+				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('0');
+			});
+		});
+	});
+
 	describe('the LensModule freeze contract', () => {
 		it('the default export is a frozen LensModule', () => {
 			expect(Object.isFrozen(blanksLens)).toBe(true);

@@ -44,7 +44,20 @@ import { freezeInPlace } from '@utils/freeze.js';
 
 import type { Blank, BlankCorrectness, EvaluationResult } from '../types.js';
 
-const PLACEHOLDER = '__';
+/**
+ * Inc 6.7 length-matched placeholders: a blank is "unfilled" when its
+ * content has ANY `_` characters (whether all-underscores like
+ * `_____` or partial like `h___o`). The legacy fixed-`__` check
+ * (`text === '__'`) is preserved as a fallback for any caller that
+ * still emits the literal `'__'` (e.g., tests). The wrapper's
+ * StateField uses the same logic for the in-editor decoration class
+ * — keeping the two surfaces (side-panel score, in-editor color)
+ * derived from the same source-of-truth.
+ */
+const LEGACY_PLACEHOLDER = '__';
+function looksUnfilled(text: string): boolean {
+	return text === LEGACY_PLACEHOLDER || text.includes('_');
+}
 
 /**
  * Builds the EvaluationResult from sorted-order learner texts.
@@ -68,12 +81,15 @@ function buildResultFromTexts(
 		const blank = blanks[i]!;
 		const text = learnerTexts[i];
 		let status: BlankCorrectness;
-		if (text === null || text === PLACEHOLDER) {
+		if (text === null) {
 			status = 'unfilled';
 			unfilled += 1;
 		} else if (text === blank.original) {
 			status = 'correct';
 			correct += 1;
+		} else if (looksUnfilled(text)) {
+			status = 'unfilled';
+			unfilled += 1;
 		} else {
 			status = 'incorrect';
 			incorrect += 1;

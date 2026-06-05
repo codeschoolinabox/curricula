@@ -607,6 +607,17 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 							))}
 						</fieldset>
 					</div>
+					<div
+						data-blanks-editor-header
+						data-header-mode={viewMode}
+						data-header-difficulty={String(difficulty)}
+						data-header-blanks-total={String(evaluation.total)}
+						data-header-blanks-remaining={String(evaluation.unfilled)}
+						aria-live="polite"
+					>
+						Mode: <strong>{viewMode}</strong> · Difficulty: {difficulty}%
+						{' · '}Blanks: {evaluation.total} · Remaining: {evaluation.unfilled}
+					</div>
 					<div ref={editorContainer} data-blanks-editor-host />
 					<div
 						data-blanks-score={String(evaluation.score)}
