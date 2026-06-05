@@ -19,16 +19,16 @@
  * place. There is no destroy/recreate loop to guard, so the mirror would be cargo
  * cult.
  *
- * **Current scope (Inc 7a + 7b):** the wrapper mounts, resolves config, parses
- * the snippet (`useMemo(parseParsons)`), holds the arrangement in `useReducer`
- * over `arrange.ts`, and renders the two-column board — the shuffled pool
- * (`<ul>`) + the solution column (`<ol>`). Native HTML5 DnD wires pool↔solution
- * movement: `onDragStart` writes `${zone}:${id}` to `dataTransfer`; `onDragOver`
- * calls `preventDefault` (load-bearing — without it `onDrop` never fires);
- * `onDrop` dispatches `placeFromPool` (pool→solution, at the derived insert
- * index) or `returnToPool` (solution→pool). Reorder-within-solution (7c), indent
- * controls (7d), Check/score (7e), and the view-mode toggle (7f) are not wired
- * yet — solution→solution and pool→pool drops are deliberate no-ops here.
+ * **Current scope (Inc 7a–7c):** the wrapper mounts, resolves config, parses the
+ * snippet (`useMemo(parseParsons)`), holds the arrangement in `useReducer` over
+ * `arrange.ts`, and renders the two-column board — the shuffled pool (`<ul>`) +
+ * the solution column (`<ol>`). Native HTML5 DnD: `onDragStart` writes
+ * `${zone}:${id}` to `dataTransfer`; `onDragOver` calls `preventDefault`
+ * (load-bearing — without it `onDrop` never fires); `onDrop` dispatches
+ * `placeFromPool` (pool→solution), `returnToPool` (solution→pool), or
+ * `reorderWithinSolution` (solution→solution, with a removal-shift-adjusted insert
+ * index + a same-position short-circuit). Indent controls (7d), Check/score (7e),
+ * and the view-mode toggle (7f) are not wired yet; a pool→pool drop is a no-op.
  */
 
 import React, { useMemo, useReducer } from 'react';
@@ -39,7 +39,12 @@ import { freezeInPlace } from '@utils/freeze.js';
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import parsonsCore from './core.js';
-import { initialArrangement, placeFromPool, returnToPool } from './lib/arrange.js';
+import {
+	initialArrangement,
+	placeFromPool,
+	reorderWithinSolution,
+	returnToPool,
+} from './lib/arrange.js';
 import { parseParsons } from './lib/parse-parsons.js';
 import type { Arrangement, ParsonsLine } from './types.js';
 
@@ -48,9 +53,10 @@ import './parsons.css';
 /** The two drag zones, encoded into `dataTransfer` as the `${zone}:${id}` prefix. */
 type Zone = 'pool' | 'solution';
 
-/** Reducer actions wired in Inc 7b (place / return). Reorder + indent land in 7c/7d. */
+/** Reducer actions wired in Inc 7b (place / return) + 7c (reorder). Indent lands in 7d. */
 type ArrangeAction =
 	| { type: 'place'; id: string; index: number }
+	| { type: 'reorder'; id: string; index: number }
 	| { type: 'return'; id: string };
 
 function arrangementReducer(
@@ -60,6 +66,8 @@ function arrangementReducer(
 	switch (action.type) {
 		case 'place':
 			return placeFromPool(state, action.id, action.index);
+		case 'reorder':
+			return reorderWithinSolution(state, action.id, action.index);
 		case 'return':
 			return returnToPool(state, action.id);
 		default:
@@ -171,10 +179,25 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 		event.preventDefault();
 		const payload = parseDragPayload(event.dataTransfer.getData('text/plain'));
 		if (payload === null) return;
+		const targetIndex = solutionDropIndex(event);
 		if (payload.zone === 'pool') {
-			dispatch({ type: 'place', id: payload.id, index: solutionDropIndex(event) });
+			dispatch({ type: 'place', id: payload.id, index: targetIndex });
+			return;
 		}
-		// solution -> solution reorder is Inc 7c (deliberate no-op here).
+		// solution -> solution: reorder within the column.
+		const dragIndex = arrangement.solution.findIndex((s) => s.id === payload.id);
+		if (dragIndex === -1) return;
+		// "Drop onto line i inserts BEFORE line i." `reorderWithinSolution`
+		// interprets its index against the array AFTER the dragged line is removed,
+		// so a line moving DOWN (dragIndex < targetIndex) sees the target shift up by
+		// one — adjust for it. A drop on the empty area gives targetIndex ===
+		// solution.length, which clamps to the end inside the reducer.
+		const insertIndex =
+			dragIndex < targetIndex ? targetIndex - 1 : targetIndex;
+		// Skip a same-position move: `reorderWithinSolution` returns a NEW
+		// arrangement even for a no-op index, which would re-render for nothing.
+		if (insertIndex === dragIndex) return;
+		dispatch({ type: 'reorder', id: payload.id, index: insertIndex });
 	}
 
 	function handleDropOnPool(event: React.DragEvent<HTMLElement>): void {

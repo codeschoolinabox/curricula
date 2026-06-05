@@ -15,7 +15,12 @@
  * Current coverage:
  * - Inc 7a: mount + parse + render the shuffled pool lines as `draggable` <li>
  *   in a read-only state; root `data-lens="parsons"` + `data-view-mode="work"` +
- *   `data-can-indent`. No drop handlers yet (7b).
+ *   `data-can-indent`.
+ * - Inc 7b: two-column board (pool <ul> + solution <ol>) + native HTML5 DnD
+ *   wiring for pool<->solution movement (place / return); the onDragOver
+ *   preventDefault footgun; the `${zone}:${id}` encoding; insert-index derivation.
+ * - Inc 7c: reorder within the solution column (solution->solution), incl. the
+ *   removal-shift on downward moves and the same-position no-op short-circuit.
  */
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
@@ -36,6 +41,65 @@ function poolLines(container: HTMLElement): NodeListOf<HTMLLIElement> {
 /** The text content of each rendered pool line, in render (shuffled) order. */
 function poolTexts(container: HTMLElement): string[] {
 	return Array.from(poolLines(container)).map((li) => li.textContent ?? '');
+}
+
+// --- Shared DnD test helpers (used by the Inc 7b + 7c blocks) ---
+
+const THREE_LINE_SRC = 'const a = 1;\nconst b = 2;\nconst c = 3;';
+
+function renderThreeLine(): ReturnType<typeof render> {
+	return render(
+		<parsonsLens.Component
+			embodiment={embody(THREE_LINE_SRC)}
+			config={parsonsLens.config()}
+		/>,
+	);
+}
+
+// jsdom has no real DataTransfer; this mock persists a single string across a
+// dragStart -> drop pair so the round-trip (setData in onDragStart, getData in
+// onDrop) is exercised. Real drag is browser-verified (see the suite header).
+// `getData` honors the `text/plain` format the README contract mandates: a
+// wrong-format read returns '' (so a mis-formatted impl fails, not passes).
+function makeDataTransfer(): {
+	getData: (format: string) => string;
+	setData: (format: string, data: string) => void;
+	effectAllowed: string;
+	dropEffect: string;
+} {
+	let store = '';
+	return {
+		getData: (format) => (format === 'text/plain' ? store : ''),
+		setData: (_format, data) => {
+			store = data;
+		},
+		effectAllowed: 'all',
+		dropEffect: 'move',
+	};
+}
+
+function poolItem(container: HTMLElement, id: string): Element | null {
+	return container.querySelector(`[data-parsons-pool] [data-line-id="${id}"]`);
+}
+function solutionItem(container: HTMLElement, id: string): Element | null {
+	return container.querySelector(
+		`[data-parsons-solution] [data-line-id="${id}"]`,
+	);
+}
+function solutionOrder(container: HTMLElement): Array<string | null> {
+	return Array.from(
+		container.querySelectorAll('[data-parsons-solution] > li'),
+	).map((li) => li.getAttribute('data-line-id'));
+}
+
+// Place a pool line into the solution by dropping it on the zone's empty area
+// (the <ol> itself, not onto a child line) -> appends at the end.
+function placeOnZone(container: HTMLElement, id: string): void {
+	const dt = makeDataTransfer();
+	fireEvent.dragStart(poolItem(container, id)!, { dataTransfer: dt });
+	fireEvent.drop(container.querySelector('[data-parsons-solution]')!, {
+		dataTransfer: dt,
+	});
 }
 
 describe('parsons wrapper — Inc 7a (mount + shuffled pool)', () => {
@@ -268,64 +332,7 @@ describe('parsons wrapper — Inc 7a (mount + shuffled pool)', () => {
 });
 
 describe('parsons wrapper — Inc 7b (two-column board + native DnD: place / return)', () => {
-	const SRC = 'const a = 1;\nconst b = 2;\nconst c = 3;';
-
-	// jsdom has no real DataTransfer; this mock persists a single string across a
-	// dragStart -> drop pair so the round-trip (setData in onDragStart, getData in
-	// onDrop) is exercised. Real drag is browser-verified (see the suite header).
-	// `getData` honors the `text/plain` format the README contract mandates: a
-	// wrong-format read returns '' (so a mis-formatted impl fails, not passes).
-	function makeDataTransfer(): {
-		getData: (format: string) => string;
-		setData: (format: string, data: string) => void;
-		effectAllowed: string;
-		dropEffect: string;
-	} {
-		let store = '';
-		return {
-			getData: (format) => (format === 'text/plain' ? store : ''),
-			setData: (_format, data) => {
-				store = data;
-			},
-			effectAllowed: 'all',
-			dropEffect: 'move',
-		};
-	}
-
-	function poolItem(container: HTMLElement, id: string): Element | null {
-		return container.querySelector(
-			`[data-parsons-pool] [data-line-id="${id}"]`,
-		);
-	}
-	function solutionItem(container: HTMLElement, id: string): Element | null {
-		return container.querySelector(
-			`[data-parsons-solution] [data-line-id="${id}"]`,
-		);
-	}
-	function solutionOrder(container: HTMLElement): Array<string | null> {
-		return Array.from(
-			container.querySelectorAll('[data-parsons-solution] > li'),
-		).map((li) => li.getAttribute('data-line-id'));
-	}
-
-	// Place a pool line into the solution by dropping it on the zone's empty
-	// area (the <ol> itself, not onto a child line) -> appends at the end.
-	function placeOnZone(container: HTMLElement, id: string): void {
-		const dt = makeDataTransfer();
-		fireEvent.dragStart(poolItem(container, id)!, { dataTransfer: dt });
-		fireEvent.drop(container.querySelector('[data-parsons-solution]')!, {
-			dataTransfer: dt,
-		});
-	}
-
-	function renderMany(): ReturnType<typeof render> {
-		return render(
-			<parsonsLens.Component
-				embodiment={embody(SRC)}
-				config={parsonsLens.config()}
-			/>,
-		);
-	}
+	const renderMany = renderThreeLine;
 
 	describe('Structure — two-column board', () => {
 		it('renders a board containing both the pool and the solution column', () => {
@@ -464,20 +471,96 @@ describe('parsons wrapper — Inc 7b (two-column board + native DnD: place / ret
 			expect(poolLines(container).length).toBe(before);
 			expect(solutionOrder(container).length).toBe(0);
 		});
+	});
+});
 
-		it('dragging a placed line onto another placed line does NOT reorder in 7b (that is 7c)', () => {
-			const { container } = renderMany();
-			placeOnZone(container, 'line-0');
-			placeOnZone(container, 'line-1');
-			// solution -> solution: drag line-1 onto line-0. 7b routes only
-			// pool->solution (place); the solution-source drop is a deliberate no-op
-			// until reorder lands in 7c, so the order must be unchanged.
-			const dt = makeDataTransfer();
-			fireEvent.dragStart(solutionItem(container, 'line-1')!, {
-				dataTransfer: dt,
-			});
-			fireEvent.drop(solutionItem(container, 'line-0')!, { dataTransfer: dt });
-			expect(solutionOrder(container)).toEqual(['line-0', 'line-1']);
+describe('parsons wrapper — Inc 7c (reorder within the solution column)', () => {
+	// Build a known solution order [line-0, line-1, line-2] by placing in order
+	// (placeOnZone appends), so reorder assertions are deterministic despite the
+	// shuffled pool.
+	function renderThreePlaced(): ReturnType<typeof render> {
+		const rendered = renderThreeLine();
+		placeOnZone(rendered.container, 'line-0');
+		placeOnZone(rendered.container, 'line-1');
+		placeOnZone(rendered.container, 'line-2');
+		return rendered;
+	}
+
+	// Reorder by dragging a placed line onto another placed line.
+	function reorderOnto(
+		container: HTMLElement,
+		dragId: string,
+		targetId: string,
+	): void {
+		const dt = makeDataTransfer();
+		fireEvent.dragStart(solutionItem(container, dragId)!, { dataTransfer: dt });
+		fireEvent.drop(solutionItem(container, targetId)!, { dataTransfer: dt });
+	}
+
+	it('precondition: the three lines are placed in order', () => {
+		const { container } = renderThreePlaced();
+		expect(solutionOrder(container)).toEqual(['line-0', 'line-1', 'line-2']);
+	});
+
+	it('moves a line UP: drop the last line onto the first inserts it before the first', () => {
+		const { container } = renderThreePlaced();
+		reorderOnto(container, 'line-2', 'line-0');
+		expect(solutionOrder(container)).toEqual(['line-2', 'line-0', 'line-1']);
+	});
+
+	it('moves a line UP to a NON-FIRST position (conditional shift, not always-subtract-1)', () => {
+		// drag line-2 (idx 2) onto line-1 (idx 1): dragIndex > targetIndex, so NO
+		// removal-shift -> insertIndex = 1 -> [line-0, line-2, line-1]. An impl that
+		// ALWAYS subtracts 1 would give insertIndex 0 -> [line-2, line-0, line-1]
+		// (clamp hides the bug for drop-on-first, so this non-first case is needed).
+		const { container } = renderThreePlaced();
+		reorderOnto(container, 'line-2', 'line-1');
+		expect(solutionOrder(container)).toEqual(['line-0', 'line-2', 'line-1']);
+	});
+
+	it('moves a line DOWN: drop the first onto the last inserts it BEFORE the last (removal-shift)', () => {
+		// The removal-shift trap: dragging line-0 (index 0) onto line-2 (index 2),
+		// after line-0 is removed line-2 sits at index 1 — so "before line-2" is
+		// index 1, NOT 2. A naive impl that passes the raw target index would put
+		// line-0 at the very end ([line-1, line-2, line-0]); the correct result is
+		// [line-1, line-0, line-2].
+		const { container } = renderThreePlaced();
+		reorderOnto(container, 'line-0', 'line-2');
+		expect(solutionOrder(container)).toEqual(['line-1', 'line-0', 'line-2']);
+	});
+
+	it('reorders to the END when dropped on the column empty area', () => {
+		const { container } = renderThreePlaced();
+		// drop line-0 on the <ol> zone itself (empty area below the lines)
+		const dt = makeDataTransfer();
+		fireEvent.dragStart(solutionItem(container, 'line-0')!, { dataTransfer: dt });
+		fireEvent.drop(container.querySelector('[data-parsons-solution]')!, {
+			dataTransfer: dt,
 		});
+		expect(solutionOrder(container)).toEqual(['line-1', 'line-2', 'line-0']);
+	});
+
+	// NOTE: these two no-op cases assert the DOM OUTCOME (order unchanged) only.
+	// They cannot prove the dispatch-skip short-circuit actually fired — without it,
+	// `reorderWithinSolution` still returns a same-order (but NEW) arrangement, so
+	// the DOM reads identically. The reducer's same-index no-op semantics are pinned
+	// in arrange.test.ts; the short-circuit itself is a re-render-avoidance property.
+	it('dropping a line onto itself is a no-op (order unchanged)', () => {
+		const { container } = renderThreePlaced();
+		reorderOnto(container, 'line-1', 'line-1');
+		expect(solutionOrder(container)).toEqual(['line-0', 'line-1', 'line-2']);
+	});
+
+	it('dropping a line onto its immediate successor is a no-op (it is already before it)', () => {
+		const { container } = renderThreePlaced();
+		reorderOnto(container, 'line-0', 'line-1');
+		expect(solutionOrder(container)).toEqual(['line-0', 'line-1', 'line-2']);
+	});
+
+	it('reorder does not leak a line into the pool (stays in the solution)', () => {
+		const { container } = renderThreePlaced();
+		reorderOnto(container, 'line-2', 'line-0');
+		expect(poolLines(container).length).toBe(0);
+		expect(solutionOrder(container).length).toBe(3);
 	});
 });
