@@ -1666,6 +1666,12 @@ the human explicitly opts out.
 - Are there subtle bugs (off-by-one, null handling, async footguns)?
 - Is error handling appropriate (validate at boundaries only)?
 - Would a junior developer understand this without explanation?
+- **Sandbox Checkpoints**: for user-observable features, confirm a 🔍 sandbox
+  checkpoint is present and reachable (see § Sandbox Checkpoints).
+- **Security regressions**: where this increment touches untrusted input or a
+  trust boundary (parsing untrusted input, shelling out, rendering user-supplied
+  content), check for injection, XSS, and the OWASP Top 10. No-op for pure
+  content/markdown increments.
 - **Data flow**: Sketch the actual intra-file data flow as Mermaid (ephemeral,
   not committed). Compare the file's inputs and outputs against the peer DOCS.md
   Mermaid flow diagram for contract match. Is the intra-file flow simpler or
@@ -1693,6 +1699,21 @@ when the human explicitly opts out.
   final implementation match the DOCS.md architectural sketch, or did
   implementation drift from the Phase 0 design?
 - Scope: did we add anything beyond what was requested?
+- Cross-increment coherence: do decisions made in increment 1 hold through
+  increment N? Watch for naming drift, abstraction leakage, and inconsistencies
+  that accumulate past increment-level review.
+- Type contract integrity: is types.ts still the single source of truth? Flag
+  casts, `any`s, or parallel type definitions added during increments. No-op for
+  pure content/markdown increments.
+- Test coverage coherence: read together, do the tests form a coherent ZOMBIES
+  story? Any integration-level gaps invisible in a single increment's test file?
+  No-op for pure content/markdown increments.
+- Security: an OWASP Top 10 pass across the changed files, scaled to the
+  changeset — no-op for pure content, thorough where code touches untrusted
+  input or a trust boundary.
+- Non-Negotiable Invariants: confirm every invariant in
+  [§ Non-Negotiable Invariants](AGENTS.md#non-negotiable-invariants) holds
+  across the full changeset.
 
 **Provide to agent:** Full diff (git diff), modified files list, the original
 task description, DOCS.md for modified modules
