@@ -1,0 +1,55 @@
+/*
+ * Visual styling for the `parsons` lens. Scoped to `[data-lens='parsons']` so it
+ * cannot leak into Docusaurus's global code blocks or other lenses' surfaces
+ * (same convention as `blanks/blanks.css` and `annotate/annotate.css`).
+ *
+ * Inc 7b: the two-column board layout (available pool + solution column) and the
+ * draggable line chips. Per-line indent margins (Inc 7d) and per-line correctness
+ * coloring (Inc 7e) layer on top of these base styles via `data-indent` /
+ * `data-correctness` hooks.
+ */
+
+[data-lens='parsons'] [data-parsons-board] {
+	display: flex;
+	gap: 1rem;
+	align-items: flex-start;
+}
+
+[data-lens='parsons'] [data-parsons-pool],
+[data-lens='parsons'] [data-parsons-solution] {
+	flex: 1 1 0;
+	min-height: 4rem;
+	margin: 0;
+	padding: 0.5rem;
+	list-style: none;
+	border: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+	border-radius: 4px;
+	background: var(--ifm-background-surface-color, #ffffff);
+}
+
+[data-lens='parsons'] [data-parsons-pool] > li,
+[data-lens='parsons'] [data-parsons-solution] > li {
+	padding: 0.25rem 0.5rem;
+	margin: 0.25rem 0;
+	border: 1px solid var(--ifm-color-emphasis-200, #e0e0e0);
+	border-radius: 3px;
+	background: var(--ifm-color-emphasis-100, #f5f5f5);
+	font-family: var(--ifm-font-family-monospace, monospace);
+	white-space: pre;
+	cursor: grab;
+}
+
+[data-lens='parsons'] [data-parsons-pool] > li:active,
+[data-lens='parsons'] [data-parsons-solution] > li:active {
+	cursor: grabbing;
+}
+
+[data-lens='parsons'] [data-parsons-pool] > li > code,
+[data-lens='parsons'] [data-parsons-solution] > li > code {
+	background: none;
+	border: none;
+	padding: 0;
+	/* Inherit the <li>'s `white-space: pre` so an aggressive host
+	   `code { white-space: normal }` cannot collapse code spacing. */
+	white-space: inherit;
+}

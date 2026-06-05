@@ -18,7 +18,7 @@
  *   `data-can-indent`. No drop handlers yet (7b).
  */
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -263,6 +263,221 @@ describe('parsons wrapper — Inc 7a (mount + shuffled pool)', () => {
 			);
 			const line = poolLines(container)[0];
 			expect(line?.getAttribute('draggable')).toBe('true');
+		});
+	});
+});
+
+describe('parsons wrapper — Inc 7b (two-column board + native DnD: place / return)', () => {
+	const SRC = 'const a = 1;\nconst b = 2;\nconst c = 3;';
+
+	// jsdom has no real DataTransfer; this mock persists a single string across a
+	// dragStart -> drop pair so the round-trip (setData in onDragStart, getData in
+	// onDrop) is exercised. Real drag is browser-verified (see the suite header).
+	// `getData` honors the `text/plain` format the README contract mandates: a
+	// wrong-format read returns '' (so a mis-formatted impl fails, not passes).
+	function makeDataTransfer(): {
+		getData: (format: string) => string;
+		setData: (format: string, data: string) => void;
+		effectAllowed: string;
+		dropEffect: string;
+	} {
+		let store = '';
+		return {
+			getData: (format) => (format === 'text/plain' ? store : ''),
+			setData: (_format, data) => {
+				store = data;
+			},
+			effectAllowed: 'all',
+			dropEffect: 'move',
+		};
+	}
+
+	function poolItem(container: HTMLElement, id: string): Element | null {
+		return container.querySelector(
+			`[data-parsons-pool] [data-line-id="${id}"]`,
+		);
+	}
+	function solutionItem(container: HTMLElement, id: string): Element | null {
+		return container.querySelector(
+			`[data-parsons-solution] [data-line-id="${id}"]`,
+		);
+	}
+	function solutionOrder(container: HTMLElement): Array<string | null> {
+		return Array.from(
+			container.querySelectorAll('[data-parsons-solution] > li'),
+		).map((li) => li.getAttribute('data-line-id'));
+	}
+
+	// Place a pool line into the solution by dropping it on the zone's empty
+	// area (the <ol> itself, not onto a child line) -> appends at the end.
+	function placeOnZone(container: HTMLElement, id: string): void {
+		const dt = makeDataTransfer();
+		fireEvent.dragStart(poolItem(container, id)!, { dataTransfer: dt });
+		fireEvent.drop(container.querySelector('[data-parsons-solution]')!, {
+			dataTransfer: dt,
+		});
+	}
+
+	function renderMany(): ReturnType<typeof render> {
+		return render(
+			<parsonsLens.Component
+				embodiment={embody(SRC)}
+				config={parsonsLens.config()}
+			/>,
+		);
+	}
+
+	describe('Structure — two-column board', () => {
+		it('renders a board containing both the pool and the solution column', () => {
+			const { container } = renderMany();
+			const board = container.querySelector('[data-parsons-board]');
+			expect(board).not.toBeNull();
+			expect(board?.querySelector('[data-parsons-pool]')).not.toBeNull();
+			expect(board?.querySelector('[data-parsons-solution]')).not.toBeNull();
+		});
+
+		it('renders the solution column as an <ol> (ordered)', () => {
+			const { container } = renderMany();
+			expect(
+				container.querySelector('[data-parsons-solution]')?.tagName,
+			).toBe('OL');
+		});
+
+		it('starts with an empty solution column (all lines in the pool)', () => {
+			const { container } = renderMany();
+			expect(solutionOrder(container).length).toBe(0);
+			expect(poolLines(container).length).toBe(3);
+		});
+	});
+
+	describe('onDragOver — the load-bearing preventDefault (without it onDrop never fires)', () => {
+		it('cancels dragover over the solution zone', () => {
+			const { container } = renderMany();
+			const zone = container.querySelector('[data-parsons-solution]')!;
+			// fireEvent returns false when a cancelable event was preventDefault-ed.
+			expect(
+				fireEvent.dragOver(zone, { dataTransfer: makeDataTransfer() }),
+			).toBe(false);
+		});
+
+		it('cancels dragover over the pool zone', () => {
+			const { container } = renderMany();
+			const zone = container.querySelector('[data-parsons-pool]')!;
+			expect(
+				fireEvent.dragOver(zone, { dataTransfer: makeDataTransfer() }),
+			).toBe(false);
+		});
+	});
+
+	describe('onDragStart — encodes zone:id into dataTransfer (the mechanism, not just the outcome)', () => {
+		it('writes "pool:<id>" when dragging a pool line', () => {
+			const { container } = renderMany();
+			const dt = makeDataTransfer();
+			fireEvent.dragStart(poolItem(container, 'line-0')!, { dataTransfer: dt });
+			// Verifies the ENCODING (README contract `${zone}:${id}`), so an impl
+			// that routes purely by drop-target DOM zone (ignoring the payload)
+			// cannot pass — the zone prefix is load-bearing for 7c reorder.
+			expect(dt.getData('text/plain')).toBe('pool:line-0');
+		});
+
+		it('writes "solution:<id>" when dragging a placed line', () => {
+			const { container } = renderMany();
+			placeOnZone(container, 'line-0');
+			const dt = makeDataTransfer();
+			fireEvent.dragStart(solutionItem(container, 'line-0')!, {
+				dataTransfer: dt,
+			});
+			expect(dt.getData('text/plain')).toBe('solution:line-0');
+		});
+
+		it('renders placed solution lines as draggable (so they can be returned/reordered)', () => {
+			const { container } = renderMany();
+			placeOnZone(container, 'line-0');
+			expect(
+				solutionItem(container, 'line-0')!.getAttribute('draggable'),
+			).toBe('true');
+		});
+	});
+
+	describe('place — drag a pool line into the solution', () => {
+		it('moves the dragged line from the pool into the solution on drop', () => {
+			const { container } = renderMany();
+			placeOnZone(container, 'line-0');
+			expect(solutionItem(container, 'line-0')).not.toBeNull();
+			expect(poolItem(container, 'line-0')).toBeNull();
+		});
+
+		it('APPENDS successive lines dropped on the empty zone area (not prepend)', () => {
+			// Triangulation: a hardcoded `index = 0` impl would PREPEND here, giving
+			// [line-1, line-0]. Append requires index = solution.length.
+			const { container } = renderMany();
+			placeOnZone(container, 'line-0');
+			placeOnZone(container, 'line-1');
+			expect(solutionOrder(container)).toEqual(['line-0', 'line-1']);
+		});
+
+		it('inserts before a NON-FIRST drop-target line (real index derivation, not hardcoded 0)', () => {
+			// Triangulation: with [line-0, line-1] placed, dropping line-2 ONTO
+			// line-1 (index 1) must yield [line-0, line-2, line-1]. A hardcoded
+			// `index = 0` impl would yield [line-2, line-0, line-1] and FAIL.
+			const { container } = renderMany();
+			placeOnZone(container, 'line-0');
+			placeOnZone(container, 'line-1');
+			const dt = makeDataTransfer();
+			fireEvent.dragStart(poolItem(container, 'line-2')!, { dataTransfer: dt });
+			fireEvent.drop(solutionItem(container, 'line-1')!, { dataTransfer: dt });
+			expect(solutionOrder(container)).toEqual([
+				'line-0',
+				'line-2',
+				'line-1',
+			]);
+		});
+	});
+
+	describe('return — drag a placed line back to the pool', () => {
+		it('moves a placed line from the solution back into the pool', () => {
+			const { container } = renderMany();
+			placeOnZone(container, 'line-0');
+			expect(solutionItem(container, 'line-0')).not.toBeNull();
+			// drag it back out to the pool zone
+			const dt = makeDataTransfer();
+			fireEvent.dragStart(solutionItem(container, 'line-0')!, {
+				dataTransfer: dt,
+			});
+			fireEvent.drop(container.querySelector('[data-parsons-pool]')!, {
+				dataTransfer: dt,
+			});
+			expect(poolItem(container, 'line-0')).not.toBeNull();
+			expect(solutionItem(container, 'line-0')).toBeNull();
+		});
+	});
+
+	describe('routing safety — out-of-scope drops are safe no-ops in 7b', () => {
+		it('dragging a pool line and dropping back on the pool changes nothing', () => {
+			const { container } = renderMany();
+			const before = poolLines(container).length;
+			const dt = makeDataTransfer();
+			fireEvent.dragStart(poolItem(container, 'line-0')!, { dataTransfer: dt });
+			fireEvent.drop(container.querySelector('[data-parsons-pool]')!, {
+				dataTransfer: dt,
+			});
+			expect(poolLines(container).length).toBe(before);
+			expect(solutionOrder(container).length).toBe(0);
+		});
+
+		it('dragging a placed line onto another placed line does NOT reorder in 7b (that is 7c)', () => {
+			const { container } = renderMany();
+			placeOnZone(container, 'line-0');
+			placeOnZone(container, 'line-1');
+			// solution -> solution: drag line-1 onto line-0. 7b routes only
+			// pool->solution (place); the solution-source drop is a deliberate no-op
+			// until reorder lands in 7c, so the order must be unchanged.
+			const dt = makeDataTransfer();
+			fireEvent.dragStart(solutionItem(container, 'line-1')!, {
+				dataTransfer: dt,
+			});
+			fireEvent.drop(solutionItem(container, 'line-0')!, { dataTransfer: dt });
+			expect(solutionOrder(container)).toEqual(['line-0', 'line-1']);
 		});
 	});
 });
