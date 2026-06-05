@@ -449,7 +449,6 @@ export default tseslint.config(
 		rules: {
 			'import/no-named-export': 'off',
 			'functional/immutable-data': 'off',
-			'functional/prefer-readonly-type': 'off',
 			'arrow-body-style': 'off',
 			'sonarjs/no-duplicate-string': 'off',
 			'unicorn/consistent-function-scoping': 'off',
