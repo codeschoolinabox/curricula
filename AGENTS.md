@@ -362,6 +362,8 @@ rewrites branches, publishes to remotes, or destroys work.
   only), `git fetch` (remote-read-only), `git stash push` (reversible)
 - Branch creation: `git branch <new-name>`, `git checkout -b <new-name>`
   (creating new branches, not switching in a way that loses work)
+- Bypassing pre-commit hooks on commit: `git commit --no-verify` (permitted —
+  deliberate workflow for repos carrying pre-existing hook/lint debt)
 
 **Forbidden** (destructive, rewriting, or publishing):
 
@@ -376,8 +378,7 @@ rewrites branches, publishes to remotes, or destroys work.
   `git branch -D`, `git branch -d`, `git tag -d`
 - Merging: `git merge` (any form — merges rewrite history in the sense of
   creating merge commits that are hard to undo without force-push)
-- Skipping hooks or signing: `--no-verify`, `--no-gpg-sign` (unless the user
-  explicitly requests)
+- Skipping signing: `--no-gpg-sign` (unless the user explicitly requests)
 
 **Rule of thumb**: If the command can be undone by `git reset --hard HEAD~1` or
 a single force-push from the human, it's destructive — ask first. If it only
