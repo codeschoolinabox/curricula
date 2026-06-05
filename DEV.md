@@ -1665,6 +1665,8 @@ the human explicitly opts out.
   closures)?
 - Are there subtle bugs (off-by-one, null handling, async footguns)?
 - Is error handling appropriate (validate at boundaries only)?
+- Dead code: are there commented-out blocks, unreachable branches, or leftover
+  TODO stubs to remove?
 - Would a junior developer understand this without explanation?
 - **Sandbox Checkpoints**: for user-observable features, confirm a 🔍 sandbox
   checkpoint is present and reachable (see § Sandbox Checkpoints).
