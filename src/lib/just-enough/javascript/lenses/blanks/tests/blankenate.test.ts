@@ -153,4 +153,42 @@ describe('blankenate', () => {
 			expect(result).toBeNull();
 		});
 	});
+
+	describe('Literal blanks preserve quotes (regression: evaluator quote-mismatch)', () => {
+		it('string literal stores original WITH quotes (verbatim source slice)', () => {
+			// Acorn's node.value for a string literal strips quotes
+			// ('hi' for `"hi"`). The blank's source range [start, end)
+			// includes the quotes. When the learner types the verbatim
+			// source they reproduce the quotes; the evaluator must
+			// compare against an original that ALSO has the quotes.
+			const code = 'let x = "hi";';
+			const result = blankenate(code, 1, {
+				...NO_TYPES,
+				literals: true,
+			});
+			const blank = result?.blanks[0];
+			expect(blank?.original).toBe('"hi"');
+		});
+
+		it('numeric literal stores original verbatim', () => {
+			const code = 'let x = 42;';
+			const result = blankenate(code, 1, {
+				...NO_TYPES,
+				literals: true,
+			});
+			const blank = result?.blanks[0];
+			expect(blank?.original).toBe('42');
+		});
+
+		it('literal blank.original equals code.slice(blank.start, blank.end) for every literal type', () => {
+			const code = 'const a = "hi"; const b = 42; const c = true;';
+			const result = blankenate(code, 1, {
+				...NO_TYPES,
+				literals: true,
+			});
+			for (const blank of result?.blanks ?? []) {
+				expect(blank.original).toBe(code.slice(blank.start, blank.end));
+			}
+		});
+	});
 });

@@ -144,7 +144,16 @@ function blankenate(
 			});
 		}
 
-		// Blank literals
+		// Blank literals.
+		// Use the verbatim source slice for `original` (not String(node.value)).
+		// Acorn's node.value for a string literal strips the quotes
+		// ('positive' for `"positive"`), but the source range
+		// [start, end) the blank covers INCLUDES the quotes. When the
+		// learner types over the __ they reproduce the source verbatim
+		// (with quotes); the evaluator compares their typed text to
+		// `original` and would mismatch on a quote-stripped original.
+		// Same applies to RegExp literals (Acorn returns a RegExp object;
+		// String() coerces to '/foo/g' but the source slice is canonical).
 		if (
 			config.literals &&
 			(node.type === 'Literal' || node.type === 'RegExpLiteral') &&
@@ -153,7 +162,7 @@ function blankenate(
 			blankedTokens.push({
 				start: node.start,
 				end: node.end,
-				original: String(node.value),
+				original: code.substring(node.start, node.end),
 				type: 'literal',
 			});
 		}
