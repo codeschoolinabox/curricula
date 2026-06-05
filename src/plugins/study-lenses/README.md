@@ -143,9 +143,9 @@ synonym anywhere in the code is a bug.
   "no entry" (fences in the subtree go untransformed), but declaratively
   expresses the override. Use case: a parent `lenses.json` enables JS
   site-wide; an experimental subtree opts out via `{"defaults": {"js": null}}`
-  so its JS fences render as raw code blocks. The cascade merge at
-  `resolve-cascade.ts:199` propagates null correctly via the existing
-  shallow spread.
+  so its JS fences render as raw code blocks. The cascade merge in
+  `resolve-cascade.ts` shallow-spreads `defaults`, so a child `null`
+  propagates verbatim into the resolved config.
 - **Cascade** — the root → leaf directory walk that collects and merges
   `lenses.json` files.
 - **Resolved config** — the frozen, deep-merged output of the cascade for a
