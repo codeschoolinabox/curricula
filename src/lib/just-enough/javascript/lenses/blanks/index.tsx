@@ -78,8 +78,12 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 	// `blankenate` re-rolls whenever a parent re-renders (load-bearing
 	// once Inc 6b adds local state to the wrapper).
 	const resolved = useMemo(() => blanksCore.config(config), [config]);
-	const difficulty =
+	const initialDifficulty =
 		typeof resolved.difficulty === 'number' ? resolved.difficulty : 50;
+	// Inc 6e: difficulty is now LOCAL state, seeded from the prop config.
+	// The slider mutates this directly; the blankenate useMemo deps now
+	// include `difficulty` so the blank set re-derives per drag.
+	const [difficulty, setDifficulty] = useState<number>(initialDifficulty);
 	const contentTypes = Array.isArray(resolved.contentTypes)
 		? (resolved.contentTypes as ReadonlyArray<ContentType>)
 		: ALL_CONTENT_TYPES;
@@ -117,21 +121,15 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 				difficulty / 100,
 				deriveContentTypeFlags(contentTypes),
 			),
-		// True minimal deps: `difficulty` and `contentTypes` are derived
-		// from `resolved` above; listing them separately would imply
-		// they can change independently of resolved (they cannot — yet).
-		//
-		// TODO Inc 6e/6f: when the difficulty slider + content-type
-		// checkboxes introduce LOCAL state for these values (no longer
-		// prop-derived), this useMemo's deps must expand to include
-		// those local values. blankResult identity will then change on
-		// every slider/checkbox interaction → the mountEditorView
-		// effect remounts the view → learnerCodeRef.current still holds
-		// the old typed text but against the old blank positions.
-		// Per DOCS § Phase 2: "Re-derivation on settings change resets
-		// the correctness map" — Inc 6e/6f handlers must also clear
-		// learnerCode (setLearnerCode(null)) when settings change.
-		[embodiment.source.code, resolved],
+		// Inc 6e: difficulty is now local state, so it IS an independent
+		// signal for re-derivation. blankResult identity changes on every
+		// slider drag → the mountEditorView effect remounts the editor
+		// with the new blankedCode. The change handler also resets
+		// learnerCode (per DOCS § Phase 2: "Re-derivation on settings
+		// change resets the correctness map" — see `handleDifficultyChange`
+		// below).
+		// TODO Inc 6f: same wiring for contentTypes when checkboxes land.
+		[embodiment.source.code, difficulty, contentTypes],
 	);
 
 	// Defense-in-depth: in production `applicableTo` gates on
@@ -146,6 +144,20 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 
 	const editorContainer = useRef<HTMLDivElement | null>(null);
 	const editorView = useRef<EditorView | null>(null);
+
+	// Inc 6e: difficulty change handler. Updates local difficulty AND
+	// resets learnerCode so the new (different) blank positions start
+	// from a clean slate. Per DOCS § Phase 2: "Re-derivation on settings
+	// change resets the correctness map" — the wrapper does NOT preserve
+	// correctness across re-rolls because the old learner answers no
+	// longer correspond to new blank positions.
+	function handleDifficultyChange(
+		event: React.ChangeEvent<HTMLInputElement>,
+	): void {
+		const next = Number(event.target.value);
+		setDifficulty(next);
+		setLearnerCode(null);
+	}
 
 	// Inc 6d: per-blank correctness wiring + aggregate score display.
 	// evaluateCorrectness is pure; recomputes on learnerCode change
@@ -278,6 +290,18 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 						>
 							📖 Complete Code
 						</button>
+						<label data-difficulty-control>
+							Difficulty: {difficulty}%
+							<input
+								type="range"
+								min="0"
+								max="100"
+								value={difficulty}
+								onChange={handleDifficultyChange}
+								data-difficulty-slider
+								aria-label="Blanks difficulty (0 to 100)"
+							/>
+						</label>
 					</div>
 					<div ref={editorContainer} data-blanks-editor-host />
 					<div
