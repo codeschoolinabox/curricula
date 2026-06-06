@@ -28,9 +28,10 @@
  * `placeFromPool` (pool→solution), `returnToPool` (solution→pool), or
  * `reorderWithinSolution` (solution→solution, with a removal-shift-adjusted insert
  * index + a same-position short-circuit). Each placed line carries
- * `data-indent={level}`, renders one `indentSize`-wide guide step per level
- * (editor-style alignment guides so equal depths line up), and (when `canIndent`)
- * right-side outdent/indent buttons that dispatch `outdentLine`/`indentLine`.
+ * `data-indent={level}`, renders one compact guide step per level (editor-style
+ * alignment guides so equal depths line up — a fixed-width nesting cue, not
+ * literal `indentSize` spaces), and (when `canIndent`) right-side outdent/indent
+ * buttons that dispatch `outdentLine`/`indentLine`.
  * Check/score (7e) and the view-mode toggle (7f) are not wired yet; a pool→pool
  * drop is a no-op.
  */
@@ -116,10 +117,11 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 		resolved.viewMode === 'complete' ? 'complete' : 'work';
 	const maxDistractors =
 		typeof resolved.maxDistractors === 'number' ? resolved.maxDistractors : 10;
-	// Presentation-only: spaces per indent LEVEL when rendering the margin. Grading
-	// compares levels, never raw spaces (see README § Indent contract).
-	const indentSize =
-		typeof resolved.indentSize === 'number' ? resolved.indentSize : 4;
+	// NOTE: `indentSize` is intentionally NOT read here. In the WORK view the
+	// indent is shown as compact fixed-width guide steps (a relative nesting cue —
+	// see parsons.css `[data-parsons-indent-step]`), so a deep nest does not eat
+	// horizontal space. `indentSize` drives the LITERAL indentation of the
+	// complete-solution view (Inc 7f); it is read there.
 
 	// Parse the snippet into the model solution + selected distractors + the
 	// initial shuffled pool of ids. Memoized on source + maxDistractors: re-parse
@@ -274,16 +276,17 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 									handleDragStart(event, 'solution', placed.id)
 								}
 							>
-								{/* One guide step per indent level — a faint vertical rule
-								    every `indentSize` columns so equal-depth lines align
-								    visually. Decorative (aria-hidden); the depth is conveyed
-								    semantically by `data-indent`. */}
+								{/* One compact guide step per indent level — a faint vertical
+								    rule so equal-depth lines align visually without a deep nest
+								    eating horizontal space (width is a fixed cue in
+								    parsons.css, NOT literal `indentSize` spaces). Decorative
+								    (aria-hidden); the depth is conveyed semantically by
+								    `data-indent`. */}
 								{Array.from({ length: placed.indent }, (_, depth) => (
 									<span
 										key={depth}
 										data-parsons-indent-step
 										aria-hidden="true"
-										style={{ width: `${indentSize}ch` }}
 									/>
 								))}
 								<code>{line.code}</code>

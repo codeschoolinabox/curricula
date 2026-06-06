@@ -53,10 +53,13 @@
 	gap: 0.25rem;
 }
 
-/* One faint vertical rule per indent level. Width is set inline (level-agnostic
-   `indentSize` ch); the left border is the alignment guide. */
+/* One faint vertical rule per indent level. A COMPACT fixed width (a relative
+   nesting cue — deliberately NOT literal `indentSize` spaces, so a deep nest
+   does not consume horizontal space; `indentSize` drives the literal complete
+   view). The left border is the alignment guide. */
 [data-lens='parsons'] [data-parsons-indent-step] {
 	flex: 0 0 auto;
+	width: 1.5ch;
 	align-self: stretch;
 	border-left: 1px solid var(--ifm-color-emphasis-300, #cccccc);
 }

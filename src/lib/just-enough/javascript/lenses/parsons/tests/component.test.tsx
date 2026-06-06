@@ -642,19 +642,18 @@ describe('parsons wrapper — Inc 7d (indent / outdent controls)', () => {
 		expect(outdentBtn(container, 'line-0')).toBeNull(); // gone again at 0
 	});
 
-	it('renders one indent-guide step per level, each indentSize wide (depth indicator)', () => {
-		const { container } = renderWith({ indentSize: 3 });
+	it('renders one indent-guide step per indent level (depth indicator)', () => {
+		const { container } = renderThreeLine();
 		placeOnZone(container, 'line-0');
 		fireEvent.click(indentBtn(container, 'line-0')!);
 		fireEvent.click(indentBtn(container, 'line-0')!); // level = 2
-		const steps = solutionItem(
-			container,
-			'line-0',
-		)!.querySelectorAll<HTMLElement>('[data-parsons-indent-step]');
-		// level 2 -> 2 steps (catches a hardcoded level); width indentSize=3 -> '3ch'
-		// (catches a hardcoded indentSize of 4). Both factors triangulated.
+		const steps = solutionItem(container, 'line-0')!.querySelectorAll(
+			'[data-parsons-indent-step]',
+		);
+		// level 2 -> 2 steps. The step WIDTH is a fixed compact CSS cue (no longer
+		// `indentSize`-driven in the work view), so it is browser-verified, not
+		// asserted here (jsdom applies no stylesheet).
 		expect(steps.length).toBe(2);
-		expect(steps[0].style.width).toBe('3ch');
 	});
 
 	it('a flush (level 0) line renders no indent-guide steps', () => {
