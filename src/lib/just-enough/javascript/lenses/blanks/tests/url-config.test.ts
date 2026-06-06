@@ -62,10 +62,33 @@ describe('parseHash — pure', () => {
 			});
 		});
 
-		it('extracts hintsLevel', () => {
-			expect(urlConfig.parseHash('#?blanks=hints:easy')).toEqual({
-				hintsLevel: 'easy',
+		it('extracts hintsMode', () => {
+			expect(urlConfig.parseHash('#?blanks=hints:on')).toEqual({
+				hintsMode: 'on',
 			});
+			expect(urlConfig.parseHash('#?blanks=hints:off')).toEqual({
+				hintsMode: 'off',
+			});
+		});
+
+		// AR-3 BLOCKER Inc 6h-redux: editorMode round-trip lock —
+		// without this, dropping the `editor:` key from serializeConfig
+		// or removing it from parseHash would silently break URL
+		// persistence with no test signal.
+		it('extracts editorMode', () => {
+			expect(urlConfig.parseHash('#?blanks=editor:helpful')).toEqual({
+				editorMode: 'helpful',
+			});
+			expect(urlConfig.parseHash('#?blanks=editor:diff')).toEqual({
+				editorMode: 'diff',
+			});
+			expect(urlConfig.parseHash('#?blanks=editor:raw')).toEqual({
+				editorMode: 'raw',
+			});
+		});
+
+		it('ignores unknown editorMode', () => {
+			expect(urlConfig.parseHash('#?blanks=editor:bogus')).toEqual({});
 		});
 
 		it('extracts contentTypes as array', () => {
@@ -78,13 +101,13 @@ describe('parseHash — pure', () => {
 	describe('Many — multiple fields combined', () => {
 		it('extracts all four fields from a fully-populated hash', () => {
 			const result = urlConfig.parseHash(
-				'#?blanks=difficulty:50,types:keywords+identifiers,view:blankenated,hints:medium',
+				'#?blanks=difficulty:50,types:keywords+identifiers,view:blankenated,hints:on',
 			);
 			expect(result).toEqual({
 				difficulty: 50,
 				contentTypes: ['keywords', 'identifiers'],
 				viewMode: 'blankenated',
-				hintsLevel: 'medium',
+				hintsMode: 'on',
 			});
 		});
 	});
@@ -114,8 +137,10 @@ describe('parseHash — pure', () => {
 			expect(urlConfig.parseHash('#?blanks=view:bogus')).toEqual({});
 		});
 
-		it('ignores unknown hintsLevel', () => {
+		it('ignores unknown hintsMode', () => {
 			expect(urlConfig.parseHash('#?blanks=hints:bogus')).toEqual({});
+			expect(urlConfig.parseHash('#?blanks=hints:auto')).toEqual({});
+			expect(urlConfig.parseHash('#?blanks=hints:easy')).toEqual({});
 		});
 
 		it('filters unknown content type names', () => {
@@ -160,10 +185,45 @@ describe('serializeConfig — pure', () => {
 			);
 		});
 
-		it('serializes hintsLevel alone', () => {
-			expect(urlConfig.serializeConfig({ hintsLevel: 'auto' })).toBe(
-				'hints:auto',
+		it('serializes hintsMode alone', () => {
+			expect(urlConfig.serializeConfig({ hintsMode: 'on' })).toBe(
+				'hints:on',
 			);
+			expect(urlConfig.serializeConfig({ hintsMode: 'off' })).toBe(
+				'hints:off',
+			);
+		});
+
+		it('serializes editorMode alone', () => {
+			expect(urlConfig.serializeConfig({ editorMode: 'helpful' })).toBe(
+				'editor:helpful',
+			);
+			expect(urlConfig.serializeConfig({ editorMode: 'diff' })).toBe(
+				'editor:diff',
+			);
+			expect(urlConfig.serializeConfig({ editorMode: 'raw' })).toBe(
+				'editor:raw',
+			);
+		});
+
+		it('round-trips editorMode through serialize/parse', () => {
+			const config = { editorMode: 'diff' as const };
+			const serialized = urlConfig.serializeConfig(config);
+			const parsed = urlConfig.parseHash(`#?blanks=${serialized}`);
+			expect(parsed).toEqual(config);
+		});
+
+		it('round-trips a fully-populated config including editorMode', () => {
+			const config = {
+				difficulty: 50,
+				contentTypes: ['keywords'] as ReadonlyArray<'keywords'>,
+				viewMode: 'blankenated' as const,
+				editorMode: 'raw' as const,
+				hintsMode: 'off' as const,
+			};
+			const serialized = urlConfig.serializeConfig(config);
+			const parsed = urlConfig.parseHash(`#?blanks=${serialized}`);
+			expect(parsed).toEqual(config);
 		});
 	});
 
@@ -173,10 +233,10 @@ describe('serializeConfig — pure', () => {
 				difficulty: 50,
 				contentTypes: ['keywords', 'identifiers'],
 				viewMode: 'blankenated',
-				hintsLevel: 'medium',
+				hintsMode: 'on',
 			}),
 		).toBe(
-			'difficulty:50,types:keywords+identifiers,view:blankenated,hints:medium',
+			'difficulty:50,types:keywords+identifiers,view:blankenated,hints:on',
 		);
 	});
 
@@ -194,7 +254,7 @@ describe('serializeConfig — pure', () => {
 			difficulty: 33,
 			contentTypes: ['operators'] as ReadonlyArray<'operators'>,
 			viewMode: 'blankenated' as const,
-			hintsLevel: 'hard' as const,
+			hintsMode: 'off' as const,
 		};
 		const serialized = urlConfig.serializeConfig(config);
 		const parsed = urlConfig.parseHash(`#?blanks=${serialized}`);
@@ -213,7 +273,7 @@ describe('serializeConfig — pure', () => {
 			difficulty: 50,
 			contentTypes: ['delimiters'] as ReadonlyArray<'delimiters'>,
 			viewMode: 'blankenated' as const,
-			hintsLevel: 'auto' as const,
+			hintsMode: 'on' as const,
 		};
 		const serialized = urlConfig.serializeConfig(config);
 		const parsed = urlConfig.parseHash(`#?blanks=${serialized}`);
@@ -262,13 +322,13 @@ describe('write — side-effecting', () => {
 	it('writes serialized config to the hash via history.replaceState', () => {
 		const scope = makeStubScope('');
 		const replaceSpy = vi.spyOn(scope.history, 'replaceState');
-		urlConfig.write({ difficulty: 50, hintsLevel: 'medium' }, scope);
+		urlConfig.write({ difficulty: 50, hintsMode: 'on' }, scope);
 		expect(replaceSpy).toHaveBeenCalledTimes(1);
 		const url = replaceSpy.mock.calls[0]![2];
 		// Lock the URL format: must start with #?blanks= (the query form).
 		expect(url).toMatch(/^#\?blanks=/);
 		expect(url).toContain('difficulty:50');
-		expect(url).toContain('hints:medium');
+		expect(url).toContain('hints:on');
 	});
 
 	it('produces a hash that round-trips back through read', () => {

@@ -1703,6 +1703,829 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
+	describe('hints panel — Inc 6h-redux (cursor-scoped, on-demand, scrambled)', () => {
+		// User-directed redesign:
+		// - hintsMode = 'on' | 'off' (orthogonal to difficulty; no tier
+		//   inference)
+		// - panel shows hint for THE blank under the cursor (cursor-
+		//   scoped); empty state otherwise
+		// - hidden by default; incremental per-blank reveal: each
+		//   click of "Reveal next letter" exposes ONE more position of
+		//   the correct answer at its actual position (in a per-blank-
+		//   stable random order); hidden positions are shown as `•`
+		// - reveal-count is per-blank and persists across cursor moves
+		// - hints panel only renders when viewMode === 'blankenated'
+		//   (diff/raw/complete modes hide the panel)
+
+		describe('hintsMode root attribute + panel presence', () => {
+			it('default hintsMode is "on" — panel renders', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('OK')}
+						config={blanksLens.config()}
+					/>,
+				);
+				await waitFor(() => {
+					const root = container.querySelector('[data-lens="blanks"]');
+					expect(root?.getAttribute('data-hints-mode')).toBe('on');
+					expect(
+						container.querySelector('[data-blanks-hints]'),
+					).not.toBeNull();
+				});
+			});
+
+			it('hintsMode "off" — panel does NOT render at all', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('OK')}
+						config={blanksLens.config({ hintsMode: 'off' })}
+					/>,
+				);
+				await waitFor(() => {
+					const root = container.querySelector('[data-lens="blanks"]');
+					expect(root?.getAttribute('data-hints-mode')).toBe('off');
+				});
+				expect(container.querySelector('[data-blanks-hints]')).toBeNull();
+			});
+		});
+
+		describe('cursor-scoped behavior', () => {
+			it('no cursor in any blank → empty state ("place cursor")', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('OK')}
+						config={blanksLens.config({ difficulty: 100 })}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('[data-blanks-hints]')).not.toBeNull();
+				});
+				expect(
+					container.querySelector('[data-hint-empty]'),
+				).not.toBeNull();
+				expect(
+					container.querySelector('[data-hint-reveal-button]'),
+				).toBeNull();
+			});
+
+			it('cursor in a blank → shows reveal button for THAT blank', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('hello')}
+						config={blanksLens.config({ difficulty: 100 })}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				view!.dispatch({ selection: { anchor: 2 } });
+				await waitFor(() => {
+					const btn = container.querySelector(
+						'[data-hint-reveal-button]',
+					) as HTMLElement;
+					expect(btn).not.toBeNull();
+					expect(btn.getAttribute('data-hint-blank-id')).toBeTruthy();
+				});
+			});
+
+			it('cursor in anchor (between blanks) → empty state', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('let x = 1;')}
+						config={blanksLens.config({
+							difficulty: 100,
+							contentTypes: ['keywords', 'identifiers'],
+						})}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				// Doc: `___ _ = 1;` — `___` is blank [0,3), `_` is blank
+				// [4,5). Position 6 is in the anchor `= 1;` (between blank
+				// 2's end at 5 and end of doc).
+				view!.dispatch({ selection: { anchor: 6 } });
+				await waitFor(() => {
+					expect(container.querySelector('[data-hint-empty]')).not.toBeNull();
+				});
+				expect(
+					container.querySelector('[data-hint-reveal-button]'),
+				).toBeNull();
+			});
+		});
+
+		describe('incremental reveal behavior', () => {
+			it('initial state (cursor in blank, 0 clicks): empty partial, button visible', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('hello')}
+						config={blanksLens.config({ difficulty: 100 })}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				view!.dispatch({ selection: { anchor: 0 } });
+				await waitFor(() => {
+					const revealed = container.querySelector(
+						'[data-hint-revealed]',
+					) as HTMLElement;
+					expect(revealed).not.toBeNull();
+					// Scrambled-order reveal: 0 clicks → empty string.
+					expect(
+						revealed.querySelector('[data-hint-partial]')?.textContent,
+					).toBe('');
+					expect(revealed.getAttribute('data-hint-reveal-count')).toBe('0');
+					expect(revealed.getAttribute('data-hint-reveal-total')).toBe('5');
+				});
+				expect(
+					container.querySelector('[data-hint-reveal-button]'),
+				).not.toBeNull();
+			});
+
+			it('one click reveals exactly ONE letter (left-to-right, scrambled order)', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('hello')}
+						config={blanksLens.config({ difficulty: 100 })}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				view!.dispatch({ selection: { anchor: 0 } });
+				await waitFor(() => {
+					expect(
+						container.querySelector('[data-hint-reveal-button]'),
+					).not.toBeNull();
+				});
+				fireEvent.click(
+					container.querySelector(
+						'[data-hint-reveal-button]',
+					) as HTMLButtonElement,
+				);
+				await waitFor(() => {
+					const revealed = container.querySelector(
+						'[data-hint-revealed]',
+					) as HTMLElement;
+					expect(revealed.getAttribute('data-hint-reveal-count')).toBe('1');
+					const partial =
+						revealed.querySelector('[data-hint-partial]')?.textContent ?? '';
+					// Exactly one letter revealed. Letter is from `hello`
+					// (don't care which — depends on the per-blank seeded
+					// scramble).
+					expect(partial.length).toBe(1);
+					expect([...'hello']).toContain(partial);
+				});
+			});
+
+			it('reveal-count increments on subsequent clicks; fully revealed = no button', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('hi')}
+						config={blanksLens.config({ difficulty: 100 })}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				view!.dispatch({ selection: { anchor: 0 } });
+				await waitFor(() => {
+					expect(
+						container.querySelector('[data-hint-reveal-button]'),
+					).not.toBeNull();
+				});
+				// Click 1 of 2.
+				fireEvent.click(
+					container.querySelector(
+						'[data-hint-reveal-button]',
+					) as HTMLButtonElement,
+				);
+				await waitFor(() => {
+					const revealed = container.querySelector(
+						'[data-hint-revealed]',
+					) as HTMLElement;
+					expect(revealed.getAttribute('data-hint-reveal-count')).toBe('1');
+					// One letter revealed, must be 'h' or 'i'.
+					const partial =
+						revealed.querySelector('[data-hint-partial]')?.textContent ?? '';
+					expect(partial.length).toBe(1);
+					expect(['h', 'i']).toContain(partial);
+				});
+				expect(
+					container.querySelector('[data-hint-reveal-button]'),
+				).not.toBeNull();
+				// Click 2 of 2 → fully revealed.
+				fireEvent.click(
+					container.querySelector(
+						'[data-hint-reveal-button]',
+					) as HTMLButtonElement,
+				);
+				await waitFor(() => {
+					const revealed = container.querySelector(
+						'[data-hint-revealed]',
+					) as HTMLElement;
+					expect(revealed.getAttribute('data-hint-reveal-count')).toBe('2');
+					// Fully revealed: 2-char permutation of `hi` — either
+					// `hi` or `ih` depending on the seed.
+					const partial =
+						revealed.querySelector('[data-hint-partial]')?.textContent ?? '';
+					expect(partial.length).toBe(2);
+					expect(['hi', 'ih']).toContain(partial);
+				});
+				// Fully revealed → no more reveal button.
+				expect(
+					container.querySelector('[data-hint-reveal-button]'),
+				).toBeNull();
+			});
+
+			it('reveal-count persists across cursor moves between blanks', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('let x = 1;')}
+						config={blanksLens.config({
+							difficulty: 100,
+							contentTypes: ['keywords', 'identifiers'],
+						})}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				// Cursor in blank 1 (`let` at [0,3)).
+				view!.dispatch({ selection: { anchor: 1 } });
+				await waitFor(() => {
+					expect(
+						container.querySelector('[data-hint-reveal-button]'),
+					).not.toBeNull();
+				});
+				fireEvent.click(
+					container.querySelector(
+						'[data-hint-reveal-button]',
+					) as HTMLButtonElement,
+				);
+				fireEvent.click(
+					container.querySelector(
+						'[data-hint-reveal-button]',
+					) as HTMLButtonElement,
+				);
+				await waitFor(() => {
+					expect(
+						container
+							.querySelector('[data-hint-revealed]')
+							?.getAttribute('data-hint-reveal-count'),
+					).toBe('2');
+				});
+				// Cursor → blank 2 (`x` at [4,5)) → new blank, count 0.
+				view!.dispatch({ selection: { anchor: 4 } });
+				await waitFor(() => {
+					expect(
+						container
+							.querySelector('[data-hint-revealed]')
+							?.getAttribute('data-hint-reveal-count'),
+					).toBe('0');
+				});
+				// Cursor → back to blank 1 → count restored.
+				view!.dispatch({ selection: { anchor: 1 } });
+				await waitFor(() => {
+					expect(
+						container
+							.querySelector('[data-hint-revealed]')
+							?.getAttribute('data-hint-reveal-count'),
+					).toBe('2');
+				});
+			});
+
+			it('single-char blank: one click fully reveals; button vanishes', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('let x = 1;')}
+						config={blanksLens.config({
+							difficulty: 100,
+							contentTypes: ['identifiers'],
+						})}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				view!.dispatch({ selection: { anchor: 4 } });
+				await waitFor(() => {
+					expect(
+						container.querySelector('[data-hint-reveal-button]'),
+					).not.toBeNull();
+				});
+				fireEvent.click(
+					container.querySelector(
+						'[data-hint-reveal-button]',
+					) as HTMLButtonElement,
+				);
+				await waitFor(() => {
+					const revealed = container.querySelector(
+						'[data-hint-revealed]',
+					) as HTMLElement;
+					expect(
+						revealed.querySelector('[data-hint-partial]')?.textContent,
+					).toBe('x');
+				});
+				expect(
+					container.querySelector('[data-hint-reveal-button]'),
+				).toBeNull();
+			});
+		});
+
+		describe('editor-mode sub-toggle (orthogonal to viewMode) — Inc 6h-redux', () => {
+			// The editor-mode sub-toggle lives INSIDE blankenated mode.
+			// Three variants from easiest to hardest:
+			//   helpful (default) → diff → raw
+			// Switching to diff/raw stays within blankenated viewMode;
+			// they're alternate renderings of the SAME blanked editor.
+
+			it('renders the three editor-mode sub-toggle buttons inside blankenated', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('OK')}
+						config={blanksLens.config({ difficulty: 100 })}
+					/>,
+				);
+				await waitFor(() => {
+					expect(
+						container.querySelector('[data-editor-mode-toggle="helpful"]'),
+					).not.toBeNull();
+					expect(
+						container.querySelector('[data-editor-mode-toggle="diff"]'),
+					).not.toBeNull();
+					expect(
+						container.querySelector('[data-editor-mode-toggle="raw"]'),
+					).not.toBeNull();
+				});
+			});
+
+			it('switching editorMode to diff stays in blankenated viewMode', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('hello')}
+						config={blanksLens.config({ difficulty: 100 })}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const diffBtn = container.querySelector(
+					'[data-editor-mode-toggle="diff"]',
+				) as HTMLButtonElement;
+				fireEvent.click(diffBtn);
+				await waitFor(() => {
+					const root = container.querySelector('[data-lens="blanks"]');
+					// viewMode unchanged — still blankenated.
+					expect(root?.getAttribute('data-view-mode')).toBe('blankenated');
+				});
+				// Editor still mounted; hints panel hidden.
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+				expect(container.querySelector('[data-blanks-hints]')).toBeNull();
+			});
+
+			it('diff editor mode: char-level mismatch decorations appear after wrong typing', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('hello')}
+						config={blanksLens.config({
+							difficulty: 100,
+							editorMode: 'diff',
+						})}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				view!.dispatch({ changes: { from: 0, insert: 'x' } });
+				await waitFor(() => {
+					expect(
+						container.querySelector('.cm-diff-mismatch'),
+					).not.toBeNull();
+				});
+				// In diff mode, correctness-class decorations are NOT
+				// active (no per-blank borders).
+				expect(container.querySelector('.cm-blank-unfilled')).toBeNull();
+				expect(container.querySelector('.cm-blank-correct')).toBeNull();
+				expect(container.querySelector('.cm-blank-incorrect')).toBeNull();
+			});
+
+			it('raw editor mode: no feedback decorations of any kind; no hints panel', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('hello')}
+						config={blanksLens.config({
+							difficulty: 100,
+							editorMode: 'raw',
+						})}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				view!.dispatch({ changes: { from: 0, insert: 'x' } });
+				expect(container.querySelector('.cm-blank-unfilled')).toBeNull();
+				expect(container.querySelector('.cm-blank-correct')).toBeNull();
+				expect(container.querySelector('.cm-blank-incorrect')).toBeNull();
+				expect(container.querySelector('.cm-diff-mismatch')).toBeNull();
+				expect(container.querySelector('[data-blanks-hints]')).toBeNull();
+			});
+
+			it('raw editor mode: anchor edits are ACCEPTED (plain editor — no lockFilter)', async () => {
+				// User-directed redesign: diff and raw are plain
+				// CodeMirror, NO lockFilter. The learner can edit
+				// anywhere (including anchor text), with the trade-off
+				// that they have to be careful not to corrupt the
+				// surrounding structure.
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('let x = 1;')}
+						config={blanksLens.config({
+							difficulty: 100,
+							contentTypes: ['keywords', 'identifiers'],
+							editorMode: 'raw',
+						})}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				const before = view!.state.doc.toString();
+				// Insert at the anchor (the space at position 3) is now
+				// allowed — doc length grows by 1.
+				view!.dispatch({ changes: { from: 3, insert: 'X' } });
+				expect(view!.state.doc.length).toBe(before.length + 1);
+			});
+
+			it('diff editor mode: anchor edits are ACCEPTED (plain editor — no lockFilter)', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('let x = 1;')}
+						config={blanksLens.config({
+							difficulty: 100,
+							contentTypes: ['keywords', 'identifiers'],
+							editorMode: 'diff',
+						})}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				const before = view!.state.doc.toString();
+				view!.dispatch({ changes: { from: 3, insert: 'X' } });
+				expect(view!.state.doc.length).toBe(before.length + 1);
+			});
+
+			it('switching editorMode resets learnerCode (fresh exercise from blankedCode)', async () => {
+				// Reset is load-bearing for the helpful editor's invariants:
+				// the free editors (diff/raw) accept arbitrary edits that
+				// would corrupt the helpful editor's length-match + anchor-
+				// lock contract if carried over. Reset on switch keeps each
+				// scaffolding level starting clean.
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('hello')}
+						config={blanksLens.config({
+							difficulty: 100,
+							editorMode: 'raw',
+						})}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const cmContent = container.querySelector('.cm-content') as HTMLElement;
+				const view = EditorView.findFromDOM(cmContent);
+				// In raw mode, type arbitrary chars (including in anchors).
+				view!.dispatch({ changes: { from: 0, insert: 'XYZ_GARBAGE_' } });
+				const dirtyDoc = view!.state.doc.toString();
+				expect(dirtyDoc).toContain('XYZ_GARBAGE_');
+				// Switch to helpful — the exercise resets.
+				const helpfulBtn = container.querySelector(
+					'[data-editor-mode-toggle="helpful"]',
+				) as HTMLButtonElement;
+				fireEvent.click(helpfulBtn);
+				await waitFor(() => {
+					const newContent = container.querySelector(
+						'.cm-content',
+					) as HTMLElement;
+					const newView = EditorView.findFromDOM(newContent);
+					const freshDoc = newView!.state.doc.toString();
+					// Fresh blankedCode for `hello` is `_____` (5 underscores).
+					expect(freshDoc).toBe('_____');
+					expect(freshDoc).not.toContain('XYZ_GARBAGE_');
+				});
+			});
+
+			it('editor-mode sub-toggle is hidden when viewMode === complete', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('OK')}
+						config={blanksLens.config({
+							difficulty: 100,
+							viewMode: 'complete',
+						})}
+					/>,
+				);
+				await waitFor(() => {
+					const root = container.querySelector('[data-lens="blanks"]');
+					expect(root?.getAttribute('data-view-mode')).toBe('complete');
+				});
+				expect(
+					container.querySelector('[data-editor-mode-toggle="helpful"]'),
+				).toBeNull();
+			});
+		});
+	});
+
+	describe('Inc 6h-redux AR-3 absorbed: parity classes, PRNG stability, reset-symmetry, diff triangulation', () => {
+		// AR-3 BLOCKER 2: adjacent blanks must receive ALTERNATING
+		// parity classes. A bug that assigns the same class to all
+		// blanks would defeat the CVD-safe chunk-distinction design,
+		// yet without this test all 222 prior tests would stay green.
+		// Triangulation requires at least 2 blanks (1 blank cannot
+		// distinguish alternation from static assignment).
+		it('parity classes alternate across adjacent blanks (Inc 6h-redux CVD palette)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('let x = 1;')}
+					config={blanksLens.config({
+						difficulty: 100,
+						contentTypes: ['keywords', 'identifiers'],
+					})}
+				/>,
+			);
+			await waitFor(() => {
+				expect(
+					container.querySelector('.cm-blank-parity-even'),
+				).not.toBeNull();
+				expect(
+					container.querySelector('.cm-blank-parity-odd'),
+				).not.toBeNull();
+			});
+			// Both parities present → adjacent blanks differ. Defends
+			// against a "parity-even on every blank" regression that
+			// would still produce correct correctness colors.
+		});
+
+		// AR-3 IMPORTANT 3: the scrambled-order PRNG must be
+		// deterministic across the React render lifecycle. A bug that
+		// seeds the shuffle from Math.random() instead of blank.id
+		// would pass every existing test, because every existing test
+		// uses one render and one click sequence.
+		it('scrambled-order reveal is stable across unmount/remount (PRNG determinism)', async () => {
+			function captureFirstReveal(): string {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('hello')}
+						config={blanksLens.config({ difficulty: 100 })}
+					/>,
+				);
+				return new Promise<string>((resolve) => {
+					waitFor(() => {
+						const cmContent = container.querySelector(
+							'.cm-content',
+						) as HTMLElement | null;
+						expect(cmContent).not.toBeNull();
+					}).then(() => {
+						const cmContent = container.querySelector(
+							'.cm-content',
+						) as HTMLElement;
+						const view = EditorView.findFromDOM(cmContent);
+						view!.dispatch({ selection: { anchor: 0 } });
+						waitFor(() => {
+							expect(
+								container.querySelector('[data-hint-reveal-button]'),
+							).not.toBeNull();
+						}).then(() => {
+							fireEvent.click(
+								container.querySelector(
+									'[data-hint-reveal-button]',
+								) as HTMLButtonElement,
+							);
+							waitFor(() => {
+								const partial = container.querySelector(
+									'[data-hint-partial]',
+								)?.textContent;
+								expect(partial?.length).toBe(1);
+							}).then(() => {
+								const letter =
+									container.querySelector('[data-hint-partial]')
+										?.textContent ?? '';
+								cleanup();
+								resolve(letter);
+							});
+						});
+					});
+				}) as unknown as string;
+			}
+			// Simpler imperative form that works with vitest's async:
+			const renderOnce = async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('hello')}
+						config={blanksLens.config({ difficulty: 100 })}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				const view = EditorView.findFromDOM(
+					container.querySelector('.cm-content') as HTMLElement,
+				);
+				view!.dispatch({ selection: { anchor: 0 } });
+				await waitFor(() => {
+					expect(
+						container.querySelector('[data-hint-reveal-button]'),
+					).not.toBeNull();
+				});
+				fireEvent.click(
+					container.querySelector(
+						'[data-hint-reveal-button]',
+					) as HTMLButtonElement,
+				);
+				let letter = '';
+				await waitFor(() => {
+					const partial =
+						container.querySelector('[data-hint-partial]')?.textContent ?? '';
+					expect(partial.length).toBe(1);
+					letter = partial;
+				});
+				cleanup();
+				return letter;
+			};
+			void captureFirstReveal;
+			const first = await renderOnce();
+			const second = await renderOnce();
+			// Deterministic per blank.id: same blank in same source →
+			// same first letter every render.
+			expect(second).toBe(first);
+		});
+
+		// AR-3 IMPORTANT 4: reset-on-switch covers all directions, not
+		// just raw → helpful. Specifically, helpful → diff must reset
+		// (so a solved helpful exercise doesn't carry into diff with
+		// no `_` chars left, defeating the diff display).
+		it('reset on helpful → diff: solved helpful state does NOT carry into diff', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const view = EditorView.findFromDOM(
+				container.querySelector('.cm-content') as HTMLElement,
+			);
+			typeIntoBlank(view!, 'hello', 0);
+			expect(view!.state.doc.toString()).toBe('hello');
+			// Switch to diff — exercise resets to blankedCode.
+			fireEvent.click(
+				container.querySelector(
+					'[data-editor-mode-toggle="diff"]',
+				) as HTMLButtonElement,
+			);
+			await waitFor(() => {
+				const newView = EditorView.findFromDOM(
+					container.querySelector('.cm-content') as HTMLElement,
+				);
+				expect(newView!.state.doc.toString()).toBe('_____');
+			});
+		});
+
+		it('reset on helpful → raw: solved helpful state does NOT carry into raw', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const view = EditorView.findFromDOM(
+				container.querySelector('.cm-content') as HTMLElement,
+			);
+			typeIntoBlank(view!, 'hello', 0);
+			fireEvent.click(
+				container.querySelector(
+					'[data-editor-mode-toggle="raw"]',
+				) as HTMLButtonElement,
+			);
+			await waitFor(() => {
+				const newView = EditorView.findFromDOM(
+					container.querySelector('.cm-content') as HTMLElement,
+				);
+				expect(newView!.state.doc.toString()).toBe('_____');
+			});
+		});
+
+		it('reset on diff → raw: arbitrary diff edits do NOT carry into raw', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({
+						difficulty: 100,
+						editorMode: 'diff',
+					})}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const view = EditorView.findFromDOM(
+				container.querySelector('.cm-content') as HTMLElement,
+			);
+			// In diff mode, free anchor edits.
+			view!.dispatch({ changes: { from: 0, insert: 'GARBAGE_' } });
+			fireEvent.click(
+				container.querySelector(
+					'[data-editor-mode-toggle="raw"]',
+				) as HTMLButtonElement,
+			);
+			await waitFor(() => {
+				const newView = EditorView.findFromDOM(
+					container.querySelector('.cm-content') as HTMLElement,
+				);
+				expect(newView!.state.doc.toString()).toBe('_____');
+			});
+		});
+
+		// AR-3 IMPORTANT 5: diff-mode correct-char must NOT produce a
+		// mismatch decoration (triangulates against a hardcoded "any
+		// edit shows mismatch" implementation).
+		it('diff mode: a CORRECT char does NOT produce a mismatch decoration', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({
+						difficulty: 100,
+						editorMode: 'diff',
+					})}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const view = EditorView.findFromDOM(
+				container.querySelector('.cm-content') as HTMLElement,
+			);
+			// `h` at position 0 matches `hello`[0] → no mismatch.
+			view!.dispatch({ changes: { from: 0, insert: 'h' } });
+			// Wait briefly to let the StateField rebuild.
+			await new Promise((r) => setTimeout(r, 50));
+			expect(container.querySelector('.cm-diff-mismatch')).toBeNull();
+		});
+
+		it('diff mode: extending the doc past originalCode does not throw or break the editor', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hi')}
+					config={blanksLens.config({
+						difficulty: 100,
+						editorMode: 'diff',
+					})}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const view = EditorView.findFromDOM(
+				container.querySelector('.cm-content') as HTMLElement,
+			);
+			// Doc starts at length 2 (`__`); insert past end to grow it.
+			view!.dispatch({ changes: { from: 2, insert: 'AAAAAA' } });
+			expect(view!.state.doc.length).toBeGreaterThan(2);
+			// Editor still mounted and responsive.
+			expect(container.querySelector('.cm-content')).not.toBeNull();
+		});
+	});
+
 	describe('the LensModule freeze contract', () => {
 		it('the default export is a frozen LensModule', () => {
 			expect(Object.isFrozen(blanksLens)).toBe(true);

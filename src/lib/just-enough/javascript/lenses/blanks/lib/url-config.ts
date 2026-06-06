@@ -45,7 +45,8 @@
 import type {
 	BlanksLensConfig,
 	ContentType,
-	HintsLevel,
+	EditorMode,
+	HintsMode,
 	ViewMode,
 } from '../types.js';
 
@@ -72,12 +73,12 @@ const VALID_VIEW_MODES: ReadonlySet<ViewMode> = new Set([
 	'blankenated',
 	'complete',
 ]);
-const VALID_HINTS_LEVELS: ReadonlySet<HintsLevel> = new Set([
-	'auto',
-	'easy',
-	'medium',
-	'hard',
+const VALID_EDITOR_MODES: ReadonlySet<EditorMode> = new Set([
+	'helpful',
+	'diff',
+	'raw',
 ]);
+const VALID_HINTS_MODES: ReadonlySet<HintsMode> = new Set(['on', 'off']);
 
 function getBlanksParamValue(hash: string): string | null {
 	// Format: `#?blanks=...&other=...` — the `?` separator is mandatory.
@@ -104,7 +105,8 @@ function parseHash(hash: string): Partial<BlanksLensConfig> {
 		difficulty?: number;
 		contentTypes?: ReadonlyArray<ContentType>;
 		viewMode?: ViewMode;
-		hintsLevel?: HintsLevel;
+		editorMode?: EditorMode;
+		hintsMode?: HintsMode;
 	} = {};
 
 	for (const segment of blanksValue.split(',')) {
@@ -128,9 +130,13 @@ function parseHash(hash: string): Partial<BlanksLensConfig> {
 			if (VALID_VIEW_MODES.has(value as ViewMode)) {
 				config.viewMode = value as ViewMode;
 			}
+		} else if (key === 'editor') {
+			if (VALID_EDITOR_MODES.has(value as EditorMode)) {
+				config.editorMode = value as EditorMode;
+			}
 		} else if (key === 'hints') {
-			if (VALID_HINTS_LEVELS.has(value as HintsLevel)) {
-				config.hintsLevel = value as HintsLevel;
+			if (VALID_HINTS_MODES.has(value as HintsMode)) {
+				config.hintsMode = value as HintsMode;
 			}
 		}
 	}
@@ -150,8 +156,11 @@ function serializeConfig(config: Partial<BlanksLensConfig>): string {
 	if (config.viewMode !== undefined) {
 		parts.push(`view:${config.viewMode}`);
 	}
-	if (config.hintsLevel !== undefined) {
-		parts.push(`hints:${config.hintsLevel}`);
+	if (config.editorMode !== undefined) {
+		parts.push(`editor:${config.editorMode}`);
+	}
+	if (config.hintsMode !== undefined) {
+		parts.push(`hints:${config.hintsMode}`);
 	}
 	return parts.join(',');
 }

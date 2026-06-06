@@ -88,10 +88,14 @@ Fields:
     semantics.
   - `viewMode?: 'blankenated' | 'complete'` (default `'blankenated'`) — initial
     view.
-  - `hintsLevel?: 'auto' | 'easy' | 'medium' | 'hard'` (default `'auto'`) —
-    which hints-panel tier renders. `'auto'` resolves at render time from
-    `difficulty` (see [Hints panel contract](#hints-panel-contract)). The other
-    three are explicit overrides.
+  - `hintsMode?: 'on' | 'off'` (default `'on'`) — whether the
+    cursor-scoped hints panel renders. **Orthogonal to `difficulty`**
+    (Inc 6h-redux user-directed redesign — hints are not inferred from
+    difficulty). When `'off'`, the panel does not render at all.
+    When `'on'`, the panel shows a reveal-button for the blank under
+    the cursor (only that blank); the learner controls scaffolding by
+    choosing how many blanks to reveal. See
+    [Hints panel contract](#hints-panel-contract).
 - `applicableTo(embodiment): boolean` — returns `embodiment.status.parsed` (Tier
   2 per [`../README.md`](../README.md) § Three-tier classification). The
   vendored `blankenate` walks an Acorn AST; an unparseable snippet has no AST to
@@ -173,11 +177,10 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   corrections (see
   [`../../orchestrate/lib/socratizing/README.md`](../../orchestrate/lib/socratizing/README.md))
   — Ask Me's outputs do not carry correctness state.
-- **Hints level** — one of four config values controlling the panel's
-  scaffolding tier: `'auto' | 'easy' | 'medium' | 'hard'`. `'auto'` is the
-  default; the resolved tier inferred from `difficulty` (see § Hints panel
-  contract). The `data-hints-level` attribute on the root reflects the
-  **resolved** tier (`'easy' | 'medium' | 'hard'`), never `'auto'`.
+- **Hints mode** — `'on' | 'off'`. Enable or disable the cursor-scoped
+  hints panel. Default `'on'`. Orthogonal to `difficulty` (Inc 6h-redux
+  user-directed redesign). The `data-hints-mode` attribute on the root
+  reflects this value.
 - **Score** — the aggregate percentage. Formula:
   `total === 0 ? 100 : Math.round(correct / total * 100)`. Surfaced in the
   editor header and the hints panel. The `total === 0` branch handles the
@@ -196,23 +199,25 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 ## UI structure
 
 ```text
-<div data-lens="blanks" data-view-mode="blankenated|complete" data-hints-level="easy|medium|hard">
+<div data-lens="blanks" data-view-mode="blankenated|complete" data-hints-mode="on|off">
   <header>                          — title + Ask Me button
   <toolbar>                         — difficulty slider, 5 content-type checkboxes, view-mode toggle
   <editorHeader>                    — mode label + difficulty% + blanks count + remaining count
   <main>                            — CodeMirror EditorView (editable in blankenated, read-only in complete)
-  <hintsPanel>                      — 3 tiers; per-blank correctness feedback
+  <aside data-blanks-hints>         — cursor-scoped hint for the blank under the cursor:
+                                      empty state OR reveal-button OR scrambled-letters reveal
+                                      (rendered only when data-hints-mode='on';
+                                      per-blank in-editor visual lives on CM6 decorations via Inc 6.7,
+                                      separate from this panel)
   <instructions>                    — collapsible "How to use" panel
 </div>
 ```
 
 The `data-lens` attribute is the lenses-peer invariant (see
-[`../DOCS.md` § Structural constraints](../DOCS.md)). The `data-view-mode` and
-`data-hints-level` attributes are sandbox-harness selectors and CSS hooks;
-renaming them is a contract change. `data-*` values reflect **committed config
-state** (e.g. `data-hints-level` shows the resolved tier
-`'easy' | 'medium' | 'hard'`, never the unresolved `'auto'`); CSS transitions
-should anchor on the parent, not on the attribute change.
+[`../DOCS.md` § Structural constraints](../DOCS.md)). The `data-view-mode`
+and `data-hints-mode` attributes are sandbox-harness selectors and CSS
+hooks; renaming them is a contract change. `data-*` values reflect
+**committed config state**.
 
 ## Toolbar contract
 
@@ -257,45 +262,68 @@ should anchor on the parent, not on the attribute change.
 
 ## Hints panel contract
 
-The hints panel renders **always** in v1 (legacy compiled it out via
-`{false && showHints && ...}`; we ship it enabled at parity). The active tier
-resolves from `config.hintsLevel`:
+Inc 6h-redux ships a **cursor-scoped, on-demand, scrambled** hints panel
+per user-directed redesign. The legacy 3-tier system (`'auto' | 'easy' |
+'medium' | 'hard'` controlling rendered richness) is gone — replaced by:
 
-| `hintsLevel`       | Active tier when…                                                                    |
-| ------------------ | ------------------------------------------------------------------------------------ |
-| `'auto'` (default) | `difficulty >= 67` → easy; `34 ≤ difficulty ≤ 66` → medium; `difficulty ≤ 33` → hard |
-| `'easy'`           | easy (override)                                                                      |
-| `'medium'`         | medium (override)                                                                    |
-| `'hard'`           | hard (override)                                                                      |
+- **Orthogonality.** Hints are decoupled from `difficulty`. `hintsMode`
+  has its own knob (`'on' | 'off'`), not inferred from the slider.
+- **Cursor-scoped.** The panel surfaces hints for **one blank at a
+  time**: whichever blank the cursor is currently inside. Anchor
+  positions (between blanks) show an empty state.
+- **Hidden by default + incremental reveal.** Each blank's hint starts
+  hidden. The panel shows a "Reveal next letter" button. Each click
+  exposes ONE more letter of the correct answer, appending it left-to-
+  right to the displayed partial. After N clicks the learner sees the
+  first N letters of the per-blank scrambled order (no position info).
+  For `hello` (length 5), if the per-blank permutation is `[3, 0, 4,
+  1, 2]`, clicks 1–5 produce `'l'`, `'lh'`, `'lho'`, `'lhoe'`,
+  `'lhoel'`. After all letters revealed, the button vanishes.
+- **Scrambled-order is deterministic per-blank-mount.** The
+  permutation comes from a mulberry32 PRNG seeded by an FNV-1a 32-bit
+  hash of `blank.id` (see `index.tsx` § `shufflePositions`). Same
+  blank in the same mount always reveals letters in the same
+  sequence; same blank in a re-rolled blank set (after settings
+  change) gets a new permutation. No `Math.random()` per render —
+  tests are deterministic and re-renders don't reshuffle.
+- **Per-blank reveal-count persists** across cursor moves. Once two
+  letters are revealed for blank A, returning to A after visiting B
+  shows the same two letters. Switching the editor-mode scaffolding
+  level (helpful → diff → raw or back) resets all reveal-counts.
 
-The `'auto'` inference preserves the legacy's pedagogical claim: **hardest
-difficulty deserves most scaffolding** (high difficulty = many blanks = needs
-the full-reveal panel; low difficulty = few blanks = score-only is enough). The
-`data-hints-level` attribute on the root reflects the **resolved** tier
-(`'easy' | 'medium' | 'hard'`), never `'auto'` — so CSS hooks and
-sandbox-harness selectors don't have to know about the inference.
+**Why this design.** The 3-tier system coupled scaffolding intensity to
+difficulty, but the user's pedagogical goal is the inverse: the learner
+chooses how much help to ask for, blank by blank. The "tier" is now
+emergent — how many blanks the learner chooses to peek at across a
+session is itself the scaffolding gradient.
 
-Per-tier rendering:
+**Panel structure (when `hintsMode === 'on'`):**
 
-- **easy** — full list of every blank with its expected answer + a per-blank
-  correctness icon:
-  - Correct blanks: green border (`#4caf50`), checkmark.
-  - Incorrect blanks: red border (`#f44336`), expected-answer reveal.
-  - Unfilled blanks: yellow border (`#ffc107`), `Missing: "x" (type)` hint.
-- **medium** — "fill in the blanks" message, remaining-count, and aggregate
-  score percentage. No per-blank reveal.
-- **hard** — score percentage only. No remaining-count; no per-blank reveal.
+```text
+<aside data-blanks-hints>
+  <h4>Hint</h4>
+  EITHER (cursor not in any blank):
+    <p data-hint-empty>Place the cursor in a blank to request a hint.</p>
+  OR (cursor in blank):
+    <p data-hint-revealed
+       data-hint-blank-id="…"
+       data-hint-type="…"
+       data-hint-reveal-count="N"
+       data-hint-reveal-total="M">
+      <type>: <code data-hint-partial><first N scrambled letters></code>
+      (N / M revealed)
+    </p>
+    {N < M ? <button data-hint-reveal-button>Reveal next letter</button>
+           : nothing — fully revealed}
+</aside>
+```
 
-The aggregate score is the percentage of fully-typed blanks that match their
-original; the `total === 0` edge case (difficulty 0, or all content-type
-checkboxes unchecked, or empty source) declares a vacuously-complete exercise at
-100% rather than rendering `NaN%`. Formula and computation live in
-`lib/evaluate-correctness.ts` (canonical spec in the [`./types.ts`](./types.ts)
-JSDoc on `EvaluationResult`).
+When `hintsMode === 'off'`, the `<aside>` does not render at all.
 
-A learner attempts a difficulty-100 puzzle on `hard` for the hardest exercise;
-an instructor demos a snippet on `easy` for maximum scaffolding. The CSS classes
-(`.hintItem.correct` etc.) preserve the legacy's green/red/yellow palette.
+**Independent from the score panel.** The aggregate-score display
+(`[data-blanks-score]`) and the editor header (`[data-blanks-editor-header]`)
+still surface score / remaining / total. The hints panel only shows the
+per-blank scrambled reveal — it does not duplicate the score.
 
 ## Editor header contract
 
@@ -370,7 +398,7 @@ The lens reads its config from the URL on mount and writes config changes back
 to the URL with a 500ms debounce. Format:
 
 ```text
-?blanks=difficulty:50,types:keywords+identifiers,view:blankenated,hints:medium
+?blanks=difficulty:50,types:keywords+identifiers,view:blankenated,hints:on
 ```
 
 The `:` separates a key from its value; the `,` separates parameters within the
@@ -522,11 +550,11 @@ each is independently testable:
   `src/utils/urlManager.js`. Only the `getLensConfig('blanks')` /
   `updateLensConfig('blanks', config)` surface is preserved. Pure.
 - `types.ts` (shared) — lens-local types: `Blank`, `BlankType`,
-  `BlankenateResult`, `ContentType`, `ViewMode`, `HintsLevel`,
-  `ResolvedHintsLevel`, `BlankCorrectness`, `CorrectnessMap`,
-  `EvaluationResult`, `BlanksLensConfig`. The boolean-map representation of
-  content types is wrapper-internal state derived from the array on render; it
-  has no exported type.
+  `BlankenateResult`, `ContentType`, `ViewMode`, `HintsMode`,
+  `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`,
+  `BlanksLensConfig`. The boolean-map representation of content types
+  is wrapper-internal state derived from the array on render; it has
+  no exported type.
 
 Tests split: `tests/blankenate.test.ts`, `tests/no-paste-extension.test.ts`,
 `tests/evaluate-correctness.test.ts`, `tests/url-config.test.ts`,

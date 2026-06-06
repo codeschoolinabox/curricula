@@ -4,27 +4,34 @@
  *
  * The wrapper composes the pure-TS core (`./core.ts`) + the vendored
  * lib modules (`./lib/blankenate.ts` etc.) into the blanks surface: a
- * `<div data-lens="blanks" data-view-mode="…" data-hints-level="…">`
- * root with toolbar, editor, editor header, hints panel, and Ask Me
- * button.
+ * `<div data-lens="blanks" data-view-mode="…" data-hints-mode="…">`
+ * root with toolbar, editor header, editor, score, and hints panel.
  *
- * **Current scope (Inc 6a + 6b + 6c + 6d):** wrapper mounts a
- * CodeMirror EditorView (6a), with a two-button view-mode toggle
- * (6b), editable in blankenated mode with noPasteExtension wired
- * (6c), and an aggregate score panel that updates per keystroke as
- * the learner fills blanks (6d). The root currently emits
- * `data-lens="blanks" data-view-mode={viewMode}`; `data-hints-level`
- * is deferred to Inc 6h when the hints panel + tier resolution land.
- * 6e–6j add the slider, content-type checkboxes, editor header, full
- * hints panel with per-blank visual feedback, URL config, and Ask Me.
+ * **Current scope (Inc 6a → 6h-redux):** mounts CodeMirror in
+ * editable/read-only mode per view-mode toggle (6a/6b/6c); aggregate
+ * score panel + per-blank correctness (6d); difficulty slider (6e);
+ * 5 content-type checkboxes (6f); lock non-placeholder regions with
+ * StateField + transactionFilter (6.5); 5th content-type 'delimiters'
+ * via Acorn onToken + per-blank visual border (6.6); length-matched
+ * placeholders + fixed-width overwrite-mode UX + directional
+ * compaction on `_` deletes + correctness-aware decoration class
+ * (6.7); informational editor header showing mode + difficulty +
+ * blanks total + remaining (6g); resolved-tier hints panel with 3
+ * tiers (easy/medium/hard) plus auto-inference from difficulty
+ * (6h-redux).
+ *
+ * Remaining: URL config read/write (6i); Ask Me button → socratizing/
+ * (6j); registration in LENS_REGISTRY (7).
  */
 
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorState, StateField } from '@codemirror/state';
 import type { ChangeSpec, Text } from '@codemirror/state';
-import { Decoration, EditorView } from '@codemirror/view';
+import { Decoration, EditorView, drawSelection, keymap } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
+import type { Range } from '@codemirror/state';
+import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { basicSetup } from 'codemirror';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType } from 'react';
@@ -37,7 +44,13 @@ import blanksCore from './core.js';
 import blankenate from './lib/blankenate.js';
 import evaluateCorrectness from './lib/evaluate-correctness.js';
 import noPasteExtension from './lib/no-paste-extension.js';
-import type { BlankenateResult, ContentType, ViewMode } from './types.js';
+import type {
+	BlankenateResult,
+	ContentType,
+	EditorMode,
+	HintsMode,
+	ViewMode,
+} from './types.js';
 
 import './blanks.css';
 
@@ -48,6 +61,95 @@ const ALL_CONTENT_TYPES: ReadonlyArray<ContentType> = [
 	'literals',
 	'delimiters',
 ];
+
+/**
+ * Inc 6h-redux: per-blank random-permutation of position indices for
+ * the incremental position-reveal hint. Each click on a blank's
+ * "Reveal next letter" button advances the reveal count for that
+ * blank; this function gives the order in which positions are
+ * revealed.
+ *
+ * Deterministic per `(seed, length)`: same blank in same mount
+ * always gets the same permutation, so a learner who reveals 3 out
+ * of 5 then closes-and-reopens the panel sees the same 3 positions.
+ * The seed is a 32-bit hash of `blank.id`; the permutation is a
+ * Fisher-Yates shuffle driven by a mulberry32 PRNG.
+ *
+ * No `Math.random()` here — the StateField-style determinism makes
+ * tests deterministic and avoids the per-render reshuffle that would
+ * make every keystroke a different reveal order.
+ */
+function hashStringTo32Bit(s: string): number {
+	let h = 0x811c9dc5; // FNV-1a offset basis
+	for (let i = 0; i < s.length; i++) {
+		h ^= s.charCodeAt(i);
+		// FNV-1a prime multiplication (32-bit). `Math.imul` keeps it 32-bit.
+		h = Math.imul(h, 0x01000193);
+	}
+	return h >>> 0;
+}
+
+function mulberry32(seed: number): () => number {
+	let s = seed;
+	return function rand() {
+		s |= 0;
+		s = (s + 0x6d2b79f5) | 0;
+		let t = Math.imul(s ^ (s >>> 15), 1 | s);
+		t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+	};
+}
+
+function shufflePositions(seed: string, length: number): ReadonlyArray<number> {
+	const positions = Array.from({ length }, (_, i) => i);
+	const rand = mulberry32(hashStringTo32Bit(seed));
+	// Fisher-Yates in-place.
+	for (let i = positions.length - 1; i > 0; i--) {
+		const j = Math.floor(rand() * (i + 1));
+		const tmp = positions[i]!;
+		positions[i] = positions[j]!;
+		positions[j] = tmp;
+	}
+	return positions;
+}
+
+/**
+ * Inc 6h-redux: render a partial hint for `original` revealing the
+ * first `revealCount` characters in the per-blank random-scrambled
+ * order. The display grows left-to-right; each new click appends one
+ * more letter. Position info is NOT exposed — the learner gets the
+ * SET of letters needed (one at a time, in random sequence) without
+ * the order or position info.
+ *
+ * Examples for `hello` (5 chars, with random perm [3,0,4,1,2]):
+ *  - count 0 → ''        (no letters yet)
+ *  - count 1 → 'l'       (hello[3])
+ *  - count 2 → 'lh'      (hello[3] + hello[0])
+ *  - count 3 → 'lho'
+ *  - count 4 → 'lhoe'
+ *  - count 5 → 'lhoel'   (full scrambled set; equivalent to
+ *                        revealing the whole letter inventory)
+ *
+ * The learner sees `lhoel` (or whatever the per-blank random
+ * permutation produces) and must figure out the order to reassemble
+ * `hello`. The scramble is deterministic per `(seed, length)` so the
+ * same blank in the same mount always reveals letters in the same
+ * sequence — re-visiting a partially-revealed blank shows the same
+ * partial state.
+ */
+function renderPartialHint(
+	original: string,
+	revealCount: number,
+	seed: string,
+): string {
+	const perm = shufflePositions(seed, original.length);
+	const clamped = Math.min(revealCount, perm.length);
+	let out = '';
+	for (let i = 0; i < clamped; i++) {
+		out += original[perm[i]!];
+	}
+	return out;
+}
 
 /**
  * Derives the boolean-map representation of contentTypes the
@@ -116,11 +218,57 @@ function deriveContentTypeFlags(
  * derives per-blank visual class independently — CM6-native, no
  * React→CM6 effect plumbing for decoration updates.
  */
+/**
+ * Inc 6h-redux: diff-only decoration extension for the `diff` editor
+ * mode. Plain CodeMirror (no lockFilter, no autopad) — the learner
+ * edits freely. The StateField highlights each character whose
+ * doc value differs from `originalCode` at the same byte position.
+ * If the doc length diverges from originalCode (learner inserted or
+ * deleted chars), positions past the shorter end are highlighted as
+ * extras / not marked (graceful degradation; the learner sees the
+ * pattern shift as a signal that they've drifted).
+ */
+function buildDiffDecorations(originalCode: string) {
+	const mismatchMark = Decoration.mark({ class: 'cm-diff-mismatch' });
+	function decorate(doc: Text): DecorationSet {
+		const docStr = doc.toString();
+		const marks: Range<Decoration>[] = [];
+		const limit = Math.min(docStr.length, originalCode.length);
+		for (let i = 0; i < limit; i++) {
+			// Treat `_` as "unfilled" — no diff signal (it's not wrong,
+			// just empty). Any other mismatch is highlighted red.
+			if (docStr[i] !== originalCode[i] && docStr[i] !== '_') {
+				marks.push(mismatchMark.range(i, i + 1));
+			}
+		}
+		// Doc longer than originalCode → highlight the extra chars as
+		// "extras" (mismatch since they have no counterpart).
+		for (let i = limit; i < docStr.length; i++) {
+			if (docStr[i] !== '_') {
+				marks.push(mismatchMark.range(i, i + 1));
+			}
+		}
+		return Decoration.set(marks, true);
+	}
+	const diffField = StateField.define<DecorationSet>({
+		create(state) {
+			return decorate(state.doc);
+		},
+		update(value, tr) {
+			if (!tr.docChanged) return value;
+			return decorate(tr.newDoc);
+		},
+		provide: (f) => EditorView.decorations.from(f),
+	});
+	return [diffField];
+}
+
 function buildLockExtensions(blankResult: BlankenateResult) {
 	// Inc 6.7 length-matched: doc positions === source positions
 	// because the placeholder is `_`.repeat(blank.original.length).
 	// Captured once at mount; auto-pad preserves blank widths so these
-	// positions never shift.
+	// positions never shift. Used only by the 'helpful' editor mode;
+	// diff and raw modes get a plain CodeMirror with no lock/autopad.
 	const sortedBlanks = [...blankResult.blanks].sort(
 		(a, b) => a.start - b.start,
 	);
@@ -136,28 +284,38 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 		return 'cm-blank-incorrect';
 	}
 
-	function buildDecorationSet(doc: Text): DecorationSet {
+	function buildCorrectnessDecorations(doc: Text): DecorationSet {
 		// Zero-width blanks (`original === ''`) are not pedagogically
 		// meaningful — they have no characters to fill. Skip them at
 		// decoration-set construction so the StateField never has to
 		// reason about empty ranges (which the autoPad rejection at
 		// "trailing underscores < insertLen" would silently confuse for
 		// a "blank is full" state). AR-4 Inc 6.7 guard.
+		//
+		// Inc 6h-redux: alternating parity classes so adjacent blanks
+		// render in different chunk colors (CVD-safe palette per
+		// blanks.css). Parity is by visible-blank index (post-filter),
+		// not by the original blank ordering, so chunks alternate
+		// cleanly even when some blanks are zero-width and skipped.
+		const visible = positions.filter(({ from, to }) => to > from);
 		return Decoration.set(
-			positions
-				.filter(({ from, to }) => to > from)
-				.map(({ from, to, original }) => {
-					const content = doc.sliceString(from, to);
-					const cls = deriveClass(content, original);
-					return Decoration.mark({ class: cls }).range(from, to);
-				}),
+			visible.map(({ from, to, original }, i) => {
+				const content = doc.sliceString(from, to);
+				const cls = deriveClass(content, original);
+				const parity =
+					i % 2 === 0 ? 'cm-blank-parity-even' : 'cm-blank-parity-odd';
+				return Decoration.mark({ class: `${cls} ${parity}` }).range(
+					from,
+					to,
+				);
+			}),
 			true,
 		);
 	}
 
 	const blanksField = StateField.define<DecorationSet>({
 		create(state) {
-			return buildDecorationSet(state.doc);
+			return buildCorrectnessDecorations(state.doc);
 		},
 		// Performance note (AR-4 Inc 6.7): rebuilds the entire
 		// DecorationSet from scratch on every docChanged transaction —
@@ -170,7 +328,7 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 		// (auto-pad preserves width), so position-mapping is identity.
 		update(value, tr) {
 			if (!tr.docChanged) return value;
-			return buildDecorationSet(tr.newDoc);
+			return buildCorrectnessDecorations(tr.newDoc);
 		},
 		provide: (f) => EditorView.decorations.from(f),
 	});
@@ -369,6 +527,40 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 		resolved.viewMode === 'complete' ? 'complete' : 'blankenated';
 	const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
 
+	// Inc 6h-redux: editor-mode sub-toggle (only meaningful when
+	// viewMode === 'blankenated'). Three variants from easiest to
+	// hardest: 'helpful' (full correctness colors + hints panel) →
+	// 'diff' (char-level diff against hidden original; no hints) →
+	// 'raw' (no feedback of any kind). Seeded from config.editorMode
+	// (default 'helpful').
+	const initialEditorMode: EditorMode =
+		resolved.editorMode === 'diff'
+			? 'diff'
+			: resolved.editorMode === 'raw'
+				? 'raw'
+				: 'helpful';
+	const [editorMode, setEditorMode] = useState<EditorMode>(initialEditorMode);
+
+	// Inc 6h-redux: switching the scaffolding level (editorMode)
+	// resets the exercise. The free editors (diff/raw) allow arbitrary
+	// edits that may violate the helpful editor's length-match +
+	// anchor-lock invariants — carrying that arbitrary state into the
+	// helpful editor would put it in a corrupted starting position.
+	// Reset clears learnerCode (so the next mount picks up blankedCode
+	// from blankenate) and revealCounts (fresh hint state per exercise).
+	function changeEditorMode(next: EditorMode) {
+		setEditorMode(next);
+		setLearnerCode(null);
+		setRevealCounts(new Map());
+		// AR-4 MINOR Inc 6h-redux: also reset cursorPos so the hints
+		// panel doesn't briefly resolve a stale cursor against the new
+		// (just-rebuilt) editor and flash an out-of-date reveal state.
+		// The new editor's updateListener overwrites cursorPos on first
+		// focus event regardless; this reset just makes the transient
+		// state empty rather than misleading.
+		setCursorPos(null);
+	}
+
 	// Learner edits state (Inc 6c). null = no edits yet → editor uses
 	// blankedCode on first mount. Once the learner types, the
 	// updateListener captures the current doc into learnerCode; later
@@ -466,8 +658,46 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 			correct: result.correct,
 			incorrect: result.incorrect,
 			unfilled: result.unfilled,
+			correctnessMap: result.correctnessMap,
 		};
 	}, [learnerCode, blankResult]);
+
+	// Inc 6h-redux: hints config is `'on' | 'off'`, orthogonal to
+	// difficulty (user-directed redesign — hints are NOT inferred
+	// from difficulty; learners choose how many blanks to reveal as
+	// their own scaffolding gradient). Default 'on'.
+	const hintsMode: HintsMode =
+		resolved.hintsMode === 'off' ? 'off' : 'on';
+
+	// Inc 6h-redux: cursor position state. Updated by the CodeMirror
+	// updateListener on selectionSet. Render-only state — does NOT
+	// appear in the editor mount effect's deps (would re-mount per
+	// keystroke; see Inc 6c remount bug).
+	const [cursorPos, setCursorPos] = useState<number | null>(null);
+
+	// Inc 6h-redux: per-blank reveal-count. Each click of "Reveal next
+	// letter" advances the count by 1 for that blank, exposing one
+	// more position of the correct answer (in the
+	// `shufflePositions(blank.id, length)` order). Count of 0 means
+	// no letters revealed yet; count of `blank.original.length` means
+	// fully revealed. Persistent across cursor moves — coming back to
+	// a partially-revealed blank shows the same partial state.
+	const [revealCounts, setRevealCounts] = useState<
+		ReadonlyMap<string, number>
+	>(() => new Map());
+
+	// Inc 6h-redux: derive the blank under cursor. Positions align 1:1
+	// with the doc per Inc 6.7 length-matched placeholders. A cursor
+	// at a blank boundary (`from` or `to`) counts as "in" the blank;
+	// cursors in anchor segments return null.
+	const activeBlank = useMemo(() => {
+		if (cursorPos === null || blankResult === null) return null;
+		return (
+			blankResult.blanks.find(
+				(b) => cursorPos >= b.start && cursorPos <= b.end,
+			) ?? null
+		);
+	}, [cursorPos, blankResult]);
 
 	// Mount the CodeMirror EditorView. Destroy + recreate on STRUCTURAL
 	// changes only: viewMode flips, or blankResult re-derives (source /
@@ -486,47 +716,85 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 			const host = editorContainer.current;
 			if (!host) return;
 
+			// Inc 6h-redux: only `complete` viewMode is read-only.
+			// `blankenated` is editable; the editor-mode sub-toggle
+			// (helpful/diff/raw) controls which decorations attach.
 			const isBlankenated = viewMode === 'blankenated';
+			const isEditable = isBlankenated;
 
 			// Derive the initial document INSIDE the effect closure so
-			// learnerCode is read from the ref (not state-as-dep). Toggle
-			// back to blankenated picks up the latest in-progress edits;
-			// fresh mount with no edits uses blankedCode.
+			// learnerCode is read from the ref (not state-as-dep).
+			// Editable modes (blankenated, diff, raw) all show the
+			// blankedCode (or the learner's in-progress edits via the
+			// ref). Complete mode shows the originalCode read-only.
 			const initialDoc =
 				blankResult === null
 					? embodiment.source.code
-					: isBlankenated
+					: isEditable
 						? (learnerCodeRef.current ?? blankResult.blankedCode)
 						: blankResult.originalCode;
 
 			const updateListener = EditorView.updateListener.of(function onUpdate(
 				update,
 			) {
-				if (!update.docChanged) return;
-				if (!isBlankenated) return;
+				if (!isEditable) return;
 				// Mirror the learner's edit into local state. The wrapper's
 				// updateListener NEVER calls the orchestrator's snippet setter
 				// per the single-writer invariant (DOCS § Structural constraints
 				// "CodeMirror writes to local state, never to setSnippet").
-				setLearnerCode(update.state.doc.toString());
+				if (update.docChanged) {
+					setLearnerCode(update.state.doc.toString());
+				}
+				// Inc 6h-redux: capture cursor position so the cursor-scoped
+				// hints panel knows which blank to surface (only relevant
+				// in `blankenated` mode but harmless to track in others).
+				if (update.selectionSet || update.docChanged) {
+					setCursorPos(update.state.selection.main.head);
+				}
 			});
+
+			// Editor-mode extensions (Inc 6h-redux):
+			//   helpful → basicSetup (autocomplete, bracket matching, lint,
+			//             etc.) + lockFilter + autopad + noPasteExtension
+			//             + correctness decorations (full scaffolding)
+			//   diff    → minimalSetup (no autocomplete, no bracket
+			//             matching, no lint diagnostics, no tooltips) +
+			//             char-level diff highlights; no lock, no
+			//             autopad, paste allowed — the diff IS the hint
+			//   raw     → minimalSetup only; nothing else
+			// `minimalSetup` retains just the essentials: history (so
+			// undo/redo works), drawSelection (visible cursor), and the
+			// default + history keymaps. JavaScript syntax highlighting
+			// stays in all modes (readability isn't a "hint"; it's just
+			// the editor not being broken).
+			const helpfulBaseline = basicSetup;
+			const minimalBaseline = [
+				history(),
+				drawSelection(),
+				keymap.of([...defaultKeymap, ...historyKeymap]),
+			];
+			const isHelpful = editorMode === 'helpful';
+			const baseline = isHelpful ? helpfulBaseline : minimalBaseline;
+
+			const editorExtensions =
+				!isEditable || blankResult === null
+					? []
+					: isHelpful
+						? [noPasteExtension(), ...buildLockExtensions(blankResult)]
+						: editorMode === 'diff'
+							? buildDiffDecorations(blankResult.originalCode)
+							: [];
 
 			const state = EditorState.create({
 				doc: initialDoc,
 				extensions: [
-					basicSetup,
+					baseline,
 					javascript(),
 					oneDark,
-					EditorView.editable.of(isBlankenated),
-					EditorState.readOnly.of(!isBlankenated),
+					EditorView.editable.of(isEditable),
+					EditorState.readOnly.of(!isEditable),
 					updateListener,
-					...(isBlankenated ? [noPasteExtension()] : []),
-					// Inc 6.5: lock non-placeholder regions. Only when in
-					// blankenated mode AND we have a blankResult (defense-
-					// in-depth fallback path doesn't render the editor).
-					...(isBlankenated && blankResult !== null
-						? buildLockExtensions(blankResult)
-						: []),
+					...editorExtensions,
 				],
 			});
 			const view = new EditorView({ state, parent: host });
@@ -543,14 +811,18 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 		// embodiment.source.code is captured via blankResult (memoized on
 		// embodiment.source.code + resolved); including it here directly
 		// would just duplicate the blankResult-driven remount path.
-		[viewMode, blankResult],
+		[viewMode, editorMode, blankResult],
 	);
 
 	// Render: on null blankResult (defense-in-depth) render ONLY the
 	// fallback panel, not toolbar + editor. README § Edge cases says
 	// the wrapper renders the fallback "rather than the editor."
 	return (
-		<div data-lens="blanks" data-view-mode={viewMode}>
+		<div
+			data-lens="blanks"
+			data-view-mode={viewMode}
+			data-hints-mode={hintsMode}
+		>
 			{showFallback ? (
 				<div
 					data-blanks-fallback="parse-fail"
@@ -580,6 +852,35 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 						>
 							📖 Complete Code
 						</button>
+						{viewMode === 'blankenated' && (
+							<div data-blanks-editor-mode role="group" aria-label="Editor mode">
+								<span>Editor:</span>
+								<button
+									type="button"
+									data-editor-mode-toggle="helpful"
+									aria-pressed={editorMode === 'helpful' ? 'true' : 'false'}
+									onClick={() => changeEditorMode('helpful')}
+								>
+									✨ Helpful
+								</button>
+								<button
+									type="button"
+									data-editor-mode-toggle="diff"
+									aria-pressed={editorMode === 'diff' ? 'true' : 'false'}
+									onClick={() => changeEditorMode('diff')}
+								>
+									📋 Diff
+								</button>
+								<button
+									type="button"
+									data-editor-mode-toggle="raw"
+									aria-pressed={editorMode === 'raw' ? 'true' : 'false'}
+									onClick={() => changeEditorMode('raw')}
+								>
+									🪨 Raw
+								</button>
+							</div>
+						)}
 						<label data-difficulty-control>
 							Difficulty: {difficulty}%
 							<input
@@ -624,11 +925,6 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 						data-blanks-total={String(evaluation.total)}
 						data-blanks-correct={String(evaluation.correct)}
 						aria-live="polite"
-						style={{
-							padding: '0.5rem 0',
-							fontFamily: 'system-ui, sans-serif',
-							fontSize: '0.9rem',
-						}}
 					>
 						Score: {evaluation.score}%
 						{evaluation.total > 0 && (
@@ -638,6 +934,63 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 							</>
 						)}
 					</div>
+					{hintsMode === 'on' &&
+						viewMode === 'blankenated' &&
+						editorMode === 'helpful' && (
+						<aside data-blanks-hints aria-label="Hints panel">
+							<h4>Hint</h4>
+							{activeBlank === null ? (
+								<p data-hint-empty>
+									Place the cursor in a blank to request a hint.
+								</p>
+							) : (
+								(() => {
+									const count = revealCounts.get(activeBlank.id) ?? 0;
+									const total = activeBlank.original.length;
+									const fullyRevealed = count >= total;
+									return (
+										<>
+											<p
+												data-hint-revealed
+												data-hint-blank-id={activeBlank.id}
+												data-hint-type={activeBlank.type}
+												data-hint-reveal-count={String(count)}
+												data-hint-reveal-total={String(total)}
+											>
+												{activeBlank.type}:{' '}
+												<code data-hint-partial>
+													{renderPartialHint(
+														activeBlank.original,
+														count,
+														activeBlank.id,
+													)}
+												</code>
+												{' '}({count} / {total} revealed)
+											</p>
+											{!fullyRevealed && (
+												<button
+													type="button"
+													data-hint-reveal-button
+													data-hint-blank-id={activeBlank.id}
+													onClick={() => {
+														const id = activeBlank.id;
+														setRevealCounts((prev) => {
+															const next = new Map(prev);
+															const cur = next.get(id) ?? 0;
+															next.set(id, cur + 1);
+															return next;
+														});
+													}}
+												>
+													Reveal next letter
+												</button>
+											)}
+										</>
+									);
+								})()
+							)}
+						</aside>
+					)}
 				</>
 			)}
 		</div>

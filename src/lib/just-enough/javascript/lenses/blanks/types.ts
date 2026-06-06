@@ -28,7 +28,7 @@
  *
  * @remarks `LensConfig` (from `../types.ts`) is the wrapper's prop
  * type for `config`; the lens reads four known fields (`difficulty`,
- * `contentTypes`, `viewMode`, `hintsLevel`) and ignores the rest.
+ * `contentTypes`, `viewMode`, `hintsMode`) and ignores the rest.
  * Per-lens narrowing is captured in `BlanksLensConfig` below — it
  * documents the known fields but does NOT exclude unknown ones
  * (config is open-shape at the contract boundary). All four documented
@@ -178,35 +178,46 @@ type ContentType =
  */
 type ViewMode = 'blankenated' | 'complete';
 
-// ─── Hints level (config + resolved) ────────────────────────
+/**
+ * The `editorMode` config value: which editor variant renders inside
+ * blankenated mode. Three sub-modes, ordered easiest to hardest:
+ *
+ * - `'helpful'` — fixed-width fillable-field UX with correctness-aware
+ *   per-blank colors (Inc 6.7), plus the cursor-scoped hints panel
+ *   (Inc 6h-redux). Full scaffolding.
+ * - `'diff'` — same editor, but per-character diff highlighting against
+ *   the (hidden) original instead of per-blank correctness colors. No
+ *   hints panel. The diff is the hint.
+ * - `'raw'` — same editor, but no visual feedback at all (no
+ *   correctness colors, no diff highlighting, no hints panel). The
+ *   learner gets nothing but the blanked source.
+ *
+ * Orthogonal to `viewMode` — only meaningful when
+ * `viewMode === 'blankenated'`. In `'complete'` mode this field is
+ * ignored (the editor shows the read-only original regardless).
+ */
+type EditorMode = 'helpful' | 'diff' | 'raw';
+
+// ─── Hints mode ─────────────────────────────────────────────
 
 /**
- * The `hintsLevel` config value. Four values: three explicit tiers
- * plus `'auto'`, which derives the active tier from `difficulty` at
- * render time.
+ * The `hintsMode` config value: enable or disable the cursor-scoped
+ * hints panel.
  *
- * @remarks The `'auto'` inference (per `./README.md` § Hints panel
- * contract):
- * - `difficulty >= 67` → `'easy'`
- * - `34 <= difficulty <= 66` → `'medium'`
- * - `difficulty <= 33` → `'hard'`
+ * @remarks Inc 6h-redux ships a **cursor-scoped, on-demand, scrambled**
+ * hints panel. When `hintsMode === 'on'`, the panel renders below the
+ * editor and shows a reveal-button for the blank under the cursor
+ * (only). Clicking the button reveals the scrambled-letters hint
+ * (alphabetical sort of `blank.original` — same character set, no
+ * order info). The learner controls the scaffolding gradient by
+ * choosing how many blanks to reveal, not by a config tier.
  *
- * The pedagogical claim: hardest difficulty deserves most
- * scaffolding (high difficulty = many blanks = needs the full-reveal
- * panel; low difficulty = few blanks = score-only is enough).
- * `'auto'` is the default; the other three are explicit overrides.
+ * When `hintsMode === 'off'`, the panel does not render at all.
+ *
+ * Decoupled from `difficulty` per user-directed redesign — hints are
+ * orthogonal to the difficulty slider.
  */
-type HintsLevel = 'auto' | 'easy' | 'medium' | 'hard';
-
-/**
- * The active hints-panel tier after `'auto'` resolution. Used for the
- * `data-hints-level` attribute on the root element and for the
- * per-tier rendering branch in the wrapper.
- *
- * @remarks Never `'auto'` — the resolution happens before this type
- * is read.
- */
-type ResolvedHintsLevel = 'easy' | 'medium' | 'hard';
+type HintsMode = 'on' | 'off';
 
 // ─── Correctness ────────────────────────────────────────────
 
@@ -259,7 +270,7 @@ type EvaluationResult = {
  *
  * @remarks All four fields are `SerializableValue`-compliant per
  * `../types.ts`: primitives (`difficulty: number`,
- * `viewMode: string`, `hintsLevel: string`) or arrays of primitives
+ * `viewMode: string`, `hintsMode: string`) or arrays of primitives
  * (`contentTypes: readonly string[]`). Nested objects would violate
  * `LensConfig`'s flat-record contract; the boolean-map
  * representation of content types is **wrapper-internal state**
@@ -269,13 +280,14 @@ type EvaluationResult = {
  * - `difficulty` → `50`
  * - `contentTypes` → `['keywords', 'identifiers', 'operators', 'literals', 'delimiters']`
  * - `viewMode` → `'blankenated'`
- * - `hintsLevel` → `'auto'`
+ * - `hintsMode` → `'on'`
  */
 type BlanksLensConfig = {
 	readonly difficulty?: number;
 	readonly contentTypes?: ReadonlyArray<ContentType>;
 	readonly viewMode?: ViewMode;
-	readonly hintsLevel?: HintsLevel;
+	readonly editorMode?: EditorMode;
+	readonly hintsMode?: HintsMode;
 };
 
 // ─── Exports ────────────────────────────────────────────────
@@ -288,8 +300,8 @@ export type {
 	BlanksLensConfig,
 	ContentType,
 	CorrectnessMap,
+	EditorMode,
 	EvaluationResult,
-	HintsLevel,
-	ResolvedHintsLevel,
+	HintsMode,
 	ViewMode,
 };

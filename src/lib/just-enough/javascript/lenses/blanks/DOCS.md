@@ -43,7 +43,7 @@ structural pieces:
 - Buggy substring-based evaluation → position-aware
   `lib/evaluate-correctness.ts`
 - Compiled-out hints panel (`{false && showHints && (...)}`) → **enabled by
-  default** with `'auto'` tier resolution
+  default** with cursor-scoped on-demand reveals (Inc 6h-redux)
 - Compiled-out editor header (`{/* ... */}`) → **enabled by default**
 
 See `./README.md` § "What this lens does NOT do" for the full lens-specific drop
@@ -61,7 +61,7 @@ session-level decisions and audit trail.
 | `lib/no-paste-extension.ts`   | core    | **Vendored** — CodeMirror extension blocking keyboard and context-menu paste                                                                                                          |
 | `lib/evaluate-correctness.ts` | core    | Position-aware per-blank correctness; fixes the legacy's two substring bugs                                                                                                           |
 | `lib/url-config.ts`           | core    | Slimmed URLManager pattern; reads/writes the lens's URL parameter                                                                                                                     |
-| `types.ts`                    | shared  | `Blank`, `BlankType`, `BlankenateResult`, `ContentType`, `ViewMode`, `HintsLevel`, `ResolvedHintsLevel`, `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`, `BlanksLensConfig` |
+| `types.ts`                    | shared  | `Blank`, `BlankType`, `BlankenateResult`, `ContentType`, `ViewMode`, `HintsMode`, `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`, `BlanksLensConfig` |
 
 Default export of `index.tsx` is the frozen `LensModule` record. The core
 subsystems under `lib/` are internal; only `index.tsx` and (where applicable)
@@ -142,26 +142,28 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    `evaluateCorrectness(currentDoc, blanks, originalCode)` where
    `currentDoc = learnerCode ?? blankResult.blankedCode`. The evaluator
    returns `EvaluationResult` (`correctnessMap` + counts + score); Inc 6d
-   surfaces the score in the JSX, and Inc 6h feeds `correctnessMap` to
-   the hints panel for the per-blank green/red/yellow visual. `useMemo`
-   (not `useEffect`): synchronous-pure computation belongs in the render
-   pass so the score updates atomically with the learner's keystroke —
-   no stale-score flicker frame. Position-aware: each blank's
+   surfaces the score in the JSX, and Inc 6.7's StateField derives the
+   per-blank in-editor visual class (`cm-blank-correct/incorrect/unfilled`)
+   from the same source-of-truth (doc content vs `blank.original`).
+   `useMemo` (not `useEffect`): synchronous-pure computation belongs in
+   the render pass so the score updates atomically with the learner's
+   keystroke — no stale-score flicker frame. Position-aware: each blank's
    `{start, end}` from `blankenate`'s output anchors a per-position
    match against the learner's typed text. Fixes the legacy's two bugs
    (substring-containment false positive; multi-blank-same-word
    tracking).
 
 5. **Render** (sync) — the wrapper emits the root
-   `<div data-lens="blanks" data-view-mode="blankenated|complete" data-hints-level="easy|medium|hard">`
-   with toolbar, editor header, CodeMirror container, hints panel, and
-   instructions panel. The `data-hints-level` attribute reflects the
-   **resolved** tier (`'easy' | 'medium' | 'hard'`), never `'auto'` — the
-   inference happens before this attribute is read.
+   `<div data-lens="blanks" data-view-mode="blankenated|complete" data-hints-mode="on|off">`
+   with toolbar, editor header, CodeMirror container, the cursor-scoped
+   hints panel (Inc 6h-redux — renders only when `data-hints-mode='on'`),
+   and the instructions panel. The `data-hints-mode` attribute reflects
+   the `config.hintsMode` value directly (no inference; orthogonal to
+   difficulty).
 
 6. **Handle interaction** (per learner event) — per-control handlers update the
    relevant config-state slice (`difficulty`, `contentTypes`, `viewMode`,
-   `hintsLevel`); the wrapper's URL-write effect (debounced 500ms) writes the
+   `hintsMode`); the wrapper's URL-write effect (debounced 500ms) writes the
    new config to the URL parameter.
 
 7. **Ask Me** (per learner click, sync, pure) — the Ask Me button calls
@@ -196,7 +198,7 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
 flowchart TD
     Props["LensProps<br/>{ embodiment: Snippet (frozen),<br/>config: LensConfig (frozen) }"]
 
-    Props -->|"resolve, sync, pure"| ResolvedConfig["{ difficulty, contentTypes (array),<br/>viewMode, hintsLevel }"]
+    Props -->|"resolve, sync, pure"| ResolvedConfig["{ difficulty, contentTypes (array),<br/>viewMode, hintsMode }"]
     Props -->|"applicableTo, sync, pure"| Gate["embodiment.status.parsed"]
     Props -->|"recommend, sync, pure"| Recs["[] (WS2-deferred)"]
 
@@ -218,15 +220,16 @@ flowchart TD
     Eval -->|"EvaluationResult"| Correctness["{ correctnessMap, total,<br/>correct, incorrect, unfilled, score }"]
     Correctness --> Render
 
-    State -->|"hintsLevel + difficulty"| ResolveTier["resolve tier<br/>(sync, pure;<br/>'auto' → easy/medium/hard)"]
-    ResolveTier -->|"ResolvedHintsLevel"| Render
+    Editor -.->|"selectionSet"| CursorPos["cursorPos<br/>(lens-local state;<br/>render-only, not in mount deps)"]
+    CursorPos --> ActiveBlank["activeBlank<br/>(useMemo: positions.find by cursorPos)"]
 
     State --> Render["wrapper render"]
     Blanks --> Render
+    ActiveBlank --> Render
 
-    Render --> DOM["&lt;div data-lens=blanks<br/>data-view-mode=blankenated|complete<br/>data-hints-level=easy|medium|hard&gt;<br/>toolbar + editor header +<br/>CodeMirror + hints panel +<br/>instructions"]
+    Render --> DOM["&lt;div data-lens=blanks<br/>data-view-mode=blankenated|complete<br/>data-hints-mode=on|off&gt;<br/>toolbar + editor header +<br/>CodeMirror + cursor-scoped hints panel +<br/>instructions"]
 
-    DOM -->|"toolbar events<br/>(slider, checkbox, toggle)"| ConfigUpdate["state update<br/>(difficulty, contentTypes,<br/>viewMode, hintsLevel)"]
+    DOM -->|"toolbar events<br/>(slider, checkbox, toggle)"| ConfigUpdate["state update<br/>(difficulty, contentTypes,<br/>viewMode, hintsMode)"]
     ConfigUpdate --> State
 
     State -->|"debounced 500ms"| URLWrite[("url-config.write<br/>(useEffect cleanup clears timeout)")]
@@ -268,9 +271,8 @@ learner answers and the correctness map die with the component instance.
 - **`data-lens="blanks"` on the wrapper's root element.** Load-bearing for
   sandbox-harness selectors. Per the lenses peer's invariant.
 - **`data-view-mode="blankenated|complete"` and
-  `data-hints-level="easy|medium|hard"`** on the root. Sandbox-harness
-  selectors + CSS hooks. The `data-hints-level` value reflects the **resolved**
-  tier — never `'auto'`. Values reflect committed config state, not in-flight
+  `data-hints-mode="on|off"`** on the root. Sandbox-harness selectors +
+  CSS hooks. Values reflect committed config state, not in-flight
   transitions; CSS transitions should anchor on the parent.
 - **Tier-2 classification.** The contract per [`../types.ts`](../types.ts):
   `applicableTo` is the recommender's cheap gate; `recommend` only fires on
@@ -399,25 +401,35 @@ mount, answers live in React state for the lifetime of the component. (AR-1
 decision lock; the early-Phase-0 design that diverged toward clear-on-toggle was
 caught and reversed.)
 
-## Why ship the hints panel enabled by default with `'auto'` tier
+## Why ship the hints panel enabled by default
 
 The legacy compiled the hints panel out (`{false && showHints && (...)}` at
-line 672) but the design and styling exist in full (lines 670–864). v1 ships the
-panel enabled because per-blank visual feedback (green/red/yellow) is the
-load-bearing pedagogical affordance that makes the exercise self-pacing —
-without it, the learner has to guess whether they've answered correctly until
-they manually toggle to complete-view. Disabling-in-legacy was a ship cut, not a
-design decision; the lens-shipping-shells failure mode the redo exists to
-prevent (per [`./README.md`](./README.md) § Why this lens exists) is exactly
-what disabled per-blank feedback recreates.
+line 672) but the design and styling exist in full (lines 670–864). v1 ships
+the panel enabled because **per-blank visual feedback is load-bearing for a
+self-pacing exercise** — without it, the learner has to guess whether they've
+answered correctly until they manually toggle to complete-view. Disabling in
+legacy was a ship cut, not a design decision; the lens-shipping-shells failure
+mode the redo exists to prevent (per [`./README.md`](./README.md) § Why this
+lens exists) is exactly what disabled feedback recreates.
 
-The `'auto'` tier is the default because the legacy's difficulty-derived
-inference (high difficulty → many blanks → needs the easy/full-reveal panel; low
-difficulty → few blanks → score-only) is a real pedagogical claim: hardest
-exercises deserve most scaffolding. A static `'medium'` default would break that
-coupling — a difficulty-100 exercise would ship with medium hints, exactly the
-misalignment `'auto'` exists to prevent. (AR-1 decision lock; the early-Phase-0
-design that dropped `'auto'` was caught and reversed.)
+The per-blank green/red/yellow visual lives in the editor itself (Inc 6.7's
+correctness-aware decoration class on the CodeMirror StateField). The hints
+panel is a **separate affordance** for cursor-scoped on-demand hint reveals
+(Inc 6h-redux): the learner clicks a button to see the scrambled letters of
+the blank they're focused on.
+
+## Why hints are orthogonal to difficulty (Inc 6h-redux)
+
+An earlier design (now reversed) auto-derived a 3-tier hints config from the
+difficulty slider — high difficulty → easy/full-reveal panel; low difficulty
+→ score-only. User-directed redesign rejected this coupling on pedagogical
+grounds: **the learner, not the slider, should control scaffolding**. The
+3-tier system implicitly conflated "how hard is the exercise" with "how much
+help is offered"; the user's intent is that those be independent so a learner
+can grind through a hard exercise without scaffolding (or get help on an easy
+one if stuck). The hints panel now exposes a single `hintsMode: 'on' | 'off'`
+knob; when `'on'`, the learner chooses how many blanks to reveal as their own
+scaffolding gradient.
 
 ## Why drop the seeded RNG
 

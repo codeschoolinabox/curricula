@@ -30,8 +30,12 @@ describe('blanks core', () => {
 				expect(core.config().viewMode).toBe('blankenated');
 			});
 
-			it('hintsLevel defaults to "auto"', () => {
-				expect(core.config().hintsLevel).toBe('auto');
+			it('hintsMode defaults to "on" (Inc 6h-redux: orthogonal to difficulty)', () => {
+				expect(core.config().hintsMode).toBe('on');
+			});
+
+			it('editorMode defaults to "helpful" (Inc 6h-redux)', () => {
+				expect(core.config().editorMode).toBe('helpful');
 			});
 		});
 
@@ -50,8 +54,12 @@ describe('blanks core', () => {
 				expect(core.config({ viewMode: 'complete' }).viewMode).toBe('complete');
 			});
 
-			it('hintsLevel override wins over default', () => {
-				expect(core.config({ hintsLevel: 'easy' }).hintsLevel).toBe('easy');
+			it('hintsMode override wins over default', () => {
+				expect(core.config({ hintsMode: 'off' }).hintsMode).toBe('off');
+			});
+
+			it('editorMode override wins over default', () => {
+				expect(core.config({ editorMode: 'diff' }).editorMode).toBe('diff');
 			});
 		});
 
@@ -108,12 +116,12 @@ describe('blanks core', () => {
 					difficulty: 75,
 					contentTypes: ['operators'],
 					viewMode: 'complete',
-					hintsLevel: 'hard',
+					hintsMode: 'off',
 				});
 				expect(resolved.difficulty).toBe(75);
 				expect(resolved.contentTypes).toEqual(['operators']);
 				expect(resolved.viewMode).toBe('complete');
-				expect(resolved.hintsLevel).toBe('hard');
+				expect(resolved.hintsMode).toBe('off');
 			});
 		});
 

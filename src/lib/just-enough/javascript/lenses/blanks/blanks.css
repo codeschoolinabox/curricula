@@ -25,9 +25,35 @@
  * adding any actual horizontal spacing.
  */
 
-[data-lens='blanks'] .cm-blank-unfilled {
-	background-color: rgba(255, 235, 153, 0.35);
-	outline: 1px solid rgba(180, 140, 0, 0.45);
+/*
+ * Inc 6h-redux: alternating per-blank "chunk" highlighting using
+ * Wong's colorblind-safe palette (Nature Methods 2011):
+ *   - Blue   #0072B2  (even-parity chunks)
+ *   - Orange #D55E00  (odd-parity chunks; vermilion)
+ * These two are the canonical first-two choices for CVD-safe
+ * distinguishability (deuteranopia + protanopia + tritanopia safe;
+ * high contrast against light backgrounds).
+ *
+ * Unfilled vs Incorrect distinction does NOT rely on color alone:
+ *   - Unfilled: light tint, thin solid outline
+ *   - Incorrect: deeper tint, thick DASHED outline
+ * The outline-style change is perceptible regardless of color
+ * recognition, so "this blank is wrong" reads even for users who
+ * can't distinguish the parity colors at all.
+ *
+ * Correct: transparent (no chunk decoration) — the blank fades into
+ * the source once solved, minimizing visual noise.
+ */
+[data-lens='blanks'] .cm-blank-unfilled.cm-blank-parity-even {
+	background-color: rgba(0, 114, 178, 0.18);
+	outline: 1px solid rgba(0, 114, 178, 0.6);
+	outline-offset: 1px;
+	border-radius: 2px;
+}
+
+[data-lens='blanks'] .cm-blank-unfilled.cm-blank-parity-odd {
+	background-color: rgba(213, 94, 0, 0.18);
+	outline: 1px solid rgba(213, 94, 0, 0.6);
 	outline-offset: 1px;
 	border-radius: 2px;
 }
@@ -37,11 +63,41 @@
 	background-color: transparent;
 }
 
-[data-lens='blanks'] .cm-blank-incorrect {
-	background-color: rgba(220, 60, 60, 0.18);
-	outline: 1px solid rgba(180, 30, 30, 0.55);
+[data-lens='blanks'] .cm-blank-incorrect.cm-blank-parity-even {
+	background-color: rgba(0, 114, 178, 0.30);
+	outline: 2px dashed rgba(0, 114, 178, 0.85);
 	outline-offset: 1px;
 	border-radius: 2px;
+}
+
+[data-lens='blanks'] .cm-blank-incorrect.cm-blank-parity-odd {
+	background-color: rgba(213, 94, 0, 0.30);
+	outline: 2px dashed rgba(213, 94, 0, 0.85);
+	outline-offset: 1px;
+	border-radius: 2px;
+}
+
+/*
+ * AR-4 IMPORTANT Inc 6h-redux: oneDark background (#282c34, luminance
+ * ~0.023) makes the 0.18-opacity tints near-invisible. Boost opacity
+ * under dark color schemes so the chunk colors stay perceptible
+ * without losing the light-mode subtlety. The outline-style
+ * distinction (solid vs dashed) carries the unfilled-vs-incorrect
+ * signal in both modes; this just makes the parity colors readable.
+ */
+@media (prefers-color-scheme: dark) {
+	[data-lens='blanks'] .cm-blank-unfilled.cm-blank-parity-even {
+		background-color: rgba(0, 114, 178, 0.42);
+	}
+	[data-lens='blanks'] .cm-blank-unfilled.cm-blank-parity-odd {
+		background-color: rgba(213, 94, 0, 0.42);
+	}
+	[data-lens='blanks'] .cm-blank-incorrect.cm-blank-parity-even {
+		background-color: rgba(0, 114, 178, 0.55);
+	}
+	[data-lens='blanks'] .cm-blank-incorrect.cm-blank-parity-odd {
+		background-color: rgba(213, 94, 0, 0.55);
+	}
 }
 
 /*
@@ -56,4 +112,75 @@
 	font-size: 0.85rem;
 	color: #555;
 	border-bottom: 1px solid #ddd;
+}
+
+/*
+ * Inc 6h-redux hints panel: cursor-scoped, on-demand, scrambled.
+ * Renders only when hintsMode='on'. Shows hint for the blank under
+ * the cursor (or empty state when cursor is in anchor text). A
+ * per-blank reveal button toggles the alphabetically-scrambled
+ * letters of `blank.original` (deterministic; reveals character SET
+ * without order).
+ */
+[data-lens='blanks'] [data-blanks-hints] {
+	margin: 0.5rem 0;
+	padding: 0.5rem 0.75rem;
+	font-family: system-ui, sans-serif;
+	font-size: 0.85rem;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fafafa;
+}
+
+[data-lens='blanks'] [data-blanks-hints] h4 {
+	margin: 0 0 0.25rem 0;
+	font-size: 0.9rem;
+	color: #444;
+}
+
+[data-lens='blanks'] [data-blanks-hints] [data-hint-empty] {
+	margin: 0;
+	color: #888;
+	font-style: italic;
+}
+
+[data-lens='blanks'] [data-blanks-hints] [data-hint-reveal-button] {
+	padding: 0.25rem 0.6rem;
+	font-size: 0.85rem;
+	border: 1px solid #bbb;
+	border-radius: 3px;
+	background: #fff;
+	cursor: pointer;
+}
+
+[data-lens='blanks'] [data-blanks-hints] [data-hint-reveal-button]:hover {
+	background: #f0f0f0;
+}
+
+[data-lens='blanks'] [data-blanks-hints] [data-hint-revealed] {
+	margin: 0;
+	color: #333;
+}
+
+[data-lens='blanks'] [data-blanks-hints] [data-hint-revealed] code {
+	padding: 0 0.3rem;
+	background: rgba(255, 193, 7, 0.18);
+	border: 1px solid rgba(180, 140, 0, 0.35);
+	border-radius: 2px;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/*
+ * Inc 6h-redux char-level diff highlighting for viewMode='diff'.
+ * In diff mode the per-blank correctness classes (Inc 6.7) are NOT
+ * applied; instead each character whose value mismatches the
+ * `originalCode` at the same position (and isn't an unfilled `_`)
+ * gets `.cm-diff-mismatch` — red tint on the wrong char.
+ * "The diff itself is the hint."
+ */
+[data-lens='blanks'] .cm-diff-mismatch {
+	background-color: rgba(244, 67, 54, 0.25);
+	outline: 1px solid rgba(180, 30, 30, 0.55);
+	outline-offset: 1px;
+	border-radius: 2px;
 }
