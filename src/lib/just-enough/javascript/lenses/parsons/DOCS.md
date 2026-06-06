@@ -89,15 +89,20 @@ wrapper end-to-end (jsdom + `@testing-library/react`); tests live under `tests/`
    seeded from the parser's shuffled pool (all lines in the pool, solution
    column empty); the evaluation result is empty (populated on the first Check).
 
-2. **Parse the snippet** (sync, pure, memoized) — the wrapper memoizes the
-   `parse-parsons` call on the embodiment's source and the resolved config
-   (`maxDistractors`). The call is synchronous and does not parse an AST
-   (parsons is text-only). Result shape per `ParsedParsons`: the model solution
-   (ordered), the selected distractors (`min(maxDistractors, declared)`), and
-   the initial shuffled pool of line ids. The shuffle uses bare `Math.random()`
+2. **Parse the snippet** (sync, **impure**, held as **mount-state** — NOT
+   memoized) — the wrapper holds the `parse-parsons` result in lazy-seeded
+   `useState` (see § Phase-8 additions for why `useState` over `useMemo`: the
+   parse is impure via `Math.random()`, and Reset must reseed parse + arrangement
+   atomically or a fresh parse's re-selected distractor subset desyncs `lineById`).
+   The call is synchronous and does not parse an AST (parsons is text-only). Result
+   shape per `ParsedParsons`: the model solution (ordered), the selected distractors
+   (`min(maxDistractors, declared)`), the initial shuffled pool of line ids, and
+   (Inc 9) the extracted hint blocks. The shuffle uses bare `Math.random()`
    (mechanical mandate); a valid shuffle never equals the model order for a
-   multi-line solution. Re-parse on config/source change re-seeds the
-   arrangement and clears the evaluation result.
+   multi-line solution. **`parsed` is mount-stable:** a config/source change
+   REMOUNTS the component (preview `key={code}`, orchestrator editor↔lens toggle +
+   lens switch) rather than re-parsing in place; only **Reset** reseeds it in-mount
+   (replacing parse + arrangement together and clearing the evaluation result).
 
 3. **Arrange** (per learner drag/indent, sync, pure reducer) — the learner's
    arrangement (`{ pool, solution }`) is `useReducer` state transformed by
@@ -132,9 +137,12 @@ wrapper end-to-end (jsdom + `@testing-library/react`); tests live under `tests/`
    `<div data-lens="parsons" data-view-mode="work|complete" data-can-indent="…">`.
    In work view: the available pool (draggable lines) + the solution column
    (drop target, ordered placed lines with `data-indent` and, after Check,
-   `data-correctness`) + indent controls (when `canIndent`) + the Check button +
-   the score (`aria-live="polite"`). In complete view: the model solution
-   rendered read-only at `level * indentSize`.
+   `data-correctness`) + indent controls + the Check button + the score
+   (`aria-live="polite"`). **Work-view indent renders as compact guide steps
+   (`data-parsons-indent-step`), NOT a `level * indentSize` margin** — `indentSize`
+   is literal in the COMPLETE view only; controls sit on the right (see § Phase-8
+   additions). In complete view: the model solution rendered read-only at literal
+   `level * indentSize`.
 
 6. **Toggle + Reset** (the interactions not owned by phases 3–4) — the view-mode
    toggle swaps `viewMode` **without** clearing the arrangement (self-check
@@ -158,9 +166,9 @@ flowchart TD
     Props -->|"recommend, sync, pure"| Recs["[] (WS2-deferred)"]
     Props -->|"resolve config, sync, pure"| Cfg["{ canIndent, maxDistractors,<br/>indentSize, viewMode }"]
 
-    Props -->|"source.code"| Parse[("useMemo:<br/>parse-parsons<br/>(vendored, sync, pure;<br/>split + // distractor +<br/>normalize indent + shuffle)")]
+    Props -->|"source.code"| Parse[("mount-state (useState):<br/>parse-parsons<br/>(sync, impure via Math.random;<br/>extract /* */ hints + split +<br/>// distractor + normalize indent + shuffle)")]
     Cfg --> Parse
-    Parse -->|"ParsedParsons"| Model["{ solution (ordered, model indent),<br/>distractors (min(max,declared)),<br/>pool (shuffled ids) }"]
+    Parse -->|"ParsedParsons"| Model["{ solution (ordered, model indent),<br/>distractors (min(max,declared)),<br/>pool (shuffled ids),<br/>hints (Inc 9) }"]
 
     Model --> State[("useReducer:<br/>Arrangement<br/>{ pool, solution: PlacedLine[] }")]
     State -->|"native HTML5 DnD<br/>(onDragStart/onDragOver preventDefault/<br/>onDrop) + indent/outdent"| Arrange[("arrange.ts<br/>(pure reducer:<br/>placeFromPool/reorder/<br/>returnToPool/indent/outdent)")]
@@ -186,12 +194,19 @@ flowchart TD
     Props -.->|"unmount (snippet change)"| Unmount[/"React GC of per-mount state.<br/>No listeners/timers to clean<br/>(no URL, no CodeMirror, no debounce)."/]
 ```
 
+> **Diagram currency:** the Parse node is `useState` mount-state (not `useMemo`).
+> The Phase-8 render surface is NOT yet drawn here — the info panel (legend,
+> `extra lines: N`, hint blocks), the single view toggle, the per-level guide
+> steps, and the attempt-history modal + its `Attempt[]` state land in Inc 9–11
+> and the diagram is redrawn with its producer increment (per the AR-4 "sketch the
+> actual flow" step). See § Phase-8 additions for the authoritative deltas.
+
 The diagram is per-mount. The orchestrator (upstream) supplies `embodiment` and
 `config`; the recommender (sibling) calls `applicableTo` and `recommend`. The
-render loop reads the arrangement state + the memoized parse result + (after
-Check) the evaluation result; the drag/indent handlers feed arrangement updates
-through the reducer. **There is no cross-mount persistence** — the arrangement
-and evaluation die with the component instance (no URL state in v1).
+render loop reads the arrangement state + the parse mount-state + (after Check)
+the evaluation result; the drag/indent handlers feed arrangement updates through
+the reducer. **There is no cross-mount persistence** — the arrangement,
+evaluation, and attempt history die with the component instance (no URL state in v1).
 
 ### Structural constraints
 
@@ -300,6 +315,71 @@ and evaluation die with the component instance (no URL state in v1).
   Python-isms.** Out of scope; a richer-assessment follow-up.
 - **Multi-language support.** v1 is JavaScript-only (the package is
   `just-enough/javascript`); multi-language is an `embody/` concern.
+
+## Phase-8 additions + browser-checkpoint reconciliations
+
+> The wrapper's UX was reshaped at the per-increment browser gates, and a second
+> DDD pass added four parsonizer-parity features (read faithfully from the legacy
+> `…/parsonizer/component.js`). These are the deltas to the sketch phases above and
+> to the structural constraints; the original phases otherwise stand.
+
+- **Parse held as `useState`, not `useMemo` (phase 2 delta).** `parseParsons` is
+  impure (`Math.random`), and Reset must reseed the parse AND the arrangement
+  together — a fresh parse re-selects the distractor subset, which would desync
+  `lineById` from the reducer if parse re-derived independently. So `parsed` is
+  lazy-seeded mount-state, replaced atomically with the arrangement on Reset (React
+  batches both). Mount-stable otherwise (snippet/config changes remount).
+- **Indent rendering split (phases 3/5 delta).** `data-indent` is the semantic
+  level. The **work view** renders it as `N` compact fixed-width guide steps
+  (`data-parsons-indent-step`) — an alignment cue, NOT a literal margin — with the
+  indent/outdent controls on the **right** so the code's left origin is fixed.
+  `indentSize` is read ONLY for the **complete view's** literal `level * indentSize`
+  rendering. Rationale for buttons-not-drag corrected: `clientX` IS available on
+  `drop`; buttons are an a11y/precision/simplicity trade-off, not a hard limit.
+- **Single view toggle (phase 6 delta).** One `data-parsons-view-toggle` button
+  (label + `aria-pressed` track the view) replaces a two-button segmented control —
+  a deliberate divergence from blanks (peeking is binary). Toggle changes only
+  `viewMode`; it is not an `applyArrange` edit, so it preserves arrangement +
+  feedback.
+- **Block-comment hints (new parse output).** `parse-parsons.ts` extracts `/* … */`
+  blocks (legacy regex) from the source before line-splitting, strips them from the
+  orderable code, and returns `ParsedParsons.hints: ReadonlyArray<HintBlock>`. A
+  `parsons-collapse: <summary>` marker → a collapsible `<details>`; else a plain,
+  always-visible `<pre>`. Rendered above the board (`data-parsons-hints`). Only
+  `/* */` blocks are extracted; `//` line-comments stay as orderable code
+  (deliberate scope vs. the legacy `strip()`-all-comments — note this means a
+  ported snippet with trailing `// note` comments keeps them as line text).
+  **The extraction is a source→source pre-pass UPSTREAM of the existing
+  split/normalize/guard pipeline and must preserve its invariants:** the empty-snippet
+  guard (a hint-only source → empty exercise → score 100, no crash), indent
+  normalization of the line following a stripped block (no phantom indent), and the
+  marker-only-line drop.
+- **Distractor-count + legend (new render).** `data-parsons-distractor-count`
+  (`extra lines: N`, N>0) and `data-parsons-legend` (the 5-state colour key) sit in
+  an info panel above the board. **Both collapsed by default — a deliberate V2
+  divergence, NOT legacy parity** (the legacy shows `extra lines:` always-open):
+  collapsed per the user's compactness request, with a known discoverability
+  trade-off for novices (revisit at the Inc 10 browser gate; consider auto-expanding
+  the legend on first Check). The legend itself is a V2 add (legacy used bare marker
+  classes). Non-marker hint blocks stay always-visible (faithful).
+- **Attempt history (new in-mount state).** Each Check appends an `Attempt`
+  (snapshot of placed lines' code+indent+correctness + score + success) to a
+  `useState` array; a `data-parsons-history-open` button opens a React-state modal
+  (`data-parsons-history-modal`, NOT the legacy `:target`/anchor hack) listing them.
+  Persists across Reset (faithful), dies on unmount (in-mount only — squares with
+  disposable-practice: no cross-mount persistence). **Snapshots are frozen at Check
+  time and rendered verbatim — the modal NEVER re-grades** (re-derivation would
+  diverge from what the learner saw; the same desync class as the parse-`useState`
+  decision). **The legacy `history` enable/disable flag (default `true`) is dropped:**
+  history is always-on, no config knob (no pedagogical case for disabling a
+  non-destructive review affordance; keeps `ParsonsLensConfig` minimal).
+- **New sandbox-harness `data-*` hooks** join the contract (renaming any is a
+  contract change): `data-parsons-toolbar`, `-check`, `-reset`, `-view-toggle`,
+  `-indent-step`, `-indent`/`-outdent`, `-unplaced`, `-score` (value-bearing),
+  `-legend`, `-distractor-count`, `-hints`, `-history-open`, `-history-modal`. Types
+  added: `HintBlock`, `Attempt` (runtime, not config — SerializableValue discipline
+  unaffected); `ParsedParsons.hints` lands with its producer in the hint-extraction
+  increment.
 
 ## Why grade per-line independently (vs. the legacy sequential gate)
 

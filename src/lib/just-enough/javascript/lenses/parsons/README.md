@@ -161,23 +161,68 @@ JSParsons widget (`parsons.js`).
 
 ```text
 <div data-lens="parsons" data-view-mode="work|complete" data-can-indent="true|false">
-  <header>                          — title + Check button + Reset button
-  <main data-parsons-board>         — work view: two columns
-    <ul data-parsons-pool>          —   available pool (shuffled, draggable lines)
-    <ol data-parsons-solution>      —   solution column (drop target, ordered)
-      <li data-parsons-line         —     each placed line:
-          data-indent="N"           —       indent level (visual margin = N * indentSize)
-          data-correctness="…">     —       set after Check: correct|wrong-order|wrong-indent|distractor
-        <indent controls>           —       outdent / indent buttons (when canIndent)
-  <pre data-parsons-complete>       — complete view: the solution, read-only
-  <div data-parsons-score>          — aggregate score (after Check), aria-live="polite"
+  <header data-parsons-toolbar>       — controls
+    <button data-parsons-check>       —   grade the current arrangement
+    <button data-parsons-reset>       —   re-shuffle + clear feedback
+    <button data-parsons-view-toggle> —   single toggle: "Show solution" ⇄ "Back to
+                                            exercise" (aria-pressed = solution shown)
+  — info panel (above the board) —
+    <… data-parsons-legend>           —   feedback colour key (collapsible)
+    <… data-parsons-distractor-count> —   "extra lines: N" hint (collapsible; N>0)
+    <… data-parsons-hints>            —   educator hint blocks: <details><summary> when
+                                            parsons-collapse:, else <pre>
+  — work view (data-view-mode="work") —
+  <main data-parsons-board>           —   two columns
+    <ul data-parsons-pool>            —     available pool (shuffled, draggable <li>;
+        <li data-parsons-unplaced>    —       set after Check on a SOLUTION line still
+                                                in the pool — a "missing" hint)
+    <ol data-parsons-solution>        —     solution column (drop target, ordered)
+      <li data-parsons-line           —       each placed line:
+          data-indent="N"             —         indent level (semantic; non-negative int)
+          data-correctness="…">       —         after Check: correct|wrong-order|
+                                                  wrong-indent|distractor
+        <span data-parsons-indent-step> —       N compact guide rules (alignment cue —
+                                                  NOT literal indentSize spaces)
+        <code>line text</code>
+        <span data-parsons-indent-controls> —   right-side outdent/indent buttons
+            <button data-parsons-outdent>   —     (omitted at level 0)
+            <button data-parsons-indent>    —     (when canIndent)
+  <div data-parsons-score>            —   aggregate score (after Check), aria-live
+  — complete view (data-view-mode="complete") —
+  <pre data-parsons-complete>         —   model solution, read-only, in order at
+                                            literal level*indentSize spaces, no distractors
+  — attempt history —
+  <button data-parsons-history-open> + modal <… data-parsons-history-modal> — Check log
 </div>
 ```
 
 The `data-lens` attribute is the lenses-peer invariant (see
-[`../DOCS.md` § Structural constraints](../DOCS.md)). The `data-view-mode`,
-`data-can-indent`, `data-indent`, and `data-correctness` attributes are
-sandbox-harness selectors and CSS hooks; renaming them is a contract change.
+[`../DOCS.md` § Structural constraints](../DOCS.md)). These are sandbox-harness
+selectors and CSS hooks; renaming any is a contract change: `data-view-mode`,
+`data-can-indent`, `data-indent`, `data-correctness`, `data-parsons-toolbar`,
+`data-parsons-check`, `data-parsons-reset`, `data-parsons-view-toggle`,
+`data-parsons-board`, `data-parsons-pool`, `data-parsons-solution`,
+`data-parsons-line`, `data-parsons-indent-step`, `data-parsons-indent` /
+`data-parsons-outdent`, `data-parsons-unplaced`, `data-parsons-score`
+(its value is the score), `data-parsons-complete`, `data-parsons-legend`,
+`data-parsons-distractor-count`, `data-parsons-hints`, `data-parsons-history-open`,
+`data-parsons-history-modal`.
+
+`data-line-id` (on every pool and solution `<li>`) is an **internal wiring hook**,
+not a sandbox-harness selector: `onDrop` reads it via `closest('[data-line-id]')` to
+identify the drop-target line and compute the insert index. It is load-bearing for
+the drag interaction (do not remove it), but harness/CSS code should key off the
+`data-parsons-*` family above. `data-correctness` is **absent until the first
+Check** (React omits it while ungraded) — treat absence as "ungraded," not a state.
+
+**Two presentation divergences from the original Phase-0 sketch** (reshaped at the
+browser checkpoints, see [`./DOCS.md`](./DOCS.md)): (1) in the WORK view the indent
+is shown as compact fixed-width **guide steps** (a relative nesting cue), not a
+literal `level * indentSize` margin — `indentSize` drives only the COMPLETE view's
+literal rendering; the controls sit on the **right** so the code's left origin is
+fixed and equal depths align. (2) the view toggle is a **single** button (peeking
+is a binary action), a deliberate parsons-specific divergence from the `blanks`
+two-button toggle.
 
 ## Pool + solution contract
 
@@ -232,24 +277,34 @@ therefore specified concretely, and the **arrangement logic is a pure reducer**
 
 ## Indent contract (when `canIndent`)
 
-- Each placed line carries an **indent level** (non-negative integer), shown as
-  a left margin of `level * indentSize` spaces.
-- **Indent / outdent controls** (per placed line) increment / decrement the
-  level; outdent floors at 0.
+- Each placed line carries an **indent level** (non-negative integer), exposed
+  semantically as `data-indent="N"`. In the **work view** the level is shown as
+  `N` compact, fixed-width **guide steps** (`data-parsons-indent-step` — faint
+  vertical rules) rather than a literal `level * indentSize` margin, so deep
+  nesting does not consume horizontal space and equal depths line up visually.
+  (`indentSize` drives the **complete view's** literal rendering, not the work
+  view — see [View contract](#view-contract).)
+- **Indent / outdent controls** sit on the **right** of each placed line (so the
+  code's left origin is fixed and equal depths align). They are dimmed at rest and
+  brighten on hover / keyboard focus, but stay in the DOM and keyboard-reachable.
+  The **outdent button is omitted at level 0** (nothing to outdent — the floor is
+  enforced by its absence; the reducer also floors at 0 as defense).
 - Indent level is learner state. Every line **starts at level 0** when it enters
-  the solution (legacy parity: `init` zeroes all line indents, L1016 — lines
-  begin flush-left and the learner establishes nesting themselves). Thereafter
-  the level is set by the indent/outdent controls and **persists across reorders
-  within the solution column**. Returning a line to the pool drops its level
-  (the pool carries no indent — `Arrangement.pool` is a list of ids), so a line
-  dragged back and re-placed restarts at 0. (The legacy set indent via
-  horizontal drag-distance, `updateIndent` L1137; V2 uses explicit buttons
-  because native HTML5 DnD exposes no reliable horizontal-offset signal — a
-  deliberate divergence in _mechanism_.) The level is graded against the model
-  line's normalized level.
-- When `canIndent` is `false`, the controls are hidden,
+  the solution (legacy parity: `init` zeroes all line indents — lines begin
+  flush-left and the learner establishes nesting themselves). It **persists across
+  reorders within the solution column** and **resets to 0 on a pool round-trip**
+  (the pool carries no indent — `Arrangement.pool` is a list of ids). The level is
+  graded against the model line's normalized level.
+- **Why buttons, not drag-to-indent.** The legacy set indent via horizontal
+  drag-distance (`updateIndent`). V2 uses explicit controls. This is a deliberate
+  trade-off, **not** a hard limitation: native HTML5 DnD _does_ expose `clientX` on
+  `drop`, so drag-to-indent is implementable — buttons are chosen for accessibility
+  (keyboard/pointer-independent), precision (an exact level vs. a fiddly horizontal
+  band), and a 1-D `onDrop` adapter. (Drag-to-indent / `@dnd-kit` is a Future
+  direction.)
+- When `canIndent` is `false`, the controls and guide steps are not rendered,
   `data-can-indent="false"` is set, and indentation is excluded from grading and
-  from the score.
+  from the score (lines render flush-left).
 
 ## Feedback contract (Check)
 
@@ -300,15 +355,86 @@ vacuously 100% rather than `NaN%`.
 
 ## View contract
 
-- **Work view** (`data-view-mode="work"`) — the interactive pool + solution
-  board described above.
+- **Work view** (`data-view-mode="work"`) — the interactive pool + solution board
+  described above.
 - **Complete view** (`data-view-mode="complete"`) — the model solution rendered
-  read-only (lines in model order, indented at `level * indentSize`), for
-  self-check. No distractors. Toggling to complete and back **preserves the
-  learner's arrangement** (parity with the blanks view-mode toggle; the toggle
-  is a self-check affordance, not a reset). Arrangement lives in lens-local
-  React state for the lifetime of the mount; only unmount discards it, per the
-  disposable-practice contract.
+  read-only in `<pre data-parsons-complete>` (lines in model order, indented at
+  literal `level * indentSize` spaces — the one place `indentSize` is used
+  literally). No distractors.
+- **Single toggle.** One `data-parsons-view-toggle` button flips the view —
+  labelled "Show solution" in work view, "Back to exercise" in complete view;
+  `aria-pressed` is `true` when the solution is showing. It seeds from
+  `config.viewMode`. **A deliberate parsons-specific divergence from the blanks
+  two-button toggle:** peeking at the solution is a binary action, so one labelled
+  toggle reads clearer than two co-equal buttons.
+- Toggling is a **self-check affordance, not a reset**: it changes only the view,
+  never the arrangement — it is not routed through the arrangement reducer, so it
+  **preserves both the learner's arrangement AND any Check feedback**. Arrangement +
+  feedback live in lens-local React state for the lifetime of the mount; only
+  unmount discards them, per the disposable-practice contract.
+
+## Feedback legend
+
+A collapsible legend (`data-parsons-legend`) keys the per-line feedback colours
+(correct / wrong-order / wrong-indent / distractor / unplaced → their meanings) so a
+learner can read a Check result without guessing. Collapsed by default to keep the
+surface uncluttered. This is a V2 addition (the legacy used bare marker classes with
+no key).
+
+## Hint blocks (educator `/* … */` guidance)
+
+The educator may embed **hint blocks** in the snippet as C-style block comments.
+Ported faithfully from the legacy JSParsons parsonizer (`component.js`): each
+`/* … */` block (with its surrounding horizontal whitespace) is **extracted from the
+source before line-parsing** by `lib/parse-parsons.ts`, removed from the orderable
+code (so it is never a solution or distractor line), and rendered read-only above
+the board (`data-parsons-hints`). The parser returns them as
+`ParsedParsons.hints` (`ReadonlyArray<HintBlock>`, see [`./types.ts`](./types.ts)).
+
+- A block containing a `parsons-collapse: <summary>` marker renders as
+  `<details><summary>…</summary>…</details>` — the text after the marker is the
+  summary, the rest is the body — for collapsible long-form guidance.
+- A block with no marker renders as a plain, always-visible `<pre>` (whitespace
+  preserved) — faithful to the legacy (only `parsons-collapse:` blocks collapse).
+- **Scope:** only `/* … */` block comments become hints. Unlike the legacy (which
+  `strip()`s ALL comments out of the code), V2 leaves `//` line-comments as ordinary
+  orderable code — a deliberate scope decision (this feature is block-comment hints,
+  not general comment stripping). (Consequence: a snippet ported from the legacy with
+  trailing `// note` comments keeps them as part of the orderable line text.)
+- **Empty edge:** an empty block (`/**/`) or an empty `parsons-collapse:` summary
+  renders as-is (an empty hint), not filtered.
+
+## Distractor-count hint
+
+When the exercise includes distractors, a `data-parsons-distractor-count` hint shows
+**`extra lines: N`** (N = the number of distractors mixed into the pool) so the
+learner knows some pool lines do not belong. The text is ported from the legacy
+(`component.js` `extra lines:` line); shown only when N > 0. **It is collapsed by
+default — a deliberate V2 divergence, NOT legacy parity** (the legacy renders it
+always-open). Collapsed per the compactness request, with a known **discoverability
+trade-off** for novices (a beginner may not learn distractors exist until they fail
+Check) — revisit at the Inc 10 browser checkpoint.
+
+## Attempt history
+
+Each **Check** appends an `Attempt` (see [`./types.ts`](./types.ts)) to an in-mount
+history. A `data-parsons-history-open` control opens a modal
+(`data-parsons-history-modal`) listing every checked attempt — its number,
+pass / fail, score, and a **read-only snapshot of the arrangement as it was checked**
+(each placed line's code, indent, and resolved correctness). Ported from the legacy
+parsonizer's "review guesses" modal (`component.js` `registerGuess`), with two
+adaptations: the modal is **React-state-driven** (not the legacy anchor-hash /
+`:target` hack, which fights SPA routing), and each snapshot is a re-rendered value
+rather than a cloned DOM node. History **persists across Reset** (faithful — the
+legacy keeps guesses across reshuffle) and dies on unmount (in-mount only; no
+cross-mount persistence, per the disposable-practice contract). Each snapshot is
+**frozen at Check time and rendered verbatim — the modal never re-grades** (re-deriving
+would risk showing a different verdict than the learner saw).
+
+The legacy gated this whole surface on a `history` constructor flag (default
+`true`); **V2 drops the flag — history is always-on, no config knob** (no
+pedagogical case for disabling a non-destructive review affordance, and it keeps
+`ParsonsLensConfig` minimal). Making it configurable is a Future-direction item.
 
 ## Edge cases
 

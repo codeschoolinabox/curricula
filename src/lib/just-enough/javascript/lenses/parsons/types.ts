@@ -85,6 +85,35 @@ export type ParsedParsons = Readonly<{
 	solution: ReadonlyArray<ParsonsLine>;
 	distractors: ReadonlyArray<ParsonsLine>;
 	pool: ReadonlyArray<string>;
+	// NOTE (Inc 9): `hints: ReadonlyArray<HintBlock>` joins this shape when
+	// `parse-parsons` gains block-comment extraction. It is added there (with its
+	// producer) rather than here, so the type and the code that populates it land
+	// together — adding the required field before the producer would not typecheck.
+}>;
+
+/**
+ * An educator-authored hint block extracted from the snippet — a legacy-parity
+ * feature ported from the JSParsons parsonizer (`component.js` block-comment
+ * extraction). A C-style block comment (slash-star … star-slash) in the source is
+ * pulled OUT of the orderable code and shown as read-only guidance above the
+ * board; it is never a solution or distractor line.
+ *
+ * @remarks
+ * Produced by `parse-parsons.ts` (Inc 9) via the legacy block-comment regex, which
+ * strips the block (and its surrounding horizontal whitespace) from the code
+ * before line-splitting. (The exact regex is vendored in `parse-parsons.ts`; it is
+ * not reproduced here to avoid embedding a comment terminator in this doc.)
+ *
+ * - `summary` — when the block contains a `parsons-collapse: <text>` marker, the
+ *   text after the marker becomes a collapsible `<details><summary>`; the rest of
+ *   the block is the body. `null` when there is no marker (the block renders as a
+ *   plain, always-visible `<pre>`).
+ * - `body` — the block-comment text to display (with the `parsons-collapse:`
+ *   marker line removed when `summary` is set). Whitespace is preserved.
+ */
+export type HintBlock = Readonly<{
+	summary: string | null;
+	body: string;
 }>;
 
 /**
@@ -196,6 +225,34 @@ export type EvaluationResult = Readonly<{
 	correct: number;
 	score: number;
 	success: boolean;
+}>;
+
+/**
+ * One logged Check attempt for the attempt-history modal — a legacy-parity feature
+ * ported from the JSParsons parsonizer (`component.js` `registerGuess` / "review
+ * guesses"). Each Check appends an `Attempt`; the learner can open a modal to
+ * review what they tried.
+ *
+ * @remarks
+ * Wired in Inc 11. The history lives in per-mount React state only — it persists
+ * across Reset (faithful: the legacy keeps `guesses` across reshuffle) but dies on
+ * unmount, consistent with the disposable-practice invariant (no cross-mount
+ * persistence; see README § Conventions inherited).
+ *
+ * - `index` — the 1-based attempt number (display order).
+ * - `score` / `success` — the `EvaluationResult` aggregates at Check time.
+ * - `snapshot` — the SOLUTION column as it was when checked: each placed line's
+ *   `code`, chosen `indent`, and resolved `correctness`, in placed order. Rendered
+ *   read-only in the modal (a faithful "see what I tried" view rather than the
+ *   legacy's DOM clone).
+ */
+export type Attempt = Readonly<{
+	index: number;
+	score: number;
+	success: boolean;
+	snapshot: ReadonlyArray<
+		Readonly<{ code: string; indent: number; correctness: LineCorrectness }>
+	>;
 }>;
 
 /**
