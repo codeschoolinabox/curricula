@@ -1,32 +1,36 @@
 /**
  * @file React wrapper for the `blanks` lens. Default-exports the frozen
- * `LensModule` the orchestrator's lens registry consumes (post Inc 7).
+ * `LensModule` the orchestrator's `LENS_REGISTRY` consumes.
  *
- * The wrapper composes the pure-TS core (`./core.ts`) + the vendored
- * lib modules (`./lib/blankenate.ts` etc.) into the blanks surface: a
- * `<div data-lens="blanks" data-view-mode="…" data-hints-mode="…">`
- * root with toolbar, editor header, editor, score, and hints panel.
+ * Composes the pure-TS core (`./core.ts`) and the four `lib/` subsystems
+ * (`blankenate`, `no-paste-extension`, `evaluate-correctness`, `url-config`)
+ * into the lens surface: a `<div data-lens="blanks" data-view-mode="…"
+ * data-editor-mode="…" data-hints-mode="…">` root containing the toolbar,
+ * editor header, editor-mode toggle, CodeMirror editor, score, and
+ * cursor-scoped hints panel.
  *
- * **Current scope (Inc 6a → 6h-redux):** mounts CodeMirror in
- * editable/read-only mode per view-mode toggle (6a/6b/6c); aggregate
- * score panel + per-blank correctness (6d); difficulty slider (6e);
- * 5 content-type checkboxes (6f); lock non-placeholder regions with
- * StateField + transactionFilter (6.5); 5th content-type 'delimiters'
- * via Acorn onToken + per-blank visual border (6.6); length-matched
- * placeholders + fixed-width overwrite-mode UX + directional
- * compaction on `_` deletes + correctness-aware decoration class
- * (6.7); informational editor header showing mode + difficulty +
- * blanks total + remaining (6g); resolved-tier hints panel with 3
- * tiers (easy/medium/hard) plus auto-inference from difficulty
- * (6h-redux).
+ * Behavior owned here:
+ * - Mounts CodeMirror with length-matched `_` placeholders for blanked
+ *   tokens; the placeholder span behaves as a fixed-width fillable form
+ *   field (overwrite-mode UX, directional compaction on `_` deletes,
+ *   per-blank correctness-aware decoration class) via `StateField` +
+ *   `EditorState.transactionFilter`.
+ * - View-mode toggle (`blankenated` / `complete`); editor-mode sub-toggle
+ *   (`helpful` / `diff` / `raw`) for the blankenated view.
+ * - Difficulty slider (0–100) and 5 content-type checkboxes (keywords,
+ *   identifiers, operators, literals, delimiters); both re-derive the
+ *   blank set on change.
+ * - Editor header (mode label + difficulty% + total / remaining counts).
+ * - Cursor-scoped hints panel with scrambled-incremental letter reveals
+ *   per blank, rendered only when `hintsMode === 'on'` AND
+ *   `viewMode === 'blankenated'` AND `editorMode === 'helpful'`.
+ * - URL config read on mount + debounced 500ms write on user-driven
+ *   change + `hashchange` listener for browser back/forward replay.
  *
- * Remaining: URL config read/write (6i); registration in
- * LENS_REGISTRY (7).
- *
- * Inc 6.m: Ask Me / socratizing removed from this lens — moved
- * to the SL orchestrator (cross-lens concern; the original
- * embodiment, not the blankenated source, is what socratizing
- * consumes — so it belongs one layer up, not per-lens).
+ * Not owned here: the Socratic study companion (Ask Me / socratizing)
+ * lives at the SL orchestrator one layer up — it operates on the
+ * original embodiment rather than the blankenated source, so it is a
+ * cross-lens concern.
  */
 
 import { javascript } from '@codemirror/lang-javascript';
@@ -697,7 +701,13 @@ const BlanksComponent: ComponentType<LensProperties> =
 		// (snippet / future-difficulty / future-content-types).
 		const evaluation = useMemo(() => {
 			if (blankResult === null) {
-				return { score: 100, total: 0, correct: 0, incorrect: 0, unfilled: 0 };
+				return freezeInPlace({
+					score: 100,
+					total: 0,
+					correct: 0,
+					incorrect: 0,
+					unfilled: 0,
+				});
 			}
 			// The doc the learner is editing — learnerCode if they typed,
 			// blankedCode otherwise. evaluateCorrectness compares against
@@ -708,14 +718,14 @@ const BlanksComponent: ComponentType<LensProperties> =
 				blankResult.blanks,
 				blankResult.originalCode,
 			);
-			return {
+			return freezeInPlace({
 				score: result.score,
 				total: result.total,
 				correct: result.correct,
 				incorrect: result.incorrect,
 				unfilled: result.unfilled,
 				correctnessMap: result.correctnessMap,
-			};
+			});
 		}, [learnerCode, blankResult]);
 
 		// Inc 6h-redux: hints config is `'on' | 'off'`, orthogonal to

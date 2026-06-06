@@ -1,18 +1,17 @@
 /**
  * @vitest-environment jsdom
  *
- * Component tests for the `blanks` React wrapper. Current coverage:
- * - Inc 6a: minimum-viable mount of CodeMirror in read-only
- *   blankenated mode with `data-lens="blanks"` root.
- * - Inc 6b: two-button view-mode toggle (blankenated ↔ complete);
- *   data-view-mode attribute reflects active mode; editor content
- *   swaps between blankedCode and originalCode on toggle.
+ * Component tests for the `blanks` React wrapper. End-state behaviors
+ * locked here: CodeMirror mount with `data-lens="blanks"` root; view-mode
+ * toggle (blankenated ↔ complete); editor-mode sub-toggle (helpful / diff
+ * / raw); editable + noPasteExtension wiring; per-blank correctness
+ * decorations; difficulty slider + content-type-checkbox re-derive;
+ * editor header counts; cursor-scoped hints panel with scrambled-
+ * incremental reveal; URL config read/write with debounced 500ms write
+ * and `hashchange` back/forward replay.
  *
- * Inc 6g–6i will add: editor header, hints panel, URL config.
- * (Inc 6c editable+noPaste, 6d correctness wiring, 6e slider, 6f
- * content-type checkboxes — landed.)
- * Inc 6.m removed the Ask Me / socratizing surface from this lens;
- * Ask Me now lives in the SL orchestrator one layer up.
+ * The Socratic study companion (Ask Me / socratizing) is NOT a surface
+ * of this lens — it lives at the SL orchestrator one layer up.
  */
 
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';

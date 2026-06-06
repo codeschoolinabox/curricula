@@ -186,12 +186,8 @@ describe('serializeConfig — pure', () => {
 		});
 
 		it('serializes hintsMode alone', () => {
-			expect(urlConfig.serializeConfig({ hintsMode: 'on' })).toBe(
-				'hints:on',
-			);
-			expect(urlConfig.serializeConfig({ hintsMode: 'off' })).toBe(
-				'hints:off',
-			);
+			expect(urlConfig.serializeConfig({ hintsMode: 'on' })).toBe('hints:on');
+			expect(urlConfig.serializeConfig({ hintsMode: 'off' })).toBe('hints:off');
 		});
 
 		it('serializes editorMode alone', () => {
@@ -289,11 +285,7 @@ describe('serializeConfig — pure', () => {
 				'literals',
 				'delimiters',
 			] as ReadonlyArray<
-				| 'keywords'
-				| 'identifiers'
-				| 'operators'
-				| 'literals'
-				| 'delimiters'
+				'keywords' | 'identifiers' | 'operators' | 'literals' | 'delimiters'
 			>,
 		};
 		const serialized = urlConfig.serializeConfig(config);

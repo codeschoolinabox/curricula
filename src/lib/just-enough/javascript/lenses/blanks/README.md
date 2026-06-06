@@ -89,10 +89,22 @@ Fields:
     semantics.
   - `viewMode?: 'blankenated' | 'complete'` (default `'blankenated'`) — initial
     view.
+  - `editorMode?: 'helpful' | 'diff' | 'raw'` (default `'helpful'`) — sub-mode
+    that the blankenated editor renders in. `helpful` is the full cloze
+    experience: position-locked placeholders, autopad on insert/delete,
+    overwrite-mode UX, per-blank correctness decorations, hints panel eligible
+    to render. `diff` shows the learner's typed text alongside char-level
+    mismatch highlighting against the hidden original; the learner can edit
+    freely (no position-lock); the hints panel does NOT render. `raw` accepts
+    arbitrary edits with no decorations and no feedback (an escape hatch for
+    free-form exploration). The mode is ignored when `viewMode === 'complete'`
+    (the complete view is read-only by definition). The
+    `data-blanks-editor-mode` attribute on the root reflects this value.
   - `hintsMode?: 'on' | 'off'` (default `'on'`) — whether the cursor-scoped
-    hints panel renders. **Orthogonal to `difficulty`** (Inc 6h-redux
-    user-directed redesign — hints are not inferred from difficulty). When
-    `'off'`, the panel does not render at all. When `'on'`, the panel shows a
+    hints panel renders. **Orthogonal to `difficulty`** (hints are not inferred
+    from difficulty). When `'off'`, the panel does not render at all. When
+    `'on'`, the panel renders only when `viewMode === 'blankenated'` AND
+    `editorMode === 'helpful'` — outside those, no panel — and shows a
     reveal-button for the blank under the cursor (only that blank); the learner
     controls scaffolding by choosing how many blanks to reveal. See
     [Hints panel contract](#hints-panel-contract).
@@ -163,11 +175,18 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   shape. The toolbar exposes a checkbox per category; unchecking removes that
   category from the array.
 - **View mode** — one of the two representations of the snippet: `blankenated`
-  (editable, with `__` placeholders the learner fills) or `complete` (read-only,
+  (editable, with `_` placeholders the learner fills) or `complete` (read-only,
   original source for self-check).
+- **Editor mode** — `'helpful' | 'diff' | 'raw'`. Sub-mode that the blankenated
+  editor renders in. `helpful` is the full cloze experience (position-locked
+  overwrite-mode placeholders, per-blank correctness, hints panel eligible).
+  `diff` shows char-level mismatch highlighting against the hidden original;
+  learner edits freely; no hints panel. `raw` accepts arbitrary edits with no
+  decorations. Ignored when `viewMode === 'complete'`. The
+  `data-blanks-editor-mode` attribute on the root reflects this value.
 - **Blankenated** — the verb form (legacy retained). "The source has been
   blankenated" = "the blankenate algorithm has produced a version with selected
-  tokens replaced by `__`".
+  tokens replaced by length-matched `_` runs".
 - **Blankenate** — the vendored algorithm at `lib/blankenate.ts` (JS→TS
   conversion of the legacy `public/static/blanks/blankenate.js`).
 - **Difficulty** — the per-token probability slider (0–100);
@@ -175,10 +194,13 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 - **Correctness** — per-blank state in the **blanks-exercise** sense: `correct`
   (learner typed the original token), `incorrect` (learner typed something
   else), `unfilled` (learner hasn't typed anything yet; the `_` placeholder
-  remains in place). This is the only correctness signal the lens exposes.
+  remains in place, OR the learner typed a string that still contains `_`). This
+  is the only correctness signal the lens exposes. See § Edge cases for the
+  `_`-containing-typed-text caveat.
 - **Hints mode** — `'on' | 'off'`. Enable or disable the cursor-scoped hints
-  panel. Default `'on'`. Orthogonal to `difficulty` (Inc 6h-redux user-directed
-  redesign). The `data-hints-mode` attribute on the root reflects this value.
+  panel. Default `'on'`. Orthogonal to `difficulty`. Renders only when
+  `viewMode === 'blankenated'` AND `editorMode === 'helpful'`. The
+  `data-hints-mode` attribute on the root reflects this value.
 - **Score** — the aggregate percentage. Formula:
   `total === 0 ? 100 : Math.round(correct / total * 100)`. Surfaced in the
   editor header and the hints panel. The `total === 0` branch handles the
@@ -188,19 +210,25 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 ## UI structure
 
 ```text
-<div data-lens="blanks" data-view-mode="blankenated|complete" data-hints-mode="on|off">
-  (Inc 6.m: header with the Ask Me button removed — moved to the SL orchestrator)
+<div data-lens="blanks"
+     data-view-mode="blankenated|complete"
+     data-editor-mode="helpful|diff|raw"
+     data-hints-mode="on|off">
   <toolbar>                         — difficulty slider, 5 content-type checkboxes, view-mode toggle
   <editorHeader>                    — mode label + difficulty% + blanks count + remaining count
+  <editorModeToggle>                — three buttons selecting helpful / diff / raw
   <main>                            — CodeMirror EditorView (editable in blankenated, read-only in complete)
   <aside data-blanks-hints>         — cursor-scoped hint for the blank under the cursor:
-                                      empty state OR reveal-button OR scrambled-letters reveal
-                                      (rendered only when data-hints-mode='on';
-                                      per-blank in-editor visual lives on CM6 decorations via Inc 6.7,
-                                      separate from this panel)
-  <instructions>                    — collapsible "How to use" panel
+                                      empty state OR reveal-button OR scrambled-letters reveal.
+                                      Rendered only when data-hints-mode='on' AND
+                                      data-view-mode='blankenated' AND data-editor-mode='helpful'.
+                                      Per-blank in-editor visual lives on CM6 decorations,
+                                      separate from this panel.
 </div>
 ```
+
+The Socratic study companion (Ask Me) is **not** part of this lens; it lives at
+the SL orchestrator one layer up. See § Ask Me — out of scope.
 
 The `data-lens` attribute is the lenses-peer invariant (see
 [`../DOCS.md` § Structural constraints](../DOCS.md)). The `data-view-mode` and
@@ -348,7 +376,7 @@ The lens reads its config from the URL on mount and writes config changes back
 to the URL with a 500ms debounce. Format:
 
 ```text
-?blanks=difficulty:50,types:keywords+identifiers,view:blankenated,hints:on
+?blanks=difficulty:50,types:keywords+identifiers,view:blankenated,editor:helpful,hints:on
 ```
 
 The `:` separates a key from its value; the `,` separates parameters within the
@@ -371,8 +399,16 @@ URL handling lifts to an adapter over that surface (see
 - **Initial mount.** `blankenate()` is called **synchronously during the first
   render** (the AST is already in `embodiment.raw.ast` by the time
   `applicableTo` admits the lens; Acorn parsing has already happened upstream in
-  `embody()`). The first paint already shows `__` placeholders; no flicker. No
-  `useEffect` wraps the initial derivation.
+  `embody()`). The first paint already shows length-matched `_` placeholders; no
+  flicker. No `useEffect` wraps the initial derivation.
+- **Typed text containing `_`** (e.g. learner types `_priv` into an identifier
+  blank). `evaluate-correctness` classifies any typed content that still
+  contains `_` as `unfilled`, not `incorrect` — the visual feedback is yellow
+  rather than red. Pedagogically minor: the learner sees "still working on it"
+  instead of "wrong answer," and the trailing-`_`-on-an-incomplete-blank case is
+  the dominant signal the heuristic was tuned for. The Future direction item on
+  `Decoration.mark`-based per-blank re-anchoring would replace this heuristic
+  with exact per-blank position tracking.
 - **Empty source** (`embodiment.source.code === ''`). `blankenate('')` returns
   `{ blankedCode: '', blanks: [], originalCode: '' }` — the AST has zero nodes,
   no token is eligible. The lens renders an empty CodeMirror editor; the hints
@@ -515,8 +551,6 @@ jsdom + `@testing-library/react`).
 - **`@codemirror/view`, `@codemirror/state`, `@codemirror/lang-javascript`,
   `@codemirror/theme-one-dark`, `codemirror`** — already in `package.json` (used
   by the editor and the annotate lens).
-- **`socratizing/`** — sibling module at `../../orchestrate/lib/socratizing/`.
-  Imported directly as ESM.
 
 ## Future direction
 

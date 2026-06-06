@@ -3,12 +3,12 @@
 ## Why this module exists
 
 The `blanks` lens is the learner's **fill-in-the-blank workbench**: a place to
-read a snippet with selected tokens replaced by `__` placeholders inside a
-CodeMirror editor, type the missing tokens, and get per-blank correctness
-feedback (green / red / yellow) as they go. A difficulty slider scales the
-exercise across the novice → review spectrum (`p = difficulty / 100` per
-eligible token); five content-type checkboxes scope which token categories are
-eligible (keywords / identifiers / operators / literals / delimiters); a
+read a snippet with selected tokens replaced by length-matched `_` placeholders
+inside a CodeMirror editor, type the missing tokens, and get per-blank
+correctness feedback (green / red / yellow) as they go. A difficulty slider
+scales the exercise across the novice → review spectrum (`p = difficulty / 100`
+per eligible token); five content-type checkboxes scope which token categories
+are eligible (keywords / identifiers / operators / literals / delimiters); a
 view-mode toggle gives the learner a peek at the complete source for self-check
 without losing their answers.
 
@@ -21,12 +21,12 @@ It is the **second migrated pedagogical lens** in WS4's batch (after
 `annotate`). The previous V2 sprint shipped structurally-compliant shells that
 satisfied the `LensModule` contract and passed all tests + AR cycles, but
 **never opened in a browser as a learner** — real pedagogical features
-(CodeMirror with `__` placeholders, AST-based blankenate, hint tiers, per-blank
-feedback, content-type filters, view-mode toggle, URL config) were absent. The
-user called those shells "weak hallucinations." This redo deletes them and
-migrates the legacy `BlanksLens.jsx` faithfully — preserving the algorithm via
-vendoring rather than re-porting, treating the Sandbox Checkpoint as a gate not
-a celebration.
+(CodeMirror with length-matched `_` placeholders, AST-based blankenate, hints
+panel, per-blank feedback, content-type filters, view-mode toggle, URL config)
+were absent. The user called those shells "weak hallucinations." This redo
+deletes them and migrates the legacy `BlanksLens.jsx` faithfully — starting from
+a mechanical conversion of the legacy algorithm and extending the token coverage
+as V2-owned work — treating the Sandbox Checkpoint as a gate not a celebration.
 
 ## Migration
 
@@ -55,25 +55,27 @@ session-level decisions and audit trail.
 
 ## Modules
 
-| File                          | Layer   | Purpose                                                                                                                                                        |
-| ----------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `index.tsx`                   | wrapper | React `Component`; owns per-mount UI state; composes the core                                                                                                  |
-| `core.ts`                     | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend`                                                                                                  |
-| `lib/blankenate.ts`           | core    | **Vendored** — walks the parsed AST, rolls a probability per eligible token, returns the blanked source plus an array of blank descriptors                     |
-| `lib/no-paste-extension.ts`   | core    | **Vendored** — CodeMirror extension blocking keyboard and context-menu paste                                                                                   |
-| `lib/evaluate-correctness.ts` | core    | Position-aware per-blank correctness; fixes the legacy's two substring bugs                                                                                    |
-| `lib/url-config.ts`           | core    | Slimmed URLManager pattern; reads/writes the lens's URL parameter                                                                                              |
-| `types.ts`                    | shared  | `Blank`, `BlankType`, `BlankenateResult`, `ContentType`, `ViewMode`, `HintsMode`, `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`, `BlanksLensConfig` |
+| File                          | Layer   | Purpose                                                                                                                                                                           |
+| ----------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`                   | wrapper | React `Component`; owns per-mount UI state; composes the core                                                                                                                     |
+| `core.ts`                     | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend`                                                                                                                     |
+| `lib/blankenate.ts`           | core    | Walks the parsed AST + token stream, rolls a per-token probability, returns blanked source + blank descriptors. Mechanical JS→TS baseline + V2-owned token-coverage augmentations |
+| `lib/no-paste-extension.ts`   | core    | **Vendored** — CodeMirror extension blocking keyboard and context-menu paste                                                                                                      |
+| `lib/evaluate-correctness.ts` | core    | Position-aware per-blank correctness; fixes the legacy's two substring bugs                                                                                                       |
+| `lib/url-config.ts`           | core    | URL read/write surface for `?blanks=...`; parser validates against V2 enums                                                                                                       |
+| `types.ts`                    | shared  | `Blank`, `BlankType`, `BlankenateResult`, `ContentType`, `ViewMode`, `HintsMode`, `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`, `BlanksLensConfig`                    |
 
 Default export of `index.tsx` is the frozen `LensModule` record. The core
 subsystems under `lib/` are internal; only `index.tsx` and (where applicable)
 `core.ts` import them. The `lib/` subdirectory is eslint-ignored per
-`eslint.config.mjs` § Global ignores — the vendored files preserve the legacy's
-style as a deliberate trade against the mechanical-conversion mandate
-(refactoring to idiomatic V2 is a deliberate follow-up, not an upfront cost).
+`eslint.config.mjs` § Global ignores — preserves the legacy file's style without
+fighting lint; refactoring to idiomatic V2 style is a deliberate follow-up.
 Tests target each subsystem in isolation (vitest, no jsdom) plus the wrapper
 end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
-`lib/tests/`) so they ARE linted — they are OUR code, not vendored.
+`lib/tests/`). The `tests/` directory is currently in `eslint.config.mjs` §
+Global ignores — a WIP exemption during the redo's concurrent-session phase.
+Re-including `tests/` in lint coverage is a follow-up (the eslint config comment
+names this explicitly).
 
 ## Architectural sketch
 
@@ -85,11 +87,11 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
 ### Execution phases
 
 1. **Mount + resolve config** (sync, pure) — orchestrator passes a frozen
-   embodiment and a frozen lens config via props. The wrapper reads four known
-   config fields (difficulty, content types, view mode, hints level) with
-   documented defaults; other fields are preserved but ignored. The content-type
-   config is an array of category names; the wrapper derives a boolean-map
-   internal representation from it on render (no exported type —
+   embodiment and a frozen lens config via props. The wrapper reads five known
+   config fields (difficulty, content types, view mode, editor mode, hints mode)
+   with documented defaults; other fields are preserved but ignored. The
+   content-type config is an array of category names; the wrapper derives a
+   boolean-map internal representation from it on render (no exported type —
    wrapper-internal only). Initial per-mount state at mount: view mode and hints
    level seeded from config; learner code is empty (filled on first edit);
    correctness map is empty (populated when the learner types into a blank
@@ -98,17 +100,18 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
 2. **Derive blanks** (sync, pure, per-render-conditional) — the wrapper memoizes
    the blankenate call on the embodiment, difficulty, and content-type-flags
    inputs. The call is synchronous. Note: the parse-success gate at
-   `applicableTo` is already satisfied; `blankenate` re-parses internally per
-   the mechanical-conversion mandate (it does not consume `embodiment.raw.ast`).
-   Two parses happen on every re-derive — consuming the upstream AST directly is
-   on the Future direction list. Result shape per `BlankenateResult` (in
-   `types.ts`) on success; `null` on internal parse failure (defense-in-depth —
-   in production `applicableTo` gates this case out). The first paint already
-   shows length-matched `_` placeholders (Inc 6.7: `_`.repeat(original.length) —
-   one underscore per character of the original token, preserving the token's
-   width as a recognition-cue) — no flicker between an empty editor and a
-   populated one. Re-derivation on settings change resets the correctness map;
-   the wrapper does NOT preserve correctness across re-rolls.
+   `applicableTo` is already satisfied; `blankenate` re-parses internally rather
+   than consuming `embodiment.raw.ast` (legacy carry-over — the mechanical
+   baseline parsed its own input). Two parses happen on every re-derive —
+   consuming the upstream AST directly is on the Future direction list. Result
+   shape per `BlankenateResult` (in `types.ts`) on success; `null` on internal
+   parse failure (defense-in-depth — in production `applicableTo` gates this
+   case out). The first paint already shows length-matched `_` placeholders (Inc
+   6.7: `_`.repeat(original.length) — one underscore per character of the
+   original token, preserving the token's width as a recognition-cue) — no
+   flicker between an empty editor and a populated one. Re-derivation on
+   settings change resets the correctness map; the wrapper does NOT preserve
+   correctness across re-rolls.
 
 3. **Wire CodeMirror** (per-mount, async-setup) — a mount effect instantiates
    the editor view configured with the standard JavaScript basicSetup, the
@@ -261,10 +264,20 @@ learner answers and the correctness map die with the component instance.
   `props.embodiment`. Per the lenses-peer invariant.
 - **`data-lens="blanks"` on the wrapper's root element.** Load-bearing for
   sandbox-harness selectors. Per the lenses peer's invariant.
-- **`data-view-mode="blankenated|complete"` and `data-hints-mode="on|off"`** on
-  the root. Sandbox-harness selectors + CSS hooks. Values reflect committed
-  config state, not in-flight transitions; CSS transitions should anchor on the
-  parent.
+- **`data-view-mode="blankenated|complete"`,
+  `data-editor-mode="helpful|diff|raw"`, and `data-hints-mode="on|off"`** on the
+  root. Sandbox-harness selectors + CSS hooks. Values reflect committed config
+  state, not in-flight transitions; CSS transitions should anchor on the parent.
+- **Token-classification precedence (blankenate).** The algorithm runs three
+  classification passes in fixed order over the parsed source — (1) delimiters
+  token-stream walk, (2) keywords token-stream walk, (3) AST walk for
+  identifiers / literals / operators / template-content — and dedupes
+  `[start, end)` collisions first-push-wins. The call order is structural, not
+  stylistic: reordering the passes silently re-classifies overlap-prone tokens
+  (`typeof` is both a keyword and a unary operator; `null` / `true` / `false`
+  are both keywords and `Literal` nodes). Tests at `tests/blankenate.test.ts` §
+  "Inc 6.k — comprehensive token coverage" encode the expected taxonomy; the
+  call order is the constraint that produces it.
 - **Tier-2 classification.** The contract per [`../types.ts`](../types.ts):
   `applicableTo` is the recommender's cheap gate; `recommend` only fires on
   applicable lenses. This lens honors that contract by returning
@@ -353,26 +366,21 @@ learner answers and the correctness map die with the component instance.
   `setSnippet`.
 - **Code execution / run / trace.** Other lenses' jobs (`trace-table`, future
   `run`); the orchestrator's L1 picker exposes them.
-- **Cursor-aware Ask Me.** v1 sends the whole original embodiment to
-  socratizing; future scopes Ask Me to the blank the learner is currently typing
-  in (per § Future direction in [`./README.md`](./README.md)).
+- **Socratic study companion (Ask Me / socratizing).** Inc 6.m moved this
+  surface out of the blanks lens entirely — it lives in the SL orchestrator one
+  layer up (it operates on the original embodiment rather than the blankenated
+  source, so it's cross-lens rather than per-lens).
 - **Seeded RNG for reproducible blank sets.** v1 preserves the legacy's bare
   `Math.random()` per the mechanical-conversion mandate.
   Reproducibility-via-seed is deferred (see § Future direction).
 - **Per-blank inline highlight in the editor.** v1 shows per-blank state in the
   side panel only. A future CodeMirror `Decoration.mark` at each `{start, end}`
   lets the learner see green/red/yellow at the position they're typing.
-- **Ask Me config knobs in the toolbar.** v1 caps at five questions per call
-  with the comparative register filtered out (the open and pointed registers
-  remain); the literal config lives in `index.tsx` as a module-level constant.
-  UI knobs for kind / features / levels / categories / register are deferred.
 - **Error-state UI beyond the parse-fail fallback.** The wrapper renders a
   single fallback panel when `blankenate` returns `null` (defense-in-depth).
   Other failure modes degrade silently with default behavior: malformed URL
-  config falls back to wrapper defaults; an Ask Me result of `{ ok: false }`
-  (architecturally unreachable in production) renders the no-questions message;
-  an evaluator throw is treated as "all blanks unfilled" rather than surfacing
-  an error banner.
+  config falls back to wrapper defaults; an evaluator throw is treated as "all
+  blanks unfilled" rather than surfacing an error banner.
 - **Multi-language support.** v1 ships JavaScript-only since the package is
   `just-enough/javascript`; multi-language is a multi-embodiment-type concern
   that `embody/` would surface, not a lens-level concern.
@@ -497,8 +505,6 @@ full follow-up list. Key directions in scope of this lens's evolution:
 
 - **WS2 `recommend()` heuristics** — populate Block-Model placements with
   snippet-fit relevance once WS2's analysis surface lands.
-- **Cursor-aware Ask Me** — scope to the blank the learner is typing via
-  socratizing's `MicroDecisionConfig.range` field.
 - **Per-blank position-aware learner-input re-anchoring** — CodeMirror
   `Decoration.mark` per blank so non-placeholder edits don't corrupt position
   tracking.
@@ -506,8 +512,6 @@ full follow-up list. Key directions in scope of this lens's evolution:
   stays mechanical; wrapper supplies a seeded PRNG when `seed` is configured.
 - **Per-blank inline highlight in the editor** — `Decoration.mark` for
   green/red/yellow at the typing position.
-- **Ask Me config knobs in the toolbar** — expose `kind`, `features`, `levels`,
-  `categories`, `register` to learners.
 - **URL state lifted to the orchestrator** — `lib/url-config.ts` becomes an
   adapter over the orchestrator's URL surface (post-WS3).
 - **Internal-EventBus dispatch** — `blank-filled`, `view-toggled`,

@@ -1,26 +1,41 @@
 /**
- * @file VENDORED — mechanical JS→TS conversion of the legacy
- * `public/static/blanks/blankenate.js` from the pre-V2 study-lenses
- * app. Walks an Acorn AST, rolls a per-eligible-token probability via
- * bare `Math.random()`, and returns the source with blanked positions
- * replaced by the `__` placeholder plus an array of blank descriptors.
+ * @file The blanks lens's tokenizer. Walks an Acorn AST + token stream,
+ * rolls a per-eligible-token probability via bare `Math.random()`, and
+ * returns the source with blanked positions replaced by length-matched
+ * `_` placeholders plus an array of blank descriptors.
  *
- * Vendoring posture (per the handoff plan at
- * `~/.claude/plans/you-re-picking-up-handoff-zazzy-ullman.md` §
- * Decisions locked: "Vendoring (blankenate algorithm)"):
+ * Provenance: this file began as a mechanical JS→TS conversion of the
+ * pre-V2 `public/static/blanks/blankenate.js` (Acorn AST walk + bare
+ * `Math.random()` per token). The token-coverage algorithm has been
+ * extended by V2-owned augmentations:
  *
- * - Mechanical conversion only — preserve semantics, do not re-port.
- * - This directory (`lenses/blanks/lib/**`) is eslint-ignored per
- *   `eslint.config.mjs` § Global ignores; the legacy file's style is
- *   preserved as-is.
- * - Reproducibility via seeded RNG is a Future direction item; v1
- *   preserves the legacy's bare `Math.random()` per-token roll.
+ * - Delimiters category (token-stream walk over Acorn punctuator token
+ *   labels — `(`, `)`, `{`, `}`, `${`, `[`, `]`, `;`, `,`, `.`, `=>`,
+ *   `?`, `:`, `?.`, `...`, and `` ` ``).
+ * - Keywords (token-stream walk using Acorn's `tok.type.keyword` flag
+ *   plus a fixed `CONTEXTUAL_KEYWORDS` set covering `let` / `static` /
+ *   `async` / `await` / `yield` / `of` / `as` / `from` / `get` / `set`).
+ * - Identifiers extended to include `PrivateIdentifier` (`#x` class
+ *   fields).
+ * - Operators extended to include `LogicalExpression` (`&&`, `||`,
+ *   `??`), `AssignmentPattern` default-parameter `=`, and
+ *   `PropertyDefinition` class-field initializer `=`.
+ * - Literals extended to include `TemplateElement` (template-literal
+ *   text chunks).
+ * - First-push-wins dedupe across overlapping classifiers (e.g.
+ *   `typeof` is both a keyword and a unary operator; `null` / `true` /
+ *   `false` are both keywords and `Literal` nodes). The classification
+ *   ORDER is structural — see `DOCS.md` § Structural constraints.
  *
- * Output contract per the lens-local `types.ts`:
- * `BlankenateResult | null` (null on internal parse failure;
- * defense-in-depth — in production the lens's `applicableTo` gate
- * (`embodiment.status.parsed`) prevents the lens from mounting on
- * unparseable embodiments).
+ * Style posture: this directory (`lenses/blanks/lib/**`) is
+ * eslint-ignored per `eslint.config.mjs` § Global ignores — preserves
+ * the legacy file's idiosyncratic style without fighting lint. The
+ * algorithmic surface is V2-owned and is held by `tests/blankenate.test.ts`.
+ *
+ * Output contract per the lens-local `types.ts`: `BlankenateResult |
+ * null` (null on internal parse failure; defense-in-depth — in
+ * production the lens's `applicableTo` gate (`embodiment.status.parsed`)
+ * prevents the lens from mounting on unparseable embodiments).
  */
 
 import * as acorn from 'acorn';

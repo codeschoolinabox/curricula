@@ -1,12 +1,14 @@
 /**
- * @file VENDORED & SLIMMED — adapted from the legacy 296-line
- * `src/utils/urlManager.js`. Only the read/write surface for the
- * single `?blanks=...` URL parameter is preserved; multi-lens cascade,
- * file-path management, code-share-via-base64, pseudocode toggles,
- * and colorize toggles (which were properly orchestrator-domain) are
- * dropped.
+ * @file URL-config read/write surface for the `?blanks=...` URL
+ * parameter. Originated as a slim adaptation of the legacy 296-line
+ * `src/utils/urlManager.js` — only the single-lens read/write surface
+ * is preserved; multi-lens cascade, file-path management,
+ * code-share-via-base64, pseudocode toggles, and colorize toggles
+ * (orchestrator-domain) are dropped. The parser is V2-owned: it
+ * validates against the lens's `ContentType` / `ViewMode` /
+ * `EditorMode` / `HintsMode` enums (none of which existed in legacy).
  *
- * URL format (Inc 6h-redux extended; legacy was 4 fields):
+ * URL format (5 fields):
  * `?blanks=difficulty:N,types:a+b,view:X,editor:Y,hints:Z`
  *
  * Field order in `serializeConfig` is the canonical order
@@ -146,7 +148,7 @@ function parseHash(hash: string): Partial<BlanksLensConfig> {
 
 function serializeConfig(config: Partial<BlanksLensConfig>): string {
 	const parts: string[] = [];
-	// Canonical field order: difficulty, types, view, hints.
+	// Canonical field order: difficulty, types, view, editor, hints.
 	if (config.difficulty !== undefined) {
 		parts.push(`difficulty:${config.difficulty}`);
 	}

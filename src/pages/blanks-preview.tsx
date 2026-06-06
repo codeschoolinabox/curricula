@@ -1,21 +1,19 @@
 /**
  * @file Dev preview harness for the `blanks` lens. Mounts the lens's
- * React `Component` DIRECTLY (importing the LensModule + `embody`),
- * bypassing the orchestrator's `LENS_REGISTRY` — `blanks` is not
- * registered until Inc 7 of the WS4 sprint. This page is the browser
- * eyeball surface for the per-increment sandbox checkpoints (Inc
- * 6a → 6j): type a snippet, toggle controls, and observe the lens.
+ * React `Component` directly (importing the `LensModule` + `embody`)
+ * rather than going through the orchestrator's `LENS_REGISTRY` — the
+ * lens IS registered (consumers can reach it via the L1 picker too),
+ * but this page deliberately bypasses the registry so the lens
+ * surface is isolated from picker/orchestrator state for sandbox
+ * observation.
  *
- * **How to use** (after `npm run start`):
+ * Open `http://localhost:3000/spiralearn/blanks-preview` in a browser
+ * after `npm run start`. Edit the snippet textarea, click the
+ * "comprehensive" button for the multi-feature test snippet, and
+ * exercise the controls.
  *
- * 1. Open `http://localhost:3000/spiralearn/blanks-preview` in a browser.
- * 2. Edit the snippet, toggle the controls (as they land per
- *    increment), and watch the lens re-mount as the redo progresses
- *    through increments 6a–6j.
- *
- * Inc 6a: wrapper mounts CodeMirror in read-only blankenated mode.
- * Difficulty hard-coded to 100 (every eligible token blanked) so the
- * `__` placeholders are maximally visible at the checkpoint.
+ * Difficulty is hard-coded to 100 (every eligible token blanked) so
+ * the `_` placeholders are maximally visible.
  *
  * @vitest-skip — Docusaurus auto-routes `src/pages/*.tsx`; this is a
  * page, not a unit test.
