@@ -564,3 +564,169 @@ describe('parsons wrapper — Inc 7c (reorder within the solution column)', () =
 		expect(solutionOrder(container).length).toBe(3);
 	});
 });
+
+describe('parsons wrapper — Inc 7d (indent / outdent controls)', () => {
+	function indentBtn(
+		container: HTMLElement,
+		id: string,
+	): HTMLButtonElement | null {
+		return (
+			solutionItem(container, id)?.querySelector<HTMLButtonElement>(
+				'[data-parsons-indent]',
+			) ?? null
+		);
+	}
+	function outdentBtn(
+		container: HTMLElement,
+		id: string,
+	): HTMLButtonElement | null {
+		return (
+			solutionItem(container, id)?.querySelector<HTMLButtonElement>(
+				'[data-parsons-outdent]',
+			) ?? null
+		);
+	}
+	function indentLevel(container: HTMLElement, id: string): string | null {
+		return solutionItem(container, id)?.getAttribute('data-indent') ?? null;
+	}
+
+	function renderWith(
+		config: Parameters<typeof parsonsLens.config>[0],
+	): ReturnType<typeof render> {
+		return render(
+			<parsonsLens.Component
+				embodiment={embody(THREE_LINE_SRC)}
+				config={parsonsLens.config(config)}
+			/>,
+		);
+	}
+
+	it('placed lines render the indent control when canIndent (default)', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		expect(indentBtn(container, 'line-0')).not.toBeNull();
+		// outdent presence is level-dependent (absent at 0) — see the dedicated
+		// level-0 test below.
+	});
+
+	it('a freshly placed line starts at data-indent="0"', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		expect(indentLevel(container, 'line-0')).toBe('0');
+	});
+
+	it('clicking indent increments the level; clicking outdent decrements', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		fireEvent.click(indentBtn(container, 'line-0')!);
+		expect(indentLevel(container, 'line-0')).toBe('1');
+		fireEvent.click(indentBtn(container, 'line-0')!);
+		expect(indentLevel(container, 'line-0')).toBe('2');
+		fireEvent.click(outdentBtn(container, 'line-0')!);
+		expect(indentLevel(container, 'line-0')).toBe('1');
+		fireEvent.click(outdentBtn(container, 'line-0')!);
+		expect(indentLevel(container, 'line-0')).toBe('0');
+	});
+
+	it('shows NO outdent button at level 0; it appears once indented and the floor is enforced by its absence', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		// At level 0 there is nothing to outdent: the button does not exist.
+		expect(outdentBtn(container, 'line-0')).toBeNull();
+		expect(indentBtn(container, 'line-0')).not.toBeNull();
+		fireEvent.click(indentBtn(container, 'line-0')!);
+		expect(indentLevel(container, 'line-0')).toBe('1');
+		expect(outdentBtn(container, 'line-0')).not.toBeNull(); // appears at >= 1
+		fireEvent.click(outdentBtn(container, 'line-0')!);
+		expect(indentLevel(container, 'line-0')).toBe('0');
+		expect(outdentBtn(container, 'line-0')).toBeNull(); // gone again at 0
+	});
+
+	it('renders one indent-guide step per level, each indentSize wide (depth indicator)', () => {
+		const { container } = renderWith({ indentSize: 3 });
+		placeOnZone(container, 'line-0');
+		fireEvent.click(indentBtn(container, 'line-0')!);
+		fireEvent.click(indentBtn(container, 'line-0')!); // level = 2
+		const steps = solutionItem(
+			container,
+			'line-0',
+		)!.querySelectorAll<HTMLElement>('[data-parsons-indent-step]');
+		// level 2 -> 2 steps (catches a hardcoded level); width indentSize=3 -> '3ch'
+		// (catches a hardcoded indentSize of 4). Both factors triangulated.
+		expect(steps.length).toBe(2);
+		expect(steps[0].style.width).toBe('3ch');
+	});
+
+	it('a flush (level 0) line renders no indent-guide steps', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		expect(
+			solutionItem(container, 'line-0')!.querySelectorAll(
+				'[data-parsons-indent-step]',
+			).length,
+		).toBe(0);
+	});
+
+	it('indenting one placed line does NOT change another line level (per-id dispatch)', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1');
+		fireEvent.click(indentBtn(container, 'line-0')!);
+		fireEvent.click(indentBtn(container, 'line-0')!);
+		expect(indentLevel(container, 'line-0')).toBe('2');
+		expect(indentLevel(container, 'line-1')).toBe('0'); // untouched
+	});
+
+	it('hides the indent controls AND guide steps when canIndent is false', () => {
+		const { container } = renderWith({ canIndent: false });
+		placeOnZone(container, 'line-0');
+		expect(indentBtn(container, 'line-0')).toBeNull();
+		expect(outdentBtn(container, 'line-0')).toBeNull();
+		// No indentability implied: no depth guides either (lines render flush).
+		expect(
+			solutionItem(container, 'line-0')!.querySelectorAll(
+				'[data-parsons-indent-step]',
+			).length,
+		).toBe(0);
+	});
+
+	it('pool lines never carry indent controls', () => {
+		const { container } = renderThreeLine();
+		const poolLine = poolItem(container, 'line-0')!;
+		expect(poolLine.querySelector('[data-parsons-indent]')).toBeNull();
+		expect(poolLine.querySelector('[data-parsons-outdent]')).toBeNull();
+	});
+
+	it('indent level PERSISTS across a reorder within the solution', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1');
+		fireEvent.click(indentBtn(container, 'line-0')!);
+		fireEvent.click(indentBtn(container, 'line-0')!);
+		expect(indentLevel(container, 'line-0')).toBe('2');
+		// move line-0 to the end (drop on the empty zone area)
+		const dt = makeDataTransfer();
+		fireEvent.dragStart(solutionItem(container, 'line-0')!, { dataTransfer: dt });
+		fireEvent.drop(container.querySelector('[data-parsons-solution]')!, {
+			dataTransfer: dt,
+		});
+		expect(solutionOrder(container)).toEqual(['line-1', 'line-0']);
+		expect(indentLevel(container, 'line-0')).toBe('2'); // preserved across reorder
+	});
+
+	it('indent level RESETS to 0 on a pool round-trip', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		fireEvent.click(indentBtn(container, 'line-0')!);
+		expect(indentLevel(container, 'line-0')).toBe('1');
+		// drag back to the pool
+		const dt = makeDataTransfer();
+		fireEvent.dragStart(solutionItem(container, 'line-0')!, { dataTransfer: dt });
+		fireEvent.drop(container.querySelector('[data-parsons-pool]')!, {
+			dataTransfer: dt,
+		});
+		// re-place -> indent must restart at 0 (the pool carries no indent)
+		placeOnZone(container, 'line-0');
+		expect(indentLevel(container, 'line-0')).toBe('0');
+	});
+});

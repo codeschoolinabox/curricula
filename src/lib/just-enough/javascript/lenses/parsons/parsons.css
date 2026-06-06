@@ -44,6 +44,23 @@
 	cursor: grabbing;
 }
 
+/* Solution lines lay out as a row: indent guide steps + code on the left, the
+   indent controls pushed to the right so the code's left origin stays fixed
+   (equal indent depths then line up under the same guides). */
+[data-lens='parsons'] [data-parsons-solution] > li {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+/* One faint vertical rule per indent level. Width is set inline (level-agnostic
+   `indentSize` ch); the left border is the alignment guide. */
+[data-lens='parsons'] [data-parsons-indent-step] {
+	flex: 0 0 auto;
+	align-self: stretch;
+	border-left: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+}
+
 [data-lens='parsons'] [data-parsons-pool] > li > code,
 [data-lens='parsons'] [data-parsons-solution] > li > code {
 	background: none;
@@ -52,4 +69,37 @@
 	/* Inherit the <li>'s `white-space: pre` so an aggressive host
 	   `code { white-space: normal }` cannot collapse code spacing. */
 	white-space: inherit;
+}
+
+/*
+ * Indent / outdent controls (Inc 7d). Kept LIGHTLY visible at rest (dimmed) so a
+ * learner always knows indentation is part of the task — discoverability matters
+ * for a novice exercise where indent is graded — then brought to full opacity on
+ * hover OR keyboard focus (`:focus-within`). The buttons are always in the DOM
+ * and always clickable; only opacity changes (never `display`), so they stay
+ * keyboard- and screen-reader-reachable. The outdent button is omitted entirely
+ * at level 0 (see index.tsx), so a flush-left line shows only the indent control.
+ */
+[data-lens='parsons'] [data-parsons-indent-controls] {
+	display: inline-flex;
+	gap: 0.125rem;
+	margin-left: auto; /* push to the right edge; keeps the code origin fixed */
+	opacity: 0.4;
+	transition: opacity 0.1s ease;
+}
+
+[data-lens='parsons'] [data-parsons-line]:hover [data-parsons-indent-controls],
+[data-lens='parsons']
+	[data-parsons-line]:focus-within
+	[data-parsons-indent-controls] {
+	opacity: 1;
+}
+
+[data-lens='parsons'] [data-parsons-indent-controls] > button {
+	cursor: pointer;
+	padding: 0 0.35rem;
+	line-height: 1.4;
+	border: 1px solid var(--ifm-color-emphasis-300, #cccccc);
+	border-radius: 3px;
+	background: var(--ifm-background-surface-color, #ffffff);
 }

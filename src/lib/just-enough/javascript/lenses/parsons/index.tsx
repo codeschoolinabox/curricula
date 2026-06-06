@@ -19,7 +19,7 @@
  * place. There is no destroy/recreate loop to guard, so the mirror would be cargo
  * cult.
  *
- * **Current scope (Inc 7a–7c):** the wrapper mounts, resolves config, parses the
+ * **Current scope (Inc 7a–7d):** the wrapper mounts, resolves config, parses the
  * snippet (`useMemo(parseParsons)`), holds the arrangement in `useReducer` over
  * `arrange.ts`, and renders the two-column board — the shuffled pool (`<ul>`) +
  * the solution column (`<ol>`). Native HTML5 DnD: `onDragStart` writes
@@ -27,8 +27,12 @@
  * (load-bearing — without it `onDrop` never fires); `onDrop` dispatches
  * `placeFromPool` (pool→solution), `returnToPool` (solution→pool), or
  * `reorderWithinSolution` (solution→solution, with a removal-shift-adjusted insert
- * index + a same-position short-circuit). Indent controls (7d), Check/score (7e),
- * and the view-mode toggle (7f) are not wired yet; a pool→pool drop is a no-op.
+ * index + a same-position short-circuit). Each placed line carries
+ * `data-indent={level}`, renders one `indentSize`-wide guide step per level
+ * (editor-style alignment guides so equal depths line up), and (when `canIndent`)
+ * right-side outdent/indent buttons that dispatch `outdentLine`/`indentLine`.
+ * Check/score (7e) and the view-mode toggle (7f) are not wired yet; a pool→pool
+ * drop is a no-op.
  */
 
 import React, { useMemo, useReducer } from 'react';
@@ -40,7 +44,9 @@ import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import parsonsCore from './core.js';
 import {
+	indentLine,
 	initialArrangement,
+	outdentLine,
 	placeFromPool,
 	reorderWithinSolution,
 	returnToPool,
@@ -53,11 +59,13 @@ import './parsons.css';
 /** The two drag zones, encoded into `dataTransfer` as the `${zone}:${id}` prefix. */
 type Zone = 'pool' | 'solution';
 
-/** Reducer actions wired in Inc 7b (place / return) + 7c (reorder). Indent lands in 7d. */
+/** Reducer actions wired in Inc 7b (place / return) + 7c (reorder) + 7d (indent / outdent). */
 type ArrangeAction =
 	| { type: 'place'; id: string; index: number }
 	| { type: 'reorder'; id: string; index: number }
-	| { type: 'return'; id: string };
+	| { type: 'return'; id: string }
+	| { type: 'indent'; id: string }
+	| { type: 'outdent'; id: string };
 
 function arrangementReducer(
 	state: Arrangement,
@@ -70,6 +78,10 @@ function arrangementReducer(
 			return reorderWithinSolution(state, action.id, action.index);
 		case 'return':
 			return returnToPool(state, action.id);
+		case 'indent':
+			return indentLine(state, action.id);
+		case 'outdent':
+			return outdentLine(state, action.id);
 		default:
 			return state;
 	}
@@ -104,6 +116,10 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 		resolved.viewMode === 'complete' ? 'complete' : 'work';
 	const maxDistractors =
 		typeof resolved.maxDistractors === 'number' ? resolved.maxDistractors : 10;
+	// Presentation-only: spaces per indent LEVEL when rendering the margin. Grading
+	// compares levels, never raw spaces (see README § Indent contract).
+	const indentSize =
+		typeof resolved.indentSize === 'number' ? resolved.indentSize : 4;
 
 	// Parse the snippet into the model solution + selected distractors + the
 	// initial shuffled pool of ids. Memoized on source + maxDistractors: re-parse
@@ -250,13 +266,58 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 						return (
 							<li
 								key={placed.id}
+								data-parsons-line
 								data-line-id={placed.id}
+								data-indent={placed.indent}
 								draggable
 								onDragStart={(event) =>
 									handleDragStart(event, 'solution', placed.id)
 								}
 							>
+								{/* One guide step per indent level — a faint vertical rule
+								    every `indentSize` columns so equal-depth lines align
+								    visually. Decorative (aria-hidden); the depth is conveyed
+								    semantically by `data-indent`. */}
+								{Array.from({ length: placed.indent }, (_, depth) => (
+									<span
+										key={depth}
+										data-parsons-indent-step
+										aria-hidden="true"
+										style={{ width: `${indentSize}ch` }}
+									/>
+								))}
 								<code>{line.code}</code>
+								{/* Controls live on the RIGHT so the line's left origin stays
+								    fixed — that is what makes equal indent depths line up. */}
+								{canIndent && (
+									<span data-parsons-indent-controls>
+										{/* No outdent at level 0 — nothing to outdent. The
+										    reducer floors at 0 too (defense); here the button
+										    simply does not exist until the line is indented. */}
+										{placed.indent > 0 && (
+											<button
+												type="button"
+												data-parsons-outdent
+												aria-label="Outdent line"
+												onClick={() =>
+													dispatch({ type: 'outdent', id: placed.id })
+												}
+											>
+												←
+											</button>
+										)}
+										<button
+											type="button"
+											data-parsons-indent
+											aria-label="Indent line"
+											onClick={() =>
+												dispatch({ type: 'indent', id: placed.id })
+											}
+										>
+											→
+										</button>
+									</span>
+								)}
 							</li>
 						);
 					})}
