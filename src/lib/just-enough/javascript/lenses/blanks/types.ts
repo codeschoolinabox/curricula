@@ -56,9 +56,10 @@
  * - `literal` — `Node.type === 'Literal' | 'RegExpLiteral' | 'TemplateElement'`
  *   (strings, numbers, booleans, regex; plus Inc 6.n: template-literal text
  *   chunks — the source between `` ` `` and `${`, or between `}` and `` ` ``).
- *   Backticks themselves and the `${`/`}` interpolation boundaries are NOT
- *   blanked under literals (the backticks are a literal-delimiter analog of
- *   string quotes; `${` is a delimiter token under `delimiters`).
+ *   The backtick `` ` `` and the `${`/`}` interpolation boundaries are NOT
+ *   blanked under literals — they blank under `delimiters` instead
+ *   (Inc 6.o for backticks; Inc 6.6 for `${`; block-close `}` shared with
+ *   template-close `}`).
  * - `keyword` — Inc 6.k: token-stream walk over Acorn's tokens, matching
  *   `tok.type.keyword` (reserved keywords like `function`/`if`/`return`/
  *   `class`/`import`/`extends`/`super`/`try`/`catch`/`null`/`true`/etc.)
@@ -80,15 +81,17 @@
  *   syntactic delimiter tokens from Acorn's token stream:
  *   `(`, `)`, `{`, `}`, `[`, `]`, `${`, `;`, `,`, `.`, plus
  *   (Inc 6.k) the syntactic-marker delimiters `=>`, `?`, `:`,
- *   `?.`, `...`. The template-expression opener `${` is treated as
- *   a single 2-char token (`tokTypes.dollarBraceL`); block-close
+ *   `?.`, `...`, plus (Inc 6.o) the template-literal opener/closer
+ *   `` ` ``. The template-expression opener `${` is treated as a
+ *   single 2-char token (`tokTypes.dollarBraceL`); block-close
  *   and template-close `}` are not distinguished for v1 (both blank
  *   as `}`). Ternary `?` / `:` are classified as delimiters, NOT
  *   operators — the operators category covers AST-walk-driven
  *   operator strings (BinaryExpression.operator etc.); ternary
  *   tokens come through the token-stream filter. See
  *   `./lib/blankenate.ts` DELIMITER_LABELS for the comprehensive
- *   set + the documented exclusions (backtick, regex slash).
+ *   set + the one documented exclusion (regex slash — part of
+ *   the `regexp` token, not separately tokenized).
  */
 type BlankType =
 	| 'identifier'

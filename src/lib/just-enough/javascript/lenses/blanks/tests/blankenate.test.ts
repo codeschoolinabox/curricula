@@ -470,14 +470,9 @@ describe('blankenate', () => {
 		});
 
 		// Negative locks: things that must NOT be blanked under delimiters
-		it('backtick `` ` `` is NOT blanked under delimiters (template-literal delimiter, analogous to string quotes)', () => {
-			const result = blankenate('const s = `hello`;', 1, {
-				...NO_TYPES,
-				delimiters: true,
-			});
-			const originals = (result?.blanks ?? []).map((b) => b.original);
-			expect(originals).not.toContain('`');
-		});
+		// Inc 6.o reversed the backtick exclusion — see the
+		// `Inc 6.o — backticks blank under delimiters` describe block
+		// below for the new positive locks.
 
 		it('regex slashes are NOT blanked as delimiters (regex is one `regexp` token)', () => {
 			const result = blankenate('const re = /\\d+/g;', 1, {
@@ -513,8 +508,13 @@ describe('blankenate', () => {
 			[acorn.tokTypes.colon.label, 'a ? b : c;', 'in'],
 			[acorn.tokTypes.questionDot.label, 'obj?.prop;', 'in'],
 			[acorn.tokTypes.ellipsis.label, '[...rest];', 'in'],
-			// Documented exclusion: backtick.
-			[acorn.tokTypes.backQuote.label, 'const s = `hi`;', 'out'],
+			// Inc 6.o: backtick now IN (was OUT in Inc 6.k era).
+			[acorn.tokTypes.backQuote.label, 'const s = `hi`;', 'in'],
+			// AR-3 IMPORTANT (Inc 6.o): keep at least one `'out'` row so
+			// the matrix test's negative branch stays live. Regex `/` is
+			// a permanent exclusion (regex literal is one `regexp` token,
+			// not separately tokenized).
+			['/', 'const re = /d+/g;', 'out'],
 		];
 
 		it.each(PUNCTUATOR_MATRIX)(
@@ -1085,5 +1085,88 @@ describe('blankenate', () => {
 		it.todo(
 			'tagged template `tag\\`hello ${x}!\\`` blanks TemplateElement chunks under literals=true',
 		);
+	});
+
+	describe('Inc 6.o — backticks blank under delimiters (Inc 6.k reversal)', () => {
+		// Inc 6.k excluded `` ` `` from DELIMITER_LABELS with the
+		// rationale "analogous to `'`/`"` quotes for string literals
+		// (part of the literal token, not separately blanked)." User
+		// browser-sandboxed the post-Inc-6.n output and reported the
+		// backticks remained literal in template-literal lines. Inc
+		// 6.o reverses the exclusion — backticks now blank under
+		// delimiters (same as `${` already does).
+
+		it('blanks the opening and closing backticks of an interpolation-free template literal', () => {
+			const result = blankenate('const m = `hello`;', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			const backticks = (result?.blanks ?? []).filter(
+				(b) => b.original === '`',
+			);
+			expect(originals).toContain('`');
+			expect(backticks.length).toBe(2);
+		});
+
+		it('blanks all four backticks across two template literals in one source (positions distinct)', () => {
+			// AR-3 IMPORTANT fix: assert all four backticks are at
+			// distinct source positions — a fake impl that pushed the
+			// same blank object 4 times would otherwise pass the count.
+			const result = blankenate('const a = `one`; const b = `two`;', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const backticks = (result?.blanks ?? []).filter(
+				(b) => b.original === '`',
+			);
+			expect(backticks.length).toBe(4);
+			expect(new Set(backticks.map((b) => b.start)).size).toBe(4);
+		});
+
+		it('backtick blank is exactly 1 char wide and classified as delimiter', () => {
+			const result = blankenate('const s = `x`;', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const backtick = (result?.blanks ?? []).find((b) => b.original === '`');
+			expect(backtick).toBeDefined();
+			expect(backtick!.end - backtick!.start).toBe(1);
+			expect(backtick!.type).toBe('delimiter');
+		});
+
+		it('backticks remain literal when delimiters=false (negative lock; assert other categories actually fired)', () => {
+			// AR-3 IMPORTANT fix: prove the "other categories on" claim is
+			// not vacuous by asserting literals/identifiers/keywords
+			// blanks actually appeared in the result. Without these,
+			// `not.toContain` would pass even if the flag combination
+			// silently dropped everything.
+			const result = blankenate('const m = `hello`;', 1, {
+				...NO_TYPES,
+				delimiters: false,
+				keywords: true,
+				identifiers: true,
+				operators: true,
+				literals: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).not.toContain('`');
+			// Other categories actually fired:
+			expect(originals).toContain('const'); // keyword
+			expect(originals).toContain('m'); // identifier
+			expect(originals).toContain('hello'); // TemplateElement (literal)
+		});
+
+		it('end-to-end regression: full template-literal `\\`Failed: ${error.message}\\`` blanks both backticks under delimiters=true', () => {
+			const result = blankenate(
+				'throw new Error(`Failed: ${error.message}`);',
+				1,
+				{ ...NO_TYPES, delimiters: true },
+			);
+			const backticks = (result?.blanks ?? []).filter(
+				(b) => b.original === '`',
+			);
+			expect(backticks.length).toBe(2);
+		});
 	});
 });

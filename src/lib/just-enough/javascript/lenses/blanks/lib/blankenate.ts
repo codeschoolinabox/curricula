@@ -88,13 +88,21 @@ type BlankedToken = {
 // "semantic markers" but the learner should practice them just like
 // `(` and `,`).
 //
+// Inc 6.o: backtick (`` ` ``) added to DELIMITER_LABELS. Inc 6.k had
+// excluded it on the "analogous to `'`/`"` for string literals"
+// argument, but the user reversed that decision: backticks frame the
+// template-literal expression the same way `${`/`}` frame each
+// interpolation (and those ARE blanked under delimiters), so for
+// consistency the backticks join them. Pedagogical impact: at
+// difficulty 1.0 + delimiters=true, `` `text` `` blanks both
+// backticks (separately from the TemplateElement content, which
+// blanks under literals per Inc 6.n).
+//
 // Still excluded by design (each with a single-line rationale):
-//   `` ` `` (backtick) — template-literal delimiter; analogous to
-//     `'`/`"` quotes which are part of the string-literal token, not
-//     separately blanked. Blanking it obscures "this is a template".
 //   `template` / `invalidTemplate` (string content between
-//     interpolations) — these are content like string literals;
-//     would join `literals` not `delimiters` if blanked.
+//     interpolations) — Inc 6.n: these are blanked, but under
+//     LITERALS not DELIMITERS. AST-walk via `TemplateElement` node
+//     instead of token-stream label match.
 //   `/` — regex literal delimiters are part of the `regexp` token
 //     (Acorn emits `tokTypes.regexp` as one), not separate.
 //   `eof` — not a syntactic character.
@@ -129,6 +137,7 @@ const DELIMITER_LABELS = new Set<string>([
 	':',
 	'?.',
 	'...',
+	'`', // Inc 6.o — template-literal opener/closer
 ]);
 
 // Inc 6.k: contextual keywords — tokens Acorn emits as `name` (label
@@ -322,9 +331,14 @@ function blankenate(
 		//
 		// `node.end > node.start` skips empty chunks (e.g. the empty
 		// span between two adjacent interpolations `${a}${b}`) — a
-		// zero-length blank would be meaningless. Backticks themselves
-		// remain literal (NOT in DELIMITER_LABELS) so the template-
-		// literal shape stays visually identifiable.
+		// zero-length blank would be meaningless.
+		//
+		// Inc 6.o: backticks ARE now in DELIMITER_LABELS (reversal of
+		// the Inc 6.k exclusion) and blank under delimiters=true,
+		// independently of this TemplateElement/literals path. No
+		// position overlap — backtick tokens and TemplateElement nodes
+		// cover disjoint source ranges (TemplateElement.start is AFTER
+		// the opening backtick, .end is BEFORE the closing backtick).
 		if (
 			config.literals &&
 			node.type === 'TemplateElement' &&

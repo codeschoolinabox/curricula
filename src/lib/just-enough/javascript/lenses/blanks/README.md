@@ -122,14 +122,13 @@ literals-only blanks emphasize value recognition (strings, numbers, booleans,
 regex, AND template-literal text chunks per Inc 6.n — the source between `` ` ``
 and `${`, or between `}` and `` ` ``); delimiters-only blanks emphasize
 syntactic structure — comprehensive Acorn punctuator coverage: parens `( )`,
-brackets `[ ]`, braces `{ }`, template-expression opener `${`, semicolons `;`,
-commas `,`, dots `.`, arrow `=>`, ternary / object-property colon `:`, ternary
-`?`, optional chaining `?.`, and spread/rest `...`. Backticks (template-literal
-delimiters) are NOT blanked — they are analogous to `'`/`"` quotes for string
-literals (part of the literal token, not separately blanked). Regex slashes are
-not separately blanked either; Acorn emits regex literals as one token. The
-view-mode toggle lets the learner peek at the complete source as a self- check
-without leaving the lens.
+brackets `[ ]`, braces `{ }`, template-expression opener `${`, template-literal
+backticks `` ` `` (Inc 6.o; framing-delimiter analog to `${`/`}` for
+interpolations), semicolons `;`, commas `,`, dots `.`, arrow `=>`, ternary /
+object-property colon `:`, ternary `?`, optional chaining `?.`, and spread/rest
+`...`. Regex slashes are NOT separately blanked; Acorn emits regex literals as
+one token. The view-mode toggle lets the learner peek at the complete source as
+a self-check without leaving the lens.
 
 The hints panel surfaces per-blank correctness state as the learner types —
 green for correct, red for incorrect, yellow for unfilled — making the exercise
