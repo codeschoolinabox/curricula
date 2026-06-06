@@ -729,3 +729,211 @@ describe('parsons wrapper — Inc 7d (indent / outdent controls)', () => {
 		expect(indentLevel(container, 'line-0')).toBe('0');
 	});
 });
+
+describe('parsons wrapper — Inc 7f (Check / Reset / per-line feedback + score)', () => {
+	function check(container: HTMLElement): void {
+		fireEvent.click(container.querySelector('[data-parsons-check]')!);
+	}
+	function reset(container: HTMLElement): void {
+		fireEvent.click(container.querySelector('[data-parsons-reset]')!);
+	}
+	function scoreEl(container: HTMLElement): Element | null {
+		return container.querySelector('[data-parsons-score]');
+	}
+	function correctnessOf(container: HTMLElement, id: string): string | null {
+		return solutionItem(container, id)?.getAttribute('data-correctness') ?? null;
+	}
+	function indentBtn(
+		container: HTMLElement,
+		id: string,
+	): HTMLButtonElement | null {
+		return (
+			solutionItem(container, id)?.querySelector<HTMLButtonElement>(
+				'[data-parsons-indent]',
+			) ?? null
+		);
+	}
+
+	// These tests verify WIRING — that Check feeds the live arrangement to
+	// buildEvaluation and renders the result, that edits clear stale feedback, and
+	// that Reset reseeds. The grading OUTCOMES (every state, score formula) are
+	// exhaustively unit-tested in evaluate.test.ts; here we include a couple of
+	// outcome checks only to prove the real arrangement (not garbage) flows in.
+
+	it('renders a Check and a Reset control', () => {
+		const { container } = renderThreeLine();
+		expect(container.querySelector('[data-parsons-check]')).not.toBeNull();
+		expect(container.querySelector('[data-parsons-reset]')).not.toBeNull();
+	});
+
+	it('shows no per-line correctness or score before the first Check', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		expect(correctnessOf(container, 'line-0')).toBeNull();
+		expect(scoreEl(container)).toBeNull();
+	});
+
+	it('on Check, a fully correct arrangement marks every line correct and scores 100', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1');
+		placeOnZone(container, 'line-2');
+		check(container);
+		expect(correctnessOf(container, 'line-0')).toBe('correct');
+		expect(correctnessOf(container, 'line-1')).toBe('correct');
+		expect(correctnessOf(container, 'line-2')).toBe('correct');
+		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('100');
+		// the score is an aria-live region (announced when it changes).
+		expect(scoreEl(container)?.getAttribute('aria-live')).toBe('polite');
+	});
+
+	it('on Check with NOTHING placed, every solution line is unplaced and the score is 0', () => {
+		const { container } = renderThreeLine();
+		check(container);
+		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('0');
+		for (const id of ['line-0', 'line-1', 'line-2']) {
+			expect(poolItem(container, id)?.hasAttribute('data-parsons-unplaced')).toBe(
+				true,
+			);
+		}
+	});
+
+	it('on Check, a placed line at the wrong indent is flagged wrong-indent; re-Check after fixing it recovers (proves the live arrangement flows in + Check is re-runnable)', () => {
+		// Indented model: if (x) { @0 / y(); @1 / } @0. Placed flat (all indent 0),
+		// so line-1 is at indent 0 != model 1 -> wrong-indent. This non-correct state
+		// is what falsifies a "mark every placed line correct" fake impl.
+		const { container } = render(
+			<parsonsLens.Component
+				embodiment={embody('if (x) {\n\ty();\n}')}
+				config={parsonsLens.config()}
+			/>,
+		);
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1');
+		placeOnZone(container, 'line-2');
+		check(container);
+		expect(correctnessOf(container, 'line-1')).toBe('wrong-indent');
+		expect(correctnessOf(container, 'line-0')).toBe('correct');
+		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('67');
+		// Fix the indent (this clears the stale feedback), then re-Check: fresh 100.
+		fireEvent.click(indentBtn(container, 'line-1')!);
+		expect(scoreEl(container)).toBeNull();
+		check(container);
+		expect(correctnessOf(container, 'line-1')).toBe('correct');
+		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('100');
+	});
+
+	it('on Check, a solution line left in the pool is flagged unplaced and lowers the score', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1'); // line-2 left in the pool
+		check(container);
+		// `unplaced` is a POOL-line hint, never a data-correctness on a placed <li>.
+		expect(
+			poolItem(container, 'line-2')?.hasAttribute('data-parsons-unplaced'),
+		).toBe(true);
+		// `unplaced` is NOT a data-correctness value — the pool line must not carry one.
+		expect(
+			poolItem(container, 'line-2')?.getAttribute('data-correctness'),
+		).toBeNull();
+		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('67');
+		expect(correctnessOf(container, 'line-0')).toBe('correct');
+	});
+
+	it('editing after Check clears the stale feedback (correctness + score)', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1');
+		placeOnZone(container, 'line-2');
+		check(container);
+		expect(scoreEl(container)).not.toBeNull();
+		// any arrangement mutation invalidates the last Check — indent line-0.
+		fireEvent.click(indentBtn(container, 'line-0')!);
+		expect(correctnessOf(container, 'line-0')).toBeNull();
+		expect(scoreEl(container)).toBeNull();
+	});
+
+	it('a DRAG (place) after Check also clears the stale feedback (not just indent)', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1'); // line-2 left in pool
+		check(container);
+		expect(scoreEl(container)).not.toBeNull();
+		// placing the remaining line is an arrange mutation -> feedback clears.
+		placeOnZone(container, 'line-2');
+		expect(scoreEl(container)).toBeNull();
+		expect(correctnessOf(container, 'line-0')).toBeNull();
+	});
+
+	it('returning a placed line to the pool after Check also clears the feedback', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1');
+		check(container);
+		expect(scoreEl(container)).not.toBeNull();
+		// drag a placed line back to the pool -> handleDropOnPool -> applyArrange.
+		const dt = makeDataTransfer();
+		fireEvent.dragStart(solutionItem(container, 'line-0')!, { dataTransfer: dt });
+		fireEvent.drop(container.querySelector('[data-parsons-pool]')!, {
+			dataTransfer: dt,
+		});
+		expect(scoreEl(container)).toBeNull();
+		expect(correctnessOf(container, 'line-1')).toBeNull();
+	});
+
+	it('on Check, a distractor left in the pool is NOT flagged unplaced (only solution lines are)', () => {
+		const { container } = render(
+			<parsonsLens.Component
+				embodiment={embody('const good = 1;\nconst bad = 2; // distractor')}
+				config={parsonsLens.config()}
+			/>,
+		);
+		// Place nothing, Check: line-0 (solution) is unplaced; line-1 (distractor)
+		// is correct-by-omission and must NOT carry the unplaced hint.
+		check(container);
+		expect(
+			poolItem(container, 'line-0')?.hasAttribute('data-parsons-unplaced'),
+		).toBe(true);
+		expect(
+			poolItem(container, 'line-1')?.hasAttribute('data-parsons-unplaced'),
+		).toBe(false);
+	});
+
+	it('Reset works before any Check (start over without peeking)', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		expect(solutionOrder(container).length).toBe(1);
+		reset(container);
+		expect(solutionOrder(container).length).toBe(0);
+		expect(poolLines(container).length).toBe(3);
+	});
+
+	it('Reset empties the solution, re-fills the pool, and clears feedback', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1');
+		check(container);
+		expect(scoreEl(container)).not.toBeNull();
+		reset(container);
+		expect(solutionOrder(container).length).toBe(0);
+		expect(poolLines(container).length).toBe(3);
+		expect(scoreEl(container)).toBeNull();
+	});
+
+	it('passes canIndent=false to the grader: a flat placement of an indented model still scores 100', () => {
+		// Model: if (x) { @0 / y(); @1 / } @0. With canIndent false there are no
+		// indent controls, so lines stay flat; indent must be excluded from grading.
+		const { container } = render(
+			<parsonsLens.Component
+				embodiment={embody('if (x) {\n\ty();\n}')}
+				config={parsonsLens.config({ canIndent: false })}
+			/>,
+		);
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1');
+		placeOnZone(container, 'line-2');
+		check(container);
+		expect(correctnessOf(container, 'line-1')).toBe('correct'); // not wrong-indent
+		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('100');
+	});
+});

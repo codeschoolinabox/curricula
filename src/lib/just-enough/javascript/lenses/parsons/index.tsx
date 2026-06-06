@@ -19,24 +19,24 @@
  * place. There is no destroy/recreate loop to guard, so the mirror would be cargo
  * cult.
  *
- * **Current scope (Inc 7a–7d):** the wrapper mounts, resolves config, parses the
- * snippet (`useMemo(parseParsons)`), holds the arrangement in `useReducer` over
- * `arrange.ts`, and renders the two-column board — the shuffled pool (`<ul>`) +
- * the solution column (`<ol>`). Native HTML5 DnD: `onDragStart` writes
- * `${zone}:${id}` to `dataTransfer`; `onDragOver` calls `preventDefault`
+ * **Current scope (Inc 7a–7f):** the wrapper mounts, resolves config, parses the
+ * snippet (parse held as state, reseeded on Reset), holds the arrangement in
+ * `useReducer` over `arrange.ts`, and renders the two-column board — the shuffled
+ * pool (`<ul>`) + the solution column (`<ol>`). Native HTML5 DnD: `onDragStart`
+ * writes `${zone}:${id}` to `dataTransfer`; `onDragOver` calls `preventDefault`
  * (load-bearing — without it `onDrop` never fires); `onDrop` dispatches
- * `placeFromPool` (pool→solution), `returnToPool` (solution→pool), or
- * `reorderWithinSolution` (solution→solution, with a removal-shift-adjusted insert
- * index + a same-position short-circuit). Each placed line carries
- * `data-indent={level}`, renders one compact guide step per level (editor-style
- * alignment guides so equal depths line up — a fixed-width nesting cue, not
- * literal `indentSize` spaces), and (when `canIndent`) right-side outdent/indent
- * buttons that dispatch `outdentLine`/`indentLine`.
- * Check/score (7e) and the view-mode toggle (7f) are not wired yet; a pool→pool
- * drop is a no-op.
+ * `placeFromPool` / `returnToPool` / `reorderWithinSolution` (removal-shift-adjusted
+ * insert index + same-position short-circuit). Each placed line carries
+ * `data-indent={level}` + compact guide steps (editor-style alignment cues) and
+ * (when `canIndent`) right-side outdent/indent buttons. A `Check` button grades via
+ * `buildEvaluation` and renders `data-correctness` per placed line + a
+ * `data-parsons-unplaced` hint on pool lines + a `data-parsons-score` aria-live
+ * region; any arrangement edit clears the stale result (`applyArrange`); `Reset`
+ * re-shuffles + clears. The view-mode toggle / complete view (7g) is not wired yet;
+ * a pool→pool drop is a no-op.
  */
 
-import React, { useMemo, useReducer } from 'react';
+import React, { useMemo, useReducer, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { freezeInPlace } from '@utils/freeze.js';
@@ -52,21 +52,31 @@ import {
 	reorderWithinSolution,
 	returnToPool,
 } from './lib/arrange.js';
+import { buildEvaluation } from './lib/evaluate.js';
 import { parseParsons } from './lib/parse-parsons.js';
-import type { Arrangement, ParsonsLine } from './types.js';
+import type {
+	Arrangement,
+	EvaluationResult,
+	ParsedParsons,
+	ParsonsLine,
+} from './types.js';
 
 import './parsons.css';
 
 /** The two drag zones, encoded into `dataTransfer` as the `${zone}:${id}` prefix. */
 type Zone = 'pool' | 'solution';
 
-/** Reducer actions wired in Inc 7b (place / return) + 7c (reorder) + 7d (indent / outdent). */
+/**
+ * Reducer actions: place/return (7b), reorder (7c), indent/outdent (7d), and
+ * `reseed` (7f Reset) — re-init the arrangement from a freshly shuffled pool.
+ */
 type ArrangeAction =
 	| { type: 'place'; id: string; index: number }
 	| { type: 'reorder'; id: string; index: number }
 	| { type: 'return'; id: string }
 	| { type: 'indent'; id: string }
-	| { type: 'outdent'; id: string };
+	| { type: 'outdent'; id: string }
+	| { type: 'reseed'; pool: ReadonlyArray<string> };
 
 function arrangementReducer(
 	state: Arrangement,
@@ -83,6 +93,8 @@ function arrangementReducer(
 			return indentLine(state, action.id);
 		case 'outdent':
 			return outdentLine(state, action.id);
+		case 'reseed':
+			return initialArrangement(action.pool);
 		default:
 			return state;
 	}
@@ -121,16 +133,17 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 	// indent is shown as compact fixed-width guide steps (a relative nesting cue —
 	// see parsons.css `[data-parsons-indent-step]`), so a deep nest does not eat
 	// horizontal space. `indentSize` drives the LITERAL indentation of the
-	// complete-solution view (Inc 7f); it is read there.
+	// complete-solution view (Inc 7g); it is read there.
 
 	// Parse the snippet into the model solution + selected distractors + the
-	// initial shuffled pool of ids. Memoized on source + maxDistractors: re-parse
-	// (re-roll the shuffle) ONLY when those change. `Math.random()` makes this
-	// impure across re-renders, so the deps are deliberately narrow — and the
-	// orchestrator/preview remount (key / unmount) on snippet change reseeds it.
-	const parsed = useMemo(
-		() => parseParsons(embodiment.source.code, maxDistractors),
-		[embodiment.source.code, maxDistractors],
+	// initial shuffled pool of ids. Held as STATE (lazy-seeded once at mount), NOT
+	// a useMemo: `Math.random()` makes parsing impure, and Reset must reseed the
+	// parse + the arrangement TOGETHER (a fresh parse re-selects distractors, so the
+	// arrangement's ids and lineById would desync if parse re-derived independently).
+	// Mount-stable otherwise: snippet/config changes remount (preview `key={code}`,
+	// orchestrator editor<->lens toggle + lens switch); only Reset replaces it.
+	const [parsed, setParsed] = useState<ParsedParsons>(() =>
+		parseParsons(embodiment.source.code, maxDistractors),
 	);
 
 	// id -> ParsonsLine over solution ∪ distractors, for O(1) code lookup when
@@ -144,24 +157,37 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 	}, [parsed]);
 
 	// The learner's arrangement: all ids start in the pool, the solution empty.
-	// Lazy-initialized from the parsed pool. `useReducer` does NOT re-run the
-	// initializer when `parsed` later changes — so the arrangement is reseeded by
-	// a fresh MOUNT, never an in-place prop update. That holds in v1: both inputs
-	// to `parsed` (embodiment.source.code, config.maxDistractors) are mount-stable.
-	// The preview remounts via `key={code}`. The orchestrator mounts
-	// `<lensModule.Component>` with no key, but never edits the snippet or config
-	// while a lens is mounted — entering lens mode (editor->lens toggle) and
-	// switching lens both render a fresh component (verified against
-	// orchestrate/index.tsx: no in-mount path mutates source or resolvedConfig).
-	// IF a future increment adds an in-mount control that changes maxDistractors
-	// (cf. the blanks difficulty slider, which is LOCAL state for exactly this
-	// reason), the arrangement must be explicitly reset then — otherwise `parsed`
-	// re-derives while the reducer keeps stale ids, desyncing lineById from it.
+	// Lazy-initialized from the parsed pool. Reseeded together with `parsed` on
+	// Reset (the `reseed` action); otherwise mount-stable like `parsed`.
 	const [arrangement, dispatch] = useReducer(
 		arrangementReducer,
 		parsed.pool,
 		initialArrangement,
 	);
+
+	// The last Check result (null until the first Check, and CLEARED on any
+	// arrangement edit so stale per-line feedback never outlives the move it graded).
+	const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
+
+	// Every arrangement mutation flows through here so the last Check is invalidated.
+	// (No-op transitions short-circuit BEFORE calling this, so they don't clear.)
+	function applyArrange(action: ArrangeAction): void {
+		dispatch(action);
+		setEvaluation(null);
+	}
+
+	function handleCheck(): void {
+		setEvaluation(buildEvaluation(arrangement, parsed, canIndent));
+	}
+
+	function handleReset(): void {
+		// Fresh shuffle: re-parse, then reseed the arrangement from it so `parsed`
+		// (hence lineById) and the arrangement stay consistent. applyArrange clears
+		// the evaluation.
+		const fresh = parseParsons(embodiment.source.code, maxDistractors);
+		setParsed(fresh);
+		applyArrange({ type: 'reseed', pool: fresh.pool });
+	}
 
 	// --- Native HTML5 DnD adapters (thin; all transition logic is in arrange.ts) ---
 
@@ -199,7 +225,7 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 		if (payload === null) return;
 		const targetIndex = solutionDropIndex(event);
 		if (payload.zone === 'pool') {
-			dispatch({ type: 'place', id: payload.id, index: targetIndex });
+			applyArrange({ type: 'place', id: payload.id, index: targetIndex });
 			return;
 		}
 		// solution -> solution: reorder within the column.
@@ -215,7 +241,7 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 		// Skip a same-position move: `reorderWithinSolution` returns a NEW
 		// arrangement even for a no-op index, which would re-render for nothing.
 		if (insertIndex === dragIndex) return;
-		dispatch({ type: 'reorder', id: payload.id, index: insertIndex });
+		applyArrange({ type: 'reorder', id: payload.id, index: insertIndex });
 	}
 
 	function handleDropOnPool(event: React.DragEvent<HTMLElement>): void {
@@ -223,10 +249,12 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 		const payload = parseDragPayload(event.dataTransfer.getData('text/plain'));
 		if (payload === null) return;
 		if (payload.zone === 'solution') {
-			dispatch({ type: 'return', id: payload.id });
+			applyArrange({ type: 'return', id: payload.id });
 		}
 		// pool -> pool is a no-op.
 	}
+
+	const correctness = evaluation?.correctnessMap;
 
 	return (
 		<div
@@ -234,6 +262,14 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 			data-view-mode={viewMode}
 			data-can-indent={String(canIndent)}
 		>
+			<header data-parsons-toolbar>
+				<button type="button" data-parsons-check onClick={handleCheck}>
+					Check
+				</button>
+				<button type="button" data-parsons-reset onClick={handleReset}>
+					Reset
+				</button>
+			</header>
 			<main data-parsons-board>
 				<ul
 					data-parsons-pool
@@ -248,6 +284,9 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 							<li
 								key={id}
 								data-line-id={id}
+								data-parsons-unplaced={
+									correctness?.get(id) === 'unplaced' || undefined
+								}
 								draggable
 								onDragStart={(event) => handleDragStart(event, 'pool', id)}
 							>
@@ -271,6 +310,7 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 								data-parsons-line
 								data-line-id={placed.id}
 								data-indent={placed.indent}
+								data-correctness={correctness?.get(placed.id)}
 								draggable
 								onDragStart={(event) =>
 									handleDragStart(event, 'solution', placed.id)
@@ -303,7 +343,7 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 												data-parsons-outdent
 												aria-label="Outdent line"
 												onClick={() =>
-													dispatch({ type: 'outdent', id: placed.id })
+													applyArrange({ type: 'outdent', id: placed.id })
 												}
 											>
 												←
@@ -314,7 +354,7 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 											data-parsons-indent
 											aria-label="Indent line"
 											onClick={() =>
-												dispatch({ type: 'indent', id: placed.id })
+												applyArrange({ type: 'indent', id: placed.id })
 											}
 										>
 											→
@@ -326,6 +366,12 @@ const ParsonsComponent: ComponentType<LensProperties> = function ParsonsComponen
 					})}
 				</ol>
 			</main>
+			{evaluation !== null && (
+				<div data-parsons-score={evaluation.score} aria-live="polite">
+					Score: {evaluation.score}% ({evaluation.correct} / {evaluation.total})
+					{evaluation.success ? ' — solved!' : ''}
+				</div>
+			)}
 		</div>
 	);
 };

@@ -106,3 +106,40 @@
 	border-radius: 3px;
 	background: var(--ifm-background-surface-color, #ffffff);
 }
+
+/*
+ * Per-line feedback after Check (Inc 7f). Keyed by `data-correctness` on placed
+ * solution lines (the four placed states) and `data-parsons-unplaced` on pool
+ * lines. Selectors include the `> li` so they out-specify the base line rule
+ * above (0,3,1 vs 0,2,1). A background tint carries the state; distractor and
+ * unplaced also get a dashed border so the two reds (wrong-order vs distractor)
+ * are distinguishable without relying on hue alone.
+ */
+[data-lens='parsons'] [data-parsons-solution] > li[data-correctness='correct'] {
+	background: rgba(46, 160, 67, 0.16);
+	border-color: rgba(46, 160, 67, 0.55);
+}
+[data-lens='parsons']
+	[data-parsons-solution]
+	> li[data-correctness='wrong-order'] {
+	background: rgba(248, 81, 73, 0.16);
+	border-color: rgba(248, 81, 73, 0.55);
+}
+[data-lens='parsons']
+	[data-parsons-solution]
+	> li[data-correctness='wrong-indent'] {
+	background: rgba(219, 171, 9, 0.2);
+	border-color: rgba(219, 171, 9, 0.65);
+}
+[data-lens='parsons']
+	[data-parsons-solution]
+	> li[data-correctness='distractor'] {
+	background: rgba(248, 81, 73, 0.16);
+	border-color: rgba(248, 81, 73, 0.7);
+	border-style: dashed;
+}
+[data-lens='parsons'] [data-parsons-pool] > li[data-parsons-unplaced] {
+	background: rgba(130, 130, 130, 0.14);
+	border-style: dashed;
+	border-color: var(--ifm-color-emphasis-400, #999999);
+}
