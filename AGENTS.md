@@ -71,6 +71,12 @@ encouragement. They cannot be overridden by momentum.
    away exactly the anomalies an audit is looking for. This applies to every
    file in the task, not "the important ones." If a file is too long to read in
    one pass, paginate deliberately and cover every line; do not sample.
+10. **Always run a Plan-agent design pass in plan mode** — while in plan mode,
+    after exploration and before exiting to request approval, spawn a Plan
+    subagent to design and adversarially validate the approach. Never skip it
+    because the design feels tightly templated by existing patterns; the
+    independent pass catches honesty, scope, and architecture gaps the
+    implementing agent rationalizes away. Only the human can waive it.
 
 > If these feel like friction, that friction is working as intended.
 
