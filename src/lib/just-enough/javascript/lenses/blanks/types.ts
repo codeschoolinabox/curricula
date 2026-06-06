@@ -64,9 +64,14 @@
  *   pre-Inc-6.k partial AST-walk approach which omitted ~25 keywords.
  * - `operator` — AST-walk over `BinaryExpression.operator`,
  *   `AssignmentExpression.operator`, `UpdateExpression.operator`,
- *   `UnaryExpression.operator`, `VariableDeclarator` init `=`, and
+ *   `UnaryExpression.operator`, `VariableDeclarator` init `=`,
  *   `AssignmentPattern` default-parameter `=` (Inc 6.k; covers
- *   `function f(x = 0)` and `({ a = 1 } = {})`).
+ *   `function f(x = 0)` and `({ a = 1 } = {})`),
+ *   `LogicalExpression.operator` (Inc 6.l; `&&`, `||`, `??` — Acorn
+ *   splits these into LogicalExpression nodes, NOT BinaryExpression),
+ *   and `PropertyDefinition` class-field initializer `=` (Inc 6.l;
+ *   covers `class A { x = 1 }`, `class A { #count = 0 }`, and
+ *   `class A { static MAX = 100 }`).
  * - `delimiter` (Inc 6.6 extension; beyond legacy) —
  *   syntactic delimiter tokens from Acorn's token stream:
  *   `(`, `)`, `{`, `}`, `[`, `]`, `${`, `;`, `,`, `.`, plus

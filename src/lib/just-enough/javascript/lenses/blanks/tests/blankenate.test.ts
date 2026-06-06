@@ -814,4 +814,152 @@ describe('blankenate', () => {
 			expect(originals).toContain('true');
 		});
 	});
+
+	describe('Inc 6.l — gap closures from the sandbox comprehensive snippet', () => {
+		// User pasted the difficulty-100/all-categories blanked output of
+		// the comprehensive Inc 6.k preview snippet. Three gaps showed
+		// literal characters where blanks were expected:
+		//   - PropertyDefinition `=` (class field initializer)
+		//   - LogicalExpression operators `&&`, `||`, `??`
+		//   - Generator `*` (deferred — see Inc 6.k AR notes)
+		// The first two are real pedagogical surfaces; locks below.
+
+		it('blanks PropertyDefinition `=` in class-field initializer (instance field) under operators=true', () => {
+			// `class A { x = 1; }` produces a PropertyDefinition node where
+			// node.key is the field name and node.value is the initializer.
+			// The `=` lives in source between them with NO AssignmentExpression
+			// or AssignmentPattern wrapping it. Inc 6.k AssignmentPattern fix
+			// did NOT cover this case.
+			const result = blankenate('class A { x = 1; }', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const equals = (result?.blanks ?? []).filter((b) => b.original === '=');
+			expect(equals.length).toBeGreaterThanOrEqual(1);
+		});
+
+		it('blanks PropertyDefinition `=` in private-field initializer (`#count = 0`) under operators=true', () => {
+			// Same as instance field but key is a PrivateIdentifier.
+			const result = blankenate('class A { #count = 0; }', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const equals = (result?.blanks ?? []).filter((b) => b.original === '=');
+			expect(equals.length).toBeGreaterThanOrEqual(1);
+		});
+
+		it('blanks PropertyDefinition `=` in static-field initializer (`static MAX = 100`) under operators=true', () => {
+			// `static` is the only PropertyDefinition variant where
+			// node.static === true; same node shape otherwise.
+			const result = blankenate('class A { static MAX = 100; }', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const equals = (result?.blanks ?? []).filter((b) => b.original === '=');
+			expect(equals.length).toBeGreaterThanOrEqual(1);
+		});
+
+		it('blanks LogicalExpression `&&` under operators=true', () => {
+			// Acorn produces a LogicalExpression (NOT BinaryExpression) for
+			// `&&`, `||`, `??`. Same `node.operator` shape as BinaryExpression
+			// but the type-discriminator differs; Inc 6.k operator walker
+			// only handled BinaryExpression.
+			const result = blankenate('a && b;', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('&&');
+		});
+
+		it('blanks LogicalExpression `||` under operators=true', () => {
+			const result = blankenate('a || b;', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('||');
+		});
+
+		it('blanks LogicalExpression `??` (nullish coalescing) under operators=true', () => {
+			const result = blankenate('a ?? b;', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('??');
+		});
+
+		it('end-to-end regression: `items?.[0] ?? "default"` blanks `??` under operators=true', () => {
+			// The exact user-pasted failing case (simplified).
+			const result = blankenate("const first = items?.[0] ?? 'default';", 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('??');
+		});
+
+		// AR-3 BLOCKER fix: lock that BinaryExpression operators still
+		// blank after the LogicalExpression `||` widening of the shared
+		// branch. Without this, a future refactor that drops
+		// BinaryExpression from the gate would be invisible to the
+		// suite.
+		it('regression lock: BinaryExpression `+` still blanks after LogicalExpression widening', () => {
+			const result = blankenate('1 + 2;', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('+');
+		});
+
+		// AR-3 IMPORTANT fix: triangulate the LogicalExpression branch
+		// against a string-scan shortcut. A fake impl that scans the
+		// source text for `&&`/`||`/`??` would pass the three single-
+		// operator tests above; only a real AST walk locates all three
+		// distinct positions correctly in a chained source. Note: JS
+		// disallows `??` mixed with `&&`/`||` without grouping parens
+		// (spec-level SyntaxError) — chain `&&`/`||` in one source and
+		// parenthesize `??` to test all three.
+		it('chained logical expression `(a ?? b) && c || d` blanks all three operators', () => {
+			const result = blankenate('(a ?? b) && c || d;', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('&&');
+			expect(originals).toContain('||');
+			expect(originals).toContain('??');
+		});
+
+		// AR-3 IMPORTANT fix: negative lock that MethodDefinition (e.g.
+		// `class A { m() {} }`) does NOT produce a spurious `=` blank.
+		// PropertyDefinition and MethodDefinition are different Acorn
+		// node types; the gate explicitly checks PropertyDefinition.
+		it('negative lock: MethodDefinition `class A { m() {} }` does NOT blank `=` under operators=true', () => {
+			const result = blankenate('class A { m() { return 1; } }', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).not.toContain('=');
+		});
+
+		// AR-3 IMPORTANT (deferred to a future increment per AR-3
+		// recommendation): computed-key PropertyDefinition. Documented
+		// here as a `.todo` so the gap is visible in test output.
+		it.todo(
+			'computed-key class field `class A { [k] = 1 }` blanks `=` under operators=true',
+		);
+
+		// Generator `*` deferral marker (per Inc 6.l plan): adding `*`
+		// to DELIMITER_LABELS would mis-categorize arithmetic `*` in
+		// `a * b` (it would blank as 'delimiter' instead of 'operator'
+		// since the delimiter walk fires first and dedup keeps the
+		// first-pushed entry). Real fix requires generator-context AST
+		// detection on FunctionDeclaration/MethodDefinition with
+		// `.generator === true`. Deferred to a future increment.
+		it.todo('generator `*` in `function* g() {}` blanks under delimiters=true');
+	});
 });

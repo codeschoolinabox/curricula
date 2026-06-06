@@ -324,19 +324,35 @@ function blankenate(
 		// `break`, `continue`, `of`, `in`, `get`, `set`, etc. Switching
 		// to the token-stream `keyword` flag catches them all uniformly.
 
-		// Blank operators (binary, assignment, unary, update, and
-		// AssignmentPattern for default-parameter `=` — added Inc 6.k).
+		// Blank operators. Covered AST node types:
+		//   - BinaryExpression / LogicalExpression (Inc 6.l): `+ - * / % == === !=`
+		//     etc. (BinaryExpression) and `&& || ??` (LogicalExpression).
+		//   - AssignmentExpression: `= += -= ||= ??=` etc.
+		//   - UnaryExpression: `!` `~` `typeof` `void` `delete` etc.
+		//   - UpdateExpression: `++` `--` (pre and post).
+		//   - VariableDeclarator: synthetic `=` from `const x = 1`.
+		//   - AssignmentPattern (Inc 6.k): synthetic `=` from
+		//     `function f(x = 0)` and destructuring defaults.
+		//   - PropertyDefinition (Inc 6.l): synthetic `=` from
+		//     `class A { x = 1 }` and static/private field initializers.
 		if (
 			config.operators &&
 			(node.operator ||
 				node.type === 'VariableDeclarator' ||
-				node.type === 'AssignmentPattern') &&
+				node.type === 'AssignmentPattern' ||
+				node.type === 'PropertyDefinition') &&
 			Math.random() < probability
 		) {
 			let operatorStart = -1;
 
-			if (node.type === 'BinaryExpression') {
-				// For binary expressions, operator is between left and right
+			if (
+				node.type === 'BinaryExpression' ||
+				node.type === 'LogicalExpression'
+			) {
+				// Binary AND logical expressions share the same shape:
+				// `node.left`, `node.right`, `node.operator`. Acorn splits
+				// `&&` / `||` / `??` into LogicalExpression nodes (Inc 6.l);
+				// `+` / `-` / `*` / `==` / `===` / etc. into BinaryExpression.
 				const leftEnd = node.left.end;
 				const rightStart = node.right.start;
 				const betweenText = code.substring(leftEnd, rightStart);
@@ -377,6 +393,23 @@ function blankenate(
 					operatorStart = leftEnd + operatorIndex;
 					node.operator = '=';
 				}
+			} else if (node.type === 'PropertyDefinition' && node.value && node.key) {
+				// Inc 6.l: class-field initializer `=` lives between
+				// node.key (the field name — Identifier or PrivateIdentifier)
+				// and node.value (the initializer expression). Covers:
+				//   class A { x = 1; }          (instance field)
+				//   class A { #count = 0; }     (private field)
+				//   class A { static MAX = 100; } (static field)
+				// PropertyDefinition has no `.operator` field — same shape
+				// as VariableDeclarator/AssignmentPattern in that regard.
+				const keyEnd = node.key.end;
+				const valueStart = node.value.start;
+				const betweenText = code.substring(keyEnd, valueStart);
+				const operatorIndex = betweenText.indexOf('=');
+				if (operatorIndex !== -1) {
+					operatorStart = keyEnd + operatorIndex;
+					node.operator = '=';
+				}
 			} else if (node.type === 'UnaryExpression') {
 				// For unary expressions, operator is at the beginning
 				if (node.prefix) {
@@ -415,7 +448,8 @@ function blankenate(
 				operatorStart !== -1 &&
 				(node.operator ||
 					node.type === 'VariableDeclarator' ||
-					node.type === 'AssignmentPattern')
+					node.type === 'AssignmentPattern' ||
+					node.type === 'PropertyDefinition')
 			) {
 				blankedTokens.push({
 					start: operatorStart,
