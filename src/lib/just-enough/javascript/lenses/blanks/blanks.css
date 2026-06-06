@@ -106,6 +106,69 @@
  * Distinct from the toolbar (which holds controls); this is read-only
  * status.
  */
+/*
+ * Inc 6j: Ask Me header bar. Hosts the "🤔 Ask Me" button + the
+ * Question-N-of-K counter + the active question's context and
+ * open-register prompt. Renders ABOVE the toolbar so it's visible
+ * regardless of view-mode or editor-mode toggles.
+ */
+[data-lens='blanks'] [data-blanks-header] {
+	padding: 0.4rem 0.5rem;
+	margin-bottom: 0.4rem;
+	font-family: system-ui, sans-serif;
+	font-size: 0.9rem;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fafafa;
+}
+
+[data-lens='blanks'] [data-ask-me-button] {
+	padding: 0.3rem 0.7rem;
+	margin-right: 0.5rem;
+	font-size: 0.9rem;
+	border: 1px solid #bbb;
+	border-radius: 3px;
+	background: #fff;
+	cursor: pointer;
+}
+
+[data-lens='blanks'] [data-ask-me-button]:hover:not(:disabled) {
+	background: #f0f0f0;
+}
+
+[data-lens='blanks'] [data-ask-me-button]:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+[data-lens='blanks'] [data-ask-me-counter] {
+	color: #666;
+	font-size: 0.85rem;
+}
+
+[data-lens='blanks'] [data-ask-me-question] {
+	margin-top: 0.4rem;
+	padding-top: 0.4rem;
+	border-top: 1px dashed #ddd;
+}
+
+[data-lens='blanks'] [data-ask-me-context] {
+	margin: 0 0 0.3rem 0;
+	color: #444;
+	font-style: italic;
+}
+
+[data-lens='blanks'] [data-ask-me-prompt] {
+	margin: 0;
+	color: #222;
+	font-weight: 500;
+}
+
+[data-lens='blanks'] [data-ask-me-empty] {
+	color: #888;
+	font-style: italic;
+}
+
 [data-lens='blanks'] [data-blanks-editor-header] {
 	padding: 0.25rem 0.5rem;
 	font-family: system-ui, sans-serif;

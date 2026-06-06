@@ -2662,6 +2662,226 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
+	describe('Ask Me button — Inc 6j', () => {
+		// Source rich enough to produce multiple micro-decision
+		// questions: variable declarations, control flow, function
+		// call. socratizing's analyzers typically surface several
+		// CodeQuestions from this.
+		const RICH_SOURCE =
+			'function add(a, b) { let result = a + b; return result; }';
+
+		it('renders the Ask Me button', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody(RICH_SOURCE)}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				expect(
+					container.querySelector('[data-ask-me-button]'),
+				).not.toBeNull();
+			});
+		});
+
+		it('initial render shows Question 1 of K and the active question is rendered', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody(RICH_SOURCE)}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				const counter = container.querySelector('[data-ask-me-counter]');
+				expect(counter?.textContent ?? '').toMatch(/Question 1 of \d+/);
+				expect(
+					container.querySelector('[data-ask-me-question]'),
+				).not.toBeNull();
+				expect(
+					container.querySelector('[data-ask-me-context]'),
+				).not.toBeNull();
+				expect(
+					container.querySelector('[data-ask-me-prompt]'),
+				).not.toBeNull();
+			});
+		});
+
+		it('clicking Ask Me advances the cursor (Question 2 of K appears)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody(RICH_SOURCE)}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				expect(
+					container.querySelector('[data-ask-me-counter]'),
+				).not.toBeNull();
+			});
+			const counterBefore = container.querySelector(
+				'[data-ask-me-counter]',
+			)?.textContent;
+			const total = Number(/of (\d+)/.exec(counterBefore ?? '')?.[1] ?? '0');
+			// Require at least 2 questions for this test to be meaningful.
+			expect(total).toBeGreaterThanOrEqual(2);
+			fireEvent.click(
+				container.querySelector(
+					'[data-ask-me-button]',
+				) as HTMLButtonElement,
+			);
+			await waitFor(() => {
+				const counter = container.querySelector('[data-ask-me-counter]');
+				expect(counter?.textContent ?? '').toMatch(/Question 2 of \d+/);
+			});
+		});
+
+		it('clicking past the last question wraps back to 1 of K', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody(RICH_SOURCE)}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				expect(
+					container.querySelector('[data-ask-me-counter]'),
+				).not.toBeNull();
+			});
+			const counterEl = container.querySelector('[data-ask-me-counter]');
+			const total = Number(
+				/of (\d+)/.exec(counterEl?.textContent ?? '')?.[1] ?? '0',
+			);
+			expect(total).toBeGreaterThanOrEqual(2);
+			// Click K times (wrap point is at the last click).
+			const btn = container.querySelector(
+				'[data-ask-me-button]',
+			) as HTMLButtonElement;
+			for (let i = 0; i < total; i++) {
+				fireEvent.click(btn);
+			}
+			await waitFor(() => {
+				const counter = container.querySelector('[data-ask-me-counter]');
+				expect(counter?.textContent ?? '').toMatch(/Question 1 of \d+/);
+			});
+		});
+
+		it('Ask Me caps results at 5 (per README — session-sized list)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody(RICH_SOURCE)}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				const counter = container.querySelector('[data-ask-me-counter]');
+				const total = Number(
+					/of (\d+)/.exec(counter?.textContent ?? '')?.[1] ?? '0',
+				);
+				expect(total).toBeLessThanOrEqual(5);
+			});
+		});
+
+		it('Ask Me uses the ORIGINAL embodiment (not blankenated)', async () => {
+			// At difficulty 100 the entire source becomes blanks. If the
+			// implementation mistakenly passed the blankenated source,
+			// socratizing's analyzers would either error or produce
+			// nonsense (analyzing `__` instead of real identifiers). The
+			// fact that questions still render proves it's analyzing the
+			// original.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody(RICH_SOURCE)}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(
+					container.querySelector('[data-ask-me-question]'),
+				).not.toBeNull();
+			});
+			// Question context should reference real identifiers from
+			// the source, not literal `__` placeholders.
+			const context =
+				container.querySelector('[data-ask-me-context]')?.textContent ?? '';
+			expect(context).not.toMatch(/\b__\b/);
+		});
+
+		it('cursor resets to 0 when embodiment changes', async () => {
+			const { container, rerender } = render(
+				<blanksLens.Component
+					embodiment={embody(RICH_SOURCE)}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				expect(
+					container.querySelector('[data-ask-me-counter]'),
+				).not.toBeNull();
+			});
+			// Advance the cursor.
+			fireEvent.click(
+				container.querySelector(
+					'[data-ask-me-button]',
+				) as HTMLButtonElement,
+			);
+			await waitFor(() => {
+				expect(
+					container
+						.querySelector('[data-ask-me-counter]')
+						?.textContent ?? '',
+				).toMatch(/Question 2 of \d+/);
+			});
+			// Swap the embodiment — cursor must reset.
+			rerender(
+				<blanksLens.Component
+					embodiment={embody('let x = 42;')}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				const counter = container.querySelector('[data-ask-me-counter]');
+				// If a question list exists for the new snippet, we should
+				// be on Question 1. If not, the empty-state message renders.
+				const empty = container.querySelector('[data-ask-me-empty]');
+				if (counter) {
+					expect(counter.textContent ?? '').toMatch(
+						/Question 1 of \d+/,
+					);
+				} else {
+					expect(empty).not.toBeNull();
+				}
+			});
+		});
+
+		it('renders an empty-state message + disabled button when no questions match config', async () => {
+			// `;` (empty statement) is the minimal parseable JS source
+			// that socratizing's POINT + PROGRAM analyzers produce zero
+			// questions for. AR-4 Inc 6j fix: unconditional assertion
+			// of the empty-state branch (was OR-gated). If a future
+			// analyzer surfaces a question for `;`, update this test
+			// to use a different genuinely-empty source rather than
+			// weakening back to an OR-gate.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody(';')}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				expect(
+					container.querySelector('[data-ask-me-button]'),
+				).not.toBeNull();
+			});
+			expect(container.querySelector('[data-ask-me-empty]')).not.toBeNull();
+			expect(container.querySelector('[data-ask-me-counter]')).toBeNull();
+			expect(container.querySelector('[data-ask-me-question]')).toBeNull();
+			const button = container.querySelector(
+				'[data-ask-me-button]',
+			) as HTMLButtonElement;
+			expect(button.disabled).toBe(true);
+		});
+	});
+
 	describe('the LensModule freeze contract', () => {
 		it('the default export is a frozen LensModule', () => {
 			expect(Object.isFrozen(blanksLens)).toBe(true);

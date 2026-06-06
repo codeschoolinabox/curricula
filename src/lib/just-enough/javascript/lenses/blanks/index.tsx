@@ -45,6 +45,11 @@ import blankenate from './lib/blankenate.js';
 import evaluateCorrectness from './lib/evaluate-correctness.js';
 import noPasteExtension from './lib/no-paste-extension.js';
 import urlConfig from './lib/url-config.js';
+import analyzeMicroDecisions from '../../orchestrate/lib/socratizing/analyze-micro-decisions.js';
+import type {
+	CodeQuestion,
+	MicroDecisionConfig,
+} from '../../orchestrate/lib/socratizing/types.js';
 import type {
 	BlankenateResult,
 	BlanksLensConfig,
@@ -55,6 +60,19 @@ import type {
 } from './types.js';
 
 import './blanks.css';
+
+/**
+ * Inc 6j: Ask Me config — caps at 5 questions per call (session-sized
+ * list, not 30+) and filters out the comparative register (which
+ * assumes the learner already knows the baseline and isn't useful as
+ * a study companion). Per `./README.md` § Ask Me contract — frozen
+ * module-level constant; filter knobs in the UI are a Future
+ * direction item.
+ */
+const ASK_ME_CONFIG: MicroDecisionConfig = Object.freeze({
+	count: 5,
+	register: Object.freeze({ open: true, pointed: true, comparative: false }),
+}) as MicroDecisionConfig;
 
 const ALL_CONTENT_TYPES: ReadonlyArray<ContentType> = [
 	'keywords',
@@ -687,6 +705,39 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 		setLearnerCode(null);
 	}
 
+	// Inc 6j: Ask Me cursor — index into the filtered question list.
+	// Starts at 0; advances (wrapping) per click. Resets to 0 when
+	// embodiment changes (new snippet starts from question 1, not
+	// mid-cycle from the previous snippet). Tracked separately from
+	// any per-mount disposable state because the question list is
+	// derived from embodiment, not from learner activity.
+	const [askMeCursor, setAskMeCursor] = useState<number>(0);
+
+	// Inc 6j: derive the filtered question list from the ORIGINAL
+	// embodiment (not the blankenated source — `__` placeholders would
+	// produce semantically-incoherent micro-decision questions per
+	// README § Ask Me contract). useMemo keyed on `source.code`
+	// (string-stable) rather than `embodiment` (object-identity) so
+	// the analyzer runs at most once per snippet change — a parent
+	// that calls `embody()` inline on every render would otherwise
+	// rerun the full AST walk every time (AR-4 Inc 6j fix).
+	const askMeResult = useMemo(
+		() => analyzeMicroDecisions(embodiment, ASK_ME_CONFIG),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[embodiment.source.code],
+	);
+	const askMeQuestions: ReadonlyArray<CodeQuestion> = useMemo(
+		() => (askMeResult.ok ? askMeResult.questions : []),
+		[askMeResult],
+	);
+
+	// Inc 6j: reset Ask Me cursor on embodiment change. useEffect
+	// keyed on embodiment.source.code so the cursor zeros out when
+	// the snippet changes — not on every render.
+	useEffect(() => {
+		setAskMeCursor(0);
+	}, [embodiment.source.code]);
+
 	// Inc 6d: per-blank correctness wiring + aggregate score display.
 	// evaluateCorrectness is pure; recomputes on learnerCode change
 	// (typing dispatches setLearnerCode) and on blankResult change
@@ -968,6 +1019,56 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 				</div>
 			) : (
 				<>
+					<header data-blanks-header>
+						<button
+							type="button"
+							data-ask-me-button
+							onClick={() => {
+								if (askMeQuestions.length === 0) return;
+								setAskMeCursor(
+									(c) => (c + 1) % askMeQuestions.length,
+								);
+							}}
+							disabled={askMeQuestions.length === 0}
+						>
+							🤔 Ask Me
+						</button>
+						{askMeQuestions.length === 0 ? (
+							<span data-ask-me-empty>
+								No questions available for this snippet at the current Ask
+								Me configuration.
+							</span>
+						) : (
+							<>
+								<span data-ask-me-counter>
+									Question {askMeCursor + 1} of {askMeQuestions.length}
+								</span>
+								{(() => {
+									const q = askMeQuestions[askMeCursor];
+									if (!q) return null;
+									// Prefer open-register prompt; fall back to the
+									// first available register if none is `open`.
+									// Empty `q.questions[]` is structurally legal per
+									// the socratizing type — guard rather than assert.
+									const openQ =
+										q.questions.find((x) => x.register === 'open') ??
+										q.questions[0];
+									return (
+										<div
+											data-ask-me-question
+											data-ask-me-question-id={q.id}
+											data-ask-me-question-kind={q.kind}
+										>
+											<p data-ask-me-context>{q.context}</p>
+											{openQ ? (
+												<p data-ask-me-prompt>{openQ.text}</p>
+											) : null}
+										</div>
+									);
+								})()}
+							</>
+						)}
+					</header>
 					<div data-blanks-toolbar role="toolbar">
 						<button
 							type="button"

@@ -373,18 +373,23 @@ The "🤔 Ask Me" button in the header delegates to the `socratizing/` module:
   ships the constant.
 
 - **Cycling**: the lens maintains a local cursor (0..K-1) into the filtered
-  question list. The first click shows `questions[0]`; subsequent clicks advance
-  the cursor (wrapping at K back to 0). The cursor resets to 0 on `embodiment`
-  change or on `config` change (so a new snippet starts from question 1, not
-  mid-cycle from the previous snippet). The lens UI shows a "Question N of K"
-  indicator so cycling is legible.
+  question list. The first render shows `questions[0]`; clicking the Ask Me
+  button advances the cursor by one (wrapping at K back to 0). The cursor
+  resets to 0 on `embodiment.source.code` change (a new snippet starts from
+  question 1, not mid-cycle from the previous snippet). The lens UI shows a
+  "Question N of K" indicator so cycling is legible.
 - Questions are ordered by source location (top-to-bottom) before capping, per
   [`../../orchestrate/lib/socratizing/README.md`](../../orchestrate/lib/socratizing/README.md)
   § Ordering — so the first question on the same snippet is stable across
   mounts.
 - The lens displays each question's `context` (PBSI sentence framing the
-  decision) + the first `questions[N].questions[0].text` (the open-register
-  question text).
+  decision) + the prompt text. Prompt selection prefers the open-register
+  question (`questions[N].questions.find(q => q.register === 'open').text`),
+  falling back to `questions[N].questions[0].text` when no open-register
+  entry exists. The pedagogical bias is toward open prompts — they invite
+  the learner to articulate their own reasoning, matching the Ask Me /
+  socratizing posture (vs. pointed prompts which presume the learner
+  already has a candidate to evaluate).
 - An empty result list (`questions.length === 0` after filtering) renders "No
   questions available for this snippet at the current Ask Me configuration." The
   `ok: false` branch is unreachable in production because `applicableTo` gates
