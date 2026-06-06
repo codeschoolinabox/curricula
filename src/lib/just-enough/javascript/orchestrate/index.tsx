@@ -50,6 +50,7 @@ import React from 'react';
 import deepMerge from '../../../utils/deep-merge.js';
 import embody from '../embody/index.js';
 import annotateLens from '../lenses/annotate/index.js';
+import blanksLens from '../lenses/blanks/index.js';
 import debugPropertiesLens from '../lenses/debug-props/index.js';
 import type { LensConfig, LensModule } from '../lenses/types.js';
 
@@ -75,6 +76,7 @@ import type {
  */
 const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 	annotate: annotateLens,
+	blanks: blanksLens,
 	'debug-props': debugPropertiesLens,
 });
 
