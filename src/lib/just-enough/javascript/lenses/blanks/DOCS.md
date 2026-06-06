@@ -9,22 +9,24 @@ feedback (green / red / yellow) as they go. A difficulty slider scales the
 exercise across the novice → review spectrum (`p = difficulty / 100` per
 eligible token); five content-type checkboxes scope which token categories are
 eligible (keywords / identifiers / operators / literals / delimiters); a
-view-mode toggle
-gives the learner a peek at the complete source for self-check without losing
-their answers. An "Ask Me" button delegates to the `socratizing/` module for
-Socratic micro-decision / comprehension questions about the original source —
-layering an observational study mode on top of the cloze-deletion task.
+view-mode toggle gives the learner a peek at the complete source for self-check
+without losing their answers.
+
+Inc 6.m: the Ask Me / `socratizing/` surface previously offered by this lens was
+removed and is no longer a blanks concern. Socratic study lives at the SL
+orchestrator layer above (it operates on the original embodiment, not on the
+blankenated source — so it belongs cross-lens, not per-lens).
 
 It is the **second migrated pedagogical lens** in WS4's batch (after
 `annotate`). The previous V2 sprint shipped structurally-compliant shells that
 satisfied the `LensModule` contract and passed all tests + AR cycles, but
 **never opened in a browser as a learner** — real pedagogical features
 (CodeMirror with `__` placeholders, AST-based blankenate, hint tiers, per-blank
-feedback, content-type filters, view-mode toggle, URL config, Ask Me) were
-absent. The user called those shells "weak hallucinations." This redo deletes
-them and migrates the legacy `BlanksLens.jsx` faithfully — preserving the
-algorithm via vendoring rather than re-porting, treating the Sandbox Checkpoint
-as a gate not a celebration.
+feedback, content-type filters, view-mode toggle, URL config) were absent. The
+user called those shells "weak hallucinations." This redo deletes them and
+migrates the legacy `BlanksLens.jsx` faithfully — preserving the algorithm via
+vendoring rather than re-porting, treating the Sandbox Checkpoint as a gate not
+a celebration.
 
 ## Migration
 
@@ -53,14 +55,14 @@ session-level decisions and audit trail.
 
 ## Modules
 
-| File                          | Layer   | Purpose                                                                                                                                                                               |
-| ----------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `index.tsx`                   | wrapper | React `Component`; owns per-mount UI state; composes the core                                                                                                                         |
-| `core.ts`                     | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend`                                                                                                                         |
-| `lib/blankenate.ts`           | core    | **Vendored** — walks the parsed AST, rolls a probability per eligible token, returns the blanked source plus an array of blank descriptors                                            |
-| `lib/no-paste-extension.ts`   | core    | **Vendored** — CodeMirror extension blocking keyboard and context-menu paste                                                                                                          |
-| `lib/evaluate-correctness.ts` | core    | Position-aware per-blank correctness; fixes the legacy's two substring bugs                                                                                                           |
-| `lib/url-config.ts`           | core    | Slimmed URLManager pattern; reads/writes the lens's URL parameter                                                                                                                     |
+| File                          | Layer   | Purpose                                                                                                                                                        |
+| ----------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`                   | wrapper | React `Component`; owns per-mount UI state; composes the core                                                                                                  |
+| `core.ts`                     | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend`                                                                                                  |
+| `lib/blankenate.ts`           | core    | **Vendored** — walks the parsed AST, rolls a probability per eligible token, returns the blanked source plus an array of blank descriptors                     |
+| `lib/no-paste-extension.ts`   | core    | **Vendored** — CodeMirror extension blocking keyboard and context-menu paste                                                                                   |
+| `lib/evaluate-correctness.ts` | core    | Position-aware per-blank correctness; fixes the legacy's two substring bugs                                                                                    |
+| `lib/url-config.ts`           | core    | Slimmed URLManager pattern; reads/writes the lens's URL parameter                                                                                              |
 | `types.ts`                    | shared  | `Blank`, `BlankType`, `BlankenateResult`, `ContentType`, `ViewMode`, `HintsMode`, `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`, `BlanksLensConfig` |
 
 Default export of `index.tsx` is the frozen `LensModule` record. The core
@@ -91,7 +93,7 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    wrapper-internal only). Initial per-mount state at mount: view mode and hints
    level seeded from config; learner code is empty (filled on first edit);
    correctness map is empty (populated when the learner types into a blank
-   position); the Ask Me cursor starts at index zero.
+   position).
 
 2. **Derive blanks** (sync, pure, per-render-conditional) — the wrapper memoizes
    the blankenate call on the embodiment, difficulty, and content-type-flags
@@ -102,8 +104,8 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    on the Future direction list. Result shape per `BlankenateResult` (in
    `types.ts`) on success; `null` on internal parse failure (defense-in-depth —
    in production `applicableTo` gates this case out). The first paint already
-   shows length-matched `_` placeholders (Inc 6.7: `_`.repeat(original.length)
-   — one underscore per character of the original token, preserving the token's
+   shows length-matched `_` placeholders (Inc 6.7: `_`.repeat(original.length) —
+   one underscore per character of the original token, preserving the token's
    width as a recognition-cue) — no flicker between an empty editor and a
    populated one. Re-derivation on settings change resets the correctness map;
    the wrapper does NOT preserve correctness across re-rolls.
@@ -111,85 +113,72 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
 3. **Wire CodeMirror** (per-mount, async-setup) — a mount effect instantiates
    the editor view configured with the standard JavaScript basicSetup, the
    codebase's editor theme, an editability flag driven by view mode, an update
-   listener that mirrors learner edits into local state, the no-paste
-   extension (in blankenated mode only), and **(Inc 6.7) a `buildLockExtensions`
-   bundle** that adds two CodeMirror primitives:
-   (a) an `EditorState.transactionFilter` enforcing the fixed-width fillable-
-   field UX — typing at any position inside a blank OVERWRITES the char there
-   (whether `_` or a previously-typed char); backspace replaces the char-
-   before-cursor with `_`; **directional compaction on `_` deletes** — when
-   the deleted char is itself a `_`, the freed space is moved to the side
-   opposite to the editing motion (backspace pads `_` at blank end + shifts
-   right-text left; Del pads `_` at blank front + shifts left-text right);
-   out-of-blank edits and replace-with-selection operations are rejected;
-   and (b) a `StateField<DecorationSet>` that
-   re-derives each blank's correctness class per transaction from the doc
-   content vs `blank.original` (`cm-blank-correct` / `cm-blank-incorrect` /
-   `cm-blank-unfilled`) — see `blanks.css` for the per-class styling.
-   The update listener fires only when the document changed AND view mode is
-   blankenated; it **never** calls the orchestrator's snippet setter —
-   learner answers stay lens-local per the single-writer invariant. On
-   view-mode change, the wrapper recreates the editor view (parity with
-   legacy lines 310–338; see § Why recreate on toggle below). Learner answers
-   are **preserved** across the toggle: when toggling to `'complete'` the
-   editor mounts on `embodiment.source.code` (read-only, no `_`); when
-   toggling back to `'blankenated'` the editor mounts on `learnerCode` (the
-   in-progress edits) or, on first-toggle-back, on `blankedCode` from the
-   memoized blankenate result.
+   listener that mirrors learner edits into local state, the no-paste extension
+   (in blankenated mode only), and **(Inc 6.7) a `buildLockExtensions` bundle**
+   that adds two CodeMirror primitives: (a) an `EditorState.transactionFilter`
+   enforcing the fixed-width fillable- field UX — typing at any position inside
+   a blank OVERWRITES the char there (whether `_` or a previously-typed char);
+   backspace replaces the char- before-cursor with `_`; **directional compaction
+   on `_` deletes** — when the deleted char is itself a `_`, the freed space is
+   moved to the side opposite to the editing motion (backspace pads `_` at blank
+   end + shifts right-text left; Del pads `_` at blank front + shifts left-text
+   right); out-of-blank edits and replace-with-selection operations are
+   rejected; and (b) a `StateField<DecorationSet>` that re-derives each blank's
+   correctness class per transaction from the doc content vs `blank.original`
+   (`cm-blank-correct` / `cm-blank-incorrect` / `cm-blank-unfilled`) — see
+   `blanks.css` for the per-class styling. The update listener fires only when
+   the document changed AND view mode is blankenated; it **never** calls the
+   orchestrator's snippet setter — learner answers stay lens-local per the
+   single-writer invariant. On view-mode change, the wrapper recreates the
+   editor view (parity with legacy lines 310–338; see § Why recreate on toggle
+   below). Learner answers are **preserved** across the toggle: when toggling to
+   `'complete'` the editor mounts on `embodiment.source.code` (read-only, no
+   `_`); when toggling back to `'blankenated'` the editor mounts on
+   `learnerCode` (the in-progress edits) or, on first-toggle-back, on
+   `blankedCode` from the memoized blankenate result.
 
-4. **Evaluate correctness** (per learner edit, sync, pure) — a `useMemo`
-   keyed on `(learnerCode, blankResult)` calls
+4. **Evaluate correctness** (per learner edit, sync, pure) — a `useMemo` keyed
+   on `(learnerCode, blankResult)` calls
    `evaluateCorrectness(currentDoc, blanks, originalCode)` where
-   `currentDoc = learnerCode ?? blankResult.blankedCode`. The evaluator
-   returns `EvaluationResult` (`correctnessMap` + counts + score); Inc 6d
-   surfaces the score in the JSX, and Inc 6.7's StateField derives the
-   per-blank in-editor visual class (`cm-blank-correct/incorrect/unfilled`)
-   from the same source-of-truth (doc content vs `blank.original`).
-   `useMemo` (not `useEffect`): synchronous-pure computation belongs in
-   the render pass so the score updates atomically with the learner's
-   keystroke — no stale-score flicker frame. Position-aware: each blank's
-   `{start, end}` from `blankenate`'s output anchors a per-position
-   match against the learner's typed text. Fixes the legacy's two bugs
-   (substring-containment false positive; multi-blank-same-word
-   tracking).
+   `currentDoc = learnerCode ?? blankResult.blankedCode`. The evaluator returns
+   `EvaluationResult` (`correctnessMap` + counts + score); Inc 6d surfaces the
+   score in the JSX, and Inc 6.7's StateField derives the per-blank in-editor
+   visual class (`cm-blank-correct/incorrect/unfilled`) from the same
+   source-of-truth (doc content vs `blank.original`). `useMemo` (not
+   `useEffect`): synchronous-pure computation belongs in the render pass so the
+   score updates atomically with the learner's keystroke — no stale-score
+   flicker frame. Position-aware: each blank's `{start, end}` from
+   `blankenate`'s output anchors a per-position match against the learner's
+   typed text. Fixes the legacy's two bugs (substring-containment false
+   positive; multi-blank-same-word tracking).
 
 5. **Render** (sync) — the wrapper emits the root
    `<div data-lens="blanks" data-view-mode="blankenated|complete" data-hints-mode="on|off">`
-   with toolbar, editor header, CodeMirror container, the cursor-scoped
-   hints panel (Inc 6h-redux — renders only when `data-hints-mode='on'`),
-   and the instructions panel. The `data-hints-mode` attribute reflects
-   the `config.hintsMode` value directly (no inference; orthogonal to
-   difficulty).
+   with toolbar, editor header, CodeMirror container, the cursor-scoped hints
+   panel (Inc 6h-redux — renders only when `data-hints-mode='on'`), and the
+   instructions panel. The `data-hints-mode` attribute reflects the
+   `config.hintsMode` value directly (no inference; orthogonal to difficulty).
 
 6. **Handle interaction** (per learner event) — per-control handlers update the
    relevant config-state slice (`difficulty`, `contentTypes`, `viewMode`,
-   `hintsMode`); the wrapper's URL-write effect (debounced 500ms) writes the
-   new config to the URL parameter.
+   `hintsMode`); the wrapper's URL-write effect (debounced 500ms) writes the new
+   config to the URL parameter.
 
-7. **Ask Me** (per learner click, sync, pure) — the Ask Me button calls
-   `analyzeMicroDecisions(embodiment, ASK_ME_CONFIG)` and surfaces one
-   `CodeQuestion` from the filtered result at the wrapper's local cursor index;
-   subsequent clicks advance the cursor (wrapping back to zero at the end of the
-   filtered question list). Cursor resets to zero on embodiment or config
-   change. Ask Me is capped at five questions per call, with the comparative
-   register filtered out for v1 (the open and pointed registers remain); see
-   README § Ask Me contract for the rationale and the literal config constant.
+7. **URL config sync** (per learner control change, debounced 500ms) — a write
+   effect keyed on the five config fields
+   (`difficulty, contentTypes, viewMode, editorMode, hintsMode`) debounces 500ms
+   (matching legacy line 222) and calls the URL-config writer. The write effect
+   skips its first invocation via a `useRef` guard so an empty URL on mount
+   doesn't immediately get overwritten with prop defaults. On mount, a separate
+   read effect calls the URL-config reader once, merging any URL-supplied values
+   over the wrapper's default state. A hashchange listener registered by a third
+   effect re-reads on browser back/forward — same merge semantics.
+   `urlConfig.write` uses `history.replaceState` which does NOT fire
+   `hashchange` (per HTML spec), so the write→listener loop is structurally
+   prevented. URL is the only cross-mount persistence; learner answers, blanks,
+   and correctness are React-state only.
 
-8. **URL config sync** (per learner control change, debounced 500ms) — a write
-   effect keyed on the five config fields (`difficulty, contentTypes, viewMode,
-   editorMode, hintsMode`) debounces 500ms (matching legacy line 222) and
-   calls the URL-config writer. The write effect skips its first invocation
-   via a `useRef` guard so an empty URL on mount doesn't immediately get
-   overwritten with prop defaults. On mount, a separate read effect calls the
-   URL-config reader once, merging any URL-supplied values over the
-   wrapper's default state. A hashchange listener registered by a third effect
-   re-reads on browser back/forward — same merge semantics. `urlConfig.write`
-   uses `history.replaceState` which does NOT fire `hashchange` (per HTML
-   spec), so the write→listener loop is structurally prevented. URL is the
-   only cross-mount persistence; learner answers, blanks, correctness, and the
-   Ask Me cursor are React-state only.
-
-9. **Unmount** (React-driven) — orchestrator unmounts when the snippet changes
+8. **Unmount** (React-driven) — orchestrator unmounts when the snippet changes
    or the learner exits the lens. Per-mount state is garbage-collected with the
    component instance. Four cleanup obligations fire: (a) React GCs the
    per-mount state, (b) the CodeMirror editor view destroys via its own cleanup,
@@ -207,7 +196,7 @@ flowchart TD
     Props -->|"applicableTo, sync, pure"| Gate["embodiment.status.parsed"]
     Props -->|"recommend, sync, pure"| Recs["[] (WS2-deferred)"]
 
-    ResolvedConfig --> State["per-mount state<br/>{ viewMode, editorMode, hintsMode,<br/>difficulty, contentTypes,<br/>learnerCode, cursorPos,<br/>revealCounts, askMeCursor }"]
+    ResolvedConfig --> State["per-mount state<br/>{ viewMode, editorMode, hintsMode,<br/>difficulty, contentTypes,<br/>learnerCode, cursorPos,<br/>revealCounts }"]
 
     Props --> Memo
     ResolvedConfig --> Memo[("useMemo:<br/>blankenate (sync, pure;<br/>runs during first render —<br/>no flicker between empty and<br/>__-filled editor)")]
@@ -243,10 +232,7 @@ flowchart TD
     URL -->|"hashchange listener:<br/>re-read, same merge semantics"| URLRead
     URLRead --> State
 
-    DOM -->|"Ask Me click"| AskMe[("analyzeMicroDecisions<br/>(sync, pure;<br/>original embodiment,<br/>NOT blankenated)")]
-    AskMe -->|"questions[cursor]"| Render
-    State -->|"askMeCursor"| AskMe
-    Props -.->|"reset askMeCursor + correctnessMap<br/>on embodiment or config change"| State
+    Props -.->|"reset correctnessMap<br/>on embodiment or config change"| State
 
     Props -.->|"unmount triggers (snippet change)"| Unmount[/"React unmount<br/>4 cleanups:<br/>(a) per-mount state → GC<br/>(b) EditorView.destroy<br/>(c) URL-write debounce cancel<br/>(d) hashchange listener remove"/]
 ```
@@ -275,10 +261,10 @@ learner answers and the correctness map die with the component instance.
   `props.embodiment`. Per the lenses-peer invariant.
 - **`data-lens="blanks"` on the wrapper's root element.** Load-bearing for
   sandbox-harness selectors. Per the lenses peer's invariant.
-- **`data-view-mode="blankenated|complete"` and
-  `data-hints-mode="on|off"`** on the root. Sandbox-harness selectors +
-  CSS hooks. Values reflect committed config state, not in-flight
-  transitions; CSS transitions should anchor on the parent.
+- **`data-view-mode="blankenated|complete"` and `data-hints-mode="on|off"`** on
+  the root. Sandbox-harness selectors + CSS hooks. Values reflect committed
+  config state, not in-flight transitions; CSS transitions should anchor on the
+  parent.
 - **Tier-2 classification.** The contract per [`../types.ts`](../types.ts):
   `applicableTo` is the recommender's cheap gate; `recommend` only fires on
   applicable lenses. This lens honors that contract by returning
@@ -330,8 +316,8 @@ learner answers and the correctness map die with the component instance.
 - **Read-only views.** The lens never mutates `embodiment` or `config` (both
   deep-frozen anyway).
 - **Disposable practice.** No `localStorage`, no module-level cache, no refs
-  across mounts for learner answers / blanks / correctness / askMeCursor. URL is
-  the one cross-mount persistence and it's orchestrator-domain (URL = caller
+  across mounts for learner answers / blanks / correctness. URL is the one
+  cross-mount persistence and it's orchestrator-domain (URL = caller
   environment, not lens-internal).
 - **No consumer-side branching on `embodiment.source.code`.** The lens _renders_
   `source.code` (legitimate per the lenses-peer invariant) but does not use it
@@ -340,7 +326,7 @@ learner answers and the correctness map die with the component instance.
   theme/view-default/hints-tier.
 - **LensModule surface stays synchronous.** `config()`, `applicableTo()`,
   `recommend()` are sync. There is no async work inside this lens — blankenate
-  is sync, evaluate is sync, socratizing is sync. Per the lenses peer's
+  is sync; evaluate is sync. Per the lenses peer's
   [§ Structural constraints](../DOCS.md#structural-constraints).
 - **Display content is rendered safely.** The CodeMirror editor renders source
   code via its own document model (never `dangerouslySetInnerHTML`). Hints panel
@@ -409,8 +395,8 @@ caught and reversed.)
 ## Why ship the hints panel enabled by default
 
 The legacy compiled the hints panel out (`{false && showHints && (...)}` at
-line 672) but the design and styling exist in full (lines 670–864). v1 ships
-the panel enabled because **per-blank visual feedback is load-bearing for a
+line 672) but the design and styling exist in full (lines 670–864). v1 ships the
+panel enabled because **per-blank visual feedback is load-bearing for a
 self-pacing exercise** — without it, the learner has to guess whether they've
 answered correctly until they manually toggle to complete-view. Disabling in
 legacy was a ship cut, not a design decision; the lens-shipping-shells failure
@@ -419,21 +405,21 @@ lens exists) is exactly what disabled feedback recreates.
 
 The per-blank green/red/yellow visual lives in the editor itself (Inc 6.7's
 correctness-aware decoration class on the CodeMirror StateField). The hints
-panel is a **separate affordance** for cursor-scoped on-demand hint reveals
-(Inc 6h-redux): the learner clicks a button to see the scrambled letters of
-the blank they're focused on.
+panel is a **separate affordance** for cursor-scoped on-demand hint reveals (Inc
+6h-redux): the learner clicks a button to see the scrambled letters of the blank
+they're focused on.
 
 ## Why hints are orthogonal to difficulty (Inc 6h-redux)
 
 An earlier design (now reversed) auto-derived a 3-tier hints config from the
-difficulty slider — high difficulty → easy/full-reveal panel; low difficulty
-→ score-only. User-directed redesign rejected this coupling on pedagogical
-grounds: **the learner, not the slider, should control scaffolding**. The
-3-tier system implicitly conflated "how hard is the exercise" with "how much
-help is offered"; the user's intent is that those be independent so a learner
-can grind through a hard exercise without scaffolding (or get help on an easy
-one if stuck). The hints panel now exposes a single `hintsMode: 'on' | 'off'`
-knob; when `'on'`, the learner chooses how many blanks to reveal as their own
+difficulty slider — high difficulty → easy/full-reveal panel; low difficulty →
+score-only. User-directed redesign rejected this coupling on pedagogical
+grounds: **the learner, not the slider, should control scaffolding**. The 3-tier
+system implicitly conflated "how hard is the exercise" with "how much help is
+offered"; the user's intent is that those be independent so a learner can grind
+through a hard exercise without scaffolding (or get help on an easy one if
+stuck). The hints panel now exposes a single `hintsMode: 'on' | 'off'` knob;
+when `'on'`, the learner chooses how many blanks to reveal as their own
 scaffolding gradient.
 
 ## Why drop the seeded RNG

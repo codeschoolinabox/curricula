@@ -15,8 +15,7 @@
  *   the URL config read/write surface.
  * - The React wrapper (`./index.tsx`) composes the cores, owns the
  *   per-mount UI state (current view mode, learner code, blanks,
- *   correctness map, Ask Me cursor), and dispatches user-interaction
- *   events.
+ *   correctness map), and dispatches user-interaction events.
  *
  * @remarks The lens does NOT mutate `embodiment` (deep-frozen per the
  * `embody/` contract) or `config`. Learner answers, blanks, and the
@@ -39,9 +38,10 @@
  *
  * @remarks Naming note: vocabulary matches the legacy
  * `BlanksLens.jsx` directly (`blank`, `blankenated`, `content type`,
- * `view mode`, `hints level`, `correctness`). New terms from the
- * `socratizing/` integration (`code question`, `micro-decision`) are
- * documented in `./README.md` § Glossary.
+ * `view mode`, `hints level`, `correctness`). Inc 6.m: removed
+ * `code question`/`micro-decision` terms — `socratizing/` is no
+ * longer a blanks concern (moved to the SL orchestrator since it
+ * operates on the original embodiment, not the blankenated source).
  */
 
 // ─── Token category + blank identity ────────────────────────
@@ -241,13 +241,12 @@ type HintsMode = 'on' | 'off';
 /**
  * Per-blank state in the blanks-exercise sense.
  *
- * @remarks `socratizing/` deliberately produces questions rather than
- * corrections (see `../../orchestrate/lib/socratizing/README.md`);
- * `BlankCorrectness` is a blanks-internal term for the
- * cloze-deletion exercise, not a socratizing concept. The Ask Me
- * affordance and the blank-correctness affordance share a snippet
- * but carry different pedagogical commitments — see `./README.md` §
- * Why this lens exists ("Bimodal pedagogical posture").
+ * @remarks `BlankCorrectness` is a blanks-internal term for the
+ * cloze-deletion exercise. It is the only correctness signal the
+ * lens exposes — the lens does NOT layer Socratic questioning on top.
+ * (Inc 6.m: the Ask Me / socratizing surface was moved out of this
+ * lens and into the SL orchestrator, since it operates on the
+ * original embodiment rather than the blankenated source.)
  */
 type BlankCorrectness = 'correct' | 'incorrect' | 'unfilled';
 

@@ -69,7 +69,7 @@ Fields:
 - `name: 'blanks'` — registry identity.
 - `Component: ComponentType<LensProps>` — React wrapper around the lens's
   pure-TS core. Renders the blanks surface (`<div data-lens="blanks">`) with the
-  toolbar, editor, editor header, hints panel, and Ask Me button.
+  toolbar, editor, editor header, and hints panel.
 - `config(overrides?): LensConfig` — resolves the per-lens config. Returns a
   frozen `LensConfig` (flat `Record<string, SerializableValue>` per
   [`../types.ts`](../types.ts) `LensConfig`); unknown keys in `overrides` are
@@ -130,24 +130,17 @@ peek at the complete source as a self- check without leaving the lens.
 
 The hints panel surfaces per-blank correctness state as the learner types —
 green for correct, red for incorrect, yellow for unfilled — making the exercise
-self-pacing rather than a submit-then-grade round-trip. The Ask Me button hands
-the original (non-blanked) source to the `socratizing/` module for Socratic
-micro-decision / comprehension questions, framing the exercise as a study
-session rather than a quiz.
+self-pacing rather than a submit-then-grade round-trip.
 
-**Bimodal pedagogical posture.** The blanks exercise is a correct/incorrect
-cloze-deletion task by design (per Denny et al. 2019); the Ask Me affordance
-layers socratizing's observational study mode on top for learners who want to
-step back from filling blanks and consider the source's micro-decisions. The
-lens carries both pedagogical commitments deliberately: blanks-mode is "answer
-the questions correctly," Ask-Me-mode is "consider the choices." The two
-surfaces share a snippet but ask different things of the learner.
+The blanks exercise is a correct/incorrect cloze-deletion task by design (per
+Denny et al. 2019). The Socratic study companion (`socratizing/`) is a
+cross-lens orchestrator concern — it operates on the original embodiment, not on
+the blankenated source — and is **not part of this lens** as of Inc 6.m.
 
 ## Glossary
 
 Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
-`BlanksLens.jsx`; socratizing terms surface from the
-[`socratizing/` module](../../orchestrate/lib/socratizing/README.md).
+`BlanksLens.jsx`.
 
 - **Blank** — a single position where an original token was replaced by a
   length-matched placeholder. Each blank carries
@@ -179,12 +172,8 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   `p = difficulty / 100` is the chance each eligible token is replaced.
 - **Correctness** — per-blank state in the **blanks-exercise** sense: `correct`
   (learner typed the original token), `incorrect` (learner typed something
-  else), `unfilled` (learner hasn't typed anything yet; the `__` placeholder
-  remains in place). This is a blanks-internal term for the cloze-deletion
-  exercise; `socratizing/` deliberately produces questions rather than
-  corrections (see
-  [`../../orchestrate/lib/socratizing/README.md`](../../orchestrate/lib/socratizing/README.md))
-  — Ask Me's outputs do not carry correctness state.
+  else), `unfilled` (learner hasn't typed anything yet; the `_` placeholder
+  remains in place). This is the only correctness signal the lens exposes.
 - **Hints mode** — `'on' | 'off'`. Enable or disable the cursor-scoped hints
   panel. Default `'on'`. Orthogonal to `difficulty` (Inc 6h-redux user-directed
   redesign). The `data-hints-mode` attribute on the root reflects this value.
@@ -193,21 +182,12 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   editor header and the hints panel. The `total === 0` branch handles the
   degenerate case (difficulty 0, or all content-type checkboxes unchecked, or
   empty source) as a vacuously-complete exercise.
-- **Code question** — a Socratic question about the source code, produced by the
-  `socratizing/` module. Two kinds: `micro-decision` ("What effect does this
-  choice have?") and `comprehension` ("What does this line do?"). The Ask Me
-  button surfaces these.
-- **Micro-decision question** — a `CodeQuestion` of kind `micro-decision`;
-  invites the learner to consider an alternative choice (e.g. `let` vs `const`,
-  ternary vs if/else).
-- **Comprehension question** — a `CodeQuestion` of kind `comprehension`; invites
-  the learner to articulate what the code does.
 
 ## UI structure
 
 ```text
 <div data-lens="blanks" data-view-mode="blankenated|complete" data-hints-mode="on|off">
-  <header>                          — title + Ask Me button
+  (Inc 6.m: header with the Ask Me button removed — moved to the SL orchestrator)
   <toolbar>                         — difficulty slider, 5 content-type checkboxes, view-mode toggle
   <editorHeader>                    — mode label + difficulty% + blanks count + remaining count
   <main>                            — CodeMirror EditorView (editable in blankenated, read-only in complete)
@@ -349,62 +329,16 @@ Legacy designed this readout but compiled it out via `{/* ... */}` (lines
 648–662); we ship it at parity per the visible-progress-signal pedagogical
 principle.
 
-## Ask Me contract
+## Ask Me — out of scope (Inc 6.m)
 
-The "🤔 Ask Me" button in the header delegates to the `socratizing/` module:
-
-- On click: `analyzeMicroDecisions(embodiment, ASK_ME_CONFIG)` →
-  `MicroDecisionResult`.
-- The embodiment passed is the **original** (`props.embodiment`), NOT a
-  re-embodied blankenated version. Rationale: the `__` placeholders are valid
-  JavaScript identifiers and would parse, but the resulting AST would be
-  semantically incoherent — `socratizing/`'s analyzers would produce questions
-  like "What does the name `__` communicate?" which is not a useful Socratic
-  prompt. Ask Me v1 is whole-source study-companion; cursor-aware Ask Me (scoped
-  to the blank the learner is currently typing in) is a
-  [Future direction](#future-direction) item with a clear path via socratizing's
-  `MicroDecisionConfig.range` field.
-- **v1 config** (`ASK_ME_CONFIG`, module-level constant in `index.tsx`):
-
-  ```ts
-  const ASK_ME_CONFIG: MicroDecisionConfig = {
-  	count: 5,
-  	register: { open: true, pointed: true, comparative: false },
-  };
-  ```
-
-  The cap of 5 keeps a session-sized list rather than dumping 30+ questions on
-  the learner; dropping the comparative register removes the "consider this
-  alternative" questions that assume the learner already knows the baseline (per
-  [`../../orchestrate/lib/socratizing/README.md`](../../orchestrate/lib/socratizing/README.md)
-  — "comparative questions for learners ready to explore alternatives"). Filter
-  knobs in the lens UI are a [Future direction](#future-direction) item; v1
-  ships the constant.
-
-- **Cycling**: the lens maintains a local cursor (0..K-1) into the filtered
-  question list. The first render shows `questions[0]`; clicking the Ask Me
-  button advances the cursor by one (wrapping at K back to 0). The cursor resets
-  to 0 on `embodiment.source.code` change (a new snippet starts from question 1,
-  not mid-cycle from the previous snippet). The lens UI shows a "Question N of
-  K" indicator so cycling is legible.
-- Questions are ordered by source location (top-to-bottom) before capping, per
-  [`../../orchestrate/lib/socratizing/README.md`](../../orchestrate/lib/socratizing/README.md)
-  § Ordering — so the first question on the same snippet is stable across
-  mounts.
-- The lens displays each question's `context` (PBSI sentence framing the
-  decision) + the prompt text. Prompt selection prefers the open-register
-  question (`questions[N].questions.find(q => q.register === 'open').text`),
-  falling back to `questions[N].questions[0].text` when no open-register entry
-  exists. The pedagogical bias is toward open prompts — they invite the learner
-  to articulate their own reasoning, matching the Ask Me / socratizing posture
-  (vs. pointed prompts which presume the learner already has a candidate to
-  evaluate).
-- An empty result list (`questions.length === 0` after filtering) renders "No
-  questions available for this snippet at the current Ask Me configuration." The
-  `ok: false` branch is unreachable in production because `applicableTo` gates
-  on `status.parsed` (and socratizing's `ok: false` fires only on un-parsed
-  embodiments), but the wrapper handles it as `"Snippet did not produce an AST"`
-  for defense-in-depth.
+The Socratic study companion (`socratizing/` module) is **not part of this
+lens**. It operates on the original embodiment (not the blankenated source) and
+is a cross-lens orchestrator concern; mounting it inside the blanks lens
+duplicates the surface across every lens and couples each lens to socratizing
+imports. As of Inc 6.m, the Ask Me button and its supporting state / useMemo /
+useEffect were removed from this lens — the orchestrator owns Ask Me at the
+level above. See `../../orchestrate/lib/socratizing/` for the module and the
+orchestrator's planned integration.
 
 ## URL config sync
 
@@ -441,9 +375,7 @@ URL handling lifts to an adapter over that surface (see
   `{ blankedCode: '', blanks: [], originalCode: '' }` — the AST has zero nodes,
   no token is eligible. The lens renders an empty CodeMirror editor; the hints
   panel shows `total === 0` → score 100% (vacuously complete; per § Glossary
-  `Score` formula); the editor header shows `0 blanks · 0 remaining`. Ask Me on
-  an empty source returns `questions.length === 0` → "No questions available for
-  this snippet at the current Ask Me configuration."
+  `Score` formula); the editor header shows `0 blanks · 0 remaining`.
 - **Acorn parse error** (`embodiment.status.parsed === false`). `applicableTo`
   returns `false` for this case; the orchestrator's recommender filters the lens
   out before mount. **Defense-in-depth:** if the lens is nonetheless mounted on
@@ -591,15 +523,6 @@ jsdom + `@testing-library/react`).
   placements with snippet-fit relevance heuristics (likely higher relevance for
   snippets with many keywords / identifiers in scope, motivating the blanks
   exercise). Specific cells are WS2's call.
-- **Cursor-aware Ask Me** — scope Ask Me to the blank the learner is currently
-  typing in. Socratizing already supports this via
-  [`MicroDecisionConfig.range`](../../orchestrate/lib/socratizing/types.ts)
-  (filter questions whose `location` overlaps a source-line range). The lens
-  already knows each blank's `{start, end}` offsets from `blankenate`'s output;
-  mapping cursor → blank → source-line → range → filtered Socratic questions is
-  one extra arg to `analyzeMicroDecisions`. This makes Ask Me a per-decision
-  Socratic prompt rather than a whole-snippet survey ("the name you're about to
-  choose — what would it communicate about this variable's role?").
 - **Per-blank position-aware learner-input re-anchoring.** v1's evaluator reads
   each blank's `{start, end}` from `blankenate`'s output and compares the
   learner's text at those positions; edits **outside** placeholders shift the
@@ -618,11 +541,6 @@ jsdom + `@testing-library/react`).
   `EditorView` on view-mode change (parity with legacy) is perf-suboptimal.
   CodeMirror 6 supports dynamic `EditorView.editable.of()` reconfiguration; the
   swap-out can land as a follow-up.
-- **Ask Me config knobs in the toolbar.** v1 calls
-  `analyzeMicroDecisions(embodiment, {})` (include everything). A follow-up
-  exposes the `kind` / `features` / `levels` / `categories` / `register` knobs
-  in the lens UI so a learner can scope Ask Me to e.g. "only `micro-decision`
-  questions about `variables` at the `syntax` level."
 - **URL state lifted to the orchestrator.** v1 owns its own URL slice (vendored
   `url-config.ts`). Post-WS3, when the orchestrator grows a URL-state surface,
   this lens's URL handling becomes an adapter over that surface and the vendored
@@ -684,9 +602,6 @@ Follows all conventions in [`../README.md`](../README.md) and
   `LensConfig`.
 - **Embodiment contract**: [`../../embody/types.ts`](../../embody/types.ts) —
   the `Snippet` type the lens consumes.
-- **Socratizing module**:
-  [`../../orchestrate/lib/socratizing/README.md`](../../orchestrate/lib/socratizing/README.md)
-  — the Ask Me backend.
 - **Orchestrator that mounts this lens**:
   [`../../orchestrate/`](../../orchestrate/) — see § Public API for the
   `lens="blanks"` dispatch path.

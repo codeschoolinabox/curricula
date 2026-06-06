@@ -20,20 +20,36 @@
  * tiers (easy/medium/hard) plus auto-inference from difficulty
  * (6h-redux).
  *
- * Remaining: URL config read/write (6i); Ask Me button → socratizing/
- * (6j); registration in LENS_REGISTRY (7).
+ * Remaining: URL config read/write (6i); registration in
+ * LENS_REGISTRY (7).
+ *
+ * Inc 6.m: Ask Me / socratizing removed from this lens — moved
+ * to the SL orchestrator (cross-lens concern; the original
+ * embodiment, not the blankenated source, is what socratizing
+ * consumes — so it belongs one layer up, not per-lens).
  */
 
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorState, StateField } from '@codemirror/state';
 import type { ChangeSpec, Text } from '@codemirror/state';
-import { Decoration, EditorView, drawSelection, keymap } from '@codemirror/view';
+import {
+	Decoration,
+	EditorView,
+	drawSelection,
+	keymap,
+} from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { basicSetup } from 'codemirror';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 import type { ComponentType } from 'react';
 
 import { freezeInPlace } from '@utils/freeze.js';
@@ -45,11 +61,6 @@ import blankenate from './lib/blankenate.js';
 import evaluateCorrectness from './lib/evaluate-correctness.js';
 import noPasteExtension from './lib/no-paste-extension.js';
 import urlConfig from './lib/url-config.js';
-import analyzeMicroDecisions from '../../orchestrate/lib/socratizing/analyze-micro-decisions.js';
-import type {
-	CodeQuestion,
-	MicroDecisionConfig,
-} from '../../orchestrate/lib/socratizing/types.js';
 import type {
 	BlankenateResult,
 	BlanksLensConfig,
@@ -60,19 +71,6 @@ import type {
 } from './types.js';
 
 import './blanks.css';
-
-/**
- * Inc 6j: Ask Me config — caps at 5 questions per call (session-sized
- * list, not 30+) and filters out the comparative register (which
- * assumes the learner already knows the baseline and isn't useful as
- * a study companion). Per `./README.md` § Ask Me contract — frozen
- * module-level constant; filter knobs in the UI are a Future
- * direction item.
- */
-const ASK_ME_CONFIG: MicroDecisionConfig = Object.freeze({
-	count: 5,
-	register: Object.freeze({ open: true, pointed: true, comparative: false }),
-}) as MicroDecisionConfig;
 
 const ALL_CONTENT_TYPES: ReadonlyArray<ContentType> = [
 	'keywords',
@@ -177,9 +175,7 @@ function renderPartialHint(
  * field. Wrapper-internal — no exported type per DOCS § Structural
  * constraints.
  */
-function deriveContentTypeFlags(
-	contentTypes: ReadonlyArray<ContentType>,
-): {
+function deriveContentTypeFlags(contentTypes: ReadonlyArray<ContentType>): {
 	keywords: boolean;
 	identifiers: boolean;
 	operators: boolean;
@@ -288,13 +284,7 @@ function useUrlConfigApplier(
 				setHintsMode(fromUrl.hintsMode);
 			}
 		},
-		[
-			setDifficulty,
-			setContentTypes,
-			setViewMode,
-			setEditorMode,
-			setHintsMode,
-		],
+		[setDifficulty, setContentTypes, setViewMode, setEditorMode, setHintsMode],
 	);
 }
 
@@ -374,10 +364,7 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 				const cls = deriveClass(content, original);
 				const parity =
 					i % 2 === 0 ? 'cm-blank-parity-even' : 'cm-blank-parity-odd';
-				return Decoration.mark({ class: `${cls} ${parity}` }).range(
-					from,
-					to,
-				);
+				return Decoration.mark({ class: `${cls} ${parity}` }).range(from, to);
 			}),
 			true,
 		);
@@ -429,7 +416,13 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 		let primarySelection: number | undefined;
 
 		tr.changes.iterChanges(
-			(fromA: number, toA: number, _fromB: number, _toB: number, inserted: Text) => {
+			(
+				fromA: number,
+				toA: number,
+				_fromB: number,
+				_toB: number,
+				inserted: Text,
+			) => {
 				const insertText = inserted.toString();
 				const insertLen = insertText.length;
 				const deleteLen = toA - fromA;
@@ -464,9 +457,7 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 				} else if (insertLen === 0 && deleteLen > 0) {
 					// Pure delete → preserve blank width. The DELETE range
 					// `[fromA, toA)` must fit entirely inside a blank.
-					const blank = positions.find(
-						(p) => fromA >= p.from && toA <= p.to,
-					);
+					const blank = positions.find((p) => fromA >= p.from && toA <= p.to);
 					if (!blank) {
 						allowed = false;
 						return;
@@ -492,10 +483,7 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 					// Single-char-only: multi-char range deletes (e.g.
 					// programmatic) fall back to the in-place `_`
 					// replacement (no compaction) for simplicity.
-					const deletedContent = tr.startState.doc.sliceString(
-						fromA,
-						toA,
-					);
+					const deletedContent = tr.startState.doc.sliceString(fromA, toA);
 					if (deleteLen === 1 && deletedContent === '_') {
 						const cursorBefore = tr.startState.selection.main.head;
 						if (cursorBefore === toA) {
@@ -551,685 +539,604 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 	return [blanksField, lockFilter];
 }
 
-const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent({
-	embodiment,
-	config,
-}) {
-	// Memoize resolved config on the `config` prop (stable reference from
-	// the orchestrator). Without this, `blanksCore.config()` produces a
-	// fresh frozen clone on every render — including a fresh
-	// `contentTypes` array — which would cascade into spurious
-	// `blankenate` re-rolls whenever a parent re-renders (load-bearing
-	// once Inc 6b adds local state to the wrapper).
-	const resolved = useMemo(() => blanksCore.config(config), [config]);
-	const initialDifficulty =
-		typeof resolved.difficulty === 'number' ? resolved.difficulty : 50;
-	// Inc 6e: difficulty is now LOCAL state, seeded from the prop config.
-	// The slider mutates this directly; the blankenate useMemo deps now
-	// include `difficulty` so the blank set re-derives per drag.
-	const [difficulty, setDifficulty] = useState<number>(initialDifficulty);
+const BlanksComponent: ComponentType<LensProperties> =
+	function BlanksComponent({ embodiment, config }) {
+		// Memoize resolved config on the `config` prop (stable reference from
+		// the orchestrator). Without this, `blanksCore.config()` produces a
+		// fresh frozen clone on every render — including a fresh
+		// `contentTypes` array — which would cascade into spurious
+		// `blankenate` re-rolls whenever a parent re-renders (load-bearing
+		// once Inc 6b adds local state to the wrapper).
+		const resolved = useMemo(() => blanksCore.config(config), [config]);
+		const initialDifficulty =
+			typeof resolved.difficulty === 'number' ? resolved.difficulty : 50;
+		// Inc 6e: difficulty is now LOCAL state, seeded from the prop config.
+		// The slider mutates this directly; the blankenate useMemo deps now
+		// include `difficulty` so the blank set re-derives per drag.
+		const [difficulty, setDifficulty] = useState<number>(initialDifficulty);
 
-	// Inc 6f: contentTypes is now LOCAL state, seeded from the prop
-	// config (default = all five). The checkboxes mutate this directly;
-	// the blankenate useMemo deps include `contentTypes` so the blank
-	// set re-derives per toggle.
-	//
-	// Defensive: filter the prop-supplied array against ALL_CONTENT_TYPES
-	// rather than casting blindly. An educator config with a typo (e.g.
-	// `contentTypes: ['keywrds']`) degrades to the all-five default
-	// element-by-element rather than silently breaking blankenate.
-	const initialContentTypes: ReadonlyArray<ContentType> = Array.isArray(
-		resolved.contentTypes,
-	)
-		? (resolved.contentTypes as ReadonlyArray<unknown>).filter(
-				(t): t is ContentType =>
-					(ALL_CONTENT_TYPES as ReadonlyArray<string>).includes(t as string),
-			)
-		: ALL_CONTENT_TYPES;
-	const [contentTypes, setContentTypes] =
-		useState<ReadonlyArray<ContentType>>(initialContentTypes);
+		// Inc 6f: contentTypes is now LOCAL state, seeded from the prop
+		// config (default = all five). The checkboxes mutate this directly;
+		// the blankenate useMemo deps include `contentTypes` so the blank
+		// set re-derives per toggle.
+		//
+		// Defensive: filter the prop-supplied array against ALL_CONTENT_TYPES
+		// rather than casting blindly. An educator config with a typo (e.g.
+		// `contentTypes: ['keywrds']`) degrades to the all-five default
+		// element-by-element rather than silently breaking blankenate.
+		const initialContentTypes: ReadonlyArray<ContentType> = Array.isArray(
+			resolved.contentTypes,
+		)
+			? (resolved.contentTypes as ReadonlyArray<unknown>).filter(
+					(t): t is ContentType =>
+						(ALL_CONTENT_TYPES as ReadonlyArray<string>).includes(t as string),
+				)
+			: ALL_CONTENT_TYPES;
+		const [contentTypes, setContentTypes] =
+			useState<ReadonlyArray<ContentType>>(initialContentTypes);
 
-	// View-mode state (Inc 6b). Seeded from config.viewMode (default
-	// 'blankenated' via blanksCore.config). The toggle preserves the
-	// learner's in-progress edits across mode swaps (AR-1 lock —
-	// disposable-practice governs unmount, not within-mount toggle).
-	const initialViewMode: ViewMode =
-		resolved.viewMode === 'complete' ? 'complete' : 'blankenated';
-	const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
+		// View-mode state (Inc 6b). Seeded from config.viewMode (default
+		// 'blankenated' via blanksCore.config). The toggle preserves the
+		// learner's in-progress edits across mode swaps (AR-1 lock —
+		// disposable-practice governs unmount, not within-mount toggle).
+		const initialViewMode: ViewMode =
+			resolved.viewMode === 'complete' ? 'complete' : 'blankenated';
+		const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
 
-	// Inc 6h-redux: editor-mode sub-toggle (only meaningful when
-	// viewMode === 'blankenated'). Three variants from easiest to
-	// hardest: 'helpful' (full correctness colors + hints panel) →
-	// 'diff' (char-level diff against hidden original; no hints) →
-	// 'raw' (no feedback of any kind). Seeded from config.editorMode
-	// (default 'helpful').
-	const initialEditorMode: EditorMode =
-		resolved.editorMode === 'diff'
-			? 'diff'
-			: resolved.editorMode === 'raw'
-				? 'raw'
-				: 'helpful';
-	const [editorMode, setEditorMode] = useState<EditorMode>(initialEditorMode);
+		// Inc 6h-redux: editor-mode sub-toggle (only meaningful when
+		// viewMode === 'blankenated'). Three variants from easiest to
+		// hardest: 'helpful' (full correctness colors + hints panel) →
+		// 'diff' (char-level diff against hidden original; no hints) →
+		// 'raw' (no feedback of any kind). Seeded from config.editorMode
+		// (default 'helpful').
+		const initialEditorMode: EditorMode =
+			resolved.editorMode === 'diff'
+				? 'diff'
+				: resolved.editorMode === 'raw'
+					? 'raw'
+					: 'helpful';
+		const [editorMode, setEditorMode] = useState<EditorMode>(initialEditorMode);
 
-	// Inc 6h-redux: switching the scaffolding level (editorMode)
-	// resets the exercise. The free editors (diff/raw) allow arbitrary
-	// edits that may violate the helpful editor's length-match +
-	// anchor-lock invariants — carrying that arbitrary state into the
-	// helpful editor would put it in a corrupted starting position.
-	// Reset clears learnerCode (so the next mount picks up blankedCode
-	// from blankenate) and revealCounts (fresh hint state per exercise).
-	function changeEditorMode(next: EditorMode) {
-		setEditorMode(next);
-		setLearnerCode(null);
-		setRevealCounts(new Map());
-		// AR-4 MINOR Inc 6h-redux: also reset cursorPos so the hints
-		// panel doesn't briefly resolve a stale cursor against the new
-		// (just-rebuilt) editor and flash an out-of-date reveal state.
-		// The new editor's updateListener overwrites cursorPos on first
-		// focus event regardless; this reset just makes the transient
-		// state empty rather than misleading.
-		setCursorPos(null);
-	}
-
-	// Learner edits state (Inc 6c). null = no edits yet → editor uses
-	// blankedCode on first mount. Once the learner types, the
-	// updateListener captures the current doc into learnerCode; later
-	// toggles back to blankenated re-mount with learnerCode (not the
-	// original blankedCode) so in-progress work is preserved.
-	const [learnerCode, setLearnerCode] = useState<string | null>(null);
-	// Ref mirror of learnerCode — read by the EditorView-mount effect at
-	// mount-time. The effect MUST NOT have learnerCode in its dep array
-	// (would feedback-loop: keystroke → setLearnerCode → re-render →
-	// effect re-fires → view.destroy → lost focus → "feels read-only").
-	const learnerCodeRef = useRef<string | null>(learnerCode);
-	learnerCodeRef.current = learnerCode;
-
-	// Memoize the blankenate call on (source, resolved). `resolved` is
-	// itself memoized on `config`, so the dep chain is stable when the
-	// orchestrator keeps the prop stable. Per DOCS § Phase 2: synchronous
-	// during first render — no flicker between an empty editor and a
-	// __-filled re-render.
-	const blankResult = useMemo(
-		() =>
-			blankenate(
-				embodiment.source.code,
-				difficulty / 100,
-				deriveContentTypeFlags(contentTypes),
-			),
-		// Inc 6e/6f: difficulty + contentTypes are LOCAL state, so each
-		// is an independent signal for re-derivation. blankResult identity
-		// changes on slider drag (6e) or checkbox toggle (6f) → the
-		// mountEditorView effect remounts the editor with the new
-		// blankedCode. The change handlers (handleDifficultyChange /
-		// handleContentTypeToggle) also reset learnerCode per DOCS § Phase 2:
-		// "Re-derivation on settings change resets the correctness map."
-		[embodiment.source.code, difficulty, contentTypes],
-	);
-
-	// Defense-in-depth: in production `applicableTo` gates on
-	// `status.parsed`, so unparseable embodiments never reach the wrapper.
-	// If one does (e.g. the picker bypasses the recommender), render the
-	// fallback panel. We gate on `embodiment.status.parsed` directly
-	// (canonical signal) rather than on `blankResult === null` because
-	// some embody failure modes (e.g. validate-stage failures) carry
-	// parseable source strings, where Acorn-inside-blankenate succeeds
-	// but the embodiment is still marked unparsed.
-	const showFallback = !embodiment.status.parsed || blankResult === null;
-
-	const editorContainer = useRef<HTMLDivElement | null>(null);
-	const editorView = useRef<EditorView | null>(null);
-
-	// Inc 6e: difficulty change handler. Updates local difficulty AND
-	// resets learnerCode so the new (different) blank positions start
-	// from a clean slate. Per DOCS § Phase 2: "Re-derivation on settings
-	// change resets the correctness map" — the wrapper does NOT preserve
-	// correctness across re-rolls because the old learner answers no
-	// longer correspond to new blank positions.
-	function handleDifficultyChange(
-		event: React.ChangeEvent<HTMLInputElement>,
-	): void {
-		const next = Number(event.target.value);
-		setDifficulty(next);
-		setLearnerCode(null);
-	}
-
-	// Inc 6f: toggle a content-type category in/out of the eligible set.
-	// Same reset-learnerCode logic as the slider — the new blank set has
-	// different positions, so the old typed text no longer aligns.
-	function handleContentTypeToggle(type: ContentType): void {
-		setContentTypes((current) =>
-			current.includes(type)
-				? current.filter((t) => t !== type)
-				: [...current, type],
-		);
-		setLearnerCode(null);
-	}
-
-	// Inc 6j: Ask Me cursor — index into the filtered question list.
-	// Starts at 0; advances (wrapping) per click. Resets to 0 when
-	// embodiment changes (new snippet starts from question 1, not
-	// mid-cycle from the previous snippet). Tracked separately from
-	// any per-mount disposable state because the question list is
-	// derived from embodiment, not from learner activity.
-	const [askMeCursor, setAskMeCursor] = useState<number>(0);
-
-	// Inc 6j: derive the filtered question list from the ORIGINAL
-	// embodiment (not the blankenated source — `__` placeholders would
-	// produce semantically-incoherent micro-decision questions per
-	// README § Ask Me contract). useMemo keyed on `source.code`
-	// (string-stable) rather than `embodiment` (object-identity) so
-	// the analyzer runs at most once per snippet change — a parent
-	// that calls `embody()` inline on every render would otherwise
-	// rerun the full AST walk every time (AR-4 Inc 6j fix).
-	const askMeResult = useMemo(
-		() => analyzeMicroDecisions(embodiment, ASK_ME_CONFIG),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[embodiment.source.code],
-	);
-	const askMeQuestions: ReadonlyArray<CodeQuestion> = useMemo(
-		() => (askMeResult.ok ? askMeResult.questions : []),
-		[askMeResult],
-	);
-
-	// Inc 6j: reset Ask Me cursor on embodiment change. useEffect
-	// keyed on embodiment.source.code so the cursor zeros out when
-	// the snippet changes — not on every render.
-	useEffect(() => {
-		setAskMeCursor(0);
-	}, [embodiment.source.code]);
-
-	// Inc 6d: per-blank correctness wiring + aggregate score display.
-	// evaluateCorrectness is pure; recomputes on learnerCode change
-	// (typing dispatches setLearnerCode) and on blankResult change
-	// (snippet / future-difficulty / future-content-types).
-	const evaluation = useMemo(() => {
-		if (blankResult === null) {
-			return { score: 100, total: 0, correct: 0, incorrect: 0, unfilled: 0 };
+		// Inc 6h-redux: switching the scaffolding level (editorMode)
+		// resets the exercise. The free editors (diff/raw) allow arbitrary
+		// edits that may violate the helpful editor's length-match +
+		// anchor-lock invariants — carrying that arbitrary state into the
+		// helpful editor would put it in a corrupted starting position.
+		// Reset clears learnerCode (so the next mount picks up blankedCode
+		// from blankenate) and revealCounts (fresh hint state per exercise).
+		function changeEditorMode(next: EditorMode) {
+			setEditorMode(next);
+			setLearnerCode(null);
+			setRevealCounts(new Map());
+			// AR-4 MINOR Inc 6h-redux: also reset cursorPos so the hints
+			// panel doesn't briefly resolve a stale cursor against the new
+			// (just-rebuilt) editor and flash an out-of-date reveal state.
+			// The new editor's updateListener overwrites cursorPos on first
+			// focus event regardless; this reset just makes the transient
+			// state empty rather than misleading.
+			setCursorPos(null);
 		}
-		// The doc the learner is editing — learnerCode if they typed,
-		// blankedCode otherwise. evaluateCorrectness compares against
-		// blank.original at each anchor position.
-		const currentDoc = learnerCode ?? blankResult.blankedCode;
-		const result = evaluateCorrectness(
-			currentDoc,
-			blankResult.blanks,
-			blankResult.originalCode,
+
+		// Learner edits state (Inc 6c). null = no edits yet → editor uses
+		// blankedCode on first mount. Once the learner types, the
+		// updateListener captures the current doc into learnerCode; later
+		// toggles back to blankenated re-mount with learnerCode (not the
+		// original blankedCode) so in-progress work is preserved.
+		const [learnerCode, setLearnerCode] = useState<string | null>(null);
+		// Ref mirror of learnerCode — read by the EditorView-mount effect at
+		// mount-time. The effect MUST NOT have learnerCode in its dep array
+		// (would feedback-loop: keystroke → setLearnerCode → re-render →
+		// effect re-fires → view.destroy → lost focus → "feels read-only").
+		const learnerCodeRef = useRef<string | null>(learnerCode);
+		learnerCodeRef.current = learnerCode;
+
+		// Memoize the blankenate call on (source, resolved). `resolved` is
+		// itself memoized on `config`, so the dep chain is stable when the
+		// orchestrator keeps the prop stable. Per DOCS § Phase 2: synchronous
+		// during first render — no flicker between an empty editor and a
+		// __-filled re-render.
+		const blankResult = useMemo(
+			() =>
+				blankenate(
+					embodiment.source.code,
+					difficulty / 100,
+					deriveContentTypeFlags(contentTypes),
+				),
+			// Inc 6e/6f: difficulty + contentTypes are LOCAL state, so each
+			// is an independent signal for re-derivation. blankResult identity
+			// changes on slider drag (6e) or checkbox toggle (6f) → the
+			// mountEditorView effect remounts the editor with the new
+			// blankedCode. The change handlers (handleDifficultyChange /
+			// handleContentTypeToggle) also reset learnerCode per DOCS § Phase 2:
+			// "Re-derivation on settings change resets the correctness map."
+			[embodiment.source.code, difficulty, contentTypes],
 		);
-		return {
-			score: result.score,
-			total: result.total,
-			correct: result.correct,
-			incorrect: result.incorrect,
-			unfilled: result.unfilled,
-			correctnessMap: result.correctnessMap,
-		};
-	}, [learnerCode, blankResult]);
 
-	// Inc 6h-redux: hints config is `'on' | 'off'`, orthogonal to
-	// difficulty (user-directed redesign — hints are NOT inferred
-	// from difficulty; learners choose how many blanks to reveal as
-	// their own scaffolding gradient). Default 'on'.
-	//
-	// Inc 6i: hintsMode is now LOCAL state (was derived from
-	// `resolved`). State enables URL sync — the URL read effect
-	// can call `setHintsMode` to apply persisted values, and the
-	// URL write effect serializes the live state to the hash.
-	const initialHintsMode: HintsMode =
-		resolved.hintsMode === 'off' ? 'off' : 'on';
-	const [hintsMode, setHintsMode] = useState<HintsMode>(initialHintsMode);
+		// Defense-in-depth: in production `applicableTo` gates on
+		// `status.parsed`, so unparseable embodiments never reach the wrapper.
+		// If one does (e.g. the picker bypasses the recommender), render the
+		// fallback panel. We gate on `embodiment.status.parsed` directly
+		// (canonical signal) rather than on `blankResult === null` because
+		// some embody failure modes (e.g. validate-stage failures) carry
+		// parseable source strings, where Acorn-inside-blankenate succeeds
+		// but the embodiment is still marked unparsed.
+		const showFallback = !embodiment.status.parsed || blankResult === null;
 
-	// Inc 6h-redux: cursor position state. Updated by the CodeMirror
-	// updateListener on selectionSet. Render-only state — does NOT
-	// appear in the editor mount effect's deps (would re-mount per
-	// keystroke; see Inc 6c remount bug).
-	const [cursorPos, setCursorPos] = useState<number | null>(null);
+		const editorContainer = useRef<HTMLDivElement | null>(null);
+		const editorView = useRef<EditorView | null>(null);
 
-	// Inc 6h-redux: per-blank reveal-count. Each click of "Reveal next
-	// letter" advances the count by 1 for that blank, exposing one
-	// more position of the correct answer (in the
-	// `shufflePositions(blank.id, length)` order). Count of 0 means
-	// no letters revealed yet; count of `blank.original.length` means
-	// fully revealed. Persistent across cursor moves — coming back to
-	// a partially-revealed blank shows the same partial state.
-	const [revealCounts, setRevealCounts] = useState<
-		ReadonlyMap<string, number>
-	>(() => new Map());
-
-	// Inc 6h-redux: derive the blank under cursor. Positions align 1:1
-	// with the doc per Inc 6.7 length-matched placeholders. A cursor
-	// at a blank boundary (`from` or `to`) counts as "in" the blank;
-	// cursors in anchor segments return null.
-	const activeBlank = useMemo(() => {
-		if (cursorPos === null || blankResult === null) return null;
-		return (
-			blankResult.blanks.find(
-				(b) => cursorPos >= b.start && cursorPos <= b.end,
-			) ?? null
-		);
-	}, [cursorPos, blankResult]);
-
-	// Mount the CodeMirror EditorView. Destroy + recreate on STRUCTURAL
-	// changes only: viewMode flips, or blankResult re-derives (source /
-	// difficulty / contentTypes change). Per-keystroke `learnerCode`
-	// updates flow through the updateListener into React state but MUST
-	// NOT re-fire this effect — that would feedback-loop and destroy
-	// the EditorView mid-typing.
-	//
-	// Inc 6i: URL config plumbing. Three effects:
-	//
-	// 1. **Read on mount.** Parse `window.location.hash` and apply
-	//    any persisted config values as overrides on top of the
-	//    prop-derived initial state. Runs once; if URL is empty,
-	//    leaves state alone.
-	//
-	// 2. **Debounced write on state change.** Serialize the live
-	//    config to the hash 500ms after the last change. Matches the
-	//    legacy URLManager debounce; prevents `history.replaceState`
-	//    spam during slider drags. Skips the first invocation so an
-	//    empty URL on mount doesn't immediately get overwritten with
-	//    prop defaults.
-	//
-	// 3. **Hashchange listener.** Re-read URL on browser
-	//    back/forward; apply any changed values. Enables URL replay.
-	//    `urlConfig.write` uses `history.replaceState` which per
-	//    HTML spec does NOT fire `hashchange`, so the write→listener
-	//    loop is structurally prevented (AR-4 Inc 6i comment).
-	//
-	// All three guard on `typeof window !== 'undefined'` so the
-	// effects are no-ops during Docusaurus SSR pre-render (the
-	// useEffect itself is client-only, but defensive anyway).
-	const urlApplyHandle = useUrlConfigApplier(
-		setDifficulty,
-		setContentTypes,
-		setViewMode,
-		setEditorMode,
-		setHintsMode,
-	);
-
-	// Effect 1: read URL once on mount.
-	useEffect(() => {
-		if (typeof window === 'undefined') return;
-		urlApplyHandle(urlConfig.read());
-	}, [urlApplyHandle]);
-
-	// Effect 2: debounced write on config-state change. Skips the
-	// FIRST invocation — React runs every effect on initial mount
-	// regardless of whether the deps changed, so without this guard
-	// we'd write the prop-default state to an empty URL the moment
-	// the component mounts.
-	const skipFirstWriteRef = useRef(true);
-	useEffect(() => {
-		if (typeof window === 'undefined') return;
-		if (skipFirstWriteRef.current) {
-			skipFirstWriteRef.current = false;
-			return;
+		// Inc 6e: difficulty change handler. Updates local difficulty AND
+		// resets learnerCode so the new (different) blank positions start
+		// from a clean slate. Per DOCS § Phase 2: "Re-derivation on settings
+		// change resets the correctness map" — the wrapper does NOT preserve
+		// correctness across re-rolls because the old learner answers no
+		// longer correspond to new blank positions.
+		function handleDifficultyChange(
+			event: React.ChangeEvent<HTMLInputElement>,
+		): void {
+			const next = Number(event.target.value);
+			setDifficulty(next);
+			setLearnerCode(null);
 		}
-		const timeoutId = setTimeout(() => {
-			urlConfig.write({
-				difficulty,
-				contentTypes,
-				viewMode,
-				editorMode,
-				hintsMode,
-			});
-		}, 500);
-		return () => {
-			clearTimeout(timeoutId);
-		};
-	}, [difficulty, contentTypes, viewMode, editorMode, hintsMode]);
 
-	// Effect 3: hashchange listener for back/forward replay.
-	useEffect(() => {
-		if (typeof window === 'undefined') return;
-		function onHashChange() {
-			urlApplyHandle(urlConfig.read());
+		// Inc 6f: toggle a content-type category in/out of the eligible set.
+		// Same reset-learnerCode logic as the slider — the new blank set has
+		// different positions, so the old typed text no longer aligns.
+		function handleContentTypeToggle(type: ContentType): void {
+			setContentTypes((current) =>
+				current.includes(type)
+					? current.filter((t) => t !== type)
+					: [...current, type],
+			);
+			setLearnerCode(null);
 		}
-		window.addEventListener('hashchange', onHashChange);
-		return () => {
-			window.removeEventListener('hashchange', onHashChange);
-		};
-	}, [urlApplyHandle]);
 
-	// Inc 6c:
-	//   - blankenated mode → editable, noPasteExtension wired,
-	//     updateListener captures learner edits into learnerCode state.
-	//   - complete mode → read-only, no paste extension, no listener
-	//     reaction to docChanged.
-	useEffect(
-		function mountEditorView() {
-			const host = editorContainer.current;
-			if (!host) return;
-
-			// Inc 6h-redux: only `complete` viewMode is read-only.
-			// `blankenated` is editable; the editor-mode sub-toggle
-			// (helpful/diff/raw) controls which decorations attach.
-			const isBlankenated = viewMode === 'blankenated';
-			const isEditable = isBlankenated;
-
-			// Derive the initial document INSIDE the effect closure so
-			// learnerCode is read from the ref (not state-as-dep).
-			// Editable modes (blankenated, diff, raw) all show the
-			// blankedCode (or the learner's in-progress edits via the
-			// ref). Complete mode shows the originalCode read-only.
-			const initialDoc =
-				blankResult === null
-					? embodiment.source.code
-					: isEditable
-						? (learnerCodeRef.current ?? blankResult.blankedCode)
-						: blankResult.originalCode;
-
-			const updateListener = EditorView.updateListener.of(function onUpdate(
-				update,
-			) {
-				if (!isEditable) return;
-				// Mirror the learner's edit into local state. The wrapper's
-				// updateListener NEVER calls the orchestrator's snippet setter
-				// per the single-writer invariant (DOCS § Structural constraints
-				// "CodeMirror writes to local state, never to setSnippet").
-				if (update.docChanged) {
-					setLearnerCode(update.state.doc.toString());
-				}
-				// Inc 6h-redux: capture cursor position so the cursor-scoped
-				// hints panel knows which blank to surface (only relevant
-				// in `blankenated` mode but harmless to track in others).
-				if (update.selectionSet || update.docChanged) {
-					setCursorPos(update.state.selection.main.head);
-				}
-			});
-
-			// Editor-mode extensions (Inc 6h-redux):
-			//   helpful → basicSetup (autocomplete, bracket matching, lint,
-			//             etc.) + lockFilter + autopad + noPasteExtension
-			//             + correctness decorations (full scaffolding)
-			//   diff    → minimalSetup (no autocomplete, no bracket
-			//             matching, no lint diagnostics, no tooltips) +
-			//             char-level diff highlights; no lock, no
-			//             autopad, paste allowed — the diff IS the hint
-			//   raw     → minimalSetup only; nothing else
-			// `minimalSetup` retains just the essentials: history (so
-			// undo/redo works), drawSelection (visible cursor), and the
-			// default + history keymaps. JavaScript syntax highlighting
-			// stays in all modes (readability isn't a "hint"; it's just
-			// the editor not being broken).
-			const helpfulBaseline = basicSetup;
-			const minimalBaseline = [
-				history(),
-				drawSelection(),
-				keymap.of([...defaultKeymap, ...historyKeymap]),
-			];
-			const isHelpful = editorMode === 'helpful';
-			const baseline = isHelpful ? helpfulBaseline : minimalBaseline;
-
-			const editorExtensions =
-				!isEditable || blankResult === null
-					? []
-					: isHelpful
-						? [noPasteExtension(), ...buildLockExtensions(blankResult)]
-						: editorMode === 'diff'
-							? buildDiffDecorations(blankResult.originalCode)
-							: [];
-
-			const state = EditorState.create({
-				doc: initialDoc,
-				extensions: [
-					baseline,
-					javascript(),
-					oneDark,
-					EditorView.editable.of(isEditable),
-					EditorState.readOnly.of(!isEditable),
-					updateListener,
-					...editorExtensions,
-				],
-			});
-			const view = new EditorView({ state, parent: host });
-			editorView.current = view;
-
-			return function cleanup() {
-				view.destroy();
-				editorView.current = null;
+		// Inc 6d: per-blank correctness wiring + aggregate score display.
+		// evaluateCorrectness is pure; recomputes on learnerCode change
+		// (typing dispatches setLearnerCode) and on blankResult change
+		// (snippet / future-difficulty / future-content-types).
+		const evaluation = useMemo(() => {
+			if (blankResult === null) {
+				return { score: 100, total: 0, correct: 0, incorrect: 0, unfilled: 0 };
+			}
+			// The doc the learner is editing — learnerCode if they typed,
+			// blankedCode otherwise. evaluateCorrectness compares against
+			// blank.original at each anchor position.
+			const currentDoc = learnerCode ?? blankResult.blankedCode;
+			const result = evaluateCorrectness(
+				currentDoc,
+				blankResult.blanks,
+				blankResult.originalCode,
+			);
+			return {
+				score: result.score,
+				total: result.total,
+				correct: result.correct,
+				incorrect: result.incorrect,
+				unfilled: result.unfilled,
+				correctnessMap: result.correctnessMap,
 			};
-		},
-		// Intentionally minimal deps: structural remounts only.
-		// learnerCode is read via ref above; including it here would
-		// recreate the regression bug fixed in Inc 6c.
-		// embodiment.source.code is captured via blankResult (memoized on
-		// embodiment.source.code + resolved); including it here directly
-		// would just duplicate the blankResult-driven remount path.
-		[viewMode, editorMode, blankResult],
-	);
+		}, [learnerCode, blankResult]);
 
-	// Render: on null blankResult (defense-in-depth) render ONLY the
-	// fallback panel, not toolbar + editor. README § Edge cases says
-	// the wrapper renders the fallback "rather than the editor."
-	return (
-		<div
-			data-lens="blanks"
-			data-view-mode={viewMode}
-			data-hints-mode={hintsMode}
-		>
-			{showFallback ? (
-				<div
-					data-blanks-fallback="parse-fail"
-					role="alert"
-					style={{ padding: '0.5rem', color: '#c33' }}
-				>
-					Snippet did not parse — the blanks lens requires a parseable
-					source (defense-in-depth; applicableTo should have prevented
-					mount).
-				</div>
-			) : (
-				<>
-					<header data-blanks-header>
-						<button
-							type="button"
-							data-ask-me-button
-							onClick={() => {
-								if (askMeQuestions.length === 0) return;
-								setAskMeCursor(
-									(c) => (c + 1) % askMeQuestions.length,
-								);
-							}}
-							disabled={askMeQuestions.length === 0}
-						>
-							🤔 Ask Me
-						</button>
-						{askMeQuestions.length === 0 ? (
-							<span data-ask-me-empty>
-								No questions available for this snippet at the current Ask
-								Me configuration.
-							</span>
-						) : (
-							<>
-								<span data-ask-me-counter>
-									Question {askMeCursor + 1} of {askMeQuestions.length}
-								</span>
-								{(() => {
-									const q = askMeQuestions[askMeCursor];
-									if (!q) return null;
-									// Prefer open-register prompt; fall back to the
-									// first available register if none is `open`.
-									// Empty `q.questions[]` is structurally legal per
-									// the socratizing type — guard rather than assert.
-									const openQ =
-										q.questions.find((x) => x.register === 'open') ??
-										q.questions[0];
-									return (
-										<div
-											data-ask-me-question
-											data-ask-me-question-id={q.id}
-											data-ask-me-question-kind={q.kind}
-										>
-											<p data-ask-me-context>{q.context}</p>
-											{openQ ? (
-												<p data-ask-me-prompt>{openQ.text}</p>
-											) : null}
-										</div>
-									);
-								})()}
-							</>
-						)}
-					</header>
-					<div data-blanks-toolbar role="toolbar">
-						<button
-							type="button"
-							data-view-toggle="blankenated"
-							aria-pressed={viewMode === 'blankenated' ? 'true' : 'false'}
-							onClick={() => setViewMode('blankenated')}
-						>
-							📝 Blankenated Code
-						</button>
-						<button
-							type="button"
-							data-view-toggle="complete"
-							aria-pressed={viewMode === 'complete' ? 'true' : 'false'}
-							onClick={() => setViewMode('complete')}
-						>
-							📖 Complete Code
-						</button>
-						{viewMode === 'blankenated' && (
-							<div data-blanks-editor-mode role="group" aria-label="Editor mode">
-								<span>Editor:</span>
-								<button
-									type="button"
-									data-editor-mode-toggle="helpful"
-									aria-pressed={editorMode === 'helpful' ? 'true' : 'false'}
-									onClick={() => changeEditorMode('helpful')}
-								>
-									✨ Helpful
-								</button>
-								<button
-									type="button"
-									data-editor-mode-toggle="diff"
-									aria-pressed={editorMode === 'diff' ? 'true' : 'false'}
-									onClick={() => changeEditorMode('diff')}
-								>
-									📋 Diff
-								</button>
-								<button
-									type="button"
-									data-editor-mode-toggle="raw"
-									aria-pressed={editorMode === 'raw' ? 'true' : 'false'}
-									onClick={() => changeEditorMode('raw')}
-								>
-									🪨 Raw
-								</button>
-							</div>
-						)}
-						<label data-difficulty-control>
-							Difficulty: {difficulty}%
-							<input
-								type="range"
-								min="0"
-								max="100"
-								value={difficulty}
-								onChange={handleDifficultyChange}
-								data-difficulty-slider
-								aria-label="Blanks difficulty (0 to 100)"
-							/>
-						</label>
-						<fieldset data-content-types>
-							<legend>Eligible token categories</legend>
-							{ALL_CONTENT_TYPES.map((type) => (
-								<label key={type}>
-									<input
-										type="checkbox"
-										checked={contentTypes.includes(type)}
-										onChange={() => handleContentTypeToggle(type)}
-										data-content-type={type}
-									/>
-									{type}
-								</label>
-							))}
-						</fieldset>
-					</div>
+		// Inc 6h-redux: hints config is `'on' | 'off'`, orthogonal to
+		// difficulty (user-directed redesign — hints are NOT inferred
+		// from difficulty; learners choose how many blanks to reveal as
+		// their own scaffolding gradient). Default 'on'.
+		//
+		// Inc 6i: hintsMode is now LOCAL state (was derived from
+		// `resolved`). State enables URL sync — the URL read effect
+		// can call `setHintsMode` to apply persisted values, and the
+		// URL write effect serializes the live state to the hash.
+		const initialHintsMode: HintsMode =
+			resolved.hintsMode === 'off' ? 'off' : 'on';
+		const [hintsMode, setHintsMode] = useState<HintsMode>(initialHintsMode);
+
+		// Inc 6h-redux: cursor position state. Updated by the CodeMirror
+		// updateListener on selectionSet. Render-only state — does NOT
+		// appear in the editor mount effect's deps (would re-mount per
+		// keystroke; see Inc 6c remount bug).
+		const [cursorPos, setCursorPos] = useState<number | null>(null);
+
+		// Inc 6h-redux: per-blank reveal-count. Each click of "Reveal next
+		// letter" advances the count by 1 for that blank, exposing one
+		// more position of the correct answer (in the
+		// `shufflePositions(blank.id, length)` order). Count of 0 means
+		// no letters revealed yet; count of `blank.original.length` means
+		// fully revealed. Persistent across cursor moves — coming back to
+		// a partially-revealed blank shows the same partial state.
+		const [revealCounts, setRevealCounts] = useState<
+			ReadonlyMap<string, number>
+		>(() => new Map());
+
+		// Inc 6h-redux: derive the blank under cursor. Positions align 1:1
+		// with the doc per Inc 6.7 length-matched placeholders. A cursor
+		// at a blank boundary (`from` or `to`) counts as "in" the blank;
+		// cursors in anchor segments return null.
+		const activeBlank = useMemo(() => {
+			if (cursorPos === null || blankResult === null) return null;
+			return (
+				blankResult.blanks.find(
+					(b) => cursorPos >= b.start && cursorPos <= b.end,
+				) ?? null
+			);
+		}, [cursorPos, blankResult]);
+
+		// Mount the CodeMirror EditorView. Destroy + recreate on STRUCTURAL
+		// changes only: viewMode flips, or blankResult re-derives (source /
+		// difficulty / contentTypes change). Per-keystroke `learnerCode`
+		// updates flow through the updateListener into React state but MUST
+		// NOT re-fire this effect — that would feedback-loop and destroy
+		// the EditorView mid-typing.
+		//
+		// Inc 6i: URL config plumbing. Three effects:
+		//
+		// 1. **Read on mount.** Parse `window.location.hash` and apply
+		//    any persisted config values as overrides on top of the
+		//    prop-derived initial state. Runs once; if URL is empty,
+		//    leaves state alone.
+		//
+		// 2. **Debounced write on state change.** Serialize the live
+		//    config to the hash 500ms after the last change. Matches the
+		//    legacy URLManager debounce; prevents `history.replaceState`
+		//    spam during slider drags. Skips the first invocation so an
+		//    empty URL on mount doesn't immediately get overwritten with
+		//    prop defaults.
+		//
+		// 3. **Hashchange listener.** Re-read URL on browser
+		//    back/forward; apply any changed values. Enables URL replay.
+		//    `urlConfig.write` uses `history.replaceState` which per
+		//    HTML spec does NOT fire `hashchange`, so the write→listener
+		//    loop is structurally prevented (AR-4 Inc 6i comment).
+		//
+		// All three guard on `typeof window !== 'undefined'` so the
+		// effects are no-ops during Docusaurus SSR pre-render (the
+		// useEffect itself is client-only, but defensive anyway).
+		const urlApplyHandle = useUrlConfigApplier(
+			setDifficulty,
+			setContentTypes,
+			setViewMode,
+			setEditorMode,
+			setHintsMode,
+		);
+
+		// Effect 1: read URL once on mount.
+		useEffect(() => {
+			if (typeof window === 'undefined') return;
+			urlApplyHandle(urlConfig.read());
+		}, [urlApplyHandle]);
+
+		// Effect 2: debounced write on config-state change. Skips the
+		// FIRST invocation — React runs every effect on initial mount
+		// regardless of whether the deps changed, so without this guard
+		// we'd write the prop-default state to an empty URL the moment
+		// the component mounts.
+		const skipFirstWriteRef = useRef(true);
+		useEffect(() => {
+			if (typeof window === 'undefined') return;
+			if (skipFirstWriteRef.current) {
+				skipFirstWriteRef.current = false;
+				return;
+			}
+			const timeoutId = setTimeout(() => {
+				urlConfig.write({
+					difficulty,
+					contentTypes,
+					viewMode,
+					editorMode,
+					hintsMode,
+				});
+			}, 500);
+			return () => {
+				clearTimeout(timeoutId);
+			};
+		}, [difficulty, contentTypes, viewMode, editorMode, hintsMode]);
+
+		// Effect 3: hashchange listener for back/forward replay.
+		useEffect(() => {
+			if (typeof window === 'undefined') return;
+			function onHashChange() {
+				urlApplyHandle(urlConfig.read());
+			}
+			window.addEventListener('hashchange', onHashChange);
+			return () => {
+				window.removeEventListener('hashchange', onHashChange);
+			};
+		}, [urlApplyHandle]);
+
+		// Inc 6c:
+		//   - blankenated mode → editable, noPasteExtension wired,
+		//     updateListener captures learner edits into learnerCode state.
+		//   - complete mode → read-only, no paste extension, no listener
+		//     reaction to docChanged.
+		useEffect(
+			function mountEditorView() {
+				const host = editorContainer.current;
+				if (!host) return;
+
+				// Inc 6h-redux: only `complete` viewMode is read-only.
+				// `blankenated` is editable; the editor-mode sub-toggle
+				// (helpful/diff/raw) controls which decorations attach.
+				const isBlankenated = viewMode === 'blankenated';
+				const isEditable = isBlankenated;
+
+				// Derive the initial document INSIDE the effect closure so
+				// learnerCode is read from the ref (not state-as-dep).
+				// Editable modes (blankenated, diff, raw) all show the
+				// blankedCode (or the learner's in-progress edits via the
+				// ref). Complete mode shows the originalCode read-only.
+				const initialDoc =
+					blankResult === null
+						? embodiment.source.code
+						: isEditable
+							? (learnerCodeRef.current ?? blankResult.blankedCode)
+							: blankResult.originalCode;
+
+				const updateListener = EditorView.updateListener.of(
+					function onUpdate(update) {
+						if (!isEditable) return;
+						// Mirror the learner's edit into local state. The wrapper's
+						// updateListener NEVER calls the orchestrator's snippet setter
+						// per the single-writer invariant (DOCS § Structural constraints
+						// "CodeMirror writes to local state, never to setSnippet").
+						if (update.docChanged) {
+							setLearnerCode(update.state.doc.toString());
+						}
+						// Inc 6h-redux: capture cursor position so the cursor-scoped
+						// hints panel knows which blank to surface (only relevant
+						// in `blankenated` mode but harmless to track in others).
+						if (update.selectionSet || update.docChanged) {
+							setCursorPos(update.state.selection.main.head);
+						}
+					},
+				);
+
+				// Editor-mode extensions (Inc 6h-redux):
+				//   helpful → basicSetup (autocomplete, bracket matching, lint,
+				//             etc.) + lockFilter + autopad + noPasteExtension
+				//             + correctness decorations (full scaffolding)
+				//   diff    → minimalSetup (no autocomplete, no bracket
+				//             matching, no lint diagnostics, no tooltips) +
+				//             char-level diff highlights; no lock, no
+				//             autopad, paste allowed — the diff IS the hint
+				//   raw     → minimalSetup only; nothing else
+				// `minimalSetup` retains just the essentials: history (so
+				// undo/redo works), drawSelection (visible cursor), and the
+				// default + history keymaps. JavaScript syntax highlighting
+				// stays in all modes (readability isn't a "hint"; it's just
+				// the editor not being broken).
+				const helpfulBaseline = basicSetup;
+				const minimalBaseline = [
+					history(),
+					drawSelection(),
+					keymap.of([...defaultKeymap, ...historyKeymap]),
+				];
+				const isHelpful = editorMode === 'helpful';
+				const baseline = isHelpful ? helpfulBaseline : minimalBaseline;
+
+				const editorExtensions =
+					!isEditable || blankResult === null
+						? []
+						: isHelpful
+							? [noPasteExtension(), ...buildLockExtensions(blankResult)]
+							: editorMode === 'diff'
+								? buildDiffDecorations(blankResult.originalCode)
+								: [];
+
+				const state = EditorState.create({
+					doc: initialDoc,
+					extensions: [
+						baseline,
+						javascript(),
+						oneDark,
+						EditorView.editable.of(isEditable),
+						EditorState.readOnly.of(!isEditable),
+						updateListener,
+						...editorExtensions,
+					],
+				});
+				const view = new EditorView({ state, parent: host });
+				editorView.current = view;
+
+				return function cleanup() {
+					view.destroy();
+					editorView.current = null;
+				};
+			},
+			// Intentionally minimal deps: structural remounts only.
+			// learnerCode is read via ref above; including it here would
+			// recreate the regression bug fixed in Inc 6c.
+			// embodiment.source.code is captured via blankResult (memoized on
+			// embodiment.source.code + resolved); including it here directly
+			// would just duplicate the blankResult-driven remount path.
+			[viewMode, editorMode, blankResult],
+		);
+
+		// Render: on null blankResult (defense-in-depth) render ONLY the
+		// fallback panel, not toolbar + editor. README § Edge cases says
+		// the wrapper renders the fallback "rather than the editor."
+		return (
+			<div
+				data-lens="blanks"
+				data-view-mode={viewMode}
+				data-hints-mode={hintsMode}
+			>
+				{showFallback ? (
 					<div
-						data-blanks-editor-header
-						data-header-mode={viewMode}
-						data-header-difficulty={String(difficulty)}
-						data-header-blanks-total={String(evaluation.total)}
-						data-header-blanks-remaining={String(evaluation.unfilled)}
-						aria-live="polite"
+						data-blanks-fallback="parse-fail"
+						role="alert"
+						style={{ padding: '0.5rem', color: '#c33' }}
 					>
-						Mode: <strong>{viewMode}</strong> · Difficulty: {difficulty}%
-						{' · '}Blanks: {evaluation.total} · Remaining: {evaluation.unfilled}
+						Snippet did not parse — the blanks lens requires a parseable source
+						(defense-in-depth; applicableTo should have prevented mount).
 					</div>
-					<div ref={editorContainer} data-blanks-editor-host />
-					<div
-						data-blanks-score={String(evaluation.score)}
-						data-blanks-total={String(evaluation.total)}
-						data-blanks-correct={String(evaluation.correct)}
-						aria-live="polite"
-					>
-						Score: {evaluation.score}%
-						{evaluation.total > 0 && (
-							<>
-								{' '}
-								({evaluation.correct} / {evaluation.total} blanks)
-							</>
-						)}
-					</div>
-					{hintsMode === 'on' &&
-						viewMode === 'blankenated' &&
-						editorMode === 'helpful' && (
-						<aside data-blanks-hints aria-label="Hints panel">
-							<h4>Hint</h4>
-							{activeBlank === null ? (
-								<p data-hint-empty>
-									Place the cursor in a blank to request a hint.
-								</p>
-							) : (
-								(() => {
-									const count = revealCounts.get(activeBlank.id) ?? 0;
-									const total = activeBlank.original.length;
-									const fullyRevealed = count >= total;
-									return (
-										<>
-											<p
-												data-hint-revealed
-												data-hint-blank-id={activeBlank.id}
-												data-hint-type={activeBlank.type}
-												data-hint-reveal-count={String(count)}
-												data-hint-reveal-total={String(total)}
-											>
-												{activeBlank.type}:{' '}
-												<code data-hint-partial>
-													{renderPartialHint(
-														activeBlank.original,
-														count,
-														activeBlank.id,
-													)}
-												</code>
-												{' '}({count} / {total} revealed)
-											</p>
-											{!fullyRevealed && (
-												<button
-													type="button"
-													data-hint-reveal-button
-													data-hint-blank-id={activeBlank.id}
-													onClick={() => {
-														const id = activeBlank.id;
-														setRevealCounts((prev) => {
-															const next = new Map(prev);
-															const cur = next.get(id) ?? 0;
-															next.set(id, cur + 1);
-															return next;
-														});
-													}}
-												>
-													Reveal next letter
-												</button>
-											)}
-										</>
-									);
-								})()
+				) : (
+					<>
+						<div data-blanks-toolbar role="toolbar">
+							<button
+								type="button"
+								data-view-toggle="blankenated"
+								aria-pressed={viewMode === 'blankenated' ? 'true' : 'false'}
+								onClick={() => setViewMode('blankenated')}
+							>
+								📝 Blankenated Code
+							</button>
+							<button
+								type="button"
+								data-view-toggle="complete"
+								aria-pressed={viewMode === 'complete' ? 'true' : 'false'}
+								onClick={() => setViewMode('complete')}
+							>
+								📖 Complete Code
+							</button>
+							{viewMode === 'blankenated' && (
+								<div
+									data-blanks-editor-mode
+									role="group"
+									aria-label="Editor mode"
+								>
+									<span>Editor:</span>
+									<button
+										type="button"
+										data-editor-mode-toggle="helpful"
+										aria-pressed={editorMode === 'helpful' ? 'true' : 'false'}
+										onClick={() => changeEditorMode('helpful')}
+									>
+										✨ Helpful
+									</button>
+									<button
+										type="button"
+										data-editor-mode-toggle="diff"
+										aria-pressed={editorMode === 'diff' ? 'true' : 'false'}
+										onClick={() => changeEditorMode('diff')}
+									>
+										📋 Diff
+									</button>
+									<button
+										type="button"
+										data-editor-mode-toggle="raw"
+										aria-pressed={editorMode === 'raw' ? 'true' : 'false'}
+										onClick={() => changeEditorMode('raw')}
+									>
+										🪨 Raw
+									</button>
+								</div>
 							)}
-						</aside>
-					)}
-				</>
-			)}
-		</div>
-	);
-};
+							<label data-difficulty-control>
+								Difficulty: {difficulty}%
+								<input
+									type="range"
+									min="0"
+									max="100"
+									value={difficulty}
+									onChange={handleDifficultyChange}
+									data-difficulty-slider
+									aria-label="Blanks difficulty (0 to 100)"
+								/>
+							</label>
+							<fieldset data-content-types>
+								<legend>Eligible token categories</legend>
+								{ALL_CONTENT_TYPES.map((type) => (
+									<label key={type}>
+										<input
+											type="checkbox"
+											checked={contentTypes.includes(type)}
+											onChange={() => handleContentTypeToggle(type)}
+											data-content-type={type}
+										/>
+										{type}
+									</label>
+								))}
+							</fieldset>
+						</div>
+						<div
+							data-blanks-editor-header
+							data-header-mode={viewMode}
+							data-header-difficulty={String(difficulty)}
+							data-header-blanks-total={String(evaluation.total)}
+							data-header-blanks-remaining={String(evaluation.unfilled)}
+							aria-live="polite"
+						>
+							Mode: <strong>{viewMode}</strong> · Difficulty: {difficulty}%
+							{' · '}Blanks: {evaluation.total} · Remaining:{' '}
+							{evaluation.unfilled}
+						</div>
+						<div ref={editorContainer} data-blanks-editor-host />
+						<div
+							data-blanks-score={String(evaluation.score)}
+							data-blanks-total={String(evaluation.total)}
+							data-blanks-correct={String(evaluation.correct)}
+							aria-live="polite"
+						>
+							Score: {evaluation.score}%
+							{evaluation.total > 0 && (
+								<>
+									{' '}
+									({evaluation.correct} / {evaluation.total} blanks)
+								</>
+							)}
+						</div>
+						{hintsMode === 'on' &&
+							viewMode === 'blankenated' &&
+							editorMode === 'helpful' && (
+								<aside data-blanks-hints aria-label="Hints panel">
+									<h4>Hint</h4>
+									{activeBlank === null ? (
+										<p data-hint-empty>
+											Place the cursor in a blank to request a hint.
+										</p>
+									) : (
+										(() => {
+											const count = revealCounts.get(activeBlank.id) ?? 0;
+											const total = activeBlank.original.length;
+											const fullyRevealed = count >= total;
+											return (
+												<>
+													<p
+														data-hint-revealed
+														data-hint-blank-id={activeBlank.id}
+														data-hint-type={activeBlank.type}
+														data-hint-reveal-count={String(count)}
+														data-hint-reveal-total={String(total)}
+													>
+														{activeBlank.type}:{' '}
+														<code data-hint-partial>
+															{renderPartialHint(
+																activeBlank.original,
+																count,
+																activeBlank.id,
+															)}
+														</code>{' '}
+														({count} / {total} revealed)
+													</p>
+													{!fullyRevealed && (
+														<button
+															type="button"
+															data-hint-reveal-button
+															data-hint-blank-id={activeBlank.id}
+															onClick={() => {
+																const id = activeBlank.id;
+																setRevealCounts((prev) => {
+																	const next = new Map(prev);
+																	const cur = next.get(id) ?? 0;
+																	next.set(id, cur + 1);
+																	return next;
+																});
+															}}
+														>
+															Reveal next letter
+														</button>
+													)}
+												</>
+											);
+										})()
+									)}
+								</aside>
+							)}
+					</>
+				)}
+			</div>
+		);
+	};
 
 const blanksLens: LensModule = freezeInPlace<LensModule>({
 	name: 'blanks',
