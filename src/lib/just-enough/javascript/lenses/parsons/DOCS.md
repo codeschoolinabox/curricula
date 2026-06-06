@@ -353,7 +353,9 @@ evaluation, and attempt history die with the component instance (no URL state in
   split/normalize/guard pipeline and must preserve its invariants:** the empty-snippet
   guard (a hint-only source → empty exercise → score 100, no crash), indent
   normalization of the line following a stripped block (no phantom indent), and the
-  marker-only-line drop.
+  marker-only-line drop. (An INLINE block mid-code-line is also stripped — eating
+  its surrounding horizontal whitespace — which can leave a broken code remnant on
+  that line; educators should place hint blocks on their own lines.)
 - **Distractor-count + legend (new render).** `data-parsons-distractor-count`
   (`extra lines: N`, N>0) and `data-parsons-legend` (the 5-state colour key) sit in
   an info panel above the board. **Both collapsed by default — a deliberate V2

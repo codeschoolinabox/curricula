@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+	extractHints,
 	normalizeIndents,
 	parseLines,
 	parseParsons,
@@ -229,5 +230,138 @@ describe('parse-parsons', () => {
 			const b = parseParsons(SRC, 3, () => 0.999);
 			expect(a.solution).toEqual(b.solution);
 		});
+	});
+});
+
+describe('extractHints — block-comment hints (Inc 9)', () => {
+	it('returns no hints + the source unchanged when there are no block comments', () => {
+		const src = 'const a = 1;\nconst b = 2;';
+		const { code, hints } = extractHints(src);
+		expect(hints).toEqual([]);
+		expect(code).toBe(src);
+	});
+
+	it('extracts a plain block comment as a hint (summary null), stripped from the code', () => {
+		const src = 'const a = 1;\n/* think about order */\nconst b = 2;';
+		const { code, hints } = extractHints(src);
+		expect(hints).toEqual([{ summary: null, body: 'think about order' }]);
+		expect(code).not.toContain('think about order');
+		expect(parseLines(code).solution.map((l) => l.code)).toEqual([
+			'const a = 1;',
+			'const b = 2;',
+		]);
+	});
+
+	it('parses a parsons-collapse: marker into summary (after marker) + body (rest)', () => {
+		const src =
+			'/*\nparsons-collapse: Hint\nthink about the loop\n*/\nconst a = 1;';
+		const { hints } = extractHints(src);
+		expect(hints).toHaveLength(1);
+		expect(hints[0].summary).toBe('Hint');
+		expect(hints[0].body).toBe('think about the loop');
+	});
+
+	it('extracts multiple blocks in source order', () => {
+		const src = '/* first */\nconst a = 1;\n/* second */\nconst b = 2;';
+		const { hints } = extractHints(src);
+		expect(hints.map((h) => h.body)).toEqual(['first', 'second']);
+	});
+
+	it('handles an empty block comment (empty body, summary null)', () => {
+		const { hints } = extractHints('/**/\nconst a = 1;');
+		expect(hints).toEqual([{ summary: null, body: '' }]);
+	});
+
+	it('strips an own-line indented block without leaving a phantom indent', () => {
+		const src = 'const a = 1;\n  /* note */\nconst b = 2;';
+		const { solution } = parseLines(extractHints(src).code);
+		expect(solution.map((l) => l.code)).toEqual(['const a = 1;', 'const b = 2;']);
+		expect(solution.map((l) => l.indent)).toEqual([0, 0]);
+	});
+
+	it('does not disturb // distractor parsing', () => {
+		const src = '/* hint */\nconst a = 1;\nconst x = 9; // distractor';
+		const { solution, distractors } = parseLines(extractHints(src).code);
+		expect(solution.map((l) => l.code)).toEqual(['const a = 1;']);
+		expect(distractors.map((l) => l.code)).toEqual(['const x = 9;']);
+	});
+
+	// V2 trims: the summary (text after the marker) is trimmed, and the body is
+	// OUTER-trimmed (interior whitespace preserved). The `/* */` delimiters are
+	// dropped (inner content only). The whole `parsons-collapse:` LINE is removed
+	// from the body (not just the marker text — so no blank line is left behind).
+
+	it('trims the summary text after the marker', () => {
+		const { hints } = extractHints('/* parsons-collapse:  Padded\ncontent */');
+		expect(hints[0]).toEqual({ summary: 'Padded', body: 'content' });
+	});
+
+	it('keeps body content BOTH before and after the marker line (line excised, not split)', () => {
+		const src = '/*\npreamble\nparsons-collapse: Cap\npostamble\n*/';
+		const { hints } = extractHints(src);
+		expect(hints[0].summary).toBe('Cap');
+		expect(hints[0].body).toBe('preamble\npostamble');
+	});
+
+	it('preserves INTERIOR whitespace of a multi-line body (outer-trim only)', () => {
+		const src = '/*\nfirst line\n  indented line\nlast line\n*/';
+		expect(extractHints(src).hints[0].body).toBe(
+			'first line\n  indented line\nlast line',
+		);
+	});
+
+	it('a parsons-collapse: with no text yields summary "" (empty string), not null', () => {
+		const { hints } = extractHints('/*\nparsons-collapse:\nsome body\n*/');
+		expect(hints[0].summary).toBe('');
+		expect(hints[0].body).toBe('some body');
+	});
+
+	it('detects the marker per-block (mixed: first collapses, second is plain)', () => {
+		const src =
+			'/* parsons-collapse: Head\nbody here\n*/\nconst a = 1;\n/* plain */';
+		const { hints } = extractHints(src);
+		expect(hints[0]).toEqual({ summary: 'Head', body: 'body here' });
+		expect(hints[1]).toEqual({ summary: null, body: 'plain' });
+	});
+
+	it('extracts an INLINE mid-line block too (faithful to the legacy regex; the code line is reduced)', () => {
+		// The regex does not discriminate inline vs own-line — it also eats the
+		// surrounding horizontal spaces, so the line joins. Documented, not a bug.
+		const { code, hints } = extractHints('const a = 1; /* x */ + 2;');
+		expect(hints).toEqual([{ summary: null, body: 'x' }]);
+		expect(code).toBe('const a = 1;+ 2;');
+	});
+
+	it('treats only the FIRST parsons-collapse: line as the marker; a second stays in body', () => {
+		const src =
+			'/*\nparsons-collapse: First\nbody\nparsons-collapse: Second\nmore\n*/';
+		const { hints } = extractHints(src);
+		expect(hints[0].summary).toBe('First');
+		expect(hints[0].body).toBe('body\nparsons-collapse: Second\nmore');
+	});
+});
+
+describe('parseParsons — hints threading (Inc 9)', () => {
+	it('returns extracted hints on ParsedParsons.hints and excludes them from solution/pool', () => {
+		const src =
+			'/* parsons-collapse: Tip\nread the spec\n*/\nconst a = 1;\nconst b = 2;';
+		const parsed = parseParsons(src, 10, () => 0);
+		expect(parsed.hints).toEqual([{ summary: 'Tip', body: 'read the spec' }]);
+		expect(parsed.solution.map((l) => l.code)).toEqual([
+			'const a = 1;',
+			'const b = 2;',
+		]);
+		expect(parsed.pool).toHaveLength(2);
+	});
+
+	it('a hint-only snippet yields an empty exercise (no crash)', () => {
+		const parsed = parseParsons('/* just a hint */', 10, () => 0);
+		expect(parsed.solution).toEqual([]);
+		expect(parsed.pool).toEqual([]);
+		expect(parsed.hints).toEqual([{ summary: null, body: 'just a hint' }]);
+	});
+
+	it('no block comments -> empty hints', () => {
+		expect(parseParsons('const a = 1;', 10, () => 0).hints).toEqual([]);
 	});
 });

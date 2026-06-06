@@ -85,10 +85,10 @@ export type ParsedParsons = Readonly<{
 	solution: ReadonlyArray<ParsonsLine>;
 	distractors: ReadonlyArray<ParsonsLine>;
 	pool: ReadonlyArray<string>;
-	// NOTE (Inc 9): `hints: ReadonlyArray<HintBlock>` joins this shape when
-	// `parse-parsons` gains block-comment extraction. It is added there (with its
-	// producer) rather than here, so the type and the code that populates it land
-	// together — adding the required field before the producer would not typecheck.
+	// Educator hint blocks extracted from the snippet's `/* … */` block comments
+	// (removed from the orderable code); rendered read-only above the board. See
+	// `HintBlock` + `./lib/parse-parsons.ts` `extractHints`. Empty array when none.
+	hints: ReadonlyArray<HintBlock>;
 }>;
 
 /**

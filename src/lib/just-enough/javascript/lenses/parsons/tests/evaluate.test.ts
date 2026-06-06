@@ -35,6 +35,7 @@ function makeParsed(
 			distractor: true,
 		})),
 		pool: [], // unused by buildEvaluation
+		hints: [], // unused by buildEvaluation
 	};
 }
 

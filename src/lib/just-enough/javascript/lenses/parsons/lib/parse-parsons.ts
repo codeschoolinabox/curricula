@@ -22,7 +22,7 @@
  * § Edge cases). Eslint-ignored (vendored) per `eslint.config.mjs`.
  */
 
-import type { ParsedParsons, ParsonsLine } from '../types.js';
+import type { HintBlock, ParsedParsons, ParsonsLine } from '../types.js';
 
 /** Trailing `// distractor` marker (JS-idiom; legacy used Python `#distractor`). */
 const DISTRACTOR_MARKER = /\/\/\s*distractor\s*$/;
@@ -132,8 +132,66 @@ export function parseLines(source: string): {
 }
 
 /**
- * Full parse: `parseLines` + select `min(maxDistractors, declared)` distractors
- * (random subset) + build and shuffle the initial pool of line ids.
+ * Extract educator hint blocks (C-style block comments) from the snippet —
+ * faithful port of the legacy parsonizer (`component.js`). Each block (with its
+ * surrounding HORIZONTAL whitespace) is removed from the returned `code` so it is
+ * never parsed as a solution / distractor line; a block containing a
+ * `parsons-collapse: <summary>` marker yields a `summary` (collapsible), else
+ * `summary: null` (plain). Pure; runs BEFORE `parseLines`.
+ *
+ * @returns the source with block comments stripped, plus the hints in source order.
+ */
+// Legacy block-comment regex (faithful): a `/* … */` block PLUS its surrounding
+// HORIZONTAL whitespace (newlines excluded, so an own-line block collapses to an
+// empty line that `parseLines` then drops — no phantom indent). Group 1 = inner.
+const BLOCK_COMMENT = /[^\S\r\n]*\/\*([\S\s]*?)\*\/[^\S\r\n]*/gm;
+// A `parsons-collapse: …` marker LINE (with its trailing newline). Removed whole
+// from the body so no blank line is left where the marker was.
+const COLLAPSE_LINE = /^[^\S\r\n]*parsons-collapse:[^\r\n]*\r?\n?/im;
+
+/**
+ * Turn one block's inner content into a HintBlock (summary split + V2 trims).
+ *
+ * The `summary` field encodes how the renderer (Inc 10) shows the block:
+ * - `null` — NO `parsons-collapse:` marker → render as a plain always-visible `<pre>`.
+ * - `''` (empty string) — marker present but no text after it → render as a
+ *   collapsible `<details>` with an empty summary label.
+ * - non-empty string — collapsible `<details>` with that summary label.
+ *
+ * Only the FIRST `parsons-collapse:` line is treated as the marker; any later one
+ * stays verbatim in the body (`COLLAPSE_LINE` is non-global).
+ */
+function toHintBlock(inner: string): HintBlock {
+	const markerLine = inner.match(COLLAPSE_LINE);
+	if (markerLine !== null) {
+		// summary = the text after the marker on that line, trimmed (may be '').
+		const summary = markerLine[0]
+			.replace(/^[^\S\r\n]*parsons-collapse:/i, '')
+			.trim();
+		// body = the block minus the whole marker line, outer-trimmed.
+		return { summary, body: inner.replace(COLLAPSE_LINE, '').trim() };
+	}
+	return { summary: null, body: inner.trim() };
+}
+
+export function extractHints(source: string): {
+	code: string;
+	hints: HintBlock[];
+} {
+	const hints: HintBlock[] = [];
+	// `String.replace` with a global regex invokes the callback left-to-right (JS
+	// spec), so `hints` accumulates in source order.
+	const code = source.replace(BLOCK_COMMENT, (_full, inner: string) => {
+		hints.push(toHintBlock(inner));
+		return '';
+	});
+	return { code, hints };
+}
+
+/**
+ * Full parse: extract hint blocks, then `parseLines` the stripped code + select
+ * `min(maxDistractors, declared)` distractors (random subset) + build and shuffle
+ * the initial pool of line ids.
  *
  * @param random injectable RNG in `[0,1)`; defaults to `Math.random`. Pass a
  *   deterministic stub in tests.
@@ -143,12 +201,13 @@ export function parseParsons(
 	maxDistractors: number,
 	random: () => number = Math.random,
 ): ParsedParsons {
-	const { solution, distractors } = parseLines(source);
+	const { code, hints } = extractHints(source);
+	const { solution, distractors } = parseLines(code);
 	const count = Math.max(0, Math.min(maxDistractors, distractors.length));
 	const selected = shuffle(distractors, random).slice(0, count);
 	const pool = shuffle(
 		[...solution.map((l) => l.id), ...selected.map((l) => l.id)],
 		random,
 	);
-	return { solution, distractors: selected, pool };
+	return { solution, distractors: selected, pool, hints };
 }
