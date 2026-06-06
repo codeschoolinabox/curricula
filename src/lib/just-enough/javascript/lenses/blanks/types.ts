@@ -51,23 +51,35 @@
  *
  * @remarks Sourced from the vendored algorithm's AST + token-stream
  * classification (per `./lib/blankenate.ts`):
- * - `identifier` — `Node.type === 'Identifier'` (variable names,
- *   parameter names, etc.).
+ * - `identifier` — `Node.type === 'Identifier' | 'PrivateIdentifier'`
+ *   (variable names, parameter names, private class fields like `#x`).
  * - `literal` — `Node.type === 'Literal' | 'RegExpLiteral'` (strings,
  *   numbers, booleans, regex).
- * - `keyword` — inferred from parent node type
- *   (`FunctionDeclaration` → `'function'`, `IfStatement` → `'if'`,
- *   `VariableDeclaration.kind` → `'const'/'let'/'var'`, etc.).
- * - `operator` — `BinaryExpression.operator`,
+ * - `keyword` — Inc 6.k: token-stream walk over Acorn's tokens, matching
+ *   `tok.type.keyword` (reserved keywords like `function`/`if`/`return`/
+ *   `class`/`import`/`extends`/`super`/`try`/`catch`/`null`/`true`/etc.)
+ *   plus a fixed contextual-keyword set (`let`, `static`, `async`,
+ *   `await`, `yield`, `of`, `as`, `from`, `get`, `set` — which Acorn
+ *   emits as `name` tokens with `.keyword === undefined`). Replaces the
+ *   pre-Inc-6.k partial AST-walk approach which omitted ~25 keywords.
+ * - `operator` — AST-walk over `BinaryExpression.operator`,
  *   `AssignmentExpression.operator`, `UpdateExpression.operator`,
- *   `UnaryExpression.operator`, `VariableDeclarator` init `=`.
+ *   `UnaryExpression.operator`, `VariableDeclarator` init `=`, and
+ *   `AssignmentPattern` default-parameter `=` (Inc 6.k; covers
+ *   `function f(x = 0)` and `({ a = 1 } = {})`).
  * - `delimiter` (Inc 6.6 extension; beyond legacy) —
  *   syntactic delimiter tokens from Acorn's token stream:
- *   `(`, `)`, `{`, `}`, `[`, `]`, `${`, `;`, `,`, `.`. The
- *   template-expression opener `${` is treated as a single 2-char
- *   token (Acorn's `tokTypes.dollarBraceL`); block-close and
- *   template-close `}` are not distinguished for v1 (both blank as
- *   `}`) — see `./lib/blankenate.ts` DELIMITER_LABELS rationale.
+ *   `(`, `)`, `{`, `}`, `[`, `]`, `${`, `;`, `,`, `.`, plus
+ *   (Inc 6.k) the syntactic-marker delimiters `=>`, `?`, `:`,
+ *   `?.`, `...`. The template-expression opener `${` is treated as
+ *   a single 2-char token (`tokTypes.dollarBraceL`); block-close
+ *   and template-close `}` are not distinguished for v1 (both blank
+ *   as `}`). Ternary `?` / `:` are classified as delimiters, NOT
+ *   operators — the operators category covers AST-walk-driven
+ *   operator strings (BinaryExpression.operator etc.); ternary
+ *   tokens come through the token-stream filter. See
+ *   `./lib/blankenate.ts` DELIMITER_LABELS for the comprehensive
+ *   set + the documented exclusions (backtick, regex slash).
  */
 type BlankType =
 	| 'identifier'

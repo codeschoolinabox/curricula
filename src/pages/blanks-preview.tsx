@@ -30,6 +30,84 @@ import blanksLens from '@site/src/lib/just-enough/javascript/lenses/blanks/index
 const SAMPLE =
 	'function classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}';
 
+/**
+ * Inc 6.k comprehensive snippet — exercises every feature category the
+ * blanks lens covers, plus syntactic-marker delimiters (`=>`, `?`, `:`,
+ * `?.`, `...`) added in Inc 6.k. With all five content-type checkboxes
+ * on at difficulty 100, every eligible token should be blanked.
+ *
+ * Categories covered:
+ * - Keywords: import, from, class, extends, static, new, function,
+ *   const, let, var, if, else, for, of, while, do, return, yield,
+ *   async, await, try, catch, finally, throw, switch, case, break,
+ *   continue, typeof, instanceof, delete, void, this, super, export,
+ *   default
+ * - Identifiers: variable / parameter / method names + private field #x
+ * - Literals: strings, numbers, booleans, null, regex
+ * - Operators: binary, unary, assignment, update, logical, nullish
+ * - Delimiters: parens, brackets, braces, ${, semicolons, commas, dots,
+ *   ARROW =>, ternary ? :, OPTIONAL ?., SPREAD ...
+ */
+const COMPREHENSIVE_SAMPLE = `import { Logger } from './logger.js';
+
+class Counter extends Logger {
+	#count = 0;
+	static MAX = 100;
+
+	constructor(initial = 0) {
+		super();
+		this.#count = initial;
+	}
+
+	get value() {
+		return this.#count;
+	}
+
+	static fromObject({ initial = 0, step = 1 } = {}) {
+		return new Counter(initial);
+	}
+
+	*iterate(n) {
+		for (let i = 0; i < n; i++) yield this.#count + i;
+	}
+
+	async fetchAndIncrement() {
+		try {
+			const result = await Promise.resolve(this.#count + 1);
+			this.#count = result;
+			return result;
+		} catch (error) {
+			throw new Error(\`Failed: \${error.message}\`);
+		} finally {
+			console.log('done');
+		}
+	}
+}
+
+const items = [1, 2, 3, ...[4, 5]];
+const total = items.reduce((acc, n) => acc + n, 0);
+const isEven = (n) => n % 2 === 0 ? 'even' : 'odd';
+const first = items?.[0] ?? 'default';
+const re = /^\\d+$/g;
+
+if (typeof first === 'number' && !isNaN(first)) {
+	for (const item of items) {
+		if (item > Counter.MAX) break;
+		if (item === 0) continue;
+		console.log(\`item: \${item}, parity: \${isEven(item)}\`);
+	}
+} else {
+	switch (first) {
+		case 'default':
+			throw new RangeError('unknown');
+		default:
+			delete items[0];
+			void console.log(\`got \${first}\`);
+	}
+}
+
+export default Counter;`;
+
 export default function BlanksPreview(): React.JSX.Element {
 	const [code, setCode] = React.useState<string>(SAMPLE);
 
@@ -47,6 +125,26 @@ export default function BlanksPreview(): React.JSX.Element {
 					(6i), and the Ask Me button backed by <code>socratizing/</code> (6j).
 				</p>
 
+				<div style={{ marginBottom: 8 }}>
+					<button
+						type="button"
+						onClick={() => {
+							setCode(SAMPLE);
+						}}
+						style={{ marginRight: 8 }}
+					>
+						Load minimal snippet
+					</button>
+					<button
+						type="button"
+						onClick={() => {
+							setCode(COMPREHENSIVE_SAMPLE);
+						}}
+					>
+						Load comprehensive Inc 6.k test snippet
+					</button>
+				</div>
+
 				<label style={{ display: 'block', marginBottom: 8 }}>
 					Snippet:
 					<textarea
@@ -54,7 +152,7 @@ export default function BlanksPreview(): React.JSX.Element {
 						onChange={function onCodeChange(event) {
 							setCode(event.target.value);
 						}}
-						rows={6}
+						rows={12}
 						style={{ width: '100%', fontFamily: 'monospace' }}
 					/>
 				</label>

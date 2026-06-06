@@ -7,18 +7,18 @@ preserving the token's width as a recognition-cue) inside a CodeMirror editor.
 Each blank behaves as a fixed-width fillable form field (Inc 6.7 overwrite-mode
 UX): typing at any position inside a blank OVERWRITES the char at that position
 (whether `_` or a previously-typed char); backspace replaces a typed char with
-`_`; total blank width never changes. This means a learner can fill in any
-order — typing `fun` then jumping to fill the end with `ion` yields `fun__ion`,
-and then typing `c`+`t` at the middle underscores yields `function`.
+`_`; total blank width never changes. This means a learner can fill in any order
+— typing `fun` then jumping to fill the end with `ion` yields `fun__ion`, and
+then typing `c`+`t` at the middle underscores yields `function`.
 
 **Directional compaction on `_` deletes.** When the learner backspaces or
 forward-deletes a `_` (not a typed char), the empty slot is compacted in the
-direction opposite to the freed space: backspace shifts right-text LEFT and
-pads a new `_` at the END of the blank (e.g., cursor at 3 in `he_lo`, backspace
-deletes the `_` at position 2 → `helo_`); Del shifts left-text RIGHT and pads
-a new `_` at the FRONT of the blank (e.g., cursor at 2 in `he_lo`, Del deletes
-the `_` at position 2 → `_helo`). This lets the learner compact scattered
-typed chars without having to re-type them.
+direction opposite to the freed space: backspace shifts right-text LEFT and pads
+a new `_` at the END of the blank (e.g., cursor at 3 in `he_lo`, backspace
+deletes the `_` at position 2 → `helo_`); Del shifts left-text RIGHT and pads a
+new `_` at the FRONT of the blank (e.g., cursor at 2 in `he_lo`, Del deletes the
+`_` at position 2 → `_helo`). This lets the learner compact scattered typed
+chars without having to re-type them.
 
 Per-blank correctness is computed live against the original code.
 
@@ -77,8 +77,9 @@ Fields:
   - `difficulty?: number` (default `50`, range `0–100`) — per-token probability
     `p = difficulty / 100` of being blanked.
   - `contentTypes?: ReadonlyArray<'keywords' | 'identifiers' | 'operators' | 'literals' | 'delimiters'>`
-    (default `['keywords', 'identifiers', 'operators', 'literals', 'delimiters']`)
-    — which token categories are eligible to be blanked. Presence in the array =
+    (default
+    `['keywords', 'identifiers', 'operators', 'literals', 'delimiters']`) —
+    which token categories are eligible to be blanked. Presence in the array =
     enabled. The wrapper derives a boolean map for per-render rendering; the
     config-level representation is the flat array to comply with
     `SerializableValue` (`LensConfig` admits only primitives and arrays of
@@ -88,13 +89,12 @@ Fields:
     semantics.
   - `viewMode?: 'blankenated' | 'complete'` (default `'blankenated'`) — initial
     view.
-  - `hintsMode?: 'on' | 'off'` (default `'on'`) — whether the
-    cursor-scoped hints panel renders. **Orthogonal to `difficulty`**
-    (Inc 6h-redux user-directed redesign — hints are not inferred from
-    difficulty). When `'off'`, the panel does not render at all.
-    When `'on'`, the panel shows a reveal-button for the blank under
-    the cursor (only that blank); the learner controls scaffolding by
-    choosing how many blanks to reveal. See
+  - `hintsMode?: 'on' | 'off'` (default `'on'`) — whether the cursor-scoped
+    hints panel renders. **Orthogonal to `difficulty`** (Inc 6h-redux
+    user-directed redesign — hints are not inferred from difficulty). When
+    `'off'`, the panel does not render at all. When `'on'`, the panel shows a
+    reveal-button for the blank under the cursor (only that blank); the learner
+    controls scaffolding by choosing how many blanks to reveal. See
     [Hints panel contract](#hints-panel-contract).
 - `applicableTo(embodiment): boolean` — returns `embodiment.status.parsed` (Tier
   2 per [`../README.md`](../README.md) § Three-tier classification). The
@@ -118,10 +118,15 @@ structural keywords disappear (recall). The five content-type checkboxes let an
 educator tune which dimensions of the code the learner practices — keywords-only
 blanks emphasize control-flow vocabulary; identifiers-only blanks emphasize
 naming and scope; operators-only blanks emphasize semantics-of-symbols;
-delimiters-only blanks emphasize syntactic structure (parens, brackets,
-braces, `${`, semicolons, commas, dots). The
-view-mode toggle lets the learner peek at the complete source as a self-check
-without leaving the lens.
+delimiters-only blanks emphasize syntactic structure — comprehensive Acorn
+punctuator coverage: parens `( )`, brackets `[ ]`, braces `{ }`, template-
+expression opener `${`, semicolons `;`, commas `,`, dots `.`, arrow `=>`,
+ternary / object-property colon `:`, ternary `?`, optional chaining `?.`, and
+spread/rest `...`. Backticks (template-literal delimiters) are NOT blanked —
+they are analogous to `'`/`"` quotes for string literals (part of the literal
+token, not separately blanked). Regex slashes are not separately blanked either;
+Acorn emits regex literals as one token. The view-mode toggle lets the learner
+peek at the complete source as a self- check without leaving the lens.
 
 The hints panel surfaces per-blank correctness state as the learner types —
 green for correct, red for incorrect, yellow for unfilled — making the exercise
@@ -144,13 +149,16 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 `BlanksLens.jsx`; socratizing terms surface from the
 [`socratizing/` module](../../orchestrate/lib/socratizing/README.md).
 
-- **Blank** — a single position where an original token was replaced by the `__`
-  placeholder. Each blank carries `{ id, original, type, start, end }`: its
-  unique identifier, the original token text, its category (`identifier` /
-  `literal` / `keyword` / `operator`), and its position in the original source
-  (zero-indexed character offsets).
-- **`__` placeholder** — the two-underscore string the learner sees in place of
-  a blanked token. Legal JavaScript identifier; the editor treats it as text the
+- **Blank** — a single position where an original token was replaced by a
+  length-matched placeholder. Each blank carries
+  `{ id, original, type, start, end }`: its unique identifier, the original
+  token text, its category (`identifier` / `literal` / `keyword` / `operator` /
+  `delimiter`), and its position in the original source (zero-indexed character
+  offsets).
+- **`_` placeholder** — the run of underscores the learner sees in place of a
+  blanked token. Inc 6.7: length-matched — a 4-char token like `name` becomes
+  `____`, a 1-char token like `;` becomes `_`. Each placeholder is a legal
+  JavaScript identifier (or single character); the editor treats it as text the
   learner types over.
 - **Content type** — one of the five token categories
   (`keywords / identifiers / operators / literals / delimiters`). Stored in
@@ -177,10 +185,9 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   corrections (see
   [`../../orchestrate/lib/socratizing/README.md`](../../orchestrate/lib/socratizing/README.md))
   — Ask Me's outputs do not carry correctness state.
-- **Hints mode** — `'on' | 'off'`. Enable or disable the cursor-scoped
-  hints panel. Default `'on'`. Orthogonal to `difficulty` (Inc 6h-redux
-  user-directed redesign). The `data-hints-mode` attribute on the root
-  reflects this value.
+- **Hints mode** — `'on' | 'off'`. Enable or disable the cursor-scoped hints
+  panel. Default `'on'`. Orthogonal to `difficulty` (Inc 6h-redux user-directed
+  redesign). The `data-hints-mode` attribute on the root reflects this value.
 - **Score** — the aggregate percentage. Formula:
   `total === 0 ? 100 : Math.round(correct / total * 100)`. Surfaced in the
   editor header and the hints panel. The `total === 0` branch handles the
@@ -214,10 +221,10 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 ```
 
 The `data-lens` attribute is the lenses-peer invariant (see
-[`../DOCS.md` § Structural constraints](../DOCS.md)). The `data-view-mode`
-and `data-hints-mode` attributes are sandbox-harness selectors and CSS
-hooks; renaming them is a contract change. `data-*` values reflect
-**committed config state**.
+[`../DOCS.md` § Structural constraints](../DOCS.md)). The `data-view-mode` and
+`data-hints-mode` attributes are sandbox-harness selectors and CSS hooks;
+renaming them is a contract change. `data-*` values reflect **committed config
+state**.
 
 ## Toolbar contract
 
@@ -226,11 +233,10 @@ hooks; renaming them is a contract change. `data-*` values reflect
   next render. Score resets to unfilled when the set changes (the previous
   learner answers no longer correspond to the new blank positions).
 - **Content-type checkboxes** — five checkboxes (keywords / identifiers /
-  operators / literals / delimiters). Toggle fires `onChange`; the state
-  updates immediately
-  and the blank set re-derives on the next render. A checkbox set to `false`
-  suppresses that token category from being eligible — even at difficulty 100,
-  tokens of an unchecked category remain visible.
+  operators / literals / delimiters). Toggle fires `onChange`; the state updates
+  immediately and the blank set re-derives on the next render. A checkbox set to
+  `false` suppresses that token category from being eligible — even at
+  difficulty 100, tokens of an unchecked category remain visible.
 - **View-mode toggle** — two `<button>`s ("📝 Blankenated Code" / "📖 Complete
   Code"). Active button is highlighted via the `data-view-mode` attribute on the
   root. Toggling **preserves the learner's answers** (parity with legacy) — the
@@ -262,40 +268,39 @@ hooks; renaming them is a contract change. `data-*` values reflect
 
 ## Hints panel contract
 
-Inc 6h-redux ships a **cursor-scoped, on-demand, scrambled** hints panel
-per user-directed redesign. The legacy 3-tier system (`'auto' | 'easy' |
-'medium' | 'hard'` controlling rendered richness) is gone — replaced by:
+Inc 6h-redux ships a **cursor-scoped, on-demand, scrambled** hints panel per
+user-directed redesign. The legacy 3-tier system
+(`'auto' | 'easy' | 'medium' | 'hard'` controlling rendered richness) is gone —
+replaced by:
 
-- **Orthogonality.** Hints are decoupled from `difficulty`. `hintsMode`
-  has its own knob (`'on' | 'off'`), not inferred from the slider.
-- **Cursor-scoped.** The panel surfaces hints for **one blank at a
-  time**: whichever blank the cursor is currently inside. Anchor
-  positions (between blanks) show an empty state.
-- **Hidden by default + incremental reveal.** Each blank's hint starts
-  hidden. The panel shows a "Reveal next letter" button. Each click
-  exposes ONE more letter of the correct answer, appending it left-to-
-  right to the displayed partial. After N clicks the learner sees the
-  first N letters of the per-blank scrambled order (no position info).
-  For `hello` (length 5), if the per-blank permutation is `[3, 0, 4,
-  1, 2]`, clicks 1–5 produce `'l'`, `'lh'`, `'lho'`, `'lhoe'`,
-  `'lhoel'`. After all letters revealed, the button vanishes.
-- **Scrambled-order is deterministic per-blank-mount.** The
-  permutation comes from a mulberry32 PRNG seeded by an FNV-1a 32-bit
-  hash of `blank.id` (see `index.tsx` § `shufflePositions`). Same
-  blank in the same mount always reveals letters in the same
-  sequence; same blank in a re-rolled blank set (after settings
-  change) gets a new permutation. No `Math.random()` per render —
-  tests are deterministic and re-renders don't reshuffle.
-- **Per-blank reveal-count persists** across cursor moves. Once two
-  letters are revealed for blank A, returning to A after visiting B
-  shows the same two letters. Switching the editor-mode scaffolding
-  level (helpful → diff → raw or back) resets all reveal-counts.
+- **Orthogonality.** Hints are decoupled from `difficulty`. `hintsMode` has its
+  own knob (`'on' | 'off'`), not inferred from the slider.
+- **Cursor-scoped.** The panel surfaces hints for **one blank at a time**:
+  whichever blank the cursor is currently inside. Anchor positions (between
+  blanks) show an empty state.
+- **Hidden by default + incremental reveal.** Each blank's hint starts hidden.
+  The panel shows a "Reveal next letter" button. Each click exposes ONE more
+  letter of the correct answer, appending it left-to- right to the displayed
+  partial. After N clicks the learner sees the first N letters of the per-blank
+  scrambled order (no position info). For `hello` (length 5), if the per-blank
+  permutation is `[3, 0, 4, 1, 2]`, clicks 1–5 produce `'l'`, `'lh'`, `'lho'`,
+  `'lhoe'`, `'lhoel'`. After all letters revealed, the button vanishes.
+- **Scrambled-order is deterministic per-blank-mount.** The permutation comes
+  from a mulberry32 PRNG seeded by an FNV-1a 32-bit hash of `blank.id` (see
+  `index.tsx` § `shufflePositions`). Same blank in the same mount always reveals
+  letters in the same sequence; same blank in a re-rolled blank set (after
+  settings change) gets a new permutation. No `Math.random()` per render — tests
+  are deterministic and re-renders don't reshuffle.
+- **Per-blank reveal-count persists** across cursor moves. Once two letters are
+  revealed for blank A, returning to A after visiting B shows the same two
+  letters. Switching the editor-mode scaffolding level (helpful → diff → raw or
+  back) resets all reveal-counts.
 
 **Why this design.** The 3-tier system coupled scaffolding intensity to
-difficulty, but the user's pedagogical goal is the inverse: the learner
-chooses how much help to ask for, blank by blank. The "tier" is now
-emergent — how many blanks the learner chooses to peek at across a
-session is itself the scaffolding gradient.
+difficulty, but the user's pedagogical goal is the inverse: the learner chooses
+how much help to ask for, blank by blank. The "tier" is now emergent — how many
+blanks the learner chooses to peek at across a session is itself the scaffolding
+gradient.
 
 **Panel structure (when `hintsMode === 'on'`):**
 
@@ -333,8 +338,12 @@ Renders above the CodeMirror editor:
   (Read-only)" (complete).
 - Difficulty %: `{difficulty}%`.
 - Blanks count: `{blanks.length}`.
-- Remaining count: `{learnerCode.match(/__/g)?.length ?? 0}` (number of `__`
-  placeholders still in the editor — i.e. blanks the learner hasn't filled).
+- Remaining count: the number of blanks whose `evaluate-correctness` verdict is
+  `unfilled` (computed from the `CorrectnessMap` the editor wrapper already
+  derives). Inc 6.7 length-matched placeholders make a simple `/__/g` regex
+  match invalid — a 1-char blank like `_` would not match the literal `__`.
+  Sourcing from `CorrectnessMap` is also more precise (a half-typed blank with
+  leftover `_`-tail is still `unfilled`).
 
 Legacy designed this readout but compiled it out via `{/* ... */}` (lines
 648–662); we ship it at parity per the visible-progress-signal pedagogical
@@ -374,10 +383,10 @@ The "🤔 Ask Me" button in the header delegates to the `socratizing/` module:
 
 - **Cycling**: the lens maintains a local cursor (0..K-1) into the filtered
   question list. The first render shows `questions[0]`; clicking the Ask Me
-  button advances the cursor by one (wrapping at K back to 0). The cursor
-  resets to 0 on `embodiment.source.code` change (a new snippet starts from
-  question 1, not mid-cycle from the previous snippet). The lens UI shows a
-  "Question N of K" indicator so cycling is legible.
+  button advances the cursor by one (wrapping at K back to 0). The cursor resets
+  to 0 on `embodiment.source.code` change (a new snippet starts from question 1,
+  not mid-cycle from the previous snippet). The lens UI shows a "Question N of
+  K" indicator so cycling is legible.
 - Questions are ordered by source location (top-to-bottom) before capping, per
   [`../../orchestrate/lib/socratizing/README.md`](../../orchestrate/lib/socratizing/README.md)
   § Ordering — so the first question on the same snippet is stable across
@@ -385,11 +394,11 @@ The "🤔 Ask Me" button in the header delegates to the `socratizing/` module:
 - The lens displays each question's `context` (PBSI sentence framing the
   decision) + the prompt text. Prompt selection prefers the open-register
   question (`questions[N].questions.find(q => q.register === 'open').text`),
-  falling back to `questions[N].questions[0].text` when no open-register
-  entry exists. The pedagogical bias is toward open prompts — they invite
-  the learner to articulate their own reasoning, matching the Ask Me /
-  socratizing posture (vs. pointed prompts which presume the learner
-  already has a candidate to evaluate).
+  falling back to `questions[N].questions[0].text` when no open-register entry
+  exists. The pedagogical bias is toward open prompts — they invite the learner
+  to articulate their own reasoning, matching the Ask Me / socratizing posture
+  (vs. pointed prompts which presume the learner already has a candidate to
+  evaluate).
 - An empty result list (`questions.length === 0` after filtering) renders "No
   questions available for this snippet at the current Ask Me configuration." The
   `ok: false` branch is unreachable in production because `applicableTo` gates
@@ -556,10 +565,9 @@ each is independently testable:
   `updateLensConfig('blanks', config)` surface is preserved. Pure.
 - `types.ts` (shared) — lens-local types: `Blank`, `BlankType`,
   `BlankenateResult`, `ContentType`, `ViewMode`, `HintsMode`,
-  `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`,
-  `BlanksLensConfig`. The boolean-map representation of content types
-  is wrapper-internal state derived from the array on render; it has
-  no exported type.
+  `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`, `BlanksLensConfig`.
+  The boolean-map representation of content types is wrapper-internal state
+  derived from the array on render; it has no exported type.
 
 Tests split: `tests/blankenate.test.ts`, `tests/no-paste-extension.test.ts`,
 `tests/evaluate-correctness.test.ts`, `tests/url-config.test.ts`,

@@ -1,3 +1,4 @@
+import * as acorn from 'acorn';
 import { describe, expect, it } from 'vitest';
 
 import blankenate from '../lib/blankenate.js';
@@ -299,48 +300,45 @@ describe('blankenate', () => {
 			}
 		});
 
-		// AR-3 concern 1: spread `...` must NOT produce `.` blanks. Acorn
-		// emits spread as a single `...`-labeled token (NOT three dots);
-		// the DELIMITER_LABELS filter excludes it because `'...'` is not
-		// in the set. Lock this with a test so a future change to the set
-		// (e.g. someone adds `'...'`) does not silently mis-blank spread.
-		it('spread `...` does NOT produce `.` blanks', () => {
+		// Inc 6.k: spread `...` is now a SINGLE blank (Acorn emits it
+		// as one `...`-labeled token via `tokTypes.ellipsis`). Lock
+		// that spread produces exactly one 3-char `...` blank per
+		// occurrence, and NEVER produces 1- or 2-char `.` blanks from
+		// the spread token (those would indicate the token was
+		// mis-split).
+		it('spread `...` produces a single 3-char `...` blank per occurrence', () => {
 			const code = 'function f(a, ...rest) { return [...rest]; }';
 			const result = blankenate(code, 1, {
 				...NO_TYPES,
 				delimiters: true,
 			});
-			// Both spread positions in the source must NOT appear as `.`
-			// blanks. The originals array should contain dots only from
-			// member-access (none in this source) and never from spread.
-			const dotOriginals = (result?.blanks ?? []).filter(
-				(b) => b.original === '.',
-			);
-			expect(dotOriginals).toEqual([]);
-			// Defensively also assert no `..` or `...` slipped through.
 			const originals = (result?.blanks ?? []).map((b) => b.original);
+			// Two spread sites: the rest param `...rest` and the spread
+			// `[...rest]`.
+			const spreads = originals.filter((o) => o === '...');
+			expect(spreads.length).toBe(2);
+			// No partial spread leakage.
 			expect(originals).not.toContain('..');
-			expect(originals).not.toContain('...');
+			// No `.` from spread (this source has no member-access dots).
+			expect(originals).not.toContain('.');
 		});
 
-		// AR-3 concern 2: ternary `?` / `:`, optional chaining `?.`, and
-		// arrow `=>` are deliberately EXCLUDED from DELIMITER_LABELS.
-		// Their labels are `?`, `:`, `?.`, `=>` — none are in the set.
-		// Lock the exclusion behaviorally so the decision boundary is
-		// documented in test, not just in code.
-		it('ternary `?`/`:`, optional chaining `?.`, and arrow `=>` are NOT blanked under delimiters', () => {
+		// Inc 6.k: ternary `?` / `:`, optional chaining `?.`, and arrow
+		// `=>` are now IN DELIMITER_LABELS (user-directed reversal of
+		// the Inc 6.6 AR-3 exclusion). Lock that they are blanked.
+		it('ternary `?`/`:`, optional chaining `?.`, and arrow `=>` ARE blanked under delimiters (Inc 6.k)', () => {
 			const code = 'const f = (x) => (x ? x.a : null); const g = obj?.prop;';
 			const result = blankenate(code, 1, {
 				...NO_TYPES,
 				delimiters: true,
 			});
 			const originals = (result?.blanks ?? []).map((b) => b.original);
-			expect(originals).not.toContain('?');
-			expect(originals).not.toContain('=>');
-			expect(originals).not.toContain('?.');
-			// Note: `:` inside object literals is also out-of-set; the
-			// ternary colon shares the label so both are excluded.
-			expect(originals).not.toContain(':');
+			expect(originals).toContain('?');
+			expect(originals).toContain('=>');
+			expect(originals).toContain('?.');
+			// `:` is also in the set (covers ternary, object literals,
+			// labels — all share the same TokenType).
+			expect(originals).toContain(':');
 		});
 
 		// AR-3 concern 3: regex literals are emitted by Acorn as a single
@@ -409,6 +407,411 @@ describe('blankenate', () => {
 			for (const blank of result?.blanks ?? []) {
 				expect(blank.original).toBe(code.slice(blank.start, blank.end));
 			}
+		});
+	});
+
+	describe('Inc 6.k: comprehensive Acorn-punctuator coverage + user regression', () => {
+		// The user's exact source from the post-Inc-7 sandbox: arrow
+		// `=>` was visible at difficulty 100 with all categories
+		// checked. Lock the fix.
+		it('user regression: arrow `=>` IS blanked in `const greeting = (name) => `...``', () => {
+			const code = 'const greeting = (name) => `hello, ${name}`;';
+			const result = blankenate(code, 1, ALL_TYPES);
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('=>');
+		});
+
+		// Optional chaining
+		it('optional chaining: `obj?.prop` produces `?.` blank + identifier blanks', () => {
+			const result = blankenate('obj?.prop;', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('?.');
+			expect(originals).toContain(';');
+		});
+
+		// Spread
+		it('spread: `[...args]` produces `[`, `...`, `]` delimiter blanks', () => {
+			const result = blankenate('[...args];', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('[');
+			expect(originals).toContain('...');
+			expect(originals).toContain(']');
+		});
+
+		// Ternary
+		it('ternary: `a ? b : c` produces `?` and `:` blanks; identifiers preserved when delimiters-only', () => {
+			const result = blankenate('a ? b : c;', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('?');
+			expect(originals).toContain(':');
+			// Identifiers a/b/c stay (delimiters-only)
+			expect(originals).not.toContain('a');
+			expect(originals).not.toContain('b');
+			expect(originals).not.toContain('c');
+		});
+
+		// Object literal colon (shares the `:` TokenType with ternary)
+		it('object literal: `{a: 1}` colon IS blanked under delimiters', () => {
+			const result = blankenate('({a: 1});', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain(':');
+		});
+
+		// Negative locks: things that must NOT be blanked under delimiters
+		it('backtick `` ` `` is NOT blanked under delimiters (template-literal delimiter, analogous to string quotes)', () => {
+			const result = blankenate('const s = `hello`;', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).not.toContain('`');
+		});
+
+		it('regex slashes are NOT blanked as delimiters (regex is one `regexp` token)', () => {
+			const result = blankenate('const re = /\\d+/g;', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).not.toContain('/');
+		});
+
+		// AR-3 BLOCKER fix Inc 6.k: behavioral matrix. For EACH Acorn
+		// punctuator label, drive `blankenate` with a source that
+		// contains the token and assert it IS or ISN'T in
+		// `originals`, per the documented DELIMITER_LABELS contract.
+		// Pulls labels from `acorn.tokTypes.*` so a future Acorn rename
+		// fails the test at parse time. Each row is a real `blankenate`
+		// call — not a hardcoded-set comparison.
+		const PUNCTUATOR_MATRIX: ReadonlyArray<
+			readonly [label: string, source: string, expected: 'in' | 'out']
+		> = [
+			[acorn.tokTypes.parenL.label, '(x);', 'in'],
+			[acorn.tokTypes.parenR.label, '(x);', 'in'],
+			[acorn.tokTypes.braceL.label, '{ a: 1 };', 'in'],
+			[acorn.tokTypes.braceR.label, '{ a: 1 };', 'in'],
+			[acorn.tokTypes.dollarBraceL.label, 'const s = `a${x}b`;', 'in'],
+			[acorn.tokTypes.bracketL.label, '[a];', 'in'],
+			[acorn.tokTypes.bracketR.label, '[a];', 'in'],
+			[acorn.tokTypes.semi.label, 'a;', 'in'],
+			[acorn.tokTypes.comma.label, 'a, b;', 'in'],
+			[acorn.tokTypes.dot.label, 'a.b;', 'in'],
+			[acorn.tokTypes.arrow.label, 'const f = (x) => x;', 'in'],
+			[acorn.tokTypes.question.label, 'a ? b : c;', 'in'],
+			[acorn.tokTypes.colon.label, 'a ? b : c;', 'in'],
+			[acorn.tokTypes.questionDot.label, 'obj?.prop;', 'in'],
+			[acorn.tokTypes.ellipsis.label, '[...rest];', 'in'],
+			// Documented exclusion: backtick.
+			[acorn.tokTypes.backQuote.label, 'const s = `hi`;', 'out'],
+		];
+
+		it.each(PUNCTUATOR_MATRIX)(
+			'Acorn label `%s` is %s of DELIMITER_LABELS (source: `%s`)',
+			(label, source, expected) => {
+				const result = blankenate(source, 1, {
+					...NO_TYPES,
+					delimiters: true,
+				});
+				const originals = (result?.blanks ?? []).map((b) => b.original);
+				if (expected === 'in') {
+					expect(originals).toContain(label);
+				} else {
+					expect(originals).not.toContain(label);
+				}
+			},
+		);
+
+		// AR-3 IMPORTANT 2 fix: sibling regression with delimiters-only
+		// to triangulate that `=>` is caught by the DELIMITER path, not
+		// by the operator AST-walk. Inc 6.6 AR-3 era assertions ran
+		// `ALL_TYPES`; this isolates the delimiter contribution.
+		it('arrow `=>` IS blanked under delimiters-only (delimiter-path triangulation)', () => {
+			const code = 'const f = (x) => x;';
+			const result = blankenate(code, 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('=>');
+		});
+
+		// AR-3 MINOR 5 fix: lock the FULL user source (both lines),
+		// not just the first. Member-access + nested call + string
+		// literal all in the second line.
+		it('user regression (full source, both lines): all delimiters present in blanks', () => {
+			const code =
+				"const greeting = (name) => `hello, ${name}`;\nconsole.log(greeting('world'));";
+			const result = blankenate(code, 1, ALL_TYPES);
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('=>');
+			expect(originals).toContain('${');
+			// Second-line delimiters: member-access dot, parens, semicolon.
+			expect(originals).toContain('.');
+			expect(originals).toContain('(');
+			expect(originals).toContain(')');
+			expect(originals).toContain(';');
+		});
+
+		// AR-3 IMPORTANT 3 fix: private-field identifier `#x` uses
+		// `tokTypes.privateId` with label `name` (Acorn emits it as a
+		// name-class token with `value` carrying the `#` prefix). It
+		// is NOT a delimiter and must NOT be blanked under delimiters-
+		// only — lock the negative case so a future change adding
+		// `'#'` to the set doesn't go silent.
+		it('private field `#x` is NOT blanked under delimiters-only', () => {
+			const code = 'class C { #x = 1; }';
+			const result = blankenate(code, 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).not.toContain('#');
+			expect(originals).not.toContain('#x');
+		});
+
+		// AR-3 MINOR 6 fix: labeled-statement `:` shares `tokTypes.colon`
+		// with ternary and object-literal. Confirms blanking applies
+		// uniformly to all `:` contexts.
+		it('labeled-statement `:` IS blanked (shares TokenType with ternary)', () => {
+			const code = 'outer: while (true) { break outer; }';
+			const result = blankenate(code, 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain(':');
+		});
+
+		// AR-3 MINOR 4 fix: compound-label tokens emit as ONE blank, not
+		// split. The prior test was vacuous (matched any blank since the
+		// position-validity invariant holds for split blanks too).
+		// These tests assert the EXPECTED blank LENGTH per label.
+		it('compound label `=>` produces one 2-char blank (not split into `=` + `>`)', () => {
+			const result = blankenate('const f = (x) => x;', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const arrows = (result?.blanks ?? []).filter((b) => b.original === '=>');
+			expect(arrows.length).toBe(1);
+			expect(arrows[0]!.end - arrows[0]!.start).toBe(2);
+		});
+
+		it('compound label `?.` produces one 2-char blank (not split into `?` + `.`)', () => {
+			const result = blankenate('obj?.prop;', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const optChain = (result?.blanks ?? []).filter(
+				(b) => b.original === '?.',
+			);
+			expect(optChain.length).toBe(1);
+			expect(optChain[0]!.end - optChain[0]!.start).toBe(2);
+		});
+
+		it('compound label `...` produces one 3-char blank (not split into 3 dots)', () => {
+			const result = blankenate('[...rest];', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const spreads = (result?.blanks ?? []).filter(
+				(b) => b.original === '...',
+			);
+			expect(spreads.length).toBe(1);
+			expect(spreads[0]!.end - spreads[0]!.start).toBe(3);
+		});
+	});
+
+	describe('Inc 6.k — comprehensive token coverage (keywords, identifiers, operators)', () => {
+		it('blanks every reserved keyword Acorn flags as .keyword under keywords=true', () => {
+			// Token-stream walk uses Acorn's `tok.type.keyword` flag.
+			// Verifies the broad sweep beyond the AST-walk subset
+			// that Inc 6.6 covered (which missed import/from/extends/
+			// super/yield/async/await/try/catch/finally/throw/break/
+			// continue/typeof/instanceof/delete/void/this/export/etc.).
+			//
+			// AR-3 expansion: include `null`/`true`/`false` (dedup-trigger
+			// group — also Literal nodes), `this` and `new` (commonly
+			// taught), and `function`/`if`/`return` (the regression
+			// surface from the AST-walk → token-stream replacement).
+			const sources: ReadonlyArray<{ code: string; keyword: string }> = [
+				{ code: "import x from 'm';", keyword: 'import' },
+				{ code: 'class A extends B {}', keyword: 'extends' },
+				{ code: 'class A { m() { return super.x; } }', keyword: 'super' },
+				{ code: 'function* g() { yield 1; }', keyword: 'yield' },
+				{ code: 'try { 1; } catch (e) { 2; }', keyword: 'catch' },
+				{ code: 'try { 1; } finally { 2; }', keyword: 'finally' },
+				{ code: 'function f() { throw 1; }', keyword: 'throw' },
+				{ code: 'for (;;) { break; }', keyword: 'break' },
+				{ code: 'for (;;) { continue; }', keyword: 'continue' },
+				{ code: 'typeof x;', keyword: 'typeof' },
+				{ code: 'x instanceof Y;', keyword: 'instanceof' },
+				{ code: 'delete x.y;', keyword: 'delete' },
+				{ code: 'void 0;', keyword: 'void' },
+				{ code: 'export default 1;', keyword: 'export' },
+				// AR-3 IMPORTANT: dedup-trigger group + AST-walk regression surface
+				{ code: 'const x = null;', keyword: 'null' },
+				{ code: 'const x = true;', keyword: 'true' },
+				{ code: 'const x = false;', keyword: 'false' },
+				{ code: 'class A { m() { return this.x; } }', keyword: 'this' },
+				{ code: 'const x = new Foo();', keyword: 'new' },
+				{ code: 'function f() {}', keyword: 'function' },
+				{ code: 'if (x) {}', keyword: 'if' },
+				{ code: 'function f() { return 1; }', keyword: 'return' },
+			];
+			for (const { code, keyword } of sources) {
+				const result = blankenate(code, 1, { ...NO_TYPES, keywords: true });
+				const originals = (result?.blanks ?? []).map((b) => b.original);
+				expect(originals, `keyword "${keyword}" in: ${code}`).toContain(
+					keyword,
+				);
+			}
+		});
+
+		it('locks CONTEXTUAL_KEYWORDS positional boundary: `get`/`from`/`of` blank even in non-canonical positions (intentional false positive)', () => {
+			// AR-3 BLOCKER fix: lock the documented design decision that
+			// CONTEXTUAL_KEYWORDS matches by value only (no syntactic-
+			// position check). The implementation comment says:
+			// "Acceptable pedagogically: if the learner sees `let` or
+			// `static` they should practice the keyword regardless of
+			// position." This test locks the BOUNDARY so a future change
+			// to add position-checking would fail visibly.
+			const sources: ReadonlyArray<{
+				code: string;
+				keyword: string;
+				note: string;
+			}> = [
+				{
+					code: 'obj.get(x);',
+					keyword: 'get',
+					note: 'method call, not getter declaration',
+				},
+				{
+					code: 'someSet.add(1);',
+					keyword: 'set',
+					// `set` doesn't appear here — use a different non-canonical:
+					note: 'placeholder; verify via the next row',
+				},
+				{
+					code: 'const from = 1;',
+					keyword: 'from',
+					note: 'variable name, not import-from',
+				},
+				{
+					code: 'const of = 1;',
+					keyword: 'of',
+					note: 'variable name, not for-of',
+				},
+				{
+					code: 'const set = 1;',
+					keyword: 'set',
+					note: 'variable name, not setter declaration',
+				},
+			];
+			for (const { code, keyword, note } of sources) {
+				if (keyword === 'set' && code.startsWith('someSet')) continue; // skip placeholder row
+				const result = blankenate(code, 1, { ...NO_TYPES, keywords: true });
+				const originals = (result?.blanks ?? []).map((b) => b.original);
+				expect(
+					originals,
+					`"${keyword}" should blank in "${code}" (${note})`,
+				).toContain(keyword);
+			}
+		});
+
+		it('blanks contextual keywords (let, async, await, of, as, from, static, get, set) under keywords=true', () => {
+			// Acorn tokenizes contextual keywords as `name`, not as
+			// reserved keywords (.keyword flag is undefined). The
+			// CONTEXTUAL_KEYWORDS set picks them up explicitly.
+			const sources: ReadonlyArray<{ code: string; keyword: string }> = [
+				{ code: 'let x = 1;', keyword: 'let' },
+				{ code: 'async function f() {}', keyword: 'async' },
+				{ code: 'async function f() { await 1; }', keyword: 'await' },
+				{ code: 'for (const x of y) {}', keyword: 'of' },
+				{ code: "import { x as y } from 'm';", keyword: 'as' },
+				{ code: "import x from 'm';", keyword: 'from' },
+				{ code: 'class A { static m() {} }', keyword: 'static' },
+				{ code: 'class A { get x() {} }', keyword: 'get' },
+				{ code: 'class A { set x(v) {} }', keyword: 'set' },
+			];
+			for (const { code, keyword } of sources) {
+				const result = blankenate(code, 1, { ...NO_TYPES, keywords: true });
+				const originals = (result?.blanks ?? []).map((b) => b.original);
+				expect(originals, `keyword "${keyword}" in: ${code}`).toContain(
+					keyword,
+				);
+			}
+		});
+
+		it('blanks private field identifier `#count` under identifiers=true (added PrivateIdentifier walker)', () => {
+			// AR-3 IMPORTANT + AR-4 IMPORTANT: tighten to the source-slice
+			// form the implementation actually emits. The PrivateIdentifier
+			// blank's `original` is `code.substring(node.start, node.end)`
+			// where node.start points at the `#`. If Acorn ever changes
+			// `node.start` to point after the `#`, this test fails loudly
+			// rather than silently masking the regression.
+			const result = blankenate('class A { #count = 0; }', 1, {
+				...NO_TYPES,
+				identifiers: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('#count');
+		});
+
+		it('blanks AssignmentPattern default-parameter `=` under operators=true', () => {
+			// `function f(x = 0) {}` has an AssignmentPattern node where
+			// node.left is the param `x` and node.right is the default `0`,
+			// with the `=` literal in source between them. No .operator field
+			// — Inc 6.k adds the AssignmentPattern branch to the operator
+			// AST walker explicitly.
+			const result = blankenate('function f(x = 0) {}', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const equals = (result?.blanks ?? []).filter((b) => b.original === '=');
+			expect(equals.length).toBeGreaterThanOrEqual(1);
+		});
+
+		it('blanks destructuring default `{ a = 1 } = {}` AssignmentPattern `=` under operators=true', () => {
+			const result = blankenate('const { a = 1 } = {};', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const equals = (result?.blanks ?? []).filter((b) => b.original === '=');
+			// Two `=`: the AssignmentPattern inside, plus the VariableDeclarator's.
+			expect(equals.length).toBeGreaterThanOrEqual(2);
+		});
+
+		it('dedup collapses keyword/operator collision: `typeof` (keyword + unary) and `null`/`true` (keyword + Literal)', () => {
+			// AR-3 BLOCKER fix: the prior dedup test source produced no
+			// classifier collisions and so trivially passed without ever
+			// invoking the dedup path. This source DOES trigger overlaps:
+			//   - `typeof` — emitted by keyword token-stream walk
+			//     AND visited as UnaryExpression operator by the AST walk
+			//   - `null`, `true` — emitted by keyword token-stream walk
+			//     AND visited as Literal nodes by the AST walk
+			// With ALL_TYPES, every classifier fires; dedup is the only
+			// thing preventing duplicate (start,end) entries.
+			const result = blankenate('typeof null === true;', 1, ALL_TYPES);
+			const keys = (result?.blanks ?? []).map((b) => `${b.start}:${b.end}`);
+			expect(new Set(keys).size).toBe(keys.length);
+			// Also verify the collision targets actually appear (dedup
+			// preserves at least one entry per position).
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('typeof');
+			expect(originals).toContain('null');
+			expect(originals).toContain('true');
 		});
 	});
 });

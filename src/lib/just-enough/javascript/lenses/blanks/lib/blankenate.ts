@@ -45,50 +45,13 @@ type ContentTypeFlags = {
 };
 
 // SL1 Blanks Generation Logic
-// Uses Acorn parser to intelligently create blanks based on AST analysis
-
-// JavaScript keywords that can be blanked
-const jsKeywords = new Set<string>([
-	'function',
-	'if',
-	'else',
-	'for',
-	'while',
-	'do',
-	'return',
-	'const',
-	'let',
-	'var',
-	'class',
-	'extends',
-	'import',
-	'export',
-	'from',
-	'as',
-	'default',
-	'try',
-	'catch',
-	'finally',
-	'throw',
-	'new',
-	'this',
-	'super',
-	'switch',
-	'case',
-	'break',
-	'continue',
-	'typeof',
-	'instanceof',
-	'in',
-	'of',
-	'async',
-	'await',
-	'yield',
-	'static',
-]);
-
-// Check if an identifier is a JavaScript keyword
-const isKeyword = (name: string): boolean => jsKeywords.has(name);
+// Uses Acorn parser to intelligently create blanks based on AST analysis.
+//
+// Inc 6.k: removed the vendored `jsKeywords` set and `isKeyword` helper —
+// they were never read by the blanking path. Keywords are detected via
+// AST node-type matching (FunctionDeclaration, IfStatement, etc.) in the
+// AST walk below; the legacy set was dead code from the original
+// vendored module.
 
 type BlankedToken = {
 	start: number;
@@ -97,16 +60,11 @@ type BlankedToken = {
 	type: Blank['type'];
 };
 
-// Find the position of an operator in the source code
-const findOperatorPosition = (code: string, node: any): number => {
-	// Simple heuristic: look for the operator between the start and end of the node
-	const nodeText = code.substring(node.start, node.end);
-	const operatorIndex = nodeText.indexOf(node.operator);
-	if (operatorIndex !== -1) {
-		return node.start + operatorIndex;
-	}
-	return -1;
-};
+// Inc 6.k: removed the vendored `findOperatorPosition` helper —
+// dead code in the v1 control flow (the operator-AST-walk in
+// `walkNode` inlines its own per-node-type position finder for
+// BinaryExpression, AssignmentExpression, VariableDeclarator,
+// AssignmentPattern, UnaryExpression, UpdateExpression).
 
 // Inc 6.6: delimiter token labels Acorn emits. These are TokenType.label
 // values (acorn.tokTypes.parenL.label === '(' etc.).
@@ -124,10 +82,37 @@ const findOperatorPosition = (code: string, node: any): number => {
 //   direction item (would require a brace-context stack walking the
 //   token stream).
 //
-// Excluded by design: ternary `?` / `:`, optional chaining `?.`,
-// arrow `=>`, spread `...`, and regex `/` are all distinct
-// TokenTypes with distinct labels, none of which are in this set.
-// See blankenate.test.ts "Inc 6.6 (5th content-type)" describe block.
+// Inc 6.k: comprehensive Acorn-punctuator coverage. The previously
+// excluded `=>`, `?`, `:`, `?.`, `...` are now in the set — user-
+// directed reversal of the Inc 6.6 AR-3 exclusion (those were
+// "semantic markers" but the learner should practice them just like
+// `(` and `,`).
+//
+// Still excluded by design (each with a single-line rationale):
+//   `` ` `` (backtick) — template-literal delimiter; analogous to
+//     `'`/`"` quotes which are part of the string-literal token, not
+//     separately blanked. Blanking it obscures "this is a template".
+//   `template` / `invalidTemplate` (string content between
+//     interpolations) — these are content like string literals;
+//     would join `literals` not `delimiters` if blanked.
+//   `/` — regex literal delimiters are part of the `regexp` token
+//     (Acorn emits `tokTypes.regexp` as one), not separate.
+//   `eof` — not a syntactic character.
+//
+// Ternary `?` / `:` are classified as DELIMITERS here, not under
+// `operators`. The operators category remains AST-walk-driven for
+// BinaryExpression / UnaryExpression / UpdateExpression /
+// AssignmentExpression operator strings. `?` / `:` are token-stream
+// punctuation; DOCS.md § Categories documents this split.
+//
+// Acorn's `tokTypes.colon` is the SAME TokenType for every `:`
+// context: ternary `a ? b : c`, object literal `{k: v}`, switch-case
+// `case 1:`, labeled statement `lbl: while ...`. Adding `:` to
+// DELIMITER_LABELS blanks all of them uniformly (the learner types
+// `:` either way; the position-specific meaning is the learner's to
+// recover from context). Same for `tokTypes.question`: ternary `?`
+// is the only JS context (optional chaining is its own token
+// `tokTypes.questionDot` with label `?.`).
 const DELIMITER_LABELS = new Set<string>([
 	'(',
 	')',
@@ -139,6 +124,28 @@ const DELIMITER_LABELS = new Set<string>([
 	';',
 	',',
 	'.',
+	'=>',
+	'?',
+	':',
+	'?.',
+	'...',
+]);
+
+// Inc 6.k: contextual keywords — tokens Acorn emits as `name` (label
+// === 'name', .keyword undefined) but ES treats as keywords in some
+// positions. Module-level to avoid per-call Set allocation; AR-4
+// IMPORTANT fix.
+const CONTEXTUAL_KEYWORDS = new Set<string>([
+	'let',
+	'static',
+	'async',
+	'await',
+	'yield',
+	'of',
+	'as',
+	'from',
+	'get',
+	'set',
 ]);
 
 function blankenate(
@@ -204,20 +211,81 @@ function blankenate(
 		}
 	}
 
+	// Inc 6.k: walk the token stream for keywords. Two paths:
+	//
+	// 1. Reserved keywords (Acorn flags TokenType with `.keyword`):
+	//    function, if, else, for, while, do, return, var, const, class,
+	//    extends, import, export, default, try, catch, finally, throw,
+	//    new, this, super, switch, case, break, continue, typeof,
+	//    instanceof, in, void, delete, null, true, false, with,
+	//    debugger.
+	//
+	// 2. Contextual keywords (Acorn tokenizes as `name` tokens — same
+	//    TokenType as plain identifiers; their keyword-ness is context-
+	//    dependent in the spec): `let`, `static`, `async`, `await`,
+	//    `yield`, `of`, `as`, `from`, `get`, `set`. We match by `value`
+	//    against a fixed set. Pedagogically these ARE keywords the
+	//    learner should practice, even if the parser treats them as
+	//    identifiers in some contexts.
+	//
+	// Overlap notes:
+	// - `typeof`, `delete`, `void` are ALSO unary operators (AST walk).
+	//   The token-stream pass runs first; dedup collapses to keyword.
+	// - `null`, `true`, `false` are simultaneously keyword tokens AND
+	//   Literal AST nodes. Same dedup rule applies.
+	// - Contextual keywords may sometimes appear as regular variable
+	//   names (e.g. `let x = 1` vs `var let = 1` — both legal). The
+	//   contextual-set match here blanks them either way. Acceptable
+	//   pedagogically: if the learner sees `let` or `static` they
+	//   should practice the keyword regardless of position. Negative
+	//   lock test: see `blankenate.test.ts` § "Inc 6.k — comprehensive
+	//   token coverage".
+	if (config.keywords) {
+		for (const tok of tokens) {
+			const kw =
+				tok.type && typeof tok.type.keyword === 'string'
+					? tok.type.keyword
+					: '';
+			const isReservedKeyword = kw !== '';
+			const isContextualKeyword =
+				!isReservedKeyword &&
+				tok.type &&
+				tok.type.label === 'name' &&
+				typeof tok.value === 'string' &&
+				CONTEXTUAL_KEYWORDS.has(tok.value);
+			if (
+				(isReservedKeyword || isContextualKeyword) &&
+				Math.random() < probability
+			) {
+				// Inc 6.k AR-4: source slice is authoritative; uniformly
+				// derive `original` from the source for every classifier.
+				// Decouples from Acorn's internal `.keyword` string.
+				const original = code.substring(tok.start, tok.end);
+				blankedTokens.push({
+					start: tok.start,
+					end: tok.end,
+					original,
+					type: 'keyword',
+				});
+			}
+		}
+	}
+
 	// Simple AST walker for blanking
 	const walkNode = (node: any): void => {
 		if (!node || typeof node !== 'object') return;
 
-		// Blank identifiers
+		// Blank identifiers (incl. PrivateIdentifier — `#x` in class
+		// bodies; same pedagogical category as regular identifiers).
 		if (
 			config.identifiers &&
-			node.type === 'Identifier' &&
+			(node.type === 'Identifier' || node.type === 'PrivateIdentifier') &&
 			Math.random() < probability
 		) {
 			blankedTokens.push({
 				start: node.start,
 				end: node.end,
-				original: node.name,
+				original: code.substring(node.start, node.end),
 				type: 'identifier',
 			});
 		}
@@ -245,73 +313,24 @@ function blankenate(
 			});
 		}
 
-		// Blank keywords - check various node types for keywords
-		if (config.keywords && Math.random() < probability) {
-			let keywordFound = false;
-			let keywordName = '';
+		// Inc 6.k: keywords are now detected via the token-stream walk
+		// below (after the AST walk), using Acorn's `tok.type.keyword`
+		// flag. The previous AST-walk-based detection covered only a
+		// hardcoded subset of keyword-bearing node types (`function`,
+		// `if`, `for`, `while`, `return`, `const`/`let`/`var`, `class`,
+		// `try`, `catch`, `throw`, `new`) — missing `else`, `extends`,
+		// `import`, `export`, `default`, `static`, `super`, `this`,
+		// `async`, `await`, `yield`, `finally`, `switch`, `case`,
+		// `break`, `continue`, `of`, `in`, `get`, `set`, etc. Switching
+		// to the token-stream `keyword` flag catches them all uniformly.
 
-			// Check different node types that can contain keywords
-			if (
-				node.type === 'FunctionDeclaration' ||
-				node.type === 'FunctionExpression'
-			) {
-				keywordFound = true;
-				keywordName = 'function';
-			} else if (node.type === 'IfStatement') {
-				keywordFound = true;
-				keywordName = 'if';
-			} else if (
-				node.type === 'ForStatement' ||
-				node.type === 'ForInStatement' ||
-				node.type === 'ForOfStatement'
-			) {
-				keywordFound = true;
-				keywordName = 'for';
-			} else if (node.type === 'WhileStatement') {
-				keywordFound = true;
-				keywordName = 'while';
-			} else if (node.type === 'ReturnStatement') {
-				keywordFound = true;
-				keywordName = 'return';
-			} else if (node.type === 'VariableDeclaration') {
-				keywordFound = true;
-				keywordName = node.kind; // const, let, var
-			} else if (node.type === 'ClassDeclaration') {
-				keywordFound = true;
-				keywordName = 'class';
-			} else if (node.type === 'TryStatement') {
-				keywordFound = true;
-				keywordName = 'try';
-			} else if (node.type === 'CatchClause') {
-				keywordFound = true;
-				keywordName = 'catch';
-			} else if (node.type === 'ThrowStatement') {
-				keywordFound = true;
-				keywordName = 'throw';
-			} else if (node.type === 'NewExpression') {
-				keywordFound = true;
-				keywordName = 'new';
-			}
-
-			if (keywordFound) {
-				// Find the actual position of the keyword in the source
-				const nodeText = code.substring(node.start, node.end);
-				const keywordIndex = nodeText.indexOf(keywordName);
-				if (keywordIndex !== -1) {
-					blankedTokens.push({
-						start: node.start + keywordIndex,
-						end: node.start + keywordIndex + keywordName.length,
-						original: keywordName,
-						type: 'keyword',
-					});
-				}
-			}
-		}
-
-		// Blank operators (binary, assignment, unary, and update operators)
+		// Blank operators (binary, assignment, unary, update, and
+		// AssignmentPattern for default-parameter `=` — added Inc 6.k).
 		if (
 			config.operators &&
-			(node.operator || node.type === 'VariableDeclarator') &&
+			(node.operator ||
+				node.type === 'VariableDeclarator' ||
+				node.type === 'AssignmentPattern') &&
 			Math.random() < probability
 		) {
 			let operatorStart = -1;
@@ -343,6 +362,19 @@ function blankenate(
 				if (operatorIndex !== -1) {
 					operatorStart = idEnd + operatorIndex;
 					// For VariableDeclarator, we need to set the operator manually since it's not in node.operator
+					node.operator = '=';
+				}
+			} else if (node.type === 'AssignmentPattern' && node.right) {
+				// Inc 6.k: default-parameter `=` lives between
+				// node.left (the param) and node.right (the default).
+				// `function f(x = 0)` and `({ a = 1 } = {})` both
+				// use AssignmentPattern nodes with no `.operator` field.
+				const leftEnd = node.left.end;
+				const rightStart = node.right.start;
+				const betweenText = code.substring(leftEnd, rightStart);
+				const operatorIndex = betweenText.indexOf('=');
+				if (operatorIndex !== -1) {
+					operatorStart = leftEnd + operatorIndex;
 					node.operator = '=';
 				}
 			} else if (node.type === 'UnaryExpression') {
@@ -381,7 +413,9 @@ function blankenate(
 
 			if (
 				operatorStart !== -1 &&
-				(node.operator || node.type === 'VariableDeclarator')
+				(node.operator ||
+					node.type === 'VariableDeclarator' ||
+					node.type === 'AssignmentPattern')
 			) {
 				blankedTokens.push({
 					start: operatorStart,
@@ -410,6 +444,27 @@ function blankenate(
 	};
 
 	walkNode(tree);
+
+	// Inc 6.k: dedupe blanks at the same `[start, end)` position. Some
+	// tokens are classifiable under MULTIPLE categories (e.g. `typeof`
+	// is both a keyword and a unary operator; `null` is both a keyword
+	// and a Literal). The two stream walks (delimiters, keywords) run
+	// BEFORE the AST walk, so first-pushed wins — the more-specific
+	// classification (keyword for `typeof`/`delete`/`void`/`null`/
+	// `true`/`false`) takes precedence over the broader operator /
+	// literal one.
+	{
+		const seen = new Set<string>();
+		const deduped: BlankedToken[] = [];
+		for (const t of blankedTokens) {
+			const key = `${t.start}:${t.end}`;
+			if (seen.has(key)) continue;
+			seen.add(key);
+			deduped.push(t);
+		}
+		blankedTokens.length = 0;
+		blankedTokens.push(...deduped);
+	}
 
 	// Sort blanks by position (reverse order for replacement)
 	blankedTokens.sort((a, b) => b.start - a.start);
