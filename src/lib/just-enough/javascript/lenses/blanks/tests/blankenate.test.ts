@@ -962,4 +962,128 @@ describe('blankenate', () => {
 		// `.generator === true`. Deferred to a future increment.
 		it.todo('generator `*` in `function* g() {}` blanks under delimiters=true');
 	});
+
+	describe('Inc 6.n — TemplateLiteral content blanks under literals', () => {
+		// User-reported gap: in `\`Failed: \${error.message}\``, the
+		// `Failed: ` content showed up literal in the sandbox output
+		// even with `literals: true` at difficulty 1.0. Inc 6.k had
+		// deferred this with the comment "would join literals not
+		// delimiters if blanked" — Inc 6.n makes good on that.
+
+		it('blanks the template-element string content `Failed: ` under literals=true', () => {
+			const result = blankenate('const m = `Failed: ${err.message}`;', 1, {
+				...NO_TYPES,
+				literals: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('Failed: ');
+		});
+
+		it('blanks every non-empty TemplateElement chunk in a multi-interpolation literal', () => {
+			// `start ${x} mid ${y} end` has THREE non-empty chunks:
+			// 'start ', ' mid ', ' end'. All three should blank.
+			const result = blankenate('const s = `start ${x} mid ${y} end`;', 1, {
+				...NO_TYPES,
+				literals: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('start ');
+			expect(originals).toContain(' mid ');
+			expect(originals).toContain(' end');
+		});
+
+		it('blanks an interpolation-free template literal (`noInterp`)', () => {
+			const result = blankenate('const s = `noInterp`;', 1, {
+				...NO_TYPES,
+				literals: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('noInterp');
+		});
+
+		it('does NOT blank empty TemplateElement chunks (e.g. between `${a}${b}`)', () => {
+			// In `${a}${b}` the chunk between `}` and `${` is empty
+			// (raw === ''). Blanking it would produce a zero-length
+			// blank — meaningless. Skip these.
+			const result = blankenate('const s = `${a}${b}`;', 1, {
+				...NO_TYPES,
+				literals: true,
+			});
+			const blanks = result?.blanks ?? [];
+			// No zero-length blank should appear.
+			for (const b of blanks) {
+				expect(b.end - b.start).toBeGreaterThan(0);
+			}
+		});
+
+		it('classifies TemplateElement blanks as `literal` type and `original` is the source slice (AR-3 IMPORTANT)', () => {
+			// AR-3 IMPORTANT: piggyback the type-lock with a
+			// position-integrity assertion. Locks that the impl uses
+			// `code.substring(node.start, node.end)` for `original` —
+			// not `node.value.raw` or `node.value.cooked`. The two
+			// agree for plain text but diverge on escape sequences;
+			// the source slice is canonical because the learner
+			// reproduces the source verbatim when typing.
+			const code = 'const m = `hello ${x}!`;';
+			const result = blankenate(code, 1, {
+				...NO_TYPES,
+				literals: true,
+			});
+			const helloBlank = (result?.blanks ?? []).find(
+				(b) => b.original === 'hello ',
+			);
+			expect(helloBlank).toBeDefined();
+			expect(helloBlank!.type).toBe('literal');
+			expect(helloBlank!.original).toBe(
+				code.slice(helloBlank!.start, helloBlank!.end),
+			);
+		});
+
+		it('TemplateElement chunks remain literal when literals=false (negative lock)', () => {
+			// AR-3 BLOCKER fix: use a source where the chunk text
+			// (`hello `, ` world`) cannot be confused for a unary
+			// operator — earlier draft used `!` inside the template
+			// which a reader might misread as testing the
+			// UnaryExpression path under operators=true.
+			const result = blankenate('const m = `hello ${x} world`;', 1, {
+				...NO_TYPES,
+				literals: false,
+				// All other categories on — chunks should NOT blank
+				// when literals=false even with everything else enabled.
+				identifiers: true,
+				operators: true,
+				delimiters: true,
+				keywords: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).not.toContain('hello ');
+			expect(originals).not.toContain(' world');
+		});
+
+		it('end-to-end regression: `\\`Failed: \\${error.message}\\`` blanks `Failed: `', () => {
+			// The exact user-pasted gap (simplified).
+			const result = blankenate(
+				'throw new Error(`Failed: ${error.message}`);',
+				1,
+				{ ...NO_TYPES, literals: true },
+			);
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('Failed: ');
+		});
+
+		// AR-3 NIT: nested templates ARE reached by the recursive AST
+		// walker (TemplateLiteral expressions contain another
+		// TemplateLiteral; the walker recurses through it). Locking
+		// this with a real test is low-value v1; mark as deferred.
+		it.todo(
+			'nested template `\\`outer ${`inner ${x}`}\\`` blanks both inner and outer TemplateElement chunks',
+		);
+
+		// AR-3 NIT: tagged template literals also reach the walker via
+		// TaggedTemplateExpression.quasi. Deferred test for the same
+		// reason as nested templates.
+		it.todo(
+			'tagged template `tag\\`hello ${x}!\\`` blanks TemplateElement chunks under literals=true',
+		);
+	});
 });

@@ -313,6 +313,32 @@ function blankenate(
 			});
 		}
 
+		// Inc 6.n: TemplateElement string content (the text chunks
+		// between ` and ${, between } and ${, or between } and `) blanks
+		// under the literals category. Pedagogically these ARE literal
+		// content (just like `'hello'` is) — Inc 6.k deferred them with
+		// the comment "would join `literals` not `delimiters` if blanked",
+		// and Inc 6.n makes good on that.
+		//
+		// `node.end > node.start` skips empty chunks (e.g. the empty
+		// span between two adjacent interpolations `${a}${b}`) — a
+		// zero-length blank would be meaningless. Backticks themselves
+		// remain literal (NOT in DELIMITER_LABELS) so the template-
+		// literal shape stays visually identifiable.
+		if (
+			config.literals &&
+			node.type === 'TemplateElement' &&
+			node.end > node.start &&
+			Math.random() < probability
+		) {
+			blankedTokens.push({
+				start: node.start,
+				end: node.end,
+				original: code.substring(node.start, node.end),
+				type: 'literal',
+			});
+		}
+
 		// Inc 6.k: keywords are now detected via the token-stream walk
 		// below (after the AST walk), using Acorn's `tok.type.keyword`
 		// flag. The previous AST-walk-based detection covered only a

@@ -53,8 +53,12 @@
  * classification (per `./lib/blankenate.ts`):
  * - `identifier` — `Node.type === 'Identifier' | 'PrivateIdentifier'`
  *   (variable names, parameter names, private class fields like `#x`).
- * - `literal` — `Node.type === 'Literal' | 'RegExpLiteral'` (strings,
- *   numbers, booleans, regex).
+ * - `literal` — `Node.type === 'Literal' | 'RegExpLiteral' | 'TemplateElement'`
+ *   (strings, numbers, booleans, regex; plus Inc 6.n: template-literal text
+ *   chunks — the source between `` ` `` and `${`, or between `}` and `` ` ``).
+ *   Backticks themselves and the `${`/`}` interpolation boundaries are NOT
+ *   blanked under literals (the backticks are a literal-delimiter analog of
+ *   string quotes; `${` is a delimiter token under `delimiters`).
  * - `keyword` — Inc 6.k: token-stream walk over Acorn's tokens, matching
  *   `tok.type.keyword` (reserved keywords like `function`/`if`/`return`/
  *   `class`/`import`/`extends`/`super`/`try`/`catch`/`null`/`true`/etc.)
