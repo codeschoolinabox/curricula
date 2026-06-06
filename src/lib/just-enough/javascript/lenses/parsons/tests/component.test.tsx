@@ -937,3 +937,160 @@ describe('parsons wrapper — Inc 7f (Check / Reset / per-line feedback + score)
 		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('100');
 	});
 });
+
+describe('parsons wrapper — Inc 7g (view-mode toggle / complete view)', () => {
+	const INDENTED_SRC = 'if (x) {\n\ty();\n}'; // levels [0,1,0]
+
+	function toggleBtn(container: HTMLElement): HTMLButtonElement | null {
+		return container.querySelector<HTMLButtonElement>(
+			'[data-parsons-view-toggle]',
+		);
+	}
+	function toggleView(container: HTMLElement): void {
+		fireEvent.click(toggleBtn(container)!);
+	}
+	function completeView(container: HTMLElement): Element | null {
+		return container.querySelector('[data-parsons-complete]');
+	}
+	function board(container: HTMLElement): Element | null {
+		return container.querySelector('[data-parsons-board]');
+	}
+	function rootViewMode(container: HTMLElement): string | null {
+		return container
+			.querySelector('[data-lens="parsons"]')
+			?.getAttribute('data-view-mode') ?? null;
+	}
+	function renderIndented(
+		config?: Parameters<typeof parsonsLens.config>[0],
+	): ReturnType<typeof render> {
+		return render(
+			<parsonsLens.Component
+				embodiment={embody(INDENTED_SRC)}
+				config={parsonsLens.config(config)}
+			/>,
+		);
+	}
+
+	it('renders a single view-toggle control, labelled for the action', () => {
+		const { container } = renderThreeLine();
+		expect(toggleBtn(container)).not.toBeNull();
+		expect(toggleBtn(container)?.textContent).toContain('Show solution');
+	});
+
+	it('the single toggle: label + aria-pressed track the view (pressed = solution shown)', () => {
+		const { container } = renderThreeLine();
+		expect(toggleBtn(container)?.getAttribute('aria-pressed')).toBe('false');
+		toggleView(container);
+		expect(toggleBtn(container)?.getAttribute('aria-pressed')).toBe('true');
+		expect(toggleBtn(container)?.textContent).toContain('Back to exercise');
+		toggleView(container);
+		expect(toggleBtn(container)?.getAttribute('aria-pressed')).toBe('false');
+		expect(toggleBtn(container)?.textContent).toContain('Show solution');
+	});
+
+	it('defaults to the work view (board shown, no complete pane)', () => {
+		const { container } = renderThreeLine();
+		expect(rootViewMode(container)).toBe('work');
+		expect(board(container)).not.toBeNull();
+		expect(completeView(container)).toBeNull();
+	});
+
+	it('toggling to complete shows the read-only solution pane and hides the board', () => {
+		const { container } = renderThreeLine();
+		toggleView(container);
+		expect(rootViewMode(container)).toBe('complete');
+		expect(completeView(container)).not.toBeNull();
+		expect(board(container)).toBeNull();
+	});
+
+	it('the complete view renders the model solution in order at level*indentSize (default 4), in a <pre>', () => {
+		const { container } = renderIndented();
+		toggleView(container);
+		expect(completeView(container)?.textContent).toBe('if (x) {\n    y();\n}');
+		// <pre> so the browser preserves the whitespace without extra CSS.
+		expect(completeView(container)?.tagName).toBe('PRE');
+	});
+
+	it('the complete view honors a custom indentSize (reads indentSize, not hardcoded)', () => {
+		const { container } = renderIndented({ indentSize: 2 });
+		toggleView(container);
+		expect(completeView(container)?.textContent).toBe('if (x) {\n  y();\n}');
+	});
+
+	it('the complete view multiplies level*indentSize (a level-2 line gets 2x spaces, not just indentSize)', () => {
+		// levels [0,1,2,1,0]; at indentSize 4 the level-2 line needs 8 spaces — an
+		// `indent > 0 ? indentSize : 0` impl would give it only 4 and FAIL here.
+		const { container } = render(
+			<parsonsLens.Component
+				embodiment={embody('if (x) {\n\tif (y) {\n\t\tz();\n\t}\n}')}
+				config={parsonsLens.config({ indentSize: 4 })}
+			/>,
+		);
+		toggleView(container);
+		expect(completeView(container)?.textContent).toBe(
+			'if (x) {\n    if (y) {\n        z();\n    }\n}',
+		);
+	});
+
+	it('the complete view shows only solution lines — distractors are excluded', () => {
+		const { container } = render(
+			<parsonsLens.Component
+				embodiment={embody('const good = 1;\nconst bad = 2; // distractor')}
+				config={parsonsLens.config()}
+			/>,
+		);
+		toggleView(container);
+		expect(completeView(container)?.textContent).toContain('const good = 1;');
+		expect(completeView(container)?.textContent).not.toContain('const bad');
+	});
+
+	it('the complete view renders an empty pane for an empty snippet (no crash)', () => {
+		const { container } = render(
+			<parsonsLens.Component
+				embodiment={embody('')}
+				config={parsonsLens.config()}
+			/>,
+		);
+		toggleView(container);
+		expect(completeView(container)).not.toBeNull();
+		expect(completeView(container)?.textContent).toBe('');
+	});
+
+	it('toggling back to work restores the board', () => {
+		const { container } = renderThreeLine();
+		toggleView(container);
+		toggleView(container);
+		expect(rootViewMode(container)).toBe('work');
+		expect(board(container)).not.toBeNull();
+		expect(completeView(container)).toBeNull();
+	});
+
+	it('toggling PRESERVES the learner arrangement (it is a self-check, not a reset)', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		placeOnZone(container, 'line-1');
+		toggleView(container);
+		toggleView(container);
+		expect(solutionOrder(container)).toEqual(['line-0', 'line-1']);
+		expect(poolLines(container).length).toBe(1); // line-2 still in pool
+	});
+
+	it('toggling does NOT clear Check feedback (a toggle is not an arrangement edit)', () => {
+		const { container } = renderThreeLine();
+		placeOnZone(container, 'line-0');
+		fireEvent.click(container.querySelector('[data-parsons-check]')!);
+		expect(container.querySelector('[data-parsons-score]')).not.toBeNull();
+		toggleView(container);
+		toggleView(container);
+		expect(container.querySelector('[data-parsons-score]')).not.toBeNull();
+		expect(
+			solutionItem(container, 'line-0')?.getAttribute('data-correctness'),
+		).not.toBeNull();
+	});
+
+	it('seeds the complete view from config.viewMode', () => {
+		const { container } = renderIndented({ viewMode: 'complete' });
+		expect(rootViewMode(container)).toBe('complete');
+		expect(completeView(container)).not.toBeNull();
+	});
+});
