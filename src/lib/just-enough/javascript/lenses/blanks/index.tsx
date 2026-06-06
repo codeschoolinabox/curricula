@@ -33,7 +33,7 @@ import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { basicSetup } from 'codemirror';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { freezeInPlace } from '@utils/freeze.js';
@@ -44,8 +44,10 @@ import blanksCore from './core.js';
 import blankenate from './lib/blankenate.js';
 import evaluateCorrectness from './lib/evaluate-correctness.js';
 import noPasteExtension from './lib/no-paste-extension.js';
+import urlConfig from './lib/url-config.js';
 import type {
 	BlankenateResult,
+	BlanksLensConfig,
 	ContentType,
 	EditorMode,
 	HintsMode,
@@ -228,6 +230,56 @@ function deriveContentTypeFlags(
  * extras / not marked (graceful degradation; the learner sees the
  * pattern shift as a signal that they've drifted).
  */
+/**
+ * Inc 6i: returns a stable applier that takes a partial URL config
+ * and dispatches the appropriate setters. Defined as a module-level
+ * hook so its closure captures only the setter references (which are
+ * stable across renders per React's useState contract), eliminating
+ * the stale-closure risk the AR-4 flagged for the in-component
+ * helper. Returned value is memoized — safe to list in effect deps.
+ */
+type ConfigSetters = {
+	setDifficulty: (n: number) => void;
+	setContentTypes: (cs: ReadonlyArray<ContentType>) => void;
+	setViewMode: (m: ViewMode) => void;
+	setEditorMode: (m: EditorMode) => void;
+	setHintsMode: (m: HintsMode) => void;
+};
+function useUrlConfigApplier(
+	setDifficulty: ConfigSetters['setDifficulty'],
+	setContentTypes: ConfigSetters['setContentTypes'],
+	setViewMode: ConfigSetters['setViewMode'],
+	setEditorMode: ConfigSetters['setEditorMode'],
+	setHintsMode: ConfigSetters['setHintsMode'],
+) {
+	return useCallback(
+		function applyUrlConfig(fromUrl: Partial<BlanksLensConfig>) {
+			if (fromUrl.difficulty !== undefined) {
+				setDifficulty(fromUrl.difficulty);
+			}
+			if (fromUrl.contentTypes !== undefined) {
+				setContentTypes(fromUrl.contentTypes);
+			}
+			if (fromUrl.viewMode !== undefined) {
+				setViewMode(fromUrl.viewMode);
+			}
+			if (fromUrl.editorMode !== undefined) {
+				setEditorMode(fromUrl.editorMode);
+			}
+			if (fromUrl.hintsMode !== undefined) {
+				setHintsMode(fromUrl.hintsMode);
+			}
+		},
+		[
+			setDifficulty,
+			setContentTypes,
+			setViewMode,
+			setEditorMode,
+			setHintsMode,
+		],
+	);
+}
+
 function buildDiffDecorations(originalCode: string) {
 	const mismatchMark = Decoration.mark({ class: 'cm-diff-mismatch' });
 	function decorate(doc: Text): DecorationSet {
@@ -666,8 +718,14 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 	// difficulty (user-directed redesign — hints are NOT inferred
 	// from difficulty; learners choose how many blanks to reveal as
 	// their own scaffolding gradient). Default 'on'.
-	const hintsMode: HintsMode =
+	//
+	// Inc 6i: hintsMode is now LOCAL state (was derived from
+	// `resolved`). State enables URL sync — the URL read effect
+	// can call `setHintsMode` to apply persisted values, and the
+	// URL write effect serializes the live state to the hash.
+	const initialHintsMode: HintsMode =
 		resolved.hintsMode === 'off' ? 'off' : 'on';
+	const [hintsMode, setHintsMode] = useState<HintsMode>(initialHintsMode);
 
 	// Inc 6h-redux: cursor position state. Updated by the CodeMirror
 	// updateListener on selectionSet. Render-only state — does NOT
@@ -706,6 +764,81 @@ const BlanksComponent: ComponentType<LensProperties> = function BlanksComponent(
 	// NOT re-fire this effect — that would feedback-loop and destroy
 	// the EditorView mid-typing.
 	//
+	// Inc 6i: URL config plumbing. Three effects:
+	//
+	// 1. **Read on mount.** Parse `window.location.hash` and apply
+	//    any persisted config values as overrides on top of the
+	//    prop-derived initial state. Runs once; if URL is empty,
+	//    leaves state alone.
+	//
+	// 2. **Debounced write on state change.** Serialize the live
+	//    config to the hash 500ms after the last change. Matches the
+	//    legacy URLManager debounce; prevents `history.replaceState`
+	//    spam during slider drags. Skips the first invocation so an
+	//    empty URL on mount doesn't immediately get overwritten with
+	//    prop defaults.
+	//
+	// 3. **Hashchange listener.** Re-read URL on browser
+	//    back/forward; apply any changed values. Enables URL replay.
+	//    `urlConfig.write` uses `history.replaceState` which per
+	//    HTML spec does NOT fire `hashchange`, so the write→listener
+	//    loop is structurally prevented (AR-4 Inc 6i comment).
+	//
+	// All three guard on `typeof window !== 'undefined'` so the
+	// effects are no-ops during Docusaurus SSR pre-render (the
+	// useEffect itself is client-only, but defensive anyway).
+	const urlApplyHandle = useUrlConfigApplier(
+		setDifficulty,
+		setContentTypes,
+		setViewMode,
+		setEditorMode,
+		setHintsMode,
+	);
+
+	// Effect 1: read URL once on mount.
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+		urlApplyHandle(urlConfig.read());
+	}, [urlApplyHandle]);
+
+	// Effect 2: debounced write on config-state change. Skips the
+	// FIRST invocation — React runs every effect on initial mount
+	// regardless of whether the deps changed, so without this guard
+	// we'd write the prop-default state to an empty URL the moment
+	// the component mounts.
+	const skipFirstWriteRef = useRef(true);
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+		if (skipFirstWriteRef.current) {
+			skipFirstWriteRef.current = false;
+			return;
+		}
+		const timeoutId = setTimeout(() => {
+			urlConfig.write({
+				difficulty,
+				contentTypes,
+				viewMode,
+				editorMode,
+				hintsMode,
+			});
+		}, 500);
+		return () => {
+			clearTimeout(timeoutId);
+		};
+	}, [difficulty, contentTypes, viewMode, editorMode, hintsMode]);
+
+	// Effect 3: hashchange listener for back/forward replay.
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+		function onHashChange() {
+			urlApplyHandle(urlConfig.read());
+		}
+		window.addEventListener('hashchange', onHashChange);
+		return () => {
+			window.removeEventListener('hashchange', onHashChange);
+		};
+	}, [urlApplyHandle]);
+
 	// Inc 6c:
 	//   - blankenated mode → editable, noPasteExtension wired,
 	//     updateListener captures learner edits into learnerCode state.

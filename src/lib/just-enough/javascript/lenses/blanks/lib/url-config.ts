@@ -6,11 +6,11 @@
  * and colorize toggles (which were properly orchestrator-domain) are
  * dropped.
  *
- * URL format (matches legacy):
- * `?blanks=difficulty:N,types:a+b,view:X,hints:Y`
+ * URL format (Inc 6h-redux extended; legacy was 4 fields):
+ * `?blanks=difficulty:N,types:a+b,view:X,editor:Y,hints:Z`
  *
  * Field order in `serializeConfig` is the canonical order
- * `difficulty, types, view, hints` — semantic round-trip
+ * `difficulty, types, view, editor, hints` — semantic round-trip
  * (`parseHash(`#?${serializeConfig(parseHash(hash))}`) === parseHash(hash)`)
  * is the contract, not byte-for-byte string equality with a
  * non-canonical input.

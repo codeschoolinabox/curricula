@@ -176,11 +176,16 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    README § Ask Me contract for the rationale and the literal config constant.
 
 8. **URL config sync** (per learner control change, debounced 500ms) — a write
-   effect keyed on the four config fields debounces 500ms (matching legacy
-   line 222) and calls the URL-config writer. On mount, a separate read effect
-   calls the URL-config reader once, merging any URL-supplied values over the
-   wrapper's default state. A hashchange listener registered by the same read
-   effect re-reads on browser back/forward — same merge semantics. URL is the
+   effect keyed on the five config fields (`difficulty, contentTypes, viewMode,
+   editorMode, hintsMode`) debounces 500ms (matching legacy line 222) and
+   calls the URL-config writer. The write effect skips its first invocation
+   via a `useRef` guard so an empty URL on mount doesn't immediately get
+   overwritten with prop defaults. On mount, a separate read effect calls the
+   URL-config reader once, merging any URL-supplied values over the
+   wrapper's default state. A hashchange listener registered by a third effect
+   re-reads on browser back/forward — same merge semantics. `urlConfig.write`
+   uses `history.replaceState` which does NOT fire `hashchange` (per HTML
+   spec), so the write→listener loop is structurally prevented. URL is the
    only cross-mount persistence; learner answers, blanks, correctness, and the
    Ask Me cursor are React-state only.
 
@@ -202,7 +207,7 @@ flowchart TD
     Props -->|"applicableTo, sync, pure"| Gate["embodiment.status.parsed"]
     Props -->|"recommend, sync, pure"| Recs["[] (WS2-deferred)"]
 
-    ResolvedConfig --> State["per-mount state<br/>{ viewMode, learnerCode,<br/>contentTypeFlags (derived),<br/>askMeCursor }"]
+    ResolvedConfig --> State["per-mount state<br/>{ viewMode, editorMode, hintsMode,<br/>difficulty, contentTypes,<br/>learnerCode, cursorPos,<br/>revealCounts, askMeCursor }"]
 
     Props --> Memo
     ResolvedConfig --> Memo[("useMemo:<br/>blankenate (sync, pure;<br/>runs during first render —<br/>no flicker between empty and<br/>__-filled editor)")]

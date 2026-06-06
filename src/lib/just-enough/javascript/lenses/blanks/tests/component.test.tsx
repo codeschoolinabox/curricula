@@ -16,7 +16,7 @@
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { EditorView } from '@codemirror/view';
 import React from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import embody from '../../../embody/index.js';
 
@@ -2523,6 +2523,142 @@ describe('blanks wrapper — Inc 6a', () => {
 			expect(view!.state.doc.length).toBeGreaterThan(2);
 			// Editor still mounted and responsive.
 			expect(container.querySelector('.cm-content')).not.toBeNull();
+		});
+	});
+
+	describe('URL config plumbing — Inc 6i', () => {
+		// Helper: clean hash before each test.
+		afterEach(() => {
+			// jsdom keeps location across tests; clean up the hash.
+			if (typeof window !== 'undefined') {
+				window.history.replaceState(null, '', window.location.pathname);
+			}
+		});
+
+		it('reads URL hash on mount and seeds difficulty from it', async () => {
+			window.history.replaceState(null, '', '#?blanks=difficulty:75');
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 25 })}
+				/>,
+			);
+			await waitFor(() => {
+				const slider = container.querySelector(
+					'[data-difficulty-slider]',
+				) as HTMLInputElement;
+				// URL `difficulty:75` overrides the prop `difficulty: 25`.
+				expect(slider.value).toBe('75');
+			});
+		});
+
+		it('reads URL hash on mount and seeds editorMode from it', async () => {
+			window.history.replaceState(null, '', '#?blanks=editor:diff');
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ editorMode: 'helpful' })}
+				/>,
+			);
+			await waitFor(() => {
+				const diffBtn = container.querySelector(
+					'[data-editor-mode-toggle="diff"]',
+				) as HTMLButtonElement;
+				expect(diffBtn.getAttribute('aria-pressed')).toBe('true');
+			});
+		});
+
+		it('reads URL hash on mount and seeds hintsMode from it', async () => {
+			window.history.replaceState(null, '', '#?blanks=hints:off');
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				const root = container.querySelector('[data-lens="blanks"]');
+				expect(root?.getAttribute('data-hints-mode')).toBe('off');
+			});
+		});
+
+		it('writes the live config to the URL hash after a 500ms debounce', async () => {
+			vi.useFakeTimers({ shouldAdvanceTime: true });
+			try {
+				window.history.replaceState(null, '', window.location.pathname);
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('OK')}
+						config={blanksLens.config({ difficulty: 25 })}
+					/>,
+				);
+				await vi.waitFor(() => {
+					expect(
+						container.querySelector('[data-difficulty-slider]'),
+					).not.toBeNull();
+				});
+				const slider = container.querySelector(
+					'[data-difficulty-slider]',
+				) as HTMLInputElement;
+				fireEvent.change(slider, { target: { value: '88' } });
+				// Before debounce window passes, hash should not yet
+				// reflect the change.
+				expect(window.location.hash).not.toContain('difficulty:88');
+				// Advance timers past the 500ms debounce.
+				vi.advanceTimersByTime(550);
+				await vi.waitFor(() => {
+					expect(window.location.hash).toContain('difficulty:88');
+				});
+			} finally {
+				vi.useRealTimers();
+			}
+		});
+
+		it('responds to hashchange events by re-reading the URL (back/forward replay)', async () => {
+			window.history.replaceState(null, '', '#?blanks=difficulty:30');
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				const slider = container.querySelector(
+					'[data-difficulty-slider]',
+				) as HTMLInputElement;
+				expect(slider.value).toBe('30');
+			});
+			// Simulate browser back/forward: change hash + dispatch event.
+			window.history.replaceState(null, '', '#?blanks=difficulty:90');
+			window.dispatchEvent(new HashChangeEvent('hashchange'));
+			await waitFor(() => {
+				const slider = container.querySelector(
+					'[data-difficulty-slider]',
+				) as HTMLInputElement;
+				expect(slider.value).toBe('90');
+			});
+		});
+
+		it('does NOT write to URL on initial mount (only after a user-driven change)', async () => {
+			// Empty hash at mount; the initial state is prop defaults.
+			// A write-on-mount would push the prop defaults into the URL
+			// even though the learner did nothing — annoying and would
+			// rewrite the URL on every page load.
+			window.history.replaceState(null, '', window.location.pathname);
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ difficulty: 42 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(
+					container.querySelector('[data-difficulty-slider]'),
+				).not.toBeNull();
+			});
+			// Wait through the debounce window with NO user action.
+			await new Promise((r) => setTimeout(r, 600));
+			expect(window.location.hash).toBe('');
 		});
 	});
 
