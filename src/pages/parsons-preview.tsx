@@ -29,7 +29,7 @@ import embody from '@site/src/lib/just-enough/javascript/embody/index.js';
 import parsonsLens from '@site/src/lib/just-enough/javascript/lenses/parsons/index.js';
 
 const SAMPLE =
-	'function classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}\nconsole.log("unused"); // distractor';
+	'/* Read each line and think about the order before you drag. */\nfunction classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}\nconsole.log("unused"); // distractor\n/* parsons-collapse: Big picture\nGuard the positive case first, then fall through to the rest. */';
 
 export default function ParsonsPreview(): React.JSX.Element {
 	const [code, setCode] = React.useState<string>(SAMPLE);
@@ -37,14 +37,27 @@ export default function ParsonsPreview(): React.JSX.Element {
 	return (
 		<Layout title="parsons preview" description="WS4 parsons lens harness">
 			<main style={{ maxWidth: 860, margin: '2rem auto', padding: '0 1rem' }}>
-				<h1>parsons lens preview (WS4 — Inc 7a)</h1>
+				<h1>parsons lens preview (WS4 — Inc 10 + 11)</h1>
 				<p>
-					Inc 7a: the wrapper mounts and renders the snippet&apos;s lines{' '}
-					<strong>shuffled</strong> into a read-only pool of draggable items
-					(plus any <code>// distractor</code> lines). Dragging is not wired yet
-					— native HTML5 drag-and-drop lands in 7b, the two-column solution
-					layout in 7c, indent controls in 7d, Check + per-line feedback + score
-					in 7e, and the show-solution toggle in 7f.
+					A full Parsons exercise: the snippet is parsed into{' '}
+					<strong>shuffled</strong> draggable lines (plus any{' '}
+					<code>// distractor</code> lines). Drag lines from the pool into the
+					solution column, reorder them, indent/outdent, then <strong>Check</strong>{' '}
+					for per-line feedback + a score; <strong>Reset</strong> re-shuffles and{' '}
+					<strong>Show solution</strong> reveals the model order. Feedback uses a{' '}
+					<strong>colour-blind-safe palette</strong> (blue = right place, vermilion =
+					wrong, with solid/dashed/dotted borders so it never relies on hue).
+				</p>
+				<p>
+					<strong>Inc 10</strong> — the info panel above the board: a collapsible{' '}
+					<strong>feedback legend</strong>, a collapsed{' '}
+					<strong>distractor-count</strong> hint (the number stays hidden until you
+					expand it), and educator <strong>hint blocks</strong> from{' '}
+					<code>{'/* … */'}</code> comments (each a collapsible{' '}
+					<em>Hint</em> by default; <code>parsons-collapse: Label</code> customizes the
+					label). <strong>Inc 11</strong> — <strong>Review attempts</strong> opens a
+					modal logging every Check (score, pass/fail, a frozen snapshot); it persists
+					across Reset and closes on Escape.
 				</p>
 
 				<label style={{ display: 'block', marginBottom: 8 }}>

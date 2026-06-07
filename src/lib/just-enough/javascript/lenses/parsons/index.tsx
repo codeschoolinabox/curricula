@@ -30,8 +30,9 @@
  * `data-indent={level}` + compact guide steps (editor-style alignment cues) and
  * (when `canIndent`) right-side outdent/indent buttons. A `Check` button grades via
  * `buildEvaluation` and renders `data-correctness` per placed line + a
- * `data-parsons-unplaced` hint on pool lines + a `data-parsons-score` aria-live
- * region; any arrangement edit clears the stale result (`applyArrange`); `Reset`
+ * `data-parsons-score` aria-live region (pool lines get NO per-line feedback — that
+ * would reveal the distractors by elimination; missing lines lower the score
+ * instead); any arrangement edit clears the stale result (`applyArrange`); `Reset`
  * re-shuffles + clears. A work/complete view toggle (`data-view-toggle`) seeds
  * from `config.viewMode` and renders the model solution read-only at literal
  * `level * indentSize` in `<pre data-parsons-complete>` (no distractors); toggling
@@ -39,7 +40,7 @@
  * pool→pool drop is a no-op.
  */
 
-import React, { useMemo, useReducer, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { freezeInPlace } from '@utils/freeze.js';
@@ -59,7 +60,9 @@ import { buildEvaluation } from './lib/evaluate.js';
 import { parseParsons } from './lib/parse-parsons.js';
 import type {
 	Arrangement,
+	Attempt,
 	EvaluationResult,
+	LineCorrectness,
 	ParsedParsons,
 	ParsonsLine,
 } from './types.js';
@@ -68,6 +71,33 @@ import './parsons.css';
 
 /** The two drag zones, encoded into `dataTransfer` as the `${zone}:${id}` prefix. */
 type Zone = 'pool' | 'solution';
+
+/**
+ * The feedback legend rows (Inc 10): the learner-facing per-line feedback states with
+ * their meanings. Rendered in a collapsed `<details data-parsons-legend>` so a learner
+ * can decode a Check result without guessing at the colours. Each row carries
+ * `data-legend-state` (an internal completeness hook + the CSS key for its colour
+ * swatch — mirrors the per-line `data-correctness` palette in parsons.css).
+ *
+ * Two states are deliberately OMITTED so the feedback never reveals which pool lines
+ * are distractors (that is the puzzle): `distractor` (a placed distractor reads as
+ * `wrong-order` — "wrong place"), and `unplaced` (flagging a missing solution line in
+ * the pool would, by elimination, identify the distractors). Missing lines lower the
+ * SCORE instead. Colours use Wong's colorblind-safe palette (blue / vermilion) with
+ * outline-style (solid / dashed / dotted) carrying the signal so it does not rely on
+ * hue alone — mirrors `blanks`.
+ */
+const LEGEND_STATES: ReadonlyArray<{ state: LineCorrectness; label: string }> = [
+	{ state: 'correct', label: 'Correct — right place and indentation' },
+	{
+		state: 'wrong-order',
+		label: 'Wrong place — this line is out of order or does not belong',
+	},
+	{ state: 'wrong-indent', label: 'Wrong indentation — right line, wrong nesting' },
+];
+
+/** Default summary label for a hint block when the educator authored none. */
+const DEFAULT_HINT_LABEL = 'Hint';
 
 /**
  * Reducer actions: place/return (7b), reorder (7c), indent/outdent (7d), and
@@ -179,15 +209,44 @@ const ParsonsComponent: ComponentType<LensProperties> =
 		// arrangement edit so stale per-line feedback never outlives the move it graded).
 		const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
 
+		// Attempt history (Inc 11): every Check appends a FROZEN snapshot. Unlike
+		// `evaluation`, history is NOT cleared by an edit or Reset — it is the
+		// learner's record of what they tried (faithful to the legacy "review guesses").
+		// In-mount only: it dies on unmount, per the disposable-practice contract.
+		const [attempts, setAttempts] = useState<ReadonlyArray<Attempt>>([]);
+		// The history modal is React-state-driven (NOT the legacy :target/anchor hack).
+		const [historyOpen, setHistoryOpen] = useState(false);
+
 		// Every arrangement mutation flows through here so the last Check is invalidated.
 		// (No-op transitions short-circuit BEFORE calling this, so they don't clear.)
+		// Note: this clears only the live `evaluation`, NEVER `attempts`.
 		function applyArrange(action: ArrangeAction): void {
 			dispatch(action);
 			setEvaluation(null);
 		}
 
 		function handleCheck(): void {
-			setEvaluation(buildEvaluation(arrangement, parsed, canIndent));
+			// Grade ONCE and use the same result for the live feedback AND the frozen
+			// history snapshot, so the modal can never show a different verdict than the
+			// learner saw (the modal renders the snapshot verbatim and never re-grades).
+			const result = buildEvaluation(arrangement, parsed, canIndent);
+			setEvaluation(result);
+			const snapshot = arrangement.solution.map((placed) => ({
+				code: lineById.get(placed.id)?.code ?? '',
+				indent: placed.indent,
+				// A placed line always has a resolved placed state in the map (never
+				// `unplaced`); the fallback is unreachable but keeps the type total.
+				correctness: result.correctnessMap.get(placed.id) ?? 'correct',
+			}));
+			setAttempts((previous) => [
+				...previous,
+				{
+					index: previous.length + 1,
+					score: result.score,
+					success: result.success,
+					snapshot,
+				},
+			]);
 		}
 
 		function handleReset(): void {
@@ -198,6 +257,17 @@ const ParsonsComponent: ComponentType<LensProperties> =
 			setParsed(fresh);
 			applyArrange({ type: 'reseed', pool: fresh.pool });
 		}
+
+		// Escape closes the history modal. A document-level listener (added only while
+		// open) catches Escape regardless of focus — robust for a keyboard user.
+		useEffect(() => {
+			if (!historyOpen) return;
+			function onKeyDown(event: KeyboardEvent): void {
+				if (event.key === 'Escape') setHistoryOpen(false);
+			}
+			document.addEventListener('keydown', onKeyDown);
+			return () => document.removeEventListener('keydown', onKeyDown);
+		}, [historyOpen]);
 
 		// --- Native HTML5 DnD adapters (thin; all transition logic is in arrange.ts) ---
 
@@ -305,7 +375,60 @@ const ParsonsComponent: ComponentType<LensProperties> =
 					>
 						{viewMode === 'complete' ? 'Back to exercise' : 'Show solution'}
 					</button>
+					{/* History opener (Inc 11). Lives in the toolbar so it is always reachable
+					    (both views); the modal itself renders at the end of the root. */}
+					<button
+						type="button"
+						data-parsons-history-open
+						onClick={() => setHistoryOpen(true)}
+					>
+						Review attempts ({attempts.length})
+					</button>
 				</header>
+				{/* Info panel (Inc 10): sits ABOVE the work/complete branch so it shows
+				    in both views — a colour legend, the distractor-count hint, and the
+				    educator hint blocks. All read-only; collapsed by default for compactness
+				    (the distractor-count collapse is a deliberate divergence from the
+				    always-open legacy — see README § Distractor-count hint). */}
+				<details data-parsons-legend>
+					<summary>Feedback legend</summary>
+					<ul>
+						{LEGEND_STATES.map(({ state, label }) => (
+							<li key={state} data-legend-state={state}>
+								<span data-legend-swatch aria-hidden="true" />
+								{label}
+							</li>
+						))}
+					</ul>
+				</details>
+				{parsed.distractors.length > 0 && (
+					<details data-parsons-distractor-count>
+						{/* The exact count is a SPOILER (it tells the learner how many lines
+						    to discard), so the collapsed summary only signals that extras
+						    exist; the number is revealed in the body on expand. */}
+						<summary>Heads up — some pool lines do not belong</summary>
+						<p>extra lines: {parsed.distractors.length}</p>
+					</details>
+				)}
+				{parsed.hints.length > 0 && (
+					<div data-parsons-hints>
+						{/* Every block comment is a collapsible "Hint" toggle — the educator
+						    need not author a label. A `parsons-collapse: <text>` marker (parsed
+						    into `summary`) CUSTOMIZES the label; null/empty falls back to the
+						    default. Body + summary render as TEXT (JSX auto-escapes) — never
+						    dangerouslySetInnerHTML, so an educator block cannot inject markup. */}
+						{parsed.hints.map((hint, index) => (
+							<details key={index}>
+								<summary>
+									{hint.summary !== null && hint.summary.length > 0
+										? hint.summary
+										: DEFAULT_HINT_LABEL}
+								</summary>
+								<pre>{hint.body}</pre>
+							</details>
+						))}
+					</div>
+				)}
 				{viewMode === 'complete' ? (
 					<pre data-parsons-complete>{completeText}</pre>
 				) : (
@@ -321,12 +444,12 @@ const ParsonsComponent: ComponentType<LensProperties> =
 									const line = lineById.get(id);
 									if (line === undefined) return null;
 									return (
+										// No per-line feedback on pool lines: marking a missing
+										// solution line would reveal the distractors by elimination.
+										// Missing lines lower the SCORE instead (see handleCheck).
 										<li
 											key={id}
 											data-line-id={id}
-											data-parsons-unplaced={
-												correctness?.get(id) === 'unplaced' || undefined
-											}
 											draggable
 											onDragStart={(event) =>
 												handleDragStart(event, 'pool', id)
@@ -415,6 +538,64 @@ const ParsonsComponent: ComponentType<LensProperties> =
 							</div>
 						)}
 					</>
+				)}
+				{/* Attempt-history modal (Inc 11): renders at the end of the root so it is
+				    reachable from BOTH views. React-state-driven (NOT the legacy
+				    :target/anchor hack). Each attempt's snapshot is FROZEN at Check time and
+				    rendered verbatim — the modal never re-grades. */}
+				{historyOpen && (
+					<div
+						data-parsons-history-modal
+						role="dialog"
+						aria-modal="true"
+						aria-label="Attempt history"
+					>
+						<header data-parsons-history-header>
+							<strong>Attempt history</strong>
+							<button
+								type="button"
+								data-parsons-history-close
+								onClick={() => setHistoryOpen(false)}
+							>
+								Close
+							</button>
+						</header>
+						{attempts.length === 0 ? (
+							<p>No attempts yet — press Check to log one.</p>
+						) : (
+							<ol data-parsons-attempt-list>
+								{attempts.map((attempt) => (
+									<li
+										key={attempt.index}
+										data-parsons-attempt
+										data-attempt-success={String(attempt.success)}
+									>
+										<div data-parsons-attempt-summary>
+											Attempt {attempt.index} —{' '}
+											{attempt.success ? 'solved' : 'not solved'} — {attempt.score}%
+										</div>
+										{/* The frozen snapshot: each placed line at its checked indent,
+										    carrying the correctness it was graded with. CSS folds
+										    `distractor` into the wrong-place look (as on the board), so the
+										    review never reveals which lines were distractors. */}
+										<ol data-parsons-attempt-snapshot>
+											{attempt.snapshot.map((line, lineIndex) => (
+												<li
+													key={lineIndex}
+													data-snapshot-line
+													data-indent={line.indent}
+													data-correctness={line.correctness}
+												>
+													{' '.repeat(line.indent * indentSize)}
+													{line.code}
+												</li>
+											))}
+										</ol>
+									</li>
+								))}
+							</ol>
+						)}
+					</div>
 				)}
 			</div>
 		);

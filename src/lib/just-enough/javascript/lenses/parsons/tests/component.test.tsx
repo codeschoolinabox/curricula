@@ -787,14 +787,17 @@ describe('parsons wrapper — Inc 7f (Check / Reset / per-line feedback + score)
 		expect(scoreEl(container)?.getAttribute('aria-live')).toBe('polite');
 	});
 
-	it('on Check with NOTHING placed, every solution line is unplaced and the score is 0', () => {
+	it('on Check with NOTHING placed, the score is 0 and NO pool line is flagged (a missing line must not be identifiable)', () => {
 		const { container } = renderThreeLine();
 		check(container);
 		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('0');
+		// Missing solution lines lower the SCORE, but the pool itself carries no
+		// per-line hint — marking "this one is missing" would, by elimination, reveal
+		// which pool lines are distractors (the leak the user flagged).
 		for (const id of ['line-0', 'line-1', 'line-2']) {
-			expect(poolItem(container, id)?.hasAttribute('data-parsons-unplaced')).toBe(
-				true,
-			);
+			expect(
+				poolItem(container, id)?.hasAttribute('data-parsons-unplaced'),
+			).toBe(false);
 		}
 	});
 
@@ -823,21 +826,23 @@ describe('parsons wrapper — Inc 7f (Check / Reset / per-line feedback + score)
 		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('100');
 	});
 
-	it('on Check, a solution line left in the pool is flagged unplaced and lowers the score', () => {
+	it('on Check, a solution line left in the pool lowers the score WITHOUT flagging the pool line', () => {
 		const { container } = renderThreeLine();
 		placeOnZone(container, 'line-0');
 		placeOnZone(container, 'line-1'); // line-2 left in the pool
 		check(container);
-		// `unplaced` is a POOL-line hint, never a data-correctness on a placed <li>.
+		// The missing line lowers the score to 67% (2/3 correct)...
+		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('67');
+		expect(correctnessOf(container, 'line-0')).toBe('correct');
+		// ...but the pool line carries NO marking (neither the removed unplaced hint
+		// nor a data-correctness) — otherwise the unmarked pool lines would be the
+		// distractors by elimination.
 		expect(
 			poolItem(container, 'line-2')?.hasAttribute('data-parsons-unplaced'),
-		).toBe(true);
-		// `unplaced` is NOT a data-correctness value — the pool line must not carry one.
+		).toBe(false);
 		expect(
 			poolItem(container, 'line-2')?.getAttribute('data-correctness'),
 		).toBeNull();
-		expect(scoreEl(container)?.getAttribute('data-parsons-score')).toBe('67');
-		expect(correctnessOf(container, 'line-0')).toBe('correct');
 	});
 
 	it('editing after Check clears the stale feedback (correctness + score)', () => {
@@ -881,22 +886,23 @@ describe('parsons wrapper — Inc 7f (Check / Reset / per-line feedback + score)
 		expect(correctnessOf(container, 'line-1')).toBeNull();
 	});
 
-	it('on Check, a distractor left in the pool is NOT flagged unplaced (only solution lines are)', () => {
+	it('on Check, NO pool line is flagged — a solution line and a distractor are indistinguishable in the pool (anti-leak regression guard)', () => {
 		const { container } = render(
 			<parsonsLens.Component
 				embodiment={embody('const good = 1;\nconst bad = 2; // distractor')}
 				config={parsonsLens.config()}
 			/>,
 		);
-		// Place nothing, Check: line-0 (solution) is unplaced; line-1 (distractor)
-		// is correct-by-omission and must NOT carry the unplaced hint.
+		// Place nothing, Check. line-0 is a needed solution line; line-1 is a
+		// distractor. If the pool flagged the solution line as "missing", the learner
+		// would know line-1 (unflagged) is the distractor by elimination. Neither may
+		// carry a marking — the score (here 0%) is the only signal.
 		check(container);
-		expect(
-			poolItem(container, 'line-0')?.hasAttribute('data-parsons-unplaced'),
-		).toBe(true);
-		expect(
-			poolItem(container, 'line-1')?.hasAttribute('data-parsons-unplaced'),
-		).toBe(false);
+		for (const id of ['line-0', 'line-1']) {
+			expect(
+				poolItem(container, id)?.hasAttribute('data-parsons-unplaced'),
+			).toBe(false);
+		}
 	});
 
 	it('Reset works before any Check (start over without peeking)', () => {
@@ -1092,5 +1098,502 @@ describe('parsons wrapper — Inc 7g (view-mode toggle / complete view)', () => 
 		const { container } = renderIndented({ viewMode: 'complete' });
 		expect(rootViewMode(container)).toBe('complete');
 		expect(completeView(container)).not.toBeNull();
+	});
+});
+
+describe('parsons wrapper — Inc 10 (info panel: legend + distractor-count + hints)', () => {
+	function render1(
+		source: string,
+		config?: Parameters<typeof parsonsLens.config>[0],
+	): ReturnType<typeof render> {
+		return render(
+			<parsonsLens.Component
+				embodiment={embody(source)}
+				config={parsonsLens.config(config)}
+			/>,
+		);
+	}
+	function legend(container: HTMLElement): HTMLDetailsElement | null {
+		return container.querySelector<HTMLDetailsElement>('[data-parsons-legend]');
+	}
+	function distractorCount(container: HTMLElement): Element | null {
+		return container.querySelector('[data-parsons-distractor-count]');
+	}
+	function hints(container: HTMLElement): Element | null {
+		return container.querySelector('[data-parsons-hints]');
+	}
+	function hintEntries(container: HTMLElement): Element[] {
+		// Direct children of the hints container: each is a <details> or a <pre>.
+		// The "direct child" shape is itself a contract assertion (no wrapper
+		// element around each entry) — if the impl wraps entries, tagName checks
+		// below break, which is the intended structural guard (AR-3 concern 6).
+		return Array.from(hints(container)?.children ?? []);
+	}
+	function rootViewMode(container: HTMLElement): string | null {
+		return (
+			container
+				.querySelector('[data-lens="parsons"]')
+				?.getAttribute('data-view-mode') ?? null
+		);
+	}
+
+	// --- Feedback legend (a V2 addition — keys the per-line feedback states) ---
+
+	describe('Interface — feedback legend', () => {
+		it('renders a data-parsons-legend element', () => {
+			const { container } = render1('const a = 1;');
+			expect(legend(container)).not.toBeNull();
+		});
+
+		it('is a collapsed <details> by default (compact surface)', () => {
+			const { container } = render1('const a = 1;');
+			const el = legend(container)!;
+			expect(el.tagName).toBe('DETAILS');
+			expect(el.hasAttribute('open')).toBe(false);
+		});
+
+		it('lists only the three placed feedback states — NOT distractor, NOT unplaced (both would leak which pool lines are distractors)', () => {
+			const { container } = render1('const a = 1;');
+			// `data-legend-state` is an internal completeness hook (analogous to the
+			// committed `data-line-id`), not a sandbox-harness selector; the visible
+			// copy is asserted below so a hooks-only invisible legend cannot pass.
+			// `distractor` is omitted (a placed distractor reads as `wrong-order`), and
+			// `unplaced` is omitted (flagging a missing pool line reveals the distractors
+			// by elimination) — both leaks the feedback must not make.
+			const rows = Array.from(
+				legend(container)!.querySelectorAll('[data-legend-state]'),
+			);
+			const states = rows.map((row) => row.getAttribute('data-legend-state'));
+			expect(new Set(states)).toEqual(
+				new Set(['correct', 'wrong-order', 'wrong-indent']),
+			);
+			expect(states).not.toContain('distractor');
+			expect(states).not.toContain('unplaced');
+			// Each row carries visible learner-facing copy (not just colour hooks).
+			for (const row of rows) {
+				expect((row.textContent ?? '').trim().length).toBeGreaterThan(0);
+			}
+		});
+
+		it('shows the legend regardless of the view mode (it sits above the view branch)', () => {
+			const { container } = render1('if (x) {\n\ty();\n}', {
+				viewMode: 'complete',
+			});
+			expect(rootViewMode(container)).toBe('complete');
+			expect(legend(container)).not.toBeNull();
+		});
+	});
+
+	// --- Distractor-count hint ("extra lines: N", collapsed, only when N > 0) ---
+
+	describe('Interface — distractor-count hint', () => {
+		// The exact count is a SPOILER (it tells the learner how many lines to discard),
+		// so the collapsed summary must NOT leak the number — only that extras exist.
+		// The count is revealed in the expandable body (a deliberate reversal of the
+		// earlier "count in summary" design, per the user's discoverability call).
+		function countSummary(container: HTMLElement): string {
+			return distractorCount(container)?.querySelector('summary')?.textContent ?? '';
+		}
+
+		it('does NOT leak the count in the collapsed summary (the number is a spoiler)', () => {
+			const { container } = render1(
+				'const good = 1;\nconst bad = 2; // distractor',
+			);
+			expect(distractorCount(container)).not.toBeNull();
+			// No digit in the collapsed label — the learner sees only that extras exist.
+			expect(countSummary(container)).not.toMatch(/\d/);
+		});
+
+		it('reveals "extra lines: N" in the expandable body (N = selected count)', () => {
+			const { container } = render1(
+				'const good = 1;\nconst bad = 2; // distractor',
+			);
+			expect(distractorCount(container)?.textContent).toContain('extra lines: 1');
+		});
+
+		it('is a collapsed <details> by default (a deliberate divergence from the always-open legacy)', () => {
+			const { container } = render1(
+				'const good = 1;\nconst bad = 2; // distractor',
+			);
+			const el = distractorCount(container)!;
+			expect(el.tagName).toBe('DETAILS');
+			expect(el.hasAttribute('open')).toBe(false);
+		});
+
+		it('counts every selected distractor in the body (N matches the rendered distractor lines)', () => {
+			const { container } = render1(
+				'const good = 1;\nconst x = 2; // distractor\nconst y = 3; // distractor',
+			);
+			expect(distractorCount(container)?.textContent).toContain('extra lines: 2');
+			expect(countSummary(container)).not.toMatch(/\d/);
+		});
+
+		it('Boundary — counts the SELECTED count, not the declared count, when maxDistractors caps below declared', () => {
+			// 3 declared, cap 2 -> parsed.distractors.length === 2 -> "extra lines: 2".
+			// An impl that counts declared distractors would wrongly say 3 here.
+			const { container } = render1(
+				'const a = 1;\nconst x = 2; // distractor\nconst y = 3; // distractor\nconst z = 4; // distractor',
+				{ maxDistractors: 2 },
+			);
+			expect(distractorCount(container)?.textContent).toContain('extra lines: 2');
+		});
+
+		it('Zero — is absent when the snippet declares no distractors', () => {
+			const { container } = render1('const a = 1;\nconst b = 2;');
+			expect(distractorCount(container)).toBeNull();
+		});
+
+		it('Boundary — is absent when maxDistractors is 0 (distractors suppressed)', () => {
+			const { container } = render1(
+				'const good = 1;\nconst bad = 2; // distractor',
+				{ maxDistractors: 0 },
+			);
+			expect(distractorCount(container)).toBeNull();
+		});
+
+		it('shows the distractor count regardless of the view mode (above the view branch)', () => {
+			const { container } = render1(
+				'const good = 1;\nconst bad = 2; // distractor',
+				{ viewMode: 'complete' },
+			);
+			expect(rootViewMode(container)).toBe('complete');
+			expect(distractorCount(container)).not.toBeNull();
+		});
+	});
+
+	// --- Educator hint blocks (from Inc 9's parsed.hints) ---
+
+	describe('Interface — hint blocks', () => {
+		it('Zero — renders no data-parsons-hints container when the snippet has no block comments', () => {
+			const { container } = render1('const a = 1;\nconst b = 2;');
+			expect(hints(container)).toBeNull();
+		});
+
+		it('every hint is a collapsible <details>; a plain /* */ block gets the default "Hint" label (no summary needed)', () => {
+			// The educator should NOT have to author a label: a bare block comment
+			// becomes a collapsible "Hint" toggle so the guidance is hidden until wanted.
+			const { container } = render1('const a = 1;\n/* think about the base case */');
+			const entries = hintEntries(container);
+			expect(entries.length).toBe(1);
+			const details = entries[0];
+			expect(details.tagName).toBe('DETAILS');
+			expect(details.hasAttribute('open')).toBe(false); // collapsed by default
+			expect(details.querySelector('summary')?.textContent).toBe('Hint');
+			expect(details.querySelector('pre')?.textContent).toBe(
+				'think about the base case',
+			);
+		});
+
+		it('a parsons-collapse: marker CUSTOMIZES the summary label (overrides the default)', () => {
+			const { container } = render1(
+				'const a = 1;\n/* parsons-collapse: Big picture\nguard the base case first */',
+			);
+			const details = hintEntries(container)[0];
+			expect(details.tagName).toBe('DETAILS');
+			expect(details.querySelector('summary')?.textContent).toBe('Big picture');
+			expect(details.querySelector('pre')?.textContent).toBe(
+				'guard the base case first',
+			);
+		});
+
+		it('an empty parsons-collapse: marker falls back to the default "Hint" label', () => {
+			const { container } = render1('const a = 1;\n/* parsons-collapse: */');
+			const details = hintEntries(container)[0];
+			expect(details.tagName).toBe('DETAILS');
+			expect(details.querySelector('summary')?.textContent).toBe('Hint');
+		});
+
+		it('Many — renders multiple hint blocks in source order (each its own toggle)', () => {
+			const { container } = render1(
+				'/* first note */\nconst a = 1;\n/* parsons-collapse: Two\nsecond note */',
+			);
+			const entries = hintEntries(container);
+			expect(entries.length).toBe(2);
+			expect(entries.every((e) => e.tagName === 'DETAILS')).toBe(true);
+			expect(entries[0].querySelector('summary')?.textContent).toBe('Hint');
+			expect(entries[0].querySelector('pre')?.textContent).toBe('first note');
+			expect(entries[1].querySelector('summary')?.textContent).toBe('Two');
+		});
+
+		it('renders the summary + body as TEXT, never as HTML (no injection on either field)', () => {
+			const { container } = render1(
+				'const a = 1;\n/* parsons-collapse: <img src=x onerror=alert(1)>\n<b>body</b> */',
+			);
+			const details = hintEntries(container)[0];
+			expect(details.querySelector('img')).toBeNull();
+			expect(details.querySelector('b')).toBeNull();
+			expect(details.querySelector('summary')?.textContent).toBe(
+				'<img src=x onerror=alert(1)>',
+			);
+			expect(details.querySelector('pre')?.textContent).toBe('<b>body</b>');
+		});
+
+		it('Zero — a hint-only source (no code lines) renders the hint without crashing', () => {
+			const { container } = render1('/* only a hint, no code */');
+			expect(hints(container)).not.toBeNull();
+			expect(hintEntries(container).length).toBe(1);
+			expect(poolLines(container).length).toBe(0); // no solution lines
+		});
+
+		it('shows hints regardless of the view mode (above the view branch)', () => {
+			const { container } = render1('const a = 1;\n/* a note */', {
+				viewMode: 'complete',
+			});
+			expect(rootViewMode(container)).toBe('complete');
+			expect(hints(container)).not.toBeNull();
+		});
+	});
+});
+
+describe('parsons wrapper — Inc 11 (attempt-history modal)', () => {
+	// Uses the shared `renderThreeLine` (line-0/1/2, no indent) + `placeOnZone` helpers.
+	function check(container: HTMLElement): void {
+		fireEvent.click(container.querySelector('[data-parsons-check]')!);
+	}
+	function reset(container: HTMLElement): void {
+		fireEvent.click(container.querySelector('[data-parsons-reset]')!);
+	}
+	function historyButton(container: HTMLElement): HTMLButtonElement | null {
+		return container.querySelector<HTMLButtonElement>(
+			'[data-parsons-history-open]',
+		);
+	}
+	function openHistory(container: HTMLElement): void {
+		fireEvent.click(historyButton(container)!);
+	}
+	function modal(container: HTMLElement): HTMLElement | null {
+		return container.querySelector<HTMLElement>('[data-parsons-history-modal]');
+	}
+	// `data-parsons-attempt`, `data-attempt-success`, and `data-snapshot-line` are
+	// INTERNAL structural hooks (like the committed `data-line-id`), used only by
+	// these tests; they are not sandbox-harness selectors. (Doc pass: disclaim or
+	// promote them in README alongside `data-parsons-history-open/-modal`.)
+	/** The per-attempt rows (the modal lists one entry per logged Check). */
+	function attemptRows(container: HTMLElement): Element[] {
+		return Array.from(
+			modal(container)?.querySelectorAll('[data-parsons-attempt]') ?? [],
+		);
+	}
+	/** The per-line snapshot rows inside one attempt (in placed order). */
+	function snapshotLines(row: Element): Element[] {
+		return Array.from(row.querySelectorAll('[data-snapshot-line]'));
+	}
+	function scoreEl(container: HTMLElement): Element | null {
+		return container.querySelector('[data-parsons-score]');
+	}
+	function indentBtn(container: HTMLElement, id: string): HTMLButtonElement | null {
+		return (
+			solutionItem(container, id)?.querySelector<HTMLButtonElement>(
+				'[data-parsons-indent]',
+			) ?? null
+		);
+	}
+
+	// --- The history-open control + modal open/close ---
+
+	describe('Interface — open / close', () => {
+		it('renders a data-parsons-history-open control from mount', () => {
+			const { container } = renderThreeLine();
+			expect(historyButton(container)).not.toBeNull();
+		});
+
+		it('the modal is absent until opened (React-state, not always in the DOM)', () => {
+			const { container } = renderThreeLine();
+			expect(modal(container)).toBeNull();
+			openHistory(container);
+			expect(modal(container)).not.toBeNull();
+		});
+
+		it('the modal is a role="dialog"', () => {
+			const { container } = renderThreeLine();
+			openHistory(container);
+			expect(modal(container)?.getAttribute('role')).toBe('dialog');
+		});
+
+		it('closes on the close button', () => {
+			const { container } = renderThreeLine();
+			openHistory(container);
+			fireEvent.click(
+				container.querySelector('[data-parsons-history-close]')!,
+			);
+			expect(modal(container)).toBeNull();
+		});
+
+		it('closes on Escape', () => {
+			const { container } = renderThreeLine();
+			openHistory(container);
+			expect(modal(container)).not.toBeNull();
+			// Fire on the modal element (impl-agnostic: bubbles to a document/window
+			// listener, or is caught by an onKeyDown on the modal itself).
+			fireEvent.keyDown(modal(container)!, { key: 'Escape' });
+			expect(modal(container)).toBeNull();
+		});
+
+		it('re-opening after close still shows the logged history (modal close != history clear)', () => {
+			const { container } = renderThreeLine();
+			placeOnZone(container, 'line-0');
+			check(container);
+			openHistory(container);
+			fireEvent.click(container.querySelector('[data-parsons-history-close]')!);
+			expect(modal(container)).toBeNull();
+			openHistory(container);
+			expect(attemptRows(container).length).toBe(1);
+		});
+	});
+
+	// --- Logging attempts on Check (ZOMBIES) ---
+
+	describe('Logging — each Check appends one attempt', () => {
+		it('Zero — before any Check the modal lists no attempts', () => {
+			const { container } = renderThreeLine();
+			openHistory(container);
+			expect(attemptRows(container).length).toBe(0);
+		});
+
+		it('One — a single Check logs exactly one attempt', () => {
+			const { container } = renderThreeLine();
+			placeOnZone(container, 'line-0');
+			check(container);
+			openHistory(container);
+			expect(attemptRows(container).length).toBe(1);
+		});
+
+		it('one Check both renders the live score AND logs the attempt (not one or the other)', () => {
+			// Guards a bifurcated handler that scores but forgets to log (or vice versa).
+			const { container } = renderThreeLine();
+			placeOnZone(container, 'line-0');
+			check(container);
+			expect(scoreEl(container)).not.toBeNull(); // Inc 7f live score still shows
+			openHistory(container);
+			expect(attemptRows(container).length).toBe(1); // and the attempt was logged
+		});
+
+		it('Zero-snippet Check logs a vacuous 100% attempt (total === 0 is still an attempt)', () => {
+			const { container } = render(
+				<parsonsLens.Component
+					embodiment={embody('')}
+					config={parsonsLens.config()}
+				/>,
+			);
+			check(container);
+			openHistory(container);
+			const row = attemptRows(container)[0];
+			expect(attemptRows(container).length).toBe(1);
+			expect(row.getAttribute('data-attempt-success')).toBe('true');
+			expect(row.textContent).toContain('100');
+		});
+
+		it('Many — N Checks accumulate N attempts (history is not cleared by re-Check)', () => {
+			const { container } = renderThreeLine();
+			placeOnZone(container, 'line-0');
+			check(container);
+			placeOnZone(container, 'line-1');
+			check(container);
+			openHistory(container);
+			expect(attemptRows(container).length).toBe(2);
+		});
+
+		it('an attempt shows its score and pass/fail verdict', () => {
+			const { container } = renderThreeLine();
+			// Place all three in model order -> fully correct -> success, 100%.
+			placeOnZone(container, 'line-0');
+			placeOnZone(container, 'line-1');
+			placeOnZone(container, 'line-2');
+			check(container);
+			openHistory(container);
+			const row = attemptRows(container)[0];
+			expect(row.textContent).toContain('100');
+			// A solved attempt reads as a pass (exact copy is impl-defined; pin the
+			// positive signal, not the wording).
+			expect(row.getAttribute('data-attempt-success')).toBe('true');
+		});
+
+		it('a partial attempt reads as a fail with a sub-100 score', () => {
+			const { container } = renderThreeLine();
+			placeOnZone(container, 'line-0'); // 1 of 3 placed -> 33%, not solved
+			check(container);
+			openHistory(container);
+			const row = attemptRows(container)[0];
+			expect(row.getAttribute('data-attempt-success')).toBe('false');
+			expect(row.textContent).toContain('33');
+		});
+	});
+
+	// --- The snapshot is frozen at Check time (never re-graded) ---
+
+	describe('Snapshot — frozen at Check, never re-graded', () => {
+		it('an attempt shows the placed lines as they were checked (code + correctness, in placed order)', () => {
+			const { container } = renderThreeLine();
+			placeOnZone(container, 'line-2'); // placed first -> appears first
+			placeOnZone(container, 'line-0');
+			check(container);
+			openHistory(container);
+			const lines = snapshotLines(attemptRows(container)[0]);
+			expect(lines.length).toBe(2);
+			expect(lines[0].textContent).toContain('const c = 3;'); // placed order, not model
+			expect(lines[1].textContent).toContain('const a = 1;');
+			// Each snapshot line carries the resolved correctness it was graded with.
+			expect(lines.every((l) => l.hasAttribute('data-correctness'))).toBe(true);
+		});
+
+		it('records each placed line indent level (not always 0 — a Fake-It guard)', () => {
+			const { container } = renderThreeLine(); // canIndent default true
+			placeOnZone(container, 'line-0');
+			fireEvent.click(indentBtn(container, 'line-0')!);
+			fireEvent.click(indentBtn(container, 'line-0')!); // indent level 2
+			check(container);
+			openHistory(container);
+			const line = snapshotLines(attemptRows(container)[0])[0];
+			expect(line.getAttribute('data-indent')).toBe('2');
+		});
+
+		it('does NOT leak distractor-ness in the snapshot beyond the raw graded value (CSS folds it to wrong-place)', () => {
+			const { container } = render(
+				<parsonsLens.Component
+					embodiment={embody('const good = 1;\nconst bad = 2; // distractor')}
+					config={parsonsLens.config()}
+				/>,
+			);
+			// Place the distractor (line-1) into the solution, then Check.
+			placeOnZone(container, 'line-1');
+			check(container);
+			openHistory(container);
+			const line = snapshotLines(attemptRows(container)[0])[0];
+			// The raw graded value is frozen (CSS renders it identically to wrong-order;
+			// the modal never invents a different verdict than the learner saw).
+			expect(line.getAttribute('data-correctness')).toBe('distractor');
+		});
+
+		it('the snapshot is FROZEN — disrupting the live arrangement after Check does not re-grade the logged attempt', () => {
+			const { container } = renderThreeLine();
+			placeOnZone(container, 'line-0');
+			placeOnZone(container, 'line-1');
+			placeOnZone(container, 'line-2'); // [0,1,2] in order -> solved, 100%
+			check(container);
+			// Now break the live arrangement: drag line-0 back to the pool. A re-grading
+			// impl would recompute 2/3 = 67%, not solved, 2 snapshot lines. The frozen
+			// attempt must still read 100% / solved / 3 lines.
+			const dt = makeDataTransfer();
+			fireEvent.dragStart(solutionItem(container, 'line-0')!, {
+				dataTransfer: dt,
+			});
+			fireEvent.drop(container.querySelector('[data-parsons-pool]')!, {
+				dataTransfer: dt,
+			});
+			openHistory(container);
+			const row = attemptRows(container)[0];
+			expect(row.getAttribute('data-attempt-success')).toBe('true');
+			expect(row.textContent).toContain('100');
+			expect(snapshotLines(row).length).toBe(3);
+		});
+
+		it('history PERSISTS across Reset (faithful to the legacy; Reset only re-shuffles)', () => {
+			const { container } = renderThreeLine();
+			placeOnZone(container, 'line-0');
+			check(container);
+			reset(container);
+			openHistory(container);
+			expect(attemptRows(container).length).toBe(1);
+		});
 	});
 });
