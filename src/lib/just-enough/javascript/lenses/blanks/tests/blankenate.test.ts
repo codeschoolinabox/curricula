@@ -946,21 +946,110 @@ describe('blankenate', () => {
 			expect(originals).not.toContain('=');
 		});
 
-		// AR-3 IMPORTANT (deferred to a future increment per AR-3
-		// recommendation): computed-key PropertyDefinition. Documented
-		// here as a `.todo` so the gap is visible in test output.
-		it.todo(
-			'computed-key class field `class A { [k] = 1 }` blanks `=` under operators=true',
-		);
+		it('blanks computed-key class field `class A { [k] = 1 }` `=` under operators=true', () => {
+			const result = blankenate('class A { [k] = 1; }', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const equals = (result?.blanks ?? []).filter((b) => b.original === '=');
+			expect(equals.length).toBeGreaterThanOrEqual(1);
+		});
 
-		// Generator `*` deferral marker (per Inc 6.l plan): adding `*`
-		// to DELIMITER_LABELS would mis-categorize arithmetic `*` in
-		// `a * b` (it would blank as 'delimiter' instead of 'operator'
-		// since the delimiter walk fires first and dedup keeps the
-		// first-pushed entry). Real fix requires generator-context AST
-		// detection on FunctionDeclaration/MethodDefinition with
-		// `.generator === true`. Deferred to a future increment.
-		it.todo('generator `*` in `function* g() {}` blanks under delimiters=true');
+		it('blanks generator `*` in `function* g() {}` declaration under delimiters=true', () => {
+			const result = blankenate('function* g() { yield 1; }', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const stars = (result?.blanks ?? []).filter((b) => b.original === '*');
+			expect(stars.length).toBe(1);
+		});
+
+		it('blanks generator method `*method() {}` under delimiters=true', () => {
+			const result = blankenate('class A { *gen() { yield 1; } }', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const stars = (result?.blanks ?? []).filter((b) => b.original === '*');
+			expect(stars.length).toBe(1);
+		});
+
+		it('does NOT blank arithmetic `*` as delimiter (operators-only blanking path)', () => {
+			// Negative lock: the generator-`*` branch must NOT fire on
+			// BinaryExpression `*`. With delimiters=true alone, no `*`
+			// should appear (arithmetic `*` is an operator, not a
+			// delimiter; only generator `*` reaches the delimiter branch).
+			const result = blankenate('const x = a * b;', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const stars = (result?.blanks ?? []).filter((b) => b.original === '*');
+			expect(stars.length).toBe(0);
+		});
+
+		// AR-3 IMPORTANT (Inc 6.q): mixed source — arithmetic `*` AND
+		// generator `*` in the same source. A string-scan fake would
+		// push both; only the AST-detection path produces exactly one
+		// blank at the generator position.
+		it('mixed source: `a * b; function* g() {}` blanks only the generator `*` at its source position', () => {
+			const code = 'const x = a * b; function* g() { yield 1; }';
+			const result = blankenate(code, 1, { ...NO_TYPES, delimiters: true });
+			const stars = (result?.blanks ?? []).filter((b) => b.original === '*');
+			expect(stars.length).toBe(1);
+			// Positional triangulation: the blank is at the generator
+			// position, not the arithmetic position. `function*` puts
+			// the `*` at index `code.indexOf('function')` + 8.
+			const generatorStarPosition =
+				code.indexOf('function') + 'function'.length;
+			expect(stars[0]!.start).toBe(generatorStarPosition);
+		});
+
+		// AR-3 IMPORTANT (Inc 6.q): static class generator method
+		// `static *gen()` — `*` lives between `static` and `gen`.
+		it('blanks `static *gen()` class generator method `*` under delimiters=true', () => {
+			const result = blankenate('class A { static *gen() { yield 1; } }', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const stars = (result?.blanks ?? []).filter((b) => b.original === '*');
+			expect(stars.length).toBe(1);
+		});
+
+		// AR-3 IMPORTANT (Inc 6.q): anonymous generator FunctionExpression
+		// `const f = function*() {}` — exercises the fallback ladder
+		// (no id, no params → boundary is body.start).
+		it('blanks anonymous generator `const f = function*() {}` `*` under delimiters=true', () => {
+			const result = blankenate('const f = function*() { yield 1; };', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const stars = (result?.blanks ?? []).filter((b) => b.original === '*');
+			expect(stars.length).toBe(1);
+		});
+
+		// AR-3 IMPORTANT (Inc 6.q): object-literal generator shorthand
+		// `{ *gen() {} }` — Property node with .value.generator true.
+		it('blanks object-literal shorthand `{ *gen() {} }` generator `*` under delimiters=true', () => {
+			const result = blankenate('const o = { *gen() { yield 1; } };', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const stars = (result?.blanks ?? []).filter((b) => b.original === '*');
+			expect(stars.length).toBe(1);
+		});
+
+		// AR-3 IMPORTANT (Inc 6.q): negative — object-literal getter
+		// `{ get foo() {} }` must NOT push a `*` blank. The Property
+		// branch guards on `.value.generator === true`, so getters
+		// (which have `.kind === 'get'` and `.value.generator === false`)
+		// should be skipped.
+		it('does NOT blank getter `{ get foo() {} }` as a generator', () => {
+			const result = blankenate('const o = { get foo() { return 1; } };', 1, {
+				...NO_TYPES,
+				delimiters: true,
+			});
+			const stars = (result?.blanks ?? []).filter((b) => b.original === '*');
+			expect(stars.length).toBe(0);
+		});
 	});
 
 	describe('Inc 6.n — TemplateLiteral content blanks under literals', () => {
@@ -1071,20 +1160,33 @@ describe('blankenate', () => {
 			expect(originals).toContain('Failed: ');
 		});
 
-		// AR-3 NIT: nested templates ARE reached by the recursive AST
-		// walker (TemplateLiteral expressions contain another
-		// TemplateLiteral; the walker recurses through it). Locking
-		// this with a real test is low-value v1; mark as deferred.
-		it.todo(
-			'nested template `\\`outer ${`inner ${x}`}\\`` blanks both inner and outer TemplateElement chunks',
-		);
+		it('nested template blanks both outer and inner TemplateElement chunks under literals=true', () => {
+			// `outer ${`inner ${x}`}` — outer TemplateLiteral has one
+			// non-empty quasi 'outer '; inner TemplateLiteral has one
+			// non-empty quasi 'inner '. The recursive AST walker visits
+			// both via TemplateLiteral.expressions → TemplateLiteral →
+			// quasis.
+			const result = blankenate('const s = `outer ${`inner ${x}`}`;', 1, {
+				...NO_TYPES,
+				literals: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('outer ');
+			expect(originals).toContain('inner ');
+		});
 
-		// AR-3 NIT: tagged template literals also reach the walker via
-		// TaggedTemplateExpression.quasi. Deferred test for the same
-		// reason as nested templates.
-		it.todo(
-			'tagged template `tag\\`hello ${x}!\\`` blanks TemplateElement chunks under literals=true',
-		);
+		it('tagged template `tag\\`hello ${x}!\\`` blanks TemplateElement chunks under literals=true', () => {
+			// TaggedTemplateExpression contains a `.quasi` of type
+			// TemplateLiteral; the walker recurses through it to the
+			// quasis. Both `hello ` and `!` should blank.
+			const result = blankenate('const s = tag`hello ${x}!`;', 1, {
+				...NO_TYPES,
+				literals: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('hello ');
+			expect(originals).toContain('!');
+		});
 	});
 
 	describe('Inc 6.o — backticks blank under delimiters (Inc 6.k reversal)', () => {

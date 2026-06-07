@@ -314,6 +314,59 @@ function blankenate(
 			});
 		}
 
+		// Inc 6.q: generator `*` (e.g. `function* g()` or class method
+		// `*gen()`) — classified as a DELIMITER. AST-detected because
+		// Acorn's `tokTypes.star` token covers BOTH generator `*` and
+		// arithmetic `a * b`; only generator should classify as
+		// delimiter (arithmetic stays under operators via the
+		// BinaryExpression branch). Three AST-shape cases:
+		//   - FunctionDeclaration/FunctionExpression with .generator
+		//     === true: `*` lives between `function` and the id (or
+		//     params if anonymous).
+		//   - MethodDefinition with .value.generator === true:
+		//     `*` lives between node.start and node.key.start
+		//     (covers `*gen()`, `static *gen()`, `*#priv()`).
+		//   - Property with .value.generator === true (object literal
+		//     shorthand `{ *gen() {} }`): same shape as MethodDefinition.
+		// The probability roll happens AFTER the AST shape resolves
+		// and the `*` is located, so non-matching nodes don't burn
+		// rolls; rolls are spent only on real candidates.
+		if (config.delimiters) {
+			let starStart = -1;
+			if (
+				(node.type === 'FunctionDeclaration' ||
+					node.type === 'FunctionExpression') &&
+				node.generator === true
+			) {
+				const boundary =
+					(node.id && node.id.start) ||
+					(node.params && node.params[0] && node.params[0].start) ||
+					(node.body && node.body.start) ||
+					node.end;
+				const text = code.substring(node.start, boundary);
+				const idx = text.indexOf('*');
+				if (idx !== -1) starStart = node.start + idx;
+			} else if (
+				(node.type === 'MethodDefinition' || node.type === 'Property') &&
+				node.value &&
+				node.value.generator === true &&
+				node.key &&
+				typeof node.key.start === 'number'
+			) {
+				const text = code.substring(node.start, node.key.start);
+				const idx = text.indexOf('*');
+				if (idx !== -1) starStart = node.start + idx;
+			}
+			if (starStart !== -1 && Math.random() < probability) {
+				blankedTokens.push({
+					start: starStart,
+					end: starStart + 1,
+					original: '*',
+					type: 'delimiter',
+				});
+			}
+		}
+
 		// Blank literals.
 		// Use the verbatim source slice for `original` (not String(node.value)).
 		// Acorn's node.value for a string literal strips the quotes

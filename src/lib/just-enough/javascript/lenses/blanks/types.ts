@@ -82,7 +82,13 @@
  *   `(`, `)`, `{`, `}`, `[`, `]`, `${`, `;`, `,`, `.`, plus
  *   (Inc 6.k) the syntactic-marker delimiters `=>`, `?`, `:`,
  *   `?.`, `...`, plus (Inc 6.o) the template-literal opener/closer
- *   `` ` ``. The template-expression opener `${` is treated as a
+ *   `` ` ``, plus (Inc 6.q) the generator `*` in `function* g()` /
+ *   `*method()` / object-literal `{ *gen() {} }`. Generator `*` is
+ *   AST-detected rather than token-stream-matched because Acorn's
+ *   `tokTypes.star` token covers BOTH generator `*` and arithmetic
+ *   `a * b` — only generator should classify as delimiter
+ *   (arithmetic stays under operators via the `BinaryExpression`
+ *   branch). The template-expression opener `${` is treated as a
  *   single 2-char token (`tokTypes.dollarBraceL`); block-close
  *   and template-close `}` are not distinguished for v1 (both blank
  *   as `}`). Ternary `?` / `:` are classified as delimiters, NOT
@@ -90,8 +96,8 @@
  *   operator strings (BinaryExpression.operator etc.); ternary
  *   tokens come through the token-stream filter. See
  *   `./lib/blankenate.ts` DELIMITER_LABELS for the comprehensive
- *   set + the one documented exclusion (regex slash — part of
- *   the `regexp` token, not separately tokenized).
+ *   token-stream set + the one documented exclusion (regex slash —
+ *   part of the `regexp` token, not separately tokenized).
  */
 type BlankType =
 	| 'identifier'

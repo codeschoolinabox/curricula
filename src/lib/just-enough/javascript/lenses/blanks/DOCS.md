@@ -268,16 +268,22 @@ learner answers and the correctness map die with the component instance.
   `data-editor-mode="helpful|diff|raw"`, and `data-hints-mode="on|off"`** on the
   root. Sandbox-harness selectors + CSS hooks. Values reflect committed config
   state, not in-flight transitions; CSS transitions should anchor on the parent.
-- **Token-classification precedence (blankenate).** The algorithm runs three
-  classification passes in fixed order over the parsed source — (1) delimiters
+- **Token-classification precedence (blankenate).** The algorithm runs four
+  classification paths in fixed order over the parsed source — (1) delimiters
   token-stream walk, (2) keywords token-stream walk, (3) AST walk for
-  identifiers / literals / operators / template-content — and dedupes
-  `[start, end)` collisions first-push-wins. The call order is structural, not
-  stylistic: reordering the passes silently re-classifies overlap-prone tokens
-  (`typeof` is both a keyword and a unary operator; `null` / `true` / `false`
-  are both keywords and `Literal` nodes). Tests at `tests/blankenate.test.ts` §
-  "Inc 6.k — comprehensive token coverage" encode the expected taxonomy; the
-  call order is the constraint that produces it.
+  identifiers / literals / operators / template-content, (4) AST walk for the
+  generator-`*` delimiter (Inc 6.q — Acorn's `tokTypes.star` token covers both
+  generator `*` and arithmetic `a * b`, so generator `*` is classified by AST
+  context rather than by token label, and arithmetic `*` stays under the
+  `BinaryExpression` operators path). The four paths dedupe `[start, end)`
+  collisions first-push-wins. The call order is structural, not stylistic:
+  reordering silently re-classifies overlap-prone tokens (`typeof` is both a
+  keyword and a unary operator; `null` / `true` / `false` are both keywords and
+  `Literal` nodes; `*` requires AST context to disambiguate generator vs
+  arithmetic). Tests at `tests/blankenate.test.ts` § "Inc 6.k — comprehensive
+  token coverage" and "Inc 6.l — gap closures from the sandbox comprehensive
+  snippet" encode the expected taxonomy; the call order is the constraint that
+  produces it.
 - **Tier-2 classification.** The contract per [`../types.ts`](../types.ts):
   `applicableTo` is the recommender's cheap gate; `recommend` only fires on
   applicable lenses. This lens honors that contract by returning
