@@ -1,0 +1,16 @@
+/*
+ * Per-lens styles for the `writeme` lens. Scoped to `[data-lens='writeme']`
+ * (NOT a CSS module) so they never leak into other lenses or Docusaurus
+ * content blocks. The CodeMirror `oneDark` theme handles the editor chrome;
+ * these rules only frame the editor host and cap its height.
+ */
+
+[data-lens='writeme'] [data-writeme-editor-host] {
+	border: 1px solid #464647;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+[data-lens='writeme'] [data-writeme-editor-host] .cm-editor {
+	max-height: 60vh;
+}

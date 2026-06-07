@@ -169,7 +169,7 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
     <button data-check>                —   report "X / N code lines reproduced"
     <button data-reset>                —   restore the starting template, clear feedback
   — write view (data-view-mode="write") —
-  <main data-writeme-editor-host>      —   CodeMirror editor (editable, paste-blocked;
+  <div data-writeme-editor-host>       —   CodeMirror editor (editable, paste-blocked;
                                             diff-mode adds per-line highlight)
   <… data-writeme-check-summary>       —   after Check: "X / N code lines (P%)", aria-live
   <aside data-writeme-hints>           —   on-demand hint reveal (when data-hints-mode="on")
