@@ -42,7 +42,9 @@ The pre-refactor lens lived at
   → an honest per-line diff + a `X / N code lines` Check (see
   [Why the honest line-count replaces the legacy score](#why-the-honest-line-count-replaces-the-legacy-score))
 - a second (solution) CodeMirror editor + a duplicate `<pre>` comparison grid →
-  one `<pre>` side-by-side read view (zero CodeMirror in the read view)
+  a read view that shows the **solution alone** (one `<pre>`, zero CodeMirror,
+  no learner panel — see
+  [Why Read shows the solution alone](#why-read-shows-the-solution-alone))
 - the `?writeme=…` URL config → dropped (no URL surface in v1)
 
 The legacy's `diff` / `raw` distinction did not exist; the editor-mode ladder is
@@ -117,8 +119,9 @@ subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
 5. **Render** (sync) — the wrapper emits the root
    `<div data-lens="writeme" data-view-mode="write|read" data-editor-mode="diff|raw" data-hints-mode="on|off">`
    with the toolbar; in write view the CodeMirror editor + the check summary +
-   the on-demand hints panel; in read view the side-by-side `<pre>` comparison
-   (solution | attempt, no editor); and the instructions accordion in both.
+   the on-demand hints panel; in read view the **solution alone** as a `<pre>`
+   study panel (no editor, no learner panel); and the instructions accordion in
+   both.
 
 6. **Handle interaction** (per learner event) — the view toggle and editor-mode
    toggle update their state slice and **preserve learner code**; the
@@ -158,8 +161,7 @@ flowchart TD
     Dec -->|"overlay (diff mode)"| Editor
     Diff -->|"tally match lines, pure"| Summary["honest summary<br/>X / N code lines (P%)"]
 
-    Solution -->|"view = read"| Compare["read-view comparison<br/>(pre: solution | learner attempt)"]
-    Learner --> Compare
+    Solution -->|"view = read"| Study["read-view study panel<br/>(pre: solution alone)"]
 
     Solution -->|"generate-hints, sync, pure<br/>(regex; concept + structural; cap 8)"| Hints["Hint[]"]
     Hints -->|"hintsMode = on; on-demand reveal"| Panel["hints panel"]
@@ -167,9 +169,9 @@ flowchart TD
     Cfg --> Render["wrapper render"]
     Editor --> Render
     Summary --> Render
-    Compare --> Render
+    Study --> Render
     Panel --> Render
-    Render --> DOM["&lt;div data-lens=writeme<br/>data-view-mode data-editor-mode<br/>data-hints-mode&gt;<br/>toolbar + (write: editor + summary + hints<br/>| read: comparison) + instructions"]
+    Render --> DOM["&lt;div data-lens=writeme<br/>data-view-mode data-editor-mode<br/>data-hints-mode&gt;<br/>toolbar + (write: editor + summary + hints<br/>| read: solution panel) + instructions"]
 
     DOM -->|"view / editor-mode toggle (preserve learnerCode)"| Cfg
     DOM -->|"keep-comments toggle (pristine-gated re-seed)"| Template
@@ -317,6 +319,21 @@ default — "the lens-shipping-shells failure mode the redo exists to prevent is
 exactly what disabled feedback recreates"). `raw` remains one click away for
 learners who want a pure-recall challenge — the dial exists, but its default
 points at honest feedback.
+
+## Why Read shows the solution alone
+
+The read view shows the **solution by itself** — not a side-by-side comparison
+of the learner's attempt against it. This reverses an earlier plan decision (a
+read-mode "your code | solution" comparison): a comparison surface lets the
+learner _transcribe_ the solution rather than _recall_ it, the precise defeat of
+a write-from-memory exercise. Write and Read are therefore **mutually
+exclusive** — the learner never types with the solution in view. The loop is
+**read → remember → type**: study the solution in Read, return to Write, and
+reproduce it from memory. Self-assessment stays answer-free in the write view —
+the diff highlights which lines diverge and the Check counts reproduced lines,
+but neither reveals the solution text. (Surfaced at the Inc 6b browser
+checkpoint; the legacy's read-only solution editor + duplicate comparison grid
+collapse to a single `<pre>` study panel, zero CodeMirror.)
 
 ## Why the honest line-count replaces the legacy score
 

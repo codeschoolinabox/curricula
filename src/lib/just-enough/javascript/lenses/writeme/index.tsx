@@ -48,7 +48,12 @@ const WritemeComponent: ComponentType<LensProperties> =
 		// stable); defensively narrow the open-shape fields to the documented
 		// defaults.
 		const resolved = useMemo(() => writemeCore.config(config), [config]);
-		const viewMode: ViewMode = resolved.viewMode === 'read' ? 'read' : 'write';
+		// viewMode is STATE (seeded once from config) so the Write/Read toggle can
+		// drive it; editorMode/hintsMode stay render-derived until their own
+		// increments (6d / 6e) add toggles.
+		const initialViewMode: ViewMode =
+			resolved.viewMode === 'read' ? 'read' : 'write';
+		const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
 		const editorMode: EditorMode =
 			resolved.editorMode === 'raw' ? 'raw' : 'diff';
 		const hintsMode: HintsMode = resolved.hintsMode === 'off' ? 'off' : 'on';
@@ -134,7 +139,46 @@ const WritemeComponent: ComponentType<LensProperties> =
 				data-editor-mode={editorMode}
 				data-hints-mode={hintsMode}
 			>
-				<div ref={editorContainer} data-writeme-editor-host />
+				<div data-writeme-toolbar role="toolbar" aria-label="View">
+					<button
+						type="button"
+						data-view-toggle="write"
+						aria-pressed={viewMode === 'write'}
+						onClick={function selectWriteView() {
+							setViewMode('write');
+						}}
+					>
+						Write
+					</button>
+					<button
+						type="button"
+						data-view-toggle="read"
+						aria-pressed={viewMode === 'read'}
+						onClick={function selectReadView() {
+							setViewMode('read');
+						}}
+					>
+						Read
+					</button>
+				</div>
+				{/* The editor host stays mounted in BOTH views (hidden in read) so
+				    viewMode never enters the mount-effect deps and the learner's typed
+				    code survives the toggle [I1]. */}
+				<div
+					ref={editorContainer}
+					data-writeme-editor-host
+					hidden={viewMode === 'read'}
+				/>
+				{viewMode === 'read' && (
+					<figure data-writeme-solution-view>
+						<figcaption>
+							Read the solution, then return to Write and reproduce it from
+							memory. Write and Read are separate on purpose — you never type
+							with the solution in view.
+						</figcaption>
+						<pre data-writeme-solution>{embodiment.source.code}</pre>
+					</figure>
+				)}
 			</div>
 		);
 	};

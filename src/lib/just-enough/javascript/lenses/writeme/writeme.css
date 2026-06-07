@@ -2,8 +2,21 @@
  * Per-lens styles for the `writeme` lens. Scoped to `[data-lens='writeme']`
  * (NOT a CSS module) so they never leak into other lenses or Docusaurus
  * content blocks. The CodeMirror `oneDark` theme handles the editor chrome;
- * these rules only frame the editor host and cap its height.
+ * these rules frame the editor host, the view toolbar, and the read-view
+ * solution panel (which reuses the oneDark palette so it reads as code).
  */
+
+[data-lens='writeme'] [data-writeme-toolbar] {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
+[data-lens='writeme'] [data-view-toggle][aria-pressed='true'] {
+	font-weight: 600;
+	text-decoration: underline;
+}
 
 [data-lens='writeme'] [data-writeme-editor-host] {
 	border: 1px solid #464647;
@@ -13,4 +26,30 @@
 
 [data-lens='writeme'] [data-writeme-editor-host] .cm-editor {
 	max-height: 60vh;
+}
+
+/* Defensive: in read view the host carries the `hidden` attribute; pin
+ * display:none so a theme reset that overrides [hidden] can't leak the editor
+ * into the read view (the [I1] mutual-exclusivity contract). */
+[data-lens='writeme'] [data-writeme-editor-host][hidden] {
+	display: none;
+}
+
+[data-lens='writeme'] [data-writeme-solution-view] {
+	margin: 0;
+}
+
+[data-lens='writeme'] [data-writeme-solution-view] figcaption {
+	margin-bottom: 0.5rem;
+	font-size: 0.9rem;
+}
+
+[data-lens='writeme'] [data-writeme-solution-view] pre {
+	margin: 0;
+	max-height: 60vh;
+	overflow: auto;
+	padding: 0.5rem;
+	border-radius: 4px;
+	background: #282c34;
+	color: #abb2bf;
 }

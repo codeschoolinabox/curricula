@@ -7,8 +7,8 @@ optional **comment skeleton** leaves the comments (and blank lines) in place as
 scaffolding while stripping the executable code; turning it off gives a blank
 slate. As the learner types, a **diff** view highlights the lines that do not
 yet match the solution; a **Check** reports honestly how many code lines have
-been reproduced; a **Read** view shows the solution beside the learner's attempt
-for self-comparison.
+been reproduced; and a separate **Read** view shows the solution alone to study
+and memorize before reproducing it.
 
 The exercise is about **recall and motor reproduction**, not recognition: paste
 is blocked in every editable mode so the learner produces the code rather than
@@ -43,15 +43,15 @@ Fields:
 - `name: 'writeme'` — registry identity.
 - `Component: ComponentType<LensProps>` — React wrapper around the lens's
   pure-TS core. Renders the writeme surface (`<div data-lens="writeme">`) with
-  the toolbar, the CodeMirror write editor, the read-view comparison, the hints
-  panel, and the instructions accordion.
+  the toolbar, the CodeMirror write editor, the read-view solution panel, the
+  hints panel, and the instructions accordion.
 - `config(overrides?): LensConfig` — resolves the per-lens config. Returns a
   frozen `LensConfig` (flat `Record<string, SerializableValue>` per
   [`../types.ts`](../types.ts) `LensConfig`); unknown keys in `overrides` are
   spread through unchanged (open-shape contract). Fields the lens reads:
   - `viewMode?: 'write' | 'read'` (default `'write'`) — initial view. `'write'`
-    is the editable reconstruction surface; `'read'` reveals the solution beside
-    the learner's attempt.
+    is the editable reconstruction surface; `'read'` shows the solution alone to
+    study (Write and Read are mutually exclusive — read, remember, then type).
   - `editorMode?: 'diff' | 'raw'` (default `'diff'`) — the feedback intensity of
     the write editor. `'diff'` highlights each line of the learner's code that
     does not yet match the corresponding solution line (the honest, always-on
@@ -115,9 +115,10 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   written back to the orchestrator's snippet.
 - **Write view** — the editable reconstruction surface: a CodeMirror editor the
   learner types into, paste-blocked, with the hints panel and the toolbar.
-- **Read view** — the read-only self-check surface: the solution shown beside
-  the learner's attempt (side-by-side), rendered as plain `<pre>` text (no
-  editor).
+- **Read view** — the read-only study surface: the solution **alone**, rendered
+  as plain `<pre>` text (no editor, no learner panel). Write and Read are
+  mutually exclusive — the learner reads and memorizes here, then reproduces it
+  from memory in the write view.
 - **Editor mode** — `'diff' | 'raw'`. The write editor's feedback intensity.
   `diff` highlights non-matching lines; `raw` shows no feedback overlay.
 - **Comment skeleton** — the write editor's optional starting template: the
@@ -159,9 +160,9 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
      data-view-mode="write|read"
      data-editor-mode="diff|raw"
      data-hints-mode="on|off">
-  <header data-writeme-toolbar>        — controls
+  <div data-writeme-toolbar>           — controls
     <button data-view-toggle="write">  —   editable reconstruction surface
-    <button data-view-toggle="read">   —   solution + comparison (self-check)
+    <button data-view-toggle="read">   —   the solution alone, to study
     <button data-editor-mode-toggle="diff"> — feedback on (highlight non-matching lines)
     <button data-editor-mode-toggle="raw">  — feedback off (pure recall)
     <label data-keep-comments>         —   checkbox: seed comment skeleton vs blank slate
@@ -173,10 +174,10 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
                                             diff-mode adds per-line highlight)
   <… data-writeme-check-summary>       —   after Check: "X / N code lines (P%)", aria-live
   <aside data-writeme-hints>           —   on-demand hint reveal (when data-hints-mode="on")
-  — read view (data-view-mode="read") —
-  <div data-writeme-comparison>        —   side-by-side <pre> panels:
-    <pre data-writeme-solution>        —     the solution (read-only)
-    <pre>                              —     the learner's attempt (read-only)
+  — read view (data-view-mode="read"), solution ALONE (NO CodeMirror) —
+  <figure data-writeme-solution-view> —   study surface (read -> remember -> type)
+    <figcaption>                       —     "read it, then reproduce from memory"
+    <pre data-writeme-solution>        —     the snippet, read-only
   — always —
   <details data-writeme-instructions>  —   collapsible "How to use" help
 </div>
@@ -192,11 +193,13 @@ Check summary carries `aria-live="polite"`.
 
 ## Toolbar contract
 
-- **View toggle** — two `<button>`s ("✏️ Write" / "👁️ Read"). The active view is
+- **View toggle** — two `<button>`s ("Write" / "Read"). The active view is
   reflected by `data-view-mode` on the root. Toggling **preserves the learner's
-  code** (parity with legacy) — Read is a self-check affordance ("let me compare
-  what I typed against the solution"), not a reset. Learner code lives in
-  lens-local React state for the lifetime of the mount.
+  code** (parity with legacy) — Read is a study affordance (read and memorize
+  the solution, then reproduce it from memory in Write; the two views are
+  mutually exclusive, so the learner never types with the solution in view), not
+  a reset. Learner code lives in lens-local React state for the lifetime of the
+  mount.
 - **Editor-mode toggle** — two `<button>`s ("Diff" / "Raw"), shown only in the
   write view. Switches the write editor's feedback overlay; reflected by
   `data-editor-mode`. Switching mode preserves the learner's code (it re-mounts
@@ -331,13 +334,19 @@ generic; richer, cursor-scoped hints (as `blanks` ships) are a future direction.
 
 ## Read-view contract
 
-The read view renders the solution beside the learner's attempt as two read-only
-`<pre>` panels inside `data-writeme-comparison` (left: `data-writeme-solution`,
-the solution; right: the learner's code). It contains **no CodeMirror editor** —
-a deliberate consolidation of the legacy, which rendered the solution twice
-(once in a read-only editor and again in a comparison grid). The read view is
-purely for self-comparison; the learner returns to the write view to keep
-typing.
+The read view renders the **solution alone**: a single read-only `<pre>`
+(carrying `data-writeme-solution`) inside a captioned
+`data-writeme-solution-view` figure — **not** a side-by-side comparison against
+the learner's attempt. It contains **no CodeMirror editor**. Write and Read are
+**mutually exclusive**: the learner never types with the solution in view. The
+loop is **read → remember → type** — study the solution here, return to the
+write view, and reproduce it from memory. Self-assessment stays answer-free in
+the write view (the diff flags diverging lines; the Check counts reproduced
+lines), so neither view reveals the solution while the learner is typing. This
+both consolidates the legacy (which rendered the solution twice — a read-only
+editor plus a comparison grid) and removes the comparison surface that would let
+a learner transcribe rather than recall. See [`./DOCS.md`](./DOCS.md) § Why Read
+shows the solution alone.
 
 ## Edge cases
 
@@ -388,9 +397,12 @@ vs. the prior-art `WritemeLens.jsx`:
 - **No `setTimeout` editor-setup timing hacks or retry loops.** The legacy used
   `setTimeout(…, 50/100)` with a retry to populate its two editors. V2 mounts
   the editor in a `useEffect` and seeds the document synchronously.
-- **No second (solution) CodeMirror editor.** The legacy rendered the solution
-  in a read-only editor AND again in a `<pre>` comparison grid. V2's read view
-  is a single `<pre>` side-by-side; the read view has zero CodeMirror.
+- **No second (solution) CodeMirror editor; no comparison surface.** The legacy
+  rendered the solution in a read-only editor AND again in a `<pre>` comparison
+  grid. V2's read view shows the **solution alone** in a single `<pre>` (no
+  learner panel, zero CodeMirror) — Write and Read are mutually exclusive so the
+  learner recalls rather than transcribes. See [`./DOCS.md`](./DOCS.md) § Why
+  Read shows the solution alone.
 - **No standalone line/character-count footer.** The legacy showed a live (but
   stale) "Lines: N / Characters: M" readout. Dropped — the diff and the Check
   are the load-bearing progress signals; a raw character count is noise.

@@ -46,11 +46,13 @@
  * - `'write'` — the editable reconstruction surface: a paste-blocked CodeMirror
  *   editor the learner types the solution back into, with the toolbar and the
  *   hints panel.
- * - `'read'` — the read-only self-check surface: the solution rendered beside the
- *   learner's attempt (side-by-side `<pre>` panels; no editor).
+ * - `'read'` — the read-only study surface: the solution alone, rendered as a
+ *   `<pre>` to read and memorize (no editor, and deliberately NOT shown beside
+ *   the learner's attempt — Write and Read are mutually exclusive so the learner
+ *   recalls from memory rather than transcribing a side-by-side solution).
  *
  * The view toggle **preserves learner code** (parity with legacy) — `'read'` is a
- * self-check affordance, not a reset. Mirrors the shared `viewMode` config key
+ * study affordance, not a reset. Mirrors the shared `viewMode` config key
  * across lenses (`blanks`: `blankenated|complete`; `parsons`: `work|complete`);
  * the values are writeme-specific.
  */

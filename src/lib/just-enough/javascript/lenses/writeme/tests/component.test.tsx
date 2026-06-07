@@ -8,7 +8,7 @@
  * the browser checkpoint, not here.
  */
 
-import { cleanup, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -216,5 +216,206 @@ describe('writeme wrapper — Inc 6a (mount)', () => {
 				).not.toContain('const x = 1;');
 			});
 		});
+	});
+});
+
+describe('writeme wrapper — Inc 6b (view toggle + read view)', () => {
+	it('renders a view toolbar exposing write and read toggles', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		expect(container.querySelector('[data-writeme-toolbar]')).not.toBeNull();
+		expect(
+			container.querySelector('[data-view-toggle="write"]'),
+		).not.toBeNull();
+		expect(container.querySelector('[data-view-toggle="read"]')).not.toBeNull();
+	});
+
+	it('marks the write toggle pressed and the read toggle unpressed by default', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		expect(
+			container
+				.querySelector('[data-view-toggle="write"]')
+				?.getAttribute('aria-pressed'),
+		).toBe('true');
+		expect(
+			container
+				.querySelector('[data-view-toggle="read"]')
+				?.getAttribute('aria-pressed'),
+		).toBe('false');
+	});
+
+	it('flips the root to data-view-mode="read" when the read toggle is clicked', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		fireEvent.click(
+			container.querySelector('[data-view-toggle="read"]') as Element,
+		);
+		expect(
+			container
+				.querySelector('[data-lens="writeme"]')
+				?.getAttribute('data-view-mode'),
+		).toBe('read');
+	});
+
+	it('renders the solution study panel only in read view', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		expect(container.querySelector('[data-writeme-solution-view]')).toBeNull();
+		fireEvent.click(
+			container.querySelector('[data-view-toggle="read"]') as Element,
+		);
+		expect(
+			container.querySelector('[data-writeme-solution-view]'),
+		).not.toBeNull();
+	});
+
+	it('shows the solution exactly once in read view, with no editor and no learner panel', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config({ viewMode: 'read' })}
+			/>,
+		);
+		const solutions = container.querySelectorAll('[data-writeme-solution]');
+		expect(solutions.length).toBe(1);
+		expect(solutions[0]?.textContent).toContain('const x = 1;');
+		expect(
+			container.querySelectorAll('[data-writeme-solution-view] .cm-editor')
+				.length,
+		).toBe(0);
+		expect(
+			container.querySelectorAll('[data-writeme-solution-view] pre').length,
+		).toBe(1);
+	});
+
+	it('does not render the solution panel in write view', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		expect(container.querySelector('[data-writeme-solution]')).toBeNull();
+	});
+
+	it('keeps the editor host mounted across a write to read to write toggle', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		fireEvent.click(
+			container.querySelector('[data-view-toggle="read"]') as Element,
+		);
+		expect(
+			container.querySelector('[data-writeme-editor-host]'),
+		).not.toBeNull();
+		fireEvent.click(
+			container.querySelector('[data-view-toggle="write"]') as Element,
+		);
+		expect(
+			container.querySelector('[data-writeme-editor-host]'),
+		).not.toBeNull();
+	});
+
+	it('hides the editor host in read view and restores it in write view', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		expect(
+			container
+				.querySelector('[data-writeme-editor-host]')
+				?.hasAttribute('hidden'),
+		).toBe(false);
+		fireEvent.click(
+			container.querySelector('[data-view-toggle="read"]') as Element,
+		);
+		expect(
+			container
+				.querySelector('[data-writeme-editor-host]')
+				?.hasAttribute('hidden'),
+		).toBe(true);
+		fireEvent.click(
+			container.querySelector('[data-view-toggle="write"]') as Element,
+		);
+		expect(
+			container
+				.querySelector('[data-writeme-editor-host]')
+				?.hasAttribute('hidden'),
+		).toBe(false);
+		expect(
+			container
+				.querySelector('[data-lens="writeme"]')
+				?.getAttribute('data-view-mode'),
+		).toBe('write');
+	});
+
+	it('inverts aria-pressed on both toggles across read then write', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		fireEvent.click(
+			container.querySelector('[data-view-toggle="read"]') as Element,
+		);
+		expect(
+			container
+				.querySelector('[data-view-toggle="write"]')
+				?.getAttribute('aria-pressed'),
+		).toBe('false');
+		expect(
+			container
+				.querySelector('[data-view-toggle="read"]')
+				?.getAttribute('aria-pressed'),
+		).toBe('true');
+		fireEvent.click(
+			container.querySelector('[data-view-toggle="write"]') as Element,
+		);
+		expect(
+			container
+				.querySelector('[data-view-toggle="write"]')
+				?.getAttribute('aria-pressed'),
+		).toBe('true');
+		expect(
+			container
+				.querySelector('[data-view-toggle="read"]')
+				?.getAttribute('aria-pressed'),
+		).toBe('false');
+	});
+
+	it('renders the read-view solution panel for an empty snippet without crashing', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('')}
+				config={writemeLens.config({ viewMode: 'read' })}
+			/>,
+		);
+		expect(
+			container.querySelector('[data-writeme-solution-view]'),
+		).not.toBeNull();
+		expect(container.querySelector('[data-writeme-solution]')).not.toBeNull();
 	});
 });
