@@ -9,17 +9,21 @@
  * the wrapper's per-line diff stays index-aligned against the solution.
  *
  * Per-line rule (legacy semantics, preserved):
- * - a blank / whitespace-only / comment-only line → kept verbatim;
- * - a code-bearing line INSIDE an open block comment (not closing it) → kept
- *   verbatim;
- * - a code-bearing line WITH a comment → its leading whitespace + the comment(s);
- * - a code-bearing line with no comment → an empty line.
+ * - a FREEBIE line (blank / whitespace-only / comment-only / a code-bearing line
+ *   inside an open block comment) → kept verbatim. The code-line/freebie split is
+ *   `./code-lines.ts`, shared with `./diff-lines.ts` so the skeleton blanks
+ *   exactly the lines the Check grades (the B1 honesty invariant — a single
+ *   source, not two copies that can drift).
+ * - a code line WITH a comment → its leading whitespace + the comment(s);
+ * - a code line with no comment → an empty line.
  *
  * Port posture: mechanical conversion; preserve semantics (declining only the
- * legacy's `console.warn` + try/catch swallow, which guarded against a throw
- * that the pure string ops cannot produce). This directory
- * (`lenses/writeme/lib/**`) is eslint-ignored per `eslint.config.mjs`.
+ * legacy's `console.warn` + try/catch swallow, which guarded against a throw the
+ * pure string ops cannot produce). This directory (`lenses/writeme/lib/**`) is
+ * eslint-ignored per `eslint.config.mjs`.
  */
+
+import computeCodeLineMask from './code-lines.js';
 
 /**
  * @param solution - the original source (the snippet's `embodiment.source.code`).
@@ -27,60 +31,43 @@
  */
 function commentSkeleton(solution: string): string {
 	const lines = solution.split('\n');
+	const codeLineMask = computeCodeLineMask(lines);
 	const skeleton: string[] = [];
 
 	lines.forEach((line, index) => {
+		if (!codeLineMask[index]) {
+			// Freebie line (blank / whitespace / comment-only / inside an open
+			// block comment) — kept verbatim as scaffolding.
+			skeleton.push(line);
+			return;
+		}
+
+		// Code line: keep its comment(s) if any (indentation preserved), else blank.
 		const singleLineComment = line.match(/\/\/.*$/);
 		const multiLineCommentStart = line.match(/\/\*.*$/);
 		const multiLineCommentEnd = line.match(/^.*?\*\//);
 		const multiLineCommentFull = line.match(/\/\*.*?\*\//);
+		const commentParts: string[] = [];
 
-		const codeWithoutComments = line
-			.replace(/\/\/.*$/, '')
-			.replace(/\/\*.*?\*\//g, '')
-			.replace(/\/\*.*$/, '')
-			.replace(/^.*?\*\//, '');
+		if (singleLineComment) {
+			commentParts.push(singleLineComment[0]);
+		}
+		if (multiLineCommentFull) {
+			// `multiLineCommentFull` already matched, so the /g variant is
+			// non-null here; `|| []` mirrors the legacy's match-null idiom.
+			commentParts.push(...(line.match(/\/\*.*?\*\//g) || []));
+		} else if (multiLineCommentStart) {
+			commentParts.push(multiLineCommentStart[0]);
+		} else if (multiLineCommentEnd) {
+			commentParts.push(multiLineCommentEnd[0]);
+		}
 
-		if (codeWithoutComments.trim() === '') {
-			// Blank / whitespace-only / comment-only line — kept verbatim.
-			skeleton.push(line);
+		if (commentParts.length > 0) {
+			// `/^\s*/` is anchored + zero-or-more, so it always matches (never null).
+			const leadingWhitespace = line.match(/^\s*/)![0];
+			skeleton.push(leadingWhitespace + commentParts.join(' '));
 		} else {
-			const commentParts: string[] = [];
-
-			if (singleLineComment) {
-				commentParts.push(singleLineComment[0]);
-			}
-
-			if (multiLineCommentFull) {
-				// `multiLineCommentFull` already matched, so the /g variant is
-				// non-null here; `|| []` mirrors the legacy's match-null idiom
-				// (also used for the open/close counts below).
-				commentParts.push(...(line.match(/\/\*.*?\*\//g) || []));
-			} else if (multiLineCommentStart) {
-				commentParts.push(multiLineCommentStart[0]);
-			} else if (multiLineCommentEnd) {
-				commentParts.push(multiLineCommentEnd[0]);
-			}
-
-			// Cross-line block-comment state: count unclosed `/*` in all
-			// lines BEFORE this one (legacy semantics).
-			const beforeThisLine = lines.slice(0, index).join('\n');
-			const openComments = (beforeThisLine.match(/\/\*/g) || []).length;
-			const closeComments = (beforeThisLine.match(/\*\//g) || []).length;
-			const insideMultiLineComment = openComments > closeComments;
-
-			if (insideMultiLineComment && !multiLineCommentEnd) {
-				// Code-bearing line inside an open block comment — kept verbatim.
-				skeleton.push(line);
-			} else if (commentParts.length > 0) {
-				// Code line with a comment — keep indentation + the comment(s).
-				// `/^\s*/` is anchored + zero-or-more, so it always matches (never null).
-				const leadingWhitespace = line.match(/^\s*/)![0];
-				skeleton.push(leadingWhitespace + commentParts.join(' '));
-			} else {
-				// Code line with no comment — blanked.
-				skeleton.push('');
-			}
+			skeleton.push('');
 		}
 	});
 
