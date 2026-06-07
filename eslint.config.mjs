@@ -34,6 +34,13 @@ export default tseslint.config(
 			// re-include when the parsons lens refactor stabilizes.
 			'src/lib/just-enough/javascript/lenses/parsons/lib/**',
 			'src/lib/just-enough/javascript/lenses/parsons/tests/**',
+			// Writeme lens internals — vendored no-paste-extension + ported
+			// comment-skeleton / generate-hints (JS→TS converts of the legacy
+			// implementation) plus the new diff-lines; idiomatic V2 style is a
+			// follow-up. Tests/ extends the exclusion to this session's WIP test
+			// files during the redo — re-include when the writeme lens stabilizes.
+			'src/lib/just-enough/javascript/lenses/writeme/lib/**',
+			'src/lib/just-enough/javascript/lenses/writeme/tests/**',
 			// WIP tracer engine — Phase B redesign in progress per
 			// EMBODY-IMPL-HANDOFF.md. The full evaluating/ subtree (trace,
 			// intercept, run, shared) is mid-refactor; lint rules don't yet
