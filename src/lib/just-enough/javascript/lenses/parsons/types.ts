@@ -104,12 +104,18 @@ export type ParsedParsons = Readonly<{
  * before line-splitting. (The exact regex is vendored in `parse-parsons.ts`; it is
  * not reproduced here to avoid embedding a comment terminator in this doc.)
  *
- * - `summary` — when the block contains a `parsons-collapse: <text>` marker, the
- *   text after the marker becomes a collapsible `<details><summary>`; the rest of
- *   the block is the body. `null` when there is no marker (the block renders as a
- *   plain, always-visible `<pre>`).
+ * - `summary` — the `parsons-collapse: <text>` label: the text after the marker
+ *   (`''` when the marker is present but empty), or `null` when there is no marker.
+ *   This is the PARSER's tag; it does not by itself decide whether the block is
+ *   collapsible.
  * - `body` — the block-comment text to display (with the `parsons-collapse:`
- *   marker line removed when `summary` is set). Whitespace is preserved.
+ *   marker line removed when a marker was present). Whitespace is preserved.
+ *
+ * **Render (Inc 10, redlined):** the wrapper renders EVERY block as a collapsible
+ * `<details>` — `summary` (when a non-empty label) is the `<summary>` text, and
+ * `null`/`''` fall back to a default `Hint` label. (The earlier "no marker → plain
+ * always-visible `<pre>`" rule was dropped at the browser gate.) Both fields render as
+ * escaped text, never `dangerouslySetInnerHTML`.
  */
 export type HintBlock = Readonly<{
 	summary: string | null;
@@ -169,8 +175,15 @@ export type Arrangement = Readonly<{
  * - `wrong-indent` — order-correct but indent level ≠ model level (only when
  *   `canIndent`).
  * - `distractor` — a distractor line wrongly placed in the solution.
- * - `unplaced` — a solution line still left in the available pool (a "missing"
- *   hint on the pool line).
+ * - `unplaced` — a solution line still left in the available pool.
+ *
+ * **Anti-leak rendering (the wrapper, not this type):** all five states are computed,
+ * but the feedback never reveals which lines are distractors. `distractor` is rendered
+ * identically to `wrong-order` ("wrong place"), and `unplaced` is **not rendered at
+ * all** — a missing solution line lowers the score instead of marking the pool line
+ * (which would identify the distractors by elimination). Only `correct` / `wrong-order`
+ * / `wrong-indent` appear as distinct learner feedback (and in the legend). `distractor`
+ * and `unplaced` remain in the model for the score, `success`, and the history snapshot.
  */
 export type LineCorrectness =
 	| 'correct'
@@ -185,9 +198,10 @@ export type LineCorrectness =
  * @remarks
  * `Map` (not `Record`) for stable insertion order and O(1) lookup during the
  * per-render feedback pass. Includes entries for placed lines (one of the four
- * placed states) and for unplaced solution lines (`'unplaced'`). Distractors
- * left in the pool are correct-by-omission and are NOT included (silently
- * fine).
+ * placed states — though `distractor` is folded into the `wrong-order` look at
+ * render, see `LineCorrectness`) and for unplaced solution lines (`'unplaced'`,
+ * computed but not rendered). Distractors left in the pool are correct-by-omission
+ * and are NOT included (silently fine).
  */
 export type CorrectnessMap = ReadonlyMap<string, LineCorrectness>;
 

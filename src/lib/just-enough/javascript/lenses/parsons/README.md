@@ -5,9 +5,11 @@ The learner sees the snippet's lines **shuffled** (plus optional **distractor**
 lines that do not belong in the solution) and reconstructs the original program
 by dragging lines into a solution column **in the correct order** and **at the
 correct indentation**. A "Check" button grades the arrangement and surfaces
-**per-line feedback** — correct / wrong-order / wrong-indent / distractor /
-unplaced — plus an aggregate score. A view-mode toggle reveals the complete
-solution for self-check without discarding the learner's arrangement.
+**per-line feedback** — correct / wrong place / wrong indentation (in a
+colour-blind-safe palette) — plus an aggregate score; a placed distractor reads as
+"wrong place" and a missing line lowers the score, so the feedback never reveals which
+lines are distractors. A view-mode toggle reveals the complete solution for self-check
+without discarding the learner's arrangement.
 
 **The snippet IS the solution.** The educator authors the snippet as the correct
 program (lines in order, indented as intended); the lens derives the exercise
@@ -98,7 +100,7 @@ precedence — see [Feedback contract](#feedback-contract-check)):
 - **Order** — is each line in a correct relative position? Graded via a
   Longest-Increasing-Subsequence (LIS) comparison against the model order, so
   the feedback highlights the **fewest** lines that need to move rather than
-  cascading one early mistake into a wall of red.
+  cascading one early mistake into a wall of error markers.
 - **Indentation** — is each line nested at the correct level? Graded as relative
   nesting levels (0, 1, 2, …) derived from the snippet's leading whitespace, not
   as raw space counts — so a learner's tab-vs-spaces choice does not matter,
@@ -110,7 +112,7 @@ precedence — see [Feedback contract](#feedback-contract-check)):
   is silently correct.
 
 The Check button makes grading **commit-then-verify** rather than
-drag-until-green: the learner assembles a complete arrangement and asks for
+drag-until-correct: the learner assembles a complete arrangement and asks for
 feedback, which preserves the structural-reasoning value of the exercise
 (continuous as-you-drag feedback would degrade it into trial-and-error). The
 view-mode toggle lets the learner peek at the complete solution as a self-check
@@ -146,9 +148,12 @@ JSParsons widget (`parsons.js`).
   move.
 - **Indent correctness** — whether a placed, order-correct line's indent level
   matches its model line's indent level.
-- **Line correctness** — the per-line feedback state, one of: `correct`,
+- **Line correctness** — the per-line graded state, one of: `correct`,
   `wrong-order`, `wrong-indent`, `distractor` (a distractor wrongly placed in
-  the solution), `unplaced` (a solution line still in the available pool).
+  the solution), `unplaced` (a solution line still in the available pool). Only the
+  first three are surfaced as distinct learner feedback: `distractor` renders
+  identically to `wrong-order`, and `unplaced` is never rendered (it lowers the score)
+  — both to avoid revealing the distractors (see [Feedback contract](#feedback-contract-check)).
 - **Score** — the aggregate percentage of solution lines that are fully correct
   (right order **and**, when `canIndent`, right indent). Formula:
   `total === 0 ? 100 : Math.round(correct / total * 100)`, where `total` is the
@@ -163,24 +168,27 @@ JSParsons widget (`parsons.js`).
 <div data-lens="parsons" data-view-mode="work|complete" data-can-indent="true|false">
   <header data-parsons-toolbar>       — controls
     <button data-parsons-check>       —   grade the current arrangement
-    <button data-parsons-reset>       —   re-shuffle + clear feedback
+    <button data-parsons-reset>       —   re-shuffle + clear feedback (NOT history)
     <button data-parsons-view-toggle> —   single toggle: "Show solution" ⇄ "Back to
                                             exercise" (aria-pressed = solution shown)
-  — info panel (above the board) —
-    <… data-parsons-legend>           —   feedback colour key (collapsible)
-    <… data-parsons-distractor-count> —   "extra lines: N" hint (collapsible; N>0)
-    <… data-parsons-hints>            —   educator hint blocks: <details><summary> when
-                                            parsons-collapse:, else <pre>
+    <button data-parsons-history-open> —  open the attempt-history modal
+  — info panel (above the board; both views) —
+    <details data-parsons-legend>     —   3-state feedback key, collapsed (rows carry
+                                            internal data-legend-state)
+    <details data-parsons-distractor-count> — collapsed; spoiler-free summary, body
+                                            reveals "extra lines: N" (N>0 only)
+    <… data-parsons-hints>            —   educator hint blocks: each a collapsible
+                                            <details><summary>Hint</summary><pre>…</pre>
   — work view (data-view-mode="work") —
   <main data-parsons-board>           —   two columns
     <ul data-parsons-pool>            —     available pool (shuffled, draggable <li>;
-        <li data-parsons-unplaced>    —       set after Check on a SOLUTION line still
-                                                in the pool — a "missing" hint)
+                                            NO per-line feedback — see Anti-leak)
     <ol data-parsons-solution>        —     solution column (drop target, ordered)
       <li data-parsons-line           —       each placed line:
           data-indent="N"             —         indent level (semantic; non-negative int)
           data-correctness="…">       —         after Check: correct|wrong-order|
-                                                  wrong-indent|distractor
+                                                  wrong-indent|distractor (distractor
+                                                  rendered identically to wrong-order)
         <span data-parsons-indent-step> —       N compact guide rules (alignment cue —
                                                   NOT literal indentSize spaces)
         <code>line text</code>
@@ -191,8 +199,10 @@ JSParsons widget (`parsons.js`).
   — complete view (data-view-mode="complete") —
   <pre data-parsons-complete>         —   model solution, read-only, in order at
                                             literal level*indentSize spaces, no distractors
-  — attempt history —
-  <button data-parsons-history-open> + modal <… data-parsons-history-modal> — Check log
+  — attempt-history modal (when open; both views) —
+  <div data-parsons-history-modal>    —   role=dialog; Escape / data-parsons-history-close
+    <li data-parsons-attempt>         —     one per Check: number, pass/fail, score, +
+        <li data-snapshot-line>       —       the frozen snapshot lines (data-correctness)
 </div>
 ```
 
@@ -203,17 +213,22 @@ selectors and CSS hooks; renaming any is a contract change: `data-view-mode`,
 `data-parsons-check`, `data-parsons-reset`, `data-parsons-view-toggle`,
 `data-parsons-board`, `data-parsons-pool`, `data-parsons-solution`,
 `data-parsons-line`, `data-parsons-indent-step`, `data-parsons-indent` /
-`data-parsons-outdent`, `data-parsons-unplaced`, `data-parsons-score`
-(its value is the score), `data-parsons-complete`, `data-parsons-legend`,
-`data-parsons-distractor-count`, `data-parsons-hints`, `data-parsons-history-open`,
-`data-parsons-history-modal`.
+`data-parsons-outdent`, `data-parsons-score` (its value is the score),
+`data-parsons-complete`, `data-parsons-legend`, `data-parsons-distractor-count`,
+`data-parsons-hints`, `data-parsons-history-open`, `data-parsons-history-modal`,
+`data-parsons-history-close`. (`data-parsons-unplaced` is **removed** — pool lines
+no longer carry feedback.)
 
-`data-line-id` (on every pool and solution `<li>`) is an **internal wiring hook**,
-not a sandbox-harness selector: `onDrop` reads it via `closest('[data-line-id]')` to
-identify the drop-target line and compute the insert index. It is load-bearing for
-the drag interaction (do not remove it), but harness/CSS code should key off the
-`data-parsons-*` family above. `data-correctness` is **absent until the first
-Check** (React omits it while ungraded) — treat absence as "ungraded," not a state.
+`data-line-id` (on every pool and solution `<li>`), `data-legend-state` (legend
+rows), and the history-modal structure (`data-parsons-history-header`,
+`data-parsons-attempt-list`, `data-parsons-attempt`, `data-parsons-attempt-summary`,
+`data-attempt-success`, `data-snapshot-line`) are **internal wiring/structural hooks**,
+not sandbox-harness selectors: e.g. `onDrop` reads `data-line-id` via
+`closest('[data-line-id]')` to
+identify the drop-target line. They are load-bearing (do not remove), but harness/CSS
+code should key off the `data-parsons-*` family above. `data-correctness` is **absent
+until the first Check** (React omits it while ungraded) — treat absence as "ungraded,"
+not a state.
 
 **Two presentation divergences from the original Phase-0 sketch** (reshaped at the
 browser checkpoints, see [`./DOCS.md`](./DOCS.md)): (1) in the WORK view the indent
@@ -309,22 +324,45 @@ therefore specified concretely, and the **arrangement logic is a pure reducer**
 ## Feedback contract (Check)
 
 Clicking **Check** grades the current arrangement and sets `data-correctness` on
-each placed line plus the aggregate score. The five per-line states:
+each placed line plus the aggregate score. The grader (`lib/evaluate.ts`) computes
+five internal states, but **two of them never become learner-visible feedback** — a
+deliberate anti-leak posture (see below). The states:
 
-| State          | Meaning                                                          | Where shown                         |
-| -------------- | ---------------------------------------------------------------- | ----------------------------------- |
-| `correct`      | right relative order **and** (if `canIndent`) right indent level | placed line, green                  |
-| `wrong-order`  | not in the LIS of placed lines' model positions (should move)    | placed line, red                    |
-| `wrong-indent` | order-correct but indent level ≠ model level                     | placed line, amber                  |
-| `distractor`   | a distractor line wrongly placed in the solution                 | placed line, red (distractor badge) |
-| `unplaced`     | a solution line still left in the available pool                 | pool line, neutral "missing" hint   |
+| State          | Meaning                                                          | Rendered as                           |
+| -------------- | ---------------------------------------------------------------- | ------------------------------------- |
+| `correct`      | right relative order **and** (if `canIndent`) right indent level | blue tint, solid border               |
+| `wrong-order`  | not in the LIS of placed lines' model positions (should move)    | vermilion tint, dashed border         |
+| `wrong-indent` | order-correct but indent level ≠ model level                     | vermilion tint, dotted border         |
+| `distractor`   | a distractor line wrongly placed in the solution                 | same as wrong-order (no badge)        |
+| `unplaced`     | a solution line still left in the available pool                 | not rendered; lowers score only       |
 
-**Precedence (canonical).** Each placed line resolves to exactly one state by
-this order: `distractor` > `wrong-order` > `wrong-indent` > `correct`. (A
-distractor is flagged regardless of position; an in-solution line is
-order-checked, and only if order-correct is its indent checked.) `unplaced` is a
-**pool-line** state, not a `data-correctness` value (it is never set on a
-solution `<li>`).
+**Precedence (canonical, internal).** Each placed line resolves to exactly one
+state by this order: `distractor` > `wrong-order` > `wrong-indent` > `correct`. (A
+distractor is flagged regardless of position; an in-solution line is order-checked,
+and only if order-correct is its indent checked.) `unplaced` is a solution line still
+in the pool; it is **never** a `data-correctness` value on a solution `<li>`.
+
+**Anti-leak: feedback never identifies the distractors.** Two presentation rules keep
+the puzzle a puzzle — which lines are distractors is for the learner to deduce, not for
+the feedback to give away:
+
+1. A placed `distractor` carries `data-correctness="distractor"` in the DOM, but CSS
+   styles it **identically to `wrong-order`** ("wrong place"). The learner sees only
+   "this line does not belong here", never "this line is a distractor". (The distinct
+   value is retained for the internal `success` computation and the history snapshot.)
+2. **Pool lines carry NO per-line feedback at all.** Flagging the `unplaced` solution
+   lines would, by elimination, identify the *un*flagged pool lines as the distractors.
+   So a missing solution line is signalled only through the **score** (it lowers it),
+   never through a pool-line marker. The legend therefore lists **only the three placed
+   states a learner can act on** (`correct` / `wrong-order` / `wrong-indent`).
+
+**Colour-blind-safe palette.** Feedback uses Wong's palette (Nature Methods 2011,
+mirroring `blanks`): **blue `#0072B2`** for correct, **vermilion `#D55E00`** for errors
+— no red/green. The signal does **not** rely on hue alone: the **border style** carries
+it too (correct = solid, wrong-place = dashed, wrong-indent = dotted), so the states
+are distinguishable under total colour blindness. A dark-mode media query bumps the
+tint alpha so the hues stay readable. The same palette + border-style key drives the
+legend swatches and the history-modal snapshot.
 
 **Deliberate grading-MODEL change from legacy.** The legacy `LineBasedGrader`
 (`parsons.js` L609–723) is a **sequential gate** (`first_error_only`): it grades
@@ -346,7 +384,10 @@ vocabulary, but the gating is removed.
 `total` is the number of **solution lines** (distractors excluded) and `correct`
 counts solution lines that are fully correct (right order, and right indent when
 `canIndent`). **Unplaced solution lines count toward `total`** (so leaving hard
-lines in the pool lowers the score — the exercise is not gameable by omission).
+lines in the pool lowers the score — the exercise is not gameable by omission). A
+placed **distractor** lowers the score only _indirectly_: it occupies a solution slot,
+so a real solution line is left unplaced (which is the line that costs the point) — the
+distractor itself carries no separate penalty, consistent with the anti-leak posture.
 The legacy parsons had **no percentage score** — grading was binary
 `success: errors.length === 0` (L723). The percentage is a **V2 cross-lens
 convention** adopted from the blanks score surface (`blanks/README.md` § Score)
@@ -375,11 +416,14 @@ vacuously 100% rather than `NaN%`.
 
 ## Feedback legend
 
-A collapsible legend (`data-parsons-legend`) keys the per-line feedback colours
-(correct / wrong-order / wrong-indent / distractor / unplaced → their meanings) so a
-learner can read a Check result without guessing. Collapsed by default to keep the
-surface uncluttered. This is a V2 addition (the legacy used bare marker classes with
-no key).
+A collapsible legend (`data-parsons-legend`, collapsed by default) keys the per-line
+feedback so a learner can read a Check result without guessing. It lists **only the
+three placed states a learner can act on** — `correct` / `wrong-order` / `wrong-indent`
+— each with its Wong colour swatch + border-style cue (matching the board). `distractor`
+and `unplaced` are **deliberately absent** (listing them would help identify the
+distractors — see [Feedback contract § Anti-leak](#feedback-contract-check)). Each row
+carries an internal `data-legend-state` completeness hook (not a harness selector). A V2
+addition (the legacy used bare marker classes with no key).
 
 ## Hint blocks (educator `/* … */` guidance)
 
@@ -391,45 +435,54 @@ code (so it is never a solution or distractor line), and rendered read-only abov
 the board (`data-parsons-hints`). The parser returns them as
 `ParsedParsons.hints` (`ReadonlyArray<HintBlock>`, see [`./types.ts`](./types.ts)).
 
-- A block containing a `parsons-collapse: <summary>` marker renders as
-  `<details><summary>…</summary>…</details>` — the text after the marker is the
-  summary, the rest is the body — for collapsible long-form guidance.
-- A block with no marker renders as a plain, always-visible `<pre>` (whitespace
-  preserved) — faithful to the legacy (only `parsons-collapse:` blocks collapse).
+- **Every block renders as a collapsible `<details>` with a default `Hint` label** —
+  the educator need not author a summary; a bare `/* … */` becomes a collapsed `Hint`
+  toggle (body in a `<pre>`, whitespace preserved). A `parsons-collapse: <label>` marker
+  only **customizes the summary label** (the text after the marker); the rest of the
+  block is the body. (Browser-gate divergence from the legacy + the earlier spec: the
+  always-visible plain-`<pre>` mode is dropped — every hint is a toggle, so guidance is
+  hidden until the learner wants it.)
+- **Empty edge:** a `parsons-collapse:` marker with no text (or an empty block) falls
+  back to the default `Hint` label — never an empty/unclickable summary.
+- **Rendered as TEXT.** Both the summary label and the body are rendered as framework-
+  escaped text (never `dangerouslySetInnerHTML`), so an educator block cannot inject
+  markup.
 - **Scope:** only `/* … */` block comments become hints. Unlike the legacy (which
   `strip()`s ALL comments out of the code), V2 leaves `//` line-comments as ordinary
   orderable code — a deliberate scope decision (this feature is block-comment hints,
   not general comment stripping). (Consequence: a snippet ported from the legacy with
   trailing `// note` comments keeps them as part of the orderable line text.)
-- **Empty edge:** an empty block (`/**/`) or an empty `parsons-collapse:` summary
-  renders as-is (an empty hint), not filtered.
 
 ## Distractor-count hint
 
-When the exercise includes distractors, a `data-parsons-distractor-count` hint shows
-**`extra lines: N`** (N = the number of distractors mixed into the pool) so the
-learner knows some pool lines do not belong. The text is ported from the legacy
-(`component.js` `extra lines:` line); shown only when N > 0. **It is collapsed by
-default — a deliberate V2 divergence, NOT legacy parity** (the legacy renders it
-always-open). Collapsed per the compactness request, with a known **discoverability
-trade-off** for novices (a beginner may not learn distractors exist until they fail
-Check) — revisit at the Inc 10 browser checkpoint.
+When the exercise includes distractors, a `data-parsons-distractor-count` hint
+(`<details>`, collapsed; shown only when N > 0) signals that some pool lines do not
+belong. **The exact count is a spoiler** (it tells the learner how many lines to
+discard), so the **collapsed summary is spoiler-free** (e.g. "some pool lines do not
+belong") and the count **`extra lines: N`** (N = the number of distractors actually
+mixed into the pool, the capped/selected count — text ported from the legacy
+`component.js`) is revealed only in the **expandable body**. This both hides the spoiler
+and surfaces the explanation on expand — two deliberate V2 divergences from the legacy
+(which renders `extra lines: N` always-open).
 
 ## Attempt history
 
 Each **Check** appends an `Attempt` (see [`./types.ts`](./types.ts)) to an in-mount
-history. A `data-parsons-history-open` control opens a modal
-(`data-parsons-history-modal`) listing every checked attempt — its number,
-pass / fail, score, and a **read-only snapshot of the arrangement as it was checked**
-(each placed line's code, indent, and resolved correctness). Ported from the legacy
-parsonizer's "review guesses" modal (`component.js` `registerGuess`), with two
-adaptations: the modal is **React-state-driven** (not the legacy anchor-hash /
-`:target` hack, which fights SPA routing), and each snapshot is a re-rendered value
-rather than a cloned DOM node. History **persists across Reset** (faithful — the
-legacy keeps guesses across reshuffle) and dies on unmount (in-mount only; no
-cross-mount persistence, per the disposable-practice contract). Each snapshot is
-**frozen at Check time and rendered verbatim — the modal never re-grades** (re-deriving
-would risk showing a different verdict than the learner saw).
+history. A `data-parsons-history-open` control **in the toolbar** opens a modal
+(`data-parsons-history-modal`, `role="dialog"`, closed by a `data-parsons-history-close`
+button or **Escape**) listing every checked attempt — its number, pass / fail, score,
+and a **read-only snapshot of the arrangement as it was checked** (each placed line's
+code, indent, and resolved correctness). Ported from the legacy parsonizer's "review
+guesses" modal (`component.js` `registerGuess`), with two adaptations: the modal is
+**React-state-driven** (not the legacy anchor-hash / `:target` hack, which fights SPA
+routing), and each snapshot is a re-rendered value rather than a cloned DOM node. The
+snapshot stores each line's **raw** graded correctness (including `distractor`) but the
+modal CSS **folds `distractor` into the wrong-place look** exactly as the board does —
+the review never reveals which lines were distractors. History **persists across Reset**
+(faithful — the legacy keeps guesses across reshuffle) and dies on unmount (in-mount
+only; no cross-mount persistence, per the disposable-practice contract). Each snapshot
+is **frozen at Check time and rendered verbatim — the modal never re-grades**
+(re-deriving would risk showing a different verdict than the learner saw).
 
 The legacy gated this whole surface on a `history` constructor flag (default
 `true`); **V2 drops the flag — history is always-on, no config knob** (no
@@ -488,9 +541,12 @@ vs. the prior-art JSParsons widget:
   machinery (`$$toggle$$`, `vartests`, `unittests`) are dropped. The marker
   becomes the JS-idiom `// distractor`; indentation is
   `indentSize`-configurable; toggles and embedded unit tests are out of scope.
-- **Per-line feedback shows all five states at once** (the legacy
-  `first_error_only` grader stops at the first error). Parity with the blanks
-  redo's enabled-by-default hints panel.
+- **Per-line feedback is independent, not first-error-gated** (the legacy
+  `first_error_only` grader stops at the first error; V2 grades every placed line on
+  its own). Three states are surfaced to the learner (`correct` / `wrong-order` /
+  `wrong-indent`); `distractor` and `unplaced` are computed but never shown as distinct
+  feedback (see [Feedback contract § Anti-leak](#feedback-contract-check)). Parity with
+  the blanks redo's enabled-by-default formative feedback.
 - **No seeded RNG (yet).** The shuffle and distractor-subset selection use bare
   `Math.random()` (mechanical-conversion mandate). Reproducible exercises are a
   [Future direction](#future-direction) item via call-site PRNG injection.
@@ -545,6 +601,11 @@ each is independently testable:
   arrangement short-circuits before the LIS call. Pure.
 - `lib/evaluate-indentation.ts` (core) — **new**. Per-line indent-level
   correctness for order-correct lines, against the model levels. Pure.
+- `lib/evaluate.ts` (core) — **new**. `buildEvaluation` composes the two evaluators
+  into one `EvaluationResult`: resolves the per-line precedence, marks `unplaced`
+  solution lines, and computes `total`/`correct`/`score`/`success`. This is the grader
+  `Check` calls; it still computes the unsurfaced `distractor`/`unplaced` states (the
+  anti-leak fold is a render concern, not a grading one). Pure.
 - `lib/arrange.ts` (core) — **new**. Pure reducer for the learner's arrangement:
   `placeFromPool` / `reorderWithinSolution` / `returnToPool` / `indent` /
   `outdent` over a plain `{ pool, solution }` value. No React, no DOM — the
@@ -555,8 +616,8 @@ each is independently testable:
 
 Tests split: `tests/lis.test.ts`, `tests/parse-parsons.test.ts`,
 `tests/evaluate-line-order.test.ts`, `tests/evaluate-indentation.test.ts`,
-`tests/arrange.test.ts`, `tests/core.test.ts` (vitest, no jsdom);
-`tests/component.test.tsx` (vitest + jsdom + `@testing-library/react`).
+`tests/evaluate.test.ts`, `tests/arrange.test.ts`, `tests/core.test.ts` (vitest, no
+jsdom); `tests/component.test.tsx` (vitest + jsdom + `@testing-library/react`).
 
 ## Dependencies (no install needed)
 
