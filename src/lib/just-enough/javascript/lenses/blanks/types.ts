@@ -38,10 +38,10 @@
  *
  * @remarks Naming note: vocabulary matches the legacy
  * `BlanksLens.jsx` directly (`blank`, `blankenated`, `content type`,
- * `view mode`, `hints level`, `correctness`). Inc 6.m: removed
- * `code question`/`micro-decision` terms — `socratizing/` is no
- * longer a blanks concern (moved to the SL orchestrator since it
- * operates on the original embodiment, not the blankenated source).
+ * `view mode`, `hints level`, `correctness`). The Socratic study
+ * companion (`socratizing/`) is NOT a blanks concern — it lives at
+ * the SL orchestrator (it operates on the original embodiment, not
+ * on the blankenated source).
  */
 
 // ─── Token category + blank identity ────────────────────────
@@ -54,50 +54,47 @@
  * - `identifier` — `Node.type === 'Identifier' | 'PrivateIdentifier'`
  *   (variable names, parameter names, private class fields like `#x`).
  * - `literal` — `Node.type === 'Literal' | 'RegExpLiteral' | 'TemplateElement'`
- *   (strings, numbers, booleans, regex; plus Inc 6.n: template-literal text
+ *   (strings, numbers, booleans, regex; plus template-literal text
  *   chunks — the source between `` ` `` and `${`, or between `}` and `` ` ``).
  *   The backtick `` ` `` and the `${`/`}` interpolation boundaries are NOT
  *   blanked under literals — they blank under `delimiters` instead
- *   (Inc 6.o for backticks; Inc 6.6 for `${`; block-close `}` shared with
- *   template-close `}`).
- * - `keyword` — Inc 6.k: token-stream walk over Acorn's tokens, matching
+ *   (backticks via `tokTypes.backQuote`; `${` via `tokTypes.dollarBraceL`;
+ *   block-close `}` shared with template-close `}`).
+ * - `keyword` — token-stream walk over Acorn's tokens, matching
  *   `tok.type.keyword` (reserved keywords like `function`/`if`/`return`/
  *   `class`/`import`/`extends`/`super`/`try`/`catch`/`null`/`true`/etc.)
  *   plus a fixed contextual-keyword set (`let`, `static`, `async`,
  *   `await`, `yield`, `of`, `as`, `from`, `get`, `set` — which Acorn
- *   emits as `name` tokens with `.keyword === undefined`). Replaces the
- *   pre-Inc-6.k partial AST-walk approach which omitted ~25 keywords.
+ *   emits as `name` tokens with `.keyword === undefined`).
  * - `operator` — AST-walk over `BinaryExpression.operator`,
+ *   `LogicalExpression.operator` (`&&`, `||`, `??` — Acorn splits
+ *   these into LogicalExpression nodes, NOT BinaryExpression),
  *   `AssignmentExpression.operator`, `UpdateExpression.operator`,
  *   `UnaryExpression.operator`, `VariableDeclarator` init `=`,
- *   `AssignmentPattern` default-parameter `=` (Inc 6.k; covers
- *   `function f(x = 0)` and `({ a = 1 } = {})`),
- *   `LogicalExpression.operator` (Inc 6.l; `&&`, `||`, `??` — Acorn
- *   splits these into LogicalExpression nodes, NOT BinaryExpression),
- *   and `PropertyDefinition` class-field initializer `=` (Inc 6.l;
- *   covers `class A { x = 1 }`, `class A { #count = 0 }`, and
+ *   `AssignmentPattern` default-parameter `=` (covers
+ *   `function f(x = 0)` and `({ a = 1 } = {})`), and
+ *   `PropertyDefinition` class-field initializer `=` (covers
+ *   `class A { x = 1 }`, `class A { #count = 0 }`, and
  *   `class A { static MAX = 100 }`).
- * - `delimiter` (Inc 6.6 extension; beyond legacy) —
- *   syntactic delimiter tokens from Acorn's token stream:
- *   `(`, `)`, `{`, `}`, `[`, `]`, `${`, `;`, `,`, `.`, plus
- *   (Inc 6.k) the syntactic-marker delimiters `=>`, `?`, `:`,
- *   `?.`, `...`, plus (Inc 6.o) the template-literal opener/closer
- *   `` ` ``, plus (Inc 6.q) the generator `*` in `function* g()` /
- *   `*method()` / object-literal `{ *gen() {} }`. Generator `*` is
- *   AST-detected rather than token-stream-matched because Acorn's
- *   `tokTypes.star` token covers BOTH generator `*` and arithmetic
- *   `a * b` — only generator should classify as delimiter
- *   (arithmetic stays under operators via the `BinaryExpression`
- *   branch). The template-expression opener `${` is treated as a
- *   single 2-char token (`tokTypes.dollarBraceL`); block-close
- *   and template-close `}` are not distinguished for v1 (both blank
- *   as `}`). Ternary `?` / `:` are classified as delimiters, NOT
- *   operators — the operators category covers AST-walk-driven
- *   operator strings (BinaryExpression.operator etc.); ternary
- *   tokens come through the token-stream filter. See
- *   `./lib/blankenate.ts` DELIMITER_LABELS for the comprehensive
- *   token-stream set + the one documented exclusion (regex slash —
- *   part of the `regexp` token, not separately tokenized).
+ * - `delimiter` (extension; beyond legacy) — syntactic delimiter
+ *   tokens from Acorn's token stream: `(`, `)`, `{`, `}`, `[`, `]`,
+ *   `${`, `;`, `,`, `.`, `=>`, `?`, `:`, `?.`, `...`, `` ` ``; plus
+ *   the AST-detected generator `*` in `function* g()` / `*method()` /
+ *   object-literal `{ *gen() {} }`. Generator `*` is AST-detected
+ *   rather than token-stream-matched because Acorn's `tokTypes.star`
+ *   token covers BOTH generator `*` and arithmetic `a * b` — only
+ *   generator should classify as delimiter (arithmetic stays under
+ *   operators via the `BinaryExpression` branch). The template-
+ *   expression opener `${` is treated as a single 2-char token
+ *   (`tokTypes.dollarBraceL`); block-close and template-close `}`
+ *   are not distinguished for v1 (both blank as `}`). Ternary `?` /
+ *   `:` are classified as delimiters, NOT operators — the operators
+ *   category covers AST-walk-driven operator strings
+ *   (BinaryExpression.operator etc.); ternary tokens come through
+ *   the token-stream filter. See `./lib/blankenate.ts`
+ *   DELIMITER_LABELS for the comprehensive token-stream set + the
+ *   one documented exclusion (regex slash — part of the `regexp`
+ *   token, not separately tokenized).
  */
 type BlankType =
 	| 'identifier'
@@ -142,7 +139,7 @@ type Blank = {
  * only in the defense-in-depth path (see `./README.md` § Edge cases).
  *
  * `blankedCode` is the source with each blank's `[start, end)` range
- * substituted by length-matched `_` (Inc 6.7: `_`.repeat(original.length)
+ * substituted by length-matched `_` (`_`.repeat(original.length)
  * — one underscore per original character, preserving width).
  * `blankedCode.length === originalCode.length` always; positions in
  * `blanks[i].{start, end}` map 1:1 to positions in `blankedCode`.
@@ -213,8 +210,8 @@ type ViewMode = 'blankenated' | 'complete';
  * blankenated mode. Three sub-modes, ordered easiest to hardest:
  *
  * - `'helpful'` — fixed-width fillable-field UX with correctness-aware
- *   per-blank colors (Inc 6.7), plus the cursor-scoped hints panel
- *   (Inc 6h-redux). Full scaffolding.
+ *   per-blank colors, plus the cursor-scoped hints panel
+ *  . Full scaffolding.
  * - `'diff'` — same editor, but per-character diff highlighting against
  *   the (hidden) original instead of per-blank correctness colors. No
  *   hints panel. The diff is the hint.
@@ -234,7 +231,7 @@ type EditorMode = 'helpful' | 'diff' | 'raw';
  * The `hintsMode` config value: enable or disable the cursor-scoped
  * hints panel.
  *
- * @remarks Inc 6h-redux ships a **cursor-scoped, on-demand, scrambled**
+ * @remarks ships a **cursor-scoped, on-demand, scrambled**
  * hints panel. When `hintsMode === 'on'`, the panel renders below the
  * editor and shows a reveal-button for the blank under the cursor
  * (only). Clicking the button reveals the scrambled-letters hint
@@ -256,10 +253,10 @@ type HintsMode = 'on' | 'off';
  *
  * @remarks `BlankCorrectness` is a blanks-internal term for the
  * cloze-deletion exercise. It is the only correctness signal the
- * lens exposes — the lens does NOT layer Socratic questioning on top.
- * (Inc 6.m: the Ask Me / socratizing surface was moved out of this
- * lens and into the SL orchestrator, since it operates on the
- * original embodiment rather than the blankenated source.)
+ * lens exposes — the lens does NOT layer Socratic questioning on
+ * top. The Ask Me / `socratizing/` surface lives in the SL
+ * orchestrator one layer up, since it operates on the original
+ * embodiment rather than the blankenated source.
  */
 type BlankCorrectness = 'correct' | 'incorrect' | 'unfilled';
 

@@ -46,12 +46,12 @@ describe('blankenate', () => {
 			expect(result?.blanks.length).toBeGreaterThanOrEqual(1);
 		});
 
-		it('replaces the single identifier with length-matched underscores in the blanked source (Inc 6.7)', () => {
+		it('replaces the single identifier with length-matched underscores in the blanked source', () => {
 			const result = blankenate('let x = 1;', 1, {
 				...NO_TYPES,
 				identifiers: true,
 			});
-			// Inc 6.7: placeholder is `_` repeated original.length times.
+			// placeholder is `_` repeated original.length times.
 			// `x` is 1 char, so the placeholder is `_` (not `__`).
 			expect(result?.blankedCode).toBe('let _ = 1;');
 		});
@@ -81,7 +81,7 @@ describe('blankenate', () => {
 			expect(blanks[0].start).toBeLessThan(blanks[1].start);
 		});
 
-		it('replaces both keywords with length-matched underscores (Inc 6.7)', () => {
+		it('replaces both keywords with length-matched underscores', () => {
 			const result = blankenate('let x = 1; let y = 2;', 1, {
 				...NO_TYPES,
 				keywords: true,
@@ -167,7 +167,7 @@ describe('blankenate', () => {
 		});
 	});
 
-	describe('Delimiter blanks — Inc 6.6 (5th content-type)', () => {
+	describe('Delimiter blanks — (5th content-type)', () => {
 		it('blanks parentheses when delimiters is enabled', () => {
 			const result = blankenate('foo();', 1, {
 				...NO_TYPES,
@@ -305,7 +305,7 @@ describe('blankenate', () => {
 			}
 		});
 
-		// Inc 6.k: spread `...` is now a SINGLE blank (Acorn emits it
+		// spread `...` is now a SINGLE blank (Acorn emits it
 		// as one `...`-labeled token via `tokTypes.ellipsis`). Lock
 		// that spread produces exactly one 3-char `...` blank per
 		// occurrence, and NEVER produces 1- or 2-char `.` blanks from
@@ -328,10 +328,10 @@ describe('blankenate', () => {
 			expect(originals).not.toContain('.');
 		});
 
-		// Inc 6.k: ternary `?` / `:`, optional chaining `?.`, and arrow
+		// ternary `?` / `:`, optional chaining `?.`, and arrow
 		// `=>` are now IN DELIMITER_LABELS (user-directed reversal of
-		// the Inc 6.6 AR-3 exclusion). Lock that they are blanked.
-		it('ternary `?`/`:`, optional chaining `?.`, and arrow `=>` ARE blanked under delimiters (Inc 6.k)', () => {
+		// AR-3 exclusion). Lock that they are blanked.
+		it('ternary `?`/`:`, optional chaining `?.`, and arrow `=>` ARE blanked under delimiters ', () => {
 			const code = 'const f = (x) => (x ? x.a : null); const g = obj?.prop;';
 			const result = blankenate(code, 1, {
 				...NO_TYPES,
@@ -415,7 +415,7 @@ describe('blankenate', () => {
 		});
 	});
 
-	describe('Inc 6.k: comprehensive Acorn-punctuator coverage + user regression', () => {
+	describe('comprehensive Acorn-punctuator coverage + user regression', () => {
 		// The user's exact source from the post-Inc-7 sandbox: arrow
 		// `=>` was visible at difficulty 100 with all categories
 		// checked. Lock the fix.
@@ -475,7 +475,7 @@ describe('blankenate', () => {
 		});
 
 		// Negative locks: things that must NOT be blanked under delimiters
-		// Inc 6.o reversed the backtick exclusion — see the
+		// reversed the backtick exclusion — see the
 		// `Inc 6.o — backticks blank under delimiters` describe block
 		// below for the new positive locks.
 
@@ -488,7 +488,7 @@ describe('blankenate', () => {
 			expect(originals).not.toContain('/');
 		});
 
-		// AR-3 BLOCKER fix Inc 6.k: behavioral matrix. For EACH Acorn
+		// AR-fix: behavioral matrix. For EACH Acorn
 		// punctuator label, drive `blankenate` with a source that
 		// contains the token and assert it IS or ISN'T in
 		// `originals`, per the documented DELIMITER_LABELS contract.
@@ -513,9 +513,9 @@ describe('blankenate', () => {
 			[acorn.tokTypes.colon.label, 'a ? b : c;', 'in'],
 			[acorn.tokTypes.questionDot.label, 'obj?.prop;', 'in'],
 			[acorn.tokTypes.ellipsis.label, '[...rest];', 'in'],
-			// Inc 6.o: backtick now IN (was OUT in Inc 6.k era).
+			// backtick now IN (was OUT in era).
 			[acorn.tokTypes.backQuote.label, 'const s = `hi`;', 'in'],
-			// AR-3 IMPORTANT (Inc 6.o): keep at least one `'out'` row so
+			// AR-fix: keep at least one `'out'` row so
 			// the matrix test's negative branch stays live. Regex `/` is
 			// a permanent exclusion (regex literal is one `regexp` token,
 			// not separately tokenized).
@@ -538,9 +538,9 @@ describe('blankenate', () => {
 			},
 		);
 
-		// AR-3 IMPORTANT 2 fix: sibling regression with delimiters-only
+		// AR-fix: sibling regression with delimiters-only
 		// to triangulate that `=>` is caught by the DELIMITER path, not
-		// by the operator AST-walk. Inc 6.6 AR-3 era assertions ran
+		// by the operator AST-walk. AR-3 era assertions ran
 		// `ALL_TYPES`; this isolates the delimiter contribution.
 		it('arrow `=>` IS blanked under delimiters-only (delimiter-path triangulation)', () => {
 			const code = 'const f = (x) => x;';
@@ -569,7 +569,7 @@ describe('blankenate', () => {
 			expect(originals).toContain(';');
 		});
 
-		// AR-3 IMPORTANT 3 fix: private-field identifier `#x` uses
+		// AR-fix: private-field identifier `#x` uses
 		// `tokTypes.privateId` with label `name` (Acorn emits it as a
 		// name-class token with `value` carrying the `#` prefix). It
 		// is NOT a delimiter and must NOT be blanked under delimiters-
@@ -642,7 +642,7 @@ describe('blankenate', () => {
 		it('blanks every reserved keyword Acorn flags as .keyword under keywords=true', () => {
 			// Token-stream walk uses Acorn's `tok.type.keyword` flag.
 			// Verifies the broad sweep beyond the AST-walk subset
-			// that Inc 6.6 covered (which missed import/from/extends/
+			// that covered (which missed import/from/extends/
 			// super/yield/async/await/try/catch/finally/throw/break/
 			// continue/typeof/instanceof/delete/void/this/export/etc.).
 			//
@@ -685,7 +685,7 @@ describe('blankenate', () => {
 		});
 
 		it('locks CONTEXTUAL_KEYWORDS positional boundary: `get`/`from`/`of` blank even in non-canonical positions (intentional false positive)', () => {
-			// AR-3 BLOCKER fix: lock the documented design decision that
+			// AR-fix: lock the documented design decision that
 			// CONTEXTUAL_KEYWORDS matches by value only (no syntactic-
 			// position check). The implementation comment says:
 			// "Acceptable pedagogically: if the learner sees `let` or
@@ -778,7 +778,7 @@ describe('blankenate', () => {
 			// `function f(x = 0) {}` has an AssignmentPattern node where
 			// node.left is the param `x` and node.right is the default `0`,
 			// with the `=` literal in source between them. No .operator field
-			// — Inc 6.k adds the AssignmentPattern branch to the operator
+			// — adds the AssignmentPattern branch to the operator
 			// AST walker explicitly.
 			const result = blankenate('function f(x = 0) {}', 1, {
 				...NO_TYPES,
@@ -799,13 +799,13 @@ describe('blankenate', () => {
 		});
 
 		it('dedup collapses keyword/operator collision: `typeof` (keyword + unary) and `null`/`true` (keyword + Literal)', () => {
-			// AR-3 BLOCKER fix: the prior dedup test source produced no
+			// AR-fix: the prior dedup test source produced no
 			// classifier collisions and so trivially passed without ever
 			// invoking the dedup path. This source DOES trigger overlaps:
-			//   - `typeof` — emitted by keyword token-stream walk
-			//     AND visited as UnaryExpression operator by the AST walk
-			//   - `null`, `true` — emitted by keyword token-stream walk
-			//     AND visited as Literal nodes by the AST walk
+			// - `typeof` — emitted by keyword token-stream walk
+			// AND visited as UnaryExpression operator by the AST walk
+			// - `null`, `true` — emitted by keyword token-stream walk
+			// AND visited as Literal nodes by the AST walk
 			// With ALL_TYPES, every classifier fires; dedup is the only
 			// thing preventing duplicate (start,end) entries.
 			const result = blankenate('typeof null === true;', 1, ALL_TYPES);
@@ -822,18 +822,18 @@ describe('blankenate', () => {
 
 	describe('Inc 6.l — gap closures from the sandbox comprehensive snippet', () => {
 		// User pasted the difficulty-100/all-categories blanked output of
-		// the comprehensive Inc 6.k preview snippet. Three gaps showed
+		// the comprehensive preview snippet. Three gaps showed
 		// literal characters where blanks were expected:
-		//   - PropertyDefinition `=` (class field initializer)
-		//   - LogicalExpression operators `&&`, `||`, `??`
-		//   - Generator `*` (deferred — see Inc 6.k AR notes)
+		// - PropertyDefinition `=` (class field initializer)
+		// - LogicalExpression operators `&&`, `||`, `??`
+		// - Generator `*` (deferred — see AR notes)
 		// The first two are real pedagogical surfaces; locks below.
 
 		it('blanks PropertyDefinition `=` in class-field initializer (instance field) under operators=true', () => {
 			// `class A { x = 1; }` produces a PropertyDefinition node where
 			// node.key is the field name and node.value is the initializer.
 			// The `=` lives in source between them with NO AssignmentExpression
-			// or AssignmentPattern wrapping it. Inc 6.k AssignmentPattern fix
+			// or AssignmentPattern wrapping it. AssignmentPattern fix
 			// did NOT cover this case.
 			const result = blankenate('class A { x = 1; }', 1, {
 				...NO_TYPES,
@@ -867,7 +867,7 @@ describe('blankenate', () => {
 		it('blanks LogicalExpression `&&` under operators=true', () => {
 			// Acorn produces a LogicalExpression (NOT BinaryExpression) for
 			// `&&`, `||`, `??`. Same `node.operator` shape as BinaryExpression
-			// but the type-discriminator differs; Inc 6.k operator walker
+			// but the type-discriminator differs; operator walker
 			// only handled BinaryExpression.
 			const result = blankenate('a && b;', 1, {
 				...NO_TYPES,
@@ -905,7 +905,7 @@ describe('blankenate', () => {
 			expect(originals).toContain('??');
 		});
 
-		// AR-3 BLOCKER fix: lock that BinaryExpression operators still
+		// AR-fix: lock that BinaryExpression operators still
 		// blank after the LogicalExpression `||` widening of the shared
 		// branch. Without this, a future refactor that drops
 		// BinaryExpression from the gate would be invisible to the
@@ -919,7 +919,7 @@ describe('blankenate', () => {
 			expect(originals).toContain('+');
 		});
 
-		// AR-3 IMPORTANT fix: triangulate the LogicalExpression branch
+		// AR-fix: triangulate the LogicalExpression branch
 		// against a string-scan shortcut. A fake impl that scans the
 		// source text for `&&`/`||`/`??` would pass the three single-
 		// operator tests above; only a real AST walk locates all three
@@ -938,7 +938,7 @@ describe('blankenate', () => {
 			expect(originals).toContain('??');
 		});
 
-		// AR-3 IMPORTANT fix: negative lock that MethodDefinition (e.g.
+		// AR-fix: negative lock that MethodDefinition (e.g.
 		// `class A { m() {} }`) does NOT produce a spurious `=` blank.
 		// PropertyDefinition and MethodDefinition are different Acorn
 		// node types; the gate explicitly checks PropertyDefinition.
@@ -991,7 +991,7 @@ describe('blankenate', () => {
 			expect(stars.length).toBe(0);
 		});
 
-		// AR-3 IMPORTANT (Inc 6.q): mixed source — arithmetic `*` AND
+		// AR-fix: mixed source — arithmetic `*` AND
 		// generator `*` in the same source. A string-scan fake would
 		// push both; only the AST-detection path produces exactly one
 		// blank at the generator position.
@@ -1008,7 +1008,7 @@ describe('blankenate', () => {
 			expect(stars[0].start).toBe(generatorStarPosition);
 		});
 
-		// AR-3 IMPORTANT (Inc 6.q): static class generator method
+		// AR-fix: static class generator method
 		// `static *gen()` — `*` lives between `static` and `gen`.
 		it('blanks `static *gen()` class generator method `*` under delimiters=true', () => {
 			const result = blankenate('class A { static *gen() { yield 1; } }', 1, {
@@ -1019,7 +1019,7 @@ describe('blankenate', () => {
 			expect(stars.length).toBe(1);
 		});
 
-		// AR-3 IMPORTANT (Inc 6.q): anonymous generator FunctionExpression
+		// AR-fix: anonymous generator FunctionExpression
 		// `const f = function*() {}` — exercises the fallback ladder
 		// (no id, no params → boundary is body.start).
 		it('blanks anonymous generator `const f = function*() {}` `*` under delimiters=true', () => {
@@ -1031,7 +1031,7 @@ describe('blankenate', () => {
 			expect(stars.length).toBe(1);
 		});
 
-		// AR-3 IMPORTANT (Inc 6.q): object-literal generator shorthand
+		// AR-fix: object-literal generator shorthand
 		// `{ *gen() {} }` — Property node with .value.generator true.
 		it('blanks object-literal shorthand `{ *gen() {} }` generator `*` under delimiters=true', () => {
 			const result = blankenate('const o = { *gen() { yield 1; } };', 1, {
@@ -1042,7 +1042,7 @@ describe('blankenate', () => {
 			expect(stars.length).toBe(1);
 		});
 
-		// AR-3 IMPORTANT (Inc 6.q): negative — object-literal getter
+		// AR-fix: negative — object-literal getter
 		// `{ get foo() {} }` must NOT push a `*` blank. The Property
 		// branch guards on `.value.generator === true`, so getters
 		// (which have `.kind === 'get'` and `.value.generator === false`)
@@ -1060,9 +1060,9 @@ describe('blankenate', () => {
 	describe('Inc 6.n — TemplateLiteral content blanks under literals', () => {
 		// User-reported gap: in `\`Failed: \${error.message}\``, the
 		// `Failed: ` content showed up literal in the sandbox output
-		// even with `literals: true` at difficulty 1.0. Inc 6.k had
+		// even with `literals: true` at difficulty 1.0. had
 		// deferred this with the comment "would join literals not
-		// delimiters if blanked" — Inc 6.n makes good on that.
+		// delimiters if blanked" — makes good on that.
 
 		it('blanks the template-element string content `Failed: ` under literals=true', () => {
 			const result = blankenate('const m = `Failed: ${err.message}`;', 1, {
@@ -1134,7 +1134,7 @@ describe('blankenate', () => {
 		});
 
 		it('TemplateElement chunks remain literal when literals=false (negative lock)', () => {
-			// AR-3 BLOCKER fix: use a source where the chunk text
+			// AR-fix: use a source where the chunk text
 			// (`hello `, ` world`) cannot be confused for a unary
 			// operator — earlier draft used `!` inside the template
 			// which a reader might misread as testing the
@@ -1195,7 +1195,7 @@ describe('blankenate', () => {
 	});
 
 	describe('Inc 6.o — backticks blank under delimiters (Inc 6.k reversal)', () => {
-		// Inc 6.k excluded `` ` `` from DELIMITER_LABELS with the
+		// excluded `` ` `` from DELIMITER_LABELS with the
 		// rationale "analogous to `'`/`"` quotes for string literals
 		// (part of the literal token, not separately blanked)." User
 		// browser-sandboxed the post-Inc-6.n output and reported the
@@ -1217,7 +1217,7 @@ describe('blankenate', () => {
 		});
 
 		it('blanks all four backticks across two template literals in one source (positions distinct)', () => {
-			// AR-3 IMPORTANT fix: assert all four backticks are at
+			// AR-fix: assert all four backticks are at
 			// distinct source positions — a fake impl that pushed the
 			// same blank object 4 times would otherwise pass the count.
 			const result = blankenate('const a = `one`; const b = `two`;', 1, {
@@ -1243,7 +1243,7 @@ describe('blankenate', () => {
 		});
 
 		it('backticks remain literal when delimiters=false (negative lock; assert other categories actually fired)', () => {
-			// AR-3 IMPORTANT fix: prove the "other categories on" claim is
+			// AR-fix: prove the "other categories on" claim is
 			// not vacuous by asserting literals/identifiers/keywords
 			// blanks actually appeared in the result. Without these,
 			// `not.toContain` would pass even if the flag combination

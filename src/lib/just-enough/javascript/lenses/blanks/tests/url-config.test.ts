@@ -71,7 +71,7 @@ describe('parseHash — pure', () => {
 			});
 		});
 
-		// AR-3 BLOCKER Inc 6h-redux: editorMode round-trip lock —
+		// AR-3 BLOCKER editorMode round-trip lock —
 		// without this, dropping the `editor:` key from serializeConfig
 		// or removing it from parseHash would silently break URL
 		// persistence with no test signal.
@@ -257,7 +257,7 @@ describe('serializeConfig — pure', () => {
 		expect(parsed).toEqual(config);
 	});
 
-	// AR-4 BLOCKER fix (Inc 6.6 expansion): the `delimiters` content
+	// AR-fix: the `delimiters` content
 	// type was added to BlankType/ContentType + DELIMITER_LABELS +
 	// core.ts defaults, but `VALID_CONTENT_TYPES` in url-config.ts was
 	// missed in the original rename — silently dropping `delimiters`

@@ -48,7 +48,7 @@ describe('noPasteExtension', () => {
 
 	// Behavioral tests for actual paste-blocking (keymap Mod-V dispatch,
 	// DOM paste event preventDefault) live in the wrapper component
-	// tests + the Inc 6c Sandbox Checkpoint — they require a mounted
+	// tests + the Sandbox Checkpoint — they require a mounted
 	// EditorView (jsdom) and synthetic-event dispatch outside the
 	// scope of this pure-utility lib test.
 });

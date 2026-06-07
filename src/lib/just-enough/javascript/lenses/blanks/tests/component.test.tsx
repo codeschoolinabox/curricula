@@ -25,10 +25,10 @@ import blanksLens from '../index.js';
 afterEach(cleanup);
 
 /**
- * Inc 6.7 test helper: type `text` char-by-char into `view` starting at
+ * test helper: type `text` char-by-char into `view` starting at
  * `startPos`. Each char is a separate transaction so the auto-pad
  * transactionFilter runs once per char (mirrors the real keystroke
- * stream). Required because Inc 6.7's filter rejects multi-char
+ * stream). Required because 's filter rejects multi-char
  * inserts (which previously allowed `dispatch({changes: {from, to,
  * insert: longString}})` to "fill a blank in one shot").
  *
@@ -52,7 +52,7 @@ function typeIntoBlank(view: EditorView, text: string, startPos: number): void {
 	}
 }
 
-describe('blanks wrapper — Inc 6a', () => {
+describe('blanks wrapper — ', () => {
 	describe('Zero — degenerate snippet does not crash', () => {
 		it('renders data-lens="blanks" without throwing on an unparseable snippet (defense-in-depth)', () => {
 			expect(() =>
@@ -150,11 +150,11 @@ describe('blanks wrapper — Inc 6a', () => {
 			});
 		});
 
-		// Read-only / editable state is mode-dependent now (Inc 6c):
+		// Read-only / editable state is mode-dependent now:
 		// see the "editable mode + learnerCode state" describe block.
 	});
 
-	describe('view-mode toggle — Inc 6b', () => {
+	describe('view-mode toggle — ', () => {
 		it('config.viewMode="complete" seeds initial data-view-mode="complete"', () => {
 			const { container } = render(
 				<blanksLens.Component
@@ -276,7 +276,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
-	describe('editable mode + learnerCode state — Inc 6c', () => {
+	describe('editable mode + learnerCode state — ', () => {
 		it('the editor is EDITABLE in blankenated mode (state.readOnly === false)', async () => {
 			const { container } = render(
 				<blanksLens.Component
@@ -328,7 +328,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('toggle preserves learner edits: type → complete → blankenated → typed text is still there (AR-1 invariant)', async () => {
-			// Inc 6.7: use a longer source so 3 chars fit inside the blank.
+			// use a longer source so 3 chars fit inside the blank.
 			// `hello` (5 chars) — a single identifier — becomes a 5-char
 			// blank at difficulty 100, with room for 'XYZ' plus 2 trailing
 			// underscores.
@@ -383,8 +383,8 @@ describe('blanks wrapper — Inc 6a', () => {
 			});
 		});
 
-		it('typing does NOT remount the EditorView (regression: Inc 6c displayCode-feedback bug)', async () => {
-			// REGRESSION TEST for the Inc 6c remount-per-keystroke bug.
+		it('typing does NOT remount the EditorView (regression: displayCode-feedback bug)', async () => {
+			// REGRESSION TEST for the remount-per-keystroke bug.
 			// If the wrapper has `displayCode` in its useEffect deps and
 			// `displayCode` derives from `learnerCode` state that the
 			// updateListener feeds, every keystroke destroys+remounts the
@@ -447,7 +447,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
-	describe('correctness wiring + score display — Inc 6d', () => {
+	describe('correctness wiring + score display — ', () => {
 		it('renders a [data-blanks-score] element on a parseable snippet at difficulty=100', async () => {
 			const { container } = render(
 				<blanksLens.Component
@@ -476,7 +476,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('score is 100% when the learner has typed the originalCode verbatim', async () => {
-			// Inc 6.7: type char-by-char into each blank instead of doing
+			// type char-by-char into each blank instead of doing
 			// a single replace-all (which the auto-pad transactionFilter
 			// rejects — it only allows pure inserts and pure deletes
 			// inside blank ranges, not replace operations).
@@ -534,7 +534,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
-	describe('difficulty slider — Inc 6e', () => {
+	describe('difficulty slider — ', () => {
 		it('renders a difficulty slider [data-difficulty-slider] input (type=range)', async () => {
 			const { container } = render(
 				<blanksLens.Component
@@ -615,7 +615,7 @@ describe('blanks wrapper — Inc 6a', () => {
 			// difficulty — the new blank set may be empty (total=0 →
 			// vacuously complete → score=100, masking the reset).
 			//
-			// Inc 6.7: type char-by-char to fill the blank (replace-all
+			// type char-by-char to fill the blank (replace-all
 			// is rejected by the auto-pad filter).
 			const originalCode = embody('OK').source.code;
 			const { container } = render(
@@ -668,7 +668,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
-	describe('content-type checkboxes — Inc 6f', () => {
+	describe('content-type checkboxes — ', () => {
 		it('renders five checkboxes, one per content type (Inc 6.6 adds delimiters)', () => {
 			const { container } = render(
 				<blanksLens.Component
@@ -769,7 +769,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('toggling a checkbox resets learnerCode (data-blanks-correct returns to 0)', async () => {
-			// Inc 6.7: type char-by-char (replace-all is rejected by
+			// type char-by-char (replace-all is rejected by
 			// auto-pad filter).
 			const originalCode = embody('OK').source.code;
 			const { container } = render(
@@ -802,17 +802,17 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
-	describe('lock non-placeholder regions — Inc 6.5', () => {
+	describe('lock non-placeholder regions — ', () => {
 		// Locks the editable surface to the __ placeholder ranges only.
 		// Edits outside any blank's range are rejected via
 		// EditorState.changeFilter. This makes the whitespace-fragility
 		// bug architecturally unreachable (learner cannot corrupt the
 		// anchor segments by mistake).
 
-		// Inc 6.7 (was AR-3 concern 4 for Inc 6.6): the same StateField
+		// (was AR-3 concern 4 for ): the same StateField
 		// that powers the lock also drives the per-blank decoration class
 		// (`cm-blank-unfilled` initially, transitioning to `cm-blank-correct`
-		// or `cm-blank-incorrect` as the learner types — Inc 6.7). A
+		// or `cm-blank-incorrect` as the learner types — ). A
 		// regression where the `provide: (f) => EditorView.decorations.from(f)`
 		// line gets dropped from the StateField would silently break the
 		// visual decoration without breaking the lock. This test catches
@@ -848,7 +848,7 @@ describe('blanks wrapper — Inc 6a', () => {
 			view!.dispatch({
 				changes: { from: firstBlank + 1, insert: 'X' },
 			});
-			// Inc 6.7: auto-pad preserves doc length; a trailing `_` is
+			// auto-pad preserves doc length; a trailing `_` is
 			// consumed instead of growing the doc.
 			expect(view!.state.doc.toString().length).toBe(docBefore.length);
 			// The 'X' is present at the typed position.
@@ -856,7 +856,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('inserts at anchor positions (between blanks) are REJECTED (anchors are immutable)', async () => {
-			// Inc 6.7 overwrite-mode: anchor segments (text between
+			// overwrite-mode: anchor segments (text between
 			// blanks) are immutable. An insert at a space character (an
 			// anchor) is outside every blank's range, so the containment
 			// check rejects it and the doc is unchanged. Lock the anchor-
@@ -885,9 +885,9 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('inserts at the LEFT boundary (cursor at start of placeholder) are ACCEPTED', async () => {
-			// AR-4 concern (Inc 6.5): a pure-insert at position ===
+			// AR-4 concern: a pure-insert at position ===
 			// decoration.from was at risk of silent rejection via the
-			// transactionFilter's containment check. Inc 6.7 keeps the
+			// transactionFilter's containment check. keeps the
 			// containment check (`fromA >= p.from && toA <= p.to`); the
 			// boundary case `fromA === p.from` still satisfies the check.
 			const { container } = render(
@@ -909,7 +909,7 @@ describe('blanks wrapper — Inc 6a', () => {
 			view!.dispatch({
 				changes: { from: firstBlank, insert: 'X' },
 			});
-			// Inc 6.7 auto-pad: width preserved, X at the typed position.
+			// auto-pad: width preserved, X at the typed position.
 			expect(view!.state.doc.toString().length).toBe(docBefore.length);
 			expect(view!.state.doc.toString()[firstBlank]).toBe('X');
 		});
@@ -945,7 +945,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('sequential typing within the same blank — both chars present, width preserved (Inc 6.7 auto-pad)', async () => {
-			// Inc 6.7: typing consumes trailing underscores instead of
+			// typing consumes trailing underscores instead of
 			// extending the blank. Both typed chars must be present in
 			// the doc; width must be preserved.
 			const { container } = render(
@@ -979,11 +979,11 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
-	describe('fixed-width auto-pad — Inc 6.7', () => {
+	describe('fixed-width auto-pad — ', () => {
 		// Auto-pad rewrites each insert/delete inside a blank to preserve
 		// the blank's original width. Typing consumes trailing
 		// underscores; backspace re-inserts an underscore at the end.
-		// Doc length === originalCode.length always (Inc 6.7 invariant).
+		// Doc length === originalCode.length always (invariant).
 
 		// Zero — no typing, blank state.
 		it('Zero: a fresh blank starts as N underscores matching original length', async () => {
@@ -1060,7 +1060,7 @@ describe('blanks wrapper — Inc 6a', () => {
 			expect(view!.state.doc.toString()).toBe('hi');
 		});
 
-		// Overwrite a typed char (Inc 6.7 overwrite-mode).
+		// Overwrite a typed char (overwrite-mode).
 		it('Overwrite: typing INSIDE a full blank replaces the existing char', async () => {
 			const { container } = render(
 				<blanksLens.Component
@@ -1195,7 +1195,7 @@ describe('blanks wrapper — Inc 6a', () => {
 			expect(view!.state.doc.toString()).toBe(before);
 		});
 
-		// Directional compaction (Inc 6.7 refinement): deleting a `_` in
+		// Directional compaction (refinement): deleting a `_` in
 		// a fill-in compacts typed chars in the direction opposite to
 		// the freed space. Backspace shifts right-text left, padding at
 		// end; Del shifts left-text right, padding at front.
@@ -1341,7 +1341,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
-	describe('correctness-aware decoration class — Inc 6.7', () => {
+	describe('correctness-aware decoration class — ', () => {
 		// The StateField re-derives each blank's decoration class per
 		// transaction from its current content vs `blank.original`:
 		// - `cm-blank-unfilled`: any `_` remaining (initial state too)
@@ -1504,7 +1504,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
-	describe('editor header — Inc 6g', () => {
+	describe('editor header — ', () => {
 		// The editor header is an informational strip rendered above the
 		// CodeMirror editor (distinct from the toolbar's controls). It
 		// surfaces the active mode, current difficulty %, total blanks
@@ -1716,19 +1716,19 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
-	describe('hints panel — Inc 6h-redux (cursor-scoped, on-demand, scrambled)', () => {
+	describe('hints panel — (cursor-scoped, on-demand, scrambled)', () => {
 		// User-directed redesign:
 		// - hintsMode = 'on' | 'off' (orthogonal to difficulty; no tier
-		//   inference)
+		// inference)
 		// - panel shows hint for THE blank under the cursor (cursor-
-		//   scoped); empty state otherwise
+		// scoped); empty state otherwise
 		// - hidden by default; incremental per-blank reveal: each
-		//   click of "Reveal next letter" exposes ONE more position of
-		//   the correct answer at its actual position (in a per-blank-
-		//   stable random order); hidden positions are shown as `•`
+		// click of "Reveal next letter" exposes ONE more position of
+		// the correct answer at its actual position (in a per-blank-
+		// stable random order); hidden positions are shown as `•`
 		// - reveal-count is per-blank and persists across cursor moves
 		// - hints panel only renders when viewMode === 'blankenated'
-		//   (diff/raw/complete modes hide the panel)
+		// (diff/raw/complete modes hide the panel)
 
 		describe('hintsMode root attribute + panel presence', () => {
 			it('default hintsMode is "on" — panel renders', async () => {
@@ -2050,10 +2050,10 @@ describe('blanks wrapper — Inc 6a', () => {
 			});
 		});
 
-		describe('editor-mode sub-toggle (orthogonal to viewMode) — Inc 6h-redux', () => {
+		describe('editor-mode sub-toggle (orthogonal to viewMode) — ', () => {
 			// The editor-mode sub-toggle lives INSIDE blankenated mode.
 			// Three variants from easiest to hardest:
-			//   helpful (default) → diff → raw
+			// helpful (default) → diff → raw
 			// Switching to diff/raw stays within blankenated viewMode;
 			// they're alternate renderings of the SAME blanked editor.
 
@@ -2480,7 +2480,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 	});
 
-	describe('URL config plumbing — Inc 6i', () => {
+	describe('URL config plumbing — ', () => {
 		// Helper: clean hash before each test.
 		afterEach(() => {
 			// jsdom keeps location across tests; clean up the hash.

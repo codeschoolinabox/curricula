@@ -29,11 +29,11 @@ describe('blanks core', () => {
 				expect(core.config().viewMode).toBe('blankenated');
 			});
 
-			it('hintsMode defaults to "on" (Inc 6h-redux: orthogonal to difficulty)', () => {
+			it('hintsMode defaults to "on" (orthogonal to difficulty)', () => {
 				expect(core.config().hintsMode).toBe('on');
 			});
 
-			it('editorMode defaults to "helpful" (Inc 6h-redux)', () => {
+			it('editorMode defaults to "helpful"', () => {
 				expect(core.config().editorMode).toBe('helpful');
 			});
 		});

@@ -4,13 +4,13 @@
  * no padding/margin) to avoid cursor-position jumps in CM6's
  * contenteditable spans.
  *
- * Inc 6.7 introduces three correctness states, derived per
+ * introduces three correctness states, derived per
  * transaction from each blank's current content vs `blank.original`
  * inside the wrapper's StateField (`buildLockExtensions`):
  *
  * - `.cm-blank-unfilled`: any `_` remaining (partially or fully
  *   unfilled). Yellow background + amber outline — the "in progress"
- *   look carried over from Inc 6.6.
+ *   look.
  * - `.cm-blank-correct`: content === original. No visible decoration
  *   (transparent + no outline) so a correctly-filled blank fades
  *   into the source — minimizing distraction once the learner has
@@ -26,7 +26,7 @@
  */
 
 /*
- * Inc 6h-redux: alternating per-blank "chunk" highlighting using
+ * alternating per-blank "chunk" highlighting using
  * Wong's colorblind-safe palette (Nature Methods 2011):
  *   - Blue   #0072B2  (even-parity chunks)
  *   - Orange #D55E00  (odd-parity chunks; vermilion)
@@ -78,7 +78,7 @@
 }
 
 /*
- * AR-4 IMPORTANT Inc 6h-redux: oneDark background (#282c34, luminance
+ * AR-4 IMPORTANT oneDark background (#282c34, luminance
  * ~0.023) makes the 0.18-opacity tints near-invisible. Boost opacity
  * under dark color schemes so the chunk colors stay perceptible
  * without losing the light-mode subtlety. The outline-style
@@ -101,7 +101,7 @@
 }
 
 /*
- * Inc 6g editor header: informational strip above the CodeMirror
+ * editor header: informational strip above the CodeMirror
  * editor showing mode + difficulty% + blanks-total + blanks-remaining.
  * Distinct from the toolbar (which holds controls); this is read-only
  * status.
@@ -115,7 +115,7 @@
 }
 
 /*
- * Inc 6h-redux hints panel: cursor-scoped, on-demand, scrambled.
+ * hints panel: cursor-scoped, on-demand, scrambled.
  * Renders only when hintsMode='on'. Shows hint for the blank under
  * the cursor (or empty state when cursor is in anchor text). A
  * per-blank reveal button toggles the alphabetically-scrambled
@@ -172,7 +172,7 @@
 
 /*
  * Char-level diff highlighting for editorMode='diff'.
- * In diff mode the per-blank correctness classes (Inc 6.7) are NOT
+ * In diff mode the per-blank correctness classes are NOT
  * applied; instead each character whose value mismatches the
  * `originalCode` at the same position (and isn't an unfilled `_`)
  * gets `.cm-diff-mismatch` — red tint on the wrong char.

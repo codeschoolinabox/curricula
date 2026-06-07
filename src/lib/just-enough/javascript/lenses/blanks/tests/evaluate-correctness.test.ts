@@ -57,8 +57,8 @@ describe('evaluateCorrectness', () => {
 			expect(result.correctnessMap.get('b0')).toBe('unfilled');
 		});
 
-		it('marks the blank unfilled when a length-matched underscore placeholder remains (Inc 6.7)', () => {
-			// Inc 6.7: placeholder is `_`.repeat(original.length), not
+		it('marks the blank unfilled when a length-matched underscore placeholder remains', () => {
+			// placeholder is `_`.repeat(original.length), not
 			// the legacy two-char `__`. `looksUnfilled` must detect both.
 			const result = evaluateCorrectness(
 				'_____',
@@ -77,7 +77,7 @@ describe('evaluateCorrectness', () => {
 			expect(result.correctnessMap.get('b0')).toBe('unfilled');
 		});
 
-		// AR-4 BLOCKER concern 1+2 (Inc 6g): identifiers whose `original`
+		// AR-4 BLOCKER concern 1+2: identifiers whose `original`
 		// itself contains `_` (e.g. `_private`) must be correctly
 		// classified. The guard order in `buildResultFromTexts` checks
 		// `text === blank.original` BEFORE `looksUnfilled`, so:

@@ -45,7 +45,7 @@ import { freezeInPlace } from '@utils/freeze.js';
 import type { Blank, BlankCorrectness, EvaluationResult } from '../types.js';
 
 /**
- * Inc 6.7 length-matched placeholders: a blank is "unfilled" when its
+ * length-matched placeholders: a blank is "unfilled" when its
  * content has ANY `_` characters (whether all-underscores like
  * `_____` or partial like `h___o`). The legacy fixed-`__` check
  * (`text === '__'`) is preserved as a fallback for any caller that

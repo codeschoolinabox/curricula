@@ -12,10 +12,10 @@ are eligible (keywords / identifiers / operators / literals / delimiters); a
 view-mode toggle gives the learner a peek at the complete source for self-check
 without losing their answers.
 
-Inc 6.m: the Ask Me / `socratizing/` surface previously offered by this lens was
-removed and is no longer a blanks concern. Socratic study lives at the SL
-orchestrator layer above (it operates on the original embodiment, not on the
-blankenated source — so it belongs cross-lens, not per-lens).
+The Ask Me / `socratizing/` surface is **not** part of this lens. Socratic study
+lives at the SL orchestrator one layer up (it operates on the original
+embodiment, not on the blankenated source — so it belongs cross-lens, not
+per-lens).
 
 It is the **second migrated pedagogical lens** in WS4's batch (after
 `annotate`). The previous V2 sprint shipped structurally-compliant shells that
@@ -45,7 +45,7 @@ structural pieces:
 - Buggy substring-based evaluation → position-aware
   `lib/evaluate-correctness.ts`
 - Compiled-out hints panel (`{false && showHints && (...)}`) → **enabled by
-  default** with cursor-scoped on-demand reveals (Inc 6h-redux)
+  default** with cursor-scoped on-demand reveals
 - Compiled-out editor header (`{/* ... */}`) → **enabled by default**
 
 See `./README.md` § "What this lens does NOT do" for the full lens-specific drop
@@ -114,14 +114,14 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    the editor view configured with the standard JavaScript basicSetup, the
    codebase's editor theme, an editability flag driven by view mode, an update
    listener that mirrors learner edits into local state, the no-paste extension
-   (in blankenated mode only), and **(Inc 6.7) a `buildLockExtensions` bundle**
-   that adds two CodeMirror primitives: (a) an `EditorState.transactionFilter`
-   enforcing the fixed-width fillable- field UX — typing at any position inside
-   a blank OVERWRITES the char there (whether `_` or a previously-typed char);
-   backspace replaces the char- before-cursor with `_`; **directional compaction
-   on `_` deletes** — when the deleted char is itself a `_`, the freed space is
-   moved to the side opposite to the editing motion (backspace pads `_` at blank
-   end + shifts right-text left; Del pads `_` at blank front + shifts left-text
+   (in blankenated mode only), and **a `buildLockExtensions` bundle** that adds
+   two CodeMirror primitives: (a) an `EditorState.transactionFilter` enforcing
+   the fixed-width fillable- field UX — typing at any position inside a blank
+   OVERWRITES the char there (whether `_` or a previously-typed char); backspace
+   replaces the char- before-cursor with `_`; **directional compaction on `_`
+   deletes** — when the deleted char is itself a `_`, the freed space is moved
+   to the side opposite to the editing motion (backspace pads `_` at blank end +
+   shifts right-text left; Del pads `_` at blank front + shifts left-text
    right); out-of-blank edits and replace-with-selection operations are
    rejected; and (b) a `StateField<DecorationSet>` that re-derives each blank's
    correctness class per transaction from the doc content vs `blank.original`
@@ -141,9 +141,9 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    on `(learnerCode, blankResult)` calls
    `evaluateCorrectness(currentDoc, blanks, originalCode)` where
    `currentDoc = learnerCode ?? blankResult.blankedCode`. The evaluator returns
-   `EvaluationResult` (`correctnessMap` + counts + score); Inc 6d surfaces the
-   score in the JSX, and Inc 6.7's StateField derives the per-blank in-editor
-   visual class (`cm-blank-correct/incorrect/unfilled`) from the same
+   `EvaluationResult` (`correctnessMap` + counts + score); surfaces the score in
+   the JSX, and the StateField in `buildLockExtensions` derives the per-blank
+   in-editor visual class (`cm-blank-correct/incorrect/unfilled`) from the same
    source-of-truth (doc content vs `blank.original`). `useMemo` (not
    `useEffect`): synchronous-pure computation belongs in the render pass so the
    score updates atomically with the learner's keystroke — no stale-score
@@ -155,9 +155,9 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
 5. **Render** (sync) — the wrapper emits the root
    `<div data-lens="blanks" data-view-mode="blankenated|complete" data-hints-mode="on|off">`
    with toolbar, editor header, CodeMirror container, the cursor-scoped hints
-   panel (Inc 6h-redux — renders only when `data-hints-mode='on'`), and the
-   instructions panel. The `data-hints-mode` attribute reflects the
-   `config.hintsMode` value directly (no inference; orthogonal to difficulty).
+   panel (— renders only when `data-hints-mode='on'`), and the instructions
+   panel. The `data-hints-mode` attribute reflects the `config.hintsMode` value
+   directly (no inference; orthogonal to difficulty).
 
 6. **Handle interaction** (per learner event) — per-control handlers update the
    relevant config-state slice (`difficulty`, `contentTypes`, `viewMode`,
@@ -269,9 +269,9 @@ learner answers and the correctness map die with the component instance.
   classification paths in fixed order over the parsed source — (1) delimiters
   token-stream walk, (2) keywords token-stream walk, (3) AST walk for
   identifiers / literals / operators / template-content, (4) AST walk for the
-  generator-`*` delimiter (Inc 6.q — Acorn's `tokTypes.star` token covers both
-  generator `*` and arithmetic `a * b`, so generator `*` is classified by AST
-  context rather than by token label, and arithmetic `*` stays under the
+  generator-`*` delimiter (Acorn's `tokTypes.star` token covers both generator
+  `*` and arithmetic `a * b`, so generator `*` is classified by AST context
+  rather than by token label, and arithmetic `*` stays under the
   `BinaryExpression` operators path). The four paths dedupe `[start, end)`
   collisions first-push-wins. The call order is structural, not stylistic:
   reordering silently re-classifies overlap-prone tokens (`typeof` is both a
@@ -369,10 +369,9 @@ learner answers and the correctness map die with the component instance.
   `setSnippet`.
 - **Code execution / run / trace.** Other lenses' jobs (`trace-table`, future
   `run`); the orchestrator's L1 picker exposes them.
-- **Socratic study companion (Ask Me / socratizing).** Inc 6.m moved this
-  surface out of the blanks lens entirely — it lives in the SL orchestrator one
-  layer up (it operates on the original embodiment rather than the blankenated
-  source, so it's cross-lens rather than per-lens).
+- **Socratic study companion (Ask Me / socratizing).** Lives in the SL
+  orchestrator one layer up — operates on the original embodiment rather than
+  the blankenated source, so it's cross-lens rather than per-lens.
 - **Seeded RNG for reproducible blank sets.** v1 preserves the legacy's bare
   `Math.random()` per the mechanical-conversion mandate.
   Reproducibility-via-seed is deferred (see § Future direction).
@@ -414,13 +413,13 @@ legacy was a ship cut, not a design decision; the lens-shipping-shells failure
 mode the redo exists to prevent (per [`./README.md`](./README.md) § Why this
 lens exists) is exactly what disabled feedback recreates.
 
-The per-blank green/red/yellow visual lives in the editor itself (Inc 6.7's
-correctness-aware decoration class on the CodeMirror StateField). The hints
-panel is a **separate affordance** for cursor-scoped on-demand hint reveals (Inc
-6h-redux): the learner clicks a button to see the scrambled letters of the blank
-they're focused on.
+The per-blank green/red/yellow visual lives in the editor itself (a
+correctness-aware decoration class on a CodeMirror `StateField`). The hints
+panel is a **separate affordance** for cursor-scoped on-demand hint reveals: the
+learner clicks a button to see the scrambled letters of the blank they're
+focused on.
 
-## Why hints are orthogonal to difficulty (Inc 6h-redux)
+## Why hints are orthogonal to difficulty
 
 An earlier design (now reversed) auto-derived a 3-tier hints config from the
 difficulty slider — high difficulty → easy/full-reveal panel; low difficulty →

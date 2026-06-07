@@ -29,22 +29,24 @@ const SAMPLE =
 	'function classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}';
 
 /**
- * Inc 6.k comprehensive snippet — exercises every feature category the
- * blanks lens covers, plus syntactic-marker delimiters (`=>`, `?`, `:`,
- * `?.`, `...`) added in Inc 6.k. With all five content-type checkboxes
- * on at difficulty 100, every eligible token should be blanked.
+ * Comprehensive test snippet — exercises every feature category the
+ * blanks lens covers. With all five content-type checkboxes on at
+ * difficulty 100, every eligible token should be blanked.
  *
  * Categories covered:
  * - Keywords: import, from, class, extends, static, new, function,
  *   const, let, var, if, else, for, of, while, do, return, yield,
  *   async, await, try, catch, finally, throw, switch, case, break,
  *   continue, typeof, instanceof, delete, void, this, super, export,
- *   default
- * - Identifiers: variable / parameter / method names + private field #x
- * - Literals: strings, numbers, booleans, null, regex
- * - Operators: binary, unary, assignment, update, logical, nullish
- * - Delimiters: parens, brackets, braces, ${, semicolons, commas, dots,
- *   ARROW =>, ternary ? :, OPTIONAL ?., SPREAD ...
+ *   default.
+ * - Identifiers: variable / parameter / method names + private field
+ *   `#x`.
+ * - Literals: strings, numbers, booleans, null, regex, template-
+ *   literal text chunks.
+ * - Operators: binary, unary, assignment, update, logical, nullish.
+ * - Delimiters: parens, brackets, braces, `${`, semicolons, commas,
+ *   dots, arrow `=>`, ternary `?` / `:`, optional `?.`, spread
+ *   `...`, template backticks `` ` ``, and generator `*`.
  */
 const COMPREHENSIVE_SAMPLE = `import { Logger } from './logger.js';
 
@@ -112,15 +114,15 @@ export default function BlanksPreview(): React.JSX.Element {
 	return (
 		<Layout title="blanks preview" description="WS4 blanks lens harness">
 			<main style={{ maxWidth: 860, margin: '2rem auto', padding: '0 1rem' }}>
-				<h1>blanks lens preview (WS4 — Inc 6a)</h1>
+				<h1>blanks lens preview</h1>
 				<p>
-					Inc 6a: wrapper mounts CodeMirror in read-only blankenated mode.
-					Difficulty is set to 100 so every eligible token is blanked
-					(maximum-visible <code>__</code> for the checkpoint). Subsequent
-					increments add the view-mode toggle (6b), editable mode (6c),
-					per-blank correctness (6d), difficulty slider (6e), content-type
-					checkboxes (6f), editor header (6g), hints panel (6h), URL config
-					(6i), and the Ask Me button backed by <code>socratizing/</code> (6j).
+					Dev harness for the blanks lens. The textarea below feeds an
+					embodiment into the lens; the wrapper renders the blankenated source
+					with length-matched <code>_</code>
+					placeholders, view-mode toggle, editor-mode sub-toggle, difficulty
+					slider, content-type checkboxes, editor header, cursor-scoped hints
+					panel, and URL-config plumbing. Difficulty is hard-coded to 100 so
+					every eligible token is blanked.
 				</p>
 
 				<div style={{ marginBottom: 8 }}>
@@ -139,7 +141,7 @@ export default function BlanksPreview(): React.JSX.Element {
 							setCode(COMPREHENSIVE_SAMPLE);
 						}}
 					>
-						Load comprehensive Inc 6.k test snippet
+						Load comprehensive test snippet
 					</button>
 				</div>
 

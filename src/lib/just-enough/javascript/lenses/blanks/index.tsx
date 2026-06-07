@@ -85,8 +85,8 @@ const ALL_CONTENT_TYPES: ReadonlyArray<ContentType> = [
 ];
 
 /**
- * Inc 6h-redux: per-blank random-permutation of position indices for
- * the incremental position-reveal hint. Each click on a blank's
+ * Per-blank random-permutation of position indices for the
+ * incremental position-reveal hint. Each click on a blank's
  * "Reveal next letter" button advances the reveal count for that
  * blank; this function gives the order in which positions are
  * revealed.
@@ -136,12 +136,12 @@ function shufflePositions(seed: string, length: number): ReadonlyArray<number> {
 }
 
 /**
- * Inc 6h-redux: render a partial hint for `original` revealing the
- * first `revealCount` characters in the per-blank random-scrambled
- * order. The display grows left-to-right; each new click appends one
- * more letter. Position info is NOT exposed — the learner gets the
- * SET of letters needed (one at a time, in random sequence) without
- * the order or position info.
+ * Render a partial hint for `original` revealing the first
+ * `revealCount` characters in the per-blank random-scrambled order.
+ * The display grows left-to-right; each new click appends one more
+ * letter. Position info is NOT exposed — the learner gets the SET of
+ * letters needed (one at a time, in random sequence) without the
+ * order or position info.
  *
  * Examples for `hello` (5 chars, with random perm [3,0,4,1,2]):
  *  - count 0 → ''        (no letters yet)
@@ -196,13 +196,10 @@ function deriveContentTypeFlags(contentTypes: ReadonlyArray<ContentType>): {
 	};
 }
 
-/* Inc 6.5 historical: lock non-placeholder regions via StateField +
- * transactionFilter. Inc 6.6 added per-blank visual border via the
- * `cm-blank-placeholder` decoration class. Both superseded by Inc 6.7
- * (see JSDoc immediately below). */
 /**
- * Inc 6.7: replaces Inc 6.5's static lock + static `cm-blank-placeholder`
- * decoration with the fixed-width fillable-field UX:
+ * Lock non-placeholder regions via `StateField` + `EditorState
+ * .transactionFilter`, and apply per-blank correctness-aware
+ * decorations. The fixed-width fillable-field UX:
  *
  * 1. **Length-matched positions** (sub-change A in `lib/blankenate.ts`).
  *    Each blank's `[start, end)` in the source now matches its
@@ -239,7 +236,7 @@ function deriveContentTypeFlags(contentTypes: ReadonlyArray<ContentType>): {
  * React→CM6 effect plumbing for decoration updates.
  */
 /**
- * Inc 6h-redux: diff-only decoration extension for the `diff` editor
+ * diff-only decoration extension for the `diff` editor
  * mode. Plain CodeMirror (no lockFilter, no autopad) — the learner
  * edits freely. The StateField highlights each character whose
  * doc value differs from `originalCode` at the same byte position.
@@ -249,7 +246,7 @@ function deriveContentTypeFlags(contentTypes: ReadonlyArray<ContentType>): {
  * pattern shift as a signal that they've drifted).
  */
 /**
- * Inc 6i: returns a stable applier that takes a partial URL config
+ * returns a stable applier that takes a partial URL config
  * and dispatches the appropriate setters. Defined as a module-level
  * hook so its closure captures only the setter references (which are
  * stable across renders per React's useState contract), eliminating
@@ -328,7 +325,7 @@ function buildDiffDecorations(originalCode: string) {
 }
 
 function buildLockExtensions(blankResult: BlankenateResult) {
-	// Inc 6.7 length-matched: doc positions === source positions
+	// length-matched: doc positions === source positions
 	// because the placeholder is `_`.repeat(blank.original.length).
 	// Captured once at mount; auto-pad preserves blank widths so these
 	// positions never shift. Used only by the 'helpful' editor mode;
@@ -354,9 +351,9 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 		// decoration-set construction so the StateField never has to
 		// reason about empty ranges (which the autoPad rejection at
 		// "trailing underscores < insertLen" would silently confuse for
-		// a "blank is full" state). AR-4 Inc 6.7 guard.
+		// a "blank is full" state). AR-4 guard.
 		//
-		// Inc 6h-redux: alternating parity classes so adjacent blanks
+		// alternating parity classes so adjacent blanks
 		// render in different chunk colors (CVD-safe palette per
 		// blanks.css). Parity is by visible-blank index (post-filter),
 		// not by the original blank ordering, so chunks alternate
@@ -378,7 +375,7 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 		create(state) {
 			return buildCorrectnessDecorations(state.doc);
 		},
-		// Performance note (AR-4 Inc 6.7): rebuilds the entire
+		// Performance note (AR-4): rebuilds the entire
 		// DecorationSet from scratch on every docChanged transaction —
 		// O(N) per keystroke where N = blanks count. Fine at typical
 		// snippet sizes (5–20 blanks). At 100+ blanks per snippet the
@@ -394,7 +391,7 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 		provide: (f) => EditorView.decorations.from(f),
 	});
 
-	// Multi-cursor caveat (AR-4 Inc 6.7): `iterChanges` may fire multiple
+	// Multi-cursor caveat (AR-4): `iterChanges` may fire multiple
 	// times for one transaction (multi-cursor + simultaneous edit, or
 	// programmatic multi-change dispatch). `primarySelection` is
 	// overwritten by each iteration — only one cursor is returned even
@@ -404,14 +401,14 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 	// limitation is low risk. Worth surfacing if multi-cursor support
 	// is ever explicitly added.
 	//
-	// Inc 6.7 overwrite mode (user-directed UX refinement): each blank
+	// overwrite mode (user-directed UX refinement): each blank
 	// behaves as a fixed-width "form field". Typing at any position
 	// inside a blank OVERWRITES the char there (whether it's `_` or a
 	// previously-typed char). Backspace replaces the char-before-cursor
 	// with `_`. Delete-forward replaces the char-at-cursor with `_`.
 	// Width is preserved by construction (each rewrite is N→N chars,
 	// never net-zero-length-shift required). Replaces typing-as-consume-
-	// trailing-underscore from the earlier Inc 6.7 design.
+	// trailing-underscore from the earlier design.
 	const lockFilter = EditorState.transactionFilter.of((tr) => {
 		if (!tr.docChanged) return tr;
 
@@ -431,7 +428,7 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 				const insertLen = insertText.length;
 				const deleteLen = toA - fromA;
 
-				// Defensive (AR-4 Inc 6.7 MINOR 4): a zero-width no-op
+				// Defensive (AR-4 MINOR 4): a zero-width no-op
 				// change (insertLen === 0 && deleteLen === 0) would
 				// produce a spurious cursor-set transaction. CM6
 				// usually prunes these before calling the filter, but
@@ -467,7 +464,7 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 						return;
 					}
 
-					// Inc 6.7 directional compaction for deleting `_`s:
+					// directional compaction for deleting `_`s:
 					// when the deleted range is a single `_`, the
 					// deletion compacts typed chars in the direction
 					// opposite to the freed space. The direction is
@@ -550,16 +547,16 @@ const BlanksComponent: ComponentType<LensProperties> =
 		// fresh frozen clone on every render — including a fresh
 		// `contentTypes` array — which would cascade into spurious
 		// `blankenate` re-rolls whenever a parent re-renders (load-bearing
-		// once Inc 6b adds local state to the wrapper).
+		// once adds local state to the wrapper).
 		const resolved = useMemo(() => blanksCore.config(config), [config]);
 		const initialDifficulty =
 			typeof resolved.difficulty === 'number' ? resolved.difficulty : 50;
-		// Inc 6e: difficulty is now LOCAL state, seeded from the prop config.
+		// difficulty is now LOCAL state, seeded from the prop config.
 		// The slider mutates this directly; the blankenate useMemo deps now
 		// include `difficulty` so the blank set re-derives per drag.
 		const [difficulty, setDifficulty] = useState<number>(initialDifficulty);
 
-		// Inc 6f: contentTypes is now LOCAL state, seeded from the prop
+		// contentTypes is now LOCAL state, seeded from the prop
 		// config (default = all five). The checkboxes mutate this directly;
 		// the blankenate useMemo deps include `contentTypes` so the blank
 		// set re-derives per toggle.
@@ -579,7 +576,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 		const [contentTypes, setContentTypes] =
 			useState<ReadonlyArray<ContentType>>(initialContentTypes);
 
-		// View-mode state (Inc 6b). Seeded from config.viewMode (default
+		// View-mode state. Seeded from config.viewMode (default
 		// 'blankenated' via blanksCore.config). The toggle preserves the
 		// learner's in-progress edits across mode swaps (AR-1 lock —
 		// disposable-practice governs unmount, not within-mount toggle).
@@ -587,7 +584,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 			resolved.viewMode === 'complete' ? 'complete' : 'blankenated';
 		const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
 
-		// Inc 6h-redux: editor-mode sub-toggle (only meaningful when
+		// editor-mode sub-toggle (only meaningful when
 		// viewMode === 'blankenated'). Three variants from easiest to
 		// hardest: 'helpful' (full correctness colors + hints panel) →
 		// 'diff' (char-level diff against hidden original; no hints) →
@@ -601,7 +598,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 					: 'helpful';
 		const [editorMode, setEditorMode] = useState<EditorMode>(initialEditorMode);
 
-		// Inc 6h-redux: switching the scaffolding level (editorMode)
+		// switching the scaffolding level (editorMode)
 		// resets the exercise. The free editors (diff/raw) allow arbitrary
 		// edits that may violate the helpful editor's length-match +
 		// anchor-lock invariants — carrying that arbitrary state into the
@@ -612,7 +609,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 			setEditorMode(next);
 			setLearnerCode(null);
 			setRevealCounts(new Map());
-			// AR-4 MINOR Inc 6h-redux: also reset cursorPos so the hints
+			// AR-4 MINOR also reset cursorPos so the hints
 			// panel doesn't briefly resolve a stale cursor against the new
 			// (just-rebuilt) editor and flash an out-of-date reveal state.
 			// The new editor's updateListener overwrites cursorPos on first
@@ -621,7 +618,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 			setCursorPos(null);
 		}
 
-		// Learner edits state (Inc 6c). null = no edits yet → editor uses
+		// Learner edits state. null = no edits yet → editor uses
 		// blankedCode on first mount. Once the learner types, the
 		// updateListener captures the current doc into learnerCode; later
 		// toggles back to blankenated re-mount with learnerCode (not the
@@ -646,7 +643,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 					difficulty / 100,
 					deriveContentTypeFlags(contentTypes),
 				),
-			// Inc 6e/6f: difficulty + contentTypes are LOCAL state, so each
+			// difficulty + contentTypes are LOCAL state, so each
 			// is an independent signal for re-derivation. blankResult identity
 			// changes on slider drag (6e) or checkbox toggle (6f) → the
 			// mountEditorView effect remounts the editor with the new
@@ -669,7 +666,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 		const editorContainer = useRef<HTMLDivElement | null>(null);
 		const editorView = useRef<EditorView | null>(null);
 
-		// Inc 6e: difficulty change handler. Updates local difficulty AND
+		// difficulty change handler. Updates local difficulty AND
 		// resets learnerCode so the new (different) blank positions start
 		// from a clean slate. Per DOCS § Phase 2: "Re-derivation on settings
 		// change resets the correctness map" — the wrapper does NOT preserve
@@ -683,7 +680,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 			setLearnerCode(null);
 		}
 
-		// Inc 6f: toggle a content-type category in/out of the eligible set.
+		// toggle a content-type category in/out of the eligible set.
 		// Same reset-learnerCode logic as the slider — the new blank set has
 		// different positions, so the old typed text no longer aligns.
 		function handleContentTypeToggle(type: ContentType): void {
@@ -695,7 +692,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 			setLearnerCode(null);
 		}
 
-		// Inc 6d: per-blank correctness wiring + aggregate score display.
+		// per-blank correctness wiring + aggregate score display.
 		// evaluateCorrectness is pure; recomputes on learnerCode change
 		// (typing dispatches setLearnerCode) and on blankResult change
 		// (snippet / future-difficulty / future-content-types).
@@ -728,12 +725,12 @@ const BlanksComponent: ComponentType<LensProperties> =
 			});
 		}, [learnerCode, blankResult]);
 
-		// Inc 6h-redux: hints config is `'on' | 'off'`, orthogonal to
+		// hints config is `'on' | 'off'`, orthogonal to
 		// difficulty (user-directed redesign — hints are NOT inferred
 		// from difficulty; learners choose how many blanks to reveal as
 		// their own scaffolding gradient). Default 'on'.
 		//
-		// Inc 6i: hintsMode is now LOCAL state (was derived from
+		// hintsMode is now LOCAL state (was derived from
 		// `resolved`). State enables URL sync — the URL read effect
 		// can call `setHintsMode` to apply persisted values, and the
 		// URL write effect serializes the live state to the hash.
@@ -741,13 +738,13 @@ const BlanksComponent: ComponentType<LensProperties> =
 			resolved.hintsMode === 'off' ? 'off' : 'on';
 		const [hintsMode, setHintsMode] = useState<HintsMode>(initialHintsMode);
 
-		// Inc 6h-redux: cursor position state. Updated by the CodeMirror
+		// cursor position state. Updated by the CodeMirror
 		// updateListener on selectionSet. Render-only state — does NOT
 		// appear in the editor mount effect's deps (would re-mount per
-		// keystroke; see Inc 6c remount bug).
+		// keystroke; see remount bug).
 		const [cursorPos, setCursorPos] = useState<number | null>(null);
 
-		// Inc 6h-redux: per-blank reveal-count. Each click of "Reveal next
+		// per-blank reveal-count. Each click of "Reveal next
 		// letter" advances the count by 1 for that blank, exposing one
 		// more position of the correct answer (in the
 		// `shufflePositions(blank.id, length)` order). Count of 0 means
@@ -758,8 +755,8 @@ const BlanksComponent: ComponentType<LensProperties> =
 			ReadonlyMap<string, number>
 		>(() => new Map());
 
-		// Inc 6h-redux: derive the blank under cursor. Positions align 1:1
-		// with the doc per Inc 6.7 length-matched placeholders. A cursor
+		// derive the blank under cursor. Positions align 1:1
+		// with the doc per length-matched placeholders. A cursor
 		// at a blank boundary (`from` or `to`) counts as "in" the blank;
 		// cursors in anchor segments return null.
 		const activeBlank = useMemo(() => {
@@ -778,7 +775,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 		// NOT re-fire this effect — that would feedback-loop and destroy
 		// the EditorView mid-typing.
 		//
-		// Inc 6i: URL config plumbing. Three effects:
+		// URL config plumbing. Three effects:
 		//
 		// 1. **Read on mount.** Parse `window.location.hash` and apply
 		//    any persisted config values as overrides on top of the
@@ -796,7 +793,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 		//    back/forward; apply any changed values. Enables URL replay.
 		//    `urlConfig.write` uses `history.replaceState` which per
 		//    HTML spec does NOT fire `hashchange`, so the write→listener
-		//    loop is structurally prevented (AR-4 Inc 6i comment).
+		//    loop is structurally prevented (AR-4 comment).
 		//
 		// All three guard on `typeof window !== 'undefined'` so the
 		// effects are no-ops during Docusaurus SSR pre-render (the
@@ -853,7 +850,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 			};
 		}, [urlApplyHandle]);
 
-		// Inc 6c:
+		// Editability + paste wiring per view-mode:
 		//   - blankenated mode → editable, noPasteExtension wired,
 		//     updateListener captures learner edits into learnerCode state.
 		//   - complete mode → read-only, no paste extension, no listener
@@ -863,7 +860,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 				const host = editorContainer.current;
 				if (!host) return;
 
-				// Inc 6h-redux: only `complete` viewMode is read-only.
+				// only `complete` viewMode is read-only.
 				// `blankenated` is editable; the editor-mode sub-toggle
 				// (helpful/diff/raw) controls which decorations attach.
 				const isBlankenated = viewMode === 'blankenated';
@@ -891,7 +888,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 						if (update.docChanged) {
 							setLearnerCode(update.state.doc.toString());
 						}
-						// Inc 6h-redux: capture cursor position so the cursor-scoped
+						// capture cursor position so the cursor-scoped
 						// hints panel knows which blank to surface (only relevant
 						// in `blankenated` mode but harmless to track in others).
 						if (update.selectionSet || update.docChanged) {
@@ -900,7 +897,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 					},
 				);
 
-				// Editor-mode extensions (Inc 6h-redux):
+				// Editor-mode extensions:
 				//   helpful → basicSetup (autocomplete, bracket matching, lint,
 				//             etc.) + lockFilter + autopad + noPasteExtension
 				//             + correctness decorations (full scaffolding)
@@ -954,7 +951,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 			},
 			// Intentionally minimal deps: structural remounts only.
 			// learnerCode is read via ref above; including it here would
-			// recreate the regression bug fixed in Inc 6c.
+			// recreate the regression bug fixed in
 			// embodiment.source.code is captured via blankResult (memoized on
 			// embodiment.source.code + resolved); including it here directly
 			// would just duplicate the blankResult-driven remount path.

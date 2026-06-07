@@ -4,8 +4,8 @@ The `blanks` lens — a **fill-in-the-blank programming exercise** over a frozen
 snippet. The learner sees the source code with selected tokens replaced by
 length-matched `_` placeholders (one `_` per character of the original token,
 preserving the token's width as a recognition-cue) inside a CodeMirror editor.
-Each blank behaves as a fixed-width fillable form field (Inc 6.7 overwrite-mode
-UX): typing at any position inside a blank OVERWRITES the char at that position
+Each blank behaves as a fixed-width fillable form field (overwrite-mode UX):
+typing at any position inside a blank OVERWRITES the char at that position
 (whether `_` or a previously-typed char); backspace replaces a typed char with
 `_`; total blank width never changes. This means a learner can fill in any order
 — typing `fun` then jumping to fill the end with `ion` yields `fun__ion`, and
@@ -131,16 +131,17 @@ educator tune which dimensions of the code the learner practices — keywords-on
 blanks emphasize control-flow vocabulary; identifiers-only blanks emphasize
 naming and scope; operators-only blanks emphasize semantics-of-symbols;
 literals-only blanks emphasize value recognition (strings, numbers, booleans,
-regex, AND template-literal text chunks per Inc 6.n — the source between `` ` ``
-and `${`, or between `}` and `` ` ``); delimiters-only blanks emphasize
-syntactic structure — comprehensive Acorn punctuator coverage: parens `( )`,
-brackets `[ ]`, braces `{ }`, template-expression opener `${`, template-literal
-backticks `` ` `` (Inc 6.o; framing-delimiter analog to `${`/`}` for
-interpolations), semicolons `;`, commas `,`, dots `.`, arrow `=>`, ternary /
-object-property colon `:`, ternary `?`, optional chaining `?.`, and spread/rest
-`...`. Regex slashes are NOT separately blanked; Acorn emits regex literals as
-one token. The view-mode toggle lets the learner peek at the complete source as
-a self-check without leaving the lens.
+regex, and template-literal text chunks — the source between `` ` `` and `${`,
+or between `}` and `` ` ``); delimiters-only blanks emphasize syntactic
+structure — comprehensive Acorn punctuator coverage: parens `( )`, brackets
+`[ ]`, braces `{ }`, template-expression opener `${`, template-literal backticks
+`` ` `` (framing-delimiter analog to `${`/`}` for interpolations), semicolons
+`;`, commas `,`, dots `.`, arrow `=>`, ternary / object-property colon `:`,
+ternary `?`, optional chaining `?.`, spread/rest `...`, and the generator `*` in
+`function* g()` / `*method()` / `{ *gen() {} }`. Regex slashes are NOT
+separately blanked; Acorn emits regex literals as one token. The view-mode
+toggle lets the learner peek at the complete source as a self-check without
+leaving the lens.
 
 The hints panel surfaces per-blank correctness state as the learner types —
 green for correct, red for incorrect, yellow for unfilled — making the exercise
@@ -149,7 +150,7 @@ self-pacing rather than a submit-then-grade round-trip.
 The blanks exercise is a correct/incorrect cloze-deletion task by design (per
 Denny et al. 2019). The Socratic study companion (`socratizing/`) is a
 cross-lens orchestrator concern — it operates on the original embodiment, not on
-the blankenated source — and is **not part of this lens** as of Inc 6.m.
+the blankenated source — and is **not part of this lens**.
 
 ## Glossary
 
@@ -163,10 +164,10 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   `delimiter`), and its position in the original source (zero-indexed character
   offsets).
 - **`_` placeholder** — the run of underscores the learner sees in place of a
-  blanked token. Inc 6.7: length-matched — a 4-char token like `name` becomes
-  `____`, a 1-char token like `;` becomes `_`. Each placeholder is a legal
-  JavaScript identifier (or single character); the editor treats it as text the
-  learner types over.
+  blanked token. length-matched — a 4-char token like `name` becomes `____`, a
+  1-char token like `;` becomes `_`. Each placeholder is a legal JavaScript
+  identifier (or single character); the editor treats it as text the learner
+  types over.
 - **Content type** — one of the five token categories
   (`keywords / identifiers / operators / literals / delimiters`). Stored in
   `config` as a
@@ -278,10 +279,9 @@ state**.
 
 ## Hints panel contract
 
-Inc 6h-redux ships a **cursor-scoped, on-demand, scrambled** hints panel per
-user-directed redesign. The legacy 3-tier system
-(`'auto' | 'easy' | 'medium' | 'hard'` controlling rendered richness) is gone —
-replaced by:
+ships a **cursor-scoped, on-demand, scrambled** hints panel per user-directed
+redesign. The legacy 3-tier system (`'auto' | 'easy' | 'medium' | 'hard'`
+controlling rendered richness) is gone — replaced by:
 
 - **Orthogonality.** Hints are decoupled from `difficulty`. `hintsMode` has its
   own knob (`'on' | 'off'`), not inferred from the slider.
@@ -350,25 +350,24 @@ Renders above the CodeMirror editor:
 - Blanks count: `{blanks.length}`.
 - Remaining count: the number of blanks whose `evaluate-correctness` verdict is
   `unfilled` (computed from the `CorrectnessMap` the editor wrapper already
-  derives). Inc 6.7 length-matched placeholders make a simple `/__/g` regex
-  match invalid — a 1-char blank like `_` would not match the literal `__`.
-  Sourcing from `CorrectnessMap` is also more precise (a half-typed blank with
-  leftover `_`-tail is still `unfilled`).
+  derives). length-matched placeholders make a simple `/__/g` regex match
+  invalid — a 1-char blank like `_` would not match the literal `__`. Sourcing
+  from `CorrectnessMap` is also more precise (a half-typed blank with leftover
+  `_`-tail is still `unfilled`).
 
 Legacy designed this readout but compiled it out via `{/* ... */}` (lines
 648–662); we ship it at parity per the visible-progress-signal pedagogical
 principle.
 
-## Ask Me — out of scope (Inc 6.m)
+## Ask Me — out of scope
 
 The Socratic study companion (`socratizing/` module) is **not part of this
 lens**. It operates on the original embodiment (not the blankenated source) and
-is a cross-lens orchestrator concern; mounting it inside the blanks lens
-duplicates the surface across every lens and couples each lens to socratizing
-imports. As of Inc 6.m, the Ask Me button and its supporting state / useMemo /
-useEffect were removed from this lens — the orchestrator owns Ask Me at the
-level above. See `../../orchestrate/lib/socratizing/` for the module and the
-orchestrator's planned integration.
+is a cross-lens orchestrator concern; mounting it inside the blanks lens would
+duplicate the surface across every lens and couple each lens to socratizing
+imports. The orchestrator owns Ask Me at the level above. See
+`../../orchestrate/lib/socratizing/` for the module and the orchestrator's
+planned integration.
 
 ## URL config sync
 

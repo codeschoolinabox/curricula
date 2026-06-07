@@ -22,6 +22,9 @@
  *   `PropertyDefinition` class-field initializer `=`.
  * - Literals extended to include `TemplateElement` (template-literal
  *   text chunks).
+ * - Generator `*` is AST-detected and classified as a delimiter
+ *   (since Acorn's `tokTypes.star` token covers both generator `*`
+ *   and arithmetic `*`, only the AST context can disambiguate).
  * - First-push-wins dedupe across overlapping classifiers (e.g.
  *   `typeof` is both a keyword and a unary operator; `null` / `true` /
  *   `false` are both keywords and `Literal` nodes). The classification
@@ -53,20 +56,11 @@ type ContentTypeFlags = {
 	readonly identifiers: boolean;
 	readonly operators: boolean;
 	readonly literals: boolean;
-	// Inc 6.6 extension: delimiter tokens (parens, brackets, braces,
-	// `${`, semicolons, commas, dots). Sourced from Acorn's token
-	// stream (not AST nodes — delimiters are not standalone nodes).
+	// Delimiter tokens (parens, brackets, braces, `${`, semicolons,
+	// commas, dots, etc.) — sourced from Acorn's token stream (not
+	// AST nodes — delimiters are not standalone nodes).
 	readonly delimiters: boolean;
 };
-
-// SL1 Blanks Generation Logic
-// Uses Acorn parser to intelligently create blanks based on AST analysis.
-//
-// Inc 6.k: removed the vendored `jsKeywords` set and `isKeyword` helper —
-// they were never read by the blanking path. Keywords are detected via
-// AST node-type matching (FunctionDeclaration, IfStatement, etc.) in the
-// AST walk below; the legacy set was dead code from the original
-// vendored module.
 
 type BlankedToken = {
 	start: number;
@@ -75,13 +69,7 @@ type BlankedToken = {
 	type: Blank['type'];
 };
 
-// Inc 6.k: removed the vendored `findOperatorPosition` helper —
-// dead code in the v1 control flow (the operator-AST-walk in
-// `walkNode` inlines its own per-node-type position finder for
-// BinaryExpression, AssignmentExpression, VariableDeclarator,
-// AssignmentPattern, UnaryExpression, UpdateExpression).
-
-// Inc 6.6: delimiter token labels Acorn emits. These are TokenType.label
+// Delimiter token labels Acorn emits. These are TokenType.label
 // values (acorn.tokTypes.parenL.label === '(' etc.).
 //
 // Brace nuance (template-literal disambiguation):
@@ -97,27 +85,10 @@ type BlankedToken = {
 //   direction item (would require a brace-context stack walking the
 //   token stream).
 //
-// Inc 6.k: comprehensive Acorn-punctuator coverage. The previously
-// excluded `=>`, `?`, `:`, `?.`, `...` are now in the set — user-
-// directed reversal of the Inc 6.6 AR-3 exclusion (those were
-// "semantic markers" but the learner should practice them just like
-// `(` and `,`).
-//
-// Inc 6.o: backtick (`` ` ``) added to DELIMITER_LABELS. Inc 6.k had
-// excluded it on the "analogous to `'`/`"` for string literals"
-// argument, but the user reversed that decision: backticks frame the
-// template-literal expression the same way `${`/`}` frame each
-// interpolation (and those ARE blanked under delimiters), so for
-// consistency the backticks join them. Pedagogical impact: at
-// difficulty 1.0 + delimiters=true, `` `text` `` blanks both
-// backticks (separately from the TemplateElement content, which
-// blanks under literals per Inc 6.n).
-//
-// Still excluded by design (each with a single-line rationale):
+// Excluded from DELIMITER_LABELS by design:
 //   `template` / `invalidTemplate` (string content between
-//     interpolations) — Inc 6.n: these are blanked, but under
-//     LITERALS not DELIMITERS. AST-walk via `TemplateElement` node
-//     instead of token-stream label match.
+//     interpolations) — these are blanked, but under LITERALS not
+//     DELIMITERS, via AST-walk on `TemplateElement` nodes.
 //   `/` — regex literal delimiters are part of the `regexp` token
 //     (Acorn emits `tokTypes.regexp` as one), not separate.
 //   `eof` — not a syntactic character.
@@ -152,13 +123,12 @@ const DELIMITER_LABELS = new Set<string>([
 	':',
 	'?.',
 	'...',
-	'`', // Inc 6.o — template-literal opener/closer
+	'`', // template-literal opener/closer
 ]);
 
-// Inc 6.k: contextual keywords — tokens Acorn emits as `name` (label
-// === 'name', .keyword undefined) but ES treats as keywords in some
-// positions. Module-level to avoid per-call Set allocation; AR-4
-// IMPORTANT fix.
+// Contextual keywords — tokens Acorn emits as `name` (label === 'name',
+// `.keyword` undefined) but ES treats as keywords in some positions.
+// Module-level to avoid per-call Set allocation.
 const CONTEXTUAL_KEYWORDS = new Set<string>([
 	'let',
 	'static',
@@ -183,15 +153,14 @@ function blankenate(
 		delimiters: false,
 	},
 ): BlankenateResult | null {
-	// Inc 6.7: length-matched placeholders. Each blank is replaced by
-	// `_` repeated original.length times (was fixed `'__'` regardless
-	// of original length). Cascades: blankedCode.length ===
+	// Length-matched placeholders: each blank is replaced by `_`
+	// repeated `original.length` times. Cascade: blankedCode.length ===
 	// originalCode.length always; positions align 1:1 between the two;
 	// the wrapper's lock-shift arithmetic collapses to zero.
 
-	// Inc 6.6: collect Acorn tokens during parse for delimiter
-	// classification. AST walk handles identifier/literal/keyword/operator;
-	// the token stream handles the delimiters that have no standalone
+	// Collect Acorn tokens during parse for delimiter classification.
+	// AST walk handles identifier / literal / operator; the token stream
+	// handles keywords and the delimiters that have no standalone
 	// AST node.
 	const tokens: Array<{ type: any; value: any; start: number; end: number }> =
 		[];
@@ -217,9 +186,9 @@ function blankenate(
 
 	const blankedTokens: BlankedToken[] = [];
 
-	// Inc 6.6: walk the token stream for delimiters. Independent of the
-	// AST walk below — same probability check per token; same
-	// blankedTokens accumulator (sort + replace logic applies uniformly).
+	// Walk the token stream for delimiters. Independent of the AST walk
+	// below — same probability check per token; same `blankedTokens`
+	// accumulator (sort + replace logic applies uniformly).
 	if (config.delimiters) {
 		for (const tok of tokens) {
 			const label =
@@ -235,19 +204,18 @@ function blankenate(
 		}
 	}
 
-	// Inc 6.k: walk the token stream for keywords. Two paths:
+	// Walk the token stream for keywords. Two paths:
 	//
 	// 1. Reserved keywords (Acorn flags TokenType with `.keyword`):
 	//    function, if, else, for, while, do, return, var, const, class,
 	//    extends, import, export, default, try, catch, finally, throw,
 	//    new, this, super, switch, case, break, continue, typeof,
-	//    instanceof, in, void, delete, null, true, false, with,
-	//    debugger.
+	//    instanceof, in, void, delete, null, true, false, with, debugger.
 	//
 	// 2. Contextual keywords (Acorn tokenizes as `name` tokens — same
 	//    TokenType as plain identifiers; their keyword-ness is context-
 	//    dependent in the spec): `let`, `static`, `async`, `await`,
-	//    `yield`, `of`, `as`, `from`, `get`, `set`. We match by `value`
+	//    `yield`, `of`, `as`, `from`, `get`, `set`. Matched by `value`
 	//    against a fixed set. Pedagogically these ARE keywords the
 	//    learner should practice, even if the parser treats them as
 	//    identifiers in some contexts.
@@ -261,9 +229,9 @@ function blankenate(
 	//   names (e.g. `let x = 1` vs `var let = 1` — both legal). The
 	//   contextual-set match here blanks them either way. Acceptable
 	//   pedagogically: if the learner sees `let` or `static` they
-	//   should practice the keyword regardless of position. Negative
-	//   lock test: see `blankenate.test.ts` § "Inc 6.k — comprehensive
-	//   token coverage".
+	//   should practice the keyword regardless of position. See
+	//   `blankenate.test.ts` for the negative-lock test on this
+	//   intentional false-positive.
 	if (config.keywords) {
 		for (const tok of tokens) {
 			const kw =
@@ -281,8 +249,8 @@ function blankenate(
 				(isReservedKeyword || isContextualKeyword) &&
 				Math.random() < probability
 			) {
-				// Inc 6.k AR-4: source slice is authoritative; uniformly
-				// derive `original` from the source for every classifier.
+				// Source slice is authoritative; uniformly derive
+				// `original` from the source for every classifier.
 				// Decouples from Acorn's internal `.keyword` string.
 				const original = code.substring(tok.start, tok.end);
 				blankedTokens.push({
@@ -314,23 +282,22 @@ function blankenate(
 			});
 		}
 
-		// Inc 6.q: generator `*` (e.g. `function* g()` or class method
-		// `*gen()`) — classified as a DELIMITER. AST-detected because
-		// Acorn's `tokTypes.star` token covers BOTH generator `*` and
-		// arithmetic `a * b`; only generator should classify as
-		// delimiter (arithmetic stays under operators via the
-		// BinaryExpression branch). Three AST-shape cases:
-		//   - FunctionDeclaration/FunctionExpression with .generator
-		//     === true: `*` lives between `function` and the id (or
-		//     params if anonymous).
-		//   - MethodDefinition with .value.generator === true:
-		//     `*` lives between node.start and node.key.start
+		// Generator `*` (e.g. `function* g()` or class method `*gen()`)
+		// — classified as a DELIMITER. AST-detected because Acorn's
+		// `tokTypes.star` token covers BOTH generator `*` and arithmetic
+		// `a * b`; only generator should classify as delimiter
+		// (arithmetic stays under operators via the BinaryExpression
+		// branch). Three AST-shape cases:
+		//   - FunctionDeclaration / FunctionExpression with
+		//     `.generator === true`: `*` lives between `function` and
+		//     the id (or params if anonymous).
+		//   - MethodDefinition with `.value.generator === true`:
+		//     `*` lives between `node.start` and `node.key.start`
 		//     (covers `*gen()`, `static *gen()`, `*#priv()`).
-		//   - Property with .value.generator === true (object literal
+		//   - Property with `.value.generator === true` (object-literal
 		//     shorthand `{ *gen() {} }`): same shape as MethodDefinition.
-		// The probability roll happens AFTER the AST shape resolves
-		// and the `*` is located, so non-matching nodes don't burn
-		// rolls; rolls are spent only on real candidates.
+		// The probability roll happens AFTER the AST shape resolves and
+		// the `*` is located, so non-matching nodes don't burn rolls.
 		if (config.delimiters) {
 			let starStart = -1;
 			if (
@@ -390,23 +357,21 @@ function blankenate(
 			});
 		}
 
-		// Inc 6.n: TemplateElement string content (the text chunks
-		// between ` and ${, between } and ${, or between } and `) blanks
-		// under the literals category. Pedagogically these ARE literal
-		// content (just like `'hello'` is) — Inc 6.k deferred them with
-		// the comment "would join `literals` not `delimiters` if blanked",
-		// and Inc 6.n makes good on that.
+		// TemplateElement string content (the text chunks between ` and
+		// ${, between } and ${, or between } and `) blanks under the
+		// literals category. Pedagogically these ARE literal content
+		// (just like `'hello'` is).
 		//
 		// `node.end > node.start` skips empty chunks (e.g. the empty
 		// span between two adjacent interpolations `${a}${b}`) — a
 		// zero-length blank would be meaningless.
 		//
-		// Inc 6.o: backticks ARE now in DELIMITER_LABELS (reversal of
-		// the Inc 6.k exclusion) and blank under delimiters=true,
-		// independently of this TemplateElement/literals path. No
-		// position overlap — backtick tokens and TemplateElement nodes
-		// cover disjoint source ranges (TemplateElement.start is AFTER
-		// the opening backtick, .end is BEFORE the closing backtick).
+		// Backticks ARE in DELIMITER_LABELS (above) and blank under
+		// `delimiters=true` independently of this TemplateElement /
+		// literals path. No position overlap — backtick tokens and
+		// TemplateElement nodes cover disjoint source ranges
+		// (TemplateElement.start is AFTER the opening backtick, .end
+		// is BEFORE the closing backtick).
 		if (
 			config.literals &&
 			node.type === 'TemplateElement' &&
@@ -421,28 +386,23 @@ function blankenate(
 			});
 		}
 
-		// Inc 6.k: keywords are now detected via the token-stream walk
-		// below (after the AST walk), using Acorn's `tok.type.keyword`
-		// flag. The previous AST-walk-based detection covered only a
-		// hardcoded subset of keyword-bearing node types (`function`,
-		// `if`, `for`, `while`, `return`, `const`/`let`/`var`, `class`,
-		// `try`, `catch`, `throw`, `new`) — missing `else`, `extends`,
-		// `import`, `export`, `default`, `static`, `super`, `this`,
-		// `async`, `await`, `yield`, `finally`, `switch`, `case`,
-		// `break`, `continue`, `of`, `in`, `get`, `set`, etc. Switching
-		// to the token-stream `keyword` flag catches them all uniformly.
+		// Keywords are detected via the token-stream walk above —
+		// Acorn's `tok.type.keyword` flag catches reserved keywords
+		// uniformly, plus the CONTEXTUAL_KEYWORDS set covers contextual
+		// keywords that tokenize as `name`.
 
 		// Blank operators. Covered AST node types:
-		//   - BinaryExpression / LogicalExpression (Inc 6.l): `+ - * / % == === !=`
-		//     etc. (BinaryExpression) and `&& || ??` (LogicalExpression).
+		//   - BinaryExpression / LogicalExpression: `+ - * / % == === !=`
+		//     etc. (BinaryExpression) and `&& || ??` (LogicalExpression
+		//     — Acorn splits short-circuit into its own node type).
 		//   - AssignmentExpression: `= += -= ||= ??=` etc.
 		//   - UnaryExpression: `!` `~` `typeof` `void` `delete` etc.
 		//   - UpdateExpression: `++` `--` (pre and post).
 		//   - VariableDeclarator: synthetic `=` from `const x = 1`.
-		//   - AssignmentPattern (Inc 6.k): synthetic `=` from
-		//     `function f(x = 0)` and destructuring defaults.
-		//   - PropertyDefinition (Inc 6.l): synthetic `=` from
-		//     `class A { x = 1 }` and static/private field initializers.
+		//   - AssignmentPattern: synthetic `=` from `function f(x = 0)`
+		//     and destructuring defaults.
+		//   - PropertyDefinition: synthetic `=` from `class A { x = 1 }`
+		//     and static / private field initializers.
 		if (
 			config.operators &&
 			(node.operator ||
@@ -459,7 +419,7 @@ function blankenate(
 			) {
 				// Binary AND logical expressions share the same shape:
 				// `node.left`, `node.right`, `node.operator`. Acorn splits
-				// `&&` / `||` / `??` into LogicalExpression nodes (Inc 6.l);
+				// `&&` / `||` / `??` into LogicalExpression nodes;
 				// `+` / `-` / `*` / `==` / `===` / etc. into BinaryExpression.
 				const leftEnd = node.left.end;
 				const rightStart = node.right.start;
@@ -489,10 +449,10 @@ function blankenate(
 					node.operator = '=';
 				}
 			} else if (node.type === 'AssignmentPattern' && node.right) {
-				// Inc 6.k: default-parameter `=` lives between
-				// node.left (the param) and node.right (the default).
-				// `function f(x = 0)` and `({ a = 1 } = {})` both
-				// use AssignmentPattern nodes with no `.operator` field.
+				// Default-parameter `=` lives between node.left (the
+				// param) and node.right (the default). Both
+				// `function f(x = 0)` and `({ a = 1 } = {})` use
+				// AssignmentPattern nodes with no `.operator` field.
 				const leftEnd = node.left.end;
 				const rightStart = node.right.start;
 				const betweenText = code.substring(leftEnd, rightStart);
@@ -502,14 +462,15 @@ function blankenate(
 					node.operator = '=';
 				}
 			} else if (node.type === 'PropertyDefinition' && node.value && node.key) {
-				// Inc 6.l: class-field initializer `=` lives between
-				// node.key (the field name — Identifier or PrivateIdentifier)
+				// Class-field initializer `=` lives between node.key
+				// (the field name — Identifier or PrivateIdentifier)
 				// and node.value (the initializer expression). Covers:
-				//   class A { x = 1; }          (instance field)
-				//   class A { #count = 0; }     (private field)
+				//   class A { x = 1; }            (instance field)
+				//   class A { #count = 0; }       (private field)
 				//   class A { static MAX = 100; } (static field)
-				// PropertyDefinition has no `.operator` field — same shape
-				// as VariableDeclarator/AssignmentPattern in that regard.
+				// PropertyDefinition has no `.operator` field — same
+				// shape as VariableDeclarator / AssignmentPattern in
+				// that regard.
 				const keyEnd = node.key.end;
 				const valueStart = node.value.start;
 				const betweenText = code.substring(keyEnd, valueStart);
@@ -587,14 +548,15 @@ function blankenate(
 
 	walkNode(tree);
 
-	// Inc 6.k: dedupe blanks at the same `[start, end)` position. Some
-	// tokens are classifiable under MULTIPLE categories (e.g. `typeof`
-	// is both a keyword and a unary operator; `null` is both a keyword
-	// and a Literal). The two stream walks (delimiters, keywords) run
+	// Dedupe blanks at the same `[start, end)` position. Some tokens
+	// are classifiable under MULTIPLE categories (e.g. `typeof` is both
+	// a keyword and a unary operator; `null` is both a keyword and a
+	// Literal). The two token-stream walks (delimiters, keywords) run
 	// BEFORE the AST walk, so first-pushed wins — the more-specific
-	// classification (keyword for `typeof`/`delete`/`void`/`null`/
-	// `true`/`false`) takes precedence over the broader operator /
-	// literal one.
+	// classification (keyword for `typeof` / `delete` / `void` / `null`
+	// / `true` / `false`) takes precedence over the broader operator /
+	// literal one. See `DOCS.md` § Structural constraints for the
+	// token-classification precedence invariant.
 	{
 		const seen = new Set<string>();
 		const deduped: BlankedToken[] = [];
@@ -627,7 +589,7 @@ function blankenate(
 			end: token.end,
 		});
 
-		// Replace with length-matched blank placeholder (Inc 6.7).
+		// Replace with length-matched blank placeholder.
 		blankedCode =
 			blankedCode.substring(0, token.start) +
 			'_'.repeat(token.original.length) +
