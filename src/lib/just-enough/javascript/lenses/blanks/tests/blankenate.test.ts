@@ -78,7 +78,7 @@ describe('blankenate', () => {
 				keywords: true,
 			});
 			const blanks = result?.blanks ?? [];
-			expect(blanks[0]!.start).toBeLessThan(blanks[1]!.start);
+			expect(blanks[0].start).toBeLessThan(blanks[1].start);
 		});
 
 		it('replaces both keywords with length-matched underscores (Inc 6.7)', () => {
@@ -140,7 +140,10 @@ describe('blankenate', () => {
 				identifiers: true,
 			});
 			const blank = result?.blanks[0];
-			expect(blank?.original).toBe(code.slice(blank?.start, blank?.end));
+			expect(blank).toBeDefined();
+			expect(blank?.original).toBe(
+				code.slice(blank?.start ?? 0, blank?.end ?? 0),
+			);
 		});
 
 		it('each blank.type is one of identifier/literal/keyword/operator/delimiter', () => {
@@ -181,7 +184,9 @@ describe('blankenate', () => {
 				...NO_TYPES,
 				delimiters: true,
 			});
-			const originals = (result?.blanks ?? []).map((b) => b.original).sort();
+			const originals = (result?.blanks ?? [])
+				.map((b) => b.original)
+				.toSorted((a, b) => a.localeCompare(b));
 			expect(originals).toContain('[');
 			expect(originals).toContain(']');
 			expect(originals).toContain(';');
@@ -346,7 +351,7 @@ describe('blankenate', () => {
 		// that no `/` blanks appear inside a source containing regex
 		// literals.
 		it('regex-literal slashes are NOT blanked as delimiters', () => {
-			const code = 'const re = /\\d+/g; const s = re.test("42");';
+			const code = String.raw`const re = /\d+/g; const s = re.test("42");`;
 			const result = blankenate(code, 1, {
 				...NO_TYPES,
 				delimiters: true,
@@ -475,7 +480,7 @@ describe('blankenate', () => {
 		// below for the new positive locks.
 
 		it('regex slashes are NOT blanked as delimiters (regex is one `regexp` token)', () => {
-			const result = blankenate('const re = /\\d+/g;', 1, {
+			const result = blankenate(String.raw`const re = /\d+/g;`, 1, {
 				...NO_TYPES,
 				delimiters: true,
 			});
@@ -605,7 +610,7 @@ describe('blankenate', () => {
 			});
 			const arrows = (result?.blanks ?? []).filter((b) => b.original === '=>');
 			expect(arrows.length).toBe(1);
-			expect(arrows[0]!.end - arrows[0]!.start).toBe(2);
+			expect(arrows[0].end - arrows[0].start).toBe(2);
 		});
 
 		it('compound label `?.` produces one 2-char blank (not split into `?` + `.`)', () => {
@@ -617,7 +622,7 @@ describe('blankenate', () => {
 				(b) => b.original === '?.',
 			);
 			expect(optChain.length).toBe(1);
-			expect(optChain[0]!.end - optChain[0]!.start).toBe(2);
+			expect(optChain[0].end - optChain[0].start).toBe(2);
 		});
 
 		it('compound label `...` produces one 3-char blank (not split into 3 dots)', () => {
@@ -629,7 +634,7 @@ describe('blankenate', () => {
 				(b) => b.original === '...',
 			);
 			expect(spreads.length).toBe(1);
-			expect(spreads[0]!.end - spreads[0]!.start).toBe(3);
+			expect(spreads[0].end - spreads[0].start).toBe(3);
 		});
 	});
 
@@ -1000,7 +1005,7 @@ describe('blankenate', () => {
 			// the `*` at index `code.indexOf('function')` + 8.
 			const generatorStarPosition =
 				code.indexOf('function') + 'function'.length;
-			expect(stars[0]!.start).toBe(generatorStarPosition);
+			expect(stars[0].start).toBe(generatorStarPosition);
 		});
 
 		// AR-3 IMPORTANT (Inc 6.q): static class generator method

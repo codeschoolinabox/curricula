@@ -19,16 +19,16 @@ function makeStubScope(initialHash = ''): GlobalScope & {
 		},
 		history: {
 			replaceState(_state, _title, url) {
-				const idx = url.indexOf('#');
-				hash = idx === -1 ? '' : url.slice(idx);
+				const index = url.indexOf('#');
+				hash = index === -1 ? '' : url.slice(index);
 			},
 		},
 		addEventListener(_type, listener) {
 			listeners.push(listener);
 		},
 		removeEventListener(_type, listener) {
-			const idx = listeners.indexOf(listener);
-			if (idx !== -1) listeners.splice(idx, 1);
+			const index = listeners.indexOf(listener);
+			if (index !== -1) listeners.splice(index, 1);
 		},
 		listeners,
 	};
@@ -316,7 +316,7 @@ describe('write — side-effecting', () => {
 		const replaceSpy = vi.spyOn(scope.history, 'replaceState');
 		urlConfig.write({ difficulty: 50, hintsMode: 'on' }, scope);
 		expect(replaceSpy).toHaveBeenCalledTimes(1);
-		const url = replaceSpy.mock.calls[0]![2];
+		const url = replaceSpy.mock.calls[0][2];
 		// Lock the URL format: must start with #?blanks= (the query form).
 		expect(url).toMatch(/^#\?blanks=/);
 		expect(url).toContain('difficulty:50');
@@ -339,7 +339,7 @@ describe('subscribe — hashchange', () => {
 		const callback = vi.fn();
 		urlConfig.subscribe(callback, scope);
 		expect(scope.listeners.length).toBe(1);
-		scope.listeners[0]!();
+		scope.listeners[0]();
 		expect(callback).toHaveBeenCalledTimes(1);
 	});
 

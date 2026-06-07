@@ -35,7 +35,6 @@
     "src/lib/just-enough/javascript/embody/lib/evaluating/shared/**",
     "src/lib/just-enough/javascript/embody/lib/parse-old/**",
     "src/lib/just-enough/javascript/embody/.legacy/**",
-    "src/lib/just-enough/javascript/lenses/blanks/lib/**",
-    "src/lib/just-enough/javascript/lenses/blanks/tests/**"
+    "src/lib/just-enough/javascript/lenses/blanks/lib/**"
   ]
 }

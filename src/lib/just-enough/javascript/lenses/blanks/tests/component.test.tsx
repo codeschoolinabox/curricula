@@ -14,13 +14,12 @@
  * of this lens — it lives at the SL orchestrator one layer up.
  */
 
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { EditorView } from '@codemirror/view';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import embody from '../../../embody/index.js';
-
 import blanksLens from '../index.js';
 
 afterEach(cleanup);
@@ -98,8 +97,8 @@ describe('blanks wrapper — Inc 6a', () => {
 					config={blanksLens.config()}
 				/>,
 			);
-			const root = container.querySelector('[data-lens="blanks"]');
-			expect(root?.getAttribute('data-view-mode')).toBe('blankenated');
+			const root = container.querySelector<HTMLElement>('[data-lens="blanks"]');
+			expect(root?.dataset.viewMode).toBe('blankenated');
 		});
 	});
 
@@ -163,8 +162,8 @@ describe('blanks wrapper — Inc 6a', () => {
 					config={blanksLens.config({ viewMode: 'complete' })}
 				/>,
 			);
-			const root = container.querySelector('[data-lens="blanks"]');
-			expect(root?.getAttribute('data-view-mode')).toBe('complete');
+			const root = container.querySelector<HTMLElement>('[data-lens="blanks"]');
+			expect(root?.dataset.viewMode).toBe('complete');
 		});
 
 		it('config.viewMode="blankenated" explicit seed (not just default)', () => {
@@ -174,8 +173,8 @@ describe('blanks wrapper — Inc 6a', () => {
 					config={blanksLens.config({ viewMode: 'blankenated' })}
 				/>,
 			);
-			const root = container.querySelector('[data-lens="blanks"]');
-			expect(root?.getAttribute('data-view-mode')).toBe('blankenated');
+			const root = container.querySelector<HTMLElement>('[data-lens="blanks"]');
+			expect(root?.dataset.viewMode).toBe('blankenated');
 		});
 
 		it('renders a view-mode toggle button group with both options', () => {
@@ -185,14 +184,14 @@ describe('blanks wrapper — Inc 6a', () => {
 					config={blanksLens.config()}
 				/>,
 			);
-			const blankenatedBtn = container.querySelector(
+			const blankenatedButton = container.querySelector(
 				'[data-view-toggle="blankenated"]',
 			);
-			const completeBtn = container.querySelector(
+			const completeButton = container.querySelector(
 				'[data-view-toggle="complete"]',
 			);
-			expect(blankenatedBtn).not.toBeNull();
-			expect(completeBtn).not.toBeNull();
+			expect(blankenatedButton).not.toBeNull();
+			expect(completeButton).not.toBeNull();
 		});
 
 		it('clicking the complete-mode button switches data-view-mode to "complete"', async () => {
@@ -202,13 +201,15 @@ describe('blanks wrapper — Inc 6a', () => {
 					config={blanksLens.config()}
 				/>,
 			);
-			const completeBtn = container.querySelector(
+			const completeButton = container.querySelector(
 				'[data-view-toggle="complete"]',
 			) as HTMLButtonElement;
-			fireEvent.click(completeBtn);
+			fireEvent.click(completeButton);
 			await waitFor(() => {
-				const root = container.querySelector('[data-lens="blanks"]');
-				expect(root?.getAttribute('data-view-mode')).toBe('complete');
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.viewMode).toBe('complete');
 			});
 		});
 
@@ -238,10 +239,10 @@ describe('blanks wrapper — Inc 6a', () => {
 					config={blanksLens.config({ difficulty: 100 })}
 				/>,
 			);
-			const completeBtn = container.querySelector(
+			const completeButton = container.querySelector(
 				'[data-view-toggle="complete"]',
 			) as HTMLButtonElement;
-			const blankenatedBtn = container.querySelector(
+			const blankenatedButton = container.querySelector(
 				'[data-view-toggle="blankenated"]',
 			) as HTMLButtonElement;
 
@@ -252,19 +253,23 @@ describe('blanks wrapper — Inc 6a', () => {
 			});
 
 			// Toggle to complete → __ absent, editor shows original.
-			fireEvent.click(completeBtn);
+			fireEvent.click(completeButton);
 			await waitFor(() => {
-				const root = container.querySelector('[data-lens="blanks"]');
-				expect(root?.getAttribute('data-view-mode')).toBe('complete');
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.viewMode).toBe('complete');
 				const text = container.querySelector('.cm-content')?.textContent ?? '';
 				expect(text.includes('__')).toBe(false);
 			});
 
 			// Toggle back to blankenated → __ returns.
-			fireEvent.click(blankenatedBtn);
+			fireEvent.click(blankenatedButton);
 			await waitFor(() => {
-				const root = container.querySelector('[data-lens="blanks"]');
-				expect(root?.getAttribute('data-view-mode')).toBe('blankenated');
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.viewMode).toBe('blankenated');
 				const text = container.querySelector('.cm-content')?.textContent ?? '';
 				expect(text).toContain('__');
 			});
@@ -350,25 +355,29 @@ describe('blanks wrapper — Inc 6a', () => {
 
 			// Toggle to complete (which destroys the editor + recreates with
 			// originalCode).
-			const completeBtn = container.querySelector(
+			const completeButton = container.querySelector(
 				'[data-view-toggle="complete"]',
 			) as HTMLButtonElement;
-			fireEvent.click(completeBtn);
+			fireEvent.click(completeButton);
 			await waitFor(() => {
-				const root = container.querySelector('[data-lens="blanks"]');
-				expect(root?.getAttribute('data-view-mode')).toBe('complete');
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.viewMode).toBe('complete');
 			});
 
 			// Toggle back to blankenated. The editor recreates; its document
 			// MUST be the learnerCode (XYZ-prefixed), not the original
 			// blankedCode.
-			const blankenatedBtn = container.querySelector(
+			const blankenatedButton = container.querySelector(
 				'[data-view-toggle="blankenated"]',
 			) as HTMLButtonElement;
-			fireEvent.click(blankenatedBtn);
+			fireEvent.click(blankenatedButton);
 			await waitFor(() => {
-				const root = container.querySelector('[data-lens="blanks"]');
-				expect(root?.getAttribute('data-view-mode')).toBe('blankenated');
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.viewMode).toBe('blankenated');
 				const text = container.querySelector('.cm-content')?.textContent ?? '';
 				expect(text.startsWith('XYZ')).toBe(true);
 			});
@@ -459,8 +468,10 @@ describe('blanks wrapper — Inc 6a', () => {
 				/>,
 			);
 			await waitFor(() => {
-				const scoreEl = container.querySelector('[data-blanks-score]');
-				expect(scoreEl?.textContent).toContain('0');
+				const scoreElement = container.querySelector<HTMLElement>(
+					'[data-blanks-score]',
+				);
+				expect(scoreElement?.textContent).toContain('0');
 			});
 		});
 
@@ -484,8 +495,10 @@ describe('blanks wrapper — Inc 6a', () => {
 			// blank `__`. Type 'OK' char-by-char at position 0.
 			typeIntoBlank(view!, 'OK', 0);
 			await waitFor(() => {
-				const scoreEl = container.querySelector('[data-blanks-score]');
-				expect(scoreEl?.textContent).toContain('100');
+				const scoreElement = container.querySelector<HTMLElement>(
+					'[data-blanks-score]',
+				);
+				expect(scoreElement?.textContent).toContain('100');
 			});
 		});
 
@@ -497,9 +510,11 @@ describe('blanks wrapper — Inc 6a', () => {
 				/>,
 			);
 			await waitFor(() => {
-				const scoreEl = container.querySelector('[data-blanks-score]');
+				const scoreElement = container.querySelector<HTMLElement>(
+					'[data-blanks-score]',
+				);
 				// Initial: 0 (no edits, blanks present)
-				expect(scoreEl?.getAttribute('data-blanks-score')).toBe('0');
+				expect(scoreElement?.dataset.blanksScore).toBe('0');
 			});
 		});
 
@@ -511,8 +526,10 @@ describe('blanks wrapper — Inc 6a', () => {
 				/>,
 			);
 			await waitFor(() => {
-				const scoreEl = container.querySelector('[data-blanks-score]');
-				expect(scoreEl?.getAttribute('data-blanks-score')).toBe('100');
+				const scoreElement = container.querySelector<HTMLElement>(
+					'[data-blanks-score]',
+				);
+				expect(scoreElement?.dataset.blanksScore).toBe('100');
 			});
 		});
 	});
@@ -526,9 +543,9 @@ describe('blanks wrapper — Inc 6a', () => {
 				/>,
 			);
 			await waitFor(() => {
-				const slider = container.querySelector(
+				const slider = container.querySelector<HTMLInputElement>(
 					'[data-difficulty-slider]',
-				) as HTMLInputElement | null;
+				);
 				expect(slider).not.toBeNull();
 				expect(slider?.type).toBe('range');
 				expect(slider?.min).toBe('0');
@@ -544,9 +561,9 @@ describe('blanks wrapper — Inc 6a', () => {
 				/>,
 			);
 			await waitFor(() => {
-				const slider = container.querySelector(
+				const slider = container.querySelector<HTMLInputElement>(
 					'[data-difficulty-slider]',
-				) as HTMLInputElement | null;
+				);
 				expect(slider?.value).toBe('50');
 			});
 		});
@@ -559,9 +576,9 @@ describe('blanks wrapper — Inc 6a', () => {
 				/>,
 			);
 			await waitFor(() => {
-				const slider = container.querySelector(
+				const slider = container.querySelector<HTMLInputElement>(
 					'[data-difficulty-slider]',
-				) as HTMLInputElement | null;
+				);
 				expect(slider?.value).toBe('100');
 			});
 		});
@@ -643,8 +660,10 @@ describe('blanks wrapper — Inc 6a', () => {
 			});
 			// Stronger reset check: data-blanks-correct === '0'
 			// (learner had 100% before; reset means no "correct" credit).
-			const scoreEl = container.querySelector('[data-blanks-score]');
-			const correctAttribute = scoreEl?.getAttribute('data-blanks-correct');
+			const scoreElement = container.querySelector<HTMLElement>(
+				'[data-blanks-score]',
+			);
+			const correctAttribute = scoreElement?.dataset.blanksCorrect;
 			expect(correctAttribute).toBe('0');
 		});
 	});
@@ -738,10 +757,10 @@ describe('blanks wrapper — Inc 6a', () => {
 				'literals',
 				'delimiters',
 			]) {
-				const cb = container.querySelector(
+				const callback = container.querySelector(
 					`[data-content-type="${type}"]`,
 				) as HTMLInputElement;
-				fireEvent.click(cb);
+				fireEvent.click(callback);
 			}
 			await waitFor(() => {
 				const text = container.querySelector('.cm-content')?.textContent ?? '';
@@ -770,13 +789,15 @@ describe('blanks wrapper — Inc 6a', () => {
 				expect(text).toBe(originalCode);
 			});
 			// Toggle off "literals" — learnerCode must reset.
-			const cb = container.querySelector(
+			const callback = container.querySelector(
 				'[data-content-type="literals"]',
 			) as HTMLInputElement;
-			fireEvent.click(cb);
+			fireEvent.click(callback);
 			await waitFor(() => {
-				const scoreEl = container.querySelector('[data-blanks-score]');
-				expect(scoreEl?.getAttribute('data-blanks-correct')).toBe('0');
+				const scoreElement = container.querySelector<HTMLElement>(
+					'[data-blanks-score]',
+				);
+				expect(scoreElement?.dataset.blanksCorrect).toBe('0');
 			});
 		});
 	});
@@ -1474,8 +1495,10 @@ describe('blanks wrapper — Inc 6a', () => {
 			typeIntoBlank(view!, 'hello', 0);
 			await waitFor(() => {
 				// Both surfaces agree the blank is correct.
-				const scoreEl = container.querySelector('[data-blanks-score]');
-				expect(scoreEl?.textContent).toContain('100');
+				const scoreElement = container.querySelector<HTMLElement>(
+					'[data-blanks-score]',
+				);
+				expect(scoreElement?.textContent).toContain('100');
 				expect(container.querySelector('.cm-blank-correct')).not.toBeNull();
 			});
 		});
@@ -1513,19 +1536,19 @@ describe('blanks wrapper — Inc 6a', () => {
 				const header = container.querySelector(
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
-				expect(header?.getAttribute('data-header-mode')).toBe('blankenated');
+				expect(header?.dataset.headerMode).toBe('blankenated');
 				expect(header?.textContent ?? '').toMatch(/blankenated/i);
 			});
 			// Toggle to complete; mode label updates.
-			const completeBtn = container.querySelector(
+			const completeButton = container.querySelector(
 				'[data-view-toggle="complete"]',
 			) as HTMLButtonElement;
-			fireEvent.click(completeBtn);
+			fireEvent.click(completeButton);
 			await waitFor(() => {
 				const header = container.querySelector(
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
-				expect(header?.getAttribute('data-header-mode')).toBe('complete');
+				expect(header?.dataset.headerMode).toBe('complete');
 				expect(header?.textContent ?? '').toMatch(/complete/i);
 			});
 		});
@@ -1541,7 +1564,7 @@ describe('blanks wrapper — Inc 6a', () => {
 				const header = container.querySelector(
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
-				expect(header?.getAttribute('data-header-difficulty')).toBe('75');
+				expect(header?.dataset.headerDifficulty).toBe('75');
 				expect(header?.textContent ?? '').toContain('75');
 			});
 		});
@@ -1558,8 +1581,8 @@ describe('blanks wrapper — Inc 6a', () => {
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
 				// `hello` at difficulty 100 = 1 blank, 1 remaining (unfilled).
-				expect(header?.getAttribute('data-header-blanks-total')).toBe('1');
-				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('1');
+				expect(header?.dataset.headerBlanksTotal).toBe('1');
+				expect(header?.dataset.headerBlanksRemaining).toBe('1');
 			});
 		});
 
@@ -1580,7 +1603,7 @@ describe('blanks wrapper — Inc 6a', () => {
 				const header = container.querySelector(
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
-				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('0');
+				expect(header?.dataset.headerBlanksRemaining).toBe('0');
 			});
 		});
 
@@ -1608,8 +1631,8 @@ describe('blanks wrapper — Inc 6a', () => {
 				const header = container.querySelector(
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
-				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('0');
-				expect(header?.getAttribute('data-header-blanks-total')).toBe('1');
+				expect(header?.dataset.headerBlanksRemaining).toBe('0');
+				expect(header?.dataset.headerBlanksTotal).toBe('1');
 			});
 		});
 
@@ -1632,7 +1655,7 @@ describe('blanks wrapper — Inc 6a', () => {
 				const header = container.querySelector(
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
-				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('0');
+				expect(header?.dataset.headerBlanksRemaining).toBe('0');
 			});
 			// Backspace one char: blank becomes `hell_` → has `_` → unfilled.
 			view!.dispatch({ selection: { anchor: 5 } });
@@ -1641,7 +1664,7 @@ describe('blanks wrapper — Inc 6a', () => {
 				const header = container.querySelector(
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
-				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('1');
+				expect(header?.dataset.headerBlanksRemaining).toBe('1');
 			});
 		});
 
@@ -1660,7 +1683,7 @@ describe('blanks wrapper — Inc 6a', () => {
 				const header = container.querySelector(
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
-				expect(header?.getAttribute('data-header-difficulty')).toBe('100');
+				expect(header?.dataset.headerDifficulty).toBe('100');
 			});
 			const slider = container.querySelector(
 				'[data-difficulty-slider]',
@@ -1670,7 +1693,7 @@ describe('blanks wrapper — Inc 6a', () => {
 				const header = container.querySelector(
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
-				expect(header?.getAttribute('data-header-difficulty')).toBe('30');
+				expect(header?.dataset.headerDifficulty).toBe('30');
 			});
 		});
 
@@ -1687,8 +1710,8 @@ describe('blanks wrapper — Inc 6a', () => {
 				const header = container.querySelector(
 					'[data-blanks-editor-header]',
 				) as HTMLElement;
-				expect(header?.getAttribute('data-header-blanks-total')).toBe('0');
-				expect(header?.getAttribute('data-header-blanks-remaining')).toBe('0');
+				expect(header?.dataset.headerBlanksTotal).toBe('0');
+				expect(header?.dataset.headerBlanksRemaining).toBe('0');
 			});
 		});
 	});
@@ -1716,8 +1739,10 @@ describe('blanks wrapper — Inc 6a', () => {
 					/>,
 				);
 				await waitFor(() => {
-					const root = container.querySelector('[data-lens="blanks"]');
-					expect(root?.getAttribute('data-hints-mode')).toBe('on');
+					const root = container.querySelector<HTMLElement>(
+						'[data-lens="blanks"]',
+					);
+					expect(root?.dataset.hintsMode).toBe('on');
 					expect(container.querySelector('[data-blanks-hints]')).not.toBeNull();
 				});
 			});
@@ -1730,8 +1755,10 @@ describe('blanks wrapper — Inc 6a', () => {
 					/>,
 				);
 				await waitFor(() => {
-					const root = container.querySelector('[data-lens="blanks"]');
-					expect(root?.getAttribute('data-hints-mode')).toBe('off');
+					const root = container.querySelector<HTMLElement>(
+						'[data-lens="blanks"]',
+					);
+					expect(root?.dataset.hintsMode).toBe('off');
 				});
 				expect(container.querySelector('[data-blanks-hints]')).toBeNull();
 			});
@@ -1766,11 +1793,11 @@ describe('blanks wrapper — Inc 6a', () => {
 				const view = EditorView.findFromDOM(cmContent);
 				view!.dispatch({ selection: { anchor: 2 } });
 				await waitFor(() => {
-					const btn = container.querySelector(
+					const button = container.querySelector(
 						'[data-hint-reveal-button]',
 					) as HTMLElement;
-					expect(btn).not.toBeNull();
-					expect(btn.getAttribute('data-hint-blank-id')).toBeTruthy();
+					expect(button).not.toBeNull();
+					expect(button.dataset.hintBlankId).toBeTruthy();
 				});
 			});
 
@@ -1823,8 +1850,8 @@ describe('blanks wrapper — Inc 6a', () => {
 					expect(
 						revealed.querySelector('[data-hint-partial]')?.textContent,
 					).toBe('');
-					expect(revealed.getAttribute('data-hint-reveal-count')).toBe('0');
-					expect(revealed.getAttribute('data-hint-reveal-total')).toBe('5');
+					expect(revealed.dataset.hintRevealCount).toBe('0');
+					expect(revealed.dataset.hintRevealTotal).toBe('5');
 				});
 				expect(
 					container.querySelector('[data-hint-reveal-button]'),
@@ -1858,7 +1885,7 @@ describe('blanks wrapper — Inc 6a', () => {
 					const revealed = container.querySelector(
 						'[data-hint-revealed]',
 					) as HTMLElement;
-					expect(revealed.getAttribute('data-hint-reveal-count')).toBe('1');
+					expect(revealed.dataset.hintRevealCount).toBe('1');
 					const partial =
 						revealed.querySelector('[data-hint-partial]')?.textContent ?? '';
 					// Exactly one letter revealed. Letter is from `hello`
@@ -1897,7 +1924,7 @@ describe('blanks wrapper — Inc 6a', () => {
 					const revealed = container.querySelector(
 						'[data-hint-revealed]',
 					) as HTMLElement;
-					expect(revealed.getAttribute('data-hint-reveal-count')).toBe('1');
+					expect(revealed.dataset.hintRevealCount).toBe('1');
 					// One letter revealed, must be 'h' or 'i'.
 					const partial =
 						revealed.querySelector('[data-hint-partial]')?.textContent ?? '';
@@ -1917,7 +1944,7 @@ describe('blanks wrapper — Inc 6a', () => {
 					const revealed = container.querySelector(
 						'[data-hint-revealed]',
 					) as HTMLElement;
-					expect(revealed.getAttribute('data-hint-reveal-count')).toBe('2');
+					expect(revealed.dataset.hintRevealCount).toBe('2');
 					// Fully revealed: 2-char permutation of `hi` — either
 					// `hi` or `ih` depending on the seed.
 					const partial =
@@ -1963,27 +1990,24 @@ describe('blanks wrapper — Inc 6a', () => {
 				);
 				await waitFor(() => {
 					expect(
-						container
-							.querySelector('[data-hint-revealed]')
-							?.getAttribute('data-hint-reveal-count'),
+						container.querySelector<HTMLElement>('[data-hint-revealed]')
+							?.dataset.hintRevealCount,
 					).toBe('2');
 				});
 				// Cursor → blank 2 (`x` at [4,5)) → new blank, count 0.
 				view!.dispatch({ selection: { anchor: 4 } });
 				await waitFor(() => {
 					expect(
-						container
-							.querySelector('[data-hint-revealed]')
-							?.getAttribute('data-hint-reveal-count'),
+						container.querySelector<HTMLElement>('[data-hint-revealed]')
+							?.dataset.hintRevealCount,
 					).toBe('0');
 				});
 				// Cursor → back to blank 1 → count restored.
 				view!.dispatch({ selection: { anchor: 1 } });
 				await waitFor(() => {
 					expect(
-						container
-							.querySelector('[data-hint-revealed]')
-							?.getAttribute('data-hint-reveal-count'),
+						container.querySelector<HTMLElement>('[data-hint-revealed]')
+							?.dataset.hintRevealCount,
 					).toBe('2');
 				});
 			});
@@ -2063,14 +2087,16 @@ describe('blanks wrapper — Inc 6a', () => {
 				await waitFor(() => {
 					expect(container.querySelector('.cm-content')).not.toBeNull();
 				});
-				const diffBtn = container.querySelector(
+				const diffButton = container.querySelector(
 					'[data-editor-mode-toggle="diff"]',
 				) as HTMLButtonElement;
-				fireEvent.click(diffBtn);
+				fireEvent.click(diffButton);
 				await waitFor(() => {
-					const root = container.querySelector('[data-lens="blanks"]');
+					const root = container.querySelector<HTMLElement>(
+						'[data-lens="blanks"]',
+					);
 					// viewMode unchanged — still blankenated.
-					expect(root?.getAttribute('data-view-mode')).toBe('blankenated');
+					expect(root?.dataset.viewMode).toBe('blankenated');
 				});
 				// Editor still mounted; hints panel hidden.
 				expect(container.querySelector('.cm-content')).not.toBeNull();
@@ -2200,10 +2226,10 @@ describe('blanks wrapper — Inc 6a', () => {
 				const dirtyDoc = view!.state.doc.toString();
 				expect(dirtyDoc).toContain('XYZ_GARBAGE_');
 				// Switch to helpful — the exercise resets.
-				const helpfulBtn = container.querySelector(
+				const helpfulButton = container.querySelector(
 					'[data-editor-mode-toggle="helpful"]',
 				) as HTMLButtonElement;
-				fireEvent.click(helpfulBtn);
+				fireEvent.click(helpfulButton);
 				await waitFor(() => {
 					const newContent = container.querySelector(
 						'.cm-content',
@@ -2227,8 +2253,10 @@ describe('blanks wrapper — Inc 6a', () => {
 					/>,
 				);
 				await waitFor(() => {
-					const root = container.querySelector('[data-lens="blanks"]');
-					expect(root?.getAttribute('data-view-mode')).toBe('complete');
+					const root = container.querySelector<HTMLElement>(
+						'[data-lens="blanks"]',
+					);
+					expect(root?.dataset.viewMode).toBe('complete');
 				});
 				expect(
 					container.querySelector('[data-editor-mode-toggle="helpful"]'),
@@ -2269,52 +2297,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		// would pass every existing test, because every existing test
 		// uses one render and one click sequence.
 		it('scrambled-order reveal is stable across unmount/remount (PRNG determinism)', async () => {
-			function captureFirstReveal(): string {
-				const { container } = render(
-					<blanksLens.Component
-						embodiment={embody('hello')}
-						config={blanksLens.config({ difficulty: 100 })}
-					/>,
-				);
-				return new Promise<string>((resolve) => {
-					waitFor(() => {
-						const cmContent = container.querySelector(
-							'.cm-content',
-						) as HTMLElement | null;
-						expect(cmContent).not.toBeNull();
-					}).then(() => {
-						const cmContent = container.querySelector(
-							'.cm-content',
-						) as HTMLElement;
-						const view = EditorView.findFromDOM(cmContent);
-						view!.dispatch({ selection: { anchor: 0 } });
-						waitFor(() => {
-							expect(
-								container.querySelector('[data-hint-reveal-button]'),
-							).not.toBeNull();
-						}).then(() => {
-							fireEvent.click(
-								container.querySelector(
-									'[data-hint-reveal-button]',
-								) as HTMLButtonElement,
-							);
-							waitFor(() => {
-								const partial = container.querySelector(
-									'[data-hint-partial]',
-								)?.textContent;
-								expect(partial?.length).toBe(1);
-							}).then(() => {
-								const letter =
-									container.querySelector('[data-hint-partial]')?.textContent ??
-									'';
-								cleanup();
-								resolve(letter);
-							});
-						});
-					});
-				}) as unknown as string;
-			}
-			// Simpler imperative form that works with vitest's async:
+			// Imperative form that works with vitest's async:
 			const renderOnce = async () => {
 				const { container } = render(
 					<blanksLens.Component
@@ -2349,7 +2332,6 @@ describe('blanks wrapper — Inc 6a', () => {
 				cleanup();
 				return letter;
 			};
-			void captureFirstReveal;
 			const first = await renderOnce();
 			const second = await renderOnce();
 			// Deterministic per blank.id: same blank in same source →
@@ -2502,13 +2484,13 @@ describe('blanks wrapper — Inc 6a', () => {
 		// Helper: clean hash before each test.
 		afterEach(() => {
 			// jsdom keeps location across tests; clean up the hash.
-			if (typeof window !== 'undefined') {
-				window.history.replaceState(null, '', window.location.pathname);
+			if (globalThis.window !== undefined) {
+				globalThis.history.replaceState(null, '', globalThis.location.pathname);
 			}
 		});
 
 		it('reads URL hash on mount and seeds difficulty from it', async () => {
-			window.history.replaceState(null, '', '#?blanks=difficulty:75');
+			globalThis.history.replaceState(null, '', '#?blanks=difficulty:75');
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
@@ -2525,7 +2507,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('reads URL hash on mount and seeds editorMode from it', async () => {
-			window.history.replaceState(null, '', '#?blanks=editor:diff');
+			globalThis.history.replaceState(null, '', '#?blanks=editor:diff');
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
@@ -2533,15 +2515,15 @@ describe('blanks wrapper — Inc 6a', () => {
 				/>,
 			);
 			await waitFor(() => {
-				const diffBtn = container.querySelector(
+				const diffButton = container.querySelector(
 					'[data-editor-mode-toggle="diff"]',
 				) as HTMLButtonElement;
-				expect(diffBtn.getAttribute('aria-pressed')).toBe('true');
+				expect(diffButton.getAttribute('aria-pressed')).toBe('true');
 			});
 		});
 
 		it('reads URL hash on mount and seeds hintsMode from it', async () => {
-			window.history.replaceState(null, '', '#?blanks=hints:off');
+			globalThis.history.replaceState(null, '', '#?blanks=hints:off');
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
@@ -2549,15 +2531,17 @@ describe('blanks wrapper — Inc 6a', () => {
 				/>,
 			);
 			await waitFor(() => {
-				const root = container.querySelector('[data-lens="blanks"]');
-				expect(root?.getAttribute('data-hints-mode')).toBe('off');
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.hintsMode).toBe('off');
 			});
 		});
 
 		it('writes the live config to the URL hash after a 500ms debounce', async () => {
 			vi.useFakeTimers({ shouldAdvanceTime: true });
 			try {
-				window.history.replaceState(null, '', window.location.pathname);
+				globalThis.history.replaceState(null, '', globalThis.location.pathname);
 				const { container } = render(
 					<blanksLens.Component
 						embodiment={embody('OK')}
@@ -2575,11 +2559,11 @@ describe('blanks wrapper — Inc 6a', () => {
 				fireEvent.change(slider, { target: { value: '88' } });
 				// Before debounce window passes, hash should not yet
 				// reflect the change.
-				expect(window.location.hash).not.toContain('difficulty:88');
+				expect(globalThis.location.hash).not.toContain('difficulty:88');
 				// Advance timers past the 500ms debounce.
 				vi.advanceTimersByTime(550);
 				await vi.waitFor(() => {
-					expect(window.location.hash).toContain('difficulty:88');
+					expect(globalThis.location.hash).toContain('difficulty:88');
 				});
 			} finally {
 				vi.useRealTimers();
@@ -2587,7 +2571,7 @@ describe('blanks wrapper — Inc 6a', () => {
 		});
 
 		it('responds to hashchange events by re-reading the URL (back/forward replay)', async () => {
-			window.history.replaceState(null, '', '#?blanks=difficulty:30');
+			globalThis.history.replaceState(null, '', '#?blanks=difficulty:30');
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
@@ -2601,8 +2585,8 @@ describe('blanks wrapper — Inc 6a', () => {
 				expect(slider.value).toBe('30');
 			});
 			// Simulate browser back/forward: change hash + dispatch event.
-			window.history.replaceState(null, '', '#?blanks=difficulty:90');
-			window.dispatchEvent(new HashChangeEvent('hashchange'));
+			globalThis.history.replaceState(null, '', '#?blanks=difficulty:90');
+			globalThis.dispatchEvent(new HashChangeEvent('hashchange'));
 			await waitFor(() => {
 				const slider = container.querySelector(
 					'[data-difficulty-slider]',
@@ -2616,7 +2600,7 @@ describe('blanks wrapper — Inc 6a', () => {
 			// A write-on-mount would push the prop defaults into the URL
 			// even though the learner did nothing — annoying and would
 			// rewrite the URL on every page load.
-			window.history.replaceState(null, '', window.location.pathname);
+			globalThis.history.replaceState(null, '', globalThis.location.pathname);
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('OK')}
@@ -2630,7 +2614,7 @@ describe('blanks wrapper — Inc 6a', () => {
 			});
 			// Wait through the debounce window with NO user action.
 			await new Promise((r) => setTimeout(r, 600));
-			expect(window.location.hash).toBe('');
+			expect(globalThis.location.hash).toBe('');
 		});
 	});
 

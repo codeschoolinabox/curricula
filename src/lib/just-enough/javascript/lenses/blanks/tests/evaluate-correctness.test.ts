@@ -249,7 +249,11 @@ describe('evaluateCorrectness', () => {
 				[blank('b0', 'x', 4, 5), blank('b1', 'y', 15, 16)],
 				'let x = 1; let y = 2;',
 			);
-			expect([...result.correctnessMap.keys()].sort()).toEqual(['b0', 'b1']);
+			expect(
+				[...result.correctnessMap.keys()].toSorted((a, b) =>
+					a.localeCompare(b),
+				),
+			).toEqual(['b0', 'b1']);
 		});
 
 		it('returned result is frozen', () => {

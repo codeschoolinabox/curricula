@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import embody from '../../../embody/index.js';
 import type { Snippet } from '../../../embody/types.js';
-
 import core from '../core.js';
 
 function makeSnippet(overrides: Partial<Snippet> = {}): Snippet {
@@ -127,7 +126,7 @@ describe('blanks core', () => {
 
 		describe('Exceptions — defensive', () => {
 			it('accepts undefined overrides (matches the Partial<LensConfig> signature)', () => {
-				expect(() => core.config(undefined)).not.toThrow();
+				expect(() => core.config()).not.toThrow();
 			});
 
 			it('accepts an empty-object overrides (defaults still apply)', () => {

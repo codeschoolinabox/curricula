@@ -26,11 +26,7 @@ export default tseslint.config(
 			// Vendored blanks lens internals (blankenate, no-paste-extension,
 			// url-config, evaluate-correctness) — JS→TS mechanical converts of
 			// the legacy implementation; idiomatic V2 style is a follow-up.
-			// Tests/ extends the exclusion to the concurrent session's WIP
-			// test files (component.test.tsx etc.) — re-include when the
-			// blanks lens refactor stabilizes.
 			'src/lib/just-enough/javascript/lenses/blanks/lib/**',
-			'src/lib/just-enough/javascript/lenses/blanks/tests/**',
 			// Vendored parsons lens internals (lis, parse-parsons) — JS→TS
 			// mechanical converts of the legacy JSParsons implementation;
 			// idiomatic V2 style is a follow-up. Tests/ extends the

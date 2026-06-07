@@ -72,10 +72,7 @@ subsystems under `lib/` are internal; only `index.tsx` and (where applicable)
 fighting lint; refactoring to idiomatic V2 style is a deliberate follow-up.
 Tests target each subsystem in isolation (vitest, no jsdom) plus the wrapper
 end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
-`lib/tests/`). The `tests/` directory is currently in `eslint.config.mjs` §
-Global ignores — a WIP exemption during the redo's concurrent-session phase.
-Re-including `tests/` in lint coverage is a follow-up (the eslint config comment
-names this explicitly).
+`lib/tests/`) and ARE linted — they're V2-owned code, not vendored.
 
 ## Architectural sketch
 
