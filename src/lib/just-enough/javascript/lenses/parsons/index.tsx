@@ -19,25 +19,28 @@
  * place. There is no destroy/recreate loop to guard, so the mirror would be cargo
  * cult.
  *
- * **Current scope (Inc 7a–7g):** the wrapper mounts, resolves config, parses the
- * snippet (parse held as state, reseeded on Reset), holds the arrangement in
- * `useReducer` over `arrange.ts`, and renders the two-column board — the shuffled
- * pool (`<ul>`) + the solution column (`<ol>`). Native HTML5 DnD: `onDragStart`
- * writes `${zone}:${id}` to `dataTransfer`; `onDragOver` calls `preventDefault`
- * (load-bearing — without it `onDrop` never fires); `onDrop` dispatches
- * `placeFromPool` / `returnToPool` / `reorderWithinSolution` (removal-shift-adjusted
- * insert index + same-position short-circuit). Each placed line carries
- * `data-indent={level}` + compact guide steps (editor-style alignment cues) and
- * (when `canIndent`) right-side outdent/indent buttons. A `Check` button grades via
- * `buildEvaluation` and renders `data-correctness` per placed line + a
- * `data-parsons-score` aria-live region (pool lines get NO per-line feedback — that
- * would reveal the distractors by elimination; missing lines lower the score
- * instead); any arrangement edit clears the stale result (`applyArrange`); `Reset`
- * re-shuffles + clears. A work/complete view toggle (`data-view-toggle`) seeds
- * from `config.viewMode` and renders the model solution read-only at literal
+ * **What the wrapper does:** mounts, resolves config, parses the snippet (parse held
+ * as state, reseeded on Reset), holds the arrangement in `useReducer` over
+ * `arrange.ts`, and renders the two-column board — the shuffled pool (`<ul>`) + the
+ * solution column (`<ol>`). Native HTML5 DnD: `onDragStart` writes `${zone}:${id}` to
+ * `dataTransfer`; `onDragOver` calls `preventDefault` (load-bearing — without it
+ * `onDrop` never fires); `onDrop` dispatches `placeFromPool` / `returnToPool` /
+ * `reorderWithinSolution` (removal-shift-adjusted insert index + same-position
+ * short-circuit). Each placed line carries `data-indent={level}` + compact guide steps
+ * (editor-style alignment cues) and (when `canIndent`) right-side outdent/indent
+ * buttons. A `Check` button grades via `buildEvaluation` and renders `data-correctness`
+ * per placed line + a `data-parsons-score` aria-live region (pool lines get NO per-line
+ * feedback — that would reveal the distractors by elimination; missing lines lower the
+ * score instead; a placed distractor reads as `wrong-order`); any arrangement edit
+ * clears the stale result (`applyArrange`); `Reset` re-shuffles + clears (but NOT the
+ * attempt history). A work/complete view toggle (`data-parsons-view-toggle`) seeds from
+ * `config.viewMode` and renders the model solution read-only at literal
  * `level * indentSize` in `<pre data-parsons-complete>` (no distractors); toggling
- * preserves the arrangement + feedback (it is not an `applyArrange` edit). A
- * pool→pool drop is a no-op.
+ * preserves the arrangement + feedback. An **info panel** above the board (both views)
+ * holds a 3-state feedback legend, the distractor-count hint, and the collapsible
+ * educator hint blocks. A toolbar **history** button opens a React-state modal
+ * (`data-parsons-history-modal`, Escape-to-close) listing each Check as a frozen,
+ * never-re-graded snapshot. A pool→pool drop is a no-op.
  */
 
 import React, { useEffect, useMemo, useReducer, useState } from 'react';

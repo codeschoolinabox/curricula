@@ -152,11 +152,12 @@ const COLLAPSE_LINE = /^[^\S\r\n]*parsons-collapse:[^\r\n]*\r?\n?/im;
 /**
  * Turn one block's inner content into a HintBlock (summary split + V2 trims).
  *
- * The `summary` field encodes how the renderer (Inc 10) shows the block:
- * - `null` — NO `parsons-collapse:` marker → render as a plain always-visible `<pre>`.
- * - `''` (empty string) — marker present but no text after it → render as a
- *   collapsible `<details>` with an empty summary label.
- * - non-empty string — collapsible `<details>` with that summary label.
+ * The `summary` field only selects the renderer's (Inc 10) collapsible label — EVERY
+ * block renders as a collapsible `<details>` (the old "no marker → plain `<pre>`" mode
+ * was dropped at the browser gate):
+ * - `null` — NO `parsons-collapse:` marker → default `Hint` label.
+ * - `''` (empty string) — marker present but no text after it → also the default label.
+ * - non-empty string — the `<details>` summary label.
  *
  * Only the FIRST `parsons-collapse:` line is treated as the marker; any later one
  * stays verbatim in the body (`COLLAPSE_LINE` is non-global).
