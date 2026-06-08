@@ -274,7 +274,7 @@ owns the curricular scope.
 | Layer I — Lenses & defaults        | `orchestrate/lib/recommender/` ranks by snippet-fit; `lenses/` are the plugins                                                                                                                                               | _(subsumed)_                                          |
 | Layer II — Path generation         | Open spec — auto-generated lens path on one snippet (3D Block × NM in draft)                                                                                                                                                 | Sequence of `<StudyLenses>` instances across snippets |
 | Layer III — Manual recommendations | `lens` prop: "open in this lens first" (per-fence `js:trace?…` or directory `lenses.json` cascade)                                                                                                                           | LMS picks the curated snippet                         |
-| Layer IV — Manually crafted paths  | **Deferred** — Q-IV at snippet scope is owned by the LMS; auto-recommended Q-II tours suffice for in-snippet guidance. Future shape (5th prop / meta-key in `configs` / directory-level setting) is intentionally undecided. | Full curriculum sequence                              |
+| Layer IV — Manually crafted paths  | **Deferred** — Q-IV at snippet scope is owned by the LMS; auto-recommended Q-II tours suffice for in-snippet guidance. Future shape (new prop / meta-key in `configs` / directory-level setting) is intentionally undecided. | Full curriculum sequence                              |
 | Top — Monitored learning           | _(n/a)_                                                                                                                                                                                                                      | Grade reports, LMS integration, cheating detection    |
 
 ### 3D Block Model space
@@ -410,34 +410,37 @@ embody architecture, data flow, and tradeoffs are documented in
 (`run`, `intercept`, `trace.syntax`, `trace.semantics`) are what
 `embody.streams.evaluate.*` wraps internally.
 
-### Four-prop public API
+### Three-prop public API
 
 ```tsx
-<StudyLenses snippet={…} lens={…}? config={…}? configs={…}? />
+<StudyLenses snippet={…} lens={…}? configs={…}? />
 ```
 
 - **`snippet`** — code string. Orchestrator builds the embodiment internally.
 - **`lens`** — optional default-mount lens name (Q-III seam).
-- **`config`** — optional override for the resolved-default lens.
-- **`configs`** — optional cascade bundle keyed by lens name. The picker reads
-  `configs[lensName]` when opening any lens.
+- **`configs`** — optional, maximally opaque cascade passthrough
+  (`Readonly<Record<string, unknown>>`). The orchestrator reads
+  `configs.lenses?.[lensName]` as the authoritative per-lens config when opening
+  any lens; that `lenses[lens]` lookup is an internal structural assumption, not
+  a constraint on the public type.
+
+The separate `config` prop is **gone** — the **3-prop reshape** folds any
+per-fence / sibling override INTO `configs.lenses[lens]` at plugin emission
+time, so the cascade is the single merged truth. The mount-time guard that once
+threw on a `config` without a resolved `lens` has no trigger anymore and is
+likewise gone.
 
 **Resolved-default-lens resolution order**: `lens` prop → cascade default
 declaration in `configs` → none.
 
-**Resolution chain for any lens-name**:
+**Resolution chain for any lens-name** (two tiers, post-reshape):
 
 ```text
-resolved(lensName) = module.config()                          // tier 0: lens defaults
-                   ⊕ configs?.[lensName]                      // tier 1: cascade entry
-                   ⊕ (lensName === resolvedDefault ? config : {})  // tier 2: override
+resolved(lensName) = module.config()                  // tier 0: lens defaults
+                   ⊕ configs.lenses?.[lensName]        // tier 1: cascade entry
 ```
 
 (`⊕` = deep-merge-right-wins.)
-
-`config=` without `lens=` applies to the resolved-default lens (the cascade may
-declare the default). If no default resolves at all, the orchestrator throws at
-mount.
 
 **Per-fence info-string syntax** (URL-style; the Docusaurus plugin parses this
 and emits the props):
@@ -445,18 +448,20 @@ and emits the props):
 ```text
 js                         → no lens (editor home base)
 js:trace                   → lens="trace"
-js:trace?stepDelay=500     → lens="trace", config={ stepDelay: 500 }
-js:trace?cols=value,steps  → lens="trace", config={ cols: ["value","steps"] }
+js:trace?stepDelay=500     → lens="trace", merged into configs.lenses.trace
+js:trace?cols=value,steps  → lens="trace", merged into configs.lenses.trace
 ```
 
-`lenses.json` directory cascade emits `configs`. See
+The URL-style query is deep-merged INTO `configs.lenses[lens]` at emission time
+(there is no standalone `config` prop). The `lenses.json` directory cascade
+emits the rest of `configs`. See
 [`.planning-handoffs/03-orchestrator-and-contracts.md`](./.planning-handoffs/03-orchestrator-and-contracts.md)
 for the full lock + plugin alignment.
 
-**Q-IV (per-snippet manual sequencing) is deferred.** The future shape (5th prop
-/ meta-key in `configs` / directory-level setting) is intentionally undecided
-until Q-IV un-defers. The LMS owns curricular sequencing; auto-recommended Q-II
-tours suffice for in-snippet guidance.
+**Q-IV (per-snippet manual sequencing) is deferred.** The future shape (a new
+top-level prop / meta-key in `configs` / directory-level setting) is
+intentionally undecided until Q-IV un-defers. The LMS owns curricular
+sequencing; auto-recommended Q-II tours suffice for in-snippet guidance.
 
 ## Open holes in the contract
 

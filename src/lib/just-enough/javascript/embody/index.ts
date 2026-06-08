@@ -52,9 +52,12 @@
  *   |     |--- "EVAL_LIMIT"          --> apex leaf; run() outcome:'limit-exceeded'
  *   |     |--- "EVAL_CANCELLED"      --> apex leaf; run() outcome:'cancelled'
  *   |
- *   |--- no:  real composition — pre-acorn stub (status all false,
- *             raw all null, errors null). Acorn run wires in at
- *             Increment 2 (see EMBODY-IMPL-HANDOFF.md)
+ *   |--- no:  real composition — two-stage acorn run (tokenize → parse).
+ *             Success → apex-real (tokenized:T, parsed:T, raw populated,
+ *             errors null); analysis/validation/creation still stubbed
+ *             null (validated:F, created:F) pending lib/parse + lib/scope.
+ *             Tokenize/parse failure → tokenize-fail / parse-fail leaf
+ *             with populated errors (see EMBODY-IMPL-HANDOFF.md)
  *   |
  *   v
  * assemble Snippet per types.ts § 14 staircase

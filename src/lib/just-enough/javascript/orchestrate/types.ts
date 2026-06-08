@@ -17,25 +17,26 @@
  *   `resolvePerLensConfig`.
  * - Internal state is mode-discriminated (`editor` | `lens`).
  * - The live embodiment lives in a single authoritative top-level
- *   slot (`CachedEmbodiment | null`) ALONGSIDE the mode state — NOT
+ *   slot (`LiveEmbodiment | null`) ALONGSIDE the mode state — NOT
  *   inside `LensModeState`. Lens-mode rendering reads the embodiment
- *   from this slot. Cache survives `lens → editor` round-trips and is
- *   cleared only on snippet edit in editor mode.
+ *   from this slot; the editor-mode gutter reads its `errors`. The slot
+ *   is refreshed by a debounced static `embody()` while editing and
+ *   flushed on `editor → lens`; it survives `lens → editor` round-trips.
  * - INTERNAL-only EventBus — no `subscribe` / `onEvent` prop on
- *   `<StudyLenses>` until a concrete LMS integration target appears
- *   (per WS3 handoff F5). `lens-switched` (forward from Inc-9) and
- *   `mode-changed` (new for the 2-mode state machine) are the only
- *   event names today.
+ *   `<StudyLenses>` until a concrete LMS integration target appears.
+ *   `lens-switched` (carried forward from the pre-refactor
+ *   orchestrator) and `mode-changed` (new for the 2-mode state
+ *   machine) are the only event names today.
  *
  * **What survives unchanged**: the `EventBus` shape (typed
  * dispatch/subscribe/unsubscribe/clear), per-instance ownership
  * (each `<StudyLenses>` mount owns its own bus, no global registry).
  *
  * **Open holes**:
- * - `LensSelectionSource` may still grow with L5/L6: `'panel'` is
- *   typed but unwired (recommendations-panel cell click, deferred);
- *   a keyboard-shortcut source could land alongside. Extensions are
- *   gated — see the policy block on the union itself.
+ * - `LensSelectionSource` may still grow: `'panel'` is typed but
+ *   unwired (reserved for the future Cycle-2 phase-station dispatch
+ *   site, deferred); a keyboard-shortcut source could land alongside.
+ *   Extensions are gated — see the policy block on the union itself.
  * - `'edit-button'` is typed (the toolbar edit-return click site
  *   computes it) but not externally observable today, because
  *   `ModeChangedPayload` carries only `{from, to}`. A future
@@ -80,11 +81,12 @@ import type { LensConfig } from '../lenses/types.js';
  *   on the first render and is the sole writer thereafter;
  *   subsequent changes to this prop are IGNORED. Callers who need
  *   to swap the snippet remotely should remount via React `key={…}`.
- *   The orchestrator builds the embodiment internally on lens-open
- *   (lazy). Caller does NOT pre-build.
- * - `lens?` — Q-III educator-supplied default-mount lens name. The
- *   learner can switch via the toolbar picker (L1+); this is just
- *   the initial selection. Changes to this prop AFTER mount drive
+ *   The orchestrator builds the embodiment internally (live debounced
+ *   static `embody()` while editing; seeded once at mount). Caller
+ *   does NOT pre-build.
+ * - `lens?` — educator-supplied default-mount lens; the learner can
+ *   switch via the picker. This is just the initial selection.
+ *   Changes to this prop AFTER mount drive
  *   mode transitions (per `./README.md` § Editor-vs-lens state
  *   machine).
  * - `configs?` — opaque cascade passthrough (see § configs typing
@@ -138,10 +140,9 @@ type StudyLensesProps = Readonly<{
  * string. No active lens.
  *
  * @remarks Per `./README.md` § Glossary. The live embodiment
- * (if any survives from a prior lens-mode session) lives in the
- * top-level `CachedEmbodiment` slot, NOT here — `EditorModeState`
- * is intentionally minimal so the discriminator's only role is
- * to name the rendered subtree.
+ * lives in the top-level `LiveEmbodiment` slot, NOT here —
+ * `EditorModeState` is intentionally minimal so the discriminator's
+ * only role is to name the rendered subtree.
  *
  * The edit callback (`onSnippetChange`) flows through
  * `<EditorComponent>`'s prop surface and is wired up by the
@@ -155,17 +156,18 @@ type EditorModeState = Readonly<{
  * Lens mode — a lens is mounted. Snippet is read-only.
  *
  * @remarks Per `./README.md` § Glossary. The frozen embodiment is
- * stored in the top-level `CachedEmbodiment` slot (single
+ * stored in the top-level `LiveEmbodiment` slot (single
  * authoritative location); `LensModeState` carries only the
  * orchestrator's lens-mode-specific bookkeeping. `activeLens` is
  * a separate field (rather than implied by render-time prop
- * inspection) so F4's in-mode lens-switching can change it
+ * inspection) so in-mode lens-switching can change it
  * without re-deriving from props.
  *
  * **Coherence invariant** (enforced by transition logic, not
  * the type system): when `state.mode === 'lens'`, the
- * orchestrator's `cachedEmbodiment` slot is non-null AND
- * `cachedEmbodiment.snippet === currentSnippet`.
+ * orchestrator's `liveEmbodiment` slot is non-null AND
+ * `liveEmbodiment.snippet === currentSnippet` (a stale slot is a
+ * loud failure, not just a null one).
  */
 type LensModeState = Readonly<{
 	mode: 'lens';
@@ -177,40 +179,49 @@ type LensModeState = Readonly<{
  * The orchestrator's mode-discriminated state. Exactly one mode at
  * a time (no concurrent editor+lens rendering).
  *
- * @remarks The snippet string and the cached embodiment are each
+ * @remarks The snippet string and the live embodiment are each
  * owned in their own top-level state slot, separately from this
- * union. See `CachedEmbodiment` and `./README.md` § Cross-mode
- * embodiment cache for the cache contract.
+ * union. See `LiveEmbodiment` and `./README.md` § Live embodiment
+ * for the slot contract.
  */
 type OrchestratorState = EditorModeState | LensModeState;
 
 /**
- * The orchestrator's lazy-embodiment memo. Single authoritative
- * storage location for the live `Snippet`; lens-mode rendering
- * reads `cachedEmbodiment.embodiment` directly. Held in a
- * separate top-level `useState` slot alongside
- * `OrchestratorState`.
+ * The orchestrator's live static embodiment of the editing buffer.
+ * Single authoritative storage location for the `Snippet`; lens-mode
+ * rendering reads `liveEmbodiment.embodiment` directly, and the
+ * editor-mode gutter + (Cycle-2) phase panel read its `status` /
+ * `errors` / `validation`. Held in a separate top-level `useState`
+ * slot alongside `OrchestratorState`.
  *
- * @remarks Trigger semantics (per `./README.md` § Cross-mode
- * embodiment cache):
+ * @remarks Trigger semantics (per `./README.md` § Live embodiment):
  *
- * - Initial mount: populated atomically with `embody(snippet)` when
- *   `deriveInitialState` returns lens mode; `null` when it returns
- *   editor mode.
- * - Editor → lens transition: cache hit (`cache.snippet ===
- *   currentSnippet`) reuses `cache.embodiment`; otherwise call
- *   `embody(currentSnippet)` once and write the cache before
- *   committing the mode flip.
- * - Lens → editor transition: cache RETAINED (cross-mode survival).
- * - Snippet edit in editor mode: cache cleared (`null`).
+ * - Initial mount (either mode): populated atomically with a fresh
+ *   `embody(snippet)`.
+ * - Editor mode, on edit: a debounced static `embody()` refreshes the
+ *   slot on the trailing edge (~200ms idle); the slot is NOT cleared.
+ * - Editor → lens transition: flush-then-read — reuse when
+ *   `liveEmbodiment.snippet === currentSnippet`, else `embody()`
+ *   synchronously inline; cancel any pending debounce.
+ * - Lens → editor transition: slot RETAINED.
  *
- * `snippet` field carries the source string the cached `embodiment`
- * was built from — equality check is string-identity (`===`).
+ * `embody()` here is static-only (no worker); program execution stays
+ * lazy. `snippet` carries the source the `embodiment` was built from —
+ * the staleness / reuse check is string-identity (`===`).
  */
-type CachedEmbodiment = Readonly<{
+type LiveEmbodiment = Readonly<{
 	snippet: string;
 	embodiment: Snippet;
 }>;
+
+/**
+ * @deprecated Transitional alias for {@link LiveEmbodiment}. The slot was
+ * renamed `cachedEmbodiment` → `liveEmbodiment` for the live-embodiment
+ * contract; this alias keeps pre-rename call sites compiling until the
+ * orchestrator implementation is migrated (Cycle 1, increment 2a), after
+ * which it is removed.
+ */
+type CachedEmbodiment = LiveEmbodiment;
 
 // --- Lens selection (where a switch came from) ---
 
@@ -229,8 +240,8 @@ type CachedEmbodiment = Readonly<{
  *   handler. This site does NOT dispatch `lens-switched`; the source
  *   value is computed by `applyTransition` but never reaches a bus
  *   subscriber (see the "Open holes" note on `ModeChangedPayload`).
- * - `'panel'` — L5 recommendations-panel cell click (deferred; typed
- *   but no dispatch site exists yet).
+ * - `'panel'` — reserved for the future Cycle-2 phase-station
+ *   dispatch site (deferred; typed but unwired).
  *
  * **Extension policy.** Adding a value to this union requires:
  * 1. An AR-1 design review (this is a contract, not an implementation
@@ -252,11 +263,11 @@ type LensSelectionSource =
 /**
  * Internal event names. INTERNAL-ONLY — never exposed via a
  * `subscribe` / `onEvent` prop on `<StudyLenses>` until a concrete
- * LMS integration target appears (per WS3 handoff F5).
+ * LMS integration target appears.
  *
  * @remarks Each name maps to a payload shape via `EventPayloadMap`.
- * F5 implements `lens-switched` and `mode-changed`; later
- * increments add `exercise-completed`, `lens-mount-error`.
+ * Today's taxonomy is `lens-switched` and `mode-changed`; later
+ * cycles add `exercise-completed`, `lens-mount-error`.
  */
 const EVENT_NAMES = Object.freeze({
 	LENS_SWITCHED: 'lens-switched',
@@ -343,6 +354,7 @@ export type {
 	OrchestratorState,
 	EditorModeState,
 	LensModeState,
+	LiveEmbodiment,
 	CachedEmbodiment,
 	LensSelectionSource,
 	EventName,

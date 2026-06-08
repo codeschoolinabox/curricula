@@ -6,8 +6,9 @@
 React surface where learners edit the snippet string. Per the locked
 single-writer state model in [`../README.md`](../README.md) § Conventions and
 [`../DOCS.md` § Why the editor is a peer subdir, not a lens](../DOCS.md), this
-is the only surface in the package that mutates snippet source. Lenses, the
-recommender, and the toolbar picker are all read-only.
+is the only surface in the package that mutates snippet source. Lenses are
+read-only views over a frozen embodiment; the lens-picker selects but does not
+write.
 
 The editor is **not** a `LensModule`. It is **not** registered in the lens
 registry. The orchestrator's editor-mode UI mounts [`./index.tsx`](./index.tsx)
@@ -17,16 +18,16 @@ mode it unmounts the editor and mounts a `<LensModule.Component>` instead (per
 
 ## Single-component module
 
-| File        | Purpose                                                                                                  |
-| ----------- | -------------------------------------------------------------------------------------------------------- |
-| `index.tsx` | React home-base component (default export). Renders the writable, orchestrator-controlled host textarea. |
+| File        | Purpose                                                                                                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx` | React home-base component (default export). Renders the orchestrator-controlled host `<div data-orchestrator-host>` into which CodeMirror mounts a writable `EditorView`. |
 
-The previous draft of this DOCS framed the editor as a two-layer "React
-adapter + LensModule stub" module. AR-1 rejected that framing: the post-refactor
-`LensModule` contract (per [`../../lenses/types.ts`](../../lenses/types.ts)
-lines 186-192) requires `Component` + `applicableTo` fields, which the
-pre-refactor stub lacked. The home base is a single React component; the legacy
-stub at `./editor.ts` was deleted as part of F1.C.
+The home base is a single React component; there is no second "React adapter +
+`LensModule` stub" layer. The post-refactor `LensModule` contract (per
+[`../../lenses/types.ts`](../../lenses/types.ts)) requires `Component` +
+`applicableTo` fields, which a home-base surface has no business carrying — the
+editor is structurally distinct from a read-only lens and the type system keeps
+the two apart.
 
 ## Architectural sketch
 
@@ -38,11 +39,15 @@ flowchart TD
     InitialSeed["initial source<br/>(string captured at mount)"]
     LiveDoc["live document<br/>(CM-internal mutable state)"]
     ChangeNotif["change notification<br/>(next: string)"]
-    SnippetState -->|"mount, async (one-time per mount)"| InitialSeed
-    InitialSeed -->|"factory resolves, document constructed"| LiveDoc
+    InterpDiag["interpretedDiagnostics<br/>(readonly LintDiagnostic[])<br/>orchestrator-derived"]
+    Gutter["gutter + hover<br/>(linter / lintGutter / hoverTooltip)"]
+    SnippetState -->|"capture initial source (sync)<br/>(one-time per mount)"| InitialSeed
+    InitialSeed -->|"factory resolves async → document constructed"| LiveDoc
     LiveDoc -->|"docChanged transaction, sync"| ChangeNotif
     ChangeNotif -->|"schedules state update; re-render"| SnippetState
     SnippetState -.->|"external prop change,<br/>equality-guarded write"| LiveDoc
+    InterpDiag -->|"merged as one diagnostic source"| Gutter
+    LiveDoc -->|"diagnostic positions clamp to live doc"| Gutter
 ```
 
 The orchestrator's snippet state seeds the live document at mount; from then on,
@@ -60,43 +65,59 @@ original snippet preserved), the prop-sync effect writes the new value into the
 live document — guarded by an equality check so the round-trip from the editor's
 own writes does not echo back.
 
+The right-hand branch is the **diagnostics** path. The editor surfaces gutter
+markers and hover tooltips from its own structural linter (`lintJej`) and from
+the orchestrator-supplied `interpretedDiagnostics` prop — a
+`readonly LintDiagnostic[]` the orchestrator derives from its live embodiment's
+`errors`. The editor merges both feeds through the same `linter()` /
+`lintGutter()` / `hoverTooltip()` machinery; CodeMirror clamps each diagnostic's
+positions to the live document.
+
 Domain terms used above (and their concrete shapes are pinned in
 [`../lib/editing/types.ts`](../lib/editing/types.ts)): the **editor handle** —
 `EditorInstance` per the editing/ types — is the React component's reference to
 the live document; the **factory** is
-[`createEditor`](../lib/editing/create-editor.ts) (async).
+[`createEditor`](../lib/editing/create-editor.ts) (async); `LintDiagnostic` is
+the editing layer's diagnostic shape consumed by the linter pipeline.
 
 ### Execution phases
+
+> **Vocabulary seam.** The phases below name the **editor's** half of the
+> lifecycle (its own mount / edit / prop-sync / teardown). The orchestrator-side
+> counterparts — seed embodiment, debounced live re-embody, flush-on-transition,
+> interpreted-diagnostic derivation — are catalogued as the orchestrator's
+> effect categories in [`../DOCS.md` § Live embodiment](../DOCS.md). Where a
+> phase below references an orchestrator-owned action (debounced embody, mode
+> flip), that action is the orchestrator's; the editor only sees its prop
+> effects.
 
 1. **Mount initiation (async, fires once per mount)** — orchestrator is in
    editor mode; the editor component renders an empty host div and schedules a
    mount effect. The effect invokes the editing/ factory with the current
    snippet string (as initial source) and the editor's change-notification
-   callback. A cancellation flag, scoped to the effect closure, marks whether
-   the effect has been cleaned up while the factory's promise is still in
-   flight.
-2. **Mount resolution** — three disjoint outcomes:
-   - **Success** — the factory's promise resolves; the cancellation flag is
-     checked first. If still active, the resolved editor handle
-     (`EditorInstance` per [`../lib/editing/types.ts`](../lib/editing/types.ts))
-     is stored for later sync and destroy. If the flag has been raised, the
-     factory's output is destroyed immediately so no zombie editor leaks into
-     the DOM.
-   - **Cancellation** — React tore down the component before the factory
-     resolved (typical under StrictMode's intentional mount-then-unmount cycle).
-     The flag is raised by the cleanup function; the success path above handles
-     the late arrival.
-   - **Rejection** — the factory's promise rejects with a construction error.
-     The component stores the rejection in a fallback state slot and renders a
-     minimal error notice (see § Render-on-rejection).
+   callback.
+2. **Mount resolution** — the factory's promise either resolves to an editor
+   handle (`EditorInstance` per
+   [`../lib/editing/types.ts`](../lib/editing/types.ts), stored for later sync
+   and destroy) or rejects with a construction error (stored in a fallback state
+   slot, rendering a minimal error notice — see § Render-on-rejection). The
+   load-bearing **async-boundary constraint** is that a component destroyed
+   before _or_ after the factory resolves never leaves a live `EditorView` in
+   the DOM: the mount effect's cleanup tears down whatever the resolution
+   produced, so a resolution that lands after unmount is reaped rather than
+   mounted. This is what makes the surface safe under StrictMode's intentional
+   mount → unmount → mount cycle (and any other mid-flight unmount).
 3. **Learner edit (sync inside transaction)** — the live document accepts an
    edit through CodeMirror's input pipeline; the registered update listener
    fires once per `docChanged` transaction with the new document content as a
    plain string. The change-notification callback the factory was given is the
    editor component's pass-through to `onSnippetChange`, so the orchestrator's
    state setter receives the new value. React schedules a re-render of the
-   orchestrator subtree; per the orchestrator's snippet-edit invalidation rule,
-   the cross-mode embodiment cache is cleared at the same setState (F2.5).
+   orchestrator subtree. The editor's per-keystroke firing is 1:1 with
+   `docChanged` transactions and is **not** debounced; the orchestrator
+   debounces only its own `embody()` reaction to those updates (see
+   [`../README.md` § Live embodiment](../README.md)), which is what eventually
+   refreshes the `interpretedDiagnostics` the editor renders.
 4. **Prop sync (external write)** — when the snippet state changes from outside
    the editor's own write loop (e.g. lens → editor return with the original
    snippet preserved), a second effect watching the snippet prop writes the new
@@ -106,15 +127,26 @@ the live document; the **factory** is
    gap between component mount and factory resolution; the equality check
    prevents the orchestrator's own round-trip from echoing back into the
    document.
-5. **Mode transition (editor → lens)** — orchestrator's mode discriminator moves
-   to `'lens'`. React unmounts the editor component entirely. The mount effect's
-   cleanup runs the editor handle's destroy method (idempotent per the editing/
+5. **Diagnostics refresh (external prop)** — when the orchestrator's live
+   embodiment settles (its debounced re-embody fires) it recomputes
+   `interpretedDiagnostics` and re-renders the editor with the new array. The
+   editor feeds the array into its diagnostic pipeline alongside `lintJej`'s
+   structural markers; CodeMirror re-paints the gutter and hover surface.
+   Because the orchestrator's embody reaction is debounced, the interpreted feed
+   is at most one debounce-window stale relative to the live buffer; during the
+   transient overshoot this relies on the editing layer's assumption that
+   out-of-range diagnostics are clamped (not dropped or thrown), and markers
+   re-locate on the next settle (see [`../lib/editing/`](../lib/editing/)).
+6. **Teardown / re-mount (editor half)** — when React unmounts the editor
+   component (the orchestrator left editor mode), the mount effect's cleanup
+   runs the editor handle's destroy method (idempotent per the editing/
    contract), tearing down the live document and releasing CodeMirror's internal
-   DOM. The lens component mounts in the editor's place.
-6. **Mode transition (lens → editor)** — symmetric. React unmounts the lens and
-   mounts a fresh editor component against the orchestrator's (preserved)
-   snippet state, kicking off a new mount cycle. Editor-internal state (cursor
-   position, scroll, undo history) is per-mount; nothing carries across.
+   DOM. A later return to editor mounts a **fresh** editor component, kicking
+   off a new mount cycle (phases 1–2) against the orchestrator's preserved
+   snippet state; editor-internal state (cursor position, scroll, undo history)
+   is per-mount and nothing carries across. The orchestrator side of these
+   transitions — the mode discriminator flip and what mounts in the editor's
+   place — is owned upstream; see [`../DOCS.md` § Lifecycle modes](../DOCS.md).
 
 ### Structural constraints
 
@@ -124,22 +156,37 @@ the live document; the **factory** is
   prop, the editor component passes it as the change-notification callback to
   the factory, and lenses are read-only views. Each `docChanged` transaction
   produces exactly one change-notification invocation (1:1
-  transaction-to-callback, no batching, no debouncing). F2.5's invariant — every
-  edit invalidates the cache before lens-mode re-entry — is satisfied because
-  every edit produces at least one such transaction. (CodeMirror semantics:
-  multi-cursor edits, paste, undo, and programmatic dispatches each produce one
-  transaction covering N character changes; IME composition can produce zero
-  transactions for several keystrokes followed by one covering the composed
-  grapheme. The contract is transaction-based, not keystroke-based.)
-- **No `embodiment` prop on the editor — ever.** The editor is editor-mode-only.
-  Per [`../DOCS.md` § Lifecycle modes](../DOCS.md), editor mode has no
-  embodiment built. Embodiment is a lens-mode concept and is passed to
-  `<LensModule.Component>`, not to this editor. The `createEditor` factory
-  accepts `(initialCode: string, options)` precisely so the editor home base
-  doesn't need to fabricate a Snippet wrapper.
-- **No `LensModule` registration.** The editor is not enumerated by the picker,
-  not ranked by the recommender, not present in the lens registry. The
-  orchestrator imports the component directly.
+  transaction-to-callback, no batching, no debouncing **in the editor**).
+  (CodeMirror semantics: multi-cursor edits, paste, undo, and programmatic
+  dispatches each produce one transaction covering N character changes; IME
+  composition can produce zero transactions for several keystrokes followed by
+  one covering the composed grapheme. The contract is transaction-based, not
+  keystroke-based.) The orchestrator debounces its embody reaction to these
+  per-keystroke notifications; that debounce lives upstream and is invisible to
+  this component.
+- **No `embodiment` prop on the editor — ever; only diagnostics cross.** The
+  editor never receives a `Snippet`. Embodiment is owned by the orchestrator; in
+  lens mode it is handed to `<LensModule.Component>`, not to this editor. In
+  editor mode the orchestrator derives `interpretedDiagnostics` (a
+  `readonly LintDiagnostic[]`) from its live embodiment's `errors` and passes
+  **only that array** down — the editor renders located explanation strings
+  without ever inspecting the embodiment that produced them. The `createEditor`
+  factory accepts `(initialCode: string, options)` precisely so the editor home
+  base doesn't need to fabricate a Snippet wrapper.
+- **Lens-mode re-entry correctness is flush-on-transition, not cache
+  invalidation.** The editor does not invalidate anything on edit and does not
+  participate in embodiment freshness. The orchestrator owns the live-embodiment
+  slot and guarantees the slot reflects the exact current buffer on an editor →
+  lens transition (flush-then-read: embody synchronously inline when
+  `liveEmbodiment.snippet !== currentSnippet`, else reuse; cancel any pending
+  debounce). The editor's only contribution to that guarantee is that every edit
+  it accepts fires `onSnippetChange`, so the orchestrator's `snippet` state is
+  always current at transition time. See
+  [`../README.md` § Live embodiment](../README.md) and
+  [`../DOCS.md` § Live embodiment](../DOCS.md).
+- **No `LensModule` registration.** The editor is not enumerated by the picker
+  and not present in the lens registry. The orchestrator imports the component
+  directly.
 - **Async mount via `useEffect`.** `createEditor` is async (dynamic
   language-module loading). The mount effect's cleanup calls `editor.destroy()`
   for StrictMode-safe teardown. The async surface lives **inside the
@@ -155,11 +202,12 @@ the live document; the **factory** is
   benign (idempotent setState), but side-effecting consumers (analytics,
   logging) should de-dupe by content.
 - **Single host element.** The component renders one host element carrying the
-  `data-orchestrator-host` attribute; CodeMirror's live document mounts into it.
-  The data attribute is the test / dev-sandbox handle for "this is the home base
-  surface". CodeMirror's content element is a child of the host; consumer code
-  reading editor content via DOM should target the editor handle's `.content`
-  property (the public API), not the host's descendants.
+  `data-orchestrator-host` attribute; CodeMirror's `EditorView` mounts into it.
+  The host is the `<div>` element — there is no `<textarea>`. The data attribute
+  is the test / dev-sandbox handle for "this is the home base surface".
+  CodeMirror's content element is a child of the host; consumer code reading
+  editor content via DOM should target the editor handle's `.content` property
+  (the public API), not the host's descendants.
 - **Sync-effect resilience.** The prop-sync effect must no-op when the editor
   handle is not yet resolved. This is the load-bearing guard for the
   StrictMode-double-mount × prop-change-during-mount intersection: if the
@@ -172,6 +220,54 @@ the live document; the **factory** is
   so the update listener fires no consumer callback — CodeMirror still accepts
   edits at the DOM level but typed characters do not propagate to any parent
   state. The orchestrator always passes the callback in production.
+- **`interpretedDiagnostics` is optional.** When omitted (display-only mounts,
+  tests that don't exercise the gutter), the editor renders only its own
+  structural `lintJej` markers. The orchestrator always supplies the array in
+  production editor mode (possibly empty when the live embodiment has no
+  `errors`).
+
+### Diagnostic surface
+
+The editor renders gutter markers and hover tooltips from two diagnostic feeds,
+merged through one pipeline (`linter()` + `lintGutter()` + `hoverTooltip()` in
+[`../lib/editing/build-extensions.ts`](../lib/editing/build-extensions.ts)):
+
+- **Structural — `lintJej`.** The editor's own live JEJ-subset + parse marker
+  feed. `lintJej` calls
+  [`validate(code)`](../../embody/lib/validating/validate.ts) directly — a pure
+  parse + JEJ-subset walk that constructs no `Snippet` — so the editor remains
+  embodiment-blind. See § Deferred callback wiring → `linters` and
+  [`lib/linting/DOCS.md`](../../lib/linting/DOCS.md).
+- **Interpreted — `interpretedDiagnostics`.** Located explanations the
+  orchestrator derives from its live embodiment's `errors` (via
+  [`interpretError`](../lib/error-interpreting/interpret-error.ts),
+  orchestrator- side — the editor never sees the embodiment). Each carries a
+  concise plain-prose `message` (the `whatWentWrong` interpretation) in Cycle 1;
+  rich multi-section / markdown hover is deferred because the editing layer
+  renders hovers via `textContent` with no markdown parser.
+
+Both feeds populate the same `LintDiagnostic` shape, so the merge is uniform.
+Three rules govern coexistence:
+
+- **Source-tagged rendering, not blanket dedup.** Each `LintDiagnostic` carries
+  its `source` (syntax / JEJ-compliance / interpreted), so the three render with
+  distinct severity + gutter presentation and may coexist on the same buffer.
+- **Supersede the same error only.** The editor suppresses **only** the case
+  where the _same_ error appears both terse (raw `lintJej`) and interpreted; the
+  interpreted message supersedes the raw terse one for that error. Unrelated
+  diagnostics from the two feeds are not deduped against each other.
+- **Line targeting.** A diagnostic's `(line, column)` comes from the error's
+  `loc` when present, else is derived from `source.offsets` + the error's
+  character offset, else falls back to a file-level notice. This is computed
+  orchestrator-side before the array crosses; the editor just renders the
+  located markers.
+
+> **What lights up now.** Because embody's real-composition validating /
+> creation slices are stubbed, interpreted gutter errors are demonstrable today
+> for tokenize / parse (syntax) errors on the real acorn path, plus the scenario
+> fixtures. Genuinely non-JEJ code (e.g. `var x = 1`) still shows `lintJej`'s
+> live structural marker but no embodiment-derived _interpretation_ until the
+> validating / creation slices land — this is expected, not a bug.
 
 ### Render-on-rejection
 
@@ -185,26 +281,25 @@ locate the surface. The underlying error is also logged to the console for
 diagnosis. The orchestrator's mode machine is unaffected; the learner can still
 toggle to lens mode and back to attempt a fresh mount.
 
-### Caller migration
-
-Downstream consumers that read editor content via DOM queries against
-`[data-orchestrator-host]` (specifically the orchestrator-level cross-boundary
-tests at [`../tests/study-lenses.test.tsx`](../tests/study-lenses.test.tsx))
-must migrate from `HTMLTextAreaElement.value` reads to either the editor
-handle's `.content` property (when an `EditorInstance` is available) or DOM
-queries against CodeMirror's content element (when only the DOM is available).
-That rewrite is part of E2's deliverable.
-
 ### Out of scope
 
-- **Embodiment-/execution-driven diagnostics** — the editor never receives an
-  embodiment, so diagnostics that require runtime evaluation (e.g. evaluation
-  errors, or anything derived from a `Snippet`'s `validation.*` / `errors.*`)
-  remain out of scope; they belong to lens mode, which owns the embodiment.
-  Static JEJ diagnostics are a _different_ feed and **are** wired — see §
-  Deferred callback wiring → `linters`.
-- **Recommend-time analysis** — the editor is not a lens; it has no
-  `recommend()` surface. Recommendations belong to lens modules.
+- **Execution-derived diagnostics.** Diagnostics that require running the
+  program — runtime / evaluation errors, or anything that only exists after
+  `evaluation.events.run` — are **out of scope** for the editor. Program
+  execution stays lazy (a future Run affordance owns it); the editor's
+  interpreted feed is derived only from the **static** embodiment's `errors`
+  (tokenize / parse / validation / creation phases). Runtime-error
+  interpretation surfaces elsewhere (the future Run dock's console), not in this
+  gutter.
+- **Static, errors-derived diagnostics are IN.** To be explicit about the cut:
+  what crosses the editor boundary is the orchestrator-computed
+  `interpretedDiagnostics` array (located explanation strings derived from the
+  static embodiment's `errors`) plus the editor's own `lintJej` structural
+  markers. What does **not** cross is the embodiment itself and anything
+  execution-derived.
+- **Recommend-time analysis.** The editor is not a lens; it has no `recommend()`
+  surface. Recommendation is a deferred backlog concern and never touches the
+  editor.
 - **Snippet ownership beyond mount-time seed.** The orchestrator owns snippet
   state via `useState`; the editor reads from props and writes via
   `onSnippetChange`. The editor never holds local snippet state of its own (no
@@ -213,12 +308,26 @@ That rewrite is part of E2's deliverable.
 ## External contract
 
 The home-base component holds the following surface invariant. Internal
-implementation may evolve (extension stack, future callback wiring, diagnostics
-linter) without changing these:
+implementation may evolve (extension stack, callback wiring, diagnostic
+pipeline) without changing these:
+
+> **Code-vs-contract note.** The prop surface below
+> (`{ snippet, onSnippetChange?, interpretedDiagnostics? }`) is the **Cycle-1
+> contract**. The in-code prop surface still carries only
+> `{ snippet, onSnippetChange? }` — `interpretedDiagnostics` is not wired into
+> the component yet; the Phase-1 gutter-merge increment adds it (it is the
+> increment that has the orchestrator pass the prop and the editor merge it into
+> its diagnostic pipeline). This section describes the contract; the prop is a
+> pending Cycle-1 increment. (The orchestrator side has the mirror of this gap —
+> see [`../DOCS.md` § Live embodiment](../DOCS.md).)
 
 - **File path:** [`./index.tsx`](./index.tsx).
 - **Default export shape:** a React function component.
-- **Prop surface:** `{ snippet, onSnippetChange? }`.
+- **Prop surface:** `{ snippet, onSnippetChange?, interpretedDiagnostics? }`.
+  `snippet` is the controlled initial-value and external-sync source;
+  `onSnippetChange` is the single-writer callback; `interpretedDiagnostics` is a
+  `readonly LintDiagnostic[]` (the orchestrator's live-embodiment-derived
+  interpreted feed). The editor never receives an `embodiment`.
 - **Data attribute on the host element:** `data-orchestrator-host`. The host is
   the `<div>` element that CodeMirror's `EditorView` mounts into. When rendering
   an error fallback (per § Render-on-rejection), the same attribute lives on the
@@ -242,8 +351,7 @@ Consumers:
   — dev-only Docusaurus smoke page; deep-imports the editor for live
   wired-callback verification on the running site. Not a production consumer.
 
-No other production consumers. Lenses do not consume the editor; the recommender
-does not consume it; the toolbar does not consume it.
+No other production consumers. Lenses do not consume the editor.
 
 ## Deferred callback wiring
 
@@ -252,13 +360,14 @@ The CodeMirror factory at [`../lib/editing/`](../lib/editing/) exposes slots for
 `onChange`). All four callback slots are now wired:
 
 - `linters` — **wired** to [`lintJej`](../../lib/linting/lint-jej.ts) from the
-  JEJ-package [`lib/linting/`](../../lib/linting/) module. The original open
-  design question (embodiment-derived diagnostics vs. a live re-parse) resolved
-  in favor of the **validation feed**: `lintJej` calls
+  JEJ-package [`lib/linting/`](../../lib/linting/) module. This is the editor's
+  **structural** gutter feed (live JEJ-subset + parse markers). `lintJej` calls
   [`validate(code)`](../../embody/lib/validating/validate.ts) directly — a pure
-  parse + JEJ-subset walk that constructs no `Snippet` — so the F2 "no embody in
-  editor mode" invariant holds (the editor still never receives an embodiment).
-  See [`lib/linting/DOCS.md`](../../lib/linting/DOCS.md).
+  parse + JEJ-subset walk that constructs no `Snippet` — so the editor stays
+  embodiment-blind: it consumes a string, never a `Snippet`. The
+  orchestrator-supplied `interpretedDiagnostics` are a _separate_ feed merged
+  through the same pipeline (see § Diagnostic surface). See
+  [`lib/linting/DOCS.md`](../../lib/linting/DOCS.md).
 
 - `format` — **wired** to
   [`formatJej`](../../lib/formatting-editor/format-jej.ts) from the JEJ-package
@@ -267,12 +376,10 @@ The CodeMirror factory at [`../lib/editing/`](../lib/editing/) exposes slots for
   [`format()`](../../embody/lib/formatting/format.ts) — the same
   Prettier-standalone function the runtime gate
   [`checkFormat`](../../embody/lib/formatting/check-format.ts) validates
-  against. The original "Prettier-based or JeJ-canonical" design question
-  resolved in favor of **single source of truth**: what the editor formats is
-  byte-identical to what `isJej` considers canonical, by construction. No
-  JEJ-subset gate at this boundary — any parseable JS gets formatted; the linter
-  (above) surfaces JEJ violations. Learner triggers via `Ctrl-Shift-f` /
-  `Cmd-Shift-f` registered in
+  against. What the editor formats is byte-identical to what `isJej` considers
+  canonical, by construction. No JEJ-subset gate at this boundary — any
+  parseable JS gets formatted; the linter (above) surfaces JEJ violations.
+  Learner triggers via `Ctrl-Shift-f` / `Cmd-Shift-f` registered in
   [`build-extensions.ts`](../lib/editing/build-extensions.ts). See
   [`lib/formatting-editor/DOCS.md`](../../lib/formatting-editor/DOCS.md).
 
@@ -288,9 +395,7 @@ The CodeMirror factory at [`../lib/editing/`](../lib/editing/) exposes slots for
   (`var`, `class`, `function`, etc.) surface in the popup with
   `type: 'blocked'`, `detail: '(not in JEJ)'`, a curated `info` tooltip, and
   `apply: 'noop'` so the keystroke does not insert blocked text — the linter
-  (above) catches the manual override. Driven through the Phase 0 contract
-  widening that gave `CompletionCallback` its `CompletionRequest` argument and
-  `CompletionItem` its `info`/`apply` fields. See
+  (above) catches the manual override. See
   [`lib/completing/DOCS.md`](../../lib/completing/DOCS.md).
 
 - `docLookup` — **wired** to

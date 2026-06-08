@@ -36,13 +36,13 @@ flowchart LR
     JEJ --> NM --> embody --> lenses --> orchestrate
 ```
 
-| Layer            | What it is                                                                                                                         | File / dir                                     |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| **JEJ**          | The language subset (what learners write)                                                                                          | [`reference.md`](./reference.md)               |
-| **NM**           | The conceptual evaluation model (the learning objective)                                                                           | [`notional-machine.md`](./notional-machine.md) |
-| **embody**       | The operational embodiment of the NM (frozen data + event streams)                                                                 | [`embody/`](./embody/)                         |
-| **study lenses** | Pedagogical perspectives on the embodied NM                                                                                        | [`lenses/`](./lenses/)                         |
-| **orchestrate**  | `<StudyLenses>` orchestrator + recommender + analysis helpers — the single-writer editor and snippet-scope Explorotron realization | [`orchestrate/`](./orchestrate/)               |
+| Layer            | What it is                                                                                                | File / dir                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **JEJ**          | The language subset (what learners write)                                                                 | [`reference.md`](./reference.md)               |
+| **NM**           | The conceptual evaluation model (the learning objective)                                                  | [`notional-machine.md`](./notional-machine.md) |
+| **embody**       | The operational embodiment of the NM (frozen data + event streams)                                        | [`embody/`](./embody/)                         |
+| **study lenses** | Pedagogical perspectives on the embodied NM                                                               | [`lenses/`](./lenses/)                         |
+| **orchestrate**  | `<StudyLenses>` orchestrator + analysis helpers — the single-writer editor and the NM phase-station panel | [`orchestrate/`](./orchestrate/)               |
 
 Get the NM right and embody / lenses / orchestrate / curriculum follow. This
 package's internal directory structure mirrors the chain.
@@ -117,10 +117,10 @@ instances). We own the snippet scope; the LMS owns the curricular scope.
 | Pyramid layer                      | Snippet scope (us)                                                                                                                                                                                                           | Curricular scope (LMS)                                   |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | Base — Progress modelling          | _(n/a)_                                                                                                                                                                                                                      | Learner state / knowledge graph / ZPD positioning        |
-| Layer I — Lenses & defaults        | Recommender ranks lenses by snippet-fit                                                                                                                                                                                      | _(subsumed)_                                             |
+| Layer I — Lenses & defaults        | Recommender ranks lenses by snippet-fit (ranking lib exists; surfaced via the picker — recommendations-panel UI is deferred backlog)                                                                                         | _(subsumed)_                                             |
 | Layer II — Path generation         | Auto-generated lens path on one snippet (open spec — Block-model × NM in draft)                                                                                                                                              | Sequence of `<StudyLenses>` instances across snippets    |
 | Layer III — Manual recommendations | `lens` prop: "open in this lens first" (per-fence `js:trace?…` or directory `lenses.json` cascade)                                                                                                                           | LMS picks the curated snippet to render                  |
-| Layer IV — Manually crafted paths  | **Deferred** — Q-IV at snippet scope is owned by the LMS; auto-recommended Q-II tours suffice for in-snippet guidance. Future shape (5th prop / meta-key in `configs` / directory-level setting) is intentionally undecided. | Full curriculum (sequence of curated snippets + configs) |
+| Layer IV — Manually crafted paths  | **Deferred** — Q-IV at snippet scope is owned by the LMS; auto-recommended Q-II tours suffice for in-snippet guidance. Future shape (new prop / meta-key in `configs` / directory-level setting) is intentionally undecided. | Full curriculum (sequence of curated snippets + configs) |
 | Top — Monitored learning           | _(n/a)_                                                                                                                                                                                                                      | Grade reports, LMS integration, cheating detection       |
 
 A free-form lens dropdown is **always** available within `<StudyLenses>` — the
@@ -130,17 +130,19 @@ below.
 
 ### Concrete examples (snippet-scope quadrants)
 
-The locked public API is four props:
+The locked public API is three props:
 
 ```tsx
-<StudyLenses snippet={…} lens={…}? config={…}? configs={…}? />
+<StudyLenses snippet={…} lens={…}? configs={…}? />
 ```
 
-`lens` is the optional default-mount; `config` is the override for that default;
-`configs` is the cascade bundle (keyed by lens name) the picker uses when the
-learner opens a non-default lens. See
-[`DOCS.md` § Four-prop public API](./DOCS.md#four-prop-public-api) for the full
-spec + resolution chain.
+`lens` is the optional default-mount; `configs` is the cascade bundle (keyed by
+lens name under `configs.lenses`) the picker uses when the learner opens any
+lens. There is no separate per-default `config` prop — the per-fence / sibling
+override is folded into `configs.lenses[lens]` at plugin emission time. See
+[`orchestrate/README.md` § Public API](./orchestrate/README.md#public-api-studylenses)
+and [`orchestrate/types.ts`](./orchestrate/types.ts) (`StudyLensesProps`) for
+the full spec + resolution chain.
 
 - **Q1 — uncurated/unguided.** A learner pastes random JS into the editor, opens
   `<StudyLenses>`, sees default lens recommendations ranked by snippet-fit,
@@ -150,8 +152,9 @@ spec + resolution chain.
   (a 3D framework based on the Block model × the NM is in draft).
 - **Q3 — curated/unguided.** Curriculum author renders
   `<StudyLenses snippet={X} lens="trace" />`. The trace lens opens by default;
-  the learner can switch via the dropdown. With per-fence override:
-  `<StudyLenses snippet={X} lens="trace" config={{ stepDelay: 500 }} />`.
+  the learner can switch via the dropdown. With a per-fence override (folded
+  into the cascade):
+  `<StudyLenses snippet={X} lens="trace" configs={{ lenses: { trace: { stepDelay: 500 } } }} />`.
 - **Q4 — curated/guided.** Deferred at snippet scope. The LMS arranges curated
   sequences across multiple `<StudyLenses>` instances at the curricular scope;
   auto-recommended Q-II tours cover the in-snippet case.
@@ -279,8 +282,8 @@ exploration and creativity.
 
 Validates learner JavaScript against the language level and evaluates it in
 sandboxed environments. Provides validation, formatting, parsing, and evaluation
-modes — all through a unified API with a code object factory as the default
-export.
+modes — exposed as named function exports (there is no default export; the
+package's primary surface is the `<StudyLenses>` orchestrator).
 
 ## Study lenses: research translation platform
 
@@ -293,12 +296,12 @@ trace tables (predict-then-compare), and more.
 
 The architecture provides lenses (code-to-component, e.g., editor, parsons,
 blanks) that consume frozen embodiments built by the embody factory. A
-recommender analyzes each snippet against the JEJ notional machine and suggests
-relevant exercises organized in a 3D Block Model grid (comprehension level ×
-scope × NM components). This enables rapid iteration on exercise design —
-researchers prototype new interventions by composing existing lenses, curriculum
-authors embed them in code fences, and learners choose their own path through
-the recommendations.
+recommender (ranking lib built; its 3D Block Model grid — comprehension level ×
+scope × NM components — and recommendations UI are deferred backlog) analyzes
+each snippet against the JEJ notional machine to suggest relevant exercises.
+This enables rapid iteration on exercise design — researchers prototype new
+interventions by composing existing lenses, curriculum authors embed them in
+code fences, and learners choose their own path through the available lenses.
 
 See [`lenses/README.md`](./lenses/README.md) for the full architecture, module
 contracts, and directory layout.
@@ -306,7 +309,7 @@ contracts, and directory layout.
 ## Public API: `<StudyLenses>`
 
 The package's primary public interface is the **`<StudyLenses>`** React
-component, exported by `index.ts`. The locked four-prop surface:
+component, exported by `index.ts`. The locked three-prop surface:
 
 ```ts
 import { StudyLenses } from './index.js';
@@ -317,37 +320,39 @@ import { StudyLenses } from './index.js';
 // Curated default-mount lens (Q-III):
 <StudyLenses snippet={`let x = 5;`} lens="trace" />
 
-// With per-fence override for the default-mount lens:
-<StudyLenses snippet={`let x = 5;`} lens="trace" config={{ stepDelay: 500 }} />
-
-// With cascade bundle for picker-opened lenses:
+// With cascade bundle (per-fence / sibling overrides fold into configs.lenses):
 <StudyLenses
   snippet={`let x = 5;`}
   lens="trace"
-  configs={{ trace: { stepDelay: 500 }, annotate: { defaultView: 'code' } }}
+  configs={{ lenses: { trace: { stepDelay: 500 }, annotate: { defaultView: 'code' } } }}
 />
 ```
 
 - **`snippet`** — code string. Orchestrator builds the embodiment internally.
 - **`lens`** — optional default-mount lens name (Q-III seam).
-- **`config`** — optional override for the resolved-default lens.
-- **`configs`** — optional cascade bundle keyed by lens name; the picker reads
-  `configs[lensName]` when opening any lens.
+- **`configs`** — optional cascade bundle; the orchestrator reads
+  `configs.lenses[lensName]` when opening any lens. There is no separate
+  per-default `config` prop — the per-fence / sibling override is deep-merged
+  into `configs.lenses[lens]` at plugin emission time.
 
 The Docusaurus plugin parses URL-style fence info-strings
-(`js:trace?stepDelay=500`) and emits `lens` + `config` props; the directory-wide
-`lenses.json` cascade emits `configs`. See
-[`DOCS.md` § Four-prop public API](./DOCS.md#four-prop-public-api) for the full
-resolution chain.
+(`js:trace?stepDelay=500`) and folds the resulting `{ stepDelay: '500' }` into
+`configs.lenses["trace"]`; the directory-wide `lenses.json` cascade supplies the
+rest of `configs`. So the plugin emits two props — `lens` + `configs` — with the
+cascade as the single merged truth. See
+[`orchestrate/README.md` § Public API](./orchestrate/README.md#public-api-studylenses)
+and [`orchestrate/types.ts`](./orchestrate/types.ts) (`StudyLensesProps`) for
+the full resolution chain.
 
 `<StudyLenses>` is the orchestrator: it ingests the snippet, builds the
 embodiment via `embody()` (which checks the snippet against JEJ language
 constraints and surfaces violations and format-compliance via
 `Snippet.validation.*` — JEJ-subset violations as a list, format compliance as a
-boolean), selects which lenses to surface (via the recommender), mounts them,
-and manages all state. Formatting is the learner's responsibility — the
-orchestrator does not pre-format snippets. Consumers get one component to mount;
-everything else is internal.
+boolean), surfaces the registered lenses through the picker (recommender-based
+snippet-fit ranking is deferred backlog), mounts them, and manages all state.
+Formatting is the learner's responsibility — the orchestrator does not
+pre-format snippets. Consumers get one component to mount; everything else is
+internal.
 
 `embody`, lens plugins, and `orchestrate/lib/*` analysis helpers are **not**
 part of the public API. They are internal building blocks that `<StudyLenses>`
