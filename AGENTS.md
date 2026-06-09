@@ -451,6 +451,50 @@ After context resets:
 2. Read plan file to restore session context
 3. Verify understanding with user before resuming
 
+#### Cold-start handoffs (prefer over riding compaction)
+
+Auto-compaction is lossy and fires at a point you don't control — it can drop
+the exact nuance the work depends on (an audit's conclusion, an AR's resolved
+concerns, a cross-increment decision). A **deliberate cold-start** — end at a
+clean boundary, then start fresh from the durable artifacts (this file, DEV.md,
+the module README/DOCS/types, the committed code, the plan's RESUMPTION POINT) —
+is strictly better than riding a long, repeatedly-compacted context: you choose
+what survives, and the next agent reads ground truth instead of a lossy summary.
+This is what the codebase's discipline is FOR — DDD/AR/end-state docs + the
+RESUMPTION POINT externalize understanding into durable artifacts precisely so a
+cold-started agent can pick up. The growing conversation is mostly the _less_
+durable half (transient tool output, superseded reasoning).
+
+- **Boundary, not frequency.** Cold-start at increment-cluster / phase
+  boundaries, NOT every commit. A cluster of tightly-coupled increments (same
+  files, shared in-flight findings) amortizes the re-orientation cost —
+  re-reading the canonical docs is not free — and shares context wasteful to
+  re-derive per commit. Re-orienting every commit is churn; riding one context
+  across a whole phase courts mid-work compaction loss. Cold-start _between_
+  clusters.
+- **Commit to a clean boundary before handing off.** Never hand off
+  mid-increment — between a red test and its green implementation, or between
+  implementation and its AR. That transient TDD state is the fragile part; the
+  atomic-commit discipline is what keeps boundaries frequent and clean enough to
+  cold-start at will.
+- **The RESUMPTION POINT must carry the _findings_, not just the status.**
+  Capture the durable things that otherwise live only in conversation: audit /
+  ripple-analysis conclusions, cross-increment decisions + their rationale, AR
+  carry-forward notes (a concern deferred to a later increment), and the current
+  code-vs-contract gap (implemented vs pending) — enough to reproduce your
+  understanding without the transcript. (Contents checklist: § Proactive
+  persistence for long-running work.)
+- **Status lives in the plan, not the docs.** The code-vs-contract gap belongs
+  in the RESUMPTION POINT, never as a migration status-note in end-state
+  README/DOCS/types (per
+  [DEV.md § What goes in docs vs. plans vs. handoffs](./DEV.md)). Keep end-state
+  docs a clean present-tense contract; let the plan carry the gap, so a
+  cold-started agent trusts the docs.
+
+The human decides when to cold-start; the agent keeps every commit boundary
+cold-start-ready (rich RESUMPTION POINT + clean docs) so the option is always
+available at near-zero handoff cost.
+
 ### Safety Guardrails
 
 Claude must actively protect the codebase — especially from its own worst
@@ -681,6 +725,10 @@ work resumable across a compaction boundary:
 - **When compaction strikes mid-task:** the human can ask the freshly-compacted
   agent to read the plan file's RESUMPTION POINT block to recover state. If the
   agent did its job well, the handoff cost is zero or near-zero.
+- **Prefer a deliberate cold-start to riding repeated compactions.** At a clean
+  increment-cluster / phase boundary, a fresh start from the durable artifacts
+  beats a long auto-compacted context — you choose what survives. See § Context
+  Compaction Protocol → Cold-start handoffs for when and at what grain.
 
 ## Adversarial Review Protocol
 
