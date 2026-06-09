@@ -33,8 +33,7 @@ const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);
  * - `difficulty` → `50`
  * - `contentTypes` → `['keywords', 'identifiers', 'operators', 'literals', 'delimiters']`
  * - `viewMode` → `'blankenated'`
- * - `editorMode` → `'helpful'`
- * - `hintsMode` → `'on'`
+ * - `editorMode` → `'skeleton'`
  * - `suggestions` → `false`
  *
  * @param overrides - Partial config bundle from the educator's per-fence
@@ -66,8 +65,7 @@ function config(overrides?: Partial<LensConfig>): LensConfig {
 			'delimiters',
 		],
 		viewMode: 'blankenated',
-		editorMode: 'helpful',
-		hintsMode: 'on',
+		editorMode: 'skeleton',
 		suggestions: false,
 		...overrides,
 	}) as LensConfig;

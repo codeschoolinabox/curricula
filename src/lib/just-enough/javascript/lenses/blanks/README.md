@@ -84,30 +84,32 @@ Fields:
     config-level representation is the flat array to comply with
     `SerializableValue` (`LensConfig` admits only primitives and arrays of
     primitives — nested objects break determinism of config hashing per
-    [`../types.ts`](../types.ts) JSDoc on `SerializablePrimitive`). The
-    URL-config format `types:keywords+identifiers` mirrors the same array
-    semantics.
+    [`../types.ts`](../types.ts) JSDoc on `SerializablePrimitive`).
   - `viewMode?: 'blankenated' | 'complete'` (default `'blankenated'`) — initial
     view.
-  - `editorMode?: 'helpful' | 'diff' | 'raw'` (default `'helpful'`) — sub-mode
-    that the blankenated editor renders in. `helpful` is the full cloze
-    experience: position-locked placeholders, autopad on insert/delete,
-    overwrite-mode UX, per-blank correctness decorations, hints panel eligible
-    to render. `diff` shows the learner's typed text alongside char-level
-    mismatch highlighting against the hidden original; the learner can edit
-    freely (no position-lock); the hints panel does NOT render. `raw` accepts
-    arbitrary edits with no decorations and no feedback (an escape hatch for
+  - `editorMode?: 'skeleton' | 'diff' | 'raw'` (default `'skeleton'`) — sub-mode
+    that the blankenated editor renders in. `skeleton`'s defining trait is that
+    the blank sizes and surrounding code structure are **immutable**: the learner
+    fills fixed-width `_` overwrite fields in a locked skeleton (position-locked
+    placeholders, autopad on insert/delete, overwrite-mode UX, per-blank
+    correctness decorations, hints panel eligible to render). It is not "more
+    helpful" than the others — it is **fixed structure**. `diff` is free-edit
+    (no position-lock) with char-level mismatch highlighting against the hidden
+    original — the diff is the feedback; the hints panel does NOT render. `raw`
+    is free-edit with no decorations and no feedback at all (an escape hatch for
     free-form exploration). The mode is ignored when `viewMode === 'complete'`
     (the complete view is read-only by definition). The
-    `data-blanks-editor-mode` attribute on the root reflects this value.
-  - `hintsMode?: 'on' | 'off'` (default `'on'`) — whether the cursor-scoped
-    hints panel renders. **Orthogonal to `difficulty`** (hints are not inferred
-    from difficulty). When `'off'`, the panel does not render at all. When
-    `'on'`, the panel renders only when `viewMode === 'blankenated'` AND
-    `editorMode === 'helpful'` — outside those, no panel — and shows a
-    reveal-button for the blank under the cursor (only that blank); the learner
-    controls scaffolding by choosing how many blanks to reveal. See
-    [Hints panel contract](#hints-panel-contract).
+    `data-editor-mode-toggle="skeleton|diff|raw"` toolbar buttons select this
+    value.
+  - `suggestions?: boolean` (default `false`, opt-in) — the unified "help"
+    toggle. A toolbar checkbox (`data-assist-toggle="suggestions"`) and a root
+    attribute (`data-suggestions="true|false"`), visible in every blankenated
+    editor mode. Behavior is mode-dependent: in `skeleton` mode it shows / hides
+    the cursor-scoped hints panel; in `diff` / `raw` mode it enables snippet-free
+    autocomplete (JS keywords + identifiers already in the buffer — NO
+    `for`/`if`/`function` snippet templates, and no completion of un-typed
+    identifiers). Default OFF. See [Hints panel contract](#hints-panel-contract)
+    and [Toolbar contract](#toolbar-contract).
 - `applicableTo(embodiment): boolean` — returns `embodiment.status.parsed` (Tier
   2 per [`../README.md`](../README.md) § Three-tier classification). The
   vendored `blankenate` walks an Acorn AST; an unparseable snippet has no AST to
@@ -172,19 +174,20 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   (`keywords / identifiers / operators / literals / delimiters`). Stored in
   `config` as a
   `ReadonlyArray<'keywords' | 'identifiers' | 'operators' | 'literals' | 'delimiters'>`
-  (presence = enabled), mirroring the URL format's `types:keywords+identifiers`
-  shape. The toolbar exposes a checkbox per category; unchecking removes that
-  category from the array.
+  (presence = enabled). The toolbar exposes a checkbox per category; unchecking
+  removes that category from the array.
 - **View mode** — one of the two representations of the snippet: `blankenated`
   (editable, with `_` placeholders the learner fills) or `complete` (read-only,
   original source for self-check).
-- **Editor mode** — `'helpful' | 'diff' | 'raw'`. Sub-mode that the blankenated
-  editor renders in. `helpful` is the full cloze experience (position-locked
-  overwrite-mode placeholders, per-blank correctness, hints panel eligible).
-  `diff` shows char-level mismatch highlighting against the hidden original;
-  learner edits freely; no hints panel. `raw` accepts arbitrary edits with no
-  decorations. Ignored when `viewMode === 'complete'`. The
-  `data-blanks-editor-mode` attribute on the root reflects this value.
+- **Editor mode** — `'skeleton' | 'diff' | 'raw'`. Sub-mode that the
+  blankenated editor renders in. `skeleton`'s defining trait is **fixed
+  structure**: the blank sizes and surrounding code are immutable, so the
+  learner fills fixed-width `_` overwrite fields in a locked skeleton
+  (position-locked overwrite-mode placeholders, per-blank correctness, hints
+  panel eligible). `diff` is free-edit with char-level mismatch highlighting
+  against the hidden original; no hints panel. `raw` is free-edit with no
+  decorations. Ignored when `viewMode === 'complete'`. The toolbar's
+  `data-editor-mode-toggle="skeleton|diff|raw"` buttons select this value.
 - **Blankenated** — the verb form (legacy retained). "The source has been
   blankenated" = "the blankenate algorithm has produced a version with selected
   tokens replaced by length-matched `_` runs".
@@ -198,10 +201,13 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   remains in place, OR the learner typed a string that still contains `_`). This
   is the only correctness signal the lens exposes. See § Edge cases for the
   `_`-containing-typed-text caveat.
-- **Hints mode** — `'on' | 'off'`. Enable or disable the cursor-scoped hints
-  panel. Default `'on'`. Orthogonal to `difficulty`. Renders only when
-  `viewMode === 'blankenated'` AND `editorMode === 'helpful'`. The
-  `data-hints-mode` attribute on the root reflects this value.
+- **Suggestions** — `boolean`. The unified "help" toggle (default `false`,
+  opt-in). A toolbar checkbox (`data-assist-toggle="suggestions"`) + root
+  attribute (`data-suggestions="true|false"`), visible in every blankenated
+  editor mode. Mode-dependent: in `skeleton` mode it shows / hides the
+  cursor-scoped hints panel; in `diff` / `raw` mode it enables snippet-free
+  autocomplete (JS keywords + in-buffer identifiers, no snippet templates).
+  Orthogonal to `difficulty`.
 - **Score** — the aggregate percentage. Formula:
   `total === 0 ? 100 : Math.round(correct / total * 100)`. Surfaced in the
   editor header and the hints panel. The `total === 0` branch handles the
@@ -213,16 +219,16 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 ```text
 <div data-lens="blanks"
      data-view-mode="blankenated|complete"
-     data-editor-mode="helpful|diff|raw"
-     data-hints-mode="on|off">
-  <toolbar>                         — difficulty slider, 5 content-type checkboxes, view-mode toggle
+     data-suggestions="true|false">
+  <toolbar>                         — view-mode toggle, editor-mode group, difficulty slider,
+                                      5 content-type checkboxes, suggestions checkbox
   <editorHeader>                    — mode label + difficulty% + blanks count + remaining count
-  <editorModeToggle>                — three buttons selecting helpful / diff / raw
+  <editorModeToggle>                — three buttons selecting skeleton / diff / raw
   <main>                            — CodeMirror EditorView (editable in blankenated, read-only in complete)
   <aside data-blanks-hints>         — cursor-scoped hint for the blank under the cursor:
-                                      empty state OR reveal-button OR scrambled-letters reveal.
-                                      Rendered only when data-hints-mode='on' AND
-                                      data-view-mode='blankenated' AND data-editor-mode='helpful'.
+                                      empty state OR reveal-button OR positional letter reveal.
+                                      Rendered only when data-suggestions='true' AND
+                                      data-view-mode='blankenated' AND editor mode is skeleton.
                                       Per-blank in-editor visual lives on CM6 decorations,
                                       separate from this panel.
 </div>
@@ -233,7 +239,7 @@ the SL orchestrator one layer up. See § Ask Me — out of scope.
 
 The `data-lens` attribute is the lenses-peer invariant (see
 [`../DOCS.md` § Structural constraints](../DOCS.md)). The `data-view-mode` and
-`data-hints-mode` attributes are sandbox-harness selectors and CSS hooks;
+`data-suggestions` attributes are sandbox-harness selectors and CSS hooks;
 renaming them is a contract change. `data-*` values reflect **committed config
 state**.
 
@@ -256,6 +262,25 @@ state**.
   lifetime of the mount; only unmount discards them, per the disposable-practice
   contract. Disposable-practice governs cross-mount persistence, not
   within-mount toggle semantics.
+- **Editor-mode toggle** — three `<button>`s ("🦴 Skeleton" / "📋 Diff" / "🪨
+  Raw"), each carrying `data-editor-mode-toggle="skeleton|diff|raw"`. Rendered
+  only in the blankenated view (editor mode is meaningless in the read-only
+  complete view). Switching modes **resets the exercise** (clears in-progress
+  edits and reveal-counts) — the free editors (diff / raw) allow arbitrary edits
+  that would violate the skeleton editor's length-match + anchor-lock
+  invariants, so carrying that state across would corrupt the skeleton's
+  starting position.
+- **Suggestions checkbox** — one `<input type="checkbox"
+  data-assist-toggle="suggestions">` (label "Suggestions"), wrapped in a
+  `<label data-blanks-suggestions>`. Rendered in the blankenated view in every
+  editor mode. Off by default (opt-in). It is the unified "help" toggle and its
+  effect is mode-dependent: in `skeleton` mode it shows / hides the cursor-scoped
+  hints panel; in `diff` / `raw` mode it enables snippet-free autocomplete (JS
+  keywords + identifiers already typed into the buffer; NO `for`/`if`/`function`
+  snippet templates and no completion of un-typed identifiers). The root's
+  `data-suggestions="true|false"` attribute reflects the committed value.
+  Toggling does NOT reset the learner's in-progress edits (modelled on the
+  view-mode path, not the editor-mode path).
 
 ## View contract
 
@@ -279,32 +304,39 @@ state**.
 
 ## Hints panel contract
 
-ships a **cursor-scoped, on-demand, scrambled** hints panel per user-directed
+ships a **cursor-scoped, on-demand, positional** hints panel per user-directed
 redesign. The legacy 3-tier system (`'auto' | 'easy' | 'medium' | 'hard'`
 controlling rendered richness) is gone — replaced by:
 
-- **Orthogonality.** Hints are decoupled from `difficulty`. `hintsMode` has its
-  own knob (`'on' | 'off'`), not inferred from the slider.
+- **Gated on `suggestions` (in `skeleton` mode).** The panel is the `skeleton`-
+  mode face of the unified `suggestions` toggle (default OFF → the panel is
+  **hidden by default**). It renders only when `suggestions` is ON AND
+  `viewMode === 'blankenated'` AND `editorMode === 'skeleton'` — outside those,
+  no panel. Orthogonal to `difficulty` (hints are not inferred from the slider).
 - **Cursor-scoped.** The panel surfaces hints for **one blank at a time**:
   whichever blank the cursor is currently inside. Anchor positions (between
   blanks) show an empty state.
-- **Hidden by default + incremental reveal.** Each blank's hint starts hidden.
-  The panel shows a "Reveal next letter" button. Each click exposes ONE more
-  letter of the correct answer, appending it left-to- right to the displayed
-  partial. After N clicks the learner sees the first N letters of the per-blank
-  scrambled order (no position info). For `hello` (length 5), if the per-blank
-  permutation is `[3, 0, 4, 1, 2]`, clicks 1–5 produce `'l'`, `'lh'`, `'lho'`,
-  `'lhoe'`, `'lhoel'`. After all letters revealed, the button vanishes.
-- **Scrambled-order is deterministic per-blank-mount.** The permutation comes
-  from a mulberry32 PRNG seeded by an FNV-1a 32-bit hash of `blank.id` (see
-  `index.tsx` § `shufflePositions`). Same blank in the same mount always reveals
-  letters in the same sequence; same blank in a re-rolled blank set (after
-  settings change) gets a new permutation. No `Math.random()` per render — tests
-  are deterministic and re-renders don't reshuffle.
-- **Per-blank reveal-count persists** across cursor moves. Once two letters are
+- **Positional incremental reveal.** Each blank's hint starts fully hidden — a
+  run of `•` bullets, one per character of the answer. Each click of "Reveal
+  next letter" exposes ONE more position; the revealed letter is shown at its
+  **actual position** in the word, and every not-yet-revealed position stays a
+  `•`. So the learner always sees WHERE each revealed letter belongs, not an
+  out-of-order inventory. For `hello` (length 5), if the reveal order is
+  `[3, 0, 4, 1, 2]`, clicks 0–5 produce `'•••••'`, `'•••l•'`, `'h••l•'`,
+  `'h••lo'`, `'he•lo'`, `'hello'` (fully revealed = the real word, in order).
+  After all positions are revealed, the button vanishes.
+- **Reveal-order is deterministic per-blank-mount.** The ORDER positions are
+  exposed is a per-blank-stable random permutation from a mulberry32 PRNG seeded
+  by an FNV-1a 32-bit hash of `blank.id` (see `index.tsx` § `shufflePositions`).
+  Same blank in the same mount always reveals positions in the same sequence;
+  same blank in a re-rolled blank set (after settings change) gets a new
+  permutation. No `Math.random()` per render — tests are deterministic and
+  re-renders don't reshuffle. Only the order is randomized; the DISPLAY is always
+  positional.
+- **Per-blank reveal-count persists** across cursor moves. Once two positions are
   revealed for blank A, returning to A after visiting B shows the same two
-  letters. Switching the editor-mode scaffolding level (helpful → diff → raw or
-  back) resets all reveal-counts.
+  positions. Switching the editor-mode scaffolding level (skeleton → diff → raw
+  or back) resets all reveal-counts.
 
 **Why this design.** The 3-tier system coupled scaffolding intensity to
 difficulty, but the user's pedagogical goal is the inverse: the learner chooses
@@ -312,7 +344,7 @@ how much help to ask for, blank by blank. The "tier" is now emergent — how man
 blanks the learner chooses to peek at across a session is itself the scaffolding
 gradient.
 
-**Panel structure (when `hintsMode === 'on'`):**
+**Panel structure (when `suggestions === true` AND editor mode is `skeleton`):**
 
 ```text
 <aside data-blanks-hints>
@@ -325,7 +357,7 @@ gradient.
        data-hint-type="…"
        data-hint-reveal-count="N"
        data-hint-reveal-total="M">
-      <type>: <code data-hint-partial><first N scrambled letters></code>
+      <type>: <code data-hint-partial><word with N positions filled, rest as •></code>
       (N / M revealed)
     </p>
     {N < M ? <button data-hint-reveal-button>Reveal next letter</button>
@@ -333,12 +365,13 @@ gradient.
 </aside>
 ```
 
-When `hintsMode === 'off'`, the `<aside>` does not render at all.
+When `suggestions === false` (or the editor mode is not `skeleton`), the
+`<aside>` does not render at all.
 
 **Independent from the score panel.** The aggregate-score display
 (`[data-blanks-score]`) and the editor header (`[data-blanks-editor-header]`)
 still surface score / remaining / total. The hints panel only shows the
-per-blank scrambled reveal — it does not duplicate the score.
+per-blank positional reveal — it does not duplicate the score.
 
 ## Editor header contract
 
@@ -368,30 +401,6 @@ duplicate the surface across every lens and couple each lens to socratizing
 imports. The orchestrator owns Ask Me at the level above. See
 `../../orchestrate/lib/socratizing/` for the module and the orchestrator's
 planned integration.
-
-## URL config sync
-
-The lens reads its config from the URL on mount and writes config changes back
-to the URL with a 500ms debounce. Format:
-
-```text
-?blanks=difficulty:50,types:keywords+identifiers,view:blankenated,editor:helpful,hints:on
-```
-
-The `:` separates a key from its value; the `,` separates parameters within the
-lens; the `+` within `types:` is a value-array separator. Unrecognized
-parameters are ignored. The parser is the vendored `url-config.ts` (slimmed
-adaptation of the legacy `urlManager.js`); only the read/write surface for the
-single `blanks` URL parameter is preserved.
-
-URL state is the **only** cross-mount persistence the lens uses. Learner
-answers, blanks, correctness map, and overall score are all React-state only —
-gone on unmount per the disposable-practice contract.
-
-The orchestrator owns no URL state in this batch; the lens manages its own URL
-slice. When the orchestrator grows a URL-state surface (post-WS3), this lens's
-URL handling lifts to an adapter over that surface (see
-[Future direction](#future-direction)).
 
 ## Edge cases
 
@@ -464,10 +473,13 @@ vs. the prior-art `BlanksLens.jsx`:
   `public/static/ask/component/ask-questions.js` (a chain of `multiple-choice`
   library files); v1 of V2 uses the `socratizing/` module instead. Richer
   questions, stronger config, in-tree code.
-- **No `URLManager` global class.** Replaced by the vendored slimmed
-  `lib/url-config.ts` adapter; only the read/write of the single `blanks` URL
-  parameter is preserved. Global URL-coordination is out-of-scope for a lens
-  module; the orchestrator will own that when it grows a URL surface.
+- **No `URLManager` global class — and no URL config sync at all.** The legacy
+  persisted its config in the URL hash via a `URLManager` static class; V2 drops
+  this entirely. Config comes ONLY from the educator's `config` prop (resolved
+  through `core.ts`'s `config()` defaults), never from the URL. There is no
+  `?blanks=...` parameter, no read-on-mount, no debounced write, no `hashchange`
+  listener. URL coordination is orchestrator-domain; the orchestrator will own
+  any URL surface when it grows one.
 - **No `useColorize` / `useApp` Preact contexts.** Replaced by the `embodiment`
   prop and lens-local React state. (`useColorize` was vestigial in the legacy —
   imported and destructured but never used.)
@@ -529,19 +541,21 @@ each is independently testable:
   correctness; takes `(learnerCode, blanks)` and returns
   `{ correctnessMap: CorrectnessMap, score: number }`. Fixes the legacy's two
   evaluation bugs. Pure.
-- `lib/url-config.ts` (core) — **vendored & slimmed** from the legacy
-  `src/utils/urlManager.js`. Only the `getLensConfig('blanks')` /
-  `updateLensConfig('blanks', config)` surface is preserved. Pure.
+- `../lib/snippet-free-autocomplete.ts` (shared lens helper) — the CodeMirror
+  completion source the wrapper wires in `diff` / `raw` mode when `suggestions`
+  is on. Offers JS keywords + identifiers already present in the buffer; no
+  `for`/`if`/`function` snippet templates and no completion of un-typed
+  identifiers. Lives one level up because it is shared across lenses, not
+  blanks-specific.
 - `types.ts` (shared) — lens-local types: `Blank`, `BlankType`,
-  `BlankenateResult`, `ContentType`, `ViewMode`, `HintsMode`,
+  `BlankenateResult`, `ContentType`, `ViewMode`, `EditorMode`,
   `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`, `BlanksLensConfig`.
   The boolean-map representation of content types is wrapper-internal state
   derived from the array on render; it has no exported type.
 
 Tests split: `tests/blankenate.test.ts`, `tests/no-paste-extension.test.ts`,
-`tests/evaluate-correctness.test.ts`, `tests/url-config.test.ts`,
-`tests/core.test.ts` (vitest, no jsdom); `tests/component.test.tsx` (vitest +
-jsdom + `@testing-library/react`).
+`tests/evaluate-correctness.test.ts`, `tests/core.test.ts` (vitest, no jsdom);
+`tests/component.test.tsx` (vitest + jsdom + `@testing-library/react`).
 
 ## Dependencies (no install needed)
 
@@ -576,10 +590,12 @@ jsdom + `@testing-library/react`).
   `EditorView` on view-mode change (parity with legacy) is perf-suboptimal.
   CodeMirror 6 supports dynamic `EditorView.editable.of()` reconfiguration; the
   swap-out can land as a follow-up.
-- **URL state lifted to the orchestrator.** v1 owns its own URL slice (vendored
-  `url-config.ts`). Post-WS3, when the orchestrator grows a URL-state surface,
-  this lens's URL handling becomes an adapter over that surface and the vendored
-  `url-config.ts` shrinks (or disappears).
+- **Orchestrator-owned config persistence.** v1 takes its config ONLY from the
+  educator's `config` prop — there is no cross-mount config persistence and no
+  URL slice. If config-in-URL (shareable / reloadable exercise settings) is
+  wanted later, it belongs to the orchestrator's URL-state surface (post-WS3),
+  with this lens reading the resolved values through its `config` prop exactly as
+  it does today — no lens-side URL wiring.
 - **Hints panel: per-blank highlight in the editor.** v1 shows per-blank state
   in the side panel. A follow-up adds inline highlighting at the blank's
   `{start, end}` in the editor itself (e.g. CodeMirror `Decoration.mark`) so the
@@ -618,9 +634,9 @@ Follows all conventions in [`../README.md`](../README.md) and
   sandbox harnesses + per-lens CSS.
 - **`embodiment` parameter name** in core signatures.
 - **Disposable practice** — no cross-mount state for learner answers, blanks, or
-  correctness; React owns the lifecycle. URL config is the one exception
-  (cross-mount config persistence), and that's orchestrator-domain (URL = caller
-  environment, not lens-internal).
+  correctness; React owns the lifecycle. There is no cross-mount persistence at
+  all: config comes from the `config` prop each mount, and learner answers /
+  blanks / correctness die on unmount.
 - **Read-only views** — the lens never mutates `embodiment` or `config`; the
   wrapper's CodeMirror writes to local `learnerCode` state, never to the
   orchestrator's `setSnippet`.

@@ -3,12 +3,11 @@
  *
  * Component tests for the `blanks` React wrapper. End-state behaviors
  * locked here: CodeMirror mount with `data-lens="blanks"` root; view-mode
- * toggle (blankenated ↔ complete); editor-mode sub-toggle (helpful / diff
+ * toggle (blankenated ↔ complete); editor-mode sub-toggle (skeleton / diff
  * / raw); editable + noPasteExtension wiring; per-blank correctness
  * decorations; difficulty slider + content-type-checkbox re-derive;
- * editor header counts; cursor-scoped hints panel with scrambled-
- * incremental reveal; URL config read/write with debounced 500ms write
- * and `hashchange` back/forward replay.
+ * editor header counts; cursor-scoped hints panel with positional
+ * incremental reveal.
  *
  * The Socratic study companion (Ask Me / socratizing) is NOT a surface
  * of this lens — it lives at the SL orchestrator one layer up.
@@ -17,7 +16,7 @@
 import { EditorView } from '@codemirror/view';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import embody from '../../../embody/index.js';
 import blanksLens from '../index.js';
@@ -799,6 +798,162 @@ describe('blanks wrapper — ', () => {
 				);
 				expect(scoreElement?.dataset.blanksCorrect).toBe('0');
 			});
+		});
+	});
+
+	describe('suggestions toggle — (the unified help toggle)', () => {
+		// `suggestions` is the one "help" toggle (default off): in skeleton mode
+		// it shows / hides the cursor-scoped hints panel; in diff/raw it enables
+		// snippet-free autocomplete. The checkbox is visible in every blankenated
+		// editor mode. These jsdom tests lock the WIRING contract (checkbox
+		// present, root attr reflects + flips, learner code survives the
+		// remount); the popup CONTENTS and the hints-panel reveal live in the
+		// hints-panel suite + the browser gate.
+		it('default suggestions is false — root data-suggestions="false"', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.suggestions).toBe('false');
+			});
+		});
+
+		it('config suggestions:true → root data-suggestions="true" and the checkbox is checked', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config({ suggestions: true })}
+				/>,
+			);
+			await waitFor(() => {
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.suggestions).toBe('true');
+				const checkbox = container.querySelector(
+					'[data-assist-toggle="suggestions"]',
+				) as HTMLInputElement;
+				expect(checkbox.checked).toBe(true);
+			});
+		});
+
+		it('renders the Suggestions checkbox in every blankenated editor mode', () => {
+			for (const editorMode of ['skeleton', 'diff', 'raw'] as const) {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('OK')}
+						config={blanksLens.config({ editorMode })}
+					/>,
+				);
+				expect(
+					container.querySelector('[data-assist-toggle="suggestions"]'),
+				).not.toBeNull();
+				cleanup();
+			}
+		});
+
+		it('toggling the checkbox flips root data-suggestions to "true" (editor stays mounted)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			const checkbox = container.querySelector(
+				'[data-assist-toggle="suggestions"]',
+			) as HTMLInputElement;
+			fireEvent.click(checkbox);
+			await waitFor(() => {
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.suggestions).toBe('true');
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+		});
+
+		it('toggling twice returns data-suggestions to "false" (a real toggle, not a one-way latch)', async () => {
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('OK')}
+					config={blanksLens.config()}
+				/>,
+			);
+			const checkbox = container.querySelector(
+				'[data-assist-toggle="suggestions"]',
+			) as HTMLInputElement;
+			fireEvent.click(checkbox);
+			await waitFor(() => {
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.suggestions).toBe('true');
+			});
+			fireEvent.click(checkbox);
+			await waitFor(() => {
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.suggestions).toBe('false');
+			});
+		});
+
+		it('toggling suggestions preserves learner code across the remount', async () => {
+			// `suggestions` is in the mount-effect deps, so toggling REMOUNTS
+			// the editor — but learnerCode is re-read from the ref (modelled on
+			// the viewMode path, NOT changeEditorMode which wipes it), so the
+			// typed text MUST survive. Two-step wait: settle the remount (attr
+			// flip) FIRST, then assert the POST-remount view's state.doc — so a
+			// broken impl cannot pass on the pre-remount view's stale content.
+			const { container } = render(
+				<blanksLens.Component
+					embodiment={embody('hello')}
+					config={blanksLens.config({ difficulty: 100 })}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const view = EditorView.findFromDOM(
+				container.querySelector('.cm-content') as HTMLElement,
+			);
+			// Type 'XYZ' into the 5-char blank → doc becomes `XYZ__`.
+			typeIntoBlank(view!, 'XYZ', 0);
+			expect(view?.state.doc.toString().startsWith('XYZ')).toBe(true);
+
+			const checkbox = container.querySelector(
+				'[data-assist-toggle="suggestions"]',
+			) as HTMLInputElement;
+			fireEvent.click(checkbox);
+			await waitFor(() => {
+				const root = container.querySelector<HTMLElement>(
+					'[data-lens="blanks"]',
+				);
+				expect(root?.dataset.suggestions).toBe('true');
+			});
+			await waitFor(() => {
+				const remounted = EditorView.findFromDOM(
+					container.querySelector('.cm-content') as HTMLElement,
+				);
+				expect(remounted?.state.doc.toString().startsWith('XYZ')).toBe(true);
+			});
+		});
+
+		it('does not crash with suggestions on for a degenerate snippet', () => {
+			expect(() =>
+				render(
+					<blanksLens.Component
+						embodiment={embody('')}
+						config={blanksLens.config({ suggestions: true })}
+					/>,
+				),
+			).not.toThrow();
 		});
 	});
 
@@ -1716,22 +1871,20 @@ describe('blanks wrapper — ', () => {
 		});
 	});
 
-	describe('hints panel — (cursor-scoped, on-demand, scrambled)', () => {
-		// User-directed redesign:
-		// - hintsMode = 'on' | 'off' (orthogonal to difficulty; no tier
-		// inference)
-		// - panel shows hint for THE blank under the cursor (cursor-
-		// scoped); empty state otherwise
-		// - hidden by default; incremental per-blank reveal: each
-		// click of "Reveal next letter" exposes ONE more position of
-		// the correct answer at its actual position (in a per-blank-
-		// stable random order); hidden positions are shown as `•`
+	describe('hints panel — (cursor-scoped, on-demand, positional reveal)', () => {
+		// Unified-help redesign:
+		// - the panel is gated on `suggestions` (default OFF → hidden); it
+		//   renders only when suggestions is ON AND viewMode === 'blankenated'
+		//   AND editorMode === 'skeleton'
+		// - panel shows a hint for THE blank under the cursor (cursor-scoped);
+		//   empty state otherwise
+		// - incremental per-blank reveal: each "Reveal next letter" click
+		//   exposes ONE more position of the answer at its ACTUAL position (in
+		//   a per-blank-stable random order); unrevealed positions show as `•`
 		// - reveal-count is per-blank and persists across cursor moves
-		// - hints panel only renders when viewMode === 'blankenated'
-		// (diff/raw/complete modes hide the panel)
 
-		describe('hintsMode root attribute + panel presence', () => {
-			it('default hintsMode is "on" — panel renders', async () => {
+		describe('suggestions gates the panel (skeleton mode)', () => {
+			it('default suggestions off — panel does NOT render', async () => {
 				const { container } = render(
 					<blanksLens.Component
 						embodiment={embody('OK')}
@@ -1739,28 +1892,66 @@ describe('blanks wrapper — ', () => {
 					/>,
 				);
 				await waitFor(() => {
-					const root = container.querySelector<HTMLElement>(
-						'[data-lens="blanks"]',
-					);
-					expect(root?.dataset.hintsMode).toBe('on');
+					expect(
+						container.querySelector('[data-lens="blanks"]'),
+					).not.toBeNull();
+				});
+				expect(container.querySelector('[data-blanks-hints]')).toBeNull();
+			});
+
+			it('suggestions on — panel renders in skeleton mode', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('OK')}
+						config={blanksLens.config({ suggestions: true })}
+					/>,
+				);
+				await waitFor(() => {
 					expect(container.querySelector('[data-blanks-hints]')).not.toBeNull();
 				});
 			});
 
-			it('hintsMode "off" — panel does NOT render at all', async () => {
+			it('suggestions on but diff mode — no panel (autocomplete instead)', async () => {
 				const { container } = render(
 					<blanksLens.Component
 						embodiment={embody('OK')}
-						config={blanksLens.config({ hintsMode: 'off' })}
+						config={blanksLens.config({
+							suggestions: true,
+							editorMode: 'diff',
+						})}
 					/>,
 				);
 				await waitFor(() => {
-					const root = container.querySelector<HTMLElement>(
-						'[data-lens="blanks"]',
-					);
-					expect(root?.dataset.hintsMode).toBe('off');
+					expect(container.querySelector('.cm-content')).not.toBeNull();
 				});
 				expect(container.querySelector('[data-blanks-hints]')).toBeNull();
+			});
+
+			it('toggling suggestions live in skeleton shows then hides the panel', async () => {
+				const { container } = render(
+					<blanksLens.Component
+						embodiment={embody('OK')}
+						config={blanksLens.config()}
+					/>,
+				);
+				await waitFor(() => {
+					expect(container.querySelector('.cm-content')).not.toBeNull();
+				});
+				// default suggestions:false → no panel
+				expect(container.querySelector('[data-blanks-hints]')).toBeNull();
+				const checkbox = container.querySelector(
+					'[data-assist-toggle="suggestions"]',
+				) as HTMLInputElement;
+				fireEvent.click(checkbox);
+				// on → panel appears
+				await waitFor(() => {
+					expect(container.querySelector('[data-blanks-hints]')).not.toBeNull();
+				});
+				fireEvent.click(checkbox);
+				// off → panel gone
+				await waitFor(() => {
+					expect(container.querySelector('[data-blanks-hints]')).toBeNull();
+				});
 			});
 		});
 
@@ -1769,7 +1960,7 @@ describe('blanks wrapper — ', () => {
 				const { container } = render(
 					<blanksLens.Component
 						embodiment={embody('OK')}
-						config={blanksLens.config({ difficulty: 100 })}
+						config={blanksLens.config({ suggestions: true, difficulty: 100 })}
 					/>,
 				);
 				await waitFor(() => {
@@ -1783,7 +1974,7 @@ describe('blanks wrapper — ', () => {
 				const { container } = render(
 					<blanksLens.Component
 						embodiment={embody('hello')}
-						config={blanksLens.config({ difficulty: 100 })}
+						config={blanksLens.config({ suggestions: true, difficulty: 100 })}
 					/>,
 				);
 				await waitFor(() => {
@@ -1806,6 +1997,7 @@ describe('blanks wrapper — ', () => {
 					<blanksLens.Component
 						embodiment={embody('let x = 1;')}
 						config={blanksLens.config({
+							suggestions: true,
 							difficulty: 100,
 							contentTypes: ['keywords', 'identifiers'],
 						})}
@@ -1832,7 +2024,7 @@ describe('blanks wrapper — ', () => {
 				const { container } = render(
 					<blanksLens.Component
 						embodiment={embody('hello')}
-						config={blanksLens.config({ difficulty: 100 })}
+						config={blanksLens.config({ suggestions: true, difficulty: 100 })}
 					/>,
 				);
 				await waitFor(() => {
@@ -1846,10 +2038,10 @@ describe('blanks wrapper — ', () => {
 						'[data-hint-revealed]',
 					) as HTMLElement;
 					expect(revealed).not.toBeNull();
-					// Scrambled-order reveal: 0 clicks → empty string.
+					// Positional reveal: 0 clicks → all bullets.
 					expect(
 						revealed.querySelector('[data-hint-partial]')?.textContent,
-					).toBe('');
+					).toBe('•••••');
 					expect(revealed.dataset.hintRevealCount).toBe('0');
 					expect(revealed.dataset.hintRevealTotal).toBe('5');
 				});
@@ -1858,11 +2050,11 @@ describe('blanks wrapper — ', () => {
 				).not.toBeNull();
 			});
 
-			it('one click reveals exactly ONE letter (left-to-right, scrambled order)', async () => {
+			it('one click reveals exactly ONE position (positional)', async () => {
 				const { container } = render(
 					<blanksLens.Component
 						embodiment={embody('hello')}
-						config={blanksLens.config({ difficulty: 100 })}
+						config={blanksLens.config({ suggestions: true, difficulty: 100 })}
 					/>,
 				);
 				await waitFor(() => {
@@ -1888,11 +2080,19 @@ describe('blanks wrapper — ', () => {
 					expect(revealed.dataset.hintRevealCount).toBe('1');
 					const partial =
 						revealed.querySelector('[data-hint-partial]')?.textContent ?? '';
-					// Exactly one letter revealed. Letter is from `hello`
-					// (don't care which — depends on the per-blank seeded
-					// scramble).
-					expect(partial.length).toBe(1);
-					expect([...'hello']).toContain(partial);
+					// Positional reveal: 5-wide, exactly one position revealed;
+					// the revealed letter sits at its ACTUAL index (rest are •).
+					expect(partial.length).toBe(5);
+					expect(
+						[...partial].filter((character) => character !== '•'),
+					).toHaveLength(1);
+					// every revealed letter sits at its actual index
+					expect(
+						[...partial].every(
+							(character, index) =>
+								character === '•' || character === 'hello'[index],
+						),
+					).toBe(true);
 				});
 			});
 
@@ -1900,7 +2100,7 @@ describe('blanks wrapper — ', () => {
 				const { container } = render(
 					<blanksLens.Component
 						embodiment={embody('hi')}
-						config={blanksLens.config({ difficulty: 100 })}
+						config={blanksLens.config({ suggestions: true, difficulty: 100 })}
 					/>,
 				);
 				await waitFor(() => {
@@ -1925,11 +2125,13 @@ describe('blanks wrapper — ', () => {
 						'[data-hint-revealed]',
 					) as HTMLElement;
 					expect(revealed.dataset.hintRevealCount).toBe('1');
-					// One letter revealed, must be 'h' or 'i'.
+					// One position revealed (the other is a bullet).
 					const partial =
 						revealed.querySelector('[data-hint-partial]')?.textContent ?? '';
-					expect(partial.length).toBe(1);
-					expect(['h', 'i']).toContain(partial);
+					expect(partial.length).toBe(2);
+					expect(
+						[...partial].filter((character) => character !== '•'),
+					).toHaveLength(1);
 				});
 				expect(
 					container.querySelector('[data-hint-reveal-button]'),
@@ -1945,12 +2147,10 @@ describe('blanks wrapper — ', () => {
 						'[data-hint-revealed]',
 					) as HTMLElement;
 					expect(revealed.dataset.hintRevealCount).toBe('2');
-					// Fully revealed: 2-char permutation of `hi` — either
-					// `hi` or `ih` depending on the seed.
+					// Fully revealed → the actual word in order (positional).
 					const partial =
 						revealed.querySelector('[data-hint-partial]')?.textContent ?? '';
-					expect(partial.length).toBe(2);
-					expect(['hi', 'ih']).toContain(partial);
+					expect(partial).toBe('hi');
 				});
 				// Fully revealed → no more reveal button.
 				expect(container.querySelector('[data-hint-reveal-button]')).toBeNull();
@@ -1961,6 +2161,7 @@ describe('blanks wrapper — ', () => {
 					<blanksLens.Component
 						embodiment={embody('let x = 1;')}
 						config={blanksLens.config({
+							suggestions: true,
 							difficulty: 100,
 							contentTypes: ['keywords', 'identifiers'],
 						})}
@@ -2017,6 +2218,7 @@ describe('blanks wrapper — ', () => {
 					<blanksLens.Component
 						embodiment={embody('let x = 1;')}
 						config={blanksLens.config({
+							suggestions: true,
 							difficulty: 100,
 							contentTypes: ['identifiers'],
 						})}
@@ -2053,7 +2255,7 @@ describe('blanks wrapper — ', () => {
 		describe('editor-mode sub-toggle (orthogonal to viewMode) — ', () => {
 			// The editor-mode sub-toggle lives INSIDE blankenated mode.
 			// Three variants from easiest to hardest:
-			// helpful (default) → diff → raw
+			// skeleton (default) → diff → raw
 			// Switching to diff/raw stays within blankenated viewMode;
 			// they're alternate renderings of the SAME blanked editor.
 
@@ -2066,7 +2268,7 @@ describe('blanks wrapper — ', () => {
 				);
 				await waitFor(() => {
 					expect(
-						container.querySelector('[data-editor-mode-toggle="helpful"]'),
+						container.querySelector('[data-editor-mode-toggle="skeleton"]'),
 					).not.toBeNull();
 					expect(
 						container.querySelector('[data-editor-mode-toggle="diff"]'),
@@ -2202,9 +2404,9 @@ describe('blanks wrapper — ', () => {
 			});
 
 			it('switching editorMode resets learnerCode (fresh exercise from blankedCode)', async () => {
-				// Reset is load-bearing for the helpful editor's invariants:
+				// Reset is load-bearing for the skeleton editor's invariants:
 				// the free editors (diff/raw) accept arbitrary edits that
-				// would corrupt the helpful editor's length-match + anchor-
+				// would corrupt the skeleton editor's length-match + anchor-
 				// lock contract if carried over. Reset on switch keeps each
 				// scaffolding level starting clean.
 				const { container } = render(
@@ -2225,11 +2427,11 @@ describe('blanks wrapper — ', () => {
 				view!.dispatch({ changes: { from: 0, insert: 'XYZ_GARBAGE_' } });
 				const dirtyDoc = view!.state.doc.toString();
 				expect(dirtyDoc).toContain('XYZ_GARBAGE_');
-				// Switch to helpful — the exercise resets.
-				const helpfulButton = container.querySelector(
-					'[data-editor-mode-toggle="helpful"]',
+				// Switch to skeleton — the exercise resets.
+				const skeletonButton = container.querySelector(
+					'[data-editor-mode-toggle="skeleton"]',
 				) as HTMLButtonElement;
-				fireEvent.click(helpfulButton);
+				fireEvent.click(skeletonButton);
 				await waitFor(() => {
 					const newContent = container.querySelector(
 						'.cm-content',
@@ -2259,7 +2461,7 @@ describe('blanks wrapper — ', () => {
 					expect(root?.dataset.viewMode).toBe('complete');
 				});
 				expect(
-					container.querySelector('[data-editor-mode-toggle="helpful"]'),
+					container.querySelector('[data-editor-mode-toggle="skeleton"]'),
 				).toBeNull();
 			});
 		});
@@ -2291,18 +2493,18 @@ describe('blanks wrapper — ', () => {
 			// would still produce correct correctness colors.
 		});
 
-		// AR-3 IMPORTANT 3: the scrambled-order PRNG must be
+		// AR-3 IMPORTANT 3: the positional-reveal PRNG must be
 		// deterministic across the React render lifecycle. A bug that
 		// seeds the shuffle from Math.random() instead of blank.id
 		// would pass every existing test, because every existing test
 		// uses one render and one click sequence.
-		it('scrambled-order reveal is stable across unmount/remount (PRNG determinism)', async () => {
+		it('positional reveal is stable across unmount/remount (PRNG determinism)', async () => {
 			// Imperative form that works with vitest's async:
 			const renderOnce = async () => {
 				const { container } = render(
 					<blanksLens.Component
 						embodiment={embody('hello')}
-						config={blanksLens.config({ difficulty: 100 })}
+						config={blanksLens.config({ difficulty: 100, suggestions: true })}
 					/>,
 				);
 				await waitFor(() => {
@@ -2322,28 +2524,32 @@ describe('blanks wrapper — ', () => {
 						'[data-hint-reveal-button]',
 					) as HTMLButtonElement,
 				);
-				let letter = '';
+				let revealedPositional = '';
 				await waitFor(() => {
 					const partial =
 						container.querySelector('[data-hint-partial]')?.textContent ?? '';
-					expect(partial.length).toBe(1);
-					letter = partial;
+					// Positional: 5-wide with exactly one revealed position.
+					expect(partial.length).toBe(5);
+					expect(
+						[...partial].filter((character) => character !== '•'),
+					).toHaveLength(1);
+					revealedPositional = partial;
 				});
 				cleanup();
-				return letter;
+				return revealedPositional;
 			};
 			const first = await renderOnce();
 			const second = await renderOnce();
 			// Deterministic per blank.id: same blank in same source →
-			// same first letter every render.
+			// same positional reveal every render.
 			expect(second).toBe(first);
 		});
 
 		// AR-3 IMPORTANT 4: reset-on-switch covers all directions, not
-		// just raw → helpful. Specifically, helpful → diff must reset
-		// (so a solved helpful exercise doesn't carry into diff with
+		// just raw → skeleton. Specifically, skeleton → diff must reset
+		// (so a solved skeleton exercise doesn't carry into diff with
 		// no `_` chars left, defeating the diff display).
-		it('reset on helpful → diff: solved helpful state does NOT carry into diff', async () => {
+		it('reset on skeleton → diff: solved skeleton state does NOT carry into diff', async () => {
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('hello')}
@@ -2372,7 +2578,7 @@ describe('blanks wrapper — ', () => {
 			});
 		});
 
-		it('reset on helpful → raw: solved helpful state does NOT carry into raw', async () => {
+		it('reset on skeleton → raw: solved skeleton state does NOT carry into raw', async () => {
 			const { container } = render(
 				<blanksLens.Component
 					embodiment={embody('hello')}
@@ -2477,144 +2683,6 @@ describe('blanks wrapper — ', () => {
 			expect(view!.state.doc.length).toBeGreaterThan(2);
 			// Editor still mounted and responsive.
 			expect(container.querySelector('.cm-content')).not.toBeNull();
-		});
-	});
-
-	describe('URL config plumbing — ', () => {
-		// Helper: clean hash before each test.
-		afterEach(() => {
-			// jsdom keeps location across tests; clean up the hash.
-			if (globalThis.window !== undefined) {
-				globalThis.history.replaceState(null, '', globalThis.location.pathname);
-			}
-		});
-
-		it('reads URL hash on mount and seeds difficulty from it', async () => {
-			globalThis.history.replaceState(null, '', '#?blanks=difficulty:75');
-			const { container } = render(
-				<blanksLens.Component
-					embodiment={embody('OK')}
-					config={blanksLens.config({ difficulty: 25 })}
-				/>,
-			);
-			await waitFor(() => {
-				const slider = container.querySelector(
-					'[data-difficulty-slider]',
-				) as HTMLInputElement;
-				// URL `difficulty:75` overrides the prop `difficulty: 25`.
-				expect(slider.value).toBe('75');
-			});
-		});
-
-		it('reads URL hash on mount and seeds editorMode from it', async () => {
-			globalThis.history.replaceState(null, '', '#?blanks=editor:diff');
-			const { container } = render(
-				<blanksLens.Component
-					embodiment={embody('OK')}
-					config={blanksLens.config({ editorMode: 'helpful' })}
-				/>,
-			);
-			await waitFor(() => {
-				const diffButton = container.querySelector(
-					'[data-editor-mode-toggle="diff"]',
-				) as HTMLButtonElement;
-				expect(diffButton.getAttribute('aria-pressed')).toBe('true');
-			});
-		});
-
-		it('reads URL hash on mount and seeds hintsMode from it', async () => {
-			globalThis.history.replaceState(null, '', '#?blanks=hints:off');
-			const { container } = render(
-				<blanksLens.Component
-					embodiment={embody('OK')}
-					config={blanksLens.config()}
-				/>,
-			);
-			await waitFor(() => {
-				const root = container.querySelector<HTMLElement>(
-					'[data-lens="blanks"]',
-				);
-				expect(root?.dataset.hintsMode).toBe('off');
-			});
-		});
-
-		it('writes the live config to the URL hash after a 500ms debounce', async () => {
-			vi.useFakeTimers({ shouldAdvanceTime: true });
-			try {
-				globalThis.history.replaceState(null, '', globalThis.location.pathname);
-				const { container } = render(
-					<blanksLens.Component
-						embodiment={embody('OK')}
-						config={blanksLens.config({ difficulty: 25 })}
-					/>,
-				);
-				await vi.waitFor(() => {
-					expect(
-						container.querySelector('[data-difficulty-slider]'),
-					).not.toBeNull();
-				});
-				const slider = container.querySelector(
-					'[data-difficulty-slider]',
-				) as HTMLInputElement;
-				fireEvent.change(slider, { target: { value: '88' } });
-				// Before debounce window passes, hash should not yet
-				// reflect the change.
-				expect(globalThis.location.hash).not.toContain('difficulty:88');
-				// Advance timers past the 500ms debounce.
-				vi.advanceTimersByTime(550);
-				await vi.waitFor(() => {
-					expect(globalThis.location.hash).toContain('difficulty:88');
-				});
-			} finally {
-				vi.useRealTimers();
-			}
-		});
-
-		it('responds to hashchange events by re-reading the URL (back/forward replay)', async () => {
-			globalThis.history.replaceState(null, '', '#?blanks=difficulty:30');
-			const { container } = render(
-				<blanksLens.Component
-					embodiment={embody('OK')}
-					config={blanksLens.config()}
-				/>,
-			);
-			await waitFor(() => {
-				const slider = container.querySelector(
-					'[data-difficulty-slider]',
-				) as HTMLInputElement;
-				expect(slider.value).toBe('30');
-			});
-			// Simulate browser back/forward: change hash + dispatch event.
-			globalThis.history.replaceState(null, '', '#?blanks=difficulty:90');
-			globalThis.dispatchEvent(new HashChangeEvent('hashchange'));
-			await waitFor(() => {
-				const slider = container.querySelector(
-					'[data-difficulty-slider]',
-				) as HTMLInputElement;
-				expect(slider.value).toBe('90');
-			});
-		});
-
-		it('does NOT write to URL on initial mount (only after a user-driven change)', async () => {
-			// Empty hash at mount; the initial state is prop defaults.
-			// A write-on-mount would push the prop defaults into the URL
-			// even though the learner did nothing — annoying and would
-			// rewrite the URL on every page load.
-			globalThis.history.replaceState(null, '', globalThis.location.pathname);
-			const { container } = render(
-				<blanksLens.Component
-					embodiment={embody('OK')}
-					config={blanksLens.config({ difficulty: 42 })}
-				/>,
-			);
-			await waitFor(() => {
-				expect(
-					container.querySelector('[data-difficulty-slider]'),
-				).not.toBeNull();
-			});
-			// Wait through the debounce window with NO user action.
-			await new Promise((r) => setTimeout(r, 600));
-			expect(globalThis.location.hash).toBe('');
 		});
 	});
 

@@ -115,12 +115,13 @@
 }
 
 /*
- * hints panel: cursor-scoped, on-demand, scrambled.
- * Renders only when hintsMode='on'. Shows hint for the blank under
- * the cursor (or empty state when cursor is in anchor text). A
- * per-blank reveal button toggles the alphabetically-scrambled
- * letters of `blank.original` (deterministic; reveals character SET
- * without order).
+ * hints panel: cursor-scoped, on-demand, positional reveal.
+ * Renders only when suggestions is on AND viewMode='blankenated' AND
+ * editorMode='skeleton'. Shows a hint for the blank under the cursor
+ * (or empty state when the cursor is in anchor text). A per-blank
+ * reveal button exposes one more position of `blank.original` at its
+ * ACTUAL position (per-blank-stable random order); unrevealed positions
+ * show as `•`.
  */
 [data-lens='blanks'] [data-blanks-hints] {
 	margin: 0.5rem 0;

@@ -9,10 +9,9 @@
  *
  * Two layers (per the lenses peer's two-layer module convention):
  * - The pure-TS core (`./core.ts` + `./lib/blankenate.ts` +
- *   `./lib/no-paste-extension.ts` + `./lib/evaluate-correctness.ts` +
- *   `./lib/url-config.ts`) produces the blanked source, the per-blank
- *   correctness map, the CodeMirror extension that blocks paste, and
- *   the URL config read/write surface.
+ *   `./lib/no-paste-extension.ts` + `./lib/evaluate-correctness.ts`)
+ *   produces the blanked source, the per-blank correctness map, and the
+ *   CodeMirror extension that blocks paste.
  * - The React wrapper (`./index.tsx`) composes the cores, owns the
  *   per-mount UI state (current view mode, learner code, blanks,
  *   correctness map), and dispatches user-interaction events.
@@ -20,14 +19,15 @@
  * @remarks The lens does NOT mutate `embodiment` (deep-frozen per the
  * `embody/` contract) or `config`. Learner answers, blanks, and the
  * correctness map exist only in per-mount React state — no
- * `localStorage`, no module-level cache, no refs across mounts. URL
- * config is the one cross-mount persistence surface; it's
- * orchestrator-domain (URL = caller environment, not lens-internal).
- * See `../README.md` § Disposable practice.
+ * `localStorage`, no module-level cache, no refs across mounts, no URL
+ * persistence — config comes only from the `config` prop, and learner
+ * state is discarded on unmount. See `../README.md` § Disposable
+ * practice.
  *
  * @remarks `LensConfig` (from `../types.ts`) is the wrapper's prop
- * type for `config`; the lens reads four known fields (`difficulty`,
- * `contentTypes`, `viewMode`, `hintsMode`) and ignores the rest.
+ * type for `config`; the lens reads the known fields (`difficulty`,
+ * `contentTypes`, `viewMode`, `editorMode`, `suggestions`) and ignores
+ * the rest.
  * Per-lens narrowing is captured in `BlanksLensConfig` below — it
  * documents the known fields but does NOT exclude unknown ones
  * (config is open-shape at the contract boundary). All four documented
@@ -154,7 +154,7 @@ type BlankenateResult = {
 	readonly originalCode: string;
 };
 
-// ─── Content type (config + URL format) ─────────────────────
+// ─── Content type ───────────────────────────────────────────
 
 /**
  * One element of the `contentTypes` config array. Each value names a
@@ -165,8 +165,7 @@ type BlankenateResult = {
  * (compliant with `SerializableValue`'s primitive-array constraint).
  * The wrapper derives a boolean map (`{ keywords: bool, identifiers:
  * bool, … }`) for per-render rendering; the array is the
- * config-level representation. The URL config format
- * `types:keywords+identifiers` is the same array, joined with `+`.
+ * config-level representation.
  *
  * The relationship to `BlankType`:
  * - `'keywords' | 'identifiers' | 'operators' | 'literals' | 'delimiters'`
@@ -209,7 +208,7 @@ type ViewMode = 'blankenated' | 'complete';
  * The `editorMode` config value: which editor variant renders inside
  * blankenated mode. Three sub-modes, ordered easiest to hardest:
  *
- * - `'helpful'` — fixed-width fillable-field UX with correctness-aware
+ * - `'skeleton'` — fixed-width fillable-field UX with correctness-aware
  *   per-blank colors, plus the cursor-scoped hints panel
  *  . Full scaffolding.
  * - `'diff'` — same editor, but per-character diff highlighting against
@@ -223,28 +222,7 @@ type ViewMode = 'blankenated' | 'complete';
  * `viewMode === 'blankenated'`. In `'complete'` mode this field is
  * ignored (the editor shows the read-only original regardless).
  */
-type EditorMode = 'helpful' | 'diff' | 'raw';
-
-// ─── Hints mode ─────────────────────────────────────────────
-
-/**
- * The `hintsMode` config value: enable or disable the cursor-scoped
- * hints panel.
- *
- * @remarks ships a **cursor-scoped, on-demand, scrambled**
- * hints panel. When `hintsMode === 'on'`, the panel renders below the
- * editor and shows a reveal-button for the blank under the cursor
- * (only). Clicking the button reveals the scrambled-letters hint
- * (alphabetical sort of `blank.original` — same character set, no
- * order info). The learner controls the scaffolding gradient by
- * choosing how many blanks to reveal, not by a config tier.
- *
- * When `hintsMode === 'off'`, the panel does not render at all.
- *
- * Decoupled from `difficulty` per user-directed redesign — hints are
- * orthogonal to the difficulty slider.
- */
-type HintsMode = 'on' | 'off';
+type EditorMode = 'skeleton' | 'diff' | 'raw';
 
 // ─── Correctness ────────────────────────────────────────────
 
@@ -294,9 +272,9 @@ type EvaluationResult = {
  * contract boundary — but it documents what the lens looks for and
  * what defaults apply when a field is absent.
  *
- * @remarks All four fields are `SerializableValue`-compliant per
+ * @remarks All fields are `SerializableValue`-compliant per
  * `../types.ts`: primitives (`difficulty: number`,
- * `viewMode: string`, `hintsMode: string`) or arrays of primitives
+ * `viewMode: string`, `suggestions: boolean`) or arrays of primitives
  * (`contentTypes: readonly string[]`). Nested objects would violate
  * `LensConfig`'s flat-record contract; the boolean-map
  * representation of content types is **wrapper-internal state**
@@ -306,8 +284,7 @@ type EvaluationResult = {
  * - `difficulty` → `50`
  * - `contentTypes` → `['keywords', 'identifiers', 'operators', 'literals', 'delimiters']`
  * - `viewMode` → `'blankenated'`
- * - `editorMode` → `'helpful'`
- * - `hintsMode` → `'on'`
+ * - `editorMode` → `'skeleton'`
  * - `suggestions` → `false`
  */
 type BlanksLensConfig = {
@@ -315,11 +292,12 @@ type BlanksLensConfig = {
 	readonly contentTypes?: ReadonlyArray<ContentType>;
 	readonly viewMode?: ViewMode;
 	readonly editorMode?: EditorMode;
-	readonly hintsMode?: HintsMode;
 	/**
-	 * Opt-in snippet-free autocomplete (JS keywords + in-buffer locals;
-	 * no `for`/`if`/`function` templates, no completion of un-typed
-	 * identifiers). Default `false`. See `./README.md` § Toolbar contract.
+	 * The unified "help" toggle (opt-in, default `false`). In `skeleton`
+	 * mode it shows / hides the cursor-scoped hints panel; in `diff` /
+	 * `raw` it enables snippet-free autocomplete (JS keywords + in-buffer
+	 * locals, no `for`/`if`/`function` templates, no completion of
+	 * un-typed identifiers). See `./README.md` § Toolbar contract.
 	 */
 	readonly suggestions?: boolean;
 };
@@ -336,6 +314,5 @@ export type {
 	CorrectnessMap,
 	EditorMode,
 	EvaluationResult,
-	HintsMode,
 	ViewMode,
 };

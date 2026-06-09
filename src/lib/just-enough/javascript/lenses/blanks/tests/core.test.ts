@@ -10,7 +10,7 @@ function makeSnippet(overrides: Partial<Snippet> = {}): Snippet {
 
 describe('blanks core', () => {
 	describe('config', () => {
-		describe('Zero — no overrides applies all four defaults', () => {
+		describe('Zero — no overrides applies all defaults', () => {
 			it('difficulty defaults to 50', () => {
 				expect(core.config().difficulty).toBe(50);
 			});
@@ -29,12 +29,8 @@ describe('blanks core', () => {
 				expect(core.config().viewMode).toBe('blankenated');
 			});
 
-			it('hintsMode defaults to "on" (orthogonal to difficulty)', () => {
-				expect(core.config().hintsMode).toBe('on');
-			});
-
-			it('editorMode defaults to "helpful"', () => {
-				expect(core.config().editorMode).toBe('helpful');
+			it('editorMode defaults to "skeleton"', () => {
+				expect(core.config().editorMode).toBe('skeleton');
 			});
 
 			it('suggestions defaults to false (opt-in, matches writeme)', () => {
@@ -55,10 +51,6 @@ describe('blanks core', () => {
 
 			it('viewMode override wins over default', () => {
 				expect(core.config({ viewMode: 'complete' }).viewMode).toBe('complete');
-			});
-
-			it('hintsMode override wins over default', () => {
-				expect(core.config({ hintsMode: 'off' }).hintsMode).toBe('off');
 			});
 
 			it('editorMode override wins over default', () => {
@@ -124,14 +116,12 @@ describe('blanks core', () => {
 					contentTypes: ['operators'],
 					viewMode: 'complete',
 					editorMode: 'diff',
-					hintsMode: 'off',
 					suggestions: true,
 				});
 				expect(resolved.difficulty).toBe(75);
 				expect(resolved.contentTypes).toEqual(['operators']);
 				expect(resolved.viewMode).toBe('complete');
 				expect(resolved.editorMode).toBe('diff');
-				expect(resolved.hintsMode).toBe('off');
 				expect(resolved.suggestions).toBe(true);
 			});
 		});

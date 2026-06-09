@@ -2,10 +2,10 @@
  * @file React wrapper for the `blanks` lens. Default-exports the frozen
  * `LensModule` the orchestrator's `LENS_REGISTRY` consumes.
  *
- * Composes the pure-TS core (`./core.ts`) and the four `lib/` subsystems
- * (`blankenate`, `no-paste-extension`, `evaluate-correctness`, `url-config`)
+ * Composes the pure-TS core (`./core.ts`) and the three `lib/` subsystems
+ * (`blankenate`, `no-paste-extension`, `evaluate-correctness`)
  * into the lens surface: a `<div data-lens="blanks" data-view-mode="…"
- * data-editor-mode="…" data-hints-mode="…">` root containing the toolbar,
+ * data-suggestions="…">` root containing the toolbar,
  * editor header, editor-mode toggle, CodeMirror editor, score, and
  * cursor-scoped hints panel.
  *
@@ -16,16 +16,14 @@
  *   per-blank correctness-aware decoration class) via `StateField` +
  *   `EditorState.transactionFilter`.
  * - View-mode toggle (`blankenated` / `complete`); editor-mode sub-toggle
- *   (`helpful` / `diff` / `raw`) for the blankenated view.
+ *   (`skeleton` / `diff` / `raw`) for the blankenated view.
  * - Difficulty slider (0–100) and 5 content-type checkboxes (keywords,
  *   identifiers, operators, literals, delimiters); both re-derive the
  *   blank set on change.
  * - Editor header (mode label + difficulty% + total / remaining counts).
- * - Cursor-scoped hints panel with scrambled-incremental letter reveals
- *   per blank, rendered only when `hintsMode === 'on'` AND
- *   `viewMode === 'blankenated'` AND `editorMode === 'helpful'`.
- * - URL config read on mount + debounced 500ms write on user-driven
- *   change + `hashchange` listener for browser back/forward replay.
+ * - Cursor-scoped hints panel with positional letter reveals per
+ *   blank, rendered only when `suggestions` is on AND
+ *   `viewMode === 'blankenated'` AND `editorMode === 'skeleton'`.
  *
  * Not owned here: the Socratic study companion (Ask Me / socratizing)
  * lives at the SL orchestrator one layer up — it operates on the
@@ -33,6 +31,7 @@
  * cross-lens concern.
  */
 
+import { completionKeymap } from '@codemirror/autocomplete';
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorState, StateField } from '@codemirror/state';
@@ -47,30 +46,22 @@ import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { basicSetup } from 'codemirror';
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { freezeInPlace } from '@utils/freeze.js';
 
+import snippetFreeAutocomplete from '../lib/snippet-free-autocomplete.js';
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import blanksCore from './core.js';
 import blankenate from './lib/blankenate.js';
 import evaluateCorrectness from './lib/evaluate-correctness.js';
 import noPasteExtension from './lib/no-paste-extension.js';
-import urlConfig from './lib/url-config.js';
 import type {
 	BlankenateResult,
-	BlanksLensConfig,
 	ContentType,
 	EditorMode,
-	HintsMode,
 	ViewMode,
 } from './types.js';
 
@@ -136,28 +127,24 @@ function shufflePositions(seed: string, length: number): ReadonlyArray<number> {
 }
 
 /**
- * Render a partial hint for `original` revealing the first
- * `revealCount` characters in the per-blank random-scrambled order.
- * The display grows left-to-right; each new click appends one more
- * letter. Position info is NOT exposed — the learner gets the SET of
- * letters needed (one at a time, in random sequence) without the
- * order or position info.
+ * Render a partial hint for `original` as a POSITIONAL reveal: each
+ * already-revealed letter is shown at its ACTUAL position, and every
+ * not-yet-revealed position is a bullet (`•`). `shufflePositions` decides
+ * the ORDER positions are revealed (a per-blank-stable random order), so
+ * clicking "Reveal next letter" exposes one more position — but the display
+ * stays positional, so the learner sees WHERE each revealed letter belongs
+ * rather than an out-of-order letter inventory.
  *
- * Examples for `hello` (5 chars, with random perm [3,0,4,1,2]):
- *  - count 0 → ''        (no letters yet)
- *  - count 1 → 'l'       (hello[3])
- *  - count 2 → 'lh'      (hello[3] + hello[0])
- *  - count 3 → 'lho'
- *  - count 4 → 'lhoe'
- *  - count 5 → 'lhoel'   (full scrambled set; equivalent to
- *                        revealing the whole letter inventory)
+ * Examples for `hello` (5 chars, with reveal order [3, 0, 4, 1, 2]):
+ *  - count 0 → '•••••'   (nothing revealed)
+ *  - count 1 → '•••l•'   (position 3)
+ *  - count 2 → 'h••l•'   (positions 3, 0)
+ *  - count 3 → 'h••lo'   (positions 3, 0, 4)
+ *  - count 4 → 'he•lo'   (positions 3, 0, 4, 1)
+ *  - count 5 → 'hello'   (all positions)
  *
- * The learner sees `lhoel` (or whatever the per-blank random
- * permutation produces) and must figure out the order to reassemble
- * `hello`. The scramble is deterministic per `(seed, length)` so the
- * same blank in the same mount always reveals letters in the same
- * sequence — re-visiting a partially-revealed blank shows the same
- * partial state.
+ * Deterministic per `(seed, length)` — re-visiting a partially-revealed
+ * blank shows the same partial state.
  */
 function renderPartialHint(
 	original: string,
@@ -166,11 +153,10 @@ function renderPartialHint(
 ): string {
 	const perm = shufflePositions(seed, original.length);
 	const clamped = Math.min(revealCount, perm.length);
-	let out = '';
-	for (let i = 0; i < clamped; i++) {
-		out += original[perm[i]!];
-	}
-	return out;
+	const revealed = new Set(perm.slice(0, clamped));
+	return Array.from(original, (character, index) =>
+		revealed.has(index) ? character : '•',
+	).join('');
 }
 
 /**
@@ -245,50 +231,6 @@ function deriveContentTypeFlags(contentTypes: ReadonlyArray<ContentType>): {
  * extras / not marked (graceful degradation; the learner sees the
  * pattern shift as a signal that they've drifted).
  */
-/**
- * returns a stable applier that takes a partial URL config
- * and dispatches the appropriate setters. Defined as a module-level
- * hook so its closure captures only the setter references (which are
- * stable across renders per React's useState contract), eliminating
- * the stale-closure risk the AR-4 flagged for the in-component
- * helper. Returned value is memoized — safe to list in effect deps.
- */
-type ConfigSetters = {
-	setDifficulty: (n: number) => void;
-	setContentTypes: (cs: ReadonlyArray<ContentType>) => void;
-	setViewMode: (m: ViewMode) => void;
-	setEditorMode: (m: EditorMode) => void;
-	setHintsMode: (m: HintsMode) => void;
-};
-function useUrlConfigApplier(
-	setDifficulty: ConfigSetters['setDifficulty'],
-	setContentTypes: ConfigSetters['setContentTypes'],
-	setViewMode: ConfigSetters['setViewMode'],
-	setEditorMode: ConfigSetters['setEditorMode'],
-	setHintsMode: ConfigSetters['setHintsMode'],
-) {
-	return useCallback(
-		function applyUrlConfig(fromUrl: Partial<BlanksLensConfig>) {
-			if (fromUrl.difficulty !== undefined) {
-				setDifficulty(fromUrl.difficulty);
-			}
-			if (fromUrl.contentTypes !== undefined) {
-				setContentTypes(fromUrl.contentTypes);
-			}
-			if (fromUrl.viewMode !== undefined) {
-				setViewMode(fromUrl.viewMode);
-			}
-			if (fromUrl.editorMode !== undefined) {
-				setEditorMode(fromUrl.editorMode);
-			}
-			if (fromUrl.hintsMode !== undefined) {
-				setHintsMode(fromUrl.hintsMode);
-			}
-		},
-		[setDifficulty, setContentTypes, setViewMode, setEditorMode, setHintsMode],
-	);
-}
-
 function buildDiffDecorations(originalCode: string) {
 	const mismatchMark = Decoration.mark({ class: 'cm-diff-mismatch' });
 	function decorate(doc: Text): DecorationSet {
@@ -328,7 +270,7 @@ function buildLockExtensions(blankResult: BlankenateResult) {
 	// length-matched: doc positions === source positions
 	// because the placeholder is `_`.repeat(blank.original.length).
 	// Captured once at mount; auto-pad preserves blank widths so these
-	// positions never shift. Used only by the 'helpful' editor mode;
+	// positions never shift. Used only by the 'skeleton' editor mode;
 	// diff and raw modes get a plain CodeMirror with no lock/autopad.
 	const sortedBlanks = [...blankResult.blanks].sort(
 		(a, b) => a.start - b.start,
@@ -586,23 +528,23 @@ const BlanksComponent: ComponentType<LensProperties> =
 
 		// editor-mode sub-toggle (only meaningful when
 		// viewMode === 'blankenated'). Three variants from easiest to
-		// hardest: 'helpful' (full correctness colors + hints panel) →
+		// hardest: 'skeleton' (full correctness colors + hints panel) →
 		// 'diff' (char-level diff against hidden original; no hints) →
 		// 'raw' (no feedback of any kind). Seeded from config.editorMode
-		// (default 'helpful').
+		// (default 'skeleton').
 		const initialEditorMode: EditorMode =
 			resolved.editorMode === 'diff'
 				? 'diff'
 				: resolved.editorMode === 'raw'
 					? 'raw'
-					: 'helpful';
+					: 'skeleton';
 		const [editorMode, setEditorMode] = useState<EditorMode>(initialEditorMode);
 
 		// switching the scaffolding level (editorMode)
 		// resets the exercise. The free editors (diff/raw) allow arbitrary
-		// edits that may violate the helpful editor's length-match +
+		// edits that may violate the skeleton editor's length-match +
 		// anchor-lock invariants — carrying that arbitrary state into the
-		// helpful editor would put it in a corrupted starting position.
+		// skeleton editor would put it in a corrupted starting position.
 		// Reset clears learnerCode (so the next mount picks up blankedCode
 		// from blankenate) and revealCounts (fresh hint state per exercise).
 		function changeEditorMode(next: EditorMode) {
@@ -725,18 +667,13 @@ const BlanksComponent: ComponentType<LensProperties> =
 			});
 		}, [learnerCode, blankResult]);
 
-		// hints config is `'on' | 'off'`, orthogonal to
-		// difficulty (user-directed redesign — hints are NOT inferred
-		// from difficulty; learners choose how many blanks to reveal as
-		// their own scaffolding gradient). Default 'on'.
-		//
-		// hintsMode is now LOCAL state (was derived from
-		// `resolved`). State enables URL sync — the URL read effect
-		// can call `setHintsMode` to apply persisted values, and the
-		// URL write effect serializes the live state to the hash.
-		const initialHintsMode: HintsMode =
-			resolved.hintsMode === 'off' ? 'off' : 'on';
-		const [hintsMode, setHintsMode] = useState<HintsMode>(initialHintsMode);
+		// snippet-free autocomplete toggle (opt-in). Seeded from
+		// config.suggestions (default false). The mount effect adds
+		// `snippetFreeAutocomplete()` to the editor when on; the checkbox
+		// mutates this and the editor remounts (suggestions is in the mount
+		// deps) WITHOUT resetting learnerCode — so toggling preserves work.
+		const initialSuggestions: boolean = resolved.suggestions === true;
+		const [suggestions, setSuggestions] = useState<boolean>(initialSuggestions);
 
 		// cursor position state. Updated by the CodeMirror
 		// updateListener on selectionSet. Render-only state — does NOT
@@ -774,81 +711,6 @@ const BlanksComponent: ComponentType<LensProperties> =
 		// updates flow through the updateListener into React state but MUST
 		// NOT re-fire this effect — that would feedback-loop and destroy
 		// the EditorView mid-typing.
-		//
-		// URL config plumbing. Three effects:
-		//
-		// 1. **Read on mount.** Parse `window.location.hash` and apply
-		//    any persisted config values as overrides on top of the
-		//    prop-derived initial state. Runs once; if URL is empty,
-		//    leaves state alone.
-		//
-		// 2. **Debounced write on state change.** Serialize the live
-		//    config to the hash 500ms after the last change. Matches the
-		//    legacy URLManager debounce; prevents `history.replaceState`
-		//    spam during slider drags. Skips the first invocation so an
-		//    empty URL on mount doesn't immediately get overwritten with
-		//    prop defaults.
-		//
-		// 3. **Hashchange listener.** Re-read URL on browser
-		//    back/forward; apply any changed values. Enables URL replay.
-		//    `urlConfig.write` uses `history.replaceState` which per
-		//    HTML spec does NOT fire `hashchange`, so the write→listener
-		//    loop is structurally prevented (AR-4 comment).
-		//
-		// All three guard on `typeof window !== 'undefined'` so the
-		// effects are no-ops during Docusaurus SSR pre-render (the
-		// useEffect itself is client-only, but defensive anyway).
-		const urlApplyHandle = useUrlConfigApplier(
-			setDifficulty,
-			setContentTypes,
-			setViewMode,
-			setEditorMode,
-			setHintsMode,
-		);
-
-		// Effect 1: read URL once on mount.
-		useEffect(() => {
-			if (typeof window === 'undefined') return;
-			urlApplyHandle(urlConfig.read());
-		}, [urlApplyHandle]);
-
-		// Effect 2: debounced write on config-state change. Skips the
-		// FIRST invocation — React runs every effect on initial mount
-		// regardless of whether the deps changed, so without this guard
-		// we'd write the prop-default state to an empty URL the moment
-		// the component mounts.
-		const skipFirstWriteRef = useRef(true);
-		useEffect(() => {
-			if (typeof window === 'undefined') return;
-			if (skipFirstWriteRef.current) {
-				skipFirstWriteRef.current = false;
-				return;
-			}
-			const timeoutId = setTimeout(() => {
-				urlConfig.write({
-					difficulty,
-					contentTypes,
-					viewMode,
-					editorMode,
-					hintsMode,
-				});
-			}, 500);
-			return () => {
-				clearTimeout(timeoutId);
-			};
-		}, [difficulty, contentTypes, viewMode, editorMode, hintsMode]);
-
-		// Effect 3: hashchange listener for back/forward replay.
-		useEffect(() => {
-			if (typeof window === 'undefined') return;
-			function onHashChange() {
-				urlApplyHandle(urlConfig.read());
-			}
-			window.addEventListener('hashchange', onHashChange);
-			return () => {
-				window.removeEventListener('hashchange', onHashChange);
-			};
-		}, [urlApplyHandle]);
 
 		// Editability + paste wiring per view-mode:
 		//   - blankenated mode → editable, noPasteExtension wired,
@@ -862,7 +724,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 
 				// only `complete` viewMode is read-only.
 				// `blankenated` is editable; the editor-mode sub-toggle
-				// (helpful/diff/raw) controls which decorations attach.
+				// (skeleton/diff/raw) controls which decorations attach.
 				const isBlankenated = viewMode === 'blankenated';
 				const isEditable = isBlankenated;
 
@@ -898,7 +760,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 				);
 
 				// Editor-mode extensions:
-				//   helpful → basicSetup (autocomplete, bracket matching, lint,
+				//   skeleton → basicSetup (autocomplete, bracket matching, lint,
 				//             etc.) + lockFilter + autopad + noPasteExtension
 				//             + correctness decorations (full scaffolding)
 				//   diff    → minimalSetup (no autocomplete, no bracket
@@ -911,23 +773,35 @@ const BlanksComponent: ComponentType<LensProperties> =
 				// default + history keymaps. JavaScript syntax highlighting
 				// stays in all modes (readability isn't a "hint"; it's just
 				// the editor not being broken).
-				const helpfulBaseline = basicSetup;
+				const skeletonBaseline = basicSetup;
 				const minimalBaseline = [
 					history(),
 					drawSelection(),
 					keymap.of([...defaultKeymap, ...historyKeymap]),
 				];
-				const isHelpful = editorMode === 'helpful';
-				const baseline = isHelpful ? helpfulBaseline : minimalBaseline;
+				const isSkeleton = editorMode === 'skeleton';
+				const baseline = isSkeleton ? skeletonBaseline : minimalBaseline;
 
 				const editorExtensions =
 					!isEditable || blankResult === null
 						? []
-						: isHelpful
+						: isSkeleton
 							? [noPasteExtension(), ...buildLockExtensions(blankResult)]
 							: editorMode === 'diff'
 								? buildDiffDecorations(blankResult.originalCode)
 								: [];
+
+				// Snippet-free autocomplete (opt-in `suggestions`) — diff/raw ONLY.
+				// skeleton's fixed-width overwrite blanks conflict with autocomplete:
+				// its lock filter strips the `input.type` userEvent (so the popup
+				// never activates) AND rejects the variable-length completion
+				// insert. So suggestions are offered only in the free-editing modes
+				// (the checkbox is hidden in skeleton). minimalBaseline has no
+				// completion engine or completionKeymap, so both are added here.
+				const suggestionsExtensions =
+					isEditable && suggestions && !isSkeleton
+						? [snippetFreeAutocomplete(), keymap.of(completionKeymap)]
+						: [];
 
 				const state = EditorState.create({
 					doc: initialDoc,
@@ -939,6 +813,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 						EditorState.readOnly.of(!isEditable),
 						updateListener,
 						...editorExtensions,
+						...suggestionsExtensions,
 					],
 				});
 				const view = new EditorView({ state, parent: host });
@@ -955,7 +830,11 @@ const BlanksComponent: ComponentType<LensProperties> =
 			// embodiment.source.code is captured via blankResult (memoized on
 			// embodiment.source.code + resolved); including it here directly
 			// would just duplicate the blankResult-driven remount path.
-			[viewMode, editorMode, blankResult],
+			// `suggestions` is a structural-remount trigger (it adds/removes
+			// the snippet-free autocomplete extension); the remount re-reads
+			// learnerCodeRef so the document survives (no learnerCode reset —
+			// modelled on the viewMode path, NOT changeEditorMode).
+			[viewMode, editorMode, blankResult, suggestions],
 		);
 
 		// Render: on null blankResult (defense-in-depth) render ONLY the
@@ -965,7 +844,7 @@ const BlanksComponent: ComponentType<LensProperties> =
 			<div
 				data-lens="blanks"
 				data-view-mode={viewMode}
-				data-hints-mode={hintsMode}
+				data-suggestions={String(suggestions)}
 			>
 				{showFallback ? (
 					<div
@@ -1004,11 +883,11 @@ const BlanksComponent: ComponentType<LensProperties> =
 									<span>Editor:</span>
 									<button
 										type="button"
-										data-editor-mode-toggle="helpful"
-										aria-pressed={editorMode === 'helpful' ? 'true' : 'false'}
-										onClick={() => changeEditorMode('helpful')}
+										data-editor-mode-toggle="skeleton"
+										aria-pressed={editorMode === 'skeleton' ? 'true' : 'false'}
+										onClick={() => changeEditorMode('skeleton')}
 									>
-										✨ Helpful
+										🦴 Skeleton
 									</button>
 									<button
 										type="button"
@@ -1054,6 +933,17 @@ const BlanksComponent: ComponentType<LensProperties> =
 									</label>
 								))}
 							</fieldset>
+							{viewMode === 'blankenated' && (
+								<label data-blanks-suggestions>
+									<input
+										type="checkbox"
+										data-assist-toggle="suggestions"
+										checked={suggestions}
+										onChange={() => setSuggestions(!suggestions)}
+									/>{' '}
+									Suggestions
+								</label>
+							)}
 						</div>
 						<div
 							data-blanks-editor-header
@@ -1082,9 +972,9 @@ const BlanksComponent: ComponentType<LensProperties> =
 								</>
 							)}
 						</div>
-						{hintsMode === 'on' &&
+						{suggestions &&
 							viewMode === 'blankenated' &&
-							editorMode === 'helpful' && (
+							editorMode === 'skeleton' && (
 								<aside data-blanks-hints aria-label="Hints panel">
 									<h4>Hint</h4>
 									{activeBlank === null ? (
