@@ -35,18 +35,26 @@ JavaScript-error-shaped object — callers may adapt either an `embodiment.error
 (pre-evaluation gate error) or a `runInstance.endReport.error` (runtime
 evaluation error) into `{ name, message, line?, column? }`.
 
+For the editor gutter, the orchestrator does not call `interpretError` directly
+— it uses the `deriveInterpretedDiagnostics` adapter below, which performs that
+`EmbodyError → { name, message, line?, column? }` mapping (plus the
+`EmbodyError.phase` → `parse`/`runtime` collapse) and returns a located
+`LintDiagnostic[]`. See
+[`../../DOCS.md` § Interpreted-diagnostic data flow](../../DOCS.md).
+
 ## Structure
 
-| File                      | Purpose                                                          |
-| ------------------------- | ---------------------------------------------------------------- |
-| `types.ts`                | All types for the module                                         |
-| `explanations.ts`         | Frozen array of 20 explanation patterns (inline)                 |
-| `interpret-error.ts`      | Main public function (orchestrator)                              |
-| `match-explanation.ts`    | Matches an error to an explanation pattern                       |
-| `extract-context.ts`      | AST analysis + pattern extraction from error                     |
-| `interpolate-template.ts` | Fills `{{placeholders}}` in explanation markdown                 |
-| `parse-best-effort.ts`    | Acorn parse helper used only by sibling tests; deletion deferred |
-| `find-node-at-line.ts`    | Locates deepest AST node at a given line                         |
+| File                                | Purpose                                                          |
+| ----------------------------------- | ---------------------------------------------------------------- |
+| `types.ts`                          | All types for the module                                         |
+| `explanations.ts`                   | Frozen array of 20 explanation patterns (inline)                 |
+| `interpret-error.ts`                | Main public function (orchestrator)                              |
+| `derive-interpreted-diagnostics.ts` | Adapter: embodiment's static error → gutter `LintDiagnostic[]`   |
+| `match-explanation.ts`              | Matches an error to an explanation pattern                       |
+| `extract-context.ts`                | AST analysis + pattern extraction from error                     |
+| `interpolate-template.ts`           | Fills `{{placeholders}}` in explanation markdown                 |
+| `parse-best-effort.ts`              | Acorn parse helper used only by sibling tests; deletion deferred |
+| `find-node-at-line.ts`              | Locates deepest AST node at a given line                         |
 
 ## Explanation Patterns
 
