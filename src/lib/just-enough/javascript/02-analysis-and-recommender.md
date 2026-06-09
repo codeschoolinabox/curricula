@@ -1,11 +1,20 @@
 # Work Stream 2: Snippet Analysis + Recommendation System
 
-> **Pivot resolved (see `01-NM-components.md`).** The 3rd Block Model dimension
-> is no longer an ordinal sub-language level progression. It is the **unordered
-> set of 10 NM components** sourced from the syntax tracer's `StepCategory` enum
-> at `embody/lib/evaluating/trace/syntax/types.ts`. Analysis detects categories
-> via **static AST mapping** (no execution). Lens recommendations may tag
-> MULTIPLE categories per `Recommendation`.
+> **Status.** WS2 (the recommender) is **deferred backlog** under the NM-lifecycle
+> orchestrator strategy ("works within NM phases later"); this is the unstarted
+> Phase-0 spec, relocated here from the dissolved `.planning-handoffs/`. Its
+> sibling-handoff links were removed. ⚠️ Its embody-shape references
+> (`embodiment.parse.ast`, `embodiment.static.features`) predate **embody Phase
+> B**, which reshaped `Snippet` (no `parse`/`static`; the AST/feature surfaces are
+> now `parseAST()` + `status`/`validation` per `./embody/types.ts`). Re-confirm
+> the data-access model against `./embody/types.ts` in WS2 Phase 0.
+>
+> **The 3rd Block Model dimension** is the **unordered set of 10 NM components**
+> from the syntax tracer's `StepCategory` enum at
+> `embody/lib/evaluating/trace/syntax/types.ts` (not an ordinal level progression
+> — see `./DOCS.md` § 3D Block Model space). Analysis detects categories via
+> **static AST mapping** (no execution); lens recommendations may tag MULTIPLE
+> categories per `Recommendation`.
 
 ## Prerequisites
 
@@ -15,7 +24,6 @@ Before starting, read these files in full (do not skim):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/AGENTS.md`
 - **DEV.md** (repo root):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/DEV.md`
-- **Master plan**: `./00-master-plan.md` (in this directory)
 - **Syntax tracer** (canonical source of the NM-components enum — the 3rd Block
   Model dimension):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/embody/lib/evaluating/trace/syntax/`
@@ -38,10 +46,10 @@ Before starting, read these files in full (do not skim):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/embody/lib/validating/`
 - **Lenses DOCS.md** (current lens architecture):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/lenses/DOCS.md`
-- **NM components** (Work Stream 1 output, `01-NM-components.md`): the 3rd Block
-  Model dimension. The canonical enum (`StepCategory`) lives in the syntax
-  tracer; WS1 wires it into `lenses/types.ts`. Read `01-NM-components.md` for
-  the contract.
+- **3rd Block Model dimension** — the canonical `StepCategory` enum lives in the
+  syntax tracer (`embody/lib/evaluating/trace/syntax/types.ts`), wired into
+  `lenses/types.ts` (`BlockModelCell.nmComponents`); see `./DOCS.md` § 3D Block
+  Model space for the unordered-set framing.
 
 ## Context
 
@@ -72,7 +80,7 @@ The recommender does not re-parse code — it walks the already-frozen
 
 This is the implementation of Malaise & Signer (2023)'s Figure 3 architecture
 (applicability filter + ranking engine); see
-[`../DOCS.md` § Recommender = Applicability filter + Ranking engine](../DOCS.md#recommender--applicability-filter--ranking-engine).
+[`./DOCS.md` § Recommender = Applicability filter + Ranking engine](./DOCS.md#recommender--applicability-filter--ranking-engine).
 
 ### Why it matters
 
@@ -114,8 +122,7 @@ Each lens falls into one of three tiers based on what it needs from the code:
 available, even with syntax errors.
 
 - parsons (line shuffling)
-- annotate (annotation workbench; formerly `highlight`, renamed during WS4 Phase
-  0 — see `04-lens-migration.md` § Editor placement + annotate lens status)
+- annotate (annotation workbench)
 - copy-type (write-from-memory)
 
 **Tier 2: AST-dependent static** -- Needs a valid parse but no execution. Syntax
@@ -178,7 +185,7 @@ surfaces. The signals available:
 Each lens's `recommend()` function returns `Recommendation[]`. A single lens can
 suggest multiple versions of itself at different Block Model cells with
 different configs. The canonical type lives in
-[`../lenses/types.ts`](../lenses/types.ts):
+[`./lenses/types.ts`](./lenses/types.ts):
 
 ```text
 Recommendation = {
@@ -193,11 +200,10 @@ Recommendation = {
 - `lens` is a string (not a component reference) -- keeps `recommend()` in pure
   TS. The orchestrator resolves names to components via the registry.
 - A single lens can suggest multiple versions of itself (e.g., blanks at
-  difficulty 1 for keywords, blanks at difficulty 3 for identifiers). See
-  [`04-lens-migration.md` § Multi-variant lens](./04-lens-migration.md#lens-design-patterns).
+  difficulty 1 for keywords, blanks at difficulty 3 for identifiers).
 - **No transforms tier** — the previous transforms-as-pipeline design was
-  superseded; transforms are now a lens-internal concern (see
-  [`03-orchestrator-and-contracts.md`](./03-orchestrator-and-contracts.md)).
+  superseded; transforms are now a lens-internal concern (see `./DOCS.md`
+  § Locked decisions).
 
 ### The RecommendationGrid
 
@@ -207,7 +213,7 @@ organizes them into a 3D grid:
 - Dimension 1: **Level** (text surface, program execution, function/purpose)
 - Dimension 2: **Scope** (atoms, blocks, relations, macro)
 - Dimension 3: **NM components** (the 10 syntax-tracer categories from
-  `StepCategory`, unordered; see `01-NM-components.md`)
+  `StepCategory`, unordered; see `./DOCS.md` § 3D Block Model space)
 
 Not every cell needs filling -- only cells matching the code's features and
 available lens suggestions are populated.
@@ -252,12 +258,10 @@ finds them useful, but that's a future- refactor concern, not WS2's scope.
 
 ### This stream depends on
 
-- **Work Stream 1 (`01-NM-components.md`)**: supplies the 3rd Block Model
-  dimension (the `StepCategory` enum from the syntax tracer). WS1 is small — it
-  wires `StepCategory` into `lenses/types.ts` and confirms the 10-category list.
-  WS1 is ready now (the syntax tracer's Phase 0 has stabilized the outer
-  categories); WS2 can start Phase 0 (DDD) immediately and consume the enum
-  during Phase 1 implementation.
+- **The 3rd Block Model dimension** (the `StepCategory` enum from the syntax
+  tracer, wired into `lenses/types.ts`) is in place — the syntax tracer's Phase 0
+  stabilized the outer categories. WS2 can start Phase 0 (DDD) immediately and
+  consume the enum during Phase 1 implementation.
 
 ### Other streams that depend on this
 
@@ -268,12 +272,12 @@ finds them useful, but that's a future- refactor concern, not WS2's scope.
   `applicableTo(embodiment)` and `recommend(embodiment)` against the frozen
   `Snippet` type. Lens authors do NOT consume a separate `AnalysisReport` — they
   read the embodiment's surfaces directly (`status.*`, `parse.ast`,
-  `static.features`). See [`../lenses/types.ts`](../lenses/types.ts) for the
+  `static.features`). See [`./lenses/types.ts`](./lenses/types.ts) for the
   canonical contract.
 
 ## Non-negotiable constraints
 
-From the master plan:
+Sourced from the canonical docs (`./README.md`, `./DOCS.md`):
 
 1. **Pure TS, no React, no DOM.** The recommender lives in
    `orchestrate/lib/recommender/`; it is consumed by the orchestrator (React)
