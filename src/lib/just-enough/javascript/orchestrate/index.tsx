@@ -9,9 +9,9 @@
  * editing** (a trailing-edge `useEffect([snippet])`, ~200ms idle), and **never
  * cleared on edit**. It stays content-keyed by snippet: reused on an editor →
  * lens transition when `liveEmbodiment.snippet === currentSnippet`, else
- * re-embodied. Program execution stays lazy. (The editor → lens flush that
- * embodies inline on a stale slot and cancels the pending debounce is a later
- * increment — see [`./DOCS.md` § Live embodiment](./DOCS.md).)
+ * re-embodied inline (the flush). The transition also cancels any pending
+ * debounce so no late trailing write lands after the mode flip. Program
+ * execution stays lazy. See [`./DOCS.md` § Live embodiment](./DOCS.md).
  *
  * **Edit handling.** The snippet setter threaded into `EditorComponent`
  * (`handleSnippetChange`) updates snippet state only — it does NOT touch the
@@ -349,6 +349,16 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			nextLens: string | undefined,
 			source: LensSelectionSource,
 		): void {
+			// Cancel any pending debounced re-embody before flipping. The flush
+			// below brings the slot to the exact current buffer, and a mode flip
+			// does not change `snippet`, so the [snippet] debounce effect's own
+			// cleanup does not fire here — without this, a trailing-edge embody
+			// could land a late setLiveEmbodiment AFTER the flip, mutating what a
+			// mounted lens renders against. `.cancel()` is an idle-safe no-op when
+			// nothing is pending — which is every non-(editor→lens) transition,
+			// since the editor is structurally absent in lens mode so no edit can
+			// arm the debounce there. Hence the unconditional placement is safe.
+			reembodyReference.current?.cancel();
 			const next = deriveInitialState(
 				snippetReference.current,
 				nextLens,
@@ -476,15 +486,21 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		const pickerValue = state.mode === 'lens' ? state.activeLens : '';
 
 		if (state.mode === 'lens') {
-			// Invariant (enforced by transition logic): mode='lens' ⇒ the live slot
-			// is non-null AND liveEmbodiment.snippet === current snippet. A null
-			// slot here means a transition path forgot to populate it — surface
-			// loudly rather than silently dereferencing. (This guard checks the
-			// null half; the snippet-identity half is asserted in a later
-			// increment.)
+			// Coherence invariant (enforced by transition logic; the type system
+			// cannot): mode='lens' ⇒ the live slot is non-null AND
+			// liveEmbodiment.snippet === current snippet. A null OR stale slot here
+			// means a transition path forgot to flush it — fail loud rather than
+			// render a lens against the wrong (or missing) embodiment. The
+			// transition's flush makes this unreachable on every legitimate render;
+			// see DOCS § Coherence invariant.
 			if (liveEmbodiment === null) {
 				throw new Error(
-					'orchestrator invariant violated: lens mode requires non-null liveEmbodiment',
+					'orchestrator invariant violated: lens mode requires a non-null live embodiment',
+				);
+			}
+			if (liveEmbodiment.snippet !== snippet) {
+				throw new Error(
+					'orchestrator invariant violated: lens mode requires a live embodiment matching the current snippet (stale slot)',
 				);
 			}
 			const lensModule = LENS_REGISTRY[state.activeLens];

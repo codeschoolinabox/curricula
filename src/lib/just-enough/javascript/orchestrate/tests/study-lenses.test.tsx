@@ -307,6 +307,45 @@ describe('<StudyLenses> — F1 smoke', () => {
 				embodySpy.mockRestore();
 			}
 		});
+
+		it('a pending debounce is cancelled on the editor → lens flip (no late re-embody)', async () => {
+			// The flip flushes the slot inline (cache-miss embody = count 2); a
+			// debounce armed by the edit must NOT also fire afterwards. Without the
+			// cancel the timer survives the flip — snippet is unchanged by the flip,
+			// so the [snippet] effect does not re-run and its cleanup never cancels
+			// it — and a 200ms advance would re-embody (count 3) under the mounted
+			// lens. Fake timers are scoped to this test (mount + view on real
+			// timers; only the edit → flip → advance window is faked). The
+			// prop-driven flip (rerender) exercises the cancel, which lives
+			// unconditionally in applyTransition — the picker path routes through
+			// the same handler, so this one test gates both.
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				const { container, rerender } = render(<StudyLenses snippet="OK" />);
+				const view = await findMountedEditorView(container);
+				vi.useFakeTimers();
+				try {
+					typeInto(view, 'FAIL_AT_PARSE');
+					rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+					// The flip ran applyTransition synchronously: seed (1) + the
+					// inline flush embody('FAIL_AT_PARSE') (2). Asserting 2 BEFORE
+					// the advance pins that the flush is synchronous (a non-flushed
+					// effect would read 1) — so the second call is the flush, not
+					// the surviving debounce.
+					expect(embodySpy).toHaveBeenCalledTimes(2);
+					act(() => {
+						vi.advanceTimersByTime(200);
+					});
+					// Still 2: the flip cancelled the armed debounce, so the 200ms
+					// advance fires nothing. Without the cancel this is 3.
+					expect(embodySpy).toHaveBeenCalledTimes(2);
+				} finally {
+					vi.useRealTimers();
+				}
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
 	});
 
 	describe('Many — non-success embody scenario', () => {
