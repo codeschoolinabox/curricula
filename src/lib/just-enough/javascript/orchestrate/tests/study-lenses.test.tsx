@@ -34,7 +34,7 @@ async function findMountedEditorView(
  * dispatch, wrapped in React's `act` so the resulting setState round-trip
  * commits before the next assertion. Not equivalent to `userEvent.type`
  * (which would emit one transaction per keystroke) — the F2.4 / F2.5
- * cross-boundary tests assert cache-invalidation + embody-call count,
+ * cross-boundary tests assert embody-call count (cache hit vs re-embody),
  * NOT per-keystroke transaction count, so single-dispatch suffices.
  */
 function typeInto(view: EditorView, content: string): void {
@@ -152,16 +152,22 @@ describe('<StudyLenses> — F1 smoke', () => {
 		});
 	});
 
-	// ─── F2.5: edit-eager cache invalidation ──────────────────────────────
+	// ─── F2.5: the live embodiment is retained across edits ───────────────
 
-	describe('F2.5 — edit invalidates the cache eagerly', () => {
-		it('type-then-undo → toggle to lens re-fires embody (cache cleared eagerly on edit, not restored by undo)', async () => {
-			// Decisive test for F2.5 vs F2.4-cache-hit-only (per cache contract in
-			// DOCS.md § Effect topology — "Embodiment-on-edit invalidation" row):
-			// Under F2.4 alone, the cache-hit check would see snippet="OK" matches
-			// cache.snippet="OK" → cache hit → count stays 1.
-			// Under F2.5, the first edit eagerly clears the cache; subsequent
-			// "undo" edits leave cache null; toggle to lens → cache miss → embody.
+	describe('F2.5 — the live embodiment is retained across edits (no clear-on-edit)', () => {
+		it('edit-then-revert → toggle to lens reuses the embodiment (the slot is retained, so reverting to the original snippet is a cache hit)', async () => {
+			// New live-embodiment contract (replaces the prior clear-on-edit
+			// model): an edit does NOT clear the slot. The slot keeps the last
+			// embodied { snippet, embodiment }, content-keyed by snippet. Editing
+			// to FAIL_AT_PARSE then reverting to "OK" leaves the slot still
+			// holding the "OK" embodiment, so the editor → lens transition sees
+			// liveEmbodiment.snippet === currentSnippet → cache hit → no re-embody.
+			//
+			// Triangulation: this test alone would also pass a broken impl that
+			// never re-embodies (count stays 1). The sibling test below kills that
+			// impl — it asserts count=2 + the new arg on a snippet-mismatch
+			// transition. Together they triangulate "reuse on match, re-embody on
+			// mismatch".
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
 				const { container, rerender } = render(
@@ -175,13 +181,13 @@ describe('<StudyLenses> — F1 smoke', () => {
 				typeInto(view, 'OK');
 
 				rerender(<StudyLenses snippet="OK" lens="debug-props" />);
-				expect(embodySpy).toHaveBeenCalledTimes(2);
+				expect(embodySpy).toHaveBeenCalledOnce();
 			} finally {
 				embodySpy.mockRestore();
 			}
 		});
 
-		it('edit + toggle re-fires embody with the new snippet (covers cache-miss path)', async () => {
+		it('edit to a different snippet → toggle re-embodies (the slot is content-keyed; a snippet mismatch at transition is a cache miss)', async () => {
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
 				const { container, rerender } = render(
@@ -728,7 +734,13 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			const values = Array.from(options).map(
 				(option) => (option as HTMLOptionElement).value,
 			);
-			expect(values).toEqual(['', 'annotate', 'blanks', 'debug-props', 'parsons']);
+			expect(values).toEqual([
+				'',
+				'annotate',
+				'blanks',
+				'debug-props',
+				'parsons',
+			]);
 		});
 	});
 

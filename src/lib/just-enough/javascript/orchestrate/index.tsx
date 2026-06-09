@@ -2,18 +2,19 @@
  * @file `<StudyLenses>` — the package's public API surface.
  *
  * **F3 status** — lazy embodiment on need is satisfied by F2.4 (transition-only
- * trigger) + F2.5 (eager edit invalidation). Evaluation phases inside a
- * mounted lens are **lens-internal**: lenses call `snippet.evaluation.events.*`
- * directly on the embodiment they hold; no orchestrator round-trip.
+ * trigger). Evaluation phases inside a mounted lens are **lens-internal**:
+ * lenses call `snippet.evaluation.events.*` directly on the embodiment they
+ * hold; no orchestrator round-trip.
  * See [`./DOCS.md` § F3 — lazy embodiment realized] for the full satisfaction
  * analysis + sentinel-blindness invariant.
  *
- * **F2.5 scope**: edit invalidation. The snippet setter passed to
- * `EditorComponent` is wrapped so that any snippet edit eagerly clears the
- * `liveEmbodiment` slot, per the cache contract documented in DOCS.md
- * § Effect topology (Embodiment-on-edit invalidation row). This makes the
- * editor → lens transition after an edit always re-embody, even if the
- * learner happens to undo their edit back to the cached snippet value.
+ * **Edit handling**: the snippet setter passed to `EditorComponent`
+ * (`handleSnippetChange`) updates snippet state only — it does NOT clear the
+ * `liveEmbodiment` slot. Per the live-embodiment contract the slot is never
+ * cleared on edit; it stays content-keyed by snippet and is reused (cache hit)
+ * or re-embodied (snippet mismatch) at the next editor → lens transition, so
+ * reverting an edit back to the original snippet is a cache hit. See
+ * [`./DOCS.md` § Live embodiment](./DOCS.md).
  *
  * **F2.4 scope** (preserved): `embody()` fires only on mode → lens
  * transitions, never on keystrokes. The `liveEmbodiment` slot is the
@@ -25,7 +26,8 @@
  * **F2.4 effect topology**:
  * - **Snippet slot** — seeded from `snippetProp` at mount (initial-value-only
  *   per F2.1). `handleSnippetChange` (wrapping `setSnippet`) is threaded into
- *   `EditorComponent`; the wrapper also clears `liveEmbodiment` (F2.5).
+ *   `EditorComponent`; it updates snippet state only — the slot is never
+ *   cleared on edit (content-keyed; reused or re-embodied at transition).
  * - **Mode slot** — `useState<OrchestratorState>` initialized via
  *   `deriveInitialState`; driven post-mount by `useEffect([lens, configs])`.
  * - **LiveEmbodiment slot** — `useState<LiveEmbodiment | null>`, projected
@@ -382,17 +384,19 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			applyTransition(undefined, 'edit-button');
 		}
 
-		// F2.5: edit invalidation. Any snippet edit eagerly clears the cache so a
-		// subsequent editor → lens transition always re-embodies, per the cache
-		// contract documented in DOCS.md § Effect topology (Embodiment-on-edit
-		// invalidation row). Empty deps are safe: React guarantees setter identity
-		// is stable across renders. The two setters fire from a synthetic onChange
-		// event, so React 18 auto-batches them into a single commit.
+		// Single-writer snippet update — the editor is the only surface that
+		// mutates snippet state, and this threads its edits into `setSnippet`. It
+		// deliberately does NOT touch the live-embodiment slot: under the
+		// live-embodiment contract the slot is never cleared on edit — it stays
+		// content-keyed by snippet and is reused (cache hit) or re-embodied
+		// (snippet mismatch) at the next editor → lens transition, so reverting an
+		// edit back to the original snippet is a cache hit. Wrapped in
+		// `useCallback([])` for a stable prop identity so the editor isn't
+		// re-created on every render.
 		const handleSnippetChange = React.useCallback(function handleSnippetChange(
 			next: string,
 		) {
 			setSnippet(next);
-			setLiveEmbodiment(null);
 		}, []);
 
 		// L1.4 + L1.5: picker value is derived from state, NOT held in a

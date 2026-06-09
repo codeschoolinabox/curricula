@@ -393,15 +393,11 @@ live-embodiment trigger governs only **when** embody fires; it is independent of
 how `embody()` reports errors.
 
 > **Code-vs-contract note (Cycle 1, in progress).** This section describes the
-> **contract** — the load-bearing truth. The slot type in
-> [`./types.ts`](./types.ts) and the in-code identifier in
-> [`./index.tsx`](./index.tsx) are both `LiveEmbodiment` / `liveEmbodiment` now
-> — the rename increment landed and the transitional
-> `@deprecated CachedEmbodiment` alias is removed. What still lags is the
-> _behavior_: the component carries the prior clear-on-edit wiring until the
-> live-debounced-embodiment increment lands; the debounced refresh, the
-> never-clear-on-edit behavior, and the editor's `interpretedDiagnostics` prop
-> are the contract that increment converges the code onto.
+> **contract** — the load-bearing truth. The slot identifier (`liveEmbodiment`),
+> the type (`LiveEmbodiment`), and the never-clear-on-edit behavior have landed.
+> Still pending to converge the code onto this section: the live-debounced
+> editor-mode re-embody + seed-at-mount (the next increment), and the editor's
+> `interpretedDiagnostics` prop (the gutter-wiring increment).
 
 **Known cost (Cycle 1):** the editor's `lintJej` runs `validate(code)` (acorn)
 _and_ the orchestrator's debounced `embody()` runs acorn — two parses per settle
