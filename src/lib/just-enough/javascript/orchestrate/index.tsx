@@ -91,11 +91,12 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 const LENS_NAMES: readonly string[] = Object.freeze(Object.keys(LENS_REGISTRY));
 
 /**
- * Single-pass initial derivation of `{ state, cache }` from the first-render
- * props. Both `useState` lazy initializers project from a single call so
- * `embody()` is invoked at most once at first render (in lens mode).
+ * Single-pass initial derivation of `{ state, liveEmbodiment }` from the
+ * first-render props. Both `useState` lazy initializers project from a single
+ * call so `embody()` is invoked at most once at first render (in lens mode).
  *
- * - Registered `lens` + `prevCache.snippet === snippet` → cache hit; reuse.
+ * - Registered `lens` + `previousLiveEmbodiment.snippet === snippet` → cache
+ *   hit; reuse.
  * - Registered `lens` + cache miss → call `embody(snippet)` once; fresh cache.
  * - Unset or unregistered `lens` → editor mode; cache passes through unchanged
  *   (callers seed `null` at mount; the post-mount effect retains the cache
@@ -105,8 +106,11 @@ function deriveInitialState(
 	snippet: string,
 	lens: string | undefined,
 	configs: Pick<StudyLensesProperties, 'configs'>['configs'],
-	previousCache: LiveEmbodiment | null,
-): { readonly state: OrchestratorState; readonly cache: LiveEmbodiment | null } {
+	previousLiveEmbodiment: LiveEmbodiment | null,
+): {
+	readonly state: OrchestratorState;
+	readonly liveEmbodiment: LiveEmbodiment | null;
+} {
 	const registered = lens === undefined ? undefined : LENS_REGISTRY[lens];
 	if (registered !== undefined) {
 		// Cache-key check: full-string identity, NOT a semantic content branch.
@@ -115,18 +119,22 @@ function deriveInitialState(
 		// test against snippet content. This is the only snippet-string compare
 		// in the orchestrator, and it asks "same snippet I already embodied?",
 		// not "what does this code do?".
-		const cache: LiveEmbodiment =
-			previousCache !== null && previousCache.snippet === snippet
-				? previousCache
+		const liveEmbodiment: LiveEmbodiment =
+			previousLiveEmbodiment !== null &&
+			previousLiveEmbodiment.snippet === snippet
+				? previousLiveEmbodiment
 				: { snippet, embodiment: embody(snippet) };
 		const state: LensModeState = {
 			mode: 'lens',
 			activeLens: lens!,
 			resolvedConfig: resolvePerLensConfig(registered, lens!, configs),
 		};
-		return { state, cache };
+		return { state, liveEmbodiment };
 	}
-	return { state: { mode: 'editor' }, cache: previousCache };
+	return {
+		state: { mode: 'editor' },
+		liveEmbodiment: previousLiveEmbodiment,
+	};
 }
 
 /**
@@ -225,7 +233,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		if (busReference.current === null) {
 			busReference.current = createEventBus();
 		}
-		React.useImperativeHandle(reference, () => ({ bus: busReference.current! }), []);
+		React.useImperativeHandle(
+			reference,
+			() => ({ bus: busReference.current! }),
+			[],
+		);
 
 		// Snippet slot — seeded from prop at mount only (initial-value-only).
 		const [snippet, setSnippet] = React.useState(snippetProperty);
@@ -245,7 +257,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			initialDerived.state,
 		);
 		const [liveEmbodiment, setLiveEmbodiment] =
-			React.useState<LiveEmbodiment | null>(initialDerived.cache);
+			React.useState<LiveEmbodiment | null>(initialDerived.liveEmbodiment);
 
 		// Ref shadow for cache — lets the mode-transition effect read the latest
 		// cache without depending on `snippet` (which would re-fire the effect on
@@ -286,7 +298,9 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// so the prop-change effect can compute mode + activeLens transitions
 		// for bus dispatch. Seeded to the initial state at mount and updated
 		// after every transition. Read inside post-commit effects only.
-		const previousStateReference = React.useRef<OrchestratorState>(initialDerived.state);
+		const previousStateReference = React.useRef<OrchestratorState>(
+			initialDerived.state,
+		);
 
 		// Shared transition handler. Both the prop-change effect (`source:
 		// 'prop'`) and the picker (`source: 'picker'`, L1.6+) route through
@@ -305,15 +319,19 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 				liveEmbodimentReference.current,
 			);
 			setState(next.state);
-			setLiveEmbodiment(next.cache);
+			setLiveEmbodiment(next.liveEmbodiment);
 
 			const previous = previousStateReference.current;
 			const bus = busReference.current!;
 			if (previous.mode !== next.state.mode) {
-				bus.dispatch('mode-changed', { from: previous.mode, to: next.state.mode });
+				bus.dispatch('mode-changed', {
+					from: previous.mode,
+					to: next.state.mode,
+				});
 			}
 			if (next.state.mode === 'lens') {
-				const previousLens = previous.mode === 'lens' ? previous.activeLens : null;
+				const previousLens =
+					previous.mode === 'lens' ? previous.activeLens : null;
 				if (previousLens !== next.state.activeLens) {
 					bus.dispatch('lens-switched', {
 						previous: previousLens,
@@ -330,16 +348,19 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// with `source: 'prop'`. The state setters land in a single React 18
 		// commit; the dispatches fire synchronously after.
 		const isMountedReference = React.useRef(false);
-		React.useEffect(function applyLensPropTransition() {
-			if (!isMountedReference.current) {
-				isMountedReference.current = true;
-				return;
-			}
-			applyTransition(lens, 'prop');
-			// `applyTransition` closes over the current render's `configs`
-			// and the stable refs; no extra dep needed beyond [lens, configs].
-			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, [lens, configs]);
+		React.useEffect(
+			function applyLensPropTransition() {
+				if (!isMountedReference.current) {
+					isMountedReference.current = true;
+					return;
+				}
+				applyTransition(lens, 'prop');
+				// `applyTransition` closes over the current render's `configs`
+				// and the stable refs; no extra dep needed beyond [lens, configs].
+				// eslint-disable-next-line react-hooks/exhaustive-deps
+			},
+			[lens, configs],
+		);
 
 		// L1.6: picker-driven transitions. The picker passes the chosen lens
 		// name; the handler routes through the shared transition logic with
@@ -367,7 +388,9 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// invalidation row). Empty deps are safe: React guarantees setter identity
 		// is stable across renders. The two setters fire from a synthetic onChange
 		// event, so React 18 auto-batches them into a single commit.
-		const handleSnippetChange = React.useCallback(function handleSnippetChange(next: string) {
+		const handleSnippetChange = React.useCallback(function handleSnippetChange(
+			next: string,
+		) {
 			setSnippet(next);
 			setLiveEmbodiment(null);
 		}, []);
