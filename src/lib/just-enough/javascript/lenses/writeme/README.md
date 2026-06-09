@@ -190,6 +190,9 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
     <button data-hints-toggle>         —   show / hide the hints panel
     <button data-check>                —   report "X / N code lines reproduced"
     <button data-reset>                —   restore the starting template, clear feedback
+    <span data-writeme-reseed-pending> —   "Reset to apply" — present ONLY when a
+                                            comments toggle landed on a diverged
+                                            editor (the re-seed is deferred to Reset)
   — write view (data-view-mode="write") —
   <div data-writeme-editor-host>       —   CodeMirror editor (editable, paste-blocked;
                                             diff adds per-line highlight)
@@ -207,12 +210,12 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 The `data-lens` attribute is the lenses-peer invariant (see
 [`../DOCS.md` § Structural constraints](../DOCS.md)). All `data-writeme-*` /
 `data-view-toggle` / `data-assist-toggle` / `data-hints-toggle` / `data-reset` /
-`data-check` hooks are sandbox-harness selectors and CSS hooks; renaming any is
-a contract change. The four scaffold booleans (`data-colorize`,
-`data-suggestions`, `data-comments`, `data-diff`) and `data-view-mode` /
-`data-hints-mode` reflect committed config/view state. The view-toggle buttons
-carry `aria-pressed`; the Assist checkboxes carry `checked`; the Check summary
-carries `aria-live="polite"`.
+`data-writeme-reseed-pending` / `data-check` hooks are sandbox-harness selectors
+and CSS hooks; renaming any is a contract change. The four scaffold booleans
+(`data-colorize`, `data-suggestions`, `data-comments`, `data-diff`) and
+`data-view-mode` / `data-hints-mode` reflect committed config/view state. The
+view-toggle buttons carry `aria-pressed`; the Assist checkboxes carry `checked`;
+the Check summary carries `aria-live="polite"`.
 
 ## Toolbar contract
 

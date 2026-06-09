@@ -585,3 +585,208 @@ describe('writeme wrapper — scaffold toggles (compartments)', () => {
 		});
 	});
 });
+
+describe('writeme wrapper — comments toggle + reset (6c-rb)', () => {
+	it('renders the comments checkbox (checked by default) and a Reset button', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('// hi\nconst x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		const comments = container.querySelector(
+			'[data-assist-toggle="comments"]',
+		) as HTMLInputElement | null;
+		expect(comments).not.toBeNull();
+		expect(comments?.checked).toBe(true);
+		expect(container.querySelector('[data-reset]')).not.toBeNull();
+	});
+
+	it('toggling comments off re-seeds the pristine editor to a blank slate', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('// hi\nconst x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-content')
+					?.textContent,
+			).toContain('// hi');
+		});
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="comments"]') as Element,
+		);
+		await waitFor(() => {
+			const text = container.querySelector(
+				'[data-writeme-editor-host] .cm-content',
+			)?.textContent;
+			expect(text).not.toContain('// hi');
+			expect(text).not.toContain('const x = 1;');
+		});
+		expect(
+			container
+				.querySelector('[data-lens="writeme"]')
+				?.getAttribute('data-comments'),
+		).toBe('false');
+	});
+
+	it('toggling comments on re-seeds the pristine editor to the comment skeleton', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('// hi\nconst x = 1;')}
+				config={writemeLens.config({ keepComments: false })}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-editor'),
+			).not.toBeNull();
+		});
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="comments"]') as Element,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-content')
+					?.textContent,
+			).toContain('// hi');
+		});
+	});
+
+	it('re-seeds in place on a comments toggle (no remount)', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('// hi\nconst x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-editor'),
+			).not.toBeNull();
+		});
+		const before = container.querySelector(
+			'[data-writeme-editor-host] .cm-editor',
+		);
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="comments"]') as Element,
+		);
+		expect(
+			container
+				.querySelector('[data-lens="writeme"]')
+				?.getAttribute('data-comments'),
+		).toBe('false');
+		expect(
+			container.querySelector('[data-writeme-editor-host] .cm-editor'),
+		).toBe(before);
+	});
+
+	it('shows no "Reset to apply" hint after a pristine comments toggle', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('// hi\nconst x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-editor'),
+			).not.toBeNull();
+		});
+		// Never rendered on a pristine editor — nothing was clobbered.
+		expect(container.querySelector('[data-writeme-reseed-pending]')).toBeNull();
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="comments"]') as Element,
+		);
+		await waitFor(() => {
+			expect(
+				container
+					.querySelector('[data-lens="writeme"]')
+					?.getAttribute('data-comments'),
+			).toBe('false');
+		});
+		// Still absent: a pristine re-seed keeps appliedKeepComments aligned.
+		expect(container.querySelector('[data-writeme-reseed-pending]')).toBeNull();
+	});
+
+	it('Reset re-seeds to the comment skeleton when keepComments is on', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('// hi\nconst x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-editor'),
+			).not.toBeNull();
+		});
+		fireEvent.click(container.querySelector('[data-reset]') as Element);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-content')
+					?.textContent,
+			).toContain('// hi');
+		});
+	});
+
+	it('Reset re-seeds to a blank slate when keepComments is off', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('// hi\nconst x = 1;')}
+				config={writemeLens.config({ keepComments: false })}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-editor'),
+			).not.toBeNull();
+		});
+		fireEvent.click(container.querySelector('[data-reset]') as Element);
+		await waitFor(() => {
+			const text = container.querySelector(
+				'[data-writeme-editor-host] .cm-content',
+			)?.textContent;
+			expect(text).not.toContain('// hi');
+			expect(text).not.toContain('const x = 1;');
+		});
+	});
+
+	it('toggling comments off blanks a comment-only snippet (boundary)', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('// only a comment')}
+				config={writemeLens.config()}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-content')
+					?.textContent,
+			).toContain('// only');
+		});
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="comments"]') as Element,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-content')
+					?.textContent,
+			).not.toContain('// only');
+		});
+	});
+});
+
+describe.skip('comments + reset — diverged-editor behavior (browser gate; jsdom cannot type into CodeMirror)', () => {
+	it.todo(
+		'toggling comments while the learner has typed divergent code does NOT clobber it',
+	);
+	it.todo(
+		'a comments toggle on a diverged editor surfaces the "Reset to apply" affordance',
+	);
+	it.todo(
+		'Reset restores the starting template after the learner has diverged',
+	);
+});

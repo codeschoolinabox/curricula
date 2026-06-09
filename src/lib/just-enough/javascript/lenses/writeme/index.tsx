@@ -69,7 +69,15 @@ const WritemeComponent: ComponentType<LensProperties> =
 		const [suggestions, setSuggestions] = useState<boolean>(
 			resolved.suggestions === true,
 		);
-		const keepComments = resolved.keepComments !== false;
+		const [keepComments, setKeepComments] = useState<boolean>(
+			resolved.keepComments !== false,
+		);
+		// The keepComments value the editor's current seed reflects. When it differs
+		// from `keepComments` (a toggle landed on a diverged editor and was NOT
+		// applied), the toolbar shows a quiet "Reset to apply" hint.
+		const [appliedKeepComments, setAppliedKeepComments] = useState<boolean>(
+			resolved.keepComments !== false,
+		);
 		const diff = resolved.diff !== false;
 		const hintsMode: HintsMode = resolved.hintsMode === 'off' ? 'off' : 'on';
 		// Mirror colorize/suggestions into refs so the mount effect seeds the
@@ -246,6 +254,42 @@ const WritemeComponent: ComponentType<LensProperties> =
 			[viewMode, colorize, embodiment.source.code],
 		);
 
+		// Re-seed the LIVE write editor (a doc dispatch, NOT a remount). Used by the
+		// comments toggle (pristine only) and Reset.
+		function reseedWriteEditor(withComments: boolean) {
+			const view = editorView.current;
+			if (view) {
+				const template = withComments
+					? commentSkeleton(embodiment.source.code)
+					: '';
+				view.dispatch({
+					changes: { from: 0, to: view.state.doc.length, insert: template },
+				});
+			}
+		}
+
+		function toggleComments() {
+			const next = !keepComments;
+			const view = editorView.current;
+			// Pristine = the editor still shows the current starting template, OR is
+			// empty (nothing to clobber). Only then re-seed; typed work is never
+			// clobbered, and a diverged toggle waits for Reset. (DOCS § Why
+			// keep-comments re-seeds only while pristine.)
+			const currentDoc = view?.state.doc.toString() ?? startingTemplate;
+			const pristine = currentDoc === '' || currentDoc === startingTemplate;
+			if (pristine) {
+				reseedWriteEditor(next);
+				setAppliedKeepComments(next);
+			}
+			setKeepComments(next);
+		}
+
+		function resetWriteEditor() {
+			reseedWriteEditor(keepComments);
+			setAppliedKeepComments(keepComments);
+			// (When the Check summary + hints panel land, Reset also clears them.)
+		}
+
 		return (
 			<div
 				data-lens="writeme"
@@ -300,7 +344,22 @@ const WritemeComponent: ComponentType<LensProperties> =
 							/>{' '}
 							Suggestions
 						</label>
+						<label>
+							<input
+								type="checkbox"
+								data-assist-toggle="comments"
+								checked={keepComments}
+								onChange={toggleComments}
+							/>{' '}
+							Comments
+						</label>
 					</div>
+					<button type="button" data-reset onClick={resetWriteEditor}>
+						Reset
+					</button>
+					{keepComments !== appliedKeepComments && (
+						<span data-writeme-reseed-pending>Reset to apply</span>
+					)}
 				</div>
 				{/* The editor host stays mounted in BOTH views (hidden in read) so
 				    viewMode never enters the mount-effect deps and the learner's typed
