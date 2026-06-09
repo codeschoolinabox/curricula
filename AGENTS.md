@@ -490,6 +490,16 @@ durable half (transient tool output, superseded reasoning).
   [DEV.md § What goes in docs vs. plans vs. handoffs](./DEV.md)). Keep end-state
   docs a clean present-tense contract; let the plan carry the gap, so a
   cold-started agent trusts the docs.
+- **Validate the handoff with a context-free agent — MANDATORY at each
+  increment-cluster / phase boundary before a cold-start.** Spawn a fresh agent
+  (no session context); hand it the RESUMPTION POINT + the launch prompt; have
+  it report whether it could orient and execute the next increment, and where it
+  would stumble. The handoff author holds all the context a cold-start agent
+  lacks and is therefore structurally blind to the gaps — a context-free reader
+  catches what the author rationalizes as obvious (the same bias-correction the
+  ARs apply to code). One reviewer with a free-text report is the required
+  floor; escalate to multiple lenses only when the stakes are high. Apply its
+  must-fix findings before handing off. Mandatory; only the human waives it.
 
 The human decides when to cold-start; the agent keeps every commit boundary
 cold-start-ready (rich RESUMPTION POINT + clean docs) so the option is always
