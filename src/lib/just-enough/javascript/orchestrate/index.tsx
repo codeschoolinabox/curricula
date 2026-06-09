@@ -10,13 +10,13 @@
  *
  * **F2.5 scope**: edit invalidation. The snippet setter passed to
  * `EditorComponent` is wrapped so that any snippet edit eagerly clears the
- * `cachedEmbodiment` slot, per the cache contract documented in DOCS.md
+ * `liveEmbodiment` slot, per the cache contract documented in DOCS.md
  * § Effect topology (Embodiment-on-edit invalidation row). This makes the
  * editor → lens transition after an edit always re-embody, even if the
  * learner happens to undo their edit back to the cached snippet value.
  *
  * **F2.4 scope** (preserved): `embody()` fires only on mode → lens
- * transitions, never on keystrokes. The `cachedEmbodiment` slot is the
+ * transitions, never on keystrokes. The `liveEmbodiment` slot is the
  * single embodiment store; `useEmbodiment` is gone. Cache is RETAINED
  * across `lens → editor` round trips and reused on `editor → lens` when
  * `cache.snippet === currentSnippet` (cache-hit shortcut, observable only
@@ -25,10 +25,10 @@
  * **F2.4 effect topology**:
  * - **Snippet slot** — seeded from `snippetProp` at mount (initial-value-only
  *   per F2.1). `handleSnippetChange` (wrapping `setSnippet`) is threaded into
- *   `EditorComponent`; the wrapper also clears `cachedEmbodiment` (F2.5).
+ *   `EditorComponent`; the wrapper also clears `liveEmbodiment` (F2.5).
  * - **Mode slot** — `useState<OrchestratorState>` initialized via
  *   `deriveInitialState`; driven post-mount by `useEffect([lens, configs])`.
- * - **CachedEmbodiment slot** — `useState<CachedEmbodiment | null>`, projected
+ * - **LiveEmbodiment slot** — `useState<LiveEmbodiment | null>`, projected
  *   from the same `deriveInitialState` call at first render (atomic init).
  *   Populated on editor → lens, retained on lens → editor.
  * - **Embody trigger** — fires inside the transition path only: at first
@@ -59,7 +59,7 @@ import EditorComponent from './editor/index.js';
 import createEventBus from './event-bus.js';
 import Toolbar from './toolbar.js';
 import type {
-	CachedEmbodiment,
+	LiveEmbodiment,
 	EventBus,
 	LensModeState,
 	LensSelectionSource,
@@ -105,8 +105,8 @@ function deriveInitialState(
 	snippet: string,
 	lens: string | undefined,
 	configs: Pick<StudyLensesProperties, 'configs'>['configs'],
-	previousCache: CachedEmbodiment | null,
-): { readonly state: OrchestratorState; readonly cache: CachedEmbodiment | null } {
+	previousCache: LiveEmbodiment | null,
+): { readonly state: OrchestratorState; readonly cache: LiveEmbodiment | null } {
 	const registered = lens === undefined ? undefined : LENS_REGISTRY[lens];
 	if (registered !== undefined) {
 		// Cache-key check: full-string identity, NOT a semantic content branch.
@@ -115,7 +115,7 @@ function deriveInitialState(
 		// test against snippet content. This is the only snippet-string compare
 		// in the orchestrator, and it asks "same snippet I already embodied?",
 		// not "what does this code do?".
-		const cache: CachedEmbodiment =
+		const cache: LiveEmbodiment =
 			previousCache !== null && previousCache.snippet === snippet
 				? previousCache
 				: { snippet, embodiment: embody(snippet) };
@@ -244,8 +244,8 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		const [state, setState] = React.useState<OrchestratorState>(
 			initialDerived.state,
 		);
-		const [cachedEmbodiment, setCachedEmbodiment] =
-			React.useState<CachedEmbodiment | null>(initialDerived.cache);
+		const [liveEmbodiment, setLiveEmbodiment] =
+			React.useState<LiveEmbodiment | null>(initialDerived.cache);
 
 		// Ref shadow for cache — lets the mode-transition effect read the latest
 		// cache without depending on `snippet` (which would re-fire the effect on
@@ -253,11 +253,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// effects (never during render), which keeps the StrictMode discarded-
 		// render case correct: the discarded render's write is overwritten by the
 		// committed render's write before any effect fires.
-		const cachedEmbodimentReference = React.useRef(cachedEmbodiment);
-		cachedEmbodimentReference.current = cachedEmbodiment;
+		const liveEmbodimentReference = React.useRef(liveEmbodiment);
+		liveEmbodimentReference.current = liveEmbodiment;
 
 		// Ref shadow for snippet — same rationale and same read-only-in-effect
-		// invariant as cachedEmbodimentRef above.
+		// invariant as liveEmbodimentRef above.
 		const snippetReference = React.useRef(snippet);
 		snippetReference.current = snippet;
 
@@ -302,10 +302,10 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 				snippetReference.current,
 				nextLens,
 				configs,
-				cachedEmbodimentReference.current,
+				liveEmbodimentReference.current,
 			);
 			setState(next.state);
-			setCachedEmbodiment(next.cache);
+			setLiveEmbodiment(next.cache);
 
 			const previous = previousStateReference.current;
 			const bus = busReference.current!;
@@ -369,7 +369,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// event, so React 18 auto-batches them into a single commit.
 		const handleSnippetChange = React.useCallback(function handleSnippetChange(next: string) {
 			setSnippet(next);
-			setCachedEmbodiment(null);
+			setLiveEmbodiment(null);
 		}, []);
 
 		// L1.4 + L1.5: picker value is derived from state, NOT held in a
@@ -384,9 +384,9 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			// AND cache.snippet === current snippet. A null cache here means a
 			// transition path forgot to populate it — surface loudly rather than
 			// silently dereferencing.
-			if (cachedEmbodiment === null) {
+			if (liveEmbodiment === null) {
 				throw new Error(
-					'orchestrator invariant violated: lens mode requires non-null cachedEmbodiment',
+					'orchestrator invariant violated: lens mode requires non-null liveEmbodiment',
 				);
 			}
 			const lensModule = LENS_REGISTRY[state.activeLens];
@@ -400,7 +400,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						onEditReturn={handleEditReturn}
 					/>
 					<lensModule.Component
-						embodiment={cachedEmbodiment.embodiment}
+						embodiment={liveEmbodiment.embodiment}
 						config={state.resolvedConfig}
 					/>
 				</div>

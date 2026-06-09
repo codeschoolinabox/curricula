@@ -394,13 +394,14 @@ how `embody()` reports errors.
 
 > **Code-vs-contract note (Cycle 1, in progress).** This section describes the
 > **contract** — the load-bearing truth. The slot type in
-> [`./types.ts`](./types.ts) is already `LiveEmbodiment` (with a `@deprecated`
-> `CachedEmbodiment` alias kept only to compile the not-yet-migrated component).
-> The component code in [`./index.tsx`](./index.tsx) still carries the prior
-> variable name and the prior clear-on-edit wiring until the Cycle-1 rename +
-> live-debounced-embodiment increments land; the debounced refresh, the
+> [`./types.ts`](./types.ts) and the in-code identifier in
+> [`./index.tsx`](./index.tsx) are both `LiveEmbodiment` / `liveEmbodiment` now
+> — the rename increment landed and the transitional
+> `@deprecated CachedEmbodiment` alias is removed. What still lags is the
+> _behavior_: the component carries the prior clear-on-edit wiring until the
+> live-debounced-embodiment increment lands; the debounced refresh, the
 > never-clear-on-edit behavior, and the editor's `interpretedDiagnostics` prop
-> are the contract those increments converge the code onto.
+> are the contract that increment converges the code onto.
 
 **Known cost (Cycle 1):** the editor's `lintJej` runs `validate(code)` (acorn)
 _and_ the orchestrator's debounced `embody()` runs acorn — two parses per settle

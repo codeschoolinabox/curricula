@@ -214,15 +214,6 @@ type LiveEmbodiment = Readonly<{
 	embodiment: Snippet;
 }>;
 
-/**
- * @deprecated Transitional alias for {@link LiveEmbodiment}. The slot was
- * renamed `cachedEmbodiment` → `liveEmbodiment` for the live-embodiment
- * contract; this alias keeps pre-rename call sites compiling until the
- * orchestrator implementation is migrated (Cycle 1, increment 2a), after
- * which it is removed.
- */
-type CachedEmbodiment = LiveEmbodiment;
-
 // --- Lens selection (where a switch came from) ---
 
 /**
@@ -355,7 +346,6 @@ export type {
 	EditorModeState,
 	LensModeState,
 	LiveEmbodiment,
-	CachedEmbodiment,
 	LensSelectionSource,
 	EventName,
 	EventPayload,

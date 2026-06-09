@@ -309,12 +309,13 @@ The orchestrator owns the following effect categories. Editor and lens-internal
 effects are listed separately for system-wide context — they're the neighbors'
 effects, not orchestrator categories.
 
-> **Code-vs-contract note.** The slot's contract name is **`liveEmbodiment`**
-> (the type and the slot semantics described here). The in-code identifier is
-> still `cachedEmbodiment` until the Cycle-1 rename increment migrates it; the
-> type already exports `LiveEmbodiment` with a `@deprecated CachedEmbodiment`
-> alias to keep call sites compiling across the rename. This sketch describes
-> the contract; the rename is a pending Cycle-1 increment.
+> **Code-vs-contract note.** The slot's contract name **`liveEmbodiment`** is
+> now the in-code identifier too — the Cycle-1 rename increment has landed and
+> the transitional `@deprecated CachedEmbodiment` alias is removed. What still
+> lags the contract is the _behavior_: the slot is currently refreshed lazily
+> and cleared on edit. The live-debounced re-embody + drop-clear-on-edit
+> increment is the pending Cycle-1 step that converges the code onto the
+> semantics described here.
 
 These orchestrator-side effect categories (seed / debounced re-embody /
 flush-on-transition) are the _trigger-cadence_ decomposition of when the static
