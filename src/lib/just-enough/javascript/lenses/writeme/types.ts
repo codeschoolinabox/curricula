@@ -12,8 +12,9 @@
  *   `./lib/no-paste-extension.ts`) produces the starting template, the per-line
  *   diff verdict, the generated hints, and the CodeMirror paste-block extension.
  * - The React wrapper (`./index.tsx`) composes the cores, owns the per-mount UI
- *   state (view mode, editor mode, keep-comments, hints mode, learner code,
- *   check summary, revealed-hint ids), and dispatches user-interaction events.
+ *   state (view mode, the four scaffold toggles — colorize / suggestions /
+ *   comments / diff — hints mode, learner code, check summary, revealed-hint
+ *   ids), and dispatches user-interaction events.
  *
  * @remarks The lens does NOT mutate `embodiment` (deep-frozen per the `embody/`
  * contract) or `config`. Learner code, the check summary, and revealed-hint ids
@@ -22,22 +23,23 @@
  * deliberate divergence from `blanks`). See `../README.md` § Disposable practice.
  *
  * @remarks `LensConfig` (from `../types.ts`) is the wrapper's prop type for
- * `config`; the lens reads four known fields (`viewMode`, `editorMode`,
- * `keepComments`, `hintsMode`) and ignores the rest. Per-lens narrowing is
- * captured in `WritemeLensConfig` below — it documents the known fields but does
- * NOT exclude unknown ones (config is open-shape at the contract boundary). All
- * four documented fields are `SerializableValue`-compliant (string / boolean
- * primitives) — nested objects are forbidden by `LensConfig`'s contract per
- * `../types.ts` JSDoc on `SerializablePrimitive`.
+ * `config`; the lens reads six known fields (`viewMode`, the four scaffold
+ * toggles `colorize` / `suggestions` / `keepComments` / `diff`, and `hintsMode`)
+ * and ignores the rest. Per-lens narrowing is captured in `WritemeLensConfig`
+ * below — it documents the known fields but does NOT exclude unknown ones (config
+ * is open-shape at the contract boundary). All documented fields are
+ * `SerializableValue`-compliant (string / boolean primitives) — nested objects
+ * are forbidden by `LensConfig`'s contract per `../types.ts` JSDoc on
+ * `SerializablePrimitive`.
  *
  * @remarks Naming note: vocabulary matches the legacy `WritemeLens.jsx` directly
  * (`write` / `read` mode, `keep comments`, the comment skeleton, hints). The
- * `editor mode` (`diff` / `raw`) vocabulary is adopted from the `blanks` lens's
- * editor-mode ladder (`blanks` adds a third `helpful` mode that writeme has no
- * analog for — writeme has no per-token correctness).
+ * `diff` toggle is distilled from the `blanks` lens's editor-mode ladder down to
+ * a single on/off feedback boolean (writeme has no per-token correctness, so no
+ * `helpful` analog and no `diff` / `raw` mode pair).
  */
 
-// ─── View + editor mode ─────────────────────────────────────
+// ─── View + scaffold toggles ───────────────────────────────
 
 /**
  * Which surface the lens renders.
@@ -46,10 +48,11 @@
  * - `'write'` — the editable reconstruction surface: a paste-blocked CodeMirror
  *   editor the learner types the solution back into, with the toolbar and the
  *   hints panel.
- * - `'read'` — the read-only study surface: the solution alone, rendered as a
- *   `<pre>` to read and memorize (no editor, and deliberately NOT shown beside
- *   the learner's attempt — Write and Read are mutually exclusive so the learner
- *   recalls from memory rather than transcribing a side-by-side solution).
+ * - `'read'` — the read-only study surface: the solution in a read-only
+ *   CodeMirror editor PAIRED with the write editor (mirrors `colorize`; shows the
+ *   diff from the solution side when `diff` is on). The learner's code is never
+ *   shown — Write and Read are mutually exclusive while typing, so the learner
+ *   recalls from memory rather than transcribing.
  *
  * The view toggle **preserves learner code** (parity with legacy) — `'read'` is a
  * study affordance, not a reset. Mirrors the shared `viewMode` config key
@@ -59,24 +62,38 @@
 type ViewMode = 'write' | 'read';
 
 /**
- * The write editor's feedback intensity. Only meaningful in `'write'` view.
+ * The four **scaffold toggles** — independent (orthogonal) on/off axes, each a
+ * different KIND of support, NOT an ordered difficulty ladder. A learner mixes
+ * them freely; the all-off corner is genuine cold recall. All are `boolean`
+ * fields on {@link WritemeLensConfig}.
  *
  * @remarks
- * - `'diff'` — per-line diff highlighting against the solution (a CodeMirror
- *   `Decoration.line` on each `'diff'`-status line). The always-on honest
- *   feedback. **Default** (per `./README.md` § Public API + `./DOCS.md` § Why
- *   default the editor to diff — shipping feedback-off recreates the
- *   weak-shell failure this redo exists to prevent).
- * - `'raw'` — no feedback overlay; pure recall. Check and Read remain available
- *   on demand.
+ * - **`colorize`** (default `true`) — syntax *highlighting* of what the learner
+ *   has typed. Readability scaffold; leaks no solution content. `false` keeps the
+ *   dark editor chrome + the JavaScript language but drops token coloring (a
+ *   dark-monochrome editor, not a white box).
+ * - **`suggestions`** (default `false`) — typing autocomplete: JavaScript
+ *   keywords + identifiers the learner has ALREADY typed (in-buffer locals), and
+ *   **no snippet templates** (no `for`/`if`/`function` skeletons — those would
+ *   hand structure). Syntax-production scaffold. Default OFF so the default stays
+ *   a genuine recall task; it is the opt-in for blank-page paralysis. It cannot
+ *   suggest the solution's unrevealed identifiers (they are not in the buffer),
+ *   so it leaks no answer.
+ * - **`keepComments`** (default `true`) — seed the editor with the comment
+ *   skeleton (comments + blank lines kept; executable code stripped) vs a blank
+ *   slate. Intent/structure scaffold. Comment lines are ungraded freebies.
+ * - **`diff`** (default `true`) — per-line diff highlighting against the solution
+ *   (a CodeMirror `Decoration.line` on each `'diff'`-status line). Feedback
+ *   scaffold; flags WHICH lines diverge, never the correct text. Default `true`
+ *   (per `./DOCS.md` § Why default the editor to diff — shipping feedback-off
+ *   recreates the weak-shell failure this redo exists to prevent). Replaces the
+ *   former `editorMode: 'diff' | 'raw'`.
  *
- * Adapted from the `blanks` `EditorMode` ladder, minus `'helpful'` (writeme has
- * no per-token correctness to color). Switching `diff` ↔ `raw` **preserves**
- * learner code (both modes share one free-form document) — a deliberate
- * divergence from `blanks`, whose mode switch resets learner code because its
- * modes carry incompatible placeholder invariants.
+ * Toggling any scaffold **preserves the learner's typed code** (and cursor /
+ * history / scroll): the editor mounts once and each toggle live-reconfigures a
+ * CodeMirror `Compartment` rather than remounting — see `./DOCS.md` § Why
+ * scaffold toggles use compartments.
  */
-type EditorMode = 'diff' | 'raw';
 
 /**
  * Whether the on-demand hints panel renders in the write view.
@@ -176,20 +193,25 @@ type DiffResult = Readonly<{
  * it documents what the lens looks for and what defaults apply when a field is
  * absent.
  *
- * @remarks All four fields are `SerializableValue`-compliant per `../types.ts`:
- * string primitives (`viewMode`, `editorMode`, `hintsMode`) or a boolean
- * (`keepComments`). No arrays, no nested objects.
+ * @remarks All fields are `SerializableValue`-compliant per `../types.ts`:
+ * string primitives (`viewMode`, `hintsMode`) or booleans (the four scaffold
+ * toggles — see above). No arrays, no nested objects.
  *
- * @remarks Defaults (per `./README.md` § Public API):
+ * @remarks Defaults (per `./README.md` § Public API). Note the asymmetry —
+ * `suggestions` is the one toggle that defaults OFF:
  * - `viewMode` → `'write'`
- * - `editorMode` → `'diff'`
+ * - `colorize` → `true`
+ * - `suggestions` → `false`
  * - `keepComments` → `true`
+ * - `diff` → `true`
  * - `hintsMode` → `'on'`
  */
 type WritemeLensConfig = {
 	readonly viewMode?: ViewMode;
-	readonly editorMode?: EditorMode;
+	readonly colorize?: boolean;
+	readonly suggestions?: boolean;
 	readonly keepComments?: boolean;
+	readonly diff?: boolean;
 	readonly hintsMode?: HintsMode;
 };
 
@@ -197,7 +219,6 @@ type WritemeLensConfig = {
 
 export type {
 	DiffResult,
-	EditorMode,
 	Hint,
 	HintType,
 	HintsMode,

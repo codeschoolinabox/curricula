@@ -103,18 +103,18 @@ describe('writeme wrapper — Inc 6a (mount)', () => {
 			).toBe('write');
 		});
 
-		it('reflects the default editor mode (diff)', () => {
+		it('reflects the default scaffold toggles (colorize/comments/diff on, suggestions off)', () => {
 			const { container } = render(
 				<writemeLens.Component
 					embodiment={embody('const x = 1;')}
 					config={writemeLens.config()}
 				/>,
 			);
-			expect(
-				container
-					.querySelector('[data-lens="writeme"]')
-					?.getAttribute('data-editor-mode'),
-			).toBe('diff');
+			const root = container.querySelector('[data-lens="writeme"]');
+			expect(root?.getAttribute('data-colorize')).toBe('true');
+			expect(root?.getAttribute('data-suggestions')).toBe('false');
+			expect(root?.getAttribute('data-comments')).toBe('true');
+			expect(root?.getAttribute('data-diff')).toBe('true');
 		});
 
 		it('reflects the default hints mode (on)', () => {
@@ -131,18 +131,23 @@ describe('writeme wrapper — Inc 6a (mount)', () => {
 			).toBe('on');
 		});
 
-		it('reflects an editorMode override on the root (triangulates the diff default)', () => {
+		it('reflects scaffold-toggle overrides on the root (triangulates each default)', () => {
 			const { container } = render(
 				<writemeLens.Component
 					embodiment={embody('const x = 1;')}
-					config={writemeLens.config({ editorMode: 'raw' })}
+					config={writemeLens.config({
+						colorize: false,
+						suggestions: true,
+						keepComments: false,
+						diff: false,
+					})}
 				/>,
 			);
-			expect(
-				container
-					.querySelector('[data-lens="writeme"]')
-					?.getAttribute('data-editor-mode'),
-			).toBe('raw');
+			const root = container.querySelector('[data-lens="writeme"]');
+			expect(root?.getAttribute('data-colorize')).toBe('false');
+			expect(root?.getAttribute('data-suggestions')).toBe('true');
+			expect(root?.getAttribute('data-comments')).toBe('false');
+			expect(root?.getAttribute('data-diff')).toBe('false');
 		});
 
 		it('reflects a viewMode override on the root (triangulates the write default)', () => {
@@ -286,23 +291,27 @@ describe('writeme wrapper — Inc 6b (view toggle + read view)', () => {
 		).not.toBeNull();
 	});
 
-	it('shows the solution exactly once in read view, with no editor and no learner panel', () => {
+	it('renders a read-only solution editor showing the solution in read view', async () => {
 		const { container } = render(
 			<writemeLens.Component
 				embodiment={embody('const x = 1;')}
 				config={writemeLens.config({ viewMode: 'read' })}
 			/>,
 		);
-		const solutions = container.querySelectorAll('[data-writeme-solution]');
-		expect(solutions.length).toBe(1);
-		expect(solutions[0]?.textContent).toContain('const x = 1;');
+		expect(container.querySelectorAll('[data-writeme-solution]').length).toBe(
+			1,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-solution-view] .cm-content')
+					?.textContent,
+			).toContain('const x = 1;');
+		});
 		expect(
-			container.querySelectorAll('[data-writeme-solution-view] .cm-editor')
-				.length,
-		).toBe(0);
-		expect(
-			container.querySelectorAll('[data-writeme-solution-view] pre').length,
-		).toBe(1);
+			container
+				.querySelector('[data-writeme-solution-view] .cm-content')
+				?.getAttribute('contenteditable'),
+		).not.toBe('true');
 	});
 
 	it('does not render the solution panel in write view', () => {
@@ -417,5 +426,162 @@ describe('writeme wrapper — Inc 6b (view toggle + read view)', () => {
 			container.querySelector('[data-writeme-solution-view]'),
 		).not.toBeNull();
 		expect(container.querySelector('[data-writeme-solution]')).not.toBeNull();
+	});
+});
+
+describe('writeme wrapper — scaffold toggles (compartments)', () => {
+	it('renders the Assist cluster with colorize and suggestions checkboxes', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		expect(container.querySelector('[data-writeme-assist]')).not.toBeNull();
+		expect(
+			container
+				.querySelector('[data-assist-toggle="colorize"]')
+				?.getAttribute('type'),
+		).toBe('checkbox');
+		expect(
+			container
+				.querySelector('[data-assist-toggle="suggestions"]')
+				?.getAttribute('type'),
+		).toBe('checkbox');
+	});
+
+	it('checks colorize and leaves suggestions unchecked by default', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		expect(
+			(
+				container.querySelector(
+					'[data-assist-toggle="colorize"]',
+				) as HTMLInputElement
+			).checked,
+		).toBe(true);
+		expect(
+			(
+				container.querySelector(
+					'[data-assist-toggle="suggestions"]',
+				) as HTMLInputElement
+			).checked,
+		).toBe(false);
+	});
+
+	it('keeps the Assist cluster available in read view', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config({ viewMode: 'read' })}
+			/>,
+		);
+		expect(container.querySelector('[data-writeme-assist]')).not.toBeNull();
+		expect(
+			container.querySelector('[data-assist-toggle="colorize"]'),
+		).not.toBeNull();
+	});
+
+	it('toggling colorize flips data-colorize and reconfigures the editor in place (no remount)', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-editor'),
+			).not.toBeNull();
+		});
+		const before = container.querySelector(
+			'[data-writeme-editor-host] .cm-editor',
+		);
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="colorize"]') as Element,
+		);
+		expect(
+			(
+				container.querySelector(
+					'[data-assist-toggle="colorize"]',
+				) as HTMLInputElement
+			).checked,
+		).toBe(false);
+		expect(
+			container
+				.querySelector('[data-lens="writeme"]')
+				?.getAttribute('data-colorize'),
+		).toBe('false');
+		expect(
+			container.querySelector('[data-writeme-editor-host] .cm-editor'),
+		).toBe(before);
+	});
+
+	it('toggling suggestions flips data-suggestions', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="suggestions"]') as Element,
+		);
+		expect(
+			container
+				.querySelector('[data-lens="writeme"]')
+				?.getAttribute('data-suggestions'),
+		).toBe('true');
+	});
+
+	it('toggling suggestions reconfigures the editor in place (no remount)', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-editor'),
+			).not.toBeNull();
+		});
+		const before = container.querySelector(
+			'[data-writeme-editor-host] .cm-editor',
+		);
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="suggestions"]') as Element,
+		);
+		expect(
+			container.querySelector('[data-writeme-editor-host] .cm-editor'),
+		).toBe(before);
+	});
+
+	it('keeps the read editor and its solution across a colorize toggle in read view', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config({ viewMode: 'read' })}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-solution-view] .cm-content')
+					?.textContent,
+			).toContain('const x = 1;');
+		});
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="colorize"]') as Element,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-solution-view] .cm-content')
+					?.textContent,
+			).toContain('const x = 1;');
+		});
 	});
 });

@@ -10,7 +10,8 @@ how many code lines have been reproduced. It is the furthest point on the
 recognition → recall spectrum among the migrated lenses: `parsons` orders given
 lines, `blanks` fills given holes, `writeme` reproduces the whole program.
 `blanks` is in effect a more heavily scaffolded `writeme`, and `writeme` shares
-its `diff` / `raw` editor-mode ladder (adapted to whole-line granularity).
+its `diff` feedback toggle (adapted from the `blanks` editor-mode ladder to a
+whole-line, single-boolean form).
 
 It is a migrated pedagogical lens in the WS4 batch. A previous V2 sprint shipped
 structurally-compliant lens _shells_ that satisfied the `LensModule` contract
@@ -41,15 +42,17 @@ The pre-refactor lens lived at
 - the gameable concept-count + length-ratio "progress" score (≥85% = "complete")
   → an honest per-line diff + a `X / N code lines` Check (see
   [Why the honest line-count replaces the legacy score](#why-the-honest-line-count-replaces-the-legacy-score))
-- a second (solution) CodeMirror editor + a duplicate `<pre>` comparison grid →
-  a read view that shows the **solution alone** (one `<pre>`, zero CodeMirror,
-  no learner panel — see
-  [Why Read shows the solution alone](#why-read-shows-the-solution-alone))
+- the legacy's duplicate solution render (a read-only editor + a `<pre>`
+  comparison grid) → a single read-only solution editor **paired** with the
+  write editor (mirrors colorize; the diff pair when diff is on; the comparison
+  grid dropped — see
+  [Why Read is the paired solution editor](#why-read-is-the-paired-solution-editor))
 - the `?writeme=…` URL config → dropped (no URL surface in v1)
 
-The legacy's `diff` / `raw` distinction did not exist; the editor-mode ladder is
-adopted from the `blanks` lens. See `./README.md` § "What this lens does NOT do"
-for the full lens-specific drop list, and
+The legacy had no feedback toggle; writeme adopts a single `diff` boolean —
+distilled from the `blanks` lens's editor-mode concept down to one on/off
+feedback toggle, not the full `diff` / `raw` ladder. See `./README.md` § "What
+this lens does NOT do" for the full lens-specific drop list, and
 `~/.claude/plans/migrate-the-writeme-temporal-bentley.md` for the session-level
 decisions and audit trail.
 
@@ -63,7 +66,7 @@ decisions and audit trail.
 | `lib/comment-skeleton.ts`   | core    | **Ported & de-duplicated** — solution → comment-only skeleton (executable code stripped; line count preserved) |
 | `lib/diff-lines.ts`         | core    | **New** — per-line `LineStatus` verdicts + code-line tallies (`matched` / `total`); powers diff visual + Check |
 | `lib/generate-hints.ts`     | core    | **Ported** — regex concept + structural hints from the solution, capped at 8                                   |
-| `types.ts`                  | shared  | `ViewMode`, `EditorMode`, `HintsMode`, `HintType`, `Hint`, `LineStatus`, `DiffResult`, `WritemeLensConfig`     |
+| `types.ts`                  | shared  | `ViewMode`, `HintsMode`, `HintType`, `Hint`, `LineStatus`, `DiffResult`, `WritemeLensConfig`                   |
 
 Default export of `index.tsx` is the frozen `LensModule` record. The core
 subsystems under `lib/` are internal; only `index.tsx` (and where applicable
@@ -87,12 +90,12 @@ subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
 ### Execution phases
 
 1. **Mount + resolve config** (sync, pure) — the orchestrator passes a frozen
-   embodiment and a frozen lens config via props. The wrapper reads four known
-   config fields (view mode, editor mode, keep comments, hints mode) with
-   documented defaults; other fields are preserved but ignored. Initial
-   per-mount state: view / editor / keep-comments / hints modes seeded from
-   config; the learner's code seeded from the starting template; the check
-   summary empty; the revealed-hint set empty.
+   embodiment and a frozen lens config via props. The wrapper reads the known
+   config fields (view mode; the four scaffold toggles colorize / suggestions /
+   keep-comments / diff; hints mode) with documented defaults; other fields are
+   preserved but ignored. Initial per-mount state: view mode, the four toggles,
+   and hints mode seeded from config; the learner's code seeded from the
+   starting template; the check summary empty; the revealed-hint set empty.
 
 2. **Derive the starting template** (sync, pure) — when keep-comments is on, the
    wrapper computes the comment skeleton of the solution (executable code
@@ -100,37 +103,41 @@ subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
    template is the empty string. Computed synchronously so the editor's first
    paint already shows the template — no empty-then-filled flicker.
 
-3. **Wire the write editor** (per-mount, imperative) — a mount effect
-   instantiates the CodeMirror view seeded with the starting template (or, on a
-   mode re-mount, the in-progress learner code read from a ref), configured
-   editable, with the paste-block extension attached **in every editable mode**,
-   an update listener that mirrors learner edits into local state, and — in diff
-   mode — a decoration field that paints each diff-status line. The editor
-   re-mounts on editor-mode change and on a pristine keep-comments re-seed;
-   per-keystroke learner-code updates flow through the listener into state and
-   MUST NOT re-fire the mount effect (that would destroy the view mid-typing).
+3. **Wire the write editor** (mount-once, imperative) — a mount effect
+   instantiates the CodeMirror view seeded with the starting template (or the
+   in-progress learner code, read from a ref so the seed reflects prior edits),
+   configured editable, with the paste-block extension attached **always**
+   (every editable state), an update listener that mirrors learner edits into
+   local state, and a colorize / suggestions / diff compartment each holding its
+   extension (or nothing). The editor mounts **once** (mount-effect deps `[]`);
+   scaffold toggles live-reconfigure their compartment (colorize / suggestions /
+   diff) and the comments re-seed dispatches a document change — nothing
+   remounts. Per-keystroke learner-code updates flow through the listener into
+   state and cannot re-fire the mount effect (deps `[]`), so the view is never
+   destroyed mid-typing.
 
 4. **Diff the learner's code** (per edit, sync, pure) — a memoized per-line diff
    compares the learner's code to the solution line-by-line, by index, compared
    trimmed: each solution line resolves to match / diff / empty / comment, and
    the code lines are tallied (matched, total). The result drives the diff
-   decorations (diff mode) and the honest Check summary.
+   decorations (when diff is on) and the honest Check summary.
 
 5. **Render** (sync) — the wrapper emits the root
-   `<div data-lens="writeme" data-view-mode="write|read" data-editor-mode="diff|raw" data-hints-mode="on|off">`
+   `<div data-lens="writeme" data-view-mode="write|read" data-colorize data-suggestions data-comments data-diff data-hints-mode="on|off">`
    with the toolbar; in write view the CodeMirror editor + the check summary +
-   the on-demand hints panel; in read view the **solution alone** as a `<pre>`
-   study panel (no editor, no learner panel); and the instructions accordion in
-   both.
+   the on-demand hints panel; in read view the **read-only solution editor**
+   (paired with the write editor — mirrors colorize, shows the diff pair when
+   on); and the instructions accordion in both.
 
-6. **Handle interaction** (per learner event) — the view toggle and editor-mode
-   toggle update their state slice and **preserve learner code**; the
-   keep-comments toggle re-seeds the editor only while it is pristine (otherwise
-   it updates the hint set + the Reset template, leaving the editor untouched);
-   the hints toggle gates rendering (preserving revealed ids); Check computes
-   and shows the honest summary; Reset re-seeds to the current template and
-   clears the check summary + revealed hints; a hint-reveal adds an id to the
-   revealed set.
+6. **Handle interaction** (per learner event) — the view toggle and the four
+   Assist scaffold toggles update their state slice and **preserve learner
+   code** (toggles via compartment reconfigure / doc-change dispatch, never a
+   remount); the keep-comments toggle re-seeds the editor only while it is
+   pristine (otherwise it updates the hint set + the Reset template, leaving the
+   editor untouched); the hints toggle gates rendering (preserving revealed
+   ids); Check computes and shows the honest summary; Reset re-seeds to the
+   current template and clears the check summary + revealed hints; a hint-reveal
+   adds an id to the revealed set.
 
 7. **Unmount** (React-driven) — the orchestrator unmounts on snippet change or
    lens exit. Per-mount state is garbage-collected with the component instance;
@@ -146,7 +153,7 @@ flowchart TD
 
     Props -->|"applicableTo, sync, pure"| Gate["Tier 1: true<br/>(text-only; no AST)"]
     Props -->|"recommend, sync, pure"| Recs["[] (WS2-deferred)"]
-    Props -->|"resolve config, sync, pure"| Cfg["{ viewMode, editorMode,<br/>keepComments, hintsMode }"]
+    Props -->|"resolve config, sync, pure"| Cfg["{ viewMode, colorize, suggestions,<br/>keepComments, diff, hintsMode }"]
 
     Props -->|"source.code"| Solution["solution string<br/>(the correct program)"]
     Solution -->|"comment-skeleton if keepComments<br/>(sync, pure; strip code,<br/>keep comments + line count)"| Template["starting template<br/>(skeleton OR empty)"]
@@ -157,11 +164,11 @@ flowchart TD
 
     Learner -->|"diff-lines, sync, pure<br/>(per-line, by index, trimmed)"| Diff["DiffResult<br/>{ perLine, matched, total }"]
     Solution -->|"reference"| Diff
-    Diff -->|"select diff-status lines, pure"| Dec["diff highlight set<br/>(diff-status lines only)"]
-    Dec -->|"overlay (diff mode)"| Editor
+    Editor -->|"diff on: self-recomputing StateField<br/>recomputes from the write doc"| Editor
     Diff -->|"tally match lines, pure"| Summary["honest summary<br/>X / N code lines (P%)"]
+    Diff -->|"diff pair (diff on): mark unmatched"| Study["read-only solution editor<br/>(paired; mirrors colorize)"]
 
-    Solution -->|"view = read"| Study["read-view study panel<br/>(pre: solution alone)"]
+    Solution -->|"view = read"| Study
 
     Solution -->|"generate-hints, sync, pure<br/>(regex; concept + structural; cap 8)"| Hints["Hint[]"]
     Hints -->|"hintsMode = on; on-demand reveal"| Panel["hints panel"]
@@ -171,9 +178,9 @@ flowchart TD
     Summary --> Render
     Study --> Render
     Panel --> Render
-    Render --> DOM["&lt;div data-lens=writeme<br/>data-view-mode data-editor-mode<br/>data-hints-mode&gt;<br/>toolbar + (write: editor + summary + hints<br/>| read: solution panel) + instructions"]
+    Render --> DOM["&lt;div data-lens=writeme<br/>data-view-mode data-colorize data-suggestions<br/>data-comments data-diff data-hints-mode&gt;<br/>toolbar + (write: editor + summary + hints<br/>| read: solution editor) + instructions"]
 
-    DOM -->|"view / editor-mode toggle (preserve learnerCode)"| Cfg
+    DOM -->|"view / assist toggle (preserve learnerCode)"| Cfg
     DOM -->|"keep-comments toggle (pristine-gated re-seed)"| Template
     DOM -->|"Reset (re-seed + clear)"| Template
 
@@ -198,9 +205,9 @@ state in v1).
 - **`embodiment` parameter name** in core signatures (lenses-peer invariant).
 - **`data-lens="writeme"` on the wrapper's root.** Load-bearing for
   sandbox-harness selectors. Per the lenses-peer invariant.
-- **`data-view-mode`, `data-editor-mode`, `data-hints-mode`** on the root —
-  sandbox-harness selectors + CSS hooks; renaming any is a contract change.
-  Values reflect committed state.
+- **`data-view-mode`, `data-colorize`, `data-suggestions`, `data-comments`,
+  `data-diff`, `data-hints-mode`** on the root — sandbox-harness selectors + CSS
+  hooks; renaming any is a contract change. Values reflect committed state.
 - **Tier 1 classification.** `applicableTo` returns `true` — writeme reproduces
   text and needs no AST and no parse success. A **deliberate divergence** from
   `blanks` (Tier 2, `status.parsed`). Suitability (a snippet long enough to be
@@ -217,9 +224,9 @@ state in v1).
   `freezeInPlace` / `cloneAndFreeze` convention (AGENTS.md § Deep Freeze Return
   Values).
 - **`SerializableValue` discipline.** `WritemeLensConfig` fields are primitives
-  only (`viewMode`, `editorMode`, `keepComments`, `hintsMode`). Domain values
-  (`Hint`, `DiffResult`, `LineStatus`) are runtime structures, never stored in
-  `LensConfig`.
+  only (`viewMode`, `colorize`, `suggestions`, `keepComments`, `diff`,
+  `hintsMode`). Domain values (`Hint`, `DiffResult`, `LineStatus`) are runtime
+  structures, never stored in `LensConfig`.
 - **Per-line diff is by index, trimmed.** Learner line `i` vs solution line `i`,
   compared trimmed. The comment skeleton preserves the solution's line count, so
   index alignment holds while the learner fills lines in place. Code lines (text
@@ -237,27 +244,40 @@ state in v1).
   (whose per-character model works only because `blanks`'s blanked source is
   length-matched to the original). The correct-lines-highlighted behavior is
   verified at the browser checkpoint (jsdom cannot exercise CodeMirror layout).
-- **Paste blocked in every editable mode** (both `diff` and `raw`) — a
-  divergence from `blanks`, which permits paste in diff mode because its
-  placeholders are position-locked. writeme has no anchors, so a paste would
-  smuggle in the whole solution. See
+- **Paste blocked whenever the editor is editable** (regardless of the `diff`
+  toggle) — a divergence from `blanks`, which permits paste in its diff mode
+  because its placeholders are position-locked. writeme has no anchors, so a
+  paste would smuggle in the whole solution. See
   [Why paste is blocked in diff too](#why-paste-is-blocked-in-diff-too).
 - **First-paint invariant.** The starting template is computed synchronously
   during the render that mounts the editor; the editor's initial document is the
   template, never an empty editor followed by a re-seed.
-- **Toggle semantics.** The view toggle and the editor-mode toggle update only
-  their state slice; `learnerCode` is untouched (both editor modes share one
-  free-form document — see
-  [Why diff and raw preserve learner code](#why-diff-and-raw-preserve-learner-code)).
+- **Toggle semantics.** The view toggle and the four Assist scaffold toggles
+  update only their state slice; `learnerCode` is untouched — each toggle is a
+  compartment reconfigure or a doc-change dispatch over one free-form document,
+  never a remount (see
+  [Why toggling a scaffold preserves learner code](#why-toggling-a-scaffold-preserves-learner-code)).
   The keep-comments toggle re-seeds only while the editor is pristine (see
   [Why keep-comments re-seeds only while pristine](#why-keep-comments-re-seeds-only-while-pristine));
   Reset re-seeds and clears feedback. Tested at the wrapper level.
-- **Mount-effect deps + pristine predicate (anti-regression).** The CodeMirror
-  mount effect's dependencies are the two structural remount triggers ONLY —
-  editor-mode change, and a pristine keep-comments re-seed. `learnerCode` is
-  mirrored into a ref and read at mount time; it MUST NOT appear in the
-  mount-effect deps (a per-keystroke remount destroys the view mid-typing — the
-  `blanks` remount regression). The pristine predicate is pure:
+- **Mount-once + compartments.** The CodeMirror editor mounts exactly once
+  (mount-effect deps `[]`). The four scaffold toggles never remount it: colorize
+  / suggestions / diff each live-reconfigure a CodeMirror `Compartment` via
+  `view.dispatch({ effects: compartment.reconfigure(...) })`, and the comments
+  toggle and Reset dispatch a document change. The constant base (line numbers,
+  history, selection, the JavaScript language, the `oneDark` theme, editable,
+  the update-listener, the paste-block) never reconfigures. This makes the [I1]
+  preserve-learner-code invariant structural rather than disciplinary — no value
+  can re-fire the mount effect. See § Why scaffold toggles use compartments.
+- **Mount-once + pristine predicate (anti-regression).** The CodeMirror mount
+  effect's dependencies are `[]` — the editor mounts exactly once and never
+  remounts. Scaffold toggles reconfigure compartments (colorize / suggestions /
+  diff), and the comments toggle / Reset dispatch document changes; none of
+  these re-run the mount effect. `learnerCode` is mirrored into a ref and read
+  at mount time so it seeds the initial document only; it MUST NOT appear in the
+  mount-effect deps (a per-keystroke remount would destroy the view mid-typing —
+  the `blanks` remount regression, here structurally impossible because deps are
+  `[]`). The pristine predicate is pure:
   `learnerCode === '' || learnerCode === templateFor(keepComments-before-toggle)`,
   evaluated against the flag value BEFORE the toggle flips (evaluating it after
   the flip would mis-read a skeleton-showing editor as non-pristine and revive
@@ -277,9 +297,9 @@ state in v1).
 - **LensModule surface stays synchronous.** `config()`, `applicableTo()`,
   `recommend()` are sync; comment-skeleton, diff-lines, and generate-hints are
   all sync-pure.
-- **Display content rendered safely.** The CodeMirror editor renders via its own
-  document model; the read-view `<pre>` panels render `source.code` and learner
-  text as framework-escaped plain text; never `dangerouslySetInnerHTML`.
+- **Display content rendered safely.** Both CodeMirror editors render via their
+  own document model (the write editor the learner text, the read editor
+  `source.code`); never `dangerouslySetInnerHTML`.
 
 ### Out of scope
 
@@ -305,35 +325,73 @@ state in v1).
 - **Multi-language support.** v1 is JavaScript-only (the package is
   `just-enough/javascript`); multi-language is an `embody/` concern.
 
+## Why scaffold toggles use compartments
+
+The four scaffold toggles (colorize / suggestions / comments / diff) each swap
+an editor extension on or off. The naive implementation — list the toggle states
+in the mount-effect deps and rebuild the `EditorView` on every change —
+multiplies the very remount surface the [I1] anti-regression invariant exists to
+shrink, and on each toggle it discards the learner's cursor, scroll, and undo
+history (the document survives only because it is re-seeded from a ref). Caching
+one pre-built editor per toggle combination is worse: four independent toggles
+are sixteen combinations, and every switch would have to hand-copy the document,
+cursor, and history into the target instance or they desync.
+
+CodeMirror's `Compartment` is the purpose-built tool. The editor mounts **once**
+(mount-effect deps `[]`); each toggle is a
+`view.dispatch({ effects: compartment.reconfigure(ext) })` that swaps just the
+one affected extension live. The document, cursor, selection, scroll, and undo
+history are preserved automatically — nothing to cache, nothing to sync. Because
+deps are `[]`, no reactive value can re-fire the mount effect, so the
+per-keystroke-remount regression is not merely avoided but structurally
+impossible.
+
+Layout: a constant base (line numbers, history, selection, default / history /
+completion keymaps, the `oneDark` theme, the JavaScript language, editable, the
+update-listener, the paste-block) plus three compartments — colorize (the
+`oneDark` highlight style or nothing), suggestions (the snippet-free
+autocomplete extension or nothing), and diff (the `Decoration.line` field or
+nothing). The comments toggle and Reset are document-change dispatches, not
+compartment reconfigures. writeme is the repo's first compartment user (`blanks`
+destroy/recreates its editor on mode change); this is the precedent.
+
 ## Why default the editor to diff
 
-The editor defaults to `diff` (feedback on), not `raw` (feedback off). A
-raw-default editor is a feedback-free box — the precise shape of the weak-shell
-failure this redo exists to prevent (per `./README.md` § Why this lens exists).
-Defaulting to `diff` makes the honest-feedback mechanism visible on first paint:
-the learner sees the lens working, and the diff guides their reconstruction.
-This mirrors the `blanks` redo's decision to ship its hints panel
-enabled-by-default rather than compiled-out (see
-[`../blanks/DOCS.md`](../blanks/DOCS.md) § Why ship the hints panel enabled by
-default — "the lens-shipping-shells failure mode the redo exists to prevent is
-exactly what disabled feedback recreates"). `raw` remains one click away for
-learners who want a pure-recall challenge — the dial exists, but its default
-points at honest feedback.
+The `diff` toggle defaults ON (feedback on), not off. A feedback-off default is
+a feedback-free box — the precise shape of the weak-shell failure this redo
+exists to prevent (per `./README.md` § Why this lens exists). Defaulting `diff`
+on makes the honest-feedback mechanism visible on first paint: the learner sees
+the lens working, and the diff guides their reconstruction. This mirrors the
+`blanks` redo's decision to ship its hints panel enabled-by-default rather than
+compiled-out (see [`../blanks/DOCS.md`](../blanks/DOCS.md) § Why ship the hints
+panel enabled by default — "the lens-shipping-shells failure mode the redo
+exists to prevent is exactly what disabled feedback recreates"). Turning `diff`
+off remains one click away for learners who want a pure-recall challenge — the
+dial exists, but its default points at honest feedback.
 
-## Why Read shows the solution alone
+## Why Read is the paired solution editor
 
-The read view shows the **solution by itself** — not a side-by-side comparison
-of the learner's attempt against it. This reverses an earlier plan decision (a
-read-mode "your code | solution" comparison): a comparison surface lets the
-learner _transcribe_ the solution rather than _recall_ it, the precise defeat of
-a write-from-memory exercise. Write and Read are therefore **mutually
-exclusive** — the learner never types with the solution in view. The loop is
-**read → remember → type**: study the solution in Read, return to Write, and
-reproduce it from memory. Self-assessment stays answer-free in the write view —
-the diff highlights which lines diverge and the Check counts reproduced lines,
-but neither reveals the solution text. (Surfaced at the Inc 6b browser
-checkpoint; the legacy's read-only solution editor + duplicate comparison grid
-collapse to a single `<pre>` study panel, zero CodeMirror.)
+The read view shows the solution in a **read-only editor configured to match the
+write editor** — a pair — not the learner's code beside it. The learner's typed
+code is never shown in Read; only the solution (mirroring `colorize`, and, when
+`diff` is on, the solution lines the learner has not yet matched — progress
+markers, not the learner's code). Write and Read stay **mutually exclusive while
+typing**: the learner never types with the solution in view. The loop is **read
+→ remember → type**: study the solution in Read (the diff-pair markers focus
+what is still missing), return to Write, and reproduce it from memory.
+
+This is the synthesis of two earlier decisions. First, an even earlier plan had
+a read-mode "your code | solution" side-by-side comparison; that was dropped (a
+comparison surface lets the learner _transcribe_ rather than _recall_) — and the
+learner's code is still never shown in Read. Then the read view was briefly a
+plain `<pre>` (zero CodeMirror); that is now reversed, because **colorize and
+the diff pair need a real CodeMirror surface** to mirror the write editor's
+highlighting and carry line decorations — a `<pre>` cannot. The read editor is
+read-only (`EditorState.readOnly` + `EditorView.editable.of(false)`), carries no
+update-listener, and never writes `learnerCode`, so it stays a study surface,
+not a second editing surface. (The legacy rendered the solution twice — a
+read-only editor plus a duplicate comparison grid; V2 keeps a single read-only
+solution editor and drops the grid.)
 
 ## Why the honest line-count replaces the legacy score
 
@@ -410,17 +468,23 @@ behavior change from the legacy's guarded non-re-seed, chosen to make the
 control work without the destructive surprise — documented in `./README.md` §
 "What this lens does NOT do."
 
-## Why diff and raw preserve learner code
+## Why toggling a scaffold preserves learner code
 
-The `blanks` `changeEditorMode` resets learner code on a mode switch
+Every scaffold toggle — colorize, suggestions, comments, diff — leaves the
+learner's typed code, cursor, and history intact, because none of them remounts
+the editor. The editor mounts once (mount-effect deps `[]`); colorize /
+suggestions / diff each live-reconfigure a CodeMirror `Compartment` and the
+comments toggle / Reset dispatch a document change, so the document survives the
+toggle automatically (see
+[Why scaffold toggles use compartments](#why-scaffold-toggles-use-compartments)).
+writeme can do this because it has no per-mode document invariants to honor: all
+toggles edit the **same free-form document**, and diff only adds a read-only
+decoration overlay — it imposes no structure on the text. This is the divergence
+from `blanks`, whose `changeEditorMode` resets learner code on a mode switch
 (`setLearnerCode(null)`) because its `helpful` mode carries length-matched
-placeholder + anchor-lock invariants that arbitrary `diff`/`raw` edits would
-violate — carrying that arbitrary text into the helpful editor would corrupt it.
-writeme has no such invariants: both `diff` and `raw` edit the **same free-form
-document** (the diff mode only adds a read-only decoration overlay; it imposes
-no structure on the text). So switching `diff` ↔ `raw` simply re-mounts the
-editor on the current learner code (read from a ref) and preserves it. The mode
-toggle is a feedback-visibility switch, not a restart.
+placeholder and anchor-lock invariants that arbitrary free-form text would
+corrupt. writeme has no anchors, so its scaffold toggles never reset learner
+code — a compartment reconfigure, not a remount-and-reset.
 
 ## Why paste is blocked in diff too
 
@@ -428,9 +492,9 @@ toggle is a feedback-visibility switch, not a restart.
 position-locked — a paste cannot smuggle the answer into the locked anchor
 regions. writeme has no anchors: the editor is a free-form document and the
 whole exercise is to reproduce the solution from memory. Permitting paste in any
-editable mode would let the learner paste the solution and defeat the exercise
-entirely. So writeme blocks paste in **both** `diff` and `raw` — a deliberate
-divergence from `blanks`, justified by the anchor-lock asymmetry.
+editable state would let the learner paste the solution and defeat the exercise
+entirely. So writeme blocks paste **regardless of the `diff` toggle** — a
+deliberate divergence from `blanks`, justified by the anchor-lock asymmetry.
 
 ## Module ownership
 
@@ -456,6 +520,6 @@ full list. Key directions in scope of this lens's evolution:
   order-insensitive.
 - **Cursor-scoped hints** — adopt the `blanks` cursor-scoped, incremental-reveal
   hint model in place of the legacy's generic generated hints.
-- **URL state lifted to the orchestrator** — persist `viewMode` / `editorMode` /
-  `keepComments` / `hintsMode` once the orchestrator grows a URL surface (per
-  the blanks precedent).
+- **URL state lifted to the orchestrator** — persist `viewMode` / `colorize` /
+  `suggestions` / `keepComments` / `diff` / `hintsMode` once the orchestrator
+  grows a URL surface (per the blanks precedent).

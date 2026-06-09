@@ -2,26 +2,31 @@
  * @file React wrapper for the `writeme` lens — default-exports the frozen
  * `LensModule` the orchestrator's lens registry consumes (post Inc 7).
  *
- * Inc 6a scope: mounts the write-view CodeMirror editor (editable, paste-blocked,
- * seeded synchronously from the comment skeleton) under a `data-lens="writeme"`
- * root that carries the committed view / editor / hints modes. The view toggle +
- * read view (6b), keep-comments + reset (6c), diff-mode line decorations (6d),
- * hints panel (6e), and the honest Check + instructions (6f) land in later
- * increments.
+ * Scope so far: the write-view CodeMirror editor (editable, paste-blocked, seeded
+ * synchronously from the comment skeleton) under a `data-lens="writeme"` root; a
+ * Write/Read view toggle (read = solution-only study surface); and the colorize +
+ * suggestions Assist toggles (live compartment reconfigure). The comments + diff
+ * Assist toggles, the hints panel, and the honest Check + instructions land in
+ * later increments.
  *
- * The CodeMirror `EditorView` is imperatively mounted in a `useEffect`; per the
- * lenses-peer anti-regression invariant the learner's edits are mirrored into a
- * `useRef` read at mount time and MUST NOT appear in the mount-effect deps — a
- * per-keystroke remount would destroy the view mid-typing (the blanks remount
- * regression). Mount-effect deps are the structural remount triggers only
- * (`[editorMode]` for now; the keep-comments re-seed in 6c is an imperative
- * dispatch, not a remount).
+ * The CodeMirror `EditorView` is imperatively mounted ONCE in a `useEffect`
+ * (deps `[]`); per the lenses-peer anti-regression invariant the learner's edits
+ * are mirrored into a `useRef` read at mount time. The scaffold toggles
+ * (colorize / suggestions / diff) live-reconfigure CodeMirror `Compartment`s and
+ * the keep-comments re-seed dispatches a doc change — neither remounts, so no
+ * value can re-fire the mount effect and destroy the view mid-typing (the blanks
+ * remount regression is structurally impossible here).
  */
 
+import { completionKeymap } from '@codemirror/autocomplete';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { javascript } from '@codemirror/lang-javascript';
-import { EditorState } from '@codemirror/state';
-import { oneDark } from '@codemirror/theme-one-dark';
+import { syntaxHighlighting } from '@codemirror/language';
+import { Compartment, EditorState } from '@codemirror/state';
+import {
+	oneDarkHighlightStyle,
+	oneDarkTheme,
+} from '@codemirror/theme-one-dark';
 import {
 	EditorView,
 	drawSelection,
@@ -38,7 +43,8 @@ import type { LensModule, LensProps as LensProperties } from '../types.js';
 import writemeCore from './core.js';
 import commentSkeleton from './lib/comment-skeleton.js';
 import noPasteExtension from './lib/no-paste-extension.js';
-import type { EditorMode, HintsMode, ViewMode } from './types.js';
+import snippetFreeAutocomplete from './lib/snippet-free-autocomplete.js';
+import type { HintsMode, ViewMode } from './types.js';
 
 import './writeme.css';
 
@@ -49,15 +55,29 @@ const WritemeComponent: ComponentType<LensProperties> =
 		// defaults.
 		const resolved = useMemo(() => writemeCore.config(config), [config]);
 		// viewMode is STATE (seeded once from config) so the Write/Read toggle can
-		// drive it; editorMode/hintsMode stay render-derived until their own
-		// increments (6d / 6e) add toggles.
+		// drive it; the scaffold toggles + hints stay render-derived until their
+		// own increments wire the live controls.
 		const initialViewMode: ViewMode =
 			resolved.viewMode === 'read' ? 'read' : 'write';
 		const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
-		const editorMode: EditorMode =
-			resolved.editorMode === 'raw' ? 'raw' : 'diff';
-		const hintsMode: HintsMode = resolved.hintsMode === 'off' ? 'off' : 'on';
+		// colorize + suggestions are STATE so their Assist toggles can drive them
+		// (live compartment reconfigure, never a remount); keepComments + diff stay
+		// render-derived until their increments wire controls.
+		const [colorize, setColorize] = useState<boolean>(
+			resolved.colorize !== false,
+		);
+		const [suggestions, setSuggestions] = useState<boolean>(
+			resolved.suggestions === true,
+		);
 		const keepComments = resolved.keepComments !== false;
+		const diff = resolved.diff !== false;
+		const hintsMode: HintsMode = resolved.hintsMode === 'off' ? 'off' : 'on';
+		// Mirror colorize/suggestions into refs so the mount effect seeds the
+		// compartments at mount without listing them as deps (which would remount).
+		const colorizeReference = useRef(colorize);
+		colorizeReference.current = colorize;
+		const suggestionsReference = useRef(suggestions);
+		suggestionsReference.current = suggestions;
 
 		// The starting template — comment skeleton (scaffolding) or blank slate —
 		// computed SYNCHRONOUSLY so the editor's first paint already shows it (no
@@ -79,11 +99,26 @@ const WritemeComponent: ComponentType<LensProperties> =
 
 		const editorContainer = useRef<HTMLDivElement | null>(null);
 		const editorView = useRef<EditorView | null>(null);
+		// The read view's read-only solution editor (mounted only while reading).
+		const readEditorContainer = useRef<HTMLDivElement | null>(null);
+		const readEditorView = useRef<EditorView | null>(null);
+		// One CodeMirror Compartment per live-reconfigurable scaffold. Lazy-inited
+		// once so they are stable across renders; the mount effect seeds them and
+		// the reconfigure effects swap their extension live (no remount).
+		const compartments = useRef<{
+			colorize: Compartment;
+			suggestions: Compartment;
+		} | null>(null);
+		compartments.current ??= {
+			colorize: new Compartment(),
+			suggestions: new Compartment(),
+		};
 
 		useEffect(
 			function mountEditorView() {
 				const host = editorContainer.current;
-				if (host) {
+				const compartment = compartments.current;
+				if (host && compartment) {
 					// Read the seed from refs (never deps) so typing doesn't remount.
 					const initialDoc =
 						learnerCodeReference.current ?? startingTemplateReference.current;
@@ -101,23 +136,37 @@ const WritemeComponent: ComponentType<LensProperties> =
 					const state = EditorState.create({
 						doc: initialDoc,
 						extensions: [
-							// Deliberately minimal baseline — NO autocomplete, lint, or
-							// bracket-auto-close. A recall exercise must never have the
-							// editor SUGGEST the very code the learner is reproducing from
-							// memory (rawdog typing; a divergence from the legacy's
-							// `basicSetup`). Line numbers + history + selection +
-							// JavaScript syntax highlighting stay (readability isn't a hint).
+							// CONSTANT base — never reconfigured; the scaffold toggles live
+							// in the compartments below. The JavaScript language stays
+							// always-on (its syntax tree powers `suggestions`' local
+							// completion); `oneDarkTheme` is the chrome only — token COLORING
+							// is the colorize compartment. `completionKeymap` is harmless
+							// when the suggestions compartment is empty (no popup to act on).
 							lineNumbers(),
 							history(),
 							drawSelection(),
-							keymap.of([...defaultKeymap, ...historyKeymap]),
+							keymap.of([
+								...defaultKeymap,
+								...historyKeymap,
+								...completionKeymap,
+							]),
 							javascript(),
-							oneDark,
+							oneDarkTheme,
 							EditorView.editable.of(true),
 							updateListener,
-							// Paste blocked in EVERY editable mode (no anchors to protect
+							// Paste blocked in EVERY editable state (no anchors to protect
 							// the answer — pasting would defeat the reproduction exercise).
 							noPasteExtension(),
+							// Live-reconfigurable scaffolds, seeded from the config-derived
+							// toggle state read at mount (refs, so this stays deps-free).
+							compartment.colorize.of(
+								colorizeReference.current
+									? syntaxHighlighting(oneDarkHighlightStyle)
+									: [],
+							),
+							compartment.suggestions.of(
+								suggestionsReference.current ? snippetFreeAutocomplete() : [],
+							),
 						],
 					});
 					editorView.current = new EditorView({ state, parent: host });
@@ -128,18 +177,86 @@ const WritemeComponent: ComponentType<LensProperties> =
 					editorView.current = null;
 				};
 			},
-			// Structural remount triggers only; learner code rides the ref above.
-			[editorMode],
+			// Mount ONCE — deps []. Scaffold toggles live-reconfigure their
+			// CodeMirror compartment (below) instead of remounting, so no value here
+			// can re-fire the effect and destroy the learner's typed code.
+			[],
+		);
+
+		// Live-reconfigure each scaffold compartment when its toggle flips — a
+		// dispatch, NOT a remount, so the doc / cursor / history are preserved.
+		useEffect(
+			function reconfigureColorize() {
+				const view = editorView.current;
+				const compartment = compartments.current;
+				if (view && compartment) {
+					view.dispatch({
+						effects: compartment.colorize.reconfigure(
+							colorize ? syntaxHighlighting(oneDarkHighlightStyle) : [],
+						),
+					});
+				}
+			},
+			[colorize],
+		);
+		useEffect(
+			function reconfigureSuggestions() {
+				const view = editorView.current;
+				const compartment = compartments.current;
+				if (view && compartment) {
+					view.dispatch({
+						effects: compartment.suggestions.reconfigure(
+							suggestions ? snippetFreeAutocomplete() : [],
+						),
+					});
+				}
+			},
+			[suggestions],
+		);
+
+		// The read view shows the SOLUTION in a read-only editor configured to
+		// match the write editor (currently colorize; the diff pair lands with the
+		// diff increment). Mounted only while reading; remounts on a colorize
+		// change (read-only, so a remount loses nothing).
+		useEffect(
+			function mountReadEditor() {
+				const host = readEditorContainer.current;
+				if (viewMode === 'read' && host) {
+					const state = EditorState.create({
+						doc: embodiment.source.code,
+						extensions: [
+							lineNumbers(),
+							drawSelection(),
+							keymap.of([...defaultKeymap]),
+							javascript(),
+							oneDarkTheme,
+							EditorView.editable.of(false),
+							EditorState.readOnly.of(true),
+							colorize ? syntaxHighlighting(oneDarkHighlightStyle) : [],
+						],
+					});
+					readEditorView.current = new EditorView({ state, parent: host });
+				}
+
+				return function cleanup() {
+					readEditorView.current?.destroy();
+					readEditorView.current = null;
+				};
+			},
+			[viewMode, colorize, embodiment.source.code],
 		);
 
 		return (
 			<div
 				data-lens="writeme"
 				data-view-mode={viewMode}
-				data-editor-mode={editorMode}
+				data-colorize={colorize}
+				data-suggestions={suggestions}
+				data-comments={keepComments}
+				data-diff={diff}
 				data-hints-mode={hintsMode}
 			>
-				<div data-writeme-toolbar role="toolbar" aria-label="View">
+				<div data-writeme-toolbar role="toolbar" aria-label="Editor controls">
 					<button
 						type="button"
 						data-view-toggle="write"
@@ -160,6 +277,30 @@ const WritemeComponent: ComponentType<LensProperties> =
 					>
 						Read
 					</button>
+					<div data-writeme-assist role="group" aria-label="Assist">
+						<label>
+							<input
+								type="checkbox"
+								data-assist-toggle="colorize"
+								checked={colorize}
+								onChange={function toggleColorize() {
+									setColorize(!colorize);
+								}}
+							/>{' '}
+							Colorize
+						</label>
+						<label>
+							<input
+								type="checkbox"
+								data-assist-toggle="suggestions"
+								checked={suggestions}
+								onChange={function toggleSuggestions() {
+									setSuggestions(!suggestions);
+								}}
+							/>{' '}
+							Suggestions
+						</label>
+					</div>
 				</div>
 				{/* The editor host stays mounted in BOTH views (hidden in read) so
 				    viewMode never enters the mount-effect deps and the learner's typed
@@ -171,12 +312,7 @@ const WritemeComponent: ComponentType<LensProperties> =
 				/>
 				{viewMode === 'read' && (
 					<figure data-writeme-solution-view>
-						<figcaption>
-							Read the solution, then return to Write and reproduce it from
-							memory. Write and Read are separate on purpose — you never type
-							with the solution in view.
-						</figcaption>
-						<pre data-writeme-solution>{embodiment.source.code}</pre>
+						<div ref={readEditorContainer} data-writeme-solution />
 					</figure>
 				)}
 			</div>

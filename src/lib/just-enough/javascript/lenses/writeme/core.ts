@@ -28,8 +28,10 @@ const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);
  * @remarks Defaults per `./README.md` § Public API and the `WritemeLensConfig`
  * JSDoc:
  * - `viewMode` → `'write'`
- * - `editorMode` → `'diff'`
+ * - `colorize` → `true`
+ * - `suggestions` → `false`
  * - `keepComments` → `true`
+ * - `diff` → `true`
  * - `hintsMode` → `'on'`
  *
  * @param overrides - Partial config from the educator's per-fence directive or
@@ -40,14 +42,16 @@ function config(overrides?: Partial<LensConfig>): LensConfig {
 	// `cloneAndFreeze` (not `freezeInPlace`) so a caller-supplied overrides
 	// object is NOT frozen as a side-effect. Spread preserves null/false
 	// overrides verbatim (vs the `??` / `||` anti-patterns). The `as LensConfig`
-	// cast widens the narrowly-typed default literal (e.g. `editorMode: 'diff'`
+	// cast widens the narrowly-typed default literal (e.g. `viewMode: 'write'`
 	// rather than `SerializableValue`) to the open-shape
 	// `Record<string, SerializableValue>` and crosses the
 	// `exactOptionalPropertyTypes` boundary (see blanks/core.ts for the rationale).
 	return cloneAndFreeze({
 		viewMode: 'write',
-		editorMode: 'diff',
+		colorize: true,
+		suggestions: false,
 		keepComments: true,
+		diff: true,
 		hintsMode: 'on',
 		...overrides,
 	}) as LensConfig;

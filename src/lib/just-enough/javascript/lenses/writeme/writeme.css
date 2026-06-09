@@ -1,9 +1,9 @@
 /*
  * Per-lens styles for the `writeme` lens. Scoped to `[data-lens='writeme']`
  * (NOT a CSS module) so they never leak into other lenses or Docusaurus
- * content blocks. The CodeMirror `oneDark` theme handles the editor chrome;
- * these rules frame the editor host, the view toolbar, and the read-view
- * solution panel (which reuses the oneDark palette so it reads as code).
+ * content blocks. The CodeMirror `oneDarkTheme` handles the editor chrome;
+ * these rules frame the write editor host, the view toolbar, the Assist
+ * checkboxes, and the read-view read-only solution editor.
  */
 
 [data-lens='writeme'] [data-writeme-toolbar] {
@@ -16,6 +16,20 @@
 [data-lens='writeme'] [data-view-toggle][aria-pressed='true'] {
 	font-weight: 600;
 	text-decoration: underline;
+}
+
+[data-lens='writeme'] [data-writeme-assist] {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-bottom: 0.5rem;
+}
+
+[data-lens='writeme'] [data-writeme-assist] label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	cursor: pointer;
 }
 
 [data-lens='writeme'] [data-writeme-editor-host] {
@@ -39,17 +53,12 @@
 	margin: 0;
 }
 
-[data-lens='writeme'] [data-writeme-solution-view] figcaption {
-	margin-bottom: 0.5rem;
-	font-size: 0.9rem;
+[data-lens='writeme'] [data-writeme-solution-view] [data-writeme-solution] {
+	border: 1px solid #464647;
+	border-radius: 4px;
+	overflow: hidden;
 }
 
-[data-lens='writeme'] [data-writeme-solution-view] pre {
-	margin: 0;
+[data-lens='writeme'] [data-writeme-solution-view] .cm-editor {
 	max-height: 60vh;
-	overflow: auto;
-	padding: 0.5rem;
-	border-radius: 4px;
-	background: #282c34;
-	color: #abb2bf;
 }

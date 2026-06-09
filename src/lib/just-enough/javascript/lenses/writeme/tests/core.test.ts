@@ -10,8 +10,16 @@ describe('writeme core', () => {
 				expect(writemeCore.config().viewMode).toBe('write');
 			});
 
-			it('editorMode defaults to diff', () => {
-				expect(writemeCore.config().editorMode).toBe('diff');
+			it('colorize defaults to true', () => {
+				expect(writemeCore.config().colorize).toBe(true);
+			});
+
+			it('suggestions defaults to false', () => {
+				expect(writemeCore.config().suggestions).toBe(false);
+			});
+
+			it('diff defaults to true', () => {
+				expect(writemeCore.config().diff).toBe(true);
 			});
 
 			it('keepComments defaults to true', () => {
@@ -28,10 +36,18 @@ describe('writeme core', () => {
 				expect(writemeCore.config({ viewMode: 'read' }).viewMode).toBe('read');
 			});
 
-			it('editorMode override wins', () => {
-				expect(writemeCore.config({ editorMode: 'raw' }).editorMode).toBe(
-					'raw',
+			it('diff false override wins over the true default', () => {
+				expect(writemeCore.config({ diff: false }).diff).toBe(false);
+			});
+
+			it('suggestions true override wins over the false default', () => {
+				expect(writemeCore.config({ suggestions: true }).suggestions).toBe(
+					true,
 				);
+			});
+
+			it('colorize false override wins over the true default', () => {
+				expect(writemeCore.config({ colorize: false }).colorize).toBe(false);
 			});
 
 			it('keepComments false override wins over the true default', () => {
@@ -45,17 +61,21 @@ describe('writeme core', () => {
 			});
 		});
 
-		describe('Many — all four fields overridden simultaneously', () => {
-			it('all four documented fields can be overridden in one call', () => {
+		describe('Many — all documented fields overridden simultaneously', () => {
+			it('all documented fields can be overridden in one call', () => {
 				const resolved = writemeCore.config({
 					viewMode: 'read',
-					editorMode: 'raw',
+					colorize: false,
+					suggestions: true,
 					keepComments: false,
+					diff: false,
 					hintsMode: 'off',
 				});
 				expect(resolved.viewMode).toBe('read');
-				expect(resolved.editorMode).toBe('raw');
+				expect(resolved.colorize).toBe(false);
+				expect(resolved.suggestions).toBe(true);
 				expect(resolved.keepComments).toBe(false);
+				expect(resolved.diff).toBe(false);
 				expect(resolved.hintsMode).toBe('off');
 			});
 		});
@@ -84,7 +104,7 @@ describe('writeme core', () => {
 			});
 
 			it('does not freeze the caller-supplied overrides object', () => {
-				const input = { editorMode: 'raw' as const };
+				const input = { diff: false as const };
 				writemeCore.config(input);
 				expect(Object.isFrozen(input)).toBe(false);
 			});
