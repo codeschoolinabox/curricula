@@ -179,20 +179,22 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
      data-comments="true|false"
      data-diff="true|false"
      data-hints-mode="on|off">
-  <div data-writeme-toolbar role="toolbar"> — view + assist controls (one row)
-    <button data-view-toggle="write">  —   editable reconstruction surface
-    <button data-view-toggle="read">   —   the read-only solution editor (paired)
-    <div data-writeme-assist role="group"> — four scaffold checkboxes (BOTH views):
+  <div data-writeme-toolbar role="toolbar"> — three zones: views | assist | actions
+    <div data-writeme-views role="group"> — the Write/Read view switch (segmented pair)
+      <button data-view-toggle="write">  —   editable reconstruction surface
+      <button data-view-toggle="read">   —   the read-only solution editor (paired)
+    <div data-writeme-assist role="group"> — four scaffold checkboxes (BOTH views; fenced):
       <input type=checkbox data-assist-toggle="colorize">    — syntax highlighting on / off
       <input type=checkbox data-assist-toggle="suggestions"> — autocomplete (keyword and local) on / off
       <input type=checkbox data-assist-toggle="comments">    — seed comment skeleton vs blank slate
       <input type=checkbox data-assist-toggle="diff">        — per-line feedback overlay on / off
-    <button data-hints-toggle>         —   show / hide the hints panel
-    <button data-check>                —   report "X / N code lines reproduced"
-    <button data-reset>                —   restore the starting template, clear feedback
-    <span data-writeme-reseed-pending> —   "Reset to apply" — present ONLY when a
-                                            comments toggle landed on a diverged
-                                            editor (the re-seed is deferred to Reset)
+    <div data-writeme-actions>             — trailing zone (pushed to the right edge):
+      <button data-hints-toggle>         —   show / hide the hints panel
+      <button data-check>                —   report "X / N code lines reproduced"
+      <button data-reset>                —   restore the starting template, clear feedback
+      <span data-writeme-reseed-pending> —   "Reset to apply" — present ONLY when a
+                                              comments toggle landed on a diverged
+                                              editor (the re-seed is deferred to Reset)
   — write view (data-view-mode="write") —
   <div data-writeme-editor-host>       —   CodeMirror editor (editable, paste-blocked;
                                             diff adds per-line highlight)
@@ -208,8 +210,10 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 ```
 
 The `data-lens` attribute is the lenses-peer invariant (see
-[`../DOCS.md` § Structural constraints](../DOCS.md)). All `data-writeme-*` /
-`data-view-toggle` / `data-assist-toggle` / `data-hints-toggle` / `data-reset` /
+[`../DOCS.md` § Structural constraints](../DOCS.md)). All `data-writeme-*`
+(including the three toolbar-zone wrappers `data-writeme-views` /
+`data-writeme-assist` / `data-writeme-actions`) / `data-view-toggle` /
+`data-assist-toggle` / `data-hints-toggle` / `data-reset` /
 `data-writeme-reseed-pending` / `data-check` hooks are sandbox-harness selectors
 and CSS hooks; renaming any is a contract change. The four scaffold booleans
 (`data-colorize`, `data-suggestions`, `data-comments`, `data-diff`) and

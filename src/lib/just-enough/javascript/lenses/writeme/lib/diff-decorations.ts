@@ -1,6 +1,8 @@
 /**
  * @file NEW — CodeMirror decoration glue for the `diff` scaffold. Maps the pure
- * per-line verdict from `./diff-lines.ts` onto CodeMirror line decorations.
+ * per-line verdict from `./diff-lines.ts` onto CodeMirror line decorations. Both
+ * halves of the diff PAIR live here (one cohesive feature, sharing `diffLines`,
+ * the `index + 1` line mapping, and the `cm-writeme-*-line` idiom):
  *
  * - {@link buildWriteDiffField} — a self-recomputing `StateField` for the WRITE
  *   editor. On every doc change it recomputes `diffLines(doc, solution)` and
@@ -8,6 +10,11 @@
  *   `'empty'` (unattempted) and `'comment'` (freebie) lines stay NEUTRAL — only
  *   typed-but-wrong lines are flagged. The field captures the solution at
  *   construction; the editor's live document is the learner's code.
+ * - {@link buildReadMarkerField} — a STATIC `StateField` for the read-only READ
+ *   editor (whose document IS the solution). It marks every solution line the
+ *   learner has not yet reproduced (`'diff'` OR `'empty'` — the complement of
+ *   `'match'`/`'comment'`); computed once from the learner's progress captured at
+ *   read-view entry, never recomputed (the read doc never changes).
  *
  * Why a `StateField` (not React-pushed decorations): the write editor mounts once
  * and the learner types into it continuously; recomputing from `tr.state` inside
@@ -81,4 +88,64 @@ function buildWriteDiffField(solution: string): StateField<DecorationSet> {
 	});
 }
 
+// The read-view "diff pair" marker: a SOLUTION line the learner has not yet
+// reproduced (typed-but-wrong OR not-yet-typed). Distinct from the write editor's
+// "wrong" red — this is a study cue ON the solution that focuses what is still
+// missing, never a view of the learner's code.
+const todoLineDecoration = Decoration.line({ class: 'cm-writeme-todo-line' });
+
+/**
+ * Map the learner's progress onto markers on the READ-view solution editor: one
+ * zero-width `Decoration.line` per solution code line the learner has NOT matched
+ * (`'diff'` or `'empty'` — i.e. anything but `'match'`). `'comment'` freebie lines
+ * are never marked; matched lines are left clean (done). The read editor's doc IS
+ * the solution, so `perLine.length === state.doc.lines` and the `index + 1`
+ * mapping always resolves (the guard mirrors the write field for symmetry).
+ */
+function computeReadMarkerDecorations(
+	state: EditorState,
+	learner: string,
+	solution: string,
+): DecorationSet {
+	const { perLine } = diffLines(learner, solution);
+	const ranges = perLine.flatMap((status, index) =>
+		(status === 'diff' || status === 'empty') && index + 1 <= state.doc.lines
+			? [todoLineDecoration.range(state.doc.line(index + 1).from)]
+			: [],
+	);
+	return Decoration.set(ranges, true);
+}
+
+/**
+ * Build the read-editor "diff pair" marker field. Unlike the write field this is
+ * STATIC — the read editor is read-only, so its document (the solution) never
+ * changes; the markers are computed once from the learner's progress captured at
+ * read-view entry. Recompute happens by remounting the read editor (the wrapper
+ * keys the read mount on `viewMode` / `diff`), not by a doc transaction.
+ *
+ * @param learner - the learner's current code (`learnerCode ?? startingTemplate`).
+ * @param solution - the original source (the read editor's document).
+ * @returns a `StateField<DecorationSet>` (also a CodeMirror `Extension`): add it to
+ *   the read editor, or read it off an `EditorState` via `state.field(returnedField)`
+ *   to inspect the marker set in a test.
+ */
+function buildReadMarkerField(
+	learner: string,
+	solution: string,
+): StateField<DecorationSet> {
+	return StateField.define<DecorationSet>({
+		create(state) {
+			return computeReadMarkerDecorations(state, learner, solution);
+		},
+		// Static: the read editor is read-only, so its document never changes.
+		// `update` returns the prior set verbatim (no recompute) — the markers are
+		// fixed at read-view entry; progress changes by remounting the read editor.
+		update(value) {
+			return value;
+		},
+		provide: (field) => EditorView.decorations.from(field),
+	});
+}
+
 export default buildWriteDiffField;
+export { buildReadMarkerField };

@@ -585,6 +585,33 @@ describe('writeme wrapper — scaffold toggles (compartments)', () => {
 		});
 	});
 
+	it('keeps the read editor showing the solution across a diff toggle in read view (6e-rb-2)', async () => {
+		// The diff PAIR adds `diff` to the read-editor mount deps, so toggling diff
+		// in read view remounts it. Prove the remount is lossless (solution still
+		// shown); the marker visual itself is browser-gate (see describe.skip below).
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config({ viewMode: 'read' })}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-solution-view] .cm-content')
+					?.textContent,
+			).toContain('const x = 1;');
+		});
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="diff"]') as Element,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-solution-view] .cm-content')
+					?.textContent,
+			).toContain('const x = 1;');
+		});
+	});
+
 	// ─── diff toggle (6e-rb-1) — write-editor overlay wiring ───
 	// WHICH lines the StateField decorates is unit-tested in
 	// tests/diff-decorations.test.ts; here we prove only the toggle's wiring.
@@ -666,6 +693,16 @@ describe.skip('diff overlay — visual render (browser gate; jsdom has no CodeMi
 		'correcting the line clears the highlight live (self-recomputing field)',
 	);
 	it.todo('toggling diff off removes all highlights; paste stays blocked');
+});
+
+describe.skip('read-view diff pair — visual render (browser gate; jsdom has no CodeMirror layout)', () => {
+	it.todo(
+		'in read view with diff on, un-reproduced solution lines show .cm-writeme-todo-line',
+	);
+	it.todo('toggling diff off in read view removes the todo-line markers');
+	it.todo(
+		'switching write → read captures the learner’s progress at that moment',
+	);
 });
 
 describe('writeme wrapper — comments toggle + reset (6c-rb)', () => {

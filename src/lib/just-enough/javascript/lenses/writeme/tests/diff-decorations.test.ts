@@ -18,12 +18,26 @@
 import { EditorState } from '@codemirror/state';
 import { describe, expect, it } from 'vitest';
 
-import buildWriteDiffField from '../lib/diff-decorations.js';
+import buildWriteDiffField, {
+	buildReadMarkerField,
+} from '../lib/diff-decorations.js';
 
 /** The 1-based line numbers that carry a diff decoration, in document order. */
 function decoratedLines(doc: string, solution: string): number[] {
 	const field = buildWriteDiffField(solution);
 	const state = EditorState.create({ doc, extensions: [field] });
+	const lines: number[] = [];
+	state.field(field).between(0, state.doc.length, (from) => {
+		lines.push(state.doc.lineAt(from).number);
+	});
+	return lines;
+}
+
+/** The 1-based solution lines marked as not-yet-reproduced, in document order. */
+function markedLines(learner: string, solution: string): number[] {
+	const field = buildReadMarkerField(learner, solution);
+	// The read editor's document IS the solution.
+	const state = EditorState.create({ doc: solution, extensions: [field] });
 	const lines: number[] = [];
 	state.field(field).between(0, state.doc.length, (from) => {
 		lines.push(state.doc.lineAt(from).number);
@@ -156,5 +170,88 @@ describe('buildWriteDiffField — write-editor diff decorations', () => {
 			linesAfter.push(moved.doc.lineAt(from).number);
 		});
 		expect(linesAfter).toEqual([1]);
+	});
+});
+
+describe('buildReadMarkerField — read-view diff-pair markers', () => {
+	// Marks every SOLUTION code line the learner has NOT matched ('diff' OR
+	// 'empty'). Contrast the write field, which flags only 'diff'. Comment/freebie
+	// lines and matched lines are never marked. The learner's code is never shown —
+	// markers live on the solution editor as a study cue.
+
+	it('returns an empty set for an empty solution (Zero)', () => {
+		expect(markedLines('', '')).toEqual([]);
+	});
+
+	it('marks every code line when the learner has typed nothing (all to-do)', () => {
+		// Learner is the comment skeleton: comment kept, code lines blank.
+		const solution = '// header\nconst x = 1;\nconst y = 2;';
+		const learner = '// header\n\n';
+		expect(markedLines(learner, solution)).toEqual([2, 3]);
+	});
+
+	it('marks no lines when the learner has reproduced every code line (all done)', () => {
+		const solution = '// header\nconst x = 1;\nconst y = 2;';
+		const learner = '// header\nconst x = 1;\nconst y = 2;';
+		expect(markedLines(learner, solution)).toEqual([]);
+	});
+
+	it('marks a not-yet-typed FIRST code line (index 0 → line 1)', () => {
+		const solution = 'const a = 1;\nconst b = 2;';
+		const learner = '\nconst b = 2;';
+		expect(markedLines(learner, solution)).toEqual([1]);
+	});
+
+	it('marks only the un-reproduced code lines (partial progress)', () => {
+		const solution = 'const a = 1;\nconst b = 2;\nconst c = 3;';
+		const learner = 'const a = 1;\n\nconst c = 3;';
+		expect(markedLines(learner, solution)).toEqual([2]);
+	});
+
+	it('marks a typed-but-wrong line — it is "not yet matched" too', () => {
+		// The KEY distinction from the write field: there, only typed-but-wrong is
+		// flagged; here, BOTH typed-wrong and not-yet-typed count as un-reproduced.
+		const solution = 'const a = 1;\nconst b = 2;';
+		const learner = 'const a = 1;\nconst b = 9;';
+		expect(markedLines(learner, solution)).toEqual([2]);
+	});
+
+	it('never marks a comment/freebie line', () => {
+		const solution = '// header\nconst x = 1;';
+		const learner = '// CHANGED\nconst x = 1;';
+		expect(markedLines(learner, solution)).toEqual([]);
+	});
+
+	it('skips a comment line while marking its un-reproduced code neighbors', () => {
+		// A comment-inclusion mutant would return [1, 2, 3]; the comment (line 2)
+		// must be skipped while the empty code lines 1 and 3 are still marked.
+		const solution = 'const a = 1;\n// comment\nconst c = 3;';
+		const learner = '\n// comment\n';
+		expect(markedLines(learner, solution)).toEqual([1, 3]);
+	});
+
+	it('marks both not-typed and typed-wrong lines together (Many)', () => {
+		// The keystone: simultaneously kills the diff-only mutant (-> [1]), the
+		// empty-only mutant (-> [2]), and the match-inclusion mutant (-> [1,2,3]).
+		const solution = 'const a = 1;\nconst b = 2;\nconst c = 3;';
+		const learner = 'const a = 9;\n\nconst c = 3;';
+		expect(markedLines(learner, solution)).toEqual([1, 2]);
+	});
+
+	it('is a STATIC field — a doc change never recomputes the marker set', () => {
+		// The read editor is read-only, so its document never changes in
+		// production; `update` returns the prior value verbatim. This pins that
+		// contract (and catches an accidental copy of the write field's
+		// recompute-on-docChanged `update`): a synthetic doc edit must leave the
+		// SAME DecorationSet object in place (reference equality), not a rebuild.
+		const solution = 'const x = 1;';
+		const field = buildReadMarkerField('', solution); // line 1 un-typed -> marked
+		const state = EditorState.create({ doc: solution, extensions: [field] });
+		const before = state.field(field);
+		expect(before.size).toBe(1);
+		const after = state.update({
+			changes: { from: 0, to: state.doc.length, insert: 'const x = 1;' },
+		}).state;
+		expect(after.field(field)).toBe(before); // same object — no recompute
 	});
 });

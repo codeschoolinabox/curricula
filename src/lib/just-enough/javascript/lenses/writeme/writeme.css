@@ -6,11 +6,25 @@
  * checkboxes, and the read-view read-only solution editor.
  */
 
+/*
+ * The toolbar reads as three distinct zones, left to right:
+ *   [ Write | Read ]  |  [ Colorize  Suggestions  Comments  Diff ]  ⟶  [ Reset ]
+ *   views (segmented)    assist (fenced by dividers)                   actions (trailing)
+ * so the view switch, the scaffold toggles, and the destructive Reset never read
+ * as one undifferentiated row of controls.
+ */
 [data-lens='writeme'] [data-writeme-toolbar] {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.5rem;
+	align-items: center;
+	gap: 0.75rem;
 	margin-bottom: 0.5rem;
+}
+
+/* Zone 1 — the Write/Read view switch, a tight segmented pair. */
+[data-lens='writeme'] [data-writeme-views] {
+	display: inline-flex;
+	gap: 0.25rem;
 }
 
 [data-lens='writeme'] [data-view-toggle][aria-pressed='true'] {
@@ -18,11 +32,22 @@
 	text-decoration: underline;
 }
 
+/* Zone 2 — the Assist toggles, fenced off from the view switch and actions. */
 [data-lens='writeme'] [data-writeme-assist] {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.75rem;
-	margin-bottom: 0.5rem;
+	padding: 0 0.75rem;
+	border-left: 1px solid #464647;
+	border-right: 1px solid #464647;
+}
+
+/* Zone 3 — Reset (and its "Reset to apply" hint), pushed to the trailing edge. */
+[data-lens='writeme'] [data-writeme-actions] {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-left: auto;
 }
 
 [data-lens='writeme'] [data-writeme-assist] label {
@@ -52,6 +77,18 @@
 [data-lens='writeme'] .cm-writeme-diff-line {
 	background-color: rgba(244, 67, 54, 0.13);
 	box-shadow: inset 2px 0 0 0 rgba(244, 67, 54, 0.7);
+}
+
+/*
+ * Read-view diff pair (the `diff` scaffold). A `Decoration.line` from the
+ * read-only solution editor's marker field flags each solution line the learner
+ * has NOT yet reproduced (typed-wrong OR not-yet-typed) — a study cue on the
+ * solution that focuses what is still missing. Amber, distinct from the write
+ * editor's "wrong" red: this is "still to reproduce", not "incorrect".
+ */
+[data-lens='writeme'] .cm-writeme-todo-line {
+	background-color: rgba(255, 193, 7, 0.12);
+	box-shadow: inset 2px 0 0 0 rgba(255, 193, 7, 0.75);
 }
 
 /* Defensive: in read view the host carries the `hidden` attribute; pin

@@ -6,8 +6,9 @@
  * synchronously from the comment skeleton) under a `data-lens="writeme"` root; a
  * Write/Read view toggle (read = solution-only study surface); and the four Assist
  * toggles — colorize + suggestions + diff (live compartment reconfigure) and
- * comments (pristine-gated doc re-seed). The diff overlay highlights typed-but-wrong
- * lines on the WRITE editor; the read-view diff PAIR, the hints panel, and the
+ * comments (pristine-gated doc re-seed). The diff is a pair: it highlights
+ * typed-but-wrong lines on the WRITE editor, and marks the solution lines the
+ * learner has not yet reproduced on the READ editor. The hints panel and the
  * honest Check + instructions land in later increments.
  *
  * The CodeMirror `EditorView` is imperatively mounted ONCE in a `useEffect`
@@ -43,7 +44,9 @@ import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import writemeCore from './core.js';
 import commentSkeleton from './lib/comment-skeleton.js';
-import buildWriteDiffField from './lib/diff-decorations.js';
+import buildWriteDiffField, {
+	buildReadMarkerField,
+} from './lib/diff-decorations.js';
 import noPasteExtension from './lib/no-paste-extension.js';
 import snippetFreeAutocomplete from './lib/snippet-free-autocomplete.js';
 import type { HintsMode, ViewMode } from './types.js';
@@ -255,9 +258,10 @@ const WritemeComponent: ComponentType<LensProperties> =
 		);
 
 		// The read view shows the SOLUTION in a read-only editor configured to
-		// match the write editor (currently colorize; the read-view diff PAIR lands
-		// with the next increment, 6e-rb-2). Mounted only while reading; remounts on
-		// a colorize change (read-only, so a remount loses nothing).
+		// match the write editor (mirrors colorize; and, when diff is on, the diff
+		// PAIR — markers on the solution lines the learner has not yet reproduced).
+		// Mounted only while reading; remounts on a colorize or diff change
+		// (read-only, so a remount loses nothing).
 		useEffect(
 			function mountReadEditor() {
 				const host = readEditorContainer.current;
@@ -273,6 +277,18 @@ const WritemeComponent: ComponentType<LensProperties> =
 							EditorView.editable.of(false),
 							EditorState.readOnly.of(true),
 							colorize ? syntaxHighlighting(oneDarkHighlightStyle) : [],
+							// The diff PAIR: mark the solution lines the learner has NOT
+							// yet reproduced (their progress captured at read-view entry —
+							// `learnerCode` or, if untouched, the starting template). Static
+							// markers; a diff toggle remounts this read-only editor. The
+							// learner's code is never shown — only solution-side markers.
+							diff
+								? buildReadMarkerField(
+										learnerCodeReference.current ??
+											startingTemplateReference.current,
+										embodiment.source.code,
+									)
+								: [],
 						],
 					});
 					readEditorView.current = new EditorView({ state, parent: host });
@@ -283,7 +299,7 @@ const WritemeComponent: ComponentType<LensProperties> =
 					readEditorView.current = null;
 				};
 			},
-			[viewMode, colorize, embodiment.source.code],
+			[viewMode, colorize, diff, embodiment.source.code],
 		);
 
 		// Re-seed the LIVE write editor (a doc dispatch, NOT a remount). Used by the
@@ -333,26 +349,28 @@ const WritemeComponent: ComponentType<LensProperties> =
 				data-hints-mode={hintsMode}
 			>
 				<div data-writeme-toolbar role="toolbar" aria-label="Editor controls">
-					<button
-						type="button"
-						data-view-toggle="write"
-						aria-pressed={viewMode === 'write'}
-						onClick={function selectWriteView() {
-							setViewMode('write');
-						}}
-					>
-						Write
-					</button>
-					<button
-						type="button"
-						data-view-toggle="read"
-						aria-pressed={viewMode === 'read'}
-						onClick={function selectReadView() {
-							setViewMode('read');
-						}}
-					>
-						Read
-					</button>
+					<div data-writeme-views role="group" aria-label="View">
+						<button
+							type="button"
+							data-view-toggle="write"
+							aria-pressed={viewMode === 'write'}
+							onClick={function selectWriteView() {
+								setViewMode('write');
+							}}
+						>
+							Write
+						</button>
+						<button
+							type="button"
+							data-view-toggle="read"
+							aria-pressed={viewMode === 'read'}
+							onClick={function selectReadView() {
+								setViewMode('read');
+							}}
+						>
+							Read
+						</button>
+					</div>
 					<div data-writeme-assist role="group" aria-label="Assist">
 						<label>
 							<input
@@ -397,12 +415,18 @@ const WritemeComponent: ComponentType<LensProperties> =
 							Diff
 						</label>
 					</div>
-					<button type="button" data-reset onClick={resetWriteEditor}>
-						Reset
-					</button>
-					{keepComments !== appliedKeepComments && (
-						<span data-writeme-reseed-pending>Reset to apply</span>
-					)}
+					{/* Actions zone is a layout-only wrapper (no role="group", unlike the
+					    views/assist zones): a lone Reset button + its status span is not a
+					    semantic group, and grouping a single control would announce a
+					    meaningless boundary to assistive tech. */}
+					<div data-writeme-actions>
+						<button type="button" data-reset onClick={resetWriteEditor}>
+							Reset
+						</button>
+						{keepComments !== appliedKeepComments && (
+							<span data-writeme-reseed-pending>Reset to apply</span>
+						)}
+					</div>
 				</div>
 				{/* The editor host stays mounted in BOTH views (hidden in read) so
 				    viewMode never enters the mount-effect deps and the learner's typed
