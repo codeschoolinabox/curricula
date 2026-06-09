@@ -42,6 +42,18 @@
 	max-height: 60vh;
 }
 
+/*
+ * Diff overlay (the `diff` scaffold). A `Decoration.line` from the write-editor
+ * diff StateField marks each typed-but-wrong code line — only `diff`-status
+ * lines; `empty` (unattempted) and `comment` (freebie) lines stay neutral.
+ * Whole-line, so subtler than the `blanks` char-tint: a faint red wash plus an
+ * inset left bar reads as "this line is wrong" without drowning the dark theme.
+ */
+[data-lens='writeme'] .cm-writeme-diff-line {
+	background-color: rgba(244, 67, 54, 0.13);
+	box-shadow: inset 2px 0 0 0 rgba(244, 67, 54, 0.7);
+}
+
 /* Defensive: in read view the host carries the `hidden` attribute; pin
  * display:none so a theme reset that overrides [hidden] can't leak the editor
  * into the read view (the [I1] mutual-exclusivity contract). */

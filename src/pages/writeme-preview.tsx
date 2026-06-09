@@ -40,17 +40,19 @@ export default function WritemePreview(): React.JSX.Element {
 	return (
 		<Layout title="writeme preview" description="WS4 writeme lens harness">
 			<main style={{ maxWidth: 860, margin: '2rem auto', padding: '0 1rem' }}>
-				<h1>writeme lens preview (WS4 — Inc 6b)</h1>
+				<h1>writeme lens preview (WS4 — Inc 6e-rb-1)</h1>
 				<p>
-					Through Inc 6b: a <strong>paste-blocked</strong> CodeMirror editor
-					seeded from the <strong>comment skeleton</strong> (Keep Comments
-					default on — comments stay, code lines are blanked), plus a{' '}
-					<strong>Write / Read</strong> toggle. Read shows the{' '}
-					<strong>solution alone</strong> to study and memorize — Write and Read
-					are mutually exclusive (read → remember → type; you never type with
-					the solution in view). Keep-comments + reset (6c), diff highlighting
-					(6d), hints (6e), and the honest Check + instructions (6f) land in
-					later increments.
+					A <strong>paste-blocked</strong> CodeMirror editor seeded from the{' '}
+					<strong>comment skeleton</strong> (Comments default on — comments stay,
+					code lines are blanked), a <strong>Write / Read</strong> toggle (Read
+					shows the <strong>solution alone</strong> to study; Write and Read are
+					mutually exclusive — read → remember → type), and four orthogonal{' '}
+					<strong>Assist</strong> toggles: Colorize, Suggestions, Comments
+					(pristine-gated re-seed + Reset), and <strong>Diff</strong>. Diff
+					highlights each <strong>typed-but-wrong</strong> line live on the write
+					editor (unattempted blank lines stay neutral). The read-view diff{' '}
+					<em>pair</em>, the hints panel, and the honest Check + instructions land
+					in later increments.
 				</p>
 
 				<label style={{ display: 'block', marginBottom: 8 }}>

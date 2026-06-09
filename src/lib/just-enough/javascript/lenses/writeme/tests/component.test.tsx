@@ -584,6 +584,88 @@ describe('writeme wrapper — scaffold toggles (compartments)', () => {
 			).toContain('const x = 1;');
 		});
 	});
+
+	// ─── diff toggle (6e-rb-1) — write-editor overlay wiring ───
+	// WHICH lines the StateField decorates is unit-tested in
+	// tests/diff-decorations.test.ts; here we prove only the toggle's wiring.
+
+	it('renders the Diff checkbox, checked by default', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		const diffToggle = container.querySelector(
+			'[data-assist-toggle="diff"]',
+		) as HTMLInputElement | null;
+		expect(diffToggle?.getAttribute('type')).toBe('checkbox');
+		expect(diffToggle?.checked).toBe(true);
+	});
+
+	it('leaves the Diff checkbox unchecked when diff is overridden off', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config({ diff: false })}
+			/>,
+		);
+		expect(
+			(
+				container.querySelector(
+					'[data-assist-toggle="diff"]',
+				) as HTMLInputElement
+			).checked,
+		).toBe(false);
+	});
+
+	it('toggling diff flips data-diff on the root', () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="diff"]') as Element,
+		);
+		expect(
+			container
+				.querySelector('[data-lens="writeme"]')
+				?.getAttribute('data-diff'),
+		).toBe('false');
+	});
+
+	it('toggling diff reconfigures the editor in place (no remount)', async () => {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('const x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-editor'),
+			).not.toBeNull();
+		});
+		const before = container.querySelector(
+			'[data-writeme-editor-host] .cm-editor',
+		);
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="diff"]') as Element,
+		);
+		expect(
+			container.querySelector('[data-writeme-editor-host] .cm-editor'),
+		).toBe(before);
+	});
+});
+
+describe.skip('diff overlay — visual render (browser gate; jsdom has no CodeMirror layout)', () => {
+	it.todo('a typed-but-wrong line shows the .cm-writeme-diff-line highlight');
+	it.todo(
+		'correcting the line clears the highlight live (self-recomputing field)',
+	);
+	it.todo('toggling diff off removes all highlights; paste stays blocked');
 });
 
 describe('writeme wrapper — comments toggle + reset (6c-rb)', () => {

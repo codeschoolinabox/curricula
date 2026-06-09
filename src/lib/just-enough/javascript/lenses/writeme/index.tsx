@@ -4,10 +4,11 @@
  *
  * Scope so far: the write-view CodeMirror editor (editable, paste-blocked, seeded
  * synchronously from the comment skeleton) under a `data-lens="writeme"` root; a
- * Write/Read view toggle (read = solution-only study surface); and the colorize +
- * suggestions Assist toggles (live compartment reconfigure). The comments + diff
- * Assist toggles, the hints panel, and the honest Check + instructions land in
- * later increments.
+ * Write/Read view toggle (read = solution-only study surface); and the four Assist
+ * toggles — colorize + suggestions + diff (live compartment reconfigure) and
+ * comments (pristine-gated doc re-seed). The diff overlay highlights typed-but-wrong
+ * lines on the WRITE editor; the read-view diff PAIR, the hints panel, and the
+ * honest Check + instructions land in later increments.
  *
  * The CodeMirror `EditorView` is imperatively mounted ONCE in a `useEffect`
  * (deps `[]`); per the lenses-peer anti-regression invariant the learner's edits
@@ -42,6 +43,7 @@ import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import writemeCore from './core.js';
 import commentSkeleton from './lib/comment-skeleton.js';
+import buildWriteDiffField from './lib/diff-decorations.js';
 import noPasteExtension from './lib/no-paste-extension.js';
 import snippetFreeAutocomplete from './lib/snippet-free-autocomplete.js';
 import type { HintsMode, ViewMode } from './types.js';
@@ -78,14 +80,20 @@ const WritemeComponent: ComponentType<LensProperties> =
 		const [appliedKeepComments, setAppliedKeepComments] = useState<boolean>(
 			resolved.keepComments !== false,
 		);
-		const diff = resolved.diff !== false;
+		const [diff, setDiff] = useState<boolean>(resolved.diff !== false);
 		const hintsMode: HintsMode = resolved.hintsMode === 'off' ? 'off' : 'on';
-		// Mirror colorize/suggestions into refs so the mount effect seeds the
+		// Mirror colorize/suggestions/diff into refs so the mount effect seeds the
 		// compartments at mount without listing them as deps (which would remount).
 		const colorizeReference = useRef(colorize);
 		colorizeReference.current = colorize;
 		const suggestionsReference = useRef(suggestions);
 		suggestionsReference.current = suggestions;
+		const diffReference = useRef(diff);
+		diffReference.current = diff;
+		// The solution to diff against, mirrored into a ref so the mount effect and
+		// the diff reconfigure can read it without a remount-forcing dep.
+		const solutionReference = useRef(embodiment.source.code);
+		solutionReference.current = embodiment.source.code;
 
 		// The starting template — comment skeleton (scaffolding) or blank slate —
 		// computed SYNCHRONOUSLY so the editor's first paint already shows it (no
@@ -116,10 +124,12 @@ const WritemeComponent: ComponentType<LensProperties> =
 		const compartments = useRef<{
 			colorize: Compartment;
 			suggestions: Compartment;
+			diff: Compartment;
 		} | null>(null);
 		compartments.current ??= {
 			colorize: new Compartment(),
 			suggestions: new Compartment(),
+			diff: new Compartment(),
 		};
 
 		useEffect(
@@ -175,6 +185,14 @@ const WritemeComponent: ComponentType<LensProperties> =
 							compartment.suggestions.of(
 								suggestionsReference.current ? snippetFreeAutocomplete() : [],
 							),
+							// The diff overlay: a self-recomputing StateField (highlights
+							// typed-but-wrong lines, recomputed from the live doc). Empty
+							// when diff is off; the reconfigure effect swaps it live.
+							compartment.diff.of(
+								diffReference.current
+									? buildWriteDiffField(solutionReference.current)
+									: [],
+							),
 						],
 					});
 					editorView.current = new EditorView({ state, parent: host });
@@ -221,11 +239,25 @@ const WritemeComponent: ComponentType<LensProperties> =
 			},
 			[suggestions],
 		);
+		useEffect(
+			function reconfigureDiff() {
+				const view = editorView.current;
+				const compartment = compartments.current;
+				if (view && compartment) {
+					view.dispatch({
+						effects: compartment.diff.reconfigure(
+							diff ? buildWriteDiffField(solutionReference.current) : [],
+						),
+					});
+				}
+			},
+			[diff],
+		);
 
 		// The read view shows the SOLUTION in a read-only editor configured to
-		// match the write editor (currently colorize; the diff pair lands with the
-		// diff increment). Mounted only while reading; remounts on a colorize
-		// change (read-only, so a remount loses nothing).
+		// match the write editor (currently colorize; the read-view diff PAIR lands
+		// with the next increment, 6e-rb-2). Mounted only while reading; remounts on
+		// a colorize change (read-only, so a remount loses nothing).
 		useEffect(
 			function mountReadEditor() {
 				const host = readEditorContainer.current;
@@ -352,6 +384,17 @@ const WritemeComponent: ComponentType<LensProperties> =
 								onChange={toggleComments}
 							/>{' '}
 							Comments
+						</label>
+						<label>
+							<input
+								type="checkbox"
+								data-assist-toggle="diff"
+								checked={diff}
+								onChange={function toggleDiff() {
+									setDiff(!diff);
+								}}
+							/>{' '}
+							Diff
 						</label>
 					</div>
 					<button type="button" data-reset onClick={resetWriteEditor}>
