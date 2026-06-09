@@ -1,14 +1,22 @@
 /**
  * @vitest-environment jsdom
  *
- * Component (wiring) tests for the `writeme` React wrapper. jsdom does NOT
- * implement real CodeMirror interaction (typing, paste events, contenteditable
- * selection) — these prove the wrapper MOUNTS, seeds its editor, and exposes its
- * data-* contract; real paste-blocking / diff / typing behavior is verified at
- * the browser checkpoint, not here.
+ * Component (wiring) tests for the `writeme` React wrapper. jsdom does NOT render
+ * CodeMirror's visual layer (the diff/marker highlights, the completion popup) or
+ * dispatch real keystroke/paste events — those are browser-gated. But editor
+ * DOCUMENT changes CAN be driven via `view.dispatch` off `EditorView.findFromDOM`,
+ * so doc-level behaviour (re-seed, the pristine-gate, learnerCode mirroring) IS
+ * exercised here, not deferred.
  */
 
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { EditorView } from '@codemirror/view';
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	waitFor,
+} from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -16,6 +24,29 @@ import embody from '../../../embody/index.js';
 import writemeLens from '../index.js';
 
 afterEach(cleanup);
+
+/** The mounted write-view CodeMirror EditorView (write view only). */
+function writeView(container: HTMLElement): EditorView {
+	const content = container.querySelector(
+		'[data-writeme-editor-host] .cm-content',
+	);
+	const view = content && EditorView.findFromDOM(content as HTMLElement);
+	if (!view) throw new Error('write EditorView not found');
+	return view;
+}
+
+/**
+ * Drive the learner's editor to divergent content via a CM dispatch (NOT
+ * keystrokes — jsdom can't type, but it can dispatch). Wrapped in `act` so the
+ * updateListener's setLearnerCode round-trip commits before the next assertion.
+ */
+function divergeEditor(view: EditorView, content: string): void {
+	act(() => {
+		view.dispatch({
+			changes: { from: 0, to: view.state.doc.length, insert: content },
+		});
+	});
+}
 
 describe('writeme wrapper — Inc 6a (mount)', () => {
 	describe('Zero — degenerate snippets do not crash', () => {
@@ -870,14 +901,61 @@ describe('writeme wrapper — comments toggle + reset (6c-rb)', () => {
 	});
 });
 
-describe.skip('comments + reset — diverged-editor behavior (browser gate; jsdom cannot type into CodeMirror)', () => {
-	it.todo(
-		'toggling comments while the learner has typed divergent code does NOT clobber it',
-	);
-	it.todo(
-		'a comments toggle on a diverged editor surfaces the "Reset to apply" affordance',
-	);
-	it.todo(
-		'Reset restores the starting template after the learner has diverged',
-	);
+describe('comments + reset — diverged-editor behavior (doc driven via dispatch)', () => {
+	async function mountAndDiverge(content: string): Promise<HTMLElement> {
+		const { container } = render(
+			<writemeLens.Component
+				embodiment={embody('// hi\nconst x = 1;')}
+				config={writemeLens.config()}
+			/>,
+		);
+		await waitFor(() => {
+			expect(
+				container.querySelector('[data-writeme-editor-host] .cm-editor'),
+			).not.toBeNull();
+		});
+		divergeEditor(writeView(container), content);
+		return container;
+	}
+
+	it('toggling comments while the learner has typed divergent code does NOT clobber it', async () => {
+		const container = await mountAndDiverge('const learnerTyped = 99;');
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="comments"]') as Element,
+		);
+		// Pristine gate fails (doc diverged) → no re-seed → typed work survives.
+		expect(
+			container.querySelector('[data-writeme-editor-host] .cm-content')
+				?.textContent,
+		).toContain('const learnerTyped = 99;');
+		expect(
+			container
+				.querySelector('[data-lens="writeme"]')
+				?.getAttribute('data-comments'),
+		).toBe('false');
+	});
+
+	it('a comments toggle on a diverged editor surfaces the "Reset to apply" affordance', async () => {
+		const container = await mountAndDiverge('diverged code');
+		expect(container.querySelector('[data-writeme-reseed-pending]')).toBeNull();
+		fireEvent.click(
+			container.querySelector('[data-assist-toggle="comments"]') as Element,
+		);
+		// keepComments flipped but the seed was NOT applied → the hint appears.
+		expect(
+			container.querySelector('[data-writeme-reseed-pending]'),
+		).not.toBeNull();
+	});
+
+	it('Reset restores the starting template after the learner has diverged', async () => {
+		const container = await mountAndDiverge('totally different content');
+		fireEvent.click(container.querySelector('[data-reset]') as Element);
+		await waitFor(() => {
+			const text = container.querySelector(
+				'[data-writeme-editor-host] .cm-content',
+			)?.textContent;
+			expect(text).toContain('// hi'); // skeleton restored
+			expect(text).not.toContain('totally different');
+		});
+	});
 });

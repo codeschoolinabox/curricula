@@ -1,10 +1,10 @@
 /**
  * @file Dev preview harness for the `writeme` lens. Mounts the lens's React
- * `Component` DIRECTLY (importing the LensModule + `embody`), bypassing the
- * orchestrator's `LENS_REGISTRY` — `writeme` is not registered until the final
- * increment of the WS4 sprint. This page is the browser eyeball surface for the
- * per-increment sandbox checkpoints (Inc 6a → 6f): edit the snippet, type to
- * reconstruct it, and observe the lens.
+ * `Component` DIRECTLY (importing the LensModule + `embody`) for isolated
+ * eyeballing. `writeme` is now registered in the orchestrator's `LENS_REGISTRY`
+ * and reachable end-to-end through the L1 picker (the `study-lenses-smoke` page);
+ * this harness mounts it directly so a single snippet can be exercised without
+ * the picker. Edit the snippet, type to reconstruct it, and observe the lens.
  *
  * **How to use** (after `npm run start`):
  *
@@ -41,7 +41,7 @@ export default function WritemePreview(): React.JSX.Element {
 	return (
 		<Layout title="writeme preview" description="WS4 writeme lens harness">
 			<main style={{ maxWidth: 860, margin: '2rem auto', padding: '0 1rem' }}>
-				<h1>writeme lens preview (WS4 — Inc 6e-rb-2)</h1>
+				<h1>writeme lens preview</h1>
 				<p>
 					A <strong>paste-blocked</strong> CodeMirror editor seeded from the{' '}
 					<strong>comment skeleton</strong> (Comments default on — comments

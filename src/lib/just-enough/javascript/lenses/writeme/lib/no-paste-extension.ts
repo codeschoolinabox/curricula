@@ -7,10 +7,10 @@
  *
  * Used by the writeme wrapper so the learner TYPES the code back rather than
  * pasting it — the anti-cheat heart of the reproduction exercise. Paste is
- * blocked in EVERY editable mode (both `diff` and `raw`), a deliberate
- * divergence from `blanks` (which permits paste in its diff mode because its
- * placeholders are position-locked); writeme has no anchors, so a paste would
- * smuggle in the whole solution.
+ * blocked in EVERY editable state (regardless of the `diff` toggle), a
+ * deliberate divergence from `blanks` (which permits paste in its diff mode
+ * because its placeholders are position-locked); writeme has no anchors, so a
+ * paste would smuggle in the whole solution.
  *
  * Vendoring posture: mechanical conversion only; preserve semantics. This
  * directory (`lenses/writeme/lib/**`) is eslint-ignored per `eslint.config.mjs`

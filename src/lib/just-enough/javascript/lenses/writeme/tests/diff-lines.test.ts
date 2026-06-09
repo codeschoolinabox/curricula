@@ -47,6 +47,14 @@ describe('diffLines', () => {
 		it('a comment-only solution line is excluded from total', () => {
 			expect(diffLines('// note', '// note').total).toBe(0);
 		});
+
+		it('a multi-line all-comment solution is vacuously complete (total 0, no NaN)', () => {
+			// The named DOCS § Honest tally constraint: total === 0 (no code lines)
+			// is vacuously complete, never NaN. Guards it for a non-empty solution.
+			const result = diffLines('anything', '// a\n// b\n// c');
+			expect(result.total).toBe(0);
+			expect(result.matched).toBe(0);
+		});
 	});
 
 	describe('Boundaries — trimmed compare + short learner', () => {
