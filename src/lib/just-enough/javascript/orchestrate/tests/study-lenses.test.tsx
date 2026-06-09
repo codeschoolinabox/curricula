@@ -231,6 +231,17 @@ describe('<StudyLenses> — F1 smoke', () => {
 			expect(lensRoot).not.toBeNull();
 		});
 
+		it('lens="writeme" mounts the writeme lens (root carries data-lens="writeme")', () => {
+			// Proves the registry VALUE at key 'writeme' routes to writemeLens, not
+			// just that the key is enumerated — a copy-paste `writeme: parsonsLens`
+			// would render data-lens="parsons" and fail here.
+			const { container } = render(
+				<StudyLenses snippet="const x = 1;" lens="writeme" />,
+			);
+			const lensRoot = container.querySelector('[data-lens="writeme"]');
+			expect(lensRoot).not.toBeNull();
+		});
+
 		it('lens="debug-props" does NOT mount the editor home-base', () => {
 			const { container } = render(
 				<StudyLenses snippet="OK" lens="debug-props" />,
@@ -726,7 +737,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 	});
 
 	describe('L1.3 — picker enumerates the LENS_REGISTRY', () => {
-		it('the picker has the sentinel followed by one <option> per registered lens (annotate, blanks, debug-props, parsons)', () => {
+		it('the picker has the sentinel followed by one <option> per registered lens (annotate, blanks, debug-props, parsons, writeme)', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
 			const options = container.querySelectorAll(
 				'[data-orchestrator-lens-picker] option',
@@ -740,6 +751,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 				'blanks',
 				'debug-props',
 				'parsons',
+				'writeme',
 			]);
 		});
 	});
@@ -836,6 +848,15 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			expect(
 				container.querySelector('[data-lens="debug-props"]'),
 			).not.toBeNull();
+		});
+
+		it('selecting "writeme" from editor mode mounts the writeme lens (the L1 picker bar)', () => {
+			const { container } = render(<StudyLenses snippet="const x = 1;" />);
+			const picker = container.querySelector(
+				'[data-orchestrator-lens-picker]',
+			) as HTMLSelectElement;
+			fireEvent.change(picker, { target: { value: 'writeme' } });
+			expect(container.querySelector('[data-lens="writeme"]')).not.toBeNull();
 		});
 	});
 

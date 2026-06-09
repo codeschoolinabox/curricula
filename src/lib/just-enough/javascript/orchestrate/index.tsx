@@ -56,6 +56,7 @@ import blanksLens from '../lenses/blanks/index.js';
 import debugPropertiesLens from '../lenses/debug-props/index.js';
 import parsonsLens from '../lenses/parsons/index.js';
 import type { LensConfig, LensModule } from '../lenses/types.js';
+import writemeLens from '../lenses/writeme/index.js';
 
 import EditorComponent from './editor/index.js';
 import createEventBus from './event-bus.js';
@@ -82,6 +83,7 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 	blanks: blanksLens,
 	'debug-props': debugPropertiesLens,
 	parsons: parsonsLens,
+	writeme: writemeLens,
 });
 
 /**
