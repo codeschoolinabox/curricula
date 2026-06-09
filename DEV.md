@@ -107,14 +107,14 @@ Types live **with their module**, not in a centralized location.
 | `src/<module>/types.ts` | Types for that module                 |
 | `src/index.ts`          | Re-exports consumer-facing types flat |
 
-**Rules:**
+<strong>Rules:</strong>
 
 1. Each module has its own `types.ts` (if needed)
 2. Types stay with the code they document (transparency, portability)
 3. Internal code imports directly from module's `types.ts`
 4. `/src/index.ts` re-exports consumer-facing types (flat, no namespace)
 
-**Rationale:**
+<strong>Rationale:</strong>
 
 - Transparency: Types are discoverable where they're used
 - Portability: Renaming/moving folders doesn't break unrelated code
@@ -126,7 +126,7 @@ The `@typescript-eslint/no-explicit-any` rule is set to **warn** (not error)
 because `any` has legitimate uses. All `any` usage MUST be justified during code
 review.
 
-**Acceptable uses:**
+<strong>Acceptable uses:</strong>
 
 1. **Dynamic runtime values** — data parsed from JSON, user input, or eval
    results
@@ -136,7 +136,7 @@ review.
 4. **Test fixtures** — intentionally breaking types to test error handling
 5. **Stub implementations** — temporary mock data during TDD cycles
 
-**Unacceptable uses:**
+<strong>Unacceptable uses:</strong>
 
 - Business logic with known types (use proper interfaces)
 - Public API parameters (force callers to use correct types)
@@ -150,14 +150,14 @@ it's necessary.
 
 `eslint-disable` comments are a code review tool, NOT a development shortcut.
 
-**Rules:**
+<strong>Rules:</strong>
 
 1. **Never add `eslint-disable` in initial implementation** — fix the violation
    instead
 2. **Only add during code review** — after discussing with reviewer
 3. **Require justification comment** — explain WHY the rule doesn't apply
 
-**Format:**
+<strong>Format:</strong>
 
 ```typescript
 // eslint-disable-next-line rule-name -- Justification for disabling
@@ -292,7 +292,7 @@ function formatUserSummary(user) {
 }
 ```
 
-**Why?**
+<strong>Why?</strong>
 
 - `users.filter(isActiveAdmin)` reads like English
 - Named functions show in stack traces
@@ -381,7 +381,7 @@ function processConfig({ preset = 'detailed', variables = true }) {}
 
 ### 10. Naming
 
-**Functions: verb first**
+<strong>Functions: verb first</strong>
 
 ```javascript
 // ✅ CORRECT
@@ -651,7 +651,7 @@ import { freezeInPlace, cloneAndFreeze } from '../utils/freeze.js';
 //     inline a custom implementation.
 ```
 
-**Two operations, one ownership rule:**
+<strong>Two operations, one ownership rule:</strong>
 
 | Operation        | When to use                                         | Behavior                      |
 | ---------------- | --------------------------------------------------- | ----------------------------- |
@@ -664,7 +664,7 @@ reason to clone something nobody else has a reference to. If the object came
 from outside (a parameter, imported data), clone-then-freeze to avoid mutating
 the caller's data.
 
-**What to freeze:**
+<strong>What to freeze:</strong>
 
 - All function return values that are objects or arrays
 - Config objects and resolved options
@@ -712,7 +712,7 @@ Every source directory under `src/` has both a `README.md` and a `DOCS.md`:
 | Architecture, design decisions, why this approach   | `DOCS.md` per directory    | Developers   |
 | Non-obvious implementation detail                   | Inline `//` comment        | Code readers |
 
-**Rules:**
+<strong>Rules:</strong>
 
 - Every directory has a `README.md` AND a `DOCS.md`
 - `DOCS.md` captures the "why" — tradeoffs, alternatives considered,
@@ -835,7 +835,7 @@ flowchart TD
 ```
 ````
 
-**Public function documentation:**
+<strong>Public function documentation:</strong>
 
 ```typescript
 /**
@@ -892,9 +892,9 @@ Within scope, four kinds of documentation, with strict separation:
 - **Handoff files** (`*-HANDOFF.md` at repo or directory root,
   `.planning-handoffs/*.md` including per-stream `*-notes.md`): per-migration
   coordination scaffolding. Process info, ordered steps, phase splits, status
-  snapshots, cross-stream coordination all live here. Most handoffs are deleted
-  when their migration completes; some (durable coordination guides like
-  `development-guide.md`) persist as the project's coordination manual.
+  snapshots, cross-stream coordination all live here. Handoffs are transitional
+  scaffolding, deleted when their migration completes (git history retains them);
+  they are never a durable source of truth — the end-state docs are.
 - **Git history** (commit messages, `git log`, PR descriptions): what was
   changed and why, captured at commit time. AR-cycle history, rejected
   alternatives, prior attempts, "we tried Y before X" narratives — all go here.
@@ -1564,7 +1564,7 @@ Every adversarial review prompt follows this structure:
 **Trigger:** During Phase 0, after README spec (step 0.2), before types.ts locks
 the contract (step 0.4). **Skip:** Only when the human explicitly opts out.
 
-**Focus areas:**
+<strong>Focus areas:</strong>
 
 - Does the ubiquitous language in the README align with the rest of the
   codebase? Any naming collisions, synonyms, or redefinitions?
@@ -1589,7 +1589,7 @@ patterns
 0.6), before the final review and implementation begin (step 0.7). **Skip:**
 Only when the human explicitly opts out.
 
-**Focus areas:**
+<strong>Focus areas:</strong>
 
 - Is the sketch at the right level of abstraction — does it constrain structure
   without prescribing implementation? (No function names, variable names, or
@@ -1621,7 +1621,7 @@ Only when the human explicitly opts out.
 **Trigger:** After first failing test is written for an increment. **Skip:**
 Only when the human explicitly opts out.
 
-**Focus areas:**
+<strong>Focus areas:</strong>
 
 - **Triangulation check**: Can this first test be passed by returning a
   hardcoded value? If yes, name the second test that makes hardcoding
@@ -1650,7 +1650,7 @@ existing tests, the peer DOCS.md data flow diagram
 **Trigger:** After self-review (step 12) for an increment. **Skip:** Only when
 the human explicitly opts out.
 
-**Focus areas:**
+<strong>Focus areas:</strong>
 
 - **Structural quality**: Does the implementation reflect the DOCS.md
   architectural sketch? Are the named execution phases present and distinct? Are
@@ -1691,7 +1691,7 @@ used
 **Trigger:** After all increments complete, before commit prompt. **Skip:** Only
 when the human explicitly opts out.
 
-**Focus areas:**
+<strong>Focus areas:</strong>
 
 - Cross-file consistency: do naming, patterns, and conventions align?
 - Documentation sync: do README, DOCS.md, types, JSDoc, and tests all agree?
@@ -1918,7 +1918,7 @@ development:
 Open VS Code → install recommended extensions when prompted → editor is
 configured.
 
-**Debug configurations:**
+<strong>Debug configurations:</strong>
 
 - **Debug Current Test File** — open a `.test.ts` file, press F5
 - **Debug All Tests** — run full suite with breakpoints
