@@ -8,11 +8,11 @@
  * validates against the lens's `ContentType` / `ViewMode` /
  * `EditorMode` / `HintsMode` enums (none of which existed in legacy).
  *
- * URL format (5 fields):
- * `?blanks=difficulty:N,types:a+b,view:X,editor:Y,hints:Z`
+ * URL format (6 fields):
+ * `?blanks=difficulty:N,types:a+b,view:X,editor:Y,hints:Z,suggest:W`
  *
  * Field order in `serializeConfig` is the canonical order
- * `difficulty, types, view, editor, hints` — semantic round-trip
+ * `difficulty, types, view, editor, hints, suggest` — semantic round-trip
  * (`parseHash(`#?${serializeConfig(parseHash(hash))}`) === parseHash(hash)`)
  * is the contract, not byte-for-byte string equality with a
  * non-canonical input.
@@ -81,6 +81,10 @@ const VALID_EDITOR_MODES: ReadonlySet<EditorMode> = new Set([
 	'raw',
 ]);
 const VALID_HINTS_MODES: ReadonlySet<HintsMode> = new Set(['on', 'off']);
+// `suggestions` is a boolean config field, but its wire form mirrors the
+// other small enums (`on`/`off`) for URL readability — decoded to a boolean
+// at the parse boundary, encoded back at serialize.
+const VALID_SUGGESTIONS: ReadonlySet<string> = new Set(['on', 'off']);
 
 function getBlanksParamValue(hash: string): string | null {
 	// Format: `#?blanks=...&other=...` — the `?` separator is mandatory.
@@ -109,6 +113,7 @@ function parseHash(hash: string): Partial<BlanksLensConfig> {
 		viewMode?: ViewMode;
 		editorMode?: EditorMode;
 		hintsMode?: HintsMode;
+		suggestions?: boolean;
 	} = {};
 
 	for (const segment of blanksValue.split(',')) {
@@ -140,6 +145,14 @@ function parseHash(hash: string): Partial<BlanksLensConfig> {
 			if (VALID_HINTS_MODES.has(value as HintsMode)) {
 				config.hintsMode = value as HintsMode;
 			}
+		} else if (key === 'suggest') {
+			// Decode the on/off wire form to the boolean config field. Any
+			// other value is ignored — the key stays ABSENT (not coerced to
+			// `false`), so an unknown `suggest:` never clobbers a default
+			// downstream (the applier dispatches only on `!== undefined`).
+			if (VALID_SUGGESTIONS.has(value)) {
+				config.suggestions = value === 'on';
+			}
 		}
 	}
 
@@ -148,7 +161,7 @@ function parseHash(hash: string): Partial<BlanksLensConfig> {
 
 function serializeConfig(config: Partial<BlanksLensConfig>): string {
 	const parts: string[] = [];
-	// Canonical field order: difficulty, types, view, editor, hints.
+	// Canonical field order: difficulty, types, view, editor, hints, suggest.
 	if (config.difficulty !== undefined) {
 		parts.push(`difficulty:${config.difficulty}`);
 	}
@@ -163,6 +176,9 @@ function serializeConfig(config: Partial<BlanksLensConfig>): string {
 	}
 	if (config.hintsMode !== undefined) {
 		parts.push(`hints:${config.hintsMode}`);
+	}
+	if (config.suggestions !== undefined) {
+		parts.push(`suggest:${config.suggestions ? 'on' : 'off'}`);
 	}
 	return parts.join(',');
 }

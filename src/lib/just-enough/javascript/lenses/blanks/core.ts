@@ -23,7 +23,7 @@ const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);
 
 /**
  * Resolves the blanks lens's per-mount config — applies the documented
- * defaults for the four config fields and merges educator-supplied
+ * defaults for the config fields and merges educator-supplied
  * overrides on top (overrides win). Unknown fields in `overrides` are
  * preserved verbatim (open-shape contract). The returned object is
  * deep-frozen via `freezeInPlace`.
@@ -35,6 +35,7 @@ const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);
  * - `viewMode` → `'blankenated'`
  * - `editorMode` → `'helpful'`
  * - `hintsMode` → `'on'`
+ * - `suggestions` → `false`
  *
  * @param overrides - Partial config bundle from the educator's per-fence
  *   directive or `lenses.json` cascade. May be `undefined`.
@@ -67,6 +68,7 @@ function config(overrides?: Partial<LensConfig>): LensConfig {
 		viewMode: 'blankenated',
 		editorMode: 'helpful',
 		hintsMode: 'on',
+		suggestions: false,
 		...overrides,
 	}) as LensConfig;
 }

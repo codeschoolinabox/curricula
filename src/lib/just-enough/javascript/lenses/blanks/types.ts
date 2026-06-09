@@ -306,7 +306,9 @@ type EvaluationResult = {
  * - `difficulty` → `50`
  * - `contentTypes` → `['keywords', 'identifiers', 'operators', 'literals', 'delimiters']`
  * - `viewMode` → `'blankenated'`
+ * - `editorMode` → `'helpful'`
  * - `hintsMode` → `'on'`
+ * - `suggestions` → `false`
  */
 type BlanksLensConfig = {
 	readonly difficulty?: number;
@@ -314,6 +316,12 @@ type BlanksLensConfig = {
 	readonly viewMode?: ViewMode;
 	readonly editorMode?: EditorMode;
 	readonly hintsMode?: HintsMode;
+	/**
+	 * Opt-in snippet-free autocomplete (JS keywords + in-buffer locals;
+	 * no `for`/`if`/`function` templates, no completion of un-typed
+	 * identifiers). Default `false`. See `./README.md` § Toolbar contract.
+	 */
+	readonly suggestions?: boolean;
 };
 
 // ─── Exports ────────────────────────────────────────────────

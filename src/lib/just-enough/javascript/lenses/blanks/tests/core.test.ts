@@ -36,6 +36,10 @@ describe('blanks core', () => {
 			it('editorMode defaults to "helpful"', () => {
 				expect(core.config().editorMode).toBe('helpful');
 			});
+
+			it('suggestions defaults to false (opt-in, matches writeme)', () => {
+				expect(core.config().suggestions).toBe(false);
+			});
 		});
 
 		describe('One — single-field overrides win', () => {
@@ -59,6 +63,10 @@ describe('blanks core', () => {
 
 			it('editorMode override wins over default', () => {
 				expect(core.config({ editorMode: 'diff' }).editorMode).toBe('diff');
+			});
+
+			it('suggestions override wins over default', () => {
+				expect(core.config({ suggestions: true }).suggestions).toBe(true);
 			});
 		});
 
@@ -109,18 +117,22 @@ describe('blanks core', () => {
 			});
 		});
 
-		describe('Many — all four fields overridden simultaneously', () => {
-			it('all four documented fields can be overridden in one call', () => {
+		describe('Many — all documented fields overridden simultaneously', () => {
+			it('all documented fields can be overridden in one call', () => {
 				const resolved = core.config({
 					difficulty: 75,
 					contentTypes: ['operators'],
 					viewMode: 'complete',
+					editorMode: 'diff',
 					hintsMode: 'off',
+					suggestions: true,
 				});
 				expect(resolved.difficulty).toBe(75);
 				expect(resolved.contentTypes).toEqual(['operators']);
 				expect(resolved.viewMode).toBe('complete');
+				expect(resolved.editorMode).toBe('diff');
 				expect(resolved.hintsMode).toBe('off');
+				expect(resolved.suggestions).toBe(true);
 			});
 		});
 

@@ -96,18 +96,42 @@ describe('parseHash — pure', () => {
 				urlConfig.parseHash('#?blanks=types:keywords+identifiers'),
 			).toEqual({ contentTypes: ['keywords', 'identifiers'] });
 		});
+
+		// round-trip lock (mirrors the editorMode lock above): dropping the
+		// `suggest:` key from parseHash or serializeConfig would silently
+		// break the suggestions toggle's URL persistence with no test signal.
+		it('extracts suggestions', () => {
+			expect(urlConfig.parseHash('#?blanks=suggest:on')).toEqual({
+				suggestions: true,
+			});
+			expect(urlConfig.parseHash('#?blanks=suggest:off')).toEqual({
+				suggestions: false,
+			});
+		});
+
+		// AR-3 concern 2: the URL applier in index.tsx only dispatches
+		// `setSuggestions` when `fromUrl.suggestions !== undefined`, so an
+		// absent `suggest:` segment MUST leave the key absent (not `false`) —
+		// else a hash with no suggest would clobber an educator-set default.
+		it('absent suggest key leaves suggestions unset (absent, not false)', () => {
+			const result = urlConfig.parseHash('#?blanks=difficulty:50');
+			expect(result).toEqual({ difficulty: 50 });
+			expect('suggestions' in result).toBe(false);
+		});
 	});
 
 	describe('Many — multiple fields combined', () => {
-		it('extracts all four fields from a fully-populated hash', () => {
+		it('extracts all known fields from a fully-populated hash', () => {
 			const result = urlConfig.parseHash(
-				'#?blanks=difficulty:50,types:keywords+identifiers,view:blankenated,hints:on',
+				'#?blanks=difficulty:50,types:keywords+identifiers,view:blankenated,editor:helpful,hints:on,suggest:on',
 			);
 			expect(result).toEqual({
 				difficulty: 50,
 				contentTypes: ['keywords', 'identifiers'],
 				viewMode: 'blankenated',
+				editorMode: 'helpful',
 				hintsMode: 'on',
+				suggestions: true,
 			});
 		});
 	});
@@ -141,6 +165,14 @@ describe('parseHash — pure', () => {
 			expect(urlConfig.parseHash('#?blanks=hints:bogus')).toEqual({});
 			expect(urlConfig.parseHash('#?blanks=hints:auto')).toEqual({});
 			expect(urlConfig.parseHash('#?blanks=hints:easy')).toEqual({});
+		});
+
+		it('ignores unknown suggestions value (on/off only — case-sensitive, not true/false)', () => {
+			expect(urlConfig.parseHash('#?blanks=suggest:bogus')).toEqual({});
+			expect(urlConfig.parseHash('#?blanks=suggest:true')).toEqual({});
+			expect(urlConfig.parseHash('#?blanks=suggest:1')).toEqual({});
+			expect(urlConfig.parseHash('#?blanks=suggest:ON')).toEqual({});
+			expect(urlConfig.parseHash('#?blanks=suggest:')).toEqual({});
 		});
 
 		it('filters unknown content type names', () => {
@@ -209,6 +241,31 @@ describe('serializeConfig — pure', () => {
 			expect(parsed).toEqual(config);
 		});
 
+		it('serializes suggestions alone (boolean → on/off wire form)', () => {
+			expect(urlConfig.serializeConfig({ suggestions: true })).toBe(
+				'suggest:on',
+			);
+			expect(urlConfig.serializeConfig({ suggestions: false })).toBe(
+				'suggest:off',
+			);
+		});
+
+		it('round-trips suggestions through serialize/parse', () => {
+			const config = { suggestions: false };
+			const serialized = urlConfig.serializeConfig(config);
+			const parsed = urlConfig.parseHash(`#?blanks=${serialized}`);
+			expect(parsed).toEqual(config);
+		});
+
+		// AR-3 concern 3: round-trip the `true` side too, so a Fake-It impl
+		// that hardcodes `false` for any `suggest:` value cannot pass.
+		it('round-trips suggestions: true through serialize/parse', () => {
+			const config = { suggestions: true };
+			const serialized = urlConfig.serializeConfig(config);
+			const parsed = urlConfig.parseHash(`#?blanks=${serialized}`);
+			expect(parsed).toEqual(config);
+		});
+
 		it('round-trips a fully-populated config including editorMode', () => {
 			const config = {
 				difficulty: 50,
@@ -233,6 +290,21 @@ describe('serializeConfig — pure', () => {
 			}),
 		).toBe(
 			'difficulty:50,types:keywords+identifiers,view:blankenated,hints:on',
+		);
+	});
+
+	it('serializes suggestions last, after hints (canonical order)', () => {
+		expect(
+			urlConfig.serializeConfig({
+				difficulty: 50,
+				contentTypes: ['keywords'],
+				viewMode: 'blankenated',
+				editorMode: 'helpful',
+				hintsMode: 'on',
+				suggestions: true,
+			}),
+		).toBe(
+			'difficulty:50,types:keywords,view:blankenated,editor:helpful,hints:on,suggest:on',
 		);
 	});
 
