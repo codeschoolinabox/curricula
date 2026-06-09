@@ -1,41 +1,32 @@
 /**
  * @file `<StudyLenses>` — the package's public API surface.
  *
- * **F3 status** — lazy embodiment on need is satisfied by F2.4 (transition-only
- * trigger). Evaluation phases inside a mounted lens are **lens-internal**:
- * lenses call `snippet.evaluation.events.*` directly on the embodiment they
- * hold; no orchestrator round-trip.
- * See [`./DOCS.md` § F3 — lazy embodiment realized] for the full satisfaction
- * analysis + sentinel-blindness invariant.
+ * **Live embodiment.** The orchestrator owns one live static `embody()` of the
+ * editing buffer in the `liveEmbodiment` slot (`{ snippet, embodiment }`). The
+ * slot is **seeded once at mount in both modes** (the lazy `useState`
+ * initializer runs `deriveInitialState`: its lens branch embodies, its editor
+ * branch retains-or-seeds), **refreshed by a debounced static `embody()` while
+ * editing** (a trailing-edge `useEffect([snippet])`, ~200ms idle), and **never
+ * cleared on edit**. It stays content-keyed by snippet: reused on an editor →
+ * lens transition when `liveEmbodiment.snippet === currentSnippet`, else
+ * re-embodied. Program execution stays lazy. (The editor → lens flush that
+ * embodies inline on a stale slot and cancels the pending debounce is a later
+ * increment — see [`./DOCS.md` § Live embodiment](./DOCS.md).)
  *
- * **Edit handling**: the snippet setter passed to `EditorComponent`
- * (`handleSnippetChange`) updates snippet state only — it does NOT clear the
- * `liveEmbodiment` slot. Per the live-embodiment contract the slot is never
- * cleared on edit; it stays content-keyed by snippet and is reused (cache hit)
- * or re-embodied (snippet mismatch) at the next editor → lens transition, so
- * reverting an edit back to the original snippet is a cache hit. See
- * [`./DOCS.md` § Live embodiment](./DOCS.md).
+ * **Edit handling.** The snippet setter threaded into `EditorComponent`
+ * (`handleSnippetChange`) updates snippet state only — it does NOT touch the
+ * `liveEmbodiment` slot. The slot refreshes on the debounce settle, so an edit
+ * reverted to the slot's snippet leaves it untouched (a no-op refresh, guarded
+ * by snippet identity in the debounce effect).
  *
- * **F2.4 scope** (preserved): `embody()` fires only on mode → lens
- * transitions, never on keystrokes. The `liveEmbodiment` slot is the
- * single embodiment store; `useEmbodiment` is gone. Cache is RETAINED
- * across `lens → editor` round trips and reused on `editor → lens` when
- * `cache.snippet === currentSnippet` (cache-hit shortcut, observable only
- * for the lens → editor → lens with no intervening edit case).
- *
- * **F2.4 effect topology**:
- * - **Snippet slot** — seeded from `snippetProp` at mount (initial-value-only
- *   per F2.1). `handleSnippetChange` (wrapping `setSnippet`) is threaded into
- *   `EditorComponent`; it updates snippet state only — the slot is never
- *   cleared on edit (content-keyed; reused or re-embodied at transition).
+ * **Slots:**
+ * - **Snippet slot** — seeded from `snippetProp` at mount (initial-value-only);
+ *   `handleSnippetChange` (wrapping `setSnippet`) is the sole writer thereafter.
  * - **Mode slot** — `useState<OrchestratorState>` initialized via
  *   `deriveInitialState`; driven post-mount by `useEffect([lens, configs])`.
- * - **LiveEmbodiment slot** — `useState<LiveEmbodiment | null>`, projected
- *   from the same `deriveInitialState` call at first render (atomic init).
- *   Populated on editor → lens, retained on lens → editor.
- * - **Embody trigger** — fires inside the transition path only: at first
- *   render when initial mode is lens, OR inside the prop-change effect when
- *   transitioning editor → lens without a cache hit.
+ * - **LiveEmbodiment slot** — `useState<LiveEmbodiment | null>`, projected from
+ *   the same `deriveInitialState` call at first render (atomic init), then
+ *   refreshed by the debounced `useEffect([snippet])`.
  * - **EventBus** — per-instance bus owned by a `useRef`, exposed via
  *   `forwardRef` + `useImperativeHandle` for tests. Initial-mount dispatch
  *   fires from a one-time post-commit `useEffect([])` when the first commit
@@ -48,6 +39,8 @@
  */
 
 import React from 'react';
+
+import debounce from '@utils/debounce.js';
 
 import deepMerge from '../../../utils/deep-merge.js';
 import embody from '../embody/index.js';
@@ -95,16 +88,24 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 const LENS_NAMES: readonly string[] = Object.freeze(Object.keys(LENS_REGISTRY));
 
 /**
+ * Idle window (ms) for the debounced live re-embody. An edit reschedules the
+ * trailing-edge `embody()` of the current buffer; the slot refreshes once the
+ * learner pauses for this long. Per the live-embodiment design (~150–300ms).
+ */
+const LIVE_REEMBODY_DEBOUNCE_MS = 200;
+
+/**
  * Single-pass initial derivation of `{ state, liveEmbodiment }` from the
  * first-render props. Both `useState` lazy initializers project from a single
- * call so `embody()` is invoked at most once at first render (in lens mode).
+ * call so `embody()` is invoked at most once at first render.
  *
- * - Registered `lens` + `previousLiveEmbodiment.snippet === snippet` → cache
- *   hit; reuse.
- * - Registered `lens` + cache miss → call `embody(snippet)` once; fresh cache.
- * - Unset or unregistered `lens` → editor mode; cache passes through unchanged
- *   (callers seed `null` at mount; the post-mount effect retains the cache
- *   across `lens → editor` transitions).
+ * - Registered `lens` (lens mode) — **reuse-or-embody**: reuse when
+ *   `previousLiveEmbodiment.snippet === snippet`, else `embody(snippet)` once.
+ * - Unset or unregistered `lens` (editor mode) — **retain-or-seed**: retain a
+ *   non-null `previousLiveEmbodiment` (e.g. across a `lens → editor` transition;
+ *   the post-mount transition threads the prior slot through), else seed the
+ *   slot with a fresh `embody(snippet)` at mount so the gutter can paint on the
+ *   first frame.
  */
 function deriveInitialState(
 	snippet: string,
@@ -117,12 +118,11 @@ function deriveInitialState(
 } {
 	const registered = lens === undefined ? undefined : LENS_REGISTRY[lens];
 	if (registered !== undefined) {
-		// Cache-key check: full-string identity, NOT a semantic content branch.
-		// The orchestrator's sentinel-blindness invariant (DOCS § F3 — lazy
-		// embodiment realized) forbids any substring / prefix / regex / pattern
-		// test against snippet content. This is the only snippet-string compare
-		// in the orchestrator, and it asks "same snippet I already embodied?",
-		// not "what does this code do?".
+		// Snippet-identity reuse check: full-string identity, NOT a semantic
+		// content branch. The orchestrator's snippet-content-blindness invariant
+		// (DOCS § Snippet-content-blind orchestrator) forbids any substring /
+		// prefix / regex / pattern test against snippet content. It asks "same
+		// snippet I already embodied?", not "what does this code do?".
 		const liveEmbodiment: LiveEmbodiment =
 			previousLiveEmbodiment !== null &&
 			previousLiveEmbodiment.snippet === snippet
@@ -137,7 +137,11 @@ function deriveInitialState(
 	}
 	return {
 		state: { mode: 'editor' },
-		liveEmbodiment: previousLiveEmbodiment,
+		// Retain-or-seed: keep a non-null slot across a lens → editor transition;
+		// seed a fresh embodiment at editor-mode mount (when the slot is still
+		// null) so the gutter can paint on the first frame.
+		liveEmbodiment:
+			previousLiveEmbodiment ?? { snippet, embodiment: embody(snippet) },
 	};
 }
 
@@ -251,9 +255,9 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// per real mount, not once per discarded-render pair.
 		const initialDispatchFiredReference = React.useRef(false);
 
-		// Atomic init: derive both state and cache from a single call so embody()
-		// fires at most once at first render. The tuple is held in its own state
-		// slot for clarity; React never re-runs the lazy initializer.
+		// Atomic init: derive both state and the live slot from a single call so
+		// embody() fires at most once at first render. The tuple is held in its
+		// own state slot for clarity; React never re-runs the lazy initializer.
 		const [initialDerived] = React.useState(() =>
 			deriveInitialState(snippetProperty, lens, configs, null),
 		);
@@ -263,8 +267,8 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		const [liveEmbodiment, setLiveEmbodiment] =
 			React.useState<LiveEmbodiment | null>(initialDerived.liveEmbodiment);
 
-		// Ref shadow for cache — lets the mode-transition effect read the latest
-		// cache without depending on `snippet` (which would re-fire the effect on
+		// Ref shadow for the live slot — lets the mode-transition effect read the
+		// latest slot without depending on `snippet` (which would re-fire it on
 		// every keystroke). Updated during render; only read inside post-commit
 		// effects (never during render), which keeps the StrictMode discarded-
 		// render case correct: the discarded render's write is overwritten by the
@@ -276,6 +280,35 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// invariant as liveEmbodimentRef above.
 		const snippetReference = React.useRef(snippet);
 		snippetReference.current = snippet;
+
+		// Live re-embody on edit — a trailing-edge debounced static embody of the
+		// current buffer, one instance per mount (held in a ref, lazy-initialized
+		// like the bus above so re-renders don't build a throwaway). The empty
+		// catch is defense-in-depth at the detached-timer boundary: a throw on a
+		// timer callback has no React error boundary above it, so swallowing keeps
+		// the prior slot value rather than tearing down the editor. (The inline
+		// flush-on-transition embody, by contrast, leans on embody's
+		// total-on-`string` contract — see DOCS § Live embodiment, the
+		// try/catch-asymmetry note.)
+		function reembodyCurrentSnippet(nextSnippet: string): void {
+			try {
+				setLiveEmbodiment({
+					snippet: nextSnippet,
+					embodiment: embody(nextSnippet),
+				});
+			} catch {
+				/* keep the prior slot on a stray background throw */
+			}
+		}
+		const reembodyReference = React.useRef<
+			(((nextSnippet: string) => void) & { cancel: () => void }) | null
+		>(null);
+		if (reembodyReference.current === null) {
+			reembodyReference.current = debounce(
+				reembodyCurrentSnippet,
+				LIVE_REEMBODY_DEBOUNCE_MS,
+			);
+		}
 
 		// F5b.2 initial-mount dispatch. If the first commit landed in lens
 		// mode, dispatch mode-changed(editor→lens) then
@@ -309,8 +342,8 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// Shared transition handler. Both the prop-change effect (`source:
 		// 'prop'`) and the picker (`source: 'picker'`, L1.6+) route through
 		// this single helper so the diff/dispatch contract is enforced in
-		// one place. Reads snippet + cache from refs to avoid re-firing the
-		// prop-change effect on every snippet keystroke; reads `configs`
+		// one place. Reads snippet + the live slot from refs to avoid re-firing
+		// the prop-change effect on every snippet keystroke; reads `configs`
 		// from the live closure so each call captures the current cascade.
 		function applyTransition(
 			nextLens: string | undefined,
@@ -347,8 +380,9 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			previousStateReference.current = next.state;
 		}
 
-		// Prop-change mode transition. Skips initial mount (state/cache already
-		// seeded); fires on lens or configs change only. Calls `applyTransition`
+		// Prop-change mode transition. Skips initial mount (state + live slot
+		// already seeded); fires on lens or configs change only. Calls
+		// `applyTransition`
 		// with `source: 'prop'`. The state setters land in a single React 18
 		// commit; the dispatches fire synchronously after.
 		const isMountedReference = React.useRef(false);
@@ -364,6 +398,40 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 				// eslint-disable-next-line react-hooks/exhaustive-deps
 			},
 			[lens, configs],
+		);
+
+		// Debounced live re-embody. A snippet edit schedules a trailing-edge
+		// embody of the current buffer into the live slot; the slot is never
+		// cleared, only refreshed on settle. A NEW dedicated mount guard (NOT
+		// `isMountedReference`, which `applyLensPropTransition` owns) skips the
+		// first run, where the seed already embodied — sharing the guard would let
+		// one effect flip it before the other reads it, scheduling a stray
+		// re-embody at mount. The snippet-identity check is the deeper backstop:
+		// it skips the refresh whenever the slot already holds this snippet —
+		// covering both an edit reverted to the seeded buffer AND a StrictMode
+		// remount (whose discarded first run already flipped the mount guard, so
+		// the identity check, not the guard, is what prevents a spurious
+		// re-embody there). Cleanup cancels any pending timer, so a StrictMode
+		// mount → unmount → remount leaves no duplicate trailing-edge embody.
+		const debounceMountGuardReference = React.useRef(false);
+		React.useEffect(
+			function scheduleLiveReembody() {
+				const reembody = reembodyReference.current!;
+				const isInitialMount = !debounceMountGuardReference.current;
+				debounceMountGuardReference.current = true;
+				const alreadyCurrent =
+					liveEmbodimentReference.current?.snippet === snippet;
+				// Skip the seed mount (already embodied) and any edit that lands
+				// back on the slot's snippet (nothing to refresh); otherwise
+				// schedule the trailing-edge re-embody.
+				if (!isInitialMount && !alreadyCurrent) {
+					reembody(snippet);
+				}
+				return function cancelPendingReembody() {
+					reembody.cancel();
+				};
+			},
+			[snippet],
 		);
 
 		// L1.6: picker-driven transitions. The picker passes the chosen lens
@@ -388,13 +456,12 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 
 		// Single-writer snippet update — the editor is the only surface that
 		// mutates snippet state, and this threads its edits into `setSnippet`. It
-		// deliberately does NOT touch the live-embodiment slot: under the
-		// live-embodiment contract the slot is never cleared on edit — it stays
-		// content-keyed by snippet and is reused (cache hit) or re-embodied
-		// (snippet mismatch) at the next editor → lens transition, so reverting an
-		// edit back to the original snippet is a cache hit. Wrapped in
-		// `useCallback([])` for a stable prop identity so the editor isn't
-		// re-created on every render.
+		// deliberately does NOT touch the live slot directly: the debounced
+		// re-embody effect refreshes the slot on settle, and the slot is never
+		// cleared on edit — it stays content-keyed by snippet, so an edit reverted
+		// to the slot's snippet is a no-op refresh (and a reuse at the next
+		// editor → lens transition). Wrapped in `useCallback([])` for a stable
+		// prop identity so the editor isn't re-created on every render.
 		const handleSnippetChange = React.useCallback(function handleSnippetChange(
 			next: string,
 		) {
@@ -409,10 +476,12 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		const pickerValue = state.mode === 'lens' ? state.activeLens : '';
 
 		if (state.mode === 'lens') {
-			// Invariant (enforced by transition logic): mode='lens' ⇒ cache non-null
-			// AND cache.snippet === current snippet. A null cache here means a
-			// transition path forgot to populate it — surface loudly rather than
-			// silently dereferencing.
+			// Invariant (enforced by transition logic): mode='lens' ⇒ the live slot
+			// is non-null AND liveEmbodiment.snippet === current snippet. A null
+			// slot here means a transition path forgot to populate it — surface
+			// loudly rather than silently dereferencing. (This guard checks the
+			// null half; the snippet-identity half is asserted in a later
+			// increment.)
 			if (liveEmbodiment === null) {
 				throw new Error(
 					'orchestrator invariant violated: lens mode requires non-null liveEmbodiment',

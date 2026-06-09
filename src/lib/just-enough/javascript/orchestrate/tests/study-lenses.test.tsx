@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
 import { EditorView } from '@codemirror/view';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import * as embodyModule from '../../embody/index.js';
 import * as eventBusModule from '../event-bus.js';
@@ -44,6 +44,14 @@ function typeInto(view: EditorView, content: string): void {
 		});
 	});
 }
+
+// Unmount mounted trees between tests. The unit project runs with
+// `globals: false` and no setup file, so @testing-library/react's automatic
+// afterEach(cleanup) is not registered; without this, the debounced re-embody's
+// pending setTimeout (scheduled by an editor edit) would survive its test and
+// could fire during a later one. cleanup() unmounts, running the debounce
+// effect's `.cancel()` teardown.
+afterEach(cleanup);
 
 describe('<StudyLenses> — F1 smoke', () => {
 	describe('Zero — root mount', () => {
@@ -95,18 +103,27 @@ describe('<StudyLenses> — F1 smoke', () => {
 		});
 	});
 
-	describe('F2.4 — embody fires only on mode → lens transitions', () => {
-		it('embody is NOT called when mounting without a lens prop', () => {
+	describe('F2.4 — embody seeds at mount (both modes) and re-embodies debounced on edit', () => {
+		it('embody IS called once at editor-mode mount (the seed), with the snippet', () => {
+			// Live-embodiment contract: the orchestrator seeds embody(snippet) at
+			// mount in BOTH modes (the editor branch is now retain-or-seed; the
+			// seed runs synchronously in the lazy useState initializer). Inverts
+			// the prior lazy-on-transition contract, under which an editor-mode
+			// mount embodied nothing. A non-scenario snippet is used so the arg
+			// check fails a hardcoded-'OK' seed.
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
-				render(<StudyLenses snippet="OK" />);
-				expect(embodySpy).not.toHaveBeenCalled();
+				render(<StudyLenses snippet="const seeded = 1;" />);
+				expect(embodySpy).toHaveBeenCalledOnce();
+				expect(embodySpy).toHaveBeenCalledWith('const seeded = 1;');
 			} finally {
 				embodySpy.mockRestore();
 			}
 		});
 
 		it('embody IS called exactly once on initial mount with a registered lens prop', () => {
+			// Lens-mode mount: the lens branch of deriveInitialState IS the seed —
+			// one embody, not two (the editor seed branch is not taken).
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
 				render(<StudyLenses snippet="OK" lens="debug-props" />);
@@ -117,12 +134,14 @@ describe('<StudyLenses> — F1 smoke', () => {
 			}
 		});
 
-		it('embody fires ONCE total across an editor→lens→editor→lens round-trip with stable snippet (cache hit)', () => {
-			// Decisive test — kills any useMemo([snippet, lens]) fake-it impl:
-			// such an impl would re-fire embody on the second lens-open because
-			// lens went undefined → "debug-props" (dep value change). The cache
-			// slot with snippet-equality check is the only way to keep count=1
-			// across the round-trip when snippet hasn't changed.
+		it('embody fires ONCE total across an editor→lens→editor→lens round-trip with a stable snippet (seed → retain → reuse)', () => {
+			// Decisive against a useMemo([snippet, lens]) fake-it: that would
+			// re-fire embody on the second lens-open (the lens dep changed
+			// undefined → "debug-props"). The live slot keeps count=1 across the
+			// round-trip — the lens-mount seeds, lens→editor retains the non-null
+			// slot (the editor branch seeds only when the slot is null), and
+			// editor→lens is a snippet-identity reuse. The snippet never changes,
+			// so the debounced re-embody never schedules.
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
 				const { rerender } = render(
@@ -138,14 +157,96 @@ describe('<StudyLenses> — F1 smoke', () => {
 			}
 		});
 
-		it('embody is NOT re-called when typing into the editor (no mode transition)', async () => {
+		it('typing does NOT re-embody synchronously — the re-embody is debounced', async () => {
+			// Real timers: after the keystroke the 200ms idle window has not
+			// elapsed, so only the mount seed has fired. A synchronous-re-embody
+			// fake-it would push the count to 2 here. The pending real timer is
+			// cancelled by the file-level afterEach(cleanup) when the component
+			// unmounts.
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
 				const { container } = render(<StudyLenses snippet="OK" />);
 				const view = await findMountedEditorView(container);
-				typeInto(view, 'arbitrary code, not a sentinel');
-				typeInto(view, 'more arbitrary text');
-				expect(embodySpy).not.toHaveBeenCalled();
+				typeInto(view, 'arbitrary text');
+				expect(embodySpy).toHaveBeenCalledOnce();
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+
+		it('the debounced re-embody fires after the idle window elapses, with the edited snippet', async () => {
+			// Fake timers are SCOPED to this test (not file-global): F2.5 + L1.10
+			// run on real timers and assert embody counts, so a global fake clock
+			// would freeze their CodeMirror async mounts. The editor mount +
+			// findMountedEditorView run on REAL timers; only the type→settle
+			// window uses fake timers.
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				const { container } = render(<StudyLenses snippet="OK" />);
+				const view = await findMountedEditorView(container);
+				vi.useFakeTimers();
+				try {
+					typeInto(view, 'arbitrary text');
+					act(() => {
+						vi.advanceTimersByTime(200);
+					});
+					expect(embodySpy).toHaveBeenCalledTimes(2);
+					expect(embodySpy).toHaveBeenLastCalledWith('arbitrary text');
+				} finally {
+					vi.useRealTimers();
+				}
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+
+		it('multiple edits within the window collapse to one re-embody, with the most recent snippet', async () => {
+			// Triangulates against a hardcoded-argument or fire-once-per-edit
+			// fake-it: two distinct edits inside one window must produce exactly
+			// one debounce embody (count = seed + 1, NOT seed + 2) carrying the
+			// SECOND string (the debounce's latest-args-win contract).
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				const { container } = render(<StudyLenses snippet="OK" />);
+				const view = await findMountedEditorView(container);
+				vi.useFakeTimers();
+				try {
+					typeInto(view, 'first edit');
+					typeInto(view, 'second edit');
+					act(() => {
+						vi.advanceTimersByTime(200);
+					});
+					expect(embodySpy).toHaveBeenCalledTimes(2);
+					expect(embodySpy).toHaveBeenLastCalledWith('second edit');
+				} finally {
+					vi.useRealTimers();
+				}
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+
+		it('an edit that reverts to the seeded snippet does NOT re-embody (snippet-identity guard)', async () => {
+			// The debounce-settle path is snippet-identity guarded: editing away
+			// then back to the slot's snippet leaves nothing to refresh, so no
+			// re-embody fires. F2.5 covers the revert as a cache-hit at the
+			// editor→lens transition; this covers the guard on the debounce path
+			// itself (a distinct data-flow edge).
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				const { container } = render(<StudyLenses snippet="OK" />);
+				const view = await findMountedEditorView(container);
+				vi.useFakeTimers();
+				try {
+					typeInto(view, 'something different');
+					typeInto(view, 'OK');
+					act(() => {
+						vi.advanceTimersByTime(200);
+					});
+					expect(embodySpy).toHaveBeenCalledOnce();
+				} finally {
+					vi.useRealTimers();
+				}
 			} finally {
 				embodySpy.mockRestore();
 			}
