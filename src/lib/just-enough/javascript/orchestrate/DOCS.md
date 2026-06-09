@@ -309,13 +309,6 @@ The orchestrator owns the following effect categories. Editor and lens-internal
 effects are listed separately for system-wide context — they're the neighbors'
 effects, not orchestrator categories.
 
-> **Code-vs-contract note.** The slot identifier (`liveEmbodiment`) and the
-> never-clear-on-edit behavior described here have landed; the slot is
-> content-keyed and reused (cache hit) or re-embodied (snippet mismatch) at the
-> editor → lens transition. Still pending to fully converge the code onto this
-> section: the live-debounced editor-mode re-embody + seed-at-mount (the next
-> Cycle-1 increment).
-
 These orchestrator-side effect categories (seed / debounced re-embody /
 flush-on-transition) are the _trigger-cadence_ decomposition of when the static
 embody staircase runs — a different axis from the editor's **Execution phases**

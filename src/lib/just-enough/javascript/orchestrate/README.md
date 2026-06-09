@@ -392,13 +392,6 @@ thrown) — a flagged dependency should embody ever reintroduce throwing. The
 live-embodiment trigger governs only **when** embody fires; it is independent of
 how `embody()` reports errors.
 
-> **Code-vs-contract note (Cycle 1, in progress).** This section describes the
-> **contract** — the load-bearing truth. The slot identifier (`liveEmbodiment`),
-> the type (`LiveEmbodiment`), and the never-clear-on-edit behavior have landed.
-> Still pending to converge the code onto this section: the live-debounced
-> editor-mode re-embody + seed-at-mount (the next increment), and the editor's
-> `interpretedDiagnostics` prop (the gutter-wiring increment).
-
 **Known cost (Cycle 1):** the editor's `lintJej` runs `validate(code)` (acorn)
 _and_ the orchestrator's debounced `embody()` runs acorn — two parses per settle
 (plus CodeMirror's own tokenizer). Accepted for now. **Convergence target:**
