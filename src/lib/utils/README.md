@@ -1,9 +1,10 @@
 # utils/
 
-Pure utility functions for deep object operations. JavaScript's built-in object
-tools (`Object.assign`, spread, `Object.freeze`) are all shallow — these
-utilities fill that gap for immutable-style programming with nested data
-structures.
+Pure utility functions for deep object operations, plus a few small
+cross-cutting helpers. JavaScript's built-in object tools (`Object.assign`,
+spread, `Object.freeze`) are all shallow — most of these utilities fill that gap
+for immutable-style programming with nested data structures; `debounce` is the
+one stateful exception (see Design Principles).
 
 ## Utilities
 
@@ -109,12 +110,33 @@ isPlainObject(null); // false
 Used internally by `deepMerge` and `deepEqual` to distinguish plain objects from
 other object types before attempting recursive structural operations.
 
+### debounce
+
+Trailing-edge debounce. Wraps a function so it runs once after `ms` of idle;
+rapid calls within the window reset the timer and the last call's arguments win.
+The returned wrapper carries a `.cancel()` method that drops any pending
+invocation (a no-op when nothing is pending) — safe to call from a React effect
+cleanup. The deferred call returns `void` (there is no synchronous result).
+
+```typescript
+import debounce from './debounce.js';
+
+const refresh = debounce(loadData, 200);
+refresh('a');
+refresh('b'); // only the 'b' call survives
+// ...200ms later → loadData('b') runs once
+
+refresh.cancel(); // drop a pending invocation
+```
+
 ## Design Principles
 
 - **Pure functions**: No side effects, same input always produces same output.
-  **Exception**: `deepFreezeInPlace` intentionally mutates its input. This is
-  acceptable because it's only used on freshly-built objects we own — the
-  mutation happens before any reference escapes
+  **Exceptions**: `deepFreezeInPlace` intentionally mutates its input —
+  acceptable because it's only used on freshly-built objects we own, before any
+  reference escapes. `debounce` is stateful by nature: it holds the pending
+  timer in a mutable closure (the deliberate low-level exception in DEV.md §8)
+  and schedules a deferred side-effecting call
 - **Browser-compatible**: No `structuredClone` — works in all modern browsers
 - **Type-preserving**: Generics maintain TypeScript types through operations
 - **Circular reference safety**: `deepClone` detects cycles; `deepEqual` tracks
