@@ -191,11 +191,14 @@ dies with the component instance (no URL state in v1).
 ### Structural constraints
 
 - **Two-layer module shape** — `core.ts` + the files under `lib/` do NOT
-  `import React`. `lib/no-paste-extension.ts` imports `@codemirror/*` (a
-  third-party library whose extension type is React-free); the other lib files
-  are pure TS over strings. `index.tsx` is the only file with React imports.
-  Tests split per file (no jsdom) + `tests/component.test.tsx` (jsdom). Per the
-  lenses peer's [§ Structural constraints](../DOCS.md#structural-constraints).
+  `import React`. Three lib files import `@codemirror/*` (a third-party library
+  whose extension types are React-free): `no-paste-extension.ts`,
+  `diff-decorations.ts`, and `snippet-free-autocomplete.ts`; the other three
+  (`comment-skeleton.ts`, `code-lines.ts`, `diff-lines.ts`) are pure TS over
+  strings. `index.tsx` is the only file with React imports. Tests split per file
+  (the CodeMirror-importing ones run under jsdom but assert off `EditorState`,
+  not layout) + `tests/component.test.tsx` (jsdom RTL). Per the lenses peer's
+  [§ Structural constraints](../DOCS.md#structural-constraints).
 - **`embodiment` parameter name** in core signatures (lenses-peer invariant).
 - **`data-lens="writeme"` on the wrapper's root.** Load-bearing for
   sandbox-harness selectors. Per the lenses-peer invariant.

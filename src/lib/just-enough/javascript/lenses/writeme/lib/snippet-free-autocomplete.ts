@@ -80,3 +80,8 @@ export default function snippetFreeAutocomplete(): Extension {
 		override: [localCompletionSource, completeFromList([...JS_KEYWORDS])],
 	});
 }
+
+// Exported for unit testing — the anti-cheat invariant (the keyword list is
+// plain bare words, NEVER snippet templates) is pinned in
+// `tests/snippet-free-autocomplete.test.ts`.
+export { JS_KEYWORDS };

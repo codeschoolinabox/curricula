@@ -485,8 +485,9 @@ each is independently testable:
 Tests split: `tests/no-paste-extension.test.ts`,
 `tests/comment-skeleton.test.ts`, `tests/code-lines.test.ts`,
 `tests/diff-lines.test.ts`, `tests/diff-decorations.test.ts`,
-`tests/core.test.ts` (vitest, no jsdom); `tests/component.test.tsx` (vitest +
-jsdom + `@testing-library/react`).
+`tests/snippet-free-autocomplete.test.ts`, `tests/core.test.ts` (vitest; the
+CodeMirror-importing ones run under jsdom but assert off `EditorState`, not
+layout); `tests/component.test.tsx` (vitest + jsdom + `@testing-library/react`).
 
 ## Dependencies (no install needed)
 
