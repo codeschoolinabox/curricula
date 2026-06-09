@@ -2,14 +2,15 @@
  * @file React wrapper for the `writeme` lens — default-exports the frozen
  * `LensModule` the orchestrator's lens registry consumes (post Inc 7).
  *
- * Scope so far: the write-view CodeMirror editor (editable, paste-blocked, seeded
+ * Scope: the write-view CodeMirror editor (editable, paste-blocked, seeded
  * synchronously from the comment skeleton) under a `data-lens="writeme"` root; a
  * Write/Read view toggle (read = solution-only study surface); and the four Assist
  * toggles — colorize + suggestions + diff (live compartment reconfigure) and
  * comments (pristine-gated doc re-seed). The diff is a pair: it highlights
  * typed-but-wrong lines on the WRITE editor, and marks the solution lines the
- * learner has not yet reproduced on the READ editor. The hints panel and the
- * honest Check + instructions land in later increments.
+ * learner has not yet reproduced on the READ editor. This is the complete feature
+ * set — hints, a numeric Check, and an instructions accordion were considered and
+ * cut (the live diff pair is the feedback).
  *
  * The CodeMirror `EditorView` is imperatively mounted ONCE in a `useEffect`
  * (deps `[]`); per the lenses-peer anti-regression invariant the learner's edits
@@ -49,7 +50,7 @@ import buildWriteDiffField, {
 } from './lib/diff-decorations.js';
 import noPasteExtension from './lib/no-paste-extension.js';
 import snippetFreeAutocomplete from './lib/snippet-free-autocomplete.js';
-import type { HintsMode, ViewMode } from './types.js';
+import type { ViewMode } from './types.js';
 
 import './writeme.css';
 
@@ -59,15 +60,14 @@ const WritemeComponent: ComponentType<LensProperties> =
 		// stable); defensively narrow the open-shape fields to the documented
 		// defaults.
 		const resolved = useMemo(() => writemeCore.config(config), [config]);
-		// viewMode is STATE (seeded once from config) so the Write/Read toggle can
-		// drive it; the scaffold toggles + hints stay render-derived until their
-		// own increments wire the live controls.
+		// Every surface control is per-mount STATE seeded once from config:
+		// viewMode drives the Write/Read toggle; the four scaffold toggles drive
+		// their Assist checkboxes (colorize / suggestions / diff via live
+		// compartment reconfigure, comments via a pristine-gated doc re-seed) —
+		// none remounts the editor.
 		const initialViewMode: ViewMode =
 			resolved.viewMode === 'read' ? 'read' : 'write';
 		const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
-		// colorize + suggestions are STATE so their Assist toggles can drive them
-		// (live compartment reconfigure, never a remount); keepComments + diff stay
-		// render-derived until their increments wire controls.
 		const [colorize, setColorize] = useState<boolean>(
 			resolved.colorize !== false,
 		);
@@ -84,7 +84,6 @@ const WritemeComponent: ComponentType<LensProperties> =
 			resolved.keepComments !== false,
 		);
 		const [diff, setDiff] = useState<boolean>(resolved.diff !== false);
-		const hintsMode: HintsMode = resolved.hintsMode === 'off' ? 'off' : 'on';
 		// Mirror colorize/suggestions/diff into refs so the mount effect seeds the
 		// compartments at mount without listing them as deps (which would remount).
 		const colorizeReference = useRef(colorize);
@@ -335,7 +334,6 @@ const WritemeComponent: ComponentType<LensProperties> =
 		function resetWriteEditor() {
 			reseedWriteEditor(keepComments);
 			setAppliedKeepComments(keepComments);
-			// (When the Check summary + hints panel land, Reset also clears them.)
 		}
 
 		return (
@@ -346,7 +344,6 @@ const WritemeComponent: ComponentType<LensProperties> =
 				data-suggestions={suggestions}
 				data-comments={keepComments}
 				data-diff={diff}
-				data-hints-mode={hintsMode}
 			>
 				<div data-writeme-toolbar role="toolbar" aria-label="Editor controls">
 					<div data-writeme-views role="group" aria-label="View">

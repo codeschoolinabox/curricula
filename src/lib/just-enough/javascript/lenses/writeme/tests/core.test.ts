@@ -25,10 +25,6 @@ describe('writeme core', () => {
 			it('keepComments defaults to true', () => {
 				expect(writemeCore.config().keepComments).toBe(true);
 			});
-
-			it('hintsMode defaults to on', () => {
-				expect(writemeCore.config().hintsMode).toBe('on');
-			});
 		});
 
 		describe('One — a single override wins over its default', () => {
@@ -55,10 +51,6 @@ describe('writeme core', () => {
 					false,
 				);
 			});
-
-			it('hintsMode override wins', () => {
-				expect(writemeCore.config({ hintsMode: 'off' }).hintsMode).toBe('off');
-			});
 		});
 
 		describe('Many — all documented fields overridden simultaneously', () => {
@@ -69,14 +61,12 @@ describe('writeme core', () => {
 					suggestions: true,
 					keepComments: false,
 					diff: false,
-					hintsMode: 'off',
 				});
 				expect(resolved.viewMode).toBe('read');
 				expect(resolved.colorize).toBe(false);
 				expect(resolved.suggestions).toBe(true);
 				expect(resolved.keepComments).toBe(false);
 				expect(resolved.diff).toBe(false);
-				expect(resolved.hintsMode).toBe('off');
 			});
 		});
 
@@ -94,7 +84,7 @@ describe('writeme core', () => {
 			});
 
 			it('preserves a null override verbatim', () => {
-				expect(writemeCore.config({ hintsMode: null }).hintsMode).toBe(null);
+				expect(writemeCore.config({ colorize: null }).colorize).toBe(null);
 			});
 		});
 

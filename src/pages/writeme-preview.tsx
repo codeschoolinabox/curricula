@@ -13,13 +13,14 @@
  * 2. Edit the snippet (the "solution"), type into the editor to reconstruct it,
  *    and watch the lens re-mount as the redo progresses through increments 6a–6f.
  *
- * Through Inc 6b: a paste-blocked CodeMirror editor seeded from the comment
- * skeleton (Keep Comments default on — comments stay, code lines are blanked),
- * plus a Write / Read toggle. Read shows the SOLUTION ALONE to study and
- * memorize — Write and Read are mutually exclusive (read → remember → type; you
- * never type with the solution in view). `key={code}` forces a fresh mount (and
- * re-seed) per snippet edit. Keep-comments + reset (6c), diff highlighting (6d),
- * hints (6e), and the honest Check + instructions (6f) land in later increments.
+ * A paste-blocked CodeMirror editor seeded from the comment skeleton (Comments
+ * default on — comments stay, code lines are blanked), a Write / Read toggle
+ * (Read shows the SOLUTION ALONE to study; Write and Read are mutually exclusive
+ * — read → remember → type), the four Assist toggles (colorize / suggestions /
+ * comments / diff), and the diff PAIR (write: typed-but-wrong lines in red; Read:
+ * not-yet-reproduced solution lines in amber). `key={code}` forces a fresh mount
+ * (and re-seed) per snippet edit. This is the complete lens — hints, a numeric
+ * Check, and instructions were considered and cut (the diff pair is the feedback).
  *
  * @vitest-skip — Docusaurus auto-routes `src/pages/*.tsx`; this is a page, not a
  * unit test.
@@ -54,8 +55,8 @@ export default function WritemePreview(): React.JSX.Element {
 					(live; unattempted blanks stay neutral); on the <strong>Read</strong>{' '}
 					solution editor it marks in amber every line you have{' '}
 					<strong>not yet reproduced</strong> (a study cue — your code is never
-					shown). The hints panel and the honest Check + instructions land in
-					later increments.
+					shown). This is the complete lens — hints, a numeric Check, and
+					instructions were considered and cut; the diff pair is the feedback.
 				</p>
 
 				<label style={{ display: 'block', marginBottom: 8 }}>

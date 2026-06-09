@@ -6,9 +6,9 @@ frozen snippet. The snippet IS the solution; the learner reconstructs it by
 optional **comment skeleton** leaves the comments (and blank lines) in place as
 scaffolding while stripping the executable code; turning it off gives a blank
 slate. As the learner types, a **diff** view highlights the lines that do not
-yet match the solution; a **Check** reports honestly how many code lines have
-been reproduced; and a separate **Read** view shows the solution in a read-only
-editor paired with the write editor, to study before reproducing from memory.
+yet match the solution; and a separate **Read** view shows the solution in a
+read-only editor paired with the write editor, to study before reproducing from
+memory.
 
 The exercise is about **recall and motor reproduction**, not recognition: paste
 is blocked in every editable mode so the learner produces the code rather than
@@ -19,13 +19,13 @@ the recommender ranks.
 
 > Migrated from the pre-refactor `WritemeLens.jsx` (registry id `writeme`). The
 > V2 redo preserves the legacy's pedagogical surface (paste-blocked write
-> editor, comment-skeleton scaffolding, solution reference, hints, reset) while
+> editor, comment-skeleton scaffolding, solution reference, reset) while
 > replacing structural pieces (Preact `useApp`/`useColorize` contexts →
 > `embodiment` prop; imperative `setTimeout` editor wiring → a `useEffect`
-> mount; the gameable concept-count "progress" score → an honest per-line diff +
-> line count) and reshaping the scaffolds into four orthogonal toggles
-> (colorize, suggestions, comments, diff). See [`./DOCS.md`](./DOCS.md) for the
-> migration audit trail and decision log.
+> mount; the gameable concept-count "progress" score → the honest per-line diff
+> pair) and reshaping the scaffolds into four orthogonal toggles (colorize,
+> suggestions, comments, diff). See [`./DOCS.md`](./DOCS.md) for the migration
+> audit trail and decision log.
 
 ## Public API
 
@@ -44,8 +44,8 @@ Fields:
 - `name: 'writeme'` — registry identity.
 - `Component: ComponentType<LensProps>` — React wrapper around the lens's
   pure-TS core. Renders the writeme surface (`<div data-lens="writeme">`) with
-  the toolbar, the CodeMirror write editor, the read-view read-only solution
-  editor, the hints panel, and the instructions accordion.
+  the toolbar, the CodeMirror write editor, and the read-view read-only solution
+  editor.
 - `config(overrides?): LensConfig` — resolves the per-lens config. Returns a
   frozen `LensConfig` (flat `Record<string, SerializableValue>` per
   [`../types.ts`](../types.ts) `LensConfig`); unknown keys in `overrides` are
@@ -72,14 +72,11 @@ Fields:
   - `diff?: boolean` (default `true`) — the per-line feedback overlay. When
     `true`, each line of the learner's code that does not yet match the
     corresponding solution line is highlighted (the honest, always-on feedback);
-    `false` removes the overlay — pure recall, no signal until the learner asks
-    (via Check or Read). Default `true` so the lens shows its honest feedback
+    `false` removes the overlay — pure recall, no signal until the learner
+    switches to Read. Default `true` so the lens shows its honest feedback
     mechanism working on first open rather than presenting a feedback-free box
     (see [`./DOCS.md`](./DOCS.md) § Why default the editor to diff). Replaces
     the former `editorMode: 'diff' | 'raw'`.
-  - `hintsMode?: 'on' | 'off'` (default `'on'`) — whether the on-demand hints
-    panel renders in the write view. When `'on'`, the learner can reveal
-    generated hints one at a time; when `'off'`, the panel does not render.
 - `applicableTo(embodiment): boolean` — returns `true` (Tier 1 per
   [`../README.md`](../README.md) § Three-tier classification). Writing code back
   from memory needs neither an AST nor a successful parse — the lens renders the
@@ -105,9 +102,9 @@ a copy task.
 The comment skeleton is the scaffolding dial: with comments kept, the learner
 reconstructs code against a running commentary of intent (a guided
 reconstruction); with comments off, the learner reproduces the whole thing from
-a blank page (unaided recall). The diff view and the Check make the exercise
-self-pacing — the learner sees which lines still diverge and how many they have
-reproduced, rather than guessing until a submit-then-grade round-trip.
+a blank page (unaided recall). The diff pair makes the exercise self-pacing —
+the learner sees which lines still diverge, rather than guessing until a
+submit-then-grade round-trip.
 
 `blanks` is, in effect, a more heavily scaffolded `writeme`: the same "reproduce
 the source" goal, but with most of the source already on screen and only
@@ -121,12 +118,12 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 
 - **Solution** — the snippet's `embodiment.source.code`: the correct, complete
   program the learner reconstructs. The lens renders it (in the read view and as
-  the diff/Check reference) but never mutates it.
+  the diff reference) but never mutates it.
 - **Learner code** — the text the learner has typed into the write editor. Lives
   in per-mount React state (mirrored into the CodeMirror document); never
   written back to the orchestrator's snippet.
 - **Write view** — the editable reconstruction surface: a CodeMirror editor the
-  learner types into, paste-blocked, with the hints panel and the toolbar.
+  learner types into, paste-blocked, with the toolbar.
 - **Read view** — the read-only study surface: the solution in a **read-only
   CodeMirror editor paired with the write editor** (same `colorize`; the diff
   from the solution side when `diff` is on). No learner code is shown. Write and
@@ -147,24 +144,19 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   skeleton (`true`) or a blank slate (`false`).
 - **Code line** — a solution line that bears executable code (its text, with
   comments stripped, is non-empty). These are the lines the learner must
-  reproduce — the only lines the Check counts and the diff grades.
+  reproduce — the only lines the diff grades (and the only ones the
+  computed-but-unsurfaced tally counts).
 - **Comment line** — a solution line that is blank, whitespace-only, or
   comment-only. The comment skeleton seeds these verbatim; they are **freebies**
-  — not counted by the Check, not flagged by the diff.
+  — not flagged by the diff, not counted by the tally.
 - **Line status** — the per-line diff verdict: `match` (learner's trimmed line
   equals the solution's), `diff` (a code line the learner typed differently),
   `empty` (a code line the learner has left blank), or `comment` (a comment line
   — ungraded).
 - **Diff** — the per-line comparison of learner code against the solution (line
-  index _i_ vs line index _i_, compared trimmed). Powers both the `diff`-mode
-  line highlighting and the Check. Produced by `lib/diff-lines.ts`.
-- **Check** — the learner action that reports, honestly, how many code lines
-  have been reproduced (`X / N code lines`). Re-runnable; non-destructive. It
-  makes no "complete" / "done" claim — reproducing N of N lines is the literal
-  measurement, not a mastery verdict.
-- **Hint** — a generated reminder about the program's structure (e.g. "define a
-  function named `classify`", "this program has 7 lines"), revealed on demand
-  one at a time. Produced by `lib/generate-hints.ts`.
+  index _i_ vs line index _i_, compared trimmed). Powers the `diff`-mode line
+  highlighting (and yields the computed-but-unsurfaced reproduced-line tally).
+  Produced by `lib/diff-lines.ts`.
 - **Paste-blocked** — the write editor rejects keyboard (`Mod-V`) and
   context-menu paste, in every editable mode, so the learner types the code
   rather than pasting the solution. Provided by `lib/no-paste-extension.ts`.
@@ -177,8 +169,7 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
      data-colorize="true|false"
      data-suggestions="true|false"
      data-comments="true|false"
-     data-diff="true|false"
-     data-hints-mode="on|off">
+     data-diff="true|false">
   <div data-writeme-toolbar role="toolbar"> — three zones: views | assist | actions
     <div data-writeme-views role="group"> — the Write/Read view switch (segmented pair)
       <button data-view-toggle="write">  —   editable reconstruction surface
@@ -189,8 +180,6 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
       <input type=checkbox data-assist-toggle="comments">    — seed comment skeleton vs blank slate
       <input type=checkbox data-assist-toggle="diff">        — per-line feedback overlay on / off
     <div data-writeme-actions>             — trailing zone (pushed to the right edge):
-      <button data-hints-toggle>         —   show / hide the hints panel
-      <button data-check>                —   report "X / N code lines reproduced"
       <button data-reset>                —   restore the starting template, clear feedback
       <span data-writeme-reseed-pending> —   "Reset to apply" — present ONLY when a
                                               comments toggle landed on a diverged
@@ -198,14 +187,10 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
   — write view (data-view-mode="write") —
   <div data-writeme-editor-host>       —   CodeMirror editor (editable, paste-blocked;
                                             diff adds per-line highlight)
-  <… data-writeme-check-summary>       —   after Check: "X / N code lines (P%)", aria-live
-  <aside data-writeme-hints>           —   on-demand hint reveal (when data-hints-mode="on")
   — read view (data-view-mode="read"): the PAIRED read-only solution editor —
   <figure data-writeme-solution-view> —   solution editor, matched to write
     <div data-writeme-solution>        —     read-only CodeMirror; mirrors colorize;
                                             shows the diff pair when diff is on
-  — always —
-  <details data-writeme-instructions>  —   collapsible "How to use" help
 </div>
 ```
 
@@ -213,13 +198,11 @@ The `data-lens` attribute is the lenses-peer invariant (see
 [`../DOCS.md` § Structural constraints](../DOCS.md)). All `data-writeme-*`
 (including the three toolbar-zone wrappers `data-writeme-views` /
 `data-writeme-assist` / `data-writeme-actions`) / `data-view-toggle` /
-`data-assist-toggle` / `data-hints-toggle` / `data-reset` /
-`data-writeme-reseed-pending` / `data-check` hooks are sandbox-harness selectors
-and CSS hooks; renaming any is a contract change. The four scaffold booleans
-(`data-colorize`, `data-suggestions`, `data-comments`, `data-diff`) and
-`data-view-mode` / `data-hints-mode` reflect committed config/view state. The
-view-toggle buttons carry `aria-pressed`; the Assist checkboxes carry `checked`;
-the Check summary carries `aria-live="polite"`.
+`data-assist-toggle` / `data-reset` / `data-writeme-reseed-pending` hooks are
+sandbox-harness selectors and CSS hooks; renaming any is a contract change. The
+four scaffold booleans (`data-colorize`, `data-suggestions`, `data-comments`,
+`data-diff`) and `data-view-mode` reflect committed config/view state. The
+view-toggle buttons carry `aria-pressed`; the Assist checkboxes carry `checked`.
 
 ## Toolbar contract
 
@@ -260,14 +243,9 @@ the Check summary carries `aria-live="polite"`.
     solution editor highlights the same diff from the solution side (progress
     markers). With `colorize` off and `diff` on, the line-highlights stay
     legible (they are line-level decorations, independent of token coloring).
-- **Hints toggle** — a `<button>` ("💡 Show / Hide Hints") that flips
-  `hintsMode`; reflected by `data-hints-mode`. When off, the hints panel does
-  not render.
-- **Check** — a `<button>` ("🔍 Check") that computes and renders the honest
-  line-reproduction summary (see [Check contract](#check-contract)).
 - **Reset** — a `<button>` ("🔄 Reset") that restores the write editor to its
-  starting template (per the current Keep-comments setting) and clears the Check
-  summary and any revealed hints.
+  starting template (per the current Keep-comments setting) and clears any
+  feedback decorations.
 
 ## Write-view contract
 
@@ -309,17 +287,16 @@ the Check summary carries `aria-live="polite"`.
   highlight is a CodeMirror line decoration (`Decoration.line`) supplied by a
   **self-recomputing `StateField`** that captures the solution at construction
   and recomputes the per-line statuses from the write editor's own document on
-  each transaction (the field lives in the `diff` compartment). The honest
-  **Check** and the read-editor diff pair both use the React-side `DiffResult`
-  from `lib/diff-lines.ts` (computed from the learner's code); all three derive
-  from the same pure per-line core.
+  each transaction (the field lives in the `diff` compartment). The read-editor
+  diff pair and the computed-but-unsurfaced reproduced-line tally both use the
+  React-side `DiffResult` from `lib/diff-lines.ts` (computed from the learner's
+  code); all derive from the same pure per-line core.
 - **The diff pair.** When `diff` is on the **read** (solution) editor marks the
   solution lines the learner has **not yet matched** — progress markers that
   focus what is still missing, never the learner's typed code. Write shows the
   learner's divergences; Read shows the solution's still-unmatched lines.
 - When `diff` is off no decoration attaches (in either editor) — the learner
-  reconstructs with no feedback overlay (Check and Read remain available on
-  demand).
+  reconstructs with no feedback overlay (Read remains available on demand).
 - The diff is a **drift signal, not a grade**: if the learner inserts or deletes
   whole lines, the index alignment shifts and downstream lines will flag as
   differing — the visible shift tells the learner they have drifted from the
@@ -335,61 +312,23 @@ skeleton preserves the solution's line count, so index alignment holds while the
 learner fills lines in place. Each solution line resolves to one `LineStatus`:
 
 - `comment` — the solution line bears no executable code (blank / whitespace /
-  comment-only). Ungraded; never highlighted; excluded from the Check total.
+  comment-only). Ungraded; never highlighted; excluded from the tally total.
 - `match` — a code line whose trimmed learner text equals the solution's.
 - `diff` — a code line whose trimmed learner text differs (and is non-empty).
 - `empty` — a code line the learner has left blank.
 
-The Check **total** is the number of code lines (`match` + `diff` + `empty`);
-the Check **matched** is the number of `match` lines. Comment lines are excluded
-so the count reflects work the learner actually did — the comment skeleton seeds
-the comment lines, so counting them would inflate the score before the learner
+The `DiffResult` **total** is the number of code lines (`match` + `diff` +
+`empty`); **matched** is the number of `match` lines. Comment lines are excluded
+so the tally reflects work the learner actually did — the comment skeleton seeds
+the comment lines, so counting them would inflate the count before the learner
 typed anything (the dishonesty this lens's feedback redesign exists to avoid).
+`matched` / `total` are **computed but not currently surfaced** — the diff pair
+is the feedback; the tally is a cheap byproduct of the same pass and a clean
+extension point (a numeric summary was considered and cut as redundant).
 
 The `diff`-mode highlight uses only the `diff` status (typed-but-wrong);
-`match`, `comment`, and `empty` lines are left unhighlighted. The Check counts
-`match` against the full code-line total (so `empty` lines lower the fraction
-without being painted red). The two surfaces share one `diffLines` computation
-but read different fields of it.
-
-## Check contract
-
-Clicking **Check** renders, into `data-writeme-check-summary` (aria-live), an
-honest summary: **`X / N code lines reproduced (P%)`**, where `N` is the number
-of code lines in the solution, `X` is the number the learner has reproduced
-exactly (trimmed), and `P = Math.round(X / N * 100)`. When `N === 0` (no code
-lines — empty or comment-only solution) the summary reads "no code lines to
-reproduce" (vacuously complete; no `NaN%`).
-
-The summary makes **no "complete" / "you're done" claim** — `X / N` is a literal
-measurement of line reproduction, not a mastery verdict. This is the deliberate
-replacement for the legacy's gameable "progress" score (which averaged a
-regex-concept-presence count with a length ratio and declared ≥ 85% "complete" —
-reachable by typing the right keywords at the right length without writing
-working code). See [`./DOCS.md`](./DOCS.md) § Why the honest line-count replaces
-the legacy score.
-
-## Hints panel contract
-
-When `hintsMode === 'on'` and the view is `write`, an
-`<aside data-writeme-hints>` renders the generated hints (from
-`lib/generate-hints.ts`) with on-demand reveal: each hint starts hidden behind a
-"Reveal hint" button; clicking reveals that hint's text. **Toggling `hintsMode`
-off then on preserves each hint's revealed/hidden state** — the toggle gates
-rendering only (parity with the legacy's render-only `showHints`); only
-**Reset** re-hides all hints.
-
-Hints are generated from the solution by regex analysis — concept hints ("define
-a function named `classify`", "declare a variable called `total`") followed by
-structural hints ("this program has 7 lines", "think about the logical flow") —
-and the combined list is **capped at 8**. Concept hints take precedence: on a
-concept-rich snippet the cap drops the structural hints first (legacy parity),
-so the structural hints are not guaranteed to appear. The hint set depends on
-`keepComments` (with comments kept, hints emphasize implementation; with
-comments off, they emphasize structure), matching the legacy's two pattern sets.
-
-The hints are faithful ports of the legacy generator and are intentionally
-generic; richer, cursor-scoped hints (as `blanks` ships) are a future direction.
+`match`, `comment`, and `empty` lines are left unhighlighted. The diff pair and
+the tally share one `diffLines` computation but read different fields of it.
 
 ## Read-view contract
 
@@ -412,12 +351,11 @@ editor.
 
 - **Empty source** (`embodiment.source.code === ''`). The comment skeleton of
   `''` is `''`; the write editor starts empty; the diff has zero code lines; the
-  Check reads "no code lines to reproduce." No crash, no `NaN` — this also fixes
-  a latent legacy defect (the legacy's length-ratio score divided by zero
-  solution lines, yielding `NaN%`; V2's code-line Check is vacuously complete
-  instead).
+  tally is `0 / 0`. No crash, no `NaN` — this also fixes a latent legacy defect
+  (the legacy's length-ratio score divided by zero solution lines, yielding
+  `NaN%`; V2's `total === 0` tally is vacuously complete instead).
 - **Comment-only / blank-only source.** Every line is a comment line; the
-  comment skeleton equals the source; there are zero code lines; the Check is
+  comment skeleton equals the source; there are zero code lines; the tally is
   vacuously complete. The exercise is degenerate (nothing to reproduce) but
   renders safely.
 - **Snippet that does not parse.** Irrelevant — writeme grades text lines, not
@@ -434,9 +372,9 @@ editor.
 - **Keep-comments toggled mid-exercise.** If the editor is still pristine
   (empty, or unchanged from the current template), it re-seeds to the
   newly-chosen template. If the learner has already typed divergent code, the
-  toggle updates the hint set and the template **Reset** will produce but leaves
-  the editor untouched ("Reset to apply"); in-progress work is never silently
-  discarded. Only **Reset** clears the editor.
+  toggle updates the template **Reset** will produce but leaves the editor
+  untouched ("Reset to apply"); in-progress work is never silently discarded.
+  Only **Reset** clears the editor.
 
 ## What this lens does NOT do (lens-specific drops only)
 
@@ -447,8 +385,9 @@ vs. the prior-art `WritemeLens.jsx`:
 
 - **No gameable "progress" score.** The legacy averaged a regex-concept-presence
   count with a length ratio and declared ≥ 85% "complete." Replaced by the
-  honest per-line diff + `X / N code lines` Check. (The legacy metric is the
-  kind of weak feedback this redo exists to prevent.)
+  honest per-line diff pair (plus a computed-but-unsurfaced honest
+  reproduced-line tally). (The legacy metric is the kind of weak feedback this
+  redo exists to prevent.)
 - **No reading editor state during render.** The legacy called
   `getStudentValue()` (reading the imperative CodeMirror document) directly in
   JSX, so its line/char counts and comparison panel were **stale** until an
@@ -467,14 +406,13 @@ vs. the prior-art `WritemeLens.jsx`:
   than transcribes. See [`./DOCS.md`](./DOCS.md) § Why Read is the paired
   solution editor.
 - **No standalone line/character-count footer.** The legacy showed a live (but
-  stale) "Lines: N / Characters: M" readout. Dropped — the diff and the Check
-  are the load-bearing progress signals; a raw character count is noise.
-- **No URL config sync.** The legacy persisted
-  `?writeme=nocomments:true,hints:true` to the URL. V2 ships no URL surface;
-  config comes from the fence directive / props. URL-state persistence is a
-  [Future direction](#future-direction) item (and would lift to the
-  orchestrator, per the `blanks` precedent). **A deliberate divergence from
-  `blanks`**, which ships a `lib/url-config.ts`.
+  stale) "Lines: N / Characters: M" readout. Dropped — the diff pair is the
+  load-bearing progress signal; a raw character count is noise.
+- **No URL config sync.** The legacy persisted `?writeme=nocomments:true` to the
+  URL. V2 ships no URL surface; config comes from the fence directive / props.
+  URL-state persistence is a [Future direction](#future-direction) item (and
+  would lift to the orchestrator, per the `blanks` precedent). **A deliberate
+  divergence from `blanks`**, which ships a `lib/url-config.ts`.
 - **No language / extension applicability gate.** The legacy gated `applicable`
   on `file.lang === 'javascript' && file.ext !== '.mjs'`. V2's `applicableTo` is
   unconditional `true`: the `lenses/javascript/` tree is JS-by-construction (the
@@ -484,12 +422,12 @@ vs. the prior-art `WritemeLens.jsx`:
 - **Keep-comments never silently discards work** (behavior change from the
   legacy). The legacy guarded its student-editor seed with
   `studentEditorInitialized`, so toggling Keep Comments after typing began did
-  NOT re-seed the editor — it only changed hint generation and what Reset
-  produced, leaving the checkbox feeling dead. V2 re-seeds **only while the
-  editor is pristine**; once the learner has diverged, the toggle updates the
-  hint set + the Reset template and surfaces "Reset to apply," never nuking
-  in-progress text. Chosen so the control works on the common before-typing case
-  without the destructive surprise of a blind re-seed.
+  NOT re-seed the editor — it only changed what Reset produced, leaving the
+  checkbox feeling dead. V2 re-seeds **only while the editor is pristine**; once
+  the learner has diverged, the toggle updates the Reset template and surfaces
+  "Reset to apply," never nuking in-progress text. Chosen so the control works
+  on the common before-typing case without the destructive surprise of a blind
+  re-seed.
 - **No `useColorize` / `useApp` Preact contexts.** Replaced by the `embodiment`
   prop and lens-local React state. (`useColorize` was vestigial in the legacy —
   imported but unused.)
@@ -509,9 +447,9 @@ each is independently testable:
 
 - `index.tsx` (wrapper) — React `Component`, the `LensModule.Component`. Owns
   the per-mount UI state (view mode, the four scaffold toggles — colorize /
-  suggestions / comments / diff — hints mode, learner code, check summary,
-  revealed hints), the write + read CodeMirror editors and their compartments,
-  and the diff-line decoration field. The only file that imports React.
+  suggestions / comments / diff — and learner code), the write + read CodeMirror
+  editors and their compartments, and the diff-line decoration field. The only
+  file that imports React.
 - `core.ts` (core) — `LensModule` defaults: `config`, `applicableTo` (Tier 1),
   `recommend`.
 - `lib/no-paste-extension.ts` (core) — **vendored** from the legacy
@@ -520,21 +458,35 @@ each is independently testable:
 - `lib/comment-skeleton.ts` (core) — **ported & de-duplicated** from the
   legacy's two byte-identical inline template generators. Produces the comment
   skeleton; preserves line count. Pure. Eslint-ignored.
+- `lib/code-lines.ts` (core) — **ported**. The single source of truth for
+  classifying which solution lines are gradable **code lines** vs **freebie**
+  lines (blank / whitespace-only / comment-only / inside an open block comment).
+  Shared by `comment-skeleton.ts` (which seeds freebies verbatim) and
+  `diff-lines.ts` (which grades only code lines) so the two **must agree** — the
+  B1 honesty invariant: extracting the classifier to one source keeps the diff
+  and the tally honest (counting skeleton-seeded freebies would inflate the
+  count). Pure. Eslint-ignored.
 - `lib/diff-lines.ts` (core) — **new**. Per-line `LineStatus` verdicts +
-  code-line tallies (`matched` / `total`). Powers both the diff decoration and
-  the Check. Pure. Eslint-ignored.
-- `lib/generate-hints.ts` (core) — **ported** from the legacy's inline
-  `generateHints` + `stripComments` component helpers. Regex hint generation
-  (concept ids `hint_<n>`, structural ids `structural_<n>` — legacy scheme,
-  preserved so the wrapper's revealed-id keying is faithful), capped at 8. Pure.
-  Eslint-ignored.
-- `types.ts` (shared) — lens-local types: `ViewMode`, `HintsMode`, `Hint`,
-  `LineStatus`, `DiffResult`, `WritemeLensConfig`.
+  code-line tallies (`matched` / `total`). Powers the diff decorations; the
+  tally is computed but not currently surfaced. Pure. Eslint-ignored.
+- `lib/diff-decorations.ts` (core) — **new**. The CodeMirror `StateField` glue
+  that maps `diff-lines.ts`'s per-line verdict onto the diff-pair decorations —
+  both halves live here: a self-recomputing field flagging the **write**
+  editor's typed-but-wrong lines, and a static field marking the **read**
+  (solution) editor's not-yet-reproduced lines. Eslint-ignored.
+- `lib/snippet-free-autocomplete.ts` (core) — the `suggestions` scaffold: a
+  CodeMirror autocomplete extension offering JS keywords plus in-buffer locals
+  (from the Lezer tree) and **no snippet templates** — it overrides the
+  language-data completion sources so `lang-javascript`'s `for`/`if`/`function`
+  skeletons are never consulted, leaking no answer. Eslint-ignored.
+- `types.ts` (shared) — lens-local types: `ViewMode`, `LineStatus`,
+  `DiffResult`, `WritemeLensConfig`.
 
 Tests split: `tests/no-paste-extension.test.ts`,
-`tests/comment-skeleton.test.ts`, `tests/diff-lines.test.ts`,
-`tests/generate-hints.test.ts`, `tests/core.test.ts` (vitest, no jsdom);
-`tests/component.test.tsx` (vitest + jsdom + `@testing-library/react`).
+`tests/comment-skeleton.test.ts`, `tests/code-lines.test.ts`,
+`tests/diff-lines.test.ts`, `tests/diff-decorations.test.ts`,
+`tests/core.test.ts` (vitest, no jsdom); `tests/component.test.tsx` (vitest +
+jsdom + `@testing-library/react`).
 
 ## Dependencies (no install needed)
 
@@ -551,16 +503,16 @@ Tests split: `tests/no-paste-extension.test.ts`,
 - **Order-insensitive line alignment.** v1 diffs by line index; whole-line
   insertions/deletions shift alignment. An LCS-based alignment would diff the
   learner's lines against the solution regardless of inserted/removed lines.
-- **Cursor-scoped hints.** v1 ships the legacy's generic generated hints. A
-  follow-up could adopt the `blanks` cursor-scoped, incremental-reveal model
-  (hint for the line under the cursor).
+- **No hints affordance.** A hints panel was **considered and cut** — `writeme`
+  is the recall lens, and the Read view is the escape hatch (expertise
+  reversal): a learner who is stuck reads the solution, then reproduces it. A
+  hint layer would blunt that boundary, so it is not deferred — it is dropped.
 - **Seeded / reproducible exercises.** Not applicable in v1 (no randomness), but
-  an educator-pinned snippet ordering or hint selection could land with the WS2
-  recommender.
+  an educator-pinned snippet ordering could land with the WS2 recommender.
 - **URL state lifted to the orchestrator.** v1 ships none. A follow-up could
-  persist `viewMode` / `colorize` / `suggestions` / `keepComments` / `diff` /
-  `hintsMode` to the URL, lifting to the orchestrator's URL surface when it
-  lands (per the `blanks` precedent).
+  persist `viewMode` / `colorize` / `suggestions` / `keepComments` / `diff` to
+  the URL, lifting to the orchestrator's URL surface when it lands (per the
+  `blanks` precedent).
 - **Character-level intra-line diff.** v1 highlights whole non-matching lines. A
   follow-up could highlight the specific characters within a line that differ
   (the `blanks` `diff`-mode char model), once line alignment is
@@ -575,8 +527,8 @@ Follows all conventions in [`../README.md`](../README.md) and
 - **`data-lens="writeme"` on the wrapper's root element** — load-bearing for
   sandbox harnesses + per-lens CSS.
 - **`embodiment` parameter name** in core signatures.
-- **Disposable practice** — no cross-mount state for learner code, check, or
-  hints; React owns the lifecycle. (No URL config in v1 — see drops.)
+- **Disposable practice** — no cross-mount state for learner code; React owns
+  the lifecycle. (No URL config in v1 — see drops.)
 - **Read-only views** — the lens never mutates `embodiment` or `config`; the
   write editor writes to local `learnerCode` state, never to `setSnippet`.
 - **Tier 1 classification** — `applicableTo` returns `true` (text-only exercise,

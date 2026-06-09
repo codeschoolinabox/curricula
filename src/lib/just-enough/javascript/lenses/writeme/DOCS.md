@@ -4,11 +4,11 @@
 
 The `writeme` lens is the learner's **reproduction workbench**: a place to type
 a program back from memory into a paste-blocked CodeMirror editor, with an
-optional comment skeleton as scaffolding, a per-line diff that highlights where
-the learner's code diverges from the solution, and an honest Check that reports
-how many code lines have been reproduced. It is the furthest point on the
-recognition → recall spectrum among the migrated lenses: `parsons` orders given
-lines, `blanks` fills given holes, `writeme` reproduces the whole program.
+optional comment skeleton as scaffolding and a per-line diff **pair** as the
+feedback — the write editor flags typed-but-wrong lines, and the read-only
+solution editor marks the lines not yet reproduced. It is the furthest point on
+the recognition → recall spectrum among the migrated lenses: `parsons` orders
+given lines, `blanks` fills given holes, `writeme` reproduces the whole program.
 `blanks` is in effect a more heavily scaffolded `writeme`, and `writeme` shares
 its `diff` feedback toggle (adapted from the `blanks` editor-mode ladder to a
 whole-line, single-boolean form).
@@ -19,9 +19,10 @@ and passed tests + AR cycles but **never worked in a browser as a learner** —
 "weak hallucinations" lacking the real pedagogy. Those shells were reverted.
 This redo migrates the legacy `WritemeLens.jsx` faithfully — preserving its
 pedagogical surface (paste-blocked write editor, comment-skeleton scaffolding,
-solution reference, hints, reset) while replacing structural pieces and the one
-pedagogically-broken piece (the gameable "progress" score) — and treats the
-Sandbox Checkpoint as a gate, not a celebration.
+solution reference, reset) while replacing structural pieces and the one
+pedagogically-broken piece (the gameable "progress" score, replaced by the
+honest per-line diff pair) — and treats the Sandbox Checkpoint as a gate, not a
+celebration.
 
 ## Migration
 
@@ -40,7 +41,8 @@ The pre-refactor lens lived at
 - the two byte-identical inline comment-skeleton generators → one pure
   `lib/comment-skeleton.ts`
 - the gameable concept-count + length-ratio "progress" score (≥85% = "complete")
-  → an honest per-line diff + a `X / N code lines` Check (see
+  → an honest per-line diff **pair** (the write editor flags typed-but-wrong
+  lines; the read editor marks lines not yet reproduced) — see
   [Why the honest line-count replaces the legacy score](#why-the-honest-line-count-replaces-the-legacy-score))
 - the legacy's duplicate solution render (a read-only editor + a `<pre>`
   comparison grid) → a single read-only solution editor **paired** with the
@@ -58,15 +60,17 @@ decisions and audit trail.
 
 ## Modules
 
-| File                        | Layer   | Purpose                                                                                                        |
-| --------------------------- | ------- | -------------------------------------------------------------------------------------------------------------- |
-| `index.tsx`                 | wrapper | React `Component`; owns per-mount UI state; mounts CodeMirror + the diff decoration field; composes the core   |
-| `core.ts`                   | core    | `LensModule` defaults — `config`, `applicableTo` (Tier 1), `recommend`                                         |
-| `lib/no-paste-extension.ts` | core    | **Vendored** — CodeMirror extension blocking keyboard (`Mod-v`) + context-menu paste                           |
-| `lib/comment-skeleton.ts`   | core    | **Ported & de-duplicated** — solution → comment-only skeleton (executable code stripped; line count preserved) |
-| `lib/diff-lines.ts`         | core    | **New** — per-line `LineStatus` verdicts + code-line tallies (`matched` / `total`); powers diff visual + Check |
-| `lib/generate-hints.ts`     | core    | **Ported** — regex concept + structural hints from the solution, capped at 8                                   |
-| `types.ts`                  | shared  | `ViewMode`, `HintsMode`, `HintType`, `Hint`, `LineStatus`, `DiffResult`, `WritemeLensConfig`                   |
+| File                               | Layer   | Purpose                                                                                                                               |
+| ---------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`                        | wrapper | React `Component`; owns per-mount UI state; mounts CodeMirror + the diff decoration fields; composes the core                         |
+| `core.ts`                          | core    | `LensModule` defaults — `config`, `applicableTo` (Tier 1), `recommend`                                                                |
+| `lib/no-paste-extension.ts`        | core    | **Vendored** — CodeMirror extension blocking keyboard (`Mod-v`) + context-menu paste                                                  |
+| `lib/comment-skeleton.ts`          | core    | **Ported & de-duplicated** — solution → comment-only skeleton (executable code stripped; line count preserved)                        |
+| `lib/code-lines.ts`                | core    | **Ported** — the shared gradable-code-line classifier; `comment-skeleton.ts` + `diff-lines.ts` agree on it (the B1 honesty invariant) |
+| `lib/diff-lines.ts`                | core    | **New** — per-line `LineStatus` verdicts + code-line tallies (`matched` / `total`); powers the diff visual + the honest tally         |
+| `lib/diff-decorations.ts`          | core    | **New** — CodeMirror `StateField` glue: `buildWriteDiffField` (write overlay) + `buildReadMarkerField` (read marker) — the diff pair  |
+| `lib/snippet-free-autocomplete.ts` | core    | **New** — the `suggestions` toggle's autocomplete: JS keywords + in-buffer locals, no snippet templates                               |
+| `types.ts`                         | shared  | `ViewMode`, `LineStatus`, `DiffResult`, `WritemeLensConfig`                                                                           |
 
 Default export of `index.tsx` is the frozen `LensModule` record. The core
 subsystems under `lib/` are internal; only `index.tsx` (and where applicable
@@ -74,10 +78,11 @@ subsystems under `lib/` are internal; only `index.tsx` (and where applicable
 `eslint.config.mjs` § Global ignores — the vendored files preserve the legacy's
 style as a deliberate trade against the mechanical-conversion mandate (the
 vendored `no-paste-extension.ts` from a standalone legacy file; the ported
-`comment-skeleton.ts` + `generate-hints.ts` from inline legacy component
-helpers), and the new file (`diff-lines.ts`) shares the carve-out for
-WIP-duration consistency with the blanks/parsons precedent. Tests target each
-subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
+`comment-skeleton.ts` + `code-lines.ts` from inline legacy component helpers),
+and the new files (`diff-lines.ts`, `diff-decorations.ts`,
+`snippet-free-autocomplete.ts`) share the carve-out for WIP-duration consistency
+with the blanks/parsons precedent. Tests target each subsystem in isolation
+(vitest, no jsdom) plus the wrapper end-to-end (jsdom +
 `@testing-library/react`); tests live under `tests/` (NOT `lib/tests/`).
 
 ## Architectural sketch
@@ -92,10 +97,9 @@ subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
 1. **Mount + resolve config** (sync, pure) — the orchestrator passes a frozen
    embodiment and a frozen lens config via props. The wrapper reads the known
    config fields (view mode; the four scaffold toggles colorize / suggestions /
-   keep-comments / diff; hints mode) with documented defaults; other fields are
-   preserved but ignored. Initial per-mount state: view mode, the four toggles,
-   and hints mode seeded from config; the learner's code seeded from the
-   starting template; the check summary empty; the revealed-hint set empty.
+   keep-comments / diff) with documented defaults; other fields are preserved
+   but ignored. Initial per-mount state: view mode and the four toggles seeded
+   from config; the learner's code seeded from the starting template.
 
 2. **Derive the starting template** (sync, pure) — when keep-comments is on, the
    wrapper computes the comment skeleton of the solution (executable code
@@ -119,25 +123,22 @@ subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
 4. **Diff the learner's code** (per edit, sync, pure) — a memoized per-line diff
    compares the learner's code to the solution line-by-line, by index, compared
    trimmed: each solution line resolves to match / diff / empty / comment, and
-   the code lines are tallied (matched, total). The result drives the diff
-   decorations (when diff is on) and the honest Check summary.
+   the code lines are tallied (matched, total). The result drives the diff-pair
+   decorations (when diff is on); the matched / total tally is an honest
+   byproduct of the same pass, computed but not currently surfaced.
 
 5. **Render** (sync) — the wrapper emits the root
-   `<div data-lens="writeme" data-view-mode="write|read" data-colorize data-suggestions data-comments data-diff data-hints-mode="on|off">`
-   with the toolbar; in write view the CodeMirror editor + the check summary +
-   the on-demand hints panel; in read view the **read-only solution editor**
-   (paired with the write editor — mirrors colorize, shows the diff pair when
-   on); and the instructions accordion in both.
+   `<div data-lens="writeme" data-view-mode="write|read" data-colorize data-suggestions data-comments data-diff>`
+   with the toolbar; in write view the CodeMirror editor (with the diff overlay
+   when diff is on); in read view the **read-only solution editor** (paired with
+   the write editor — mirrors colorize, shows the diff pair when on).
 
 6. **Handle interaction** (per learner event) — the view toggle and the four
    Assist scaffold toggles update their state slice and **preserve learner
    code** (toggles via compartment reconfigure / doc-change dispatch, never a
    remount); the keep-comments toggle re-seeds the editor only while it is
-   pristine (otherwise it updates the hint set + the Reset template, leaving the
-   editor untouched); the hints toggle gates rendering (preserving revealed
-   ids); Check computes and shows the honest summary; Reset re-seeds to the
-   current template and clears the check summary + revealed hints; a hint-reveal
-   adds an id to the revealed set.
+   pristine (otherwise it updates the Reset template, leaving the editor
+   untouched); Reset re-seeds to the current template.
 
 7. **Unmount** (React-driven) — the orchestrator unmounts on snippet change or
    lens exit. Per-mount state is garbage-collected with the component instance;
@@ -153,7 +154,7 @@ flowchart TD
 
     Props -->|"applicableTo, sync, pure"| Gate["Tier 1: true<br/>(text-only; no AST)"]
     Props -->|"recommend, sync, pure"| Recs["[] (WS2-deferred)"]
-    Props -->|"resolve config, sync, pure"| Cfg["{ viewMode, colorize, suggestions,<br/>keepComments, diff, hintsMode }"]
+    Props -->|"resolve config, sync, pure"| Cfg["{ viewMode, colorize, suggestions,<br/>keepComments, diff }"]
 
     Props -->|"source.code"| Solution["solution string<br/>(the correct program)"]
     Solution -->|"comment-skeleton if keepComments<br/>(sync, pure; strip code,<br/>keep comments + line count)"| Template["starting template<br/>(skeleton OR empty)"]
@@ -162,23 +163,17 @@ flowchart TD
     Template -->|"synchronous seed, no flicker"| Editor[("learner-code document<br/>(editable, paste-blocked)")]
     Editor -->|"edit, mirror to state (never setSnippet)"| Learner["learnerCode<br/>(per-mount state)"]
 
-    Learner -->|"diff-lines, sync, pure<br/>(per-line, by index, trimmed)"| Diff["DiffResult<br/>{ perLine, matched, total }"]
+    Learner -->|"diff-lines, sync, pure<br/>(per-line, by index, trimmed)"| Diff["DiffResult<br/>{ perLine, matched, total }<br/>(matched/total computed, not surfaced)"]
     Solution -->|"reference"| Diff
     Editor -->|"diff on: self-recomputing StateField<br/>recomputes from the write doc"| Editor
-    Diff -->|"tally match lines, pure"| Summary["honest summary<br/>X / N code lines (P%)"]
     Diff -->|"diff pair (diff on): mark unmatched"| Study["read-only solution editor<br/>(paired; mirrors colorize)"]
 
     Solution -->|"view = read"| Study
 
-    Solution -->|"generate-hints, sync, pure<br/>(regex; concept + structural; cap 8)"| Hints["Hint[]"]
-    Hints -->|"hintsMode = on; on-demand reveal"| Panel["hints panel"]
-
     Cfg --> Render["wrapper render"]
     Editor --> Render
-    Summary --> Render
     Study --> Render
-    Panel --> Render
-    Render --> DOM["&lt;div data-lens=writeme<br/>data-view-mode data-colorize data-suggestions<br/>data-comments data-diff data-hints-mode&gt;<br/>toolbar + (write: editor + summary + hints<br/>| read: solution editor) + instructions"]
+    Render --> DOM["&lt;div data-lens=writeme<br/>data-view-mode data-colorize data-suggestions<br/>data-comments data-diff&gt;<br/>toolbar + (write: editor<br/>| read: solution editor)"]
 
     DOM -->|"view / assist toggle (preserve learnerCode)"| Cfg
     DOM -->|"keep-comments toggle (pristine-gated re-seed)"| Template
@@ -190,9 +185,8 @@ flowchart TD
 The diagram is per-mount. The orchestrator (upstream) supplies `embodiment` and
 `config`; the recommender (sibling) calls `applicableTo` and `recommend`. The
 render loop reads state + the solution + the memoized diff; the toolbar handlers
-feed state updates back. **There is no cross-mount persistence** — learner code,
-the check summary, and revealed hints die with the component instance (no URL
-state in v1).
+feed state updates back. **There is no cross-mount persistence** — learner code
+dies with the component instance (no URL state in v1).
 
 ### Structural constraints
 
@@ -206,8 +200,8 @@ state in v1).
 - **`data-lens="writeme"` on the wrapper's root.** Load-bearing for
   sandbox-harness selectors. Per the lenses-peer invariant.
 - **`data-view-mode`, `data-colorize`, `data-suggestions`, `data-comments`,
-  `data-diff`, `data-hints-mode`** on the root — sandbox-harness selectors + CSS
-  hooks; renaming any is a contract change. Values reflect committed state.
+  `data-diff`** on the root — sandbox-harness selectors + CSS hooks; renaming
+  any is a contract change. Values reflect committed state.
 - **Tier 1 classification.** `applicableTo` returns `true` — writeme reproduces
   text and needs no AST and no parse success. A **deliberate divergence** from
   `blanks` (Tier 2, `status.parsed`). Suitability (a snippet long enough to be
@@ -224,18 +218,22 @@ state in v1).
   `freezeInPlace` / `cloneAndFreeze` convention (AGENTS.md § Deep Freeze Return
   Values).
 - **`SerializableValue` discipline.** `WritemeLensConfig` fields are primitives
-  only (`viewMode`, `colorize`, `suggestions`, `keepComments`, `diff`,
-  `hintsMode`). Domain values (`Hint`, `DiffResult`, `LineStatus`) are runtime
-  structures, never stored in `LensConfig`.
+  only (`viewMode`, `colorize`, `suggestions`, `keepComments`, `diff`). Domain
+  values (`DiffResult`, `LineStatus`) are runtime structures, never stored in
+  `LensConfig`.
 - **Per-line diff is by index, trimmed.** Learner line `i` vs solution line `i`,
   compared trimmed. The comment skeleton preserves the solution's line count, so
   index alignment holds while the learner fills lines in place. Code lines (text
   with comments stripped is non-empty) are graded; comment lines are excluded
-  from the Check total. An empty (unattempted) code line is left NEUTRAL in the
+  from the tally total. An empty (unattempted) code line is left NEUTRAL in the
   diff visual — only `diff` (typed-but-wrong) lines are highlighted.
-- **Honest Check.** The summary reports `matched / total` over code lines, with
-  no "complete" / "done" claim; `total === 0` (no code lines) is vacuously
-  complete (no `NaN`). See
+- **Honest tally [B1].** The diff pass computes `matched / total` over code
+  lines — an honest reproduced-line tally with no "complete" / "done" claim;
+  `total === 0` (no code lines) is vacuously complete (no `NaN`).
+  `code-lines.ts` and `diff-lines.ts` MUST agree on which lines are graded so
+  the diff and the tally stay honest (the B1 invariant). The tally is **computed
+  but NOT currently surfaced** — a clean extension point; the diff pair is the
+  feedback. See
   [Why the honest line-count replaces the legacy score](#why-the-honest-line-count-replaces-the-legacy-score).
 - **Diff decorations are line decorations.** The diff visual is a
   `Decoration.line` per `diff`-status line, anchored zero-width at the line
@@ -295,32 +293,35 @@ state in v1).
   `source.code` (the solution) and diffs the learner's text against it
   (legitimate consumption) but does not use it as a behavior discriminator.
 - **LensModule surface stays synchronous.** `config()`, `applicableTo()`,
-  `recommend()` are sync; comment-skeleton, diff-lines, and generate-hints are
-  all sync-pure.
+  `recommend()` are sync; comment-skeleton, code-lines, and diff-lines are all
+  sync-pure.
 - **Display content rendered safely.** Both CodeMirror editors render via their
   own document model (the write editor the learner text, the read editor
   `source.code`); never `dangerouslySetInnerHTML`.
 
 ### Out of scope
 
-- **Cross-mount persistence** of learner code / check / hints. Per-mount React
-  state only; nothing survives unmount.
+- **Cross-mount persistence** of learner code. Per-mount React state only;
+  nothing survives unmount.
 - **URL state.** v1 ships none. A Future-direction item; would lift to the
   orchestrator per the blanks precedent. **Deliberate divergence from blanks.**
 - **Snippet mutation / editing.** The lens is read-only; learner code is
   lens-local and never written back to `setSnippet`.
 - **Code execution / run / trace.** Other lenses' jobs.
-- **Live (always-visible) line count.** The honest count surfaces on a Check
-  click, not per keystroke — the diff highlight is the live signal. (parsons
-  defers an analogous live-feedback mode.)
+- **A surfaced line count.** The `matched / total` tally is computed but not
+  shown in the UI — the diff pair is the live signal. A numeric "X / N code
+  lines" Check was considered and cut (the diff pair makes a separate score
+  redundant); surfacing the already-computed tally is a clean extension point.
+  (parsons defers an analogous live-feedback mode.)
 - **Order-insensitive line alignment.** v1 diffs by line index; whole-line
   insertions/deletions shift alignment (a visible drift signal). LCS-based
   alignment is deferred.
 - **Character-level intra-line diff.** v1 highlights whole non-matching lines;
   char-level highlighting within a line is deferred (and needs order-insensitive
   alignment first).
-- **Cursor-scoped hints.** v1 ships the legacy's generic generated hints; the
-  `blanks` cursor-scoped model is deferred.
+- **A hints affordance.** Considered and cut — writeme is the recall lens, and
+  Read is the escape hatch (expertise reversal). Not deferred; the legacy's
+  generated-hints panel is not carried forward.
 - **Seeded / reproducible exercises.** No randomness in v1; not applicable.
 - **Multi-language support.** v1 is JavaScript-only (the package is
   `just-enough/javascript`); multi-language is an `embody/` concern.
@@ -361,11 +362,10 @@ The `diff` toggle defaults ON (feedback on), not off. A feedback-off default is
 a feedback-free box — the precise shape of the weak-shell failure this redo
 exists to prevent (per `./README.md` § Why this lens exists). Defaulting `diff`
 on makes the honest-feedback mechanism visible on first paint: the learner sees
-the lens working, and the diff guides their reconstruction. This mirrors the
-`blanks` redo's decision to ship its hints panel enabled-by-default rather than
-compiled-out (see [`../blanks/DOCS.md`](../blanks/DOCS.md) § Why ship the hints
-panel enabled by default — "the lens-shipping-shells failure mode the redo
-exists to prevent is exactly what disabled feedback recreates"). Turning `diff`
+the lens working, and the diff guides their reconstruction. The general
+principle — ship the feedback mechanism enabled by default rather than
+compiled-out — is the lens-shipping-shells lesson: the failure mode the redo
+exists to prevent is exactly what disabled feedback recreates. Turning `diff`
 off remains one click away for learners who want a pure-recall challenge — the
 dial exists, but its default points at honest feedback.
 
@@ -405,18 +405,22 @@ writing working — or even sensible — code. Shipping a feedback signal that
 rewards the appearance of work over the substance of it is exactly the
 weak-pedagogy failure this redo targets.
 
-V2 replaces it with a measurement, not a verdict: the Check reports
-`X / N code lines reproduced`, where `X` is the number of solution code lines
-the learner has reproduced exactly (trimmed) and `N` is the total number of code
-lines. This is honest because it counts the literal thing the exercise asks for
-(reproduce the code), it cannot be gamed by keyword-stuffing (a line either
-matches or it doesn't), and it makes no mastery claim — `N / N` means "you
-reproduced every line," not "you have mastered this." Comment lines are excluded
-from `N` because the comment skeleton seeds them, so counting them would start
-the score non-zero before the learner has typed anything (a different flavor of
-the same dishonesty). This is the faithful-migration posture: decline a
-documented pedagogical defect, the same way `blanks` declined its
-substring-evaluation bug and `parsons` declined its `first_error_only` gate.
+V2 replaces it with a measurement, not a verdict: the **per-line diff pair**.
+The write editor flags the learner's typed-but-wrong lines in red; the read-only
+solution editor marks the solution lines not yet reproduced in amber. This is
+honest because it shows the literal thing the exercise asks for (reproduce the
+code) line by line, it cannot be gamed by keyword-stuffing (a line either
+matches or it doesn't), and it makes no mastery claim — every line matched means
+"you reproduced every line," not "you have mastered this." A numeric
+`X / N code lines` score was considered and **cut**: the live diff pair already
+shows reproduction progress, so a separate number would be redundant. The same
+pass still computes an honest `matched / total` tally (comment lines excluded
+from `total` — the comment skeleton seeds them, so counting them would start the
+score non-zero before the learner types) as a cheap byproduct; it is **not
+currently surfaced** but remains a clean extension point. This is the
+faithful-migration posture: decline a documented pedagogical defect, the same
+way `blanks` declined its substring-evaluation bug and `parsons` declined its
+`first_error_only` gate.
 
 ## Why per-line (not per-char) diff
 
@@ -443,8 +447,8 @@ The keep-comments toggle selects the starting template (comment skeleton vs
 blank slate). The question is what it does mid-exercise. The legacy guarded its
 student-editor seed effect with `studentEditorInitialized` (legacy lines 194 /
 269), so toggling Keep Comments after typing began did **not** re-seed the
-editor — it only changed hint generation and what a subsequent Reset would
-produce. The checkbox felt dead once the learner started typing.
+editor — it only changed what a subsequent Reset would produce. The checkbox
+felt dead once the learner started typing.
 
 Two failure modes bound the design: a dead control (the legacy) is confusing; an
 unconditional live re-seed silently discards in-progress work on a single
@@ -461,12 +465,12 @@ learner who typed then cleared back to empty is also pristine (the `=== ''`
 clause), so a toggle then re-seeds onto the empty canvas — intended. Before the
 learner types, the toggle applies immediately (the common case — "I want a blank
 slate / I want the comments"). Once they have typed divergent code, the toggle
-updates the hint set and the Reset template but leaves the editor untouched, and
-the toolbar surfaces "Reset to apply." The learner's work is never silently
-discarded; only the explicit Reset clears the editor. This is a deliberate
-behavior change from the legacy's guarded non-re-seed, chosen to make the
-control work without the destructive surprise — documented in `./README.md` §
-"What this lens does NOT do."
+updates the Reset template but leaves the editor untouched, and the toolbar
+surfaces "Reset to apply." The learner's work is never silently discarded; only
+the explicit Reset clears the editor. This is a deliberate behavior change from
+the legacy's guarded non-re-seed, chosen to make the control work without the
+destructive surprise — documented in `./README.md` § "What this lens does NOT
+do."
 
 ## Why toggling a scaffold preserves learner code
 
@@ -499,9 +503,10 @@ deliberate divergence from `blanks`, justified by the anchor-lock asymmetry.
 ## Module ownership
 
 The lens owns its own `README.md`, `DOCS.md`, `types.ts`, source (`core.ts`,
-`lib/no-paste-extension.ts`, `lib/comment-skeleton.ts`, `lib/diff-lines.ts`,
-`lib/generate-hints.ts`, `index.tsx`), and tests. Cross-cutting lens conventions
-(two-layer split, `data-lens` invariant, `LensConfig` shape,
+`lib/no-paste-extension.ts`, `lib/comment-skeleton.ts`, `lib/code-lines.ts`,
+`lib/diff-lines.ts`, `lib/diff-decorations.ts`,
+`lib/snippet-free-autocomplete.ts`, `index.tsx`), and tests. Cross-cutting lens
+conventions (two-layer split, `data-lens` invariant, `LensConfig` shape,
 no-source-code-branching anti-pattern, disposable-practice) live in
 [`../README.md`](../README.md) + [`../DOCS.md`](../DOCS.md); this lens inherits
 them.
@@ -518,8 +523,9 @@ full list. Key directions in scope of this lens's evolution:
 - **Character-level intra-line diff** — highlight the differing characters
   within a line (the `blanks` char model), once line alignment is
   order-insensitive.
-- **Cursor-scoped hints** — adopt the `blanks` cursor-scoped, incremental-reveal
-  hint model in place of the legacy's generic generated hints.
+- **Surface the `matched / total` tally** — the diff pass already computes the
+  honest reproduced-line count; a numeric summary could render it (a clean
+  extension point), though the diff pair is the feedback today.
 - **URL state lifted to the orchestrator** — persist `viewMode` / `colorize` /
-  `suggestions` / `keepComments` / `diff` / `hintsMode` once the orchestrator
-  grows a URL surface (per the blanks precedent).
+  `suggestions` / `keepComments` / `diff` once the orchestrator grows a URL
+  surface (per the blanks precedent).

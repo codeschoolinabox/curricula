@@ -6,9 +6,10 @@
  *
  * Both `comment-skeleton.ts` (which blanks code lines and keeps freebies
  * verbatim) and `diff-lines.ts` (which grades code lines and treats freebies as
- * ungraded `comment`) MUST agree on this classification — otherwise the Check
- * would count lines the skeleton seeded for free, inflating the score before the
- * learner types (the dishonesty the feedback redesign exists to prevent).
+ * ungraded `comment`) MUST agree on this classification — otherwise the
+ * reproduced-line tally would count lines the skeleton seeded for free, inflating
+ * it before the learner types (the dishonesty the feedback redesign exists to
+ * prevent).
  * Extracting it here makes the agreement one source, not two copies that can
  * drift (the drift was a real bug, caught at AR-4 of the diff-lines increment).
  *

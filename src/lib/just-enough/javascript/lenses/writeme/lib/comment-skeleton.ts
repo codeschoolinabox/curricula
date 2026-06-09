@@ -12,7 +12,7 @@
  * - a FREEBIE line (blank / whitespace-only / comment-only / a code-bearing line
  *   inside an open block comment) → kept verbatim. The code-line/freebie split is
  *   `./code-lines.ts`, shared with `./diff-lines.ts` so the skeleton blanks
- *   exactly the lines the Check grades (the B1 honesty invariant — a single
+ *   exactly the lines the diff grades (the B1 honesty invariant — a single
  *   source, not two copies that can drift).
  * - a code line WITH a comment → its leading whitespace + the comment(s);
  * - a code line with no comment → an empty line.

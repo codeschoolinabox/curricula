@@ -20,7 +20,7 @@ import type { LensConfig, Recommendation, Snippet } from '../types.js';
 const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);
 
 /**
- * Resolves the writeme lens's per-mount config — applies the four documented
+ * Resolves the writeme lens's per-mount config — applies the documented
  * defaults and merges educator-supplied overrides on top (overrides win).
  * Unknown fields in `overrides` are preserved verbatim (open-shape contract).
  * Deep-frozen via `cloneAndFreeze`.
@@ -32,7 +32,6 @@ const EMPTY_RECOMMENDATIONS = freezeInPlace<ReadonlyArray<Recommendation>>([]);
  * - `suggestions` → `false`
  * - `keepComments` → `true`
  * - `diff` → `true`
- * - `hintsMode` → `'on'`
  *
  * @param overrides - Partial config from the educator's per-fence directive or
  *   `lenses.json` cascade. May be `undefined`.
@@ -52,7 +51,6 @@ function config(overrides?: Partial<LensConfig>): LensConfig {
 		suggestions: false,
 		keepComments: true,
 		diff: true,
-		hintsMode: 'on',
 		...overrides,
 	}) as LensConfig;
 }

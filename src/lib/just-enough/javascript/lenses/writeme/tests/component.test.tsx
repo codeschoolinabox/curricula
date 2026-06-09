@@ -117,20 +117,6 @@ describe('writeme wrapper — Inc 6a (mount)', () => {
 			expect(root?.getAttribute('data-diff')).toBe('true');
 		});
 
-		it('reflects the default hints mode (on)', () => {
-			const { container } = render(
-				<writemeLens.Component
-					embodiment={embody('const x = 1;')}
-					config={writemeLens.config()}
-				/>,
-			);
-			expect(
-				container
-					.querySelector('[data-lens="writeme"]')
-					?.getAttribute('data-hints-mode'),
-			).toBe('on');
-		});
-
 		it('reflects scaffold-toggle overrides on the root (triangulates each default)', () => {
 			const { container } = render(
 				<writemeLens.Component
@@ -162,20 +148,6 @@ describe('writeme wrapper — Inc 6a (mount)', () => {
 					.querySelector('[data-lens="writeme"]')
 					?.getAttribute('data-view-mode'),
 			).toBe('read');
-		});
-
-		it('reflects a hintsMode override on the root (triangulates the on default)', () => {
-			const { container } = render(
-				<writemeLens.Component
-					embodiment={embody('const x = 1;')}
-					config={writemeLens.config({ hintsMode: 'off' })}
-				/>,
-			);
-			expect(
-				container
-					.querySelector('[data-lens="writeme"]')
-					?.getAttribute('data-hints-mode'),
-			).toBe('off');
 		});
 	});
 
