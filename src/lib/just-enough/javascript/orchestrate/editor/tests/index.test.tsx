@@ -592,6 +592,10 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 				Promise.resolve({
 					destroy: () => {},
 					content: '',
+					// The onMounted seed calls this unconditionally on the real
+					// instance; the mock must carry it or the seed becomes an
+					// unhandled rejection inside the mount .then().
+					setInterpretedDiagnostics: () => {},
 				} as unknown as EditorInstance),
 			);
 			vi.doMock('../../lib/editing/create-editor.js', () => ({
@@ -629,6 +633,10 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 				Promise.resolve({
 					destroy: () => {},
 					content: '',
+					// The onMounted seed calls this unconditionally on the real
+					// instance; the mock must carry it or the seed becomes an
+					// unhandled rejection inside the mount .then().
+					setInterpretedDiagnostics: () => {},
 				} as unknown as EditorInstance),
 			);
 			vi.doMock('../../lib/editing/create-editor.js', () => ({
@@ -666,6 +674,10 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 				Promise.resolve({
 					destroy: () => {},
 					content: '',
+					// The onMounted seed calls this unconditionally on the real
+					// instance; the mock must carry it or the seed becomes an
+					// unhandled rejection inside the mount .then().
+					setInterpretedDiagnostics: () => {},
 				} as unknown as EditorInstance),
 			);
 			vi.doMock('../../lib/editing/create-editor.js', () => ({
