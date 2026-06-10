@@ -23,10 +23,10 @@ satisfied the `LensModule` contract and passed all tests + AR cycles, but
 **never opened in a browser as a learner** — real pedagogical features
 (CodeMirror with length-matched `_` placeholders, AST-based blankenate, hints
 panel, per-blank feedback, content-type filters, view-mode toggle) were absent.
-The user called those shells "weak hallucinations." This redo
-deletes them and migrates the legacy `BlanksLens.jsx` faithfully — starting from
-a mechanical conversion of the legacy algorithm and extending the token coverage
-as V2-owned work — treating the Sandbox Checkpoint as a gate not a celebration.
+The user called those shells "weak hallucinations." This redo deletes them and
+migrates the legacy `BlanksLens.jsx` faithfully — starting from a mechanical
+conversion of the legacy algorithm and extending the token coverage as V2-owned
+work — treating the Sandbox Checkpoint as a gate not a celebration.
 
 ## Migration
 
@@ -45,8 +45,8 @@ pieces:
   from the educator's `config` prop; no URL persistence)
 - Buggy substring-based evaluation → position-aware
   `lib/evaluate-correctness.ts`
-- Compiled-out hints panel (`{false && showHints && (...)}`) → ships gated on the
-  `suggestions` toggle, with cursor-scoped on-demand positional reveals
+- Compiled-out hints panel (`{false && showHints && (...)}`) → ships gated on
+  the `suggestions` toggle, with cursor-scoped on-demand positional reveals
 - Compiled-out editor header (`{/* ... */}`) → **enabled by default**
 
 See `./README.md` § "What this lens does NOT do" for the full lens-specific drop
@@ -92,8 +92,8 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    derives a boolean-map internal representation from it on render (no exported
    type — wrapper-internal only). Initial per-mount state at mount: view mode,
    editor mode, and suggestions seeded from config; learner code is empty
-   (filled on first edit); correctness map is empty (populated when the learner
-   types into a blank position).
+   (filled on first edit); per-blank correctness is uncomputed until the learner
+   types into a blank position.
 
 2. **Derive blanks** (sync, pure, per-render-conditional) — the wrapper memoizes
    the blankenate call on the embodiment, difficulty, and content-type-flags
@@ -108,8 +108,8 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    6.7: `_`.repeat(original.length) — one underscore per character of the
    original token, preserving the token's width as a recognition-cue) — no
    flicker between an empty editor and a populated one. Re-derivation on
-   settings change resets the correctness map; the wrapper does NOT preserve
-   correctness across re-rolls.
+   settings change recomputes correctness from scratch; the wrapper does NOT
+   preserve correctness across re-rolls.
 
 3. **Wire CodeMirror** (per-mount, async-setup) — a mount effect instantiates
    the editor view configured with the standard JavaScript basicSetup, the
@@ -132,17 +132,17 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    orchestrator's snippet setter — learner answers stay lens-local per the
    single-writer invariant. The editor view is recreated on structural changes —
    view-mode flip, editor-mode flip, blank-set re-derive, or `suggestions`
-   toggle (parity with legacy lines 310–338; see § Why recreate on toggle below).
-   The `skeleton` mode wires `buildLockExtensions`; `diff` mode wires
-   `buildDiffDecorations` (char-level mismatch highlighting, free editing); `raw`
-   mode wires neither. When `suggestions` is on, `diff` / `raw` additionally wire
-   the snippet-free autocomplete completion source (not `skeleton` — its
-   fixed-width overwrite lock conflicts with variable-length completions).
-   Learner answers are **preserved** across the view-mode and `suggestions`
-   toggles (both re-read the learner-code ref on remount): when toggling to
-   `'complete'` the editor mounts on `embodiment.source.code` (read-only, no
-   `_`); when toggling back to `'blankenated'` the editor mounts on
-   `learnerCode` (the in-progress edits) or, on first-toggle-back, on
+   toggle (parity with legacy lines 310–338; see § Why recreate on toggle
+   below). The `skeleton` mode wires `buildLockExtensions`; `diff` mode wires
+   `buildDiffDecorations` (char-level mismatch highlighting, free editing);
+   `raw` mode wires neither. When `suggestions` is on, `diff` / `raw`
+   additionally wire the snippet-free autocomplete completion source (not
+   `skeleton` — its fixed-width overwrite lock conflicts with variable-length
+   completions). Learner answers are **preserved** across the view-mode and
+   `suggestions` toggles (both re-read the learner-code ref on remount): when
+   toggling to `'complete'` the editor mounts on `embodiment.source.code`
+   (read-only, no `_`); when toggling back to `'blankenated'` the editor mounts
+   on `learnerCode` (the in-progress edits) or, on first-toggle-back, on
    `blankedCode` from the memoized blankenate result. The editor-mode toggle, by
    contrast, **resets** the exercise (clears learner code + reveal-counts).
 
@@ -150,10 +150,11 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    on `(learnerCode, blankResult)` calls
    `evaluateCorrectness(currentDoc, blanks, originalCode)` where
    `currentDoc = learnerCode ?? blankResult.blankedCode`. The evaluator returns
-   `EvaluationResult` (`correctnessMap` + counts + score); surfaces the score in
-   the JSX, and the StateField in `buildLockExtensions` derives the per-blank
-   in-editor visual class (`cm-blank-correct/incorrect/unfilled`) from the same
-   source-of-truth (doc content vs `blank.original`). `useMemo` (not
+   `EvaluationResult` (`correctnessMap` + counts + score); the JSX surfaces the
+   score / counts, and the editor's `StateField` (`deriveClass`) derives the
+   per-blank in-editor visual class (`cm-blank-correct/incorrect/unfilled`)
+   independently from the same raw inputs (doc content vs `blank.original`),
+   deliberately decoupled from the React render cycle. `useMemo` (not
    `useEffect`): synchronous-pure computation belongs in the render pass so the
    score updates atomically with the learner's keystroke — no stale-score
    flicker frame. Position-aware: each blank's `{start, end}` from
@@ -163,8 +164,8 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
 
 5. **Render** (sync) — the wrapper emits the root
    `<div data-lens="blanks" data-view-mode="blankenated|complete" data-suggestions="true|false">`
-   with toolbar, editor header, CodeMirror container, and the cursor-scoped hints
-   panel. The hints panel renders only when `suggestions` is on AND
+   with toolbar, editor header, CodeMirror container, and the cursor-scoped
+   hints panel. The hints panel renders only when `suggestions` is on AND
    `viewMode === 'blankenated'` AND `editorMode === 'skeleton'`. The
    `data-suggestions` attribute reflects the `suggestions` state directly
    (orthogonal to difficulty).
@@ -199,7 +200,7 @@ flowchart TD
     ResolvedConfig --> Memo[("useMemo:<br/>blankenate (sync, pure;<br/>runs during first render —<br/>no flicker between empty and<br/>__-filled editor)")]
 
     Memo -->|"BlankenateResult"| Blanks["{ blankedCode, blanks, originalCode }<br/>OR null (defense-in-depth)"]
-    Memo -.->|"re-derivation on settings change<br/>resets correctness map"| Correctness
+    Memo -.->|"re-derivation on settings change<br/>recomputes evaluation"| Correctness
 
     Blanks --> Editor
     State -->|"viewMode, editorMode, suggestions<br/>(structural remount)"| Editor[("CodeMirror EditorView<br/>(useEffect; editable on blankenated;<br/>noPasteExtension + lock on skeleton;<br/>diff highlights on diff;<br/>snippet-free autocomplete on<br/>diff/raw when suggestions on;<br/>updateListener → learnerCode)")]
@@ -208,7 +209,7 @@ flowchart TD
     LearnerCode --> State
 
     State -->|"learnerCode + blanks"| Eval[("evaluate-correctness<br/>(useMemo; sync, pure;<br/>position-aware per blank)")]
-    Eval -->|"EvaluationResult"| Correctness["{ correctnessMap, total,<br/>correct, incorrect, unfilled, score }"]
+    Eval -->|"EvaluationResult<br/>(memo keeps the rendered subset)"| Correctness["{ total, correct,<br/>unfilled, score }"]
     Correctness --> Render
 
     Editor -.->|"selectionSet"| CursorPos["cursorPos<br/>(lens-local state;<br/>render-only, not in mount deps)"]
@@ -223,7 +224,7 @@ flowchart TD
     DOM -->|"toolbar events<br/>(slider, checkbox, toggle)"| ConfigUpdate["state update<br/>(difficulty, contentTypes,<br/>viewMode, editorMode, suggestions)"]
     ConfigUpdate --> State
 
-    Props -.->|"reset correctnessMap<br/>on embodiment or config change"| State
+    Props -.->|"recompute evaluation (score + counts)<br/>on embodiment or config change"| State
 
     Props -.->|"unmount triggers (snippet change)"| Unmount[/"React unmount<br/>2 cleanups:<br/>(a) per-mount state → GC<br/>(b) EditorView.destroy"/]
 ```
@@ -231,9 +232,10 @@ flowchart TD
 The diagram is per-mount. The orchestrator (upstream) supplies `embodiment` and
 `config`; the recommender (sibling) calls `applicableTo` and `recommend`. The
 render loop reads state + the memoized blankenate result; the event handlers
-feed state updates back through their respective hooks. **There is no cross-mount
-persistence** — config is read from the `config` prop on mount, and learner
-answers, blanks, and the correctness map all die with the component instance.
+feed state updates back through their respective hooks. **There is no
+cross-mount persistence** — config is read from the `config` prop on mount, and
+learner answers, blanks, and the derived evaluation all die with the component
+instance.
 
 ### Structural constraints
 
@@ -254,9 +256,10 @@ answers, blanks, and the correctness map all die with the component instance.
 - **`data-view-mode="blankenated|complete"` and
   `data-suggestions="true|false"`** on the root. Sandbox-harness selectors + CSS
   hooks. Values reflect committed config state, not in-flight transitions; CSS
-  transitions should anchor on the parent. The editor mode is surfaced not on the
-  root but on the toolbar buttons (`data-editor-mode-toggle="skeleton|diff|raw"`,
-  `aria-pressed` marking the active one).
+  transitions should anchor on the parent. The editor mode is surfaced not on
+  the root but on the toolbar buttons
+  (`data-editor-mode-toggle="skeleton|diff|raw"`, `aria-pressed` marking the
+  active one).
 - **Token-classification precedence (blankenate).** The algorithm runs four
   classification paths in fixed order over the parsed source — (1) delimiters
   token-stream walk, (2) keywords token-stream walk, (3) AST walk for
@@ -298,13 +301,13 @@ answers, blanks, and the correctness map all die with the component instance.
   includes inter-file fixtures asserting `blankenate`'s output is consumable by
   `evaluate-correctness` without coordinate translation.
 - **Cleanup obligations.** Unmount triggers two distinct cleanups: (a) React GCs
-  the per-mount state, (b) CodeMirror's editor view destroys via its own cleanup.
-  Each is the responsibility of the effect that registered the resource; the lens
-  MUST NOT leak any past unmount. Structural state changes (view-mode toggle,
-  editor-mode toggle, blank-set re-derive, `suggestions` toggle) additionally
-  trigger an editor-view destroy-and-recreate cycle (the wrapper does not
-  dynamically reconfigure editability per legacy parity; the dynamic-reconfigure
-  optimization is on § Future direction).
+  the per-mount state, (b) CodeMirror's editor view destroys via its own
+  cleanup. Each is the responsibility of the effect that registered the
+  resource; the lens MUST NOT leak any past unmount. Structural state changes
+  (view-mode toggle, editor-mode toggle, blank-set re-derive, `suggestions`
+  toggle) additionally trigger an editor-view destroy-and-recreate cycle (the
+  wrapper does not dynamically reconfigure editability per legacy parity; the
+  dynamic-reconfigure optimization is on § Future direction).
 - **First-paint invariant.** Blanks derivation is synchronous-during-
   first-render — the wrapper never paints an empty editor followed by a
   `__`-filled re-render. The memoized `blankenate` call runs during the same
@@ -329,8 +332,8 @@ answers, blanks, and the correctness map all die with the component instance.
 - **No consumer-side branching on `embodiment.source.code`.** The lens _renders_
   `source.code` (legitimate per the lenses-peer invariant) but does not use it
   as a discriminator. Branches on `embodiment.status.parsed` for the
-  defense-in-depth fallback; branches on `config` fields for
-  view-default / editor-mode / suggestions.
+  defense-in-depth fallback; branches on `config` fields for view-default /
+  editor-mode / suggestions.
 - **LensModule surface stays synchronous.** `config()`, `applicableTo()`,
   `recommend()` are sync. There is no async work inside this lens — blankenate
   is sync; evaluate is sync. Per the lenses peer's
@@ -341,9 +344,9 @@ answers, blanks, and the correctness map all die with the component instance.
   from `embodiment.source.code` are framework-escaped.
 - **No URL config sync.** Config comes only from the educator's `config` prop;
   the lens reads no URL parameter, writes none, and registers no `hashchange`
-  listener. If config-in-URL is wanted later it belongs to the orchestrator's URL
-  surface, with this lens still reading the resolved values through `config` (see
-  § Future direction).
+  listener. If config-in-URL is wanted later it belongs to the orchestrator's
+  URL surface, with this lens still reading the resolved values through `config`
+  (see § Future direction).
 - **Vendored `lib/` is eslint-ignored.** The carve-out for
   `lenses/blanks/lib/**` lives in `eslint.config.mjs`; matches the existing
   `sl-trace-js-aran-legacy` precedent. The trade: vendored legacy code preserves
@@ -354,8 +357,8 @@ answers, blanks, and the correctness map all die with the component instance.
 
 - **Cross-mount persistence of any kind.** No state persists across mounts —
   learner answers, blanks, correctness, and config alike. Config is re-read from
-  the `config` prop each mount; everything else is per-mount React state. Per the
-  disposable-practice principle.
+  the `config` prop each mount; everything else is per-mount React state. Per
+  the disposable-practice principle.
 - **Snippet mutation / editing.** Editor's job; the lens is read-only. The
   wrapper's CodeMirror in blankenated mode is editable for the learner's typing,
   but those edits write to local state only — never to the orchestrator's
@@ -405,10 +408,10 @@ the two affordances the legacy conflated:
 - **Per-blank correctness feedback** (green/red/yellow) ships **enabled** in
   `skeleton` mode because **visible per-blank state is load-bearing for a
   self-pacing exercise** — without it, the learner has to guess whether they've
-  answered correctly until they manually toggle to complete-view. Disabling it in
-  legacy was a ship cut, not a design decision; the lens-shipping-shells failure
-  mode the redo exists to prevent (per [`./README.md`](./README.md) § Why this
-  lens exists) is exactly what disabled feedback recreates.
+  answered correctly until they manually toggle to complete-view. Disabling it
+  in legacy was a ship cut, not a design decision; the lens-shipping-shells
+  failure mode the redo exists to prevent (per [`./README.md`](./README.md) §
+  Why this lens exists) is exactly what disabled feedback recreates.
 - **The hints panel** (on-demand letter reveals) ships **off by default**, gated
   on the opt-in `suggestions` toggle. It is help-on-request, not always-on
   feedback — so it stays out of the way until the learner asks for it.
@@ -481,24 +484,24 @@ fixes both bugs. This is in scope as "faithful migration" because:
 The legacy `urlManager.js` (296 lines) is a full URL coordination class —
 file-path management, multi-lens cascade, code-share via base64, pseudocode
 toggles, colorize toggles, etc. An earlier V2 iteration slimmed it to a ~60-line
-`lib/url-config.ts` adapter that persisted the blanks config in the `?blanks=...`
-URL parameter. The redesign drops URL config sync entirely: config now comes ONLY
-from the educator's `config` prop, resolved through `core.ts`'s `config()`
-defaults. There is no `?blanks=...` parameter, no read-on-mount, no debounced
-write, no `hashchange` listener, and no `lib/url-config.ts`.
+`lib/url-config.ts` adapter that persisted the blanks config in the
+`?blanks=...` URL parameter. The redesign drops URL config sync entirely: config
+now comes ONLY from the educator's `config` prop, resolved through `core.ts`'s
+`config()` defaults. There is no `?blanks=...` parameter, no read-on-mount, no
+debounced write, no `hashchange` listener, and no `lib/url-config.ts`.
 
 URL coordination (shareable / reloadable exercise settings) is properly
-orchestrator-domain; if it lands later it belongs to the orchestrator's URL-state
-surface, with this lens still reading the resolved values through its `config`
-prop (see § Future direction).
+orchestrator-domain; if it lands later it belongs to the orchestrator's
+URL-state surface, with this lens still reading the resolved values through its
+`config` prop (see § Future direction).
 
 ## Module ownership
 
 The lens owns its own `README.md`, `DOCS.md`, `types.ts`, source (`core.ts`,
 `lib/blankenate.ts`, `lib/no-paste-extension.ts`, `lib/evaluate-correctness.ts`,
 `index.tsx`), and tests. Cross-cutting lens conventions (two-layer split,
-`data-lens` invariant, `LensConfig` shape, no-source-code-branching anti-pattern,
-disposable-practice) live in [`../README.md`](../README.md) +
+`data-lens` invariant, `LensConfig` shape, no-source-code-branching
+anti-pattern, disposable-practice) live in [`../README.md`](../README.md) +
 [`../DOCS.md`](../DOCS.md); this lens inherits them.
 
 ## Future direction

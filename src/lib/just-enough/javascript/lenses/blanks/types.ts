@@ -256,6 +256,20 @@ type CorrectnessMap = ReadonlyMap<string, BlankCorrectness>;
  * vacuously complete; it would otherwise render `NaN%`.
  */
 type EvaluationResult = {
+	/**
+	 * Per-blank `id → status` detail. This is the evaluator's primary
+	 * output; `total`/`correct`/`incorrect`/`unfilled`/`score` are its
+	 * aggregate.
+	 *
+	 * Not consumed by production render: the score panel surfaces only the
+	 * aggregate counts, and the in-editor coloring is computed independently
+	 * by the CodeMirror `StateField` (`deriveClass` in `index.tsx`), which
+	 * recomputes per transaction to stay decoupled from React render timing.
+	 * The map is kept as the position-discrimination assertion surface for
+	 * the unit tests (a `{correct:1, incorrect:1}` count cannot tell whether
+	 * two blanks were classified correctly or swapped) and as the natural
+	 * hook for any future per-blank UI.
+	 */
 	readonly correctnessMap: CorrectnessMap;
 	readonly total: number;
 	readonly correct: number;

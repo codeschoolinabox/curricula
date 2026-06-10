@@ -644,7 +644,6 @@ const BlanksComponent: ComponentType<LensProperties> =
 					score: 100,
 					total: 0,
 					correct: 0,
-					incorrect: 0,
 					unfilled: 0,
 				});
 			}
@@ -657,13 +656,16 @@ const BlanksComponent: ComponentType<LensProperties> =
 				blankResult.blanks,
 				blankResult.originalCode,
 			);
+			// View-model: only the fields the score panel renders. The evaluator
+			// also returns `incorrect` and the per-blank `correctnessMap`; those
+			// are intentionally NOT surfaced here — the editor paints its own
+			// per-blank decorations (see `deriveClass`) and the map is a
+			// test/inspection surface (see EvaluationResult's JSDoc).
 			return freezeInPlace({
 				score: result.score,
 				total: result.total,
 				correct: result.correct,
-				incorrect: result.incorrect,
 				unfilled: result.unfilled,
-				correctnessMap: result.correctnessMap,
 			});
 		}, [learnerCode, blankResult]);
 
