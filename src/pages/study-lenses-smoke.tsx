@@ -1,25 +1,29 @@
 /**
- * @file F1 sandbox harness for `<StudyLenses>`. Mounts the orchestrator
- * directly with hardcoded snippets so the F1 chain
- * (snippet → embody → frozen Snippet → editor home base) can be
- * observed in a real browser via the Docusaurus dev server.
+ * @file Sandbox harness for `<StudyLenses>` — the Cycle-1 demo page.
+ * Mounts the orchestrator directly (bypassing the Docusaurus plugin) so the
+ * live-embodiment chain (buffer → debounced static embody → interpreted
+ * gutter diagnostics) can be exercised in a real browser via the dev server.
  *
- * Plugin alignment is post-F1 cross-tier work (per
- * `.planning-handoffs/03-orchestrator-and-contracts.md` § Cross-handoff
- * impact); this harness mounts `<StudyLenses>` directly to bypass the
- * pre-refactor plugin emit shape during the F1 window.
+ * **Demo script** (after `npm run start`, open
+ * `http://localhost:3000/study-lenses-smoke`):
  *
- * **How to use** (after `npm run start`):
- *
- * 1. Open `http://localhost:3000/study-lenses-smoke` in a browser.
- * 2. Open React DevTools → Components → select `StudyLenses`.
- * 3. Verify the `useEmbodiment` debug value is a frozen `Snippet`
- *    with `status.{tokenized,parsed,created}` reflecting the chosen
- *    sentinel.
- * 4. Verify the `<textarea data-orchestrator-host>` displays the
- *    snippet text and is read-only (F1 has no edit propagation).
- * 5. Click the sentinel buttons to swap snippets and confirm the
- *    embodiment + textarea both update.
+ * 1. Type `let x = ;` into the editor (replace the buffer). After the
+ *    ~200ms debounce settle, ONE red gutter marker appears on line 1;
+ *    hovering it shows a friendly plain-prose explanation — not acorn's
+ *    terse parse message duplicated (the interpreted diagnostic supersedes
+ *    the structural marker at the same position).
+ * 2. Fix the line to `let x = 1;` — the marker clears on the next settle.
+ * 3. Click `VALIDATION_FAIL` (or type it as the whole buffer): the canned
+ *    scenario embodiment's interpretation appears in the gutter. The
+ *    sentinel buttons swap snippets by REMOUNTING via `key={snippet}` —
+ *    the orchestrator consumes `snippet` as an initial value only.
+ * 4. Type `var x = 1` — lintJej's structural marker appears (teaching-
+ *    boundary style) but NO embodiment-derived interpretation. Expected,
+ *    not a bug: embody's validating/creation slices are stubbed on real
+ *    code, so Cycle 1 interprets tokenize/parse errors + the named
+ *    scenarios only.
+ * 5. Use the lens picker to open a lens and the edit button to return —
+ *    the gutter state survives the round-trip (the live slot is retained).
  *
  * @vitest-skip — Docusaurus auto-routes `src/pages/*.tsx`; this is a
  * page, not a unit test. No corresponding `.test.tsx` file.
@@ -41,18 +45,22 @@ const SCENARIOS = [
 export default function StudyLensesSmoke(): React.JSX.Element {
 	const [snippet, setSnippet] = React.useState<string>('OK');
 	return (
-		<Layout title="study-lenses smoke" description="F1 sandbox harness">
+		<Layout title="study-lenses smoke" description="StudyLenses sandbox harness">
 			<main style={{ maxWidth: 720, margin: '2rem auto', padding: '0 1rem' }}>
-				<h1>study-lenses smoke (F1)</h1>
+				<h1>study-lenses smoke</h1>
 				<p>
-					Hardcoded harness for the F1 chain. Plugin alignment is post-F1
-					cross-tier work; this page mounts <code>&lt;StudyLenses&gt;</code>{' '}
-					directly. Open React DevTools and inspect <code>StudyLenses</code>{' '}
-					&rarr; <code>useEmbodiment</code> debug value to see the frozen{' '}
-					<code>Snippet</code>.
+					Sandbox harness for <code>&lt;StudyLenses&gt;</code> (mounted
+					directly, bypassing the plugin). Type broken JS —{' '}
+					<code>let x = ;</code> — and hover the red gutter marker after a
+					beat: the friendly interpreted explanation supersedes the terse
+					parse message. Fix the line and it clears. <code>var x = 1</code>{' '}
+					shows the structural JEJ marker but no interpretation yet (embody's
+					validating slice is pending — expected).
 				</p>
 				<p>
-					<strong>Current sentinel:</strong> <code>{snippet}</code>
+					<strong>Current sentinel:</strong> <code>{snippet}</code> (buttons
+					remount the orchestrator — <code>snippet</code> is initial-value
+					only)
 				</p>
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					{SCENARIOS.map(function renderButton(name) {
@@ -70,7 +78,7 @@ export default function StudyLensesSmoke(): React.JSX.Element {
 					})}
 				</div>
 				<div style={{ marginTop: '1.5rem' }}>
-					<StudyLenses snippet={snippet} />
+					<StudyLenses key={snippet} snippet={snippet} />
 				</div>
 			</main>
 		</Layout>
