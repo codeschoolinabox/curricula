@@ -1,7 +1,7 @@
 # AI Agent Context
 
 This file provides specific context for AI assistants working with this
-`@study-lenses` package.
+repository (spiralearn / `@codeschoolinabox/spiralearn`).
 
 - [Non-Negotiable Invariants](#non-negotiable-invariants)
 - [Session Start Protocol](#session-start-protocol)
@@ -90,7 +90,7 @@ editor, create a file, or write a single line of code until every step is done.
 - [ ] **Read this file** (AGENTS.md) — if you haven't in this session, read it
       now
 - [ ] **Read the module README.md** — understand what this module does and where
-      it fits in the `@study-lenses` ecosystem
+      it fits in this repository
 - [ ] **Read DOCS.md if it exists** — understand the architectural sketch and
       any recorded design decisions before writing anything
 - [ ] **Read 1–2 existing similar files** — find existing functions that match
@@ -106,8 +106,8 @@ editor, create a file, or write a single line of code until every step is done.
 
 ## Project Overview
 
-See [README.md](./README.md) for what this package does and where it fits in the
-`@study-lenses` ecosystem.
+See [README.md](./README.md) for what this repository contains and how it is
+organized.
 
 > **⚠️ Plan Mode First:** Discuss changes with Claude in plan mode before
 > implementation. Exceptions: trivial fixes, user says "skip plan mode", or pure
@@ -196,13 +196,15 @@ dependency-order coverage. Quick agent-facing rules:
 
 See DEV.md § Linting Conventions for full details. Summary:
 
-- **Three-tool pipeline**: ESLint (logic/patterns) + Prettier (formatting) +
-  TypeScript (types)
+- **Lint pipeline**: `npm run lint` = ESLint (code + `.mdx`) + markdownlint-cli2
+  (`.md`) + ls-lint (file names) + cspell (spelling); plus Prettier (formatting)
+  and TypeScript (types)
 - Most functional/import/style conventions auto-enforced via ESLint
-- Pre-commit hooks run `lint:fix` and `format` on staged files
+- Pre-commit hooks run Prettier (formatting only) on staged files; linters run
+  via per-file checkpoints and `npm run validate`, never the hook
 - Manual review for: default `= {}` params, verb-first naming, file granularity,
   comment quality
-- Run `npm run validate` to check all three tools at once
+- Run `npm run validate` to check every tool at once
 
 ### Incremental TDD Workflow
 
@@ -301,7 +303,8 @@ not a valid substitute — write the steps out.
 **During TDD cycles:**
 
 - Run lint checkpoints on specific modified files, not the whole codebase:
-  `npm run lint <file>`
+  `npx eslint <file>` for code and `.mdx`, `npx markdownlint-cli2 "<file>"` for
+  `.md` (the compound `npm run lint` does not forward file arguments)
 - Write tests in ZOMBIES order (Zero → One → Many...) to force triangulation.
   After the first test, ask: _could this be passed by returning a hardcoded
   value?_ If yes, the second test must make that impossible before you
@@ -366,30 +369,33 @@ rewrites branches, publishes to remotes, or destroys work.
   `git branch --list`, `git ls-files`, `git remote -v`
 - Additive: `git add <specific-files>`, `git commit -m "..."` (new commits
   only), `git fetch` (remote-read-only), `git stash push` (reversible)
-- Branch creation: `git branch <new-name>`, `git checkout -b <new-name>`
-  (creating new branches, not switching in a way that loses work)
+- Branch creation: `git branch <new-name>`, `git checkout -b <new-name>` — only
+  when the user has explicitly instructed a branch in the current conversation
+  (the default workflow is commit-to-main)
 - Bypassing pre-commit hooks on commit: `git commit --no-verify` (permitted —
   deliberate workflow for repos carrying pre-existing hook/lint debt)
 
 **Forbidden** (destructive, rewriting, or publishing):
 
-- History mutation: `git commit --amend`, `git rebase` (any form),
+- History rewriting: `git commit --amend`, `git rebase` (any form),
   `git reset --hard`, `git reset` (soft/mixed OK only with explicit user
-  instruction for a specific file unstage), `git revert`, `git cherry-pick`
+  instruction for a specific file unstage)
+- Undoing/replaying history: `git revert`, `git cherry-pick` — additive in
+  mechanism, but the agent does not unilaterally undo or replay history; prompt
+  the human
 - Publishing: `git push` (any form, including `--force`, `--force-with-lease`,
-  `--delete`)
-- Remote mutation: `git push`, `git push --tags`, `git fetch --prune`
+  `--tags`, `--delete`)
 - Destroying work: `git checkout -- <file>` / `git restore <file>` (discards
   unstaged changes), `git clean -f`, `git stash drop`, `git stash clear`,
-  `git branch -D`, `git branch -d`, `git tag -d`
-- Merging: `git merge` (any form — merges rewrite history in the sense of
-  creating merge commits that are hard to undo without force-push)
+  `git branch -D`, `git branch -d`, `git tag -d`, `git fetch --prune` (deletes
+  local remote-tracking refs)
+- Merging: `git merge` (any form) — branch topology is the human's decision
 - Skipping signing: `--no-gpg-sign` (unless the user explicitly requests)
 
-**Rule of thumb**: If the command can be undone by `git reset --hard HEAD~1` or
-a single force-push from the human, it's destructive — ask first. If it only
-adds new commits that can be dropped by the human later without losing unrelated
-work, it's additive — Claude may run it.
+**Rule of thumb**: if undoing the command would require a force-push or a reflog
+rescue from the human, it's destructive — ask first. If it only adds new commits
+that can be dropped by the human later without losing unrelated work, it's
+additive — Claude may run it.
 
 **Instead for forbidden actions:** Claude prompts the human. Format:
 
@@ -653,8 +659,8 @@ first attempt:
 - **Predictable `kebab-case` filenames** enable discovery without searching
 - **"Why" comments** signal intent that syntax can't convey
 - **Self-documenting error messages** include context for debugging
-- **Structural consistency** (imports → helpers → main → export) enables
-  prediction
+- **Structural consistency** (imports → main → hoisted helpers; function files
+  open with an inline `export default function`) enables prediction
 
 ### Communication Discipline
 
@@ -759,26 +765,25 @@ this particular case doesn't need an AR, that reasoning is the signal it does.
 
 ### Sub-model dispatch for AR subagents
 
-When spawning AR reviewers in this repo, pass `model` per the table below.
-Drift-catching reviews stay on Opus where the reasoning-depth cliff matters;
-implementation-correctness reviews run on Sonnet.
+Model selection lives in the registered `ar-N` agents' frontmatter — do not pass
+a `model` parameter when spawning ARs; it would silently override the configured
+roster. Drift-catching reviews stay on Opus where the reasoning-depth cliff
+matters; implementation-correctness reviews run on Sonnet. Current pins
+(mirrored from frontmatter; on divergence, frontmatter wins):
 
-| AR                          | What it catches               | Model            |
-| --------------------------- | ----------------------------- | ---------------- |
-| AR-1 (Design Challenge)     | Drift / cross-cutting         | `opus` (default) |
-| AR-2 (Architectural Sketch) | Drift / cross-cutting         | `opus` (default) |
-| AR-3 (Test Strategy)        | Implementation correctness    | `sonnet`         |
-| AR-4 (Impl Audit)           | Implementation correctness    | `sonnet`         |
-| AR-5 (Pre-Merge)            | Drift + cross-cutting + scope | `opus` (default) |
+| AR                          | What it catches               | Model    |
+| --------------------------- | ----------------------------- | -------- |
+| AR-1 (Design Challenge)     | Drift / cross-cutting         | `opus`   |
+| AR-2 (Architectural Sketch) | Drift / cross-cutting         | `opus`   |
+| AR-3 (Test Strategy)        | Implementation correctness    | `sonnet` |
+| AR-4 (Impl Audit)           | Implementation correctness    | `sonnet` |
+| AR-5 (Pre-Merge)            | Drift + cross-cutting + scope | `opus`   |
 
 AR-5 stays on Opus because architectural drift and scope creep are the most
 expensive things it catches; the cross-file consistency and convention items
 ride along on the same Opus call. The estimated session-cost saving from running
 AR-3 and AR-4 on Sonnet is approximate and will vary by review size — treat it
 as a directional choice, not a measured optimization.
-
-In Claude Code, pass `model='sonnet'` to the Agent tool when spawning AR-3 or
-AR-4. Omit the parameter (or pass `model='opus'`) for AR-1 / AR-2 / AR-5.
 
 ## Vibetoading and Frogramming — house terms
 
