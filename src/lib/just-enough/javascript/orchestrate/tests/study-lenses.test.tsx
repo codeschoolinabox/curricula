@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { forEachDiagnostic, forceLinting } from '@codemirror/lint';
 import { EditorView } from '@codemirror/view';
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -43,6 +44,33 @@ function typeInto(view: EditorView, content: string): void {
 			changes: { from: 0, to: view.state.doc.length, insert: content },
 		});
 	});
+}
+
+/**
+ * Total diagnostics currently in the editor's lint state (read via
+ * `forEachDiagnostic`, not gutter DOM — jsdom does not lay out CM's gutter).
+ */
+function countDiagnostics(view: EditorView): number {
+	let count = 0;
+	forEachDiagnostic(view.state, () => {
+		count += 1;
+	});
+	return count;
+}
+
+/**
+ * Diagnostics in lint state carrying the given `source` tag — discriminates
+ * the orchestrator-derived `'interpreted'` feed from lintJej's `'JEJ'` feed
+ * in the F6 cross-boundary tests.
+ */
+function countDiagnosticsBySource(view: EditorView, source: string): number {
+	let count = 0;
+	forEachDiagnostic(view.state, (diagnostic) => {
+		if (diagnostic.source === source) {
+			count += 1;
+		}
+	});
+	return count;
 }
 
 // Unmount mounted trees between tests. The unit project runs with
@@ -1339,5 +1367,98 @@ describe('<StudyLenses> — F5b.6 prop-driven in-mode lens-switch (lens → lens
 				factorySpy.mockRestore();
 			}
 		});
+	});
+});
+
+describe('F6 — interpreted gutter diagnostics (editor mode, cross-boundary)', () => {
+	// The orchestrator derives interpretedDiagnostics from the live
+	// embodiment's errors (via deriveInterpretedDiagnostics, adapter committed
+	// in Inc 4) and passes them to <EditorComponent>; the editing layer's
+	// positional supersede merge (Inc 5a) renders them in place of lintJej's
+	// terse marker for the SAME acorn error. These tests pin the orchestrator
+	// side: the derivation, the null/stale guard, and the end-to-end
+	// supersede through real acorn + real lintJej (no mocks).
+
+	it('a clean snippet produces no interpreted diagnostics (Zero)', async () => {
+		// ZOMBIES anchor: kills an unconditional always-paint fake at the
+		// derivation site. 'let x = 1;' is clean JEJ — no embodiment errors,
+		// no lintJej markers, nothing interpreted.
+		const { container } = render(<StudyLenses snippet="let x = 1;" />);
+		const view = await findMountedEditorView(container);
+		act(() => {
+			forceLinting(view);
+		});
+		await waitFor(() => {
+			expect(countDiagnostics(view)).toBe(0);
+		});
+		expect(countDiagnosticsBySource(view, 'interpreted')).toBe(0);
+	});
+
+	it('a snippet that ships broken paints exactly ONE interpreted diagnostic (supersedes the terse parse marker)', async () => {
+		// 'let x = ;' is NOT a scenario keyword → the real acorn path. The
+		// seed embodiment (lazy useState init) carries the parse error; the
+		// derived diagnostic and lintJej's parse marker locate the SAME acorn
+		// error at the SAME (line, column), so the supersede collapses them:
+		// total 1, source 'interpreted', zero 'JEJ'. Kills: derivation
+		// unwired (no 'interpreted' source ever appears), a hardcoded
+		// position (acorn locates at the ';', not (1,0) — no collapse ⇒
+		// total 2), and a broken merge (total 2).
+		const { container } = render(<StudyLenses snippet="let x = ;" />);
+		const view = await findMountedEditorView(container);
+		act(() => {
+			forceLinting(view);
+		});
+		await waitFor(() => {
+			expect(countDiagnosticsBySource(view, 'interpreted')).toBe(1);
+		});
+		expect(countDiagnostics(view)).toBe(1);
+		expect(countDiagnosticsBySource(view, 'JEJ')).toBe(0);
+	});
+
+	it('mid-debounce staleness: typing clean code clears the interpreted marker BEFORE the slot refreshes (the guard)', async () => {
+		// In editor mode the slot may be STALE mid-debounce (it still holds
+		// the previous buffer's embodiment; editor mode has no loud coherence
+		// guard). The derivation guard maps a stale slot to [] rather than
+		// painting the OLD embodiment's error onto the NEW buffer. Fake
+		// timers freeze the 200ms debounce so the assertion provably runs
+		// mid-window — on real timers the settle (which also yields no
+		// errors on clean code) could mask a missing guard.
+		const { container } = render(<StudyLenses snippet="let x = ;" />);
+		const view = await findMountedEditorView(container);
+		act(() => {
+			forceLinting(view);
+		});
+		await waitFor(() => {
+			expect(countDiagnosticsBySource(view, 'interpreted')).toBe(1);
+		});
+
+		vi.useFakeTimers();
+		try {
+			typeInto(view, 'let x = 1;');
+			// Flush the push chain WITHOUT advancing the clock. Load-bearing
+			// mechanics (AR-3): the editor's setInterpretedDiagnostics
+			// (create-editor.ts) calls forceLinting INSIDE the push, and the
+			// effect-dispatch arms the lint plugin via needsRefresh — so the
+			// forced lint pass runs synchronously and its setDiagnostics
+			// commit lands on the MICROTASK queue (batchResults), which
+			// `await act(async () => {})` flushes. It does NOT ride the
+			// frozen setTimeout. If a refactor ever drops forceLinting from
+			// the push path, this mid-window assertion becomes unreliable —
+			// fix the push path, not this test. Meanwhile the 200ms debounce
+			// has NOT fired; the slot still holds the broken 'let x = ;'
+			// embodiment (stale).
+			await act(async () => {});
+			expect(countDiagnosticsBySource(view, 'interpreted')).toBe(0);
+
+			// Settle the debounce: the slot refreshes to the clean buffer's
+			// embodiment (errors null) — still no interpreted marker.
+			act(() => {
+				vi.advanceTimersByTime(200);
+			});
+			await act(async () => {});
+			expect(countDiagnosticsBySource(view, 'interpreted')).toBe(0);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 });

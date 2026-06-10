@@ -26,7 +26,10 @@
  *   `deriveInitialState`; driven post-mount by `useEffect([lens, configs])`.
  * - **LiveEmbodiment slot** — `useState<LiveEmbodiment | null>`, projected from
  *   the same `deriveInitialState` call at first render (atomic init), then
- *   refreshed by the debounced `useEffect([snippet])`.
+ *   refreshed by the debounced `useEffect([snippet])`. In editor mode its
+ *   `errors` feed the memoized `interpretedDiagnostics` derivation
+ *   (snippet-identity guarded: a stale/null slot derives to empty), passed to
+ *   `<EditorComponent>` as located `LintDiagnostic[]` — never the embodiment.
  * - **EventBus** — per-instance bus owned by a `useRef`, exposed via
  *   `forwardRef` + `useImperativeHandle` for tests. Initial-mount dispatch
  *   fires from a one-time post-commit `useEffect([])` when the first commit
@@ -53,6 +56,8 @@ import writemeLens from '../lenses/writeme/index.js';
 
 import EditorComponent from './editor/index.js';
 import createEventBus from './event-bus.js';
+import type { LintDiagnostic } from './lib/editing/types.js';
+import deriveInterpretedDiagnostics from './lib/error-interpreting/derive-interpreted-diagnostics.js';
 import Toolbar from './toolbar.js';
 import type {
 	LiveEmbodiment,
@@ -93,6 +98,13 @@ const LENS_NAMES: readonly string[] = Object.freeze(Object.keys(LENS_REGISTRY));
  * learner pauses for this long. Per the live-embodiment design (~150–300ms).
  */
 const LIVE_REEMBODY_DEBOUNCE_MS = 200;
+
+/**
+ * Stable empty interpreted-diagnostics array. The memoized derivation returns
+ * this single frozen instance on every null/stale-slot render so the editor's
+ * push effect (keyed on prop identity) does not re-fire for "still nothing".
+ */
+const EMPTY_DIAGNOSTICS: readonly LintDiagnostic[] = Object.freeze([]);
 
 /**
  * Single-pass initial derivation of `{ state, liveEmbodiment }` from the
@@ -280,6 +292,37 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// invariant as liveEmbodimentRef above.
 		const snippetReference = React.useRef(snippet);
 		snippetReference.current = snippet;
+
+		// Interpreted gutter diagnostics — derived from the live embodiment's
+		// errors; the editor NEVER receives the embodiment, only the located
+		// LintDiagnostic[]. GUARD (load-bearing): in editor mode the slot may
+		// be STALE mid-debounce (it holds the previous buffer's embodiment
+		// until the ~200ms settle; the loud coherence guards are lens-mode
+		// only). A stale or null slot derives to the stable EMPTY_DIAGNOSTICS
+		// rather than painting the old buffer's error onto the new one
+		// (≤1-debounce-window staleness per DOCS § Interpreted diagnostics,
+		// "Coherence"). Sequential ifs, not `liveEmbodiment?.snippet ===
+		// snippet ? …`: the optional-chain form loses the non-null narrowing
+		// the embodiment read needs (the repo's prefer-optional-chain
+		// catch-22). The memo itself is load-bearing: an inline derivation
+		// would mint a fresh array identity every render and fire the
+		// editor's push effect (effect dispatch + forced lint pass) on every
+		// orchestrator render instead of only when the slot or snippet moves.
+		const interpretedDiagnostics = React.useMemo(
+			function deriveGutterDiagnostics(): readonly LintDiagnostic[] {
+				if (liveEmbodiment === null) return EMPTY_DIAGNOSTICS;
+				if (liveEmbodiment.snippet !== snippet) return EMPTY_DIAGNOSTICS;
+				// Error-free short-circuit (AR-4): the adapter returns a FRESH
+				// frozen [] when errors are null, which would re-fire the
+				// editor's identity-keyed push effect on every clean settle.
+				// Returning the stable sentinel keeps "still nothing" pushless.
+				if (liveEmbodiment.embodiment.errors === null) {
+					return EMPTY_DIAGNOSTICS;
+				}
+				return deriveInterpretedDiagnostics(liveEmbodiment.embodiment);
+			},
+			[liveEmbodiment, snippet],
+		);
 
 		// Live re-embody on edit — a trailing-edge debounced static embody of the
 		// current buffer, one instance per mount (held in a ref, lazy-initialized
@@ -538,6 +581,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 				<EditorComponent
 					snippet={snippet}
 					onSnippetChange={handleSnippetChange}
+					interpretedDiagnostics={interpretedDiagnostics}
 				/>
 			</div>
 		);

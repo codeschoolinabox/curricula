@@ -66,13 +66,6 @@ itself); the editor adds them as one more diagnostic source alongside its own
 structural `lintJej` markers (see § Conventions for the source-tagging,
 supersede, and coherence rules).
 
-> **Code-vs-contract note.** `interpretedDiagnostics` is wired editor-side:
-> the component accepts the prop and pushes it into the editing layer's
-> diagnostic pipeline (positional supersede merge included — see
-> [`../lib/editing/README.md` § Push-based interpreted diagnostics](../lib/editing/README.md)).
-> The orchestrator-side derivation that supplies the prop at runtime lands as
-> the next Cycle-1 increment; until then no caller passes it.
-
 ## Why a single React component
 
 The editor's role is structurally distinct from the read-only lens role — the

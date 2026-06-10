@@ -47,8 +47,7 @@ IS designed to be, not a migration narrative; where a piece is
 locked-but-unbuilt it says so.
 
 - **Cycle 1 — live embodiment + interpreted diagnostics** _(this sketch's
-  current contract; the live-embodiment slot is mid-migration in code — see the
-  note in § Live-embodiment effect topology)._ The orchestrator holds one
+  current contract — implemented)._ The orchestrator holds one
   authoritative live `Snippet` of the editing buffer, refreshed by a **debounced
   static `embody()`** while editing, flushed to the exact current buffer on an
   editor → lens transition. From its `errors` the orchestrator derives

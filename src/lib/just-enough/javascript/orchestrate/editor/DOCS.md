@@ -311,14 +311,6 @@ The home-base component holds the following surface invariant. Internal
 implementation may evolve (extension stack, callback wiring, diagnostic
 pipeline) without changing these:
 
-> **Code-vs-contract note.** The prop surface below
-> (`{ snippet, onSnippetChange?, interpretedDiagnostics? }`) is fully wired in
-> code editor-side: the component accepts `interpretedDiagnostics` and pushes
-> it into the editing layer's diagnostic pipeline. The orchestrator-side
-> derivation that supplies the prop at runtime lands as the next Cycle-1
-> increment. (The orchestrator side has the mirror of this gap — see
-> [`../DOCS.md` § Live embodiment](../DOCS.md).)
-
 - **File path:** [`./index.tsx`](./index.tsx).
 - **Default export shape:** a React function component.
 - **Prop surface:** `{ snippet, onSnippetChange?, interpretedDiagnostics? }`.
