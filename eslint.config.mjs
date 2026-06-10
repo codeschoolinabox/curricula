@@ -215,10 +215,11 @@ export default tseslint.config(
 			],
 			// OFF, not warn: this rule's autofixer adds `readonly` /
 			// `ReadonlyArray` / `ReadonlyMap` to mutated locals, which breaks
-			// typecheck. lint-staged runs `eslint --fix`, and `--fix` applies
-			// fixers regardless of severity — so `warn` does NOT disarm it
-			// (a `warn` here is exactly what caused the 124-error autofix
-			// cascade). `off` is the only setting that stops the autofix.
+			// typecheck. `--fix` applies fixers regardless of severity — so
+			// `warn` does NOT disarm it (a `warn` here is exactly what caused
+			// the 124-error autofix cascade). `off` is the only setting that
+			// stops the autofix. The hook is prettier-only; never re-add a
+			// linter `--fix` to lint-staged.
 			'functional/prefer-readonly-type': 'off',
 			'functional/no-let': 'off',
 			'functional/no-loop-statements': 'off',

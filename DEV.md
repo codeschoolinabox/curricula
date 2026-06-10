@@ -29,46 +29,48 @@ Detailed conventions and module boundaries are documented in sections below.
 
 ### Conventions Summary
 
-| Situation                      | Convention                                                       |
-| ------------------------------ | ---------------------------------------------------------------- |
-| Non-trivial function           | Named `function` declaration                                     |
-| Inline callback (trivial)      | Arrow OK: `user => user.id`, `n => n > 0`                        |
-| Arrow assigned to variable     | **Not allowed** — use named `function` declaration               |
-| Arrow with body block `{}`     | **Not allowed** — use named `function` declaration               |
-| Callback (non-trivial)         | Extract as named `function`, pass by name                        |
-| Hoisting below call site       | Encouraged for readability                                       |
-| `this` keyword                 | **Banned** (functional codebase)                                 |
-| Classes                        | **Banned** (exception: error classes in `/errors`)               |
-| Error handling                 | Use base error class for catch-all                               |
-| Mutable closures               | **Banned**                                                       |
-| Immutable closures             | OK (e.g. currying over cached config)                            |
-| Method shorthand in objects    | Allowed (`{ process() {} }`)                                     |
-| Variable bindings              | Prefer `const`; `let` only when reassignment needed              |
-| Export                         | Define first, `export default` at bottom                         |
-| Import paths                   | Always include `.js` extension                                   |
-| Multiple things from one file  | Split into separate files                                        |
-| Destructured object params     | Default empty object: `{ ... } = {}`                             |
-| Boolean functions              | Prefix with `is`/`has`/`can`/`should`                            |
-| Return values (objects/arrays) | Deep freeze (clone+freeze for external, freeze-in-place for own) |
+| Situation                      | Convention                                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Non-trivial function           | Named `function` declaration                                                                                                         |
+| Inline callback (trivial)      | Arrow OK: `user => user.id`, `n => n > 0`                                                                                            |
+| Arrow assigned to variable     | **Not allowed** — use named `function` declaration                                                                                   |
+| Arrow with body block `{}`     | **Not allowed** — use named `function` declaration                                                                                   |
+| Callback (non-trivial)         | Extract as named `function`, pass by name                                                                                            |
+| Hoisting below call site       | Encouraged for readability                                                                                                           |
+| `this` keyword                 | **Banned** (functional codebase)                                                                                                     |
+| Classes                        | **Banned** (exception: error classes in `/errors`)                                                                                   |
+| Error handling                 | Use base error class for catch-all                                                                                                   |
+| Mutable closures               | **Banned**                                                                                                                           |
+| Immutable closures             | OK (e.g. currying over cached config)                                                                                                |
+| Method shorthand in objects    | Allowed (`{ process() {} }`)                                                                                                         |
+| Variable bindings              | Prefer `const`; `let` only when reassignment needed                                                                                  |
+| Export                         | Function files: inline `export default function` at top. Constant files: define first, `export default` at bottom (file-kind signal) |
+| Import paths                   | Always include `.js` extension                                                                                                       |
+| Multiple things from one file  | Split into separate files                                                                                                            |
+| Destructured object params     | Default empty object: `{ ... } = {}`                                                                                                 |
+| Boolean functions              | Prefix with `is`/`has`/`can`/`should`                                                                                                |
+| Return values (objects/arrays) | Deep freeze (clone+freeze for external, freeze-in-place for own)                                                                     |
 
 ### 1. Export Conventions
 
-**CRITICAL**: All internal files use default-only exports with named-then-export
-pattern.
+**CRITICAL**: All internal files use default-only exports. The export form is a
+**file-kind signal**: function files export inline at the top; constant files
+keep the named-then-export form at the bottom. A top inline export marks a
+behavior file; a bottom name-export marks a value file.
 
 ```javascript
-// ✅ CORRECT - Named function, then export at bottom
-function myFunction() { ... }
+// ✅ CORRECT - Function file: inline default export opens the file
+export default function myFunction() { ... }
 
-export default myFunction;
-
-// ✅ CORRECT - Constants follow same pattern
+// ✅ CORRECT - Constant file: named, then export at bottom
+// (`export default const` is invalid syntax, and an anonymous value would
+// have no binding for internal reference — the asymmetry is the signal)
 const MY_CONSTANT = Symbol('description');
 
 export default MY_CONSTANT;
 
-// ❌ WRONG - Inline default export (poor tooling support)
-export default function myFunction() { ... }
+// ❌ WRONG - Anonymous default export (no binding; nothing can reference it)
+export default function () { ... }
 
 // ❌ WRONG - Named exports in internal files
 export function myFunction() { ... }
@@ -88,6 +90,11 @@ import { createConfig, applyPreset } from './configuring/index.js';
 // ✅ EXCEPTION - Public API only
 import { doThing } from '@study-lenses/this-package';
 ```
+
+**Import naming**: import under the export's canonical name by default; rename
+at the import site only when it genuinely clarifies the consumption context.
+(The import path always carries the canonical filename, so provenance greps stay
+safe either way.)
 
 **Rationale**:
 
@@ -299,16 +306,26 @@ function formatUserSummary(user) {
 - Extracted functions are independently testable
 - Forces naming, which clarifies intent
 
-#### Hoisting for Readability
+#### File Anatomy: Newspaper Order
 
-Defining a `function` below where its name is first used is encouraged when it
-improves readability — high-level flow at the top, implementation details below.
+Files read top-down like a newspaper: **imports → main → hoisted helpers**. The
+main function is the first thing after imports — for function files it carries
+the inline `export default`, so the export marker and the main marker are the
+same line. Helpers are supporting details, defined below. This is safe because
+`function` declarations hoist (and arrows assigned to variables are banned, so
+there is nothing in the file that doesn't).
+
+Module-level constants also live below main, with the helpers. This is safe
+because nothing executes at module load (guaranteed by the no-side-effects
+style) — constants only need to be ordered among themselves.
 
 ```javascript
 // ✅ — main flow reads top-down, details defined below
-const pipeline = buildPipeline(config);
-const result = executePipeline(pipeline, code);
-return formatOutput(result);
+export default function processCode(config, code) {
+	const pipeline = buildPipeline(config);
+	const result = executePipeline(pipeline, code);
+	return formatOutput(result);
+}
 
 function buildPipeline(config) { ... }
 function executePipeline(pipeline, code) { ... }
@@ -464,6 +481,8 @@ function isPlainObject(thing: unknown): thing is Record<string, unknown> {
 }
 ```
 
+Real example: this function exists at `src/lib/utils/is-plain-object.ts`.
+
 #### Named intermediate variables
 
 When a sub-expression has a clear identity, capture it in a `const`. Name the
@@ -482,7 +501,7 @@ if (!tracers[tracer]) throw new TracerUnknownError(tracer, ...);
 const options = tracers[tracer].optionsSchema ? prepareConfig(...) : {};
 ```
 
-Real example: `src/api/trace.ts` lines 39–40.
+Real example: `src/lib/utils/is-plain-object.ts` — the `proto` intermediate.
 
 #### Ternary: transparent value selection only
 
@@ -498,16 +517,22 @@ const entry = condition ? [key, expandBoolean(value, schema)] : [key, value];
 const result = condition ? executeSomething() : returnEarlyWithFallback();
 ```
 
-Real example: `src/configuring/expand-shorthand.ts` `.map()` callback.
+Real example: `src/lib/snippetry/debug/guard-loops/guard-loops.ts` — the
+`typeof evalCode === 'object' ? evalCode : recast.parse(evalCode)` line; both
+branches produce a parsed AST.
 
 #### Within-file helpers for readability; separate file for reuse
 
-**Within-file helper** (file-private, possibly single-use): extract when the
-main function reads more clearly after the extraction. The caller says WHAT
-without explaining HOW inline. Single use is fine. Define below (hoisting) for
-subordinate helpers; above for substantial ones.
+**The extraction rule, two parts:**
 
-**Separate file**: only when the logic is used in 2+ places.
+- **Within a file**: extract helpers freely — no use-count limit — whenever it
+  makes the file and its export read better. The caller says WHAT without
+  explaining HOW inline. Single use is fine. Helpers are defined below main
+  (newspaper order). Trivial wrappers that name nothing (`const x = getX(o)`)
+  still get inlined — they fail the readability test, not a use-count test.
+- **Separate file**: only when the logic is used in 2+ places — and extraction
+  to a new domain-related file is an inter-file trigger under two-tier autonomy
+  (check in with the user).
 
 ```typescript
 // ✅ — shouldExpand() and expandBoolean() are single-use but they name the concepts
@@ -544,7 +569,10 @@ function createClosure(state) {
 }
 ```
 
-Real examples: `src/configuring/expand-shorthand.ts`, `src/api/embody.ts`.
+Real examples: `src/lib/snippetry/debug/guard-loops/guard-loops.ts` (single-use
+narrative helpers `generateLoopGuard` and `insertBlankLinesAfterGuards`);
+`src/lib/utils/deep-clone.ts` (extracted to its own file — imported by both
+`freeze.ts` and `deep-freeze.ts`).
 
 #### Numbered step comments for multi-phase functions
 
@@ -568,7 +596,8 @@ const meta = prepareConfig(...);
 return tracerModule.record(code, { meta, options });
 ```
 
-Real example: `src/api/trace.ts` (8 numbered steps).
+Real example: `src/lib/just-enough/javascript/embody/lib/validating/validate.ts`
+(three numbered phases: parse error / rejections / valid).
 
 #### WHY comments for non-obvious JS semantics
 
@@ -645,10 +674,7 @@ downstream.
 Use the freeze utilities from this package's shared utilities:
 
 ```typescript
-import { freezeInPlace, cloneAndFreeze } from '../utils/freeze.js';
-// ^^^ Adjust import path to match this package's utility location.
-//     If you cannot locate these utilities, stop and ask — do not
-//     inline a custom implementation.
+import { freezeInPlace, cloneAndFreeze } from '@utils/freeze.js';
 ```
 
 <strong>Two operations, one ownership rule:</strong>
@@ -893,8 +919,8 @@ Within scope, four kinds of documentation, with strict separation:
   `.planning-handoffs/*.md` including per-stream `*-notes.md`): per-migration
   coordination scaffolding. Process info, ordered steps, phase splits, status
   snapshots, cross-stream coordination all live here. Handoffs are transitional
-  scaffolding, deleted when their migration completes (git history retains them);
-  they are never a durable source of truth — the end-state docs are.
+  scaffolding, deleted when their migration completes (git history retains
+  them); they are never a durable source of truth — the end-state docs are.
 - **Git history** (commit messages, `git log`, PR descriptions): what was
   changed and why, captured at commit time. AR-cycle history, rejected
   alternatives, prior attempts, "we tried Y before X" narratives — all go here.
@@ -951,7 +977,8 @@ npm run test:watch  # Run tests in watch mode
 All non-trivial changes follow the Incremental Development Workflow below. For
 quick reference:
 
-1. Create feature branch
+1. Work directly on main — atomic commits per increment (agents never create
+   branches unless explicitly instructed; see AGENTS git policy)
 2. Follow Phase 0 → Phase 1 (per increment) → Phase 2 (see below)
 3. Update `README.md` in affected directories
 4. Run quality checks before each commit:
@@ -1325,6 +1352,8 @@ AR-2 catches this before it locks in.
   the implementation will do and what shape it will take?
 - If not, the ambiguity will surface as a bug or a structural mess. Resolve it
   now.
+- Present the Phase 0 artifacts to the human at the Phase-0 commit prompt.
+  **Phase 1 does not start until the human approves.**
 
 ### Phase 1: TDD Implementation
 
@@ -1334,7 +1363,7 @@ For each behavioral increment:
    consumer-facing "why")
 2. **Stub function** — create function with stub body
 3. **Placeholder types** — `any`/`unknown` to unblock; tighten later
-4. **Lint checkpoint 1** — `npm run lint <new-file>`. Fix violations.
+4. **Lint checkpoint 1** — `npx eslint <new-file>`. Fix violations.
 5. **Unit test** — write ONE failing test in ZOMBIES order. Start with the
    degenerate case (Zero) if this is the first test for this function. After
    writing it, ask: _could this be passed by returning a hardcoded value?_ If
@@ -1346,12 +1375,12 @@ For each behavioral increment:
    > [§ AR-3: Test Strategy Challenge](#ar-3-test-strategy-challenge) below for
    > focus areas, including the triangulation check.
 
-6. **Lint checkpoint 2** — `npm run lint <test-file>`. Fix violations.
+6. **Lint checkpoint 2** — `npx eslint <test-file>`. Fix violations.
 7. **Implement** — minimal code to pass the test (Red → Green). **Fake It is
    acceptable here for the first test** — returning a hardcoded value to confirm
    the test harness and stub are wired correctly is a legitimate TDD move. It is
    not a shortcut; it is the move. It expires when the next test is written.
-8. **Lint checkpoint 3** — `npm run lint <impl-file>`. Fix violations.
+8. **Lint checkpoint 3** — `npx eslint <impl-file>`. Fix violations.
 9. **Refactor** — address structural quality while behavioral correctness holds.
 
    Tests passing means _behavioral correctness_ is achieved — the function does
@@ -1394,7 +1423,8 @@ For each behavioral increment:
    utility file (freeze, merge, clone — utilities are invisible in every data
    flow diagram) is NOT a trigger.
 
-10. **Lint checkpoint 4** — final lint on modified files. Should be clean.
+10. **Lint checkpoint 4** — final `npx eslint` on modified files (plus
+    `npx markdownlint-cli2` for any modified `.md`). Should be clean.
 11. **Update types** — finalize based on actual implementation
 12. **Self-review** — simplest solution? only what requested?
     junior-maintainable?
@@ -1488,7 +1518,7 @@ Each passing TDD cycle = one atomic commit:
 
 - One behavior per commit
 - Descriptive message: `add: createConfig expands boolean shorthand`
-- Feature branch for planned work batches
+- Commits go directly to main; branches only when the human explicitly instructs
 
 ### What NOT to Do
 
@@ -1527,7 +1557,10 @@ then responds to each concern before proceeding.
 
 Tool-specific examples:
 
-- **Claude Code**: use the Agent tool with subagent_type="general-purpose"
+- **Claude Code**: invoke the registered reviewer agents `ar-1` through `ar-5`
+  by name — they carry the role, constraints, and output format below. Fall back
+  to a general-purpose subagent with the prompt structure pasted in only where
+  the registered agents are unavailable.
 - **Cursor/Copilot**: use chat with the adversarial prompt pasted in
 - **CLI tools**: spawn a second agent session with the review prompt
 
@@ -1558,6 +1591,32 @@ Every adversarial review prompt follows this structure:
 - CONSIDER: document your response to each concern, then continue
 - PAUSE: present concerns to human, wait for decision before continuing
 - Never skip a PAUSE verdict — it exists to protect the codebase
+
+### Sub-model dispatch
+
+Model selection for AR reviewers follows one mechanism: an explicit `model`
+parameter overrides the agent definition's frontmatter, which overrides
+inheriting the spawning session's model. **The pins live in the registered
+`ar-N` agent definitions' frontmatter — do not pass a `model` parameter when
+spawning ARs**; it would silently override the configured roster.
+
+Current roster (mirrors the frontmatter; if they ever diverge, the frontmatter
+wins):
+
+| AR                          | What it catches               | Model    |
+| --------------------------- | ----------------------------- | -------- |
+| AR-1 (Design Challenge)     | Drift / cross-cutting         | `opus`   |
+| AR-2 (Architectural Sketch) | Drift / cross-cutting         | `opus`   |
+| AR-3 (Test Strategy)        | Implementation correctness    | `sonnet` |
+| AR-4 (Impl Audit)           | Implementation correctness    | `sonnet` |
+| AR-5 (Pre-Merge)            | Drift + cross-cutting + scope | `opus`   |
+
+Reasoning: judgment-heavy reviews (design, sketch, pre-merge) should track or
+exceed the authoring model's tier — a reviewer below the author's tier is the
+most likely to rubber-stamp the author's subtle drift. Mechanical reviews (test
+strategy, implementation audit) ride a cheaper tier, because independence and
+fresh context — not raw capability — do most of their work. Tier choices are a
+directional cost/quality trade, not a measured optimization.
 
 ### AR-1: Design Challenge
 
@@ -1717,45 +1776,60 @@ when the human explicitly opts out.
   [§ Non-Negotiable Invariants](AGENTS.md#non-negotiable-invariants) holds
   across the full changeset.
 
-**Provide to agent:** Full diff (git diff), modified files list, the original
-task description, DOCS.md for modified modules
+**Provide to agent:** the baseline SHA (recorded at plan approval via
+`git rev-parse HEAD`) and the modified file paths — the reviewer runs
+`git diff <baseline>..HEAD` itself — plus the original task description and
+DOCS.md paths for modified modules. Pass paths, not pasted contents: the
+reviewer has Read/Bash/Grep/Glob and pulls its own inputs.
 
 ## Linting Conventions
 
-This codebase uses a three-tool pipeline for code quality:
+Code quality runs through seven tools:
 
-- **ESLint** — enforces logic patterns and code style
-- **Prettier** — handles formatting (spaces, quotes, line length)
-- **TypeScript** — validates types via `tsc` compiler
+- **`npm run lint`** is a five-linter compound: **ESLint** (logic and patterns —
+  `.ts`/`.js` and `.mdx`), **markdownlint-cli2** (`.md`), **ls-lint** (file
+  names), **cspell** (spelling)
+- **Prettier** — formatting (spaces, quotes, line length)
+- **TypeScript** — types via `tsc`
 
 ### Running the Tools
 
 ```bash
 # Check for violations
-npm run lint           # ESLint
+npm run lint           # eslint + markdownlint + mdx-eslint + ls-lint + cspell
 npm run format:check   # Prettier
-npm run typecheck     # TypeScript
+npm run typecheck      # TypeScript
 
-# Auto-fix what's fixable
-npm run lint:fix       # ESLint auto-fix
-npm run format         # Prettier auto-format
+# Auto-format
+npm run format         # Prettier
 
 # Run all checks at once
 npm run validate       # typecheck + format check + lint + test
 ```
 
+Per-file checkpoints — the compound script does not forward file arguments, so
+use the underlying tools directly:
+
+| File type          | Command                          |
+| ------------------ | -------------------------------- |
+| `.ts` `.js` `.mdx` | `npx eslint <file>`              |
+| `.md`              | `npx markdownlint-cli2 "<file>"` |
+| spelling, any type | `npx cspell <file>`              |
+
 ### Pre-commit Hooks
 
 Husky + lint-staged run automatically before each commit:
 
-- `npm run lint:fix` on staged `.ts`/`.js` files
-- `npm run format` on staged `.ts`/`.js`/`.json`/`.md`/`.yml`/`.yaml` files
+- `prettier --write` on staged source, markdown, MDX, JSON, and YAML files
 
-Most violations get fixed automatically before you even see them.
+Formatting is the only thing fixed at commit time. **Linters do not run in the
+hook** — `--fix` applies fixers regardless of severity (warn-level autofixes
+land as readily as errors), so lint violations are caught by the per-file
+checkpoints and `npm run validate`, never by the hook.
 
 ### Enforced Conventions
 
-See [eslint.config.js](./eslint.config.js) for full configuration.
+See [eslint.config.mjs](./eslint.config.mjs) for full configuration.
 
 #### Functional Programming Core
 
@@ -1866,7 +1940,8 @@ catch-all) and matching `element-types` rules:
 ```
 
 More specific patterns are listed first so they match before the broader
-catch-all. See embody's `eslint.config.js` for a full multi-layer example.
+catch-all. See the embody package's eslint config (external repo) for a full
+multi-layer example.
 
 ### Updating Boundaries
 
@@ -1881,15 +1956,15 @@ When the architecture evolves:
 
 Common patterns to avoid:
 
-| Anti-Pattern                | Rule                                         | Example Fix                                         |
-| --------------------------- | -------------------------------------------- | --------------------------------------------------- |
-| **Over-engineering**        | Helper used once? Inline it                  | `const x = getX(o)` → `const x = o.x`               |
-| **Class addiction**         | Prefer functions over classes                | `class X` → `function createX()`                    |
-| **Future-proofing**         | Don't add unused flexibility                 | `options = {}` with unused fields → direct impl     |
-| **Defensive over-coding**   | Validate at boundaries only                  | Remove internal re-validation                       |
-| **Verbose docs**            | Name + types self-document?                  | Only document WHY or non-obvious contracts          |
-| **Fake It without Make It** | Hardcoded values expire after the first test | Write the second test to make hardcoding impossible |
-| **Status hedging in docs**  | Status/phase belongs in plan or handoff      | `## Status — pre-impl...` → handoff file            |
+| Anti-Pattern                | Rule                                                                                                     | Example Fix                                         |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| **Over-engineering**        | New file needs 2+ call sites; in-file extraction is free; trivial wrappers that name nothing get inlined | `const x = getX(o)` → `const x = o.x`               |
+| **Class addiction**         | Prefer functions over classes                                                                            | `class X` → `function createX()`                    |
+| **Future-proofing**         | Don't add unused flexibility                                                                             | `options = {}` with unused fields → direct impl     |
+| **Defensive over-coding**   | Validate at boundaries only                                                                              | Remove internal re-validation                       |
+| **Verbose docs**            | Name + types self-document?                                                                              | Only document WHY or non-obvious contracts          |
+| **Fake It without Make It** | Hardcoded values expire after the first test                                                             | Write the second test to make hardcoding impossible |
+| **Status hedging in docs**  | Status/phase belongs in plan or handoff                                                                  | `## Status — pre-impl...` → handoff file            |
 
 ### Pre-Commit Checklist
 
@@ -1897,7 +1972,8 @@ Before proposing code, answer YES to ALL:
 
 - [ ] **Simplest solution?** Not most "elegant" or "extensible"
 - [ ] **Only what requested?** No future-proofing, no "nice-to-haves"
-- [ ] **Helpers used >1x?** If used once, inline it
+- [ ] **Helpers placed by the extraction rule?** In-file freely for readability;
+      new file only at 2+ call sites
 - [ ] **Validate at boundaries only?** No re-validating internal calls
 - [ ] **Junior-maintainable?** Understandable without explanation
 - [ ] **Structural quality?** Does the implementation reflect the DOCS.md
