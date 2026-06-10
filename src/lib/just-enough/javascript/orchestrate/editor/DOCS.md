@@ -312,14 +312,12 @@ implementation may evolve (extension stack, callback wiring, diagnostic
 pipeline) without changing these:
 
 > **Code-vs-contract note.** The prop surface below
-> (`{ snippet, onSnippetChange?, interpretedDiagnostics? }`) is the **Cycle-1
-> contract**. The in-code prop surface still carries only
-> `{ snippet, onSnippetChange? }` — `interpretedDiagnostics` is not wired into
-> the component yet; the Phase-1 gutter-merge increment adds it (it is the
-> increment that has the orchestrator pass the prop and the editor merge it into
-> its diagnostic pipeline). This section describes the contract; the prop is a
-> pending Cycle-1 increment. (The orchestrator side has the mirror of this gap —
-> see [`../DOCS.md` § Live embodiment](../DOCS.md).)
+> (`{ snippet, onSnippetChange?, interpretedDiagnostics? }`) is fully wired in
+> code editor-side: the component accepts `interpretedDiagnostics` and pushes
+> it into the editing layer's diagnostic pipeline. The orchestrator-side
+> derivation that supplies the prop at runtime lands as the next Cycle-1
+> increment. (The orchestrator side has the mirror of this gap — see
+> [`../DOCS.md` § Live embodiment](../DOCS.md).)
 
 - **File path:** [`./index.tsx`](./index.tsx).
 - **Default export shape:** a React function component.

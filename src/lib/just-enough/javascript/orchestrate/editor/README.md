@@ -66,12 +66,12 @@ itself); the editor adds them as one more diagnostic source alongside its own
 structural `lintJej` markers (see § Conventions for the source-tagging,
 supersede, and coherence rules).
 
-> **Code-vs-contract note.** `interpretedDiagnostics` is the editor's locked
-> Cycle-1 prop contract. The orchestrator-side derivation and the prop's wiring
-> into the editor's diagnostic pipeline land as a pending Cycle-1 increment; in
-> the current `index.tsx` the prop type is still being threaded in. Treat the
-> contract described here —
-> `{ snippet, onSnippetChange?, interpretedDiagnostics? }` — as the truth.
+> **Code-vs-contract note.** `interpretedDiagnostics` is wired editor-side:
+> the component accepts the prop and pushes it into the editing layer's
+> diagnostic pipeline (positional supersede merge included — see
+> [`../lib/editing/README.md` § Push-based interpreted diagnostics](../lib/editing/README.md)).
+> The orchestrator-side derivation that supplies the prop at runtime lands as
+> the next Cycle-1 increment; until then no caller passes it.
 
 ## Why a single React component
 

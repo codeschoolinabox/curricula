@@ -11,10 +11,11 @@
  * @module create-editor
  */
 
-import { setDiagnostics } from '@codemirror/lint';
+import { forceLinting, setDiagnostics } from '@codemirror/lint';
 import { EditorView } from '@codemirror/view';
 
 import buildExtensions from './build-extensions.js';
+import interpretedDiagnostics from './interpreted-diagnostics.js';
 import { toCMDiagnostic, runLinterCallbacks } from './to-cm-diagnostic.js';
 import type { EditorOptions, EditorInstance, LintDiagnostic } from './types.js';
 
@@ -146,7 +147,19 @@ async function createEditor(
 		}
 
 		const currentCode = editor.state.doc.toString();
-		const allDiagnostics = runLinterCallbacks(linterCallbacks, currentCode);
+		const structural = runLinterCallbacks(linterCallbacks, currentCode);
+		// Merge the pushed interpreted feed so an imperative check() does
+		// not wipe interpreted gutter markers — the same merge the linter
+		// pass applies (one merge semantics everywhere). check() therefore
+		// returns the merged set: what renders is what's reported.
+		// `(field, false)` + `?? []` is a type-safety convenience, not a
+		// runtime safeguard: the field is always installed when the
+		// linterCallbacks guard above passes (both ship together in
+		// buildExtensions step 3).
+		const allDiagnostics = interpretedDiagnostics.merge(
+			structural,
+			editor.state.field(interpretedDiagnostics.field, false) ?? [],
+		);
 
 		const cmDiagnostics = allDiagnostics.map((d) =>
 			toCMDiagnostic(editor.state.doc, d),
@@ -155,6 +168,28 @@ async function createEditor(
 		editor.dispatch(setDiagnostics(editor.state, cmDiagnostics));
 
 		return allDiagnostics;
+	}
+
+	// Push-based interpreted-diagnostics entry point. Mirrors runCheck's
+	// guard shape: the interpreted feed rides the linter pipeline, which is
+	// only installed when linter callbacks exist (see buildExtensions step 3),
+	// so a linter-less editor treats pushes as no-ops by contract.
+	function pushInterpretedDiagnostics(
+		diagnostics: readonly LintDiagnostic[],
+	): void {
+		if (destroyed || !linterCallbacks || linterCallbacks.length === 0) {
+			return;
+		}
+
+		editor.dispatch({
+			effects: interpretedDiagnostics.effect.of(diagnostics),
+		});
+		// The effect transaction trips the linter's needsRefresh (field
+		// identity changed), arming the lint plugin — so this forceLinting
+		// actually runs instead of waiting out the lint delay. Without the
+		// field/needsRefresh pair it would silently no-op (see the module
+		// JSDoc in ./interpreted-diagnostics.ts).
+		forceLinting(editor);
 	}
 
 	// perf: skip freeze — stateful editor API requires mutable methods and closures
@@ -194,6 +229,10 @@ async function createEditor(
 
 		check(): readonly LintDiagnostic[] {
 			return runCheck();
+		},
+
+		setInterpretedDiagnostics(diagnostics: readonly LintDiagnostic[]): void {
+			pushInterpretedDiagnostics(diagnostics);
 		},
 
 		destroy(): void {

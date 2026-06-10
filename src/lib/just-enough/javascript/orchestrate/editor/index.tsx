@@ -18,7 +18,10 @@
  *   3. Learner edit — CM transaction fires `onChange` (the consumer's
  *      `onSnippetChange`).
  *   4. Prop sync — external snippet prop change writes into the live
- *      document (equality-guarded; null-handle-guarded).
+ *      document (equality-guarded; null-handle-guarded). The
+ *      `interpretedDiagnostics?` prop syncs through its own push effect:
+ *      prop identity change → `EditorInstance.setInterpretedDiagnostics`
+ *      (mount seeds from the latest prop ref — the snippet-race analog).
  *   5. Unmount — cleanup destroys the editor and removes the DOM subtree.
  */
 
@@ -29,16 +32,25 @@ import documentJej from '../../lib/documenting/document-jej.js';
 import formatJej from '../../lib/formatting-editor/format-jej.js';
 import lintJej from '../../lib/linting/lint-jej.js';
 import createEditor from '../lib/editing/create-editor.js';
-import type { EditorInstance } from '../lib/editing/types.js';
+import type { EditorInstance, LintDiagnostic } from '../lib/editing/types.js';
 
 type EditorComponentProperties = Readonly<{
 	readonly snippet: string;
 	readonly onSnippetChange?: (next: string) => void;
+	/**
+	 * Located, embodiment-derived diagnostics the orchestrator pushes for
+	 * gutter rendering. Plain data only — the editor never receives the
+	 * embodiment. Each new array identity replaces the previous push; omit
+	 * or pass `[]` for none. See `../lib/editing/interpreted-diagnostics.ts`
+	 * for the merge/supersede semantics.
+	 */
+	readonly interpretedDiagnostics?: readonly LintDiagnostic[];
 }>;
 
 function EditorComponent({
 	snippet,
 	onSnippetChange,
+	interpretedDiagnostics,
 }: EditorComponentProperties): React.JSX.Element {
 	const hostReference = React.useRef<HTMLDivElement | null>(null);
 	const editorReference = React.useRef<EditorInstance | null>(null);
@@ -57,6 +69,13 @@ function EditorComponent({
 	// honored without unmount/remount.
 	const onSnippetChangeReference = React.useRef(onSnippetChange);
 	onSnippetChangeReference.current = onSnippetChange;
+
+	// Ref shadow for the latest `interpretedDiagnostics` prop — read inside
+	// the mount effect's `.then` to resolve the prop-change-during-mount
+	// race (the snippetReference analog): pre-mount pushes are seeded from
+	// the LATEST prop once mount resolves, never silently dropped.
+	const interpretedDiagnosticsReference = React.useRef(interpretedDiagnostics);
+	interpretedDiagnosticsReference.current = interpretedDiagnostics;
 
 	// Stable `onChange` callback passed to createEditor at mount time.
 	// The ref-shadow indirection (`onSnippetChangeRef`) absorbs
@@ -115,6 +134,13 @@ function EditorComponent({
 					if (instance.content !== snippetReference.current) {
 						instance.content = snippetReference.current;
 					}
+					// Seed the push-based interpreted feed from the latest prop
+					// (the mount-race analog of the snippet recovery above; the
+					// post-mount push effect below skips while the handle is
+					// null, so this seed is the only path for the initial prop).
+					instance.setInterpretedDiagnostics(
+						interpretedDiagnosticsReference.current ?? [],
+					);
 				},
 				function onMountRejected(error: unknown) {
 					if (cancelledReference.current) return;
@@ -145,6 +171,20 @@ function EditorComponent({
 			editor.content = snippet;
 		},
 		[snippet],
+	);
+
+	// Interpreted-diagnostics push effect — fires on prop identity change
+	// (the orchestrator memoizes its derivation; a new array identity means
+	// new content). The optional-chained null-handle guard mirrors
+	// snippetSyncEffect: a pre-mount fire is skipped — the mount callback
+	// seeds from the ref instead. `?? []` maps an omitted prop to a clear.
+	React.useEffect(
+		function interpretedDiagnosticsSyncEffect() {
+			editorReference.current?.setInterpretedDiagnostics(
+				interpretedDiagnostics ?? [],
+			);
+		},
+		[interpretedDiagnostics],
 	);
 
 	if (mountError !== null) {

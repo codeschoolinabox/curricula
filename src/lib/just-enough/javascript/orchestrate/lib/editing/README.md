@@ -18,15 +18,16 @@ tooltips, markers) but does not know what the feedback means.
 
 ## Files
 
-| File                   | Purpose                                       |
-| ---------------------- | --------------------------------------------- |
-| `types.ts`             | All types, callback signatures, data shapes   |
-| `create-editor.ts`     | `createEditor(initialCode, options)` factory  |
-| `detect-language.ts`   | File extension to language mapping (pure)     |
-| `build-extensions.ts`  | CodeMirror extension builder (internal)       |
-| `build-tooltip-dom.ts` | Hover-doc tooltip DOM construction (internal) |
-| `build-info-dom.ts`    | Completion-`info` DOM construction (internal) |
-| `to-cm-diagnostic.ts`  | Diagnostic data translation (internal)        |
+| File                         | Purpose                                          |
+| ---------------------------- | ------------------------------------------------ |
+| `types.ts`                   | All types, callback signatures, data shapes      |
+| `create-editor.ts`           | `createEditor(initialCode, options)` factory     |
+| `detect-language.ts`         | File extension to language mapping (pure)        |
+| `build-extensions.ts`        | CodeMirror extension builder (internal)          |
+| `build-tooltip-dom.ts`       | Hover-doc tooltip DOM construction (internal)    |
+| `build-info-dom.ts`          | Completion-`info` DOM construction (internal)    |
+| `to-cm-diagnostic.ts`        | Diagnostic data translation (internal)           |
+| `interpreted-diagnostics.ts` | Push-based diagnostics injection seam (internal) |
 
 ## Usage
 
@@ -87,6 +88,29 @@ extensions internally. Callbacks never see or return CodeMirror types.
 | `docLookup`   | `(word) => DocEntry \| null` | `hoverTooltip()`                    |
 | `completions` | `(req) => CompletionItem[]`  | `autocompletion()`                  |
 | `onFormat`    | `(result) => void`           | Called after format                 |
+
+### Push-based interpreted diagnostics
+
+The `linters` callbacks are **pull-based**: the editor re-runs them on doc
+changes, deriving diagnostics from the code string. Externally computed
+diagnostics (the orchestrator's embodiment-derived "interpreted" explanations)
+are **push-based** — they arrive on the consumer's own cadence with no
+accompanying doc change — and enter through an instance method instead of a
+callback:
+
+```ts
+editor.setInterpretedDiagnostics([
+	{ line: 1, column: 4, severity: 'error', message: 'friendly explanation' },
+]);
+```
+
+Each push **replaces** the previously pushed array (`[]` clears). The pushed
+feed is merged with the linter results by a positional supersede — an
+interpreted diagnostic replaces a structural one at the same `(line, column)`;
+everything else coexists (see `interpreted-diagnostics.ts` for the predicate
+and its non-goals fence). The method no-ops on a linter-less editor: the
+interpreted feed rides the linter pipeline, which is only installed when
+`linters` are configured.
 
 `onChange` fires **synchronously** inside each `docChanged` transaction with the
 new document content as a plain string. It is the single mechanism by which

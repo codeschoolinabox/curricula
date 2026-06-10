@@ -231,7 +231,8 @@ type EditorOptions = {
  * the time the returned promise resolves. All methods are unconditionally
  * safe to call on the resolved instance. After `destroy()`, the instance
  * remains callable but behaves as a dead sentinel: `content` returns `''`,
- * the setter drops, `reset`/`format` no-op, `check` returns `[]`. Double
+ * the setter drops, `reset`/`format`/`setInterpretedDiagnostics` no-op,
+ * `check` returns `[]`. Double
  * destroy is idempotent. The `el` reference is preserved post-destroy but
  * its contents are torn down — do not re-append it to a new parent.
  */
@@ -242,6 +243,24 @@ type EditorInstance = {
 	readonly reset: () => void;
 	readonly format: () => void;
 	readonly check: () => readonly LintDiagnostic[];
+	/**
+	 * Pushes an externally computed interpreted-diagnostics array into the
+	 * editor's diagnostic pipeline.
+	 *
+	 * @remarks PUSH-based counterpart to the PULL-based `linters` callbacks:
+	 * interpreted diagnostics are embodiment-keyed data computed outside the
+	 * editor (not derivable from the code string) and arrive WITHOUT an
+	 * accompanying doc change. Each call REPLACES the previously pushed
+	 * array; pass `[]` to clear. The pushed feed is merged with the linter
+	 * results by the supersede merge (`interpreted-diagnostics.ts`) — an
+	 * interpreted diagnostic replaces a structural one at the same
+	 * `(line, column)`. No-op when the editor was created without `linters`
+	 * (the diagnostic pipeline is only installed alongside the linter
+	 * extension) and after `destroy()`.
+	 */
+	readonly setInterpretedDiagnostics: (
+		diagnostics: readonly LintDiagnostic[],
+	) => void;
 	readonly destroy: () => void;
 };
 

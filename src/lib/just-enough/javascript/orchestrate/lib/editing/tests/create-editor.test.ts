@@ -18,6 +18,7 @@ describe('createEditor', () => {
 				reset: expect.any(Function),
 				format: expect.any(Function),
 				check: expect.any(Function),
+				setInterpretedDiagnostics: expect.any(Function),
 				destroy: expect.any(Function),
 			});
 		});
@@ -78,6 +79,20 @@ describe('createEditor', () => {
 		});
 	});
 
+	describe('setInterpretedDiagnostics guard (Boundaries)', () => {
+		it('no-ops without throwing on a linter-less editor', async () => {
+			// Documented contract (types.ts): the interpreted feed rides the
+			// linter pipeline, which is only installed when `linters` exist —
+			// a linter-less editor treats pushes as silent no-ops.
+			const editor = await createEditor('OK');
+			expect(() => {
+				editor.setInterpretedDiagnostics([
+					{ line: 1, column: 0, severity: 'error', message: 'pushed' },
+				]);
+			}).not.toThrow();
+		});
+	});
+
 	describe('check callback', () => {
 		it('invokes linter with current content', async () => {
 			const linterSpy = vi.fn((_code: string) => []);
@@ -99,6 +114,37 @@ describe('createEditor', () => {
 			const result = editor.check();
 			expect(result).toHaveLength(1);
 			expect(result[0]?.message).toBe('stub diagnostic');
+		});
+
+		it('returns the MERGED set after an interpreted push (what renders is what is reported)', async () => {
+			// AR-4: pins check()'s merged-return contract — a regression to
+			// "linter results only" would desync check() from the gutter
+			// (and its setDiagnostics push would wipe interpreted markers).
+			const linterSpy = vi.fn((_code: string) => [
+				{
+					line: 1,
+					column: 0,
+					severity: 'error' as const,
+					message: 'structural diagnostic',
+				},
+			]);
+			const editor = await createEditor('OK', { linters: [linterSpy] });
+			editor.setInterpretedDiagnostics([
+				{
+					line: 2,
+					column: 0,
+					severity: 'error',
+					message: 'interpreted diagnostic',
+				},
+			]);
+			const result = editor.check();
+			expect(result).toHaveLength(2);
+			expect(result.map((diagnostic) => diagnostic.message)).toEqual(
+				expect.arrayContaining([
+					'structural diagnostic',
+					'interpreted diagnostic',
+				]),
+			);
 		});
 	});
 
@@ -229,6 +275,11 @@ describe('createEditor', () => {
 			expect(() => editor.reset()).not.toThrow();
 			expect(() => editor.format()).not.toThrow();
 			expect(editor.check()).toStrictEqual([]);
+			expect(() => {
+				editor.setInterpretedDiagnostics([
+					{ line: 1, column: 0, severity: 'error', message: 'late push' },
+				]);
+			}).not.toThrow();
 		});
 	});
 

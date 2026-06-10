@@ -72,7 +72,7 @@ After `destroy()` the instance remains callable but behaves as a dead sentinel:
 
 - `content` getter returns `''`
 - `content` setter silently drops
-- `reset()` / `format()` are no-ops
+- `reset()` / `format()` / `setInterpretedDiagnostics()` are no-ops
 - `check()` returns `[]`
 - `destroy()` itself is idempotent — double-destroy does not throw
 - `el` reference is preserved (same HTMLElement), but CM's internal DOM teardown
@@ -114,7 +114,8 @@ crashes from out-of-range diagnostics.
 
 ### LintDiagnostic
 
-Returned by linter callbacks. Aligns with JeJ's `Violation` type. The
+Returned by linter callbacks and pushed via `setInterpretedDiagnostics`.
+Aligns with JeJ's `Violation` type. The
 `'rejection'` severity is mapped to CM's `'warning'` — JEJ-subset violations are
 teaching-boundary signals (yellow/orange gutter marker), not syntax errors.
 Parse failures (`'error'`) stay red.
@@ -222,6 +223,9 @@ The editor was split into single-concept files during TypeScript conversion:
 - `build-tooltip-dom.ts` — hover-doc tooltip DOM construction from DocEntry
 - `build-info-dom.ts` — completion-`info` DOM construction from prose string
 - `to-cm-diagnostic.ts` — LintDiagnostic to CM Diagnostic translation
+- `interpreted-diagnostics.ts` — push-based diagnostics injection seam
+  (StateEffect/StateField + the positional supersede merge; carries the
+  load-bearing `needsRefresh` mechanics in its module JSDoc)
 
 ## Language Detection
 

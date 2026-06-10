@@ -20,6 +20,7 @@ import { basicSetup } from 'codemirror';
 
 import buildInfoDom from './build-info-dom.js';
 import buildTooltipDom from './build-tooltip-dom.js';
+import interpretedDiagnostics from './interpreted-diagnostics.js';
 import { toCMDiagnostic, runLinterCallbacks } from './to-cm-diagnostic.js';
 import type {
 	LinterCallback,
@@ -111,17 +112,39 @@ async function buildExtensions(
 	// 2. Dynamic language support
 	await loadLanguageExtension(language, extensions);
 
-	// 3. Linter callbacks → linter() + lintGutter()
+	// 3. Linter callbacks → linter() + lintGutter(), with the push-based
+	//    interpreted-diagnostics field as the linter's second input. The
+	//    field changing re-arms the lint pass via needsRefresh — a push
+	//    arrives on a React prop change with NO accompanying doc change,
+	//    which would otherwise never re-run the pull-based linter (see
+	//    ./interpreted-diagnostics.ts for the load-bearing mechanics).
+	//    The `!code.trim()` early return intentionally also suppresses
+	//    interpreted markers on an empty/whitespace doc: located
+	//    diagnostics are meaningless there, and a ≤1-debounce-window-stale
+	//    interpreted feed on a just-cleared buffer should not paint.
 	if (linterCallbacks && linterCallbacks.length > 0) {
 		extensions.push(
-			linter(function combinedLinter(view: EditorView) {
-				const code = view.state.doc.toString();
-				if (!code.trim()) return [];
+			interpretedDiagnostics.field,
+			linter(
+				function combinedLinter(view: EditorView) {
+					const code = view.state.doc.toString();
+					if (!code.trim()) return [];
 
-				return runLinterCallbacks(linterCallbacks, code).map((d) =>
-					toCMDiagnostic(view.state.doc, d),
-				);
-			}),
+					const structural = runLinterCallbacks(linterCallbacks, code);
+					const interpreted = view.state.field(interpretedDiagnostics.field);
+					return interpretedDiagnostics
+						.merge(structural, interpreted)
+						.map((d) => toCMDiagnostic(view.state.doc, d));
+				},
+				{
+					needsRefresh(update) {
+						return (
+							update.state.field(interpretedDiagnostics.field) !==
+							update.startState.field(interpretedDiagnostics.field)
+						);
+					},
+				},
+			),
 			lintGutter(),
 		);
 	}

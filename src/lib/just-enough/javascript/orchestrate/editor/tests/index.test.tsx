@@ -59,6 +59,83 @@ function countDiagnostics(view: EditorView): number {
 	return count;
 }
 
+/**
+ * Newline-joined messages of all current lint-state diagnostics —
+ * order-insensitive membership checks via `toContain`, again reading
+ * lint state rather than gutter DOM.
+ */
+function diagnosticMessages(view: EditorView): string {
+	let messages = '';
+	forEachDiagnostic(view.state, (diagnostic) => {
+		messages += `${diagnostic.message}\n`;
+	});
+	return messages;
+}
+
+/**
+ * The (line, column, message) of the first diagnostic in lint state, or
+ * null when none. Lets the supersede test target the structural
+ * diagnostic's exact coordinates without hardcoding lintJej's output
+ * (lines are 1-based, columns 0-based — the LintDiagnostic convention).
+ */
+function firstDiagnostic(
+	view: EditorView,
+): { line: number; column: number; message: string } | null {
+	let first: { line: number; column: number; message: string } | null = null;
+	forEachDiagnostic(view.state, (diagnostic, from) => {
+		if (first !== null) return;
+		const lineInfo = view.state.doc.lineAt(from);
+		first = {
+			line: lineInfo.number,
+			column: from - lineInfo.from,
+			message: diagnostic.message,
+		};
+	});
+	return first;
+}
+
+/**
+ * How many lint-state diagnostics sit at exactly (line, column) — makes
+ * the supersede count-assertion robust if lintJej ever reports multiple
+ * diagnostics at one position.
+ */
+function countDiagnosticsAt(
+	view: EditorView,
+	line: number,
+	column: number,
+): number {
+	let count = 0;
+	forEachDiagnostic(view.state, (_diagnostic, from) => {
+		const lineInfo = view.state.doc.lineAt(from);
+		if (lineInfo.number === line && from - lineInfo.from === column) {
+			count += 1;
+		}
+	});
+	return count;
+}
+
+/**
+ * Newline-joined messages of the diagnostics at exactly (line, column) —
+ * position-scoped variant of diagnosticMessages, needed because lintJej
+ * emits IDENTICAL message text for repeated violations (two `var`s), so
+ * a whole-buffer message check cannot tell the superseded marker from
+ * its surviving same-message twin at another position.
+ */
+function diagnosticMessagesAt(
+	view: EditorView,
+	line: number,
+	column: number,
+): string {
+	let messages = '';
+	forEachDiagnostic(view.state, (diagnostic, from) => {
+		const lineInfo = view.state.doc.lineAt(from);
+		if (lineInfo.number === line && from - lineInfo.from === column) {
+			messages += `${diagnostic.message}\n`;
+		}
+	});
+	return messages;
+}
+
 describe('<EditorComponent> — CodeMirror lifecycle', () => {
 	describe('Zero — minimal mount', () => {
 		it('renders a host element with data-orchestrator-host attribute', () => {
@@ -199,6 +276,301 @@ describe('<EditorComponent> — CodeMirror lifecycle', () => {
 			await waitFor(() => {
 				expect(countDiagnostics(view)).toBe(0);
 			});
+		});
+	});
+
+	describe('Interpreted diagnostics — push-based gutter feed', () => {
+		// The interpretedDiagnostics prop is PUSH-based, embodiment-keyed
+		// data: it arrives on a React prop change with NO accompanying doc
+		// change (the orchestrator computes it from its live embodiment on
+		// the debounce settle). These tests pin the push cadence and the
+		// supersede merge end-to-end through the real CM pipeline. See
+		// lib/editing/interpreted-diagnostics.ts for the load-bearing
+		// needsRefresh mechanics; lib/editing/tests/ covers the pure merge.
+
+		it('renders an interpreted diagnostic supplied at mount', async () => {
+			const { container } = render(
+				<EditorComponent
+					interpretedDiagnostics={[
+						{
+							line: 1,
+							column: 4,
+							severity: 'error',
+							message: 'SEEDED AT MOUNT',
+							source: 'interpreted',
+						},
+					]}
+					snippet="let x = 1;"
+				/>,
+			);
+			const view = await findMountedEditorView(container);
+			await waitFor(() => {
+				expect(diagnosticMessages(view)).toContain('SEEDED AT MOUNT');
+			});
+			// Clean JEJ code — the interpreted diagnostic is the only one.
+			expect(countDiagnostics(view)).toBe(1);
+		});
+
+		it('repaints when the prop updates with NO accompanying doc change (the push cadence)', async () => {
+			// THE CRUX. A prop push arrives between doc changes (the
+			// orchestrator's debounce settle), so the lint plugin sees no
+			// docChanged transaction. A ref-held array + forceLinting
+			// silently no-ops there (the plugin's `set` flag is false) —
+			// this test is the permanent regression sentinel for the
+			// StateEffect/StateField + needsRefresh seam. No doc dispatch
+			// and no test-side forceLinting after the rerender: the push
+			// alone must repaint.
+			const { container, rerender } = render(
+				<EditorComponent snippet="let x = 1;" />,
+			);
+			const view = await findMountedEditorView(container);
+			forceLinting(view);
+			await waitFor(() => {
+				expect(countDiagnostics(view)).toBe(0);
+			});
+
+			rerender(
+				<EditorComponent
+					interpretedDiagnostics={[
+						{
+							line: 1,
+							column: 0,
+							severity: 'error',
+							message: 'PUSHED AFTER MOUNT',
+							source: 'interpreted',
+						},
+					]}
+					snippet="let x = 1;"
+				/>,
+			);
+			await waitFor(() => {
+				expect(countDiagnostics(view)).toBe(1);
+			});
+			expect(diagnosticMessages(view)).toContain('PUSHED AFTER MOUNT');
+		});
+
+		it('a second push replaces the first — pushes are not cumulative', async () => {
+			// Pins the REPLACE (not accumulate) contract from the
+			// setInterpretedDiagnostics JSDoc: the field holds only the
+			// latest pushed array.
+			const { container, rerender } = render(
+				<EditorComponent
+					interpretedDiagnostics={[
+						{
+							line: 1,
+							column: 0,
+							severity: 'error',
+							message: 'FIRST PUSH',
+							source: 'interpreted',
+						},
+					]}
+					snippet="let x = 1;"
+				/>,
+			);
+			const view = await findMountedEditorView(container);
+			await waitFor(() => {
+				expect(diagnosticMessages(view)).toContain('FIRST PUSH');
+			});
+
+			rerender(
+				<EditorComponent
+					interpretedDiagnostics={[
+						{
+							line: 1,
+							column: 4,
+							severity: 'error',
+							message: 'SECOND PUSH',
+							source: 'interpreted',
+						},
+					]}
+					snippet="let x = 1;"
+				/>,
+			);
+			await waitFor(() => {
+				expect(diagnosticMessages(view)).toContain('SECOND PUSH');
+			});
+			expect(diagnosticMessages(view)).not.toContain('FIRST PUSH');
+			expect(countDiagnostics(view)).toBe(1);
+		});
+
+		it('a push racing the mount seeds the LATEST prop value once mount resolves', async () => {
+			// AR-3: analog of the snippet race test below — the prop changes
+			// BEFORE createEditor's promise resolves. Contract: the mount
+			// callback seeds from the latest prop ref (pre-mount pushes are
+			// never silently dropped; intermediate values are skipped).
+			const { container, rerender } = render(
+				<EditorComponent
+					interpretedDiagnostics={[
+						{
+							line: 1,
+							column: 0,
+							severity: 'error',
+							message: 'STALE PRE-MOUNT PUSH',
+							source: 'interpreted',
+						},
+					]}
+					snippet="let x = 1;"
+				/>,
+			);
+			rerender(
+				<EditorComponent
+					interpretedDiagnostics={[
+						{
+							line: 1,
+							column: 0,
+							severity: 'error',
+							message: 'LATEST PRE-MOUNT PUSH',
+							source: 'interpreted',
+						},
+					]}
+					snippet="let x = 1;"
+				/>,
+			);
+			const view = await findMountedEditorView(container);
+			await waitFor(() => {
+				expect(diagnosticMessages(view)).toContain('LATEST PRE-MOUNT PUSH');
+			});
+			expect(diagnosticMessages(view)).not.toContain('STALE PRE-MOUNT PUSH');
+		});
+
+		it('clears interpreted diagnostics when the prop updates to an empty array', async () => {
+			// Also a needsRefresh sentinel on the CLEAR path (AR-3): the
+			// empty-array push must re-arm the lint pass exactly like a
+			// non-empty one — same seam, opposite direction.
+			const { container, rerender } = render(
+				<EditorComponent
+					interpretedDiagnostics={[
+						{
+							line: 1,
+							column: 0,
+							severity: 'error',
+							message: 'TO BE CLEARED',
+							source: 'interpreted',
+						},
+					]}
+					snippet="let x = 1;"
+				/>,
+			);
+			const view = await findMountedEditorView(container);
+			await waitFor(() => {
+				expect(countDiagnostics(view)).toBe(1);
+			});
+
+			rerender(
+				<EditorComponent interpretedDiagnostics={[]} snippet="let x = 1;" />,
+			);
+			await waitFor(() => {
+				expect(countDiagnostics(view)).toBe(0);
+			});
+		});
+
+		it('an interpreted diagnostic supersedes the structural one at the same position', async () => {
+			// End-to-end supersede through the real lintJej feed: `var` is
+			// JEJ-banned, so the structural feed reports it; pushing an
+			// interpreted diagnostic at the SAME (line, column) must replace
+			// that marker (no double-render of the range) while leaving the
+			// total count otherwise unchanged. Coordinates are derived from
+			// live lint state, not hardcoded against lintJej internals.
+			// TWO `var` violations on purpose (AR-3): with a single
+			// structural diagnostic, the expected count (1 − 1 + 1 = 1)
+			// cannot distinguish supersede from a blanket replacement that
+			// drops the whole structural feed; the second violation makes
+			// blanket replacement fail the count assertion (1 ≠ 2).
+			const { container, rerender } = render(<EditorComponent snippet="OK" />);
+			const view = await findMountedEditorView(container);
+			view.dispatch({
+				changes: {
+					from: 0,
+					to: view.state.doc.length,
+					insert: 'var x = 5;\nvar y = 3;',
+				},
+			});
+			forceLinting(view);
+			await waitFor(() => {
+				expect(countDiagnostics(view)).toBeGreaterThan(0);
+			});
+
+			const structural = firstDiagnostic(view);
+			if (structural === null) throw new Error('no structural diagnostic');
+			const structuralCount = countDiagnostics(view);
+			const collidingCount = countDiagnosticsAt(
+				view,
+				structural.line,
+				structural.column,
+			);
+
+			rerender(
+				<EditorComponent
+					interpretedDiagnostics={[
+						{
+							line: structural.line,
+							column: structural.column,
+							severity: 'error',
+							message: 'FRIENDLY EXPLANATION',
+							source: 'interpreted',
+						},
+					]}
+					snippet="OK"
+				/>,
+			);
+			await waitFor(() => {
+				expect(diagnosticMessages(view)).toContain('FRIENDLY EXPLANATION');
+			});
+			// Superseded, not added: colliding structural marker(s) replaced
+			// by the one interpreted diagnostic.
+			expect(countDiagnostics(view)).toBe(
+				structuralCount - collidingCount + 1,
+			);
+			// Position-scoped (both `var` markers carry identical message
+			// text): the superseded position now holds ONLY the interpreted
+			// message…
+			const atPosition = diagnosticMessagesAt(
+				view,
+				structural.line,
+				structural.column,
+			);
+			expect(atPosition).toContain('FRIENDLY EXPLANATION');
+			expect(atPosition).not.toContain(structural.message);
+			// …while the same-message twin at the OTHER position survives
+			// (message-level proof that supersede is per-position, not a
+			// blanket structural-feed replacement).
+			expect(diagnosticMessages(view)).toContain(structural.message);
+		});
+
+		it('non-colliding interpreted and structural diagnostics coexist', async () => {
+			const { container, rerender } = render(<EditorComponent snippet="OK" />);
+			const view = await findMountedEditorView(container);
+			view.dispatch({
+				changes: {
+					from: 0,
+					to: view.state.doc.length,
+					insert: 'var x = 5;\nlet y = 2;',
+				},
+			});
+			forceLinting(view);
+			await waitFor(() => {
+				expect(countDiagnostics(view)).toBeGreaterThan(0);
+			});
+			const structuralCount = countDiagnostics(view);
+
+			rerender(
+				<EditorComponent
+					interpretedDiagnostics={[
+						{
+							line: 2,
+							column: 0,
+							severity: 'error',
+							message: 'COEXISTING NOTE',
+							source: 'interpreted',
+						},
+					]}
+					snippet="OK"
+				/>,
+			);
+			await waitFor(() => {
+				expect(countDiagnostics(view)).toBe(structuralCount + 1);
+			});
+			expect(diagnosticMessages(view)).toContain('COEXISTING NOTE');
 		});
 	});
 
