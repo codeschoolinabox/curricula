@@ -287,10 +287,10 @@ sketch.
   phase-station panel), but the underlying "select a registered lens → enter
   lens mode" contract is unchanged.
 - **Registry / registered lens** — the orchestrator's lens-dispatch lookup
-  exposed as `LENS_REGISTRY`, keyed by `LensModule.name`. It registers **four**
-  lenses today: `annotate`, `blanks`, `debug-props`, `parsons`. The picker
-  enumerates registry entries; the active lens (in lens mode) is always a
-  registry entry.
+  exposed as `LENS_REGISTRY`, keyed by `LensModule.name`. It registers **five**
+  lenses today: `annotate`, `blanks`, `debug-props`, `parsons`, `writeme`. The
+  picker enumerates registry entries; the active lens (in lens mode) is always
+  a registry entry.
 - **Active lens** — when `state.mode === 'lens'`, the lens name currently
   mounted. Stored as `state.activeLens`. The picker `value` derives from this;
   the edit-return affordance's visibility derives from `state.mode === 'lens'`.
@@ -519,15 +519,14 @@ they teach understanding of the source, the AST is just their instrument.
 > distinct from the lifecycle `NMEventPhase` values. A lens declares the station
 > it teaches, not the embody phase it reads from.
 
-The lenses slot as (registered-today: `parsons` / `blanks` / `annotate` /
-`debug-props`; `writeme` is planned and registers when built):
+The lenses slot as (all five registered today):
 
 | Lens          | Station | Notes                                                                             |
 | ------------- | ------- | --------------------------------------------------------------------------------- |
 | `parsons`     | source  | registered today                                                                  |
 | `blanks`      | source  | registered today; consumes the AST; teaches the source                            |
 | `annotate`    | source  | registered today; consumes the AST; teaches the source                            |
-| `writeme`     | source  | **planned** — registers when built                                                |
+| `writeme`     | source  | registered today                                                                  |
 | `debug-props` | (none)  | registered today, but **panel-excluded** — carries no `phase` binding (see below) |
 
 The non-source stations (`realm`, `parse`, `creation`, `evaluation`) stay mostly

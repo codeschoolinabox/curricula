@@ -467,7 +467,10 @@ flowchart TD
   plain-prose; the editing layer renders hover content via `textContent` (no
   markdown parser). Rich-markdown hovers are deferred.
 - **Line targeting.** Prefer `errors.loc`; else derive `(line, column)` from
-  `source.offsets` + the error's char offset; else a file-level notice.
+  `source.offsets` + the error's char offset; else a file-level notice. (The
+  middle tier has no input in Cycle 1 — every current error source either
+  carries `loc` or nothing; the adapter implements loc-else-file-level and
+  reserves the offset tier for a future error source that carries one.)
 - **Coherence.** Interpreted diagnostics are at most one debounce-window stale
   relative to the buffer (they ride the live slot's refresh cadence).
 - **What lights up now.** Interpreted gutter errors are demonstrable for
@@ -536,8 +539,8 @@ flowchart LR
   **pedagogical TARGET** — which lifecycle phase the lens teaches understanding
   OF — **NOT** which embody phase it reads from. (E.g. `blanks` / `annotate`
   target `source` even though they consume the AST.) Existing lenses slot to
-  **source**: parsons, blanks, annotate (plus `writeme`, which registers when
-  built). `debug-props` is **excluded** (a dev lens, not a learner station). The
+  **source**: parsons, blanks, annotate, writeme (all registered today).
+  `debug-props` is **excluded** (a dev lens, not a learner station). The
   other stations are mostly empty until prediction lenses are built (a backlog
   item). The exact `LensModule.phase` type (`string` | `string[]`) and the
   per-station state model (what a station shows when its embody phase is
