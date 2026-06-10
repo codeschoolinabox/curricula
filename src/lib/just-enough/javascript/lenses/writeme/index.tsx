@@ -41,6 +41,7 @@ import type { ComponentType } from 'react';
 
 import { freezeInPlace } from '@utils/freeze.js';
 
+import snippetFreeAutocomplete from '../lib/snippet-free-autocomplete.js';
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import writemeCore from './core.js';
@@ -49,7 +50,6 @@ import buildWriteDiffField, {
 	buildReadMarkerField,
 } from './lib/diff-decorations.js';
 import noPasteExtension from './lib/no-paste-extension.js';
-import snippetFreeAutocomplete from './lib/snippet-free-autocomplete.js';
 import type { ViewMode } from './types.js';
 
 import './writeme.css';

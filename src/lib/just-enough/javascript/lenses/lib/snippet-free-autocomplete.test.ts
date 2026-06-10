@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 
 import snippetFreeAutocomplete, {
 	JS_KEYWORDS,
-} from '../lib/snippet-free-autocomplete.js';
+} from './snippet-free-autocomplete.js';
 
 describe('snippetFreeAutocomplete — the snippet-free completion factory', () => {
 	it('composes into an EditorState without throwing', () => {
