@@ -1606,10 +1606,10 @@ wins):
 | AR                          | What it catches               | Model    |
 | --------------------------- | ----------------------------- | -------- |
 | AR-1 (Design Challenge)     | Drift / cross-cutting         | `opus`   |
-| AR-2 (Architectural Sketch) | Drift / cross-cutting         | `opus`   |
+| AR-2 (Architectural Sketch) | Drift / cross-cutting         | inherit  |
 | AR-3 (Test Strategy)        | Implementation correctness    | `sonnet` |
 | AR-4 (Impl Audit)           | Implementation correctness    | `sonnet` |
-| AR-5 (Pre-Merge)            | Drift + cross-cutting + scope | `opus`   |
+| AR-5 (Pre-Merge)            | Drift + cross-cutting + scope | inherit  |
 
 Reasoning: judgment-heavy reviews (design, sketch, pre-merge) should track or
 exceed the authoring model's tier — a reviewer below the author's tier is the
@@ -1617,6 +1617,14 @@ most likely to rubber-stamp the author's subtle drift. Mechanical reviews (test
 strategy, implementation audit) ride a cheaper tier, because independence and
 fresh context — not raw capability — do most of their work. Tier choices are a
 directional cost/quality trade, not a measured optimization.
+
+"inherit" means no `model:` line in that agent's frontmatter: the reviewer runs
+on whatever model the spawning session runs, so the two most consequential
+judgment reviews (AR-2, AR-5) track the authoring model automatically across
+generations. AR-1 keeps an explicit `opus` pin as a deliberate cost trim — it
+fires at the earliest, cheapest-to-redo gate, and the Phase-0→1 human gate
+follows it. Caveat: under a deliberately cheaper main agent, inherited reviews
+downgrade with the session — pin explicitly if that matters.
 
 ### AR-1: Design Challenge
 
@@ -1954,31 +1962,14 @@ When the architecture evolves:
 
 ## Code Quality Anti-Patterns
 
-Common patterns to avoid:
+The self-review anti-pattern table and pre-proposal checklist live in the agent
+governance files, where they fire at step 12 of every increment — one canonical
+copy per audience, not duplicated here:
 
-| Anti-Pattern                | Rule                                                                                                     | Example Fix                                         |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| **Over-engineering**        | New file needs 2+ call sites; in-file extraction is free; trivial wrappers that name nothing get inlined | `const x = getX(o)` → `const x = o.x`               |
-| **Class addiction**         | Prefer functions over classes                                                                            | `class X` → `function createX()`                    |
-| **Future-proofing**         | Don't add unused flexibility                                                                             | `options = {}` with unused fields → direct impl     |
-| **Defensive over-coding**   | Validate at boundaries only                                                                              | Remove internal re-validation                       |
-| **Verbose docs**            | Name + types self-document?                                                                              | Only document WHY or non-obvious contracts          |
-| **Fake It without Make It** | Hardcoded values expire after the first test                                                             | Write the second test to make hardcoding impossible |
-| **Status hedging in docs**  | Status/phase belongs in plan or handoff                                                                  | `## Status — pre-impl...` → handoff file            |
-
-### Pre-Commit Checklist
-
-Before proposing code, answer YES to ALL:
-
-- [ ] **Simplest solution?** Not most "elegant" or "extensible"
-- [ ] **Only what requested?** No future-proofing, no "nice-to-haves"
-- [ ] **Helpers placed by the extraction rule?** In-file freely for readability;
-      new file only at 2+ call sites
-- [ ] **Validate at boundaries only?** No re-validating internal calls
-- [ ] **Junior-maintainable?** Understandable without explanation
-- [ ] **Structural quality?** Does the implementation reflect the DOCS.md
-      architectural sketch — named phases, separated concerns, no Fake It values
-      surviving past the first increment?
+- Pre-fable agents:
+  [AGENTS.md § LLM Anti-Patterns](./AGENTS.md#llm-anti-patterns-resist-these-tendencies)
+- Fable-generation agents:
+  [AGENTS.fable.md § Self-Review Checklists](./AGENTS.fable.md#self-review-checklists)
 
 ## VS Code Setup
 

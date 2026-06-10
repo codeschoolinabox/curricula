@@ -45,10 +45,8 @@ encouragement. They cannot be overridden by momentum.
    starting the next behavior.
 5. **Atomic commits with clear messages** — commit after each passing TDD cycle
    and after completing Phase 0 artifacts. Each commit captures one behavior or
-   milestone; never batch multiple increments. Messages use imperative voice and
-   describe the behavior added, not the mechanical change: `add: [behavior]`,
-   `docs: [artifact]`, `fix: [what broke]`, `refactor: [structural change]`.
-   Prompt the user before committing; never commit silently.
+   milestone; never batch multiple increments. Message format lives in § Git
+   prompts. Prompt the user before committing; never commit silently.
 6. **Plans are execution checklists, not references** — every plan document must
    explicitly list every required workflow step: Phase 0 DDD steps, AR trigger
    points (AR-1 through AR-5), commit steps, and quality checks. "Follow
@@ -243,28 +241,14 @@ Each passing TDD cycle = one atomic commit. Do not batch behaviors.
 
 #### Sandbox Checkpoints
 
-For user-observable increments (new UI element, new button, browser-visible
-behavior), a 🔍 Sandbox checkpoint fires between the Phase 1 quality-checks step
-and the commit-prompt step:
-
-```text
-... Quality checks → 🔍 Sandbox checkpoint (when user-observable) → Commit prompt
-```
-
-Cosmetic redirects (spacing, wording, polish) roll into the next increment;
-behavioral defects (wrong buffer reset, content corruption, missing a11y label)
-block the commit and trigger rework.
-
-**Sandbox checkpoints are gate points, not optional.** Skipping one because
-tests are green is the exact failure mode they exist to prevent. Only the human
-can skip; the agent never skips on its own. The one place skipping is
-appropriate is when the increment has no user-visible surface (pure utility
-function, private type, data shape narrowing) — and even there, the skip is
-explicit ("no sandbox checkpoint: pure utility").
-
-See
-[DEV.md § Sandbox Checkpoints](./DEV.md#sandbox-checkpoints--user-observable-features)
-for the full cycle diagram, redirect policy, and content-quality rules.
+For user-observable increments, a 🔍 Sandbox checkpoint fires between the Phase
+1 quality-checks step and the commit prompt: the user exercises the feature at a
+running dev server. Cosmetic redirects roll into the next increment;
+**behavioral defects block the commit**. Checkpoints are gate points, not
+optional — only the human skips, and the only legitimate skip is an increment
+with no user-visible surface, declared explicitly ("no sandbox checkpoint: pure
+utility"). Full cycle diagram, redirect policy, and content-quality rules:
+[DEV.md § Sandbox Checkpoints](./DEV.md#sandbox-checkpoints--user-observable-features).
 
 #### Claude-Specific Workflow Notes
 
@@ -289,16 +273,11 @@ for the full cycle diagram, redirect policy, and content-quality rules.
 - Before writing any code, explain in plain language what you're about to do and
   why
 
-**Plans must explicitly list every workflow step, including:**
-
-- Phase 0: ubiquitous language → README spec → AR-1 → types.ts → architectural
-  sketch in DOCS.md → AR-2 → commit Phase 0 artifacts
-- For each increment: JSDoc → stub → failing test → AR-3 → implement → lint →
-  refactor (check against DOCS.md sketch) → AR-4 → quality checks → commit
-- Phase 2: full quality checks → AR-5 → commit / push prompt
-
-Plans that omit these steps are incomplete. "See AGENTS.md for the workflow" is
-not a valid substitute — write the steps out.
+**Plans must explicitly list every workflow step** — the full Phase 0 /
+per-increment / Phase 2 sequence summarized in § Incremental TDD Workflow above,
+with every AR trigger point and commit step written out. Plans that omit these
+steps are incomplete. "See AGENTS.md for the workflow" is not a valid substitute
+— write the steps out.
 
 **During TDD cycles:**
 
@@ -321,14 +300,12 @@ not a valid substitute — write the steps out.
   still match the peer `DOCS.md` Mermaid data flow diagram.
   - Contract preserved → autonomous; commit.
   - Contract changed → flag to user; update `DOCS.md` only with approval.
-- **Two-tier autonomy** (mechanical, not judgment):
-  - Intra-file refactors are autonomous.
-  - Inter-file changes require user check-in if ANY trigger fires: file added to
-    or removed from the flow; file's input/output shape changes; phase
-    annotation changes (throws / pure / async).
-  - Extracting a helper to a new domain-related file IS a trigger. Extracting to
-    a domain-agnostic utility file (freeze, merge, clone) is NOT (utilities are
-    invisible in data flow diagrams).
+- **Two-tier autonomy** (mechanical, not judgment): intra-file refactors are
+  autonomous; inter-file changes require user check-in if ANY trigger fires
+  (file added to or removed from the flow; I/O shape change; phase annotation
+  change; helper extracted to a new domain-related file — domain-agnostic
+  utilities are exempt). Full trigger definitions: DEV.md § Incremental
+  Development Workflow, step 9.
 - At step 12 (self-review): run through the LLM Anti-Pattern Checklist. Reality
   check: did I run it? Did I trigger the exact behavior I changed? Would I bet
   $100 this works? Flag what you're least confident about for the user to
@@ -336,7 +313,9 @@ not a valid substitute — write the steps out.
 - At step 13: show actual output from quality checks — don't just claim "tests
   pass"
 
-**Git prompts** (Claude prompts, user executes):
+#### Git prompts
+
+(Claude prompts, user executes:)
 
 - After Phase 0 completes: "Phase 0 complete — ready for atomic commit:
   `docs: establish [module] domain model and architectural sketch`"
@@ -618,15 +597,15 @@ immeasurable trust loss.
 
 #### LLM Anti-Patterns (Resist These Tendencies)
 
-| Anti-Pattern                | Rule                                                                           | Example Fix                                                  |
-| --------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| **Over-engineering**        | Helper used once? Inline it                                                    | `const x = getX(o)` → `const x = o.x`                        |
-| **Class addiction**         | Linter blocks, but check first                                                 | `class X` → `function createX()`                             |
-| **Future-proofing**         | User didn't ask? Don't add it                                                  | `options = {}` with unused fields → direct impl              |
-| **Defensive coding**        | Validate at boundaries only                                                    | Remove internal re-validation                                |
-| **Verbose docs**            | Name + types explain? Skip JSDoc                                               | Only document WHY or non-obvious contracts                   |
-| **Fake It without Make It** | Hardcoded values expire after the first test                                   | Write second test to make hardcoding impossible              |
-| **Status hedging in docs**  | Status / phase / hedging belongs in plan, handoff, or commit message, not docs | `## Status — pre-impl...` → handoff or `.planning-handoffs/` |
+| Anti-Pattern                | Rule                                                                                                     | Example Fix                                                  |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **Over-engineering**        | New file needs 2+ call sites; in-file extraction is free; trivial wrappers that name nothing get inlined | `const x = getX(o)` → `const x = o.x`                        |
+| **Class addiction**         | Linter blocks, but check first                                                                           | `class X` → `function createX()`                             |
+| **Future-proofing**         | User didn't ask? Don't add it                                                                            | `options = {}` with unused fields → direct impl              |
+| **Defensive coding**        | Validate at boundaries only                                                                              | Remove internal re-validation                                |
+| **Verbose docs**            | Name + types explain? Skip JSDoc                                                                         | Only document WHY or non-obvious contracts                   |
+| **Fake It without Make It** | Hardcoded values expire after the first test                                                             | Write second test to make hardcoding impossible              |
+| **Status hedging in docs**  | Status / phase / hedging belongs in plan, handoff, or commit message, not docs                           | `## Status — pre-impl...` → handoff or `.planning-handoffs/` |
 
 ##### Pre-Proposal Checklist
 
@@ -634,7 +613,8 @@ Before proposing code, answer YES to ALL:
 
 - [ ] **Simplest solution?** Not most "elegant" or "extensible"
 - [ ] **Only what requested?** No future-proofing, no "nice-to-haves"
-- [ ] **Helpers used >1x?** If used once, inline it
+- [ ] **Helpers placed by the extraction rule?** In-file freely for readability;
+      new file only at 2+ call sites
 - [ ] **Validate at boundaries only?** No re-validating internal calls
 - [ ] **Junior-maintainable?** Understandable without explanation
 - [ ] **Structural quality?** Does the implementation reflect the DOCS.md
@@ -672,10 +652,6 @@ across all projects. Single source of truth.
 
 Project-specific reinforcements that always apply when working in this codebase:
 
-- No false confidence: never claim something works without running it
-- No sycophancy: never agree with an approach just because the user suggested it
-- Express uncertainty with confidence levels ("~80% confident this is correct")
-- When uncertain, investigate first rather than confirming assumptions
 - Lead with problems and risks, not optimism — drift is the most expensive thing
   this codebase has historically suffered
 
@@ -702,16 +678,6 @@ genuinely double the commit's scope, requires infrastructure that doesn't exist
 **Anti-pattern to avoid:** Presenting a review with 5 findings and asking the
 human to pick 2 or 3. They'll often say "all of them" and you'll have wasted a
 round-trip. Recommend "fix all unless one is out of scope" upfront.
-
-### Working with Claude
-
-- Treat Claude as an iterative partner, not a one-shot solution
-- Save your state (git commit) before letting Claude make large changes
-- Core business logic needs close human oversight; peripheral features can run
-  more autonomously
-- **Never split a file between agents**: if an agent reads a file, it needs the
-  WHOLE file for context. Don't have one agent read lines 1-100 and another read
-  lines 100-200 of the same file. Assign whole files to agents.
 
 ### Proactive persistence for long-running work
 
@@ -767,23 +733,8 @@ this particular case doesn't need an AR, that reasoning is the signal it does.
 
 Model selection lives in the registered `ar-N` agents' frontmatter — do not pass
 a `model` parameter when spawning ARs; it would silently override the configured
-roster. Drift-catching reviews stay on Opus where the reasoning-depth cliff
-matters; implementation-correctness reviews run on Sonnet. Current pins
-(mirrored from frontmatter; on divergence, frontmatter wins):
-
-| AR                          | What it catches               | Model    |
-| --------------------------- | ----------------------------- | -------- |
-| AR-1 (Design Challenge)     | Drift / cross-cutting         | `opus`   |
-| AR-2 (Architectural Sketch) | Drift / cross-cutting         | `opus`   |
-| AR-3 (Test Strategy)        | Implementation correctness    | `sonnet` |
-| AR-4 (Impl Audit)           | Implementation correctness    | `sonnet` |
-| AR-5 (Pre-Merge)            | Drift + cross-cutting + scope | `opus`   |
-
-AR-5 stays on Opus because architectural drift and scope creep are the most
-expensive things it catches; the cross-file consistency and convention items
-ride along on the same Opus call. The estimated session-cost saving from running
-AR-3 and AR-4 on Sonnet is approximate and will vary by review size — treat it
-as a directional choice, not a measured optimization.
+roster. The canonical roster table, the tier reasoning, and the inherit caveat
+live in [DEV.md § Sub-model dispatch](./DEV.md#sub-model-dispatch).
 
 ## Vibetoading and Frogramming — house terms
 

@@ -1,7 +1,8 @@
 # HUMANS.md — Operating Manual for the Human in the Loop
 
 > **Audience: you, the human collaborator.** This file is your protocol; the
-> agent's is in `AGENTS.md`; your style across all projects is in
+> agent's is in `AGENTS.md` (pre-fable agents) and `AGENTS.fable.md`
+> (Fable-generation agents); your style across all projects is in
 > `~/.claude/CLAUDE.md`; the contributor conventions are in `DEV.md`. Three
 > doors out, one door in: this is your door. It captures _your end of the
 > bargain_ — protocols you follow, when to /clear, when to commit, how to coach
@@ -397,6 +398,17 @@ Some things are yours to do. Don't outsource these:
 - **Memory file curation.** The agent writes memory entries; you periodically
   review them for staleness. Memories about file paths, function names, or
   architectural decisions decay as the codebase evolves. Prune annually.
+
+---
+
+## Working with the agent — quick habits
+
+(Relocated from AGENTS.md — these are your habits, not agent instructions.)
+
+- Treat the agent as an iterative partner, not a one-shot solution
+- Save your state (git commit) before letting it make large changes
+- Core business logic needs close human oversight; peripheral features can run
+  more autonomously
 
 ---
 
