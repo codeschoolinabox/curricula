@@ -34,7 +34,7 @@
  *
  * **Open holes**:
  * - `LensSelectionSource` may still grow: `'panel'` is typed but
- *   unwired (reserved for the future Cycle-2 phase-station dispatch
+ *   unwired (reserved for the future Cycle-2 phases-panel dispatch
  *   site, deferred); a keyboard-shortcut source could land alongside.
  *   Extensions are gated — see the policy block on the union itself.
  * - `'edit-button'` is typed (the toolbar edit-return click site
@@ -231,7 +231,7 @@ type LiveEmbodiment = Readonly<{
  *   handler. This site does NOT dispatch `lens-switched`; the source
  *   value is computed by `applyTransition` but never reaches a bus
  *   subscriber (see the "Open holes" note on `ModeChangedPayload`).
- * - `'panel'` — reserved for the future Cycle-2 phase-station
+ * - `'panel'` — reserved for the future Cycle-2 phases-panel
  *   dispatch site (deferred; typed but unwired).
  *
  * **Extension policy.** Adding a value to this union requires:

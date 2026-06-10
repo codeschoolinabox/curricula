@@ -11,8 +11,8 @@
 
 - The `<StudyLenses>` component (`./index.tsx`).
 - The toolbar lens-picker + edit-return button (`./toolbar.tsx`). This is the
-  Cycle-1 affordance container; Cycle 2 replaces it with the **NM phase-station
-  panel** (see § The phase-station panel below).
+  Cycle-1 affordance container; Cycle 2 replaces it with the **phases panel**
+  (see § The phases panel below).
 - The orchestrator-internal types (`./types.ts`): prop contract, 2-mode state
   machine, the single live-embodiment slot, internal EventBus event taxonomy.
 
@@ -52,16 +52,20 @@ locked-but-unbuilt it says so.
   static `embody()`** while editing, flushed to the exact current buffer on an
   editor → lens transition. From its `errors` the orchestrator derives
   **interpreted diagnostics** and hands them to the editor for gutter rendering.
-- **Cycle 2 — the phase-station panel** _(design locked, NOT built)._ An
+- **Cycle 2 — the phases panel** _(design locked, NOT built)._ An
   NM-lifecycle instrument that both teaches and displays the lifecycle and
   points phase-targeted lenses at each stage. Replaces `toolbar.tsx`.
 - **Cycle 3 — the omnipresent region** _(design locked, NOT built)._ Cross-phase
   study tools: a Run dock and a Quiz button.
 
-The orchestrator's UI splits on `validation.isJeJ` (read off the live
-embodiment): a **JEJ** snippet drives the phase-station panel; a **non-JEJ**
-snippet drives a run/debug surface (a separate, later DDD — out of scope here).
-The branch lives in `index.tsx`; the panel module is presentation.
+Lens availability is **never JEJ-gated** — source-station lenses serve the
+full JS language (locked constraint, Cycle 2 Phase 0). The earlier
+JEJ/non-JEJ UI split ("JEJ → phases panel; non-JEJ → run/debug") is
+**reopened** by that constraint and owned by a dedicated follow-up DDD
+(full-JS lens availability + the non-JEJ surface); until it lands, the
+phases panel mounts unconditionally. Whatever the follow-up decides, the
+branch (if any) lives in `index.tsx`; the panel module is presentation. See
+[`./README.md` § The phases panel](./README.md).
 
 ## Architectural sketch
 
@@ -74,7 +78,7 @@ The branch lives in `index.tsx`; the panel module is presentation.
 > debounced-refresh / flush-on-transition lifecycle, editor↔lens transitions,
 > interpreted-diagnostic derivation, the INTERNAL EventBus dispatch, the toolbar
 > (picker + edit-return), in-mode lens-switching, and a forward sketch of the
-> Cycle-2 phase-station panel.
+> Cycle-2 phases panel.
 
 ### Lifecycle modes
 
@@ -437,7 +441,7 @@ on unrelated parent re-renders — the same `lens` value paired with a new
 `configs` object identity counts as a consumer write and re-runs the transition.
 
 > The toolbar is the **Cycle-1** affordance container. Cycle 2 replaces it with
-> the phase-station panel (§ The phase-station panel). The picker's
+> the phases panel (§ The phases panel). The picker's
 > always-visible autonomy guarantee and the edit-return semantics carry forward;
 > the layout becomes the N-station lifecycle bar.
 
@@ -492,7 +496,7 @@ See [`./editor/DOCS.md` § Out of scope](./editor/DOCS.md) and
 [`./editor/README.md`](./editor/README.md) for the editor-side contract (what
 crosses the boundary, and the `interpretedDiagnostics` prop shape).
 
-### The phase-station panel (Cycle 2 — design locked, NOT built)
+### The phases panel (Cycle 2 — design locked, NOT built)
 
 Cycle 2 replaces the toolbar with an **NM-lifecycle instrument**: N "stations"
 laid out left → right — **source · realm · parse · creation · evaluation** —
@@ -501,56 +505,80 @@ deliberate: the layout itself engrains the lifecycle. The panel **doubles as a
 lifecycle-status display** — it shows how far the machine got and where it
 tripped, teaching the lifecycle before any lens is picked.
 
-> **Naming.** The panel's name is **intentionally unspecified** here — it is
-> locked in Cycle 2's Phase 0. "Control panel" is reserved by
+> **Naming (locked, Cycle 2 Phase 0).** The panel is the **phases panel**
+> (module folder `phases-panel/`) — named for the lifecycle it lays out and
+> instruments (glossary sense (a) in
+> [`./README.md` § Glossary](./README.md)); its columns remain **stations**
+> (sense (b)). "Control panel" stays reserved by
 > [`../notional-machine.md`](../notional-machine.md) (§ "Control panel vs.
-> machine", the visible-syntax-as-the-programmer's-interface metaphor) and must
-> NOT be reused for this panel.
+> machine", the visible-syntax-as-the-programmer's-interface metaphor) — the
+> phases panel instruments the machine's stages; it is not the interface that
+> drives the machine, so the two names share no metaphor.
 
 ```mermaid
 flowchart LR
-    Live["liveEmbodiment.embodiment<br/>(status.{tokenized,parsed,created} + errors.phase)"]
-    Live -->|"derive gating"| Gate{"phase reached?"}
+    Live["liveEmbodiment.embodiment<br/>(full Status {tokenized,parsed,validated,created}<br/>+ errors: EmbodyError | null)"]
+    Live -->|"station-status derivation (pure)"| Map["per-station status map<br/>(constant | ok | errored | barred | pending)"]
 
-    subgraph Bar["phase-station bar (left → right)"]
-        Src["source<br/>(snippet.source — not a lifecycle phase)<br/>never greyed"]
-        Realm["realm<br/>(documentary; constant)<br/>never greyed"]
-        Parse["parse<br/>(tokenize + AST folded)<br/>first phase that can error"]
-        Creation["creation<br/>(decls / hoisting / TDZ)"]
-        Eval["evaluation<br/>(trace-tier; the machine's internals)"]
+    subgraph Bar["phases panel (stations left → right)"]
+        Src["source<br/>(snippet.source — not a lifecycle phase)<br/>{constant}"]
+        Realm["realm<br/>(documentary; structurally error-free)<br/>{constant}"]
+        Parse["parse<br/>(tokenize + AST folded)<br/>{ok, errored}"]
+        Creation["creation<br/>(decls / hoisting / TDZ)<br/>{ok, errored, barred, pending}"]
+        Eval["evaluation<br/>(trace-tier; the machine's internals)<br/>{errored, barred, pending}"]
     end
 
-    Gate -->|"source + realm always live"| Src
-    Gate --> Realm
-    Gate -->|"parse errored ⇒ grey later phases"| Parse
-    Gate -->|"greyed if a prior phase errored"| Creation
-    Gate -->|"greyed if a prior phase errored;<br/>runtime errors only at Run"| Eval
+    Map --> Src
+    Map --> Realm
+    Map -->|"errors.phase parse:* ⇒ errored here"| Parse
+    Map -->|"barred after any earlier gate error<br/>(incl. the station-less validation gate);<br/>pending while the creation slice is stubbed"| Creation
+    Map -->|"errored only on errors.phase 'evaluation'<br/>(scenarios today; real runtime errors only at Run)"| Eval
 
-    Src -.->|"each station = a lens dropdown<br/>(lenses whose LensModule.phase targets it)"| Lenses["phase-targeted lenses"]
+    Src -.->|"each station = a lens dropdown<br/>(stationsOf(lens) normalizes LensModule.phase)"| Lenses["station-targeted lenses"]
 ```
 
-- **Column / phase-based gating** is computed purely from the embody staircase
-  (`status.{tokenized, parsed, created}` + `errors.phase`). Phases **after** the
-  errored phase grey out; **source and realm never grey**; **parse** is the
-  first phase that can error (nothing bars it). This cycle does **column-level**
-  gating only; per-lens gating (consulting each lens's `applicableTo`) is a
-  backlogged seam.
-- **Lens → station binding** via a new `LensModule.phase` field: the
-  **pedagogical TARGET** — which lifecycle phase the lens teaches understanding
-  OF — **NOT** which embody phase it reads from. (E.g. `blanks` / `annotate`
-  target `source` even though they consume the AST.) Existing lenses slot to
-  **source**: parsons, blanks, annotate, writeme (all registered today).
-  `debug-props` is **excluded** (a dev lens, not a learner station). The
-  other stations are mostly empty until prediction lenses are built (a backlog
-  item). The exact `LensModule.phase` type (`string` | `string[]`) and the
-  per-station state model (what a station shows when its embody phase is
-  `null`/stubbed) are **intentionally unspecified** — locked in Cycle 2's
-  Phase 0.
-- The JEJ/non-JEJ branch (on `validation.isJeJ`) lives in `index.tsx`: a JEJ
-  snippet mounts this panel; a non-JEJ snippet mounts a run/debug surface (a
-  separate, later DDD). The panel module is presentation; the branch is the
-  orchestrator's.
-- The panel **replaces `toolbar.tsx`** and likely becomes a new module folder.
+- **The panel's two named phases (locked)** — two pure derivations with
+  different inputs and different cadences; do not couple them:
+  - **Station-roster derivation** (static — once per registry load, invariant
+    across edits): `(registry, per-lens phase bindings) → per-station lens
+    roster`. Buckets each registered lens into its station(s) via the
+    normalize-at-read helper; panel-excluded lenses (no `phase`) appear in no
+    roster.
+  - **Station-status derivation** (per-edit — rides the live slot's refresh
+    cadence): `(status, errors) → per-station status map`, taking the
+    **whole** `Status` (including the currently-always-`false` `validated`,
+    so the validating slice lands later with no signature change) and
+    producing one of five statuses per station. The full value-space, the
+    per-station reachable subsets, the validation barrier
+    (`errors.phase === 'validation'` has no station: parse `ok`, creation +
+    evaluation `barred`; presentation reads `errors.phase` directly — no
+    panel-private trip field), and the honest-under-stubs `pending`/`barred`
+    distinction are pinned in
+    [`./README.md` § Station-status model](./README.md). Column-level gating
+    only; per-lens gating (consulting `applicableTo`) is a backlogged seam.
+- **Lens → station binding (locked)** via `LensModule.phase?: Station |
+  readonly Station[]` ([`../lenses/types.ts`](../lenses/types.ts) owns
+  `Station`): the **pedagogical TARGET** — which lifecycle phase the lens
+  teaches understanding OF — **NOT** which embody phase it reads from (e.g.
+  `blanks` / `annotate` target `source` yet consume the AST; the binding is
+  orthogonal to the `applicableTo` tiers). Absent = panel-excluded
+  (`debug-props`). Consumers normalize at read (`stationsOf(lens)`); no
+  consumer branches on the union shape. Migration: parsons / blanks /
+  annotate / writeme → `'source'`. The non-source stations stay mostly empty
+  until prediction lenses are built (backlog).
+- **Mount condition + the reopened branch.** Source-station lenses serve the
+  **full JS language**, never JEJ-gated (locked constraint) — so the earlier
+  "JEJ → panel; non-JEJ → run/debug" split is **reopened** and owned by a
+  dedicated follow-up DDD (full-JS lens availability + the non-JEJ surface).
+  Cycle 2 Phase 1 mounts the phases panel **unconditionally**; see
+  [`./README.md` § The phases panel](./README.md) for the constraint, the
+  interim mis-surfacing note, and what `validation.isJeJ` may eventually
+  drive.
+- **Selector contract (locked):** `data-orchestrator-phases-panel` on the
+  panel root; `data-orchestrator-station="<Station>"` per column.
+  `data-orchestrator-toolbar` / `-lens-picker` retire WITH `toolbar.tsx`; no
+  alias.
+- The panel **replaces `toolbar.tsx`** as the module folder `phases-panel/`.
 
 ### The omnipresent region (Cycle 3 — design locked, NOT built)
 
@@ -923,8 +951,9 @@ doesn't, plus the one load-bearing open-spec item.
 
 **Open-spec item the peer owns**: the **lens registry** mechanism. The registry
 is a top-level static map keyed by lens name (`LENS_REGISTRY` at `./index.tsx`),
-holding the four registered lenses (`annotate`, `blanks`, `debug-props`,
-`parsons`). The registry's shape — static map vs. runtime `register()` API — is
+holding the five registered lenses (`annotate`, `blanks`, `debug-props`,
+`parsons`, `writeme`). The registry's shape — static map vs. runtime
+`register()` API — is
 intentionally undecided at this peer's level; the lens-side
 [`../lenses/DOCS.md`](../lenses/DOCS.md) § Out of scope owns the shape decision.
 Either way the registry lives at the peer's top level alongside the
@@ -941,8 +970,8 @@ This peer does NOT own:
 
 ## Future direction
 
-- **The phase-station panel** (Cycle 2): the NM-lifecycle bar that replaces the
-  toolbar (§ The phase-station panel). Its name, the `LensModule.phase` type,
+- **The phases panel** (Cycle 2): the NM-lifecycle bar that replaces the
+  toolbar (§ The phases panel). Its name, the `LensModule.phase` type,
   and the per-station state model are settled in Cycle 2's Phase 0.
 - **The omnipresent region** (Cycle 3): the Run dock + Quiz button (§ The
   omnipresent region). Exact layout settled in Cycle 3.

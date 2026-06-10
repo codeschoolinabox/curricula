@@ -189,7 +189,49 @@ type LensModule = Readonly<{
 	config: (overrides?: Partial<LensConfig>) => LensConfig;
 	applicableTo: (embodiment: Snippet) => boolean;
 	recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
+	/**
+	 * The phases-panel station(s) this lens slots into — the **pedagogical
+	 * target** (which lifecycle phase the lens teaches understanding OF),
+	 * NOT which embody phase it reads from (`blanks` targets `'source'` yet
+	 * consumes the AST).
+	 *
+	 * @remarks **Absent = panel-excluded**: the lens never appears in a
+	 * station dropdown (`debug-props` declares nothing); no registry-level
+	 * exclusion list exists. Single value or array; panel consumers
+	 * normalize at read (a `stationsOf(lens): readonly Station[]` helper)
+	 * and never branch on the union shape. `Station[]` admits
+	 * multi-station lenses; the registered five each target one station.
+	 *
+	 * Lens availability is **never JEJ-gated** — source-station lenses
+	 * serve the full JS language (locked constraint, Cycle 2 Phase 0; see
+	 * `../orchestrate/README.md` § The phases panel).
+	 */
+	phase?: Station | readonly Station[];
 }>;
+
+/**
+ * A phases-panel station — the value-space of {@link LensModule.phase}.
+ *
+ * @remarks **Triple-role contract** (locked, Cycle 2 Phase 0): a
+ * lens-declaration value (`LensModule.phase`), a phases-panel column key,
+ * and the DOM selector value (`data-orchestrator-station="<Station>"`).
+ * Widening or renaming a member touches all three surfaces plus the lens
+ * migration — treat as a locked contract.
+ *
+ * `parse` deliberately **folds** embody's two parse stages
+ * (`parse:tokenize` + `parse:ast`) into one station — the panel teaches the
+ * machine's stages, not acorn's two-pass internals; do not "fix" this by
+ * splitting it. `source` (code-as-text, before the machine) and `realm`
+ * (documentary; structurally error-free — `EmbodyPhase` excludes it) are
+ * stations without embody error phases.
+ *
+ * **Homonym alert**: this is glossary sense (b) — a panel column — NOT
+ * `NMEventPhase` (sense a). And it is orthogonal to the three-tier
+ * `applicableTo` classification (`./README.md` § Three-tier
+ * classification): "source" the station names what a lens TEACHES;
+ * "text-only" the tier names what a lens NEEDS.
+ */
+type Station = 'source' | 'realm' | 'parse' | 'creation' | 'evaluation';
 
 export type {
 	SerializablePrimitive,
@@ -199,6 +241,7 @@ export type {
 	LensModule,
 	BlockModelCell,
 	Recommendation,
+	Station,
 };
 
 // Re-export Snippet from embody so lens authors can import the lens

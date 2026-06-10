@@ -42,7 +42,7 @@ flowchart LR
 | **NM**           | The conceptual evaluation model (the learning objective)                                                  | [`notional-machine.md`](./notional-machine.md) |
 | **embody**       | The operational embodiment of the NM (frozen data + event streams)                                        | [`embody/`](./embody/)                         |
 | **study lenses** | Pedagogical perspectives on the embodied NM                                                               | [`lenses/`](./lenses/)                         |
-| **orchestrate**  | `<StudyLenses>` orchestrator + analysis helpers — the single-writer editor and the NM phase-station panel | [`orchestrate/`](./orchestrate/)               |
+| **orchestrate**  | `<StudyLenses>` orchestrator + analysis helpers — the single-writer editor and the NM phases panel        | [`orchestrate/`](./orchestrate/)               |
 
 Get the NM right and embody / lenses / orchestrate / curriculum follow. This
 package's internal directory structure mirrors the chain.
