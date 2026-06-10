@@ -411,8 +411,9 @@ vs. the prior-art `WritemeLens.jsx`:
 - **No URL config sync.** The legacy persisted `?writeme=nocomments:true` to the
   URL. V2 ships no URL surface; config comes from the fence directive / props.
   URL-state persistence is a [Future direction](#future-direction) item (and
-  would lift to the orchestrator, per the `blanks` precedent). **A deliberate
-  divergence from `blanks`**, which ships a `lib/url-config.ts`.
+  would lift to the orchestrator). **All JS lenses converge here — `blanks`
+  dropped its `lib/url-config.ts` in the help-model redesign, so URL persistence
+  is uniformly orchestrator-domain, not a per-lens surface.**
 - **No language / extension applicability gate.** The legacy gated `applicable`
   on `file.lang === 'javascript' && file.ext !== '.mjs'`. V2's `applicableTo` is
   unconditional `true`: the `lenses/javascript/` tree is JS-by-construction (the

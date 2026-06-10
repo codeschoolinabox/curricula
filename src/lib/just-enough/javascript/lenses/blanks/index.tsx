@@ -791,13 +791,13 @@ const BlanksComponent: ComponentType<LensProperties> =
 								? buildDiffDecorations(blankResult.originalCode)
 								: [];
 
-				// Snippet-free autocomplete (opt-in `suggestions`) — diff/raw ONLY.
-				// skeleton's fixed-width overwrite blanks conflict with autocomplete:
-				// its lock filter strips the `input.type` userEvent (so the popup
-				// never activates) AND rejects the variable-length completion
-				// insert. So suggestions are offered only in the free-editing modes
-				// (the checkbox is hidden in skeleton). minimalBaseline has no
-				// completion engine or completionKeymap, so both are added here.
+				// Snippet-free AUTOCOMPLETE is offered only in diff/raw. skeleton's
+				// fixed-width overwrite blanks conflict with it: the lock filter
+				// strips the `input.type` userEvent (so the popup never activates)
+				// AND rejects the variable-length completion insert. The Suggestions
+				// checkbox still SHOWS in skeleton — there it drives the hints panel
+				// instead. minimalBaseline has no completion engine or
+				// completionKeymap, so both are added here.
 				const suggestionsExtensions =
 					isEditable && suggestions && !isSkeleton
 						? [snippetFreeAutocomplete(), keymap.of(completionKeymap)]

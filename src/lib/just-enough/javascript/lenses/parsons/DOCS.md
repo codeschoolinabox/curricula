@@ -7,13 +7,13 @@ reconstruct a program from its scrambled lines. The learner sees the snippet's
 lines shuffled into an available pool (mixed with optional distractor lines that
 do not belong), drags them into a solution column in the right order, indents
 them to the right nesting level, and clicks **Check** to get per-line feedback
-(correct / wrong place / wrong indentation, in a colour-blind-safe palette — a placed
-distractor reads as "wrong place" and a missing line lowers the score, so the feedback
-never reveals which lines are distractors) and a score. A
-Parsons problem (Parsons & Haden 2006) isolates **program structure and
-sequencing** from the load of recalling syntax — it sits earlier on the novice →
-competence path than `blanks` (recall tokens); parsons asks the learner to
-**order and nest** lines they are given.
+(correct / wrong place / wrong indentation, in a colour-blind-safe palette — a
+placed distractor reads as "wrong place" and a missing line lowers the score, so
+the feedback never reveals which lines are distractors) and a score. A Parsons
+problem (Parsons & Haden 2006) isolates **program structure and sequencing**
+from the load of recalling syntax — it sits earlier on the novice → competence
+path than `blanks` (recall tokens); parsons asks the learner to **order and
+nest** lines they are given.
 
 It is a migrated pedagogical lens in WS4's batch, redone after the previous
 sprint shipped a structurally-compliant shell that satisfied the `LensModule`
@@ -95,17 +95,18 @@ wrapper end-to-end (jsdom + `@testing-library/react`); tests live under `tests/`
 2. **Parse the snippet** (sync, **impure**, held as **mount-state** — NOT
    memoized) — the wrapper holds the `parse-parsons` result in lazy-seeded
    `useState` (see § Phase-8 additions for why `useState` over `useMemo`: the
-   parse is impure via `Math.random()`, and Reset must reseed parse + arrangement
-   atomically or a fresh parse's re-selected distractor subset desyncs `lineById`).
-   The call is synchronous and does not parse an AST (parsons is text-only). Result
-   shape per `ParsedParsons`: the model solution (ordered), the selected distractors
-   (`min(maxDistractors, declared)`), the initial shuffled pool of line ids, and
-   (Inc 9) the extracted hint blocks. The shuffle uses bare `Math.random()`
-   (mechanical mandate); a valid shuffle never equals the model order for a
-   multi-line solution. **`parsed` is mount-stable:** a config/source change
-   REMOUNTS the component (preview `key={code}`, orchestrator editor↔lens toggle +
-   lens switch) rather than re-parsing in place; only **Reset** reseeds it in-mount
-   (replacing parse + arrangement together and clearing the evaluation result).
+   parse is impure via `Math.random()`, and Reset must reseed parse +
+   arrangement atomically or a fresh parse's re-selected distractor subset
+   desyncs `lineById`). The call is synchronous and does not parse an AST
+   (parsons is text-only). Result shape per `ParsedParsons`: the model solution
+   (ordered), the selected distractors (`min(maxDistractors, declared)`), the
+   initial shuffled pool of line ids, and (Inc 9) the extracted hint blocks. The
+   shuffle uses bare `Math.random()` (mechanical mandate); a valid shuffle never
+   equals the model order for a multi-line solution. **`parsed` is
+   mount-stable:** a config/source change REMOUNTS the component (preview
+   `key={code}`, orchestrator editor↔lens toggle + lens switch) rather than
+   re-parsing in place; only **Reset** reseeds it in-mount (replacing parse +
+   arrangement together and clearing the evaluation result).
 
 3. **Arrange** (per learner drag/indent, sync, pure reducer) — the learner's
    arrangement (`{ pool, solution }`) is `useReducer` state transformed by
@@ -120,20 +121,20 @@ wrapper end-to-end (jsdom + `@testing-library/react`); tests live under `tests/`
    reorders within the solution, and resets to 0 on a pool round-trip (the pool
    stores no indent).
 
-4. **Evaluate** (per Check click, sync, pure) — clicking Check calls the composing
-   grader `evaluate.ts` (`buildEvaluation`), which produces the `EvaluationResult` by
-   combining the two evaluators below under the precedence and computing
-   `unplaced`/score/`success`. Order correctness comes from `evaluate-line-order`, which
-   derives the LIS input per-Check by **matching each placed line's `code` to
-   the next-unused solution line** (the legacy `lastFoundCodeIndex` walk — so
-   identical lines are interchangeable and not penalized for "wrong copy");
-   lines not in the LIS are `wrong-order`; an empty arrangement short-circuits
-   before the vendored LIS call (`patience_sort([])` builds a phantom
-   `[[undefined]]` deck). Indent correctness comes from `evaluate-indentation`
-   (only for order-correct lines, only when `canIndent`; the expected level is
-   the matched solution line's). Distractors placed in the solution are
-   `distractor`; solution lines still in the pool are `unplaced`. Per-line
-   states resolve under the precedence
+4. **Evaluate** (per Check click, sync, pure) — clicking Check calls the
+   composing grader `evaluate.ts` (`buildEvaluation`), which produces the
+   `EvaluationResult` by combining the two evaluators below under the precedence
+   and computing `unplaced`/score/`success`. Order correctness comes from
+   `evaluate-line-order`, which derives the LIS input per-Check by **matching
+   each placed line's `code` to the next-unused solution line** (the legacy
+   `lastFoundCodeIndex` walk — so identical lines are interchangeable and not
+   penalized for "wrong copy"); lines not in the LIS are `wrong-order`; an empty
+   arrangement short-circuits before the vendored LIS call (`patience_sort([])`
+   builds a phantom `[[undefined]]` deck). Indent correctness comes from
+   `evaluate-indentation` (only for order-correct lines, only when `canIndent`;
+   the expected level is the matched solution line's). Distractors placed in the
+   solution are `distractor`; solution lines still in the pool are `unplaced`.
+   Per-line states resolve under the precedence
    `distractor > wrong-order > wrong-indent > correct`. The score is
    `Math.round(correct / total * 100)` over solution lines
    (`total === 0 → 100`), with unplaced solution lines counted in `total`.
@@ -144,10 +145,10 @@ wrapper end-to-end (jsdom + `@testing-library/react`); tests live under `tests/`
    (drop target, ordered placed lines with `data-indent` and, after Check,
    `data-correctness`) + indent controls + the Check button + the score
    (`aria-live="polite"`). **Work-view indent renders as compact guide steps
-   (`data-parsons-indent-step`), NOT a `level * indentSize` margin** — `indentSize`
-   is literal in the COMPLETE view only; controls sit on the right (see § Phase-8
-   additions). In complete view: the model solution rendered read-only at literal
-   `level * indentSize`.
+   (`data-parsons-indent-step`), NOT a `level * indentSize` margin** —
+   `indentSize` is literal in the COMPLETE view only; controls sit on the right
+   (see § Phase-8 additions). In complete view: the model solution rendered
+   read-only at literal `level * indentSize`.
 
 6. **Toggle + Reset** (the interactions not owned by phases 3–4) — the view-mode
    toggle swaps `viewMode` **without** clearing the arrangement (self-check
@@ -199,42 +200,45 @@ flowchart TD
     Props -.->|"unmount (snippet change)"| Unmount[/"React GC of per-mount state.<br/>No listeners/timers to clean<br/>(no URL, no CodeMirror, no debounce)."/]
 ```
 
-> **Diagram currency:** the Parse node is `useState` mount-state (not `useMemo`).
-> The Phase-8 render surface (info panel: legend / `extra lines: N` / hint blocks;
-> the single view toggle; the per-level guide steps; the attempt-history modal + its
-> `Attempt[]` state) is now SHIPPED (Inc 9–11) but is not re-drawn in this high-level
-> diagram — see § Phase-8 additions for the authoritative deltas, including the
-> browser-gate redlines (distractor fold, `unplaced` removal, Wong palette).
+> **Diagram currency:** the Parse node is `useState` mount-state (not
+> `useMemo`). The Phase-8 render surface (info panel: legend / `extra lines: N`
+> / hint blocks; the single view toggle; the per-level guide steps; the
+> attempt-history modal + its `Attempt[]` state) is now SHIPPED (Inc 9–11) but
+> is not re-drawn in this high-level diagram — see § Phase-8 additions for the
+> authoritative deltas, including the browser-gate redlines (distractor fold,
+> `unplaced` removal, Wong palette).
 
 The diagram is per-mount. The orchestrator (upstream) supplies `embodiment` and
 `config`; the recommender (sibling) calls `applicableTo` and `recommend`. The
 render loop reads the arrangement state + the parse mount-state + (after Check)
 the evaluation result; the drag/indent handlers feed arrangement updates through
 the reducer. **There is no cross-mount persistence** — the arrangement,
-evaluation, and attempt history die with the component instance (no URL state in v1).
+evaluation, and attempt history die with the component instance (no URL state in
+v1).
 
 ### Structural constraints
 
 - **Two-layer module shape** — `core.ts` + the files under `lib/` do NOT
-  `import React`. `lib/lis.ts`, `lib/parse-parsons.ts`, `lib/evaluate*.ts` (the two
-  evaluators + the composing `lib/evaluate.ts`), and `lib/arrange.ts` are pure TS over
-  plain values; `index.tsx` is the only file with React imports. Tests split:
-  `tests/lis.test.ts`, `tests/parse-parsons.test.ts`,
+  `import React`. `lib/lis.ts`, `lib/parse-parsons.ts`, `lib/evaluate*.ts` (the
+  two evaluators + the composing `lib/evaluate.ts`), and `lib/arrange.ts` are
+  pure TS over plain values; `index.tsx` is the only file with React imports.
+  Tests split: `tests/lis.test.ts`, `tests/parse-parsons.test.ts`,
   `tests/evaluate-line-order.test.ts`, `tests/evaluate-indentation.test.ts`,
-  `tests/evaluate.test.ts`, `tests/arrange.test.ts`,
-  `tests/core.test.ts` (no jsdom) + `tests/component.test.tsx` (jsdom). Per the
-  lenses peer's [§ Structural constraints](../DOCS.md#structural-constraints).
+  `tests/evaluate.test.ts`, `tests/arrange.test.ts`, `tests/core.test.ts` (no
+  jsdom) + `tests/component.test.tsx` (jsdom). Per the lenses peer's
+  [§ Structural constraints](../DOCS.md#structural-constraints).
 - **`embodiment` parameter name** in core signatures (lenses-peer invariant).
 - **`data-lens="parsons"` on the wrapper's root.** Load-bearing for
   sandbox-harness selectors. Per the lenses-peer invariant.
 - **`data-view-mode`, `data-can-indent`, `data-indent`, `data-correctness`** on
   the relevant elements — sandbox-harness selectors + CSS hooks; renaming is a
   contract change. `data-correctness` carries only the four **placed** states
-  (`correct|wrong-order|wrong-indent|distractor`), never `unplaced`. **Anti-leak:**
-  `distractor` is styled identically to `wrong-order` (no distinct colour), pool lines
-  carry **no** feedback attribute at all (the old `data-parsons-unplaced` is removed),
-  and the legend lists only `correct|wrong-order|wrong-indent` — so the feedback never
-  identifies the distractors. Feedback uses the Wong colour-blind-safe palette with
+  (`correct|wrong-order|wrong-indent|distractor`), never `unplaced`.
+  **Anti-leak:** `distractor` is styled identically to `wrong-order` (no
+  distinct colour), pool lines carry **no** feedback attribute at all (the old
+  `data-parsons-unplaced` is removed), and the legend lists only
+  `correct|wrong-order|wrong-indent` — so the feedback never identifies the
+  distractors. Feedback uses the Wong colour-blind-safe palette with
   border-style (solid/dashed/dotted) carrying the signal, not hue alone.
 - **Tier 1 classification.** `applicableTo` returns `true` — parsons reorders
   text lines and needs no AST and no parse success. A **deliberate divergence**
@@ -309,8 +313,10 @@ evaluation, and attempt history die with the component instance (no URL state in
 - **Cross-mount persistence of the arrangement / feedback.** Per-mount React
   state only; nothing survives unmount.
 - **URL state.** v1 ships none (legacy parsons had none beyond `?code=`). A
-  Future-direction item; would lift to the orchestrator per the blanks
-  precedent. **Deliberate divergence from blanks**, which ships `url-config.ts`.
+  Future-direction item; would lift to the orchestrator. **All JS lenses
+  converge here — `blanks` dropped its `url-config.ts` in the help-model
+  redesign, so URL persistence is uniformly orchestrator-domain, not a per-lens
+  surface.**
 - **Snippet mutation / editing.** The lens is read-only; the arrangement is
   lens-local and never written back to `setSnippet`.
 - **Code execution / run / trace.** Other lenses' jobs.
@@ -330,91 +336,97 @@ evaluation, and attempt history die with the component instance (no URL state in
 ## Phase-8 additions + browser-checkpoint reconciliations
 
 > The wrapper's UX was reshaped at the per-increment browser gates, and a second
-> DDD pass added four parsonizer-parity features (read faithfully from the legacy
-> `…/parsonizer/component.js`). These are the deltas to the sketch phases above and
-> to the structural constraints; the original phases otherwise stand.
+> DDD pass added four parsonizer-parity features (read faithfully from the
+> legacy `…/parsonizer/component.js`). These are the deltas to the sketch phases
+> above and to the structural constraints; the original phases otherwise stand.
 
 - **Parse held as `useState`, not `useMemo` (phase 2 delta).** `parseParsons` is
   impure (`Math.random`), and Reset must reseed the parse AND the arrangement
   together — a fresh parse re-selects the distractor subset, which would desync
   `lineById` from the reducer if parse re-derived independently. So `parsed` is
-  lazy-seeded mount-state, replaced atomically with the arrangement on Reset (React
-  batches both). Mount-stable otherwise (snippet/config changes remount).
+  lazy-seeded mount-state, replaced atomically with the arrangement on Reset
+  (React batches both). Mount-stable otherwise (snippet/config changes remount).
 - **Indent rendering split (phases 3/5 delta).** `data-indent` is the semantic
   level. The **work view** renders it as `N` compact fixed-width guide steps
-  (`data-parsons-indent-step`) — an alignment cue, NOT a literal margin — with the
-  indent/outdent controls on the **right** so the code's left origin is fixed.
-  `indentSize` is read ONLY for the **complete view's** literal `level * indentSize`
-  rendering. Rationale for buttons-not-drag corrected: `clientX` IS available on
-  `drop`; buttons are an a11y/precision/simplicity trade-off, not a hard limit.
+  (`data-parsons-indent-step`) — an alignment cue, NOT a literal margin — with
+  the indent/outdent controls on the **right** so the code's left origin is
+  fixed. `indentSize` is read ONLY for the **complete view's** literal
+  `level * indentSize` rendering. Rationale for buttons-not-drag corrected:
+  `clientX` IS available on `drop`; buttons are an a11y/precision/simplicity
+  trade-off, not a hard limit.
 - **Single view toggle (phase 6 delta).** One `data-parsons-view-toggle` button
-  (label + `aria-pressed` track the view) replaces a two-button segmented control —
-  a deliberate divergence from blanks (peeking is binary). Toggle changes only
-  `viewMode`; it is not an `applyArrange` edit, so it preserves arrangement +
-  feedback.
-- **Block-comment hints (new parse output).** `parse-parsons.ts` extracts `/* … */`
-  blocks (legacy regex) from the source before line-splitting, strips them from the
-  orderable code, and returns `ParsedParsons.hints: ReadonlyArray<HintBlock>`. The
-  parser tags each block's `summary` (`null` = no marker, `''` = empty marker, else the
-  label text). **Render (Inc 10, redlined): every block is a collapsible `<details>`
-  with a default `Hint` label** (body in a `<pre>`); a `parsons-collapse: <label>`
-  marker only customizes that label (the old always-visible plain-`<pre>` mode is
-  dropped). Summary + body render as escaped TEXT. Rendered above the board
-  (`data-parsons-hints`). Only `/* */` blocks are extracted; `//` line-comments stay as
-  orderable code
-  (deliberate scope vs. the legacy `strip()`-all-comments — note this means a
-  ported snippet with trailing `// note` comments keeps them as line text).
-  **The extraction is a source→source pre-pass UPSTREAM of the existing
-  split/normalize/guard pipeline and must preserve its invariants:** the empty-snippet
-  guard (a hint-only source → empty exercise → score 100, no crash), indent
-  normalization of the line following a stripped block (no phantom indent), and the
-  marker-only-line drop. (An INLINE block mid-code-line is also stripped — eating
-  its surrounding horizontal whitespace — which can leave a broken code remnant on
-  that line; educators should place hint blocks on their own lines.)
+  (label + `aria-pressed` track the view) replaces a two-button segmented
+  control — a deliberate divergence from blanks (peeking is binary). Toggle
+  changes only `viewMode`; it is not an `applyArrange` edit, so it preserves
+  arrangement + feedback.
+- **Block-comment hints (new parse output).** `parse-parsons.ts` extracts
+  `/* … */` blocks (legacy regex) from the source before line-splitting, strips
+  them from the orderable code, and returns
+  `ParsedParsons.hints: ReadonlyArray<HintBlock>`. The parser tags each block's
+  `summary` (`null` = no marker, `''` = empty marker, else the label text).
+  **Render (Inc 10, redlined): every block is a collapsible `<details>` with a
+  default `Hint` label** (body in a `<pre>`); a `parsons-collapse: <label>`
+  marker only customizes that label (the old always-visible plain-`<pre>` mode
+  is dropped). Summary + body render as escaped TEXT. Rendered above the board
+  (`data-parsons-hints`). Only `/* */` blocks are extracted; `//` line-comments
+  stay as orderable code (deliberate scope vs. the legacy `strip()`-all-comments
+  — note this means a ported snippet with trailing `// note` comments keeps them
+  as line text). **The extraction is a source→source pre-pass UPSTREAM of the
+  existing split/normalize/guard pipeline and must preserve its invariants:**
+  the empty-snippet guard (a hint-only source → empty exercise → score 100, no
+  crash), indent normalization of the line following a stripped block (no
+  phantom indent), and the marker-only-line drop. (An INLINE block mid-code-line
+  is also stripped — eating its surrounding horizontal whitespace — which can
+  leave a broken code remnant on that line; educators should place hint blocks
+  on their own lines.)
 - **Distractor-count + legend (new render).** `data-parsons-distractor-count`
   (`<details>`, N>0) and `data-parsons-legend` (the **3-state** colour key —
-  `correct|wrong-order|wrong-indent`, the only states a learner can act on) sit in an
-  info panel above the board (rendered in BOTH views). **Both collapsed by default**
-  (a deliberate divergence from the always-open legacy). **Redline:** the distractor
-  count is a spoiler, so its collapsed summary is spoiler-free and the `extra lines: N`
-  text lives in the expandable BODY (revealed on expand), not the summary. The legend
-  is a V2 add (legacy used bare marker classes) and uses the Wong palette swatches.
+  `correct|wrong-order|wrong-indent`, the only states a learner can act on) sit
+  in an info panel above the board (rendered in BOTH views). **Both collapsed by
+  default** (a deliberate divergence from the always-open legacy). **Redline:**
+  the distractor count is a spoiler, so its collapsed summary is spoiler-free
+  and the `extra lines: N` text lives in the expandable BODY (revealed on
+  expand), not the summary. The legend is a V2 add (legacy used bare marker
+  classes) and uses the Wong palette swatches.
 - **Attempt history (new in-mount state).** Each Check appends an `Attempt`
   (snapshot of placed lines' code+indent+correctness + score + success) to a
-  `useState` array; a `data-parsons-history-open` button **in the toolbar** opens a
-  React-state modal (`data-parsons-history-modal`, `role="dialog"`, closed via
-  `data-parsons-history-close` or Escape — a document keydown `useEffect`; NOT the
-  legacy `:target`/anchor hack) listing them. Persists across Reset (faithful), dies on
-  unmount (in-mount only — squares with disposable-practice: no cross-mount
-  persistence). **Snapshots are frozen at Check time and rendered verbatim — the modal
-  NEVER re-grades** (re-derivation would diverge from what the learner saw; the same
-  desync class as the parse-`useState` decision). The snapshot stores the **raw**
-  graded `correctness` (incl. `distractor`); the modal CSS folds `distractor` into the
-  wrong-place look exactly as the board does. **The legacy `history` enable/disable flag
-  (default `true`) is dropped:**
-  history is always-on, no config knob (no pedagogical case for disabling a
-  non-destructive review affordance; keeps `ParsonsLensConfig` minimal).
+  `useState` array; a `data-parsons-history-open` button **in the toolbar**
+  opens a React-state modal (`data-parsons-history-modal`, `role="dialog"`,
+  closed via `data-parsons-history-close` or Escape — a document keydown
+  `useEffect`; NOT the legacy `:target`/anchor hack) listing them. Persists
+  across Reset (faithful), dies on unmount (in-mount only — squares with
+  disposable-practice: no cross-mount persistence). **Snapshots are frozen at
+  Check time and rendered verbatim — the modal NEVER re-grades** (re-derivation
+  would diverge from what the learner saw; the same desync class as the
+  parse-`useState` decision). The snapshot stores the **raw** graded
+  `correctness` (incl. `distractor`); the modal CSS folds `distractor` into the
+  wrong-place look exactly as the board does. **The legacy `history`
+  enable/disable flag (default `true`) is dropped:** history is always-on, no
+  config knob (no pedagogical case for disabling a non-destructive review
+  affordance; keeps `ParsonsLensConfig` minimal).
 - **Anti-leak redlines (browser-gate decisions — feedback must not identify the
-  distractors).** (1) A placed `distractor` keeps `data-correctness="distractor"` but
-  CSS renders it **identically to `wrong-order`** ("wrong place") — no badge, no
-  distinct colour. (2) Pool-line feedback is **removed entirely**: the old
-  `data-parsons-unplaced` hint is gone (flagging the missing solution lines would
-  reveal the distractors by elimination); missing lines lower the **score** only. (3)
-  The legend lists only the three actionable placed states. (4) Feedback uses the
-  **Wong colour-blind-safe palette** (blue correct / vermilion error) with border-style
+  distractors).** (1) A placed `distractor` keeps
+  `data-correctness="distractor"` but CSS renders it **identically to
+  `wrong-order`** ("wrong place") — no badge, no distinct colour. (2) Pool-line
+  feedback is **removed entirely**: the old `data-parsons-unplaced` hint is gone
+  (flagging the missing solution lines would reveal the distractors by
+  elimination); missing lines lower the **score** only. (3) The legend lists
+  only the three actionable placed states. (4) Feedback uses the **Wong
+  colour-blind-safe palette** (blue correct / vermilion error) with border-style
   (solid/dashed/dotted) carrying the signal, not hue alone — mirrors `blanks`; a
-  dark-mode media query bumps the tint alpha (board + modal snapshot). `evaluate.ts` is
-  untouched (it still computes `distractor`/`unplaced` internally for the score +
-  snapshot); these are pure presentation rules.
+  dark-mode media query bumps the tint alpha (board + modal snapshot).
+  `evaluate.ts` is untouched (it still computes `distractor`/`unplaced`
+  internally for the score + snapshot); these are pure presentation rules.
 - **New sandbox-harness `data-*` hooks** join the contract (renaming any is a
   contract change): `data-parsons-toolbar`, `-check`, `-reset`, `-view-toggle`,
-  `-score` (value-bearing), `-legend`, `-distractor-count`, `-hints`, `-history-open`,
-  `-history-modal`, `-history-close`, plus per-line `-indent-step`, `-indent`/`-outdent`.
-  Internal (non-harness) hooks: `data-line-id`, `data-legend-state`,
-  `data-parsons-attempt`, `data-attempt-success`, `data-snapshot-line`. (`-unplaced` is
-  **removed**.) Types added: `HintBlock`, `Attempt` (runtime, not config —
-  SerializableValue discipline unaffected); `ParsedParsons.hints` lands with its
-  producer in the hint-extraction increment.
+  `-score` (value-bearing), `-legend`, `-distractor-count`, `-hints`,
+  `-history-open`, `-history-modal`, `-history-close`, plus per-line
+  `-indent-step`, `-indent`/`-outdent`. Internal (non-harness) hooks:
+  `data-line-id`, `data-legend-state`, `data-parsons-attempt`,
+  `data-attempt-success`, `data-snapshot-line`. (`-unplaced` is **removed**.)
+  Types added: `HintBlock`, `Attempt` (runtime, not config — SerializableValue
+  discipline unaffected); `ParsedParsons.hints` lands with its producer in the
+  hint-extraction increment.
 
 ## Why grade per-line independently (vs. the legacy sequential gate)
 
@@ -471,12 +483,11 @@ citation is now explicit and the decision is "restore," not "preserve.")
 
 The lens owns its own `README.md`, `DOCS.md`, `types.ts`, source (`core.ts`,
 `lib/lis.ts`, `lib/parse-parsons.ts`, `lib/evaluate-line-order.ts`,
-`lib/evaluate-indentation.ts`, `lib/evaluate.ts`, `lib/arrange.ts`, `index.tsx`), and
-tests.
-Cross-cutting lens conventions (two-layer split, `data-lens` invariant,
-`LensConfig` shape, no-source-code-branching anti-pattern, disposable-practice)
-live in [`../README.md`](../README.md) + [`../DOCS.md`](../DOCS.md); this lens
-inherits them.
+`lib/evaluate-indentation.ts`, `lib/evaluate.ts`, `lib/arrange.ts`,
+`index.tsx`), and tests. Cross-cutting lens conventions (two-layer split,
+`data-lens` invariant, `LensConfig` shape, no-source-code-branching
+anti-pattern, disposable-practice) live in [`../README.md`](../README.md) +
+[`../DOCS.md`](../DOCS.md); this lens inherits them.
 
 ## Future direction
 

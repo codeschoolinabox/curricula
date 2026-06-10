@@ -89,25 +89,25 @@ Fields:
     view.
   - `editorMode?: 'skeleton' | 'diff' | 'raw'` (default `'skeleton'`) — sub-mode
     that the blankenated editor renders in. `skeleton`'s defining trait is that
-    the blank sizes and surrounding code structure are **immutable**: the learner
-    fills fixed-width `_` overwrite fields in a locked skeleton (position-locked
-    placeholders, autopad on insert/delete, overwrite-mode UX, per-blank
-    correctness decorations, hints panel eligible to render). It is not "more
-    helpful" than the others — it is **fixed structure**. `diff` is free-edit
-    (no position-lock) with char-level mismatch highlighting against the hidden
-    original — the diff is the feedback; the hints panel does NOT render. `raw`
-    is free-edit with no decorations and no feedback at all (an escape hatch for
-    free-form exploration). The mode is ignored when `viewMode === 'complete'`
-    (the complete view is read-only by definition). The
-    `data-editor-mode-toggle="skeleton|diff|raw"` toolbar buttons select this
-    value.
+    the blank sizes and surrounding code structure are **immutable**: the
+    learner fills fixed-width `_` overwrite fields in a locked skeleton
+    (position-locked placeholders, autopad on insert/delete, overwrite-mode UX,
+    per-blank correctness decorations, hints panel eligible to render). It is
+    not "more helpful" than the others — it is **fixed structure**. `diff` is
+    free-edit (no position-lock) with char-level mismatch highlighting against
+    the hidden original — the diff is the feedback; the hints panel does NOT
+    render. `raw` is free-edit with no decorations and no feedback at all (an
+    escape hatch for free-form exploration). The mode is ignored when
+    `viewMode === 'complete'` (the complete view is read-only by definition).
+    The `data-editor-mode-toggle="skeleton|diff|raw"` toolbar buttons select
+    this value.
   - `suggestions?: boolean` (default `false`, opt-in) — the unified "help"
     toggle. A toolbar checkbox (`data-assist-toggle="suggestions"`) and a root
     attribute (`data-suggestions="true|false"`), visible in every blankenated
     editor mode. Behavior is mode-dependent: in `skeleton` mode it shows / hides
-    the cursor-scoped hints panel; in `diff` / `raw` mode it enables snippet-free
-    autocomplete (JS keywords + identifiers already in the buffer — NO
-    `for`/`if`/`function` snippet templates, and no completion of un-typed
+    the cursor-scoped hints panel; in `diff` / `raw` mode it enables
+    snippet-free autocomplete (JS keywords + identifiers already in the buffer —
+    NO `for`/`if`/`function` snippet templates, and no completion of un-typed
     identifiers). Default OFF. See [Hints panel contract](#hints-panel-contract)
     and [Toolbar contract](#toolbar-contract).
 - `applicableTo(embodiment): boolean` — returns `embodiment.status.parsed` (Tier
@@ -179,14 +179,14 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 - **View mode** — one of the two representations of the snippet: `blankenated`
   (editable, with `_` placeholders the learner fills) or `complete` (read-only,
   original source for self-check).
-- **Editor mode** — `'skeleton' | 'diff' | 'raw'`. Sub-mode that the
-  blankenated editor renders in. `skeleton`'s defining trait is **fixed
-  structure**: the blank sizes and surrounding code are immutable, so the
-  learner fills fixed-width `_` overwrite fields in a locked skeleton
-  (position-locked overwrite-mode placeholders, per-blank correctness, hints
-  panel eligible). `diff` is free-edit with char-level mismatch highlighting
-  against the hidden original; no hints panel. `raw` is free-edit with no
-  decorations. Ignored when `viewMode === 'complete'`. The toolbar's
+- **Editor mode** — `'skeleton' | 'diff' | 'raw'`. Sub-mode that the blankenated
+  editor renders in. `skeleton`'s defining trait is **fixed structure**: the
+  blank sizes and surrounding code are immutable, so the learner fills
+  fixed-width `_` overwrite fields in a locked skeleton (position-locked
+  overwrite-mode placeholders, per-blank correctness, hints panel eligible).
+  `diff` is free-edit with char-level mismatch highlighting against the hidden
+  original; no hints panel. `raw` is free-edit with no decorations. Ignored when
+  `viewMode === 'complete'`. The toolbar's
   `data-editor-mode-toggle="skeleton|diff|raw"` buttons select this value.
 - **Blankenated** — the verb form (legacy retained). "The source has been
   blankenated" = "the blankenate algorithm has produced a version with selected
@@ -270,17 +270,21 @@ state**.
   that would violate the skeleton editor's length-match + anchor-lock
   invariants, so carrying that state across would corrupt the skeleton's
   starting position.
-- **Suggestions checkbox** — one `<input type="checkbox"
-  data-assist-toggle="suggestions">` (label "Suggestions"), wrapped in a
-  `<label data-blanks-suggestions>`. Rendered in the blankenated view in every
-  editor mode. Off by default (opt-in). It is the unified "help" toggle and its
-  effect is mode-dependent: in `skeleton` mode it shows / hides the cursor-scoped
-  hints panel; in `diff` / `raw` mode it enables snippet-free autocomplete (JS
-  keywords + identifiers already typed into the buffer; NO `for`/`if`/`function`
-  snippet templates and no completion of un-typed identifiers). The root's
-  `data-suggestions="true|false"` attribute reflects the committed value.
-  Toggling does NOT reset the learner's in-progress edits (modelled on the
-  view-mode path, not the editor-mode path).
+- **Suggestions checkbox** — one
+  `<input type="checkbox" data-assist-toggle="suggestions">` (label
+  "Suggestions"), wrapped in a `<label data-blanks-suggestions>`. Rendered in
+  the blankenated view in every editor mode. Off by default (opt-in). It is the
+  unified "help" toggle and its effect is mode-dependent: in `skeleton` mode it
+  shows / hides the cursor-scoped hints panel; in `diff` / `raw` mode it enables
+  snippet-free autocomplete (JS keywords + identifiers already typed into the
+  buffer; NO `for`/`if`/`function` snippet templates and no completion of
+  un-typed identifiers). The root's `data-suggestions="true|false"` attribute
+  reflects the committed value. Toggling does NOT reset the learner's
+  in-progress edits (modelled on the view-mode path, not the editor-mode path).
+  Note: `data-suggestions` is a per-lens flag whose _effect_ is lens- and
+  mode-specific (in `writeme` it means autocomplete-on; in `blanks` it is the
+  mode-dependent help toggle above), so a cross-lens sandbox / analytics
+  consumer must branch on `data-lens` before interpreting it.
 
 ## View contract
 
@@ -331,10 +335,10 @@ controlling rendered richness) is gone — replaced by:
   Same blank in the same mount always reveals positions in the same sequence;
   same blank in a re-rolled blank set (after settings change) gets a new
   permutation. No `Math.random()` per render — tests are deterministic and
-  re-renders don't reshuffle. Only the order is randomized; the DISPLAY is always
-  positional.
-- **Per-blank reveal-count persists** across cursor moves. Once two positions are
-  revealed for blank A, returning to A after visiting B shows the same two
+  re-renders don't reshuffle. Only the order is randomized; the DISPLAY is
+  always positional.
+- **Per-blank reveal-count persists** across cursor moves. Once two positions
+  are revealed for blank A, returning to A after visiting B shows the same two
   positions. Switching the editor-mode scaffolding level (skeleton → diff → raw
   or back) resets all reveal-counts.
 
@@ -594,8 +598,8 @@ Tests split: `tests/blankenate.test.ts`, `tests/no-paste-extension.test.ts`,
   educator's `config` prop — there is no cross-mount config persistence and no
   URL slice. If config-in-URL (shareable / reloadable exercise settings) is
   wanted later, it belongs to the orchestrator's URL-state surface (post-WS3),
-  with this lens reading the resolved values through its `config` prop exactly as
-  it does today — no lens-side URL wiring.
+  with this lens reading the resolved values through its `config` prop exactly
+  as it does today — no lens-side URL wiring.
 - **Hints panel: per-blank highlight in the editor.** v1 shows per-blank state
   in the side panel. A follow-up adds inline highlighting at the blank's
   `{start, end}` in the editor itself (e.g. CodeMirror `Decoration.mark`) so the
