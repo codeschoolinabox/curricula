@@ -14,12 +14,7 @@
 
 import type { LocationIndex } from './types.js';
 
-type LookupResult = {
-	readonly source: 'enclosing-fallback';
-	readonly nodePath: string;
-};
-
-function lookupNodePath(
+export default function lookupNodePath(
 	index: LocationIndex,
 	line: number,
 	column: number,
@@ -80,4 +75,7 @@ function approxSize(loc: {
 	return lineSpan * 1_000_000 + colSpan;
 }
 
-export default lookupNodePath;
+type LookupResult = {
+	readonly source: 'enclosing-fallback';
+	readonly nodePath: string;
+};

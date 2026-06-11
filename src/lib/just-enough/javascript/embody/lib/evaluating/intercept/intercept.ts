@@ -65,338 +65,6 @@ import {
 } from './worker-protocol.js';
 import wrapCallExpressions from './wrap-call-expressions.js';
 
-// --- Internal message types for the queue ---
-
-type WorkerErrorSignal = {
-	readonly type: 'worker-error';
-	readonly message: string;
-};
-type QueueMessage = WorkerOutbound | WorkerErrorSignal;
-
-// --- Internal termination state (first-write-wins) ---
-
-/**
- * Every path that ends a run records a cause here via setTermination.
- * First-write-wins: concurrent triggers (cancel racing timeout,
- * worker-error racing cancel) resolve monotonically — no priority
- * ladder, no flag combinatorics. See DOCS.md § Unified termination
- * protocol.
- */
-type TerminationCause =
-	| { readonly kind: 'cancel' }
-	| { readonly kind: 'fail'; readonly reason: unknown }
-	| { readonly kind: 'timeout' }
-	| { readonly kind: 'worker-error' };
-
-// Flat per-pause deduction representing the typical wall-clock cost
-// of one event-cycle's consumer-side processing. Rounded up so a busy
-// event loop times out at-or-before its `seconds` budget rather than
-// after — see DOCS.md "Timer-vs-yield".
-const YIELD_CHARGE_MS = 5;
-
-// --- Resolved IO ---
-
-const CONSOLE_METHODS: readonly ConsoleMethod[] = [
-	'log',
-	'debug',
-	'info',
-	'warn',
-	'error',
-	'assert',
-	'table',
-	'dir',
-	'dirxml',
-	'group',
-	'groupCollapsed',
-	'groupEnd',
-	'count',
-	'countReset',
-	'time',
-	'timeEnd',
-	'timeLog',
-	'trace',
-	'clear',
-];
-
-type ResolvedConsole = Record<
-	ConsoleMethod,
-	(...arguments_: readonly unknown[]) => Promise<void>
->;
-
-type ResolvedIo = {
-	readonly prompt: (
-		message: string,
-		defaultValue?: string,
-	) => Promise<string | null>;
-	readonly alert: (message: string) => Promise<void>;
-	readonly confirm: (message: string) => Promise<boolean>;
-	readonly console: ResolvedConsole;
-};
-
-/**
- * Merges consumer-provided mocks with Native IO wrappers into the
- * Resolved IO table. Each slot is independently overridable — omitted
- * slots fall back to the Native IO wrapper. All callbacks are wrapped
- * in async so the main loop can always `await` them uniformly.
- */
-function buildResolvedIo(io?: IoMocks): ResolvedIo {
-	const resolvedConsole = {} as ResolvedConsole;
-
-	for (const method of CONSOLE_METHODS) {
-		const mock = io?.console?.[method];
-		if (mock) {
-			resolvedConsole[method] = async (...arguments_) => {
-				await mock(...arguments_);
-			};
-		} else {
-			const nativeFunction = (
-				console as unknown as Record<ConsoleMethod, (...a: readonly unknown[]) => void>
-			)[method];
-			resolvedConsole[method] = async (...arguments_) => {
-				 
-				nativeFunction?.(...arguments_);
-			};
-		}
-	}
-
-	return {
-		prompt: io?.prompt
-			? async (message, def) => io.prompt!(message, def)
-			: async (message, def) =>
-					 
-					def === undefined ? globalThis.prompt(message) : globalThis.prompt(message, def),
-
-		alert: io?.alert
-			? async (message) => {
-					await io.alert!(message);
-				}
-			: async (message) => {
-					 
-					globalThis.alert(message);
-				},
-
-		confirm: io?.confirm
-			? async (message) => io.confirm!(message)
-			: async (message) => 
-					 
-					 globalThis.confirm(message)
-				,
-
-		console: resolvedConsole,
-	};
-}
-
-// --- LinkedInterceptEvent enrichment helpers ---
-
-/**
- * Enriches a worker-emitted `InterceptEvent` with AST navigation
- * fields (nodePath, nodePathSource, node, loc, callee, calleePath)
- * AND pushes the event into the resolved node's `events[]` back-ref
- * array. Entwining happens inline at emission time so consumers
- * iterating live see fully-linked events without waiting for run
- * completion.
- *
- * @remarks Mutates `event` in place to preserve reference identity
- * (load-bearing for the replay invariant: events yielded during
- * streaming must be `===` the same objects in `result.events`).
- *
- * Three branches:
- *
- * 1. **Worker-emitted with `nodePath` already set** (the happy path
- *    after the universal CallExpression wrap). Worker stamped
- *    `event.nodePath = __currentPath`. Stamp `nodePathSource:
- *    'instrumented'`, resolve `event.node` and `event.loc` from
- *    `locationIndex.astByPath[nodePath]`, push back-ref.
- * 2. **Residual error path** — runtime error fired OUTSIDE any
- *    wrapped CallExpression. Worker fell back to
- *    `extractPositionFromError` and emitted `line` (and maybe
- *    `column`) without `nodePath`. Look up via `lookupNodePath` to
- *    find the deepest containing AST node; stamp
- *    `nodePathSource: 'enclosing-fallback'`, resolve `event.node`
- *    and `event.loc`, push back-ref.
- * 3. **No AST built** — `locationIndex` is `null` (validation failed
- *    pre-parse) OR the event has no nodePath/line/column to look up.
- *    Stamp `nodePath: null, nodePathSource: 'no-ast', node: null,
- *    loc: null`. No back-ref to push.
- */
-function enrichEvent(
-	event: InterceptEvent,
-	locationIndex: LocationIndex | null,
-): LinkedInterceptEvent {
-	const incomingNodePath = (event as { readonly nodePath?: string | null }).nodePath;
-
-	// Branch 1: worker stamped nodePath via __$ic — instrumented path.
-	if (typeof incomingNodePath === 'string' && locationIndex !== null) {
-		const node = locationIndex.astByPath.get(incomingNodePath);
-		const enriched = event as InterceptEvent & {
-			readonly nodePath: string | null;
-			readonly nodePathSource: NodePathSource;
-			readonly node: ASTNode | null;
-			readonly loc: {
-				readonly start: { readonly line: number; readonly column: number };
-				readonly end: { readonly line: number; readonly column: number };
-			} | null;
-			readonly callee: ASTNode | null;
-			readonly calleePath: string | null;
-		};
-		enriched.nodePath = incomingNodePath;
-		enriched.nodePathSource = 'instrumented';
-		enriched.node = node ?? null;
-		enriched.loc = node ? node.loc : null;
-		// Direct callee navigation: only meaningful when node is a
-		// CallExpression (the wrapped happy path). For non-call nodes
-		// (residual error path), callee/calleePath stay null.
-		if (node?.type === 'CallExpression') {
-			const calleeReference = (node as unknown as { readonly callee: ASTNode | undefined })
-				.callee;
-			enriched.callee = calleeReference ?? null;
-			enriched.calleePath = calleeReference ? calleeReference.syntaxId : null;
-		} else {
-			enriched.callee = null;
-			enriched.calleePath = null;
-		}
-		// Push back-ref into node.events[] (the AST → events accessor).
-		// Replaces what the post-completion `link()` step used to do; now
-		// happens inline so consumers see populated back-refs mid-stream.
-		if (node !== undefined) {
-			(node.events).push(
-				enriched as unknown as LinkedInterceptEvent,
-			);
-		}
-		return enriched as unknown as LinkedInterceptEvent;
-	}
-
-	const {line} = (event as { readonly line?: number });
-	const {column} = (event as { readonly column?: number });
-
-	// Branch 3: no AST OR no usable position — no-ast.
-	if (locationIndex === null || line === undefined || column === undefined) {
-		const enriched = event as InterceptEvent & {
-			readonly nodePath: string | null;
-			readonly nodePathSource: NodePathSource;
-			readonly node: ASTNode | null;
-			readonly loc: {
-				readonly start: { readonly line: number; readonly column: number };
-				readonly end: { readonly line: number; readonly column: number };
-			} | null;
-			readonly callee: ASTNode | null;
-			readonly calleePath: string | null;
-		};
-		enriched.nodePath = null;
-		enriched.nodePathSource = 'no-ast';
-		enriched.node = null;
-		enriched.loc = null;
-		enriched.callee = null;
-		enriched.calleePath = null;
-		return enriched as unknown as LinkedInterceptEvent;
-	}
-
-	// Branch 2: residual error path — fall back to (line, column) lookup.
-	const lookup = lookupNodePath(locationIndex, line, column);
-	const node = locationIndex.astByPath.get(lookup.nodePath);
-	const enriched = event as InterceptEvent & {
-		readonly nodePath: string;
-		readonly nodePathSource: NodePathSource;
-		readonly node: ASTNode | null;
-		readonly loc: {
-			readonly start: { readonly line: number; readonly column: number };
-			readonly end: { readonly line: number; readonly column: number };
-		} | null;
-		readonly callee: ASTNode | null;
-		readonly calleePath: string | null;
-	};
-	enriched.nodePath = lookup.nodePath;
-	enriched.nodePathSource = lookup.source;
-	enriched.node = node ?? null;
-	enriched.loc = node ? node.loc : null;
-	// Same CallExpression discriminator as Branch 1; residual lookups
-	// usually land on non-call nodes (e.g. MemberExpression for
-	// `let x = null.foo;`), in which case callee/calleePath stay null.
-	if (node?.type === 'CallExpression') {
-		const calleeReference = (node as unknown as { readonly callee: ASTNode | undefined })
-			.callee;
-		enriched.callee = calleeReference ?? null;
-		enriched.calleePath = calleeReference ? calleeReference.syntaxId : null;
-	} else {
-		enriched.callee = null;
-		enriched.calleePath = null;
-	}
-	// Push back-ref into node.events[] for residual-path attribution.
-	if (node !== undefined) {
-		(node.events).push(
-			enriched as unknown as LinkedInterceptEvent,
-		);
-	}
-	return enriched as unknown as LinkedInterceptEvent;
-}
-
-/**
- * Builds an InterceptResult for early-return paths that occur BEFORE
- * the AST exists (cancel/fail before iterate, validation/format/SAB
- * gate failures, Worker construction errors). Events on these paths
- * carry `nodePath: null, nodePathSource: 'no-ast', node: null` and
- * `result.ast` is `null`.
- *
- * For the post-execution full-AST path see `buildResult`.
- */
-function buildEarlyResult(
-	code: string,
-	options: InterceptOptions,
-	outcome: InterceptOutcome,
-	events: readonly LinkedInterceptEvent[],
-	error?: InterceptResultError,
-	reason?: unknown,
-): InterceptResult {
-	const ok =
-		outcome === 'complete' || outcome === 'cancel' || outcome === 'fail';
-	const linked = events.map((e) => {
-		const event = e as {
-			readonly node: ASTNode | null;
-			readonly callee: ASTNode | null;
-			readonly calleePath: string | null;
-		};
-		event.node = null;
-		event.callee = null;
-		event.calleePath = null;
-		return e as unknown as LinkedInterceptEvent;
-	});
-	// Wire prev/next as plain frozen properties — for one-shot finalization
-	// the neighbor is known at build time, so accessor backing isn't needed.
-	// Same observable shape as the streaming-path appendEvent helper.
-	for (let index = 0; index < linked.length; index++) {
-		const event = linked[index] as {
-			readonly prev: LinkedInterceptEvent | null;
-			readonly next: LinkedInterceptEvent | null;
-		};
-		event.prev = index > 0 ? (linked[index - 1] ?? null) : null;
-		event.next = index + 1 < linked.length ? (linked[index + 1] ?? null) : null;
-		Object.freeze(linked[index]);
-	}
-	return deepFreezeInPlace({
-		ok,
-		outcome,
-		events: linked,
-		...(error === undefined ? {} : { error }),
-		...(reason === undefined ? {} : { reason }),
-		code,
-		options,
-		ast: null as Readonly<Record<string, ASTNode>> | null,
-		visitCounts: {} as Readonly<Record<string, number>>,
-	});
-}
-
-// --- Internal error helper ---
-
-function makeInternalError(error: unknown, step: number): RunErrorEvent {
-	return {
-		event: 'error',
-		name: 'InternalError',
-		message: error instanceof Error ? error.message : String(error),
-		phase: 'execution',
-		step,
-	};
-}
-
 /**
  * Creates an async generator that runs learner code in a Web Worker
  * and yields events as they occur.
@@ -473,7 +141,7 @@ function makeInternalError(error: unknown, step: number): RunErrorEvent {
  * learners can examine steps and consumers can run async UIs without
  * consuming execution time.
  */
-function createInterceptGenerator(
+export default function createInterceptGenerator(
 	code: string,
 	options?: InterceptOptions,
 ): InterceptHandle {
@@ -586,7 +254,7 @@ function createInterceptGenerator(
 	// 'cancel' as a possibility. Centralizing the widening cast keeps
 	// future readers from forgetting it and accidentally losing a branch.
 	function getTerminationKind(): TerminationCause['kind'] | undefined {
-		return (terminationCause)?.kind;
+		return terminationCause?.kind;
 	}
 
 	function wakeDequeue(): void {
@@ -930,7 +598,7 @@ function createInterceptGenerator(
 
 				// 8a. Streamed event — route IO callback, yield to consumer
 				if (message.type === 'event') {
-					const {event} = message;
+					const { event } = message;
 					const enriched = enrichEvent(event, locationIndex);
 					appendEvent(events, enriched);
 
@@ -1212,7 +880,7 @@ function createInterceptGenerator(
 			// SAME LinkedInterceptEvent references the live iteration
 			// yielded — this is the replay-identity invariant.
 			const settled = settledResult;
-			const {events} = settled;
+			const { events } = settled;
 			let index = 0;
 			return {
 				next(): Promise<IteratorResult<LinkedInterceptEvent, InterceptResult>> {
@@ -1328,7 +996,8 @@ function buildResult(
 	const visitCountsObject: Record<string, number> = {};
 	for (const event of events) {
 		if (event.nodePath !== null) {
-			visitCountsObject[event.nodePath] = (visitCountsObject[event.nodePath] ?? 0) + 1;
+			visitCountsObject[event.nodePath] =
+				(visitCountsObject[event.nodePath] ?? 0) + 1;
 		}
 	}
 
@@ -1439,4 +1108,331 @@ function findErrorEvent(
 	return undefined;
 }
 
-export default createInterceptGenerator;
+// --- Internal message types for the queue ---
+
+type WorkerErrorSignal = {
+	readonly type: 'worker-error';
+	readonly message: string;
+};
+type QueueMessage = WorkerOutbound | WorkerErrorSignal;
+
+// --- Internal termination state (first-write-wins) ---
+
+/**
+ * Every path that ends a run records a cause here via setTermination.
+ * First-write-wins: concurrent triggers (cancel racing timeout,
+ * worker-error racing cancel) resolve monotonically — no priority
+ * ladder, no flag combinatorics. See DOCS.md § Unified termination
+ * protocol.
+ */
+type TerminationCause =
+	| { readonly kind: 'cancel' }
+	| { readonly kind: 'fail'; readonly reason: unknown }
+	| { readonly kind: 'timeout' }
+	| { readonly kind: 'worker-error' };
+
+// Flat per-pause deduction representing the typical wall-clock cost
+// of one event-cycle's consumer-side processing. Rounded up so a busy
+// event loop times out at-or-before its `seconds` budget rather than
+// after — see DOCS.md "Timer-vs-yield".
+const YIELD_CHARGE_MS = 5;
+
+// --- Resolved IO ---
+
+const CONSOLE_METHODS: readonly ConsoleMethod[] = [
+	'log',
+	'debug',
+	'info',
+	'warn',
+	'error',
+	'assert',
+	'table',
+	'dir',
+	'dirxml',
+	'group',
+	'groupCollapsed',
+	'groupEnd',
+	'count',
+	'countReset',
+	'time',
+	'timeEnd',
+	'timeLog',
+	'trace',
+	'clear',
+];
+
+type ResolvedConsole = Record<
+	ConsoleMethod,
+	(...arguments_: readonly unknown[]) => Promise<void>
+>;
+
+type ResolvedIo = {
+	readonly prompt: (
+		message: string,
+		defaultValue?: string,
+	) => Promise<string | null>;
+	readonly alert: (message: string) => Promise<void>;
+	readonly confirm: (message: string) => Promise<boolean>;
+	readonly console: ResolvedConsole;
+};
+
+/**
+ * Merges consumer-provided mocks with Native IO wrappers into the
+ * Resolved IO table. Each slot is independently overridable — omitted
+ * slots fall back to the Native IO wrapper. All callbacks are wrapped
+ * in async so the main loop can always `await` them uniformly.
+ */
+function buildResolvedIo(io?: IoMocks): ResolvedIo {
+	const resolvedConsole = {} as ResolvedConsole;
+
+	for (const method of CONSOLE_METHODS) {
+		const mock = io?.console?.[method];
+		if (mock) {
+			resolvedConsole[method] = async (...arguments_) => {
+				await mock(...arguments_);
+			};
+		} else {
+			const nativeFunction = (
+				console as unknown as Record<
+					ConsoleMethod,
+					(...a: readonly unknown[]) => void
+				>
+			)[method];
+			resolvedConsole[method] = async (...arguments_) => {
+				nativeFunction?.(...arguments_);
+			};
+		}
+	}
+
+	return {
+		prompt: io?.prompt
+			? async (message, def) => io.prompt!(message, def)
+			: async (message, def) =>
+					def === undefined
+						? globalThis.prompt(message)
+						: globalThis.prompt(message, def),
+
+		alert: io?.alert
+			? async (message) => {
+					await io.alert!(message);
+				}
+			: async (message) => {
+					globalThis.alert(message);
+				},
+
+		confirm: io?.confirm
+			? async (message) => io.confirm!(message)
+			: async (message) => globalThis.confirm(message),
+		console: resolvedConsole,
+	};
+}
+
+// --- LinkedInterceptEvent enrichment helpers ---
+
+/**
+ * Enriches a worker-emitted `InterceptEvent` with AST navigation
+ * fields (nodePath, nodePathSource, node, loc, callee, calleePath)
+ * AND pushes the event into the resolved node's `events[]` back-ref
+ * array. Entwining happens inline at emission time so consumers
+ * iterating live see fully-linked events without waiting for run
+ * completion.
+ *
+ * @remarks Mutates `event` in place to preserve reference identity
+ * (load-bearing for the replay invariant: events yielded during
+ * streaming must be `===` the same objects in `result.events`).
+ *
+ * Three branches:
+ *
+ * 1. **Worker-emitted with `nodePath` already set** (the happy path
+ *    after the universal CallExpression wrap). Worker stamped
+ *    `event.nodePath = __currentPath`. Stamp `nodePathSource:
+ *    'instrumented'`, resolve `event.node` and `event.loc` from
+ *    `locationIndex.astByPath[nodePath]`, push back-ref.
+ * 2. **Residual error path** — runtime error fired OUTSIDE any
+ *    wrapped CallExpression. Worker fell back to
+ *    `extractPositionFromError` and emitted `line` (and maybe
+ *    `column`) without `nodePath`. Look up via `lookupNodePath` to
+ *    find the deepest containing AST node; stamp
+ *    `nodePathSource: 'enclosing-fallback'`, resolve `event.node`
+ *    and `event.loc`, push back-ref.
+ * 3. **No AST built** — `locationIndex` is `null` (validation failed
+ *    pre-parse) OR the event has no nodePath/line/column to look up.
+ *    Stamp `nodePath: null, nodePathSource: 'no-ast', node: null,
+ *    loc: null`. No back-ref to push.
+ */
+function enrichEvent(
+	event: InterceptEvent,
+	locationIndex: LocationIndex | null,
+): LinkedInterceptEvent {
+	const incomingNodePath = (event as { readonly nodePath?: string | null })
+		.nodePath;
+
+	// Branch 1: worker stamped nodePath via __$ic — instrumented path.
+	if (typeof incomingNodePath === 'string' && locationIndex !== null) {
+		const node = locationIndex.astByPath.get(incomingNodePath);
+		const enriched = event as InterceptEvent & {
+			readonly nodePath: string | null;
+			readonly nodePathSource: NodePathSource;
+			readonly node: ASTNode | null;
+			readonly loc: {
+				readonly start: { readonly line: number; readonly column: number };
+				readonly end: { readonly line: number; readonly column: number };
+			} | null;
+			readonly callee: ASTNode | null;
+			readonly calleePath: string | null;
+		};
+		enriched.nodePath = incomingNodePath;
+		enriched.nodePathSource = 'instrumented';
+		enriched.node = node ?? null;
+		enriched.loc = node ? node.loc : null;
+		// Direct callee navigation: only meaningful when node is a
+		// CallExpression (the wrapped happy path). For non-call nodes
+		// (residual error path), callee/calleePath stay null.
+		if (node?.type === 'CallExpression') {
+			const calleeReference = (
+				node as unknown as { readonly callee: ASTNode | undefined }
+			).callee;
+			enriched.callee = calleeReference ?? null;
+			enriched.calleePath = calleeReference ? calleeReference.syntaxId : null;
+		} else {
+			enriched.callee = null;
+			enriched.calleePath = null;
+		}
+		// Push back-ref into node.events[] (the AST → events accessor).
+		// Replaces what the post-completion `link()` step used to do; now
+		// happens inline so consumers see populated back-refs mid-stream.
+		if (node !== undefined) {
+			node.events.push(enriched as unknown as LinkedInterceptEvent);
+		}
+		return enriched as unknown as LinkedInterceptEvent;
+	}
+
+	const { line } = event as { readonly line?: number };
+	const { column } = event as { readonly column?: number };
+
+	// Branch 3: no AST OR no usable position — no-ast.
+	if (locationIndex === null || line === undefined || column === undefined) {
+		const enriched = event as InterceptEvent & {
+			readonly nodePath: string | null;
+			readonly nodePathSource: NodePathSource;
+			readonly node: ASTNode | null;
+			readonly loc: {
+				readonly start: { readonly line: number; readonly column: number };
+				readonly end: { readonly line: number; readonly column: number };
+			} | null;
+			readonly callee: ASTNode | null;
+			readonly calleePath: string | null;
+		};
+		enriched.nodePath = null;
+		enriched.nodePathSource = 'no-ast';
+		enriched.node = null;
+		enriched.loc = null;
+		enriched.callee = null;
+		enriched.calleePath = null;
+		return enriched as unknown as LinkedInterceptEvent;
+	}
+
+	// Branch 2: residual error path — fall back to (line, column) lookup.
+	const lookup = lookupNodePath(locationIndex, line, column);
+	const node = locationIndex.astByPath.get(lookup.nodePath);
+	const enriched = event as InterceptEvent & {
+		readonly nodePath: string;
+		readonly nodePathSource: NodePathSource;
+		readonly node: ASTNode | null;
+		readonly loc: {
+			readonly start: { readonly line: number; readonly column: number };
+			readonly end: { readonly line: number; readonly column: number };
+		} | null;
+		readonly callee: ASTNode | null;
+		readonly calleePath: string | null;
+	};
+	enriched.nodePath = lookup.nodePath;
+	enriched.nodePathSource = lookup.source;
+	enriched.node = node ?? null;
+	enriched.loc = node ? node.loc : null;
+	// Same CallExpression discriminator as Branch 1; residual lookups
+	// usually land on non-call nodes (e.g. MemberExpression for
+	// `let x = null.foo;`), in which case callee/calleePath stay null.
+	if (node?.type === 'CallExpression') {
+		const calleeReference = (
+			node as unknown as { readonly callee: ASTNode | undefined }
+		).callee;
+		enriched.callee = calleeReference ?? null;
+		enriched.calleePath = calleeReference ? calleeReference.syntaxId : null;
+	} else {
+		enriched.callee = null;
+		enriched.calleePath = null;
+	}
+	// Push back-ref into node.events[] for residual-path attribution.
+	if (node !== undefined) {
+		node.events.push(enriched as unknown as LinkedInterceptEvent);
+	}
+	return enriched as unknown as LinkedInterceptEvent;
+}
+
+/**
+ * Builds an InterceptResult for early-return paths that occur BEFORE
+ * the AST exists (cancel/fail before iterate, validation/format/SAB
+ * gate failures, Worker construction errors). Events on these paths
+ * carry `nodePath: null, nodePathSource: 'no-ast', node: null` and
+ * `result.ast` is `null`.
+ *
+ * For the post-execution full-AST path see `buildResult`.
+ */
+function buildEarlyResult(
+	code: string,
+	options: InterceptOptions,
+	outcome: InterceptOutcome,
+	events: readonly LinkedInterceptEvent[],
+	error?: InterceptResultError,
+	reason?: unknown,
+): InterceptResult {
+	const ok =
+		outcome === 'complete' || outcome === 'cancel' || outcome === 'fail';
+	const linked = events.map((e) => {
+		const event = e as {
+			readonly node: ASTNode | null;
+			readonly callee: ASTNode | null;
+			readonly calleePath: string | null;
+		};
+		event.node = null;
+		event.callee = null;
+		event.calleePath = null;
+		return e as unknown as LinkedInterceptEvent;
+	});
+	// Wire prev/next as plain frozen properties — for one-shot finalization
+	// the neighbor is known at build time, so accessor backing isn't needed.
+	// Same observable shape as the streaming-path appendEvent helper.
+	for (let index = 0; index < linked.length; index++) {
+		const event = linked[index] as {
+			readonly prev: LinkedInterceptEvent | null;
+			readonly next: LinkedInterceptEvent | null;
+		};
+		event.prev = index > 0 ? (linked[index - 1] ?? null) : null;
+		event.next = index + 1 < linked.length ? (linked[index + 1] ?? null) : null;
+		Object.freeze(linked[index]);
+	}
+	return deepFreezeInPlace({
+		ok,
+		outcome,
+		events: linked,
+		...(error === undefined ? {} : { error }),
+		...(reason === undefined ? {} : { reason }),
+		code,
+		options,
+		ast: null as Readonly<Record<string, ASTNode>> | null,
+		visitCounts: {} as Readonly<Record<string, number>>,
+	});
+}
+
+// --- Internal error helper ---
+
+function makeInternalError(error: unknown, step: number): RunErrorEvent {
+	return {
+		event: 'error',
+		name: 'InternalError',
+		message: error instanceof Error ? error.message : String(error),
+		phase: 'execution',
+		step,
+	};
+}

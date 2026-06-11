@@ -32,7 +32,7 @@
  *    `new Function` with dialog traps as arguments.
  * 3. Posts `complete` (with optional `error` payload) when done.
  */
-function createWorkerScript(): string {
+export default function createWorkerScript(): string {
 	return `"use strict";
 
 // --- SAB layout constants (duplicated from worker-protocol.ts) ---
@@ -241,5 +241,3 @@ function extractLineFromError(err) {
 }
 `;
 }
-
-export default createWorkerScript;

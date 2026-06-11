@@ -51,122 +51,6 @@ import {
 	writePromptResponse,
 } from './worker-protocol.js';
 
-// --- Internal termination state (first-write-wins) ---
-
-/**
- * Mirrors intercept's `TerminationCause` pattern: every async path
- * that ends a run records a cause here via `setTermination`. First-
- * write-wins across cancel / timeout / worker-error / io-error.
- *
- * Sync gate failures don't go through this — they pre-settle the
- * result Promise directly inside `run()` body before the handle is
- * returned.
- */
-type TerminationCause =
-	| { readonly kind: 'cancel' }
-	| { readonly kind: 'timeout' }
-	| { readonly kind: 'worker-error' }
-	| { readonly kind: 'io-error' };
-
-// Flat per-pause deduction. In intercept this represents the typical
-// wall-clock cost of one event-cycle's consumer-side processing. In
-// the trapless engine the only pause is during an I/O callback await,
-// so the value is essentially symbolic — a small per-pause minimum
-// tick that prevents I/O-bound code from cumulatively evading the
-// seconds budget. Kept at the same value as intercept for symmetry;
-// revisit only if testing shows material over-counting of typical
-// prompt modal time.
-const YIELD_CHARGE_MS = 0.8;
-
-// --- Resolved IO ---
-
-type ResolvedIo = {
-	readonly prompt: (
-		message: string,
-		defaultValue?: string,
-	) => Promise<string | null>;
-	readonly alert: (message: string) => Promise<void>;
-	readonly confirm: (message: string) => Promise<boolean>;
-};
-
-/**
- * Wraps consumer mocks; missing slots fall back to the native browser
- * dialog (`globalThis.prompt` / `globalThis.alert` / `globalThis.confirm`).
- *
- * @remarks Matches intercept's `buildResolvedIo` behavior — there is no
- * behavioral divergence between the two engines here. (An earlier
- * version of this engine threw on missing mocks; that decision was
- * reverted in favor of parity with intercept.)
- */
-function buildResolvedIo(io?: IoMocks): ResolvedIo {
-	return {
-		prompt: io?.prompt
-			? async (message, def) => io.prompt!(message, def)
-			: async (message, def) => globalThis.prompt(message, def),
-		alert: io?.alert
-			? async (message) => await io.alert!(message)
-			: async (message) => await globalThis.alert(message),
-		confirm: io?.confirm
-			? async (message) => io.confirm!(message)
-			: async (message) => globalThis.confirm(message),
-	};
-}
-
-// --- Default options ---
-
-const DEFAULT_SECONDS = 5;
-
-// --- Iteration-limit classifier ---
-
-/**
- * Matches the RangeError message thrown by guard-loops:
- *   `Loop {n} exceeded {maxIterations} iterations.`
- *
- * Preserves intercept's classification gate — an *unguarded* RangeError
- * from learner code (e.g. `new Array(2**32)`) must not be misclassified
- * as `iteration-limit`. Both the regex match AND `maxIterations !==
- * undefined` are required.
- */
-const ITERATION_LIMIT_MESSAGE_RE = /^Loop \d+ exceeded \d+ iterations\.?/;
-
-function classifyCompleteError(
-	error: NonNullable<CompleteMessage['error']>,
-	maxIterations: number | undefined,
-): RunResult {
-	if (
-		maxIterations !== undefined &&
-		error.name === 'RangeError' &&
-		ITERATION_LIMIT_MESSAGE_RE.test(error.message)
-	) {
-		return {
-			ok: false,
-			outcome: 'iteration-limit',
-			error: {
-				kind: 'iteration-limit',
-				name: error.name,
-				message: error.message,
-				...(error.line === undefined ? {} : { line: error.line }),
-				phase: 'execution',
-				limit: maxIterations,
-			},
-		};
-	}
-	const jsError: JavaScriptResultError = {
-		kind: 'javascript',
-		name: error.name,
-		message: error.message,
-		...(error.line === undefined ? {} : { line: error.line }),
-		phase: error.phase,
-	};
-	return {
-		ok: false,
-		outcome: 'error',
-		error: jsError,
-	};
-}
-
-// --- Public entry ---
-
 /**
  * Runs JeJ code in a trapless Web Worker.
  *
@@ -175,7 +59,10 @@ function classifyCompleteError(
  *   `handle.cancel()` aborts an in-flight run. `handle.code`,
  *   `handle.ast`, and `handle.options` are sync-available reads.
  */
-function createRunHandle(code: string, options?: RunOptions): RunHandle {
+export default function createRunHandle(
+	code: string,
+	options?: RunOptions,
+): RunHandle {
 	const resolvedOptions: ResolvedRunOptions = Object.freeze({
 		seconds: options?.seconds ?? DEFAULT_SECONDS,
 		...(options?.iterations === undefined
@@ -204,7 +91,7 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 	// Phase 1: parse + JeJ validate (single parse pass; ast threaded
 	// through via the validate refactor)
 	const validation = validate(code);
-	const {ast} = validation;
+	const { ast } = validation;
 
 	if (!validation.ok) {
 		// Two flavors: parse error (no ast) or rejections (ast set).
@@ -486,7 +373,10 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 					if (message.error) {
 						if (!setTermination({ kind: 'worker-error' })) return;
 						terminate();
-						const classified = classifyCompleteError(message.error, maxIterations);
+						const classified = classifyCompleteError(
+							message.error,
+							maxIterations,
+						);
 						settle({
 							...classified,
 							...(ast ? { ast } : {}),
@@ -570,4 +460,116 @@ function createRunHandle(code: string, options?: RunOptions): RunHandle {
 	}
 }
 
-export default createRunHandle;
+// --- Internal termination state (first-write-wins) ---
+
+/**
+ * Mirrors intercept's `TerminationCause` pattern: every async path
+ * that ends a run records a cause here via `setTermination`. First-
+ * write-wins across cancel / timeout / worker-error / io-error.
+ *
+ * Sync gate failures don't go through this — they pre-settle the
+ * result Promise directly inside `run()` body before the handle is
+ * returned.
+ */
+type TerminationCause =
+	| { readonly kind: 'cancel' }
+	| { readonly kind: 'timeout' }
+	| { readonly kind: 'worker-error' }
+	| { readonly kind: 'io-error' };
+
+// Flat per-pause deduction. In intercept this represents the typical
+// wall-clock cost of one event-cycle's consumer-side processing. In
+// the trapless engine the only pause is during an I/O callback await,
+// so the value is essentially symbolic — a small per-pause minimum
+// tick that prevents I/O-bound code from cumulatively evading the
+// seconds budget. Kept at the same value as intercept for symmetry;
+// revisit only if testing shows material over-counting of typical
+// prompt modal time.
+const YIELD_CHARGE_MS = 0.8;
+
+// --- Resolved IO ---
+
+type ResolvedIo = {
+	readonly prompt: (
+		message: string,
+		defaultValue?: string,
+	) => Promise<string | null>;
+	readonly alert: (message: string) => Promise<void>;
+	readonly confirm: (message: string) => Promise<boolean>;
+};
+
+/**
+ * Wraps consumer mocks; missing slots fall back to the native browser
+ * dialog (`globalThis.prompt` / `globalThis.alert` / `globalThis.confirm`).
+ *
+ * @remarks Matches intercept's `buildResolvedIo` behavior — there is no
+ * behavioral divergence between the two engines here. (An earlier
+ * version of this engine threw on missing mocks; that decision was
+ * reverted in favor of parity with intercept.)
+ */
+function buildResolvedIo(io?: IoMocks): ResolvedIo {
+	return {
+		prompt: io?.prompt
+			? async (message, def) => io.prompt!(message, def)
+			: async (message, def) => globalThis.prompt(message, def),
+		alert: io?.alert
+			? async (message) => await io.alert!(message)
+			: async (message) => await globalThis.alert(message),
+		confirm: io?.confirm
+			? async (message) => io.confirm!(message)
+			: async (message) => globalThis.confirm(message),
+	};
+}
+
+// --- Default options ---
+
+const DEFAULT_SECONDS = 5;
+
+// --- Iteration-limit classifier ---
+
+/**
+ * Matches the RangeError message thrown by guard-loops:
+ *   `Loop {n} exceeded {maxIterations} iterations.`
+ *
+ * Preserves intercept's classification gate — an *unguarded* RangeError
+ * from learner code (e.g. `new Array(2**32)`) must not be misclassified
+ * as `iteration-limit`. Both the regex match AND `maxIterations !==
+ * undefined` are required.
+ */
+const ITERATION_LIMIT_MESSAGE_RE = /^Loop \d+ exceeded \d+ iterations\.?/;
+
+function classifyCompleteError(
+	error: NonNullable<CompleteMessage['error']>,
+	maxIterations: number | undefined,
+): RunResult {
+	if (
+		maxIterations !== undefined &&
+		error.name === 'RangeError' &&
+		ITERATION_LIMIT_MESSAGE_RE.test(error.message)
+	) {
+		return {
+			ok: false,
+			outcome: 'iteration-limit',
+			error: {
+				kind: 'iteration-limit',
+				name: error.name,
+				message: error.message,
+				...(error.line === undefined ? {} : { line: error.line }),
+				phase: 'execution',
+				limit: maxIterations,
+			},
+		};
+	}
+	const jsError: JavaScriptResultError = {
+		kind: 'javascript',
+		name: error.name,
+		message: error.message,
+		...(error.line === undefined ? {} : { line: error.line }),
+		phase: error.phase,
+	};
+	return {
+		ok: false,
+		outcome: 'error',
+		error: jsError,
+	};
+}

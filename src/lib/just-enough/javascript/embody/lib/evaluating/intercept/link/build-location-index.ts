@@ -31,28 +31,10 @@ import type { Node, Program } from 'acorn';
 
 import type { ASTNode, LocationIndex, SourceLocation } from './types.js';
 
-const META_KEYS = new Set(['type', 'start', 'end', 'loc']);
-
-function isAcornNode(value: unknown): value is Node {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		typeof (value as { readonly type?: unknown }).type === 'string'
-	);
-}
-
-function cloneLoc(loc: Node['loc']): SourceLocation {
-	const safeLoc = loc as {
-		readonly start: { readonly line: number; readonly column: number };
-		readonly end: { readonly line: number; readonly column: number };
-	};
-	return {
-		start: { line: safeLoc.start.line, column: safeLoc.start.column },
-		end: { line: safeLoc.end.line, column: safeLoc.end.column },
-	};
-}
-
-function buildLocationIndex(program: Program, source: string): LocationIndex {
+export default function buildLocationIndex(
+	program: Program,
+	source: string,
+): LocationIndex {
 	const astByPath = new Map<string, ASTNode>();
 	const exactStarts = new Map<string, string>();
 
@@ -69,8 +51,8 @@ function walk(
 	astByPath: ReadonlyMap<string, ASTNode>,
 	exactStarts: ReadonlyMap<string, string>,
 ): ASTNode {
-	const {start} = (acornNode as { readonly start: number });
-	const {end} = (acornNode as { readonly end: number });
+	const { start } = acornNode as { readonly start: number };
+	const { end } = acornNode as { readonly end: number };
 
 	// `children` is mutable until the result is frozen; we push every
 	// direct AST descendant here in source order so consumers have a
@@ -163,4 +145,23 @@ function walk(
 	return astNode;
 }
 
-export default buildLocationIndex;
+const META_KEYS = new Set(['type', 'start', 'end', 'loc']);
+
+function isAcornNode(value: unknown): value is Node {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		typeof (value as { readonly type?: unknown }).type === 'string'
+	);
+}
+
+function cloneLoc(loc: Node['loc']): SourceLocation {
+	const safeLoc = loc as {
+		readonly start: { readonly line: number; readonly column: number };
+		readonly end: { readonly line: number; readonly column: number };
+	};
+	return {
+		start: { line: safeLoc.start.line, column: safeLoc.start.column },
+		end: { line: safeLoc.end.line, column: safeLoc.end.column },
+	};
+}

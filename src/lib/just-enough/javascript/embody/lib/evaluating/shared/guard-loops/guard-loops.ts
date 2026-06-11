@@ -32,103 +32,10 @@ import * as recast from 'recast';
 
 import type { GuardResult, LoopType } from './types.js';
 
-/**
- * Builds an array mapping 0-indexed line numbers to the character
- * offset where each line starts in the source string.
- *
- * @param source - The full source code string
- * @returns Array where index N is the character offset of line N's first char
- */
-function computeLineStartOffsets(source: string): readonly number[] {
-	const offsets = [0];
-	for (let index = 0; index < source.length; index++) {
-		if (source[index] === '\n') {
-			offsets.push(index + 1);
-		}
-	}
-	return offsets;
-}
-
-/** Loc position from the AST — line is 1-indexed, column is 0-indexed. */
-type AstPosition = { readonly line: number; readonly column: number };
-
-/**
- * Converts an AST loc position to a character offset in the source string.
- *
- * Recast reports columns as visual positions where tabs expand to
- * `tabWidth` (default 4) columns. This function walks the actual
- * characters on the line, counting visual width, to find the true
- * character offset.
- *
- * @param pos - AST position (1-indexed line, visual column)
- * @param code - The original source string
- * @param lineStarts - Array from computeLineStartOffsets
- * @returns Character offset into the source string
- */
-function toOffset(
-	pos: AstPosition,
+export default function guardLoops(
 	code: string,
-	lineStarts: readonly number[],
-): number {
-	const TAB_WIDTH = 4;
-	const lineStart = lineStarts[pos.line - 1];
-	let visualCol = 0;
-	let index = lineStart;
-
-	while (visualCol < pos.column) {
-		if (code[index] === '\t') {
-			visualCol += TAB_WIDTH - (visualCol % TAB_WIDTH);
-		} else {
-			visualCol++;
-		}
-		index++;
-	}
-
-	return index;
-}
-
-/**
- * Injects body-injection guards into `while` loop bodies.
- *
- * @param code - JavaScript source code to transform
- * @param maxIterations - Maximum allowed iterations before throwing RangeError
- * @returns Object with transformed code and loop count. If no while
- *   loops are found, returns the original code unchanged with
- *   loopCount 0.
- *
- * @remarks Loops are numbered in reading order (pre-order DFS):
- * outer loops get lower numbers than inner loops. IDs start at 1.
- *
- * The transformation uses recast for AST parsing only (to get source
- * positions). String insertion at computed offsets preserves all
- * original formatting — no lines added, no columns shifted.
- */
-/** Loop node shape we depend on — `body.loc` for guard insertion; full `loc`
- * for do-while reset insertion (statement end, past the trailing `while(cond);`). */
-type LoopNode = {
-	readonly body: {
-		readonly loc: { readonly start: AstPosition; readonly end: AstPosition };
-	};
-	readonly loc: { readonly start: AstPosition; readonly end: AstPosition };
-};
-
-type CollectedLoop = {
-	readonly loopType: LoopType;
-	readonly node: LoopNode;
-};
-
-/** A single text insertion planned against the original source string. */
-type Insertion = { readonly offset: number; readonly text: string };
-
-/** Loop types this module guards. Single source of truth for the walker filter. */
-const GUARDED_LOOP_TYPES: readonly LoopType[] = [
-	'WhileStatement',
-	'ForStatement',
-	'DoWhileStatement',
-	'ForOfStatement',
-];
-
-function guardLoops(code: string, maxIterations: number): GuardResult {
+	maxIterations: number,
+): GuardResult {
 	const ast = recast.parse(code);
 	const loops: readonly CollectedLoop[] = collectLoops(ast);
 
@@ -224,4 +131,82 @@ function planLoopInsertions(
 	];
 }
 
-export default guardLoops;
+/**
+ * Builds an array mapping 0-indexed line numbers to the character
+ * offset where each line starts in the source string.
+ *
+ * @param source - The full source code string
+ * @returns Array where index N is the character offset of line N's first char
+ */
+function computeLineStartOffsets(source: string): readonly number[] {
+	const offsets = [0];
+	for (let index = 0; index < source.length; index++) {
+		if (source[index] === '\n') {
+			offsets.push(index + 1);
+		}
+	}
+	return offsets;
+}
+
+/** Loc position from the AST — line is 1-indexed, column is 0-indexed. */
+type AstPosition = { readonly line: number; readonly column: number };
+
+/**
+ * Converts an AST loc position to a character offset in the source string.
+ *
+ * Recast reports columns as visual positions where tabs expand to
+ * `tabWidth` (default 4) columns. This function walks the actual
+ * characters on the line, counting visual width, to find the true
+ * character offset.
+ *
+ * @param pos - AST position (1-indexed line, visual column)
+ * @param code - The original source string
+ * @param lineStarts - Array from computeLineStartOffsets
+ * @returns Character offset into the source string
+ */
+function toOffset(
+	pos: AstPosition,
+	code: string,
+	lineStarts: readonly number[],
+): number {
+	const TAB_WIDTH = 4;
+	const lineStart = lineStarts[pos.line - 1];
+	let visualCol = 0;
+	let index = lineStart;
+
+	while (visualCol < pos.column) {
+		if (code[index] === '\t') {
+			visualCol += TAB_WIDTH - (visualCol % TAB_WIDTH);
+		} else {
+			visualCol++;
+		}
+		index++;
+	}
+
+	return index;
+}
+
+/** Loop node shape we depend on — `body.loc` for guard insertion; full `loc`
+ * for do-while reset insertion (statement end, past the trailing `while(cond);`). */
+type LoopNode = {
+	readonly body: {
+		readonly loc: { readonly start: AstPosition; readonly end: AstPosition };
+	};
+	readonly loc: { readonly start: AstPosition; readonly end: AstPosition };
+};
+
+type CollectedLoop = {
+	readonly loopType: LoopType;
+	readonly node: LoopNode;
+};
+
+/** A single text insertion planned against the original source string. */
+type Insertion = { readonly offset: number; readonly text: string };
+
+/** Loop types this module guards. Single source of truth for the walker filter. */
+const GUARDED_LOOP_TYPES: readonly LoopType[] = [
+	'WhileStatement',
+	'ForStatement',
+	'DoWhileStatement',
+	'ForOfStatement',
+];

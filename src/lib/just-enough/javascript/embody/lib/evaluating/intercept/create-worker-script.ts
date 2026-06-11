@@ -23,7 +23,7 @@
  * I/O traps (alert/confirm/prompt) block via `Atomics.wait` until the
  * main thread writes a response to the SAB.
  */
-function createWorkerScript(): string {
+export default function createWorkerScript(): string {
 	return String.raw`"use strict";
 
 // --- SAB layout constants (duplicated from worker-protocol.ts) ---
@@ -337,5 +337,3 @@ function extractPositionFromError(err) {
 }
 `;
 }
-
-export default createWorkerScript;
