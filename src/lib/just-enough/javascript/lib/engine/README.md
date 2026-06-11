@@ -1,4 +1,4 @@
-# evaluating/engine
+# engine
 
 A **generic sandboxed streaming evaluator**. The engine runs untrusted code in a
 killable module Worker, streams **opaque items** to a consumer one at a time,
@@ -181,7 +181,7 @@ engine-made `error`, no halt.
 Consumer-driven stops (`cancelled`, `failed`) carry NO engine error — nothing
 misbehaved; the consumer ended a healthy run. This matches the embody contract's
 `error: null` mapping for those outcomes
-([embody/DOCS.md § Consumer-driven stops](../../../DOCS.md)).
+([embody/DOCS.md § Consumer-driven stops](../../embody/DOCS.md)).
 
 The division of limits: **time is engine-owned and standardly available;
 everything else (iteration counts, step budgets, domain rules) is owned by the
@@ -359,9 +359,9 @@ contract — `EndReport`, `RunInstance`, NM events, tier definitions, gates, the
 not-runnable short-circuit (the embody adapter and the JEJ tracers); hosting
 headers (COOP/COEP are the host page's concern).
 
-**Placement**: the engine lives under `embody/lib/evaluating/`, but it depends
-on nothing outside itself — a `javascript/lib/`-level home, alongside the other
-standalone modules there, fits it with no code change.
+**Placement**: the engine lives at the JeJ-package level (`javascript/lib/`),
+alongside the other peer-independent modules; it depends on nothing outside
+itself, so any peer — or any consumer beyond this package — imports it directly.
 
 **Vocabulary bridges**: what embody calls an NM _event_ is, to the engine, an
 opaque _item_. The engine's `EngineHandle` is not embody's `EvaluateHandle` —
@@ -373,7 +373,7 @@ bootstrap-posted, exactly once.
 
 - [DOCS.md](./DOCS.md) — architectural sketch, data flow, decision records
 - [types.ts](./types.ts) — the engine contract
-- [../../../README.md](../../../README.md) — embody: the consumer contract the
-  adapter layer implements on top of this engine
-- [../../../DOCS.md](../../../DOCS.md) — embody architecture; its section on
-  consumer-driven stops shapes the adapter's outcome vocabulary
+- [../../embody/README.md](../../embody/README.md) — embody: the consumer
+  contract the adapter layer implements on top of this engine
+- [../../embody/DOCS.md](../../embody/DOCS.md) — embody architecture; its
+  section on consumer-driven stops shapes the adapter's outcome vocabulary

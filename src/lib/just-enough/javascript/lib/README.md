@@ -11,10 +11,10 @@ requiring an upward dependency between peers.
 
 - A module under `embody/lib/` is internal to embody's pipeline.
 - A module under `orchestrate/lib/` is internal to the orchestrator.
-- A module under `lib/` is **JeJ-aware** (it knows about the JeJ language level,
-  the JeJ validation pipeline, the JeJ notional machine) but
-  **peer-independent** — usable from any peer that needs JeJ-shaped data over a
-  code string.
+- A module under `lib/` is **peer-independent** — usable from any peer — and is
+  either **JeJ-aware** (it knows about the JeJ language level, the JeJ
+  validation pipeline, the JeJ notional machine) or **fully generic** (the
+  sandbox `engine/` knows nothing of JeJ at all).
 
 ## What lives here
 
@@ -25,6 +25,9 @@ lib/
                          suggestions with blocked-marker overlay
   documenting/           docLookup-callback adapter: JEJ-aware
                          hover documentation
+  engine/                generic sandboxed streaming evaluator:
+                         killable module Worker, opaque items, one
+                         termination machine — fully JeJ-agnostic
   formatting-editor/     format-callback adapter: JeJ canonical
                          formatting delegated to the runtime formatter
   linting/               validation-feed adapter: JeJ violations
@@ -46,7 +49,8 @@ conflate JeJ-aware adapters (which produce shapes for editor / lens / tool
 consumption) with embody's internal pipeline (which produces the canonical
 `Snippet` embodiment).
 
-`lib/` is the home for the in-between: peer-independent, JeJ-aware.
+`lib/` is the home for both: the JeJ-aware adapters and the fully generic engine
+— peer-independent either way.
 
 ## Conventions
 
@@ -54,11 +58,11 @@ Inherits all conventions from [`../README.md`](../README.md),
 [`../../README.md`](../../README.md) (if applicable), and the top-level
 `AGENTS.md` / `DEV.md`. Module-specific rules:
 
-- **JeJ-aware, peer-independent.** A module under `lib/` may import from JeJ
-  data layers (`../embody/types.js`, `../embody/lib/*`) and from peer-shared
-  contracts (`../orchestrate/lib/editing/types.js` for editor-shape types when
-  relevant). It must not import from peer-internal implementation files outside
-  its own dependency chain.
+- **Peer-independent.** A module under `lib/` may import from JeJ data layers
+  (`../embody/types.js`, `../embody/lib/*`) and from peer-shared contracts
+  (`../orchestrate/lib/editing/types.js` for editor-shape types when relevant) —
+  or import nothing at all (the engine). It must not import from peer-internal
+  implementation files outside its own dependency chain.
 - **Each module is its own DDD cycle.** README + DOCS + types per module, Phase
   0 AR ceremony per new module.
 - **Pure-function default.** Modules under `lib/` produce shapes, not side
@@ -77,6 +81,8 @@ Inherits all conventions from [`../README.md`](../README.md),
   - [`./documenting/README.md`](./documenting/README.md) — docLookup-callback
     adapter with a curated JEJ-aware hover-doc table (keywords, allowed globals,
     curated members, plus blocked-stumble entries badged `not in JEJ`).
+  - [`./engine/README.md`](./engine/README.md) — generic sandboxed streaming
+    evaluator; the substrate the embody evaluate tiers run on.
   - [`./formatting-editor/README.md`](./formatting-editor/README.md) —
     format-callback adapter delegating to the canonical formatter.
   - [`./linting/README.md`](./linting/README.md) — validation-feed adapter for

@@ -1,9 +1,9 @@
-# evaluating/engine — Architecture & Decisions
+# engine — Architecture & Decisions
 
 Vocabulary: [README.md § Glossary](./README.md). The outcome table and what each
 settlement carries: [README.md § How a run ends](./README.md). A downstream
 example — the embody result vocabulary its adapter maps onto:
-[embody/DOCS.md](../../../DOCS.md) § Consumer-driven stops.
+[embody/DOCS.md](../../embody/DOCS.md) § Consumer-driven stops.
 
 ## Architectural Sketch
 
