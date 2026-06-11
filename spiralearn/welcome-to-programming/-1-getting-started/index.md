@@ -15,7 +15,7 @@ course is structured.
   🥚🐣🐥🐔 priority system
 - [Exercise Types](./exercise-types.md) — the types of exercises you'll
   encounter
-- [Just Enough JavaScript](./just-enough/javascript.md) |
+- [Just Enough JavaScript](./study-lenses.md) |
   [Just Enough Python](./just-enough/python.md) — language cheat sheets
 - [Studying with LLMs](./studying-with-llms/) — how to use AI tools responsibly
   while learning

@@ -5,7 +5,7 @@
  * Root is the whole javascript package so that run.ts can resolve
  * @utils and sibling imports without path gymnastics.
  *
- * Usage: npx vite --config src/lib/just-enough/javascript/embody/lib/evaluating/run/vite.sandbox.config.ts
+ * Usage: npx vite --config src/lib/study-lenses/embody/lib/evaluating/run/vite.sandbox.config.ts
  */
 
 import path from 'node:path';
@@ -13,7 +13,7 @@ import path from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	root: 'src/lib/just-enough/javascript',
+	root: 'src/lib/study-lenses',
 	resolve: {
 		alias: {
 			'@utils': path.resolve('src/lib/utils'),

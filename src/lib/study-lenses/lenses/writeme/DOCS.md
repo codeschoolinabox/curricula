@@ -327,7 +327,7 @@ dies with the component instance (no URL state in v1).
   generated-hints panel is not carried forward.
 - **Seeded / reproducible exercises.** No randomness in v1; not applicable.
 - **Multi-language support.** v1 is JavaScript-only (the package is
-  `just-enough/javascript`); multi-language is an `embody/` concern.
+  `study-lenses`); multi-language is an `embody/` concern.
 
 ## Why scaffold toggles use compartments
 

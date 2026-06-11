@@ -2037,5 +2037,5 @@ guide what each region of each chapter delivers.
 - `narrative/README.md` — the composer/virtuoso metaphor system
 - `assets/spiral-curriculum.png` and `assets/curriculum-spider-web.svg` — the
   topology + trajectory views
-- `just-enough/javascript/` — the JEJ → NM → embody → lenses → orchestrator
+- `study-lenses/` — the JEJ → NM → embody → lenses → orchestrator
   infrastructure

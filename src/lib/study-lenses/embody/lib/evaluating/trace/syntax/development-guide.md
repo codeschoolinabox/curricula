@@ -72,19 +72,19 @@ Each Claude Code session is a **fresh start**. The agent has:
 
 ```
 Read these files before doing anything:
-1. just-enough/javascript/embody/lib/evaluating/trace/syntax/PLAN.md (the plan — your assignment)
-2. just-enough/javascript/embody/lib/evaluating/trace/syntax/development-guide.md (this file, skim)
-3. just-enough/javascript/embody/lib/evaluating/trace/syntax/README.md (Phase 0.2 output)
-4. just-enough/javascript/embody/lib/evaluating/trace/syntax/DOCS.md (Phase 0.5 output)
-5. just-enough/javascript/embody/lib/evaluating/trace/syntax/types.ts (Phase 0.4 skeleton)
-6. just-enough/javascript/embody/lib/evaluating/trace/semantics/README.md and DOCS.md
+1. study-lenses/embody/lib/evaluating/trace/syntax/PLAN.md (the plan — your assignment)
+2. study-lenses/embody/lib/evaluating/trace/syntax/development-guide.md (this file, skim)
+3. study-lenses/embody/lib/evaluating/trace/syntax/README.md (Phase 0.2 output)
+4. study-lenses/embody/lib/evaluating/trace/syntax/DOCS.md (Phase 0.5 output)
+5. study-lenses/embody/lib/evaluating/trace/syntax/types.ts (Phase 0.4 skeleton)
+6. study-lenses/embody/lib/evaluating/trace/semantics/README.md and DOCS.md
    (the sibling semantic tracer — our input)
 7. 0-curricula/AGENTS.md and 0-curricula/DEV.md (workflow + conventions)
-8. just-enough/javascript/notional-machine.md (the NM spec — what we're modelling)
-9. just-enough/javascript/tracer.md, tracer.architecture.md, tracer.walkthroughs.md
+8. study-lenses/notional-machine.md (the NM spec — what we're modelling)
+9. study-lenses/tracer.md, tracer.architecture.md, tracer.walkthroughs.md
    (semantic-tracer docs — our input contract)
-10. just-enough/javascript/syllabus.md (pedagogical framing — "twinning", layers)
-11. just-enough/javascript/.planning-handoffs/00-master-plan.md (study-lenses
+10. study-lenses/syllabus.md (pedagogical framing — "twinning", layers)
+11. study-lenses/.planning-handoffs/00-master-plan.md (study-lenses
     architecture context — NM layer feeds this)
 
 Then resolve the "What's still open" items in PLAN.md §Handoff §What's still
@@ -203,8 +203,8 @@ intra-node). Revisit only if a concrete pedagogical use case forces it.
 ## Coordination with the tracer
 
 The NM layer is built on top of the semantic tracer. Phase 0-A makes small
-additions to tracer docs (at `just-enough/javascript/tracer.md`,
-`tracer.architecture.md`, `tracer.walkthroughs.md`):
+additions to tracer docs (at `study-lenses/tracer.md`, `tracer.architecture.md`,
+`tracer.walkthroughs.md`):
 
 - `io: { prompt, alert, confirm, console }` field on `TraceConfig`. `prompt`
   takes `(message: string, placeholder?: string)` per the spec.

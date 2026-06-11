@@ -18,7 +18,7 @@ Three adversarial agent reviews just returned:
   recommended (provenance, envPrefix, bindingTimeline).
 
 Phase 0 artifacts go into (empty, ready):
-`/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/lib/evaluating/trace/syntax/`
+`/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/lib/evaluating/trace/syntax/`
 
 Follows AGENTS.md workflow exactly.
 
@@ -235,7 +235,7 @@ layer.
 
 <strong>Files updated (spec only — no code in this DDD):</strong>
 
-- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/tracer.md`
+- `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/tracer.md`
 - `/Users/master/Documents/.../javascript/tracer.architecture.md`
 - `/Users/master/Documents/.../javascript/tracer.walkthroughs.md` (add a
   mocked-I/O walkthrough)
@@ -3434,7 +3434,7 @@ authoring proves the consumer-side filter is awkward in practice.
   `liveStep.events: AsyncIterable<TraceEvent>` (inner stream).
 - **Caching** — recompute. Pure functions. Caching deferred.
 - **Static-DAG build** — lives in the **wrapper** at
-  `src/lib/just-enough/javascript/lib/evaluating/trace/syntax/`.
+  `src/lib/study-lenses/lib/evaluating/trace/syntax/`.
 - **Environment reconstruction** — consumer's job. Wrapper emits initial env +
   per-step envDiff.
 - **Step types** — multi-type model: `DataStep` (atomic s→t→d with sources[] +

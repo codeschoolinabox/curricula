@@ -146,7 +146,7 @@ const result = await run(code, {
 A hand-test page exercises the full public API:
 
 ```bash
-npx vite --config src/lib/just-enough/javascript/embody/lib/evaluating/run/vite.sandbox.config.ts
+npx vite --config src/lib/study-lenses/embody/lib/evaluating/run/vite.sandbox.config.ts
 ```
 
 Then click `[run]` on the snippets to walk through each outcome variant. The
@@ -157,10 +157,10 @@ and the full result object is logged to the dev-tools console as `[run result]`.
 
 ```bash
 node ./node_modules/vitest/vitest.mjs run --project unit \
-	src/lib/just-enough/javascript/embody/lib/evaluating/run/tests/
+	src/lib/study-lenses/embody/lib/evaluating/run/tests/
 
 node ./node_modules/vitest/vitest.mjs run --project browser \
-	src/lib/just-enough/javascript/embody/lib/evaluating/run/tests/
+	src/lib/study-lenses/embody/lib/evaluating/run/tests/
 ```
 
 ## Related

@@ -244,21 +244,21 @@ different CodeMirror affordance. That cross-module data flow is sketched in
 
   **Categorical move** (content edit, intent: promote documenting from future to
   current inhabitant):
-  - `src/lib/just-enough/javascript/lib/README.md` — move "Documentation lookup
-    (hover tooltips for keywords)" from "likely future inhabitant" line to
-    "Current inhabitants" list with a `./documenting/README.md` entry.
+  - `src/lib/study-lenses/lib/README.md` — move "Documentation lookup (hover
+    tooltips for keywords)" from "likely future inhabitant" line to "Current
+    inhabitants" list with a `./documenting/README.md` entry.
 
   **Mechanical rename** (find-and-replace `jej-documentation` → `documenting`,
   with surrounding context adjustment as needed):
-  - `src/lib/just-enough/javascript/README.md` (parent-of-parent)
-  - `src/lib/just-enough/javascript/DOCS.md` (tree diagram + cross-peer table)
-  - `src/lib/just-enough/javascript/orchestrate/README.md`
-  - `src/lib/just-enough/javascript/orchestrate/lib/README.md`
-  - `src/lib/just-enough/javascript/orchestrate/DOCS.md`
-  - `src/lib/just-enough/javascript/orchestrate/editor/DOCS.md` § Deferred
-    callback wiring (also move docLookup from "unwired" to "wired" — a small
-    intent-edit nested in this file's mechanical rename)
-  - `src/lib/just-enough/javascript/lib/completing/DOCS.md`
+  - `src/lib/study-lenses/README.md` (parent-of-parent)
+  - `src/lib/study-lenses/DOCS.md` (tree diagram + cross-peer table)
+  - `src/lib/study-lenses/orchestrate/README.md`
+  - `src/lib/study-lenses/orchestrate/lib/README.md`
+  - `src/lib/study-lenses/orchestrate/DOCS.md`
+  - `src/lib/study-lenses/orchestrate/editor/DOCS.md` § Deferred callback wiring
+    (also move docLookup from "unwired" to "wired" — a small intent-edit nested
+    in this file's mechanical rename)
+  - `src/lib/study-lenses/lib/completing/DOCS.md`
 
   Same commit (per batch-fix-now), distinct intent. The categorical-move file
   should NOT be batched into a global search- and-replace pass; treat it as the

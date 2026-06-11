@@ -381,8 +381,8 @@ instance.
   throw is treated as "all blanks unfilled" rather than surfacing an error
   banner.
 - **Multi-language support.** v1 ships JavaScript-only since the package is
-  `just-enough/javascript`; multi-language is a multi-embodiment-type concern
-  that `embody/` would surface, not a lens-level concern.
+  `study-lenses`; multi-language is a multi-embodiment-type concern that
+  `embody/` would surface, not a lens-level concern.
 - **Adaptive difficulty / item-response-theory scaling.** v1 ships the manual
   slider; algorithmic difficulty adjustment based on learner performance is its
   own arc, not a v1 concern.

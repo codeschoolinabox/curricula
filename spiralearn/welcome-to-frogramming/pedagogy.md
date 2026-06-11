@@ -316,10 +316,9 @@ vocabulary:
 
 ## Lenses, embody, and substrate ↔ pedagogy mutual constitution
 
-The JEJ chain (`just-enough/javascript/` + `embody/` + Study Lenses +
-orchestrator) is named and described in `study-lenses.md` as infrastructure.
-This file carries the principles by which that infrastructure is
-pedagogy-shaped:
+The JEJ chain (`study-lenses/` + `embody/` + Study Lenses + orchestrator) is
+named and described in `study-lenses.md` as infrastructure. This file carries
+the principles by which that infrastructure is pedagogy-shaped:
 
 ### Lenses are F-pedagogy infrastructure
 
@@ -533,7 +532,7 @@ contextual, the less reusable. Points outward toward §B.3 stance & values (via
 Open Education + Forkability).
 
 **The Reusability Paradox is not a problem to solve — it's the productive
-tension the course lives inside.** `just-enough/javascript/` (the JEJ chain; see
+tension the course lives inside.** `study-lenses/` (the JEJ chain; see
 `study-lenses.md`) is the reusable infrastructure side; the manifesto / ontology
 / chapters are the opinionated content side. The course is what happens when the
 opinionated content uses the reusable infrastructure.
@@ -562,8 +561,8 @@ LLM prompting is an alternative way to operate the same panel.
 Ch4 framing: **"code is content, not deliverable."** AI-generated code is
 material to study, not work-product to ship.
 
-The principle is shared between this curriculum and `just-enough/javascript/`'s
-README — it's an org-wide commitment, not a Ch4-only flourish.
+The principle is shared between this curriculum and `study-lenses/`'s README —
+it's an org-wide commitment, not a Ch4-only flourish.
 
 #### §12-ter Full Complexity, Max Simplicity
 

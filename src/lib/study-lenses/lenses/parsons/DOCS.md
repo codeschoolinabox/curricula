@@ -331,7 +331,7 @@ v1).
 - **Toggle-line distractors (`$$toggle$$`), embedded unit/variable tests, and
   Python-isms.** Out of scope; a richer-assessment follow-up.
 - **Multi-language support.** v1 is JavaScript-only (the package is
-  `just-enough/javascript`); multi-language is an `embody/` concern.
+  `study-lenses`); multi-language is an `embody/` concern.
 
 ## Phase-8 additions + browser-checkpoint reconciliations
 

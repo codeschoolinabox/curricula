@@ -54,7 +54,7 @@ body-injection strategy (visible in DevTools).
 To test interactively, start the Vite dev server from the project root:
 
 ```sh
-npx vite --config src/lib/just-enough-javascript/evaluating/debug/vite.sandbox.config.ts
+npx vite --config src/lib/snippetry/debug/vite.sandbox.config.ts
 ```
 
 Then open `http://localhost:5173/sandbox.html`.

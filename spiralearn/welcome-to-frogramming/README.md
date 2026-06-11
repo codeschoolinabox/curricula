@@ -300,9 +300,9 @@ exhaustive dependency list.
 **Study Lenses** is embedded directly in every page. Every code snippet has a
 full suite of lenses available: trace tables, variable highlighters, Parsons
 problems, flow charts, fill-in-the-blanks, and more. Exercises suggest lenses,
-but you're always free to use whichever helps you most. The
-just-enough/javascript tooling that powers Study Lenses implements the
-Explorotron pedagogical framework (Malaise & Signer, 2023).
+but you're always free to use whichever helps you most. The study-lenses tooling
+that powers Study Lenses implements the Explorotron pedagogical framework
+(Malaise & Signer, 2023).
 
 **JavaScript only**. JS is the primary track because it is a popular language
 that makes the developer/user split _architecturally visible_: `console.log`

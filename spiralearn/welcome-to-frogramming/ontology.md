@@ -3,8 +3,7 @@
 > **Purpose**: this document is the substantive ontology of the WtF curriculum.
 > It captures the _conclusions_ of an extended thinking-together process — the
 > framework, not the conversation. It weaves substance from `README.md`,
-> `narrative/README.md`, and the `just-enough/javascript/` infrastructure
-> documentation.
+> `narrative/README.md`, and the `study-lenses/` infrastructure documentation.
 >
 > **Companions** (siblings, by co-location):
 >
@@ -1445,7 +1444,7 @@ Most load-bearing:
   summaries; rich chapter bodies live in `chapters.md`
 - `narrative/README.md` — composer/virtuoso/mechanism metaphor + 8 AI-collab
   skills + voice spec + visual asset set
-- `just-enough/javascript/README.md` + `DOCS.md` + `notional-machine.md`
+- `study-lenses/README.md` + `DOCS.md` + `notional-machine.md`
   - `embody/README.md` + `lenses/README.md` + `orchestrate/README.md` — the JEJ
     → NM → embody → lenses → orchestrate chain
 - User's `0--notes/pages/` First Principles trail (Wear Hats, Learner Trust,

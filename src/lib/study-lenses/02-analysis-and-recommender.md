@@ -26,26 +26,26 @@ Before starting, read these files in full (do not skim):
   `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/DEV.md`
 - **Syntax tracer** (canonical source of the NM-components enum — the 3rd Block
   Model dimension):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/embody/lib/evaluating/trace/syntax/`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/embody/lib/evaluating/trace/syntax/`
   — read `PLAN.md` (Resolutions), `README.md` (categories table), `types.ts`
   (`StepCategory` enum), `DOCS.md` (step-closing rules).
 - **Notional machine** (conceptual spec; operational implementation is the
   syntax tracer above):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/notional-machine.md`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/embody/language-levels/just-enough-javascript/notional-machine.md`
 - **Semantic tracer docs** (current implementation — the syntax tracer's input;
   semantic layers, gate config):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/embody/lib/evaluating/trace/semantics/`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/embody/lib/evaluating/trace/semantics/`
   (README + DOCS). Historical references at
   `embody/lib/evaluating/.old-notes-for-reference-and-inspiration/tracer.md`.
 - **Recommender directory** (currently empty scaffolding — README only):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/orchestrate/lib/recommender/`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/lib/recommender/`
 - **Socratizing module** (prior art for snippet analysis; may later consume the
   shared analysis):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/orchestrate/lib/socratizing/`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/orchestrate/lib/socratizing/`
 - **Validating module** (AST parsing for JEJ):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/embody/lib/validating/`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/embody/lib/validating/`
 - **Lenses DOCS.md** (current lens architecture):
-  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/lenses/DOCS.md`
+  `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/study-lenses/lenses/DOCS.md`
 - **3rd Block Model dimension** — the canonical `StepCategory` enum lives in the
   syntax tracer (`embody/lib/evaluating/trace/syntax/types.ts`), wired into
   `lenses/types.ts` (`BlockModelCell.nmComponents`); see `./DOCS.md` § 3D Block

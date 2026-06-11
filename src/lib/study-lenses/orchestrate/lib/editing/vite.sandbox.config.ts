@@ -1,7 +1,7 @@
 /**
  * @file Vite dev server config for the editor sandbox.
  *
- * Usage: npx vite --config src/lib/just-enough/javascript/orchestrate/lib/editing/vite.sandbox.config.ts
+ * Usage: npx vite --config src/lib/study-lenses/orchestrate/lib/editing/vite.sandbox.config.ts
  */
 
 import path from 'node:path';
@@ -9,7 +9,7 @@ import path from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	root: 'src/lib/just-enough/javascript/orchestrate/lib/editing',
+	root: 'src/lib/study-lenses/orchestrate/lib/editing',
 	resolve: {
 		alias: {
 			// Editor files import from @utils/... — resolve to src/lib/utils

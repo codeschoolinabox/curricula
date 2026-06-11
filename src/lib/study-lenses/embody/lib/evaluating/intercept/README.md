@@ -655,7 +655,7 @@ with `name: 'EnvironmentError'` rather than throwing.
 To test interactively, start the Vite dev server from the project root:
 
 ```sh
-npx vite --config src/lib/just-enough/javascript/embody/lib/evaluating/intercept/vite.sandbox.config.ts
+npx vite --config src/lib/study-lenses/embody/lib/evaluating/intercept/vite.sandbox.config.ts
 ```
 
 Then open `http://localhost:5173/sandbox.html`.

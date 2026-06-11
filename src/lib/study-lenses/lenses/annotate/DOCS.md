@@ -244,8 +244,8 @@ state-only, no annotation-set transformation runs.
   gone.
 - **Multi-language Prism support.** Pre-refactor lens switched `language-*` on
   file extension (JS / TS / Python / …). v1 ships JavaScript-only since the
-  package is `just-enough/javascript`; multi-language is a multi-embodiment-type
-  concern that `embody/` would surface, not a lens-level concern.
+  package is `study-lenses`; multi-language is a multi-embodiment-type concern
+  that `embody/` would surface, not a lens-level concern.
 - **Cross-lens annotation reuse.** A learner's annotations on snippet A do not
   transfer to snippet B; that's by design (per the disposable-practice principle
   and per the LMS's responsibility for cross-snippet learner state).

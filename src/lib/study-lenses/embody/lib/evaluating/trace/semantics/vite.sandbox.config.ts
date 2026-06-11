@@ -4,7 +4,7 @@
  * Adds COOP/COEP headers required for SharedArrayBuffer
  * (needed for worker-based trace with SAB+Atomics I/O traps).
  *
- * Usage: npx vite --config src/lib/just-enough/javascript/evaluating/trace/vite.sandbox.config.ts
+ * Usage: npx vite --config src/lib/study-lenses/evaluating/trace/vite.sandbox.config.ts
  */
 
 import path from 'node:path';
@@ -13,7 +13,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	// WHY this root: sandbox.html imports from ../../api/ (validate, format, trace).
 	// The root must include both evaluating/ and api/ directories.
-	root: 'src/lib/just-enough/javascript',
+	root: 'src/lib/study-lenses',
 	resolve: {
 		alias: {
 			'@utils': path.resolve('src/lib/utils'),

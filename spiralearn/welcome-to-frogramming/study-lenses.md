@@ -624,11 +624,11 @@ elsewhere; brief acknowledgment + see-X).
 
 **Source-code documentation chain** (canonical technical contracts):
 
-- [`just-enough/javascript/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/README.md)
+- [`study-lenses/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/README.md)
   — package overview, Pedagogical first principles
-- [`just-enough/javascript/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/DOCS.md)
+- [`study-lenses/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/DOCS.md)
   — architecture decisions
-- [`just-enough/javascript/notional-machine.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/language-levels/just-enough-javascript/notional-machine.md)
+- [`study-lenses/notional-machine.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/language-levels/just-enough-javascript/notional-machine.md)
   — NM specification
 - [`embody/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/README.md)
   and
