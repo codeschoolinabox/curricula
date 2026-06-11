@@ -8,159 +8,6 @@ import type { ScopeInfo } from '../scope/types.js';
 import createViolation from './create-violation.js';
 import type { Violation } from './types.js';
 
-/** Known JavaScript built-in globals. Identifiers in this set that are NOT
- * in the language level's `allowedGlobals` produce a rejection. Identifiers
- * NOT in this set pass through to runtime — typos get ReferenceError.
- *
- * Does not need to be exhaustive — missing entries safely pass to runtime. */
-const KNOWN_JS_GLOBALS: ReadonlySet<string> = Object.freeze(
-	new Set([
-		// Constructors / namespaces
-		'Object',
-		'Function',
-		'Array',
-		'Number',
-		'String',
-		'Boolean',
-		'Symbol',
-		'BigInt',
-		'Date',
-		'RegExp',
-		'Error',
-		'TypeError',
-		'RangeError',
-		'ReferenceError',
-		'SyntaxError',
-		'URIError',
-		'EvalError',
-		'AggregateError',
-		'Map',
-		'Set',
-		'WeakMap',
-		'WeakSet',
-		'WeakRef',
-		'FinalizationRegistry',
-		'Promise',
-		'Proxy',
-		'Reflect',
-		'JSON',
-		'Math',
-		'Intl',
-		'ArrayBuffer',
-		'SharedArrayBuffer',
-		'DataView',
-		'Atomics',
-		'Int8Array',
-		'Uint8Array',
-		'Uint8ClampedArray',
-		'Int16Array',
-		'Uint16Array',
-		'Int32Array',
-		'Uint32Array',
-		'Float32Array',
-		'Float64Array',
-		'BigInt64Array',
-		'BigUint64Array',
-		'Iterator',
-		'AsyncIterator',
-		// Global functions
-		'parseInt',
-		'parseFloat',
-		'isNaN',
-		'isFinite',
-		'encodeURI',
-		'encodeURIComponent',
-		'decodeURI',
-		'decodeURIComponent',
-		'escape',
-		'unescape',
-		'btoa',
-		'atob',
-		'setTimeout',
-		'setInterval',
-		'clearTimeout',
-		'clearInterval',
-		'requestAnimationFrame',
-		'cancelAnimationFrame',
-		'queueMicrotask',
-		'structuredClone',
-		'fetch',
-		'AbortController',
-		'AbortSignal',
-		// Browser globals
-		'window',
-		'self',
-		'globalThis',
-		'document',
-		'navigator',
-		'location',
-		'history',
-		'screen',
-		'localStorage',
-		'sessionStorage',
-		'indexedDB',
-		'XMLHttpRequest',
-		'Worker',
-		'WebSocket',
-		'EventSource',
-		// DOM
-		'Element',
-		'HTMLElement',
-		'Node',
-		'NodeList',
-		'Event',
-		'CustomEvent',
-		'MutationObserver',
-		'IntersectionObserver',
-		'ResizeObserver',
-		// Web APIs
-		'URL',
-		'URLSearchParams',
-		'Headers',
-		'Request',
-		'Response',
-		'FormData',
-		'Blob',
-		'File',
-		'FileReader',
-		'TextEncoder',
-		'TextDecoder',
-		'crypto',
-		'performance',
-		'ReadableStream',
-		'WritableStream',
-		'TransformStream',
-	]),
-);
-
-// ─── Scope lookup helpers ──────────────────────────────────
-
-/**
- * Finds the child scope whose AST node matches the given node.
- * Falls back to the parent scope if no child matches (e.g.,
- * a ForOfStatement body block that was merged into the for-of scope).
- */
-function findChildScope(node: Node, parentScope: ScopeInfo): ScopeInfo {
-	return parentScope.children.find((c) => c.node === node) ?? parentScope;
-}
-
-/**
- * Checks if a name is declared in the scope chain from the given
- * scope upward.
- */
-function isNameDeclared(name: string, scope: ScopeInfo): boolean {
-	let current: ScopeInfo | null = scope;
-	while (current) {
-		if (current.declarations.has(name)) {
-			return true;
-		}
-		current = current.parent;
-	}
-	return false;
-}
-
-// ─── Main function ─────────────────────────────────────────
-
 /**
  * Performs scope analysis on a parsed AST to detect disallowed globals.
  *
@@ -178,7 +25,7 @@ function isNameDeclared(name: string, scope: ScopeInfo): boolean {
  *   a `let`/`const` declaration (e.g. `console`, `alert`).
  * @returns A frozen array of scope-related {@link Violation}s.
  */
-function checkUndeclaredGlobals(
+export default function checkUndeclaredGlobals(
 	ast: Node,
 	allowedGlobals: ReadonlySet<string>,
 ): readonly Violation[] {
@@ -476,4 +323,153 @@ function extractLocation(node: Node) {
 	};
 }
 
-export default checkUndeclaredGlobals;
+// ─── Scope lookup helpers ──────────────────────────────────
+
+/**
+ * Finds the child scope whose AST node matches the given node.
+ * Falls back to the parent scope if no child matches (e.g.,
+ * a ForOfStatement body block that was merged into the for-of scope).
+ */
+function findChildScope(node: Node, parentScope: ScopeInfo): ScopeInfo {
+	return parentScope.children.find((c) => c.node === node) ?? parentScope;
+}
+
+/**
+ * Checks if a name is declared in the scope chain from the given
+ * scope upward.
+ */
+function isNameDeclared(name: string, scope: ScopeInfo): boolean {
+	let current: ScopeInfo | null = scope;
+	while (current) {
+		if (current.declarations.has(name)) {
+			return true;
+		}
+		current = current.parent;
+	}
+	return false;
+}
+
+/** Known JavaScript built-in globals. Identifiers in this set that are NOT
+ * in the language level's `allowedGlobals` produce a rejection. Identifiers
+ * NOT in this set pass through to runtime — typos get ReferenceError.
+ *
+ * Does not need to be exhaustive — missing entries safely pass to runtime. */
+const KNOWN_JS_GLOBALS: ReadonlySet<string> = Object.freeze(
+	new Set([
+		// Constructors / namespaces
+		'Object',
+		'Function',
+		'Array',
+		'Number',
+		'String',
+		'Boolean',
+		'Symbol',
+		'BigInt',
+		'Date',
+		'RegExp',
+		'Error',
+		'TypeError',
+		'RangeError',
+		'ReferenceError',
+		'SyntaxError',
+		'URIError',
+		'EvalError',
+		'AggregateError',
+		'Map',
+		'Set',
+		'WeakMap',
+		'WeakSet',
+		'WeakRef',
+		'FinalizationRegistry',
+		'Promise',
+		'Proxy',
+		'Reflect',
+		'JSON',
+		'Math',
+		'Intl',
+		'ArrayBuffer',
+		'SharedArrayBuffer',
+		'DataView',
+		'Atomics',
+		'Int8Array',
+		'Uint8Array',
+		'Uint8ClampedArray',
+		'Int16Array',
+		'Uint16Array',
+		'Int32Array',
+		'Uint32Array',
+		'Float32Array',
+		'Float64Array',
+		'BigInt64Array',
+		'BigUint64Array',
+		'Iterator',
+		'AsyncIterator',
+		// Global functions
+		'parseInt',
+		'parseFloat',
+		'isNaN',
+		'isFinite',
+		'encodeURI',
+		'encodeURIComponent',
+		'decodeURI',
+		'decodeURIComponent',
+		'escape',
+		'unescape',
+		'btoa',
+		'atob',
+		'setTimeout',
+		'setInterval',
+		'clearTimeout',
+		'clearInterval',
+		'requestAnimationFrame',
+		'cancelAnimationFrame',
+		'queueMicrotask',
+		'structuredClone',
+		'fetch',
+		'AbortController',
+		'AbortSignal',
+		// Browser globals
+		'window',
+		'self',
+		'globalThis',
+		'document',
+		'navigator',
+		'location',
+		'history',
+		'screen',
+		'localStorage',
+		'sessionStorage',
+		'indexedDB',
+		'XMLHttpRequest',
+		'Worker',
+		'WebSocket',
+		'EventSource',
+		// DOM
+		'Element',
+		'HTMLElement',
+		'Node',
+		'NodeList',
+		'Event',
+		'CustomEvent',
+		'MutationObserver',
+		'IntersectionObserver',
+		'ResizeObserver',
+		// Web APIs
+		'URL',
+		'URLSearchParams',
+		'Headers',
+		'Request',
+		'Response',
+		'FormData',
+		'Blob',
+		'File',
+		'FileReader',
+		'TextEncoder',
+		'TextDecoder',
+		'crypto',
+		'performance',
+		'ReadableStream',
+		'WritableStream',
+		'TransformStream',
+	]),
+);

@@ -28,7 +28,7 @@ import type { SourceRange, Violation } from './types.js';
  * @param severity - Always `'rejection'`. All violations block execution.
  * @returns A deeply frozen {@link Violation}.
  */
-function createViolation(
+export default function createViolation(
 	nodeType: string,
 	message: string,
 	location: SourceRange,
@@ -46,5 +46,3 @@ function createViolation(
 		nodePath,
 	});
 }
-
-export default createViolation;

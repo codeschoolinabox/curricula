@@ -21,6 +21,43 @@ import type {
 	ScopeKind,
 } from './types.js';
 
+/**
+ * Builds a complete scope analysis from a parsed AST.
+ *
+ * @remarks Pure function. Takes an acorn AST (parsed with
+ * `locations: true`). Returns a deeply frozen `ScopeAnalysis`
+ * containing the scope tree and a flat list of all declarations
+ * with their reference counts.
+ *
+ * @param ast - The root AST node (typically `Program`).
+ * @returns A frozen `ScopeAnalysis`.
+ */
+export default function buildScope(ast: Node): ScopeAnalysis {
+	const rootScope: MutableScope = {
+		kind: 'program',
+		node: ast,
+		parent: null,
+		declarations: new Map(),
+		children: [],
+		depth: 0,
+	};
+
+	walkScope(ast, rootScope, false, false);
+
+	const allDeclarations: DeclarationInfo[] = [];
+	const root = convertScope(rootScope, allDeclarations);
+
+	freezeScopeTree(root);
+	Object.freeze(allDeclarations);
+
+	const analysis: ScopeAnalysis = {
+		root,
+		allDeclarations,
+	};
+
+	return Object.freeze(analysis);
+}
+
 // ─── Mutable internal types ────────────────────────────────
 
 type MutableDeclaration = {
@@ -362,44 +399,3 @@ function freezeScopeTree(scope: ScopeInfo): void {
 	Object.freeze(scope.children);
 	Object.freeze(scope);
 }
-
-// ─── Main function ─────────────────────────────────────────
-
-/**
- * Builds a complete scope analysis from a parsed AST.
- *
- * @remarks Pure function. Takes an acorn AST (parsed with
- * `locations: true`). Returns a deeply frozen `ScopeAnalysis`
- * containing the scope tree and a flat list of all declarations
- * with their reference counts.
- *
- * @param ast - The root AST node (typically `Program`).
- * @returns A frozen `ScopeAnalysis`.
- */
-function buildScope(ast: Node): ScopeAnalysis {
-	const rootScope: MutableScope = {
-		kind: 'program',
-		node: ast,
-		parent: null,
-		declarations: new Map(),
-		children: [],
-		depth: 0,
-	};
-
-	walkScope(ast, rootScope, false, false);
-
-	const allDeclarations: DeclarationInfo[] = [];
-	const root = convertScope(rootScope, allDeclarations);
-
-	freezeScopeTree(root);
-	Object.freeze(allDeclarations);
-
-	const analysis: ScopeAnalysis = {
-		root,
-		allDeclarations,
-	};
-
-	return Object.freeze(analysis);
-}
-
-export default buildScope;

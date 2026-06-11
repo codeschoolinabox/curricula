@@ -26,7 +26,9 @@ import type { ChildWithPath } from './types.js';
  * @returns Direct children paired with their path segments, in
  *   property-enumeration order (array elements in source order).
  */
-function getChildNodesWithPath(node: Node): readonly ChildWithPath[] {
+export default function getChildNodesWithPath(
+	node: Node,
+): readonly ChildWithPath[] {
 	const children: ChildWithPath[] = [];
 	const record = node as unknown as Record<string, unknown>;
 
@@ -81,5 +83,3 @@ function isNode(value: unknown): value is Node {
 		typeof (value as Record<string, unknown>).type === 'string'
 	);
 }
-
-export default getChildNodesWithPath;

@@ -37,7 +37,7 @@ import type { LanguageLevel, ValidationReport } from './types.js';
  * @returns A frozen {@link ValidationReport} with all violations
  *   found (or a parse error if the source is syntactically invalid).
  */
-function validateProgram(
+export default function validateProgram(
 	source: string,
 	languageLevel: LanguageLevel,
 ): ValidationReport {
@@ -121,5 +121,3 @@ function hasWithStatement(ast: Node): boolean {
 	}
 	return false;
 }
-
-export default validateProgram;

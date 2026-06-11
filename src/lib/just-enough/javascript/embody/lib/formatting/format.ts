@@ -17,6 +17,22 @@ import * as estreePlugin from 'prettier/plugins/estree';
 import { format as prettierFormat } from 'prettier/standalone';
 
 /**
+ * Format JavaScript source code the JeJ way.
+ *
+ * @param code - ANY valid JavaScript source code
+ * @returns Promise resolving to formatted code. Graceful degradation:
+ *   resolves to the original code unchanged if Prettier throws
+ *   (e.g. on a parse error).
+ */
+export default async function format(code: string): Promise<string> {
+	try {
+		return await prettierFormat(code, JEJ_PRETTIER_OPTIONS);
+	} catch {
+		return code;
+	}
+}
+
+/**
  * Fixed Prettier options for JeJ formatting.
  *
  * WHY these values: match the project's .editorconfig and established
@@ -34,21 +50,3 @@ const JEJ_PRETTIER_OPTIONS = Object.freeze({
 	singleQuote: true,
 	semi: true,
 });
-
-/**
- * Format JavaScript source code the JeJ way.
- *
- * @param code - ANY valid JavaScript source code
- * @returns Promise resolving to formatted code. Graceful degradation:
- *   resolves to the original code unchanged if Prettier throws
- *   (e.g. on a parse error).
- */
-async function format(code: string): Promise<string> {
-	try {
-		return await prettierFormat(code, JEJ_PRETTIER_OPTIONS);
-	} catch {
-		return code;
-	}
-}
-
-export default format;

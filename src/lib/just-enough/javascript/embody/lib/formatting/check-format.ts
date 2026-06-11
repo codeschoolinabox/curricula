@@ -17,12 +17,12 @@ import type { CheckFormatResult } from './types.js';
  * @param code - JavaScript source code to check
  * @returns `Promise<{ formatted: boolean }>`
  */
-async function checkFormat(code: string): Promise<CheckFormatResult> {
+export default async function checkFormat(
+	code: string,
+): Promise<CheckFormatResult> {
 	try {
 		return { formatted: (await format(code)) === code };
 	} catch {
 		return { formatted: true };
 	}
 }
-
-export default checkFormat;

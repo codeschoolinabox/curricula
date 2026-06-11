@@ -23,7 +23,6 @@ import justEnoughJs from './just-enough-js.js';
 import type { BaseResult } from './types.js';
 import validateProgram from './validate-program.js';
 
-
 /**
  * Validates a program against the full Just Enough JavaScript level.
  *
@@ -32,7 +31,9 @@ import validateProgram from './validate-program.js';
  *   acorn `Program` when parsing succeeded. The `ast` field is
  *   undefined only when parse itself failed.
  */
-function validate(code: string): BaseResult & { readonly ast?: Program } {
+export default function validate(
+	code: string,
+): BaseResult & { readonly ast?: Program } {
 	const report = validateProgram(code, justEnoughJs);
 
 	// 1. Parse error — code is not valid syntax
@@ -66,5 +67,3 @@ function validate(code: string): BaseResult & { readonly ast?: Program } {
 		...(report.ast ? { ast: report.ast } : {}),
 	});
 }
-
-export default validate;

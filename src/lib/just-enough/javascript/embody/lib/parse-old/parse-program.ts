@@ -26,7 +26,7 @@ import type { ParseError } from './types.js';
  * @returns An acorn `Program` AST on success, or a frozen
  *   {@link ParseError} on failure.
  */
-function parseProgram(
+export default function parseProgram(
 	source: string,
 	sourceType: 'script' | 'module' = 'script',
 ): Program | ParseError {
@@ -68,5 +68,3 @@ function createParseError(error: unknown): ParseError {
 		}),
 	});
 }
-
-export default parseProgram;

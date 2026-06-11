@@ -32,7 +32,7 @@ import type { NodeRule, Violation } from './types.js';
  * @param nodes - The allowlist record from a {@link LanguageLevel}.
  * @returns A frozen array of all {@link Violation}s found.
  */
-function collectViolations(
+export default function collectViolations(
 	ast: Node,
 	nodes: Readonly<Record<string, NodeRule>>,
 ): readonly Violation[] {
@@ -126,5 +126,3 @@ function extractLocation(node: Node) {
 		end: { line: 1, column: 0 },
 	};
 }
-
-export default collectViolations;

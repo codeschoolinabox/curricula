@@ -24,7 +24,7 @@ import type { Node } from 'acorn';
  *   enumeration order. For array-valued properties like
  *   `BlockStatement.body`, children appear in source order.
  */
-function getChildNodes(node: Node): readonly Node[] {
+export default function getChildNodes(node: Node): readonly Node[] {
 	const children: Node[] = [];
 
 	for (const key of Object.keys(node)) {
@@ -65,5 +65,3 @@ function isNode(value: unknown): value is Node {
 		typeof (value as Record<string, unknown>).type === 'string'
 	);
 }
-
-export default getChildNodes;

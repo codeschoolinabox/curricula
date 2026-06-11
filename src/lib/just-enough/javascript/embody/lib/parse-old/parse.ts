@@ -35,7 +35,7 @@ import type { ParseResult } from './types.js';
  *   then read `ast` (success) or `error` (failure). On `with`-statement
  *   programs that pass via script-mode fallback, `scriptMode` is `true`.
  */
-function parse(code: string): ParseResult {
+export default function parse(code: string): ParseResult {
 	const moduleResult = parseProgram(code, 'module');
 
 	if (!('message' in moduleResult)) {
@@ -99,5 +99,3 @@ function buildParseResultError(parseError: {
 		column: parseError.location.column,
 	};
 }
-
-export default parse;

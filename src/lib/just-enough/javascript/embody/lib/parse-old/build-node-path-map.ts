@@ -23,7 +23,9 @@ import getChildNodesWithPath from './get-child-nodes-with-path.js';
  * @param root - The AST root (typically a `Program` node).
  * @returns A map from each reachable node to its NodePath string.
  */
-function buildNodePathMap(root: Node): ReadonlyMap<Node, string> {
+export default function buildNodePathMap(
+	root: Node,
+): ReadonlyMap<Node, string> {
 	const map = new Map<Node, string>();
 	assignPaths(root, '$', map);
 	// perf: skip freeze — transient; read and discarded within one validation pass
@@ -42,5 +44,3 @@ function assignPaths(node: Node, path: string, map: Map<Node, string>): void {
 		assignPaths(child, `${path}.${segment}`, map);
 	}
 }
-
-export default buildNodePathMap;
