@@ -13,7 +13,7 @@ orchestrate/
   DOCS.md                    architectural sketch + Mermaid (peer + StudyLenses)
   types.ts                   <StudyLenses> prop contract + state shape + INTERNAL EventBus events
 
-  index.tsx                  the <StudyLenses> component (owns surface-mount routing; the JEJ/non-JEJ branch is reopened — see § The phases panel)
+  index.tsx                  the <StudyLenses> component (owns surface-mount routing + station availability — see § The phases panel)
   event-bus.ts               createEventBus() — per-instance internal pub/sub
   toolbar.tsx                lens-picker dropdown + edit-return button (the phases panel will replace this — see § The phases panel)
   tests/                     vitest jsdom tests
@@ -30,13 +30,13 @@ orchestrate/
 ```
 
 The peer follows a **primary-export-at-top-level** convention: `<StudyLenses>`
-and its co-bundled UI files (the toolbar today; the phases panel module
-that will replace it) sit at the peer's top level alongside the subdirs
-`editor/` and `lib/`. This mirrors [`../embody/`](../embody/)'s convention — the
-peer's primary export sits at the peer's top level (`embody()` at
-`embody/index.ts`; `<StudyLenses>` at `orchestrate/index.tsx`). Subdirs are
-separable concerns the peer also owns; the orchestrator's primary export sits
-above them at the peer root.
+and its co-bundled UI files (the toolbar today; the phases panel module that
+will replace it) sit at the peer's top level alongside the subdirs `editor/` and
+`lib/`. This mirrors [`../embody/`](../embody/)'s convention — the peer's
+primary export sits at the peer's top level (`embody()` at `embody/index.ts`;
+`<StudyLenses>` at `orchestrate/index.tsx`). Subdirs are separable concerns the
+peer also owns; the orchestrator's primary export sits above them at the peer
+root.
 
 The two subdirs map to separable concerns:
 
@@ -52,8 +52,8 @@ The two subdirs map to separable concerns:
   JEJ-package [`lib/`](../lib/) peer, not here.
 
 Everything else (the `<StudyLenses>` component, mode state, lens dispatch, the
-affordance container — toolbar today, phases panel in Cycle 2 — and the
-internal EventBus) lives at the peer's top level: these are inseparable from the
+affordance container — toolbar today, phases panel in Cycle 2 — and the internal
+EventBus) lives at the peer's top level: these are inseparable from the
 orchestrator because they ARE the orchestrator.
 
 ## Public API: `<StudyLenses>`
@@ -137,6 +137,17 @@ lens authors don't compute it themselves.
 
 The full type declarations live in [`./types.ts`](./types.ts).
 
+### Orchestrator-level settings (configs tier)
+
+Beyond per-lens entries, the orchestrator reads `configs.orchestrator` — the
+same internal-structural-assumption pattern as `configs.lenses` (a cast at the
+boundary; no constraint on the maximally opaque public type) — for
+orchestrator-level defaults: the initial **source type** (script | module),
+**danger-mode availability** (educators can remove the danger position from the
+sandbox toggle per page), and **run-limit defaults**. Unconfigured settings use
+built-in defaults and reset on remount — the LMS owns persistence
+(disposability).
+
 ### Anti-patterns (durable rules)
 
 - **No consumer-side branching on `snippet.source.code`.** `embody(code)`
@@ -160,8 +171,10 @@ Each `<StudyLenses>` mount owns an isolated `EventBus` instance (see
 **intra-component** events — picker selections notifying the orchestrator of
 mode changes, sandbox test subscribers verifying transitions, future analytics
 hooks — and is internal-only: no DOM registry, no global, no `subscribe` /
-`onEvent` prop on the public `<StudyLenses>` surface. The two event names are
-`lens-switched` and `mode-changed`.
+`onEvent` prop on the public `<StudyLenses>` surface. The four event names are
+`lens-switched`, `mode-changed`, `type-toggled`, and `sandbox-toggled` — the
+latter two are typed now and dispatch from the dock when it is built (the same
+typed-before-wired precedent as `LensSelectionSource`'s `'panel'`).
 
 ### Why internal-only
 
@@ -205,21 +218,36 @@ sketch.
     `NMEventPhase` value-space: `realm` / `parse:tokenize` / `parse:ast` /
     `creation` / `evaluation`. This is what `errors.phase` and the embody
     staircase report.
-  - **(b) Station** — a column of the phases panel (see § The
-    phases panel). The station set is **not** `NMEventPhase`: it folds
-    `parse:tokenize` + `parse:ast` into a single **parse** station and adds the
-    non-lifecycle **source** station (code-as-text, before the machine). Station
-    set: `source` · `realm` · `parse` · `creation` · `evaluation`.
+  - **(b) Station** — a column of the phases panel (see § The phases panel). The
+    station set is **not** `NMEventPhase`: it folds `parse:tokenize` +
+    `parse:ast` into a single **parse** station and adds the non-lifecycle
+    **source** station (code-as-text, before the machine). Station set: `source`
+    · `realm` · `parse` · `creation` · `evaluation`.
   - **(c) `LensModule.phase`** — a pedagogical-target binding on a lens (which
     lifecycle phase the lens teaches understanding OF). Its value-space **IS the
-    station-name set** (sense b) — single or array (`Station | readonly
-    Station[]`;
-    absent = panel-excluded) — deliberately distinct from `NMEventPhase`
-    (sense a). A lens declares the station(s) it slots into, not the embody
-    phase it reads from.
+    station-name set** (sense b) — single or array
+    (`Station | readonly Station[]`; absent = panel-excluded) — deliberately
+    distinct from `NMEventPhase` (sense a). A lens declares the station(s) it
+    slots into, not the embody phase it reads from.
   - **Naming note:** the Cycle-2 panel itself is the **phases panel** — named
-    for sense (a), the lifecycle it instruments; its columns are stations
-    (sense b). See § The phases panel.
+    for sense (a), the lifecycle it instruments; its columns are stations (sense
+    b). See § The phases panel.
+- **Source type** — `'script' | 'module'`, the snippet's program-type posture
+  (`snippet.type`; selected by the dock's type toggle, default module). Module
+  is the NM-study posture — the admission gate can run; script is the
+  validator-free posture — no language level is active. Full definition:
+  [`../embody/README.md` § Glossary](../embody/README.md).
+- **CORE station / LL station** — the two station kinds: CORE (`source`,
+  `parse`) are provided by embody's JS-generic core and always shown; LL
+  (`realm`, `creation`, `evaluation`) are provided by the active language
+  level's semantic models and shown only where those models apply. CORE/LL is a
+  _classification_ of stations, not a station name — no `Station` union member
+  is named core; any future type literal uses lowercase (`'core' | 'll'`). See §
+  The phases panel.
+- **Station availability** — the per-edit pure derivation
+  `(type, validation) → shown stations`. The third panel derivation, beside the
+  static roster derivation and the per-edit status derivation; LL stations hide
+  iff `type === 'script'` or `validation?.isJeJ === false`.
 - **Editor mode** — the home base ([`./editor/`](./editor/)) is mounted. The
   learner types into the snippet; the CodeMirror buffer is the source of truth
   for `snippet`. No active lens. The live embodiment of the buffer is kept fresh
@@ -251,11 +279,12 @@ sketch.
   transition logic is centralized in a single internal handler shared by the
   prop-change effect, the picker handler, and the edit-return handler.
 - **Live embodiment** — the orchestrator's single live `Snippet` of the editing
-  buffer, held in the top-level `liveEmbodiment` slot. Refreshed by a debounced
-  static `embody()` in editor mode and flushed to the exact current buffer on an
-  editor → lens transition. Static-only (no execution); the source of `status` /
-  `errors` / `validation` for gutter errors (Cycle 1) and the phases panel
-  (Cycle 2).
+  buffer, held in the top-level `liveEmbodiment` slot and keyed by the
+  `(snippet, type)` pair. Refreshed by a debounced static `embody()` in editor
+  mode, flushed to the exact current buffer on an editor → lens transition, and
+  re-embodied immediately on a type toggle. Static-only (no execution); the
+  source of `status` / `errors` / `validation` for gutter errors (Cycle 1) and
+  the phases panel (Cycle 2).
 - **Debounce settle** — the trailing-edge moment, after ~200 ms of edit
   inactivity, when the orchestrator re-runs static `embody()` on the current
   buffer and refreshes the live slot. Per-keystroke `onSnippetChange` still
@@ -281,21 +310,37 @@ sketch.
   surface in the current (pre-Cycle-2) implementation. Owns the lens-picker
   dropdown and (in lens mode only) the edit-return button. Mounted in both
   editor and lens mode; its contents are mode-aware. Cycle 2 replaces it with
-  the phases panel (see § The phases panel); the picker and
-  edit-return semantics survive the replacement.
+  the phases panel (see § The phases panel); the picker and edit-return
+  semantics survive the replacement.
+- **The dock** — the run/debug surface of the omnipresent region (see § The
+  dock): a collapsible affordance container + output surface holding the type
+  toggle (+ adjacent hint), the sandbox toggle, run limits, Run (with the two
+  I/O output channels), and the danger-mode debugger option.
+- **Danger mode** — the sandbox toggle's non-default position: the snippet is
+  evaluated as a script tag in an iframe (pure JS only). Native dialogs, real
+  window, browser-debugger stepping; a hung run can freeze the host page — the
+  name carries the consent. Loop-guard instrumentation stays active and visible
+  in the debugger.
+- **Run limits** — the learner interface to the seconds and iterations execution
+  limits, with per-backend semantics (worker: engine timer + terminate; danger:
+  in-guard elapsed check). Surfaces `endReport.outcome: 'limit-exceeded'` when
+  tripped.
+- **Embedded guide** — the orchestrator-resident learner guide to the
+  environment itself (stations, reveal rules, toggles, limits, danger). A meta
+  tool: neither generative nor a reactive explainer.
 - **Lens-picker** (or just **picker**) — the affordance that selects a lens. In
   the current toolbar it is a `<select>` over the registered lenses
   (`LENS_REGISTRY` entries): one `<option>` per registered lens name plus a
   non-selectable sentinel first option; editor is not a picker option. Selecting
   a non-sentinel option transitions the orchestrator to lens mode for that lens.
-  In Cycle 2 the single picker becomes N per-station dropdowns (see § The
-  phases panel), but the underlying "select a registered lens → enter
-  lens mode" contract is unchanged.
+  In Cycle 2 the single picker becomes N per-station dropdowns (see § The phases
+  panel), but the underlying "select a registered lens → enter lens mode"
+  contract is unchanged.
 - **Registry / registered lens** — the orchestrator's lens-dispatch lookup
   exposed as `LENS_REGISTRY`, keyed by `LensModule.name`. It registers **five**
   lenses today: `annotate`, `blanks`, `debug-props`, `parsons`, `writeme`. The
-  picker enumerates registry entries; the active lens (in lens mode) is always
-  a registry entry.
+  picker enumerates registry entries; the active lens (in lens mode) is always a
+  registry entry.
 - **Active lens** — when `state.mode === 'lens'`, the lens name currently
   mounted. Stored as `state.activeLens`. The picker `value` derives from this;
   the edit-return affordance's visibility derives from `state.mode === 'lens'`.
@@ -325,8 +370,8 @@ sketch.
   listeners. Each `EventName` has exactly one payload shape via the
   `EventPayloadMap` type-level mapping.
 - **Event name** — a member of the `EventName` union (`'lens-switched'` |
-  `'mode-changed'`). Each name has a fixed payload shape; new names land
-  alongside their payloads in `types.ts`.
+  `'mode-changed'` | `'type-toggled'` | `'sandbox-toggled'`). Each name has a
+  fixed payload shape; new names land alongside their payloads in `types.ts`.
 - **Re-entrant dispatch** — a listener dispatches another event (or the same
   event) inside its own handler. Depth-first: the nested dispatch runs to
   completion before the outer dispatch's next listener fires.
@@ -334,8 +379,10 @@ sketch.
 ### Live embodiment
 
 The orchestrator holds a single authoritative top-level state slot
-`liveEmbodiment: { snippet: string; embodiment: Snippet } | null` alongside the
-mode-discriminator state. It is the orchestrator's **live static embodiment of
+`liveEmbodiment: { snippet: string; type: SnippetType; embodiment: Snippet } | null`
+alongside the mode-discriminator state. The slot is keyed by the
+`(snippet, type)` pair — the same buffer embodied under a different source type
+is a different embodiment. It is the orchestrator's **live static embodiment of
 the editing buffer**: there is one storage location for the embodiment;
 `LensModeState` carries only `activeLens` and `resolvedConfig`, and both
 lens-mode rendering and the (Cycle-2) phases panel read
@@ -353,27 +400,29 @@ per logical mount in both modes** so a snippet that _ships_ with a syntax error
 shows its interpreted gutter marker on the first frame, before the learner
 types. (React StrictMode may double-invoke the lazy initializer in dev; because
 `embody()` is idempotent on a given string the resulting slot is identical, so
-the double-invoke is safe.) (The same live slot later feeds the Cycle-2
-phases panel, but that is not the Cycle-1 justification.)
+the double-invoke is safe.) (The same live slot later feeds the Cycle-2 phases
+panel, but that is not the Cycle-1 justification.)
 
 The slot is **never cleared on edit**: an edit only schedules a debounced
 refresh, and the slot holds the prior value until the trailing edge replaces it.
 
 **Coherence invariant** — whenever `state.mode === 'lens'`, the slot is non-null
-AND `liveEmbodiment.snippet === currentSnippet`. A stale slot (snippet mismatch)
+AND `liveEmbodiment.snippet === currentSnippet` AND
+`liveEmbodiment.type === currentType`. A stale slot (snippet or type mismatch)
 at lens-mount is a **loud** failure, not just a null one. The transition logic
 enforces this; types cannot.
 
 **Trigger semantics:**
 
-| Event                                                      | liveEmbodiment effect                                                            | Mode effect                                    |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Initial mount (either mode)                                | populate atomically with fresh `embody(snippet)`                                 | per `deriveInitialState`                       |
-| Snippet edit in editor mode                                | schedule a debounced refresh; slot holds the prior value until the trailing edge | (no transition; stays in editor mode)          |
-| Debounce settle in editor mode                             | `embody(currentSnippet)` once; refresh slot                                      | (no transition)                                |
-| Editor → lens, `liveEmbodiment.snippet === currentSnippet` | reuse `embodiment` (flush no-op); cancel pending debounce                        | `{ mode: 'lens', activeLens, resolvedConfig }` |
-| Editor → lens, slot stale or null                          | flush: `embody(currentSnippet)` synchronously inline; cancel pending debounce    | `{ mode: 'lens', activeLens, resolvedConfig }` |
-| Lens → editor transition                                   | retain slot                                                                      | `{ mode: 'editor' }`                           |
+| Event                                                      | liveEmbodiment effect                                                            | Mode effect                                       |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Initial mount (either mode)                                | populate atomically with fresh `embody(snippet)`                                 | per `deriveInitialState`                          |
+| Snippet edit in editor mode                                | schedule a debounced refresh; slot holds the prior value until the trailing edge | (no transition; stays in editor mode)             |
+| Debounce settle in editor mode                             | `embody(currentSnippet)` once; refresh slot                                      | (no transition)                                   |
+| Editor → lens, `liveEmbodiment.snippet === currentSnippet` | reuse `embodiment` (flush no-op); cancel pending debounce                        | `{ mode: 'lens', activeLens, resolvedConfig }`    |
+| Editor → lens, slot stale or null                          | flush: `embody(currentSnippet)` synchronously inline; cancel pending debounce    | `{ mode: 'lens', activeLens, resolvedConfig }`    |
+| Lens → editor transition                                   | retain slot                                                                      | `{ mode: 'editor' }`                              |
+| Type toggle (dock)                                         | re-embody immediately under the new type; cancel any pending debounce            | lens mode first returns to editor (disposability) |
 
 A lens → editor → lens round-trip with no intervening edit reuses the slot (the
 flush is a no-op — zero `embody` at the transition); an edit refreshes the slot
@@ -460,9 +509,9 @@ re-embody-bypass optimization is also a violation).
 Branches that need to know what the code does consume only the resulting
 `Snippet`'s `status` / `errors` / `validation` fields. Cycle 1 begins consuming
 these to compute the interpreted gutter diagnostics; Cycle 2 consumes the full
-`Status` + `errors.phase` for the phases panel's station-status derivation
-(`validation.isJeJ` consumption awaits the reopened-branch follow-up DDD — see
-§ The phases panel) — all the allowed path; the orchestrator still never
+`Status` + `errors.phase` for the phases panel's station-status derivation, and
+the station-availability derivation consumes `snippet.type` + `validation.isJeJ`
+(see § The phases panel) — all the allowed path; the orchestrator still never
 inspects `source.code` semantically. This invariant aligns with embody's
 anti-pattern (no consumer-side branching on `snippet.source.code`) and persists
 as the non-scenario real-composition path grows per
@@ -473,8 +522,8 @@ as the non-scenario real-composition path grows per
 > **Design status.** This section describes the **intended end-state** of the
 > orchestrator's affordance container. It is the locked Cycle-2 design; the
 > current implementation still ships the thin `toolbar.tsx` (lens-picker
-> dropdown + edit-return button). The phases panel replaces the toolbar;
-> the picker and edit-return semantics described above carry over.
+> dropdown + edit-return button). The phases panel replaces the toolbar; the
+> picker and edit-return semantics described above carry over.
 
 The panel is a **notional-machine lifecycle instrument**. Instead of one lens
 picker, it lays the NM lifecycle out as **N "stations" left → right** — **source
@@ -484,28 +533,31 @@ teaches the lifecycle, so a learner reads the machine's stages before picking
 any lens.
 
 The panel **doubles as a lifecycle-status display.** Off the live embodiment's
-**embody staircase** (`status.{tokenized,parsed,created}` + `errors.phase`) it
-shows how far the machine got and where it tripped — teaching the lifecycle even
-before a lens is picked. (This dual role — teach the lifecycle AND show the
-machine's progress through it — is the panel's reason for being.)
+**embody staircase** (the whole `Status` + `errors.phase`) it shows how far the
+machine got and where it tripped — teaching the lifecycle even before a lens is
+picked. (This dual role — teach the lifecycle AND show the machine's progress
+through it — is the panel's reason for being.)
 
 ### Phase stations and column gating
 
-Each station maps to a stage of the embody staircase, and the panel **greys out
-phases after the one that errored**:
+Each station maps to a stage of the embody staircase. Shown stations follow the
+availability split (CORE always; LL iff the level's models apply — see § Where
+the panel lives); within the shown regime the panel **greys out phases after the
+one that errored**:
 
-| Station        | embody mapping (what it shows status from)                                 | Greying                                                                                    |
-| -------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| **source**     | `snippet.source` (code-as-text, before the machine; not a lifecycle phase) | never greyed                                                                               |
-| **realm**      | the documentary realm (light; constant — never changes with the code)      | never greyed                                                                               |
-| **parse**      | tokenize + AST, folded into one station                                    | the **first** phase that can error; nothing bars it. A self-error here greys later phases. |
-| **creation**   | script-scope decls, hoisting, TDZ                                          | greyed when `status.created` is unreached or a prior phase errored                         |
-| **evaluation** | the machine's runtime internals (trace-tier prediction)                    | greyed until creation succeeds; runtime errors surface only at Run                         |
+| Station        | Kind | embody mapping (what it shows status from)                                    | Greying (within regime)                                                                    |
+| -------------- | ---- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **source**     | CORE | `snippet.source` (code-as-text, before the machine; not a lifecycle phase)    | never greyed                                                                               |
+| **realm**      | LL   | the level's documentary realm (light; constant — never changes with the code) | never greyed                                                                               |
+| **parse**      | CORE | tokenize + AST, folded into one station                                       | the **first** phase that can error; nothing bars it. A self-error here greys later phases. |
+| **creation**   | LL   | script-scope decls, hoisting, TDZ                                             | greyed when `status.created` is unreached or a prior phase errored                         |
+| **evaluation** | LL   | the machine's runtime internals (trace-tier prediction)                       | greyed until creation succeeds; runtime errors surface only at Run                         |
 
 The greying is computed **purely from the embody staircase** (column/phase-based
 gating only — lens-level `applicableTo` gating is a backlog seam, not this
-design). `source` and `realm` never grey. The exact per-station value-space is
-the station-status model below (locked in Cycle 2 Phase 0).
+design). `source` never greys; `realm`, when shown, never greys. The exact
+per-station value-space is the station-status model below (locked in Cycle 2
+Phase 0; availability revision recorded in this follow-up).
 
 ### Station-status model (locked)
 
@@ -513,8 +565,8 @@ Each station renders exactly one of five statuses, derived **purely** from the
 live embodiment's staircase by a single pure derivation —
 `(status, errors) → a per-station status map`. The input is the **whole**
 `Status` (`{tokenized, parsed, validated, created}`) plus
-`errors: EmbodyError | null`: `validated` is always `false` under today's
-stubs, but it is an input NOW so the validating slice can land later without a
+`errors: EmbodyError | null`: `validated` is always `false` under today's stubs,
+but it is an input NOW so the validating slice can land later without a
 derivation-signature change (the zero-panel-changes invariant below depends on
 this).
 
@@ -523,25 +575,29 @@ this).
 | `constant` | no machine status; the station never greys                                                   | `source` and `realm`, always                                                                                                                                                                          |
 | `ok`       | the machine completed this stage                                                             | parse: `status.parsed`; creation: `status.created`                                                                                                                                                    |
 | `errored`  | the machine tripped AT this stage                                                            | `errors.phase` maps into the station: `parse:tokenize` / `parse:ast` → **parse**; `creation` → **creation**; `evaluation` → **evaluation** (scenario fixtures today; real runtime errors only at Run) |
-| `barred`   | unreachable — an earlier gate failed                                                         | every station after the errored one (including after a `validation` error — see the validation barrier below)                                                                                         |
+| `barred`   | unreachable — an earlier machine phase failed                                                | every shown station after the errored one (machine errors only — a `validation` failure hides the LL stations instead; see the availability rule)                                                     |
 | `pending`  | not yet reported — nothing failed before it, but the machine has not instrumented this stage | creation on real code while embody's creation slice is stubbed (`status.created === false`, no prior error); evaluation statically (runtime status exists only at Run)                                |
 
 Per-station **reachable subsets** (so the implementation carries no dead
 branches): `source` / `realm` → `{constant}` only (`realm` is structurally
 error-free — `EmbodyPhase` excludes it); `parse` → `{ok, errored}` (nothing
 precedes it, so never `barred`/`pending`); `creation` →
-`{ok, errored, barred, pending}`; `evaluation` → `{errored, barred, pending}`
-(never `ok` statically — runtime success is only knowable at Run, Cycle 3).
+`{ok, errored, barred, pending}` (`barred` only from machine errors upstream —
+parse — never from validation, which hides instead); `evaluation` →
+`{errored, barred, pending}` (never `ok` statically — runtime success is only
+knowable at Run, Cycle 3).
 
-- **The validation barrier.** `errors.phase === 'validation'` has **no station
-  of its own** — the station set folds the validate gate into the space between
-  parse and creation. Mapping: parse renders `ok` (it parsed); creation and
-  evaluation render `barred`. There is **no separate trip-attribution field**:
-  the presentation layer reads `errors.phase` directly when it wants to
-  annotate the barrier on the creation station (minting a panel-private field
-  would duplicate `errors.phase` and add a fourth phase-vocabulary surface).
-  How the annotation renders is Phase-1 presentation; the state mapping is
-  locked here.
+- **The validation outcome has no station — and no barred mapping.** A module
+  snippet that parses but fails the admission gate
+  (`validation.isJeJ === false`, `errors.phase === 'validation'`) **hides** the
+  LL stations via the availability derivation rather than rendering them barred:
+  non-admission is out-of-model, not a machine failure, and rendering
+  valid-but-not-admitted JS as a broken machine would lie. Consequently the
+  status derivation's barred-after-error rule applies to machine phases only — a
+  validation error never produces `barred`. There is still **no separate
+  trip-attribution field**: consumers read `errors.phase` / `validation`
+  directly (minting a panel-private field would duplicate them and add a fourth
+  phase-vocabulary surface).
 - **Honest under stubs.** `pending` is deliberately distinct from `barred`:
   creation on clean real code today is `pending` ("the machine hasn't reported
   this stage yet") — never `ok` (a lie while the creation slice is stubbed) and
@@ -555,12 +611,12 @@ precedes it, so never `barred`/`pending`); `creation` →
 
 ### Lens → station binding (locked)
 
-`LensModule.phase?: Station | readonly Station[]` declares the station(s) a
-lens belongs
-to. Its semantics are the **pedagogical target** — which lifecycle phase the
-lens teaches understanding OF — **not** which embody phase the lens reads from.
-So `blanks`/`annotate` declare `phase: 'source'` even though they consume the
-AST: they teach understanding of the source, the AST is just their instrument.
+`LensModule.phase?: Station | readonly Station[]` declares the station(s) a lens
+belongs to. Its semantics are the **pedagogical target** — which lifecycle phase
+the lens teaches understanding OF — **not** which embody phase the lens reads
+from. So `blanks`/`annotate` declare `phase: 'source'` even though they consume
+the AST: they teach understanding of the source, the AST is just their
+instrument.
 
 The locked shape (Cycle 2 Phase 0):
 
@@ -569,9 +625,10 @@ The locked shape (Cycle 2 Phase 0):
 - **Single or array** — a lens may target one station or several. The panel
   **normalizes at read** (a `stationsOf(lens): readonly Station[]` helper), so
   no consumer ever branches on the union shape.
-- **`Station` is a named union** — `'source' | 'realm' | 'parse' | 'creation' |
-  'evaluation'` — declared in [`../lenses/types.ts`](../lenses/types.ts) next to
-  `LensModule` (the lens declares it, so the lens peer owns the type).
+- **`Station` is a named union** —
+  `'source' | 'realm' | 'parse' | 'creation' | 'evaluation'` — declared in
+  [`../lenses/types.ts`](../lenses/types.ts) next to `LensModule` (the lens
+  declares it, so the lens peer owns the type).
 - **Migration (Phase-1 work, locked now):** `parsons`, `blanks`, `annotate`,
   `writeme` declare `phase: 'source'`; `debug-props` declares nothing.
 - **Orthogonal to the `applicableTo` tiers.** `phase` (station / pedagogical
@@ -620,21 +677,41 @@ panel module is presentation; `index.tsx` owns which surface mounts.
 > (`writeme`, `annotate`, `parsons`, `blanks`) serve the **full JS language**,
 > not just the JEJ subset — lens availability is never JEJ-gated. A learner
 > studying arbitrary (parseable) JS keeps the source-station study tools.
->
-> **Consequence — the JEJ/non-JEJ branch design is REOPENED.** The earlier
-> sketch ("JEJ → the phases panel; non-JEJ → run/debug", implying non-JEJ
-> snippets lose the lenses) conflicts with the constraint above and is no
-> longer locked. What the `validation.isJeJ` read actually drives — a
-> run/debug affordance region, per-station availability, something else — is
-> owned by a **dedicated follow-up DDD ("full-JS lens availability + the
-> non-JEJ surface")** together with the run/debug surface design. Until that
-> DDD lands, Cycle 2 Phase 1 builds the phases panel **unconditionally** (it
-> mounts for every snippet), which today's stubbed reality produces anyway:
-> the branch read would be `validation?.isJeJ ?? true` and real code carries
-> `validation: null` until embody's validating slice lands. Known interim
-> mis-surfacing: genuinely non-JEJ code gets no "this isn't JEJ" surface
-> signal beyond `lintJej`'s structural markers — accepted until the follow-up
-> DDD.
+
+**What `validation.isJeJ` drives — station availability.** The panel always
+mounts; what varies is **which stations are shown**. Stations split into two
+kinds:
+
+- **CORE stations** — `source`, `parse`: provided by embody's JS-generic core;
+  shown for any code, under both source types.
+- **LL stations** — `realm`, `creation`, `evaluation`: provided by the active
+  language level's semantic models (see
+  [`../embody/language-levels/just-enough-javascript/`](../embody/language-levels/just-enough-javascript/));
+  hidden exactly when the level's models do not apply. Hidden means **fully
+  removed** — no stubs, no greyed placeholders. The hidden set is non-contiguous
+  (`realm` sits between `source` and `parse`; out-of-model code reads
+  `source · parse`).
+
+A third pure derivation — **station availability**,
+`(type, validation) → shown stations`, per-edit — joins the two locked
+derivations (static roster, per-edit status). LL stations are hidden iff
+`type === 'script'` OR `validation?.isJeJ === false` (admission explicitly
+refused). When `validation` is null — the gate's output absent on a snippet that
+failed before the gate, or while embody's validating slice reports nothing —
+admission is undetermined and the LL stations stay shown: failures _inside_ the
+machine render through the station-status model (parse `errored`, downstream
+`barred` — the staircase teaching), and only _out-of-model_ code hides the
+machine. The three derivations have distinct inputs and cadences and are never
+coupled; within the shown regime the station-status model below applies
+unchanged (intra-JEJ greying retained: creation-fail ⇒ evaluation visible but
+barred).
+
+**Learner signals.** In module mode the editor gutter's JEJ-compliance markers
+name the exact non-JEJ features that cost the NM stations — the warning is the
+explanation. In script mode there are no JEJ markers (structurally: no validator
+runs); the dock's type toggle carries an adjacent hint when module-admissible
+code sits in script mode. The embedded guide (§ The omnipresent region)
+documents the reveal rules for learners.
 
 The **quadrant principles** (Q-I curated/uncurated × guided/unguided, etc.) are
 **not** the panel's structural axis — that role belongs to the NM lifecycle
@@ -654,12 +731,13 @@ than targeting one station. The durable ontology cuts along **two axes**:
 
 1. **per-phase lenses** (target one station) vs. **cross-phase tools** (span the
    lifecycle);
-2. within cross-phase tools, **generative** tools (produce things _about the
-   program_) get an omnipresent affordance, while **reactive explainers**
-   (explain one specific thing) attach where the subject appears rather than
-   living as a button.
+2. within cross-phase tools, a three-way **kind**: **generative** tools (produce
+   things _about the program_) get an omnipresent affordance; **reactive
+   explainers** (explain one specific thing) attach where the subject appears
+   rather than living as a button; **meta** tools (document the instrument
+   itself, not the program) are omnipresent and program-independent.
 
-Those axes place the four known tools:
+Those axes place the known tools:
 
 - **Run** — a cross-phase generative affordance (not a lens), mapping to
   `evaluation.events.{run, intercept}` on the embodiment.
@@ -669,13 +747,64 @@ Those axes place the four known tools:
   mutates source, so it belongs to the home base.
 - **`error-interpret` is not a button** — it is the **reactive explainer**
   behind the interpreted diagnostics (editor gutter for static errors today,
-  Run-dock console for runtime errors later), a shared utility consumed by
-  surfaces, not an affordance the learner clicks.
+  dock console for runtime errors later), a shared utility consumed by surfaces,
+  not an affordance the learner clicks.
+- **The embedded guide** — the **meta** kind's one inhabitant today: it
+  documents the instrument itself (what the stations are, why they appear and
+  disappear, what the toggles and limits do, what danger mode risks). It
+  produces nothing about the program and explains no single subject — it
+  explains the environment. Orchestrator-resident.
 
-The Run dock's internal layout (its two I/O-channel panels) and the non-JEJ
-run/debug surface that reuses it are **locked in Cycle 3 — see the ledger**
-(`read-0-curricula-dev-md-and-0-curricula-mossy-hickey.md`); the exact
-omnipresent-region layout is not specified here.
+### The dock (run/debug surface)
+
+The region's run/debug surface is **the dock** — a collapsible affordance
+container + output surface. Its contract:
+
+- **Type toggle** — selects the snippet's source type (`script` | `module`;
+  default module, seedable via configs). Toggling re-embodies the buffer under
+  the other type — the live-embodiment slot is keyed by `(snippet, type)` (see §
+  Live embodiment); toggling while a lens is mounted returns to editor mode
+  first (the toggle changes what the machine IS; the lens was mounted against
+  the old machine — disposability applies). An adjacent hint appears when
+  module-admissible code sits in script mode (the only state in which the NM
+  stations are absent with nothing in the gutter to say why).
+- **Sandbox toggle** — selects the execution backend: **worker** (the sandboxed
+  default) ↔ **danger** (an iframe evaluating the snippet as a script tag — pure
+  JS only; HTML hosting templates are backlogged, not this surface). Danger mode
+  exists for what workers cannot give: native dialogs, the real window
+  environment, and the browser debugger. A hung danger run can freeze the host
+  page — the name carries the consent; educators can disable danger availability
+  via configs.
+- **Run limits** — the learner interface to the seconds and iterations limits.
+  Per-backend semantics: the worker backend enforces seconds by engine timer +
+  external termination (exact) and iterations by the loop-guard rewrite; the
+  danger backend's limits both ride the loop-guard rewrite — the iterations
+  counter, plus an elapsed-time check specified on the same per-iteration
+  injection point (a requirement on the guard rewrite, not a capability it has
+  today) — loop-bound coverage, deliberately weaker than the worker's external
+  clock. Limit trips surface as `endReport.outcome: 'limit-exceeded'`.
+- **Run** — the affordance that drives program execution (the lazy half of the
+  embody contract), opening the dock's output surface: two **output channels**
+  mirroring the NM's two I/O channels — a **User Interface** channel
+  (alert/confirm/prompt dialogs) and a **Developer Console** channel
+  (`console.*`). ("Panel" stays reserved for the phases panel — the dock's
+  output regions are channels, never panels.)
+- **Debugger option** (danger mode only) — wraps the evaluated snippet with a
+  `debugger;` statement above and below, so a learner with devtools open steps
+  straight into their program; inert without devtools. Loop-guard
+  instrumentation remains active and **visible** in the stepped source —
+  deliberately: navigating a guard in the debugger teaches what a guard is.
+
+**Execution backends behind one contract.** The dock programs against the
+embody-level evaluate surface (`EvaluateHandle` / `RunInstance` — see
+[`../embody/types.ts`](../embody/types.ts)); runnability is tiered (the plain
+run tier serves anything parsed; NM tiers require `created` — see
+[`../embody/README.md` § Events](../embody/README.md)). The worker backend is
+the evaluating engine; the danger-iframe is a second backend behind the same
+contract, deliberately deferred (the registry-shape precedent: named, not yet
+specified).
+
+The exact omnipresent-region layout is not specified here.
 
 ## Deferred backlog
 
@@ -704,24 +833,24 @@ sandbox harnesses.
 | `data-orchestrator-edit-button` | The toolbar `<button>` that returns to editor mode (rendered only when `state.mode === 'lens'`)                                          | Tests + sandbox locate the edit-return affordance.      |
 | `data-orchestrator-error`       | The editor host `<div>` when CodeMirror mount rejects (fallback render)                                                                  | Tests + sandbox detect a failed editor mount.           |
 
-The phases panel (Cycle 2) and omnipresent region (Cycle 3) will add
-their own `data-orchestrator-*` attributes when built; they are intentionally
-not enumerated here yet.
+The phases panel (Cycle 2) and omnipresent region (Cycle 3) will add their own
+`data-orchestrator-*` attributes when built; they are intentionally not
+enumerated here yet.
 
 **Fate of `-toolbar` / `-lens-picker` under the Cycle-2 replacement — RESOLVED
 (Cycle 2 Phase 0): renamed.** Once the phases panel replaces `toolbar.tsx`, the
-names `data-orchestrator-toolbar` and `data-orchestrator-lens-picker` describe
-a DOM that no longer exists, and keeping them as aliases would introduce
-exactly the homonym this doc warns against (`-toolbar` naming a non-toolbar).
-The locked Cycle-2 selector contract:
+names `data-orchestrator-toolbar` and `data-orchestrator-lens-picker` describe a
+DOM that no longer exists, and keeping them as aliases would introduce exactly
+the homonym this doc warns against (`-toolbar` naming a non-toolbar). The locked
+Cycle-2 selector contract:
 
 - `data-orchestrator-phases-panel` — the panel root.
 - `data-orchestrator-station="<station name>"` — each station column (the
   per-station lens dropdown lives inside it).
 
-`-toolbar` and `-lens-picker` retire WITH `toolbar.tsx` in the Cycle-2
-increment that replaces it; the test suite re-anchors on the new attributes in
-those same increments. No alias survives.
+`-toolbar` and `-lens-picker` retire WITH `toolbar.tsx` in the Cycle-2 increment
+that replaces it; the test suite re-anchors on the new attributes in those same
+increments. No alias survives.
 
 **Directory → type/attribute asymmetry.** The directory is named `orchestrate/`
 (verb) to mirror `embody/`'s convention of verb-named peers exporting their

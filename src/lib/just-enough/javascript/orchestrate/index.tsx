@@ -139,7 +139,7 @@ function deriveInitialState(
 			previousLiveEmbodiment !== null &&
 			previousLiveEmbodiment.snippet === snippet
 				? previousLiveEmbodiment
-				: { snippet, embodiment: embody(snippet) };
+				: { snippet, type: 'module', embodiment: embody(snippet) };
 		const state: LensModeState = {
 			mode: 'lens',
 			activeLens: lens!,
@@ -152,8 +152,11 @@ function deriveInitialState(
 		// Retain-or-seed: keep a non-null slot across a lens → editor transition;
 		// seed a fresh embodiment at editor-mode mount (when the slot is still
 		// null) so the gutter can paint on the first frame.
-		liveEmbodiment:
-			previousLiveEmbodiment ?? { snippet, embodiment: embody(snippet) },
+		liveEmbodiment: previousLiveEmbodiment ?? {
+			snippet,
+			type: 'module',
+			embodiment: embody(snippet),
+		},
 	};
 }
 
@@ -337,6 +340,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			try {
 				setLiveEmbodiment({
 					snippet: nextSnippet,
+					type: 'module',
 					embodiment: embody(nextSnippet),
 				});
 			} catch {

@@ -20,13 +20,22 @@
  *   slot (`LiveEmbodiment | null`) ALONGSIDE the mode state — NOT
  *   inside `LensModeState`. Lens-mode rendering reads the embodiment
  *   from this slot; the editor-mode gutter reads its `errors`. The slot
- *   is refreshed by a debounced static `embody()` while editing and
- *   flushed on `editor → lens`; it survives `lens → editor` round-trips.
+ *   is keyed by the `(snippet, type)` pair, refreshed by a debounced
+ *   static `embody()` while editing, flushed on `editor → lens`, and
+ *   re-embodied immediately on a type toggle; it survives
+ *   `lens → editor` round-trips.
+ * - The snippet's source type (`SnippetType`, default `'module'`,
+ *   seedable via the configs orchestrator tier) lives in its own
+ *   top-level slot alongside the snippet string and the live
+ *   embodiment; the dock's type toggle is its only writer.
  * - INTERNAL-only EventBus — no `subscribe` / `onEvent` prop on
  *   `<StudyLenses>` until a concrete LMS integration target appears.
- *   `lens-switched` (carried forward from the pre-refactor
- *   orchestrator) and `mode-changed` (new for the 2-mode state
- *   machine) are the only event names today.
+ *   Four event names: `lens-switched` (carried forward from the
+ *   pre-refactor orchestrator), `mode-changed` (the 2-mode state
+ *   machine), and `type-toggled` / `sandbox-toggled` (typed now;
+ *   dispatched from the dock when it is built — the same
+ *   typed-before-wired precedent as `LensSelectionSource`'s
+ *   `'panel'`).
  *
  * **What survives unchanged**: the `EventBus` shape (typed
  * dispatch/subscribe/unsubscribe/clear), per-instance ownership
@@ -48,7 +57,7 @@
  * internal-only.
  */
 
-import type { Snippet } from '../embody/types.js';
+import type { Snippet, SnippetType } from '../embody/types.js';
 import type { LensConfig } from '../lenses/types.js';
 
 // --- Public prop surface (the only externally-visible type) ---
@@ -166,8 +175,9 @@ type EditorModeState = Readonly<{
  * **Coherence invariant** (enforced by transition logic, not
  * the type system): when `state.mode === 'lens'`, the
  * orchestrator's `liveEmbodiment` slot is non-null AND
- * `liveEmbodiment.snippet === currentSnippet` (a stale slot is a
- * loud failure, not just a null one).
+ * `liveEmbodiment.snippet === currentSnippet` AND
+ * `liveEmbodiment.type === currentType` (a stale slot — snippet or
+ * type mismatch — is a loud failure, not just a null one).
  */
 type LensModeState = Readonly<{
 	mode: 'lens';
@@ -197,20 +207,25 @@ type OrchestratorState = EditorModeState | LensModeState;
  * @remarks Trigger semantics (per `./README.md` § Live embodiment):
  *
  * - Initial mount (either mode): populated atomically with a fresh
- *   `embody(snippet)`.
+ *   `embody(snippet, { type })`.
  * - Editor mode, on edit: a debounced static `embody()` refreshes the
  *   slot on the trailing edge (~200ms idle); the slot is NOT cleared.
- * - Editor → lens transition: flush-then-read — reuse when
- *   `liveEmbodiment.snippet === currentSnippet`, else `embody()`
+ * - Editor → lens transition: flush-then-read — reuse when the slot
+ *   matches `(currentSnippet, currentType)`, else `embody()`
  *   synchronously inline; cancel any pending debounce.
  * - Lens → editor transition: slot RETAINED.
+ * - Type toggle (dock): re-embody immediately under the new type;
+ *   cancel any pending debounce (in lens mode the toggle first
+ *   returns to editor mode — disposability).
  *
  * `embody()` here is static-only (no worker); program execution stays
- * lazy. `snippet` carries the source the `embodiment` was built from —
- * the staleness / reuse check is string-identity (`===`).
+ * lazy. `snippet` + `type` carry the source string and source type the
+ * `embodiment` was built from — the staleness / reuse check is the
+ * `(snippet, type)` pair (string identity on both).
  */
 type LiveEmbodiment = Readonly<{
 	snippet: string;
+	type: SnippetType;
 	embodiment: Snippet;
 }>;
 
@@ -257,12 +272,17 @@ type LensSelectionSource =
  * LMS integration target appears.
  *
  * @remarks Each name maps to a payload shape via `EventPayloadMap`.
- * Today's taxonomy is `lens-switched` and `mode-changed`; later
- * cycles add `exercise-completed`, `lens-mount-error`.
+ * The taxonomy is `lens-switched`, `mode-changed`, `type-toggled`,
+ * and `sandbox-toggled` — the latter two are typed now and dispatch
+ * from the dock when it is built (the typed-before-wired precedent
+ * set by `LensSelectionSource`'s `'panel'`). Later cycles may add
+ * `exercise-completed`, `lens-mount-error`.
  */
 const EVENT_NAMES = Object.freeze({
 	LENS_SWITCHED: 'lens-switched',
 	MODE_CHANGED: 'mode-changed',
+	TYPE_TOGGLED: 'type-toggled',
+	SANDBOX_TOGGLED: 'sandbox-toggled',
 } as const);
 
 type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
@@ -302,6 +322,33 @@ type ModeChangedPayload = Readonly<{
 }>;
 
 /**
+ * The dock's execution-backend selector — `'worker'` (the sandboxed
+ * default) or `'danger'` (iframe script-tag evaluation). See
+ * `./README.md` § The dock.
+ */
+type SandboxMode = 'worker' | 'danger';
+
+/**
+ * Payload for `type-toggled`. Fires when the dock's type toggle
+ * changes the snippet's source type (script ↔ module). Dispatch site
+ * lands with the dock; typed-before-wired.
+ */
+type TypeToggledPayload = Readonly<{
+	from: SnippetType;
+	to: SnippetType;
+}>;
+
+/**
+ * Payload for `sandbox-toggled`. Fires when the dock's sandbox toggle
+ * changes the execution backend (worker ↔ danger). Dispatch site lands
+ * with the dock; typed-before-wired.
+ */
+type SandboxToggledPayload = Readonly<{
+	from: SandboxMode;
+	to: SandboxMode;
+}>;
+
+/**
  * Type-level mapping from event name to payload shape. The
  * `EventBus.dispatch` / `EventBus.subscribe` generics index this map
  * to constrain payload types per event name.
@@ -309,6 +356,8 @@ type ModeChangedPayload = Readonly<{
 type EventPayloadMap = Readonly<{
 	'lens-switched': LensSwitchedPayload;
 	'mode-changed': ModeChangedPayload;
+	'type-toggled': TypeToggledPayload;
+	'sandbox-toggled': SandboxToggledPayload;
 }>;
 
 type EventPayload<N extends EventName> = EventPayloadMap[N];
@@ -347,6 +396,7 @@ export type {
 	LensModeState,
 	LiveEmbodiment,
 	LensSelectionSource,
+	SandboxMode,
 	EventName,
 	EventPayload,
 	EventPayloadMap,
@@ -354,6 +404,8 @@ export type {
 	EventBus,
 	LensSwitchedPayload,
 	ModeChangedPayload,
+	TypeToggledPayload,
+	SandboxToggledPayload,
 };
 
 export { EVENT_NAMES };

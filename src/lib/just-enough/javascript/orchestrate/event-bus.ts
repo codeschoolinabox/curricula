@@ -62,10 +62,16 @@ export default function createEventBus(): EventBus {
 		'lens-switched': Set<EventListener<'lens-switched'>>;
 		// eslint-disable-next-line functional/prefer-readonly-type -- stateful bus per DEV.md § 8
 		'mode-changed': Set<EventListener<'mode-changed'>>;
+		// eslint-disable-next-line functional/prefer-readonly-type -- stateful bus per DEV.md § 8
+		'type-toggled': Set<EventListener<'type-toggled'>>;
+		// eslint-disable-next-line functional/prefer-readonly-type -- stateful bus per DEV.md § 8
+		'sandbox-toggled': Set<EventListener<'sandbox-toggled'>>;
 	};
 	const listenersByEvent: ListenerStore = {
 		'lens-switched': new Set(),
 		'mode-changed': new Set(),
+		'type-toggled': new Set(),
+		'sandbox-toggled': new Set(),
 	};
 
 	const bus: EventBus = {
@@ -123,6 +129,10 @@ export default function createEventBus(): EventBus {
 			listenersByEvent['lens-switched'].clear();
 			// eslint-disable-next-line functional/immutable-data -- stateful bus per DEV.md § 8
 			listenersByEvent['mode-changed'].clear();
+			// eslint-disable-next-line functional/immutable-data -- stateful bus per DEV.md § 8
+			listenersByEvent['type-toggled'].clear();
+			// eslint-disable-next-line functional/immutable-data -- stateful bus per DEV.md § 8
+			listenersByEvent['sandbox-toggled'].clear();
 		},
 	};
 	return freezeInPlace(bus);
