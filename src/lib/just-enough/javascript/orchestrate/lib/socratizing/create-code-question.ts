@@ -20,7 +20,9 @@ import type { CodeQuestion, CodeQuestionInput } from './types.js';
  * @param input - All fields for the CodeQuestion.
  * @returns A frozen CodeQuestion.
  */
-function createCodeQuestion(input: CodeQuestionInput): CodeQuestion {
+export default function createCodeQuestion(
+	input: CodeQuestionInput,
+): CodeQuestion {
 	const question: CodeQuestion = {
 		id: input.id,
 		kind: input.kind,
@@ -40,5 +42,3 @@ function createCodeQuestion(input: CodeQuestionInput): CodeQuestion {
 
 	return Object.freeze(question);
 }
-
-export default createCodeQuestion;

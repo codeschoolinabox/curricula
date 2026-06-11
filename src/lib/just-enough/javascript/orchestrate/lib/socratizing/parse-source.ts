@@ -23,6 +23,66 @@ import type { SourcePosition } from '../../../embody/lib/validating/types.js';
 
 import type { ParseResult } from './types.js';
 
+/**
+ * Parses JeJ source code with a three-step fallback chain.
+ *
+ * @param source - Raw source code string.
+ * @returns A `ParseResult`: `{ ok: true, ast }` or `{ ok: false, error }`.
+ */
+export default function parseSource(source: string): ParseResult {
+	// 1. Module mode (JeJ default)
+	try {
+		const ast = parse(source, { ...BASE_OPTIONS, sourceType: 'module' });
+		return { ok: true, ast };
+	} catch {
+		// Fall through to script mode
+	}
+
+	// 2. Script mode + WithStatement check
+	try {
+		const ast = parse(source, { ...BASE_OPTIONS, sourceType: 'script' });
+		if (hasWithStatement(ast)) {
+			return { ok: true, ast };
+		}
+		// Script parsed but no `with` — don't accept script mode for normal code
+	} catch {
+		// Fall through to expression mode
+	}
+
+	// 3. Module mode + allowExpression (partial code)
+	try {
+		const ast = parse(source, {
+			...BASE_OPTIONS,
+			sourceType: 'module',
+			allowImportExportEverywhere: true,
+		});
+		return { ok: true, ast };
+	} catch {
+		// All fallbacks failed
+	}
+
+	// Build error from the first (module) parse attempt
+	try {
+		parse(source, { ...BASE_OPTIONS, sourceType: 'module' });
+	} catch (error: unknown) {
+		const location = extractErrorLocation(error);
+		return {
+			ok: false,
+			error: {
+				message:
+					error instanceof Error ? error.message : 'Failed to parse source',
+				...(location ? { location } : {}),
+			},
+		};
+	}
+
+	// Should not reach here, but defensive
+	return {
+		ok: false,
+		error: { message: 'Failed to parse source' },
+	};
+}
+
 // ─── Parse options ─────────────────────────────────────────
 
 const BASE_OPTIONS = {
@@ -85,67 +145,3 @@ function extractErrorLocation(
 	}
 	return undefined;
 }
-
-// ─── Main function ─────────────────────────────────────────
-
-/**
- * Parses JeJ source code with a three-step fallback chain.
- *
- * @param source - Raw source code string.
- * @returns A `ParseResult`: `{ ok: true, ast }` or `{ ok: false, error }`.
- */
-function parseSource(source: string): ParseResult {
-	// 1. Module mode (JeJ default)
-	try {
-		const ast = parse(source, { ...BASE_OPTIONS, sourceType: 'module' });
-		return { ok: true, ast };
-	} catch {
-		// Fall through to script mode
-	}
-
-	// 2. Script mode + WithStatement check
-	try {
-		const ast = parse(source, { ...BASE_OPTIONS, sourceType: 'script' });
-		if (hasWithStatement(ast)) {
-			return { ok: true, ast };
-		}
-		// Script parsed but no `with` — don't accept script mode for normal code
-	} catch {
-		// Fall through to expression mode
-	}
-
-	// 3. Module mode + allowExpression (partial code)
-	try {
-		const ast = parse(source, {
-			...BASE_OPTIONS,
-			sourceType: 'module',
-			allowImportExportEverywhere: true,
-		});
-		return { ok: true, ast };
-	} catch {
-		// All fallbacks failed
-	}
-
-	// Build error from the first (module) parse attempt
-	try {
-		parse(source, { ...BASE_OPTIONS, sourceType: 'module' });
-	} catch (error: unknown) {
-		const location = extractErrorLocation(error);
-		return {
-			ok: false,
-			error: {
-				message:
-					error instanceof Error ? error.message : 'Failed to parse source',
-				...(location ? { location } : {}),
-			},
-		};
-	}
-
-	// Should not reach here, but defensive
-	return {
-		ok: false,
-		error: { message: 'Failed to parse source' },
-	};
-}
-
-export default parseSource;

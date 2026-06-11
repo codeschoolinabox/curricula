@@ -39,68 +39,6 @@ import type {
 	ProgramAnalyzer,
 } from './types.js';
 
-/** Point analyzers: each fires on every AST node. */
-const POINT_ANALYZERS: ReadonlyArray<{
-	id: string;
-	analyze: PointAnalyzer;
-}> = [
-	...voiceAnalyzers,
-	...clarityAnalyzers,
-	...cautionAnalyzers,
-	...trapAnalyzers,
-	...easterEggAnalyzers,
-	...comprehensionVariableAnalyzers,
-	...comprehensionControlFlowAnalyzers,
-	...comprehensionInteractionAnalyzers,
-	...comprehensionOperatorAnalyzers,
-	...comprehensionDataAnalyzers,
-];
-
-/** Program analyzers: each fires once on the full AST. */
-const PROGRAM_ANALYZERS: ReadonlyArray<{
-	id: string;
-	analyze: ProgramAnalyzer;
-}> = [
-	...consistencyAnalyzers,
-	...comprehensionGenericAnalyzers,
-	...voiceProfileAnalyzers,
-];
-
-// ─── AST walk ──────────────────────────────────────────────
-
-/**
- * Walks the AST, running point analyzers on each node.
- */
-function walkAndAnalyze(
-	node: Node,
-	scope: ScopeAnalysis,
-	source: string,
-	pointAnalyzers: ReadonlyArray<{ id: string; analyze: PointAnalyzer }>,
-	questions: CodeQuestion[],
-	errors: AnalyzerError[],
-): void {
-	for (const { id, analyze } of pointAnalyzers) {
-		try {
-			const result = analyze(node, scope, source);
-			if (result !== null) {
-				questions.push(result);
-			}
-		} catch (error: unknown) {
-			errors.push({
-				analyzerId: id,
-				message:
-					error instanceof Error ? error.message : 'Unknown analyzer error',
-			});
-		}
-	}
-
-	for (const child of getChildNodes(node)) {
-		walkAndAnalyze(child, scope, source, pointAnalyzers, questions, errors);
-	}
-}
-
-// ─── Main function ─────────────────────────────────────────
-
 /**
  * Analyzes JeJ source code for micro-decisions and comprehension questions.
  *
@@ -120,7 +58,7 @@ function walkAndAnalyze(
  * @param config - Optional filtering configuration.
  * @returns A frozen `MicroDecisionResult`.
  */
-function analyzeMicroDecisions(
+export default function analyzeMicroDecisions(
 	embodiment: Snippet,
 	config: MicroDecisionConfig = {},
 ): MicroDecisionResult {
@@ -183,4 +121,62 @@ function analyzeMicroDecisions(
 	return Object.freeze(result);
 }
 
-export default analyzeMicroDecisions;
+/** Point analyzers: each fires on every AST node. */
+const POINT_ANALYZERS: ReadonlyArray<{
+	id: string;
+	analyze: PointAnalyzer;
+}> = [
+	...voiceAnalyzers,
+	...clarityAnalyzers,
+	...cautionAnalyzers,
+	...trapAnalyzers,
+	...easterEggAnalyzers,
+	...comprehensionVariableAnalyzers,
+	...comprehensionControlFlowAnalyzers,
+	...comprehensionInteractionAnalyzers,
+	...comprehensionOperatorAnalyzers,
+	...comprehensionDataAnalyzers,
+];
+
+/** Program analyzers: each fires once on the full AST. */
+const PROGRAM_ANALYZERS: ReadonlyArray<{
+	id: string;
+	analyze: ProgramAnalyzer;
+}> = [
+	...consistencyAnalyzers,
+	...comprehensionGenericAnalyzers,
+	...voiceProfileAnalyzers,
+];
+
+// ─── AST walk ──────────────────────────────────────────────
+
+/**
+ * Walks the AST, running point analyzers on each node.
+ */
+function walkAndAnalyze(
+	node: Node,
+	scope: ScopeAnalysis,
+	source: string,
+	pointAnalyzers: ReadonlyArray<{ id: string; analyze: PointAnalyzer }>,
+	questions: CodeQuestion[],
+	errors: AnalyzerError[],
+): void {
+	for (const { id, analyze } of pointAnalyzers) {
+		try {
+			const result = analyze(node, scope, source);
+			if (result !== null) {
+				questions.push(result);
+			}
+		} catch (error: unknown) {
+			errors.push({
+				analyzerId: id,
+				message:
+					error instanceof Error ? error.message : 'Unknown analyzer error',
+			});
+		}
+	}
+
+	for (const child of getChildNodes(node)) {
+		walkAndAnalyze(child, scope, source, pointAnalyzers, questions, errors);
+	}
+}

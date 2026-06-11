@@ -15,95 +15,6 @@
 
 import type { CodeQuestion, MicroDecisionConfig, Question } from './types.js';
 
-// ─── Config toggle helpers ─────────────────────────────────
-
-/**
- * Checks if a single value passes a config group.
- * If the group is undefined (omitted), all values pass.
- * If all toggles in the group are false, nothing passes.
- */
-function passesSingleValueFilter(
-	value: string,
-	group: Record<string, boolean | undefined> | undefined,
-	keyMap?: Record<string, string>,
-): boolean {
-	if (group === undefined) {
-		return true;
-	}
-	const key = keyMap?.[value] ?? value;
-	return group[key] !== false;
-}
-
-/**
- * Checks if a multi-value array passes a config group.
- * At least one value must match an enabled toggle.
- */
-function passesMultiValueFilter(
-	values: readonly string[],
-	group: Record<string, boolean | undefined> | undefined,
-): boolean {
-	if (group === undefined) {
-		return true;
-	}
-	return values.some((v) => group[v] !== false);
-}
-
-/**
- * Checks if a question's location overlaps a configured range.
- */
-function passesRangeFilter(
-	question: CodeQuestion,
-	range: { start: number; end: number } | undefined,
-): boolean {
-	if (range === undefined) {
-		return true;
-	}
-	const qStart = question.location.start.line;
-	const qEnd = question.location.end.line;
-	// Any overlap — not full containment
-	return qStart <= range.end && qEnd >= range.start;
-}
-
-// ─── Category key mapping ──────────────────────────────────
-
-/**
- * Maps Category string values to config key names.
- * Only entries that differ need to be listed.
- */
-const CATEGORY_KEY_MAP: Record<string, string> = {
-	'easter-egg': 'easterEgg',
-};
-
-// ─── Kind key mapping ──────────────────────────────────────
-
-/**
- * Maps CodeQuestionKind string values to config key names.
- */
-const KIND_KEY_MAP: Record<string, string> = {
-	'micro-decision': 'microDecision',
-};
-
-// ─── Register filter ───────────────────────────────────────
-
-/**
- * Filters the `questions` array within a CodeQuestion by register.
- * Returns the pruned array, or null if all entries were removed.
- */
-function filterByRegister(
-	questions: readonly Question[],
-	registerConfig: Record<string, boolean | undefined> | undefined,
-): readonly Question[] | null {
-	if (registerConfig === undefined) {
-		return questions;
-	}
-	const filtered = questions.filter(
-		(q) => registerConfig[q.register] !== false,
-	);
-	return filtered.length > 0 ? filtered : null;
-}
-
-// ─── Main filter function ──────────────────────────────────
-
 /**
  * Filters a list of CodeQuestions by the given config.
  *
@@ -111,7 +22,7 @@ function filterByRegister(
  * @param config - The filtering configuration (all fields optional).
  * @returns A new array of filtered, sorted, and optionally capped questions.
  */
-function filterQuestions(
+export default function filterQuestions(
 	questions: readonly CodeQuestion[],
 	config: MicroDecisionConfig,
 ): readonly CodeQuestion[] {
@@ -215,4 +126,89 @@ function filterQuestions(
 	return Object.freeze(result);
 }
 
-export default filterQuestions;
+// ─── Config toggle helpers ─────────────────────────────────
+
+/**
+ * Checks if a single value passes a config group.
+ * If the group is undefined (omitted), all values pass.
+ * If all toggles in the group are false, nothing passes.
+ */
+function passesSingleValueFilter(
+	value: string,
+	group: Record<string, boolean | undefined> | undefined,
+	keyMap?: Record<string, string>,
+): boolean {
+	if (group === undefined) {
+		return true;
+	}
+	const key = keyMap?.[value] ?? value;
+	return group[key] !== false;
+}
+
+/**
+ * Checks if a multi-value array passes a config group.
+ * At least one value must match an enabled toggle.
+ */
+function passesMultiValueFilter(
+	values: readonly string[],
+	group: Record<string, boolean | undefined> | undefined,
+): boolean {
+	if (group === undefined) {
+		return true;
+	}
+	return values.some((v) => group[v] !== false);
+}
+
+/**
+ * Checks if a question's location overlaps a configured range.
+ */
+function passesRangeFilter(
+	question: CodeQuestion,
+	range: { start: number; end: number } | undefined,
+): boolean {
+	if (range === undefined) {
+		return true;
+	}
+	const qStart = question.location.start.line;
+	const qEnd = question.location.end.line;
+	// Any overlap — not full containment
+	return qStart <= range.end && qEnd >= range.start;
+}
+
+// ─── Category key mapping ──────────────────────────────────
+
+/**
+ * Maps Category string values to config key names.
+ * Only entries that differ need to be listed.
+ */
+const CATEGORY_KEY_MAP: Record<string, string> = {
+	'easter-egg': 'easterEgg',
+};
+
+// ─── Kind key mapping ──────────────────────────────────────
+
+/**
+ * Maps CodeQuestionKind string values to config key names.
+ */
+const KIND_KEY_MAP: Record<string, string> = {
+	'micro-decision': 'microDecision',
+};
+
+// ─── Register filter ───────────────────────────────────────
+
+/**
+ * Filters the `questions` array within a CodeQuestion by register.
+ * Returns the pruned array, or null if all entries were removed.
+ */
+function filterByRegister(
+	questions: readonly Question[],
+	registerConfig: Record<string, boolean | undefined> | undefined,
+): readonly Question[] | null {
+	if (registerConfig === undefined) {
+		return questions;
+	}
+	const filtered = questions.filter(
+		(q) => registerConfig[q.register] !== false,
+	);
+	return filtered.length > 0 ? filtered : null;
+}

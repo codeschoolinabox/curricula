@@ -17,8 +17,8 @@ import type { SourceRange } from '../../../embody/lib/validating/types.js';
  * @param node - An acorn AST node (parsed with `locations: true`).
  * @returns A frozen SourceRange.
  */
-function extractLocation(node: Node): SourceRange {
-	const {loc} = node;
+export default function extractLocation(node: Node): SourceRange {
+	const { loc } = node;
 	if (loc) {
 		return Object.freeze({
 			start: Object.freeze({ line: loc.start.line, column: loc.start.column }),
@@ -30,5 +30,3 @@ function extractLocation(node: Node): SourceRange {
 		end: Object.freeze({ line: 1, column: 0 }),
 	});
 }
-
-export default extractLocation;
