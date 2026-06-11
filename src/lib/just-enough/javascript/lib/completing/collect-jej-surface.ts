@@ -20,66 +20,10 @@ import buildScope from '../../embody/lib/scope/build-scope.js';
 import justEnoughJs from '../../embody/lib/validating/just-enough-js.js';
 import type { CompletionRequest } from '../../orchestrate/lib/editing/types.js';
 
+import CURATED_MEMBERS from './curated-members.js';
+import KEYWORDS from './completing-keywords.js';
+import SUPPRESSED_GLOBALS from './suppressed-globals.js';
 import type { Suggestion } from './types.js';
-
-export const KEYWORDS: readonly string[] = [
-	'let',
-	'const',
-	'if',
-	'else',
-	'for',
-	'while',
-	'do',
-	'break',
-	'continue',
-	'return',
-	'true',
-	'false',
-	'null',
-	'new',
-	'typeof',
-	'in',
-];
-
-export const SUPPRESSED_GLOBALS: ReadonlySet<string> = new Set(['eval']);
-
-/**
- * Curated member-name union emitted in dot-receiver context. One
- * union for all receivers (no type inference — `str.`, `(5).`,
- * `Math.`, `console.` all show the same list). Pedagogically
- * scannable; 28 commonly-useful names from `String`, `Number`,
- * and `Math` that JEJ allows.
- */
-export const CURATED_MEMBERS: readonly string[] = [
-	'length',
-	'toString',
-	'valueOf',
-	'charAt',
-	'charCodeAt',
-	'slice',
-	'substring',
-	'toUpperCase',
-	'toLowerCase',
-	'indexOf',
-	'includes',
-	'startsWith',
-	'endsWith',
-	'repeat',
-	'trim',
-	'concat',
-	'replace',
-	'replaceAll',
-	'toFixed',
-	'toPrecision',
-	'abs',
-	'floor',
-	'ceil',
-	'round',
-	'max',
-	'min',
-	'pow',
-	'sqrt',
-];
 
 /**
  * Collect the JEJ-allowed suggestion union for the given completion
@@ -90,7 +34,7 @@ export const CURATED_MEMBERS: readonly string[] = [
  *   overlay runs. Each suggestion has a `label` and a `source`
  *   identifying which sub-collector emitted it.
  */
-function collectJejSurface(
+export default function collectJejSurface(
 	_request: CompletionRequest,
 	ast?: Program,
 	inDotContext = false,
@@ -159,5 +103,3 @@ function collectLocals(
 		return { label: name, source: 'local' as const };
 	});
 }
-
-export default collectJejSurface;

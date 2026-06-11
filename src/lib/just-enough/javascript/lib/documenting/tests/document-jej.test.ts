@@ -1,11 +1,9 @@
 import { describe, it, expect } from 'vitest';
 
 import justEnoughJs from '../../../embody/lib/validating/just-enough-js.js';
-import {
-	KEYWORDS,
-	SUPPRESSED_GLOBALS,
-	CURATED_MEMBERS,
-} from '../../completing/collect-jej-surface.js';
+import CURATED_MEMBERS from '../../completing/curated-members.js';
+import KEYWORDS from '../../completing/completing-keywords.js';
+import SUPPRESSED_GLOBALS from '../../completing/suppressed-globals.js';
 import assembleDocumentTable from '../assemble-doc-table.js';
 import DOC_TABLE from '../doc-table.js';
 import documentJej from '../document-jej.js';
