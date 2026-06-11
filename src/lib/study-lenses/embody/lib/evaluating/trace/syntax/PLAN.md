@@ -464,7 +464,7 @@ Contents:
 - Navigation (file layout).
 - Links to sibling (`../semantics/`), parent (`../../../../README.md`), tracer
   docs (`../../../../tracer.md` et al), NM spec
-  (`../../../../embody/language-levels/just-enough-javascript/notional-machine.md`).
+  (`../../../../language-levels/just-enough-javascript/notional-machine.md`).
 
 ### 0.3 — AR-1 design challenge
 
@@ -794,8 +794,8 @@ DOCS.md step-closing-rules table.
 
 - `../../../../tracer.md`, `../../../../tracer.architecture.md`,
   `../../../../tracer.walkthroughs.md`,
-  `../../../../embody/language-levels/just-enough-javascript/notional-machine.md`,
-  `../../../../embody/language-levels/just-enough-javascript/reference.md`
+  `../../../../language-levels/just-enough-javascript/notional-machine.md`,
+  `../../../../language-levels/just-enough-javascript/reference.md`
 - `../semantics/` (sibling runtime dep — the semantic tracer)
 - `/0-curricula/AGENTS.md`, `/0-curricula/DEV.md`
 

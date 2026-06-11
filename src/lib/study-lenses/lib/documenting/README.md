@@ -49,9 +49,9 @@ criteria: **audience-reach minimalism** (the language includes just enough to
 address users via `prompt`/`alert`/`confirm`, devs via `console.*`, and the
 computer via the NM; agents are read as code-side audiences alongside devs per
 the "alien virtuoso" framing in
-[`metaphor.md`](../../../../../spiralearn/welcome-to-frogramming/metaphor.md))
+[`metaphor.md`](../../../../spiralearn/welcome-to-frogramming/metaphor.md))
 and **compact NM with rich computational idioms** (imperative paradigm per
-[`ontology.md` §13](../../../../../spiralearn/welcome-to-frogramming/ontology.md);
+[`ontology.md` §13](../../../../spiralearn/welcome-to-frogramming/ontology.md);
 primitive-only value-type set; rich methods on `String` / `Number` / `Math` /
 `Date` / regex). Distinct from `whenToUse` (modern-JS usage) and
 `commonMistakes` (pitfalls when reaching anyway).

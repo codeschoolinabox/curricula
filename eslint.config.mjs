@@ -26,34 +26,34 @@ export default tseslint.config(
 			// Vendored blanks lens internals (blankenate, no-paste-extension,
 			// url-config, evaluate-correctness) — JS→TS mechanical converts of
 			// the legacy implementation; idiomatic V2 style is a follow-up.
-			'src/lib/just-enough/javascript/lenses/blanks/lib/**',
+			'src/lib/study-lenses/lenses/blanks/lib/**',
 			// Vendored parsons lens internals (lis, parse-parsons) — JS→TS
 			// mechanical converts of the legacy JSParsons implementation;
 			// idiomatic V2 style is a follow-up. Tests/ extends the
 			// exclusion to this session's WIP test files during the redo —
 			// re-include when the parsons lens refactor stabilizes.
-			'src/lib/just-enough/javascript/lenses/parsons/lib/**',
-			'src/lib/just-enough/javascript/lenses/parsons/tests/**',
+			'src/lib/study-lenses/lenses/parsons/lib/**',
+			'src/lib/study-lenses/lenses/parsons/tests/**',
 			// Writeme lens internals — vendored no-paste-extension + ported
 			// comment-skeleton / generate-hints (JS→TS converts of the legacy
 			// implementation) plus the new diff-lines; idiomatic V2 style is a
 			// follow-up. Tests/ extends the exclusion to this session's WIP test
 			// files during the redo — re-include when the writeme lens stabilizes.
-			'src/lib/just-enough/javascript/lenses/writeme/lib/**',
-			'src/lib/just-enough/javascript/lenses/writeme/tests/**',
+			'src/lib/study-lenses/lenses/writeme/lib/**',
+			'src/lib/study-lenses/lenses/writeme/tests/**',
 			// WIP tracer engine — Phase B redesign in progress per
 			// EMBODY-IMPL-HANDOFF.md. The full evaluating/ subtree (trace,
 			// intercept, run, shared) is mid-refactor; lint rules don't yet
 			// apply cleanly. Vitest still runs these (run.browser.test.ts =
 			// 27 passing tests verified post Sprint 5.3). Re-include
 			// directory-by-directory as each lands its Phase B sub-task.
-			'src/lib/just-enough/javascript/embody/lib/evaluating/trace/**',
-			'src/lib/just-enough/javascript/embody/lib/evaluating/intercept/**',
-			'src/lib/just-enough/javascript/embody/lib/evaluating/run/**',
-			'src/lib/just-enough/javascript/embody/lib/evaluating/shared/**',
+			'src/lib/study-lenses/embody/lib/evaluating/trace/**',
+			'src/lib/study-lenses/embody/lib/evaluating/intercept/**',
+			'src/lib/study-lenses/embody/lib/evaluating/run/**',
+			'src/lib/study-lenses/embody/lib/evaluating/shared/**',
 			// Legacy / pre-redesign holdouts (explicit subdir names).
-			'src/lib/just-enough/javascript/embody/lib/parse-old/**',
-			'src/lib/just-enough/javascript/embody/.legacy/**',
+			'src/lib/study-lenses/embody/lib/parse-old/**',
+			'src/lib/study-lenses/embody/.legacy/**',
 			// Test fixtures are intentional inputs (some malformed, some
 			// using legacy syntax) — ESLint rules don't apply to them.
 			'**/tests/fixtures/**',
@@ -412,8 +412,8 @@ export default tseslint.config(
 			// Domain-partition data files (documenting/, completing/) where
 			// each file exports one slice of a union. The collection's
 			// canonical structure is "many named exports per category".
-			'src/lib/just-enough/javascript/lib/documenting/*.ts',
-			'src/lib/just-enough/javascript/lib/completing/*.ts',
+			'src/lib/study-lenses/lib/documenting/*.ts',
+			'src/lib/study-lenses/lib/completing/*.ts',
 		],
 		rules: {
 			'import/no-named-export': 'off',

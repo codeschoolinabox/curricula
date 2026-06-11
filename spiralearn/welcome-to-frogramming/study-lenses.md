@@ -20,7 +20,7 @@
 > - `metaphor.md` — the composer/virtuoso/mechanism metaphor; lenses are the
 >   Frogrammer's "kit of magnifying glasses" 🔬
 > - Source-code documentation: canonical technical contracts at
->   [`src/lib/just-enough/javascript/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/README.md)
+>   [`src/lib/study-lenses/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/README.md)
 >   and the sibling `DOCS.md`, `notional-machine.md`, `embody/`, `lenses/`,
 >   `orchestrate/` files
 >
@@ -97,13 +97,13 @@ flowchart LR
     JEJ --> NM --> embody --> lenses --> orchestrate
 ```
 
-| #   | Layer              | What it is                                                                                                                                                       | What it produces                                                                                                                                            | Where it lives                                                                                                                       |
-| --- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | **JEJ**            | The curated language subset learners write within                                                                                                                | Source code valid against the JEJ grammar                                                                                                                   | [`reference.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/reference.md)               |
-| 2   | **NM**             | The conceptual evaluation model JEJ programs run on — _what learners twin_                                                                                       | A bounded mental machine: scopes, bindings, values, coercion, control flow, two I/O channels (developer console + user dialogs)                             | [`notional-machine.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/notional-machine.md) |
-| 3   | **`embody/`**      | The operational embodiment of the NM — `embody(code)` turns a JEJ source string into a frozen-data + event-stream object whose every field maps to an NM concept | A `Snippet` value: source + parse + static analyses + validation + streams (callable generators per lifecycle phase)                                        | [`embody/`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/embody/)                         |
-| 4   | **`lenses/`**      | Pedagogical perspectives on the embodied NM — the Frogrammer's kit of magnifying glasses 🔬                                                                      | One self-contained "mini web app" per lens: takes `embodiment` + optional config; renders a learning exercise (annotate, blanks, parsons, trace-table, ...) | [`lenses/`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/lenses/)                         |
-| 5   | **`orchestrate/`** | The `<StudyLenses>` React component + recommender + analysis helpers; wires the chain together for the learner                                                   | The package's public surface — one component to mount; everything else internal                                                                             | [`orchestrate/`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/orchestrate/)               |
+| #   | Layer              | What it is                                                                                                                                                       | What it produces                                                                                                                                            | Where it lives                                                                                                                                                           |
+| --- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | **JEJ**            | The curated language subset learners write within                                                                                                                | Source code valid against the JEJ grammar                                                                                                                   | [`reference.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/language-levels/just-enough-javascript/reference.md)               |
+| 2   | **NM**             | The conceptual evaluation model JEJ programs run on — _what learners twin_                                                                                       | A bounded mental machine: scopes, bindings, values, coercion, control flow, two I/O channels (developer console + user dialogs)                             | [`notional-machine.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/language-levels/just-enough-javascript/notional-machine.md) |
+| 3   | **`embody/`**      | The operational embodiment of the NM — `embody(code)` turns a JEJ source string into a frozen-data + event-stream object whose every field maps to an NM concept | A `Snippet` value: source + parse + static analyses + validation + streams (callable generators per lifecycle phase)                                        | [`embody/`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/)                                                                       |
+| 4   | **`lenses/`**      | Pedagogical perspectives on the embodied NM — the Frogrammer's kit of magnifying glasses 🔬                                                                      | One self-contained "mini web app" per lens: takes `embodiment` + optional config; renders a learning exercise (annotate, blanks, parsons, trace-table, ...) | [`lenses/`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/lenses/)                                                                       |
+| 5   | **`orchestrate/`** | The `<StudyLenses>` React component + recommender + analysis helpers; wires the chain together for the learner                                                   | The package's public surface — one component to mount; everything else internal                                                                             | [`orchestrate/`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/orchestrate/)                                                             |
 
 Each layer's contract sits at the boundary between it and the next:
 
@@ -115,7 +115,7 @@ Each layer's contract sits at the boundary between it and the next:
 | **lenses → orchestrator** | Each lens module declares `name` + `Component` + `config()` + `applicableTo()` + `recommend()`; the orchestrator mounts and dispatches                                                                                  | `lenses/types.ts`                             |
 
 **The chain's directionality is one-way** (per
-[`DOCS.md` § Dependency rules](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/DOCS.md)):
+[`DOCS.md` § Dependency rules](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/DOCS.md)):
 
 ```mermaid
 flowchart TB
@@ -209,9 +209,9 @@ learners; features beyond JEJ cannot be added. JEJ is the ceiling, not the floor
 — each chapter exposes a curated subset.
 
 Cross-link:
-[`reference.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/reference.md)
+[`reference.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/language-levels/just-enough-javascript/reference.md)
 (learner-facing cheat sheet) and
-[`README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/README.md)
+[`README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/README.md)
 (package overview, including the rationale for each exclusion).
 
 ---
@@ -271,7 +271,7 @@ programs interact with users only through these — no DOM manipulation, no fetc
 no file I/O.
 
 Cross-link to
-[`notional-machine.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/notional-machine.md)
+[`notional-machine.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/language-levels/just-enough-javascript/notional-machine.md)
 for the full specification (every concept, every step category, every binding
 state, every event kind).
 
@@ -347,9 +347,9 @@ A separate `debug` mode uses an iframe + `debugger` statements for DevTools
 step-through; it is a distinct isolation model from the three worker engines.
 
 Cross-link to
-[`embody/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/embody/README.md)
+[`embody/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/README.md)
 (orientation, named scenarios, NM-concept-to-type table) and
-[`embody/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/embody/DOCS.md)
+[`embody/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/DOCS.md)
 (architecture decisions, data flow, the five-leaf shape catalog specification,
 open contract holes).
 
@@ -378,7 +378,7 @@ about.
 A Tier-2 lens that _also_ wants JEJ-subset compliance gates on
 `embodiment.status.validated` (which sits between `parsed` and `created` in the
 chain). See
-[`lenses/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/lenses/README.md)
+[`lenses/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/lenses/README.md)
 for the `validated`-as-gate-vs-metadata nuance.
 
 **The lens roster is open by construction.** New lenses ship by satisfying the
@@ -420,9 +420,9 @@ practice** — never reach for `localStorage`, refs across mounts, or other
 persistence. Cross-edit state belongs to the embedding LMS.
 
 Cross-link to
-[`lenses/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/lenses/README.md)
+[`lenses/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/lenses/README.md)
 and
-[`lenses/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/lenses/DOCS.md)
+[`lenses/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/lenses/DOCS.md)
 for the full `LensModule` contract and the dependency rules.
 
 ---
@@ -463,9 +463,9 @@ code fences; the Docusaurus plugin emits the props.
 
 The orchestrator builds the embodiment internally — callers do NOT pre-build.
 The locked contract is canonical at
-[`orchestrate/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/orchestrate/README.md)
+[`orchestrate/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/orchestrate/README.md)
 and
-[`orchestrate/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/orchestrate/DOCS.md).
+[`orchestrate/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/orchestrate/DOCS.md).
 This section is a curriculum-facing summary; that file IS the public-API spec.
 
 **Single-writer state model**: only the editor mutates snippet state. Lenses are
@@ -492,9 +492,9 @@ embedding LMS arranges instances). The LMS owns curricular scope; this package
 never reaches above the snippet boundary.
 
 Cross-link to
-[`orchestrate/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/orchestrate/README.md)
+[`orchestrate/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/orchestrate/README.md)
 and
-[`orchestrate/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/orchestrate/DOCS.md).
+[`orchestrate/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/orchestrate/DOCS.md).
 
 ---
 
@@ -624,21 +624,21 @@ elsewhere; brief acknowledgment + see-X).
 
 **Source-code documentation chain** (canonical technical contracts):
 
-- [`just-enough/javascript/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/README.md)
+- [`just-enough/javascript/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/README.md)
   — package overview, Pedagogical first principles
-- [`just-enough/javascript/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/DOCS.md)
+- [`just-enough/javascript/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/DOCS.md)
   — architecture decisions
-- [`just-enough/javascript/notional-machine.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/notional-machine.md)
+- [`just-enough/javascript/notional-machine.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/language-levels/just-enough-javascript/notional-machine.md)
   — NM specification
-- [`embody/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/embody/README.md)
+- [`embody/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/README.md)
   and
-  [`embody/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/embody/DOCS.md)
+  [`embody/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/embody/DOCS.md)
   — embody architecture, types
-- [`lenses/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/lenses/README.md)
+- [`lenses/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/lenses/README.md)
   — lens module contract
-- [`orchestrate/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/orchestrate/README.md)
+- [`orchestrate/README.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/orchestrate/README.md)
   and
-  [`orchestrate/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/just-enough/javascript/orchestrate/DOCS.md)
+  [`orchestrate/DOCS.md`](https://github.com/codeschoolinabox/spiralearn/blob/main/src/lib/study-lenses/orchestrate/DOCS.md)
   — orchestrator, state machine
 
 **External pointers:**

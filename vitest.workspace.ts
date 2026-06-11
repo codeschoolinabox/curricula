@@ -33,7 +33,7 @@ export default defineWorkspace([
 				// WIP tracer redesign — Phase B2 / Step B7 work deferred per
 				// EMBODY-IMPL-HANDOFF.md. Tests run against half-landed types
 				// would give misleading green signals.
-				'src/lib/just-enough/javascript/embody/lib/evaluating/trace/semantics/**',
+				'src/lib/study-lenses/embody/lib/evaluating/trace/semantics/**',
 			],
 			environment: 'node',
 			// WHY server.deps.inline for CM packages: CodeMirror 6 uses
@@ -82,7 +82,7 @@ export default defineWorkspace([
 				// WIP tracer redesign — Phase B2 / Step B7 work deferred per
 				// EMBODY-IMPL-HANDOFF.md. Tests run against half-landed types
 				// would give misleading green signals.
-				'src/lib/just-enough/javascript/embody/lib/evaluating/trace/semantics/**',
+				'src/lib/study-lenses/embody/lib/evaluating/trace/semantics/**',
 			],
 			// WHY sequential + retry: browser tests spawn Workers with
 			// SharedArrayBuffer pause protocol. Running test files in

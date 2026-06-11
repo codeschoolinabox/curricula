@@ -28,12 +28,12 @@
     "build",
     ".docusaurus",
     "**/legacy-aran-trace/**",
-    "src/lib/just-enough/javascript/embody/lib/evaluating/trace/**",
-    "src/lib/just-enough/javascript/embody/lib/evaluating/intercept/**",
-    "src/lib/just-enough/javascript/embody/lib/evaluating/run/**",
-    "src/lib/just-enough/javascript/embody/lib/evaluating/shared/**",
-    "src/lib/just-enough/javascript/embody/lib/parse-old/**",
-    "src/lib/just-enough/javascript/embody/.legacy/**",
-    "src/lib/just-enough/javascript/lenses/blanks/lib/**"
+    "src/lib/study-lenses/embody/lib/evaluating/trace/**",
+    "src/lib/study-lenses/embody/lib/evaluating/intercept/**",
+    "src/lib/study-lenses/embody/lib/evaluating/run/**",
+    "src/lib/study-lenses/embody/lib/evaluating/shared/**",
+    "src/lib/study-lenses/embody/lib/parse-old/**",
+    "src/lib/study-lenses/embody/.legacy/**",
+    "src/lib/study-lenses/lenses/blanks/lib/**"
   ]
 }

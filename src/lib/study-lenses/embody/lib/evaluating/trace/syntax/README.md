@@ -279,7 +279,7 @@ stripped for serialization via replacer or helper.
 - Parent: [../../../../README.md](../../../../README.md) — JEJ language level
   overview
 - NM spec:
-  [../../../../embody/language-levels/just-enough-javascript/notional-machine.md](../../../../embody/language-levels/just-enough-javascript/notional-machine.md)
+  [../../../../language-levels/just-enough-javascript/notional-machine.md](../../../../language-levels/just-enough-javascript/notional-machine.md)
 - Semantic tracer docs: [../../../../tracer.md](../../../../tracer.md),
   [../../../../tracer.architecture.md](../../../../tracer.architecture.md),
   [../../../../tracer.walkthroughs.md](../../../../tracer.walkthroughs.md)

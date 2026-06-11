@@ -337,7 +337,7 @@ Consumers:
 
 - [`../index.tsx`](../index.tsx) — the orchestrator imports the component for
   editor mode.
-- [`../../../../../pages/editor-smoke.tsx`](../../../../../pages/editor-smoke.tsx)
+- [`../../../../pages/editor-smoke.tsx`](../../../../pages/editor-smoke.tsx)
   — dev-only Docusaurus smoke page; deep-imports the editor for live
   wired-callback verification on the running site. Not a production consumer.
 

@@ -30,7 +30,7 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import { StudyLenses } from '@site/src/lib/just-enough/javascript/index.js';
+import { StudyLenses } from '@site/src/lib/study-lenses/index.js';
 
 export default function L1Picker(): React.JSX.Element {
 	return (

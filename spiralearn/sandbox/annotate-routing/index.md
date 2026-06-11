@@ -5,7 +5,7 @@ sidebar_position: 2
 # annotate routing — `LENS_REGISTRY` registered-path check
 
 Sandbox page for the live-render eyeball check from the
-[annotate-registration handoff](../../../src/lib/just-enough/javascript/.planning-handoffs/04a-annotate-registration-handoff.md)
+[annotate-registration handoff](../../../src/lib/study-lenses/.planning-handoffs/04a-annotate-registration-handoff.md)
 step 4. The fence below uses `js:annotate` (suffix-driven lens dispatch) so the
 orchestrator's `LENS_REGISTRY` must route the fence through the registered
 `annotate` lens instead of falling through to the editor home base.

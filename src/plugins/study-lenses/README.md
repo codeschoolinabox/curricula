@@ -7,7 +7,7 @@ A build-time Docusaurus plugin that pre-processes markdown content in the
 
 The `<StudyLenses>` emitted by the plugin is rendered by the orchestrator
 component at
-[`src/lib/just-enough/javascript/orchestrate/`](../../lib/just-enough/javascript/orchestrate/),
+[`src/lib/study-lenses/orchestrate/`](../../lib/study-lenses/orchestrate/),
 registered as `StudyLenses` in the swizzled
 [`src/theme/MDXComponents.js`](../../theme/MDXComponents.js).
 
@@ -21,7 +21,7 @@ Docusaurus's native TypeScript config support.
 
 Every `<StudyLenses>` node this plugin emits carries the **three-prop public
 API** locked in the orchestrator at
-[`../../lib/just-enough/javascript/orchestrate/README.md`](../../lib/just-enough/javascript/orchestrate/README.md):
+[`../../lib/study-lenses/orchestrate/README.md`](../../lib/study-lenses/orchestrate/README.md):
 
 ```jsx
 <StudyLenses
@@ -50,16 +50,15 @@ The plugin populates the three props from three input surfaces:
   whole-cascade `configs` prop).
 - **Per-directory `lenses.json` cascade** (see § lenses.json schema) — its
   `defaults[lang]` does **double duty**: (1) gates whether a fence in that
-  language transforms at all (configured-languages rule) and (2) when the
-  fence is bare (no `:suffix`, no frontmatter `defaultLens`), supplies the
-  default lens that the orchestrator mounts. The per-language slot is a
-  `LensName | null`: a non-null entry enables transformation for the
-  language AND supplies the default; `null` explicitly suppresses ancestor
-  enablement for that subtree (fences go untransformed); a missing key
-  means no ancestor configured the language. See § Default-lens
-  precedence chain for ordering. The whole resolved cascade ships verbatim
-  as `configs` (with per-fence/sibling overrides pre-merged into
-  `configs.lenses[lens]`).
+  language transforms at all (configured-languages rule) and (2) when the fence
+  is bare (no `:suffix`, no frontmatter `defaultLens`), supplies the default
+  lens that the orchestrator mounts. The per-language slot is a
+  `LensName | null`: a non-null entry enables transformation for the language
+  AND supplies the default; `null` explicitly suppresses ancestor enablement for
+  that subtree (fences go untransformed); a missing key means no ancestor
+  configured the language. See § Default-lens precedence chain for ordering. The
+  whole resolved cascade ships verbatim as `configs` (with per-fence/sibling
+  overrides pre-merged into `configs.lenses[lens]`).
 - **Per-fence `@study-lens` directive in `.js` siblings** — educator-override
   surface; populates the sibling's `lens` and a per-sibling override bundle that
   gets deep-merged INTO the cascade's `lenses[lens]` entry before emission.
@@ -75,12 +74,11 @@ synonym anywhere in the code is a bug.
   orchestrator-side `lenses/` peer (`highlight`, `blanks`, `parsons`,
   `trace-table`, etc.). The `lens` attribute the plugin emits is populated, in
   precedence order (fence side), from: per-fence `:suffix`, frontmatter
-  `defaultLens`, cascade `defaults[fenceLang]` (the cascade default lens),
-  and finally none (editor mode). Sibling side: directive then cascade
-  `defaults[lang]`. See § Default-lens precedence chain for the full
-  ordering and the **subtree deconfiguration** semantics of an explicit
-  `null` value.
-  [`../../lib/just-enough/javascript/orchestrate/README.md`](../../lib/just-enough/javascript/orchestrate/README.md).
+  `defaultLens`, cascade `defaults[fenceLang]` (the cascade default lens), and
+  finally none (editor mode). Sibling side: directive then cascade
+  `defaults[lang]`. See § Default-lens precedence chain for the full ordering
+  and the **subtree deconfiguration** semantics of an explicit `null` value.
+  [`../../lib/study-lenses/orchestrate/README.md`](../../lib/study-lenses/orchestrate/README.md).
 - **Fenced code block** — a markdown code block delimited by triple backticks.
   The MDAST `code` node type. Standard CommonMark term.
 - **Code fence** — the triple-backtick delimiters themselves, as opposed to the
@@ -91,17 +89,17 @@ synonym anywhere in the code is a bug.
   `python`, `html`). Determines the default lens lookup.
 - **Configured language** — a language identifier that has a corresponding key
   in the resolved configuration's `defaults` map **with a non-null value**.
-  Note: configured-ness is **directory-relative** — the resolved cascade
-  varies per directory, so a language `L` can be configured in one subtree
-  (an ancestor `lenses.json` opted it in) and simultaneously unconfigured in
-  a child subtree (a deeper `lenses.json` suppressed it via `null`). When a
-  test or function signature says "configured language," it always means
-  "configured in the resolved cascade for the fence's directory."
-  **Only configured languages trigger fence transformation**; unconfigured
-  languages — whether the key is absent OR the key is present with explicit
-  `null` (see **Subtree deconfiguration**) — fall through to Docusaurus's
-  default code-block rendering. This avoids footguns like replacing an ASCII
-  diagram in a `txt` fence with a plaintext editor.
+  Note: configured-ness is **directory-relative** — the resolved cascade varies
+  per directory, so a language `L` can be configured in one subtree (an ancestor
+  `lenses.json` opted it in) and simultaneously unconfigured in a child subtree
+  (a deeper `lenses.json` suppressed it via `null`). When a test or function
+  signature says "configured language," it always means "configured in the
+  resolved cascade for the fence's directory." **Only configured languages
+  trigger fence transformation**; unconfigured languages — whether the key is
+  absent OR the key is present with explicit `null` (see **Subtree
+  deconfiguration**) — fall through to Docusaurus's default code-block
+  rendering. This avoids footguns like replacing an ASCII diagram in a `txt`
+  fence with a plaintext editor.
 - **Lens suffix** — the text after the colon in a fence info string. A bare
   suffix is a lens name (`js:highlight`). A suffix may carry a URL-style query
   string for per-fence config overrides
@@ -119,33 +117,32 @@ synonym anywhere in the code is a bug.
   the merged truth.
 - **Resolved-default lens** — the lens the orchestrator mounts at first render,
   computed by running the **default-lens precedence chain** against the fence's
-  (or sibling's) inputs. The orchestrator is indifferent to which tier won —
-  it sees only the final resolved value on the emitted `lens` attribute. See
-  **Default-lens precedence chain** for the ordering and **Cascade bundle**
-  for how per-fence/sibling overrides ride inside `configs`.
-- **Cascade default lens** — the value of `defaults[fenceLang]` in the
-  resolved cascade for a fence's directory. When non-null, supplies the
-  `lens` prop the orchestrator mounts on a bare ``` ```js ``` fence (no
-  `:suffix`, no frontmatter `defaultLens`). Resolves via the cascade walk
-  (root → leaf, child wins per-language). Subject to **subtree
-  deconfiguration** (child `null` suppresses ancestor enablement).
+  (or sibling's) inputs. The orchestrator is indifferent to which tier won — it
+  sees only the final resolved value on the emitted `lens` attribute. See
+  **Default-lens precedence chain** for the ordering and **Cascade bundle** for
+  how per-fence/sibling overrides ride inside `configs`.
+- **Cascade default lens** — the value of `defaults[fenceLang]` in the resolved
+  cascade for a fence's directory. When non-null, supplies the `lens` prop the
+  orchestrator mounts on a bare ` `js
+  ```fence (no`:suffix`, no frontmatter `defaultLens`). Resolves via the cascade walk (root → leaf, child wins per-language). Subject to **subtree deconfiguration** (child `null`
+  suppresses ancestor enablement).
 - **Default-lens precedence chain** — the fence-side ordering by which the
   plugin populates the emitted `lens` attribute. Fence: per-fence `:suffix`
-  > frontmatter `defaultLens` > cascade `defaults[fenceLang]` (when
-  non-null) > none (editor mode). Sibling: `@study-lens` directive >
-  cascade `defaults[lang]`. The chain runs only **after** the
-  configured-languages gate passes — if the fence's language is unconfigured
-  (key absent OR explicit `null`), the fence is left as a plain code block
-  and the chain doesn't run.
+  > frontmatter `defaultLens` > cascade `defaults[fenceLang]` (when non-null) >
+  > none (editor mode). Sibling: `@study-lens` directive > cascade
+  > `defaults[lang]`. The chain runs only **after** the configured-languages
+  > gate passes — if the fence's language is unconfigured (key absent OR
+  > explicit `null`), the fence is left as a plain code block and the chain
+  > doesn't run.
 - **Subtree deconfiguration** — an explicit `null` value at a child
-  `lenses.json`'s `defaults[lang]` slot that suppresses an ancestor's
-  enablement of that language for the subtree. Functionally equivalent to
-  "no entry" (fences in the subtree go untransformed), but declaratively
-  expresses the override. Use case: a parent `lenses.json` enables JS
-  site-wide; an experimental subtree opts out via `{"defaults": {"js": null}}`
-  so its JS fences render as raw code blocks. The cascade merge in
-  `resolve-cascade.ts` shallow-spreads `defaults`, so a child `null`
-  propagates verbatim into the resolved config.
+  `lenses.json`'s `defaults[lang]` slot that suppresses an ancestor's enablement
+  of that language for the subtree. Functionally equivalent to "no entry"
+  (fences in the subtree go untransformed), but declaratively expresses the
+  override. Use case: a parent `lenses.json` enables JS site-wide; an
+  experimental subtree opts out via `{"defaults": {"js": null}}` so its JS
+  fences render as raw code blocks. The cascade merge in `resolve-cascade.ts`
+  shallow-spreads `defaults`, so a child `null` propagates verbatim into the
+  resolved config.
 - **Cascade** — the root → leaf directory walk that collects and merges
   `lenses.json` files.
 - **Resolved config** — the frozen, deep-merged output of the cascade for a
@@ -268,7 +265,7 @@ alongside `Tabs` and `TabItem` (imported from `@theme/Tabs` and `@theme/TabItem`
 — they ship with `@docusaurus/theme-classic` but are NOT in the default
 `MDXComponents`, so the plugin's swizzle must add them for the emitted JSX to
 resolve). The orchestrator component lives at
-[`../../lib/just-enough/javascript/orchestrate/`](../../lib/just-enough/javascript/orchestrate/).
+[`../../lib/study-lenses/orchestrate/`](../../lib/study-lenses/orchestrate/).
 
 ## `lenses.json` schema
 
@@ -294,17 +291,18 @@ keys, all optional:
 ```
 
 - **`defaults`** maps a language identifier (not a file extension) to the
-  default lens for that language. Type: `Readonly<Record<LangName, LensName | null>>`.
-  - Non-null entry (e.g. `"js": "study"`): opts the language in. Bare fences
-    in that language transform AND default to that lens; suffix and
-    frontmatter still override (see § Default-lens precedence chain).
+  default lens for that language. Type:
+  `Readonly<Record<LangName, LensName | null>>`.
+  - Non-null entry (e.g. `"js": "study"`): opts the language in. Bare fences in
+    that language transform AND default to that lens; suffix and frontmatter
+    still override (see § Default-lens precedence chain).
   - Explicit `null` (e.g. `"js": null`): **subtree deconfiguration**. A child
-    `lenses.json` can suppress an ancestor's enablement — fences in that
-    subtree go untransformed (raw code blocks).
-  - Omitted key: language was never enabled at any ancestor level; fences
-    pass through Docusaurus's default code-block rendering.
-  Authoring guidance: `"py": "study"` opts Python in site-wide; an
-  experimental subdirectory can opt out with `"py": null`.
+    `lenses.json` can suppress an ancestor's enablement — fences in that subtree
+    go untransformed (raw code blocks).
+  - Omitted key: language was never enabled at any ancestor level; fences pass
+    through Docusaurus's default code-block rendering. Authoring guidance:
+    `"py": "study"` opts Python in site-wide; an experimental subdirectory can
+    opt out with `"py": null`.
 - **`embedSiblings`** controls auto-embedding of sibling `.js` files:
   - `mode: "off"` disables embedding entirely.
   - `mode: "bottom"` appends each sibling as its own `<StudyLenses>` block.
@@ -322,12 +320,12 @@ keys, all optional:
   orchestrator sees a single source of truth: `configs.lenses?.[lens]`. The
   orchestrator's resolution chain collapses to two tiers —
   `module.config() ⊕ configs.lenses?.[lens]` — per
-  [`../../lib/just-enough/javascript/orchestrate/README.md` § Per-lens config resolution chain](../../lib/just-enough/javascript/orchestrate/README.md).
+  [`../../lib/study-lenses/orchestrate/README.md` § Per-lens config resolution chain](../../lib/study-lenses/orchestrate/README.md).
 
   **Lens-config value shape:** values inside `lenses.<lens-name>` are expected
-  to satisfy [`LensConfig`](../../lib/just-enough/javascript/lenses/types.ts) —
-  a flat record of primitives + primitive arrays. The plugin types them loosely
-  as `Record<string, unknown>` because the cascade resolver does not validate
+  to satisfy [`LensConfig`](../../lib/study-lenses/lenses/types.ts) — a flat
+  record of primitives + primitive arrays. The plugin types them loosely as
+  `Record<string, unknown>` because the cascade resolver does not validate
   against the lens-side schema; authors who supply richer values (nested
   objects, callbacks, dates) get undefined behavior at the lens boundary.
   Strictness is a **lens-prop-boundary** contract (the orchestrator casts to
@@ -861,10 +859,10 @@ For readers unfamiliar with Docusaurus:
   [AGENTS.md](../../../AGENTS.md) · [DEV.md](../../../DEV.md)
 - **Parent:** [`src/plugins/README.md`](../README.md)
 - **Downstream consumer:**
-  [`src/lib/just-enough/javascript/orchestrate/`](../../lib/just-enough/javascript/orchestrate/)
-  — the orchestrator package whose `<StudyLenses>` component this plugin emits
-  JSX for.
+  [`src/lib/study-lenses/orchestrate/`](../../lib/study-lenses/orchestrate/) —
+  the orchestrator package whose `<StudyLenses>` component this plugin emits JSX
+  for.
 - **Lens contract:**
-  [`src/lib/just-enough/javascript/lenses/`](../../lib/just-enough/javascript/lenses/)
-  — individual lens implementations the orchestrator dispatches to (per the
-  resolved `lens` prop).
+  [`src/lib/study-lenses/lenses/`](../../lib/study-lenses/lenses/) — individual
+  lens implementations the orchestrator dispatches to (per the resolved `lens`
+  prop).

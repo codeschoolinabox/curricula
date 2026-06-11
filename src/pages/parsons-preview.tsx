@@ -25,8 +25,8 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import embody from '@site/src/lib/just-enough/javascript/embody/index.js';
-import parsonsLens from '@site/src/lib/just-enough/javascript/lenses/parsons/index.js';
+import embody from '@site/src/lib/study-lenses/embody/index.js';
+import parsonsLens from '@site/src/lib/study-lenses/lenses/parsons/index.js';
 
 const SAMPLE =
 	'/* Read each line and think about the order before you drag. */\nfunction classify(n) {\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}\nconsole.log("unused"); // distractor\n/* parsons-collapse: Big picture\nGuard the positive case first, then fall through to the rest. */';

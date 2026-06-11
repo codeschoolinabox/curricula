@@ -1,4 +1,4 @@
-# just-enough/javascript — Architecture & Decisions
+# study-lenses — Architecture & Decisions
 
 This package is the JavaScript study environment + language-level layer for
 Welcome to Frogramming. A JS-generic core reads any source text; the
@@ -16,11 +16,11 @@ shape, peer responsibilities, and dependency rules.
 
 ## Directory layout
 
-Three peers under `javascript/` mirror the conceptual chain. The implementation
+Three peers under `study-lenses/` mirror the conceptual chain. The implementation
 peer (`orchestrate/`) wires everything together for the learner.
 
 ```text
-javascript/
+study-lenses/
   README.md
   notional-machine.md
   notional-machine.svg

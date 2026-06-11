@@ -73,7 +73,7 @@ by the Sprint 6 post-mortem AR-5 (2026-06-05).
 The Phase A constraints carry forward into Phase B:
 
 - **Three peers + utils.** Final shape is `embody/`, `lenses/`, `orchestrate/`
-  under `javascript/`; cross-cutting infra stays at `src/lib/utils/` and is
+  under `study-lenses/`; cross-cutting infra stays at `src/lib/utils/` and is
   imported via the existing `@`-alias. Any new `embody/lib/<module>/` module
   honors this — no cross-peer reaches.
 - **Single writer of snippet state.** Only the orchestrator's editor home base

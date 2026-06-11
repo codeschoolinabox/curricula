@@ -100,7 +100,7 @@ no separate `config` prop; the per-fence/sibling override is folded into
 > embodiment is described in § Live embodiment. The cascade-supplied
 > default-lens seam is sourced from `configs.defaults[fenceLang]` (per the
 > plugin's default-lens precedence chain (a glossary entry in
-> [`src/plugins/study-lenses/README.md` § Glossary](../../../../plugins/study-lenses/README.md#glossary));
+> [`src/plugins/study-lenses/README.md` § Glossary](../../../plugins/study-lenses/README.md#glossary));
 > the orchestrator itself reads only the resolved `lens` prop and is indifferent
 > to which precedence tier supplied it.
 >

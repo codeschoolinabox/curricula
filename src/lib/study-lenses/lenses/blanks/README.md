@@ -536,7 +536,7 @@ each is independently testable:
 - `lib/blankenate.ts` (core) — **vendored** from the legacy
   `public/static/blanks/blankenate.js`. JS→TS mechanical conversion; AST walk
   via Acorn; per-token seeded RNG. Pure. Eslint-ignored per
-  [`../../../../../../eslint.config.mjs`](../../../../../../eslint.config.mjs)
+  [`../../../../../eslint.config.mjs`](../../../../../eslint.config.mjs)
   global-ignores.
 - `lib/no-paste-extension.ts` (core) — **vendored** from the legacy
   `src/utils/noPasteExtension.js`. CodeMirror 6 extension that blocks paste via

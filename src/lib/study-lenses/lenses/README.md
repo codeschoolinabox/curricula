@@ -178,7 +178,7 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
   before evaluation, the `parsons` lens's line shuffler — all live inside the
   lens that uses them). The `<StudyLenses>` plugin must NOT emit a `transforms`
   attribute (see
-  [`../../../../plugins/study-lenses/README.md` § Plugin alignment](../../../../plugins/study-lenses/README.md)).
+  [`../../../plugins/study-lenses/README.md` § Plugin alignment](../../../plugins/study-lenses/README.md)).
 - **`Validation` gate vs. metadata.** The validate gate is the language level's
   admission gate; its criterion is `validation.isJeJ` (i.e.,
   `violations.length === 0`). Gate failure means no `creation` phase and no

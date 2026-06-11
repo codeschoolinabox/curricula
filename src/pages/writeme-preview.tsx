@@ -29,8 +29,8 @@
 import Layout from '@theme/Layout';
 import React from 'react';
 
-import embody from '@site/src/lib/just-enough/javascript/embody/index.js';
-import writemeLens from '@site/src/lib/just-enough/javascript/lenses/writeme/index.js';
+import embody from '@site/src/lib/study-lenses/embody/index.js';
+import writemeLens from '@site/src/lib/study-lenses/lenses/writeme/index.js';
 
 const SAMPLE =
 	'function classify(n) {\n\t// positive, negative, or zero\n\tif (n > 0) {\n\t\treturn "positive";\n\t}\n\treturn "non-positive";\n}';

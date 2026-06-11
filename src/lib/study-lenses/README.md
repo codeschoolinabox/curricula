@@ -1,4 +1,4 @@
-# just-enough-javascript
+# study-lenses
 
 An interactive JavaScript study environment + its first curated **language
 level** (JEJ) for introductory programming education. JEJ programs are the

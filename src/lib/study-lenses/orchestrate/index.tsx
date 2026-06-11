@@ -45,7 +45,7 @@ import React from 'react';
 
 import debounce from '@utils/debounce.js';
 
-import deepMerge from '../../../utils/deep-merge.js';
+import deepMerge from '../../utils/deep-merge.js';
 import embody from '../embody/index.js';
 import annotateLens from '../lenses/annotate/index.js';
 import blanksLens from '../lenses/blanks/index.js';

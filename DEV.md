@@ -596,8 +596,8 @@ const meta = prepareConfig(...);
 return tracerModule.record(code, { meta, options });
 ```
 
-Real example: `src/lib/just-enough/javascript/embody/lib/validating/validate.ts`
-(three numbered phases: parse error / rejections / valid).
+Real example: `src/lib/study-lenses/embody/lib/validating/validate.ts` (three
+numbered phases: parse error / rejections / valid).
 
 #### WHY comments for non-obvious JS semantics
 
