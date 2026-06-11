@@ -18,6 +18,8 @@
  *      `"sl-01-"`), return the original name unchanged and warn once.
  */
 
+import toTitleCase from './to-title-case.js';
+
 /**
  * Applies prefix-strip → numeric-strip → kebab-to-Title-Case.
  *
@@ -53,16 +55,4 @@ function prettifyDirName(
 	return toTitleCase(dirName);
 }
 
-/**
- * Converts a kebab-case string to Title Case:
- * `while-loops` → `"While Loops"`.
- */
-function toTitleCase(s: string): string {
-	return s
-		.split('-')
-		.map((seg) => (seg === '' ? seg : seg[0].toUpperCase() + seg.slice(1)))
-		.join(' ');
-}
-
 export default prettifyDirName;
-export { toTitleCase };

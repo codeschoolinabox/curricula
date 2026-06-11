@@ -130,6 +130,7 @@ import type { Node as AcornNode, Comment as AcornComment } from 'acorn';
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
+
 import type {
 	Analysis,
 	AnyNMEvent,
@@ -174,28 +175,6 @@ import type {
 // ─────────────────────────────────────────────────────────────────────────────
 // Scenario list — single source of truth for the discriminator + throw message.
 // ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * The 11 named scenarios accepted by `embody(code)`.
- *
- * @internal — embody-internal scenario keyword list. NOT re-exported from
- * any package barrel.
- */
-const EMBODY_SCENARIOS = Object.freeze([
-	'OK',
-	'FAIL_AT_TOKENIZE',
-	'FAIL_AT_PARSE',
-	'VALIDATION_FAIL',
-	'FAIL_AT_CREATE',
-	'NON_DETERMINISTIC',
-	'PAUSES',
-	'EVAL_ERROR',
-	'EVAL_TIMEOUT',
-	'EVAL_LIMIT',
-	'EVAL_CANCELLED',
-] as const);
-
-type EmbodyScenario = (typeof EMBODY_SCENARIOS)[number];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers — shape-valid stubs reused across scenarios.
@@ -1130,7 +1109,7 @@ function buildApexRealSnippet(
  * @throws `TypeError` when `code` is not a string (`code.trim()` fails
  *   fast at the boundary).
  */
-function embody(code: string): Snippet {
+export default function embody(code: string): Snippet {
 	// Normalize input for scenario-keyword matching: trim + uppercase.
 	// Non-string input fails fast at code.trim() (TypeError at boundary).
 	// On the scenario-dispatch branch, the normalized form becomes
@@ -1167,12 +1146,3 @@ function embody(code: string): Snippet {
 		: buildParseFailRealSnippet(source, acornResult.tokens, acornResult.error);
 }
 
-export default embody;
-
-/* eslint-disable import/no-named-export -- EMBODY_SCENARIOS is the
-   @internal source-of-truth list used by the throw error message and by
-   orchestrator dev / test fixtures that enumerate canned scenarios.
-   Type re-export rides alongside per the same justification. */
-export { EMBODY_SCENARIOS };
-export type { EmbodyScenario };
-/* eslint-enable import/no-named-export */

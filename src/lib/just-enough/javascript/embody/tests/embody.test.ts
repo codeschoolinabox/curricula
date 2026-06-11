@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
-import embody, { EMBODY_SCENARIOS } from '../index.js';
+import EMBODY_SCENARIOS from '../embody-scenarios.js';
+import embody from '../index.js';
 
 describe('embody', () => {
 	describe('EMBODY_SCENARIOS export', () => {

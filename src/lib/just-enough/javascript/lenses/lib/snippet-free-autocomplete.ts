@@ -25,55 +25,7 @@ import { autocompletion, completeFromList } from '@codemirror/autocomplete';
 import { localCompletionSource } from '@codemirror/lang-javascript';
 import type { Extension } from '@codemirror/state';
 
-/**
- * Bare JavaScript keyword strings — completed as plain text, never as snippet
- * templates (the learner gets spelling help, not structure).
- */
-const JS_KEYWORDS: readonly string[] = [
-	'const',
-	'let',
-	'var',
-	'function',
-	'return',
-	'if',
-	'else',
-	'for',
-	'while',
-	'do',
-	'switch',
-	'case',
-	'default',
-	'break',
-	'continue',
-	'class',
-	'extends',
-	'new',
-	'this',
-	'super',
-	'typeof',
-	'instanceof',
-	'in',
-	'of',
-	'try',
-	'catch',
-	'finally',
-	'throw',
-	'async',
-	'await',
-	'yield',
-	'import',
-	'export',
-	'from',
-	'null',
-	'undefined',
-	'true',
-	'false',
-	'void',
-	'delete',
-	'static',
-	'get',
-	'set',
-];
+import JS_KEYWORDS from './js-keywords.js';
 
 export default function snippetFreeAutocomplete(): Extension {
 	return autocompletion({
@@ -81,8 +33,3 @@ export default function snippetFreeAutocomplete(): Extension {
 	});
 }
 
-// Exported for unit testing — the anti-cheat invariant (the keyword list is
-// plain bare words, NEVER snippet templates) is pinned in
-// `./snippet-free-autocomplete.test.ts`.
-// eslint-disable-next-line import/no-named-export -- the keyword list is a tested constant
-export { JS_KEYWORDS };

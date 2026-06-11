@@ -17,9 +17,8 @@ import { javascript } from '@codemirror/lang-javascript';
 import { EditorState } from '@codemirror/state';
 import { describe, expect, it } from 'vitest';
 
-import snippetFreeAutocomplete, {
-	JS_KEYWORDS,
-} from './snippet-free-autocomplete.js';
+import JS_KEYWORDS from './js-keywords.js';
+import snippetFreeAutocomplete from './snippet-free-autocomplete.js';
 
 describe('snippetFreeAutocomplete — the snippet-free completion factory', () => {
 	it('composes into an EditorState without throwing', () => {

@@ -46,9 +46,8 @@ import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import writemeCore from './core.js';
 import commentSkeleton from './lib/comment-skeleton.js';
-import buildWriteDiffField, {
-	buildReadMarkerField,
-} from './lib/diff-decorations.js';
+import buildReadMarkerField from './lib/build-read-marker-field.js';
+import buildWriteDiffField from './lib/diff-decorations.js';
 import noPasteExtension from './lib/no-paste-extension.js';
 import type { ViewMode } from './types.js';
 

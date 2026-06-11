@@ -18,9 +18,8 @@
 import { EditorState } from '@codemirror/state';
 import { describe, expect, it } from 'vitest';
 
-import buildWriteDiffField, {
-	buildReadMarkerField,
-} from '../lib/diff-decorations.js';
+import buildReadMarkerField from '../lib/build-read-marker-field.js';
+import buildWriteDiffField from '../lib/diff-decorations.js';
 
 /** The 1-based line numbers that carry a diff decoration, in document order. */
 function decoratedLines(doc: string, solution: string): number[] {
