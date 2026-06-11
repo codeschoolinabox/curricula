@@ -43,7 +43,7 @@ import type { ResolvedConfig, Sibling } from './types.js';
  *   files match the configured-languages filter, or if the walk
  *   encounters only ignored/boundary directories.
  */
-function discoverSiblings(
+export default function discoverSiblings(
 	pageDir: string,
 	config: ResolvedConfig,
 ): ReadonlyArray<Sibling> {
@@ -148,5 +148,3 @@ function isSiblingBearingPageDir(dir: string): boolean {
 		fs.existsSync(path.join(dir, 'README.md'))
 	);
 }
-
-export default discoverSiblings;

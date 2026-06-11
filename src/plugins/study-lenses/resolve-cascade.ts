@@ -21,36 +21,6 @@ import DEFAULTS from './defaults.js';
 import type { LensesConfigFile, LensName, ResolvedConfig } from './types.js';
 
 /**
- * A file tracked during a cascade walk, paired with the mtime observed
- * at the time the walk ran. Used to revalidate cache entries against
- * the current filesystem state.
- */
-type TrackedFile = Readonly<{ path: string; mtime: number }>;
-
-type CacheEntry = Readonly<{
-	config: ResolvedConfig;
-	tracked: ReadonlyArray<TrackedFile>;
-}>;
-
-/**
- * Module-scoped cache. Survives across every `resolveCascade` invocation
- * within one Node process; each test file gets a fresh cache because
- * Vitest isolates module graphs per file by default. Key shape:
- * `` `${contentRoot}\0${absDir}` `` with null-byte separator so a path
- * segment containing a literal ASCII "0" cannot accidentally alias two
- * distinct (contentRoot, absDir) pairs.
- *
- * @remarks Each entry carries a snapshot of the tracked files (their
- * absolute paths + mtimes) observed during the walk that produced the
- * entry. The Revalidate phase re-walks the current ancestry and
- * compares; any divergence (set shape or any mtime) invalidates.
- *
- * @remarks Sanctioned exception to DEV.md "no mutable closures" rule —
- * see DOCS.md §Structural constraints "Module-scoped cache."
- */
-const cache = new Map<string, CacheEntry>();
-
-/**
  * Resolves the effective configuration for a specific directory under
  * a specific content root.
  *
@@ -75,7 +45,7 @@ const cache = new Map<string, CacheEntry>();
  *   invalid JSON. The error message includes the offending file path.
  *   Missing `lenses.json` files are not errors — they are skipped.
  */
-function resolveCascade(
+export default function resolveCascade(
 	absDir: string,
 	{ contentRoot }: { readonly contentRoot: string },
 ): ResolvedConfig {
@@ -246,4 +216,32 @@ function mergeLenses(
 	return result;
 }
 
-export default resolveCascade;
+/**
+ * A file tracked during a cascade walk, paired with the mtime observed
+ * at the time the walk ran. Used to revalidate cache entries against
+ * the current filesystem state.
+ */
+type TrackedFile = Readonly<{ path: string; mtime: number }>;
+
+type CacheEntry = Readonly<{
+	config: ResolvedConfig;
+	tracked: ReadonlyArray<TrackedFile>;
+}>;
+
+/**
+ * Module-scoped cache. Survives across every `resolveCascade` invocation
+ * within one Node process; each test file gets a fresh cache because
+ * Vitest isolates module graphs per file by default. Key shape:
+ * `` `${contentRoot}\0${absDir}` `` with null-byte separator so a path
+ * segment containing a literal ASCII "0" cannot accidentally alias two
+ * distinct (contentRoot, absDir) pairs.
+ *
+ * @remarks Each entry carries a snapshot of the tracked files (their
+ * absolute paths + mtimes) observed during the walk that produced the
+ * entry. The Revalidate phase re-walks the current ancestry and
+ * compares; any divergence (set shape or any mtime) invalidates.
+ *
+ * @remarks Sanctioned exception to DEV.md "no mutable closures" rule —
+ * see DOCS.md §Structural constraints "Module-scoped cache."
+ */
+const cache = new Map<string, CacheEntry>();

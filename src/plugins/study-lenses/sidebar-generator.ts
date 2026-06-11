@@ -27,26 +27,7 @@ import prettifyDirName from './prettify-dir-name.js';
 import resolveCascade from './resolve-cascade.js';
 import type { ResolvedConfig, SidebarGeneratorOptions } from './types.js';
 
-/**
- * Returned shape matches Docusaurus's `SidebarItemsGeneratorOption`.
- * Not typed with the Docusaurus `SidebarItemsGenerator` directly to
- * avoid tight coupling to a specific minor version's type exports.
- */
-type StudySidebarGenerator = (arguments_: {
-	readonly defaultSidebarItemsGenerator: (
-		arguments_: unknown,
-	) => Promise<ReadonlyArray<unknown>>;
-	readonly [k: string]: unknown;
-}) => Promise<ReadonlyArray<unknown>>;
-
-type SidebarItemLike = Readonly<{
-	readonly type?: string;
-	readonly label?: string;
-	readonly items?: ReadonlyArray<unknown>;
-	readonly [k: string]: unknown;
-}>;
-
-function createStudySidebarGenerator(
+export default function createStudySidebarGenerator(
 	options: SidebarGeneratorOptions,
 ): StudySidebarGenerator {
 	const config: ResolvedConfig =
@@ -82,7 +63,9 @@ function transformItems(
 		const index = item as SidebarItemLike;
 		if (index.type !== 'category') return item;
 		const rewrittenChildren =
-			index.items === undefined ? index.items : transformItems(index.items, prefixes);
+			index.items === undefined
+				? index.items
+				: transformItems(index.items, prefixes);
 		const rewrittenLabel = transformLabel(index.label ?? '', prefixes);
 		return { ...index, label: rewrittenLabel, items: rewrittenChildren };
 	}
@@ -108,4 +91,21 @@ function transformLabel(
 	return prettifyDirName(label, prefixes);
 }
 
-export default createStudySidebarGenerator;
+/**
+ * Returned shape matches Docusaurus's `SidebarItemsGeneratorOption`.
+ * Not typed with the Docusaurus `SidebarItemsGenerator` directly to
+ * avoid tight coupling to a specific minor version's type exports.
+ */
+type StudySidebarGenerator = (arguments_: {
+	readonly defaultSidebarItemsGenerator: (
+		arguments_: unknown,
+	) => Promise<ReadonlyArray<unknown>>;
+	readonly [k: string]: unknown;
+}) => Promise<ReadonlyArray<unknown>>;
+
+type SidebarItemLike = Readonly<{
+	readonly type?: string;
+	readonly label?: string;
+	readonly items?: ReadonlyArray<unknown>;
+	readonly [k: string]: unknown;
+}>;

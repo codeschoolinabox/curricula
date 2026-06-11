@@ -14,13 +14,6 @@ import path from 'node:path';
 
 import type { LifecyclePluginOptions } from './types.js';
 
-type LoadContext = Readonly<{ readonly siteDir: string }>;
-
-type StudyLensesPlugin = Readonly<{
-	readonly name: string;
-	readonly getPathsToWatch: () => ReadonlyArray<string>;
-}>;
-
 /**
  * Builds the Docusaurus lifecycle plugin.
  *
@@ -29,7 +22,7 @@ type StudyLensesPlugin = Readonly<{
  * @param options - `contentRoots` is the list of docs-instance content
  *   paths (relative to `siteDir`) this plugin should watch.
  */
-function createStudyLensesPlugin(
+export default function createStudyLensesPlugin(
 	context: LoadContext,
 	options: LifecyclePluginOptions,
 ): StudyLensesPlugin {
@@ -44,4 +37,9 @@ function createStudyLensesPlugin(
 	};
 }
 
-export default createStudyLensesPlugin;
+type LoadContext = Readonly<{ readonly siteDir: string }>;
+
+type StudyLensesPlugin = Readonly<{
+	readonly name: string;
+	readonly getPathsToWatch: () => ReadonlyArray<string>;
+}>;

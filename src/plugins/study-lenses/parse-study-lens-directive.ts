@@ -33,32 +33,6 @@
  * intact when appropriate).
  */
 
-export type StudyLensDirective = Readonly<{
-	lens: string;
-	lensConfig?: Readonly<Record<string, unknown>>;
-}>;
-
-export type StudyLensDirectiveMatch = Readonly<{
-	directive: StudyLensDirective;
-	strippedCode: string;
-}>;
-
-type LineKind =
-	| 'blank'
-	| 'line-comment'
-	| 'block-comment-open'
-	| 'block-comment-interior'
-	| 'block-comment-close'
-	| 'single-line-block-comment'
-	| 'shebang'
-	| 'code';
-
-type CommentForm = Readonly<{
-	kind: 'line-run' | 'block';
-	startLine: number; // inclusive, 0-based
-	endLine: number; // inclusive
-}>;
-
 /**
  * Parses the `@study-lens` directive from a file's leading or
  * trailing comment block, and returns both the parsed directive and
@@ -73,7 +47,7 @@ type CommentForm = Readonly<{
  * @throws If the directive appears in both blocks (ambiguous
  *   placement) OR the directive's JSON body is syntactically invalid.
  */
-function parseStudyLensDirective(
+export default function parseStudyLensDirective(
 	fileContent: string,
 	absPath: string,
 ): StudyLensDirectiveMatch | null {
@@ -305,4 +279,28 @@ function stripFormFromLines(
 	return [...before.slice(0, j + 1), ...after];
 }
 
-export default parseStudyLensDirective;
+export type StudyLensDirective = Readonly<{
+	lens: string;
+	lensConfig?: Readonly<Record<string, unknown>>;
+}>;
+
+export type StudyLensDirectiveMatch = Readonly<{
+	directive: StudyLensDirective;
+	strippedCode: string;
+}>;
+
+type LineKind =
+	| 'blank'
+	| 'line-comment'
+	| 'block-comment-open'
+	| 'block-comment-interior'
+	| 'block-comment-close'
+	| 'single-line-block-comment'
+	| 'shebang'
+	| 'code';
+
+type CommentForm = Readonly<{
+	kind: 'line-run' | 'block';
+	startLine: number; // inclusive, 0-based
+	endLine: number; // inclusive
+}>;

@@ -40,45 +40,6 @@ import type { Code } from 'mdast';
 
 import type { LensName, StudyLensesHastProps } from './types.js';
 
-// Local type definitions — no external import from `mdast-util-mdx-jsx`
-// (consistent with the existing `appendTabsEmbed` inline `as const` casts
-// in `remark-study-lenses.ts`).
-//
-// `name` is narrowed to `keyof StudyLensesHastProps` so the contract type
-// in `./types.ts` is the single source of truth for emitted attribute
-// names — a typo or drift between the emission helper and the contract
-// fails at compile time.
-//
-// Two attribute shapes: string-valued (snippet, lens) and
-// expression-valued (configs). The expression-valued shape carries the
-// estree program MDX evaluates to produce the object at runtime.
-type StudyLensesJsxStringAttribute = {
-	type: 'mdxJsxAttribute';
-	name: keyof StudyLensesHastProps;
-	value: string;
-};
-
-type StudyLensesJsxExpressionAttribute = {
-	type: 'mdxJsxAttribute';
-	name: keyof StudyLensesHastProps;
-	value: {
-		type: 'mdxJsxAttributeValueExpression';
-		value: string;
-		data: { estree: Program };
-	};
-};
-
-type StudyLensesJsxAttribute =
-	| StudyLensesJsxStringAttribute
-	| StudyLensesJsxExpressionAttribute;
-
-type StudyLensesJsxNode = {
-	type: 'mdxJsxFlowElement';
-	name: 'StudyLenses';
-	attributes: StudyLensesJsxAttribute[];
-	children: [];
-};
-
 /**
  * Builds an `mdxJsxFlowElement` node representing `<StudyLenses>` from a
  * fenced code block and its resolved cascade.
@@ -107,7 +68,7 @@ type StudyLensesJsxNode = {
  * the orchestrator's embody pipeline auto-detects language from the
  * snippet. See `./README.md` § Emitted JSX prop contract.
  */
-function codeBlockToJsx(
+export default function codeBlockToJsx(
 	codeNode: Code,
 	{
 		lens,
@@ -173,7 +134,45 @@ function buildObjectAttribute(
 	};
 }
 
-export default codeBlockToJsx;
+// Local type definitions — no external import from `mdast-util-mdx-jsx`
+// (consistent with the existing `appendTabsEmbed` inline `as const` casts
+// in `remark-study-lenses.ts`).
+//
+// `name` is narrowed to `keyof StudyLensesHastProps` so the contract type
+// in `./types.ts` is the single source of truth for emitted attribute
+// names — a typo or drift between the emission helper and the contract
+// fails at compile time.
+//
+// Two attribute shapes: string-valued (snippet, lens) and
+// expression-valued (configs). The expression-valued shape carries the
+// estree program MDX evaluates to produce the object at runtime.
+type StudyLensesJsxStringAttribute = {
+	type: 'mdxJsxAttribute';
+	name: keyof StudyLensesHastProps;
+	value: string;
+};
+
+type StudyLensesJsxExpressionAttribute = {
+	type: 'mdxJsxAttribute';
+	name: keyof StudyLensesHastProps;
+	value: {
+		type: 'mdxJsxAttributeValueExpression';
+		value: string;
+		data: { estree: Program };
+	};
+};
+
+type StudyLensesJsxAttribute =
+	| StudyLensesJsxStringAttribute
+	| StudyLensesJsxExpressionAttribute;
+
+type StudyLensesJsxNode = {
+	type: 'mdxJsxFlowElement';
+	name: 'StudyLenses';
+	attributes: StudyLensesJsxAttribute[];
+	children: [];
+};
+
 export type {
 	StudyLensesJsxAttribute,
 	StudyLensesJsxStringAttribute,

@@ -35,8 +35,6 @@ import type {
 	Sibling,
 } from './types.js';
 
-type Transformer = (tree: Root, file: VFile) => void;
-
 /**
  * Builds a remark transformer bound to a specific docs instance's
  * content root.
@@ -47,7 +45,9 @@ type Transformer = (tree: Root, file: VFile) => void;
  * @returns A transformer function Docusaurus registers in
  *   `beforeDefaultRemarkPlugins` for each docs-instance plugin.
  */
-function createRemarkStudyLenses(options: RemarkPluginOptions): Transformer {
+export default function createRemarkStudyLenses(
+	options: RemarkPluginOptions,
+): Transformer {
 	if (options.contentRoot === '') {
 		throw new Error('createRemarkStudyLenses: contentRoot is required');
 	}
@@ -471,4 +471,4 @@ function parseFenceQuery(queryStr: string): Readonly<Record<string, unknown>> {
 	return out;
 }
 
-export default createRemarkStudyLenses;
+type Transformer = (tree: Root, file: VFile) => void;
