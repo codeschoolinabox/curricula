@@ -10,7 +10,10 @@ import type { Node } from 'acorn';
 
 import getChildNodes from '../../../../embody/lib/parse-old/get-child-nodes.js';
 
-function collectNodes(ast: Node, types: ReadonlySet<string>): Node[] {
+export default function collectNodes(
+	ast: Node,
+	types: ReadonlySet<string>,
+): Node[] {
 	const results: Node[] = [];
 
 	function walk(node: Node): void {
@@ -25,5 +28,3 @@ function collectNodes(ast: Node, types: ReadonlySet<string>): Node[] {
 	walk(ast);
 	return results;
 }
-
-export default collectNodes;

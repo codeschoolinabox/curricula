@@ -10,11 +10,9 @@ import type { Node } from 'acorn';
 
 import getRecord from './get-record.js';
 
-function getIdentifierName(node: Node): string | null {
+export default function getIdentifierName(node: Node): string | null {
 	if (node.type === 'Identifier') {
 		return getRecord(node).name as string;
 	}
 	return null;
 }
-
-export default getIdentifierName;

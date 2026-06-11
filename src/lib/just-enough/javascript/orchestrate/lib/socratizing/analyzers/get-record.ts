@@ -8,8 +8,6 @@
 
 import type { Node } from 'acorn';
 
-function getRecord(node: Node): Record<string, unknown> {
+export default function getRecord(node: Node): Record<string, unknown> {
 	return node as unknown as Record<string, unknown>;
 }
-
-export default getRecord;
