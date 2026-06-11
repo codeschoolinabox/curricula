@@ -4,7 +4,7 @@ import { describe, it, expect } from 'vitest';
 import justEnoughJs from '../just-enough-js.js';
 import type { NodeValidator } from '../types.js';
 
-// LanguageLevel declares allowedGlobals + blockedMemberNames as optional,
+// SyntaxAllowlist declares allowedGlobals + blockedMemberNames as optional,
 // but the justEnoughJs literal always populates them. Destructure here so
 // the rest of the file can use them without repeated null-narrowing; the
 // throw enforces the test-file invariant.

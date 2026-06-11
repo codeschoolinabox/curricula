@@ -1,8 +1,13 @@
 # embody
 
-`embody(code)` is the **operational embodiment of the JEJ notional machine**. It
-takes a JEJ source string and returns a frozen-data + event-stream object
-representing the snippet as the NM would treat it.
+`embody(code, { type })` is the **operational embodiment of the JEJ notional
+machine**. It takes any JavaScript source string — plus a **source type**
+(`'script' | 'module'`, default `'module'`) — and returns a frozen-data +
+event-stream object representing the snippet as the machine treats it. A
+JS-generic core reads the text (tokens, AST) for any code; the
+just-enough-javascript **language level** supplies the NM's semantic models
+(realm, creation, evaluation) behind an **admission gate** that runs only on
+module-type snippets once they parse.
 
 embody is one rung of the conceptual chain (see [../README.md](../README.md)):
 
@@ -12,8 +17,9 @@ JEJ  →  NM  →  embody  →  study lenses  →  orchestrate
 
 - The **NM** ([../notional-machine.md](../notional-machine.md)) defines what
   concepts exist (phases, scopes, bindings, coercion, …).
-- **embody** turns each JEJ snippet into a data object whose every field and
-  event corresponds to one of those NM concepts.
+- **embody** turns each snippet into a data object: core phases (source,
+  tokenize, parseAST) for any JavaScript; the full NM correspondence — every
+  field and event mapping to an NM concept — for admitted JEJ.
 - **Study lenses** consume `embodiment` to render pedagogical perspectives on
   it.
 - **The orchestrator** (`orchestrate/`) distributes `embodiment` to mounted
@@ -101,10 +107,31 @@ linked event may not exist when the opener is emitted).
 the phase is null, never throws. Only the `.events` axis has this layer-first
 access. The `.data` and `.entwined` layers are phase-first only.
 
+**Source type** — `'script' | 'module'`, the program-type input to
+`embody(code, { type })`, carried on `snippet.type`. Selects the spec parse goal
+(acorn `sourceType`) and the execution semantics at run. Module is the default
+and the NM-study posture; script is the validator-free posture — the admission
+gate never runs, so every language-level phase is null.
+
+**Language level** — a plugin inside [`language-levels/`](./language-levels/)
+providing (1) the semantic models for the NM's realm, creation, and evaluation
+phases and (2) a validator as admission gate guaranteeing those models never lie
+about admitted programs. Semantic, not syntactic: the syntax restriction derives
+from what the models cover. `just-enough-javascript` is the first and only
+language level today.
+
+**Admission gate** — the language level's validator; runs iff
+`type === 'module'` and the snippet parsed. Gate criterion: `validation.isJeJ`
+(zero violations). Not a linter — admission to the level's semantic models. The
+admission gate is the validate stage of the hard-gated staircase — one gate
+among the staircase's gates, and the only one the language level owns (tokenize
+and parse are JS-generic).
+
 ## What you get from `embody(code)`
 
 ```text
-const snippet = embody(code);
+const snippet = embody(code);                       // module by default
+const scripty = embody(code, { type: 'script' });   // validator-free posture
 ```
 
 `snippet` is a frozen `Snippet` (see [`types.ts`](./types.ts)) with a
@@ -140,10 +167,14 @@ snippet.events.tokenize(); // safe even if snippet.tokenize === null; yields not
 snippet.events.evaluation.run(); // === snippet.evaluation.events.run()
 ```
 
-**Nullable phase objects.** `tokenize`, `parseAST`, and `creation` are
-`Phase | null`; null when the corresponding status flag is false. `realm` and
-`evaluation` are always present. Gate on `snippet.status` before reaching for
-nullable phase objects.
+**Nullable phase objects.** `tokenize`, `parseAST`, `creation`, and `realm` are
+`Phase | null`. `tokenize`/`parseAST`/`creation` are null when the corresponding
+status flag is false; `realm` — a language-level model — is null exactly when no
+language level is active (`type === 'script'`). `evaluation` is always present.
+Gate on `snippet.status` (and `snippet.type`) before reaching for nullable phase
+objects. Under `type === 'script'`, `snippet.events.realm()` (layer-first)
+yields an empty generator — the always-safe layer-first contract holds for realm
+like any null phase.
 
 **Evaluation exception.** `snippet.evaluation` has only `.events` — no `.data`
 or `.entwined`. Evaluation data is fully dynamic and lives only on `RunInstance`
@@ -153,6 +184,8 @@ events; nothing is crystallized. Static analyses _about_ evaluation
 
 **Cross-phase flat fields** (not on the grid):
 
+- **`type`** — `'script' | 'module'` — the source type this snippet was embodied
+  as (the second `embody` argument; module by default)
 - **`source`** — `{ code, offsets }` — input string + line-offsets index for
   `loc` lookups
 - **`status`** — `{ tokenized, parsed, validated, created }` — hard-gate
@@ -165,8 +198,10 @@ events; nothing is crystallized. Static analyses _about_ evaluation
 - **`raw`** — flat Acorn provenance: `{ tokens, ast, comments }` — raw Acorn
   output verbatim
 
-`analysis` and `validation` are cross-phase gate outputs, not grid phases. They
-are present from `validate-fail` onward (see § Pipeline and shape leaves below).
+`analysis` and `validation` are cross-phase gate outputs, not grid phases. On
+module-type snippets they are present from `validate-fail` onward; on
+script-type snippets they are always null — the validate stage never runs
+without a language level (see § Pipeline and shape leaves below).
 
 ## Events (the only callable surface)
 
@@ -209,6 +244,13 @@ Streaming handles (`intercept`, `trace.*`) expose `.cancel()` and
 `endReport.failReason`. `run()` returns a bare `Promise<RunInstance>` with
 neither (no mid-stream surface to decide a stop from).
 
+**Runnability is tiered.** The plain `run()` tier serves any snippet that parsed
+— script or module, admitted or not (the program may still error at runtime;
+that is the lesson). The NM-instrumented tiers (`intercept`, `trace.*`) require
+`status.created` — they replay the language level's machine, which exists only
+for admitted programs. Below its gate, a tier short-circuits with
+`endReport.outcome: 'not-runnable'`.
+
 ## Load-bearing principles (do not violate without explicit decision)
 
 1. **Pure data, no methods.** Every embody surface is data: frozen objects,
@@ -244,33 +286,49 @@ Snippet is shape-valid.
 
 ### Pipeline and shape leaves
 
-The construction pipeline is a hard-gated staircase: **realm → tokenize → parse
-→ validate → create**. Realm always passes. Each subsequent gate can fail,
-producing a structurally distinct embodiment shape.
+The construction pipeline is a hard-gated staircase, branched by source type.
+Module (the default): **realm → tokenize → parse → validate → create** — realm
+always passes; each subsequent gate can fail, producing a structurally distinct
+embodiment shape. Script: **tokenize → parse** — the core phases only; no
+language level is active, so no realm model, no admission gate, and nothing
+beyond parse.
 
 The "Phase objects present" column lists which `snippet.*` phase objects are
 non-null. `evaluation` is always present (events always callable, though may
 yield nothing when prior phases failed).
 
-| Leaf              | Reached when                 | `Snippet.status`                | Phase objects present                         | Phase objects null                 |
-| ----------------- | ---------------------------- | ------------------------------- | --------------------------------------------- | ---------------------------------- |
-| **tokenize-fail** | tokenize fails               | `tokenized=false`               | `realm`, `evaluation`                         | `tokenize`, `parseAST`, `creation` |
-| **parse-fail**    | AST-build fails              | `tokenized=true, parsed=false`  | `realm`, `tokenize`, `evaluation`             | `parseAST`, `creation`             |
-| **validate-fail** | `validation.isJeJ === false` | `parsed=true, validated=false`  | `realm`, `tokenize`, `parseAST`, `evaluation` | `creation`                         |
-| **create-fail**   | script-scope creation fails  | `validated=true, created=false` | `realm`, `tokenize`, `parseAST`, `evaluation` | `creation`                         |
-| **apex**          | all gates pass               | all `true`                      | all phases                                    | —                                  |
+| Leaf              | Reached when                 | `Snippet.status`                                                           | Phase objects present                         | Phase objects null                 |
+| ----------------- | ---------------------------- | -------------------------------------------------------------------------- | --------------------------------------------- | ---------------------------------- |
+| **tokenize-fail** | tokenize fails               | `tokenized=false`                                                          | `realm`, `evaluation`                         | `tokenize`, `parseAST`, `creation` |
+| **parse-fail**    | AST-build fails              | `tokenized=true, parsed=false`                                             | `realm`, `tokenize`, `evaluation`             | `parseAST`, `creation`             |
+| **validate-fail** | `validation.isJeJ === false` | `parsed=true, validated=false`                                             | `realm`, `tokenize`, `parseAST`, `evaluation` | `creation`                         |
+| **create-fail**   | script-scope creation fails  | `validated=true, created=false`                                            | `realm`, `tokenize`, `parseAST`, `evaluation` | `creation`                         |
+| **apex**          | all gates pass               | all `true`                                                                 | all phases                                    | —                                  |
+| **script-parsed** | script-type snippet parses   | `tokenized=true, parsed=true` (`validated`/`created` structurally `false`) | `tokenize`, `parseAST`, `evaluation`          | `realm`, `creation`                |
 
-`snippet.analysis` and `snippet.validation` (cross-phase flat fields) are
-present from `validate-fail` onward.
+The validate-fail, create-fail, and apex leaves are module-only (`realm` present
+— the language level is active even when its admission gate refuses);
+tokenize-fail and parse-fail occur under both types, carrying `realm` per-type
+(present on module, null on script). **script-parsed** is the script-type
+terminal: parsing succeeded and the staircase is complete — no language-level
+phase exists, `validation` and `analysis` are null, and `validated`/`created`
+are structurally false rather than failed.
+
+On module-type snippets, `snippet.analysis` and `snippet.validation`
+(cross-phase flat fields) are present from `validate-fail` onward.
 
 `snippet.events.tokenize()`, `snippet.events.parseAST()`, etc. are always
 callable via layer-first access; null or absent phases yield empty generators.
 
-Validation is a **hard gate**, not a metadata field: a program that fails JEJ
-validation produces no `creation` phase object and no evaluate-tier events.
-`validation.isDeterministic` and `validation.doesPause` are informational
-metadata for consumers, not gate criteria — a non-deterministic or user-pausing
-program is still valid JEJ and passes the gate.
+Validation is the language level's **admission gate**, not a metadata field —
+itself one hard gate of the staircase, distinct from the JS-generic gates
+(tokenize, parse), and scoped to the level: it runs only on module-type snippets
+that parsed. A program that fails it produces no `creation` phase object and no
+NM-instrumented evaluate events (`intercept`, `trace.*`); the plain `run()` tier
+remains available to anything that parsed (see § Events — runnability is
+tiered). `validation.isDeterministic` and `validation.doesPause` are
+informational metadata for consumers, not gate criteria — a non-deterministic or
+user-pausing program is still valid JEJ and passes the gate.
 
 ### Scenario → leaf mapping
 
@@ -322,6 +380,10 @@ On the scenario-dispatch branch, `snippet.source.code` holds the **normalized**
 form (the canonical scenario identifier). Non-scenario inputs preserve their raw
 form through real tokenization.
 
+Scenario snippets are module-typed (`snippet.type === 'module'`) regardless of
+the `type` option passed — they are canned module-shape fixtures; the option
+affects only real composition.
+
 `EMBODY_SCENARIOS` is exported as a frozen array of the 11 valid scenario
 keywords for use in test fixtures and sandbox demos. The named scenarios cover:
 `OK`, `FAIL_AT_TOKENIZE`, `FAIL_AT_PARSE`, `FAIL_AT_CREATE`, `VALIDATION_FAIL`,
@@ -346,11 +408,12 @@ only through a live `.fail(reason)` on a streaming handle (see
 
 ## How to read this directory
 
-| File                     | Audience                                                                                | Purpose                                                 |
-| ------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `README.md` (this)       | Contributors                                                                            | What embody is, navigation                              |
-| [`types.ts`](./types.ts) | embody implementers, orchestrator authors, lens authors (for typing `embodiment` props) | **Canonical contract** — every type, fully documented   |
-| [`DOCS.md`](./DOCS.md)   | Implementers, reviewers                                                                 | Architecture: why these decisions, data flow, tradeoffs |
+| File                                     | Audience                                                                                | Purpose                                                                                            |
+| ---------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `README.md` (this)                       | Contributors                                                                            | What embody is, navigation                                                                         |
+| [`types.ts`](./types.ts)                 | embody implementers, orchestrator authors, lens authors (for typing `embodiment` props) | **Canonical contract** — every type, fully documented                                              |
+| [`DOCS.md`](./DOCS.md)                   | Implementers, reviewers                                                                 | Architecture: why these decisions, data flow, tradeoffs                                            |
+| [`language-levels/`](./language-levels/) | LL authors, implementers                                                                | Language-level plugins — semantic models + admission gates; `just-enough-javascript/` is the first |
 
 For prose explanation of the NM concepts each type maps to, see
 [`../notional-machine.md`](../notional-machine.md).

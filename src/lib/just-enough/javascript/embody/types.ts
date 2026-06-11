@@ -1,8 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // JEJ embody — canonical types
 //
-// Represents a JEJ snippet through its full ECMAScript-aligned lifecycle:
-//   realm → parse(tokenize → AST) → creation(script-scope) → evaluation
+// Represents a JavaScript snippet through its ECMAScript-aligned lifecycle,
+// branched by source type (SnippetType):
+//   module (default): realm → parse(tokenize → AST) → creation(script-scope) → evaluation
+//   script:           tokenize → parse (JS-generic core only; no language level)
 //
 // Three-layer type hierarchy (Data → Entwined → NMEvent):
 //   Data     — pure per-entity data; no cross-references.
@@ -61,6 +63,27 @@ interface Source {
 	readonly code: string;
 	/** offsets[n] = char offset of the first char of line n+1; offsets[0] === 0. */
 	readonly offsets: ReadonlyArray<number>;
+}
+
+/**
+ * The snippet's program-type posture — the second axis of `embody`'s input,
+ * carried on `Snippet.type`. Selects the spec parse goal (acorn `sourceType`)
+ * and the execution semantics at run. `'module'` (the default) is the
+ * NM-study posture: the language level's admission gate can run. `'script'`
+ * is the validator-free posture: no language level is active and every
+ * language-level phase on the Snippet (realm, creation, evaluation's NM
+ * tiers) is null or gated off.
+ */
+type SnippetType = 'script' | 'module';
+
+/**
+ * Options for `embody(code, options?)`. `type` defaults to `'module'`.
+ *
+ * On the scenario-dispatch branch the option is ignored — scenarios are
+ * canned module-shape fixtures (see ./README.md § Named scenarios).
+ */
+interface EmbodyOptions {
+	readonly type?: SnippetType;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -297,7 +320,8 @@ interface CreationEntwined {}
 //
 // One object per spec-grounded lifecycle phase. Phase objects on Snippet are
 // nullable (null when the corresponding status gate didn't complete), except
-// realm and evaluation which are always present.
+// evaluation which is always present. Realm — a language-level model — is
+// additionally null when no language level is active (script type).
 // ═════════════════════════════════════════════════════════════════════════════
 
 interface RealmPhase {
@@ -334,7 +358,7 @@ interface EvaluationPhase {
 //
 // EventsView is the only layer-first axis on Snippet (snippet.events.*).
 // All stream functions are always safe — null/absent phases yield empty
-// generators, never throw.
+// generators, never throw (including realm under script type).
 // ═════════════════════════════════════════════════════════════════════════════
 
 interface EventsView {
@@ -969,9 +993,11 @@ interface HasIo {
 }
 
 /**
- * Cross-phase derived analyses. Present from validate-fail onward (when
- * status.parsed === true). Replaces the old StaticAnalyses — realm and
- * initialScope are now accessible via snippet.realm.* (phase-based access).
+ * Cross-phase derived analyses. Present from validate-fail onward on
+ * module-type snippets (the validate stage requires parsed AND a language
+ * level); always null under script type. Replaces the old StaticAnalyses —
+ * realm and initialScope are now accessible via snippet.realm.* (phase-based
+ * access).
  */
 interface Analysis {
 	readonly bindings: ReadonlyArray<BindingDeclaration>;
@@ -993,9 +1019,11 @@ interface Analysis {
 // it; the PUBLIC EXPORTS block re-exports it.
 
 /**
- * Output of the validate gate. `isJeJ` is the gate criterion.
- * `isDeterministic` and `doesPause` are informational metadata — not gate
- * criteria. A non-deterministic or pausing program is still valid JEJ.
+ * Output of the validate gate — the language level's ADMISSION GATE. Runs iff
+ * `type === 'module'` and the snippet parsed; `Snippet.validation` is always
+ * null under script type. `isJeJ` is the gate criterion. `isDeterministic`
+ * and `doesPause` are informational metadata — not gate criteria. A
+ * non-deterministic or pausing program is still valid JEJ.
  *
  * Derivation invariants (implementations MUST honor; not type-enforceable):
  *   isJeJ            === violations.length === 0
@@ -1035,6 +1063,12 @@ interface EmbodyError {
 	readonly cause?: unknown;
 }
 
+/**
+ * Hard-gate booleans, monotonic by construction (created ⇒ validated ⇒
+ * parsed ⇒ tokenized). Under script type, `validated` and `created` are
+ * STRUCTURALLY false — the admission gate never runs without a language
+ * level (the script-parsed leaf) — not failed.
+ */
 interface Status {
 	readonly tokenized: boolean;
 	readonly parsed: boolean;
@@ -1045,17 +1079,30 @@ interface Status {
 // ═════════════════════════════════════════════════════════════════════════════
 // 14. SNIPPET — top-level type
 //
-// embody(code) returns a Snippet. Hard-gated staircase:
+// embody(code, { type }) returns a Snippet. Hard-gated staircase, branched by
+// source type.
 //
+// Module (the default): realm → tokenize → parse → validate → create
 //   tokenize-fail:  realm + evaluation present; tokenize/parseAST/creation null
 //   parse-fail:     + tokenize present; parseAST/creation null
 //   validate-fail:  + parseAST present; creation null; analysis + validation present
 //   create-fail:    + analysis + validation present; creation null
 //   apex:           all phases present
 //
-// Realm always passes (precedes tokenize; no failure mode in the NM).
-// Evaluation always present (events always callable; may yield nothing).
-// Analysis and validation are null until the validate stage runs (requires parsed).
+// Script: tokenize → parse (JS-generic core only; no language level)
+//   tokenize-fail / parse-fail: as above but realm null
+//   script-parsed:  tokenize + parseAST + evaluation present; realm/creation
+//                   null; analysis/validation null; validated/created
+//                   structurally false (terminal — the script staircase is
+//                   complete at parse)
+//
+// Realm is a language-level model: present on every module-type leaf (it
+// precedes tokenize and never fails — no failure mode in the NM); null under
+// script type, where no language level is active.
+// Evaluation always present (events always callable; may yield nothing —
+// runnability is tiered: plain run gates on parsed, NM tiers on created).
+// Analysis and validation are null until the validate stage runs (module
+// type + parsed) — and always null under script type.
 //
 // Only the .events axis has layer-first access (snippet.events.*).
 // .data and .entwined are phase-first only (snippet.<phase>.data/entwined).
@@ -1063,15 +1110,16 @@ interface Status {
 
 interface Snippet {
 	// ── cross-phase flat (not on the phase×layer grid) ──
+	readonly type: SnippetType; // the source type this snippet was embodied as
 	readonly source: Source;
 	readonly status: Status;
 	readonly errors: EmbodyError | null;
-	readonly analysis: Analysis | null; // null before validate stage runs (requires parsed)
-	readonly validation: Validation | null; // null before validate stage runs (requires parsed)
+	readonly analysis: Analysis | null; // null before the validate stage runs (module + parsed); always null under script
+	readonly validation: Validation | null; // null before the validate stage runs (module + parsed); always null under script
 	readonly raw: RawAcorn;
 
 	// ── phase-first access ──
-	readonly realm: RealmPhase; // always present
+	readonly realm: RealmPhase | null; // language-level model; null when no language level is active (script type)
 	readonly tokenize: TokenizePhase | null; // null when !status.tokenized
 	readonly parseAST: ParseASTPhase | null; // null when !status.parsed
 	readonly creation: CreationPhase | null; // null when !status.created
@@ -1091,6 +1139,10 @@ export type {
 	SourcePosition,
 	SourceLocation,
 	Source,
+
+	// input posture
+	SnippetType,
+	EmbodyOptions,
 
 	// raw acorn provenance
 	RawAcorn,

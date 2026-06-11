@@ -581,6 +581,7 @@ function buildFailAtTokenizeSnippet(code: string): Snippet {
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
+		type: 'module',
 		status: {
 			tokenized: false,
 			parsed: false,
@@ -625,6 +626,7 @@ function buildFailAtParseSnippet(code: string): Snippet {
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
+		type: 'module',
 		status: {
 			tokenized: true,
 			parsed: false,
@@ -684,6 +686,7 @@ function buildValidateFailSnippet(code: string): Snippet {
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
+		type: 'module',
 		status: { tokenized: true, parsed: true, validated: false, created: false },
 		source: buildSource(code),
 		raw: { tokens: rawTokens, ast: rawAst, comments: [] },
@@ -728,6 +731,7 @@ function buildFailAtCreateSnippet(code: string): Snippet {
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
+		type: 'module',
 		status: { tokenized: true, parsed: true, validated: true, created: false },
 		source: buildSource(code),
 		raw: { tokens: rawTokens, ast: rawAst, comments: [] },
@@ -807,6 +811,7 @@ function buildApexSnippet(code: string, overlay: ApexOverlay): Snippet {
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
+		type: 'module',
 		status: { tokenized: true, parsed: true, validated: true, created: true },
 		source: buildSource(code),
 		raw: { tokens: rawTokens, ast: rawAst, comments: [] },
@@ -979,6 +984,7 @@ function buildTokenizeFailRealSnippet(source: Source, error: unknown): Snippet {
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
+		type: 'module',
 		status: {
 			tokenized: false,
 			parsed: false,
@@ -1021,6 +1027,7 @@ function buildParseFailRealSnippet(
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
+		type: 'module',
 		status: {
 			tokenized: true,
 			parsed: false,
@@ -1068,6 +1075,7 @@ function buildApexRealSnippet(
 		evaluation: evaluationEvents,
 	};
 	const snippet: Snippet = {
+		type: 'module',
 		status: { tokenized: true, parsed: true, validated: false, created: false },
 		source,
 		raw: { tokens, ast, comments },

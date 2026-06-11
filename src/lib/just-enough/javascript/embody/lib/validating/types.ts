@@ -195,7 +195,7 @@ type NodeValidator = (node: Node, nodePath: string) => true | Violation;
 /**
  * A rule for a single node type in a language level.
  *
- * @remarks Used as values in the `LanguageLevel.nodes` record.
+ * @remarks Used as values in the `SyntaxAllowlist.nodes` record.
  *
  * - `true` — unconditionally allowed (structural nodes like
  *   `Program`, `BlockStatement`, `Identifier`)
@@ -225,7 +225,7 @@ type NodeRule = true | false | NodeValidator;
  *
  * @example
  * ```ts
- * const myLevel: LanguageLevel = Object.freeze({
+ * const myLevel: SyntaxAllowlist = Object.freeze({
  *   name: 'My Subset',
  *   allowedGlobals: Object.freeze(new Set(['console'])),
  *   blockedMemberNames: Object.freeze(new Set(['split', 'constructor'])),
@@ -237,7 +237,7 @@ type NodeRule = true | false | NodeValidator;
  * });
  * ```
  */
-type LanguageLevel = {
+type SyntaxAllowlist = {
 	readonly name: string;
 	readonly allowedGlobals?: ReadonlySet<string>;
 	readonly blockedMemberNames?: ReadonlySet<string>;
@@ -249,7 +249,7 @@ type LanguageLevel = {
 export type {
 	BaseResult,
 	FormattingResultError,
-	LanguageLevel,
+	SyntaxAllowlist,
 	NodeRule,
 	NodeValidator,
 	SourcePosition,

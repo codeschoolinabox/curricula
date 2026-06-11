@@ -24,7 +24,7 @@ source string
   → ValidationReport { isValid, violations, source, levelName }
 ```
 
-The `LanguageLevel` object controls everything:
+The `SyntaxAllowlist` object controls everything:
 
 - `name` — identifies the level in reports (e.g. `"Just Enough JavaScript"`)
 - `allowedGlobals` — `ReadonlySet<string>` of identifier names that don't need a
@@ -46,7 +46,7 @@ The `LanguageLevel` object controls everything:
 | `validate.ts`                 | Public entry: `validate(code)` → frozen `BaseResult`                |
 | `collect-violations.ts`       | Recursive AST walk + allowlist checking                             |
 | `create-violation.ts`         | Violation factory (with severity)                                   |
-| `just-enough-js.ts`           | Pre-built "Just Enough JS" LanguageLevel config                     |
+| `just-enough-js.ts`           | Pre-built "Just Enough JS" SyntaxAllowlist config                   |
 | `check-undeclared-globals.ts` | Scope analysis: disallowed globals detection                        |
 | `is-jej.ts`                   | Convenience: `isJej(code)` returns boolean                          |
 | `tests/`                      | Unit tests                                                          |
@@ -56,8 +56,9 @@ Files moved out: `parse-program.ts` and `get-child-nodes.ts` now live in
 
 ## Glossary additions
 
-These terms join the existing `Violation` / `ValidationReport` / `LanguageLevel`
-vocabulary; they are produced by the public `validate(code)` entry.
+These terms join the existing `Violation` / `ValidationReport` /
+`SyntaxAllowlist` vocabulary; they are produced by the public `validate(code)`
+entry.
 
 - **BaseResult** — frozen `{ ok, error?, rejections? }` returned by
   `validate(code)`. The `ok` boolean is the primary success signal; `error` and
@@ -88,10 +89,10 @@ vocabulary; they are produced by the public `validate(code)` entry.
   default). Matches the `nodePath` convention used by the tracer and
   `embody/types.ts`.
 - **Blocked member name** — a property name in
-  `LanguageLevel.blockedMemberNames`. Non-computed dot access to a blocked name
-  (`x.split`, `x.constructor`) is a rejection; every other dot name passes. This
-  allow-all-except-blocklist model is the inverse of an allowlist — chosen so
-  the validator tracks reference.md's "all String methods except
+  `SyntaxAllowlist.blockedMemberNames`. Non-computed dot access to a blocked
+  name (`x.split`, `x.constructor`) is a rejection; every other dot name passes.
+  This allow-all-except-blocklist model is the inverse of an allowlist — chosen
+  so the validator tracks reference.md's "all String methods except
   split/match/matchAll" framing without enumerating the full permitted surface.
 - **Date-only `new`** — `NewExpression` is allowed only when the callee is the
   identifier `Date` (`new Date(...)`). reference.md states `new Date()` is the
@@ -149,18 +150,18 @@ fallback in `validate-program.ts` remains; `validate(code)` inherits it.
   (which exposes `scriptMode`) or `validateProgram` (which exposes
   `ValidationReport.scriptMode`) directly.
 
-### `validateProgram(source, level)` (building block)
+### `validateProgram(source, allowlist)` (building block)
 
 ```ts
 function validateProgram(
 	source: string,
-	level: LanguageLevel,
+	allowlist: SyntaxAllowlist,
 ): ValidationReport;
 ```
 
 Lower-level entry. Returns a `ValidationReport` instead of the shaped
 `BaseResult`. Suitable for tools that want the raw `violations` array, the
-`levelName`, or to validate against a custom (non-JeJ) `LanguageLevel`.
+`levelName`, or to validate against a custom (non-JeJ) `SyntaxAllowlist`.
 
 ### `isJej(code)` (boolean convenience)
 
@@ -262,7 +263,7 @@ and docs.)
 ```ts
 function validateProgram(
 	source: string,
-	level: LanguageLevel,
+	allowlist: SyntaxAllowlist,
 ): ValidationReport;
 ```
 

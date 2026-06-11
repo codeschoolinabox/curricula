@@ -1,5 +1,19 @@
 # Embody implementation handoff — Phase B
 
+> **Addendum (2026-06-11) — source types + language-level plugins.** The embody
+> contract gained `embody(code, { type })` with `type: 'script' | 'module'`
+> (default module), a top-level `Snippet.type`, a nullable `realm`, the six-leaf
+> staircase (new `script-parsed` terminal), and **tiered runnability** (plain
+> `run()` gates on `parsed`; NM tiers on `created` — coordinate with the
+> evaluating-engine campaign's adapter, which owns the `not-runnable`
+> short-circuit). Phase B steps build against this contract (types.ts;
+> embody/DOCS.md § Data flow + § Language levels as plugins). The validating
+> config type renamed `LanguageLevel` → `SyntaxAllowlist`. LL-owned models
+> (validating rules, scope/creation modeling, NM trace instrumentation) have a
+> designated home at `embody/language-levels/just-enough-javascript/` — B2's
+> per-module re-typing may re-home them there as each module's DDD lands (decide
+> per-module at that DDD, not as a bulk move).
+
 **Status:** Phase B is **unblocked**. Phase A is closed — `REFACTOR-HANDOFF.md`
 self-deleted in commit `4526dc3` (2026-05-06, "Phase A complete"). The
 three-peer embody/lenses/orchestrate architecture is the running shape; the
@@ -51,8 +65,8 @@ The recovery (`a55d087`) hid ~21 such files behind the tsconfig `exclude`
 instead of reverting them, so they currently do **not** typecheck and will
 surface ~100 errors the moment they are un-excluded. Per-file recipe (safe now
 that `prefer-readonly-type` is `off` — commit `8295a67`):
-`git show 0e05c5a^:<file> > <file>`, then drop the path from `exclude`.
-Surfaced by the Sprint 6 post-mortem AR-5 (2026-06-05).
+`git show 0e05c5a^:<file> > <file>`, then drop the path from `exclude`. Surfaced
+by the Sprint 6 post-mortem AR-5 (2026-06-05).
 
 ## Constraints to honor
 
@@ -109,22 +123,24 @@ Phase B adds the following:
   discriminator is not. AR-4 / AR-5 audits grep consumer code for
   `source.code ===` / substring tests against scenario keywords and fail any
   non-test occurrence.
-- **Hard-gated pipeline.** The construction pipeline is
-  `tokenize → parse → validate → create`. Each gate failure produces a
-  structurally distinct leaf (5 total: tokenize-fail, parse-fail, validate-fail,
-  create-fail, apex). Downstream surfaces (event streams) are absent on leaves
-  where the chain didn't complete: validate-fail and earlier have no
-  `streams.create` and no `streams.evaluate`; create-fail has no
-  `streams.evaluate`. Real- composition modules wiring into the non-scenario
-  branch MUST honor this — no event streams for programs that won't run. The
-  validate gate criterion is `validation.isJeJ` (i.e.,
-  `violations.length === 0`); `validation.isDeterministic` and
-  `validation.doesPause` are consumer-side metadata, NOT gate criteria.
-- **Runtime errors not embodied.** `streams.evaluate.*` outcomes (`'errored'`,
-  `'timed-out'`, `'limit-exceeded'`, `'cancelled'`) live on
+- **Hard-gated pipeline (per the addendum's six-leaf, type-branched contract).**
+  Module: `realm → tokenize → parse → validate → create`; script:
+  `tokenize → parse` ending at the `script-parsed` terminal. Each gate failure
+  produces a structurally distinct leaf (6 total: tokenize-fail, parse-fail,
+  validate-fail, create-fail, apex, script-parsed). Downstream surfaces honor
+  **tiered runnability**: creation events exist only when `status.created`; the
+  NM-instrumented evaluate tiers (`intercept`, `trace.*`) require
+  `status.created`; the plain `run()` tier serves anything that parsed; below a
+  tier's gate it returns `not-runnable`. Real-composition modules wiring into
+  the non-scenario branch MUST honor this. The validate gate criterion is
+  `validation.isJeJ` (i.e., `violations.length === 0`);
+  `validation.isDeterministic` and `validation.doesPause` are consumer-side
+  metadata, NOT gate criteria.
+- **Runtime errors not embodied.** `evaluation.events.*` outcomes (`'errored'`,
+  `'timed-out'`, `'limit-exceeded'`, `'cancelled'`, `'failed'`) live on
   `RunInstance.endReport`, not on the static Snippet. The apex leaf is
-  shape-identical across `OK` and `EVAL_*` scenarios; the EVAL\__ overlay is
-  interpreted by `streams.evaluate._` at call time.
+  shape-identical across `OK` and `EVAL_*` scenarios; the EVAL\_\* overlay is
+  interpreted by the evaluate streams at call time.
 
 ## Ordered steps
 

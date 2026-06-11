@@ -1,7 +1,7 @@
 import type { Node } from 'acorn';
 
 import createViolation from './create-violation.js';
-import type { LanguageLevel, NodeRule, Violation } from './types.js';
+import type { SyntaxAllowlist, NodeRule, Violation } from './types.js';
 
 // -- constraint validators --
 // Each validator is a NodeValidator: (node: Node, nodePath: string) => true | Violation.
@@ -385,7 +385,7 @@ function validateForStatement(node: Node, nodePath: string): true | Violation {
  * a provided blocklist (allow-all-except-blocklist).
  *
  * @remarks Factory pattern — derives the blocked set from the
- * {@link LanguageLevel} config rather than duplicating it as a
+ * {@link SyntaxAllowlist} config rather than duplicating it as a
  * module-level constant. No type checking — `.log` on a string is
  * a runtime error, not our problem. We only check the property name.
  *
@@ -467,7 +467,7 @@ function extractLocation(node: Node) {
  *
  * @remarks Single source of truth — used by both the
  * {@link createMemberValidator} factory and exposed on the
- * {@link LanguageLevel} config for external consumers. Two tiers:
+ * {@link SyntaxAllowlist} config for external consumers. Two tiers:
  * array-returning string methods reference.md excludes (arrays are out
  * of JeJ scope), and reflection / prototype-escape names with no JeJ
  * use. Every name NOT listed here passes dot access
@@ -518,7 +518,7 @@ const BLOCKED_MEMBER_NAMES: ReadonlySet<string> = Object.freeze(
  * allowed at this language level" message directing them to the
  * allowed alternative.
  */
-const justEnoughJs: LanguageLevel = Object.freeze({
+const justEnoughJs: SyntaxAllowlist = Object.freeze({
 	name: 'Just Enough JavaScript',
 
 	allowedGlobals: Object.freeze(

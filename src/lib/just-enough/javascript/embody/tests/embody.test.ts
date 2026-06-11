@@ -551,7 +551,7 @@ describe('embody', () => {
 
 		it('events.realm === realm.events (reference-identical across both axes)', () => {
 			const s = embody('OK');
-			expect(s.events.realm).toBe(s.realm.events);
+			expect(s.events.realm).toBe(s.realm!.events);
 		});
 
 		it('events.tokenize === tokenize.events (reference-identical across both axes)', () => {

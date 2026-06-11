@@ -5,7 +5,7 @@ import parseProgram from '../parse-old/parse-program.js';
 
 import checkUndeclaredGlobals from './check-undeclared-globals.js';
 import collectViolations from './collect-violations.js';
-import type { LanguageLevel, ValidationReport } from './types.js';
+import type { SyntaxAllowlist, ValidationReport } from './types.js';
 
 /**
  * Validates a JavaScript program against a language level.
@@ -31,7 +31,7 @@ import type { LanguageLevel, ValidationReport } from './types.js';
  * syntax errors that must be reported gracefully, not as exceptions.
  *
  * @param source - The raw JavaScript source code to validate.
- * @param languageLevel - The {@link LanguageLevel} configuration
+ * @param allowlist - The {@link SyntaxAllowlist} configuration
  *   defining which syntax is allowed. Typically `justEnoughJs` but
  *   can be any custom level.
  * @returns A frozen {@link ValidationReport} with all violations
@@ -39,7 +39,7 @@ import type { LanguageLevel, ValidationReport } from './types.js';
  */
 export default function validateProgram(
 	source: string,
-	languageLevel: LanguageLevel,
+	allowlist: SyntaxAllowlist,
 ): ValidationReport {
 	// 1. Parse — try module mode first
 	const moduleResult = parseProgram(source, 'module');
@@ -57,7 +57,7 @@ export default function validateProgram(
 				isValid: false,
 				violations: Object.freeze([]),
 				source,
-				levelName: languageLevel.name,
+				levelName: allowlist.name,
 				parseError: moduleResult,
 			});
 		}
@@ -72,7 +72,7 @@ export default function validateProgram(
 				isValid: false,
 				violations: Object.freeze([]),
 				source,
-				levelName: languageLevel.name,
+				levelName: allowlist.name,
 				parseError: moduleResult,
 			});
 		}
@@ -81,11 +81,11 @@ export default function validateProgram(
 	}
 
 	// 2. Collect node violations
-	const nodeViolations = collectViolations(ast, languageLevel.nodes);
+	const nodeViolations = collectViolations(ast, allowlist.nodes);
 
 	// 3. Scope analysis — disallowed globals
-	const scopeViolations = languageLevel.allowedGlobals
-		? checkUndeclaredGlobals(ast, languageLevel.allowedGlobals)
+	const scopeViolations = allowlist.allowedGlobals
+		? checkUndeclaredGlobals(ast, allowlist.allowedGlobals)
 		: [];
 
 	const violations = Object.freeze([...nodeViolations, ...scopeViolations]);
@@ -95,7 +95,7 @@ export default function validateProgram(
 		isValid: violations.length === 0,
 		violations,
 		source,
-		levelName: languageLevel.name,
+		levelName: allowlist.name,
 		ast,
 	};
 

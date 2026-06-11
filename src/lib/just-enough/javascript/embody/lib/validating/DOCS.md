@@ -96,7 +96,7 @@ All terminal results are deep-frozen (utility, not shown).
   `BaseResult` has no `scriptMode` field. Tools that need this signal should
   call `parse(code)` (which exposes `scriptMode`) or `validateProgram` (which
   exposes `ValidationReport.scriptMode`) directly.
-- **Caller-supplied LanguageLevel** — `validate(code)` always uses
+- **Caller-supplied SyntaxAllowlist** — `validate(code)` always uses
   `justEnoughJs`. Custom levels go through `validateProgram(source, level)`.
 - **Async boundary** — synchronous throughout. No I/O.
 - **Caller responsibilities** — formatting `error.message` for display, mapping
@@ -130,13 +130,13 @@ fix suggestions.
    analyzing student source code only. Better error messages, source locations
    on every violation, simpler architecture.
 
-2. **Single allowlist object.** The `LanguageLevel.nodes` record maps ESTree
+2. **Single allowlist object.** The `SyntaxAllowlist.nodes` record maps ESTree
    node type strings to `NodeRule` values: `true` (unconditionally allowed),
    `false` (explicitly forbidden), or a `NodeValidator` function for constraint
    checking. If a node's type is not a key in the record, it's an automatic
    violation. Safer than a denylist — new JS features are blocked by default.
 
-3. **Injectable configuration.** `validateProgram` takes the `LanguageLevel` as
+3. **Injectable configuration.** `validateProgram` takes the `SyntaxAllowlist` as
    an argument rather than hardcoding it. Different exercises can use different
    subsets. `allowedGlobals` and `blockedMemberNames` are `ReadonlySet<string>`
    for the same reason — injectable, not hardcoded.

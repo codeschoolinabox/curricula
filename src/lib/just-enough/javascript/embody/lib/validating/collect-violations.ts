@@ -29,7 +29,7 @@ import type { NodeRule, Violation } from './types.js';
  * complete picture rather than stopping at the first error.
  *
  * @param ast - The root AST node to walk (typically a `Program`).
- * @param nodes - The allowlist record from a {@link LanguageLevel}.
+ * @param nodes - The allowlist record from a {@link SyntaxAllowlist}.
  * @returns A frozen array of all {@link Violation}s found.
  */
 export default function collectViolations(

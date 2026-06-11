@@ -8,31 +8,40 @@ the tradeoffs we considered before locking the contract in
 
 ## Data flow
 
-A JEJ source string flows through embody as a hard-gated pipeline. The input is
-first normalized (`trim().toUpperCase()`) and matched against the named scenario
-keyword set; matches jump directly to the matching shape leaf. Non-matches
-descend through four gates — **tokenize → parse → validate → create** — each
-with a pass/fail fork. Each fork produces a structurally distinct snippet shape;
-phase objects downstream of a failed gate are `null` on the resulting Snippet.
+A JavaScript source string + a **source type** (`'script' | 'module'`, default
+module) flow through embody as a hard-gated pipeline. The input is first
+normalized (`trim().toUpperCase()`) and matched against the named scenario
+keyword set; matches jump directly to the matching shape leaf (always
+module-shaped — the type option is ignored on the scenario branch). Non-matches
+parse per the spec for their source type, then branch: module-type snippets
+descend the full staircase with the language level active — **realm → tokenize →
+parse → validate → create** (tokenize and parse are JS-generic core gates; the
+admission gate is the level's) — while script-type snippets run the JS-generic
+core only (**tokenize → parse**) and terminate at the **script-parsed** leaf.
+Each fork produces a structurally distinct snippet shape; phase objects
+downstream of a failed gate — and every language-level phase when no language
+level is active — are `null` on the resulting Snippet.
 
 ```mermaid
 flowchart TD
-    src[("source string")] --> norm[("normalized source\nOR scenario key")]
+    src[("source string + source type")] --> norm[("normalized source\nOR scenario key")]
     norm --> dispatch{"scenario keyword?"}
-    dispatch -->|"yes"| canned[("canned Snippet\nshape per leaf")]
-    dispatch -->|"no"| tokData[("RawAcorn.tokens\nTokenizeData · TokenizeEntwined")]
+    dispatch -->|"yes"| canned[("canned Snippet\nshape per leaf — module-typed")]
+    dispatch -->|"no"| tokData[("RawAcorn.tokens\nTokenizeData · TokenizeEntwined\n(spec parse goal per source type)")]
     tokData --> astData[("RawAcorn.ast\nParseASTData · ParseASTEntwined")]
-    astData --> analyzed[("Analysis · Validation\ncross-phase outputs")]
+    astData --> typeFork{"source type?"}
+    typeFork -->|"script — no language level"| sParsed[("script-parsed Snippet\nrealm/creation/analysis/validation null")]
+    typeFork -->|"module — language level active"| analyzed[("Analysis · Validation\ncross-phase outputs\n(the admission gate runs)")]
     analyzed -->|"isJeJ = true"| created[("CreationData · CreationEntwined\nscript-scope graph")]
     analyzed -->|"isJeJ = false"| vFail[("validate-fail Snippet")]
     tokData -.->|"threw"| tFail[("tokenize-fail Snippet")]
     astData -.->|"threw"| pFail[("parse-fail Snippet")]
     created -.->|"threw"| cFail[("create-fail Snippet")]
     created --> apex[("apex Snippet")]
-    tFail & pFail & vFail & cFail & apex & canned --> frozen[("deep-frozen Snippet\nrealm + evaluation always present\nother phases non-null on success")]
+    tFail & pFail & vFail & cFail & apex & sParsed & canned --> frozen[("deep-frozen Snippet\nevaluation always present\nrealm present on module leaves\nother phases non-null on success")]
 ```
 
-Both paths converge on the same five-leaf shape catalog. **Scenario shortcuts**
+Both paths converge on the same six-leaf shape catalog. **Scenario shortcuts**
 (the `dispatch → canned` branch) **construct the matching leaf shape directly**
 without running the upstream stages. Scenario dispatch is shape-construction,
 not pipeline-traversal — the canned Snippet is materialized from the scenario
@@ -51,20 +60,28 @@ keyword, then frozen.
   2. Reads `analysis.nonDeterminism` → derives `isDeterministic` (metadata).
   3. Reads `analysis.hasIo.user.total` → derives `doesPause` (metadata).
 
-**Validation is a hard gate.** `violations.length > 0` sets
-`snippet.creation = null` and prevents evaluation — programs that aren't valid
-JEJ don't run. On validate-fail, `snippet.errors` carries `phase='validation'`
-(first-fail-wins).
+**Validation is the language level's admission gate — and a hard staircase
+gate.** It runs only on module-type snippets that parsed.
+`violations.length > 0` sets `snippet.creation = null` and bars the
+NM-instrumented evaluate tiers — programs the level does not admit are never
+modeled by its machine. The plain `run()` tier remains available to anything
+that parsed (runnability is tiered — see below). On validate-fail,
+`snippet.errors` carries `phase='validation'` (first-fail-wins).
 
-**Phase objects are nullable (Option A).** `snippet.tokenize`, `.parseAST`, and
-`.creation` are `PhaseType | null` — null when the corresponding status flag is
-false. `snippet.realm` is always present (realm always passes).
-`snippet.evaluation` is always present but has only `.events` (no `.data`, no
-`.entwined`).
+**Phase objects are nullable (Option A).** `snippet.tokenize`, `.parseAST`,
+`.creation`, and `.realm` are `PhaseType | null`. The first three are null when
+the corresponding status flag is false; `realm` — a language-level model — is
+null exactly when no language level is active (script type) and present on every
+module-type leaf (realm always passes). `snippet.evaluation` is always present
+but has only `.events` (no `.data`, no `.entwined`).
 
-**`snippet.evaluation` is always callable.** On non-apex leaves, `run()` returns
-a no-op `RunInstance` with `events: []` and `endReport.outcome: 'not-runnable'`;
-no worker is spawned. See
+**`snippet.evaluation` is always callable, and runnability is tiered.** The
+plain `run()` tier executes any snippet that parsed — script or module, admitted
+or not; the program may still error at runtime, which is the lesson. The
+NM-instrumented tiers (`intercept`, `trace.*`) require `status.created` — they
+replay the language level's machine, which exists only for admitted programs.
+Below its gate, a tier returns a no-op `RunInstance` with `events: []` and
+`endReport.outcome: 'not-runnable'`; no worker is spawned. See
 [Evaluation behavior across leaves](#evaluation-behavior-across-leaves).
 
 **Runtime errors are NOT embodied.** Outcomes from
@@ -192,28 +209,36 @@ shorthand is restricted to events:
    want tokenize entwined or parseAST entwined, never a merged view of all
    phases.
 
-## 5-leaf staircase (field presence)
+## 6-leaf staircase (field presence)
 
 Phase objects follow Option A — present when the phase completed, `null` when it
-did not. `analysis` and `validation` are null when `!status.parsed`; present
-whenever `status.parsed === true` (regardless of validation or creation
-outcome).
+did not — and language-level phases are additionally null when no language level
+is active (script type). On module-type snippets, `analysis` and `validation`
+are null when `!status.parsed` and present whenever `status.parsed === true`
+(regardless of validation or creation outcome); on script-type snippets they are
+always null (the validate stage never runs).
 
-| Leaf            | `realm` | `tokenize` | `parseAST` | `creation` | `evaluation`     | `analysis` | `validation` |
-| --------------- | ------- | ---------- | ---------- | ---------- | ---------------- | ---------- | ------------ |
-| `tokenize-fail` | present | **null**   | null       | null       | present (events) | null       | null         |
-| `parse-fail`    | present | present    | **null**   | null       | present (events) | null       | null         |
-| `validate-fail` | present | present    | present    | **null**   | present (events) | present    | present      |
-| `create-fail`   | present | present    | present    | **null**   | present (events) | present    | present      |
-| `apex`          | present | present    | present    | present    | present (events) | present    | present      |
+| Leaf            | Type   | `realm`  | `tokenize` | `parseAST` | `creation` | `evaluation`     | `analysis` | `validation` |
+| --------------- | ------ | -------- | ---------- | ---------- | ---------- | ---------------- | ---------- | ------------ |
+| `tokenize-fail` | either | per-type | **null**   | null       | null       | present (events) | null       | null         |
+| `parse-fail`    | either | per-type | present    | **null**   | null       | present (events) | null       | null         |
+| `validate-fail` | module | present  | present    | present    | **null**   | present (events) | present    | present      |
+| `create-fail`   | module | present  | present    | present    | **null**   | present (events) | present    | present      |
+| `apex`          | module | present  | present    | present    | present    | present (events) | present    | present      |
+| `script-parsed` | script | **null** | present    | present    | **null**   | present (events) | null       | null         |
 
 Notes:
 
-- `snippet.realm` is always present — realm is universally-passing.
+- `snippet.realm` is a language-level model: present on every module-type leaf
+  (realm is universally-passing where a level is active), null under script type
+  ("per-type" above: present on module, null on script).
+- `script-parsed` is the script staircase's TERMINAL — parsing succeeded and the
+  staircase is complete; `validated`/`created` are structurally false, not
+  failed.
 - `snippet.evaluation` is always present; it has only `.events` (no `.data` or
   `.entwined`). Evaluation is fully dynamic; its payload lives on `RunInstance`.
 - `snippet.events.*` streams are always callable via `EventsView`; null phases
-  yield empty generators — never throw.
+  (including realm under script) yield empty generators — never throw.
 - On `parse-fail`: Acorn parse is all-or-nothing; no partial AST is surfaced.
 - On `create-fail`: `snippet.creation` is null; `snippet.errors` carries
   `phase='creation'`.
@@ -221,15 +246,18 @@ Notes:
 ### Evaluation behavior across leaves
 
 `snippet.evaluation.events.*` methods are always callable (the phase object is
-non-nullable). Their behavior varies by leaf:
+non-nullable). Runnability is tiered — the plain `run()` tier gates on
+`status.parsed`; the NM-instrumented tiers gate on `status.created`:
 
-| Leaf              | `run()`                                                                                                                                         | `intercept()` / `trace.*()`           |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `apex`            | Spawns a worker; returns a full `RunInstance`                                                                                                   | Spawns a worker; emits events live    |
-| any non-apex leaf | Returns a no-op `RunInstance`: `events: []`, `endReport.outcome: 'not-runnable'`, `endReport.error: null` (gate failure is on `snippet.errors`) | Returns a no-op handle; emits nothing |
+| Leaf                                                                | `run()`                                                                                                                                         | `intercept()` / `trace.*()`                                                 |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `apex`                                                              | Executes; returns a full `RunInstance`                                                                                                          | Executes; emits NM events live                                              |
+| parsed, below `created` (validate-fail, create-fail, script-parsed) | Executes the program (it may error at runtime — that is the lesson); returns a `RunInstance` with the run's real outcome                        | Returns a no-op handle; emits nothing (`endReport.outcome: 'not-runnable'`) |
+| pre-parse (tokenize-fail, parse-fail)                               | Returns a no-op `RunInstance`: `events: []`, `endReport.outcome: 'not-runnable'`, `endReport.error: null` (gate failure is on `snippet.errors`) | Returns a no-op handle; emits nothing                                       |
 
-No worker is spawned for non-apex leaves. `endReport.outcome: 'not-runnable'`
-indicates the call was not executed due to a gate failure, not a runtime error.
+No execution backend is engaged below a tier's gate.
+`endReport.outcome: 'not-runnable'` indicates the call was not executed because
+the tier's gate was not reached, not a runtime error.
 
 ## Why this design
 
@@ -460,10 +488,14 @@ guaranteed to match across separate `run()` calls on the same snippet.
 
 ## Validation gate vs. validation metadata
 
-The validate gate criterion is `isJeJ` (i.e., `violations.length === 0`). A
-program either is a valid JEJ subset or it isn't; the gate flips
-`status.validated` accordingly. Failure means `snippet.creation = null`;
-`snippet.evaluation.events.*` are still callable but return no-op RunInstances.
+The validate gate is the language level's **admission gate** — it runs only on
+module-type snippets that parsed (under script type no language level is active
+and `snippet.validation` is null). The gate criterion is `isJeJ` (i.e.,
+`violations.length === 0`). A program either is admitted by the level or it
+isn't; the gate flips `status.validated` accordingly. Failure means
+`snippet.creation = null` and the NM-instrumented evaluate tiers return no-op
+RunInstances; the plain `run()` tier still executes anything that parsed
+(runnability is tiered — see § Data flow).
 
 Two `snippet.validation` fields are **metadata for consumers, NOT gate
 criteria**:
@@ -515,6 +547,10 @@ here so a future reader doesn't read the colocation as accident.
 `EMBODY_SCENARIOS` is exported as a frozen array of the 11 valid scenario
 keywords for tests + sandbox demos to enumerate.
 
+Scenario snippets are module-typed (`snippet.type === 'module'`) regardless of
+the `type` option passed — they are canned module-shape fixtures; the option
+affects only real composition.
+
 Canned evaluate handles are born settled — by the first-write-wins rule (see §
 Consumer-driven stops), consumer stops (`cancel()` / `fail()`) on them are
 no-ops; `result` keeps the scenario's outcome.
@@ -534,6 +570,39 @@ no-ops; `result` keeps the scenario's outcome.
 The contract surface (`types.ts`) does not mention scenarios at all — they're a
 body-level concern of `index.ts`. The public `embody(code)` signature is
 shape-stable across scenario-vs-real-composition dispatch.
+
+## Language levels as plugins
+
+A **language level** is a plugin at `embody/language-levels/<name>/` providing
+the NM's semantic models — realm, creation, evaluation — plus a validator as
+**admission gate** guaranteeing those models never lie about admitted programs.
+The definition is semantic, not syntactic (canonical statement:
+[`../README.md` § A language level is semantic, not syntactic](../README.md#a-language-level-is-semantic-not-syntactic));
+the syntax restriction derives from what the models cover.
+`just-enough-javascript` is the first and only level.
+
+- **Why inside embody/**: the level supplies embody's phase models — realm,
+  creation, and the NM evaluate tiers ARE the level's content; embody's
+  JS-generic core (tokenize, parse, the staircase machinery, the freeze) is what
+  remains without one. The plugin boundary keeps the core honest about which is
+  which.
+- **Dependency direction**: the embody root composes plugins (`embody/` →
+  `language-levels/*` → `lib/*` → `@-utils`); a plugin never imports the root.
+  See [`../DOCS.md` § Dependency rules](../DOCS.md).
+- **Naming**: the validator's config type is `SyntaxAllowlist` (in
+  [`./lib/validating/`](./lib/validating/)), not "LanguageLevel" — a language
+  level is the semantic plugin; the allowlist is its _derived_ syntax surface,
+  feature by feature (each exclusion maps to an NM component the level does not
+  model). One name per concept keeps the two from being conflated.
+- **Selection**: with one level, activation is the source type itself —
+  module-type snippets get the level, script-type snippets get none. When a
+  second level exists, the configs orchestrator tier names the level for
+  module-type snippets; the activation seam is the single derivation input, not
+  scattered reads.
+- **Evaluation plug-point**: the NM-instrumented evaluate tiers plug into the
+  generic execution engine as instrumentation + event categories — the
+  engine/worker/limits machinery is core; the instrumentation that makes a run
+  observable in NM vocabulary is the level's.
 
 ## `embody/lib/*` integration
 
