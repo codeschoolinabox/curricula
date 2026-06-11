@@ -123,15 +123,18 @@ Tier 1 lenses (parsons line-shuffling, copy-type, annotate) work even on
 syntactically-broken snippets. Tier 2 lenses (blanks, variables/scope, ask) need
 a valid AST — they ignore the JEJ-validity question and operate on the AST
 regardless. A Tier-2 lens that also wants JEJ-subset compliance gates on
-`embodiment.status.validated` instead. Tier 3 lenses (trace-table, run) need the
-snippet to be evaluable — i.e. all four gates passed (per
-[`../embody/types.ts`](../embody/types.ts) §Status booleans), which includes the
-validate gate; `embodiment.status.created` is the load-bearing flag since it
-implies validate passed.
+`embodiment.status.validated` instead. Tier 3 lenses (trace-table and other
+NM-replay lenses) need the snippet to be evaluable — i.e. all four gates passed
+(per [`../embody/types.ts`](../embody/types.ts) §Status booleans), which
+includes the validate gate; `embodiment.status.created` is the load-bearing flag
+since it implies validate passed.
 
 The `status` chain is monotonic by construction: `created` implies `validated`
 implies `parsed` implies `tokenized`. Lens-author logic only checks the field it
-cares about; the chain handles itself.
+cares about; the chain handles itself. The tier gates are also
+source-type-agnostic: script-type snippets (no language level active) simply
+never reach `validated`/`created`, so Tier-1/Tier-2 lenses serve them and Tier-3
+lenses never apply — no tier ever branches on `snippet.type`.
 
 See
 [`../.planning-handoffs/04-lens-migration.md`](../.planning-handoffs/04-lens-migration.md)
@@ -176,17 +179,20 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
   lens that uses them). The `<StudyLenses>` plugin must NOT emit a `transforms`
   attribute (see
   [`../../../../plugins/study-lenses/README.md` § Plugin alignment](../../../../plugins/study-lenses/README.md)).
-- **`Validation` gate vs. metadata.** The validate gate criterion is
-  `validation.isJeJ` (i.e., `violations.length === 0`). Gate failure means no
-  `streams.create` and no `streams.evaluate`. The fields
+- **`Validation` gate vs. metadata.** The validate gate is the language level's
+  admission gate; its criterion is `validation.isJeJ` (i.e.,
+  `violations.length === 0`). Gate failure means no `creation` phase and no
+  NM-instrumented evaluate events (`intercept`, `trace.*`); the plain `run()`
+  tier still serves anything that parsed (runnability is tiered — see
+  [`../embody/README.md` § Events](../embody/README.md)). The fields
   `validation.isDeterministic` and `validation.doesPause` are **derived** from
   raw analyses (`isDeterministic = !any(nonDeterminism)`,
   `doesPause = hasIo.user.total > 0`) and are **informational metadata, NOT gate
   criteria** — a non-deterministic or pausing program is still a valid JEJ
-  subset and passes the gate. `Snippet.validation` is optional (absent on
-  tokenize-fail / parse-fail leaves). Pinned in
-  [`../embody/types.ts`](../embody/types.ts) JSDoc; lens authors reading these
-  fields treat them as read-only summaries.
+  subset and passes the gate. `Snippet.validation` is `null` before the gate
+  runs (tokenize-fail / parse-fail leaves) and always `null` on script-type
+  snippets. Pinned in [`../embody/types.ts`](../embody/types.ts) JSDoc; lens
+  authors reading these fields treat them as read-only summaries.
 - **`embodiment` parameter name** wherever a function takes a Snippet instance.
 - One default export per file (named function/const, then `export default`).
   `.js` extensions in imports.

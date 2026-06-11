@@ -1,17 +1,18 @@
 # just-enough-javascript
 
-A curated JavaScript language level + static and dynamic tooling for
-introductory programming education. JEJ programs are the learning vehicle for
-the Welcome to Frogramming curriculum.
+An interactive JavaScript study environment + its first curated **language
+level** (JEJ) for introductory programming education. JEJ programs are the
+learning vehicle for the Welcome to Frogramming curriculum; the study tooling
+serves any JavaScript a learner explores.
 
 ## The story (the conceptual chain)
 
-Welcome to Frogramming teaches **JEJ** (just-enough JavaScript) — a curated
-subset of the language. Every JEJ program runs on a precise, bounded **notional
-machine** (NM): the conceptual model of how JEJ evaluates. Twinning the NM in
-your own mind is the **learning objective** of the course. The NM is the
-[mechanical instrument][metaphor] of the syllabus's metaphor — what the 🔬
-Frogrammer grounds their predictions in.
+Welcome to Frogramming teaches **JEJ** (just-enough JavaScript) — this package's
+first **language level**: a slice of JavaScript curated so that every admitted
+program runs on a precise, bounded **notional machine** (NM): the conceptual
+model of how JEJ evaluates. Twinning the NM in your own mind is the **learning
+objective** of the course. The NM is the [mechanical instrument][metaphor] of
+the syllabus's metaphor — what the 🔬 Frogrammer grounds their predictions in.
 
 **Code is the UI.** The JS source text is the _control panel_ through which a
 programmer operates the NM. Authoring code is one way to operate that panel;
@@ -20,15 +21,19 @@ thing the panel controls — and you can also observe it directly through visual
 debuggers / embody / lenses, bypassing the panel entirely.
 
 The NM doesn't only live in prose. It is **embodied** by the
-[`embody/`](./embody/) factory — every JEJ snippet becomes a frozen-data +
-event-stream object whose every field corresponds to a concept in the NM.
-**Study lenses** then offer different perspectives on the embodied NM — think of
-them as the kit of magnifying glasses 🔬 the Frogrammer carries: each lens
-highlights a different aspect of the same machine.
+[`embody/`](./embody/) factory: a JS-generic core reads any source text (tokens,
+AST), and the language level plugs in the NM's semantic models — realm,
+creation, evaluation — behind an **admission gate** that guarantees those models
+never lie about the programs they admit. Every admitted JEJ snippet becomes a
+frozen-data + event-stream object whose every field corresponds to a concept in
+the NM. **Study lenses** then offer different perspectives — think of them as
+the kit of magnifying glasses 🔬 the Frogrammer carries: each lens highlights a
+different aspect of the same machine. Source-level lenses serve any JavaScript,
+admitted or not.
 
 ```mermaid
 flowchart LR
-    JEJ["JEJ<br/>(language subset)"]
+    JEJ["JEJ<br/>(language level: admission gate<br/>+ semantic models)"]
     NM["Notional Machine<br/>(this is what learners twin)"]
     embody["embody/<br/>(operational data + event streams)"]
     lenses["lenses/<br/>(pedagogical perspectives)"]
@@ -36,13 +41,13 @@ flowchart LR
     JEJ --> NM --> embody --> lenses --> orchestrate
 ```
 
-| Layer            | What it is                                                                                                | File / dir                                     |
-| ---------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| **JEJ**          | The language subset (what learners write)                                                                 | [`reference.md`](./reference.md)               |
-| **NM**           | The conceptual evaluation model (the learning objective)                                                  | [`notional-machine.md`](./notional-machine.md) |
-| **embody**       | The operational embodiment of the NM (frozen data + event streams)                                        | [`embody/`](./embody/)                         |
-| **study lenses** | Pedagogical perspectives on the embodied NM                                                               | [`lenses/`](./lenses/)                         |
-| **orchestrate**  | `<StudyLenses>` orchestrator + analysis helpers — the single-writer editor and the NM phases panel        | [`orchestrate/`](./orchestrate/)               |
+| Layer            | What it is                                                                                         | File / dir                                     |
+| ---------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **JEJ**          | The first language level (what learners write; admission gate + semantic models)                   | [`reference.md`](./reference.md)               |
+| **NM**           | The conceptual evaluation model (the learning objective)                                           | [`notional-machine.md`](./notional-machine.md) |
+| **embody**       | The operational embodiment of the NM (frozen data + event streams)                                 | [`embody/`](./embody/)                         |
+| **study lenses** | Pedagogical perspectives on the embodied NM                                                        | [`lenses/`](./lenses/)                         |
+| **orchestrate**  | `<StudyLenses>` orchestrator + analysis helpers — the single-writer editor and the NM phases panel | [`orchestrate/`](./orchestrate/)               |
 
 Get the NM right and embody / lenses / orchestrate / curriculum follow. This
 package's internal directory structure mirrors the chain.
@@ -168,6 +173,12 @@ Three load-bearing principles from the paper:
   for real work, not a separate "school" tool.
 - **Expertise reversal** (Sweller et al., 2003) — scaffolding helps beginners
   but hurts experts. Lenses are designed to peel away support based on context.
+  This package operationalizes the principle structurally — **low floor, high
+  ceiling**: a learner can type ANY JavaScript; source-level study tools and
+  run/debug affordances serve all of it, and the NM scaffolding (the phases
+  panel's language-level stations, NM-instrumented evaluation) appears exactly
+  when the code sits inside the language level's semantic models — withdrawing,
+  never blocking, when the learner writes beyond them.
 - **Lifelong-learning autonomy** — Quadrant I (uncurated/unguided) isn't a
   fallback; it's the central pedagogical bet. Students take their learning
   skills with them, applied to any code they encounter long after graduation.
@@ -188,16 +199,17 @@ the embedding system passes (and which the learner overrides).
 
 The folder layout mirrors the conceptual chain:
 
-| Path                                           | Purpose                                           |
-| ---------------------------------------------- | ------------------------------------------------- |
-| `README.md` (this)                             | Orientation — front door                          |
-| [`reference.md`](./reference.md)               | Allowed language features (syntax / controls)     |
-| [`notional-machine.md`](./notional-machine.md) | How the NM controlled by our language level works |
-| [`embody/`](./embody/)                         | Programmatic embodiment of the NM                 |
-| [`lenses/`](./lenses/)                         | Pedagogical views on the embodied NM              |
-| [`orchestrate/`](./orchestrate/)               | `<StudyLenses>` orchestrator + analysis helpers   |
-| [`lib/`](./lib/)                               | JeJ-aware shared adapters (peer-independent)      |
-| `sandbox-programs/`                            | Test fixtures (may be moved later)                |
+| Path                                                   | Purpose                                                                                            |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `README.md` (this)                                     | Orientation — front door                                                                           |
+| [`reference.md`](./reference.md)                       | Allowed language features (syntax / controls)                                                      |
+| [`notional-machine.md`](./notional-machine.md)         | How the NM controlled by our language level works                                                  |
+| [`embody/`](./embody/)                                 | Programmatic embodiment of the NM                                                                  |
+| [`embody/language-levels/`](./embody/language-levels/) | Language-level plugins (semantic models + admission gates); `just-enough-javascript/` is the first |
+| [`lenses/`](./lenses/)                                 | Pedagogical views on the embodied NM                                                               |
+| [`orchestrate/`](./orchestrate/)                       | `<StudyLenses>` orchestrator + analysis helpers                                                    |
+| [`lib/`](./lib/)                                       | JeJ-aware shared adapters (peer-independent)                                                       |
+| `sandbox-programs/`                                    | Test fixtures (may be moved later)                                                                 |
 
 (`.planning-handoff/` is a temporary dev artifact — intentionally not documented
 in README.)
@@ -212,6 +224,18 @@ The language level is designed around a specific balance: **meaningful
 computational exploration** within a **manageable notional machine** — which is
 why we've defined the NM explicitly in
 [notional-machine.md](./notional-machine.md). The NM is the learning objective.
+
+### A language level is semantic, not syntactic
+
+In this package a **language level** is defined by the semantics it models, not
+by the syntax it includes — a deliberate divergence from the syntax-subset
+language levels common in computing-education research (e.g. DrRacket's student
+languages). A language level provides two things: the **semantic models** for
+the NM's realm, creation, and evaluation phases, and a **validator as admission
+gate** that guarantees those models never lie about the programs they admit. The
+syntax restriction _derives_ from semantic modelability: a feature is excluded
+exactly when admitting it would demand an NM component the level doesn't model —
+which is precisely what the exclusion table below shows.
 
 ### Few options, many possibilities
 
@@ -289,7 +313,7 @@ package's primary surface is the `<StudyLenses>` orchestrator).
 
 The study-lenses system is a research translation platform (TCER Phase 4) built
 on top of JEJ's tooling. **embody** captures the notional machine as data; the
-**study-lenses** system turns that data — and any JEJ snippet — into interactive
+**study-lenses** system turns that data — and any JS snippet — into interactive
 learning exercises. Each lens embodies a computing education research-backed
 pedagogical intervention: blanks (fill-in-the-blank), parsons (line ordering),
 trace tables (predict-then-compare), and more.
@@ -345,14 +369,15 @@ and [`orchestrate/types.ts`](./orchestrate/types.ts) (`StudyLensesProps`) for
 the full resolution chain.
 
 `<StudyLenses>` is the orchestrator: it ingests the snippet, builds the
-embodiment via `embody()` (which checks the snippet against JEJ language
-constraints and surfaces violations and format-compliance via
+embodiment via `embody()` (whose JEJ admission gate runs on module-type snippets
+once they parse, surfacing violations and format-compliance via
 `Snippet.validation.*` — JEJ-subset violations as a list, format compliance as a
-boolean), surfaces the registered lenses through the picker (recommender-based
-snippet-fit ranking is deferred backlog), mounts them, and manages all state.
-Formatting is the learner's responsibility — the orchestrator does not
-pre-format snippets. Consumers get one component to mount; everything else is
-internal.
+boolean; script-type snippets skip the gate), surfaces the registered lenses
+through the picker (recommender-based snippet-fit ranking is deferred backlog),
+mounts them, and manages all state — including the learner's script/module
+**source-type** selection that decides whether the gate applies. Formatting is
+the learner's responsibility — the orchestrator does not pre-format snippets.
+Consumers get one component to mount; everything else is internal.
 
 `embody`, lens plugins, and `orchestrate/lib/*` analysis helpers are **not**
 part of the public API. They are internal building blocks that `<StudyLenses>`

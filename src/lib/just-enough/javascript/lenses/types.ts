@@ -204,7 +204,11 @@ type LensModule = Readonly<{
 	 *
 	 * Lens availability is **never JEJ-gated** — source-station lenses
 	 * serve the full JS language (locked constraint, Cycle 2 Phase 0; see
-	 * `../orchestrate/README.md` § The phases panel).
+	 * `../orchestrate/README.md` § The phases panel). Station
+	 * AVAILABILITY is a panel concern, not a lens concern: when a
+	 * station is hidden (LL stations under script type or refused
+	 * admission), the panel hides the column — the lens stays
+	 * registered, undeclared, and untouched.
 	 */
 	phase?: Station | readonly Station[];
 }>;
@@ -224,6 +228,12 @@ type LensModule = Readonly<{
  * splitting it. `source` (code-as-text, before the machine) and `realm`
  * (documentary; structurally error-free — `EmbodyPhase` excludes it) are
  * stations without embody error phases.
+ *
+ * Stations also carry a CLASSIFICATION (not a union member): CORE
+ * (`source`, `parse` — JS-generic, always shown) vs LL (`realm`,
+ * `creation`, `evaluation` — provided by the active language level's
+ * semantic models; hidden when those models do not apply). See
+ * `../orchestrate/README.md` § The phases panel — station availability.
  *
  * **Homonym alert**: this is glossary sense (b) — a panel column — NOT
  * `NMEventPhase` (sense a). And it is orthogonal to the three-tier
