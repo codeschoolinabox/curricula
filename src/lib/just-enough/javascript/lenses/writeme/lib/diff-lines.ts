@@ -39,7 +39,10 @@ import computeCodeLineMask from './code-lines.js';
  * @returns frozen per-line verdicts + code-line tallies (`perLine.length ===
  *   solution.split('\n').length`).
  */
-function diffLines(learner: string, solution: string): DiffResult {
+export default function diffLines(
+	learner: string,
+	solution: string,
+): DiffResult {
 	const solutionLines = solution.split('\n');
 	const learnerLines = learner.split('\n');
 	// Shared code-line classifier — grades exactly the lines the comment skeleton
@@ -71,5 +74,3 @@ function diffLines(learner: string, solution: string): DiffResult {
 
 	return freezeInPlace({ perLine, matched, total });
 }
-
-export default diffLines;

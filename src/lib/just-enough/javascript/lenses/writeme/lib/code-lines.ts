@@ -25,7 +25,9 @@
  * @returns one boolean per input line: `true` = a gradable code line; `false` =
  *   a freebie (blank / whitespace / comment-only / inside an open block comment).
  */
-function computeCodeLineMask(lines: readonly string[]): boolean[] {
+export default function computeCodeLineMask(
+	lines: readonly string[],
+): boolean[] {
 	return lines.map((line, index) => {
 		const codeWithoutComments = line
 			.replace(/\/\/.*$/, '')
@@ -51,5 +53,3 @@ function computeCodeLineMask(lines: readonly string[]): boolean[] {
 		return true;
 	});
 }
-
-export default computeCodeLineMask;

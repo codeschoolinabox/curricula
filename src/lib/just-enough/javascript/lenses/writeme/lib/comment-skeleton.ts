@@ -29,7 +29,7 @@ import computeCodeLineMask from './code-lines.js';
  * @param solution - the original source (the snippet's `embodiment.source.code`).
  * @returns the comment-only skeleton; `out.split('\n').length === solution.split('\n').length`.
  */
-function commentSkeleton(solution: string): string {
+export default function commentSkeleton(solution: string): string {
 	const lines = solution.split('\n');
 	const codeLineMask = computeCodeLineMask(lines);
 	const skeleton: string[] = [];
@@ -73,5 +73,3 @@ function commentSkeleton(solution: string): string {
 
 	return skeleton.join('\n');
 }
-
-export default commentSkeleton;
