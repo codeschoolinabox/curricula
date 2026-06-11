@@ -16,7 +16,8 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { cloneAndFreeze, freezeInPlace } from '../freeze.js';
+import cloneAndFreeze from '../clone-and-freeze.js';
+import freezeInPlace from '../freeze-in-place.js';
 
 // ============================================================================
 // freezeInPlace

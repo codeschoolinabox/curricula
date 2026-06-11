@@ -8,7 +8,7 @@
  * `./tests/core.test.ts`).
  */
 
-import { freezeInPlace } from '@utils/freeze.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { LensConfig, Recommendation, Snippet } from '../types.js';
 

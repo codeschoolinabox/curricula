@@ -13,7 +13,7 @@
  * file — typically at the docs-instance content root.
  */
 
-import { freezeInPlace } from '../../lib/utils/freeze.js';
+import freezeInPlace from '../../lib/utils/freeze-in-place.js';
 
 import type { ResolvedConfig } from './types.js';
 

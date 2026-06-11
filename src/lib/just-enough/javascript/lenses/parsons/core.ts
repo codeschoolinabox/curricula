@@ -7,7 +7,8 @@
  * no React. Tests run in vitest without jsdom (see `./tests/core.test.ts`).
  */
 
-import { cloneAndFreeze, freezeInPlace } from '@utils/freeze.js';
+import cloneAndFreeze from '@utils/clone-and-freeze.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { LensConfig, Recommendation, Snippet } from '../types.js';
 

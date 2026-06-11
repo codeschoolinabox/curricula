@@ -19,7 +19,7 @@
  * prior frame's arrays are already frozen, so nothing can mutate them.
  */
 
-import { freezeInPlace } from '@utils/freeze.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type {
 	AnnotationSet,

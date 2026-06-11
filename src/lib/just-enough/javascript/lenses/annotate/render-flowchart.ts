@@ -23,7 +23,7 @@
 
 import { convertCodeToSvg } from 'js2flowchart';
 
-import { freezeInPlace } from '@utils/freeze.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { FlowchartSvg } from './types.js';
 

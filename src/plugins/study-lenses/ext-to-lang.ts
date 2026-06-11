@@ -13,7 +13,7 @@
  * remark transformer both gate on `defaults`).
  */
 
-import { freezeInPlace } from '../../lib/utils/freeze.js';
+import freezeInPlace from '../../lib/utils/freeze-in-place.js';
 
 import type { LangName } from './types.js';
 

@@ -49,7 +49,7 @@ import { basicSetup } from 'codemirror';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType } from 'react';
 
-import { freezeInPlace } from '@utils/freeze.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import snippetFreeAutocomplete from '../lib/snippet-free-autocomplete.js';
 import type { LensModule, LensProps as LensProperties } from '../types.js';

@@ -40,7 +40,7 @@
  * `total === 0 ? 100 : Math.round(correct / total * 100)`.
  */
 
-import { freezeInPlace } from '@utils/freeze.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { Blank, BlankCorrectness, EvaluationResult } from '../types.js';
 

@@ -28,7 +28,7 @@
  * exception above.
  */
 
-import { freezeInPlace } from '../../../utils/freeze.js';
+import freezeInPlace from '../../../utils/freeze-in-place.js';
 
 import type {
 	EventBus,

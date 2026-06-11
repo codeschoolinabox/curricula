@@ -38,7 +38,7 @@ import effectBefore from './advice/effect-before.js';
 import effectAfterAdvice from './advice/effect-after.js';
 import statementBefore from './advice/statement-before.js';
 
-import { freezeInPlace } from '@utils/freeze.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { JejTag, TracerState } from './types.js';
 

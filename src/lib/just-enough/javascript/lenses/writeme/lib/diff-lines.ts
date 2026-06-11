@@ -27,7 +27,7 @@
  * This directory (`lenses/writeme/lib/**`) is eslint-ignored per `eslint.config.mjs`.
  */
 
-import { freezeInPlace } from '@utils/freeze.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { DiffResult, LineStatus } from '../types.js';
 

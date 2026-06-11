@@ -21,7 +21,7 @@
 
 import { Prism, normalizeTokens } from 'prism-react-renderer';
 
-import { freezeInPlace } from '@utils/freeze.js';
+import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { CodeSpanTree } from './types.js';
 

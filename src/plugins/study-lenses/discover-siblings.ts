@@ -22,7 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { freezeInPlace } from '../../lib/utils/freeze.js';
+import freezeInPlace from '../../lib/utils/freeze-in-place.js';
 
 import EXT_TO_LANG from './ext-to-lang.js';
 import parseStudyLensDirective from './parse-study-lens-directive.js';
