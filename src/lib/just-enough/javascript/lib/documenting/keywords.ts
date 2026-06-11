@@ -163,6 +163,3 @@ const KEYWORD_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 
 export default KEYWORD_ENTRIES;
 
-export const KEYWORD_LABELS: ReadonlySet<string> = new Set(
-	Object.keys(KEYWORD_ENTRIES),
-);

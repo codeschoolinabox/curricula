@@ -9,10 +9,10 @@ import {
 import assembleDocumentTable from '../assemble-doc-table.js';
 import DOC_TABLE from '../doc-table.js';
 import documentJej from '../document-jej.js';
-import { GLOBAL_LABELS } from '../globals.js';
-import { KEYWORD_LABELS } from '../keywords.js';
-import { MEMBER_LABELS } from '../members.js';
-import { NOT_IN_JEJ_LABELS } from '../not-in-jej.js';
+import GLOBAL_LABELS from '../global-labels.js';
+import KEYWORD_LABELS from '../keyword-labels.js';
+import MEMBER_LABELS from '../member-labels.js';
+import NOT_IN_JEJ_LABELS from '../not-in-jej-labels.js';
 
 describe('documentJej', () => {
 	describe('unknown words yield null', () => {

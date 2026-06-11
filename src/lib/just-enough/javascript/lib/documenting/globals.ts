@@ -174,6 +174,3 @@ const GLOBAL_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 
 export default GLOBAL_ENTRIES;
 
-export const GLOBAL_LABELS: ReadonlySet<string> = new Set(
-	Object.keys(GLOBAL_ENTRIES),
-);

@@ -265,6 +265,3 @@ const MEMBER_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 
 export default MEMBER_ENTRIES;
 
-export const MEMBER_LABELS: ReadonlySet<string> = new Set(
-	Object.keys(MEMBER_ENTRIES),
-);

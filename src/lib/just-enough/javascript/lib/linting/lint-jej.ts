@@ -2,9 +2,8 @@ import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import validate from '../../embody/lib/validating/validate.js';
 import type { LintDiagnostic } from '../../orchestrate/lib/editing/types.js';
-import NOT_IN_JEJ_ENTRIES, {
-	NOT_IN_JEJ_LABELS,
-} from '../documenting/not-in-jej.js';
+import NOT_IN_JEJ_ENTRIES from '../documenting/not-in-jej.js';
+import NOT_IN_JEJ_LABELS from '../documenting/not-in-jej-labels.js';
 
 import violationToDiagnostic from './violation-to-diagnostic.js';
 

@@ -354,6 +354,3 @@ const NOT_IN_JEJ_ENTRIES: Readonly<Record<string, DocumentEntry>> = {
 
 export default NOT_IN_JEJ_ENTRIES;
 
-export const NOT_IN_JEJ_LABELS: ReadonlySet<string> = new Set(
-	Object.keys(NOT_IN_JEJ_ENTRIES),
-);

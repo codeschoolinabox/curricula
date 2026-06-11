@@ -20,7 +20,7 @@
 
 import justEnoughJs from '../../embody/lib/validating/just-enough-js.js';
 import type { CompletionItem } from '../../orchestrate/lib/editing/types.js';
-import { NOT_IN_JEJ_LABELS } from '../documenting/not-in-jej.js';
+import NOT_IN_JEJ_LABELS from '../documenting/not-in-jej-labels.js';
 
 import type { Suggestion } from './types.js';
 
