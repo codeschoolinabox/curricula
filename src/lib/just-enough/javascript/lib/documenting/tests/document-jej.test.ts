@@ -6,7 +6,8 @@ import {
 	SUPPRESSED_GLOBALS,
 	CURATED_MEMBERS,
 } from '../../completing/collect-jej-surface.js';
-import DOC_TABLE, { assembleDocTable as assembleDocumentTable } from '../doc-table.js';
+import assembleDocumentTable from '../assemble-doc-table.js';
+import DOC_TABLE from '../doc-table.js';
 import documentJej from '../document-jej.js';
 import { GLOBAL_LABELS } from '../globals.js';
 import { KEYWORD_LABELS } from '../keywords.js';
