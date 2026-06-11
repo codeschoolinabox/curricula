@@ -282,4 +282,5 @@ Synchronous (recast format check is sync).
 - [DOCS.md](./DOCS.md) — design decisions and rationale
 - [../parse-old/README.md](../parse-old/README.md) — parse primitives this
   module consumes
-- [../reference.md](../reference.md) — learner-facing language cheat sheet
+- [../embody/language-levels/just-enough-javascript/reference.md](../embody/language-levels/just-enough-javascript/reference.md)
+  — learner-facing language cheat sheet

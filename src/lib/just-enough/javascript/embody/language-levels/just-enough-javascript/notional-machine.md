@@ -11,8 +11,8 @@ of the Frogrammer hat.
 
 For the larger story — **JEJ → NM → embody → study lenses**, the four audiences,
 and the Frogrammer's predict-trace-verify practice — see
-[README.md](./README.md). This document is upstream of all of that: get the NM
-right and embody / lenses / curriculum follow.
+[README.md](../../../README.md). This document is upstream of all of that: get
+the NM right and embody / lenses / curriculum follow.
 
 Covers exactly the language features in [reference.md](./reference.md).
 
@@ -26,29 +26,29 @@ lenses choose what to _teach_. The contract is accuracy.
 **Scope.** The NM is the conceptual model; embody is the per-snippet operational
 data form lenses consume. The system-wide learner state (the "Progress
 modelling" base layer of Malaise & Signer's Explorotron pyramid — see
-[README.md § Pedagogical first principles](./README.md#pedagogical-first-principles))
+[README.md § Pedagogical first principles](../../../README.md#pedagogical-first-principles))
 is the embedding LMS's responsibility, not the NM's or embody's scope.
 
 See also:
 
-- [README.md](./README.md) — JEJ overview, the conceptual chain, audiences
-- [embody/](./embody/) — operational embodiment (data + event streams) of this
-  NM
-- [embody/types.ts](./embody/types.ts) — canonical TypeScript contract
-- [embody/DOCS.md](./embody/DOCS.md) — embody architecture + data flow
-- [`lib/evaluating/trace/syntax/`](./lib/evaluating/trace/syntax/) — syntax
+- [README.md](../../../README.md) — JEJ overview, the conceptual chain,
+  audiences
+- [embody/](../../) — operational embodiment (data + event streams) of this NM
+- [embody/types.ts](../../types.ts) — canonical TypeScript contract
+- [embody/DOCS.md](../../DOCS.md) — embody architecture + data flow
+- [`lib/evaluating/trace/syntax/`](../../lib/evaluating/trace/syntax/) — syntax
   tracer: README + DOCS for the NM-step-category implementation
-- [`lib/evaluating/trace/semantics/`](./lib/evaluating/trace/semantics/) —
+- [`lib/evaluating/trace/semantics/`](../../lib/evaluating/trace/semantics/) —
   semantic tracer: README + DOCS for finer-grained instrumentation
 
 [metaphor]: ../../../spiralearn/welcome-to-frogramming/README.md
 
 **Operational implementation.** The NM components described here are implemented
 as step categories in the **syntax tracer** at
-[`lib/evaluating/trace/syntax/`](./lib/evaluating/trace/syntax/) and the
+[`lib/evaluating/trace/syntax/`](../../lib/evaluating/trace/syntax/) and the
 **semantic tracer** at
-[`lib/evaluating/trace/semantics/`](./lib/evaluating/trace/semantics/). Each NM
-component corresponds to one of the tracer's step categories (`expression`,
+[`lib/evaluating/trace/semantics/`](../../lib/evaluating/trace/semantics/). Each
+NM component corresponds to one of the tracer's step categories (`expression`,
 `resolve`, `statement`, `scope`, `control-flow`, `initialization`, `for-init`,
 `write`, `coerce`, `emit`, `error`).
 

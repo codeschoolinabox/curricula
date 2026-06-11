@@ -9,10 +9,10 @@ the run/debug surface serves every snippet, admitted or not.
 
 The conceptual chain — **JEJ → NM → embody → lenses** — is established in
 [`README.md`](./README.md). The NM is documented in
-[`notional-machine.md`](./notional-machine.md). Embody architecture + data flow
-are in [`embody/DOCS.md`](./embody/DOCS.md). This document captures the
-**package-level architectural decisions**: directory shape, peer
-responsibilities, and dependency rules.
+[`notional-machine.md`](./embody/language-levels/just-enough-javascript/notional-machine.md).
+Embody architecture + data flow are in [`embody/DOCS.md`](./embody/DOCS.md).
+This document captures the **package-level architectural decisions**: directory
+shape, peer responsibilities, and dependency rules.
 
 ## Directory layout
 

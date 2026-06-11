@@ -15,8 +15,9 @@ embody is one rung of the conceptual chain (see [../README.md](../README.md)):
 JEJ  →  NM  →  embody  →  study lenses  →  orchestrate
 ```
 
-- The **NM** ([../notional-machine.md](../notional-machine.md)) defines what
-  concepts exist (phases, scopes, bindings, coercion, …).
+- The **NM**
+  ([../embody/language-levels/just-enough-javascript/notional-machine.md](../embody/language-levels/just-enough-javascript/notional-machine.md))
+  defines what concepts exist (phases, scopes, bindings, coercion, …).
 - **embody** turns each snippet into a data object: core phases (source,
   tokenize, parseAST) for any JavaScript; the full NM correspondence — every
   field and event mapping to an NM concept — for admitted JEJ.
@@ -267,7 +268,8 @@ for admitted programs. Below its gate, a tier short-circuits with
 4. **Per-instance, no shared state.** No module-level cache, no cross-instance
    communication. One `embody(code)` knows nothing of others.
 5. **Spec-aligned, learner-named.** Names follow the NM body (learner-
-   friendly); spec correspondence is in `../notional-machine.md`.
+   friendly); spec correspondence is in
+   `../embody/language-levels/just-enough-javascript/notional-machine.md`.
 6. **`event.bindings` is a Proxy.** The one exception to "pure frozen data":
    this field walks the current scope chain at access time and is documented as
    a computed view. Enumeration and mutation are not supported.
@@ -416,7 +418,7 @@ only through a live `.fail(reason)` on a streaming handle (see
 | [`language-levels/`](./language-levels/) | LL authors, implementers                                                                | Language-level plugins — semantic models + admission gates; `just-enough-javascript/` is the first |
 
 For prose explanation of the NM concepts each type maps to, see
-[`../notional-machine.md`](../notional-machine.md).
+[`../embody/language-levels/just-enough-javascript/notional-machine.md`](../embody/language-levels/just-enough-javascript/notional-machine.md).
 
 ## Conceptual link to the NM
 

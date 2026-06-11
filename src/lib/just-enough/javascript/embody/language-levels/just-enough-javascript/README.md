@@ -23,10 +23,9 @@ programs those models can tell the truth about.
   whose `SyntaxAllowlist` config is this level's syntax surface — derived from
   the semantic models above, feature by feature.
 - **The level's documentation** —
-  [`notional-machine.md`](../../../notional-machine.md), the semantic models in
-  prose (the machine this level claims), and
-  [`reference.md`](../../../reference.md), the learner-facing reference of what
-  the gate admits.
+  [`notional-machine.md`](./notional-machine.md), the semantic models in prose
+  (the machine this level claims), and [`reference.md`](./reference.md), the
+  learner-facing reference of what the gate admits.
 
 ## Module posture
 

@@ -1,6 +1,7 @@
 # embody — Architecture & Decisions
 
-This module operationalizes the [JEJ Notional Machine](../notional-machine.md)
+This module operationalizes the
+[JEJ Notional Machine](../embody/language-levels/just-enough-javascript/notional-machine.md)
 as a frozen-data + event-stream contract. The conceptual model is upstream of
 the data; this document captures **why the data is shaped the way it is** and
 the tradeoffs we considered before locking the contract in
@@ -636,8 +637,9 @@ ECMA-262 abstract operation:
 | `BindingStatus = 'tdz'`                   | Uninitialized binding                          | §9.1.1.1.1                                                           |
 | `CoerceNMEvent kind`                      | ToPrimitive / ToString / ToNumeric / ToBoolean | §7.1                                                                 |
 
-See `../notional-machine.md` § Spec correspondence appendix for the full mapping
-including JEJ-pedagogical splits, glossary bridges, and known imperfections.
+See `../embody/language-levels/just-enough-javascript/notional-machine.md` §
+Spec correspondence appendix for the full mapping including JEJ-pedagogical
+splits, glossary bridges, and known imperfections.
 
 ## Archive
 

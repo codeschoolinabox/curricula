@@ -42,13 +42,13 @@ identifier-context (`var`, `function`, `class`, `=>`, `this`, `throw`, `try`,
 **`whyNotInJej`** — notional-machine-grounded explanation of why a feature is
 excluded. Set only on `isJEJ: false` entries. Names the specific NM components
 the feature would extend, rely on, or reflect over — see
-[`../../notional-machine.md`](../../notional-machine.md) for the canonical NM
-(scope chain, prototype chain, call stack, execution context, host bindings,
-value-type set). Grounded in JEJ's in/exclusion criteria: **audience-reach
-minimalism** (the language includes just enough to address users via
-`prompt`/`alert`/`confirm`, devs via `console.*`, and the computer via the NM;
-agents are read as code-side audiences alongside devs per the "alien virtuoso"
-framing in
+[`../../embody/language-levels/just-enough-javascript/notional-machine.md`](../../embody/language-levels/just-enough-javascript/notional-machine.md)
+for the canonical NM (scope chain, prototype chain, call stack, execution
+context, host bindings, value-type set). Grounded in JEJ's in/exclusion
+criteria: **audience-reach minimalism** (the language includes just enough to
+address users via `prompt`/`alert`/`confirm`, devs via `console.*`, and the
+computer via the NM; agents are read as code-side audiences alongside devs per
+the "alien virtuoso" framing in
 [`metaphor.md`](../../../../../spiralearn/welcome-to-frogramming/metaphor.md))
 and **compact NM with rich computational idioms** (imperative paradigm per
 [`ontology.md` §13](../../../../../spiralearn/welcome-to-frogramming/ontology.md);
@@ -100,9 +100,9 @@ with `isJEJ: true` and the caveat woven into `whenToUse` or `commonMistakes`.
 
 **Voice** — editor-side inline whisper, not reference-document prose. The voice
 and scope are deliberately decoupled from
-[`../../reference.md`](../../reference.md) (which is the comprehensive learner /
-agent-facing reference) and from MDN-style external sources. Entries are concise
-(one to two sentences per field).
+[`../../embody/language-levels/just-enough-javascript/reference.md`](../../embody/language-levels/just-enough-javascript/reference.md)
+(which is the comprehensive learner / agent-facing reference) and from MDN-style
+external sources. Entries are concise (one to two sentences per field).
 
 **`'not in JEJ'` badge** — UI-rendered when `isJEJ: false`. The DOM lift derives
 the badge text from the boolean; DocEntry does not store display text. Blocked
@@ -313,12 +313,14 @@ both surfaces call this function with the same `DocEntry` arguments.
 (`build-info-dom.ts` is the legacy plain-string renderer; the JEJ adapter does
 not exercise it.)
 
-Relationship to [`../../reference.md`](../../reference.md): the reference is the
-comprehensive doc — prose, code tables, PseudoCode equivalents, multi-paragraph
-explanations. The hover adapter is the **editor-side whisper**: 1–2 sentence
-description, short example, 1–3 common mistakes, single-sentence whenToUse.
-Different voice, different scope, different surface. The two are not derived
-from each other; they evolve independently within the fixed JEJ language level.
+Relationship to
+[`../../embody/language-levels/just-enough-javascript/reference.md`](../../embody/language-levels/just-enough-javascript/reference.md):
+the reference is the comprehensive doc — prose, code tables, PseudoCode
+equivalents, multi-paragraph explanations. The hover adapter is the
+**editor-side whisper**: 1–2 sentence description, short example, 1–3 common
+mistakes, single-sentence whenToUse. Different voice, different scope, different
+surface. The two are not derived from each other; they evolve independently
+within the fixed JEJ language level.
 
 ## Conventions
 

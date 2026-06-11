@@ -41,13 +41,13 @@ flowchart LR
     JEJ --> NM --> embody --> lenses --> orchestrate
 ```
 
-| Layer            | What it is                                                                                         | File / dir                                     |
-| ---------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| **JEJ**          | The first language level (what learners write; admission gate + semantic models)                   | [`reference.md`](./reference.md)               |
-| **NM**           | The conceptual evaluation model (the learning objective)                                           | [`notional-machine.md`](./notional-machine.md) |
-| **embody**       | The operational embodiment of the NM (frozen data + event streams)                                 | [`embody/`](./embody/)                         |
-| **study lenses** | Pedagogical perspectives on the embodied NM                                                        | [`lenses/`](./lenses/)                         |
-| **orchestrate**  | `<StudyLenses>` orchestrator + analysis helpers — the single-writer editor and the NM phases panel | [`orchestrate/`](./orchestrate/)               |
+| Layer            | What it is                                                                                         | File / dir                                                                                   |
+| ---------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **JEJ**          | The first language level (what learners write; admission gate + semantic models)                   | [`reference.md`](./embody/language-levels/just-enough-javascript/reference.md)               |
+| **NM**           | The conceptual evaluation model (the learning objective)                                           | [`notional-machine.md`](./embody/language-levels/just-enough-javascript/notional-machine.md) |
+| **embody**       | The operational embodiment of the NM (frozen data + event streams)                                 | [`embody/`](./embody/)                                                                       |
+| **study lenses** | Pedagogical perspectives on the embodied NM                                                        | [`lenses/`](./lenses/)                                                                       |
+| **orchestrate**  | `<StudyLenses>` orchestrator + analysis helpers — the single-writer editor and the NM phases panel | [`orchestrate/`](./orchestrate/)                                                             |
 
 Get the NM right and embody / lenses / orchestrate / curriculum follow. This
 package's internal directory structure mirrors the chain.
@@ -199,17 +199,17 @@ the embedding system passes (and which the learner overrides).
 
 The folder layout mirrors the conceptual chain:
 
-| Path                                                   | Purpose                                                                                            |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `README.md` (this)                                     | Orientation — front door                                                                           |
-| [`reference.md`](./reference.md)                       | Allowed language features (syntax / controls)                                                      |
-| [`notional-machine.md`](./notional-machine.md)         | How the NM controlled by our language level works                                                  |
-| [`embody/`](./embody/)                                 | Programmatic embodiment of the NM                                                                  |
-| [`embody/language-levels/`](./embody/language-levels/) | Language-level plugins (semantic models + admission gates); `just-enough-javascript/` is the first |
-| [`lenses/`](./lenses/)                                 | Pedagogical views on the embodied NM                                                               |
-| [`orchestrate/`](./orchestrate/)                       | `<StudyLenses>` orchestrator + analysis helpers                                                    |
-| [`lib/`](./lib/)                                       | JeJ-aware shared adapters (peer-independent)                                                       |
-| `sandbox-programs/`                                    | Test fixtures (may be moved later)                                                                 |
+| Path                                                                                         | Purpose                                                                                            |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `README.md` (this)                                                                           | Orientation — front door                                                                           |
+| [`reference.md`](./embody/language-levels/just-enough-javascript/reference.md)               | Allowed language features (syntax / controls)                                                      |
+| [`notional-machine.md`](./embody/language-levels/just-enough-javascript/notional-machine.md) | How the NM controlled by our language level works                                                  |
+| [`embody/`](./embody/)                                                                       | Programmatic embodiment of the NM                                                                  |
+| [`embody/language-levels/`](./embody/language-levels/)                                       | Language-level plugins (semantic models + admission gates); `just-enough-javascript/` is the first |
+| [`lenses/`](./lenses/)                                                                       | Pedagogical views on the embodied NM                                                               |
+| [`orchestrate/`](./orchestrate/)                                                             | `<StudyLenses>` orchestrator + analysis helpers                                                    |
+| [`lib/`](./lib/)                                                                             | JeJ-aware shared adapters (peer-independent)                                                       |
+| `sandbox-programs/`                                                                          | Test fixtures (may be moved later)                                                                 |
 
 (`.planning-handoff/` is a temporary dev artifact — intentionally not documented
 in README.)
@@ -223,7 +223,8 @@ the entire program is visible on screen at once, traceable step-by-step.
 The language level is designed around a specific balance: **meaningful
 computational exploration** within a **manageable notional machine** — which is
 why we've defined the NM explicitly in
-[notional-machine.md](./notional-machine.md). The NM is the learning objective.
+[notional-machine.md](./embody/language-levels/just-enough-javascript/notional-machine.md).
+The NM is the learning objective.
 
 ### A language level is semantic, not syntactic
 
@@ -292,15 +293,15 @@ exploration and creativity.
 
 ## Language level documentation
 
-| Document                                                                           | Purpose                                                         |
-| ---------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| [reference.md](./reference.md)                                                     | Learner-facing cheat sheet — every allowed syntax with examples |
-| [notional-machine.md](./notional-machine.md)                                       | The conceptual evaluation model JEJ programs run on             |
-| [embody/](./embody/)                                                               | Operational embodiment of the NM (data + event streams)         |
-| [embody/types.ts](./embody/types.ts)                                               | Canonical TypeScript contract                                   |
-| [embody/DOCS.md](./embody/DOCS.md)                                                 | embody architecture + data flow                                 |
-| [embody/lib/evaluating/trace/syntax/](./embody/lib/evaluating/trace/syntax/)       | Syntax tracer — NM-step-category implementation (README + DOCS) |
-| [embody/lib/evaluating/trace/semantics/](./embody/lib/evaluating/trace/semantics/) | Semantic tracer — finer-grained instrumentation (README + DOCS) |
+| Document                                                                                   | Purpose                                                         |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| [reference.md](./embody/language-levels/just-enough-javascript/reference.md)               | Learner-facing cheat sheet — every allowed syntax with examples |
+| [notional-machine.md](./embody/language-levels/just-enough-javascript/notional-machine.md) | The conceptual evaluation model JEJ programs run on             |
+| [embody/](./embody/)                                                                       | Operational embodiment of the NM (data + event streams)         |
+| [embody/types.ts](./embody/types.ts)                                                       | Canonical TypeScript contract                                   |
+| [embody/DOCS.md](./embody/DOCS.md)                                                         | embody architecture + data flow                                 |
+| [embody/lib/evaluating/trace/syntax/](./embody/lib/evaluating/trace/syntax/)               | Syntax tracer — NM-step-category implementation (README + DOCS) |
+| [embody/lib/evaluating/trace/semantics/](./embody/lib/evaluating/trace/semantics/)         | Semantic tracer — finer-grained instrumentation (README + DOCS) |
 
 ## Tooling
 
@@ -462,9 +463,10 @@ type Result<TEvent> = {
 
 ## Navigation
 
-- [reference.md](./reference.md) — learner-facing language reference
-- [notional-machine.md](./notional-machine.md) — the NM (conceptual evaluation
-  model)
+- [reference.md](./embody/language-levels/just-enough-javascript/reference.md) —
+  learner-facing language reference
+- [notional-machine.md](./embody/language-levels/just-enough-javascript/notional-machine.md)
+  — the NM (conceptual evaluation model)
 - [embody/README.md](./embody/README.md) — embody factory
 - [embody/DOCS.md](./embody/DOCS.md) — embody architecture + data flow
 - [embody/types.ts](./embody/types.ts) — canonical types

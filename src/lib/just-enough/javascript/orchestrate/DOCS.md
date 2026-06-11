@@ -40,8 +40,8 @@ also owns; the orchestrator's primary export sits above them at the peer root.
 The orchestrator is being re-organized around the **JEJ notional-machine
 lifecycle** — the same phase staircase `embody()` walks (realm → parse[tokenize
 → AST] → creation → evaluation, see
-[`../notional-machine.md`](../notional-machine.md) and
-[`../embody/types.ts`](../embody/types.ts)). The design lands in **three
+[`../embody/language-levels/just-enough-javascript/notional-machine.md`](../embody/language-levels/just-enough-javascript/notional-machine.md)
+and [`../embody/types.ts`](../embody/types.ts)). The design lands in **three
 cycles**, each its own DDD cycle. This sketch documents the orchestrator as it
 IS designed to be, not a migration narrative; where a piece is
 locked-but-unbuilt it says so.
@@ -513,10 +513,11 @@ tripped, teaching the lifecycle before any lens is picked.
 > (module folder `phases-panel/`) — named for the lifecycle it lays out and
 > instruments (glossary sense (a) in [`./README.md` § Glossary](./README.md));
 > its columns remain **stations** (sense (b)). "Control panel" stays reserved by
-> [`../notional-machine.md`](../notional-machine.md) (§ "Control panel vs.
-> machine", the visible-syntax-as-the-programmer's-interface metaphor) — the
-> phases panel instruments the machine's stages; it is not the interface that
-> drives the machine, so the two names share no metaphor.
+> [`../embody/language-levels/just-enough-javascript/notional-machine.md`](../embody/language-levels/just-enough-javascript/notional-machine.md)
+> (§ "Control panel vs. machine", the
+> visible-syntax-as-the-programmer's-interface metaphor) — the phases panel
+> instruments the machine's stages; it is not the interface that drives the
+> machine, so the two names share no metaphor.
 
 ```mermaid
 flowchart LR

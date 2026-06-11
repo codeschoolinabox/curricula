@@ -306,6 +306,7 @@ is independent. Pure data-flow trace visualized as arrows between AST positions.
 - [PLAN.md](./PLAN.md) — full DDD plan, Resolutions, canvas
 - [types.ts](./types.ts) — public types (partial)
 - [../semantics/](../semantics/) — sibling semantic tracer module
-- [../../../../notional-machine.md](../../../../notional-machine.md) — NM spec
+- [../../../../embody/language-levels/just-enough-javascript/notional-machine.md](../../../../embody/language-levels/just-enough-javascript/notional-machine.md)
+  — NM spec
 - [../../../../tracer.architecture.md](../../../../tracer.architecture.md) —
   tracer architecture (inspiration for this doc's style)

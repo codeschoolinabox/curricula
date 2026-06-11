@@ -21,7 +21,7 @@
 // No Maps/Sets at the public surface (Object.freeze doesn't freeze them).
 //
 // Companion documents:
-//   ../notional-machine.md — prose model and spec correspondence
+//   ../embody/language-levels/just-enough-javascript/notional-machine.md — prose model and spec correspondence
 //   ./README.md            — peer front-door overview and glossary
 //   ./DOCS.md              — architecture sketch + data flow + tradeoffs
 //

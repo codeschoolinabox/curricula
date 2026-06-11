@@ -422,4 +422,5 @@ array with Phase A stub AST; full question set in Phase B).
 - [DOCS.md](./DOCS.md) — architecture decisions and rationale
 - [../scope/README.md](../scope/README.md) — shared scope tracker (dependency)
 - [../validating/README.md](../validating/README.md) — validation module
-- [../reference.md](../reference.md) — JeJ language reference
+- [../embody/language-levels/just-enough-javascript/reference.md](../embody/language-levels/just-enough-javascript/reference.md)
+  — JeJ language reference

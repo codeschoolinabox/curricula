@@ -662,11 +662,12 @@ prediction — backlog).
 > **Naming (locked).** The panel is the **phases panel** — named for the
 > lifecycle (glossary sense (a)) it lays out and instruments; its columns remain
 > **stations** (sense (b)): "the phases panel's parse station". "Control panel"
-> stays reserved — [`notional-machine.md`](../notional-machine.md) gives it to
-> the syntax-as-the-programmer's-interface metaphor; the phases panel is an
-> instrument **over the machine's stages**, not the interface that drives the
-> machine, so the two names share no metaphor. Module folder (Phase 1):
-> `phases-panel/`.
+> stays reserved —
+> [`notional-machine.md`](../embody/language-levels/just-enough-javascript/notional-machine.md)
+> gives it to the syntax-as-the-programmer's-interface metaphor; the phases
+> panel is an instrument **over the machine's stages**, not the interface that
+> drives the machine, so the two names share no metaphor. Module folder (Phase
+> 1): `phases-panel/`.
 
 ### Where the panel lives
 
@@ -923,5 +924,6 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
   - [`./lib/README.md`](./lib/README.md) — analysis libs index.
 - **Embodiment contract**: [`../embody/types.ts`](../embody/types.ts).
 - **Lens contract**: [`../lenses/types.ts`](../lenses/types.ts).
-- **Notional machine**: [`../notional-machine.md`](../notional-machine.md) — the
-  lifecycle the phases panel instruments.
+- **Notional machine**:
+  [`../embody/language-levels/just-enough-javascript/notional-machine.md`](../embody/language-levels/just-enough-javascript/notional-machine.md)
+  — the lifecycle the phases panel instruments.
