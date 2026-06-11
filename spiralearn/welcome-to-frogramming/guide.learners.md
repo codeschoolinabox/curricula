@@ -224,7 +224,7 @@ project.
 > what users need, do, and experience — through research, prototyping, and
 > testing with real people. The notional machine underneath is intentionally
 > delegated.
-
+>
 > 🔬 **The Frogrammer** works grounded in the notional machine. They build a
 > deep model of what the machine will do — through prediction, tracing, and
 > verification. The user, the audience, the design they may collaborate on or

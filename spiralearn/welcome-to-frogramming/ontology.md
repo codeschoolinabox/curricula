@@ -635,7 +635,7 @@ meta-pattern.
   `translational-framing.md` §6).
 
 <details>
-<summary><b>Visualization: V/F + the rhetorical model</b> <i>(introduced as primary diagram in §2; reproduced here for V/F context)</i></summary>
+<summary>**Visualization: V/F + the rhetorical model** _(introduced as primary diagram in §2; reproduced here for V/F context)_</summary>
 
 ![The big picture — the rhetorical model](./assets/the-big-picture.png)
 ![The big picture plus AI](./assets/the-big-picture-plus-ai.png)

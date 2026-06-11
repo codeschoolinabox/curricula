@@ -24,7 +24,7 @@ sidebar_position: 99
 
 ## Open Questions
 
-_(To be resolved when we return to fully design this chapter.)_
+<em>(To be resolved when we return to fully design this chapter.)</em>
 
 - **Representation sequence:** Should this chapter use the same 7-pass
   representation sequence as Chapter 5, or a reduced set focused on

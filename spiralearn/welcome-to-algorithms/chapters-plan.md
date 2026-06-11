@@ -27,7 +27,7 @@ These chapters follow the analytical chain (smallest problem → growth → stat
 language features) and the spider web model (concentric circles × representation
 sequence).
 
-**Chapter 1: Iteration & Simple Algorithms**
+<strong>Chapter 1: Iteration & Simple Algorithms</strong>
 
 - Current: 5.0 (iteration setup) + 5.1 (each element independently)
 - Focus: `for...of`/`for...in`, single-pass traversal, gatherer variables,
@@ -37,7 +37,7 @@ sequence).
   before being applied to algorithms
 - Representation sequence: full 7 passes on the simplest algorithms
 
-**Chapter 2: Dependent & Composed Algorithms**
+<strong>Chapter 2: Dependent & Composed Algorithms</strong>
 
 - Current: 5.2 (adjacent relationships) + 5.3 (composed scans)
 - Focus: dependent chains, holder variables, multi-pass decomposition
@@ -47,7 +47,7 @@ sequence).
 - Key comparison moments: count vowels (ch1) vs. count runs (ch2), single-pass
   vs. multi-pass
 
-**Chapter 3: Complex Algorithms**
+<strong>Chapter 3: Complex Algorithms</strong>
 
 - Current: 5.4 (global relationships) + 5.5 (two perspectives)
 - Focus: nested loops, two-pointer/converging techniques
@@ -61,7 +61,7 @@ sequence).
 These chapters restructure the algorithms from Part I into named, documented,
 testable functions.
 
-**Chapter 4: JSDoc & Documentation**
+<strong>Chapter 4: JSDoc & Documentation</strong>
 
 - Current: 5.6
 - Focus: writing contracts before implementation, `@param`/`@returns`,
@@ -72,7 +72,7 @@ testable functions.
 - Prerequisite: Part I algorithms (learners document algorithms they already
   understand)
 
-**Chapter 5: Functions**
+<strong>Chapter 5: Functions</strong>
 
 - Current: 5.7
 - Focus: arrow function expressions, parameters, return values, scope,
@@ -82,7 +82,7 @@ testable functions.
   function). Scope rules need room for comprehension exercises.
 - Prerequisite: JSDoc (learners implement contracts they already wrote)
 
-**Chapter 6: Unit Testing**
+<strong>Chapter 6: Unit Testing</strong>
 
 - Current: 5.8
 - Focus: `describe`/`it`/`expect`, TDD red-green-refactor, progressive test
@@ -95,7 +95,7 @@ testable functions.
 
 ### Part III: Complexity
 
-**Chapter 7: Complexity & Big O**
+<strong>Chapter 7: Complexity & Big O</strong>
 
 - Current: 6.0–6.4 (counting setup through Big O)
 - Focus: step-counting, growth curves, dominant term analysis, Big O notation
@@ -104,7 +104,7 @@ testable functions.
   efficiency comparisons.
 - Key insight: Ch 5's observable dimensions become explanatory dimensions
 
-**Interlude: Regex — A Different Paradigm**
+<strong>Interlude: Regex — A Different Paradigm</strong>
 
 - Current: 5.9
 - A fun breather between complexity analysis and the space/time capstone. Not a
@@ -114,7 +114,7 @@ testable functions.
   paradigm. Placed here because it's a palette cleanser: after the intensity of
   complexity analysis, a paradigm shift that doesn't require step-counting.
 
-**Chapter 8: Space, Time & Absurd Algorithms**
+<strong>Chapter 8: Space, Time & Absurd Algorithms</strong>
 
 - Current: 6.5–6.6
 - Focus: space vs. time tradeoffs, memoization, absurd sorting algorithms, the

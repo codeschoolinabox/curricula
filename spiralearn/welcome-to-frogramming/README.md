@@ -2,6 +2,8 @@
 sidebar_position: 1
 ---
 
+<!-- markdownlint-disable MD051 -->
+
 # 🐸 Welcome to Frogramming - Syllabus {#welcome-to-frogramming---syllabus}
 
 > The best authors and the best JavaScript developers are those who obsess about

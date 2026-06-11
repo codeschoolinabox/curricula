@@ -43,7 +43,7 @@ This is **_just enough JavaScript_** to:
   - [Naming Convention: camelCase](#naming-convention-camelcase)
   - [Indentation: Tabs](#indentation-tabs)
   - [Semicolons](#semicolons)
-  - [Before Your Code Runs](#before-your-code-runs)
+  - [Before Your Code Runs](#program-type-module)
 - [Language Reference](./reference.md)
 
 ---
@@ -93,12 +93,12 @@ Throughout this reference, each section shows **JavaScript** on the left and
 <tr>
 <td>
 
-**JavaScript**
+<strong>JavaScript</strong>
 
 </td>
 <td>
 
-**PseudoCode**
+<strong>PseudoCode</strong>
 
 </td>
 </tr>
@@ -136,7 +136,7 @@ each piece of syntax.
 
 Each syntax section below is labeled as one or the other.
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
@@ -176,7 +176,7 @@ structured.
 </td>
 <td>
 
-_N/A in PseudoCode_
+<em>N/A in PseudoCode</em>
 
 </td>
 </tr>
@@ -203,7 +203,7 @@ Module mode has this built in — one less thing to think about.
 </td>
 <td>
 
-_N/A in PseudoCode_
+<em>N/A in PseudoCode</em>
 
 </td>
 </tr>
@@ -254,13 +254,13 @@ if (condition) {
 JavaScript uses semicolons (`;`) to mark the end of certain statements. The
 rules are simple in Just Enough JavaScript:
 
-**No semicolon after closing `}`:**
+<strong>No semicolon after closing `}`:</strong>
 
 - `if (...) { ... }` — no `;`
 - `while (...) { ... }` — no `;`
 - `for (const c of str) { ... }` — no `;`
 
-**Use a semicolon at the end of each line after everything else:**
+<strong>Use a semicolon at the end of each line after everything else:</strong>
 
 - Expression statements: `alert('hello');`, `console.log(x);`
 - Variable declarations: `let name = 'Alice';`, `const x = 5;`
@@ -272,4 +272,4 @@ missing semicolons for you behind the scenes before it runs your code, but
 relying on it can lead to a couple confusing bugs. Writing semicolons explicitly
 makes your intent clear and avoids avoidable mistakes.
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)

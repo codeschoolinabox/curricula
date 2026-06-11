@@ -99,7 +99,7 @@ Instructions for this session:
 
 Here are some general tips for collaborating with LLMs when studying:
 
-- If you can't use [jeJS LLM Context](#just-enough-javascript-llm-context), then
+- If you can't use [jeJS LLM Context](./welcome-to-js.llm-instructions.md), then
   begin your chat by describing the persona you'd like the LLM to use. For
   example: _Answer like you are a patient programming teacher who always asks
   comprehension questions before moving on._ You can make these personas as

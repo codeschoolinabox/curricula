@@ -438,7 +438,7 @@ A **paired entry**, not two separate principles.
 read as 5 different spirals through the same web at 5 engagement depths.
 
 <details>
-<summary><b>Visualization: spiderweb (topology) + spiral (trajectory)</b> <i>(most load-bearing — existing assets)</i></summary>
+<summary>**Visualization: spiderweb (topology) + spiral (trajectory)** _(most load-bearing — existing assets)_</summary>
 
 - `assets/curriculum-spider-web.svg` — the spiderweb topology
 - `assets/spiral-curriculum.png` — Bruner-style spiral

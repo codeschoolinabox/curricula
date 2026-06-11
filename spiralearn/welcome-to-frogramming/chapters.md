@@ -193,7 +193,7 @@ The following distinctions are not knowledge to memorize. They are landmarks.
 You will encounter each one again as the course progresses, and what feels
 abstract now will become concrete. For now, use them as orientation.
 
-**What WtF is and what it isn't:**
+<strong>What WtF is and what it isn't:</strong>
 
 | This course                                                                                                                                                                                    | Not this course (yet)                                                                                                                                             |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -203,7 +203,7 @@ abstract now will become concrete. For now, use them as orientation.
 | **Comprehension before production** — you'll read and trace code before you write it; programs are written to verify understanding, not to demonstrate output                                  | **Production-first** — most courses have you writing immediately; output becomes the measure of understanding                                                     |
 | **Depth on a constrained surface** — Just Enough JavaScript offers few features deliberately                                                                                                   | **Breadth across many features** — JS has hundreds; covering all of them diffuses the focus needed to build a real mental model                                   |
 
-**How you will work:**
+<strong>How you will work:</strong>
 
 | WtF's approach                                                                                                                                           | The common alternative                                                                           |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -211,7 +211,7 @@ abstract now will become concrete. For now, use them as orientation.
 | **Read from code first** — you will spend real time as a code investigator before you write                                                              | Learn by writing — produce output to prove you understand                                        |
 | **Predict and check** — proactive and mechanistic; you will see what happens and update your model                                                       | Watch and explain — retroactive and justifying; post-hoc description of what you've already seen |
 
-**Where WtF fits in the larger journey:**
+<strong>Where WtF fits in the larger journey:</strong>
 
 | WtF                                                                                                                                                                                    | What follows                                                                                                                                 |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -233,12 +233,12 @@ into existing structures. This course teaches you to read and understand code
 first because that is what all programming work actually is. You will write
 programs throughout, but to verify understanding, not to demonstrate output. The
 deeper reason — unpacked in README.md § How Learning Happens — is that
-**understanding is the part of programming you cannot delegate.**
+<strong>understanding is the part of programming you cannot delegate.</strong>
 Comprehension-first because comprehension is the experience-form of building the
 twin of the machine; production-first skips the experiences and installs nothing
 durable.
 
-**Three vocabulary distinctions worth having early:**
+<strong>Three vocabulary distinctions worth having early:</strong>
 
 | Term                     | What it means                                                                                                                                                                                                                                                          | In WtF                                                                                                                                                       |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -272,7 +272,7 @@ vocabularies. This course teaches JS's actual machine. Understanding it gives
 you a stable base from which to see that paradigm choices are partly about which
 machine's event vocabulary you want to think in.
 
-**What the course constrains — and why:**
+<strong>What the course constrains — and why:</strong>
 
 Just Enough JavaScript is deliberately small. It excludes classes, most array
 methods, async/await, modules, destructuring, generators, and dozens of other
@@ -413,7 +413,7 @@ names specific working modes within it.
 
 ### Layer 0 — Mastery
 
-_(sparse — no code yet)_
+<em>(sparse — no code yet)</em>
 
 - 🥚 Recognize that programming is fundamentally about understanding a machine
   well enough to direct it precisely — _the notional machine is what gets
@@ -462,7 +462,7 @@ _(sparse — no code yet)_
 
 ### Layer 3 — Snippetry
 
-_(sparse at L3 in Ch0 — snippetry formalizes in Ch5)_
+<em>(sparse at L3 in Ch0 — snippetry formalizes in Ch5)</em>
 
 - 🥚 Recognize that _informal_ snippetry can begin from Ch0 — small,
   curiosity-driven exploratory programs are welcome from day one
@@ -631,14 +631,14 @@ discipline of comments — _every word is a choice_ — extends here.
 
 ### Layer 3 — Snippetry
 
-_(sparse)_
+<em>(sparse)</em>
 
 - 🥚 _(future feature)_ Share code with others via save-to-gist / pop-up sandbox
   — early gesture toward Ch5's collaborative gist system
 
 ### Layer 4 — Philosophy
 
-_(sparse — Ch1 is dense at L1, light elsewhere)_
+<em>(sparse — Ch1 is dense at L1, light elsewhere)</em>
 
 - 🥚 _(footnote)_ Notice that the developer audience is the only audience that
   reads STATIC code — every other audience experiences the DYNAMIC evaluation.
@@ -709,7 +709,7 @@ lifecycle of a program_ — a static 4D rendering of a 3D flowing river. Streams
 represent the dynamics; embody exists to make every facet of that motion
 explorable.
 
-**The further skill: decoupling syntax from events.**
+<strong>The further skill: decoupling syntax from events.</strong>
 
 Once you can think in events, a new ability becomes possible: you can specify
 _what you want the machine to do_ — describe a desired event sequence — before
@@ -720,7 +720,7 @@ produced actually achieves what you wanted.
 This is what "programming the machine directly" means. The syntax is notation
 for the machine; the events are what the machine actually speaks.
 
-**Errors.**
+<strong>Errors.</strong>
 
 An error is not a personal failure and it is not the machine breaking. It is a
 specific event that fires because the machine encountered a specification it
@@ -731,7 +731,7 @@ most useful output.
 Learning to read errors as information — rather than experiencing them as
 indictments — is a skill this chapter develops alongside everything else.
 
-**The tracer.**
+<strong>The tracer.</strong>
 
 Study Lenses' tracer captures the evaluation event stream: every
 behind-the-scenes moment as your code runs, as a structured sequence you can
@@ -1087,7 +1087,7 @@ time as a domain.
 
 ### Layer 4 — Philosophy
 
-_(sparse)_
+<em>(sparse)</em>
 
 - 🥚 _(footnote)_ Notice that an "error" is the machine telling you _exactly_
   where it can't interpret your specification. The machine's honesty is
@@ -1205,7 +1205,7 @@ _(sparse)_
 
 ### Layer 4 — Philosophy
 
-_(sparse)_
+<em>(sparse)</em>
 
 - 🥚 _(footnote)_ Notice that an "error" is the machine telling you _exactly_
   where it can't interpret your specification. The machine's honesty is
@@ -1285,7 +1285,7 @@ that make the experience the program serves possible.
 
 **Input/output pairs as test cases** in the top-level doc comment extend
 predictive assertion from values and bindings (Ch2) to program-level behavior.
-_"For input X, the program should output Y."_
+<em>"For input X, the program should output Y."</em>
 
 **Test coverage** asks: are all conditional paths covered by your test cases?
 Branches without test inputs are silent corners where bugs hide.
@@ -1431,7 +1431,7 @@ identified as a tool, not as essential infrastructure.
 
 ### Layer 4 — Philosophy
 
-_(sparse)_
+<em>(sparse)</em>
 
 - 🥚 _(footnote)_ The user experiences the dynamic side of your program but
   never the static side. What does that asymmetry mean for design?
@@ -1515,7 +1515,7 @@ you twin during the conversation**. This is why every section below revisits a
 Ch1–Ch3 audience: agent communication is what you've already been doing, just
 refracted through the alien.
 
-**The visual NM view (`embody/` + study lenses) becomes load-bearing here.**
+<strong>The visual NM view (`embody/` + study lenses) becomes load-bearing here.</strong>
 When you delegate the control panel, you can no longer rely on the act of typing
 to keep your NM understanding sharp. Visual debuggers let you observe, predict,
 and debug the machine _directly_ — the NM view that exists regardless of who (or
@@ -1567,7 +1567,7 @@ collaboration.
 
 ### 4.3 Agents and Developer Communication
 
-_Revisits Chapter 1: comments, variable names — with an LLM collaborator._
+<em>Revisits Chapter 1: comments, variable names — with an LLM collaborator.</em>
 
 The developer audience is where LLMs are most reliably useful: comments and
 variable names are pattern-rich, conventionally bounded, and don't require
@@ -1583,7 +1583,7 @@ task where the LLM adds value, or does using it undermine your learning?
 
 ### 4.4 Agents and Computer Communication
 
-_Revisits Chapter 2: tracing, asserting — with an LLM collaborator._
+<em>Revisits Chapter 2: tracing, asserting — with an LLM collaborator.</em>
 
 This is where the asymmetry shows. LLMs are better at _generating_ code than at
 _tracing_ it. They produce plausible-looking but often wrong traces. The skill:
@@ -1601,7 +1601,7 @@ the tracing _is_ the learning.
 
 ### 4.5 Agents and User Communication
 
-_Revisits Chapter 3: user programs — with an LLM collaborator._
+<em>Revisits Chapter 3: user programs — with an LLM collaborator.</em>
 
 The full user-program skill stack from Ch3 now operates over LLM-generated code:
 reading, PBIS evaluation, code review, test design, debugging, documentation
@@ -1833,7 +1833,7 @@ work tractable and visible.
 Chapter 5 is where you **graduate from the scaffolded curriculum environment**
 into real browser evaluation with real consequences.
 
-**What comes off:**
+<strong>What comes off:</strong>
 
 - **JEJ language-feature constraint** — you can use any and all JS language
   features. Newly available: user-defined functions, closures, arrays, objects,
@@ -1846,7 +1846,7 @@ into real browser evaluation with real consequences.
 - **Study Lenses NM visualizations** — the curriculum's tracer-based NM
   visualizations are no longer the primary tool.
 
-**What replaces it:**
+<strong>What replaces it:</strong>
 
 - **Full browser devtools debugging toolkit** — line breakpoints, conditional
   breakpoints, logpoints, `debugger` statements, step over/into/out, scope

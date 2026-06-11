@@ -181,7 +181,7 @@ Research shows that students overwhelmingly develop broken mental models of LLMs
 — most believe in keyword-lookup or database-retrieval models that cannot
 explain stochasticity, failure modes, or effective collaboration strategies.
 Students who correctly understood how GPT-like systems work performed measurably
-better (0.27 vs. 0.22 pass rate) [🔬](#misconceptions-interfere). Teaching _how
+better (0.27 vs. 0.22 pass rate) [🔬](#misconceptions-interfere). <!-- markdownlint-disable-line MD051 --> Teaching _how
 LLMs actually work_ (at appropriate depth) is prerequisite to effective
 collaboration, not an optional extra.
 

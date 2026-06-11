@@ -4,7 +4,7 @@
 >
 > - 🥚 [compute-it](http://compute-it.toxicode.fr/)
 > - 🐣 [little-dot](http://little-dot.toxicode.fr/)
-
+>
 > These videos cover predictive stepping:
 >
 > - [How to use this version of Study Lenses](https://youtube.com/video/oXrZZgTN0oY)

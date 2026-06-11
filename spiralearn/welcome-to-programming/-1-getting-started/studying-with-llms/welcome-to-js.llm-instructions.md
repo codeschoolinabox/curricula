@@ -9,7 +9,7 @@ through Welcome ot JS.
 - [Learner Profile](#learner-profile)
 - [Teaching Approach](#teaching-approach)
 - [jeJS Language Features and Constraints](#jejs-language-features-and-constraints)
-- [DOM I/O](#dom-i-o)
+- [DOM I/O](#dom-io)
 
 ## Overview
 

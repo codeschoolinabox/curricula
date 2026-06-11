@@ -234,7 +234,7 @@ different strategies, different amounts of work.
 
 > This chain of thought may need adjustment! Should it place state before
 > growth? Revisit with some hand-run practice to feel it out.  
->  There was an earlier version that felt more natural but claude overwrote it
+> There was an earlier version that felt more natural but claude overwrote it
 > then crashed and lost all context or memory.
 
 The organizing principle for Chapter 5's subchapter progression is a chain of
@@ -312,7 +312,7 @@ question that Chapter 6 answers with rigor.
 
 Three layers combine to create the full exercise structure for each algorithm:
 
-**Layer 1: Code Ownership Progression (PRIMMy scaffold)**
+<strong>Layer 1: Code Ownership Progression (PRIMMy scaffold)</strong>
 
 The fading scaffold applies to the CODE itself. The progression controls how
 much of the program the learner creates:
@@ -340,7 +340,7 @@ learners must ensure all levels align. This is a game-time decision per
 exercise, depending on where it sits in the spiral and what learning objective
 it serves.
 
-**Layer 2: AT Taxonomy Transitions (between representations)**
+<strong>Layer 2: AT Taxonomy Transitions (between representations)</strong>
 
 The Abstraction Transition Taxonomy structures exercises as transitions BETWEEN
 representation levels:
@@ -358,7 +358,7 @@ representation levels:
   "Why" questions are critical for deep comprehension but easy to omit — they
   should be explicit in every subchapter.
 
-**Layer 3: Test Case Sequencing (per algorithm)**
+<strong>Layer 3: Test Case Sequencing (per algorithm)</strong>
 
 Test cases are written as input/output pairs in a doc comment. Learners manually
 run each case, predicting the output before executing. The ORDER of test cases

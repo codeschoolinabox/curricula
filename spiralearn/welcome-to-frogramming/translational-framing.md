@@ -51,7 +51,7 @@ It exists because:
 > TCER paper: Cole, E., Malaise, Y., & Signer, B. (2023). _Computing Education
 > Research as a Translational Transdiscipline._ In Proceedings of the 54th ACM
 > Technical Symposium on Computer Science Education V. 1 (SIGCSE 2023).
-> https://doi.org/10.1145/3545945.3569771
+> <https://doi.org/10.1145/3545945.3569771>
 
 ### 2.1 The two divides
 
@@ -341,7 +341,7 @@ evidence claims live in their existing homes.
 
 - **TCER paper**: Cole, E., Malaise, Y., & Signer, B. (2023). _Computing
   Education Research as a Translational Transdiscipline._ SIGCSE 2023.
-  https://doi.org/10.1145/3545945.3569771
+  <https://doi.org/10.1145/3545945.3569771>
 - **Embody-side TCER analysis**: `DGMD-E-1-artifacts/embodying-tcer/`
 - **Theory-to-requirements pipeline (the 5-step translational process)**:
   `DGMD-E-1-artifacts/theory-to-requirements/`

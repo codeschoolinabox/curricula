@@ -99,7 +99,7 @@ these when executing your code.
 
 ### Primitive Types
 
-_expression_
+<em>expression</em>
 
 The smallest pieces of data in a JS program. There are many primitive types but
 you only need to know these for now:
@@ -240,7 +240,7 @@ value to a number before checking — which can give confusing results.
 
 ### Type Conversion
 
-_expression_
+<em>expression</em>
 
 JavaScript can convert values between types. This is especially important with
 `prompt()`, which always returns a string — even when the user types a number.
@@ -425,7 +425,7 @@ Number('3.14')
 
 ### Number Helpers
 
-_expression_
+<em>expression</em>
 
 Functions for validating numbers. These are especially useful after converting
 user input with `Number()` or `parseInt()` — they tell you whether the result is
@@ -480,7 +480,7 @@ Number.isFinite(NaN)
 
 ### Math
 
-_expression_
+<em>expression</em>
 
 The `Math` object provides mathematical operations and constants. All `Math`
 methods and constants are available in JEJ.
@@ -586,7 +586,7 @@ Math.clz32(1); // 31 — count leading zeros
 
 ### Operators
 
-_expression_
+<em>expression</em>
 
 Ways to transform data. An operator takes in 1 or more values and _evaluates to_
 a new value.
@@ -1021,7 +1021,7 @@ NOT 5
 
 ### Logs & Assertions
 
-_expression (used for side effects)_
+<em>expression (used for side effects)</em>
 
 #### Logging
 
@@ -1094,7 +1094,7 @@ list.
 
 ### String Access & Methods
 
-_expression_
+<em>expression</em>
 
 The data type used for storing and manipulating text data. Strings will be the
 main type of data used in Welcome to Programming.
@@ -1353,7 +1353,7 @@ can use it.
 
 ### Optional Chaining
 
-_expression_
+<em>expression</em>
 
 The `?.` operator lets you safely access properties or call methods on a value
 that might be `null` or `undefined`. Instead of throwing an error, it
@@ -1413,7 +1413,7 @@ input?.includes('a')
 
 ### Template Literals
 
-_expression_
+<em>expression</em>
 
 Template literals use backticks (`` ` ``) instead of quotes, and let you embed
 expressions directly in a string using `${...}`. They can also span multiple
@@ -1471,7 +1471,7 @@ poem <- '  roses are red
 
 ### Variables
 
-_statement_
+<em>statement</em>
 
 Variables allow you to save values to use again later in your program. They're
 kind of like a box that can only hold one thing at a time. You can use a
@@ -1575,7 +1575,7 @@ pi <- 3.14, maxRetries <- 3
 
 ### Assignment Operators
 
-_expression (used as statements)_
+<em>expression (used as statements)</em>
 
 Assignment operators are how you _change_ the value stored in a variable. There
 is `=` for straightforward reassignment and compound operators like `+=` that
@@ -1829,7 +1829,7 @@ bits >>>= 1
 
 ### Interactions
 
-_expression_
+<em>expression</em>
 
 Ways for users to pass data into your programs (_input_), and ways to display
 data from inside your program to a user (_output_).
@@ -1940,7 +1940,7 @@ console.log(secret); // ReferenceError
 
 ### Conditionals
 
-_statement_
+<em>statement</em>
 
 Execute different blocks of code depending on whether an expression evaluates to
 `true` or to `false`. The expression in `if (...)` is converted to a boolean
@@ -2015,7 +2015,7 @@ Always use braces `{ }` for Just Enough JavaScript.
 
 ### While Loops
 
-_statement_
+<em>statement</em>
 
 Repeat a block of code as long as an expression evaluates to `true`. The
 expression in `while (...)` follows the same `Boolean()` rules — see
@@ -2061,7 +2061,7 @@ Always use braces `{ }` for Just Enough JavaScript.
 
 ### Do-While Loops
 
-_statement_
+<em>statement</em>
 
 Like `while`, but the body runs _first_, then the condition is checked. This
 guarantees the body executes at least once.
@@ -2132,7 +2132,7 @@ while (condition) {
 
 ### For Loops
 
-_statement_
+<em>statement</em>
 
 A loop with initialization, condition, and update all in one header. The three
 parts are separated by semicolons: `for (init; test; update)`.
@@ -2219,7 +2219,7 @@ while (
 
 ### For-Of Loops
 
-_statement_
+<em>statement</em>
 
 Iterate over a string, executing the loop body once for each character.
 
@@ -2327,7 +2327,7 @@ Always use braces `{ }` for Just Enough JavaScript.
 
 ### Break
 
-_statement_
+<em>statement</em>
 
 Exit a loop immediately and skip to the next line after the loop.
 
@@ -2390,7 +2390,7 @@ FOR: character OF 'hello'
 
 ### Continue
 
-_statement_
+<em>statement</em>
 
 Skip the rest of the loop body and go to the next iteration.
 
@@ -2479,7 +2479,7 @@ when you see them in the debugger or in an error message.
 
 ### debugger
 
-_statement_
+<em>statement</em>
 
 When you click the [debug] button, a `debugger` statement is added to your code.
 This pauses your program and opens the browser's debugging tools. From there you
@@ -2506,7 +2506,7 @@ console.log(name);
 </td>
 <td>
 
-_N/A in PseudoCode_
+<em>N/A in PseudoCode</em>
 
 </td>
 </tr>
@@ -2514,7 +2514,7 @@ _N/A in PseudoCode_
 
 ### Braceless `if`
 
-_statement_
+<em>statement</em>
 
 JavaScript allows `if (condition) statement;` without curly braces _only when_
 your conditional has a single statement. In code you write for JEJ, braces are
@@ -2538,7 +2538,7 @@ if (count > 100) {
 
 ### Prefix Increment (`++`)
 
-_expression (operator)_
+<em>expression (operator)</em>
 
 `++variable` adds 1 to the variable _and_ returns the new value, in a single
 expression. In code you write, use `variable += 1` or explicit assignment
@@ -2559,7 +2559,7 @@ count += 1;
 
 ### `throw`
 
-_statement_
+<em>statement</em>
 
 `throw` immediately stops execution and raises an error. Whatever value comes
 after `throw` becomes the error. You'll see it paired with error constructors
@@ -2587,7 +2587,7 @@ console.log('this line is not reached');
 
 ### `new RangeError`
 
-_expression_
+<em>expression</em>
 
 `new RangeError(message)` creates an error object for when a value is outside an
 expected range. In the loop guard, it tells you which loop got stuck and how

@@ -178,7 +178,7 @@ decisions.
 
 ## Appendix: Space vs. Time (via Absurd Algorithms)
 
-_(Confirmed closing subchapter — exact number TBD after 6.2+ are designed.)_
+<em>(Confirmed closing subchapter — exact number TBD after 6.2+ are designed.)</em>
 
 A fun interlude. Chapter 6 has been counting steps — measuring _time_. But
 there's another resource algorithms consume: _memory_ (space). Is one
@@ -191,7 +191,7 @@ relationship between space and time.
 
 ### The Exhibits
 
-**Time-catastrophic, space-cheap:**
+<strong>Time-catastrophic, space-cheap:</strong>
 
 - **Bogosort** ([Wikipedia](https://en.wikipedia.org/wiki/Bogosort)): Randomly
   shuffle the array. Check if it's sorted. If not, shuffle again. Expected
@@ -203,7 +203,7 @@ relationship between space and time.
   cosmic ray to flip the right bits. O(∞) expected time, O(1) space. The logical
   extreme of "maybe it'll just work out."
 
-**Time-cheap, space-catastrophic:**
+<strong>Time-cheap, space-catastrophic:</strong>
 
 - **Lookup table extreme** (thought experiment): Precompute the sorted output
   for every possible input array and store them all. O(1) lookup time, but the
@@ -211,7 +211,7 @@ relationship between space and time.
   more atoms than exist in the universe. The opposite extreme of bogosort —
   trading infinite space for instant time.
 
-**Converts time into something else entirely:**
+<strong>Converts time into something else entirely:</strong>
 
 - **Sleep sort**: For each element, create a thread that sleeps for a duration
   proportional to its value, then outputs the value when it wakes up. The values
@@ -219,7 +219,7 @@ relationship between space and time.
   time, O(n) space for threads. A literal demonstration that time is a resource
   — here it's not just spent, it _is_ the sorting mechanism.
 
-**Cheats the problem instead of solving it:**
+<strong>Cheats the problem instead of solving it:</strong>
 
 These three algorithms raise a question that connects back to Chapter 3's
 discussion of specs and behavior: _what does it even mean for an algorithm to be
@@ -244,7 +244,7 @@ discussion of specs and behavior: _what does it even mean for an algorithm to be
   space. Does literally nothing. The algorithm "solves" the problem by declaring
   victory.
 
-**Goalpost sort — the code:**
+<strong>Goalpost sort — the code:</strong>
 
 ```js
 const goalpostSort = (nums = []) => ({

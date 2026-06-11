@@ -166,7 +166,7 @@ The metaphor isn't only metaphor — it's grounded in real history where music a
 computing literally share origins.
 
 <details>
-<summary><b>Visualization: historical lineage timeline</b> <i>(supporting)</i></summary>
+<summary>**Visualization: historical lineage timeline** _(supporting)_</summary>
 
 ```text
  1725 ─ Buxtehude, organ masters, counterpoint tradition
@@ -246,7 +246,7 @@ Each has a specific composer-virtuoso activity.
 | **Describe** (adapted) | Naming the gap between what you heard and what you wanted; vocabulary for mismatch                                                    |
 
 <details>
-<summary><b>Visualization: 8 collaboration skills as composer-virtuoso exchanges</b> <i>(most load-bearing)</i></summary>
+<summary>**Visualization: 8 collaboration skills as composer-virtuoso exchanges** _(most load-bearing)_</summary>
 
 ```text
     ┌───────────────────────────────────────────────┐
@@ -276,21 +276,21 @@ Each skill has a specific moment in the collaborative loop.
 ### Supporting diagrams
 
 <details>
-<summary><b>Visualization: collaboration decision tree</b> <i>(supporting)</i></summary>
+<summary>**Visualization: collaboration decision tree** _(supporting)_</summary>
 
 ![AI collaboration decision tree — when/how to collaborate](./assets/decision-tree.svg)
 
 </details>
 
 <details>
-<summary><b>Visualization: AI learning progression</b> <i>(supporting)</i></summary>
+<summary>**Visualization: AI learning progression** _(supporting)_</summary>
 
 ![AI integration progression across chapters](./assets/learning-progression.svg)
 
 </details>
 
 <details>
-<summary><b>Visualization: SOLO integration</b> <i>(supporting)</i></summary>
+<summary>**Visualization: SOLO integration** _(supporting)_</summary>
 
 ![SOLO mapping to AI collaboration readiness](./assets/solo-integration.svg)
 
@@ -345,7 +345,7 @@ externalization, visual thinking). An LLM doesn't need Study Lenses; it has its
 own internal ways of processing code. Study Lenses exists for us.
 
 <details>
-<summary><b>Visualization: composer's critical ear feedback loop</b> <i>(supporting)</i></summary>
+<summary>**Visualization: composer's critical ear feedback loop** _(supporting)_</summary>
 
 ```text
   ┌──────────┐       ┌──────────┐       ┌──────────┐
@@ -399,7 +399,7 @@ involves:
 - **Quotation** (using libraries, APIs) — referencing existing musical material
 
 <details>
-<summary><b>Visualization: arrangement/variation vs. greenfield composition</b> <i>(supporting)</i></summary>
+<summary>**Visualization: arrangement/variation vs. greenfield composition** _(supporting)_</summary>
 
 ```text
 GREENFIELD COMPOSITION              ARRANGEMENT / VARIATION
@@ -447,7 +447,7 @@ metaphor-illustration form.
 ## 6. The NM from multiple angles
 
 <details>
-<summary><b>Visualization: NM from four angles</b> <i>(most load-bearing)</i></summary>
+<summary>**Visualization: NM from four angles** _(most load-bearing)_</summary>
 
 | Angle                                     | Framing                                                                                                                                                                     |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -462,7 +462,7 @@ different moments.
 </details>
 
 <details>
-<summary><b>Visualization: black-boxed-within-NM layering</b> <i>(supporting)</i></summary>
+<summary>**Visualization: black-boxed-within-NM layering** _(supporting)_</summary>
 
 ```text
  ┌──────────────── YOUR CODE ────────────────┐
@@ -518,7 +518,7 @@ comprehensible. But his visualization target is different from this curriculum's
 — the distinction matters.
 
 <details>
-<summary><b>Visualization: Victor vs. NM visualization</b> <i>(most load-bearing)</i></summary>
+<summary>**Visualization: Victor vs. NM visualization** _(most load-bearing)_</summary>
 
 ```text
   VICTOR'S VISUALIZATION               NM VISUALIZATION (Study Lenses)
@@ -563,7 +563,7 @@ Victor wanted _less implementation toil_ AND _more powerful thinking tools_,
 both at once. LLMs decompose the wish in an unexpected way.
 
 <details>
-<summary><b>Visualization: Victor's wish decomposed</b> <i>(supporting)</i></summary>
+<summary>**Visualization: Victor's wish decomposed** _(supporting)_</summary>
 
 ```text
                 ┌─── less human toil            ─── ✅ partially by LLMs
@@ -632,7 +632,7 @@ the code) to behavior-level checking (which requires only understanding what
 outcome you want).
 
 <details>
-<summary><b>Visualization: verification limit — code vs. behavior check</b> <i>(most load-bearing)</i></summary>
+<summary>**Visualization: verification limit — code vs. behavior check** _(most load-bearing)_</summary>
 
 ```text
        CODE-LEVEL CHECK                 BEHAVIOR-LEVEL CHECK
@@ -655,7 +655,7 @@ outcome you want).
 </details>
 
 <details>
-<summary><b>Visualization: agile-visible discipline loop</b> <i>(supporting)</i></summary>
+<summary>**Visualization: agile-visible discipline loop** _(supporting)_</summary>
 
 ```text
    ┌──────────────────────────────────────┐
@@ -710,7 +710,7 @@ languages suited to how _they_ compute. Notions of "high-level" and "low-level"
 adjectives describe a centrality that would no longer apply.
 
 <details>
-<summary><b>Visualization: PL-future spectrum</b> <i>(supporting)</i></summary>
+<summary>**Visualization: PL-future spectrum** _(supporting)_</summary>
 
 ```text
    NOW                     NEAR FUTURE              FAR FUTURE
