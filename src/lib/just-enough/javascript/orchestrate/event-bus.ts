@@ -50,7 +50,7 @@ import type {
  * does not prevent listener registration — see the file-level `@remarks`
  * for the stateful-pattern exception.
  */
-function createEventBus(): EventBus {
+export default function createEventBus(): EventBus {
 	// Mutable listener store — closure variable per the stateful-pattern
 	// exception (DEV.md § 8). Per-event-name Sets keep listener registration
 	// type-safe (each Set is typed against its specific event's listener
@@ -127,5 +127,3 @@ function createEventBus(): EventBus {
 	};
 	return freezeInPlace(bus);
 }
-
-export default createEventBus;

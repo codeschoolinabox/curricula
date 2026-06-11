@@ -44,7 +44,7 @@ import type { EditorOptions, EditorInstance, LintDiagnostic } from './types.js';
  * @param options - Editor configuration and callbacks
  * @returns A promise resolving to a fully-initialized editor instance.
  */
-async function createEditor(
+export default async function createEditor(
 	initialCode: string,
 	{
 		language,
@@ -242,5 +242,3 @@ async function createEditor(
 		},
 	};
 }
-
-export default createEditor;

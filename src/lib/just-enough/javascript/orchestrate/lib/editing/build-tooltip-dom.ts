@@ -20,7 +20,10 @@ import type { DocEntry as DocumentEntry } from './types.js';
  * @param doc - DocEntry from docLookup callback
  * @returns Styled HTMLElement for the tooltip
  */
-function buildTooltipDom(word: string, document_: DocumentEntry): HTMLElement {
+export default function buildTooltipDom(
+	word: string,
+	document_: DocumentEntry,
+): HTMLElement {
 	const container = document.createElement('div');
 	container.style.cssText =
 		'background: #2d2d30; color: #d4d4d4; padding: 12px; border-radius: 6px; ' +
@@ -92,7 +95,7 @@ function buildTooltipDom(word: string, document_: DocumentEntry): HTMLElement {
 			const item = document.createElement('div');
 			item.style.cssText =
 				'color: #f48771; font-size: 11px; margin-bottom: 2px; padding-left: 8px;';
-			item.textContent = `\u2022 ${  mistake}`;
+			item.textContent = `\u2022 ${mistake}`;
 			content.append(item);
 		}
 	}
@@ -129,5 +132,3 @@ function buildTooltipDom(word: string, document_: DocumentEntry): HTMLElement {
 	// perf: skip freeze — DOM element, inherently mutable
 	return container;
 }
-
-export default buildTooltipDom;

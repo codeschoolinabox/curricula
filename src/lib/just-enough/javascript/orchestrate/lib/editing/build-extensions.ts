@@ -28,60 +28,6 @@ import type {
 	CompletionCallback,
 } from './types.js';
 
-// ─── Language loading ───────────────────────────────────────
-
-// CM language packages have varying shapes — we only call pkg[fnName]()
-// and runtime-guard with typeof === 'function'
-const CM_LOADERS = Object.freeze({
-	javascript: () => import('@codemirror/lang-javascript'),
-	typescript: () => import('@codemirror/lang-javascript'),
-	python: () => import('@codemirror/lang-python'),
-	html: () => import('@codemirror/lang-html'),
-	css: () => import('@codemirror/lang-css'),
-	markdown: () => import('@codemirror/lang-markdown'),
-	json: () => import('@codemirror/lang-json'),
-	xml: () => import('@codemirror/lang-xml'),
-	// OpenQASM uses JavaScript highlighting as a reasonable fallback
-	openqasm2: () => import('@codemirror/lang-javascript'),
-}) satisfies Readonly<Record<string, () => Promise<Record<string, unknown>>>>;
-
-const CM_FUNCTION_NAMES: Readonly<Record<string, string>> = Object.freeze({
-	javascript: 'javascript',
-	typescript: 'javascript',
-	python: 'python',
-	html: 'html',
-	css: 'css',
-	markdown: 'markdown',
-	json: 'json',
-	xml: 'xml',
-	openqasm2: 'javascript',
-});
-
-// ─── Helpers ────────────────────────────────────────────────
-
-/**
- * Apply-callback for completion items carrying the `apply: 'noop'`
- * sentinel — dismisses the popup on Enter without inserting the
- * label. JEJ-aware adapters use this to surface blocked vocabulary
- * pedagogically without the keystroke landing.
- */
-function dismissPopup(view: EditorView): void {
-	closeCompletion(view);
-}
-
-// ─── Options type (private to this module) ──────────────────
-
-type BuildExtensionsOptions = {
-	readonly indentChar: string;
-	readonly tabSize: number;
-	readonly linterCallbacks?: readonly LinterCallback[];
-	readonly docLookup?: DocumentLookupCallback;
-	readonly completions?: CompletionCallback;
-	readonly runFormat?: () => void;
-};
-
-// ─── Main function ──────────────────────────────────────────
-
 /**
  * Build the CodeMirror extensions array from options and callbacks.
  *
@@ -89,7 +35,7 @@ type BuildExtensionsOptions = {
  * @param options - Configuration and callback references
  * @returns Array of CodeMirror extensions
  */
-async function buildExtensions(
+export default async function buildExtensions(
 	language: string,
 	{
 		indentChar,
@@ -272,4 +218,52 @@ async function loadLanguageExtension(
 	}
 }
 
-export default buildExtensions;
+// ─── Language loading ───────────────────────────────────────
+
+// CM language packages have varying shapes — we only call pkg[fnName]()
+// and runtime-guard with typeof === 'function'
+const CM_LOADERS = Object.freeze({
+	javascript: () => import('@codemirror/lang-javascript'),
+	typescript: () => import('@codemirror/lang-javascript'),
+	python: () => import('@codemirror/lang-python'),
+	html: () => import('@codemirror/lang-html'),
+	css: () => import('@codemirror/lang-css'),
+	markdown: () => import('@codemirror/lang-markdown'),
+	json: () => import('@codemirror/lang-json'),
+	xml: () => import('@codemirror/lang-xml'),
+	// OpenQASM uses JavaScript highlighting as a reasonable fallback
+	openqasm2: () => import('@codemirror/lang-javascript'),
+}) satisfies Readonly<Record<string, () => Promise<Record<string, unknown>>>>;
+
+const CM_FUNCTION_NAMES: Readonly<Record<string, string>> = Object.freeze({
+	javascript: 'javascript',
+	typescript: 'javascript',
+	python: 'python',
+	html: 'html',
+	css: 'css',
+	markdown: 'markdown',
+	json: 'json',
+	xml: 'xml',
+	openqasm2: 'javascript',
+});
+
+/**
+ * Apply-callback for completion items carrying the `apply: 'noop'`
+ * sentinel — dismisses the popup on Enter without inserting the
+ * label. JEJ-aware adapters use this to surface blocked vocabulary
+ * pedagogically without the keystroke landing.
+ */
+function dismissPopup(view: EditorView): void {
+	closeCompletion(view);
+}
+
+// ─── Options type (private to this module) ──────────────────
+
+type BuildExtensionsOptions = {
+	readonly indentChar: string;
+	readonly tabSize: number;
+	readonly linterCallbacks?: readonly LinterCallback[];
+	readonly docLookup?: DocumentLookupCallback;
+	readonly completions?: CompletionCallback;
+	readonly runFormat?: () => void;
+};

@@ -19,7 +19,7 @@
  * @param prose - Single-paragraph learner-facing explanation.
  * @returns Styled HTMLElement for the autocompletion info slot.
  */
-function buildInfoDom(prose: string): HTMLElement {
+export default function buildInfoDom(prose: string): HTMLElement {
 	const container = document.createElement('div');
 	container.style.cssText =
 		'background: #2d2d30; color: #d4d4d4; padding: 10px 12px; ' +
@@ -30,5 +30,3 @@ function buildInfoDom(prose: string): HTMLElement {
 	// perf: skip freeze — DOM element, inherently mutable
 	return container;
 }
-
-export default buildInfoDom;
