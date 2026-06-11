@@ -35,19 +35,7 @@ import type { LensConfig } from '../types.js';
 
 import type { DisplayTree, Panel } from './types.js';
 
-/**
- * Emitted by the validation panel when `embodiment.validation` is absent
- * (tokenize-fail and parse-fail leaves per the embody staircase). The
- * placeholder phrases the gate condition, not a counterfactual about what
- * happened, so it reads correctly for both fail-leaves regardless of which
- * gate actually failed. Mirrors the literal in
- * `./tests/core.test.ts § VALIDATION_ABSENT_PLACEHOLDER` and the prose
- * in `./README.md § Panel contract` + `./DOCS.md § Display derivation`.
- */
-const VALIDATION_ABSENT_PLACEHOLDER =
-	'(validation absent — gated on parse success)';
-
-function deriveDisplayTree(
+export default function deriveDisplayTree(
 	embodiment: Snippet,
 	config?: LensConfig,
 ): DisplayTree {
@@ -108,4 +96,14 @@ function deriveDisplayTree(
 	return Object.freeze({ panels: Object.freeze(panels) });
 }
 
-export default deriveDisplayTree;
+/**
+ * Emitted by the validation panel when `embodiment.validation` is absent
+ * (tokenize-fail and parse-fail leaves per the embody staircase). The
+ * placeholder phrases the gate condition, not a counterfactual about what
+ * happened, so it reads correctly for both fail-leaves regardless of which
+ * gate actually failed. Mirrors the literal in
+ * `./tests/core.test.ts § VALIDATION_ABSENT_PLACEHOLDER` and the prose
+ * in `./README.md § Panel contract` + `./DOCS.md § Display derivation`.
+ */
+const VALIDATION_ABSENT_PLACEHOLDER =
+	'(validation absent — gated on parse success)';

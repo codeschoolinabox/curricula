@@ -38,7 +38,9 @@ import type { FlowchartSvg } from './types.js';
  * @param source - The snippet source code (`embodiment.source.code`).
  * @returns A Promise of a deep-frozen `FlowchartSvg` (`ready` | `error`).
  */
-function deriveFlowchartSvg(source: string): Promise<FlowchartSvg> {
+export default function deriveFlowchartSvg(
+	source: string,
+): Promise<FlowchartSvg> {
 	try {
 		const svg = convertCodeToSvg(source);
 		return Promise.resolve(
@@ -51,5 +53,3 @@ function deriveFlowchartSvg(source: string): Promise<FlowchartSvg> {
 		);
 	}
 }
-
-export default deriveFlowchartSvg;

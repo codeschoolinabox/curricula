@@ -45,104 +45,7 @@ import * as acorn from 'acorn';
 
 import type { Blank, BlankenateResult } from '../types.js';
 
-/**
- * The wrapper-internal boolean map derived from `ContentType[]` on
- * render. Not exported as a type per the architectural sketch
- * (wrapper-internal only); kept lib-local here as the algorithm's
- * input shape.
- */
-type ContentTypeFlags = {
-	readonly keywords: boolean;
-	readonly identifiers: boolean;
-	readonly operators: boolean;
-	readonly literals: boolean;
-	// Delimiter tokens (parens, brackets, braces, `${`, semicolons,
-	// commas, dots, etc.) — sourced from Acorn's token stream (not
-	// AST nodes — delimiters are not standalone nodes).
-	readonly delimiters: boolean;
-};
-
-type BlankedToken = {
-	start: number;
-	end: number;
-	original: string;
-	type: Blank['type'];
-};
-
-// Delimiter token labels Acorn emits. These are TokenType.label
-// values (acorn.tokTypes.parenL.label === '(' etc.).
-//
-// Brace nuance (template-literal disambiguation):
-// - `{` is unambiguous — Acorn's `tokTypes.braceL` (label `{`) is
-//   ONLY emitted for block/object braces. Template-expression opens
-//   are a separate token, `tokTypes.dollarBraceL` (label `${`), which
-//   covers both the `$` and `{` characters as one 2-char token.
-// - `}` is shared by block/object/template-expression close
-//   (`tokTypes.braceR`, label `}`). Both forms blank as `}`; the
-//   learner types `}` either way, so the label-only filter is
-//   pedagogically sound for blanking even without sub-classification.
-//   Richer taxonomy (template-close vs block-close) is a Future
-//   direction item (would require a brace-context stack walking the
-//   token stream).
-//
-// Excluded from DELIMITER_LABELS by design:
-//   `template` / `invalidTemplate` (string content between
-//     interpolations) — these are blanked, but under LITERALS not
-//     DELIMITERS, via AST-walk on `TemplateElement` nodes.
-//   `/` — regex literal delimiters are part of the `regexp` token
-//     (Acorn emits `tokTypes.regexp` as one), not separate.
-//   `eof` — not a syntactic character.
-//
-// Ternary `?` / `:` are classified as DELIMITERS here, not under
-// `operators`. The operators category remains AST-walk-driven for
-// BinaryExpression / UnaryExpression / UpdateExpression /
-// AssignmentExpression operator strings. `?` / `:` are token-stream
-// punctuation; DOCS.md § Categories documents this split.
-//
-// Acorn's `tokTypes.colon` is the SAME TokenType for every `:`
-// context: ternary `a ? b : c`, object literal `{k: v}`, switch-case
-// `case 1:`, labeled statement `lbl: while ...`. Adding `:` to
-// DELIMITER_LABELS blanks all of them uniformly (the learner types
-// `:` either way; the position-specific meaning is the learner's to
-// recover from context). Same for `tokTypes.question`: ternary `?`
-// is the only JS context (optional chaining is its own token
-// `tokTypes.questionDot` with label `?.`).
-const DELIMITER_LABELS = new Set<string>([
-	'(',
-	')',
-	'{',
-	'}',
-	'${',
-	'[',
-	']',
-	';',
-	',',
-	'.',
-	'=>',
-	'?',
-	':',
-	'?.',
-	'...',
-	'`', // template-literal opener/closer
-]);
-
-// Contextual keywords — tokens Acorn emits as `name` (label === 'name',
-// `.keyword` undefined) but ES treats as keywords in some positions.
-// Module-level to avoid per-call Set allocation.
-const CONTEXTUAL_KEYWORDS = new Set<string>([
-	'let',
-	'static',
-	'async',
-	'await',
-	'yield',
-	'of',
-	'as',
-	'from',
-	'get',
-	'set',
-]);
-
-function blankenate(
+export default function blankenate(
 	code: string,
 	probability: number = 0.2,
 	config: ContentTypeFlags = {
@@ -612,4 +515,100 @@ function blankenate(
 // representation is wrapper-internal-only. The wrapper constructs
 // the shape inline at the call site; TypeScript infers it from the
 // `blankenate` parameter signature.
-export default blankenate;
+
+/**
+ * The wrapper-internal boolean map derived from `ContentType[]` on
+ * render. Not exported as a type per the architectural sketch
+ * (wrapper-internal only); kept lib-local here as the algorithm's
+ * input shape.
+ */
+type ContentTypeFlags = {
+	readonly keywords: boolean;
+	readonly identifiers: boolean;
+	readonly operators: boolean;
+	readonly literals: boolean;
+	// Delimiter tokens (parens, brackets, braces, `${`, semicolons,
+	// commas, dots, etc.) — sourced from Acorn's token stream (not
+	// AST nodes — delimiters are not standalone nodes).
+	readonly delimiters: boolean;
+};
+
+type BlankedToken = {
+	start: number;
+	end: number;
+	original: string;
+	type: Blank['type'];
+};
+
+// Delimiter token labels Acorn emits. These are TokenType.label
+// values (acorn.tokTypes.parenL.label === '(' etc.).
+//
+// Brace nuance (template-literal disambiguation):
+// - `{` is unambiguous — Acorn's `tokTypes.braceL` (label `{`) is
+//   ONLY emitted for block/object braces. Template-expression opens
+//   are a separate token, `tokTypes.dollarBraceL` (label `${`), which
+//   covers both the `$` and `{` characters as one 2-char token.
+// - `}` is shared by block/object/template-expression close
+//   (`tokTypes.braceR`, label `}`). Both forms blank as `}`; the
+//   learner types `}` either way, so the label-only filter is
+//   pedagogically sound for blanking even without sub-classification.
+//   Richer taxonomy (template-close vs block-close) is a Future
+//   direction item (would require a brace-context stack walking the
+//   token stream).
+//
+// Excluded from DELIMITER_LABELS by design:
+//   `template` / `invalidTemplate` (string content between
+//     interpolations) — these are blanked, but under LITERALS not
+//     DELIMITERS, via AST-walk on `TemplateElement` nodes.
+//   `/` — regex literal delimiters are part of the `regexp` token
+//     (Acorn emits `tokTypes.regexp` as one), not separate.
+//   `eof` — not a syntactic character.
+//
+// Ternary `?` / `:` are classified as DELIMITERS here, not under
+// `operators`. The operators category remains AST-walk-driven for
+// BinaryExpression / UnaryExpression / UpdateExpression /
+// AssignmentExpression operator strings. `?` / `:` are token-stream
+// punctuation; DOCS.md § Categories documents this split.
+//
+// Acorn's `tokTypes.colon` is the SAME TokenType for every `:`
+// context: ternary `a ? b : c`, object literal `{k: v}`, switch-case
+// `case 1:`, labeled statement `lbl: while ...`. Adding `:` to
+// DELIMITER_LABELS blanks all of them uniformly (the learner types
+// `:` either way; the position-specific meaning is the learner's to
+// recover from context). Same for `tokTypes.question`: ternary `?`
+// is the only JS context (optional chaining is its own token
+// `tokTypes.questionDot` with label `?.`).
+const DELIMITER_LABELS = new Set<string>([
+	'(',
+	')',
+	'{',
+	'}',
+	'${',
+	'[',
+	']',
+	';',
+	',',
+	'.',
+	'=>',
+	'?',
+	':',
+	'?.',
+	'...',
+	'`', // template-literal opener/closer
+]);
+
+// Contextual keywords — tokens Acorn emits as `name` (label === 'name',
+// `.keyword` undefined) but ES treats as keywords in some positions.
+// Module-level to avoid per-call Set allocation.
+const CONTEXTUAL_KEYWORDS = new Set<string>([
+	'let',
+	'static',
+	'async',
+	'await',
+	'yield',
+	'of',
+	'as',
+	'from',
+	'get',
+	'set',
+]);

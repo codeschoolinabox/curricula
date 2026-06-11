@@ -38,7 +38,10 @@ import type { CodeSpanTree } from './types.js';
  * @param colorize - Whether to apply Prism tokenization.
  * @returns A deep-frozen `CodeSpanTree` (per-line span arrays).
  */
-function deriveCodeSpanTree(source: string, colorize: boolean): CodeSpanTree {
+export default function deriveCodeSpanTree(
+	source: string,
+	colorize: boolean,
+): CodeSpanTree {
 	// Plain path: one span per source line, no Prism classes. Exact
 	// per-line roundtrip — the wrapper supplies the visual line break.
 	if (!colorize) {
@@ -62,5 +65,3 @@ function deriveCodeSpanTree(source: string, colorize: boolean): CodeSpanTree {
 	);
 	return freezeInPlace<CodeSpanTree>({ lines });
 }
-
-export default deriveCodeSpanTree;

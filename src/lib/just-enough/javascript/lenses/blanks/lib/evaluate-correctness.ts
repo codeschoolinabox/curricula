@@ -44,71 +44,7 @@ import { freezeInPlace } from '@utils/freeze.js';
 
 import type { Blank, BlankCorrectness, EvaluationResult } from '../types.js';
 
-/**
- * length-matched placeholders: a blank is "unfilled" when its
- * content has ANY `_` characters (whether all-underscores like
- * `_____` or partial like `h___o`). The legacy fixed-`__` check
- * (`text === '__'`) is preserved as a fallback for any caller that
- * still emits the literal `'__'` (e.g., tests). The wrapper's
- * StateField uses the same logic for the in-editor decoration class
- * — keeping the two surfaces (side-panel score, in-editor color)
- * derived from the same source-of-truth.
- */
-const LEGACY_PLACEHOLDER = '__';
-function looksUnfilled(text: string): boolean {
-	return text === LEGACY_PLACEHOLDER || text.includes('_');
-}
-
-/**
- * Builds the EvaluationResult from sorted-order learner texts.
- *
- * Note on `correctnessMap` mutability: `CorrectnessMap` is typed
- * `ReadonlyMap` (compile-time enforcement). At runtime the `Map`
- * itself is mutable — `freezeInPlace` cannot freeze internal Map slots
- * (`Object.freeze(new Map()).set('k', 'v')` succeeds in V8). The
- * TypeScript structural type IS the contract; well-typed callers
- * cannot `.set()`. Accepted per AR-4 for v1.
- */
-function buildResultFromTexts(
-	blanks: ReadonlyArray<Blank>,
-	learnerTexts: ReadonlyArray<string | null>,
-): EvaluationResult {
-	const correctnessMap = new Map<string, BlankCorrectness>();
-	let correct = 0;
-	let incorrect = 0;
-	let unfilled = 0;
-	for (let i = 0; i < blanks.length; i += 1) {
-		const blank = blanks[i]!;
-		const text = learnerTexts[i];
-		let status: BlankCorrectness;
-		if (text === null) {
-			status = 'unfilled';
-			unfilled += 1;
-		} else if (text === blank.original) {
-			status = 'correct';
-			correct += 1;
-		} else if (looksUnfilled(text)) {
-			status = 'unfilled';
-			unfilled += 1;
-		} else {
-			status = 'incorrect';
-			incorrect += 1;
-		}
-		correctnessMap.set(blank.id, status);
-	}
-	const total = blanks.length;
-	const score = total === 0 ? 100 : Math.round((correct / total) * 100);
-	return freezeInPlace({
-		correctnessMap,
-		total,
-		correct,
-		incorrect,
-		unfilled,
-		score,
-	});
-}
-
-function evaluateCorrectness(
+export default function evaluateCorrectness(
 	learnerCode: string,
 	blanks: ReadonlyArray<Blank>,
 	originalCode: string,
@@ -235,4 +171,66 @@ function mapBackToBlankOrder(
 	return buildResultFromTexts(originalBlanks, originalOrderedTexts);
 }
 
-export default evaluateCorrectness;
+/**
+ * length-matched placeholders: a blank is "unfilled" when its
+ * content has ANY `_` characters (whether all-underscores like
+ * `_____` or partial like `h___o`). The legacy fixed-`__` check
+ * (`text === '__'`) is preserved as a fallback for any caller that
+ * still emits the literal `'__'` (e.g., tests). The wrapper's
+ * StateField uses the same logic for the in-editor decoration class
+ * — keeping the two surfaces (side-panel score, in-editor color)
+ * derived from the same source-of-truth.
+ */
+const LEGACY_PLACEHOLDER = '__';
+function looksUnfilled(text: string): boolean {
+	return text === LEGACY_PLACEHOLDER || text.includes('_');
+}
+
+/**
+ * Builds the EvaluationResult from sorted-order learner texts.
+ *
+ * Note on `correctnessMap` mutability: `CorrectnessMap` is typed
+ * `ReadonlyMap` (compile-time enforcement). At runtime the `Map`
+ * itself is mutable — `freezeInPlace` cannot freeze internal Map slots
+ * (`Object.freeze(new Map()).set('k', 'v')` succeeds in V8). The
+ * TypeScript structural type IS the contract; well-typed callers
+ * cannot `.set()`. Accepted per AR-4 for v1.
+ */
+function buildResultFromTexts(
+	blanks: ReadonlyArray<Blank>,
+	learnerTexts: ReadonlyArray<string | null>,
+): EvaluationResult {
+	const correctnessMap = new Map<string, BlankCorrectness>();
+	let correct = 0;
+	let incorrect = 0;
+	let unfilled = 0;
+	for (let i = 0; i < blanks.length; i += 1) {
+		const blank = blanks[i]!;
+		const text = learnerTexts[i];
+		let status: BlankCorrectness;
+		if (text === null) {
+			status = 'unfilled';
+			unfilled += 1;
+		} else if (text === blank.original) {
+			status = 'correct';
+			correct += 1;
+		} else if (looksUnfilled(text)) {
+			status = 'unfilled';
+			unfilled += 1;
+		} else {
+			status = 'incorrect';
+			incorrect += 1;
+		}
+		correctnessMap.set(blank.id, status);
+	}
+	const total = blanks.length;
+	const score = total === 0 ? 100 : Math.round((correct / total) * 100);
+	return freezeInPlace({
+		correctnessMap,
+		total,
+		correct,
+		incorrect,
+		unfilled,
+		score,
+	});
+}

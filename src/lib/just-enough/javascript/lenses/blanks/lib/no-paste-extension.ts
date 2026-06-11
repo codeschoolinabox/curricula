@@ -29,7 +29,7 @@ import { EditorView, keymap } from '@codemirror/view';
 /**
  * @returns array of CodeMirror extensions that block paste operations.
  */
-function noPasteExtension(): Extension {
+export default function noPasteExtension(): Extension {
 	return Object.freeze([
 		// Block keyboard shortcuts (Ctrl+V, Cmd+V)
 		Prec.high(
@@ -55,5 +55,3 @@ function noPasteExtension(): Extension {
 		}),
 	]);
 }
-
-export default noPasteExtension;
