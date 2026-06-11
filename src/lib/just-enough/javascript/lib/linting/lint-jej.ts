@@ -34,7 +34,7 @@ import violationToDiagnostic from './violation-to-diagnostic.js';
  * @param code - snippet source.
  * @returns frozen lint diagnostics, empty for clean/empty input.
  */
-function lintJej(code: string): readonly LintDiagnostic[] {
+export default function lintJej(code: string): readonly LintDiagnostic[] {
 	const result = validate(code);
 
 	// parse failure: synthesize one point diagnostic (no source range)
@@ -133,5 +133,3 @@ function positionToOffset(
 	}
 	return offset + pos.column;
 }
-
-export default lintJej;

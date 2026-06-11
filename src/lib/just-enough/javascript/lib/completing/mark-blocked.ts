@@ -24,9 +24,6 @@ import { NOT_IN_JEJ_LABELS } from '../documenting/not-in-jej.js';
 
 import type { Suggestion } from './types.js';
 
-/** `detail` text shown inline next to the label in the dropdown row. */
-const BLOCKED_DETAIL = '(not in JEJ)';
-
 /**
  * Convert each `Suggestion` to a `CompletionItem` (pass-through) and
  * synthesize blocked items for JEJ-blocked labels not present in the
@@ -39,7 +36,7 @@ const BLOCKED_DETAIL = '(not in JEJ)';
  * @returns Read-only array of completion items, NOT yet
  *   prefix-filtered or frozen.
  */
-function markBlocked(
+export default function markBlocked(
 	suggestions: readonly Suggestion[],
 	inDotContext = false,
 ): readonly CompletionItem[] {
@@ -111,4 +108,5 @@ function synthesizeIdentifierBlocked(
 		});
 }
 
-export default markBlocked;
+/** `detail` text shown inline next to the label in the dropdown row. */
+const BLOCKED_DETAIL = '(not in JEJ)';

@@ -29,6 +29,36 @@ import collectJejSurface from './collect-jej-surface.js';
 import markBlocked from './mark-blocked.js';
 
 /**
+ * Produce the JEJ-curated completion list for a single completion
+ * request.
+ *
+ * @param request - Structured request from the editing factory:
+ *   `{prefix, precedingText, fullText}`.
+ * @returns Deep-frozen array of completion items, prefix-filtered
+ *   case-insensitively. Blocked tokens appear with `type: 'blocked'`,
+ *   `detail`, `entry: DocEntry` (carrying the rich pedagogical
+ *   content from `../documenting/not-in-jej.ts`), and
+ *   `apply: 'noop'`. Allowed tokens appear with `type` from their
+ *   source. Advisory tokens (`new`, `null`) appear with
+ *   source-derived `type` only — no per-suggestion `info`/`entry`;
+ *   their pedagogical caveats live in their `keywords.ts`
+ *   DocEntries and surface on hover.
+ */
+export default function completeJej(
+	request: CompletionRequest,
+): readonly CompletionItem[] {
+	const validation = validate(request.fullText);
+	const inDotContext = isDotReceiverContext(request.precedingText);
+	const suggestions = collectJejSurface(request, validation.ast, inDotContext);
+	const items = markBlocked(suggestions, inDotContext);
+	const prefixLower = request.prefix.toLowerCase();
+	const filtered = items.filter(function matchesPrefix(item) {
+		return item.label.toLowerCase().startsWith(prefixLower);
+	});
+	return deepFreezeInPlace(filtered);
+}
+
+/**
  * Whether `precedingText` ends with `<identifier>.` (allowing
  * trailing whitespace after the dot). Chained access (`x.y().`)
  * returns false because `)` is not an identifier character — chains
@@ -62,33 +92,3 @@ function isIdentifierStart(char: string): boolean {
 function isIdentifierContinue(char: string): boolean {
 	return IDENTIFIER_CONTINUE_RE.test(char);
 }
-
-/**
- * Produce the JEJ-curated completion list for a single completion
- * request.
- *
- * @param request - Structured request from the editing factory:
- *   `{prefix, precedingText, fullText}`.
- * @returns Deep-frozen array of completion items, prefix-filtered
- *   case-insensitively. Blocked tokens appear with `type: 'blocked'`,
- *   `detail`, `entry: DocEntry` (carrying the rich pedagogical
- *   content from `../documenting/not-in-jej.ts`), and
- *   `apply: 'noop'`. Allowed tokens appear with `type` from their
- *   source. Advisory tokens (`new`, `null`) appear with
- *   source-derived `type` only — no per-suggestion `info`/`entry`;
- *   their pedagogical caveats live in their `keywords.ts`
- *   DocEntries and surface on hover.
- */
-function completeJej(request: CompletionRequest): readonly CompletionItem[] {
-	const validation = validate(request.fullText);
-	const inDotContext = isDotReceiverContext(request.precedingText);
-	const suggestions = collectJejSurface(request, validation.ast, inDotContext);
-	const items = markBlocked(suggestions, inDotContext);
-	const prefixLower = request.prefix.toLowerCase();
-	const filtered = items.filter(function matchesPrefix(item) {
-		return item.label.toLowerCase().startsWith(prefixLower);
-	});
-	return deepFreezeInPlace(filtered);
-}
-
-export default completeJej;

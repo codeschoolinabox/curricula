@@ -19,7 +19,9 @@ import type { LintDiagnostic } from '../../orchestrate/lib/editing/types.js';
  * @param violation - a JEJ-subset violation from the validating pipeline.
  * @returns a frozen `LintDiagnostic`.
  */
-function violationToDiagnostic(violation: Violation): LintDiagnostic {
+export default function violationToDiagnostic(
+	violation: Violation,
+): LintDiagnostic {
 	const { location, severity, message } = violation;
 	return deepFreezeInPlace({
 		line: location.start.line,
@@ -31,5 +33,3 @@ function violationToDiagnostic(violation: Violation): LintDiagnostic {
 		source: 'JEJ',
 	});
 }
-
-export default violationToDiagnostic;

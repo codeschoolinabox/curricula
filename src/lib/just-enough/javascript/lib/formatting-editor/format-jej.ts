@@ -24,8 +24,6 @@ import format from '../../embody/lib/formatting/format.js';
  * transformation, no inspection, and no error swallowing of its own.
  * See `DOCS.md` § Decisions for the locked no-thickening contract.
  */
-async function formatJej(code: string): Promise<string> {
+export default async function formatJej(code: string): Promise<string> {
 	return format(code);
 }
-
-export default formatJej;
