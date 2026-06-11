@@ -17,7 +17,7 @@
  * `lib/` which is carved out per `eslint.config.mjs`.
  */
 
-import { best_lise_inverse_indices } from './lis.js';
+import bestLiseInverseIndices from './best-lise-inverse-indices.js';
 
 /** A line the learner placed in the solution column: its id and visible code. */
 export type PlacedCode = Readonly<{ id: string; code: string }>;
@@ -42,7 +42,7 @@ export type LineOrderResult = Readonly<{
  * @param placed the learner's solution column, in order (id + code).
  * @param modelCodes the model solution lines' codes, in model order.
  */
-export function evaluateLineOrder(
+export default function evaluateLineOrder(
 	placed: ReadonlyArray<PlacedCode>,
 	modelCodes: ReadonlyArray<string>,
 ): LineOrderResult {
@@ -84,7 +84,7 @@ export function evaluateLineOrder(
 	// array) are the lines to move.
 	const lisEntries = walked.filter((w) => !w.ignore);
 	const inverse = new Set(
-		best_lise_inverse_indices(lisEntries.map((w) => w.position)),
+		bestLiseInverseIndices(lisEntries.map((w) => w.position)),
 	);
 	const verdictByLisIndex = new Map<number, 'correct' | 'wrong-order'>();
 	for (let i = 0; i < lisEntries.length; i++) {

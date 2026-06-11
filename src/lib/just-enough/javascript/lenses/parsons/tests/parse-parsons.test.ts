@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-	extractHints,
-	normalizeIndents,
-	parseLines,
-	parseParsons,
-} from '../lib/parse-parsons.js';
+import extractHints from '../lib/extract-hints.js';
+import normalizeIndents from '../lib/normalize-indents.js';
+import parseLines from '../lib/parse-lines.js';
+import parseParsons from '../lib/parse-parsons.js';
 
 describe('parse-parsons', () => {
 	describe('normalizeIndents — raw leading-whitespace counts to relative levels', () => {

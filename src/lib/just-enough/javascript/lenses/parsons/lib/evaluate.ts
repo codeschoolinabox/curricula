@@ -18,8 +18,8 @@
  * @see ../DOCS.md § Architectural sketch phase 4 (Evaluate).
  */
 
-import { evaluateLineOrder } from './evaluate-line-order.js';
-import { evaluateIndentation } from './evaluate-indentation.js';
+import evaluateIndentation from './evaluate-indentation.js';
+import evaluateLineOrder from './evaluate-line-order.js';
 import type {
 	Arrangement,
 	CorrectnessMap,
@@ -40,7 +40,7 @@ import type {
  *   indent is neither evaluated nor reflected in `correct` / `score`.
  * @returns the `EvaluationResult` (see `../types.ts`).
  */
-export function buildEvaluation(
+export default function buildEvaluation(
 	arrangement: Arrangement,
 	parsed: ParsedParsons,
 	canIndent: boolean,

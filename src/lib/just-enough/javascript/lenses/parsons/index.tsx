@@ -51,16 +51,14 @@ import freezeInPlace from '@utils/freeze-in-place.js';
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import parsonsCore from './core.js';
-import {
-	indentLine,
-	initialArrangement,
-	outdentLine,
-	placeFromPool,
-	reorderWithinSolution,
-	returnToPool,
-} from './lib/arrange.js';
-import { buildEvaluation } from './lib/evaluate.js';
-import { parseParsons } from './lib/parse-parsons.js';
+import buildEvaluation from './lib/evaluate.js';
+import indentLine from './lib/indent-line.js';
+import initialArrangement from './lib/initial-arrangement.js';
+import outdentLine from './lib/outdent-line.js';
+import parseParsons from './lib/parse-parsons.js';
+import placeFromPool from './lib/place-from-pool.js';
+import reorderWithinSolution from './lib/reorder-within-solution.js';
+import returnToPool from './lib/return-to-pool.js';
 import type {
 	Arrangement,
 	Attempt,

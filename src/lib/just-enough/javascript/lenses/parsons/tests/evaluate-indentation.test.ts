@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { evaluateIndentation } from '../lib/evaluate-indentation.js';
+import evaluateIndentation from '../lib/evaluate-indentation.js';
 
 const placed = (
 	...entries: ReadonlyArray<[string, number]>

@@ -13,7 +13,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { buildEvaluation } from '../lib/evaluate.js';
+import buildEvaluation from '../lib/evaluate.js';
 import type { Arrangement, ParsedParsons } from '../types.js';
 
 /** Build a ParsedParsons from `[code, modelIndent]` solution lines + distractor codes. */

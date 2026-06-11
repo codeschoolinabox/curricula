@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-	indentLine,
-	initialArrangement,
-	outdentLine,
-	placeFromPool,
-	returnToPool,
-	reorderWithinSolution,
-} from '../lib/arrange.js';
+import indentLine from '../lib/indent-line.js';
+import initialArrangement from '../lib/initial-arrangement.js';
+import outdentLine from '../lib/outdent-line.js';
+import placeFromPool from '../lib/place-from-pool.js';
+import reorderWithinSolution from '../lib/reorder-within-solution.js';
+import returnToPool from '../lib/return-to-pool.js';
 import type { Arrangement } from '../types.js';
 
 const arr = (

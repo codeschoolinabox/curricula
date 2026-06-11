@@ -39,7 +39,7 @@ export type IndentVerdict = 'correct' | 'wrong-indent';
  *   alone is unsafe, since `undefined === undefined` would coincide to `'correct'`
  *   when a missing id AND an out-of-range index occur together.
  */
-export function evaluateIndentation(
+export default function evaluateIndentation(
 	learnerIndents: ReadonlyArray<{ id: string; indent: number }>,
 	matchedModelIndex: ReadonlyMap<string, number>,
 	modelIndents: ReadonlyArray<number>,
