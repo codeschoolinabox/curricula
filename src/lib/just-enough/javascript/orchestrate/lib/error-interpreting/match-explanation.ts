@@ -21,7 +21,7 @@ import type {
  * @param patterns - Loaded explanation patterns
  * @returns The matched pattern, or `undefined` if no match
  */
-function matchExplanation(
+export default function matchExplanation(
 	error: ErrorInput,
 	patterns: readonly ExplanationPattern[],
 	{ phase }: InterpretOptions = {},
@@ -48,5 +48,3 @@ function matchExplanation(
 			messageLower.includes(pattern.match.toLowerCase()),
 	);
 }
-
-export default matchExplanation;

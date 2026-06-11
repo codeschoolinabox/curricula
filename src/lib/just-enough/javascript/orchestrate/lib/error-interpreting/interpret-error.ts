@@ -31,47 +31,6 @@ import type {
 	InterpretOptions,
 } from './types.js';
 
-// ─── Context to template record ─────────────────────────────
-
-/**
- * Converts an ErrorContext to a string record for template interpolation.
- */
-function contextToRecord(context: ErrorContext): Record<string, string> {
-	const record: Record<string, string> = {};
-	if (context.errorName) record.errorName = context.errorName;
-	if (context.errorMessage) record.errorMessage = context.errorMessage;
-	if (context.line !== undefined) record.line = String(context.line);
-	if (context.column !== undefined) record.column = String(context.column);
-	if (context.name) record.name = context.name;
-	if (context.actualType) record.actualType = context.actualType;
-	if (context.expression) record.expression = context.expression;
-	if (context.suggestion) record.suggestion = context.suggestion;
-	return record;
-}
-
-// ─── Generic fallback ───────────────────────────────────────
-
-function buildFallback(
-	error: ErrorInput,
-	context: ErrorContext,
-): ErrorInterpretation {
-	return deepFreezeInPlace({
-		whatWentWrong: `A \`${error.name}\` occurred: ${error.message}`,
-		howToFix:
-			`Check the error message carefully and review your code ${ 
-			error.line ? `around line ${error.line}.` : 'for issues.'}`,
-		likelyMisunderstanding:
-			'This error does not have a specific explanation yet. ' +
-			'The error message itself is your best guide.',
-		howToAdjust:
-			'Read the error message word by word. JavaScript error messages ' +
-			'are precise — each word tells you something about what went wrong.',
-		context,
-	});
-}
-
-// ─── Main function ──────────────────────────────────────────
-
 /**
  * Interprets a JEJ program error into a structured, human-friendly explanation.
  *
@@ -105,7 +64,7 @@ function buildFallback(
  * result.whatWentWrong; // "You used the variable `userName` but..."
  * ```
  */
-function interpretError(
+export default function interpretError(
 	embodiment: Snippet,
 	error: ErrorInput,
 	{ phase }: InterpretOptions = {},
@@ -159,4 +118,37 @@ function interpretError(
 	}
 }
 
-export default interpretError;
+/**
+ * Converts an ErrorContext to a string record for template interpolation.
+ */
+function contextToRecord(context: ErrorContext): Record<string, string> {
+	const record: Record<string, string> = {};
+	if (context.errorName) record.errorName = context.errorName;
+	if (context.errorMessage) record.errorMessage = context.errorMessage;
+	if (context.line !== undefined) record.line = String(context.line);
+	if (context.column !== undefined) record.column = String(context.column);
+	if (context.name) record.name = context.name;
+	if (context.actualType) record.actualType = context.actualType;
+	if (context.expression) record.expression = context.expression;
+	if (context.suggestion) record.suggestion = context.suggestion;
+	return record;
+}
+
+function buildFallback(
+	error: ErrorInput,
+	context: ErrorContext,
+): ErrorInterpretation {
+	return deepFreezeInPlace({
+		whatWentWrong: `A \`${error.name}\` occurred: ${error.message}`,
+		howToFix: `Check the error message carefully and review your code ${
+			error.line ? `around line ${error.line}.` : 'for issues.'
+		}`,
+		likelyMisunderstanding:
+			'This error does not have a specific explanation yet. ' +
+			'The error message itself is your best guide.',
+		howToAdjust:
+			'Read the error message word by word. JavaScript error messages ' +
+			'are precise — each word tells you something about what went wrong.',
+		context,
+	});
+}

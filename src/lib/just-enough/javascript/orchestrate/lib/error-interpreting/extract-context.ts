@@ -14,20 +14,40 @@ import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import findNodeAtLine from './find-node-at-line.js';
 import type { ErrorContext, ErrorInput } from './types.js';
 
-// ─── Name extraction patterns ───────────────────────────────
+/**
+ * Extracts structured context from an error, source, and optional AST.
+ *
+ * @param error - The error to analyze
+ * @param source - The JEJ program source code
+ * @param ast - Pre-parsed AST (or `null` if parsing failed). Typed as
+ *   `Node | null` so the entry can pass `embodiment.raw.ast` (typed as
+ *   `AcornNode | null`) without an extra cast.
+ * @returns A frozen `ErrorContext` with all available fields
+ */
+export default function extractContext(
+	error: ErrorInput,
+	source: string,
+	ast: Node | null,
+): Readonly<ErrorContext> {
+	const name = extractName(error.message);
+	const expression = extractSourceLine(source, error.line);
+	const node = ast && error.line ? findNodeAtLine(ast, error.line) : undefined;
+	const suggestion = generateSuggestion(error, name, ast, node);
 
-// "x is not defined" → "x"
-const NOT_DEFINED_RE = /^(\S+) is not defined/;
+	const context: ErrorContext = {
+		errorName: error.name,
+		errorMessage: error.message,
+		...(error.line !== undefined && { line: error.line }),
+		...(error.column !== undefined && { column: error.column }),
+		...(name !== undefined && { name }),
+		...(expression !== undefined && { expression }),
+		...(suggestion !== undefined && { suggestion }),
+	};
 
-// "Cannot access 'x' before initialization" → "x"
-const TDZ_RE = /Cannot access '(\w+)' before initialization/;
+	return deepFreezeInPlace(context);
+}
 
-// "Cannot read properties of null (reading 'x')" → "x"
-const NULL_PROP_RE =
-	/Cannot read properties of (?:null|undefined) \(reading '(\w+)'\)/;
-
-// "x is not a function" → "x"
-const NOT_FUNCTION_RE = /^(\S+) is not a function/;
+// ─── Name extraction ─────────────────────────────────────────
 
 /**
  * Extracts a human-readable identifier from the error message.
@@ -148,39 +168,15 @@ function isPromptRelated(node: Node): boolean {
 	return found;
 }
 
-// ─── Main function ──────────────────────────────────────────
+// "x is not defined" → "x"
+const NOT_DEFINED_RE = /^(\S+) is not defined/;
 
-/**
- * Extracts structured context from an error, source, and optional AST.
- *
- * @param error - The error to analyze
- * @param source - The JEJ program source code
- * @param ast - Pre-parsed AST (or `null` if parsing failed). Typed as
- *   `Node | null` so the entry can pass `embodiment.raw.ast` (typed as
- *   `AcornNode | null`) without an extra cast.
- * @returns A frozen `ErrorContext` with all available fields
- */
-function extractContext(
-	error: ErrorInput,
-	source: string,
-	ast: Node | null,
-): Readonly<ErrorContext> {
-	const name = extractName(error.message);
-	const expression = extractSourceLine(source, error.line);
-	const node = ast && error.line ? findNodeAtLine(ast, error.line) : undefined;
-	const suggestion = generateSuggestion(error, name, ast, node);
+// "Cannot access 'x' before initialization" → "x"
+const TDZ_RE = /Cannot access '(\w+)' before initialization/;
 
-	const context: ErrorContext = {
-		errorName: error.name,
-		errorMessage: error.message,
-		...(error.line !== undefined && { line: error.line }),
-		...(error.column !== undefined && { column: error.column }),
-		...(name !== undefined && { name }),
-		...(expression !== undefined && { expression }),
-		...(suggestion !== undefined && { suggestion }),
-	};
+// "Cannot read properties of null (reading 'x')" → "x"
+const NULL_PROP_RE =
+	/Cannot read properties of (?:null|undefined) \(reading '(\w+)'\)/;
 
-	return deepFreezeInPlace(context);
-}
-
-export default extractContext;
+// "x is not a function" → "x"
+const NOT_FUNCTION_RE = /^(\S+) is not a function/;

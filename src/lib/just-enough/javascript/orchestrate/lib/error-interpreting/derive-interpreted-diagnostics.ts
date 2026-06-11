@@ -52,7 +52,7 @@ import type { ErrorInput } from './types.js';
  * @param embodiment - the live static `Snippet` whose `errors` are interpreted
  * @returns a frozen `readonly LintDiagnostic[]` — empty when there is no error
  */
-function deriveInterpretedDiagnostics(
+export default function deriveInterpretedDiagnostics(
 	embodiment: Snippet,
 ): readonly LintDiagnostic[] {
 	const { errors } = embodiment;
@@ -89,5 +89,3 @@ function deriveInterpretedDiagnostics(
 
 	return deepFreezeInPlace([diagnostic]);
 }
-
-export default deriveInterpretedDiagnostics;

@@ -13,7 +13,7 @@
  * @param context - Key-value pairs to substitute
  * @returns The template with matched placeholders replaced
  */
-function interpolateTemplate(
+export default function interpolateTemplate(
 	template: string,
 	context: Readonly<Record<string, string>>,
 ): string {
@@ -26,5 +26,3 @@ function interpolateTemplate(
 		return value === undefined ? original : value;
 	}
 }
-
-export default interpolateTemplate;

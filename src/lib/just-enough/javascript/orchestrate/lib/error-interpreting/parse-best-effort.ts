@@ -18,7 +18,7 @@ import { parse, type Program } from 'acorn';
  * @param source - JavaScript source code
  * @returns The parsed `Program` node, or `null` if parsing fails
  */
-function parseBestEffort(source: string): Program | null {
+export default function parseBestEffort(source: string): Program | null {
 	// 1. Try module mode (JEJ programs run as modules)
 	try {
 		return parse(source, {
@@ -41,5 +41,3 @@ function parseBestEffort(source: string): Program | null {
 		return null;
 	}
 }
-
-export default parseBestEffort;

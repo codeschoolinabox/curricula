@@ -16,7 +16,10 @@ import { walk } from 'estree-walker';
  * @param line - 1-based line number to search for
  * @returns The deepest node at that line, or `undefined`
  */
-function findNodeAtLine(ast: Node, line: number): Node | undefined {
+export default function findNodeAtLine(
+	ast: Node,
+	line: number,
+): Node | undefined {
 	let deepest: Node | undefined;
 
 	// walk visits nodes depth-first — later matches are deeper
@@ -30,5 +33,3 @@ function findNodeAtLine(ast: Node, line: number): Node | undefined {
 
 	return deepest;
 }
-
-export default findNodeAtLine;
