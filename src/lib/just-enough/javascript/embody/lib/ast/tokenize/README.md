@@ -14,7 +14,7 @@ Self-contained: imports only `acorn` and `lib/ast/shared/`.
 > load-bearing — every type, function, and test description in this module must
 > use those terms exactly. This README and the (future) `DOCS.md` build on that
 > contract.
-
+>
 > **Status — Phase 0 in progress.** This README and `glossary.md` are in place.
 > `types.ts` and `tokenize.ts` land after the AR-1 design challenge. `DOCS.md`
 > (architectural sketch) lands after `types.ts`, followed by AR-2.

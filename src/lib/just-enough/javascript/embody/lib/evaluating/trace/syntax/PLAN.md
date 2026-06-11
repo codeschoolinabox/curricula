@@ -233,7 +233,7 @@ authoritative spec — source code is stale) are updated so the NM Phase 0 can
 reference a consistent tracer contract when it reaches the config-translation
 layer.
 
-**Files updated (spec only — no code in this DDD):**
+<strong>Files updated (spec only — no code in this DDD):</strong>
 
 - `/Users/master/Documents/0-teach-code/0-spiralearn/0-curriculum-committee/0-curricula/src/lib/just-enough/javascript/tracer.md`
 - `/Users/master/Documents/.../javascript/tracer.architecture.md`
@@ -271,7 +271,7 @@ type TraceConfig = {
 };
 ```
 
-**Contract:**
+<strong>Contract:</strong>
 
 - Every mock function is **async** (returns Promise). Tracer awaits the Promise
   before continuing.
@@ -576,7 +576,7 @@ per-category tables. Concrete asks:
   `alert(prompt('n') + '!');`) at full fidelity, annotated with category/kind
   per step.
 
-**Execution phases (domain terms):**
+<strong>Execution phases (domain terms):</strong>
 
 1. **Construction** (sync, throws on R4a) — parse + JEJ-validate + build tagged
    AST + initial environment. Output: live-mirror AST, initialEnvironment,
@@ -601,7 +601,7 @@ per-category tables. Concrete asks:
 7. **Finalization** (at `complete()`) — merge NM tags with tracer's post-link
    AST into `result.ast`; freeze steps, env, coverage; return NMTraceResult.
 
-**Structural constraints:**
+<strong>Structural constraints:</strong>
 
 - NM-owned ASTs are fresh copies (Resolution 19); `session.ast` at Construction,
   `result.ast` at Finalization. Tracer's frozen AST is an input; the NM layer
@@ -651,7 +651,7 @@ per-category tables. Concrete asks:
     loop-iteration-end on iteration's scope-leave)
   - ErrorStep: error event
 
-**Out of scope:**
+<strong>Out of scope:</strong>
 
 - Custom-UI I/O dialogs (consumer concern — consumer supplies
   `io: { prompt, alert, confirm, console }` async functions; NM layer passes
@@ -790,7 +790,7 @@ DOCS.md step-closing-rules table.
 - No helper modules (Resolution 20 — no pure helpers in NM layer)
 - `tests/` subdirectory with `.test.ts` per source file
 
-**Read-only references:**
+<strong>Read-only references:</strong>
 
 - `../../../../tracer.md`, `../../../../tracer.architecture.md`,
   `../../../../tracer.walkthroughs.md`, `../../../../notional-machine.md`,
@@ -1069,7 +1069,7 @@ A working canvas for designing the NM (notional machine) layer that wraps the
 JEJ tracer with an NM-step-tracer API. Not a plan — a working design document
 with current decisions + open questions.
 
-**Reading order:**
+<strong>Reading order:</strong>
 
 - **Diagram 0** — the DAG substrate, the foundational representation. Six
   subsections (0.0 through 0.5) cover the 3×2 role × view grid, AST (= AST with
@@ -1248,7 +1248,7 @@ if (name.length > 0) {
 }
 ```
 
-**Static DAG:**
+<strong>Static DAG:</strong>
 
 ```text
 ┌─ Stmt 1: let name = prompt('name'); ────────────────┐
@@ -1292,7 +1292,7 @@ if (name.length > 0) {
 **R4a errors:** if source fails parse, JEJ validation, or tracer
 instrumentation, the AST never materializes. Program never runs.
 
-**AST (AST) properties:**
+<strong>AST (AST) properties:</strong>
 
 - **Potential, not actual.** Every branch and loop body is shown. The dynamic
   trace will realize ONE path through.
@@ -1350,7 +1350,7 @@ Step 1 diff: name: TDZ → 'Alice' (v1)
 Step 2 diff: (no env change — alert returns undefined, nothing stored)
 ```
 
-**Environment properties:**
+<strong>Environment properties:</strong>
 
 - **Lexical structure comes from the AST** — which bindings exist and in which
   scope are derivable at parse time.
@@ -1459,13 +1459,13 @@ two reading conventions; the NM layer exposes only `ast` with role tags.)
 - "Given multiple dynamic traces of the same program, identify the invariant
   static structure."
 
-**Environment-focused:**
+<strong>Environment-focused:</strong>
 
 - "Fill in the env snapshot at step T." (conventional trace table)
 - "Given env diffs, infer the code that produced them."
 - "Scope movie: given a trace, draw the scope lifecycle."
 
-**Hybrid / mixed:**
+<strong>Hybrid / mixed:</strong>
 
 - "Given AST + env snapshot at step T, predict dynamic trace at T+1."
 - "Coverage map: given a dynamic trace, highlight which AST nodes were
@@ -1511,7 +1511,7 @@ Each row is a gateable element. Curated named profiles (the former L1, L3, L6
 triples) become lens-config presets built from the palette, not a fixed
 progression.
 
-**Two compatible framings:**
+<strong>Two compatible framings:</strong>
 
 - **Palette = tracer gate profile**: each enabled row corresponds to specific
   `options.*` gates.
@@ -1901,7 +1901,7 @@ stress-tested.
 
 ### Snippet A — `let x = 5;`
 
-**Source:**
+<strong>Source:</strong>
 
 ```js
 let x = 5;
@@ -1939,7 +1939,7 @@ let x = 5;
      envDiff: { scopesLeft: [script] } }
 ```
 
-**Stress-checked:**
+<strong>Stress-checked:</strong>
 
 - ScopeStep(create) carrying hoist events.
 - InitializationStep as the visible step on `let x = 5;` (declare already done
@@ -1952,7 +1952,7 @@ let x = 5;
 Critical stress: real-time I/O (learner must see the prompt dialog BEFORE the
 user responds).
 
-**Step stream:**
+<strong>Step stream:</strong>
 
 ```text
 1. ScopeStep(create, script) — no hoisted bindings
@@ -2006,7 +2006,7 @@ user responds).
 7. ScopeStep(leave)
 ```
 
-**Stress-checked:**
+<strong>Stress-checked:</strong>
 
 - **Real-time I/O visibility**: `io.user.output` fires as an event on the
   LiveStep's inner stream BEFORE `.done` resolves. Consumer can render "prompt
@@ -2021,7 +2021,7 @@ user responds).
 
 ### Snippet C — `if (x > 0) { let y = x * 2; }` (assuming `x` pre-initialized)
 
-**Step stream (selected yields):**
+<strong>Step stream (selected yields):</strong>
 
 ```text
 1. StatementStep(enter, IfStatement)
@@ -2066,7 +2066,7 @@ user responds).
 11. StatementStep(exit, IfStatement)
 ```
 
-**Stress-checked:**
+<strong>Stress-checked:</strong>
 
 - Nested scopes: script scope (outer) + if-body block scope (inner).
 - Control flow represented as two ControlFlowSteps (test → branch).
@@ -2075,7 +2075,7 @@ user responds).
 
 ### Insights from the stress-test sketch
 
-**Design holds:**
+<strong>Design holds:</strong>
 
 1. **Visible-syntax principle.** Each step corresponds to a syntactic construct
    the learner can point at.
@@ -2087,7 +2087,7 @@ user responds).
 5. **The `{ step, envDiff }` yield is enough** — consumer can derive anything
    else from `step.dagNodePath → ast` lookups.
 
-**Gaps / questions surfaced:**
+<strong>Gaps / questions surfaced:</strong>
 
 1. **Compound assignment (`x += 1`) as a DataStep.** Not sketched. The step
    would have sources including a binding-read of x AND destinations including a
@@ -2148,7 +2148,7 @@ Diagram 0's scope statement.
 Reading [`tracer.walkthroughs.md`](../../tracer.walkthroughs.md) against the DAG
 model — does the tracer's specified event vocabulary support what the DAG needs?
 
-**Strong alignment (event model supports DAG as specified):**
+<strong>Strong alignment (event model supports DAG as specified):</strong>
 
 - **Coercion as standalone events** between operand resolve and operator apply:
   `coerce(0 → false, context: boolean)`,
@@ -2177,7 +2177,7 @@ model — does the tracer's specified event vocabulary support what the DAG need
 - **Errors as terminal events** with `phase: 'creation' | 'execution'`. R4a /
   R4b map directly.
 
-**Alignment issues to address in proposal text (minor):**
+<strong>Alignment issues to address in proposal text (minor):</strong>
 
 - **Templates render as three events** (`template-begin`, `template-evaluation`
   per interpolation, `template-end`) with coercions interspersed. Stress 11's
@@ -3185,7 +3185,7 @@ Purpose: expose API ergonomics gaps before implementation.
 a blank table of (binding × step), fills in values, submits, compares to
 reality.
 
-**Consumption pattern:**
+<strong>Consumption pattern:</strong>
 
 ```text
 const session = nm(sourceCode, { options: { bindings: true, statements: true } })
@@ -3199,7 +3199,7 @@ const result = await session.complete()
 renderFullTable(session, result)
 ```
 
-**API features validated:**
+<strong>API features validated:</strong>
 
 - Immediate `ast` (the tagged AST) + `initialEnvironment` for pre-render.
 - `complete()` for the full finalized result.
@@ -3213,7 +3213,7 @@ renderFullTable(session, result)
 expression and show values flowing in real time. Critical use case:
 `prompt('name')` dialog visible BEFORE user responds.
 
-**Consumption pattern:**
+<strong>Consumption pattern:</strong>
 
 ```text
 const session = nm(sourceCode, { options: { origination: true,
@@ -3238,7 +3238,7 @@ for await (const liveStep of session.steps) {
 }
 ```
 
-**API features validated:**
+<strong>API features validated:</strong>
 
 - `session.steps` as AsyncIterable, yields LiveSteps on start.
 - LiveStep.events inner AsyncIterable for incremental updates.
@@ -3246,7 +3246,7 @@ for await (const liveStep of session.steps) {
 - Real-time visibility of I/O events BEFORE step completion (prompt dialog shown
   before response arrives).
 
-**Gaps discovered:**
+<strong>Gaps discovered:</strong>
 
 - LiveStep type has both the step's progressively-accumulating fields AND the
   inner streams — consumer uses both. Needs clear docs on mutation semantics (is
@@ -3261,7 +3261,7 @@ for await (const liveStep of session.steps) {
 and asks "where did this come from?" Lens walks backward through the DAG,
 highlighting each ancestor step.
 
-**Consumption pattern:**
+<strong>Consumption pattern:</strong>
 
 ```text
 const result = await session.complete()
@@ -3286,14 +3286,14 @@ const lineage = walkBack(clickedStep)
 highlightLineage(session, lineage)
 ```
 
-**API features validated:**
+<strong>API features validated:</strong>
 
 - `producingStepIndex` on SourceRefs gives backward walk.
 - `consumerStepIndex` on DestinationRefs would symmetrically give forward walk.
 - Result's steps[] is a flat array; random access by index works.
 - No helper needed for the walk (consumer writes it; decided).
 
-**Gaps discovered:**
+<strong>Gaps discovered:</strong>
 
 - When a source is `{ sourceKind: 'literal' }`, it has no producingStepIndex —
   the walk terminates. That's correct but consumer code needs to handle the
@@ -3316,14 +3316,14 @@ You flagged the possible argument for a 2D config system — syntax options ×
 (source | transformation | destination) — as opposed to today's 1D
 syntax-visible-elements list. Lens scenarios to evaluate:
 
-**Scenario A — "Show all variable interactions (reads + writes)."**
+<strong>Scenario A — "Show all variable interactions (reads + writes)."</strong>
 
 - 1D: `identifiers: true` + `declarations: true` + `assignments: true` catches
   it, but also includes non-variable identifiers (`Math`, `prompt`, `.length`).
 - 2D: `identifiers × (source | destination)` — no clear precision gain over 1D
   for this scenario; the cleanup is still by name, not role.
 
-**Scenario B — "Show variable READS only (no writes)."**
+<strong>Scenario B — "Show variable READS only (no writes)."</strong>
 
 - 1D: `identifiers: true` — but this also catches target-reads in assignments
   (`x` in `x = 5`) and property-key reads (`.length`).
@@ -3332,11 +3332,11 @@ syntax-visible-elements list. Lens scenarios to evaluate:
 - 1D + consumer-side filter on dagRole — equally precise if dagRole is available
   on every step / event.
 
-**Scenario C — "Show data flow, hide storage."**
+<strong>Scenario C — "Show data flow, hide storage."</strong>
 
 - 1D: `operators + calls + templates` gets it. No benefit from 2D.
 
-**Scenario D — "Show I/O inputs separately from outputs."**
+<strong>Scenario D — "Show I/O inputs separately from outputs."</strong>
 
 - 1D: `io: true` catches both; consumer filters by dagKind (`io-in` vs
   `io-out`).

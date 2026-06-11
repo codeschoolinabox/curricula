@@ -42,7 +42,7 @@ This is **_just enough JavaScript_** to:
   - [Naming Convention: camelCase](#naming-convention-camelcase)
   - [Indentation: Tabs](#indentation-tabs)
   - [Semicolons](#semicolons)
-  - [Before Your Code Runs](#before-your-code-runs)
+  - [Before Your Code Runs](#program-type-strict-mode-script)
 - [Syntax You'll Learn](#syntax-youll-learn)
   - [Comments](#comments)
   - [Primitive Types](#primitive-types)
@@ -147,12 +147,12 @@ Throughout this reference, each section shows **JavaScript** on the left and
 <tr>
 <td>
 
-**JavaScript**
+<strong>JavaScript</strong>
 
 </td>
 <td>
 
-**PseudoCode**
+<strong>PseudoCode</strong>
 
 </td>
 </tr>
@@ -190,7 +190,7 @@ each piece of syntax.
 
 Each syntax section below is labeled as one or the other.
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
@@ -238,7 +238,7 @@ alert(name);
 </td>
 <td>
 
-_N/A in PseudoCode_
+<em>N/A in PseudoCode</em>
 
 </td>
 </tr>
@@ -294,14 +294,14 @@ if (condition) {
 JavaScript uses semicolons (`;`) to mark the end of certain statements. The
 rules are simple in Just Enough JavaScript:
 
-**Use a semicolon after:**
+<strong>Use a semicolon after:</strong>
 
 - Expression statements: `alert('hello');`, `console.log(x);`
 - Variable declarations: `let name = 'Alice';`, `const x = 5;`
 - `break;`
 - `continue;`
 
-**No semicolon after closing `}`:**
+<strong>No semicolon after closing `}`:</strong>
 
 - `if (...) { ... }` — no `;`
 - `while (...) { ... }` — no `;`
@@ -312,7 +312,7 @@ missing semicolons for you behind the scenes before it runs your code, but
 relying on it can lead to a couple confusing bugs. Writing semicolons explicitly
 makes your intent clear and avoids avoidable mistakes.
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
@@ -351,13 +351,13 @@ these when executing your code.
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Primitive Types
 
-_expression_
+<em>expression</em>
 
 The smallest pieces of data in a JS program. There are many primitive types but
 you only need to know these for now:
@@ -495,13 +495,13 @@ JEJ uses only the namespaced versions to avoid coercion surprises.
 > for learning it separately. What matters here is that you can use regex
 > literals with string methods like `.replace()` and `.search()`.
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Type Conversion
 
-_expression_
+<em>expression</em>
 
 JavaScript can convert values between types. This is especially important with
 `prompt()`, which always returns a string — even when the user types a number.
@@ -680,13 +680,13 @@ Number('3.14')
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Number Helpers
 
-_expression_
+<em>expression</em>
 
 Functions for validating numbers. These are especially useful after converting
 user input with `Number()` or `parseInt()` — they tell you whether the result is
@@ -735,13 +735,13 @@ Number.isFinite(NaN)
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Number Methods
 
-_expression_
+<em>expression</em>
 
 Methods available on number values for formatting and conversion. Most useful is
 `toString(radix)` for converting between number bases (binary, hex, etc.).
@@ -792,13 +792,13 @@ back ← parseInt(binary, 2)
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### String Helpers
 
-_expression_
+<em>expression</em>
 
 Static methods on the `String` object for creating characters from numeric
 codes. Useful for exploring character encoding, ASCII art, and Unicode.
@@ -862,13 +862,13 @@ arithmetic: Caesar ciphers, case conversion, character range checks, and more.
 
 </details>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Date
 
-_expression_
+<em>expression</em>
 
 The `Date` object provides tools for working with dates and times. `Date.now()`
 and `Date.parse()` are static methods that return numbers. `new Date()` creates
@@ -983,13 +983,13 @@ date.toISOString()
 > between executions. This is intentional — time and randomness are concepts
 > worth exploring.
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Math
 
-_expression_
+<em>expression</em>
 
 The `Math` object provides mathematical operations and constants. All `Math`
 methods and constants are available in JEJ.
@@ -1089,13 +1089,13 @@ Math.imul(2, 3); // 6 — 32-bit integer multiply
 Math.clz32(1); // 31 — count leading zeros
 ```
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Operators
 
-_expression_
+<em>expression</em>
 
 Ways to transform data. An operator takes in 1 or more values and _evaluates to_
 a new value.
@@ -1520,15 +1520,15 @@ NOT 5
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Logs & Assertions
 
-_expression (used for side effects)_
+<em>expression (used for side effects)</em>
 
-#### Output
+#### Logging
 
 Each `console` output method communicates a different _intent_ to the developer
 watching the console — not just what the value is, but why you're logging it.
@@ -1648,13 +1648,13 @@ console.trace('where am I?'); // logs: "where am I?" + a one-line stack
 
 </details>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### String Access & Methods
 
-_expression_
+<em>expression</em>
 
 The data type used for storing and manipulating text data. Strings will be the
 main type of data used in Welcome to Programming.
@@ -1907,13 +1907,13 @@ All `String.prototype` methods are available in JEJ, except `.split()`,
 language level). If you find a string method on MDN that isn't shown above, you
 can use it.
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### In
 
-_expression_
+<em>expression</em>
 
 The `in` operator checks whether a property exists on an object. It's a binary
 operator (like `+` or `===`), introduced here now that you know the global
@@ -1962,13 +1962,13 @@ if method IN Math
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Optional Chaining
 
-_expression_
+<em>expression</em>
 
 The `?.` operator lets you safely access properties or call methods on a value
 that might be `null` or `undefined`. Instead of throwing an error, it
@@ -2022,13 +2022,13 @@ input?.includes('a')
 > let name = input?.trim() ?? 'anonymous';
 > ```
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Template Literals
 
-_expression_
+<em>expression</em>
 
 Template literals use backticks (`` ` ``) instead of quotes, and let you embed
 expressions directly in a string using `${...}`. They can also span multiple
@@ -2080,13 +2080,13 @@ poem <- '  roses are red
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Variables
 
-_statement_
+<em>statement</em>
 
 Variables allow you to save values to use again later in your program. They're
 kind of like a box that can only hold one thing at a time. You can use a
@@ -2184,13 +2184,13 @@ pi <- 3.14, maxRetries <- 3
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Assignment Operators
 
-_expression (used as statements)_
+<em>expression (used as statements)</em>
 
 Assignment operators are how you _change_ the value stored in a variable. There
 is `=` for straightforward reassignment and compound operators like `+=` that
@@ -2479,13 +2479,13 @@ bits >>>= 1
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Interactions
 
-_expression_
+<em>expression</em>
 
 Ways for users to pass data into your programs (_input_), and ways to display
 data from inside your program to a user (_output_).
@@ -2543,7 +2543,7 @@ alert('a message')
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
@@ -2590,13 +2590,13 @@ console.log(secret); // ReferenceError
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Conditionals
 
-_statement_
+<em>statement</em>
 
 Execute different blocks of code depending on whether an expression evaluates to
 `true` or to `false`. The expression in `if (...)` is converted to a boolean
@@ -2665,13 +2665,13 @@ ELSE:
 
 Always use braces `{ }` for Just Enough JavaScript.
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### While Loops
 
-_statement_
+<em>statement</em>
 
 Repeat a block of code as long as an expression evaluates to `true`. The
 expression in `while (...)` follows the same `Boolean()` rules — see
@@ -2711,13 +2711,13 @@ WHILE: anExpression
 
 Always use braces `{ }` for Just Enough JavaScript.
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Do-While Loops
 
-_statement_
+<em>statement</em>
 
 Like `while`, but the body runs _first_, then the condition is checked. This
 guarantees the body executes at least once.
@@ -2782,13 +2782,13 @@ while (condition) {
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### For Loops
 
-_statement_
+<em>statement</em>
 
 A loop with initialization, condition, and update all in one header. The three
 parts are separated by semicolons: `for (init; test; update)`.
@@ -2869,13 +2869,13 @@ while (
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### For-Of Loops
 
-_statement_
+<em>statement</em>
 
 Iterate over a string, executing the loop body once for each character.
 
@@ -2977,13 +2977,13 @@ while (index < word.length) {
 
 Always use braces `{ }` for Just Enough JavaScript.
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Break
 
-_statement_
+<em>statement</em>
 
 Exit a loop immediately and skip to the next line after the loop.
 
@@ -3040,13 +3040,13 @@ FOR: character OF 'hello'
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### Continue
 
-_statement_
+<em>statement</em>
 
 Skip the rest of the loop body and go to the next iteration.
 
@@ -3103,13 +3103,13 @@ FOR: character OF 'hello'
 </tr>
 </table>
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)
 
 ---
 
 ### BigInt
 
-_expression_
+<em>expression</em>
 
 BigInt is a numeric type for integers of arbitrary size. Regular numbers lose
 precision beyond `Number.MAX_SAFE_INTEGER` (9,007,199,254,740,991). BigInt has
@@ -3175,4 +3175,4 @@ typeof 42n   → 'bigint'
 > `42n + 1` throws a TypeError. Convert explicitly: `42n + BigInt(1)` or
 > `Number(42n) + 1` (but Number conversion loses precision for large values).
 
-[TOP](#just-enough-javascript)
+[TOP](#just-enough-javascript-jej)

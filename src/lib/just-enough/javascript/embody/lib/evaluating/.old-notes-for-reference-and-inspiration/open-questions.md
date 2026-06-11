@@ -14,7 +14,7 @@ execution. The tracer uses Aran's AST weaving.
 
 ## 1. Notional machine completeness
 
-**Are we missing any observable JS behaviors that Aran can see?**
+<strong>Are we missing any observable JS behaviors that Aran can see?</strong>
 
 Our NM has these components: values, bindings (declare/initialize/available/
 access/update), scopes (create/enter/completion/interrupt/leave), expressions
@@ -31,7 +31,7 @@ phase).
   literals, no try/catch, no async). Does the absence of these simplify or
   complicate Aran's hook model in ways we should know about?
 
-**How should we visually lay out and represent the notional machine?**
+<strong>How should we visually lay out and represent the notional machine?</strong>
 
 We need a diagram that:
 
@@ -50,7 +50,7 @@ evaluation-resolution sequence visually?
 
 ## 2. Event architecture — the lighter/thinner model
 
-**Can Aran support enter/exit brackets around compound expressions?**
+<strong>Can Aran support enter/exit brackets around compound expressions?</strong>
 
 Our new event model uses lighter events in sequences:
 
@@ -71,7 +71,7 @@ resolve(6)
   resolve, is there a performance concern with doubling the expression hook
   count?
 
-**Can we get per-sub-expression granularity?**
+<strong>Can we get per-sub-expression granularity?</strong>
 
 For `1 + 2 * 3`, we want separate events for:
 
@@ -90,7 +90,7 @@ desugar the expression in a way that loses the sub-expression structure?
 
 ## 3. Scope chain lookup
 
-**Can Aran expose the scope chain walk as separate events per scope checked?**
+<strong>Can Aran expose the scope chain walk as separate events per scope checked?</strong>
 
 We want:
 
@@ -112,7 +112,7 @@ from what our scopeStack walk would produce?
 
 ## 4. Prototype chain lookup
 
-**Can Aran expose prototype chain walking for method access?**
+<strong>Can Aran expose prototype chain walking for method access?</strong>
 
 For `str.toUpperCase()`, we want:
 
@@ -136,7 +136,7 @@ we need it internally for the prototype chain. Any concerns with this approach?
 
 ## 5. Coercion visibility
 
-**How do we capture pre-coercion and post-coercion values?**
+<strong>How do we capture pre-coercion and post-coercion values?</strong>
 
 For `'5' + 1`, we want a coercion event showing `1 → '1'` BETWEEN the operand
 resolution and the operator application.
@@ -147,7 +147,7 @@ resolution and the operator application.
 - For boolean coercion contexts (`if (x)`, `while (x)`, `!x`): does
   `expression@after` give us the pre-coercion value AND the boolean result?
 
-**Specific coercion scenarios we need to handle:**
+<strong>Specific coercion scenarios we need to handle:</strong>
 
 - `'5' + 1` → string concatenation (number coerced to string)
 - `'5' - 1` → numeric subtraction (string coerced to number)
@@ -159,7 +159,7 @@ resolution and the operator application.
 
 ## 6. Execution model
 
-**eval+local-strict vs script+global for JEJ programs**
+<strong>eval+local-strict vs script+global for JEJ programs</strong>
 
 JEJ programs run as modules (`<script type="module">`). Currently our tracer
 uses Aran's `kind: 'eval'` with `situ: { type: 'local', mode: 'strict' }`. This
@@ -182,7 +182,7 @@ breaks the binding lifecycle event sequence.
 
 ## 7. TDZ representation
 
-**How does Aran represent TDZ state in the frame passed to block@declaration?**
+<strong>How does Aran represent TDZ state in the frame passed to block@declaration?</strong>
 
 Currently we detect TDZ via `typeof value === 'symbol'` (Aran uses a Symbol as
 the deadzone marker). Is this the stable API? Could this change in future Aran
@@ -196,7 +196,7 @@ initialize/available. Is this correct?
 
 ## 8. ASTNode building
 
-**Can Aran's digest callback build ASTNode objects with parent refs?**
+<strong>Can Aran's digest callback build ASTNode objects with parent refs?</strong>
 
 Our current `instrument.ts` builds ASTNode objects during the digest callback,
 setting `.parent` by looking up a pre-built parent-info map from the ESTree AST.
@@ -212,7 +212,7 @@ setting `.parent` by looking up a pre-built parent-info map from the ESTree AST.
 
 ## 9. Performance and practical concerns
 
-**Event volume at sub-expression granularity**
+<strong>Event volume at sub-expression granularity</strong>
 
 With enter/exit brackets, resolve events, scope-check events, and coercion
 events, a simple program like `let x = 1 + 2 * 3;` produces ~15 events. A
@@ -223,7 +223,7 @@ realistic JEJ program (20-30 lines) might produce hundreds.
 - Should we consider batching (emit N events per pause cycle) instead of
   per-event pausing?
 
-**tagMap lifecycle**
+<strong>tagMap lifecycle</strong>
 
 Our tagMap is a `Map<string, JejTag>` built during the digest callback. It can't
 be in `initialState` (Aran's code generator can't serialize Maps). We hold it in
@@ -233,7 +233,7 @@ the generator closure. Is there a better pattern?
 
 ## 10. Things we might be missing entirely
 
-**What don't we know that we don't know?**
+<strong>What don't we know that we don't know?</strong>
 
 - Are there Aran hooks we're not using that could provide valuable information?
   (We currently use: block@setup/declaration/before/after/throwing/teardown,
@@ -257,7 +257,7 @@ the generator closure. Is there a better pattern?
   object creation and subsequent method calls (getFullYear, toLocaleDateString,
   etc.) through the same advice hooks?
 
-**Visual representation of the NM**
+<strong>Visual representation of the NM</strong>
 
 - How would you visually lay out the notional machine for learners? We need a
   diagram that can be drawn on paper, shows code + memory, supports step-by-step
