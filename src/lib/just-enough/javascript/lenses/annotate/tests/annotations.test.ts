@@ -8,7 +8,11 @@
 
 import { describe, expect, it } from 'vitest';
 
-import annotationOps from '../annotations.js';
+import addNote from '../annotations/add-note.js';
+import addStroke from '../annotations/add-stroke.js';
+import clearView from '../annotations/clear-view.js';
+import removeNote from '../annotations/remove-note.js';
+import removeStroke from '../annotations/remove-stroke.js';
 import type { AnnotationsByView, Note, Stroke } from '../types.js';
 
 function emptyPair(): AnnotationsByView {
@@ -50,7 +54,7 @@ const note2: Note = {
 describe('annotationOps', () => {
 	describe('addStroke', () => {
 		it('appends the stroke to the active view strokes', () => {
-			const result = annotationOps.addStroke(emptyPair(), 'code', stroke);
+			const result = addStroke(emptyPair(), 'code', stroke);
 			expect(result.code.strokes).toEqual([stroke]);
 		});
 
@@ -59,7 +63,7 @@ describe('annotationOps', () => {
 				code: { strokes: [stroke], notes: [] },
 				flowchart: { strokes: [], notes: [] },
 			};
-			const result = annotationOps.addStroke(start, 'code', stroke2);
+			const result = addStroke(start, 'code', stroke2);
 			expect(result.code.strokes).toEqual([stroke, stroke2]);
 		});
 
@@ -68,40 +72,40 @@ describe('annotationOps', () => {
 				code: { strokes: [], notes: [note] },
 				flowchart: { strokes: [], notes: [] },
 			};
-			const result = annotationOps.addStroke(start, 'code', stroke);
+			const result = addStroke(start, 'code', stroke);
 			expect(result.code.notes).toEqual([note]);
 		});
 
 		it('keeps the inactive view reference-identical', () => {
 			const start = emptyPair();
-			const result = annotationOps.addStroke(start, 'code', stroke);
+			const result = addStroke(start, 'code', stroke);
 			expect(result.flowchart).toBe(start.flowchart);
 		});
 
 		it('returns a new pair, not the input (no in-place mutation)', () => {
 			const start = emptyPair();
-			const result = annotationOps.addStroke(start, 'code', stroke);
+			const result = addStroke(start, 'code', stroke);
 			expect(result).not.toBe(start);
 		});
 
 		it('replaces the active view with a new AnnotationSet reference', () => {
 			const start = emptyPair();
-			const result = annotationOps.addStroke(start, 'code', stroke);
+			const result = addStroke(start, 'code', stroke);
 			expect(result.code).not.toBe(start.code);
 		});
 
 		it('returns a frozen pair', () => {
-			const result = annotationOps.addStroke(emptyPair(), 'code', stroke);
+			const result = addStroke(emptyPair(), 'code', stroke);
 			expect(Object.isFrozen(result)).toBe(true);
 		});
 
 		it('freezes the active view AnnotationSet', () => {
-			const result = annotationOps.addStroke(emptyPair(), 'code', stroke);
+			const result = addStroke(emptyPair(), 'code', stroke);
 			expect(Object.isFrozen(result.code)).toBe(true);
 		});
 
 		it('freezes the active view strokes array (deep)', () => {
-			const result = annotationOps.addStroke(emptyPair(), 'code', stroke);
+			const result = addStroke(emptyPair(), 'code', stroke);
 			expect(Object.isFrozen(result.code.strokes)).toBe(true);
 		});
 	});
@@ -112,7 +116,7 @@ describe('annotationOps', () => {
 				code: { strokes: [stroke, stroke2], notes: [] },
 				flowchart: { strokes: [], notes: [] },
 			};
-			const result = annotationOps.removeStroke(start, 'code', 's1');
+			const result = removeStroke(start, 'code', 's1');
 			expect(result.code.strokes).toEqual([stroke2]);
 		});
 
@@ -121,7 +125,7 @@ describe('annotationOps', () => {
 				code: { strokes: [stroke], notes: [] },
 				flowchart: { strokes: [], notes: [] },
 			};
-			const result = annotationOps.removeStroke(start, 'code', 'missing');
+			const result = removeStroke(start, 'code', 'missing');
 			expect(result.code.strokes).toEqual([stroke]);
 		});
 
@@ -130,26 +134,26 @@ describe('annotationOps', () => {
 				code: { strokes: [stroke], notes: [] },
 				flowchart: { strokes: [stroke2], notes: [] },
 			};
-			const result = annotationOps.removeStroke(start, 'code', 's1');
+			const result = removeStroke(start, 'code', 's1');
 			expect(result.flowchart).toBe(start.flowchart);
 		});
 	});
 
 	describe('addNote', () => {
 		it('appends the note to the active view notes', () => {
-			const result = annotationOps.addNote(emptyPair(), 'flowchart', note);
+			const result = addNote(emptyPair(), 'flowchart', note);
 			expect(result.flowchart.notes).toEqual([note]);
 		});
 
 		it('keeps the inactive view reference-identical', () => {
 			const start = emptyPair();
-			const result = annotationOps.addNote(start, 'flowchart', note);
+			const result = addNote(start, 'flowchart', note);
 			expect(result.code).toBe(start.code);
 		});
 
 		it('replaces the active view with a new AnnotationSet reference', () => {
 			const start = emptyPair();
-			const result = annotationOps.addNote(start, 'flowchart', note);
+			const result = addNote(start, 'flowchart', note);
 			expect(result.flowchart).not.toBe(start.flowchart);
 		});
 	});
@@ -160,7 +164,7 @@ describe('annotationOps', () => {
 				code: { strokes: [], notes: [note, note2] },
 				flowchart: { strokes: [], notes: [] },
 			};
-			const result = annotationOps.removeNote(start, 'code', 'n1');
+			const result = removeNote(start, 'code', 'n1');
 			expect(result.code.notes).toEqual([note2]);
 		});
 
@@ -169,7 +173,7 @@ describe('annotationOps', () => {
 				code: { strokes: [], notes: [note] },
 				flowchart: { strokes: [], notes: [note2] },
 			};
-			const result = annotationOps.removeNote(start, 'code', 'n1');
+			const result = removeNote(start, 'code', 'n1');
 			expect(result.flowchart).toBe(start.flowchart);
 		});
 	});
@@ -180,7 +184,7 @@ describe('annotationOps', () => {
 				code: { strokes: [stroke], notes: [note] },
 				flowchart: { strokes: [], notes: [] },
 			};
-			const result = annotationOps.clearView(start, 'code');
+			const result = clearView(start, 'code');
 			expect(result.code.strokes).toEqual([]);
 		});
 
@@ -189,7 +193,7 @@ describe('annotationOps', () => {
 				code: { strokes: [stroke], notes: [note] },
 				flowchart: { strokes: [], notes: [] },
 			};
-			const result = annotationOps.clearView(start, 'code');
+			const result = clearView(start, 'code');
 			expect(result.code.notes).toEqual([]);
 		});
 
@@ -198,7 +202,7 @@ describe('annotationOps', () => {
 				code: { strokes: [stroke], notes: [note] },
 				flowchart: { strokes: [stroke2], notes: [note2] },
 			};
-			const result = annotationOps.clearView(start, 'code');
+			const result = clearView(start, 'code');
 			expect(result.flowchart).toBe(start.flowchart);
 		});
 	});

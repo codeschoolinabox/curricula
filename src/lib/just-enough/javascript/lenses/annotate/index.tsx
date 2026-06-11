@@ -17,7 +17,10 @@ import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
-import annotationOps from './annotations.js';
+import addNote from './annotations/add-note.js';
+import addStroke from './annotations/add-stroke.js';
+import clearView from './annotations/clear-view.js';
+import removeStroke from './annotations/remove-stroke.js';
 import annotateCore from './core.js';
 import deriveCodeSpanTree from './render-code.js';
 import deriveFlowchartSvg from './render-flowchart.js';
@@ -243,7 +246,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 					color,
 				};
 				setAnnotationsByView((previous) =>
-					annotationOps.addStroke(previous, viewMode, stroke),
+					addStroke(previous, viewMode, stroke),
 				);
 			}
 			setCurrentStroke(null);
@@ -261,7 +264,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 					.map((stroke) => stroke.id);
 				let next = previous;
 				for (const id of erasedIds) {
-					next = annotationOps.removeStroke(next, viewMode, id);
+					next = removeStroke(next, viewMode, id);
 				}
 				return next;
 			}
@@ -292,7 +295,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 					color,
 				};
 				setAnnotationsByView((previous) =>
-					annotationOps.addNote(previous, viewMode, note),
+					addNote(previous, viewMode, note),
 				);
 			}
 			setNoteDialog(null);
@@ -310,7 +313,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 		function clearActiveView(): void {
 			if (!globalThis.confirm('Clear all annotations on this view?')) return;
 			setAnnotationsByView((previous) =>
-				annotationOps.clearView(previous, viewMode),
+				clearView(previous, viewMode),
 			);
 		}
 
