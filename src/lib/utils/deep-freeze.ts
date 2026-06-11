@@ -31,7 +31,7 @@ import deepClone from './deep-clone.js';
  *
  * console.log(original === frozen);  // false - different references
  */
-function deepFreeze<T>(value: T): Readonly<T> {
+export default function deepFreeze<T>(value: T): Readonly<T> {
 	// Primitives and null: nothing to freeze
 	if (value === null || typeof value !== 'object') {
 		return value;
@@ -60,5 +60,3 @@ function freezeRecursive(value: unknown): void {
 		}
 	}
 }
-
-export default deepFreeze;

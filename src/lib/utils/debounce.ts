@@ -11,15 +11,6 @@
  */
 
 /**
- * A debounced wrapper: callable like the wrapped function (returning `void`,
- * since the call is deferred) with an attached `.cancel()` to drop a pending
- * invocation.
- */
-type DebouncedFunction<A extends unknown[]> = ((...arguments_: A) => void) & {
-	cancel: () => void;
-};
-
-/**
  * Wraps a function so it runs once after `ms` of idle, on the trailing edge.
  *
  * Each call to the wrapper resets the idle window; if the window elapses with no
@@ -37,7 +28,7 @@ type DebouncedFunction<A extends unknown[]> = ((...arguments_: A) => void) & {
  * // ...200ms later → loadData('b') runs once
  * refresh.cancel();               // drop a pending invocation
  */
-function debounce<A extends unknown[]>(
+export default function debounce<A extends unknown[]>(
 	function_: (...arguments_: A) => void,
 	ms: number,
 ): DebouncedFunction<A> {
@@ -69,4 +60,11 @@ function debounce<A extends unknown[]>(
 	});
 }
 
-export default debounce;
+/**
+ * A debounced wrapper: callable like the wrapped function (returning `void`,
+ * since the call is deferred) with an attached `.cancel()` to drop a pending
+ * invocation.
+ */
+type DebouncedFunction<A extends unknown[]> = ((...arguments_: A) => void) & {
+	cancel: () => void;
+};

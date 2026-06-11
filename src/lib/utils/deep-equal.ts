@@ -40,7 +40,7 @@ import isPlainObject from './is-plain-object.js';
  * deepEqual(a, b) // true
  */
 /* eslint-disable functional/immutable-data, functional/prefer-readonly-type -- seenA/seenB are mutable tracking stacks scoped to one call tree, same pattern as deepClone's visited WeakSet */
-function deepEqual(
+export default function deepEqual(
 	a: unknown,
 	b: unknown,
 	seenA: object[] = [],
@@ -146,5 +146,3 @@ function deepEqual(
 	return result;
 }
 /* eslint-enable functional/immutable-data, functional/prefer-readonly-type */
-
-export default deepEqual;

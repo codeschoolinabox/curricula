@@ -12,7 +12,10 @@
  * @returns A deep copy of the input value. Functions are the same
  *   identity; all other structures are new references.
  */
-function deepClone<T>(value: T, visited = new WeakSet<object>()): T {
+export default function deepClone<T>(
+	value: T,
+	visited = new WeakSet<object>(),
+): T {
 	if (value === null) {
 		return value;
 	}
@@ -80,5 +83,3 @@ function deepClone<T>(value: T, visited = new WeakSet<object>()): T {
 
 	return Object.fromEntries([...stringEntries, ...symbolEntries]) as T;
 }
-
-export default deepClone;

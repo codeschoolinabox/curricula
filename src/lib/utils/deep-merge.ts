@@ -42,7 +42,7 @@ import isPlainObject from './is-plain-object.js';
  * )
  * // Result: { a: { b: { c: 3, d: 2 } } }
  */
-function deepMerge<T>(base: T, user: unknown): T {
+export default function deepMerge<T>(base: T, user: unknown): T {
 	// User value always wins for primitives, null, undefined
 	if (user === null || user === undefined || typeof user !== 'object') {
 		return user as T;
@@ -87,5 +87,3 @@ function deepMerge<T>(base: T, user: unknown): T {
 		...userEntries,
 	]) as T;
 }
-
-export default deepMerge;

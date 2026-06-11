@@ -24,7 +24,9 @@
  * isPlainObject(null)           // false
  * isPlainObject(Object.create(null)) // false
  */
-function isPlainObject(thing: unknown): thing is Record<string, unknown> {
+export default function isPlainObject(
+	thing: unknown,
+): thing is Record<string, unknown> {
 	if (typeof thing !== 'object') return false;
 	if (thing === null) return false;
 	if (Array.isArray(thing)) return false;
@@ -32,5 +34,3 @@ function isPlainObject(thing: unknown): thing is Record<string, unknown> {
 	const proto = Object.getPrototypeOf(thing);
 	return proto === Object.prototype;
 }
-
-export default isPlainObject;

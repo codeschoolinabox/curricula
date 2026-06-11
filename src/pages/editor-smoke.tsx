@@ -40,11 +40,7 @@ import React from 'react';
 
 import EditorComponent from '@site/src/lib/just-enough/javascript/orchestrate/editor/index.js';
 
-function logSnippetChange(next: string): void {
-	console.log('[editor-smoke] onSnippetChange:', next.length, 'chars');
-}
-
-function EditorSmoke(): React.JSX.Element {
+export default function EditorSmoke(): React.JSX.Element {
 	const [snippet, setSnippet] = React.useState<string>('');
 
 	const handleSnippetChange = React.useCallback(function notifyParent(
@@ -95,4 +91,6 @@ function EditorSmoke(): React.JSX.Element {
 	);
 }
 
-export default EditorSmoke;
+function logSnippetChange(next: string): void {
+	console.log('[editor-smoke] onSnippetChange:', next.length, 'chars');
+}
