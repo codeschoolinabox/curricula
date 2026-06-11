@@ -7,7 +7,7 @@ import type { FunctionReturnEvent, ValueRepresentation } from '../../types.js';
  * @returns Domain-specific fields for a FunctionReturnEvent
  * @throws {Error} If name is empty or value is missing
  */
-function createFunctionReturnEvent(
+export default function createFunctionReturnEvent(
 	{
 		name,
 		value,
@@ -35,5 +35,3 @@ function createFunctionReturnEvent(
 		value,
 	};
 }
-
-export default createFunctionReturnEvent;

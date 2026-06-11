@@ -4,6 +4,40 @@ import type {
 	ValueRepresentation,
 } from '../../types.js';
 
+/**
+ * Creates a PureOperatorEvent for operators that evaluate all operands.
+ *
+ * @param params - subkind, operator string, operands, result, optional coercedOperands
+ * @returns Domain-specific fields for a PureOperatorEvent
+ * @throws {Error} If operands is empty
+ */
+export default function createPureOperatorEvent(
+	{
+		subkind,
+		operator,
+		operands,
+		result,
+		coercedOperands,
+	}: PureOperatorParams = {} as PureOperatorParams,
+): Omit<PureOperatorEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
+	if (!operands || operands.length === 0) {
+		throw new Error('createPureOperatorEvent: operands must be non-empty');
+	}
+
+	const coercionOccurred =
+		coercedOperands !== undefined && hasCoercion(operands, coercedOperands);
+
+	return {
+		category: 'operator',
+		kind: 'pure',
+		subkind,
+		operator,
+		operands,
+		result,
+		...(coercionOccurred && { coercion: coercedOperands }),
+	};
+}
+
 type PureOperatorParams = {
 	readonly subkind: PureOperatorSubkind;
 	readonly operator: string;
@@ -41,39 +75,3 @@ function hasCoercion(
 
 	return false;
 }
-
-/**
- * Creates a PureOperatorEvent for operators that evaluate all operands.
- *
- * @param params - subkind, operator string, operands, result, optional coercedOperands
- * @returns Domain-specific fields for a PureOperatorEvent
- * @throws {Error} If operands is empty
- */
-function createPureOperatorEvent(
-	{
-		subkind,
-		operator,
-		operands,
-		result,
-		coercedOperands,
-	}: PureOperatorParams = {} as PureOperatorParams,
-): Omit<PureOperatorEvent, 'step' | 'semantics' | 'loc' | 'node' | 'source'> {
-	if (!operands || operands.length === 0) {
-		throw new Error('createPureOperatorEvent: operands must be non-empty');
-	}
-
-	const coercionOccurred =
-		coercedOperands !== undefined && hasCoercion(operands, coercedOperands);
-
-	return {
-		category: 'operator',
-		kind: 'pure',
-		subkind,
-		operator,
-		operands,
-		result,
-		...(coercionOccurred && { coercion: coercedOperands }),
-	};
-}
-
-export default createPureOperatorEvent;

@@ -10,7 +10,7 @@ import type {
  * @param params - kind, tested value, boolean result, optional coercion, scope ref, label
  * @returns Domain-specific fields for a TestEvent
  */
-function createTestEvent(
+export default function createTestEvent(
 	{
 		kind,
 		value,
@@ -45,5 +45,3 @@ function createTestEvent(
 		...(label !== undefined && { label }),
 	};
 }
-
-export default createTestEvent;

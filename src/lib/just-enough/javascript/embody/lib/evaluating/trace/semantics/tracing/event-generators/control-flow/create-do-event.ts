@@ -4,7 +4,7 @@ import type { DoEvent } from '../../types.js';
  * Creates a DoEvent for do-while loops. Fires before every body execution.
  * Kind is always 'doWhile' — set automatically.
  */
-function createDoEvent(
+export default function createDoEvent(
 	{
 		scopeCreationStep,
 		label,
@@ -24,5 +24,3 @@ function createDoEvent(
 		...(label !== undefined && { label }),
 	};
 }
-
-export default createDoEvent;

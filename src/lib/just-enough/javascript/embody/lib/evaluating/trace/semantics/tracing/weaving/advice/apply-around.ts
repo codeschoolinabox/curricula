@@ -24,89 +24,7 @@ import representValue from '../../represent-value/represent-value.js';
 
 import type { TracerState, JejTag } from '../types.js';
 
-/**
- * Computes coerced operands for a binary operator.
- * Returns undefined if no coercion is possible (strict operators).
- */
-function computeBinaryCoercion(
-	operator: string,
-	left: unknown,
-	right: unknown,
-): [unknown, unknown] | undefined {
-	// strict equality — never coerces
-	if (operator === '===' || operator === '!==') return undefined;
-
-	// addition: if either is string, both coerce to string; else both to number
-	if (operator === '+') {
-		if (typeof left === 'string' || typeof right === 'string') {
-			return [String(left), String(right)];
-		}
-		return [Number(left), Number(right)];
-	}
-
-	// arithmetic/bitwise: coerce to number
-	if (
-		['-', '*', '/', '%', '**', '&', '|', '^', '<<', '>>', '>>>'].includes(
-			operator,
-		)
-	) {
-		return [Number(left), Number(right)];
-	}
-
-	// comparison: both strings → no coercion; otherwise coerce to number
-	if (['<', '>', '<=', '>='].includes(operator)) {
-		if (typeof left === 'string' && typeof right === 'string') return undefined;
-		return [Number(left), Number(right)];
-	}
-
-	return undefined;
-}
-
-/**
- * Computes coerced operand for a unary operator.
- */
-function computeUnaryCoercion(
-	operator: string,
-	operand: unknown,
-): [unknown] | undefined {
-	if (operator === '!') return [Boolean(operand)];
-	if (operator === '+' || operator === '-') return [Number(operand)];
-	if (operator === '~') return [Number(operand)];
-	return undefined;
-}
-
-/** Binary operator → PureOperatorSubkind */
-const BINARY_SUBKIND: Record<string, string> = {
-	'+': 'addition',
-	'-': 'arithmetic',
-	'*': 'arithmetic',
-	'/': 'arithmetic',
-	'%': 'arithmetic',
-	'**': 'arithmetic',
-	'===': 'comparison',
-	'!==': 'comparison',
-	'>': 'comparison',
-	'<': 'comparison',
-	'>=': 'comparison',
-	'<=': 'comparison',
-	'&': 'bitwise',
-	'|': 'bitwise',
-	'^': 'bitwise',
-	'<<': 'bitwise',
-	'>>': 'bitwise',
-	'>>>': 'bitwise',
-};
-
-/** Unary operator → PureOperatorSubkind */
-const UNARY_SUBKIND: Record<string, string> = {
-	typeof: 'typeof',
-	'!': 'negation.logical',
-	'~': 'negation.bitwise',
-	'+': 'arithmetic',
-	'-': 'arithmetic',
-};
-
-function applyAround(
+export default function applyAround(
 	state: TracerState,
 	callee: unknown,
 	thisArg: unknown,
@@ -269,4 +187,84 @@ function applyAround(
 	return callResult;
 }
 
-export default applyAround;
+/**
+ * Computes coerced operands for a binary operator.
+ * Returns undefined if no coercion is possible (strict operators).
+ */
+function computeBinaryCoercion(
+	operator: string,
+	left: unknown,
+	right: unknown,
+): [unknown, unknown] | undefined {
+	// strict equality — never coerces
+	if (operator === '===' || operator === '!==') return undefined;
+
+	// addition: if either is string, both coerce to string; else both to number
+	if (operator === '+') {
+		if (typeof left === 'string' || typeof right === 'string') {
+			return [String(left), String(right)];
+		}
+		return [Number(left), Number(right)];
+	}
+
+	// arithmetic/bitwise: coerce to number
+	if (
+		['-', '*', '/', '%', '**', '&', '|', '^', '<<', '>>', '>>>'].includes(
+			operator,
+		)
+	) {
+		return [Number(left), Number(right)];
+	}
+
+	// comparison: both strings → no coercion; otherwise coerce to number
+	if (['<', '>', '<=', '>='].includes(operator)) {
+		if (typeof left === 'string' && typeof right === 'string') return undefined;
+		return [Number(left), Number(right)];
+	}
+
+	return undefined;
+}
+
+/**
+ * Computes coerced operand for a unary operator.
+ */
+function computeUnaryCoercion(
+	operator: string,
+	operand: unknown,
+): [unknown] | undefined {
+	if (operator === '!') return [Boolean(operand)];
+	if (operator === '+' || operator === '-') return [Number(operand)];
+	if (operator === '~') return [Number(operand)];
+	return undefined;
+}
+
+/** Binary operator → PureOperatorSubkind */
+const BINARY_SUBKIND: Record<string, string> = {
+	'+': 'addition',
+	'-': 'arithmetic',
+	'*': 'arithmetic',
+	'/': 'arithmetic',
+	'%': 'arithmetic',
+	'**': 'arithmetic',
+	'===': 'comparison',
+	'!==': 'comparison',
+	'>': 'comparison',
+	'<': 'comparison',
+	'>=': 'comparison',
+	'<=': 'comparison',
+	'&': 'bitwise',
+	'|': 'bitwise',
+	'^': 'bitwise',
+	'<<': 'bitwise',
+	'>>': 'bitwise',
+	'>>>': 'bitwise',
+};
+
+/** Unary operator → PureOperatorSubkind */
+const UNARY_SUBKIND: Record<string, string> = {
+	typeof: 'typeof',
+	'!': 'negation.logical',
+	'~': 'negation.bitwise',
+	'+': 'arithmetic',
+	'-': 'arithmetic',
+};

@@ -42,131 +42,6 @@ import { freezeInPlace } from '@utils/freeze.js';
 
 import type { JejTag, TracerState } from './types.js';
 
-type PointcutEntry = {
-	readonly kind: string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Aran's flexible API uses heterogeneous signatures per hook kind
-	readonly pointcut: (...args: any[]) => unknown[] | null | undefined;
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- AranLang nodes have dynamic shape
-type AranNode = any;
-
-/**
- * Resolves a hash-string tag to a JejTag from the tag map.
- * Throws if the hash is not found — indicates a digest/pre-walk bug.
- */
-function resolveTag(
-	hash: unknown,
-	tagMap: Map<string, JejTag>,
-): JejTag | unknown {
-	if (typeof hash !== 'string') return hash;
-	const resolved = tagMap.get(hash);
-	if (resolved === undefined) {
-		throw new Error(
-			`Tag map lookup failed for hash: ${hash}. This indicates a digest bug.`,
-		);
-	}
-	return resolved;
-}
-
-/**
- * Resolves .tag properties on an AranLang node using the tag map.
- * Returns a shallow copy with .tag replaced. Does NOT mutate the original.
- */
-function resolveNodeTags(
-	node: AranNode,
-	tagMap: Map<string, JejTag>,
-): AranNode {
-	if (node === null || node === undefined) return node;
-	if (typeof node !== 'object') return node;
-	if (typeof node.tag !== 'string') return node;
-
-	// Shallow copy with resolved tag
-	return { ...node, tag: resolveTag(node.tag, tagMap) };
-}
-
-/**
- * Resolves .tag on a parent node AND its known nested positions.
- *
- * Whitelist: parent.tag, parent.then?.tag, parent.else?.tag,
- * parent.try?.tag, parent.catch?.tag, parent.finally?.tag
- *
- * WHY whitelist: block-pointcut.ts uses `parent.then?.tag === node.tag`
- * for branch identification. Both sides must be resolved for identity
- * comparison to work. tagMap.get() returns the same object reference
- * for the same hash, preserving ===.
- */
-function resolveParentTags(
-	parent: AranNode,
-	tagMap: Map<string, JejTag>,
-): AranNode {
-	if (parent === null || parent === undefined) return parent;
-	if (typeof parent !== 'object') return parent;
-
-	const copy = { ...parent };
-
-	if (typeof copy.tag === 'string') {
-		copy.tag = resolveTag(copy.tag, tagMap);
-	}
-
-	// Nested positions used in identity comparisons (block-pointcut.ts, expression-pointcut.ts)
-	if (copy.test && typeof copy.test.tag === 'string') {
-		copy.test = { ...copy.test, tag: resolveTag(copy.test.tag, tagMap) };
-	}
-	if (copy.then && typeof copy.then.tag === 'string') {
-		copy.then = { ...copy.then, tag: resolveTag(copy.then.tag, tagMap) };
-	}
-	if (copy.else && typeof copy.else.tag === 'string') {
-		copy.else = { ...copy.else, tag: resolveTag(copy.else.tag, tagMap) };
-	}
-	if (copy.try && typeof copy.try.tag === 'string') {
-		copy.try = { ...copy.try, tag: resolveTag(copy.try.tag, tagMap) };
-	}
-	if (copy.catch && typeof copy.catch.tag === 'string') {
-		copy.catch = { ...copy.catch, tag: resolveTag(copy.catch.tag, tagMap) };
-	}
-	if (copy.finally && typeof copy.finally.tag === 'string') {
-		copy.finally = {
-			...copy.finally,
-			tag: resolveTag(copy.finally.tag, tagMap),
-		};
-	}
-
-	return copy;
-}
-
-/**
- * Wraps a pointcut function to resolve hash-string tags to JejTag objects.
- *
- * Aran's digest produces hash strings as tags. Pointcut functions expect
- * JejTag objects. This wrapper bridges the two by resolving tags on node,
- * parent, and root before calling the original pointcut.
- */
-function wrapPointcut(
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- original pointcut has heterogeneous signature
-	originalPointcut: (...args: any[]) => unknown[] | null | undefined,
-	tagMap: Map<string, JejTag>,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- must match Aran's pointcut signature
-): (...args: any[]) => unknown[] | null | undefined {
-	return function wrappedPointcut(
-		node: AranNode,
-		parent: AranNode,
-		root: AranNode,
-	) {
-		return originalPointcut(
-			resolveNodeTags(node, tagMap),
-			resolveParentTags(parent, tagMap),
-			resolveNodeTags(root, tagMap),
-		);
-	};
-}
-
-type AspectResult = {
-	readonly pointcut: Record<string, PointcutEntry>;
-	readonly adviceGlobals: Record<string, Function>;
-	readonly initialState: TracerState;
-};
-
 /**
  * Builds an Aran flexible aspect from user config.
  *
@@ -176,7 +51,7 @@ type AspectResult = {
  *   with unit tests that don't use the full instrumentation pipeline.
  * @returns Separated pointcut config, advice globals, and initial state
  */
-function createAspect(
+export default function createAspect(
 	config: Record<string, unknown>,
 	tagMap: Map<string, JejTag> = new Map(),
 	variableKinds: Record<string, 'let' | 'const'> = {},
@@ -312,4 +187,127 @@ function createAspect(
 	}) as AspectResult;
 }
 
-export default createAspect;
+type PointcutEntry = {
+	readonly kind: string;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Aran's flexible API uses heterogeneous signatures per hook kind
+	readonly pointcut: (...args: any[]) => unknown[] | null | undefined;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- AranLang nodes have dynamic shape
+type AranNode = any;
+
+/**
+ * Resolves a hash-string tag to a JejTag from the tag map.
+ * Throws if the hash is not found — indicates a digest/pre-walk bug.
+ */
+function resolveTag(
+	hash: unknown,
+	tagMap: Map<string, JejTag>,
+): JejTag | unknown {
+	if (typeof hash !== 'string') return hash;
+	const resolved = tagMap.get(hash);
+	if (resolved === undefined) {
+		throw new Error(
+			`Tag map lookup failed for hash: ${hash}. This indicates a digest bug.`,
+		);
+	}
+	return resolved;
+}
+
+/**
+ * Resolves .tag properties on an AranLang node using the tag map.
+ * Returns a shallow copy with .tag replaced. Does NOT mutate the original.
+ */
+function resolveNodeTags(
+	node: AranNode,
+	tagMap: Map<string, JejTag>,
+): AranNode {
+	if (node === null || node === undefined) return node;
+	if (typeof node !== 'object') return node;
+	if (typeof node.tag !== 'string') return node;
+
+	// Shallow copy with resolved tag
+	return { ...node, tag: resolveTag(node.tag, tagMap) };
+}
+
+/**
+ * Resolves .tag on a parent node AND its known nested positions.
+ *
+ * Whitelist: parent.tag, parent.then?.tag, parent.else?.tag,
+ * parent.try?.tag, parent.catch?.tag, parent.finally?.tag
+ *
+ * WHY whitelist: block-pointcut.ts uses `parent.then?.tag === node.tag`
+ * for branch identification. Both sides must be resolved for identity
+ * comparison to work. tagMap.get() returns the same object reference
+ * for the same hash, preserving ===.
+ */
+function resolveParentTags(
+	parent: AranNode,
+	tagMap: Map<string, JejTag>,
+): AranNode {
+	if (parent === null || parent === undefined) return parent;
+	if (typeof parent !== 'object') return parent;
+
+	const copy = { ...parent };
+
+	if (typeof copy.tag === 'string') {
+		copy.tag = resolveTag(copy.tag, tagMap);
+	}
+
+	// Nested positions used in identity comparisons (block-pointcut.ts, expression-pointcut.ts)
+	if (copy.test && typeof copy.test.tag === 'string') {
+		copy.test = { ...copy.test, tag: resolveTag(copy.test.tag, tagMap) };
+	}
+	if (copy.then && typeof copy.then.tag === 'string') {
+		copy.then = { ...copy.then, tag: resolveTag(copy.then.tag, tagMap) };
+	}
+	if (copy.else && typeof copy.else.tag === 'string') {
+		copy.else = { ...copy.else, tag: resolveTag(copy.else.tag, tagMap) };
+	}
+	if (copy.try && typeof copy.try.tag === 'string') {
+		copy.try = { ...copy.try, tag: resolveTag(copy.try.tag, tagMap) };
+	}
+	if (copy.catch && typeof copy.catch.tag === 'string') {
+		copy.catch = { ...copy.catch, tag: resolveTag(copy.catch.tag, tagMap) };
+	}
+	if (copy.finally && typeof copy.finally.tag === 'string') {
+		copy.finally = {
+			...copy.finally,
+			tag: resolveTag(copy.finally.tag, tagMap),
+		};
+	}
+
+	return copy;
+}
+
+/**
+ * Wraps a pointcut function to resolve hash-string tags to JejTag objects.
+ *
+ * Aran's digest produces hash strings as tags. Pointcut functions expect
+ * JejTag objects. This wrapper bridges the two by resolving tags on node,
+ * parent, and root before calling the original pointcut.
+ */
+function wrapPointcut(
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- original pointcut has heterogeneous signature
+	originalPointcut: (...args: any[]) => unknown[] | null | undefined,
+	tagMap: Map<string, JejTag>,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- must match Aran's pointcut signature
+): (...args: any[]) => unknown[] | null | undefined {
+	return function wrappedPointcut(
+		node: AranNode,
+		parent: AranNode,
+		root: AranNode,
+	) {
+		return originalPointcut(
+			resolveNodeTags(node, tagMap),
+			resolveParentTags(parent, tagMap),
+			resolveNodeTags(root, tagMap),
+		);
+	};
+}
+
+type AspectResult = {
+	readonly pointcut: Record<string, PointcutEntry>;
+	readonly adviceGlobals: Record<string, Function>;
+	readonly initialState: TracerState;
+};

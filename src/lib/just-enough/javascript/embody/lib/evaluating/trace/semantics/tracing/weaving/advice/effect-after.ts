@@ -22,7 +22,10 @@ import representValue from '../../represent-value/represent-value.js';
 
 import type { TracerState, JejTag } from '../types.js';
 
-function effectAfter(state: TracerState, ...point: unknown[]): void {
+export default function effectAfter(
+	state: TracerState,
+	...point: unknown[]
+): void {
 	try {
 		const variable = point[0] as string;
 		const tag = point[1] as JejTag;
@@ -86,5 +89,3 @@ function effectAfter(state: TracerState, ...point: unknown[]): void {
 		// swallow advice errors — don't crash learner code
 	}
 }
-
-export default effectAfter;

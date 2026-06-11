@@ -10,7 +10,7 @@ import type {
  * @returns Domain-specific fields for a TemplateEvaluationEvent
  * @throws {Error} If index < 0
  */
-function createTemplateEvaluationEvent(
+export default function createTemplateEvaluationEvent(
 	{
 		index,
 		value,
@@ -40,5 +40,3 @@ function createTemplateEvaluationEvent(
 		beginStep,
 	};
 }
-
-export default createTemplateEvaluationEvent;

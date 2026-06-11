@@ -3,7 +3,7 @@ import type { JumpEvent, LoopKind } from '../../types.js';
 /**
  * Creates a JumpEvent for break/continue statements.
  */
-function createJumpEvent(
+export default function createJumpEvent(
 	{
 		kind,
 		target,
@@ -30,5 +30,3 @@ function createJumpEvent(
 		...(label !== undefined && { label }),
 	};
 }
-
-export default createJumpEvent;

@@ -17,10 +17,11 @@ import validateConfig from './validate-config.js';
  * @returns Fully-filled, validated data object
  * @throws OptionsInvalidError when validation fails
  */
-function prepareConfig(data: unknown, schema: JSONSchema): unknown {
+export default function prepareConfig(
+	data: unknown,
+	schema: JSONSchema,
+): unknown {
 	const expanded = expandShorthand(data, schema);
 	const filled = fillDefaults(expanded, schema);
 	return validateConfig(filled, schema);
 }
-
-export default prepareConfig;

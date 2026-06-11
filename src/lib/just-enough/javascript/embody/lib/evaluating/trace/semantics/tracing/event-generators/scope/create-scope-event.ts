@@ -5,17 +5,6 @@ import type {
 	ControlFlowStructure,
 } from '../../types.js';
 
-type ScopeParams = {
-	readonly kind: ScopeKind;
-	readonly event: ScopeEventType;
-	readonly depth: number;
-	readonly creationStep: number;
-	readonly parentCreationStep?: number;
-	readonly structure?: ControlFlowStructure;
-	readonly structureStep?: number;
-	readonly label?: string;
-};
-
 /**
  * Creates a ScopeEvent for scope lifecycle tracking.
  *
@@ -23,7 +12,7 @@ type ScopeParams = {
  * @returns Domain-specific fields for a ScopeEvent
  * @throws {Error} If depth < 0 or structure/structureStep don't co-occur
  */
-function createScopeEvent(
+export default function createScopeEvent(
 	{
 		kind,
 		event,
@@ -60,4 +49,13 @@ function createScopeEvent(
 	};
 }
 
-export default createScopeEvent;
+type ScopeParams = {
+	readonly kind: ScopeKind;
+	readonly event: ScopeEventType;
+	readonly depth: number;
+	readonly creationStep: number;
+	readonly parentCreationStep?: number;
+	readonly structure?: ControlFlowStructure;
+	readonly structureStep?: number;
+	readonly label?: string;
+};

@@ -21,7 +21,10 @@ import type { TracerState, JejTag } from '../types.js';
  * @param state - Tracer state
  * @param point - Point data: ['jump', jumpKind, userLabel, tag]
  */
-function statementBefore(state: TracerState, ...point: unknown[]): void {
+export default function statementBefore(
+	state: TracerState,
+	...point: unknown[]
+): void {
 	const discriminant = point[0] as string;
 
 	if (discriminant !== 'jump') return;
@@ -50,5 +53,3 @@ function statementBefore(state: TracerState, ...point: unknown[]): void {
 		});
 	}
 }
-
-export default statementBefore;

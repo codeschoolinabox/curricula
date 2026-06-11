@@ -7,7 +7,7 @@ import type { WithEvent, ValueRepresentation } from '../../types.js';
  * @returns Domain-specific fields for a WithEvent
  * @throws {Error} If event or object is missing
  */
-function createWithEvent(
+export default function createWithEvent(
 	{
 		event,
 		object,
@@ -32,5 +32,3 @@ function createWithEvent(
 		object,
 	};
 }
-
-export default createWithEvent;

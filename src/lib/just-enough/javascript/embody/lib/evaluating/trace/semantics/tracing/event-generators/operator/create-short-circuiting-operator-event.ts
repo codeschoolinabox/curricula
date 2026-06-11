@@ -3,14 +3,6 @@ import type {
 	ValueRepresentation,
 } from '../../types.js';
 
-type ShortCircuitingParams = {
-	readonly operator: '&&' | '||' | '??';
-	readonly left: ValueRepresentation;
-	readonly right?: ValueRepresentation;
-	readonly result: ValueRepresentation;
-	readonly shortCircuited?: true;
-};
-
 /**
  * Creates a ShortCircuitingOperatorEvent for &&, ||, ??, ?:.
  *
@@ -18,7 +10,7 @@ type ShortCircuitingParams = {
  * @returns Domain-specific fields for a ShortCircuitingOperatorEvent
  * @throws {Error} If shortCircuited with right present, or not shortCircuited without right
  */
-function createShortCircuitingOperatorEvent(
+export default function createShortCircuitingOperatorEvent(
 	{
 		operator,
 		left,
@@ -52,4 +44,10 @@ function createShortCircuitingOperatorEvent(
 	};
 }
 
-export default createShortCircuitingOperatorEvent;
+type ShortCircuitingParams = {
+	readonly operator: '&&' | '||' | '??';
+	readonly left: ValueRepresentation;
+	readonly right?: ValueRepresentation;
+	readonly result: ValueRepresentation;
+	readonly shortCircuited?: true;
+};

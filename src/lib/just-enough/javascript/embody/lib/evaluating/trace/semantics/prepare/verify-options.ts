@@ -18,7 +18,7 @@
  * @throws Error if iterations <= 0
  * @throws Error if seconds <= 0
  */
-function verifyOptions(options: unknown): void {
+export default function verifyOptions(options: unknown): void {
 	if (typeof options !== 'object' || options === null) return;
 	const config = options as Record<string, unknown>;
 
@@ -47,5 +47,3 @@ function verifyOptions(options: unknown): void {
 		throw new Error(`seconds (${String(seconds)}) must be a positive number`);
 	}
 }
-
-export default verifyOptions;

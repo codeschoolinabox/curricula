@@ -19,7 +19,10 @@ import representValue from '../../represent-value/represent-value.js';
 
 import type { TracerState, JejTag } from '../types.js';
 
-function effectBefore(state: TracerState, ...point: unknown[]): void {
+export default function effectBefore(
+	state: TracerState,
+	...point: unknown[]
+): void {
 	const variable = point[0] as string;
 	const tag = point[1] as JejTag;
 	const assignedValue = state.lastExpressionResult;
@@ -47,5 +50,3 @@ function effectBefore(state: TracerState, ...point: unknown[]): void {
 		});
 	}
 }
-
-export default effectBefore;

@@ -11,21 +11,7 @@
 
 import type { JejTag } from '../types.js';
 
-type CalleeNode = {
-	readonly type: string;
-	readonly intrinsic?: string;
-};
-
-/**
- * Classifies an ApplyExpression at weave time.
- *
- * @param node - ApplyExpression AranLang node
- * @param _parent - Parent node (unused)
- * @param _root - Program root (unused)
- * @returns [discriminant, tag] — discriminant is intrinsic name, 'template', or 'call'
- */
-// perf: skip freeze — consumed by Aran's weaving machinery
-function applyPointcut(
+export default function applyPointcut(
 	node: { readonly tag: JejTag; readonly callee?: CalleeNode },
 	_parent: unknown,
 	_root: unknown,
@@ -44,4 +30,17 @@ function applyPointcut(
 	return ['call', node.tag];
 }
 
-export default applyPointcut;
+type CalleeNode = {
+	readonly type: string;
+	readonly intrinsic?: string;
+};
+
+/**
+ * Classifies an ApplyExpression at weave time.
+ *
+ * @param node - ApplyExpression AranLang node
+ * @param _parent - Parent node (unused)
+ * @param _root - Program root (unused)
+ * @returns [discriminant, tag] — discriminant is intrinsic name, 'template', or 'call'
+ */
+// perf: skip freeze — consumed by Aran's weaving machinery

@@ -15,7 +15,7 @@ import type { TracerState, ScopeInfo, VariableInfo } from '../types.js';
  * @param name - Variable name to find
  * @returns The owning scope and variable info, or null if not found
  */
-function lookupVariable(
+export default function lookupVariable(
 	state: TracerState,
 	name: string,
 ): { scope: ScopeInfo; info: VariableInfo } | null {
@@ -27,5 +27,3 @@ function lookupVariable(
 	}
 	return null;
 }
-
-export default lookupVariable;

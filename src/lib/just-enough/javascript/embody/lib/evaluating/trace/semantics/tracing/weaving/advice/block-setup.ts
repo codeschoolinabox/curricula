@@ -14,7 +14,7 @@ import emitEvent from './emit-event.js';
 
 import type { TracerState, JejTag } from '../types.js';
 
-function blockSetup(
+export default function blockSetup(
 	state: TracerState,
 	_parentType: string,
 	scopeKind: string,
@@ -65,5 +65,3 @@ function blockSetup(
 
 	return state;
 }
-
-export default blockSetup;

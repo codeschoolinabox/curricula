@@ -32,6 +32,83 @@ import type {
 	ControlFlowStructure,
 } from './types.js';
 
+/**
+ * Instruments JavaScript source code for tracing.
+ *
+ * @param code - JavaScript source to instrument
+ * @param config - Trace config from options.schema.json
+ * @returns The instrumented code string, initial tracer state, and tag map
+ */
+export default function instrument(
+	code: string,
+	config: Record<string, unknown>,
+): InstrumentResult {
+	// 1. Detect `with` statement → use script mode (module mode forbids `with`)
+	// WHY: JEJ programs are modules (strict mode, no `var` hoisting). But the
+	// worker evaluates via new Function() which can't handle `import.meta`.
+	// Solution: use Aran's 'eval' kind with strict mode situ so the output is
+	// eval-compatible with module-like semantics.
+	// Exception: `with` requires sloppy mode → parse/transpile as script.
+	const hasWithStatement = /\bwith\s*\(/.test(code);
+
+	// 2. Parse source to ESTree
+	// WHY always script: Aran's 'eval' kind requires sourceType: 'script'.
+	// JEJ module semantics (strict mode, no var hoisting) are enforced by
+	// Aran's situ: { type: 'local', mode: 'strict' }, not by ESTree sourceType.
+	const ast = parse(code, {
+		ecmaVersion: 2024,
+		sourceType: 'script',
+		locations: true,
+	});
+
+	// 3. Build digest function + tag map
+	// WHY before transpile: the digest callback runs during transpile and
+	// builds the tagMap as a side effect. The map must be fully populated
+	// before createAspect is called.
+	const { digest, tagMap, variableKinds } = createDigest(ast, code);
+
+	// 4. Aran transpile: ESTree → AranLang (with custom digest for tag map)
+	// WHY 'eval' kind: module kind generates import.meta which new Function()
+	// can't execute. eval kind with strict situ gives module-like behavior
+	// (strict mode, no var hoisting to global) without import.meta.
+	const aranAST = transpile(
+		{
+			kind: hasWithStatement ? 'script' : 'eval',
+			situ: hasWithStatement
+				? { type: 'global' }
+				: { type: 'local', mode: 'strict' },
+			root: ast,
+			path: 'learner.js',
+		},
+		{ global_declarative_record: 'builtin', digest },
+	);
+
+	// 5. Create aspect (pointcut config + advice globals + initial state)
+	// WHY after transpile: createAspect needs the tagMap (populated by digest
+	// during transpile) to wrap pointcuts for tag resolution.
+	const aspect = createAspect(config, tagMap, variableKinds);
+
+	// 6. Aran weaveFlexible: inject advice calls based on pointcut
+	const woven = weaveFlexible(aranAST, {
+		initial_state: aspect.initialState,
+		pointcut: aspect.pointcut,
+	});
+
+	// 7. Aran retropile: AranLang → ESTree (standalone = embedded intrinsic setup)
+	const output = retropile(woven, {
+		mode: 'standalone',
+	});
+
+	// 8. Generate JavaScript string
+	const instrumentedCode = generate(output);
+
+	return {
+		instrumentedCode,
+		initialState: aspect.initialState,
+		tagMap,
+	};
+}
+
 type InstrumentResult = {
 	readonly instrumentedCode: string;
 	readonly initialState: TracerState;
@@ -231,82 +308,3 @@ function createDigest(
 
 	return { digest, tagMap, variableKinds };
 }
-
-/**
- * Instruments JavaScript source code for tracing.
- *
- * @param code - JavaScript source to instrument
- * @param config - Trace config from options.schema.json
- * @returns The instrumented code string, initial tracer state, and tag map
- */
-function instrument(
-	code: string,
-	config: Record<string, unknown>,
-): InstrumentResult {
-	// 1. Detect `with` statement → use script mode (module mode forbids `with`)
-	// WHY: JEJ programs are modules (strict mode, no `var` hoisting). But the
-	// worker evaluates via new Function() which can't handle `import.meta`.
-	// Solution: use Aran's 'eval' kind with strict mode situ so the output is
-	// eval-compatible with module-like semantics.
-	// Exception: `with` requires sloppy mode → parse/transpile as script.
-	const hasWithStatement = /\bwith\s*\(/.test(code);
-
-	// 2. Parse source to ESTree
-	// WHY always script: Aran's 'eval' kind requires sourceType: 'script'.
-	// JEJ module semantics (strict mode, no var hoisting) are enforced by
-	// Aran's situ: { type: 'local', mode: 'strict' }, not by ESTree sourceType.
-	const ast = parse(code, {
-		ecmaVersion: 2024,
-		sourceType: 'script',
-		locations: true,
-	});
-
-	// 3. Build digest function + tag map
-	// WHY before transpile: the digest callback runs during transpile and
-	// builds the tagMap as a side effect. The map must be fully populated
-	// before createAspect is called.
-	const { digest, tagMap, variableKinds } = createDigest(ast, code);
-
-	// 4. Aran transpile: ESTree → AranLang (with custom digest for tag map)
-	// WHY 'eval' kind: module kind generates import.meta which new Function()
-	// can't execute. eval kind with strict situ gives module-like behavior
-	// (strict mode, no var hoisting to global) without import.meta.
-	const aranAST = transpile(
-		{
-			kind: hasWithStatement ? 'script' : 'eval',
-			situ: hasWithStatement
-				? { type: 'global' }
-				: { type: 'local', mode: 'strict' },
-			root: ast,
-			path: 'learner.js',
-		},
-		{ global_declarative_record: 'builtin', digest },
-	);
-
-	// 5. Create aspect (pointcut config + advice globals + initial state)
-	// WHY after transpile: createAspect needs the tagMap (populated by digest
-	// during transpile) to wrap pointcuts for tag resolution.
-	const aspect = createAspect(config, tagMap, variableKinds);
-
-	// 6. Aran weaveFlexible: inject advice calls based on pointcut
-	const woven = weaveFlexible(aranAST, {
-		initial_state: aspect.initialState,
-		pointcut: aspect.pointcut,
-	});
-
-	// 7. Aran retropile: AranLang → ESTree (standalone = embedded intrinsic setup)
-	const output = retropile(woven, {
-		mode: 'standalone',
-	});
-
-	// 8. Generate JavaScript string
-	const instrumentedCode = generate(output);
-
-	return {
-		instrumentedCode,
-		initialState: aspect.initialState,
-		tagMap,
-	};
-}
-
-export default instrument;

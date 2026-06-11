@@ -11,7 +11,7 @@ import type {
  * @returns Domain-specific fields for a PropertyAccessEvent
  * @throws {Error} If shortCircuited is set on non-optionalChaining kind
  */
-function createPropertyAccessEvent(
+export default function createPropertyAccessEvent(
 	{
 		kind,
 		object,
@@ -47,5 +47,3 @@ function createPropertyAccessEvent(
 		...(shortCircuited && { shortCircuited }),
 	};
 }
-
-export default createPropertyAccessEvent;

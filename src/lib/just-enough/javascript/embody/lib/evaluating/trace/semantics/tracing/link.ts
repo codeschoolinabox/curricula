@@ -30,11 +30,11 @@ import type { TraceEvent, LinkedTraceEvent, ASTNode } from './types.js';
  * fields. The real ast record doesn't exist yet (Capstone work), so we lie
  * to the type system in ONE place instead of at every call site.
  */
-function link(events: readonly TraceEvent[]): readonly LinkedTraceEvent[] {
+export default function link(
+	events: readonly TraceEvent[],
+): readonly LinkedTraceEvent[] {
 	const stubNode = {} as ASTNode;
 	return events.map(function toLinked(event): LinkedTraceEvent {
 		return { ...event, node: stubNode } as LinkedTraceEvent;
 	});
 }
-
-export default link;

@@ -37,7 +37,10 @@ import type { JSONSchema } from './types.js';
  * @param schema - JSON Schema defining the expected structure
  * @returns New options object with shorthand expanded (never mutates input)
  */
-function expandShorthand(options: unknown, schema: JSONSchema): unknown {
+export default function expandShorthand(
+	options: unknown,
+	schema: JSONSchema,
+): unknown {
 	if (options === null || options === undefined) return {};
 	if (typeof options !== 'object') return options;
 
@@ -101,5 +104,3 @@ function expandBooleanRecursive(
 
 	return result;
 }
-
-export default expandShorthand;

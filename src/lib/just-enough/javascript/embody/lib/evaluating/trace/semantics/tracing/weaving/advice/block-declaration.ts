@@ -14,7 +14,7 @@ import representValue from '../../represent-value/represent-value.js';
 
 import type { TracerState, JejTag } from '../types.js';
 
-function blockDeclaration(
+export default function blockDeclaration(
 	state: TracerState,
 	frame: Record<string, unknown>,
 	_parentType: string,
@@ -88,5 +88,3 @@ function blockDeclaration(
 		}
 	}
 }
-
-export default blockDeclaration;

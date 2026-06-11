@@ -7,7 +7,7 @@ import type { TemplateBeginEvent } from '../../types.js';
  * @returns Domain-specific fields for a TemplateBeginEvent
  * @throws {Error} If strings.length !== expressionCount + 1
  */
-function createTemplateBeginEvent(
+export default function createTemplateBeginEvent(
 	{
 		strings,
 		expressionCount,
@@ -32,5 +32,3 @@ function createTemplateBeginEvent(
 		expressionCount,
 	};
 }
-
-export default createTemplateBeginEvent;

@@ -13,7 +13,7 @@
  * @param options - Fully-filled options (after schema validation)
  * @throws Error if range.start > range.end
  */
-function verifyOptions(options: unknown): void {
+export default function verifyOptions(options: unknown): void {
 	if (typeof options !== 'object' || options === null) return;
 
 	const { range } = options as Record<string, unknown>;
@@ -28,5 +28,3 @@ function verifyOptions(options: unknown): void {
 		);
 	}
 }
-
-export default verifyOptions;

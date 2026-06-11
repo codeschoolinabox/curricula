@@ -13,7 +13,7 @@ import type { ValueRepresentation } from '../types.js';
  * @param value - Any JavaScript value encountered at runtime
  * @returns A frozen ValueRepresentation matching the value's type
  */
-function representValue(value: unknown): ValueRepresentation {
+export default function representValue(value: unknown): ValueRepresentation {
 	if (value === null) {
 		return { type: 'object', value: null, isNull: true };
 	}
@@ -65,5 +65,3 @@ function representValue(value: unknown): ValueRepresentation {
 	// fallback — JEJ learner code only uses primitives, so this rarely fires
 	return { type: 'object', value: null, isNull: true };
 }
-
-export default representValue;

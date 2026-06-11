@@ -22,22 +22,7 @@ import representValue from '../../represent-value/represent-value.js';
 
 import type { TracerState, JejTag } from '../types.js';
 
-/**
- * Determines if a short-circuiting operator short-circuited based on
- * the operator and the result value.
- *
- * For &&: short-circuits when left is falsy (result = left)
- * For ||: short-circuits when left is truthy (result = left)
- * For ??: short-circuits when left is not null/undefined (result = left)
- */
-function didShortCircuit(operator: string, result: unknown): boolean {
-	if (operator === '&&') return !Boolean(result);
-	if (operator === '||') return Boolean(result);
-	if (operator === '??') return result !== null && result !== undefined;
-	return false;
-}
-
-function expressionAfter(
+export default function expressionAfter(
 	state: TracerState,
 	result: unknown,
 	...point: unknown[]
@@ -138,4 +123,17 @@ function expressionAfter(
 	return result;
 }
 
-export default expressionAfter;
+/**
+ * Determines if a short-circuiting operator short-circuited based on
+ * the operator and the result value.
+ *
+ * For &&: short-circuits when left is falsy (result = left)
+ * For ||: short-circuits when left is truthy (result = left)
+ * For ??: short-circuits when left is not null/undefined (result = left)
+ */
+function didShortCircuit(operator: string, result: unknown): boolean {
+	if (operator === '&&') return !Boolean(result);
+	if (operator === '||') return Boolean(result);
+	if (operator === '??') return result !== null && result !== undefined;
+	return false;
+}

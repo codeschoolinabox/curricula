@@ -12,7 +12,7 @@ import emitEvent from './emit-event.js';
 
 import type { TracerState, JejTag } from '../types.js';
 
-function blockThrowing(
+export default function blockThrowing(
 	state: TracerState,
 	error: unknown,
 	_parentType: string,
@@ -46,5 +46,3 @@ function blockThrowing(
 
 	return error;
 }
-
-export default blockThrowing;

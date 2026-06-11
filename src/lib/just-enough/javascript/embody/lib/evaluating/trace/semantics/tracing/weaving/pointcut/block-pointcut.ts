@@ -11,6 +11,20 @@
 
 import type { JejTag } from '../types.js';
 
+export default function blockPointcut(
+	node: BlockNode,
+	parent: AranNode,
+	_root: unknown,
+): [string, string, string, JejTag, string | null] {
+	const scopeKind = deriveScopeKind(parent);
+	const segmentKind = deriveSegmentKind(node, parent);
+
+	// extract first user-facing label (skip Aran-mangled labels starting with '$')
+	const userLabel = node.labels?.find((l) => !l.startsWith('$')) ?? null;
+
+	return [parent.type, scopeKind, segmentKind, node.tag, userLabel];
+}
+
 type AranNode = {
 	readonly type: string;
 	readonly kind?: string;
@@ -77,18 +91,3 @@ function deriveScopeKind(parent: AranNode): string {
  * @returns [parentType, scopeKind, segmentKind, tag]
  */
 // perf: skip freeze — consumed by Aran's weaving machinery (ephemeral, serialized into code)
-function blockPointcut(
-	node: BlockNode,
-	parent: AranNode,
-	_root: unknown,
-): [string, string, string, JejTag, string | null] {
-	const scopeKind = deriveScopeKind(parent);
-	const segmentKind = deriveSegmentKind(node, parent);
-
-	// extract first user-facing label (skip Aran-mangled labels starting with '$')
-	const userLabel = node.labels?.find((l) => !l.startsWith('$')) ?? null;
-
-	return [parent.type, scopeKind, segmentKind, node.tag, userLabel];
-}
-
-export default blockPointcut;

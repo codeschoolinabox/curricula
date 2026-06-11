@@ -10,12 +10,6 @@
 import Ajv from './ajv.js';
 import type { JSONSchema } from './types.js';
 
-/** Configured Ajv instance for validation */
-const ajv = new Ajv({
-	allErrors: true,
-	strict: false,
-});
-
 /**
  * Validates data against JSON Schema.
  *
@@ -24,7 +18,10 @@ const ajv = new Ajv({
  * @returns Same data reference on success (enables piping)
  * @throws Error when validation fails — message lists every violation joined with "; "
  */
-function validateConfig(data: unknown, schema: JSONSchema): unknown {
+export default function validateConfig(
+	data: unknown,
+	schema: JSONSchema,
+): unknown {
 	// Handle null/undefined as empty object
 	const input = data === null || data === undefined ? {} : data;
 
@@ -78,4 +75,8 @@ function formatError(error: AjvError): string {
 	return `${path} ${message}`;
 }
 
-export default validateConfig;
+/** Configured Ajv instance for validation */
+const ajv = new Ajv({
+	allErrors: true,
+	strict: false,
+});

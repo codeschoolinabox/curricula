@@ -11,7 +11,7 @@ import emitEvent from './emit-event.js';
 
 import type { TracerState, JejTag } from '../types.js';
 
-function blockTeardown(
+export default function blockTeardown(
 	state: TracerState,
 	_parentType: string,
 	scopeKind: string,
@@ -48,5 +48,3 @@ function blockTeardown(
 	// 2. pop scope — always, even if event emission failed
 	popScope(state);
 }
-
-export default blockTeardown;

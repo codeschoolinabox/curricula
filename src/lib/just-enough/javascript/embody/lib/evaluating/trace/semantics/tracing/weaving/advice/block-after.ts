@@ -11,7 +11,7 @@ import emitEvent from './emit-event.js';
 
 import type { TracerState, JejTag } from '../types.js';
 
-function blockAfter(
+export default function blockAfter(
 	state: TracerState,
 	_parentType: string,
 	scopeKind: string,
@@ -36,5 +36,3 @@ function blockAfter(
 		});
 	}
 }
-
-export default blockAfter;

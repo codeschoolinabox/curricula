@@ -4,7 +4,7 @@ import type { ForInitializeEvent } from '../../types.js';
  * Creates a ForInitializeEvent for the for-loop initialization phase.
  * Kind is always 'for' — set automatically.
  */
-function createForInitializeEvent(
+export default function createForInitializeEvent(
 	{
 		scopeCreationStep,
 		label,
@@ -24,5 +24,3 @@ function createForInitializeEvent(
 		...(label !== undefined && { label }),
 	};
 }
-
-export default createForInitializeEvent;

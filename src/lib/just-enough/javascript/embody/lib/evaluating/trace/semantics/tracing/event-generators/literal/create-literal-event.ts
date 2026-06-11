@@ -4,15 +4,6 @@ import type {
 	ValueRepresentation,
 } from '../../types.js';
 
-const VALID_KINDS = new Set<LiteralKind>([
-	'string',
-	'boolean',
-	'number',
-	'undefined',
-	'null',
-	'regex',
-]);
-
 /**
  * Creates a LiteralEvent for when a value is created from a literal expression.
  *
@@ -20,7 +11,7 @@ const VALID_KINDS = new Set<LiteralKind>([
  * @returns The domain-specific fields for a LiteralEvent (without BaseEvent metadata)
  * @throws {Error} If kind or value is missing
  */
-function createLiteralEvent(
+export default function createLiteralEvent(
 	{
 		kind,
 		value,
@@ -45,4 +36,11 @@ function createLiteralEvent(
 	};
 }
 
-export default createLiteralEvent;
+const VALID_KINDS = new Set<LiteralKind>([
+	'string',
+	'boolean',
+	'number',
+	'undefined',
+	'null',
+	'regex',
+]);

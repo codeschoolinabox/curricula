@@ -20,7 +20,7 @@ import emitEvent from './emit-event.js';
 
 import type { TracerState, JejTag } from '../types.js';
 
-function blockBefore(
+export default function blockBefore(
 	state: TracerState,
 	_parentType: string,
 	scopeKind: string,
@@ -112,5 +112,3 @@ function blockBefore(
 		}
 	}
 }
-
-export default blockBefore;

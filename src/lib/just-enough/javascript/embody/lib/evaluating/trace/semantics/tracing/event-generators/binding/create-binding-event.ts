@@ -5,23 +5,6 @@ import type {
 	ValueRepresentation,
 } from '../../types.js';
 
-type BindingParams = {
-	readonly kind: BindingKind;
-	readonly event: BindingEventType;
-	readonly name: string;
-	readonly scopeCreationStep: number;
-	readonly declarationStep?: number;
-	readonly value?: ValueRepresentation;
-	readonly explicit?: boolean;
-};
-
-const EVENTS_WITH_VALUE = new Set<BindingEventType>([
-	'initialize',
-	'available',
-	'assign',
-	'read',
-]);
-
 /**
  * Creates a BindingEvent for variable lifecycle tracking.
  *
@@ -29,7 +12,7 @@ const EVENTS_WITH_VALUE = new Set<BindingEventType>([
  * @returns Domain-specific fields for a BindingEvent
  * @throws {Error} If name is empty or value missing on events that require it
  */
-function createBindingEvent(
+export default function createBindingEvent(
 	{
 		kind,
 		event,
@@ -63,4 +46,19 @@ function createBindingEvent(
 	};
 }
 
-export default createBindingEvent;
+type BindingParams = {
+	readonly kind: BindingKind;
+	readonly event: BindingEventType;
+	readonly name: string;
+	readonly scopeCreationStep: number;
+	readonly declarationStep?: number;
+	readonly value?: ValueRepresentation;
+	readonly explicit?: boolean;
+};
+
+const EVENTS_WITH_VALUE = new Set<BindingEventType>([
+	'initialize',
+	'available',
+	'assign',
+	'read',
+]);

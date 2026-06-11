@@ -6,7 +6,7 @@ import type { TemplateEndEvent, ValueRepresentation } from '../../types.js';
  * @param params - final string value and begin step reference
  * @returns Domain-specific fields for a TemplateEndEvent
  */
-function createTemplateEndEvent(
+export default function createTemplateEndEvent(
 	{
 		value,
 		beginStep,
@@ -25,5 +25,3 @@ function createTemplateEndEvent(
 		beginStep,
 	};
 }
-
-export default createTemplateEndEvent;

@@ -4,7 +4,7 @@ import type { BranchEvent } from '../../types.js';
  * Creates a BranchEvent for if/else path selection.
  * Kind is always 'conditional' — set automatically.
  */
-function createBranchEvent(
+export default function createBranchEvent(
 	{
 		branch,
 		scopeCreationStep,
@@ -28,5 +28,3 @@ function createBranchEvent(
 		...(label !== undefined && { label }),
 	};
 }
-
-export default createBranchEvent;

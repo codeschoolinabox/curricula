@@ -11,25 +11,15 @@
 import type { JejTag } from '../types.js';
 import ARAN_PARAMETERS from '../aran-parameters.js';
 
-type ExpressionNode = {
-	readonly type: string;
-	readonly tag: JejTag;
-	readonly variable?: string;
-	readonly primitive?: unknown;
-};
-
-type ParentNode = {
-	readonly type: string;
-	readonly test?: ExpressionNode;
-};
-
 /**
  * Creates an expression pointcut that checks config.
  *
  * @param config - The user's trace config
  * @returns Pointcut function for expression@after hook
  */
-function createExpressionPointcut(config: Record<string, unknown>) {
+export default function createExpressionPointcut(
+	config: Record<string, unknown>,
+) {
 	const literals = (config.literals ?? {}) as Record<string, unknown>;
 	const bindings = (config.bindings ?? {}) as Record<string, unknown>;
 	const bindingEvents = (bindings.events ?? {}) as Record<string, unknown>;
@@ -99,4 +89,14 @@ function createExpressionPointcut(config: Record<string, unknown>) {
 	return expressionPointcut;
 }
 
-export default createExpressionPointcut;
+type ExpressionNode = {
+	readonly type: string;
+	readonly tag: JejTag;
+	readonly variable?: string;
+	readonly primitive?: unknown;
+};
+
+type ParentNode = {
+	readonly type: string;
+	readonly test?: ExpressionNode;
+};

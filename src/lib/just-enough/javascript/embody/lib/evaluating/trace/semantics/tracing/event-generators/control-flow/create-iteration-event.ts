@@ -4,23 +4,13 @@ import type {
 	ValueRepresentation,
 } from '../../types.js';
 
-type IterationParams = {
-	readonly kind: LoopKind;
-	readonly index: number;
-	readonly scopeCreationStep: number;
-	readonly iterable?: ValueRepresentation;
-	readonly iterationValue?: ValueRepresentation;
-	readonly iterationVariable?: string;
-	readonly label?: string;
-};
-
 /**
  * Creates an IterationEvent for loop iteration start.
  * forOf-specific fields (iterable, iterationValue, iterationVariable) must all co-occur.
  *
  * @throws {Error} If index < 0 or forOf fields don't co-occur
  */
-function createIterationEvent(
+export default function createIterationEvent(
 	{
 		kind,
 		index,
@@ -58,4 +48,12 @@ function createIterationEvent(
 	};
 }
 
-export default createIterationEvent;
+type IterationParams = {
+	readonly kind: LoopKind;
+	readonly index: number;
+	readonly scopeCreationStep: number;
+	readonly iterable?: ValueRepresentation;
+	readonly iterationValue?: ValueRepresentation;
+	readonly iterationVariable?: string;
+	readonly label?: string;
+};

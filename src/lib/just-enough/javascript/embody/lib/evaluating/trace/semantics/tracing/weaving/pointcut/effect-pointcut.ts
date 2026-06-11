@@ -7,19 +7,13 @@
 
 import type { JejTag } from '../types.js';
 
-type EffectNode = {
-	readonly type: string;
-	readonly tag: JejTag;
-	readonly variable?: string;
-};
-
 /**
  * Creates an effect pointcut function that checks config.
  *
  * @param config - The user's trace config
  * @returns Pointcut function for effect@before/after hooks
  */
-function createEffectPointcut(config: Record<string, unknown>) {
+export default function createEffectPointcut(config: Record<string, unknown>) {
 	const bindings = (config.bindings ?? {}) as Record<string, unknown>;
 	const bindingEvents = (bindings.events ?? {}) as Record<string, unknown>;
 	const operators = (config.operators ?? {}) as Record<string, unknown>;
@@ -57,4 +51,8 @@ function createEffectPointcut(config: Record<string, unknown>) {
 	return effectPointcut;
 }
 
-export default createEffectPointcut;
+type EffectNode = {
+	readonly type: string;
+	readonly tag: JejTag;
+	readonly variable?: string;
+};

@@ -14,6 +14,37 @@
 
 import type { JejTag } from '../types.js';
 
+/**
+ * Creates a statement pointcut. Intercepts BreakStatement for JumpEvent.
+ * Point data: ['jump', jumpKind, userLabel, tag]
+ */
+export default function createStatementPointcut(
+	config: Record<string, unknown>,
+) {
+	const controlFlow = (config.controlFlow ?? {}) as Record<string, unknown>;
+	const controlFlowEvents = (controlFlow.events ?? {}) as Record<
+		string,
+		unknown
+	>;
+
+	// perf: skip freeze — consumed by Aran's weaving machinery
+	function statementPointcut(
+		node: StatementNode,
+		_parent: unknown,
+		_root: unknown,
+	): unknown[] | null {
+		if (node.type === 'BreakStatement' && controlFlowEvents.jump) {
+			const jumpKind = isContinueLabel(node.label) ? 'continue' : 'break';
+			const userLabel = extractUserLabel(node.label);
+			return ['jump', jumpKind, userLabel, node.tag];
+		}
+
+		return null;
+	}
+
+	return statementPointcut;
+}
+
 type StatementNode = {
 	readonly type: string;
 	readonly tag: JejTag;
@@ -51,34 +82,3 @@ function extractUserLabel(label: string | undefined): string | null {
 	if (dotIndex === -1) return null;
 	return label.slice(dotIndex + 1);
 }
-
-/**
- * Creates a statement pointcut. Intercepts BreakStatement for JumpEvent.
- * Point data: ['jump', jumpKind, userLabel, tag]
- */
-function createStatementPointcut(config: Record<string, unknown>) {
-	const controlFlow = (config.controlFlow ?? {}) as Record<string, unknown>;
-	const controlFlowEvents = (controlFlow.events ?? {}) as Record<
-		string,
-		unknown
-	>;
-
-	// perf: skip freeze — consumed by Aran's weaving machinery
-	function statementPointcut(
-		node: StatementNode,
-		_parent: unknown,
-		_root: unknown,
-	): unknown[] | null {
-		if (node.type === 'BreakStatement' && controlFlowEvents.jump) {
-			const jumpKind = isContinueLabel(node.label) ? 'continue' : 'break';
-			const userLabel = extractUserLabel(node.label);
-			return ['jump', jumpKind, userLabel, node.tag];
-		}
-
-		return null;
-	}
-
-	return statementPointcut;
-}
-
-export default createStatementPointcut;

@@ -7,7 +7,7 @@ import type { FunctionCallEvent, ValueRepresentation } from '../../types.js';
  * @returns Domain-specific fields for a FunctionCallEvent
  * @throws {Error} If name is missing or empty
  */
-function createFunctionCallEvent(
+export default function createFunctionCallEvent(
 	{
 		name,
 		args,
@@ -32,5 +32,3 @@ function createFunctionCallEvent(
 		args,
 	};
 }
-
-export default createFunctionCallEvent;

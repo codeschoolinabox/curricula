@@ -20,7 +20,7 @@ import type { TracerState, JejTag } from '../types.js';
  * @param generatorPath - Dot-separated path to event generator (e.g., 'literals.string')
  * @param payload - Domain-specific data for the generator
  */
-function emitEvent(
+export default function emitEvent(
 	state: TracerState,
 	tag: JejTag,
 	semantics: 'expression' | 'statement',
@@ -41,5 +41,3 @@ function emitEvent(
 	state.trace.push(event);
 	state.onEvent?.(event);
 }
-
-export default emitEvent;

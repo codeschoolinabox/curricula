@@ -4,7 +4,7 @@ import type { ForIncrementEvent } from '../../types.js';
  * Creates a ForIncrementEvent for the for-loop update/increment phase.
  * Kind is always 'for' — set automatically.
  */
-function createForIncrementEvent(
+export default function createForIncrementEvent(
 	{
 		scopeCreationStep,
 		label,
@@ -24,5 +24,3 @@ function createForIncrementEvent(
 		...(label !== undefined && { label }),
 	};
 }
-
-export default createForIncrementEvent;
