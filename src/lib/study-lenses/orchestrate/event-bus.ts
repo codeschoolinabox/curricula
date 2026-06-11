@@ -83,15 +83,14 @@ export default function createEventBus(): EventBus {
 			// the in-flight loop. Re-entrant dispatches take their own
 			// snapshot at inner-dispatch time, so the depth-first contract
 			// holds per-call rather than per-root.
-			const listeners = [...listenersByEvent[name]];
+			// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
+			const listeners = Array.from(
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- tsc (binding gate) rejects the unioned indexed access without it (TS2769); eslint's checker disagrees — tool catch-22, tsc wins.
+				listenersByEvent[name] as Set<EventListener<N>>,
+			);
 			for (const listener of listeners) {
 				try {
-					// Cast is safe: each Set in ListenerStore only ever holds
-					// EventListener<N> for its own key, by construction at the
-					// subscribe boundary. TypeScript can't narrow through a
-					// generic indexed access on the discriminated record, so
-					// the cast bridges the gap.
-					(listener as EventListener<N>)(payload);
+					listener(payload);
 				} catch (error) {
 					console.warn(
 						`EventBus: listener for "${name}" threw; subsequent listeners still fire`,
