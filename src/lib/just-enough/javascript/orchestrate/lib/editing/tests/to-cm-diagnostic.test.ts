@@ -2,7 +2,7 @@ import { Text } from '@codemirror/state';
 import { describe, it, expect } from 'vitest';
 
 
-import { toCMDiagnostic } from '../to-cm-diagnostic.js';
+import toCMDiagnostic from '../to-cm-diagnostic.js';
 import type { DocEntry as DocumentEntry, LintDiagnostic } from '../types.js';
 
 const SAMPLE_ENTRY: DocumentEntry = Object.freeze({

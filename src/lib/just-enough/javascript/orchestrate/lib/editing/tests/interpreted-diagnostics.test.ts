@@ -13,10 +13,10 @@
 
 import { describe, expect, it } from 'vitest';
 
-import interpretedDiagnostics from '../interpreted-diagnostics.js';
+import mergeDiagnostics from '../interpreted-diagnostics/merge-diagnostics.js';
 import type { LintDiagnostic } from '../types.js';
 
-const { merge } = interpretedDiagnostics;
+const merge = mergeDiagnostics;
 
 function makeDiagnostic(
 	line: number,

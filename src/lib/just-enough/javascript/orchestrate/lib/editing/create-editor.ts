@@ -15,8 +15,11 @@ import { forceLinting, setDiagnostics } from '@codemirror/lint';
 import { EditorView } from '@codemirror/view';
 
 import buildExtensions from './build-extensions.js';
-import interpretedDiagnostics from './interpreted-diagnostics.js';
-import { toCMDiagnostic, runLinterCallbacks } from './to-cm-diagnostic.js';
+import interpretedDiagnosticsField from './interpreted-diagnostics/field.js';
+import mergeDiagnostics from './interpreted-diagnostics/merge-diagnostics.js';
+import setInterpretedDiagnosticsEffect from './interpreted-diagnostics/set-effect.js';
+import runLinterCallbacks from './run-linter-callbacks.js';
+import toCMDiagnostic from './to-cm-diagnostic.js';
 import type { EditorOptions, EditorInstance, LintDiagnostic } from './types.js';
 
 /**
@@ -156,9 +159,9 @@ export default async function createEditor(
 		// runtime safeguard: the field is always installed when the
 		// linterCallbacks guard above passes (both ship together in
 		// buildExtensions step 3).
-		const allDiagnostics = interpretedDiagnostics.merge(
+		const allDiagnostics = mergeDiagnostics(
 			structural,
-			editor.state.field(interpretedDiagnostics.field, false) ?? [],
+			editor.state.field(interpretedDiagnosticsField, false) ?? [],
 		);
 
 		const cmDiagnostics = allDiagnostics.map((d) =>
@@ -182,7 +185,7 @@ export default async function createEditor(
 		}
 
 		editor.dispatch({
-			effects: interpretedDiagnostics.effect.of(diagnostics),
+			effects: setInterpretedDiagnosticsEffect.of(diagnostics),
 		});
 		// The effect transaction trips the linter's needsRefresh (field
 		// identity changed), arming the lint plugin — so this forceLinting

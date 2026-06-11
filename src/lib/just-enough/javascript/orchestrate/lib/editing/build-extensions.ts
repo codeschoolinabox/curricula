@@ -20,8 +20,10 @@ import { basicSetup } from 'codemirror';
 
 import buildInfoDom from './build-info-dom.js';
 import buildTooltipDom from './build-tooltip-dom.js';
-import interpretedDiagnostics from './interpreted-diagnostics.js';
-import { toCMDiagnostic, runLinterCallbacks } from './to-cm-diagnostic.js';
+import interpretedDiagnosticsField from './interpreted-diagnostics/field.js';
+import mergeDiagnostics from './interpreted-diagnostics/merge-diagnostics.js';
+import runLinterCallbacks from './run-linter-callbacks.js';
+import toCMDiagnostic from './to-cm-diagnostic.js';
 import type {
 	LinterCallback,
 	DocLookupCallback as DocumentLookupCallback,
@@ -70,23 +72,22 @@ export default async function buildExtensions(
 	//    interpreted feed on a just-cleared buffer should not paint.
 	if (linterCallbacks && linterCallbacks.length > 0) {
 		extensions.push(
-			interpretedDiagnostics.field,
+			interpretedDiagnosticsField,
 			linter(
 				function combinedLinter(view: EditorView) {
 					const code = view.state.doc.toString();
 					if (!code.trim()) return [];
 
 					const structural = runLinterCallbacks(linterCallbacks, code);
-					const interpreted = view.state.field(interpretedDiagnostics.field);
-					return interpretedDiagnostics
-						.merge(structural, interpreted)
+					const interpreted = view.state.field(interpretedDiagnosticsField);
+					return mergeDiagnostics(structural, interpreted)
 						.map((d) => toCMDiagnostic(view.state.doc, d));
 				},
 				{
 					needsRefresh(update) {
 						return (
-							update.state.field(interpretedDiagnostics.field) !==
-							update.startState.field(interpretedDiagnostics.field)
+							update.state.field(interpretedDiagnosticsField) !==
+							update.startState.field(interpretedDiagnosticsField)
 						);
 					},
 				},

@@ -12,7 +12,7 @@ import type { Diagnostic } from '@codemirror/lint';
 import type { Text } from '@codemirror/state';
 
 import buildTooltipDom from './build-tooltip-dom.js';
-import type { LintDiagnostic, LinterCallback } from './types.js';
+import type { LintDiagnostic } from './types.js';
 
 /**
  * Convert a {@link LintDiagnostic} to a CodeMirror {@link Diagnostic}.
@@ -27,7 +27,7 @@ import type { LintDiagnostic, LinterCallback } from './types.js';
  * @param diagnostic - LintDiagnostic from a callback
  * @returns CodeMirror Diagnostic
  */
-function toCMDiagnostic(doc: Text, diagnostic: LintDiagnostic): Diagnostic {
+export default function toCMDiagnostic(doc: Text, diagnostic: LintDiagnostic): Diagnostic {
 	const { line, column, endLine, endColumn, severity, message, source, entry } =
 		diagnostic;
 
@@ -76,31 +76,3 @@ function toCMDiagnostic(doc: Text, diagnostic: LintDiagnostic): Diagnostic {
 	return result;
 }
 
-/**
- * Run all linter callbacks safely, catching errors and filtering bad returns.
- *
- * @param callbacks - Linter functions to invoke
- * @param code - Current editor content
- * @returns Combined diagnostics from all linters
- */
-function runLinterCallbacks(
-	callbacks: readonly LinterCallback[],
-	code: string,
-): LintDiagnostic[] {
-	const results: LintDiagnostic[] = [];
-
-	for (const fn of callbacks) {
-		try {
-			const linterResult = fn(code);
-			if (Array.isArray(linterResult)) {
-				results.push(...linterResult);
-			}
-		} catch (err: unknown) {
-			console.warn('Linter callback threw:', err);
-		}
-	}
-
-	return results;
-}
-
-export { toCMDiagnostic, runLinterCallbacks };
