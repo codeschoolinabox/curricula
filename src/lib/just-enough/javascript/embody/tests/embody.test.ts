@@ -489,6 +489,11 @@ describe('embody', () => {
 			const ri = await embody('EVAL_CANCELLED').events.evaluation.run();
 			expect(ri.endReport.ok).toBe(false);
 		});
+
+		it('events.evaluation.run() resolves with endReport.error: null', async () => {
+			const ri = await embody('EVAL_CANCELLED').events.evaluation.run();
+			expect(ri.endReport.error).toBeNull();
+		});
 	});
 
 	describe('events.evaluation.intercept and trace.* (apex modes)', () => {
@@ -510,6 +515,11 @@ describe('embody', () => {
 		it('cancel() returns undefined (no-op)', () => {
 			const handle = embody('OK').events.evaluation.intercept();
 			expect(handle.cancel()).toBeUndefined();
+		});
+
+		it('intercept returns an EvaluateHandle with .fail', () => {
+			const handle = embody('OK').events.evaluation.intercept();
+			expect(typeof handle.fail).toBe('function');
 		});
 
 		it('intercept .result resolves to the same canned RunInstance run() returns', async () => {

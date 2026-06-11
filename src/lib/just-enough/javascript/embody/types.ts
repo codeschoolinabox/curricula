@@ -658,7 +658,21 @@ interface EmitNMEvent extends NMEvent {
 interface ErrorNMEvent extends NMEvent {
 	readonly phase: 'evaluation';
 	readonly category: 'error';
-	readonly kind: 'ReferenceError' | 'TypeError' | 'RangeError' | 'SyntaxError';
+	/**
+	 * Coarse lens-facing discriminator. INVARIANT: `kind === 'Error'` iff
+	 * `errorName` is not one of the four named kinds; `errorName` carries
+	 * the engine-classified error name (the constructor name for Error
+	 * instances; engine-classified for non-Error throws like
+	 * `throw 'oops'`) and equals `kind` for the named four. Engine-level
+	 * failures (timeout, worker crash, io-mock throw) are NEVER error
+	 * events — they surface only on `EndReport.error`.
+	 */
+	readonly kind:
+		| 'ReferenceError'
+		| 'TypeError'
+		| 'RangeError'
+		| 'SyntaxError'
+		| 'Error';
 	readonly entwined: NodeEntwined | null;
 	readonly errorName: string;
 	readonly message: string;
@@ -714,19 +728,81 @@ interface EvaluateOptions {
 	readonly io?: IoMocks;
 }
 
+/**
+ * Per-hook IO mocks. Every mock is awaited by the engine — learner code
+ * holds until the callback settles (sync returns are valid and cost one
+ * microtask; async returns let styled dialogs and slow consumers finish
+ * without the learner's script noticing).
+ *
+ * WHY both return shapes: embody's earlier sync-only signatures were a
+ * drift from the intercept engine, which has always awaited async mocks.
+ * This realigns the contract with the engine it specifies.
+ */
 interface IoMocks {
-	readonly alert?: (message: string) => void;
-	readonly confirm?: (message: string) => boolean;
-	readonly prompt?: (message: string, defaultValue?: string) => string | null;
-	readonly console?: Partial<Record<string, (...args: unknown[]) => void>>;
+	readonly alert?: (message: string) => void | Promise<void>;
+	readonly confirm?: (message: string) => boolean | Promise<boolean>;
+	readonly prompt?: (
+		message: string,
+		defaultValue?: string,
+	) => string | null | Promise<string | null>;
+	readonly console?: Partial<
+		Record<string, (...arguments_: unknown[]) => void | Promise<void>>
+	>;
 }
 
-/** Async iterable + .result Promise for live-streamed evaluate tiers. */
+/**
+ * Async iterable + .result Promise for live-streamed evaluate tiers.
+ *
+ * `result` resolves with THIS call's RunInstance. Identity-equality with
+ * another call's RunInstance (e.g. the one `run()` resolves) is never a
+ * contract guarantee — each evaluate call is a fresh run. (The canned
+ * scenario stubs share one RunInstance; that is a stub coincidence, not
+ * contract.)
+ *
+ * `cancel()` stops the run; `result` resolves with outcome `'cancelled'`.
+ *
+ * `fail(reason?)` is the consumer-driven STRUCTURED stop — for teaching
+ * harnesses that must record WHY a run was stopped (e.g. a learner's
+ * prediction was wrong). `result` resolves with outcome `'failed'` and
+ * `endReport.failReason === reason` — the same reference, frozen in place
+ * by the RunInstance deep-freeze (pass a clone if the original must stay
+ * mutable). Unavailable on `run()`: a bare Promise offers no mid-stream
+ * surface from which to decide a failure.
+ *
+ * Both stops are idempotent and first-write-wins — against each other,
+ * timeout, runtime error, and the run's natural completion. A stop
+ * requested after `result` settles is a no-op.
+ */
 interface EvaluateHandle extends AsyncIterable<AnyNMEvent> {
 	readonly result: Promise<RunInstance>;
 	readonly cancel: () => void;
+	readonly fail: (reason?: unknown) => void;
 }
 
+/**
+ * How one evaluate call ended. Three independent axes:
+ *
+ * - `ok` — did the program run to its natural end? `true` iff
+ *   `outcome === 'completed'`.
+ * - `error` — did the program or its enforcement misbehave? Non-null iff
+ *   outcome is `'errored' | 'timed-out' | 'limit-exceeded'`.
+ *   Consumer-driven stops (`'cancelled'`, `'failed'`) and the gate
+ *   short-circuit (`'not-runnable'`, whose failure lives on
+ *   `snippet.errors`) carry `error: null`.
+ * - `outcome` — exhaustive classification of how the run ended.
+ *
+ * | outcome                              | ok    | error    |
+ * | ------------------------------------ | ----- | -------- |
+ * | completed                            | true  | null     |
+ * | errored / timed-out / limit-exceeded | false | non-null |
+ * | cancelled / failed / not-runnable    | false | null     |
+ *
+ * `failReason` is present iff `outcome === 'failed'`: the payload passed
+ * to `EvaluateHandle.fail(reason)`, stored by reference and frozen in
+ * place by the RunInstance deep-freeze. (Named `failReason`, not `reason`
+ * — `reason` on scope/script/statement events is the `ScopePopReason`
+ * enum; a different concept.)
+ */
 interface EndReport {
 	readonly ok: boolean;
 	readonly error: EmbodyError | null;
@@ -735,8 +811,10 @@ interface EndReport {
 		| 'errored'
 		| 'timed-out'
 		| 'cancelled'
+		| 'failed'
 		| 'limit-exceeded'
 		| 'not-runnable';
+	readonly failReason?: unknown;
 }
 
 interface RunMetrics {
@@ -753,7 +831,14 @@ interface RunMetrics {
 interface RunInstance {
 	readonly events: ReadonlyArray<AnyNMEvent>;
 	readonly endReport: EndReport;
-	readonly finalEnvironment: ScopeEntwined;
+	/**
+	 * Null until a tier provides runtime scope tracking (trace.variables
+	 * and up). As typed, ScopeEntwined is static — per DOCS § Static/
+	 * runtime asymmetry, static entities never carry runtime values — so
+	 * the eventual non-null shape is expected to be revisited in the
+	 * trace.variables DDD. See DOCS § Open holes.
+	 */
+	readonly finalEnvironment: ScopeEntwined | null;
 	readonly runMetrics: RunMetrics;
 	readonly snippet: Snippet;
 }

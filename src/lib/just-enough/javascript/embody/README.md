@@ -203,6 +203,12 @@ Evaluate-tier events are a flat discriminated union; tiers are filter
 whitelists, not type-narrowed subsets. Each call returns a `RunInstance` with
 the events that fired plus an end-report.
 
+Streaming handles (`intercept`, `trace.*`) expose `.cancel()` and
+`.fail(reason?)` — `fail` is the structured consumer-driven stop, resolving
+`result` with `endReport.outcome: 'failed'` and the reason on
+`endReport.failReason`. `run()` returns a bare `Promise<RunInstance>` with
+neither (no mid-stream surface to decide a stop from).
+
 ## Load-bearing principles (do not violate without explicit decision)
 
 1. **Pure data, no methods.** Every embody surface is data: frozen objects,
@@ -320,7 +326,10 @@ form through real tokenization.
 keywords for use in test fixtures and sandbox demos. The named scenarios cover:
 `OK`, `FAIL_AT_TOKENIZE`, `FAIL_AT_PARSE`, `FAIL_AT_CREATE`, `VALIDATION_FAIL`,
 `NON_DETERMINISTIC`, `PAUSES`, `EVAL_ERROR`, `EVAL_TIMEOUT`, `EVAL_LIMIT`,
-`EVAL_CANCELLED`.
+`EVAL_CANCELLED`. The set is exhaustive over `run()`-reachable outcomes — not
+over all outcomes: `'failed'` has no scenario keyword because it is reachable
+only through a live `.fail(reason)` on a streaming handle (see
+[DOCS.md](./DOCS.md) § Consumer-driven stops).
 
 > **Anti-pattern: no consumer-side branching on `snippet.source.code`.**
 > Consumers (lenses, orchestrator, recommender, …) MUST NOT use `source.code`

@@ -338,6 +338,40 @@ small, runs are cheap, and cache machinery (mock identity tracking, WeakMap edge
 cases, stale-cache confusion) costs more than it saves. Lenses that want a
 stable replay hold onto a RunInstance themselves.
 
+Re-iterating a settled `EvaluateHandle` is likewise not contract behavior —
+`RunInstance.events` IS the cache. A lens that streamed a run live and wants to
+walk it again reads `(await handle.result).events`; each evaluate call is a
+fresh run.
+
+### Consumer-driven stops — `.fail`, `cancelled`, and the three axes of EndReport
+
+`EvaluateHandle.fail(reason?)` exists for teaching harnesses that must record
+WHY a run was stopped (a learner's prediction was wrong, a step budget was
+spent). `cancel()` says "stop"; `fail(reason)` says "stop, and here is the
+structured why" — the payload surfaces on `endReport.failReason` by reference
+(and is frozen in place by the RunInstance deep-freeze; consumers pass a clone
+if the original must stay mutable). Both stops are first-write-wins — against
+each other, timeout, runtime error, and the run's natural completion; a stop
+requested after the run settles is a no-op. Because the decision to fail is
+inherently mid-stream (event-driven), `fail` lives only on streaming handles —
+`run()` returns a bare Promise, which makes `'failed'` unreachable via `run()`
+and leaves it without a scenario keyword (a canned `failReason` fixture would be
+meaningless — the payload is consumer-authored, and a fixture has no consumer to
+author it).
+
+`EndReport` reads as three independent axes:
+
+- `ok` — did the program run to its natural end? (`true` iff `'completed'`)
+- `error` — did the program or its enforcement misbehave? (non-null iff
+  `'errored' | 'timed-out' | 'limit-exceeded'`)
+- `outcome` — how the run ended, exhaustively.
+
+The two `ok: false, error: null` buckets are distinct in kind: `'not-runnable'`
+is a **gate short-circuit** (the snippet never started; the failure lives on
+`snippet.errors`), while `'cancelled'` / `'failed'` are **consumer-driven
+stops** (the run was healthy; the consumer ended it). Neither is a misbehavior,
+which is why neither fabricates an `EmbodyError`.
+
 ### Getters for frozen-emit constraint (`prev` / `next`)
 
 `NMEvent.prev` and `NMEvent.next` are declared as `get prev(): NMEvent | null` —
@@ -481,6 +515,10 @@ here so a future reader doesn't read the colocation as accident.
 `EMBODY_SCENARIOS` is exported as a frozen array of the 11 valid scenario
 keywords for tests + sandbox demos to enumerate.
 
+Canned evaluate handles are born settled — by the first-write-wins rule (see §
+Consumer-driven stops), consumer stops (`cancel()` / `fail()`) on them are
+no-ops; `result` keeps the scenario's outcome.
+
 > **Anti-pattern: no consumer-side branching on `snippet.source.code`.**
 > Consumers (orchestrator, lenses, recommender, …) MUST NOT use `source.code`
 > content as a branching key — branch on the resulting `Snippet`'s `status` /
@@ -561,6 +599,11 @@ use is needed to inform.
   `coerce: 'ToPrimitive' | 'ToString' | …`, etc.) are named in
   [`types.ts`](./types.ts); the full payload shape per kind is intentionally
   open so per-category emission detail is not premature.
+- **`RunInstance.finalEnvironment` non-null shape** — typed
+  `ScopeEntwined | null`, null until a tier provides runtime scope tracking
+  (trace.variables and up). As typed, `ScopeEntwined` is static — per § Static/
+  runtime asymmetry it cannot carry runtime values — so the eventual non-null
+  shape is expected to be revisited in the trace.variables DDD.
 - **`validation.formatted`** — semantics TBD pending `lib/formatting/` DDD. The
   field exists on `Validation`; its meaning (e.g. "source was already in
   formatted form on entry" vs. "formatting was run and produced no diff") is not

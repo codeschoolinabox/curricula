@@ -160,7 +160,6 @@ import type {
 	RealmNMEvent,
 	RealmPhase,
 	RunInstance,
-	ScopeEntwined,
 	ScopeNMEvent,
 	Snippet,
 	Source,
@@ -270,6 +269,11 @@ async function* emptyEvaluateAsyncIterator(): AsyncGenerator<AnyNMEvent> {
 
 /** No-op cancel for `EvaluateHandle`. Scenario dispatch does not schedule cancellation. */
 function noOpCancel(): void {
+	// intentional no-op
+}
+
+/** No-op fail for `EvaluateHandle`. Scenario dispatch never reaches a 'failed' outcome. */
+function noOpFail(_reason?: unknown): void {
 	// intentional no-op
 }
 
@@ -454,6 +458,7 @@ function makeStubEvaluateHandle(runInstance: RunInstance): EvaluateHandle {
 		[Symbol.asyncIterator]: emptyEvaluateAsyncIterator,
 		result: Promise.resolve(runInstance),
 		cancel: noOpCancel,
+		fail: noOpFail,
 	};
 }
 
@@ -501,7 +506,7 @@ function makeStubRunInstance(endReport: EndReport): RunInstance {
 	return {
 		events: [],
 		endReport,
-		finalEnvironment: {} as unknown as ScopeEntwined,
+		finalEnvironment: null,
 		runMetrics: { steps: 0, durationMs: 0, iterationCount: 0 },
 		snippet: undefined as unknown as Snippet,
 	};
@@ -523,12 +528,20 @@ function makeEvalError(outcome: EndReport['outcome']): EmbodyError {
 
 /**
  * Build the `endReport` for an apex-status mode given the requested
- * outcome. `'completed'` → ok:true, error:null. All other outcomes
- * → ok:false with a fabricated `EmbodyError`.
+ * outcome, per the EndReport ok/error mapping (types.ts § EndReport):
+ * `'completed'` → ok:true, error:null; `'cancelled'` → ok:false,
+ * error:null (consumer-driven stop, not a misbehavior); other failure
+ * outcomes → ok:false with a fabricated `EmbodyError`. Domain: the
+ * `'completed'` default plus the four EVAL_* overlay outcomes —
+ * `'failed'` and `'not-runnable'` never reach this builder
+ * (`not-runnable` uses NOT_RUNNABLE_REPORT; no scenario cans a failure).
  */
 function makeApexEndReport(outcome: EndReport['outcome']): EndReport {
 	if (outcome === 'completed') {
 		return { ok: true, error: null, outcome: 'completed' };
+	}
+	if (outcome === 'cancelled') {
+		return { ok: false, error: null, outcome: 'cancelled' };
 	}
 	return { ok: false, error: makeEvalError(outcome), outcome };
 }
