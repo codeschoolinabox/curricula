@@ -43,9 +43,10 @@ decision numbers are rename-proof; only paths drift.
    It is CANONICAL — where anything (including this handoff) conflicts with it,
    the plan wins. Your scope is **§Phase 0-bis only**: DDD for two new modules,
    no implementation. It depends only on the committed Phase 0 (`f2f1f5e`, done)
-   and MUST complete before Cluster B. Cluster A (engine TDD) is a PARALLEL
-   workflow — see `src/lib/study-lenses/lib/engine/.handoff/cluster-a-launch.md`
-   — neither blocks the other.
+   and MUST complete before Cluster B. Cluster A (engine TDD) is COMPLETE
+   (2026-06-11; its handoff is deleted — see the canonical plan's RESUMPTION
+   POINT for its commit log): the engine is implemented and tested at
+   `src/lib/study-lenses/lib/engine/`.
 3. Read the committed engine contract END-TO-END — the tracers and the adapter
    are its first consumers: `src/lib/study-lenses/lib/engine/README.md`
    (two-sided contract, drain semantics, outcome carriage, §Pause economics,
