@@ -57,6 +57,18 @@ describe('deriveStationRoster', () => {
 			});
 		});
 
+		it('buckets by membership regardless of declaration order', () => {
+			expect(
+				deriveStationRoster({ a: { name: 'a', phase: ['parse', 'source'] } }),
+			).toEqual({
+				source: ['a'],
+				realm: [],
+				parse: ['a'],
+				creation: [],
+				evaluation: [],
+			});
+		});
+
 		it('excludes a lens with no phase from every roster', () => {
 			expect(deriveStationRoster({ a: { name: 'a' } })).toEqual({
 				source: [],
