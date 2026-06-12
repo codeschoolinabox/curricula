@@ -3,17 +3,60 @@
 Audience: a fresh Fable-generation agent with NO prior conversation context.
 Written 2026-06-11, immediately after commits `f2f1f5e` (engine Phase 0 DDD
 artifacts) and `63b71e2` (engine hoisted to
-`src/lib/just-enough/javascript/lib/engine/`). All repo paths below are
-repo-rooted from `0-curricula/`.
+`src/lib/just-enough/javascript/lib/engine/`, since renamed to
+`src/lib/study-lenses/lib/engine/`). All repo paths below are repo-rooted from
+`0-curricula/`.
 
 ## Path-drift warning — read first
 
-A concurrent agent is running a large orchestrator/embody codebase refactor with
-renames. Every path in this handoff was valid at commit `63b71e2`. If a path
-does not exist, the refactor moved it — search by module name (`intercept`,
-`worker-protocol`, `trace-worker`) before assuming deletion. THIS module
-(`src/lib/just-enough/javascript/lib/engine/`) is expected to keep its path; the
-oracle modules under `embody/lib/evaluating/` may move.
+A concurrent agent ran a large orchestrator/embody codebase refactor with
+renames AFTER this handoff was written. Every path in this handoff was valid at
+commit `63b71e2`; by the time it was committed the refactor had already begun
+renaming `src/lib/just-enough/javascript/` → `src/lib/study-lenses/`, and more
+renames may have followed. Paths here are HINTS, not truth — if a path does not
+exist, search by module/file name (`engine/types.ts`, `worker-protocol.ts`,
+`trace-worker.ts`) before assuming deletion. Module CONTENTS, commit SHAs, and
+the canonical plan's decision numbers are rename-proof; only paths drift.
+
+## Path refresh — your FIRST task, before Orientation
+
+1. Establish ground truth: the directory containing this handoff is the engine's
+   real home (`…/engine/.handoff/` → the module is one level up). Locate the
+   oracles by name, not path:
+   `git log --oneline --follow -- '**/worker-protocol.ts'`, or
+   `find src -name trace-worker.ts`; `git log -1 --follow -- <found-path>`
+   confirms a move preserved content.
+2. Rewrite every stale path IN THIS HANDOFF to the post-refactor truth
+   (repo-rooted), and fix the same paths where they appear in the canonical
+   plan's RESUMPTION POINT and §Launch prompts.
+3. Prompt the human for a small commit:
+   `docs: refresh campaign handoff paths after the orchestrator refactor`.
+4. **If the refactor is still IN FLIGHT when you start** (you may be launched in
+   parallel with it — check `git status` for a large foreign staged rename set):
+   skip the refresh commit (step 3), resolve paths by name continuously instead
+   of once, and do the refresh commit when the tree stabilizes. Your own module
+   directory may move mid-session — re-`find` it rather than caching its
+   absolute path.
+5. Only then start Orientation below.
+
+## Running in parallel with the orchestrator refactor
+
+This workflow is isolated enough to run alongside the refactor (all writes land
+inside the engine module; oracles are read-only). Three disciplines make it
+safe:
+
+- **Commit discipline**: before EVERY commit, `git status` — if a foreign staged
+  set exists (the orchestrator's renames), a bare `git commit` would swallow it.
+  Commit with explicit pathspecs (`git commit <your-paths> -m "…"`), which is
+  clean for new files, or wait for the foreign commit to land. Never unstage or
+  touch the foreign entries.
+- **Root configs are the orchestrator's blast zone** (eslint.config.mjs,
+  tsconfig, vitest config). If wiring your tests requires a ROOT config edit,
+  check `git status` on that file first and check in with the human —
+  engine-local files are always safe, root files need coordination.
+- **Old-engine suites are reference, not signal, during the refactor window**:
+  derive your tests from them by reading; do not gate your increments on the old
+  browser suites passing while the tree is being renamed under them.
 
 ## Orientation (in order, before any work)
 
@@ -25,8 +68,8 @@ oracle modules under `embody/lib/evaluating/` may move.
    It is CANONICAL — where anything (including this handoff) conflicts with it,
    the plan wins. Your scope is **§Cluster A only** (A1 → A4). Phase 0 is
    committed. Phase 0-bis (tracers + adapter DDD) is a PARALLEL workflow — see
-   `src/lib/just-enough/javascript/embody/lib/evaluating/.handoff/phase-0-bis-launch.md`
-   — and Cluster A does NOT depend on it: the engine ships its own trivial test
+   `src/lib/study-lenses/embody/lib/evaluating/.handoff/phase-0-bis-launch.md` —
+   and Cluster A does NOT depend on it: the engine ships its own trivial test
    logic (A2).
 3. Read this module's committed ground truth END-TO-END — it is the contract you
    implement, not a suggestion: [README.md](../README.md) (drain semantics, the
@@ -67,11 +110,10 @@ checkpoint: pure infrastructure" → commit prompt → HUMAN approval.
 
 ## Oracles (read before the increment that uses them; do NOT delete them)
 
-- A1:
-  `src/lib/just-enough/javascript/embody/lib/evaluating/intercept/worker-protocol.ts`
+- A1: `src/lib/study-lenses/embody/lib/evaluating/intercept/worker-protocol.ts`
   and its tests — 8192-byte buffer, 6×Int32 header, payload at byte 24.
 - A2:
-  `src/lib/just-enough/javascript/embody/lib/evaluating/trace/semantics/tracing/trace-worker.ts`
+  `src/lib/study-lenses/embody/lib/evaluating/trace/semantics/tracing/trace-worker.ts`
   (worker-global advice registration) and intercept's `vite.sandbox.config.ts`.
 - A3: intercept's cancel / event-ready / timer-pause-yield suites AND its
   PromiseLike/await-drain suites (genericize them); `…/evaluating/run/DOCS.md`
