@@ -178,8 +178,9 @@ mode changes, sandbox test subscribers verifying transitions, future analytics
 hooks — and is internal-only: no DOM registry, no global, no `subscribe` /
 `onEvent` prop on the public `<StudyLenses>` surface. The four event names are
 `lens-switched`, `mode-changed`, `type-toggled`, and `sandbox-toggled` — the
-latter two are typed now and dispatch from the dock when it is built (the same
-typed-before-wired precedent as `LensSelectionSource`'s `'panel'`).
+latter two are typed now and dispatch from the dock when it is built (the
+typed-before-wired pattern `LensSelectionSource`'s `'panel'` followed until the
+phases panel landed its dispatch site).
 
 ### Why internal-only
 

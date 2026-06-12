@@ -610,7 +610,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						statusMap={statusMap}
 						activeLens={activeLens}
 						onLensSelect={handleLensSelect}
-						editButtonVisible={state.mode === 'lens'}
+						editButtonVisible
 						onEditReturn={handleEditReturn}
 					/>
 					<lensModule.Component

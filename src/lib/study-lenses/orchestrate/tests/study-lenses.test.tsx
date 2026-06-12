@@ -909,12 +909,11 @@ describe('<StudyLenses> — C2 the per-station dropdowns (the panel as picker su
 	describe('C2.3 — the source station enumerates the panel-included registry', () => {
 		it('the source dropdown has the sentinel followed by the four source lenses in registration order', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
-			const options = container.querySelectorAll(
+			const options = container.querySelectorAll<HTMLOptionElement>(
 				'[data-orchestrator-station="source"] option',
 			);
-			const values = Array.from(options).map(
-				(option) => (option as HTMLOptionElement).value,
-			);
+			// eslint-disable-next-line unicorn/prefer-spread -- NodeList spread fails tsc without dom.iterable
+			const values = Array.from(options).map((option) => option.value);
 			expect(values).toEqual(['', 'annotate', 'blanks', 'parsons', 'writeme']);
 		});
 
@@ -931,9 +930,9 @@ describe('<StudyLenses> — C2 the per-station dropdowns (the panel as picker su
 	describe('C2.4 — source-station dropdown value in editor mode', () => {
 		it('the source dropdown value is the empty string when there is no lens prop', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
-			const picker = container.querySelector(
+			const picker = container.querySelector<HTMLSelectElement>(
 				'[data-orchestrator-station="source"] select',
-			) as HTMLSelectElement | null;
+			);
 			expect(picker?.value).toBe('');
 		});
 
@@ -942,9 +941,9 @@ describe('<StudyLenses> — C2 the per-station dropdowns (the panel as picker su
 				<StudyLenses snippet="OK" lens="annotate" />,
 			);
 			rerender(<StudyLenses snippet="OK" />);
-			const picker = container.querySelector(
+			const picker = container.querySelector<HTMLSelectElement>(
 				'[data-orchestrator-station="source"] select',
-			) as HTMLSelectElement | null;
+			);
 			expect(picker?.value).toBe('');
 		});
 	});
@@ -1086,9 +1085,9 @@ describe('<StudyLenses> — C2 the per-station dropdowns (the panel as picker su
 			const { container } = render(
 				<StudyLenses snippet="OK" lens="annotate" />,
 			);
-			const picker = container.querySelector(
+			const picker = container.querySelector<HTMLSelectElement>(
 				'[data-orchestrator-station="source"] select',
-			) as HTMLSelectElement | null;
+			);
 			expect(picker?.value).toBe('annotate');
 		});
 
@@ -1097,9 +1096,9 @@ describe('<StudyLenses> — C2 the per-station dropdowns (the panel as picker su
 				<StudyLenses snippet="OK" lens="annotate" />,
 			);
 			rerender(<StudyLenses snippet="OK" lens="blanks" />);
-			const picker = container.querySelector(
+			const picker = container.querySelector<HTMLSelectElement>(
 				'[data-orchestrator-station="source"] select',
-			) as HTMLSelectElement | null;
+			);
 			expect(picker?.value).toBe('blanks');
 		});
 
@@ -1520,6 +1519,27 @@ describe('<StudyLenses> — C2 station availability + status through real embody
 					'[data-orchestrator-station="evaluation"]',
 				)?.dataset.orchestratorStationStatus,
 			).toBe('barred');
+		});
+	});
+
+	describe('Interfaces — the panel tracks the debounce settle (pins the per-edit cadence)', () => {
+		it('flips the parse station to errored after an edit breaks the buffer and the debounce settles', async () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			const view = await findMountedEditorView(container);
+			vi.useFakeTimers();
+			try {
+				typeInto(view, 'let x = ;');
+				act(() => {
+					vi.advanceTimersByTime(200);
+				});
+				expect(
+					container.querySelector<HTMLElement>(
+						'[data-orchestrator-station="parse"]',
+					)?.dataset.orchestratorStationStatus,
+				).toBe('errored');
+			} finally {
+				vi.useRealTimers();
+			}
 		});
 	});
 
