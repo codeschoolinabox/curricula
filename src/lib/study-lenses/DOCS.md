@@ -49,7 +49,8 @@ study-lenses/
   orchestrate/                  orchestrator + default editor + analysis libs
     README.md, DOCS.md, types.ts
     index.tsx                   the <StudyLenses> component (state mgmt + lens dispatch)
-    toolbar.tsx, event-bus.ts   affordance container (phases panel in Cycle 2) + internal bus
+    phases-panel/, event-bus.ts affordance container (the phases panel) + internal bus
+    stations.ts, derive-station-*.ts  the panel's three pure derivations
     editor/                     default home base (the only writer of snippet state)
     lib/                        analysis helpers — all (embodiment) → result
       recommender/              which lenses to surface for an embodiment

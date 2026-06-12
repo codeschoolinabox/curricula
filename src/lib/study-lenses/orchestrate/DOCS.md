@@ -10,9 +10,12 @@
 **At the peer's top level** (the orchestrator itself):
 
 - The `<StudyLenses>` component (`./index.tsx`).
-- The toolbar lens-picker + edit-return button (`./toolbar.tsx`). This is the
-  Cycle-1 affordance container; Cycle 2 replaces it with the **phases panel**
-  (see § The phases panel below).
+- The **phases panel** (`./phases-panel/` — per-station lens dropdowns +
+  edit-return button) and the three station derivations it renders
+  (`./stations.ts`, `./derive-station-roster.ts`,
+  `./derive-station-availability.ts`, `./derive-station-status.ts` — invoked by
+  `index.tsx`; see § The phases panel below). The panel replaced the Cycle-1
+  toolbar.
 - The orchestrator-internal types (`./types.ts`): prop contract, 2-mode state
   machine, the single live-embodiment slot, internal EventBus event taxonomy.
 
@@ -30,7 +33,7 @@ testable in vitest without `jsdom` and limits framework-portability concerns to
 one peer.
 
 The peer follows a **primary-export-at-top-level** convention: `<StudyLenses>`
-and its co-bundled UI files (toolbar, types) sit at the peer's top level,
+and its co-bundled files (the derivations, types) sit at the peer's top level,
 mirroring [`../embody/`](../embody/)'s convention where `embody()` lives at
 `embody/index.ts`. Subdirs (`editor/`, `lib/`) are separable concerns the peer
 also owns; the orchestrator's primary export sits above them at the peer root.
@@ -52,9 +55,9 @@ locked-but-unbuilt it says so.
   `embody()`** while editing, flushed to the exact current buffer on an editor →
   lens transition. From its `errors` the orchestrator derives **interpreted
   diagnostics** and hands them to the editor for gutter rendering.
-- **Cycle 2 — the phases panel** _(design locked, NOT built)._ An NM-lifecycle
-  instrument that both teaches and displays the lifecycle and points
-  phase-targeted lenses at each stage. Replaces `toolbar.tsx`.
+- **Cycle 2 — the phases panel** _(implemented)._ An NM-lifecycle instrument
+  that both teaches and displays the lifecycle and points phase-targeted lenses
+  at each stage. Replaced `toolbar.tsx`.
 - **Cycle 3 — the omnipresent region** _(design locked, NOT built)._ Cross-phase
   study tools: a Run dock and a Quiz button.
 
@@ -63,10 +66,12 @@ JS language (locked constraint, Cycle 2 Phase 0). What `validation.isJeJ` drives
 is **station availability**: the panel always mounts; CORE stations (`source`,
 `parse`) show for any code, and the LL stations (`realm`, `creation`,
 `evaluation`) hide exactly where the language level's models do not apply
-(`type === 'script'` or admission explicitly refused). The availability
-derivation lives in `index.tsx`; the panel module is presentation. The run/debug
-surface (the dock — type toggle, sandbox toggle, run limits, debugger option)
-serves every snippet. See [`./README.md` § The phases panel](./README.md).
+(`type === 'script'` or admission explicitly refused). The three station
+derivations live as top-level `orchestrate/` files invoked by `index.tsx`
+(direct pure-TS unit tests; `orchestrate/lib/` is unavailable — it may never
+import from `lenses/`); the panel module is presentation. The run/debug surface
+(the dock — type toggle, sandbox toggle, run limits, debugger option) serves
+every snippet. See [`./README.md` § The phases panel](./README.md).
 
 ## Architectural sketch
 
@@ -77,21 +82,20 @@ serves every snippet. See [`./README.md` § The phases panel](./README.md).
 > **Diagram scope.** The diagrams cover the orchestrator's steady-state
 > machinery: the mode discriminator, the single live-embodiment slot and its
 > debounced-refresh / flush-on-transition lifecycle, editor↔lens transitions,
-> interpreted-diagnostic derivation, the INTERNAL EventBus dispatch, the toolbar
-> (picker + edit-return), in-mode lens-switching, and a forward sketch of the
-> Cycle-2 phases panel.
+> interpreted-diagnostic derivation, the INTERNAL EventBus dispatch, the phases
+> panel (per-station dropdowns + edit-return), and in-mode lens-switching.
 
 ### Lifecycle modes
 
 The orchestrator's UI is in exactly one of two modes at a time. The edge labels
-name the steady-state learner-facing trigger surface (picker, in-mode
-lens-switch, edit-return). See § Mode-gated state machine below for the
-component-internal view.
+name the steady-state learner-facing trigger surface (the panel's station
+dropdowns, in-mode lens-switch, edit-return). See § Mode-gated state machine
+below for the component-internal view.
 
 ```mermaid
 stateDiagram-v2
     [*] --> EditorMode: initial mount<br/>(seed embodied once → live slot)
-    EditorMode --> LensMode: learner opens a lens<br/>(picker / lens prop change)
+    EditorMode --> LensMode: learner opens a lens<br/>(station dropdown / lens prop change)
     LensMode --> EditorMode: learner exits lens<br/>(edit-return button / lens prop unset)
     LensMode --> LensMode: learner switches lens<br/>(reuses live embodiment;<br/>previous lens unmounts)
     EditorMode --> EditorMode: learner edits snippet<br/>(debounced re-embody refreshes the live slot)
@@ -134,7 +138,7 @@ flowchart TD
     EditorPath["editor mode<br/>(home base mounted; renders interpreted diagnostics in gutter)"]
     LensPath["lens mode<br/>(active lens mounted with embodiment +<br/>resolved per-lens config)"]
 
-    Picker["toolbar lens-picker<br/>(always available)"] -->|"selection, sync"| LensPath
+    Picker["phases-panel station dropdowns<br/>(always available)"] -->|"selection, sync"| LensPath
     EditorPath -->|"learner opens lens, sync"| LensPath
     LensPath -->|"learner exits lens, sync"| EditorPath
     EditorPath -->|"edit, sync"| SnippetState
@@ -192,7 +196,7 @@ Steady-state lifecycle:
   responsibility.
 - The orchestrator switches between **editor mode** (home base active) and
   **lens mode** (active lens mounted with embodiment + config props).
-- The toolbar lens-picker is always visible.
+- The phases panel (the per-station picker surface) is always visible.
 - An edit in the editor produces a new snippet string and schedules a debounced
   re-embody of the live slot; the slot is not cleared.
 
@@ -210,9 +214,9 @@ stateDiagram-v2
     InitDerive --> EditorMode: lens prop unset OR unregistered
     InitDerive --> LensMode: lens prop registered<br/>(reuse the seed embodiment)
     EditorMode --> EditorMode: edit<br/>(setSnippet; schedule debounced re-embody)
-    EditorMode --> LensMode: lens prop becomes registered OR picker select<br/>(flush: reuse if the slot matches (snippet, type),<br/>else embody synchronously inline; cancel pending debounce)
+    EditorMode --> LensMode: lens prop becomes registered OR dropdown select<br/>(flush: reuse if the slot matches (snippet, type),<br/>else embody synchronously inline; cancel pending debounce)
     LensMode --> EditorMode: lens prop unset/unregistered OR edit-return<br/>(dispose lens; live slot RETAINED)
-    LensMode --> LensMode: picker selects a different lens<br/>(same embodiment; previous lens unmounts)
+    LensMode --> LensMode: dropdown selects a different lens<br/>(same embodiment; previous lens unmounts)
     LensMode --> [*]: component unmount
     EditorMode --> [*]: component unmount
 ```
@@ -239,7 +243,7 @@ flowchart TD
     Live -->|"reads liveEmbodiment.embodiment<br/>(coherence invariant: snippet === currentSnippet)"| LensMount
     Mode -->|"reads resolvedConfig"| LensMount
 
-    LensPropChange["lens prop change / picker select<br/>(editor↔lens transition)"] --> TransitionFn["transition: editor↔lens<br/>flush: slot matches (snippet, type) ? reuse :<br/>embody(currentSnippet, { type }) inline; cancel pending debounce"]
+    LensPropChange["lens prop change / dropdown select<br/>(editor↔lens transition)"] --> TransitionFn["transition: editor↔lens<br/>flush: slot matches (snippet, type) ? reuse :<br/>embody(currentSnippet, { type }) inline; cancel pending debounce"]
     TransitionFn -->|"setState (co-batched)"| Mode
     TransitionFn -->|"setLiveEmbodiment (co-batched)"| Live
 
@@ -377,12 +381,12 @@ trigger-semantics table.
 
 ### Switch flow (lens-mode internal)
 
-When already in lens mode and the learner picks a different lens via the picker
-(or, in Cycle 2, a panel station):
+When already in lens mode and the learner selects a different lens via a
+station dropdown:
 
 ```mermaid
 flowchart TD
-    Selection["learner picks lens N<br/>(picker change OR — Cycle 2 — panel station)"]
+    Selection["learner selects lens N<br/>(station dropdown change)"]
     Selection -->|"state transition, sync"| ActiveLens["state.activeLens = N"]
     ActiveLens -->|"reconciliation, sync"| Unmount["previous lens unmounts<br/>(React runs its cleanups)"]
     ActiveLens -->|"mount, sync"| LensMount["&lt;LensModule.Component<br/>embodiment={…current} config={…N's}&gt;"]
@@ -395,41 +399,46 @@ to the new lens. The previous lens's in-progress UI state (parsons shuffle,
 blanks fills) is gone (per disposability). The new lens's `LensModule.Component`
 mounts fresh; if it does async setup, it manages that internally.
 
-The `lens-switched` event fires INTERNALLY (no outbound emit). The picker
-re-renders to reflect the new default-selected option.
+The `lens-switched` event fires INTERNALLY (no outbound emit). The owning
+station's dropdown re-renders to reflect the new selection.
 
-### Toolbar data flow (Cycle 1)
+### Phases-panel data flow
 
-The toolbar (`./toolbar.tsx`) owns the lens-picker `<select>` and the
+The panel (`./phases-panel/`) owns the per-station lens dropdowns and the
 edit-return `<button>`. It is always rendered above the active surface in both
-editor and lens mode; its contents are derived from `state`. Mode transitions
-originating in the toolbar route through the same internal transition handler as
-the prop-change effect — there is no second source of truth for
-`state.activeLens`.
+editor and lens mode; its contents are derived from `state` plus the three
+derivations. Mode transitions originating in the panel route through the same
+internal transition handler as the prop-change effect — there is no second
+source of truth for `state.activeLens`.
 
 ```mermaid
 flowchart TD
+    Registry["LENS_REGISTRY (static)"] -->|"deriveStationRoster — once per module load"| Roster["STATION_ROSTER"]
+    Live["liveEmbodiment slot"] -->|"derivePanelState memo, per-edit:<br/>deriveStationAvailability(type, validation) +<br/>deriveStationStatus(status, errors)"| Derived["shownStations + statusMap<br/>(panel reads the latest live value at<br/>debounce cadence — no staleness blanking)"]
     State["orchestrator state<br/>{ mode, activeLens, resolvedConfig }"]
-    RenderedToolbar["rendered toolbar<br/>(picker &lt;select&gt; + conditional edit &lt;button&gt;)"]
-    State -->|"derives picker.value:<br/>mode === 'lens' ? activeLens : '' (sentinel)"| RenderedToolbar
-    State -->|"derives editButton.visible:<br/>mode === 'lens'"| RenderedToolbar
+    State -->|"derives activeLens:<br/>mode === 'lens' ? activeLens : null"| Panel
+    Roster --> Panel["rendered &lt;PhasesPanel&gt;<br/>(per-station &lt;select&gt;s + conditional edit &lt;button&gt;)"]
+    Derived --> Panel
 
     Transition["shared transition handler<br/>(flush slot + setState co-batched)"]
-    RenderedToolbar -->|"learner picker change (source: 'picker')"| Transition
-    RenderedToolbar -->|"learner edit-button click<br/>(mode-changed only; no lens-switched)"| Transition
+    Panel -->|"learner dropdown change (source: 'panel')"| Transition
+    Panel -->|"learner edit-button click<br/>(mode-changed only; no lens-switched)"| Transition
     PropChange["lens / configs change post-mount<br/>useEffect([lens, configs]); source: 'prop'"] --> Transition
 
     Transition -->|"setState + setLiveEmbodiment co-batched<br/>(most-recent write wins)"| State
     Transition -->|"diff prev vs next; mode-changed before lens-switched"| Bus["internal EventBus"]
 ```
 
-**Picker neutral state.** When `state.mode === 'editor'`, the picker's `value`
-is the empty string and the first `<option>` is a non-selectable sentinel
+**Dropdown neutral state.** When `state.mode === 'editor'`, every station
+dropdown's `value` is the empty string and the first `<option>` is a
+non-selectable sentinel
 (`<option value="" disabled hidden>— select a lens —</option>`). The remaining
-options enumerate the registered lenses in **registration order** (the insertion
+options enumerate the station's roster in **registration order** (the insertion
 order of `LENS_REGISTRY`'s keys per the ES2015+ `Object.keys` spec). Selecting
 any non-sentinel option transitions to lens mode for that lens; the sentinel
-itself cannot be re-selected.
+itself cannot be re-selected. In lens mode each station rostering the active
+lens shows it as its `value`; a panel-excluded active lens (prop-mounted, in no
+roster) leaves every dropdown on the sentinel.
 
 **Edit-button visibility.** The edit button appears only when
 `state.mode === 'lens'`. Clicking it dispatches
@@ -437,17 +446,12 @@ itself cannot be re-selected.
 dispatch `lens-switched` (no lens is being selected — the active lens is being
 unmounted). The live slot is **retained** across the return.
 
-**Picker-vs-prop precedence.** Mode transitions are driven by three sources: the
-`lens` prop changing (consumer-driven), the picker selection (learner-driven),
+**Panel-vs-prop precedence.** Mode transitions are driven by three sources: the
+`lens` prop changing (consumer-driven), a dropdown selection (learner-driven),
 and the edit button (learner-driven). On conflict, the most-recent write wins.
-Consumers SHOULD memoize `configs` to avoid clobbering learner picker selections
-on unrelated parent re-renders — the same `lens` value paired with a new
-`configs` object identity counts as a consumer write and re-runs the transition.
-
-> The toolbar is the **Cycle-1** affordance container. Cycle 2 replaces it with
-> the phases panel (§ The phases panel). The picker's always-visible autonomy
-> guarantee and the edit-return semantics carry forward; the layout becomes the
-> N-station lifecycle bar.
+Consumers SHOULD memoize `configs` to avoid clobbering learner selections on
+unrelated parent re-renders — the same `lens` value paired with a new `configs`
+object identity counts as a consumer write and re-runs the transition.
 
 ### Interpreted-diagnostic data flow (Cycle 1)
 
@@ -500,9 +504,9 @@ See [`./editor/DOCS.md` § Out of scope](./editor/DOCS.md) and
 [`./editor/README.md`](./editor/README.md) for the editor-side contract (what
 crosses the boundary, and the `interpretedDiagnostics` prop shape).
 
-### The phases panel (Cycle 2 — design locked, NOT built)
+### The phases panel (Cycle 2 — built)
 
-Cycle 2 replaces the toolbar with an **NM-lifecycle instrument**: N "stations"
+Cycle 2 replaced the toolbar with an **NM-lifecycle instrument**: N "stations"
 laid out left → right — **source · realm · parse · creation · evaluation** —
 each its own lens dropdown for lenses targeting that phase. The N dropdowns are
 deliberate: the layout itself engrains the lifecycle. The panel **doubles as a
@@ -558,13 +562,15 @@ flowchart LR
     render through the status model and only out-of-model code hides the
     machine. Hidden = fully removed.
   - **Station-status derivation** (per-edit — same cadence, independent output):
-    `(status, errors) → per-station status map` over the SHOWN stations, taking
-    the **whole** `Status` (including `validated`, so the validating slice lands
-    later with no signature change) and producing one of five statuses per
-    station. The full value-space, the per-station reachable subsets, the
-    revised validation mapping (a refusal HIDES the LL stations via availability
-    — it never renders `barred`; `barred` is for machine errors only), and the
-    honest-under-stubs `pending`/`barred` distinction are pinned in
+    `(status, errors) → per-station status map` for ALL five stations (the panel
+    renders the shown intersection — coupling the status derivation to the shown
+    set would re-couple what this design keeps apart), taking the **whole**
+    `Status` (including `validated`, so the validating slice lands later with no
+    signature change) and producing one of five statuses per station. The full
+    value-space, the per-station reachable subsets, the revised validation
+    mapping (a refusal HIDES the LL stations via availability — it never renders
+    `barred`; `barred` is for machine errors only), and the honest-under-stubs
+    `pending`/`barred` distinction are pinned in
     [`./README.md` § Station-status model](./README.md). Column-level gating
     only; per-lens gating (consulting `applicableTo`) is a backlogged seam.
 - **Lens → station binding (locked)** via
@@ -585,10 +591,12 @@ flowchart LR
   hint covers admissible-code-in-script-mode; the embedded guide documents the
   reveal rules. See [`./README.md` § The phases panel](./README.md).
 - **Selector contract (locked):** `data-orchestrator-phases-panel` on the panel
-  root; `data-orchestrator-station="<Station>"` per column.
-  `data-orchestrator-toolbar` / `-lens-picker` retire WITH `toolbar.tsx`; no
-  alias.
-- The panel **replaces `toolbar.tsx`** as the module folder `phases-panel/`.
+  root; `data-orchestrator-station="<Station>"` per column (plus
+  `data-orchestrator-station-status` / `-station-status-label` — see
+  [`./README.md` § Data attributes](./README.md)). `data-orchestrator-toolbar` /
+  `-lens-picker` retired WITH `toolbar.tsx`; no alias survived.
+- The panel lives at the module folder `phases-panel/` (it **replaced
+  `toolbar.tsx`**).
 
 ### The omnipresent region (Cycle 3 — design locked, NOT built)
 
@@ -698,7 +706,7 @@ effect (`useEffect([])` that observes the first-commit state), in standard
 order: `mode-changed({ from: 'editor', to: 'lens' })` first, then
 `lens-switched({ previous: null, next: state.activeLens, source: 'initial' })`.
 This is the only execution path that uses `source: 'initial'`; any other editor
-→ lens transition (prop-driven, picker) also reports `previous: null` but with
+→ lens transition (prop-driven, dropdown) also reports `previous: null` but with
 its own `source` value.
 
 Initial mount in editor mode dispatches nothing — the system simply IS in editor
@@ -720,19 +728,19 @@ Every bus dispatch the orchestrator emits comes from one of these sites. The
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Initial-mount post-commit effect (`useEffect([])`)           | `mode-changed(editor → lens)` + `lens-switched(null → next)` | `'initial'`                                                                                                                                                   |
 | Prop-change effect (`useEffect([lens, configs])` post-mount) | `mode-changed` + `lens-switched` as applicable               | `'prop'`                                                                                                                                                      |
-| Picker `onChange` handler                                    | `mode-changed` + `lens-switched` as applicable               | `'picker'`                                                                                                                                                    |
+| Station-dropdown `onChange` handler                          | `mode-changed` + `lens-switched` as applicable               | `'panel'`                                                                                                                                                     |
 | Edit-button `onClick` handler                                | `mode-changed(lens → editor)` only                           | n/a (no `lens-switched`); the handler still supplies `source: 'edit-button'` for consistency with `LensSelectionSource` and for future analytics attribution. |
 
-`LensSelectionSource` also types `'panel'`, reserved for a future panel-station
-dispatch site; no such site exists yet. Likewise the `type-toggled` and
-`sandbox-toggled` dispatch sites land with the dock (Cycle 3) — typed in the
-taxonomy, unwired today.
+The toolbar picker's `'picker'` value retired from `LensSelectionSource` WITH
+its dispatch site — every union member stays pinned to a live site. The
+`type-toggled` and `sandbox-toggled` dispatch sites land with the dock (Cycle 3)
+— typed in the taxonomy, unwired today.
 
 #### Data flow — bus topology
 
 ```mermaid
 flowchart TD
-    DispatchSite["dispatch site<br/>(initial-mount effect / prop-change effect /<br/>picker handler / edit-button handler)"]
+    DispatchSite["dispatch site<br/>(initial-mount effect / prop-change effect /<br/>dropdown handler / edit-button handler)"]
     DispatchSite -->|"bus.dispatch(name, payload)"| Bus["EventBus instance<br/>(per &lt;StudyLenses&gt; mount,<br/>via createEventBus())"]
     Bus -->|"lookup listeners[name] in registration order"| ListenerStep{"more listeners?"}
     ListenerStep -->|"no"| Done["dispatch returns<br/>(bus is sync)"]
@@ -820,10 +828,9 @@ requires a separate, narrower protocol designed against a concrete host's needs
 - **Internal-only EventBus.** The orchestrator's bus coordinates intra-component
   communication. No outbound `subscribe` prop on `<StudyLenses>` until a
   concrete LMS integration target exists.
-- **Picker always visible.** The toolbar lens-picker is shown in BOTH editor and
-  lens mode — the lifelong-learning autonomy guarantee. (In Cycle 2 the
-  per-station dropdowns become the picker surface; the always-available
-  guarantee carries forward.)
+- **Picker always visible.** The phases panel's per-station dropdowns are shown
+  in BOTH editor and lens mode — the lifelong-learning autonomy guarantee the
+  Cycle-1 single picker carried.
 - **Async caveat carries forward.** Any `useEffect` body that awaits a Promise
   (async lens setup, a hypothetical future async embody) creates a microtask gap
   between effect-fire and side-effect-completion. Subscribers to `lens-switched`
@@ -868,9 +875,9 @@ requires a separate, narrower protocol designed against a concrete host's needs
   and the block-model quiz engine are siblings (both consume the embodiment via
   a block-model, both span the lifecycle, each its own later DDD). They "work
   within NM phases later."
-- **Applicability filtering at the picker** — the picker enumerates the full
-  registered lens set; it does not filter by `applicableTo(embodiment)`.
-  Per-station applicability filtering in the Cycle-2 panel is a backlogged seam.
+- **Applicability filtering at the panel** — each station dropdown enumerates
+  its full roster; it does not filter by `applicableTo(embodiment)`.
+  Per-station applicability filtering is a backlogged seam.
 
 ## Why a two-mode state machine
 
@@ -910,7 +917,7 @@ embodiment of the buffer, refreshed on a debounced settle, so:
   friendly marker on the first frame (the seed embodiment), and new errors
   appear as the buffer settles.
 - **One slot, two freshness contracts.** A mounted lens always gets the
-  exact-current buffer via the flush-on-transition; the (Cycle-2) phase panel
+  exact-current buffer via the flush-on-transition; the phases panel
   and the editor gutter read the latest live value at debounce cadence. The
   `liveEmbodiment.snippet` key tells each consumer exactly how stale the slot
   is.
@@ -949,9 +956,9 @@ concrete integration target exists:
 - **Premature interface design risks lock-in.** Without a real LMS in hand, we'd
   guess at event payload shapes and timing semantics; wrong guesses become hard
   to reverse once authors depend on the contract.
-- **Internal coordination is enough today.** The picker, the editor, and (soon)
-  the panel all live in the same React tree; React's natural composition + a
-  private bus suffice for intra-`<StudyLenses>` plumbing.
+- **Internal coordination is enough today.** The panel and the editor live in
+  the same React tree; React's natural composition + a private bus suffice for
+  intra-`<StudyLenses>` plumbing.
 - **The taxonomy can mature internally.** When an LMS appears, the externalized
   protocol can be a curated subset of the internal events that proved useful.
 
@@ -998,9 +1005,6 @@ This peer does NOT own:
 
 ## Future direction
 
-- **The phases panel** (Cycle 2): the NM-lifecycle bar that replaces the toolbar
-  (§ The phases panel). Its name, the `LensModule.phase` type, and the
-  per-station state model are settled in Cycle 2's Phase 0.
 - **The omnipresent region** (Cycle 3): the Run dock + Quiz button (§ The
   omnipresent region). Exact layout settled in Cycle 3.
 - **The dock's danger backend internals**: the worker backend's engine settles

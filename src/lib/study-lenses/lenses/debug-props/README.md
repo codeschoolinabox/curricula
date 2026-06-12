@@ -23,6 +23,10 @@ A [`LensModule`](../types.ts) like any other:
 - `recommend`: returns an empty array. The lens is for harness work, not
   pedagogical recommendation; the WS2 recommender does not surface it in the
   recommendations panel.
+- `phase`: deliberately ABSENT — panel-excluded. The lens never appears in a
+  phases-panel station dropdown (it teaches no lifecycle phase); it stays
+  registered and reachable via the `lens` prop, which is how sandbox harnesses
+  mount it.
 
 ## Why this lens exists
 

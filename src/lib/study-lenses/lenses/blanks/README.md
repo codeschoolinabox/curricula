@@ -67,6 +67,8 @@ const roster = [annotate, blanks, /* … */];
 Fields:
 
 - `name: 'blanks'` — registry identity.
+- `phase: 'source'` — the phases-panel station this lens teaches (it consumes
+  the AST, but its pedagogical target is the source).
 - `Component: ComponentType<LensProps>` — React wrapper around the lens's
   pure-TS core. Renders the blanks surface (`<div data-lens="blanks">`) with the
   toolbar, editor, editor header, and hints panel.

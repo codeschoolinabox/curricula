@@ -40,6 +40,8 @@ const roster = [annotate, /* parsons, blanks, … */];
 Fields:
 
 - `name: 'annotate'` — registry identity.
+- `phase: 'source'` — the phases-panel station this lens teaches (it consumes
+  the AST, but its pedagogical target is the source).
 - `Component: ComponentType<LensProps>` — React wrapper around the lens's
   pure-TS core. Renders the annotation surface (`<div data-lens="annotate">`)
   with the active view + drawing/note overlay.

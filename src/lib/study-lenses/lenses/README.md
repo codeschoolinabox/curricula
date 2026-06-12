@@ -91,6 +91,7 @@ type LensModule = Readonly<{
 	config: (overrides?: Partial<LensConfig>) => LensConfig;
 	applicableTo: (embodiment: Snippet) => boolean; // recommender's applicability filter
 	recommend: (embodiment: Snippet) => ReadonlyArray<Recommendation>;
+	phase?: Station | readonly Station[]; // phases-panel station(s); absent = panel-excluded
 }>;
 
 type LensProps = Readonly<{

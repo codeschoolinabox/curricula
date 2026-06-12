@@ -13,9 +13,14 @@ orchestrate/
   DOCS.md                    architectural sketch + Mermaid (peer + StudyLenses)
   types.ts                   <StudyLenses> prop contract + state shape + INTERNAL EventBus events
 
-  index.tsx                  the <StudyLenses> component (owns surface-mount routing + station availability — see § The phases panel)
+  index.tsx                  the <StudyLenses> component (owns surface-mount routing + runs the panel derivations — see § The phases panel)
   event-bus.ts               createEventBus() — per-instance internal pub/sub
-  toolbar.tsx                lens-picker dropdown + edit-return button (the phases panel will replace this — see § The phases panel)
+  stations.ts                STATIONS — the canonical left → right station order
+  derive-station-roster.ts        (registry) → per-station lens rosters (static)
+  derive-station-availability.ts  (type, validation) → shown stations (per-edit)
+  derive-station-status.ts        (status, errors) → per-station statuses (per-edit)
+  phases-panel/              the panel component — presentation only (replaced toolbar.tsx)
+    index.tsx, README.md, DOCS.md, tests/
   tests/                     vitest jsdom tests
 
   editor/                    default home base — only writer of snippet state
@@ -30,8 +35,8 @@ orchestrate/
 ```
 
 The peer follows a **primary-export-at-top-level** convention: `<StudyLenses>`
-and its co-bundled UI files (the toolbar today; the phases panel module that
-will replace it) sit at the peer's top level alongside the subdirs `editor/` and
+and its co-bundled files (the phases panel module and the three station
+derivations) sit at the peer's top level alongside the subdirs `editor/` and
 `lib/`. This mirrors [`../embody/`](../embody/)'s convention — the peer's
 primary export sits at the peer's top level (`embody()` at `embody/index.ts`;
 `<StudyLenses>` at `orchestrate/index.tsx`). Subdirs are separable concerns the
@@ -52,9 +57,9 @@ The two subdirs map to separable concerns:
   JEJ-package [`lib/`](../lib/) peer, not here.
 
 Everything else (the `<StudyLenses>` component, mode state, lens dispatch, the
-affordance container — toolbar today, phases panel in Cycle 2 — and the internal
-EventBus) lives at the peer's top level: these are inseparable from the
-orchestrator because they ARE the orchestrator.
+affordance container — the phases panel — and the internal EventBus) lives at
+the peer's top level: these are inseparable from the orchestrator because they
+ARE the orchestrator.
 
 ## Public API: `<StudyLenses>`
 
@@ -306,12 +311,12 @@ sketch.
   terse message for the same error. Line targeting prefers `errors.loc`, else
   derives `(line, column)` from `source.offsets` + the error's char offset, else
   a file-level notice.
-- **Toolbar** — the always-visible affordance container at the top of the active
-  surface in the current (pre-Cycle-2) implementation. Owns the lens-picker
-  dropdown and (in lens mode only) the edit-return button. Mounted in both
-  editor and lens mode; its contents are mode-aware. Cycle 2 replaces it with
-  the phases panel (see § The phases panel); the picker and edit-return
-  semantics survive the replacement.
+- **Phases panel** — the always-visible affordance container at the top of the
+  active surface: the NM-lifecycle instrument (see § The phases panel and
+  [`./phases-panel/README.md`](./phases-panel/README.md)). Owns the per-station
+  lens dropdowns and (in lens mode only) the edit-return button. Mounted in both
+  editor and lens mode; its contents are state-derived. It replaced the Cycle-1
+  toolbar; the picker and edit-return semantics survived the replacement.
 - **The dock** — the run/debug surface of the omnipresent region (see § The
   dock): a collapsible affordance container + output surface holding the type
   toggle (+ adjacent hint), the sandbox toggle, run limits, Run (with the two
@@ -328,14 +333,14 @@ sketch.
 - **Embedded guide** — the orchestrator-resident learner guide to the
   environment itself (stations, reveal rules, toggles, limits, danger). A meta
   tool: neither generative nor a reactive explainer.
-- **Lens-picker** (or just **picker**) — the affordance that selects a lens. In
-  the current toolbar it is a `<select>` over the registered lenses
-  (`LENS_REGISTRY` entries): one `<option>` per registered lens name plus a
-  non-selectable sentinel first option; editor is not a picker option. Selecting
-  a non-sentinel option transitions the orchestrator to lens mode for that lens.
-  In Cycle 2 the single picker becomes N per-station dropdowns (see § The phases
-  panel), but the underlying "select a registered lens → enter lens mode"
-  contract is unchanged.
+- **Lens-picker** (or just **picker**) — the affordance that selects a lens: the
+  phases panel's N per-station dropdowns (see § The phases panel). Each is a
+  `<select>` over the lenses that target its station (its roster), with a
+  non-selectable sentinel first option; editor is not a picker option;
+  panel-excluded lenses (no `phase` declaration) appear in no dropdown.
+  Selecting a non-sentinel option transitions the orchestrator to lens mode for
+  that lens — the same "select a registered lens → enter lens mode" contract the
+  Cycle-1 single picker carried.
 - **Registry / registered lens** — the orchestrator's lens-dispatch lookup
   exposed as `LENS_REGISTRY`, keyed by `LensModule.name`. It registers **five**
   lenses today: `annotate`, `blanks`, `debug-props`, `parsons`, `writeme`. The
@@ -345,17 +350,18 @@ sketch.
   mounted. Stored as `state.activeLens`. The picker `value` derives from this;
   the edit-return affordance's visibility derives from `state.mode === 'lens'`.
 - **Edit return** — the orchestrator-state transition from lens mode back to
-  editor mode. The affordance (the toolbar's edit button today) dispatches
+  editor mode. The affordance (the panel's edit button) dispatches
   `mode-changed({ from: 'lens', to: 'editor' })` on the internal bus; it does
   NOT dispatch `lens-switched` (no lens is being selected — the active lens is
   being unmounted). The live embodiment is retained across the return. The
   affordance is conditionally rendered (lens mode only); the editor-mode tree
   exposes no edit-return affordance because no transition is needed.
-- **Neutral picker state** — what the current toolbar picker renders in editor
-  mode: a non-selectable sentinel first `<option>`
+- **Neutral picker state** — what every station dropdown renders in editor mode
+  (and what a non-rostering station's dropdown renders in lens mode): a
+  non-selectable sentinel first `<option>`
   (`<option value="" disabled hidden>— select a lens —</option>`) that reads as
-  the picker's `value`, with the remaining `<option>`s enumerating the
-  registered lenses. Selecting any non-sentinel option transitions to lens mode
+  the dropdown's `value`, with the remaining `<option>`s enumerating the
+  station's roster. Selecting any non-sentinel option transitions to lens mode
   for that lens; the sentinel itself cannot be re-selected by the learner.
 - **Dispatch** — calling `bus.dispatch(eventName, payload)` to notify all
   listeners registered for that event. Synchronous; listeners execute in
@@ -400,8 +406,8 @@ per logical mount in both modes** so a snippet that _ships_ with a syntax error
 shows its interpreted gutter marker on the first frame, before the learner
 types. (React StrictMode may double-invoke the lazy initializer in dev; because
 `embody()` is idempotent on a given string the resulting slot is identical, so
-the double-invoke is safe.) (The same live slot later feeds the Cycle-2 phases
-panel, but that is not the Cycle-1 justification.)
+the double-invoke is safe.) (The same live slot also feeds the phases panel's
+per-edit derivations, but that was not the Cycle-1 justification.)
 
 The slot is **never cleared on edit**: an edit only schedules a debounced
 refresh, and the slot holds the prior value until the trailing edge replaces it.
@@ -519,11 +525,10 @@ as the non-scenario real-composition path grows per
 
 ## The phases panel
 
-> **Design status.** This section describes the **intended end-state** of the
-> orchestrator's affordance container. It is the locked Cycle-2 design; the
-> current implementation still ships the thin `toolbar.tsx` (lens-picker
-> dropdown + edit-return button). The phases panel replaces the toolbar; the
-> picker and edit-return semantics described above carry over.
+> **Design status.** This section is the locked Cycle-2 design, and it is BUILT:
+> the phases panel ships at [`./phases-panel/`](./phases-panel/), replacing the
+> Cycle-1 `toolbar.tsx`. The picker and edit-return semantics described above
+> carried over.
 
 The panel is a **notional-machine lifecycle instrument**. Instead of one lens
 picker, it lays the NM lifecycle out as **N "stations" left → right** — **source
@@ -570,13 +575,13 @@ but it is an input NOW so the validating slice can land later without a
 derivation-signature change (the zero-panel-changes invariant below depends on
 this).
 
-| Status     | Meaning                                                                                      | When                                                                                                                                                                                                  |
-| ---------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `constant` | no machine status; the station never greys                                                   | `source` and `realm`, always                                                                                                                                                                          |
-| `ok`       | the machine completed this stage                                                             | parse: `status.parsed`; creation: `status.created`                                                                                                                                                    |
-| `errored`  | the machine tripped AT this stage                                                            | `errors.phase` maps into the station: `parse:tokenize` / `parse:ast` → **parse**; `creation` → **creation**; `evaluation` → **evaluation** (scenario fixtures today; real runtime errors only at Run) |
-| `barred`   | unreachable — an earlier machine phase failed                                                | every shown station after the errored one (machine errors only — a `validation` failure hides the LL stations instead; see the availability rule)                                                     |
-| `pending`  | not yet reported — nothing failed before it, but the machine has not instrumented this stage | creation on real code while embody's creation slice is stubbed (`status.created === false`, no prior error); evaluation statically (runtime status exists only at Run)                                |
+| Status     | Meaning                                                                                      | When                                                                                                                                                                                               |
+| ---------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `constant` | no machine status; the station never greys                                                   | `source` and `realm`, always                                                                                                                                                                       |
+| `ok`       | the machine completed this stage                                                             | parse: `status.parsed`; creation: `status.created`                                                                                                                                                 |
+| `errored`  | the machine tripped AT this stage                                                            | `errors.phase` maps into the station: `parse:tokenize` / `parse:ast` → **parse**; `creation` → **creation**; `evaluation` → **evaluation** (type-reachable only today; runtime errors land at Run) |
+| `barred`   | unreachable — an earlier machine phase failed                                                | every shown station after the errored one (machine errors only — a `validation` failure hides the LL stations instead; see the availability rule)                                                  |
+| `pending`  | not yet reported — nothing failed before it, but the machine has not instrumented this stage | creation on real code while embody's creation slice is stubbed (`status.created === false`, no prior error); evaluation statically (runtime status exists only at Run)                             |
 
 Per-station **reachable subsets** (so the implementation carries no dead
 branches): `source` / `realm` → `{constant}` only (`realm` is structurally
@@ -671,8 +676,10 @@ prediction — backlog).
 
 ### Where the panel lives
 
-The panel replaces `toolbar.tsx` as the new module folder `phases-panel/`. The
-panel module is presentation; `index.tsx` owns which surface mounts.
+The panel lives at the module folder [`phases-panel/`](./phases-panel/) (it
+replaced `toolbar.tsx`). The panel module is presentation; `index.tsx` owns
+which surface mounts and runs the three derivations (each its own top-level
+`derive-station-*.ts` file beside `index.tsx`, which invokes them).
 
 > **Locked constraint (full-JS lens availability).** Source-station lenses
 > (`writeme`, `annotate`, `parsons`, `blanks`) serve the **full JS language**,
@@ -825,33 +832,28 @@ Named here so they are not mistaken for current surfaces:
 The set below is the orchestrator's stable selector surface for tests and
 sandbox harnesses.
 
-| Attribute                       | Where                                                                                                                                    | Used by                                                 |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `data-orchestrator-root`        | The wrapper `<div>` (affordance container + active surface)                                                                              | Tests + sandbox locate the orchestrator instance.       |
-| `data-orchestrator-host`        | The host `<div>` where the active surface mounts — for the editor home base, a `<div>` into which the CodeMirror `EditorView` is mounted | Tests + sandbox locate where the active surface mounts. |
-| `data-orchestrator-toolbar`     | The toolbar `<nav>` (current implementation; superseded by the Cycle-2 phases panel — see selector-fate note below)                      | Tests + sandbox locate the affordance container.        |
-| `data-orchestrator-lens-picker` | The toolbar `<select>` (current implementation)                                                                                          | Tests + sandbox locate the picker.                      |
-| `data-orchestrator-edit-button` | The toolbar `<button>` that returns to editor mode (rendered only when `state.mode === 'lens'`)                                          | Tests + sandbox locate the edit-return affordance.      |
-| `data-orchestrator-error`       | The editor host `<div>` when CodeMirror mount rejects (fallback render)                                                                  | Tests + sandbox detect a failed editor mount.           |
+| Attribute                                | Where                                                                                                                                    | Used by                                                 |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `data-orchestrator-root`                 | The wrapper `<div>` (affordance container + active surface)                                                                              | Tests + sandbox locate the orchestrator instance.       |
+| `data-orchestrator-host`                 | The host `<div>` where the active surface mounts — for the editor home base, a `<div>` into which the CodeMirror `EditorView` is mounted | Tests + sandbox locate where the active surface mounts. |
+| `data-orchestrator-phases-panel`         | The panel root `<nav>` (the affordance container)                                                                                        | Tests + sandbox locate the panel.                       |
+| `data-orchestrator-station`              | Each station column (`="<Station>"`); the per-station lens dropdown lives inside it                                                      | Tests + sandbox locate a station column.                |
+| `data-orchestrator-station-status`       | The column's per-edit status (`="<StationStatus>"`)                                                                                      | Tests + sandbox read a station's status.                |
+| `data-orchestrator-station-status-label` | The visible status label inside a column (tests anchor on the attributes above, never label text)                                        | Tests + sandbox locate the status label.                |
+| `data-orchestrator-edit-button`          | The panel `<button>` that returns to editor mode (rendered only when `state.mode === 'lens'`; carried over from the retired toolbar)     | Tests + sandbox locate the edit-return affordance.      |
+| `data-orchestrator-error`                | The editor host `<div>` when CodeMirror mount rejects (fallback render)                                                                  | Tests + sandbox detect a failed editor mount.           |
 
-The phases panel (Cycle 2) and omnipresent region (Cycle 3) will add their own
-`data-orchestrator-*` attributes when built; they are intentionally not
-enumerated here yet.
+The omnipresent region (Cycle 3) will add its own `data-orchestrator-*`
+attributes when built; they are intentionally not enumerated here yet.
 
 **Fate of `-toolbar` / `-lens-picker` under the Cycle-2 replacement — RESOLVED
-(Cycle 2 Phase 0): renamed.** Once the phases panel replaces `toolbar.tsx`, the
-names `data-orchestrator-toolbar` and `data-orchestrator-lens-picker` describe a
-DOM that no longer exists, and keeping them as aliases would introduce exactly
-the homonym this doc warns against (`-toolbar` naming a non-toolbar). The locked
-Cycle-2 selector contract:
-
-- `data-orchestrator-phases-panel` — the panel root.
-- `data-orchestrator-station="<station name>"` — each station column (the
-  per-station lens dropdown lives inside it).
-
-`-toolbar` and `-lens-picker` retire WITH `toolbar.tsx` in the Cycle-2 increment
-that replaces it; the test suite re-anchors on the new attributes in those same
-increments. No alias survives.
+(Cycle 2 Phase 0): renamed; executed in Phase 1.** The names
+`data-orchestrator-toolbar` and `data-orchestrator-lens-picker` described a DOM
+that no longer exists once the phases panel replaced `toolbar.tsx`, and keeping
+them as aliases would have introduced exactly the homonym this doc warns against
+(`-toolbar` naming a non-toolbar). They retired WITH `toolbar.tsx` in the
+increment that replaced it; the test suite re-anchored on the panel attributes
+in that same increment. No alias survives.
 
 **Directory → type/attribute asymmetry.** The directory is named `orchestrate/`
 (verb) to mirror `embody/`'s convention of verb-named peers exporting their

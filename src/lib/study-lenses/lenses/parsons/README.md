@@ -49,6 +49,7 @@ import parsons from './index.js';
 Fields:
 
 - `name: 'parsons'` — registry identity.
+- `phase: 'source'` — the phases-panel station this lens teaches.
 - `Component: ComponentType<LensProps>` — React wrapper around the lens's
   pure-TS core. Renders the parsons surface (`<div data-lens="parsons">`) with
   the available-lines pool, the solution column, per-line indent controls, the

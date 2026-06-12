@@ -200,7 +200,7 @@ type OrchestratorState = EditorModeState | LensModeState;
  * The orchestrator's live static embodiment of the editing buffer.
  * Single authoritative storage location for the `Snippet`; lens-mode
  * rendering reads `liveEmbodiment.embodiment` directly, and the
- * editor-mode gutter + (Cycle-2) phase panel read its `status` /
+ * editor-mode gutter + the phases panel read its `status` /
  * `errors` / `validation`. Held in a separate top-level `useState`
  * slot alongside `OrchestratorState`.
  *

@@ -42,6 +42,7 @@ import writeme from './index.js';
 Fields:
 
 - `name: 'writeme'` — registry identity.
+- `phase: 'source'` — the phases-panel station this lens teaches.
 - `Component: ComponentType<LensProps>` — React wrapper around the lens's
   pure-TS core. Renders the writeme surface (`<div data-lens="writeme">`) with
   the toolbar, the CodeMirror write editor, and the read-view read-only solution
