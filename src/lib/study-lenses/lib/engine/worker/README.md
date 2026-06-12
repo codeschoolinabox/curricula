@@ -14,6 +14,9 @@ sandboxed worker coordinate underneath it.
 | `create-buffer-views.ts` | Typed views (control header + payload area) over the shared buffer    |
 | `write-call-response.ts` | Thread-side: encode one bounded call response and signal the worker   |
 | `read-call-response.ts`  | Worker-side: decode the response, reset the channel for the next call |
+| `bootstrap.ts`           | Worker-side: handshake, consumer setup, globals injection, halt posts |
+| `write-resume-signal.ts` | Thread-side: release the worker's pause                               |
+| `clear-event-ready.ts`   | Thread-side: clear the event-ready flag after disposing an emission   |
 
 ## Navigation
 

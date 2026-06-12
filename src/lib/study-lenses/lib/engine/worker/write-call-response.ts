@@ -43,12 +43,14 @@ export default function writeCallResponse(
 	}
 
 	// WHY: the control signal lands last so the worker, waking on
-	// RESPONDED, observes a complete response (release ordering).
+	// RESPONDED, observes a complete response (release ordering). The
+	// notify wakes the worker's Atomics.wait — a store alone never does.
 	Atomics.store(
 		views.control,
 		PROTOCOL.CONTROL_INDEX,
 		PROTOCOL.SIGNAL_RESPONDED,
 	);
+	Atomics.notify(views.control, PROTOCOL.CONTROL_INDEX);
 }
 
 /**
