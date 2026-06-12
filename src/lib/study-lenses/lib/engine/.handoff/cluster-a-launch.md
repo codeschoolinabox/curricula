@@ -145,8 +145,9 @@ checkpoint: pure infrastructure" → commit prompt → HUMAN approval.
 
 ## Standing rules
 
-Commits on main, no branches, `--no-verify` permitted, never amend, the human
-approves every commit, ARs via the registered `ar-1`…`ar-5` agents (pass paths +
+Commits on main, no branches, `--no-verify` permitted, never amend, commits
+autonomous and announced (SHA + message — AGENTS.fable.md invariant 5; pushes
+stay human-gated), ARs via the registered `ar-1`…`ar-5` agents (pass paths +
 baseline SHA, never pasted contents, never a `model` param), batch-fix review
 findings in-commit. Campaign AR-5 baseline: `4130b57f`. Update the canonical
 plan's RESUMPTION POINT at increment-cluster boundaries; validate any further
