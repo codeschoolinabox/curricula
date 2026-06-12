@@ -43,10 +43,13 @@ encouragement. They cannot be overridden by momentum.
    fix. Exception: user explicitly says "skip plan mode."
 4. **One increment at a time** — complete Red → Green → Refactor → Lint before
    starting the next behavior.
-5. **Atomic commits with clear messages** — commit after each passing TDD cycle
-   and after completing Phase 0 artifacts. Each commit captures one behavior or
-   milestone; never batch multiple increments. Message format lives in § Git
-   prompts. Prompt the user before committing; never commit silently.
+5. **Atomic commits with clear messages** — commit autonomously after each
+   passing TDD cycle and after completing Phase 0 artifacts. Each commit
+   captures one behavior or milestone; never batch multiple increments. Message
+   format lives in § Git checkpoints. No per-commit approval prompt — announce
+   each commit as it lands (SHA + message) so the human can audit and revert;
+   new commits only, so every checkpoint is droppable. Pushing remains
+   human-gated; the Phase-0 → Phase-1 human review gate is unchanged.
 6. **Plans are execution checklists, not references** — every plan document must
    explicitly list every required workflow step: Phase 0 DDD steps, AR trigger
    points (AR-1 through AR-5), commit steps, and quality checks. "Follow
@@ -223,7 +226,8 @@ Development Workflow for the full process.
   it away) → lint → refactor (structural quality against DOCS.md sketch) → AR-4
   → quality checks → commit (atomic: one behavior per commit; message:
   `add: [behavior this increment implements]`)
-- **Phase 2**: Full quality checks → AR-5 pre-merge review → commit prompt
+- **Phase 2**: Full quality checks → AR-5 pre-merge review → commit (autonomous,
+  announced) → push prompt
 
 Each passing TDD cycle = one atomic commit. Do not batch behaviors.
 
@@ -242,7 +246,7 @@ Each passing TDD cycle = one atomic commit. Do not batch behaviors.
 #### Sandbox Checkpoints
 
 For user-observable increments, a 🔍 Sandbox checkpoint fires between the Phase
-1 quality-checks step and the commit prompt: the user exercises the feature at a
+1 quality-checks step and the commit: the user exercises the feature at a
 running dev server. Cosmetic redirects roll into the next increment;
 **behavioral defects block the commit**. Checkpoints are gate points, not
 optional — only the human skips, and the only legitimate skip is an increment
@@ -313,15 +317,17 @@ steps are incomplete. "See AGENTS.md for the workflow" is not a valid substitute
 - At step 13: show actual output from quality checks — don't just claim "tests
   pass"
 
-#### Git prompts
+#### Git checkpoints
 
-(Claude prompts, user executes:)
+(Commits are autonomous and announced; pushing is prompted:)
 
-- After Phase 0 completes: "Phase 0 complete — ready for atomic commit:
-  `docs: establish [module] domain model and architectural sketch`"
-- After each passing TDD cycle: "Ready for atomic commit:
-  `add: [behavior this increment implements]`"
-- After the last increment: "Sprint complete — ready to push to main"
+- After Phase 0 completes: commit
+  `docs: establish [module] domain model and architectural sketch`, announce the
+  SHA, and stop at the Phase-0 → Phase-1 human review gate (unchanged).
+- After each passing TDD cycle: commit
+  `add: [behavior this increment implements]` and announce the SHA.
+- After the last increment: "Sprint complete — ready to push to main" — the push
+  itself stays with the human (§ Git policy).
 
 Commit message format: imperative voice, one line, describes the behavior or
 artifact — not the mechanical change. Prefixes: `add:` (new behavior), `docs:`
@@ -408,7 +414,7 @@ When context is approaching capacity, Claude MUST:
 1. **Update plan file** — capture current state, what's done, what's left
 2. **Update docs** — ensure AGENTS.md/DEV.md/README.md/DOCS.md reflect current
    reality
-3. **Prompt user to commit** — atomic checkpoint before compaction
+3. **Commit (autonomous, announced)** — atomic checkpoint before compaction
 4. **Summarize active context** — write session summary to plan file:
    - Current branch and recent commits
    - Files being modified
