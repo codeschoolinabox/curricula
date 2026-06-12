@@ -155,12 +155,20 @@ function handleExecute(state: RunState, code: string, strict: boolean): void {
 /** Authors and posts the halt; a throwing serializer posts `failure`. */
 function postHalt(state: RunState, kind: HaltKind, rawError?: unknown): void {
 	if (state.serializeHalt === null) {
-		post({ kind: 'halt', payload: defaultHaltPayload(kind, rawError) });
+		post({
+			kind: 'halt',
+			haltKind: kind,
+			payload: defaultHaltPayload(kind, rawError),
+		});
 		return;
 	}
 
 	try {
-		post({ kind: 'halt', payload: state.serializeHalt(kind, rawError) });
+		post({
+			kind: 'halt',
+			haltKind: kind,
+			payload: state.serializeHalt(kind, rawError),
+		});
 	} catch (error) {
 		post({
 			kind: 'failure',

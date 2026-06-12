@@ -1,12 +1,15 @@
 /**
  * @file Engine-internal message-protocol types: the typed views over
- * the shared buffer and the postMessage envelopes exchanged between
- * the thread-side transport and the worker-side bootstrap. Consumers
- * never touch these — the public contract lives in `../types.ts`.
+ * the shared buffer, the postMessage envelopes exchanged between the
+ * thread-side transport and the worker-side bootstrap, and the
+ * transport contract `evaluate` consumes. Consumers never touch
+ * these — the public contract lives in `../types.ts`.
  *
  * Emits and call requests ride postMessage (FIFO, preserved order);
  * only the call response rides the shared-memory slot.
  */
+
+import type { CallResponse, HaltKind } from '../types.js';
 
 /** Typed views over the shared buffer — layout in `./protocol.ts`. */
 type BufferViews = {
@@ -53,10 +56,13 @@ type CallRequestMessage = {
 
 /**
  * The worker-side stop payload, authored by the consumer's
- * `serializeHalt` (or the engine default), posted exactly once.
+ * `serializeHalt` (or the engine default), posted exactly once. The
+ * `haltKind` rides the envelope structurally — the payload is opaque,
+ * and classification (completed vs errored) never reads it.
  */
 type HaltMessage = {
 	readonly kind: 'halt';
+	readonly haltKind: HaltKind;
 	readonly payload: unknown;
 };
 
@@ -77,11 +83,59 @@ type FromWorkerMessage =
 	| HaltMessage
 	| FailureMessage;
 
+// ─── Transport contract ───────────────────────────────────────────────────────
+
+/** What a transport needs to start one run. */
+type TransportInit = {
+	readonly code: string;
+	readonly workerUrl: URL;
+	readonly workerConfig: unknown;
+	readonly strict: boolean;
+};
+
+/**
+ * What the pump receives: every from-worker envelope except `ready`
+ * (the handshake is the transport's own concern). FIFO; halt or
+ * failure is delivered at most once, last.
+ */
+type TransportEvent =
+	| EmittedMessage
+	| CallRequestMessage
+	| HaltMessage
+	| FailureMessage;
+
+/**
+ * The engine-internal seam between `evaluate` and a worker. The real
+ * implementation (worker/transport.ts) spawns a module worker over
+ * postMessage + shared memory; the engine-shipped fake substitutes a
+ * same-thread double. Environment failures (shared memory
+ * unavailable, worker construction failure) surface as `failure`
+ * events through `next()`, never as throws.
+ */
+type Transport = {
+	/** Spawns the sandbox, completes the handshake, delivers setup + code. */
+	readonly start: (init: TransportInit) => Promise<void>;
+	/** Resolves with the next worker event in post order. */
+	readonly next: () => Promise<TransportEvent>;
+	/** Whether an emission is awaiting thread-side disposal (timer consult). */
+	readonly hasPendingEvent: () => boolean;
+	/** Releases the worker's pause after an emission is disposed of. */
+	readonly resume: () => void;
+	/** Writes one call response back over the shared slot. */
+	readonly respond: (response: CallResponse) => void;
+	/** Teardown-without-resume: kills the sandbox, paused or not. */
+	readonly terminate: () => void;
+};
+
+/** One transport per run; invoked only at run start (laziness stays above). */
+type CreateTransport = () => Transport;
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 export type {
 	BufferViews,
 	CallRequestMessage,
+	CreateTransport,
 	EmittedMessage,
 	ExecuteMessage,
 	FailureMessage,
@@ -90,4 +144,7 @@ export type {
 	ReadyMessage,
 	SetupMessage,
 	ToWorkerMessage,
+	Transport,
+	TransportEvent,
+	TransportInit,
 };

@@ -108,6 +108,7 @@ describe('bootstrap', () => {
 
 			expect(halt).toEqual({
 				kind: 'halt',
+				haltKind: 'natural-end',
 				payload: { name: 'natural-end', message: '' },
 			});
 		});
@@ -122,6 +123,7 @@ describe('bootstrap', () => {
 
 			expect(halt).toEqual({
 				kind: 'halt',
+				haltKind: 'throw',
 				payload: { name: 'TypeError', message: 'boom' },
 			});
 		});
@@ -133,6 +135,7 @@ describe('bootstrap', () => {
 
 			expect(halt).toEqual({
 				kind: 'halt',
+				haltKind: 'natural-end',
 				payload: {
 					kind: 'natural-end',
 					name: 'natural-end',
