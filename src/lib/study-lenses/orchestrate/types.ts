@@ -246,6 +246,34 @@ type LiveEmbodiment = Readonly<{
  */
 type StationRoster = Readonly<Record<Station, readonly string[]>>;
 
+/**
+ * A station's per-edit status — the value-space of the panel's
+ * station-status derivation (locked in Cycle 2 Phase 0; full model in
+ * `./README.md` § Station-status model).
+ *
+ * @remarks `constant` — no machine status, never greys (`source`,
+ * `realm`). `ok` — the machine completed this stage. `errored` — the
+ * machine tripped AT this stage (machine phases only; a validation
+ * refusal HIDES the LL stations via the availability derivation — it
+ * never renders here). `barred` — unreachable, an earlier MACHINE phase
+ * failed. `pending` — not yet reported: nothing failed before it, but
+ * the machine has not instrumented this stage (honest under stubs —
+ * never `ok` while a slice is stubbed, never `barred` without an
+ * upstream failure).
+ */
+type StationStatus = 'constant' | 'ok' | 'errored' | 'barred' | 'pending';
+
+/**
+ * Per-station statuses — the output of the panel's per-edit
+ * station-status derivation, always carrying ALL five stations.
+ *
+ * @remarks Computed from the live embodiment's whole `Status` +
+ * `errors` only — deliberately UNCOUPLED from the availability
+ * derivation (the three panel derivations have distinct inputs and
+ * cadences); the panel renders the shown intersection.
+ */
+type StationStatusMap = Readonly<Record<Station, StationStatus>>;
+
 // --- Lens selection (where a switch came from) ---
 
 /**
@@ -413,6 +441,8 @@ export type {
 	LensModeState,
 	LiveEmbodiment,
 	StationRoster,
+	StationStatus,
+	StationStatusMap,
 	LensSelectionSource,
 	SandboxMode,
 	EventName,
