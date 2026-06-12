@@ -21,6 +21,9 @@ requiring an upward dependency between peers.
 ```text
 lib/
   README.md              (this — orientation + navigation)
+  classifying/           exhaustive token classification: category
+                         set × role × range per token (consumed by
+                         blanks + quizzing)
   completing/            completion-callback adapter: JeJ-curated
                          suggestions with blocked-marker overlay
   documenting/           docLookup-callback adapter: JEJ-aware
@@ -76,6 +79,8 @@ Inherits all conventions from [`../README.md`](../README.md),
 - **Parent peer index:** [`../README.md`](../README.md).
 - **Conceptual chain:** [`../README.md`](../README.md) § The story.
 - **Current inhabitants:**
+  - [`./classifying/README.md`](./classifying/README.md) — exhaustive
+    syntax-element classification (category set × role × range per token).
   - [`./completing/README.md`](./completing/README.md) — completion-callback
     adapter with JEJ-curated suggestions and a blocked-marker overlay.
   - [`./documenting/README.md`](./documenting/README.md) — docLookup-callback

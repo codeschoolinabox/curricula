@@ -150,8 +150,9 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
   `embody/` (top) or `orchestrate/` (top). Receive `embodiment` via props.
   **Type-only imports** from `embody/types.ts` (e.g.
   `import type { Snippet } from '../../embody/types.js'`) are OK. May also
-  import (runtime + type) from `orchestrate/lib/*` and `@-utils`. (Per
-  [`../DOCS.md` § Dependency rules](../DOCS.md).)
+  import (runtime + type) from `lib/*` (JEJ-peer shared adapters — see
+  [`../lib/README.md`](../lib/README.md)), `orchestrate/lib/*`, and
+  `@-utils`. (Per [`../DOCS.md` § Dependency rules](../DOCS.md).)
 - **Disposable practice**. Lens-internal UI state (parsons shuffle, blanks
   fills) is per-mount only. When the snippet changes, React unmounts the lens;
   in-progress UI state is gone. Never reach for `localStorage`, refs across

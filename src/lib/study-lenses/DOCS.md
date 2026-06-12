@@ -383,8 +383,18 @@ embody/       orchestrate/   ←    embody/  +  lenses/
                               (orchestrate distributes embodiment to lenses via props)
 ```
 
+Plus the JEJ-peer `lib/` tier (canonical conventions:
+[`lib/README.md`](./lib/README.md)): `lib/*` sits between `@-utils` and the
+three conceptual-chain peers — peer-independent shared adapters that any peer
+may consume without an upward dependency between peers.
+
 Concrete:
 
+- `lib/*` (JEJ-peer shared adapters — completing, documenting, classifying,
+  …) may import from `embody/types.ts` (types), `embody/lib/*`, peer-shared
+  contracts (`orchestrate/lib/*/types.ts`), sibling `lib/*`, and `@-utils`.
+  Never from `embody/` (top), `orchestrate/` (top), or `lenses/`. Any peer —
+  `embody/`, `lenses/<lens>/*`, `orchestrate/` — may import from `lib/*`.
 - `embody/` may import from `embody/language-levels/*`, `embody/lib/*`, and
   `@-utils`. Never from `orchestrate/` or `lenses/`.
 - `embody/language-levels/*` (language-level plugins) may import from
@@ -394,9 +404,10 @@ Concrete:
 - `embody/lib/*` may import from sibling `embody/lib/*` and `@-utils`. Never
   from `embody/` (top), `embody/language-levels/*`, `orchestrate/`, or
   `lenses/`.
-- `lenses/<lens>/*` may import from sibling lens-internal files,
-  `orchestrate/lib/*`, and `@-utils`. Receives `embodiment` via props from the
-  orchestrator. Never imports from `embody/` or `orchestrate/` (top).
+- `lenses/<lens>/*` may import from sibling lens-internal files, `lib/*`
+  (JEJ-peer shared adapters), `orchestrate/lib/*`, and `@-utils`. Receives
+  `embodiment` via props from the orchestrator. Never imports from `embody/`
+  or `orchestrate/` (top).
 - `orchestrate/` may import from `orchestrate/lib/*`, `embody/`, `lenses/`,
   `@-utils`.
 - `orchestrate/lib/*` may import from sibling `orchestrate/lib/*`, `embody/`
@@ -419,6 +430,7 @@ Concrete:
 | (new)                     | `lib/formatting-editor/`              | JEJ format-callback adapter (landed at JEJ-peer `lib/`)        |
 | (new)                     | `lib/linting/`                        | JEJ lint-diagnostic adapter (landed at JEJ-peer `lib/`)        |
 | `lib/completing/`         | `lib/completing/`                     | Autocomplete (landed at JEJ-peer `lib/`)                       |
+| (new)                     | `lib/classifying/`                    | Exhaustive token classification; consumed by blanks + quizzing |
 | `lib/editing/`            | `orchestrate/lib/editing/`            | Editor integration                                             |
 | `lib/error-interpreting/` | `orchestrate/lib/error-interpreting/` | Learner-friendly error messages (editor concern)               |
 | `lib/recommender/`        | `orchestrate/lib/recommender/`        | Exercise recommender; consumes embodiment after refactor       |
