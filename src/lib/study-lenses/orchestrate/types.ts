@@ -58,7 +58,7 @@
  */
 
 import type { Snippet, SnippetType } from '../embody/types.js';
-import type { LensConfig } from '../lenses/types.js';
+import type { LensConfig, Station } from '../lenses/types.js';
 
 // --- Public prop surface (the only externally-visible type) ---
 
@@ -229,6 +229,23 @@ type LiveEmbodiment = Readonly<{
 	embodiment: Snippet;
 }>;
 
+// --- Phases-panel derivation shapes (Cycle 2) ---
+
+/**
+ * Per-station lens rosters — the output of the panel's static
+ * station-roster derivation: which registered lenses staff each
+ * station's dropdown.
+ *
+ * @remarks Keyed by every `Station` — a station no lens targets maps to
+ * an empty array (full five-key shape, never an absent key). Values are
+ * lens names (registry keys) in registration order. Derived once per
+ * registry load and invariant across edits — the static one of the
+ * panel's three derivations (static roster · per-edit availability ·
+ * per-edit status; distinct inputs and cadences, never coupled).
+ * Panel-excluded lenses (no `LensModule.phase`) appear in no roster.
+ */
+type StationRoster = Readonly<Record<Station, readonly string[]>>;
+
 // --- Lens selection (where a switch came from) ---
 
 /**
@@ -395,6 +412,7 @@ export type {
 	EditorModeState,
 	LensModeState,
 	LiveEmbodiment,
+	StationRoster,
 	LensSelectionSource,
 	SandboxMode,
 	EventName,
