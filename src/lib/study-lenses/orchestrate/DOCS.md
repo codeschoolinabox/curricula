@@ -381,8 +381,8 @@ trigger-semantics table.
 
 ### Switch flow (lens-mode internal)
 
-When already in lens mode and the learner selects a different lens via a
-station dropdown:
+When already in lens mode and the learner selects a different lens via a station
+dropdown:
 
 ```mermaid
 flowchart TD
@@ -876,8 +876,8 @@ requires a separate, narrower protocol designed against a concrete host's needs
   a block-model, both span the lifecycle, each its own later DDD). They "work
   within NM phases later."
 - **Applicability filtering at the panel** — each station dropdown enumerates
-  its full roster; it does not filter by `applicableTo(embodiment)`.
-  Per-station applicability filtering is a backlogged seam.
+  its full roster; it does not filter by `applicableTo(embodiment)`. Per-station
+  applicability filtering is a backlogged seam.
 
 ## Why a two-mode state machine
 
@@ -917,8 +917,8 @@ embodiment of the buffer, refreshed on a debounced settle, so:
   friendly marker on the first frame (the seed embodiment), and new errors
   appear as the buffer settles.
 - **One slot, two freshness contracts.** A mounted lens always gets the
-  exact-current buffer via the flush-on-transition; the phases panel
-  and the editor gutter read the latest live value at debounce cadence. The
+  exact-current buffer via the flush-on-transition; the phases panel and the
+  editor gutter read the latest live value at debounce cadence. The
   `liveEmbodiment.snippet` key tells each consumer exactly how stale the slot
   is.
 - **Execution stays lazy.** Only the static staircase runs on the debounce; the
