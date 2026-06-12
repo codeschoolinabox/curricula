@@ -51,6 +51,12 @@ function typeIntoBlank(view: EditorView, text: string, startPos: number): void {
 	}
 }
 
+describe('blanks lens — LensModule shape', () => {
+	it('declares the source station as its pedagogical target', () => {
+		expect(blanksLens.phase).toBe('source');
+	});
+});
+
 describe('blanks wrapper — ', () => {
 	describe('Zero — degenerate snippet does not crash', () => {
 		it('renders data-lens="blanks" without throwing on an unparseable snippet (defense-in-depth)', () => {

@@ -294,9 +294,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 					text: noteText,
 					color,
 				};
-				setAnnotationsByView((previous) =>
-					addNote(previous, viewMode, note),
-				);
+				setAnnotationsByView((previous) => addNote(previous, viewMode, note));
 			}
 			setNoteDialog(null);
 			setNoteText('');
@@ -312,9 +310,7 @@ const AnnotateComponent: ComponentType<LensProperties> =
 		// `clearView`.
 		function clearActiveView(): void {
 			if (!globalThis.confirm('Clear all annotations on this view?')) return;
-			setAnnotationsByView((previous) =>
-				clearView(previous, viewMode),
-			);
+			setAnnotationsByView((previous) => clearView(previous, viewMode));
 		}
 
 		// State-only viewMode swap: both per-view annotation sets are untouched
@@ -485,6 +481,7 @@ const annotateLens: LensModule = freezeInPlace<LensModule>({
 	config: annotateCore.config,
 	applicableTo: annotateCore.applicableTo,
 	recommend: annotateCore.recommend,
+	phase: 'source',
 });
 
 export default annotateLens;

@@ -49,6 +49,10 @@ describe('debug-props lens — LensModule shape', () => {
 		expect(cfg).toEqual({ foo: 'bar' });
 		expect(Object.isFrozen(cfg)).toBe(true);
 	});
+
+	it('declares no station — panel-excluded by absence', () => {
+		expect(debugPropsLens.phase).toBeUndefined();
+	});
 });
 
 describe('debug-props lens — Component rendering', () => {

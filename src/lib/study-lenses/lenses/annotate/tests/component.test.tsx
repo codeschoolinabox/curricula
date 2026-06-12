@@ -66,6 +66,10 @@ describe('annotate lens — LensModule shape', () => {
 	it('recommend() delegates to the core placeholder', () => {
 		expect(annotateLens.recommend(makeSnippet())).toEqual([]);
 	});
+
+	it('declares the source station as its pedagogical target', () => {
+		expect(annotateLens.phase).toBe('source');
+	});
 });
 
 describe('annotate lens — Component rendering', () => {

@@ -48,6 +48,12 @@ function divergeEditor(view: EditorView, content: string): void {
 	});
 }
 
+describe('writeme lens — LensModule shape', () => {
+	it('declares the source station as its pedagogical target', () => {
+		expect(writemeLens.phase).toBe('source');
+	});
+});
+
 describe('writeme wrapper — Inc 6a (mount)', () => {
 	describe('Zero — degenerate snippets do not crash', () => {
 		it('renders without throwing on an empty snippet', () => {

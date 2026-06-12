@@ -1043,6 +1043,7 @@ const blanksLens: LensModule = freezeInPlace<LensModule>({
 	config: blanksCore.config,
 	applicableTo: blanksCore.applicableTo,
 	recommend: blanksCore.recommend,
+	phase: 'source',
 });
 
 export default blanksLens;

@@ -88,14 +88,18 @@ type Zone = 'pool' | 'solution';
  * outline-style (solid / dashed / dotted) carrying the signal so it does not rely on
  * hue alone — mirrors `blanks`.
  */
-const LEGEND_STATES: ReadonlyArray<{ state: LineCorrectness; label: string }> = [
-	{ state: 'correct', label: 'Correct — right place and indentation' },
-	{
-		state: 'wrong-order',
-		label: 'Wrong place — this line is out of order or does not belong',
-	},
-	{ state: 'wrong-indent', label: 'Wrong indentation — right line, wrong nesting' },
-];
+const LEGEND_STATES: ReadonlyArray<{ state: LineCorrectness; label: string }> =
+	[
+		{ state: 'correct', label: 'Correct — right place and indentation' },
+		{
+			state: 'wrong-order',
+			label: 'Wrong place — this line is out of order or does not belong',
+		},
+		{
+			state: 'wrong-indent',
+			label: 'Wrong indentation — right line, wrong nesting',
+		},
+	];
 
 /** Default summary label for a hint block when the educator authored none. */
 const DEFAULT_HINT_LABEL = 'Hint';
@@ -573,7 +577,8 @@ const ParsonsComponent: ComponentType<LensProperties> =
 									>
 										<div data-parsons-attempt-summary>
 											Attempt {attempt.index} —{' '}
-											{attempt.success ? 'solved' : 'not solved'} — {attempt.score}%
+											{attempt.success ? 'solved' : 'not solved'} —{' '}
+											{attempt.score}%
 										</div>
 										{/* The frozen snapshot: each placed line at its checked indent,
 										    carrying the correctness it was graded with. CSS folds
@@ -608,6 +613,7 @@ const parsonsLens: LensModule = freezeInPlace<LensModule>({
 	config: parsonsCore.config,
 	applicableTo: parsonsCore.applicableTo,
 	recommend: parsonsCore.recommend,
+	phase: 'source',
 });
 
 export default parsonsLens;

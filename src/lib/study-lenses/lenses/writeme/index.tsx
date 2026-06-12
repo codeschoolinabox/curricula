@@ -447,6 +447,7 @@ const writemeLens: LensModule = freezeInPlace<LensModule>({
 	config: writemeCore.config,
 	applicableTo: writemeCore.applicableTo,
 	recommend: writemeCore.recommend,
+	phase: 'source',
 });
 
 export default writemeLens;

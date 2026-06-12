@@ -102,6 +102,12 @@ function placeOnZone(container: HTMLElement, id: string): void {
 	});
 }
 
+describe('parsons lens — LensModule shape', () => {
+	it('declares the source station as its pedagogical target', () => {
+		expect(parsonsLens.phase).toBe('source');
+	});
+});
+
 describe('parsons wrapper — Inc 7a (mount + shuffled pool)', () => {
 	describe('Zero — degenerate snippet does not crash', () => {
 		it('renders data-lens="parsons" without throwing on an empty snippet', () => {
@@ -187,9 +193,9 @@ describe('parsons wrapper — Inc 7a (mount + shuffled pool)', () => {
 			);
 			const all = Array.from(poolLines(container));
 			expect(all.length).toBe(3);
-			expect(
-				all.every((li) => li.getAttribute('draggable') === 'true'),
-			).toBe(true);
+			expect(all.every((li) => li.getAttribute('draggable') === 'true')).toBe(
+				true,
+			);
 		});
 
 		it('drops blank lines from the pool', () => {
@@ -267,9 +273,9 @@ describe('parsons wrapper — Inc 7a (mount + shuffled pool)', () => {
 					config={parsonsLens.config()}
 				/>,
 			);
-			expect(
-				container.querySelector('[data-parsons-pool]')?.tagName,
-			).toBe('UL');
+			expect(container.querySelector('[data-parsons-pool]')?.tagName).toBe(
+				'UL',
+			);
 		});
 
 		it('defaults data-view-mode="work"', () => {
@@ -345,9 +351,9 @@ describe('parsons wrapper — Inc 7b (two-column board + native DnD: place / ret
 
 		it('renders the solution column as an <ol> (ordered)', () => {
 			const { container } = renderMany();
-			expect(
-				container.querySelector('[data-parsons-solution]')?.tagName,
-			).toBe('OL');
+			expect(container.querySelector('[data-parsons-solution]')?.tagName).toBe(
+				'OL',
+			);
 		});
 
 		it('starts with an empty solution column (all lines in the pool)', () => {
@@ -400,9 +406,9 @@ describe('parsons wrapper — Inc 7b (two-column board + native DnD: place / ret
 		it('renders placed solution lines as draggable (so they can be returned/reordered)', () => {
 			const { container } = renderMany();
 			placeOnZone(container, 'line-0');
-			expect(
-				solutionItem(container, 'line-0')!.getAttribute('draggable'),
-			).toBe('true');
+			expect(solutionItem(container, 'line-0')!.getAttribute('draggable')).toBe(
+				'true',
+			);
 		});
 	});
 
@@ -433,11 +439,7 @@ describe('parsons wrapper — Inc 7b (two-column board + native DnD: place / ret
 			const dt = makeDataTransfer();
 			fireEvent.dragStart(poolItem(container, 'line-2')!, { dataTransfer: dt });
 			fireEvent.drop(solutionItem(container, 'line-1')!, { dataTransfer: dt });
-			expect(solutionOrder(container)).toEqual([
-				'line-0',
-				'line-2',
-				'line-1',
-			]);
+			expect(solutionOrder(container)).toEqual(['line-0', 'line-2', 'line-1']);
 		});
 	});
 
@@ -533,7 +535,9 @@ describe('parsons wrapper — Inc 7c (reorder within the solution column)', () =
 		const { container } = renderThreePlaced();
 		// drop line-0 on the <ol> zone itself (empty area below the lines)
 		const dt = makeDataTransfer();
-		fireEvent.dragStart(solutionItem(container, 'line-0')!, { dataTransfer: dt });
+		fireEvent.dragStart(solutionItem(container, 'line-0')!, {
+			dataTransfer: dt,
+		});
 		fireEvent.drop(container.querySelector('[data-parsons-solution]')!, {
 			dataTransfer: dt,
 		});
@@ -705,7 +709,9 @@ describe('parsons wrapper — Inc 7d (indent / outdent controls)', () => {
 		expect(indentLevel(container, 'line-0')).toBe('2');
 		// move line-0 to the end (drop on the empty zone area)
 		const dt = makeDataTransfer();
-		fireEvent.dragStart(solutionItem(container, 'line-0')!, { dataTransfer: dt });
+		fireEvent.dragStart(solutionItem(container, 'line-0')!, {
+			dataTransfer: dt,
+		});
 		fireEvent.drop(container.querySelector('[data-parsons-solution]')!, {
 			dataTransfer: dt,
 		});
@@ -720,7 +726,9 @@ describe('parsons wrapper — Inc 7d (indent / outdent controls)', () => {
 		expect(indentLevel(container, 'line-0')).toBe('1');
 		// drag back to the pool
 		const dt = makeDataTransfer();
-		fireEvent.dragStart(solutionItem(container, 'line-0')!, { dataTransfer: dt });
+		fireEvent.dragStart(solutionItem(container, 'line-0')!, {
+			dataTransfer: dt,
+		});
 		fireEvent.drop(container.querySelector('[data-parsons-pool]')!, {
 			dataTransfer: dt,
 		});
@@ -741,7 +749,9 @@ describe('parsons wrapper — Inc 7f (Check / Reset / per-line feedback + score)
 		return container.querySelector('[data-parsons-score]');
 	}
 	function correctnessOf(container: HTMLElement, id: string): string | null {
-		return solutionItem(container, id)?.getAttribute('data-correctness') ?? null;
+		return (
+			solutionItem(container, id)?.getAttribute('data-correctness') ?? null
+		);
 	}
 	function indentBtn(
 		container: HTMLElement,
@@ -878,7 +888,9 @@ describe('parsons wrapper — Inc 7f (Check / Reset / per-line feedback + score)
 		expect(scoreEl(container)).not.toBeNull();
 		// drag a placed line back to the pool -> handleDropOnPool -> applyArrange.
 		const dt = makeDataTransfer();
-		fireEvent.dragStart(solutionItem(container, 'line-0')!, { dataTransfer: dt });
+		fireEvent.dragStart(solutionItem(container, 'line-0')!, {
+			dataTransfer: dt,
+		});
 		fireEvent.drop(container.querySelector('[data-parsons-pool]')!, {
 			dataTransfer: dt,
 		});
@@ -962,9 +974,11 @@ describe('parsons wrapper — Inc 7g (view-mode toggle / complete view)', () => 
 		return container.querySelector('[data-parsons-board]');
 	}
 	function rootViewMode(container: HTMLElement): string | null {
-		return container
-			.querySelector('[data-lens="parsons"]')
-			?.getAttribute('data-view-mode') ?? null;
+		return (
+			container
+				.querySelector('[data-lens="parsons"]')
+				?.getAttribute('data-view-mode') ?? null
+		);
 	}
 	function renderIndented(
 		config?: Parameters<typeof parsonsLens.config>[0],
@@ -1192,7 +1206,9 @@ describe('parsons wrapper — Inc 10 (info panel: legend + distractor-count + hi
 		// The count is revealed in the expandable body (a deliberate reversal of the
 		// earlier "count in summary" design, per the user's discoverability call).
 		function countSummary(container: HTMLElement): string {
-			return distractorCount(container)?.querySelector('summary')?.textContent ?? '';
+			return (
+				distractorCount(container)?.querySelector('summary')?.textContent ?? ''
+			);
 		}
 
 		it('does NOT leak the count in the collapsed summary (the number is a spoiler)', () => {
@@ -1208,7 +1224,9 @@ describe('parsons wrapper — Inc 10 (info panel: legend + distractor-count + hi
 			const { container } = render1(
 				'const good = 1;\nconst bad = 2; // distractor',
 			);
-			expect(distractorCount(container)?.textContent).toContain('extra lines: 1');
+			expect(distractorCount(container)?.textContent).toContain(
+				'extra lines: 1',
+			);
 		});
 
 		it('is a collapsed <details> by default (a deliberate divergence from the always-open legacy)', () => {
@@ -1224,7 +1242,9 @@ describe('parsons wrapper — Inc 10 (info panel: legend + distractor-count + hi
 			const { container } = render1(
 				'const good = 1;\nconst x = 2; // distractor\nconst y = 3; // distractor',
 			);
-			expect(distractorCount(container)?.textContent).toContain('extra lines: 2');
+			expect(distractorCount(container)?.textContent).toContain(
+				'extra lines: 2',
+			);
 			expect(countSummary(container)).not.toMatch(/\d/);
 		});
 
@@ -1235,7 +1255,9 @@ describe('parsons wrapper — Inc 10 (info panel: legend + distractor-count + hi
 				'const a = 1;\nconst x = 2; // distractor\nconst y = 3; // distractor\nconst z = 4; // distractor',
 				{ maxDistractors: 2 },
 			);
-			expect(distractorCount(container)?.textContent).toContain('extra lines: 2');
+			expect(distractorCount(container)?.textContent).toContain(
+				'extra lines: 2',
+			);
 		});
 
 		it('Zero — is absent when the snippet declares no distractors', () => {
@@ -1272,7 +1294,9 @@ describe('parsons wrapper — Inc 10 (info panel: legend + distractor-count + hi
 		it('every hint is a collapsible <details>; a plain /* */ block gets the default "Hint" label (no summary needed)', () => {
 			// The educator should NOT have to author a label: a bare block comment
 			// becomes a collapsible "Hint" toggle so the guidance is hidden until wanted.
-			const { container } = render1('const a = 1;\n/* think about the base case */');
+			const { container } = render1(
+				'const a = 1;\n/* think about the base case */',
+			);
 			const entries = hintEntries(container);
 			expect(entries.length).toBe(1);
 			const details = entries[0];
@@ -1381,7 +1405,10 @@ describe('parsons wrapper — Inc 11 (attempt-history modal)', () => {
 	function scoreEl(container: HTMLElement): Element | null {
 		return container.querySelector('[data-parsons-score]');
 	}
-	function indentBtn(container: HTMLElement, id: string): HTMLButtonElement | null {
+	function indentBtn(
+		container: HTMLElement,
+		id: string,
+	): HTMLButtonElement | null {
 		return (
 			solutionItem(container, id)?.querySelector<HTMLButtonElement>(
 				'[data-parsons-indent]',
@@ -1413,9 +1440,7 @@ describe('parsons wrapper — Inc 11 (attempt-history modal)', () => {
 		it('closes on the close button', () => {
 			const { container } = renderThreeLine();
 			openHistory(container);
-			fireEvent.click(
-				container.querySelector('[data-parsons-history-close]')!,
-			);
+			fireEvent.click(container.querySelector('[data-parsons-history-close]')!);
 			expect(modal(container)).toBeNull();
 		});
 
