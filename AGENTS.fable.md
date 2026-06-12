@@ -45,10 +45,13 @@ encouragement. They cannot be overridden by momentum.
    fix. Exception: user explicitly says "skip plan mode."
 4. **One increment at a time** — complete Red → Green → Refactor → Lint before
    starting the next behavior.
-5. **Atomic commits, prompted** — commit after each passing TDD cycle and after
-   completing Phase 0 artifacts; one behavior or milestone per commit; the human
-   approves every commit — never commit silently. Message format in
-   [§ Git Policy](#git-policy).
+5. **Atomic commits, announced** — commit autonomously after each passing TDD
+   cycle and after completing Phase 0 artifacts; one behavior or milestone per
+   commit. No per-commit approval prompt — announce each commit as it lands
+   (SHA + message) so the human can audit and revert; new commits only, so every
+   checkpoint is droppable. Pushing remains human-gated
+   ([§ Git Policy](#git-policy)). The Phase-0 → Phase-1 human review gate is
+   unchanged. Message format in [§ Git Policy](#git-policy).
 6. **Plans are execution checklists, not references** — every plan document
    explicitly lists every required workflow step: Phase 0 DDD steps, AR trigger
    points (AR-1 through AR-5), sandbox checkpoints, commit steps, and quality
@@ -226,10 +229,11 @@ until the human approves the Phase 0 commit.
 the second test is written) → lint checkpoint → refactor against the DOCS.md
 sketch → self-review ([§ Self-Review Checklists](#self-review-checklists)) →
 **AR-4** → quality checks → 🔍 sandbox checkpoint when user-observable → commit
-prompt.
+(autonomous, announced).
 
 **Phase 2**: full quality checks (`npm run validate` — see
-[§ Linting](#linting)) → **AR-5** → commit / push prompt.
+[§ Linting](#linting)) → **AR-5** → commit (autonomous, announced) → push
+prompt.
 
 **The Refactor step is structural, not cosmetic.** Green tests prove behavioral
 correctness; the Refactor step holds the implementation against the DOCS.md
@@ -263,11 +267,11 @@ check in.
 
 When an increment adds a user-observable change (new UI element, new
 browser-visible behavior), a **🔍 sandbox checkpoint** fires between quality
-checks and the commit prompt: the user exercises the feature at a running dev
-server; the agent reports observations verbatim. Cosmetic redirects roll into
-the next increment; **behavioral defects block the commit**. Checkpoints are
-gate points — only the human skips, and the only legitimate skip is an increment
-with no user-visible surface, declared explicitly ("no sandbox checkpoint: pure
+checks and the commit: the user exercises the feature at a running dev server;
+the agent reports observations verbatim. Cosmetic redirects roll into the next
+increment; **behavioral defects block the commit**. Checkpoints are gate points
+— only the human skips, and the only legitimate skip is an increment with no
+user-visible surface, declared explicitly ("no sandbox checkpoint: pure
 utility"). Name a specific action and a specific expected observation; "verify
 it works" is not a checkpoint. Full rules:
 [DEV.md § Sandbox Checkpoints](./DEV.md#sandbox-checkpoints--user-observable-features).
@@ -284,15 +288,17 @@ it works" is not a checkpoint. Full rules:
 - Before starting, verify understanding with the user: what will be built, what
   constraints apply, what success looks like.
 
-### Git Prompts
+### Git Checkpoints
 
-Claude prompts, the human approves:
+Commits are autonomous and announced; pushing is prompted:
 
-- After Phase 0: "Phase 0 complete — ready for atomic commit:
-  `docs: establish [module] domain model and architectural sketch`"
-- After each passing TDD cycle: "Ready for atomic commit:
-  `add: [behavior this increment implements]`"
-- After the last increment: "Sprint complete — ready to push to main"
+- After Phase 0: commit
+  `docs: establish [module] domain model and architectural sketch`, announce the
+  SHA, and stop at the Phase-0 → Phase-1 human review gate (unchanged).
+- After each passing TDD cycle: commit
+  `add: [behavior this increment implements]` and announce the SHA.
+- After the last increment: "Sprint complete — ready to push to main" — the push
+  itself stays with the human ([§ Git Policy](#git-policy)).
 
 ---
 

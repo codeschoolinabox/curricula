@@ -1352,8 +1352,8 @@ AR-2 catches this before it locks in.
   the implementation will do and what shape it will take?
 - If not, the ambiguity will surface as a bug or a structural mess. Resolve it
   now.
-- Present the Phase 0 artifacts to the human at the Phase-0 commit prompt.
-  **Phase 1 does not start until the human approves.**
+- Commit the Phase 0 artifacts (autonomous, announced) and present them to the
+  human for review. **Phase 1 does not start until the human approves.**
 
 ### Phase 1: TDD Implementation
 
@@ -1446,7 +1446,7 @@ catches layout shift, flicker, focus behavior, keyboard feel, accessibility
 regressions, and visual polish. **When a TDD increment adds a user-observable
 change** (a new UI element, a new button, a new behavior visible in the
 browser), a **🔍 Sandbox checkpoint** step is inserted into the cycle **between
-step i (quality checks green) and step j (commit prompt)**.
+step i (quality checks green) and step j (the commit)**.
 
 The cycle becomes:
 
@@ -1456,7 +1456,7 @@ b. Stub         g. Refactor
 c. Failing test h. AR-4
 d. AR-3         i. Quality checks
 e. Implement    🔍 Sandbox checkpoint   (when user-observable)
-                j. Commit prompt
+                j. Commit (autonomous, announced)
 ```
 
 At each checkpoint:
@@ -1755,8 +1755,8 @@ used
 
 ### AR-5: Pre-Merge Review
 
-**Trigger:** After all increments complete, before commit prompt. **Skip:** Only
-when the human explicitly opts out.
+**Trigger:** After all increments complete, before the final commit and the push
+prompt. **Skip:** Only when the human explicitly opts out.
 
 <strong>Focus areas:</strong>
 
