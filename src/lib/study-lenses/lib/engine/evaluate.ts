@@ -321,8 +321,8 @@ async function dispatchCall(
 	const { onCall } = state.spec.threadLogic;
 	if (onCall === undefined) {
 		requestStop(state, {
-			kind: 'call-error',
-			name: 'EngineCallError',
+			kind: CALL_ERROR,
+			name: ENGINE_CALL_ERROR,
 			message: 'the worker called while onCall is absent',
 		});
 		return;
@@ -334,8 +334,8 @@ async function dispatchCall(
 		response = await onCall(request);
 	} catch (error) {
 		requestStop(state, {
-			kind: 'call-error',
-			name: 'EngineCallError',
+			kind: CALL_ERROR,
+			name: ENGINE_CALL_ERROR,
 			message: `onCall threw: ${describeError(error)}`,
 		});
 		return;
@@ -343,7 +343,18 @@ async function dispatchCall(
 	if (state.stop !== null) {
 		return;
 	}
-	transport.respond(response);
+	try {
+		transport.respond(response);
+	} catch (error) {
+		// A response the channel cannot carry (the payload ceiling) is a
+		// round-trip that could not be serviced — README § How a run ends.
+		requestStop(state, {
+			kind: CALL_ERROR,
+			name: ENGINE_CALL_ERROR,
+			message: `the response could not be written: ${describeError(error)}`,
+		});
+		return;
+	}
 	state.budget?.resume();
 }
 
@@ -663,3 +674,5 @@ type BudgetClock = {
 const STOP_SENTINEL: unique symbol = Symbol('engine-stop');
 const DEFAULT_SECONDS = 5;
 const YIELD_CHARGE_MS = 5;
+const ENGINE_CALL_ERROR = 'EngineCallError';
+const CALL_ERROR = 'call-error' as const;

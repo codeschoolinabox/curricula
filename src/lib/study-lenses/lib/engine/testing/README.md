@@ -12,6 +12,7 @@ tracers without knowing anything about them.
 | `reference-worker-setup.ts` | Config-driven worker logic: emit/call/getConfig globals, halt stamping |
 | `reference-thread-logic.ts` | Drop-a-sentinel / yield-the-rest, echo calls, limit-shape refiner      |
 | `test-worker-entry.ts`      | The thin-entry pattern: bootstrap wired to the reference setup         |
+| `fake-transport.ts`         | The same-thread reference double: clones every payload, sync calls     |
 
 ## Navigation
 
