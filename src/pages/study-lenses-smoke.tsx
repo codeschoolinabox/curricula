@@ -22,8 +22,12 @@
  *    not a bug: embody's validating/creation slices are stubbed on real
  *    code, so Cycle 1 interprets tokenize/parse errors + the named
  *    scenarios only.
- * 5. Use the lens picker to open a lens and the edit button to return —
- *    the gutter state survives the round-trip (the live slot is retained).
+ * 5. Use a phases-panel station dropdown to open a lens and the edit
+ *    button to return — the gutter state survives the round-trip (the
+ *    live slot is retained). The panel's columns double as the lifecycle
+ *    status display: scenario buttons exercise hiding (VALIDATION_FAIL →
+ *    LL stations removed) and barring (FAIL_AT_PARSE → creation +
+ *    evaluation barred).
  *
  * @vitest-skip — Docusaurus auto-routes `src/pages/*.tsx`; this is a
  * page, not a unit test. No corresponding `.test.tsx` file.

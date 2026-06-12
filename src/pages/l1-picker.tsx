@@ -1,18 +1,23 @@
 /**
- * @file L1 sandbox harness for the toolbar lens-picker.
+ * @file Sandbox harness for the orchestrator's lens-selection surface
+ * (originally the L1 toolbar picker; now the Cycle-2 phases panel).
  *
  * Open `http://localhost:3000/spiralearn/l1-picker` after `npm run start`.
  *
  * Both panels mount `<StudyLenses>` with the same snippet; the top panel
  * starts in editor mode, the bottom in lens mode (`lens="debug-props"`).
- * Toolbar contents are state-derived in both panels:
+ * Panel contents are state-derived in both panels:
  *
- * - **Lens-picker dropdown** — a `<select data-orchestrator-lens-picker>`
- *   carrying a non-selectable sentinel (`— select a lens —`) followed by
- *   one `<option>` per entry in `LENS_REGISTRY`, in registration order.
+ * - **Per-station dropdowns** — the phases panel
+ *   (`<nav data-orchestrator-phases-panel>`) renders one column per shown
+ *   station (`data-orchestrator-station`), each with a `<select>` carrying
+ *   a non-selectable sentinel (`— select a lens —`) followed by one
+ *   `<option>` per lens that targets the station, in registration order.
  *   Selecting a lens transitions the orchestrator to lens mode for that
  *   lens and dispatches `mode-changed` then
- *   `lens-switched(source: 'picker')` on the internal bus.
+ *   `lens-switched(source: 'panel')` on the internal bus. `debug-props`
+ *   declares no station, so it appears in no dropdown (panel-excluded —
+ *   prop-reachable only, as the bottom panel demonstrates).
  * - **Edit-return button** — a `<button data-orchestrator-edit-button>`
  *   labelled "Edit code" that appears only when `state.mode === 'lens'`.
  *   Clicking it returns to editor mode and dispatches
@@ -36,14 +41,14 @@ export default function L1Picker(): React.JSX.Element {
 	return (
 		<Layout
 			title="L1 picker"
-			description="L1 sandbox — toolbar lens-picker + edit-return button"
+			description="Sandbox — phases-panel station dropdowns + edit-return button"
 		>
 			<main style={{ maxWidth: 720, margin: '2rem auto', padding: '0 1rem' }}>
 				<h1>L1 picker sandbox</h1>
 				<p>
-					Each panel renders a fully-wired toolbar above its active surface. The
-					picker enumerates the registered lenses (sentinel first); the
-					edit-return button appears only in lens mode.
+					Each panel renders the phases panel above its active surface. The
+					source station&apos;s dropdown enumerates the source lenses (sentinel
+					first); the edit-return button appears only in lens mode.
 				</p>
 				<h2>Editor mode (no lens prop)</h2>
 				<StudyLenses snippet="OK" />

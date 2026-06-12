@@ -33,20 +33,19 @@
  *   Four event names: `lens-switched` (carried forward from the
  *   pre-refactor orchestrator), `mode-changed` (the 2-mode state
  *   machine), and `type-toggled` / `sandbox-toggled` (typed now;
- *   dispatched from the dock when it is built — the same
- *   typed-before-wired precedent as `LensSelectionSource`'s
- *   `'panel'`).
+ *   dispatched from the dock when it is built — the
+ *   typed-before-wired pattern `LensSelectionSource`'s `'panel'`
+ *   followed until the phases panel landed its dispatch site).
  *
  * **What survives unchanged**: the `EventBus` shape (typed
  * dispatch/subscribe/unsubscribe/clear), per-instance ownership
  * (each `<StudyLenses>` mount owns its own bus, no global registry).
  *
  * **Open holes**:
- * - `LensSelectionSource` may still grow: `'panel'` is typed but
- *   unwired (reserved for the future Cycle-2 phases-panel dispatch
- *   site, deferred); a keyboard-shortcut source could land alongside.
- *   Extensions are gated — see the policy block on the union itself.
- * - `'edit-button'` is typed (the toolbar edit-return click site
+ * - `LensSelectionSource` may still grow (a keyboard-shortcut source
+ *   could land alongside). Extensions are gated — see the policy
+ *   block on the union itself.
+ * - `'edit-button'` is typed (the panel edit-return click site
  *   computes it) but not externally observable today, because
  *   `ModeChangedPayload` carries only `{from, to}`. A future
  *   `ModeChangedPayload.source` extension would surface it; until
@@ -94,7 +93,8 @@ import type { LensConfig, Station } from '../lenses/types.js';
  *   static `embody()` while editing; seeded once at mount). Caller
  *   does NOT pre-build.
  * - `lens?` — educator-supplied default-mount lens; the learner can
- *   switch via the picker. This is just the initial selection.
+ *   switch via the panel's station dropdowns. This is just the initial
+ *   selection.
  *   Changes to this prop AFTER mount drive
  *   mode transitions (per `./README.md` § Editor-vs-lens state
  *   machine).
@@ -277,7 +277,7 @@ type StationStatusMap = Readonly<Record<Station, StationStatus>>;
 // --- Lens selection (where a switch came from) ---
 
 /**
- * Source of a lens-selection event — useful for analytics, picker
+ * Source of a lens-selection event — useful for analytics, panel
  * highlighting logic, and (future) exercise-completion attribution.
  *
  * @remarks Current enumeration (each value pinned to a dispatch site):
@@ -285,14 +285,14 @@ type StationStatusMap = Readonly<Record<Station, StationStatus>>;
  *   when first render lands in lens mode.
  * - `'prop'` — the prop-change effect (`useEffect([lens, configs])`)
  *   that fires when an external consumer changes the lens prop.
- * - `'picker'` — the toolbar lens-picker `<select>`'s `onChange`
- *   handler.
- * - `'edit-button'` — the toolbar's edit-return `<button>`'s `onClick`
+ * - `'panel'` — a phases-panel station dropdown's `onChange` handler
+ *   (the Cycle-2 dispatch site this value was reserved for; it replaced
+ *   the toolbar picker's retired `'picker'` value, which left the union
+ *   WITH its dispatch site — every value stays pinned to a live site).
+ * - `'edit-button'` — the panel's edit-return `<button>`'s `onClick`
  *   handler. This site does NOT dispatch `lens-switched`; the source
  *   value is computed by `applyTransition` but never reaches a bus
  *   subscriber (see the "Open holes" note on `ModeChangedPayload`).
- * - `'panel'` — reserved for the future Cycle-2 phases-panel
- *   dispatch site (deferred; typed but unwired).
  *
  * **Extension policy.** Adding a value to this union requires:
  * 1. An AR-1 design review (this is a contract, not an implementation
@@ -302,12 +302,7 @@ type StationStatusMap = Readonly<Record<Station, StationStatus>>;
  *    represents.
  * Only the human can waive the AR-1 step. Agents do not self-waive.
  */
-type LensSelectionSource =
-	| 'picker'
-	| 'panel'
-	| 'prop'
-	| 'initial'
-	| 'edit-button';
+type LensSelectionSource = 'panel' | 'prop' | 'initial' | 'edit-button';
 
 // --- INTERNAL EventBus taxonomy ---
 
@@ -319,8 +314,9 @@ type LensSelectionSource =
  * @remarks Each name maps to a payload shape via `EventPayloadMap`.
  * The taxonomy is `lens-switched`, `mode-changed`, `type-toggled`,
  * and `sandbox-toggled` — the latter two are typed now and dispatch
- * from the dock when it is built (the typed-before-wired precedent
- * set by `LensSelectionSource`'s `'panel'`). Later cycles may add
+ * from the dock when it is built (the typed-before-wired pattern
+ * `LensSelectionSource`'s `'panel'` followed until the phases panel
+ * landed its dispatch site). Later cycles may add
  * `exercise-completed`, `lens-mount-error`.
  */
 const EVENT_NAMES = Object.freeze({
@@ -334,7 +330,7 @@ type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
 
 /**
  * Payload for `lens-switched`. Fires when the active lens changes
- * inside lens mode (picker change OR panel cell selection).
+ * inside lens mode (a station-dropdown selection).
  *
  * @remarks `previous` may be `null` on the very first lens-mount
  * (editor → lens transition); subsequent in-mode switches always

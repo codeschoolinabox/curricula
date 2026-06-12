@@ -51,20 +51,24 @@ import annotateLens from '../lenses/annotate/index.js';
 import blanksLens from '../lenses/blanks/index.js';
 import debugPropertiesLens from '../lenses/debug-props/index.js';
 import parsonsLens from '../lenses/parsons/index.js';
-import type { LensConfig, LensModule } from '../lenses/types.js';
+import type { LensConfig, LensModule, Station } from '../lenses/types.js';
 import writemeLens from '../lenses/writeme/index.js';
 
+import deriveStationAvailability from './derive-station-availability.js';
+import deriveStationRoster from './derive-station-roster.js';
+import deriveStationStatus from './derive-station-status.js';
 import EditorComponent from './editor/index.js';
 import createEventBus from './event-bus.js';
 import type { LintDiagnostic } from './lib/editing/types.js';
 import deriveInterpretedDiagnostics from './lib/error-interpreting/derive-interpreted-diagnostics.js';
-import Toolbar from './toolbar.js';
+import PhasesPanel from './phases-panel/index.js';
 import type {
 	LiveEmbodiment,
 	EventBus,
 	LensModeState,
 	LensSelectionSource,
 	OrchestratorState,
+	StationStatusMap,
 	StudyLensesProps as StudyLensesProperties,
 } from './types.js';
 
@@ -85,12 +89,27 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 });
 
 /**
- * Registered lens names, in registration order. Stable reference passed
- * to `<Toolbar lensNames={LENS_NAMES} ... />` so the picker's option
- * list doesn't recompute per render. Insertion order is preserved by
- * the ES2015+ `Object.keys` spec for string-keyed properties.
+ * Per-station lens rosters — the panel's STATIC derivation, run once per
+ * module load against the static registry (the same module-load posture
+ * as `LENS_REGISTRY` itself). Invariant across edits; the per-edit
+ * derivations (availability, status) run in the component against the
+ * live slot.
  */
-const LENS_NAMES: readonly string[] = Object.freeze(Object.keys(LENS_REGISTRY));
+const STATION_ROSTER = deriveStationRoster(LENS_REGISTRY);
+
+/**
+ * The all-pending status map backing the live slot's type-level-only
+ * null guard in the panel-state memo. Unreachable post-mount (the slot
+ * is seeded non-null in both modes and never written null); pinned here
+ * so the guard has no implementation-time improvisation.
+ */
+const ALL_PENDING_STATUSES: StationStatusMap = Object.freeze({
+	source: 'pending',
+	realm: 'pending',
+	parse: 'pending',
+	creation: 'pending',
+	evaluation: 'pending',
+});
 
 /**
  * Idle window (ms) for the debounced live re-embody. An edit reschedules the
@@ -327,6 +346,36 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			[liveEmbodiment, snippet],
 		);
 
+		// Phases-panel per-edit derivations — shown stations (availability) +
+		// per-station statuses, derived from the live slot at its own cadence
+		// (the panel reads the latest live value at debounce cadence — no
+		// staleness blanking, unlike the gutter memo above: a mid-debounce
+		// panel shows the previous settle's staircase, per DOCS.md § Why a
+		// live (debounced) embodiment, "One slot, two freshness contracts").
+		// The null branch is type-level-only (the slot is
+		// seeded non-null in both modes and never written null) and pins to
+		// zero-stations + all-pending. The memo keeps the panel's array/map
+		// prop identities stable across unrelated orchestrator renders.
+		const { shownStations, statusMap } = React.useMemo(
+			function derivePanelState(): {
+				readonly shownStations: readonly Station[];
+				readonly statusMap: StationStatusMap;
+			} {
+				if (liveEmbodiment === null) {
+					return { shownStations: [], statusMap: ALL_PENDING_STATUSES };
+				}
+				const { embodiment } = liveEmbodiment;
+				return {
+					shownStations: deriveStationAvailability(
+						liveEmbodiment.type,
+						embodiment.validation,
+					),
+					statusMap: deriveStationStatus(embodiment.status, embodiment.errors),
+				};
+			},
+			[liveEmbodiment],
+		);
+
 		// Live re-embody on edit — a trailing-edge debounced static embody of the
 		// current buffer, one instance per mount (held in a ref, lazy-initialized
 		// like the bus above so re-renders don't build a throwaway). The empty
@@ -386,10 +435,10 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			initialDerived.state,
 		);
 
-		// Shared transition handler. Both the prop-change effect (`source:
-		// 'prop'`) and the picker (`source: 'picker'`, L1.6+) route through
-		// this single helper so the diff/dispatch contract is enforced in
-		// one place. Reads snippet + the live slot from refs to avoid re-firing
+		// Shared transition handler. The prop-change effect (`source:
+		// 'prop'`), the panel dropdowns (`source: 'panel'`), and the
+		// edit-return button all route through this single helper so the
+		// diff/dispatch contract is enforced in one place. Reads snippet + the live slot from refs to avoid re-firing
 		// the prop-change effect on every snippet keystroke; reads `configs`
 		// from the live closure so each call captures the current cascade.
 		function applyTransition(
@@ -491,15 +540,17 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			[snippet],
 		);
 
-		// L1.6: picker-driven transitions. The picker passes the chosen lens
+		// Panel-driven transitions. A station dropdown passes the chosen lens
 		// name; the handler routes through the shared transition logic with
-		// `source: 'picker'`. The sentinel (empty string) is filtered at the
-		// toolbar boundary so this handler only ever sees real lens names.
+		// `source: 'panel'` (the dispatch site the reservation in
+		// `LensSelectionSource` named). The sentinel (empty string) is
+		// filtered at the panel boundary so this handler only ever sees real
+		// lens names.
 		function handleLensSelect(name: string): void {
-			applyTransition(name, 'picker');
+			applyTransition(name, 'panel');
 		}
 
-		// L1.10: edit-return transitions. The toolbar's edit button drives
+		// L1.10: edit-return transitions. The panel's edit button drives
 		// `lens → editor`. Passing `undefined` as the lens target routes
 		// `deriveInitialState` through the editor branch; `applyTransition`
 		// then dispatches `mode-changed({from: 'lens', to: 'editor'})` and
@@ -525,12 +576,12 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			setSnippet(next);
 		}, []);
 
-		// L1.4 + L1.5: picker value is derived from state, NOT held in a
-		// local picker-side state slot. State remains the single source of
-		// truth (per README § Picker-vs-prop ownership). Lens mode shows the
-		// active lens name; editor mode shows the empty string, which the
-		// sentinel option carries.
-		const pickerValue = state.mode === 'lens' ? state.activeLens : '';
+		// The panel's active lens is derived from state, NOT held in a
+		// panel-side slot. State remains the single source of truth (per
+		// README § Picker-vs-prop ownership). Lens mode names the active
+		// lens (each station rostering it shows it as its dropdown value);
+		// editor mode passes null and every dropdown shows the sentinel.
+		const activeLens = state.mode === 'lens' ? state.activeLens : null;
 
 		if (state.mode === 'lens') {
 			// Coherence invariant (enforced by transition logic; the type system
@@ -553,9 +604,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			const lensModule = LENS_REGISTRY[state.activeLens];
 			return (
 				<div data-orchestrator-root>
-					<Toolbar
-						lensNames={LENS_NAMES}
-						pickerValue={pickerValue}
+					<PhasesPanel
+						stations={shownStations}
+						roster={STATION_ROSTER}
+						statusMap={statusMap}
+						activeLens={activeLens}
 						onLensSelect={handleLensSelect}
 						editButtonVisible={state.mode === 'lens'}
 						onEditReturn={handleEditReturn}
@@ -575,9 +628,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// explicit at this call site.
 		return (
 			<div data-orchestrator-root>
-				<Toolbar
-					lensNames={LENS_NAMES}
-					pickerValue={pickerValue}
+				<PhasesPanel
+					stations={shownStations}
+					roster={STATION_ROSTER}
+					statusMap={statusMap}
+					activeLens={activeLens}
 					onLensSelect={handleLensSelect}
 					editButtonVisible={false}
 					onEditReturn={handleEditReturn}

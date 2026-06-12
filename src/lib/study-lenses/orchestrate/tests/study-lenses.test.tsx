@@ -883,70 +883,74 @@ describe('<StudyLenses> — F5b.5 prop-driven lens → editor transition', () =>
 	});
 });
 
-describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () => {
-	describe('Zero — toolbar is present in editor mode', () => {
-		it('rendering without a lens prop shows the [data-orchestrator-toolbar] element', () => {
+describe('<StudyLenses> — C2 the phases panel mounts above the active surface', () => {
+	describe('Zero — the panel is present in editor mode', () => {
+		it('rendering without a lens prop shows the [data-orchestrator-phases-panel] element', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
 			expect(
-				container.querySelector('[data-orchestrator-toolbar]'),
+				container.querySelector('[data-orchestrator-phases-panel]'),
 			).not.toBeNull();
 		});
 	});
 
-	describe('One — toolbar is also present in lens mode', () => {
-		it('rendering with lens="debug-props" still shows the [data-orchestrator-toolbar] element', () => {
+	describe('One — the panel is also present in lens mode', () => {
+		it('rendering with lens="debug-props" still shows the [data-orchestrator-phases-panel] element', () => {
 			const { container } = render(
 				<StudyLenses snippet="OK" lens="debug-props" />,
 			);
 			expect(
-				container.querySelector('[data-orchestrator-toolbar]'),
+				container.querySelector('[data-orchestrator-phases-panel]'),
 			).not.toBeNull();
 		});
 	});
+});
 
-	describe('L1.3 — picker enumerates the LENS_REGISTRY', () => {
-		it('the picker has the sentinel followed by one <option> per registered lens (annotate, blanks, debug-props, parsons, writeme)', () => {
+describe('<StudyLenses> — C2 the per-station dropdowns (the panel as picker surface)', () => {
+	describe('C2.3 — the source station enumerates the panel-included registry', () => {
+		it('the source dropdown has the sentinel followed by the four source lenses in registration order', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
 			const options = container.querySelectorAll(
-				'[data-orchestrator-lens-picker] option',
+				'[data-orchestrator-station="source"] option',
 			);
 			const values = Array.from(options).map(
 				(option) => (option as HTMLOptionElement).value,
 			);
-			expect(values).toEqual([
-				'',
-				'annotate',
-				'blanks',
-				'debug-props',
-				'parsons',
-				'writeme',
-			]);
+			expect(values).toEqual(['', 'annotate', 'blanks', 'parsons', 'writeme']);
+		});
+
+		it('debug-props appears in no station dropdown (panel-excluded)', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			expect(
+				container.querySelectorAll(
+					'[data-orchestrator-station] option[value="debug-props"]',
+				),
+			).toHaveLength(0);
 		});
 	});
 
-	describe('L1.4 — picker value in editor mode', () => {
-		it('the picker value is the empty string when there is no lens prop', () => {
+	describe('C2.4 — source-station dropdown value in editor mode', () => {
+		it('the source dropdown value is the empty string when there is no lens prop', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
 			const picker = container.querySelector(
-				'[data-orchestrator-lens-picker]',
+				'[data-orchestrator-station="source"] select',
 			) as HTMLSelectElement | null;
 			expect(picker?.value).toBe('');
 		});
 
-		it('the picker value re-syncs to "" after a lens → editor transition', () => {
+		it('the source dropdown value re-syncs to "" after a lens → editor transition', () => {
 			const { container, rerender } = render(
-				<StudyLenses snippet="OK" lens="debug-props" />,
+				<StudyLenses snippet="OK" lens="annotate" />,
 			);
 			rerender(<StudyLenses snippet="OK" />);
 			const picker = container.querySelector(
-				'[data-orchestrator-lens-picker]',
+				'[data-orchestrator-station="source"] select',
 			) as HTMLSelectElement | null;
 			expect(picker?.value).toBe('');
 		});
 	});
 
-	describe('L1.6 — selecting a lens from the picker (editor → lens)', () => {
-		it('selecting "debug-props" from editor mode dispatches mode-changed({from: editor, to: lens})', () => {
+	describe('C2.6 — selecting a lens from a station dropdown (editor → lens)', () => {
+		it('selecting "annotate" from editor mode dispatches mode-changed({from: editor, to: lens})', () => {
 			const { bus, dispatchSpy } = createSpyBus();
 			const factorySpy = vi
 				.spyOn(eventBusModule, 'default')
@@ -955,9 +959,9 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 				const { container } = render(<StudyLenses snippet="OK" />);
 				expect(dispatchSpy).not.toHaveBeenCalled();
 				const picker = container.querySelector(
-					'[data-orchestrator-lens-picker]',
+					'[data-orchestrator-station="source"] select',
 				) as HTMLSelectElement;
-				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				fireEvent.change(picker, { target: { value: 'annotate' } });
 				expect(dispatchSpy).toHaveBeenCalledWith('mode-changed', {
 					from: 'editor',
 					to: 'lens',
@@ -967,7 +971,7 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			}
 		});
 
-		it('selecting "debug-props" from editor mode dispatches lens-switched(null → debug-props, picker)', () => {
+		it('selecting "annotate" from editor mode dispatches lens-switched(null → annotate, panel)', () => {
 			const { bus, dispatchSpy } = createSpyBus();
 			const factorySpy = vi
 				.spyOn(eventBusModule, 'default')
@@ -976,20 +980,20 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 				const { container } = render(<StudyLenses snippet="OK" />);
 				expect(dispatchSpy).not.toHaveBeenCalled();
 				const picker = container.querySelector(
-					'[data-orchestrator-lens-picker]',
+					'[data-orchestrator-station="source"] select',
 				) as HTMLSelectElement;
-				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				fireEvent.change(picker, { target: { value: 'annotate' } });
 				expect(dispatchSpy).toHaveBeenCalledWith('lens-switched', {
 					previous: null,
-					next: 'debug-props',
-					source: 'picker',
+					next: 'annotate',
+					source: 'panel',
 				});
 			} finally {
 				factorySpy.mockRestore();
 			}
 		});
 
-		it('mode-changed dispatches before lens-switched on the picker-driven transition', () => {
+		it('mode-changed dispatches before lens-switched on the panel-driven transition', () => {
 			const { bus, dispatchSpy } = createSpyBus();
 			const factorySpy = vi
 				.spyOn(eventBusModule, 'default')
@@ -997,9 +1001,9 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			try {
 				const { container } = render(<StudyLenses snippet="OK" />);
 				const picker = container.querySelector(
-					'[data-orchestrator-lens-picker]',
+					'[data-orchestrator-station="source"] select',
 				) as HTMLSelectElement;
-				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				fireEvent.change(picker, { target: { value: 'annotate' } });
 				const eventNames = dispatchSpy.mock.calls.map((args) => args[0]);
 				expect(eventNames).toEqual(['mode-changed', 'lens-switched']);
 			} finally {
@@ -1007,29 +1011,27 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 			}
 		});
 
-		it('selecting "debug-props" from editor mode mounts the debug-props lens', () => {
+		it('selecting "annotate" from editor mode mounts the annotate lens', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
 			const picker = container.querySelector(
-				'[data-orchestrator-lens-picker]',
+				'[data-orchestrator-station="source"] select',
 			) as HTMLSelectElement;
-			fireEvent.change(picker, { target: { value: 'debug-props' } });
-			expect(
-				container.querySelector('[data-lens="debug-props"]'),
-			).not.toBeNull();
+			fireEvent.change(picker, { target: { value: 'annotate' } });
+			expect(container.querySelector('[data-lens="annotate"]')).not.toBeNull();
 		});
 
-		it('selecting "writeme" from editor mode mounts the writeme lens (the L1 picker bar)', () => {
+		it('selecting "writeme" from editor mode mounts the writeme lens', () => {
 			const { container } = render(<StudyLenses snippet="const x = 1;" />);
 			const picker = container.querySelector(
-				'[data-orchestrator-lens-picker]',
+				'[data-orchestrator-station="source"] select',
 			) as HTMLSelectElement;
 			fireEvent.change(picker, { target: { value: 'writeme' } });
 			expect(container.querySelector('[data-lens="writeme"]')).not.toBeNull();
 		});
 	});
 
-	describe('L1.7 — selecting a different lens from the picker (in-mode lens switch)', () => {
-		it('selecting "debug-props" while lens="annotate" dispatches lens-switched({previous: "annotate", next: "debug-props", source: "picker"})', () => {
+	describe('C2.7 — selecting a different lens from a station dropdown (in-mode lens switch)', () => {
+		it('selecting "blanks" while lens="annotate" dispatches lens-switched({previous: "annotate", next: "blanks", source: "panel"})', () => {
 			const { bus, dispatchSpy } = createSpyBus();
 			const factorySpy = vi
 				.spyOn(eventBusModule, 'default')
@@ -1041,20 +1043,20 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 				expect(dispatchSpy).toHaveBeenCalledTimes(2);
 				dispatchSpy.mockClear();
 				const picker = container.querySelector(
-					'[data-orchestrator-lens-picker]',
+					'[data-orchestrator-station="source"] select',
 				) as HTMLSelectElement;
-				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				fireEvent.change(picker, { target: { value: 'blanks' } });
 				expect(dispatchSpy).toHaveBeenCalledWith('lens-switched', {
 					previous: 'annotate',
-					next: 'debug-props',
-					source: 'picker',
+					next: 'blanks',
+					source: 'panel',
 				});
 			} finally {
 				factorySpy.mockRestore();
 			}
 		});
 
-		it('the in-mode picker switch does NOT dispatch mode-changed (mode stays "lens")', () => {
+		it('the in-mode panel switch does NOT dispatch mode-changed (mode stays "lens")', () => {
 			const { bus, dispatchSpy } = createSpyBus();
 			const factorySpy = vi
 				.spyOn(eventBusModule, 'default')
@@ -1066,9 +1068,9 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 				expect(dispatchSpy).toHaveBeenCalledTimes(2);
 				dispatchSpy.mockClear();
 				const picker = container.querySelector(
-					'[data-orchestrator-lens-picker]',
+					'[data-orchestrator-station="source"] select',
 				) as HTMLSelectElement;
-				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				fireEvent.change(picker, { target: { value: 'blanks' } });
 				expect(dispatchSpy).not.toHaveBeenCalledWith(
 					'mode-changed',
 					expect.anything(),
@@ -1079,52 +1081,65 @@ describe('<StudyLenses> — L1.2 toolbar mounted above the active surface', () =
 		});
 	});
 
-	describe('L1.5 — picker value in lens mode', () => {
-		it('the picker value equals the active lens name when lens="debug-props"', () => {
+	describe('C2.5 — source-station dropdown value in lens mode', () => {
+		it('the source dropdown value equals the active lens name when lens="annotate"', () => {
 			const { container } = render(
-				<StudyLenses snippet="OK" lens="debug-props" />,
+				<StudyLenses snippet="OK" lens="annotate" />,
 			);
 			const picker = container.querySelector(
-				'[data-orchestrator-lens-picker]',
+				'[data-orchestrator-station="source"] select',
 			) as HTMLSelectElement | null;
-			expect(picker?.value).toBe('debug-props');
+			expect(picker?.value).toBe('annotate');
 		});
 
-		it('the picker value re-syncs to the new active lens after an in-mode lens switch', () => {
+		it('the source dropdown value re-syncs to the new active lens after an in-mode lens switch', () => {
 			const { container, rerender } = render(
 				<StudyLenses snippet="OK" lens="annotate" />,
 			);
-			rerender(<StudyLenses snippet="OK" lens="debug-props" />);
+			rerender(<StudyLenses snippet="OK" lens="blanks" />);
 			const picker = container.querySelector(
-				'[data-orchestrator-lens-picker]',
+				'[data-orchestrator-station="source"] select',
 			) as HTMLSelectElement | null;
-			expect(picker?.value).toBe('debug-props');
+			expect(picker?.value).toBe('blanks');
+		});
+
+		it('a prop-mounted panel-excluded lens leaves every station dropdown on the sentinel', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			// eslint-disable-next-line unicorn/prefer-spread -- NodeList spread fails tsc without dom.iterable
+			const values = Array.from(
+				container.querySelectorAll<HTMLSelectElement>(
+					'[data-orchestrator-station] select',
+				),
+			).map((select) => select.value);
+			expect(values).toEqual(['', '', '', '', '']);
 		});
 	});
 });
 
-describe('<StudyLenses> — L1.11 external lens prop change re-syncs picker value', () => {
-	describe('Many+Interface — most-recent write wins after a picker-driven selection', () => {
-		it('after picker selects "annotate", an external lens="debug-props" prop change moves the picker to "debug-props"', () => {
+describe('<StudyLenses> — C2.11 external lens prop change re-syncs the panel', () => {
+	describe('Many+Interface — most-recent write wins after a panel-driven selection', () => {
+		it('after the panel selects "annotate", an external lens="writeme" prop change moves the source dropdown to "writeme"', () => {
 			const { container, rerender } = render(<StudyLenses snippet="OK" />);
 			const picker = container.querySelector(
-				'[data-orchestrator-lens-picker]',
+				'[data-orchestrator-station="source"] select',
 			) as HTMLSelectElement;
 			fireEvent.change(picker, { target: { value: 'annotate' } });
 			expect(picker.value).toBe('annotate');
-			rerender(<StudyLenses snippet="OK" lens="debug-props" />);
-			expect(picker.value).toBe('debug-props');
+			rerender(<StudyLenses snippet="OK" lens="writeme" />);
+			expect(picker.value).toBe('writeme');
 		});
 
-		it('after picker selects "annotate", an external lens=undefined prop change resets the picker to the sentinel', () => {
+		it('after the panel selects "blanks", an external lens=undefined prop change resets the source dropdown to the sentinel', () => {
 			const { container, rerender } = render(
 				<StudyLenses snippet="OK" lens="annotate" />,
 			);
 			const picker = container.querySelector(
-				'[data-orchestrator-lens-picker]',
+				'[data-orchestrator-station="source"] select',
 			) as HTMLSelectElement;
-			fireEvent.change(picker, { target: { value: 'debug-props' } });
-			expect(picker.value).toBe('debug-props');
+			fireEvent.change(picker, { target: { value: 'blanks' } });
+			expect(picker.value).toBe('blanks');
 			rerender(<StudyLenses snippet="OK" />);
 			expect(picker.value).toBe('');
 		});
@@ -1237,7 +1252,7 @@ describe('<StudyLenses> — L1.8 + L1.9 + L1.10 edit-return button', () => {
 			).toBeNull();
 		});
 
-		it('after clicking edit, opening a lens via the picker re-mounts the lens (state machine is re-entrant)', () => {
+		it('after clicking edit, opening a lens via a station dropdown re-mounts a lens (state machine is re-entrant)', () => {
 			const { container } = render(
 				<StudyLenses snippet="OK" lens="debug-props" />,
 			);
@@ -1246,15 +1261,13 @@ describe('<StudyLenses> — L1.8 + L1.9 + L1.10 edit-return button', () => {
 			) as HTMLButtonElement;
 			fireEvent.click(editButton);
 			const picker = container.querySelector(
-				'[data-orchestrator-lens-picker]',
+				'[data-orchestrator-station="source"] select',
 			) as HTMLSelectElement;
-			fireEvent.change(picker, { target: { value: 'debug-props' } });
-			expect(
-				container.querySelector('[data-lens="debug-props"]'),
-			).not.toBeNull();
+			fireEvent.change(picker, { target: { value: 'annotate' } });
+			expect(container.querySelector('[data-lens="annotate"]')).not.toBeNull();
 		});
 
-		it('the edit-return → picker-reopen round trip with stable snippet is a cache-hit (embody fires once total)', () => {
+		it('the edit-return → panel-reopen round trip with stable snippet is a cache-hit (embody fires once total)', () => {
 			const embodySpy = vi.spyOn(embodyModule, 'default');
 			try {
 				const { container } = render(
@@ -1266,9 +1279,9 @@ describe('<StudyLenses> — L1.8 + L1.9 + L1.10 edit-return button', () => {
 				) as HTMLButtonElement;
 				fireEvent.click(editButton);
 				const picker = container.querySelector(
-					'[data-orchestrator-lens-picker]',
+					'[data-orchestrator-station="source"] select',
 				) as HTMLSelectElement;
-				fireEvent.change(picker, { target: { value: 'debug-props' } });
+				fireEvent.change(picker, { target: { value: 'annotate' } });
 				expect(embodySpy).toHaveBeenCalledTimes(1);
 			} finally {
 				embodySpy.mockRestore();
@@ -1460,5 +1473,79 @@ describe('F6 — interpreted gutter diagnostics (editor mode, cross-boundary)', 
 		} finally {
 			vi.useRealTimers();
 		}
+	});
+});
+
+describe('<StudyLenses> — C2 station availability + status through real embody', () => {
+	describe('Boundaries — a validation refusal hides the LL stations (never bars)', () => {
+		it('VALIDATION_FAIL shows only the CORE stations, realm removed from between source and parse', () => {
+			const { container } = render(<StudyLenses snippet="VALIDATION_FAIL" />);
+			// eslint-disable-next-line unicorn/prefer-spread -- NodeList spread fails tsc without dom.iterable
+			const columns = Array.from(
+				container.querySelectorAll<HTMLElement>('[data-orchestrator-station]'),
+			).map((column) => column.dataset.orchestratorStation);
+			expect(columns).toEqual(['source', 'parse']);
+		});
+	});
+
+	describe('Boundaries — an in-machine failure keeps the LL stations shown and bars downstream', () => {
+		it('FAIL_AT_PARSE keeps all five stations shown', () => {
+			const { container } = render(<StudyLenses snippet="FAIL_AT_PARSE" />);
+			// eslint-disable-next-line unicorn/prefer-spread -- NodeList spread fails tsc without dom.iterable
+			const columns = Array.from(
+				container.querySelectorAll<HTMLElement>('[data-orchestrator-station]'),
+			).map((column) => column.dataset.orchestratorStation);
+			expect(columns).toEqual([
+				'source',
+				'realm',
+				'parse',
+				'creation',
+				'evaluation',
+			]);
+		});
+
+		it('FAIL_AT_PARSE bars the creation station', () => {
+			const { container } = render(<StudyLenses snippet="FAIL_AT_PARSE" />);
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-station="creation"]',
+				)?.dataset.orchestratorStationStatus,
+			).toBe('barred');
+		});
+
+		it('FAIL_AT_PARSE bars the evaluation station', () => {
+			const { container } = render(<StudyLenses snippet="FAIL_AT_PARSE" />);
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-station="evaluation"]',
+				)?.dataset.orchestratorStationStatus,
+			).toBe('barred');
+		});
+	});
+
+	describe('Boundaries — honest under stubs: clean real code stays pending (STUB-COUPLED: flips to ok when the creation slice lands; edit this test then)', () => {
+		it('a clean real snippet shows all five stations', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			// eslint-disable-next-line unicorn/prefer-spread -- NodeList spread fails tsc without dom.iterable
+			const columns = Array.from(
+				container.querySelectorAll<HTMLElement>('[data-orchestrator-station]'),
+			).map((column) => column.dataset.orchestratorStation);
+			expect(columns).toEqual([
+				'source',
+				'realm',
+				'parse',
+				'creation',
+				'evaluation',
+			]);
+		});
+
+		it('a clean real snippet reports the creation station as pending, never ok', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-station="creation"]',
+				)?.dataset.orchestratorStationStatus,
+			).toBe('pending');
+		});
 	});
 });
