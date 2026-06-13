@@ -67,10 +67,10 @@ helpers (newspaper anatomy: export first, helpers below).
    gives them all one `braceR` token type.
 
 5. **Assemble + freeze** (pure, shape finalization ONLY) — emit the
-   source-ordered `readonly ClassifiedToken[]`, deep-frozen via `freezeInPlace`
-   (`@utils/freeze.js` — objects this module just built). This phase never adds,
-   drops, or reorders elements — `partner` indices assigned in phase 4 must stay
-   valid.
+   source-ordered `readonly ClassifiedToken[]`, deep-frozen via
+   `deepFreezeInPlace` (`@utils/deep-freeze-in-place.js` — objects this module
+   just built). This phase never adds, drops, or reorders elements — `partner`
+   indices assigned in phase 4 must stay valid.
 
 ### Data flow
 

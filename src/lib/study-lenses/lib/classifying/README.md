@@ -71,18 +71,25 @@ the blanks regression suite for JEJ constructs).
 
 Categories are assigned **token-stream-first**: every token's category comes
 from its Acorn token type via the classification table; the AST contributes only
-alternates, roles, and the one re-bin (generator `*`). Each token type has
-exactly one home row and the final row is a catch-all, which is what makes
-totality provable rather than asserted.
+alternates, roles, and the one re-bin (generator `*`). The rows are tried in
+order — **first match wins** — and the final row is a catch-all, which is what
+makes totality provable rather than asserted. The one load-bearing precedence is
+**keyword before identifier**: contextual keywords (`let`, `of`, `as`, …) are
+emitted as bare `name` tokens, so the keyword row must be tried before the
+identifier row or they would classify as identifiers. Reserved keyword-operators
+(`in`, `instanceof`, `typeof`, `void`, `delete`) carry a `.keyword` flag and are
+**not** in the operator token-type set, so they classify as keyword (their
+operator nature is added later as an AST alternate); keyword-before-operator is
+therefore conceptual ordering, not a contested precedence.
 
-| Token (by Acorn token type)                                                                                                                                 | Category                |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| punctuator with a delimiter label (parens, braces, brackets, `;`, `,`, `.`, `=>`, `?`, `:`, `?.`, `...`, backtick, `${`)                                    | `delimiter`             |
-| TokenType carrying an operator flag (`binop` / `isAssign` / `prefix` / `postfix`) or the `**` family (`+`, `=`, `===`, `<`, `&&`, `??`, `++`, `!`, `**`, …) | `operator`              |
-| token with the `.keyword` flag, or a `name` token in the contextual-keyword set                                                                             | `keyword`               |
-| `name` / `privateId` token (not contextual-keyword)                                                                                                         | `identifier`            |
-| `num` / `string` / `regexp` / non-empty `template` token                                                                                                    | `literal`               |
-| anything else                                                                                                                                               | `delimiter` (catch-all) |
+| Token (first matching row wins)                                                                                                                               | Category                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| delimiter punctuator (parens, braces, brackets, `;`, `,`, `.`, `=>`, `?`, `:`, `?.`, `...`, backtick, `${`)                                                   | `delimiter`             |
+| has a `.keyword` flag, or a `name` token whose text is a contextual keyword (`let`, `of`, `as`, `from`, `get`, `set`, …)                                      | `keyword`               |
+| an operator token type (`=` and compound assigns, `++`/`--`, `!`/`~`, `&&`/`\|\|`/`??`, comparison / arithmetic / bitwise / shift families, `*` `/` `**` `%`) | `operator`              |
+| `name` / `privateId` token (not a contextual keyword)                                                                                                         | `identifier`            |
+| `num` / `string` / `regexp` / non-empty `template` token                                                                                                      | `literal`               |
+| anything else                                                                                                                                                 | `delimiter` (catch-all) |
 
 Token-derivable **role seeds** are assigned in the same token-stream pass
 (literal kinds; `statement-end` for `;`; `member-access` for `.` / `?.`;
@@ -177,6 +184,10 @@ Behavior:
 - **Zero-length template chunks** (the empty span between adjacent
   interpolations in `` `${a}${b}` ``) are dropped — a zero-width element can be
   neither blanked nor clicked.
+- **`invalidTemplate` chunks** — the template chunk Acorn emits for an illegal
+  escape in a tagged template (`` tag`\unicode` ``, which still parses) classify
+  as `literal` with role `template-chunk`, the same as a normal chunk; they are
+  not a parse failure.
 - **`}` disambiguation**: Acorn emits one `braceR` token type for block,
   switch-body, and template-expression closers. The pairing pass assigns the
   closer the role of its opener (`block`, `template-expression` for a `${`
