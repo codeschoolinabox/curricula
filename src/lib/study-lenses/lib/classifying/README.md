@@ -196,9 +196,11 @@ Behavior:
   as `literal` with role `template-chunk`, the same as a normal chunk; they are
   not a parse failure.
 - **`}` disambiguation**: Acorn emits one `braceR` token type for block,
-  switch-body, and template-expression closers. The pairing pass assigns the
-  closer the role of its opener (`block`, `template-expression` for a `${`
-  partner, or the opener's `other` until finer brace roles land).
+  switch-body, and template-expression closers. The pairing pass records mutual
+  `partner` indices that tell them apart — a `}` partnered with a `${` closes a
+  template expression; partnered with a `{`, a block. Closer-role inheritance
+  (the `}` taking `template-expression` / `block` from its opener) is a later
+  increment; closers carry `'other'` until then.
 - **Reserved-word operators and literals**: `typeof` / `in` / `instanceof` /
   `void` / `delete` classify as `operator` and `null` / `true` / `false` as
   `literal`, by what they do — not as `keyword`, even though Acorn flags them

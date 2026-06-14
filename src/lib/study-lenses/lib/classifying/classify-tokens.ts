@@ -15,9 +15,10 @@ import type {
  * per non-empty source token, in source order — total and pure (inputs are
  * never mutated; safe on frozen embodiment data).
  *
- * Increment 1 scope: home category + token-derivable role seed only. Each
- * `categories` is single-element (AST alternates land later); `partner` is
- * always `null` (pairing lands later); `ast` is validated but not yet walked.
+ * Increment scope: home category + token-derivable role seed + delimiter
+ * pairing. Each `categories` is single-element (AST alternates land later);
+ * AST-context roles and closer-role inheritance land later; `ast` is validated
+ * but not yet walked.
  *
  * @throws TypeError when `code`, `tokens`, or `ast` is missing or null —
  *   callers gate on a successful parse (see `./README.md` § Public API).
@@ -33,14 +34,22 @@ export default function classifyTokens({
 		);
 	}
 
-	const classified = tokens
-		.filter((token) => token.type !== tt.eof && token.end > token.start)
-		.map((token) => classifyToken(token, code));
+	const kept = tokens.filter(
+		(token) => token.type !== tt.eof && token.end > token.start,
+	);
+	const partners = pairDelimiters(kept);
+	const classified = kept.map((token, index) =>
+		classifyToken(token, code, partners[index]),
+	);
 
 	return deepFreezeInPlace(classified);
 }
 
-function classifyToken(token: acorn.Token, code: string): ClassifiedToken {
+function classifyToken(
+	token: acorn.Token,
+	code: string,
+	partner: number | null,
+): ClassifiedToken {
 	const { start, end } = token;
 	const text = code.slice(start, end);
 	const category = homeCategory(token, text);
@@ -50,9 +59,43 @@ function classifyToken(token: acorn.Token, code: string): ClassifiedToken {
 		end,
 		categories: [category],
 		role: roleSeed(token, category),
-		partner: null,
+		partner,
 	};
 }
+
+// Match paired delimiters with a stack walk over the kept tokens, returning
+// each token's partner index (into the same kept array) or null. Backtick is
+// one token type for open AND close — it closes iff the stack top is a pending
+// backtick, else opens. `}` closes whichever of `{` / `${` is on top. The
+// local stack and result array never escape this function, so the in-place
+// mutation is safe.
+/* eslint-disable functional/immutable-data -- local stack + result array, never escape this pure function */
+function pairDelimiters(
+	tokens: ReadonlyArray<acorn.Token>,
+): ReadonlyArray<number | null> {
+	const partner: Array<number | null> = tokens.map(() => null);
+	const stack: Array<{ index: number; closer: acorn.TokenType }> = [];
+	for (const [index, token] of tokens.entries()) {
+		const { type } = token;
+		const closer = OPENER_CLOSERS.get(type);
+		if (closer !== undefined) {
+			stack.push({ index, closer });
+			continue;
+		}
+		const top = stack.at(-1);
+		if (type === tt.backQuote && top?.closer !== tt.backQuote) {
+			stack.push({ index, closer: tt.backQuote });
+			continue;
+		}
+		if (top?.closer === type) {
+			stack.pop();
+			partner[index] = top.index;
+			partner[top.index] = index;
+		}
+	}
+	return partner;
+}
+/* eslint-enable functional/immutable-data */
 
 // Categories are SEMANTIC, not lexical: a "keyword" indicates a statement /
 // declaration / control structure acting on the NM, and does not transform
@@ -104,6 +147,16 @@ function roleSeed(token: acorn.Token, category: Category): Role | null {
 }
 
 const tt = acorn.tokTypes;
+
+// Paired-delimiter openers → the token type that closes them. Backtick is
+// absent (it is its own open/close toggle, handled in `pairDelimiters`); `${`
+// and `{` both close with `}` (`braceR`).
+const OPENER_CLOSERS = new Map<acorn.TokenType, acorn.TokenType>([
+	[tt.parenL, tt.parenR],
+	[tt.bracketL, tt.bracketR],
+	[tt.braceL, tt.braceR],
+	[tt.dollarBraceL, tt.braceR],
+]);
 
 // Punctuator token types that are delimiters in the house taxonomy — ternary
 // `?`/`:`, `=>`, `?.`, `...`, and the template backtick included.

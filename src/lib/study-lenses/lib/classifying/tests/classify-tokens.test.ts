@@ -238,6 +238,67 @@ describe('classifyTokens', () => {
 		});
 	});
 
+	describe('Pairing', () => {
+		it('pairs an opener with its closer', () => {
+			const result = classifyTokens(parse('(x)'));
+			expect(result[0]?.partner).toBe(2);
+		});
+
+		it('pairs a closer with its opener', () => {
+			const result = classifyTokens(parse('(x)'));
+			expect(result[2]?.partner).toBe(0);
+		});
+
+		it('pairs nested delimiters by stack order, not nearest type', () => {
+			const result = classifyTokens(parse('({a})'));
+			expect(result[1]?.partner).toBe(3);
+		});
+
+		it('pairs bracket delimiters', () => {
+			const result = classifyTokens(parse('[a]'));
+			expect(result[0]?.partner).toBe(2);
+		});
+
+		it('pairs block brace delimiters', () => {
+			const result = classifyTokens(parse('{ x; }'));
+			expect(result[0]?.partner).toBe(3);
+		});
+
+		it('pairs a template-expression close with its open, not a block brace', () => {
+			const result = classifyTokens(parse('`${x}`; { y }'));
+			expect(result[3]?.partner).toBe(1);
+		});
+
+		it('pairs a block close with its open, not a template-expression open', () => {
+			const result = classifyTokens(parse('`${x}`; { y }'));
+			expect(result[8]?.partner).toBe(6);
+		});
+
+		it('pairs nested template backticks by stack depth', () => {
+			const result = classifyTokens(parse('`${`b`}`'));
+			expect(result[0]?.partner).toBe(6);
+		});
+
+		it('pairs the inner backticks of a nested template', () => {
+			const result = classifyTokens(parse('`${`b`}`'));
+			expect(result[2]?.partner).toBe(4);
+		});
+
+		it('makes every partner link mutual', () => {
+			const result = classifyTokens(parse('`${x}`; [a]; (b); { c }'));
+			for (const [index, token] of result.entries()) {
+				if (token.partner !== null) {
+					expect(result[token.partner]?.partner).toBe(index);
+				}
+			}
+		});
+
+		it('leaves a non-delimiter token inside a paired expression unpaired', () => {
+			const result = classifyTokens(parse('(x)'));
+			expect(result[1]?.partner).toBeNull();
+		});
+	});
+
 	describe('Frozen', () => {
 		it('returns a frozen array', () => {
 			expect(Object.isFrozen(classifyTokens(parse('x')))).toBe(true);
