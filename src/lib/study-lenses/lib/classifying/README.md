@@ -3,10 +3,11 @@
 Exhaustive syntax-element classification for a parsed JavaScript snippet. Given
 a snippet's source text plus its Acorn token stream and AST, produces one frozen
 `ClassifiedToken` per source token: the token's text, its `[start, end)` range,
-its **category set** (identifier / keyword / operator / literal / delimiter — a
-token may belong to more than one), its **role** (an AST-context refinement,
-e.g. _this `(` opens call arguments_ vs _this `(` groups an expression_), and —
-for paired delimiters — the index of its **partner** token.
+its **category** (identifier / keyword / operator / literal / delimiter —
+semantic, by what the element does in the NM, not by Acorn's lexer flag), its
+**role** (an AST-context refinement, e.g. _this `(` opens call arguments_ vs
+_this `(` groups an expression_), and — for paired delimiters — the index of its
+**partner** token.
 
 Classification is **total**: every non-empty token in the stream is classified.
 Consumers select from the classification; this module never selects, never
@@ -17,31 +18,35 @@ chunks are literals).
 
 ## Glossary
 
-**Category** — one of the five house syntax-element kinds: `identifier`,
-`keyword`, `operator`, `literal`, `delimiter`. The taxonomy is shared vocabulary
-across blanks (its five content-type checkboxes) and quizzing (its category
-questions).
+**Category** — one of the five house syntax-element kinds, defined by what the
+element DOES in the notional machine, not by Acorn's lexer:
 
-**Category set** — the ordered, non-empty list of categories a token belongs to,
-primary first. Most tokens have exactly one. Overlap tokens carry the full set:
-`typeof` is `['keyword', 'operator']`, `null` / `true` / `false` are
-`['keyword', 'literal']`, a contextual keyword used as a plain variable name
-(`let of = 3`) is `['keyword', 'identifier']`. The primary rule is the one the
-blanks lens's locks actually pin: **keyword wins primary wherever a token also
-classifies under an AST-derived category**. All span collisions are
-keyword-vs-AST: `Identifier`/`Literal` node coverage, and `UnaryExpression` /
-`BinaryExpression` operator positions (`typeof x`, `a in b`, `a instanceof B`);
-delimiter tokens never collide. With those alternates carried,
-selection-by-primary reproduces the legacy dedupe winner and
-selection-by-any-match reproduces legacy per-category eligibility. Every
-category a token carries is keyed to that token's `[start, end)` span;
-AST-derived categories attach to the token whose span they fall within.
+- `identifier` — names a binding (references/stores a value)
+- `keyword` — marks a statement, declaration, or control structure that directs
+  the NM; it neither transforms data nor produces/references a value
+- `operator` — transforms operands / produces a value
+- `literal` — is a value
+- `delimiter` — structural punctuation
 
-**Home category / alternate / re-bin** — the _home category_ is what the
-classification table assigns from the token type alone; it is always primary.
-_Alternates_ are AST-derived additional categories appended after it. The
-_re-bin_ is the single sanctioned home-category change: generator `*` moves
-`operator` → `delimiter`.
+The decisive consequence: **a reserved word is not automatically a keyword.**
+`typeof` / `in` / `instanceof` / `void` / `delete` produce values → operators;
+`null` / `true` / `false` are values → literals — even though Acorn flags all of
+them `.keyword`. True keywords are `if`, `else`, `while`, `for`, `const`, `let`,
+`function`, `return`, … The taxonomy is shared vocabulary across blanks (its
+five content-type checkboxes) and quizzing (its category questions).
+
+**Category set** — the `categories` array, primary first. Under the semantic
+taxonomy most tokens settle to exactly one category once context is known;
+`categories` stays an array because a few tokens are genuinely context-dependent
+(a contextual keyword like `of` is the for-of keyword in `for (x of …)` but an
+identifier in `let of = 3` — disambiguated by the AST), and whether any token is
+ever simultaneously multi-category is settled in the alternates increment. Every
+category a token carries is keyed to that token's `[start, end)` span.
+
+**Home category / re-bin** — the _home category_ is what the classification
+table assigns from the token type; in increment 1 it is the whole (single-entry)
+`categories` array. The _re-bin_ is the single sanctioned home-category change:
+generator `*` moves `operator` → `delimiter` (an AST pass).
 
 **Role** — a finer, AST-context-dependent refinement within a category. Roles
 answer "what is this token doing HERE": the same `(` text is `call-arguments` in
@@ -62,45 +67,48 @@ output with a non-empty category set. Totality is provable from the
 classification table below: every token type has exactly one home row, and the
 final row is a catch-all. Exotic constructs the legacy walk silently skipped
 (the `*` in `import * as ns`, the `*` in `yield* g()`) classify as `operator` by
-token label — a deliberate, documented totality improvement (and the one known
-behavior delta vs. legacy for blanks: under operators-only configs those
-previously-unreachable stars become eligible; irrelevant within JEJ, locked by
-the blanks regression suite for JEJ constructs).
+token type — a deliberate totality improvement.
+
+**Behavior deltas vs. legacy blanks** (the semantic taxonomy reclassifies what
+acorn's `.keyword` flag conflated; the blanks refactor adopts the corrected
+categories rather than preserving legacy): `typeof` / `in` / `instanceof` /
+`void` / `delete` move keyword → operator; `null` / `true` / `false` move
+keyword → literal; the previously-skipped stars become operators. So a learner
+filtering blanks by "keywords" no longer blanks `typeof`; by "operators" now
+does — the corrected, more accurate behavior.
 
 ## The taxonomy
 
 Categories are assigned **token-stream-first**: every token's category comes
 from its Acorn token type via the classification table; the AST contributes only
-alternates, roles, and the one re-bin (generator `*`). The rows are tried in
-order — **first match wins** — and the final row is a catch-all, which is what
-makes totality provable rather than asserted. The one load-bearing precedence is
-**keyword before identifier**: contextual keywords (`let`, `of`, `as`, …) are
-emitted as bare `name` tokens, so the keyword row must be tried before the
-identifier row or they would classify as identifiers. Reserved keyword-operators
-(`in`, `instanceof`, `typeof`, `void`, `delete`) carry a `.keyword` flag and are
-**not** in the operator token-type set, so they classify as keyword (their
-operator nature is added later as an AST alternate); keyword-before-operator is
-therefore conceptual ordering, not a contested precedence.
+roles and the one re-bin (generator `*`). The rows are tried in order — **first
+match wins** — and the final row is a catch-all, which is what makes totality
+provable rather than asserted. Two precedences are load-bearing, both because
+Acorn's `.keyword` flag is broader than the semantic keyword category:
 
-| Token (first matching row wins)                                                                                                                               | Category                |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| delimiter punctuator (parens, braces, brackets, `;`, `,`, `.`, `=>`, `?`, `:`, `?.`, `...`, backtick, `${`)                                                   | `delimiter`             |
-| has a `.keyword` flag, or a `name` token whose text is a contextual keyword (`let`, `of`, `as`, `from`, `get`, `set`, …)                                      | `keyword`               |
-| an operator token type (`=` and compound assigns, `++`/`--`, `!`/`~`, `&&`/`\|\|`/`??`, comparison / arithmetic / bitwise / shift families, `*` `/` `**` `%`) | `operator`              |
-| `name` / `privateId` token (not a contextual keyword)                                                                                                         | `identifier`            |
-| `num` / `string` / `regexp` / non-empty `template` token                                                                                                      | `literal`               |
-| anything else                                                                                                                                                 | `delimiter` (catch-all) |
+- **operator and literal before keyword** — the reserved-word operators
+  (`typeof`, `in`, `instanceof`, `void`, `delete`) and reserved-word literals
+  (`null`, `true`, `false`) carry `.keyword` but are categorized by what they
+  do, so their token-type sets are checked first.
+- **keyword before identifier** — contextual keywords (`let`, `of`, `as`, …) are
+  emitted as bare `name` tokens, so the keyword row must precede the identifier
+  row or they would classify as identifiers.
+
+| Token (first matching row wins)                                                                                                                                                                                                           | Category                |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| delimiter punctuator (parens, braces, brackets, `;`, `,`, `.`, `=>`, `?`, `:`, `?.`, `...`, backtick, `${`)                                                                                                                               | `delimiter`             |
+| an operator token type (`=` and compound assigns, `++`/`--`, `!`/`~`, `&&`/`\|\|`/`??`, comparison / arithmetic / bitwise / shift families, `*` `/` `**` `%`, and the reserved-word operators `typeof` `in` `instanceof` `void` `delete`) | `operator`              |
+| a literal token type (`num`, `string`, `regexp`, non-empty `template`, and the reserved-word literals `null` `true` `false`)                                                                                                              | `literal`               |
+| has a `.keyword` flag, or a `name` token whose text is a contextual keyword (`let`, `of`, `as`, `from`, `get`, `set`, …)                                                                                                                  | `keyword`               |
+| `name` / `privateId` token (not a contextual keyword)                                                                                                                                                                                     | `identifier`            |
+| anything else                                                                                                                                                                                                                             | `delimiter` (catch-all) |
 
 Token-derivable **role seeds** are assigned in the same token-stream pass
-(literal kinds; `statement-end` for `;`; `member-access` for `.` / `?.`;
-`template-delimiter` for backticks; `template-expression` for `${`; default
-`'other'` or `null`). AST augmentation (second pass, never reassigns the home
-category except the named re-bin):
+(literal kinds incl. `null`/`boolean`; `statement-end` for `;`; `member-access`
+for `.` / `?.`; `template-delimiter` for backticks; `template-expression` for
+`${`; default `'other'` or `null`). AST augmentation (second pass) never
+reassigns the home category except the generator re-bin:
 
-- **Alternates**: a keyword token whose span is covered by an `Identifier` node
-  gains `identifier`; by a `Literal` node gains `literal`; in a
-  `UnaryExpression` or `BinaryExpression` operator position gains `operator`
-  (`typeof`, `void`, `delete`, `in`, `instanceof`).
 - **Generator `*` re-bin**: a `*` token in function/method/property generator
   position is re-binned `delimiter` with role `generator` (house taxonomy,
   inherited from blanks). The `*` of `yield*` delegation and of `import * as ns`
@@ -109,9 +117,7 @@ category except the named re-bin):
   the `=` split (declarator-init vs assignment), paren roles, block braces —
   from the owning node's kind and the token's position within it.
 
-**Role keying**: `role` refines the **primary** category. Keyword-primary tokens
-therefore never carry a literal role (`null` / `true` / `false` are
-keyword-primary with `literal` as alternate and `role: null`).
+**Role keying**: `role` refines the token's category.
 
 Roles, by category (JEJ-precise for the named consumers' needs; everything else
 `'other'`; new roles land with the catalog clusters that need them — widening
@@ -122,7 +128,8 @@ the union is a cross-consumer contract event):
   `generator`, `other`
 - **operator**: `binary`, `logical`, `unary`, `update`, `assignment`,
   `declarator-init`, `other`
-- **literal**: `number`, `string`, `regexp`, `template-chunk`, `other`
+- **literal**: `number`, `string`, `boolean`, `null`, `regexp`,
+  `template-chunk`, `other`
 - **identifier**, **keyword**: no finer roles — `role` is `null`. (Identifier
   usage analysis — read vs assign, binding resolution — is scope-aware work that
   belongs to consumers with scope context, not to token classification.)
@@ -192,13 +199,23 @@ Behavior:
   switch-body, and template-expression closers. The pairing pass assigns the
   closer the role of its opener (`block`, `template-expression` for a `${`
   partner, or the opener's `other` until finer brace roles land).
+- **Reserved-word operators and literals**: `typeof` / `in` / `instanceof` /
+  `void` / `delete` classify as `operator` and `null` / `true` / `false` as
+  `literal`, by what they do — not as `keyword`, even though Acorn flags them
+  `.keyword`. (`in` is also an operator inside `for (… in …)`, where it is
+  statement glue; disambiguating that needs the AST and is out of JEJ scope.)
 - **Contextual keywords as plain names**: `of`, `get`, `set`, `from`, `as`,
-  `async`, `await`, `yield`, `let`, `static` classify as `keyword` (primary)
-  wherever they appear — including positions where the parser treats them as
-  identifiers (`let of = 3`). There they carry `identifier` as an alternate.
-  This preserves the blanks lens's locked, intentionally false-positive behavior
-  (see `lenses/blanks/tests/blankenate.test.ts` § contextual keywords) while
-  letting precision-needing consumers detect the overlap from the category set.
+  `async`, `await`, `yield`, `let`, `static` classify as `keyword` wherever they
+  appear — including positions where the parser treats them as identifiers
+  (`let of = 3`). By the semantic taxonomy `of`-as-a-variable should be
+  `identifier`; distinguishing it from for-of `of` needs the AST, so the
+  token-stream pass leaves it `keyword` for now (a deferred refinement, flagged
+  for the AST increment).
+- **Open rulings (flagged, low priority — all outside JEJ except `new`)**: `new`
+  (`new Date()` produces a value, leans `operator`), `this` / `super` (reference
+  values, so not keywords by the definition, but identifier-vs- operator is
+  unsettled), and `yield` / `await` keep their provisional `keyword` home
+  pending a ruling.
 - **Comments are not tokens** and do not appear in the output. (They live on
   `Snippet.raw.comments`; classifying them is out of scope.)
 - **Regex literals** are one `regexp` token: one `literal` element; the slashes

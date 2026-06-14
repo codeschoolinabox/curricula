@@ -54,28 +54,30 @@ function classifyToken(token: acorn.Token, code: string): ClassifiedToken {
 	};
 }
 
-// Order matters where branches overlap: contextual keywords (`let`, `of`, …)
-// are `name` tokens, so the keyword check must precede the identifier check.
-// Reserved keyword-operators (`in` / `instanceof` / `typeof` / `void` /
-// `delete`) match only this keyword branch — their operator nature is added
-// later as an AST alternate — so keyword-before-operator is conceptual
-// ordering, not a contested precedence.
+// Categories are SEMANTIC, not lexical: a "keyword" indicates a statement /
+// declaration / control structure acting on the NM, and does not transform
+// or produce a value. So the reserved-word operators (`typeof`, `in`,
+// `instanceof`, `void`, `delete`) and reserved-word literals (`null`, `true`,
+// `false`) — though Acorn flags them `.keyword` — are operators and literals
+// by what they DO, and the OPERATOR_TYPES / LITERAL_TYPES checks must precede
+// the keyword check. Keyword then precedes identifier so contextual keywords
+// (`let`, `of`, …), which Acorn emits as `name` tokens, classify as keyword.
 function homeCategory(token: acorn.Token, text: string): Category {
 	const { type } = token;
 	if (DELIMITER_TYPES.has(type)) {
 		return 'delimiter';
 	}
-	if (typeof type.keyword === 'string' || isContextualKeyword(token, text)) {
-		return 'keyword';
-	}
 	if (OPERATOR_TYPES.has(type)) {
 		return 'operator';
 	}
-	if (type === tt.name || type === tt.privateId) {
-		return 'identifier';
-	}
 	if (LITERAL_TYPES.has(type)) {
 		return 'literal';
+	}
+	if (typeof type.keyword === 'string' || isContextualKeyword(token, text)) {
+		return 'keyword';
+	}
+	if (type === tt.name || type === tt.privateId) {
+		return 'identifier';
 	}
 	return 'delimiter';
 }
@@ -124,8 +126,12 @@ const DELIMITER_TYPES = new Set<acorn.TokenType>([
 	tt.backQuote,
 ]);
 
-// Every operator token type. Equality / relational / bit-shift / inc-dec each
-// share ONE token type across their variants, so identity covers them all.
+// Every operator token type. Punctuator operators (equality / relational /
+// bit-shift / inc-dec each share ONE token type across their variants) plus
+// the reserved-word operators (`typeof`, `in`, `instanceof`, `void`,
+// `delete`) — value-producing, so operators despite their `.keyword` flag.
+// (`in` is an operator here even in `for (… in …)`, where it is statement
+// glue; disambiguating that needs the AST and is out of JEJ scope.)
 const OPERATOR_TYPES = new Set<acorn.TokenType>([
 	tt.eq,
 	tt.assign,
@@ -145,16 +151,27 @@ const OPERATOR_TYPES = new Set<acorn.TokenType>([
 	tt.slash,
 	tt.starstar,
 	tt.coalesce,
+	tt._typeof,
+	tt._instanceof,
+	tt._in,
+	tt._void,
+	tt._delete,
 ]);
 
-// `invalidTemplate` is the template chunk Acorn emits for an illegal escape in
-// a tagged template (`` tag`\unicode` ``) — still a parseable literal chunk.
+// Every literal token type. `num` / `string` / `regexp` / `template` (and
+// `invalidTemplate`, the chunk Acorn emits for an illegal escape in a tagged
+// template `` tag`\unicode` `` — still a parseable chunk), plus the
+// reserved-word literals `null` / `true` / `false` — values, so literals
+// despite their `.keyword` flag.
 const LITERAL_TYPES = new Set<acorn.TokenType>([
 	tt.num,
 	tt.string,
 	tt.regexp,
 	tt.template,
 	tt.invalidTemplate,
+	tt._null,
+	tt._true,
+	tt._false,
 ]);
 
 const DELIMITER_ROLE_SEEDS = new Map<acorn.TokenType, Role>([
@@ -171,6 +188,9 @@ const LITERAL_ROLE_SEEDS = new Map<acorn.TokenType, Role>([
 	[tt.regexp, 'regexp'],
 	[tt.template, 'template-chunk'],
 	[tt.invalidTemplate, 'template-chunk'],
+	[tt._null, 'null'],
+	[tt._true, 'boolean'],
+	[tt._false, 'boolean'],
 ]);
 
 // Tokens acorn emits as `name` (no `.keyword` flag) that JEJ treats as

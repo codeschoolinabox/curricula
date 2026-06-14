@@ -68,34 +68,64 @@ describe('classifyTokens', () => {
 	});
 
 	describe('Home category — precedence', () => {
-		it('classifies a prefix keyword-operator as keyword, not operator', () => {
+		it('classifies the reserved-word operator typeof as operator', () => {
 			const result = classifyTokens(parse('typeof x'));
-			expect(result[0]?.categories).toEqual(['keyword']);
+			expect(result[0]?.categories).toEqual(['operator']);
 		});
 
-		it('classifies a binary keyword-operator as keyword, not operator', () => {
+		it('classifies the reserved-word operator in as operator', () => {
 			const result = classifyTokens(parse('a in b'));
-			expect(result[1]?.categories).toEqual(['keyword']);
+			expect(result[1]?.categories).toEqual(['operator']);
 		});
 
-		it('classifies instanceof as keyword, not operator', () => {
+		it('classifies the reserved-word operator instanceof as operator', () => {
 			const result = classifyTokens(parse('a instanceof b'));
-			expect(result[1]?.categories).toEqual(['keyword']);
+			expect(result[1]?.categories).toEqual(['operator']);
 		});
 
-		it('classifies a prefix keyword unary as keyword, not operator', () => {
+		it('classifies the reserved-word operator void as operator', () => {
 			const result = classifyTokens(parse('void x'));
+			expect(result[0]?.categories).toEqual(['operator']);
+		});
+
+		it('classifies the reserved-word operator delete as operator', () => {
+			const result = classifyTokens(parse('delete a.b'));
+			expect(result[0]?.categories).toEqual(['operator']);
+		});
+
+		it('classifies the reserved-word literal null as literal', () => {
+			const result = classifyTokens(parse('null'));
+			expect(result[0]?.categories).toEqual(['literal']);
+		});
+
+		it('classifies the reserved-word literal true as literal', () => {
+			const result = classifyTokens(parse('true'));
+			expect(result[0]?.categories).toEqual(['literal']);
+		});
+
+		it('classifies the reserved-word literal false as literal', () => {
+			const result = classifyTokens(parse('false'));
+			expect(result[0]?.categories).toEqual(['literal']);
+		});
+
+		it('classifies the contextual keyword await as keyword', () => {
+			const result = classifyTokens(parse('await x'));
 			expect(result[0]?.categories).toEqual(['keyword']);
 		});
 
-		it('classifies a contextual keyword as keyword', () => {
+		it('classifies the contextual keyword yield as keyword', () => {
+			const result = classifyTokens(parse('function* g() { yield 1; }'));
+			expect(result[6]?.categories).toEqual(['keyword']);
+		});
+
+		it('classifies a statement keyword as keyword', () => {
+			const result = classifyTokens(parse('if (x) {}'));
+			expect(result[0]?.categories).toEqual(['keyword']);
+		});
+
+		it('classifies a declaration contextual keyword as keyword', () => {
 			const result = classifyTokens(parse('let x = 1'));
 			expect(result[0]?.categories).toEqual(['keyword']);
-		});
-
-		it('classifies a contextual keyword used as a plain name as keyword', () => {
-			const result = classifyTokens(parse('let of = 3'));
-			expect(result[1]?.categories).toEqual(['keyword']);
 		});
 
 		it('classifies the flagless ** as operator', () => {
@@ -168,6 +198,26 @@ describe('classifyTokens', () => {
 		it('seeds an invalid-escape template chunk with template-chunk', () => {
 			const result = classifyTokens(parse('x`\\u`'));
 			expect(result[2]?.role).toBe('template-chunk');
+		});
+
+		it('seeds the null literal with null', () => {
+			const result = classifyTokens(parse('null'));
+			expect(result[0]?.role).toBe('null');
+		});
+
+		it('seeds a boolean literal with boolean', () => {
+			const result = classifyTokens(parse('true'));
+			expect(result[0]?.role).toBe('boolean');
+		});
+
+		it('seeds the false literal with boolean', () => {
+			const result = classifyTokens(parse('false'));
+			expect(result[0]?.role).toBe('boolean');
+		});
+
+		it('seeds a reserved-word operator with other', () => {
+			const result = classifyTokens(parse('typeof x'));
+			expect(result[0]?.role).toBe('other');
 		});
 
 		it('leaves an identifier role null', () => {

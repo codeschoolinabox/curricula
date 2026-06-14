@@ -2,13 +2,13 @@
  * @file Canonical types for the classifying module.
  *
  * The domain model in TypeScript: the five-category house taxonomy
- * (established by the blanks lens; ternary `?`/`:` are delimiters,
- * generator `*` is a delimiter, template text chunks are literals),
- * the per-category role unions, and the total per-token output shape.
+ * (semantic — by what the element does in the NM, not Acorn's lexer
+ * flag; ternary `?`/`:` are delimiters, generator `*` is a delimiter,
+ * template text chunks are literals), the per-category role unions, and
+ * the total per-token output shape.
  *
- * See `./README.md` for the taxonomy tables, the primary-category rule
- * (keyword wins over AST-derived alternates), and the totality
- * invariant these types encode.
+ * See `./README.md` for the taxonomy tables, the semantic category
+ * rules, and the totality invariant these types encode.
  */
 
 import type * as acorn from 'acorn';
@@ -58,14 +58,16 @@ export type OperatorRole =
 	| 'other';
 
 /**
- * Roles for `literal`-PRIMARY tokens: the literal's kind, derived from
- * the token type. Keyword-literals (`null`, `true`, `false`) are
- * keyword-primary with `literal` only as an alternate, so no literal
- * role exists for them — role refines the primary category.
+ * Roles for `literal`-category tokens: the literal's kind, derived from
+ * the token type. The reserved-word literals `null` / `true` / `false`
+ * are literals (values, not statements — they are NOT keywords) and
+ * carry `'null'` / `'boolean'` roles.
  */
 export type LiteralRole =
 	| 'number'
 	| 'string'
+	| 'boolean'
+	| 'null'
 	| 'regexp'
 	| 'template-chunk'
 	| 'other';
@@ -96,10 +98,11 @@ export type ClassifyInput = {
  * slice (never Acorn's processed `value`); `[start, end)` is
  * zero-indexed and half-open into the input `code`.
  *
- * `categories` is non-empty, primary first (keyword wins primary over
- * AST-derived alternates). `partner` is the index — into the same
- * returned array — of this token's paired delimiter (`(`/`)`, `[`/`]`,
- * `{`/`}`, backticks, `${`/`}`), or `null` for unpaired tokens.
+ * `categories` is non-empty, primary first; every non-empty token has
+ * exactly one semantic category after the token-stream pass. `partner`
+ * is the index — into the same returned array — of this token's paired
+ * delimiter (`(`/`)`, `[`/`]`, `{`/`}`, backticks, `${`/`}`), or `null`
+ * for unpaired tokens.
  */
 export type ClassifiedToken = {
 	readonly text: string;

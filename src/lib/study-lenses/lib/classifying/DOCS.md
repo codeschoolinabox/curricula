@@ -29,33 +29,33 @@ helpers (newspaper anatomy: export first, helpers below).
 
 2. **Token-stream classification** (pure) — one pass over `tokens`. Skip `eof`
    and zero-length tokens; the element list is FIXED at the end of this pass.
-   Assign each token its **home category** from the classification table (README
-   § The taxonomy) and its **token-derivable role seed**: literal kinds from the
-   token type; `statement-end` for `;`; `member-access` for `.` / `?.`;
+   Assign each token its **semantic category** from the classification table
+   (README § The taxonomy) and its **token-derivable role seed**: literal kinds
+   from the token type; `statement-end` for `;`; `member-access` for `.` / `?.`;
    `template-delimiter` for backticks; `template-expression` for `${`;
-   everything else seeds `'other'` (or `null` for identifier/keyword primaries).
+   everything else seeds `'other'` (or `null` for identifier/keyword tokens).
    `text` comes from `code.slice(start, end)` — source-slice authority.
    **Totality of both category and role holds from the end of this phase; every
    later phase only refines.**
 
 3. **AST refinement** (pure, one AST traversal) — the AST is traversed exactly
    once; a sorted token-position index, precomputed from the token array (array
-   prep, not a second traversal), bridges nodes to tokens. Three refinements,
-   opener/contextual tokens only (closer roles are phase 4's job):
-   - **Alternates**: a keyword token covered by an `Identifier` node gains
-     `identifier`; by a `Literal` node gains `literal`; in a `UnaryExpression`
-     or `BinaryExpression` operator position gains `operator` (`typeof`, `void`,
-     `delete`, `in`, `instanceof`). Keyword stays primary (the rule the blanks
-     dedupe locks pin).
+   prep, not a second traversal), bridges nodes to tokens. Categories are
+   already settled by the semantic classification table in phase 2 (reserved
+   words categorized by what they do); the AST only:
    - **Generator `*` re-bin**: function/method/property generator stars move
      `operator` → `delimiter` with role `generator` — the single sanctioned
      home-category change.
-   - **Role refinement**: from the owning node's kind and the token's position
-     in it — `=` in a `VariableDeclarator` → `declarator-init` vs in an
+   - **Role refinement** (opener/contextual tokens only; closer roles are phase
+     4's job): from the owning node's kind and the token's position in it — `=`
+     in a `VariableDeclarator` → `declarator-init` vs in an
      `AssignmentExpression` → `assignment`; operator roles from the owning
      expression node; opener parens and braces per the claim list (see
      Structural constraints § Grouping by elimination); literal-role seeds stand
      unless a node refines them.
+   - (Deferred) **contextual-keyword re-categorization**: `of`/`as`/… used as a
+     plain variable name should become `identifier`; needs the AST to tell it
+     from for-of `of`. Flagged, not yet implemented.
 
 4. **Pairing** (pure) — a stack walk over the paired-delimiter tokens (`(`/`)`,
    `[`/`]`, `{`/`}`, backticks, `${`/`}`): assign each pair mutual `partner`
@@ -78,14 +78,14 @@ helpers (newspaper anatomy: export first, helpers below).
 flowchart TD
     In["ClassifyInput<br/>{ code, tokens, ast }"]
     Shaped["shape-confirmed input"]
-    Seeded["totally categorized tokens<br/>(home category + role seed;<br/>no alternates, no partners)"]
-    Refined["role-refined tokens<br/>(+ alternates, + re-bin,<br/>opener roles resolved)"]
+    Seeded["totally categorized tokens<br/>(semantic category + role seed;<br/>no partners)"]
+    Refined["role-refined tokens<br/>(+ generator re-bin,<br/>opener roles resolved)"]
     Partnered["partnered tokens<br/>(closers carry opener roles)"]
     Out["frozen ClassifiedToken[]<br/>(source-ordered, total)"]
 
     In -->|"validate — throws TypeError<br/>on null/missing"| Shaped
     Shaped -->|"classify by token type<br/>(pure; element list fixed here)"| Seeded
-    Seeded -->|"one AST traversal:<br/>alternates · generator re-bin ·<br/>opener role refinement (pure)"| Refined
+    Seeded -->|"one AST traversal:<br/>generator re-bin ·<br/>opener role refinement (pure)"| Refined
     Refined -->|"stack pairing (pure)"| Partnered
     Partnered -->|"assemble + freeze<br/>(shape finalization only)"| Out
 ```
@@ -93,11 +93,16 @@ flowchart TD
 ### Structural constraints
 
 - **Token-stream-first.** Categories and role seeds come from token types; the
-  AST contributes only alternates, opener-role refinement, and the generator
-  re-bin. This is a deliberate inversion of the legacy design (AST-walk-located
-  operators with `betweenText.indexOf` string arithmetic) — it eliminates that
-  fragility class entirely and makes totality provable from the classification
-  table instead of asserted.
+  AST contributes only opener-role refinement and the generator re-bin. This is
+  a deliberate inversion of the legacy design (AST-walk-located operators with
+  `betweenText.indexOf` string arithmetic) — it eliminates that fragility class
+  entirely and makes totality provable from the classification table instead of
+  asserted.
+- **Categories are semantic.** A token's category is what it does in the NM, not
+  how Acorn's lexer flags it: the reserved-word operators (`typeof`/`in`/
+  `instanceof`/`void`/`delete`) and literals (`null`/`true`/`false`) are
+  operators/literals despite their `.keyword` flag, so the operator and literal
+  token-type checks precede the keyword check.
 - **Totality from phase 2 — categories AND roles.** Every non-empty token has a
   home category and a role seed before the AST is consulted; a parse-anomalous
   AST can leave roles at their seeds but can never drop a token.
@@ -112,9 +117,10 @@ flowchart TD
   the module must run unchanged on deep-frozen embodiment data.
 - **One AST traversal.** Phase 3 consults the precomputed token index; it never
   re-walks the tree. JEJ's page-size invariant bounds the cost; no caching.
-- **Keyword-over-AST primary.** All span collisions are keyword-vs-AST
-  (`Identifier`/`Literal` coverage; `UnaryExpression`/`BinaryExpression`
-  operator positions); keyword stays primary, matching the blanks dedupe locks.
+- **Semantic precedence.** Operator and literal token-type checks precede the
+  keyword check so the reserved-word operators/literals land in their semantic
+  category; the keyword check precedes the identifier check so contextual
+  keywords (bare `name` tokens) are not mistaken for identifiers.
 - **Pairing never reaches outside delimiters.** The stack walk sees only
   paired-delimiter tokens; mismatched pairs (impossible in a parsed snippet)
   would leave `partner: null`, never throw.
@@ -148,14 +154,18 @@ flowchart TD
 - **Role seeds live in phase 2** (per AR-2 counter-proposal A). Half the role
   union is token-derivable; seeding it with the home category makes phase 3
   strictly AST refinement and extends the totality invariant to roles.
-- **Category set with keyword-primary** (per the campaign plan's MF-4 decision).
-  Carrying primary + alternates — including the `BinaryExpression`
-  keyword-operators `in`/`instanceof` (per AR-2 concern
-  1. — lets blanks filter any-match, preserving its partial-config behavior
-     exactly, while quizzing reads the full set for overlap-aware questions.
-- **Role refines the primary category** (per AR-2 concern 2). One role slot per
-  token; keyword-primary tokens never carry a literal role, which is why
-  `LiteralRole` has no `boolean`/`null` members.
+- **Semantic categories** (human ruling, post-increment-1; supersedes the
+  earlier "category set with keyword-primary" framing). A category is what the
+  element does in the NM, not Acorn's lexer flag: the reserved-word operators
+  (`typeof`/`in`/`instanceof`/`void`/`delete`) are operators and the
+  reserved-word literals (`null`/`true`/`false`) are literals — not keywords.
+  This removes the keyword↔operator/literal "alternates" the earlier plan
+  carried; the blanks refactor adopts the corrected categories rather than
+  preserving legacy. Whether any token is ever genuinely multi-category (the
+  `categories` array having length > 1) is revisited in the AST increment; today
+  every token is single-category.
+- **Role refines the token's category** (per AR-2 concern 2). One role slot per
+  token; `LiteralRole` includes `boolean`/`null` for the reserved-word literals.
 - **`ClassifyInput` in acorn terms** (per AR-1 concern 3). The classifier walks
   acorn shapes, so the contract says so; `Snippet.raw`'s loose `unknown[]` types
   narrow at the caller's boundary in one cast. Tests build inputs with a bare
