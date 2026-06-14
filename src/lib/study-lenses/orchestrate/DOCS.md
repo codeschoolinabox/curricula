@@ -634,8 +634,41 @@ surface is **the dock**, whose contract this sketch pins structurally:
   documentation of the instrument itself (stations, reveal rules, toggles,
   limits, danger).
 
-The exact omnipresent-region layout is **intentionally unspecified** — locked in
-Cycle 3.
+**Region structure (settled).** Three presentation-only tool modules —
+[`./dock/`](./dock/), [`./quiz-button/`](./quiz-button/),
+[`./embedded-guide/`](./embedded-guide/) — each mirroring `phases-panel/`
+(README, DOCS, `index.tsx`, tests/). `index.tsx` owns every state slot
+(`SnippetType` · `SandboxMode` · `RunLimits`, seeded from `OrchestratorConfig`),
+the live slot, and the **run lifecycle** (it invokes
+`evaluation.events.{run, intercept}` and accumulates the output); the tool modules
+import no `embody`, dispatch no bus events, and hold no orchestrator state. The
+region is a labelled landmark grouping the tools, realised as **flat siblings**
+inside `data-orchestrator-root` (panel · active surface · dock, top→bottom) — not
+a wrapper around the panel. The `type-toggled` / `sandbox-toggled` dispatch sites
+(typed-before-wired — see § Internal event taxonomy) will be the dock's type-toggle
+/ sandbox-toggle `onChange` handlers; this is the design intent, not a status flip
+(they remain unwired until Phase 1). The exact CSS / visual arrangement stays a
+Phase-1 presentational choice ("lock the model, not the CSS").
+
+#### Dock data flow
+
+```mermaid
+flowchart TD
+    Config["configs.orchestrator<br/>(OrchestratorConfig: initialType,<br/>dangerAvailable, runLimits)"]
+    Config -->|"readOrchestratorConfig (cast boundary), once at mount"| Orch
+    Orch["orchestrate/index.tsx<br/>(owns type/sandbox/run-limit slots,<br/>the live slot, and the run lifecycle)"]
+    Orch -->|"sourceType · sandboxMode · runLimits ·<br/>runState · outcome · channel output ·<br/>dangerAvailable · handlers"| Dock["&lt;Dock&gt; (presentation only)<br/>[data-orchestrator-dock]"]
+    Dock --> Controls["type/sandbox toggles · run limits · debugger<br/>[-dock-type-toggle | -sandbox-toggle | -limit | -debugger]"]
+    Dock --> Out["Run · two output channels · outcome<br/>[-dock-run | -run-state | -channel | -outcome]"]
+    Controls -->|"onTypeToggle / onSandboxToggle / limit setters"| Orch
+    Out -->|"onRun / onCancel"| Orch
+    Orch -.->|"type toggle → re-key the live slot;<br/>Run → evaluation.events.{run, intercept}(EvaluateOptions);<br/>dispatch type-toggled / sandbox-toggled on the bus"| Eval["live embodiment — evaluate surface<br/>(engine behind EvaluateHandle; NOT dock-owned)"]
+```
+
+The dock owns no execution backend: the orchestrator consumes
+`evaluation.events.{run, intercept}` on the live embodiment, and the worker engine
+(and the deferred danger-iframe backend) sit behind the `EvaluateHandle` contract,
+off the dock's surface entirely.
 
 ### Internal event taxonomy
 

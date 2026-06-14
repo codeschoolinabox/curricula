@@ -28,6 +28,12 @@
  *   seedable via the configs orchestrator tier) lives in its own
  *   top-level slot alongside the snippet string and the live
  *   embodiment; the dock's type toggle is its only writer.
+ * - The orchestrator-level configs tier (`OrchestratorConfig`, read
+ *   INTERNALLY from `configs.orchestrator` at a cast boundary — NOT a
+ *   public-surface widening) seeds the dock's source-type, sandbox, and
+ *   run-limit slots at mount. The dock's own value types — `RunLimits`,
+ *   `DockRunState`, `ChannelKind`, and the `EndReportOutcome` alias of
+ *   embody's `EndReport['outcome']` — are internal-only.
  * - INTERNAL-only EventBus — no `subscribe` / `onEvent` prop on
  *   `<StudyLenses>` until a concrete LMS integration target appears.
  *   Four event names: `lens-switched` (carried forward from the
@@ -56,7 +62,7 @@
  * internal-only.
  */
 
-import type { Snippet, SnippetType } from '../embody/types.js';
+import type { EndReport, Snippet, SnippetType } from '../embody/types.js';
 import type { LensConfig, Station } from '../lenses/types.js';
 
 // --- Public prop surface (the only externally-visible type) ---
@@ -274,6 +280,76 @@ type StationStatus = 'constant' | 'ok' | 'errored' | 'barred' | 'pending';
  */
 type StationStatusMap = Readonly<Record<Station, StationStatus>>;
 
+// --- Dock / omnipresent-region shapes (Cycle 3) ---
+
+/**
+ * The learner-facing run-limits pair — the seconds + iterations execution
+ * limits the dock exposes, threaded into embody's `EvaluateOptions`.
+ *
+ * @remarks "Run limits" is the learner-facing name over two embody mechanisms
+ * (the run's time budget + the loop guard); a tripped limit surfaces as
+ * `EndReport.outcome: 'limit-exceeded'`. See `./README.md` § Glossary.
+ */
+type RunLimits = Readonly<{
+	seconds: number;
+	iterations: number;
+}>;
+
+/**
+ * The dock's transport phase — its run lifecycle, distinct from the run's
+ * RESULT (`EndReportOutcome`). `'idle'` (never run) → `'running'` (handle
+ * pending) → `'settled'` (handle resolved — read the outcome for HOW it ended).
+ *
+ * @remarks Deliberately orthogonal to the outcome: `'settled'` collapses every
+ * terminal outcome (completed / errored / timed-out / …) into "the handle
+ * resolved", so the two never describe the same axis at two grains. Surfaced as
+ * `data-orchestrator-dock-run-state`.
+ */
+type DockRunState = 'idle' | 'running' | 'settled';
+
+/**
+ * The dock's two output channels — each rendering one of the NM's two I/O
+ * channels: `'user-interface'` (alert/confirm/prompt dialogs) and
+ * `'developer-console'` (`console.*`).
+ *
+ * @remarks "Channel", never "panel" ("panel" is reserved for the phases panel).
+ * Surfaced as `data-orchestrator-dock-channel`. See `./README.md` § Glossary.
+ */
+type ChannelKind = 'user-interface' | 'developer-console';
+
+/**
+ * The terminal classification of one run — embody's `EndReport['outcome']`
+ * union, aliased under an orchestrator-local name so dock code renders an
+ * outcome without re-importing embody internals at each site.
+ *
+ * @remarks Present (on `data-orchestrator-dock-outcome`) only when the
+ * `DockRunState` is `'settled'`. The full union lives in
+ * [`../embody/types.ts`](../embody/types.ts).
+ */
+type EndReportOutcome = EndReport['outcome'];
+
+/**
+ * The orchestrator-level configs tier — read INTERNALLY from
+ * `configs.orchestrator` at a cast boundary (the same structural-assumption
+ * pattern as `configs.lenses`, via a `readOrchestratorConfig` helper), NOT a
+ * widening of the maximally-opaque public `StudyLensesProps['configs']`.
+ *
+ * @remarks Seeds the dock's top-level state slots at mount; unconfigured fields
+ * fall back to built-in defaults and reset on remount (the LMS owns persistence
+ * — disposability). See `./README.md` § Orchestrator-level settings.
+ *
+ * - `initialType` — seeds the source-type slot (default `'module'`).
+ * - `dangerAvailable` — whether the sandbox toggle offers the `'danger'`
+ *   position (educators may remove it per page; default `false`).
+ * - `runLimits` — seeds the run-limits slots (partial; unset fields use
+ *   built-in defaults).
+ */
+type OrchestratorConfig = Readonly<{
+	initialType?: SnippetType;
+	dangerAvailable?: boolean;
+	runLimits?: Readonly<{ seconds?: number; iterations?: number }>;
+}>;
+
 // --- Lens selection (where a switch came from) ---
 
 /**
@@ -439,6 +515,11 @@ export type {
 	StationRoster,
 	StationStatus,
 	StationStatusMap,
+	RunLimits,
+	DockRunState,
+	ChannelKind,
+	EndReportOutcome,
+	OrchestratorConfig,
 	LensSelectionSource,
 	SandboxMode,
 	EventName,

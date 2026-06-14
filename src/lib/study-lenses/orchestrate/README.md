@@ -238,6 +238,16 @@ sketch.
   - **Naming note:** the Cycle-2 panel itself is the **phases panel** — named
     for sense (a), the lifecycle it instruments; its columns are stations (sense
     b). See § The phases panel.
+- **"State" and "surface" (overloaded words — keep the senses apart).**
+  - _State:_ the orchestrator `state.*` (the mode-discriminated React state); the
+    dock's **run state** (its transport phase — `idle` / `running` / `settled`);
+    and a tool's **display state** (collapse / expand). All three are distinct from
+    **mode** (Danger mode position / editor-lens mode / `SandboxMode`).
+  - _Surface:_ "surface" names any rendered region; the **active surface**
+    specifically is the editor-or-lens host (§ Editor-vs-lens state machine). The
+    dock's **run/debug surface** + **output surface** and the Quiz
+    **question-render surface** are region tools — context disambiguates, but the
+    active surface is the one load-bearing sense.
 - **Source type** — `'script' | 'module'`, the snippet's program-type posture
   (`snippet.type`; selected by the dock's type toggle, default module). Module
   is the NM-study posture — the admission gate can run; script is the
@@ -318,22 +328,60 @@ sketch.
   lens dropdowns and (in lens mode only) the edit-return button. Mounted in both
   editor and lens mode; its contents are state-derived. It replaced the Cycle-1
   toolbar; the picker and edit-return semantics survived the replacement.
-- **The dock** — the run/debug surface of the omnipresent region (see § The
+- **Omnipresent region** — the orchestrator-resident band of **cross-phase study
+  tools** (spanning source → evaluation) that sits alongside the phase stations.
+  Its run/debug surface is the dock; its other inhabitants are the Quiz button and
+  the embedded guide (see § The omnipresent region). Distinct from **the dock**,
+  which is one surface within the region, not the region itself.
+- **Tool kind** — the three-way classification of cross-phase tools:
+  **generative** (produce something _about the program_; get an omnipresent
+  affordance — Run, Quiz), **reactive explainer** (explain one subject where it
+  appears, not a button — `error-interpret`), and **meta** (document the
+  instrument itself, program-independent — the embedded guide). Orthogonal to the
+  per-phase-lens vs. cross-phase-tool axis.
+- **The dock** — the run/debug **surface** of the omnipresent region (see § The
   dock): a collapsible affordance container + output surface holding the type
   toggle (+ adjacent hint), the sandbox toggle, run limits, Run (with the two
-  I/O output channels), and the danger-mode debugger option.
-- **Danger mode** — the sandbox toggle's non-default position: the snippet is
-  evaluated as a script tag in an iframe (pure JS only). Native dialogs, real
-  window, browser-debugger stepping; a hung run can freeze the host page — the
-  name carries the consent. Loop-guard instrumentation stays active and visible
-  in the debugger.
+  output channels), and the danger-only debugger option. One surface of the
+  region, not the region itself.
+- **Output channel** — a labelled region of the dock's output surface that renders
+  one of the NM's two I/O channels: the **User Interface channel**
+  (`alert`/`confirm`/`prompt` dialogs) and the **Developer Console channel**
+  (`console.*`). _Homonym guard:_ **"panel" is reserved for the phases panel** —
+  the dock's output regions are **channels**, never panels. A dock channel IS the
+  rendering of an NM I/O channel; same concept, not a new one.
+- **Execution backend** (**worker** / **danger**) — the engine that evaluates the
+  snippet behind the locked `EvaluateHandle` contract: **worker** (the sandboxed
+  default — the real evaluating engine) and **danger** (an iframe script-tag
+  backend; deferred). _Homonym guard:_ "backend" here is the evaluation engine
+  behind `EvaluateHandle`, never a server. Distinct from **Danger mode**, the
+  sandbox toggle **position** that selects the danger backend.
+- **Danger mode** — the sandbox toggle's non-default **position** (it selects the
+  danger backend): the snippet is evaluated as a script tag in an iframe (pure JS
+  only). Native dialogs, real window, browser-debugger stepping; a hung run can
+  freeze the host page — the name carries the consent. Loop-guard instrumentation
+  stays active and visible in the debugger. ("Mode" here is the toggle position,
+  NOT the orchestrator's editor/lens mode.)
+- **Debugger option** — a danger-only dock affordance that wraps the evaluated
+  snippet with a `debugger;` statement above and below, so a learner with devtools
+  open steps straight into their program; inert without devtools. Guard
+  instrumentation stays visible in the stepped source (deliberately).
 - **Run limits** — the learner interface to the seconds and iterations execution
   limits, with per-backend semantics (worker: engine timer + terminate; danger:
   in-guard elapsed check). Surfaces `endReport.outcome: 'limit-exceeded'` when
-  tripped.
-- **Embedded guide** — the orchestrator-resident learner guide to the
-  environment itself (stations, reveal rules, toggles, limits, danger). A meta
-  tool: neither generative nor a reactive explainer.
+  tripped. (The embody substrate calls the seconds value the run's time budget and
+  the iterations mechanism the loop guard; "run limits" is the learner-facing name
+  over those two embody mechanisms.)
+- **Quiz button** — an omnipresent **generative** affordance (not a lens) that
+  calls `socratize` (`lib/socratizing/`) on the live embodiment to produce
+  Socratic questions about the program. The heavier block-model Quiz _engine_ is
+  deferred backlog (see § Deferred backlog).
+- **Collapse / expand** — the dock's two display states; collapsing hides the
+  controls while output stays reachable (the exact visual treatment is a Phase-1
+  presentational choice).
+- **Embedded guide** — the orchestrator-resident learner guide to the environment
+  itself (stations, reveal rules, toggles, limits, danger). The **meta** tool
+  kind's one inhabitant: neither generative nor a reactive explainer.
 - **Lens-picker** (or just **picker**) — the affordance that selects a lens: the
   phases panel's N per-station dropdowns (see § The phases panel). Each is a
   `<select>` over the lenses that target its station (its roster), with a
@@ -421,15 +469,15 @@ enforces this; types cannot.
 
 **Trigger semantics:**
 
-| Event                                                      | liveEmbodiment effect                                                            | Mode effect                                       |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Initial mount (either mode)                                | populate atomically with fresh `embody(snippet)`                                 | per `deriveInitialState`                          |
-| Snippet edit in editor mode                                | schedule a debounced refresh; slot holds the prior value until the trailing edge | (no transition; stays in editor mode)             |
-| Debounce settle in editor mode                             | `embody(currentSnippet)` once; refresh slot                                      | (no transition)                                   |
-| Editor → lens, `liveEmbodiment.snippet === currentSnippet` | reuse `embodiment` (flush no-op); cancel pending debounce                        | `{ mode: 'lens', activeLens, resolvedConfig }`    |
-| Editor → lens, slot stale or null                          | flush: `embody(currentSnippet)` synchronously inline; cancel pending debounce    | `{ mode: 'lens', activeLens, resolvedConfig }`    |
-| Lens → editor transition                                   | retain slot                                                                      | `{ mode: 'editor' }`                              |
-| Type toggle (dock)                                         | re-embody immediately under the new type; cancel any pending debounce            | lens mode first returns to editor (disposability) |
+| Event                                                      | liveEmbodiment effect                                                                   | Mode effect                                       |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Initial mount (either mode)                                | populate atomically with fresh `embody(snippet, { type })`                              | per `deriveInitialState`                          |
+| Snippet edit in editor mode                                | schedule a debounced refresh; slot holds the prior value until the trailing edge        | (no transition; stays in editor mode)             |
+| Debounce settle in editor mode                             | `embody(currentSnippet, { type })` once; refresh slot                                   | (no transition)                                   |
+| Editor → lens, `liveEmbodiment.snippet === currentSnippet` | reuse `embodiment` (flush no-op); cancel pending debounce                               | `{ mode: 'lens', activeLens, resolvedConfig }`    |
+| Editor → lens, slot stale or null                          | flush: `embody(currentSnippet, { type })` synchronously inline; cancel pending debounce | `{ mode: 'lens', activeLens, resolvedConfig }`    |
+| Lens → editor transition                                   | retain slot                                                                             | `{ mode: 'editor' }`                              |
+| Type toggle (dock)                                         | re-embody immediately under the new type; cancel any pending debounce                   | lens mode first returns to editor (disposability) |
 
 A lens → editor → lens round-trip with no intervening edit reuses the slot (the
 flush is a no-op — zero `embody` at the transition); an edit refreshes the slot
@@ -813,7 +861,36 @@ the evaluating engine; the danger-iframe is a second backend behind the same
 contract, deliberately deferred (the registry-shape precedent: named, not yet
 specified).
 
-The exact omnipresent-region layout is not specified here.
+### Region structure and where it mounts
+
+The region is **three presentation-only tool modules**, each mirroring
+[`./phases-panel/`](./phases-panel/) (its own `README.md` + `DOCS.md` +
+`index.tsx` + `tests/`):
+
+- [`./dock/`](./dock/) — the run/debug surface (above).
+- [`./quiz-button/`](./quiz-button/) — the Quiz generative button + its
+  question-render surface (calls `socratize`).
+- [`./embedded-guide/`](./embedded-guide/) — the meta guide.
+
+Each is **presentation only**: `index.tsx` owns the state, the run lifecycle, and
+the handlers, and threads them down as props — the tool modules import no
+`embody`, dispatch no bus events, and hold no orchestrator state (the same split
+the phases panel follows). The Run lifecycle (invoking
+`evaluation.events.{run, intercept}` on the live embodiment) lives in `index.tsx`,
+not in the dock component; the dock receives run state + output as props and emits
+intent callbacks.
+
+The **region itself is a labelled landmark** grouping the tools; it is realised as
+flat siblings inside `data-orchestrator-root` alongside the phases panel and the
+active surface (panel on top, active surface in the middle, the dock below it — the
+console-below-editor reading order). The region is **not** a wrapper around the
+panel.
+
+The exact CSS / visual arrangement — ordering within the dock, collapsed-vs-expanded
+treatment, channel layout, the question-render surface's shape — is a Phase-1
+presentational choice. This section locks the **affordance set, the module
+boundaries, and the selector surface** (§ Data attributes), not the pixels (the
+same "lock the model, not the CSS" line the phases panel follows).
 
 ## Deferred backlog
 
@@ -844,8 +921,46 @@ sandbox harnesses.
 | `data-orchestrator-edit-button`          | The panel `<button>` that returns to editor mode (rendered only when `state.mode === 'lens'`; carried over from the retired toolbar)     | Tests + sandbox locate the edit-return affordance.      |
 | `data-orchestrator-error`                | The editor host `<div>` when CodeMirror mount rejects (fallback render)                                                                  | Tests + sandbox detect a failed editor mount.           |
 
-The omnipresent region (Cycle 3) will add its own `data-orchestrator-*`
-attributes when built; they are intentionally not enumerated here yet.
+**Omnipresent-region selectors.** The region's stable selector contract is locked
+here; the attributes materialise on the DOM when the region is built. Value-bearing
+attributes carry the current value (tests anchor on attribute + value, never label
+text), mirroring `data-orchestrator-station-status="<StationStatus>"`. **Value
+convention:** an attribute whose value mirrors a named type (`SnippetType`,
+`SandboxMode`, `DockRunState`, `ChannelKind`, `EndReport['outcome']`) carries the
+exact type-member string; any other value-bearing attribute carries a kebab-cased
+domain term. The visual treatment of each (collapsed styling, channel layout) is a
+Phase-1 presentational choice; the names and value-spaces below are the locked
+contract.
+
+- `data-orchestrator-omnipresent-region` — the region landmark `<section>` grouping
+  the dock, Quiz button, and guide.
+- `data-orchestrator-dock` — the dock root.
+- `data-orchestrator-dock-collapsed` — on the dock root; `="true"` or `="false"`.
+- `data-orchestrator-dock-type-toggle` — the type toggle control; `="script"` or
+  `="module"`.
+- `data-orchestrator-dock-type-hint` — the admissible-in-script hint (present only
+  when shown).
+- `data-orchestrator-dock-sandbox-toggle` — the sandbox toggle control; `="worker"`
+  or `="danger"`.
+- `data-orchestrator-dock-limit` — each run-limit input; `="seconds"` or
+  `="iterations"`.
+- `data-orchestrator-dock-debugger` — the debugger option (present only in danger
+  mode).
+- `data-orchestrator-dock-run` — the Run button.
+- `data-orchestrator-dock-run-state` — the dock's transport phase (a `DockRunState`)
+  on the Run control; `="idle"`, `="running"`, or `="settled"`. Orthogonal to
+  `-dock-outcome`: while `running` no outcome exists yet; once `settled`, read
+  `-dock-outcome` for HOW the run ended. ("settled" replaces a lossy "done" — a run
+  that errored, timed out, was cancelled, or came back not-runnable is all settled
+  but carries four different outcomes.)
+- `data-orchestrator-dock-channel` — each output channel container;
+  `="user-interface"` or `="developer-console"`.
+- `data-orchestrator-dock-outcome` — the terminal classification, present only when
+  `-dock-run-state="settled"`; `="<EndReport outcome>"` (the embody `EndReport`
+  union, in its declared order: completed, errored, timed-out, cancelled, failed,
+  limit-exceeded, not-runnable).
+- `data-orchestrator-quiz` — the Quiz button.
+- `data-orchestrator-guide` — the embedded-guide root.
 
 **Fate of `-toolbar` / `-lens-picker` under the Cycle-2 replacement — RESOLVED
 (Cycle 2 Phase 0): renamed; executed in Phase 1.** The names
