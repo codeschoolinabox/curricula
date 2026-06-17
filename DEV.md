@@ -797,6 +797,32 @@ Mermaid flowchart depicting the **data's journey** through the module:
 - The diagram answers "what shape is the data in at each phase, and what changes
   between phases" — not "what imports what." If you can answer the diagram by
   reading the import statements, you've drawn the wrong thing.
+- **Exception — presentation-component module DOCS.** A module whose job is to
+  _render_ — a React component that receives props and routes intent back up,
+  owning no derivation of its own (e.g. `orchestrate/phases-panel/`,
+  `orchestrate/dock/`) — MAY instead draw its `## Data flow` as a
+  **component/prop-flow** diagram. In this mode the rules above are **suspended
+  for this diagram**: the "nodes are data states / never filenames or identifiers
+  / wrappers invisible" rules AND the architectural-sketch ban on function and
+  variable names do not apply here. Nodes are the **owning orchestrator**, **this
+  component**, its **rendered sub-regions**, and any **external surface it routes
+  intent toward** (an engine, a library) drawn as a boundary node via a dotted
+  edge; edges are props-down and callbacks-up, and their labels MAY name the
+  actual props and callbacks — for a wiring diagram those names are the content.
+  (The relaxation covers only this diagram's nodes and edge labels; prose phases
+  and every other diagram keep the rules above.) A data-state diagram for a pure
+  render component would be near-contentless, which is why this mode exists.
+- **The qualifying test is ownership of derivation, not absence of reshaping.** A
+  module qualifies for the exception only if every non-trivial shape it renders
+  was derived by an upstream owner and handed in as a prop, and the module itself
+  does only **render-local formatting** (mapping a roster to columns, formatting
+  a label, assembling an options bag it hands straight onward). If it _computes_
+  a shape that **downstream consumers depend on** — a derivation, a parse, an
+  accumulation that outlives the render — it is **data-transforming** and the
+  data-state rules apply, wherever it sits in the tree. (The `derive-*.ts`
+  siblings of these components are the contrast class: they own derivation, so
+  they get data-state diagrams.) When in doubt: "does this module own a shape
+  something downstream reads?" — if yes, data-state.
 
 The same Mermaid syntax handles linear, branching, and joining flows. Use
 whatever topology the actual data flow requires; there is no separate choice of
@@ -1680,6 +1706,14 @@ Only when the human explicitly opts out.
   ubiquitous language consistently? Are domain-agnostic utilities (freeze,
   merge, clone) correctly omitted as invisible, and domain-related functions
   correctly shown as nodes?
+- **Presentation-component exception**: if the DOCS is a presentation-component
+  module under the § Data flow diagram exception (a render component owning no
+  downstream-consumed derivation), apply the component/prop-flow rules instead —
+  confirm the diagram is genuinely wiring (props-down / callbacks-up) and that
+  the module owns no derivation a downstream consumer reads (if it does, it
+  belongs in a data-state diagram). Do NOT flag the orchestrator/component/
+  library nodes or the prop/callback edge labels as violations: the
+  node-and-identifier bans are suspended for that diagram mode.
 
 **Provide to agent:** DOCS.md architectural sketch, README.md, types.ts
 
