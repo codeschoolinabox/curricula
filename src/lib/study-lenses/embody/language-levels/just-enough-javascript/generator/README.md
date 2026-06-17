@@ -1,35 +1,48 @@
 # generator
 
-Produces a fresh, **admitted** Just Enough JavaScript program for a learner to
-study, from a small **generation config**, using a language model — with this
-level's admission gate as the validity guarantee.
+Produces an **admitted** Just Enough JavaScript program for a learner to study —
+either freshly from a small **generation config**, or as a **variation** of a
+JEJ program handed in — using a language model, with this level's admission gate
+as the validity guarantee.
 
 ## Purpose
 
-**A source of programs, not an authoring tool.** When a learner arrives with no
-code of their own to study (for example, the empty-snippet default view of
-`<StudyLenses>`), the generator hands them a JEJ program to read, trace, and
-decipher. It chooses _what program_; it does not teach, embody, run, or format —
-those belong to the surrounding study environment.
+**A source of programs, not an authoring tool.** When a learner needs a JEJ
+program to read, trace, and decipher, the generator supplies one: composed from
+a config (for example, the empty-snippet default view of `<StudyLenses>`), or as
+a **variation** of a program they already have ("give me another like this"). It
+chooses _what program_; it does not teach, embody, run, or format — those belong
+to the surrounding study environment.
 
-The generator owns one transformation: **a generation config in, an admitted JEJ
-program out.** A language model proposes the program; the level's existing
+The generator owns one transformation: **a request in, an admitted JEJ program
+out.** The request is a generation config, optionally paired with a source
+program to vary. A language model proposes the program; the level's existing
 admission gate ([`validate`](../../../lib/validating/)) decides whether it is
 JEJ; a repair loop closes the gap when it isn't. The model supplies
-_plausibility and meaning_; the gate supplies _validity_. Neither alone is the
-generator — the loop between them is.
+_plausibility and meaning_ (and, for a variation, the kinship to the source);
+the gate supplies _validity_. Neither alone is the generator — the loop between
+them is.
 
 ## Ubiquitous language
 
-- **Generation config** — the request. The knobs a caller turns to shape the
-  program: which **model** to use, plus optional **generation guidance**.
-  Distinct from the model's own runtime options.
+- **Generation config** — the knobs a caller turns to shape the program: which
+  **model** to use, plus optional **generation guidance**. Distinct from the
+  model's own runtime options.
 - **Generation guidance** — the soft shaping of a request: which language
   features to lean on, how complex, how long, and a theme/domain for the subject
   matter. Guidance is _expressed to the model_, not enforced by a second
   validator — this level's gate admits full JEJ, so guidance steers _which_ JEJ
   while the gate guarantees it is _valid_ JEJ.
-- **Candidate** — one program the model proposes for a config, before admission.
+- **Source program** — an existing JEJ program handed in with a request. When
+  present, the output is a _variation_ of it rather than a freshly composed
+  program.
+- **Variation** — an admitted JEJ program the model derives from a source
+  program: recognisably related to it (similar intent or shape) yet different in
+  its specifics. A variation passes the same admission gate as a fresh program;
+  how far it departs from the source is the model's call, not a guaranteed
+  faithfulness.
+- **Candidate** — one program the model proposes for a request, before
+  admission.
 - **Admission** — the level's existing gate verdict (`isJeJ`): a candidate is
   admitted exactly when it parses and the validator finds zero violations. The
   generator reuses admission unchanged; it defines no second notion of validity.
@@ -48,18 +61,19 @@ generator — the loop between them is.
 
 ## What it produces (the boundary)
 
-- **In:** a generation config — a model identity plus optional generation
-  guidance.
-- **Out:** either an **admitted JEJ program** (the program text plus the meta a
-  caller needs — which model produced it, how many attempts it took), or a
-  **structured refusal**. The generator never returns an un-admitted program.
+- **In:** a generation config (a model identity plus optional generation
+  guidance), and **optionally a source program to vary**.
+- **Out:** either an **admitted JEJ program** — freshly composed, or a variation
+  of the source — plus the meta a caller needs (which model produced it, how
+  many attempts it took), or a **structured refusal**. The generator never
+  returns an un-admitted program.
 
 ## Owns vs. excludes
 
 **Owns**
 
-- Turning a generation config into the request(s) that ask the model for a JEJ
-  program, and for repairs.
+- Turning a request into the prompt(s) that ask the model for a JEJ program —
+  composed fresh, or varied from a supplied source — and for repairs.
 - The admit-or-repair loop and its attempt bound.
 - The result shape: admitted program + meta, or structured refusal.
 - Naming the configured model handle and bringing it up lazily, on first use.
@@ -74,17 +88,23 @@ generator — the loop between them is.
   _how_ a model runs.
 - **Embodiment, lenses, execution, formatting** — once a program exists it is an
   ordinary JEJ snippet; embody / orchestrate / engine / formatting handle it.
-- **Authoring** — a learner or curriculum author writing their own program is
-  the uncurated path; the generator is the _no-program-supplied_ path.
+- **Authoring** — a learner or curriculum author writing a program for its own
+  sake is the uncurated path. The generator produces programs _to study_ —
+  composed from a config or varied from a supplied one; a source program is a
+  seed to vary, not a program this module maintains.
 
 ## Design commitments
 
 These are present-tense decisions the module is built to honour.
 
-- **Generation is not reproducible.** The same config yields _different_
+- **Generation is not reproducible.** The same request yields _different_
   programs across calls — a language model is not a pure function.
   Reproducibility is not a property this module offers; a caller who wants a
   fixed program stores the program, not the config.
+- **A variation is related, not faithful.** Given a source program, the model
+  decides how far the variation departs from it; the only hard guarantee is that
+  the result is admitted JEJ. A caller needing an exact, rule-based
+  transformation will not find it here.
 - **Offline after first load, not zero-footprint.** The model loads once (a
   one-time cost) and then serves locally — no remote service, no account, no
   per-call budget. Where no model can run, the generator is simply
