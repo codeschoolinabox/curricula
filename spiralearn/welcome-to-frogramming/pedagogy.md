@@ -194,6 +194,17 @@ then, AI is what you're using AS you build — not what you're using INSTEAD of
 building. Not just a better explanation. The work is yours, has always been
 yours, and will always be yours — that's what makes it worth doing.
 
+The human–AI slider (ontology §11) reads _how much_ AI did a task, but
+deliberately not _whether you were learning the skill or applying a mastered
+one_ — the same position means opposite things in those two cases. The mastery
+contract supplies that second reading. Before the AI Integration Threshold,
+slide toward Productive Struggle: the reps are the work that builds the twin.
+After mastery — or for skills outside the current learning goal — the position
+is a free choice. _The slider shows delegation; the contract says when
+delegation is earned._ For authors, a prescriptive recipe (ontology §11) is a
+static encoding of exactly this: each task placed for the best _learning_, left
+while the skill is still being built.
+
 ---
 
 ## Using the 5 layers (§6 of ontology) in teaching
@@ -703,7 +714,9 @@ developed in subsequent Wave-3 commits and in the ontology↔pedagogy audit pass
 - Sequence: when each concept first lands (the ladder), how it deepens (the
   spiral)
 - Exercise patterns per strand (§7) and per lens (§9)
-- Methods for introducing the three roles of agential AI (§11)
+- Methods for introducing the three roles of agential AI (§11), including
+  diagnostic vs prescriptive use of the human–AI slider as a reflection
+  instrument
 - The pedagogy ↔ ontology seam, ongoing — the audit pass scheduled at 3d will
   move how-it's-taught content from `ontology.md` into the appropriate sections
   of this file
