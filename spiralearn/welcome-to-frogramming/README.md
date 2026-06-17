@@ -511,7 +511,7 @@ canonically in [`metaphor.md`](./metaphor.md).
 
 ## References
 
-Three resources are always available alongside the curriculum. None is a
+A few resources are always available alongside the curriculum. None is a
 prerequisite; refer to them when you need them.
 
 - **Just Enough JavaScript** — a curated subset of JavaScript: enough to write
@@ -527,6 +527,13 @@ prerequisite; refer to them when you need them.
   of something hard and want context for what you are experiencing. Covers
   spiral curriculum design, threshold concepts, liminal zone thinking, and the
   learning sequence.
+- **Cognitive-delegation sliders** (external companion tool) — a single-page POC
+  for placing tasks on the human–AI slider (Productive Struggle ↔ Cognitive
+  Delegation) and sharing the result. Reach for it when reflecting on where your
+  AI use actually sat; a native in-curriculum version is deferred. See
+  [`ontology.md`](./ontology.md) §11 for the framework.
+  ([repo](https://github.com/colevandersWands/cognitive-delegation-sliders),
+  [live](https://colevandersWands.github.io/cognitive-delegation-sliders/))
 
 **The full source-materials catalog** — academic lineages, design- principle
 sources, infrastructure documentation, prior-session handoffs — lives in
@@ -544,16 +551,16 @@ labels, table cells, audience lists — wherever the marked concept is the activ
 subject. This is a **reading aid**, not a memorization task; ignore any symbol
 whose meaning isn't yet clear and come back to this key when needed.
 
-| Symbol | Concept                         | What it marks                                                                                                                                                                    |
-| ------ | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🐸     | The course / both hats together | The umbrella. Frog/toad ambiguity is a feature: it carries both hats at once. Appears in the title and stays out of body text.                                                   |
-| 🔬     | Frogrammer                      | Development grounded in the notional machine — predict, trace, verify, apply craft practices intentionally; shoulders the NM-twin, may delegate user-research.                   |
-| 🎨     | Vibetoader                      | Development grounded in the user — research, prototype, test with real people; shoulders the user-twin, may delegate the notional machine.                                       |
-| 🧑     | Human                           | Used at active Human / AI distinctions.                                                                                                                                          |
-| 🤖     | AI / Agent                      | Used both for "AI" (in the Human/AI distinction) and for "Agent" (the fourth audience). Same thing, two framings.                                                                |
-| 🧑‍💻     | Developer (audience)            | The human who reads and writes code — Chapter 1's audience.                                                                                                                      |
-| 💻     | Computer (audience)             | The machine that evaluates code — Chapter 2's audience. "Understanding the computer" = twinning the notional machine; the NM is the computer at our chosen level of abstraction. |
-| 💭     | Snippetry                       | Small, runnable, self-contained programs as ongoing practice. The thought-bubble glyph is borrowed from the snippetry source repo.                                               |
+| Symbol | Concept                         | What it marks                                                                                                                                                                     |
+| ------ | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🐸     | The course / both hats together | The umbrella. Frog/toad ambiguity is a feature: it carries both hats at once. Appears in the title and stays out of body text.                                                    |
+| 🔬     | Frogrammer                      | Development grounded in the notional machine — predict, trace, verify, apply craft practices intentionally; shoulders the NM-twin, may delegate user-research.                    |
+| 🎨     | Vibetoader                      | Development grounded in the user — research, prototype, test with real people; shoulders the user-twin, may delegate the notional machine.                                        |
+| 🧑     | Human                           | Used at active Human / AI distinctions; also the Human (Productive Struggle) pole of the human–AI slider (§11).                                                                   |
+| 🤖     | AI / Agent                      | Used both for "AI" (in the Human/AI distinction) and for "Agent" (the fourth audience). Same thing, two framings. Also the AI (Cognitive Delegation) pole of the human–AI slider. |
+| 🧑‍💻     | Developer (audience)            | The human who reads and writes code — Chapter 1's audience.                                                                                                                       |
+| 💻     | Computer (audience)             | The machine that evaluates code — Chapter 2's audience. "Understanding the computer" = twinning the notional machine; the NM is the computer at our chosen level of abstraction.  |
+| 💭     | Snippetry                       | Small, runnable, self-contained programs as ongoing practice. The thought-bubble glyph is borrowed from the snippetry source repo.                                                |
 
 **Flagged for later:** the User audience (Chapter 3) and the Notional Machine
 itself don't yet have locked symbols. Both will be picked once the rest of the
