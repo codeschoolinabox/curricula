@@ -68,6 +68,9 @@ tasks; AI cannot have _your_ generative model align with the target system. The
 completed without AI, because mastery is the _having of the experience that
 builds the model_ — non-transferable.
 
+The human–AI slider (§11) operationalizes this caveat per task: it reads
+task-delegation, never comprehension-delegation.
+
 ##### Three threads grounding the principle
 
 The claim _"AI can't UNDERSTAND for you"_ sits at the intersection of three
@@ -499,6 +502,11 @@ in the loop:
 | 🎨 **Vibetoading** (user-grounded) | UX-research-led prototyping; design-thinking-driven iteration with real people; the NM is intentionally delegated. | Karpathy's _vibe coding_ — LLM writes notation, you focus on user-visible outcomes; works only paired with deep user-twin. |
 | 🔬 **Frogramming** (NM-grounded)   | Traditional engineering — humans write notation grounded in NM-awareness, craft practices applied intentionally.   | Willison's _vibe engineering_ / _agentic engineering_ — LLM writes notation; you direct and verify against the NM.         |
 
+The continuous, per-task form of this grid's right-hand (humans-only ↔
+LLM-collab) dimension is the **human–AI slider** (§11) — the 2-D quadrant
+collapsed to a 1-D per-task reading. V/F (which twin you shoulder) stays
+orthogonal to it.
+
 #### Vibing predates LLMs
 
 Pattern-matching syntax without understanding the underlying mechanism is older
@@ -625,6 +633,11 @@ meta-pattern.
   Empathy" was reaching for, six years on._ Direct continuity.
 - **Three-audience architecture** (developer / computer / user) — intrinsically
   bridging; the developer holds all three audiences
+- **collAIboration "Human+AI Collaboration Roles" quadrant** (Strategist /
+  Implementer / Curator / Orchestrator) — Evan Cole / Janet Tilstra / Joslenne
+  Peña prior work; the 2-D precursor the §11 human–AI slider distills into a
+  per-task 1-D reading. The companion POC tool attributes its framework to both
+  this quick-read and WtF.
 - **Bakhtiar Mikhak — engineering × physics co-evolution** — the deeper pattern
   V/F instantiates. Faraday/Maxwell-style mutual constitution: engineering
   practice and theoretical practice shape each other; neither is downstream of
@@ -1051,6 +1064,11 @@ existing study-lens yet); the triple's openness inherits from §7's. Each axis i
 canonical in its own section; §9 surfaces the cross-product so the reader can
 see all three at once.
 
+The human–AI slider (§11) is **not** a fourth axis here. It is a per-task
+pedagogical instrument that reads §11's depth-of-involvement — a teaching tool
+laid over the geometry, not part of it. The structural axes remain exactly
+three.
+
 #### Transitions between lenses
 
 The transitions between adjacent lenses can also be read as places where the
@@ -1267,6 +1285,89 @@ behavior at runtime.
 The three axes (positional, depth-of-involvement, verification target) align
 across all three roles. Read together they show the roles are real ontological
 distinctions, not arbitrary slices.
+
+#### The human–AI slider — per-task depth-of-involvement
+
+The three roles describe _where_ AI sits relative to the work. Within a role —
+especially Role 2, the band WtF teaches — _how much_ of a given task you hand to
+the AI is itself a per-task choice. The **human–AI slider** reads that choice: a
+single continuous reading of the depth-of-involvement axis above, applied one
+task at a time. It is a teaching and reflection instrument laid over the
+workflow — **not a fourth structural axis** (the geometry stays at three; see §9
+_Three independent axes_).
+
+Its two poles carry the curriculum's existing glyphs:
+
+- 🧑 **Productive Struggle** (Human, 0%) — you do the thinking yourself,
+  reaching for AI only after genuine effort.
+- 🤖 **Cognitive Delegation** (AI, 100%) — you intentionally hand the _thinking_
+  work (not just the typing) to the AI, while keeping the goals.
+
+Five bands name positions along it, each bridging to a stance already defined
+elsewhere in this document:
+
+| Band         | Position | Who does the cognitive work       | WtF bridge — _delegation depth_, not which-twin                                                        |
+| ------------ | -------- | --------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Fully human  | 0–19%    | you, unaided                      | mastery-contract territory — you operate the control panel yourself; the reps that build the twin (§1) |
+| Mostly human | 20–39%   | you lead; AI assists at the edges | you still operate the panel; the AI fills in notation at the margins                                   |
+| Balanced     | 40–59%   | shared                            | you and the AI each carry part of the task's cognition                                                 |
+| Mostly AI    | 60–79%   | AI leads; you direct and verify   | you "delegate operation of the control panel" (above) and verify against your twin                     |
+| Fully AI     | 80–100%  | AI; you accept and verify         | operation fully handed off — Role 2 at its most delegated; the §10 verification limit bites hardest    |
+
+> _Term hygiene._ "Cognitive Delegation" names the slider's AI pole — a per-task
+> reading of how much of _this task_ went to the AI. It is distinct from V/F's
+> _NM-delegation_ (which twin you shoulder, §4) and from the _control-panel
+> delegation_ above (operating the NM through an LLM). The slider is
+> **orthogonal to V/F**: _either_ conversation mode above — NM-grounded or
+> user-grounded — can sit at _any_ band, because the mode is _which twin_ you
+> hold and the band is _how much_ you delegate. A Frogramming task and a
+> Vibetoading task can each sit anywhere along it.
+
+**Two uses.** _Diagnostically_ — "which approach did I actually use, and does it
+match my goal?" (the learner reflecting). _Prescriptively_ — "given the goal,
+where should AI use sit?" (the author scoping a task). The diagnostic use is
+where the interactive companion tool helps; the prescriptive use is most often a
+**static recipe** — a per-task band-table, authored inline, naming the positions
+that lead to the best _learning_ (not the best productivity). A recipe renders
+as a numbered band-table — one row per task, the recommended band, and the
+learning rationale. The format, illustratively:
+
+| #   | Task                     | Recommended    | Why                                                 |
+| --- | ------------------------ | -------------- | --------------------------------------------------- |
+| 1   | Predict the output       | 🧑 Fully human | the prediction _is_ the rep that builds the NM-twin |
+| 2   | Generate edge-case tests | Balanced       | breadth where the AI is strong; you judge coverage  |
+| 3   | Verify the trace         | 🧑 Fully human | the verification is the learning                    |
+
+(🧑 marks human-leaning bands, 🤖 AI-leaning, Balanced bare; no new glyph.
+Chapter 4 carries the first full worked recipe.)
+
+> **Understanding is non-delegable** (§1, Principle 1). The slider reads who did
+> the _task_, never who did the _understanding_. A task can sit at Fully AI
+> while comprehension sits at zero delegation — different readings.
+>
+> **One axis, honestly.** The slider deliberately captures only _how much AI did
+> the task_, not _whether you are learning a skill or applying a mastered one_ —
+> the same position means opposite things in those two cases. That second
+> reading is the mastery contract's job (`pedagogy.md`), not the slider's.
+
+**Lineage.** The slider distills the collAIboration "Human+AI Collaboration
+Roles" quadrant roles (Strategist / Implementer / Curator / Orchestrator) into a
+per-task 1-D reading — the same Evan Cole / Janet Tilstra / Joslenne Peña prior
+work Chapter 4 draws its shape from (see §4 _Lineage_ and `chapters.md` Ch4
+overview). An interactive companion tool exists
+([repo](https://github.com/colevandersWands/cognitive-delegation-sliders) ·
+[live](https://colevandersWands.github.io/cognitive-delegation-sliders/)); a
+native in-curriculum version is deferred.
+
+<details>
+<summary>**Visualization: the slider** _(optional extra angle)_</summary>
+
+```mermaid
+flowchart LR
+    H["🧑 Productive Struggle<br/>(Human · 0%)"] --- MH[Mostly human] --- B[Balanced] --- MA[Mostly AI] --- A["🤖 Cognitive Delegation<br/>(AI · 100%)"]
+```
+
+</details>
 
 #### Curriculum mapping
 
