@@ -219,6 +219,8 @@ do nothing else here, this refactor is the safe, clearly-good move.
   orchestrator grow a notion of "run this and feed me the stream"?
 - **Which audience does v1 personify?** User-agent (robustness testing) is the
   shippable thinking; dev-agent (review/authoring) is the aspirational one.
+- **And a few wilder dreams** sit beyond all of this — tucked into a footnote
+  rather than the body, since they're "wonder" territory, not roadmap.[^dreams]
 
 ## Source pointers (consulted 2026-06-17)
 
@@ -237,3 +239,26 @@ do nothing else here, this refactor is the safe, clearly-good move.
 - **welcome-to-frogramming/README.md:307** (dev/user split is architecturally
   visible) · **ontology.md:400** (predict-and-twin loop) · Chapter 4 adds
   **Agents** as the fourth audience.
+
+[^dreams]:
+    **Wilder dreams** — L4 "wonder" territory, beyond any v1, recorded here so
+    they aren't lost.
+
+    _The literal fourth audience._ A lens where an agent reads _your_ code and
+    you watch it form its (mis)understanding — Chapter 4's "writing for and with
+    agents" made watchable. The agent as _itself_, not standing in for dev or
+    user.
+
+    _"The user" is plural._ An ensemble of user-personas hitting the same
+    program at once, surfacing the Vibetoader insight that there is no singular
+    user. Cheap once ① exists — just more `io.*` handlers.
+
+    _The north-star dodge._ Reach ④ not by making the local model good enough,
+    but by treating a curated **recorded run** as the deliverable: an author
+    records one good incremental-build story; students scrub and replay it. This
+    decouples the most valuable demo from model quality — and falls straight out
+    of the "recorded transcript is the load-bearing artifact" conclusion above.
+
+    _Recorded-run as a first-class lensable artifact._ A "run" you attach lenses
+    to, the way you attach them to a `Snippet` today. More architectural — a
+    data type, not just a view.
