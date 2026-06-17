@@ -195,13 +195,20 @@ returned as-is, by design, and the rawness is the lesson, not a defect.
 - **Validate** (`validate`) — the boolean that decides curated vs. uncurated.
   `true` runs the admit-and-conform loop; `false` skips it and returns the
   model's raw program. The prompt is built and sent either way; only the gating
-  differs.
+  differs. **Defaults to `true`** — curated, scaffolded study is the common
+  case; a caller opts _into_ raw output explicitly.
 - **Curated / uncurated** — the curated/uncurated axis read off `validate`.
   **Curated** (`validate: true`): controlled by the validation loop, validated
   to spec. **Uncurated** (`validate: false`): raw model output, drift and all.
   The rhyme with the canonical axis is deliberate — canonically the author
   controls by hand-picking; here the loop controls by validating. Same axis,
   same direction (control vs. rawness); only the control _mechanism_ differs.
+  Curation is a matter of **degree**, not just on/off: within a curated call the
+  feature subset and size bounds constrain _what the output may contain_, and a
+  non-empty **seed** program (see _Variation_) constrains its very shape — the
+  tightest constraint of all. A seeded curated request is **hyper-curated**:
+  composing from an empty seed is curated, varying a seed is curated _harder_.
+  Seeding is another dimension of curation, not a separate axis.
 - **Guided / unguided** — the guided/unguided axis read off **who fills
   `config`**. **Guided**: the environment or lens fills the prompt and
   constraints (educator-structured). **Unguided**: the learner fills them
