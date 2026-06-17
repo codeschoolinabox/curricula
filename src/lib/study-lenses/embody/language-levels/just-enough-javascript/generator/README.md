@@ -128,6 +128,30 @@ These are present-tense decisions the module is built to honour.
   _preference_ expressed to the model, never a new admission rule; every
   returned program is admitted as full JEJ.
 
+## Testing posture
+
+The module has exactly one non-deterministic dependency — the model. That seam
+is all a test cannot pin down; everything around it is pure and asserted with
+the model **mocked**.
+
+- **Invariants, not output.** A test asserts _properties_ of a result, never its
+  program text. The load-bearing one: every returned program is admitted JEJ
+  (`validate(result).ok`), by construction — a mock returning invalid candidates
+  must yield a repaired program or a structured refusal, never an invalid one.
+- **Deterministic around the seam.** Prompt construction (config → prompt, empty
+  vs. non-empty routing, repair carrying the prior violations), the attempt
+  bound, result shaping, and lazy model load are pure given a fake model
+  returning canned candidates — ordinary ZOMBIES units.
+- **Measured, not asserted.** The program's content and quality — and, because
+  guidance is not gate-enforced, whether the output actually obeys the requested
+  features / complexity / length — are statistical rates over a real model (an
+  eval), not unit assertions. Hard subset enforcement would move
+  feature-conformance into the asserted column; guidance-only keeps it a rate.
+
+The structural seam that makes this possible — the model isolated behind a pure
+core — is the [`./DOCS.md`](./DOCS.md) sketch's responsibility, not this
+contract.
+
 ## Navigation
 
 - Parent: [`../README.md`](../README.md) — the just-enough-javascript language
