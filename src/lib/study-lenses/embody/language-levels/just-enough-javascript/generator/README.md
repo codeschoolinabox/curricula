@@ -3,10 +3,10 @@
 Produces a valid, focused Just Enough JavaScript program for a learner to study.
 Given an **input program** (possibly empty) and a **config**, it returns a
 program matching the config — composed from scratch when the input is empty, or
-a **variation** of the input when it isn't — via a language model. Every
-returned program is **admitted** by the level (`isJej`: valid, formatted JEJ)
-_and_ **conformant** to the request (only the chosen features, within the chosen
-size).
+a **variation** of the input when it isn't — via a **local** language model that
+runs on the learner's own device. Every returned program is **admitted** by the
+level (`isJej`: valid, formatted JEJ) _and_ **conformant** to the request (only
+the chosen features, within the chosen size).
 
 ## Purpose
 
@@ -40,9 +40,11 @@ kinship to it); the gates supply the guarantees. Neither alone is the generator
   _compose from scratch_; non-empty means _produce a variation_ of it. The input
   is a **seed, not a constraint**: read for intent and shape, and _not_ required
   to be admitted JEJ — only the output is gated.
-- **Config** — the target spec for the output: which **model** to use, the
-  request's **constraints** (a feature subset and size bounds, both _enforced_),
-  and a **theme** (soft). Distinct from the model's own runtime options.
+- **Config** — the target spec for the output: which **model** to use (a named
+  local model, chosen along a size/capability spectrum — see _Model handle_),
+  the request's **constraints** (a feature subset and size bounds, both
+  _enforced_), and a **theme** (soft). Distinct from the model's own runtime
+  options.
 - **Feature subset** — the constructs _and operators_ a request permits, a
   restriction of full JEJ. **Enforced**: the output uses only these.
 - **Size bounds** — requested limits on complexity (e.g. nesting depth, branch
@@ -75,13 +77,25 @@ kinship to it); the gates supply the guarantees. Neither alone is the generator
   attempts for a single request.
 - **Structured refusal** — the outcome when no result is reached: a named cause,
   never an out-of-spec program. Causes: the **attempt bound exhausted** and **no
-  model available** — one failure vocabulary. A request whose spec no program
-  can satisfy refuses for the first cause, expectedly.
-- **Model handle** — the loaded language model. Selected by the config, brought
-  into memory **on first use**, and reused thereafter — a load-once-reuse
-  lifecycle this module owns. The model's identity is a parameter (a caller may
-  pick a larger or smaller one); the model _runtime_ (how a model executes) is
-  outside this module.
+  model available** — one failure vocabulary. _No model available_ means the
+  device cannot bring a model up: no model it can run, or the requested model is
+  neither cached nor reachable to fetch. Because every model is local, when the
+  device cannot bring one up the generator refuses rather than reaching for a
+  remote one. A request whose spec no program can satisfy refuses for the first
+  cause, expectedly.
+- **Model handle** — the loaded language model, always a **local** one: it runs
+  on the learner's own device, never a remote service. The config selects it by
+  **name** from an **open set** of models spread along a **size/capability
+  spectrum** — a smaller model downloads less and loads and runs faster but
+  writes weaker programs; a larger one downloads more and runs slower but writes
+  stronger ones — so a caller matches the choice to the machine's power and its
+  network/storage budget, and the set **grows as small portable models
+  improve**. A named model is **fetched once and cached on the device**, then
+  **brought into memory on first use** and reused thereafter — a fetch-once,
+  load-once-reuse lifecycle this module owns. The network is touched only for
+  that one-time fetch; every later load is from the cache, offline. The model's
+  identity is a parameter; the model _runtime_ (how a model executes) is outside
+  this module.
 
 ## What it produces (the boundary)
 
@@ -93,9 +107,10 @@ kinship to it); the gates supply the guarantees. Neither alone is the generator
   never returns a program that fails either gate.
 
 Generation is **asynchronous**: a caller `await`s the result (the model call and
-the checks are async). The model's one-time lazy load hides behind that same
-`await` — from the outside the operation is _pure-seeming_, a request in and a
-program out, never revealing whether this call loaded the model or reused it.
+the checks are async). The model's lazy load — and, the very first time, the
+one-time fetch that fills the cache — hides behind that same `await`; from the
+outside the operation is _pure-seeming_, a request in and a program out, never
+revealing whether this call fetched, loaded, or reused the model.
 
 ## Owns vs. excludes
 
@@ -108,8 +123,11 @@ program out, never revealing whether this call loaded the model or reused it.
   violations for repair.
 - The admit-or-conform-or-repair loop and its attempt bound.
 - The result shape: a result + meta, or a structured refusal.
-- The configured model's load-once-reuse lifecycle: selecting it from the config
-  and bringing it up lazily, on first use.
+- The configured **local** model's fetch-once, load-once-reuse lifecycle:
+  selecting the named model from the config, driving its one-time
+  fetch-and-cache on first need, and bringing it into memory lazily, on first
+  use — driving _which_ model and _when_, not the fetch, cache, or run
+  mechanics, which are the runtime's (see _Excludes_).
 
 ### Excludes
 
@@ -118,9 +136,13 @@ program out, never revealing whether this call loaded the model or reused it.
   _full_ JEJ and is reused **unchanged**, never modified or extended to carry
   this module's per-request subset. Conformance is a separate, generator-owned
   check that runs _after_ admission and only narrows further.
-- **The model runtime** — how a language model executes is infrastructure; this
-  module names _which_ model and drives its load lifecycle, not _how_ a model
-  runs.
+- **The model runtime** — how a local model is **fetched, cached on the device,
+  and executed** is infrastructure. This module names _which_ local model,
+  constrains the selection to local models, and drives _when_ its lifecycle runs
+  — not _how_ it is fetched, stored, or run. Excluding the mechanism does not
+  weaken the commitment that every model is local: the generator relies on that
+  property exactly as it relies on the level's admission gate, without
+  implementing either.
 - **Embodiment, lenses, execution** — once a program exists it is an ordinary
   JEJ source string; embody / orchestrate / engine handle it from there.
 - **Authoring** — a learner or author writing a program for its own sake is the
@@ -160,19 +182,37 @@ These are present-tense decisions the module honours.
   decides how far the result departs; the hard guarantees are only admission and
   conformance. A caller needing an exact, rule-based transformation will not
   find it here.
-- **Offline after first load, not zero-footprint.** The model loads once and
-  then serves locally — no remote service, account, or per-call budget. Where no
-  model can run, the generator returns a structured refusal (_no model
-  available_); there is no lower-fidelity fallback, by design.
+- **Local models only — and four properties follow.** The generator drives
+  _only_ local models, run on the learner's own device; it never calls a remote
+  model service. This is the invariant the module's value rests on, not a
+  default to relax, because four guarantees flow straight from it: generation is
+  **offline-capable** (after a model is acquired, no network at generation
+  time), **account-free** (nothing to sign into or authenticate against),
+  **private** (the learner's code and the generated programs never leave the
+  device — ever), and **cost-free** (no per-call or per-token billing, only the
+  machine's own compute). A remote escape hatch would forfeit all four; there is
+  none, by design.
+- **Offline after acquisition, not zero-footprint.** "Offline" is scoped to
+  _generation_: a model is fetched once and cached, and from then on runs with
+  no network at all. That one-time fetch is the same kind of one-time online
+  step the surrounding application itself takes to come online — acquire once,
+  cache, then run offline — so the model is one more cached asset under that
+  same envelope, not a separate live dependency. The fetch carries no learner
+  code (privacy holds even there), though it spends bandwidth and reveals
+  _which_ model is requested to whatever host serves the weights — "cost-free"
+  means no per-call billing and no account, not zero bytes. Where no model the
+  device can run is available, the generator returns a structured refusal (_no
+  model available_); there is no remote or lower-fidelity fallback.
 
 ## Testing posture
 
 Generation is async and, from the outside, _pure-seeming_ — the model
 interaction, including the one-time lazy load, is hidden behind the `await`.
 Internally the only impure dependencies are the **non-deterministic model call**
-and the **stateful model loader**; everything else — including the whole
-**conformance check** — is pure. Tests pass a fake model (canned candidates) and
-a counted loader (to assert load-once).
+and the **stateful model loader** (the load-once bring-up of the handle — the
+runtime's fetch and cache sit below this seam); everything else — including the
+whole **conformance check** — is pure. Tests pass a fake model (canned
+candidates) and a counted loader (to assert load-once, with no real fetch).
 
 - **Conformance is a pure unit.** `conform(code, subset, size)` takes only data
   and returns a verdict + violations — the richest unit-test surface here,
