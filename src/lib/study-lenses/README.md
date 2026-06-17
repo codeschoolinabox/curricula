@@ -169,10 +169,10 @@ the full spec + resolution chain.
 
 These quadrants describe **studying** a snippet that already exists. Its
 generative twin — _producing_ the snippet there is to study — is the
-[JEJ program generator](./embody/language-levels/just-enough-javascript/generator/README.md),
-the **generative arm** of the same quad: it spans the same four quadrants along
-the same two axes (`validate` reads the curated/uncurated axis; who supplies the
-config reads the guided/unguided one).
+[**aithor**](./embody/language-levels/just-enough-javascript/aithor/README.md)
+(_AI + author_), the **generative arm** of the same quad: it spans the same four
+quadrants along the same two axes (`validate` reads the curated/uncurated axis;
+who supplies the config reads the guided/unguided one).
 
 ### Why this architecture
 
