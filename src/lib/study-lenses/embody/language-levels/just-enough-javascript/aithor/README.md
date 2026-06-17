@@ -1,15 +1,15 @@
-# generator
+# aithor
 
 The canonical Explorotron quad studies code that _already exists_ — a learner
 pastes or is handed a snippet, and the [study lenses][quad] open perspectives on
 it. This module is the **generative arm** of that same quad: it _produces_ the
-program. The lenses look at code; the generator makes the code there is to look
-at — and it spans the same four quadrants, along the same two axes, so that
-producing a study program and studying it are two halves of one pedagogy rather
-than two vocabularies.
+program. The lenses look at code; the **aithor** — _AI + author_ — makes the
+code there is to look at — and it spans the same four quadrants, along the same
+two axes, so that producing a study program and studying it are two halves of
+one pedagogy rather than two vocabularies.
 
-The call is `generator(program, config)` — a `program` string (possibly empty)
-and a `config` that names a **local** model, a learner- or environment-authored
+The call is `aithor(program, config)` — a `program` string (possibly empty) and
+a `config` that names a **local** model, a learner- or environment-authored
 **prompt**, the feature and size constraints, and a **validate** flag. From
 those two arguments it returns a Just Enough JavaScript program for a learner to
 read, trace, and decipher — composed from scratch when the `program` is empty,
@@ -38,8 +38,8 @@ the quad treatment there; read its generative mirror here.
 
 ## Config → quadrant
 
-The canonical axes are **curated/uncurated × guided/unguided**. The generator
-does not fork that vocabulary — it reads each axis off the config.
+The canonical axes are **curated/uncurated × guided/unguided**. The aithor does
+not fork that vocabulary — it reads each axis off the config.
 
 - **The curated/uncurated axis is `validate`.** Canonically, _curated_ means
   author-controlled study material — the author hand-picks the snippet a learner
@@ -59,7 +59,7 @@ does not fork that vocabulary — it reads each axis off the config.
   learner-authored prompt is the surface on which learners _practise writing
   prompts_; an environment-authored prompt is a scaffolded objective.
 
-Crossing the two axes gives the four quadrants, in the generator's terms:
+Crossing the two axes gives the four quadrants, in the aithor's terms:
 
 |                                              | **Uncurated** (`validate: false`, raw)                                                              | **Curated** (`validate: true`, validated-to-spec)                                                          |
 | -------------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -85,7 +85,7 @@ their own_ — gets the [package README's][quad] **both-yes** answer here too:
 Q1 + Q2 are the learner filling the config (structuring their own); Q3 + Q4 are
 the environment or lens filling it (educators structuring it for them). The axis
 that flips is _who fills `config`_; the component called is the same
-`generator(program, config)` either way.
+`aithor(program, config)` either way.
 
 ## Mapped onto the chapters
 
@@ -98,7 +98,7 @@ on a single generative arm.
 - **Chapters 1–3 — Q4, guided and curated.** The lens or environment fills the
   config: a tight feature subset, a small size, an objective baked into the
   `prompt` (a loop to trace, a branch to predict, a coercion to catch), and
-  `validate: true`. The generator returns a validated JEJ study program aimed at
+  `validate: true`. The aithor returns a validated JEJ study program aimed at
   that objective — scaffolded study, a program built _to be read_. Here the
   learner structures nothing; the educator structures it for them. These
   scaffolded-study lenses always pass `validate: true` — the curated guarantee
@@ -107,22 +107,25 @@ on a single generative arm.
   control panel for the notional machine and the LLM as an alternative way to
   operate it — _you delegate the typing while still owning the NM_. Its
   load-bearing calibration skill is the verify/generate asymmetry: **models
-  generate more readily than they verify, so _you_ verify**. The generator's
+  generate more readily than they verify, so _you_ verify**. The aithor's
   uncurated path is where learners practise exactly that. They pass a
   learner-authored `prompt`, get the model's **raw** program — drift,
   hallucination, and all — then run the Chapter 1–3 skill stack over it (trace
-  tables, predictive stepping, code review). The gap between what the
-  constraints _asked for_ (they shape only the prompt here) and what the model
-  _gave_ is the §4.4 lesson, not a defect. Q1 is the learner iterating solo on
-  their own prompt; Q2 is the environment setting a prompt-objective and the
-  learner watching the model drift past the target — the jagged frontier and the
-  same-prompt-different-output stochasticity become the ambient material to
-  direct, not a failure to avoid. And because the model is **local**, this works
-  **offline** — account-free, private, cost-free AI-co-authoring practice on the
-  learner's own device. The Chapter-4 use is what the local-only invariant is
-  _for_: not a privacy nicety bolted on the side, but the condition that makes
-  drift-as-lesson practicable for every learner regardless of network, account,
-  or budget.
+  tables, predictive stepping, code review). Because that program is raw it may
+  not even be admitted JEJ — when it isn't, the NM-scaffolded lenses (which need
+  admission) fall back to source-level study, exactly as they do for any code
+  beyond the level; the source-level skill stack still applies in full. The gap
+  between what the constraints _asked for_ (they shape only the prompt here) and
+  what the model _gave_ is the §4.4 lesson, not a defect. Q1 is the learner
+  iterating solo on their own prompt; Q2 is the environment setting a
+  prompt-objective and the learner watching the model drift past the target —
+  the jagged frontier and the same-prompt-different-output stochasticity become
+  the ambient material to direct, not a failure to avoid. And because the model
+  is **local**, this works **offline** — account-free, private, cost-free
+  AI-co-authoring practice on the learner's own device. The Chapter-4 use is
+  what the local-only invariant is _for_: not a privacy nicety bolted on the
+  side, but the condition that makes drift-as-lesson practicable for every
+  learner regardless of network, account, or budget.
 - **Chapter 5 — Q1, learner-driven.** Training wheels off: the learner fills the
   config and generates for their own snippetry — a seed program to vary, a
   sketch to chase. Generative play in the same uncurated mode, now in service of
@@ -132,18 +135,18 @@ For the canonical treatment of the quadrants — the axes, the layered pyramid,
 and the Begel & Ko both-yes — see the package quad treatment in
 [`../../../../README.md`](../../../../README.md) (search _two-axis grid_, _Q1_,
 _both-yes_), which in turn situates against the curriculum's pedagogy §7. This
-section _situates_ the generator against that treatment; it does not restate it.
+section _situates_ the aithor against that treatment; it does not restate it.
 
 ## Purpose
 
 **A source of programs, not an authoring tool.** When a learner needs a JEJ
-program to read, trace, and decipher, the generator supplies one. It is a
-_single_ operation — **shape a program to a config, seeded by an input program**
-— with two familiar ends: an **empty** input composes a program from scratch
-(the empty-snippet default view of `<StudyLenses>`), and a **non-empty** input
-yields a variation of it ("give me another like this"). It chooses _what
-program_; it does not teach, embody, run, or own the language level — those
-belong to the surrounding study environment.
+program to read, trace, and decipher, the aithor supplies one. It is a _single_
+operation — **shape a program to a config, seeded by an input program** — with
+two familiar ends: an **empty** input composes a program from scratch (the
+empty-snippet default view of `<StudyLenses>`), and a **non-empty** input yields
+a variation of it ("give me another like this"). It chooses _what program_; it
+does not teach, embody, run, or own the language level — those belong to the
+surrounding study environment.
 
 Generation is not a second operation — it is the **base case** of variation. The
 empty program is itself admitted (`isJej('')` passes), so "vary the empty
@@ -156,13 +159,13 @@ gates: the level **admits** it (valid, formatted JEJ) and the request's
 within the requested complexity and length). A repair loop closes the gap when
 either fails. The model supplies _plausibility and meaning_ (and, from a
 non-empty input, the kinship to it); the gates supply the guarantees. Neither
-alone is the curated generator — the loop between them is. Under
-`validate: false` there is no loop and no gates — the model's program is
-returned as-is, by design, and the rawness is the lesson, not a defect.
+alone is the curated aithor — the loop between them is. Under `validate: false`
+there is no loop and no gates — the model's program is returned as-is, by
+design, and the rawness is the lesson, not a defect.
 
 ## Ubiquitous language
 
-- **Request** — what the generator is given: an **input program** (`program`,
+- **Request** — what the aithor is given: an **input program** (`program`,
   possibly empty) paired with a **config**.
 - **Input program** (`program`) — the program a request shapes from. Empty means
   _compose from scratch_; non-empty means _produce a variation_ of it. The input
@@ -179,9 +182,16 @@ returned as-is, by design, and the rawness is the lesson, not a defect.
   concatenated into it, so they always _shape_ the ask — whether or not they are
   enforced.
 - **Feature subset** (`include` / `exclude`) — the constructs _and operators_ a
-  request permits, a restriction of full JEJ. **Enforced under
-  `validate: true`**: a curated output uses _only_ these. **Prompt-shaping under
-  `validate: false`**: it is asked for but not gated.
+  request permits, a restriction of full JEJ, named in the level's
+  learner-facing feature vocabulary (the [`reference.md`](../reference.md)
+  surface — _loops_, _ternary_, _for-of_, and the like). This is _not_ the
+  analytic **`Features`** enum ([`../../../types.ts`](../../../types.ts)), a
+  closed set of presence-booleans that _detects what a program uses_ rather than
+  gating what it _may_ use; nor is it the level's syntax **allowlist**, which
+  `conform` deliberately does not reuse (see _Conformance_). `conform` maps the
+  named features to its own checks. **Enforced under `validate: true`**: a
+  curated output uses _only_ these. **Prompt-shaping under `validate: false`**:
+  it is asked for but not gated.
 - **Size bounds** — the requested limits: `lines` (length) and `complexity`
   (control-flow depth). Two orthogonal dimensions, kept separate as the level's
   `Metrics` keeps them. **Enforced under `validate: true`**; prompt-shaping
@@ -229,7 +239,7 @@ returned as-is, by design, and the rawness is the lesson, not a defect.
   [`../../../lib/validating/`](../../../lib/validating/), reused **unchanged** —
   it serves the whole language level, not this module's per-request focus. Runs
   only on the curated path.
-- **Conformance** — the **generator's own** gate: a pure check that a candidate
+- **Conformance** — the **aithor's own** gate: a pure check that a candidate
   uses only the requested feature subset (constructs and operators) and fits the
   requested size bounds —
   `conform(code, subset, size) → verdict + located violations`. It only ever
@@ -243,7 +253,7 @@ returned as-is, by design, and the rawness is the lesson, not a defect.
   program. Repair turns a refused candidate into a result without discarding the
   model's work. A curated-only mechanism — there is nothing to repair when
   nothing is gated.
-- **Attempt** — one model call, initial or repair. The generator bounds the
+- **Attempt** — one model call, initial or repair. The aithor bounds the
   attempts for a single curated request; an uncurated request is a single
   ungated call.
 - **Structured refusal** — the outcome when no result is reached: a named cause,
@@ -253,7 +263,7 @@ returned as-is, by design, and the rawness is the lesson, not a defect.
   with no loop there is no attempt-bound refusal. _No model available_ means the
   device cannot bring a model up: no model it can run, or the requested model is
   neither cached nor reachable to fetch. Because every model is local, when the
-  device cannot bring one up the generator refuses rather than reaching for a
+  device cannot bring one up the aithor refuses rather than reaching for a
   remote one. A curated request whose spec no program can satisfy refuses for
   the bound, expectedly.
 - **Model handle** — the loaded language model, always a **local** one: it runs
@@ -280,8 +290,8 @@ The boundary splits on `validate`.
 - **Out, curated (`validate: true`):** either a **result** — an admitted,
   conformant program (composed if the input was empty, a variation otherwise)
   plus the meta a caller needs (which model, how many attempts), or a
-  **structured refusal**. The generator never returns a program that fails
-  either gate. The boundary holds.
+  **structured refusal**. The aithor never returns a program that fails either
+  gate. The boundary holds.
 - **Out, uncurated (`validate: false`):** the model's program **as-is** —
   possibly invalid, possibly drifting past the requested subset or size — **by
   design**. The constraints shaped the prompt; nothing enforced them, so the gap
@@ -322,13 +332,13 @@ model.
 - **The language level** — admission (`isJej` / `validate`) lives in
   [`../../../lib/validating/`](../../../lib/validating/); it is the gate for
   _full_ JEJ and is reused **unchanged**, never modified or extended to carry
-  this module's per-request subset. Conformance is a separate, generator-owned
+  this module's per-request subset. Conformance is a separate, aithor-owned
   check that runs _after_ admission and only narrows further.
 - **The model runtime** — how a local model is **fetched, cached on the device,
   and executed** is infrastructure. This module names _which_ local model,
   constrains the selection to local models, and drives _when_ its lifecycle runs
   — not _how_ it is fetched, stored, or run. Excluding the mechanism does not
-  weaken the commitment that every model is local: the generator relies on that
+  weaken the commitment that every model is local: the aithor relies on that
   property exactly as it relies on the level's admission gate, without
   implementing either.
 - **Embodiment, lenses, execution** — once a program exists it is an ordinary
@@ -338,7 +348,7 @@ model.
   a non-empty input is a seed, not a program this module maintains. This is
   _not_ the same as the uncurated path: `validate: false` is squarely owned here
   — it is the Q1/Q2 generative surface where learners practise prompting and
-  directing raw model output. The generator owns _generating_ the uncurated
+  directing raw model output. The aithor owns _generating_ the uncurated
   program; it does not own _maintaining_ an authored one.
 
 ## Design commitments
@@ -366,10 +376,10 @@ These are present-tense decisions the module honours.
   did not weaken; it gained a sibling.
 - **Two gates, two owners — on the curated path.** Admission (`isJej`) is the
   level's, reused unchanged. Conformance (feature subset + size bounds) is the
-  generator's own pure check, layered on top. The generator never touches,
-  re-derives, or widens the level's gate — it only narrows below JEJ — so the
-  level's never-lies invariant is untouched. Under `validate: false` neither
-  gate runs; the constraints shape the prompt only.
+  aithor's own pure check, layered on top. The aithor never touches, re-derives,
+  or widens the level's gate — it only narrows below JEJ — so the level's
+  never-lies invariant is untouched. Under `validate: false` neither gate runs;
+  the constraints shape the prompt only.
 - **Feature subset and size bounds are enforced under `validate: true`,
   prompt-shaping under `validate: false`; theme is always soft.** A curated
   program uses _only_ the requested constructs and operators and stays within
@@ -396,10 +406,10 @@ These are present-tense decisions the module honours.
   decides how far the result departs; the hard guarantees (under
   `validate: true`) are only admission and conformance. A caller needing an
   exact, rule-based transformation will not find it here.
-- **Local models only — and four properties follow.** The generator drives
-  _only_ local models, run on the learner's own device; it never calls a remote
-  model service. This is the invariant the module's value rests on, not a
-  default to relax, because four guarantees flow straight from it: generation is
+- **Local models only — and four properties follow.** The aithor drives _only_
+  local models, run on the learner's own device; it never calls a remote model
+  service. This is the invariant the module's value rests on, not a default to
+  relax, because four guarantees flow straight from it: generation is
   **offline-capable** (after a model is acquired, no network at generation
   time), **account-free** (nothing to sign into or authenticate against),
   **private** (the learner's code and the generated programs never leave the
@@ -418,7 +428,7 @@ These are present-tense decisions the module honours.
   code (privacy holds even there), though it spends bandwidth and reveals
   _which_ model is requested to whatever host serves the weights — "cost-free"
   means no per-call billing and no account, not zero bytes. Where no model the
-  device can run is available, the generator returns a structured refusal (_no
+  device can run is available, the aithor returns a structured refusal (_no
   model available_) under either `validate` value; there is no remote or
   lower-fidelity fallback.
 
@@ -442,7 +452,7 @@ candidates) and a counted loader (to assert load-once, with no real fetch).
   returning a non-conforming candidate must yield a repair or a structured
   refusal, never a non-conforming result. (The gate seam is async.)
 - **The uncurated rawness, as a tested property.** Of an _uncurated_
-  (`validate: false`) result a test asserts the opposite shape: the generator
+  (`validate: false`) result a test asserts the opposite shape: the aithor
   returns the model's candidate **unmodified** — no admission, no conformance,
   no repair. The rawness is itself a property, gated _out_ on purpose; a test
   that saw the output cleaned up would be catching a bug.
@@ -468,7 +478,7 @@ sketch's concern.
 - [`../DOCS.md`](../DOCS.md) — the level's architecture (admission, the
   never-lies invariant).
 - [`../reference.md`](../reference.md) — the learner-facing JEJ cheat sheet (the
-  feature surface the generator targets).
+  feature surface the aithor targets).
 - [`../../../lib/validating/`](../../../lib/validating/) — `validate` / `isJej`,
   the level's admission gate this module reuses unchanged.
 - [`../../../types.ts`](../../../types.ts) — `Features` / `Metrics`, the level's
@@ -476,7 +486,7 @@ sketch's concern.
   `Metrics.maxNestingDepth` is the recommended primary `complexity` ordinal).
 - [`../../../../README.md`](../../../../README.md) — the package's canonical
   Explorotron quad treatment (search _two-axis grid_, _Q1_, _both-yes_); the
-  generator is its generative arm. Read the quad there; do not restate it here.
+  aithor is its generative arm. Read the quad there; do not restate it here.
 - [`./DOCS.md`](./DOCS.md) — this module's architecture sketch.
 - [`./types.ts`](./types.ts) — the contract in TypeScript (the `validate` flag,
   the `complexity` metric and threshold, the config shape).
