@@ -28,8 +28,9 @@ export type Category =
 
 /**
  * Roles for `delimiter`-category tokens. JEJ-precise; `'other'` is the
- * total fallback. (Closers will inherit their opener's role via pairing
- * in the pairing-role increment; today closers carry `'other'`.)
+ * total fallback. A closer inherits its opener's final role via the
+ * `partner` link. Opener roles not yet assigned by the AST pass
+ * (`call-arguments`, `control-head`, `grouping`) still seed `'other'`.
  */
 export type DelimiterRole =
 	| 'call-arguments'

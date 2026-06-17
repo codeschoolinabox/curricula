@@ -16,9 +16,9 @@ import type {
  * never mutated; safe on frozen embodiment data).
  *
  * Increment scope: home category + token-derivable role seed + delimiter
- * pairing. Each `categories` is single-element (AST alternates land later);
- * AST-context roles and closer-role inheritance land later; `ast` is validated
- * but not yet walked.
+ * pairing + the `block` brace role + closer-role inheritance. Each
+ * `categories` is single-element (AST alternates land later); paren and
+ * operator AST roles land later.
  *
  * @throws TypeError when `code`, `tokens`, or `ast` is missing or null —
  *   callers gate on a successful parse (see `./README.md` § Public API).
@@ -38,11 +38,12 @@ export default function classifyTokens({
 		(token) => token.type !== tt.eof && token.end > token.start,
 	);
 	const partners = pairDelimiters(kept);
-	const classified = kept.map((token, index) =>
+	const seeded = kept.map((token, index) =>
 		classifyToken(token, code, partners[index]),
 	);
+	const refined = refineDelimiterRoles(seeded, ast);
 
-	return deepFreezeInPlace(classified);
+	return deepFreezeInPlace(refined);
 }
 
 function classifyToken(
@@ -96,6 +97,60 @@ function pairDelimiters(
 	return partner;
 }
 /* eslint-enable functional/immutable-data */
+
+// AST refinement: override the brace role of each `BlockStatement` opener to
+// `block`, then make every closer inherit its opener's FINAL role across the
+// `partner` link — so a block `}` becomes `block`, a backtick close inherits
+// `template-delimiter`, and a `)` inherits its `(`'s role. The block override
+// runs before inheritance so a block `}` inherits `block`, not the seed.
+function refineDelimiterRoles(
+	tokens: ReadonlyArray<ClassifiedToken>,
+	ast: acorn.Node,
+): ReadonlyArray<ClassifiedToken> {
+	const blockStarts = new Set(collectBlockStarts(ast));
+	function openerRole(index: number): Role | null {
+		const token = tokens[index];
+		if (token.text === '{' && blockStarts.has(token.start)) {
+			return 'block';
+		}
+		return token.role;
+	}
+	return tokens.map(function refine(token, index) {
+		const { partner } = token;
+		const source = partner !== null && partner < index ? partner : index;
+		const role = openerRole(source);
+		return role === token.role ? token : { ...token, role };
+	});
+}
+
+function collectBlockStarts(node: acorn.Node): ReadonlyArray<number> {
+	const here = node.type === 'BlockStatement' ? [node.start] : [];
+	const childStarts = astChildren(node).flatMap((child) =>
+		collectBlockStarts(child),
+	);
+	return [...here, ...childStarts];
+}
+
+function astChildren(node: acorn.Node): ReadonlyArray<acorn.Node> {
+	const record = node as unknown as Record<string, unknown>;
+	return Object.entries(record).flatMap(function childrenOf([key, value]) {
+		if (key === 'parent') {
+			return [];
+		}
+		if (Array.isArray(value)) {
+			return value.filter((item) => isAstNode(item));
+		}
+		return isAstNode(value) ? [value] : [];
+	});
+}
+
+function isAstNode(value: unknown): value is acorn.Node {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		typeof (value as { readonly type?: unknown }).type === 'string'
+	);
+}
 
 // Categories are SEMANTIC, not lexical: a "keyword" indicates a statement /
 // declaration / control structure acting on the NM, and does not transform

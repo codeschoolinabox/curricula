@@ -198,9 +198,12 @@ Behavior:
 - **`}` disambiguation**: Acorn emits one `braceR` token type for block,
   switch-body, and template-expression closers. The pairing pass records mutual
   `partner` indices that tell them apart — a `}` partnered with a `${` closes a
-  template expression; partnered with a `{`, a block. Closer-role inheritance
-  (the `}` taking `template-expression` / `block` from its opener) is a later
-  increment; closers carry `'other'` until then.
+  template expression; partnered with a `{`, a block. A closer then inherits its
+  opener's final role via that link: a block `}` is `block`, a switch/object `}`
+  is `'other'`, a closing backtick is `template-delimiter`. (Opener roles the
+  AST pass does not yet assign — paren `call-arguments` / `control-head` /
+  `grouping` — still seed `'other'`, so their closers inherit `'other'` for
+  now.)
 - **Reserved-word operators and literals**: `typeof` / `in` / `instanceof` /
   `void` / `delete` classify as `operator` and `null` / `true` / `false` as
   `literal`, by what they do — not as `keyword`, even though Acorn flags them

@@ -38,39 +38,44 @@ helpers (newspaper anatomy: export first, helpers below).
    **Totality of both category and role holds from the end of this phase; every
    later phase only refines.**
 
-3. **AST refinement** (pure, one AST traversal) — the AST is traversed exactly
-   once; a sorted token-position index, precomputed from the token array (array
-   prep, not a second traversal), bridges nodes to tokens. Categories are
-   already settled by the semantic classification table in phase 2 (reserved
-   words categorized by what they do); the AST only:
-   - **Generator `*` re-bin**: function/method/property generator stars move
-     `operator` → `delimiter` with role `generator` — the single sanctioned
-     home-category change.
-   - **Role refinement** (opener/contextual tokens only; closer roles are phase
-     4's job): from the owning node's kind and the token's position in it — `=`
-     in a `VariableDeclarator` → `declarator-init` vs in an
-     `AssignmentExpression` → `assignment`; operator roles from the owning
-     expression node; opener parens and braces per the claim list (see
-     Structural constraints § Grouping by elimination); literal-role seeds stand
-     unless a node refines them.
-   - (Deferred) **contextual-keyword re-categorization**: `of`/`as`/… used as a
-     plain variable name should become `identifier`; needs the AST to tell it
-     from for-of `of`. Flagged, not yet implemented.
+3. **Pair** (pure) — a stack walk over the paired-delimiter tokens (`(`/`)`,
+   `[`/`]`, `{`/`}`, backticks, `${`/`}`) assigns each pair mutual `partner`
+   indices. Backtick open/close share one token type — the stack disambiguates:
+   a backtick closes iff the stack top is a backtick, otherwise it opens (sound
+   because templates nest only through `${…}`). This is also what tells a `}`
+   closing a block from one closing a `${` — Acorn gives them one `braceR` token
+   type. Pairing is independent of roles and runs before AST refinement so the
+   `partner` links are available for closer inheritance.
 
-4. **Pairing** (pure) — a stack walk over the paired-delimiter tokens (`(`/`)`,
-   `[`/`]`, `{`/`}`, backticks, `${`/`}`): assign each pair mutual `partner`
-   indices; **closers inherit their opener's role** (phase 3 deliberately leaves
-   closers seeded `'other'`). Backtick open/close share one token type — the
-   stack disambiguates: a backtick closes iff the stack top is a backtick,
-   otherwise it opens (sound because templates nest only through `${…}`). This
-   same pass is what disambiguates `}` closers (block vs `${` partner) — Acorn
-   gives them all one `braceR` token type.
+4. **AST role refinement** (pure, one AST traversal) — categories are already
+   settled by the semantic classification table in phase 2 (reserved words
+   categorized by what they do); the AST refines only roles, then closers
+   inherit. Each token's final role is the role of its OPENER (resolved via the
+   `partner` link) when it is a closer, else its own refined role — so a block
+   `}` becomes `block`, a backtick close inherits `template-delimiter`, and a
+   `)` inherits its `(`'s role. Block detection uses a `Set` of `BlockStatement`
+   start offsets for O(1) `has(token.start)` lookup; a finer node→token position
+   index is added when the deferred opener roles below need it.
+   - **Block brace role** (implemented): an open `{` at a `BlockStatement` start
+     → `block`. Object-literal, switch, and other braces keep their `'other'`
+     seed.
+   - **Generator `*` re-bin** (deferred): function/method/property generator
+     stars move `operator` → `delimiter` with role `generator` — the single
+     sanctioned home-category change.
+   - **Opener role refinement** (deferred): paren roles (call-arguments /
+     control-head / grouping per the claim list — see Structural constraints §
+     Grouping by elimination) and operator roles (`=` in a `VariableDeclarator`
+     → `declarator-init` vs in an `AssignmentExpression` → `assignment`;
+     operator roles from the owning expression node).
+   - **Contextual-keyword re-categorization** (deferred): `of`/`as`/… used as a
+     plain variable name should become `identifier`; needs the AST to tell it
+     from for-of `of`.
 
 5. **Assemble + freeze** (pure, shape finalization ONLY) — emit the
    source-ordered `readonly ClassifiedToken[]`, deep-frozen via
    `deepFreezeInPlace` (`@utils/deep-freeze-in-place.js` — objects this module
    just built). This phase never adds, drops, or reorders elements — `partner`
-   indices assigned in phase 4 must stay valid.
+   indices assigned in phase 3 must stay valid.
 
 ### Data flow
 
@@ -78,16 +83,16 @@ helpers (newspaper anatomy: export first, helpers below).
 flowchart TD
     In["ClassifyInput<br/>{ code, tokens, ast }"]
     Shaped["shape-confirmed input"]
-    Seeded["totally categorized tokens<br/>(semantic category + role seed;<br/>no partners)"]
-    Refined["role-refined tokens<br/>(+ generator re-bin,<br/>opener roles resolved)"]
-    Partnered["partnered tokens<br/>(closers carry opener roles)"]
+    Seeded["totally categorized tokens<br/>(semantic category + role seed)"]
+    Paired["+ partner indices<br/>(mutual delimiter links)"]
+    Refined["role-refined tokens<br/>(opener roles + closer inheritance)"]
     Out["frozen ClassifiedToken[]<br/>(source-ordered, total)"]
 
     In -->|"validate — throws TypeError<br/>on null/missing"| Shaped
     Shaped -->|"classify by token type<br/>(pure; element list fixed here)"| Seeded
-    Seeded -->|"one AST traversal:<br/>generator re-bin ·<br/>opener role refinement (pure)"| Refined
-    Refined -->|"stack pairing (pure)"| Partnered
-    Partnered -->|"assemble + freeze<br/>(shape finalization only)"| Out
+    Seeded -->|"stack pairing (pure)"| Paired
+    Paired -->|"one AST traversal: block role +<br/>generator re-bin + opener roles,<br/>then closers resolve to opener role (pure)"| Refined
+    Refined -->|"assemble + freeze<br/>(shape finalization only)"| Out
 ```
 
 ### Structural constraints
@@ -115,8 +120,10 @@ flowchart TD
 - **Pure on frozen inputs.** No mutation of `tokens`, `ast`, or any node — the
   legacy walk's synthetic `node.operator = '='` writes are explicitly banned;
   the module must run unchanged on deep-frozen embodiment data.
-- **One AST traversal.** Phase 3 consults the precomputed token index; it never
-  re-walks the tree. JEJ's page-size invariant bounds the cost; no caching.
+- **One AST traversal.** The role-refinement phase walks the AST exactly once
+  (collecting `BlockStatement` start offsets today; finer node→token bridging
+  later); it never re-walks. JEJ's page-size invariant bounds the cost; no
+  caching.
 - **Semantic precedence.** Operator and literal token-type checks precede the
   keyword check so the reserved-word operators/literals land in their semantic
   category; the keyword check precedes the identifier check so contextual
@@ -151,9 +158,10 @@ flowchart TD
   tokens (namespace-import `*`, `yield*` delegation) a provable home. Known,
   documented behavior delta vs. legacy: those previously-skipped stars are now
   classified (README § Totality).
-- **Role seeds live in phase 2** (per AR-2 counter-proposal A). Half the role
-  union is token-derivable; seeding it with the home category makes phase 3
-  strictly AST refinement and extends the totality invariant to roles.
+- **Role seeds live in the classification pass** (per AR-2 counter-proposal A).
+  Half the role union is token-derivable; seeding it with the home category
+  keeps the AST refinement pass to genuinely AST-only work and extends the
+  totality invariant to roles.
 - **Semantic categories** (human ruling, post-increment-1; supersedes the
   earlier "category set with keyword-primary" framing). A category is what the
   element does in the NM, not Acorn's lexer flag: the reserved-word operators

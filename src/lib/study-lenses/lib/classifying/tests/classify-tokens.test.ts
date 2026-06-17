@@ -299,6 +299,72 @@ describe('classifyTokens', () => {
 		});
 	});
 
+	describe('Delimiter roles', () => {
+		it('roles a block-statement open brace as block', () => {
+			const result = classifyTokens(parse('{ x; }'));
+			expect(result[0]?.role).toBe('block');
+		});
+
+		it('roles a block-statement close brace as block via inheritance', () => {
+			const result = classifyTokens(parse('{ x; }'));
+			expect(result[3]?.role).toBe('block');
+		});
+
+		it('roles a function-body open brace as block', () => {
+			const result = classifyTokens(parse('function f() {}'));
+			expect(result[4]?.role).toBe('block');
+		});
+
+		it('roles an arrow-body open brace as block', () => {
+			const result = classifyTokens(parse('() => { return 1 }'));
+			expect(result[3]?.role).toBe('block');
+		});
+
+		it('roles a try-body open brace as block', () => {
+			const result = classifyTokens(parse('try { x } catch(e) { y }'));
+			expect(result[1]?.role).toBe('block');
+		});
+
+		it('roles a switch-body open brace as other, not block', () => {
+			const result = classifyTokens(parse('switch (x) {}'));
+			expect(result[4]?.role).toBe('other');
+		});
+
+		it('roles a switch-body close brace as other via inheritance', () => {
+			const result = classifyTokens(parse('switch (x) {}'));
+			expect(result[5]?.role).toBe('other');
+		});
+
+		it('roles an object-literal open brace as other', () => {
+			const result = classifyTokens(parse('({a:1})'));
+			expect(result[1]?.role).toBe('other');
+		});
+
+		it('inherits a non-block opener role onto its closer', () => {
+			const result = classifyTokens(parse('`x`'));
+			expect(result[2]?.role).toBe('template-delimiter');
+		});
+
+		it('inherits any opener role onto its closer, not only block', () => {
+			const result = classifyTokens(parse('(x)'));
+			expect(result[2]?.role).toBe('other');
+		});
+
+		it('makes every paired delimiter share its partner role', () => {
+			const result = classifyTokens(parse('{ x } ({a:1})'));
+			for (const token of result) {
+				if (token.partner !== null) {
+					expect(result[token.partner]?.role).toBe(token.role);
+				}
+			}
+		});
+
+		it('leaves a non-delimiter role unchanged', () => {
+			const result = classifyTokens(parse('{ x; }'));
+			expect(result[2]?.role).toBe('statement-end');
+		});
+	});
+
 	describe('Frozen', () => {
 		it('returns a frozen array', () => {
 			expect(Object.isFrozen(classifyTokens(parse('x')))).toBe(true);
