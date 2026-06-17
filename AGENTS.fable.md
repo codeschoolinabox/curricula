@@ -19,6 +19,7 @@ everything else.
 - [Verification](#verification)
 - [Emergency Brake and Redirects](#emergency-brake-and-redirects)
 - [Context Discipline](#context-discipline)
+- [Orchestrated delegation](#orchestrated-delegation)
 - [Adversarial Review Protocol](#adversarial-review-protocol) (→ DEV.md for the
   full protocol)
 - [Sub-Model Dispatch for Subagents](#sub-model-dispatch-for-subagents)
@@ -51,7 +52,12 @@ encouragement. They cannot be overridden by momentum.
    (SHA + message) so the human can audit and revert; new commits only, so every
    checkpoint is droppable. Pushing remains human-gated
    ([§ Git Policy](#git-policy)). The Phase-0 → Phase-1 human review gate is
-   unchanged. Message format in [§ Git Policy](#git-policy).
+   unchanged. Under orchestrated fan-out
+   ([§ Orchestrated delegation](#orchestrated-delegation)) each worker's commits
+   are still announced individually for audit (full SHA + message); the
+   orchestrator only orders the ledger per-subtree — presentation, not
+   aggregation — and the safe revert unit is the subtree. Message format in
+   [§ Git Policy](#git-policy).
 6. **Plans are execution checklists, not references** — every plan document
    explicitly lists every required workflow step: Phase 0 DDD steps, AR trigger
    points (AR-1 through AR-5), sandbox checkpoints, commit steps, and quality
@@ -234,6 +240,11 @@ sketch → self-review ([§ Self-Review Checklists](#self-review-checklists)) �
 **Phase 2**: full quality checks (`npm run validate` — see
 [§ Linting](#linting)) → **AR-5** → commit (autonomous, announced) → push
 prompt.
+
+**Default execution after Phase 0:** a session fans out across the type-defined
+dependency DAG by default
+([§ Orchestrated delegation](#orchestrated-delegation)); the human may override
+to synchronous.
 
 **The Refactor step is structural, not cosmetic.** Green tests prove behavioral
 correctness; the Refactor step holds the implementation against the DOCS.md
@@ -465,6 +476,49 @@ summary. The discipline that makes this possible:
 After a mid-task summarization: read the plan file's RESUMPTION POINT, re-read
 the relevant module docs, and verify understanding with the user before
 resuming.
+
+---
+
+## Orchestrated delegation
+
+Development defaults to **delegation fan-out** (distinct from the broad _read_
+fan-out that goes to Explore subagents): the
+[§ Context Discipline](#context-discipline) cold-start handoff rotated
+**temporal → spatial**. Instead of one agent handing off to a future agent across
+time, an **orchestrator** session hands off to fresh **worker** subagents across
+the dependency graph — automatic because the graph is **type-defined**. After
+Phase 0, absent explicit human prompting, a session fans out; dispatch is
+mechanical (read from the type-defined DAG the human locked at the
+Phase-0 → Phase-1 gate, not the agent's judgment about what is independent). The
+human may override to synchronous.
+
+- **The guard.** A type edge ⇒ serialize. The _absence_ of one does NOT license
+  parallel — serialize is the default, parallel the earned exception.
+  Affirmatively clear every non-type coupling first (environment colocation,
+  frozen-singleton /
+  registration order, semantic protocol — not an exhaustive list); when in doubt,
+  serialize. A hidden dependency the types can't see is a `types.ts` modeling gap
+  to enrich, not paper over.
+- **A worker** is a fresh subagent owning one complete triangulated unit (a
+  function + its ZOMBIES cluster), running the full cycle (ZOMBIES → `ar-3` →
+  implement → refactor → `ar-4`) and committing green — full ceremony, never
+  split mid-triangulation. Parallelize only committed-and-covered subtrees that
+  pass the guard, bottom-up
+  ([§ Dependency-order coverage](./DEV.md#dependency-order-coverage)). Each worker
+  is a mini cold-start; validate the **decomposition** before each fan-out wave.
+- **The orchestrator** holds the spine — `types.ts`, the DOCS `## Data flow`
+  diagram, the plan/gate ledger — and reads committed contracts at DAG joins to
+  catch seam-slop (Always Works™ at the seam can't be delegated). Lean ≠ blind: it
+  writes no per-worker churn and serializes its own spine edits.
+
+**Workers report DONE | BLOCKED | FLAG — no fourth channel.** DONE = verified and
+committed (no "green but unverified" — that is BLOCKED, or out of scope and
+already on the DAG; coverage a node test can't reach → move the test). BLOCKED =
+can't finish; the orchestrator pivots. FLAG = an inter-file contract boundary (the
+[two-tier rule](#two-tier-autonomy), delegated; `types.ts`/DOCS changes still need
+human approval) **or** a suspected cross-subtree coupling the orchestrator then
+checks at the seam. Gates are unchanged; the win is a permanently lean, coherent
+orchestrator — not throughput.
 
 ---
 

@@ -315,6 +315,22 @@ agent claims things are done; you verify they actually are.
   you'd see? If the agent said "tabs / single quotes / semicolons / 80-col wrap"
   and you see four-space indents, the test was wrong.
 
+**After an orchestrated fan-out:**
+
+- The orchestrator surfaces a **per-subtree ledger** — each worker's commits
+  (SHA + message), ordered by subtree, not interleaved by wall-clock. Read it
+  subtree by subtree. If commits from different subtrees are interleaved, or a
+  worker reported only "cluster done" without per-commit SHAs, the audit channel
+  collapsed — push back.
+- **The safe revert unit is the subtree, not the individual commit.** Cross-worker
+  commits within a subtree can depend on one another; backing one out
+  mid-history is human-only surgery (the agent is barred from it). To drop a
+  subtree, revert its commit range yourself.
+- Spot-check a **seam**: pick a DAG join where one subtree's output feeds another
+  and read the committed contract on both sides. Two individually-green functions
+  can integrate wrong — that's what the orchestrator's seam reads guard, and what
+  you're double-checking.
+
 ---
 
 ## Field protocols
@@ -383,6 +399,16 @@ Some things are yours to do. Don't outsource these:
 - **Final architectural decisions on multi-module changes.** The agent gives you
   tradeoffs; you pick. Don't ask "which is better?" — ask "what are the
   implications of A vs B?" then decide.
+- **Approving the `types.ts` contract at the Phase-0 gate — it _is_ the DAG.**
+  Under default [orchestrated delegation](./AGENTS.md#orchestrated-delegation) the
+  agent fans workers out across the _type-defined_ dependency graph
+  automatically, so `types.ts` approval at the Phase-0 → Phase-1 gate is where
+  your architectural control is **front-loaded**: it defines what gets
+  parallelized. That makes it your _primary_ control surface, **not your only
+  one** — the multi-module decision right above persists _during_ execution (a
+  worker FLAGs any inter-file / `types.ts` / `DOCS.md` change up to you; the
+  emergency brake still fires). Approve the DAG deliberately; don't wave
+  `types.ts` through as "just types."
 - **The merge of `*.DRAFT.md` files for governance docs.** The drafts-only
   pattern exists because multi-file governance refactors are where the agent has
   historically broken things. Verify the diff yourself before merging (or asking

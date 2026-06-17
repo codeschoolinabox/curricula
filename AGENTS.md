@@ -18,6 +18,7 @@ repository (spiralearn / `@codeschoolinabox/spiralearn`).
   - [Context Compaction Protocol](#context-compaction-protocol)
   - [Safety Guardrails](#safety-guardrails)
   - [When Working on This Codebase](#when-working-on-this-codebase)
+- [Orchestrated delegation](#orchestrated-delegation)
 - [LLM Collaboration Conventions](#llm-collaboration-conventions)
 - [Adversarial Review Protocol](#adversarial-review-protocol) (→ DEV.md for full
   protocol)
@@ -49,7 +50,11 @@ encouragement. They cannot be overridden by momentum.
    format lives in § Git checkpoints. No per-commit approval prompt — announce
    each commit as it lands (SHA + message) so the human can audit and revert;
    new commits only, so every checkpoint is droppable. Pushing remains
-   human-gated; the Phase-0 → Phase-1 human review gate is unchanged.
+   human-gated; the Phase-0 → Phase-1 human review gate is unchanged. Under
+   orchestrated fan-out (§ Orchestrated delegation) each worker's commits are
+   still announced individually for audit (full SHA + message); the orchestrator
+   only orders the ledger per-subtree — presentation, not aggregation — and the
+   safe revert unit is the subtree.
 6. **Plans are execution checklists, not references** — every plan document must
    explicitly list every required workflow step: Phase 0 DDD steps, AR trigger
    points (AR-1 through AR-5), commit steps, and quality checks. "Follow
@@ -230,6 +235,10 @@ Development Workflow for the full process.
   announced) → push prompt
 
 Each passing TDD cycle = one atomic commit. Do not batch behaviors.
+
+**Default execution after Phase 0:** a session fans out across the type-defined
+dependency DAG by default (§ Orchestrated delegation); the human may override to
+synchronous.
 
 > **On DDD**: The ubiquitous language established in Phase 0 is not optional
 > ceremony. Names chosen here propagate into every function signature, test
@@ -633,6 +642,93 @@ The full convention checklist lives in
 [DEV.md § Conventions Checklist](./DEV.md#3-conventions-checklist). Honor it for
 every change. The non-negotiable invariants at the top of this file ride above
 the checklist.
+
+## Orchestrated delegation
+
+Development defaults to **delegation fan-out** — not a single linear stream (and
+distinct from the broad _read_ fan-out of Explore subagents). It is the
+[§ Cold-start handoffs](#cold-start-handoffs-prefer-over-riding-compaction)
+discipline rotated **temporal → spatial**: instead of one agent handing off to a
+future agent across time, an **orchestrator** session hands off to fresh
+**worker** subagents across the dependency graph. The temporal cold-start is
+human-timed; this spatial rotation is automatic, because the graph is
+**type-defined**.
+
+**Default, not opt-in.** After Phase 0, absent explicit human prompting, a
+session fans out. This is trustworthy by default because dispatch is
+_mechanical_ — read from the type-defined DAG the human locked at the
+Phase-0 → Phase-1 gate, not from the agent's judgment about what is independent.
+The human may override to synchronous at any time.
+
+- **The guard.** A type edge ⇒ **serialize** (mechanical and certain). The
+  _absence_ of a type edge does **not** license parallelism — serialization is
+  the default, parallelism the earned exception. Before parallelizing two
+  subtrees, the orchestrator must affirmatively clear every non-type coupling:
+  among them **environment colocation** (node vs. browser / `Worker` +
+  `SharedArrayBuffer`), **shared frozen-singleton / registration order**, and
+  **semantic-protocol** contracts — examples, not an exhaustive checklist. **When
+  in doubt, serialize**: a missed parallelization costs latency, a wrong one
+  costs coherence.
+- **Enrichment over reliance.** A real ordering dependency the types cannot see
+  is a `types.ts` _modeling gap_. Recurring hidden dependencies are a signal to
+  enrich the contract until the type graph **is** the full DAG — not to lean
+  harder on the guard.
+
+**A worker is a fresh subagent.** It owns one **complete triangulated unit** — a
+function (or tight pair) plus its full ZOMBIES increment cluster — and runs the
+full per-increment cycle itself (ZOMBIES → `ar-3` → implement → lint → refactor
+against the DOCS sketch → `ar-4`), committing green. Full ceremony, not a
+lightweight mode. Never split a worker mid-triangulation: the clean commit
+boundary is the clean delegation boundary (the same rule as cold-start's "never
+hand off between a red test and its green"). Order the DAG bottom-up — leaf →
+engine → API, per
+[§ Dependency-order coverage](./DEV.md#dependency-order-coverage) — and
+parallelize only across subtrees already committed-and-covered that pass the
+guard.
+
+**A worker is also a mini cold-start**, so its launch prompt is a cold-start
+launch prompt (AGENTS/DEV + the module README/DOCS/types + its cluster
+contract). The orchestrator's decomposition and launch prompts are themselves a
+handoff their author is blind to — so the mandatory context-free validation pass
+checks the **decomposition before each fan-out wave** (the right grain; not a
+per-worker regress).
+
+**The orchestrator holds the coherence spine** and nothing else: `types.ts`, the
+DOCS `## Data flow` diagram, the plan/DAG/gate ledger, and the **seam reads** at
+DAG joins — **never** per-worker implementation churn. **Lean ≠ blind:** it reads
+the committed contracts where subtrees join to catch seam-slop (two
+individually-correct functions integrating wrong);
+[Always Works™](#always-works-reality-check) at the seam cannot be delegated. It
+**serializes its own spine edits** — only one `types.ts` reconciliation in flight
+at a time (invariant 4, re-applied to the orchestrator's own work).
+
+**Workers report DONE | BLOCKED | FLAG — no fourth channel:**
+
+- **DONE** — verified and committed; Always Works™ satisfied. No confidence
+  caveats: "green but couldn't verify X" is _not_ DONE — it is BLOCKED, or X is
+  out of scope and already on the DAG. (Coverage a node test structurally can't
+  reach → _move the test_, not ship a caveat.)
+- **BLOCKED** — can't finish this increment; report up, the orchestrator pivots.
+- **FLAG** — either (a) an inter-file contract boundary it can't cross alone (the
+  [two-tier "inter-file → check in" rule](#claude-specific-workflow-notes) —
+  triggers at [DEV.md step 9](./DEV.md#phase-1-tdd-implementation) — delegated:
+  the orchestrator is first responder and may resolve within the spine
+  it owns, but `types.ts`/DOCS changes still need human approval), or (b) a
+  _suspected_ cross-subtree coupling it can't confirm from inside its context,
+  which the orchestrator then checks at the seam. FLAG-(b) is how the guard's
+  blind spot reports from below.
+
+Knowledge routes to durable homes, never to a status channel: design rationale →
+WHY-comments, contract limits → JSDoc, cross-file carry-forward → the
+orchestrator's plan as a FLAG, status/confidence → nowhere
+([§ What goes in docs vs. plans vs. handoffs](./DEV.md#what-goes-in-docs-vs-plans-vs-handoffs)).
+
+**All gates are unchanged** — 🔍 sandbox checkpoints, commit prompts, AR PAUSE
+resolutions, and the Phase-0 → Phase-1 human gate stay with the orchestrator and
+the human; fan-out removes no gate. The point is not throughput — it is a
+**permanently lean and coherent orchestrator**, holding only the spine and never
+the churn, so the work stays trackable and drift-resistant across a long body of
+development.
 
 ## LLM Collaboration Conventions
 
