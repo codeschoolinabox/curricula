@@ -388,6 +388,11 @@ the loop:
 | **🎨 Vibetoading** (user-grounded) | Real Vibetoading, humans-only: user-research-led prototyping, design-thinking-driven iteration with real people; the NM is delegated to a collaborator or familiar tools. (Note: pattern-matching without a user-twin is **not** Vibetoading; it's the no-twin corner of the 2×2 in ontology §4.) | Karpathy's _vibe coding_ — LLM writes notation, you focus on user-visible outcomes; works only when paired with deep user-twin and willingness to read what the LLM produced enough to verify it. |
 | **🔬 Frogramming** (NM-grounded)   | Traditional engineering — humans write notation grounded in NM-awareness, applying craft practices intentionally.                                                                                                                                                                                 | Willison's _vibe engineering_ / _agentic engineering_ — LLM writes the notation; you direct and verify against the NM.                                                                            |
 
+The per-task, continuous form of this grid's Humans-only ↔ LLM-collab axis is
+the **human–AI slider** — Productive Struggle (🧑 Human) ↔ Cognitive Delegation
+(🤖 AI), five bands, applied one task at a time. Canonical at `ontology.md` §11;
+you'll use it diagnostically in Chapter 4.
+
 #### Related vocabulary
 
 This course's house terms are **Vibetoading** and **Frogramming**. The wider
@@ -1467,7 +1472,7 @@ process that twins what _you_ twin (the user, or the NM). Your job is to align �
 and to relish productive divergence.
 
 **Chapter 4's shape draws on a 4-level AI-adoption model** originally developed
-by Evan Cole with collaborators Janet Tilstra and Josenne Peña (the curriculum
+by Evan Cole with collaborators Janet Tilstra and Joslenne Peña (the curriculum
 author's prior work). That model has since been refined into the framework now
 canonical in `ontology.md`: the **§9 lenses** (a general-systems view of
 analytical levels at which any system can be read, with AI as one instance),
@@ -1515,12 +1520,29 @@ you twin during the conversation**. This is why every section below revisits a
 Ch1–Ch3 audience: agent communication is what you've already been doing, just
 refracted through the alien.
 
-<strong>The visual NM view (`embody/` + study lenses) becomes load-bearing here.</strong>
-When you delegate the control panel, you can no longer rely on the act of typing
-to keep your NM understanding sharp. Visual debuggers let you observe, predict,
-and debug the machine _directly_ — the NM view that exists regardless of who (or
-what) wrote the code text. Frogramming with delegation is only sustainable if
-you keep the direct NM view alive.
+Within either mode, _how much_ of each task you hand the virtuoso is a per-task
+choice — the **human–AI slider** (`ontology.md` §11): Productive Struggle ↔
+Cognitive Delegation. _Diagnostically_, after each task you read where you
+actually sat and ask whether it matched your goal. _Prescriptively_, the same
+instrument is a static **recipe** of the per-task positions that lead to the
+best _learning_ — here, for debugging an LLM-generated countdown:
+
+| #   | Task                             | Recommended    | Why (learning rationale)                               |
+| --- | -------------------------------- | -------------- | ------------------------------------------------------ |
+| 1   | Predict what the code does       | 🧑 Fully human | the prediction is the rep that keeps the NM-twin sharp |
+| 2   | Generate a candidate fix         | 🤖 Mostly AI   | notation is where the LLM is strong                    |
+| 3   | Trace the fix to verify it       | 🧑 Fully human | the verification is the learning; LLMs mis-trace       |
+| 4   | Write an assertion that locks it | Balanced       | you decide what to assert; the LLM drafts the syntax   |
+
+The recipe encodes the mastery contract: the reps that build the twin (predict,
+trace) stay left while you're still learning the skill.
+
+<strong>The visual NM view (`embody/` + study lenses) becomes load-bearing
+here.</strong> When you delegate the control panel, you can no longer rely on
+the act of typing to keep your NM understanding sharp. Visual debuggers let you
+observe, predict, and debug the machine _directly_ — the NM view that exists
+regardless of who (or what) wrote the code text. Frogramming with delegation is
+only sustainable if you keep the direct NM view alive.
 
 ### 4.1 What is an LLM?
 
@@ -1567,7 +1589,8 @@ collaboration.
 
 ### 4.3 Agents and Developer Communication
 
-<em>Revisits Chapter 1: comments, variable names — with an LLM collaborator.</em>
+<em>Revisits Chapter 1: comments, variable names — with an LLM
+collaborator.</em>
 
 The developer audience is where LLMs are most reliably useful: comments and
 variable names are pattern-rich, conventionally bounded, and don't require
@@ -1714,7 +1737,14 @@ look similar from outside.
   twin-grounded alternative to twin-ignored or twin-wrong LLM use)
 - 🐣 🎨 Wear the Vibetoader hat intentionally — choose it for the scope where
   it's right
-- 🐥 Apply §10 Role 2 (dev collaborator) to Ch4 work: twin the AI as
+- 🐣 Use the human–AI slider **diagnostically**: after a task, place where AI
+  use actually sat and judge it against your goal (mastery, speed, exploration)
+- 🐥 Use the human–AI slider **prescriptively**: given a goal and the mastery
+  contract, scope where AI use _should_ sit before starting — left while you're
+  still building the skill, freer once it's mastered
+- 🐣 Distinguish the slider's question (_how much_ you delegate the task) from
+  V/F's question (_which twin_ you shoulder) — they are orthogonal
+- 🐥 Apply §11 Role 2 (dev collaborator) to Ch4 work: twin the AI as
   collaborator through F's lens (NM-grounded mode) or V's lens (user-grounded
   mode)
 - 🐔 **Code is content, not deliverable** — AI-generated code is material to
@@ -1734,6 +1764,9 @@ look similar from outside.
 - 🐥 Locate LLM-collaborative work on the twin/process 2×2 (see ontology §4):
   what determines whether a given collaboration session lands in the both-twins
   corner or slides toward pure process
+- 🐣 _(easter egg)_ "One axis, honestly": the human–AI slider reads how much AI
+  did the task, not whether you were learning or applying. Sit with what a
+  single position does and doesn't capture
 - 🐔 Recognize the emergence of **agentic AI systems** (LLMs doing design work,
   not just notation) as a more complex development than the authoring-partner
   frame covers; flag as territory for post-curriculum learning
@@ -2037,5 +2070,4 @@ guide what each region of each chapter delivers.
 - `narrative/README.md` — the composer/virtuoso metaphor system
 - `assets/spiral-curriculum.png` and `assets/curriculum-spider-web.svg` — the
   topology + trajectory views
-- `study-lenses/` — the JEJ → NM → embody → lenses → orchestrator
-  infrastructure
+- `study-lenses/` — the JEJ → NM → embody → lenses → orchestrator infrastructure
