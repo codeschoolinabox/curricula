@@ -279,6 +279,16 @@ describe('classifyTokens', () => {
 			expect(result[0]?.partner).toBe(6);
 		});
 
+		it('pairs the backticks across a delimiter-looking template chunk', () => {
+			const result = classifyTokens(parse('`(`'));
+			expect(result[0]?.partner).toBe(2);
+		});
+
+		it('leaves a delimiter-looking template chunk unpaired', () => {
+			const result = classifyTokens(parse('`(`'));
+			expect(result[1]?.partner).toBeNull();
+		});
+
 		it('pairs the inner backticks of a nested template', () => {
 			const result = classifyTokens(parse('`${`b`}`'));
 			expect(result[2]?.partner).toBe(4);

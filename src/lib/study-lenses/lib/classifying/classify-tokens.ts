@@ -37,20 +37,15 @@ export default function classifyTokens({
 	const kept = tokens.filter(
 		(token) => token.type !== tt.eof && token.end > token.start,
 	);
-	const partners = pairDelimiters(kept);
-	const seeded = kept.map((token, index) =>
-		classifyToken(token, code, partners[index]),
-	);
-	const refined = refineDelimiterRoles(seeded, ast);
+	const seeded = kept.map((token) => classifyToken(token, code));
+	const refined = refineOpenerRoles(seeded, ast);
+	const partners = computePartners(kept);
+	const paired = inheritFromPartners(refined, partners);
 
-	return deepFreezeInPlace(refined);
+	return deepFreezeInPlace(paired);
 }
 
-function classifyToken(
-	token: acorn.Token,
-	code: string,
-	partner: number | null,
-): ClassifiedToken {
+function classifyToken(token: acorn.Token, code: string): ClassifiedToken {
 	const { start, end } = token;
 	const text = code.slice(start, end);
 	const category = homeCategory(token, text);
@@ -60,66 +55,24 @@ function classifyToken(
 		end,
 		categories: [category],
 		role: roleSeed(token, category),
-		partner,
+		partner: null,
 	};
 }
 
-// Match paired delimiters with a stack walk over the kept tokens, returning
-// each token's partner index (into the same kept array) or null. Backtick is
-// one token type for open AND close — it closes iff the stack top is a pending
-// backtick, else opens. `}` closes whichever of `{` / `${` is on top. The
-// local stack and result array never escape this function, so the in-place
-// mutation is safe.
-/* eslint-disable functional/immutable-data -- local stack + result array, never escape this pure function */
-function pairDelimiters(
-	tokens: ReadonlyArray<acorn.Token>,
-): ReadonlyArray<number | null> {
-	const partner: Array<number | null> = tokens.map(() => null);
-	const stack: Array<{ index: number; closer: acorn.TokenType }> = [];
-	for (const [index, token] of tokens.entries()) {
-		const { type } = token;
-		const closer = OPENER_CLOSERS.get(type);
-		if (closer !== undefined) {
-			stack.push({ index, closer });
-			continue;
-		}
-		const top = stack.at(-1);
-		if (type === tt.backQuote && top?.closer !== tt.backQuote) {
-			stack.push({ index, closer: tt.backQuote });
-			continue;
-		}
-		if (top?.closer === type) {
-			stack.pop();
-			partner[index] = top.index;
-			partner[top.index] = index;
-		}
-	}
-	return partner;
-}
-/* eslint-enable functional/immutable-data */
-
-// AST refinement: override the brace role of each `BlockStatement` opener to
-// `block`, then make every closer inherit its opener's FINAL role across the
-// `partner` link — so a block `}` becomes `block`, a backtick close inherits
-// `template-delimiter`, and a `)` inherits its `(`'s role. The block override
-// runs before inheritance so a block `}` inherits `block`, not the seed.
-function refineDelimiterRoles(
+// AST role refinement (openers only): a `BlockStatement` opener `{` becomes
+// `block`. Object-literal, switch, and other braces keep their seed. Paren and
+// operator opener roles land in later increments. Closer roles are phase 4's
+// job (see `inheritFromPartners`).
+function refineOpenerRoles(
 	tokens: ReadonlyArray<ClassifiedToken>,
 	ast: acorn.Node,
 ): ReadonlyArray<ClassifiedToken> {
 	const blockStarts = new Set(collectBlockStarts(ast));
-	function openerRole(index: number): Role | null {
-		const token = tokens[index];
+	return tokens.map(function refine(token) {
 		if (token.text === '{' && blockStarts.has(token.start)) {
-			return 'block';
+			return { ...token, role: 'block' };
 		}
-		return token.role;
-	}
-	return tokens.map(function refine(token, index) {
-		const { partner } = token;
-		const source = partner !== null && partner < index ? partner : index;
-		const role = openerRole(source);
-		return role === token.role ? token : { ...token, role };
+		return token;
 	});
 }
 
@@ -151,6 +104,60 @@ function isAstNode(value: unknown): value is acorn.Node {
 		typeof (value as { readonly type?: unknown }).type === 'string'
 	);
 }
+
+// Closer inheritance (the last pass, so opener roles are final): each closer
+// inherits its opener's role across the `partner` link — a block `}` becomes
+// `block`, a closing backtick inherits `template-delimiter`, a `)` inherits its
+// `(`'s role. `partners` aligns by index with `tokens` (both derived from the
+// kept list in source order).
+function inheritFromPartners(
+	tokens: ReadonlyArray<ClassifiedToken>,
+	partners: ReadonlyArray<number | null>,
+): ReadonlyArray<ClassifiedToken> {
+	return tokens.map(function link(token, index) {
+		const partner = partners[index];
+		const role =
+			partner !== null && partner < index ? tokens[partner].role : token.role;
+		return partner === token.partner && role === token.role
+			? token
+			: { ...token, partner, role };
+	});
+}
+
+// Match paired delimiters by a stack walk over the kept tokens (by Acorn token
+// type, so a template chunk whose text is `(` is never mistaken for a paren),
+// returning each token's partner index (into the same array) or null. Backtick
+// is one token type for open AND close — it closes iff the stack top is a
+// pending backtick, else opens. `}` closes whichever of `{` / `${` is on top.
+// The local stack and result array never escape this function, so the in-place
+// mutation is safe.
+/* eslint-disable functional/immutable-data -- local stack + result array, never escape this pure function */
+function computePartners(
+	tokens: ReadonlyArray<acorn.Token>,
+): ReadonlyArray<number | null> {
+	const partner: Array<number | null> = tokens.map(() => null);
+	const stack: Array<{ index: number; closer: acorn.TokenType }> = [];
+	for (const [index, token] of tokens.entries()) {
+		const { type } = token;
+		const closer = OPENER_CLOSERS.get(type);
+		if (closer !== undefined) {
+			stack.push({ index, closer });
+			continue;
+		}
+		const top = stack.at(-1);
+		if (type === tt.backQuote && top?.closer !== tt.backQuote) {
+			stack.push({ index, closer: tt.backQuote });
+			continue;
+		}
+		if (top?.closer === type) {
+			stack.pop();
+			partner[index] = top.index;
+			partner[top.index] = index;
+		}
+	}
+	return partner;
+}
+/* eslint-enable functional/immutable-data */
 
 // Categories are SEMANTIC, not lexical: a "keyword" indicates a statement /
 // declaration / control structure acting on the NM, and does not transform
@@ -204,8 +211,8 @@ function roleSeed(token: acorn.Token, category: Category): Role | null {
 const tt = acorn.tokTypes;
 
 // Paired-delimiter openers → the token type that closes them. Backtick is
-// absent (it is its own open/close toggle, handled in `pairDelimiters`); `${`
-// and `{` both close with `}` (`braceR`).
+// absent (its own open/close toggle, handled in `computePartners`); `${` and
+// `{` both close with `}` (`braceR`).
 const OPENER_CLOSERS = new Map<acorn.TokenType, acorn.TokenType>([
 	[tt.parenL, tt.parenR],
 	[tt.bracketL, tt.bracketR],

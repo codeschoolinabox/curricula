@@ -38,27 +38,16 @@ helpers (newspaper anatomy: export first, helpers below).
    **Totality of both category and role holds from the end of this phase; every
    later phase only refines.**
 
-3. **Pair** (pure) — a stack walk over the paired-delimiter tokens (`(`/`)`,
-   `[`/`]`, `{`/`}`, backticks, `${`/`}`) assigns each pair mutual `partner`
-   indices. Backtick open/close share one token type — the stack disambiguates:
-   a backtick closes iff the stack top is a backtick, otherwise it opens (sound
-   because templates nest only through `${…}`). This is also what tells a `}`
-   closing a block from one closing a `${` — Acorn gives them one `braceR` token
-   type. Pairing is independent of roles and runs before AST refinement so the
-   `partner` links are available for closer inheritance.
-
-4. **AST role refinement** (pure, one AST traversal) — categories are already
+3. **AST role refinement** (pure, one AST traversal) — categories are already
    settled by the semantic classification table in phase 2 (reserved words
-   categorized by what they do); the AST refines only roles, then closers
-   inherit. Each token's final role is the role of its OPENER (resolved via the
-   `partner` link) when it is a closer, else its own refined role — so a block
-   `}` becomes `block`, a backtick close inherits `template-delimiter`, and a
-   `)` inherits its `(`'s role. Block detection uses a `Set` of `BlockStatement`
-   start offsets for O(1) `has(token.start)` lookup; a finer node→token position
-   index is added when the deferred opener roles below need it.
+   categorized by what they do); this phase refines OPENER roles only. An open
+   `{` at a `BlockStatement` start → `block` (object-literal, switch, and other
+   braces keep their `'other'` seed); detection uses a `Set` of `BlockStatement`
+   start offsets for O(1) `has(token.start)` lookup, with a finer node→token
+   position index added when the deferred opener roles below need it. Closer
+   roles are phase 4's job.
    - **Block brace role** (implemented): an open `{` at a `BlockStatement` start
-     → `block`. Object-literal, switch, and other braces keep their `'other'`
-     seed.
+     → `block`.
    - **Generator `*` re-bin** (deferred): function/method/property generator
      stars move `operator` → `delimiter` with role `generator` — the single
      sanctioned home-category change.
@@ -71,11 +60,21 @@ helpers (newspaper anatomy: export first, helpers below).
      plain variable name should become `identifier`; needs the AST to tell it
      from for-of `of`.
 
+4. **Pair + closer inheritance** (pure) — a stack walk over the paired-delimiter
+   tokens (`(`/`)`, `[`/`]`, `{`/`}`, backticks, `${`/`}`) links each pair with
+   mutual `partner` indices; then every closer inherits its opener's now-final
+   role across that link — a block `}` becomes `block`, a closing backtick
+   inherits `template-delimiter`, a `)` inherits its `(`'s role. Backtick
+   open/close share one form — the stack disambiguates: a backtick closes iff
+   the stack top is a pending backtick, otherwise it opens (sound because
+   templates nest only through `${…}`). This is also what tells a `}` closing a
+   block from one closing a `${`. Runs last so opener roles are final.
+
 5. **Assemble + freeze** (pure, shape finalization ONLY) — emit the
    source-ordered `readonly ClassifiedToken[]`, deep-frozen via
    `deepFreezeInPlace` (`@utils/deep-freeze-in-place.js` — objects this module
    just built). This phase never adds, drops, or reorders elements — `partner`
-   indices assigned in phase 3 must stay valid.
+   indices assigned in phase 4 must stay valid.
 
 ### Data flow
 
@@ -83,16 +82,16 @@ helpers (newspaper anatomy: export first, helpers below).
 flowchart TD
     In["ClassifyInput<br/>{ code, tokens, ast }"]
     Shaped["shape-confirmed input"]
-    Seeded["totally categorized tokens<br/>(semantic category + role seed)"]
-    Paired["+ partner indices<br/>(mutual delimiter links)"]
-    Refined["role-refined tokens<br/>(opener roles + closer inheritance)"]
+    Seeded["totally categorized tokens<br/>(semantic category + role seed;<br/>partner null)"]
+    Refined["opener-role-refined tokens<br/>(block role; paren/operator later)"]
+    Paired["paired tokens<br/>(partner links + closers<br/>inherit opener role)"]
     Out["frozen ClassifiedToken[]<br/>(source-ordered, total)"]
 
     In -->|"validate — throws TypeError<br/>on null/missing"| Shaped
     Shaped -->|"classify by token type<br/>(pure; element list fixed here)"| Seeded
-    Seeded -->|"stack pairing (pure)"| Paired
-    Paired -->|"one AST traversal: block role +<br/>generator re-bin + opener roles,<br/>then closers resolve to opener role (pure)"| Refined
-    Refined -->|"assemble + freeze<br/>(shape finalization only)"| Out
+    Seeded -->|"one AST traversal:<br/>opener roles (block now) (pure)"| Refined
+    Refined -->|"stack pairing +<br/>closer inheritance (pure)"| Paired
+    Paired -->|"assemble + freeze<br/>(shape finalization only)"| Out
 ```
 
 ### Structural constraints
