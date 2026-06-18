@@ -13,6 +13,7 @@ import type {
 	FeatureSubset,
 	FeatureViolation,
 	SizeBounds,
+	SizeViolation,
 } from './types.js';
 
 /**
@@ -32,13 +33,16 @@ import type {
  * The result envelope and its violations are deep-frozen; the echoed `ast` is
  * left unfrozen because the curated repair loop reuses it.
  *
- * Size bounds (`lines` / `complexity`) are enforced in a later increment;
- * `_size` is accepted now to lock the contract signature.
+ * Size bounds narrow further: a program longer than `lines`, or deeper than
+ * `complexity` (maximum control-flow nesting depth), yields a `SizeViolation`.
+ * An absent bound is unbounded, and bounds are inclusive (only `actual > limit`
+ * violates). Feature violations come first in document order, then size
+ * violations (`lines`, then `complexity`).
  */
 export default function conform(
 	code: string,
 	subset: FeatureSubset,
-	_size: SizeBounds,
+	size: SizeBounds,
 ): ConformResult {
 	const parsed = parseProgram(code, 'module');
 	if ('message' in parsed) {
@@ -47,7 +51,10 @@ export default function conform(
 
 	const ast: Program = parsed;
 	const pathMap = buildNodePathMap(ast);
-	const violations = collectFeatureViolations(ast, subset, pathMap);
+	const violations = [
+		...collectFeatureViolations(ast, subset, pathMap),
+		...collectSizeViolations(code, ast, size),
+	];
 	deepFreezeInPlace(violations);
 
 	return Object.freeze({ ok: violations.length === 0, violations, ast });
@@ -221,4 +228,95 @@ function extractLocation(node: Node): SourceRange {
 		};
 	}
 	return { start: { line: 1, column: 0 }, end: { line: 1, column: 0 } };
+}
+
+// ─── Size bounds ──────────────────────────────────────────────────────
+
+/** One size violation per over-bound dimension: lines first, then complexity. */
+function collectSizeViolations(
+	code: string,
+	ast: Program,
+	size: SizeBounds,
+): SizeViolation[] {
+	const checks = [
+		sizeViolation('lines', size.lines, countLines(code)),
+		sizeViolation('complexity', size.complexity, maxNestingDepth(ast)),
+	];
+	return checks.filter(
+		(violation): violation is SizeViolation => violation !== null,
+	);
+}
+
+/** A violation only when a bound is set and `actual` strictly exceeds it. */
+function sizeViolation(
+	dimension: 'lines' | 'complexity',
+	limit: number | undefined,
+	actual: number,
+): SizeViolation | null {
+	if (limit === undefined || actual <= limit) return null;
+	return {
+		kind: 'size',
+		dimension,
+		limit,
+		actual,
+		message: `program ${dimension} ${actual} exceeds the limit of ${limit}`,
+	};
+}
+
+/** Physical line count — `Metrics.source.lines` semantics (a trailing newline counts). */
+function countLines(code: string): number {
+	return code.split('\n').length;
+}
+
+/**
+ * Maximum control-flow nesting depth: the most control-flow bodies enclosing
+ * any node. Each of the five block-bearing constructs (`if`, `while`,
+ * `do-while`, `for`, `for-of`) adds one level to its body. A ternary adds
+ * nothing (a decision point, not block nesting), and an `else if` is flat — a
+ * chained `IfStatement` in the `alternate` shares the chain's depth rather than
+ * nesting. (The level stubs `Metrics.maxNestingDepth` to 0, so conform owns this.)
+ */
+function maxNestingDepth(ast: Program): number {
+	return deepest(ast, 0);
+}
+
+const LOOP_TYPES: ReadonlySet<string> = new Set([
+	'WhileStatement',
+	'DoWhileStatement',
+	'ForStatement',
+	'ForOfStatement',
+]);
+
+function deepest(node: Node, depth: number): number {
+	const bodies = controlFlowBodies(node);
+	const childDepths = getChildNodes(node).map((child) =>
+		deepest(child, bodies.has(child) ? depth + 1 : depth),
+	);
+	return Math.max(depth, ...childDepths);
+}
+
+/**
+ * The child nodes that constitute a deeper nesting level: a loop's body, an
+ * if's consequent, and a real `else` block — but never a chained else-if.
+ */
+function controlFlowBodies(node: Node): ReadonlySet<Node> {
+	const shaped = node as unknown as {
+		readonly type: string;
+		readonly body?: Node;
+		readonly consequent?: Node;
+		readonly alternate?: Node | null;
+	};
+	if (LOOP_TYPES.has(shaped.type)) {
+		return new Set<Node>(shaped.body ? [shaped.body] : []);
+	}
+	if (shaped.type === 'IfStatement') {
+		const alternate = shaped.alternate ?? undefined;
+		const elseBody = alternate?.type === 'IfStatement' ? undefined : alternate;
+		return new Set<Node>(
+			[shaped.consequent, elseBody].filter(
+				(child): child is Node => child !== undefined,
+			),
+		);
+	}
+	return new Set<Node>();
 }

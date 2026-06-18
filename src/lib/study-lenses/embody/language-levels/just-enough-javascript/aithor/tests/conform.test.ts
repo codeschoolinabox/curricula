@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import conform from '../conform.js';
-import type { FeatureName } from '../types.js';
+import type { FeatureName, SizeViolation } from '../types.js';
 
 // Increment 1 — conform: feature-subset conformance.
 // Size bounds (`lines`/`complexity`) arrive in increment 2; every case here
@@ -260,6 +260,220 @@ describe('conform — feature subset', () => {
 				expect(violation.feature).toBe(feature);
 			},
 		);
+	});
+
+	describe('size — line bounds', () => {
+		it('flags a program longer than the lines bound', () => {
+			const result = conform(
+				'let a = 1;\nlet b = 2;\nlet c = 3;',
+				{ include: [], exclude: [] },
+				{ lines: 2 },
+			);
+
+			expect(result.ok).toBe(false);
+			expect(result.violations).toHaveLength(1);
+			const [violation] = result.violations;
+			if (violation.kind !== 'size')
+				throw new Error('expected a size violation');
+			expect(violation.dimension).toBe('lines');
+			expect(violation.limit).toBe(2);
+			expect(violation.actual).toBe(3);
+			expect(violation.message).toBeTruthy();
+		});
+
+		it('a program exactly at the lines bound passes (inclusive)', () => {
+			const result = conform(
+				'let a = 1;\nlet b = 2;',
+				{ include: [], exclude: [] },
+				{ lines: 2 },
+			);
+
+			expect(result.ok).toBe(true);
+			expect(result.violations).toEqual([]);
+		});
+
+		it('an absent lines bound is unbounded', () => {
+			const result = conform(
+				'let a = 1;\nlet b = 2;\nlet c = 3;\nlet d = 4;',
+				{ include: [], exclude: [] },
+				{},
+			);
+
+			expect(result.ok).toBe(true);
+		});
+
+		it('counts a trailing newline as a line (split semantics, matching the level)', () => {
+			// 'let a = 1;\nlet b = 2;\n'.split('\n') is ['let a = 1;', 'let b = 2;', '']
+			// — three lines, matching Metrics.source.lines.
+			const result = conform(
+				'let a = 1;\nlet b = 2;\n',
+				{ include: [], exclude: [] },
+				{ lines: 2 },
+			);
+
+			expect(result.ok).toBe(false);
+			expect(result.violations).toHaveLength(1);
+			const [violation] = result.violations;
+			if (violation.kind !== 'size')
+				throw new Error('expected a size violation');
+			expect(violation.dimension).toBe('lines');
+			expect(violation.actual).toBe(3);
+		});
+	});
+
+	describe('size — complexity (control-flow nesting depth)', () => {
+		it('flags a program deeper than the complexity bound', () => {
+			const result = conform(
+				'if (true) {\n\tif (false) {\n\t\t1;\n\t}\n}',
+				{ include: [], exclude: [] },
+				{ complexity: 1 },
+			);
+
+			expect(result.ok).toBe(false);
+			expect(result.violations).toHaveLength(1);
+			const [violation] = result.violations;
+			if (violation.kind !== 'size')
+				throw new Error('expected a size violation');
+			expect(violation.dimension).toBe('complexity');
+			expect(violation.limit).toBe(1);
+			expect(violation.actual).toBe(2);
+		});
+
+		it('flat code has depth 0', () => {
+			const result = conform(
+				'let a = 1;\nlet b = 2;',
+				{ include: [], exclude: [] },
+				{ complexity: 0 },
+			);
+
+			expect(result.ok).toBe(true);
+		});
+
+		it('a single control-flow construct has depth 1', () => {
+			const result = conform(
+				'if (true) {\n\t1;\n}',
+				{ include: [], exclude: [] },
+				{ complexity: 0 },
+			);
+
+			expect(result.ok).toBe(false);
+			const [violation] = result.violations;
+			if (violation.kind !== 'size')
+				throw new Error('expected a size violation');
+			expect(violation.actual).toBe(1);
+		});
+
+		it('an else-if ladder stays flat (depth 1, not one level per arm)', () => {
+			const result = conform(
+				'if (true) {\n} else if (false) {\n} else if (true) {\n} else {\n}',
+				{ include: [], exclude: [] },
+				{ complexity: 0 },
+			);
+
+			expect(result.ok).toBe(false);
+			const [violation] = result.violations;
+			if (violation.kind !== 'size')
+				throw new Error('expected a size violation');
+			expect(violation.actual).toBe(1);
+		});
+
+		it('nested ternaries do not add depth (depth 0)', () => {
+			const result = conform(
+				'let a = true ? (false ? 1 : 2) : 3;',
+				{ include: [], exclude: [] },
+				{ complexity: 0 },
+			);
+
+			expect(result.ok).toBe(true);
+		});
+
+		it('a program exactly at the complexity bound passes (inclusive)', () => {
+			const result = conform(
+				'if (true) {\n\t1;\n}',
+				{ include: [], exclude: [] },
+				{ complexity: 1 },
+			);
+
+			expect(result.ok).toBe(true);
+		});
+
+		it('counts nesting beyond two (no depth cap)', () => {
+			const result = conform(
+				'while (true) {\n\tif (false) {\n\t\twhile (true) {\n\t\t\t1;\n\t\t}\n\t}\n}',
+				{ include: [], exclude: [] },
+				{ complexity: 2 },
+			);
+
+			expect(result.ok).toBe(false);
+			const [violation] = result.violations;
+			if (violation.kind !== 'size')
+				throw new Error('expected a size violation');
+			expect(violation.actual).toBe(3);
+		});
+
+		it.each([
+			['do-while', 'do {\n\t1;\n} while (false);'],
+			['for', 'for (let i = 0; i < 1; ) {\n\t1;\n}'],
+			['for-of', 'for (const x of [1]) {\n\t1;\n}'],
+		])('a %s body adds a depth level', (_label, code) => {
+			const result = conform(
+				code,
+				{ include: [], exclude: [] },
+				{ complexity: 0 },
+			);
+
+			expect(result.ok).toBe(false);
+			expect(result.violations).toHaveLength(1);
+			const [violation] = result.violations;
+			if (violation.kind !== 'size')
+				throw new Error('expected a size violation');
+			expect(violation.dimension).toBe('complexity');
+			expect(violation.actual).toBe(1);
+		});
+
+		it('an if inside a real else block adds a level (unlike a flat else-if)', () => {
+			const result = conform(
+				'if (true) {\n} else {\n\tif (false) {\n\t\t1;\n\t}\n}',
+				{ include: [], exclude: [] },
+				{ complexity: 1 },
+			);
+
+			expect(result.ok).toBe(false);
+			const [violation] = result.violations;
+			if (violation.kind !== 'size')
+				throw new Error('expected a size violation');
+			expect(violation.actual).toBe(2);
+		});
+	});
+
+	describe('size — combined with feature violations', () => {
+		it('orders feature violations first, then size (lines, then complexity)', () => {
+			const result = conform(
+				'while (true) {\n\tif (false) {\n\t\t1;\n\t}\n}',
+				{ include: [], exclude: ['while'] },
+				{ lines: 1, complexity: 1 },
+			);
+
+			expect(result.ok).toBe(false);
+			expect(result.violations.map((v) => v.kind)).toEqual([
+				'feature',
+				'size',
+				'size',
+			]);
+
+			const sizeViolations = result.violations.filter(
+				(v): v is SizeViolation => v.kind === 'size',
+			);
+			expect(sizeViolations.map((v) => v.dimension)).toEqual([
+				'lines',
+				'complexity',
+			]);
+			const [linesViolation, complexityViolation] = sizeViolations;
+			expect(linesViolation).toMatchObject({ limit: 1, actual: 5 });
+			expect(complexityViolation).toMatchObject({ limit: 1, actual: 2 });
+			expect(Object.isFrozen(linesViolation)).toBe(true);
+			expect(Object.isFrozen(complexityViolation)).toBe(true);
+		});
 	});
 
 	describe('interface — result shape and immutability', () => {
