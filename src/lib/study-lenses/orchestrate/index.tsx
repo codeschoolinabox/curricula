@@ -57,6 +57,7 @@ import writemeLens from '../lenses/writeme/index.js';
 import deriveStationAvailability from './derive-station-availability.js';
 import deriveStationRoster from './derive-station-roster.js';
 import deriveStationStatus from './derive-station-status.js';
+import Dock from './dock/index.js';
 import EditorComponent from './editor/index.js';
 import createEventBus from './event-bus.js';
 import type { LintDiagnostic } from './lib/editing/types.js';
@@ -576,6 +577,15 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			setSnippet(next);
 		}, []);
 
+		// Dock collapse slot — the omnipresent region's display state. The dock
+		// is presentation-only; the orchestrator owns the collapse bit and the
+		// toggle handler and threads them down as props (the same split the
+		// phases panel follows).
+		const [collapsed, setCollapsed] = React.useState(false);
+		function handleCollapseToggle(): void {
+			setCollapsed((previous) => !previous);
+		}
+
 		// The panel's active lens is derived from state, NOT held in a
 		// panel-side slot. State remains the single source of truth (per
 		// README § Picker-vs-prop ownership). Lens mode names the active
@@ -617,6 +627,12 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						embodiment={liveEmbodiment.embodiment}
 						config={state.resolvedConfig}
 					/>
+					<section
+						data-orchestrator-omnipresent-region
+						aria-label="study tools"
+					>
+						<Dock collapsed={collapsed} onCollapseToggle={handleCollapseToggle} />
+					</section>
 				</div>
 			);
 		}
@@ -642,6 +658,9 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 					onSnippetChange={handleSnippetChange}
 					interpretedDiagnostics={interpretedDiagnostics}
 				/>
+				<section data-orchestrator-omnipresent-region aria-label="study tools">
+					<Dock collapsed={collapsed} onCollapseToggle={handleCollapseToggle} />
+				</section>
 			</div>
 		);
 	},

@@ -1569,3 +1569,54 @@ describe('<StudyLenses> — C2 station availability + status through real embody
 		});
 	});
 });
+
+describe('<StudyLenses> — Cycle 3 B0 the omnipresent region landmark + dock', () => {
+	describe('Zero/One — the region landmark mounts', () => {
+		it('mounts a section landmark in editor mode', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			expect(
+				container.querySelector('[data-orchestrator-omnipresent-region]')?.tagName,
+			).toBe('SECTION');
+		});
+
+		it('mounts the region landmark in lens mode too', () => {
+			const { container } = render(
+				<StudyLenses snippet="let x = 1;" lens="debug-props" />,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-omnipresent-region]'),
+			).not.toBeNull();
+		});
+
+		it('the region landmark carries a non-empty aria-label', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			expect(
+				container
+					.querySelector('[data-orchestrator-omnipresent-region]')
+					?.getAttribute('aria-label'),
+			).toBeTruthy();
+		});
+	});
+
+	describe('Interface — the dock mounts inside the region', () => {
+		it('renders the dock inside the region landmark', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-omnipresent-region] [data-orchestrator-dock]',
+				),
+			).not.toBeNull();
+		});
+
+		it('clicking the collapse affordance flips the dock collapsed state', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			fireEvent.click(
+				container.querySelector('[aria-label="toggle dock controls"]')!,
+			);
+			expect(
+				container.querySelector<HTMLElement>('[data-orchestrator-dock]')?.dataset
+					.orchestratorDockCollapsed,
+			).toBe('true');
+		});
+	});
+});
