@@ -438,7 +438,7 @@ Concrete:
 
 The moves landed in Phase A (its handoff self-deleted in `4526dc3`); the
 per-module re-typing schedule lives in
-[`EMBODY-IMPL-HANDOFF.md`](./EMBODY-IMPL-HANDOFF.md).
+[`EMBODY-ROADMAP.md`](./EMBODY-ROADMAP.md).
 
 ## Public API: `<StudyLenses>` (orchestrator-primary, not embody-primary)
 

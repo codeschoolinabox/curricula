@@ -9,7 +9,7 @@
 // Phase 3 migration remnant: the @study-lenses/tracing dependency has
 // not been vendored or added to package.json. The entire semantics/
 // tree is excluded from typecheck/lint/test per Step B7 (see
-// EMBODY-IMPL-HANDOFF.md), so the dangling import doesn't block CI.
+// EMBODY-ROADMAP.md), so the dangling import doesn't block CI.
 // Resolve this — either by inlining the wrapper or adding the package —
 // as part of Step B7.
 import tracing from '@study-lenses/tracing';

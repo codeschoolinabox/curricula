@@ -31,7 +31,7 @@ export default defineWorkspace([
 			exclude: [
 				'src/lib/**/*.browser.test.ts',
 				// WIP tracer redesign — Phase B2 / Step B7 work deferred per
-				// EMBODY-IMPL-HANDOFF.md. Tests run against half-landed types
+				// EMBODY-ROADMAP.md. Tests run against half-landed types
 				// would give misleading green signals.
 				'src/lib/study-lenses/embody/lib/evaluating/trace/semantics/**',
 			],
@@ -80,7 +80,7 @@ export default defineWorkspace([
 			include: ['src/lib/**/*.browser.test.ts'],
 			exclude: [
 				// WIP tracer redesign — Phase B2 / Step B7 work deferred per
-				// EMBODY-IMPL-HANDOFF.md. Tests run against half-landed types
+				// EMBODY-ROADMAP.md. Tests run against half-landed types
 				// would give misleading green signals.
 				'src/lib/study-lenses/embody/lib/evaluating/trace/semantics/**',
 			],

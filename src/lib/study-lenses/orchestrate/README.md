@@ -570,7 +570,7 @@ the station-availability derivation consumes `snippet.type` + `validation.isJeJ`
 inspects `source.code` semantically. This invariant aligns with embody's
 anti-pattern (no consumer-side branching on `snippet.source.code`) and persists
 as the non-scenario real-composition path grows per
-[`../EMBODY-IMPL-HANDOFF.md`](../EMBODY-IMPL-HANDOFF.md).
+[`../EMBODY-ROADMAP.md`](../EMBODY-ROADMAP.md).
 
 ## The phases panel
 

@@ -4,8 +4,8 @@
 > This is the durable map for conforming embody's **code** to its **locked
 > contract** (`README.md` / `DOCS.md` / `types.ts`). It is migration
 > scaffolding, not end-state truth — the end-state docs are. **Self-delete when
-> the migration completes.** Supersedes `EMBODY-IMPL-HANDOFF.md` (retained,
-> banner-deprecated, until its inbound references are repointed — see §
+> the migration completes.** Supersedes the former `EMBODY-IMPL-HANDOFF.md`
+> (deleted 2026-06-18; its inbound references now point here — see §
 > Provenance).
 >
 > Verified 2026-06-18 by a 16-agent read-only gap-analysis pass (adversarially
@@ -307,7 +307,7 @@ danger-iframe backend; `tracers/variables` own `VariablesTraceEvent` union
 - **Don't branch on `snippet.source.code`** in consumers (scenario keywords are
   a producer affordance); branch on `status`/`validation`/`endReport` shape.
 
-## B7 blocker ledger (absorbed from EMBODY-IMPL-HANDOFF)
+## B7 blocker ledger (absorbed from the former EMBODY-IMPL-HANDOFF)
 
 The deferred `trace/semantics` redesign (STEP 5) must address (verify each
 against current code — line numbers in the old handoff are stale):
@@ -329,15 +329,14 @@ against current code — line numbers in the old handoff are stale):
 
 ## Provenance
 
-- **`EMBODY-IMPL-HANDOFF.md` is stale** on its central premise (it says the
-  non-scenario branch "throws pending real composition"; the throw is gone —
-  `index.ts` does real acorn tokenize/parse). This roadmap supersedes it; its
-  two live bits (the readonly recovery recipe + the B7 ledger) are absorbed
-  above. The old file is **banner-deprecated, not yet deleted**: it has ~10
-  inbound references (6 JSDoc comments in `index.ts`, one in
-  `trace/semantics/index.ts`, plus links in `study-lenses/DOCS.md`,
-  `orchestrate/README.md`, `lenses/debug-props/DOCS.md`). Delete it in a
-  follow-up that repoints those to this roadmap.
+- **`EMBODY-IMPL-HANDOFF.md` was deleted 2026-06-18.** It was stale on its
+  central premise (it said the non-scenario branch "throws pending real
+  composition"; the throw is gone — `index.ts` does real acorn tokenize/parse).
+  This roadmap supersedes it; its two live bits (the readonly recovery recipe +
+  the B7 ledger) are absorbed above. Its 12 inbound references — 6 JSDoc
+  comments in `index.ts`, one in `trace/semantics/index.ts`, two in
+  `vitest.workspace.ts`, and links in `study-lenses/DOCS.md`,
+  `orchestrate/README.md`, `lenses/debug-props/DOCS.md` — were repointed here.
 - **Verified 2026-06-18** by an 8-subsystem read-only gap-analysis workflow + 8
   adversarial critics (run `wf_e20ed9da-bb4`). Only 2 findings were refuted —
   both because code moved ahead: `tracers/variables/instrument-variables.ts` is
