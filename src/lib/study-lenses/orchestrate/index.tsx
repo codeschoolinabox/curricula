@@ -47,6 +47,7 @@ import debounce from '@utils/debounce.js';
 
 import deepMerge from '../../utils/deep-merge.js';
 import embody from '../embody/index.js';
+import type { SnippetType } from '../embody/types.js';
 import annotateLens from '../lenses/annotate/index.js';
 import blanksLens from '../lenses/blanks/index.js';
 import debugPropertiesLens from '../lenses/debug-props/index.js';
@@ -68,6 +69,7 @@ import type {
 	EventBus,
 	LensModeState,
 	LensSelectionSource,
+	OrchestratorConfig,
 	OrchestratorState,
 	StationStatusMap,
 	StudyLensesProps as StudyLensesProperties,
@@ -144,6 +146,7 @@ function deriveInitialState(
 	lens: string | undefined,
 	configs: Pick<StudyLensesProperties, 'configs'>['configs'],
 	previousLiveEmbodiment: LiveEmbodiment | null,
+	type: SnippetType,
 ): {
 	readonly state: OrchestratorState;
 	readonly liveEmbodiment: LiveEmbodiment | null;
@@ -159,7 +162,7 @@ function deriveInitialState(
 			previousLiveEmbodiment !== null &&
 			previousLiveEmbodiment.snippet === snippet
 				? previousLiveEmbodiment
-				: { snippet, type: 'module', embodiment: embody(snippet) };
+				: { snippet, type, embodiment: embody(snippet) };
 		const state: LensModeState = {
 			mode: 'lens',
 			activeLens: lens!,
@@ -174,7 +177,7 @@ function deriveInitialState(
 		// null) so the gutter can paint on the first frame.
 		liveEmbodiment: previousLiveEmbodiment ?? {
 			snippet,
-			type: 'module',
+			type,
 			embodiment: embody(snippet),
 		},
 	};
@@ -251,6 +254,27 @@ function readCascadeLensEntry(
 }
 
 /**
+ * Reads the orchestrator-level config tier from an opaque `configs` value at
+ * the orchestrator's structural-assumption boundary — the same cast pattern as
+ * `readCascadeLensEntry`. The public `StudyLensesProps.configs` makes no
+ * statement about `configs.orchestrator`; this helper encapsulates the
+ * assumption that, when present, it is an `OrchestratorConfig`-shaped object,
+ * with a runtime sanity check: a non-object value (string, number, null,
+ * array) fails the read and the dock's slots fall back to built-in defaults.
+ */
+function readOrchestratorConfig(
+	cascade: Readonly<Record<string, unknown>> | undefined,
+): OrchestratorConfig | undefined {
+	const asConfigMap = cascade as
+		| Readonly<{ readonly orchestrator?: unknown }>
+		| undefined;
+	const entry = asConfigMap?.orchestrator;
+	return typeof entry === 'object' && entry !== null && !Array.isArray(entry)
+		? (entry as OrchestratorConfig)
+		: undefined;
+}
+
+/**
  * Test-time handle on a `<StudyLenses>` instance. Exposes the per-mount
  * `EventBus` so test harnesses (and, later, the L1 sandbox page) can
  * subscribe to internal events without the bus appearing on the public
@@ -285,6 +309,18 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// Snippet slot — seeded from prop at mount only (initial-value-only).
 		const [snippet, setSnippet] = React.useState(snippetProperty);
 
+		// Source-type slot — seeded once at mount from `configs.orchestrator`
+		// (a mount-only seed; the dock's type toggle becomes its writer in a
+		// later increment). Read via `typeReference` inside post-commit
+		// handlers/effects (the same read-only-in-effects invariant as
+		// `snippetReference`) so the trailing-edge re-embody and the prop-change
+		// transition never capture a stale type.
+		const [type] = React.useState<SnippetType>(
+			() => readOrchestratorConfig(configs)?.initialType ?? 'module',
+		);
+		const typeReference = React.useRef(type);
+		typeReference.current = type;
+
 		// F5b.2 initial-mount dispatch guard. Survives StrictMode's
 		// mount → cleanup → remount cycle so the dispatch fires exactly once
 		// per real mount, not once per discarded-render pair.
@@ -293,8 +329,10 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// Atomic init: derive both state and the live slot from a single call so
 		// embody() fires at most once at first render. The tuple is held in its
 		// own state slot for clarity; React never re-runs the lazy initializer.
+		// `type` is the source type already resolved by the slot above (passed in,
+		// not re-read — the config seed is a mount-once read).
 		const [initialDerived] = React.useState(() =>
-			deriveInitialState(snippetProperty, lens, configs, null),
+			deriveInitialState(snippetProperty, lens, configs, null, type),
 		);
 		const [state, setState] = React.useState<OrchestratorState>(
 			initialDerived.state,
@@ -390,7 +428,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			try {
 				setLiveEmbodiment({
 					snippet: nextSnippet,
-					type: 'module',
+					type: typeReference.current,
 					embodiment: embody(nextSnippet),
 				});
 			} catch {
@@ -461,6 +499,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 				nextLens,
 				configs,
 				liveEmbodimentReference.current,
+				typeReference.current,
 			);
 			setState(next.state);
 			setLiveEmbodiment(next.liveEmbodiment);

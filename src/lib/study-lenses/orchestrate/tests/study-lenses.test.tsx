@@ -1620,3 +1620,85 @@ describe('<StudyLenses> — Cycle 3 B0 the omnipresent region landmark + dock', 
 		});
 	});
 });
+
+describe('<StudyLenses> — Cycle 3 A1 config-seeded source type', () => {
+	describe('One — initialType seeds the live slot type', () => {
+		it('initialType "script" hides the language-level stations in editor mode', () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="let x = 1;"
+					configs={{ orchestrator: { initialType: 'script' } }}
+				/>,
+			);
+			const stations = Array.from(
+				// eslint-disable-next-line unicorn/prefer-spread -- NodeList spread fails tsc without dom.iterable
+				container.querySelectorAll<HTMLElement>('[data-orchestrator-station]'),
+			).map((column) => column.dataset.orchestratorStation);
+			expect(stations).toEqual(['source', 'parse']);
+		});
+
+		it('initialType "script" hides the language-level stations in lens-mode initial mount', () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="let x = 1;"
+					lens="debug-props"
+					configs={{ orchestrator: { initialType: 'script' } }}
+				/>,
+			);
+			expect(
+				container.querySelectorAll('[data-orchestrator-station]'),
+			).toHaveLength(2);
+		});
+
+		it('initialType "script" survives a debounced re-embody after an edit', async () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="let x = 1;"
+					configs={{ orchestrator: { initialType: 'script' } }}
+				/>,
+			);
+			const view = await findMountedEditorView(container);
+			vi.useFakeTimers();
+			try {
+				typeInto(view, 'let y = 2;');
+				act(() => {
+					vi.advanceTimersByTime(250);
+				});
+				expect(
+					container.querySelectorAll('[data-orchestrator-station]'),
+				).toHaveLength(2);
+			} finally {
+				vi.useRealTimers();
+			}
+		});
+	});
+
+	describe('Boundaries — config robustness (mirrors readCascadeLensEntry)', () => {
+		it('an orchestrator entry without initialType defaults to module', () => {
+			const { container } = render(
+				<StudyLenses snippet="let x = 1;" configs={{ orchestrator: {} }} />,
+			);
+			expect(
+				container.querySelectorAll('[data-orchestrator-station]'),
+			).toHaveLength(5);
+		});
+
+		it('a configs object with no orchestrator key defaults to module', () => {
+			const { container } = render(
+				<StudyLenses snippet="let x = 1;" configs={{}} />,
+			);
+			expect(
+				container.querySelectorAll('[data-orchestrator-station]'),
+			).toHaveLength(5);
+		});
+
+		it('a non-object orchestrator entry falls back to module, never throws', () => {
+			const { container } = render(
+				<StudyLenses snippet="let x = 1;" configs={{ orchestrator: 'nope' }} />,
+			);
+			expect(
+				container.querySelectorAll('[data-orchestrator-station]'),
+			).toHaveLength(5);
+		});
+	});
+});
