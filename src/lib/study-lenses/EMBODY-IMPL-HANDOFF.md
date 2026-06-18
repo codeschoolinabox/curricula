@@ -1,5 +1,15 @@
 # Embody implementation handoff — Phase B
 
+⚠️ **SUPERSEDED (2026-06-18) by [`EMBODY-ROADMAP.md`](./EMBODY-ROADMAP.md).**
+This file is stale on its central premise (it describes a "throw on
+non-scenario" fallback that `index.ts` has already replaced with real acorn
+composition). Its two still-live bits — the `prefer-readonly-type` recovery
+recipe and the Step-B7 tracer-redesign blocker ledger — are absorbed into the
+roadmap. Retained only until its inbound references (JSDoc in `index.ts` and
+`trace/semantics/index.ts`; links in `study-lenses/DOCS.md`,
+`orchestrate/README.md`, `lenses/debug-props/DOCS.md`) are repointed; then
+delete. Do not act on the steps below without checking the roadmap first.
+
 > **Addendum (2026-06-11) — source types + language-level plugins.** The embody
 > contract gained `embody(code, { type })` with `type: 'script' | 'module'`
 > (default module), a top-level `Snippet.type`, a nullable `realm`, the six-leaf
