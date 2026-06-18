@@ -398,6 +398,31 @@ type VariablesHelpers = {
  */
 type AbruptReason = 'break' | 'continue' | 'error';
 
+// ─── Instrumentation boundary error ────────────────────────────────────────────
+
+/**
+ * Why the instrumentation transform rejected an otherwise-JEJ-valid program.
+ * These constructs pass the JEJ gate but cannot be faithfully spliced, so the
+ * transform throws at the boundary instead of mistracing them (README §
+ * Bounded context). A labeled break/continue is covered by `'labeled-statement'`
+ * — it cannot appear without an enclosing labeled statement.
+ */
+type InstrumentBoundaryReason =
+	| 'labeled-statement'
+	| 'expression-target-for-of';
+
+/**
+ * The typed boundary error the instrumentation transform throws (and the
+ * facade re-throws on the validate path). A real thrown `Error` — so it carries
+ * a stack and is `instanceof Error` — augmented with a discriminant tag and the
+ * {@link InstrumentBoundaryReason}, so callers can identify it structurally
+ * without parsing the message (the same tag idiom as {@link OpaqueValue}).
+ */
+type InstrumentBoundaryError = Error & {
+	readonly instrumentBoundary: true;
+	readonly reason: InstrumentBoundaryReason;
+};
+
 // ─── Exports ───────────────────────────────────────────────────────────────────
 
 export type {
@@ -439,4 +464,7 @@ export type {
 	ScopeTable,
 	VariablesHelpers,
 	AbruptReason,
+	// instrumentation boundary error
+	InstrumentBoundaryReason,
+	InstrumentBoundaryError,
 };

@@ -29,14 +29,17 @@ Vocabulary and the event pinning table: [README.md](./README.md). The contract:
    rejected constructs) — splice the program into instrumented source. Input:
    the validated program + source + scope table. First rejects, with a typed
    boundary throw, the constructs that pass the JEJ gate but cannot be
-   faithfully spliced (labels, expression-target for-of). Output: a source
-   string, line-for-line with the original, carrying scope wraps (open /
+   faithfully spliced (labels, expression-target for-of). The scope table
+   addresses which scopes are wrapped (its keys are the open/close targets);
+   whether an identifier is a traced read is resolved against the program's own
+   lexical scope, which the flat table does not carry. Output: a source string,
+   line-for-line with the original, carrying scope wraps (open /
    try-catch-finally close), declared-variable reads as deferred thunks, the
    per-form assignment and increment wraps, the declaration-initializer wraps,
    the abrupt-completion markers before break/continue, and the post-loop flag
    clears — every value-bearing splice a call against the worker-side helper
-   protocol the contract pins. Insertion-only — original characters are never
-   rewritten.
+   protocol the contract pins. Line-preserving — no splice inserts or removes a
+   newline.
 
 4. **Run and emit** (factory call sync and lazy; emission async) — assemble the
    engine spec (instrumented source + thin worker entry + the scope table as
@@ -68,7 +71,7 @@ Vocabulary and the event pinning table: [README.md](./README.md). The contract:
 flowchart TD
     SRC[JEJ source string] -->|validate — JEJ gate, throws on parse-fail / violation / rejected construct| AST[validated program: AST + source]
     AST -->|project — pure: re-home for-heads, drop empty blocks, rename program→script| TABLE[scope table: scope identity → kind + declared variables]
-    AST -->|instrument — insertion-only, line-preserving, throws on labels / expression-target for-of| CODE[instrumented source: scope wraps + deferred reads + assign/increment wraps + abrupt markers]
+    AST -->|instrument — line-preserving, throws on labels / expression-target for-of| CODE[instrumented source: scope wraps + deferred reads + assign/increment wraps + abrupt markers]
     TABLE --> SPEC
     CODE --> SPEC[engine spec: code + worker entry + scope-table config + worker/thread logic + seconds]
     SPEC -->|evaluate — lazy, sandboxed| RUN[running program: registry + step counter + scope-instance counter + abrupt flag]
@@ -93,10 +96,12 @@ flowchart TD
   are deterministic functions of their inputs, testable in isolation.
   Instrumentation is pure given an instrumentable program: it inspects for and
   throws on the rejected constructs first, then splices.
-- **Instrumentation is insertion-only and line-preserving.** Original source
-  characters are never rewritten and no splice inserts a newline; the
-  instrumented source maps one-to-one to the original lines, so every stamped
-  node path resolves against the original.
+- **Instrumentation is line-preserving.** No splice inserts or removes a
+  newline, so the instrumented source has the same line count as the original
+  and any engine line-report maps back. Most splices wrap a span verbatim; the
+  simple `=` form is the one that relocates its right-hand side (to the eager
+  `incoming` argument position), staying within its original lines — the binding
+  invariant is line count, not byte-for-byte preservation.
 - **Only declaring scopes emit scope events** (the script scope always does;
   blocks only when they declare a binding). An empty block pushes no scope, per
   the NM.
