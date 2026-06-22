@@ -40,22 +40,27 @@ helpers (newspaper anatomy: export first, helpers below).
 
 3. **AST role refinement** (pure, one AST traversal) — categories are already
    settled by the semantic classification table in phase 2 (reserved words
-   categorized by what they do); this phase refines OPENER roles only. An open
-   `{` at a `BlockStatement` start → `block` (object-literal, switch, and other
-   braces keep their `'other'` seed); detection uses a `Set` of `BlockStatement`
-   start offsets for O(1) `has(token.start)` lookup, with a finer node→token
-   position index added when the deferred opener roles below need it. Closer
-   roles are phase 4's job.
+   categorized by what they do); this phase refines OPENER roles only. A single
+   descent collects every `BlockStatement` start offset and every paren-owner
+   claim (a role plus the source range that locates its `(`). A block `{` sits
+   at `node.start`, but a paren is at no node's start, so each paren claim is
+   snapped to the first paren-opener token at/after its anchor. Closer roles are
+   phase 4's job.
    - **Block brace role** (implemented): an open `{` at a `BlockStatement` start
-     → `block`.
+     → `block` (object-literal, switch, and other braces keep their `'other'`
+     seed).
+   - **Paren roles** (implemented): `call-arguments` (call / `new` argument
+     lists), `control-head` (`if` / `while` / `for` / `switch` heads, the
+     `do…while` tail, `catch (e)`), and `grouping` (any paren no owner claims —
+     see Structural constraints § Grouping by elimination). Function / arrow /
+     method parameter lists are claimed `'other'` (no finer JEJ role) so they
+     are excluded from grouping.
    - **Generator `*` re-bin** (deferred): function/method/property generator
      stars move `operator` → `delimiter` with role `generator` — the single
      sanctioned home-category change.
-   - **Opener role refinement** (deferred): paren roles (call-arguments /
-     control-head / grouping per the claim list — see Structural constraints §
-     Grouping by elimination) and operator roles (`=` in a `VariableDeclarator`
-     → `declarator-init` vs in an `AssignmentExpression` → `assignment`;
-     operator roles from the owning expression node).
+   - **Operator role refinement** (deferred): `=` in a `VariableDeclarator` →
+     `declarator-init` vs in an `AssignmentExpression` → `assignment`; operator
+     roles from the owning expression node.
    - **Contextual-keyword re-categorization** (deferred): `of`/`as`/… used as a
      plain variable name should become `identifier`; needs the AST to tell it
      from for-of `of`.
@@ -83,13 +88,13 @@ flowchart TD
     In["ClassifyInput<br/>{ code, tokens, ast }"]
     Shaped["shape-confirmed input"]
     Seeded["totally categorized tokens<br/>(semantic category + role seed;<br/>partner null)"]
-    Refined["opener-role-refined tokens<br/>(block role; paren/operator later)"]
+    Refined["opener-role-refined tokens<br/>(block + paren roles;<br/>operator later)"]
     Paired["paired tokens<br/>(partner links + closers<br/>inherit opener role)"]
     Out["frozen ClassifiedToken[]<br/>(source-ordered, total)"]
 
     In -->|"validate — throws TypeError<br/>on null/missing"| Shaped
     Shaped -->|"classify by token type<br/>(pure; element list fixed here)"| Seeded
-    Seeded -->|"one AST traversal:<br/>opener roles (block now) (pure)"| Refined
+    Seeded -->|"one AST traversal:<br/>opener roles (block + paren) (pure)"| Refined
     Refined -->|"stack pairing +<br/>closer inheritance (pure)"| Paired
     Paired -->|"assemble + freeze<br/>(shape finalization only)"| Out
 ```
@@ -115,14 +120,25 @@ flowchart TD
   owner MUST claim its tokens: call/`new` argument lists, control heads (`if` /
   `while` / `for` / `switch` and the `do…while` tail), `catch (e)`, and
   function/arrow/method parameter lists. Owned-but-unclaimed parens degrade to
-  `'other'`, never to a wrong confident role.
+  `'other'`, never to a wrong confident role. (Dynamic `import(...)` is
+  deliberately outside the claim list — its `(` falls to `grouping`; JEJ
+  snippets do not use dynamic import.)
+- **Owner parens are located by first-paren-at/after-anchor.** Each owner claims
+  the first paren-opener token at or after an anchor — the callee end for
+  call/`new`, the statement start for control heads (the body end for
+  `do…while`), the node start for parameter lists. This is sound because no
+  non-owned paren can lexically precede the owned paren within an owner's range:
+  the head/param paren is syntactically first after its keyword, and the call
+  anchor sits past any parenthesized callee's own grouping paren (`(a.b)()`).
+  Paren-opener tokens are identified by delimiter category, so a template chunk
+  whose text is `(` is never mistaken for one.
 - **Pure on frozen inputs.** No mutation of `tokens`, `ast`, or any node — the
   legacy walk's synthetic `node.operator = '='` writes are explicitly banned;
   the module must run unchanged on deep-frozen embodiment data.
 - **One AST traversal.** The role-refinement phase walks the AST exactly once
-  (collecting `BlockStatement` start offsets today; finer node→token bridging
-  later); it never re-walks. JEJ's page-size invariant bounds the cost; no
-  caching.
+  (collecting `BlockStatement` start offsets and paren-owner claims in a single
+  descent, then snapping each claim to its paren-opener token); it never
+  re-walks. JEJ's page-size invariant bounds the cost; no caching.
 - **Semantic precedence.** Operator and literal token-type checks precede the
   keyword check so the reserved-word operators/literals land in their semantic
   category; the keyword check precedes the identifier check so contextual

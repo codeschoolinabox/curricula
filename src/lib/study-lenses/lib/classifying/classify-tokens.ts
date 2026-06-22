@@ -6,6 +6,7 @@ import type {
 	Category,
 	ClassifiedToken,
 	ClassifyInput,
+	DelimiterRole,
 	Role,
 } from './types.js';
 
@@ -16,9 +17,10 @@ import type {
  * never mutated; safe on frozen embodiment data).
  *
  * Increment scope: home category + token-derivable role seed + delimiter
- * pairing + the `block` brace role + closer-role inheritance. Each
- * `categories` is single-element (AST alternates land later); paren and
- * operator AST roles land later.
+ * pairing + brace/paren opener roles (`block`, `call-arguments`,
+ * `control-head`, `grouping`) + closer-role inheritance. Each `categories`
+ * is single-element (AST alternates land later); operator AST roles and the
+ * generator-`*` re-bin land later.
  *
  * @throws TypeError when `code`, `tokens`, or `ast` is missing or null —
  *   callers gate on a successful parse (see `./README.md` § Public API).
@@ -59,29 +61,126 @@ function classifyToken(token: acorn.Token, code: string): ClassifiedToken {
 	};
 }
 
-// AST role refinement (openers only): a `BlockStatement` opener `{` becomes
-// `block`. Object-literal, switch, and other braces keep their seed. Paren and
-// operator opener roles land in later increments. Closer roles are phase 4's
-// job (see `inheritFromPartners`).
+// AST role refinement (openers only): assign each opener delimiter its role from
+// the owning AST node. A `BlockStatement` `{` is `block`; a paren is
+// `call-arguments` (call / `new` argument lists), `control-head` (`if` / `while`
+// / `for` / `switch` heads, the `do…while` tail, `catch (e)`), or `other`
+// (function / arrow / method parameter lists — claimed so they are excluded from
+// grouping). Every paren no owner claims is `grouping` by elimination — sound
+// only because the claim list is exhaustive (see `./DOCS.md` § Structural
+// constraints). Operator roles and the generator-`*` re-bin land in a later
+// increment. Closer roles are phase 4's job (see `inheritFromPartners`).
 function refineOpenerRoles(
 	tokens: ReadonlyArray<ClassifiedToken>,
 	ast: acorn.Node,
 ): ReadonlyArray<ClassifiedToken> {
-	const blockStarts = new Set(collectBlockStarts(ast));
+	const parenStarts = tokens
+		.filter((token) => isParenOpener(token))
+		.map((token) => token.start);
+	const { blockStarts, parenClaims } = collectOpenerRoles(ast);
+	const blockOpeners = new Set(blockStarts);
+	const parenRoles = resolveParenClaims(parenClaims, parenStarts);
 	return tokens.map(function refine(token) {
-		if (token.text === '{' && blockStarts.has(token.start)) {
-			return { ...token, role: 'block' };
-		}
-		return token;
+		const role = openerRole(token, blockOpeners, parenRoles);
+		return role === token.role ? token : { ...token, role };
 	});
 }
 
-function collectBlockStarts(node: acorn.Node): ReadonlyArray<number> {
-	const here = node.type === 'BlockStatement' ? [node.start] : [];
-	const childStarts = astChildren(node).flatMap((child) =>
-		collectBlockStarts(child),
-	);
-	return [...here, ...childStarts];
+// A `{` at a `BlockStatement` start is `block`; a `(` takes its owner's role, or
+// `grouping` when no owner claimed it. Every other token keeps its seed.
+function openerRole(
+	token: ClassifiedToken,
+	blockOpeners: ReadonlySet<number>,
+	parenRoles: ReadonlyMap<number, DelimiterRole>,
+): Role | null {
+	if (isBraceOpener(token)) {
+		return blockOpeners.has(token.start) ? 'block' : token.role;
+	}
+	if (isParenOpener(token)) {
+		return parenRoles.get(token.start) ?? 'grouping';
+	}
+	return token.role;
+}
+
+// A claim that the first paren opener in `[anchor, bound)` plays `role`.
+type ParenClaim = {
+	readonly anchor: number;
+	readonly bound: number;
+	readonly role: DelimiterRole;
+};
+
+// One AST traversal (see `./DOCS.md` § Structural constraints): collect every
+// `BlockStatement` start offset and every paren-owner claim in a single descent.
+function collectOpenerRoles(node: acorn.Node): {
+	readonly blockStarts: ReadonlyArray<number>;
+	readonly parenClaims: ReadonlyArray<ParenClaim>;
+} {
+	const blockHere = node.type === 'BlockStatement' ? [node.start] : [];
+	const claimHere = parenClaim(node);
+	const children = astChildren(node).map((child) => collectOpenerRoles(child));
+	return {
+		blockStarts: [
+			...blockHere,
+			...children.flatMap((child) => child.blockStarts),
+		],
+		parenClaims: [
+			...(claimHere === null ? [] : [claimHere]),
+			...children.flatMap((child) => child.parenClaims),
+		],
+	};
+}
+
+// The owner claim for a node's paren, or null when the node owns none. The
+// anchor points just before the owned `(`; `resolveParenClaims` snaps it to the
+// first paren opener in `[anchor, bound)`. The param-list arm claims role
+// `'other'` (JEJ assigns param parens no finer role) PURELY to exclude them from
+// grouping-by-elimination — an unclaimed function paren would wrongly degrade to
+// `grouping`. Order of the branches is irrelevant; node types are disjoint.
+function parenClaim(node: acorn.Node): ParenClaim | null {
+	if (node.type === 'CallExpression' || node.type === 'NewExpression') {
+		const callee = childNode(node, 'callee');
+		return callee === null
+			? null
+			: { anchor: callee.end, bound: node.end, role: 'call-arguments' };
+	}
+	if (CONTROL_HEAD_TYPES.has(node.type)) {
+		return controlHead(node.start, node.end);
+	}
+	if (node.type === 'DoWhileStatement') {
+		const body = childNode(node, 'body');
+		return body === null ? null : controlHead(body.end, node.end);
+	}
+	if (node.type === 'CatchClause') {
+		const parameter = childNode(node, 'param');
+		const body = childNode(node, 'body');
+		return parameter === null || body === null
+			? null
+			: controlHead(node.start, body.start);
+	}
+	if (FUNCTION_TYPES.has(node.type)) {
+		const parameters = childNodes(node, 'params');
+		const body = childNode(node, 'body');
+		if (body === null) {
+			return null;
+		}
+		const bound = parameters.length > 0 ? parameters[0].start : body.start;
+		return { anchor: node.start, bound, role: 'other' };
+	}
+	return null;
+}
+
+function controlHead(anchor: number, bound: number): ParenClaim {
+	return { anchor, bound, role: 'control-head' };
+}
+
+function childNode(node: acorn.Node, key: string): acorn.Node | null {
+	const value = (node as unknown as Record<string, unknown>)[key];
+	return isAstNode(value) ? value : null;
+}
+
+function childNodes(node: acorn.Node, key: string): ReadonlyArray<acorn.Node> {
+	const value = (node as unknown as Record<string, unknown>)[key];
+	return Array.isArray(value) ? value.filter((item) => isAstNode(item)) : [];
 }
 
 function astChildren(node: acorn.Node): ReadonlyArray<acorn.Node> {
@@ -103,6 +202,48 @@ function isAstNode(value: unknown): value is acorn.Node {
 		value !== null &&
 		typeof (value as { readonly type?: unknown }).type === 'string'
 	);
+}
+
+// Snap each claim's anchor to the first paren opener at/after it (within the
+// claim's bound), mapping that opener's offset to the claimed role. First-writer
+// wins: a parent owner is emitted before its descendants, so it keeps the paren
+// — insurance against future overlapping claims (none overlap in valid JS today).
+/* eslint-disable functional/immutable-data -- local Map, never escapes until returned */
+function resolveParenClaims(
+	claims: ReadonlyArray<ParenClaim>,
+	parenStarts: ReadonlyArray<number>,
+): ReadonlyMap<number, DelimiterRole> {
+	const roleByOffset = new Map<number, DelimiterRole>();
+	for (const { anchor, bound, role } of claims) {
+		const offset = firstParenOpenerIn(parenStarts, anchor, bound);
+		if (offset !== undefined && !roleByOffset.has(offset)) {
+			roleByOffset.set(offset, role);
+		}
+	}
+	return roleByOffset;
+}
+/* eslint-enable functional/immutable-data */
+
+// The first paren-opener offset in `[anchor, bound)`. `parenStarts` is in source
+// order, so `find` returns the lexically-first opener — which is the owned paren
+// for every claim (no non-owned paren precedes it in an owner's range; see
+// `./DOCS.md` § Structural constraints, the find-first invariant).
+function firstParenOpenerIn(
+	parenStarts: ReadonlyArray<number>,
+	anchor: number,
+	bound: number,
+): number | undefined {
+	return parenStarts.find((start) => start >= anchor && start < bound);
+}
+
+// A real `(` / `{` opener is a delimiter-category token; a template chunk whose
+// text is `(` / `{` is a literal, so it is never mistaken for a delimiter.
+function isParenOpener(token: ClassifiedToken): boolean {
+	return token.text === '(' && token.categories[0] === 'delimiter';
+}
+
+function isBraceOpener(token: ClassifiedToken): boolean {
+	return token.text === '{' && token.categories[0] === 'delimiter';
 }
 
 // Closer inheritance (the last pass, so opener roles are final): each closer
@@ -209,6 +350,27 @@ function roleSeed(token: acorn.Token, category: Category): Role | null {
 }
 
 const tt = acorn.tokTypes;
+
+// AST node types whose head paren is the first `(` after the keyword (anchor =
+// `node.start`). `do…while` (tail paren) and `catch` (optional binding) need
+// their own anchors and are handled separately in `parenClaim`.
+const CONTROL_HEAD_TYPES = new Set<string>([
+	'IfStatement',
+	'WhileStatement',
+	'ForStatement',
+	'ForInStatement',
+	'ForOfStatement',
+	'SwitchStatement',
+]);
+
+// AST node types whose parameter-list paren is claimed `'other'`. Methods,
+// getters, setters, and accessors are `FunctionExpression` values, so they are
+// covered here without a separate branch.
+const FUNCTION_TYPES = new Set<string>([
+	'FunctionDeclaration',
+	'FunctionExpression',
+	'ArrowFunctionExpression',
+]);
 
 // Paired-delimiter openers → the token type that closes them. Backtick is
 // absent (its own open/close toggle, handled in `computePartners`); `${` and

@@ -200,10 +200,14 @@ Behavior:
   `partner` indices that tell them apart — a `}` partnered with a `${` closes a
   template expression; partnered with a `{`, a block. A closer then inherits its
   opener's final role via that link: a block `}` is `block`, a switch/object `}`
-  is `'other'`, a closing backtick is `template-delimiter`. (Opener roles the
-  AST pass does not yet assign — paren `call-arguments` / `control-head` /
-  `grouping` — still seed `'other'`, so their closers inherit `'other'` for
-  now.)
+  is `'other'`, a closing backtick is `template-delimiter`, and a `)` inherits
+  its `(`'s role (`call-arguments` / `control-head` / `grouping` / `'other'`).
+- **Parameter-list parens**: the `(` of a function / arrow / method parameter
+  list is `'other'` — JEJ assigns it no finer role, but its owning node still
+  _claims_ it so that `grouping`-by-elimination stays sound; an unclaimed
+  function paren would wrongly read as a grouping expression. Dynamic
+  `import(...)` is outside the claim list, so its `(` is `grouping` (JEJ does
+  not use dynamic import).
 - **Reserved-word operators and literals**: `typeof` / `in` / `instanceof` /
   `void` / `delete` classify as `operator` and `null` / `true` / `false` as
   `literal`, by what they do — not as `keyword`, even though Acorn flags them

@@ -357,7 +357,7 @@ describe('classifyTokens', () => {
 
 		it('inherits any opener role onto its closer, not only block', () => {
 			const result = classifyTokens(parse('(x)'));
-			expect(result[2]?.role).toBe('other');
+			expect(result[2]?.role).toBe('grouping');
 		});
 
 		it('makes every paired delimiter share its partner role', () => {
@@ -372,6 +372,153 @@ describe('classifyTokens', () => {
 		it('leaves a non-delimiter role unchanged', () => {
 			const result = classifyTokens(parse('{ x; }'));
 			expect(result[2]?.role).toBe('statement-end');
+		});
+	});
+
+	describe('Paren roles', () => {
+		it('roles a call argument open paren as call-arguments', () => {
+			const result = classifyTokens(parse('f(x)'));
+			expect(result[1]?.role).toBe('call-arguments');
+		});
+
+		it('roles a new-expression argument open paren as call-arguments', () => {
+			const result = classifyTokens(parse('new Date()'));
+			expect(result[2]?.role).toBe('call-arguments');
+		});
+
+		it('roles each open paren of a chained call as call-arguments', () => {
+			const result = classifyTokens(parse('f(x)(y)'));
+			expect(result[4]?.role).toBe('call-arguments');
+		});
+
+		it('roles a call open paren after a parenthesized callee as call-arguments', () => {
+			const result = classifyTokens(parse('(a.b)()'));
+			expect(result[5]?.role).toBe('call-arguments');
+		});
+
+		it('roles the grouping paren around a callee as grouping', () => {
+			const result = classifyTokens(parse('(a.b)()'));
+			expect(result[0]?.role).toBe('grouping');
+		});
+
+		it('roles an if head open paren as control-head', () => {
+			const result = classifyTokens(parse('if (x) {}'));
+			expect(result[1]?.role).toBe('control-head');
+		});
+
+		it('roles a while head open paren as control-head', () => {
+			const result = classifyTokens(parse('while (a) f(b)'));
+			expect(result[1]?.role).toBe('control-head');
+		});
+
+		it('roles a for head open paren as control-head', () => {
+			const result = classifyTokens(parse('for (let i = 0; i < 3; i++) {}'));
+			expect(result[1]?.role).toBe('control-head');
+		});
+
+		it('roles a for-in head open paren as control-head', () => {
+			const result = classifyTokens(parse('for (x in y) {}'));
+			expect(result[1]?.role).toBe('control-head');
+		});
+
+		it('roles a for-of head open paren as control-head', () => {
+			const result = classifyTokens(parse('for (x of y) {}'));
+			expect(result[1]?.role).toBe('control-head');
+		});
+
+		it('roles a switch head open paren as control-head', () => {
+			const result = classifyTokens(parse('switch (x) {}'));
+			expect(result[1]?.role).toBe('control-head');
+		});
+
+		it('roles a do-while condition open paren as control-head', () => {
+			const result = classifyTokens(parse('do { f(x) } while (y)'));
+			expect(result[8]?.role).toBe('control-head');
+		});
+
+		it('roles a call paren inside a do body as call-arguments', () => {
+			const result = classifyTokens(parse('do { f(x) } while (y)'));
+			expect(result[3]?.role).toBe('call-arguments');
+		});
+
+		it('roles a catch binding open paren as control-head', () => {
+			const result = classifyTokens(parse('try {} catch (e) {}'));
+			expect(result[4]?.role).toBe('control-head');
+		});
+
+		it('leaves a binding-less catch clause with no control-head paren', () => {
+			const result = classifyTokens(parse('try {} catch {}'));
+			expect(result.every((token) => token.role !== 'control-head')).toBe(true);
+		});
+
+		it('roles a function declaration param open paren as other', () => {
+			const result = classifyTokens(parse('function f(a) {}'));
+			expect(result[2]?.role).toBe('other');
+		});
+
+		it('roles an arrow param open paren as other', () => {
+			const result = classifyTokens(parse('(a) => a'));
+			expect(result[0]?.role).toBe('other');
+		});
+
+		it('roles a zero-param arrow open paren as other', () => {
+			const result = classifyTokens(parse('() => x'));
+			expect(result[0]?.role).toBe('other');
+		});
+
+		it('roles an async arrow param open paren as other', () => {
+			const result = classifyTokens(parse('async (x) => x'));
+			expect(result[1]?.role).toBe('other');
+		});
+
+		it('roles a generator function param open paren as other', () => {
+			const result = classifyTokens(parse('function* g() {}'));
+			expect(result[3]?.role).toBe('other');
+		});
+
+		it('roles a method param open paren as other', () => {
+			const result = classifyTokens(parse('class A { m(x) {} }'));
+			expect(result[4]?.role).toBe('other');
+		});
+
+		it('roles an optional-call open paren as call-arguments', () => {
+			const result = classifyTokens(parse('a?.(x)'));
+			expect(result[2]?.role).toBe('call-arguments');
+		});
+
+		it('roles a grouped new callee paren as grouping', () => {
+			const result = classifyTokens(parse('new (Foo)(x)'));
+			expect(result[1]?.role).toBe('grouping');
+		});
+
+		it('roles a grouped new call paren as call-arguments', () => {
+			const result = classifyTokens(parse('new (Foo)(x)'));
+			expect(result[4]?.role).toBe('call-arguments');
+		});
+
+		it('roles a standalone grouping paren as grouping', () => {
+			const result = classifyTokens(parse('(a)'));
+			expect(result[0]?.role).toBe('grouping');
+		});
+
+		it('roles a paren-less arrow body grouping paren as grouping', () => {
+			const result = classifyTokens(parse('() => (b)'));
+			expect(result[3]?.role).toBe('grouping');
+		});
+
+		it('roles the param paren of an arrow with a grouping body as other', () => {
+			const result = classifyTokens(parse('() => (b)'));
+			expect(result[0]?.role).toBe('other');
+		});
+
+		it('inherits the call-arguments role onto the closer paren', () => {
+			const result = classifyTokens(parse('f(x)'));
+			expect(result[3]?.role).toBe('call-arguments');
+		});
+
+		it('leaves a delimiter-looking template chunk role untouched', () => {
+			const result = classifyTokens(parse('`(`'));
+			expect(result[1]?.role).toBe('template-chunk');
 		});
 	});
 
