@@ -120,6 +120,14 @@ type IncrementForm = 'prefix' | 'postfix';
  * order (assigned worker-side); `nodePath` attributes the event to source;
  * `scopeInstanceId` identifies the runtime scope occurrence (a loop body
  * re-enters the same static scope once per iteration).
+ *
+ * On scope events (`scope-push` / `scope-pop`) `scopeInstanceId` is that
+ * scope's own instance. On binding events (`initialize` / `read` / `assign` /
+ * `increment`) it is the instance of the scope that DECLARES the named binding
+ * (its home scope), not the innermost live scope — so a binding's `initialize`
+ * and every later read/assign/increment of it carry one id, giving a stable
+ * per-binding-life key. The two readings differ only when an outer binding is
+ * touched from an inner scope.
  */
 type VariablesEventBase = {
 	readonly step: number;
@@ -340,8 +348,14 @@ type VariablesHelpers = {
 	readonly open: (scopePath: NodePath) => void;
 	/** Scope pop: emit the cleaned-out variables with the current abrupt reason. */
 	readonly close: (scopePath: NodePath) => void;
-	/** Mark how control is about to leave (spliced before a break/continue). */
-	readonly abrupt: (reason: 'break' | 'continue') => void;
+	/**
+	 * Mark how control is about to leave. Spliced immediately before a
+	 * break/continue (with `'break'` / `'continue'`); the scope wrap's own
+	 * `catch` also calls it with `'error'` before rethrowing. The parameter is
+	 * therefore the full {@link AbruptReason} (seam 4), not just the two
+	 * abrupt-statement reasons.
+	 */
+	readonly abrupt: (reason: AbruptReason) => void;
 	/** Clear a stale abrupt flag after a loop statement. */
 	readonly landed: () => void;
 	/** Declaration initializer: record `value` for `name`, emit `initialize`. */
