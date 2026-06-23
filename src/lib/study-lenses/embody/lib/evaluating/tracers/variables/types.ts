@@ -297,8 +297,8 @@ type TraceVariables = (
  * authors the COMPLETE event (step, scopeInstanceId, value snapshots) so the
  * thread logic stays pure and stateless; the message is therefore the
  * clone-safe wire form of a {@link VariablesTraceEvent}. The thread narrows the
- * engine's opaque `unknown` to this, freezes it, and yields; a message that
- * fails the narrowing is dropped.
+ * engine's opaque `unknown` to this and yields it BY REFERENCE (the engine
+ * freezes the item at yield); a message that fails the narrowing is dropped.
  */
 type VariablesMessage = VariablesTraceEvent;
 
