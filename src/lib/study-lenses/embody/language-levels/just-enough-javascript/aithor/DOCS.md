@@ -29,16 +29,18 @@ boundary so the rest is data-in, data-out:
   When the device cannot bring a model up, the request short-circuits to a
   refusal.
 - **Candidate generation** — input: a built prompt + a model handle; output: a
-  raw candidate. **Async, non-deterministic (seam 2 — the model call).** The
-  same request yields different candidates; the only non-reproducible point.
-- **Disposition** — input: a raw candidate (+ request); output: a conformant
-  program + meta, a raw candidate as-is, or a structured refusal.
-  **Validate-forked.** Under `validate: true` the candidate faces admission (the
-  level's gate, async) then conformance (the aithor's pure check, sync); on a
-  pass it is shaped into a result with meta, on a fail it routes to a repair
-  turn within an attempt bound, and the exhausted bound shapes a refusal. Under
-  `validate: false` the candidate is shaped unmodified — no admission, no
-  conformance, no repair.
+  decomposed result (`raw` + extracted `code`). **Async, non-deterministic (seam
+  2 — the model call).** The same request yields different results; the only
+  non-reproducible point. The handle is the runtime's; this phase reads its
+  result, never the model's fetch/cache.
+- **Disposition** — input: a decomposed result (+ request); output: a conformant
+  program + meta, the raw output as-is, or a structured refusal.
+  **Validate-forked.** Under `validate: true` the result's extracted `code` faces
+  admission (the level's gate, async) then conformance (the aithor's pure check,
+  sync); on a pass it is shaped into a result with meta, on a fail it routes to a
+  repair turn within an attempt bound, and the exhausted bound shapes a refusal.
+  Under `validate: false` the result's byte-exact `raw` is returned unmodified —
+  no admission, no conformance, no repair.
 
 ## Data flow
 
@@ -47,9 +49,9 @@ flowchart TD
     request[("request<br/>(input program + config)")] -->|"build prompt, pure<br/>(constraints stringified in,<br/>regardless of validate)"| prompt[("built prompt")]
     prompt -->|"bring model up, async stateful<br/>(load-once; fetch/cache below seam)"| avail{"model<br/>available?"}
     avail -->|"no"| refusal[("structured refusal<br/>(validate-aware cause)")]
-    avail -->|"yes — call model,<br/>async non-deterministic"| candidate[("raw candidate")]
-    candidate -->|"validate: false —<br/>pass through, unmodified"| raw[("raw program as result<br/>(uncurated, drift and all)")]
-    candidate -->|"validate: true —<br/>admit (async) + conform (pure)"| gate{"admitted and<br/>conformant?"}
+    avail -->|"yes — call model,<br/>async non-deterministic"| candidate[("decomposed result<br/>(raw + extracted code)")]
+    candidate -->|"validate: false —<br/>raw, unmodified"| raw[("raw program as result<br/>(uncurated, drift and all)")]
+    candidate -->|"validate: true —<br/>admit + conform the code"| gate{"admitted and<br/>conformant?"}
     gate -->|"both pass"| curated[("conformant program + meta<br/>(curated)")]
     gate -->|"either fails —<br/>repair within attempt bound"| prompt
     gate -.->|"attempt bound exhausted"| refusal
@@ -64,7 +66,7 @@ causes converge on one refusal state.
 
 - **The two seams are the only impure points** (load-bearing): the stateful
   loader (name → handle, load-once) and the non-deterministic model call (handle
-  → candidate). Everything else — prompt construction, conformance, the validate
+  → decomposed result). Everything else — prompt construction, conformance, the validate
   fork, the attempt bound, result-shaping, refusal-cause selection — is pure
   given those two injected. Conformance never reaches the model.
 - **The curated boundary holds, fail-loud.** Under `validate: true` a candidate

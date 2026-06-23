@@ -12,7 +12,7 @@
  *
  * Two impure seams are isolated behind a pure core (prompt construction,
  * `conform`, the `validate`-gated loop, result-shaping): a non-deterministic
- * {@link Model} call and a stateful load-once {@link ModelLoader}, injected as
+ * {@link LoadedModel} call and a stateful load-once {@link ModelLoader}, injected as
  * an optional `runtime` third argument so the WHAT/HOW split holds — `config`
  * is what to make, `runtime` is the excluded how (the local-model fetch/cache
  * sit below the loader seam).
@@ -32,6 +32,7 @@
 import type { Program } from 'acorn';
 
 import type { SourceRange } from '../../../lib/validating/types.js';
+import type { LoadedModel } from '../../../../lib/local-llm/types.js';
 
 // ─── Feature subset (permitted constructs + operators) ────────────────
 
@@ -158,29 +159,31 @@ type ConformResult = {
 // ─── Model seams (injected; runtime excluded) ─────────────────────────
 
 /**
- * A loaded LOCAL model handle — the non-deterministic seam. `generate` takes
- * the fully built prompt and resolves to one candidate program; the same
- * prompt may yield different candidates (generation is not reproducible). Tests
- * inject a fake whose `generate` returns canned candidates.
- */
-type Model = {
-	readonly generate: (prompt: string) => Promise<string>;
-};
-
-/**
  * Brings a named local model into memory, load-once — the stateful seam. The
- * load-once-reuse lifecycle and the one-time fetch/cache below it are the
- * runtime's, not the aithor's. Rejects (surfacing as a `no-model-available`
- * refusal) when the device cannot bring the model up; there is no remote
- * fallback. Tests inject a counted loader to assert load-once with no real
- * fetch.
+ * handle is a {@link LoadedModel} owned by the injected local-llm runtime
+ * (`lib/local-llm/`), NOT defined here: aithor names WHICH model and drives WHEN;
+ * the runtime owns the fetch/cache/load. Its `generate` resolves to a decomposed
+ * `GenerationResult` — aithor conforms its `code` on the curated path and returns
+ * its byte-exact `raw` on the uncurated one (the non-deterministic seam: the same
+ * prompt may yield different results).
+ *
+ * Resolves to the handle, or — value, NOT a throw — a {@link Refusal}
+ * (`no-model-available`) when the device cannot bring the model up. That collapses
+ * local-llm's `LoadFailure` (its `no-feasible-model` and `fetch-failed` causes)
+ * into aithor's single device-availability cause, matching both aithor's
+ * `ok`-boolean convention and the runtime's own value-not-throw decision. There is
+ * no remote fallback. Tests inject a counted loader returning a fake whose
+ * `generate` returns canned results, to assert load-once with no real fetch.
  */
-type ModelLoader = (name: string) => Promise<Model>;
+type ModelLoader = (name: string) => Promise<LoadedModel | Refusal>;
 
 /**
  * The injectable runtime — the excluded HOW behind the WHAT of `config`.
- * Optional third argument to `aithor`; omitted, it defaults to the real
- * local-model runtime, so the public contract stays effectively two-arg.
+ * Optional third argument to `aithor`; omitted, it defaults to a thin adapter
+ * over the real local-llm runtime, so the public contract stays effectively
+ * two-arg. That default adapter (Phase-1 wiring) constructs the local-llm runtime
+ * with a host-supplied `AdapterMap` and re-maps its `load(selection)` →
+ * `loadModel(name)`; it is named here, not a zero-config given.
  */
 type AithorRuntime = {
 	readonly loadModel: ModelLoader;
@@ -244,7 +247,9 @@ type ResolvedAithorConfig = {
  * - `'attempt-bound-exhausted'` — curated only: the loop ran out of attempts
  *   (some subset × size × intent requests are unsatisfiable).
  * - `'no-model-available'` — either path: the device cannot bring a local model
- *   up. The only uncurated refusal cause.
+ *   up. The only uncurated refusal cause, and the re-mapping of local-llm's
+ *   `LoadFailure` — both its `no-feasible-model` and `fetch-failed` causes
+ *   collapse into this single device-availability cause.
  */
 type RefusalCause = 'attempt-bound-exhausted' | 'no-model-available';
 
@@ -296,7 +301,6 @@ export type {
 	SizeViolation,
 	ConformanceViolation,
 	ConformResult,
-	Model,
 	ModelLoader,
 	AithorRuntime,
 	AithorConfig,

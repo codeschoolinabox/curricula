@@ -231,9 +231,11 @@ design, and the rawness is the lesson, not a defect.
   Under `validate: true` it passes the same two gates as a from-scratch program;
   how far it departs from the input is the model's call, not a guaranteed
   faithfulness.
-- **Candidate** — one program the model proposes for a request. Under
-  `validate: true` it faces the gates before becoming a result; under
-  `validate: false` it _is_ the result, unmodified.
+- **Candidate** — one program the model proposes for a request, taken from the
+  decomposed `GenerationResult`: the extracted `code` on the curated path, the
+  byte-exact `raw` on the uncurated one. Under `validate: true` the candidate
+  (`code`) faces the gates before becoming a result; under `validate: false` the
+  candidate (`raw`) _is_ the result, unmodified.
 - **Admission** — the **level's** gate, `isJej(code)`: the program is valid and
   properly formatted full JEJ. Owned by
   [`../../../lib/validating/`](../../../lib/validating/), reused **unchanged** —
@@ -266,19 +268,22 @@ design, and the rawness is the lesson, not a defect.
   device cannot bring one up the aithor refuses rather than reaching for a
   remote one. A curated request whose spec no program can satisfy refuses for
   the bound, expectedly.
-- **Model handle** — the loaded language model, always a **local** one: it runs
-  on the learner's own device, never a remote service. The config selects it by
-  **name** from an **open set** of models spread along a **size/capability
-  spectrum** — a smaller model downloads less and loads and runs faster but
-  writes weaker programs; a larger one downloads more and runs slower but writes
-  stronger ones — so a caller matches the choice to the machine's power and its
-  network/storage budget, and the set **grows as small portable models
-  improve**. A named model is **fetched once and cached on the device**, then
-  **brought into memory on first use** and reused thereafter — a fetch-once,
-  load-once-reuse lifecycle this module owns. The network is touched only for
-  that one-time fetch; every later load is from the cache, offline. The model's
-  identity is a parameter; the model _runtime_ (how a model executes) is outside
-  this module.
+- **Model handle** — a **`LoadedModel`** from the injected local-llm runtime
+  ([`lib/local-llm/`](../../../../lib/local-llm/README.md)), always a **local**
+  one: it runs on the learner's own device, never a remote service. The config
+  selects it by **name** from local-llm's **open set** of models along a
+  **size/capability spectrum** — smaller downloads less and runs faster but writes
+  weaker programs, larger the reverse — and the set **grows as small portable
+  models improve**. The named model is **fetched once and cached on the device**,
+  then **brought into memory on first use** and reused thereafter — a fetch-once,
+  load-once-reuse lifecycle the **runtime** owns; aithor names _which_ model and
+  drives _when_, not _how_. The network is touched only for that one-time fetch;
+  every later load is from the cache, offline. Its `generate` resolves to a
+  decomposed `GenerationResult` (`raw` byte-exact, `code` the extracted program);
+  aithor conforms `.code` and returns `.raw` per quadrant. The runtime also
+  offers a one-time-fetch progress callback, which aithor does not surface — by
+  the pure-seeming commitment below. The model _runtime_ (how a model executes)
+  is outside this module.
 
 ## What it produces (the boundary)
 
@@ -440,7 +445,7 @@ Internally the only impure dependencies are the **non-deterministic model call**
 and the **stateful model loader** (the load-once bring-up of the handle — the
 runtime's fetch and cache sit below this seam); everything else — including the
 whole **conformance check** — is pure. Tests pass a fake model (canned
-candidates) and a counted loader (to assert load-once, with no real fetch).
+results) and a counted loader (to assert load-once, with no real fetch).
 
 - **Conformance is a pure unit.** `conform(code, subset, size)` takes only data
   and returns a verdict + violations — the richest unit-test surface here,

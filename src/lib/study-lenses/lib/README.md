@@ -35,6 +35,9 @@ lib/
                          formatting delegated to the runtime formatter
   linting/               validation-feed adapter: JeJ violations
                          shaped as editor lint diagnostics
+  local-llm/             device-local LLM runtime: capability-aware
+                         model selection + load-once backends, returns
+                         decomposed code — code-oriented, JeJ-agnostic
 ```
 
 Adapters land here as the package's tooling needs expand.
@@ -92,3 +95,7 @@ Inherits all conventions from [`../README.md`](../README.md),
     format-callback adapter delegating to the canonical formatter.
   - [`./linting/README.md`](./linting/README.md) — validation-feed adapter for
     editor lint diagnostics.
+  - [`./local-llm/README.md`](./local-llm/README.md) — device-local
+    language-model runtime: capability-aware model selection and load-once
+    backends, returning decomposed code; code-oriented and JeJ-agnostic. Injected
+    by aithor as its model runtime.
