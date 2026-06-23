@@ -947,7 +947,7 @@ contract.
 - `data-orchestrator-dock-sandbox-toggle` — the sandbox toggle control; `="worker"`
   or `="danger"` (present only when the danger sandbox is available).
 - `data-orchestrator-dock-limit` — each run-limit input; `="seconds"` or
-  `="iterations"`.
+  `="iterations"` (always present, unlike the danger-gated controls above).
 - `data-orchestrator-dock-debugger` — the debugger option (present only in danger
   mode).
 - `data-orchestrator-dock-run` — the Run button.

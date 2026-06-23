@@ -23,6 +23,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -45,6 +47,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -66,6 +70,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -90,6 +96,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			fireEvent.click(
@@ -113,6 +121,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -135,6 +145,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -160,6 +172,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			fireEvent.click(
@@ -183,6 +197,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -203,6 +219,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -223,6 +241,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			const describedBy = container
@@ -247,6 +267,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -268,6 +290,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -292,6 +316,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			const controlsId = container
@@ -318,6 +344,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -340,6 +368,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -362,6 +392,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -382,6 +414,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -406,6 +440,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -426,6 +462,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -446,6 +484,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -466,6 +506,8 @@ describe('Dock', () => {
 					debuggerEnabled={true}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -488,6 +530,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -510,6 +554,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			expect(
@@ -535,6 +581,8 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={onSandboxToggle}
 					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			fireEvent.click(
@@ -557,12 +605,195 @@ describe('Dock', () => {
 					debuggerEnabled={false}
 					onSandboxToggle={() => {}}
 					onDebuggerToggle={onDebuggerToggle}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
 				/>,
 			);
 			fireEvent.click(
 				container.querySelector('[data-orchestrator-dock-debugger]')!,
 			);
 			expect(onDebuggerToggle).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('Boundary — the run-limit inputs', () => {
+		it('the seconds input carries the seconds value', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-limit="seconds"]',
+				)?.value,
+			).toBe('5');
+		});
+
+		it('the iterations input carries the iterations value', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-limit="iterations"]',
+				)?.value,
+			).toBe('1000');
+		});
+
+		it('gives the seconds input a non-empty aria-label', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+				/>,
+			);
+			expect(
+				container
+					.querySelector('[data-orchestrator-dock-limit="seconds"]')
+					?.getAttribute('aria-label')?.length,
+			).toBeGreaterThan(0);
+		});
+
+		it('gives the iterations input a non-empty aria-label', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+				/>,
+			);
+			expect(
+				container
+					.querySelector('[data-orchestrator-dock-limit="iterations"]')
+					?.getAttribute('aria-label')?.length,
+			).toBeGreaterThan(0);
+		});
+
+		it('carries non-default values on two distinct number inputs', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 10, iterations: 500 }}
+					onLimitChange={() => {}}
+				/>,
+			);
+			const seconds = container.querySelector<HTMLInputElement>(
+				'[data-orchestrator-dock-limit="seconds"]',
+			);
+			const iterations = container.querySelector<HTMLInputElement>(
+				'[data-orchestrator-dock-limit="iterations"]',
+			);
+			// Non-default values kill a hardcoded-pair fake; type="number" locks the
+			// numeric-input contract the C3-C5 run lifecycle depends on.
+			expect(seconds?.value).toBe('10');
+			expect(iterations?.value).toBe('500');
+			expect(seconds?.getAttribute('type')).toBe('number');
+			expect(iterations?.getAttribute('type')).toBe('number');
+		});
+	});
+
+	describe('Interface — editing the run limits', () => {
+		it('editing the seconds input reports onLimitChange with the seconds field and the new number', () => {
+			const onLimitChange = vi.fn();
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={onLimitChange}
+				/>,
+			);
+			fireEvent.change(
+				container.querySelector('[data-orchestrator-dock-limit="seconds"]')!,
+				{ target: { value: '7' } },
+			);
+			expect(onLimitChange).toHaveBeenCalledWith('seconds', 7);
+		});
+
+		it('editing the iterations input reports onLimitChange with the iterations field and the new number', () => {
+			const onLimitChange = vi.fn();
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={onLimitChange}
+				/>,
+			);
+			fireEvent.change(
+				container.querySelector('[data-orchestrator-dock-limit="iterations"]')!,
+				{ target: { value: '500' } },
+			);
+			expect(onLimitChange).toHaveBeenCalledWith('iterations', 500);
 		});
 	});
 });

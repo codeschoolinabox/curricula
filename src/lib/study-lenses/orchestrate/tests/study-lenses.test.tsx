@@ -1978,3 +1978,83 @@ describe('<StudyLenses> — Cycle 3 B1-2 the dock sandbox toggle (wire + dispatc
 		});
 	});
 });
+
+describe('<StudyLenses> — Cycle 3 C1-C2 the dock run-limits slot (seed + update)', () => {
+	describe('Zero — built-in defaults when configs absent', () => {
+		it('seeds both limits from the built-in defaults', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-limit="seconds"]',
+				)?.value,
+			).toBe('5');
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-limit="iterations"]',
+				)?.value,
+			).toBe('1000');
+		});
+	});
+
+	describe('One — seeding from configs.orchestrator.runLimits', () => {
+		it('seeds the seconds limit from config, iterations from the default', () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="OK"
+					configs={{ orchestrator: { runLimits: { seconds: 10 } } }}
+				/>,
+			);
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-limit="seconds"]',
+				)?.value,
+			).toBe('10');
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-limit="iterations"]',
+				)?.value,
+			).toBe('1000');
+		});
+	});
+
+	describe('Boundary — partial config fills the unset field from defaults', () => {
+		it('seeds iterations from config and seconds from the default', () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="OK"
+					configs={{ orchestrator: { runLimits: { iterations: 50 } } }}
+				/>,
+			);
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-limit="iterations"]',
+				)?.value,
+			).toBe('50');
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-limit="seconds"]',
+				)?.value,
+			).toBe('5');
+		});
+	});
+
+	describe('Interface — editing updates the slot (controlled round-trip)', () => {
+		it('editing the seconds limit updates it in-session and leaves iterations untouched', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			fireEvent.change(
+				container.querySelector('[data-orchestrator-dock-limit="seconds"]')!,
+				{ target: { value: '7' } },
+			);
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-limit="seconds"]',
+				)?.value,
+			).toBe('7');
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-limit="iterations"]',
+				)?.value,
+			).toBe('1000');
+		});
+	});
+});

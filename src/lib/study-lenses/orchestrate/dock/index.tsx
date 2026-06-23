@@ -18,7 +18,7 @@
 import React from 'react';
 
 import type { SnippetType } from '../../embody/types.js';
-import type { SandboxMode } from '../types.js';
+import type { RunLimits, SandboxMode } from '../types.js';
 
 type DockProperties = Readonly<{
 	/** The dock's display state — surfaced as `data-orchestrator-dock-collapsed`. */
@@ -67,6 +67,18 @@ type DockProperties = Readonly<{
 
 	/** Called when the learner toggles the danger-only debugger. */
 	readonly onDebuggerToggle: () => void;
+
+	/**
+	 * The current run limits (seconds + iterations) — each surfaced as a
+	 * value-bearing `data-orchestrator-dock-limit="seconds|iterations"` input.
+	 */
+	readonly runLimits: RunLimits;
+
+	/** Called when the learner edits a run-limit input (field + the new number). */
+	readonly onLimitChange: (
+		field: 'seconds' | 'iterations',
+		value: number,
+	) => void;
 }>;
 
 /**
@@ -87,6 +99,8 @@ function Dock({
 	debuggerEnabled,
 	onSandboxToggle,
 	onDebuggerToggle,
+	runLimits,
+	onLimitChange,
 }: DockProperties): React.JSX.Element {
 	// Per-instance element ids for the dock's intra-component ARIA wiring —
 	// `useId` keeps them unique across multiple <StudyLenses> step-stones on one
@@ -142,6 +156,24 @@ function Dock({
 						onChange={onDebuggerToggle}
 					/>
 				) : null}
+				<input
+					type="number"
+					data-orchestrator-dock-limit="seconds"
+					aria-label="run time limit in seconds"
+					value={runLimits.seconds}
+					onChange={(event) =>
+						onLimitChange('seconds', Number(event.target.value))
+					}
+				/>
+				<input
+					type="number"
+					data-orchestrator-dock-limit="iterations"
+					aria-label="run loop-iteration limit"
+					value={runLimits.iterations}
+					onChange={(event) =>
+						onLimitChange('iterations', Number(event.target.value))
+					}
+				/>
 			</div>
 		</div>
 	);

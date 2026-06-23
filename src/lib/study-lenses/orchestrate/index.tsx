@@ -71,6 +71,7 @@ import type {
 	LensSelectionSource,
 	OrchestratorConfig,
 	OrchestratorState,
+	RunLimits,
 	SandboxMode,
 	StationStatusMap,
 	StudyLensesProps as StudyLensesProperties,
@@ -128,6 +129,17 @@ const LIVE_REEMBODY_DEBOUNCE_MS = 200;
  * push effect (keyed on prop identity) does not re-fire for "still nothing".
  */
 const EMPTY_DIAGNOSTICS: readonly LintDiagnostic[] = Object.freeze([]);
+
+/**
+ * Built-in run limits — the per-field fallback when `configs.orchestrator.runLimits`
+ * omits a field (the dock's run-limit slot seeds from config, falling back here).
+ * `seconds: 5` + `iterations: 1000` mirror the embody evaluate examples
+ * (`run(code, { seconds: 5, iterations: 1000 })`). Frozen — the slot's invariant value.
+ */
+const DEFAULT_RUN_LIMITS: RunLimits = Object.freeze({
+	seconds: 5,
+	iterations: 1000,
+});
 
 /**
  * Single-pass initial derivation of `{ state, liveEmbodiment }` from the
@@ -678,6 +690,37 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			setDebuggerEnabled((previous) => !previous);
 		}
 
+		// Dock run-limit slot — the learner-facing seconds + iterations execution
+		// limits. Seeded ONCE at mount from `configs.orchestrator.runLimits`
+		// (partial; each unset field falls back to DEFAULT_RUN_LIMITS), the same
+		// mount-only-config posture as `type` and `dangerAvailable`.
+		// `handleLimitChange` rewrites one field via a functional updater minting a
+		// fresh FROZEN object (no mutation; DEV.md §8). The values feed the future
+		// EvaluateOptions; this increment seeds + edits the slot only.
+		function seedRunLimits(): RunLimits {
+			const configured = readOrchestratorConfig(configs)?.runLimits;
+			return Object.freeze({
+				seconds: configured?.seconds ?? DEFAULT_RUN_LIMITS.seconds,
+				iterations: configured?.iterations ?? DEFAULT_RUN_LIMITS.iterations,
+			});
+		}
+		const [runLimits, setRunLimits] = React.useState<RunLimits>(seedRunLimits);
+		function handleLimitChange(
+			field: 'seconds' | 'iterations',
+			value: number,
+		): void {
+			// Slot-integrity guard: keep a non-finite value out of the slot so it
+			// can't reach the future EvaluateOptions. Unreachable through the
+			// type=number input today (it sanitizes invalid text to '' → Number 0),
+			// so this is defense against a direct or future caller. 0 and negatives
+			// pass here; positivity / min-bound semantics belong to the run lifecycle
+			// (C3-C5).
+			if (!Number.isFinite(value)) return;
+			setRunLimits((previous) =>
+				Object.freeze({ ...previous, [field]: value }),
+			);
+		}
+
 		// The panel's active lens is derived from state, NOT held in a
 		// panel-side slot. State remains the single source of truth (per
 		// README § Picker-vs-prop ownership). Lens mode names the active
@@ -750,6 +793,8 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 							debuggerEnabled={debuggerEnabled}
 							onSandboxToggle={handleSandboxToggle}
 							onDebuggerToggle={handleDebuggerToggle}
+							runLimits={runLimits}
+							onLimitChange={handleLimitChange}
 						/>
 					</section>
 				</div>
@@ -789,6 +834,8 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						debuggerEnabled={debuggerEnabled}
 						onSandboxToggle={handleSandboxToggle}
 						onDebuggerToggle={handleDebuggerToggle}
+						runLimits={runLimits}
+						onLimitChange={handleLimitChange}
 					/>
 				</section>
 			</div>
