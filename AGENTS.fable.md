@@ -86,6 +86,18 @@ encouragement. They cannot be overridden by momentum.
     subagents. Do not substitute in-context self-review for either.
     Current-generation agents under-reach for subagents by default; this line is
     the counterweight.
+12. **Validate every handoff with a context-free agent** — before handing off
+    at any increment-cluster or phase boundary (and before any deliberate
+    cold-start), spawn a fresh subagent with NO session context, give
+    it the RESUMPTION POINT plus the launch/handoff prompt, and have it report
+    whether it could orient and execute the next step and exactly where it would
+    stumble. Apply its must-fix findings before the handoff is final. The author
+    holds all the context the next agent lacks and is therefore structurally
+    blind to their own gaps — this is the same bias-correction the ARs apply to
+    code. **This step is routinely skipped — writing the handoff feels like
+    finishing, so the validation never runs. Do not skip it.** Only the human
+    waives it. (Full protocol: § Context Compaction Protocol → Cold-start
+    handoffs.)
 
 > If these feel like friction, that friction is working as intended.
 
