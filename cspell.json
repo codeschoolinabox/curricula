@@ -66,7 +66,8 @@
 		"unrefetchable",
 		"webgpu",
 		"webllm",
-		"wllama"
+		"wllama",
+		"qwen"
 	],
 	"ignorePaths": [
 		"node_modules",
