@@ -729,6 +729,12 @@ need the new active lens name at mode-change time should subscribe to
 `lens-switched` and read the `to` field from the most recently observed
 `mode-changed`.
 
+When a dock type toggle from lens mode returns to editor mode (disposability),
+`mode-changed` (`lens` → `editor`) is dispatched **before** `type-toggled` — the
+same frame-event-first ordering: the mode transition is announced, then the
+specific change within it. (An editor-mode toggle dispatches `type-toggled`
+alone, since the mode does not change.)
+
 Edit-return transitions (lens → editor) dispatch only `mode-changed`; no
 `lens-switched` fires because no lens is being selected.
 

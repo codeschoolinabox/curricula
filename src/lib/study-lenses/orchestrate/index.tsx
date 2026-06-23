@@ -160,7 +160,8 @@ function deriveInitialState(
 		// snippet I already embodied?", not "what does this code do?".
 		const liveEmbodiment: LiveEmbodiment =
 			previousLiveEmbodiment !== null &&
-			previousLiveEmbodiment.snippet === snippet
+			previousLiveEmbodiment.snippet === snippet &&
+			previousLiveEmbodiment.type === type
 				? previousLiveEmbodiment
 				: { snippet, type, embodiment: embody(snippet) };
 		const state: LensModeState = {
@@ -172,14 +173,17 @@ function deriveInitialState(
 	}
 	return {
 		state: { mode: 'editor' },
-		// Retain-or-seed: keep a non-null slot across a lens → editor transition;
-		// seed a fresh embodiment at editor-mode mount (when the slot is still
-		// null) so the gutter can paint on the first frame.
-		liveEmbodiment: previousLiveEmbodiment ?? {
-			snippet,
-			type,
-			embodiment: embody(snippet),
-		},
+		// Retain-or-seed: keep a non-null slot across a lens → editor transition
+		// (the live slot is keyed by the (snippet, type) pair, so retention
+		// requires the type to match — a type toggle changes it, forcing a
+		// re-seed under the new type); seed a fresh embodiment at editor-mode
+		// mount (when the slot is still null) so the gutter can paint on the
+		// first frame.
+		liveEmbodiment:
+			previousLiveEmbodiment !== null &&
+			previousLiveEmbodiment.type === type
+				? previousLiveEmbodiment
+				: { snippet, type, embodiment: embody(snippet) },
 	};
 }
 
@@ -315,7 +319,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// handlers/effects (the same read-only-in-effects invariant as
 		// `snippetReference`) so the trailing-edge re-embody and the prop-change
 		// transition never capture a stale type.
-		const [type] = React.useState<SnippetType>(
+		const [type, setType] = React.useState<SnippetType>(
 			() => readOrchestratorConfig(configs)?.initialType ?? 'module',
 		);
 		const typeReference = React.useRef(type);
@@ -483,6 +487,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		function applyTransition(
 			nextLens: string | undefined,
 			source: LensSelectionSource,
+			nextType: SnippetType = typeReference.current,
 		): void {
 			// Cancel any pending debounced re-embody before flipping. The flush
 			// below brings the slot to the exact current buffer, and a mode flip
@@ -499,7 +504,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 				nextLens,
 				configs,
 				liveEmbodimentReference.current,
-				typeReference.current,
+				nextType,
 			);
 			setState(next.state);
 			setLiveEmbodiment(next.liveEmbodiment);
@@ -625,12 +630,42 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			setCollapsed((previous) => !previous);
 		}
 
+		// Type toggle (dock) — flips the source type. `applyTransition` cancels any
+		// pending debounced re-embody and re-seeds the live slot under the
+		// EXPLICITLY-threaded new type (not the still-stale `typeReference.current`,
+		// which only updates on the next render); from lens mode it routes through
+		// the editor branch first (disposability + the (snippet, type) coherence
+		// invariant). `setType` flips the slot in the same React batch. The
+		// `'edit-button'` source is unused on the → editor path (no lens-switched
+		// fires there).
+		function handleTypeToggle(): void {
+			const { current: currentType } = typeReference;
+			const next: SnippetType = currentType === 'module' ? 'script' : 'module';
+			setType(next);
+			applyTransition(undefined, 'edit-button', next);
+			busReference.current!.dispatch('type-toggled', {
+				from: currentType,
+				to: next,
+			});
+		}
+
 		// The panel's active lens is derived from state, NOT held in a
 		// panel-side slot. State remains the single source of truth (per
 		// README § Picker-vs-prop ownership). Lens mode names the active
 		// lens (each station rostering it shows it as its dropdown value);
 		// editor mode passes null and every dropdown shows the sentinel.
 		const activeLens = state.mode === 'lens' ? state.activeLens : null;
+
+		// The dock's script-mode hint shows when module-admissible code (the
+		// admission gate accepted it) sits in script mode — the one state where
+		// the LL stations are absent with nothing in the gutter to say why.
+		// Snippet-content-blind: reads the gate's `validation` output, never the
+		// source. Honest under stubs: real code carries `validation: null` until
+		// the validating slice lands, so the hint stays dormant there (the
+		// `EVAL_*`/`OK` apex scenarios drive `isJeJ: true` for tests).
+		const scriptModeHintVisible =
+			type === 'script' &&
+			liveEmbodiment?.embodiment.validation?.isJeJ === true;
 
 		if (state.mode === 'lens') {
 			// Coherence invariant (enforced by transition logic; the type system
@@ -648,6 +683,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			if (liveEmbodiment.snippet !== snippet) {
 				throw new Error(
 					'orchestrator invariant violated: lens mode requires a live embodiment matching the current snippet (stale slot)',
+				);
+			}
+			if (liveEmbodiment.type !== type) {
+				throw new Error(
+					'orchestrator invariant violated: lens mode requires a live embodiment matching the current source type (stale slot)',
 				);
 			}
 			const lensModule = LENS_REGISTRY[state.activeLens];
@@ -670,7 +710,13 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						data-orchestrator-omnipresent-region
 						aria-label="study tools"
 					>
-						<Dock collapsed={collapsed} onCollapseToggle={handleCollapseToggle} />
+						<Dock
+							collapsed={collapsed}
+							onCollapseToggle={handleCollapseToggle}
+							sourceType={type}
+							scriptModeHintVisible={scriptModeHintVisible}
+							onTypeToggle={handleTypeToggle}
+						/>
 					</section>
 				</div>
 			);
@@ -698,7 +744,13 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 					interpretedDiagnostics={interpretedDiagnostics}
 				/>
 				<section data-orchestrator-omnipresent-region aria-label="study tools">
-					<Dock collapsed={collapsed} onCollapseToggle={handleCollapseToggle} />
+					<Dock
+						collapsed={collapsed}
+						onCollapseToggle={handleCollapseToggle}
+						sourceType={type}
+						scriptModeHintVisible={scriptModeHintVisible}
+						onTypeToggle={handleTypeToggle}
+					/>
 				</section>
 			</div>
 		);

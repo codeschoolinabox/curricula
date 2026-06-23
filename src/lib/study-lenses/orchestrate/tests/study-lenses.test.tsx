@@ -1702,3 +1702,152 @@ describe('<StudyLenses> — Cycle 3 A1 config-seeded source type', () => {
 		});
 	});
 });
+
+describe('<StudyLenses> — Cycle 3 A2-3 the dock type toggle (re-embody + dispatch)', () => {
+	describe('One — toggling re-keys the live slot', () => {
+		it('toggling module→script hides the language-level stations', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-dock-type-toggle]')!,
+			);
+			expect(
+				container.querySelectorAll('[data-orchestrator-station]'),
+			).toHaveLength(2);
+		});
+
+		it('a toggle cancels a pending debounced re-embody (no late stale write)', async () => {
+			const embodySpy = vi.spyOn(embodyModule, 'default');
+			try {
+				const { container } = render(<StudyLenses snippet="let x = 1;" />);
+				const view = await findMountedEditorView(container);
+				vi.useFakeTimers();
+				try {
+					typeInto(view, 'let y = 2;');
+					fireEvent.click(
+						container.querySelector('[data-orchestrator-dock-type-toggle]')!,
+					);
+					act(() => {
+						vi.advanceTimersByTime(200);
+					});
+					expect(embodySpy).toHaveBeenCalledTimes(2);
+				} finally {
+					vi.useRealTimers();
+				}
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+	});
+
+	describe('Interface — the type-toggled event', () => {
+		it('toggling module→script dispatches type-toggled {from: module, to: script}', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(<StudyLenses snippet="let x = 1;" />);
+				fireEvent.click(
+					container.querySelector('[data-orchestrator-dock-type-toggle]')!,
+				);
+				expect(dispatchSpy).toHaveBeenCalledWith('type-toggled', {
+					from: 'module',
+					to: 'script',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('toggling script→module dispatches type-toggled {from: script, to: module}', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(
+					<StudyLenses
+						snippet="let x = 1;"
+						configs={{ orchestrator: { initialType: 'script' } }}
+					/>,
+				);
+				fireEvent.click(
+					container.querySelector('[data-orchestrator-dock-type-toggle]')!,
+				);
+				expect(dispatchSpy).toHaveBeenCalledWith('type-toggled', {
+					from: 'script',
+					to: 'module',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+	});
+
+	describe('Boundary — toggling from lens mode returns to editor first', () => {
+		it('toggling while a lens is mounted lands back in editor mode', () => {
+			const { container } = render(
+				<StudyLenses snippet="let x = 1;" lens="debug-props" />,
+			);
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-dock-type-toggle]')!,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-host]'),
+			).not.toBeNull();
+		});
+
+		it('toggling from lens mode dispatches mode-changed {from: lens, to: editor}', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(
+					<StudyLenses snippet="let x = 1;" lens="debug-props" />,
+				);
+				fireEvent.click(
+					container.querySelector('[data-orchestrator-dock-type-toggle]')!,
+				);
+				expect(dispatchSpy).toHaveBeenCalledWith('mode-changed', {
+					from: 'lens',
+					to: 'editor',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('dispatches mode-changed before type-toggled when toggling from lens mode', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(
+					<StudyLenses snippet="let x = 1;" lens="debug-props" />,
+				);
+				dispatchSpy.mockClear();
+				fireEvent.click(
+					container.querySelector('[data-orchestrator-dock-type-toggle]')!,
+				);
+				const eventNames = dispatchSpy.mock.calls.map((args) => args[0]);
+				expect(eventNames).toEqual(['mode-changed', 'type-toggled']);
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+	});
+
+	describe('Boundary — the script-mode hint', () => {
+		it('toggling module-admissible code into script mode reveals the hint', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-dock-type-toggle]')!,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-dock-type-hint]'),
+			).not.toBeNull();
+		});
+	});
+});
