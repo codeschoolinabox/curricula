@@ -51,7 +51,22 @@
 		"unparseable",
 		"mousedown",
 		"mousemove",
-		"mouseup"
+		"mouseup",
+		"aithor",
+		"dedup",
+		"dtype",
+		"Dtypes",
+		"GGUF",
+		"mediapipe",
+		"ollama",
+		"onnx",
+		"onnxruntime",
+		"sandboxed",
+		"uncurated",
+		"unrefetchable",
+		"webgpu",
+		"webllm",
+		"wllama"
 	],
 	"ignorePaths": [
 		"node_modules",
