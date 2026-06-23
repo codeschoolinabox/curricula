@@ -215,11 +215,6 @@ describe('classifyTokens', () => {
 			expect(result[0]?.role).toBe('boolean');
 		});
 
-		it('seeds a reserved-word operator with other', () => {
-			const result = classifyTokens(parse('typeof x'));
-			expect(result[0]?.role).toBe('other');
-		});
-
 		it('leaves an identifier role null', () => {
 			const result = classifyTokens(parse('x'));
 			expect(result[0]?.role).toBeNull();
@@ -522,6 +517,227 @@ describe('classifyTokens', () => {
 		});
 	});
 
+	describe('Operator roles', () => {
+		it('roles a declarator equals as declarator-init', () => {
+			const result = classifyTokens(parse('let x = 1'));
+			expect(result[2]?.role).toBe('declarator-init');
+		});
+
+		it('roles an assignment-expression equals as assignment', () => {
+			const result = classifyTokens(parse('x = 1'));
+			expect(result[1]?.role).toBe('assignment');
+		});
+
+		it('roles the outer equals of a chained init as declarator-init', () => {
+			const result = classifyTokens(parse('let x = y = 1'));
+			expect(result[2]?.role).toBe('declarator-init');
+		});
+
+		it('roles the inner equals of a chained init as assignment', () => {
+			const result = classifyTokens(parse('let x = y = 1'));
+			expect(result[4]?.role).toBe('assignment');
+		});
+
+		it('roles a compound assignment as assignment', () => {
+			const result = classifyTokens(parse('x += 1'));
+			expect(result[1]?.role).toBe('assignment');
+		});
+
+		it('roles a binary plus operator as binary', () => {
+			const result = classifyTokens(parse('a + b'));
+			expect(result[1]?.role).toBe('binary');
+		});
+
+		it('roles an exponentiation operator as binary', () => {
+			const result = classifyTokens(parse('a ** b'));
+			expect(result[1]?.role).toBe('binary');
+		});
+
+		it('roles a binary in operator as binary', () => {
+			const result = classifyTokens(parse('a in b'));
+			expect(result[1]?.role).toBe('binary');
+		});
+
+		it('roles a binary instanceof operator as binary', () => {
+			const result = classifyTokens(parse('a instanceof b'));
+			expect(result[1]?.role).toBe('binary');
+		});
+
+		it('roles a logical-and operator as logical', () => {
+			const result = classifyTokens(parse('a && b'));
+			expect(result[1]?.role).toBe('logical');
+		});
+
+		it('roles a logical-or operator as logical', () => {
+			const result = classifyTokens(parse('a || b'));
+			expect(result[1]?.role).toBe('logical');
+		});
+
+		it('roles a nullish-coalescing operator as logical', () => {
+			const result = classifyTokens(parse('a ?? b'));
+			expect(result[1]?.role).toBe('logical');
+		});
+
+		it('roles a prefix bang operator as unary', () => {
+			const result = classifyTokens(parse('!x'));
+			expect(result[0]?.role).toBe('unary');
+		});
+
+		it('roles the reserved-word operator typeof as unary', () => {
+			const result = classifyTokens(parse('typeof x'));
+			expect(result[0]?.role).toBe('unary');
+		});
+
+		it('roles the reserved-word operator void as unary', () => {
+			const result = classifyTokens(parse('void x'));
+			expect(result[0]?.role).toBe('unary');
+		});
+
+		it('roles the reserved-word operator delete as unary', () => {
+			const result = classifyTokens(parse('delete a.b'));
+			expect(result[0]?.role).toBe('unary');
+		});
+
+		it('roles a prefix increment operator as update', () => {
+			const result = classifyTokens(parse('++x'));
+			expect(result[0]?.role).toBe('update');
+		});
+
+		it('roles a postfix increment operator as update', () => {
+			const result = classifyTokens(parse('x++'));
+			expect(result[1]?.role).toBe('update');
+		});
+
+		it('roles a postfix increment before a binary plus as update', () => {
+			const result = classifyTokens(parse('x++ + y'));
+			expect(result[1]?.role).toBe('update');
+		});
+
+		it('roles the binary plus after a postfix increment as binary', () => {
+			const result = classifyTokens(parse('x++ + y'));
+			expect(result[2]?.role).toBe('binary');
+		});
+
+		it('roles the for-head declarator equals as declarator-init', () => {
+			const result = classifyTokens(parse('for (let i = 0; i < 3; i++) {}'));
+			expect(result[4]?.role).toBe('declarator-init');
+		});
+
+		it('roles the for-head comparison operator as binary', () => {
+			const result = classifyTokens(parse('for (let i = 0; i < 3; i++) {}'));
+			expect(result[8]?.role).toBe('binary');
+		});
+
+		it('roles the for-head update operator as update', () => {
+			const result = classifyTokens(parse('for (let i = 0; i < 3; i++) {}'));
+			expect(result[12]?.role).toBe('update');
+		});
+
+		it('leaves a for-in in operator with role other', () => {
+			const result = classifyTokens(parse('for (x in y) {}'));
+			expect(result[3]?.role).toBe('other');
+		});
+
+		it('leaves a default-value equals with role other', () => {
+			const result = classifyTokens(parse('function f(a = 1) {}'));
+			expect(result[4]?.role).toBe('other');
+		});
+	});
+
+	describe('Generator re-bin', () => {
+		it('re-bins a generator-function star to the delimiter category', () => {
+			const result = classifyTokens(parse('function* g(){}'));
+			expect(result[1]?.categories).toEqual(['delimiter']);
+		});
+
+		it('roles a generator-function star as generator', () => {
+			const result = classifyTokens(parse('function* g(){}'));
+			expect(result[1]?.role).toBe('generator');
+		});
+
+		it('leaves a re-binned generator star unpaired', () => {
+			const result = classifyTokens(parse('function* g(){}'));
+			expect(result[1]?.partner).toBeNull();
+		});
+
+		it('re-bins an anonymous function-expression generator star', () => {
+			const result = classifyTokens(parse('const g = function*(){}'));
+			expect(result[4]?.role).toBe('generator');
+		});
+
+		it('re-bins a class method generator star', () => {
+			const result = classifyTokens(parse('class A { *m(){} }'));
+			expect(result[3]?.role).toBe('generator');
+		});
+
+		it('re-bins an object property generator star', () => {
+			const result = classifyTokens(parse('({ *m(){} })'));
+			expect(result[2]?.role).toBe('generator');
+		});
+
+		it('re-bins a static method generator star', () => {
+			const result = classifyTokens(parse('class A { static *m(){} }'));
+			expect(result[4]?.role).toBe('generator');
+		});
+
+		it('re-bins an async generator-function star', () => {
+			const result = classifyTokens(parse('async function* g(){}'));
+			expect(result[2]?.role).toBe('generator');
+		});
+
+		it('re-bins the generator star of a function with a default param', () => {
+			const result = classifyTokens(parse('function* g(a = b * c){}'));
+			expect(result[1]?.categories).toEqual(['delimiter']);
+		});
+
+		it('roles that generator star as generator despite the default param', () => {
+			const result = classifyTokens(parse('function* g(a = b * c){}'));
+			expect(result[1]?.role).toBe('generator');
+		});
+
+		it('leaves the default-value equals of that function with role other', () => {
+			const result = classifyTokens(parse('function* g(a = b * c){}'));
+			expect(result[5]?.role).toBe('other');
+		});
+
+		it('roles the multiply inside that default param as binary', () => {
+			const result = classifyTokens(parse('function* g(a = b * c){}'));
+			expect(result[7]?.role).toBe('binary');
+		});
+	});
+
+	describe('Generator non-re-bin', () => {
+		it('leaves a multiply star in the operator category', () => {
+			const result = classifyTokens(parse('a * b'));
+			expect(result[1]?.categories).toEqual(['operator']);
+		});
+
+		it('roles a multiply star as binary', () => {
+			const result = classifyTokens(parse('a * b'));
+			expect(result[1]?.role).toBe('binary');
+		});
+
+		it('leaves a yield-delegate star in the operator category', () => {
+			const result = classifyTokens(parse('function* g(){ yield* h() }'));
+			expect(result[7]?.categories).toEqual(['operator']);
+		});
+
+		it('leaves a yield-delegate star with role other', () => {
+			const result = classifyTokens(parse('function* g(){ yield* h() }'));
+			expect(result[7]?.role).toBe('other');
+		});
+
+		it('leaves a namespace-import star in the operator category', () => {
+			const result = classifyTokens(parse('import * as ns from "x"'));
+			expect(result[1]?.categories).toEqual(['operator']);
+		});
+
+		it('leaves a namespace-import star with role other', () => {
+			const result = classifyTokens(parse('import * as ns from "x"'));
+			expect(result[1]?.role).toBe('other');
+		});
+	});
+
 	describe('Frozen', () => {
 		it('returns a frozen array', () => {
 			expect(Object.isFrozen(classifyTokens(parse('x')))).toBe(true);
@@ -535,6 +751,11 @@ describe('classifyTokens', () => {
 		it('returns a frozen categories sub-array', () => {
 			const result = classifyTokens(parse('x'));
 			expect(Object.isFrozen(result[0]?.categories)).toBe(true);
+		});
+
+		it('returns a frozen categories sub-array on a re-binned generator star', () => {
+			const result = classifyTokens(parse('function* g(){}'));
+			expect(Object.isFrozen(result[1]?.categories)).toBe(true);
 		});
 	});
 

@@ -40,12 +40,14 @@ helpers (newspaper anatomy: export first, helpers below).
 
 3. **AST role refinement** (pure, one AST traversal) — categories are already
    settled by the semantic classification table in phase 2 (reserved words
-   categorized by what they do); this phase refines OPENER roles only. A single
-   descent collects every `BlockStatement` start offset and every paren-owner
-   claim (a role plus the source range that locates its `(`). A block `{` sits
-   at `node.start`, but a paren is at no node's start, so each paren claim is
-   snapped to the first paren-opener token at/after its anchor. Closer roles are
-   phase 4's job.
+   categorized by what they do); this phase refines AST-context roles and
+   performs the one sanctioned home-category change. A single descent collects
+   every `BlockStatement` start offset, every paren-owner claim, every
+   operator-owner claim (a role plus the source range that locates the
+   operator), and every generator-star range. A block `{` sits at `node.start`,
+   but a paren / operator / generator `*` is at no node's start, so each claim
+   is snapped to the first matching token (paren opener / operator / `*`
+   operator) at/after its anchor. Closer roles are phase 4's job.
    - **Block brace role** (implemented): an open `{` at a `BlockStatement` start
      → `block` (object-literal, switch, and other braces keep their `'other'`
      seed).
@@ -55,12 +57,16 @@ helpers (newspaper anatomy: export first, helpers below).
      see Structural constraints § Grouping by elimination). Function / arrow /
      method parameter lists are claimed `'other'` (no finer JEJ role) so they
      are excluded from grouping.
-   - **Generator `*` re-bin** (deferred): function/method/property generator
-     stars move `operator` → `delimiter` with role `generator` — the single
-     sanctioned home-category change.
-   - **Operator role refinement** (deferred): `=` in a `VariableDeclarator` →
-     `declarator-init` vs in an `AssignmentExpression` → `assignment`; operator
-     roles from the owning expression node.
+   - **Operator role refinement** (implemented): `=` in a `VariableDeclarator` →
+     `declarator-init` vs in an `AssignmentExpression` → `assignment` (compound
+     `+=` included); `binary` / `logical` / `unary` (incl. `typeof` / `void` /
+     `delete`) / `update` from the owning expression node. Operators no
+     expression node claims — the `in` of a `for (… in …)` head, a default-value
+     `=` (`AssignmentPattern`) — keep their `'other'` seed.
+   - **Generator `*` re-bin** (implemented): a `*` in function / method /
+     property generator position moves `operator` → `delimiter` with role
+     `generator` — the single sanctioned home-category change. The `*` of
+     `yield*` delegation and of `import * as ns` stays an `operator`.
    - **Contextual-keyword re-categorization** (deferred): `of`/`as`/… used as a
      plain variable name should become `identifier`; needs the AST to tell it
      from for-of `of`.
@@ -88,13 +94,13 @@ flowchart TD
     In["ClassifyInput<br/>{ code, tokens, ast }"]
     Shaped["shape-confirmed input"]
     Seeded["totally categorized tokens<br/>(semantic category + role seed;<br/>partner null)"]
-    Refined["opener-role-refined tokens<br/>(block + paren roles;<br/>operator later)"]
+    Refined["AST-refined tokens<br/>(block + paren + operator roles;<br/>generator * re-binned)"]
     Paired["paired tokens<br/>(partner links + closers<br/>inherit opener role)"]
     Out["frozen ClassifiedToken[]<br/>(source-ordered, total)"]
 
     In -->|"validate — throws TypeError<br/>on null/missing"| Shaped
     Shaped -->|"classify by token type<br/>(pure; element list fixed here)"| Seeded
-    Seeded -->|"one AST traversal:<br/>opener roles (block + paren) (pure)"| Refined
+    Seeded -->|"one AST traversal:<br/>block + paren + operator roles +<br/>generator * re-bin (pure)"| Refined
     Refined -->|"stack pairing +<br/>closer inheritance (pure)"| Paired
     Paired -->|"assemble + freeze<br/>(shape finalization only)"| Out
 ```
@@ -102,11 +108,11 @@ flowchart TD
 ### Structural constraints
 
 - **Token-stream-first.** Categories and role seeds come from token types; the
-  AST contributes only opener-role refinement and the generator re-bin. This is
-  a deliberate inversion of the legacy design (AST-walk-located operators with
-  `betweenText.indexOf` string arithmetic) — it eliminates that fragility class
-  entirely and makes totality provable from the classification table instead of
-  asserted.
+  AST contributes only role refinement (opener and operator roles) and the
+  generator re-bin. This is a deliberate inversion of the legacy design
+  (AST-walk-located operators with `betweenText.indexOf` string arithmetic) — it
+  eliminates that fragility class entirely and makes totality provable from the
+  classification table instead of asserted.
 - **Categories are semantic.** A token's category is what it does in the NM, not
   how Acorn's lexer flags it: the reserved-word operators (`typeof`/`in`/
   `instanceof`/`void`/`delete`) and literals (`null`/`true`/`false`) are
@@ -132,13 +138,23 @@ flowchart TD
   anchor sits past any parenthesized callee's own grouping paren (`(a.b)()`).
   Paren-opener tokens are identified by delimiter category, so a template chunk
   whose text is `(` is never mistaken for one.
+- **Operators and generator stars are located by the same first-token rule.** An
+  operator owner claims the first operator token between its operands
+  (`left.end` → `right.start`, or `node.start` → `argument.start` for prefix
+  unary/update), sound because only closing delimiters — never operators — sit
+  between an operand's end and its operator. A generator owner claims the first
+  `*` operator token in its header range; the `function`-rule bound stops before
+  the params, so a default-value `*` (`function* g(a = b * c) {}`) keeps its
+  `binary` role and only the leading `*` re-bins. `yield*` and `import *` stars
+  own no generator node and stay operators.
 - **Pure on frozen inputs.** No mutation of `tokens`, `ast`, or any node — the
   legacy walk's synthetic `node.operator = '='` writes are explicitly banned;
   the module must run unchanged on deep-frozen embodiment data.
 - **One AST traversal.** The role-refinement phase walks the AST exactly once
-  (collecting `BlockStatement` start offsets and paren-owner claims in a single
-  descent, then snapping each claim to its paren-opener token); it never
-  re-walks. JEJ's page-size invariant bounds the cost; no caching.
+  (collecting `BlockStatement` start offsets, paren-owner claims, operator-owner
+  claims, and generator-star ranges in a single descent, then snapping each
+  claim to its token); it never re-walks. JEJ's page-size invariant bounds the
+  cost; no caching.
 - **Semantic precedence.** Operator and literal token-type checks precede the
   keyword check so the reserved-word operators/literals land in their semantic
   category; the keyword check precedes the identifier check so contextual

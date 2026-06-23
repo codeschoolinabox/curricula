@@ -7,6 +7,7 @@ import type {
 	ClassifiedToken,
 	ClassifyInput,
 	DelimiterRole,
+	OperatorRole,
 	Role,
 } from './types.js';
 
@@ -16,11 +17,13 @@ import type {
  * per non-empty source token, in source order — total and pure (inputs are
  * never mutated; safe on frozen embodiment data).
  *
- * Increment scope: home category + token-derivable role seed + delimiter
- * pairing + brace/paren opener roles (`block`, `call-arguments`,
- * `control-head`, `grouping`) + closer-role inheritance. Each `categories`
- * is single-element (AST alternates land later); operator AST roles and the
- * generator-`*` re-bin land later.
+ * Per token: home category + token-derivable role seed + delimiter pairing +
+ * brace/paren opener roles (`block`, `call-arguments`, `control-head`,
+ * `grouping`) + operator roles (`declarator-init` / `assignment` and
+ * `binary` / `logical` / `unary` / `update`) + the generator-`*` re-bin
+ * (`operator` → `delimiter`, role `generator`) + closer-role inheritance.
+ * Each `categories` is single-element (AST alternates and contextual-keyword
+ * re-categorization land later).
  *
  * @throws TypeError when `code`, `tokens`, or `ast` is missing or null —
  *   callers gate on a successful parse (see `./README.md` § Public API).
@@ -40,7 +43,7 @@ export default function classifyTokens({
 		(token) => token.type !== tt.eof && token.end > token.start,
 	);
 	const seeded = kept.map((token) => classifyToken(token, code));
-	const refined = refineOpenerRoles(seeded, ast);
+	const refined = refineFromAst(seeded, ast);
 	const partners = computePartners(kept);
 	const paired = inheritFromPartners(refined, partners);
 
@@ -61,43 +64,63 @@ function classifyToken(token: acorn.Token, code: string): ClassifiedToken {
 	};
 }
 
-// AST role refinement (openers only): assign each opener delimiter its role from
-// the owning AST node. A `BlockStatement` `{` is `block`; a paren is
-// `call-arguments` (call / `new` argument lists), `control-head` (`if` / `while`
-// / `for` / `switch` heads, the `do…while` tail, `catch (e)`), or `other`
-// (function / arrow / method parameter lists — claimed so they are excluded from
-// grouping). Every paren no owner claims is `grouping` by elimination — sound
-// only because the claim list is exhaustive (see `./DOCS.md` § Structural
-// constraints). Operator roles and the generator-`*` re-bin land in a later
-// increment. Closer roles are phase 4's job (see `inheritFromPartners`).
-function refineOpenerRoles(
+// AST refinement (one descent — see `collectAstRefinements`): assign each opener
+// delimiter and operator its AST-context role, and perform the single sanctioned
+// home-category change (the generator-`*` re-bin). A `BlockStatement` `{` is
+// `block`; a paren is `call-arguments` / `control-head` / `grouping` / `other`
+// (see `./DOCS.md` § Structural constraints — grouping is by elimination, sound
+// only because the claim list is exhaustive). An operator takes its owning node's
+// role (`declarator-init` / `assignment` / `binary` / `logical` / `unary` /
+// `update`), else keeps its `'other'` seed. A `*` in generator position moves
+// `operator` → `delimiter`, role `generator` — the `*` of `yield*` and
+// `import *` stays an operator. Closer roles are phase 4's job (see
+// `inheritFromPartners`).
+function refineFromAst(
 	tokens: ReadonlyArray<ClassifiedToken>,
 	ast: acorn.Node,
 ): ReadonlyArray<ClassifiedToken> {
 	const parenStarts = tokens
 		.filter((token) => isParenOpener(token))
 		.map((token) => token.start);
-	const { blockStarts, parenClaims } = collectOpenerRoles(ast);
+	const operatorStarts = tokens
+		.filter((token) => isOperator(token))
+		.map((token) => token.start);
+	const starStarts = tokens
+		.filter((token) => isStarOperator(token))
+		.map((token) => token.start);
+	const { blockStarts, parenClaims, operatorClaims, generatorStarClaims } =
+		collectAstRefinements(ast);
 	const blockOpeners = new Set(blockStarts);
 	const parenRoles = resolveParenClaims(parenClaims, parenStarts);
-	return tokens.map(function refine(token) {
-		const role = openerRole(token, blockOpeners, parenRoles);
+	const operatorRoles = resolveOperatorClaims(operatorClaims, operatorStarts);
+	const generatorStars = resolveGeneratorStars(generatorStarClaims, starStarts);
+	return tokens.map(function refine(token): ClassifiedToken {
+		if (generatorStars.has(token.start)) {
+			return { ...token, categories: ['delimiter'], role: 'generator' };
+		}
+		const role = refinedRole(token, blockOpeners, parenRoles, operatorRoles);
 		return role === token.role ? token : { ...token, role };
 	});
 }
 
 // A `{` at a `BlockStatement` start is `block`; a `(` takes its owner's role, or
-// `grouping` when no owner claimed it. Every other token keeps its seed.
-function openerRole(
+// `grouping` when no owner claimed it; an operator takes its owning node's role,
+// or keeps its `'other'` seed. Every other token keeps its seed. (The generator
+// re-bin is handled by the caller, ahead of this dispatch.)
+function refinedRole(
 	token: ClassifiedToken,
 	blockOpeners: ReadonlySet<number>,
 	parenRoles: ReadonlyMap<number, DelimiterRole>,
+	operatorRoles: ReadonlyMap<number, OperatorRole>,
 ): Role | null {
 	if (isBraceOpener(token)) {
 		return blockOpeners.has(token.start) ? 'block' : token.role;
 	}
 	if (isParenOpener(token)) {
 		return parenRoles.get(token.start) ?? 'grouping';
+	}
+	if (isOperator(token)) {
+		return operatorRoles.get(token.start) ?? token.role;
 	}
 	return token.role;
 }
@@ -109,23 +132,51 @@ type ParenClaim = {
 	readonly role: DelimiterRole;
 };
 
+// A claim that the first operator token in `[anchor, bound)` plays `role`.
+type OperatorClaim = {
+	readonly anchor: number;
+	readonly bound: number;
+	readonly role: OperatorRole;
+};
+
+// A range whose first `*` operator token is a generator star (to be re-binned).
+type TokenRange = {
+	readonly anchor: number;
+	readonly bound: number;
+};
+
 // One AST traversal (see `./DOCS.md` § Structural constraints): collect every
-// `BlockStatement` start offset and every paren-owner claim in a single descent.
-function collectOpenerRoles(node: acorn.Node): {
+// `BlockStatement` start offset, every paren-owner claim, every operator-owner
+// claim, and every generator-star range in a single descent.
+function collectAstRefinements(node: acorn.Node): {
 	readonly blockStarts: ReadonlyArray<number>;
 	readonly parenClaims: ReadonlyArray<ParenClaim>;
+	readonly operatorClaims: ReadonlyArray<OperatorClaim>;
+	readonly generatorStarClaims: ReadonlyArray<TokenRange>;
 } {
 	const blockHere = node.type === 'BlockStatement' ? [node.start] : [];
-	const claimHere = parenClaim(node);
-	const children = astChildren(node).map((child) => collectOpenerRoles(child));
+	const parenHere = parenClaim(node);
+	const operatorHere = operatorClaim(node);
+	const generatorHere = generatorStarClaim(node);
+	const children = astChildren(node).map((child) =>
+		collectAstRefinements(child),
+	);
 	return {
 		blockStarts: [
 			...blockHere,
 			...children.flatMap((child) => child.blockStarts),
 		],
 		parenClaims: [
-			...(claimHere === null ? [] : [claimHere]),
+			...(parenHere === null ? [] : [parenHere]),
 			...children.flatMap((child) => child.parenClaims),
+		],
+		operatorClaims: [
+			...(operatorHere === null ? [] : [operatorHere]),
+			...children.flatMap((child) => child.operatorClaims),
+		],
+		generatorStarClaims: [
+			...(generatorHere === null ? [] : [generatorHere]),
+			...children.flatMap((child) => child.generatorStarClaims),
 		],
 	};
 }
@@ -173,6 +224,110 @@ function controlHead(anchor: number, bound: number): ParenClaim {
 	return { anchor, bound, role: 'control-head' };
 }
 
+// The operator-role claim for a node, or null when the node owns no operator
+// token. `=` is `declarator-init` under a `VariableDeclarator` (with `init`) and
+// `assignment` under an `AssignmentExpression` (compound `+=` included); binary /
+// logical / unary / update come from the owning expression node. The anchor sits
+// just before the owned operator; `resolveOperatorClaims` snaps it to the first
+// operator token in `[anchor, bound)` (the find-first invariant — between an
+// operand's end and its operator lie only closing delimiters, never operators).
+// Order of the branches is irrelevant; node types are disjoint.
+function operatorClaim(node: acorn.Node): OperatorClaim | null {
+	if (node.type === 'VariableDeclarator') {
+		const id = childNode(node, 'id');
+		const init = childNode(node, 'init');
+		return id === null || init === null
+			? null
+			: { anchor: id.end, bound: init.start, role: 'declarator-init' };
+	}
+	if (node.type === 'AssignmentExpression') {
+		return infixOperatorClaim(node, 'assignment');
+	}
+	if (node.type === 'BinaryExpression') {
+		return infixOperatorClaim(node, 'binary');
+	}
+	if (node.type === 'LogicalExpression') {
+		return infixOperatorClaim(node, 'logical');
+	}
+	if (node.type === 'UnaryExpression') {
+		const argument = childNode(node, 'argument');
+		return argument === null
+			? null
+			: { anchor: node.start, bound: argument.start, role: 'unary' };
+	}
+	if (node.type === 'UpdateExpression') {
+		return updateOperatorClaim(node);
+	}
+	return null;
+}
+
+// An infix operator sits between `left.end` and `right.start`.
+function infixOperatorClaim(
+	node: acorn.Node,
+	role: OperatorRole,
+): OperatorClaim | null {
+	const left = childNode(node, 'left');
+	const right = childNode(node, 'right');
+	return left === null || right === null
+		? null
+		: { anchor: left.end, bound: right.start, role };
+}
+
+// A prefix `++` / `--` sits before its argument; a postfix one sits after it.
+function updateOperatorClaim(node: acorn.Node): OperatorClaim | null {
+	const argument = childNode(node, 'argument');
+	if (argument === null) {
+		return null;
+	}
+	return nodeFlag(node, 'prefix')
+		? { anchor: node.start, bound: argument.start, role: 'update' }
+		: { anchor: argument.end, bound: node.end, role: 'update' };
+}
+
+// The generator-star range for a node, or null when the node introduces none. A
+// `function*` star sits between the `function` keyword and the name (or the
+// params / body when anonymous); a `*method` / `*property` star sits between the
+// node start and the key. The `function`-rule bound stops before the params so a
+// default-value `*` (`function* g(a = b * c) {}`) is never mistaken for the
+// generator star; a generator method's value `FunctionExpression` also matches
+// the `function` rule but its start is past the leading `*`, so it claims none.
+function generatorStarClaim(node: acorn.Node): TokenRange | null {
+	if (isGeneratorFunction(node)) {
+		const body = childNode(node, 'body');
+		return body === null
+			? null
+			: { anchor: node.start, bound: functionHeadBound(node, body) };
+	}
+	if (node.type === 'MethodDefinition' || node.type === 'Property') {
+		const value = childNode(node, 'value');
+		const key = childNode(node, 'key');
+		return value === null || key === null || !nodeFlag(value, 'generator')
+			? null
+			: { anchor: node.start, bound: key.start };
+	}
+	return null;
+}
+
+// The end of a generator function's header — the name when present, else the
+// first parameter, else the body — bounding the claim to the `function *` prefix
+// so no default-value expression inside the params is reached.
+function functionHeadBound(node: acorn.Node, body: acorn.Node): number {
+	const id = childNode(node, 'id');
+	if (id !== null) {
+		return id.start;
+	}
+	const parameters = childNodes(node, 'params');
+	return parameters.length > 0 ? parameters[0].start : body.start;
+}
+
+function isGeneratorFunction(node: acorn.Node): boolean {
+	return (
+		(node.type === 'FunctionDeclaration' ||
+			node.type === 'FunctionExpression') &&
+		nodeFlag(node, 'generator')
+	);
+}
+
 function childNode(node: acorn.Node, key: string): acorn.Node | null {
 	const value = (node as unknown as Record<string, unknown>)[key];
 	return isAstNode(value) ? value : null;
@@ -181,6 +336,10 @@ function childNode(node: acorn.Node, key: string): acorn.Node | null {
 function childNodes(node: acorn.Node, key: string): ReadonlyArray<acorn.Node> {
 	const value = (node as unknown as Record<string, unknown>)[key];
 	return Array.isArray(value) ? value.filter((item) => isAstNode(item)) : [];
+}
+
+function nodeFlag(node: acorn.Node, key: string): boolean {
+	return (node as unknown as Record<string, unknown>)[key] === true;
 }
 
 function astChildren(node: acorn.Node): ReadonlyArray<acorn.Node> {
@@ -215,7 +374,7 @@ function resolveParenClaims(
 ): ReadonlyMap<number, DelimiterRole> {
 	const roleByOffset = new Map<number, DelimiterRole>();
 	for (const { anchor, bound, role } of claims) {
-		const offset = firstParenOpenerIn(parenStarts, anchor, bound);
+		const offset = firstStartInRange(parenStarts, anchor, bound);
 		if (offset !== undefined && !roleByOffset.has(offset)) {
 			roleByOffset.set(offset, role);
 		}
@@ -224,16 +383,55 @@ function resolveParenClaims(
 }
 /* eslint-enable functional/immutable-data */
 
-// The first paren-opener offset in `[anchor, bound)`. `parenStarts` is in source
-// order, so `find` returns the lexically-first opener — which is the owned paren
-// for every claim (no non-owned paren precedes it in an owner's range; see
-// `./DOCS.md` § Structural constraints, the find-first invariant).
-function firstParenOpenerIn(
-	parenStarts: ReadonlyArray<number>,
+// Snap each operator claim to the first operator token in its range, mapping that
+// offset to the claimed role. First-writer wins (parent before descendants), as
+// for parens; operator claim ranges do not overlap in valid JS.
+/* eslint-disable functional/immutable-data -- local Map, never escapes until returned */
+function resolveOperatorClaims(
+	claims: ReadonlyArray<OperatorClaim>,
+	operatorStarts: ReadonlyArray<number>,
+): ReadonlyMap<number, OperatorRole> {
+	const roleByOffset = new Map<number, OperatorRole>();
+	for (const { anchor, bound, role } of claims) {
+		const offset = firstStartInRange(operatorStarts, anchor, bound);
+		if (offset !== undefined && !roleByOffset.has(offset)) {
+			roleByOffset.set(offset, role);
+		}
+	}
+	return roleByOffset;
+}
+/* eslint-enable functional/immutable-data */
+
+// The offsets of every generator star: the first `*` operator token in each
+// claim's range. A generator method's value `FunctionExpression` contributes an
+// empty claim (its start is past the leading `*`), so the `Set` makes any such
+// overlap idempotent.
+/* eslint-disable functional/immutable-data -- local Set, never escapes until returned */
+function resolveGeneratorStars(
+	claims: ReadonlyArray<TokenRange>,
+	starStarts: ReadonlyArray<number>,
+): ReadonlySet<number> {
+	const offsets = new Set<number>();
+	for (const { anchor, bound } of claims) {
+		const offset = firstStartInRange(starStarts, anchor, bound);
+		if (offset !== undefined) {
+			offsets.add(offset);
+		}
+	}
+	return offsets;
+}
+/* eslint-enable functional/immutable-data */
+
+// The first candidate offset in `[anchor, bound)`. `starts` is in source order,
+// so `find` returns the lexically-first match — the owned token for every claim
+// (no non-owned candidate precedes it in an owner's range; see `./DOCS.md` §
+// Structural constraints, the find-first invariant).
+function firstStartInRange(
+	starts: ReadonlyArray<number>,
 	anchor: number,
 	bound: number,
 ): number | undefined {
-	return parenStarts.find((start) => start >= anchor && start < bound);
+	return starts.find((start) => start >= anchor && start < bound);
 }
 
 // A real `(` / `{` opener is a delimiter-category token; a template chunk whose
@@ -244,6 +442,16 @@ function isParenOpener(token: ClassifiedToken): boolean {
 
 function isBraceOpener(token: ClassifiedToken): boolean {
 	return token.text === '{' && token.categories[0] === 'delimiter';
+}
+
+function isOperator(token: ClassifiedToken): boolean {
+	return token.categories[0] === 'operator';
+}
+
+// A `*` in operator position (a multiply / `yield*` / namespace `*`); the AST
+// pass re-bins only the ones in generator position to `delimiter`.
+function isStarOperator(token: ClassifiedToken): boolean {
+	return token.text === '*' && isOperator(token);
 }
 
 // Closer inheritance (the last pass, so opener roles are final): each closer
