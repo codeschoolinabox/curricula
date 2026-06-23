@@ -1276,4 +1276,279 @@ describe('blankenate', () => {
 			expect(backticks.length).toBe(2);
 		});
 	});
+
+	// ─── lib/classifying adoption — partial-config overlap matrix ───
+	//
+	// Characterizes TODAY's legacy blankenate under partial content-type
+	// configs (GREEN against current code). The next increment refactors
+	// blankenate onto `lib/classifying`; the rows whose name says `FLIPS`
+	// change then — a visible, intentional test-diff rather than a silent
+	// regression. probability=1 neutralizes `Math.random()` so every eligible
+	// token blanks deterministically. Assertions are on `original`/position
+	// only (never `type`, never blank order) so they survive the
+	// re-categorization (a token's home category changes; its bytes do not).
+	describe('lib/classifying adoption — partial-config overlap matrix (characterization)', () => {
+		it('cell 1 PIN: `typeof` blanks under keywords-only today [FLIPS in→out: becomes operator]', () => {
+			const result = blankenate('typeof x;', 1, {
+				...NO_TYPES,
+				keywords: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('typeof');
+		});
+
+		it('cell 1 triangulation: `typeof` blanks under operators-only [GREEN both increments]', () => {
+			const result = blankenate('typeof x;', 1, {
+				...NO_TYPES,
+				operators: true,
+			});
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			expect(originals).toContain('typeof');
+		});
+
+		const OVERLAP_MATRIX: ReadonlyArray<
+			readonly [
+				label: string,
+				code: string,
+				flags: {
+					keywords: boolean;
+					identifiers: boolean;
+					operators: boolean;
+					literals: boolean;
+					delimiters: boolean;
+				},
+				token: string,
+				expected: 'in' | 'out',
+			]
+		> = [
+			[
+				'cell 1 PIN: `instanceof` under keywords-only [FLIPS in→out]',
+				'x instanceof Y;',
+				{ ...NO_TYPES, keywords: true },
+				'instanceof',
+				'in',
+			],
+			[
+				'cell 1 triangulation: `instanceof` under operators-only [GREEN both]',
+				'x instanceof Y;',
+				{ ...NO_TYPES, operators: true },
+				'instanceof',
+				'in',
+			],
+			[
+				'cell 1 PIN: `void` under keywords-only [FLIPS in→out]',
+				'void 0;',
+				{ ...NO_TYPES, keywords: true },
+				'void',
+				'in',
+			],
+			[
+				'cell 1 triangulation: `void` under operators-only [GREEN both]',
+				'void 0;',
+				{ ...NO_TYPES, operators: true },
+				'void',
+				'in',
+			],
+			[
+				'cell 1 PIN: `delete` under keywords-only [FLIPS in→out]',
+				'delete x.y;',
+				{ ...NO_TYPES, keywords: true },
+				'delete',
+				'in',
+			],
+			[
+				'cell 1 triangulation: `delete` under operators-only [GREEN both]',
+				'delete x.y;',
+				{ ...NO_TYPES, operators: true },
+				'delete',
+				'in',
+			],
+			[
+				'cell 2 PIN: `null` under keywords-only [FLIPS in→out: becomes literal]',
+				'const x = null;',
+				{ ...NO_TYPES, keywords: true },
+				'null',
+				'in',
+			],
+			[
+				'cell 2 triangulation: `null` under literals-only [GREEN both]',
+				'const x = null;',
+				{ ...NO_TYPES, literals: true },
+				'null',
+				'in',
+			],
+			[
+				'cell 2 PIN: `true` under keywords-only [FLIPS in→out]',
+				'const x = true;',
+				{ ...NO_TYPES, keywords: true },
+				'true',
+				'in',
+			],
+			[
+				'cell 2 triangulation: `true` under literals-only [GREEN both]',
+				'const x = true;',
+				{ ...NO_TYPES, literals: true },
+				'true',
+				'in',
+			],
+			[
+				'cell 2 PIN: `false` under keywords-only [FLIPS in→out]',
+				'const x = false;',
+				{ ...NO_TYPES, keywords: true },
+				'false',
+				'in',
+			],
+			[
+				'cell 2 triangulation: `false` under literals-only [GREEN both]',
+				'const x = false;',
+				{ ...NO_TYPES, literals: true },
+				'false',
+				'in',
+			],
+			[
+				'cell 3 PIN: `import *` star under operators-only [FLIPS out→in: totality add]',
+				'import * as ns from "m";',
+				{ ...NO_TYPES, operators: true },
+				'*',
+				'out',
+			],
+			[
+				'cell 4 PIN: `from`-as-name under identifiers-only [FLIPS in→out: becomes keyword]',
+				'const from = 1;',
+				{ ...NO_TYPES, identifiers: true },
+				'from',
+				'in',
+			],
+			[
+				'cell 4 triangulation: `from`-as-name under keywords-only [GREEN both]',
+				'const from = 1;',
+				{ ...NO_TYPES, keywords: true },
+				'from',
+				'in',
+			],
+			[
+				'cell 4 PIN: `of`-as-name under identifiers-only [FLIPS in→out]',
+				'let of = 2;',
+				{ ...NO_TYPES, identifiers: true },
+				'of',
+				'in',
+			],
+			[
+				'cell 4 triangulation: `of`-as-name under keywords-only [GREEN both]',
+				'let of = 2;',
+				{ ...NO_TYPES, keywords: true },
+				'of',
+				'in',
+			],
+			[
+				'cell 4 PIN: `as`-as-name under identifiers-only [FLIPS in→out]',
+				'const as = 3;',
+				{ ...NO_TYPES, identifiers: true },
+				'as',
+				'in',
+			],
+			[
+				'cell 4 triangulation: `as`-as-name under keywords-only [GREEN both]',
+				'const as = 3;',
+				{ ...NO_TYPES, keywords: true },
+				'as',
+				'in',
+			],
+			[
+				'cell 5 PIN: for-in `in` under keywords-only [FLIPS in→out: becomes operator]',
+				'for (const x in y) {}',
+				{ ...NO_TYPES, keywords: true },
+				'in',
+				'in',
+			],
+			[
+				'cell 5 PIN: for-in `in` under operators-only [FLIPS out→in: totality add]',
+				'for (const x in y) {}',
+				{ ...NO_TYPES, operators: true },
+				'in',
+				'out',
+			],
+			[
+				'cell 5 contrast: binary `a in b` under operators-only [GREEN both: not for-in-specific]',
+				'a in b;',
+				{ ...NO_TYPES, operators: true },
+				'in',
+				'in',
+			],
+			[
+				'union reassurance: `typeof` under keywords+operators [GREEN both: never disappears]',
+				'typeof x;',
+				{ ...NO_TYPES, keywords: true, operators: true },
+				'typeof',
+				'in',
+			],
+		];
+
+		it.each(OVERLAP_MATRIX)('%s', (_label, code, flags, token, expected) => {
+			const result = blankenate(code, 1, flags);
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			if (expected === 'in') {
+				expect(originals).toContain(token);
+			} else {
+				expect(originals).not.toContain(token);
+			}
+		});
+
+		it('cell 3 PIN: `yield*` star is NOT blanked under operators-only today [FLIPS out→in]', () => {
+			// `return 1 + 2` adds a live operator (`+`) so the operators path is
+			// provably exercised — the yield-star absence is then a real exclusion,
+			// not a dead-path artefact. The generator `function*` star is a
+			// delimiter, so it never appears under operators-only either.
+			const code = 'function* g() { yield* h(); return 1 + 2; }';
+			const starPosition = code.indexOf('yield') + 'yield'.length;
+			const result = blankenate(code, 1, { ...NO_TYPES, operators: true });
+			const originals = (result?.blanks ?? []).map((b) => b.original);
+			const yieldStar = (result?.blanks ?? []).find(
+				(b) => b.original === '*' && b.start === starPosition,
+			);
+			expect(originals).toContain('+');
+			expect(yieldStar).toBeUndefined();
+		});
+
+		it('parity gate: ALL_TYPES blanks exactly every non-trivial Acorn token [position-diff; GREEN both increments]', () => {
+			// The snippet deliberately omits the cell-3/cell-5 totality tokens
+			// (`import *`, `yield*`, for-in `in`) — those ADD positions under
+			// classifying's ALL_TYPES, which would move the set and break the
+			// gate. The `b * 3` star is arithmetic (a BinaryExpression operator
+			// in both legacy and classifying), so it is safe to include. The
+			// gate compares positions only; cells 1/2/4 re-categorize the same
+			// bytes, so they never move the set.
+			const code = [
+				'const greeting = `hi ${name}!`;',
+				'let count = 0;',
+				'class Box { #id = 1; static MAX = 100; get size() { return this.#id; } }',
+				'const f = (a, b = 2) => a + b * 3 - 1;',
+				'const ok = a && b || !c;',
+				'const v = obj?.prop ?? [1, 2, ...rest];',
+				'const t = cond ? x : y;',
+				'count++;',
+				'arr.map(n => n);',
+			].join('\n');
+			const tokens: acorn.Token[] = [];
+			acorn.parse(code, {
+				ecmaVersion: 2022,
+				sourceType: 'module',
+				onToken: (token) => tokens.push(token),
+			});
+			const tokenPositions = new Set(
+				tokens
+					.filter(
+						(token) =>
+							token.type !== acorn.tokTypes.eof && token.end > token.start,
+					)
+					.map((token) => `${token.start}:${token.end}`),
+			);
+			const blankPositions = new Set(
+				(blankenate(code, 1, ALL_TYPES)?.blanks ?? []).map(
+					(b) => `${b.start}:${b.end}`,
+				),
+			);
+			expect(blankPositions).toEqual(tokenPositions);
+		});
+	});
 });
