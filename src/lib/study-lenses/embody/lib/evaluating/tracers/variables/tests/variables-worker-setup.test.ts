@@ -522,6 +522,21 @@ describe('variablesWorkerSetup', () => {
 			assertMonotonicSteps(events);
 		});
 
+		it('leaves an undeclared-identifier ReferenceError unattributed (no stamp)', () => {
+			// `zzz` is undeclared, so the instrumenter never wraps it; the
+			// ReferenceError throws unwrapped, reaching the halt without a node path
+			// (the named boundary, contrasting the stamped TDZ read above).
+			const { events, halt } = runWorker('let y = zzz;');
+
+			expect(byType(events, 'read')).toHaveLength(0);
+			expect(byType(events, 'initialize')).toHaveLength(0);
+			expect(halt).toMatchObject({
+				natural: false,
+				errorName: 'ReferenceError',
+				nodePath: null,
+			});
+		});
+
 		it('a const reassignment is stamped and rethrown with no assign event', () => {
 			const { events, halt, code } = runWorker('const c = 1; c = 2;');
 

@@ -13,9 +13,10 @@ Vocabulary and the event pinning table: [README.md](./README.md). The contract:
 
 1. **Validate** (sync, throws) — the JEJ admission gate at the boundary. Input:
    a raw source string. Output: a validated program (AST + source), or a typed
-   boundary throw on parse failure, a JEJ violation, or a construct this tier
-   rejects (labels, expression-target for-of). A gated program never reaches the
-   engine.
+   boundary throw on parse failure or a JEJ violation. A gated program never
+   reaches the engine. (Constructs that pass the JEJ gate but cannot be
+   faithfully spliced — labels, expression-target for-of — are rejected later,
+   at Instrument (§ 3), not here.)
 
 2. **Project** (sync, pure) — fold the package scope analysis into this tier's
    own scope table. Input: the validated program. Output: a clone-safe table

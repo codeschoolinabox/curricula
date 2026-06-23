@@ -167,8 +167,10 @@ It does **not** own, and explicitly excludes:
 - **Per-iteration environment copies for classic `for`.** The NM models a fresh
   environment per iteration of `for (let i …)`; this tier models one synthesized
   for-scope per loop. In closure-free JEJ the copies are value-equivalent. A
-  loop _body_ block that declares bindings still shows its own per-iteration
-  push/pop.
+  classic `for (let i …)` _body_ block that declares bindings still shows its
+  own per-iteration push/pop; a `for-of` body block is merged into the
+  per-iteration for-of scope (build-scope's merge — see § synthesized
+  for-scope), so it does not push/pop separately.
 - **The `'limit'` pop reason and timeout/cancel pops.** This tier owns no
   instrumentation limit, so scopes never pop with reason `limit`; a timeout or
   cancel kills the worker, so the scopes open at that moment do not pop at all.
