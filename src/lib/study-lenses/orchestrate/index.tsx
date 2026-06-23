@@ -71,6 +71,7 @@ import type {
 	LensSelectionSource,
 	OrchestratorConfig,
 	OrchestratorState,
+	SandboxMode,
 	StationStatusMap,
 	StudyLensesProps as StudyLensesProperties,
 } from './types.js';
@@ -180,8 +181,7 @@ function deriveInitialState(
 		// mount (when the slot is still null) so the gutter can paint on the
 		// first frame.
 		liveEmbodiment:
-			previousLiveEmbodiment !== null &&
-			previousLiveEmbodiment.type === type
+			previousLiveEmbodiment !== null && previousLiveEmbodiment.type === type
 				? previousLiveEmbodiment
 				: { snippet, type, embodiment: embody(snippet) },
 	};
@@ -649,6 +649,35 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			});
 		}
 
+		// Dock sandbox slots — the execution-backend selector (worker|danger)
+		// and the danger-only debugger toggle. `dangerAvailable` is seeded ONCE
+		// at mount from `configs.orchestrator` (an educator setting; the same
+		// mount-only seed as `type`, deliberately NOT live-tracked — re-reading
+		// `configs` each render would open a stranding bug where a post-mount
+		// danger→unavailable flip yanks the sandbox toggle while `sandboxMode`
+		// is stuck at 'danger'). The toggle SELECTS NO execution path here (the
+		// danger backend is deferred); this increment stores the mode and
+		// dispatches `sandbox-toggled`. `sandboxMode` is read in the synchronous
+		// click handler only (no effect/debounce reader), so a render-closure
+		// read is stale-safe and needs no ref shadow — unlike `type`, which
+		// `applyTransition` reads from a post-commit effect.
+		const [sandboxMode, setSandboxMode] = React.useState<SandboxMode>('worker');
+		const [dangerAvailable] = React.useState(
+			() => readOrchestratorConfig(configs)?.dangerAvailable ?? false,
+		);
+		const [debuggerEnabled, setDebuggerEnabled] = React.useState(false);
+		function handleSandboxToggle(): void {
+			const next: SandboxMode = sandboxMode === 'worker' ? 'danger' : 'worker';
+			setSandboxMode(next);
+			busReference.current!.dispatch('sandbox-toggled', {
+				from: sandboxMode,
+				to: next,
+			});
+		}
+		function handleDebuggerToggle(): void {
+			setDebuggerEnabled((previous) => !previous);
+		}
+
 		// The panel's active lens is derived from state, NOT held in a
 		// panel-side slot. State remains the single source of truth (per
 		// README § Picker-vs-prop ownership). Lens mode names the active
@@ -716,6 +745,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 							sourceType={type}
 							scriptModeHintVisible={scriptModeHintVisible}
 							onTypeToggle={handleTypeToggle}
+							sandboxMode={sandboxMode}
+							dangerAvailable={dangerAvailable}
+							debuggerEnabled={debuggerEnabled}
+							onSandboxToggle={handleSandboxToggle}
+							onDebuggerToggle={handleDebuggerToggle}
 						/>
 					</section>
 				</div>
@@ -750,6 +784,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						sourceType={type}
 						scriptModeHintVisible={scriptModeHintVisible}
 						onTypeToggle={handleTypeToggle}
+						sandboxMode={sandboxMode}
+						dangerAvailable={dangerAvailable}
+						debuggerEnabled={debuggerEnabled}
+						onSandboxToggle={handleSandboxToggle}
+						onDebuggerToggle={handleDebuggerToggle}
 					/>
 				</section>
 			</div>

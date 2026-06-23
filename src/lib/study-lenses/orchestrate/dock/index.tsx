@@ -18,6 +18,7 @@
 import React from 'react';
 
 import type { SnippetType } from '../../embody/types.js';
+import type { SandboxMode } from '../types.js';
 
 type DockProperties = Readonly<{
 	/** The dock's display state — surfaced as `data-orchestrator-dock-collapsed`. */
@@ -40,6 +41,32 @@ type DockProperties = Readonly<{
 
 	/** Called when the learner clicks the type toggle (a flip; takes no argument). */
 	readonly onTypeToggle: () => void;
+
+	/**
+	 * The current execution sandbox — the sandbox toggle's value, surfaced as
+	 * `data-orchestrator-dock-sandbox-toggle="worker|danger"`. The toggle is
+	 * rendered ONLY when `dangerAvailable` (no danger position ⇒ no toggle).
+	 */
+	readonly sandboxMode: SandboxMode;
+
+	/**
+	 * Whether the danger sandbox is offered (an educator-level setting, seeded
+	 * once at mount). When false the sandbox toggle is absent entirely — there is
+	 * no danger position to flip to.
+	 */
+	readonly dangerAvailable: boolean;
+
+	/**
+	 * Whether the danger-only debugger is enabled — reflected on the debugger
+	 * control's `checked` state. The debugger control shows only in danger mode.
+	 */
+	readonly debuggerEnabled: boolean;
+
+	/** Called when the learner clicks the sandbox toggle (a flip; takes no argument). */
+	readonly onSandboxToggle: () => void;
+
+	/** Called when the learner toggles the danger-only debugger. */
+	readonly onDebuggerToggle: () => void;
 }>;
 
 /**
@@ -55,6 +82,11 @@ function Dock({
 	sourceType,
 	scriptModeHintVisible,
 	onTypeToggle,
+	sandboxMode,
+	dangerAvailable,
+	debuggerEnabled,
+	onSandboxToggle,
+	onDebuggerToggle,
 }: DockProperties): React.JSX.Element {
 	// Per-instance element ids for the dock's intra-component ARIA wiring —
 	// `useId` keeps them unique across multiple <StudyLenses> step-stones on one
@@ -90,6 +122,25 @@ function Dock({
 					<span id={hintId} data-orchestrator-dock-type-hint>
 						Module-admissible code is running in script mode.
 					</span>
+				) : null}
+				{dangerAvailable ? (
+					<button
+						type="button"
+						data-orchestrator-dock-sandbox-toggle={sandboxMode}
+						aria-label="toggle execution sandbox between worker and danger"
+						onClick={onSandboxToggle}
+					>
+						{sandboxMode}
+					</button>
+				) : null}
+				{dangerAvailable && sandboxMode === 'danger' ? (
+					<input
+						type="checkbox"
+						data-orchestrator-dock-debugger
+						aria-label="enable the debugger"
+						checked={debuggerEnabled}
+						onChange={onDebuggerToggle}
+					/>
 				) : null}
 			</div>
 		</div>

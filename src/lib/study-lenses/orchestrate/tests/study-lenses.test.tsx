@@ -2,7 +2,13 @@
 
 import { forEachDiagnostic, forceLinting } from '@codemirror/lint';
 import { EditorView } from '@codemirror/view';
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	waitFor,
+} from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -1575,7 +1581,8 @@ describe('<StudyLenses> — Cycle 3 B0 the omnipresent region landmark + dock', 
 		it('mounts a section landmark in editor mode', () => {
 			const { container } = render(<StudyLenses snippet="let x = 1;" />);
 			expect(
-				container.querySelector('[data-orchestrator-omnipresent-region]')?.tagName,
+				container.querySelector('[data-orchestrator-omnipresent-region]')
+					?.tagName,
 			).toBe('SECTION');
 		});
 
@@ -1614,8 +1621,8 @@ describe('<StudyLenses> — Cycle 3 B0 the omnipresent region landmark + dock', 
 				container.querySelector('[aria-label="toggle dock controls"]')!,
 			);
 			expect(
-				container.querySelector<HTMLElement>('[data-orchestrator-dock]')?.dataset
-					.orchestratorDockCollapsed,
+				container.querySelector<HTMLElement>('[data-orchestrator-dock]')
+					?.dataset.orchestratorDockCollapsed,
 			).toBe('true');
 		});
 	});
@@ -1848,6 +1855,126 @@ describe('<StudyLenses> — Cycle 3 A2-3 the dock type toggle (re-embody + dispa
 			expect(
 				container.querySelector('[data-orchestrator-dock-type-hint]'),
 			).not.toBeNull();
+		});
+	});
+});
+
+describe('<StudyLenses> — Cycle 3 B1-2 the dock sandbox toggle (wire + dispatch)', () => {
+	describe('One — toggling worker→danger reveals the debugger', () => {
+		it('toggling the sandbox to danger reveals the debugger option', () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="let x = 1;"
+					configs={{ orchestrator: { dangerAvailable: true } }}
+				/>,
+			);
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-dock-sandbox-toggle]')!,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-dock-debugger]'),
+			).not.toBeNull();
+		});
+	});
+
+	describe('Interface — the sandbox-toggled event', () => {
+		it('toggling worker→danger dispatches sandbox-toggled {from: worker, to: danger}', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(
+					<StudyLenses
+						snippet="let x = 1;"
+						configs={{ orchestrator: { dangerAvailable: true } }}
+					/>,
+				);
+				fireEvent.click(
+					container.querySelector('[data-orchestrator-dock-sandbox-toggle]')!,
+				);
+				expect(dispatchSpy).toHaveBeenCalledWith('sandbox-toggled', {
+					from: 'worker',
+					to: 'danger',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+
+		it('toggling danger→worker dispatches sandbox-toggled {from: danger, to: worker}', () => {
+			const { bus, dispatchSpy } = createSpyBus();
+			const factorySpy = vi
+				.spyOn(eventBusModule, 'default')
+				.mockReturnValue(bus);
+			try {
+				const { container } = render(
+					<StudyLenses
+						snippet="let x = 1;"
+						configs={{ orchestrator: { dangerAvailable: true } }}
+					/>,
+				);
+				// worker → danger (first flip), then clear so we assert only the second.
+				fireEvent.click(
+					container.querySelector('[data-orchestrator-dock-sandbox-toggle]')!,
+				);
+				dispatchSpy.mockClear();
+				// danger → worker (second flip).
+				fireEvent.click(
+					container.querySelector('[data-orchestrator-dock-sandbox-toggle]')!,
+				);
+				expect(dispatchSpy).toHaveBeenCalledWith('sandbox-toggled', {
+					from: 'danger',
+					to: 'worker',
+				});
+			} finally {
+				factorySpy.mockRestore();
+			}
+		});
+	});
+
+	describe('Boundary — danger unavailable hides the toggle', () => {
+		it('omits the sandbox toggle when no orchestrator config is given', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			expect(
+				container.querySelector('[data-orchestrator-dock-sandbox-toggle]'),
+			).toBeNull();
+		});
+	});
+
+	describe('Interface — the debugger toggle', () => {
+		it('clicking the debugger flips its checked state and back', () => {
+			const { container } = render(
+				<StudyLenses
+					snippet="let x = 1;"
+					configs={{ orchestrator: { dangerAvailable: true } }}
+				/>,
+			);
+			// Reveal the debugger by entering danger mode.
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-dock-sandbox-toggle]')!,
+			);
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-debugger]',
+				)?.checked,
+			).toBe(false);
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-dock-debugger]')!,
+			);
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-debugger]',
+				)?.checked,
+			).toBe(true);
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-dock-debugger]')!,
+			);
+			expect(
+				container.querySelector<HTMLInputElement>(
+					'[data-orchestrator-dock-debugger]',
+				)?.checked,
+			).toBe(false);
 		});
 	});
 });

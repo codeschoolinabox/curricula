@@ -365,7 +365,11 @@ sketch.
 - **Debugger option** — a danger-only dock affordance that wraps the evaluated
   snippet with a `debugger;` statement above and below, so a learner with devtools
   open steps straight into their program; inert without devtools. Guard
-  instrumentation stays visible in the stepped source (deliberately).
+  instrumentation stays visible in the stepped source (deliberately). Danger-only
+  by necessity, not fiat: `debugger;` _runs_ in a worker, but a paused breakpoint
+  must outlast the run limits — the worker backend's external terminate would kill
+  a worker paused at a breakpoint, while the danger backend has no external
+  terminate (its limits ride the loop-guard, frozen with execution when paused).
 - **Run limits** — the learner interface to the seconds and iterations execution
   limits, with per-backend semantics (worker: engine timer + terminate; danger:
   in-guard elapsed check). Surfaces `endReport.outcome: 'limit-exceeded'` when
@@ -941,7 +945,7 @@ contract.
 - `data-orchestrator-dock-type-hint` — the admissible-in-script hint (present only
   when shown).
 - `data-orchestrator-dock-sandbox-toggle` — the sandbox toggle control; `="worker"`
-  or `="danger"`.
+  or `="danger"` (present only when the danger sandbox is available).
 - `data-orchestrator-dock-limit` — each run-limit input; `="seconds"` or
   `="iterations"`.
 - `data-orchestrator-dock-debugger` — the debugger option (present only in danger
