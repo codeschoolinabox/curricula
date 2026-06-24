@@ -137,7 +137,8 @@ export default function variablesWorkerSetup(
 				nodePath: scopePath,
 				scopeInstanceId: instanceId,
 				scopeKind,
-				variables: [...bindings].map(([name, state]) => ({
+				// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Map>]` to `[<Map>]`; Array.from survives.
+				variables: Array.from(bindings).map(([name, state]) => ({
 					name,
 					kind: state.kind,
 				})),
@@ -157,7 +158,8 @@ export default function variablesWorkerSetup(
 				scopeInstanceId: frame.instanceId,
 				scopeKind: frame.scopeKind,
 				reason,
-				variables: [...frame.bindings].map(([name, state]) =>
+				// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Map>]` to `[<Map>]`; Array.from survives.
+				variables: Array.from(frame.bindings).map(([name, state]) =>
 					finalVariable(name, state),
 				),
 			});
