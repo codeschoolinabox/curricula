@@ -23,6 +23,7 @@ type GpuAdapterLike = {
 		readonly maxBufferSize: number;
 		readonly maxStorageBufferBindingSize: number;
 	};
+	readonly features: ReadonlySet<string>;
 };
 type ProbeNavigator = Navigator & {
 	readonly gpu?: {
@@ -34,9 +35,10 @@ type ProbeNavigator = Navigator & {
 /**
  * Probes the live device for its {@link DeviceCapabilities} — a conservative
  * heuristic, never an exact resource readout (the browser does not expose total
- * VRAM). WebGPU presence and its adapter's buffer limits, a coarse memory
- * bucket, storage headroom, and the WASM features for a CPU fallback. Optional
- * fields are omitted (never `undefined`) when the device does not report them.
+ * VRAM). WebGPU presence, its adapter's buffer limits and advertised features, a
+ * coarse memory bucket, storage headroom, and the WASM features for a CPU
+ * fallback. Optional fields are omitted (never `undefined`) when the device does
+ * not report them.
  *
  * @returns A frozen {@link DeviceCapabilities}.
  */
@@ -56,6 +58,8 @@ export default async function probeCapabilities(): Promise<DeviceCapabilities> {
 					maxBufferBytes: adapter.limits.maxBufferSize,
 					maxStorageBufferBindingBytes:
 						adapter.limits.maxStorageBufferBindingSize,
+					// eslint-disable-next-line unicorn/prefer-spread -- Docusaurus/Babel mistranspiles `[...<Set>]` to `[<Set>]`; Array.from survives.
+					webgpuFeatures: Array.from(adapter.features),
 				}),
 		...(deviceMemory === undefined
 			? {}

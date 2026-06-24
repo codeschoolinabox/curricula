@@ -67,7 +67,9 @@
 		"webgpu",
 		"webllm",
 		"wllama",
-		"qwen"
+		"qwen",
+		"smol",
+		"mistranspiles"
 	],
 	"ignorePaths": [
 		"node_modules",

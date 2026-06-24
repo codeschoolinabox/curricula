@@ -52,4 +52,28 @@ describe('probeCapabilities (real browser)', () => {
 			expect(typeof caps.maxStorageBufferBindingBytes).toBe('number');
 		},
 	);
+
+	it.skipIf(!webgpuAvailable)(
+		'webgpuFeatures is a string array when a WebGPU adapter exists (GPU-only)',
+		async () => {
+			const caps = await probeCapabilities();
+			expect(Array.isArray(caps.webgpuFeatures)).toBe(true);
+		},
+	);
+
+	it.skipIf(!webgpuAvailable)(
+		'webgpuFeatures has at least one entry on a conformant adapter (GPU-only)',
+		async () => {
+			const caps = await probeCapabilities();
+			expect((caps.webgpuFeatures ?? []).length).toBeGreaterThanOrEqual(1);
+		},
+	);
+
+	it.skipIf(webgpuAvailable)(
+		'webgpuFeatures is absent (not just undefined) when WebGPU is unavailable',
+		async () => {
+			const caps = await probeCapabilities();
+			expect('webgpuFeatures' in caps).toBe(false);
+		},
+	);
 });
