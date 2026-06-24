@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import buildPrompt from '../build-prompt.js';
-import type { FeatureName } from '../types.js';
+import type { ConformanceViolation, FeatureName } from '../types.js';
 
 // Increment 1 — the initial-prompt builder: ask + program routing + the
 // constraints stringified in. (Repair folding is Increment 2.)
@@ -329,6 +329,169 @@ describe('buildPrompt', () => {
 			expect(a.length).toBeGreaterThan(0);
 			expect(a).toBe(b); // pure + deterministic
 			expect(a).toContain('```js'); // the output contract survives an empty ask
+		});
+	});
+
+	// Increment 2 — repair folding. The SAME pure phase, now seeded: an optional
+	// trailing `repair` makes the prompt re-state the base ask AND fold in the
+	// prior candidate plus the located reasons it was refused. The violation
+	// `message`s are conform's own — the builder restates, never re-derives them.
+	describe('repair — folding a refused candidate and its located reasons', () => {
+		const featureViolation: ConformanceViolation = {
+			kind: 'feature',
+			feature: 'while',
+			message: 'while-loops are not allowed in this exercise',
+			location: {
+				start: { line: 1, column: 0 },
+				end: { line: 1, column: 12 },
+			},
+			nodePath: '$.body.0',
+		};
+		const sizeViolation: ConformanceViolation = {
+			kind: 'size',
+			dimension: 'lines',
+			limit: 10,
+			actual: 15,
+			message: 'the program is 15 lines, over the limit of 10',
+		};
+		const complexityViolation: ConformanceViolation = {
+			kind: 'size',
+			dimension: 'complexity',
+			limit: 2,
+			actual: 4,
+			message: 'the program nests 4 levels deep, over the limit of 2',
+		};
+
+		it('shows the refused candidate verbatim so the model corrects its own work', () => {
+			const candidate = 'while (true) {\n\tx++;\n}\n';
+
+			const prompt = buildPrompt(
+				'',
+				'a counter',
+				{ include: ['if'], exclude: [] },
+				{},
+				{ candidate, violations: [featureViolation] },
+			);
+
+			expect(prompt).toContain(candidate);
+		});
+
+		it('folds a feature violation message into the repair', () => {
+			const prompt = buildPrompt(
+				'',
+				'x',
+				{ include: ['if'], exclude: [] },
+				{},
+				{ candidate: 'while (true) {}\n', violations: [featureViolation] },
+			);
+
+			expect(prompt).toContain('while-loops are not allowed in this exercise');
+		});
+
+		it('folds a size violation message (limit and actual) into the repair', () => {
+			const prompt = buildPrompt(
+				'',
+				'x',
+				{ include: [], exclude: [] },
+				{ lines: 10 },
+				{ candidate: 'a\nb\n', violations: [sizeViolation] },
+			);
+
+			expect(prompt).toContain('the program is 15 lines, over the limit of 10');
+		});
+
+		it('folds BOTH a feature and a size violation without dropping either', () => {
+			const prompt = buildPrompt(
+				'',
+				'x',
+				{ include: ['if'], exclude: [] },
+				{ lines: 10 },
+				{
+					candidate: 'while (true) {}\n',
+					violations: [featureViolation, sizeViolation],
+				},
+			);
+
+			expect(prompt).toContain(featureViolation.message);
+			expect(prompt).toContain(sizeViolation.message);
+			// rendered as distinct ordered items (feature before size, matching
+			// conform's own violation order) — not smashed into one blob.
+			expect(prompt.indexOf(featureViolation.message)).toBeLessThan(
+				prompt.indexOf(sizeViolation.message),
+			);
+		});
+
+		it('folds three violations (feature + lines + complexity) without dropping any', () => {
+			const prompt = buildPrompt(
+				'',
+				'x',
+				{ include: ['if'], exclude: [] },
+				{ lines: 10, complexity: 2 },
+				{
+					candidate: 'while (true) {}\n',
+					violations: [featureViolation, sizeViolation, complexityViolation],
+				},
+			);
+
+			expect(prompt).toContain(featureViolation.message);
+			expect(prompt).toContain(sizeViolation.message);
+			expect(prompt).toContain(complexityViolation.message);
+		});
+
+		it('presents the candidate before the problems to fix', () => {
+			const candidate = 'while (true) {}\n';
+
+			const prompt = buildPrompt(
+				'',
+				'x',
+				{ include: ['if'], exclude: [] },
+				{},
+				{ candidate, violations: [featureViolation] },
+			);
+
+			expect(prompt.indexOf(candidate)).toBeLessThan(
+				prompt.indexOf(featureViolation.message),
+			);
+		});
+
+		it('re-states the base ask and constraints — repair augments, it does not replace', () => {
+			const ask = 'a coffee shop ordering system';
+			const subset = { include: ['if'] as FeatureName[], exclude: [] };
+
+			const repaired = buildPrompt(
+				'',
+				ask,
+				subset,
+				{ lines: 12 },
+				{
+					candidate: 'while (true) {}\n',
+					violations: [featureViolation],
+				},
+			);
+
+			// the base ask survives the (stateless) repair turn...
+			expect(repaired).toContain(ask);
+			expect(repaired).toContain('if-statements'); // constraint
+			expect(repaired).toContain('12'); // bound
+			// ...alongside the repair seed, folded in AFTER the base constraints
+			// (repair augments, it does not replace — and it does not lead).
+			expect(repaired).toContain('while (true) {}');
+			expect(repaired).toContain(featureViolation.message);
+			expect(repaired.indexOf(featureViolation.message)).toBeGreaterThan(
+				repaired.indexOf('12'),
+			);
+		});
+
+		it('omits the repair section on the initial turn — no candidate, no reasons', () => {
+			const candidate = 'while (true) {}\n';
+
+			// Built WITHOUT a repair context: the repair-specific FACTS (a prior
+			// candidate, a violation reason) must be absent — asserted on domain
+			// facts, not on a builder-authored heading.
+			const base = buildPrompt('', 'x', { include: ['if'], exclude: [] }, {});
+
+			expect(base).not.toContain(candidate);
+			expect(base).not.toContain(featureViolation.message);
 		});
 	});
 });

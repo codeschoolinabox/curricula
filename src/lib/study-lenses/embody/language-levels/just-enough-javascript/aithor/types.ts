@@ -156,6 +156,41 @@ type ConformResult = {
 	readonly ast?: Program;
 };
 
+// ─── Repair context (the prompt-construction seed for a repair turn) ──
+
+/**
+ * The seed a repair turn folds into the next prompt — the located reasons a
+ * candidate was refused, paired with the candidate itself.
+ *
+ * @remarks
+ * The data-flow sketch's repair edge returns to the same pure prompt phase "now
+ * seeded with the specific out-of-subset construct or out-of-bounds metric"; this
+ * is that seed, made a value.
+ * - `candidate` — the refused program (the curated path's extracted `code`),
+ *   shown to the model so a repair corrects its own work rather than starting
+ *   over.
+ * - `violations` — the located {@link ConformanceViolation}s `conform` emitted,
+ *   each already carrying its own `message`; the prompt restates those failures
+ *   in the model's terms without re-deriving them. **Non-empty by construction**:
+ *   a repair is only built for a *refused* candidate, which always carries at
+ *   least one located reason, so the type is a non-empty tuple (no degenerate
+ *   "fix these problems" with nothing to fix). Typed to the narrow conformance
+ *   union (not the level's admission `Violation`), keeping this seed model-free;
+ *   a later curated-loop unit may widen the element type if admission failures
+ *   are ever folded in (the non-empty cardinality holds regardless).
+ *
+ * Absent on the initial turn (the base ask); present on every repair turn. The
+ * base ask — persona, learner prompt, seed program, stringified constraints — is
+ * re-stated regardless: repair augments the prompt, it does not replace it.
+ */
+type RepairContext = {
+	readonly candidate: string;
+	readonly violations: readonly [
+		ConformanceViolation,
+		...ConformanceViolation[],
+	];
+};
+
 // ─── Model seams (injected; runtime excluded) ─────────────────────────
 
 /**
@@ -376,6 +411,7 @@ export type {
 	SizeViolation,
 	ConformanceViolation,
 	ConformResult,
+	RepairContext,
 	ResolvedModel,
 	ModelLoader,
 	AithorRuntime,

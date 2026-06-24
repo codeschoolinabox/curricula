@@ -1,4 +1,9 @@
-import type { FeatureName, FeatureSubset, SizeBounds } from './types.js';
+import type {
+	FeatureName,
+	FeatureSubset,
+	RepairContext,
+	SizeBounds,
+} from './types.js';
 
 /**
  * Builds the single natural-language prompt handed to the local model's
@@ -27,18 +32,25 @@ import type { FeatureName, FeatureSubset, SizeBounds } from './types.js';
  * curated loop's concern, not this phase's. An empty `include` permits all of
  * JEJ (so the prompt never enumerates the full set); a non-empty `include` is an
  * allow-list, narrowed by `exclude` (which wins on overlap).
+ *
+ * An optional `repair` makes this the repair turn — the SAME pure phase, now
+ * seeded: the whole base ask is re-stated (`generate` is stateless, with no
+ * conversation history) and the prior refused candidate plus its located reasons
+ * are folded in AFTER the constraints, before the output instruction.
  */
 export default function buildPrompt(
 	program: string,
 	prompt: string,
 	subset: FeatureSubset,
 	size: SizeBounds,
+	repair?: RepairContext,
 ): string {
 	const sections = [
 		PERSONA,
 		prompt,
 		renderSeed(program),
 		renderRequirements(subset, size),
+		renderRepair(repair),
 		OUTPUT_INSTRUCTION,
 	];
 
@@ -87,6 +99,23 @@ function renderSeed(program: string): string {
 	if (program.length === 0) return '';
 
 	return `Here is a program to use as a starting point — write a new one in the same spirit:\n\n${CODE_FENCE}\n${program}\n${CODE_FENCE}`;
+}
+
+/**
+ * The repair block — empty on the initial turn. Shows the refused candidate
+ * (fenced, so it corrects its own work) then the located reasons as a fix-list,
+ * one bullet per `conform`-supplied `message` in document order. The candidate is
+ * admitted JEJ (no triple-backtick syntax), so its bare fence never collides with
+ * the output instruction's ` ```js `.
+ */
+function renderRepair(repair: RepairContext | undefined): string {
+	if (repair === undefined) return '';
+
+	const problems = repair.violations
+		.map((violation) => `- ${violation.message}`)
+		.join('\n');
+
+	return `Your previous attempt did not meet the requirements:\n\n${CODE_FENCE}\n${repair.candidate}\n${CODE_FENCE}\n\nFix these problems, then return a corrected program:\n${problems}`;
 }
 
 /**
