@@ -61,3 +61,26 @@ describe('embody traceVariableLifecycle (node, fake transport)', () => {
 		expect(kinds).toContain('read');
 	});
 });
+
+describe('embody traceVariableLifecycle (node, synchronous admission gate)', () => {
+	it('propagates the tracer throw on non-JEJ real source', () => {
+		// `var x = 1` parses fine but is not Just-Enough-JavaScript: the real apex
+		// forward hands it to the tracer, whose eager JEJ gate throws synchronously
+		// at the call (no Worker spawned). The forward has NO try/catch — the throw
+		// propagates naked, so the message is the tracer's own, distinct from the
+		// canned-scenario throw (the no-wrap guarantee lives in that naked forward).
+		expect(() =>
+			embody('var x = 1').events.evaluation.traceVariableLifecycle(),
+		).toThrow(/not Just-Enough-JavaScript/u);
+	});
+
+	it('propagates the tracer throw on unparseable real source', () => {
+		// `const` tokenizes fine but fails at parse: the real parse-fail forward
+		// hands the raw source to the tracer, whose parse gate throws synchronously
+		// before any Worker is spawned — so the synchronous `.toThrow` form (not
+		// `.rejects`) is correct.
+		expect(() =>
+			embody('const').events.evaluation.traceVariableLifecycle(),
+		).toThrow(/not valid JavaScript/u);
+	});
+});
