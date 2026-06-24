@@ -260,30 +260,50 @@ design, and the rawness is the lesson, not a defect.
   ungated call.
 - **Structured refusal** — the outcome when no result is reached: a named cause,
   never an out-of-spec program where one was promised. The causes are
-  `validate`-aware. Under `validate: true`: the **attempt bound exhausted** and
-  **no model available**. Under `validate: false`: only **no model available** —
-  with no loop there is no attempt-bound refusal. _No model available_ means the
-  device cannot bring a model up: no model it can run, or the requested model is
-  neither cached nor reachable to fetch. Because every model is local, when the
-  device cannot bring one up the aithor refuses rather than reaching for a
-  remote one. A curated request whose spec no program can satisfy refuses for
-  the bound, expectedly.
+  `validate`-aware in one direction only: **attempt bound exhausted** is
+  curated-only (no loop, no bound), while **no model available** and **unknown
+  model** are bring-up-time and so arise under either `validate` value (model
+  bring-up precedes the curated/uncurated fork). Under `validate: true`: any of
+  the three. Under `validate: false`: **no model available** or **unknown model**
+  — with no loop there is no attempt-bound refusal. _No model available_ means the
+  device cannot bring up a model it otherwise knows: no model it can run, or the
+  requested model is neither cached nor reachable to fetch — both of local-llm's
+  load-failure causes collapse here, and so does a rejected device-capability
+  probe or any other infrastructure fault raised during bring-up (the runtime
+  propagates those rather than returning a load failure; the aithor seam catches
+  them into this same cause). _Unknown model_ is a different layer: the
+  requested `model` name is absent from the runtime's catalog altogether (a typo,
+  or a name from a newer catalog) — kept distinct so a misnamed model never
+  masquerades as "your device can't run it." Because every model is local, when
+  the device cannot bring one up the aithor refuses rather than reaching for a
+  remote one. A curated request whose spec no program can satisfy refuses for the
+  bound, expectedly.
 - **Model handle** — a **`LoadedModel`** from the injected local-llm runtime
   ([`lib/local-llm/`](../../../../lib/local-llm/README.md)), always a **local**
   one: it runs on the learner's own device, never a remote service. The config
   selects it by **name** from local-llm's **open set** of models along a
   **size/capability spectrum** — smaller downloads less and runs faster but writes
   weaker programs, larger the reverse — and the set **grows as small portable
-  models improve**. The named model is **fetched once and cached on the device**,
-  then **brought into memory on first use** and reused thereafter — a fetch-once,
-  load-once-reuse lifecycle the **runtime** owns; aithor names _which_ model and
-  drives _when_, not _how_. The network is touched only for that one-time fetch;
-  every later load is from the cache, offline. Its `generate` resolves to a
-  decomposed `GenerationResult` (`raw` byte-exact, `code` the extracted program);
-  aithor conforms `.code` and returns `.raw` per quadrant. The runtime also
-  offers a one-time-fetch progress callback, which aithor does not surface — by
-  the pure-seeming commitment below. The model _runtime_ (how a model executes)
-  is outside this module.
+  models improve**. aithor passes that name straight through to the runtime
+  (`load({ model })`); it does **not** choose a size class or device-tier
+  preference, nor offer a "let the runtime pick its default" mode — `model` must
+  name a real model. A name absent from the runtime's catalog — **the empty
+  string included** (the very case the runtime would otherwise resolve to its own
+  default pick) — refuses as **unknown model**, pre-checked before bring-up
+  against the **same catalog instance** aithor injects into the runtime at
+  construction (local-llm exposes no membership predicate, so the pre-check and
+  the runtime agree by construction). The named model is **fetched once and
+  cached on the device**, then **brought into memory on first use** and reused
+  thereafter — a fetch-once, load-once-reuse lifecycle the **runtime** owns;
+  aithor names _which_ model and drives _when_, not _how_. The network is touched
+  only for that one-time fetch; every later load is from the cache, offline. Its
+  `generate` resolves to a decomposed `GenerationResult` (`raw` byte-exact,
+  `code` the extracted program); aithor conforms `.code` and returns `.raw` per
+  quadrant. The runtime also offers a one-time-fetch progress callback, which
+  aithor does not surface — by the pure-seeming commitment below. The model
+  _runtime_ — how a model executes, and **which on-device backend** runs it (the
+  host registers that with the runtime; aithor ships no backend and takes no
+  backend dependency) — is outside this module.
 
 ## What it produces (the boundary)
 
@@ -300,8 +320,9 @@ The boundary splits on `validate`.
 - **Out, uncurated (`validate: false`):** the model's program **as-is** —
   possibly invalid, possibly drifting past the requested subset or size — **by
   design**. The constraints shaped the prompt; nothing enforced them, so the gap
-  between asked-for and got is real and intentional. The only refusal here is
-  **no model available**; with no loop, there is no attempt-bound refusal.
+  between asked-for and got is real and intentional. The only refusals here are
+  **no model available** and **unknown model** (both bring-up-time); with no
+  loop, there is no attempt-bound refusal.
 
 Generation is **asynchronous**: a caller `await`s the result (the model call
 and, on the curated path, the checks are async). The model's lazy load — and,
@@ -331,6 +352,11 @@ model.
   fetch-and-cache on first need, and bringing it into memory lazily, on first
   use — driving _which_ model and _when_, not the fetch, cache, or run
   mechanics, which are the runtime's (see _Excludes_).
+- The **catalog-membership pre-check**: turning a `model` name absent from the
+  injected catalog (the empty string included) into an **unknown model** refusal
+  _before_ the runtime's `load` is called, so the runtime's unknown-name throw is
+  never reached on the default path — the aithor seam stays uniformly
+  value-not-throw.
 
 ### Excludes
 
@@ -342,10 +368,13 @@ model.
 - **The model runtime** — how a local model is **fetched, cached on the device,
   and executed** is infrastructure. This module names _which_ local model,
   constrains the selection to local models, and drives _when_ its lifecycle runs
-  — not _how_ it is fetched, stored, or run. Excluding the mechanism does not
-  weaken the commitment that every model is local: the aithor relies on that
-  property exactly as it relies on the level's admission gate, without
-  implementing either.
+  — not _how_ it is fetched, stored, or run. It also does not **choose or ship**
+  the on-device inference backend: local-llm takes the backends it runs as a
+  host-supplied adapter map (the host registers only what it ships), and aithor
+  consumes whatever local backend the host wired rather than bundling one of its
+  own. Excluding the mechanism does not weaken the commitment that every model is
+  local: the aithor relies on that property exactly as it relies on the level's
+  admission gate, without implementing either.
 - **Embodiment, lenses, execution** — once a program exists it is an ordinary
   JEJ source string; embody / orchestrate / engine handle it from there.
 - **Authoring _for its own sake_** — a learner or author writing a finished
@@ -420,7 +449,12 @@ These are present-tense decisions the module honours.
   **private** (the learner's code and the generated programs never leave the
   device — ever), and **cost-free** (no per-call or per-token billing, only the
   machine's own compute). A remote escape hatch would forfeit all four; there is
-  none, by design. This is what the **Chapter-4 uncurated use is built on**:
+  none, by design. aithor's own default-runtime factory is a thin construction
+  over the local-llm runtime, which has no remote path — so once a host wires a
+  backend adapter, the local-only guarantee is anchored in code on that default
+  path, not merely asserted in prose (a host that injects its own runtime owns the
+  invariant for that runtime). This is what the **Chapter-4 uncurated use is built
+  on**:
   AI-co-authoring practice that is offline, account-free, private, and cost-free
   is only practicable for every learner because the model is local — the
   local-only invariant is what that use is _for_.
@@ -434,8 +468,9 @@ These are present-tense decisions the module honours.
   _which_ model is requested to whatever host serves the weights — "cost-free"
   means no per-call billing and no account, not zero bytes. Where no model the
   device can run is available, the aithor returns a structured refusal (_no
-  model available_) under either `validate` value; there is no remote or
-  lower-fidelity fallback.
+  model available_; a name absent from the catalog refuses separately as _unknown
+  model_) under either `validate` value; there is no remote or lower-fidelity
+  fallback.
 
 ## Testing posture
 
@@ -466,7 +501,11 @@ results) and a counted loader (to assert load-once, with no real fetch).
   either `validate`, repair carrying the specific failure), the `validate`
   branch (loop vs. pass-through), the attempt bound, result shaping, refusal
   causes (`validate`-aware), and load-once behaviour are pure given the two
-  mocks — ordinary ZOMBIES units.
+  mocks — ordinary ZOMBIES units. The loader boundary is itself a unit: a fake
+  whose underlying runtime throws an unknown-name error, returns a load failure,
+  or rejects its probe must surface as a value — `unknown-model` for the first,
+  `no-model-available` for the other two — never a thrown exception, since aithor
+  is uniformly value-not-throw.
 - **Measured, not asserted.** Only the program's content, quality, and _theme_
   fidelity are statistical rates over a real model (an eval). Feature and size
   conformance are _asserted_ on the curated path — they are gated by `conform`,

@@ -31,8 +31,8 @@
 
 import type { Program } from 'acorn';
 
-import type { SourceRange } from '../../../lib/validating/types.js';
 import type { LoadedModel } from '../../../../lib/local-llm/types.js';
+import type { SourceRange } from '../../../lib/validating/types.js';
 
 // ─── Feature subset (permitted constructs + operators) ────────────────
 
@@ -167,23 +167,50 @@ type ConformResult = {
  * its byte-exact `raw` on the uncurated one (the non-deterministic seam: the same
  * prompt may yield different results).
  *
- * Resolves to the handle, or — value, NOT a throw — a {@link Refusal}
- * (`no-model-available`) when the device cannot bring the model up. That collapses
- * local-llm's `LoadFailure` (its `no-feasible-model` and `fetch-failed` causes)
- * into aithor's single device-availability cause, matching both aithor's
- * `ok`-boolean convention and the runtime's own value-not-throw decision. There is
- * no remote fallback. Tests inject a counted loader returning a fake whose
- * `generate` returns canned results, to assert load-once with no real fetch.
+ * This loader is aithor's value-not-throw BOUNDARY: it resolves to the handle or
+ * a {@link Refusal} — NEVER a throw, NEVER a leaked rejection — even though
+ * local-llm itself is NOT uniformly value-not-throw. It absorbs local-llm's three
+ * non-success shapes, matching aithor's `ok`-boolean convention:
+ * - a `LoadFailure` (its `no-feasible-model` and `fetch-failed` causes) →
+ *   `Refusal('no-model-available')`; local-llm's `detail` is dropped at the seam
+ *   (a {@link Refusal} carries only a cause).
+ * - a model name absent from the injected catalog → `Refusal('unknown-model')`,
+ *   detected by a catalog-membership pre-check (against the same catalog aithor
+ *   injects) BEFORE `load` is called. The pre-check does double duty: a NON-EMPTY
+ *   absent name is one local-llm THROWS on, so pre-checking keeps the seam from
+ *   ever reaching that throw; the EMPTY string is one local-llm does NOT throw on
+ *   — it would instead silently pick a default model — so the same pre-check is
+ *   what enforces aithor's no-default-pick rule. Either way the name never reaches
+ *   `load`.
+ * - a rejected device-capability probe, or any other infrastructure throw raised
+ *   during bring-up — which local-llm PROPAGATES rather than returning a
+ *   `LoadFailure` — caught and folded into `Refusal('no-model-available')` by a
+ *   catch-all around the whole `load` call.
+ * There is no remote fallback. Tests inject a counted loader returning a fake whose
+ * `generate` returns canned results (to assert load-once with no real fetch), plus
+ * fakes whose underlying runtime throws / fails / rejects, to assert each shape
+ * surfaces as the right `Refusal` value rather than a throw.
  */
 type ModelLoader = (name: string) => Promise<LoadedModel | Refusal>;
 
 /**
- * The injectable runtime — the excluded HOW behind the WHAT of `config`.
- * Optional third argument to `aithor`; omitted, it defaults to a thin adapter
- * over the real local-llm runtime, so the public contract stays effectively
- * two-arg. That default adapter (Phase-1 wiring) constructs the local-llm runtime
- * with a host-supplied `AdapterMap` and re-maps its `load(selection)` →
- * `loadModel(name)`; it is named here, not a zero-config given.
+ * The injectable runtime — the excluded HOW behind the WHAT of `config`. Optional
+ * third argument to `aithor`; the seam through which the model loader is supplied
+ * (a real runtime in production, a fake in tests).
+ *
+ * aithor stays BACKEND-AGNOSTIC. Its default-runtime factory (Phase-1 wiring) is a
+ * thin construction over the real local-llm runtime: local-llm requires the host
+ * to register the backends it ships (there is no default `AdapterMap`, and aithor
+ * bundles no backend of its own), so the factory takes a HOST-SUPPLIED `AdapterMap`,
+ * constructs the runtime with that map AND the catalog aithor holds for its
+ * membership pre-check, and re-maps `load(selection)` → `loadModel(name)`
+ * (collapsing `LoadFailure` → `no-model-available`, pre-checking unknown names →
+ * `unknown-model`). For a browser host wanting the canonical zero-wiring path,
+ * aithor ALSO ships a SEPARATE, opt-in webllm convenience export — the sole place
+ * that depends on `@mlc-ai/web-llm`. So `aithor(program, config)` is effectively
+ * two-arg AFTER one host backend wiring; the third arg is the injected seam, not a
+ * per-call argument. The local-only invariant stays anchored in code: the default
+ * factory always constructs local-llm, which has no remote path.
  */
 type AithorRuntime = {
 	readonly loadModel: ModelLoader;
@@ -202,7 +229,10 @@ type AithorRuntime = {
  *   empty string is valid: the seed program + stringified constraints carry the
  *   ask.
  * - `model` — the local model's NAME from an open, growing size/capability set.
- *   A `string`, not an enum: a closed type would foreclose the open set.
+ *   A `string`, not an enum: a closed type would foreclose the open set. Required
+ *   and must name a real model: a name absent from the runtime's catalog — the
+ *   empty string included — refuses as `unknown-model` (there is no default-pick
+ *   mode).
  * - `include` / `exclude` — the feature subset. Enforced under `validate: true`,
  *   prompt-shaping under `validate: false`.
  * - `lines` / `complexity` — the size bounds. Same enforcement split.
@@ -241,17 +271,30 @@ type ResolvedAithorConfig = {
 // ─── Result / refusal (the boundary out) ──────────────────────────────
 
 /**
- * Why no result was reached — `validate`-aware.
+ * Why no result was reached.
  *
  * @remarks
+ * `validate`-aware in one direction only: `attempt-bound-exhausted` is
+ * curated-only; the two bring-up causes arise under either `validate` value
+ * (model bring-up precedes the curated/uncurated fork).
  * - `'attempt-bound-exhausted'` — curated only: the loop ran out of attempts
  *   (some subset × size × intent requests are unsatisfiable).
- * - `'no-model-available'` — either path: the device cannot bring a local model
- *   up. The only uncurated refusal cause, and the re-mapping of local-llm's
- *   `LoadFailure` — both its `no-feasible-model` and `fetch-failed` causes
- *   collapse into this single device-availability cause.
+ * - `'no-model-available'` — either path: the device cannot bring up a model it
+ *   otherwise knows. The re-mapping of local-llm's `LoadFailure` — both its
+ *   `no-feasible-model` and `fetch-failed` causes collapse here — and also the
+ *   catch-all for a propagated capability-probe or infrastructure fault during
+ *   bring-up.
+ * - `'unknown-model'` — either path: the requested `model` name is absent from the
+ *   runtime's (injected) catalog — a typo, the empty string, or a name from a
+ *   newer catalog. Kept distinct from `no-model-available` so a misnamed model
+ *   never masquerades as device-unavailability; pre-checked before bring-up (a
+ *   non-empty absent name is one local-llm would throw on; the empty string is one
+ *   it would instead silently default-pick — the pre-check rules out both).
  */
-type RefusalCause = 'attempt-bound-exhausted' | 'no-model-available';
+type RefusalCause =
+	| 'attempt-bound-exhausted'
+	| 'no-model-available'
+	| 'unknown-model';
 
 /** A structured refusal — a named cause, never an out-of-spec program. */
 type Refusal = {

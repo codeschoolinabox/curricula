@@ -22,12 +22,16 @@ boundary so the rest is data-in, data-out:
   stringified constraints — composing from an empty input, varying a non-empty
   one — independent of `validate`. On a repair turn the same phase folds the
   located refusal reason into the next prompt.
-- **Model bring-up** — input: a model name; output: a model handle, or
-  _no-model-available_. **Async, stateful (seam 1 — load-once).** The named
-  local model is brought into memory on first need and reused thereafter; the
-  runtime's one-time fetch and on-device cache sit below this seam, invisible.
-  When the device cannot bring a model up, the request short-circuits to a
-  refusal.
+- **Model bring-up** — input: a model name; output: a model handle, or a refusal
+  (_no-model-available_ or _unknown-model_). **Async, stateful (seam 1 —
+  load-once).** The named local model is brought into memory on first need and
+  reused thereafter; the runtime's one-time fetch and on-device cache sit below
+  this seam, invisible. This seam is aithor's value-not-throw boundary: a
+  catalog-membership pre-check turns a name absent from the injected catalog (the
+  empty string included) into _unknown-model_ before the runtime's `load` is
+  called, and the boundary absorbs the runtime's load failure, a propagated probe
+  fault, and any other throw into _no-model-available_ — so a refusal is always a
+  value, never a throw.
 - **Candidate generation** — input: a built prompt + a model handle; output: a
   decomposed result (`raw` + extracted `code`). **Async, non-deterministic (seam
   2 — the model call).** The same request yields different results; the only
@@ -47,8 +51,8 @@ boundary so the rest is data-in, data-out:
 ```mermaid
 flowchart TD
     request[("request<br/>(input program + config)")] -->|"build prompt, pure<br/>(constraints stringified in,<br/>regardless of validate)"| prompt[("built prompt")]
-    prompt -->|"bring model up, async stateful<br/>(load-once; fetch/cache below seam)"| avail{"model<br/>available?"}
-    avail -->|"no"| refusal[("structured refusal<br/>(validate-aware cause)")]
+    prompt -->|"pre-check name vs catalog (sync),<br/>then bring up (async, load-once);<br/>value-not-throw boundary"| avail{"model<br/>available?"}
+    avail -->|"no — unknown name, or<br/>device can't bring one up"| refusal[("structured refusal<br/>(named cause)")]
     avail -->|"yes — call model,<br/>async non-deterministic"| candidate[("decomposed result<br/>(raw + extracted code)")]
     candidate -->|"validate: false —<br/>raw, unmodified"| raw[("raw program as result<br/>(uncurated, drift and all)")]
     candidate -->|"validate: true —<br/>admit + conform the code"| gate{"admitted and<br/>conformant?"}
@@ -59,8 +63,9 @@ flowchart TD
 
 The repair edge returns to prompt construction — the same pure phase, now seeded
 with the specific out-of-subset construct or out-of-bounds metric. The loop is
-bounded; the dotted edge is the join where the bound is spent. Both refusal
-causes converge on one refusal state.
+bounded; the dotted edge is the join where the bound is spent. The three refusal
+causes (_attempt-bound-exhausted_, _no-model-available_, _unknown-model_)
+converge on one refusal state.
 
 ## Structural constraints
 
@@ -68,7 +73,11 @@ causes converge on one refusal state.
   loader (name → handle, load-once) and the non-deterministic model call (handle
   → decomposed result). Everything else — prompt construction, conformance, the validate
   fork, the attempt bound, result-shaping, refusal-cause selection — is pure
-  given those two injected. Conformance never reaches the model.
+  given those two injected. Conformance never reaches the model. The loader seam
+  is aithor's value-not-throw boundary: local-llm is not uniformly value-not-throw
+  (it throws on an unknown name and propagates a probe fault), so the loader
+  pre-checks catalog membership and wraps `load` in a catch-all, turning every
+  non-success into a `Refusal` value.
 - **The curated boundary holds, fail-loud.** Under `validate: true` a candidate
   becomes a result only when admission AND conformance both pass; one that fails
   either is repaired or refused, never returned. There is no degrade-to-
@@ -76,9 +85,11 @@ causes converge on one refusal state.
 - **The uncurated rawness is preserved, by design.** Under `validate: false` the
   candidate passes through unmodified — admission and conformance do not run,
   and any cleanup would be a defect.
-- **Refusal causes are validate-aware.** Curated: _attempt-bound-exhausted_ or
-  _no-model-available_. Uncurated: _no-model-available_ only — with no loop
-  there is no attempt-bound refusal.
+- **Refusal causes are validate-aware in one direction only.**
+  _attempt-bound-exhausted_ is curated-only; _no-model-available_ and
+  _unknown-model_ are bring-up-time and arise under either `validate` value.
+  Curated: any of the three. Uncurated: _no-model-available_ or _unknown-model_ —
+  with no loop there is no attempt-bound refusal.
 - **The result follows the `BaseResult` `ok`-boolean convention** — consumers
   check `ok`, not a discriminated tag. The only failure surface is a structured
   refusal; conformance violations stay internal to the repair loop.
@@ -97,8 +108,9 @@ causes converge on one refusal state.
   narrower, aithor-owned check.
 - **The model runtime** — how a local model is fetched, cached on the device,
   and executed sits below the bring-up seam. This module names _which_ local
-  model and drives _when_ its lifecycle runs, not _how_; the runtime is
-  injected.
+  model and drives _when_ its lifecycle runs, not _how_; the runtime is injected,
+  and the on-device backend it runs is a host-supplied adapter map — aithor ships
+  no backend of its own.
 - **Embodiment, lenses, execution** — once a program exists it is an ordinary
   JEJ source string; embody / orchestrate / engine own it from there.
 - **Authoring for its own sake** — this module produces programs _to study_, not
