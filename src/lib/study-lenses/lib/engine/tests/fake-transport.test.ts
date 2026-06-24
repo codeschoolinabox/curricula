@@ -20,7 +20,11 @@ function fakeRun(
 ): EngineHandle {
 	const spec: EvaluateSpec = {
 		code,
-		workerUrl: new URL('file:///ignored-by-the-fake'),
+		// The fake runs same-thread and never invokes the factory; a throwing
+		// dummy makes "never invoked" assertable.
+		workerFactory: () => {
+			throw new Error('fake transport must not construct a worker');
+		},
 		threadLogic: REFERENCE_THREAD_LOGIC,
 		...overrides,
 	};

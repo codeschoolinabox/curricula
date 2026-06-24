@@ -17,7 +17,10 @@ const fakeRunner: AgnosticRunner = {
 	run(code, overrides = {}) {
 		const spec: EvaluateSpec = {
 			code,
-			workerUrl: new URL('file:///ignored-by-the-fake'),
+			// Fake runs same-thread; the factory is never invoked.
+			workerFactory: () => {
+				throw new Error('fake transport must not construct a worker');
+			},
 			threadLogic: REFERENCE_THREAD_LOGIC,
 			...overrides,
 		};

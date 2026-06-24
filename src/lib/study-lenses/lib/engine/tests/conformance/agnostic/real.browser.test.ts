@@ -10,17 +10,17 @@ import registerSettlement from './settlement.js';
 import registerStreaming from './streaming.js';
 import type { AgnosticRunner } from './types.js';
 
-const WORKER_URL = new URL(
-	'../../../testing/test-worker-entry.ts',
-	import.meta.url,
-);
-
 const realRunner: AgnosticRunner = {
 	name: 'real',
 	run(code, overrides = {}) {
 		const spec: EvaluateSpec = {
 			code,
-			workerUrl: WORKER_URL,
+			// Inline `new Worker(new URL(...))` — keep the adjacency webpack needs.
+			workerFactory: () =>
+				new Worker(
+					new URL('../../../testing/test-worker-entry.ts', import.meta.url),
+					{ type: 'module' },
+				),
 			threadLogic: REFERENCE_THREAD_LOGIC,
 			...overrides,
 		};

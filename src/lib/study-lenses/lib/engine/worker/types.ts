@@ -88,7 +88,13 @@ type FromWorkerMessage =
 /** What a transport needs to start one run. */
 type TransportInit = {
 	readonly code: string;
-	readonly workerUrl: URL;
+	/**
+	 * Constructs the run's module worker — see `EvaluateSpec.workerFactory`
+	 * for the adjacency + module-type obligations. The real transport invokes
+	 * this inside its construction try/catch (a throwing factory → worker-error);
+	 * the fake never invokes it.
+	 */
+	readonly workerFactory: () => Worker;
 	readonly workerConfig: unknown;
 	readonly strict: boolean;
 };

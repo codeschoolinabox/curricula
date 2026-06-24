@@ -77,8 +77,15 @@ export default function traceVariables(
 	// fails the JEJ gate above and never reaches here.
 	const spec: EvaluateSpec = {
 		code: instrumented,
-		// eslint-disable-next-line unicorn/relative-url-style -- Vite's `new URL(..., import.meta.url)` worker bundling resolves the `./` form
-		workerUrl: new URL('./variables-worker-entry.ts', import.meta.url),
+		// Inline `new Worker(new URL(...))` so webpack's static worker detection
+		// emits a real worker chunk; splitting it across modules (URL apart from
+		// `new Worker`) emits a raw .ts asset that crashes. See engine
+		// `EvaluateSpec.workerFactory`.
+		workerFactory: () =>
+			// eslint-disable-next-line unicorn/relative-url-style -- `new URL(..., import.meta.url)` worker bundling resolves the `./` form
+			new Worker(new URL('./variables-worker-entry.ts', import.meta.url), {
+				type: 'module',
+			}),
 		workerConfig: scopeTable,
 		threadLogic: variablesThreadLogic,
 		...(options.seconds === undefined ? {} : { seconds: options.seconds }),

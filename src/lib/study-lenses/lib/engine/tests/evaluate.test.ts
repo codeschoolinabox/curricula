@@ -18,7 +18,11 @@ import type { EngineHandle } from '../types.js';
 function lazyHandle(): EngineHandle {
 	return evaluate({
 		code: '',
-		workerUrl: new URL('file:///unused-in-node'),
+		// Node has no Worker and these rows never start a run — a throwing
+		// factory documents (and would loudly prove) it is never invoked.
+		workerFactory: () => {
+			throw new Error('worker factory must not run in node');
+		},
 		threadLogic: { onMessage: (message) => message },
 	});
 }

@@ -28,7 +28,7 @@ import type { CreateTransport, Transport } from './worker/types.js';
  * The engine's entry point: spec in, lazy handle out.
  *
  * @param spec - The whole coupling surface (README.md § Public API):
- *   code, worker entry URL, clone-safe worker config, thread logic,
+ *   code, worker factory, clone-safe worker config, thread logic,
  *   seconds (default 5), strict (default true).
  * @param createTransport - Engine-internal conformance seam: the
  *   transport factory the run will use. Defaults to the real worker
@@ -173,7 +173,7 @@ async function runToSettlement(
 	try {
 		await transport.start({
 			code: state.spec.code,
-			workerUrl: state.spec.workerUrl,
+			workerFactory: state.spec.workerFactory,
 			workerConfig: state.spec.workerConfig,
 			strict: state.spec.strict ?? true,
 		});

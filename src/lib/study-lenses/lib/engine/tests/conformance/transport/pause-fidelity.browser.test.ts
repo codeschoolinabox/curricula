@@ -11,15 +11,15 @@ import evaluate from '../../../evaluate.js';
 import REFERENCE_THREAD_LOGIC from '../../../testing/reference-thread-logic.js';
 import type { EvaluateSpec } from '../../../types.js';
 
-const WORKER_URL = new URL(
-	'../../../testing/test-worker-entry.ts',
-	import.meta.url,
-);
-
 function realRun(code: string) {
 	const spec: EvaluateSpec = {
 		code,
-		workerUrl: WORKER_URL,
+		// Inline `new Worker(new URL(...))` — keep the adjacency webpack needs.
+		workerFactory: () =>
+			new Worker(
+				new URL('../../../testing/test-worker-entry.ts', import.meta.url),
+				{ type: 'module' },
+			),
 		threadLogic: REFERENCE_THREAD_LOGIC,
 	};
 	return evaluate(spec);

@@ -24,11 +24,26 @@ type EvaluateSpec = {
 	/** The program, as an opaque string — instrumented or not. */
 	readonly code: string;
 	/**
-	 * A thin per-consumer worker entry: a few lines importing the engine's
-	 * bootstrap and this consumer's worker logic, wiring them. Dynamic
-	 * module delivery is deliberately not supported (bundlers stay static).
+	 * Constructs THIS run's module worker. MUST be authored as ONE
+	 * syntactically adjacent expression in the CONSUMER's module:
+	 *
+	 *   () => new Worker(new URL('./entry.ts', import.meta.url), { type: 'module' })
+	 *
+	 * The factory loads a thin per-consumer worker entry (a few lines wiring
+	 * the engine's bootstrap to this consumer's worker logic). The consumer
+	 * owns construction — not the engine — for two load-bearing reasons:
+	 * (1) ADJACENCY — webpack's static worker detection emits a real worker
+	 *     chunk only when `new Worker(new URL(...))` is one expression;
+	 *     splitting the URL from `new Worker`, or hiding it behind a helper,
+	 *     regresses to a raw-`.ts` asset that crashes (`worker-error`).
+	 * (2) MODULE TYPE — omitting `{ type: 'module' }` yields a classic worker
+	 *     whose ESM `import`s fail at load (also `worker-error`).
+	 * Neither is type-enforceable (`() => Worker` cannot encode the options),
+	 * and a branded wrapper to enforce them would BE the forbidden re-splitting
+	 * helper — so the guard is doc-only by necessity. Dynamic module delivery
+	 * stays unsupported; the URL is a static literal (bundlers stay static).
 	 */
-	readonly workerUrl: URL;
+	readonly workerFactory: () => Worker;
 	/** Clone-safe data delivered verbatim to the worker logic at setup. */
 	readonly workerConfig?: unknown;
 	readonly threadLogic: ThreadLogic;

@@ -18,15 +18,20 @@ import evaluate from '../evaluate.js';
 import REFERENCE_THREAD_LOGIC from '../testing/reference-thread-logic.js';
 import type { EvaluateSpec, ThreadLogic } from '../types.js';
 
-const WORKER_URL = new URL('../testing/test-worker-entry.ts', import.meta.url);
-
 function referenceSpec(
 	code: string,
 	overrides: Partial<EvaluateSpec> = {},
 ): EvaluateSpec {
 	return {
 		code,
-		workerUrl: WORKER_URL,
+		// Inline `new Worker(new URL(...))` — the adjacency webpack's static
+		// worker detection needs (and that the production consumer uses);
+		// splitting the URL into a const or a helper re-breaks the bundle at
+		// runtime (silent until deployment). See engine `EvaluateSpec.workerFactory`.
+		workerFactory: () =>
+			new Worker(new URL('../testing/test-worker-entry.ts', import.meta.url), {
+				type: 'module',
+			}),
 		threadLogic: REFERENCE_THREAD_LOGIC,
 		...overrides,
 	};
@@ -197,10 +202,30 @@ describe('evaluate (real transport)', () => {
 			]);
 		});
 
-		it('settles worker-error for a bad worker url', async () => {
+		it('settles worker-error for a throwing worker factory', async () => {
 			const handle = evaluate(
 				referenceSpec('', {
-					workerUrl: new URL('does-not-exist-worker.ts', import.meta.url),
+					workerFactory: () => {
+						throw new Error('worker construction failed');
+					},
+				}),
+			);
+			const { settlement } = await handle.result;
+
+			expect([settlement.outcome, settlement.error?.cause]).toEqual([
+				'errored',
+				'worker-error',
+			]);
+		});
+
+		it('settles worker-error when the worker fails to load (async error event)', async () => {
+			const handle = evaluate(
+				referenceSpec('', {
+					workerFactory: () =>
+						new Worker(
+							new URL('../testing/failing-worker-entry.ts', import.meta.url),
+							{ type: 'module' },
+						),
 				}),
 			);
 			const { settlement } = await handle.result;

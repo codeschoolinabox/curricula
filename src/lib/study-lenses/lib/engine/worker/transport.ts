@@ -111,7 +111,7 @@ async function startWorker(
 
 	let worker: Worker;
 	try {
-		worker = new Worker(init.workerUrl, { type: 'module' });
+		worker = init.workerFactory();
 	} catch (error) {
 		enqueue(state, {
 			kind: 'failure',

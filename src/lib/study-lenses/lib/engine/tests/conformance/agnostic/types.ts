@@ -1,7 +1,7 @@
 /**
  * @file The contract between the agnostic spec modules and their two
  * runners. Spec modules register describe blocks over a runner; the
- * runner owns transport injection and the worker entry URL. Spec
+ * runner owns transport injection and the worker factory. Spec
  * modules MUST call the runner only inside `it` bodies — never at
  * module evaluation time, never in shared describe-scope state.
  */

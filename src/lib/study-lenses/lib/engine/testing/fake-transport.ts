@@ -53,8 +53,8 @@ import type {
  * sync-THROWING onCall does the same — so the pump invokes the hook a
  * second time for classification (a documented double-invocation,
  * test-double territory); a thenable return queues a loud failure
- * naming the sync-only constraint. The spec's `workerUrl` is ignored
- * (the runner passes a dummy).
+ * naming the sync-only constraint. The spec's `workerFactory` is never
+ * invoked (the fake runs same-thread; no worker is constructed).
  */
 export default function createFakeTransport(
 	workerSetup: WorkerSetup,
