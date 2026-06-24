@@ -20,15 +20,17 @@ example — the embody result vocabulary its adapter maps onto:
    engine drains on the consumer's behalf (phase 3) — `result` always settles.
 
 2. **Sandbox start** (async, first pull or result access) — a module worker is
-   spawned from the spec's worker entry; readiness is confirmed by handshake;
-   shared memory and the worker config are delivered at setup; the consumer's
-   worker logic returns its globals (validated as identifiers, loudly) and
-   optional halt serializer; the code is delivered and runs under the
-   strict-mode preference. Environment failures — shared memory unavailable,
-   worker construction failure — are worker-error terminations with the
-   condition in the engine error, never throws; consumer setup failures (invalid
-   global keys, a throwing setup, clone-unsafe worker config) settle the same
-   way.
+   spawned via the spec's worker factory (which loads the consumer's thin worker
+   entry); readiness is confirmed by handshake; shared memory and the worker
+   config are delivered at setup; the consumer's worker logic returns its
+   globals (validated as identifiers, loudly) and optional halt serializer; the
+   code is delivered and runs under the strict-mode preference. Environment
+   failures — shared memory unavailable, a throwing worker factory — are
+   worker-error terminations with the condition in the engine error, never
+   throws (a factory returning a non-`Worker` is a consumer-side type error;
+   should it reach runtime it settles via the engine's internal-defect path, not
+   this one); consumer setup failures (invalid global keys, a throwing setup,
+   clone-unsafe worker config) settle the same way.
 
 3. **Streaming** (async, per message) — the running program emits messages one
    at a time under the pause protocol; each is handed to the message hook and
@@ -59,7 +61,7 @@ example — the embody result vocabulary its adapter maps onto:
 
 ```mermaid
 flowchart TD
-    SPEC[spec<br/>code · worker entry · worker config ·<br/>thread logic · seconds · strict] --> HANDLE[lazy handle<br/>no work before first pull or result access]
+    SPEC[spec<br/>code · worker factory · worker config ·<br/>thread logic · seconds · strict] --> HANDLE[lazy handle<br/>no work before first pull or result access]
     HANDLE -->|cancel or fail before the run starts| SETTLE
     HANDLE -->|first pull or result access| RUN[running program in module worker<br/>globals injected · halt serializer registered]
     RUN -->|emit: clone-safe message,<br/>pauses until disposed| MSG[message on thread]
@@ -126,9 +128,17 @@ flowchart TD
 - **Worker-post order is preserved.** Emissions and call requests are serviced
   FIFO as posted.
 - **Environment failures are settlements, never throws** — shared memory
-  unavailable and worker construction failure settle as errored with the
-  condition in the engine error. Serving the cross-origin isolation headers
-  (COOP/COEP) is the host page's responsibility.
+  unavailable and a throwing worker factory settle as errored with the condition
+  in the engine error. Serving the cross-origin isolation headers (COOP/COEP) is
+  the host page's responsibility.
+- **The engine spawns only what the factory returns.** Worker construction is
+  consumer-owned; the engine asserts nothing about the worker at runtime
+  (module-vs-classic, adjacency, bundler). A _throwing_ worker factory is a
+  worker-error settlement; a factory returning a non-`Worker` is a consumer-side
+  type error (it lands on the internal-defect path if it reaches runtime). The
+  adjacency and `{ type: 'module' }` requirements are consumer obligations,
+  doc-enforced (§ Why this design → Module workers), never type-enforced — a
+  branded wrapper to enforce them would be the forbidden re-splitting helper.
 - **The sandbox is torn down on every path.**
 
 ### Out of scope
@@ -159,6 +169,28 @@ bootstrap to that consumer's worker logic) rather than receiving modules
 dynamically: bundlers stay static, and heavy instrumentation that registers
 itself at module load ships only into the runs that use it. Dynamic module
 delivery is rejected — it has no pedagogical case and real bundler risk.
+
+The spec carries a **worker factory** (`() => Worker`), not a worker URL,
+because the consumer — not the engine — must own the `new Worker(new URL(...))`
+expression. webpack 5's static worker detection only emits a real worker chunk
+when `new Worker(new URL('./entry.ts', import.meta.url), { type: 'module' })` is
+ONE syntactically adjacent expression in the consumer's module; the older
+URL-in-the-spec form split that across modules (the consumer built the URL, the
+engine's `transport.ts` did the `new Worker`) and webpack emitted the entry as a
+raw `.ts` asset that crashes at load. Vite resolves the split — which is why
+this hid behind green browser tests until a real `npm run build` exposed it. The
+factory keeps the URL a static literal, so "bundlers stay static" still holds.
+
+Two consequences are deliberate. **(1) The duplicated adjacent
+`new Worker(new URL(...), { type: 'module' })` across consumers is
+load-bearing.** A centralizing helper (`moduleWorker(url)`) would move the
+`new Worker` into the helper's module — re-splitting it from the consumer's
+`new URL` and re-breaking webpack. Do NOT DRY it up. **(2) The engine no longer
+guarantees `{ type: 'module' }`** — a consumer that omits it gets a classic
+worker whose ESM imports fail. Neither constraint is type-enforceable
+(`() => Worker` can't encode the options, and a branded wrapper to enforce them
+is exactly the forbidden helper), so the guard is documentation by necessity —
+see the `workerFactory` JSDoc and README § Public API.
 
 ### Fully opaque items
 

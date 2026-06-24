@@ -30,10 +30,19 @@ The spec is the whole coupling surface:
 
 - `code` — the program, as a string. Instrumented or not — the engine does not
   know or care.
-- `workerUrl` — a **thin worker entry** (a few lines: import the engine's
-  bootstrap, import this consumer's worker logic, wire them). Per-consumer
-  entries keep bundlers static; dynamic module delivery is deliberately not
-  supported.
+- `workerFactory` — a thunk constructing THIS run's module worker, authored as
+  one adjacent expression in the consumer's module:
+  `() => new Worker(new URL('./entry.ts', import.meta.url), { type: 'module' })`.
+  It loads a **thin worker entry** (a few lines wiring the engine's bootstrap to
+  this consumer's worker logic). The consumer constructs the worker — not the
+  engine — so `new Worker(new URL(…))` stays syntactically adjacent for
+  webpack's static worker detection; a split (URL built apart from `new Worker`)
+  or a wrapping helper regresses to a broken raw-`.ts` asset. Omitting
+  `{ type: 'module' }` is a separate failure: a classic worker whose ESM imports
+  fail at load (a worker-error settlement, not a typecheck error). Both
+  constraints — module-type AND adjacency — are load-bearing. The URL stays a
+  static literal; bundlers stay static; dynamic module delivery is still
+  unsupported.
 - `workerConfig` — clone-safe data delivered to the worker logic at setup (trap
   selections, whitelists — whatever the consumer's logic wants).
 - `threadLogic` — the thread-side hooks: `onMessage` (interpret / augment /
@@ -265,11 +274,15 @@ Using a different name in code is a bug, not a stylistic choice.
 - **engine** — this module: the generic machinery. Domain logic never lives
   here; the anti-goal is any engine code that interprets a payload.
 - **factory** — the `evaluate` entry point: spec in, handle out.
-- **spec** — the factory argument: code, worker entry, worker config, thread
+- **spec** — the factory argument: code, worker factory, worker config, thread
   logic, seconds, strict.
 - **worker logic** — consumer-authored, worker-side:
   `setup(api, workerConfig) → { globals, serializeHalt? }` (typed
   `WorkerSetup`). Owns traps, mocks, emission decisions, halt authoring.
+- **worker factory** — the consumer-supplied thunk in the spec that constructs
+  this run's module worker; authored as one adjacent expression (never split,
+  never behind a helper) so webpack emits a real worker chunk. Loads the worker
+  entry. See § Public API for the canonical snippet and why.
 - **worker entry** — the thin per-consumer worker file wiring the engine's
   bootstrap to that consumer's worker logic.
 - **bootstrap** — the engine's worker-side module: receives setup/execute, hands
@@ -357,7 +370,10 @@ limit (instrumentation + `serializeHalt` + `refineError`); mock behavior (worker
 logic + `onCall`); whitelisting (consumer logic, either side); the embody
 contract — `EndReport`, `RunInstance`, NM events, tier definitions, gates, the
 not-runnable short-circuit (the embody adapter and the JEJ tracers); hosting
-headers (COOP/COEP are the host page's concern).
+headers (COOP/COEP are the host page's concern); worker construction (the
+consumer's worker factory builds the `Worker`; the engine spawns only what it is
+handed — module-type and adjacency are consumer obligations, doc-enforced, and a
+classic or non-adjacent worker fails at load).
 
 **Placement**: the engine lives at the JeJ-package level (`javascript/lib/`),
 alongside the other peer-independent modules; it depends on nothing outside
