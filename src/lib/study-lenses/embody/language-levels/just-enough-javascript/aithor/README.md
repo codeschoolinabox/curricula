@@ -47,8 +47,9 @@ not fork that vocabulary — it reads each axis off the config.
   **curated** call (`validate: true`) runs the admit-and-conform loop, so every
   returned program is validated-to-spec JEJ within the requested subset and size
   — or a structured refusal. An **uncurated** call (`validate: false`) returns
-  the model's program as-is — possible drift, possible hallucination, no gate.
-  Same word, same axis; the control just moves from the author's hand to the
+  the model's program as-is — possible drift, possible hallucination, no gate
+  (with meta naming which model ran). Same word, same axis; the control just moves
+  from the author's hand to the
   validation loop. The rhyme is deliberate: curated still means _controlled_,
   uncurated still means _raw_.
 - **The guided/unguided axis is who fills the config.** Canonically, _guided_
@@ -160,8 +161,8 @@ within the requested complexity and length). A repair loop closes the gap when
 either fails. The model supplies _plausibility and meaning_ (and, from a
 non-empty input, the kinship to it); the gates supply the guarantees. Neither
 alone is the curated aithor — the loop between them is. Under `validate: false`
-there is no loop and no gates — the model's program is returned as-is, by
-design, and the rawness is the lesson, not a defect.
+there is no loop and no gates — the model's program is returned as-is (beside meta
+naming the model that ran), by design, and the rawness is the lesson, not a defect.
 
 ## Ubiquitous language
 
@@ -297,9 +298,8 @@ design, and the rawness is the lesson, not a defect.
   the runtime agree by construction). The check is gated on a non-empty name —
   mirroring the runtime's own — so an empty name passes straight through as a
   model-less default-pick request. On a successful bring-up the loader also yields
-  **which model was
-  resolved**, so a curated result's meta names the model that actually ran, even
-  when the request let the runtime choose. The named model is **fetched once and
+  **which model was resolved**, so a result's meta names the model that actually
+  ran — on either path — even when the request let the runtime choose. The named model is **fetched once and
   cached on the device**, then **brought into memory on first use** and reused
   thereafter — a fetch-once, load-once-reuse lifecycle the **runtime** owns;
   aithor names _which_ model and drives _when_, not _how_. The network is touched
@@ -326,10 +326,11 @@ The boundary splits on `validate`.
   gate. The boundary holds.
 - **Out, uncurated (`validate: false`):** the model's program **as-is** —
   possibly invalid, possibly drifting past the requested subset or size — **by
-  design**. The constraints shaped the prompt; nothing enforced them, so the gap
-  between asked-for and got is real and intentional. The only refusals here are
-  **no model available** and **unknown model** (both bring-up-time); with no
-  loop, there is no attempt-bound refusal.
+  design**, plus the meta naming **which model ran** (a single call; the program
+  itself is unmodified). The constraints shaped the prompt; nothing
+  enforced them, so the gap between asked-for and got is real and intentional. The
+  only refusals here are **no model available** and **unknown model** (both
+  bring-up-time); with no loop, there is no attempt-bound refusal.
 
 Generation is **asynchronous**: a caller `await`s the result (the model call
 and, on the curated path, the checks are async). The model's lazy load — and,
@@ -502,7 +503,9 @@ results) and a counted loader (to assert load-once, with no real fetch).
   (`validate: false`) result a test asserts the opposite shape: the aithor
   returns the model's candidate **unmodified** — no admission, no conformance,
   no repair. The rawness is itself a property, gated _out_ on purpose; a test
-  that saw the output cleaned up would be catching a bug.
+  that saw the output cleaned up would be catching a bug. (The result still
+  carries `meta` naming which model ran — the _program_ is raw, the provenance is
+  reported; a test asserts both.)
 - **Deterministic around the seams.** Prompt construction (config → prompt,
   empty vs. non-empty routing, the constraints stringified into the prompt under
   either `validate`, repair carrying the specific failure), the `validate`

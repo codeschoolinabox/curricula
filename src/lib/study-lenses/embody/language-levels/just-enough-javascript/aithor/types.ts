@@ -166,10 +166,10 @@ type ConformResult = {
  * invisible to a study program's reader — whereas the **model identity** names the
  * artifact's provenance, learner-meaningful truth (which is why it is surfaced even
  * when the runtime picked). The {@link LoadedModel} handle is owned by the injected
- * local-llm runtime (`lib/local-llm/`), NOT defined here; a curated result's
- * {@link Meta} reports `resolvedId` so the model is named truthfully even for an
- * empty "pick for me" request (see {@link AithorConfig}). The pick is never a black
- * box.
+ * local-llm runtime (`lib/local-llm/`), NOT defined here; a result's {@link Meta}
+ * (on EITHER path) reports `resolvedId` so the model is named truthfully even for
+ * an empty "pick for me" request (see {@link AithorConfig}). The pick is never a
+ * black box.
  */
 type ResolvedModel = {
 	readonly model: LoadedModel;
@@ -323,17 +323,19 @@ type Refusal = {
 };
 
 /**
- * The meta a caller needs about a curated result — which model produced it and
- * how many model calls (initial + repairs) the loop spent. Present on curated
- * results; absent on raw uncurated ones.
+ * The meta a caller needs about a result — which model produced it and how many
+ * model calls it took. Present on EVERY successful result (both paths); absent
+ * only on a refusal. `attempts` is the model-call count: `1` on the uncurated
+ * single call, `initial + repairs` on the curated loop.
  *
  * @remarks
  * `model` is the RESOLVED id (the {@link ResolvedModel} `resolvedId` of the model
  * that actually ran), not the requested name — they coincide for an explicit pick,
  * but for an empty "pick for me" request `model` reports the runtime's chosen
- * default, never the empty string. The pick is never a black box. Phase-1
- * invariant: populate this from `ResolvedModel.resolvedId`, NEVER from the
- * (possibly-empty) requested `model`.
+ * default, never the empty string. The pick is never a black box, on EITHER path —
+ * the uncurated (raw) result names its model too, even though its program is
+ * returned unmodified. Phase-1 invariant: populate `model` from
+ * `ResolvedModel.resolvedId`, NEVER from the (possibly-empty) requested `model`.
  */
 type Meta = {
 	readonly model: string;
@@ -348,10 +350,11 @@ type Meta = {
  * discriminated tag — without inheriting `BaseResult`'s parse/format error
  * slots (aithor's only failure surface is `refusal`):
  *
- * - `ok: true`  — `program` is set, `refusal` absent. On the curated path it is
- *   admitted AND conformant, with `meta`; on the uncurated path it is the
- *   model's candidate unmodified, no `meta`.
- * - `ok: false` — `refusal` is set, `program` absent.
+ * - `ok: true`  — `program` and `meta` are set, `refusal` absent. On the curated
+ *   path `program` is admitted AND conformant; on the uncurated path it is the
+ *   model's candidate unmodified. EITHER way `meta` names which model ran — the
+ *   uncurated program is unmodified, but the result still reports its model.
+ * - `ok: false` — `refusal` is set, `program` and `meta` absent.
  *
  * Conformance violations never surface here: they are `conform`-internal repair
  * fuel; the aithor never returns a non-conforming program.

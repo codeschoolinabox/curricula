@@ -40,13 +40,16 @@ boundary so the rest is data-in, data-out:
   non-reproducible point. The handle is the runtime's; this phase reads its
   result, never the model's fetch/cache.
 - **Disposition** — input: a decomposed result (+ request); output: a conformant
-  program + meta, the raw output as-is, or a structured refusal.
+  program + meta, the raw output (+ meta), or a structured refusal.
   **Validate-forked.** Under `validate: true` the result's extracted `code` faces
   admission (the level's gate, async) then conformance (the aithor's pure check,
   sync); on a pass it is shaped into a result with meta, on a fail it routes to a
   repair turn within an attempt bound, and the exhausted bound shapes a refusal.
-  Under `validate: false` the result's byte-exact `raw` is returned unmodified —
-  no admission, no conformance, no repair.
+  Under `validate: false` the result's byte-exact `raw` is returned unmodified,
+  wrapped with meta naming which model ran (a single call) — no admission,
+  no conformance, no repair. Meta rides every successful result; the `model` it
+  names is shared across paths — only the result's program and meta's `attempts`
+  differ.
 
 ## Data flow
 
@@ -55,18 +58,22 @@ flowchart TD
     request[("request<br/>(input program + config)")] -->|"build prompt, pure<br/>(constraints stringified in,<br/>regardless of validate)"| prompt[("built prompt")]
     prompt -->|"pre-check non-empty name vs catalog (sync),<br/>then bring up (async, load-once);<br/>value-not-throw boundary"| avail{"model<br/>available?"}
     avail -->|"no — unknown name, or<br/>device can't bring one up"| refusal[("structured refusal<br/>(named cause)")]
-    avail -->|"yes — call model,<br/>async non-deterministic"| candidate[("decomposed result<br/>(raw + extracted code)")]
-    candidate -->|"validate: false —<br/>raw, unmodified"| raw[("raw program as result<br/>(uncurated, drift and all)")]
+    avail -->|"yes"| resolved[("resolved model<br/>(handle + resolved id)")]
+    resolved -->|"call model,<br/>async non-deterministic"| candidate[("decomposed result<br/>(raw + extracted code)")]
+    candidate -->|"validate: false —<br/>raw, unmodified"| raw[("raw program + meta<br/>(uncurated, drift and all)")]
     candidate -->|"validate: true —<br/>admit + conform the code"| gate{"admitted and<br/>conformant?"}
     gate -->|"both pass"| curated[("conformant program + meta<br/>(curated)")]
     gate -->|"either fails —<br/>repair within attempt bound"| prompt
     gate -.->|"attempt bound exhausted"| refusal
 ```
 
-The repair edge returns to prompt construction — the same pure phase, now seeded
-with the specific out-of-subset construct or out-of-bounds metric. The loop is
-bounded; the dotted edge is the join where the bound is spent. The three refusal
-causes (_attempt-bound-exhausted_, _no-model-available_, _unknown-model_)
+The resolved model is named once at bring-up (handle **plus** resolved id) and
+flows to BOTH success terminals — every result's `meta` names that id, curated or
+raw, so provenance has a single shared source regardless of the validate fork. The
+repair edge returns to prompt construction — the same pure phase, now seeded with
+the specific out-of-subset construct or out-of-bounds metric. The loop is bounded;
+the dotted edge is the join where the bound is spent. The three refusal causes
+(_attempt-bound-exhausted_, _no-model-available_, _unknown-model_)
 converge on one refusal state.
 
 ## Structural constraints
@@ -86,7 +93,8 @@ converge on one refusal state.
   non-conformant result.
 - **The uncurated rawness is preserved, by design.** Under `validate: false` the
   candidate passes through unmodified — admission and conformance do not run,
-  and any cleanup would be a defect.
+  and any cleanup would be a defect. (Meta naming the resolved model rides beside
+  it; the candidate itself is untouched.)
 - **Refusal causes are validate-aware in one direction only.**
   _attempt-bound-exhausted_ is curated-only; _no-model-available_ and
   _unknown-model_ are bring-up-time and arise under either `validate` value.
