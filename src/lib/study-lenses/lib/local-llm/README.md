@@ -190,8 +190,9 @@ reports through `onProgress`; the load-once memory bring-up hides behind the
 
 ## Edge cases (the refusal map)
 
-Every "can't proceed" resolves to exactly one of two outcomes — a **load failure**
-(a device/availability limit, expected) or a **throw** (a programmer error):
+Every _domain_ "can't proceed" resolves to one of two outcomes — a **load failure**
+(a device/availability limit, expected) or a **throw** (a programmer error). An
+infrastructure fault in the probe is a third path, noted at the end:
 
 - **No WebGPU, but a CPU/WASM runtime is registered and a tiny model is feasible**
   → loads that rung. No-WebGPU is _not_ an automatic refusal; only an empty
@@ -212,6 +213,11 @@ Every "can't proceed" resolves to exactly one of two outcomes — a **load failu
 - **Cache eviction while offline** → a previously-loadable model can become a load
   failure; offline-capability is **best-effort** (a durable cache and
   `navigator.storage.persist()` mitigate it, they do not guarantee it).
+- **The capability probe itself rejects** (e.g. an injection or environment fault,
+  not a domain refusal) → the rejection propagates unchanged from `load` and from
+  `canRun` (which is the probe). It is neither a `LoadFailure` nor the unknown-name
+  programmer error, so it is not collapsed into either — probe faults are the host's
+  to handle.
 
 ## Design commitments
 

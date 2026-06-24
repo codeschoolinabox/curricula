@@ -268,6 +268,26 @@ describe('makeLocalLlm', () => {
 		});
 	});
 
+	describe('capability probe failure', () => {
+		it('propagates a probe rejection from load (not a LoadFailure)', async () => {
+			const llm = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: () => Promise.reject(new Error('probe boom')),
+			});
+			await expect(llm.load()).rejects.toThrow('probe boom');
+		});
+
+		it('propagates a probe rejection from canRun (the probe directly)', async () => {
+			const llm = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: () => Promise.reject(new Error('probe boom')),
+			});
+			await expect(llm.canRun()).rejects.toThrow('probe boom');
+		});
+	});
+
 	describe('progress', () => {
 		it('forwards onProgress to the adapter', async () => {
 			const llm = makeLocalLlm({

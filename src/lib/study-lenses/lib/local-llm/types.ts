@@ -301,7 +301,11 @@ type LoadResult = LoadSuccess | LoadFailure;
  * entry point (the which-model / which-runtime resolution is internal).
  *
  * `load` throws on an unknown model name (a programmer error); a device or
- * availability limit yields a {@link LoadFailure}, not a throw.
+ * availability limit yields a {@link LoadFailure}, not a throw. A rejected
+ * {@link CapabilityProbe} propagates as a rejection too — a broken probe is an
+ * infrastructure fault, not a device-limit refusal, so it is collapsed into
+ * neither the unknown-name throw nor a returned LoadFailure. `canRun` exposes the
+ * probe directly and rejects on the same fault.
  */
 type LocalLlm = {
 	readonly canRun: () => Promise<DeviceCapabilities>;
