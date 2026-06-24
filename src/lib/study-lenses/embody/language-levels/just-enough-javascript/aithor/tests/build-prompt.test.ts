@@ -166,6 +166,32 @@ describe('buildPrompt', () => {
 			expect(prompt).toContain('simple statements');
 			expect(prompt).not.toContain('if-statements'); // not in the (empty) allow-list
 		});
+
+		it('renders the allow-list in canonical order, independent of include order', () => {
+			const prompt = buildPrompt(
+				'',
+				'x',
+				{ include: ['ternary', 'if'], exclude: [] }, // reversed vs canonical
+				{},
+			);
+
+			// canonical order (if before ternary in the feature vocabulary), NOT
+			// the order the caller happened to pass — a determinism guarantee.
+			expect(prompt.indexOf('if-statements')).toBeLessThan(
+				prompt.indexOf('the ternary ? :'),
+			);
+		});
+
+		it('renders a duplicated included feature exactly once', () => {
+			const prompt = buildPrompt(
+				'',
+				'x',
+				{ include: ['if', 'if'], exclude: [] },
+				{},
+			);
+
+			expect(prompt.split('if-statements').length - 1).toBe(1);
+		});
 	});
 
 	describe('boundary — size bounds', () => {
@@ -456,12 +482,11 @@ describe('buildPrompt', () => {
 
 		it('re-states the base ask and constraints — repair augments, it does not replace', () => {
 			const ask = 'a coffee shop ordering system';
-			const subset = { include: ['if'] as FeatureName[], exclude: [] };
 
 			const repaired = buildPrompt(
 				'',
 				ask,
-				subset,
+				{ include: ['if'], exclude: [] },
 				{ lines: 12 },
 				{
 					candidate: 'while (true) {}\n',
