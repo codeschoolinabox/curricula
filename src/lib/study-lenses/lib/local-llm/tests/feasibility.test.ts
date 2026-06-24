@@ -473,4 +473,127 @@ describe('selectFeasible', () => {
 			expect(result.chosen).toBe(aaa);
 		});
 	});
+
+	describe('required WebGPU features', () => {
+		it('no required features ignores the advertised feature set', () => {
+			const entry = webllmEntry({ vramRequiredMB: 1000 });
+			const result = selectFeasible({
+				catalog: [entry],
+				capabilities: fakeCaps({ webgpuFeatures: [] }),
+				adapters: WEBLLM,
+			});
+			expect(result.feasible).toEqual([entry]);
+		});
+
+		it('an empty required-features list is no constraint', () => {
+			const entry = webllmEntry({ vramRequiredMB: 1000, requiredFeatures: [] });
+			const result = selectFeasible({
+				catalog: [entry],
+				capabilities: fakeCaps({ webgpuFeatures: [] }),
+				adapters: WEBLLM,
+			});
+			expect(result.feasible).toEqual([entry]);
+		});
+
+		it('a required feature the adapter advertises is feasible', () => {
+			const entry = webllmEntry({
+				vramRequiredMB: 1000,
+				requiredFeatures: ['shader-f16'],
+			});
+			const result = selectFeasible({
+				catalog: [entry],
+				capabilities: fakeCaps({ webgpuFeatures: ['shader-f16'] }),
+				adapters: WEBLLM,
+			});
+			expect(result.feasible).toEqual([entry]);
+		});
+
+		it('a required feature the adapter lacks is not feasible', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({
+						vramRequiredMB: 1000,
+						requiredFeatures: ['shader-f16'],
+					}),
+				],
+				capabilities: fakeCaps({ webgpuFeatures: [] }),
+				adapters: WEBLLM,
+			});
+			expect(result.feasible).toEqual([]);
+		});
+
+		it('a required feature is not feasible when the device reports no features', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({
+						vramRequiredMB: 1000,
+						requiredFeatures: ['shader-f16'],
+					}),
+				],
+				capabilities: fakeCaps(),
+				adapters: WEBLLM,
+			});
+			expect(result.feasible).toEqual([]);
+		});
+
+		it('all of several required features advertised → feasible', () => {
+			const entry = webllmEntry({
+				vramRequiredMB: 1000,
+				requiredFeatures: ['shader-f16', 'timestamp-query'],
+			});
+			const result = selectFeasible({
+				catalog: [entry],
+				capabilities: fakeCaps({
+					webgpuFeatures: ['shader-f16', 'timestamp-query'],
+				}),
+				adapters: WEBLLM,
+			});
+			expect(result.feasible).toEqual([entry]);
+		});
+
+		it('only some of several required features advertised → not feasible', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({
+						vramRequiredMB: 1000,
+						requiredFeatures: ['shader-f16', 'timestamp-query'],
+					}),
+				],
+				capabilities: fakeCaps({ webgpuFeatures: ['shader-f16'] }),
+				adapters: WEBLLM,
+			});
+			expect(result.feasible).toEqual([]);
+		});
+
+		it('a feature-requiring model is still refused with no WebGPU (guard coherence)', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({
+						vramRequiredMB: 1000,
+						requiredFeatures: ['shader-f16'],
+					}),
+				],
+				capabilities: fakeCaps({ webgpu: false }),
+				adapters: WEBLLM,
+			});
+			expect(result.feasible).toEqual([]);
+		});
+
+		it('a feature-compatible model is still refused when vram is over budget', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({
+						vramRequiredMB: 5000,
+						requiredFeatures: ['shader-f16'],
+					}),
+				],
+				capabilities: fakeCaps({
+					deviceMemoryGB: 8,
+					webgpuFeatures: ['shader-f16'],
+				}),
+				adapters: WEBLLM,
+			});
+			expect(result.feasible).toEqual([]);
+		});
+	});
 });

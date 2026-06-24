@@ -29,6 +29,7 @@ export const webllmEntry = (
 		sizeClass?: SizeClass;
 		vramRequiredMB?: number;
 		codeSpecialized?: boolean;
+		requiredFeatures?: readonly string[];
 	} = {},
 ): ModelCatalogEntry => {
 	const id = over.id ?? 'model-a';
@@ -48,6 +49,9 @@ export const webllmEntry = (
 					...(over.vramRequiredMB === undefined
 						? {}
 						: { vramRequiredMB: over.vramRequiredMB }),
+					...(over.requiredFeatures === undefined
+						? {}
+						: { requiredFeatures: over.requiredFeatures }),
 				},
 				fetchUrl: `https://example.test/${id}`,
 			},

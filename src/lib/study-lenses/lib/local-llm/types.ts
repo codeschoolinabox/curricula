@@ -105,7 +105,8 @@ type RuntimeLoad =
 			 * Feasibility refuses the model on a device whose adapter does not
 			 * advertise all of them (see {@link DeviceCapabilities.webgpuFeatures}) —
 			 * a conservative gate, so an incompatible device is refused up front
-			 * rather than failing mid-bring-up.
+			 * rather than failing mid-bring-up. Matched case-sensitively, so use the
+			 * WebGPU spec's lower-case feature names.
 			 */
 			readonly requiredFeatures?: readonly string[];
 	  }

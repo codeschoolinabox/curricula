@@ -120,6 +120,13 @@ function isLoadFeasible(
 ): boolean {
 	if (load.runtime === 'webllm') {
 		if (!capabilities.webgpu) return false;
+		// Feature gate AFTER the presence guard: a model whose required WebGPU
+		// features the adapter does not advertise is refused up front.
+		if (
+			!hasRequiredFeatures(load.requiredFeatures, capabilities.webgpuFeatures)
+		) {
+			return false;
+		}
 		if (load.vramRequiredMB !== undefined) {
 			const budgetMB =
 				HALF * (capabilities.deviceMemoryGB ?? DEFAULT_MEMORY_GB) * MB_PER_GB;
@@ -130,6 +137,16 @@ function isLoadFeasible(
 	// Non-webllm (CPU/WASM) runtimes carry no webgpu requirement — a tiny/small
 	// model still loads (DOCS § "No-WebGPU is not an automatic refusal").
 	return fitsCpuSizeClass(entry.sizeClass);
+}
+
+/** Whether the device advertises every WebGPU feature the load requires (no requirement ⇒ yes). */
+function hasRequiredFeatures(
+	required: readonly string[] | undefined,
+	advertised: readonly string[] | undefined,
+): boolean {
+	if (required === undefined || required.length === 0) return true;
+	const available = advertised ?? [];
+	return required.every((feature) => available.includes(feature));
 }
 
 function fitsCpuSizeClass(sizeClass: SizeClass): boolean {
