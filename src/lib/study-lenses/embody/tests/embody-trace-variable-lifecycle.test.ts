@@ -84,3 +84,31 @@ describe('embody traceVariableLifecycle (node, synchronous admission gate)', () 
 		).toThrow(/not valid JavaScript/u);
 	});
 });
+
+describe('embody traceVariableLifecycle (node, canned scenario rejection)', () => {
+	it('throws on the apex OK scenario — the inverted gate (created:true still rejected)', () => {
+		const snippet = embody('OK');
+		// Machine-verify the inversion PREMISE: apex OK really is created:true. Without
+		// this, a silent drift of status.created to false would leave the throw green
+		// while the inversion claim below became false. The gate is real-composition-
+		// vs-canned-scenario, NOT status.created: even apex OK (created:true) is canned —
+		// its source.code is the keyword sentinel 'OK', not executable JS — so the
+		// method throws (realSource === null) and never forwards. A consumer gating on
+		// status.created would get this exactly backwards.
+		expect(snippet.status.created).toBe(true);
+		expect(() =>
+			snippet.events.evaluation.traceVariableLifecycle(),
+		).toThrow(/canned scenario/u);
+	});
+
+	it('throws on a FAIL_AT_* canned scenario', () => {
+		// A non-apex canned builder (buildFailAtTokenizeSnippet, not buildApexSnippet):
+		// the gate is STRUCTURAL, not apex-specific — every canned builder passes
+		// makeEvaluationEvents(runInstance, null), every real path passes source.code.
+		// So one apex case (OK) + one non-apex case here is sufficient scope; the EVAL_*
+		// apex scenarios share buildApexSnippet's null literal and need no separate case.
+		expect(() =>
+			embody('FAIL_AT_TOKENIZE').events.evaluation.traceVariableLifecycle(),
+		).toThrow(/canned scenario/u);
+	});
+});
