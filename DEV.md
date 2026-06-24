@@ -674,7 +674,9 @@ downstream.
 Use the freeze utilities from this package's shared utilities:
 
 ```typescript
-import { freezeInPlace, cloneAndFreeze } from '@utils/freeze.js';
+// One default export per file, no barrel (see § module conventions):
+import freezeInPlace from '@utils/freeze-in-place.js';
+import cloneAndFreeze from '@utils/clone-and-freeze.js';
 ```
 
 <strong>Two operations, one ownership rule:</strong>
