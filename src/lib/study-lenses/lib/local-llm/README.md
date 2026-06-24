@@ -112,8 +112,8 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
 - **Feasibility** — the catalog narrowed by device capabilities and the adapter
   map: which entries this device can actually bring up, and on which runtime.
 - **Selection** — the optional caller preference over the feasible set (a named
-  model, a size-class ceiling, a download budget, a prefer-policy). Absent, the
-  runtime picks the **default model**.
+  model, a size-class ceiling, a prefer-policy). Absent, the runtime picks the
+  **default model**.
 - **Default model** — the runtime's heuristic pick for a device: the best
   **cost-aware** rung that fits, _not_ the largest feasible one — a one-time
   download cost is weighed, and a heavier model is an explicit opt-in. The pick is

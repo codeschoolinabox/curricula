@@ -290,17 +290,6 @@ describe('selectFeasible', () => {
 			expect(result.chosen).toBe(small);
 		});
 
-		it('treats maxDownloadMB as a no-op in v1 (no download-size data)', () => {
-			const entry = webllmEntry({ sizeClass: 'small' });
-			const result = selectFeasible({
-				catalog: [entry],
-				capabilities: fakeCaps(),
-				adapters: WEBLLM,
-				selection: { maxDownloadMB: 1 },
-			});
-			expect(result.chosen).toBe(entry);
-		});
-
 		it('an explicit feasible model wins over the prefer policy', () => {
 			const a = webllmEntry({
 				id: 'a',

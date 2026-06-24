@@ -163,9 +163,7 @@ function choosePick(picks: readonly Pick[], selection: Selection): Pick | null {
 		return picks.find((pick) => pick.entry.id === selection.model) ?? null;
 	}
 
-	// Honor the sizeClass ceiling. maxDownloadMB is a documented v1 no-op: the
-	// catalog carries no download-size field, and vramRequiredMB (runtime memory)
-	// is not download size — wiring it would be a semantically wrong filter.
+	// Honor the sizeClass ceiling (the prefer policy then picks within it).
 	const ceiling = selection.sizeClass;
 	const candidates =
 		ceiling === undefined

@@ -239,14 +239,12 @@ type CapabilityProbe = () => Promise<DeviceCapabilities>;
  * @remarks
  * - `model` — an explicit catalog id; wins if feasible.
  * - `sizeClass` — a target/ceiling rung.
- * - `maxDownloadMB` — a download budget cap (metered connections).
  * - `prefer` — `'default'` (cost-aware balance, NOT the largest feasible),
  *   `'max'` (the ceiling the device can run), or `'min'` (the smallest).
  */
 type Selection = {
 	readonly model?: string;
 	readonly sizeClass?: SizeClass;
-	readonly maxDownloadMB?: number;
 	readonly prefer?: 'default' | 'max' | 'min';
 };
 
