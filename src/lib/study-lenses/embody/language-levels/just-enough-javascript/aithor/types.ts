@@ -159,29 +159,49 @@ type ConformResult = {
 // ─── Model seams (injected; runtime excluded) ─────────────────────────
 
 /**
- * Brings a named local model into memory, load-once — the stateful seam. The
- * handle is a {@link LoadedModel} owned by the injected local-llm runtime
- * (`lib/local-llm/`), NOT defined here: aithor names WHICH model and drives WHEN;
- * the runtime owns the fetch/cache/load. Its `generate` resolves to a decomposed
+ * A successfully brought-up model paired with the id of the model that was
+ * actually resolved — aithor's re-mapping of local-llm's `LoadSuccess` (minus the
+ * `ok` discriminant and the device-tier `resolvedRuntime`). The line is drawn so
+ * `resolvedId` stays and `resolvedRuntime` goes because the **backend** is HOW —
+ * invisible to a study program's reader — whereas the **model identity** names the
+ * artifact's provenance, learner-meaningful truth (which is why it is surfaced even
+ * when the runtime picked). The {@link LoadedModel} handle is owned by the injected
+ * local-llm runtime (`lib/local-llm/`), NOT defined here; a curated result's
+ * {@link Meta} reports `resolvedId` so the model is named truthfully even for an
+ * empty "pick for me" request (see {@link AithorConfig}). The pick is never a black
+ * box.
+ */
+type ResolvedModel = {
+	readonly model: LoadedModel;
+	readonly resolvedId: string;
+};
+
+/**
+ * Brings a model into memory, load-once — the stateful seam. Resolves to a
+ * {@link ResolvedModel} (the {@link LoadedModel} handle plus the resolved id) owned
+ * by the injected local-llm runtime (`lib/local-llm/`), NOT defined here: aithor
+ * names WHICH model (or lets the runtime pick) and drives WHEN; the runtime owns
+ * the fetch/cache/load. The handle's `generate` resolves to a decomposed
  * `GenerationResult` — aithor conforms its `code` on the curated path and returns
  * its byte-exact `raw` on the uncurated one (the non-deterministic seam: the same
  * prompt may yield different results).
  *
- * This loader is aithor's value-not-throw BOUNDARY: it resolves to the handle or
- * a {@link Refusal} — NEVER a throw, NEVER a leaked rejection — even though
- * local-llm itself is NOT uniformly value-not-throw. It absorbs local-llm's three
- * non-success shapes, matching aithor's `ok`-boolean convention:
+ * This loader is aithor's value-not-throw BOUNDARY: it resolves to a
+ * {@link ResolvedModel} or a {@link Refusal} — NEVER a throw, NEVER a leaked
+ * rejection — even though local-llm itself is NOT uniformly value-not-throw. It
+ * absorbs local-llm's three non-success shapes, matching aithor's `ok`-boolean
+ * convention:
  * - a `LoadFailure` (its `no-feasible-model` and `fetch-failed` causes) →
  *   `Refusal('no-model-available')`; local-llm's `detail` is dropped at the seam
  *   (a {@link Refusal} carries only a cause).
- * - a model name absent from the injected catalog → `Refusal('unknown-model')`,
+ * - a NON-EMPTY model name absent from the injected catalog → `Refusal('unknown-model')`,
  *   detected by a catalog-membership pre-check (against the same catalog aithor
- *   injects) BEFORE `load` is called. The pre-check does double duty: a NON-EMPTY
- *   absent name is one local-llm THROWS on, so pre-checking keeps the seam from
- *   ever reaching that throw; the EMPTY string is one local-llm does NOT throw on
- *   — it would instead silently pick a default model — so the same pre-check is
- *   what enforces aithor's no-default-pick rule. Either way the name never reaches
- *   `load`.
+ *   injects) BEFORE `load` is called, so local-llm's unknown-name throw is never
+ *   reached. The pre-check is gated on a non-empty name, mirroring local-llm's own
+ *   `isNamed`: an EMPTY name is NOT pre-checked — it is mapped to a **model-less**
+ *   `Selection` (the runtime's default-pick request, NOT a `Selection` carrying an
+ *   empty `model`), so the runtime picks its cost-aware default (aithor's one "pick
+ *   for me" affordance) and the chosen id comes back as `resolvedId`.
  * - a rejected device-capability probe, or any other infrastructure throw raised
  *   during bring-up — which local-llm PROPAGATES rather than returning a
  *   `LoadFailure` — caught and folded into `Refusal('no-model-available')` by a
@@ -191,7 +211,7 @@ type ConformResult = {
  * fakes whose underlying runtime throws / fails / rejects, to assert each shape
  * surfaces as the right `Refusal` value rather than a throw.
  */
-type ModelLoader = (name: string) => Promise<LoadedModel | Refusal>;
+type ModelLoader = (name: string) => Promise<ResolvedModel | Refusal>;
 
 /**
  * The injectable runtime — the excluded HOW behind the WHAT of `config`. Optional
@@ -229,10 +249,11 @@ type AithorRuntime = {
  *   empty string is valid: the seed program + stringified constraints carry the
  *   ask.
  * - `model` — the local model's NAME from an open, growing size/capability set.
- *   A `string`, not an enum: a closed type would foreclose the open set. Required
- *   and must name a real model: a name absent from the runtime's catalog — the
- *   empty string included — refuses as `unknown-model` (there is no default-pick
- *   mode).
+ *   A `string`, not an enum: a closed type would foreclose the open set. A
+ *   NON-EMPTY name absent from the runtime's catalog refuses as `unknown-model`;
+ *   the EMPTY string is the "pick for me" request — it lets the runtime choose its
+ *   cost-aware default, and the chosen model comes back in {@link Meta} as the
+ *   resolved id.
  * - `include` / `exclude` — the feature subset. Enforced under `validate: true`,
  *   prompt-shaping under `validate: false`.
  * - `lines` / `complexity` — the size bounds. Same enforcement split.
@@ -284,12 +305,12 @@ type ResolvedAithorConfig = {
  *   `no-feasible-model` and `fetch-failed` causes collapse here — and also the
  *   catch-all for a propagated capability-probe or infrastructure fault during
  *   bring-up.
- * - `'unknown-model'` — either path: the requested `model` name is absent from the
- *   runtime's (injected) catalog — a typo, the empty string, or a name from a
- *   newer catalog. Kept distinct from `no-model-available` so a misnamed model
- *   never masquerades as device-unavailability; pre-checked before bring-up (a
- *   non-empty absent name is one local-llm would throw on; the empty string is one
- *   it would instead silently default-pick — the pre-check rules out both).
+ * - `'unknown-model'` — either path: a NON-EMPTY `model` name absent from the
+ *   runtime's (injected) catalog — a typo, or a name from a newer catalog. Kept
+ *   distinct from `no-model-available` so a misnamed model never masquerades as
+ *   device-unavailability; pre-checked before bring-up (the name local-llm would
+ *   otherwise throw on). The empty string is NOT this cause — it is the
+ *   default-pick request (see {@link AithorConfig} `model`).
  */
 type RefusalCause =
 	| 'attempt-bound-exhausted'
@@ -305,6 +326,14 @@ type Refusal = {
  * The meta a caller needs about a curated result — which model produced it and
  * how many model calls (initial + repairs) the loop spent. Present on curated
  * results; absent on raw uncurated ones.
+ *
+ * @remarks
+ * `model` is the RESOLVED id (the {@link ResolvedModel} `resolvedId` of the model
+ * that actually ran), not the requested name — they coincide for an explicit pick,
+ * but for an empty "pick for me" request `model` reports the runtime's chosen
+ * default, never the empty string. The pick is never a black box. Phase-1
+ * invariant: populate this from `ResolvedModel.resolvedId`, NEVER from the
+ * (possibly-empty) requested `model`.
  */
 type Meta = {
 	readonly model: string;
@@ -344,6 +373,7 @@ export type {
 	SizeViolation,
 	ConformanceViolation,
 	ConformResult,
+	ResolvedModel,
 	ModelLoader,
 	AithorRuntime,
 	AithorConfig,

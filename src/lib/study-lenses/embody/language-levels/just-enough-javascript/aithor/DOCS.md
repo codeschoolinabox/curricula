@@ -22,16 +22,18 @@ boundary so the rest is data-in, data-out:
   stringified constraints — composing from an empty input, varying a non-empty
   one — independent of `validate`. On a repair turn the same phase folds the
   located refusal reason into the next prompt.
-- **Model bring-up** — input: a model name; output: a model handle, or a refusal
-  (_no-model-available_ or _unknown-model_). **Async, stateful (seam 1 —
-  load-once).** The named local model is brought into memory on first need and
-  reused thereafter; the runtime's one-time fetch and on-device cache sit below
-  this seam, invisible. This seam is aithor's value-not-throw boundary: a
-  catalog-membership pre-check turns a name absent from the injected catalog (the
-  empty string included) into _unknown-model_ before the runtime's `load` is
-  called, and the boundary absorbs the runtime's load failure, a propagated probe
-  fault, and any other throw into _no-model-available_ — so a refusal is always a
-  value, never a throw.
+- **Model bring-up** — input: a model name; output: the resolved model (a handle
+  plus the resolved id), or a refusal (_no-model-available_ either way;
+  _unknown-model_ only for a non-empty unknown name). **Async, stateful (seam 1 — load-once).** The named local model is brought into
+  memory on first need and reused thereafter; the runtime's one-time fetch and
+  on-device cache sit below this seam, invisible. This seam is aithor's
+  value-not-throw boundary: a catalog-membership pre-check turns a **non-empty**
+  name absent from the injected catalog into _unknown-model_ before the runtime's
+  `load` is called (an empty name is the "pick for me" request — it passes through
+  to the runtime's cost-aware default, whose id comes back resolved), and the
+  boundary absorbs the runtime's load failure, a propagated probe fault, and any
+  other throw into _no-model-available_ — so a refusal is always a value, never a
+  throw.
 - **Candidate generation** — input: a built prompt + a model handle; output: a
   decomposed result (`raw` + extracted `code`). **Async, non-deterministic (seam
   2 — the model call).** The same request yields different results; the only
@@ -51,7 +53,7 @@ boundary so the rest is data-in, data-out:
 ```mermaid
 flowchart TD
     request[("request<br/>(input program + config)")] -->|"build prompt, pure<br/>(constraints stringified in,<br/>regardless of validate)"| prompt[("built prompt")]
-    prompt -->|"pre-check name vs catalog (sync),<br/>then bring up (async, load-once);<br/>value-not-throw boundary"| avail{"model<br/>available?"}
+    prompt -->|"pre-check non-empty name vs catalog (sync),<br/>then bring up (async, load-once);<br/>value-not-throw boundary"| avail{"model<br/>available?"}
     avail -->|"no — unknown name, or<br/>device can't bring one up"| refusal[("structured refusal<br/>(named cause)")]
     avail -->|"yes — call model,<br/>async non-deterministic"| candidate[("decomposed result<br/>(raw + extracted code)")]
     candidate -->|"validate: false —<br/>raw, unmodified"| raw[("raw program as result<br/>(uncurated, drift and all)")]
@@ -70,8 +72,8 @@ converge on one refusal state.
 ## Structural constraints
 
 - **The two seams are the only impure points** (load-bearing): the stateful
-  loader (name → handle, load-once) and the non-deterministic model call (handle
-  → decomposed result). Everything else — prompt construction, conformance, the validate
+  loader (name → resolved model, load-once) and the non-deterministic model call
+  (handle → decomposed result). Everything else — prompt construction, conformance, the validate
   fork, the attempt bound, result-shaping, refusal-cause selection — is pure
   given those two injected. Conformance never reaches the model. The loader seam
   is aithor's value-not-throw boundary: local-llm is not uniformly value-not-throw

@@ -271,10 +271,13 @@ design, and the rawness is the lesson, not a defect.
   load-failure causes collapse here, and so does a rejected device-capability
   probe or any other infrastructure fault raised during bring-up (the runtime
   propagates those rather than returning a load failure; the aithor seam catches
-  them into this same cause). _Unknown model_ is a different layer: the
+  them into this same cause). _Unknown model_ is a different layer: a **non-empty**
   requested `model` name is absent from the runtime's catalog altogether (a typo,
   or a name from a newer catalog) — kept distinct so a misnamed model never
-  masquerades as "your device can't run it." Because every model is local, when
+  masquerades as "your device can't run it." (An **empty** `model` is never an
+  _unknown model_ refusal — it asks the runtime to pick its cost-aware default; if
+  the device can run nothing it still refuses as _no model available_.) Because
+  every model is local, when
   the device cannot bring one up the aithor refuses rather than reaching for a
   remote one. A curated request whose spec no program can satisfy refuses for the
   bound, expectedly.
@@ -286,13 +289,17 @@ design, and the rawness is the lesson, not a defect.
   weaker programs, larger the reverse — and the set **grows as small portable
   models improve**. aithor passes that name straight through to the runtime
   (`load({ model })`); it does **not** choose a size class or device-tier
-  preference, nor offer a "let the runtime pick its default" mode — `model` must
-  name a real model. A name absent from the runtime's catalog — **the empty
-  string included** (the very case the runtime would otherwise resolve to its own
-  default pick) — refuses as **unknown model**, pre-checked before bring-up
+  preference. The **empty string is the "pick for me" request** — it lets the
+  runtime choose its **cost-aware default**; a **non-empty** name absent from the
+  runtime's catalog refuses as **unknown model**, pre-checked before bring-up
   against the **same catalog instance** aithor injects into the runtime at
   construction (local-llm exposes no membership predicate, so the pre-check and
-  the runtime agree by construction). The named model is **fetched once and
+  the runtime agree by construction). The check is gated on a non-empty name —
+  mirroring the runtime's own — so an empty name passes straight through as a
+  model-less default-pick request. On a successful bring-up the loader also yields
+  **which model was
+  resolved**, so a curated result's meta names the model that actually ran, even
+  when the request let the runtime choose. The named model is **fetched once and
   cached on the device**, then **brought into memory on first use** and reused
   thereafter — a fetch-once, load-once-reuse lifecycle the **runtime** owns;
   aithor names _which_ model and drives _when_, not _how_. The network is touched
@@ -314,7 +321,7 @@ The boundary splits on `validate`.
   the `validate` flag).
 - **Out, curated (`validate: true`):** either a **result** — an admitted,
   conformant program (composed if the input was empty, a variation otherwise)
-  plus the meta a caller needs (which model, how many attempts), or a
+  plus the meta a caller needs (which model actually ran, how many attempts), or a
   **structured refusal**. The aithor never returns a program that fails either
   gate. The boundary holds.
 - **Out, uncurated (`validate: false`):** the model's program **as-is** —
@@ -352,11 +359,11 @@ model.
   fetch-and-cache on first need, and bringing it into memory lazily, on first
   use — driving _which_ model and _when_, not the fetch, cache, or run
   mechanics, which are the runtime's (see _Excludes_).
-- The **catalog-membership pre-check**: turning a `model` name absent from the
-  injected catalog (the empty string included) into an **unknown model** refusal
-  _before_ the runtime's `load` is called, so the runtime's unknown-name throw is
-  never reached on the default path — the aithor seam stays uniformly
-  value-not-throw.
+- The **catalog-membership pre-check**: turning a **non-empty** `model` name
+  absent from the injected catalog into an **unknown model** refusal _before_ the
+  runtime's `load` is called, so the runtime's unknown-name throw is never reached
+  — the aithor seam stays uniformly value-not-throw. (An empty `model` is not
+  pre-checked; it passes through to the runtime's default pick.)
 
 ### Excludes
 
