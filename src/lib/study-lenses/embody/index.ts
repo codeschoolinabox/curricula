@@ -130,7 +130,9 @@ import type { Node as AcornNode, Comment as AcornComment } from 'acorn';
 
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
+import type { CreateTransport } from '../lib/engine/worker/types.js';
 
+import traceVariables from './lib/evaluating/tracers/variables/trace-variables.js';
 import type {
 	Analysis,
 	AnyNMEvent,
@@ -168,7 +170,9 @@ import type {
 	TokenizeEntwined,
 	TokenizePhase,
 	TokenNMEvent,
+	TraceVariableLifecycleOptions,
 	Validation,
+	VariablesTraceHandle,
 	Violation,
 } from './types.js';
 
@@ -441,8 +445,38 @@ function makeStubEvaluateHandle(runInstance: RunInstance): EvaluateHandle {
 	};
 }
 
+/**
+ * The raw `traceVariableLifecycle` forward, bound per call to a snippet's real
+ * source string.
+ *
+ * Canned scenarios pass `realSource === null`: this throws before any forward
+ * (their `source.code` is a keyword sentinel, not executable JS). Real
+ * compositions pass `source.code` (including `''`, a real empty program): this
+ * forwards to the variables tracer, which self-gates on its own
+ * Just-Enough-JavaScript admission — NOT on `status.created`.
+ *
+ * `createTransport` is a test-only engine-transport seam, absent from the public
+ * 1-arg `EvaluationEvents` member; the runtime forward is 2-arg and wider-
+ * function assignability hides the seam from the contract (no cast in this module).
+ */
+function forwardTraceVariableLifecycle(
+	realSource: string | null,
+	options?: TraceVariableLifecycleOptions,
+	createTransport?: CreateTransport,
+): VariablesTraceHandle {
+	if (realSource === null) {
+		throw new Error(
+			'traceVariableLifecycle: not available on canned scenario',
+		);
+	}
+	return traceVariables(realSource, options, createTransport);
+}
+
 /** Build the `EvaluationEvents` surface bound to a given `RunInstance`. */
-function makeEvaluationEvents(runInstance: RunInstance): EvaluationEvents {
+function makeEvaluationEvents(
+	runInstance: RunInstance,
+	realSource: string | null,
+): EvaluationEvents {
 	return {
 		run: (_options?: EvaluateOptions): Promise<RunInstance> =>
 			Promise.resolve(runInstance),
@@ -456,6 +490,11 @@ function makeEvaluationEvents(runInstance: RunInstance): EvaluationEvents {
 			semantics: (_options?: EvaluateOptions): EvaluateHandle =>
 				makeStubEvaluateHandle(runInstance),
 		},
+		traceVariableLifecycle: (
+			options?: TraceVariableLifecycleOptions,
+			createTransport?: CreateTransport,
+		): VariablesTraceHandle =>
+			forwardTraceVariableLifecycle(realSource, options, createTransport),
 	};
 }
 
@@ -571,7 +610,7 @@ function buildStageFailValidation(): Validation {
 function buildFailAtTokenizeSnippet(code: string): Snippet {
 	const realmPhase = makeStubRealmPhase();
 	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
-	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationEvents = makeEvaluationEvents(runInstance, null);
 	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
 	const eventsView: EventsView = {
 		realm: realmPhase.events,
@@ -616,7 +655,7 @@ function buildFailAtParseSnippet(code: string): Snippet {
 	const tokenizePhase = makeStubTokenizePhase();
 	const rawTokens: ReadonlyArray<unknown> = [makeStubRawToken(code)];
 	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
-	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationEvents = makeEvaluationEvents(runInstance, null);
 	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
 	const eventsView: EventsView = {
 		realm: realmPhase.events,
@@ -676,7 +715,7 @@ function buildValidateFailSnippet(code: string): Snippet {
 		violations,
 	};
 	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
-	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationEvents = makeEvaluationEvents(runInstance, null);
 	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
 	const eventsView: EventsView = {
 		realm: realmPhase.events,
@@ -721,7 +760,7 @@ function buildFailAtCreateSnippet(code: string): Snippet {
 	const rawAst = makeStubAcornNode(code);
 	const analysis = makeStubAnalysis(code, rawTokens.length);
 	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
-	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationEvents = makeEvaluationEvents(runInstance, null);
 	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
 	const eventsView: EventsView = {
 		realm: realmPhase.events,
@@ -801,7 +840,7 @@ function buildApexSnippet(code: string, overlay: ApexOverlay): Snippet {
 	const runInstance = makeStubRunInstance(
 		makeApexEndReport(overlay.evalOutcome),
 	);
-	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationEvents = makeEvaluationEvents(runInstance, null);
 	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
 	const eventsView: EventsView = {
 		realm: realmPhase.events,
@@ -974,7 +1013,7 @@ function extractAcornError(
 function buildTokenizeFailRealSnippet(source: Source, error: unknown): Snippet {
 	const realmPhase = makeStubRealmPhase();
 	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
-	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationEvents = makeEvaluationEvents(runInstance, source.code);
 	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
 	const eventsView: EventsView = {
 		realm: realmPhase.events,
@@ -1017,7 +1056,7 @@ function buildParseFailRealSnippet(
 	const realmPhase = makeStubRealmPhase();
 	const tokenizePhase = makeStubTokenizePhase();
 	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
-	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationEvents = makeEvaluationEvents(runInstance, source.code);
 	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
 	const eventsView: EventsView = {
 		realm: realmPhase.events,
@@ -1065,7 +1104,7 @@ function buildApexRealSnippet(
 	const tokenizePhase = makeStubTokenizePhase();
 	const parseASTPhase = makeStubParseASTPhase();
 	const runInstance = makeStubRunInstance(NOT_RUNNABLE_REPORT);
-	const evaluationEvents = makeEvaluationEvents(runInstance);
+	const evaluationEvents = makeEvaluationEvents(runInstance, source.code);
 	const evaluationPhase: EvaluationPhase = { events: evaluationEvents };
 	const eventsView: EventsView = {
 		realm: realmPhase.events,
