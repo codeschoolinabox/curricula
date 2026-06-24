@@ -24,15 +24,16 @@ that touches a network or a GPU.
 
 1. **Capability probe** (async, device-boundary read) — input: the device;
    output: a device-capabilities profile. A **conservative heuristic** — WebGPU
-   presence and its adapter's buffer limits, a coarse memory bucket, storage
-   headroom, WASM features — never an exact resource readout (the browser does not
-   expose total VRAM). Injectable, so the pure phases below test without a real
-   device.
+   presence, its adapter's buffer limits and advertised features, a coarse memory
+   bucket, storage headroom, WASM features — never an exact resource readout (the
+   browser does not expose total VRAM). Injectable, so the pure phases below test
+   without a real device.
 
 2. **Feasibility & selection** (sync, pure) — input: device capabilities + the
    catalog + an optional preference; output: a chosen catalog entry, or
    nothing-feasible. Narrows the catalog to what the device can bring up on a
-   _registered_ runtime, then picks: an explicit named model if feasible, else the
+   _registered_ runtime (a model whose required WebGPU features the adapter lacks
+   is filtered out), then picks: an explicit named model if feasible, else the
    **cost-aware default** rung (which weighs the one-time download, not the largest
    that fits). An explicit named preference is first checked for **catalog
    membership** — absent ⇒ a precondition throw (a programmer error), _before_ any
@@ -59,7 +60,7 @@ that touches a network or a GPU.
 
 ```mermaid
 flowchart TD
-    req[("request<br/>(prompt + optional selection)")] -->|"probe device, async<br/>(conservative heuristic)"| caps[("device capabilities")]
+    req[("request<br/>(prompt + optional selection)")] -->|"probe device, async<br/>(conservative heuristic)"| caps[("device capabilities<br/>(limits + advertised features)")]
     catalog[("model catalog<br/>(open data + per-runtime load params)")] -->|"narrow by capabilities, pure"| sel
     caps -->|"resolve pick / enumerate feasible, pure<br/>(question one — no I/O, no bring-up)"| sel{"a feasible model?"}
     sel -->|"no — nothing feasible"| fail[("load failure<br/>(a returned value, not a throw)")]
@@ -93,6 +94,13 @@ state (see constraints).
 - **No-WebGPU is not an automatic refusal.** A registered CPU/WASM runtime with a
   feasible tiny model still loads; only an empty feasible set across _all_
   registered runtimes refuses.
+- **The WebGPU feature gate lives inside the webllm branch, after the WebGPU
+  presence guard.** A model's required WebGPU features (e.g. `shader-f16`) are
+  checked against the adapter's advertised set only once WebGPU is present, so a
+  no-WebGPU device is already refused before features are consulted. A
+  feature-mismatch is a new _resolution_ of the existing feasibility decision (an
+  infeasible model), not a new data path — it refuses up front rather than failing
+  mid-bring-up.
 - **Selection is cost-aware by construction.** The default pick weighs the one-time
   download and never auto-selects the largest feasible model; the resolved pick is
   always reported, so the heuristic is never a black box.

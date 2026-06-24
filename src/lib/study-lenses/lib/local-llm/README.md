@@ -104,10 +104,11 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
 - **Adapter map** — the host-supplied map of runtime kind → runtime adapter,
   given **at construction**. The host **registers only the runtimes it ships**; an
   entry whose runtimes are all absent from the map is simply not loadable here.
-- **Device capabilities** — the result of probing the device: WebGPU presence and
-  its adapter's buffer limits, a coarse memory bucket, storage headroom, and the
-  WASM features for a CPU fallback. A **conservative heuristic**, not an exact
-  resource readout — the browser does not expose total VRAM.
+- **Device capabilities** — the result of probing the device: WebGPU presence,
+  its adapter's buffer limits and advertised features (e.g. `shader-f16`), a
+  coarse memory bucket, storage headroom, and the WASM features for a CPU
+  fallback. A **conservative heuristic**, not an exact resource readout — the
+  browser does not expose total VRAM.
 - **Feasibility** — the catalog narrowed by device capabilities and the adapter
   map: which entries this device can actually bring up, and on which runtime.
 - **Selection** — the optional caller preference over the feasible set (a named
@@ -195,6 +196,10 @@ Every "can't proceed" resolves to exactly one of two outcomes — a **load failu
 - **No WebGPU, but a CPU/WASM runtime is registered and a tiny model is feasible**
   → loads that rung. No-WebGPU is _not_ an automatic refusal; only an empty
   feasible set across all registered runtimes is.
+- **WebGPU present but the adapter lacks a model's required feature (e.g.
+  `shader-f16`)** → that model is not feasible; a feature-compatible rung loads
+  instead, or an empty feasible set is a load failure. The feature gate refuses up
+  front rather than failing mid-bring-up.
 - **Nothing feasible on any registered runtime** → load failure.
 - **A feasible model whose every runtime is absent from the adapter map** → load
   failure.
@@ -223,9 +228,10 @@ Every "can't proceed" resolves to exactly one of two outcomes — a **load failu
   backends and treats desktop ones as explicit opt-ins that break no-install.
 - **Capability matching is a conservative heuristic, not an exact fit.** The
   browser does not expose total VRAM; feasibility leans on adapter buffer limits
-  and coarse memory buckets with a safety margin, and tolerates a load that fails
-  by surfacing a load failure, never by promising an exactness the platform can't
-  give.
+  and coarse memory buckets with a safety margin, gates a model's required WebGPU
+  features (e.g. `shader-f16`) against the adapter's advertised set, and tolerates
+  a load that fails by surfacing a load failure, never by promising an exactness
+  the platform can't give.
 - **The default is cost-aware, not maximal.** A device that _can_ run the heaviest
   model is not made to download it by default; the heavier rung is opt-in. The
   resolved model is always reported.

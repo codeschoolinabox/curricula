@@ -100,6 +100,14 @@ type RuntimeLoad =
 			readonly vramRequiredMB?: number;
 			readonly contextWindowSize?: number;
 			readonly lowResourceRequired?: boolean;
+			/**
+			 * WebGPU features this model REQUIRES to load (e.g. `'shader-f16'`).
+			 * Feasibility refuses the model on a device whose adapter does not
+			 * advertise all of them (see {@link DeviceCapabilities.webgpuFeatures}) —
+			 * a conservative gate, so an incompatible device is refused up front
+			 * rather than failing mid-bring-up.
+			 */
+			readonly requiredFeatures?: readonly string[];
 	  }
 	| {
 			readonly runtime: 'transformers-js';
@@ -201,6 +209,16 @@ type DeviceCapabilities = {
 	readonly webgpu: boolean;
 	readonly maxBufferBytes?: number;
 	readonly maxStorageBufferBindingBytes?: number;
+	/**
+	 * The WebGPU features the adapter advertises (e.g. `'shader-f16'`). Feasibility
+	 * checks a model's {@link RuntimeLoad} `requiredFeatures` against this set;
+	 * absent/empty means none were detected (no WebGPU, or none reported).
+	 *
+	 * An open `string[]`, not a closed union — WebGPU's feature set grows, and the
+	 * catalog is data, not an enum; locking it would foreclose new features the way
+	 * an enum would foreclose the catalog.
+	 */
+	readonly webgpuFeatures?: readonly string[];
 	/** `navigator.deviceMemory`, coarse and capped (≤ 8 GB buckets). */
 	readonly deviceMemoryGB?: number;
 	readonly storageQuotaBytes?: number;
