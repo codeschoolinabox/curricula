@@ -257,7 +257,10 @@ the Snippet (the one-sided seam).
   (AR-1 OPEN #4). `unlocks` and `anchorPath` are end-state base-type fields
   whose later addition would break the locked base; the filter knobs are
   additive (a new optional group is backward-compatible), so they land with the
-  clusters that need them.
+  clusters that need them. `anchorPath` is **optional**: token-anchored forms
+  (the category-ID form) carry only `anchorRange` (a token is not an AST node),
+  while node-anchored forms also carry the path. `anchorRange` is the universal
+  anchor; `anchorPath` is the AST-identity refinement where one exists.
 - **`groupKey` is keyed on the form's classification axis** (AR-1 #8), not on
   what the lens displays: the category-ID form keys on `Category`
   (`category:<category>`), role-aware forms on category-and-role. The key is

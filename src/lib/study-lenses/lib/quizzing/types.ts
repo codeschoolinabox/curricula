@@ -62,9 +62,12 @@ export type QuizOption = Readonly<{
 /**
  * Fields every `QuizItem` carries regardless of answer mode. `anchorRange` is
  * `[start, end)` (zero-indexed, half-open into `source.code`, matching
- * classifying's range convention); `anchorPath` is the AST node identity.
- * `groupKey` is keyed on the classification axis the `form` uses — the
- * category-ID form uses `category:<category>` — and is deterministic from
+ * classifying's range convention) — always present, since every anchor is a
+ * source span. `anchorPath` is the AST node identity, present only for
+ * node-anchored forms; token-anchored forms (the category-ID form) carry only
+ * `anchorRange`, because a token is not an AST node and has no path. `groupKey`
+ * is keyed on the classification axis the `form` uses — the category-ID form
+ * uses `category:<category>` — and is deterministic from
  * `(snippet, classified, filter)`. `unlocks` names the propagation group(s) a
  * "sameness" form earns; absent on forms that earn nothing.
  */
@@ -73,7 +76,7 @@ export type QuizItemBase = Readonly<{
 	family: Family;
 	form: string;
 	anchorRange: readonly [number, number];
-	anchorPath: NodePath;
+	anchorPath?: NodePath;
 	cells: ReadonlyArray<BlockCell>;
 	prompt: string;
 	groupKey: string;

@@ -128,11 +128,14 @@ it on parseable code.
 
 **Anchor / anchorRange** — the single source element a `QuizItem` is attached
 to: `anchorRange` is its `[start, end)` (zero-indexed, half-open into
-`source.code`, matching classifying's range convention) and `anchorPath` is its
-AST node path. The anchor is what the learner clicks to open the item — a token
-for atom questions, a brace for block questions. A `QuizItem` has exactly one
-anchor; selection _targets_ — the ranges a code-surface answer must hit — are
-carried separately by the code-surface answer modes, not by the anchor.
+`source.code`, matching classifying's range convention) — always present, since
+every anchor is a source span. `anchorPath` is its AST node path, present only
+for node-anchored forms; a token-anchored form (the category-ID question)
+carries only `anchorRange`, because a token is not an AST node and has no path.
+The anchor is what the learner clicks to open the item — a token for atom
+questions, a brace for block questions. A `QuizItem` has exactly one anchor;
+selection _targets_ — the ranges a code-surface answer must hit — are carried
+separately by the code-surface answer modes, not by the anchor.
 
 **Block-Model cell (`cells`)** — the pedagogical coordinate(s) of a `QuizItem`
 on the Block Model: its dimension (`text-surface` / `execution`) and level
