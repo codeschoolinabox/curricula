@@ -84,6 +84,9 @@ replay the language level's machine, which exists only for admitted programs.
 Below its gate, a tier returns a no-op `RunInstance` with `events: []` and
 `endReport.outcome: 'not-runnable'`; no worker is spawned. See
 [Evaluation behavior across leaves](#evaluation-behavior-across-leaves).
+(`traceVariableLifecycle` is the exception to this tiering — a raw tracer method
+that gates on real-vs-canned, not `status.created`, and throws rather than
+returning a no-op; see that section.)
 
 **Runtime errors are NOT embodied.** Outcomes from
 `snippet.evaluation.events.run()` (timeout, cancellation, evaluation error) live
@@ -259,6 +262,38 @@ non-nullable). Runnability is tiered — the plain `run()` tier gates on
 No execution backend is engaged below a tier's gate.
 `endReport.outcome: 'not-runnable'` indicates the call was not executed because
 the tier's gate was not reached, not a runtime error.
+
+**`traceVariableLifecycle` is the exception — a raw tracer method, not a tier.**
+It is absent from the table above because it neither gates on `status.created`
+nor returns a `not-runnable` no-op. It forwards a real snippet's `source.code`
+to the complete variables tracer — which self-gates via its
+just-enough-javascript admission gate at call time — and returns the tracer's
+own `VariablesTraceHandle`. Its gate is **real-composition-vs-canned-scenario**:
+
+- A **real** snippet (apex-real, tokenize-fail-real, parse-fail-real) forwards
+  to the tracer. Admissible JEJ streams; inadmissible source (non-JEJ,
+  unparseable, or an instrumenter-rejected construct) **throws synchronously at
+  the call**.
+- A **canned scenario** (every keyword leaf, including apex `OK`) **throws**
+  `"not available on canned scenario"` — a canned `source.code` is a keyword
+  sentinel, not executable JS.
+
+The `status.created` correlation is **inverted** here: canned `OK` is
+`created: true` yet throws, while real apex is `created: false` yet forwards.
+Consumers therefore guard `traceVariableLifecycle` with `try/catch`, never with
+a `status.created` check. The returned handle is foreign to the other evaluate
+surfaces: its `.events` iterate `VariablesTraceEvent` (not `AnyNMEvent`), and
+its `.result` resolves to `VariablesTraceResult` (`{ events, settlement }`), not
+a `RunInstance`.
+
+```mermaid
+flowchart LR
+    EMB["embody(code)"] --> R{"real composition\nor canned scenario?"}
+    R -->|"canned (incl. OK)"| T1["traceVariableLifecycle →\nthrows 'not available\non canned scenario'"]
+    R -->|"real"| TV["traceVariableLifecycle(opts?)\n→ traceVariables(source.code, opts)"]
+    TV -->|"inadmissible"| T2["throws (propagated):\nError / InstrumentBoundaryError"]
+    TV -->|"admissible JEJ"| H["VariablesTraceHandle\n.result → VariablesTraceResult\n{ events, settlement }"]
+```
 
 ## Why this design
 

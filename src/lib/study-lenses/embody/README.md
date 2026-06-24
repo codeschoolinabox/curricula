@@ -146,7 +146,7 @@ two-dimensional property grid:
                    realm          tokenize          parseAST          creation          evaluation
 .data         RealmData       TokenizeData      ParseASTData      CreationData      (none — dynamic)
 .entwined     RealmEntwined   TokenizeEntwined  ParseASTEntwined  CreationEntwined  (none — dynamic)
-.events       events()        events()          events()          events()          events.{ run, intercept, trace.* }
+.events       events()        events()          events()          events()          events.{ run, intercept, trace.*, traceVariableLifecycle }
 ```
 
 Phase-first access:
@@ -209,17 +209,18 @@ without a language level (see § Pipeline and shape leaves below).
 Generators are the only callable thing on a Snippet. Static-side generators
 iterate pre-computed frozen data; evaluate-side generators run a Worker live.
 
-| Stream                   | Phase-first access                                 | Returns                                     | Purpose                                        |
-| ------------------------ | -------------------------------------------------- | ------------------------------------------- | ---------------------------------------------- |
-| realm                    | `snippet.realm.events()`                           | `Generator<RealmNMEvent>`                   | Realm setup — intrinsics scope then host scope |
-| tokenize                 | `snippet.tokenize?.events()`                       | `Generator<TokenNMEvent \| CommentNMEvent>` | Tokens + comments interleaved in source order  |
-| parseAST                 | `snippet.parseAST?.events()`                       | `Generator<NodeNMEvent>`                    | AST traversal — bookended enter/exit pairs     |
-| creation                 | `snippet.creation?.events()`                       | `Generator<ScopeNMEvent \| BindingNMEvent>` | Script-scope creation events                   |
-| evaluate.run             | `snippet.evaluation.events.run(opts?)`             | `Promise<RunInstance>`                      | End-report only (no event stream)              |
-| evaluate.intercept       | `snippet.evaluation.events.intercept(opts?)`       | `EvaluateHandle`                            | I/O + error events (live worker)               |
-| evaluate.trace.variables | `snippet.evaluation.events.trace.variables(opts?)` | `EvaluateHandle`                            | + light variables-only instrumentation         |
-| evaluate.trace.syntax    | `snippet.evaluation.events.trace.syntax(opts?)`    | `EvaluateHandle`                            | + NM step events                               |
-| evaluate.trace.semantics | `snippet.evaluation.events.trace.semantics(opts?)` | `EvaluateHandle`                            | + finer-grained internals                      |
+| Stream                          | Phase-first access                                        | Returns                                     | Purpose                                                                                            |
+| ------------------------------- | --------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| realm                           | `snippet.realm.events()`                                  | `Generator<RealmNMEvent>`                   | Realm setup — intrinsics scope then host scope                                                     |
+| tokenize                        | `snippet.tokenize?.events()`                              | `Generator<TokenNMEvent \| CommentNMEvent>` | Tokens + comments interleaved in source order                                                      |
+| parseAST                        | `snippet.parseAST?.events()`                              | `Generator<NodeNMEvent>`                    | AST traversal — bookended enter/exit pairs                                                         |
+| creation                        | `snippet.creation?.events()`                              | `Generator<ScopeNMEvent \| BindingNMEvent>` | Script-scope creation events                                                                       |
+| evaluate.run                    | `snippet.evaluation.events.run(opts?)`                    | `Promise<RunInstance>`                      | End-report only (no event stream)                                                                  |
+| evaluate.intercept              | `snippet.evaluation.events.intercept(opts?)`              | `EvaluateHandle`                            | I/O + error events (live worker)                                                                   |
+| evaluate.trace.variables        | `snippet.evaluation.events.trace.variables(opts?)`        | `EvaluateHandle`                            | + light variables-only instrumentation                                                             |
+| evaluate.trace.syntax           | `snippet.evaluation.events.trace.syntax(opts?)`           | `EvaluateHandle`                            | + NM step events                                                                                   |
+| evaluate.trace.semantics        | `snippet.evaluation.events.trace.semantics(opts?)`        | `EvaluateHandle`                            | + finer-grained internals                                                                          |
+| evaluate.traceVariableLifecycle | `snippet.evaluation.events.traceVariableLifecycle(opts?)` | `VariablesTraceHandle`                      | Raw variable-lifecycle tracer — real source only (throws on canned scenarios / inadmissible input) |
 
 `RealmNMEvent` discriminates by `kind: 'intrinsics-created' | 'host-created'`.
 `NodeNMEvent` discriminates by `kind: 'enter' | 'exit'` (bookended pairs linked
@@ -251,6 +252,26 @@ that is the lesson). The NM-instrumented tiers (`intercept`, `trace.*`) require
 `status.created` — they replay the language level's machine, which exists only
 for admitted programs. Below its gate, a tier short-circuits with
 `endReport.outcome: 'not-runnable'`.
+
+**`traceVariableLifecycle` is a raw tracer method, not a tier.** Where
+`intercept` and `trace.*` are NM-instrumented tiers that replay the language
+level's machine, `traceVariableLifecycle` forwards a real snippet's source
+directly to the complete variables tracer and returns the tracer's own
+`VariablesTraceHandle`. It **self-gates via the tracer's just-enough-javascript
+admission gate** — evaluated at call time on the real source — **not** on
+`status.created` (real-composition snippets are `created: false` today, so a
+created-gate would make the method permanently dead). It does **not**
+short-circuit to a `not-runnable` no-op: inadmissible input (non-JEJ,
+unparseable, or an instrumenter-rejected construct) and **canned scenarios**
+both **throw synchronously at the call**, so the consumer guards the call with
+`try/catch`. The gate is real-composition-vs-canned-scenario, **not**
+`status.created` — even the apex `OK` scenario throws, because a canned
+`source.code` is a scenario-keyword sentinel, not executable JS. **Do not gate
+calls on `status.created`:** a `created` guard is _inverted_ for this method —
+it admits the throwing canned scenarios (canned `OK` is `created: true`) and
+rejects the working real snippets (real apex is `created: false`); guard on
+`try/catch` instead. A program that runs and then fails surfaces its outcome on
+the settlement (`await handle.result`), never as a throw.
 
 ## Load-bearing principles (do not violate without explicit decision)
 

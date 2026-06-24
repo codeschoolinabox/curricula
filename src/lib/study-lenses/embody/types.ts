@@ -29,6 +29,16 @@
 
 import type { Node as AcornNode } from 'acorn';
 
+// The variables tracer's public handle/event/result/settlement types. The tracer
+// (`./lib/evaluating/tracers/variables/`) owns them; re-exported below so
+// lens-purity-safe consumers import them from the embody surface (mirrors the
+// `Violation` re-export). `traceVariableLifecycle` returns `VariablesTraceHandle`.
+import type {
+	VariablesTraceHandle,
+	VariablesTraceEvent,
+	VariablesTraceResult,
+	VariablesSettlement,
+} from './lib/evaluating/tracers/variables/types.js';
 // `Violation` is owned by the validating pipeline (it is what produces
 // violations). Re-exported below so `Snippet.validation.violations` and
 // consumers can import it from the embody-level types module.
@@ -369,6 +379,17 @@ interface EventsView {
 	readonly evaluation: EvaluationEvents;
 }
 
+/**
+ * Options for `traceVariableLifecycle`. Only `seconds` (the engine timeout
+ * budget) is honored — the variables tracer self-instruments and owns no IO
+ * mocks or iteration cap, so the broader `EvaluateOptions` surface does not
+ * apply. Deliberately distinct from the tracer's own `TraceVariablesOptions`
+ * (though structurally identical today): a tracer option change becomes an
+ * embody-side propagation decision, surfaced as a compile error at the forward
+ * site rather than silently widening this public surface.
+ */
+type TraceVariableLifecycleOptions = { readonly seconds?: number };
+
 interface EvaluationEvents {
 	readonly run: (opts?: EvaluateOptions) => Promise<RunInstance>;
 	readonly intercept: (opts?: EvaluateOptions) => EvaluateHandle;
@@ -377,6 +398,32 @@ interface EvaluationEvents {
 		readonly syntax: (opts?: EvaluateOptions) => EvaluateHandle;
 		readonly semantics: (opts?: EvaluateOptions) => EvaluateHandle;
 	};
+	/**
+	 * Raw variable-lifecycle tracer — a thin forward to the COMPLETE variables
+	 * tracer, returning the tracer's OWN handle (not the `AnyNMEvent` adapter
+	 * `trace.variables`). NOT an NM-instrumented tier.
+	 *
+	 * Gating is real-composition-vs-canned-scenario, NOT `status.created`:
+	 *   - A REAL snippet forwards `source.code` to the tracer, which self-gates
+	 *     via its just-enough-javascript admission gate at call time.
+	 *   - A CANNED scenario throws "not available on canned scenario" (its
+	 *     `source.code` is a keyword sentinel, not executable JS — even apex `OK`).
+	 *
+	 * Do NOT gate calls on `status.created`: the guard is INVERTED for this method
+	 * — it admits the throwing canned `OK` (`created: true`) and rejects the
+	 * working real apex (`created: false`). Guard with `try/catch` instead. Unlike
+	 * the NM tiers it does not return a `not-runnable` no-op — inadmissible input
+	 * (non-JEJ, unparseable, or instrumenter-rejected) THROWS synchronously at the
+	 * call.
+	 *
+	 * Returns the tracer's FOREIGN handle, deliberately asymmetric with the other
+	 * members: `.events` iterate `VariablesTraceEvent` (NOT `AnyNMEvent`);
+	 * `.result` resolves to `VariablesTraceResult` = `{ events, settlement }` (NOT
+	 * a `RunInstance` — there is no `endReport`).
+	 */
+	readonly traceVariableLifecycle: (
+		opts?: TraceVariableLifecycleOptions,
+	) => VariablesTraceHandle;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -1263,6 +1310,13 @@ export type {
 	// validation
 	Violation,
 	Validation,
+
+	// variables tracer — the raw traceVariableLifecycle surface
+	TraceVariableLifecycleOptions,
+	VariablesTraceHandle,
+	VariablesTraceEvent,
+	VariablesTraceResult,
+	VariablesSettlement,
 
 	// errors & status
 	EmbodyPhase,
