@@ -53,8 +53,8 @@ describe('embody', () => {
 		// the snippet is canned (realSource === null). It is the ONLY EvaluationEvents
 		// method that behaves differently by path (run/intercept/trace.* are no-op
 		// stubs on both paths), so it is the sole runtime discriminant available. The
-		// type-level `satisfies` enforcement (Increment 2, index.ts) will pin the
-		// other direction (recognized ⊆ scenarios) at compile time.
+		// type-level `satisfies` enforcement (index.ts) pins the other direction
+		// (recognized ⊆ scenarios) at compile time.
 		it('recognizes exactly the EMBODY_SCENARIOS keywords as canned', () => {
 			for (const scenario of EMBODY_SCENARIOS) {
 				expect(() =>

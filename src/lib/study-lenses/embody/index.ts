@@ -133,6 +133,7 @@ import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import type { CreateTransport } from '../lib/engine/worker/types.js';
 
+import type { EmbodyScenario } from './embody-scenarios.js';
 import traceVariables from './lib/evaluating/tracers/variables/trace-variables.js';
 import type {
 	Analysis,
@@ -179,7 +180,8 @@ import type {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Scenario keywords — re-exported from ./embody-scenarios.ts, the single source
-// of truth the dispatch is locked to (see the drift-guard test in embody.test.ts).
+// of truth the dispatch is locked to: every dispatch keyword `satisfies EmbodyScenario`
+// (compile-time), and the drift-guard test pins the runtime set (embody.test.ts).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export { default as EMBODY_SCENARIOS } from './embody-scenarios.js';
@@ -922,7 +924,7 @@ const APEX_OVERLAYS: Readonly<Record<string, ApexOverlay>> = Object.freeze({
 		hasIoUserTotal: 0,
 		evalOutcome: 'cancelled',
 	},
-});
+} satisfies Readonly<Partial<Record<EmbodyScenario, ApexOverlay>>>);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Real-composition helpers (incrementally filled — see EMBODY-ROADMAP.md).
@@ -1168,16 +1170,18 @@ export default function embody(code: string): Snippet {
 	// Snippet.source.code (canonical scenario identifier).
 	const normalized = code.trim().toUpperCase();
 
-	if (normalized === 'FAIL_AT_TOKENIZE') {
+	// `satisfies EmbodyScenario` (parenthesized so it binds to the literal, not the
+	// `===` result) compile-asserts each dispatch keyword is in EMBODY_SCENARIOS.
+	if (normalized === ('FAIL_AT_TOKENIZE' satisfies EmbodyScenario)) {
 		return buildFailAtTokenizeSnippet(normalized);
 	}
-	if (normalized === 'FAIL_AT_PARSE') {
+	if (normalized === ('FAIL_AT_PARSE' satisfies EmbodyScenario)) {
 		return buildFailAtParseSnippet(normalized);
 	}
-	if (normalized === 'VALIDATION_FAIL') {
+	if (normalized === ('VALIDATION_FAIL' satisfies EmbodyScenario)) {
 		return buildValidateFailSnippet(normalized);
 	}
-	if (normalized === 'FAIL_AT_CREATE') {
+	if (normalized === ('FAIL_AT_CREATE' satisfies EmbodyScenario)) {
 		return buildFailAtCreateSnippet(normalized);
 	}
 	if (Object.hasOwn(APEX_OVERLAYS, normalized)) {
