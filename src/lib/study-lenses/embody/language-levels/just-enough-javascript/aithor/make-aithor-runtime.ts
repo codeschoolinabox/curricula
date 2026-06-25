@@ -43,9 +43,11 @@ type AithorRuntimeConfig = {
 export default function makeAithorRuntime(
 	config: AithorRuntimeConfig,
 ): AithorRuntime {
-	// Resolve the catalog ONCE so the SAME instance backs both makeLocalLlm's
-	// feasibility and makeLoadModel's membership pre-check (do not let makeLocalLlm
-	// default internally — that would be a different DEFAULT_CATALOG reference).
+	// Resolve the catalog ONCE and pass the SAME instance to BOTH makeLocalLlm
+	// (feasibility) and makeLoadModel (the membership pre-check). This matters when
+	// a catalog is INJECTED: both must see the host's catalog, not one the host's
+	// and the other local-llm's default. (local-llm exposes no membership
+	// predicate, so the pre-check and feasibility agree only by sharing the array.)
 	const catalog = config.catalog ?? DEFAULT_CATALOG;
 
 	const llm = makeLocalLlm({
