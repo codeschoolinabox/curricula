@@ -240,10 +240,11 @@ _plus_ the pre-computed `classified` array — quizzing never calls
 `classifyTokens`; the consumer narrows the snippet to `{ code, tokens, ast }`,
 calls `classifyTokens`, and passes the result in. The whole `Snippet` is taken
 so quizzing's accessor seam can grow into binding and scope reads as later forms
-need them; on parseable code today it reads only `source.code` and
-`raw.{tokens, ast}` (plus the supplied `classified`), and every other surface is
-reached only through a helper. This mirrors the asymmetry classifying already
-documents (classifying takes three narrow values; quizzing takes the Snippet).
+need them; on parseable code today it reads only the parse gate's two surfaces
+(`status.parsed`, `raw.ast`) plus the supplied `classified` — the deferred
+`range` filter adds `source.offsets` — and every other surface is reached only
+through a helper. This mirrors the asymmetry classifying already documents
+(classifying takes three narrow values; quizzing takes the Snippet).
 
 **Grading is one-sided.** `grade` reads only `(item, response)` and never the
 snippet: each `QuizItem` carries its ground truth (correct option ids or target
