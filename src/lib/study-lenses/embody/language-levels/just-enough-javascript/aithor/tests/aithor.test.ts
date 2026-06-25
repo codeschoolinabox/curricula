@@ -321,6 +321,21 @@ describe('aithor', () => {
 		});
 	});
 
+	describe('exceptions — the default runtime (no runtime injected)', () => {
+		it('refuses unknown-model for a name absent from the default catalog, no runtime wired', async () => {
+			// No 3rd arg → the module-level backend-agnostic default runtime. The
+			// unknown-model pre-check short-circuits before any device probe, so this
+			// stays hermetic (no real WebGPU / network).
+			const result = await aithor('', {
+				prompt: 'p',
+				model: 'definitely-not-in-the-default-catalog',
+			});
+
+			expect(result.ok).toBe(false);
+			expect(result.refusal).toEqual({ cause: 'unknown-model' });
+		});
+	});
+
 	describe('boundary — lines:0 is a real bound, not dropped', () => {
 		it('refuses a multi-line program under lines:0 (0 survives resolution)', async () => {
 			// 'let x = 5;\n' is admitted and >0 lines. With lines:0 it over-runs the
