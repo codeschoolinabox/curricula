@@ -32,11 +32,16 @@ import type {
 	AithorResult,
 	AithorRuntime,
 	FeatureSubset,
+	RepairContext,
 	ResolvedAithorConfig,
 	SizeBounds,
 } from './types.js';
 
 const defaultRuntime: AithorRuntime = makeAithorRuntime({ adapters: {} });
+
+// The curated attempt bound — total model calls (1 initial + up to 2 repairs).
+// Fixed, not config-driven (AithorConfig has no attempts field); a tunable knob.
+const MAX_ATTEMPTS = 3;
 
 export default async function aithor(
 	program: string,
@@ -74,20 +79,36 @@ export default async function aithor(
 		return { ok: true, program: raw, meta: { model: resolvedId, attempts: 1 } };
 	}
 
-	// Curated: a single admit + conform attempt for now (the bounded repair loop
-	// arrives in the next increment). A pass returns the conformant code; any
-	// failure refuses for the (degenerate, single) attempt bound.
-	const { code } = await model.generate(
-		buildPrompt(program, resolved.prompt, subset, size),
-	);
-	if (await isJej(code)) {
-		const verdict = conform(code, subset, size);
-		if (verdict.ok) {
-			return {
-				ok: true,
-				program: code,
-				meta: { model: resolvedId, attempts: 1 },
+	// Curated: the bounded admit → conform → repair loop. Each iteration is one
+	// model call (the handle is reused — load-once). A conformance failure seeds
+	// the next prompt with the refused candidate + its located reasons; an
+	// admission failure re-asks bare (there are no conformance violations to seed
+	// with). The spent bound shapes the curated-only exhaustion refusal.
+	let repair: RepairContext | undefined;
+	for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+		const { code } = await model.generate(
+			buildPrompt(program, resolved.prompt, subset, size, repair),
+		);
+		if (await isJej(code)) {
+			const verdict = conform(code, subset, size);
+			if (verdict.ok) {
+				return {
+					ok: true,
+					program: code,
+					meta: { model: resolvedId, attempts: attempt },
+				};
+			}
+			// Non-empty here by construction: `code` passed isJej admission above (a
+			// successful module parse), so conform's own parse cannot fail — thus
+			// !verdict.ok ⇒ violations.length > 0, the non-empty tuple the cast asserts.
+			repair = {
+				candidate: code,
+				violations: verdict.violations as RepairContext['violations'],
 			};
+		} else {
+			// Admission failure: reset repair so a stale conformance context from a
+			// prior attempt does not leak into this bare re-ask.
+			repair = undefined;
 		}
 	}
 	return { ok: false, refusal: { cause: 'attempt-bound-exhausted' } };
