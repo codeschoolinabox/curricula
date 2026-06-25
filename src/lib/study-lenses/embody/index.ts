@@ -115,10 +115,11 @@
  *
  * Default export: `embody(code: string): Snippet`. Internal-only per
  * `embody/README.md` (the package's public surface is the
- * `<StudyLenses>` orchestrator, not embody). Named export:
- * `EMBODY_SCENARIOS` — a frozen `ReadonlyArray<string>` of the
- * 11 valid scenario keywords, used by the throw error message and by
- * orchestrator dev / test fixtures that want to enumerate scenarios.
+ * `<StudyLenses>` orchestrator, not embody). Named export
+ * `EMBODY_SCENARIOS` (re-exported from `./embody-scenarios.ts`) — the frozen
+ * `ReadonlyArray<string>` of the 11 scenario keywords (+ the `EmbodyScenario`
+ * type); the single source of truth the dispatch is locked to (drift-guard test),
+ * also consumed by dev / test fixtures that enumerate scenarios.
  *
  * @see ./types.ts — the `Snippet` contract
  * @see ./DOCS.md — architectural sketch + § Open holes
@@ -177,8 +178,12 @@ import type {
 } from './types.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Scenario list — single source of truth for the discriminator + throw message.
+// Scenario keywords — re-exported from ./embody-scenarios.ts, the single source
+// of truth the dispatch is locked to (see the drift-guard test in embody.test.ts).
 // ─────────────────────────────────────────────────────────────────────────────
+
+export { default as EMBODY_SCENARIOS } from './embody-scenarios.js';
+export type { EmbodyScenario } from './embody-scenarios.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers — shape-valid stubs reused across scenarios.

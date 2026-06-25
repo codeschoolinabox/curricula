@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import EMBODY_SCENARIOS from '../embody-scenarios.js';
-import embody from '../index.js';
+import embody, { EMBODY_SCENARIOS } from '../index.js';
 
 describe('embody', () => {
 	describe('EMBODY_SCENARIOS export', () => {
@@ -46,6 +45,29 @@ describe('embody', () => {
 					'PAUSES',
 				]),
 			);
+		});
+
+		// Drift guard: the dispatch must recognize EXACTLY the EMBODY_SCENARIOS
+		// keywords as canned. The canned-vs-real discriminant is the B4 gate —
+		// `traceVariableLifecycle()` throws "not available on canned scenario" iff
+		// the snippet is canned (realSource === null). It is the ONLY EvaluationEvents
+		// method that behaves differently by path (run/intercept/trace.* are no-op
+		// stubs on both paths), so it is the sole runtime discriminant available. The
+		// type-level `satisfies` enforcement (Increment 2, index.ts) will pin the
+		// other direction (recognized ⊆ scenarios) at compile time.
+		it('recognizes exactly the EMBODY_SCENARIOS keywords as canned', () => {
+			for (const scenario of EMBODY_SCENARIOS) {
+				expect(() =>
+					embody(scenario).evaluation.events.traceVariableLifecycle(),
+				).toThrow(/canned scenario/u);
+			}
+			// An admissible REAL apex snippet routes to the tracer and returns a handle
+			// — NO throw at all. `.not.toThrow()` (no pattern) rules out a universal
+			// canned-throw fake, which would fail here (whereas a parse-fail real source
+			// would throw a *different* error and falsely pass `.not.toThrow(/canned/)`).
+			expect(() =>
+				embody('let x = 1').evaluation.events.traceVariableLifecycle(),
+			).not.toThrow();
 		});
 	});
 
