@@ -29,18 +29,31 @@ type FeasibilityInput = {
 	readonly selection?: Selection;
 };
 
-/** The selection core's result — the feasible set, the chosen entry + its resolved runtime (null iff none chosen), and a per-entry rejection diagnosis. */
+/** The selection core's result — the feasible set, the chosen entry + its resolved runtime (null iff none chosen), the per-entry rejection diagnosis, and the ordered fallback chain. */
 type FeasibilityResult = {
 	readonly feasible: readonly ModelCatalogEntry[];
 	readonly chosen: ModelCatalogEntry | null;
 	readonly chosenRuntime: RuntimeKind | null;
 	readonly rejections: readonly EntryRejection[];
+	readonly chain: readonly Candidate[];
 };
 
 /** A feasible entry paired with the runtime it resolved to (browser-first). */
 type Pick = {
 	readonly entry: ModelCatalogEntry;
 	readonly runtime: RuntimeKind;
+};
+
+/**
+ * One step of the fallback chain: a feasible `(model, runtime)` pick resolved to the
+ * load params `load()` needs (generalizes {@link Pick}). INTERNAL — the chain never
+ * crosses the public `load(): LoadResult` boundary; `load()` descends it in order.
+ */
+type Candidate = {
+	readonly entry: ModelCatalogEntry;
+	readonly runtime: RuntimeKind;
+	readonly load: RuntimeLoad;
+	readonly fetchUrl: string;
 };
 
 /**
@@ -118,7 +131,89 @@ export default function selectFeasible(
 		chosen: chosen === null ? null : chosen.entry,
 		chosenRuntime: chosen === null ? null : chosen.runtime,
 		rejections: diagnoseRejections(catalog, picks, capabilities, adapters),
+		chain: buildChain(picks, chosen, isNamed(named)),
 	});
+}
+
+/** The ordered fallback chain load() descends: the cost-aware default first, then the remaining WebGPU candidates descending in size, then CPU/WASM. A named pin is a single-candidate chain (artifact-precise, no descent). */
+function buildChain(
+	picks: readonly Pick[],
+	chosen: Pick | null,
+	isNamedPin: boolean,
+): readonly Candidate[] {
+	if (chosen === null) return Object.freeze([]);
+	const head = toCandidate(chosen);
+	// A named pin is artifact-precise: the single named candidate, no descent.
+	if (isNamedPin) return Object.freeze([head]);
+	// Descent only, never ascent: the tail is the feasible picks no larger than the
+	// chosen pick (heavier is opt-in via prefer:'max'), ordered WebGPU-first then
+	// descending in size. The exclusion is relative to `chosen`, so prefer:'max'
+	// naturally yields a longer chain than the cost-aware default.
+	const chosenRank = SIZE_RANK[chosen.entry.sizeClass];
+	const tail = orderChain(
+		picks.filter(
+			(pick) =>
+				pick !== chosen && SIZE_RANK[pick.entry.sizeClass] <= chosenRank,
+		),
+	).map((pick) => toCandidate(pick));
+	return Object.freeze([head, ...tail]);
+}
+
+/** Resolve a pick to a frozen {@link Candidate} (the wrapper is own data; the entry/load it references stay caller-owned, so this is a shallow freeze, not freezeInPlace). */
+function toCandidate(pick: Pick): Candidate {
+	const member = pick.entry.runtimes.find(
+		(option) => option.load.runtime === pick.runtime,
+	);
+	// Guaranteed by resolveRuntime (it only resolves a runtime present in the entry).
+	if (member === undefined) {
+		throw new Error(
+			`buildChain: resolved runtime "${pick.runtime}" missing from "${pick.entry.id}"`,
+		);
+	}
+	return Object.freeze({
+		entry: pick.entry,
+		runtime: pick.runtime,
+		load: member.load,
+		fetchUrl: member.fetchUrl,
+	});
+}
+
+/** Order chain picks deterministically (the repo bans `.sort()` AND `.reduce()`): a stable insertion that reassigns a NEW array each step, never mutating one. */
+function orderChain(picks: readonly Pick[]): readonly Pick[] {
+	let ordered: readonly Pick[] = [];
+	for (const pick of picks) {
+		ordered = insertByChainOrder(ordered, pick);
+	}
+	return ordered;
+}
+
+function insertByChainOrder(
+	ordered: readonly Pick[],
+	pick: Pick,
+): readonly Pick[] {
+	const index = ordered.findIndex((other) => chainComesBefore(pick, other));
+	return index === -1
+		? [...ordered, pick]
+		: [...ordered.slice(0, index), pick, ...ordered.slice(index)];
+}
+
+/** The total, deterministic chain order: WebGPU class first, then descending size, then code-specialized, then descending VRAM, then id ascending. */
+function chainComesBefore(a: Pick, b: Pick): boolean {
+	const aWebGpu = isWebGpuRuntime(a.runtime);
+	if (aWebGpu !== isWebGpuRuntime(b.runtime)) return aWebGpu;
+	const byRank = SIZE_RANK[b.entry.sizeClass] - SIZE_RANK[a.entry.sizeClass];
+	if (byRank !== 0) return byRank < 0;
+	if (a.entry.codeSpecialized !== b.entry.codeSpecialized) {
+		return a.entry.codeSpecialized;
+	}
+	const byVram = vramOf(b) - vramOf(a);
+	if (byVram !== 0) return byVram < 0;
+	return a.entry.id.localeCompare(b.entry.id, 'en-US') < 0;
+}
+
+/** Whether a runtime is GPU-accelerated in-browser (tried before CPU/WASM in the chain). */
+function isWebGpuRuntime(runtime: RuntimeKind): boolean {
+	return WEBGPU_RUNTIMES.has(runtime);
 }
 
 /** The per-entry rejection diagnosis: every catalog entry NOT in `feasible`, with the reason each declared runtime failed. Diagnostic (DOCS), never a gate. */
@@ -234,8 +329,10 @@ function isLoadFeasible(
 		}
 		return fitsCpuSizeClass(entry.sizeClass);
 	}
-	// Non-webllm (CPU/WASM) runtimes carry no webgpu requirement — a tiny/small
-	// model still loads (DOCS § "No-WebGPU is not an automatic refusal").
+	// Non-webllm runtimes: today only the CPU/WASM rung (wllama) ships an adapter, so
+	// the size-class gate suffices and a tiny/small model still loads (DOCS §
+	// "No-WebGPU is not an automatic refusal"). transformers-js / mediapipe (WebGPU)
+	// and the server runtimes would each need their own gate + chain class when added.
 	return fitsCpuSizeClass(entry.sizeClass);
 }
 
@@ -373,6 +470,12 @@ const DEFAULT_PREFERENCE: readonly RuntimeKind[] = [
 	'node-llama-cpp',
 	'ollama',
 ];
+// The runtimes the chain tries before CPU/WASM ones. Kept in lockstep with which
+// runtimes `isLoadFeasible` actually WebGPU-gates: today only webllm. transformers-js
+// and mediapipe are WebGPU too, but until they're feasibility-gated (+ ship adapters)
+// classifying them GPU-first would wrongly sort an un-gated candidate ahead of the
+// CPU rescue — so they join this set only when their gate lands.
+const WEBGPU_RUNTIMES: ReadonlySet<RuntimeKind> = new Set(['webllm']);
 const SIZE_RANK: Record<SizeClass, number> = {
 	tiny: 0,
 	small: 1,

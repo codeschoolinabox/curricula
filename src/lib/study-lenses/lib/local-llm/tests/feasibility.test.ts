@@ -667,6 +667,212 @@ describe('selectFeasible', () => {
 		});
 	});
 
+	describe('the fallback chain', () => {
+		const ALL = { webllm: registeredAdapter, wllama: registeredAdapter };
+
+		it('is empty when nothing is feasible', () => {
+			const result = selectFeasible({
+				catalog: [webllmEntry({ id: 'x', vramRequiredMB: 100 })],
+				capabilities: fakeCaps({ webgpu: false }),
+				adapters: { webllm: registeredAdapter },
+			});
+			expect(result.chain).toEqual([]);
+		});
+
+		it('a single feasible entry is the whole chain', () => {
+			const result = selectFeasible({
+				catalog: [webllmEntry({ id: 'solo', vramRequiredMB: 1000 })],
+				capabilities: fakeCaps(),
+				adapters: { webllm: registeredAdapter },
+			});
+			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual([
+				'solo',
+			]);
+		});
+
+		it('a candidate carries the resolved runtime, load params, and weights URL', () => {
+			const result = selectFeasible({
+				catalog: [webllmEntry({ id: 'solo', vramRequiredMB: 1000 })],
+				capabilities: fakeCaps(),
+				adapters: { webllm: registeredAdapter },
+			});
+			const [head] = result.chain;
+			expect(head?.runtime).toBe('webllm');
+			expect(head?.load.runtime).toBe('webllm');
+			expect(head?.fetchUrl).toBe('https://example.test/solo');
+		});
+
+		it('chain[0] is the cost-aware default', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'mid', sizeClass: 'mid', vramRequiredMB: 1500 }),
+					webllmEntry({ id: 'tiny', sizeClass: 'tiny', vramRequiredMB: 500 }),
+				],
+				capabilities: fakeCaps(),
+				adapters: { webllm: registeredAdapter },
+			});
+			expect(result.chain[0]?.entry.id).toBe('mid'); // largest within the cost ceiling
+		});
+
+		it('orders WebGPU candidates descending in size, then CPU/WASM', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'gpu-mid', sizeClass: 'mid', vramRequiredMB: 1500 }),
+					webllmEntry({ id: 'gpu-small', sizeClass: 'small', vramRequiredMB: 1000 }),
+					webllmEntry({ id: 'gpu-tiny', sizeClass: 'tiny', vramRequiredMB: 500 }),
+					wllamaEntry({ id: 'cpu-tiny', sizeClass: 'tiny' }),
+				],
+				capabilities: fakeCaps(),
+				adapters: ALL,
+			});
+			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual([
+				'gpu-mid', // cost-aware default (chain[0])
+				'gpu-small', // remaining WebGPU, descending
+				'gpu-tiny',
+				'cpu-tiny', // CPU/WASM after the WebGPU candidates
+			]);
+		});
+
+		it('a named pin is a single-candidate chain (artifact-precise, no descent)', () => {
+			// 'pinned' has a SMALLER sibling — a non-pin chain would descend onto it,
+			// so the single-element result proves the pin suppresses the descent.
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'pinned', sizeClass: 'small', vramRequiredMB: 1000 }),
+					webllmEntry({ id: 'smaller', sizeClass: 'tiny', vramRequiredMB: 500 }),
+				],
+				capabilities: fakeCaps(),
+				adapters: { webllm: registeredAdapter },
+				selection: { model: 'pinned' },
+			});
+			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual([
+				'pinned',
+			]);
+		});
+
+		it('a feasible model heavier than the default is excluded (descent only, never ascent)', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'small', sizeClass: 'small', vramRequiredMB: 1000 }),
+					webllmEntry({
+						id: 'strong',
+						sizeClass: 'strong',
+						vramRequiredMB: 3000, // feasible (budget 4096) but above the 2048 cost ceiling
+					}),
+				],
+				capabilities: fakeCaps(),
+				adapters: { webllm: registeredAdapter },
+			});
+			// default = 'small' (largest within the ceiling); 'strong' is heavier → opt-in only.
+			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual([
+				'small',
+			]);
+		});
+
+		it('excludes heavier-than-default candidates even in a multi-element chain', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'strong', sizeClass: 'strong', vramRequiredMB: 3000 }),
+					webllmEntry({ id: 'mid', sizeClass: 'mid', vramRequiredMB: 1500 }),
+					webllmEntry({ id: 'small', sizeClass: 'small', vramRequiredMB: 1000 }),
+					webllmEntry({ id: 'tiny', sizeClass: 'tiny', vramRequiredMB: 500 }),
+				],
+				capabilities: fakeCaps({ deviceMemoryGB: 16 }), // budget 8192, all feasible
+				adapters: { webllm: registeredAdapter },
+			});
+			expect(result.feasible.map((entry) => entry.id)).toContain('strong'); // feasible…
+			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual([
+				'mid', // default (largest within the 2048 ceiling), then descending
+				'small',
+				'tiny', // 'strong' is heavier than the default → excluded from the chain
+			]);
+		});
+
+		it('breaks same-class same-size chain ties by id ascending', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'zzz', sizeClass: 'tiny', vramRequiredMB: 400 }),
+					webllmEntry({ id: 'aaa', sizeClass: 'tiny', vramRequiredMB: 400 }),
+					webllmEntry({ id: 'mid', sizeClass: 'mid', vramRequiredMB: 1500 }),
+				],
+				capabilities: fakeCaps(),
+				adapters: { webllm: registeredAdapter },
+			});
+			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual([
+				'mid',
+				'aaa',
+				'zzz',
+			]);
+		});
+
+		it("prefer:'max' makes chain[0] the largest and descends from it", () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'small', sizeClass: 'small', vramRequiredMB: 1000 }),
+					webllmEntry({ id: 'strong', sizeClass: 'strong', vramRequiredMB: 3000 }),
+				],
+				capabilities: fakeCaps({ deviceMemoryGB: 16 }), // both feasible
+				adapters: { webllm: registeredAdapter },
+				selection: { prefer: 'max' },
+			});
+			// opting into 'max' makes 'strong' the head; the chain descends from there.
+			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual([
+				'strong',
+				'small',
+			]);
+		});
+
+		it('a wllama candidate carries the wllama load variant', () => {
+			const result = selectFeasible({
+				catalog: [wllamaEntry({ id: 'cpu', sizeClass: 'tiny' })],
+				capabilities: fakeCaps({ webgpu: false }),
+				adapters: { wllama: registeredAdapter },
+			});
+			expect(result.chain[0]?.load.runtime).toBe('wllama');
+		});
+
+		it('chain[0] is the cheapest feasible when nothing fits the cost ceiling', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'mid', sizeClass: 'mid', vramRequiredMB: 3000 }),
+					webllmEntry({ id: 'strong', sizeClass: 'strong', vramRequiredMB: 6000 }),
+				],
+				capabilities: fakeCaps({ deviceMemoryGB: 16 }), // budget 8192; neither ≤ 2048
+				adapters: { webllm: registeredAdapter },
+			});
+			// chain[0] = cheapest feasible; 'strong' is heavier than it → still excluded.
+			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual(['mid']);
+		});
+
+		it('orders the chain tail by code-specialization before id', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'mid', sizeClass: 'mid', vramRequiredMB: 1500 }),
+					webllmEntry({
+						id: 'aaa-plain',
+						sizeClass: 'small',
+						vramRequiredMB: 1000,
+						codeSpecialized: false,
+					}),
+					webllmEntry({
+						id: 'zzz-coder',
+						sizeClass: 'small',
+						vramRequiredMB: 1000,
+						codeSpecialized: true,
+					}),
+				],
+				capabilities: fakeCaps(),
+				adapters: { webllm: registeredAdapter },
+			});
+			// code-specialized leads despite its LATER id (id is the last-resort tiebreak).
+			expect(result.chain.map((candidate) => candidate.entry.id)).toEqual([
+				'mid',
+				'zzz-coder',
+				'aaa-plain',
+			]);
+		});
+	});
+
 	describe('malformed entry', () => {
 		it('an entry with no runtimes is simply not feasible (no throw)', () => {
 			const entry = { ...webllmEntry({ id: 'no-runtime' }), runtimes: [] };
