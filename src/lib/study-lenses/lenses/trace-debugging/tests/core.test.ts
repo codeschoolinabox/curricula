@@ -43,7 +43,9 @@ describe('formatEvent', () => {
 				{ name: 'PI', kind: 'const' },
 			],
 		});
-		expect(line).toBe('step 1 $.body.1 SCOPE-PUSH block vars=[total:let, PI:const]');
+		expect(line).toBe(
+			'step 1 $.body.1 SCOPE-PUSH block vars=[total:let, PI:const]',
+		);
 	});
 
 	// One — the triangulator: a different tag, step, path, and suffix grammar
@@ -71,7 +73,9 @@ describe('formatEvent', () => {
 			value: 5,
 			explicit: true,
 		});
-		expect(line).toBe('step 2 $.body.0.declarations.0 INITIALIZE x = 5 (explicit)');
+		expect(line).toBe(
+			'step 2 $.body.0.declarations.0 INITIALIZE x = 5 (explicit)',
+		);
 	});
 
 	// Boundary — an implicit initialize (`let y;`): the value genuinely IS
@@ -87,7 +91,9 @@ describe('formatEvent', () => {
 			value: undefined,
 			explicit: false,
 		});
-		expect(line).toBe('step 3 $.body.1.declarations.0 INITIALIZE y = undefined (implicit)');
+		expect(line).toBe(
+			'step 3 $.body.1.declarations.0 INITIALIZE y = undefined (implicit)',
+		);
 	});
 
 	// One — a normal scope-pop with one initialized final variable (name:kind=value).
@@ -101,7 +107,9 @@ describe('formatEvent', () => {
 			reason: 'normal',
 			variables: [{ name: 'x', kind: 'let', status: 'initialized', value: 5 }],
 		});
-		expect(line).toBe('step 8 $.body.0 SCOPE-POP block reason=normal vars=[x:let=5]');
+		expect(line).toBe(
+			'step 8 $.body.0 SCOPE-POP block reason=normal vars=[x:let=5]',
+		);
 	});
 
 	// Boundary — an abrupt (break) scope-pop whose final variables mix an
@@ -120,7 +128,25 @@ describe('formatEvent', () => {
 				{ name: 'j', kind: 'const', status: 'tdz' },
 			],
 		});
-		expect(line).toBe('step 9 $.body.3 SCOPE-POP for reason=break vars=[i:let=3, j:const(tdz)]');
+		expect(line).toBe(
+			'step 9 $.body.3 SCOPE-POP for reason=break vars=[i:let=3, j:const(tdz)]',
+		);
+	});
+
+	// Boundary — a scope-pop closing a scope that declared nothing: the
+	// final-variable join must collapse to `vars=[]` (the pop path has its own
+	// map/join, distinct from the scope-push path's).
+	it('renders a scope-pop with no final variables as vars=[]', () => {
+		const line = traceDebuggingCore.formatEvent({
+			step: 10,
+			nodePath: '$.body.5',
+			scopeInstanceId: 3,
+			event: 'scope-pop',
+			scopeKind: 'block',
+			reason: 'normal',
+			variables: [],
+		});
+		expect(line).toBe('step 10 $.body.5 SCOPE-POP block reason=normal vars=[]');
 	});
 
 	// One — an assign that wrote: operator + prior → next transition.
@@ -157,6 +183,25 @@ describe('formatEvent', () => {
 		expect(line).toBe('step 7 $.body.4.expression ASSIGN x ||= (no write)');
 	});
 
+	// Boundary (AR-3) — a wrote:false assign that ALSO carries a `nextValue`: the
+	// renderer must branch on `wrote`, NOT on `nextValue` presence, so the line is
+	// still `(no write)` and the stray `nextValue` never leaks in. A correct-by-
+	// accident impl keyed on `nextValue !== undefined` would mis-render this.
+	it('renders a wrote:false assign as (no write) even when nextValue is present', () => {
+		const line = traceDebuggingCore.formatEvent({
+			step: 7,
+			nodePath: '$.body.4.expression',
+			scopeInstanceId: 1,
+			event: 'assign',
+			name: 'x',
+			operator: '&&=',
+			priorValue: 0,
+			nextValue: 99,
+			wrote: false,
+		});
+		expect(line).toBe('step 7 $.body.4.expression ASSIGN x &&= (no write)');
+	});
+
 	// One — a postfix increment: postfix RETURNS the old value (returned == prior).
 	it('renders a postfix increment with prior, next, and returned values', () => {
 		const line = traceDebuggingCore.formatEvent({
@@ -171,7 +216,9 @@ describe('formatEvent', () => {
 			nextValue: 4,
 			returnedValue: 3,
 		});
-		expect(line).toBe('step 5 $.body.3.expression INCREMENT x ++ postfix : 3 → 4 returns 3');
+		expect(line).toBe(
+			'step 5 $.body.3.expression INCREMENT x ++ postfix : 3 → 4 returns 3',
+		);
 	});
 
 	// Boundary — a prefix increment: prefix RETURNS the new value (returned ==
@@ -190,7 +237,9 @@ describe('formatEvent', () => {
 			nextValue: 4,
 			returnedValue: 4,
 		});
-		expect(line).toBe('step 5 $.body.3.expression INCREMENT x ++ prefix : 3 → 4 returns 4');
+		expect(line).toBe(
+			'step 5 $.body.3.expression INCREMENT x ++ prefix : 3 → 4 returns 4',
+		);
 	});
 
 	// Boundary — an opaque value snapshot (a non-clone-safe value the worker
@@ -219,6 +268,35 @@ describe('formatEvent', () => {
 			value: 10n,
 		});
 		expect(line).toBe('step 4 $.body.1 READ big → 10n');
+	});
+
+	// Boundary (AR-3) — a string ValueSnapshot: rendered JSON-quoted, so a string
+	// reads as distinct from a number (`"5"` vs `5`) and from `undefined` in the
+	// dump. Pins the string branch of renderValue (otherwise uncontracted).
+	it('renders a string value JSON-quoted', () => {
+		const line = traceDebuggingCore.formatEvent({
+			step: 4,
+			nodePath: '$.body.1',
+			scopeInstanceId: 1,
+			event: 'read',
+			name: 's',
+			value: 'hello',
+		});
+		expect(line).toBe('step 4 $.body.1 READ s → "hello"');
+	});
+
+	// Boundary — a null value (`let x = null`): a real JEJ value, rendered as the
+	// literal `null` (distinct from `undefined` and from the string `"null"`).
+	it('renders a null value as null', () => {
+		const line = traceDebuggingCore.formatEvent({
+			step: 4,
+			nodePath: '$.body.1',
+			scopeInstanceId: 1,
+			event: 'read',
+			name: 'x',
+			value: null,
+		});
+		expect(line).toBe('step 4 $.body.1 READ x → null');
 	});
 
 	// Exception — a value that cannot be JSON-serialized (a self-referential
