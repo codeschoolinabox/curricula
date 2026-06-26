@@ -282,14 +282,18 @@ the Snippet (the one-sided seam).
   category-ID form and role-aware forms) key on `category:<category>`, refined
   to `category:<category>:<role>` where the token carries a role; binding-aware
   forms key on binding identity (`binding:<start>-<end>`, the declaration-site
-  span). On the classification axis `identifier` / `keyword` (which classifying
-  makes role-less) stay on the bare two-segment form, while operator / literal /
-  delimiter gain the `:<role>` refinement; the serializers live in `keying/`.
-  The category-ID form's propagation grain is thus intentionally finer than its
-  category answer key — a consumer wanting category-level grouping can
-  prefix-match on `category:<category>`. The key is deterministic from
-  `(snippet, classified, filter)` — never a function of a lens display choice
-  quizzing never receives.
+  span); the usage-kind form keys per occurrence (`usage:<start>-<end>`, a
+  group-of-one) until a sameness form (V10b) earns its binding × use-type
+  propagation. On the classification axis `identifier` / `keyword` (which
+  classifying makes role-less) stay on the bare two-segment form, while operator
+  / literal / delimiter gain the `:<role>` refinement; the `category:` and
+  `binding:` serializers live in `keying/`, while the projection-less `usage:`
+  key is inlined in the form until V10b's re-key gives it structure worth
+  factoring out. The category-ID form's propagation grain is thus intentionally
+  finer than its category answer key — a consumer wanting category-level
+  grouping can prefix-match on `category:<category>`. The key is deterministic
+  from `(snippet, classified, filter)` — never a function of a lens display
+  choice quizzing never receives.
 - **V1 `id` scheme is `form@start-end`** (e.g. `V1@12-13`), derivable from the
   form and the anchor alone; binding-flavored ids (`form/binding:x@decl`) are a
   later-form scheme that lands with occurrence→binding resolution.

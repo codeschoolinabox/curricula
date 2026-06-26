@@ -3,7 +3,8 @@
  * each registered by anchor type (DOCS § Decisions "one generator per form,
  * registered by anchor type"). The run phase iterates this list; the registry,
  * not the generator, owns iteration. Generators land here as their increments
- * ship — V1 (category-ID) first.
+ * ship — V1 (category-ID, per-token), then V7 (usage-kind) and V8
+ * (declaration-site), both per-node.
  */
 
 import type { Generator } from './types.js';
