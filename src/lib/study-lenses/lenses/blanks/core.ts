@@ -75,8 +75,9 @@ function config(overrides?: Partial<LensConfig>): LensConfig {
 /**
  * The blanks lens's applicability gate — **Tier 2** per
  * `../README.md` § Three-tier classification. Returns
- * `embodiment.status.parsed`: the vendored `blankenate` walks an Acorn
- * AST; an unparseable snippet has no AST to walk.
+ * `embodiment.status.parsed`: `blankenate` re-parses the snippet with
+ * Acorn (then delegates classification to `lib/classifying`); an
+ * unparseable snippet has no tokens to classify.
  *
  * @param embodiment - The frozen `Snippet` the orchestrator considers
  *   surfacing this lens for.

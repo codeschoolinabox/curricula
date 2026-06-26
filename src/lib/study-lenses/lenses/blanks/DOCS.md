@@ -21,22 +21,21 @@ It is the **second migrated pedagogical lens** in WS4's batch (after
 `annotate`). The previous V2 sprint shipped structurally-compliant shells that
 satisfied the `LensModule` contract and passed all tests + AR cycles, but
 **never opened in a browser as a learner** — real pedagogical features
-(CodeMirror with length-matched `_` placeholders, AST-based blankenate, hints
-panel, per-blank feedback, content-type filters, view-mode toggle) were absent.
-The user called those shells "weak hallucinations." This redo deletes them and
-migrates the legacy `BlanksLens.jsx` faithfully — starting from a mechanical
-conversion of the legacy algorithm and extending the token coverage as V2-owned
-work — treating the Sandbox Checkpoint as a gate not a celebration.
+(CodeMirror with length-matched `_` placeholders, blankenate, hints panel,
+per-blank feedback, content-type filters, view-mode toggle) were absent. The
+user called those shells "weak hallucinations." This redo deletes them and
+migrates the legacy `BlanksLens.jsx` faithfully — with token classification
+delegated to the shared `lib/classifying` module — treating the Sandbox
+Checkpoint as a gate not a celebration.
 
 ## Migration
 
 The pre-refactor lens lived at
 `zz--oldd-clauding-and-context-dump/0--study-lenses--it-begins/src/lenses/BlanksLens.jsx`
-(914 lines, Preact) and consumed the vendored
-`public/static/blanks/blankenate.js` (297 lines) via runtime `<script>` tag
-loading. The V2 redo preserves the **pedagogical surface** (the algorithm, the
-toolbar, the hints panel, the view-mode toggle) while replacing structural
-pieces:
+(914 lines, Preact) and loaded a `public/static/blanks/blankenate.js` script
+(297 lines) via a runtime `<script>` tag. The V2 redo preserves the
+**pedagogical surface** (the fill-in-the-blank exercise, the toolbar, the hints
+panel, the view-mode toggle) while replacing structural pieces:
 
 - `<script>` tag loading → ESM imports
 - Preact `useColorize` / `useApp` contexts → `embodiment` + `config` props
@@ -56,24 +55,25 @@ session-level decisions and audit trail.
 
 ## Modules
 
-| File                                  | Layer   | Purpose                                                                                                                                                                           |
-| ------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `index.tsx`                           | wrapper | React `Component`; owns per-mount UI state; composes the core                                                                                                                     |
-| `core.ts`                             | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend`                                                                                                                     |
-| `lib/blankenate.ts`                   | core    | Walks the parsed AST + token stream, rolls a per-token probability, returns blanked source + blank descriptors. Mechanical JS→TS baseline + V2-owned token-coverage augmentations |
-| `lib/no-paste-extension.ts`           | core    | **Vendored** — CodeMirror extension blocking keyboard and context-menu paste                                                                                                      |
-| `lib/evaluate-correctness.ts`         | core    | Position-aware per-blank correctness; fixes the legacy's two substring bugs                                                                                                       |
-| `../lib/snippet-free-autocomplete.ts` | shared  | Completion source the wrapper wires in `diff` / `raw` mode when `suggestions` is on: JS keywords + in-buffer identifiers, no snippet templates                                    |
-| `types.ts`                            | shared  | `Blank`, `BlankType`, `BlankenateResult`, `ContentType`, `ViewMode`, `EditorMode`, `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`, `BlanksLensConfig`                   |
+| File                                  | Layer   | Purpose                                                                                                                                                                                   |
+| ------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`                           | wrapper | React `Component`; owns per-mount UI state; composes the core                                                                                                                             |
+| `core.ts`                             | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend`                                                                                                                             |
+| `lib/blankenate.ts`                   | core    | Parses the snippet, delegates token classification to `lib/classifying`, filters on the enabled content types + rolls a per-token probability, returns blanked source + blank descriptors |
+| `lib/no-paste-extension.ts`           | core    | **Vendored** — CodeMirror extension blocking keyboard and context-menu paste                                                                                                              |
+| `lib/evaluate-correctness.ts`         | core    | Position-aware per-blank correctness; fixes the legacy's two substring bugs                                                                                                               |
+| `../lib/snippet-free-autocomplete.ts` | shared  | Completion source the wrapper wires in `diff` / `raw` mode when `suggestions` is on: JS keywords + in-buffer identifiers, no snippet templates                                            |
+| `types.ts`                            | shared  | `Blank`, `BlankType`, `BlankenateResult`, `ContentType`, `ViewMode`, `EditorMode`, `BlankCorrectness`, `CorrectnessMap`, `EvaluationResult`, `BlanksLensConfig`                           |
 
 Default export of `index.tsx` is the frozen `LensModule` record. The core
 subsystems under `lib/` are internal; only `index.tsx` and (where applicable)
 `core.ts` import them. The `lib/` subdirectory is eslint-ignored per
-`eslint.config.mjs` § Global ignores — preserves the legacy file's style without
-fighting lint; refactoring to idiomatic V2 style is a deliberate follow-up.
+`eslint.config.mjs` § Global ignores — it preserves the vendored
+`no-paste-extension.ts`'s style without fighting lint; bringing `blankenate.ts`
+(now thin `lib/classifying`-consumer glue) under lint is a deliberate follow-up.
 Tests target each subsystem in isolation (vitest, no jsdom) plus the wrapper
 end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
-`lib/tests/`) and ARE linted — they're V2-owned code, not vendored.
+`lib/tests/`) and ARE linted — unlike the eslint-ignored `lib/`.
 
 ## Architectural sketch
 
@@ -99,17 +99,17 @@ end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
    the blankenate call on the embodiment, difficulty, and content-type-flags
    inputs. The call is synchronous. Note: the parse-success gate at
    `applicableTo` is already satisfied; `blankenate` re-parses internally rather
-   than consuming `embodiment.raw.ast` (legacy carry-over — the mechanical
-   baseline parsed its own input). Two parses happen on every re-derive —
-   consuming the upstream AST directly is on the Future direction list. Result
-   shape per `BlankenateResult` (in `types.ts`) on success; `null` on internal
-   parse failure (defense-in-depth — in production `applicableTo` gates this
-   case out). The first paint already shows length-matched `_` placeholders (Inc
-   6.7: `_`.repeat(original.length) — one underscore per character of the
-   original token, preserving the token's width as a recognition-cue) — no
-   flicker between an empty editor and a populated one. Re-derivation on
-   settings change recomputes correctness from scratch; the wrapper does NOT
-   preserve correctness across re-rolls.
+   than consuming `embodiment.raw.{tokens,ast}` (those are nullable `RawAcorn`,
+   so plumbing them would change the signature + call site). Two parses happen
+   on every re-derive — consuming the upstream parse directly is on the Future
+   direction list. Result shape per `BlankenateResult` (in `types.ts`) on
+   success; `null` on internal parse failure (defense-in-depth — in production
+   `applicableTo` gates this case out). The first paint already shows
+   length-matched `_` placeholders (`_`.repeat(original.length) — one underscore
+   per character of the original token, preserving the token's width as a
+   recognition-cue) — no flicker between an empty editor and a populated one.
+   Re-derivation on settings change recomputes correctness from scratch; the
+   wrapper does NOT preserve correctness across re-rolls.
 
 3. **Wire CodeMirror** (per-mount, async-setup) — a mount effect instantiates
    the editor view configured with the standard JavaScript basicSetup, the
@@ -260,29 +260,29 @@ instance.
   the root but on the toolbar buttons
   (`data-editor-mode-toggle="skeleton|diff|raw"`, `aria-pressed` marking the
   active one).
-- **Token-classification precedence (blankenate).** The algorithm runs four
-  classification paths in fixed order over the parsed source — (1) delimiters
-  token-stream walk, (2) keywords token-stream walk, (3) AST walk for
-  identifiers / literals / operators / template-content, (4) AST walk for the
-  generator-`*` delimiter (Acorn's `tokTypes.star` token covers both generator
-  `*` and arithmetic `a * b`, so generator `*` is classified by AST context
-  rather than by token label, and arithmetic `*` stays under the
-  `BinaryExpression` operators path). The four paths dedupe `[start, end)`
-  collisions first-push-wins. The call order is structural, not stylistic:
-  reordering silently re-classifies overlap-prone tokens (`typeof` is both a
-  keyword and a unary operator; `null` / `true` / `false` are both keywords and
-  `Literal` nodes; `*` requires AST context to disambiguate generator vs
-  arithmetic). Tests at `tests/blankenate.test.ts` § "Inc 6.k — comprehensive
-  token coverage" and "Inc 6.l — gap closures from the sandbox comprehensive
-  snippet" encode the expected taxonomy; the call order is the constraint that
-  produces it.
+- **Token classification is delegated.** `blankenate` parses the snippet and
+  hands `{ code, tokens, ast }` to
+  [`lib/classifying`](../../lib/classifying/classify-tokens.js)
+  (`classifyTokens`), which returns one single-category `ClassifiedToken` per
+  non-empty token via the shared semantic taxonomy (`typeof` / `in` /
+  `instanceof` / `void` / `delete` are operators, `null` / `true` / `false` are
+  literals, contextual keywords are keywords — by what the element does in the
+  notional machine, not Acorn's `.keyword` flag). blanks owns only
+  **selection**: filter the classified tokens on the learner's enabled content
+  types (any-match over `categories`), roll the per-token probability, and
+  replace. Because classifying is total and single-category, each position
+  yields at most one blank — there is **no dedup**. The five content-type
+  booleans map to `Category` values in `enabledCategories()`
+  (`lib/blankenate.ts`). The per-config behavior delta from the lens's earlier
+  in-house walk is held in `tests/blankenate.test.ts` § "lib/classifying
+  adoption — partial-config overlap matrix".
 - **Tier-2 classification.** The contract per [`../types.ts`](../types.ts):
   `applicableTo` is the recommender's cheap gate; `recommend` only fires on
   applicable lenses. This lens honors that contract by returning
-  `embodiment.status.parsed` for `applicableTo`. The vendored `blankenate`
-  re-parses internally (it doesn't consume `embodiment.raw.ast`), so a parse
-  failure inside the vendor's call path is defense-in-depth — `applicableTo`
-  should have prevented the mount.
+  `embodiment.status.parsed` for `applicableTo`. `blankenate` re-parses
+  internally (it doesn't consume `embodiment.raw.ast`), so a parse failure
+  inside its call path is defense-in-depth — `applicableTo` should have
+  prevented the mount.
 - **`recommend()`'s signature is locked at
   `(embodiment) => ReadonlyArray<Recommendation>`.** The v1 body returns the
   empty array; the WS2 follow-up replaces the body in place. The mermaid `Recs`
@@ -295,11 +295,12 @@ instance.
   codebase's `freezeInPlace`/`cloneAndFreeze` convention (AGENTS.md § Deep
   Freeze Return Values).
 - **Position semantics.** Blank positions are zero-indexed half-open intervals
-  `[start, end)` into the original source — the convention the vendored
-  `blankenate` produces. The position-aware evaluator honors the same
-  convention. Drift in this contract is silent and bug-producing; the test suite
-  includes inter-file fixtures asserting `blankenate`'s output is consumable by
-  `evaluate-correctness` without coordinate translation.
+  `[start, end)` into the original source — the convention `blankenate` produces
+  (inherited from `lib/classifying`'s `[start, end)` token ranges). The
+  position-aware evaluator honors the same convention. Drift in this contract is
+  silent and bug-producing; the test suite includes inter-file fixtures
+  asserting `blankenate`'s output is consumable by `evaluate-correctness`
+  without coordinate translation.
 - **Cleanup obligations.** Unmount triggers two distinct cleanups: (a) React GCs
   the per-mount state, (b) CodeMirror's editor view destroys via its own
   cleanup. Each is the responsibility of the effect that registered the
@@ -347,11 +348,14 @@ instance.
   listener. If config-in-URL is wanted later it belongs to the orchestrator's
   URL surface, with this lens still reading the resolved values through `config`
   (see § Future direction).
-- **Vendored `lib/` is eslint-ignored.** The carve-out for
-  `lenses/blanks/lib/**` lives in `eslint.config.mjs`; matches the existing
-  `sl-trace-js-aran-legacy` precedent. The trade: vendored legacy code preserves
-  the working algorithm in-tree without fighting style rules; refactoring to V2
-  style is a deliberate follow-up.
+- **`lib/` is eslint-ignored.** The carve-out for `lenses/blanks/lib/**` lives
+  in `eslint.config.mjs`; it matches the existing `sl-trace-js-aran-legacy`
+  precedent. It keeps the vendored `no-paste-extension.ts` in-tree without
+  fighting style rules; `blankenate.ts` is now thin `lib/classifying`-consumer
+  glue, so bringing it under lint is a deliberate follow-up — it still carries
+  imperative-style lint debt (local array/set mutation, `substring`, bare
+  `Math.random()`), so un-ignoring it pairs with a restyle, not a bare config
+  edit.
 
 ### Out of scope
 
@@ -368,9 +372,8 @@ instance.
 - **Socratic study companion (Ask Me / socratizing).** Lives in the SL
   orchestrator one layer up — operates on the original embodiment rather than
   the blankenated source, so it's cross-lens rather than per-lens.
-- **Seeded RNG for reproducible blank sets.** v1 preserves the legacy's bare
-  `Math.random()` per the mechanical-conversion mandate.
-  Reproducibility-via-seed is deferred (see § Future direction).
+- **Seeded RNG for reproducible blank sets.** v1 rolls a bare `Math.random()`
+  per token; reproducibility-via-seed is deferred (see § Future direction).
 - **Per-blank inline highlight in the editor.** v1 shows per-blank state in the
   side panel only. A future CodeMirror `Decoration.mark` at each `{start, end}`
   lets the learner see green/red/yellow at the position they're typing.
@@ -438,26 +441,19 @@ is independent of the difficulty slider.
 
 ## Why drop the seeded RNG
 
-The vendored `blankenate` uses bare `Math.random()` per token (legacy behavior).
-Adding a seeded RNG would be a behavioral change to the vendored algorithm — the
-user's locked mechanical-conversion mandate forbids that. v1 preserves the
-per-token chaos; the trade-off is that blanks re-roll on settings change (the
-learner sees a fresh set on every slider drag). The
-preserve-answers-across-toggle decision mitigates the visible regression:
-re-rolled blanks aren't learner- confusing because the learner's answers persist
-across any view-mode toggle that exposed them.
+`blankenate` rolls a bare `Math.random()` per token, so blanks re-roll on every
+settings change (the learner sees a fresh set on each slider drag). v1 keeps
+that behavior; a seeded RNG is deferred. The preserve-answers-across-toggle
+decision mitigates the visible churn: re-rolled blanks aren't confusing because
+the learner's typed answers persist across any view-mode toggle that exposed
+them.
 
-The path to reproducibility-via-seed that keeps the vendor mechanical is a
-Future direction item: inject `random: () => number` at the call-site so the
-wrapper supplies the seeded PRNG when an educator pins a `seed` config field;
-the vendor stays a one-line edit (replacing `Math.random()` with `random()`).
+The path to reproducibility (a [Future direction](./README.md#future-direction)
+item): inject `random: () => number` at the call site so the wrapper supplies a
+seeded PRNG when an educator pins a `seed` config field — a one-line change in
+`blankenate` (`Math.random()` → `random()`).
 
-Seeded RNG is on the [Future direction](./README.md#future-direction) list with
-a path that keeps the vendor mechanical: inject `random: () => number` at the
-call-site so the wrapper supplies the seeded PRNG when an educator pins a `seed`
-config field.
-
-## Why position-aware evaluation is in scope (vs. "mechanical migration")
+## Why position-aware evaluation is in scope
 
 The legacy's `evaluateExercise` (lines 394–448) has two confirmed bugs:
 substring containment false-positives (`"function"` matches `"functionX"`);
@@ -467,15 +463,15 @@ algorithm-design choices — a learner whose `"function"` blank is satisfied by
 the unrelated `functionPriority` identifier in scope is getting incorrect
 feedback.
 
-`lib/evaluate-correctness.ts` is **new code in V2**, not a vendored conversion.
-The position-aware approach (each blank's `{start, end}` from `blankenate`'s
-output anchors a per-position match against the learner's typed text) directly
-fixes both bugs. This is in scope as "faithful migration" because:
+`lib/evaluate-correctness.ts` is **new code in V2**. The position-aware approach
+(each blank's `{start, end}` from `blankenate`'s output anchors a per-position
+match against the learner's typed text) directly fixes both bugs. This is in
+scope because:
 
 - The legacy's intent was per-blank correctness — the bugs are implementation
   failures of that intent, not design decisions.
-- The vendored algorithm gives us the position information directly
-  (`blanks[i].start`, `blanks[i].end`); using that information is cheap.
+- `blankenate` gives us the position information directly (`blanks[i].start`,
+  `blanks[i].end`); using that information is cheap.
 - Shipping with the legacy's bugs would be hostile to learners (and visible at
   the Sandbox Checkpoint).
 
@@ -514,8 +510,9 @@ full follow-up list. Key directions in scope of this lens's evolution:
 - **Per-blank position-aware learner-input re-anchoring** — CodeMirror
   `Decoration.mark` per blank so non-placeholder edits don't corrupt position
   tracking.
-- **Seeded RNG** — inject `random: () => number` at the call-site so the vendor
-  stays mechanical; wrapper supplies a seeded PRNG when `seed` is configured.
+- **Seeded RNG** — inject `random: () => number` at the call-site (a one-line
+  change in `blankenate`); wrapper supplies a seeded PRNG when `seed` is
+  configured.
 - **Per-blank inline highlight in the editor** — `Decoration.mark` for
   green/red/yellow at the typing position.
 - **Orchestrator-owned config persistence** — if config-in-URL (shareable /

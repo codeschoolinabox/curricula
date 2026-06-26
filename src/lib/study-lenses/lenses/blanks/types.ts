@@ -1,9 +1,9 @@
 /**
  * @file Domain model for the `blanks` lens — a fill-in-the-blank
- * programming exercise. The vendored `blankenate` algorithm walks an
- * Acorn AST and replaces selected tokens (`identifier`, `literal`,
- * `keyword`, `operator`) with the `__` placeholder; the wrapper hosts
- * a CodeMirror editor over the result, evaluates the learner's typed
+ * programming exercise. `blankenate` parses the snippet, delegates token
+ * classification to `lib/classifying`, and replaces selected tokens (any
+ * of the five categories) with the `__` placeholder; the wrapper hosts a
+ * CodeMirror editor over the result, evaluates the learner's typed
  * answers per blank position, and renders a hints panel of per-blank
  * correctness state.
  *
@@ -47,54 +47,31 @@
 // ─── Token category + blank identity ────────────────────────
 
 /**
- * The five token categories `blankenate` recognizes.
+ * The five token categories a blank can carry — the shared house taxonomy.
  *
- * @remarks Sourced from the vendored algorithm's AST + token-stream
- * classification (per `./lib/blankenate.ts`):
- * - `identifier` — `Node.type === 'Identifier' | 'PrivateIdentifier'`
- *   (variable names, parameter names, private class fields like `#x`).
- * - `literal` — `Node.type === 'Literal' | 'RegExpLiteral' | 'TemplateElement'`
- *   (strings, numbers, booleans, regex; plus template-literal text
- *   chunks — the source between `` ` `` and `${`, or between `}` and `` ` ``).
- *   The backtick `` ` `` and the `${`/`}` interpolation boundaries are NOT
- *   blanked under literals — they blank under `delimiters` instead
- *   (backticks via `tokTypes.backQuote`; `${` via `tokTypes.dollarBraceL`;
- *   block-close `}` shared with template-close `}`).
- * - `keyword` — token-stream walk over Acorn's tokens, matching
- *   `tok.type.keyword` (reserved keywords like `function`/`if`/`return`/
- *   `class`/`import`/`extends`/`super`/`try`/`catch`/`null`/`true`/etc.)
- *   plus a fixed contextual-keyword set (`let`, `static`, `async`,
- *   `await`, `yield`, `of`, `as`, `from`, `get`, `set` — which Acorn
- *   emits as `name` tokens with `.keyword === undefined`).
- * - `operator` — AST-walk over `BinaryExpression.operator`,
- *   `LogicalExpression.operator` (`&&`, `||`, `??` — Acorn splits
- *   these into LogicalExpression nodes, NOT BinaryExpression),
- *   `AssignmentExpression.operator`, `UpdateExpression.operator`,
- *   `UnaryExpression.operator`, `VariableDeclarator` init `=`,
- *   `AssignmentPattern` default-parameter `=` (covers
- *   `function f(x = 0)` and `({ a = 1 } = {})`), and
- *   `PropertyDefinition` class-field initializer `=` (covers
- *   `class A { x = 1 }`, `class A { #count = 0 }`, and
- *   `class A { static MAX = 100 }`).
- * - `delimiter` (extension; beyond legacy) — syntactic delimiter
- *   tokens from Acorn's token stream: `(`, `)`, `{`, `}`, `[`, `]`,
- *   `${`, `;`, `,`, `.`, `=>`, `?`, `:`, `?.`, `...`, `` ` ``; plus
- *   the AST-detected generator `*` in `function* g()` / `*method()` /
- *   object-literal `{ *gen() {} }`. Generator `*` is AST-detected
- *   rather than token-stream-matched because Acorn's `tokTypes.star`
- *   token covers BOTH generator `*` and arithmetic `a * b` — only
- *   generator should classify as delimiter (arithmetic stays under
- *   operators via the `BinaryExpression` branch). The template-
- *   expression opener `${` is treated as a single 2-char token
- *   (`tokTypes.dollarBraceL`); block-close and template-close `}`
- *   are not distinguished for v1 (both blank as `}`). Ternary `?` /
- *   `:` are classified as delimiters, NOT operators — the operators
- *   category covers AST-walk-driven operator strings
- *   (BinaryExpression.operator etc.); ternary tokens come through
- *   the token-stream filter. See `./lib/blankenate.ts`
- *   DELIMITER_LABELS for the comprehensive token-stream set + the
- *   one documented exclusion (regex slash — part of the `regexp`
- *   token, not separately tokenized).
+ * @remarks Category assignment is delegated to
+ * [`lib/classifying`](../../lib/classifying/classify-tokens.js); see its
+ * `README.md` § The taxonomy for the authoritative rules. The categories are
+ * SEMANTIC — by what the element does in the notional machine, not by Acorn's
+ * lexer flag:
+ * - `identifier` — variable / parameter / property names and private class
+ *   fields (`#x`).
+ * - `literal` — strings, numbers, booleans, regex, and template-literal text
+ *   chunks. The reserved words `null` / `true` / `false` are literals (values),
+ *   NOT keywords.
+ * - `keyword` — statement / declaration / control words (`function`, `if`,
+ *   `return`, `class`, `import`, …) plus the contextual keywords (`let`, `of`,
+ *   `as`, `from`, `get`, `set`, …) wherever they appear.
+ * - `operator` — value-producing operators, including the reserved-word
+ *   operators `typeof` / `in` / `instanceof` / `void` / `delete` (operators by
+ *   what they do, despite Acorn's `.keyword` flag) and the `*` of `yield*` /
+ *   `import *`.
+ * - `delimiter` — syntactic punctuation: parens, braces, brackets, `;`, `,`,
+ *   `.`, `=>`, `?`, `:`, `?.`, `...`, the template backtick and `${`, and the
+ *   generator `*`.
+ *
+ * `BlankType` is structurally identical to classifying's `Category` (the same
+ * five names); widening or re-binning either is a cross-consumer contract event.
  */
 type BlankType =
 	| 'identifier'
@@ -111,11 +88,11 @@ type BlankType =
  * not the blankenated source. The wrapper's evaluator maps each
  * `{start, end}` onto the learner's typed text to compare per-blank.
  *
- * `id` is the blank's stable identifier within one mount; the
- * vendored `blankenate` produces `blank_0, blank_1, …` strings in
- * registration order. Mounts are disposable per the lenses-peer
- * contract, so ids are not stable across mounts (a freshly mounted
- * lens re-derives blanks from scratch).
+ * `id` is the blank's identifier within one mount; `blankenate` produces
+ * `blank_0`, `blank_1`, … in source-ascending order. The numeric suffix is
+ * opaque — callers must not depend on it. Mounts are disposable per the
+ * lenses-peer contract, so ids are not stable across mounts (a freshly
+ * mounted lens re-derives blanks from scratch).
  *
  * `original` is the token text being hidden (e.g. `'function'`,
  * `'x'`, `'+'`, `'42'`); the evaluator compares the learner's typed
@@ -130,10 +107,10 @@ type Blank = {
 };
 
 /**
- * The vendored `blankenate`'s success-shape return value.
+ * `blankenate`'s success-shape return value.
  *
  * @remarks `null` is the alternative return value (parse failure);
- * the algorithm catches Acorn's error internally. In production the
+ * `blankenate` catches Acorn's error internally. In production the
  * lens's `applicableTo` gate (`embodiment.status.parsed`) prevents
  * mounting on un-parseable embodiments, so the wrapper sees `null`
  * only in the defense-in-depth path (see `./README.md` § Edge cases).
@@ -143,10 +120,9 @@ type Blank = {
  * — one underscore per original character, preserving width).
  * `blankedCode.length === originalCode.length` always; positions in
  * `blanks[i].{start, end}` map 1:1 to positions in `blankedCode`.
- * `blanks` is the registration-order array
- * (not position-order; position-aware operations should sort by
- * `start` as needed). `originalCode` is the input source verbatim —
- * preserved here so consumers don't have to plumb the embodiment.
+ * `blanks` is in source-ascending order (by `start`). `originalCode`
+ * is the input source verbatim — preserved here so consumers don't
+ * have to plumb the embodiment.
  */
 type BlankenateResult = {
 	readonly blankedCode: string;
@@ -173,10 +149,7 @@ type BlankenateResult = {
  *   category on/off.
  * - `'identifier' | 'literal' | 'keyword' | 'operator' | 'delimiter'`
  *   (`BlankType` above) is singular; each `Blank` carries its singular
- *   type.
- *
- * The plural / singular split mirrors the legacy's vocabulary
- * (legacy lines 30–36).
+ *   type. These are the same five names as classifying's `Category`.
  */
 type ContentType =
 	| 'keywords'

@@ -160,10 +160,9 @@ function renderPartialHint(
 }
 
 /**
- * Derives the boolean-map representation of contentTypes the
- * vendored `blankenate` expects, from the array-form `LensConfig`
- * field. Wrapper-internal — no exported type per DOCS § Structural
- * constraints.
+ * Derives the boolean-map representation of contentTypes `blankenate`
+ * expects, from the array-form `LensConfig` field. Wrapper-internal — no
+ * exported type per DOCS § Structural constraints.
  */
 function deriveContentTypeFlags(contentTypes: ReadonlyArray<ContentType>): {
 	keywords: boolean;

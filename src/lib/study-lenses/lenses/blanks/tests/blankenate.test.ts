@@ -639,17 +639,16 @@ describe('blankenate', () => {
 	});
 
 	describe('Inc 6.k — comprehensive token coverage (keywords, identifiers, operators)', () => {
-		it('blanks every reserved keyword Acorn flags as .keyword under keywords=true', () => {
-			// Token-stream walk uses Acorn's `tok.type.keyword` flag.
-			// Verifies the broad sweep beyond the AST-walk subset
-			// that covered (which missed import/from/extends/
-			// super/yield/async/await/try/catch/finally/throw/break/
-			// continue/typeof/instanceof/delete/void/this/export/etc.).
-			//
-			// AR-3 expansion: include `null`/`true`/`false` (dedup-trigger
-			// group — also Literal nodes), `this` and `new` (commonly
-			// taught), and `function`/`if`/`return` (the regression
-			// surface from the AST-walk → token-stream replacement).
+		it('blanks reserved keywords that classifying keeps in the keyword category under keywords=true', () => {
+			// classifying classifies by SEMANTIC category, not Acorn's `.keyword`
+			// flag. The reserved-word operators (`typeof`/`instanceof`/`void`/
+			// `delete`) and reserved-word literals (`null`/`true`/`false`) carry
+			// `.keyword` but are operators / literals by what they DO — so they no
+			// longer blank under keywords-only. Their coverage moved to the
+			// overlap matrix's cell-1 (operators-only) and cell-2 (literals-only)
+			// triangulation rows. This sweep keeps the true keywords — statement /
+			// declaration / control words classifying still bins `keyword`,
+			// including contextual `yield`.
 			const sources: ReadonlyArray<{ code: string; keyword: string }> = [
 				{ code: "import x from 'm';", keyword: 'import' },
 				{ code: 'class A extends B {}', keyword: 'extends' },
@@ -660,15 +659,7 @@ describe('blankenate', () => {
 				{ code: 'function f() { throw 1; }', keyword: 'throw' },
 				{ code: 'for (;;) { break; }', keyword: 'break' },
 				{ code: 'for (;;) { continue; }', keyword: 'continue' },
-				{ code: 'typeof x;', keyword: 'typeof' },
-				{ code: 'x instanceof Y;', keyword: 'instanceof' },
-				{ code: 'delete x.y;', keyword: 'delete' },
-				{ code: 'void 0;', keyword: 'void' },
 				{ code: 'export default 1;', keyword: 'export' },
-				// AR-3 IMPORTANT: dedup-trigger group + AST-walk regression surface
-				{ code: 'const x = null;', keyword: 'null' },
-				{ code: 'const x = true;', keyword: 'true' },
-				{ code: 'const x = false;', keyword: 'false' },
 				{ code: 'class A { m() { return this.x; } }', keyword: 'this' },
 				{ code: 'const x = new Foo();', keyword: 'new' },
 				{ code: 'function f() {}', keyword: 'function' },
@@ -798,21 +789,18 @@ describe('blankenate', () => {
 			expect(equals.length).toBeGreaterThanOrEqual(2);
 		});
 
-		it('dedup collapses keyword/operator collision: `typeof` (keyword + unary) and `null`/`true` (keyword + Literal)', () => {
-			// AR-fix: the prior dedup test source produced no
-			// classifier collisions and so trivially passed without ever
-			// invoking the dedup path. This source DOES trigger overlaps:
-			// - `typeof` — emitted by keyword token-stream walk
-			// AND visited as UnaryExpression operator by the AST walk
-			// - `null`, `true` — emitted by keyword token-stream walk
-			// AND visited as Literal nodes by the AST walk
-			// With ALL_TYPES, every classifier fires; dedup is the only
-			// thing preventing duplicate (start,end) entries.
+		it('classifying yields one blank per position for overlap tokens: `typeof` (operator), `null`/`true` (literal) under ALL_TYPES', () => {
+			// Under classifying's single-category totality, every token has
+			// exactly ONE home category, so under ALL_TYPES each position
+			// produces a single blank — no position collision is possible. (The
+			// legacy walk needed a first-push-wins dedup here because its keyword
+			// token-walk AND its operator/literal AST walks both fired on these
+			// overlap tokens; delegating to classifying removed the dedup
+			// entirely.) `typeof` is now an operator and `null`/`true` literals,
+			// but all still blank under ALL_TYPES and `original` is unchanged.
 			const result = blankenate('typeof null === true;', 1, ALL_TYPES);
 			const keys = (result?.blanks ?? []).map((b) => `${b.start}:${b.end}`);
 			expect(new Set(keys).size).toBe(keys.length);
-			// Also verify the collision targets actually appear (dedup
-			// preserves at least one entry per position).
 			const originals = (result?.blanks ?? []).map((b) => b.original);
 			expect(originals).toContain('typeof');
 			expect(originals).toContain('null');
@@ -1288,13 +1276,13 @@ describe('blankenate', () => {
 	// only (never `type`, never blank order) so they survive the
 	// re-categorization (a token's home category changes; its bytes do not).
 	describe('lib/classifying adoption — partial-config overlap matrix (characterization)', () => {
-		it('cell 1 PIN: `typeof` blanks under keywords-only today [FLIPS in→out: becomes operator]', () => {
+		it('cell 1: `typeof` does NOT blank under keywords-only (classifying bins it operator, not keyword)', () => {
 			const result = blankenate('typeof x;', 1, {
 				...NO_TYPES,
 				keywords: true,
 			});
 			const originals = (result?.blanks ?? []).map((b) => b.original);
-			expect(originals).toContain('typeof');
+			expect(originals).not.toContain('typeof');
 		});
 
 		it('cell 1 triangulation: `typeof` blanks under operators-only [GREEN both increments]', () => {
@@ -1322,161 +1310,175 @@ describe('blankenate', () => {
 			]
 		> = [
 			[
-				'cell 1 PIN: `instanceof` under keywords-only [FLIPS in→out]',
+				'cell 1: `instanceof` does NOT blank under keywords-only (classifying bins it operator)',
 				'x instanceof Y;',
 				{ ...NO_TYPES, keywords: true },
+				'instanceof',
+				'out',
+			],
+			[
+				'cell 1 triangulation: `instanceof` blanks under operators-only',
+				'x instanceof Y;',
+				{ ...NO_TYPES, operators: true },
 				'instanceof',
 				'in',
 			],
 			[
-				'cell 1 triangulation: `instanceof` under operators-only [GREEN both]',
-				'x instanceof Y;',
-				{ ...NO_TYPES, operators: true },
-				'instanceof',
-				'in',
-			],
-			[
-				'cell 1 PIN: `void` under keywords-only [FLIPS in→out]',
+				'cell 1: `void` does NOT blank under keywords-only (classifying bins it operator)',
 				'void 0;',
 				{ ...NO_TYPES, keywords: true },
 				'void',
-				'in',
+				'out',
 			],
 			[
-				'cell 1 triangulation: `void` under operators-only [GREEN both]',
+				'cell 1 triangulation: `void` blanks under operators-only',
 				'void 0;',
 				{ ...NO_TYPES, operators: true },
 				'void',
 				'in',
 			],
 			[
-				'cell 1 PIN: `delete` under keywords-only [FLIPS in→out]',
+				'cell 1: `delete` does NOT blank under keywords-only (classifying bins it operator)',
 				'delete x.y;',
 				{ ...NO_TYPES, keywords: true },
 				'delete',
-				'in',
+				'out',
 			],
 			[
-				'cell 1 triangulation: `delete` under operators-only [GREEN both]',
+				'cell 1 triangulation: `delete` blanks under operators-only',
 				'delete x.y;',
 				{ ...NO_TYPES, operators: true },
 				'delete',
 				'in',
 			],
 			[
-				'cell 2 PIN: `null` under keywords-only [FLIPS in→out: becomes literal]',
+				'cell 2: `null` does NOT blank under keywords-only (classifying bins it literal)',
 				'const x = null;',
 				{ ...NO_TYPES, keywords: true },
+				'null',
+				'out',
+			],
+			[
+				'cell 2 triangulation: `null` blanks under literals-only',
+				'const x = null;',
+				{ ...NO_TYPES, literals: true },
 				'null',
 				'in',
 			],
 			[
-				'cell 2 triangulation: `null` under literals-only [GREEN both]',
-				'const x = null;',
-				{ ...NO_TYPES, literals: true },
-				'null',
-				'in',
-			],
-			[
-				'cell 2 PIN: `true` under keywords-only [FLIPS in→out]',
+				'cell 2: `true` does NOT blank under keywords-only (classifying bins it literal)',
 				'const x = true;',
 				{ ...NO_TYPES, keywords: true },
 				'true',
-				'in',
+				'out',
 			],
 			[
-				'cell 2 triangulation: `true` under literals-only [GREEN both]',
+				'cell 2 triangulation: `true` blanks under literals-only',
 				'const x = true;',
 				{ ...NO_TYPES, literals: true },
 				'true',
 				'in',
 			],
 			[
-				'cell 2 PIN: `false` under keywords-only [FLIPS in→out]',
+				'cell 2: `false` does NOT blank under keywords-only (classifying bins it literal)',
 				'const x = false;',
 				{ ...NO_TYPES, keywords: true },
 				'false',
-				'in',
+				'out',
 			],
 			[
-				'cell 2 triangulation: `false` under literals-only [GREEN both]',
+				'cell 2 triangulation: `false` blanks under literals-only',
 				'const x = false;',
 				{ ...NO_TYPES, literals: true },
 				'false',
 				'in',
 			],
 			[
-				'cell 3 PIN: `import *` star under operators-only [FLIPS out→in: totality add]',
+				'cell 3: `import *` star blanks under operators-only (classifying bins the star operator)',
 				'import * as ns from "m";',
 				{ ...NO_TYPES, operators: true },
+				'*',
+				'in',
+			],
+			[
+				'cell 3 triangulation: `import *` star does NOT blank under keywords-only',
+				'import * as ns from "m";',
+				{ ...NO_TYPES, keywords: true },
 				'*',
 				'out',
 			],
 			[
-				'cell 4 PIN: `from`-as-name under identifiers-only [FLIPS in→out: becomes keyword]',
+				'cell 4: `from`-as-name does NOT blank under identifiers-only (classifying bins it keyword)',
 				'const from = 1;',
 				{ ...NO_TYPES, identifiers: true },
+				'from',
+				'out',
+			],
+			[
+				'cell 4 triangulation: `from`-as-name blanks under keywords-only',
+				'const from = 1;',
+				{ ...NO_TYPES, keywords: true },
 				'from',
 				'in',
 			],
 			[
-				'cell 4 triangulation: `from`-as-name under keywords-only [GREEN both]',
-				'const from = 1;',
-				{ ...NO_TYPES, keywords: true },
-				'from',
-				'in',
-			],
-			[
-				'cell 4 PIN: `of`-as-name under identifiers-only [FLIPS in→out]',
+				'cell 4: `of`-as-name does NOT blank under identifiers-only (classifying bins it keyword)',
 				'let of = 2;',
 				{ ...NO_TYPES, identifiers: true },
 				'of',
-				'in',
+				'out',
 			],
 			[
-				'cell 4 triangulation: `of`-as-name under keywords-only [GREEN both]',
+				'cell 4 triangulation: `of`-as-name blanks under keywords-only',
 				'let of = 2;',
 				{ ...NO_TYPES, keywords: true },
 				'of',
 				'in',
 			],
 			[
-				'cell 4 PIN: `as`-as-name under identifiers-only [FLIPS in→out]',
+				'cell 4: `as`-as-name does NOT blank under identifiers-only (classifying bins it keyword)',
 				'const as = 3;',
 				{ ...NO_TYPES, identifiers: true },
 				'as',
-				'in',
+				'out',
 			],
 			[
-				'cell 4 triangulation: `as`-as-name under keywords-only [GREEN both]',
+				'cell 4 triangulation: `as`-as-name blanks under keywords-only',
 				'const as = 3;',
 				{ ...NO_TYPES, keywords: true },
 				'as',
 				'in',
 			],
 			[
-				'cell 5 PIN: for-in `in` under keywords-only [FLIPS in→out: becomes operator]',
+				'cell 5: for-in `in` does NOT blank under keywords-only (classifying bins it operator)',
 				'for (const x in y) {}',
 				{ ...NO_TYPES, keywords: true },
-				'in',
-				'in',
-			],
-			[
-				'cell 5 PIN: for-in `in` under operators-only [FLIPS out→in: totality add]',
-				'for (const x in y) {}',
-				{ ...NO_TYPES, operators: true },
 				'in',
 				'out',
 			],
 			[
-				'cell 5 contrast: binary `a in b` under operators-only [GREEN both: not for-in-specific]',
+				'cell 5: for-in `in` blanks under operators-only (classifying bins `in` operator everywhere)',
+				'for (const x in y) {}',
+				{ ...NO_TYPES, operators: true },
+				'in',
+				'in',
+			],
+			[
+				'cell 5 contrast: binary `a in b` blanks under operators-only (not for-in-specific)',
 				'a in b;',
 				{ ...NO_TYPES, operators: true },
 				'in',
 				'in',
 			],
 			[
-				'union reassurance: `typeof` under keywords+operators [GREEN both: never disappears]',
+				'cell 5 union: for-in `in` still blanks under keywords+operators (via the operators face)',
+				'for (const x in y) {}',
+				{ ...NO_TYPES, keywords: true, operators: true },
+				'in',
+				'in',
+			],
+			[
+				'union reassurance: `typeof` under keywords+operators still blanks (via the operators face)',
 				'typeof x;',
 				{ ...NO_TYPES, keywords: true, operators: true },
 				'typeof',
@@ -1494,11 +1496,11 @@ describe('blankenate', () => {
 			}
 		});
 
-		it('cell 3 PIN: `yield*` star is NOT blanked under operators-only today [FLIPS out→in]', () => {
-			// `return 1 + 2` adds a live operator (`+`) so the operators path is
-			// provably exercised — the yield-star absence is then a real exclusion,
-			// not a dead-path artefact. The generator `function*` star is a
-			// delimiter, so it never appears under operators-only either.
+		it('cell 3: `yield*` star blanks under operators-only (classifying bins the delegate star operator)', () => {
+			// `return 1 + 2` adds a second live operator (`+`) so the operators
+			// path is provably exercised. The generator `function*` star is a
+			// delimiter, so it never appears under operators-only — only the
+			// `yield*` delegate star (at `starPosition`) is the operator under test.
 			const code = 'function* g() { yield* h(); return 1 + 2; }';
 			const starPosition = code.indexOf('yield') + 'yield'.length;
 			const result = blankenate(code, 1, { ...NO_TYPES, operators: true });
@@ -1507,7 +1509,7 @@ describe('blankenate', () => {
 				(b) => b.original === '*' && b.start === starPosition,
 			);
 			expect(originals).toContain('+');
-			expect(yieldStar).toBeUndefined();
+			expect(yieldStar).toBeDefined();
 		});
 
 		it('parity gate: ALL_TYPES blanks exactly every non-trivial Acorn token [position-diff; GREEN both increments]', () => {

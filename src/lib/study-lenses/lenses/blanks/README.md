@@ -28,25 +28,23 @@ eligible (keywords / identifiers / operators / literals / delimiters); a
 view-mode toggle switches between `blankenated` (editable, with length-matched
 `_` placeholders) and `complete` (read-only, original source).
 
-**Blanks re-roll on settings change.** The vendored `blankenate` algorithm uses
-an AST walk (via Acorn) with bare `Math.random()` per eligible token — when the
-learner moves the difficulty slider or toggles a content-type checkbox, the
-blank set re-derives and the score resets. This is the legacy's chaos preserved
-deliberately: per-toggle re-rolls are part of the exercise's unpredictability.
-Reproducibility-via-seed is **deferred** per
-[Future direction](#future-direction) (introducing it requires modifying the
-vendored algorithm beyond the locked mechanical-conversion mandate).
+**Blanks re-roll on settings change.** `blankenate` rolls a bare `Math.random()`
+per eligible token — when the learner moves the difficulty slider or toggles a
+content-type checkbox, the blank set re-derives and the score resets. This is
+the legacy's chaos preserved deliberately: per-toggle re-rolls are part of the
+exercise's unpredictability. Reproducibility-via-seed is **deferred** per
+[Future direction](#future-direction).
 
 One of the lens-module implementations the orchestrator's picker enumerates and
 the recommender ranks.
 
 > Migrated from the pre-refactor `BlanksLens.jsx` (registry id `blanks`).
 > Re-implementation in this V2 sprint preserves the legacy's pedagogical surface
-> (the algorithm, controls, hints, view-mode toggle) while replacing structural
-> pieces (Preact contexts → embodiment prop; `<script>` tag loading → ESM
-> imports; legacy `askOpenEnded` chain → `socratizing/` module; buggy substring
-> evaluation → position-aware per-blank tracking). See [`./DOCS.md`](./DOCS.md)
-> for the migration audit trail and decision log.
+> (the fill-in-the-blank exercise, controls, hints, view-mode toggle) while
+> replacing structural pieces (Preact contexts → embodiment prop; `<script>` tag
+> loading → ESM imports; legacy `askOpenEnded` chain → `socratizing/` module;
+> buggy substring evaluation → position-aware per-blank tracking). See
+> [`./DOCS.md`](./DOCS.md) for the migration audit trail and decision log.
 
 ## Public API
 
@@ -113,9 +111,9 @@ Fields:
     identifiers). Default OFF. See [Hints panel contract](#hints-panel-contract)
     and [Toolbar contract](#toolbar-contract).
 - `applicableTo(embodiment): boolean` — returns `embodiment.status.parsed` (Tier
-  2 per [`../README.md`](../README.md) § Three-tier classification). The
-  vendored `blankenate` walks an Acorn AST; an unparseable snippet has no AST to
-  walk.
+  2 per [`../README.md`](../README.md) § Three-tier classification).
+  `blankenate` re-parses the source with Acorn; an unparseable snippet has no
+  AST to classify.
 - `recommend(embodiment): ReadonlyArray<Recommendation>` — returns `[]` for this
   batch. Block-Model placement contributions land in a follow-up commit once the
   WS2 analysis pipeline ships per
@@ -193,8 +191,9 @@ Vocabulary used throughout this lens. Legacy terms surface from the pre-refactor
 - **Blankenated** — the verb form (legacy retained). "The source has been
   blankenated" = "the blankenate algorithm has produced a version with selected
   tokens replaced by length-matched `_` runs".
-- **Blankenate** — the vendored algorithm at `lib/blankenate.ts` (JS→TS
-  conversion of the legacy `public/static/blanks/blankenate.js`).
+- **Blankenate** — the blank selector at `lib/blankenate.ts`: parses the
+  snippet, delegates token classification to `lib/classifying`, then filters on
+  the enabled content types, rolls probability, and replaces.
 - **Difficulty** — the per-token probability slider (0–100);
   `p = difficulty / 100` is the chance each eligible token is replaced.
 - **Correctness** — per-blank state in the **blanks-exercise** sense: `correct`
@@ -411,10 +410,11 @@ planned integration.
 ## Edge cases
 
 - **Initial mount.** `blankenate()` is called **synchronously during the first
-  render** (the AST is already in `embodiment.raw.ast` by the time
-  `applicableTo` admits the lens; Acorn parsing has already happened upstream in
-  `embody()`). The first paint already shows length-matched `_` placeholders; no
-  flicker. No `useEffect` wraps the initial derivation.
+  render** — it re-parses the source with Acorn itself (a fast, pure call; it
+  does not consume `embodiment.raw.ast` — see [`./DOCS.md`](./DOCS.md) § Phase 2
+  for the double-parse Future item). The first paint already shows
+  length-matched `_` placeholders; no flicker. No `useEffect` wraps the initial
+  derivation.
 - **Typed text containing `_`** (e.g. learner types `_priv` into an identifier
   blank). `evaluate-correctness` classifies any typed content that still
   contains `_` as `unfilled`, not `incorrect` — the visual feedback is yellow
@@ -432,11 +432,11 @@ planned integration.
   returns `false` for this case; the orchestrator's recommender filters the lens
   out before mount. **Defense-in-depth:** if the lens is nonetheless mounted on
   a parse-failed embodiment (e.g. the orchestrator's picker bypasses the
-  recommender's filter), the vendored `blankenate` returns `null` on its
-  internal re-parse attempt; the wrapper renders a fallback panel naming the
-  contradiction ("`blanks` lens received an unparseable snippet —
-  `applicableTo`'s contract was violated") rather than the editor. The fallback
-  is a safety net, not the happy path.
+  recommender's filter), `blankenate` returns `null` on its internal parse
+  attempt; the wrapper renders a fallback panel naming the contradiction
+  ("`blanks` lens received an unparseable snippet — `applicableTo`'s contract
+  was violated") rather than the editor. The fallback is a safety net, not the
+  happy path.
 - **Difficulty = 0.** `p = 0/100 = 0`; no token's `Math.random()` roll passes;
   `blanks.length === 0`. UI shows the complete code in blankenated-mode (no `__`
   placeholders); editor header shows `0 blanks · 0 remaining`; score 100%
@@ -472,8 +472,8 @@ vs. the prior-art `BlanksLens.jsx`:
 
 - **No `<script>` tag loading of `blankenate`.** The legacy injects
   `<script src="${BASE_PATH}/static/blanks/blankenate.js">` at runtime and waits
-  for `window.blankenate` to appear. V2 vendors the algorithm as
-  `lib/blankenate.ts` and imports it directly as ESM.
+  for `window.blankenate` to appear. V2 implements `lib/blankenate.ts` and
+  imports it directly as ESM.
 - **No `BASE_PATH` constant.** Irrelevant in V2 (no script-tag loading).
 - **No legacy `askOpenEnded` chain.** The legacy uses `askOpenEnded` from
   `public/static/ask/component/ask-questions.js` (a chain of `multiple-choice`
@@ -512,13 +512,11 @@ vs. the prior-art `BlanksLens.jsx`:
   discriminated-union return shape, handled by the wrapper (renders a fallback
   panel rather than the editor on a `null` blankenate result — defensive; in
   production `applicableTo` gates this case out).
-- **No seeded RNG (yet).** The vendored `blankenate.ts` preserves the legacy's
-  bare `Math.random()` per-token roll (per the mechanical-conversion mandate —
-  locked in the handoff). Blanks re-roll on settings change; the learner sees a
-  fresh set on every difficulty slider drag. Reproducibility-via-seed is on the
-  [Future direction](#future-direction) list because introducing it requires
-  modifying the vendored algorithm beyond mechanical conversion — defer until
-  the lens's other contracts are stable.
+- **No seeded RNG (yet).** `blankenate` rolls a bare `Math.random()` per token.
+  Blanks re-roll on settings change; the learner sees a fresh set on every
+  difficulty slider drag. Reproducibility-via-seed is on the
+  [Future direction](#future-direction) list — defer until the lens's other
+  contracts are stable.
 - **CodeMirror writes to local state, never to `setSnippet`.** The wrapper's
   `updateListener` mirrors learner edits into local `learnerCode` state only.
   The orchestrator's `setSnippet` is the editor's job; the lens is a read-only
@@ -535,11 +533,12 @@ each is independently testable:
   the core subsystems below into the UI shell.
 - `core.ts` (core) — `LensModule` defaults: `config`, `applicableTo`,
   `recommend`.
-- `lib/blankenate.ts` (core) — **vendored** from the legacy
-  `public/static/blanks/blankenate.js`. JS→TS mechanical conversion; AST walk
-  via Acorn; per-token seeded RNG. Pure. Eslint-ignored per
+- `lib/blankenate.ts` (core) — the blank selector. Parses the snippet, delegates
+  token classification to [`lib/classifying`](../../lib/classifying/README.md),
+  filters on the enabled content types, rolls a per-token `Math.random()`, and
+  replaces. Pure. Eslint-ignored per
   [`../../../../../eslint.config.mjs`](../../../../../eslint.config.mjs)
-  global-ignores.
+  global-ignores (a follow-up brings it under lint).
 - `lib/no-paste-extension.ts` (core) — **vendored** from the legacy
   `src/utils/noPasteExtension.js`. CodeMirror 6 extension that blocks paste via
   keymap (`Mod-v`) + DOM event handler (`paste` event). Pure. Eslint-ignored.
@@ -565,8 +564,8 @@ Tests split: `tests/blankenate.test.ts`, `tests/no-paste-extension.test.ts`,
 
 ## Dependencies (no install needed)
 
-- **`acorn`** — already in `package.json` (`^8.16.0`); the vendored `blankenate`
-  imports it directly.
+- **`acorn`** — already in `package.json` (`^8.16.0`); `blankenate` imports it
+  directly (and `lib/classifying` consumes the resulting tokens + AST).
 - **`@codemirror/view`, `@codemirror/state`, `@codemirror/lang-javascript`,
   `@codemirror/theme-one-dark`, `codemirror`** — already in `package.json` (used
   by the editor and the annotate lens).
@@ -585,13 +584,12 @@ Tests split: `tests/blankenate.test.ts`, `tests/no-paste-extension.test.ts`,
   cases). v2 re-anchors blank positions after non-placeholder edits — likely a
   CodeMirror `Decoration.mark` per blank that re-derives offsets from the
   decoration's live range rather than the static `{start, end}`.
-- **Seeded RNG for reproducible exercises.** The vendored `blankenate` uses bare
+- **Seeded RNG for reproducible exercises.** `blankenate` rolls a bare
   `Math.random()` per token; the same `(source, difficulty, contentTypes)`
   produces different blank sets on each re-roll. Educators may want
   reproducibility (same exercise across learners, re-visitable assessments).
-  Path: inject a `random: () => number` function at the call-site (so the vendor
-  stays mechanical) and pass a seeded PRNG from the wrapper when a `seed` config
-  field is provided.
+  Path: inject a `random: () => number` at the call-site and pass a seeded PRNG
+  from the wrapper when a `seed` config field is provided.
 - **Editor `editable.of()` dynamic reconfiguration.** Recreating the
   `EditorView` on view-mode change (parity with legacy) is perf-suboptimal.
   CodeMirror 6 supports dynamic `EditorView.editable.of()` reconfiguration; the
