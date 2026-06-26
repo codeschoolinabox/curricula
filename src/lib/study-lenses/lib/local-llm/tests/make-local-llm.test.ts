@@ -61,23 +61,21 @@ describe('makeLocalLlm', () => {
 			expect(result.detail).toMatch(/webgpu/i);
 		});
 
-		it('the detail reflects the device limit (no-WebGPU vs WebGPU-limited differ)', async () => {
+		it('the detail reflects the device limit (no-WebGPU vs over-budget differ)', async () => {
 			const noWebgpu = makeLocalLlm({
 				adapters: { webllm: countedAdapter() },
 				catalog: FAKE_CATALOG,
 				capabilityProbe: fakeProbe(fakeCaps({ webgpu: false })),
 			});
-			// webgpu present but the binding limit is pinned to the 128 MiB spec floor,
-			// below FAKE_CATALOG's webllm need → buffer-infeasible, empty feasible set.
-			const limited = makeLocalLlm({
+			// webgpu present, but deviceMemoryGB so low FAKE_CATALOG's webllm vram
+			// exceeds the budget → infeasible via the REAL vram gate, empty feasible set.
+			const overBudget = makeLocalLlm({
 				adapters: { webllm: countedAdapter() },
 				catalog: FAKE_CATALOG,
-				capabilityProbe: fakeProbe(
-					fakeCaps({ maxStorageBufferBindingBytes: 134_217_728 }),
-				),
+				capabilityProbe: fakeProbe(fakeCaps({ deviceMemoryGB: 1 })),
 			});
 			const a = await noWebgpu.load();
-			const b = await limited.load();
+			const b = await overBudget.load();
 			if (a.ok || b.ok) throw new Error('expected refusals');
 			expect(a.detail).not.toBe(b.detail);
 		});

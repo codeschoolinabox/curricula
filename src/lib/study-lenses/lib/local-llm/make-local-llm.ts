@@ -143,6 +143,6 @@ function noFeasibleDetail(
 		return 'A feasible model exists, but the requested selection (a sizeClass ceiling, or a named model not feasible on this device) excluded every candidate.';
 	}
 	return capabilities.webgpu
-		? "No catalog model fits this device's WebGPU limits, and no CPU/WASM model is available."
+		? 'No catalog model is feasible on this device, and no CPU/WASM model is available.'
 		: 'This device reports no WebGPU, and no CPU/WASM model is feasible or registered.';
 }

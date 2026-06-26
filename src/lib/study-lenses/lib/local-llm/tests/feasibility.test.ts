@@ -376,135 +376,45 @@ describe('selectFeasible', () => {
 		});
 	});
 
-	describe('webgpu buffer-limit gate (honest feasibility)', () => {
-		// A WebGPU-limited device (Firefox/Android pin the limits to the 128 MiB spec
-		// floor) must be refused at PRE-FLIGHT, not mid-bring-up. The model's need is
-		// DERIVED from vramRequiredMB: max(128 MiB floor, vram·1024·1024·0.30). Both
-		// probed limits gate (DOCS § "Feasibility consumes the probed buffer limits");
-		// each is undefined-admit (a probe gap must not over-refuse a capable device).
-		const SPEC_FLOOR = 134_217_728; // 128 MiB — the WebGPU spec minimum binding size
-		const NEED_VRAM_1000 = 314_572_800; // 1000·1024·1024·0.30, above the spec floor
-		const ONE_GIB = 1_073_741_824;
-
-		it('infeasible when the storage-buffer-binding limit is below the model need', () => {
-			const entry = webllmEntry({ id: 'big', vramRequiredMB: 1000 });
-			const result = selectFeasible({
-				catalog: [entry],
-				capabilities: fakeCaps({ maxStorageBufferBindingBytes: SPEC_FLOOR }),
-				adapters: WEBLLM,
-			});
-			expect(result.feasible).toEqual([]);
-		});
-
-		it('feasible when the storage-buffer-binding limit clears the model need', () => {
-			const entry = webllmEntry({ id: 'big', vramRequiredMB: 1000 });
-			const result = selectFeasible({
-				catalog: [entry],
-				capabilities: fakeCaps({ maxStorageBufferBindingBytes: ONE_GIB }),
-				adapters: WEBLLM,
-			});
-			expect(result.feasible).toEqual([entry]);
-		});
-
-		it('the requirement boundary is inclusive (exactly the need → feasible)', () => {
-			const entry = webllmEntry({ id: 'big', vramRequiredMB: 1000 });
-			const result = selectFeasible({
-				catalog: [entry],
-				capabilities: fakeCaps({ maxStorageBufferBindingBytes: NEED_VRAM_1000 }),
-				adapters: WEBLLM,
-			});
-			expect(result.feasible).toEqual([entry]);
-		});
-
-		it('one byte below the requirement → infeasible', () => {
-			const entry = webllmEntry({ id: 'big', vramRequiredMB: 1000 });
-			const result = selectFeasible({
-				catalog: [entry],
-				capabilities: fakeCaps({
-					maxStorageBufferBindingBytes: NEED_VRAM_1000 - 1,
-				}),
-				adapters: WEBLLM,
-			});
-			expect(result.feasible).toEqual([]);
-		});
-
-		it('a vram-less webllm entry needs only the 128 MiB spec floor (inclusive)', () => {
-			const entry = webllmEntry({ id: 'floor' });
-			const result = selectFeasible({
-				catalog: [entry],
-				capabilities: fakeCaps({ maxStorageBufferBindingBytes: SPEC_FLOOR }),
-				adapters: WEBLLM,
-			});
-			expect(result.feasible).toEqual([entry]);
-		});
-
-		it('a vram-less webllm entry one byte below the spec floor → infeasible', () => {
-			const entry = webllmEntry({ id: 'floor' });
-			const result = selectFeasible({
-				catalog: [entry],
-				capabilities: fakeCaps({ maxStorageBufferBindingBytes: SPEC_FLOOR - 1 }),
-				adapters: WEBLLM,
-			});
-			expect(result.feasible).toEqual([]);
-		});
-
-		it('maxBufferBytes also gates (a sub-need buffer limit refuses, per DOCS)', () => {
-			const entry = webllmEntry({ id: 'big', vramRequiredMB: 1000 });
-			const result = selectFeasible({
-				catalog: [entry],
-				capabilities: fakeCaps({ maxBufferBytes: SPEC_FLOOR }),
-				adapters: WEBLLM,
-			});
-			expect(result.feasible).toEqual([]);
-		});
-
-		it('WebGPU present but the limits unreported → admit (a probe gap, not a refusal)', () => {
-			const entry = webllmEntry({ id: 'big', vramRequiredMB: 1000 });
-			const result = selectFeasible({
-				catalog: [entry],
-				capabilities: fakeCaps(), // webgpu:true, both buffer limits undefined
-				adapters: WEBLLM,
-			});
-			expect(result.feasible).toEqual([entry]);
-		});
-	});
-
-	describe('WebGPU-limited device — the no-feasible fold + CPU rescue', () => {
-		const LIMITED = { maxStorageBufferBindingBytes: 134_217_728 }; // 128 MiB floor
-		const limitedWebllmOnly = () =>
+	describe('an over-budget device — the no-feasible fold + CPU rescue', () => {
+		// webgpu present, but deviceMemoryGB so low the webllm model's vram exceeds the
+		// budget (HALF·2·1024 = 1024 MB < a 2000 MB model) → infeasible via the REAL
+		// vram gate (not a buffer heuristic). The CPU/WASM rung (no vram gate) rescues.
+		const TIGHT = { deviceMemoryGB: 2 };
+		const webllmOnlyOverBudget = () =>
 			selectFeasible({
-				catalog: [webllmEntry({ id: 'big', vramRequiredMB: 1000 })],
-				capabilities: fakeCaps(LIMITED),
+				catalog: [webllmEntry({ id: 'big', vramRequiredMB: 2000 })],
+				capabilities: fakeCaps(TIGHT),
 				adapters: WEBLLM,
 			});
-		const limitedWithCpuRescue = () =>
+		const overBudgetWithCpuRescue = () =>
 			selectFeasible({
 				catalog: [
-					webllmEntry({ id: 'big', vramRequiredMB: 1000 }),
+					webllmEntry({ id: 'big', vramRequiredMB: 2000 }),
 					wllamaEntry({ id: 'cpu-rescue', sizeClass: 'tiny' }),
 				],
-				capabilities: fakeCaps(LIMITED),
+				capabilities: fakeCaps(TIGHT),
 				adapters: { webllm: registeredAdapter, wllama: registeredAdapter },
 			});
 
-		describe('only buffer-infeasible webllm models exist', () => {
+		describe('only an over-budget webllm model exists', () => {
 			it('the feasible set is empty', () => {
-				expect(limitedWebllmOnly().feasible).toEqual([]);
+				expect(webllmOnlyOverBudget().feasible).toEqual([]);
 			});
 			it('chosen is null', () => {
-				expect(limitedWebllmOnly().chosen).toBeNull();
+				expect(webllmOnlyOverBudget().chosen).toBeNull();
 			});
 			it('chosenRuntime is null', () => {
-				expect(limitedWebllmOnly().chosenRuntime).toBeNull();
+				expect(webllmOnlyOverBudget().chosenRuntime).toBeNull();
 			});
 		});
 
 		describe('a registered CPU/WASM candidate exists (not a blanket refusal)', () => {
 			it('rescues onto the CPU runtime', () => {
-				expect(limitedWithCpuRescue().chosenRuntime).toBe('wllama');
+				expect(overBudgetWithCpuRescue().chosenRuntime).toBe('wllama');
 			});
 			it('the chosen model is the CPU candidate', () => {
-				expect(limitedWithCpuRescue().chosen?.id).toBe('cpu-rescue');
+				expect(overBudgetWithCpuRescue().chosen?.id).toBe('cpu-rescue');
 			});
 		});
 	});
