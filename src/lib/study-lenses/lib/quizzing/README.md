@@ -94,8 +94,10 @@ by axis: classification forms — the category-ID form and later role-aware form
 — key on `category:<category>`, refined to `category:<category>:<role>` where
 the token carries a role (`identifier` and `keyword` are role-less, so they key
 on the bare category); binding-aware forms key on binding identity
-(`binding:<start>-<end>`, the declaration-site span); block and loop forms key
-on their structural anchor. Quizzing decides what a group is _keyed_ on; the
+(`binding:<start>-<end>`, the declaration-site span); the usage-kind form keys
+per occurrence (`usage:<start>-<end>`, a group-of-one) until a sameness form
+earns its binding × use-type propagation; block and loop forms key on their
+structural anchor. Quizzing decides what a group is _keyed_ on; the
 lens decides how a completed group is _presented_. The group key is
 deterministic from `(snippet, classified, filter)` — it never depends on a lens
 display choice quizzing never receives.

@@ -8,7 +8,8 @@
 
 import type { Generator } from './types.js';
 import v1CategoryId from './v1-category-id.js';
+import v7UsageKind from './v7-usage-kind.js';
 
-const GENERATORS: readonly Generator[] = [v1CategoryId];
+const GENERATORS: readonly Generator[] = [v1CategoryId, v7UsageKind];
 
 export default GENERATORS;

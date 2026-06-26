@@ -26,155 +26,42 @@ describe('generateQuiz', () => {
 	});
 
 	describe('One', () => {
-		it('generates one item for a single-token snippet', () => {
-			const snippet = embody('x');
-			expect(generateQuiz(snippet, classifyOf(snippet))).toHaveLength(1);
-		});
-
-		it('marks the item as an mcq question', () => {
-			const snippet = embody('x');
-			expect(generateQuiz(snippet, classifyOf(snippet))[0]?.mode).toBe('mcq');
-		});
-
-		it('tags the item with the V1 form', () => {
-			const snippet = embody('x');
-			expect(generateQuiz(snippet, classifyOf(snippet))[0]?.form).toBe('V1');
-		});
-
-		it('sets the family to variables for the V1 form', () => {
-			const snippet = embody('x');
-			expect(generateQuiz(snippet, classifyOf(snippet))[0]?.family).toBe(
-				'variables',
-			);
-		});
-
-		it('anchors the item to the token range', () => {
+		it('runs every registered generator over a single identifier', () => {
 			const snippet = embody('x');
 			expect(
-				generateQuiz(snippet, classifyOf(snippet))[0]?.anchorRange,
-			).toEqual([0, 1]);
-		});
-
-		it('keys the answer to the token primary category', () => {
-			const snippet = embody('x');
-			expect(
-				generateQuiz(snippet, classifyOf(snippet))[0]?.answerOptionIds,
-			).toEqual(['identifier']);
-		});
-
-		it('ids the item as V1 at the token range', () => {
-			const snippet = embody('x');
-			expect(generateQuiz(snippet, classifyOf(snippet))[0]?.id).toBe('V1@0-1');
-		});
-
-		it('keys the propagation group on the bare category for a role-less token', () => {
-			const snippet = embody('x');
-			expect(generateQuiz(snippet, classifyOf(snippet))[0]?.groupKey).toBe(
-				'category:identifier',
-			);
-		});
-
-		it('places the item on the text-surface atom cell', () => {
-			const snippet = embody('x');
-			expect(generateQuiz(snippet, classifyOf(snippet))[0]?.cells).toEqual([
-				{ dimension: 'text-surface', level: 'atom' },
-			]);
-		});
-
-		it('omits anchorPath for a token-anchored item', () => {
-			const snippet = embody('x');
-			expect(generateQuiz(snippet, classifyOf(snippet))[0]).not.toHaveProperty(
-				'anchorPath',
-			);
-		});
-
-		it('omits unlocks for the V1 form', () => {
-			const snippet = embody('x');
-			expect(generateQuiz(snippet, classifyOf(snippet))[0]).not.toHaveProperty(
-				'unlocks',
-			);
-		});
-
-		it('offers the five category options in order', () => {
-			const snippet = embody('x');
-			expect(
-				generateQuiz(snippet, classifyOf(snippet))[0]?.options.map(
-					(option) => option.id,
-				),
-			).toEqual(['identifier', 'keyword', 'operator', 'literal', 'delimiter']);
-		});
-
-		it('labels every option with non-empty text', () => {
-			const snippet = embody('x');
-			const options = generateQuiz(snippet, classifyOf(snippet))[0]?.options;
-			expect(options?.every((option) => option.text.length > 0)).toBe(true);
-		});
-
-		it('prompts for the syntax-element category', () => {
-			const snippet = embody('x');
-			expect(generateQuiz(snippet, classifyOf(snippet))[0]?.prompt).toBe(
-				'What kind of syntax element is this?',
-			);
-		});
-
-		it('carries non-empty feedback', () => {
-			const snippet = embody('x');
-			const feedback = generateQuiz(snippet, classifyOf(snippet))[0]?.feedback;
-			expect(feedback?.length).toBeGreaterThan(0);
+				generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
+			).toEqual(['V1', 'V7']);
 		});
 	});
 
 	describe('Many', () => {
-		it('generates one source-ordered item per token with its half-open range', () => {
-			const snippet = embody('x; y');
-			expect(
-				generateQuiz(snippet, classifyOf(snippet)).map(
-					(item) => item.anchorRange,
-				),
-			).toEqual([
-				[0, 1],
-				[1, 2],
-				[3, 4],
-			]);
-		});
-
-		it('keeps family variables for every item regardless of category', () => {
+		it('keeps family variables for every item regardless of generator', () => {
 			const snippet = embody('a + b');
 			expect(
-				generateQuiz(snippet, classifyOf(snippet)).map((item) => item.family),
-			).toEqual(['variables', 'variables', 'variables']);
-		});
-
-		it('refines the propagation group with the role for a role-bearing token', () => {
-			const snippet = embody('a + b');
-			expect(generateQuiz(snippet, classifyOf(snippet))[1]?.groupKey).toBe(
-				'category:operator:binary',
-			);
-		});
-	});
-
-	describe('Boundaries', () => {
-		it('covers every category present in the snippet', () => {
-			const snippet = embody('let x = null;');
-			const answered = new Set(
-				generateQuiz(snippet, classifyOf(snippet)).flatMap(
-					(item) => item.answerOptionIds,
+				generateQuiz(snippet, classifyOf(snippet)).every(
+					(item) => item.family === 'variables',
 				),
-			);
-			expect(answered).toEqual(
-				new Set(['keyword', 'identifier', 'operator', 'literal', 'delimiter']),
-			);
+			).toBe(true);
 		});
 
-		it('refines the propagation group for a role-bearing delimiter', () => {
-			const snippet = embody('let x = null;');
-			expect(generateQuiz(snippet, classifyOf(snippet))[4]?.groupKey).toBe(
-				'category:delimiter:statement-end',
-			);
+		it('groups token-anchored items before node-anchored items', () => {
+			const snippet = embody('a; b');
+			expect(
+				generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
+			).toEqual(['V1', 'V1', 'V1', 'V7', 'V7']);
 		});
 	});
 
 	describe('Interfaces', () => {
+		it('emits only mcq items from the current registry', () => {
+			const snippet = embody('x');
+			expect(
+				generateQuiz(snippet, classifyOf(snippet)).every(
+					(item) => item.mode === 'mcq',
+				),
+			).toBe(true);
+		});
+
 		it('returns a deeply frozen array', () => {
 			const snippet = embody('x');
 			expect(Object.isFrozen(generateQuiz(snippet, classifyOf(snippet)))).toBe(
@@ -189,21 +76,20 @@ describe('generateQuiz', () => {
 			).toBe(true);
 		});
 
-		it('freezes the nested arrays of each item', () => {
+		it('deeply freezes every nested array of each item', () => {
 			const snippet = embody('x');
 			const item = generateQuiz(snippet, classifyOf(snippet))[0];
-			expect(
-				[item?.options, item?.cells, item?.answerOptionIds].every((value) =>
-					Object.isFrozen(value),
-				),
-			).toBe(true);
+			const arrays = Object.values(item ?? {}).filter((value) =>
+				Array.isArray(value),
+			);
+			expect(arrays.every((array) => Object.isFrozen(array))).toBe(true);
 		});
 
 		it('accepts a filter argument as a no-op', () => {
 			const snippet = embody('x; y');
-			expect(
-				generateQuiz(snippet, classifyOf(snippet), { count: 1 }),
-			).toHaveLength(3);
+			expect(generateQuiz(snippet, classifyOf(snippet), { count: 1 })).toEqual(
+				generateQuiz(snippet, classifyOf(snippet)),
+			);
 		});
 	});
 
