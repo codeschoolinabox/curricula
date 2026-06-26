@@ -8,6 +8,7 @@
  * anchor streams).
  */
 
+import type { ScopeAnalysis } from '../../../embody/lib/scope/types.js';
 import type { ClassifiedToken } from '../../classifying/types.js';
 
 /**
@@ -37,12 +38,14 @@ export type IdentifierAnchor = Readonly<{
 /**
  * The single read-only bundle every generator receives — the chokepoint that
  * owns "what a generator sees" (DOCS § Execution phases, Phase 2). Carries the
- * pre-computed `classified` token stream (the per-token generators' input) and
- * the `identifierAnchors` stream from one AST descent (the per-node generators'
- * input). Later forms' binding / scope views join this bundle as their consumers
- * land; the V1 path needs none of them.
+ * pre-computed `classified` token stream (the per-token generators' input), the
+ * `identifierAnchors` stream from one AST descent (the per-node generators'
+ * input), and the lexical scope `forest` the binding-aware generators resolve
+ * occurrences through. Surfaces join this bundle as their consumers land; the V1
+ * path needs none of them.
  */
 export type GenerationContext = Readonly<{
 	classified: readonly ClassifiedToken[];
 	identifierAnchors: readonly IdentifierAnchor[];
+	forest: ScopeAnalysis;
 }>;

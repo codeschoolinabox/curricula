@@ -15,9 +15,8 @@ import type {
 	ScopeAnalysis,
 	ScopeInfo,
 } from '../../../embody/lib/scope/types.js';
-import type { ClassifiedToken } from '../../classifying/types.js';
 
-import type { Binding } from './types.js';
+import type { Binding, Occurrence } from './types.js';
 
 /**
  * Resolve an identifier occurrence to the binding it lexically refers to.
@@ -30,8 +29,8 @@ import type { Binding } from './types.js';
  * - It answers *which binding is this name bound to here* — it does **not** decide
  *   whether the occurrence is semantically a variable reference. Distinguishing a
  *   reference from a property name (`obj.foo`) or a declaration site needs AST
- *   position the occurrence (range + text, `role: null`) does not carry, so it is
- *   the **caller's** responsibility: binding-aware generators must feed only real
+ *   position the occurrence (`start` + `text`) does not carry, so it is the
+ *   **caller's** responsibility: binding-aware generators must feed only real
  *   reference / declaration occurrences. With a same-named in-scope variable, a
  *   property-name occurrence would mis-resolve to that variable — a known,
  *   documented precondition, not a bug to fix in this leaf.
@@ -46,7 +45,7 @@ import type { Binding } from './types.js';
  *   `Binding` (and its range tuple) is frozen.
  */
 export default function resolveBinding(
-	occurrence: ClassifiedToken,
+	occurrence: Occurrence,
 	forest: ScopeAnalysis,
 ): Binding | null {
 	const scope = findScopeAtOffset(occurrence.start, forest.root);

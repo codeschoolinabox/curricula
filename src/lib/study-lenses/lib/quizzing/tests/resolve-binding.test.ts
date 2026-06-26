@@ -138,6 +138,13 @@ describe('resolveBinding', () => {
 				binding !== null && Object.isFrozen(binding.declarationRange),
 			).toBe(true);
 		});
+
+		it('accepts a minimal { start, text } occurrence, not only a ClassifiedToken', () => {
+			const snippet = embody('let n = 1; n;');
+			expect(
+				resolveBinding({ start: 11, text: 'n' }, readScopeForest(snippet)),
+			).toEqual({ name: 'n', declarationRange: [4, 5] });
+		});
 	});
 
 	describe('Exceptions', () => {

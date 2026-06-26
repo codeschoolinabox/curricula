@@ -50,10 +50,19 @@ describe('generateQuiz', () => {
 				generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 			).toEqual(['V1', 'V1', 'V1', 'V7', 'V7']);
 		});
+
+		it('runs all three registered generators for a declared, referenced binding', () => {
+			const snippet = embody('let x = 1; x;');
+			expect(
+				new Set(
+					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
+				),
+			).toEqual(new Set(['V1', 'V7', 'V8']));
+		});
 	});
 
 	describe('Interfaces', () => {
-		it('emits only mcq items from the current registry', () => {
+		it('emits only mcq items for an undeclared identifier (no code-surface item)', () => {
 			const snippet = embody('x');
 			expect(
 				generateQuiz(snippet, classifyOf(snippet)).every(

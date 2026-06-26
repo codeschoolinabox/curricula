@@ -25,3 +25,16 @@ export type Binding = Readonly<{
 	name: string;
 	declarationRange: readonly [number, number];
 }>;
+
+/**
+ * The minimal occurrence shape `resolveBinding` reads: a `start` offset (to find
+ * the enclosing scope) and the identifier `text` (to look up the binding by
+ * name). `ClassifiedToken` satisfies it structurally, and a node-anchored
+ * generator satisfies it from an AST identifier's `{ start, name }` — so the
+ * resolver is callable from both the token stream and the AST-descent anchor
+ * stream without forcing a full `ClassifiedToken`.
+ */
+export type Occurrence = Readonly<{
+	start: number;
+	text: string;
+}>;

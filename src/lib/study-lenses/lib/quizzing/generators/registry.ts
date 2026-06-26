@@ -9,7 +9,12 @@
 import type { Generator } from './types.js';
 import v1CategoryId from './v1-category-id.js';
 import v7UsageKind from './v7-usage-kind.js';
+import v8DeclarationSite from './v8-declaration-site.js';
 
-const GENERATORS: readonly Generator[] = [v1CategoryId, v7UsageKind];
+const GENERATORS: readonly Generator[] = [
+	v1CategoryId,
+	v7UsageKind,
+	v8DeclarationSite,
+];
 
 export default GENERATORS;

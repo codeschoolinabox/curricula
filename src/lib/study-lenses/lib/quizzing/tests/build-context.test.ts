@@ -43,6 +43,15 @@ describe('buildContext', () => {
 			const classified = classifyOf(snippet);
 			expect(buildContext(snippet, classified).classified).toBe(classified);
 		});
+
+		it('carries the scope forest for binding-aware generators', () => {
+			const snippet = embody('let x = 1;');
+			expect(
+				buildContext(snippet, classifyOf(snippet)).forest.root.declarations.has(
+					'x',
+				),
+			).toBe(true);
+		});
 	});
 
 	describe('Interfaces', () => {
