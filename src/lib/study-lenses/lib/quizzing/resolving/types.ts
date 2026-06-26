@@ -17,8 +17,9 @@
  * the **stable binding identity**: two occurrences resolve to the same binding
  * iff their `declarationRange`s are equal (each declarator id has a unique span).
  * `name` is the declared name, kept for prompt/label use and to avoid re-slicing
- * the source. The `groupKey`-string formatting that keys binding-aware forms on
- * this identity lands in a later increment — this view only carries the identity.
+ * the source. The `groupKey` serializer that keys binding-aware forms on this
+ * identity lives at `../keying/binding-group-key.ts`; this view carries only the
+ * identity.
  */
 export type Binding = Readonly<{
 	name: string;
