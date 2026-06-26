@@ -26,6 +26,30 @@ describe('makeLocalLlm', () => {
 			expect(result.cause).toBe('no-feasible-model');
 		});
 
+		it('the pre-flight detail names each rejected model with its reason', async () => {
+			// deviceMemoryGB 1 → budget 512 MB < FAKE_CATALOG webllm need (1000) → the
+			// webllm entry is rejected vram-too-large; the per-entry detail names it.
+			const llm = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(fakeCaps({ deviceMemoryGB: 1 })),
+			});
+			const result = await llm.load();
+			if (result.ok) throw new Error('expected a refusal');
+			expect(result.detail).toMatch(/fake-webllm-small.*VRAM/i);
+		});
+
+		it('an empty catalog yields a no-models-available detail', async () => {
+			const llm = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: [],
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			if (result.ok) throw new Error('expected a refusal');
+			expect(result.detail).toMatch(/no catalog|available/i);
+		});
+
 		it('a caller selection that excludes every feasible model gets a selection-shaped detail, not a device-limit lie', async () => {
 			// Rich device (webgpu true), FAKE_CATALOG has a feasible webllm-small, but
 			// a 'tiny' ceiling excludes it → chosen is null though a model IS feasible.

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import selectFeasible from '../feasibility.js';
+import type { ModelCatalogEntry } from '../types.js';
 
 import {
 	fakeCaps,
@@ -416,6 +417,253 @@ describe('selectFeasible', () => {
 			it('the chosen model is the CPU candidate', () => {
 				expect(overBudgetWithCpuRescue().chosen?.id).toBe('cpu-rescue');
 			});
+		});
+	});
+
+	describe('per-entry rejection diagnosis', () => {
+		it('an empty catalog yields no rejections', () => {
+			const result = selectFeasible({
+				catalog: [],
+				capabilities: fakeCaps(),
+				adapters: WEBLLM,
+			});
+			expect(result.rejections).toEqual([]);
+		});
+
+		it('a no-WebGPU device rejects a webllm entry with a no-webgpu reason', () => {
+			const result = selectFeasible({
+				catalog: [webllmEntry({ id: 'gpu-only', vramRequiredMB: 100 })],
+				capabilities: fakeCaps({ webgpu: false }),
+				adapters: WEBLLM,
+			});
+			expect(result.rejections).toEqual([
+				{ id: 'gpu-only', reasons: [{ kind: 'no-webgpu' }] },
+			]);
+		});
+
+		it('an over-budget webllm entry reports vram-too-large with the numbers', () => {
+			const result = selectFeasible({
+				catalog: [webllmEntry({ id: 'huge', vramRequiredMB: 2000 })],
+				capabilities: fakeCaps({ deviceMemoryGB: 2 }), // budget = 1024 MB
+				adapters: WEBLLM,
+			});
+			expect(result.rejections).toEqual([
+				{
+					id: 'huge',
+					reasons: [{ kind: 'vram-too-large', requiredMB: 2000, budgetMB: 1024 }],
+				},
+			]);
+		});
+
+		it('a missing-feature webllm entry reports the missing features', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({
+						id: 'needs-f16',
+						vramRequiredMB: 100,
+						requiredFeatures: ['shader-f16'],
+					}),
+				],
+				capabilities: fakeCaps({ webgpuFeatures: [] }), // webgpu true, no f16
+				adapters: WEBLLM,
+			});
+			expect(result.rejections).toEqual([
+				{
+					id: 'needs-f16',
+					reasons: [{ kind: 'missing-feature', missing: ['shader-f16'] }],
+				},
+			]);
+		});
+
+		it('a too-large CPU entry reports size-class-too-large', () => {
+			const result = selectFeasible({
+				catalog: [wllamaEntry({ id: 'big-cpu', sizeClass: 'mid' })],
+				capabilities: fakeCaps({ webgpu: false }),
+				adapters: { wllama: registeredAdapter },
+			});
+			expect(result.rejections).toEqual([
+				{
+					id: 'big-cpu',
+					reasons: [
+						{ kind: 'size-class-too-large', sizeClass: 'mid', maxCpu: 'small' },
+					],
+				},
+			]);
+		});
+
+		it('an entry whose runtime has no registered adapter reports no-adapter', () => {
+			const result = selectFeasible({
+				catalog: [wllamaEntry({ id: 'orphan', sizeClass: 'tiny' })],
+				capabilities: fakeCaps(),
+				adapters: WEBLLM, // no wllama adapter registered
+			});
+			expect(result.rejections).toEqual([
+				{ id: 'orphan', reasons: [{ kind: 'no-adapter', runtime: 'wllama' }] },
+			]);
+		});
+
+		it('missing-feature reports only the not-advertised subset', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({
+						id: 'two-feat',
+						vramRequiredMB: 100,
+						requiredFeatures: ['shader-f16', 'timestamp-query'],
+					}),
+				],
+				capabilities: fakeCaps({ webgpuFeatures: ['shader-f16'] }),
+				adapters: WEBLLM,
+			});
+			expect(result.rejections).toEqual([
+				{
+					id: 'two-feat',
+					reasons: [{ kind: 'missing-feature', missing: ['timestamp-query'] }],
+				},
+			]);
+		});
+
+		it('an entry feasible on ONE runtime is not rejected (despite another runtime failing)', () => {
+			// webllm feasible (webgpu, vram fits); wllama would fail size-class — but the
+			// entry is feasible overall, so it must NOT appear in rejections at all.
+			const mixed: ModelCatalogEntry = {
+				id: 'mixed-feasible',
+				family: 'test',
+				params: '0.5B',
+				sizeClass: 'mid',
+				license: 'Apache-2.0',
+				codeSpecialized: false,
+				runtimes: [
+					{
+						load: {
+							runtime: 'webllm',
+							modelId: 'mixed-MLC',
+							quant: 'q4f16_1',
+							vramRequiredMB: 100,
+						},
+						fetchUrl: 'https://example.test/mixed',
+					},
+					{
+						load: {
+							runtime: 'wllama',
+							repo: 'mixed-repo',
+							file: 'm.gguf',
+							quant: 'Q4_K_M',
+						},
+						fetchUrl: 'https://example.test/mixed',
+					},
+				],
+			};
+			const result = selectFeasible({
+				catalog: [mixed],
+				capabilities: fakeCaps(),
+				adapters: { webllm: registeredAdapter, wllama: registeredAdapter },
+			});
+			expect(result.rejections).toEqual([]);
+		});
+
+		it('no-adapter is reported only for the unregistered runtime, not a registered-but-failing one', () => {
+			const mixed: ModelCatalogEntry = {
+				id: 'mixed-adapter',
+				family: 'test',
+				params: '0.5B',
+				sizeClass: 'small',
+				license: 'Apache-2.0',
+				codeSpecialized: false,
+				runtimes: [
+					{
+						load: {
+							runtime: 'webllm',
+							modelId: 'mixed-MLC',
+							quant: 'q4f16_1',
+							vramRequiredMB: 2000,
+						},
+						fetchUrl: 'https://example.test/mixed',
+					},
+					{
+						load: {
+							runtime: 'wllama',
+							repo: 'mixed-repo',
+							file: 'm.gguf',
+							quant: 'Q4_K_M',
+						},
+						fetchUrl: 'https://example.test/mixed',
+					},
+				],
+			};
+			const result = selectFeasible({
+				catalog: [mixed],
+				capabilities: fakeCaps({ deviceMemoryGB: 2 }), // budget 1024 < 2000
+				adapters: WEBLLM, // wllama NOT registered
+			});
+			expect(result.rejections).toEqual([
+				{
+					id: 'mixed-adapter',
+					reasons: [
+						{ kind: 'vram-too-large', requiredMB: 2000, budgetMB: 1024 },
+						{ kind: 'no-adapter', runtime: 'wllama' },
+					],
+				},
+			]);
+		});
+
+		it('partitions the catalog: feasible and rejected are disjoint and total', () => {
+			const result = selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'ok', vramRequiredMB: 100 }),
+					webllmEntry({ id: 'huge', vramRequiredMB: 9000 }),
+				],
+				capabilities: fakeCaps(),
+				adapters: WEBLLM,
+			});
+			expect(result.feasible.map((entry) => entry.id)).toEqual(['ok']);
+			expect(result.rejections.map((rejection) => rejection.id)).toEqual([
+				'huge',
+			]);
+		});
+
+		it('an entry rejected on every runtime lists one reason per runtime', () => {
+			const multi: ModelCatalogEntry = {
+				id: 'multi',
+				family: 'test',
+				params: '0.5B',
+				sizeClass: 'mid',
+				license: 'Apache-2.0',
+				codeSpecialized: false,
+				runtimes: [
+					{
+						load: {
+							runtime: 'webllm',
+							modelId: 'multi-MLC',
+							quant: 'q4f16_1',
+							vramRequiredMB: 100,
+						},
+						fetchUrl: 'https://example.test/multi',
+					},
+					{
+						load: {
+							runtime: 'wllama',
+							repo: 'multi-repo',
+							file: 'm.gguf',
+							quant: 'Q4_K_M',
+						},
+						fetchUrl: 'https://example.test/multi',
+					},
+				],
+			};
+			const result = selectFeasible({
+				catalog: [multi],
+				capabilities: fakeCaps({ webgpu: false }),
+				adapters: { webllm: registeredAdapter, wllama: registeredAdapter },
+			});
+			expect(result.rejections).toEqual([
+				{
+					id: 'multi',
+					reasons: [
+						{ kind: 'no-webgpu' },
+						{ kind: 'size-class-too-large', sizeClass: 'mid', maxCpu: 'small' },
+					],
+				},
+			]);
 		});
 	});
 

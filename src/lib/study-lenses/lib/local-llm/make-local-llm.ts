@@ -65,12 +65,15 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 		const capabilities = await capabilityProbe();
 		// Throws on an unknown model name — a programmer error, deliberately NOT
 		// inside the try below (an unknown name is never a returned LoadFailure).
-		const { chosen, chosenRuntime, feasible } = select(capabilities, selection);
+		const { chosen, chosenRuntime, feasible, rejections } = select(
+			capabilities,
+			selection,
+		);
 		if (chosen === null || chosenRuntime === null) {
 			return freezeInPlace({
 				ok: false,
 				cause: 'no-feasible-model',
-				detail: noFeasibleDetail(capabilities, feasible.length),
+				detail: noFeasibleDetail(feasible.length, rejections),
 			});
 		}
 
@@ -123,26 +126,56 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 	});
 }
 
+// The per-entry rejection diagnosis surfaced by selectFeasible (internal to
+// feasibility.ts — derived here rather than imported, keeping that file's
+// default-only export). Used only to compose the no-feasible `detail` string.
+type EntryRejection = ReturnType<typeof selectFeasible>['rejections'][number];
+type RejectionReason = EntryRejection['reasons'][number];
+
 /**
  * The honest reason a load resolved to no model, for the pre-flight refusal's
- * diagnostic `detail` (DDD §5: WebGPU-absent / WebGPU-limited / memory all fold to
- * the same `no-feasible-model` cause, with the reason in `detail`). `chosen` is
- * null on two distinct kinds of path, which must NOT be conflated (a teaching tool
- * must never misdescribe the device): a genuinely empty feasible set (a device
- * limit) vs. a non-empty feasible set the caller's own selection excluded. The
- * device-limit case is a coarse two-way split on WebGPU presence — the distinction
- * knowable here without re-deriving per-entry feasibility; richer per-entry
- * diagnosis is a future enhancement. Dev/log/instructor-facing; the consumer reads
- * `cause`.
+ * diagnostic `detail` (DDD §5: the reason rides in `detail`). `chosen` is null on
+ * two distinct kinds of path, which must NOT be conflated (a teaching tool must
+ * never misdescribe the device): a genuinely empty feasible set — answered with a
+ * per-entry breakdown of which catalog models were rejected and why — vs. a
+ * non-empty feasible set the caller's own selection excluded. Dev/log/instructor-
+ * facing; the consumer reads `cause`.
  */
 function noFeasibleDetail(
-	capabilities: DeviceCapabilities,
 	feasibleCount: number,
+	rejections: readonly EntryRejection[],
 ): string {
 	if (feasibleCount > 0) {
 		return 'A feasible model exists, but the requested selection (a sizeClass ceiling, or a named model not feasible on this device) excluded every candidate.';
 	}
-	return capabilities.webgpu
-		? 'No catalog model is feasible on this device, and no CPU/WASM model is available.'
-		: 'This device reports no WebGPU, and no CPU/WASM model is feasible or registered.';
+	if (rejections.length === 0) {
+		return 'No catalog models were available to evaluate.';
+	}
+	const lines = rejections.map(
+		(rejection) =>
+			`  ${rejection.id}: ${rejection.reasons
+				.map((reason) => describeReason(reason))
+				.join('; ')}`,
+	);
+	return `No catalog model is feasible on this device:\n${lines.join('\n')}`;
+}
+
+/** One rejection reason as a product-neutral, learner/instructor-readable clause. */
+function describeReason(reason: RejectionReason): string {
+	if (reason.kind === 'no-webgpu') {
+		return 'requires WebGPU, which this device reports unavailable';
+	}
+	if (reason.kind === 'missing-feature') {
+		return `requires WebGPU feature(s) not advertised: ${reason.missing.join(', ')}`;
+	}
+	if (reason.kind === 'vram-too-large') {
+		return `needs ~${Math.round(reason.requiredMB)} MB VRAM, over the ~${Math.round(reason.budgetMB)} MB budget`;
+	}
+	if (reason.kind === 'size-class-too-large') {
+		return `size class '${reason.sizeClass}' exceeds the CPU/WASM ceiling '${reason.maxCpu}'`;
+	}
+	// 'no-adapter' — the only remaining kind. The typed binding is a compile-time
+	// exhaustiveness guard: a new RejectionReason kind would fail to narrow here.
+	const noAdapter: Extract<RejectionReason, { kind: 'no-adapter' }> = reason;
+	return `no registered runtime (needs '${noAdapter.runtime}')`;
 }

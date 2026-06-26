@@ -7,6 +7,8 @@
  * the loader's pick + resolved runtime (LocalLlm.load).
  */
 
+import freezeInPlace from '@utils/freeze-in-place.js';
+
 import type {
 	AdapterMap,
 	DeviceCapabilities,
@@ -27,17 +29,44 @@ type FeasibilityInput = {
 	readonly selection?: Selection;
 };
 
-/** The selection core's result — the feasible set, the chosen entry, and its resolved runtime (null iff none chosen). */
+/** The selection core's result — the feasible set, the chosen entry + its resolved runtime (null iff none chosen), and a per-entry rejection diagnosis. */
 type FeasibilityResult = {
 	readonly feasible: readonly ModelCatalogEntry[];
 	readonly chosen: ModelCatalogEntry | null;
 	readonly chosenRuntime: RuntimeKind | null;
+	readonly rejections: readonly EntryRejection[];
 };
 
 /** A feasible entry paired with the runtime it resolved to (browser-first). */
 type Pick = {
 	readonly entry: ModelCatalogEntry;
 	readonly runtime: RuntimeKind;
+};
+
+/**
+ * Why one catalog entry is NOT feasible — a structured per-runtime gate failure so
+ * a consumer can compose an honest diagnosis. DIAGNOSTIC (read by the no-feasible
+ * `detail` and a future debug/instructor view), never a gate.
+ */
+type RejectionReason =
+	| { readonly kind: 'no-webgpu' }
+	| { readonly kind: 'missing-feature'; readonly missing: readonly string[] }
+	| {
+			readonly kind: 'vram-too-large';
+			readonly requiredMB: number;
+			readonly budgetMB: number;
+	  }
+	| {
+			readonly kind: 'size-class-too-large';
+			readonly sizeClass: SizeClass;
+			readonly maxCpu: SizeClass;
+	  }
+	| { readonly kind: 'no-adapter'; readonly runtime: RuntimeKind };
+
+/** One rejected catalog entry and every reason it failed (one per declared runtime). */
+type EntryRejection = {
+	readonly id: string;
+	readonly reasons: readonly RejectionReason[];
 };
 
 /**
@@ -88,7 +117,75 @@ export default function selectFeasible(
 		feasible: Object.freeze(picks.map((pick) => pick.entry)),
 		chosen: chosen === null ? null : chosen.entry,
 		chosenRuntime: chosen === null ? null : chosen.runtime,
+		rejections: diagnoseRejections(catalog, picks, capabilities, adapters),
 	});
+}
+
+/** The per-entry rejection diagnosis: every catalog entry NOT in `feasible`, with the reason each declared runtime failed. Diagnostic (DOCS), never a gate. */
+function diagnoseRejections(
+	catalog: ModelCatalog,
+	picks: readonly Pick[],
+	capabilities: DeviceCapabilities,
+	adapters: AdapterMap,
+): readonly EntryRejection[] {
+	const feasible = new Set(picks.map((pick) => pick.entry));
+	// Deep-freeze: rejections are entirely own data (constructed ids + reason
+	// objects), NOT the caller-owned `feasible` entries — so freezeInPlace is safe.
+	return freezeInPlace(
+		catalog
+			.filter((entry) => !feasible.has(entry))
+			.map((entry) => ({
+				id: entry.id,
+				reasons: rejectionReasons(entry, capabilities, adapters),
+			})),
+	);
+}
+
+/** Why a rejected entry failed — one structured reason per declared runtime, in declared order. */
+function rejectionReasons(
+	entry: ModelCatalogEntry,
+	capabilities: DeviceCapabilities,
+	adapters: AdapterMap,
+): readonly RejectionReason[] {
+	return entry.runtimes.map((member) =>
+		runtimeRejection(member.load, entry, capabilities, adapters),
+	);
+}
+
+/** The single gate a runtime member failed (precondition: a member of a REJECTED entry, so it IS infeasible). */
+function runtimeRejection(
+	load: RuntimeLoad,
+	entry: ModelCatalogEntry,
+	capabilities: DeviceCapabilities,
+	adapters: AdapterMap,
+): RejectionReason {
+	if (adapters[load.runtime] === undefined) {
+		return { kind: 'no-adapter', runtime: load.runtime };
+	}
+	if (load.runtime === 'webllm') {
+		if (!capabilities.webgpu) return { kind: 'no-webgpu' };
+		const missing = missingFeatures(
+			load.requiredFeatures,
+			capabilities.webgpuFeatures,
+		);
+		if (missing.length > 0) return { kind: 'missing-feature', missing };
+		const budgetMB = vramBudgetMB(capabilities);
+		if (load.vramRequiredMB !== undefined && load.vramRequiredMB > budgetMB) {
+			return {
+				kind: 'vram-too-large',
+				requiredMB: load.vramRequiredMB,
+				budgetMB,
+			};
+		}
+	}
+	// CPU/WASM, or a webllm member with no declared vram (its absence falls through
+	// to the size-class gate) — for a REJECTED entry the size class must exceed the
+	// CPU/WASM ceiling (a vram-fitting webllm member would be feasible, never here).
+	return {
+		kind: 'size-class-too-large',
+		sizeClass: entry.sizeClass,
+		maxCpu: MAX_CPU_SIZE_CLASS,
+	};
 }
 
 function isNamed(model: string | undefined): model is string {
@@ -133,9 +230,7 @@ function isLoadFeasible(
 		// the chain, not pre-refused here. The webllm gates are presence + advertised
 		// features (above) + the system-RAM budget below — a coarse admission filter.
 		if (load.vramRequiredMB !== undefined) {
-			const budgetMB =
-				HALF * (capabilities.deviceMemoryGB ?? DEFAULT_MEMORY_GB) * MB_PER_GB;
-			return load.vramRequiredMB <= budgetMB;
+			return load.vramRequiredMB <= vramBudgetMB(capabilities);
 		}
 		return fitsCpuSizeClass(entry.sizeClass);
 	}
@@ -149,13 +244,26 @@ function hasRequiredFeatures(
 	required: readonly string[] | undefined,
 	advertised: readonly string[] | undefined,
 ): boolean {
-	if (required === undefined || required.length === 0) return true;
+	return missingFeatures(required, advertised).length === 0;
+}
+
+/** The WebGPU features a load requires that the device does NOT advertise (empty ⇒ all present). */
+function missingFeatures(
+	required: readonly string[] | undefined,
+	advertised: readonly string[] | undefined,
+): readonly string[] {
+	if (required === undefined) return [];
 	const available = advertised ?? [];
-	return required.every((feature) => available.includes(feature));
+	return required.filter((feature) => !available.includes(feature));
 }
 
 function fitsCpuSizeClass(sizeClass: SizeClass): boolean {
 	return SIZE_RANK[sizeClass] <= SIZE_RANK[MAX_CPU_SIZE_CLASS];
+}
+
+/** The webllm VRAM budget for a device — half the (capped) system-RAM bucket, in MB. */
+function vramBudgetMB(capabilities: DeviceCapabilities): number {
+	return HALF * (capabilities.deviceMemoryGB ?? DEFAULT_MEMORY_GB) * MB_PER_GB;
 }
 
 /** Applies the selection over the feasible picks: explicit model, else policy. */
