@@ -105,10 +105,11 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
   given **at construction**. The host **registers only the runtimes it ships**; an
   entry whose runtimes are all absent from the map is simply not loadable here.
 - **Device capabilities** — the result of probing the device: WebGPU presence,
-  its adapter's buffer limits and advertised features (e.g. `shader-f16`), a
-  coarse memory bucket, storage headroom, and the WASM features for a CPU
-  fallback. A **conservative heuristic**, not an exact resource readout — the
-  browser does not expose total VRAM.
+  its adapter's advertised features (e.g. `shader-f16`), a coarse system-RAM
+  bucket, storage headroom, and the WASM features for a CPU fallback. The probed
+  WebGPU buffer limits are also captured, but **as diagnostics** — they inform what
+  is shown, not what is refused. A **conservative heuristic**, not an exact resource
+  readout — the browser does not expose total VRAM.
 - **Feasibility** — the catalog narrowed by device capabilities and the adapter
   map: which entries this device can actually bring up, and on which runtime.
 - **Selection** — the optional caller preference over the feasible set (a named
@@ -222,6 +223,13 @@ infrastructure fault in the probe is a third path, noted at the end:
   `shader-f16`)** → that model is not feasible; a feature-compatible rung loads
   instead, or an empty feasible set is a load failure. The feature gate refuses up
   front rather than failing mid-bring-up.
+- **A binding-limited WebGPU device whose advertised features + memory budget
+  otherwise fit** (e.g. Firefox/Android at the 128 MiB floor) → **not** pre-refused;
+  there is no honest pre-flight buffer gate, so its WebGPU candidate enters the chain,
+  and if it fails bring-up the chain descends to a smaller candidate or a CPU/WASM
+  runtime — only an exhausted chain refuses, with a **post-flight** cause. (Unlike the
+  feature-gate row above, which _does_ refuse up front: a missing advertised feature is
+  known pre-flight.)
 - **Nothing feasible on any registered runtime** → load failure, cause
   `no-feasible-model` (**pre-flight** — surfaceable before any bring-up, so a
   pre-flight gate can disable the feature with an accurate note).
@@ -279,12 +287,20 @@ infrastructure fault in the probe is a third path, noted at the end:
 - **The runtime is injected and constructed, browser-first.** The host supplies
   only the runtime adapters it ships, at construction; selection prefers in-browser
   backends and treats desktop ones as explicit opt-ins that break no-install.
-- **Capability matching is a conservative heuristic, not an exact fit.** The
-  browser does not expose total VRAM; feasibility leans on adapter buffer limits
-  and coarse memory buckets with a safety margin, gates a model's required WebGPU
-  features (e.g. `shader-f16`) against the adapter's advertised set, and tolerates
-  a load that fails by surfacing a load failure, never by promising an exactness
-  the platform can't give.
+- **Capability matching is a conservative, coarse admission filter — not an exact
+  fit.** The browser exposes no total VRAM, so webllm feasibility leans on three
+  coarse signals: WebGPU **presence** (a hard gate), the WebGPU features a model
+  **advertises** when WebLLM lists them (a _partial_ gate — many q4f16 builds list
+  none, so it catches some incompatible devices, not all), and a **system-RAM**
+  budget (`navigator.deviceMemory`, not a VRAM readout) with a safety margin. It
+  deliberately does **not** pre-gate on the probed buffer limits — there is no
+  binding per-model buffer requirement, and the platform itself tries-then-falls-back
+  rather than refusing. So feasibility is an _admission filter_ and the **fallback
+  chain is the real backstop**: a device the filter admits but that can't actually
+  bring a model up (binding-limited, small shared VRAM) is caught at bring-up and
+  descended, never pre-refused on a fabricated threshold. The buffer limits are
+  surfaced as **diagnostics**. The matcher tolerates a load that fails by surfacing a
+  load failure, never by promising an exactness the platform can't give.
 - **The default is cost-aware, not maximal.** A device that _can_ run the heaviest
   model is not made to download it by default; the heavier rung is opt-in. The
   resolved model is always reported.

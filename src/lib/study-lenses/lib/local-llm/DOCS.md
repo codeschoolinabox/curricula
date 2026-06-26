@@ -24,10 +24,10 @@ that touches a network or a GPU.
 
 1. **Capability probe** (async, device-boundary read) — input: the device;
    output: a device-capabilities profile. A **conservative heuristic** — WebGPU
-   presence, its adapter's buffer limits and advertised features, a coarse memory
-   bucket, storage headroom, WASM features — never an exact resource readout (the
-   browser does not expose total VRAM). Injectable, so the pure phases below test
-   without a real device.
+   presence, its adapter's advertised features, the probed buffer limits (kept for
+   diagnostics, not feasibility gating), a coarse memory bucket, storage headroom,
+   WASM features — never an exact resource readout (the browser does not expose
+   total VRAM). Injectable, so the pure phases below test without a real device.
 
 2. **Feasibility, selection & chain ordering** (sync, pure) — input: device
    capabilities + the catalog + an optional preference; output: a chosen catalog
@@ -139,10 +139,29 @@ precondition throw, not a data state (see constraints).
   smaller candidate may fit), but if even the smallest candidate cannot cache, quota
   is the terminal cause — partial-fetch cleanup between candidates is the backend's
   and is not assumed.
-- **Feasibility consumes the probed buffer limits.** `maxBufferBytes` /
-  `maxStorageBufferBindingBytes` gate feasibility, so a WebGPU-limited device is
-  refused at **pre-flight**, not mid-bring-up — a prerequisite of both folding
-  WebGPU-limits into `no-feasible-model` and the browser-first chain ordering.
+- **The probed buffer limits are diagnostic, not a feasibility gate.** WebGPU
+  exposes no binding per-model buffer requirement for the catalog's models, and its
+  own runtime _tries, warns, and falls back_ rather than refusing below a limit — so
+  feasibility does **not** pre-gate on `maxBufferBytes` / `maxStorageBufferBindingBytes`.
+  The webllm gates are a **coarse admission filter**: WebGPU **presence** (hard), the
+  features a model **advertises** when WebLLM lists them (partial — many q4f16 builds
+  list none), and a **system-RAM** budget (`navigator.deviceMemory`, NOT a VRAM
+  readout — the browser exposes no VRAM). A binding-limited device (e.g. Firefox /
+  Android at the 128 MiB floor) is therefore **not** pre-refused; its WebGPU
+  candidates may enter the chain and fail at bring-up, where the chain descends to a
+  smaller candidate or a CPU/WASM runtime — the chain is the real backstop for
+  everything the coarse filter admits but can't predict. The limits stay on
+  `DeviceCapabilities` as **diagnostics** (surfaced in `canRun` and a failure's `detail`).
+- **Browser-first ordering accepts a possibly-doomed fetch, bounded by the
+  cost-aware default.** Because buffers no longer pre-gate, a binding-limited device
+  may spend one WebGPU bring-up before the switch to CPU/WASM. The first WebGPU
+  candidate is the cost-aware default (`chain[0]`), capped by the cost ceiling — so on
+  a low-budget device it is already a small, cheap rung, and the worst-case wasted
+  fetch is bounded by that default's download, not by the largest model the device
+  could nominally fit; the remaining WebGPU candidates **descend** in size before the
+  runtime switch. _(Supersedes the earlier rule that made a buffer gate a hard
+  prerequisite of browser-first ordering: the prerequisite is removed, replaced by
+  this cost-ceiling bound + descent — consistent with the cost-aware default policy.)_
 - **Convergence assumes a stable capability probe within a session.** The chain
   re-runs per `load` call; a non-deterministic probe (different capabilities across
   concurrent calls) breaks per-id-cache convergence and is out of contract.

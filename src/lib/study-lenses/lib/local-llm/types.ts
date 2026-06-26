@@ -203,8 +203,13 @@ type AdapterMap = Partial<Record<RuntimeKind, RuntimeAdapter>>;
 
 /**
  * A device probe result — a CONSERVATIVE HEURISTIC, not an exact resource
- * readout (the browser does not expose total VRAM). Feasibility leans on the
- * WebGPU adapter's buffer limits and a coarse memory bucket with a safety margin.
+ * readout (the browser does not expose total VRAM). Feasibility is a COARSE
+ * ADMISSION FILTER: WebGPU presence, the WebGPU features a model advertises, and a
+ * coarse SYSTEM-RAM bucket (`navigator.deviceMemory`, not a VRAM readout) with a
+ * safety margin. The probed buffer limits (`maxBufferBytes` /
+ * `maxStorageBufferBindingBytes`) are DIAGNOSTIC, not a gate — there is no binding
+ * per-model buffer requirement, so a binding-limited device is caught at bring-up
+ * and descended, not pre-refused; the limits inform `canRun` and a failure's `detail`.
  */
 type DeviceCapabilities = {
 	readonly webgpu: boolean;
@@ -262,10 +267,11 @@ type Selection = {
  *
  * @remarks
  * - `'no-feasible-model'` — **pre-flight** (selection-time, pure): zero feasible
- *   candidates — no catalog entry fits the device on any registered runtime (no
- *   WebGPU and no CPU/WASM candidate, WebGPU limits below every candidate, or a
- *   named model not feasible). The pre-flight gate can surface this BEFORE any
- *   bring-up. Terminal — the consumer recommends a native runtime.
+ *   candidates — no catalog entry is admitted by the coarse feasibility filter on
+ *   any registered runtime (no WebGPU; or no model whose advertised features and
+ *   memory budget fit; or no CPU/WASM candidate; or a named model not feasible).
+ *   The pre-flight gate can surface this BEFORE any bring-up. Terminal — the
+ *   consumer recommends a native runtime.
  * - `'all-candidates-exhausted'` — **post-flight** terminal: feasible candidates
  *   existed but every one failed bring-up with mixed/device causes. Only knowable
  *   AFTER attempting (not pre-flight-surfaceable). Terminal — the consumer
