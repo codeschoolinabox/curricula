@@ -126,12 +126,30 @@ management** (picking, loading, running, decomposing) and **silent on meaning**.
   into memory on first use and reused. Concurrent loads of the same model before
   the first settles **share one in-flight bring-up** (no double-fetch). The
   network is touched only for that one-time fetch; every later load is offline.
-- **Load failure** — the structured refusal when no model can be brought up: the
-  device can bring nothing up, every runtime for a feasible model is unregistered,
-  or a model's one-time fetch failed (or its cache was evicted while offline).
-  This is the single source of truth consumers re-map (e.g. aithor's
-  `no-model-available`). **Distinct from an _unknown model name_** — a name absent
-  from the catalog is a programmer error and **throws**, it is not a refusal.
+- **Fallback chain** — the ordered descent of feasible `(model, runtime)`
+  **candidates** that `load` tries: the cost-aware default, then smaller, then a
+  switch to a CPU/WASM runtime. The descent is **silent and honest** — the learner
+  never opts in, and the candidate that actually loads is named in `resolvedId`. A
+  candidate's failure is intermediate; the chain refuses only when every candidate
+  is exhausted.
+- **Candidate** — one `(model, runtime)` step of the fallback chain. Distinct from
+  a **size-class** (rung): a model is one size-rung, but it may appear as two
+  candidates (e.g. a WebGPU build and a CPU/WASM build of the same family), each
+  its own catalog entry with its own id.
+- **Load failure** — the structured refusal when no model can be brought up. It
+  names a **delivery-agnostic cause** (this module never names a product): either a
+  **pre-flight** `no-feasible-model` (the device can run nothing — surfaceable
+  before any bring-up) or a **post-flight** terminal cause after the chain was
+  tried (`all-candidates-exhausted`, `fetch-failed`, `storage-quota`, or
+  `cache-evicted`), the latter carrying a diagnostic per-candidate `attempts`
+  ledger. This is the single source of truth consumers re-map (e.g. aithor's
+  `no-model-available`) and the signal a consumer turns into a next step — incl.
+  recommending a native app. **Distinct from an _unknown model name_** — a name
+  absent from the catalog is a programmer error and **throws**, it is not a refusal.
+- **Terminal refusal** — a `LoadFailure` whose cause means there is no in-browser
+  path left (`no-feasible-model` / `all-candidates-exhausted`). It is itself the
+  consumer's cue to recommend a native runtime; this module names the cause, never
+  the product.
 
 ## What it produces (the boundary)
 
@@ -190,8 +208,11 @@ reports through `onProgress`; the load-once memory bring-up hides behind the
 
 ## Edge cases (the refusal map)
 
-Every _domain_ "can't proceed" resolves to one of two outcomes — a **load failure**
-(a device/availability limit, expected) or a **throw** (a programmer error). An
+Every _domain_ "can't proceed" resolves to a **load failure** (a device/availability
+limit, expected) or a **throw** (a programmer error). A load failure ends a
+**fallback chain**: `load` descends the feasible candidates, and a single
+candidate's failure is _intermediate_ — the chain records it and tries the next. The
+failure is returned only when the chain is exhausted (or was empty). An
 infrastructure fault in the probe is a third path, noted at the end:
 
 - **No WebGPU, but a CPU/WASM runtime is registered and a tiny model is feasible**
@@ -201,17 +222,34 @@ infrastructure fault in the probe is a third path, noted at the end:
   `shader-f16`)** → that model is not feasible; a feature-compatible rung loads
   instead, or an empty feasible set is a load failure. The feature gate refuses up
   front rather than failing mid-bring-up.
-- **Nothing feasible on any registered runtime** → load failure.
+- **Nothing feasible on any registered runtime** → load failure, cause
+  `no-feasible-model` (**pre-flight** — surfaceable before any bring-up, so a
+  pre-flight gate can disable the feature with an accurate note).
 - **A feasible model whose every runtime is absent from the adapter map** → load
-  failure.
+  failure (`no-feasible-model`).
 - **An unknown model name (absent from the catalog)** → **throws** — a programmer
   error, not a device limit, kept distinct so a typo never masquerades as "your
   device can't run it."
-- **Concurrent `load()` of the same model before the first settles** → one shared
-  in-flight bring-up; no double-fetch.
-- **A first-fetch download failure** → load failure (reachable-but-failed).
-- **Cache eviction while offline** → a previously-loadable model can become a load
-  failure; offline-capability is **best-effort** (a durable cache and
+- **Concurrent `load()` of the same selection before the first settles** → one
+  shared in-flight bring-up per candidate; the chain is deterministic, so concurrent
+  identical loads converge on the same winner (no double-fetch, no divergence).
+- **The cost-aware default fails bring-up but a smaller / CPU-WASM candidate works**
+  → the chain descends silently and loads it; the resolved candidate is named in
+  `resolvedId`.
+- **Every feasible candidate fails bring-up** → load failure, with a **post-flight**
+  terminal cause promoted from the per-candidate `attempts` ledger:
+  `all-candidates-exhausted` (mixed/device failures), `fetch-failed` (all network),
+  `storage-quota` (weights can't be cached — free disk space), or `cache-evicted` (a
+  cached candidate evicted offline — reconnect, or a native runtime for durable
+  offline). `all-candidates-exhausted` and `no-feasible-model` are themselves the
+  consumer's cue to recommend a native app.
+- **A named model that is feasible only on a runtime this device lacks** (e.g. a
+  WebGPU build named on a no-WebGPU device) → `no-feasible-model`, **no descent** —
+  pinning is artifact-precise. The same model _family_ may still run via a sibling
+  catalog entry (a CPU/WASM build); `feasibleModels()` lists the runnable sibling, so
+  to run the family on whatever works, name that sibling or use the default pick.
+- **Cache eviction while offline** → a previously-loadable candidate becomes
+  `cache-evicted`; offline-capability is **best-effort** (a durable cache and
   `navigator.storage.persist()` mitigate it, they do not guarantee it).
 - **The capability probe itself rejects** (e.g. an injection or environment fault,
   not a domain refusal) → the rejection propagates unchanged from `load` and from
@@ -223,6 +261,15 @@ infrastructure fault in the probe is a third path, noted at the end:
 
 - **Local-only, four properties follow.** Offline-capable, account-free, private,
   cost-free — and no remote fallback; the load failure is the floor, not a server.
+- **Fallback is a chain, not a guarantee.** `load` tries feasible candidates in a
+  cost-aware descent (smaller, then a CPU/WASM runtime) before refusing, so a device
+  is rescued where one would have failed — but a device can have zero feasible
+  candidates, and the chain then honestly refuses. The descent is silent; honesty
+  lives in `resolvedId`, never in a learner opt-in.
+- **Failure causes are delivery-agnostic.** A `LoadFailure` names a typed device or
+  availability cause and **never a product or a "download the app" string**. The
+  consumer owns the cause→guidance mapping (incl. recommending a native runtime);
+  this keeps the local-only / no-server-hatch invariant intact.
 - **Code-oriented, JeJ-agnostic.** It assumes models emit code (a fenced block,
   an optional `<think>` trace) but knows nothing of the JeJ subset, admission, or
   conformance. It is _not_ engine-level domain-free; it is honestly scoped to

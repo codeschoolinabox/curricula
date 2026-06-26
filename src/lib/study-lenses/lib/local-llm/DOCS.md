@@ -29,25 +29,38 @@ that touches a network or a GPU.
    browser does not expose total VRAM). Injectable, so the pure phases below test
    without a real device.
 
-2. **Feasibility & selection** (sync, pure) — input: device capabilities + the
-   catalog + an optional preference; output: a chosen catalog entry, or
-   nothing-feasible. Narrows the catalog to what the device can bring up on a
-   _registered_ runtime (a model whose required WebGPU features the adapter lacks
-   is filtered out), then picks: an explicit named model if feasible, else the
-   **cost-aware default** rung (which weighs the one-time download, not the largest
-   that fits). An explicit named preference is first checked for **catalog
+2. **Feasibility, selection & chain ordering** (sync, pure) — input: device
+   capabilities + the catalog + an optional preference; output: a chosen catalog
+   entry (or nothing-feasible) **and the ordered candidate chain** — the feasible
+   `(model, runtime)` pairs in descent order. Narrows the catalog to what the device
+   can bring up on a _registered_ runtime (a model whose required WebGPU features the
+   adapter lacks is filtered out), then picks: an explicit named model if feasible,
+   else the **cost-aware default** rung (which weighs the one-time download, not the
+   largest that fits). The chain orders the feasible candidates **browser-first then
+   descending-size** — the cost-aware default first, then smaller candidates, then a
+   switch to CPU/WASM — so the ordering is a **pure, upstream** product the loader
+   consumes unre-ordered. An explicit named preference is first checked for **catalog
    membership** — absent ⇒ a precondition throw (a programmer error), _before_ any
    feasibility reasoning; present-but-infeasible ⇒ the nothing-feasible value, kept
-   distinct. This pure result is **reportable on its own** — the feasible set or
-   the chosen entry — answering question one without a bring-up; the loader
-   consumes the same selection. No I/O, no model.
+   distinct (a named model pins to its single artifact — no descent). This pure
+   result is **reportable on its own** — the feasible set or the chosen entry —
+   answering question one without a bring-up. No I/O, no model.
 
-3. **Model bring-up** (async, stateful — seam 1, load-once) — input: a chosen
-   entry + the registered adapters; output: a loaded model, or a load failure.
-   Drives fetch-once / load-once-reuse through the entry's runtime adapter,
-   browser-first; concurrent bring-ups of one model share a single in-flight load;
-   the one-time fetch reports progress; a failed fetch is a returned failure, not a
-   throw. The fetch/cache/run mechanics sit below this seam — the backend's.
+3. **Model bring-up — the fallback chain** (async, stateful — seam 1, load-once) —
+   input: the ordered candidate chain + the registered adapters; output: a loaded
+   model with its resolved candidate, or a typed terminal load failure. The chain
+   tries each candidate in order — the cost-aware default, then smaller, then a
+   switch to a CPU/WASM runtime — bringing each up through its adapter (fetch-once /
+   load-once-reuse, in-flight dedup per resolved id). A candidate's failure is
+   **intermediate**: it is recorded in the attempts ledger and the chain descends to
+   the next. Only an **exhausted** chain refuses, with a terminal cause **promoted
+   from the ledger by precedence** (a pure reduction). The descent is **silent and
+   honest** — the learner never opts in, the chain reports one calm progress
+   narrative (not a per-candidate sequence of download bars), and the winning
+   candidate is named in `resolvedId`. The chain is deterministic given `(selection,
+   capabilities)`, so concurrent identical loads converge on one winner over the
+   shared per-id cache. The fetch/cache/run mechanics sit below this seam — the
+   backend's.
 
 4. **Generation & decomposition** (async — seam 2, the model call; then sync,
    pure) — input: a prompt + a loaded model; output: a decomposed generation
@@ -61,20 +74,27 @@ that touches a network or a GPU.
 ```mermaid
 flowchart TD
     req[("request<br/>(prompt + optional selection)")] -->|"probe device, async<br/>(conservative heuristic)"| caps[("device capabilities<br/>(limits + advertised features)")]
-    catalog[("model catalog<br/>(open data + per-runtime load params)")] -->|"narrow by capabilities, pure"| sel
-    caps -->|"resolve pick / enumerate feasible, pure<br/>(question one — no I/O, no bring-up)"| sel{"a feasible model?"}
-    sel -->|"no — nothing feasible"| fail[("load failure<br/>(a returned value, not a throw)")]
-    sel -->|"yes — chosen entry (reportable on its own)"| up{"bring up via adapter<br/>async stateful (seam 1 —<br/>load-once + in-flight dedup,<br/>progress; fetch/cache below)"}
-    up -->|"fetch failed"| fail
-    up -->|"loaded"| model[("loaded model + resolved pick<br/>(reused thereafter)")]
+    catalog[("model catalog<br/>(open data + per-runtime load params)")] --> chain
+    caps -->|"narrow + order the candidate chain, pure<br/>(catalog × capabilities — question one, no I/O, no bring-up)"| chain{"any feasible candidate?"}
+    chain -->|"no — zero feasible (pre-flight)"| pf[("load failure: no-feasible-model<br/>(no attempts — surfaceable by the pre-flight gate)")]
+    chain -->|"yes — next candidate"| up{"bring up via adapter<br/>async stateful (seam 1 —<br/>load-once + in-flight dedup, progress)"}
+    up -->|"loaded"| model[("loaded model + resolved candidate<br/>(named in resolvedId, reused thereafter)")]
+    up -->|"failed — record, pure"| ledger[("attempts ledger<br/>(≥1 failed candidate; richer cause vocab incl. device-lost)")]
+    ledger -->|"more candidates"| chain
+    ledger -->|"exhausted — promote by precedence, pure"| post[("load failure: terminal cause<br/>(all-candidates-exhausted | fetch-failed | storage-quota | cache-evicted)")]
     model -->|"call the loaded model, async<br/>(seam 2 — non-deterministic)"| raw[("raw output")]
     raw -->|"decompose, pure<br/>(raw byte-exact; code lossy)"| result[("generation result<br/>raw + code + thinkTrace?")]
 ```
 
-The two load-failure causes — nothing-feasible (selection-time, pure) and
-fetch-failed (load-time, impure) — converge on one returned failure state. An
-unknown model name is not on the diagram: it is a precondition throw, not a data
-state (see constraints).
+The chain has **two** failure exits — a **pre-flight** `no-feasible-model`
+(selection-time, pure; no attempts, so the pre-flight gate can show it before any
+bring-up) and a **post-flight** terminal cause (after ≥1 candidate failed). The
+post-flight cause is a **pure reduction** of the attempts ledger by precedence; the
+ledger's richer per-attempt causes (incl. `device-lost`) are **diagnostic**, and the
+terminal value is always one of the four public post-flight causes. Both exits are
+delivery-agnostic typed values — the consumer maps them to guidance (incl. a
+native-app recommendation). An unknown model name is not on the diagram: it is a
+precondition throw, not a data state (see constraints).
 
 ## Structural constraints
 
@@ -86,11 +106,46 @@ state (see constraints).
 - **The generator never judges.** No validation, conformance, or gating runs here;
   `raw` is byte-exact and `code` is a best-effort lossy parse. Any cleaning of
   `raw` would be a defect.
-- **Failure is a value, not a throw.** Both load-failure causes converge on one
-  returned failure; the lone throw is a precondition, evaluated _before_
-  feasibility — an unknown model name (absent from the catalog) is a programmer
-  error, fail-loud, kept distinct from a named-but-infeasible model (which is the
-  nothing-feasible value).
+- **Failure is a value, not a throw.** Every load-failure cause is a returned value
+  — one **pre-flight** cause (`no-feasible-model`, the chain never ran) and a set of
+  **post-flight** causes (the chain was tried and exhausted). The lone throw is a
+  precondition, evaluated _before_ feasibility — an unknown model name (absent from
+  the catalog) is a programmer error, fail-loud, kept distinct from a
+  named-but-infeasible model (which is the nothing-feasible value).
+- **The fallback chain is ordered in the pure phase, consumed in order by bring-up.**
+  Phase 2 (pure) produces the ordered candidate chain; phase 3 (impure) iterates it
+  and never re-orders. The chain is therefore deterministic _before_ any I/O — which
+  is what lets the per-id cache converge concurrent callers (below).
+- **The chain is a descent, never an ascent.** It starts at the cost-aware default
+  and steps toward smaller/cheaper candidates, then switches runtime (browser →
+  CPU/WASM); a model heavier than the default is an explicit opt-in, never silently
+  tried. A device can have zero feasible candidates — the chain then honestly refuses.
+- **Silent honest descent — one calm narrative.** The learner never opts into a
+  fallback; honesty lives in `resolvedId`. Intermediate candidate progress reports
+  under one candidate-agnostic label, never a sequence of per-candidate download bars.
+- **Pinning is artifact-precise.** A named catalog id pins exactly that
+  `(model, runtime, quant)` build and fails loud if infeasible (no descent); to run a
+  model family on whatever runtime works, name a feasible sibling or use the default
+  pick-for-me. `feasibleModels()` lists the runnable sibling.
+- **Failure causes are delivery-agnostic.** A load failure names a typed cause and
+  never a product; the consumer maps a terminal cause to a next step (incl.
+  recommending a native runtime), preserving the local-only / no-server-hatch invariant.
+- **The attempts ledger is diagnostic.** A post-flight failure carries a non-empty
+  per-candidate ledger with a richer cause vocabulary than the public terminal enum
+  (it names `device-lost`/`unknown`), for tests and a future debug/instructor view;
+  the consumer relay does not read it. The terminal cause is promoted from the ledger
+  by precedence — a pure reduction.
+- **Storage-quota is sticky.** A capacity failure does not stop the descent (a
+  smaller candidate may fit), but if even the smallest candidate cannot cache, quota
+  is the terminal cause — partial-fetch cleanup between candidates is the backend's
+  and is not assumed.
+- **Feasibility consumes the probed buffer limits.** `maxBufferBytes` /
+  `maxStorageBufferBindingBytes` gate feasibility, so a WebGPU-limited device is
+  refused at **pre-flight**, not mid-bring-up — a prerequisite of both folding
+  WebGPU-limits into `no-feasible-model` and the browser-first chain ordering.
+- **Convergence assumes a stable capability probe within a session.** The chain
+  re-runs per `load` call; a non-deterministic probe (different capabilities across
+  concurrent calls) breaks per-id-cache convergence and is out of contract.
 - **No-WebGPU is not an automatic refusal.** A registered CPU/WASM runtime with a
   feasible tiny model still loads; only an empty feasible set across _all_
   registered runtimes refuses.
@@ -110,8 +165,9 @@ state (see constraints).
 - **Sampling defaults live in the adapter, per model.** There is no per-call
   sampling override across the seam.
 - **Offline-capability is best-effort.** A fetched-once model runs offline from
-  cache, but eviction can force a refetch that fails offline (a load failure) — the
-  cache is mitigated (durable storage, persisted), not guaranteed.
+  cache, but eviction can force a refetch that fails offline (the `cache-evicted`
+  cause, distinct from `storage-quota`) — the cache is mitigated (durable storage,
+  persisted), not guaranteed.
 
 ## Out of scope
 
@@ -133,6 +189,22 @@ state (see constraints).
   supplies; this sketch covers the catalog's shape and use, not its entries.
 - **JeJ, the language level, pedagogy** — the runtime is JeJ-agnostic; once text
   exists it is an ordinary string the consumer interprets.
+- **Generation-time fallback** — the chain is **load-time only**; once a model is
+  loaded, a failing generation propagates, it does not re-descend.
+- **Mid-generation device-loss** — the load-time `device-lost` outcome (a GPU drop
+  _during bring-up_) is recorded in the attempts ledger and folds to
+  `all-candidates-exhausted`; recovering from a device lost _during generation_ is
+  not in scope.
+- **Chain cancellation** — `load` takes no `AbortSignal`; cancelling a long
+  multi-candidate descent is a real future need the chain creates, but is not
+  modelled here.
+- **The cause→guidance render surface** — mapping a terminal cause to copy/a
+  download URL (incl. naming a product) is the consumer's; this module emits only a
+  delivery-agnostic cause.
+- **The repetition guard, the desktop shell build, and the second/third adapters** —
+  the per-model sampling guard against tiny-model degeneration, the native shell that
+  the terminal refusal points at, and the CPU/WASM + local-server adapters are
+  downstream build work, not this sketch's contract.
 
 ## Related
 

@@ -252,29 +252,104 @@ type Selection = {
 
 /**
  * Why no model could be brought up — this module's own refusal vocabulary, which
- * consumers re-map (aithor collapses both to `no-model-available`).
+ * consumers re-map (aithor collapses every cause to `no-model-available`, then
+ * derives an actionable next step). `load` tries a CHAIN of feasible
+ * `(model, runtime)` candidates; a cause is either **pre-flight** (the chain never
+ * ran) or **post-flight** (a candidate was attempted and failed) — see
+ * {@link LoadFailure}. Causes are **delivery-agnostic**: a cause names a device or
+ * availability limit, never a product or a "download the app" string — the
+ * consumer owns that mapping.
  *
  * @remarks
- * - `'no-feasible-model'` — selection-time (pure): no catalog entry fits the
- *   device on any registered runtime, or a named model is not feasible.
- * - `'fetch-failed'` — load-time (impure): a model's one-time weight fetch failed
- *   (network down, or a cache evicted while offline and unrefetchable).
+ * - `'no-feasible-model'` — **pre-flight** (selection-time, pure): zero feasible
+ *   candidates — no catalog entry fits the device on any registered runtime (no
+ *   WebGPU and no CPU/WASM candidate, WebGPU limits below every candidate, or a
+ *   named model not feasible). The pre-flight gate can surface this BEFORE any
+ *   bring-up. Terminal — the consumer recommends a native runtime.
+ * - `'all-candidates-exhausted'` — **post-flight** terminal: feasible candidates
+ *   existed but every one failed bring-up with mixed/device causes. Only knowable
+ *   AFTER attempting (not pre-flight-surfaceable). Terminal — the consumer
+ *   recommends a native runtime.
+ * - `'fetch-failed'` — **post-flight**: a candidate's one-time weight fetch failed
+ *   reachable-but-failed (network). Retriable; the terminal cause when every
+ *   candidate failed this way.
+ * - `'storage-quota'` — **post-flight**: a candidate's weights could not be cached
+ *   (capacity). The actionable next step is freeing disk space.
+ * - `'cache-evicted'` — **post-flight**: a previously-cached candidate was evicted
+ *   and cannot be refetched offline. The next step is reconnecting (or a native
+ *   runtime for durable offline).
  *
  * An UNKNOWN model name (absent from the catalog) is NOT a cause — it is a
- * programmer error and throws, never a {@link LoadFailure}.
+ * programmer error and throws, never a {@link LoadFailure}. `'device-lost'` is NOT
+ * a public cause: a GPU dropping during bring-up is recorded per-candidate in the
+ * diagnostic {@link LoadAttempt.cause} and folds to `'all-candidates-exhausted'`.
  */
-type LoadFailureCause = 'no-feasible-model' | 'fetch-failed';
+type LoadFailureCause =
+	| 'no-feasible-model'
+	| 'all-candidates-exhausted'
+	| 'fetch-failed'
+	| 'storage-quota'
+	| 'cache-evicted';
 
-/** The structured refusal: a named cause, never a half-loaded model. */
-type LoadFailure = {
-	readonly ok: false;
-	readonly cause: LoadFailureCause;
+/**
+ * The cause vocabulary for ONE candidate's failed bring-up — a DIAGNOSTIC ledger
+ * cause, deliberately richer than the consumer-facing {@link LoadFailureCause}: it
+ * names `'device-lost'` (GPU dropped during bring-up) and `'unknown'`
+ * (undiscriminated) honestly per-attempt without bloating the public terminal
+ * vocabulary. The chain promotes a terminal {@link LoadFailureCause} from these by
+ * precedence; this richer set is never surfaced to the consumer.
+ */
+type AttemptCause =
+	| 'fetch-failed'
+	| 'storage-quota'
+	| 'cache-evicted'
+	| 'device-lost'
+	| 'unknown';
+
+/**
+ * One candidate's bring-up outcome in the fallback chain — the honest per-attempt
+ * ledger entry. DIAGNOSTIC: read by tests and a future debug/instructor view, NOT
+ * by the consumer relay (which reads only the terminal {@link LoadFailure.cause}).
+ */
+type LoadAttempt = {
+	readonly id: string;
+	readonly runtime: RuntimeKind;
+	readonly cause: AttemptCause;
 	readonly detail?: string;
 };
 
 /**
+ * The structured refusal: a named cause, never a half-loaded model. A pre-flight /
+ * post-flight discriminated union on `cause` — `'no-feasible-model'` is the only
+ * pre-flight cause (the chain never ran, so there are no attempts); every other
+ * cause is **post-flight** and carries a NON-EMPTY `attempts` ledger (≥1 candidate
+ * was tried and failed). The non-empty tuple makes an empty ledger on a
+ * post-flight failure a compile error — the contract's forcing function for the
+ * TDD chain. `detail` is a human-readable message (dev/log/instructor-facing, and
+ * the only failure field a string-only seam can carry); the structured `attempts`
+ * ledger is diagnostic.
+ */
+type LoadFailure =
+	| {
+			readonly ok: false;
+			readonly cause: 'no-feasible-model';
+			readonly detail?: string;
+	  }
+	| {
+			readonly ok: false;
+			readonly cause: Exclude<LoadFailureCause, 'no-feasible-model'>;
+			readonly detail?: string;
+			readonly attempts: readonly [LoadAttempt, ...LoadAttempt[]];
+	  };
+
+/**
  * A successful load. The resolved pick is always REPORTED (a heuristic default is
- * never a black box): `resolvedId` and `resolvedRuntime` name what was chosen.
+ * never a black box): `resolvedId` and `resolvedRuntime` name what was chosen —
+ * the WINNING candidate of the fallback chain. `resolvedId` stays honest across a
+ * runtime switch by construction: each `(model, runtime, quant)` build is its own
+ * catalog entry with its own id (the shared `family` field groups builds of one
+ * model), so a chain that descends or switches runtime reports the artifact that
+ * actually ran, never the requested one.
  */
 type LoadSuccess = {
 	readonly ok: true;
@@ -353,6 +428,8 @@ export type {
 	CapabilityProbe,
 	Selection,
 	LoadFailureCause,
+	AttemptCause,
+	LoadAttempt,
 	LoadFailure,
 	LoadSuccess,
 	LoadResult,
