@@ -2058,3 +2058,138 @@ describe('<StudyLenses> — Cycle 3 C1-C2 the dock run-limits slot (seed + updat
 		});
 	});
 });
+
+describe('<StudyLenses> — Cycle 3 C4 the dock Run wiring (intercept + run-state + outcome)', () => {
+	describe('Zero — idle before any run', () => {
+		it('reports the idle run-state and no outcome before any run', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('idle');
+			expect(
+				container.querySelector('[data-orchestrator-dock-outcome]'),
+			).toBeNull();
+		});
+	});
+
+	describe('Interface — the run-state passes through running', () => {
+		it('enters the running run-state synchronously on a Run click, before the result settles', async () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			// The kick commits 'running' synchronously; the resolved `.result`
+			// has NOT flushed yet (it sits on a microtask), so the dock shows
+			// 'running' at this point — this pins setRunState('running') before
+			// the await.
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('running');
+			// Flush the settle so the run resolves on a mounted tree (no dangling
+			// update / unhandled rejection).
+			await act(async () => {});
+		});
+	});
+
+	describe('One — a run settles with the real terminal outcome', () => {
+		it('a run of EVAL_ERROR settles with the errored outcome', async () => {
+			const { container } = render(<StudyLenses snippet="EVAL_ERROR" />);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			await act(async () => {});
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('settled');
+			expect(
+				container.querySelector<HTMLElement>('[data-orchestrator-dock-outcome]')
+					?.dataset.orchestratorDockOutcome,
+			).toBe('errored');
+		});
+	});
+
+	describe('Many — each scenario settles with its own outcome (rendered verbatim)', () => {
+		// These exercise the dock rendering the verbatim terminal outcome across
+		// the union — NOT the cancel wire (that is C5; here EVAL_CANCELLED is just
+		// a canned terminal outcome, reached without ever calling handle.cancel()).
+		// Six of the seven EndReportOutcome members are covered (these four +
+		// EVAL_ERROR above + FAIL_AT_PARSE below). 'failed' has NO canned scenario
+		// — it rides EvaluateHandle.fail(), which no stub wires — so it is
+		// structurally unreachable through any current integration path; the dock
+		// renders it verbatim through the same null-or-value branch regardless.
+		it.each([
+			['EVAL_TIMEOUT', 'timed-out'],
+			['EVAL_LIMIT', 'limit-exceeded'],
+			['EVAL_CANCELLED', 'cancelled'],
+			['OK', 'completed'],
+		])('a run of %s settles with outcome %s', async (snippet, expected) => {
+			const { container } = render(<StudyLenses snippet={snippet} />);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			await act(async () => {});
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('settled');
+			expect(
+				container.querySelector<HTMLElement>('[data-orchestrator-dock-outcome]')
+					?.dataset.orchestratorDockOutcome,
+			).toBe(expected);
+		});
+	});
+
+	describe('Boundary — a below-parse scenario settles not-runnable verbatim', () => {
+		it('a run of FAIL_AT_PARSE settles with the not-runnable outcome', async () => {
+			const { container } = render(<StudyLenses snippet="FAIL_AT_PARSE" />);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			await act(async () => {});
+			expect(
+				container.querySelector<HTMLElement>('[data-orchestrator-dock-outcome]')
+					?.dataset.orchestratorDockOutcome,
+			).toBe('not-runnable');
+		});
+	});
+
+	describe('Exception — a re-click while running is ignored (single run)', () => {
+		it('ignores a Run re-click while a run is in flight (intercept fires once)', async () => {
+			// The double-click guard (`if (runState === 'running') return`) leans on
+			// the click handler re-binding each render: the first click commits
+			// 'running', so the second click's handler sees it and bails. Prove it by
+			// counting intercept() calls — a wrapped embody exposes each call. (One
+			// call after two clicks confirms the render-closure guard suffices; no
+			// ref shadow is needed, matching handleSandboxToggle.)
+			const realEmbody = embodyModule.default;
+			const interceptSpy = vi.fn();
+			const embodySpy = vi
+				.spyOn(embodyModule, 'default')
+				.mockImplementation((code) => {
+					const snippet = realEmbody(code);
+					return {
+						...snippet,
+						evaluation: {
+							...snippet.evaluation,
+							events: {
+								...snippet.evaluation.events,
+								intercept: (options) => {
+									interceptSpy();
+									return snippet.evaluation.events.intercept(options);
+								},
+							},
+						},
+					};
+				});
+			try {
+				const { container } = render(<StudyLenses snippet="OK" />);
+				const run = container.querySelector('[data-orchestrator-dock-run]')!;
+				fireEvent.click(run);
+				fireEvent.click(run);
+				await act(async () => {});
+				expect(interceptSpy).toHaveBeenCalledTimes(1);
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+	});
+});

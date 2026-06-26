@@ -25,6 +25,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -49,6 +54,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -72,6 +82,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -98,6 +113,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			fireEvent.click(
@@ -123,6 +143,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -147,6 +172,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -174,6 +204,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			fireEvent.click(
@@ -199,6 +234,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -221,6 +261,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -243,6 +288,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			const describedBy = container
@@ -269,6 +319,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -292,6 +347,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -318,6 +378,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			const controlsId = container
@@ -346,6 +411,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -370,6 +440,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -394,6 +469,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -416,6 +496,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -442,6 +527,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -464,6 +554,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -486,6 +581,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -508,6 +608,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -532,6 +637,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -556,6 +666,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -583,6 +698,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			fireEvent.click(
@@ -607,6 +727,11 @@ describe('Dock', () => {
 					onDebuggerToggle={onDebuggerToggle}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			fireEvent.click(
@@ -632,6 +757,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -656,6 +786,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -680,6 +815,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -704,6 +844,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			expect(
@@ -728,6 +873,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 10, iterations: 500 }}
 					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			const seconds = container.querySelector<HTMLInputElement>(
@@ -762,6 +912,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={onLimitChange}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			fireEvent.change(
@@ -787,6 +942,11 @@ describe('Dock', () => {
 					onDebuggerToggle={() => {}}
 					runLimits={{ seconds: 5, iterations: 1000 }}
 					onLimitChange={onLimitChange}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
 				/>,
 			);
 			fireEvent.change(
@@ -794,6 +954,324 @@ describe('Dock', () => {
 				{ target: { value: '500' } },
 			);
 			expect(onLimitChange).toHaveBeenCalledWith('iterations', 500);
+		});
+	});
+
+	describe('Zero — the run control idle state', () => {
+		it('renders the run control carrying the idle run-state', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('idle');
+		});
+
+		it('renders no outcome while idle even when an outcome value is supplied', () => {
+			// Orthogonality lock: the outcome is present IFF run-state is settled.
+			// A naive `{outcome !== null && …}` (ignoring run-state) would render it
+			// here — this kills that fake.
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+					runState="idle"
+					outcome="errored"
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-dock-outcome]'),
+			).toBeNull();
+		});
+	});
+
+	describe('One — the running run-state', () => {
+		it('renders the run control carrying the running run-state and no outcome', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+					runState="running"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('running');
+			expect(
+				container.querySelector('[data-orchestrator-dock-outcome]'),
+			).toBeNull();
+		});
+	});
+
+	describe('Boundary — the settled outcome', () => {
+		it('renders the outcome verbatim when settled', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+					runState="settled"
+					outcome="errored"
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('settled');
+			expect(
+				container.querySelector<HTMLElement>('[data-orchestrator-dock-outcome]')
+					?.dataset.orchestratorDockOutcome,
+			).toBe('errored');
+		});
+
+		it('renders a different settled outcome value verbatim (no hardcoded outcome)', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+					runState="settled"
+					outcome="timed-out"
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector<HTMLElement>('[data-orchestrator-dock-outcome]')
+					?.dataset.orchestratorDockOutcome,
+			).toBe('timed-out');
+		});
+	});
+
+	describe('Many — the output channels', () => {
+		it('renders each line of the user-interface channel', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+					runState="settled"
+					outcome="completed"
+					output={{
+						'user-interface': ['first dialog', 'second dialog'],
+						'developer-console': [],
+					}}
+					onRun={() => {}}
+					onCancel={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-dock-channel="user-interface"]',
+				)?.childElementCount,
+			).toBe(2);
+		});
+
+		it('renders each channel independently of the other (no cross-contamination)', () => {
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+					runState="settled"
+					outcome="completed"
+					output={{
+						'user-interface': ['only the ui line'],
+						'developer-console': ['console one', 'console two'],
+					}}
+					onRun={() => {}}
+					onCancel={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-dock-channel="user-interface"]',
+				)?.childElementCount,
+			).toBe(1);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-dock-channel="developer-console"]',
+				)?.childElementCount,
+			).toBe(2);
+		});
+	});
+
+	describe('Interface — the run and cancel affordances', () => {
+		it('clicking the run control calls onRun once', () => {
+			const onRun = vi.fn();
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={onRun}
+					onCancel={() => {}}
+				/>,
+			);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			expect(onRun).toHaveBeenCalledOnce();
+		});
+
+		it('clicking the cancel control calls onCancel once', () => {
+			const onCancel = vi.fn();
+			const { container } = render(
+				<Dock
+					collapsed={false}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+					runState="running"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={onCancel}
+				/>,
+			);
+			fireEvent.click(
+				container.querySelector('[aria-label="cancel the run"]')!,
+			);
+			expect(onCancel).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('Boundary — the run control survives collapse', () => {
+		it('keeps the run control reachable when collapsed', () => {
+			// The run affordance + output surface live OUTSIDE the collapsible
+			// controls strip (the controls hide on collapse; Run stays reachable).
+			const { container } = render(
+				<Dock
+					collapsed={true}
+					onCollapseToggle={() => {}}
+					sourceType="module"
+					scriptModeHintVisible={false}
+					onTypeToggle={() => {}}
+					sandboxMode="worker"
+					dangerAvailable={false}
+					debuggerEnabled={false}
+					onSandboxToggle={() => {}}
+					onDebuggerToggle={() => {}}
+					runLimits={{ seconds: 5, iterations: 1000 }}
+					onLimitChange={() => {}}
+					runState="idle"
+					outcome={null}
+					output={{ 'user-interface': [], 'developer-console': [] }}
+					onRun={() => {}}
+					onCancel={() => {}}
+				/>,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-dock-run]'),
+			).not.toBeNull();
 		});
 	});
 });

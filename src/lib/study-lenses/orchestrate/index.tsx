@@ -47,7 +47,13 @@ import debounce from '@utils/debounce.js';
 
 import deepMerge from '../../utils/deep-merge.js';
 import embody from '../embody/index.js';
-import type { SnippetType } from '../embody/types.js';
+import type {
+	EvaluateHandle,
+	EvaluateOptions,
+	IoMocks,
+	RunInstance,
+	SnippetType,
+} from '../embody/types.js';
 import annotateLens from '../lenses/annotate/index.js';
 import blanksLens from '../lenses/blanks/index.js';
 import debugPropertiesLens from '../lenses/debug-props/index.js';
@@ -71,6 +77,9 @@ import type {
 	LensSelectionSource,
 	OrchestratorConfig,
 	OrchestratorState,
+	ChannelKind,
+	DockRunState,
+	EndReportOutcome,
 	RunLimits,
 	SandboxMode,
 	StationStatusMap,
@@ -140,6 +149,28 @@ const DEFAULT_RUN_LIMITS: RunLimits = Object.freeze({
 	seconds: 5,
 	iterations: 1000,
 });
+
+/**
+ * The dock's empty output state — both channels with zero lines. Frozen; the
+ * `channelOutput` slot seeds here and (C5) resets to it at the top of each run.
+ * Each run's IoMocks append via frozen functional updaters that mint a fresh
+ * channel object, never mutating this shared value.
+ */
+const EMPTY_CHANNELS: Readonly<Record<ChannelKind, readonly string[]>> =
+	Object.freeze({
+		'user-interface': Object.freeze([]),
+		'developer-console': Object.freeze([]),
+	});
+
+/**
+ * Terminal rejection sink for a run's `.result` chain. `.result` resolves today
+ * (an EmbodyError rides `endReport.error`, never a rejection), so this is
+ * defense-in-depth: if a future engine ever rejects, swallow it here so an
+ * unhandled rejection can't crash the tree — the prior run-state simply stands.
+ */
+function ignoreRunSettleRejection(): void {
+	// Intentionally empty — see the doc comment above.
+}
 
 /**
  * Single-pass initial derivation of `{ state, liveEmbodiment }` from the
@@ -721,6 +752,106 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			);
 		}
 
+		// Dock run lifecycle — the orchestrator OWNS the run. Run kicks the live
+		// embodiment's evaluate surface via `intercept()` ALONE (run() has no
+		// cancel; only intercept() returns the EvaluateHandle with .cancel/.result,
+		// held in a lazy-null ref so Cancel — C5 — can reach it). The transport
+		// machine is idle → running → settled; `outcome` carries the verbatim
+		// terminal classification, surfaced only once settled. Channel output
+		// accumulates through the IoMocks' frozen functional updaters (no mutable
+		// closures, DEV.md §8); the canned scenario handles resolve `.result`
+		// without driving io, so accumulation is exercised at the dock leaf, not
+		// through these integration paths. Selects no danger backend (deferred).
+		const [runState, setRunState] = React.useState<DockRunState>('idle');
+		const [outcome, setOutcome] = React.useState<EndReportOutcome | null>(null);
+		const [channelOutput, setChannelOutput] =
+			React.useState<Readonly<Record<ChannelKind, readonly string[]>>>(
+				EMPTY_CHANNELS,
+			);
+		const handleReference = React.useRef<EvaluateHandle | null>(null);
+
+		// Append one line to a channel via a functional updater minting a fresh
+		// FROZEN channel object — never a mutable accumulator. Closes over the
+		// stable setState setter (the legal closure case), so each run's mocks see
+		// the latest channel state.
+		function appendChannelLine(channel: ChannelKind, line: string): void {
+			setChannelOutput((previous) =>
+				Object.freeze({
+					...previous,
+					[channel]: Object.freeze([...previous[channel], line]),
+				}),
+			);
+		}
+
+		// The run's IoMocks route user-facing dialogs to 'user-interface' and
+		// console.* to 'developer-console'. confirm/prompt RETURN a value AND
+		// append (the engine awaits each); the defaults are the safe dismiss
+		// answers. Built fresh per run inside handleRun.
+		function buildIoMocks(): IoMocks {
+			// The three user-facing mocks (alert/confirm/prompt) all write this
+			// channel; console.* is the lone developer-console writer (inline below).
+			const userInterfaceChannel: ChannelKind = 'user-interface';
+			return {
+				alert(message) {
+					appendChannelLine(userInterfaceChannel, message);
+				},
+				confirm(message) {
+					appendChannelLine(userInterfaceChannel, message);
+					return false;
+				},
+				prompt(message) {
+					appendChannelLine(userInterfaceChannel, message);
+					return null;
+				},
+				console: {
+					log(...arguments_) {
+						appendChannelLine('developer-console', arguments_.join(' '));
+					},
+				},
+			};
+		}
+
+		// EvaluateOptions thread the learner-facing run limits + the channel mocks.
+		function buildEvaluateOptions(): EvaluateOptions {
+			return {
+				seconds: runLimits.seconds,
+				iterations: runLimits.iterations,
+				io: buildIoMocks(),
+			};
+		}
+
+		// Run is a CLICK-HANDLER kickoff only (effects double-fire under
+		// StrictMode). Guards: ignore a re-click while running; bail with no live
+		// embodiment. `setRunState('running')` + clear the prior outcome commit
+		// synchronously BEFORE the await; the resolved `.result` then commits
+		// outcome + 'settled' atomically (React 18 batches them in the microtask).
+		// The terminal `.catch` is defense-in-depth (`.result` resolves today,
+		// errors riding endReport.error); the AsyncIterable is never drained
+		// (abandoning a `for await` is the unhandled-rejection trap). Channel reset
+		// on rerun is C5.
+		function handleRun(): void {
+			if (runState === 'running') return;
+			if (liveEmbodiment === null) return;
+			setRunState('running');
+			setOutcome(null);
+			function commitOutcome(runInstance: RunInstance): void {
+				setOutcome(runInstance.endReport.outcome);
+				setRunState('settled');
+			}
+			const handle = liveEmbodiment.embodiment.evaluation.events.intercept(
+				buildEvaluateOptions(),
+			);
+			handleReference.current = handle;
+			handle.result.then(commitOutcome).catch(ignoreRunSettleRejection);
+		}
+
+		// Cancel reaches the held EvaluateHandle's cancel() — idempotent /
+		// first-write-wins, and a no-op before the first run (ref null) or after the
+		// run already settled. Reset-on-rerun is C5.
+		function handleCancel(): void {
+			handleReference.current?.cancel();
+		}
+
 		// The panel's active lens is derived from state, NOT held in a
 		// panel-side slot. State remains the single source of truth (per
 		// README § Picker-vs-prop ownership). Lens mode names the active
@@ -795,6 +926,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 							onDebuggerToggle={handleDebuggerToggle}
 							runLimits={runLimits}
 							onLimitChange={handleLimitChange}
+							runState={runState}
+							outcome={outcome}
+							output={channelOutput}
+							onRun={handleRun}
+							onCancel={handleCancel}
 						/>
 					</section>
 				</div>
@@ -836,6 +972,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						onDebuggerToggle={handleDebuggerToggle}
 						runLimits={runLimits}
 						onLimitChange={handleLimitChange}
+						runState={runState}
+						outcome={outcome}
+						output={channelOutput}
+						onRun={handleRun}
+						onCancel={handleCancel}
 					/>
 				</section>
 			</div>
