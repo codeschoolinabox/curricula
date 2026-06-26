@@ -14,8 +14,8 @@ A [`LensModule`](../types.ts) like any other:
 
 - `name`: `"trace-debugging"`
 - `Component`: a React wrapper that, on a **Run** click, kicks off a trace run
-  through the `embodiment` prop's `traceVariableLifecycle`, streams events into a
-  `<pre>` dump, shows the settlement, and exposes **Stop** plus a **seconds**
+  through the `embodiment` prop's `traceVariableLifecycle`, streams events into
+  a `<pre>` dump, shows the settlement, and exposes **Stop** plus a **seconds**
   input.
 - `config`: returns a frozen empty object by default; merging external overrides
   follows the same merge-and-freeze shape as [`debug-props`](../debug-props/).
@@ -25,6 +25,9 @@ A [`LensModule`](../types.ts) like any other:
   reject. The embody method's JSDoc makes this explicit: its guard is inverted
   vs the NM tiers, so it says _"Guard with `try/catch` instead"_
   ([`../../embody/types.ts`](../../embody/types.ts) § `traceVariableLifecycle`).
+  Consequence for the UI: **Run stays enabled** for every snippet —
+  inadmissibility is unknowable before the call, so it surfaces only as a
+  post-click admission-error dump, never as a pre-flight disabled control.
 - `recommend`: always `[]`. Recommender-inert; the lens never surfaces in the
   Q-II recommendations panel.
 - `phase`: deliberately **ABSENT** — panel-excluded. The lens teaches no
@@ -51,19 +54,18 @@ later pedagogical surface); it is the harness that makes the tracer legible.
 
 ## Glossary
 
-The lens's ubiquitous language. Tracer-owned vocabulary (the six event
-variants, _halt_, _engine error_, _value snapshot_) is **consumed, not
-redefined** — see
+The lens's ubiquitous language. Tracer-owned vocabulary (the six event variants,
+_halt_, _engine error_, _value snapshot_) is **consumed, not redefined** — see
 [`../../embody/lib/evaluating/tracers/variables/README.md`](../../embody/lib/evaluating/tracers/variables/README.md).
 
 - **Trace run** — one end-to-end consumption of a `VariablesTraceHandle`: the
   call, the streamed events, and the terminal settlement.
 - **Run state** — the lens's UI lifecycle phase: `idle` (no run kicked off),
   `running` (handle live, events streaming), `settled` (a settlement arrived),
-  `admission-error` (the call threw synchronously; no run happened). The exported
-  type is `TraceRunState` (prefixed to avoid colliding with `lib/engine`'s own
-  `RunState` record). `settled` covers all five settlement _outcomes_; only the
-  pre-run synchronous throw lands in `admission-error`.
+  `admission-error` (the call threw synchronously; no run happened). The
+  exported type is `TraceRunState` (prefixed to avoid colliding with
+  `lib/engine`'s own `RunState` record). `settled` covers all five settlement
+  _outcomes_; only the pre-run synchronous throw lands in `admission-error`.
 - **Streamed event** — one `VariablesTraceEvent` pulled from the handle's async
   iteration and appended verbatim to the events dump (one of the six lifecycle
   variants).
@@ -78,9 +80,9 @@ redefined** — see
   source, unparseable source, or a JEJ-valid-but-unsupported construct. This is
   the embody method's own framing — _"inadmissible input … THROWS synchronously
   at the call"_ ([`../../embody/types.ts`](../../embody/types.ts) §
-  `traceVariableLifecycle`). It **subsumes** the tracer's JEJ admission gate (the
-  non-JEJ shape is one of the four); it is NOT a synonym for that validate-phase
-  gate alone, nor for embody's `validation.isJeJ` admission.
+  `traceVariableLifecycle`). It **subsumes** the tracer's JEJ admission gate
+  (the non-JEJ shape is one of the four); it is NOT a synonym for that
+  validate-phase gate alone, nor for embody's `validation.isJeJ` admission.
 - **Admission error (text)** — the formatted, human-readable string the lens
   shows for an admission throw.
 - **Channel 1 / Channel 2** — the synchronous-throw error channel (caught by
@@ -118,24 +120,32 @@ The lens is **pure** against the embodiment (see the lenses peer's
   Breaking the `for await` equals `cancel()`.
 - **Two error channels:**
   - **Channel 1 (synchronous admission throw)** — the call throws at the call
-    site on inadmissible input, so the call is wrapped in `try/catch`. Four throw
-    shapes, with pairwise-disjoint detection: a plain `Error` whose message
-    carries one of three stable prefixes (`canned scenario`, `not valid
-    JavaScript`, `not Just-Enough-JavaScript`), or a structurally-branded
+    site on inadmissible input, so the call is wrapped in `try/catch`. Four
+    throw shapes, with pairwise-disjoint detection: a plain `Error` whose
+    message **contains** one of three stable message **substrings**
+    (`not available on canned scenario`, `not valid JavaScript`,
+    `not Just-Enough-JavaScript`), matched with `.includes` — NOT `.startsWith`:
+    the real messages are prefixed `traceVariableLifecycle:` (embody,
+    `../../embody/index.ts`) / `traceVariables:` (the tracer gate,
+    `../../embody/lib/evaluating/tracers/variables/trace-variables.ts`), so
+    these tokens are interior. The text is authored by the embody/tracer tier,
+    not this lens — a tier-side wording change is a breaking change for this
+    classifier. The other shape is a structurally-branded
     `InstrumentBoundaryError` (carries an own `instrumentBoundary === true`
     discriminant and a `reason`). The boundary error is **not** on the embody
-    re-export surface, so it is detected by its structural brand, never by a type
-    import. **Detection order is load-bearing:** because `InstrumentBoundaryError`
-    _extends_ `Error`, the structural brand is checked **first** and the three
-    message prefixes **second** — otherwise a branded error whose message
-    happened to contain a prefix substring would mis-route.
-  - **Channel 2 (settlement)** — a run that proceeds ends only through `await
-    result`, never by throwing. The settlement carries one of five outcomes;
-    cancel and timeout are settlement _outcomes_, not errors. This lens exposes
-    no `fail()` control (Stop maps to `cancel()`), so the `failed` outcome does
-    not arise from user action — but the settlement display model handles all
-    five outcomes faithfully (retaining `failReason`), so a `failed` settlement
-    from any source still renders legibly.
+    re-export surface, so it is detected by its structural brand, never by a
+    type import. **Detection order is load-bearing:** because
+    `InstrumentBoundaryError` _extends_ `Error`, the structural brand is checked
+    **first** and the three message substrings **second** — otherwise a branded
+    error whose message happened to contain one of these substrings would
+    mis-route.
+  - **Channel 2 (settlement)** — a run that proceeds ends only through
+    `await result`, never by throwing. The settlement carries one of five
+    outcomes; cancel and timeout are settlement _outcomes_, not errors. This
+    lens exposes no `fail()` control (Stop maps to `cancel()`), so the `failed`
+    outcome does not arise from user action — but the settlement display model
+    handles all five outcomes faithfully (retaining `failReason`), so a `failed`
+    settlement from any source still renders legibly.
 
 ## Public API
 
@@ -143,7 +153,10 @@ The default export is a `LensModule` whose `Component` accepts the standard
 [`LensProps`](../types.ts):
 
 ```tsx
-<TraceDebuggingLens.Component embodiment={frozenSnippet} config={resolvedConfig} />
+<TraceDebuggingLens.Component
+	embodiment={frozenSnippet}
+	config={resolvedConfig}
+/>
 ```
 
 The wrapper renders a root element carrying `data-lens="trace-debugging"` and a
@@ -158,17 +171,19 @@ These selectors are stable; renaming or removing one is a contract change.
 ## How to navigate the code
 
 - `index.tsx` — default export: the `LensModule` with the React `Component`.
-  Owns the click-kickoff Run, the Stop/seconds controls, the three dumps, and the
-  cleanup-cancel / cancel-on-embodiment-identity lifecycle.
+  Owns the click-kickoff Run, the Stop/seconds controls, the three dumps, and
+  the cleanup-cancel / cancel-on-embodiment-identity lifecycle.
 - `core.ts` — pure-TS derivation: `formatEvent`, `deriveSettlementModel`,
-  `formatAdmissionError`. No React, no async; testable in vitest without `jsdom`.
+  `formatAdmissionError`. No React, no async; testable in vitest without
+  `jsdom`.
 - `run-trace.ts` — the async orchestration seam: owns the call (channel-1
-  `try/catch`), the drain, the settle (channel 2), and idempotent cancel. It
-  exists for **Node-testability, not reuse** — see [`./DOCS.md`](./DOCS.md).
+  `try/catch`), the drain, the settle (channel 2), and idempotent cancel. It is
+  extracted for **Node-testability** (reuse by a future prediction lens is
+  plausible but not a current goal) — see [`./DOCS.md`](./DOCS.md).
 - `types.ts` — `TraceRunState`, `SettlementDisplayModel`, and the seam types.
 - `tests/core.test.ts` — vitest, no jsdom. ZOMBIES coverage of the pure core.
-- `tests/run-trace.test.ts` — the seam driven against a fake handle (no jsdom, no
-  Worker).
+- `tests/run-trace.test.ts` — the seam driven against a fake handle (no jsdom,
+  no Worker).
 - `tests/component.test.tsx` — vitest + jsdom + `@testing-library/react`. Drives
   the wrapper with a **faked `embodiment` prop** (no `vi.mock`).
 - `tests/trace-debugging.browser.test.ts` — real Worker; drives the seam against
@@ -202,8 +217,8 @@ Follows all conventions in [`../README.md`](../README.md) and
 - **Type contract**: [`./types.ts`](./types.ts).
 - **Lens contract**: [`../types.ts`](../types.ts) — `LensModule` + `LensProps` +
   `LensConfig`.
-- **Embodiment contract**: [`../../embody/types.ts`](../../embody/types.ts) — the
-  `Snippet` the lens consumes and the `traceVariableLifecycle` method.
+- **Embodiment contract**: [`../../embody/types.ts`](../../embody/types.ts) —
+  the `Snippet` the lens consumes and the `traceVariableLifecycle` method.
 - **The tracer it ultimately drives**:
   [`../../embody/lib/evaluating/tracers/variables/`](../../embody/lib/evaluating/tracers/variables/).
 - **Orchestrator that mounts this lens**:

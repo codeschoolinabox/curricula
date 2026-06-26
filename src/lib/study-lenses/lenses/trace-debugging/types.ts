@@ -135,8 +135,10 @@ type RunTraceCallbacks = Readonly<{
  * can cancel immediately. `done` resolves after the drain completes AND
  * `onSettlement` has fired; the wrapper ignores it (`void`), tests await it for
  * determinism. `done` resolves on EVERY path and never rejects: the seam wraps
- * the drain in a `try/finally` that cancels on any abnormal exit and catches
- * callback throws — so the wrapper may ignore it without a `.catch`.
+ * the drain in a `try/finally` whose cancel is **itself guarded** (the handle's
+ * `cancel` is contracted idempotent but NOT no-throw — it forwards bare to the
+ * engine's worker/iframe teardown — so a throwing cancel is swallowed) and which
+ * catches callback throws — so the wrapper may ignore it without a `.catch`.
  */
 type TraceController = Readonly<{
 	cancel: () => void;
@@ -152,8 +154,8 @@ type TraceController = Readonly<{
  * backpressure, so an abandoned `for await` would hang the worker and leave
  * `result` pending forever. The drain MUST pull every event to `{ done: true }`
  * or route through `cancel()` (break-out == cancel) — it never early-returns out
- * of the loop without draining (a `try/finally` cancel guarantees this on any
- * abnormal exit). The tracer's `result` getter re-maps the settled engine promise
+ * of the loop without draining (a `try/finally` with a guarded cancel guarantees
+ * this on any abnormal exit). The tracer's `result` getter re-maps the settled engine promise
  * on each access (a fresh `.then`), so the seam reads it exactly once — a
  * cleanliness discipline (avoid the redundant re-map), not a correctness need; a
  * second read would be harmless.
