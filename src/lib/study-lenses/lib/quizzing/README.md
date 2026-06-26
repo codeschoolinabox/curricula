@@ -89,13 +89,16 @@ correspondence where it needs it (the same posture as the
 
 **Group key** (propagation group) — the identity string that ties together the
 `QuizItem`s that share mastery credit, so answering one can credit its group.
-The group key is keyed on the **classification axis its form uses**: the
-category-ID form keys on `Category` (group key `category:<category>`);
-role-aware forms narrow to category-and-role; binding-aware forms key on binding
-identity; block and loop forms key on their structural anchor. Quizzing decides
-what a group is _keyed_ on; the lens decides how a completed group is
-_presented_. The group key is deterministic from `(snippet, classified, filter)`
-— it never depends on a lens display choice quizzing never receives.
+The group key is keyed on the **classification axis its form uses**, namespaced
+by axis: classification forms — the category-ID form and later role-aware forms
+— key on `category:<category>`, refined to `category:<category>:<role>` where
+the token carries a role (`identifier` and `keyword` are role-less, so they key
+on the bare category); binding-aware forms key on binding identity
+(`binding:<start>-<end>`, the declaration-site span); block and loop forms key
+on their structural anchor. Quizzing decides what a group is _keyed_ on; the
+lens decides how a completed group is _presented_. The group key is
+deterministic from `(snippet, classified, filter)` — it never depends on a lens
+display choice quizzing never receives.
 
 **Sameness unlock** — the earned-propagation mechanic, expressed as data. A
 "sameness" form (V10a/b/c — "click every occurrence of this same variable / used
@@ -146,8 +149,10 @@ change. This is **socratizing's `BlockCell`**, not the lenses' `BlockModelCell`
 
 **Category, Role** (borrowed, not introduced here) — quizzing consumes
 classifying's `Category` and `Role`; it never defines its own. V1's group key is
-keyed on `Category`; later forms key on `Role`. Where this README says
-"category" or "role" it means classifying's, imported.
+keyed on `Category`, refined by `Role` where the token carries one; later
+classification forms share this category-and-role axis, and binding-aware forms
+key on binding identity. Where this README says "category" or "role" it means
+classifying's, imported.
 
 ### The Block-Model homonym (one word, two incompatible types)
 

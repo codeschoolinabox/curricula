@@ -67,7 +67,8 @@ export type QuizOption = Readonly<{
  * node-anchored forms; token-anchored forms (the category-ID form) carry only
  * `anchorRange`, because a token is not an AST node and has no path. `groupKey`
  * is keyed on the classification axis the `form` uses — the category-ID form
- * uses `category:<category>` — and is deterministic from
+ * uses `category:<category>`, refined to `category:<category>:<role>` where the
+ * token carries a role — and is deterministic from
  * `(snippet, classified, filter)`. `unlocks` names the propagation group(s) a
  * "sameness" form earns; absent on forms that earn nothing.
  */

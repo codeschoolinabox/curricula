@@ -67,7 +67,7 @@ describe('generateQuiz', () => {
 			expect(generateQuiz(snippet, classifyOf(snippet))[0]?.id).toBe('V1@0-1');
 		});
 
-		it('keys the propagation group on the category', () => {
+		it('keys the propagation group on the bare category for a role-less token', () => {
 			const snippet = embody('x');
 			expect(generateQuiz(snippet, classifyOf(snippet))[0]?.groupKey).toBe(
 				'category:identifier',
@@ -144,6 +144,13 @@ describe('generateQuiz', () => {
 				generateQuiz(snippet, classifyOf(snippet)).map((item) => item.family),
 			).toEqual(['variables', 'variables', 'variables']);
 		});
+
+		it('refines the propagation group with the role for a role-bearing token', () => {
+			const snippet = embody('a + b');
+			expect(generateQuiz(snippet, classifyOf(snippet))[1]?.groupKey).toBe(
+				'category:operator:binary',
+			);
+		});
 	});
 
 	describe('Boundaries', () => {
@@ -156,6 +163,13 @@ describe('generateQuiz', () => {
 			);
 			expect(answered).toEqual(
 				new Set(['keyword', 'identifier', 'operator', 'literal', 'delimiter']),
+			);
+		});
+
+		it('refines the propagation group for a role-bearing delimiter', () => {
+			const snippet = embody('let x = null;');
+			expect(generateQuiz(snippet, classifyOf(snippet))[4]?.groupKey).toBe(
+				'category:delimiter:statement-end',
 			);
 		});
 	});

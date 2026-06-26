@@ -262,10 +262,18 @@ the Snippet (the one-sided seam).
   while node-anchored forms also carry the path. `anchorRange` is the universal
   anchor; `anchorPath` is the AST-identity refinement where one exists.
 - **`groupKey` is keyed on the form's classification axis** (AR-1 #8), not on
-  what the lens displays: the category-ID form keys on `Category`
-  (`category:<category>`), role-aware forms on category-and-role. The key is
-  deterministic from `(snippet, classified, filter)` — never a function of a
-  lens display choice quizzing never receives.
+  what the lens displays, and is namespaced by axis: classification forms (the
+  category-ID form and role-aware forms) key on `category:<category>`, refined
+  to `category:<category>:<role>` where the token carries a role; binding-aware
+  forms key on binding identity (`binding:<start>-<end>`, the declaration-site
+  span). On the classification axis `identifier` / `keyword` (which classifying
+  makes role-less) stay on the bare two-segment form, while operator / literal /
+  delimiter gain the `:<role>` refinement; the serializers live in `keying/`.
+  The category-ID form's propagation grain is thus intentionally finer than its
+  category answer key — a consumer wanting category-level grouping can
+  prefix-match on `category:<category>`. The key is deterministic from
+  `(snippet, classified, filter)` — never a function of a lens display choice
+  quizzing never receives.
 - **V1 `id` scheme is `form@start-end`** (e.g. `V1@12-13`), derivable from the
   form and the anchor alone; binding-flavored ids (`form/binding:x@decl`) are a
   later-form scheme that lands with occurrence→binding resolution.

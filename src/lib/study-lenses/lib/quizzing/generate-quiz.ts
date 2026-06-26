@@ -12,6 +12,7 @@ import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import type { Snippet } from '../../embody/types.js';
 import type { Category, ClassifiedToken } from '../classifying/types.js';
 
+import categoryRoleGroupKey from './keying/classification-group-key.js';
 import type { McqQuizItem, QuizFilter, QuizItem, QuizOption } from './types.js';
 
 /**
@@ -79,8 +80,10 @@ function readParsedAst(snippet: Snippet): Snippet['raw']['ast'] {
 /**
  * The V1 category-ID generator, per token: the text-surface × atom question
  * "what kind of syntax element is this?". The five categories are the fixed
- * options; the token's primary category is the answer key and the propagation
- * group axis. `family` is the fixed `'variables'` constant of the V1 form (the
+ * options; the token's primary category is the answer key, while its category
+ * refined by role is the propagation group axis (via `categoryRoleGroupKey` —
+ * `identifier` / `keyword` are role-less, so they key on the bare category).
+ * `family` is the fixed `'variables'` constant of the V1 form (the
  * catalog's first family), not a function of the token's category — `Family` is
  * the domain a *form* belongs to, not classifying's `Category`. Scalar fields
  * are copied by value; the frozen `ClassifiedToken` is never embedded.
@@ -97,7 +100,7 @@ function buildV1Item(token: ClassifiedToken): McqQuizItem {
 		prompt: V1_PROMPT,
 		options: V1_OPTIONS,
 		answerOptionIds: [category],
-		groupKey: `category:${category}`,
+		groupKey: categoryRoleGroupKey(category, token.role),
 		feedback: CATEGORY_FEEDBACK[category],
 	};
 }
