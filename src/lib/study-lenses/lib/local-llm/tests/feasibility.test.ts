@@ -469,6 +469,46 @@ describe('selectFeasible', () => {
 		});
 	});
 
+	describe('WebGPU-limited device — the no-feasible fold + CPU rescue', () => {
+		const LIMITED = { maxStorageBufferBindingBytes: 134_217_728 }; // 128 MiB floor
+		const limitedWebllmOnly = () =>
+			selectFeasible({
+				catalog: [webllmEntry({ id: 'big', vramRequiredMB: 1000 })],
+				capabilities: fakeCaps(LIMITED),
+				adapters: WEBLLM,
+			});
+		const limitedWithCpuRescue = () =>
+			selectFeasible({
+				catalog: [
+					webllmEntry({ id: 'big', vramRequiredMB: 1000 }),
+					wllamaEntry({ id: 'cpu-rescue', sizeClass: 'tiny' }),
+				],
+				capabilities: fakeCaps(LIMITED),
+				adapters: { webllm: registeredAdapter, wllama: registeredAdapter },
+			});
+
+		describe('only buffer-infeasible webllm models exist', () => {
+			it('the feasible set is empty', () => {
+				expect(limitedWebllmOnly().feasible).toEqual([]);
+			});
+			it('chosen is null', () => {
+				expect(limitedWebllmOnly().chosen).toBeNull();
+			});
+			it('chosenRuntime is null', () => {
+				expect(limitedWebllmOnly().chosenRuntime).toBeNull();
+			});
+		});
+
+		describe('a registered CPU/WASM candidate exists (not a blanket refusal)', () => {
+			it('rescues onto the CPU runtime', () => {
+				expect(limitedWithCpuRescue().chosenRuntime).toBe('wllama');
+			});
+			it('the chosen model is the CPU candidate', () => {
+				expect(limitedWithCpuRescue().chosen?.id).toBe('cpu-rescue');
+			});
+		});
+	});
+
 	describe('malformed entry', () => {
 		it('an entry with no runtimes is simply not feasible (no throw)', () => {
 			const entry = { ...webllmEntry({ id: 'no-runtime' }), runtimes: [] };

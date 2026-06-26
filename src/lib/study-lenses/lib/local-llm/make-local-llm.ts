@@ -65,9 +65,13 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 		const capabilities = await capabilityProbe();
 		// Throws on an unknown model name — a programmer error, deliberately NOT
 		// inside the try below (an unknown name is never a returned LoadFailure).
-		const { chosen, chosenRuntime } = select(capabilities, selection);
+		const { chosen, chosenRuntime, feasible } = select(capabilities, selection);
 		if (chosen === null || chosenRuntime === null) {
-			return freezeInPlace({ ok: false, cause: 'no-feasible-model' });
+			return freezeInPlace({
+				ok: false,
+				cause: 'no-feasible-model',
+				detail: noFeasibleDetail(capabilities, feasible.length),
+			});
 		}
 
 		const member = chosen.runtimes.find(
@@ -117,4 +121,28 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 		) => select(capabilities, selection).chosen,
 		load,
 	});
+}
+
+/**
+ * The honest reason a load resolved to no model, for the pre-flight refusal's
+ * diagnostic `detail` (DDD §5: WebGPU-absent / WebGPU-limited / memory all fold to
+ * the same `no-feasible-model` cause, with the reason in `detail`). `chosen` is
+ * null on two distinct kinds of path, which must NOT be conflated (a teaching tool
+ * must never misdescribe the device): a genuinely empty feasible set (a device
+ * limit) vs. a non-empty feasible set the caller's own selection excluded. The
+ * device-limit case is a coarse two-way split on WebGPU presence — the distinction
+ * knowable here without re-deriving per-entry feasibility; richer per-entry
+ * diagnosis is a future enhancement. Dev/log/instructor-facing; the consumer reads
+ * `cause`.
+ */
+function noFeasibleDetail(
+	capabilities: DeviceCapabilities,
+	feasibleCount: number,
+): string {
+	if (feasibleCount > 0) {
+		return 'A feasible model exists, but the requested selection (a sizeClass ceiling, or a named model not feasible on this device) excluded every candidate.';
+	}
+	return capabilities.webgpu
+		? "No catalog model fits this device's WebGPU limits, and no CPU/WASM model is available."
+		: 'This device reports no WebGPU, and no CPU/WASM model is feasible or registered.';
 }

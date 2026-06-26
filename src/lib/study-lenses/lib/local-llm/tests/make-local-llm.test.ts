@@ -21,7 +21,65 @@ describe('makeLocalLlm', () => {
 				catalog: FAKE_CATALOG,
 				capabilityProbe: fakeProbe(fakeCaps({ webgpu: false })),
 			});
-			expect(await llm.load()).toEqual({ ok: false, cause: 'no-feasible-model' });
+			const result = await llm.load();
+			if (result.ok) throw new Error('expected a refusal');
+			expect(result.cause).toBe('no-feasible-model');
+		});
+
+		it('a caller selection that excludes every feasible model gets a selection-shaped detail, not a device-limit lie', async () => {
+			// Rich device (webgpu true), FAKE_CATALOG has a feasible webllm-small, but
+			// a 'tiny' ceiling excludes it → chosen is null though a model IS feasible.
+			const llm = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load({ sizeClass: 'tiny' });
+			if (result.ok) throw new Error('expected a refusal');
+			expect(result.detail).toMatch(/selection|exclud/i);
+		});
+
+		it('the pre-flight refusal carries an honest detail', async () => {
+			const llm = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(fakeCaps({ webgpu: false })),
+			});
+			const result = await llm.load();
+			if (result.ok) throw new Error('expected a refusal');
+			expect(result.detail).toMatch(/\S/);
+		});
+
+		it('the no-WebGPU detail names the missing capability', async () => {
+			const llm = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(fakeCaps({ webgpu: false })),
+			});
+			const result = await llm.load();
+			if (result.ok) throw new Error('expected a refusal');
+			expect(result.detail).toMatch(/webgpu/i);
+		});
+
+		it('the detail reflects the device limit (no-WebGPU vs WebGPU-limited differ)', async () => {
+			const noWebgpu = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(fakeCaps({ webgpu: false })),
+			});
+			// webgpu present but the binding limit is pinned to the 128 MiB spec floor,
+			// below FAKE_CATALOG's webllm need → buffer-infeasible, empty feasible set.
+			const limited = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(
+					fakeCaps({ maxStorageBufferBindingBytes: 134_217_728 }),
+				),
+			});
+			const a = await noWebgpu.load();
+			const b = await limited.load();
+			if (a.ok || b.ok) throw new Error('expected refusals');
+			expect(a.detail).not.toBe(b.detail);
 		});
 	});
 
