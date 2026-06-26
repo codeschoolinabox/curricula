@@ -827,11 +827,14 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		// outcome + 'settled' atomically (React 18 batches them in the microtask).
 		// The terminal `.catch` is defense-in-depth (`.result` resolves today,
 		// errors riding endReport.error); the AsyncIterable is never drained
-		// (abandoning a `for await` is the unhandled-rejection trap). Channel reset
-		// on rerun is C5.
+		// (abandoning a `for await` is the unhandled-rejection trap). Channels reset
+		// to EMPTY_CHANNELS at the top so each run shows only its own output: the
+		// reset is enqueued FIRST in the click's batch, so any functional append from
+		// THIS run's io mocks runs against EMPTY_CHANNELS, not the prior run's state.
 		function handleRun(): void {
 			if (runState === 'running') return;
 			if (liveEmbodiment === null) return;
+			setChannelOutput(EMPTY_CHANNELS);
 			setRunState('running');
 			setOutcome(null);
 			function commitOutcome(runInstance: RunInstance): void {
@@ -847,7 +850,7 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 
 		// Cancel reaches the held EvaluateHandle's cancel() — idempotent /
 		// first-write-wins, and a no-op before the first run (ref null) or after the
-		// run already settled. Reset-on-rerun is C5.
+		// run already settled.
 		function handleCancel(): void {
 			handleReference.current?.cancel();
 		}

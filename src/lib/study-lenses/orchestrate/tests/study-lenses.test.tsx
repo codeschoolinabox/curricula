@@ -2193,3 +2193,164 @@ describe('<StudyLenses> — Cycle 3 C4 the dock Run wiring (intercept + run-stat
 		});
 	});
 });
+
+describe('<StudyLenses> — Cycle 3 C5 cancel + reset-on-rerun', () => {
+	describe('Interface — a second run resets the prior run channel output', () => {
+		it('clears the prior run lines at the start of the next run', async () => {
+			// The canned stub never drives io, so wrap intercept to push one
+			// user-interface line per run via the supplied mock (synchronously — the
+			// stub engine never awaits io either, so the append lands in the same
+			// batch as the reset). Two runs must leave ONE line — proving handleRun
+			// resets channels at run-start (not append).
+			const realEmbody = embodyModule.default;
+			let runCounter = 0;
+			const embodySpy = vi
+				.spyOn(embodyModule, 'default')
+				.mockImplementation((code) => {
+					const snippet = realEmbody(code);
+					return {
+						...snippet,
+						evaluation: {
+							...snippet.evaluation,
+							events: {
+								...snippet.evaluation.events,
+								intercept: (options) => {
+									runCounter += 1;
+									// `void` — alert is typed void | Promise<void>; our mock is
+									// sync, so discard the (non-)promise to satisfy no-floating-promises.
+									void options?.io?.alert?.(`dialog ${runCounter}`);
+									return snippet.evaluation.events.intercept(options);
+								},
+							},
+						},
+					};
+				});
+			try {
+				const { container } = render(<StudyLenses snippet="OK" />);
+				const run = container.querySelector('[data-orchestrator-dock-run]')!;
+				fireEvent.click(run);
+				await act(async () => {});
+				fireEvent.click(run);
+				await act(async () => {});
+				const channel = container.querySelector(
+					'[data-orchestrator-dock-channel="user-interface"]',
+				);
+				expect(channel?.childElementCount).toBe(1);
+				// Pin that the SURVIVING line is run 2's (not run 1's) — kills a
+				// clear-after-append fake that would leave 'dialog 1'.
+				expect(channel?.children[0]?.textContent).toBe('dialog 2');
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+	});
+
+	describe('State — a rerun re-cycles run-state and clears the prior outcome', () => {
+		it('clears the prior outcome and re-enters running at the start of the next run', async () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			const run = container.querySelector('[data-orchestrator-dock-run]')!;
+			fireEvent.click(run);
+			await act(async () => {});
+			// Run 1 settled with an outcome present.
+			expect(
+				container.querySelector('[data-orchestrator-dock-outcome]'),
+			).not.toBeNull();
+			fireEvent.click(run);
+			// Run 2 in flight (synchronous, pre-flush): the prior outcome is cleared
+			// and run-state is back to running — pins setOutcome(null) on the rerun.
+			expect(
+				container.querySelector('[data-orchestrator-dock-outcome]'),
+			).toBeNull();
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('running');
+			await act(async () => {});
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('settled');
+		});
+	});
+
+	describe('One — Cancel reaches the held run handle', () => {
+		it('clicking Cancel invokes the held handle cancel once', async () => {
+			// Wrap intercept so the returned handle's cancel is a spy (the canned
+			// handle's cancel is noOpCancel and the Snippet is frozen). Asserts the
+			// CALL reaches the held handle — NOT that cancel caused 'cancelled' (the
+			// canned outcome is 'cancelled' regardless of whether cancel runs).
+			const realEmbody = embodyModule.default;
+			const cancelSpy = vi.fn();
+			const embodySpy = vi
+				.spyOn(embodyModule, 'default')
+				.mockImplementation((code) => {
+					const snippet = realEmbody(code);
+					return {
+						...snippet,
+						evaluation: {
+							...snippet.evaluation,
+							events: {
+								...snippet.evaluation.events,
+								intercept: (options) => {
+									const handle = snippet.evaluation.events.intercept(options);
+									return { ...handle, cancel: cancelSpy };
+								},
+							},
+						},
+					};
+				});
+			try {
+				const { container } = render(<StudyLenses snippet="EVAL_CANCELLED" />);
+				fireEvent.click(
+					container.querySelector('[data-orchestrator-dock-run]')!,
+				);
+				// Click Cancel synchronously while the run is in flight: both clicks
+				// are in the same JS task, so the `.result` microtask
+				// (Promise.resolve().then) has not run — the handle is still held.
+				fireEvent.click(
+					container.querySelector('[aria-label="cancel the run"]')!,
+				);
+				expect(cancelSpy).toHaveBeenCalledTimes(1);
+				await act(async () => {});
+			} finally {
+				embodySpy.mockRestore();
+			}
+		});
+	});
+
+	describe('Zero — Cancel before any run is a safe no-op', () => {
+		it('clicking Cancel with no run in flight does not throw and leaves the dock idle', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			expect(() =>
+				fireEvent.click(
+					container.querySelector('[aria-label="cancel the run"]')!,
+				),
+			).not.toThrow();
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('idle');
+		});
+	});
+
+	describe('Boundary — Cancel after a run settles is a no-op', () => {
+		it('clicking Cancel after the run settles does not throw and leaves it settled', async () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			await act(async () => {});
+			expect(() =>
+				fireEvent.click(
+					container.querySelector('[aria-label="cancel the run"]')!,
+				),
+			).not.toThrow();
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-dock-run-state]',
+				)?.dataset.orchestratorDockRunState,
+			).toBe('settled');
+		});
+	});
+});
