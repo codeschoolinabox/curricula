@@ -12,7 +12,10 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type { VariablesTraceEvent } from '../../../embody/types.js';
+import type {
+	VariablesSettlement,
+	VariablesTraceEvent,
+} from '../../../embody/types.js';
 import traceDebuggingCore from '../core.js';
 
 describe('formatEvent', () => {
@@ -328,5 +331,345 @@ describe('formatEvent', () => {
 			event: 'mystery',
 		} as unknown as VariablesTraceEvent);
 		expect(line).toBe('[unknown event] mystery');
+	});
+});
+
+describe('deriveSettlementModel', () => {
+	// One — a clean natural completion: natural halt (errorName ''), no
+	// engineError, no failReason. Pins the whole projection in one assertion —
+	// outcome round-trips, the headline is the bare outcome (no distinguishing
+	// data to append), detail collapses to the no-detail marker (the natural-end
+	// halt carries no error-relevant fields), and the raw halt / engineError /
+	// failReason / durationMs pass through verbatim.
+	it('projects a completed natural settlement into a clean model', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'completed',
+			halt: { natural: true, errorName: '', message: '', nodePath: null },
+			durationMs: 12,
+		});
+		expect(model).toEqual({
+			outcome: 'completed',
+			headline: 'completed',
+			detail: ['(no detail)'],
+			halt: { natural: true, errorName: '', message: '', nodePath: null },
+			engineError: undefined,
+			failReason: undefined,
+			durationMs: 12,
+		});
+	});
+
+	// Many / triangulator — an errored throw: the headline names errorName + the
+	// nodePath, and detail expands the error-relevant halt fields. A different
+	// outcome, a non-trivial detail array, and the `errorName at nodePath` grammar
+	// — no hardcode of the completed test survives this.
+	it('projects an errored settlement, naming errorName and nodePath in the headline', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'errored',
+			halt: {
+				natural: false,
+				errorName: 'TypeError',
+				message: 'x is not a function',
+				nodePath: '$.body.1',
+			},
+			durationMs: 7,
+		});
+		expect(model).toEqual({
+			outcome: 'errored',
+			headline: 'errored — TypeError at $.body.1',
+			detail: [
+				'errorName: TypeError',
+				'message: x is not a function',
+				'nodePath: $.body.1',
+			],
+			halt: {
+				natural: false,
+				errorName: 'TypeError',
+				message: 'x is not a function',
+				nodePath: '$.body.1',
+			},
+			engineError: undefined,
+			failReason: undefined,
+			durationMs: 7,
+		});
+	});
+
+	// Boundary (A5) — an engine-side errored end with NO worker halt: the headline
+	// must fall back to engineError.name and must NOT dereference the null halt (a
+	// naive `halt.errorName` read would crash the render path).
+	it('projects an errored settlement with a null halt, falling back to the engineError name', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'errored',
+			halt: null,
+			engineError: {
+				cause: 'worker-error',
+				name: 'WorkerError',
+				message: 'worker crashed',
+			},
+			durationMs: 9,
+		});
+		expect(model).toEqual({
+			outcome: 'errored',
+			headline: 'errored — WorkerError',
+			detail: [
+				'engine cause: worker-error',
+				'engine error: WorkerError',
+				'engine message: worker crashed',
+			],
+			halt: null,
+			engineError: {
+				cause: 'worker-error',
+				name: 'WorkerError',
+				message: 'worker crashed',
+			},
+			failReason: undefined,
+			durationMs: 9,
+		});
+	});
+
+	// Boundary — the doubly-absent errored corner: no worker halt AND no
+	// engineError. The null-halt fallback's `?? 'error'` keeps the headline from
+	// reading `errored — undefined`, and guards a future refactor that might drop
+	// the coalesce (which would then crash on `engineError.name`).
+	it('projects an errored settlement with neither halt nor engineError as a generic error', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'errored',
+			halt: null,
+			durationMs: 1,
+		});
+		expect(model).toEqual({
+			outcome: 'errored',
+			headline: 'errored — error',
+			detail: ['(no detail)'],
+			halt: null,
+			engineError: undefined,
+			failReason: undefined,
+			durationMs: 1,
+		});
+	});
+
+	// Boundary (engine-documented corner: a thread hook throwing during an errored
+	// halt's refinement) — an errored settlement carrying BOTH a halt and an
+	// engineError. The headline follows the halt; detail carries BOTH blocks.
+	it('projects an errored settlement carrying both a halt and an engineError', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'errored',
+			halt: {
+				natural: false,
+				errorName: 'TypeError',
+				message: 'boom',
+				nodePath: '$.body.2',
+			},
+			engineError: {
+				cause: 'hook-error',
+				name: 'HookError',
+				message: 'hook threw',
+			},
+			durationMs: 20,
+		});
+		expect(model).toEqual({
+			outcome: 'errored',
+			headline: 'errored — TypeError at $.body.2',
+			detail: [
+				'errorName: TypeError',
+				'message: boom',
+				'nodePath: $.body.2',
+				'engine cause: hook-error',
+				'engine error: HookError',
+				'engine message: hook threw',
+			],
+			halt: {
+				natural: false,
+				errorName: 'TypeError',
+				message: 'boom',
+				nodePath: '$.body.2',
+			},
+			engineError: {
+				cause: 'hook-error',
+				name: 'HookError',
+				message: 'hook threw',
+			},
+			failReason: undefined,
+			durationMs: 20,
+		});
+	});
+
+	// Many — a timed-out settlement: the headline names the engineError cause; the
+	// empty engine error name drops its detail line.
+	it('projects a timed-out settlement, naming the engineError cause', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'timed-out',
+			halt: null,
+			engineError: { cause: 'timeout', name: '', message: 'budget exhausted' },
+			durationMs: 200,
+		});
+		expect(model).toEqual({
+			outcome: 'timed-out',
+			headline: 'timed-out — timeout',
+			detail: ['engine cause: timeout', 'engine message: budget exhausted'],
+			halt: null,
+			engineError: { cause: 'timeout', name: '', message: 'budget exhausted' },
+			failReason: undefined,
+			durationMs: 200,
+		});
+	});
+
+	// Boundary — a timed-out settlement with no engineError: the headline drops to
+	// the bare outcome (no cause to name) and detail collapses to the marker.
+	it('projects a timed-out settlement with no engineError as the bare outcome', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'timed-out',
+			halt: null,
+			durationMs: 200,
+		});
+		expect(model).toEqual({
+			outcome: 'timed-out',
+			headline: 'timed-out',
+			detail: ['(no detail)'],
+			halt: null,
+			engineError: undefined,
+			failReason: undefined,
+			durationMs: 200,
+		});
+	});
+
+	// Many — a cancelled settlement (a clean consumer stop: no halt, no engineError,
+	// no failReason): the bare outcome headline and the no-detail marker.
+	it('projects a cancelled settlement as the bare outcome with no detail', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'cancelled',
+			halt: null,
+			durationMs: 5,
+		});
+		expect(model).toEqual({
+			outcome: 'cancelled',
+			headline: 'cancelled',
+			detail: ['(no detail)'],
+			halt: null,
+			engineError: undefined,
+			failReason: undefined,
+			durationMs: 5,
+		});
+	});
+
+	// Many — a failed settlement with a string failReason: the headline appends the
+	// reason and detail carries it. A string passes through UNQUOTED (the
+	// DOCS-prescribed defensive stringifier, distinct from renderValue's JSON form).
+	it('projects a failed settlement, passing a string failReason through unquoted', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'failed',
+			halt: null,
+			failReason: 'boom',
+			durationMs: 3,
+		});
+		expect(model).toEqual({
+			outcome: 'failed',
+			headline: 'failed — boom',
+			detail: ['failReason: boom'],
+			halt: null,
+			engineError: undefined,
+			failReason: 'boom',
+			durationMs: 3,
+		});
+	});
+
+	// Boundary — a failed settlement with NO failReason key (e.g. a foreign
+	// `fail()` with no argument): the headline drops to the bare outcome and detail
+	// collapses to the marker (gated on `failReason !== undefined`, not key presence).
+	it('projects a failed settlement with no failReason as the bare outcome', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'failed',
+			halt: null,
+			durationMs: 3,
+		});
+		expect(model).toEqual({
+			outcome: 'failed',
+			headline: 'failed',
+			detail: ['(no detail)'],
+			halt: null,
+			engineError: undefined,
+			failReason: undefined,
+			durationMs: 3,
+		});
+	});
+
+	// Boundary — an errored halt with nodePath null (an unstamped throw, e.g. an
+	// undeclared-identifier ReferenceError): the headline drops the ` at` clause
+	// and detail drops the nodePath line (never `at null`).
+	it('projects an errored settlement with a null nodePath, dropping the location clause', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'errored',
+			halt: {
+				natural: false,
+				errorName: 'ReferenceError',
+				message: 'x is not defined',
+				nodePath: null,
+			},
+			durationMs: 4,
+		});
+		expect(model).toEqual({
+			outcome: 'errored',
+			headline: 'errored — ReferenceError',
+			detail: ['errorName: ReferenceError', 'message: x is not defined'],
+			halt: {
+				natural: false,
+				errorName: 'ReferenceError',
+				message: 'x is not defined',
+				nodePath: null,
+			},
+			engineError: undefined,
+			failReason: undefined,
+			durationMs: 4,
+		});
+	});
+
+	// Boundary / Exception (DOCS-mandated) — a circular failReason: the defensive
+	// stringifier must render a typeof label and NEVER `JSON.stringify` it (which
+	// would throw in the render path). Asserts the derived headline + detail (the
+	// raw failReason object is retained by reference, covered by the string case).
+	it('renders a circular failReason as a typeof label without throwing', () => {
+		const circular: { self?: unknown } = {};
+		circular.self = circular;
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'failed',
+			halt: null,
+			failReason: circular,
+			durationMs: 6,
+		});
+		expect(model.headline).toBe('failed — <object>');
+		expect(model.detail).toEqual(['failReason: <object>']);
+	});
+
+	// Boundary — the model and its nested detail array are both frozen ("Built
+	// fresh per settlement, frozen" — types.ts). `toEqual` is blind to freezing,
+	// so this is the only guard; the freeze is unconditional, so one case suffices.
+	it('returns a frozen model with a frozen detail array', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'completed',
+			halt: { natural: true, errorName: '', message: '', nodePath: null },
+			durationMs: 1,
+		});
+		expect(Object.isFrozen(model)).toBe(true);
+		expect(Object.isFrozen(model.detail)).toBe(true);
+	});
+
+	// Exception — a malformed settlement whose outcome is none of the five: the
+	// headline flags it via a widening cast (mirrors formatEvent's fallback) and
+	// the function does NOT throw. Fixture carries a valid shape so retained fields
+	// round-trip.
+	it('falls back to an unknown-outcome headline for an unexpected outcome (no throw)', () => {
+		const model = traceDebuggingCore.deriveSettlementModel({
+			outcome: 'mystery',
+			halt: null,
+			durationMs: 0,
+		} as unknown as VariablesSettlement);
+		expect(model).toEqual({
+			outcome: 'mystery',
+			headline: 'mystery — unknown outcome',
+			detail: ['(no detail)'],
+			halt: null,
+			engineError: undefined,
+			failReason: undefined,
+			durationMs: 0,
+		});
 	});
 });

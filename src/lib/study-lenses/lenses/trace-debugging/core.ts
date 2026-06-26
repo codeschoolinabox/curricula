@@ -1,10 +1,11 @@
 /**
  * @file Pure-TS derivation core for the `trace-debugging` lens — the stateless
- * projections the React wrapper renders without re-deriving. The first (this
- * increment) is `formatEvent`: one streamed lifecycle event → one verbatim,
- * readable line. `deriveSettlementModel` and `formatAdmissionError` join it in
- * later increments. No React, no async; testable in vitest without jsdom (see
- * `./tests/core.test.ts`).
+ * projections the React wrapper renders without re-deriving. Present so far:
+ * `formatEvent` (projection #1 — one streamed lifecycle event → one verbatim,
+ * readable line) and `deriveSettlementModel` (projection #2 — a terminal
+ * settlement → the render-ready display model). `formatAdmissionError`
+ * (projection #3) joins them in a later increment. No React, no async; testable
+ * in vitest without jsdom (see `./tests/core.test.ts`).
  *
  * @remarks Trace types are imported TYPE-ONLY from `../../embody/types.js` (the
  * lens's public contract surface — lens purity forbids any runtime import from
@@ -17,11 +18,17 @@
  * @remarks Export shape follows the lenses peer's constant-file convention
  * (mirrors `../writeme/core.ts`): the named projection functions are bundled
  * into `traceDebuggingCore` and default-exported at the bottom, so consumers
- * read them namespaced (`traceDebuggingCore.formatEvent`) — projection #1 in
- * `./DOCS.md` § Trace derivation (the per-event rendering feeding the events dump).
+ * read them namespaced (`traceDebuggingCore.formatEvent` /
+ * `traceDebuggingCore.deriveSettlementModel`) — the projections in `./DOCS.md`
+ * § Trace derivation that feed the events dump and the settlement surface.
  */
 
-import type { VariablesTraceEvent } from '../../embody/types.js';
+import type {
+	VariablesSettlement,
+	VariablesTraceEvent,
+} from '../../embody/types.js';
+
+import type { SettlementDisplayModel } from './types.js';
 
 /**
  * Renders one streamed lifecycle event as a single verbatim, readable line: a
@@ -78,6 +85,167 @@ function formatEvent(event: VariablesTraceEvent): string {
 	// guards above narrow `event` to `never` here, so the tag is read through a
 	// widening cast (matches the `as unknown as` fixtures).
 	return `[unknown event] ${(event as { event: string }).event}`;
+}
+
+/**
+ * Projects a terminal `VariablesSettlement` into the render-ready
+ * `SettlementDisplayModel` the React shell renders without re-deriving: the raw
+ * `outcome`, a one-line `headline`, expanded `detail` lines, and the RETAINED
+ * raw halt / engineError / failReason / durationMs (the readable gloss never
+ * replaces the raw data — a verbatim `<pre>` dump stays faithful; see
+ * `./types.ts` § SettlementDisplayModel and `./DOCS.md` § Trace derivation,
+ * projection #2).
+ *
+ * @remarks Routes on `settlement.outcome` via an early-return if-chain (NOT a
+ * `switch` — banned by `no-restricted-syntax`); an unexpected outcome falls
+ * through to a defensive headline read via a widening cast (mirrors
+ * `formatEvent`). `failReason` (`unknown`) is stringified through the private
+ * {@link stringifyFailReason} — a string passes through, a non-string degrades
+ * to a typeof label, NEVER `JSON.stringify` (an unbounded / circular failReason
+ * would throw in the render path; see `./DOCS.md` § Trace derivation, projection
+ * #2). The model and its `detail` array are both frozen.
+ *
+ * @param settlement - The terminal settlement from `await handle.result`.
+ * @returns A frozen `SettlementDisplayModel`.
+ */
+function deriveSettlementModel(
+	settlement: VariablesSettlement,
+): SettlementDisplayModel {
+	return Object.freeze({
+		outcome: settlement.outcome,
+		headline: deriveHeadline(settlement),
+		detail: deriveDetail(settlement),
+		halt: settlement.halt,
+		engineError: settlement.engineError,
+		failReason: settlement.failReason,
+		durationMs: settlement.durationMs,
+	});
+}
+
+/**
+ * Derives the one-line `headline`: the raw outcome, plus the single datum that
+ * distinguishes that outcome class when one exists (errorName + nodePath, engine
+ * cause, fail reason). Outcomes with no distinguishing data (`completed`,
+ * `cancelled`) and absent-data boundaries (`errored` with no halt + no
+ * engineError, `timed-out` with no engineError, `failed` with no reason) collapse
+ * to the BARE outcome — never `at null` / `— undefined`. Routes via an
+ * early-return if-chain (NOT a `switch` — banned by `no-restricted-syntax`); an
+ * unexpected outcome falls through to a defensive cast (mirrors `formatEvent`).
+ */
+function deriveHeadline(settlement: VariablesSettlement): string {
+	if (settlement.outcome === 'completed') {
+		return 'completed';
+	}
+	if (settlement.outcome === 'errored') {
+		if (settlement.halt === null) {
+			// Engine-side errored end (a hook/worker failure) with no worker halt:
+			// name the engineError, never dereference the null halt.
+			return `errored — ${settlement.engineError?.name ?? 'error'}`;
+		}
+		return settlement.halt.nodePath === null
+			? `errored — ${settlement.halt.errorName}`
+			: `errored — ${settlement.halt.errorName} at ${settlement.halt.nodePath}`;
+	}
+	if (settlement.outcome === 'timed-out') {
+		return settlement.engineError === undefined
+			? 'timed-out'
+			: `timed-out — ${settlement.engineError.cause}`;
+	}
+	if (settlement.outcome === 'cancelled') {
+		return 'cancelled';
+	}
+	if (settlement.outcome === 'failed') {
+		return settlement.failReason === undefined
+			? 'failed'
+			: `failed — ${stringifyFailReason(settlement.failReason)}`;
+	}
+	return `${(settlement as { outcome: string }).outcome} — unknown outcome`;
+}
+
+/**
+ * Builds the ordered `detail` lines: the error-relevant halt fields (errorName /
+ * message / nodePath, each dropped when empty / null — the redundant `natural`
+ * boolean stays in the retained raw `halt`), then the engineError block (cause /
+ * name / message), then the `failReason` line. Assembled immutably (candidate
+ * lines then `.filter`, no `.push` mutation), frozen, and never empty — an
+ * all-absent settlement (a clean cancel) yields the single `(no detail)` marker.
+ */
+function deriveDetail(settlement: VariablesSettlement): ReadonlyArray<string> {
+	const failReasonLine =
+		settlement.failReason === undefined
+			? null
+			: `failReason: ${stringifyFailReason(settlement.failReason)}`;
+	const lines = [
+		...haltDetailLines(settlement.halt),
+		...engineDetailLines(settlement.engineError),
+		failReasonLine,
+	].filter((line): line is string => line !== null);
+	return Object.freeze(lines.length === 0 ? ['(no detail)'] : lines);
+}
+
+/**
+ * The error-relevant lines for a worker halt (errorName / message / nodePath),
+ * each dropped when empty or null; `[]` when there is no halt. The `natural`
+ * boolean is intentionally omitted — it is redundant with errorName presence and
+ * stays in the retained raw `halt`.
+ */
+function haltDetailLines(
+	halt: VariablesSettlement['halt'],
+): ReadonlyArray<string> {
+	if (halt === null) {
+		return [];
+	}
+	return [
+		halt.errorName === '' ? null : `errorName: ${halt.errorName}`,
+		halt.message === '' ? null : `message: ${halt.message}`,
+		halt.nodePath === null ? null : `nodePath: ${halt.nodePath}`,
+	].filter((line): line is string => line !== null);
+}
+
+/**
+ * The engine-error lines (cause / name / message), name and message dropped when
+ * empty; `[]` when the engine did not end the run.
+ */
+function engineDetailLines(
+	engineError: VariablesSettlement['engineError'],
+): ReadonlyArray<string> {
+	if (engineError === undefined) {
+		return [];
+	}
+	return [
+		`engine cause: ${engineError.cause}`,
+		engineError.name === '' ? null : `engine error: ${engineError.name}`,
+		engineError.message === ''
+			? null
+			: `engine message: ${engineError.message}`,
+	].filter((line): line is string => line !== null);
+}
+
+/**
+ * Defensively stringifies a `failReason` (`unknown`) for display: a string
+ * passes through verbatim; a clone-safe primitive renders as itself; anything
+ * else (object / function / symbol) degrades to a `<typeof>` label. It NEVER
+ * `JSON.stringify`s (an unbounded or circular failReason would throw in the
+ * render path) and NEVER `String()`s an object/symbol (a symbol throws; an
+ * object yields `[object Object]`). See `./DOCS.md` § Trace derivation,
+ * projection #2. Distinct from {@link renderValue} (which is for tracer
+ * `ValueSnapshot`s and JSON-quotes strings); failReasons want pass-through.
+ */
+function stringifyFailReason(reason: unknown): string {
+	if (typeof reason === 'string') {
+		return reason;
+	}
+	if (
+		typeof reason === 'number' ||
+		typeof reason === 'boolean' ||
+		typeof reason === 'bigint'
+	) {
+		return String(reason);
+	}
+	if (reason === null) {
+		return 'null';
+	}
+	return `<${typeof reason}>`;
 }
 
 /**
@@ -143,6 +311,6 @@ function isOpaqueValue(
 	);
 }
 
-const traceDebuggingCore = { formatEvent };
+const traceDebuggingCore = { formatEvent, deriveSettlementModel };
 
 export default traceDebuggingCore;
