@@ -17,6 +17,10 @@ import type {
 	SizeClass,
 } from '../types.js';
 
+// The buffer limits (maxBufferBytes / maxStorageBufferBindingBytes) are
+// deliberately OMITTED by default: feasibility treats an unreported limit as
+// undefined-admit (a probe gap must not over-refuse a capable device), so a test
+// that wants the buffer gate to fire must opt in with an explicit low limit.
 export const fakeCaps = (
 	over: Partial<DeviceCapabilities> = {},
 ): DeviceCapabilities => ({

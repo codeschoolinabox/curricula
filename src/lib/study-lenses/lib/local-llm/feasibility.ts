@@ -127,6 +127,12 @@ function isLoadFeasible(
 		) {
 			return false;
 		}
+		// Gate on the probed WebGPU buffer limits (DOCS § "Feasibility consumes the
+		// probed buffer limits"): a device whose binding/buffer limit is below the
+		// model's derived need is refused HERE, at pre-flight, rather than failing
+		// mid-bring-up. Sits after the webgpu presence guard, so an undefined limit
+		// only ever means "WebGPU present, limit unreported" (a probe gap → admit).
+		if (!meetsBufferLimits(load, capabilities)) return false;
 		if (load.vramRequiredMB !== undefined) {
 			const budgetMB =
 				HALF * (capabilities.deviceMemoryGB ?? DEFAULT_MEMORY_GB) * MB_PER_GB;
@@ -137,6 +143,38 @@ function isLoadFeasible(
 	// Non-webllm (CPU/WASM) runtimes carry no webgpu requirement — a tiny/small
 	// model still loads (DOCS § "No-WebGPU is not an automatic refusal").
 	return fitsCpuSizeClass(entry.sizeClass);
+}
+
+/**
+ * Whether the device's probed WebGPU buffer limits clear the model's derived
+ * binding need. Both limits gate (DOCS § "Feasibility consumes the probed buffer
+ * limits"); each is undefined-admit (a probe gap must not over-refuse a capable
+ * device). The need is DERIVED from `vramRequiredMB` — the contract carries no
+ * exact per-model buffer requirement, so this is a conservative heuristic — clamped
+ * to the 128 MiB WebGPU spec floor so a value-less or tiny model is never wrongly
+ * refused. The binding limit is the effective gate (a storage binding can never
+ * exceed its buffer, so `maxStorageBufferBindingBytes ≤ maxBufferBytes` always); the
+ * buffer-size leg is the DOCS-named second gate.
+ */
+function meetsBufferLimits(
+	load: Extract<RuntimeLoad, { runtime: 'webllm' }>,
+	capabilities: DeviceCapabilities,
+): boolean {
+	const required =
+		load.vramRequiredMB === undefined
+			? WEBGPU_MIN_BINDING_BYTES
+			: Math.max(
+					WEBGPU_MIN_BINDING_BYTES,
+					load.vramRequiredMB * BYTES_PER_MB * VRAM_TO_BINDING_RATIO,
+				);
+	const { maxStorageBufferBindingBytes, maxBufferBytes } = capabilities;
+	if (
+		maxStorageBufferBindingBytes !== undefined &&
+		maxStorageBufferBindingBytes < required
+	) {
+		return false;
+	}
+	return maxBufferBytes === undefined || maxBufferBytes >= required;
 }
 
 /** Whether the device advertises every WebGPU feature the load requires (no requirement ⇒ yes). */
@@ -271,3 +309,11 @@ const HALF = 0.5;
 const MB_PER_GB = 1024;
 const DEFAULT_MEMORY_GB = 4;
 const DEFAULT_VRAM_CEILING_MB = 2048;
+const BYTES_PER_MB = 1024 * 1024;
+// The WebGPU spec minimum maxStorageBufferBindingSize (128 MiB) — the floor a
+// limited device (Firefox/Android) pins to. A model never needs LESS than this.
+const WEBGPU_MIN_BINDING_BYTES = 134_217_728;
+// Conservative VRAM→binding ratio: published WebLLM per-model bindings run
+// ~0.13–0.27× VRAM, so 0.30 never UNDER-requires (which would re-admit a device
+// that then fails mid-bring-up). A heuristic, not WebLLM's exact value.
+const VRAM_TO_BINDING_RATIO = 0.3;
