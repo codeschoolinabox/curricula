@@ -82,16 +82,18 @@ program.
 
 A pure comparator. It reads only `(item, response)` — never the Snippet — and
 dispatches on `item.mode`: a panel-mode item compares the response's option ids
-against the item's answer key; a code-surface item (when those modes land)
-compares clicked ranges against the item's target ranges. The match is
-**binary** — correct only on an exact match of the answer key, no partial
-credit. An uninterpretable response grades to `malformed` (a caller / UI bug,
-distinct from a wrong answer). In V1 both item and response are `mcq`, so the
-only reachable `malformed` trigger is an unknown or extra option id; the
-mode-mismatch trigger is type-unreachable until a second mode lands (both
-discriminants are the literal `'mcq'` today) — the arm is retained so the
-discriminant-narrowing contract stays stable as modes widen. `grade` is **total
-and never throws**: it runs in the lens's interaction loop on every click.
+against the item's answer key; a code-surface item (`click-token` /
+`click-line`) compares the response's clicked ranges against the item's target
+ranges. The match is **binary** — correct only on an exact match of the answer
+key (set equality, whether of option ids or ranges), no partial credit. A
+response whose `mode` does not match the item's grades to `malformed` (a caller
+/ UI bug, distinct from a wrong answer), as does an `mcq` response carrying an
+unknown or extra option id. A code-surface item has no analogous validation:
+`grade` never sees the Snippet, so it cannot check a clicked range against the
+source — a non-matching range is simply `incorrect`. The mode-mismatch trigger,
+type-unreachable while only `mcq` existed, is now live across the panel /
+code-surface boundary. `grade` is **total and never throws**: it runs in the
+lens's interaction loop on every click.
 
 ### The accessor-helper seam
 
@@ -247,12 +249,26 @@ the Snippet (the one-sided seam).
   non-isomorphic axis; `keywords` / `delimiters` have no `Feature`, `reading`
   has no family). The partial correspondence is built where the M3 recommender
   needs it, not promised as a total map.
-- **Enumerate the closed string vocabularies fully; ship only V1 behavior**
-  (AR-1 OPEN #1). `AnswerMode` (five) and `Family` (seven) are spec-named
-  end-state vocabularies, so they are enumerated now; only the `mcq` variant of
-  `QuizItem` / `LearnerResponse`, its `grade` arm, and its one generator are
-  built. New modes widen the union additively — a cross-consumer contract event
-  with the lens.
+- **Enumerate the closed string vocabularies fully; build modes as their
+  generators land** (AR-1 OPEN #1). `AnswerMode` (five) and `Family` (seven) are
+  spec-named end-state vocabularies, enumerated up front. The `mcq` variant and
+  the code-surface `click-token` / `click-line` variant of `QuizItem` /
+  `LearnerResponse` and their `grade` arms are built; `multi-mcq` and
+  `select-in-code` remain enumerated-not-built. Each mode widens the union
+  additively — a cross-consumer contract event with the lens.
+- **Code-surface modes share one `QuizItem` variant and one grade arm.**
+  `click-token` and `click-line` differ only in the lens's capture mechanic (a
+  token span vs. a line span); their item shape (`targetRanges`) and grading
+  (exact set-equality of clicked vs. target ranges) are identical, so quizzing
+  models them as a single `CodeSurfaceQuizItem` with a two-mode discriminant,
+  not two near-duplicate types. `select-in-code` (multi-select, subset
+  semantics) stays a future separate variant. Grading is one-sided, so there is
+  no range analogue to mcq's unknown-option-id `malformed`: quizzing never sees
+  the Snippet and cannot validate a clicked range against it — the only
+  `malformed` trigger is a response / item mode mismatch. **`click-line` is
+  graded but not yet generated** — emitting it needs offset→line conversion
+  (`Source.offsets`), which no built form yet requires; the declaration-site
+  form (V8) emits `click-token`.
 - **Keep `unlocks` and `anchorPath`; defer the filter `forms` / `cells` knobs**
   (AR-1 OPEN #4). `unlocks` and `anchorPath` are end-state base-type fields
   whose later addition would break the locked base; the filter knobs are

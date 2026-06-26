@@ -10,6 +10,7 @@
 import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 
 import type {
+	CodeSurfaceQuizItem,
 	LearnerResponse,
 	McqQuizItem,
 	QuizItem,
@@ -24,16 +25,19 @@ import type {
  *   id) grades to a `malformed` verdict, not an exception, so the lens never
  *   penalizes a UI bug as a wrong answer.
  * - **Binary** — `correct` only on an exact match of the answer key (set
- *   equality of selected vs. correct option ids — order-insensitive, duplicates
- *   collapse, no missing or extra); no partial credit.
+ *   equality — order-insensitive, duplicates collapse, no missing or extra),
+ *   whether matching option ids (`mcq`) or source ranges (code-surface); no
+ *   partial credit.
  * - **One-sided** — reads only `(item, response)`; the `Verdict` reports
  *   judgment + `feedback`, never the answer key.
  *
- * Dispatch is on `item.mode`. Only `mcq` exists today; the fall-through arm is a
- * compile-time exhaustiveness guard (`never`) that keeps grade total — when a
- * second answer mode lands, its missing arm fails the build here rather than
- * silently falling through. That new arm must also gate a response whose `mode`
- * differs from the item's to `malformed` (the discriminant-narrowing contract).
+ * Dispatch is on `item.mode`: the `mcq` arm compares option-id sets; the
+ * code-surface arm (`click-token` / `click-line`) compares clicked ranges to the
+ * item's `targetRanges`. Each arm gates a response whose `mode` differs from the
+ * item's to `malformed` (the discriminant-narrowing contract — a caller / UI bug,
+ * not a wrong learner). The fall-through `never` arm keeps grade total: when
+ * `multi-mcq` or `select-in-code` lands, its missing arm fails the build here
+ * rather than silently falling through.
  */
 export default function grade(
 	item: QuizItem,
@@ -41,6 +45,9 @@ export default function grade(
 ): Verdict {
 	if (item.mode === 'mcq') {
 		return freezeVerdict(gradeMcq(item, response));
+	}
+	if (item.mode === 'click-token' || item.mode === 'click-line') {
+		return freezeVerdict(gradeCodeSurface(item, response));
 	}
 
 	const exhaustiveCheck: never = item.mode;
@@ -51,12 +58,21 @@ export default function grade(
 }
 
 /**
- * Grade an `mcq` response: an unknown option id (one not among the item's
- * options) is `malformed` — checked first, so a UI bug never masquerades as a
- * wrong answer; otherwise the selected ids must set-equal the answer key for
- * `correct`, else `incorrect`. Both judged verdicts surface `item.feedback`.
+ * Grade an `mcq` response: a response whose mode is not `mcq` is `malformed` (the
+ * discriminant-narrowing contract — a caller / UI bug, not a wrong learner); an
+ * unknown option id (one not among the item's options) is `malformed` too —
+ * checked before judging, so a UI bug never masquerades as a wrong answer;
+ * otherwise the selected ids must set-equal the answer key for `correct`, else
+ * `incorrect`. Both judged verdicts surface `item.feedback`.
  */
 function gradeMcq(item: McqQuizItem, response: LearnerResponse): Verdict {
+	if (response.mode !== 'mcq') {
+		return {
+			status: 'malformed',
+			reason: `response mode ${response.mode} does not match item mode mcq`,
+		};
+	}
+
 	const knownIds = new Set(item.options.map((option) => option.id));
 	const unknownId = response.selectedOptionIds.find((id) => !knownIds.has(id));
 	if (unknownId !== undefined) {
@@ -68,6 +84,41 @@ function gradeMcq(item: McqQuizItem, response: LearnerResponse): Verdict {
 	return isSameSet(selected, answer)
 		? { status: 'correct', feedback: item.feedback }
 		: { status: 'incorrect', feedback: item.feedback };
+}
+
+/**
+ * Grade a code-surface response: a response whose mode does not match the item's
+ * — an `mcq` response, or a `click-line` response to a `click-token` item and
+ * vice versa — is `malformed` (the discriminant-narrowing contract; a caller / UI
+ * bug, not a wrong learner). Otherwise the clicked ranges must set-equal the
+ * target ranges for `correct`, else `incorrect`. There is no range analogue to
+ * mcq's unknown-option-id `malformed`: `grade` never sees the Snippet, so a
+ * non-matching range is simply `incorrect`. Both judged verdicts surface
+ * `item.feedback`.
+ */
+function gradeCodeSurface(
+	item: CodeSurfaceQuizItem,
+	response: LearnerResponse,
+): Verdict {
+	if (response.mode === 'mcq' || response.mode !== item.mode) {
+		return {
+			status: 'malformed',
+			reason: `response mode ${response.mode} does not match item mode ${item.mode}`,
+		};
+	}
+
+	const clicked = new Set(
+		response.clickedRanges.map((range) => rangeKey(range)),
+	);
+	const target = new Set(item.targetRanges.map((range) => rangeKey(range)));
+	return isSameSet(clicked, target)
+		? { status: 'correct', feedback: item.feedback }
+		: { status: 'incorrect', feedback: item.feedback };
+}
+
+/** Canonical comparison key for a half-open source range. */
+function rangeKey(range: readonly [number, number]): string {
+	return `${range[0]}-${range[1]}`;
 }
 
 /** Set equality: same size and every member of `a` is in `b`. */

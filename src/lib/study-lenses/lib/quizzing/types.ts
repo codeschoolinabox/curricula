@@ -98,25 +98,49 @@ export type McqQuizItem = QuizItemBase &
 	}>;
 
 /**
- * A generated quiz question, anchored to one source element, carrying its own
- * machine-derived ground truth. Discriminated on `mode`. Only the `mcq`
- * variant exists today; code-surface variants (carrying `targetRanges`) and
- * `multi-mcq` widen this union additively as their modes' generators and
- * `grade` arms land — each a cross-consumer contract event with the lens.
+ * A code-surface question answered by clicking source range(s). One variant
+ * covers both `click-token` and `click-line`: the item shape and the grading are
+ * identical — the answer key is `targetRanges` and a response is graded by exact
+ * set-equality of ranges — they differ only in the lens's capture mechanic (a
+ * token span vs. a line span), which quizzing does not model. `targetRanges` are
+ * the `[start, end)` spans a correct response must hit exactly (order-insensitive,
+ * no partial credit); it is a generator invariant that they are **non-empty** — a
+ * code-surface item with zero targets is a generator bug, not a question.
+ * `select-in-code` (multi-select, subset semantics) is a future, separate variant
+ * — not this one.
  */
-export type QuizItem = McqQuizItem;
+export type CodeSurfaceQuizItem = QuizItemBase &
+	Readonly<{
+		mode: 'click-token' | 'click-line';
+		targetRanges: ReadonlyArray<readonly [number, number]>;
+	}>;
 
 /**
- * What the learner submitted, shaped by the answer mode. Discriminated on
- * `mode` so `grade` detects a response whose mode does not match the item's
- * (a caller / UI bug) rather than mis-grading it. Named `LearnerResponse`, not
- * `Response`, to avoid the DOM `Response` global in the React-side lens.
- * Widens additively alongside `QuizItem`.
+ * A generated quiz question, anchored to one source element, carrying its own
+ * machine-derived ground truth. Discriminated on `mode`. Two variants are built:
+ * the panel `mcq` and the code-surface `click-token` / `click-line` (carrying
+ * `targetRanges`). The two remaining modes widen this union in different shapes:
+ * `multi-mcq` widens `McqQuizItem.mode` (same option-id shape — set-equality
+ * grading already handles it), while `select-in-code` is a new variant (range-based
+ * but subset, not exact, semantics). Each is a cross-consumer contract event with
+ * the lens.
  */
-export type LearnerResponse = Readonly<{
-	mode: 'mcq';
-	selectedOptionIds: ReadonlyArray<string>;
-}>;
+export type QuizItem = McqQuizItem | CodeSurfaceQuizItem;
+
+/**
+ * What the learner submitted, shaped by the answer mode. Discriminated on `mode`
+ * so `grade` detects a response whose mode does not match the item's (a caller /
+ * UI bug) rather than mis-grading it: a panel mode answers by option id(s), a
+ * code-surface mode by clicked source range(s). Named `LearnerResponse`, not
+ * `Response`, to avoid the DOM `Response` global in the React-side lens. Widens
+ * additively alongside `QuizItem`.
+ */
+export type LearnerResponse =
+	| Readonly<{ mode: 'mcq'; selectedOptionIds: ReadonlyArray<string> }>
+	| Readonly<{
+			mode: 'click-token' | 'click-line';
+			clickedRanges: ReadonlyArray<readonly [number, number]>;
+	  }>;
 
 /**
  * The outcome of grading one `LearnerResponse` against one `QuizItem`.

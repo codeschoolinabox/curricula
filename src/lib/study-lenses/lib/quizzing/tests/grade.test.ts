@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import grade from '../grade.js';
-import type { LearnerResponse, McqQuizItem } from '../types.js';
+import type {
+	CodeSurfaceQuizItem,
+	LearnerResponse,
+	McqQuizItem,
+} from '../types.js';
 
 function mcqItem(
 	answerOptionIds: readonly string[],
@@ -27,6 +31,32 @@ function mcqItem(
 
 function mcqResponse(selectedOptionIds: readonly string[]): LearnerResponse {
 	return { mode: 'mcq', selectedOptionIds };
+}
+
+function codeSurfaceItem(
+	targetRanges: ReadonlyArray<readonly [number, number]>,
+	mode: 'click-token' | 'click-line' = 'click-token',
+	feedback = 'where x is declared',
+): CodeSurfaceQuizItem {
+	return {
+		mode,
+		id: 'V8@10-11',
+		family: 'variables',
+		form: 'V8',
+		anchorRange: [10, 11],
+		cells: [{ dimension: 'text-surface', level: 'relation' }],
+		prompt: 'Click where `x` is declared.',
+		groupKey: 'binding:4-5',
+		feedback,
+		targetRanges,
+	};
+}
+
+function clickResponse(
+	clickedRanges: ReadonlyArray<readonly [number, number]>,
+	mode: 'click-token' | 'click-line' = 'click-token',
+): LearnerResponse {
+	return { mode, clickedRanges };
 }
 
 describe('grade', () => {
@@ -169,6 +199,201 @@ describe('grade', () => {
 				status: 'correct',
 				feedback: 'the explanation',
 			});
+		});
+	});
+});
+
+describe('grade — code-surface modes', () => {
+	describe('Zero', () => {
+		it('grades empty clicks against a non-empty target as incorrect', () => {
+			expect(grade(codeSurfaceItem([[4, 5]]), clickResponse([]))).toEqual({
+				status: 'incorrect',
+				feedback: 'where x is declared',
+			});
+		});
+	});
+
+	describe('One', () => {
+		it('grades an exact single-range click as correct', () => {
+			expect(grade(codeSurfaceItem([[4, 5]]), clickResponse([[4, 5]]))).toEqual(
+				{ status: 'correct', feedback: 'where x is declared' },
+			);
+		});
+
+		it('grades a wrong single range as incorrect', () => {
+			expect(grade(codeSurfaceItem([[4, 5]]), clickResponse([[0, 1]]))).toEqual(
+				{ status: 'incorrect', feedback: 'where x is declared' },
+			);
+		});
+
+		it('surfaces the item feedback verbatim on a correct verdict', () => {
+			expect(
+				grade(
+					codeSurfaceItem(
+						[[4, 5]],
+						'click-token',
+						'the binding is introduced here',
+					),
+					clickResponse([[4, 5]]),
+				),
+			).toEqual({
+				status: 'correct',
+				feedback: 'the binding is introduced here',
+			});
+		});
+	});
+
+	describe('Many', () => {
+		it('matches a multi-range target regardless of click order', () => {
+			expect(
+				grade(
+					codeSurfaceItem([
+						[4, 5],
+						[10, 11],
+					]),
+					clickResponse([
+						[10, 11],
+						[4, 5],
+					]),
+				),
+			).toEqual({ status: 'correct', feedback: 'where x is declared' });
+		});
+	});
+
+	describe('Boundaries', () => {
+		it('grades a superset of clicks as incorrect (exact match, not subset)', () => {
+			expect(
+				grade(
+					codeSurfaceItem([[4, 5]]),
+					clickResponse([
+						[4, 5],
+						[10, 11],
+					]),
+				),
+			).toEqual({ status: 'incorrect', feedback: 'where x is declared' });
+		});
+
+		it('grades a partial click of a multi-range target as incorrect', () => {
+			expect(
+				grade(
+					codeSurfaceItem([
+						[4, 5],
+						[10, 11],
+					]),
+					clickResponse([[4, 5]]),
+				),
+			).toEqual({ status: 'incorrect', feedback: 'where x is declared' });
+		});
+
+		it('collapses a duplicated correct click to correct', () => {
+			expect(
+				grade(
+					codeSurfaceItem([[4, 5]]),
+					clickResponse([
+						[4, 5],
+						[4, 5],
+					]),
+				),
+			).toEqual({ status: 'correct', feedback: 'where x is declared' });
+		});
+
+		it('grades a click whose start matches but end differs as incorrect', () => {
+			expect(grade(codeSurfaceItem([[4, 5]]), clickResponse([[4, 9]]))).toEqual(
+				{ status: 'incorrect', feedback: 'where x is declared' },
+			);
+		});
+
+		it('grades a click whose end matches but start differs as incorrect', () => {
+			expect(grade(codeSurfaceItem([[4, 5]]), clickResponse([[0, 5]]))).toEqual(
+				{ status: 'incorrect', feedback: 'where x is declared' },
+			);
+		});
+	});
+
+	describe('Interfaces', () => {
+		it('omits the answer key from the verdict', () => {
+			expect(
+				grade(codeSurfaceItem([[4, 5]]), clickResponse([[4, 5]])),
+			).not.toHaveProperty('targetRanges');
+		});
+
+		it('returns a frozen verdict', () => {
+			expect(
+				Object.isFrozen(
+					grade(codeSurfaceItem([[4, 5]]), clickResponse([[4, 5]])),
+				),
+			).toBe(true);
+		});
+
+		it('grades a click-line item and response by the same range comparison', () => {
+			expect(
+				grade(
+					codeSurfaceItem([[4, 9]], 'click-line'),
+					clickResponse([[4, 9]], 'click-line'),
+				),
+			).toEqual({ status: 'correct', feedback: 'where x is declared' });
+		});
+	});
+
+	describe('Exceptions', () => {
+		it('grades a code-surface item against an mcq response as malformed', () => {
+			expect(
+				grade(codeSurfaceItem([[4, 5]]), mcqResponse(['identifier'])).status,
+			).toBe('malformed');
+		});
+
+		it('grades an mcq item against a click response as malformed', () => {
+			expect(
+				grade(mcqItem(['identifier']), clickResponse([[4, 5]])).status,
+			).toBe('malformed');
+		});
+
+		it('grades a click-token item against a click-line response as malformed', () => {
+			expect(
+				grade(
+					codeSurfaceItem([[4, 5]], 'click-token'),
+					clickResponse([[4, 5]], 'click-line'),
+				).status,
+			).toBe('malformed');
+		});
+
+		it('grades a click-line item against a click-token response as malformed', () => {
+			expect(
+				grade(
+					codeSurfaceItem([[4, 5]], 'click-line'),
+					clickResponse([[4, 5]], 'click-token'),
+				).status,
+			).toBe('malformed');
+		});
+
+		it('grades a click-line item against an mcq response as malformed', () => {
+			expect(
+				grade(codeSurfaceItem([[4, 5]], 'click-line'), mcqResponse(['x']))
+					.status,
+			).toBe('malformed');
+		});
+
+		it('reports a developer reason on a malformed verdict', () => {
+			expect(
+				grade(codeSurfaceItem([[4, 5]]), mcqResponse(['identifier'])),
+			).toHaveProperty('reason', expect.any(String));
+		});
+
+		it('reports a developer reason on a click-token vs click-line mismatch', () => {
+			expect(
+				grade(
+					codeSurfaceItem([[4, 5]], 'click-token'),
+					clickResponse([[4, 5]], 'click-line'),
+				),
+			).toHaveProperty('reason', expect.any(String));
+		});
+	});
+
+	describe('Simple', () => {
+		it('grades the same item and response equally on repeat', () => {
+			const item = codeSurfaceItem([[4, 5]]);
+			const response = clickResponse([[4, 5]]);
+			expect(grade(item, response)).toEqual(grade(item, response));
 		});
 	});
 });
