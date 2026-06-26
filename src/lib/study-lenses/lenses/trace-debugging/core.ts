@@ -1,11 +1,11 @@
 /**
- * @file Pure-TS derivation core for the `trace-debugging` lens — the stateless
- * projections the React wrapper renders without re-deriving. Present so far:
+ * @file Pure-TS derivation core for the `trace-debugging` lens — the three
+ * stateless projections the React wrapper renders without re-deriving:
  * `formatEvent` (projection #1 — one streamed lifecycle event → one verbatim,
- * readable line) and `deriveSettlementModel` (projection #2 — a terminal
- * settlement → the render-ready display model). `formatAdmissionError`
- * (projection #3) joins them in a later increment. No React, no async; testable
- * in vitest without jsdom (see `./tests/core.test.ts`).
+ * readable line), `deriveSettlementModel` (projection #2 — a terminal settlement
+ * → the render-ready display model), and `formatAdmissionError` (projection #3 —
+ * a channel-1 admission throw → the admission-error line). No React, no async;
+ * testable in vitest without jsdom (see `./tests/core.test.ts`).
  *
  * @remarks Trace types are imported TYPE-ONLY from `../../embody/types.js` (the
  * lens's public contract surface — lens purity forbids any runtime import from
@@ -19,8 +19,10 @@
  * (mirrors `../writeme/core.ts`): the named projection functions are bundled
  * into `traceDebuggingCore` and default-exported at the bottom, so consumers
  * read them namespaced (`traceDebuggingCore.formatEvent` /
- * `traceDebuggingCore.deriveSettlementModel`) — the projections in `./DOCS.md`
- * § Trace derivation that feed the events dump and the settlement surface.
+ * `traceDebuggingCore.deriveSettlementModel` /
+ * `traceDebuggingCore.formatAdmissionError`) — the projections in `./DOCS.md`
+ * § Trace derivation that feed the events dump, the settlement surface, and the
+ * admission-error surface.
  */
 
 import type {
@@ -120,6 +122,36 @@ function deriveSettlementModel(
 		failReason: settlement.failReason,
 		durationMs: settlement.durationMs,
 	});
+}
+
+/**
+ * Projects a CHANNEL-1 admission throw (the synchronous throw at the
+ * `traceVariableLifecycle` call site on inadmissible input) into the
+ * human-readable line the lens shows in the `admission-error` state. Classifies
+ * the caught throw into four pairwise-disjoint shapes (see `./DOCS.md` § The two
+ * channels): the structurally-branded boundary error FIRST (it extends `Error`,
+ * so its brand must be checked before the message — otherwise a branded error
+ * whose message contained a family substring would mis-route), then the three
+ * stable authored message families (`not available on canned scenario` /
+ * `not valid JavaScript` / `not Just-Enough-JavaScript`) matched with
+ * `.includes` (NOT `.startsWith` — the real messages are prefixed
+ * `traceVariableLifecycle:` / `traceVariables:`). A recognized family surfaces
+ * its message from the family token onward (dropping the internal tier prefix);
+ * an unrecognized `Error` message degrades to a graceful verbatim fallback (a
+ * tier-side reword fails soft, not silently); a non-`Error` throw degrades to
+ * its crash-safe string form via the shared {@link stringifyFailReason}.
+ *
+ * @remarks The boundary error is NOT on the embody re-export surface, so it is
+ * detected by its structural brand ({@link isInstrumentBoundaryError}), never a
+ * type import — the same lens-purity constraint as {@link isOpaqueValue}. The
+ * exact text is this module's choice, pinned by `./tests/core.test.ts`. Never
+ * throws.
+ *
+ * @param error - The value caught from the channel-1 `try/catch` (`unknown`).
+ * @returns A single admission-error line (never throws).
+ */
+function formatAdmissionError(error: unknown): string {
+	return `admission refused: ${admissionDetail(error)}`;
 }
 
 /**
@@ -311,6 +343,81 @@ function isOpaqueValue(
 	);
 }
 
-const traceDebuggingCore = { formatEvent, deriveSettlementModel };
+/**
+ * The stable authored substrings identifying each recognized channel-1 message
+ * family, in detection order. Matched with `.includes` (NOT `.startsWith`)
+ * because the real messages are prefixed `traceVariableLifecycle:` /
+ * `traceVariables:`, so these tokens are interior. The text is owned by the
+ * embody / tracer tier (`embody/index.ts`,
+ * `embody/lib/evaluating/tracers/variables/trace-variables.ts`) — a tier-side
+ * reword breaks this classifier, which is why an unrecognized message still
+ * renders via the graceful fallback in {@link admissionDetail}.
+ */
+const ADMISSION_FAMILY_TOKENS: readonly string[] = [
+	'not available on canned scenario',
+	'not valid JavaScript',
+	'not Just-Enough-JavaScript',
+];
+
+/**
+ * The admission-error detail tail {@link formatAdmissionError} prepends
+ * `admission refused: ` to (the prefix lives in ONE place — no duplicate
+ * literal). The structural brand is checked FIRST (a boundary error extends
+ * `Error` and may carry a message containing a family substring), then the
+ * family tokens, then the graceful verbatim fallback for an unrecognized `Error`
+ * message, then the crash-safe stringify for a non-`Error` throw.
+ */
+function admissionDetail(error: unknown): string {
+	if (isInstrumentBoundaryError(error)) {
+		return `unsupported construct (${error.reason})`;
+	}
+	if (error instanceof Error) {
+		const familyToken = ADMISSION_FAMILY_TOKENS.find((token) =>
+			error.message.includes(token),
+		);
+		// `indexOf(familyToken)` is always ≥ 0 here — `familyToken` came from the
+		// same `.includes` match, so it is present (no `slice(-1)` footgun). The
+		// slice drops the internal tier prefix; an unrecognized message (no family
+		// token) surfaces verbatim — the soft fallback (a tier reword never blanks
+		// the dump).
+		return familyToken === undefined
+			? error.message
+			: error.message.slice(error.message.indexOf(familyToken));
+	}
+	return stringifyFailReason(error);
+}
+
+/**
+ * Local narrowing shape for the tracer's structurally-branded boundary error.
+ * Lens purity forbids importing `InstrumentBoundaryError` (not on the embody
+ * re-export surface anyway), so the brand is matched by shape — the same tag
+ * idiom as {@link isOpaqueValue}. `reason` is typed `string` (not the tier's
+ * two-member union) so an unexpected future reason still renders defensively.
+ */
+type InstrumentBoundaryLike = Error & {
+	readonly instrumentBoundary: true;
+	readonly reason: string;
+};
+
+/**
+ * Structural type-guard for the boundary error. The `instanceof Error` gate is
+ * load-bearing — a plain object carrying the brand shape is NOT a boundary error
+ * and must route to the non-Error path, not the reason branch.
+ */
+function isInstrumentBoundaryError(
+	error: unknown,
+): error is InstrumentBoundaryLike {
+	return (
+		error instanceof Error &&
+		'instrumentBoundary' in error &&
+		(error as { instrumentBoundary?: unknown }).instrumentBoundary === true
+	);
+}
+
+const traceDebuggingCore = {
+	formatEvent,
+	deriveSettlementModel,
+	formatAdmissionError,
+};
 
 export default traceDebuggingCore;

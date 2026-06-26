@@ -673,3 +673,132 @@ describe('deriveSettlementModel', () => {
 		});
 	});
 });
+
+describe('formatAdmissionError', () => {
+	// One — the canned-scenario admission throw: a plain Error whose message
+	// CONTAINS the authored token (with the real `traceVariableLifecycle:` prefix,
+	// so detection is `.includes`, not `.startsWith`). The lens surfaces the
+	// message from the family token onward, dropping the internal tier prefix.
+	it('classifies a canned-scenario admission throw, dropping the tier prefix', () => {
+		const line = traceDebuggingCore.formatAdmissionError(
+			new Error('traceVariableLifecycle: not available on canned scenario'),
+		);
+		expect(line).toBe('admission refused: not available on canned scenario');
+	});
+
+	// One (triangulator) — a structurally-branded boundary error: a real Error +
+	// the `instrumentBoundary`/`reason` brand. Output is keyed on `.reason`, a
+	// different grammar that defeats any hardcode of the canned line.
+	it('surfaces the reason of a labeled-statement boundary error', () => {
+		const line = traceDebuggingCore.formatAdmissionError(
+			Object.assign(
+				new Error('instrumentVariables: labeled statements are not supported'),
+				{ instrumentBoundary: true, reason: 'labeled-statement' },
+			),
+		);
+		expect(line).toBe(
+			'admission refused: unsupported construct (labeled-statement)',
+		);
+	});
+
+	// Boundary — the second boundary reason. Defeats a hardcode of the first
+	// reason; proves `.reason` is read dynamically.
+	it('surfaces the reason of an expression-target-for-of boundary error', () => {
+		const line = traceDebuggingCore.formatAdmissionError(
+			Object.assign(
+				new Error(
+					'instrumentVariables: for-of with a non-declaration target is not supported',
+				),
+				{ instrumentBoundary: true, reason: 'expression-target-for-of' },
+			),
+		);
+		expect(line).toBe(
+			'admission refused: unsupported construct (expression-target-for-of)',
+		);
+	});
+
+	// Boundary (brand gate) — a plain object carrying the brand shape but NOT an
+	// Error instance. It must route to the non-Error branch (`<object>`), NOT the
+	// boundary branch — proving the `instanceof Error` gate is load-bearing (the
+	// brand check alone is insufficient).
+	it('does not treat a non-Error object with an instrumentBoundary brand as a boundary error', () => {
+		const line = traceDebuggingCore.formatAdmissionError({
+			instrumentBoundary: true,
+			reason: 'labeled-statement',
+		});
+		expect(line).toBe('admission refused: <object>');
+	});
+
+	// Boundary (detection order — LOAD-BEARING) — a branded error whose MESSAGE
+	// also contains a family substring (`not Just-Enough-JavaScript`). Brand is
+	// checked FIRST, so it routes to the boundary branch. If the message substring
+	// ran first, the wrong output would be
+	// `admission refused: not Just-Enough-JavaScript — bogus`.
+	it('routes a branded error to the boundary branch even when its message contains a family substring', () => {
+		const line = traceDebuggingCore.formatAdmissionError(
+			Object.assign(
+				new Error('traceVariables: not Just-Enough-JavaScript — bogus'),
+				{ instrumentBoundary: true, reason: 'labeled-statement' },
+			),
+		);
+		expect(line).toBe(
+			'admission refused: unsupported construct (labeled-statement)',
+		);
+	});
+
+	// Many — the unparseable family: the message is surfaced from the family
+	// token onward, dropping the internal `traceVariables:` prefix but KEEPING the
+	// parse-error detail tail (learner-relevant).
+	it('classifies the unparseable family, keeping the parse-error detail', () => {
+		const line = traceDebuggingCore.formatAdmissionError(
+			new Error('traceVariables: not valid JavaScript — Unexpected token (1:5)'),
+		);
+		expect(line).toBe(
+			'admission refused: not valid JavaScript — Unexpected token (1:5)',
+		);
+	});
+
+	// Many — the non-JEJ family: same slice-from-token treatment.
+	it('classifies the non-JEJ family, keeping the violation detail', () => {
+		const line = traceDebuggingCore.formatAdmissionError(
+			new Error(
+				'traceVariables: not Just-Enough-JavaScript — class declarations are rejected',
+			),
+		);
+		expect(line).toBe(
+			'admission refused: not Just-Enough-JavaScript — class declarations are rejected',
+		);
+	});
+
+	// Boundary (graceful fallback) — a recognized Error with an UNrecognized
+	// message (a hypothetical tier reword). It surfaces the message VERBATIM,
+	// including the `traceVariables:` prefix — the prefix appearing in the output
+	// is the observable distinction from a recognized family (which strips it), and
+	// the soft-fail that keeps a tier reword from silently blanking the dump (M5).
+	it('falls back to the verbatim message for an unrecognized Error', () => {
+		const line = traceDebuggingCore.formatAdmissionError(
+			new Error('traceVariables: some future tier wording'),
+		);
+		expect(line).toBe('admission refused: traceVariables: some future tier wording');
+	});
+
+	// Exception (non-Error: string) — a thrown string passes through the shared
+	// crash-safe stringifier verbatim.
+	it('stringifies a thrown string', () => {
+		const line = traceDebuggingCore.formatAdmissionError('kaboom');
+		expect(line).toBe('admission refused: kaboom');
+	});
+
+	// Exception (non-Error: null) — a thrown null renders as the literal `null`.
+	it('stringifies a thrown null', () => {
+		const line = traceDebuggingCore.formatAdmissionError(null);
+		expect(line).toBe('admission refused: null');
+	});
+
+	// Exception (non-Error: object) — a thrown plain object degrades to a typeof
+	// label (via stringifyFailReason), never `[object Object]` and never a throw.
+	it('stringifies a thrown plain object as a typeof label', () => {
+		const line = traceDebuggingCore.formatAdmissionError({ not: 'an error' });
+		expect(line).toBe('admission refused: <object>');
+	});
+});
