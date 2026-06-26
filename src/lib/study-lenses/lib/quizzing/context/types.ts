@@ -8,6 +8,8 @@
  * anchor streams).
  */
 
+import type { ClassifiedToken } from '../../classifying/types.js';
+
 /**
  * How an identifier occurrence uses its variable, read off the AST position
  * alone: `declared` (a declarator id), `read` (a reference that uses the value),
@@ -30,4 +32,17 @@ export type IdentifierAnchor = Readonly<{
 	range: readonly [number, number];
 	name: string;
 	usageKind: UsageKind;
+}>;
+
+/**
+ * The single read-only bundle every generator receives — the chokepoint that
+ * owns "what a generator sees" (DOCS § Execution phases, Phase 2). Carries the
+ * pre-computed `classified` token stream (the per-token generators' input) and
+ * the `identifierAnchors` stream from one AST descent (the per-node generators'
+ * input). Later forms' binding / scope views join this bundle as their consumers
+ * land; the V1 path needs none of them.
+ */
+export type GenerationContext = Readonly<{
+	classified: readonly ClassifiedToken[];
+	identifierAnchors: readonly IdentifierAnchor[];
 }>;
