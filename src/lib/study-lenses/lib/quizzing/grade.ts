@@ -14,6 +14,7 @@ import type {
 	LearnerResponse,
 	McqQuizItem,
 	QuizItem,
+	SelectInCodeQuizItem,
 	Verdict,
 } from './types.js';
 
@@ -26,18 +27,20 @@ import type {
  *   penalizes a UI bug as a wrong answer.
  * - **Binary** — `correct` only on an exact match of the answer key (set
  *   equality — order-insensitive, duplicates collapse, no missing or extra),
- *   whether matching option ids (`mcq`) or source ranges (code-surface); no
- *   partial credit.
+ *   whether matching option ids (`mcq`) or source ranges (code-surface /
+ *   select-in-code); no partial credit, so an exhaustive `select-in-code` answer
+ *   is `correct` only when it hits the complete target set.
  * - **One-sided** — reads only `(item, response)`; the `Verdict` reports
  *   judgment + `feedback`, never the answer key.
  *
  * Dispatch is on `item.mode`: the `mcq` arm compares option-id sets; the
  * code-surface arm (`click-token` / `click-line`) compares clicked ranges to the
- * item's `targetRanges`. Each arm gates a response whose `mode` differs from the
- * item's to `malformed` (the discriminant-narrowing contract — a caller / UI bug,
- * not a wrong learner). The fall-through `never` arm keeps grade total: when
- * `multi-mcq` or `select-in-code` lands, its missing arm fails the build here
- * rather than silently falling through.
+ * item's `targetRanges`; the `select-in-code` arm compares the exhaustive
+ * selection's ranges to the same. Each arm gates a response whose `mode` differs
+ * from the item's to `malformed` (the discriminant-narrowing contract — a caller
+ * / UI bug, not a wrong learner). The fall-through `never` arm keeps grade total:
+ * when `multi-mcq` (the sole remaining unbuilt mode) lands, its missing arm fails
+ * the build here rather than silently falling through.
  */
 export default function grade(
 	item: QuizItem,
@@ -48,6 +51,9 @@ export default function grade(
 	}
 	if (item.mode === 'click-token' || item.mode === 'click-line') {
 		return freezeVerdict(gradeCodeSurface(item, response));
+	}
+	if (item.mode === 'select-in-code') {
+		return freezeVerdict(gradeSelectInCode(item, response));
 	}
 
 	const exhaustiveCheck: never = item.mode;
@@ -67,10 +73,7 @@ export default function grade(
  */
 function gradeMcq(item: McqQuizItem, response: LearnerResponse): Verdict {
 	if (response.mode !== 'mcq') {
-		return {
-			status: 'malformed',
-			reason: `response mode ${response.mode} does not match item mode mcq`,
-		};
+		return modeMismatch(response.mode, item.mode);
 	}
 
 	const knownIds = new Set(item.options.map((option) => option.id));
@@ -87,33 +90,80 @@ function gradeMcq(item: McqQuizItem, response: LearnerResponse): Verdict {
 }
 
 /**
- * Grade a code-surface response: a response whose mode does not match the item's
- * — an `mcq` response, or a `click-line` response to a `click-token` item and
- * vice versa — is `malformed` (the discriminant-narrowing contract; a caller / UI
- * bug, not a wrong learner). Otherwise the clicked ranges must set-equal the
- * target ranges for `correct`, else `incorrect`. There is no range analogue to
- * mcq's unknown-option-id `malformed`: `grade` never sees the Snippet, so a
- * non-matching range is simply `incorrect`. Both judged verdicts surface
- * `item.feedback`.
+ * Grade a code-surface response (`click-token` / `click-line`): a response whose
+ * mode does not match the item's — an `mcq` or `select-in-code` response, or a
+ * `click-line` response to a `click-token` item and vice versa — is `malformed`
+ * (the discriminant-narrowing contract; a caller / UI bug, not a wrong learner).
+ * Otherwise the clicked ranges must set-equal the target ranges for `correct`,
+ * else `incorrect`. There is no range analogue to mcq's unknown-option-id
+ * `malformed`: `grade` never sees the Snippet, so a non-matching range is simply
+ * `incorrect`. Both judged verdicts surface `item.feedback`.
  */
 function gradeCodeSurface(
 	item: CodeSurfaceQuizItem,
 	response: LearnerResponse,
 ): Verdict {
 	if (response.mode === 'mcq' || response.mode !== item.mode) {
-		return {
-			status: 'malformed',
-			reason: `response mode ${response.mode} does not match item mode ${item.mode}`,
-		};
+		return modeMismatch(response.mode, item.mode);
 	}
-
-	const clicked = new Set(
-		response.clickedRanges.map((range) => rangeKey(range)),
+	return gradeRangeSet(
+		item.targetRanges,
+		response.clickedRanges,
+		item.feedback,
 	);
-	const target = new Set(item.targetRanges.map((range) => rangeKey(range)));
-	return isSameSet(clicked, target)
-		? { status: 'correct', feedback: item.feedback }
-		: { status: 'incorrect', feedback: item.feedback };
+}
+
+/**
+ * Grade an exhaustive `select-in-code` response: a response whose mode is not
+ * `select-in-code` is `malformed` (the discriminant-narrowing contract; a caller
+ * / UI bug, not a wrong learner). Otherwise the selected ranges must set-equal the
+ * **complete** target set for `correct`, else `incorrect` — a partial selection
+ * is never partially credited (exhaustiveness is the graded skill). Same exact
+ * set-equality as the other code-surface modes; differs only in the response
+ * field read (`selectedRanges`) and the mode guard. Both judged verdicts surface
+ * `item.feedback`.
+ */
+function gradeSelectInCode(
+	item: SelectInCodeQuizItem,
+	response: LearnerResponse,
+): Verdict {
+	if (response.mode !== 'select-in-code') {
+		return modeMismatch(response.mode, item.mode);
+	}
+	return gradeRangeSet(
+		item.targetRanges,
+		response.selectedRanges,
+		item.feedback,
+	);
+}
+
+/**
+ * Exact set-equality of a response's ranges against an item's target ranges — the
+ * shared comparator for every code-surface mode (`click-token` / `click-line` /
+ * `select-in-code`). Order-insensitive, duplicates collapse, no missing or extra
+ * (binary, no partial credit). The judged verdict surfaces `feedback`.
+ */
+function gradeRangeSet(
+	targetRanges: ReadonlyArray<readonly [number, number]>,
+	responseRanges: ReadonlyArray<readonly [number, number]>,
+	feedback: string,
+): Verdict {
+	const response = new Set(responseRanges.map((range) => rangeKey(range)));
+	const target = new Set(targetRanges.map((range) => rangeKey(range)));
+	return isSameSet(response, target)
+		? { status: 'correct', feedback }
+		: { status: 'incorrect', feedback };
+}
+
+/**
+ * A `malformed` verdict for a response whose mode does not match the item's — a
+ * caller / UI bug, not a wrong learner. The `reason` is a developer diagnostic.
+ */
+function modeMismatch(responseMode: string, itemMode: string): Verdict {
+	return {
+		status: 'malformed',
+		reason: `response mode ${responseMode} does not match item mode ${itemMode}`,
+	};
 }
 
 /** Canonical comparison key for a half-open source range. */

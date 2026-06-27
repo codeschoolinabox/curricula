@@ -5,6 +5,7 @@ import type {
 	CodeSurfaceQuizItem,
 	LearnerResponse,
 	McqQuizItem,
+	SelectInCodeQuizItem,
 } from '../types.js';
 
 function mcqItem(
@@ -57,6 +58,30 @@ function clickResponse(
 	mode: 'click-token' | 'click-line' = 'click-token',
 ): LearnerResponse {
 	return { mode, clickedRanges };
+}
+
+function selectInCodeItem(
+	targetRanges: ReadonlyArray<readonly [number, number]>,
+	feedback = 'every occurrence of x',
+): SelectInCodeQuizItem {
+	return {
+		mode: 'select-in-code',
+		id: 'V10a@4-5',
+		family: 'variables',
+		form: 'V10a',
+		anchorRange: [4, 5],
+		cells: [{ dimension: 'execution', level: 'relation' }],
+		prompt: 'Click every occurrence of `x`.',
+		groupKey: 'binding:4-5',
+		feedback,
+		targetRanges,
+	};
+}
+
+function selectResponse(
+	selectedRanges: ReadonlyArray<readonly [number, number]>,
+): LearnerResponse {
+	return { mode: 'select-in-code', selectedRanges };
 }
 
 describe('grade', () => {
@@ -393,6 +418,214 @@ describe('grade — code-surface modes', () => {
 		it('grades the same item and response equally on repeat', () => {
 			const item = codeSurfaceItem([[4, 5]]);
 			const response = clickResponse([[4, 5]]);
+			expect(grade(item, response)).toEqual(grade(item, response));
+		});
+	});
+});
+
+describe('grade — select-in-code mode', () => {
+	describe('Zero', () => {
+		it('grades an empty selection against a non-empty target as incorrect', () => {
+			expect(grade(selectInCodeItem([[4, 5]]), selectResponse([]))).toEqual({
+				status: 'incorrect',
+				feedback: 'every occurrence of x',
+			});
+		});
+	});
+
+	describe('One', () => {
+		it('grades an exact single-range selection as correct', () => {
+			expect(
+				grade(selectInCodeItem([[4, 5]]), selectResponse([[4, 5]])),
+			).toEqual({ status: 'correct', feedback: 'every occurrence of x' });
+		});
+
+		it('grades a wrong single range as incorrect', () => {
+			expect(
+				grade(selectInCodeItem([[4, 5]]), selectResponse([[0, 1]])),
+			).toEqual({ status: 'incorrect', feedback: 'every occurrence of x' });
+		});
+
+		it('surfaces the item feedback verbatim on a correct verdict', () => {
+			expect(
+				grade(
+					selectInCodeItem([[4, 5]], 'all the same binding'),
+					selectResponse([[4, 5]]),
+				),
+			).toEqual({ status: 'correct', feedback: 'all the same binding' });
+		});
+	});
+
+	describe('Many', () => {
+		it('matches a complete multi-range selection regardless of order', () => {
+			expect(
+				grade(
+					selectInCodeItem([
+						[4, 5],
+						[10, 11],
+						[20, 21],
+					]),
+					selectResponse([
+						[20, 21],
+						[4, 5],
+						[10, 11],
+					]),
+				),
+			).toEqual({ status: 'correct', feedback: 'every occurrence of x' });
+		});
+	});
+
+	describe('Boundaries', () => {
+		it('grades a partial selection of a multi-range target as incorrect (exhaustiveness — no partial credit)', () => {
+			expect(
+				grade(
+					selectInCodeItem([
+						[4, 5],
+						[10, 11],
+					]),
+					selectResponse([[4, 5]]),
+				),
+			).toEqual({ status: 'incorrect', feedback: 'every occurrence of x' });
+		});
+
+		it('grades a superset of the target as incorrect (exact match, not subset)', () => {
+			expect(
+				grade(
+					selectInCodeItem([[4, 5]]),
+					selectResponse([
+						[4, 5],
+						[10, 11],
+					]),
+				),
+			).toEqual({ status: 'incorrect', feedback: 'every occurrence of x' });
+		});
+
+		it('collapses a duplicated correct range to correct', () => {
+			expect(
+				grade(
+					selectInCodeItem([
+						[4, 5],
+						[10, 11],
+					]),
+					selectResponse([
+						[4, 5],
+						[10, 11],
+						[4, 5],
+					]),
+				),
+			).toEqual({ status: 'correct', feedback: 'every occurrence of x' });
+		});
+
+		it('grades a range whose start matches but end differs as incorrect', () => {
+			expect(
+				grade(selectInCodeItem([[4, 5]]), selectResponse([[4, 9]])),
+			).toEqual({ status: 'incorrect', feedback: 'every occurrence of x' });
+		});
+
+		it('grades a range whose end matches but start differs as incorrect', () => {
+			expect(
+				grade(selectInCodeItem([[4, 5]]), selectResponse([[0, 5]])),
+			).toEqual({ status: 'incorrect', feedback: 'every occurrence of x' });
+		});
+
+		it("does not police the non-empty generator invariant: an empty target and empty selection vacuously match as correct (a zero-target item is a generator bug, not grade's to catch)", () => {
+			expect(grade(selectInCodeItem([]), selectResponse([]))).toEqual({
+				status: 'correct',
+				feedback: 'every occurrence of x',
+			});
+		});
+	});
+
+	describe('Interfaces', () => {
+		it('omits the answer key from the verdict', () => {
+			expect(
+				grade(selectInCodeItem([[4, 5]]), selectResponse([[4, 5]])),
+			).not.toHaveProperty('targetRanges');
+		});
+
+		it('returns a frozen verdict', () => {
+			expect(
+				Object.isFrozen(
+					grade(selectInCodeItem([[4, 5]]), selectResponse([[4, 5]])),
+				),
+			).toBe(true);
+		});
+	});
+
+	describe('Exceptions', () => {
+		// Each mismatch pins the `reason` to the mode-mismatch signature
+		// ("…does not match…"), which the un-implemented fall-through
+		// ("unsupported answer mode: …") does NOT produce — so the new-arm cases
+		// fail until the guard is real, rather than passing on the fall-through.
+		it('grades a select-in-code item against a click-token response as malformed', () => {
+			expect(
+				grade(
+					selectInCodeItem([[4, 5]]),
+					clickResponse([[4, 5]], 'click-token'),
+				),
+			).toEqual({
+				status: 'malformed',
+				reason: expect.stringContaining('does not match'),
+			});
+		});
+
+		it('grades a select-in-code item against a click-line response as malformed', () => {
+			expect(
+				grade(
+					selectInCodeItem([[4, 5]]),
+					clickResponse([[4, 5]], 'click-line'),
+				),
+			).toEqual({
+				status: 'malformed',
+				reason: expect.stringContaining('does not match'),
+			});
+		});
+
+		it('grades a select-in-code item against an mcq response as malformed', () => {
+			expect(
+				grade(selectInCodeItem([[4, 5]]), mcqResponse(['identifier'])),
+			).toEqual({
+				status: 'malformed',
+				reason: expect.stringContaining('does not match'),
+			});
+		});
+
+		it('grades a click-token item against a select-in-code response as malformed', () => {
+			expect(
+				grade(
+					codeSurfaceItem([[4, 5]], 'click-token'),
+					selectResponse([[4, 5]]),
+				),
+			).toEqual({
+				status: 'malformed',
+				reason: expect.stringContaining('does not match'),
+			});
+		});
+
+		it('grades a click-line item against a select-in-code response as malformed', () => {
+			expect(
+				grade(
+					codeSurfaceItem([[4, 5]], 'click-line'),
+					selectResponse([[4, 5]]),
+				),
+			).toEqual({
+				status: 'malformed',
+				reason: expect.stringContaining('does not match'),
+			});
+		});
+
+		it('grades an mcq item against a select-in-code response as malformed', () => {
+			expect(grade(mcqItem(['identifier']), selectResponse([[4, 5]]))).toEqual({
+				status: 'malformed',
+				reason: expect.stringContaining('does not match'),
+			});
+		});
+	});
+
+	describe('Simple', () => {
+		it('grades the same item and response equally on repeat', () => {
+			const item = selectInCodeItem([[4, 5]]);
+			const response = selectResponse([[4, 5]]);
 			expect(grade(item, response)).toEqual(grade(item, response));
 		});
 	});

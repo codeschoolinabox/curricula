@@ -63,11 +63,16 @@ the response and the answer key. Two surfaces:
 - **panel modes** — answered by option id(s): single-select (`mcq`) and
   multi-select (`multi-mcq`).
 - **code-surface modes** — answered by clicked or selected source range(s):
-  `click-token`, `click-line`, `select-in-code`.
+  `click-token` / `click-line` (a single token or line span), and
+  `select-in-code` (the exhaustive-selection genre — "click every occurrence" —
+  a separate variant graded by exact range set-equality: the complete target
+  set, binary, no partial credit).
 
 Quizzing owns the answer-mode **data** (which options are correct, which ranges
 are targets); the lens owns the **interaction mechanic** (how a click is
-captured).
+captured) and the **formative** feedback — from the item's targets and the
+learner's selection it can render which ranges a `select-in-code` learner missed
+or wrongly included, while the `Verdict` quizzing returns stays binary.
 
 **Form** — the catalog identity of a question template: the appendix id (`'V1'`,
 `'V8'`, `'V10a'`, `'O3'`, …). One `form` maps to one generator and one question

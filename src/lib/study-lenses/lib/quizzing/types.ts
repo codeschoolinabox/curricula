@@ -26,9 +26,10 @@ import type { Category, ClassifiedToken } from '../classifying/types.js';
  * response and the answer key. The full end-state vocabulary (the catalog
  * names all five); the panel modes (`mcq` / `multi-mcq`) answer by option id,
  * the code-surface modes (`click-token` / `click-line` / `select-in-code`)
- * answer by source range. Today only the `mcq` variant of `QuizItem` /
- * `LearnerResponse` is defined; new modes are additive members (a
- * cross-consumer contract event with the lens).
+ * answer by source range. The `mcq`, code-surface `click-token` / `click-line`,
+ * and exhaustive `select-in-code` variants of `QuizItem` / `LearnerResponse` are
+ * built; `multi-mcq` is the only enumerated-not-built mode. New modes are additive
+ * members (a cross-consumer contract event with the lens).
  */
 export type AnswerMode =
 	| 'mcq'
@@ -106,8 +107,9 @@ export type McqQuizItem = QuizItemBase &
  * the `[start, end)` spans a correct response must hit exactly (order-insensitive,
  * no partial credit); it is a generator invariant that they are **non-empty** — a
  * code-surface item with zero targets is a generator bug, not a question.
- * `select-in-code` (multi-select, subset semantics) is a future, separate variant
- * — not this one.
+ * `select-in-code` is its own variant (`SelectInCodeQuizItem`): the
+ * multi-select-and-confirm exhaustive-selection genre, graded by the same exact
+ * set-equality — a sibling, not a member of this single-/line-click variant.
  */
 export type CodeSurfaceQuizItem = QuizItemBase &
 	Readonly<{
@@ -116,30 +118,66 @@ export type CodeSurfaceQuizItem = QuizItemBase &
 	}>;
 
 /**
- * A generated quiz question, anchored to one source element, carrying its own
- * machine-derived ground truth. Discriminated on `mode`. Two variants are built:
- * the panel `mcq` and the code-surface `click-token` / `click-line` (carrying
- * `targetRanges`). The two remaining modes widen this union in different shapes:
- * `multi-mcq` widens `McqQuizItem.mode` (same option-id shape — set-equality
- * grading already handles it), while `select-in-code` is a new variant (range-based
- * but subset, not exact, semantics). Each is a cross-consumer contract event with
- * the lens.
+ * A code-surface question answered by selecting **every** source range that
+ * satisfies the form's predicate — the exhaustive-selection genre (the sameness
+ * forms V10a/b/c and later block-selection forms): "click every occurrence of
+ * this variable", "select the declarations of all variables used in this block".
+ * Its own variant under the rule **one variant per assessment gesture, capture
+ * mechanics folded within**: `click-token` / `click-line` are one gesture (a
+ * single click, one span) and share `CodeSurfaceQuizItem`; `select-in-code` is a
+ * different gesture (multi-select-and-confirm, N targets, exhaustiveness the
+ * graded skill) — the gesture quizzing does not model, but the genre boundary it
+ * marks is real. Today this is a structural twin of `CodeSurfaceQuizItem` (only
+ * `targetRanges`); the duplication is **deliberate** — the variants are kept
+ * separate because the exhaustive genre is expected to diverge, not collapsed
+ * into a shared supertype. `targetRanges` is the **complete** target set a correct
+ * answer must hit; grading is the **same exact set-equality** as the other
+ * code-surface modes — binary, no partial credit — because "find the complete set"
+ * *is* an exact-match test (a partial selection is `incorrect`, never partially
+ * credited). It is a generator invariant that `targetRanges` is **non-empty**.
+ * This variant carries **no** missed/extra data and no feedback shape beyond the
+ * inherited `feedback: string`: quizzing supplies the complete target set so the
+ * lens *can* render formative "you missed these / wrongly included these"
+ * feedback from `targetRanges` and the learner's selection; the `Verdict` stays
+ * binary and one-sided (it never echoes the answer key).
  */
-export type QuizItem = McqQuizItem | CodeSurfaceQuizItem;
+export type SelectInCodeQuizItem = QuizItemBase &
+	Readonly<{
+		mode: 'select-in-code';
+		targetRanges: ReadonlyArray<readonly [number, number]>;
+	}>;
+
+/**
+ * A generated quiz question, anchored to one source element, carrying its own
+ * machine-derived ground truth. Discriminated on `mode`. Three variants are built:
+ * the panel `mcq`, the code-surface `click-token` / `click-line`
+ * (`CodeSurfaceQuizItem`), and the exhaustive-selection `select-in-code`
+ * (`SelectInCodeQuizItem`) — the latter two both range-based and graded by exact
+ * set-equality. `multi-mcq` is the only remaining enumerated-not-built mode: it
+ * widens `McqQuizItem.mode` (same option-id shape — set-equality grading already
+ * handles it). Adding it is a cross-consumer contract event with the lens.
+ */
+export type QuizItem = McqQuizItem | CodeSurfaceQuizItem | SelectInCodeQuizItem;
 
 /**
  * What the learner submitted, shaped by the answer mode. Discriminated on `mode`
  * so `grade` detects a response whose mode does not match the item's (a caller /
- * UI bug) rather than mis-grading it: a panel mode answers by option id(s), a
- * code-surface mode by clicked source range(s). Named `LearnerResponse`, not
- * `Response`, to avoid the DOM `Response` global in the React-side lens. Widens
- * additively alongside `QuizItem`.
+ * UI bug) rather than mis-grading it: a panel mode answers by option id(s); a
+ * single-/line-click code-surface mode by `clickedRanges`; the exhaustive
+ * `select-in-code` mode by `selectedRanges` (the multi-select set the learner
+ * built and confirmed). Named `LearnerResponse`, not `Response`, to avoid the DOM
+ * `Response` global in the React-side lens. Widens additively alongside
+ * `QuizItem`.
  */
 export type LearnerResponse =
 	| Readonly<{ mode: 'mcq'; selectedOptionIds: ReadonlyArray<string> }>
 	| Readonly<{
 			mode: 'click-token' | 'click-line';
 			clickedRanges: ReadonlyArray<readonly [number, number]>;
+	  }>
+	| Readonly<{
+			mode: 'select-in-code';
+			selectedRanges: ReadonlyArray<readonly [number, number]>;
 	  }>;
 
 /**
