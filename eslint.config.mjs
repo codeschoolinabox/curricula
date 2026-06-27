@@ -23,10 +23,12 @@ export default tseslint.config(
 			'src/lib/sl-trace-js-aran-legacy/src/record/legacy-aran-trace/**',
 			// Test snippet JS files — exercise inputs, not source code
 			'src/lib/sl-trace-js-aran-legacy/src/record/tests/test-snippets/**',
-			// Vendored blanks lens internals (blankenate, no-paste-extension,
-			// url-config, evaluate-correctness) — JS→TS mechanical converts of
-			// the legacy implementation; idiomatic V2 style is a follow-up.
-			'src/lib/study-lenses/lenses/blanks/lib/**',
+			// Blanks lens internals still pending an idiomatic-V2 lint pass:
+			// `no-paste-extension.ts` is vendored; `evaluate-correctness.ts` is a
+			// follow-up. (`blankenate.ts` is now linted — thin lib/classifying
+			// glue; see lenses/blanks/DOCS.md § "lib/ is eslint-ignored".)
+			'src/lib/study-lenses/lenses/blanks/lib/no-paste-extension.ts',
+			'src/lib/study-lenses/lenses/blanks/lib/evaluate-correctness.ts',
 			// Vendored parsons lens internals (lis, parse-parsons) — JS→TS
 			// mechanical converts of the legacy JSParsons implementation;
 			// idiomatic V2 style is a follow-up. Tests/ extends the

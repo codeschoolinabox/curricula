@@ -19,9 +19,10 @@
  * `tests/blankenate.test.ts` § "lib/classifying adoption — partial-config
  * overlap matrix".
  *
- * Style posture: this directory (`lenses/blanks/lib/**`) is eslint-ignored per
- * `eslint.config.mjs` § Global ignores; an idiomatic-V2 restyle is a named
- * follow-up. The selection surface is V2-owned and is held by
+ * Style posture: this file is linted (idiomatic V2). Its `lib/` siblings
+ * `no-paste-extension.ts` (vendored) and `evaluate-correctness.ts` stay
+ * eslint-ignored per `eslint.config.mjs` § Global ignores pending their own
+ * restyle. The selection surface is V2-owned and is held by
  * `tests/blankenate.test.ts`.
  *
  * Output contract per the lens-local `types.ts`: `BlankenateResult | null`
@@ -36,19 +37,12 @@ import * as acorn from 'acorn';
 
 import classifyTokens from '../../../lib/classifying/classify-tokens.js';
 import type { Category } from '../../../lib/classifying/types.js';
-
 import type { Blank, BlankenateResult } from '../types.js';
 
 export default function blankenate(
 	code: string,
 	probability: number = 0.2,
-	config: ContentTypeFlags = {
-		keywords: true,
-		identifiers: true,
-		literals: false,
-		operators: false,
-		delimiters: false,
-	},
+	config: ContentTypeFlags = DEFAULT_CONTENT_TYPE_FLAGS,
 ): BlankenateResult | null {
 	// Length-matched placeholders: each blank is replaced by `_` repeated
 	// `original.length` times. Cascade: blankedCode.length === code.length
@@ -67,6 +61,10 @@ export default function blankenate(
 		tree = acorn.parse(code, {
 			ecmaVersion: 2022,
 			sourceType: 'module',
+			// Acorn's onToken is push-based; this local stream never escapes
+			// (passed by value to classifyTokens), so collecting here keeps the
+			// snippet to a single parse.
+			// eslint-disable-next-line functional/immutable-data -- local stream, never escapes
 			onToken: (token) => tokens.push(token),
 		});
 	} catch {
@@ -88,7 +86,9 @@ export default function blankenate(
 
 	// Phase 4 — ROLL. Bare per-token `Math.random()` (legacy parity; seeded RNG
 	// is a Future-direction item — inject `random()` at the call site then). At
-	// probability 1 every eligible token blanks; at 0, none.
+	// probability 1 every eligible token blanks; at 0, none. The randomness is
+	// exercise variety, not security.
+	// eslint-disable-next-line sonarjs/pseudo-random -- exercise variety, not security
 	const selected = eligible.filter(() => Math.random() < probability);
 
 	// Phase 5 — BUILD. One `Blank` per selected token, in source-ascending
@@ -108,9 +108,9 @@ export default function blankenate(
 		.toReversed()
 		.reduce(
 			(source, blank) =>
-				source.substring(0, blank.start) +
+				source.slice(0, blank.start) +
 				'_'.repeat(blank.original.length) +
-				source.substring(blank.end),
+				source.slice(blank.end),
 			code,
 		);
 
@@ -128,13 +128,11 @@ export default function blankenate(
 // classifying `Category` values (plural flag → singular category). The any-match
 // filter in Phase 3 reads this set.
 function enabledCategories(config: ContentTypeFlags): ReadonlySet<Category> {
-	const enabled = new Set<Category>();
-	if (config.keywords) enabled.add('keyword');
-	if (config.identifiers) enabled.add('identifier');
-	if (config.operators) enabled.add('operator');
-	if (config.literals) enabled.add('literal');
-	if (config.delimiters) enabled.add('delimiter');
-	return enabled;
+	return new Set(
+		FLAG_TO_CATEGORY.filter(([flag]) => config[flag]).map(
+			([, category]) => category,
+		),
+	);
 }
 
 // `ContentTypeFlags` is deliberately NOT exported — per DOCS.md § Phase 1 +
@@ -148,3 +146,27 @@ type ContentTypeFlags = {
 	readonly literals: boolean;
 	readonly delimiters: boolean;
 };
+
+// The default when a caller omits `config` (legacy signature default; the
+// wrapper always passes an explicit derived map, so this is the contract
+// floor, not the production path). A named constant rather than an inline
+// object literal so the default is shared + read-only, never re-allocated.
+const DEFAULT_CONTENT_TYPE_FLAGS: ContentTypeFlags = {
+	keywords: true,
+	identifiers: true,
+	operators: false,
+	literals: false,
+	delimiters: false,
+};
+
+// The plural-flag → singular-`Category` pairs `enabledCategories` filters over.
+// Module-scoped so it is allocated once, not per call.
+const FLAG_TO_CATEGORY: ReadonlyArray<
+	readonly [keyof ContentTypeFlags, Category]
+> = [
+	['keywords', 'keyword'],
+	['identifiers', 'identifier'],
+	['operators', 'operator'],
+	['literals', 'literal'],
+	['delimiters', 'delimiter'],
+];

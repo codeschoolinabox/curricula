@@ -536,9 +536,8 @@ each is independently testable:
 - `lib/blankenate.ts` (core) — the blank selector. Parses the snippet, delegates
   token classification to [`lib/classifying`](../../lib/classifying/README.md),
   filters on the enabled content types, rolls a per-token `Math.random()`, and
-  replaces. Pure. Eslint-ignored per
-  [`../../../../../eslint.config.mjs`](../../../../../eslint.config.mjs)
-  global-ignores (a follow-up brings it under lint).
+  replaces. Pure, and **linted** (idiomatic V2 — unlike its still-ignored `lib/`
+  siblings).
 - `lib/no-paste-extension.ts` (core) — **vendored** from the legacy
   `src/utils/noPasteExtension.js`. CodeMirror 6 extension that blocks paste via
   keymap (`Mod-v`) + DOM event handler (`paste` event). Pure. Eslint-ignored.

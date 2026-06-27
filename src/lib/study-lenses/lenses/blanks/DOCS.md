@@ -67,13 +67,12 @@ session-level decisions and audit trail.
 
 Default export of `index.tsx` is the frozen `LensModule` record. The core
 subsystems under `lib/` are internal; only `index.tsx` and (where applicable)
-`core.ts` import them. The `lib/` subdirectory is eslint-ignored per
-`eslint.config.mjs` § Global ignores — it preserves the vendored
-`no-paste-extension.ts`'s style without fighting lint; bringing `blankenate.ts`
-(now thin `lib/classifying`-consumer glue) under lint is a deliberate follow-up.
-Tests target each subsystem in isolation (vitest, no jsdom) plus the wrapper
-end-to-end (jsdom + `@testing-library/react`); tests live under `tests/` (NOT
-`lib/tests/`) and ARE linted — unlike the eslint-ignored `lib/`.
+`core.ts` import them. `blankenate.ts` is linted (idiomatic V2); its `lib/`
+siblings `no-paste-extension.ts` (vendored) and `evaluate-correctness.ts` stay
+eslint-ignored per `eslint.config.mjs` § Global ignores pending their own
+restyle. Tests target each subsystem in isolation (vitest, no jsdom) plus the
+wrapper end-to-end (jsdom + `@testing-library/react`); tests live under `tests/`
+(NOT `lib/tests/`) and ARE linted.
 
 ## Architectural sketch
 
@@ -348,14 +347,13 @@ instance.
   listener. If config-in-URL is wanted later it belongs to the orchestrator's
   URL surface, with this lens still reading the resolved values through `config`
   (see § Future direction).
-- **`lib/` is eslint-ignored.** The carve-out for `lenses/blanks/lib/**` lives
-  in `eslint.config.mjs`; it matches the existing `sl-trace-js-aran-legacy`
-  precedent. It keeps the vendored `no-paste-extension.ts` in-tree without
-  fighting style rules; `blankenate.ts` is now thin `lib/classifying`-consumer
-  glue, so bringing it under lint is a deliberate follow-up — it still carries
-  imperative-style lint debt (local array/set mutation, `substring`, bare
-  `Math.random()`), so un-ignoring it pairs with a restyle, not a bare config
-  edit.
+- **Parts of `lib/` are eslint-ignored.** The carve-out in `eslint.config.mjs`
+  (matching the `sl-trace-js-aran-legacy` precedent) now covers only the
+  vendored `no-paste-extension.ts` and the still-imperative
+  `evaluate-correctness.ts`. `blankenate.ts` was restyled to idiomatic V2 and
+  **is linted** — its two justified `eslint-disable` lines (the Acorn `onToken`
+  push and the bare `Math.random()` roll, both documented in-file) are the only
+  carve-outs it needs.
 
 ### Out of scope
 
