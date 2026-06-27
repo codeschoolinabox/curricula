@@ -393,13 +393,24 @@ describe('makeLocalLlm', () => {
 	});
 
 	describe('failed bring-up', () => {
-		it('resolves fetch-failed (a returned value, not a throw)', async () => {
+		it('resolves a post-flight fetch-failed refusal carrying the attempts ledger', async () => {
 			const llm = makeLocalLlm({
 				adapters: { webllm: countedAdapter({ fail: true }) },
 				catalog: FAKE_CATALOG,
 				capabilityProbe: fakeProbe(),
 			});
-			expect(await llm.load()).toEqual({ ok: false, cause: 'fetch-failed' });
+			expect(await llm.load()).toEqual({
+				ok: false,
+				cause: 'fetch-failed',
+				attempts: [
+					{
+						id: WEBLLM_ID,
+						runtime: 'webllm',
+						cause: 'fetch-failed',
+						detail: expect.stringContaining('Failed to fetch'),
+					},
+				],
+			});
 		});
 
 		it('is not memoized — a retry re-attempts the bring-up', async () => {
@@ -473,6 +484,93 @@ describe('makeLocalLlm', () => {
 			await Promise.all(inflight);
 			await llm.load();
 			expect(adapter.calls.length).toBe(2);
+		});
+	});
+
+	describe('load — exhausted chain promotes a terminal cause', () => {
+		it('promotes storage-quota from an early rung over a later fetch-failure', async () => {
+			const webllm = scriptedAdapter({
+				[DESCENT_DEFAULT_URL]: new Error('The storage quota was exceeded'),
+			});
+			const wllama = scriptedAdapter({
+				[DESCENT_RESCUE_URL]: new TypeError('Failed to fetch'),
+			});
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			expect(result.ok === false && result.cause).toBe('storage-quota');
+		});
+
+		it('records one ordered attempt per failed candidate', async () => {
+			const webllm = scriptedAdapter({
+				[DESCENT_DEFAULT_URL]: new Error('The storage quota was exceeded'),
+			});
+			const wllama = scriptedAdapter({
+				[DESCENT_RESCUE_URL]: new TypeError('Failed to fetch'),
+			});
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			if (result.ok) throw new Error('expected a refusal');
+			if (!('attempts' in result)) {
+				throw new Error('expected a post-flight refusal');
+			}
+			expect(result.attempts).toEqual([
+				{
+					id: 'gpu-default',
+					runtime: 'webllm',
+					cause: 'storage-quota',
+					detail: expect.stringContaining('quota'),
+				},
+				{
+					id: 'cpu-rescue',
+					runtime: 'wllama',
+					cause: 'fetch-failed',
+					detail: expect.stringContaining('Failed to fetch'),
+				},
+			]);
+		});
+
+		it('promotes cache-evicted over a later fetch-failure when no storage-quota', async () => {
+			const webllm = scriptedAdapter({
+				[DESCENT_DEFAULT_URL]: new Error(
+					'the model was evicted from the cache',
+				),
+			});
+			const wllama = scriptedAdapter({
+				[DESCENT_RESCUE_URL]: new TypeError('Failed to fetch'),
+			});
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			expect(result.ok === false && result.cause).toBe('cache-evicted');
+		});
+
+		it('a chain of device-lost and undiagnosed failures refuses with all-candidates-exhausted', async () => {
+			const webllm = scriptedAdapter({
+				[DESCENT_DEFAULT_URL]: new Error('the GPU device was lost'),
+			});
+			const wllama = scriptedAdapter({
+				[DESCENT_RESCUE_URL]: new Error('something opaque'),
+			});
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			expect(result.ok === false && result.cause).toBe(
+				'all-candidates-exhausted',
+			);
 		});
 	});
 

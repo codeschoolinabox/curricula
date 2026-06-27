@@ -6,16 +6,20 @@
  * which-runtime resolution is internal behind the one `load` verb.
  */
 
-/* eslint-disable functional/immutable-data -- the load-once cache is this module's
-   declared mutable core; every write is in this file */
+/* eslint-disable functional/immutable-data -- this module's declared mutable cores:
+   the load-once cache (a Map) and the per-load attempts ledger (an array); every
+   write is in this file */
 
 import freezeInPlace from '@utils/freeze-in-place.js';
 
 import DEFAULT_CATALOG from './catalog.js';
+import classifyLoadError from './classify-load-error.js';
 import selectFeasible from './feasibility.js';
 import probeCapabilities from './probe-capabilities.js';
+import promoteTerminal from './promote-terminal-cause.js';
 import type {
 	DeviceCapabilities,
+	LoadAttempt,
 	LoadedModel,
 	LoadProgress,
 	LoadResult,
@@ -82,6 +86,7 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 		// (resolvedId names the artifact that actually ran, across a runtime switch).
 		// A failure is intermediate — evict its rejected promise and try the next
 		// rung; the learner never opts into the fallback, the descent is silent.
+		const attempts: LoadAttempt[] = [];
 		for (const candidate of chain) {
 			const adapter = adapters[candidate.runtime];
 			if (adapter === undefined) {
@@ -112,21 +117,42 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 					resolvedId: candidate.entry.id,
 					resolvedRuntime: candidate.runtime,
 				});
-			} catch {
-				// Drop the failed promise so a retry re-attempts; descend to the next
-				// candidate. Delete only if the cache still holds THIS promise (a late
-				// joiner of a failed bring-up must not evict a fresh retry in flight).
+			} catch (error) {
+				// Drop the failed promise so a retry re-attempts; record the attempt in
+				// the ledger and descend. Delete only if the cache still holds THIS
+				// promise (a late joiner of a failed bring-up must not evict a fresh
+				// retry already in flight).
 				if (cache.get(candidate.entry.id) === bringUp) {
 					cache.delete(candidate.entry.id);
 				}
+				attempts.push({
+					id: candidate.entry.id,
+					runtime: candidate.runtime,
+					...classifyLoadError(error),
+				});
 			}
 		}
 
-		// The chain is exhausted — every candidate failed. inc 7 replaces this
-		// placeholder with promoteTerminal(attempts) + the non-empty attempts ledger;
-		// until then it keeps the pre-chain shape, which is the §0.4 forcing-function
-		// type error (no attempts) that inc 7 clears.
-		return freezeInPlace({ ok: false, cause: 'fetch-failed' });
+		// The chain is exhausted — every candidate failed. The ledger is non-empty (a
+		// non-null `chosen` guarantees ≥1 chain rung, and a success returns inside the
+		// loop), so promoteTerminal folds it to the honest terminal cause while the
+		// refusal carries the full diagnostic ledger.
+		const [first, ...rest] = attempts;
+		if (first === undefined) {
+			// Unreachable: selectFeasible guarantees chosen !== null ⇒ the chain is
+			// headed by that chosen entry (length ≥ 1), so the loop ran ≥1 rung and
+			// reaching here means every rung failed — the ledger has ≥1 attempt. The
+			// guard narrows it to the contract's non-empty tuple.
+			throw new Error(
+				'makeLocalLlm: exhausted chain produced no attempts (broken invariant)',
+			);
+		}
+		const ledger: readonly [LoadAttempt, ...LoadAttempt[]] = [first, ...rest];
+		return freezeInPlace({
+			ok: false,
+			cause: promoteTerminal(ledger),
+			attempts: ledger,
+		});
 	}
 
 	// freezeInPlace freezes only the returned surface; the cache Map lives in the

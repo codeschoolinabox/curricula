@@ -115,16 +115,19 @@ export const fakeProbe =
 
 // A counted runtime adapter for the load-once/dedup/eviction tests. `calls` pins
 // how many bring-ups fired; `fail: true` rejects the bring-up (the eviction
-// path). The bring-up resolves synchronously, so a sync adapter can't hold
-// concurrent callers in-flight — the dedup tests instead gate the PROBE, which
-// holds every concurrent load at the cache-check together.
+// path). The rejection is a fetch-shaped TypeError so an exhausted single-candidate
+// chain classifies it as `fetch-failed` (its honest terminal cause); the dedup/
+// eviction tests assert only call counts, so the error shape is immaterial to them.
+// The bring-up resolves synchronously, so a sync adapter can't hold concurrent
+// callers in-flight — the dedup tests instead gate the PROBE, which holds every
+// concurrent load at the cache-check together.
 export const countedAdapter = (options: { fail?: boolean } = {}) => {
 	const calls: { load: RuntimeLoad; fetchUrl: string }[] = [];
 	const adapter = ((load, fetchUrl, onProgress) => {
 		calls.push({ load, fetchUrl });
 		onProgress?.({ phase: 'fetch', text: 'fake', ratio: 1 });
 		return options.fail
-			? Promise.reject(new Error('fake bring-up failed'))
+			? Promise.reject(new TypeError('Failed to fetch'))
 			: Promise.resolve(fakeModel());
 	}) as RuntimeAdapter & { calls: typeof calls };
 	return Object.assign(adapter, { calls });
