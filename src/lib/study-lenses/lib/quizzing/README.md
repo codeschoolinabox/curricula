@@ -110,9 +110,17 @@ display choice quizzing never receives.
 **Sameness unlock** — the earned-propagation mechanic, expressed as data. A
 "sameness" form (V10a/b/c — "click every occurrence of this same variable / used
 the same way") names, via its `unlocks` field, the group(s) whose propagation it
-earns. Passing a sameness item is what authorizes bulk-crediting its group.
-Quizzing emits the unlock relationship; the lens owns when propagation fires and
-how it shows.
+earns. Each `unlocks` entry **is a `groupKey` string** — the same namespaced
+identity other `QuizItem`s carry in their `groupKey` (see _Group key_), not a new
+id space — so the lens matches an unlocked item's `unlocks` against its peers'
+`groupKey` to find the group to bulk-credit (e.g. a V10a binding-sameness item
+unlocks the `binding:<start>-<end>` group its V8 / V12 peers share). It lists one
+entry per distinct group earned and names whatever key those peers hold — so it
+survives a later `groupKey` re-key (the `usage:` axis gains binding × use-type
+grain at V10b) without changing. Passing a sameness item is what authorizes
+bulk-crediting its group. Quizzing emits the unlock relationship as data —
+`grade` never reads `unlocks`; the lens owns when propagation fires (over
+whatever peers survive the `filter`) and how it shows.
 
 **Curated bank vs generated** — two provenances of `QuizItem`s under one
 contract. A **generated** item is computed from the snippet's structure (V1

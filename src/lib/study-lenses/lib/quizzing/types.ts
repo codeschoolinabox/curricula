@@ -70,8 +70,12 @@ export type QuizOption = Readonly<{
  * is keyed on the classification axis the `form` uses — the category-ID form
  * uses `category:<category>`, refined to `category:<category>:<role>` where the
  * token carries a role — and is deterministic from
- * `(snippet, classified, filter)`. `unlocks` names the propagation group(s) a
- * "sameness" form earns; absent on forms that earn nothing.
+ * `(snippet, classified, filter)`. `unlocks` lists the distinct `groupKey`
+ * string(s) — one per group the "sameness" gesture earns — that its propagation
+ * peers carry (same namespace as `groupKey` above, not a new id space); it names
+ * whatever key those peers hold, so it survives a later `groupKey` re-key without
+ * a contract change. Lens-consumed (the propagation mechanic is the M3 lens's),
+ * never read by `grade`. Absent on forms that earn nothing.
  */
 export type QuizItemBase = Readonly<{
 	id: string;
