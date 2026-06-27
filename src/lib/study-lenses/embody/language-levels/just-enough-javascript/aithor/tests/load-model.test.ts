@@ -160,7 +160,16 @@ describe('makeLoadModel', () => {
 	describe('many — both LoadFailure causes collapse to no-model-available', () => {
 		it.each([
 			{ cause: 'no-feasible-model' as const },
-			{ cause: 'fetch-failed' as const, detail: 'network down' },
+			{
+				cause: 'fetch-failed' as const,
+				detail: 'network down',
+				// A post-flight LoadFailure now carries a non-empty attempts ledger; the
+				// loader reads only `cause`, so the ledger is here only to satisfy the
+				// union — its contents are never asserted.
+				attempts: [
+					{ id: 'known-x', runtime: 'webllm', cause: 'fetch-failed' },
+				] as const,
+			},
 		])(
 			'maps a $cause failure to no-model-available, dropping detail',
 			async (failure) => {
