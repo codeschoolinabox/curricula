@@ -69,7 +69,10 @@ import EditorComponent from './editor/index.js';
 import createEventBus from './event-bus.js';
 import type { LintDiagnostic } from './lib/editing/types.js';
 import deriveInterpretedDiagnostics from './lib/error-interpreting/derive-interpreted-diagnostics.js';
+import analyzeMicroDecisions from './lib/socratizing/analyze-micro-decisions.js';
+import type { CodeQuestion } from './lib/socratizing/types.js';
 import PhasesPanel from './phases-panel/index.js';
+import QuizButton from './quiz-button/index.js';
 import type {
 	LiveEmbodiment,
 	EventBus,
@@ -770,6 +773,15 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			);
 		const handleReference = React.useRef<EvaluateHandle | null>(null);
 
+		// The Quiz button's question slot + busy flag. Quiz socratizes the LIVE
+		// embodiment on demand via the real socratizing library; `questions` is null
+		// before the first run, the populated list after an ok:true result, and stays
+		// null on an ok:false (e.g. a parse failure).
+		const [questions, setQuestions] = React.useState<
+			readonly CodeQuestion[] | null
+		>(null);
+		const [generating, setGenerating] = React.useState(false);
+
 		// Append one line to a channel via a functional updater minting a fresh
 		// FROZEN channel object — never a mutable accumulator. Closes over the
 		// stable setState setter (the legal closure case), so each run's mocks see
@@ -855,6 +867,29 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			handleReference.current?.cancel();
 		}
 
+		// Quiz is a CLICK-HANDLER that socratizes the live embodiment on demand: it
+		// calls the real socratizing library and stores the questions for the
+		// <QuizButton> surface. Mirrors handleRun's null guard (liveEmbodiment is
+		// nullable). analyzeMicroDecisions is synchronous; `generating` brackets the
+		// call for the busy affordance — it never paints under a sync call, but keeps
+		// the prop contract honest for a future async generator. An ok:false result
+		// (e.g. a parse failure) leaves the surface empty.
+		function handleQuiz(): void {
+			if (liveEmbodiment === null) return;
+			setGenerating(true);
+			try {
+				const result = analyzeMicroDecisions(liveEmbodiment.embodiment);
+				setQuestions(result.ok ? result.questions : null);
+			} catch {
+				// Defense-in-depth: a stray library throw (e.g. from buildScope /
+				// filterQuestions on a malformed AST) keeps the prior questions; the
+				// finally guarantees the busy flag never sticks, so the button stays
+				// usable rather than disabling itself for the session.
+			} finally {
+				setGenerating(false);
+			}
+		}
+
 		// The panel's active lens is derived from state, NOT held in a
 		// panel-side slot. State remains the single source of truth (per
 		// README § Picker-vs-prop ownership). Lens mode names the active
@@ -935,6 +970,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 							onRun={handleRun}
 							onCancel={handleCancel}
 						/>
+						<QuizButton
+							questions={questions}
+							generating={generating}
+							onQuiz={handleQuiz}
+						/>
 					</section>
 				</div>
 			);
@@ -980,6 +1020,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						output={channelOutput}
 						onRun={handleRun}
 						onCancel={handleCancel}
+					/>
+					<QuizButton
+						questions={questions}
+						generating={generating}
+						onQuiz={handleQuiz}
 					/>
 				</section>
 			</div>
