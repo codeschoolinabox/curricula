@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import makeLocalLlm from '../make-local-llm.js';
 import type {
 	CapabilityProbe,
+	LoadProgress,
 	ModelCatalog,
 	RuntimeAdapter,
 } from '../types.js';
@@ -608,7 +609,7 @@ describe('makeLocalLlm', () => {
 	});
 
 	describe('progress', () => {
-		it('forwards onProgress to the adapter', async () => {
+		it('relabels adapter progress to one calm candidate-agnostic narrative', async () => {
 			const llm = makeLocalLlm({
 				adapters: { webllm: countedAdapter() },
 				catalog: FAKE_CATALOG,
@@ -618,9 +619,73 @@ describe('makeLocalLlm', () => {
 			await llm.load(undefined, onProgress);
 			expect(onProgress).toHaveBeenCalledWith({
 				phase: 'fetch',
-				text: 'fake',
+				text: 'Setting up your local AI…',
 				ratio: 1,
 			});
+		});
+
+		it('forwards phase and ratio unchanged while replacing text', async () => {
+			const adapter: RuntimeAdapter = (_load, _fetchUrl, onProgress) => {
+				onProgress?.({ phase: 'load', text: 'loading shards', ratio: 0.5 });
+				return Promise.resolve(fakeModel());
+			};
+			const llm = makeLocalLlm({
+				adapters: { webllm: adapter },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const onProgress = vi.fn();
+			await llm.load(undefined, onProgress);
+			expect(onProgress).toHaveBeenCalledWith({
+				phase: 'load',
+				text: 'Setting up your local AI…',
+				ratio: 0.5,
+			});
+		});
+
+		it('reports one narrative across a descent — no candidate leaks its raw text', async () => {
+			const webllm = scriptedAdapter({
+				[DESCENT_DEFAULT_URL]: new Error('webgpu bring-up failed'),
+			});
+			const wllama = scriptedAdapter({ [DESCENT_RESCUE_URL]: 'ok' });
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const onProgress = vi.fn();
+			await llm.load(undefined, onProgress);
+			expect(onProgress).not.toHaveBeenCalledWith(
+				expect.objectContaining({ text: 'fake' }),
+			);
+		});
+
+		it('does not inject a ratio the adapter omitted', async () => {
+			const adapter: RuntimeAdapter = (_load, _fetchUrl, onProgress) => {
+				onProgress?.({ phase: 'load', text: 'shard' });
+				return Promise.resolve(fakeModel());
+			};
+			const llm = makeLocalLlm({
+				adapters: { webllm: adapter },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			let captured: LoadProgress | undefined;
+			await llm.load(undefined, (progress) => {
+				captured = progress;
+			});
+			if (captured === undefined) throw new Error('expected a progress report');
+			expect('ratio' in captured).toBe(false);
+		});
+
+		it('an absent onProgress is a no-op — load still resolves ok', async () => {
+			const llm = makeLocalLlm({
+				adapters: { webllm: countedAdapter() },
+				catalog: FAKE_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			expect(result.ok).toBe(true);
 		});
 	});
 });

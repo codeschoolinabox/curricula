@@ -87,6 +87,9 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 		// A failure is intermediate — evict its rejected promise and try the next
 		// rung; the learner never opts into the fallback, the descent is silent.
 		const attempts: LoadAttempt[] = [];
+		// One calm narrative for the whole descent — wrap the listener ONCE and pass
+		// the same wrapper to every candidate, so no per-candidate text ever leaks.
+		const reportProgress = relabelProgress(onProgress);
 		for (const candidate of chain) {
 			const adapter = adapters[candidate.runtime];
 			if (adapter === undefined) {
@@ -104,7 +107,7 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 			// under the JS single-thread model; an await inserted here would break it.
 			const inFlight = cache.get(candidate.entry.id);
 			const bringUp =
-				inFlight ?? adapter(candidate.load, candidate.fetchUrl, onProgress);
+				inFlight ?? adapter(candidate.load, candidate.fetchUrl, reportProgress);
 			if (inFlight === undefined) cache.set(candidate.entry.id, bringUp);
 
 			try {
@@ -222,3 +225,24 @@ function describeReason(reason: RejectionReason): string {
 	const noAdapter: Extract<RejectionReason, { kind: 'no-adapter' }> = reason;
 	return `no registered runtime (needs '${noAdapter.runtime}')`;
 }
+
+/**
+ * Wrap a caller's progress listener so the descent reports ONE calm,
+ * candidate-agnostic narrative: `phase` and `ratio` pass through (the bar still
+ * moves), but each candidate's own `text` is replaced by {@link SETUP_NARRATIVE}.
+ * The learner never sees "downloading 2 of 3" or a model/runtime name — the silent
+ * fallback they never opted into stays silent. A no-op (returns `undefined`) when
+ * there is no listener, so the absence spreads straight through to the adapter.
+ */
+function relabelProgress(
+	onProgress?: (progress: LoadProgress) => void,
+): ((progress: LoadProgress) => void) | undefined {
+	if (onProgress === undefined) return undefined;
+	return (progress) => onProgress({ ...progress, text: SETUP_NARRATIVE });
+}
+
+// The single learner-facing progress label across the whole descent — candidate-
+// and runtime-agnostic by design (the fallback is silent). Declared below its use in
+// relabelProgress but read only at call time (an adapter call is reached after module
+// init, never in the TDZ). The trailing character is a real ellipsis (…), not periods.
+const SETUP_NARRATIVE = 'Setting up your local AI…';
