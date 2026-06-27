@@ -64,12 +64,12 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 	): Promise<LoadResult> {
 		const capabilities = await capabilityProbe();
 		// Throws on an unknown model name — a programmer error, deliberately NOT
-		// inside the try below (an unknown name is never a returned LoadFailure).
-		const { chosen, chosenRuntime, feasible, rejections } = select(
+		// inside the descent below (an unknown name is never a returned LoadFailure).
+		const { chosen, feasible, rejections, chain } = select(
 			capabilities,
 			selection,
 		);
-		if (chosen === null || chosenRuntime === null) {
+		if (chosen === null) {
 			return freezeInPlace({
 				ok: false,
 				cause: 'no-feasible-model',
@@ -77,39 +77,56 @@ export default function makeLocalLlm(config: LocalLlmConfig): LocalLlm {
 			});
 		}
 
-		const member = chosen.runtimes.find(
-			(option) => option.load.runtime === chosenRuntime,
-		);
-		const adapter = adapters[chosenRuntime];
-		if (member === undefined || adapter === undefined) {
-			// Unreachable: selectFeasible only resolves a runtime present in BOTH the
-			// entry and the adapter map. Guard satisfies the types and surfaces a
-			// broken invariant loudly rather than bringing up the wrong model.
-			throw new Error(
-				`makeLocalLlm: resolved runtime "${chosenRuntime}" has no member/adapter for "${chosen.id}"`,
-			);
+		// Descend the chain: the cost-aware default first, then its smaller / CPU
+		// siblings. The FIRST candidate that brings up wins and is reported honestly
+		// (resolvedId names the artifact that actually ran, across a runtime switch).
+		// A failure is intermediate — evict its rejected promise and try the next
+		// rung; the learner never opts into the fallback, the descent is silent.
+		for (const candidate of chain) {
+			const adapter = adapters[candidate.runtime];
+			if (adapter === undefined) {
+				// Unreachable: selectFeasible only chains a runtime present in the
+				// adapter map. The guard satisfies the partial AdapterMap type and
+				// surfaces a broken invariant loudly rather than skipping silently.
+				throw new Error(
+					`makeLocalLlm: chained runtime "${candidate.runtime}" has no adapter for "${candidate.entry.id}"`,
+				);
+			}
+
+			// Cache per the candidate's catalog id (unique across the chain — each
+			// entry appears at most once). The get-then-set is synchronous (no await
+			// between), so concurrent loads arriving together dedup to one bring-up
+			// under the JS single-thread model; an await inserted here would break it.
+			const inFlight = cache.get(candidate.entry.id);
+			const bringUp =
+				inFlight ?? adapter(candidate.load, candidate.fetchUrl, onProgress);
+			if (inFlight === undefined) cache.set(candidate.entry.id, bringUp);
+
+			try {
+				// Sequential by design: await this rung, and only on its failure
+				// attempt the next — the descent never fetches candidates in parallel.
+				const model = await bringUp;
+				return freezeInPlace({
+					ok: true,
+					model,
+					resolvedId: candidate.entry.id,
+					resolvedRuntime: candidate.runtime,
+				});
+			} catch {
+				// Drop the failed promise so a retry re-attempts; descend to the next
+				// candidate. Delete only if the cache still holds THIS promise (a late
+				// joiner of a failed bring-up must not evict a fresh retry in flight).
+				if (cache.get(candidate.entry.id) === bringUp) {
+					cache.delete(candidate.entry.id);
+				}
+			}
 		}
 
-		const inFlight = cache.get(chosen.id);
-		const bringUp =
-			inFlight ?? adapter(member.load, member.fetchUrl, onProgress);
-		if (inFlight === undefined) cache.set(chosen.id, bringUp);
-
-		try {
-			const model = await bringUp;
-			return freezeInPlace({
-				ok: true,
-				model,
-				resolvedId: chosen.id,
-				resolvedRuntime: chosenRuntime,
-			});
-		} catch {
-			// Not memoized — drop the failed promise so a retry re-attempts the fetch.
-			// Delete only if the cache still holds THIS promise: a late joiner of a
-			// failed bring-up must not evict a fresh retry already in flight.
-			if (cache.get(chosen.id) === bringUp) cache.delete(chosen.id);
-			return freezeInPlace({ ok: false, cause: 'fetch-failed' });
-		}
+		// The chain is exhausted — every candidate failed. inc 7 replaces this
+		// placeholder with promoteTerminal(attempts) + the non-empty attempts ledger;
+		// until then it keeps the pre-chain shape, which is the §0.4 forcing-function
+		// type error (no attempts) that inc 7 clears.
+		return freezeInPlace({ ok: false, cause: 'fetch-failed' });
 	}
 
 	// freezeInPlace freezes only the returned surface; the cache Map lives in the

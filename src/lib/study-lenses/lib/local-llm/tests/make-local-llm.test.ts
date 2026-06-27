@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import makeLocalLlm from '../make-local-llm.js';
-import type { CapabilityProbe, RuntimeAdapter } from '../types.js';
+import type {
+	CapabilityProbe,
+	ModelCatalog,
+	RuntimeAdapter,
+} from '../types.js';
 
 import {
 	countedAdapter,
@@ -9,9 +13,22 @@ import {
 	fakeCaps,
 	fakeModel,
 	fakeProbe,
+	scriptedAdapter,
+	webllmEntry,
+	wllamaEntry,
 } from './fakes.js';
 
 const WEBLLM_ID = 'fake-webllm-small';
+
+// A failing-default + working-sibling chain: the cost-aware default (gpu-default, webllm)
+// fails bring-up, the CPU rescue (cpu-rescue, wllama) succeeds — exercising the descent
+// across a runtime switch. URLs match the entry builders' `https://example.test/${id}`.
+const DESCENT_DEFAULT_URL = 'https://example.test/gpu-default';
+const DESCENT_RESCUE_URL = 'https://example.test/cpu-rescue';
+const DESCENT_CATALOG: ModelCatalog = [
+	webllmEntry({ id: 'gpu-default', sizeClass: 'small', vramRequiredMB: 1000 }),
+	wllamaEntry({ id: 'cpu-rescue', sizeClass: 'tiny' }),
+];
 
 describe('makeLocalLlm', () => {
 	describe('load — refusal', () => {
@@ -145,6 +162,130 @@ describe('makeLocalLlm', () => {
 			});
 			await llm.load();
 			expect(adapter.calls.length).toBe(1);
+		});
+	});
+
+	describe('load — chain descent', () => {
+		it('a default that brings up wins without descending', async () => {
+			const webllm = scriptedAdapter({ [DESCENT_DEFAULT_URL]: 'ok' });
+			const wllama = scriptedAdapter({});
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			expect(result.ok && result.resolvedId).toBe('gpu-default');
+		});
+
+		it('a winning default is not descended past — the tail is never tried', async () => {
+			const webllm = scriptedAdapter({ [DESCENT_DEFAULT_URL]: 'ok' });
+			const wllama = scriptedAdapter({});
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			await llm.load();
+			expect(wllama.calls.length).toBe(0);
+		});
+
+		it('descends to a working sibling when the default fails, reporting the sibling id', async () => {
+			const webllm = scriptedAdapter({
+				[DESCENT_DEFAULT_URL]: new Error('webgpu bring-up failed'),
+			});
+			const wllama = scriptedAdapter({ [DESCENT_RESCUE_URL]: 'ok' });
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			expect(result.ok && result.resolvedId).toBe('cpu-rescue');
+		});
+
+		it('reports the winning sibling runtime across the switch', async () => {
+			const webllm = scriptedAdapter({
+				[DESCENT_DEFAULT_URL]: new Error('webgpu bring-up failed'),
+			});
+			const wllama = scriptedAdapter({ [DESCENT_RESCUE_URL]: 'ok' });
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			expect(result.ok && result.resolvedRuntime).toBe('wllama');
+		});
+
+		it('returns the winning model handle, not a refusal', async () => {
+			const webllm = scriptedAdapter({
+				[DESCENT_DEFAULT_URL]: new Error('webgpu bring-up failed'),
+			});
+			const wllama = scriptedAdapter({ [DESCENT_RESCUE_URL]: 'ok' });
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			expect(result.ok && result.model !== undefined).toBe(true);
+		});
+
+		it('tries the failing default before descending', async () => {
+			const webllm = scriptedAdapter({
+				[DESCENT_DEFAULT_URL]: new Error('webgpu bring-up failed'),
+			});
+			const wllama = scriptedAdapter({ [DESCENT_RESCUE_URL]: 'ok' });
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			await llm.load();
+			expect(webllm.calls).toContain(DESCENT_DEFAULT_URL);
+		});
+
+		it('caches the descent winner — a reload reuses it with no second rescue bring-up', async () => {
+			const webllm = scriptedAdapter({
+				[DESCENT_DEFAULT_URL]: new Error('webgpu bring-up failed'),
+			});
+			const wllama = scriptedAdapter({ [DESCENT_RESCUE_URL]: 'ok' });
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: DESCENT_CATALOG,
+				capabilityProbe: fakeProbe(),
+			});
+			await llm.load();
+			await llm.load();
+			expect(wllama.calls.length).toBe(1);
+		});
+
+		it('descends past two failing candidates to a working third', async () => {
+			const webllm = scriptedAdapter({
+				'https://example.test/gpu-big': new Error('big failed'),
+				'https://example.test/gpu-small': new Error('small failed'),
+			});
+			const wllama = scriptedAdapter({ 'https://example.test/cpu-last': 'ok' });
+			const llm = makeLocalLlm({
+				adapters: { webllm, wllama },
+				catalog: [
+					webllmEntry({
+						id: 'gpu-big',
+						sizeClass: 'small',
+						vramRequiredMB: 1500,
+					}),
+					webllmEntry({
+						id: 'gpu-small',
+						sizeClass: 'tiny',
+						vramRequiredMB: 300,
+					}),
+					wllamaEntry({ id: 'cpu-last', sizeClass: 'tiny' }),
+				],
+				capabilityProbe: fakeProbe(),
+			});
+			const result = await llm.load();
+			expect(result.ok && result.resolvedId).toBe('cpu-last');
 		});
 	});
 

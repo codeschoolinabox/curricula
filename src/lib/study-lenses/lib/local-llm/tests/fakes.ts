@@ -3,7 +3,8 @@
  * shared data — catalog entries and capabilities overrides stay inline per test).
  * Grows per increment: the selection core (inc 3) needs a capabilities double and
  * a registration placeholder; the facade (inc 6) adds a counted adapter, a fake
- * model/probe, and a small catalog.
+ * model/probe, a small catalog, and a per-candidate scripted adapter for the
+ * chain-descent tests.
  */
 
 import type {
@@ -125,6 +126,27 @@ export const countedAdapter = (options: { fail?: boolean } = {}) => {
 		return options.fail
 			? Promise.reject(new Error('fake bring-up failed'))
 			: Promise.resolve(fakeModel());
+	}) as RuntimeAdapter & { calls: typeof calls };
+	return Object.assign(adapter, { calls });
+};
+
+// A per-candidate scripted adapter for the chain-descent tests: each call resolves a
+// fakeModel or rejects per the script, keyed by fetchUrl (unique per catalog entry; a
+// RuntimeLoad is a per-runtime shape, a poor map key). An 'ok' outcome resolves; an Error
+// outcome rejects with exactly that error (so a test can drive a specific classified cause);
+// an unscripted fetchUrl rejects loudly, surfacing a test that wired the chain wrong. The
+// recorded `calls` (in order) let a test assert which candidates were tried before the win.
+export const scriptedAdapter = (script: Record<string, 'ok' | Error>) => {
+	const calls: string[] = [];
+	const adapter = ((_load, fetchUrl, onProgress) => {
+		calls.push(fetchUrl);
+		onProgress?.({ phase: 'fetch', text: 'fake', ratio: 1 });
+		const outcome = script[fetchUrl];
+		if (outcome === 'ok') return Promise.resolve(fakeModel());
+		if (outcome instanceof Error) return Promise.reject(outcome);
+		return Promise.reject(
+			new Error(`scriptedAdapter: no script for fetchUrl "${fetchUrl}"`),
+		);
 	}) as RuntimeAdapter & { calls: typeof calls };
 	return Object.assign(adapter, { calls });
 };
