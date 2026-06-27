@@ -105,9 +105,7 @@ describe('promoteTerminal', () => {
 
 		it('the fold is strict — a single non-fetch-failed among many blocks it', () => {
 			expect(
-				promoteTerminal(
-					ledger('fetch-failed', 'fetch-failed', 'device-lost'),
-				),
+				promoteTerminal(ledger('fetch-failed', 'fetch-failed', 'device-lost')),
 			).toBe('all-candidates-exhausted');
 		});
 	});
