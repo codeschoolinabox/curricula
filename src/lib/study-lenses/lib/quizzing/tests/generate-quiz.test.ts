@@ -51,13 +51,13 @@ describe('generateQuiz', () => {
 			).toEqual(['V1', 'V1', 'V1', 'V7', 'V7']);
 		});
 
-		it('runs all three registered generators for a declared, referenced binding', () => {
+		it('runs every applicable registered generator for a declared, referenced binding', () => {
 			const snippet = embody('let x = 1; x;');
 			expect(
 				new Set(
 					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 				),
-			).toEqual(new Set(['V1', 'V7', 'V8']));
+			).toEqual(new Set(['V1', 'V7', 'V8', 'V10a']));
 		});
 	});
 
