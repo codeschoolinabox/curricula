@@ -341,10 +341,12 @@ the Snippet (the one-sided seam).
   per-occurrence group-of-one fallback (`usage:occ:<start>-<end>`) for any
   occurrence with no resolvable binding (a free global, or any name the scope
   forest does not track — the same boundary V8 resolves behind, so parameters
-  and the like do not group under V7/V10b). On the classification axis
-  `identifier` / `keyword` (which classifying makes role-less) stay on the bare
-  two-segment form, while operator / literal / delimiter gain the `:<role>`
-  refinement; the `category:`, `binding:`, and `usage:` (binding × use-type)
+  and the like do not group under V7/V10b). The cross-variable sameness form
+  V10c keys on the use-type alone (`usage-kind:<usageKind>`), a fourth,
+  binding-agnostic axis. On the classification axis `identifier` / `keyword`
+  (which classifying makes role-less) stay on the bare two-segment form, while
+  operator / literal / delimiter gain the `:<role>` refinement; the `category:`,
+  `binding:`, `usage:` (binding × use-type), and `usage-kind:` (cross-variable)
   serializers live in `keying/`, while V7's `usage:occ:` group-of-one fallback
   (for an occurrence with no resolvable binding) is the only `groupKey` still
   inlined in a generator rather than serialized in `keying/`. The category-ID

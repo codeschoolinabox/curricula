@@ -107,8 +107,10 @@ resolvable binding — a free global, or any name the scope forest does not trac
 (e.g. a function parameter in unvalidated code): the same resolution boundary V8
 already lives behind, so params and the like do not group under V7/V10b; the
 sameness form V10b carries this same binding × use-type key to bulk-credit it;
-block and loop forms key on their
-structural anchor. Quizzing decides what a group is _keyed_ on; the
+the cross-variable sameness form V10c keys on the use-type alone
+(`usage-kind:<usageKind>`, binding-agnostic — the fourth namespaced axis); block
+and loop forms key on their structural anchor. Quizzing decides what a group is
+_keyed_ on; the
 lens decides how a completed group is _presented_. The group key is
 deterministic from `(snippet, classified, filter)` — it never depends on a lens
 display choice quizzing never receives.
