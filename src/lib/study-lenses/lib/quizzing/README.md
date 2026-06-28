@@ -100,8 +100,14 @@ by axis: classification forms — the category-ID form and later role-aware form
 the token carries a role (`identifier` and `keyword` are role-less, so they key
 on the bare category); binding-aware forms key on binding identity
 (`binding:<start>-<end>`, the declaration-site span); the usage-kind form keys
-per occurrence (`usage:<start>-<end>`, a group-of-one) until a sameness form
-earns its binding × use-type propagation; block and loop forms key on their
+on binding × use-type (`usage:<decl-start>-<decl-end>:<usageKind>`, so every
+occurrence of one binding used the same way shares a group), with a per-occurrence
+group-of-one fallback (`usage:occ:<start>-<end>`) for any occurrence with no
+resolvable binding — a free global, or any name the scope forest does not track
+(e.g. a function parameter in unvalidated code): the same resolution boundary V8
+already lives behind, so params and the like do not group under V7/V10b; the
+sameness form V10b carries this same binding × use-type key to bulk-credit it;
+block and loop forms key on their
 structural anchor. Quizzing decides what a group is _keyed_ on; the
 lens decides how a completed group is _presented_. The group key is
 deterministic from `(snippet, classified, filter)` — it never depends on a lens

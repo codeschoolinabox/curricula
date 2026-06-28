@@ -335,18 +335,24 @@ the Snippet (the one-sided seam).
   category-ID form and role-aware forms) key on `category:<category>`, refined
   to `category:<category>:<role>` where the token carries a role; binding-aware
   forms key on binding identity (`binding:<start>-<end>`, the declaration-site
-  span); the usage-kind form keys per occurrence (`usage:<start>-<end>`, a
-  group-of-one) until a sameness form (V10b) earns its binding × use-type
-  propagation. On the classification axis `identifier` / `keyword` (which
-  classifying makes role-less) stay on the bare two-segment form, while operator
-  / literal / delimiter gain the `:<role>` refinement; the `category:` and
-  `binding:` serializers live in `keying/`, while the projection-less `usage:`
-  key is inlined in the form until V10b's re-key gives it structure worth
-  factoring out. The category-ID form's propagation grain is thus intentionally
-  finer than its category answer key — a consumer wanting category-level
-  grouping can prefix-match on `category:<category>`. The key is deterministic
-  from `(snippet, classified, filter)` — never a function of a lens display
-  choice quizzing never receives.
+  span); the usage-kind form keys on binding × use-type
+  (`usage:<decl-start>-<decl-end>:<usageKind>`) — the V10b re-key, so every
+  occurrence of one binding used the same way shares a group — with a
+  per-occurrence group-of-one fallback (`usage:occ:<start>-<end>`) for any
+  occurrence with no resolvable binding (a free global, or any name the scope
+  forest does not track — the same boundary V8 resolves behind, so parameters
+  and the like do not group under V7/V10b). On the classification axis
+  `identifier` / `keyword` (which classifying makes role-less) stay on the bare
+  two-segment form, while operator / literal / delimiter gain the `:<role>`
+  refinement; the `category:`, `binding:`, and `usage:` (binding × use-type)
+  serializers live in `keying/`, while V7's `usage:occ:` group-of-one fallback
+  (for an occurrence with no resolvable binding) is the only `groupKey` still
+  inlined in a generator rather than serialized in `keying/`. The category-ID
+  form's propagation grain is thus intentionally finer than its category answer
+  key — a consumer wanting category-level grouping can prefix-match on
+  `category:<category>`. The key is deterministic from
+  `(snippet, classified, filter)` — never a function of a lens display choice
+  quizzing never receives.
 - **V1 `id` scheme is `form@start-end`** (e.g. `V1@12-13`), derivable from the
   form and the anchor alone; binding-flavored ids (`form/binding:x@decl`) are a
   later-form scheme that lands with occurrence→binding resolution.
