@@ -74,7 +74,10 @@ repair edge returns to prompt construction — the same pure phase, now seeded w
 the specific out-of-subset construct or out-of-bounds metric. The loop is bounded;
 the dotted edge is the join where the bound is spent. The three refusal causes
 (_attempt-bound-exhausted_, _no-model-available_, _unknown-model_)
-converge on one refusal state.
+converge on one refusal state — to which a structured _no-model-available_
+additionally attaches the derived `nextStep` category (an attribute of that refusal,
+computed as the value-not-throw boundary absorbs the load failure, not a separate
+data state — so the graph stays one refusal node).
 
 ## Structural constraints
 
@@ -100,6 +103,21 @@ converge on one refusal state.
   _unknown-model_ are bring-up-time and arise under either `validate` value.
   Curated: any of the three. Uncurated: _no-model-available_ or _unknown-model_ —
   with no loop there is no attempt-bound refusal.
+- **A device-limit refusal is actionable, and aithor names no product.** aithor and
+  local-llm both emit only a delivery-agnostic category — never a product, vendor, or
+  URL; the render surface (copy, links, naming a desktop app) is the consumer's
+  (local-llm calls this the cause→guidance mapping, and it is the lens's, not this
+  module's). So a _no-model-available_ refusal that arises from local-llm's
+  structured `LoadFailure` carries an optional **`nextStep`** — a product-neutral
+  category (_retry_, _free-space_, _reconnect_, _use-native-app_) derived by a TOTAL
+  (many-to-one) map from the terminal `LoadFailureCause`, so the lens can offer a real
+  next step rather than a dead end. The category carries no message and no URL —
+  there is no slot a product name could occupy. The refusals with no structured cause
+  carry none: _unknown-model_ (a catalog typo, not a device limit) and the
+  _no-model-available_ folded from an infrastructure fault (a rejected probe or a
+  throw — no honest terminal cause underlies it). The optional field is itself the
+  signal: `nextStep` present means a structured device-limit with a named step;
+  absent means no actionable category beyond the bare refusal.
 - **The result follows the `BaseResult` `ok`-boolean convention** — consumers
   check `ok`, not a discriminated tag. The only failure surface is a structured
   refusal; conformance violations stay internal to the repair loop.

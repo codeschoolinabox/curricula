@@ -226,7 +226,7 @@ type ResolvedModel = {
  * rejection — even though local-llm itself is NOT uniformly value-not-throw. It
  * absorbs local-llm's three non-success shapes, matching aithor's `ok`-boolean
  * convention:
- * - a `LoadFailure` (its `no-feasible-model` and `fetch-failed` causes) →
+ * - a `LoadFailure` (any of local-llm's five terminal causes) →
  *   `Refusal('no-model-available')`; local-llm's `detail` is dropped at the seam
  *   (a {@link Refusal} carries only a cause).
  * - a NON-EMPTY model name absent from the injected catalog → `Refusal('unknown-model')`,
@@ -336,10 +336,10 @@ type ResolvedAithorConfig = {
  * - `'attempt-bound-exhausted'` — curated only: the loop ran out of attempts
  *   (some subset × size × intent requests are unsatisfiable).
  * - `'no-model-available'` — either path: the device cannot bring up a model it
- *   otherwise knows. The re-mapping of local-llm's `LoadFailure` — both its
- *   `no-feasible-model` and `fetch-failed` causes collapse here — and also the
- *   catch-all for a propagated capability-probe or infrastructure fault during
- *   bring-up.
+ *   otherwise knows. The re-mapping of local-llm's `LoadFailure` — all five of its
+ *   terminal causes (`no-feasible-model`, `all-candidates-exhausted`, `fetch-failed`,
+ *   `storage-quota`, `cache-evicted`) collapse here — and also the catch-all for a
+ *   propagated capability-probe or infrastructure fault during bring-up.
  * - `'unknown-model'` — either path: a NON-EMPTY `model` name absent from the
  *   runtime's (injected) catalog — a typo, or a name from a newer catalog. Kept
  *   distinct from `no-model-available` so a misnamed model never masquerades as

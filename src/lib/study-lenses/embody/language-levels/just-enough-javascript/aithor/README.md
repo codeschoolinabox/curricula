@@ -268,11 +268,15 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   the three. Under `validate: false`: **no model available** or **unknown model**
   — with no loop there is no attempt-bound refusal. _No model available_ means the
   device cannot bring up a model it otherwise knows: no model it can run, or the
-  requested model is neither cached nor reachable to fetch — both of local-llm's
-  load-failure causes collapse here, and so does a rejected device-capability
-  probe or any other infrastructure fault raised during bring-up (the runtime
-  propagates those rather than returning a load failure; the aithor seam catches
-  them into this same cause). _Unknown model_ is a different layer: a **non-empty**
+  requested model is neither cached nor reachable to fetch — all of local-llm's
+  terminal load-failure causes (_no-feasible-model_, _all-candidates-exhausted_,
+  _fetch-failed_, _storage-quota_, _cache-evicted_) collapse to this one aithor
+  cause, and so does a rejected device-capability probe or any other infrastructure
+  fault raised during bring-up (the runtime propagates those rather than returning a
+  load failure; the aithor seam catches them into this same cause). A _no model
+  available_ that came from a structured load failure carries an optional **next
+  step** (see _Next step_) — a product-neutral category derived from that underlying
+  cause; the infrastructure-fault path carries none. _Unknown model_ is a different layer: a **non-empty**
   requested `model` name is absent from the runtime's catalog altogether (a typo,
   or a name from a newer catalog) — kept distinct so a misnamed model never
   masquerades as "your device can't run it." (An **empty** `model` is never an
@@ -282,6 +286,20 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   the device cannot bring one up the aithor refuses rather than reaching for a
   remote one. A curated request whose spec no program can satisfy refuses for the
   bound, expectedly.
+- **Next step** (`nextStep`) — an optional, **actionable** category on a _no model
+  available_ refusal that came from a structured load failure: a product-neutral
+  value — _retry_ (a transient fetch failure), _free-space_ (device storage is
+  full), _reconnect_ (a cached model was evicted, so a refetch needs the network),
+  or _use-native-app_ (this device cannot bring up any model in the browser) —
+  mapped from local-llm's terminal cause. It is the **category only**: aithor names
+  what _kind_ of next step is honest, never a product, a vendor, or a URL — the value
+  carries no message and no link, so there is no slot a product name could occupy.
+  The **render surface** — the copy, the download link, naming a desktop app — is the
+  consumer's: local-llm calls this the cause→**guidance** mapping, and it is the
+  lens's, downstream of this category (the lens renders a `nextStep` into that
+  guidance). _Unknown model_ and infrastructure-fault refusals carry no `nextStep` (no
+  honest device-limit cause underlies them) — its absence is the signal that there is
+  no actionable category beyond the bare refusal.
 - **Model handle** — a **`LoadedModel`** from the injected local-llm runtime
   ([`lib/local-llm/`](../../../../lib/local-llm/README.md)), always a **local**
   one: it runs on the learner's own device, never a remote service. The config
@@ -479,6 +497,17 @@ These are present-tense decisions the module honours.
   model available_; a name absent from the catalog refuses separately as _unknown
   model_) under either `validate` value; there is no remote or lower-fidelity
   fallback.
+- **A refusal is actionable, and aithor names no product.** A _no model available_
+  refusal that came from a structured load failure carries a **`nextStep`** — the
+  category of next step (_retry_ / _free-space_ / _reconnect_ / _use-native-app_),
+  mapped from local-llm's honest terminal cause — so a learner who cannot bring up a
+  model meets a real next step, never an opaque dead end. But aithor names only the
+  category: it never names a product, a vendor, a store, or a URL, and local-llm
+  names none either — the value has no message or link slot one could occupy.
+  Delivery — the copy, the links, the "download the desktop app" affordance — is the
+  consumer's to render from the category (local-llm calls this the cause→guidance
+  mapping, and it is the lens's). The burden of a failed bring-up never lands on the
+  learner; it lands on the lens, as an actionable category.
 
 ## Testing posture
 
