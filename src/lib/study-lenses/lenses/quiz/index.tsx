@@ -2,10 +2,11 @@
  * @file React wrapper for the `quiz` lens — Slice A. Renders a read-only,
  * un-colorized CodeMirror editor over the snippet (the lens's own decorations,
  * NOT syntax highlighting, carry meaning); clicking a syntax element highlights
- * that anchor (inc 2). A fallback notice renders when the snippet did not parse.
- * The question panel (inc 3) and graded verdicts (inc 4) build on this. Owns
- * all per-mount learner state; never writes to the orchestrator's snippet
- * (single-writer invariant). Freezes + default-exports the `LensModule`.
+ * that anchor (inc 2) and opens a question panel with the V1 prompt + options
+ * (inc 3). A fallback notice renders when the snippet did not parse. Graded
+ * verdicts (inc 4) build on the panel. Owns all per-mount learner state; never
+ * writes to the orchestrator's snippet (single-writer invariant). Freezes +
+ * default-exports the `LensModule`.
  */
 
 import { EditorState, StateEffect, StateField } from '@codemirror/state';
@@ -65,6 +66,10 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	const classified: readonly ClassifiedToken[] = model?.classified ?? [];
 	const classifiedReference = useRef<readonly ClassifiedToken[]>(classified);
 	classifiedReference.current = classified;
+
+	// The V1 quiz items (one per token); the panel resolves the picked range to
+	// its item via `itemsAt`.
+	const items = model?.items ?? [];
 
 	// The picked anchor's range (per-mount UI state); null when nothing — or
 	// whitespace — is selected. Drives the highlight decoration.
@@ -135,6 +140,25 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		[pickedRange],
 	);
 
+	// Clear the pick when the source changes so a stale range never drives the
+	// panel/highlight against a different snippet (AR-4 inc-2 #3). Snippet change
+	// is normally an unmount+remount per disposable practice (the preview keys on
+	// the code), so this guards the rare in-place embodiment-swap; it also fires
+	// once on mount — a no-op, since `pickedRange` is already null at init.
+	useEffect(
+		function clearPickOnSourceChange() {
+			setPickedRange(null);
+		},
+		[embodiment.source.code],
+	);
+
+	// The question for the picked anchor (one V1 item in Slice A; itemsAt returns
+	// an array for later co-anchored forms → answer-neutral tabs).
+	const question =
+		pickedRange === null
+			? null
+			: (anchors.itemsAt(items, pickedRange)[0] ?? null);
+
 	if (!embodiment.status.parsed) {
 		return (
 			<div data-lens="quiz">
@@ -148,6 +172,16 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	return (
 		<div data-lens="quiz">
 			<main data-quiz-editor ref={editorContainer} />
+			{question ? (
+				<aside data-quiz-panel>
+					<p>{question.prompt}</p>
+					{question.options.map((option) => (
+						<button key={option.id} type="button" data-quiz-option={option.id}>
+							{option.text}
+						</button>
+					))}
+				</aside>
+			) : null}
 		</div>
 	);
 };

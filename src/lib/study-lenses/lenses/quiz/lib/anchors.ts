@@ -7,6 +7,7 @@
  */
 
 import type { ClassifiedToken } from '../../../lib/classifying/types.js';
+import type { McqQuizItem } from '../../../lib/quizzing/types.js';
 
 /**
  * Resolves a document `offset` to the classified token whose half-open range
@@ -52,6 +53,26 @@ function searchByOffset(
 	return token;
 }
 
-const anchors = { anchorAt };
+/**
+ * Resolves a picked token `range` to the quiz item(s) anchored exactly there —
+ * the panel's content. Matches on `anchorRange` equality (V1 anchors each item
+ * to its token's `[start, end)`, so a clicked token maps 1:1 to its V1 item;
+ * the array return admits later co-anchored forms → answer-neutral tabs).
+ *
+ * @param items - The generated (V1-filtered) quiz items.
+ * @param range - The picked token's half-open `[start, end)` range.
+ * @returns The items whose `anchorRange` equals `range` (one in Slice A).
+ */
+function itemsAt(
+	items: readonly McqQuizItem[],
+	range: readonly [number, number],
+): readonly McqQuizItem[] {
+	return items.filter(
+		(item) =>
+			item.anchorRange[0] === range[0] && item.anchorRange[1] === range[1],
+	);
+}
+
+const anchors = { anchorAt, itemsAt };
 
 export default anchors;

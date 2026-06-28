@@ -157,4 +157,19 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 			});
 		});
 	});
+
+	// Inc 3: the question panel. The click→panel render is sandbox-verified
+	// (jsdom can't lay out CM for posAtCoords); the Zero state — no panel before
+	// any pick — IS jsdom-assertable and locked here.
+	describe('question panel (Zero state)', () => {
+		it('renders no data-quiz-panel before any anchor is picked', () => {
+			const { container } = render(
+				<quizLens.Component
+					embodiment={embody('OK')}
+					config={quizLens.config()}
+				/>,
+			);
+			expect(container.querySelector('[data-quiz-panel]')).toBeNull();
+		});
+	});
 });

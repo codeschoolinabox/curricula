@@ -17,14 +17,17 @@ import freezeInPlace from '@utils/freeze-in-place.js';
 
 import classifyTokens from '../../../lib/classifying/classify-tokens.js';
 import type { ClassifiedToken } from '../../../lib/classifying/types.js';
+import generateQuiz from '../../../lib/quizzing/generate-quiz.js';
+import type { McqQuizItem } from '../../../lib/quizzing/types.js';
 import type { Snippet } from '../../types.js';
 
 /**
- * The quiz model the wrapper consumes. Inc 2: the classified anchor stream.
- * Inc 3 adds `items: readonly McqQuizItem[]` (V1-filtered).
+ * The quiz model the wrapper consumes: the classified anchor stream (for click
+ * resolution) and the V1 quiz items (one per token; for the panel).
  */
 type QuizModel = Readonly<{
 	classified: readonly ClassifiedToken[];
+	items: readonly McqQuizItem[];
 }>;
 
 /**
@@ -38,6 +41,13 @@ type QuizModel = Readonly<{
  * @returns The quiz model, or `null` on internal parse failure.
  */
 function buildQuiz(snippet: Snippet): QuizModel | null {
+	// `generateQuiz` throws on an unparsed snippet, and the wrapper runs this in
+	// a `useMemo` that fires UNCONDITIONALLY (before the render gate) — so gate
+	// here too: an unparsed snippet yields no model (the wrapper renders the
+	// fallback). This is the canonical `status.parsed` gate; the re-parse `null`
+	// below is the defense-in-depth guard for the parsed-but-unparseable edge.
+	if (!snippet.status.parsed) return null;
+
 	const { code } = snippet.source;
 
 	// Re-parse with Acorn (collecting the token stream) rather than consuming
@@ -58,9 +68,19 @@ function buildQuiz(snippet: Snippet): QuizModel | null {
 	}
 
 	const classified = classifyTokens({ code, tokens, ast });
-	// `classified` is already deep-frozen by classifyTokens; freeze the wrapper
-	// so the whole returned model is immutable at the function boundary.
-	return freezeInPlace({ classified });
+
+	// `generateQuiz` runs the full generator registry (V1 + V7 + V8 today), so
+	// its output is a mixed-form stream. Slice A scopes to the single V1
+	// category-ID form (see `./README.md` § Form scoping): `mode === 'mcq'`
+	// narrows the union to `McqQuizItem`, and `form === 'V1'` excludes V7 (also
+	// mcq) and V8 (click-token). The pair is the type-safe, V1-isolating filter.
+	const items = generateQuiz(snippet, classified).filter(
+		(item): item is McqQuizItem => item.mode === 'mcq' && item.form === 'V1',
+	);
+
+	// `classified` + the V1 items are already deep-frozen upstream; freeze the
+	// wrapper so the whole returned model is immutable at the function boundary.
+	return freezeInPlace({ classified, items });
 }
 
 export default buildQuiz;

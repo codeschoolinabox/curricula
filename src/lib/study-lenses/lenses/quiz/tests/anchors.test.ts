@@ -16,8 +16,10 @@
 import * as acorn from 'acorn';
 import { describe, expect, it } from 'vitest';
 
+import embody from '../../../embody/index.js';
 import classifyTokens from '../../../lib/classifying/classify-tokens.js';
 import anchors from '../lib/anchors.js';
+import buildQuiz from '../lib/build-quiz.js';
 
 // Local acorn → classifyTokens helper (the build-quiz recipe, inlined here so
 // the anchorAt test does not depend on build-quiz).
@@ -83,5 +85,37 @@ describe('anchorAt — token resolution', () => {
 		it('resolves inside the first token to the first token', () => {
 			expect(anchors.anchorAt(0, classified)?.text).toBe('x');
 		});
+	});
+});
+
+describe('itemsAt — item resolution', () => {
+	// Real-composition snippet (7 classified tokens) → 7 V1 items, one per token.
+	const CODE = 'let x = 1; x;';
+
+	it('returns [] for a range with no item (Zero)', () => {
+		const items = buildQuiz(embody(CODE))?.items ?? [];
+		expect(anchors.itemsAt(items, [9999, 10_000])).toEqual([]);
+	});
+
+	it('returns the item anchored exactly at the first token range (One)', () => {
+		const model = buildQuiz(embody(CODE));
+		const classified = model?.classified ?? [];
+		const items = model?.items ?? [];
+		const first = classified[0];
+		const found = anchors.itemsAt(items, [first.start, first.end]);
+		expect(found.length).toBe(1);
+		expect(found[0].anchorRange[0]).toBe(first.start);
+		expect(found[0].anchorRange[1]).toBe(first.end);
+	});
+
+	it('resolves a MIDDLE token (not index 0) — forces exact end-range matching (Many)', () => {
+		const model = buildQuiz(embody(CODE));
+		const classified = model?.classified ?? [];
+		const items = model?.items ?? [];
+		const middle = classified[Math.floor(classified.length / 2)];
+		const found = anchors.itemsAt(items, [middle.start, middle.end]);
+		expect(found.length).toBe(1);
+		expect(found[0].anchorRange[0]).toBe(middle.start);
+		expect(found[0].anchorRange[1]).toBe(middle.end);
 	});
 });
