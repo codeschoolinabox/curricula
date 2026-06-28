@@ -26,78 +26,21 @@ import { describe, expect, it } from 'vitest';
 import type {
 	VariablesSettlement,
 	VariablesTraceEvent,
-	VariablesTraceHandle,
-	VariablesTraceResult,
 } from '../../../embody/types.js';
 import runTrace from '../run-trace.js';
 
+import {
+	CANCELLED,
+	COMPLETED,
+	ERRORED,
+	FAILED,
+	READ,
+	SCOPE_PUSH,
+	TIMED_OUT,
+	makeFakeHandle,
+} from './fake-handle.js';
+
 // ─── Test infrastructure ────────────────────────────────────────
-
-/**
- * A hand-built `VariablesTraceHandle`. The `events` stream in order (one `await`
- * per event so an external `cancel()` set synchronously after kickoff is observed
- * BEFORE the next event — the real worker's events arrive asynchronously too),
- * then the `terminal` settlement resolves `result` on a natural drain. An
- * external `cancel()` between yields short-circuits the generator, whose
- * `finally` settles `cancelled` (a no-op if a terminal already settled).
- * `cancelThrows` makes `cancel()` throw, to pin the seam's guarded teardown.
- * `emitted` is exposed so a test can assert the drain pulled every event (the
- * no-undrained-iterable invariant) directly, not through a closure.
- */
-function makeFakeHandle({
-	events,
-	terminal,
-	cancelThrows = false,
-}: {
-	events: readonly VariablesTraceEvent[];
-	terminal: VariablesSettlement;
-	cancelThrows?: boolean;
-}): VariablesTraceHandle & { readonly emitted: readonly VariablesTraceEvent[] } {
-	const emitted: VariablesTraceEvent[] = [];
-	let settled = false;
-	let cancelled = false;
-	let resolveResult!: (result: VariablesTraceResult) => void;
-	const result = new Promise<VariablesTraceResult>((resolve) => {
-		resolveResult = resolve;
-	});
-
-	function settle(settlement: VariablesSettlement): void {
-		if (settled) {
-			return;
-		}
-		settled = true;
-		resolveResult({ events: emitted, settlement });
-	}
-
-	async function* generate(): AsyncGenerator<VariablesTraceEvent> {
-		try {
-			for (const event of events) {
-				await Promise.resolve(); // model the worker's async arrival
-				if (cancelled) {
-					return; // external cancel interrupts BEFORE the next event
-				}
-				emitted.push(event);
-				yield event;
-			}
-			settle(terminal); // natural drain → the scripted terminal outcome
-		} finally {
-			// break / return / throw → cancelled (no-op if already settled)
-			settle({ outcome: 'cancelled', halt: null, durationMs: 0 });
-		}
-	}
-
-	const cancel = (): void => {
-		if (cancelThrows) {
-			throw new Error('teardown threw');
-		}
-		cancelled = true;
-	};
-	const fail = (): void => {
-		// The seam never calls fail(); present only to satisfy the handle shape.
-	};
-
-	return { [Symbol.asyncIterator]: generate, result, cancel, fail, emitted };
-}
 
 /**
  * Push-recording callbacks (the pure-TS tier records into arrays rather than
@@ -137,66 +80,6 @@ function makeCallbacks({ throwOnEvent = false }: { throwOnEvent?: boolean } = {}
 
 const alwaysMounted = (): boolean => true;
 const neverMounted = (): boolean => false;
-
-// ─── Settlement fixtures (the five channel-2 outcomes) ──────────
-
-const COMPLETED: VariablesSettlement = {
-	outcome: 'completed',
-	halt: { natural: true, errorName: '', message: '', nodePath: null },
-	durationMs: 1,
-};
-const ERRORED: VariablesSettlement = {
-	outcome: 'errored',
-	halt: {
-		natural: false,
-		errorName: 'TypeError',
-		message: 'Assignment to constant variable.',
-		nodePath: '$.body.1',
-	},
-	durationMs: 2,
-};
-const TIMED_OUT: VariablesSettlement = {
-	outcome: 'timed-out',
-	halt: null,
-	engineError: {
-		cause: 'timeout',
-		name: 'TimeoutError',
-		message: 'budget exceeded',
-	},
-	durationMs: 200,
-};
-const FAILED: VariablesSettlement = {
-	outcome: 'failed',
-	halt: null,
-	failReason: 'wrong-prediction',
-	durationMs: 3,
-};
-// `cancelled` is produced by the cancel path, never scripted as `terminal`; the
-// fake's `finally` builds exactly this shape.
-const CANCELLED: VariablesSettlement = {
-	outcome: 'cancelled',
-	halt: null,
-	durationMs: 0,
-};
-
-// ─── Streamed-event fixtures ────────────────────────────────────
-
-const SCOPE_PUSH: VariablesTraceEvent = {
-	step: 0,
-	nodePath: '$.body.0',
-	scopeInstanceId: 1,
-	event: 'scope-push',
-	scopeKind: 'block',
-	variables: [],
-};
-const READ: VariablesTraceEvent = {
-	step: 4,
-	nodePath: '$.body.2.expression',
-	scopeInstanceId: 1,
-	event: 'read',
-	name: 'x',
-	value: 5,
-};
 
 describe('runTrace', () => {
 	// Zero — an empty stream: the handle yields nothing and settles `completed`.
