@@ -153,10 +153,9 @@ shape.
   Progress is monotonic-up (a correct answer accrues; propagation bulk-credits);
   `wrong` toggles on an `incorrect` and clears on re-mastery. The fold that
   populates it is inc 5 (Slice B), not Slice A — Phase 0 fixes only the shape.
-  _(The exact progress curve — consecutive-correct counter vs. a 0..1 accrual
-  vs. a threshold-to-unlock — is the one mastery decision left for the human
-  gate; the type pins the range + monotonic intent, the fold's inc-5 design pins
-  the curve.)_
+  _(The progress curve is **0..1 accrual** — ruled at the Phase-0 human gate
+  2026-06-28, over a consecutive-correct counter or a threshold-to-unlock. The
+  type pins the range + monotonic intent; inc 5's fold implements the accrual.)_
 - **Earned propagation** — completing a "sameness" question (e.g. "click every
   occurrence of this variable") bulk-credits the `groupKey`s its `unlocks`
   names, so mastery shown on one element spreads to its propagation peers.

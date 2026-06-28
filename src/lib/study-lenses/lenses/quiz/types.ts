@@ -101,10 +101,10 @@ type PickedAnchor = Readonly<{
  * - `progress` — channel 1: a monotonic-up accrual of how much of this
  *   group is mastered. Rendered as a non-hue cue (e.g. underline density /
  *   fill). The **range/intent is pinned here** (0 = untouched, rising with
- *   correct answers; earned propagation bulk-credits it); the exact
- *   accrual **curve** (consecutive-correct counter vs. a 0..1 ratio vs. a
- *   threshold-to-unlock) is the inc-5 fold's design call, left for the
- *   Phase-0 human gate.
+ *   correct answers; earned propagation bulk-credits it); the accrual
+ *   **curve is 0..1** — ruled at the Phase-0 human gate (over a
+ *   consecutive-correct counter or a threshold-to-unlock); inc 5's fold
+ *   implements the 0..1 accrual.
  * - `wrong` — channel 2: an outstanding "answered incorrectly, not yet
  *   re-mastered" mark. Toggles `true` on an `incorrect` verdict, clears on
  *   re-mastery. Rendered on an axis independent of `progress` (e.g. a

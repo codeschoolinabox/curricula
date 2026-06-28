@@ -315,10 +315,10 @@ signature (`MasteryFold`) now — even though the fold is inc 5 (Slice B). The
 implementation honors the Slice-A boundary tightly: no fold, no decorations, no
 dead stub function (the type alias suffices; nothing in Slice A references it).
 This is the scope-discipline split the campaign runs on — design expands to the
-cohesive whole, implementation honors the increment boundary. The one decision
-left open for the human gate is the progress **curve** (consecutive-correct vs.
-0..1 vs. threshold-to-unlock); the type pins the range + monotonic intent so the
-gate's ruling and inc 5's fold drop in without a re-type.
+cohesive whole, implementation honors the increment boundary. The progress
+**curve was ruled 0..1 accrual** at the Phase-0 human gate (2026-06-28, over a
+consecutive-correct counter or a threshold-to-unlock); the type pins the range +
+monotonic intent so inc 5's fold drops in without a re-type.
 
 ## Why the BlockCell / BlockModelCell homonym maps only at recommend()
 
