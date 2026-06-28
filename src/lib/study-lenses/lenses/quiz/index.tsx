@@ -18,11 +18,13 @@ import type { ComponentType } from 'react';
 import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { ClassifiedToken } from '../../lib/classifying/types.js';
+import type { Verdict } from '../../lib/quizzing/types.js';
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import quizCore from './core.js';
 import anchors from './lib/anchors.js';
 import buildQuiz from './lib/build-quiz.js';
+import gradeOption from './lib/grade-option.js';
 
 import './quiz.css';
 
@@ -76,6 +78,10 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	const [pickedRange, setPickedRange] = useState<
 		readonly [number, number] | null
 	>(null);
+
+	// The verdict for the most recent answer at the picked anchor; null until the
+	// learner answers. Reset whenever the pick changes (a new anchor → no verdict).
+	const [verdict, setVerdict] = useState<Verdict | null>(null);
 
 	useEffect(
 		function mountEditor() {
@@ -145,11 +151,23 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	// is normally an unmount+remount per disposable practice (the preview keys on
 	// the code), so this guards the rare in-place embodiment-swap; it also fires
 	// once on mount — a no-op, since `pickedRange` is already null at init.
+	// (Clearing pickedRange cascades into resetVerdictOnRepick below; no need to
+	// clear the verdict here directly. Inc 5's MasteryState reset will join this.)
 	useEffect(
 		function clearPickOnSourceChange() {
 			setPickedRange(null);
 		},
 		[embodiment.source.code],
+	);
+
+	// Clear the verdict whenever the pick changes — a freshly picked anchor has
+	// no answer yet (answering does NOT change pickedRange, so a verdict persists
+	// for its own anchor). Also fires once on mount (no-op — verdict is null).
+	useEffect(
+		function resetVerdictOnRepick() {
+			setVerdict(null);
+		},
+		[pickedRange],
 	);
 
 	// The question for the picked anchor (one V1 item in Slice A; itemsAt returns
@@ -176,10 +194,22 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 				<aside data-quiz-panel>
 					<p>{question.prompt}</p>
 					{question.options.map((option) => (
-						<button key={option.id} type="button" data-quiz-option={option.id}>
+						<button
+							key={option.id}
+							type="button"
+							data-quiz-option={option.id}
+							onClick={() => setVerdict(gradeOption(question, option.id))}
+						>
 							{option.text}
 						</button>
 					))}
+					{verdict ? (
+						<div data-quiz-verdict={verdict.status} aria-live="polite">
+							{verdict.status === 'malformed'
+								? verdict.reason
+								: verdict.feedback}
+						</div>
+					) : null}
 				</aside>
 			) : null}
 		</div>

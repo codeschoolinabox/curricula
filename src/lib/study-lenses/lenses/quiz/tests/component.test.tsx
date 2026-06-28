@@ -171,5 +171,18 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 			);
 			expect(container.querySelector('[data-quiz-panel]')).toBeNull();
 		});
+
+		// Inc 4: the verdict region. The answer→verdict path is sandbox-verified
+		// (it needs a token click to open the panel, then an option click); the
+		// Zero state — no verdict before any answer — IS jsdom-assertable.
+		it('renders no data-quiz-verdict before any answer', () => {
+			const { container } = render(
+				<quizLens.Component
+					embodiment={embody('OK')}
+					config={quizLens.config()}
+				/>,
+			);
+			expect(container.querySelector('[data-quiz-verdict]')).toBeNull();
+		});
 	});
 });

@@ -26,13 +26,14 @@ re-shaping this contract. What Slice A defers is marked throughout.
 
 ## Modules
 
-| File                | Layer   | Purpose                                                                                                                                                                                                                                                |
-| ------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `index.tsx`         | wrapper | React `Component`; mounts the read-only un-colorized editor, captures clicks, owns per-mount UI state (picked anchor / selection / verdict); freezes + default-exports the `LensModule`                                                                |
-| `core.ts`           | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend` (and, in Slice B, the pure mastery fold)                                                                                                                                                 |
-| `lib/build-quiz.ts` | core    | Parses the snippet (Acorn), delegates classification to `lib/classifying`, calls `generateQuiz`, **filters the mixed-form output to `form === 'V1'`**, returns `{ classified, items }` (or `null` on internal parse failure). The single re-parse site |
-| `lib/anchors.ts`    | core    | The pure resolution layer: `anchorAt(offset, classified)` (token resolution → highlight) and `itemsAt(items, range)` (item resolution → panel). CM-independent                                                                                         |
-| `types.ts`          | shared  | `QuizLensConfig`, `PickedAnchor`, `GroupMastery`, `MasteryState`, `MasteryFold` (signature; deferred)                                                                                                                                                  |
+| File                  | Layer   | Purpose                                                                                                                                                                                                                                                |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `index.tsx`           | wrapper | React `Component`; mounts the read-only un-colorized editor, captures clicks, owns per-mount UI state (picked anchor / selection / verdict); freezes + default-exports the `LensModule`                                                                |
+| `core.ts`             | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend` (and, in Slice B, the pure mastery fold)                                                                                                                                                 |
+| `lib/build-quiz.ts`   | core    | Parses the snippet (Acorn), delegates classification to `lib/classifying`, calls `generateQuiz`, **filters the mixed-form output to `form === 'V1'`**, returns `{ classified, items }` (or `null` on internal parse failure). The single re-parse site |
+| `lib/anchors.ts`      | core    | The pure resolution layer: `anchorAt(offset, classified)` (token resolution → highlight) and `itemsAt(items, range)` (item resolution → panel). CM-independent                                                                                         |
+| `lib/grade-option.ts` | core    | `gradeOption(item, optionId)` — builds the `mcq` `LearnerResponse` from the clicked option id (verbatim) and delegates to `lib/quizzing`'s total `grade`. Pure: no React, no CodeMirror                                                                |
+| `types.ts`            | shared  | `QuizLensConfig`, `PickedAnchor`, `GroupMastery`, `MasteryState`, `MasteryFold` (signature; deferred)                                                                                                                                                  |
 
 Default export of `index.tsx` is the frozen `LensModule` record. The core
 subsystems under `lib/` are internal; only `index.tsx` (and, for the fold,
@@ -154,11 +155,12 @@ component instance.
 
 ### Structural constraints
 
-- **Two-layer module shape** — `core.ts`, `lib/build-quiz.ts`, and
-  `lib/anchors.ts` do NOT `import React`. `build-quiz.ts` imports `acorn` +
-  `classifyTokens` + `generateQuiz`; `anchors.ts` is pure TS over
-  `ClassifiedToken[]` + `McqQuizItem[]`. `index.tsx` is the only file with React
-  imports (and the only one importing `@codemirror/*`). Per the lenses peer's
+- **Two-layer module shape** — `core.ts`, `lib/build-quiz.ts`, `lib/anchors.ts`,
+  and `lib/grade-option.ts` do NOT `import React`. `build-quiz.ts` imports
+  `acorn`, `classifyTokens`, and `generateQuiz`; `anchors.ts` is pure TS over
+  `ClassifiedToken[]` and `McqQuizItem[]`; `grade-option.ts` imports `grade`.
+  `index.tsx` is the only file with React imports (and the only one importing
+  `@codemirror/*`). Per the lenses peer's
   [§ Structural constraints](../DOCS.md#structural-constraints).
 - **`embodiment` parameter name** in core signatures that take a `Snippet`.
 - **`data-lens="quiz"` on the wrapper's root element** — load-bearing for
