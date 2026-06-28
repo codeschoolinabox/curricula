@@ -57,7 +57,7 @@ describe('generateQuiz', () => {
 				new Set(
 					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 				),
-			).toEqual(new Set(['V1', 'V7', 'V8', 'V10a']));
+			).toEqual(new Set(['V1', 'V7', 'V8', 'V10a', 'V10b']));
 		});
 	});
 
