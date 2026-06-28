@@ -13,6 +13,14 @@
 	border-radius: 4px;
 }
 
+/* The picked anchor — the token the learner clicked. A highlight (not a hue
+ * pairing) marks the current selection; the mastery channels (Slice B) layer on
+ * independent, color-free axes. */
+.cm-quiz-anchor-hit {
+	background-color: rgba(255, 213, 79, 0.5);
+	border-radius: 2px;
+}
+
 /* Defense-in-depth notice shown when the lens is mounted on an unparseable
  * snippet (applicableTo should have gated it out). */
 [data-quiz-fallback] {
