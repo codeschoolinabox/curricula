@@ -30,7 +30,7 @@ describe('generateQuiz', () => {
 			const snippet = embody('x');
 			expect(
 				generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
-			).toEqual(['V1', 'V7']);
+			).toEqual(['V1', 'V7', 'V10c']);
 		});
 	});
 
@@ -48,7 +48,7 @@ describe('generateQuiz', () => {
 			const snippet = embody('a; b');
 			expect(
 				generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
-			).toEqual(['V1', 'V1', 'V1', 'V7', 'V7']);
+			).toEqual(['V1', 'V1', 'V1', 'V7', 'V7', 'V10c']);
 		});
 
 		it('runs every applicable registered generator for a declared, referenced binding', () => {
@@ -57,18 +57,21 @@ describe('generateQuiz', () => {
 				new Set(
 					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 				),
-			).toEqual(new Set(['V1', 'V7', 'V8', 'V10a', 'V10b']));
+			).toEqual(new Set(['V1', 'V7', 'V8', 'V10a', 'V10b', 'V10c']));
 		});
 	});
 
 	describe('Interfaces', () => {
-		it('emits only mcq items for an undeclared identifier (no code-surface item)', () => {
+		it('emits only the binding-independent forms for an undeclared identifier', () => {
+			// V8 / V10a / V10b need a resolvable binding, so they emit nothing for a
+			// free global; V10c (cross-variable) fires on any identifier, so an
+			// undeclared identifier still yields one code-surface (select-in-code) item.
 			const snippet = embody('x');
 			expect(
-				generateQuiz(snippet, classifyOf(snippet)).every(
-					(item) => item.mode === 'mcq',
+				new Set(
+					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 				),
-			).toBe(true);
+			).toEqual(new Set(['V1', 'V7', 'V10c']));
 		});
 
 		it('returns a deeply frozen array', () => {
