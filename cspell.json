@@ -53,6 +53,7 @@
 		"mousemove",
 		"mouseup",
 		"aithor",
+		"evals",
 		"dedup",
 		"dtype",
 		"Dtypes",
