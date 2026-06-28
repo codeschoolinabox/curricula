@@ -156,24 +156,59 @@ describe('makeLoadModel', () => {
 			expect(result.cause).toBe('unknown-model');
 			expect(runtime.calls).toHaveLength(0);
 		});
+
+		it('carries no nextStep — no honest device-limit cause underlies a typo', async () => {
+			const runtime = recordingRuntime({
+				ok: true,
+				model: fakeModel(),
+				resolvedId: 'x',
+				resolvedRuntime: 'webllm',
+			});
+
+			const result = await makeLoadModel(
+				runtime,
+				catalogOf('known-x'),
+			)('definitely-not-in-catalog');
+
+			if (!('cause' in result)) throw new Error('expected a Refusal');
+			expect('nextStep' in result).toBe(false);
+		});
 	});
 
-	describe('many — both LoadFailure causes collapse to no-model-available', () => {
+	describe('many — each LoadFailure cause maps to no-model-available with its nextStep', () => {
+		// A non-empty attempts ledger for the post-flight causes (the loader reads only
+		// `cause`; the ledger is here only to satisfy the post-flight LoadFailure union).
+		const ATTEMPTS = [
+			{ id: 'known-x', runtime: 'webllm', cause: 'device-lost' },
+		] as const;
+
 		it.each([
-			{ cause: 'no-feasible-model' as const },
 			{
-				cause: 'fetch-failed' as const,
-				detail: 'network down',
-				// A post-flight LoadFailure now carries a non-empty attempts ledger; the
-				// loader reads only `cause`, so the ledger is here only to satisfy the
-				// union — its contents are never asserted.
-				attempts: [
-					{ id: 'known-x', runtime: 'webllm', cause: 'fetch-failed' },
-				] as const,
+				failure: { cause: 'no-feasible-model' } as const,
+				nextStep: 'use-native-app' as const,
+			},
+			{
+				failure: {
+					cause: 'all-candidates-exhausted',
+					attempts: ATTEMPTS,
+				} as const,
+				nextStep: 'use-native-app' as const,
+			},
+			{
+				failure: { cause: 'fetch-failed', attempts: ATTEMPTS } as const,
+				nextStep: 'retry' as const,
+			},
+			{
+				failure: { cause: 'storage-quota', attempts: ATTEMPTS } as const,
+				nextStep: 'free-space' as const,
+			},
+			{
+				failure: { cause: 'cache-evicted', attempts: ATTEMPTS } as const,
+				nextStep: 'reconnect' as const,
 			},
 		])(
-			'maps a $cause failure to no-model-available, dropping detail',
-			async (failure) => {
+			'a $failure.cause LoadFailure → no-model-available with nextStep $nextStep',
+			async ({ failure, nextStep }) => {
 				const runtime = recordingRuntime({ ok: false, ...failure });
 
 				const result = await makeLoadModel(
@@ -181,10 +216,9 @@ describe('makeLoadModel', () => {
 					catalogOf('known-x'),
 				)('known-x');
 
-				expect('cause' in result).toBe(true);
 				if (!('cause' in result)) throw new Error('expected a Refusal');
 				expect(result.cause).toBe('no-model-available');
-				expect('detail' in result).toBe(false);
+				expect(result.nextStep).toBe(nextStep);
 			},
 		);
 	});
@@ -205,10 +239,24 @@ describe('makeLoadModel', () => {
 				makeLoadModel(runtime, catalogOf('known-x'))('known-x'),
 			).resolves.toEqual({ cause: 'no-model-available' });
 		});
+
+		it('carries no nextStep — the infra-fault path has no honest terminal cause', async () => {
+			const runtime = faultingRuntime(new Error('probe rejected'), false);
+
+			const result = await makeLoadModel(
+				runtime,
+				catalogOf('known-x'),
+			)('known-x');
+
+			if (!('cause' in result)) throw new Error('expected a Refusal');
+			expect('nextStep' in result).toBe(false);
+		});
 	});
 });
 
-describe('Refusal — the optional nextStep category', () => {
+// Compile-time contract pins (the tsc-RED forcing function), NOT behavioral coverage
+// of makeLoadModel — these exercise the Refusal / NextStep type shape, not the loader.
+describe('Refusal type contract — the optional nextStep field (compile-time pins)', () => {
 	const STEPS: readonly NextStep[] = [
 		'retry',
 		'free-space',

@@ -15,11 +15,13 @@
  * - a `LoadSuccess` → `ResolvedModel` (the handle + `resolvedId`; local-llm's
  *   device-tier `resolvedRuntime` and the `ok` discriminant are dropped — the
  *   backend is HOW, invisible to a study program's reader).
- * - a `LoadFailure` (either cause) → `Refusal('no-model-available')` (its `detail`
- *   is dropped — a {@link Refusal} carries only a cause).
+ * - a `LoadFailure` (any of local-llm's five terminal causes) →
+ *   `Refusal('no-model-available')` carrying the mapped {@link NextStep} — the
+ *   product-neutral next-step category derived from the terminal cause (see
+ *   {@link causeToNextStep}); local-llm's `detail` is dropped at the seam.
  * - ANY throw / rejection / infra fault during the call → caught by a catch-all
- *   around the whole `load` → `Refusal('no-model-available')`. There is no fourth
- *   cause.
+ *   around the whole `load` → `Refusal('no-model-available')` with NO `nextStep` (no
+ *   honest terminal cause underlies an infra fault). There is no fourth cause.
  *
  * Stateless: load-once (reuse of the handle across repair attempts) is the
  * orchestrator's job per request; cross-request fetch/cache is local-llm's. The
@@ -28,12 +30,13 @@
  * passed here, so the pre-check and the runtime agree by construction.
  */
 import type {
+	LoadFailureCause,
 	LocalLlm,
 	ModelCatalog,
 	Selection,
 } from '../../../../lib/local-llm/types.js';
 
-import type { ModelLoader } from './types.js';
+import type { ModelLoader, NextStep } from './types.js';
 
 export default function makeLoadModel(
 	runtime: Pick<LocalLlm, 'load'>,
@@ -55,9 +58,32 @@ export default function makeLoadModel(
 			if (result.ok) {
 				return { model: result.model, resolvedId: result.resolvedId };
 			}
-			return { cause: 'no-model-available' };
+			return {
+				cause: 'no-model-available',
+				nextStep: causeToNextStep(result.cause),
+			};
 		} catch {
 			return { cause: 'no-model-available' };
 		}
 	};
+}
+
+/**
+ * Map a local-llm terminal {@link LoadFailureCause} to the product-neutral
+ * {@link NextStep} category a `no-model-available` refusal carries. TOTAL — a new
+ * local-llm cause fails to narrow to `never` here (a compile error), forcing the seam
+ * to stay honest as the producer's taxonomy grows. Many-to-one: both
+ * `no-feasible-model` and `all-candidates-exhausted` are device walls →
+ * `use-native-app`. aithor names only the category; the lens renders it into guidance.
+ */
+function causeToNextStep(cause: LoadFailureCause): NextStep {
+	if (cause === 'no-feasible-model' || cause === 'all-candidates-exhausted') {
+		return 'use-native-app';
+	}
+	if (cause === 'cache-evicted') return 'reconnect';
+	if (cause === 'storage-quota') return 'free-space';
+	if (cause === 'fetch-failed') return 'retry';
+	// Exhaustiveness: a new LoadFailureCause member fails to narrow to `never` here.
+	const unreachable: never = cause;
+	return unreachable;
 }

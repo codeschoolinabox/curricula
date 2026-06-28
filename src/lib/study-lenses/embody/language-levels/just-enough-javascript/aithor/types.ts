@@ -227,8 +227,9 @@ type ResolvedModel = {
  * absorbs local-llm's three non-success shapes, matching aithor's `ok`-boolean
  * convention:
  * - a `LoadFailure` (any of local-llm's five terminal causes) →
- *   `Refusal('no-model-available')`; local-llm's `detail` is dropped at the seam
- *   (a {@link Refusal} carries only a cause).
+ *   `Refusal('no-model-available')` carrying the mapped {@link NextStep} (the
+ *   product-neutral next-step category); local-llm's `detail` and `attempts` ledger
+ *   are dropped at the seam.
  * - a NON-EMPTY model name absent from the injected catalog → `Refusal('unknown-model')`,
  *   detected by a catalog-membership pre-check (against the same catalog aithor
  *   injects) BEFORE `load` is called, so local-llm's unknown-name throw is never
