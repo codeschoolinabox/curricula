@@ -7,6 +7,7 @@ import type {
 	Selection,
 } from '../../../../../lib/local-llm/types.js';
 import makeLoadModel from '../load-model.js';
+import type { NextStep, Refusal } from '../types.js';
 
 // Increment 1 — load-model: the loader adapter seam, aithor's value-not-throw
 // re-mapping of the injected local-llm runtime's `load`. Each rung injects a fake
@@ -204,5 +205,24 @@ describe('makeLoadModel', () => {
 				makeLoadModel(runtime, catalogOf('known-x'))('known-x'),
 			).resolves.toEqual({ cause: 'no-model-available' });
 		});
+	});
+});
+
+describe('Refusal — the optional nextStep category', () => {
+	const STEPS: readonly NextStep[] = [
+		'retry',
+		'free-space',
+		'reconnect',
+		'use-native-app',
+	];
+
+	it('is optional — a bare Refusal compiles with no nextStep', () => {
+		const bare: Refusal = { cause: 'no-model-available' };
+		expect(bare.nextStep).toBeUndefined();
+	});
+
+	it.each(STEPS)('nextStep %s is valid on a Refusal', (step) => {
+		const refusal: Refusal = { cause: 'no-model-available', nextStep: step };
+		expect(refusal.nextStep).toBe(step);
 	});
 });

@@ -352,9 +352,32 @@ type RefusalCause =
 	| 'no-model-available'
 	| 'unknown-model';
 
-/** A structured refusal — a named cause, never an out-of-spec program. */
+/**
+ * The product-neutral, actionable category a structured device-limit refusal carries
+ * — what KIND of next step is honest, never a product, a vendor, or a URL. The loader
+ * seam maps it from local-llm's terminal cause (see {@link ModelLoader}); the consumer
+ * (a lens) renders a `NextStep` into learner-facing "guidance" (the copy, the download
+ * link, naming a desktop app). Deliberately a bare union with NO message/url slot —
+ * there is no place a product name could occupy, so the delivery-agnostic invariant
+ * (aithor and local-llm both name only a category) holds by construction.
+ *
+ * - `'retry'` — a transient fetch failure; trying again may succeed.
+ * - `'free-space'` — device storage is full; freeing space lets the weights cache.
+ * - `'reconnect'` — a cached model was evicted, so a refetch needs the network back.
+ * - `'use-native-app'` — this device cannot bring up any model in the browser.
+ */
+type NextStep = 'retry' | 'free-space' | 'reconnect' | 'use-native-app';
+
+/**
+ * A structured refusal — a named cause, never an out-of-spec program. On the
+ * structured-`LoadFailure` device-limit path it additionally carries an optional
+ * {@link NextStep} (the product-neutral next-step category); a refusal with no honest
+ * device-limit cause (an `unknown-model` typo, an infrastructure fault) carries none —
+ * its absence is the signal that there is no actionable category beyond the cause.
+ */
 type Refusal = {
 	readonly cause: RefusalCause;
+	readonly nextStep?: NextStep;
 };
 
 /**
@@ -418,6 +441,7 @@ export type {
 	AithorConfig,
 	ResolvedAithorConfig,
 	RefusalCause,
+	NextStep,
 	Refusal,
 	Meta,
 	AithorResult,
