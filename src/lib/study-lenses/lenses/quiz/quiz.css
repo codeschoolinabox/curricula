@@ -1,0 +1,23 @@
+/* quiz lens — a read-only, un-colorized study surface. The editor carries no
+ * syntax highlighting on purpose; the lens's own decorations (the picked
+ * anchor — inc 2; the mastery channels — Slice B) are the only visual signal. */
+
+[data-lens='quiz'] {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+[data-quiz-editor] .cm-editor {
+	border: 1px solid var(--ifm-color-emphasis-300, #ccc);
+	border-radius: 4px;
+}
+
+/* Defense-in-depth notice shown when the lens is mounted on an unparseable
+ * snippet (applicableTo should have gated it out). */
+[data-quiz-fallback] {
+	padding: 0.75rem 1rem;
+	border: 1px solid var(--ifm-color-warning-dark, #e6a700);
+	border-radius: 4px;
+	background: var(--ifm-color-warning-contrast-background, #fff8e1);
+}

@@ -51,13 +51,16 @@ subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
 
 1. **Mount + gate** (sync, pure) — the orchestrator passes a frozen embodiment
    and an **optional** frozen lens config via props (`config?` per the peer
-   `LensProps`). The wrapper resolves config through `core.config(props.config)`
-   so an absent or partial `config` prop is defaulted (the `writeme` precedent),
-   then computes the parse gate from `embodiment.status.parsed`. On `false` it
-   renders the fallback panel and stops (it never calls `generateQuiz`, which
-   throws on unparsed). On `true` it proceeds. The lens reads only `source.code`
-   and `raw.*` (via `classifyTokens`) — never `analysis` / `creation` / `realm`
-   (all null on real snippets under today's embody stubs).
+   `LensProps`). Slice A reads **no** config knob (the V1 form is
+   parameterless), so the wrapper takes only `embodiment`; an absent config prop
+   is therefore harmless, and the `core.config(props.config)` resolution
+   (merging educator overrides — the `writeme` precedent) lands with the first
+   knob (inc 8, the config-filtering increment). The wrapper computes the parse
+   gate from `embodiment.status.parsed`. On `false` it renders the fallback
+   panel and stops (it never calls `generateQuiz`, which throws on unparsed). On
+   `true` it proceeds. The lens reads only `source.code` and `raw.*` (via
+   `classifyTokens`) — never `analysis` / `creation` / `realm` (all null on real
+   snippets under today's embody stubs).
 
 2. **Build the quiz model** (sync, pure, memoized) — a `useMemo` keyed on
    `embodiment.source.code` runs the build pipeline: re-parse the source with
