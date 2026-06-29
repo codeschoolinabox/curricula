@@ -347,17 +347,41 @@ the Snippet (the one-sided seam).
   (which classifying makes role-less) stay on the bare two-segment form, while
   operator / literal / delimiter gain the `:<role>` refinement; the `category:`,
   `binding:`, `usage:` (binding × use-type), and `usage-kind:` (cross-variable)
-  serializers live in `keying/`, while V7's `usage:occ:` group-of-one fallback
-  (for an occurrence with no resolvable binding) is the only `groupKey` still
-  inlined in a generator rather than serialized in `keying/`. The category-ID
-  form's propagation grain is thus intentionally finer than its category answer
-  key — a consumer wanting category-level grouping can prefix-match on
-  `category:<category>`. The key is deterministic from
-  `(snippet, classified, filter)` — never a function of a lens display choice
-  quizzing never receives.
+  serializers live in `keying/`, while two `groupKey`s stay inlined in their
+  generators rather than serialized in `keying/`: V7's `usage:occ:<start>-<end>`
+  group-of-one fallback (for an occurrence with no resolvable binding) and V6b's
+  fixed `element-type:const-update` (the const-update twin's single-value
+  element-type group — deliberately off the `category:keyword` axis, which holds
+  the text-surface keyword-recognition forms V1/V2, because V6b is an
+  execution-dimension runtime-error fact). The category-ID form's propagation
+  grain is thus intentionally finer than its category answer key — a consumer
+  wanting category-level grouping can prefix-match on `category:<category>`. The
+  key is deterministic from `(snippet, classified, filter)` — never a function
+  of a lens display choice quizzing never receives.
 - **V1 `id` scheme is `form@start-end`** (e.g. `V1@12-13`), derivable from the
   form and the anchor alone; binding-flavored ids (`form/binding:x@decl`) are a
   later-form scheme that lands with occurrence→binding resolution.
+- **The variables-family atom forms (inc 7a): V2 / V6 / V6b + the `Binding.kind`
+  widening.** V2 (keyword-vocab) is the **first curated generator** — its option
+  text and feedback are a compile-time constant table rather than computed
+  strings (README § Glossary "Curated bank vs generated"), yet its correct
+  answer stays machine-determined (the `let` / `const` token text decides the
+  card). V6b (const-update twin) is the second curated form (fixed `TypeError`
+  answer + three authored misconception distractors). V6 (kind-semantics) and
+  V6b read reassignability off the internal `Binding`, which gained
+  `kind: 'let' | 'const'` (projected from `DeclarationInfo.kind`; `var`-free
+  because JeJ validation rejects `var` and `DeclarationInfo.kind` is itself
+  `let`/`const`-only). `kind` is non-identity convenience data and **never folds
+  into a group key** (`bindingGroupKey` keys on `declarationRange` only). V6 /
+  V6b fire once per binding on the declaration occurrence
+  (`usageKind === 'declared'`) — for JeJ's `let`/`const` fragment the declared
+  occurrence is always the binding's source-first occurrence (TDZ forbids
+  use-before-declaration), so firing on `declared` is the simplest
+  one-per-binding rule and the anchor is always the declaration span. V6 keys on
+  the binding identity (`binding:<decl>`, a V10a-unlockable peer); V6b keys on
+  the inline `element-type:const-update` group (above). All three reuse the
+  binding-flavored / `form@start-end` id schemes; none touches the public
+  `types.ts` / `grade.ts` (every form is `mcq`, an already-built variant).
 - **One generator per `form`, registered by anchor type.** The three-way anchor
   axis (token / node / program) deliberately extends socratizing's two-way point
   / program split, because classifying's output is token-indexed (per-token
