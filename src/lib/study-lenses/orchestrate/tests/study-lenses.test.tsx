@@ -913,14 +913,21 @@ describe('<StudyLenses> — C2 the phases panel mounts above the active surface'
 
 describe('<StudyLenses> — C2 the per-station dropdowns (the panel as picker surface)', () => {
 	describe('C2.3 — the source station enumerates the panel-included registry', () => {
-		it('the source dropdown has the sentinel followed by the four source lenses in registration order', () => {
+		it('the source dropdown has the sentinel followed by the five source lenses in registration order', () => {
 			const { container } = render(<StudyLenses snippet="OK" />);
 			const options = container.querySelectorAll<HTMLOptionElement>(
 				'[data-orchestrator-station="source"] option',
 			);
 			// eslint-disable-next-line unicorn/prefer-spread -- NodeList spread fails tsc without dom.iterable
 			const values = Array.from(options).map((option) => option.value);
-			expect(values).toEqual(['', 'annotate', 'blanks', 'parsons', 'writeme']);
+			expect(values).toEqual([
+				'',
+				'annotate',
+				'blanks',
+				'parsons',
+				'quiz',
+				'writeme',
+			]);
 		});
 
 		it('debug-props appears in no station dropdown (panel-excluded)', () => {

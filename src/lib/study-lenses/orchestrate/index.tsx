@@ -58,6 +58,7 @@ import annotateLens from '../lenses/annotate/index.js';
 import blanksLens from '../lenses/blanks/index.js';
 import debugPropertiesLens from '../lenses/debug-props/index.js';
 import parsonsLens from '../lenses/parsons/index.js';
+import quizLens from '../lenses/quiz/index.js';
 import type { LensConfig, LensModule, Station } from '../lenses/types.js';
 import writemeLens from '../lenses/writeme/index.js';
 
@@ -102,6 +103,7 @@ const LENS_REGISTRY: Readonly<Record<string, LensModule>> = Object.freeze({
 	blanks: blanksLens,
 	'debug-props': debugPropertiesLens,
 	parsons: parsonsLens,
+	quiz: quizLens,
 	writeme: writemeLens,
 });
 
