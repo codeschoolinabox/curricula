@@ -13,11 +13,13 @@ import v1CategoryId from './v1-category-id.js';
 import v10aBindingSameness from './v10a-binding-sameness.js';
 import v10bBindingUseType from './v10b-binding-use-type.js';
 import v10cCrossVariableUseType from './v10c-cross-variable-use-type.js';
+import v2KeywordVocab from './v2-keyword-vocab.js';
 import v7UsageKind from './v7-usage-kind.js';
 import v8DeclarationSite from './v8-declaration-site.js';
 
 const GENERATORS: readonly Generator[] = [
 	v1CategoryId,
+	v2KeywordVocab,
 	v7UsageKind,
 	v8DeclarationSite,
 	v10aBindingSameness,
