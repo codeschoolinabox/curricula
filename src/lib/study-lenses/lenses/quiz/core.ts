@@ -5,15 +5,17 @@
  *
  * @remarks Per the lenses peer's two-layer module convention, `core.ts`
  * imports no React. Tests run in vitest without jsdom (see
- * `./tests/core.test.ts`). The Slice-B mastery fold (a pure reducer over
- * `MasteryState`) will join this file; Slice A ships only the three
- * `LensModule` defaults.
+ * `./tests/core.test.ts` and `./tests/mastery.test.ts`). Beyond the three
+ * `LensModule` defaults, this file holds the inc-5 mastery fold (a pure
+ * reducer over `MasteryState`) that `./index.tsx` splices in alongside them.
  */
 
 import cloneAndFreeze from '@utils/clone-and-freeze.js';
 import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { LensConfig, Recommendation, Snippet } from '../types.js';
+
+import type { GroupMastery, MasteryFold } from './types.js';
 
 /**
  * Module-level frozen-empty-array constant — shared across all `recommend()`
@@ -72,8 +74,56 @@ function recommend(_embodiment: Snippet): ReadonlyArray<Recommendation> {
 	return EMPTY_RECOMMENDATIONS;
 }
 
+/**
+ * The per-correct-answer accrual step for `progress` — four correct answers
+ * saturate a group to `1` (the `0..1` curve ruled at the Phase-0 human gate,
+ * 2026-06-28). Module-local: the fold is the only reader, and the channel-1
+ * decoration buckets in `./index.tsx` derive from this same quarter grid.
+ */
+const MASTERY_STEP = 0.25;
+
+/**
+ * The mastery fold (inc 5) — folds one graded interaction into the
+ * per-`groupKey` mastery state. A pure reducer: returns a new frozen
+ * `MasteryState` with the single `item.groupKey` entry updated and every other
+ * group shared by reference.
+ *
+ * - **correct** → `progress` accrues one `MASTERY_STEP` toward the `1` ceiling
+ *   (`Math.min`), and `wrong` clears (re-mastery).
+ * - **incorrect** → `wrong` is set; `progress` is unchanged — the accrual is
+ *   monotonic-up, so a wrong answer never erases earned progress.
+ * - **malformed** → no-op: returns `prior` by reference. A caller / UI bug
+ *   never moves mastery; the identity return also lets React's
+ *   `setMastery(prior => …)` bail the decoration dispatch.
+ *
+ * A `groupKey` absent from `prior` initializes at `progress: 0` before the
+ * verdict applies. The fold keeps no per-item record (`GroupMastery` is
+ * `{ progress, wrong }` only), so re-answering the same token accrues again —
+ * intended for disposable practice (monotonic, capped at `1`). Keyed on
+ * `item.groupKey`, never `item.id`: mastery is a property of the concept group,
+ * not the individual question.
+ *
+ * @param prior - The mastery state before this interaction (frozen; `{}` at
+ *   mount).
+ * @param item - The graded quiz item; only its `groupKey` is read.
+ * @param verdict - The `grade` outcome for the learner's answer.
+ * @returns A new frozen `MasteryState` (or `prior` unchanged on `malformed`).
+ */
+const masteryFold: MasteryFold = function masteryFold(prior, item, verdict) {
+	if (verdict.status === 'malformed') return prior;
+	const priorProgress = prior[item.groupKey]?.progress ?? 0;
+	const group: GroupMastery =
+		verdict.status === 'correct'
+			? { progress: Math.min(1, priorProgress + MASTERY_STEP), wrong: false }
+			: { progress: priorProgress, wrong: true };
+	// `freezeInPlace` is a DEEP freeze, so freezing the spread result also freezes
+	// the new `group`; `prior`'s existing (already-frozen) groups are copied by
+	// reference and left untouched.
+	return freezeInPlace({ ...prior, [item.groupKey]: group });
+};
+
 // Intentionally unfrozen — `./index.tsx` freezes the composed `LensModule`
 // literal at construction time, which is the consumer-facing freeze boundary.
-const quizCore = { config, applicableTo, recommend };
+const quizCore = { config, applicableTo, recommend, masteryFold };
 
 export default quizCore;
