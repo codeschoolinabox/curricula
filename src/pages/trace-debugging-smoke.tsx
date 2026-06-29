@@ -8,6 +8,15 @@
  * inadmissible input) the admission-error dump. `key={code}` forces a fresh mount
  * per edit so a prior run's dumps clear.
  *
+ * **Console tee (richness probe):** the real embodiment's handle is wrapped so
+ * every RAW `VariablesTraceEvent` is logged to the console AS THE LENS'S CONSUMER
+ * PULLS IT (`[trace-debugging] event #N`), plus the terminal settlement
+ * (`[trace-debugging] settlement`). The on-screen events dump renders only a
+ * one-line gloss per event (dropping `scopeInstanceId`, the full variable bursts,
+ * prior/next/returned values, …); the console shows the FULL raw objects so the
+ * emitted data can be judged for building richer learning surfaces. This tee
+ * lives only in this dev harness — the production lens does no logging.
+ *
  * **How to use** (after `npm run start`):
  *
  * 1. Open `http://localhost:3000/spiralearn/trace-debugging-smoke` (note the
@@ -17,7 +26,8 @@
  *    the dev-server headers first.
  * 3. Run the default sample (completed), then a `while (true) {}` with a high
  *    budget and click Stop (cancelled), a non-JEJ source (admission-error), and a
- *    `while (true) {}` with seconds `0.2` (timed-out).
+ *    `while (true) {}` with seconds `0.2` (timed-out). Expand the logged event
+ *    objects in the console to inspect every field.
  *
  * @vitest-skip — Docusaurus auto-routes `src/pages/*.tsx`; this is a page, not a
  * unit test.
@@ -27,9 +37,68 @@ import Layout from '@theme/Layout';
 import React from 'react';
 
 import embody from '@site/src/lib/study-lenses/embody/index.js';
+import type {
+	Snippet,
+	TraceVariableLifecycleOptions,
+	VariablesTraceEvent,
+	VariablesTraceHandle,
+} from '@site/src/lib/study-lenses/embody/types.js';
 import traceDebuggingLens from '@site/src/lib/study-lenses/lenses/trace-debugging/index.js';
 
 const SAMPLE = 'let total = 0;\nfor (let i = 0; i < 5; i++) {\n\ttotal += i;\n}';
+
+/**
+ * Tees each streamed event (and the terminal settlement) to the console as the
+ * lens's consumer pulls it, then yields/returns it unchanged. Delegates
+ * `cancel`/`fail`; breaking the `for await` still propagates cancel to the inner
+ * handle (the inner `for await` here gets its `return()` → the real iterator's
+ * cancel). The logged objects are the RAW `VariablesTraceEvent`s / settlement.
+ */
+function loggingHandle(handle: VariablesTraceHandle): VariablesTraceHandle {
+	async function* teeEvents(): AsyncGenerator<VariablesTraceEvent> {
+		let index = 0;
+		for await (const event of handle) {
+			console.log(`[trace-debugging] event #${index}`, event);
+			index += 1;
+			yield event;
+		}
+	}
+	return {
+		[Symbol.asyncIterator]: teeEvents,
+		get result() {
+			return handle.result.then(function logSettlement(resolved) {
+				console.log('[trace-debugging] settlement', resolved.settlement);
+				return resolved;
+			});
+		},
+		cancel: () => handle.cancel(),
+		fail: (reason?: unknown) => handle.fail(reason),
+	};
+}
+
+/**
+ * A real embodiment whose `traceVariableLifecycle` returns a console-tee'd handle
+ * (everything else delegates to the real snippet). The lens consumes it exactly
+ * as it would the real one; only the streamed events/settlement are observed.
+ */
+function embodyWithLogging(code: string): Snippet {
+	const real = embody(code);
+	return {
+		...real,
+		evaluation: {
+			...real.evaluation,
+			events: {
+				...real.evaluation.events,
+				traceVariableLifecycle: (
+					options?: TraceVariableLifecycleOptions,
+				): VariablesTraceHandle =>
+					loggingHandle(
+						real.evaluation.events.traceVariableLifecycle(options),
+					),
+			},
+		},
+	} as Snippet;
+}
 
 export default function TraceDebuggingSmoke(): React.JSX.Element {
 	const [code, setCode] = React.useState<string>(SAMPLE);
@@ -52,6 +121,12 @@ export default function TraceDebuggingSmoke(): React.JSX.Element {
 					non-JEJ source shows the admission-error dump; a low seconds budget on{' '}
 					<code>while (true) {'{}'}</code> settles <code>timed-out</code>.
 				</p>
+				<p>
+					<strong>Open the console:</strong> every raw{' '}
+					<code>VariablesTraceEvent</code> is logged as it streams (
+					<code>[trace-debugging] event #N</code>), plus the terminal settlement
+					— the full objects, not the one-line dump.
+				</p>
 
 				<label style={{ display: 'block', marginBottom: 8 }}>
 					JEJ source:
@@ -71,7 +146,7 @@ export default function TraceDebuggingSmoke(): React.JSX.Element {
 				>
 					<traceDebuggingLens.Component
 						key={code}
-						embodiment={embody(code)}
+						embodiment={embodyWithLogging(code)}
 						config={traceDebuggingLens.config()}
 					/>
 				</div>
