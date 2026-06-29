@@ -61,6 +61,17 @@ describe('generateQuiz', () => {
 				new Set(['V1', 'V2', 'V6', 'V7', 'V8', 'V10a', 'V10b', 'V10c']),
 			);
 		});
+
+		it('adds the const-only V6b form for a declared, referenced const', () => {
+			const snippet = embody('const x = 1; x;');
+			expect(
+				new Set(
+					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
+				),
+			).toEqual(
+				new Set(['V1', 'V2', 'V6', 'V6b', 'V7', 'V8', 'V10a', 'V10b', 'V10c']),
+			);
+		});
 	});
 
 	describe('Interfaces', () => {
