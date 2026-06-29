@@ -14,9 +14,22 @@ conformance check, the validate-gated loop, and result-shaping stay pure.
 
 ## Execution phases
 
-Four phases, cut by structural seam — the two impure points each get their own
+Five phases, cut by structural seam — the two impure points each get their own
 boundary so the rest is data-in, data-out:
 
+- **Request resolution** — input: a request (seed + config); output: the resolved
+  constraints (a feature subset + size bounds) and the held soft aspects, or a thrown
+  request error. **Pure, sync — and the only place aithor throws.** A `vary` declaring
+  any aspect compiles down here: its hard holds (`languageLevel` / `size`) resolve
+  against the seed — read once — into the same feature subset and size bounds a hand-set
+  request carries, and its soft holds into a held-aspect list the next phase renders.
+  Two config-shape mistakes throw before the model is reached, distinct from the
+  value-not-throw outcome boundary: a `vary` declaring an aspect set beside a raw
+  `include` / `exclude` / `lines` / `complexity`, and a hard hold with no seed to read
+  off (an empty or unparseable seed). A request without `vary` passes through with its
+  raw constraints unchanged — this phase is a no-op for it. It runs **once**, before
+  bring-up (so a hard hold's throw precedes any model load); the repair loop re-enters
+  downstream, at prompt construction, never here.
 - **Prompt construction** — input: a request (input program + config); output: a
   built prompt. **Pure, sync.** Concatenates the ask, the input program, and the
   stringified constraints — composing from an empty input, varying a non-empty
@@ -55,7 +68,10 @@ boundary so the rest is data-in, data-out:
 
 ```mermaid
 flowchart TD
-    request[("request<br/>(input program + config)")] -->|"build prompt, pure<br/>(constraints stringified in,<br/>regardless of validate)"| prompt[("built prompt")]
+    request[("request<br/>(input program + config)")] -->|"resolve constraints, pure sync, pre-model"| ok{"request<br/>well-formed?"}
+    ok -->|"no — a vary declares an aspect beside a raw constraint,<br/>or a hard hold has no seed to read off (empty/unparseable)"| err[["request error<br/>(throws — config-shape, not a refusal)"]]
+    ok -->|"yes"| shaped[("resolved request<br/>(feature subset + size bounds<br/>+ held soft aspects)")]
+    shaped -->|"build prompt, pure<br/>(constraints + held soft aspects stringified in,<br/>regardless of validate)"| prompt[("built prompt")]
     prompt -->|"pre-check non-empty name vs catalog (sync),<br/>then bring up (async, load-once);<br/>value-not-throw boundary"| avail{"model<br/>available?"}
     avail -->|"no — unknown name, or<br/>device can't bring one up"| refusal[("structured refusal<br/>(named cause)")]
     avail -->|"yes"| resolved[("resolved model<br/>(handle + resolved id)")]
@@ -78,6 +94,46 @@ converge on one refusal state — to which a structured _no-model-available_
 additionally attaches the derived `nextStep` category (an attribute of that refusal,
 computed as the value-not-throw boundary absorbs the load failure, not a separate
 data state — so the graph stays one refusal node).
+
+### Vary resolution (the request-shaping prelude)
+
+The flow above **opens** with this pure, synchronous prelude (the `request → request
+well-formed? → resolved request` head): it adds no seam and no gate, and is the one place
+the module **throws** rather than refuses — the `[[ … ]]` node is a config-shape exception,
+distinct from the value `refusal` every runtime failure is. (`[[ … ]]` marks a thrown exit,
+not a data state.)
+
+**The fork.** A request's feature subset and size bounds come from exactly **one** source —
+the raw `include` / `exclude` / `lines` / `complexity` (no `vary`, or `vary: {}`), or a
+`vary`'s resolved hard holds (read off the seed once). The two are mutually exclusive by
+construction — declaring both is the config-shape throw — so exactly one path supplies them;
+for a no-`vary` request the prelude is a pass-through no-op. The hard holds become the very
+subset and bounds a hand-set request carries, so they ride the **unchanged** prompt
+construction and (under `validate: true`) the **unchanged** conformance gate; the held soft
+aspects add **one instruction clause** to prompt construction (a sibling of the existing
+feature clause), rendered against the seed — prompt-only, never gated. (That clause is the
+soft tier's only footprint in prompt construction; the hard tier touches nothing new there.)
+
+**Resolved once, before bring-up.** The prelude — and its possible throw — completes
+**before** model bring-up (a hard hold must reject an empty or unparseable seed before any
+model is reached), so the constraint assembly that today follows bring-up moves ahead of it.
+Resolution runs **once** per request; the repair loop re-enters at prompt construction
+(downstream), never at resolution, so the resolved subset / bounds / soft holds are fixed for
+the life of the request.
+
+**Measurement is shared; parse-failure policy is not.** The seed measurement the hard holds
+need — the node→feature inventory and the line/depth metrics — is the conformance gate's own,
+**extracted out of `conform` into a shared module both import** (so the inventory is the
+gate's detector, never a parallel one; the new module depends only on the parse primitive and
+the types, so there is no cycle, and `conform`'s public surface stays a single default
+export). The **parse** is _not_ shared: `conform` tolerates an unparseable candidate — it
+returns a non-conformant verdict, never throws (the parse primitive itself never throws) —
+whereas the vary resolver **parses the seed itself** and throws when a hard hold faces an
+empty or unparseable seed, because there is no AST to inventory or measure. The shared module
+owns the post-parse measurement; each caller owns its own parse-failure policy. A held
+**empty** inventory resolves via the exclude-all idiom (`include = exclude = ALL`), which the
+gate reads as permit-none and prompt construction renders as "simple statements only" — never
+the forbid-everything nonsense an empty `include` with a full `exclude` would give.
 
 ## Structural constraints
 
@@ -127,6 +183,26 @@ data state — so the graph stays one refusal node).
 - **Admission is reused unchanged.** The level's gate runs on the curated path
   only; the aithor never widens or re-derives it — conformance only ever narrows
   below admitted JEJ.
+- **Vary compiles down — no new seam, no new gate.** A `vary` request resolves to the
+  existing feature subset + size bounds (hard holds) and a held-soft-aspect list (soft
+  holds) in a pure, synchronous prelude, resolved **once before bring-up**; the two seams,
+  the loop, the conformance gate, and the result type are unchanged.
+- **Measurement is shared; parse-failure policy is not.** The measurement the hard holds
+  need — the node→feature inventory and the line/depth metrics — is the conformance gate's
+  own, **extracted out of `conform` into a shared module both import** (no cycle — the module
+  depends only on the parse primitive and the types; `conform`'s public surface stays one
+  default export), so the inventory is never a parallel detector. The **parse** is not
+  shared: `conform` tolerates an unparseable candidate (a non-conformant verdict, never a
+  throw), while the vary resolver parses the seed itself and throws on a hard hold with an
+  empty or unparseable seed. A held empty inventory resolves via the exclude-all idiom
+  (permit-none plus the "simple statements" prompt), not an empty `include` (which permits
+  all).
+- **The config-shape throw is a distinct exit from the value-refusal.** aithor stays
+  value-not-throw for _outcomes_ (a model or runtime failure is a `Refusal` value); a
+  malformed _request_ — a `vary` declaring an aspect beside a raw constraint, or a hard
+  hold with no seed to read off — throws synchronously at the request boundary, before
+  bring-up, the layer a type error lives at. A soft hold is never a validated error and
+  never throws; `vary: {}` is inert (the from-scratch base case).
 
 ## Out of scope
 
@@ -153,8 +229,8 @@ data state — so the graph stays one refusal node).
 
 - [`./README.md`](./README.md) — what this module is (the quad, config→quadrant,
   the ubiquitous language).
-- [`./types.ts`](./types.ts) — the contract in TypeScript (config, `validate`,
-  the `complexity` metric, the result + refusal shapes).
+- [`./types.ts`](./types.ts) — the contract in TypeScript (config + `vary`,
+  `validate`, the `complexity` metric, the result + refusal shapes).
 - [`../DOCS.md`](../DOCS.md) — the language level's architecture (admission, the
   never-lies invariant).
 - [`../../../lib/validating/`](../../../lib/validating/) — `isJej`, the

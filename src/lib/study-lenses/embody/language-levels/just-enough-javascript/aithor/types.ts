@@ -275,9 +275,41 @@ type AithorRuntime = {
 // ─── Config (the request, minus the input program) ────────────────────
 
 /**
- * Everything a call carries besides the input `program`. Flat, exactly these
- * fields. `prompt` and `model` are required; the rest have resolution defaults
- * (see {@link ResolvedAithorConfig}).
+ * The pedagogy-facing control over the next Variation: per aspect, whether the
+ * output stays like the seed (held) or may drift (freed). Compiles down to the
+ * existing primitives — a held hard aspect to a {@link FeatureSubset} /
+ * {@link SizeBounds}, a held soft aspect to a prompt instruction — so it adds no
+ * new gate (README § Vary).
+ *
+ * @remarks
+ * Resolution contract (not type-expressible): an aspect is HELD iff its value is
+ * `false`; `true` or absent means FREED. The caller declares holds; `vary: {}`
+ * frees everything (≡ no `vary`).
+ * - `languageLevel` / `size` — the HARD aspects. Held compiles to the seed's
+ *   feature inventory / size (lines + nesting depth, as `≤` maxima); enforced under
+ *   `validate: true`, prompt-shaping under `validate: false`.
+ * - `behavior` / `strategy` / `implementation` — the SOFT aspects, always
+ *   prompt-only (semantic, nothing to gate, like theme): the outwardly visible
+ *   behavior (UI & console), the abstract algorithm, the actual lines of code.
+ *   Independent dials — one behavior has many strategies has many implementations,
+ *   each toggled on its own; an unusual combination is never a validated error.
+ *
+ * A `vary` declaring any aspect is mutually exclusive with a raw `include` /
+ * `exclude` / `lines` / `complexity`; a hard hold needs a non-empty, parseable seed
+ * to read off. Both throw before the model runs (a soft hold never throws).
+ */
+type VaryConfig = {
+	readonly languageLevel?: boolean;
+	readonly size?: boolean;
+	readonly behavior?: boolean;
+	readonly strategy?: boolean;
+	readonly implementation?: boolean;
+};
+
+/**
+ * Everything a call carries besides the input `program`. Flat scalars plus the
+ * one cohesive `vary` sub-object. `prompt` and `model` are required; the rest
+ * have resolution defaults (see {@link ResolvedAithorConfig}).
  *
  * @remarks
  * - `prompt` — the natural-language ask, sent regardless of `validate`. Carries
@@ -294,6 +326,10 @@ type AithorRuntime = {
  *   prompt-shaping under `validate: false`.
  * - `lines` / `complexity` — the size bounds. Same enforcement split.
  * - `validate` — curated (`true`, default) vs uncurated (`false`).
+ * - `vary` — the per-aspect control over the next Variation (see {@link VaryConfig}
+ *   and README § Vary); compiles down to the fields above (hard aspects) and a
+ *   prompt instruction (soft aspects), and is mutually exclusive with a raw
+ *   `include` / `exclude` / `lines` / `complexity` when it declares any aspect.
  */
 type AithorConfig = {
 	readonly prompt: string;
@@ -303,6 +339,7 @@ type AithorConfig = {
 	readonly lines?: number;
 	readonly complexity?: number;
 	readonly validate?: boolean;
+	readonly vary?: VaryConfig;
 };
 
 /**
@@ -323,6 +360,38 @@ type ResolvedAithorConfig = {
 	readonly lines?: number;
 	readonly complexity?: number;
 	readonly validate: boolean;
+};
+
+// ─── Vary (resolved: what resolveVary compiles a VaryConfig to) ───────
+
+/** One of the three soft (prompt-only) vary aspects. */
+type SoftAspect = 'behavior' | 'strategy' | 'implementation';
+
+/**
+ * What a {@link VaryConfig} resolves to against a seed — the existing primitives
+ * the curated loop and prompt already consume, plus the held soft aspects. The hard
+ * tier reuses {@link FeatureSubset} / {@link SizeBounds}, so it drops into the
+ * orchestrator exactly where a hand-set subset/size would (no new translation); the
+ * soft tier is the resolved held-aspect list build-prompt renders.
+ *
+ * @remarks
+ * Resolution contract (not type-expressible):
+ * - `subset` — held `languageLevel` → the seed's feature inventory. A NON-EMPTY
+ *   inventory `I` → `{ include: I, exclude: [] }`. An EMPTY inventory (a seed of
+ *   plain statements) → the exclude-all idiom
+ *   `{ include: ALL_FEATURES, exclude: ALL_FEATURES }`, which `resolvePermitted`
+ *   reads as the empty permitted set AND `renderFeatureClause` renders as "simple
+ *   statements only" — never the forbid-everything nonsense an empty `include` with a
+ *   full `exclude` would give. Freed → `{ include: [], exclude: [] }`.
+ * - `size` — held `size` → `{ lines: <seed lines>, complexity: <seed max nesting
+ *   depth> }` as `≤` maxima; freed → `{}`.
+ * - `softHolds` — the held soft aspects in source order, empty when none held;
+ *   build-prompt owns their wording (a sibling of its feature phrasing).
+ */
+type ResolvedVary = {
+	readonly subset: FeatureSubset;
+	readonly size: SizeBounds;
+	readonly softHolds: readonly SoftAspect[];
 };
 
 // ─── Result / refusal (the boundary out) ──────────────────────────────
@@ -440,7 +509,10 @@ export type {
 	ModelLoader,
 	AithorRuntime,
 	AithorConfig,
+	VaryConfig,
 	ResolvedAithorConfig,
+	SoftAspect,
+	ResolvedVary,
 	RefusalCause,
 	NextStep,
 	Refusal,

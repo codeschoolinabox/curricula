@@ -171,7 +171,10 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
 - **Input program** (`program`) — the program a request shapes from. Empty means
   _compose from scratch_; non-empty means _produce a variation_ of it. The input
   is a **seed, not a constraint**: read for intent and shape, and _not_ required
-  to be admitted JEJ — only a curated output is gated.
+  to be admitted JEJ — only a curated output is gated. The **one exception** is a
+  `vary` **hard hold** (see _Vary_): there the seed's own feature inventory or size
+  is read off and becomes the curated output's enforced constraint — the deliberate,
+  opt-in diff-mode.
 - **Config** — everything the call carries besides the input program: which
   **model** to use, a **prompt**, the request's **constraints** (a feature
   subset and size bounds), and the **validate** flag. Distinct from the model's
@@ -219,7 +222,9 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   non-empty **seed** program (see _Variation_) constrains its very shape — the
   tightest constraint of all. A seeded curated request is **hyper-curated**:
   composing from an empty seed is curated, varying a seed is curated _harder_.
-  Seeding is another dimension of curation, not a separate axis.
+  Seeding is another dimension of curation, not a separate axis. `vary` (see _Vary_)
+  is the **knob on that dimension**: a held **hard** aspect promotes the seed's shape
+  from the model's-call influence it has by default to a conform-enforced constraint.
 - **Guided / unguided** — the guided/unguided axis read off **who fills
   `config`**. **Guided**: the environment or lens fills the prompt and
   constraints (educator-structured). **Unguided**: the learner fills them
@@ -232,6 +237,28 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   Under `validate: true` it passes the same two gates as a from-scratch program;
   how far it departs from the input is the model's call, not a guaranteed
   faithfulness.
+- **Vary** (`vary`) — the optional, **pedagogy-facing control over the next
+  Variation**: a per-**aspect** declaration of what stays like the seed and what may
+  drift, for endless targeted practice. It **compiles down** to the constraints above
+  (a feature subset, size bounds, or a prompt instruction) and adds no new gate, and is
+  **mutually exclusive** with a raw `include` / `exclude` / `lines` / `complexity`. See
+  the _Vary_ section.
+- **Aspect** — one of `vary`'s five dimensions. The **hard** (gateable) aspects:
+  `languageLevel` (the seed's language features) and `size` (its length and nesting
+  depth). The **soft** (semantic) aspects: `behavior` (the program's outwardly visible
+  behavior — UI and console output), `strategy` (the abstract algorithm), and
+  `implementation` (the actual lines of code). One behavior has many strategies has many
+  implementations, but each aspect is an independent boolean.
+- **Held / freed** — an aspect's two states. **Held** (`false`) pins it to the seed;
+  **freed** (`true`, and the default for any **unset** aspect) lets it depart. The caller
+  declares _holds_; `vary: {}` frees everything.
+- **Feature inventory** — the gateable features a seed actually uses, read off its AST
+  with the **same** node→feature map `conform` gates by — the detector is **shared**
+  between the gate and `vary`, not re-implemented. It is
+  the mechanism of a held `languageLevel`: the inventory becomes the output's feature
+  subset, so a curated variation stays at the seed's technical level. An **empty**
+  inventory (a seed of plain statements) held means "simple statements only," not
+  "anything goes."
 - **Candidate** — one program the model proposes for a request, taken from the
   decomposed `GenerationResult`: the extracted `code` on the curated path, the
   byte-exact `raw` on the uncurated one. Under `validate: true` the candidate
@@ -330,6 +357,86 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   host registers that with the runtime; aithor ships no backend and takes no
   backend dependency) — is outside this module.
 
+## Vary
+
+`vary` turns a learner's **current program** — the seed — into **endless targeted
+practice**. Rather than hand-set a feature subset and size bounds, the caller declares,
+per **aspect**, what should stay like the seed (**held**) and what is free to drift
+(**freed**); `vary` compiles that into the request's constraints. Hold the technical
+level and free the rest, and the learner drills the _same constructs_ across new
+programs; hold the problem and free the solution, and they meet _different solutions to
+the same problem_. The motivating consumer is an editor "vary this" affordance — outside
+this module; `vary` is pure and testable on its own.
+
+### The five aspects, two tiers
+
+Two **hard** (enforced) aspects and three **soft** (requested) ones — the same
+gateable vs. semantic split the rest of the module draws. Held, each pins the output
+to the seed:
+
+- **`languageLevel`** (hard) — uses only the seed's **feature inventory**; compiles to
+  a feature subset the conformance gate checks.
+- **`size`** (hard) — stays within the seed's **length and nesting depth**; compiles to
+  the `lines` / `complexity` bounds, as `≤` maxima.
+- **`behavior`** (soft) — the same **outwardly visible behavior** (UI and console
+  output); a prompt instruction only.
+- **`strategy`** (soft) — the same **abstract algorithm**; a prompt instruction only.
+- **`implementation`** (soft) — the same **actual lines of code**; a prompt instruction
+  only.
+
+The three soft aspects are **independent dials**: one behavior has many strategies has
+many implementations, but each is toggled on its own, and an unusual combination — hold
+the code, free the behavior — is just an unusual prompt the model is left to reconcile,
+never a validated error (a soft aspect has nothing to gate).
+
+### Held, freed, and the default
+
+Each aspect is an **optional boolean**: **`false` holds**, **`true` frees**, and an
+**unset** aspect is **freed by default**. The caller declares _holds_, so the common
+request is short — `vary: { languageLevel: false }` holds the level and frees everything
+else; `vary: {}` frees everything, a fresh variation with nothing pinned (equivalent to
+no `vary` at all).
+
+### It compiles down — no new gate
+
+`vary` is a **higher-level layer over the existing primitives**, not a new enforcement
+path. A held **hard** aspect resolves to exactly the primitive it shadows — `languageLevel`
+to a feature subset (the seed's inventory), `size` to the `lines` / `complexity` bounds —
+and rides the **existing** admit-and-conform loop and prompt unchanged. A held **soft**
+aspect resolves to a prompt instruction referencing the seed. Because it compiles to the
+existing constraints it **inherits their enforcement split**: a held hard aspect is
+enforced under `validate: true` and prompt-shaping under `validate: false`, exactly as a
+hand-set subset or bound would be; the soft aspects are soft either way, like theme.
+`conform`, the loop, and the result type are untouched — `vary` is enforced _only_ through
+what it compiles to. Which aspects a request _guaranteed_ versus merely _asked for_ is
+therefore read off this static tier split and `validate`; nothing records it.
+
+Holding `languageLevel` reads the seed's **feature inventory** off its AST with the same
+node→feature map `conform` gates by — so a held variation conforms to its own seed by
+construction. A seed of plain statements has an **empty** inventory; held, that is
+"**simple statements only**," not "anything goes."
+
+### A request mistake throws; a tight request refuses
+
+A `vary` that **declares any aspect** is **mutually exclusive** with a raw `include` /
+`exclude` / `lines` / `complexity`: it _is_ the higher-level way to set those, so setting
+both is a contradiction — it **throws**, never a silent override. (`vary: {}` declares
+nothing: it is inert, equivalent to no `vary`, and never conflicts.) And a **hard hold
+needs a seed to read off**: a held
+`languageLevel` or `size` on an **empty or unparseable** seed **throws** — you cannot
+inventory or measure a seed that is not there. A **soft** hold, by contrast, **never
+throws**: it is a prompt instruction, and the soft tier is never a validated error — a soft
+hold with no seed to reference is a vacuous instruction the model ignores, not a mistake.
+These throws are request errors knowable before the model runs — the layer a malformed
+`FeatureName` lives at, distinct from the value-not-throw _outcome_ boundary (where a model
+or runtime failure is a refusal, never an exception). `vary: {}` on an empty seed is **not**
+a mistake: with nothing held it is the from-scratch base case.
+
+A well-formed but **too-tight** request — hold the level, free the behavior, and no program
+at that level expresses what the model reaches for — is not a precondition error: it runs,
+and if the loop cannot satisfy it the **existing** _attempt-bound-exhausted_ refusal is the
+honest outcome. Tightening trades coverage for focus, here as everywhere.
+
 ## What it produces (the boundary)
 
 The boundary splits on `validate`.
@@ -418,9 +525,15 @@ These are present-tense decisions the module honours.
 - **Generation is the empty-input case of variation.** One operation, not two:
   empty `program` composes, non-empty `program` varies. The empty program is a
   real admitted JEJ program, so this is a principled base case, not a sentinel.
-- **The config describes the output, not a diff.** The same config means the
-  same target whether `program` is empty or full; the input is a seed, not a
-  constraint the output must respect, and need not be JEJ.
+- **The config describes the output, not a diff — except a `vary` hard hold.** The
+  same config means the same target whether `program` is empty or full; the input is a
+  seed, not a constraint the output must respect, and need not be JEJ. The lone,
+  deliberate exception is `vary`'s **hard** holds (`languageLevel` / `size`): they read
+  the seed and derive a constraint the curated output must respect — the one sanctioned
+  diff-mode, opt-in and named. A non-JEJ seed is still accepted; only its JEJ-gateable
+  features define a held level — non-gateable constructs are not inventoried, so holding
+  `languageLevel` on above-JEJ code yields a variation at or below the seed's level, never
+  above (the held level _lowers_ to JEJ, by construction).
 - **`validate` is the curated/uncurated axis — and rawness is the lesson, by
   design.** A curated call (`validate: true`) runs the loop and returns
   validated-to-spec JEJ or a structured refusal. An uncurated call
@@ -466,6 +579,27 @@ These are present-tense decisions the module honours.
   decides how far the result departs; the hard guarantees (under
   `validate: true`) are only admission and conformance. A caller needing an
   exact, rule-based transformation will not find it here.
+- **`vary` compiles down; it adds no gate.** `vary` is a pedagogy-facing layer over
+  the existing primitives: a held **hard** aspect (`languageLevel` / `size`) resolves to
+  a feature subset or size bound, a held **soft** aspect (`behavior` / `strategy` /
+  `implementation`) to a prompt instruction. `conform`, the two gates, the repair loop, and
+  the result type (`AithorResult` / `Refusal` / `Meta`) are **unchanged**; what `vary` adds
+  is additive — the request resolver gains a vary→primitives step, and the prompt builder
+  gains a held-soft-aspect render. `vary` is enforced _only_ through what it compiles to, so
+  a held hard aspect is enforced under `validate: true` and prompt-shaping under
+  `validate: false`, exactly as a hand-set subset or bound would be, while the three soft
+  aspects are always soft, like theme. The soft aspects are **independent dials**, never
+  cross-validated; the only request that fails before the model is a self-contradiction
+  (see below).
+- **Config-shape errors throw; outcomes are values.** aithor's value-not-throw invariant
+  governs _outcomes_ — a model or runtime failure is a structured refusal, never an
+  exception. A malformed _request_ is a different layer: a `vary` declaring any aspect set
+  alongside a raw `include` / `exclude` / `lines` / `complexity`, or a **hard** hold
+  (`languageLevel` / `size`) with no seed to read off (an empty or unparseable one), is a
+  caller mistake
+  knowable before the model runs, and it **throws** — where a malformed `FeatureName` would
+  be a type error, not a refusal. A **soft** hold never throws (it is never a validated
+  error); `vary: {}` on an empty seed is the from-scratch base case, not a mistake.
 - **Local models only — and four properties follow.** The aithor drives _only_
   local models, run on the learner's own device; it never calls a remote model
   service. This is the invariant the module's value rests on, not a default to
