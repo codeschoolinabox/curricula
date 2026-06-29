@@ -35,7 +35,10 @@ describe('usageGroupKey', () => {
 	describe('One', () => {
 		it('serializes a (binding, use-type) to a usage key', () => {
 			expect(
-				usageGroupKey({ name: 'x', declarationRange: [4, 5] }, 'read'),
+				usageGroupKey(
+					{ name: 'x', declarationRange: [4, 5], kind: 'let' },
+					'read',
+				),
 			).toBe('usage:4-5:read');
 		});
 	});
@@ -43,38 +46,63 @@ describe('usageGroupKey', () => {
 	describe('Many', () => {
 		it('keys two same-(range, kind) pairs identically regardless of name', () => {
 			expect(
-				usageGroupKey({ name: 'x', declarationRange: [4, 5] }, 'read'),
+				usageGroupKey(
+					{ name: 'x', declarationRange: [4, 5], kind: 'let' },
+					'read',
+				),
 			).toBe(
-				usageGroupKey({ name: 'other', declarationRange: [4, 5] }, 'read'),
+				usageGroupKey(
+					{ name: 'other', declarationRange: [4, 5], kind: 'let' },
+					'read',
+				),
 			);
 		});
 
 		it('keys one binding used two ways into distinct groups', () => {
 			expect(
-				usageGroupKey({ name: 'x', declarationRange: [4, 5] }, 'declared'),
+				usageGroupKey(
+					{ name: 'x', declarationRange: [4, 5], kind: 'let' },
+					'declared',
+				),
 			).not.toBe(
-				usageGroupKey({ name: 'x', declarationRange: [4, 5] }, 'read'),
+				usageGroupKey(
+					{ name: 'x', declarationRange: [4, 5], kind: 'let' },
+					'read',
+				),
 			);
 		});
 
 		it('serializes a different binding-and-kind to its own distinct key', () => {
 			expect(
-				usageGroupKey({ name: 'y', declarationRange: [17, 18] }, 'read'),
+				usageGroupKey(
+					{ name: 'y', declarationRange: [17, 18], kind: 'let' },
+					'read',
+				),
 			).toBe('usage:17-18:read');
 		});
 
 		it('keys two different bindings used the same way into distinct groups', () => {
 			expect(
-				usageGroupKey({ name: 'x', declarationRange: [4, 5] }, 'read'),
+				usageGroupKey(
+					{ name: 'x', declarationRange: [4, 5], kind: 'let' },
+					'read',
+				),
 			).not.toBe(
-				usageGroupKey({ name: 'y', declarationRange: [17, 18] }, 'read'),
+				usageGroupKey(
+					{ name: 'y', declarationRange: [17, 18], kind: 'let' },
+					'read',
+				),
 			);
 		});
 	});
 
 	describe('Boundaries', () => {
 		it('serializes each of the four usage kinds', () => {
-			const binding = { name: 'x', declarationRange: [0, 1] } as const;
+			const binding = {
+				name: 'x',
+				declarationRange: [0, 1],
+				kind: 'let',
+			} as const;
 			expect([
 				usageGroupKey(binding, 'declared'),
 				usageGroupKey(binding, 'read'),
@@ -89,12 +117,20 @@ describe('usageGroupKey', () => {
 		});
 
 		it('never collides with the two-segment binding key for the same binding', () => {
-			const binding = { name: 'x', declarationRange: [4, 5] } as const;
+			const binding = {
+				name: 'x',
+				declarationRange: [4, 5],
+				kind: 'let',
+			} as const;
 			expect(usageGroupKey(binding, 'read')).not.toBe(bindingGroupKey(binding));
 		});
 
 		it('never starts with the occ-fallback prefix (usage:occ:)', () => {
-			const binding = { name: 'x', declarationRange: [4, 5] } as const;
+			const binding = {
+				name: 'x',
+				declarationRange: [4, 5],
+				kind: 'let',
+			} as const;
 			expect(usageGroupKey(binding, 'read').startsWith('usage:occ:')).toBe(
 				false,
 			);
@@ -117,9 +153,15 @@ describe('usageGroupKey', () => {
 	describe('Simple', () => {
 		it('keys identically for the same inputs', () => {
 			expect(
-				usageGroupKey({ name: 'x', declarationRange: [4, 5] }, 'assigned'),
+				usageGroupKey(
+					{ name: 'x', declarationRange: [4, 5], kind: 'let' },
+					'assigned',
+				),
 			).toEqual(
-				usageGroupKey({ name: 'x', declarationRange: [4, 5] }, 'assigned'),
+				usageGroupKey(
+					{ name: 'x', declarationRange: [4, 5], kind: 'let' },
+					'assigned',
+				),
 			);
 		});
 	});

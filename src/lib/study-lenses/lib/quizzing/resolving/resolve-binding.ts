@@ -88,13 +88,16 @@ function lookupBinding(name: string, scope: ScopeInfo): DeclarationInfo | null {
 
 /**
  * Project an embody `DeclarationInfo` onto the minimal quizzing `Binding` view:
- * the declared name and the declaration-site span (the binding identity). Frozen,
- * matching the module's frozen-output contract.
+ * the declared name, the declaration-site span (the binding identity), and the
+ * declaration `kind` (`let` / `const`, copied straight off `DeclarationInfo.kind`
+ * for reassignability questions). Frozen, matching the module's frozen-output
+ * contract.
  */
 function toBinding(declaration: DeclarationInfo): Binding {
 	const binding: Binding = {
 		name: declaration.name,
 		declarationRange: [declaration.node.start, declaration.node.end],
+		kind: declaration.kind,
 	};
 	deepFreezeInPlace(binding);
 	return binding;

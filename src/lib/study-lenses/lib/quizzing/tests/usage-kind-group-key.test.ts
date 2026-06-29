@@ -33,14 +33,17 @@ describe('usageKindGroupKey', () => {
 	describe('Boundaries', () => {
 		it('never collides with the binding-scoped usage axis for the same kind', () => {
 			expect(usageKindGroupKey('read')).not.toBe(
-				usageGroupKey({ name: 'x', declarationRange: [4, 5] }, 'read'),
+				usageGroupKey(
+					{ name: 'x', declarationRange: [4, 5], kind: 'let' },
+					'read',
+				),
 			);
 		});
 
 		it('is not a prefix of the binding-scoped usage axis for the same kind', () => {
 			const crossVariable = usageKindGroupKey('read');
 			const bindingScoped = usageGroupKey(
-				{ name: 'x', declarationRange: [4, 5] },
+				{ name: 'x', declarationRange: [4, 5], kind: 'let' },
 				'read',
 			);
 			expect(bindingScoped.startsWith(crossVariable)).toBe(false);

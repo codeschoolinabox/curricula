@@ -50,7 +50,7 @@ describe('resolveBinding', () => {
 					tokenAt(classifyOf(snippet), 11),
 					readScopeForest(snippet),
 				),
-			).toEqual({ name: 'n', declarationRange: [4, 5] });
+			).toEqual({ name: 'n', declarationRange: [4, 5], kind: 'let' });
 		});
 
 		it('resolves a declaration-site occurrence to its own binding', () => {
@@ -60,7 +60,27 @@ describe('resolveBinding', () => {
 					tokenAt(classifyOf(snippet), 4),
 					readScopeForest(snippet),
 				),
-			).toEqual({ name: 'n', declarationRange: [4, 5] });
+			).toEqual({ name: 'n', declarationRange: [4, 5], kind: 'let' });
+		});
+
+		it('carries the declaration kind for a let binding', () => {
+			const snippet = embody('let n = 1; n;');
+			expect(
+				resolveBinding(
+					tokenAt(classifyOf(snippet), 11),
+					readScopeForest(snippet),
+				)?.kind,
+			).toBe('let');
+		});
+
+		it('carries the declaration kind for a const binding', () => {
+			const snippet = embody('const n = 1; n;');
+			expect(
+				resolveBinding(
+					tokenAt(classifyOf(snippet), 13),
+					readScopeForest(snippet),
+				)?.kind,
+			).toBe('const');
 		});
 	});
 
@@ -72,7 +92,7 @@ describe('resolveBinding', () => {
 					tokenAt(classifyOf(snippet), 14),
 					readScopeForest(snippet),
 				),
-			).toEqual({ name: 'n', declarationRange: [4, 5] });
+			).toEqual({ name: 'n', declarationRange: [4, 5], kind: 'let' });
 		});
 	});
 
@@ -84,7 +104,7 @@ describe('resolveBinding', () => {
 					tokenAt(classifyOf(snippet), 24),
 					readScopeForest(snippet),
 				),
-			).toEqual({ name: 'x', declarationRange: [17, 18] });
+			).toEqual({ name: 'x', declarationRange: [17, 18], kind: 'let' });
 		});
 
 		it('resolves an outer reference to the outer binding despite a later shadow', () => {
@@ -94,7 +114,19 @@ describe('resolveBinding', () => {
 					tokenAt(classifyOf(snippet), 11),
 					readScopeForest(snippet),
 				),
-			).toEqual({ name: 'x', declarationRange: [4, 5] });
+			).toEqual({ name: 'x', declarationRange: [4, 5], kind: 'let' });
+		});
+
+		it('carries the inner kind, not the outer, when the kinds differ across a shadow', () => {
+			// outer `let x`, inner `const x` — the inner reference must report the
+			// resolved binding's kind ('const'), not the lexically-outer keyword.
+			const snippet = embody('let x = 1; { const x = 2; x; }');
+			expect(
+				resolveBinding(
+					tokenAt(classifyOf(snippet), 26),
+					readScopeForest(snippet),
+				)?.kind,
+			).toBe('const');
 		});
 
 		it('resolves a for-of body reference to the iteration binding', () => {
@@ -104,7 +136,7 @@ describe('resolveBinding', () => {
 					tokenAt(classifyOf(snippet), 42),
 					readScopeForest(snippet),
 				),
-			).toEqual({ name: 'x', declarationRange: [28, 29] });
+			).toEqual({ name: 'x', declarationRange: [28, 29], kind: 'const' });
 		});
 
 		it('climbs from the for-of scope to resolve the iterable to its outer binding', () => {
@@ -114,7 +146,7 @@ describe('resolveBinding', () => {
 					tokenAt(classifyOf(snippet), 33),
 					readScopeForest(snippet),
 				),
-			).toEqual({ name: 'items', declarationRange: [4, 9] });
+			).toEqual({ name: 'items', declarationRange: [4, 9], kind: 'let' });
 		});
 	});
 
@@ -143,7 +175,7 @@ describe('resolveBinding', () => {
 			const snippet = embody('let n = 1; n;');
 			expect(
 				resolveBinding({ start: 11, text: 'n' }, readScopeForest(snippet)),
-			).toEqual({ name: 'n', declarationRange: [4, 5] });
+			).toEqual({ name: 'n', declarationRange: [4, 5], kind: 'let' });
 		});
 	});
 

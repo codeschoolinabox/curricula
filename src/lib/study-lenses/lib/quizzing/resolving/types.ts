@@ -2,8 +2,9 @@
  * @file The quizzing-domain `Binding` view — the minimal, identity-bearing result
  * of occurrence→binding resolution. Internal to the `resolving/` cluster (NOT the
  * locked public contract in `../types.ts`); free to widen additively as
- * binding-aware forms need more (e.g. a `kind` for "is this reassignable?"
- * questions). Deliberately decoupled from embody's `DeclarationInfo` so the B→C
+ * binding-aware forms need more — it carries `kind` (the declaration's
+ * `let`/`const`) for reassignability questions. Deliberately decoupled from
+ * embody's `DeclarationInfo` so the B→C
  * scope-forest input swap (`buildScope` → `CreationEntwined.scopeTree`) leaves
  * this view and every downstream importer untouched.
  */
@@ -17,13 +18,19 @@
  * the **stable binding identity**: two occurrences resolve to the same binding
  * iff their `declarationRange`s are equal (each declarator id has a unique span).
  * `name` is the declared name, kept for prompt/label use and to avoid re-slicing
- * the source. The `groupKey` serializer that keys binding-aware forms on this
- * identity lives at `../keying/binding-group-key.ts`; this view carries only the
- * identity.
+ * the source. `kind` is the declaration keyword (`let` / `const`), read straight off
+ * the resolved `DeclarationInfo.kind` — the static answer key for "is this binding
+ * reassignable?" forms. JeJ has no `var` (validation rejects it; `DeclarationInfo.kind`
+ * is itself `let`/`const`-only), so the union needs no `var` arm. The `groupKey`
+ * serializer that keys binding-aware forms on the identity lives at
+ * `../keying/binding-group-key.ts` and keys on `declarationRange` ONLY — so this
+ * view carries the binding identity (`declarationRange`) plus non-identity
+ * convenience data (`name`, `kind`), and `kind` must never fold into a group key.
  */
 export type Binding = Readonly<{
 	name: string;
 	declarationRange: readonly [number, number];
+	kind: 'let' | 'const';
 }>;
 
 /**

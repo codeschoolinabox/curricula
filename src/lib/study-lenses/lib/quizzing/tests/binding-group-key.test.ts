@@ -33,37 +33,54 @@ function tokenAt(
 describe('bindingGroupKey', () => {
 	describe('One', () => {
 		it('serializes a declaration range to a binding key', () => {
-			expect(bindingGroupKey({ name: 'x', declarationRange: [4, 5] })).toBe(
-				'binding:4-5',
-			);
+			expect(
+				bindingGroupKey({ name: 'x', declarationRange: [4, 5], kind: 'let' }),
+			).toBe('binding:4-5');
 		});
 	});
 
 	describe('Many', () => {
 		it('keys two same-range bindings identically regardless of name', () => {
-			expect(bindingGroupKey({ name: 'x', declarationRange: [4, 5] })).toBe(
-				bindingGroupKey({ name: 'other', declarationRange: [4, 5] }),
+			expect(
+				bindingGroupKey({ name: 'x', declarationRange: [4, 5], kind: 'let' }),
+			).toBe(
+				bindingGroupKey({
+					name: 'other',
+					declarationRange: [4, 5],
+					kind: 'let',
+				}),
 			);
 		});
 
 		it('serializes a different range to its own key', () => {
-			expect(bindingGroupKey({ name: 'x', declarationRange: [17, 18] })).toBe(
-				'binding:17-18',
-			);
+			expect(
+				bindingGroupKey({ name: 'x', declarationRange: [17, 18], kind: 'let' }),
+			).toBe('binding:17-18');
 		});
 
 		it('keys two different declaration ranges to different keys', () => {
-			expect(bindingGroupKey({ name: 'x', declarationRange: [4, 5] })).not.toBe(
-				bindingGroupKey({ name: 'x', declarationRange: [17, 18] }),
+			expect(
+				bindingGroupKey({ name: 'x', declarationRange: [4, 5], kind: 'let' }),
+			).not.toBe(
+				bindingGroupKey({ name: 'x', declarationRange: [17, 18], kind: 'let' }),
+			);
+		});
+
+		it('keys two same-range bindings identically regardless of kind', () => {
+			// kind is non-identity convenience data — it must never fold into the key.
+			expect(
+				bindingGroupKey({ name: 'x', declarationRange: [4, 5], kind: 'let' }),
+			).toBe(
+				bindingGroupKey({ name: 'x', declarationRange: [4, 5], kind: 'const' }),
 			);
 		});
 	});
 
 	describe('Boundaries', () => {
 		it('serializes a zero-width range', () => {
-			expect(bindingGroupKey({ name: 'x', declarationRange: [0, 0] })).toBe(
-				'binding:0-0',
-			);
+			expect(
+				bindingGroupKey({ name: 'x', declarationRange: [0, 0], kind: 'let' }),
+			).toBe('binding:0-0');
 		});
 	});
 
@@ -80,8 +97,10 @@ describe('bindingGroupKey', () => {
 
 	describe('Simple', () => {
 		it('keys identically for the same binding', () => {
-			expect(bindingGroupKey({ name: 'x', declarationRange: [4, 5] })).toEqual(
-				bindingGroupKey({ name: 'x', declarationRange: [4, 5] }),
+			expect(
+				bindingGroupKey({ name: 'x', declarationRange: [4, 5], kind: 'let' }),
+			).toEqual(
+				bindingGroupKey({ name: 'x', declarationRange: [4, 5], kind: 'let' }),
 			);
 		});
 	});
