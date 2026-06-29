@@ -19,8 +19,10 @@ import type {
  * sibling `RunOptions` → `ResolvedRunOptions` pattern.
  *
  * The output is ratified instructional prose (one user-message string — the
- * runtime sends no system prompt): a teacher-persona line, the learner ask
- * verbatim (omitted when empty), a fenced seed block (omitted when `program` is
+ * runtime sends no system prompt): a teacher-persona line (which also asks for a
+ * single consistent real-world theme — a soft, theme-agnostic coherence nudge that
+ * names no subject; this leaf adds no gating or measurement around it), the learner
+ * ask verbatim (omitted when empty), a fenced seed block (omitted when `program` is
  * empty — composing from scratch is the base case of varying a seed), a
  * Requirements list stringified from the subset and bounds, and an output
  * instruction asking for one ` ```js ` block. The seed is fenced with a bare
@@ -58,7 +60,7 @@ export default function buildPrompt(
 }
 
 const PERSONA =
-	'You are writing a short JavaScript program for a student to read and trace by hand.';
+	'You are writing a short JavaScript program for a student to read and trace by hand. Give the variables and scenario a single, consistent real-world theme.';
 
 const OUTPUT_INSTRUCTION =
 	'Reply with only the program, in one ```js code block.';

@@ -52,6 +52,14 @@ describe('buildPrompt', () => {
 			expect(prompt).toContain('JavaScript');
 			expect(prompt).toContain('```js');
 		});
+
+		it('nudges a consistent real-world theme even when the ask names no subject', () => {
+			// Theme-agnostic: the nudge names no subject, so it rides on every
+			// prompt — an empty ask is the minimal witness.
+			const prompt = buildPrompt('', '', { include: [], exclude: [] }, {});
+
+			expect(prompt).toContain('consistent real-world theme');
+		});
 	});
 
 	describe('one — empty vs non-empty program routing', () => {
