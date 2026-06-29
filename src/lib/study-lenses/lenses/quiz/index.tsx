@@ -18,13 +18,15 @@ import type { ComponentType } from 'react';
 import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { ClassifiedToken } from '../../lib/classifying/types.js';
-import type { Verdict } from '../../lib/quizzing/types.js';
+import type { McqQuizItem, Verdict } from '../../lib/quizzing/types.js';
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import quizCore from './core.js';
 import anchors from './lib/anchors.js';
 import buildQuiz from './lib/build-quiz.js';
+import masteryDecorations from './lib/decorations.js';
 import gradeOption from './lib/grade-option.js';
+import type { MasteryDecos, MasteryState, ProgressBucket } from './types.js';
 
 import './quiz.css';
 
@@ -51,6 +53,50 @@ const anchorHitField = StateField.define<DecorationSet>({
 	},
 	provide: (field) => EditorView.decorations.from(field),
 });
+
+// The two mastery decoration channels (inc 5), painted on every same-group token
+// from the per-mount `MasteryState`. One `StateField` fed by one `StateEffect`
+// carrying both channels' ranges (computed by the pure `./lib/decorations.ts`);
+// the read-only doc never changes, so positions are stable and no
+// `DecorationSet.map(changes)` is needed. Channel 1 (progress) is an underline
+// whose density `bucket` rises with mastery; channel 2 (wrong) is an independent
+// overline. Both classes paint with `currentColor` (no hue), so a learner with
+// color-vision deficiency reads them on separate axes — see `quiz.css`.
+const setMasteryDecos = StateEffect.define<MasteryDecos>();
+const progressMarks: Readonly<Record<ProgressBucket, Decoration>> = {
+	1: Decoration.mark({ class: 'cm-quiz-progress cm-quiz-progress-1' }),
+	2: Decoration.mark({ class: 'cm-quiz-progress cm-quiz-progress-2' }),
+	3: Decoration.mark({ class: 'cm-quiz-progress cm-quiz-progress-3' }),
+	4: Decoration.mark({ class: 'cm-quiz-progress cm-quiz-progress-4' }),
+};
+const wrongMark = Decoration.mark({ class: 'cm-quiz-wrong' });
+const masteryField = StateField.define<DecorationSet>({
+	create() {
+		return Decoration.none;
+	},
+	update(decorations, transaction) {
+		const effect = transaction.effects.find(
+			(candidate): candidate is StateEffect<MasteryDecos> =>
+				candidate.is(setMasteryDecos),
+		);
+		if (effect === undefined) return decorations;
+		const ranges = [
+			...effect.value.progress.map((entry) =>
+				progressMarks[entry.bucket].range(entry.range[0], entry.range[1]),
+			),
+			...effect.value.wrong.map((range) => wrongMark.range(range[0], range[1])),
+		];
+		// `true` lets CodeMirror sort the merged channels — a token that is both
+		// in-progress and wrong carries two marks at the same `from`.
+		return Decoration.set(ranges, true);
+	},
+	provide: (field) => EditorView.decorations.from(field),
+});
+
+// The empty mastery state, hoisted as a stable frozen reference so the
+// source-change reset is a referential no-op on mount (matches `core.ts`'s
+// `EMPTY_RECOMMENDATIONS`).
+const EMPTY_MASTERY = freezeInPlace<MasteryState>({});
 
 // Slice A reads no config knob (the V1 form is parameterless), so the wrapper
 // takes only `embodiment`; the `core.config(props.config)` resolution lands
@@ -83,6 +129,10 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	// learner answers. Reset whenever the pick changes (a new anchor → no verdict).
 	const [verdict, setVerdict] = useState<Verdict | null>(null);
 
+	// Per-group mastery accrued from graded answers (inc 5). Disposable practice:
+	// reset on source change. Drives the two color-free decoration channels.
+	const [mastery, setMastery] = useState<MasteryState>(EMPTY_MASTERY);
+
 	useEffect(
 		function mountEditor() {
 			const host = editorContainer.current;
@@ -101,6 +151,7 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 							EditorView.editable.of(false),
 							EditorState.readOnly.of(true),
 							anchorHitField,
+							masteryField,
 							EditorView.domEventHandlers({
 								mousedown(event, clickedView) {
 									const offset = clickedView.posAtCoords({
@@ -152,10 +203,12 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	// the code), so this guards the rare in-place embodiment-swap; it also fires
 	// once on mount — a no-op, since `pickedRange` is already null at init.
 	// (Clearing pickedRange cascades into resetVerdictOnRepick below; no need to
-	// clear the verdict here directly. Inc 5's MasteryState reset will join this.)
+	// clear the verdict here directly. The MasteryState reset joins it here —
+	// `EMPTY_MASTERY` is a stable ref, so it is a no-op on mount.)
 	useEffect(
 		function clearPickOnSourceChange() {
 			setPickedRange(null);
+			setMastery(EMPTY_MASTERY);
 		},
 		[embodiment.source.code],
 	);
@@ -170,12 +223,38 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		[pickedRange],
 	);
 
+	// The render-ready decoration ranges for both channels, recomputed when the
+	// mastery state changes (`items` is stable per mount). Dispatched into the
+	// mounted view below — no remount (the field reads it through a `StateEffect`,
+	// exactly like the picked-anchor highlight).
+	const masteryDecos = useMemo(
+		() => masteryDecorations(items, mastery),
+		[items, mastery],
+	);
+	useEffect(
+		function syncMasteryDecorations() {
+			editorView.current?.dispatch({
+				effects: setMasteryDecos.of(masteryDecos),
+			});
+		},
+		[masteryDecos],
+	);
+
 	// The question for the picked anchor (one V1 item in Slice A; itemsAt returns
 	// an array for later co-anchored forms → answer-neutral tabs).
 	const question =
 		pickedRange === null
 			? null
 			: (anchors.itemsAt(items, pickedRange)[0] ?? null);
+
+	// Grade the picked answer, then fold the verdict into mastery. A function
+	// declaration (a block-bodied arrow trips `arrow-body-style`); the functional
+	// `setMastery` updater reads the latest state, never the closed-over `mastery`.
+	function answer(item: McqQuizItem, optionId: string): void {
+		const result = gradeOption(item, optionId);
+		setVerdict(result);
+		setMastery((prior) => quizCore.masteryFold(prior, item, result));
+	}
 
 	if (!embodiment.status.parsed) {
 		return (
@@ -198,7 +277,7 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 							key={option.id}
 							type="button"
 							data-quiz-option={option.id}
-							onClick={() => setVerdict(gradeOption(question, option.id))}
+							onClick={() => answer(question, option.id)}
 						>
 							{option.text}
 						</button>

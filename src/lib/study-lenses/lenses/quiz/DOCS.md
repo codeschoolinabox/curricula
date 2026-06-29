@@ -29,11 +29,12 @@ re-shaping this contract. What Slice A defers is marked throughout.
 | File                  | Layer   | Purpose                                                                                                                                                                                                                                                |
 | --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `index.tsx`           | wrapper | React `Component`; mounts the read-only un-colorized editor, captures clicks, owns per-mount UI state (picked anchor / selection / verdict); freezes + default-exports the `LensModule`                                                                |
-| `core.ts`             | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend` (and, in Slice B, the pure mastery fold)                                                                                                                                                 |
+| `core.ts`             | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend`, and the pure mastery fold `masteryFold` (inc 5)                                                                                                                                         |
 | `lib/build-quiz.ts`   | core    | Parses the snippet (Acorn), delegates classification to `lib/classifying`, calls `generateQuiz`, **filters the mixed-form output to `form === 'V1'`**, returns `{ classified, items }` (or `null` on internal parse failure). The single re-parse site |
 | `lib/anchors.ts`      | core    | The pure resolution layer: `anchorAt(offset, classified)` (token resolution → highlight) and `itemsAt(items, range)` (item resolution → panel). CM-independent                                                                                         |
 | `lib/grade-option.ts` | core    | `gradeOption(item, optionId)` — builds the `mcq` `LearnerResponse` from the clicked option id (verbatim) and delegates to `lib/quizzing`'s total `grade`. Pure: no React, no CodeMirror                                                                |
-| `types.ts`            | shared  | `QuizLensConfig`, `PickedAnchor`, `GroupMastery`, `MasteryState`, `MasteryFold` (signature; deferred)                                                                                                                                                  |
+| `lib/decorations.ts`  | core    | The pure mastery-decoration projector `masteryDecorations(items, mastery)` → the two color-free render channels (`MasteryDecos`); emits plain ranges (the wrapper owns the `Decoration` / `StateField` glue). Pure, no React (inc 5)                   |
+| `types.ts`            | shared  | `QuizLensConfig`, `GroupMastery`, `MasteryState`, `MasteryFold`, `MasteryDecos`, `ProgressBucket`                                                                                                                                                      |
 
 Default export of `index.tsx` is the frozen `LensModule` record. The core
 subsystems under `lib/` are internal; only `index.tsx` (and, for the fold,
@@ -101,8 +102,12 @@ subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
    from `option.id` verbatim) and calls `grade(item, response)`. The `Verdict`'s
    `feedback` is surfaced; the answer key is never echoed (the lens reveals it
    from the item it holds, not from the `Verdict`). Picking a different anchor
-   resets the verdict. The mastery fold (folding the verdict into `MasteryState`
-   per `groupKey`) is **inc 5 (Slice B)**, not Slice A.
+   resets the verdict. The graded `Verdict` also folds into per-`groupKey`
+   `MasteryState` (`core.ts` `masteryFold`, inc 5); the pure
+   `masteryDecorations` (`lib/decorations.ts`) projects that state onto the two
+   color-free channels, which a `StateEffect` dispatches into the editor's
+   `masteryField` — no remount, exactly like the picked-anchor highlight in
+   step 3.
 
 6. **Render** (sync) — the wrapper emits the root `<div data-lens="quiz">` with
    either the read-only editor host + the picked-anchor panel + the verdict
@@ -139,7 +144,9 @@ flowchart TD
     Panel -->|"build mcq response from option id + grade — sync, total"| Verdict["verdict<br/>(feedback; answer key never echoed)"]
     Verdict --> VerdictDOM["verdict region (rendered)"]
 
-    Verdict -.->|"fold per groupKey — inc 5 (Slice B)"| Mastery["mastery state (deferred)"]
+    Verdict -->|"fold per groupKey — masteryFold (inc 5)"| Mastery["mastery state<br/>(per-mount MasteryState)"]
+    Mastery -->|"project items × mastery → channels — masteryDecorations, pure"| Decos["MasteryDecos<br/>(progress + wrong ranges)"]
+    Decos -->|"dispatch StateEffect → masteryField — view update"| MasteryDOM["two color-free channels (rendered)"]
 
     Props -.->|"snippet change → unmount"| Unmount[/"React unmount:<br/>view destroyed + state GC"/]
 ```
@@ -148,10 +155,10 @@ The diagram is per-mount. The orchestrator (upstream) supplies the props; the
 recommender (sibling) calls `applicableTo` / `recommend`. `classified` feeds the
 token-resolution edge (the binary search), not the editor itself; the highlight
 is a view-state of the picked range alone (a single mark), not a feedback input
-to the editor. The dotted edges are deferred (mastery fold) or lifecycle
-(unmount). **There is no cross-mount persistence** — config is read from the
-prop on mount; the picked anchor, the selection, and the verdict die with the
-component instance.
+to the editor. The only dotted edge is lifecycle (unmount); the mastery flow
+(fold → project → dispatch) is solid as of inc 5. **There is no cross-mount
+persistence** — config is read from the prop on mount; the picked anchor, the
+selection, the verdict, and the mastery state die with the component instance.
 
 ### Structural constraints
 
@@ -209,9 +216,14 @@ component instance.
   module-level frozen empty array; the final increment maps `QuizItem.cells`
   (`BlockCell`) → `Recommendation.blockModelCell` (`BlockModelCell`) (see § Why
   the homonym maps only at recommend).
-- **Mastery signature is locked, fold deferred.** `types.ts` pins `GroupMastery`
-  / `MasteryState` / `MasteryFold` in Phase 0; Slice A neither folds nor
-  decorates. The fold lands in inc 5 against the fixed shape.
+- **Mastery: pure fold + pure projection, thin CM seam.** `types.ts` pins
+  `GroupMastery` / `MasteryState` / `MasteryFold` / `MasteryDecos`; the fold
+  (`core.ts` `masteryFold`) and the projection (`lib/decorations.ts`
+  `masteryDecorations`) are pure and unit-tested, while `index.tsx` owns the
+  only `Decoration` / `StateField` glue (a `masteryField` fed by a
+  `StateEffect`, exactly like the picked-anchor highlight). Both channels paint
+  with `currentColor` (no hue) so a color-vision-deficient learner reads them on
+  independent axes.
 - **LensModule defaults return deep-frozen values.** `config()` returns a
   `cloneAndFreeze`-frozen `LensConfig`; `recommend()` returns a module-level
   frozen-empty-array constant (no per-call allocation); `applicableTo()` returns
@@ -232,8 +244,6 @@ component instance.
 
 ### Out of scope (Slice A)
 
-- **Mastery accrual + two-channel decorations** (inc 5). Slice A shows the
-  per-answer verdict; it does not fold verdicts or paint the decoration.
 - **Code-as-answer modes** (inc 6). V8 `click-token` items are in the
   `generateQuiz` stream but filtered out; `click-line` / `select-in-code` are
   later-form work.
@@ -312,18 +322,35 @@ inc 5/6, V8 → inc 6) rather than re-shaping the panel. _(This was the AR-1
 BLOCKER: the contract consumes the registry's mixed-form stream, not a V1-only
 stream.)_
 
-## Why define mastery types now but defer the fold
+## Why define mastery types in Phase 0 (the fold landed in inc 5)
 
 Phase-0 DDD captures the full cohesive contract before code, so `types.ts` pins
 the two-channel mastery encoding (`GroupMastery` / `MasteryState`) and the fold
-signature (`MasteryFold`) now — even though the fold is inc 5 (Slice B). The
-implementation honors the Slice-A boundary tightly: no fold, no decorations, no
-dead stub function (the type alias suffices; nothing in Slice A references it).
-This is the scope-discipline split the campaign runs on — design expands to the
-cohesive whole, implementation honors the increment boundary. The progress
-**curve was ruled 0..1 accrual** at the Phase-0 human gate (2026-06-28, over a
-consecutive-correct counter or a threshold-to-unlock); the type pins the range +
-monotonic intent so inc 5's fold drops in without a re-type.
+signature (`MasteryFold`) up front — even though the fold itself was inc 5
+(Slice B). Slice A honored that boundary tightly: no fold, no decorations, no
+dead stub function (the type aliases sufficed; nothing in Slice A referenced
+them). This is the scope-discipline split the campaign runs on — design expands
+to the cohesive whole, implementation honors the increment boundary. The
+progress **curve was ruled 0..1 accrual** at the Phase-0 human gate (2026-06-28,
+over a consecutive-correct counter or a threshold-to-unlock); inc 5 realized it
+as `MASTERY_STEP = 0.25` and added only the render-channel types (`MasteryDecos`
+/ `ProgressBucket`), no re-type of the Phase-0 shapes.
+
+## Why bucketed progress density (not continuous)
+
+Channel 1 (progress) renders as underline **density**, not a continuous width.
+With `MASTERY_STEP = 0.25` the fold can only ever produce four non-zero progress
+values — `0.25 / 0.5 / 0.75 / 1` — so four density buckets (`ProgressBucket`,
+`dotted → dashed → solid → thicker`) are a **lossless** encoding: every distinct
+mastery level reads as a distinct underline, and `masteryDecorations` maps the
+value to its bucket once (`lib/decorations.ts` `progressBucket`). A continuous
+inline width carries no more information (there is no fifth reachable value)
+while moving styling out of `quiz.css` into inline `style` strings the tests
+would have to parse. If the step ever changes, the bucket boundaries move with
+it; nothing else does. The point of two **separate** channels (an underline for
+progress, an overline for `wrong`) is color-vision safety — both cues use
+`currentColor`, so neither relies on hue and the two never collapse onto one
+red/green axis.
 
 ## Why the BlockCell / BlockModelCell homonym maps only at recommend()
 
@@ -356,9 +383,9 @@ them. It consumes — and never modifies — `lib/classifying` and `lib/quizzing
 ## Future direction
 
 See [`./README.md` § Future direction](./README.md#future-direction). Key
-directions in scope of this lens's evolution: the mastery fold + two-channel
-decorations (inc 5); code-as-answer capture (inc 6); earned propagation (inc 7);
-the config-knob toolbar → `QuizFilter` (inc 8); the real `recommend()` with the
-`BlockCell → BlockModelCell` mapping (final inc); consuming `embodiment.raw.*`
-directly to drop the double-parse; and the span-render display fallback if
-read-only-CM click capture proves fragile at the inc-2 checkpoint.
+directions in scope of this lens's evolution: code-as-answer capture (inc 6);
+earned propagation (inc 7); the config-knob toolbar → `QuizFilter` (inc 8); the
+real `recommend()` with the `BlockCell → BlockModelCell` mapping (final inc);
+consuming `embodiment.raw.*` directly to drop the double-parse; and the
+span-render display fallback if read-only-CM click capture proves fragile at the
+inc-2 checkpoint.

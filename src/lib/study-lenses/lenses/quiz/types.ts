@@ -4,8 +4,9 @@
  * peers: `lib/classifying` (`classifyTokens` → the clickable anchor set)
  * and `lib/quizzing` (`generateQuiz` → the questions; `grade` → the
  * verdict). It re-implements neither; this file declares only the lens's
- * own types — the config surface, the two-channel mastery contract, and
- * the picked-anchor bundle the panel renders.
+ * own types — the config surface, the two-channel mastery contract
+ * (the per-group state, the fold that accrues it, and the color-free
+ * decoration channels that render it).
  *
  * Two layers (per the lenses peer's two-layer module convention):
  * - The pure-TS core (`./core.ts` + `./lib/build-quiz.ts` +
@@ -40,11 +41,7 @@
  * (Slice B). See `./README.md` § Glossary (Mastery — two channels).
  */
 
-import type {
-	McqQuizItem,
-	QuizItem,
-	Verdict,
-} from '../../lib/quizzing/types.js';
+import type { QuizItem, Verdict } from '../../lib/quizzing/types.js';
 
 // ─── Config surface ─────────────────────────────────────────
 
@@ -68,30 +65,7 @@ type QuizLensConfig = Readonly<{
 	categories?: ReadonlyArray<string>;
 }>;
 
-// ─── Picked anchor (the panel's input bundle) ───────────────
-
-/**
- * The learner's current selection: the clicked source span plus the quiz
- * item(s) resolved at it. Produced by the wrapper from the click pipeline
- * — `anchorAt(offset, classified)` gives the token (hence the `range`),
- * and `itemsAt(items, range)` gives the `items`.
- *
- * @remarks `items` is an array because a single range can carry several
- * co-anchored forms (the panel then shows answer-neutral tabs). In Slice
- * A the V1 form-scope filter (`./lib/build-quiz.ts`) leaves exactly one
- * `McqQuizItem` per range, so the array holds one and the panel renders
- * single-item; the array shape is the seam later slices widen (admitting
- * V7 mcq → tabs) without re-shaping the panel. Typed as `McqQuizItem`
- * because Slice A renders only the panel `mcq` variant; widens to
- * `QuizItem` when code-as-answer modes land. `[start, end)` is the
- * half-open source range, matching classifying / quizzing.
- */
-type PickedAnchor = Readonly<{
-	range: readonly [number, number];
-	items: ReadonlyArray<McqQuizItem>;
-}>;
-
-// ─── Mastery (two-channel; contract captured, fold deferred) ─
+// ─── Mastery (two-channel; state + fold) ────────────────────
 
 /**
  * Per-group mastery state — **two orthogonal, color-free channels** so a
@@ -133,10 +107,9 @@ type MasteryState = Readonly<Record<string, GroupMastery>>;
 
 /**
  * The mastery fold — folds one graded interaction into the mastery state,
- * keyed by `item.groupKey`. **Signature only; deferred to inc 5.** Slice A
- * does not accrue mastery (it surfaces the per-answer `Verdict`), so no
- * implementation of this type exists yet; it is pinned here so inc 5
- * implements against a fixed contract.
+ * keyed by `item.groupKey`. Implemented by `quizCore.masteryFold`
+ * (`./core.ts`, inc 5); the wrapper folds each graded `Verdict` into the
+ * per-mount `MasteryState`, which then drives the decoration channels below.
  *
  * @remarks A `malformed` verdict is a no-op (returns `prior` unchanged) —
  * mastery is never moved by a caller / UI bug. A `correct` verdict raises
@@ -150,10 +123,44 @@ type MasteryFold = (
 	verdict: Verdict,
 ) => MasteryState;
 
+// ─── Mastery decorations (the two color-free render channels) ─
+
+/**
+ * The progress channel's density level for one group — channel 1 rendered as
+ * underline density (dotted → dashed → solid → thick), NOT hue. The four
+ * buckets map 1:1 onto the four reachable non-zero `progress` values under the
+ * `MASTERY_STEP` (`0.25`) grid (`0.25 → 1` … `1 → 4`), so the encoding is
+ * lossless: every distinct mastery level reads as a distinct underline.
+ */
+type ProgressBucket = 1 | 2 | 3 | 4;
+
+/**
+ * The render-ready decoration ranges for one mount, derived from the quiz items
+ * and the current `MasteryState` by `./lib/decorations.ts` (`masteryDecorations`).
+ * Two independent, color-free channels so a learner with color-vision deficiency
+ * reads both on separate visual axes:
+ *
+ * - `progress` — channel 1: one entry per same-group token with `progress > 0`,
+ *   carrying the token `range` and its density `bucket` (the underline).
+ * - `wrong` — channel 2: the `range` of every same-group token whose group is
+ *   flagged `wrong` (an independent non-hue mark, e.g. an overline).
+ *
+ * Both lists carry one entry **per token** (not per group), so mastery earned on
+ * one element paints every element sharing its `groupKey`. The wrapper hands this
+ * to a CodeMirror `StateField` via a `StateEffect`; `./index.tsx` owns that glue.
+ */
+type MasteryDecos = Readonly<{
+	progress: ReadonlyArray<
+		Readonly<{ range: readonly [number, number]; bucket: ProgressBucket }>
+	>;
+	wrong: ReadonlyArray<readonly [number, number]>;
+}>;
+
 export type {
 	QuizLensConfig,
-	PickedAnchor,
 	GroupMastery,
 	MasteryState,
 	MasteryFold,
+	ProgressBucket,
+	MasteryDecos,
 };

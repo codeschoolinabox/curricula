@@ -98,10 +98,12 @@ between them on the same code.
 
 Mastery is **earned and shown per element**, via progress-based, **non-color-
 reliant** highlighting (the two-channel decoration — see § Glossary). The
-mastery mechanic is Slice-B work (inc 5+); Slice A ships the per-answer verdict
-only, but the **contract** for mastery is fixed in Phase 0
-([`./types.ts`](./types.ts) `MasteryState`) so the fold lands against a stable
-shape.
+mastery mechanic landed in inc 5: a graded answer folds into per-`groupKey`
+`MasteryState` ([`./core.ts`](./core.ts) `masteryFold`), and the pure projector
+([`./lib/decorations.ts`](./lib/decorations.ts) `masteryDecorations`) paints the
+two color-free channels on every same-group token. The **contract** was fixed in
+Phase 0 ([`./types.ts`](./types.ts) `MasteryState`), so the fold dropped in
+against a stable shape.
 
 ## Glossary
 
@@ -152,10 +154,14 @@ shape.
   (a `malformed` verdict is a no-op — mastery is never penalized for a UI bug).
   Progress is monotonic-up (a correct answer accrues; propagation bulk-credits);
   `wrong` toggles on an `incorrect` and clears on re-mastery. The fold that
-  populates it is inc 5 (Slice B), not Slice A — Phase 0 fixes only the shape.
-  _(The progress curve is **0..1 accrual** — ruled at the Phase-0 human gate
-  2026-06-28, over a consecutive-correct counter or a threshold-to-unlock. The
-  type pins the range + monotonic intent; inc 5's fold implements the accrual.)_
+  populates it is `masteryFold` ([`./core.ts`](./core.ts), inc 5); the pure
+  `masteryDecorations` ([`./lib/decorations.ts`](./lib/decorations.ts)) then
+  projects the state onto the two channels. _(The progress curve is **0..1
+  accrual** — ruled at the Phase-0 human gate 2026-06-28, over a
+  consecutive-correct counter or a threshold-to-unlock. inc 5 set
+  `MASTERY_STEP = 0.25` (four correct answers saturate a group to `1`), rendered
+  as four underline-density buckets; the `wrong` channel is an independent,
+  color-free overline.)_
 - **Earned propagation** — completing a "sameness" question (e.g. "click every
   occurrence of this variable") bulk-credits the `groupKey`s its `unlocks`
   names, so mastery shown on one element spreads to its propagation peers.
@@ -250,8 +256,9 @@ hand a `click-token` item to an `mcq` panel.
 
 The `QuizLensConfig`, `MasteryState`, and the `MasteryFold` **signature** are
 defined in Phase 0 ([`./types.ts`](./types.ts)) so the full contract is
-captured, but Slice A does **not** implement the mastery fold, code-as-answer
-modes, propagation, config filtering, or `recommend`.
+captured. Slice A left code-as-answer modes, propagation, config filtering, and
+`recommend` to later slices; the mastery fold + two-channel decorations landed
+in inc 5.
 
 ## Edge cases
 
@@ -280,10 +287,6 @@ Inherited from the lenses peer (single-writer state, disposable practice, no
 `embody/`-top runtime imports, no branching on `source.code`): see
 [`../README.md` § Conventions](../README.md#conventions). Beyond those:
 
-- **No mastery accrual or decorations** (inc 5). Slice A shows the per-answer
-  verdict; it does not fold verdicts into `MasteryState` or paint the
-  two-channel decoration. The contract is defined; the implementation is
-  deferred.
 - **No code-as-answer modes** (inc 6). The registry already emits V8
   `click-token` items into the `generateQuiz` stream, but the V1 form-scope
   filters them out (§ Form scoping); Slice A captures only `mcq`. `click-line` /
@@ -312,7 +315,7 @@ lens lives across the two required layers:
   CodeMirror, click capture, panel, and verdict; owns per-mount UI state;
   freezes and default-exports the `LensModule`.
 - `core.ts` (core) — `LensModule` defaults: `config`, `applicableTo`,
-  `recommend` (and, in Slice B, the pure mastery fold). No React.
+  `recommend`, and the pure mastery fold `masteryFold` (inc 5). No React.
 - `lib/build-quiz.ts` (core) — parses the snippet (Acorn), delegates
   classification to `lib/classifying`, calls `generateQuiz`, **filters the
   mixed-form output to `form === 'V1'`** (§ Form scoping), and returns
@@ -323,11 +326,16 @@ lens lives across the two required layers:
   ranges, for the highlight) and `itemsAt(items, anchorRange)` (item resolution,
   the panel's item(s) for a range). Pure and **CM-independent** (so it serves
   both the CodeMirror path and the span-render fallback unchanged). No React.
+- `lib/decorations.ts` (core) — the pure mastery-decoration projector
+  `masteryDecorations(items, mastery)` → the two color-free render channels
+  (`MasteryDecos`). Pure and **CM-independent** (it emits plain ranges; the
+  wrapper owns the `Decoration` / `StateField` glue). No React. (inc 5)
 - `types.ts` (shared) — `QuizLensConfig`, `GroupMastery`, `MasteryState`,
-  `MasteryFold` (signature; deferred), `PickedAnchor`.
+  `MasteryFold`, `MasteryDecos`, `ProgressBucket`.
 
-Tests split: `tests/{core,build-quiz,anchors}.test.ts` (vitest, no jsdom) +
-`tests/component.test.tsx` (vitest + jsdom + `@testing-library/react`).
+Tests split: `tests/{core,mastery,build-quiz,anchors,decorations}.test.ts`
+(vitest, no jsdom) + `tests/component.test.tsx` (vitest + jsdom +
+`@testing-library/react`).
 
 ## Dependencies (no install needed)
 
@@ -340,9 +348,6 @@ Tests split: `tests/{core,build-quiz,anchors}.test.ts` (vitest, no jsdom) +
 
 ## Future direction
 
-- **Mastery fold + two-channel decorations** (inc 5) — implement `MasteryFold`;
-  paint per-`groupKey` progress + wrongness on the editor via CodeMirror
-  decorations on the two color-free channels.
 - **Code-as-answer modes** (inc 6) — capture `click-token` / `click-line` clicks
   and `select-in-code` multi-select-and-confirm; grade via the existing `grade`
   range-set-equality arms.
