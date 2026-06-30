@@ -149,8 +149,12 @@ type ProgressBucket = 1 | 2 | 3 | 4;
  *   flagged `wrong` (an independent non-hue mark, e.g. an overline).
  *
  * Both lists carry one entry **per token** (not per group), so mastery earned on
- * one element paints every element sharing its `groupKey`. The wrapper hands this
- * to a CodeMirror `StateField` via a `StateEffect`; `./index.tsx` owns that glue.
+ * one element paints every element sharing its `groupKey`. Since inc 6 several
+ * forms co-anchor a token, `masteryDecorations` dedupes to that one-per-token
+ * invariant: same-group co-anchored items collapse identically, and a token
+ * mastered in **several** groups keeps the **highest** progress bucket (its densest
+ * underline). The wrapper hands this to a CodeMirror `StateField` via a
+ * `StateEffect`; `./index.tsx` owns that glue.
  */
 type MasteryDecos = Readonly<{
 	progress: ReadonlyArray<

@@ -1,8 +1,8 @@
 /**
  * Pure tests for the quiz lens's model builder (`buildQuiz`). No jsdom — it
- * parses with Acorn and delegates to `classifyTokens`. Inc 2 locks the
- * `classified` production (the click → anchor stream); the V1 `items` field is
- * added + tested in inc 3 (see `./README.md` § Form scoping).
+ * parses with Acorn and delegates to `classifyTokens`. Locks the `classified`
+ * production (the click → anchor stream) and the `item.mode` filter that scopes
+ * the panel's quiz items (`mcq` in inc 6a; see `./README.md` § Form scoping).
  */
 
 import { describe, expect, it } from 'vitest';
@@ -56,36 +56,40 @@ describe('buildQuiz — quiz model builder', () => {
 		expect(textMatches).toBe(true);
 	});
 
-	describe('items — the V1 quiz questions', () => {
+	describe('items — the admitted quiz questions (the mcq-mode filter)', () => {
 		// A real-composition snippet with `x` declared AND referenced, so the
-		// quizzing registry's V7 (usage-kind, per identifier occurrence) and V8
-		// (declaration-site, on references) BOTH fire — without the `form === 'V1'`
-		// filter, items would exceed classified.length. (embody('OK') has a STUB
-		// AST with body:[], so V7/V8 emit nothing and the filter is untestable —
-		// AR-3 inc-3 blocker.)
+		// quizzing registry emits V1 (every token) plus the node-anchored mcq forms
+		// V2/V6/V7 AND the code-answer forms V8 (click-token) / V10a-c
+		// (select-in-code). Inc 6a admits by MODE — `mcq` only — so V8/V10 are
+		// excluded while every mcq form (not just V1) reaches the panel, and the
+		// kept array stays the wide `QuizItem` union. (embody('OK') has a STUB AST
+		// with body:[], so only V1 fires and the widen is untestable — use this.)
 		const CODE = 'let x = 1; x;';
 
-		it('emits one V1 item per classified token (V1 filter removes V7/V8)', () => {
+		it('admits more than one item per token — the mcq forms co-anchor (the widen delta)', () => {
 			const model = buildQuiz(embody(CODE));
 			const classified = model?.classified ?? [];
 			const items = model?.items ?? [];
-			expect(items.length).toBe(classified.length);
+			expect(items.length).toBeGreaterThan(classified.length);
 		});
 
-		it('every item is the V1 category-ID form: mcq, 5 options, the V1 prompt', () => {
+		it('every admitted item is mcq mode — no code-answer mode leaks through', () => {
 			const items = buildQuiz(embody(CODE))?.items ?? [];
 			expect(items.length).toBeGreaterThan(0);
-			const allV1 = items.every(
-				(item) =>
-					item.form === 'V1' &&
-					item.mode === 'mcq' &&
-					item.options.length === 5 &&
-					item.prompt === 'What kind of syntax element is this?',
-			);
-			expect(allV1).toBe(true);
+			expect(items.every((item) => item.mode === 'mcq')).toBe(true);
 		});
 
-		it('each item anchors to a classified token range (V1 form-scope, no V7/V8)', () => {
+		it('admits structurally-distinct mcq forms beyond V1 — the filter is mode-based, not a V1/V7 allowlist', () => {
+			// V2 (token-anchored keyword form) AND V7 (node-anchored usage-kind)
+			// must BOTH reach the panel. A form allowlist that admitted only
+			// `V1 || V7` would pass a V7-only check while silently dropping V2/V6 —
+			// requiring both pins the predicate to `mode === 'mcq'`, not a form set.
+			const forms =
+				buildQuiz(embody(CODE))?.items.map((item) => item.form) ?? [];
+			expect(forms).toEqual(expect.arrayContaining(['V2', 'V7']));
+		});
+
+		it('each admitted item anchors to a classified token range', () => {
 			const model = buildQuiz(embody(CODE));
 			const classified = model?.classified ?? [];
 			const items = model?.items ?? [];

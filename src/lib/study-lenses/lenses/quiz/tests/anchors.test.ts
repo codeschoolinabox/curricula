@@ -89,33 +89,47 @@ describe('anchorAt — token resolution', () => {
 });
 
 describe('itemsAt — item resolution', () => {
-	// Real-composition snippet (7 classified tokens) → 7 V1 items, one per token.
+	// Real-composition snippet: `x` is declared AND referenced, so the registry
+	// co-anchors several mcq forms per identifier (V1 on every token; V6/V7 on the
+	// identifiers) — the bundle a clicked range resolves to. `itemsAt` is
+	// mode-agnostic (it matches on `anchorRange` only), so it returns the FULL
+	// co-anchored bundle build-quiz admits, not just the first item. Token map:
+	// `let`=[0,3) `x`=[4,5) `=`=[6,7) `1`=[8,9) `;`=[9,10) `x`=[11,12) `;`=[12,13).
+	// These counts also cross-check build-quiz's mode filter (a leaked V8/V10
+	// code-answer item at a shared range would inflate the count); build-quiz.test.ts
+	// locks that filter in isolation, so a count failure here points there.
 	const CODE = 'let x = 1; x;';
+	const model = buildQuiz(embody(CODE));
+	const items = model?.items ?? [];
+	const classified = model?.classified ?? [];
+	const tokensWith = (text: string) =>
+		classified.filter((token) => token.text === text);
+	const [operator] = tokensWith('='); // `=` at [6,7) — only V1 anchors here
+	const [declaration, reference] = tokensWith('x'); // decl [4,5); ref [11,12)
 
-	it('returns [] for a range with no item (Zero)', () => {
-		const items = buildQuiz(embody(CODE))?.items ?? [];
+	it('returns [] for a range no item anchors to (Zero)', () => {
 		expect(anchors.itemsAt(items, [9999, 10_000])).toEqual([]);
 	});
 
-	it('returns the item anchored exactly at the first token range (One)', () => {
-		const model = buildQuiz(embody(CODE));
-		const classified = model?.classified ?? [];
-		const items = model?.items ?? [];
-		const first = classified[0];
-		const found = anchors.itemsAt(items, [first.start, first.end]);
+	it('returns the single item at a lone-anchor token (One)', () => {
+		const found = anchors.itemsAt(items, [operator.start, operator.end]);
 		expect(found.length).toBe(1);
-		expect(found[0].anchorRange[0]).toBe(first.start);
-		expect(found[0].anchorRange[1]).toBe(first.end);
+		expect(found[0].anchorRange).toEqual([operator.start, operator.end]);
 	});
 
-	it('resolves a MIDDLE token (not index 0) — forces exact end-range matching (Many)', () => {
-		const model = buildQuiz(embody(CODE));
-		const classified = model?.classified ?? [];
-		const items = model?.items ?? [];
-		const middle = classified[Math.floor(classified.length / 2)];
-		const found = anchors.itemsAt(items, [middle.start, middle.end]);
-		expect(found.length).toBe(1);
-		expect(found[0].anchorRange[0]).toBe(middle.start);
-		expect(found[0].anchorRange[1]).toBe(middle.end);
+	it('returns EVERY co-anchored item at a shared range, not just the first (Many)', () => {
+		const found = anchors.itemsAt(items, [reference.start, reference.end]);
+		expect(found.length).toBe(2); // V1 + V7 both anchor the reference `x`
+	});
+
+	it('the co-anchored bundle is heterogeneous by form (V1 + V7), not one repeated form (Many)', () => {
+		const found = anchors.itemsAt(items, [reference.start, reference.end]);
+		const forms = new Set(found.map((item) => item.form));
+		expect(forms).toEqual(new Set(['V1', 'V7']));
+	});
+
+	it('resolves a deeper bundle at the declaration — the count is range-driven, not constant (Boundary)', () => {
+		const found = anchors.itemsAt(items, [declaration.start, declaration.end]);
+		expect(found.length).toBe(3); // V1 + V6 + V7
 	});
 });

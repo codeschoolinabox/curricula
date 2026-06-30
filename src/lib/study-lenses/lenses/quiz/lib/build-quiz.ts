@@ -1,14 +1,15 @@
 /**
  * @file The quiz lens's model builder — the single Acorn re-parse site. Parses
- * the snippet, delegates token classification to `lib/classifying`, and (inc 3)
- * runs `generateQuiz` filtered to the V1 form. Returns the quiz model the
- * wrapper drives, or `null` on an internal parse failure (defense-in-depth —
- * the `status.parsed` gate should already have prevented the mount). Pure:
- * no React, no CodeMirror.
+ * the snippet, delegates token classification to `lib/classifying`, runs
+ * `generateQuiz`, and filters the mixed-mode stream by `item.mode` (the staged
+ * inc-6 filter — `mcq` today; see `./README.md` § Form scoping). Returns the
+ * quiz model the wrapper drives, or `null` on an internal parse failure
+ * (defense-in-depth — the `status.parsed` gate should already have prevented
+ * the mount). Pure: no React, no CodeMirror.
  *
- * Inc 2 builds only the `classified` anchor stream (the click → highlight needs
- * it); inc 3 widens the model with the V1 `items` (see `./README.md` § Form
- * scoping) — an additive change, not a re-shape.
+ * The filter is a plain boolean predicate (not a type-predicate), so the kept
+ * `items` stay the wide `QuizItem` union — the panel discriminates on `mode`,
+ * not the filter.
  */
 
 import * as acorn from 'acorn';
@@ -18,26 +19,28 @@ import freezeInPlace from '@utils/freeze-in-place.js';
 import classifyTokens from '../../../lib/classifying/classify-tokens.js';
 import type { ClassifiedToken } from '../../../lib/classifying/types.js';
 import generateQuiz from '../../../lib/quizzing/generate-quiz.js';
-import type { McqQuizItem } from '../../../lib/quizzing/types.js';
+import type { QuizItem } from '../../../lib/quizzing/types.js';
 import type { Snippet } from '../../types.js';
 
 /**
  * The quiz model the wrapper consumes: the classified anchor stream (for click
- * resolution) and the V1 quiz items (one per token; for the panel).
+ * resolution) and the admitted quiz items — the mcq forms co-anchored across the
+ * snippet (the panel resolves a picked range to its bundle via `itemsAt`).
  */
 type QuizModel = Readonly<{
 	classified: readonly ClassifiedToken[];
-	items: readonly McqQuizItem[];
+	items: readonly QuizItem[];
 }>;
 
 /**
  * Builds the quiz model from a parseable snippet. Re-parses the source with
  * Acorn (collecting the token stream), hands `{ code, tokens, ast }` to
- * `classifyTokens`, and returns `{ classified }`. Returns `null` on a parse
- * failure (caught before classify — `classifyTokens` throws on null inputs).
+ * `classifyTokens`, calls `generateQuiz`, filters by `item.mode`, and returns
+ * `{ classified, items }`. Returns `null` on a parse failure (caught before
+ * classify — `classifyTokens` throws on null inputs).
  *
- * @param snippet - The frozen embodiment (read for `source.code`; inc 3 also
- *   passes the whole snippet to `generateQuiz`).
+ * @param snippet - The frozen embodiment (read for `source.code`; passed whole
+ *   to `generateQuiz`, which reads `raw.ast` behind its own seam).
  * @returns The quiz model, or `null` on internal parse failure.
  */
 function buildQuiz(snippet: Snippet): QuizModel | null {
@@ -69,13 +72,13 @@ function buildQuiz(snippet: Snippet): QuizModel | null {
 
 	const classified = classifyTokens({ code, tokens, ast });
 
-	// `generateQuiz` runs the full generator registry (V1 + V7 + V8 today), so
-	// its output is a mixed-form stream. Slice A scopes to the single V1
-	// category-ID form (see `./README.md` § Form scoping): `mode === 'mcq'`
-	// narrows the union to `McqQuizItem`, and `form === 'V1'` excludes V7 (also
-	// mcq) and V8 (click-token). The pair is the type-safe, V1-isolating filter.
+	// `generateQuiz` runs the full generator registry, so its output is a
+	// mixed-mode stream. Inc 6 admits by `item.mode` (see `./README.md` § Form
+	// scoping): `mcq` today (`+click-token` in 6b, `+select-in-code` in 6c). The
+	// predicate is a plain boolean, not a type-predicate, so the kept array stays
+	// the wide `QuizItem` union — the panel discriminates on `mode`, not the filter.
 	const items = generateQuiz(snippet, classified).filter(
-		(item): item is McqQuizItem => item.mode === 'mcq' && item.form === 'V1',
+		(item) => item.mode === 'mcq',
 	);
 
 	// `classified` + the V1 items are already deep-frozen upstream; freeze the

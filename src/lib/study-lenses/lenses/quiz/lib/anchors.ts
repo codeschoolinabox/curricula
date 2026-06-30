@@ -7,7 +7,7 @@
  */
 
 import type { ClassifiedToken } from '../../../lib/classifying/types.js';
-import type { McqQuizItem } from '../../../lib/quizzing/types.js';
+import type { QuizItem } from '../../../lib/quizzing/types.js';
 
 /**
  * Resolves a document `offset` to the classified token whose half-open range
@@ -55,18 +55,21 @@ function searchByOffset(
 
 /**
  * Resolves a picked token `range` to the quiz item(s) anchored exactly there —
- * the panel's content. Matches on `anchorRange` equality (V1 anchors each item
- * to its token's `[start, end)`, so a clicked token maps 1:1 to its V1 item;
- * the array return admits later co-anchored forms → answer-neutral tabs).
+ * the panel's content. Matches on `anchorRange` equality. Co-anchoring is the
+ * norm: a clicked range can carry several forms (an identifier carries V1 + V7),
+ * so the array return is load-bearing — it is the bundle the panel renders as
+ * answer-neutral tabs. Pure and mode-agnostic (it filters on `anchorRange`
+ * only), so it serves the full `QuizItem` union — and the span-render fallback —
+ * unchanged.
  *
- * @param items - The generated (V1-filtered) quiz items.
+ * @param items - The admitted quiz items (mode-filtered upstream by build-quiz).
  * @param range - The picked token's half-open `[start, end)` range.
- * @returns The items whose `anchorRange` equals `range` (one in Slice A).
+ * @returns The items whose `anchorRange` equals `range` — the co-anchored bundle.
  */
 function itemsAt(
-	items: readonly McqQuizItem[],
+	items: readonly QuizItem[],
 	range: readonly [number, number],
-): readonly McqQuizItem[] {
+): readonly QuizItem[] {
 	return items.filter(
 		(item) =>
 			item.anchorRange[0] === range[0] && item.anchorRange[1] === range[1],

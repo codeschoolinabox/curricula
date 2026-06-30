@@ -240,12 +240,19 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		[masteryDecos],
 	);
 
-	// The question for the picked anchor (one V1 item in Slice A; itemsAt returns
-	// an array for later co-anchored forms → answer-neutral tabs).
-	const question =
+	// The question for the picked anchor. `itemsAt` now returns the full
+	// co-anchored `QuizItem` bundle (the widen); until the tab framework lands
+	// (6a-i sub-increment 3) the panel still renders the first item, narrowed to
+	// `mcq` — the `mode === 'mcq'` guard keeps this type-safe and gracefully renders
+	// no panel for a non-mcq first item. In practice V1 (token-anchored, first in
+	// registry order) co-anchors every token, so the first item is always its mcq
+	// category-ID question — identical behavior to the pre-widen single-item render.
+	const firstItem =
 		pickedRange === null
 			? null
 			: (anchors.itemsAt(items, pickedRange)[0] ?? null);
+	const question =
+		firstItem !== null && firstItem.mode === 'mcq' ? firstItem : null;
 
 	// Grade the picked answer, then fold the verdict into mastery. A function
 	// declaration (a block-bodied arrow trips `arrow-body-style`); the functional

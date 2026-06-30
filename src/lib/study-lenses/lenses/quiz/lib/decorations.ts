@@ -9,12 +9,15 @@
  * (the painted result is verified at the 🔍 sandbox checkpoint).
  *
  * @remarks Two channels, both keyed off `item.groupKey`: a same-group token earns
- * the decoration its group has earned. Because the lens holds one item per token,
- * mastery shown on one element spreads to every element sharing its `groupKey` —
- * the propagation the `groupKey` axis exists for. Channels are independent:
- * channel 1 (progress) renders only where `progress > 0`; channel 2 (wrong)
- * renders wherever the group is flagged `wrong`; a group can be in either, both,
- * or neither.
+ * the decoration its group has earned, so mastery shown on one element spreads to
+ * every element sharing its `groupKey` — the propagation the `groupKey` axis exists
+ * for. Since inc 6 several forms co-anchor each token, the projector dedupes its
+ * output to one entry per token per channel and keeps the lists source-ordered — a
+ * token surfaced by several items (co-anchored same-group forms, or several groups
+ * mastered at once) is decorated once, not once per item (progress keeps the densest
+ * bucket). Channels are independent: channel 1 (progress)
+ * renders only where `progress > 0`; channel 2 (wrong) renders wherever the group is
+ * flagged `wrong`; a group can be in either, both, or neither.
  */
 
 import freezeInPlace from '@utils/freeze-in-place.js';
@@ -24,25 +27,33 @@ import type { MasteryDecos, MasteryState, ProgressBucket } from '../types.js';
 
 /**
  * Project the quiz items and the current mastery state onto the two color-free
- * decoration channels. Iterates the items in source order, looking each item's
- * group up in `mastery`: an item whose group has `progress > 0` contributes a
- * channel-1 entry (its `anchorRange` + density `bucket`); an item whose group is
- * `wrong` contributes a channel-2 entry (its `anchorRange`). An item whose group
- * is absent from `mastery` contributes nothing. One entry per token, so every
- * same-group token is decorated.
+ * decoration channels. Each item whose group has `progress > 0` contributes a
+ * channel-1 entry (its `anchorRange` + density `bucket`); each item whose group is
+ * `wrong` contributes a channel-2 entry (its `anchorRange`); an item whose group is
+ * absent from `mastery` contributes nothing. The per-item contributions are then
+ * **deduped to one entry per token, sorted by source position** (the `MasteryDecos`
+ * contract): since inc 6 several forms co-anchor each token, a token surfaced by
+ * multiple items would otherwise be decorated once per item. A token co-anchored
+ * by same-group items collapses trivially (identical entries); a token mastered in
+ * **several different groups** keeps the **highest** progress bucket (the densest
+ * underline — its most-earned mastery), so it still reads as one underline.
  *
- * @param items - The lens's quiz items (one per token); only `groupKey` and
- *   `anchorRange` are read, so the projection is form-agnostic.
+ * @param items - The lens's quiz items (co-anchored: several per token); only
+ *   `groupKey` and `anchorRange` are read, so the projection is form-agnostic.
  * @param mastery - The current per-`groupKey` mastery state.
- * @returns The render-ready, frozen `MasteryDecos` (source-ordered range lists).
+ * @returns The render-ready, frozen `MasteryDecos` (deduped, source-ordered).
  */
 function masteryDecorations(
 	items: readonly QuizItem[],
 	mastery: MasteryState,
 ): MasteryDecos {
-	const progress = items.flatMap((item) => progressEntry(item, mastery));
-	const wrong = items.flatMap((item) =>
-		mastery[item.groupKey]?.wrong ? [item.anchorRange] : [],
+	const progress = dedupeProgress(
+		items.flatMap((item) => progressEntry(item, mastery)),
+	);
+	const wrong = dedupeRanges(
+		items.flatMap((item) =>
+			mastery[item.groupKey]?.wrong ? [item.anchorRange] : [],
+		),
 	);
 	return freezeInPlace({ progress, wrong });
 }
@@ -78,4 +89,46 @@ function progressBucket(progress: number): ProgressBucket {
 	if (progress >= 0.75) return 3;
 	if (progress >= 0.5) return 2;
 	return 1;
+}
+
+/**
+ * Dedupe the channel-1 entries to **one per token** and sort by source position.
+ * Sorts by range ascending then bucket **descending**, so the first entry at each
+ * range is its highest bucket; the filter then keeps that first entry per range.
+ * So co-anchored same-group items (identical entries) collapse, and a token in
+ * several mastered groups keeps its densest underline. (`toSorted` + `filter`, not
+ * in-place mutation.)
+ */
+function dedupeProgress(
+	entries: MasteryDecos['progress'],
+): MasteryDecos['progress'] {
+	const sorted = entries.toSorted(
+		(a, b) =>
+			a.range[0] - b.range[0] || a.range[1] - b.range[1] || b.bucket - a.bucket,
+	);
+	return sorted.filter(
+		(entry, index) =>
+			index === 0 || !sameRange(entry.range, sorted[index - 1].range),
+	);
+}
+
+/**
+ * Dedupe the channel-2 ranges to **one per token** and sort by source position —
+ * the channel-2 analogue of `dedupeProgress`. No bucket: a token is wrong or not,
+ * so range equality alone collapses both co-anchored same-group items and a token
+ * flagged `wrong` by several groups.
+ */
+function dedupeRanges(ranges: MasteryDecos['wrong']): MasteryDecos['wrong'] {
+	const sorted = ranges.toSorted((a, b) => a[0] - b[0] || a[1] - b[1]);
+	return sorted.filter(
+		(range, index) => index === 0 || !sameRange(range, sorted[index - 1]),
+	);
+}
+
+/** Two half-open ranges are the same token: equal `start` AND equal `end`. */
+function sameRange(
+	a: readonly [number, number],
+	b: readonly [number, number],
+): boolean {
+	return a[0] === b[0] && a[1] === b[1];
 }

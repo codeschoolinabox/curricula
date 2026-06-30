@@ -129,6 +129,41 @@ describe('masteryDecorations — project mastery onto the two channels', () => {
 		]);
 	});
 
+	// ── dedup — co-anchored same-group items decorate a token once ──
+
+	it('co-anchored items sharing a token AND group decorate it once, not per item', () => {
+		// `let`[0,3) carries V1 AND V2, both groupKey category:keyword (inc 6
+		// co-anchoring). Without dedup the projector would emit two identical
+		// [0,3] entries; the contract is one entry per token.
+		const decos = masteryDecorations(items, {
+			'category:keyword': { progress: 0.25, wrong: false },
+		});
+		expect(decos.progress).toEqual([{ range: [0, 3], bucket: 1 }]);
+	});
+
+	it('a token mastered in two groups at different buckets gets ONE entry at the higher bucket', () => {
+		// decl `x`[4,5) is in category:identifier (V1) AND binding:4-5 (V6). With
+		// the two groups progressed to different levels, the token reads as ONE
+		// underline at the densest (highest) bucket — one entry per token.
+		const decos = masteryDecorations(items, {
+			'category:identifier': { progress: 0.25, wrong: false }, // bucket 1
+			'binding:4-5': { progress: 0.5, wrong: false }, // bucket 2
+		});
+		const atDeclaration = decos.progress.filter(
+			(entry) => entry.range[0] === 4 && entry.range[1] === 5,
+		);
+		expect(atDeclaration).toEqual([{ range: [4, 5], bucket: 2 }]);
+	});
+
+	it('the wrong channel also dedupes co-anchored same-group items to one per token', () => {
+		// `let`[0,3) carries V1 AND V2, both category:keyword; a wrong flag on that
+		// group marks the token once, not once per co-anchored item.
+		const decos = masteryDecorations(items, {
+			'category:keyword': { progress: 0, wrong: true },
+		});
+		expect(decos.wrong).toEqual([[0, 3]]);
+	});
+
 	// ── S — strings / exact-key matching ────────────────────────
 
 	it('keys on exact groupKey — a role-refined key matches no role-less item', () => {
