@@ -6,17 +6,20 @@
  * verdict). It re-implements neither; this file declares only the lens's
  * own types — the config surface, the two-channel mastery contract
  * (the per-group state, the fold that accrues it, and the color-free
- * decoration channels that render it).
+ * decoration channels that render it), and the panel / answer-phase state
+ * inc 6 adds (the active tab, the per-item verdicts, and the staged
+ * code-answer selection).
  *
  * Two layers (per the lenses peer's two-layer module convention):
  * - The pure-TS core (`./core.ts` + `./lib/build-quiz.ts` +
- *   `./lib/anchors.ts`) produces the `LensModule` defaults, the
- *   `{ classified, items }` quiz model (parse → classify → generate →
- *   V1-scope filter), and the pure anchor / item resolution
+ *   `./lib/anchors.ts` + `./lib/grade-ranges.ts`) produces the `LensModule`
+ *   defaults, the `{ classified, items }` quiz model (parse → classify →
+ *   generate → `item.mode` filter), and the pure anchor / item resolution
  *   (`anchorAt` / `itemsAt`).
  * - The React wrapper (`./index.tsx`) mounts the read-only, un-colorized
- *   CodeMirror editor, captures clicks, owns the per-mount UI state
- *   (picked anchor, selected option, verdict), and renders the panel.
+ *   CodeMirror editor, captures clicks, owns the per-mount UI state (picked
+ *   anchor, active tab, per-item verdicts, pending selection, mastery), and
+ *   renders the answer-neutral tabs + panel.
  *
  * @remarks The lens does NOT mutate `embodiment` (deep-frozen per the
  * `embody/` contract) or `config`. The picked anchor, the learner's
@@ -156,6 +159,51 @@ type MasteryDecos = Readonly<{
 	wrong: ReadonlyArray<readonly [number, number]>;
 }>;
 
+// ─── Panel / answer-phase state (inc 6) ─────────────────────
+
+/**
+ * Which co-anchored tab is active in the panel — an index into the array
+ * `itemsAt` returns for the picked range, or `null` when no tab is armed.
+ *
+ * @remarks The default is the **first `mcq` item** in the bundle (V1 co-anchors
+ * every token, so one always exists — see `./README.md` § Form scoping); a
+ * bundle with no `mcq` item resolves to `null` (anchor phase). This mode-aware
+ * default is what keeps the editor from ever **auto-arming**: entering the answer
+ * phase is always an explicit tab selection, never a side effect of
+ * `generateQuiz`'s emission order. Per-mount React state; resets to its default
+ * on re-pick / source change.
+ */
+type ActiveTab = number | null;
+
+/**
+ * The per-item verdict map — one `Verdict` per answered `QuizItem.id`, for the
+ * **current pick**. Replaces Slice A's single `verdict`: with co-anchored tabs a
+ * lone verdict would render under the wrong tab when the learner switches tabs,
+ * so the verdict is keyed by item id and the active tab reads its own
+ * (`verdictsByItemId[activeItem.id]`).
+ *
+ * @remarks Scoped to the pick: cleared on re-pick (a fresh attempt) and on source
+ * change; **preserved across a tab switch** (the within-pick isolation that is the
+ * sole reason this type exists). The durable cross-pick record is `MasteryState`
+ * (per `groupKey`), not this — see `./README.md` § Interaction contract (reset
+ * matrix). Per-mount React state.
+ */
+type VerdictsByItemId = Readonly<Record<string, Verdict>>;
+
+/**
+ * The answer-phase staged selection — the source ranges the learner has clicked
+ * for the active code-surface tab, before confirming. The two code-surface modes
+ * share this one substrate, differing only in how a click stages: `click-token`
+ * keeps it **single-slot** (a click replaces it with `[range]`), `select-in-code`
+ * keeps it a **toggle-set** (a click toggles membership on exact `[start, end]`
+ * equality). A **Confirm** control grades the staged ranges via `grade`.
+ *
+ * @remarks Empty in anchor phase; cleared on re-pick / tab switch / source change.
+ * Per-mount React state; updated through a **functional** setter (never closing
+ * over the current value), mirroring the inc-5 `setMastery` reducer pattern.
+ */
+type PendingSelection = ReadonlyArray<readonly [number, number]>;
+
 export type {
 	QuizLensConfig,
 	GroupMastery,
@@ -163,4 +211,7 @@ export type {
 	MasteryFold,
 	ProgressBucket,
 	MasteryDecos,
+	ActiveTab,
+	VerdictsByItemId,
+	PendingSelection,
 };

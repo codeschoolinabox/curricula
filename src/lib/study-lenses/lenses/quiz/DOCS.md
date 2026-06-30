@@ -26,20 +26,24 @@ re-shaping this contract. What Slice A defers is marked throughout.
 
 ## Modules
 
-| File                  | Layer   | Purpose                                                                                                                                                                                                                                                |
-| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `index.tsx`           | wrapper | React `Component`; mounts the read-only un-colorized editor, captures clicks, owns per-mount UI state (picked anchor / selection / verdict); freezes + default-exports the `LensModule`                                                                |
-| `core.ts`             | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend`, and the pure mastery fold `masteryFold` (inc 5)                                                                                                                                         |
-| `lib/build-quiz.ts`   | core    | Parses the snippet (Acorn), delegates classification to `lib/classifying`, calls `generateQuiz`, **filters the mixed-form output to `form === 'V1'`**, returns `{ classified, items }` (or `null` on internal parse failure). The single re-parse site |
-| `lib/anchors.ts`      | core    | The pure resolution layer: `anchorAt(offset, classified)` (token resolution → highlight) and `itemsAt(items, range)` (item resolution → panel). CM-independent                                                                                         |
-| `lib/grade-option.ts` | core    | `gradeOption(item, optionId)` — builds the `mcq` `LearnerResponse` from the clicked option id (verbatim) and delegates to `lib/quizzing`'s total `grade`. Pure: no React, no CodeMirror                                                                |
-| `lib/decorations.ts`  | core    | The pure mastery-decoration projector `masteryDecorations(items, mastery)` → the two color-free render channels (`MasteryDecos`); emits plain ranges (the wrapper owns the `Decoration` / `StateField` glue). Pure, no React (inc 5)                   |
-| `types.ts`            | shared  | `QuizLensConfig`, `GroupMastery`, `MasteryState`, `MasteryFold`, `MasteryDecos`, `ProgressBucket`                                                                                                                                                      |
+| File                  | Layer   | Purpose                                                                                                                                                                                                                                                                                           |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`           | wrapper | React `Component`; mounts the read-only un-colorized editor, captures clicks, owns per-mount UI state (picked anchor / active tab / per-item verdicts / pending selection / mastery); freezes + default-exports the `LensModule`                                                                  |
+| `core.ts`             | core    | `LensModule` defaults — `config`, `applicableTo`, `recommend`, and the pure mastery fold `masteryFold` (inc 5)                                                                                                                                                                                    |
+| `lib/build-quiz.ts`   | core    | Parses the snippet (Acorn), delegates classification to `lib/classifying`, calls `generateQuiz`, **filters the mixed-mode output by `item.mode`** (staged: mcq → +click-token → +select-in-code), returns `{ classified, items }` (or `null` on internal parse failure). The single re-parse site |
+| `lib/anchors.ts`      | core    | The pure resolution layer: `anchorAt(offset, classified)` (token resolution → highlight) and `itemsAt(items, range)` (item resolution → panel). CM-independent                                                                                                                                    |
+| `lib/grade-option.ts` | core    | `gradeOption(item, optionId)` — builds the `mcq` `LearnerResponse` from the clicked option id (verbatim) and delegates to `lib/quizzing`'s total `grade`. Pure: no React, no CodeMirror                                                                                                           |
+| `lib/decorations.ts`  | core    | The pure mastery-decoration projector `masteryDecorations(items, mastery)` → the two color-free render channels (`MasteryDecos`); emits plain ranges (the wrapper owns the `Decoration` / `StateField` glue). Pure, no React (inc 5)                                                              |
+| `lib/grade-ranges.ts` | core    | (inc 6) `gradeRanges(item, ranges)` — the unified code-surface grade boundary; builds the `click-token` / `select-in-code` `LearnerResponse` inside an `item.mode` if-chain and delegates to `grade`. Pure: no React, no CodeMirror                                                               |
+| `lib/pending.ts`      | core    | (inc 6) `toggleRange(pending, range)` — the pure select-in-code toggle (exact `[start,end]` membership). `click-token`'s single-slot path needs no helper. Pure range math                                                                                                                        |
+| `types.ts`            | shared  | `QuizLensConfig`, `GroupMastery`, `MasteryState`, `MasteryFold`, `MasteryDecos`, `ProgressBucket`, and (inc 6) `ActiveTab`, `VerdictsByItemId`, `PendingSelection`                                                                                                                                |
 
 Default export of `index.tsx` is the frozen `LensModule` record. The core
 subsystems under `lib/` are internal; only `index.tsx` (and, for the fold,
-`core.ts`) import them. No `lib/` file imports React. Tests target each
-subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
+`core.ts`) import them. No `lib/` file imports React. Inc 6 widens `anchors.ts`
+and `build-quiz.ts` from `McqQuizItem` to the `QuizItem` union (a re-type, not a
+re-shape — `itemsAt` filters only on `anchorRange`). Tests target each subsystem
+in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
 `@testing-library/react`); tests live under `tests/` (NOT `lib/tests/`).
 
 ## Architectural sketch
@@ -68,8 +72,11 @@ subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
    `embodiment.source.code` runs the build pipeline: re-parse the source with
    Acorn (collecting the token stream), hand `{ code, tokens, ast }` to
    `classifyTokens`, call `generateQuiz(embodiment, classified)`, then **filter
-   the returned array to `form === 'V1'`** (see § Why filter to form V1).
-   Result: `{ classified, items }` on success, `null` on internal parse failure
+   by `item.mode`** — the staged inc-6 filter (`mcq` → `+click-token` →
+   `+select-in-code`; see § Why the staged item.mode filter). The predicate is a
+   plain boolean, not a type-predicate, so the kept `items` stays the wide
+   `QuizItem` union (the panel discriminates on `mode`, not the filter). Result:
+   `{ classified, items }` on success, `null` on internal parse failure
    (defense-in-depth — the `status.parsed` gate should already have prevented
    the mount). `generateQuiz` reads `embodiment.raw.ast` behind its own
    accessor, so the lens passes the whole embodiment to it but derives
@@ -92,22 +99,45 @@ subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
    anchor. Cleanup destroys the view.
 
 4. **Resolve the panel** (sync, pure) — when the picked range is non-null,
-   `itemsAt(items, range)` resolves the quiz item(s) at that range. In Slice A
-   the V1 filter leaves exactly one `McqQuizItem` per range, so the panel
-   renders the single item's `prompt` + five options; the answer-neutral-tab
-   path is wired but unexercised until later slices add co-anchored forms.
+   `itemsAt(items, range)` resolves **all** co-anchored quiz items at that range
+   (the array return is now load-bearing: a reference identifier co-anchors V1 +
+   V7 `mcq` + V8 `click-token` + V10b/c — § Why dispatch on active-tab mode).
+   The panel renders one **answer-neutral tab** per item (neutral bare-index
+   labels; only the active tab's body renders) and selects a default active tab
+   — the **first `mcq`** item (V1 co-anchors every token, so one exists; a
+   no-`mcq` bundle stays unarmed). The active tab renders **by its own
+   `item.mode`** through a total if-chain (`mcq` → option buttons; `click-token`
+   / `select-in-code` → a code-answer surface), mirroring `grade`'s mode
+   dispatch. The verdict is held **per item id** for the current pick
+   (`VerdictsByItemId`), so switching tabs never shows one item's verdict under
+   another's prompt.
 
-5. **Grade** (per learner answer, sync) — selecting an option builds a
-   `LearnerResponse` (`{ mode: 'mcq', selectedOptionIds: [option.id] }`, built
-   from `option.id` verbatim) and calls `grade(item, response)`. The `Verdict`'s
-   `feedback` is surfaced; the answer key is never echoed (the lens reveals it
-   from the item it holds, not from the `Verdict`). Picking a different anchor
-   resets the verdict. The graded `Verdict` also folds into per-`groupKey`
-   `MasteryState` (`core.ts` `masteryFold`, inc 5); the pure
-   `masteryDecorations` (`lib/decorations.ts`) projects that state onto the two
-   color-free channels, which a `StateEffect` dispatches into the editor's
-   `masteryField` — no remount, exactly like the picked-anchor highlight in
-   step 3.
+5. **Answer & grade** (per learner answer, sync) — two phases, derived from the
+   active tab's `mode` (held in a ref so the mount-time `mousedown` handler
+   reads the latest without remounting — § Structural constraints / refs):
+   - **Anchor phase** (active tab `mcq`, none armed, **or a code-surface tab
+     already graded this pick**) — an editor click re-picks; an `mcq` answer
+     comes from the panel: an option click builds
+     `{ mode: 'mcq', selectedOptionIds: [id] }` and grades. The `!activeVerdict`
+     term in `armed` is the disarm: a graded code-surface tab is back in anchor
+     phase (re-pick to retry — README § Interaction contract step 6).
+   - **Answer phase** (active tab code-surface, unanswered) — the editor is
+     **armed**; an in-token click **stages** a range into a pending selection
+     (`anchorAt` resolves it), and a **Confirm** grades the staged ranges. The
+     two code-surface modes share one substrate: `click-token` keeps pending
+     single-slot (replace), `select-in-code` a toggle-set (§ Why unify the
+     code-surface substrate).
+
+   Every arm builds the `LearnerResponse` **inside its own narrowed branch**,
+   with that item's own `mode` + the learner's verbatim input — so the response
+   mode always equals the item mode and `grade`'s mode-mismatch arm is
+   unreachable (§ the per-arm construction note). The `feedback` is surfaced;
+   the answer key is never echoed. A graded `Verdict` folds into per-`groupKey`
+   `MasteryState` regardless of mode (`masteryFold`, inc 5);
+   `masteryDecorations` projects it onto the two color-free channels via a
+   `StateEffect` into `masteryField` — no remount, like the picked-anchor
+   highlight in step 3. A verdict is **per-pick** (cleared on re-pick); mastery
+   is the durable per-`groupKey` record.
 
 6. **Render** (sync) — the wrapper emits the root `<div data-lens="quiz">` with
    either the read-only editor host + the picked-anchor panel + the verdict
@@ -118,34 +148,64 @@ subsystem in isolation (vitest, no jsdom) plus the wrapper end-to-end (jsdom +
    CodeMirror view destroys via its effect cleanup. The lens MUST NOT leak past
    unmount.
 
+### Phase state machine
+
+The two interaction phases and **every** transition between them (the authority;
+the data-flow diagram below shows data shapes, not the full phase machine).
+Arming is reached by an **explicit tab selection**, not by an editor click;
+every armed state has a visible exit (Confirm, cancel) — the no-stuck-armed
+invariant.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Anchor
+    Anchor: ANCHOR PHASE — active tab mcq, none armed, or a code-surface tab already graded
+    Answer: ANSWER PHASE — active tab code-surface + unanswered (editor armed)
+    Anchor --> Anchor: editor click → re-pick (itemsAt → tabs)
+    Anchor --> Answer: select a code-surface tab (explicit · no editor click)
+    Answer --> Answer: editor click → stage into pending (click-token replace · select-in-code toggle)
+    Answer --> Answer: whitespace / null-anchor click → no-op
+    Answer --> Anchor: Confirm → grade → verdict + masteryFold
+    Answer --> Anchor: data-quiz-cancel (always visible while armed)
+```
+
 ### Data flow
 
 Nodes are **data states** (the shape the lens holds at each step); edges are the
 **operations** that transform one shape into the next (with their
-sync/pure/effect character). Dotted edges are deferred work or lifecycle.
+sync/pure/effect character). Dotted edges are deferred work or lifecycle. This
+diagram shows the data path; the **phase transitions** (tab-switch arming,
+cancel, auto-return after a verdict) are the state machine above, not repeated
+here — the one phase fork drawn below (`Phase{armed?}`) is the data branch, not
+the whole transition set.
 
 ```mermaid
 flowchart TD
     Props["lens props<br/>frozen embodiment + (optional) frozen config"]
-
-    Props -->|"resolve config (default absent prop); gate on status.parsed — sync, pure"| Gate{"parsed?"}
+    Props -->|"gate on status.parsed — sync, pure"| Gate{"parsed?"}
     Gate -->|"no"| Fallback["fallback notice<br/>(needs parseable code)"]
-    Gate -->|"yes"| Parsed["parseable embodiment + resolved config"]
+    Gate -->|"yes · re-parse → classify → generate → filter by item.mode (staged) — pure, memoized"| Model["quiz model<br/>classified ranges + QuizItem[] (admitted modes)"]
 
-    Parsed -->|"re-parse → classify → generate → filter to V1 — sync, pure (memoized)"| Model["quiz model<br/>classified ranges + V1 mcq items (or null)"]
+    Model -->|"render read-only, un-colorized — effect"| Editor["editor host<br/>mousedown → click offset"]
+    Editor -->|"phase = active tab's mode (read via ref)"| Phase{"armed?<br/>active tab code-surface + unanswered"}
 
-    Model -->|"render read-only, un-colorized — effect"| Display["displayed source<br/>+ click offset (from pointer coords)"]
-    Display -->|"resolve token: binary search over classified — pure"| Picked["picked range (or none)"]
-    Picked -->|"dispatch decoration effect → single mark — view update"| Highlight["highlighted anchor (rendered)"]
+    Phase -->|"no · ANCHOR phase"| Pick["anchorAt → picked range"]
+    Pick -->|"itemsAt(range) — pure"| Tabs["co-anchored items → answer-neutral tabs<br/>active = first mcq (else unarmed)"]
+    Pick -->|"effect → mark (suppressed in answer phase)"| Highlight["picked-anchor highlight (rendered)"]
+    Tabs -->|"render active tab by item.mode — if-chain"| Body{"active mode"}
+    Body -->|"mcq"| Mcq["option buttons (panel)"]
+    Body -->|"code-surface"| Code["instruction + Confirm + cancel<br/>(arms the editor)"]
 
-    Picked -->|"resolve item(s) for range — pure"| PanelItems["panel item(s)<br/>(one V1 item in Slice A)"]
-    PanelItems --> Panel["question panel<br/>prompt + 5 options (tabs if >1)"]
+    Phase -->|"yes · ANSWER phase"| Stage["anchorAt → stage into pending<br/>click-token: replace · select-in-code: toggle"]
+    Stage -.->|".cm-quiz-pending box outline — view update"| PendingDOM["staged ranges (rendered)"]
 
-    Panel -->|"build mcq response from option id + grade — sync, total"| Verdict["verdict<br/>(feedback; answer key never echoed)"]
+    Mcq -->|"option id → response (mode 'mcq')"| Grade["grade(item, response)<br/>response mode = item mode (built per-arm)"]
+    Stage -->|"Confirm → staged ranges → response (item's mode)"| Grade
+    Grade --> Verdict["verdict<br/>(per item id · this pick)"]
     Verdict --> VerdictDOM["verdict region (rendered)"]
 
-    Verdict -->|"fold per groupKey — masteryFold (inc 5)"| Mastery["mastery state<br/>(per-mount MasteryState)"]
-    Mastery -->|"project items × mastery → channels — masteryDecorations, pure"| Decos["MasteryDecos<br/>(progress + wrong ranges)"]
+    Verdict -->|"fold per groupKey — masteryFold (inc 5)"| Mastery["mastery state<br/>(per groupKey · durable across picks)"]
+    Mastery -->|"project items × mastery — masteryDecorations, pure"| Decos["MasteryDecos<br/>(progress + wrong ranges)"]
     Decos -->|"dispatch StateEffect → masteryField — view update"| MasteryDOM["two color-free channels (rendered)"]
 
     Props -.->|"snippet change → unmount"| Unmount[/"React unmount:<br/>view destroyed + state GC"/]
@@ -158,22 +218,30 @@ is a view-state of the picked range alone (a single mark), not a feedback input
 to the editor. The only dotted edge is lifecycle (unmount); the mastery flow
 (fold → project → dispatch) is solid as of inc 5. **There is no cross-mount
 persistence** — config is read from the prop on mount; the picked anchor, the
-selection, the verdict, and the mastery state die with the component instance.
+active tab, the pending selection, the per-item verdicts, and the mastery state
+die with the component instance.
 
 ### Structural constraints
 
 - **Two-layer module shape** — `core.ts`, `lib/build-quiz.ts`, `lib/anchors.ts`,
-  and `lib/grade-option.ts` do NOT `import React`. `build-quiz.ts` imports
-  `acorn`, `classifyTokens`, and `generateQuiz`; `anchors.ts` is pure TS over
-  `ClassifiedToken[]` and `McqQuizItem[]`; `grade-option.ts` imports `grade`.
+  `lib/grade-option.ts`, and (inc 6) `lib/grade-ranges.ts` + `lib/pending.ts` do
+  NOT `import React`. `build-quiz.ts` imports `acorn`, `classifyTokens`, and
+  `generateQuiz`; `anchors.ts` is pure TS over `ClassifiedToken[]` and
+  `QuizItem[]` (widened from `McqQuizItem[]` — `itemsAt` filters only on
+  `anchorRange`, so the change is a re-type, not a re-shape); `grade-option.ts`
+  and `grade-ranges.ts` import `grade`; `pending.ts` is pure range math.
   `index.tsx` is the only file with React imports (and the only one importing
   `@codemirror/*`). Per the lenses peer's
   [§ Structural constraints](../DOCS.md#structural-constraints).
 - **`embodiment` parameter name** in core signatures that take a `Snippet`.
 - **`data-lens="quiz"` on the wrapper's root element** — load-bearing for
   sandbox-harness selectors. The `data-quiz-*` attributes (`-editor`, `-panel`,
-  `-option`, `-verdict`, `-fallback`) are sandbox selectors + CSS hooks;
-  renaming any is a contract change.
+  `-option`, `-verdict`, `-fallback`, and inc 6's `-tablist`, `-tab`,
+  `-confirm`, `-cancel`, `-phase`) and the `.cm-quiz-*` decoration classes
+  (`-anchor-hit`, `-progress-N`, `-wrong`, and inc 6's `-pending`) are sandbox
+  selectors + CSS hooks; renaming any is a contract change. `data-quiz-tablist`
+  nests inside `data-quiz-panel`; `data-quiz-phase="anchor|answer"` is on
+  `data-quiz-editor`.
 - **Read-only, un-colorized editor.** The editor is non-editable
   (`editable.of(false)` + `readOnly.of(true)`) and carries no language /
   highlight extension. The lens never writes to the orchestrator's snippet
@@ -187,19 +255,49 @@ selection, the verdict, and the mastery state die with the component instance.
   and recreate the view, losing scroll + selection). The effect's dep array is
   keyed on the structural inputs only (the source). This mirrors the blanks /
   writeme remount-avoidance pattern; getting it wrong is the classic CM-lens
-  scar.
-- **Form scoping to V1.** `generateQuiz` runs the full generator registry; its
-  output is a mixed-form stream (V1 `mcq` + V7 `mcq` + V8 `click-token` today).
-  `build-quiz.ts` filters to `form === 'V1'` — the single Slice-A form. This is
-  the one place the lens narrows the moving `generateQuiz` contract; later
-  slices widen the filter rather than re-shaping the panel. It is also what
-  makes the never-`malformed`-in-normal-play guarantee hold (see § Why filter to
-  form V1).
+  scar. **Inc 6 extends this to three disciplines:** (1) the same read-only
+  mirror ref also carries the **active item**, so the mount-time `mousedown`
+  handler knows every render whether it is in anchor or answer phase (and which
+  code item to grade); (2) `pendingSelection` is updated through a
+  **functional** setter (`setPending(prev => toggleRange(prev, range))`) so the
+  handler never closes over a stale value; (3) the graded fold stays a
+  functional `setMastery`. The handler only reads refs + calls stable setters —
+  it is never re-bound.
+- **Form scoping by `item.mode` (staged).** `generateQuiz` runs the full
+  generator registry; its output is a mixed-mode stream. `build-quiz.ts` keeps a
+  single **boolean** predicate on `item.mode` (`mcq` in 6a, `+click-token` in
+  6b, `+select-in-code` in 6c), so the kept array stays the wide `QuizItem`
+  union — the panel discriminates on `mode`, not the filter. This one line
+  widens per increment; the panel is never re-shaped (see § Why the staged
+  item.mode filter).
+- **The never-`malformed` guarantee is a response-construction invariant.** Each
+  arm — the panel `mcq` path and the unified code-surface Confirm path — builds
+  the `LearnerResponse` **inside its own narrowed branch**, with that item's own
+  literal `mode` + the learner's verbatim input. So the response mode always
+  equals the item mode and `grade`'s mode-mismatch arm is unreachable in normal
+  play. A hoisted, mode-agnostic response would defeat it — the invariant lives
+  where responses are built, not in renderer dispatch (see § the per-arm
+  construction note).
+- **Per-mode dispatch is an if-chain, never an object map or `switch`.** Both
+  the per-tab renderer and the answer-phase editor-click handler dispatch on
+  `item.mode` via a chain of guard clauses, each narrowing the union before it
+  touches a mode-specific field — mirroring `grade.ts`'s dispatch. A
+  `Record<mode, fn>` cannot narrow (every handler would receive the wide union),
+  and `switch` is banned. **The two dispatch sites have different completeness
+  profiles:** the **per-tab renderer** covers every admitted panel-reachable
+  mode and reaches its `const _never: never` exhaustiveness assert only once all
+  arms exist (6c) — until then it ends in an unreachable runtime fallback (the
+  staged filter guarantees only admitted modes arrive). The **editor-staging
+  handler** dispatches only the two code-surface modes (`click-token` replace vs
+  `select-in-code` toggle) — `mcq` never reaches it (an `mcq` active tab is
+  anchor phase, so the click re-picks), and a whitespace / null-anchor click is
+  short-circuited to a no-op **before** the dispatch; its exhaustiveness lands
+  when both code-surface modes do (6c).
 - **Anchor vs. item resolution are distinct.** `anchorAt(offset, classified)`
-  resolves the **token** (for the highlight); `itemsAt(items, range)` resolves
-  the **panel item(s)**. Two functions because a range can carry several
-  co-anchored forms — even though the V1 filter leaves one in Slice A. Both
-  pure + CM-independent so they serve the span-render fallback unchanged.
+  resolves the **token** (for the highlight + for staging a code-answer click);
+  `itemsAt(items, range)` resolves the **panel item(s)** — now the load-bearing
+  tab bundle, since co-anchoring is the norm. Both pure + CM-independent so they
+  serve the span-render fallback unchanged.
 - **Position semantics.** All ranges are zero-indexed half-open `[start, end)`
   into `embodiment.source.code` — classifying's convention, carried by
   quizzing's `anchorRange`. `anchorAt` honors `start <= offset < end` (a click
@@ -224,6 +322,25 @@ selection, the verdict, and the mastery state die with the component instance.
   `StateEffect`, exactly like the picked-anchor highlight). Both channels paint
   with `currentColor` (no hue) so a color-vision-deficient learner reads them on
   independent axes.
+- **Pending selection is a fourth, orthogonal decoration axis.** The three inc-5
+  channels are taken: anchor-hit (`background`), progress (underline density),
+  wrong (overline) — all `currentColor`. The answer-phase staged selection
+  (`.cm-quiz-pending`) is a **box outline** (`outline`, never
+  `text-decoration`), so it never collides with the mastery channels on a token
+  that is both mastered and currently staged. The transient anchor-hit
+  `background` is **suppressed in answer phase**, so the picked token and the
+  staged tokens read distinctly. (A `select-in-code` representative token can be
+  anchor + target + mastered + staged at once — the four-axis separation is what
+  keeps that legible.)
+- **Verdict is per-item, per-pick; mastery is durable.** `VerdictsByItemId` keys
+  a `Verdict` by `QuizItem.id` so co-anchored tabs never show one item's verdict
+  under another's prompt; it is cleared on re-pick (a fresh attempt) and on
+  source change, preserved across a tab switch. `MasteryState` (per `groupKey`)
+  is the durable cross-pick record — it is what the decorations paint. The
+  single Slice-A `verdict` state + its `resetVerdictOnRepick` effect are
+  **replaced**: `activeVerdict` is derived (`verdictsByItemId[activeItem?.id]`),
+  so re-pick / tab-switch surface the right verdict without a dedicated reset
+  effect.
 - **LensModule defaults return deep-frozen values.** `config()` returns a
   `cloneAndFreeze`-frozen `LensConfig`; `recommend()` returns a module-level
   frozen-empty-array constant (no per-call allocation); `applicableTo()` returns
@@ -232,8 +349,8 @@ selection, the verdict, and the mastery state die with the component instance.
   `recommend()` are sync; build-quiz + grade are sync. Only the editor wiring is
   an effect.
 - **Disposable practice.** No `localStorage`, no module-level cache, no refs
-  across mounts for the picked anchor / selection / verdict. Config arrives via
-  the `config` prop each mount.
+  across mounts for the picked anchor, active tab, per-item verdicts, pending
+  selection, or mastery. Config arrives via the `config` prop each mount.
 - **No consumer-side branching on `embodiment.source.code`.** The lens _renders_
   `source.code` (legitimate) but discriminates only on
   `embodiment.status.parsed`.
@@ -242,12 +359,11 @@ selection, the verdict, and the mastery state die with the component instance.
   renders `prompt` / option `text` / `feedback` as plain text inside React
   elements (framework-escaped).
 
-### Out of scope (Slice A)
+### Out of scope (this lens)
 
-- **Code-as-answer modes** (inc 6). V8 `click-token` items are in the
-  `generateQuiz` stream but filtered out; `click-line` / `select-in-code` are
-  later-form work.
-- **`multi-mcq`** — not emitted upstream; Slice A is single-select.
+- **`click-line` / `multi-mcq`.** `grade` handles both, but no generator emits
+  them, so the lens never receives them. (Inc 6 _does_ capture the generated
+  code-answer modes `click-token` + `select-in-code`.)
 - **Earned propagation** (inc 7). `unlocks` is carried but not acted on.
 - **Config filtering** (inc 8). The `QuizFilter` toolbar is deferred; the
   upstream `filter` is a no-op today anyway.
@@ -300,27 +416,117 @@ rendering** — one clickable `<span>` per classified token in a `<pre>`, clicks
 captured via React `onClick`. The pure `anchorAt` resolution is reused unchanged
 across both capture surfaces — that is the design hedge.
 
-## Why filter to form V1 (the consumed-contract scoping)
+## Why the staged item.mode filter (the consumed-contract scoping)
 
 `generateQuiz(snippet, classified, filter?)` runs the **whole generator
-registry** (`../../lib/quizzing/generators/registry.ts`), not V1 alone — today
-`[V1 category-ID, V7 usage-kind, V8 declaration-site]`. On `let x = 5` it
-returns V1 `mcq` items for every token **plus** a V7 `mcq` item on `x` ("how is
-this variable used here?") **plus** a V8 `click-token` item. V1 and V7 are both
-`mode: 'mcq'` and both `family: 'variables'`, so neither a `mode` filter nor the
-upstream `QuizFilter` can isolate V1. The only sound Slice-A scoping is a
-post-filter on `item.form === 'V1'`, applied in `build-quiz.ts`.
+registry** (`../../lib/quizzing/generators/registry.ts`) — currently nine forms
+across three modes — so its output is a **mixed-mode stream**, not one form.
+`build-quiz.ts` narrows it with a single **boolean** predicate on `item.mode`,
+widened per increment: `mcq` (6a) → `+click-token` (6b) → `+select-in-code`
+(6c).
 
-This is load-bearing, not cosmetic: without it (a) clicking an identifier would
-surface V1 + V7 co-anchored (the panel would need tabs immediately, and could
-render V7's prompt + options where the spec promises V1's); and (b) clicking a
-declaration would hand a V8 `click-token` item to the `mcq` panel — a render
-mismatch and the only path to a `malformed` grade. The V1 filter is exactly what
-makes the "never `malformed` in normal play" guarantee hold and keeps the panel
-single-item (no tabs) in Slice A. Later slices **widen** the filter (admit V7 →
-inc 5/6, V8 → inc 6) rather than re-shaping the panel. _(This was the AR-1
-BLOCKER: the contract consumes the registry's mixed-form stream, not a V1-only
-stream.)_
+Two decisions make this the right cut:
+
+- **Filter on `mode`, not `form`.** `mode` is the discriminant the panel and
+  `grade` both dispatch on. A `form` allowlist would have to enumerate the whole
+  registry (nine forms and growing) and would silently drop any newly-registered
+  form; a `mode` predicate admits a new form of an already-handled mode for free
+  and excludes an unhandled mode by construction.
+- **Boolean predicate, not a type-predicate.** Slice A used
+  `(item): item is McqQuizItem => …`, narrowing the kept array to
+  `McqQuizItem[]`. Inc 6 keeps it the wide `QuizItem` union (a plain
+  `(item) => item.mode === 'mcq' || …`), because the panel must dispatch across
+  modes — narrowing at the filter would only force a re-widen at the panel.
+
+Slice A originally scoped on `form === 'V1'` for a different reason: V1 and V7
+are both `mcq`, so a `mode` filter could not isolate V1 to keep the panel
+single-item (the AR-1 BLOCKER that established the registry emits a mixed
+stream, not a V1-only one). Inc 6 dissolves that constraint by **embracing**
+co-anchoring — the panel renders the bundle as answer-neutral tabs and
+dispatches each on its `mode`, so there is nothing left to isolate. The `mode`
+filter is all that remains.
+
+## Why dispatch on active-tab mode (not a panel-level mode)
+
+Inc 6's hard question: a click in the read-only editor means different things by
+state — pick an anchor, or _be_ the answer. Where does the lens decide? Three
+models were on the table: a **panel-level mode** flag the click handler reads;
+an explicit **interaction-mode state machine** (anchor / answering /
+confirming); or **dispatch on the active item's own `mode`**, with no separate
+flag.
+
+The third wins because co-anchoring is **heterogeneous**: `itemsAt` returns a
+bundle that can be `[mcq, mcq, click-token, select-in-code]` at one range (a
+reference identifier carries V1 + V7 + V8 + V10b/c). A panel-level mode cannot
+describe such a bundle — it would have to pick one, and the others would render
+wrong. The active _item_ already carries the only discriminant that matters
+(`mode`), and the lens already holds the active tab, so the phase is
+**derived**: `armed = isCodeSurface(activeItem) && !activeVerdict`. A
+panel-level flag or an interaction-mode enum would duplicate that derivation
+into stored state that can disagree with the active tab — a class of bug the
+derivation simply cannot have.
+
+It also keeps the mechanic **form-agnostic**: every per-tab renderer and the
+editor-click handler dispatch on `item.mode` through the same if-chain
+`grade.ts` uses, so a new form slots in at its mode's arm with no new control
+flow. The one rule "the active tab's `mode` is the phase" is what makes
+heterogeneous tabs work without a `switch`, a flag, or a state machine.
+
+The one thing the derivation does **not** own for free is the safety property
+"the editor never arms without explicit intent" — `armed` is `true` whenever the
+active tab is code-surface, so the _default_ active tab must be `mcq`. That is
+pinned as the **mode-aware default** (first `mcq` item, else unarmed — § Panel),
+not as "index 0," so the property is the lens's own invariant rather than a side
+effect of `generateQuiz`'s emission order.
+
+## Why unify the code-surface substrate (stage-then-confirm)
+
+`click-token` (one target) and `select-in-code` (an exhaustive set) look like
+two interactions, and the first design graded `click-token` **immediately** on
+the answering click while `select-in-code` accumulated to a Confirm. Inc 6
+unifies them: **both** stage clicked ranges into one `pendingSelection` and
+grade on a **Confirm**, differing only in how a click stages (`click-token`
+replaces — a single slot; `select-in-code` toggles — a set). The user's ruling:
+unify the mechanism, then branch on item / event properties — best of both
+worlds.
+
+- **One substrate, one renderer family, one grade path.** The editor-click
+  handler, the pending state, the Confirm control, and the `gradeRanges`
+  boundary are written once and serve both modes; `click-token` is just the
+  `n = 1` case. Two separate paths would duplicate the arm / stage / grade
+  machinery.
+- **Safety.** Immediate-grade turns a stray click into a graded — and `wrong`-
+  flagging — answer on a surface where, a moment earlier, a click merely
+  re-picked. Staging + an explicit Confirm makes submission deliberate and
+  resolves the pick-vs-answer overloading in one move.
+- **Immediacy is preserved as a thin policy, not lost.** Because the substrate
+  is unified, "does a `click-token` answer auto-grade or wait for Confirm?" is a
+  one-line handler policy (it can read event properties — a confirming
+  double-click, a click on the already-staged token) on the same pending state,
+  settled at the gate / in 6b without reshaping a type. The default leans safe
+  (stage + a one-tap Confirm); the fast path stays available.
+
+## The per-arm construction note (why never-`malformed` survives)
+
+`grade` is total and dispatches on `item.mode`, returning `malformed` whenever
+the **response** mode does not match the **item** mode (`grade.ts`
+`modeMismatch`). The lens's "never `malformed` in normal play" guarantee
+therefore rests on one thing: every response the lens builds carries the same
+`mode` as the item it answers — a property of **where the response is built**,
+not of which tab the panel rendered.
+
+So the rule is normative: build the `LearnerResponse` **inside the narrowed
+arm** for that mode — `{ mode: 'mcq', selectedOptionIds: [id] }` in the `mcq`
+arm, `{ mode: item.mode, clickedRanges }` in the `click-token` arm (where
+`item.mode` is already narrowed to `'click-token'`),
+`{ mode: 'select-in-code', selectedRanges }` in the select arm. A hoisted,
+mode-agnostic response built before the dispatch would type-check against the
+wrong union member and could send a mismatched response — the one path to
+`malformed` in normal play (and to wrongly flagging mastery). `gradeRanges`
+(`lib/grade-ranges.ts`) enforces this by constructing the response inside its
+own `item.mode` if-chain; `gradeOption` does the same for `mcq`. This is the
+invariant an implementer and an AR-4 must honor, stated where the responses are
+built.
 
 ## Why define mastery types in Phase 0 (the fold landed in inc 5)
 
