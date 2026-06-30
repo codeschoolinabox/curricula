@@ -79,7 +79,7 @@ const GUIDE_TOPICS = [
 	{
 		id: 'toggles',
 		heading: 'The type and sandbox toggles',
-		body: 'The type toggle re-embodies your buffer as a script or a module; its most visible effect is on the panel, because script mode hides the language-level stations (a gutter hint appears when module-admissible code sits in script mode). The sandbox toggle chooses where code runs: the sandboxed worker by default, or danger mode when an educator offers it.',
+		body: 'The type toggle re-embodies your buffer as a script or a module; its most visible effect is on the panel, because script mode hides the language-level stations (the dock shows an adjacent hint when module-admissible code sits in script mode). The sandbox toggle chooses where code runs: the sandboxed worker by default, or danger mode when an educator offers it.',
 	},
 	{
 		id: 'limits',
