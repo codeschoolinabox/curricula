@@ -171,10 +171,11 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
 - **Input program** (`program`) — the program a request shapes from. Empty means
   _compose from scratch_; non-empty means _produce a variation_ of it. The input
   is a **seed, not a constraint**: read for intent and shape, and _not_ required
-  to be admitted JEJ — only a curated output is gated. The **one exception** is a
-  `vary` **hard hold** (see _Vary_): there the seed's own feature inventory or size
-  is read off and becomes the curated output's enforced constraint — the deliberate,
-  opt-in diff-mode.
+  to be admitted JEJ — only a curated output is gated. Even under `vary` (see _Vary_)
+  the input stays a seed: a `vary` **hard hold** reads it as a **contextual source** to
+  _infer_ the request's feature subset or size — a convenience that spares the consumer
+  hand-typing constraints the seed already implies. The inferred constraint describes the
+  output exactly as a hand-set one would; the seed is its **source, not a diff target**.
 - **Config** — everything the call carries besides the input program: which
   **model** to use, a **prompt**, the request's **constraints** (a feature
   subset and size bounds), and the **validate** flag. Distinct from the model's
@@ -223,8 +224,9 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   tightest constraint of all. A seeded curated request is **hyper-curated**:
   composing from an empty seed is curated, varying a seed is curated _harder_.
   Seeding is another dimension of curation, not a separate axis. `vary` (see _Vary_)
-  is the **knob on that dimension**: a held **hard** aspect promotes the seed's shape
-  from the model's-call influence it has by default to a conform-enforced constraint.
+  is the **knob on that dimension**: a held **hard** aspect _infers_ a feature subset or
+  size bound from the seed — sourcing a normal constraint from it, not making the seed a
+  diff target.
 - **Guided / unguided** — the guided/unguided axis read off **who fills
   `config`**. **Guided**: the environment or lens fills the prompt and
   constraints (educator-structured). **Unguided**: the learner fills them
@@ -258,7 +260,9 @@ naming the model that ran), by design, and the rawness is the lesson, not a defe
   the mechanism of a held `languageLevel`: the inventory becomes the output's feature
   subset, so a curated variation stays at the seed's technical level. An **empty**
   inventory (a seed of plain statements) held means "simple statements only," not
-  "anything goes."
+  "anything goes" — a feature-less seed _is_ the simplest level, and holding it keeps a
+  beginner's variations at that level rather than letting the model reach for loops or
+  operators the seed never used (permit-none, not permit-all).
 - **Candidate** — one program the model proposes for a request, taken from the
   decomposed `GenerationResult`: the extracted `code` on the curated path, the
   byte-exact `raw` on the uncurated one. Under `validate: true` the candidate
@@ -525,15 +529,16 @@ These are present-tense decisions the module honours.
 - **Generation is the empty-input case of variation.** One operation, not two:
   empty `program` composes, non-empty `program` varies. The empty program is a
   real admitted JEJ program, so this is a principled base case, not a sentinel.
-- **The config describes the output, not a diff — except a `vary` hard hold.** The
-  same config means the same target whether `program` is empty or full; the input is a
-  seed, not a constraint the output must respect, and need not be JEJ. The lone,
-  deliberate exception is `vary`'s **hard** holds (`languageLevel` / `size`): they read
-  the seed and derive a constraint the curated output must respect — the one sanctioned
-  diff-mode, opt-in and named. A non-JEJ seed is still accepted; only its JEJ-gateable
-  features define a held level — non-gateable constructs are not inventoried, so holding
-  `languageLevel` on above-JEJ code yields a variation at or below the seed's level, never
-  above (the held level _lowers_ to JEJ, by construction).
+- **The config describes the output, not a diff.** The same config means the same target
+  whether `program` is empty or full; the input is a seed, not a constraint the output
+  must respect, and need not be JEJ. `vary` does not change this: a held **hard** aspect
+  (`languageLevel` / `size`) reads the seed only to _infer_ the request's feature subset or
+  size — a convenience that sources a normal constraint the consumer would otherwise
+  hand-type. The inferred constraint describes the output as any constraint does; the seed
+  is its **source, never a diff target**. A non-JEJ seed is still accepted; only its
+  JEJ-gateable features define a held level — non-gateable constructs are not inventoried,
+  so holding `languageLevel` on above-JEJ code yields a variation at or below the seed's
+  level, never above (the held level _lowers_ to JEJ, by construction).
 - **`validate` is the curated/uncurated axis — and rawness is the lesson, by
   design.** A curated call (`validate: true`) runs the loop and returns
   validated-to-spec JEJ or a structured refusal. An uncurated call
