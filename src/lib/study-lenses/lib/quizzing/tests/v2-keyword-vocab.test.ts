@@ -166,6 +166,15 @@ describe('v2KeywordVocab', () => {
 			expect(items).toHaveLength(1);
 			expect(items[0]?.anchorRange).toEqual([0, 3]);
 		});
+
+		it('declines a non-JeJ destructuring declaration (pattern opener, not an identifier)', () => {
+			// `let { x }` / `const [a]` head declarations, but their next token is `{`/`[`
+			// (a pattern opener), not the declared identifier — so V2 declines them,
+			// matching the binding-aware forms, which already emit nothing for patterns.
+			// Deliberate: destructuring is outside JeJ.
+			expect(v2ItemsOf('let { x } = obj; x;')).toEqual([]);
+			expect(v2ItemsOf('const [a] = arr; a;')).toEqual([]);
+		});
 	});
 
 	describe('Interfaces', () => {

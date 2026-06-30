@@ -385,14 +385,17 @@ the Snippet (the one-sided seam).
   validation is an unwired embody stub today), so non-JeJ but parseable snippets
   reach the generators — the forms guard defensively rather than assume JeJ
   input. V6 skips a laundered `var` binding (a `kind` outside `let`/`const`); V2
-  fires only when its `let`/`const` keyword token heads a declaration (its next
-  token is the declared identifier), so it never over-fires a vocab card on a
-  contextual keyword used as a property or object-literal key (`obj.let`,
-  `{ const: 1 }` — both emitted as keyword tokens by embody's (acorn-based)
-  context-free tokenizer). This is a deliberate **V1/V2 divergence**: V1
-  (category-ID) correctly answers `keyword` for such a token — "what category is
-  this?" is honest even for a contextual keyword — while V2's "what does this
-  keyword _do_?" is meaningful only for a real declaration, so only V2 guards.
+  fires only when its `let`/`const` keyword token is immediately followed by the
+  declared identifier — JeJ's simple `let x` / `for (let i …)` form — so it
+  never over-fires a vocab card on a contextual keyword used as a property or
+  object-literal key (`obj.let`, `{ const: 1 }` — both emitted as keyword tokens
+  by embody's (acorn-based) context-free tokenizer), and it likewise declines a
+  non-JeJ destructuring declaration (`let { x }`, `const [a]` — next token `{` /
+  `[`), the same silence the binding-aware forms already give patterns. This is
+  a deliberate **V1/V2 divergence**: V1 (category-ID) correctly answers
+  `keyword` for such a token — "what category is this?" is honest even for a
+  contextual keyword — while V2's "what does this keyword _do_?" is meaningful
+  only for a real declaration, so only V2 guards.
 - **One generator per `form`, registered by anchor type.** The three-way anchor
   axis (token / node / program) deliberately extends socratizing's two-way point
   / program split, because classifying's output is token-indexed (per-token

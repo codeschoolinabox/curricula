@@ -49,14 +49,15 @@ function isVocabKeyword(text: string): text is VocabKeyword {
 }
 
 /**
- * Whether this `let` / `const` keyword token heads a declaration — its next
- * meaningful token (in source order) is the declared identifier. The acorn
- * tokenizer is context-free, so it labels `let` / `const` as keyword tokens even
- * in non-declaration positions (`obj.let`, `{ const: 1 }`); classifying carries
- * that label through. Without this check V2 would over-fire a keyword-vocab card on
- * a property or object-literal key name. A real declaration's next token is the
- * declared identifier (`let x`, `for (let i …)`); a contextual keyword's is a
- * delimiter (`.`-member's `;`, the key's `:`). Lexical-only (token category +
+ * Whether this `let` / `const` keyword token is immediately followed by the
+ * declared identifier — JeJ's simple `let x` / `for (let i …)` declaration form.
+ * The acorn tokenizer is context-free, so it labels `let` / `const` as keyword
+ * tokens even in non-declaration positions (`obj.let`, `{ const: 1 }`); classifying
+ * carries that label through. Without this check V2 would over-fire a keyword-vocab
+ * card on a property or object-literal key name (next token a delimiter — the
+ * `.`-member's `;`, the key's `:`). It also declines a non-JeJ destructuring
+ * declaration (`let { x }`, `const [a]` — next token `{` / `[`), the same silence
+ * the binding-aware forms already give patterns. Lexical-only (token category +
  * source order) — no AST or binding lookup, so V2 stays text-surface × atom.
  */
 function headsDeclaration(
