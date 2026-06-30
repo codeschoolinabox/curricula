@@ -420,9 +420,11 @@ lens lives across the two required layers:
   single re-parse site. No React.
 - `lib/anchors.ts` (core) — the pure resolution layer:
   `anchorAt(offset, classified)` (token resolution, binary search over the token
-  ranges, for the highlight) and `itemsAt(items, anchorRange)` (item resolution,
-  the panel's item(s) for a range). Pure and **CM-independent** (so it serves
-  both the CodeMirror path and the span-render fallback unchanged). No React.
+  ranges, for the highlight), `itemsAt(items, anchorRange)` (item resolution,
+  the panel's item(s) for a range), and `defaultActiveTab(bundle)` (the
+  mode-aware safe default tab — the first `mcq` item, else `null`/unarmed; the
+  "never auto-arm" invariant). Pure and **CM-independent** (so it serves both
+  the CodeMirror path and the span-render fallback unchanged). No React.
 - `lib/decorations.ts` (core) — the pure mastery-decoration projector
   `masteryDecorations(items, mastery)` → the two color-free render channels
   (`MasteryDecos`). Pure and **CM-independent** (it emits plain ranges; the

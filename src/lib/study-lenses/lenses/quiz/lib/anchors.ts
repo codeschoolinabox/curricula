@@ -8,6 +8,7 @@
 
 import type { ClassifiedToken } from '../../../lib/classifying/types.js';
 import type { QuizItem } from '../../../lib/quizzing/types.js';
+import type { ActiveTab } from '../types.js';
 
 /**
  * Resolves a document `offset` to the classified token whose half-open range
@@ -76,6 +77,24 @@ function itemsAt(
 	);
 }
 
-const anchors = { anchorAt, itemsAt };
+/**
+ * The mode-aware safe default tab for a co-anchored bundle: the index of the
+ * first `mcq` item, or `null` when the bundle has none. NOT a bare index 0 — that
+ * would arm the editor whenever `generateQuiz` happened to emit a code-surface
+ * form first. An `mcq` active tab is anchor phase (an mcq is answered in the
+ * panel, not the editor), so defaulting to the first `mcq` keeps the editor from
+ * **ever auto-arming**; a bundle with no `mcq` item stays unarmed (`null`) until
+ * the learner selects a tab. The lens's own "never auto-arm" invariant — see
+ * `../README.md` § Panel + `../DOCS.md` § Why dispatch on active-tab mode.
+ *
+ * @param bundle - The co-anchored items `itemsAt` resolved for the picked range.
+ * @returns The first `mcq` index, or `null` for a bundle with no `mcq` item.
+ */
+function defaultActiveTab(bundle: readonly QuizItem[]): ActiveTab {
+	const index = bundle.findIndex((item) => item.mode === 'mcq');
+	return index === -1 ? null : index;
+}
+
+const anchors = { anchorAt, itemsAt, defaultActiveTab };
 
 export default anchors;

@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import embody from '../../../embody/index.js';
 import classifyTokens from '../../../lib/classifying/classify-tokens.js';
+import generateQuiz from '../../../lib/quizzing/generate-quiz.js';
 import anchors from '../lib/anchors.js';
 import buildQuiz from '../lib/build-quiz.js';
 
@@ -131,5 +132,66 @@ describe('itemsAt — item resolution', () => {
 	it('resolves a deeper bundle at the declaration — the count is range-driven, not constant (Boundary)', () => {
 		const found = anchors.itemsAt(items, [declaration.start, declaration.end]);
 		expect(found.length).toBe(3); // V1 + V6 + V7
+	});
+});
+
+describe('defaultActiveTab — the mode-aware safe default tab', () => {
+	const CODE = 'let x = 1; x;';
+	const model = buildQuiz(embody(CODE));
+	const items = model?.items ?? [];
+	const classified = model?.classified ?? [];
+	const tokensWith = (text: string) =>
+		classified.filter((token) => token.text === text);
+	const [operator] = tokensWith('='); // `=` at [6,7) — a single mcq item
+	const [, reference] = tokensWith('x'); // ref `x` at [11,12) — V1 + V7
+
+	it('returns null for an empty bundle — no pick, nothing armed (Zero)', () => {
+		expect(anchors.defaultActiveTab([])).toBeNull();
+	});
+
+	it('returns 0 for a single mcq item (One)', () => {
+		const bundle = anchors.itemsAt(items, [operator.start, operator.end]);
+		expect(anchors.defaultActiveTab(bundle)).toBe(0);
+	});
+
+	it('returns the first mcq index for a multi-mcq bundle (Many)', () => {
+		const bundle = anchors.itemsAt(items, [reference.start, reference.end]);
+		expect(anchors.defaultActiveTab(bundle)).toBe(0);
+	});
+
+	it('skips a leading non-mcq item to the first mcq — never index 0 unconditionally', () => {
+		// The full (unfiltered) stream carries code-surface forms too; put one first
+		// so a hardcoded `return 0` (which would auto-arm the editor) fails here.
+		const all = generateQuiz(embody(CODE), classify(CODE));
+		const clickToken = all.find((item) => item.mode === 'click-token');
+		const mcq = all.find((item) => item.mode === 'mcq');
+		if (clickToken === undefined || mcq === undefined) {
+			throw new Error('fixture: expected a click-token and an mcq item');
+		}
+		expect(anchors.defaultActiveTab([clickToken, mcq])).toBe(1);
+	});
+
+	it('scans past several leading non-mcq items to the first mcq', () => {
+		// mcq third, after a click-token AND a select-in-code — the index must come
+		// from a full scan, not a peek at index 0 or 1.
+		const all = generateQuiz(embody(CODE), classify(CODE));
+		const clickToken = all.find((item) => item.mode === 'click-token');
+		const selectInCode = all.find((item) => item.mode === 'select-in-code');
+		const mcq = all.find((item) => item.mode === 'mcq');
+		if (
+			clickToken === undefined ||
+			selectInCode === undefined ||
+			mcq === undefined
+		) {
+			throw new Error('fixture: expected click-token, select-in-code, and mcq');
+		}
+		expect(anchors.defaultActiveTab([clickToken, selectInCode, mcq])).toBe(2);
+	});
+
+	it('returns null for a bundle with no mcq item — stays unarmed', () => {
+		const all = generateQuiz(embody(CODE), classify(CODE));
+		const codeItems = all.filter((item) => item.mode !== 'mcq');
+		expect(codeItems.length).toBeGreaterThan(0);
+		expect(anchors.defaultActiveTab(codeItems)).toBeNull();
 	});
 });
