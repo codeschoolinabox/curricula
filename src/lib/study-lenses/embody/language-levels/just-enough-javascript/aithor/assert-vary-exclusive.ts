@@ -1,4 +1,5 @@
 import type { AithorConfig } from './types.js';
+import varyDeclaresAspect from './vary-declares-aspect.js';
 
 /**
  * The mutual-exclusivity guard — a config-shape throw, synchronous and before the
@@ -17,12 +18,7 @@ import type { AithorConfig } from './types.js';
  */
 export default function assertVaryExclusive(config: AithorConfig): void {
 	const { vary, include, exclude, lines, complexity } = config;
-	if (vary === undefined) return;
-
-	const declaresAspect = Object.values(vary).some(
-		(value) => value !== undefined,
-	);
-	if (!declaresAspect) return;
+	if (vary === undefined || !varyDeclaresAspect(vary)) return;
 
 	const hasRawConstraint =
 		include !== undefined ||

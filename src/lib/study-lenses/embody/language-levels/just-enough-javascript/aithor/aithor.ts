@@ -41,6 +41,7 @@ import type {
 	SizeBounds,
 	SoftAspect,
 } from './types.js';
+import varyDeclaresAspect from './vary-declares-aspect.js';
 
 const defaultRuntime: AithorRuntime = makeAithorRuntime({ adapters: {} });
 
@@ -64,8 +65,7 @@ export default async function aithor(
 	// (and the guard above already forbade it from sitting beside a raw constraint).
 	const varyConfig = config.vary;
 	const vary =
-		varyConfig !== undefined &&
-		Object.values(varyConfig).some((value) => value !== undefined)
+		varyConfig !== undefined && varyDeclaresAspect(varyConfig)
 			? resolveVary(program, varyConfig)
 			: undefined;
 
