@@ -2445,3 +2445,103 @@ describe('<StudyLenses> — Cycle 3 D2 wire the quiz button to socratizing', () 
 		});
 	});
 });
+
+describe('<StudyLenses> — Cycle 3 E2 wire the embedded guide disclosure state', () => {
+	describe('Zero — the guide mounts collapsed by default', () => {
+		it('mounts the guide inside the region, collapsed', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-omnipresent-region] [data-orchestrator-guide]',
+				),
+			).not.toBeNull();
+			expect(
+				container.querySelector('[data-orchestrator-guide-content]'),
+			).toBeNull();
+		});
+
+		it('mounts the guide inside the region in lens mode too, collapsed', () => {
+			const { container } = render(
+				<StudyLenses snippet="let x = 1;" lens="debug-props" />,
+			);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-omnipresent-region] [data-orchestrator-guide]',
+				),
+			).not.toBeNull();
+			expect(
+				container.querySelector('[data-orchestrator-guide-content]'),
+			).toBeNull();
+		});
+
+		it('keeps exactly one region landmark after adding the guide', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			expect(
+				container.querySelectorAll('[data-orchestrator-omnipresent-region]'),
+			).toHaveLength(1);
+		});
+
+		it('keeps exactly one region landmark in lens mode', () => {
+			const { container } = render(
+				<StudyLenses snippet="let x = 1;" lens="debug-props" />,
+			);
+			expect(
+				container.querySelectorAll('[data-orchestrator-omnipresent-region]'),
+			).toHaveLength(1);
+		});
+	});
+
+	describe('One — clicking the reveal affordance expands the guide', () => {
+		it('clicking the reveal affordance expands the guide', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			fireEvent.click(
+				container.querySelector(
+					'[data-orchestrator-guide] button[aria-label]',
+				)!,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-guide-content]'),
+			).not.toBeNull();
+		});
+
+		it('clicking the reveal affordance expands the guide in lens mode too', () => {
+			const { container } = render(
+				<StudyLenses snippet="let x = 1;" lens="debug-props" />,
+			);
+			fireEvent.click(
+				container.querySelector(
+					'[data-orchestrator-guide] button[aria-label]',
+				)!,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-guide-content]'),
+			).not.toBeNull();
+		});
+	});
+
+	describe('Many — a reveal then collapse round-trip', () => {
+		// The toggle's aria-label is static across renders, so the node reference
+		// survives the re-render; re-querying before each click is just defensive.
+		// Editor mode only by design: `guideRevealed` + handleGuideToggle are a
+		// single component-level slot + handler shared by both render branches (the
+		// One block's lens-mode test already proves that branch's onToggle is
+		// wired), so the bidirectional round-trip has no mode-specific path left to
+		// cover.
+		it('clicking the reveal affordance twice collapses the guide again', () => {
+			const { container } = render(<StudyLenses snippet="let x = 1;" />);
+			fireEvent.click(
+				container.querySelector(
+					'[data-orchestrator-guide] button[aria-label]',
+				)!,
+			);
+			fireEvent.click(
+				container.querySelector(
+					'[data-orchestrator-guide] button[aria-label]',
+				)!,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-guide-content]'),
+			).toBeNull();
+		});
+	});
+});

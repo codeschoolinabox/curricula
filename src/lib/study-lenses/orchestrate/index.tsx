@@ -67,6 +67,7 @@ import deriveStationRoster from './derive-station-roster.js';
 import deriveStationStatus from './derive-station-status.js';
 import Dock from './dock/index.js';
 import EditorComponent from './editor/index.js';
+import EmbeddedGuide from './embedded-guide/index.js';
 import createEventBus from './event-bus.js';
 import type { LintDiagnostic } from './lib/editing/types.js';
 import deriveInterpretedDiagnostics from './lib/error-interpreting/derive-interpreted-diagnostics.js';
@@ -784,6 +785,11 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		>(null);
 		const [generating, setGenerating] = React.useState(false);
 
+		// The embedded guide's disclosure state — collapsed by default. The guide
+		// is program-independent (no embodiment), so this slot is the only state it
+		// needs; handleGuideToggle flips it.
+		const [guideRevealed, setGuideRevealed] = React.useState(false);
+
 		// Append one line to a channel via a functional updater minting a fresh
 		// FROZEN channel object — never a mutable accumulator. Closes over the
 		// stable setState setter (the legal closure case), so each run's mocks see
@@ -892,6 +898,12 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			}
 		}
 
+		// The embedded guide's reveal affordance flips the disclosure slot. The
+		// guide is meta / program-independent — this handler touches no embodiment.
+		function handleGuideToggle(): void {
+			setGuideRevealed((previous) => !previous);
+		}
+
 		// The panel's active lens is derived from state, NOT held in a
 		// panel-side slot. State remains the single source of truth (per
 		// README § Picker-vs-prop ownership). Lens mode names the active
@@ -977,6 +989,10 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 							generating={generating}
 							onQuiz={handleQuiz}
 						/>
+						<EmbeddedGuide
+							revealed={guideRevealed}
+							onToggle={handleGuideToggle}
+						/>
 					</section>
 				</div>
 			);
@@ -1027,6 +1043,10 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						questions={questions}
 						generating={generating}
 						onQuiz={handleQuiz}
+					/>
+					<EmbeddedGuide
+						revealed={guideRevealed}
+						onToggle={handleGuideToggle}
 					/>
 				</section>
 			</div>
