@@ -72,6 +72,18 @@ describe('generateQuiz', () => {
 				new Set(['V1', 'V2', 'V6', 'V6b', 'V7', 'V8', 'V10a', 'V10b', 'V10c']),
 			);
 		});
+
+		it('omits the kind-keyword forms (V2/V6/V6b) for a non-JeJ var binding', () => {
+			// `var` is outside JeJ but parses, so it reaches the generators. V2 keys off
+			// the `let`/`const` keyword text (absent here); V6/V6b guard defensively
+			// against the laundered `var` kind. The binding-identity forms still fire.
+			const snippet = embody('var x = 1; x = 2; x;');
+			expect(
+				new Set(
+					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
+				),
+			).toEqual(new Set(['V1', 'V7', 'V8', 'V10a', 'V10b', 'V10c']));
+		});
 	});
 
 	describe('Interfaces', () => {

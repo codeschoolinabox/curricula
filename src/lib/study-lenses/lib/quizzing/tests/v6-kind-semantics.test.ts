@@ -143,6 +143,31 @@ describe('v6KindSemantics', () => {
 			expect(items).toHaveLength(1);
 			expect(items[0]?.anchorRange).toEqual([4, 5]);
 		});
+
+		it('emits nothing for a var binding (non-JeJ, but parseable)', () => {
+			// `var` is outside JeJ, but quizzing gates on `status.parsed`, not
+			// `status.validated`, so a `var` snippet reaches the generators; build-scope
+			// launders its declaration kind into the `'let' | 'const'`-typed field, so V6
+			// must guard defensively rather than mis-grade `var` as non-reassignable.
+			expect(v6ItemsOf('var x = 1; x = 2; x;')).toEqual([]);
+		});
+
+		it('emits nothing for a var binding with no reassignment', () => {
+			expect(v6ItemsOf('var x = 1; x;')).toEqual([]);
+		});
+
+		it('emits nothing for a var binding with no initializer', () => {
+			expect(v6ItemsOf('var x;')).toEqual([]);
+		});
+
+		it('skips only the var binding in a mixed let/var snippet (guard is per-binding)', () => {
+			// A snippet-level "contains var → bail" misimplementation would drop `a` too;
+			// the per-binding guard fires for the `let a` and skips only the `var b`.
+			const items = v6ItemsOf('let a = 1; var b = 2; a; b;');
+			expect(items).toHaveLength(1);
+			expect(items[0]?.id).toBe('V6/binding:a@4-5');
+			expect(items[0]?.answerOptionIds).toEqual(['yes']);
+		});
 	});
 
 	describe('Interfaces', () => {
@@ -161,6 +186,10 @@ describe('v6KindSemantics', () => {
 			expect(letItem !== undefined && Object.isFrozen(letItem.options)).toBe(
 				true,
 			);
+			// Both feedbacks must exist (a `var` reaching buildV6Item would yield
+			// `undefined` feedback — the guard prevents it).
+			expect(letItem?.feedback).toBeTruthy();
+			expect(constItem?.feedback).toBeTruthy();
 			expect(letItem?.feedback).not.toBe(constItem?.feedback);
 			expect(letItem?.unlocks).toBeUndefined();
 			expect(letItem?.anchorPath).toBeUndefined();

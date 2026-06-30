@@ -39,6 +39,16 @@ const v6KindSemantics: Generator = {
 		if (binding === null) {
 			return [];
 		}
+		// `build-scope` blind-casts a declaration's kind to `'let' | 'const'`, but
+		// quizzing gates on `status.parsed` (not `status.validated`), so a non-JeJ
+		// `var` binding reaches here with a runtime `kind` of `'var'` the type does
+		// not admit. Guard defensively (widen to compare) so V6 skips it rather than
+		// mis-grading `var` as non-reassignable — V6b's positive const gate is already
+		// immune. See README/DOCS § the parsed-not-validated input precondition.
+		const declaredKind: string = binding.kind;
+		if (declaredKind !== 'let' && declaredKind !== 'const') {
+			return [];
+		}
 		return [buildV6Item(anchor, binding)];
 	},
 };
@@ -83,7 +93,7 @@ const V6_OPTION_LABEL: Readonly<Record<V6OptionId, string>> = {
 const KIND_FEEDBACK: Readonly<Record<'let' | 'const', string>> = {
 	let: '`let` introduces a reassignable binding: you can update its value after initialization.',
 	const:
-		'`const` introduces an initialize-once binding: its value is set at initialization, and reassigning it throws a TypeError.',
+		'`const` introduces an initialize-once binding: its value is set at initialization and cannot be reassigned.',
 };
 
 // Frozen at declaration (shared by reference across every V6 item, like V1_OPTIONS).
