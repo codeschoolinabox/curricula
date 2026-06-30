@@ -4,11 +4,12 @@ import buildPrompt from '../build-prompt.js';
 import conform from '../conform.js';
 import resolveVary from '../resolve-vary.js';
 
-// Increment 1 — resolveVary: the pure leaf that compiles a VaryConfig down to the
-// existing primitives (feature subset + size bounds, hard) plus the held soft
-// aspects, read off a parseable, non-empty seed. The precondition throws
-// (empty/unparseable seed, vary-beside-raw mutual exclusivity) are increment 2;
-// every seed here is a good seed.
+// resolveVary — the pure leaf that compiles a VaryConfig down to the existing
+// primitives (feature subset + size bounds, hard) plus the held soft aspects, read
+// off the seed. Inc 1 covers the resolution itself (good seeds); inc 2 adds the
+// `precondition throws` block below (a hard hold needs a parseable, non-empty
+// seed). The sibling vary-beside-raw mutual-exclusivity throw is exercised in
+// assert-vary-exclusive.test.ts.
 //
 // Test posture (mirrors build-prompt.test.ts): assert the load-bearing FACTS — the
 // permitted set, the round-trip, the rendered clause, the soft-hold list — never a
@@ -212,6 +213,68 @@ describe('resolveVary', () => {
 				'implementation',
 			]);
 			expect(conform(seed, resolved.subset, resolved.size).ok).toBe(true);
+		});
+	});
+
+	describe('precondition throws — a hard hold needs a parseable, non-empty seed', () => {
+		it.each([
+			['languageLevel', { languageLevel: false }],
+			['size', { size: false }],
+		])('a held %s on an empty seed throws', (_label, vary) => {
+			expect(() => resolveVary('', vary)).toThrow();
+		});
+
+		it.each([
+			['languageLevel', { languageLevel: false }],
+			['size', { size: false }],
+		])(
+			'a held %s on a whitespace-only seed throws (no program there)',
+			(_label, vary) => {
+				expect(() => resolveVary('   \n\t\n', vary)).toThrow();
+			},
+		);
+
+		it('a present-but-trivial seed (a lone comment) does NOT throw — it is the simplest level', () => {
+			// "empty" means no content (seed.trim() === ''); a comment IS a trivial
+			// program, measurable to the empty inventory, so a held level resolves to
+			// the permit-none idiom rather than throwing. (DECISION — flagged for human.)
+			const resolved = resolveVary('// just a note\n', {
+				languageLevel: false,
+			});
+
+			// empty inventory → permit-none, same as the `let x = 5;` empty-inventory case
+			expect(conform('if (x) {\n\tx;\n}\n', resolved.subset, {}).ok).toBe(
+				false,
+			);
+		});
+
+		it.each([
+			['languageLevel', { languageLevel: false }],
+			['size', { size: false }],
+		])('a held %s on an unparseable seed throws', (_label, vary) => {
+			expect(() => resolveVary('const x = ;\n', vary)).toThrow();
+		});
+
+		it('a soft hold never throws — even on an empty seed (vacuous instruction)', () => {
+			const resolved = resolveVary('', { behavior: false });
+
+			expect(resolved.softHolds).toEqual(['behavior']);
+			expect(resolved.subset).toEqual({ include: [], exclude: [] });
+			expect(resolved.size).toEqual({});
+		});
+
+		it('a soft hold never throws — even on an unparseable seed', () => {
+			expect(() =>
+				resolveVary('const x = ;\n', { strategy: false }),
+			).not.toThrow();
+		});
+
+		it('vary: {} on an empty seed is the from-scratch base case, not a throw', () => {
+			const resolved = resolveVary('', {});
+
+			expect(resolved.subset).toEqual({ include: [], exclude: [] });
+			expect(resolved.size).toEqual({});
+			expect(resolved.softHolds).toEqual([]);
 		});
 	});
 });

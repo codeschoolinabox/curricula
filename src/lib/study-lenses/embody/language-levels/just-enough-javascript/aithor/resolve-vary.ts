@@ -38,32 +38,49 @@ const SOFT_ASPECTS: readonly SoftAspect[] = [
  * (the shared {@link features} / {@link metrics} modules), so a held variation
  * conforms to its own seed by construction.
  *
- * Increment 1 assumes a parseable, non-empty seed (the bad-seed branch is a
- * marked stub). The precondition throws — a hard hold on an empty or unparseable
- * seed, and `vary` declared beside a raw `include`/`exclude`/`lines`/`complexity`
- * — are increment 2.
+ * A hard hold (`languageLevel`/`size`) reads the seed's inventory / size off its
+ * AST, so it needs a parseable, non-empty seed: an empty or unparseable seed under
+ * a hard hold throws synchronously (a config-shape error, before the model runs).
+ * "Empty" means no content (`seed.trim() === ''`) — a present-but-trivial seed (a
+ * lone comment) is measurable to the empty inventory and does not throw. A SOFT
+ * hold never throws and never parses (the soft tier is prompt-only; a hold with no
+ * seed to reference is a vacuous instruction the model ignores), and `vary: {}` is
+ * the from-scratch base case. The sibling `vary`-beside-raw mutual-exclusivity
+ * throw lives in `assertVaryExclusive` (it needs the whole config).
  */
 export default function resolveVary(
 	seed: string,
 	vary: VaryConfig,
 ): ResolvedVary {
-	const parsed = parseProgram(seed, 'module');
-	if ('message' in parsed) {
-		// Increment 2 replaces this with the real precondition: a typed request-
-		// boundary error thrown before bring-up (a hard hold cannot inventory or
-		// measure a seed that will not parse). This stub only satisfies the Program
-		// narrowing; inc 1 exercises good seeds only, so the inc-1 tests never reach it.
-		throw new Error(
-			'vary: hard hold needs a parseable seed (precondition — increment 2)',
-		);
+	const softHolds = SOFT_ASPECTS.filter((aspect) => vary[aspect] === false);
+	const anyHardHold = vary.languageLevel === false || vary.size === false;
+
+	if (anyHardHold) {
+		if (seed.trim() === '') {
+			throw new Error(
+				'vary: a hard hold (languageLevel/size) needs a non-empty seed to read off',
+			);
+		}
+		const parsed = parseProgram(seed, 'module');
+		if ('message' in parsed) {
+			throw new Error(
+				'vary: a hard hold (languageLevel/size) needs a parseable seed to read off',
+			);
+		}
+		// Frozen before leaving the boundary (DEV.md §13): inc 4 wires this into the
+		// live request path, where a mutable subset/softHolds could be silently altered.
+		return deepFreezeInPlace({
+			subset: resolveSubset(parsed, vary),
+			size: resolveSize(seed, parsed, vary),
+			softHolds,
+		});
 	}
 
-	// Frozen before leaving the boundary (DEV.md §13): inc 4 wires this into the
-	// live request path, where a mutable subset/softHolds could be silently altered.
+	// No hard hold — the hard tiers are freed; only the soft holds ride the prompt.
 	return deepFreezeInPlace({
-		subset: resolveSubset(parsed, vary),
-		size: resolveSize(seed, parsed, vary),
-		softHolds: SOFT_ASPECTS.filter((aspect) => vary[aspect] === false),
+		subset: { include: [], exclude: [] },
+		size: {},
+		softHolds,
 	});
 }
 
