@@ -5,9 +5,10 @@
  * (`usageKind === 'declared'`) of a `const` binding, so it emits exactly one item
  * per const binding anchored at the `const` site. The correct answer is statically
  * fixed (`TypeError`) because V6b only fires on const — only the prose is authored
- * (README § Glossary "Curated bank vs generated"). The distractors are the three
- * documented misconceptions (`SyntaxError` / `ReferenceError` / silently-ignored;
- * NM doc — const reassignment is a TypeError at evaluation, not a SyntaxError). The
+ * (README § Glossary "Curated bank vs generated"). The distractors are plausible
+ * misconceptions (`SyntaxError` / `ReferenceError` / silently-ignored); the NM doc
+ * flags the central one — const reassignment is a TypeError at evaluation, NOT a
+ * SyntaxError. The
  * V6 twin: V6 asks reassignable-or-not (let and const); V6b asks the specific const
  * error.
  *

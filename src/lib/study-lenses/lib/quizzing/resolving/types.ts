@@ -20,8 +20,13 @@
  * `name` is the declared name, kept for prompt/label use and to avoid re-slicing
  * the source. `kind` is the declaration keyword (`let` / `const`), read straight off
  * the resolved `DeclarationInfo.kind` — the static answer key for "is this binding
- * reassignable?" forms. JeJ has no `var` (validation rejects it; `DeclarationInfo.kind`
- * is itself `let`/`const`-only), so the union needs no `var` arm. The `groupKey`
+ * reassignable?" forms. The union is `let`/`const` because that is
+ * `DeclarationInfo.kind`'s type. JeJ forbids `var`, but quizzing runs behind the
+ * `status.parsed` gate, NOT `status.validated` (see `../DOCS.md`), so a non-JeJ
+ * `var` snippet still reaches resolution and `buildScope` blind-casts its kind —
+ * at runtime `kind` can be `'var'` despite this type. Binding-aware forms therefore
+ * guard defensively (V6 skips any kind that is not `let`/`const`) rather than trust
+ * the type. The `groupKey`
  * serializer that keys binding-aware forms on the identity lives at
  * `../keying/binding-group-key.ts` and keys on `declarationRange` ONLY — so this
  * view carries the binding identity (`declarationRange`) plus non-identity

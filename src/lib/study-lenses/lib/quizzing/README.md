@@ -108,8 +108,12 @@ resolvable binding — a free global, or any name the scope forest does not trac
 already lives behind, so params and the like do not group under V7/V10b; the
 sameness form V10b carries this same binding × use-type key to bulk-credit it;
 the cross-variable sameness form V10c keys on the use-type alone
-(`usage-kind:<usageKind>`, binding-agnostic — the fourth namespaced axis); block
-and loop forms key on their structural anchor. Quizzing decides what a group is
+(`usage-kind:<usageKind>`, binding-agnostic — the fourth namespaced axis); the
+const-update twin V6b keys on a curated element-type group
+(`element-type:const-update`, the fifth axis — a single-value inline key, not a
+binding identity, since V6b is an execution-dimension runtime-error fact, not a
+keyword-recognition form like V1/V2); block and loop forms key on their structural
+anchor. Quizzing decides what a group is
 _keyed_ on; the
 lens decides how a completed group is _presented_. The group key is
 deterministic from `(snippet, classified, filter)` — it never depends on a lens

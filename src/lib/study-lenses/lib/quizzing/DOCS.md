@@ -369,19 +369,30 @@ the Snippet (the one-sided seam).
   card). V6b (const-update twin) is the second curated form (fixed `TypeError`
   answer + three authored misconception distractors). V6 (kind-semantics) and
   V6b read reassignability off the internal `Binding`, which gained
-  `kind: 'let' | 'const'` (projected from `DeclarationInfo.kind`; `var`-free
-  because JeJ validation rejects `var` and `DeclarationInfo.kind` is itself
-  `let`/`const`-only). `kind` is non-identity convenience data and **never folds
-  into a group key** (`bindingGroupKey` keys on `declarationRange` only). V6 /
-  V6b fire once per binding on the declaration occurrence
-  (`usageKind === 'declared'`) — for JeJ's `let`/`const` fragment the declared
-  occurrence is always the binding's source-first occurrence (TDZ forbids
-  use-before-declaration), so firing on `declared` is the simplest
-  one-per-binding rule and the anchor is always the declaration span. V6 keys on
-  the binding identity (`binding:<decl>`, a V10a-unlockable peer); V6b keys on
-  the inline `element-type:const-update` group (above). All three reuse the
-  binding-flavored / `form@start-end` id schemes; none touches the public
-  `types.ts` / `grade.ts` (every form is `mcq`, an already-built variant).
+  `kind: 'let' | 'const'` (projected from `DeclarationInfo.kind`). `kind` is
+  non-identity convenience data and **never folds into a group key**
+  (`bindingGroupKey` keys on `declarationRange` only). V6 / V6b fire once per
+  binding on the declaration occurrence (`usageKind === 'declared'`) — for JeJ's
+  `let`/`const` fragment the declared occurrence is always the binding's
+  source-first occurrence (TDZ forbids use-before-declaration), so firing on
+  `declared` is the simplest one-per-binding rule and the anchor is always the
+  declaration span. V6 keys on the binding identity (`binding:<decl>`, a
+  V10a-unlockable peer); V6b keys on the inline `element-type:const-update`
+  group (above). All three reuse the binding-flavored / `form@start-end` id
+  schemes; none touches the public `types.ts` / `grade.ts` (every form is `mcq`,
+  an already-built variant). **Input precondition (post-audit hardening).**
+  `generateQuiz` gates on `status.parsed`, not `status.validated` (real
+  validation is an unwired embody stub today), so non-JeJ but parseable snippets
+  reach the generators — the forms guard defensively rather than assume JeJ
+  input. V6 skips a laundered `var` binding (a `kind` outside `let`/`const`); V2
+  fires only when its `let`/`const` keyword token heads a declaration (its next
+  token is the declared identifier), so it never over-fires a vocab card on a
+  contextual keyword used as a property or object-literal key (`obj.let`,
+  `{ const: 1 }` — both emitted as keyword tokens by embody's (acorn-based)
+  context-free tokenizer). This is a deliberate **V1/V2 divergence**: V1
+  (category-ID) correctly answers `keyword` for such a token — "what category is
+  this?" is honest even for a contextual keyword — while V2's "what does this
+  keyword _do_?" is meaningful only for a real declaration, so only V2 guards.
 - **One generator per `form`, registered by anchor type.** The three-way anchor
   axis (token / node / program) deliberately extends socratizing's two-way point
   / program split, because classifying's output is token-indexed (per-token
