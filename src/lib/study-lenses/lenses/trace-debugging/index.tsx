@@ -80,13 +80,18 @@ const TraceDebuggingComponent: ComponentType<LensProperties> =
 
 		const mountedReference = useRef<boolean>(false);
 		const controllerReference = useRef<TraceController | null>(null);
+		// Monotonic run generation: a run's callbacks no-op once a newer run (or a
+		// remount) supersedes it, so a stale run's late settlement cannot clobber.
+		const generationReference = useRef<number>(0);
 
 		// Set true in this effect's body / reset false in THIS effect's cleanup, so
-		// StrictMode's mount→unmount→mount leaves the live instance's ref `true`.
+		// StrictMode's mount→unmount→mount leaves the live instance's ref `true`. The
+		// cleanup also cancels a still-draining run, so unmount tears down its worker.
 		useEffect(function trackMounted() {
 			mountedReference.current = true;
 			return function untrackMounted() {
 				mountedReference.current = false;
+				controllerReference.current?.cancel();
 			};
 		}, []);
 
@@ -112,15 +117,15 @@ const TraceDebuggingComponent: ComponentType<LensProperties> =
 			};
 		}, []);
 
-		function isMounted(): boolean {
-			return mountedReference.current;
-		}
-
 		function handleRun(): void {
 			// Tear down a still-draining prior run before starting a new one (a
 			// rapid re-Run): idempotent + a no-op when there is no prior or the
 			// prior already settled, so it never races a clean run.
 			controllerReference.current?.cancel();
+			// Claim this run's generation; the prior run's `isMounted` now reads
+			// false, so its late callbacks no-op instead of clobbering this run.
+			generationReference.current += 1;
+			const generation = generationReference.current;
 			// Empty / non-numeric / ≤0 → OMIT the budget (never an error — the call
 			// validates source, not the budget; `Number('')` is 0, hence `> 0`).
 			const parsed = Number(seconds);
@@ -130,6 +135,14 @@ const TraceDebuggingComponent: ComponentType<LensProperties> =
 					: undefined;
 			function start(): VariablesTraceHandle {
 				return embodiment.evaluation.events.traceVariableLifecycle(options);
+			}
+			// Per-run mounted guard: gates the seam's callbacks on BOTH mount state
+			// AND run identity, so a superseded run is fully gated off.
+			function isMounted(): boolean {
+				return (
+					mountedReference.current &&
+					generation === generationReference.current
+				);
 			}
 			setEvents([]);
 			setSettlement(null);

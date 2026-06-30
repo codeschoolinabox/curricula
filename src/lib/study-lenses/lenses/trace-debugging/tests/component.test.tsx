@@ -12,7 +12,7 @@
  * assertion is wrapped in `await waitFor(...)` (which retries inside `act`).
  */
 
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -20,7 +20,9 @@ import embody from '../../../embody/index.js';
 import type {
 	Snippet,
 	TraceVariableLifecycleOptions,
+	VariablesTraceEvent,
 	VariablesTraceHandle,
+	VariablesTraceResult,
 } from '../../../embody/types.js';
 import traceDebuggingLens from '../index.js';
 
@@ -63,6 +65,48 @@ function get(container: HTMLElement, selector: string): HTMLElement {
 		throw new Error(`missing element: ${selector}`);
 	}
 	return element;
+}
+
+/**
+ * A handle that streams `event` then HANGS — never settling on its own (its
+ * `result` stays pending) until `cancel` releases it. Lets a test prove that
+ * `handle.cancel()` was reached via a specific path (unmount / re-Run) rather than
+ * the seam's end-of-drain `finally` cancel, which fires on any natural settle and
+ * would mask a missing cleanup.
+ */
+function makeHangingHandle(event: VariablesTraceEvent): {
+	readonly handle: VariablesTraceHandle;
+	readonly cancelled: () => boolean;
+} {
+	let releaseHang!: () => void;
+	const hang = new Promise<void>((resolve) => {
+		releaseHang = resolve;
+	});
+	let resolveResult!: (result: VariablesTraceResult) => void;
+	const result = new Promise<VariablesTraceResult>((resolve) => {
+		resolveResult = resolve;
+	});
+	let wasCancelled = false;
+	async function* run(): AsyncGenerator<VariablesTraceEvent> {
+		yield event;
+		await hang; // park until cancel releases it
+		resolveResult({
+			events: [event],
+			settlement: { outcome: 'cancelled', halt: null, durationMs: 0 },
+		});
+	}
+	const handle: VariablesTraceHandle = {
+		[Symbol.asyncIterator]: run,
+		get result(): Promise<VariablesTraceResult> {
+			return result;
+		},
+		cancel: (): void => {
+			wasCancelled = true;
+			releaseHang();
+		},
+		fail: (): void => {},
+	};
+	return { handle, cancelled: () => wasCancelled };
 }
 
 // ─── LensModule shape (synchronous; no run needed) ──────────────
@@ -358,5 +402,74 @@ describe('TraceDebuggingComponent', () => {
 		await waitFor(() => {
 			expect(get(container, '[data-trace-dump="events"]').textContent).toBe('');
 		});
+	});
+
+	// ─── Lifecycle: cleanup-cancel + per-run generation token (Task A) ───
+
+	it('cancels the live run when the component unmounts mid-run', () => {
+		// A HANGING handle (never settles on its own) so `handle.cancel()` can ONLY
+		// be reached via the unmount cleanup-cancel — not the seam's end-of-drain
+		// finally (which fires on any natural settle and would mask a missing
+		// cleanup). Single Run → unmount (no second Run, which would also cancel).
+		const { handle, cancelled } = makeHangingHandle(SCOPE_PUSH);
+		const { embodiment } = makeFakeEmbodiment(handle);
+		const { container, unmount } = render(
+			<traceDebuggingLens.Component
+				embodiment={embodiment}
+				config={traceDebuggingLens.config()}
+			/>,
+		);
+
+		fireEvent.click(get(container, '[data-trace-control="run"]'));
+		unmount();
+
+		// The cleanup-cancel fires synchronously inside unmount(), before any drain
+		// microtask, so assert synchronously.
+		expect(cancelled()).toBe(true);
+	});
+
+	it('does not let a re-Run be clobbered by the prior run’s late cancelled settlement', async () => {
+		// run-1 settles `cancelled` when the re-Run cancels it; run-2 streams one
+		// event then HANGS (never settles), so run-1's late cancelled is the ONLY
+		// settlement that could appear. The per-run generation token must gate it.
+		const { handle: handle2 } = makeHangingHandle(READ);
+		const handles = [
+			makeFakeHandle({ events: [SCOPE_PUSH, READ], terminal: COMPLETED }),
+			handle2,
+		];
+		let callIndex = 0;
+		const embodiment = {
+			evaluation: {
+				events: {
+					traceVariableLifecycle: (): VariablesTraceHandle => {
+						const handle = handles[callIndex];
+						callIndex += 1;
+						return handle;
+					},
+				},
+			},
+		} as unknown as Snippet;
+		const { container } = render(
+			<traceDebuggingLens.Component
+				embodiment={embodiment}
+				config={traceDebuggingLens.config()}
+			/>,
+		);
+		const run = get(container, '[data-trace-control="run"]');
+
+		fireEvent.click(run); // run-1
+		fireEvent.click(run); // re-Run → cancels run-1, starts the hanging run-2
+
+		// Flush all microtasks (+ a macrotask) so run-1's cancelled settlement would
+		// land IF the generation token did not gate the stale run's callbacks.
+		await act(async () => {
+			await new Promise((resolve) => {
+				setTimeout(resolve, 0);
+			});
+		});
+
+		expect(
+			get(container, '[data-trace-dump="settlement"]').textContent,
+		).not.toContain('cancelled');
 	});
 });
