@@ -206,8 +206,8 @@ against a stable shape.
                                        .cm-quiz-progress-N / .cm-quiz-wrong (mastery — inc 5),
                                        .cm-quiz-pending (answer-phase staged ranges — inc 6c, a box outline).
   <aside data-quiz-panel>            — the picked anchor's question(s). Absent until an anchor is picked.
-    <div data-quiz-tablist>          — one tab per co-anchored item; present only when >1 item.
-      <button data-quiz-tab="<itemId>" aria-selected="true|false">  — neutral label (bare index);
+    <div data-quiz-tablist role="tablist">  — one tab per co-anchored item; present only when >1 item.
+      <button data-quiz-tab="<itemId>" role="tab" aria-selected="true|false">  — neutral label (bare index);
                                        the active tab is aria-selected="true", the rest "false".
     — the ACTIVE tab's body, rendered by its item.mode:
       mcq:          <button data-quiz-option="<optionId>"> ... </button>   — one per option.

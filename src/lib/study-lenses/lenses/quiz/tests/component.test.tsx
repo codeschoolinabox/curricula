@@ -18,9 +18,9 @@
  */
 
 import { EditorView } from '@codemirror/view';
-import { cleanup, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import embody from '../../../embody/index.js';
 import quizLens from '../index.js';
@@ -182,6 +182,165 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 					config={quizLens.config()}
 				/>,
 			);
+			expect(container.querySelector('[data-quiz-verdict]')).toBeNull();
+		});
+
+		it('renders no data-quiz-tablist before any anchor is picked', () => {
+			const { container } = render(
+				<quizLens.Component
+					embodiment={embody('OK')}
+					config={quizLens.config()}
+				/>,
+			);
+			expect(container.querySelector('[data-quiz-tablist]')).toBeNull();
+		});
+	});
+
+	// Inc 6a-i: co-anchored answer-neutral tabs + per-item verdict. jsdom has no
+	// CM layout, so a pick is driven by stubbing the editor's `posAtCoords` and
+	// dispatching a real mousedown; the panel + tab interactions are then plain
+	// React DOM. The REAL click→pick path (posAtCoords over a laid-out editor) is
+	// verified at the 🔍 sandbox; here we lock the panel state machine the pick
+	// drives.
+	describe('co-anchored tabs + per-item verdict', () => {
+		// `let x = 1; x;`: `=`=[6,7) is lone-V1; ref `x`=[11,12) → V1+V7 (two mcq).
+		const REFERENCE_X = 11;
+		const OPERATOR = 6;
+
+		// Mount on the real-composition fixture, wait for the editor, then drive a
+		// pick at `offset` via a posAtCoords stub. Returns the container + the spy
+		// (re-point it with `spy.mockReturnValue(n)` + another dispatch to re-pick).
+		async function mountAndPick(offset: number) {
+			const { container } = render(
+				<quizLens.Component
+					embodiment={embody('let x = 1; x;')}
+					config={quizLens.config()}
+				/>,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('.cm-content')).not.toBeNull();
+			});
+			const cmContent = container.querySelector('.cm-content') as HTMLElement;
+			const view = EditorView.findFromDOM(cmContent);
+			if (view === null) throw new Error('no editor view');
+			const spy = vi.spyOn(view, 'posAtCoords').mockReturnValue(offset);
+			cmContent.dispatchEvent(
+				new MouseEvent('mousedown', { bubbles: true, clientX: 1, clientY: 1 }),
+			);
+			await waitFor(() => {
+				expect(container.querySelector('[data-quiz-panel]')).not.toBeNull();
+			});
+			return { container, cmContent, spy };
+		}
+
+		it('a co-anchored token shows one tab per item — the reference x → 2 tabs', async () => {
+			const { container } = await mountAndPick(REFERENCE_X);
+			expect(container.querySelectorAll('[data-quiz-tab]').length).toBe(2);
+		});
+
+		it('a deeper co-anchored token shows a tab per item — the declaration x → 3 tabs', async () => {
+			// decl `x`=[4,5) co-anchors V1 + V6 + V7 (all mcq) — the tab loop is
+			// generic over N, not a hardcoded 2.
+			const { container } = await mountAndPick(4);
+			expect(container.querySelectorAll('[data-quiz-tab]').length).toBe(3);
+		});
+
+		it('tab labels are neutral bare indices, never the prompt or a gesture verb', async () => {
+			const { container } = await mountAndPick(REFERENCE_X);
+			const labels = [...container.querySelectorAll('[data-quiz-tab]')].map(
+				(tab) => tab.textContent,
+			);
+			expect(labels).toEqual(['1', '2']);
+		});
+
+		it('the default active tab is the first mcq — tab 0 aria-selected (never auto-arm)', async () => {
+			const { container } = await mountAndPick(REFERENCE_X);
+			const tabs = container.querySelectorAll('[data-quiz-tab]');
+			expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+			expect(tabs[1].getAttribute('aria-selected')).toBe('false');
+		});
+
+		it('a lone-anchor token renders the panel with NO tablist (the `=` token)', async () => {
+			const { container } = await mountAndPick(OPERATOR);
+			expect(container.querySelector('[data-quiz-panel]')).not.toBeNull();
+			expect(container.querySelector('[data-quiz-tablist]')).toBeNull();
+		});
+
+		it('selecting a tab moves the active selection (aria-selected follows the click)', async () => {
+			const { container } = await mountAndPick(REFERENCE_X);
+			fireEvent.click(container.querySelectorAll('[data-quiz-tab]')[1]);
+			await waitFor(() => {
+				expect(
+					container
+						.querySelectorAll('[data-quiz-tab]')[1]
+						.getAttribute('aria-selected'),
+				).toBe('true');
+			});
+			expect(
+				container
+					.querySelectorAll('[data-quiz-tab]')[0]
+					.getAttribute('aria-selected'),
+			).toBe('false');
+		});
+
+		it('verdict is per-item: answering tab 0 leaves tab 1 with no verdict', async () => {
+			const { container } = await mountAndPick(REFERENCE_X);
+			fireEvent.click(
+				container.querySelector('[data-quiz-option]') as HTMLElement,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('[data-quiz-verdict]')).not.toBeNull();
+			});
+			// The verdict carries a real graded status (not a stub attribute) — guards
+			// against a verdict region keyed to the wrong item.
+			expect(
+				container.querySelector<HTMLElement>('[data-quiz-verdict]')?.dataset
+					.quizVerdict,
+			).toMatch(/^(correct|incorrect)$/);
+			fireEvent.click(container.querySelectorAll('[data-quiz-tab]')[1]);
+			await waitFor(() => {
+				expect(
+					container
+						.querySelectorAll('[data-quiz-tab]')[1]
+						.getAttribute('aria-selected'),
+				).toBe('true');
+			});
+			expect(container.querySelector('[data-quiz-verdict]')).toBeNull();
+		});
+
+		it('verdict persists per-item: returning to tab 0 still shows its verdict', async () => {
+			const { container } = await mountAndPick(REFERENCE_X);
+			fireEvent.click(
+				container.querySelector('[data-quiz-option]') as HTMLElement,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('[data-quiz-verdict]')).not.toBeNull();
+			});
+			fireEvent.click(container.querySelectorAll('[data-quiz-tab]')[1]);
+			await waitFor(() => {
+				expect(container.querySelector('[data-quiz-verdict]')).toBeNull();
+			});
+			fireEvent.click(container.querySelectorAll('[data-quiz-tab]')[0]);
+			await waitFor(() => {
+				expect(container.querySelector('[data-quiz-verdict]')).not.toBeNull();
+			});
+		});
+
+		it('re-picking a different anchor clears the prior pick’s verdicts', async () => {
+			const { container, cmContent, spy } = await mountAndPick(REFERENCE_X);
+			fireEvent.click(
+				container.querySelector('[data-quiz-option]') as HTMLElement,
+			);
+			await waitFor(() => {
+				expect(container.querySelector('[data-quiz-verdict]')).not.toBeNull();
+			});
+			spy.mockReturnValue(OPERATOR);
+			cmContent.dispatchEvent(
+				new MouseEvent('mousedown', { bubbles: true, clientX: 1, clientY: 1 }),
+			);
+			await waitFor(() => {
+				expect(container.querySelector('[data-quiz-tablist]')).toBeNull();
+			});
 			expect(container.querySelector('[data-quiz-verdict]')).toBeNull();
 		});
 	});

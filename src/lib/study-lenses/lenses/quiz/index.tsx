@@ -1,24 +1,26 @@
 /**
- * @file React wrapper for the `quiz` lens — Slice A. Renders a read-only,
- * un-colorized CodeMirror editor over the snippet (the lens's own decorations,
- * NOT syntax highlighting, carry meaning); clicking a syntax element highlights
- * that anchor (inc 2) and opens a question panel with the V1 prompt + options
- * (inc 3). A fallback notice renders when the snippet did not parse. Graded
- * verdicts (inc 4) build on the panel. Owns all per-mount learner state; never
- * writes to the orchestrator's snippet (single-writer invariant). Freezes +
- * default-exports the `LensModule`.
+ * @file React wrapper for the `quiz` lens. Renders a read-only, un-colorized
+ * CodeMirror editor over the snippet (the lens's own decorations, NOT syntax
+ * highlighting, carry meaning); clicking a syntax element highlights that anchor
+ * and opens a question panel. Co-anchored items render as **answer-neutral tabs**
+ * (inc 6); the active tab's body grades against machine-derived ground truth and
+ * the verdict is held **per item** (`VerdictsByItemId`), so switching tabs never
+ * shows one question's verdict under another. A fallback notice renders when the
+ * snippet did not parse. Owns all per-mount learner state (picked anchor, active
+ * tab, per-item verdicts, mastery); never writes to the orchestrator's snippet
+ * (single-writer invariant). Freezes + default-exports the `LensModule`.
  */
 
 import { EditorState, StateEffect, StateField } from '@codemirror/state';
 import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactElement } from 'react';
 
 import freezeInPlace from '@utils/freeze-in-place.js';
 
 import type { ClassifiedToken } from '../../lib/classifying/types.js';
-import type { McqQuizItem, Verdict } from '../../lib/quizzing/types.js';
+import type { McqQuizItem, QuizItem } from '../../lib/quizzing/types.js';
 import type { LensModule, LensProps as LensProperties } from '../types.js';
 
 import quizCore from './core.js';
@@ -26,7 +28,13 @@ import anchors from './lib/anchors.js';
 import buildQuiz from './lib/build-quiz.js';
 import masteryDecorations from './lib/decorations.js';
 import gradeOption from './lib/grade-option.js';
-import type { MasteryDecos, MasteryState, ProgressBucket } from './types.js';
+import type {
+	ActiveTab,
+	MasteryDecos,
+	MasteryState,
+	ProgressBucket,
+	VerdictsByItemId,
+} from './types.js';
 
 import './quiz.css';
 
@@ -98,6 +106,12 @@ const masteryField = StateField.define<DecorationSet>({
 // `EMPTY_RECOMMENDATIONS`).
 const EMPTY_MASTERY = freezeInPlace<MasteryState>({});
 
+// The empty per-item verdict map + the empty co-anchored bundle, hoisted as stable
+// frozen references (the reset effects assign `EMPTY_VERDICTS` as a referential
+// no-op on mount, like `EMPTY_MASTERY`; `EMPTY_BUNDLE` is the no-pick bundle).
+const EMPTY_VERDICTS = freezeInPlace<VerdictsByItemId>({});
+const EMPTY_BUNDLE = freezeInPlace<readonly QuizItem[]>([]);
+
 // Slice A reads no config knob (the V1 form is parameterless), so the wrapper
 // takes only `embodiment`; the `core.config(props.config)` resolution lands
 // with the first knob (inc 8).
@@ -115,9 +129,15 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	const classifiedReference = useRef<readonly ClassifiedToken[]>(classified);
 	classifiedReference.current = classified;
 
-	// The V1 quiz items (one per token); the panel resolves the picked range to
-	// its item via `itemsAt`.
-	const items = model?.items ?? [];
+	// The admitted quiz items (the mcq forms co-anchored across the snippet); the
+	// panel resolves the picked range to its bundle via `itemsAt`. Mirrored into a
+	// ref the `[pickedRange]` reset effect reads, so it never closes over a stale
+	// `items` — the same discipline as `classifiedReference`. (Today `items` only
+	// changes with the source, which also nulls `pickedRange` and short-circuits the
+	// effect, so this is consistency + future-proofing more than a live hazard.)
+	const items = model?.items ?? EMPTY_BUNDLE;
+	const itemsReference = useRef<readonly QuizItem[]>(items);
+	itemsReference.current = items;
 
 	// The picked anchor's range (per-mount UI state); null when nothing — or
 	// whitespace — is selected. Drives the highlight decoration.
@@ -125,9 +145,17 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		readonly [number, number] | null
 	>(null);
 
-	// The verdict for the most recent answer at the picked anchor; null until the
-	// learner answers. Reset whenever the pick changes (a new anchor → no verdict).
-	const [verdict, setVerdict] = useState<Verdict | null>(null);
+	// Which co-anchored tab is active — an index into the picked bundle, or null
+	// when no tab is armed. Reset to the mode-aware default (first mcq) on re-pick;
+	// the lens's "never auto-arm" invariant lives in `anchors.defaultActiveTab`.
+	const [activeTab, setActiveTab] = useState<ActiveTab>(null);
+
+	// The per-item verdicts for the CURRENT pick — one `Verdict` per answered item
+	// id. Replaces Slice A's single verdict: with co-anchored tabs a lone verdict
+	// would render under the wrong tab on a switch. Cleared on re-pick / source
+	// change; preserved across a tab switch (the within-pick isolation it exists for).
+	const [verdictsByItemId, setVerdictsByItemId] =
+		useState<VerdictsByItemId>(EMPTY_VERDICTS);
 
 	// Per-group mastery accrued from graded answers (inc 5). Disposable practice:
 	// reset on source change. Drives the two color-free decoration channels.
@@ -165,8 +193,13 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 									setPickedRange(
 										token === null ? null : [token.start, token.end],
 									);
-									// Do not preventDefault on a read-only view.
-									return false;
+									// The lens HANDLED this mousedown as an anchor pick — return
+									// `true` to signal handled, so CodeMirror then `preventDefault`s
+									// the browser event and skips its own built-in text-selection
+									// gesture (a click on this read-only surface is a pick, never a
+									// cursor/selection move; `return false` lets that gesture run —
+									// and crashes jsdom's layout-less `Range.getClientRects`).
+									return true;
 								},
 							}),
 						],
@@ -197,28 +230,40 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		[pickedRange],
 	);
 
-	// Clear the pick when the source changes so a stale range never drives the
-	// panel/highlight against a different snippet (AR-4 inc-2 #3). Snippet change
-	// is normally an unmount+remount per disposable practice (the preview keys on
-	// the code), so this guards the rare in-place embodiment-swap; it also fires
-	// once on mount — a no-op, since `pickedRange` is already null at init.
-	// (Clearing pickedRange cascades into resetVerdictOnRepick below; no need to
-	// clear the verdict here directly. The MasteryState reset joins it here —
-	// `EMPTY_MASTERY` is a stable ref, so it is a no-op on mount.)
+	// Clear the pick + the durable mastery + the per-item verdicts when the source
+	// changes, so nothing stale drives the panel against a different snippet (AR-4
+	// inc-2 #3). Snippet change is normally an unmount+remount per disposable
+	// practice (the preview keys on the code), so this guards the rare in-place
+	// embodiment-swap; it also fires once on mount — a no-op, since every target is
+	// already its stable empty. `activeTab` is NOT reset here: nulling `pickedRange`
+	// cascades into `resetTabOnRepick` below, which owns the `activeTab` reset (the
+	// single-owner discipline — a second `setActiveTab` here would be a redundant
+	// double-write).
 	useEffect(
 		function clearPickOnSourceChange() {
 			setPickedRange(null);
 			setMastery(EMPTY_MASTERY);
+			setVerdictsByItemId(EMPTY_VERDICTS);
 		},
 		[embodiment.source.code],
 	);
 
-	// Clear the verdict whenever the pick changes — a freshly picked anchor has
-	// no answer yet (answering does NOT change pickedRange, so a verdict persists
-	// for its own anchor). Also fires once on mount (no-op — verdict is null).
+	// On every re-pick (a new anchor, or a clear to null), clear the pick's verdicts
+	// and reset the active tab to the new bundle's mode-aware default (first mcq,
+	// else null/unarmed). Reads `items` via `itemsReference` (not the closed-over
+	// `items`), so the effect stays keyed on `[pickedRange]` alone without going
+	// stale. Mastery persists (it is the durable cross-pick record). Replaces Slice
+	// A's `resetVerdictOnRepick` — `activeVerdict` is now derived, not stored.
 	useEffect(
-		function resetVerdictOnRepick() {
-			setVerdict(null);
+		function resetTabOnRepick() {
+			setVerdictsByItemId(EMPTY_VERDICTS);
+			setActiveTab(
+				pickedRange === null
+					? null
+					: anchors.defaultActiveTab(
+							anchors.itemsAt(itemsReference.current, pickedRange),
+						),
+			);
 		},
 		[pickedRange],
 	);
@@ -240,27 +285,64 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		[masteryDecos],
 	);
 
-	// The question for the picked anchor. `itemsAt` now returns the full
-	// co-anchored `QuizItem` bundle (the widen); until the tab framework lands
-	// (6a-i sub-increment 3) the panel still renders the first item, narrowed to
-	// `mcq` — the `mode === 'mcq'` guard keeps this type-safe and gracefully renders
-	// no panel for a non-mcq first item. In practice V1 (token-anchored, first in
-	// registry order) co-anchors every token, so the first item is always its mcq
-	// category-ID question — identical behavior to the pre-widen single-item render.
-	const firstItem =
-		pickedRange === null
-			? null
-			: (anchors.itemsAt(items, pickedRange)[0] ?? null);
-	const question =
-		firstItem !== null && firstItem.mode === 'mcq' ? firstItem : null;
+	// Resolve the picked anchor to its co-anchored bundle, then derive the active
+	// item + its verdict. `activeItem` / `activeVerdict` are DERIVED, not stored:
+	// `activeVerdict` being derived is exactly why Slice A's `resetVerdictOnRepick`
+	// is gone. For the one render after a re-pick — before `resetTabOnRepick` settles
+	// the tab + clears verdicts — the OLD `activeTab` indexes the NEW bundle: usually
+	// out-of-range (`undefined` → anchor phase, blank panel), or, if the new bundle is
+	// long enough, the new bundle's item there shows (and, only when re-picking the
+	// SAME token, its prior verdict) for that single frame. Both settle next frame; do
+	// NOT "fix" this with a clamp that would mask a real bug.
+	const bundle =
+		pickedRange === null ? EMPTY_BUNDLE : anchors.itemsAt(items, pickedRange);
+	const activeItem = activeTab === null ? undefined : bundle[activeTab];
+	const activeVerdict =
+		activeItem === undefined ? undefined : verdictsByItemId[activeItem.id];
 
-	// Grade the picked answer, then fold the verdict into mastery. A function
-	// declaration (a block-bodied arrow trips `arrow-body-style`); the functional
-	// `setMastery` updater reads the latest state, never the closed-over `mastery`.
+	// Grade the picked mcq answer into the per-item verdict map, then fold it into
+	// mastery. Function declarations (a block-bodied arrow trips `arrow-body-style`);
+	// both setters are functional updaters reading the latest state, never a
+	// closed-over value. Re-answering overwrites this item's verdict (the buttons
+	// stay live — the inc-5 behavior).
 	function answer(item: McqQuizItem, optionId: string): void {
 		const result = gradeOption(item, optionId);
-		setVerdict(result);
+		setVerdictsByItemId((prior) =>
+			freezeInPlace({ ...prior, [item.id]: result }),
+		);
 		setMastery((prior) => quizCore.masteryFold(prior, item, result));
+	}
+
+	// The `mcq` arm: the prompt + one option button per choice. Extracted (B2) so
+	// `item.options` is read only inside the `mode === 'mcq'`-narrowed scope —
+	// outside a mode guard, JSX touches only `QuizItemBase` fields.
+	function renderMcqTab(item: McqQuizItem): ReactElement {
+		return (
+			<>
+				<p>{item.prompt}</p>
+				{item.options.map((option) => (
+					<button
+						key={option.id}
+						type="button"
+						data-quiz-option={option.id}
+						onClick={() => answer(item, option.id)}
+					>
+						{option.text}
+					</button>
+				))}
+			</>
+		);
+	}
+
+	// The active tab's body, dispatched on its `item.mode` via an if-chain (mirrors
+	// `grade.ts`) — each guard narrows the union before touching a mode-specific
+	// field. 6a renders only the `mcq` arm; the code-surface arms (and the
+	// `const _never: never` exhaustiveness assert) land in 6b/6c, so the chain ends
+	// in a `return null` fallback (unreachable — the build filter admits only mcq).
+	function renderActiveTab(): ReactElement | null {
+		if (activeItem === undefined) return null;
+		if (activeItem.mode === 'mcq') return renderMcqTab(activeItem);
+		return null;
 	}
 
 	if (!embodiment.status.parsed) {
@@ -276,24 +358,34 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 	return (
 		<div data-lens="quiz">
 			<main data-quiz-editor ref={editorContainer} />
-			{question ? (
+			{activeItem ? (
 				<aside data-quiz-panel>
-					<p>{question.prompt}</p>
-					{question.options.map((option) => (
-						<button
-							key={option.id}
-							type="button"
-							data-quiz-option={option.id}
-							onClick={() => answer(question, option.id)}
-						>
-							{option.text}
-						</button>
-					))}
-					{verdict ? (
-						<div data-quiz-verdict={verdict.status} aria-live="polite">
-							{verdict.status === 'malformed'
-								? verdict.reason
-								: verdict.feedback}
+					{/* Minimal ARIA tabs — role=tablist/tab + aria-selected is the a11y
+					    floor; the fuller pattern (role=tabpanel + aria-controls + roving
+					    tabindex) is deferred to 6b/6c, when the panel body gains
+					    Confirm/cancel and a tabpanel landmark earns its keep. */}
+					{bundle.length > 1 ? (
+						<div data-quiz-tablist role="tablist">
+							{bundle.map((item, index) => (
+								<button
+									key={item.id}
+									type="button"
+									role="tab"
+									data-quiz-tab={item.id}
+									aria-selected={activeTab === index ? 'true' : 'false'}
+									onClick={() => setActiveTab(index)}
+								>
+									{index + 1}
+								</button>
+							))}
+						</div>
+					) : null}
+					{renderActiveTab()}
+					{activeVerdict ? (
+						<div data-quiz-verdict={activeVerdict.status} aria-live="polite">
+							{activeVerdict.status === 'malformed'
+								? activeVerdict.reason
+								: activeVerdict.feedback}
 						</div>
 					) : null}
 				</aside>
