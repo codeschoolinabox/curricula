@@ -527,4 +527,123 @@ describe('buildPrompt', () => {
 			expect(base).not.toContain(featureViolation.message);
 		});
 	});
+
+	// Increment 3 — the soft-tier `vary` holds (behavior / strategy / implementation)
+	// render as one instruction per HELD aspect, pinned to "the starting-point
+	// program". Asserted on the load-bearing aspect FRAGMENTS, not whole sentences —
+	// the exact phrasing is PROVISIONAL (a human-gate item: weak local models are
+	// phrasing-sensitive). "starting-point program" (hyphenated) is the marker unique
+	// to the vary section; renderSeed says "starting point" (no hyphen, no "program").
+	describe('vary — the soft-tier holds (provisional wording — human-gate item)', () => {
+		const seed = 'let x = 5;\n';
+		const subset = { include: [], exclude: [] };
+		const violation: ConformanceViolation = {
+			kind: 'feature',
+			feature: 'while',
+			message: 'while-loops are not allowed in this exercise',
+			location: { start: { line: 1, column: 0 }, end: { line: 1, column: 12 } },
+			nodePath: '$.body.0',
+		};
+
+		it('renders no vary section when no soft aspect is held', () => {
+			const none = buildPrompt(seed, 'x', subset, {}, undefined, []);
+			const held = buildPrompt(seed, 'x', subset, {}, undefined, ['behavior']);
+
+			expect(none).not.toContain('starting-point program');
+			expect(held).toContain('starting-point program');
+		});
+
+		it('renders an instruction only for the held aspect, pinned to the seed', () => {
+			const prompt = buildPrompt(seed, 'x', subset, {}, undefined, [
+				'behavior',
+			]);
+
+			expect(prompt).toContain('outwardly visible behavior');
+			expect(prompt).toContain('starting-point program');
+			// freed aspects emit nothing ('algorithm' = strategy fragment,
+			// 'incidental' = the provisional implementation fragment)
+			expect(prompt).not.toContain('algorithm');
+			expect(prompt).not.toContain('incidental');
+		});
+
+		it('emits the soft instruction even on an empty program (a vacuous hold is not an error)', () => {
+			// renderVary takes only softHolds, not the program — a soft hold with no
+			// seed to reference is an instruction the model ignores, never suppressed.
+			const prompt = buildPrompt('', 'x', subset, {}, undefined, ['behavior']);
+
+			expect(prompt).toContain('outwardly visible behavior');
+			expect(prompt).toContain('starting-point program');
+		});
+
+		it('renders strategy and implementation individually, held-only', () => {
+			const strategy = buildPrompt(seed, 'x', subset, {}, undefined, [
+				'strategy',
+			]);
+			const impl = buildPrompt(seed, 'x', subset, {}, undefined, [
+				'implementation',
+			]);
+
+			expect(strategy).toContain('algorithm');
+			expect(strategy).not.toContain('outwardly visible behavior');
+			expect(strategy).not.toContain('incidental');
+
+			expect(impl).toContain('incidental');
+			expect(impl).not.toContain('outwardly visible behavior');
+			expect(impl).not.toContain('algorithm');
+		});
+
+		it('renders held aspects in canonical order, independent of caller order', () => {
+			// scrambled input: strategy before behavior
+			const prompt = buildPrompt(seed, 'x', subset, {}, undefined, [
+				'strategy',
+				'behavior',
+			]);
+
+			// presence guards first, so a missing fragment fails readably (not -1 < -1)
+			expect(prompt).toContain('outwardly visible behavior');
+			expect(prompt).toContain('algorithm');
+			expect(prompt.indexOf('outwardly visible behavior')).toBeLessThan(
+				prompt.indexOf('algorithm'),
+			);
+		});
+
+		it('slots the vary section AFTER the requirements and BEFORE the repair', () => {
+			const prompt = buildPrompt(
+				seed,
+				'x',
+				{ include: ['if'], exclude: [] },
+				{},
+				{ candidate: 'while (true) {}\n', violations: [violation] },
+				['behavior'],
+			);
+
+			const requirementsIndex = prompt.indexOf('if-statements');
+			const varyIndex = prompt.indexOf('outwardly visible behavior');
+			const repairIndex = prompt.indexOf(violation.message);
+
+			expect(varyIndex).toBeGreaterThan(requirementsIndex);
+			expect(varyIndex).toBeLessThan(repairIndex);
+		});
+
+		it('the seed reference points at the seed, not the refused candidate', () => {
+			const prompt = buildPrompt(
+				seed,
+				'x',
+				subset,
+				{},
+				{ candidate: 'while (true) {}\n', violations: [violation] },
+				['behavior'],
+			);
+
+			// the soft instruction (about the starting point) is present AND sits
+			// AFTER the seed block but BEFORE the repair candidate (guard against a
+			// vacuous -1 < index pass)
+			const seedReferenceIndex = prompt.indexOf('starting-point program');
+			expect(seedReferenceIndex).toBeGreaterThanOrEqual(0);
+			expect(seedReferenceIndex).toBeGreaterThan(prompt.indexOf(seed));
+			expect(seedReferenceIndex).toBeLessThan(
+				prompt.indexOf('while (true) {}'),
+			);
+		});
+	});
 });

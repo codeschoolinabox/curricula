@@ -3,6 +3,7 @@ import type {
 	FeatureSubset,
 	RepairContext,
 	SizeBounds,
+	SoftAspect,
 } from './types.js';
 
 /**
@@ -39,6 +40,11 @@ import type {
  * seeded: the whole base ask is re-stated (`generate` is stateless, with no
  * conversation history) and the prior refused candidate plus its located reasons
  * are folded in AFTER the constraints, before the output instruction.
+ *
+ * The optional `softHolds` adds the soft-tier `vary` block — one instruction per
+ * held behavior/strategy/implementation aspect, pinned to the seed — between the
+ * requirements and the repair. Prompt-only and never gated (the soft tier has
+ * nothing to enforce); empty/absent ⇒ no block.
  */
 export default function buildPrompt(
 	program: string,
@@ -46,18 +52,56 @@ export default function buildPrompt(
 	subset: FeatureSubset,
 	size: SizeBounds,
 	repair?: RepairContext,
+	softHolds: readonly SoftAspect[] = [],
 ): string {
 	const sections = [
 		PERSONA,
 		prompt,
 		renderSeed(program),
 		renderRequirements(subset, size),
+		renderVary(softHolds),
 		renderRepair(repair),
 		OUTPUT_INSTRUCTION,
 	];
 
 	return sections.filter((section) => section.length > 0).join('\n\n');
 }
+
+/**
+ * The soft-tier vary block — one instruction per HELD soft aspect (behavior /
+ * strategy / implementation), each pinned to "the starting-point program"
+ * (matching renderSeed's own wording for the seed). The section sits BEFORE renderRepair, so
+ * the reference is unambiguously the seed, never a repair turn's refused
+ * candidate. Empty when no soft aspect is held; renders in canonical
+ * VARY_PHRASING order, independent of caller order (mirrors renderList).
+ *
+ * PROVISIONAL WORDING — the exact phrasing is a HUMAN-GATE ITEM (weak local
+ * models are phrasing-sensitive); tune once tested against a real model.
+ */
+function renderVary(softHolds: readonly SoftAspect[]): string {
+	const held = new Set<SoftAspect>(softHolds);
+	const instructions = [...VARY_PHRASING]
+		.filter(([aspect]) => held.has(aspect))
+		.map(([, phrasing]) => `- ${phrasing}`);
+
+	if (instructions.length === 0) return '';
+
+	return [VARY_HEADER, ...instructions].join('\n');
+}
+
+const VARY_HEADER = 'Keep these the same as in the starting-point program:';
+
+/**
+ * The provisional `SoftAspect` → instruction-phrasing map; insertion order is the
+ * canonical render order (behavior → strategy → implementation), a sibling of
+ * FEATURE_PHRASING. The "starting-point program" reference lives in VARY_HEADER,
+ * not in each bullet.
+ */
+const VARY_PHRASING: ReadonlyMap<SoftAspect, string> = new Map([
+	['behavior', 'the outwardly visible behavior (the same UI / console output)'],
+	['strategy', 'the overall algorithm / strategy'],
+	['implementation', 'the actual code, changing only incidental details'],
+]);
 
 const PERSONA =
 	'You are writing a short JavaScript program for a student to read and trace by hand. Give the variables and scenario a single, consistent real-world theme.';
