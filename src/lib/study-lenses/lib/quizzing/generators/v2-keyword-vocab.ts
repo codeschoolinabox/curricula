@@ -28,10 +28,13 @@ const v2KeywordVocab: Generator = {
 	anchorType: 'token',
 	build(
 		token: ClassifiedToken,
-		_context: GenerationContext,
+		context: GenerationContext,
 	): readonly QuizItem[] {
 		const keyword = token.text;
 		if (token.categories[0] !== 'keyword' || !isVocabKeyword(keyword)) {
+			return [];
+		}
+		if (!headsDeclaration(token, context.classified)) {
 			return [];
 		}
 		return [buildV2Item(token, keyword)];
@@ -43,6 +46,25 @@ export default v2KeywordVocab;
 /** Whether a token's text is one of the declaration-keyword vocab words. */
 function isVocabKeyword(text: string): text is VocabKeyword {
 	return text === 'let' || text === 'const';
+}
+
+/**
+ * Whether this `let` / `const` keyword token heads a declaration — its next
+ * meaningful token (in source order) is the declared identifier. The acorn
+ * tokenizer is context-free, so it labels `let` / `const` as keyword tokens even
+ * in non-declaration positions (`obj.let`, `{ const: 1 }`); classifying carries
+ * that label through. Without this check V2 would over-fire a keyword-vocab card on
+ * a property or object-literal key name. A real declaration's next token is the
+ * declared identifier (`let x`, `for (let i …)`); a contextual keyword's is a
+ * delimiter (`.`-member's `;`, the key's `:`). Lexical-only (token category +
+ * source order) — no AST or binding lookup, so V2 stays text-surface × atom.
+ */
+function headsDeclaration(
+	token: ClassifiedToken,
+	classified: readonly ClassifiedToken[],
+): boolean {
+	const next = classified.find((other) => other.start >= token.end);
+	return next?.categories[0] === 'identifier';
 }
 
 /**
@@ -103,7 +125,7 @@ const KEYWORD_ANSWER: Readonly<Record<VocabKeyword, V2OptionId>> = {
 const KEYWORD_FEEDBACK: Readonly<Record<VocabKeyword, string>> = {
 	let: '`let` introduces a reassignable binding: you can update its value after initialization.',
 	const:
-		'`const` introduces an initialize-once binding: its value is set at initialization and never reassigned (an update attempt throws TypeError).',
+		'`const` introduces an initialize-once binding: its value is set at initialization and never reassigned.',
 };
 
 // Frozen at declaration (shared by reference across every V2 item, like V1_OPTIONS)

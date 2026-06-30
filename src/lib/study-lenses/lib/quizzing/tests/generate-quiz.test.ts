@@ -84,6 +84,16 @@ describe('generateQuiz', () => {
 				),
 			).toEqual(new Set(['V1', 'V7', 'V8', 'V10a', 'V10b', 'V10c']));
 		});
+
+		it('emits exactly one V2 item (the declaration) for a contextual keyword as a property', () => {
+			// `obj.let` must not add a second V2 card on the property name — only the
+			// real `const obj` declaration keyword fires.
+			const snippet = embody('const obj = {}; obj.let;');
+			const v2Count = generateQuiz(snippet, classifyOf(snippet)).filter(
+				(item) => item.form === 'V2',
+			).length;
+			expect(v2Count).toBe(1);
+		});
 	});
 
 	describe('Interfaces', () => {

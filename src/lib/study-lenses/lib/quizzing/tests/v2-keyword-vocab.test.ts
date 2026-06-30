@@ -138,6 +138,34 @@ describe('v2KeywordVocab', () => {
 			expect(items).toHaveLength(1);
 			expect(items[0]?.anchorRange).toEqual([5, 10]);
 		});
+
+		it('fires on a for-loop-init let, whose next token is the loop identifier', () => {
+			// Triangulates the discriminant: the `let` at [5,8] is preceded by `(`
+			// (not a member `.`), so a lookbehind guard would wrongly skip it; only a
+			// "next token is an identifier" guard keeps it firing.
+			const items = v2ItemsOf('for (let i = 0; i < 3; i++) {}');
+			expect(items).toHaveLength(1);
+			expect(items[0]?.anchorRange).toEqual([5, 8]);
+		});
+
+		it('does not fire on a contextual keyword used as a member property', () => {
+			// The acorn tokenizer is context-free, so `obj.let`'s `let` is still emitted
+			// as a keyword token; classifying labels it `keyword`. The guard distinguishes
+			// it by its next meaningful token — here `;` (delimiter), not an identifier —
+			// so only the real `const obj` declaration fires.
+			const items = v2ItemsOf('const obj = {}; obj.let;');
+			expect(items).toHaveLength(1);
+			expect(items[0]?.anchorRange).toEqual([0, 5]);
+		});
+
+		it('does not fire on a contextual keyword used as an object-literal key', () => {
+			// Same mechanism: the tokenizer emits `{ const: 1 }`'s `const` as a keyword
+			// token even in key position; its next token is `:` (delimiter), so the
+			// guard skips it — only the real `let p` declaration fires.
+			const items = v2ItemsOf('let p = { const: 1 };');
+			expect(items).toHaveLength(1);
+			expect(items[0]?.anchorRange).toEqual([0, 3]);
+		});
 	});
 
 	describe('Interfaces', () => {
