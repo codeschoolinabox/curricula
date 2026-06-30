@@ -171,8 +171,10 @@ These selectors are stable; renaming or removing one is a contract change.
 ## How to navigate the code
 
 - `index.tsx` — default export: the `LensModule` with the React `Component`.
-  Owns the click-kickoff Run, the Stop/seconds controls, the three dumps, and
-  the cleanup-cancel / cancel-on-embodiment-identity lifecycle.
+  Owns the click-kickoff Run, the Stop/seconds controls, the three dumps, and the
+  cleanup-cancel + mounted-guard + per-run generation-token lifecycle.
+  (Cancel-on-embodiment-identity is **cut** — dev-only; see DOCS § Implementation
+  status.)
 - `core.ts` — pure-TS derivation: `formatEvent`, `deriveSettlementModel`,
   `formatAdmissionError`. No React, no async; testable in vitest without
   `jsdom`.

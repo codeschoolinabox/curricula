@@ -45,7 +45,8 @@ function noop(): void {
  * callback, never the pull), reads `result` once for the settlement (ignoring
  * `result.events`), and — through a swallowing `catch` plus a guarded `finally`
  * cancel — guarantees `done` resolves on every path and never rejects, which is
- * why the React shell may `void` it without a `.catch`.
+ * why the React shell may ignore it (store the controller, never read `done`)
+ * without a `.catch` (`void` is banned by `sonarjs/void-use`).
  */
 const runTrace: RunTrace = function runTrace(start, callbacks, isMounted) {
 	let handle: VariablesTraceHandle;
