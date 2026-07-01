@@ -308,14 +308,58 @@ type RunLimits = Readonly<{
 type DockRunState = 'idle' | 'running' | 'settled';
 
 /**
- * The dock's two output channels — each rendering one of the NM's two I/O
- * channels: `'user-interface'` (alert/confirm/prompt dialogs) and
- * `'developer-console'` (`console.*`).
+ * The two NM I/O channels — `'user-interface'` (alert/confirm/prompt — the
+ * interactive user-audience channel) and `'developer-console'` (`console.*` — the
+ * passive dev-audience channel).
  *
- * @remarks "Channel", never "panel" ("panel" is reserved for the phases panel).
- * Surfaced as `data-orchestrator-dock-channel`. See `./README.md` § Glossary.
+ * @remarks Each channel renders in its **output panel** (the content-row surface
+ * right of the active surface — `./output-panels/`), surfaced as
+ * `data-orchestrator-output-channel="<ChannelKind>"` (renamed from the retired
+ * `-dock-channel` when the channels left the dock). Homonym: an **output panel** is
+ * NOT **the phases panel** — see `./README.md` § Glossary.
  */
 type ChannelKind = 'user-interface' | 'developer-console';
+
+/**
+ * Per-channel dismissal flags for the output panels. `true` = the learner dismissed
+ * that panel (✕); it is not rendered until the next Run resets the slot.
+ *
+ * @remarks A top-level orchestrator `useState` slot, reset in `handleRun` (same batch
+ * as the channel-output reset). Panel **appearance** is otherwise derived, not stored:
+ * the `<OutputPanels>` surface mounts only while `runState !== 'idle'`, and within it
+ * a channel renders iff `!dismissed[channel]`. The User Interface panel cannot be
+ * dismissed while an interaction is pending (modal). See `./README.md` § The output
+ * panels.
+ */
+type OutputPanelDismissal = Readonly<Record<ChannelKind, boolean>>;
+
+/**
+ * A pending interactive IO request awaiting the learner's answer — the displayable
+ * half of an in-flight `alert` / `confirm` / `prompt` call (`null` when nothing is
+ * awaiting). A faithful, modal match for the native dialogs.
+ *
+ * @remarks During a run the orchestrator's async `IoMocks` (built in `handleRun`) set
+ * this slot and return the Promise the worker awaits; the User Interface panel renders
+ * it and routes the answer back through `onAnswer`, which resolves the Promise (the
+ * resolver is held in a ref, NOT here — this carries only render data) and clears the
+ * slot. The worker pauses while it awaits (run timer paused). **Single-pending
+ * invariant:** the engine serializes IO on the SAB, so at most one is pending at a
+ * time. Per-kind answer contract is {@link InteractionAnswer}. See
+ * [`../embody/lib/evaluating/intercept/README.md`](../embody/lib/evaluating/intercept/README.md)
+ * § IO execution model and `./README.md` § The output panels.
+ */
+type PendingInteraction =
+	| Readonly<{ kind: 'alert'; message: string }>
+	| Readonly<{ kind: 'confirm'; message: string }>
+	| Readonly<{ kind: 'prompt'; message: string; defaultValue?: string }>;
+
+/**
+ * The learner's answer to a {@link PendingInteraction}, routed up via the output
+ * panels' `onAnswer` and passed to the run's held resolver. Mirrors the natives
+ * per-kind: `alert` → `undefined` (native returns `void`); `confirm` → `boolean`;
+ * `prompt` → `string | null`.
+ */
+type InteractionAnswer = undefined | boolean | string | null;
 
 /**
  * The terminal classification of one run — embody's `EndReport['outcome']`
@@ -518,6 +562,9 @@ export type {
 	RunLimits,
 	DockRunState,
 	ChannelKind,
+	OutputPanelDismissal,
+	PendingInteraction,
+	InteractionAnswer,
 	EndReportOutcome,
 	OrchestratorConfig,
 	LensSelectionSource,
