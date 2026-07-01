@@ -4,7 +4,7 @@ sidebar_position: 1
 
 <!-- markdownlint-disable MD051 -->
 
-# 🐸 Welcome to Frogramming - Syllabus {#welcome-to-frogramming---syllabus}
+# 🐸 Frogramming & Vibetoading: Affordance-Discovery Cycle(s) — Syllabus {#welcome-to-frogramming---syllabus}
 
 > The best authors and the best JavaScript developers are those who obsess about
 > language, who explore and experiment with language every day and in doing so
@@ -15,90 +15,144 @@ sidebar_position: 1
 
 ## TL;DR
 
-**Welcome to Frogramming** is a self-paced course that will take you from
-_learning to program_ (building your code literacy) to _programming to learn_
-(applying your literacy to explore new concepts and skills). You will build
-predictive mastery of JavaScript's notional machine: reading code before writing
-it, correlating syntax to the runtime events it produces, and moving through the
-PRIMM progression (predict, run, investigate, modify, make) until prediction is
-reliable and authorship is confident. Each step of the way you will ground your
-skills in the world around you, learning to consider who you're building for and
-what you hope to achieve. Ultimately you will build the confidence to write your
-own programs, and the awareness to write the _right_ programs.
+**Frogramming & Vibetoading: Affordance-Discovery Cycle(s)** is a self-paced
+course that will take you from _learning to program_ (building your code
+literacy) to _programming to learn_ (applying your literacy to explore new
+concepts and skills). Underneath the JavaScript, what it teaches is the
+**affordance-discovery cycle** — the turn-taking rhythm by which software gets
+made: someone proposes an experience worth having; someone discovers what the
+machine affords that can realize it; and each turn reshapes the next. JavaScript
+is the medium; the cycle is the subject — the most transferable,
+career-preparing skill this course can give you in an ever-changing tech
+landscape. Each step of the way you will ground your skills in the world around
+you, learning to consider who you're building for and what you hope to achieve.
+Ultimately you will build the confidence to write your own programs, and the
+awareness to write the _right_ programs.
 
 ---
 
-**Welcome to Frogramming** is a self-paced course that treats programming as
-collaborative communication. A single piece of source code addresses multiple
-audiences at once (other developers, the computer, users, and AI agents). You
-will develop the ability to recognize who your code is for, understand how each
-audience experiences it, and tailor your decisions so your code does exactly
-what you designed it to do for each of them.
+This course treats programming as collaborative communication. A single piece of
+source code addresses multiple audiences at once (other developers, the
+computer, users, and AI agents). You will develop the ability to recognize who
+your code is for, understand how each audience experiences it, and tailor your
+decisions so your code does exactly what you designed it to do for each of them.
 
-You'll learn to understand and predict what the computer does with your code so
-you can control it precisely. And you'll learn to understand users so you can
-build software that actually serves them, which is ultimately what all the
-technical skill is for. LLMs have made it possible for anyone to build working
-software by describing the user-visible behavior they want without worrying
-about how the computer works behind the scenes. That's **Vibetoading**, and it's
-genuinely powerful for quick prototypes and new projects. But building larger
-systems, extending existing codebases, evaluating whether generated code
-actually does what you need, and making the design judgments that shape what
-gets built in the first place: that's **Frogramming**, and it requires
-understanding the machine behind the scenes well enough to predict and direct
-it.
+The cycle has two hands, and this course names them in its title. The
+**Vibetoading** hand twins the _user_: it proposes an experience worth having
+("when the user clicks, greet them by name…"). The **Frogramming** hand twins
+the _notional machine_: it discovers the affordance that realizes the proposal
+and verifies — by prediction, not hope — that the machine really does what was
+asked. V proposes; F discovers and verifies. LLMs have made the proposing hand
+feel effortless: anyone can describe the user-visible behavior they want and get
+working software without worrying about how the computer works behind the
+scenes, and that is genuinely powerful for quick prototypes and new projects.
+But building larger systems, extending existing codebases, evaluating whether
+generated code actually does what you need, and making the design judgments that
+shape what gets built in the first place — the discovering-and-verifying hand —
+is exactly the half that generative AI cannot replace and threatens to atrophy.
+This course builds it at full depth.
 
-The skills you build here are fundamentally human: communication, empathy,
+That depth has a concrete form: **predictive mastery of JavaScript's notional
+machine**. You will read code before writing it, correlate syntax to the runtime
+events it produces, and move through the PRIMM progression (predict, run,
+investigate, modify, make) until prediction is reliable and authorship is
+confident. Predictive mastery is the F-hand's substance: it is what lets you
+verify with your own head instead of hoping on someone else's word — human or
+machine.
+
+Languages and frameworks churn; the cycle transfers. Once you can twin one
+machine — hold a predictive model of it and interrogate it with small
+experiments — you know how to twin the next one, whatever its syntax. The
+discipline you build here on a deliberately small slice of JavaScript carries to
+every language and every tool you will meet after it.
+
+The skills on the V-hand are fundamentally human: communication, empathy,
 user-centered design thinking, the ability to hold a complex situation in view
-and make it work for real people. Those same human skills are exactly what keep
-you professionally relevant and personally capable in a world where machines
-handle more of the writing. **An LLM can do many things FOR you. It cannot
-UNDERSTAND for you. This curriculum is built around that fact.** Both
-**Frogramming** and deliberate **Vibetoading** have value beyond productivity:
-for the satisfaction of understanding a system deeply, for the new ways of
-thinking it opens up, and for the small programs you write just to explore,
-experiment, or surprise yourself. This course helps you build both at once.
+and make it work for real people. Understanding users so you can build software
+that actually serves them is, ultimately, what all the technical skill is for.
+Those same human skills are exactly what keep you professionally relevant and
+personally capable in a world where machines handle more of the writing. **An
+LLM can do many things FOR you. It cannot UNDERSTAND for you. This curriculum is
+built around that fact.** And it cannot run the cycle for you: it can accelerate
+either hand, but the proposing, the observing, and the judgment that closes each
+turn stay yours.
 
-- **Chapter 0. What is Programming?** Conceptual orientation before any code.
-  You learn to see source code as communication that simultaneously addresses
-  multiple audiences (developers, the computer, users, and agents) and
-  understand why comprehension comes before production.
-- **Chapter 1. Developers.** Your first code and your first audience. You learn
-  to write comments and logs as intentional communication to other developers —
-  including future-you, who is a stranger by the time they come back to this
-  code. **Twinning the developer audience** is the central skill of this
-  chapter, naming what the long programming-culture tradition of "writing for
-  the next reader" has always been. Every small choice in your code (a word, a
-  placement, a method) is a micro-decision that shapes how it reads.
-- **Chapter 2. Developers and Computers.** The computer becomes a full audience.
-  You build an accurate mental model of JavaScript's notional machine (how it
-  evaluates expressions, stores values, walks scope chains) and develop the
-  discipline of predicting evaluation before running code, then verifying with
-  trace tables and the debugger.
-- **Chapter 3. Developers, Computers, and Users.** Users enter the picture. You
-  learn to write programs people interact with, where user-visible behavior
-  becomes the anchor that all your reading, tracing, refactoring, and reviewing
-  skills must preserve. Design thinking across the whole situation begins here.
-- **Chapter 4. Developers, Computers, Users, and Agents.** Source code is the
-  **UI** — the control panel through which a programmer operates the notional
-  machine. LLMs are an alternative way to operate that UI: you delegate the
-  typing while still owning the NM. Two conversational modes fall out of this
-  naturally — **NM-grounded** (Frogramming-with- delegation: "make the NM
+Two commitments, then. The **cycle** is this course's transferable-value claim:
+master it here and it goes with you everywhere. **F-hand predictive mastery** is
+its non-delegable-survival claim: built at depth, because it is the half no one
+and nothing can hold for you. Both **Frogramming** and deliberate
+**Vibetoading** also have value beyond productivity: for the satisfaction of
+understanding a system deeply, for the new ways of thinking it opens up, and for
+the small programs you write just to explore, experiment, or surprise yourself.
+This course helps you build both at once.
+
+The five chapters follow the phases of mastering the cycle: **name** it,
+**live** it F-hand, **live** it V-hand, **concretize and accelerate** it,
+**practice** it for life. All of source code's audiences — developers, the
+computer, users, and agents — are introduced together in Chapter 0⟡ and each is
+deepened in the phase that needs it.
+
+- **Chapter 0⟡. What is Programming?** Conceptual orientation before you write
+  any code — comprehension comes before production, and here that means
+  predict-and-run only. You learn to see source code as communication that
+  simultaneously addresses multiple audiences, and you meet them all as runnable
+  boundary primitives: `console.log` speaks to developers, `prompt`/`alert`/
+  `confirm` speak to users, one small program addressing both channels in a
+  single run. You meet a program as both source text and running process, hear
+  why **future-you** is a stranger worth writing for, and live one tiny
+  affordance-discovery cycle — predict, run, observe — that the whole course
+  spirals on. Two cliffhangers are set that only later chapters can cash.
+- **Chapter 1⟡. Frogramming.** Living the cycle on the F-hand: computational
+  thinking as one continuous chain of affordance discoveries. You build an
+  accurate mental model of JavaScript's notional machine (how it evaluates
+  expressions, stores values, walks scope chains) and the discipline of
+  predicting **internal events** before running code, then verifying with trace
+  tables, the debugger, and tests that mature every cycle. The chain runs on
+  arithmetic-free string programs first — bindings, transformations,
+  string-based conditionals — then loops with numbers as counters, with coercion
+  and validation late and isolated. Comments, naming, and logging enter along
+  the chain as craft: intentional communication to other developers, including
+  future-you. Every cycle cashes out into new user-facing behavior — this is
+  where your first _writing_ happens — and seeds the next.
+- **Chapter 2⟡. Vibetoading.** Living the cycle on the V-hand: design thinking
+  with the same rigor. You propose experiences, build cheap text-dialog
+  prototypes in Just Enough JavaScript, commit **interaction-event predictions**
+  in writing (what will they do first? where will they hesitate, misread,
+  backtrack?), then observe real behavior and study the divergence — because
+  task-success is not twin-validity: a user can complete your task while holding
+  a wrong model of your interface. User-visible behavior becomes the anchor your
+  reading, tracing, refactoring, and reviewing skills must preserve. Real people
+  (peers, friends) are the richest observation whenever you can get them;
+  **local-LLM simulated users** — interview subjects, walkthrough participants,
+  stand-in testers — make every cycle runnable on demand, alone. They are a
+  fallibly thin imitation of a human, and feeling that thinness is itself a
+  lesson the next chapter picks up.
+- **Chapter 3⟡. Co-AIthoring.** You have run the cycle by hand in both
+  directions; this chapter names the whole thing — then accelerates it. Source
+  code is the **UI** — the control panel through which a programmer operates the
+  notional machine. LLMs are an alternative way to operate that UI: you delegate
+  the typing while still owning the NM. Two conversational modes fall out of
+  this naturally — **NM-grounded** (Frogramming-with-delegation: "make the NM
   declare a `const`, then enter a loop…") and **user-grounded**
   (Vibetoading-with-delegation: "when the user clicks, greet them by name…").
   Same Frogrammer/Vibetoader spectrum, different interface. Visual debuggers /
   embody / lenses are the _direct_ NM view that complements the code text —
   letting you observe and predict the machine even when you didn't write the
-  code yourself. You learn what makes LLM collaboration specifically different
-  from human collaboration, develop skills for evaluating and directing LLM
-  output using everything from Chapters 1–3, and build calibration for when to
-  delegate and when to do the work yourself.
-- **Chapter 5. Developers, Computers, Users, Agents, and You.** Training wheels
+  code yourself. The LLM itself turns out to be a **new beast** — neither user
+  nor machine — that needs its own twinning: you learn what makes LLM
+  collaboration specifically different from human collaboration, develop skills
+  for evaluating and directing LLM output using everything from Chapters 0⟡–2⟡,
+  and build calibration for when to delegate and when to do the work yourself.
+  **AI accelerates the cycle; it cannot run it for you.**
+- **Chapter 4⟡. Snippetry.** The cycle as a practice for life. Training wheels
   come off. You Frogram for yourself through snippetry: small, complete,
-  self-contained programs as an ongoing practice. You explore JavaScript's full
+  self-contained programs as an ongoing practice in which each snippet is one
+  honest turn of the cycle, paradigms are affordance-territory to explore, and
+  remixing is running the cycle cooperatively. You explore JavaScript's full
   multi-paradigmatic range, develop your compositional voice, and discover that
-  Frogramming has value beyond productivity: for mastery, exploration, delight,
-  the steady upkeep of one's craft, and the new thoughts it lets you think.
+  Frogramming and Vibetoading have value beyond productivity: for mastery,
+  exploration, delight, the steady upkeep of one's craft, and the new thoughts
+  they let you think.
 
 ---
 
