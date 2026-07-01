@@ -333,14 +333,17 @@ type InterceptWorkerConfig = {
 // ─── Seam 4: the instrumentation helper protocol ───────────────────────────────
 
 /**
- * The two helpers the instrumenter splices calls against and the worker logic
+ * The helpers the instrumenter splices calls against and the worker logic
  * implements as injected globals. Pinned so the instrumenter and the worker
  * setup do not reverse-engineer each other:
  *
  * - `__$il(loopIndex, locString)` — the iteration guard: spliced as a
  *   statement at the top of each guarded loop's BLOCK body
- *   (`__$il(n, 'L:C:L:C');`), with a counter reset spliced after the loop
- *   (do-while: after the trailing `while(cond);`). The guarded set is the
+ *   (`__$il(n, 'L:C:L:C');`), with the counter reset `__$ir(n);` spliced
+ *   after the loop (do-while: after the trailing `while(cond);`). The
+ *   counters live in the worker logic's closure, so the reset must be a call
+ *   too — the oracle's raw `loopN = 0;` splice against emitted `var` globals
+ *   is not reproducible under injected parameters. The guarded set is the
  *   oracle's: `while` / classic `for` / `do-while` / `for-of` with a braced
  *   body; `for-in` and brace-less bodies are NOT guarded (a brace-less
  *   runaway loop is caught by the time budget only). The helper increments
@@ -351,6 +354,10 @@ type InterceptWorkerConfig = {
  *   On exceed it throws the MARKED RangeError, pre-stamped with `locString`
  *   (the LOOP's own span, encoded at splice time) so a limit halt is always
  *   attributed to its loop.
+ * - `__$ir(loopIndex)` — the guard's reset: spliced as a statement after the
+ *   loop (`__$ir(n);`) so re-entering the loop restarts its per-entry count.
+ *   Resets ONLY that loop's per-entry counter — never the run-total
+ *   `iterationCount`.
  * - `__$lc(locString, thunk)` — the loc stamp: spliced as a same-line wrap
  *   around each `CallExpression` — and ONLY `CallExpression`s, the oracle's
  *   exact node set (`NewExpression` is not wrapped; `super()` and class
@@ -368,6 +375,7 @@ type InterceptWorkerConfig = {
  */
 type InterceptHelperProtocol = {
 	readonly __$il: (loopIndex: number, locString: string) => void;
+	readonly __$ir: (loopIndex: number) => void;
 	readonly __$lc: <T>(locString: string, thunk: () => T) => T;
 };
 

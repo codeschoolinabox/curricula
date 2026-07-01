@@ -16,13 +16,13 @@ Vocabulary and the streamed-event table: [README.md](./README.md). The contract:
    evaluator's single line-preserving splice pass. Input: the source string.
    Output: instrumented source with (a) an iteration-guard call — carrying the
    loop's own stamped span — at the top of each guarded loop's braced body plus
-   a counter reset after the loop (the guarded set is the oracle's: `while` /
-   classic `for` / `do-while` / `for-of` with a braced body; `for-in` and
-   brace-less bodies are not guarded), and (b) a same-line loc wrap around each
-   `CallExpression` — the oracle's exact node set (`NewExpression` unwrapped) —
-   stamping the call's original start/end line:column. No splice inserts or
-   removes a newline — the instrumented source has the learner's own line
-   numbers. The pass observes nothing.
+   the counter reset `__$ir(n);` after the loop (the guarded set is the
+   oracle's: `while` / classic `for` / `do-while` / `for-of` with a braced body;
+   `for-in` and brace-less bodies are not guarded), and (b) a same-line loc wrap
+   around each `CallExpression` — the oracle's exact node set (`NewExpression`
+   unwrapped) — stamping the call's original start/end line:column. No splice
+   inserts or removes a newline — the instrumented source has the learner's own
+   line numbers. The pass observes nothing.
 
 2. **Assemble** (sync, pure) — build the engine spec. Input: the instrumented
    source plus the options (`seconds`, `iterations`, `io`). Output: the engine
@@ -33,7 +33,7 @@ Vocabulary and the streamed-event table: [README.md](./README.md). The contract:
    `result` access.
 
 3. **Run** (factory call sync and lazy; emission async) — the engine runs the
-   program in the sandbox with the console/dialog **global mocks** and the two
+   program in the sandbox with the console/dialog **global mocks** and the
    instrumentation helpers injected as parameters. Input: the spec. Output: one
    **io round-trip** per trapped call (call-then-emit, below) plus a
    worker-authored halt. The worker holds the only mutable state — the 1-indexed
@@ -251,7 +251,7 @@ guard _enforces_ a limit and the loc wrap _attributes_ boundary events to source
 — neither surfaces anything about variables, scopes, or expression values. A
 tracer's instrumentation exists to observe the interior; an evaluator's splices
 exist so the boundary events are trustworthy (attributed, bounded). That is why
-the module lives under `evaluators/`, not `tracers/`.
+the module lives under `evaluators/`, not with the tracers under `trace/`.
 
 ### Every io mock is awaited — call-then-emit for all four kinds
 
@@ -310,5 +310,5 @@ the pause discipline are identical with or without a mock.
 - [`../../../../../lib/engine/README.md`](../../../../../lib/engine/README.md) —
   the engine: the two-sided contract this evaluator's worker and thread logic
   are authored against.
-- [`../../tracers/variables/DOCS.md`](../../tracers/variables/DOCS.md) — the
+- [`../../trace/variables/DOCS.md`](../../trace/variables/DOCS.md) — the
   structural template (a sibling tier that composes the engine).

@@ -10,9 +10,9 @@ possible). It enforces the consumer's **iteration limit** and settles with a
 typed halt that records how the run ended (a natural end, a throw, or the
 limit).
 
-It is a peer of the [`../tracers/`](../../tracers/) tiers on the engine
-([`../../../../../lib/engine/`](../../../../../lib/engine/)), but it is an
-**evaluator, not a tracer**. The axis is _what is observed_: a tracer
+It is a peer of the tracer tiers under [`../../trace/`](../../trace/) on the
+engine ([`../../../../../lib/engine/`](../../../../../lib/engine/)), but it is
+an **evaluator, not a tracer**. The axis is _what is observed_: a tracer
 instruments the program to observe its **interior** (variables, scopes,
 expressions); an evaluator observes only the **host boundary** — what the
 program prints and which dialogs it opens — through **global mocks** injected at
@@ -144,17 +144,19 @@ them consistently.
   stamps**. It observes nothing.
 - **iteration guard** — the spliced `__$il(n, 'L:C:L:C');` call at the top of
   each guarded loop's braced body, carrying the LOOP's own span (encoded at
-  splice time, so a limit halt is always attributed to its loop), with a counter
-  reset after the loop. The guarded set is the oracle's: `while`, classic `for`,
-  `do-while`, and `for-of` with a **braced** body; `for-in` and brace-less
-  bodies are NOT guarded (a brace-less runaway loop is caught by the time budget
-  only). The helper keeps TWO counts: a **per-loop-entry counter** — the one
-  checked against the consumer's `iterations` limit, reset after the loop so
-  each fresh entry restarts the count (oracle semantics: the limit is per loop
-  entry, never a run total) — and the never-reset run-total `iterationCount`
-  carried on every halt. On exceed it throws a **marked** `RangeError` — the
-  marker is a structured flag the halt author recognizes (never string
-  matching). No limit configured → the guard counts but never throws.
+  splice time, so a limit halt is always attributed to its loop), with the
+  counter reset `__$ir(n);` spliced after the loop (the counters live in the
+  worker logic's closure, so the reset is a call too). The guarded set is the
+  oracle's: `while`, classic `for`, `do-while`, and `for-of` with a **braced**
+  body; `for-in` and brace-less bodies are NOT guarded (a brace-less runaway
+  loop is caught by the time budget only). The helper keeps TWO counts: a
+  **per-loop-entry counter** — the one checked against the consumer's
+  `iterations` limit, reset after the loop so each fresh entry restarts the
+  count (oracle semantics: the limit is per loop entry, never a run total) — and
+  the never-reset run-total `iterationCount` carried on every halt. On exceed it
+  throws a **marked** `RangeError` — the marker is a structured flag the halt
+  author recognizes (never string matching). No limit configured → the guard
+  counts but never throws.
 - **loc stamp** — the spliced same-line call wrap `__$lc('L:C:L:C', () => …)`
   around each `CallExpression` — and ONLY `CallExpression`s, the oracle's exact
   node set (`NewExpression` is not wrapped; `super()` and class constructs are
@@ -255,7 +257,7 @@ and `EmitNMEvent.method` stays an open `string`.
 - The engine it consumes:
   [`../../../../../lib/engine/README.md`](../../../../../lib/engine/README.md)
 - The structural template (a sibling tier that composes the engine):
-  [`../../tracers/variables/README.md`](../../tracers/variables/README.md)
+  [`../../trace/variables/README.md`](../../trace/variables/README.md)
 - The behavior oracles: [`../../intercept/README.md`](../../intercept/README.md)
   and [`../../shared/guard-loops/`](../../shared/guard-loops/)
 - Architecture and data flow: [`./DOCS.md`](./DOCS.md)
