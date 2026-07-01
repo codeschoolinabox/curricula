@@ -12,6 +12,7 @@ import {
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import type { Snippet } from '../../embody/types.js';
 import * as embodyModule from '../../embody/index.js';
 import * as eventBusModule from '../event-bus.js';
 import StudyLenses from '../index.js';
@@ -908,6 +909,164 @@ describe('<StudyLenses> — C2 the phases panel mounts above the active surface'
 				container.querySelector('[data-orchestrator-phases-panel]'),
 			).not.toBeNull();
 		});
+	});
+});
+
+describe('<StudyLenses> — Redesign: chrome above the active surface (content row)', () => {
+	describe('editor mode', () => {
+		it('wraps the editor host in [data-orchestrator-content-row]', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-content-row] [data-orchestrator-host]',
+				),
+			).not.toBeNull();
+		});
+
+		it('places the phases panel directly above the omnipresent region (panel first in column)', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			const panel = container.querySelector('[data-orchestrator-phases-panel]');
+			const region = container.querySelector(
+				'[data-orchestrator-omnipresent-region]',
+			);
+			expect(region).not.toBeNull();
+			expect(panel?.nextElementSibling).toBe(region);
+		});
+
+		it('places the omnipresent region directly above the content row (chrome above content)', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			const region = container.querySelector(
+				'[data-orchestrator-omnipresent-region]',
+			);
+			const contentRow = container.querySelector(
+				'[data-orchestrator-content-row]',
+			);
+			expect(contentRow).not.toBeNull();
+			expect(region?.nextElementSibling).toBe(contentRow);
+		});
+
+		it('never renders an orchestrator control under the active surface (region not inside content row)', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			const contentRow = container.querySelector(
+				'[data-orchestrator-content-row]',
+			);
+			expect(contentRow).not.toBeNull();
+			expect(
+				contentRow?.querySelector('[data-orchestrator-omnipresent-region]'),
+			).toBeNull();
+		});
+	});
+
+	describe('lens mode', () => {
+		it('wraps the active lens in [data-orchestrator-content-row]', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-content-row] [data-lens="debug-props"]',
+				),
+			).not.toBeNull();
+		});
+
+		it('places the omnipresent region directly above the content row in lens mode', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const region = container.querySelector(
+				'[data-orchestrator-omnipresent-region]',
+			);
+			const contentRow = container.querySelector(
+				'[data-orchestrator-content-row]',
+			);
+			expect(contentRow).not.toBeNull();
+			expect(region?.nextElementSibling).toBe(contentRow);
+		});
+
+		it('places the phases panel directly above the omnipresent region in lens mode', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const panel = container.querySelector('[data-orchestrator-phases-panel]');
+			const region = container.querySelector(
+				'[data-orchestrator-omnipresent-region]',
+			);
+			expect(region).not.toBeNull();
+			expect(panel?.nextElementSibling).toBe(region);
+		});
+
+		it('never renders an orchestrator control under the active lens (region not inside content row)', () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			const contentRow = container.querySelector(
+				'[data-orchestrator-content-row]',
+			);
+			expect(contentRow).not.toBeNull();
+			expect(
+				contentRow?.querySelector('[data-orchestrator-omnipresent-region]'),
+			).toBeNull();
+		});
+	});
+});
+
+describe('<StudyLenses> — Redesign: output panels in the content row (channels left the dock)', () => {
+	// Appear-on-run (inc 5): the panels mount only once a run starts, so these
+	// drive a Run first; idle-absence is pinned in the inc-5 describe.
+	it('renders the output-panels surface inside the content row once a run starts (editor mode)', async () => {
+		const { container } = render(<StudyLenses snippet="OK" />);
+		fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+		expect(
+			container.querySelector(
+				'[data-orchestrator-content-row] [data-orchestrator-output-panels]',
+			),
+		).not.toBeNull();
+		await act(async () => {});
+	});
+
+	it('renders both channels under the content row via the -output-channel selector once a run starts', async () => {
+		const { container } = render(<StudyLenses snippet="OK" />);
+		fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+		expect(
+			container.querySelector(
+				'[data-orchestrator-content-row] [data-orchestrator-output-channel="user-interface"]',
+			),
+		).not.toBeNull();
+		expect(
+			container.querySelector(
+				'[data-orchestrator-content-row] [data-orchestrator-output-channel="developer-console"]',
+			),
+		).not.toBeNull();
+		await act(async () => {});
+	});
+
+	it('no longer renders the retired -dock-channel selector anywhere', () => {
+		const { container } = render(<StudyLenses snippet="OK" />);
+		expect(
+			container.querySelector('[data-orchestrator-dock-channel]'),
+		).toBeNull();
+	});
+
+	it('keeps output out of the dock — the dock is controls-only now', () => {
+		const { container } = render(<StudyLenses snippet="OK" />);
+		expect(
+			container.querySelector(
+				'[data-orchestrator-dock] [data-orchestrator-output-channel]',
+			),
+		).toBeNull();
+	});
+
+	it('mounts the output panels inside the content row in LENS mode too once a run starts', async () => {
+		const { container } = render(
+			<StudyLenses snippet="OK" lens="debug-props" />,
+		);
+		fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+		expect(
+			container.querySelector(
+				'[data-orchestrator-content-row] [data-orchestrator-output-panels]',
+			),
+		).not.toBeNull();
+		await act(async () => {});
 	});
 });
 
@@ -2240,7 +2399,7 @@ describe('<StudyLenses> — Cycle 3 C5 cancel + reset-on-rerun', () => {
 				fireEvent.click(run);
 				await act(async () => {});
 				const channel = container.querySelector(
-					'[data-orchestrator-dock-channel="user-interface"]',
+					'[data-orchestrator-content-row] [data-orchestrator-output-channel="user-interface"]',
 				);
 				expect(channel?.childElementCount).toBe(1);
 				// Pin that the SURVIVING line is run 2's (not run 1's) — kills a
@@ -2542,6 +2701,345 @@ describe('<StudyLenses> — Cycle 3 E2 wire the embedded guide disclosure state'
 			expect(
 				container.querySelector('[data-orchestrator-guide-content]'),
 			).toBeNull();
+		});
+	});
+});
+
+describe('<StudyLenses> — inc 4 the interactive User Interface panel (gating io)', () => {
+	// The canned stub ignores io and settles `.result` immediately, so wrap intercept
+	// with an ASYNC GATING fake: it calls + awaits the orchestrator's io mock for the
+	// given kind BEFORE resolving `.result`, so settlement is gated until the learner
+	// answers via the panel (onAnswer). This is the only way to exercise the
+	// pending-interaction flow in jsdom — the real worker is not wired (embody stub),
+	// so this proves the React pending/resolver/onAnswer WIRING, not the worker.
+	// (Distinct from the C5 wrapper, which is SYNC + non-gating.)
+	// realEmbody MUST be captured by the caller BEFORE `vi.spyOn` installs the spy
+	// — otherwise this closes over the spy itself and recurses infinitely (the C5
+	// precedent captures it on the line before spyOn for the same reason).
+	function gatingImpl(
+		realEmbody: (code: string) => Snippet,
+		kind: 'alert' | 'confirm' | 'prompt',
+		message: string,
+		defaultValue?: string,
+	): (code: string) => Snippet {
+		return (code: string) => {
+			const snippet = realEmbody(code);
+			return {
+				...snippet,
+				evaluation: {
+					...snippet.evaluation,
+					events: {
+						...snippet.evaluation.events,
+						intercept: (options) => {
+							const base = snippet.evaluation.events.intercept(options);
+							const gated = (async () => {
+								if (kind === 'confirm') await options?.io?.confirm?.(message);
+								else if (kind === 'prompt')
+									await options?.io?.prompt?.(message, defaultValue);
+								else await options?.io?.alert?.(message);
+								return base.result;
+							})();
+							return { ...base, result: gated };
+						},
+					},
+				},
+			};
+		};
+	}
+
+	function dockRunState(container: HTMLElement): string | undefined {
+		return container.querySelector<HTMLElement>(
+			'[data-orchestrator-dock-run-state]',
+		)?.dataset.orchestratorDockRunState;
+	}
+
+	it('confirm: the run gates on the dialog (still running), then settles when OK answers it', async () => {
+		const realEmbody = embodyModule.default;
+		const spy = vi
+			.spyOn(embodyModule, 'default')
+			.mockImplementation(gatingImpl(realEmbody, 'confirm', 'proceed?'));
+		try {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			await act(async () => {});
+			// Gated: the confirm dialog is up and the run has NOT settled.
+			expect(
+				container.querySelector('[data-orchestrator-pending-dialog]'),
+			).not.toBeNull();
+			expect(
+				container.querySelector('[data-orchestrator-pending-confirm]'),
+			).not.toBeNull();
+			expect(dockRunState(container)).toBe('running');
+			expect(
+				container.querySelector('[data-orchestrator-dock-outcome]'),
+			).toBeNull();
+			// Decision A: the dialog message is ALSO appended to the user-interface
+			// channel log (the transcript) — not only shown in the dialog.
+			expect(
+				container.querySelector(
+					'[data-orchestrator-output-channel="user-interface"]',
+				)?.textContent,
+			).toContain('proceed?');
+			// Answer OK → the awaited mock resolves → the run resumes and settles.
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-pending-confirm]')!,
+			);
+			await act(async () => {});
+			expect(
+				container.querySelector('[data-orchestrator-pending-dialog]'),
+			).toBeNull();
+			expect(dockRunState(container)).toBe('settled');
+			expect(
+				container.querySelector('[data-orchestrator-dock-outcome]'),
+			).not.toBeNull();
+		} finally {
+			spy.mockRestore();
+		}
+	});
+
+	it('alert: the run gates on the dialog, then settles when OK dismisses it', async () => {
+		const realEmbody = embodyModule.default;
+		const spy = vi
+			.spyOn(embodyModule, 'default')
+			.mockImplementation(gatingImpl(realEmbody, 'alert', 'heads up'));
+		try {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			await act(async () => {});
+			expect(
+				container.querySelector('[data-orchestrator-pending-dialog]'),
+			).not.toBeNull();
+			expect(dockRunState(container)).toBe('running');
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-pending-confirm]')!,
+			);
+			await act(async () => {});
+			expect(
+				container.querySelector('[data-orchestrator-pending-dialog]'),
+			).toBeNull();
+			expect(dockRunState(container)).toBe('settled');
+		} finally {
+			spy.mockRestore();
+		}
+	});
+
+	it('prompt: the dialog seeds the input; OK feeds the typed value back and settles the run', async () => {
+		const realEmbody = embodyModule.default;
+		const spy = vi
+			.spyOn(embodyModule, 'default')
+			.mockImplementation(gatingImpl(realEmbody, 'prompt', 'name?', 'seed'));
+		try {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			await act(async () => {});
+			const input = container.querySelector<HTMLInputElement>(
+				'[data-orchestrator-pending-input]',
+			);
+			expect(input).not.toBeNull();
+			expect(input?.value).toBe('seed');
+			fireEvent.change(input!, { target: { value: 'Ada' } });
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-pending-confirm]')!,
+			);
+			await act(async () => {});
+			expect(
+				container.querySelector('[data-orchestrator-pending-dialog]'),
+			).toBeNull();
+			expect(dockRunState(container)).toBe('settled');
+		} finally {
+			spy.mockRestore();
+		}
+	});
+
+	it('Cancel while a dialog is pending resolves the pending IO first, then settles (no deadlock)', async () => {
+		const realEmbody = embodyModule.default;
+		const spy = vi
+			.spyOn(embodyModule, 'default')
+			.mockImplementation(gatingImpl(realEmbody, 'confirm', 'proceed?'));
+		try {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			await act(async () => {});
+			expect(
+				container.querySelector('[data-orchestrator-pending-dialog]'),
+			).not.toBeNull();
+			// The dock Cancel resolves any pending IO then cancels. Under the canned
+			// stub this proves NO DEADLOCK (the run settles + the dialog clears) but
+			// NOT the resolve-BEFORE-cancel ORDER — the stub's cancel is a no-op that
+			// settles regardless. The order (resolve must precede cancel, else a real
+			// paused worker deadlocks) is proven by the browser harness, where a
+			// cancel that fails to resolve the pending IO hangs `.result` forever.
+			fireEvent.click(
+				container.querySelector('[aria-label="cancel the run"]')!,
+			);
+			await act(async () => {});
+			expect(
+				container.querySelector('[data-orchestrator-pending-dialog]'),
+			).toBeNull();
+			expect(dockRunState(container)).toBe('settled');
+		} finally {
+			spy.mockRestore();
+		}
+	});
+
+	it("confirm: the dialog's own Cancel answers false and settles the run", async () => {
+		const realEmbody = embodyModule.default;
+		const spy = vi
+			.spyOn(embodyModule, 'default')
+			.mockImplementation(gatingImpl(realEmbody, 'confirm', 'proceed?'));
+		try {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+			await act(async () => {});
+			expect(
+				container.querySelector('[data-orchestrator-pending-dialog]'),
+			).not.toBeNull();
+			// The dialog's OWN Cancel (not the dock Cancel) → onAnswer(false) → the
+			// gated confirm resolves false and the run settles, dialog cleared.
+			fireEvent.click(
+				container.querySelector('[data-orchestrator-pending-cancel]')!,
+			);
+			await act(async () => {});
+			expect(
+				container.querySelector('[data-orchestrator-pending-dialog]'),
+			).toBeNull();
+			expect(dockRunState(container)).toBe('settled');
+		} finally {
+			spy.mockRestore();
+		}
+	});
+
+	// Exercises handleCancel's resolve-pending null-guard (the same guard onAnswer
+	// relies on when idle): with nothing pending, Cancel must not throw or open a dialog.
+	it('Cancel with no run in flight is a safe no-op (no throw, no dialog)', () => {
+		const { container } = render(<StudyLenses snippet="OK" />);
+		expect(() =>
+			fireEvent.click(
+				container.querySelector('[aria-label="cancel the run"]')!,
+			),
+		).not.toThrow();
+		expect(
+			container.querySelector('[data-orchestrator-pending-dialog]'),
+		).toBeNull();
+	});
+});
+
+describe('<StudyLenses> — inc 5 appear-on-run + per-panel dismissal', () => {
+	function runOnce(container: HTMLElement): void {
+		fireEvent.click(container.querySelector('[data-orchestrator-dock-run]')!);
+	}
+
+	describe('Appear on run', () => {
+		it('renders NO output panels at idle (before any run)', () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			expect(
+				container.querySelector('[data-orchestrator-output-panels]'),
+			).toBeNull();
+		});
+
+		it('renders the output panels once a run has started (and they persist after settle)', async () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			runOnce(container);
+			expect(
+				container.querySelector('[data-orchestrator-output-panels]'),
+			).not.toBeNull();
+			await act(async () => {});
+			// still present after the run settles (appear-on-run, not appear-while-running)
+			expect(
+				container.querySelector('[data-orchestrator-output-panels]'),
+			).not.toBeNull();
+		});
+
+		it('mounts the output panels in LENS mode once a run has started', async () => {
+			const { container } = render(
+				<StudyLenses snippet="OK" lens="debug-props" />,
+			);
+			expect(
+				container.querySelector('[data-orchestrator-output-panels]'),
+			).toBeNull();
+			runOnce(container);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-content-row] [data-orchestrator-output-panels]',
+				),
+			).not.toBeNull();
+			await act(async () => {});
+			// persist after settle in the LENS branch too (the orchestrator has two
+			// separate <OutputPanels> mounts — this pins the lens-mode one).
+			expect(
+				container.querySelector(
+					'[data-orchestrator-content-row] [data-orchestrator-output-panels]',
+				),
+			).not.toBeNull();
+		});
+	});
+
+	describe('Dismissal', () => {
+		it('dismissing a channel hides that panel; the other stays', async () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			runOnce(container);
+			await act(async () => {});
+			const dismiss = container.querySelector(
+				'[data-orchestrator-output-panel-dismiss="developer-console"]',
+			);
+			expect(dismiss).not.toBeNull();
+			fireEvent.click(dismiss!);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-output-channel="developer-console"]',
+				),
+			).toBeNull();
+			expect(
+				container.querySelector(
+					'[data-orchestrator-output-channel="user-interface"]',
+				),
+			).not.toBeNull();
+		});
+
+		it('dismissing the user-interface channel hides it; the developer-console stays', async () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			runOnce(container);
+			await act(async () => {});
+			// no dialog is pending, so the user-interface ✕ is available (not modal)
+			const dismiss = container.querySelector(
+				'[data-orchestrator-output-panel-dismiss="user-interface"]',
+			);
+			expect(dismiss).not.toBeNull();
+			fireEvent.click(dismiss!);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-output-channel="user-interface"]',
+				),
+			).toBeNull();
+			expect(
+				container.querySelector(
+					'[data-orchestrator-output-channel="developer-console"]',
+				),
+			).not.toBeNull();
+		});
+
+		it('a new Run resets dismissal and reappears the panel', async () => {
+			const { container } = render(<StudyLenses snippet="OK" />);
+			runOnce(container);
+			await act(async () => {});
+			const dismiss = container.querySelector(
+				'[data-orchestrator-output-panel-dismiss="developer-console"]',
+			);
+			expect(dismiss).not.toBeNull();
+			fireEvent.click(dismiss!);
+			expect(
+				container.querySelector(
+					'[data-orchestrator-output-channel="developer-console"]',
+				),
+			).toBeNull();
+			// rerun → dismissal reset → the panel is back
+			runOnce(container);
+			await act(async () => {});
+			expect(
+				container.querySelector(
+					'[data-orchestrator-output-channel="developer-console"]',
+				),
+			).not.toBeNull();
 		});
 	});
 });

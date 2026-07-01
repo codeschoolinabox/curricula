@@ -14,6 +14,7 @@ orchestrate/
   types.ts                   <StudyLenses> prop contract + state shape + INTERNAL EventBus events
 
   index.tsx                  the <StudyLenses> component (owns surface-mount routing + runs the panel derivations — see § The phases panel)
+  orchestrate.css            co-located stylesheet — the chrome-above-surface band + the left→right station row; imported for side effect by index.tsx (the lens-CSS precedent)
   event-bus.ts               createEventBus() — per-instance internal pub/sub
   stations.ts                STATIONS — the canonical left → right station order
   derive-station-roster.ts        (registry) → per-station lens rosters (static)
@@ -239,15 +240,16 @@ sketch.
     for sense (a), the lifecycle it instruments; its columns are stations (sense
     b). See § The phases panel.
 - **"State" and "surface" (overloaded words — keep the senses apart).**
-  - _State:_ the orchestrator `state.*` (the mode-discriminated React state); the
-    dock's **run state** (its transport phase — `idle` / `running` / `settled`);
-    and a tool's **display state** (collapse / expand). All three are distinct from
-    **mode** (Danger mode position / editor-lens mode / `SandboxMode`).
+  - _State:_ the orchestrator `state.*` (the mode-discriminated React state);
+    the dock's **run state** (its transport phase — `idle` / `running` /
+    `settled`); and a tool's **display state** (collapse / expand). All three
+    are distinct from **mode** (Danger mode position / editor-lens mode /
+    `SandboxMode`).
   - _Surface:_ "surface" names any rendered region; the **active surface**
-    specifically is the editor-or-lens host (§ Editor-vs-lens state machine). The
-    dock's **run/debug surface** + **output surface** and the Quiz
-    **question-render surface** are region tools — context disambiguates, but the
-    active surface is the one load-bearing sense.
+    specifically is the editor-or-lens host (§ Editor-vs-lens state machine).
+    The dock's **run/debug surface** + **output surface** and the Quiz
+    **question-render surface** are region tools — context disambiguates, but
+    the active surface is the one load-bearing sense.
 - **Source type** — `'script' | 'module'`, the snippet's program-type posture
   (`snippet.type`; selected by the dock's type toggle, default module). Module
   is the NM-study posture — the admission gate can run; script is the
@@ -330,52 +332,61 @@ sketch.
   toolbar; the picker and edit-return semantics survived the replacement.
 - **Omnipresent region** — the orchestrator-resident band of **cross-phase study
   tools** (spanning source → evaluation) that sits alongside the phase stations.
-  Its run/debug surface is the dock; its other inhabitants are the Quiz button and
-  the embedded guide (see § The omnipresent region). Distinct from **the dock**,
-  which is one surface within the region, not the region itself.
+  Its run/debug surface is the dock; its other inhabitants are the Quiz button
+  and the embedded guide (see § The omnipresent region). Distinct from **the
+  dock**, which is one surface within the region, not the region itself.
 - **Tool kind** — the three-way classification of cross-phase tools:
   **generative** (produce something _about the program_; get an omnipresent
   affordance — Run, Quiz), **reactive explainer** (explain one subject where it
   appears, not a button — `error-interpret`), and **meta** (document the
-  instrument itself, program-independent — the embedded guide). Orthogonal to the
-  per-phase-lens vs. cross-phase-tool axis.
-- **The dock** — the run/debug **surface** of the omnipresent region (see § The
-  dock): a collapsible affordance container + output surface holding the type
-  toggle (+ adjacent hint), the sandbox toggle, run limits, Run (with the two
-  output channels), and the danger-only debugger option. One surface of the
-  region, not the region itself.
-- **Output channel** — a labelled region of the dock's output surface that renders
-  one of the NM's two I/O channels: the **User Interface channel**
-  (`alert`/`confirm`/`prompt` dialogs) and the **Developer Console channel**
-  (`console.*`). _Homonym guard:_ **"panel" is reserved for the phases panel** —
-  the dock's output regions are **channels**, never panels. A dock channel IS the
-  rendering of an NM I/O channel; same concept, not a new one.
-- **Execution backend** (**worker** / **danger**) — the engine that evaluates the
-  snippet behind the locked `EvaluateHandle` contract: **worker** (the sandboxed
-  default — the real evaluating engine) and **danger** (an iframe script-tag
-  backend; deferred). _Homonym guard:_ "backend" here is the evaluation engine
-  behind `EvaluateHandle`, never a server. Distinct from **Danger mode**, the
-  sandbox toggle **position** that selects the danger backend.
-- **Danger mode** — the sandbox toggle's non-default **position** (it selects the
-  danger backend): the snippet is evaluated as a script tag in an iframe (pure JS
-  only). Native dialogs, real window, browser-debugger stepping; a hung run can
-  freeze the host page — the name carries the consent. Loop-guard instrumentation
-  stays active and visible in the debugger. ("Mode" here is the toggle position,
-  NOT the orchestrator's editor/lens mode.)
+  instrument itself, program-independent — the embedded guide). Orthogonal to
+  the per-phase-lens vs. cross-phase-tool axis.
+- **The dock** — the run/debug **controls surface** of the omnipresent region
+  (see § The dock): a collapsible affordance container holding the type toggle
+  (+ adjacent hint), the sandbox toggle, run limits, Run, Cancel, and the
+  danger-only debugger option. One surface of the region, not the region itself.
+  (The run's output no longer lives in the dock — it renders in the **output
+  panels**, § The output panels.)
+- **Output channel** — one of the NM's two I/O channels a run produces: the
+  **User Interface channel** (`alert` / `confirm` / `prompt`) and the
+  **Developer Console channel** (`console.*`). Each renders in its **output
+  panel** (§ The output panels). "Channel" names the NM I/O concept; "output
+  panel" names the DOM surface that renders it — one concept, two layers.
+- **Output panel** — a dismissable surface in the content row (right of the
+  active surface) rendering one output channel: the **User Interface** panel
+  (top, **interactive** — collects the learner's `prompt` / `confirm` answers
+  and feeds them back to the paused run) and the **Developer Console** panel
+  (bottom, passive). _Homonym guard:_ an **output panel** (run output) is NOT
+  **the phases panel** (the lifecycle instrument) — distinct surfaces, distinct
+  words; "panel" alone, unqualified, still means the phases panel.
+- **Execution backend** (**worker** / **danger**) — the engine that evaluates
+  the snippet behind the locked `EvaluateHandle` contract: **worker** (the
+  sandboxed default — the real evaluating engine) and **danger** (an iframe
+  script-tag backend; deferred). _Homonym guard:_ "backend" here is the
+  evaluation engine behind `EvaluateHandle`, never a server. Distinct from
+  **Danger mode**, the sandbox toggle **position** that selects the danger
+  backend.
+- **Danger mode** — the sandbox toggle's non-default **position** (it selects
+  the danger backend): the snippet is evaluated as a script tag in an iframe
+  (pure JS only). Native dialogs, real window, browser-debugger stepping; a hung
+  run can freeze the host page — the name carries the consent. Loop-guard
+  instrumentation stays active and visible in the debugger. ("Mode" here is the
+  toggle position, NOT the orchestrator's editor/lens mode.)
 - **Debugger option** — a danger-only dock affordance that wraps the evaluated
-  snippet with a `debugger;` statement above and below, so a learner with devtools
-  open steps straight into their program; inert without devtools. Guard
-  instrumentation stays visible in the stepped source (deliberately). Danger-only
-  by necessity, not fiat: `debugger;` _runs_ in a worker, but a paused breakpoint
-  must outlast the run limits — the worker backend's external terminate would kill
-  a worker paused at a breakpoint, while the danger backend has no external
-  terminate (its limits ride the loop-guard, frozen with execution when paused).
+  snippet with a `debugger;` statement above and below, so a learner with
+  devtools open steps straight into their program; inert without devtools. Guard
+  instrumentation stays visible in the stepped source (deliberately).
+  Danger-only by necessity, not fiat: `debugger;` _runs_ in a worker, but a
+  paused breakpoint must outlast the run limits — the worker backend's external
+  terminate would kill a worker paused at a breakpoint, while the danger backend
+  has no external terminate (its limits ride the loop-guard, frozen with
+  execution when paused).
 - **Run limits** — the learner interface to the seconds and iterations execution
   limits, with per-backend semantics (worker: engine timer + terminate; danger:
   in-guard elapsed check). Surfaces `endReport.outcome: 'limit-exceeded'` when
-  tripped. (The embody substrate calls the seconds value the run's time budget and
-  the iterations mechanism the loop guard; "run limits" is the learner-facing name
-  over those two embody mechanisms.)
+  tripped. (The embody substrate calls the seconds value the run's time budget
+  and the iterations mechanism the loop guard; "run limits" is the
+  learner-facing name over those two embody mechanisms.)
 - **Quiz button** — an omnipresent **generative** affordance (not a lens) that
   calls `socratize` (`lib/socratizing/`) on the live embodiment to produce
   Socratic questions about the program. The heavier block-model Quiz _engine_ is
@@ -383,9 +394,10 @@ sketch.
 - **Collapse / expand** — the dock's two display states; collapsing hides the
   controls while output stays reachable (the exact visual treatment is a Phase-1
   presentational choice).
-- **Embedded guide** — the orchestrator-resident learner guide to the environment
-  itself (stations, reveal rules, toggles, limits, danger). The **meta** tool
-  kind's one inhabitant: neither generative nor a reactive explainer.
+- **Embedded guide** — the orchestrator-resident learner guide to the
+  environment itself (stations, reveal rules, toggles, limits, danger). The
+  **meta** tool kind's one inhabitant: neither generative nor a reactive
+  explainer.
 - **Lens-picker** (or just **picker**) — the affordance that selects a lens: the
   phases panel's N per-station dropdowns (see § The phases panel). Each is a
   `<select>` over the lenses that target its station (its roster), with a
@@ -412,10 +424,10 @@ sketch.
 - **Neutral picker state** — what every station dropdown renders in editor mode
   (and what a non-rostering station's dropdown renders in lens mode): a
   non-selectable sentinel first `<option>`
-  (`<option value="" disabled hidden>— select a lens —</option>`) that reads as
-  the dropdown's `value`, with the remaining `<option>`s enumerating the
-  station's roster. Selecting any non-sentinel option transitions to lens mode
-  for that lens; the sentinel itself cannot be re-selected by the learner.
+  (`<option value="" disabled hidden>lenses</option>`) that reads as the
+  dropdown's `value`, with the remaining `<option>`s enumerating the station's
+  roster. Selecting any non-sentinel option transitions to lens mode for that
+  lens; the sentinel itself cannot be re-selected by the learner.
 - **Dispatch** — calling `bus.dispatch(eventName, payload)` to notify all
   listeners registered for that event. Synchronous; listeners execute in
   registration order.
@@ -588,7 +600,10 @@ picker, it lays the NM lifecycle out as **N "stations" left → right** — **so
 · realm · parse · creation · evaluation** — each its own lens dropdown for the
 lenses that target that phase. The N dropdowns are deliberate: the layout itself
 teaches the lifecycle, so a learner reads the machine's stages before picking
-any lens.
+any lens. The left → right layout is **realized by the co-located
+`orchestrate.css`** (the station columns flow as a flex row); without it the
+stations are raw block elements stacking top → down, so the horizontal lifecycle
+is a styling guarantee, not just DOM order.
 
 The panel **doubles as a lifecycle-status display.** Off the live embodiment's
 **embody staircase** (the whole `Status` + `errors.phase`) it shows how far the
@@ -663,9 +678,33 @@ knowable at Run, Cycle 3).
   forward-compatibility property (the validating/creation slices land and the
   same derivation starts returning `ok` / `errored` for real code with **zero
   panel changes**), not a visual difference today.
-- **Visual treatment** of `barred` vs `pending` (greyed vs dimmed vs identical
-  with distinct tooltips/aria) is **intentionally unspecified** — a Phase-1
-  presentational choice. Phase 0 locks the state model, not the CSS.
+- **Visual treatment (locked by this redesign).** The per-station status is
+  carried **only** on the column's `data-orchestrator-station-status` attribute
+  (a styleable state); there is **no visible status-text label** (removed to
+  keep the horizontal station row compact). The attribute drives a **compact
+  visual cue** (colour / dot / border) in `orchestrate.css` — the panel still
+  "doubles as a status display" visually, without a word. `pending` gets **no
+  special visualization** (embody is synchronous — there is no loading window;
+  the UI just reflects the embodied result). The exact pixels stay a
+  presentational detail; what's locked: no text, a compact cue.
+- **Status gates the picker (reverses the prior rule; error-downstream
+  barring).** A station's lens dropdown is **non-interactive** when its roster
+  is empty **OR** its status is `barred`
+  (`disabled = roster.length === 0 || status === 'barred'`). This **reverses**
+  the prior invariant ("disabling is roster-driven only; lens availability is
+  never status-gated"). The honest rationale is **error-downstream**: a `barred`
+  station is one an **upstream machine error** left unreachable, so a lens there
+  would render a stage that never ran for this code. (This is **not** "any stage
+  the machine hasn't reported" — that is `pending`, which stays interactive;
+  `pending` is the stubbed-slice case, not an error.) `barred` arises only on
+  `creation` / `evaluation` (`source` / `realm` are `constant`; `parse` is never
+  barred), so **source-station study tools stay available for any parseable
+  JS**. _Scope today:_ the only staffed station is `source` (never barred), and
+  the barred-able stations are still roster-empty (already disabled), so the
+  disable clause **changes nothing observable yet** — it is locked for when
+  prediction lenses staff `creation` / `evaluation`. The **greying** (compact
+  cue) does apply now. Only `barred` gates — `ok` / `errored` / `constant` /
+  `pending` stay interactive.
 
 ### Lens → station binding (locked)
 
@@ -844,12 +883,16 @@ container + output surface. Its contract:
   injection point (a requirement on the guard rewrite, not a capability it has
   today) — loop-bound coverage, deliberately weaker than the worker's external
   clock. Limit trips surface as `endReport.outcome: 'limit-exceeded'`.
-- **Run** — the affordance that drives program execution (the lazy half of the
-  embody contract), opening the dock's output surface: two **output channels**
-  mirroring the NM's two I/O channels — a **User Interface** channel
-  (alert/confirm/prompt dialogs) and a **Developer Console** channel
-  (`console.*`). ("Panel" stays reserved for the phases panel — the dock's
-  output regions are channels, never panels.)
+- **Run** — a **permanent-fixture** affordance (always present in the chrome
+  band) that drives program execution (the lazy half of the embody contract) via
+  `evaluation.events.{run, intercept}` on the live embodiment. The run's two I/O
+  channels render as the **output panels** beside the active surface (§ The
+  output panels): a **User Interface** panel — where the program **interacts
+  with the user** (`alert` / `confirm` / `prompt`, the user-audience channel) —
+  and a **Developer Console** panel (`console.*`, the dev-audience channel). The
+  channels moved out of the dock into the output panels; the dock keeps only the
+  run controls. (Homonym: an **output panel** is a run-output surface, distinct
+  from **the phases panel**, the lifecycle instrument — see § Glossary.)
 - **Debugger option** (danger mode only) — wraps the evaluated snippet with a
   `debugger;` statement above and below, so a learner with devtools open steps
   straight into their program; inert without devtools. Loop-guard
@@ -865,6 +908,83 @@ the evaluating engine; the danger-iframe is a second backend behind the same
 contract, deliberately deferred (the registry-shape precedent: named, not yet
 specified).
 
+### The output panels
+
+The run's two I/O channels render as the **output panels** — a presentation-only
+module ([`./output-panels/`](./output-panels/)) mounted in the **content row**,
+to the **right** of the active surface (not in the dock; the dock keeps only the
+run controls). Two stacked output panels, top → bottom:
+
+- **User Interface panel** (`data-orchestrator-output-channel="user-interface"`)
+  — the **user-audience** channel (`alert` / `confirm` / `prompt`). **Truly
+  interactive, and a faithful match for the native dialogs** — same options,
+  same return values, same blocking — so a learner who later meets real browser
+  dialogs or the debugger gets **no surprises**. The orchestrator's run builds
+  **async `IoMocks`** (per
+  [`../embody/lib/evaluating/intercept/README.md` § IO execution model](../embody/lib/evaluating/intercept/README.md)
+  and its `sandbox.html` styled-dialog pattern): each user-facing mock sets a
+  **pending-interaction** record and returns the Promise the worker awaits; the
+  panel renders the dialog and routes the answer up through `onAnswer`. The
+  per-kind contract mirrors the natives exactly:
+  - `alert(message)` → message + **OK** → `onAnswer(undefined)` (native returns
+    `void`).
+  - `confirm(message)` → message + **OK** / **Cancel** →
+    `onAnswer(true | false)`.
+  - `prompt(message, default?)` → message + input (seeded with `default`) +
+    **OK** / **Cancel** → `onAnswer(value | null)`.
+
+  A pending dialog is **modal** — like a native dialog it is answered via its
+  own OK / Cancel / input; it is **not** dismissable (the per-panel ✕ is
+  suppressed while a question is pending). The escape from a question the
+  learner won't answer is the **run-stop control outside the panels** — the
+  dock's **Cancel**, which calls `intercept`'s `.cancel()` to stop the program
+  mid-run AND resolves any pending IO promise (the cancel-latency caveat — a
+  stuck await would otherwise deadlock the paused worker, whose timer is also
+  paused). The worker pauses on `Atomics.wait` and the **run timer pauses**
+  while it awaits, so dialog time never counts against the budget.
+  **Lifecycle:** the pending slot + resolver are cleared at the top of each Run
+  (with the channel reset) and on Cancel (after resolving); `onAnswer` is a
+  no-op when nothing is pending. **Single-pending invariant:** the engine
+  serializes IO requests on the SAB, so at most one interaction is pending at a
+  time — the resolver ref holds exactly that one (asserted-null before each
+  write). This replaces the Cycle-3 canned safe-dismiss answers
+  (`confirm → false`, `prompt → null`): every `alert` / `confirm` / `prompt` now
+  waits for a real click (the loop-of-`alert`s worst case is clicked through or
+  Cancelled — the paused timer means it won't expire).
+
+- **Developer Console panel**
+  (`data-orchestrator-output-channel="developer-console"`) — the
+  **dev-audience** channel (`console.*`). Passive: appends each console event
+  (nothing is returned to the worker). (The live mock wires `console.log` today;
+  broader `console.*` coverage rides the `buildIoMocks` work — scoped or noted,
+  not silently promised.)
+
+Both panels **appear on run** (present only once `runState !== 'idle'`; hidden
+by default — just the active surface shows — and they clear/reappear on the next
+Run). A run that prints nothing still shows the (empty) panels: they are **where
+output would go**, and an empty Developer Console after a run reads as "nothing
+printed." Each panel is **dismissable** for view management (a per-panel ✕,
+`data-orchestrator-output-panel-dismiss`, hides it until the next Run) —
+**except** the User Interface panel cannot be dismissed while a question is
+pending (modal, above). When no output panel is shown, the active surface
+occupies the full content row — an `orchestrate.css` invariant (a styling
+guarantee, like the left → right station row), not DOM order. The orchestrator
+owns the run lifecycle, the channel-output state, the pending-interaction slot
+(displayable fields in state, the resolver in a ref), and the dismissal state;
+the module renders what it is handed and routes intent up — the same
+presentation-only split the dock and phases panel follow.
+
+The **real interactive worker run requires `crossOriginIsolated`**
+(SharedArrayBuffer), and the orchestrator consumes the run via `.result` (no
+live event iteration) — `.result` internally drives the generator, awaiting the
+async io mocks during the drain
+([`../embody/lib/evaluating/intercept/README.md`](../embody/lib/evaluating/intercept/README.md)).
+That `.result`-only consumption of the io path is **new and unproven against a
+real worker** (today's scenario fixtures resolve `.result` without firing io) —
+so the interactive path is exercised by a node-fake in unit tests and **must be
+verified end-to-end at the Sandbox checkpoint** (worker pauses → dialog renders
+→ answer → worker resumes → `.result` settles).
+
 ### Region structure and where it mounts
 
 The region is **three presentation-only tool modules**, each mirroring
@@ -876,25 +996,47 @@ The region is **three presentation-only tool modules**, each mirroring
   question-render surface (calls `socratize`).
 - [`./embedded-guide/`](./embedded-guide/) — the meta guide.
 
-Each is **presentation only**: `index.tsx` owns the state, the run lifecycle, and
-the handlers, and threads them down as props — the tool modules import no
+A **fourth** presentation-only module — [`./output-panels/`](./output-panels/) —
+renders the run's two I/O channels (§ The output panels). It mirrors the same
+module shape (`README.md` + `DOCS.md` + `index.tsx` + `tests/`) but mounts in
+the **content row** beside the active surface, **not** inside the omnipresent
+region: run output belongs spatially with the code that produced it, not in the
+chrome band. The **orchestrator** (`index.tsx`) owns the run lifecycle; the
+**dock** owns the Run control (run state + outcome surface on the dock's Run
+control, while the run's output crosses to the output panels — a deliberate
+state-vs-output split); the output panels render the resulting `channelOutput`
+they are handed.
+
+Each is **presentation only**: `index.tsx` owns the state, the run lifecycle,
+and the handlers, and threads them down as props — the tool modules import no
 `embody`, dispatch no bus events, and hold no orchestrator state (the same split
 the phases panel follows). The Run lifecycle (invoking
-`evaluation.events.{run, intercept}` on the live embodiment) lives in `index.tsx`,
-not in the dock component; the dock receives run state + output as props and emits
-intent callbacks.
+`evaluation.events.{run, intercept}` on the live embodiment) lives in
+`index.tsx`, not in the dock component; the dock receives run state + output as
+props and emits intent callbacks.
 
-The **region itself is a labelled landmark** grouping the tools; it is realised as
-flat siblings inside `data-orchestrator-root` alongside the phases panel and the
-active surface (panel on top, active surface in the middle, the dock below it — the
-console-below-editor reading order). The region is **not** a wrapper around the
-panel.
+The **region itself is a labelled landmark** grouping the tools; it is realised
+as flat siblings inside `data-orchestrator-root`, alongside the phases panel and
+the **content row**. **Render order (locked): all orchestrator chrome renders
+ABOVE the active surface** — phases panel first, then the omnipresent region
+(dock controls · Quiz · guide), then the **content row** last. No orchestrator
+control ever renders below the active surface. The dock's run **output is not a
+control**: its two channels render as the **output panels** (see § The output
+panels) **beside** the active surface — to its right — never under it,
+preserving the user/dev audience split spatially. `data-orchestrator-root` is a
+flex **column** (chrome · content row); the content row
+(`data-orchestrator-content-row`) is a flex **row** (active surface · output
+panels). The region is **not** a wrapper around the panel; the only new
+container is the content row, which groups the active surface and the output
+panels into the bottom row. The arrangement is produced by DOM order plus the
+co-located `orchestrate.css`, not by a band wrapper.
 
-The exact CSS / visual arrangement — ordering within the dock, collapsed-vs-expanded
-treatment, channel layout, the question-render surface's shape — is a Phase-1
-presentational choice. This section locks the **affordance set, the module
-boundaries, and the selector surface** (§ Data attributes), not the pixels (the
-same "lock the model, not the CSS" line the phases panel follows).
+The exact CSS / visual arrangement — ordering within the dock,
+collapsed-vs-expanded treatment, channel layout, the question-render surface's
+shape — is a Phase-1 presentational choice. This section locks the **affordance
+set, the module boundaries, and the selector surface** (§ Data attributes), not
+the pixels (the same "lock the model, not the CSS" line the phases panel
+follows).
 
 ## Deferred backlog
 
@@ -914,55 +1056,74 @@ Named here so they are not mistaken for current surfaces:
 The set below is the orchestrator's stable selector surface for tests and
 sandbox harnesses.
 
-| Attribute                                | Where                                                                                                                                    | Used by                                                 |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `data-orchestrator-root`                 | The wrapper `<div>` (affordance container + active surface)                                                                              | Tests + sandbox locate the orchestrator instance.       |
-| `data-orchestrator-host`                 | The host `<div>` where the active surface mounts — for the editor home base, a `<div>` into which the CodeMirror `EditorView` is mounted | Tests + sandbox locate where the active surface mounts. |
-| `data-orchestrator-phases-panel`         | The panel root `<nav>` (the affordance container)                                                                                        | Tests + sandbox locate the panel.                       |
-| `data-orchestrator-station`              | Each station column (`="<Station>"`); the per-station lens dropdown lives inside it                                                      | Tests + sandbox locate a station column.                |
-| `data-orchestrator-station-status`       | The column's per-edit status (`="<StationStatus>"`)                                                                                      | Tests + sandbox read a station's status.                |
-| `data-orchestrator-station-status-label` | The visible status label inside a column (tests anchor on the attributes above, never label text)                                        | Tests + sandbox locate the status label.                |
-| `data-orchestrator-edit-button`          | The panel `<button>` that returns to editor mode (rendered only when `state.mode === 'lens'`; carried over from the retired toolbar)     | Tests + sandbox locate the edit-return affordance.      |
-| `data-orchestrator-error`                | The editor host `<div>` when CodeMirror mount rejects (fallback render)                                                                  | Tests + sandbox detect a failed editor mount.           |
+| Attribute                          | Where                                                                                                                                    | Used by                                                 |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `data-orchestrator-root`           | The root `<div>` — a flex **column**: chrome (phases panel · omnipresent region) above, the content row below                            | Tests + sandbox locate the orchestrator instance.       |
+| `data-orchestrator-host`           | The host `<div>` where the active surface mounts — for the editor home base, a `<div>` into which the CodeMirror `EditorView` is mounted | Tests + sandbox locate where the active surface mounts. |
+| `data-orchestrator-phases-panel`   | The panel root `<nav>` (the affordance container)                                                                                        | Tests + sandbox locate the panel.                       |
+| `data-orchestrator-station`        | Each station column (`="<Station>"`); the per-station lens dropdown lives inside it                                                      | Tests + sandbox locate a station column.                |
+| `data-orchestrator-station-status` | The column's per-edit status (`="<StationStatus>"`) — the **styleable** status state; no separate visible status-text label is rendered  | Tests + sandbox read a station's status.                |
+| `data-orchestrator-edit-button`    | The panel `<button>` that returns to editor mode (rendered only when `state.mode === 'lens'`; carried over from the retired toolbar)     | Tests + sandbox locate the edit-return affordance.      |
+| `data-orchestrator-error`          | The editor host `<div>` when CodeMirror mount rejects (fallback render)                                                                  | Tests + sandbox detect a failed editor mount.           |
 
-**Omnipresent-region selectors.** The region's stable selector contract is locked
-here; the attributes materialise on the DOM when the region is built. Value-bearing
-attributes carry the current value (tests anchor on attribute + value, never label
-text), mirroring `data-orchestrator-station-status="<StationStatus>"`. **Value
-convention:** an attribute whose value mirrors a named type (`SnippetType`,
-`SandboxMode`, `DockRunState`, `ChannelKind`, `EndReport['outcome']`) carries the
-exact type-member string; any other value-bearing attribute carries a kebab-cased
-domain term. The visual treatment of each (collapsed styling, channel layout) is a
-Phase-1 presentational choice; the names and value-spaces below are the locked
+**Omnipresent-region selectors.** The region's stable selector contract is
+locked here; the attributes materialise on the DOM when the region is built.
+Value-bearing attributes carry the current value (tests anchor on attribute +
+value, never label text), mirroring
+`data-orchestrator-station-status="<StationStatus>"`. **Value convention:** an
+attribute whose value mirrors a named type (`SnippetType`, `SandboxMode`,
+`DockRunState`, `ChannelKind`, `EndReport['outcome']`) carries the exact
+type-member string; any other value-bearing attribute carries a kebab-cased
+domain term. The visual treatment of each (collapsed styling, channel layout) is
+a Phase-1 presentational choice; the names and value-spaces below are the locked
 contract.
 
-- `data-orchestrator-omnipresent-region` — the region landmark `<section>` grouping
-  the dock, Quiz button, and guide.
+- `data-orchestrator-omnipresent-region` — the region landmark `<section>`
+  grouping the dock, Quiz button, and guide.
 - `data-orchestrator-dock` — the dock root.
-- `data-orchestrator-dock-collapsed` — on the dock root; `="true"` or `="false"`.
+- `data-orchestrator-dock-collapsed` — on the dock root; `="true"` or
+  `="false"`.
 - `data-orchestrator-dock-type-toggle` — the type toggle control; `="script"` or
   `="module"`.
-- `data-orchestrator-dock-type-hint` — the admissible-in-script hint (present only
-  when shown).
-- `data-orchestrator-dock-sandbox-toggle` — the sandbox toggle control; `="worker"`
-  or `="danger"` (present only when the danger sandbox is available).
+- `data-orchestrator-dock-type-hint` — the admissible-in-script hint (present
+  only when shown).
+- `data-orchestrator-dock-sandbox-toggle` — the sandbox toggle control;
+  `="worker"` or `="danger"` (present only when the danger sandbox is
+  available).
 - `data-orchestrator-dock-limit` — each run-limit input; `="seconds"` or
   `="iterations"` (always present, unlike the danger-gated controls above).
-- `data-orchestrator-dock-debugger` — the debugger option (present only in danger
-  mode).
+- `data-orchestrator-dock-debugger` — the debugger option (present only in
+  danger mode).
 - `data-orchestrator-dock-run` — the Run button.
-- `data-orchestrator-dock-run-state` — the dock's transport phase (a `DockRunState`)
-  on the Run control; `="idle"`, `="running"`, or `="settled"`. Orthogonal to
-  `-dock-outcome`: while `running` no outcome exists yet; once `settled`, read
-  `-dock-outcome` for HOW the run ended. ("settled" replaces a lossy "done" — a run
-  that errored, timed out, was cancelled, or came back not-runnable is all settled
-  but carries four different outcomes.)
-- `data-orchestrator-dock-channel` — each output channel container;
-  `="user-interface"` or `="developer-console"`.
-- `data-orchestrator-dock-outcome` — the terminal classification, present only when
-  `-dock-run-state="settled"`; `="<EndReport outcome>"` (the embody `EndReport`
-  union, in its declared order: completed, errored, timed-out, cancelled, failed,
-  limit-exceeded, not-runnable).
+- `data-orchestrator-dock-run-state` — the dock's transport phase (a
+  `DockRunState`) on the Run control; `="idle"`, `="running"`, or `="settled"`.
+  Orthogonal to `-dock-outcome`: while `running` no outcome exists yet; once
+  `settled`, read `-dock-outcome` for HOW the run ended. ("settled" replaces a
+  lossy "done" — a run that errored, timed out, was cancelled, or came back
+  not-runnable is all settled but carries four different outcomes.)
+- `data-orchestrator-content-row` — the bottom-row container `<div>` grouping
+  the active surface and the output panels (the only new wrapper this redesign
+  adds; a flex row).
+- `data-orchestrator-output-panels` — the output-panels surface `<section>`
+  (right of the active surface; present only once a run has started —
+  `runState !== 'idle'` — see § The output panels). Stays even when both
+  channels are dismissed.
+- `data-orchestrator-output-panel` — the per-channel **panel wrapper** (the
+  dismissable unit: groups that channel's ✕ + log so the panel can be hidden and
+  `orchestrate.css` can lay out the pair); `="user-interface"` or
+  `="developer-console"`. Absent when that channel is dismissed; the User
+  Interface wrapper appears first.
+- `data-orchestrator-output-channel` — the `role="log"` lines region inside each
+  panel wrapper; `="user-interface"` or `="developer-console"` (the value is a
+  `ChannelKind`). **Renamed** from the retired `data-orchestrator-dock-channel`
+  when the channels left the dock for the output panels; no alias survives.
+- `data-orchestrator-output-panel-dismiss` — the per-panel dismiss (✕) control;
+  `="user-interface"` or `="developer-console"` (the User Interface one is
+  suppressed while a dialog is pending — modal).
+- `data-orchestrator-dock-outcome` — the terminal classification, present only
+  when `-dock-run-state="settled"`; `="<EndReport outcome>"` (the embody
+  `EndReport` union, in its declared order: completed, errored, timed-out,
+  cancelled, failed, limit-exceeded, not-runnable).
 - `data-orchestrator-quiz` — the Quiz button.
 - `data-orchestrator-guide` — the embedded-guide root.
 
@@ -1033,6 +1194,15 @@ Inherits all conventions from [`../README.md`](../README.md) and the top-level
     (configured at the file level via `@vitest-environment jsdom`).
   - `vi.mock` factories that reference outer-scope variables wrap them in
     `vi.hoisted(() => ({ ... }))`.
+  - **Co-located stylesheet, imported for side effect.** `index.tsx` imports
+    `./orchestrate.css` for its side effect (the chrome-above-surface band + the
+    left→right station row). This is the one sanctioned load-time side effect:
+    it follows the lens-CSS precedent (each `lenses/<lens>/<lens>.css` is
+    imported by its lens `index.tsx`) and is a build-pipeline concern, not
+    runtime logic — so DEV.md's "nothing executes at module load" still holds
+    for everything else. Under vitest the Vite transform turns the `.css` import
+    into a no-op module (no config change needed; the lens suites already rely
+    on this).
 
 ## Navigation
 

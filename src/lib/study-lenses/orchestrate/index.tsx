@@ -73,6 +73,7 @@ import type { LintDiagnostic } from './lib/editing/types.js';
 import deriveInterpretedDiagnostics from './lib/error-interpreting/derive-interpreted-diagnostics.js';
 import analyzeMicroDecisions from './lib/socratizing/analyze-micro-decisions.js';
 import type { CodeQuestion } from './lib/socratizing/types.js';
+import OutputPanels from './output-panels/index.js';
 import PhasesPanel from './phases-panel/index.js';
 import QuizButton from './quiz-button/index.js';
 import type {
@@ -85,11 +86,19 @@ import type {
 	ChannelKind,
 	DockRunState,
 	EndReportOutcome,
+	InteractionAnswer,
+	OutputPanelDismissal,
+	PendingInteraction,
 	RunLimits,
 	SandboxMode,
 	StationStatusMap,
 	StudyLensesProps as StudyLensesProperties,
 } from './types.js';
+
+// The visible layout (chrome above the active surface; left → right station row;
+// content row with the output-panels column). Side-effect import — Vite no-ops it
+// under vitest; verified at the Sandbox checkpoint. Precedent: lenses/blanks.
+import './orchestrate.css';
 
 /**
  * Static lens registry — the orchestrator's bootstrap
@@ -169,6 +178,16 @@ const EMPTY_CHANNELS: Readonly<Record<ChannelKind, readonly string[]>> =
 	});
 
 /**
+ * The output panels' undismissed state — both channels visible. Frozen; the
+ * `dismissed` slot seeds here and resets to it at the top of each run (a panel
+ * dismissed on one run reappears on the next). Mirrors `EMPTY_CHANNELS`.
+ */
+const EMPTY_DISMISSAL: OutputPanelDismissal = Object.freeze({
+	'user-interface': false,
+	'developer-console': false,
+});
+
+/**
  * Terminal rejection sink for a run's `.result` chain. `.result` resolves today
  * (an EmbodyError rides `endReport.error`, never a rejection), so this is
  * defense-in-depth: if a future engine ever rejects, swallow it here so an
@@ -176,6 +195,47 @@ const EMPTY_CHANNELS: Readonly<Record<ChannelKind, readonly string[]>> =
  */
 function ignoreRunSettleRejection(): void {
 	// Intentionally empty — see the doc comment above.
+}
+
+/**
+ * Build the Promise a user-facing io mock returns (the worker awaits it) and
+ * register its resolver in the shared single-pending ref, mapping the learner's
+ * raw answer to that kind's native return value via `toResult`. Module-level
+ * (closes over nothing) so the per-mock call sites stay within the function-
+ * nesting depth limit; the resolve capture uses a named function expression per
+ * the repo's convention (see `lib/engine/evaluate.ts`). `onAnswer` invokes the
+ * stored resolver with the answer; `handleCancel` invokes it with no argument,
+ * which each mapper treats as the safe-dismiss answer.
+ */
+function registerPendingAnswer<T>(
+	resolverReference: React.RefObject<
+		((value?: InteractionAnswer) => void) | null
+	>,
+	toResult: (value: InteractionAnswer) => T,
+): Promise<T> {
+	let settle!: (value: T) => void;
+	const awaited = new Promise<T>(function captureResolve(resolve) {
+		settle = resolve;
+	});
+	resolverReference.current = (value) => settle(toResult(value));
+	return awaited;
+}
+
+/**
+ * Per-kind answer mappers for the interactive io mocks: the learner's raw answer
+ * (or `undefined` on cancel) mapped to each native return value — `alert` → void;
+ * `confirm` → `boolean` (anything but an explicit `true` is `false`, so cancel
+ * dismisses); `prompt` → `string | null` (a non-string answer, incl. cancel, is
+ * `null`).
+ */
+function alertAnswer(): void {
+	// alert returns void — the answer carries no value (the resolver ignores it).
+}
+function confirmAnswer(value: InteractionAnswer): boolean {
+	return value === true;
+}
+function promptAnswer(value: InteractionAnswer): string | null {
+	return typeof value === 'string' ? value : null;
 }
 
 /**
@@ -776,6 +836,25 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			);
 		const handleReference = React.useRef<EvaluateHandle | null>(null);
 
+		// The interactive User Interface panel's pending IO slot + the awaited run's
+		// resolver. `pending` is the DISPLAYABLE half (rendered by <OutputPanels>);
+		// the resolver lives in a REF (never state) — single-pending invariant: the
+		// engine serializes IO on the SAB, so at most one is in flight and the ref
+		// holds exactly that one. onAnswer / handleCancel resolve it and clear both.
+		const [pending, setPending] = React.useState<PendingInteraction | null>(
+			null,
+		);
+		const pendingResolverReference = React.useRef<
+			((value?: InteractionAnswer) => void) | null
+		>(null);
+
+		// Per-channel dismissal flags for the output panels (the per-panel ✕).
+		// Seeded undismissed; reset to EMPTY_DISMISSAL at the top of each run so a
+		// panel dismissed on one run reappears on the next. Appearance is otherwise
+		// derived: the panels mount only while runState !== 'idle' (appear-on-run).
+		const [dismissed, setDismissed] =
+			React.useState<OutputPanelDismissal>(EMPTY_DISMISSAL);
+
 		// The Quiz button's question slot + busy flag. Quiz socratizes the LIVE
 		// embodiment on demand via the real socratizing library; `questions` is null
 		// before the first run, the populated list after an ok:true result, and stays
@@ -804,9 +883,13 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 		}
 
 		// The run's IoMocks route user-facing dialogs to 'user-interface' and
-		// console.* to 'developer-console'. confirm/prompt RETURN a value AND
-		// append (the engine awaits each); the defaults are the safe dismiss
-		// answers. Built fresh per run inside handleRun.
+		// console.* to 'developer-console'. The three user-facing mocks are now
+		// ASYNC + native-faithful: each appends the message (the transcript), sets
+		// the `pending` slot (the panel renders the dialog), stashes its resolver in
+		// `pendingResolverReference` (single-pending), and returns the Promise the
+		// worker awaits. onAnswer / handleCancel resolve it; the run resumes. The
+		// worker's run timer pauses while awaiting, so dialog time is free. console.*
+		// stays a passive append (nothing returns to the worker). Built fresh per run.
 		function buildIoMocks(): IoMocks {
 			// The three user-facing mocks (alert/confirm/prompt) all write this
 			// channel; console.* is the lone developer-console writer (inline below).
@@ -814,14 +897,24 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			return {
 				alert(message) {
 					appendChannelLine(userInterfaceChannel, message);
+					setPending({ kind: 'alert', message });
+					return registerPendingAnswer(pendingResolverReference, alertAnswer);
 				},
 				confirm(message) {
 					appendChannelLine(userInterfaceChannel, message);
-					return false;
+					setPending({ kind: 'confirm', message });
+					return registerPendingAnswer(pendingResolverReference, confirmAnswer);
 				},
-				prompt(message) {
+				prompt(message, defaultValue) {
 					appendChannelLine(userInterfaceChannel, message);
-					return null;
+					// exactOptionalPropertyTypes: only carry defaultValue when present
+					// (the type's `defaultValue?: string` rejects an explicit undefined).
+					setPending(
+						defaultValue === undefined
+							? { kind: 'prompt', message }
+							: { kind: 'prompt', message, defaultValue },
+					);
+					return registerPendingAnswer(pendingResolverReference, promptAnswer);
 				},
 				console: {
 					log(...arguments_) {
@@ -855,6 +948,13 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			if (runState === 'running') return;
 			if (liveEmbodiment === null) return;
 			setChannelOutput(EMPTY_CHANNELS);
+			// Clear any pending interaction from a prior run in the same reset batch
+			// (a dialog left open on a settled/abandoned run must not bleed into this
+			// one). The resolver ref clear is synchronous, alongside the state reset.
+			setPending(null);
+			pendingResolverReference.current = null;
+			// Reset dismissal so panels the learner closed on a prior run reappear.
+			setDismissed(EMPTY_DISMISSAL);
 			setRunState('running');
 			setOutcome(null);
 			function commitOutcome(runInstance: RunInstance): void {
@@ -868,11 +968,42 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 			handle.result.then(commitOutcome).catch(ignoreRunSettleRejection);
 		}
 
-		// Cancel reaches the held EvaluateHandle's cancel() — idempotent /
-		// first-write-wins, and a no-op before the first run (ref null) or after the
-		// run already settled.
+		// Cancel resolves any pending IO FIRST (so a paused worker awaiting our io
+		// mock unblocks — the cancel-latency caveat: a stuck await would otherwise
+		// deadlock the worker, whose run timer is also paused), THEN reaches the held
+		// EvaluateHandle's cancel() (idempotent / first-write-wins; a no-op before the
+		// first run or after settle), THEN clears the slot. The resolve value is
+		// discarded — the run is being torn down.
 		function handleCancel(): void {
+			const resolve = pendingResolverReference.current;
+			if (resolve !== null) {
+				pendingResolverReference.current = null;
+				setPending(null);
+				resolve();
+			}
 			handleReference.current?.cancel();
+		}
+
+		// onAnswer routes the learner's answer to the pending interaction's held
+		// resolver (single-pending — at most one in flight), clears the slot (the
+		// dialog hides), and resumes the awaiting run. A no-op when nothing is
+		// pending (resolver ref null) — e.g. a stray answer after settle.
+		function onAnswer(value: InteractionAnswer): void {
+			const resolve = pendingResolverReference.current;
+			if (resolve === null) return;
+			pendingResolverReference.current = null;
+			setPending(null);
+			resolve(value);
+		}
+
+		// Dismiss one output panel (the per-panel ✕) for view management; it stays
+		// hidden until the next Run resets the slot. The component suppresses the
+		// User Interface ✕ while a dialog is pending, so this is never reached for
+		// 'user-interface' mid-interaction (the modal escape is Cancel, not dismiss).
+		function onDismiss(channel: ChannelKind): void {
+			setDismissed((previous) =>
+				Object.freeze({ ...previous, [channel]: true }),
+			);
 		}
 
 		// Quiz is a CLICK-HANDLER that socratizes the live embodiment on demand: it
@@ -957,10 +1088,6 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						editButtonVisible
 						onEditReturn={handleEditReturn}
 					/>
-					<lensModule.Component
-						embodiment={liveEmbodiment.embodiment}
-						config={state.resolvedConfig}
-					/>
 					<section
 						data-orchestrator-omnipresent-region
 						aria-label="study tools"
@@ -980,7 +1107,6 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 							onLimitChange={handleLimitChange}
 							runState={runState}
 							outcome={outcome}
-							output={channelOutput}
 							onRun={handleRun}
 							onCancel={handleCancel}
 						/>
@@ -994,6 +1120,21 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 							onToggle={handleGuideToggle}
 						/>
 					</section>
+					<div data-orchestrator-content-row>
+						<lensModule.Component
+							embodiment={liveEmbodiment.embodiment}
+							config={state.resolvedConfig}
+						/>
+						{runState === 'idle' ? null : (
+							<OutputPanels
+								output={channelOutput}
+								pending={pending}
+								onAnswer={onAnswer}
+								dismissed={dismissed}
+								onDismiss={onDismiss}
+							/>
+						)}
+					</div>
 				</div>
 			);
 		}
@@ -1014,11 +1155,6 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 					editButtonVisible={false}
 					onEditReturn={handleEditReturn}
 				/>
-				<EditorComponent
-					snippet={snippet}
-					onSnippetChange={handleSnippetChange}
-					interpretedDiagnostics={interpretedDiagnostics}
-				/>
 				<section data-orchestrator-omnipresent-region aria-label="study tools">
 					<Dock
 						collapsed={collapsed}
@@ -1035,7 +1171,6 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						onLimitChange={handleLimitChange}
 						runState={runState}
 						outcome={outcome}
-						output={channelOutput}
 						onRun={handleRun}
 						onCancel={handleCancel}
 					/>
@@ -1049,6 +1184,22 @@ const StudyLenses = React.forwardRef<StudyLensesHandle, StudyLensesProperties>(
 						onToggle={handleGuideToggle}
 					/>
 				</section>
+				<div data-orchestrator-content-row>
+					<EditorComponent
+						snippet={snippet}
+						onSnippetChange={handleSnippetChange}
+						interpretedDiagnostics={interpretedDiagnostics}
+					/>
+					{runState === 'idle' ? null : (
+						<OutputPanels
+							output={channelOutput}
+							pending={pending}
+							onAnswer={onAnswer}
+							dismissed={dismissed}
+							onDismiss={onDismiss}
+						/>
+					)}
+				</div>
 			</div>
 		);
 	},

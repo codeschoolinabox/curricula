@@ -431,14 +431,13 @@ flowchart TD
 
 **Dropdown neutral state.** When `state.mode === 'editor'`, every station
 dropdown's `value` is the empty string and the first `<option>` is a
-non-selectable sentinel
-(`<option value="" disabled hidden>— select a lens —</option>`). The remaining
-options enumerate the station's roster in **registration order** (the insertion
-order of `LENS_REGISTRY`'s keys per the ES2015+ `Object.keys` spec). Selecting
-any non-sentinel option transitions to lens mode for that lens; the sentinel
-itself cannot be re-selected. In lens mode each station rostering the active
-lens shows it as its `value`; a panel-excluded active lens (prop-mounted, in no
-roster) leaves every dropdown on the sentinel.
+non-selectable sentinel (`<option value="" disabled hidden>lenses</option>`).
+The remaining options enumerate the station's roster in **registration order**
+(the insertion order of `LENS_REGISTRY`'s keys per the ES2015+ `Object.keys`
+spec). Selecting any non-sentinel option transitions to lens mode for that lens;
+the sentinel itself cannot be re-selected. In lens mode each station rostering
+the active lens shows it as its `value`; a panel-excluded active lens
+(prop-mounted, in no roster) leaves every dropdown on the sentinel.
 
 **Edit-button visibility.** The edit button appears only when
 `state.mode === 'lens'`. Clicking it dispatches
@@ -592,7 +591,8 @@ flowchart LR
   reveal rules. See [`./README.md` § The phases panel](./README.md).
 - **Selector contract (locked):** `data-orchestrator-phases-panel` on the panel
   root; `data-orchestrator-station="<Station>"` per column (plus
-  `data-orchestrator-station-status` / `-station-status-label` — see
+  `data-orchestrator-station-status` — the styleable status state; no separate
+  visible status-text label is rendered — see
   [`./README.md` § Data attributes](./README.md)). `data-orchestrator-toolbar` /
   `-lens-picker` retired WITH `toolbar.tsx`; no alias survived.
 - The panel lives at the module folder `phases-panel/` (it **replaced
@@ -605,18 +605,19 @@ classify by a three-way **kind** — generative / reactive-explainer / meta — 
 [`./README.md` § The omnipresent region](./README.md). The region's run/debug
 surface is **the dock**, whose contract this sketch pins structurally:
 
-- **The dock** — a collapsible affordance container + output surface holding:
-  the **type toggle** (script ↔ module; toggling re-keys the live slot and, from
+- **The dock** — a collapsible affordance **controls** container holding: the
+  **type toggle** (script ↔ module; toggling re-keys the live slot and, from
   lens mode, first returns to editor mode — disposability; an adjacent hint
   covers admissible-code-in-script-mode), the **sandbox toggle** (worker ↔
   danger backend), **run limits** (seconds + iterations; per-backend semantics —
   worker: engine timer + terminate; danger: in-guard elapsed check, a
-  requirement on the loop-guard rewrite), **Run** (two **output channels**
-  mirroring the NM's two I/O channels — User Interface dialogs, Developer
-  Console; maps to the embodiment's `evaluation.events.run` +
-  `evaluation.events.intercept`, the lazy half of the embody contract), and the
-  **debugger option** (danger only; `debugger;` above + below the snippet; guard
-  instrumentation visible in the stepped source — deliberately).
+  requirement on the loop-guard rewrite), **Run** + **Cancel** (maps to the
+  embodiment's `evaluation.events.run` + `evaluation.events.intercept`, the lazy
+  half of the embody contract — the run's two I/O channels render as the
+  **output panels** beside the active surface, **not** in the dock; see § Region
+  structure), and the **debugger option** (danger only; `debugger;` above +
+  below the snippet; guard instrumentation visible in the stepped source —
+  deliberately).
 - **Execution backends behind one contract** — the dock programs against the
   embody-level evaluate surface (`EvaluateHandle` / `RunInstance`); runnability
   is tiered (plain run on `parsed`; NM tiers on `created`). The worker backend
@@ -628,27 +629,38 @@ surface is **the dock**, whose contract this sketch pins structurally:
 - **`format`** is an **editor-only subtoolbar** (format mutates source).
 - **error-interpret** is **NOT a button** — a reactive explainer surfaced where
   the error appears: the editor gutter (static errors; the Cycle-1 wiring), the
-  dock console (runtime errors), and future phase lenses. A shared utility
-  consumed by surfaces, not an affordance of its own.
+  Developer Console output panel (runtime errors), and future phase lenses. A
+  shared utility consumed by surfaces, not an affordance of its own.
 - **The embedded guide** — the meta kind's one inhabitant: orchestrator-resident
   documentation of the instrument itself (stations, reveal rules, toggles,
   limits, danger).
 
-**Region structure (settled).** Three presentation-only tool modules —
-[`./dock/`](./dock/), [`./quiz-button/`](./quiz-button/),
-[`./embedded-guide/`](./embedded-guide/) — each mirroring `phases-panel/`
+**Region structure (settled).** Three presentation-only **omnipresent** tool
+modules — [`./dock/`](./dock/), [`./quiz-button/`](./quiz-button/),
+[`./embedded-guide/`](./embedded-guide/) — plus a **fourth, content-row**
+module, [`./output-panels/`](./output-panels/), each mirroring `phases-panel/`
 (README, DOCS, `index.tsx`, tests/). `index.tsx` owns every state slot
-(`SnippetType` · `SandboxMode` · `RunLimits`, seeded from `OrchestratorConfig`),
-the live slot, and the **run lifecycle** (it invokes
-`evaluation.events.{run, intercept}` and accumulates the output); the tool modules
-import no `embody`, dispatch no bus events, and hold no orchestrator state. The
-region is a labelled landmark grouping the tools, realised as **flat siblings**
-inside `data-orchestrator-root` (panel · active surface · dock, top→bottom) — not
-a wrapper around the panel. The `type-toggled` / `sandbox-toggled` dispatch sites
-(typed-before-wired — see § Internal event taxonomy) will be the dock's type-toggle
-/ sandbox-toggle `onChange` handlers; this is the design intent, not a status flip
-(they remain unwired until Phase 1). The exact CSS / visual arrangement stays a
-Phase-1 presentational choice ("lock the model, not the CSS").
+(`SnippetType` · `SandboxMode` · `RunLimits`, seeded from `OrchestratorConfig`;
+plus `OutputPanelDismissal` and the `PendingInteraction` slot), the live slot,
+and the **run lifecycle** (it invokes `evaluation.events.{run, intercept}`,
+builds the async `IoMocks`, and accumulates the output); the tool modules import
+no `embody`, dispatch no bus events, and hold no orchestrator state. **Render
+order (locked):** `data-orchestrator-root` is a flex **column** — phases panel ·
+omnipresent region (dock controls · Quiz · guide) · **content row**
+(`data-orchestrator-content-row`, a flex **row**: active surface · output
+panels). All orchestrator chrome renders **above** the active surface; the
+dock's run **output is not a control** — its two channels render as the **output
+panels** (`./output-panels/`) **beside** the surface (to its right),
+appear-on-run and dismissable, with an **interactive** User Interface panel (a
+faithful, modal native-dialog match driven by async `IoMocks` — the worker
+pauses awaiting the learner's answer; the dock's Cancel resolves any pending
+IO). This is not a wrapper around the panel; the only new container is the
+content row. The `type-toggled` / `sandbox-toggled` dispatch sites
+(typed-before-wired — see § Internal event taxonomy) will be the dock's
+type-toggle / sandbox-toggle `onChange` handlers; this is the design intent, not
+a status flip (they remain unwired until Phase 1). The exact CSS / visual
+arrangement stays a Phase-1 presentational choice ("lock the model, not the
+CSS").
 
 #### Dock data flow
 
@@ -657,18 +669,21 @@ flowchart TD
     Config["configs.orchestrator<br/>(OrchestratorConfig: initialType,<br/>dangerAvailable, runLimits)"]
     Config -->|"readOrchestratorConfig (cast boundary), once at mount"| Orch
     Orch["orchestrate/index.tsx<br/>(owns type/sandbox/run-limit slots,<br/>the live slot, and the run lifecycle)"]
-    Orch -->|"sourceType · sandboxMode · runLimits ·<br/>runState · outcome · channel output ·<br/>dangerAvailable · handlers"| Dock["&lt;Dock&gt; (presentation only)<br/>[data-orchestrator-dock]"]
+    Orch -->|"sourceType · sandboxMode · runLimits ·<br/>runState · outcome ·<br/>dangerAvailable · handlers"| Dock["&lt;Dock&gt; (presentation only)<br/>[data-orchestrator-dock]"]
+    Orch -->|"output · dismissed · pending ·<br/>onAnswer · onDismiss<br/>(mounted while runState !== 'idle')"| Panels["&lt;OutputPanels&gt; (content row)<br/>[data-orchestrator-output-panels]<br/>see ./output-panels/DOCS.md"]
     Dock --> Controls["type/sandbox toggles · run limits · debugger<br/>[-dock-type-toggle | -sandbox-toggle | -limit | -debugger]"]
-    Dock --> Out["Run · two output channels · outcome<br/>[-dock-run | -run-state | -channel | -outcome]"]
+    Dock --> Out["Run · Cancel · outcome<br/>[-dock-run | -dock-run-state | -dock-outcome]"]
+    Panels --> Chans["UI panel (interactive) · Console panel (passive)<br/>[-output-channel='user-interface' | 'developer-console']<br/>[-output-panel-dismiss]"]
     Controls -->|"onTypeToggle / onSandboxToggle / limit setters"| Orch
     Out -->|"onRun / onCancel"| Orch
-    Orch -.->|"type toggle → re-key the live slot;<br/>Run → evaluation.events.{run, intercept}(EvaluateOptions);<br/>dispatch type-toggled / sandbox-toggled on the bus"| Eval["live embodiment — evaluate surface<br/>(engine behind EvaluateHandle; NOT dock-owned)"]
+    Chans -->|"onAnswer (UI panel) / onDismiss"| Orch
+    Orch -.->|"type toggle → re-key the live slot;<br/>Run → evaluation.events.{run, intercept}(EvaluateOptions);<br/>async IoMocks set pending → onAnswer resolves;<br/>dispatch type-toggled / sandbox-toggled on the bus"| Eval["live embodiment — evaluate surface<br/>(engine behind EvaluateHandle; NOT dock-owned)"]
 ```
 
 The dock owns no execution backend: the orchestrator consumes
-`evaluation.events.{run, intercept}` on the live embodiment, and the worker engine
-(and the deferred danger-iframe backend) sit behind the `EvaluateHandle` contract,
-off the dock's surface entirely.
+`evaluation.events.{run, intercept}` on the live embodiment, and the worker
+engine (and the deferred danger-iframe backend) sit behind the `EvaluateHandle`
+contract, off the dock's surface entirely.
 
 ### Internal event taxonomy
 
