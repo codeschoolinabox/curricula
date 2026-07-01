@@ -1,10 +1,11 @@
 /**
  * @file `<Dock>` — the omnipresent region's run/debug surface: a
- * collapsible affordance container + output surface. **Presentation
- * only.** The orchestrator ([`../index.tsx`](../index.tsx)) owns every
- * state slot (source type, sandbox mode, run limits, collapse), the run
- * lifecycle (it invokes `evaluation.events.{run, intercept}` on the live
- * embodiment and accumulates the output), and the bus dispatch. This
+ * collapsible affordance **controls** container (the run output moved to the
+ * output panels). **Presentation only.** The orchestrator
+ * ([`../index.tsx`](../index.tsx)) owns every state slot (source type, sandbox
+ * mode, run limits, collapse), the run lifecycle (it invokes
+ * `evaluation.events.{run, intercept}` on the live embodiment and accumulates
+ * the output, which it routes to the output panels), and the bus dispatch. This
  * module imports no `embody`, dispatches no bus events, and holds no
  * orchestrator state — it never sees the `Snippet`. It renders what it is
  * handed and routes intent up through `on…` callbacks.
@@ -19,7 +20,6 @@ import React from 'react';
 
 import type { SnippetType } from '../../embody/types.js';
 import type {
-	ChannelKind,
 	DockRunState,
 	EndReportOutcome,
 	RunLimits,
@@ -101,12 +101,6 @@ type DockProperties = Readonly<{
 	 */
 	readonly outcome: EndReportOutcome | null;
 
-	/**
-	 * The accumulated output lines per channel — each channel's lines render in a
-	 * `data-orchestrator-dock-channel="user-interface|developer-console"` log region.
-	 */
-	readonly output: Readonly<Record<ChannelKind, readonly string[]>>;
-
 	/** Called when the learner clicks the Run control (a kick; takes no argument). */
 	readonly onRun: () => void;
 
@@ -119,7 +113,7 @@ type DockProperties = Readonly<{
  * affordance points at the controls strip via `aria-controls`; the strip
  * holds the type toggle (+ adjacent script-mode hint) and the later controls.
  * Collapsing is a visual concern driven off `data-orchestrator-dock-collapsed`;
- * the Run affordance and output surface stay reachable.
+ * the Run affordance stays reachable (the run output moved to the output panels).
  */
 function Dock({
 	collapsed,
@@ -136,7 +130,6 @@ function Dock({
 	onLimitChange,
 	runState,
 	outcome,
-	output,
 	onRun,
 	onCancel,
 }: DockProperties): React.JSX.Element {
@@ -225,26 +218,6 @@ function Dock({
 			<button type="button" aria-label="cancel the run" onClick={onCancel}>
 				Cancel
 			</button>
-			<div
-				data-orchestrator-dock-channel="user-interface"
-				role="log"
-				aria-live="polite"
-				aria-label="user-interface output"
-			>
-				{output['user-interface'].map((line, index) => (
-					<div key={index}>{line}</div>
-				))}
-			</div>
-			<div
-				data-orchestrator-dock-channel="developer-console"
-				role="log"
-				aria-live="polite"
-				aria-label="developer-console output"
-			>
-				{output['developer-console'].map((line, index) => (
-					<div key={index}>{line}</div>
-				))}
-			</div>
 			{runState === 'settled' && outcome !== null ? (
 				<span data-orchestrator-dock-outcome={outcome}>{outcome}</span>
 			) : null}

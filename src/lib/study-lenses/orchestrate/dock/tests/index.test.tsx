@@ -27,7 +27,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -56,7 +55,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -84,7 +82,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -115,7 +112,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -145,7 +141,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -174,7 +169,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -206,7 +200,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -236,7 +229,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -263,7 +255,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -290,7 +281,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -321,7 +311,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -349,7 +338,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -380,7 +368,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -413,7 +400,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -442,7 +428,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -471,7 +456,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -498,7 +482,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -529,7 +512,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -556,7 +538,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -583,7 +564,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -610,7 +590,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -639,7 +618,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -668,7 +646,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -700,7 +677,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -729,7 +705,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -759,7 +734,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -788,7 +762,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -817,7 +790,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -846,7 +818,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -875,7 +846,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -914,7 +884,6 @@ describe('Dock', () => {
 					onLimitChange={onLimitChange}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -944,7 +913,6 @@ describe('Dock', () => {
 					onLimitChange={onLimitChange}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -975,7 +943,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -1007,7 +974,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome="errored"
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -1036,7 +1002,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="running"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -1070,7 +1035,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="settled"
 					outcome="errored"
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -1103,7 +1067,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="settled"
 					outcome="timed-out"
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,
@@ -1112,77 +1075,6 @@ describe('Dock', () => {
 				container.querySelector<HTMLElement>('[data-orchestrator-dock-outcome]')
 					?.dataset.orchestratorDockOutcome,
 			).toBe('timed-out');
-		});
-	});
-
-	describe('Many — the output channels', () => {
-		it('renders each line of the user-interface channel', () => {
-			const { container } = render(
-				<Dock
-					collapsed={false}
-					onCollapseToggle={() => {}}
-					sourceType="module"
-					scriptModeHintVisible={false}
-					onTypeToggle={() => {}}
-					sandboxMode="worker"
-					dangerAvailable={false}
-					debuggerEnabled={false}
-					onSandboxToggle={() => {}}
-					onDebuggerToggle={() => {}}
-					runLimits={{ seconds: 5, iterations: 1000 }}
-					onLimitChange={() => {}}
-					runState="settled"
-					outcome="completed"
-					output={{
-						'user-interface': ['first dialog', 'second dialog'],
-						'developer-console': [],
-					}}
-					onRun={() => {}}
-					onCancel={() => {}}
-				/>,
-			);
-			expect(
-				container.querySelector(
-					'[data-orchestrator-dock-channel="user-interface"]',
-				)?.childElementCount,
-			).toBe(2);
-		});
-
-		it('renders each channel independently of the other (no cross-contamination)', () => {
-			const { container } = render(
-				<Dock
-					collapsed={false}
-					onCollapseToggle={() => {}}
-					sourceType="module"
-					scriptModeHintVisible={false}
-					onTypeToggle={() => {}}
-					sandboxMode="worker"
-					dangerAvailable={false}
-					debuggerEnabled={false}
-					onSandboxToggle={() => {}}
-					onDebuggerToggle={() => {}}
-					runLimits={{ seconds: 5, iterations: 1000 }}
-					onLimitChange={() => {}}
-					runState="settled"
-					outcome="completed"
-					output={{
-						'user-interface': ['only the ui line'],
-						'developer-console': ['console one', 'console two'],
-					}}
-					onRun={() => {}}
-					onCancel={() => {}}
-				/>,
-			);
-			expect(
-				container.querySelector(
-					'[data-orchestrator-dock-channel="user-interface"]',
-				)?.childElementCount,
-			).toBe(1);
-			expect(
-				container.querySelector(
-					'[data-orchestrator-dock-channel="developer-console"]',
-				)?.childElementCount,
-			).toBe(2);
 		});
 	});
 
@@ -1205,7 +1097,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={onRun}
 					onCancel={() => {}}
 				/>,
@@ -1232,7 +1123,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="running"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={onCancel}
 				/>,
@@ -1246,8 +1136,9 @@ describe('Dock', () => {
 
 	describe('Boundary — the run control survives collapse', () => {
 		it('keeps the run control reachable when collapsed', () => {
-			// The run affordance + output surface live OUTSIDE the collapsible
-			// controls strip (the controls hide on collapse; Run stays reachable).
+			// The run affordance lives OUTSIDE the collapsible controls strip (the
+			// controls hide on collapse; Run stays reachable). (Output left the dock
+			// for the output panels in inc 3 — the dock is controls-only now.)
 			const { container } = render(
 				<Dock
 					collapsed={true}
@@ -1264,7 +1155,6 @@ describe('Dock', () => {
 					onLimitChange={() => {}}
 					runState="idle"
 					outcome={null}
-					output={{ 'user-interface': [], 'developer-console': [] }}
 					onRun={() => {}}
 					onCancel={() => {}}
 				/>,

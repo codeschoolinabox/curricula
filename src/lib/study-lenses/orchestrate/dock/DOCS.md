@@ -3,14 +3,15 @@
 ## Why this module exists
 
 The omnipresent region's run/debug surface is a **collapsible affordance
-container + output surface**, not part of the editor or the panel: running and
+container** (controls only — the run output moved to the output panels), not part of
+the editor or the panel: running and
 inspecting a program is a distinct activity from authoring it or reading the
 lifecycle. Module-folder presentation keeps that surface separable from the
 orchestrator's state machine — the orchestrator decides WHAT runs and owns the
 run lifecycle; this module decides only HOW the controls and output render.
 
 The locked design — the affordance set, the per-backend run-limit semantics, the
-two output channels, the danger-only debugger option, the selector contract —
+danger-only debugger option, the selector contract —
 lives at [`../README.md` § The dock](../README.md) and
 [`../DOCS.md` § The omnipresent region](../DOCS.md). This sketch covers the
 module-internal structure only.
@@ -20,12 +21,12 @@ module-internal structure only.
 ```mermaid
 flowchart TD
     Orch["orchestrate/index.tsx<br/>(owns type/sandbox/run-limit slots,<br/>the live slot, and the run lifecycle)"]
-    Orch -->|"sourceType · sandboxMode · runLimits ·<br/>runState · outcome · output · dangerAvailable ·<br/>scriptModeHintVisible · collapsed · handlers"| Dock["&lt;Dock&gt;<br/>[data-orchestrator-dock] (presentation only)"]
-    Dock --> Controls["controls strip (collapsible)<br/>type/sandbox toggles · run limits ·<br/>debugger (danger only) · Run<br/>[-dock-type-toggle | -sandbox-toggle | -limit |<br/>-debugger | -run | -run-state]"]
-    Dock --> Channels["output surface<br/>[-dock-channel='user-interface']<br/>[-dock-channel='developer-console']<br/>[-dock-outcome]"]
+    Orch -->|"sourceType · sandboxMode · runLimits ·<br/>runState · outcome · dangerAvailable ·<br/>scriptModeHintVisible · collapsed · handlers"| Dock["&lt;Dock&gt;<br/>[data-orchestrator-dock] (presentation only)"]
+    Dock --> Controls["controls strip (collapsible)<br/>type/sandbox toggles · run limits ·<br/>debugger (danger only) · Run · Cancel<br/>[-dock-type-toggle | -dock-sandbox-toggle | -dock-limit |<br/>-dock-debugger | -dock-run | -dock-run-state]"]
+    Dock --> Outcome["outcome marker<br/>[-dock-outcome] (on the Run control, when settled)"]
     Controls -->|"onTypeToggle / onSandboxToggle /<br/>limit setters / onDebuggerToggle / onRun / onCancel"| Orch
     Dock -->|"onCollapseToggle"| Orch
-    Orch -.->|"Run → evaluation.events.{run, intercept}(EvaluateOptions);<br/>IoMocks append to the channel state;<br/>endReport.outcome → outcome prop"| Eval["live embodiment — evaluate surface<br/>(engine behind EvaluateHandle; NOT dock-owned)"]
+    Orch -.->|"Run → evaluation.events.{run, intercept}(EvaluateOptions);<br/>IoMocks append to channelOutput state (→ output panels, NOT the dock);<br/>endReport.outcome → outcome prop"| Eval["live embodiment — evaluate surface<br/>(engine behind EvaluateHandle; NOT dock-owned)"]
 ```
 
 ## Structural constraints
@@ -37,9 +38,9 @@ flowchart TD
   outcomes at the orchestrator boundary in integration tests).
 - **Owns no execution backend.** The orchestrator invokes
   `evaluation.events.{run, intercept}` on the live embodiment and feeds the dock
-  `runState` / `outcome` / `output`. The worker engine and the deferred
-  danger-iframe backend live behind the `EvaluateHandle` contract, off this
-  surface entirely.
+  `runState` / `outcome` (the accumulated channel output crosses to the **output
+  panels**, not the dock). The worker engine and the deferred danger-iframe backend
+  live behind the `EvaluateHandle` contract, off this surface entirely.
 - **`run-state` (transport) and `outcome` (result) are orthogonal axes.**
   `runState ∈ {idle, running, settled}`; `outcome` is the seven-way
   `EndReportOutcome`, present only when `settled`. The dock never collapses the
@@ -54,11 +55,15 @@ flowchart TD
   the danger toggle position render conditionally on `sandboxMode` /
   `dangerAvailable` (mirrors the panel's "hidden = fully removed").
 - **Collapse acts on the controls.** Collapsing hides the controls strip; the
-  Run affordance and output surface stay reachable. Exact visual treatment is a
-  Phase-1 presentational choice; tests anchor on attributes, never label text.
-- **One IoMocks builder.** The orchestrator constructs the `IoMocks` whose
-  callbacks append to the two channels and threads it as `EvaluateOptions.io`;
-  the dock renders the accumulated lines, it does not own the mocks.
+  Run affordance stays reachable (there is no output surface in the dock now — output
+  lives in the output panels). Exact visual treatment is a Phase-1 presentational
+  choice; tests anchor on attributes, never label text.
+- **One IoMocks builder.** The orchestrator constructs the `IoMocks` whose callbacks
+  append to the two channels' `channelOutput` state and threads it as
+  `EvaluateOptions.io`; the **output panels** render the accumulated lines (the dock
+  no longer does). For the interactive User Interface channel the mocks are **async**
+  (set a pending interaction, await the learner's answer) — see
+  [`../output-panels/DOCS.md`](../output-panels/DOCS.md).
 
 ## Out of scope
 
