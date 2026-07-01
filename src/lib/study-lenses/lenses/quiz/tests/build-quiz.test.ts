@@ -73,18 +73,21 @@ describe('buildQuiz — quiz model builder', () => {
 			expect(items.length).toBeGreaterThan(classified.length);
 		});
 
-		it('admits mcq + click-token, but no select-in-code leaks through (the 6b filter)', () => {
+		it('admits all three answer modes after the 6c widen — mcq + click-token + select-in-code', () => {
 			const items = buildQuiz(embody(CODE))?.items ?? [];
 			expect(items.length).toBeGreaterThan(0);
-			// The 6b filter is `mcq || click-token`; select-in-code (V10a/b/c) stays
-			// out until 6c. So every admitted item is one of the two handled modes,
-			// and none is select-in-code.
+			// The 6c filter is `mcq || click-token || select-in-code` — every admitted
+			// item is one of the three handled modes, and select-in-code (V10a/b/c) now
+			// reaches the panel (the sameness forms are the last to be admitted).
 			expect(
 				items.every(
-					(item) => item.mode === 'mcq' || item.mode === 'click-token',
+					(item) =>
+						item.mode === 'mcq' ||
+						item.mode === 'click-token' ||
+						item.mode === 'select-in-code',
 				),
 			).toBe(true);
-			expect(items.some((item) => item.mode === 'select-in-code')).toBe(false);
+			expect(items.some((item) => item.mode === 'select-in-code')).toBe(true);
 		});
 
 		it('admits structurally-distinct mcq forms beyond V1 — the filter is mode-based, not a V1/V7 allowlist', () => {

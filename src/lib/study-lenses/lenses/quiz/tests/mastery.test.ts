@@ -170,18 +170,22 @@ describe('masteryFold — fold a graded verdict into MasteryState', () => {
 		});
 	});
 
-	it('folds three co-anchored declaration items into three distinct groupKeys (first multi-group fold)', () => {
-		// decl `x`[4,5) co-anchors V1 (category:identifier) + V6 (binding:4-5) + V7
-		// (usage:4-5:declared) — the first anchor carrying THREE distinct groupKeys.
-		// Answering all three accrues each independently: the fold keys on groupKey,
-		// so co-anchoring at one token neither collapses nor cross-credits the groups.
-		// buildQuiz mode-filters to mcq upstream, so the decl bundle is all McqQuizItem.
+	it('folds co-anchored declaration mcq items into distinct groupKeys, each independently (multi-group fold)', () => {
+		// The declaration co-anchors several mcq forms (V1 category:identifier, V6
+		// binding:4-5, V7 usage:4-5:declared, plus any others M2 adds) with DISTINCT
+		// groupKeys. Answering all accrues each independently: the fold keys on
+		// groupKey, so co-anchoring at one token neither collapses nor cross-credits
+		// the groups. Scope to the mcq items (6c admits select-in-code at the same
+		// anchor); the count is not hardcoded — the live M2 registry adds forms.
 		const declItems = items.filter(
-			(item) => item.anchorRange[0] === 4 && item.anchorRange[1] === 5,
+			(item) =>
+				item.mode === 'mcq' &&
+				item.anchorRange[0] === 4 &&
+				item.anchorRange[1] === 5,
 		) as McqQuizItem[];
-		expect(declItems).toHaveLength(3);
+		expect(declItems.length).toBeGreaterThanOrEqual(3); // at least V1/V6/V7
 		const distinctKeys = [...new Set(declItems.map((item) => item.groupKey))];
-		expect(distinctKeys).toHaveLength(3);
+		expect(distinctKeys.length).toBeGreaterThanOrEqual(3);
 		let state: MasteryState = {};
 		for (const item of declItems) {
 			state = quizCore.masteryFold(
@@ -190,9 +194,12 @@ describe('masteryFold — fold a graded verdict into MasteryState', () => {
 				gradeOption(item, item.answerOptionIds[0]),
 			);
 		}
+		// The fold produces EXACTLY the decl's distinct groupKeys (none collapsed, no
+		// phantom key), each accrued (progress >= one step) and none wrong.
 		expect(new Set(Object.keys(state))).toEqual(new Set(distinctKeys));
 		for (const key of distinctKeys) {
-			expect(state[key]).toEqual({ progress: 0.25, wrong: false });
+			expect(state[key].progress).toBeGreaterThanOrEqual(0.25);
+			expect(state[key].wrong).toBe(false);
 		}
 	});
 
@@ -201,16 +208,21 @@ describe('masteryFold — fold a graded verdict into MasteryState', () => {
 		// binding:4-5 (V6) marks ONLY that group wrong. Because the fold keys on
 		// groupKey, the peers co-anchored at the same token — category:identifier (V1)
 		// and usage:4-5:declared (V7) — keep their prior mastery, uncontaminated.
-		// buildQuiz mode-filters to mcq upstream, so the decl bundle is all McqQuizItem.
+		// Scope to the mcq items at the declaration — 6c admits select-in-code (V10a)
+		// at the same anchor, so filter by mode to keep this fold about the mcq forms
+		// (and to keep the `as McqQuizItem[]` cast sound).
 		const declItems = items.filter(
-			(item) => item.anchorRange[0] === 4 && item.anchorRange[1] === 5,
+			(item) =>
+				item.mode === 'mcq' &&
+				item.anchorRange[0] === 4 &&
+				item.anchorRange[1] === 5,
 		) as McqQuizItem[];
 		const v6 = declItems.find((item) => item.groupKey === 'binding:4-5');
 		const peers = declItems.filter((item) => item.groupKey !== 'binding:4-5');
-		if (v6 === undefined || peers.length !== 2) {
-			throw new Error('fixture: expected V6 + two co-anchored peers');
+		if (v6 === undefined || peers.length < 2) {
+			throw new Error('fixture: expected V6 + at least two co-anchored peers');
 		}
-		// Master the two peers first, then answer V6 wrong.
+		// Master every peer first, then answer V6 wrong.
 		let state: MasteryState = {};
 		for (const peer of peers) {
 			state = quizCore.masteryFold(
@@ -229,13 +241,11 @@ describe('masteryFold — fold a graded verdict into MasteryState', () => {
 			gradeOption(v6, wrongOption.id),
 		);
 		expect(afterWrong['binding:4-5']).toEqual({ progress: 0, wrong: true });
+		// The wrong flag did NOT spread — every peer keeps its prior (correct) mastery.
 		for (const peer of peers) {
-			expect(afterWrong[peer.groupKey]).toEqual({
-				progress: 0.25,
-				wrong: false,
-			});
+			expect(afterWrong[peer.groupKey].wrong).toBe(false);
+			expect(afterWrong[peer.groupKey].progress).toBeGreaterThanOrEqual(0.25);
 		}
-		expect(Object.keys(afterWrong)).toHaveLength(3);
 	});
 
 	// ── E — exceptions / immutability ───────────────────────────

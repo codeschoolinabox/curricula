@@ -211,8 +211,9 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 	// verified at the 🔍 sandbox; here we lock the panel state machine the pick
 	// drives.
 	describe('co-anchored tabs + per-item verdict', () => {
-		// `let x = 1; x;`: `=`=[6,7) is lone-V1; ref `x`=[11,12) → V1+V7 (mcq) +
-		// V8 (click-token, admitted in 6b) = 3 tabs.
+		// `let x = 1; x;`: `=`=[6,7) is lone-V1; ref `x`=[11,12) co-anchors mcq +
+		// click-token (V8) + select-in-code (V10b/c). Tab counts are DERIVED from the
+		// bundle (the live M2 registry keeps adding forms), never hardcoded.
 		const REFERENCE_X = 11;
 		const OPERATOR = 6;
 
@@ -242,24 +243,41 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 			return { container, cmContent, spy };
 		}
 
-		it('a co-anchored token shows one tab per item — the reference x → 3 tabs (V1+V7+V8)', async () => {
+		// One tab per co-anchored item — the count is DERIVED from the bundle
+		// (itemsAt at that range), not hardcoded, so the assertion tracks the live
+		// M2 registry rather than breaking each time a form is added.
+		const bundleSizeAt = (start: number, end: number) =>
+			(buildQuiz(embody('let x = 1; x;'))?.items ?? []).filter(
+				(item) => item.anchorRange[0] === start && item.anchorRange[1] === end,
+			).length;
+
+		it('shows one tab per co-anchored item — the reference x', async () => {
+			const referenceCount = bundleSizeAt(11, 12);
+			expect(referenceCount).toBeGreaterThan(1); // guard: the reference IS co-anchored
 			const { container } = await mountAndPick(REFERENCE_X);
-			expect(container.querySelectorAll('[data-quiz-tab]').length).toBe(3);
+			expect(container.querySelectorAll('[data-quiz-tab]').length).toBe(
+				referenceCount,
+			);
 		});
 
-		it('a deeper co-anchored token shows a tab per item — the declaration x → 3 tabs', async () => {
-			// decl `x`=[4,5) co-anchors V1 + V6 + V7 (all mcq) — the tab loop is
-			// generic over N, not a hardcoded 2.
+		it('shows a tab per co-anchored item at the deeper declaration bundle too (range-driven)', async () => {
+			const declCount = bundleSizeAt(4, 5);
+			expect(declCount).toBeGreaterThan(1);
 			const { container } = await mountAndPick(4);
-			expect(container.querySelectorAll('[data-quiz-tab]').length).toBe(3);
+			expect(container.querySelectorAll('[data-quiz-tab]').length).toBe(
+				declCount,
+			);
 		});
 
-		it('tab labels are neutral bare indices, never the prompt or a gesture verb', async () => {
+		it('tab labels are neutral bare indices (1..N), never the prompt or a gesture verb', async () => {
+			const referenceCount = bundleSizeAt(11, 12);
 			const { container } = await mountAndPick(REFERENCE_X);
 			const labels = [...container.querySelectorAll('[data-quiz-tab]')].map(
 				(tab) => tab.textContent,
 			);
-			expect(labels).toEqual(['1', '2', '3']);
+			expect(labels).toEqual(
+				Array.from({ length: referenceCount }, (_, index) => String(index + 1)),
+			);
 		});
 
 		it('the default active tab is the first mcq — tab 0 aria-selected (never auto-arm)', async () => {
@@ -455,7 +473,7 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 		// [4,5), so the answer is a staged click at offset 4. The Confirm count
 		// (`Confirm (N selected)`) makes staging observable in jsdom; the
 		// `.cm-quiz-pending` PAINT + the real click are sandbox-only.
-		describe('answer phase — click-token (V8)', () => {
+		describe('answer phase — click-token (V8) + select-in-code (V10a)', () => {
 			const phaseOf = (root: Element) =>
 				root.querySelector<HTMLElement>('[data-quiz-editor]')?.dataset
 					.quizPhase;
@@ -754,6 +772,103 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 				});
 				expect(phaseOf(container)).toBe('answer');
 				expect(container.querySelector('[data-quiz-verdict]')).toBeNull();
+			});
+
+			// Pick the DECLARATION `x`, then select its select-in-code (V10a) tab —
+			// V10a targets BOTH occurrences (the representative [4,5) is itself a target).
+			async function armSelectInCode() {
+				const v10a = (buildQuiz(embody('let x = 1; x;'))?.items ?? []).find(
+					(item) => item.mode === 'select-in-code' && item.form === 'V10a',
+				);
+				if (v10a === undefined) {
+					throw new Error('no select-in-code item admitted');
+				}
+				const handles = await mountAndPick(4); // the declaration `x` [4,5)
+				fireEvent.click(
+					handles.container.querySelector(
+						`[data-quiz-tab="${v10a.id}"]`,
+					) as HTMLElement,
+				);
+				await waitFor(() => {
+					expect(phaseOf(handles.container)).toBe('answer');
+				});
+				return handles;
+			}
+
+			it('selecting the select-in-code tab arms the editor (anchor → answer)', async () => {
+				const handles = await armSelectInCode();
+				expect(phaseOf(handles.container)).toBe('answer');
+			});
+
+			it('staging the anchor offset registers it as a target — the anchor is not special-cased', async () => {
+				const handles = await armSelectInCode();
+				stage(handles, 4); // offset 4 = the declaration [4,5), the anchor AND a target
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('1 selected');
+				});
+			});
+
+			it('a click TOGGLES membership — stage two occurrences, toggle one off', async () => {
+				const handles = await armSelectInCode();
+				stage(handles, 4); // toggle ON the declaration (the anchor IS a target)
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('1 selected');
+				});
+				stage(handles, 11); // toggle ON the reference
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('2 selected');
+				});
+				stage(handles, 4); // toggle OFF the declaration (exact-equality membership)
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('1 selected');
+				});
+			});
+
+			it('selecting EVERY occurrence (incl. the anchor) then Confirm grades correct', async () => {
+				const handles = await armSelectInCode();
+				stage(handles, 4); // the declaration — the anchor, itself a target
+				stage(handles, 11); // the reference
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('2 selected');
+				});
+				fireEvent.click(
+					handles.container.querySelector('[data-quiz-confirm]') as HTMLElement,
+				);
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector<HTMLElement>('[data-quiz-verdict]')
+							?.dataset.quizVerdict,
+					).toBe('correct');
+				});
+			});
+
+			it('a partial selection (missing an occurrence) then Confirm grades incorrect', async () => {
+				const handles = await armSelectInCode();
+				stage(handles, 4); // only the declaration — the reference is missing
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector('[data-quiz-confirm]')?.textContent,
+					).toContain('1 selected');
+				});
+				fireEvent.click(
+					handles.container.querySelector('[data-quiz-confirm]') as HTMLElement,
+				);
+				await waitFor(() => {
+					expect(
+						handles.container.querySelector<HTMLElement>('[data-quiz-verdict]')
+							?.dataset.quizVerdict,
+					).toBe('incorrect');
+				});
 			});
 		});
 	});

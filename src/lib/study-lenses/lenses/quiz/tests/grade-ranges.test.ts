@@ -14,7 +14,10 @@ import { describe, expect, it } from 'vitest';
 import embody from '../../../embody/index.js';
 import classifyTokens from '../../../lib/classifying/classify-tokens.js';
 import generateQuiz from '../../../lib/quizzing/generate-quiz.js';
-import type { CodeSurfaceQuizItem } from '../../../lib/quizzing/types.js';
+import type {
+	CodeSurfaceQuizItem,
+	SelectInCodeQuizItem,
+} from '../../../lib/quizzing/types.js';
 import gradeRanges from '../lib/grade-ranges.js';
 
 // Local acorn → classifyTokens helper (the build-quiz recipe, inlined so this
@@ -80,5 +83,53 @@ describe('gradeRanges — code-surface answer → verdict', () => {
 		const verdict = gradeRanges(v8, [[11, 12]]);
 		if (verdict.status !== 'incorrect') throw new Error('expected incorrect');
 		expect(verdict.feedback).toBe(v8.feedback);
+	});
+
+	// select-in-code (V10a) — the sameness form: exhaustive set-equality on ALL
+	// occurrences. On `let x = 1; x;` V10a's representative is the declaration
+	// [4,5) and its targetRanges are [[4,5),[11,12)] — the anchor IS a target.
+	const v10a = all.find(
+		(item) => item.mode === 'select-in-code' && item.form === 'V10a',
+	) as SelectInCodeQuizItem | undefined;
+
+	it('the fixture yields a V10a select-in-code item targeting both occurrences (guard)', () => {
+		expect(v10a?.mode).toBe('select-in-code');
+		expect(v10a?.targetRanges).toEqual([
+			[4, 5],
+			[11, 12],
+		]);
+	});
+
+	it('grades the exact target set as correct', () => {
+		if (v10a === undefined) throw new Error('no V10a fixture item');
+		expect(
+			gradeRanges(v10a, [
+				[4, 5],
+				[11, 12],
+			]).status,
+		).toBe('correct');
+	});
+
+	it('grades a partial selection as incorrect (exhaustive set-equality)', () => {
+		if (v10a === undefined) throw new Error('no V10a fixture item');
+		expect(gradeRanges(v10a, [[4, 5]]).status).toBe('incorrect');
+	});
+
+	it('grades an extra (non-target) range as incorrect', () => {
+		if (v10a === undefined) throw new Error('no V10a fixture item');
+		expect(
+			gradeRanges(v10a, [
+				[4, 5],
+				[11, 12],
+				[0, 3],
+			]).status,
+		).toBe('incorrect');
+	});
+
+	it('the incorrect select-in-code verdict carries the item feedback verbatim', () => {
+		if (v10a === undefined) throw new Error('no V10a fixture item');
+		const verdict = gradeRanges(v10a, [[4, 5]]);
+		if (verdict.status !== 'incorrect') throw new Error('expected incorrect');
+		expect(verdict.feedback).toBe(v10a.feedback);
 	});
 });

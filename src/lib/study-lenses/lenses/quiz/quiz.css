@@ -56,6 +56,16 @@
 	border-top: 1px dotted currentColor;
 }
 
+/* Answer-phase staged selection (inc 6c) — the FOURTH, orthogonal decoration
+ * axis: a box OUTLINE (never text-decoration), so it never collides with the
+ * mastery underline/overline on a token that is both mastered and currently
+ * staged; the anchor-hit background is suppressed in answer phase, so the four
+ * axes stay legible. `currentColor` only — no hue. (blanks.css is the precedent.) */
+.cm-quiz-pending {
+	outline: 1px solid currentColor;
+	border-radius: 2px;
+}
+
 /* Defense-in-depth notice shown when the lens is mounted on an unparseable
  * snippet (applicableTo should have gated it out). */
 [data-quiz-fallback] {

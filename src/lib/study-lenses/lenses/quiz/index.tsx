@@ -34,6 +34,7 @@ import buildQuiz from './lib/build-quiz.js';
 import masteryDecorations from './lib/decorations.js';
 import gradeOption from './lib/grade-option.js';
 import gradeRanges from './lib/grade-ranges.js';
+import toggleRange from './lib/pending.js';
 import type {
 	ActiveTab,
 	MasteryDecos,
@@ -104,6 +105,33 @@ const masteryField = StateField.define<DecorationSet>({
 		// `true` lets CodeMirror sort the merged channels — a token that is both
 		// in-progress and wrong carries two marks at the same `from`.
 		return Decoration.set(ranges, true);
+	},
+	provide: (field) => EditorView.decorations.from(field),
+});
+
+// The answer-phase staged-selection highlight (inc 6c) — the fourth decoration
+// axis. A `Decoration.mark` per staged range (`.cm-quiz-pending`, a box outline,
+// never text-decoration), driven by a `StateEffect` dispatched from React when
+// `pendingSelection` changes; the read-only doc never changes, so positions are
+// stable and no `DecorationSet.map(changes)` is needed. Empty (so invisible) in
+// anchor phase, since pending is cleared on every tab change.
+const setPendingDecos = StateEffect.define<PendingSelection>();
+const pendingMark = Decoration.mark({ class: 'cm-quiz-pending' });
+const pendingField = StateField.define<DecorationSet>({
+	create() {
+		return Decoration.none;
+	},
+	update(decorations, transaction) {
+		const effect = transaction.effects.find(
+			(candidate): candidate is StateEffect<PendingSelection> =>
+				candidate.is(setPendingDecos),
+		);
+		if (effect === undefined) return decorations;
+		// `true` lets CodeMirror sort the staged ranges (source order not guaranteed).
+		return Decoration.set(
+			effect.value.map((range) => pendingMark.range(range[0], range[1])),
+			true,
+		);
 	},
 	provide: (field) => EditorView.decorations.from(field),
 });
@@ -247,6 +275,7 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 							EditorState.readOnly.of(true),
 							anchorHitField,
 							masteryField,
+							pendingField,
 							EditorView.domEventHandlers({
 								mousedown(event, clickedView) {
 									const offset = clickedView.posAtCoords({
@@ -258,12 +287,20 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 											? null
 											: anchors.anchorAt(offset, classifiedReference.current);
 									if (armedReference.current) {
-										// Answer phase: an in-token click STAGES the range (single-
-										// slot for click-token — a click replaces the pending
-										// selection). A null/whitespace click is a no-op (it neither
-										// exits answer phase nor grades).
+										// Answer phase: an in-token click STAGES the range —
+										// click-token replaces (single slot); select-in-code toggles
+										// (exact-equality membership). A null/whitespace click is a
+										// no-op (it neither exits answer phase nor grades).
 										if (token !== null) {
-											setPendingSelection(() => [[token.start, token.end]]);
+											const range: readonly [number, number] = [
+												token.start,
+												token.end,
+											];
+											const isToggle =
+												activeItemReference.current?.mode === 'select-in-code';
+											setPendingSelection((previous) =>
+												isToggle ? toggleRange(previous, range) : [range],
+											);
 										}
 									} else {
 										// Anchor phase: the click re-picks (or clears on whitespace).
@@ -381,6 +418,18 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		[masteryDecos],
 	);
 
+	// Sync the staged-selection highlight (the 4th axis): dispatch the pending
+	// ranges into `pendingField` whenever they change — no remount, exactly like
+	// the picked-anchor + mastery highlights above.
+	useEffect(
+		function syncPendingDecorations() {
+			editorView.current?.dispatch({
+				effects: setPendingDecos.of(pendingSelection),
+			});
+		},
+		[pendingSelection],
+	);
+
 	// Grade the picked mcq answer into the per-item verdict map, then fold it into
 	// mastery. Function declarations (a block-bodied arrow trips `arrow-body-style`);
 	// both setters are functional updaters reading the latest state, never a
@@ -442,12 +491,15 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 		);
 	}
 
-	// The code-surface arm (click-token in 6b): the prompt + the answer-phase
-	// controls. Confirm grades the staged ranges (count-bearing so the staged size
-	// is visible); Cancel returns to anchor phase. Both render only while armed —
-	// after grading, the editor is disarmed and the shared verdict region (below)
-	// stands alone.
-	function renderCodeSurfaceTab(item: CodeSurfaceQuizItem): ReactElement {
+	// The code-surface arm (click-token + select-in-code): the prompt + the
+	// answer-phase controls. Confirm grades the staged ranges (count-bearing so the
+	// staged size is visible); Cancel returns to anchor phase. Both render only
+	// while armed — after grading, the editor is disarmed and the shared verdict
+	// region (below) stands alone. One renderer serves both code modes (they differ
+	// only in how a click STAGES — DOCS § Why unify the code-surface substrate).
+	function renderCodeSurfaceTab(
+		item: CodeSurfaceQuizItem | SelectInCodeQuizItem,
+	): ReactElement {
 		return (
 			<>
 				<p>{item.prompt}</p>
@@ -467,17 +519,28 @@ const QuizComponent: ComponentType<LensProperties> = function QuizComponent({
 
 	// The active tab's body, dispatched on its `item.mode` via an if-chain (mirrors
 	// `grade.ts`) — each guard narrows the union before touching a mode-specific
-	// field. 6a/6b render the `mcq` + `click-token` arms; `select-in-code` (and the
-	// `const _never: never` exhaustiveness assert) lands in 6c, so the chain still
-	// ends in a `return null` fallback (unreachable — the filter admits only the two
-	// handled modes).
+	// field. All three admitted modes now have arms (`mcq`; the code surfaces
+	// `click-token` / `click-line` / `select-in-code`), so the chain is exhaustive:
+	// the trailing `const _never: never = activeItem` makes any unhandled mode a
+	// COMPILE error (the mirror of `grade.ts`'s dispatch), replacing the 6a/6b
+	// `return null` fallback.
 	function renderActiveTab(): ReactElement | null {
 		if (activeItem === undefined) return null;
 		if (activeItem.mode === 'mcq') return renderMcqTab(activeItem);
-		if (activeItem.mode === 'click-token') {
+		if (
+			activeItem.mode === 'click-token' ||
+			activeItem.mode === 'click-line' ||
+			activeItem.mode === 'select-in-code'
+		) {
 			return renderCodeSurfaceTab(activeItem);
 		}
-		return null;
+		// Exhaustive — every admitted mode has an arm above (mcq + the three code
+		// surfaces), so this is unreachable. The `never` assign on the discriminant
+		// (`.mode` — asserting on the object doesn't reduce a member whose `mode` is a
+		// union) is the compile-time guard: a new mode fails to compile here. The
+		// throw surfaces the impossible loudly rather than rendering a bad value.
+		const _never: never = activeItem.mode;
+		throw new Error(`unhandled quiz item mode: ${String(_never)}`);
 	}
 
 	if (!embodiment.status.parsed) {

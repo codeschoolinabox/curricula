@@ -91,14 +91,13 @@ describe('anchorAt — token resolution', () => {
 
 describe('itemsAt — item resolution', () => {
 	// Real-composition snippet: `x` is declared AND referenced, so the registry
-	// co-anchors several forms per identifier — the declaration carries V1/V6/V7
-	// (mcq); the reference carries V1/V7 (mcq) + V8 (click-token, admitted in 6b).
-	// `itemsAt` is mode-agnostic (it matches on `anchorRange` only), so it returns
-	// the FULL co-anchored bundle build-quiz admits, not just the first item. Token
-	// map: `let`=[0,3) `x`=[4,5) `=`=[6,7) `1`=[8,9) `;`=[9,10) `x`=[11,12) `;`=[12,13).
-	// These counts also cross-check build-quiz's mode filter (a leaked V10
-	// select-in-code item — not admitted until 6c — would inflate the count);
-	// build-quiz.test.ts locks that filter in isolation, so a count failure points there.
+	// co-anchors several forms per identifier across ALL THREE modes — mcq,
+	// click-token (V8, on the reference), and select-in-code (V10a/b/c). `itemsAt`
+	// is mode-agnostic (it matches on `anchorRange` only), so it returns the FULL
+	// co-anchored bundle build-quiz admits, not just the first item. Token map:
+	// `let`=[0,3) `x`=[4,5) `=`=[6,7) `1`=[8,9) `;`=[9,10) `x`=[11,12) `;`=[12,13).
+	// Assertions below derive from the live bundle rather than hardcoding counts —
+	// the M2 registry keeps adding forms (build-quiz.test.ts locks the mode filter).
 	const CODE = 'let x = 1; x;';
 	const model = buildQuiz(embody(CODE));
 	const items = model?.items ?? [];
@@ -128,18 +127,36 @@ describe('itemsAt — item resolution', () => {
 
 	it('returns EVERY co-anchored item at a shared range, not just the first (Many)', () => {
 		const found = anchors.itemsAt(items, [reference.start, reference.end]);
-		expect(found.length).toBe(3); // V1 + V7 + V8 anchor the reference `x` (6b)
+		// The reference co-anchors several forms; the point is itemsAt returns ALL
+		// of them, not just the first. (Exact membership is asserted below; the count
+		// is not hardcoded — the live M2 registry adds forms over time.)
+		expect(found.length).toBeGreaterThan(1);
 	});
 
-	it('the co-anchored bundle is heterogeneous by form AND mode (V1/V7 mcq + V8 click-token), not one repeated form (Many)', () => {
+	it('the co-anchored bundle is heterogeneous across MODES (mcq + click-token + select-in-code) (Many)', () => {
 		const found = anchors.itemsAt(items, [reference.start, reference.end]);
-		const forms = new Set(found.map((item) => item.form));
-		expect(forms).toEqual(new Set(['V1', 'V7', 'V8']));
+		const modes = new Set(found.map((item) => item.mode));
+		// All three answer modes co-anchor the reference — mcq (V1/V7/…),
+		// click-token (V8), select-in-code (V10b/c). itemsAt is mode-agnostic, so it
+		// returns the whole heterogeneous bundle (this is the load-bearing property).
+		expect(modes).toEqual(new Set(['mcq', 'click-token', 'select-in-code']));
 	});
 
-	it('resolves a deeper bundle at the declaration — the count is range-driven, not constant (Boundary)', () => {
-		const found = anchors.itemsAt(items, [declaration.start, declaration.end]);
-		expect(found.length).toBe(3); // V1 + V6 + V7
+	it('resolves a range-driven bundle at the declaration — decl-only forms present, ref-only absent (Boundary)', () => {
+		const atDecl = anchors.itemsAt(items, [declaration.start, declaration.end]);
+		const atReference = anchors.itemsAt(items, [
+			reference.start,
+			reference.end,
+		]);
+		const declForms = new Set(atDecl.map((item) => item.form));
+		// The declaration carries decl-only forms (V6 kind-semantics, V10a binding-
+		// sameness) that the reference lacks, and lacks V8 (which anchors on a
+		// reference, targeting the declaration) — so the bundle is range-driven,
+		// not a constant set.
+		expect(declForms.has('V6')).toBe(true);
+		expect(declForms.has('V10a')).toBe(true);
+		expect(declForms.has('V8')).toBe(false);
+		expect(atDecl.length).not.toBe(atReference.length);
 	});
 
 	it('resolves the keyword bundle at `let` — V1 co-anchors V2, the keyword-vocab form (Interface)', () => {

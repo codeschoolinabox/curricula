@@ -5,11 +5,16 @@
  * `LearnerResponse` INSIDE the narrowed `item.mode` arm (never hoisted — the
  * never-`malformed` invariant; see `../DOCS.md` § the per-arm construction note)
  * and delegates to `lib/quizzing`'s total `grade`. Pure: no React, no CodeMirror.
- * (inc 6b adds the click-token arm; 6c adds the select-in-code arm.)
+ * The param is the code-surface union, so the mode dispatch is exhaustive (a
+ * `const _never: never` closes the chain).
  */
 
 import grade from '../../../lib/quizzing/grade.js';
-import type { QuizItem, Verdict } from '../../../lib/quizzing/types.js';
+import type {
+	CodeSurfaceQuizItem,
+	SelectInCodeQuizItem,
+	Verdict,
+} from '../../../lib/quizzing/types.js';
 import type { PendingSelection } from '../types.js';
 
 /**
@@ -17,24 +22,37 @@ import type { PendingSelection } from '../types.js';
  * response **inside** the narrowed `item.mode` arm — so the response mode always
  * equals the item mode and `grade`'s mode-mismatch arm is unreachable in normal
  * play (the never-`malformed` invariant). Delegates to `lib/quizzing`'s total
- * `grade`.
+ * `grade`. The item type is the code-surface union (`confirm` reaches this only
+ * behind the `isCodeSurface` guard), so the dispatch is exhaustive.
  *
  * @param item - The active code-surface quiz item (its `mode` is the discriminant).
  * @param ranges - The staged ranges (click-token: a single slot; select-in-code:
  *   the toggle-set).
  * @returns The `Verdict` (`correct` / `incorrect`; `malformed` only on a wiring bug).
  */
-function gradeRanges(item: QuizItem, ranges: PendingSelection): Verdict {
-	if (item.mode === 'click-token') {
-		return grade(item, { mode: 'click-token', clickedRanges: ranges });
+function gradeRanges(
+	item: CodeSurfaceQuizItem | SelectInCodeQuizItem,
+	ranges: PendingSelection,
+): Verdict {
+	// click-token / click-line share the clicked-ranges response shape. click-line
+	// is covered for EXHAUSTIVENESS only — no generator emits it and build-quiz does
+	// not admit it, so this arm is forward-compatible + unreached today.
+	if (item.mode === 'click-token' || item.mode === 'click-line') {
+		return grade(item, { mode: item.mode, clickedRanges: ranges });
 	}
-	// The `select-in-code` arm lands in 6c (and gains a `_never` exhaustiveness
-	// check then). Until then this path is unreachable: build-quiz admits only mcq +
-	// click-token, and an mcq active tab is anchor phase, so only click-token items
-	// reach gradeRanges. Delegating to `grade` (total) as a select-in-code response
-	// rather than throwing keeps the boundary safe, and this becomes the correct arm
-	// the moment 6c admits select-in-code.
-	return grade(item, { mode: 'select-in-code', selectedRanges: ranges });
+	if (item.mode === 'select-in-code') {
+		return grade(item, { mode: 'select-in-code', selectedRanges: ranges });
+	}
+	// Exhaustive over the code-surface modes — assert on the discriminant (`.mode`),
+	// which narrows to `never` (asserting on the object doesn't reduce a union member
+	// whose `mode` is itself a union). Return a safe `malformed` sentinel — NOT the
+	// raw discriminant — mirroring `grade.ts`, so an impossible runtime mode fails
+	// safely rather than leaking a string into the Verdict slot.
+	const _never: never = item.mode;
+	return {
+		status: 'malformed',
+		reason: `unsupported code-surface mode: ${String(_never)}`,
+	};
 }
 
 export default gradeRanges;
