@@ -116,21 +116,35 @@ see `metaphor.md` for the canonical treatment.
 
 ---
 
-## Ch0 What is Programming?
+## Ch0⟡ What is Programming?
 
-No language features. Conceptual orientation only.
+Language features — demonstrated, not authored: comments, `console.log`,
+`prompt` / `alert` / `confirm`, string literals, and `null` (as `prompt`'s
+cancel answer). Just Enough JavaScript starts here. You read, predict, and run;
+your first _writing_ comes in Ch1⟡.
 
 ### Metaphor anchor
 
 _**The recital as rhetorical situation** — an entire performance event with its
-audience, its performers, its instrument, and the score that ties them
-together._
+audience, its performers, its instrument, and the score that ties them together.
+The score is itself communication between composers: other composers read it for
+intent and style, long before (or entirely instead of) ever hearing it
+performed. Code has the same property._
 
 ### Overview
 
 You meet the rhetorical model (source code as communication addressing multiple
 audiences simultaneously), the Vibetoading/Frogramming distinction, and the
-positioning of WtF in the broader space of programming and computer science.
+positioning of this course — **F&V** for short, from its title _Frogramming &
+Vibetoading: Affordance-Discovery Cycle(s)_ — in the broader space of
+programming and computer science.
+
+The chapter also makes the course's positioning promise explicit: **what this
+course teaches is the affordance-discovery cycle; Just Enough JavaScript is the
+medium.** You meet every audience of source code at its boundary primitive —
+demonstrated, not authored — and you live one tiny turn of the cycle on a
+program you only read, predict, and run. Two named cliffhangers are set here
+that later chapters cash.
 
 The chapter's intellectual-agency move: _you arrive here with a why, and the
 course is built to honor it._ No assumption that you walked in with intellectual
@@ -160,12 +174,14 @@ Three human audiences read your code:
 A fourth audience has recently arrived: **🤖 Agents (LLMs)** — they read and
 understand code differently from humans; they can infer intent from examples,
 find patterns, suggest changes, and help you write it. Writing _for and with_
-agents is its own communication skill, developed in Chapter 4.
+agents is its own communication skill, developed in Chapter 3⟡.
 
 The central skill this course teaches is writing code that **addresses all four
-audiences simultaneously**. Different chapters focus on different audiences
-(hence the twinning progression: developer → computer → user → agent → self),
-but they all matter in real work.
+audiences simultaneously**. You meet all of them in this chapter, at their
+boundary primitives (§0.4), before you write a line; the chapters that follow
+deepen one twin at a time — the computer in Ch1⟡, users in Ch2⟡, agents in Ch3⟡,
+and you in Ch4⟡ — with the developer-twin woven through them all as craft. They
+all matter in real work.
 
 The curriculum tracks five **strands** — five _kinds of connection_ a learner is
 trained to recognize and produce:
@@ -184,7 +200,7 @@ The five strands have equal status. The **data thread** — a single red thread
 that stitches all five together — runs through every chapter and ramifies as the
 layers deepen.
 
-### 0.2 Positioning Welcome to Frogramming
+### 0.2 Positioning F&V
 
 Programming is a large space. Before spending time inside one part of it, it
 helps to know roughly where that part is — and what it is not.
@@ -193,38 +209,38 @@ The following distinctions are not knowledge to memorize. They are landmarks.
 You will encounter each one again as the course progresses, and what feels
 abstract now will become concrete. For now, use them as orientation.
 
-<strong>What WtF is and what it isn't:</strong>
+<strong>What F&V is and what it isn't:</strong>
 
-| This course                                                                                                                                                                                    | Not this course (yet)                                                                                                                                             |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Embodied computation** — learning to read, predict, and direct one specific notional machine through the notation it interprets. Embodied work makes theoretical work tractable and visible. | **Theory of computation** — the formal/mathematical framework defining what computation IS (Turing machines, lambda calculus, complexity classes). Begins in WtA. |
-| **Programming** — specific use cases, concrete inputs and outputs, particular implementations                                                                                                  | **Computer Science** — general classes of problems and algorithms, asymptotic analysis, formal proofs of correctness                                              |
-| **Local fluency** — expressions, bindings, scopes, control flow at the statement level                                                                                                         | **Global architecture** — system design, API boundaries, database schemas, how large codebases are organized                                                      |
-| **Comprehension before production** — you'll read and trace code before you write it; programs are written to verify understanding, not to demonstrate output                                  | **Production-first** — most courses have you writing immediately; output becomes the measure of understanding                                                     |
-| **Depth on a constrained surface** — Just Enough JavaScript offers few features deliberately                                                                                                   | **Breadth across many features** — JS has hundreds; covering all of them diffuses the focus needed to build a real mental model                                   |
+| This course                                                                                                                                                                                    | Not this course (yet)                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Embodied computation** — learning to read, predict, and direct one specific notional machine through the notation it interprets. Embodied work makes theoretical work tractable and visible. | **Theory of computation** — the formal/mathematical framework defining what computation IS (Turing machines, lambda calculus, complexity classes). Beyond this course. |
+| **Programming** — specific use cases, concrete inputs and outputs, particular implementations                                                                                                  | **Computer Science** — general classes of problems and algorithms, asymptotic analysis, formal proofs of correctness                                                   |
+| **Local fluency** — expressions, bindings, scopes, control flow at the statement level                                                                                                         | **Global architecture** — system design, API boundaries, database schemas, how large codebases are organized                                                           |
+| **Comprehension before production** — you'll read and trace code before you write it; programs are written to verify understanding, not to demonstrate output                                  | **Production-first** — most courses have you writing immediately; output becomes the measure of understanding                                                          |
+| **Depth on a constrained surface** — Just Enough JavaScript offers few features deliberately                                                                                                   | **Breadth across many features** — JS has hundreds; covering all of them diffuses the focus needed to build a real mental model                                        |
 
 <strong>How you will work:</strong>
 
-| WtF's approach                                                                                                                                           | The common alternative                                                                           |
+| F&V's approach                                                                                                                                           | The common alternative                                                                           |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | **Errors as information** — the machine is honest; an error tells you precisely where what you specified and what the machine can interpret do not match | Errors as failure — something is broken                                                          |
 | **Read from code first** — you will spend real time as a code investigator before you write                                                              | Learn by writing — produce output to prove you understand                                        |
 | **Predict and check** — proactive and mechanistic; you will see what happens and update your model                                                       | Watch and explain — retroactive and justifying; post-hoc description of what you've already seen |
 
-<strong>Where WtF fits in the larger journey:</strong>
+<strong>Where F&V fits in the larger journey:</strong>
 
-| WtF                                                                                                                                                                                    | What follows                                                                                                                                 |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Learning to program** — build fluency in the embodied language of computation. Chapter 5 is the first pivot: snippetry is where you begin using programming to explore and discover. | **Programming to learn** — use programming as a tool to explore algorithms, complexity, paradigms, and domains (WtA, Trees, SoC, and beyond) |
+| F&V                                                                                                                                                                                     | What follows                                                                                                                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Learning to program** — build fluency in the embodied language of computation. Chapter 4⟡ is the first pivot: snippetry is where you begin using programming to explore and discover. | **Programming to learn** — use programming as a tool to explore algorithms, complexity, paradigms, and domains (beyond this course: the field is wide open) |
 
-WtF is a prerequisite for any Spiralearn curriculum that requires computational
-thinking. What follows it: **Welcome to Algorithms** (algorithm strategies,
-step-counting, Big O), **Trees** (tree data structures → the DOM → browser event
-dispatch), **Separation of Concerns** (programs organized at scale across files
-and modules), and onward into specific domains, languages, and specializations.
-Trees and Separation of Concerns can be studied in either order depending on
-your goals; Trees-first provides conceptual grounding for the DOM, SoC-first
-reaches interactive pages sooner.
+F&V is a prerequisite for any Spiralearn curriculum that requires computational
+thinking. What follows it lies beyond this course: algorithm study (strategy
+families, step-counting, Big O), **Trees** (tree data structures → the DOM →
+browser event dispatch), **Separation of Concerns** (programs organized at scale
+across files and modules), and onward into specific domains, languages, and
+specializations. Trees and Separation of Concerns can be studied in either order
+depending on your goals; Trees-first provides conceptual grounding for the DOM,
+SoC-first reaches interactive pages sooner.
 
 A note on comprehension before production: all professional programming work
 takes place in existing codebases. All of what programmers do is arrangement and
@@ -240,12 +256,12 @@ durable.
 
 <strong>Three vocabulary distinctions worth having early:</strong>
 
-| Term                     | What it means                                                                                                                                                                                                                                                          | In WtF                                                                                                                                                       |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Programming paradigm** | A design philosophy for organizing programs — how you decompose problems, structure solutions, manage state                                                                                                                                                            | Ch1–4 is imperative: sequences of statements, explicit control flow, mutable state. Functional, OOP, and declarative are deferred to Ch5.                    |
-| **Computational domain** | What you are computing _about_ — the thing in the world you are modeling. A programmer who understands medicine writes better medical software; one who understands finance builds better financial tools. Domain expertise is a separate axis from programming skill. | WtF is largely domain-agnostic by design — the same NM skills transfer to any domain.                                                                        |
-| **Computational idioms** | Types of operators and operations available within a programming language — how you manipulate values. Different languages emphasize different idioms; mastering an idiom means fluency with a category of operations.                                                 | Ch2's sections (2A–2F) are organized by idiom: logic, strings, numbers, pattern matching, bits, dates. Distinct from computational domains (subject matter). |
-| **Model of computation** | A formal mathematical framework defining what computation _is_ — Turing machines, lambda calculus, finite automata                                                                                                                                                     | Largely deferred to WtA and beyond                                                                                                                           |
+| Term                     | What it means                                                                                                                                                                                                                                                          | In F&V                                                                                                                                                                                                                                                     |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Programming paradigm** | A design philosophy for organizing programs — how you decompose problems, structure solutions, manage state                                                                                                                                                            | Ch0⟡–Ch3⟡ is imperative: sequences of statements, explicit control flow, mutable state. Functional, OOP, and declarative are deferred to Ch4⟡.                                                                                                             |
+| **Computational domain** | What you are computing _about_ — the thing in the world you are modeling. A programmer who understands medicine writes better medical software; one who understands finance builds better financial tools. Domain expertise is a separate axis from programming skill. | F&V is largely domain-agnostic by design — the same NM skills transfer to any domain.                                                                                                                                                                      |
+| **Computational idioms** | Types of operators and operations available within a programming language — how you manipulate values. Different languages emphasize different idioms; mastering an idiom means fluency with a category of operations.                                                 | Ch1⟡'s cycle chain runs the core idioms in dependency order (strings, then logic on strings, then numbers); elective idiom sections (Regex, Dates, Bitwise, BigInt) follow the chain, off the spine. Distinct from computational domains (subject matter). |
+| **Model of computation** | A formal mathematical framework defining what computation _is_ — Turing machines, lambda calculus, finite automata                                                                                                                                                     | Largely beyond this course                                                                                                                                                                                                                                 |
 
 These are orthogonal axes. You can write functional medical software or
 imperative medical software — the domain (medicine) is independent of the
@@ -258,9 +274,9 @@ about what computation fundamentally is (model)?
 
 Two questions this taxonomy answers before you even ask them:
 
-- _"Why aren't we doing functional programming?"_ — Paradigm. Deferred to Ch5.
+- _"Why aren't we doing functional programming?"_ — Paradigm. Deferred to Ch4⟡.
 - _"Why aren't we working on a specific project like a web app or game?"_ —
-  Domain. WtF is domain-agnostic by design.
+  Domain. F&V is domain-agnostic by design.
 
 A note on JavaScript specifically: JS is a multi-paradigm language — it can
 _look_ like OOP, functional, or declarative code syntactically. But it runs one
@@ -277,21 +293,21 @@ machine's event vocabulary you want to think in.
 Just Enough JavaScript is deliberately small. It excludes classes, most array
 methods, async/await, modules, destructuring, generators, and dozens of other
 features JS has. This is not an oversight. Fewer features means more cognitive
-bandwidth for the concepts that actually matter in Ch1–4: how the machine
+bandwidth for the concepts that actually matter in Ch0⟡–Ch3⟡: how the machine
 evaluates, how values and bindings behave, how control flow works.
 
 The constraints are temporary and intentional:
 
-- Ch5 lifts most of them
-- Welcome to Algorithms adds functions, arrays, and objects — and uses them to
-  study algorithms
+- Ch4⟡ lifts most of them
+- Beyond this course, algorithm study adds functions, arrays, and objects — and
+  uses them to study algorithms
 - Trees and Separation of Concerns add DOM manipulation, event handling, and
   module structure
 
 If a feature you want is missing, the likely answer is: it is coming, and it
 will make more sense when it arrives because you have the foundation.
 
-**On architecture specifically:** WtF builds fluency at the level of
+**On architecture specifically:** F&V builds fluency at the level of
 expressions, statements, and small programs. It does not teach how programs are
 organized at scale — API boundaries, module systems, separation of concerns
 across files and services. That is a later skill, developed across Trees and
@@ -391,7 +407,7 @@ the loop:
 The per-task, continuous form of this grid's Humans-only ↔ LLM-collab axis is
 the **human–AI slider** — Productive Struggle (🧑 Human) ↔ Cognitive Delegation
 (🤖 AI), five bands, applied one task at a time. Canonical at `ontology.md` §11;
-you'll use it diagnostically in Chapter 4.
+you'll use it diagnostically in Chapter 3⟡.
 
 #### Related vocabulary
 
@@ -414,36 +430,161 @@ of LLM-collaborative Frogramming; traditional engineering is humans-only
 Frogramming. The house terms name the underlying stance; the wider vocabulary
 names specific working modes within it.
 
+### 0.4 Meeting Every Audience at Its Boundary
+
+You will not write code in this chapter. You will read one small program,
+predict what it does, run it, and watch it address two audiences in a single
+run. Everything below is **demonstrated, not authored** — the primitives are
+yours to run and observe; making them your own begins in Ch1⟡.
+
+The program is a greeter:
+
+```js
+/* the greeter
+
+   a tiny welcome ritual: ask, notice, greet.
+
+   expected run:
+     the user is asked their name — they type "Ada" and click OK
+     the user is asked if they are ready — OK answers true, Cancel answers false
+     the user sees the greeting: "Welcome to the recital!"
+     the console shows a note for developers: "greeter finished"
+*/
+
+console.log('greeter starting'); // developers see this — users never do
+
+prompt('What is your name?'); // the user answers … and the answer vanishes
+
+confirm('Ready to begin?'); // answers true or false … nothing to do with it yet
+
+alert('Welcome to the recital!'); // the same greeting, whoever answered
+
+console.log('greeter finished'); // the developer channel again
+```
+
+**Two channels, one run.** The devtools console is **developer space**: users
+never open it, and nothing logged there reaches them. `prompt`, `alert`, and
+`confirm` are **user space**: dialogs the user actually sees and answers. The
+same program addresses both audiences in the same run, on different channels —
+the rhetorical model of §0.1, running before your eyes. The data flows both
+ways: the program's words enter the user through their eyes; the user's answer
+enters the program through `prompt`. This chapter establishes the developer↔user
+channels; Ch1⟡ reveals the machine sitting in the middle of them.
+
+**Static vs. dynamic.** The source text above never changes. Every run is
+different — type a different name, click Cancel instead of OK. That gap has a
+name: source code is **static** (the text you read); a program run is
+**dynamic** (the evaluation you observe). Comments live in the static text — the
+machine skips them, users never see them; only readers of the code do. Logs and
+dialogs happen during the run. This distinction is the frame for how you will
+work from here on: **predict** (staring at the static text), **run** (watch the
+dynamic evaluation), **compare**.
+
+**Tests begin here.** The comment block at the top of the greeter carries an
+**expected run** — a prose input/output pair. Before you run the program, that
+pair is a prediction anyone can check; after you run it, it is either confirmed
+or it isn't. Every program you meet in this course carries its expected pairs,
+and the habit matures chapter by chapter until it is a real test suite. It
+starts as six lines of prose in a comment.
+
+**Writing for future-you.** That top-of-program comment addresses the
+often-overlooked developer-reader: **future-you**. You-in-six-months is a
+stranger; you-in-ten-minutes is already on the way there. Programs are written
+so that stranger can pick up where you left off without phoning you.
+
+> _"Programs must be written for people to read, and only incidentally for
+> machines to execute."_ — Abelson & Sussman, _Structure and Interpretation of
+> Computer Programs_
+>
+> _"Always code as if the guy who ends up maintaining your code will be a
+> violent psychopath who knows where you live."_ — John Woods (and a thousand
+> undergraduate code-style lectures since)
+
+**A first anomaly.** Predict: what does `prompt` hand back when the user clicks
+**Cancel** instead of answering? Run it and watch. The answer is `null` — not an
+answer, not empty text, but the machine's own way of saying _no answer was
+given_. It is the first value you meet that exists to mark an absence. File the
+feeling; `null`'s full story unfolds along Ch1⟡'s chain.
+
+**Cliffhanger ① — the answer vanishes.** The greeter asks for a name, the user
+gives one … and the program cannot use it. It greets everyone identically,
+because the answer was gone the moment the dialog closed. You can feel the
+program that _should_ exist — one that greets you by name — and today's
+primitives cannot build it. The machine affords a way to **hold on to** an
+answer. Discovering it is the first move of Ch1⟡.
+
+**Cliffhanger ② — a question with an unusable answer.** `confirm` answers `true`
+or `false` — a real answer, every run — and the greeter can do nothing with it.
+A yes/no answer begs for a program that _behaves differently_ depending on which
+it got. That affordance arrives mid-chain in Ch1⟡, and when it does, `confirm`
+will be sitting there, a ready-made condition.
+
+### 0.5 One Tiny Cycle, Lived
+
+What just happened has a name, and it is the name on the cover of this course.
+
+For a moment there — wanting the greeting to feel personal — you were wearing
+the 🎨 hat: you proposed an experience worth having. And in running the program
+and watching what the primitives actually do, you were wearing the 🔬 hat: you
+discovered what the machine affords today — dialogs, a vanishing answer, a
+boolean with nowhere to go. The gap between the proposal and the affordance is
+not a failure. It is the engine: it tells you exactly what to discover next, and
+each turn reshapes the one after it.
+
+That is the **affordance-discovery cycle**. V proposes; F discovers and
+verifies. This course teaches it by having you live it — F-hand through Ch1⟡,
+V-hand through Ch2⟡, both hands named whole and accelerated in Ch3⟡, and as a
+lifelong practice in Ch4⟡. There is no recipe to memorize. You have already run
+one turn.
+
 ## Learning objectives by layer
 
 ### Layer 0 — Mastery
 
-<em>(sparse — no code yet)</em>
+<em>(sparse — code is read and run here, never written)</em>
 
 - 🥚 Recognize that programming is fundamentally about understanding a machine
   well enough to direct it precisely — _the notional machine is what gets
   programmed_
+- 🥚 Recognize that source code is **static** (the text you read) and a program
+  run is **dynamic** (the evaluation you observe) — same source, different runs
+- 🥚 Identify the devtools console as **developer space** and
+  `prompt`/`alert`/`confirm` dialogs as **user space** — two channels addressed
+  in the same run
+- 🥚 Predict the observable behavior of the greeter from its static text, run
+  it, and compare the run against the prediction
+- 🥚 Recognize `null` as what `prompt` hands back on Cancel — a value that marks
+  an absence, distinct from an empty answer
 
 ### Layer 1 — Rhetoric
 
 - 🥚 Articulate the four audiences of source code: 🧑‍💻 developers, 💻 the
   computer, users, 🤖 agents (LLMs)
 - 🥚 Explain what it means for code to _address_ each audience simultaneously
-- 🥚 Describe the twinning progression across chapters: developer-twin (Ch1) →
-  computer-twin (Ch2) → user-twin (Ch3) → agent-twin (Ch4) → self-twin (Ch5)
+- 🥚 Describe how the twins deepen across chapters: all four audiences meet you
+  here at their boundary primitives; the computer-twin deepens in Ch1⟡, the
+  user-twin in Ch2⟡, the agent-twin in Ch3⟡, the self-twin in Ch4⟡ — with the
+  developer-twin woven through them all as craft
 - 🥚 Identify agents (LLMs) as a fourth audience: they read and understand code
   differently from humans
 - 🥚 Describe why this course prioritizes comprehension before production
+- 🥚 Read the greeter's **expected run** (a prose input/output pair in its
+  top-of-program comment) and recognize it as the program's first test
+- 🥚 Explain why **future-you** is a stranger worth writing for — and identify
+  the top-of-program comment as writing addressed to that stranger
+- 🥚 Name the two cliffhangers this chapter sets: `prompt`'s answer vanishes
+  (nothing can hold it yet), and `confirm`'s `true`/`false` has no work to do
+  (nothing can branch on it yet)
 - 🥚 Identify the five strands that run the curriculum: twinning, decisions
   (micro and macro), perspective stacking, the whole rhetorical situation, and
   affordances
 - 🐣 Explain the spiral curriculum as traversal of the spiderweb: why revisiting
   concepts at increasing depth produces deeper understanding
-- 🥚 Use the positioning tables to locate WtF's scope within the broader space
+- 🥚 Use the positioning tables to locate F&V's scope within the broader space
   of programming and computer science
 - 🥚 Distinguish a programming paradigm, a computational domain, a computational
   idiom, and a model of computation — and recognize they are orthogonal axes
-- 🥚 Understand why WtF constrains itself to Just Enough JavaScript and why
+- 🥚 Understand why F&V constrains itself to Just Enough JavaScript and why
   those constraints are temporary
 
 ### Layer 2 — Methodology
@@ -461,15 +602,19 @@ names specific working modes within it.
 - 🐣 Distinguish design _thinking_ (with user-twin) from design _process_ (steps
   followed without the twin) — and the same on F's side, computational
   _thinking_ vs computational _process_
-- 🐔 Articulate why this curriculum teaches Frogramming in depth while honoring
-  Vibetoading as an equally non-delegable practice (taught at gesture-level
-  here, with referrals out to follow-on courses)
+- 🥚 Name the affordance-discovery cycle you just lived once: a proposed
+  experience met what the machine affords, and the gap between them seeded the
+  next discovery
+- 🐔 Articulate why this curriculum builds the F-hand first and at depth while
+  building Vibetoading with the same rigor on its own chapter — breadth-scoped
+  to this course's slice of design practice, with referrals out to the field for
+  the deeper disciplines
 
 ### Layer 3 — Snippetry
 
-<em>(sparse at L3 in Ch0 — snippetry formalizes in Ch5)</em>
+<em>(sparse at L3 in Ch0⟡ — snippetry formalizes in Ch4⟡)</em>
 
-- 🥚 Recognize that _informal_ snippetry can begin from Ch0 — small,
+- 🥚 Recognize that _informal_ snippetry can begin from Ch0⟡ — small,
   curiosity-driven exploratory programs are welcome from day one
 - 🐣 Identify what you'd want to play with first, given the curriculum's
   trajectory
