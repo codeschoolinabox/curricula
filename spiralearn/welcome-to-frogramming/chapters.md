@@ -630,205 +630,68 @@ one turn.
 
 ---
 
-## Ch1 Developers
+## Ch1⟡ Frogramming
 
-Language features: comments, `console.log` and the full `console` API with
-string literals.
-
-### Metaphor anchor
-
-_**The score as inter-composer communication** — other composers read your score
-for intent and style, long before (or entirely instead of) ever hearing it
-performed. Code has the same property._
-
-### Overview
-
-Your first code and your first audience. The 🧑‍💻 developer audience — including
-future-you, who is a stranger by the time they come back to this code. Twinning
-the developer audience is the central skill.
-
-The chapter's intellectual-agency move: _you have authorial choices_ — every
-word, every comment, every console method is a micro-decision that shapes how a
-stranger reads your work.
-
-### 1.1 Twinning the developer audience
-
-The central skill of this chapter is **twinning the 🧑‍💻 developer audience** —
-imagining who will read your code and writing for them, not for
-yourself-right-now. This is not a new practice; it is the explicit naming of
-something the programming community has always done:
-
-> _"Programs must be written for people to read, and only incidentally for
-> machines to execute."_ — Abelson & Sussman, _Structure and Interpretation of
-> Computer Programs_
-
-And in its blunter sibling:
-
-> _"Always code as if the guy who ends up maintaining your code will be a
-> violent psychopath who knows where you live."_ — John Woods (and a thousand
-> undergraduate code-style lectures since)
-
-The developer audience includes the obvious reader — a teammate maintaining your
-code — and the often-overlooked one: **future-you**. You-in-six-months is a
-stranger. You-in-ten-minutes is already on the way there. Twinning the developer
-audience means writing so that stranger can pick up where you left off without
-phoning you.
-
-This anticipates Chapter 5's _"you"_ audience: by the time we promote
-yourself-as-a-distinct-audience, you've been twinning future-you all along.
-
-**Same self, two angles of approach.** Here you write for **you as an
-audience**; in Ch5 you'll write for **you as a human**.
-
-### 1.2 Static vs. dynamic
-
-A foundational conceptual distinction is introduced here: not as a technical
-exercise but as orientation: **source code (static) vs. program evaluation
-(dynamic)**. Comments exist in the static text; logs are observed during
-evaluation. This sets up the 🧑‍💻 developer twin: the developer who reads your
-code sees the static text, not the runtime. Understanding this distinction is
-prerequisite to understanding why comments and logs serve different purposes.
-
-The computer is not yet a full audience. Devtools console is developer space.
-
-### 1.3 Comments
-
-Comments are static notes written for the developer-reader. They live in the
-source text and never run. Their job is _why_, not _what_: the code already
-shows what; the comment fills in the intent.
-
-Four conventions to recognize and apply:
-
-- **Inline** (`// like this`) — end-of-line clarifying notes
-- **Block** (`/* like this */`) — multi-line explanations
-- **Doc-style** (`/** like this */`) — special block convention picked up by
-  tooling; first-line summary; `*`-aligned subsequent lines
-- **`*`-aligned block structure** — the visual convention that holds block and
-  doc-style comments together
-
-Every comment is a small communication act. Word selection, length, placement,
-and convention all shape how the developer-reader experiences the code. Notice
-the choices; consider their effect on the reader.
-
-### 1.4 Logs
-
-Logs are observations of the program _running_. They live in a different
-register from comments — the runtime — and address the developer-watching-
-the-console audience.
-
-The full `console` API:
-
-- **Output by intent**: `console.debug` (trace-level), `console.log` (general),
-  `console.info` (informational), `console.warn` (unexpected but not broken),
-  `console.error` (broken)
-- **Asserting**: `console.assert(condition, message)` — silent when true, logs
-  an error when false
-- **Counting**: `console.count(label)` / `console.countReset(label)` — named
-  counter tracking, useful in loops
-- **Grouping**: `console.group(label)` / `console.groupCollapsed(label)` /
-  `console.groupEnd()` — collapsible indented output sections
-- **Timing**: `console.time(label)` / `console.timeLog(label)` /
-  `console.timeEnd(label)` — named timer trio for rough measurement
-- **Utility**: `console.clear()` — clears all console output
-
-When to use comments vs. logs: comments for reading the code; logs for observing
-it run. Both serve the developer audience; they serve it differently.
-
-**Micro-decisions in logs**: which console method? What message? What data
-included? Why `.info` and not `.log`? Is `.warn` ever appropriate here? Each
-choice communicates different things to the developer watching the console. The
-discipline of comments — _every word is a choice_ — extends here.
-
-## Learning objectives by layer
-
-### Layer 0 — Mastery
-
-- 🥚 Recognize that source code is **static** (the text) — comments live here
-- 🥚 Recognize that program evaluation is **dynamic** (the runtime) — logs are
-  observed here
-- 🐣 Identify the `console` API as the developer-facing dynamic channel
-  (devtools console = developer space, separate from user space)
-
-### Layer 1 — Rhetoric
-
-- 🥚 Write comments that describe what a program should do and why
-- 🥚 Identify and apply comment conventions: inline (`//`), block (`/* */`),
-  doc-style (`/** */`), `*`-aligned block structure
-- 🥚 Understand "why not what": a comment explains the intent behind a line, not
-  what the line literally does
-- 🥚 **Micro-decisions in comments** — every choice (word selection, length,
-  placement, convention) shapes how a comment reads
-- 🥚 The full `console` API: what each method communicates (`debug` / `log` /
-  `info` / `warn` / `error`; `assert`; `count` / `countReset`; `group` /
-  `groupCollapsed` / `groupEnd`; `time` / `timeLog` / `timeEnd`; `clear`)
-- 🥚 When to use comments vs logs — comments for reading the code; logs for
-  observing it run
-- 🥚 **Micro-decisions in logs** — which method? what message? what data?
-- 🐥 Read and appreciate real comments from real codebases (funny, desperate,
-  poetic examples of developer-to-developer communication)
-- 🥚 Top-level program comments — name and purpose at the top of every program
-
-### Layer 2 — Methodology
-
-- 🥚 Recognize that "twinning the developer audience" is what programming
-  culture has always done: _"Programs must be written for people to read, and
-  only incidentally for machines to execute."_ (Abelson & Sussman)
-- 🐣 Reflect on future-you as a stranger — six months from now you'll read this
-  code without your current context
-- 🐣 Wear a V or F hat _consciously_ when writing a comment: a V-hat comment
-  grounds in the future reader's experience; an F-hat comment grounds in the
-  mechanism the reader needs to understand
-
-### Layer 3 — Snippetry
-
-<em>(sparse)</em>
-
-- 🥚 _(future feature)_ Share code with others via save-to-gist / pop-up sandbox
-  — early gesture toward Ch5's collaborative gist system
-
-### Layer 4 — Philosophy
-
-<em>(sparse — Ch1 is dense at L1, light elsewhere)</em>
-
-- 🥚 _(footnote)_ Notice that the developer audience is the only audience that
-  reads STATIC code — every other audience experiences the DYNAMIC evaluation.
-  What does that asymmetry mean for code rhetoric?
-
----
-
-## Ch2 Developers and Computers
+Language features enter where the chain needs them: comments and the `console`
+API (distributed as craft along the whole chain); `let` / `const`; string
+literals, template literals, and the string transform methods; `if` / `else` /
+`switch` / ternary with the string search methods; `while` / `do-while` / `for`
+/ `for-of` with `break` / `continue`, block scope, and numbers as counters; then
+numbers in full, with conversion and validation, late and isolated.
 
 ### Metaphor anchor
 
-_**Studying the instrument's mechanisms** — like an organ builder examining
+_**Studying the instrument's mechanism** — like an organ builder examining
 bellows, tracker action, registration, and combination action, you study how the
 JavaScript engine actually carries out your instructions._
 
 ### Overview
 
-The 💻 computer is now a full audience. The primary learning objective:
-**JavaScript's notional machine** — the mental model of how the JS engine
-evaluates your code. Other languages have their own notional machines; the
-discipline you develop here transfers. Programs produce output via logs and
-assertions but do not yet interact with users. `undefined` is encountered
-naturally through variables; `null` is held until Ch3 where `prompt()` can
-return it.
+Living the cycle on the F-hand. The 💻 computer becomes a full audience, and the
+primary learning objective of the whole course lands here: **JavaScript's
+notional machine** — the mental model of how the JS engine evaluates your code.
+Other languages have their own notional machines; the discipline you develop
+here transfers.
 
-The chapter has two tracks:
+This chapter is **one continuous chain of affordance-discovery cycles**. Each
+cycle has the same shape, lived rather than memorized: a behavior the previous
+cycle made possible runs into a gap; the machine turns out to afford something;
+you verify the discovery by predicting **internal events** before running; and
+the cycle cashes out into new user-facing behavior — which is where you now
+**write**. Ch0⟡'s predict-and-run becomes predict-verify-write. Every cash-out
+seeds the next cycle's gap; the two cliffhangers Ch0⟡ set are cashed on this
+chain, on schedule.
 
-- **NM core (2.0–2.8)**: the machine itself — expressions, values, bindings,
-  scope chain, prototype chain, coercion, statements, and reading/writing code.
-  All required.
-- **Computational idioms (2A–2F)**: what you _do_ with the machine — logic and
-  truthiness, text processing, number crunching, pattern matching, bit
-  manipulation, date computation. **2A (Logic) and 2B (Strings) are required.**
-  Choose at least one from 2C–2E. 2F is optional.
+The chain's material is deliberately ordered: **strings before numbers**.
+Arithmetic-free string programs first, then string-based control flow, then
+numbers entering minimally as loop counters, with coercion and conversion held
+late and isolated. This is not a purity rule — when a string property is the
+thing being examined, a bare number literal alongside it is fine; the focus is
+the strings. What the ordering separates is number _arithmetic and conversion_,
+because that is where the machine's most confusing behavior lives, and it
+deserves its own cycle.
+
+**The test thread matures every cycle.** Ch0⟡ left you reading a prose
+expected-run pair in a comment; on this chain the pairs become executable
+(`console.assert`), then per-branch, then boundary-aware, then
+validity-checking, and by the end of the chapter they are a systematized suite.
+
+The chain C0–C6, with its four consolidation beats, is the **JEJ-core spine —
+all of it required**. After the final beat, a set of elective sections (BigInt,
+Regular Expressions, Bitwise Computation, Dates) sits off the chain: real
+material, taken by interest, never blocking.
+
+`undefined` is encountered naturally through bindings. `null` arrived in Ch0⟡ as
+`prompt`'s cancel answer; its story continues mid-chain when truthiness gives it
+work to do.
 
 The chapter's intellectual-agency move: _you can predict what the machine will
-do, then verify it._ You become the kind of person who asks "what does this
-evaluate to?" instead of "what does this do?"
+do, then verify it_ — you become the kind of person who asks "what does this
+evaluate to?" instead of "what does this do?" And you have authorial choices:
+every word, every comment, every console method is a micro-decision that shapes
+how a stranger reads your work.
 
-### 2.0 The Notional Machine
+### C0 — Framing: the machine and its events
 
 Every programming language describes a machine. The machine JavaScript describes
 has a name: the **notional machine** (NM). You do not program JavaScript — you
@@ -849,6 +712,13 @@ The machine has two viewing levels:
   lifecycle, scope creation and chain-walking, value resolution, coercion,
   errors
 
+This is a different cut than Ch0⟡'s static-vs-dynamic. That distinction
+separated the _text_ from the _run_. This one lives entirely inside the run:
+even while a program is evaluating, what the syntax shows you and what the
+machine is doing are two different views, and much of the machine's real work is
+invisible in the syntax. You will feel the difference the first time a trace
+shows events no line of code names.
+
 Behind the scenes, the machine maintains **state** — values, bindings, scopes —
 that events read and mutate. The events are what happen; the state is what they
 happen to.
@@ -858,6 +728,25 @@ is not inert: it is a _crystalline representation of the entire dynamic data
 lifecycle of a program_ — a static 4D rendering of a 3D flowing river. Streams
 represent the dynamics; embody exists to make every facet of that motion
 explorable.
+
+<strong>Running a program: two phases, two error kinds.</strong>
+
+A program is source code that has been parsed and is now evaluating. Two phases:
+the **creation phase** sets up the program's structure; the **evaluation phase**
+runs it. Errors in the creation phase are _parse errors_; errors in the
+evaluation phase are _runtime errors_. This is a third distinction with its own
+moment: a program with a parse error dies before its first line runs — nothing
+you logged will appear — while a runtime error interrupts an evaluation already
+underway. Predicting _which kind_ a broken program will produce is an early form
+of event prediction.
+
+An error is not a personal failure and it is not the machine breaking. It is a
+specific event that fires because the machine encountered a specification it
+cannot interpret. The machine is being precisely honest: it found a mismatch
+between what was specified and what it can do. Errors are the notional machine's
+most useful output. Learning to read errors as information — rather than
+experiencing them as indictments — is a skill this chapter develops alongside
+everything else.
 
 <strong>The further skill: decoupling syntax from events.</strong>
 
@@ -869,17 +758,6 @@ produced actually achieves what you wanted.
 
 This is what "programming the machine directly" means. The syntax is notation
 for the machine; the events are what the machine actually speaks.
-
-<strong>Errors.</strong>
-
-An error is not a personal failure and it is not the machine breaking. It is a
-specific event that fires because the machine encountered a specification it
-cannot interpret. The machine is being precisely honest: it found a mismatch
-between what was specified and what it can do. Errors are the notional machine's
-most useful output.
-
-Learning to read errors as information — rather than experiencing them as
-indictments — is a skill this chapter develops alongside everything else.
 
 <strong>The tracer.</strong>
 
@@ -894,43 +772,44 @@ step through. It serves two roles:
   extends your working memory, letting you attend to evaluation you could not
   hold in your head alone
 
-### 2.1 Running a Program
+<strong>Console and comments as craft, from here on.</strong>
 
-A program is source code that has been parsed and is now evaluating. Two phases:
-the **creation phase** sets up the program's structure; the **evaluation phase**
-runs it. Errors in the creation phase are _parse errors_; errors in the
-evaluation phase are _runtime errors_.
+The developer audience's tools are distributed along this chain, arriving where
+the work needs them. Now: `console.log` (you know it from Ch0⟡) and
+`console.assert(condition, message)` — silent when true, loud when false — the
+tool the test thread grows on. Later on the chain: `console.count` when loops
+give it something to count; `console.group` and `console.time` when programs
+grow structure worth organizing. Woven throughout: **output by intent** —
+`console.debug` / `log` / `info` / `warn` / `error` communicate different things
+to the developer watching the console, and choosing between them is a
+micro-decision.
 
-A running program produces an ordered stream of observable moments —
-**evaluation events**. The tracer captures these automatically; trace tables
-record them by hand. Logging string literals from a program is your first
-practice of observing evaluation as it happens, distinct from reading the static
-text.
+Comments are the static half of the same craft. Four conventions to recognize
+and apply: **inline** (`// like this`), **block** (`/* like this */`),
+**doc-style** (`/** like this */`, picked up by tooling), and the `*`-aligned
+block structure that holds the last two together. Their job is _why_, not
+_what_: the code already shows what; the comment fills in the intent. Comments
+are for reading the code; logs are for observing it run. Both serve the
+developer audience — including future-you — and every word, placement, and
+method choice shapes how they read. Real codebases are full of funny, desperate,
+and poetic comments; reading them is part of learning the register.
 
-### 2.2 Expressions and Resolve
+**Verify:** re-trace a Ch0⟡ greeter — this time as an event stream. Call events,
+resolve events, the `null` resolve on cancel. Same program you already know; new
+eyes.
 
-An **expression** is syntax that produces a value. Operators, literals,
-identifiers, calls, templates, property access, and assignment are all
-expressions. Compound expressions evaluate step by step: sub-expressions resolve
-in order, precedence rules govern the order, and parentheses can override.
+**Tests:** the greeter's prose expected-run pair rides along unchanged;
+`console.assert` is now in your vocabulary, and the next cycle makes it
+executable.
 
-**Resolve**: every expression produces exactly one value. The VM hands that
-value back to the surrounding expression or statement.
+**Seeds the next cycle:** you can now see the events — and the first gap Ch0⟡
+left you is still open: the answer still vanishes.
 
-**Implicit coercion** is the VM's silent type-transformation between operands
-and operators (`'5' - 1`, `if ('hello')`). It is a behind-the-scenes event,
-invisible in the syntax but predictable once you learn its rules. Distinct from
-**explicit type conversion** (`Number()`, `String()`, `Boolean()`, `parseInt`,
-`parseFloat`), which is learner-visible syntax.
+### C1 — Bindings: holding on
 
-**Asserting on expressions**: `console.assert(1 + 1 === 2)` is a claim about
-what an expression resolves to. The program verifies the claim. This is your
-first move from logging to _predictive_ programming.
-
-**Block scope** is introduced as a container. Empty `{}` blocks are runnable.
-Scopes nest.
-
-### 2.3 Values and Bindings
+**The gap (cliffhanger ① cashed):** `prompt`'s answer vanished the moment the
+dialog closed, so the greeter could not greet anyone by name. The machine
+affords a way to hold on: **bindings**.
 
 A **binding** is a named slot the program reads and writes. Its lifecycle:
 declare → initialize → available → access / update. `let` allows reassignment;
@@ -939,273 +818,473 @@ declare → initialize → available → access / update. `let` allows reassignm
 Variable names are micro-decisions on par with comment choices. Conventions
 (`camelCase`, `snake_case`, `CONSTANT_CASE`, `PascalCase`) carry different
 signals; the choice is part of how the code communicates with the developer
-audience.
+audience. Naming is the first craft skill that lives _inside_ the language
+instead of beside it.
 
 **Trace tables** are systematic notation of evaluation: declare / initialize /
 access / update events for each binding, in steps-format and values-format.
 **Predictive stepping with a debugger** is the same practice extended with a
-tool: predict what happens next → step → check → investigate.
+tool: predict what happens next → step → check → investigate. Log binding
+values; observe state change over time.
 
-**Scope chain walk**: when an identifier is read, the VM checks the current
-(innermost) scope first, then its parent, up to the global environment. Each
-check is a miss (keep looking) or a hit (binding found). Block-scoped `let`
-declarations are not accessible outside their block; the scope chain walk makes
-this concrete.
+**Verify:** predict the lifecycle events of a small program — every declare,
+initialize, access, and update, in order — then trace to confirm.
 
-**Asserting on bindings**: predict what a binding holds at a specific point;
-write `console.assert` statements that must pass. The mirror move to expression
-assertions, but now about state rather than value.
+**Tests: the first executable assert.** `console.assert` turns a prediction
+about what a binding holds into a line of the program itself. Write code to
+satisfy assertions sprinkled through a script; sprinkle your own.
 
-### 2.4 Statements and Control Flow
+**Cash-out (you write):** programs that _remember_. The greeter holds the answer
+and echoes it back; an ask-then-confirm-back dialog; a program that holds two
+answers and replays them in order.
 
-**Conditionals**: `if` / `else if` / `else` make the evaluation path depend on
-values. Tracing a conditional means tracing the predicate expression, then
-following the branch the predicate resolves into. **Ternary expressions** are a
-compact equivalent form; learners refactor between them.
+**Seeds the next cycle:** you can hold answers, but only replay them verbatim.
+The greeting you actually want — the answer _woven into_ new text — needs a way
+to make new strings from old ones.
 
-**Loops**: `while`, `do-while`, `for`, `for-of` repeat evaluation. Each form has
-the same NM events; the syntax differs in how the loop variable and termination
-condition are arranged. `break` and `continue` modify loop flow.
+### C2 — Pure strings: transforming what you hold
 
-Block-scoped bindings inside `if` / `while` bodies make the scope chain walk
-concrete at the level of statement-by-statement structure.
+_Number-free, transform-only._
 
-### 2.6 Prototype Chain
+**The gap:** verbatim replay. You want new text made from held text.
 
-The prototype chain extends the scope chain pattern into a different domain:
-method lookup.
+An **expression** is syntax that produces a value. Compound expressions evaluate
+step by step: sub-expressions resolve in order, precedence rules govern the
+order, and parentheses can override. **Resolve**: every expression produces
+exactly one value; the VM hands that value back to the surrounding expression or
+statement. String concatenation with `+` is your first operator; **template
+literals** are its readable sibling, weaving held values into new text with
+interpolation.
 
-**Auto-boxing**: when a method is called on a primitive, the VM temporarily
-wraps it in its constructor's object form (`'hello'` → `String` wrapper). The
-wrapper provides access to the constructor's prototype methods, then is
-discarded.
+**The lookup mechanism comes before the method list.** When a method is called
+on a primitive, the VM temporarily wraps it in its constructor's object form
+(`'hello'` → `String` wrapper) — **auto-boxing** — and finds the method by
+**prototype chain lookup**: value → `String.prototype` → method found. Reading
+`str.toUpperCase()` becomes: _look up `toUpperCase` on `String.prototype` → call
+it with `str` as the receiver_. This is a behind-the-scenes event family of its
+own, and it is the mechanism behind every method you will ever call on a string,
+a number, or anything else.
 
-**Prototype chain lookup**: one-hop lookup for primitives: value →
-`Constructor.prototype` → method found. This is a behind-the-scenes event
-parallel to scope chain lookup. Reading `str.toUpperCase()` becomes: _look up
-`toUpperCase` on `String.prototype` → call it with `str` as the receiver_.
+With the mechanism owned, the **transform methods**: `toUpperCase` /
+`toLowerCase`, `trim`, `replace` / `replaceAll`. Each takes a string and gives
+back a string — immediately recombinable, self-cashing: every transform you
+learn is a new behavior your programs can ship the same day.
 
-The same mechanism applies to Number methods (`(3.14).toFixed(2)`) and RegExp
-methods (`/pattern/.test(str)`). String methods become available once the lookup
-mechanism is understood — all prior programs in this chapter used only operators
-and literals.
+Two deliberate deferrals. The _search_ methods (`includes`, `startsWith`,
+`endsWith`) answer `true` / `false` — and `true` / `false` still has no work to
+do in your programs; they debut next cycle, where their answers have
+consequences. And the methods that traffic in numbers (`length` as a quantity,
+`indexOf`, `charAt`, `slice`) wait until numbers have entered the chain.
 
-### 2.8 Reading, Writing, Reviewing Code
+**Verify:** predict lookup and resolve events — the miss on the value, the hit
+on `String.prototype`, the step-by-step resolution of a template with two
+interpolations — then trace.
 
-**PBIS Framework**: Purpose, Behavior, Implementation, Strategy — four
-perspectives for reading any program simultaneously. Purpose names what the
-program is _for_; Behavior names what it _does_ as observable inputs/outputs;
-Implementation names the code-level mechanism; Strategy names the choices that
-connect Implementation to Behavior. The letter order is flexible in use; the
-four perspectives are the discipline.
+**Tests: assert on transformed strings.** The expected pair for a normalizer is
+executable now: `console.assert(cleaned === 'ada')`.
 
-"Why not what" comments (Ch1) extend here: comments now explain strategy and
-behavioral correlations, grounded in PBIS vocabulary.
+**Cash-out (you write):** normalizers (trim-and-lowercase every answer),
+mad-libs (templates weaving held answers into stories), a shouting greeter.
 
-**Logging strategies**: structured `console.log` placement — at program
-structure boundaries, at variable mutation points, at control-flow forks —
-builds on logging-as-observation (2.3) into deliberate, structured debugging.
+**Seeds the next cycle:** your programs transform every answer the same way, for
+everyone. Behavior that _depends_ on the answer needs branching — and
+`confirm`'s boolean is still sitting there, unused.
 
-**Backtracing** reverses the predictive direction: reason from output back to
-input. Useful when something went wrong and you don't yet know where.
+### Consolidation Beat A — string state, resolve, lookup
 
-**Describing programs**: close reading across all PBIS levels — zooming out
-(purpose/behavior), zooming in (line-by-line), finding connections, labeling
-goals. A structured methodology combining trace tables and PBIS.
+One re-trace across everything so far: lifecycle events (C1), resolve events
+(C2), lookup events (C2) — three event families, one small program, predicted
+end to end before running. The machine so far: values held in bindings,
+expressions resolving step by step, methods found by lookup.
 
-**Naming variables**: variable analysis → generic role-based names → specific
-domain names → variable roles (fixed value, stepper, flag, gatherer, holder,
-temporary). The micro-decisions on names (2.3) now operate as a structured
-analysis methodology.
+### C3 — String-based conditionals: answers with consequences
 
-**Linting** recognizes and fixes style issues automatically; the code
-conventions of Ch1 enforced by a tool.
+**The gap (cliffhanger ② cashed):** `confirm` answers `true` or `false` every
+run, and Ch0⟡'s greeter could do nothing with it. Branching gives boolean
+answers their work — and text answers too.
 
-**Refactoring** changes implementation or strategy without changing program
-output (the `console.log` output as the fixed point). Different from rewriting;
-same Behavior preserved.
+`if` / `else if` / `else` make the evaluation path depend on values. Tracing a
+conditional means tracing the predicate expression, then following the branch
+the predicate resolves into. `switch` handles the many-exact-cases shape;
+**ternary expressions** are the compact equivalent form for a two-way value
+choice; learners refactor between all three.
 
-**Code review** is a structured template: behavior, goals, comments, linting,
-variables. **Comparing programs** with the same behavior but different
-approaches develops the eye for voice and readability tradeoffs.
+`===` on strings is the workhorse predicate. **The search methods debut here**:
+`includes`, `startsWith`, `endsWith` — born as conditions, immediately consumed:
+`if (answer.startsWith('y'))`. Their prototype lookup is the same C2 mechanism,
+extended to methods whose answers drive branches.
+**`confirm`-as-ready-made-condition** closes Ch0⟡'s loose end:
+`if (confirm('Ready?'))` — the dialog _is_ a predicate.
 
-### Computational Idioms
+**Truthiness, the non-numeric half.** Values need not be booleans to drive a
+branch: the empty string `''`, `null`, and `undefined` are falsy; other strings
+are truthy. **Negation** (`!`) flips it: `!answer` is `true` exactly when the
+answer is falsy, and `if (!answer.startsWith('y'))` reads as naturally as its
+positive twin. `null` from a cancelled `prompt` finally gets its guard:
+`if (answer === null)`. **Short-circuit evaluation** (`&&` stops at the first
+falsy, `||` at the first truthy, `??` at the first nullish) resolves to the
+_stopping value_ — the practical payoff is defaults and guards:
+`name || 'stranger'`, `answer ?? ''`. **Logical compound assignment** (`&&=`,
+`||=`, `??=`) extends the pattern to assignment, and **optional chaining**
+(`answer?.trim()`) guards method calls on values that might be `null`. The
+_numeric_ falsy values wait for the numbers cycle, where truthiness completes.
 
-These branches apply the notional machine through specific computational idioms.
-**2A and 2B are required.** Choose at least one from 2C–2E. 2F is optional.
+When a string property is the thing being checked, a bare number literal on the
+other side of the comparison is fine — `answer.length === 0` is a condition
+about a string. The focus stays on the strings.
 
-#### 2A: Logic and Truthiness 🥚
+**Verify:** predict branch-selection events — which predicate resolves to what,
+which branch the machine enters, which it never touches — including the lookup
+events of a search-method predicate.
 
-Required. Foundation for reading conditional programs and understanding how
-values flow through boolean contexts.
+**Tests: one expected pair per branch — branch-pairs are born here.** A program
+with three branches carries three input/expected-output pairs in its doc
+comment, and an assert per branch. A branch without a pair is untested by
+construction.
 
-Truthiness and falsiness: every value is truthy or falsy; the six falsy values
-(`false`, `0`, `''`, `null`, `undefined`, `NaN`). **Short-circuit evaluation**:
-`&&` stops at first falsy, `||` stops at first truthy, `??` stops at first
-non-nullish; the expression resolves to the _stopping_ value, not necessarily a
-boolean. **Logical compound assignment** (`&&=`, `||=`, `??=`) extends the
-short-circuit pattern to assignment.
+**Cash-out (you write):** gates (confirm-guarded actions, cancel-safe prompts),
+graders (right/wrong/empty answers, each with its own reply),
+choose-your-adventure dialogs.
 
-Short-circuit for default values and guard clauses is the practical payoff.
-Refactoring between `if`/`else`, ternary, and short-circuit forms develops
-PBIS-grounded judgment about when each form expresses intent clearly.
+**Seeds the next cycle:** one question, one branch, once — and a wrong answer
+just falls through. Asking _again until the answer is usable_, offering a menu
+_until they quit_, examining an answer _piece by piece_ — repetition needs
+loops, and walking through text position by position traffics in numbers.
 
-#### 2B: Strings 🥚
+### C4 — Loops and numbers-as-counters: doing it again
 
-Required. Needed for Chapter 3 user programs (`prompt`/`alert`/`confirm` work
-with strings). Builds directly on the prototype chain understanding from 2.6.
+**The gap:** once-only programs.
 
-String methods cover measuring (`length`), accessing characters (`charAt`, `at`,
-bracket notation), searching (`indexOf`, `includes`, `startsWith`, `endsWith`),
-transforming (`toUpperCase`, `toLowerCase`, `trim`, `padStart`, `padEnd`,
-`repeat`), and extracting / replacing (`slice`, `replace`, `replaceAll`,
-`split`).
+`while`, `do-while`, `for`, `for-of` repeat evaluation. Each form has the same
+NM events; the syntax differs in how the loop variable and termination condition
+are arranged. `break` and `continue` modify loop flow. Refactoring between
+equivalent loop forms is the same discipline as refactoring between conditional
+forms.
 
-**Template literals** are a readable alternative to concatenation with
-expression interpolation. **`String.fromCharCode`** / **`String.fromCodePoint`**
-introduce character encoding — strings as sequences of encoded characters.
-**Optional chaining** (`str?.method()`) handles values that might be `null` or
-`undefined`. Text-processing programs compose these methods into full programs.
+**Block scope arrives with the blocks.** `{}` is a container; scopes nest; a
+`let` declared inside a block is not accessible outside it. The **scope chain
+walk** makes this concrete: when an identifier is read, the VM checks the
+current (innermost) scope first, then its parent, up to the global environment —
+each check a miss (keep looking) or a hit (binding found). Loop bodies and `if`
+bodies make the walk visible statement by statement.
 
-#### 2C: Numbers and Math 🐣
+**Numbers enter — minimally, as counters.** A loop counter is a number the
+_program_ made: `let count = 0; count = count + 1` (and the increment /
+decrement shorthand). With counters in hand, the deferred string tools arrive:
+`length` as a quantity, `indexOf`, `charAt`, `str[i]`, and `at` (which accepts
+negative indexes: `str.at(-1)` is the last character), `slice` — and `for-of`
+walks a string character by character. The transforms that take counts —
+`repeat`, `padStart`, `padEnd` — join the toolkit. `String.fromCharCode` /
+`String.fromCodePoint` open the encoding door: strings as sequences of encoded
+characters. `str.split(separator)` produces a list of pieces you can walk with
+`for-of` — the first list-shaped value in the course, used only for walking.
+`console.count(label)` / `console.countReset(label)` give the developer channel
+its iteration tool.
 
-Choose at least one from 2C–2E.
+**Verify:** predict iteration events (how many passes, what ends them), the
+scope-chain walk for a binding read inside a nested block, and the counter's
+state at each pass.
 
-Math methods and constants: `Math.max`, `Math.min`, `Math.abs`, `Math.floor`,
-`Math.ceil`, `Math.round`, `Math.random`, `Math.pow`, `Math.sqrt`, `Math.PI`,
-`Math.E`. Number helpers: `Number.isNaN`, `Number.isFinite`, `Number.isInteger`,
-`parseInt`, `parseFloat`. Number prototype methods: `toFixed(n)`,
-`toString(radix)`, `toPrecision`, `toExponential`, `toLocaleString`.
+**Tests: loop-boundary pairs — zero, one, many.** The empty answer, the
+single-character answer, the long answer: each loop gets pairs at its
+boundaries, because that is where loops break.
 
-**Floating point representation**: why `0.1 + 0.2 !== 0.3`; precision limits of
-IEEE 754; when this matters and how to work around it. Understanding what the VM
-actually stores for a number literal.
+**Cash-out (you write):** retry-until-valid (re-prompt on empty or cancelled
+answers), menus (repeat until `'quit'`), occurrence-counters (how many times
+does a letter appear), scanners (walk a string and react character by
+character).
 
-**BigInt**: integers without precision limits. `42n` literal syntax, `BigInt()`
-constructor; `typeof` is `'bigint'`; can't mix with `number` in arithmetic;
-integer division truncates. The solution for exact large integer arithmetic.
+**Seeds the next cycle:** counters are numbers the program made — trustworthy by
+construction. Numbers from _users_ arrive as text: `'5'` is not `5`, and
+`'five'` is not anything. Arithmetic on user input needs conversion, and
+conversion needs defense.
 
-Programs: geometry and randomness; number crunching, accumulation, running
-totals, summarization.
+### Consolidation Beat B — the control panel
 
-#### 2D: Pattern Matching 🐔
+Unify the two chain-walks: the scope chain walk (innermost scope outward) and
+the prototype chain lookup (value to prototype) are the same pattern in two
+domains — ordered lookup, miss after miss until the hit. Add branch events and
+iteration events, and the machine's control panel is complete: **hold,
+transform, branch, repeat.** One full trace of a retry-menu program touches
+every family so far.
 
-Choose at least one from 2C–2E.
+### C5 — Numbers, coercion and validation
 
-**Regular expressions** are pattern-matching computation: instead of procedural
-string operations, declare the _shape_ of what you're looking for.
-`/pattern/flags` literals; `.test()`, `.match()`, `.replace()` with regex. The
-computational micro-decision between regex and string methods is not just _what
-works_ but _what expresses the problem clearly_.
+_Late, isolated, on purpose._
 
-#### 2E: Integers and Bits 🐔
+**The gap:** users type text. Math needs numbers. The boundary between those two
+is the most treacherous terrain in the language, which is why it gets its own
+cycle instead of leaking into every earlier one.
 
-Choose at least one from 2C–2E.
+**Explicit conversion** is learner-visible syntax: `Number()`, `parseInt`,
+`parseFloat` (and `String()`, `Boolean()` — the same door in other directions).
+**Implicit coercion** is the VM's silent type-transformation between operands
+and operators: `'5' + 3` concatenates to `'53'` while `'5' - 3` subtracts to
+`2`. It is a behind-the-scenes event, invisible in the syntax but predictable
+once you learn its rules — and predicting it is this cycle's verify.
+
+Arithmetic and numeric comparison operators arrive in full, with compound
+assignment and `typeof` for asking what a value is. `NaN` propagates; `isNaN`,
+`Number.isNaN`, `Number.isFinite`, and `Number.isInteger` interrogate it. `Math`
+methods and constants (`max`, `min`, `abs`, `floor`, `ceil`, `round`, `random`,
+`pow`, `sqrt`, `PI`, `E`) do the actual math. Number prototype methods
+(`toFixed(n)`, `toString(radix)`, `toPrecision`, `toExponential`,
+`toLocaleString`) — the C2 lookup mechanism, third domain. **Floating point
+representation** explains why `0.1 + 0.2 !== 0.3`: precision limits of IEEE 754,
+when this matters, and how to work around it.
+
+**Truthiness completes.** The numeric falsy values `0` and `NaN` join `false`,
+`''`, `null`, and `undefined` — all six now in hand, and the C3 guards extend to
+numeric input.
+
+**The validation discipline (the machine-side mechanics):** cast to number →
+validate the cast (`isNaN`, `Number.isFinite`) → validate the range. The user
+might type anything; the program must defend the NM-side state-space.
+
+**Verify:** predict coercion-cascade events and conversion chains — every silent
+transformation, every `NaN` propagation — before running.
+
+**Tests: valid/invalid-input pairs.** Every numeric program carries pairs for
+the number, the junk, the empty answer, and the cancel.
+
+**Cash-out (you write):** validated numeric programs — age gates, tip
+calculators, unit converters — that survive hostile input.
+
+**Seeds the next cycle:** your programs now have real moving parts — input,
+validation, logic, output — and the pairs in your comments have grown into a
+scattered pile. Time to make the structure visible and the suite systematic.
+
+### Consolidation Beat C — the coercion-vs-conversion weld
+
+One table, one weld: **explicit conversion** (your visible syntax: `Number()`,
+`String()`, `Boolean()`, `parseInt`, `parseFloat`) versus **implicit coercion**
+(the VM's silent move behind the scenes). What converts to what; where `NaN`
+comes from; truthiness as the boolean face of the same coin, now complete.
+
+### C6 — Structure: systematizing the chain
+
+**The gap:** working programs, ad-hoc structure, scattered tests.
+
+**The program structure pattern gets named:** input + validation (a while loop)
+→ logic (a conditional) → output. The phases were latent in every program since
+the retry-until-valid cash-out; naming them makes them designable. **Input
+validation strategies** — all-in-while-head, boolean flag, do-while — express
+the same Behavior three ways, an early exercise in seeing strategy as a choice.
+
+**PBIS**: Purpose, Behavior, Implementation, Strategy — four perspectives for
+reading any program simultaneously. Purpose names what the program is _for_;
+Behavior names what it _does_ as observable inputs/outputs; Implementation names
+the code-level mechanism; Strategy names the choices that connect Implementation
+to Behavior. The letter order is flexible in use; the four perspectives are the
+discipline. "Why not what" comments extend here: comments now explain strategy
+and behavioral correlations, grounded in PBIS vocabulary. **Top-level doc
+comments** grow to program scale: name, purpose, behavior, and the expected
+pairs, structured for the developer reading it.
+
+**The suite, systematized.** The test thread's antecedents line up: executable
+asserts (C1), pairs on transforms (C2), a pair per branch (C3), pairs at loop
+boundaries (C4), valid/invalid pairs (C5). **Branch coverage** asks the closing
+question: is every conditional path covered by a pair? Branches without test
+inputs are silent corners where bugs hide. **Fixing bugs** now means something
+new: the code runs without error but produces wrong behavior — the fix is
+upstream, in the predictive model. **Modifying programs**: one change at a time;
+predict; run; note the result — with the program's user-visible behavior as the
+fixed point.
+
+The remaining craft tools complete the console API and the review discipline:
+**logging strategies** (structured placement at structure boundaries, mutation
+points, control-flow forks), `console.group` / `groupCollapsed` / `groupEnd` and
+`console.time` / `timeLog` / `timeEnd` (and `console.clear`), **backtracing**
+(reason from output back to input when something went wrong), **describing
+programs** (close reading across all PBIS levels), **naming variables** as
+structured analysis (generic role-based names → specific domain names → variable
+roles: fixed value, stepper, flag, gatherer, holder, temporary), **linting**
+(the code conventions enforced by a tool), **refactoring** (changing
+implementation or strategy without changing behavior), **code review** (a
+structured template: behavior, goals, comments, linting, variables), and
+**comparing programs** (same behavior, different approaches — the eye for voice
+and readability tradeoffs).
+
+**Tests:** the suite itself is the artifact — systematic coverage, organized
+output, documented pairs.
+
+**Cash-out (you write):** robust, tested, documented programs — and the
+chapter's closing beat, the F-side of the course's symmetry: **this chapter was
+one cycle chain, run on the machine side.** The proposals stayed modest (greet,
+gate, retry, validate) so the discoveries could go deep. Ch2⟡ swings the other
+hand: the proposals get the depth, with the machine you now own underneath.
+
+### Consolidation Beat D — the whole machine
+
+One full-program trace touching every event family: lifecycle, resolve, lookup,
+branch, iteration, coercion. The NM-twin is operational — you can predict,
+verify, and direct the machine through every construct in JEJ-core.
+
+**This is the gate Ch2⟡ assumes:** full mastery of the chain — C0 through C6
+plus the four beats. The electives below are not part of the gate.
+
+### Electives — off the chain, by interest
+
+Real material, never blocking. Each elective applies the machine you already own
+to a further idiom; take any, in any order, whenever curiosity strikes.
+
+#### Elective: BigInt
+
+Integers without precision limits. `42n` literal syntax, `BigInt()` constructor;
+`typeof` is `'bigint'`; can't mix with `number` in arithmetic; integer division
+truncates. The solution for exact large integer arithmetic.
+
+#### Elective: Regular Expressions
+
+Pattern-matching computation: instead of procedural string operations, declare
+the _shape_ of what you're looking for. `/pattern/flags` literals; `.test()`,
+`.match()`, `.replace()` with regex. The computational micro-decision between
+regex and string methods is not just _what works_ but _what expresses the
+problem clearly_.
+
+#### Elective: Bitwise Computation
 
 **Bitwise operators** compute at the bit level: numbers as binary structures,
 not decimal values. `&`, `|`, `^`, `~`, `<<`, `>>`, `>>>` — each does something
-specific at the bit level. BigInt works with bitwise operators (see 2C for
-BigInt introduction). The computational micro-decision between bitwise and
-arithmetic expresses the problem's structure.
+specific at the bit level. BigInt works with bitwise operators (see the BigInt
+elective). The computational micro-decision between bitwise and arithmetic
+expresses the problem's structure.
 
-#### 2F: Dates 🐔
-
-Optional extra.
+#### Elective: Dates
 
 `Date.now()` returns the current timestamp as a number (milliseconds since
 epoch). `new Date()` is the sole `new` exception in JEJ; it creates a date
 object whose methods all return primitives. `Date.parse(str)` parses a date
-string to a timestamp.
-
-Date instance methods: `getFullYear()`, `getMonth()` (0-indexed), `getDate()`,
-`getHours()`, `getMinutes()`, `getSeconds()`, `toLocaleDateString()`,
-`toLocaleTimeString()`, `toISOString()`. Date computation programs cover elapsed
-time, formatting, and internationalization — numbers and arithmetic applied to
-time as a domain.
+string to a timestamp. Instance methods: `getFullYear()`, `getMonth()`
+(0-indexed), `getDate()`, `getHours()`, `getMinutes()`, `getSeconds()`,
+`toLocaleDateString()`, `toLocaleTimeString()`, `toISOString()`. Date
+computation programs cover elapsed time, formatting, and internationalization —
+numbers and arithmetic applied to time as a domain.
 
 ## Learning objectives by layer
 
 ### Layer 0 — Mastery
 
-#### NM core
+#### C0 — the machine and its events
 
 - 🥚 **Evaluation events**: a running program produces an ordered stream of
   observable moments; the tracer captures these automatically; trace tables
   record them by hand
-- 🥚 Static source code vs dynamic evaluation: reading a file vs running it
+- 🥚 The two viewing levels inside a run: visual-syntax vs behind-the-scenes —
+  distinct from Ch0⟡'s static-vs-dynamic (text vs run)
 - 🥚 Fix errors: parse errors (creation phase) vs runtime errors (evaluation
-  phase)
-- 🥚 Identify expressions as syntax that produces a value: operators, literals,
-  identifiers, calls, templates, property access, assignment
-- 🥚 Trace how a compound expression evaluates step by step: sub-expressions
-  resolve in order; precedence; parentheses
-- 🥚 **Resolve**: every expression produces exactly one value
-- 🥚 All operators (arithmetic, comparison, equality, logical, negation,
-  `typeof`, grouping, compound assignment, increment/decrement)
-- 🥚 **Implicit coercion**: the VM silently transforms types — a
-  _behind-the-scenes_ event, invisible in syntax
-- 🥚 **Asserting on expressions**: `console.assert(1 + 1 === 2)` as a claim
-  about what an expression resolves to
-- 🥚 Block scope as container; nested blocks
-- 🐣 Explicit type conversion vs implicit coercion: `Number()`, `String()`,
-  `Boolean()`, `parseInt`/`parseFloat`
+  phase); locate the source line; categorize the failure type
+- 🥚 An error is not a personal failure and not the machine breaking; it is the
+  machine being precisely honest about a spec it can't interpret
+
+#### C1 — bindings
+
 - 🥚 Binding lifecycle: declare → initialize → available → access / update
 - 🥚 `let` vs `const`: what each allows and what it communicates to the reader
-- 🥚 Variable names as communication choices: naming conventions (camelCase,
-  snake_case, CONSTANT_CASE, PascalCase)
 - 🥚 Log variable values; observe state change over time
 - 🥚 **Trace tables**: systematic notation of evaluation in steps-format and
   values-format
 - 🥚 **Predictive stepping with a debugger**: predict → step → check →
   investigate
-- 🥚 **Scope chain walk**: innermost → parent → global; miss/hit
-- 🥚 Block scope with variables: `let` declared inside `{}` is not accessible
-  outside
 - 🥚 **Asserting on bindings**: predict what a binding holds at a specific point
 - 🐣 Write code to satisfy assertions sprinkled through a script
-- 🥚 Conditionals: `if`/`else if`/`else`
-- 🥚 Ternary expressions
-- 🥚 While loops, do-while loops, for loops, for-of loops: reading and tracing
-- 🥚 `break` and `continue`
-- 🐣 Refactoring between equivalent loop forms
-- 🐣 Block scope inside control flow
+
+#### C2 — strings, expressions, lookup
+
+- 🥚 Identify expressions as syntax that produces a value; trace how a compound
+  expression evaluates step by step: sub-expressions resolve in order;
+  precedence; parentheses
+- 🥚 **Resolve**: every expression produces exactly one value
+- 🥚 String concatenation and template literals as recombination
 - 🐣 **Auto-boxing**: when a method is called on a primitive, the VM temporarily
   wraps it
 - 🐣 **Prototype chain lookup**: one-hop lookup for primitives — a
-  _behind-the-scenes_ event parallel to scope chain lookup
-- 🐣 Reading `str.toUpperCase()` as: look up on `String.prototype` → call with
-  `str` as receiver
-- 🐔 The same mechanism for Number methods and RegExp methods
+  _behind-the-scenes_ event; reading `str.toUpperCase()` as: look up on
+  `String.prototype` → call with `str` as receiver
+- 🥚 The transform methods (`toUpperCase` / `toLowerCase`, `trim`, `replace` /
+  `replaceAll`): string in, string out, immediately recombinable
 
-#### Errors as information
+#### C3 — conditionals on strings
 
-- 🥚 An error is not a personal failure and not the machine breaking; it is the
-  machine being precisely honest about a spec it can't interpret
-- 🥚 Read errors as information — locate the source line; categorize the failure
-  type
+- 🥚 Conditionals: `if` / `else if` / `else`; `switch` on strings; ternary
+  expressions as the compact two-way form
+- 🥚 `===` on strings as the workhorse predicate
+- 🥚 The search methods (`includes`, `startsWith`, `endsWith`) as conditions —
+  the C2 lookup mechanism extended
+- 🥚 `confirm` as a ready-made condition
+- 🥚 Truthiness, non-numeric half: `''`, `null`, `undefined` falsy; negation
+  (`!`) flips truthiness; guards for the cancelled `prompt`
+- 🥚 Short-circuit evaluation (`&&` / `||` / `??`) resolves to the stopping
+  value; defaults and guard clauses; logical compound assignment (`&&=` / `||=`
+  / `??=`); optional chaining (`answer?.method()`)
 
-#### Computational idioms (2A required; 2B required; ≥1 of 2C-2E; 2F optional)
+#### C4 — loops and counters
 
-- 🥚 **2A Logic and Truthiness**: truthiness/falsiness; the six falsy values;
-  short-circuit evaluation (`&&` / `||` / `??`); logical compound assignment
-  (`&&=` / `||=` / `??=`)
-- 🥚 **2B Strings**: methods (measuring, accessing, searching, transforming,
-  extracting/replacing); template literals;
-  `String.fromCharCode`/`fromCodePoint`
-- 🐣 Optional chaining: `str?.method()`
-- 🥚 **2C Numbers and Math**: Math methods/constants; Number helpers; Number
-  prototype methods; floating-point representation; BigInt
-- 🐔 **2D Pattern Matching**: regex; `/pattern/flags`; `.test()`, `.match()`,
+- 🥚 While loops, do-while loops, for loops, for-of loops: reading and tracing
+- 🥚 `break` and `continue`
+- 🐣 Refactoring between equivalent loop forms
+- 🥚 Block scope as container; nested blocks; `let` declared inside `{}` is not
+  accessible outside
+- 🥚 **Scope chain walk**: innermost → parent → global; miss/hit
+- 🥚 Numbers as counters: increment/decrement; counter state across iterations
+- 🥚 The numeric string tools: `length`, `indexOf`, `charAt` / `str[i]` / `at`
+  (negative indexes), `slice`; count-taking transforms (`repeat`, `padStart`,
+  `padEnd`)
+- 🐣 `String.fromCharCode` / `fromCodePoint`: strings as sequences of encoded
+  characters; `split` as a list of pieces to walk with `for-of`
+
+#### C5 — numbers, coercion, validation
+
+- 🥚 Explicit type conversion vs implicit coercion: `Number()`, `String()`,
+  `Boolean()`, `parseInt` / `parseFloat` vs the VM's silent transformations
+- 🥚 **Implicit coercion** as a _behind-the-scenes_ event: `'5' + 3` vs
+  `'5' - 3`
+- 🥚 Arithmetic, comparison, and compound-assignment operators; `typeof`
+- 🥚 `NaN` and its interrogators: `isNaN`, `Number.isNaN`, `Number.isFinite`,
+  `Number.isInteger`
+- 🥚 Math methods and constants; Number prototype methods (`toFixed`,
+  `toString(radix)`, `toPrecision`, `toExponential`, `toLocaleString`)
+- 🐣 Floating-point representation: why `0.1 + 0.2 !== 0.3`
+- 🥚 Truthiness completed: the six falsy values
+- 🥚 The validation discipline: cast → validate the cast → validate the range
+
+#### C6 — structure
+
+- 🥚 **Program structure pattern**: input + validation (while loop) → logic
+  (conditional) → output
+- 🥚 **Branch coverage**: every conditional path covered by a pair; branches
+  without test inputs are silent corners
+- 🥚 **PBIS Framework**: Purpose, Behavior, Implementation, Strategy — four
+  perspectives for reading any program simultaneously
+- 🐣 **Fixing bugs**: code runs without error but produces wrong behavior; the
+  fix is upstream in the predictive model
+- 🐣 **Modifying programs**: one change at a time, predict, run, note the result
+
+#### Electives
+
+- 🥚 **BigInt**: `42n`, `BigInt()`; `typeof 'bigint'`; no mixing with `number`
+- 🐔 **Regular Expressions**: `/pattern/flags`; `.test()`, `.match()`,
   `.replace()` with regex
-- 🐔 **2E Integers and Bits**: bitwise operators; bit-level computation
-- 🐔 **2F Dates** _(optional)_: `Date.now()`, `new Date()` (sole `new` exception
-  in JEJ), date methods
+- 🐔 **Bitwise Computation**: bitwise operators; bit-level computation
+- 🐔 **Dates**: `Date.now()`, `new Date()` (sole `new` exception in JEJ), date
+  methods
 
 ### Layer 1 — Rhetoric
 
-- 🥚 **PBIS Framework**: Purpose, Behavior, Implementation, Strategy — four
-  perspectives for reading any program simultaneously
-- 🥚 "Why not what" comments applied to programs with logic
+- 🥚 Write comments that explain _why_, not _what_; identify and apply comment
+  conventions: inline (`//`), block (`/* */`), doc-style (`/** */`), `*`-aligned
+  block structure
+- 🥚 **Micro-decisions in comments, logs, and names** — every choice (word,
+  placement, method, convention) shapes how a stranger reads the work
+- 🥚 The `console` API by intent: what each method communicates (`debug` / `log`
+  / `info` / `warn` / `error`; `assert`; `count` / `countReset`; `group` /
+  `groupCollapsed` / `groupEnd`; `time` / `timeLog` / `timeEnd`; `clear`) — and
+  when to use comments vs logs
+- 🥚 Top-level program comments at program scale: name, purpose, behavior, and
+  the expected pairs
+- 🥚 The test thread as rhetoric: expected pairs communicate behavior to the
+  developer-reader before they communicate correctness to the machine
+- 🥚 "Why not what" comments grounded in PBIS vocabulary
 - 🥚 **Logging strategies**: structured `console.log` placement
 - 🐣 **Backtracing**: reasoning backwards from output to input
 - 🐣 **Describing programs**: close reading across all PBIS levels
@@ -1218,22 +1297,34 @@ time as a domain.
 - 🐣 **Code review**: structured template (behavior, goals, comments, linting,
   variables)
 - 🐣 **Comparing programs**: same behavior, different approaches
+- 🐥 Read and appreciate real comments from real codebases (funny, desperate,
+  poetic examples of developer-to-developer communication)
 
 ### Layer 2 — Methodology
 
 - 🥚 Wear the F hat consciously: predict-trace-verify is _F's bridging practice_
   operationalized
+- 🥚 Live the cycle shape on the chain: entry behavior → gap → affordance →
+  verify by internal events → cash out → seed the next — recognized in
+  retrospect at each beat, not followed as a checklist
 - 🐣 Recognize that the tracer is **both training wheels AND power tool** —
   extends working memory beyond what can be held in head
+- 🐣 Use the consolidation beats: re-trace across event families and name what
+  unified (the two chain-walks; the coercion weld; the whole machine)
+- 🐣 Choose among validation strategies (all-in-while-head, boolean flag,
+  do-while) as a Strategy decision, not a habit
+- 🐣 Wear a V or F hat _consciously_ when writing a comment: a V-hat comment
+  grounds in the future reader's experience; an F-hat comment grounds in the
+  mechanism the reader needs to understand
 - 🐔 Discuss when verification by output is sufficient and when internal-event
   prediction is required (the two-layer misconception mechanism)
 
 ### Layer 3 — Snippetry
 
-- 🐣 Write a small snippet that uses one computational idiom in three different
-  ways
-- 🐣 Trace a snippet using one of the idioms you haven't yet chosen (e.g.,
-  regex); predict before running
+- 🐣 Write a small snippet that uses one chain skill (a transform, a branch
+  shape, a loop form) in three different ways
+- 🐣 Trace a snippet from an elective you haven't taken (e.g., regex); predict
+  before running
 
 ### Layer 4 — Philosophy
 
@@ -1242,124 +1333,9 @@ time as a domain.
 - 🥚 _(footnote)_ Notice that an "error" is the machine telling you _exactly_
   where it can't interpret your specification. The machine's honesty is
   information you can trust — unlike most channels in life
-
-### Layer 0 — Mastery
-
-#### NM core
-
-- 🥚 **Evaluation events**: a running program produces an ordered stream of
-  observable moments; the tracer captures these automatically; trace tables
-  record them by hand
-- 🥚 Static source code vs dynamic evaluation: reading a file vs running it
-- 🥚 Fix errors: parse errors (creation phase) vs runtime errors (evaluation
-  phase)
-- 🥚 Identify expressions as syntax that produces a value: operators, literals,
-  identifiers, calls, templates, property access, assignment
-- 🥚 Trace how a compound expression evaluates step by step: sub-expressions
-  resolve in order; precedence; parentheses
-- 🥚 **Resolve**: every expression produces exactly one value
-- 🥚 All operators (arithmetic, comparison, equality, logical, negation,
-  `typeof`, grouping, compound assignment, increment/decrement)
-- 🥚 **Implicit coercion**: the VM silently transforms types — a
-  _behind-the-scenes_ event, invisible in syntax
-- 🥚 **Asserting on expressions**: `console.assert(1 + 1 === 2)` as a claim
-  about what an expression resolves to
-- 🥚 Block scope as container; nested blocks
-- 🐣 Explicit type conversion vs implicit coercion: `Number()`, `String()`,
-  `Boolean()`, `parseInt`/`parseFloat`
-- 🥚 Binding lifecycle: declare → initialize → available → access / update
-- 🥚 `let` vs `const`: what each allows and what it communicates to the reader
-- 🥚 Variable names as communication choices: naming conventions (camelCase,
-  snake_case, CONSTANT_CASE, PascalCase)
-- 🥚 Log variable values; observe state change over time
-- 🥚 **Trace tables**: systematic notation of evaluation in steps-format and
-  values-format
-- 🥚 **Predictive stepping with a debugger**: predict → step → check →
-  investigate
-- 🥚 **Scope chain walk**: innermost → parent → global; miss/hit
-- 🥚 Block scope with variables: `let` declared inside `{}` is not accessible
-  outside
-- 🥚 **Asserting on bindings**: predict what a binding holds at a specific point
-- 🐣 Write code to satisfy assertions sprinkled through a script
-- 🥚 Conditionals: `if`/`else if`/`else`
-- 🥚 Ternary expressions
-- 🥚 While loops, do-while loops, for loops, for-of loops: reading and tracing
-- 🥚 `break` and `continue`
-- 🐣 Refactoring between equivalent loop forms
-- 🐣 Block scope inside control flow
-- 🐣 **Auto-boxing**: when a method is called on a primitive, the VM temporarily
-  wraps it
-- 🐣 **Prototype chain lookup**: one-hop lookup for primitives — a
-  _behind-the-scenes_ event parallel to scope chain lookup
-- 🐣 Reading `str.toUpperCase()` as: look up on `String.prototype` → call with
-  `str` as receiver
-- 🐔 The same mechanism for Number methods and RegExp methods
-
-#### Errors as information
-
-- 🥚 An error is not a personal failure and not the machine breaking; it is the
-  machine being precisely honest about a spec it can't interpret
-- 🥚 Read errors as information — locate the source line; categorize the failure
-  type
-
-#### Computational idioms (2A required; 2B required; ≥1 of 2C-2E; 2F optional)
-
-- 🥚 **2A Logic and Truthiness**: truthiness/falsiness; the six falsy values;
-  short-circuit evaluation (`&&` / `||` / `??`); logical compound assignment
-  (`&&=` / `||=` / `??=`)
-- 🥚 **2B Strings**: methods (measuring, accessing, searching, transforming,
-  extracting/replacing); template literals;
-  `String.fromCharCode`/`fromCodePoint`
-- 🐣 Optional chaining: `str?.method()`
-- 🥚 **2C Numbers and Math**: Math methods/constants; Number helpers; Number
-  prototype methods; floating-point representation; BigInt
-- 🐔 **2D Pattern Matching**: regex; `/pattern/flags`; `.test()`, `.match()`,
-  `.replace()` with regex
-- 🐔 **2E Integers and Bits**: bitwise operators; bit-level computation
-- 🐔 **2F Dates** _(optional)_: `Date.now()`, `new Date()` (sole `new` exception
-  in JEJ), date methods
-
-### Layer 1 — Rhetoric
-
-- 🥚 **PBIS Framework**: Purpose, Behavior, Implementation, Strategy — four
-  perspectives for reading any program simultaneously
-- 🥚 "Why not what" comments applied to programs with logic
-- 🥚 **Logging strategies**: structured `console.log` placement
-- 🐣 **Backtracing**: reasoning backwards from output to input
-- 🐣 **Describing programs**: close reading across all PBIS levels
-- 🐣 **Naming variables**: variable analysis → generic role-based names →
-  specific domain names → variable roles (fixed value, stepper, flag, gatherer,
-  holder, temporary)
-- 🥚 **Linting**: recognizing and fixing style issues automatically
-- 🐣 **Refactoring**: changing implementation or strategy without changing
-  program output
-- 🐣 **Code review**: structured template (behavior, goals, comments, linting,
-  variables)
-- 🐣 **Comparing programs**: same behavior, different approaches
-
-### Layer 2 — Methodology
-
-- 🥚 Wear the F hat consciously: predict-trace-verify is _F's bridging practice_
-  operationalized
-- 🐣 Recognize that the tracer is **both training wheels AND power tool** —
-  extends working memory beyond what can be held in head
-- 🐔 Discuss when verification by output is sufficient and when internal-event
-  prediction is required (the two-layer misconception mechanism)
-
-### Layer 3 — Snippetry
-
-- 🐣 Write a small snippet that uses one computational idiom in three different
-  ways
-- 🐣 Trace a snippet using one of the idioms you haven't yet chosen (e.g.,
-  regex); predict before running
-
-### Layer 4 — Philosophy
-
-<em>(sparse)</em>
-
-- 🥚 _(footnote)_ Notice that an "error" is the machine telling you _exactly_
-  where it can't interpret your specification. The machine's honesty is
-  information you can trust — unlike most channels in life
+- 🥚 _(footnote)_ The developer audience is the only audience that reads STATIC
+  code — every other audience experiences the DYNAMIC evaluation. What does that
+  asymmetry mean for code rhetoric?
 
 ---
 
