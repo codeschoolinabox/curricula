@@ -30,7 +30,7 @@ describe('generateQuiz', () => {
 			const snippet = embody('x');
 			expect(
 				generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
-			).toEqual(['V1', 'V7', 'V10c']);
+			).toEqual(['V1', 'V7', 'V10c', 'V4']);
 		});
 	});
 
@@ -44,11 +44,11 @@ describe('generateQuiz', () => {
 			).toBe(true);
 		});
 
-		it('groups token-anchored items before node-anchored items', () => {
+		it('orders token-anchored, then node-anchored, then program-anchored items', () => {
 			const snippet = embody('a; b');
 			expect(
 				generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
-			).toEqual(['V1', 'V1', 'V1', 'V7', 'V7', 'V10c']);
+			).toEqual(['V1', 'V1', 'V1', 'V7', 'V7', 'V10c', 'V4', 'V4']);
 		});
 
 		it('runs every applicable registered generator for a declared, referenced binding', () => {
@@ -58,7 +58,7 @@ describe('generateQuiz', () => {
 					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 				),
 			).toEqual(
-				new Set(['V1', 'V2', 'V6', 'V7', 'V8', 'V10a', 'V10b', 'V10c']),
+				new Set(['V1', 'V2', 'V6', 'V7', 'V8', 'V10a', 'V10b', 'V10c', 'V4']),
 			);
 		});
 
@@ -69,7 +69,18 @@ describe('generateQuiz', () => {
 					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 				),
 			).toEqual(
-				new Set(['V1', 'V2', 'V6', 'V6b', 'V7', 'V8', 'V10a', 'V10b', 'V10c']),
+				new Set([
+					'V1',
+					'V2',
+					'V6',
+					'V6b',
+					'V7',
+					'V8',
+					'V10a',
+					'V10b',
+					'V10c',
+					'V4',
+				]),
 			);
 		});
 
@@ -82,7 +93,7 @@ describe('generateQuiz', () => {
 				new Set(
 					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 				),
-			).toEqual(new Set(['V1', 'V7', 'V8', 'V10a', 'V10b', 'V10c']));
+			).toEqual(new Set(['V1', 'V7', 'V8', 'V10a', 'V10b', 'V10c', 'V4']));
 		});
 
 		it('emits exactly one V2 item (the declaration) for a contextual keyword as a property', () => {
@@ -93,6 +104,17 @@ describe('generateQuiz', () => {
 				(item) => item.form === 'V2',
 			).length;
 			expect(v2Count).toBe(1);
+		});
+
+		it('fires the program-anchored V4 end-to-end for both chains', () => {
+			// V4 is the first program-anchored generator to run; confirm both a
+			// scope-chain and a prototype-chain item reach generateQuiz output.
+			const snippet = embody('Math.max;');
+			const chainGroupKeys = generateQuiz(snippet, classifyOf(snippet))
+				.filter((item) => item.form === 'V4')
+				.map((item) => item.groupKey);
+			expect(chainGroupKeys).toContain('chain:scope-chain:Math');
+			expect(chainGroupKeys).toContain('chain:prototype-chain:max');
 		});
 	});
 
@@ -106,7 +128,7 @@ describe('generateQuiz', () => {
 				new Set(
 					generateQuiz(snippet, classifyOf(snippet)).map((item) => item.form),
 				),
-			).toEqual(new Set(['V1', 'V7', 'V10c']));
+			).toEqual(new Set(['V1', 'V7', 'V10c', 'V4']));
 		});
 
 		it('returns a deeply frozen array', () => {
