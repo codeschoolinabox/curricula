@@ -4,7 +4,7 @@
 
 `trace-debugging` is the **first real UI consumer** of the variables tracer's
 own typed handle. The tracer
-([`../../embody/lib/evaluating/tracers/variables/`](../../embody/lib/evaluating/tracers/variables/))
+([`../../embody/lib/evaluating/trace/variables/`](../../embody/lib/evaluating/trace/variables/))
 is complete and AR-5'd, and the embody surface now exposes it as
 `evaluation.events.traceVariableLifecycle` — a raw method returning the tracer's
 **own** `VariablesTraceHandle` (not the `AnyNMEvent` adapter `trace.variables`).

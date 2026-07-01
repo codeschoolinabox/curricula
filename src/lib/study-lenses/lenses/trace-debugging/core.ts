@@ -349,7 +349,7 @@ function isOpaqueValue(
  * because the real messages are prefixed `traceVariableLifecycle:` /
  * `traceVariables:`, so these tokens are interior. The text is owned by the
  * embody / tracer tier (`embody/index.ts`,
- * `embody/lib/evaluating/tracers/variables/trace-variables.ts`) — a tier-side
+ * `embody/lib/evaluating/trace/variables/trace-variables.ts`) — a tier-side
  * reword breaks this classifier, which is why an unrecognized message still
  * renders via the graceful fallback in {@link admissionDetail}.
  */

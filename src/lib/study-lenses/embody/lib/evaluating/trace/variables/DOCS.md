@@ -1,4 +1,4 @@
-# tracers/variables — Architecture & Decisions
+# trace/variables — Architecture & Decisions
 
 Vocabulary and the event pinning table: [README.md](./README.md). The contract:
 [types.ts](./types.ts). The engine this tier consumes:

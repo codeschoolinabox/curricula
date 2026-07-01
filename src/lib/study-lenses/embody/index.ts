@@ -134,7 +134,7 @@ import deepFreezeInPlace from '@utils/deep-freeze-in-place.js';
 import type { CreateTransport } from '../lib/engine/worker/types.js';
 
 import type { EmbodyScenario } from './embody-scenarios.js';
-import traceVariables from './lib/evaluating/tracers/variables/trace-variables.js';
+import traceVariables from './lib/evaluating/trace/variables/trace-variables.js';
 import type {
 	Analysis,
 	AnyNMEvent,
@@ -472,9 +472,7 @@ function forwardTraceVariableLifecycle(
 	createTransport?: CreateTransport,
 ): VariablesTraceHandle {
 	if (realSource === null) {
-		throw new Error(
-			'traceVariableLifecycle: not available on canned scenario',
-		);
+		throw new Error('traceVariableLifecycle: not available on canned scenario');
 	}
 	return traceVariables(realSource, options, createTransport);
 }
@@ -1201,4 +1199,3 @@ export default function embody(code: string): Snippet {
 		? buildTokenizeFailRealSnippet(source, acornResult.error)
 		: buildParseFailRealSnippet(source, acornResult.tokens, acornResult.error);
 }
-

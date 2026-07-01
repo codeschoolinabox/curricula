@@ -1,4 +1,4 @@
-# evaluating/tracers/variables
+# evaluating/trace/variables
 
 A standalone **variables tracer**: it runs a Just-Enough-JavaScript program in
 the generic engine's sandbox and streams **variable lifecycle events** — scope
@@ -20,9 +20,9 @@ notional machine; the other vocabularies are reference, not contract:
 - [`../../../../language-levels/just-enough-javascript/notional-machine.md`](../../../../language-levels/just-enough-javascript/notional-machine.md)
   — **canon**: the authority for the binding lifecycle and scope model. Every
   tier event must be true to it.
-- [`../../trace/semantics/tracing/types.ts`](../../trace/semantics/tracing/types.ts)
+- [`../semantics/tracing/types.ts`](../semantics/tracing/types.ts)
   `BindingEvent` and
-  [`../../trace/syntax/types.ts`](../../trace/syntax/types.ts) `ScopeStep` /
+  [`../syntax/types.ts`](../syntax/types.ts) `ScopeStep` /
   `InitializationStep` / `WriteStep` — **inspiration**: existing shapes this
   tier borrows names from, not vocabularies it must conform to.
 - [`../../../../types.ts`](../../../../types.ts) `RuntimeScopeNMEvent` /
@@ -182,8 +182,8 @@ It does **not** own, and explicitly excludes:
   identifiers reach the worker unwrapped, so their `ReferenceError` arrives
   without node-path attribution. Each is a named boundary, not a silent
   mistrace.
-- **The `tracers/` module-level documentation.** A separate effort owns the
-  `tracers/` README/DOCS; this directory documents only the variables tier.
+- **The `trace/` module-level documentation.** A separate effort owns the
+  `trace/` README/DOCS; this directory documents only the variables tier.
 
 Comma/sequence and parenthesized expressions (JEJ easter eggs) are traced
 transparently: the assigns and reads inside them produce their normal events;
@@ -204,7 +204,7 @@ the grouping itself is not an event.
 ## Navigation
 
 - Enclosing module front door: [`../../README.md`](../../README.md) (the
-  `evaluating/` module; the intermediate `tracers/` documentation is a separate
+  `evaluating/` module; the intermediate `trace/` documentation is a separate
   effort's to write)
 - The engine it consumes:
   [`../../../../../lib/engine/README.md`](../../../../../lib/engine/README.md)

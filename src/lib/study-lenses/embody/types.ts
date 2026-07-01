@@ -30,7 +30,7 @@
 import type { Node as AcornNode } from 'acorn';
 
 // The variables tracer's public handle/event/result/settlement types. The tracer
-// (`./lib/evaluating/tracers/variables/`) owns them; re-exported below so
+// (`./lib/evaluating/trace/variables/`) owns them; re-exported below so
 // lens-purity-safe consumers import them from the embody surface (mirrors the
 // `Violation` re-export). `traceVariableLifecycle` returns `VariablesTraceHandle`.
 import type {
@@ -38,7 +38,7 @@ import type {
 	VariablesTraceEvent,
 	VariablesTraceResult,
 	VariablesSettlement,
-} from './lib/evaluating/tracers/variables/types.js';
+} from './lib/evaluating/trace/variables/types.js';
 // `Violation` is owned by the validating pipeline (it is what produces
 // violations). Re-exported below so `Snippet.validation.violations` and
 // consumers can import it from the embody-level types module.

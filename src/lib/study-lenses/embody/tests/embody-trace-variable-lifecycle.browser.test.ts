@@ -6,7 +6,7 @@
  * seam is needed: the public 1-arg method drives the real transport directly.
  *
  * @see ../index.ts — `forwardTraceVariableLifecycle`
- * @see ../lib/evaluating/tracers/variables/tests/trace-variables.browser.test.ts — the mirrored real-Worker test
+ * @see ../lib/evaluating/trace/variables/tests/trace-variables.browser.test.ts — the mirrored real-Worker test
  */
 
 import { describe, expect, it } from 'vitest';

@@ -6,7 +6,7 @@
  * the `seconds` budget) lives in the peer `*.browser.test.ts`.
  *
  * @see ../index.ts — `forwardTraceVariableLifecycle` + the `makeEvaluationEvents` dispatch
- * @see ../lib/evaluating/tracers/variables/tests/trace-variables.test.ts — the mirrored seam
+ * @see ../lib/evaluating/trace/variables/tests/trace-variables.test.ts — the mirrored seam
  */
 
 import { describe, expect, it } from 'vitest';
@@ -14,8 +14,8 @@ import { describe, expect, it } from 'vitest';
 import createFakeTransport from '../../lib/engine/testing/fake-transport.js';
 import type { CreateTransport } from '../../lib/engine/worker/types.js';
 import embody from '../index.js';
-import variablesThreadLogic from '../lib/evaluating/tracers/variables/variables-thread-logic.js';
-import variablesWorkerSetup from '../lib/evaluating/tracers/variables/variables-worker-setup.js';
+import variablesThreadLogic from '../lib/evaluating/trace/variables/variables-thread-logic.js';
+import variablesWorkerSetup from '../lib/evaluating/trace/variables/variables-worker-setup.js';
 import type {
 	TraceVariableLifecycleOptions,
 	VariablesTraceHandle,
@@ -96,9 +96,9 @@ describe('embody traceVariableLifecycle (node, canned scenario rejection)', () =
 		// method throws (realSource === null) and never forwards. A consumer gating on
 		// status.created would get this exactly backwards.
 		expect(snippet.status.created).toBe(true);
-		expect(() =>
-			snippet.events.evaluation.traceVariableLifecycle(),
-		).toThrow(/canned scenario/u);
+		expect(() => snippet.events.evaluation.traceVariableLifecycle()).toThrow(
+			/canned scenario/u,
+		);
 	});
 
 	it('throws on a FAIL_AT_* canned scenario', () => {

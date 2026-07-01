@@ -38,7 +38,7 @@ A [`LensModule`](../types.ts) like any other:
 ## Why this lens exists
 
 The variables tracer
-([`../../embody/lib/evaluating/tracers/variables/`](../../embody/lib/evaluating/tracers/variables/))
+([`../../embody/lib/evaluating/trace/variables/`](../../embody/lib/evaluating/trace/variables/))
 is complete and AR-5'd, and the embody surface now exposes it as
 `traceVariableLifecycle` — a raw method returning the tracer's **own** typed
 handle (not the `AnyNMEvent` adapter `trace.variables`). This lens is the
@@ -56,7 +56,7 @@ later pedagogical surface); it is the harness that makes the tracer legible.
 
 The lens's ubiquitous language. Tracer-owned vocabulary (the six event variants,
 _halt_, _engine error_, _value snapshot_) is **consumed, not redefined** — see
-[`../../embody/lib/evaluating/tracers/variables/README.md`](../../embody/lib/evaluating/tracers/variables/README.md).
+[`../../embody/lib/evaluating/trace/variables/README.md`](../../embody/lib/evaluating/trace/variables/README.md).
 
 - **Trace run** — one end-to-end consumption of a `VariablesTraceHandle`: the
   call, the streamed events, and the terminal settlement.
@@ -127,7 +127,7 @@ The lens is **pure** against the embodiment (see the lenses peer's
     `not Just-Enough-JavaScript`), matched with `.includes` — NOT `.startsWith`:
     the real messages are prefixed `traceVariableLifecycle:` (embody,
     `../../embody/index.ts`) / `traceVariables:` (the tracer gate,
-    `../../embody/lib/evaluating/tracers/variables/trace-variables.ts`), so
+    `../../embody/lib/evaluating/trace/variables/trace-variables.ts`), so
     these tokens are interior. The text is authored by the embody/tracer tier,
     not this lens — a tier-side wording change is a breaking change for this
     classifier. The other shape is a structurally-branded
@@ -222,7 +222,7 @@ Follows all conventions in [`../README.md`](../README.md) and
 - **Embodiment contract**: [`../../embody/types.ts`](../../embody/types.ts) —
   the `Snippet` the lens consumes and the `traceVariableLifecycle` method.
 - **The tracer it ultimately drives**:
-  [`../../embody/lib/evaluating/tracers/variables/`](../../embody/lib/evaluating/tracers/variables/).
+  [`../../embody/lib/evaluating/trace/variables/`](../../embody/lib/evaluating/trace/variables/).
 - **Orchestrator that mounts this lens**:
   [`../../orchestrate/`](../../orchestrate/) — see § Public API for the
   `lens="trace-debugging"` dispatch path.
