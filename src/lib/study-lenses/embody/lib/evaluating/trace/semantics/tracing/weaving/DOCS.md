@@ -152,8 +152,8 @@ TracerState is Json-serializable (Aran requirement — the initial state is
 code-generated into the woven output). Contains:
 
 - `trace[]` — accumulated events
-- `step` — internal step counter for cross-references (see Step numbering below)
-- `eventStep` — contiguous event counter for user-facing `step` field
+- `eventStep` — the one step counter: contiguous, dispatcher-owned, assigned
+  after the runtime gates (see Step numbering below)
 - `scopeStack[]` — scope nesting for depth/creation tracking
 - `iterationCounters{}` — per-loop iteration counts (keyed by source location);
   the CAP they are checked against arrives in the runtime gate bundle
@@ -175,39 +175,34 @@ assembly on the main thread, and the runtime-checked gates (range window, name
 filters, iteration cap) reach the dispatcher via the runtime gate bundle
 delivered as the engine spec's worker config (`../../types.ts` seam 2).
 
-### Step numbering: single contiguous counter, optional cross-references
+### Step numbering: assigned at emission, navigable cross-references
 
-**`eventStep`** (user-facing): Contiguous 1-indexed counter. The event emission
-function increments it, injects it as the `step` field on the event object, then
-pushes to trace: `eventStep++ → event.step = eventStep → trace.push(event)`.
-Consumers see sequential steps with no gaps: 1, 2, 3, 4...
+**One counter, owned by the dispatcher.** `eventStep` is the contiguous
+1-indexed counter; the dispatcher increments it AFTER the runtime gates pass and
+stamps it as the event's `step`. Numbering lives at the emission layer because
+more happens in the sandbox than is emitted: iteration counters tick without
+emitting, range- and filter-dropped payloads emit nothing, and
+weave-time-skipped nodes never fire advice at all. None of those consume a
+number, so the delivered stream is always sequential with no gaps: 1, 2, 3, 4…
 
-**`step`** (internal): Counter used by advice for internal scope and variable
-tracking. Incremented by `block-setup` (scope creation) and `block-declaration`
-(variable registration). Not visible on events. Used to build the internal
-`creationStep` and `declarationStep` values in the scope stack and variable
-registry.
+**Cross-reference fields are navigable.** `scopeCreationStep`,
+`declarationStep`, `creationStep`, `parentCreationStep`,
+`targetScopeCreationStep`, and `beginStep` each carry the **emitted `step` of
+the event they reference** — a consumer can jump straight to it. The run state
+records, alongside each tracked scope and binding, the step its create/declare
+event was emitted with (or that it was not emitted); advice reads those recorded
+steps when building later events.
 
-**Cross-reference fields are optional**: Fields like `scopeCreationStep`,
-`declarationStep`, and `parentCreationStep` on events use internal step values
-to reference scope/variable tracking moments. These are **omitted** when the
-referenced event is disabled by config — the consumer can't navigate to a
-disabled event anyway. When present, they reference internal tracking IDs, not
-event step numbers. Consumers should treat them as opaque grouping keys, not as
-step indices for navigation.
+**Omission rule.** A cross-reference is omitted when the referenced event was
+NOT emitted — whether its gate was disabled by config or the runtime gates
+dropped it. There is nothing to navigate to, and no substitute key is invented.
+One practical exception: template sub-events (evaluation, end) are co-gated with
+their begin event, so `beginStep` is never orphaned.
 
-Additional cross-reference fields: `beginStep` on template evaluation/end events
-(references the template begin event), `structureStep` on scope events
-(references the control flow structure's initial event). These follow the same
-rule: optional, omitted when the referenced event is disabled. Exception:
-template sub-events (evaluation, end) are meaningless without their begin event,
-so if begin is disabled, evaluation/end should also be suppressed by the config
-gating logic — `beginStep` should never be orphaned in practice.
-
-Why separate counters: internal tracking always runs (scope creation, variable
-registration) even when those event categories are disabled by config. A single
-counter would produce gaps in user-facing step numbers. The learning UI needs
-contiguous steps for step-by-step visualization.
+**No second counter.** Internal scope/variable tracking still always runs
+(binding events need scope identity even when scope events are off), but it keys
+off the run state's own structures — it does not mint a parallel counter, and no
+internal identifier ever appears on an event.
 
 ## ASTNode lifecycle
 

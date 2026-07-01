@@ -92,7 +92,10 @@ export type JejTag = {
  */
 export type VariableInfo = {
 	kind: 'let' | 'const' | 'global';
-	declarationStep: number;
+	/** The emitted `step` of this binding's declare event, or null when that
+	 *  event was not emitted (config-disabled or gate-dropped). Read by advice
+	 *  to stamp navigable `declarationStep` cross-references. */
+	declarationStep: number | null;
 	/** False when variable is in TDZ (declared but not yet initialized).
 	 *  Set to true after the first WriteEffect assigns the initial value. */
 	initialized: boolean;
@@ -103,7 +106,10 @@ export type VariableInfo = {
  * Each scope owns its variable bindings in the `variables` map.
  */
 export type ScopeInfo = {
-	creationStep: number;
+	/** The emitted `step` of this scope's create event, or null when that
+	 *  event was not emitted. Read by advice to stamp navigable
+	 *  `creationStep` / `scopeCreationStep` cross-references. */
+	creationStep: number | null;
 	depth: number;
 	kind: string;
 	structure: ControlFlowStructure | null;
@@ -137,12 +143,11 @@ export type TracerState = {
 	 * JEJ program scale, not a leak to "fix".
 	 */
 	trace: unknown[];
-	/** Internal step counter for scope/variable cross-references.
-	 *  Incremented by block-setup (scope creation) and block-declaration
-	 *  (variable registration). Not visible on events. */
-	step: number;
-	/** Contiguous event counter. Only incremented by the dispatcher.
-	 *  Appears as the `step` field on every TraceEvent. */
+	/** The one step counter: contiguous, 1-indexed, incremented by the
+	 *  dispatcher AFTER the runtime gates pass — only emitted events consume
+	 *  a number. Appears as the `step` field on every TraceEvent.
+	 *  Cross-references carry emitted steps recorded on ScopeInfo /
+	 *  VariableInfo; there is no second counter. */
 	eventStep: number;
 	scopeStack: ScopeInfo[];
 	iterationCounters: Record<string, number>;

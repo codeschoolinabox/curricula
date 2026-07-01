@@ -141,15 +141,17 @@ config layers of the mental model plus the error channel.
 
 Three worker-side emit functions — the single seam between advice and the
 engine. Each: applies the range window and name filters (from the runtime gate
-bundle), increments the contiguous event step, stamps the wire-safe base fields
-from the tag, freezes the event, records it, updates the last-emitted-tag
-register (the error event's approximate location), and calls the installed
-emission callback. `emit-resolve` additionally bumps the visit count for the
-node — BEFORE the range/filter check, so visit counts stay range- and
-filter-independent (a node whose advice was weave-time-skipped is still never
-counted — visits mean traced evaluations; README § visit counts) — once per
-logical evaluation, and assigns provenance ids when enabled. Advice authors
-decide WHICH emit to call (driven by the co-gating discriminant); the
+bundle), increments the contiguous event step AFTER those gates pass — the step
+counter lives at the emission layer because more happens in the sandbox than is
+emitted (iteration ticks, dropped payloads, skipped nodes consume no number) —
+stamps the wire-safe base fields from the tag, freezes the event, records it,
+updates the last-emitted-tag register (the error event's approximate location),
+and calls the installed emission callback. `emit-resolve` additionally bumps the
+visit count for the node — BEFORE the range/filter check, so visit counts stay
+range- and filter-independent (a node whose advice was weave-time-skipped is
+still never counted — visits mean traced evaluations; README § visit counts) —
+once per logical evaluation, and assigns provenance ids when enabled. Advice
+authors decide WHICH emit to call (driven by the co-gating discriminant); the
 dispatchers decide WHETHER the event survives the runtime gates and HOW it is
 stamped.
 

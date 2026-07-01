@@ -203,11 +203,23 @@ export type EventLayer =
  * Fields every trace event carries — all wire-safe scalars.
  *
  * @remarks
- * - `step` — 1-indexed, sequential, no gaps (the learner-facing ordering).
+ * - `step` — 1-indexed, sequential, no gaps: assigned at the EMISSION layer
+ *   (the dispatcher), AFTER the runtime gates, so only events that actually
+ *   leave the sandbox consume a number. Observations that emit nothing —
+ *   iteration-counter ticks, range- or filter-dropped events,
+ *   weave-time-skipped nodes — never do. The delivered stream is always
+ *   contiguous.
  * - `semantics` — the mental-model layer; fixed per event variant.
  * - `nodePath` — the ast-record key attributing the event to source.
  * - `type` / `loc` / `source` — stamped at emit time so consumers can
  *   highlight and display WITHOUT an ast lookup (self-contained events).
+ *
+ * Cross-reference fields (`scopeCreationStep`, `declarationStep`,
+ * `creationStep`, `parentCreationStep`, `targetScopeCreationStep`,
+ * `beginStep`) are NAVIGABLE: each carries the `step` of the event it
+ * references, so a consumer can jump to it. A cross-reference is omitted
+ * when the referenced event was not emitted — whether its gate was disabled
+ * by config or it was dropped by a runtime gate.
  */
 export type BaseEvent = {
 	readonly step: number;
@@ -250,17 +262,14 @@ export type BindingEvent = BaseEvent & {
 	readonly kind: BindingKind;
 	readonly name: string;
 	/**
-	 * On 'declare': the parent scope's creation marker.
-	 * On others: inherited from the declare event.
-	 * Omitted when scope events are disabled by config. An OPAQUE grouping
-	 * key from an internal counter — NOT an event step; never navigate by it
-	 * (weaving/DOCS.md § Step numbering).
+	 * NAVIGABLE: the `step` of the parent scope's create event. Omitted when
+	 * that event was not emitted (config-disabled or gate-dropped).
 	 */
 	readonly scopeCreationStep?: number;
 	/**
-	 * Groups this binding's lifecycle events with their declare event. Absent
-	 * on 'declare' itself and on globals. An OPAQUE grouping key from an
-	 * internal counter — NOT an event step; never navigate by it.
+	 * NAVIGABLE: the `step` of this binding's declare event — jump there to
+	 * see the declaration. Absent on 'declare' itself, on globals, and when
+	 * the declare event was not emitted.
 	 */
 	readonly declarationStep?: number;
 	/** Present on initialize and update: the value being written. */
@@ -364,7 +373,7 @@ export type AssignmentOperatorEvent = BaseEvent & {
 	readonly coercion?: readonly ValueRepresentation[];
 	/** For ??=, ||=, &&=: right side not evaluated, no assignment occurred */
 	readonly shortCircuited?: true;
-	/** Opaque grouping key (internal counter) — NOT an event step. */
+	/** NAVIGABLE: the parent scope's create-event `step`; omitted when unemitted. */
 	readonly scopeCreationStep?: number;
 };
 
@@ -412,6 +421,7 @@ export type TemplateEvaluationEvent = BaseEvent & {
 	readonly index: number;
 	/** The interpolated expression's evaluated value */
 	readonly value: ValueRepresentation;
+	/** NAVIGABLE: the template begin event's `step` (begin gates the sub-events, so it is always emitted when this one is). */
 	readonly beginStep: number;
 };
 
@@ -419,6 +429,7 @@ export type TemplateEndEvent = BaseEvent & {
 	readonly semantics: 'expression';
 	readonly category: 'template';
 	readonly event: 'end';
+	/** NAVIGABLE: the template begin event's `step`. */
 	readonly beginStep: number;
 };
 
@@ -449,12 +460,15 @@ export type ScopeEvent = BaseEvent & {
 	readonly event: ScopeEventType;
 	readonly depth: number;
 	/**
-	 * This scope's own creation marker (self-referential on create events).
-	 * An OPAQUE grouping key from an internal counter — NOT an event step;
-	 * never navigate by it (weaving/DOCS.md § Step numbering).
+	 * NAVIGABLE: the `step` of this scope's create event (on a create event,
+	 * its own step). Omitted when the create event was not emitted
+	 * (config-disabled or gate-dropped).
 	 */
-	readonly creationStep: number;
-	/** Parent scope's creation marker (absent on the top-level script scope). Opaque grouping key. */
+	readonly creationStep?: number;
+	/**
+	 * NAVIGABLE: the parent scope's create-event `step`. Absent on the
+	 * top-level script scope and when that event was not emitted.
+	 */
 	readonly parentCreationStep?: number;
 	/** The control-flow structure this scope belongs to, when it has one. */
 	readonly structure?: ControlFlowStructure;
@@ -474,7 +488,7 @@ export type ScopeEvent = BaseEvent & {
 
 export type ConditionalEvent = BaseEvent & {
 	readonly category: 'conditional';
-	/** Opaque grouping key to the parent scope (internal counter) — NOT an event step. Omitted when scope events are disabled. */
+	/** NAVIGABLE: the parent scope's create-event `step`; omitted when unemitted. */
 	readonly scopeCreationStep?: number;
 } & (
 		| {
@@ -506,7 +520,7 @@ export type LoopEvent = BaseEvent & {
 	readonly semantics: 'statement';
 	readonly category: 'loop';
 	readonly kind: LoopKind;
-	/** Opaque grouping key to the parent scope (internal counter) — NOT an event step. Omitted when scope events are disabled. */
+	/** NAVIGABLE: the parent scope's create-event `step`; omitted when unemitted. */
 	readonly scopeCreationStep?: number;
 } & (
 		| {
@@ -556,7 +570,7 @@ export type JumpEvent = BaseEvent & {
 	readonly kind: 'break' | 'continue';
 	/** The loop kind this jump targets. */
 	readonly target: LoopKind;
-	/** Opaque grouping key to the targeted loop scope (internal counter) — NOT an event step. Omitted when scopes disabled. */
+	/** NAVIGABLE: the targeted loop scope's create-event `step`; omitted when unemitted. */
 	readonly targetScopeCreationStep?: number;
 	/** Present only on labeled break/continue. */
 	readonly label?: string;
