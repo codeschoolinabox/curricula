@@ -112,7 +112,11 @@ the cross-variable sameness form V10c keys on the use-type alone
 const-update twin V6b keys on a curated element-type group
 (`element-type:const-update`, the fifth axis — a single-value inline key, not a
 binding identity, since V6b is an execution-dimension runtime-error fact, not a
-keyword-recognition form like V1/V2); block and loop forms key on their structural
+keyword-recognition form like V1/V2); the two-chains form V4 keys on
+`chain:<role>:<name>` (role ∈ `scope-chain` | `prototype-chain` — the sixth
+namespaced axis, binding-agnostic: which chain a name is found through is a
+syntactic-position fact, so every occurrence of a name in a chain role shares a
+group); block and loop forms key on their structural
 anchor. Quizzing decides what a group is
 _keyed_ on; the
 lens decides how a completed group is _presented_. The group key is

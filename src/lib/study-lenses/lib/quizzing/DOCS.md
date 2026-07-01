@@ -42,14 +42,13 @@ program.
 2. **Establish the generation context** (pure). Assemble the single read-only
    bundle every generator receives — the chokepoint that owns "what a generator
    sees": the pre-computed `classified` token stream, the Slice-A reads
-   (`source.code`, `raw.ast`) taken through the accessor seam, and the per-node
+   (`source.code`, `raw.ast`) taken through the accessor seam, and the two
    anchor streams. This phase may dereference `raw.ast` because Phase 1 already
-   established it is present. A **single** AST descent produces the per-node
-   anchor streams the node-anchored generators consume — descend once and
-   collect, never re-walk (the same traversal discipline classifying applies,
-   though here the descent yields per-node anchor streams rather than role
-   claims). Later forms' binding and scope views join this bundle through the
-   seam; the V1 path needs none of them.
+   established it is present. A **single** AST descent produces the two anchor
+   streams the generators consume — descend once and collect, never re-walk (the
+   same traversal discipline classifying applies, though here the descent yields
+   anchor streams rather than role claims). Later forms' binding and scope views
+   join this bundle through the seam; the V1 path needs none of them.
 
 3. **Run the anchor-typed generators** (pure, the walk). A registry of
    generators, each declaring the **anchor type** it binds to. The run phase
@@ -168,9 +167,10 @@ the Snippet (the one-sided seam).
   plus the pre-computed `classified`; it never calls `classifyTokens`. The whole
   Snippet is taken so the accessor seam can grow into binding / scope reads; the
   V1 path reads only Slice-A surfaces.
-- **One AST descent.** The per-node anchor streams are collected in a single
-  traversal during context establishment; generators consume those streams
-  rather than each re-walking the AST.
+- **One AST descent.** The two anchor streams (`identifierAnchors` for the
+  per-node generators, `propertyAccessAnchors` for the program-anchored V4) are
+  collected in a single traversal during context establishment; generators
+  consume those streams rather than each re-walking the AST.
 - **Generation is selective, grading is total.** Generators emit only where
   their form applies (quizzing is not total over tokens, unlike classifying).
   `grade`, by contrast, is total over the answer-mode space and never throws.
@@ -343,21 +343,28 @@ the Snippet (the one-sided seam).
   forest does not track — the same boundary V8 resolves behind, so parameters
   and the like do not group under V7/V10b). The cross-variable sameness form
   V10c keys on the use-type alone (`usage-kind:<usageKind>`), a fourth,
-  binding-agnostic axis. On the classification axis `identifier` / `keyword`
-  (which classifying makes role-less) stay on the bare two-segment form, while
-  operator / literal / delimiter gain the `:<role>` refinement; the `category:`,
-  `binding:`, `usage:` (binding × use-type), and `usage-kind:` (cross-variable)
-  serializers live in `keying/`, while two `groupKey`s stay inlined in their
-  generators rather than serialized in `keying/`: V7's `usage:occ:<start>-<end>`
-  group-of-one fallback (for an occurrence with no resolvable binding) and V6b's
-  fixed `element-type:const-update` (the const-update twin's single-value
-  element-type group — deliberately off the `category:keyword` axis, which holds
-  the text-surface keyword-recognition forms V1/V2, because V6b is an
-  execution-dimension runtime-error fact). The category-ID form's propagation
-  grain is thus intentionally finer than its category answer key — a consumer
-  wanting category-level grouping can prefix-match on `category:<category>`. The
-  key is deterministic from `(snippet, classified, filter)` — never a function
-  of a lens display choice quizzing never receives.
+  binding-agnostic axis. The two-chains form V4 keys on `chain:<role>:<name>`
+  (role ∈ `scope-chain` | `prototype-chain`), the sixth namespaced axis and a
+  binding-agnostic one parallel to `usage-kind:`: which chain a name is found
+  through is a syntactic-position fact independent of which binding wins under
+  shadowing, so every occurrence of a name in a chain role shares one group (all
+  `.length` accesses share `chain:prototype-chain:length`). On the
+  classification axis `identifier` / `keyword` (which classifying makes
+  role-less) stay on the bare two-segment form, while operator / literal /
+  delimiter gain the `:<role>` refinement; the `category:`, `binding:`, `usage:`
+  (binding × use-type), `usage-kind:` (cross-variable), and `chain:`
+  (two-chains) serializers live in `keying/`, while two `groupKey`s stay inlined
+  in their generators rather than serialized in `keying/`: V7's
+  `usage:occ:<start>-<end>` group-of-one fallback (for an occurrence with no
+  resolvable binding) and V6b's fixed `element-type:const-update` (the
+  const-update twin's single-value element-type group — deliberately off the
+  `category:keyword` axis, which holds the text-surface keyword-recognition
+  forms V1/V2, because V6b is an execution-dimension runtime-error fact). The
+  category-ID form's propagation grain is thus intentionally finer than its
+  category answer key — a consumer wanting category-level grouping can
+  prefix-match on `category:<category>`. The key is deterministic from
+  `(snippet, classified, filter)` — never a function of a lens display choice
+  quizzing never receives.
 - **V1 `id` scheme is `form@start-end`** (e.g. `V1@12-13`), derivable from the
   form and the anchor alone; binding-flavored ids (`form/binding:x@decl`) are a
   later-form scheme that lands with occurrence→binding resolution.
