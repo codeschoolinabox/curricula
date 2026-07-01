@@ -4,8 +4,10 @@
  * the SHOWN stations out left → right (source · realm · parse · creation
  * · evaluation), each station a column with its own lens dropdown, and
  * doubles as a lifecycle-status display — the layout itself teaches the
- * lifecycle, and the per-station status shows how far the machine got
- * and where it tripped, before any lens is picked.
+ * lifecycle, and the per-station status (how far the machine got and where
+ * it tripped) renders as a compact cue on each column's
+ * `data-orchestrator-station-status` attribute (no status-text label),
+ * before any lens is picked.
  *
  * **Presentation only.** The panel renders what it is handed: the three
  * pure derivations (roster · availability · status) run in the
@@ -40,17 +42,18 @@ type PhasesPanelProperties = Readonly<{
 	 * Per-station lens rosters (all five keys — the static roster
 	 * derivation's output). Each shown station's dropdown enumerates
 	 * `roster[station]` in registration order; a station with an empty
-	 * roster renders a disabled, sentinel-only dropdown (disabling is
-	 * roster-driven ONLY — never status-driven; lens availability is
-	 * never gated).
+	 * roster renders a disabled, sentinel-only dropdown. (Disabling is
+	 * roster-empty OR `barred`-status — see `statusMap`; a `barred` station
+	 * is also disabled, error-downstream.)
 	 */
 	readonly roster: StationRoster;
 
 	/**
 	 * Per-station statuses (all five keys — the status derivation's
-	 * output). Rendered as `data-orchestrator-station-status` plus a
-	 * visible plain-text label; display only — a greyed (`barred` /
-	 * `pending`) station's dropdown stays interactive when staffed.
+	 * output). Rendered ONLY as the `data-orchestrator-station-status`
+	 * attribute (a styleable compact cue — no plain-text label). Gates
+	 * interactivity in one case: a `barred` station's dropdown is disabled
+	 * (error-downstream); every other status leaves it roster-driven.
 	 */
 	readonly statusMap: StationStatusMap;
 
@@ -112,9 +115,6 @@ function PhasesPanel({
 					data-orchestrator-station-status={statusMap[station]}
 				>
 					<span>{station}</span>
-					<span data-orchestrator-station-status-label>
-						{statusMap[station]}
-					</span>
 					<select
 						aria-label={`${station} station lens picker`}
 						value={
@@ -123,10 +123,12 @@ function PhasesPanel({
 								: ''
 						}
 						onChange={handleSelectChange}
-						disabled={roster[station].length === 0}
+						disabled={
+							roster[station].length === 0 || statusMap[station] === 'barred'
+						}
 					>
 						<option value="" disabled hidden>
-							— select a lens —
+							lenses
 						</option>
 						{roster[station].map((name) => (
 							<option key={name} value={name}>

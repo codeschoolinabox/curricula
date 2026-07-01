@@ -228,7 +228,7 @@ describe('PhasesPanel', () => {
 		});
 	});
 
-	describe('Boundaries — roster-driven disabling, status display, never-gated interactivity', () => {
+	describe('Boundaries — roster-or-barred disabling, status display, barred-gated interactivity', () => {
 		it('disables the select of an empty-roster station', () => {
 			const { container } = render(
 				<PhasesPanel
@@ -352,7 +352,7 @@ describe('PhasesPanel', () => {
 			).toBe('errored');
 		});
 
-		it('keeps a barred station with a non-empty roster interactive (lens availability is never gated)', () => {
+		it('disables a barred station even with a non-empty roster (barred = error-downstream, non-interactive)', () => {
 			const { container } = render(
 				<PhasesPanel
 					stations={['creation']}
@@ -379,10 +379,100 @@ describe('PhasesPanel', () => {
 			const select = container.querySelector<HTMLSelectElement>(
 				'[data-orchestrator-station="creation"] select',
 			);
+			expect(select?.disabled).toBe(true);
+		});
+
+		it('keeps a pending station with a non-empty roster interactive (pending is not gated)', () => {
+			const { container } = render(
+				<PhasesPanel
+					stations={['creation']}
+					roster={{
+						source: [],
+						realm: [],
+						parse: [],
+						creation: ['future-prediction-lens'],
+						evaluation: [],
+					}}
+					statusMap={{
+						source: 'constant',
+						realm: 'constant',
+						parse: 'ok',
+						creation: 'pending',
+						evaluation: 'pending',
+					}}
+					activeLens={null}
+					onLensSelect={() => {}}
+					editButtonVisible={false}
+					onEditReturn={() => {}}
+				/>,
+			);
+			const select = container.querySelector<HTMLSelectElement>(
+				'[data-orchestrator-station="creation"] select',
+			);
 			expect(select?.disabled).toBe(false);
 		});
 
-		it('renders a status label element inside the column', () => {
+		it('keeps an ok staffed station interactive (ok never gates)', () => {
+			const { container } = render(
+				<PhasesPanel
+					stations={['parse']}
+					roster={{
+						source: [],
+						realm: [],
+						parse: ['probe-lens'],
+						creation: [],
+						evaluation: [],
+					}}
+					statusMap={{
+						source: 'constant',
+						realm: 'constant',
+						parse: 'ok',
+						creation: 'pending',
+						evaluation: 'pending',
+					}}
+					activeLens={null}
+					onLensSelect={() => {}}
+					editButtonVisible={false}
+					onEditReturn={() => {}}
+				/>,
+			);
+			const select = container.querySelector<HTMLSelectElement>(
+				'[data-orchestrator-station="parse"] select',
+			);
+			expect(select?.disabled).toBe(false);
+		});
+
+		it('keeps an errored staffed station interactive (errored never gates — only barred does)', () => {
+			const { container } = render(
+				<PhasesPanel
+					stations={['parse']}
+					roster={{
+						source: [],
+						realm: [],
+						parse: ['probe-lens'],
+						creation: [],
+						evaluation: [],
+					}}
+					statusMap={{
+						source: 'constant',
+						realm: 'constant',
+						parse: 'errored',
+						creation: 'barred',
+						evaluation: 'barred',
+					}}
+					activeLens={null}
+					onLensSelect={() => {}}
+					editButtonVisible={false}
+					onEditReturn={() => {}}
+				/>,
+			);
+			const select = container.querySelector<HTMLSelectElement>(
+				'[data-orchestrator-station="parse"] select',
+			);
+			expect(select?.disabled).toBe(false);
+		});
+
+		it('renders no visible status-text label (status is the column attribute only)', () => {
 			const { container } = render(
 				<PhasesPanel
 					stations={['parse']}
@@ -410,7 +500,15 @@ describe('PhasesPanel', () => {
 				container.querySelector(
 					'[data-orchestrator-station="parse"] [data-orchestrator-station-status-label]',
 				),
-			).not.toBeNull();
+			).toBeNull();
+			// label gone AND the status attribute survives — both sides of the
+			// change pinned in one render (per DOCS Col node: status is the
+			// attribute, not a text child).
+			expect(
+				container.querySelector<HTMLElement>(
+					'[data-orchestrator-station="parse"]',
+				)?.dataset.orchestratorStationStatus,
+			).toBe('ok');
 		});
 	});
 
