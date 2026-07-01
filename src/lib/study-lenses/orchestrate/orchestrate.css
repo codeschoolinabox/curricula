@@ -1,0 +1,155 @@
+/*
+ * orchestrate.css — the <StudyLenses> visible layout: the chrome-above-surface
+ * band, the left → right phases-panel station row, and the content row (active
+ * surface | output-panels column). Side-effect imported by index.tsx (the
+ * lens-CSS precedent: lenses/blanks/blanks.css imported for side effect).
+ *
+ * EVERY selector descends from [data-orchestrator-root] so the stylesheet cannot
+ * leak into a consumer page or another lens (the same scoping the blanks lens
+ * uses under [data-lens='blanks']). That invariant is pinned by
+ * tests/orchestrate-css.test.ts (a static leak-guard) — it is the one part of
+ * this file that IS testable. jsdom computes no layout, so the actual geometry
+ * (flex axes, fill, greying) is verified ONLY at the Sandbox checkpoint
+ * (study-lenses-smoke under a COOP/COEP dev server); the colour / spacing values
+ * are conservative starting points meant to be tuned there.
+ */
+
+/* The root stacks vertically: phases panel → omnipresent chrome → content row,
+ * so the chrome sits ABOVE the active surface (the redesign's core move). */
+[data-orchestrator-root] {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+/*
+ * The phases panel lays the NM lifecycle out as stations LEFT → RIGHT. The flex
+ * row is scoped to the station children (not the <nav> as a whole): the
+ * edit-return button is also a direct child, and is forced onto its own line
+ * (flex-basis: 100%) so it never joins the station row.
+ */
+[data-orchestrator-root] [data-orchestrator-phases-panel] {
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0.25rem;
+	align-items: stretch;
+}
+
+[data-orchestrator-root]
+	[data-orchestrator-phases-panel]
+	> [data-orchestrator-station] {
+	display: flex;
+	flex: 1 1 0;
+	flex-direction: column;
+	gap: 0.125rem;
+	padding: 0.25rem;
+	border: 1px solid transparent;
+	border-radius: 0.25rem;
+}
+
+[data-orchestrator-root]
+	[data-orchestrator-phases-panel]
+	> [data-orchestrator-edit-button] {
+	flex-basis: 100%; /* break onto its own line, below the station row */
+}
+
+/*
+ * Compact per-station status cue — colour / border keyed off the status
+ * attribute (no status-text label; the attribute IS the cue). `ok` reads as
+ * reached; `errored` as the tripped stage; `barred` greys the station out
+ * (unreachable — an earlier machine phase failed), per the error-downstream
+ * model in ../README.md § Station-status model. `constant` and `pending` get NO
+ * cue — `pending` deliberately so (embody is synchronous; there is no loading
+ * window — it must never read as "reached" or "error").
+ */
+[data-orchestrator-root]
+	[data-orchestrator-phases-panel]
+	> [data-orchestrator-station][data-orchestrator-station-status='ok'] {
+	border-color: #2e7d32;
+}
+
+[data-orchestrator-root]
+	[data-orchestrator-phases-panel]
+	> [data-orchestrator-station][data-orchestrator-station-status='errored'] {
+	border-color: #c62828;
+}
+
+[data-orchestrator-root]
+	[data-orchestrator-phases-panel]
+	> [data-orchestrator-station][data-orchestrator-station-status='barred'] {
+	opacity: 0.4;
+}
+
+/* The omnipresent chrome band — the dock + quiz + guide tools, above content. */
+[data-orchestrator-root] [data-orchestrator-omnipresent-region] {
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+/*
+ * The content row: the active surface (editor or lens) on the left, the output
+ * panels in a column on the right. The active surface (any direct child that is
+ * NOT the output panels) grows to fill — so when the panels are absent (idle, or
+ * both channels dismissed) it occupies the full row. That is the styling
+ * guarantee the contract names; it does not depend on DOM order.
+ */
+[data-orchestrator-root] [data-orchestrator-content-row] {
+	display: flex;
+	flex-flow: row nowrap;
+	gap: 0.5rem;
+	align-items: flex-start;
+}
+
+[data-orchestrator-root]
+	[data-orchestrator-content-row]
+	> :not([data-orchestrator-output-panels]) {
+	flex: 1 1 auto;
+	min-width: 0; /* let the active surface shrink below its content width */
+}
+
+[data-orchestrator-root]
+	[data-orchestrator-content-row]
+	> [data-orchestrator-output-panels] {
+	display: flex;
+	flex: 0 1 24rem;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+/* Each output panel stacks its dismiss control above its log; the User
+ * Interface panel sits above the Developer Console panel (DOM order). */
+[data-orchestrator-root] [data-orchestrator-output-panel] {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	border: 1px solid #ddd;
+	border-radius: 0.25rem;
+	padding: 0.25rem;
+}
+
+[data-orchestrator-root] [data-orchestrator-output-panel-dismiss] {
+	align-self: flex-end;
+	border: none;
+	background: none;
+	cursor: pointer;
+	line-height: 1;
+}
+
+[data-orchestrator-root] [data-orchestrator-output-channel] {
+	overflow: auto;
+	white-space: pre-wrap;
+}
+
+/* The interactive dialog renders after both panels, inside the panels section. */
+[data-orchestrator-root]
+	[data-orchestrator-output-panels]
+	[data-orchestrator-pending-dialog] {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	border: 1px solid #999;
+	border-radius: 0.25rem;
+	padding: 0.5rem;
+}
