@@ -25,6 +25,13 @@ describe('buildContext', () => {
 				buildContext(snippet, classifyOf(snippet)).identifierAnchors,
 			).toEqual([]);
 		});
+
+		it('carries an empty property-access stream for a program with no member access', () => {
+			const snippet = embody('let x = 1; x;');
+			expect(
+				buildContext(snippet, classifyOf(snippet)).propertyAccessAnchors,
+			).toEqual([]);
+		});
 	});
 
 	describe('One', () => {
@@ -52,6 +59,13 @@ describe('buildContext', () => {
 				),
 			).toBe(true);
 		});
+
+		it('collects the property-access anchors from a single AST descent', () => {
+			const snippet = embody('o.x;');
+			expect(
+				buildContext(snippet, classifyOf(snippet)).propertyAccessAnchors,
+			).toEqual([{ range: [2, 3], name: 'x' }]);
+		});
 	});
 
 	describe('Interfaces', () => {
@@ -76,6 +90,24 @@ describe('buildContext', () => {
 			expect(
 				Object.isFrozen(
 					buildContext(snippet, classifyOf(snippet)).identifierAnchors[0],
+				),
+			).toBe(true);
+		});
+
+		it('deeply freezes the collected property-access stream', () => {
+			const snippet = embody('o.x;');
+			expect(
+				Object.isFrozen(
+					buildContext(snippet, classifyOf(snippet)).propertyAccessAnchors,
+				),
+			).toBe(true);
+		});
+
+		it('freezes each collected property-access anchor object', () => {
+			const snippet = embody('o.x;');
+			expect(
+				Object.isFrozen(
+					buildContext(snippet, classifyOf(snippet)).propertyAccessAnchors[0],
 				),
 			).toBe(true);
 		});
