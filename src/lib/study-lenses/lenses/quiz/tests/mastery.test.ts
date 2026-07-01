@@ -11,6 +11,7 @@
 import { describe, expect, it } from 'vitest';
 
 import embody from '../../../embody/index.js';
+import type { McqQuizItem } from '../../../lib/quizzing/types.js';
 import quizCore from '../core.js';
 import buildQuiz from '../lib/build-quiz.js';
 import gradeOption from '../lib/grade-option.js';
@@ -167,6 +168,74 @@ describe('masteryFold — fold a graded verdict into MasteryState', () => {
 			[identifierItem.groupKey]: { progress: 0.25, wrong: false },
 			[keywordItem.groupKey]: { progress: 0.25, wrong: false },
 		});
+	});
+
+	it('folds three co-anchored declaration items into three distinct groupKeys (first multi-group fold)', () => {
+		// decl `x`[4,5) co-anchors V1 (category:identifier) + V6 (binding:4-5) + V7
+		// (usage:4-5:declared) — the first anchor carrying THREE distinct groupKeys.
+		// Answering all three accrues each independently: the fold keys on groupKey,
+		// so co-anchoring at one token neither collapses nor cross-credits the groups.
+		// buildQuiz mode-filters to mcq upstream, so the decl bundle is all McqQuizItem.
+		const declItems = items.filter(
+			(item) => item.anchorRange[0] === 4 && item.anchorRange[1] === 5,
+		) as McqQuizItem[];
+		expect(declItems).toHaveLength(3);
+		const distinctKeys = [...new Set(declItems.map((item) => item.groupKey))];
+		expect(distinctKeys).toHaveLength(3);
+		let state: MasteryState = {};
+		for (const item of declItems) {
+			state = quizCore.masteryFold(
+				state,
+				item,
+				gradeOption(item, item.answerOptionIds[0]),
+			);
+		}
+		expect(new Set(Object.keys(state))).toEqual(new Set(distinctKeys));
+		for (const key of distinctKeys) {
+			expect(state[key]).toEqual({ progress: 0.25, wrong: false });
+		}
+	});
+
+	it('a wrong answer on one co-anchored group leaves its co-anchored peers untouched (no contamination)', () => {
+		// The critical isolation property of the multi-group anchor: a wrong answer on
+		// binding:4-5 (V6) marks ONLY that group wrong. Because the fold keys on
+		// groupKey, the peers co-anchored at the same token — category:identifier (V1)
+		// and usage:4-5:declared (V7) — keep their prior mastery, uncontaminated.
+		// buildQuiz mode-filters to mcq upstream, so the decl bundle is all McqQuizItem.
+		const declItems = items.filter(
+			(item) => item.anchorRange[0] === 4 && item.anchorRange[1] === 5,
+		) as McqQuizItem[];
+		const v6 = declItems.find((item) => item.groupKey === 'binding:4-5');
+		const peers = declItems.filter((item) => item.groupKey !== 'binding:4-5');
+		if (v6 === undefined || peers.length !== 2) {
+			throw new Error('fixture: expected V6 + two co-anchored peers');
+		}
+		// Master the two peers first, then answer V6 wrong.
+		let state: MasteryState = {};
+		for (const peer of peers) {
+			state = quizCore.masteryFold(
+				state,
+				peer,
+				gradeOption(peer, peer.answerOptionIds[0]),
+			);
+		}
+		const wrongOption = v6.options.find(
+			(option) => !v6.answerOptionIds.includes(option.id),
+		);
+		if (wrongOption === undefined) throw new Error('V6 has no wrong option');
+		const afterWrong = quizCore.masteryFold(
+			state,
+			v6,
+			gradeOption(v6, wrongOption.id),
+		);
+		expect(afterWrong['binding:4-5']).toEqual({ progress: 0, wrong: true });
+		for (const peer of peers) {
+			expect(afterWrong[peer.groupKey]).toEqual({
+				progress: 0.25,
+				wrong: false,
+			});
+		}
+		expect(Object.keys(afterWrong)).toHaveLength(3);
 	});
 
 	// ── E — exceptions / immutability ───────────────────────────

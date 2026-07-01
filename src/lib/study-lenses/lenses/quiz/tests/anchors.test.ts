@@ -141,6 +141,16 @@ describe('itemsAt — item resolution', () => {
 		const found = anchors.itemsAt(items, [declaration.start, declaration.end]);
 		expect(found.length).toBe(3); // V1 + V6 + V7
 	});
+
+	it('resolves the keyword bundle at `let` — V1 co-anchors V2, the keyword-vocab form (Interface)', () => {
+		// V2 (keyword-vocab) anchors the `let` KEYWORD [0,3), a DISTINCT token from
+		// the identifier forms (V6/V7). So the keyword's bundle is V1 + V2, both mcq
+		// — the mode filter admits V2 and itemsAt resolves it co-anchored with V1.
+		const [keyword] = tokensWith('let'); // `let` at [0,3)
+		const found = anchors.itemsAt(items, [keyword.start, keyword.end]);
+		const forms = new Set(found.map((item) => item.form));
+		expect(forms).toEqual(new Set(['V1', 'V2']));
+	});
 });
 
 describe('defaultActiveTab — the mode-aware safe default tab', () => {

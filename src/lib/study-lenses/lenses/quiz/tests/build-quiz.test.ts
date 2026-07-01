@@ -101,5 +101,15 @@ describe('buildQuiz — quiz model builder', () => {
 			);
 			expect(allAnchored).toBe(true);
 		});
+
+		it('admits V6b on a const declaration — the mode filter is not a `let`-only path', () => {
+			// V6b (const-update) fires ONLY on `const` bindings, so the `let x = 1; x;`
+			// fixture above never exercises it. On a const fixture it must reach the
+			// panel (mcq mode) under its own `element-type:const-update` groupKey — a
+			// coverage gap the let-only fixture cannot catch.
+			const items = buildQuiz(embody('const x = 1; x;'))?.items ?? [];
+			const groupKeys = items.map((item) => item.groupKey);
+			expect(groupKeys).toContain('element-type:const-update');
+		});
 	});
 });

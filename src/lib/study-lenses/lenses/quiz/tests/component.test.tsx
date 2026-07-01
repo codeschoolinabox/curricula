@@ -23,7 +23,9 @@ import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import embody from '../../../embody/index.js';
+import type { McqQuizItem } from '../../../lib/quizzing/types.js';
 import quizLens from '../index.js';
+import buildQuiz from '../lib/build-quiz.js';
 
 afterEach(cleanup);
 
@@ -210,10 +212,10 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 		// Mount on the real-composition fixture, wait for the editor, then drive a
 		// pick at `offset` via a posAtCoords stub. Returns the container + the spy
 		// (re-point it with `spy.mockReturnValue(n)` + another dispatch to re-pick).
-		async function mountAndPick(offset: number) {
+		async function mountAndPick(offset: number, code = 'let x = 1; x;') {
 			const { container } = render(
 				<quizLens.Component
-					embodiment={embody('let x = 1; x;')}
+					embodiment={embody(code)}
 					config={quizLens.config()}
 				/>,
 			);
@@ -342,6 +344,101 @@ describe('<quiz Component> — Slice A inc 1: read-only un-colorized editor', ()
 				expect(container.querySelector('[data-quiz-tablist]')).toBeNull();
 			});
 			expect(container.querySelector('[data-quiz-verdict]')).toBeNull();
+		});
+
+		// Inc 6a-ii: the mcq-mode filter admits V2 (keyword-vocab, anchored on the
+		// `let`/`const` KEYWORD), V6 (kind-semantics, on the declaration identifier),
+		// and V6b (const-update) — not just V1/V7. These lock that each renders as a
+		// tab and grades through the SAME renderMcqTab + answer path (no per-form
+		// code). The tab is found by its item id (data-quiz-tab === item.id), robust
+		// to registry order; the option id is read from the live item, robust to copy
+		// changes. V6b needs a `const` fixture (it never fires on `let`).
+		describe('mcq form coverage — V2 keyword-vocab / V6 kind-semantics / V6b const-update', () => {
+			// Pick the token at `offset`, switch to the tab for the `form` item, then
+			// click its correct (or, when `wrong`, an incorrect) option. Returns the
+			// mounted container so the caller asserts the verdict.
+			async function answerForm(
+				code: string,
+				offset: number,
+				form: string,
+				wrong = false,
+			) {
+				const item = (buildQuiz(embody(code))?.items ?? []).find(
+					(candidate) => candidate.form === form,
+				) as McqQuizItem | undefined;
+				if (item === undefined) throw new Error(`no ${form} fixture item`);
+				const correctId = item.answerOptionIds[0];
+				const wrongOption = item.options.find(
+					(option) => !item.answerOptionIds.includes(option.id),
+				);
+				if (wrong && wrongOption === undefined) {
+					throw new Error(`${form}: no wrong option to select`);
+				}
+				const optionId = wrong && wrongOption ? wrongOption.id : correctId;
+				const { container } = await mountAndPick(offset, code);
+				const tab = container.querySelector(`[data-quiz-tab="${item.id}"]`);
+				expect(tab).not.toBeNull();
+				fireEvent.click(tab as HTMLElement);
+				await waitFor(() => {
+					expect(tab?.getAttribute('aria-selected')).toBe('true');
+				});
+				fireEvent.click(
+					container.querySelector(
+						`[data-quiz-option="${optionId}"]`,
+					) as HTMLElement,
+				);
+				return container;
+			}
+
+			it('V2 (on the `let` keyword, not the identifier) renders as a tab and grades correct', async () => {
+				const container = await answerForm('let x = 1; x;', 0, 'V2');
+				await waitFor(() => {
+					expect(
+						container.querySelector<HTMLElement>('[data-quiz-verdict]')?.dataset
+							.quizVerdict,
+					).toBe('correct');
+				});
+			});
+
+			it('V6 (kind-semantics, on the declaration identifier) renders as a tab and grades correct', async () => {
+				const container = await answerForm('let x = 1; x;', 4, 'V6');
+				await waitFor(() => {
+					expect(
+						container.querySelector<HTMLElement>('[data-quiz-verdict]')?.dataset
+							.quizVerdict,
+					).toBe('correct');
+				});
+			});
+
+			it('V6 grades a wrong option as incorrect — the verdict tracks the answer, not a stub', async () => {
+				const container = await answerForm('let x = 1; x;', 4, 'V6', true);
+				await waitFor(() => {
+					expect(
+						container.querySelector<HTMLElement>('[data-quiz-verdict]')?.dataset
+							.quizVerdict,
+					).toBe('incorrect');
+				});
+			});
+
+			it('V6b (const-update) grades correct — needs a `const` fixture, isolated last', async () => {
+				const container = await answerForm('const x = 1; x;', 6, 'V6b');
+				await waitFor(() => {
+					expect(
+						container.querySelector<HTMLElement>('[data-quiz-verdict]')?.dataset
+							.quizVerdict,
+					).toBe('correct');
+				});
+			});
+
+			it('V6b grades a wrong option as incorrect — the const-only form is graded, not stubbed', async () => {
+				const container = await answerForm('const x = 1; x;', 6, 'V6b', true);
+				await waitFor(() => {
+					expect(
+						container.querySelector<HTMLElement>('[data-quiz-verdict]')?.dataset
+							.quizVerdict,
+					).toBe('incorrect');
+				});
+			});
 		});
 	});
 });

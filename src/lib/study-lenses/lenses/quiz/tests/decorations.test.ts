@@ -155,6 +155,22 @@ describe('masteryDecorations — project mastery onto the two channels', () => {
 		expect(atDeclaration).toEqual([{ range: [4, 5], bucket: 2 }]);
 	});
 
+	it('a token in THREE co-anchored groups still reads as ONE entry at the highest bucket', () => {
+		// decl `x`[4,5) co-anchors V1 (category:identifier), V6 (binding:4-5), AND V7
+		// (usage:4-5:declared) — three DISTINCT groups on one token (the first
+		// multi-group anchor, inc 6a-ii). Progressed to three different levels, the
+		// token still reads as ONE underline at the densest bucket, not three stacked.
+		const decos = masteryDecorations(items, {
+			'category:identifier': { progress: 0.25, wrong: false }, // bucket 1
+			'binding:4-5': { progress: 0.5, wrong: false }, // bucket 2
+			'usage:4-5:declared': { progress: 0.75, wrong: false }, // bucket 3
+		});
+		const atDeclaration = decos.progress.filter(
+			(entry) => entry.range[0] === 4 && entry.range[1] === 5,
+		);
+		expect(atDeclaration).toEqual([{ range: [4, 5], bucket: 3 }]);
+	});
+
 	it('the wrong channel also dedupes co-anchored same-group items to one per token', () => {
 		// `let`[0,3) carries V1 AND V2, both category:keyword; a wrong flag on that
 		// group marks the token once, not once per co-anchored item.
