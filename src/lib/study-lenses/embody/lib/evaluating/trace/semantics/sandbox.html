@@ -484,7 +484,6 @@
 					<select id="snippet-select" title="Choose a test snippet">
 						<option value="">-- pick a snippet --</option>
 					</select>
-					<button type="button" id="format-btn">Format</button>
 					<button type="button" id="batch-btn" class="primary">Trace (batch)</button>
 					<button type="button" id="step-btn" class="primary">Trace (step)</button>
 					<button type="button" id="next-btn" class="primary" disabled>Next</button>
@@ -504,29 +503,38 @@
 		</div>
 
 		<script type="module">
-			import trace from '../../api/trace.ts';
-			import { format } from '../../api/format.ts';
+			// Interim wiring: drives the legacy pipeline (createTracingGenerator +
+			// its own worker/SAB transport) directly. Swaps to the engine-consumer
+			// entry (traceSemantics) when that increment lands. The config sidebar
+			// speaks the flat dialect the current pointcuts/gating consume.
+			import createTracingGenerator from './tracing/index.ts';
 
-			// WHY relative: sandbox.html is at evaluating/trace/sandbox.html
-			// test-snippets are at evaluating/trace/record/tracing/tests/test-snippets/
-			const SNIPPET_DIR = './record/tracing/tests/test-snippets';
-			const SNIPPETS = [
-				'variables.js',
-				'conditionals.js',
-				'while-loop.js',
-				'do-while.js',
-				'for-loop.js',
-				'for-of.js',
-				'operators.js',
-				'io.js',
-				'templates.js',
-				'break-continue.js',
-			];
+			// Inline snippets — the old test-snippets directory no longer exists.
+			const SNIPPETS = {
+				variables: 'let x = 5;\nlet y = x + 1;\nlet z;\nz = y * 2;\n',
+				conditionals:
+					'let x = 7;\nif (x > 5) {\n\tx = x - 1;\n} else {\n\tx = x + 1;\n}\nlet sign = x > 0 ? 1 : -1;\n',
+				'while-loop':
+					'let n = 3;\nlet total = 0;\nwhile (n > 0) {\n\ttotal = total + n;\n\tn = n - 1;\n}\n',
+				'do-while': 'let n = 0;\ndo {\n\tn = n + 1;\n} while (n < 3);\n',
+				'for-loop':
+					'let total = 0;\nfor (let i = 0; i < 3; i = i + 1) {\n\ttotal = total + i;\n}\n',
+				'for-of':
+					"let word = '';\nfor (const letter of 'abc') {\n\tword = word + letter;\n}\n",
+				operators:
+					'let a = 2 + 3;\nlet b = a * 4;\nlet c = b > 10 && a < 10;\nlet d = typeof c;\n',
+				io: "let name = prompt('name?');\nlet sure = confirm('sure?');\nalert('hi ' + name);\n",
+				templates:
+					'let who = "world";\nlet greeting = `hello ${who}!`;\n',
+				'break-continue':
+					'let n = 0;\nwhile (true) {\n\tn = n + 1;\n\tif (n > 2) {\n\t\tbreak;\n\t}\n}\n',
+				'runaway-loop (timeout)': 'let n = 0;\nwhile (true) {\n\tn = n + 1;\n}\n',
+				'runtime-error': 'let x = 5;\nlet y = x + boom;\n',
+			};
 
 			const selectEl = document.getElementById('snippet-select');
 			const codeEl = document.getElementById('code');
 			const outputEl = document.getElementById('output');
-			const formatBtn = document.getElementById('format-btn');
 			const batchBtn = document.getElementById('batch-btn');
 			const stepBtn = document.getElementById('step-btn');
 			const nextBtn = document.getElementById('next-btn');
@@ -534,18 +542,23 @@
 			const copyBtn = document.getElementById('copy-btn');
 			const statusEl = document.getElementById('status');
 
-			let currentExecution = null;
 			let currentIterator = null;
 			let stepEventCount = 0;
 
-			// Set default code (pre-formatted so checkFormat passes)
-			codeEl.value = format('let x = 5;\nlet y = x + 1;\n');
+			codeEl.value = 'let x = 5;\nlet y = x + 1;\n';
 
-			for (const name of SNIPPETS) {
+			for (const name of Object.keys(SNIPPETS)) {
 				const opt = document.createElement('option');
 				opt.value = name;
-				opt.textContent = name.replace('.js', '');
+				opt.textContent = name;
 				selectEl.appendChild(opt);
+			}
+
+			// Adapts buildConfig()'s { seconds, options } to the legacy generator
+			// signature (code, flatOptions, maxMs).
+			function startTrace(code) {
+				const cfg = buildConfig();
+				return createTracingGenerator(code, cfg.options, cfg.seconds * 1000);
 			}
 
 			// --- Config helpers ---
@@ -736,7 +749,6 @@
 				stepBtn.disabled = false;
 				nextBtn.disabled = true;
 				stopBtn.disabled = true;
-				currentExecution = null;
 				currentIterator = null;
 
 				if (cancelled) {
@@ -751,15 +763,6 @@
 				}
 			}
 
-			// --- Format ---
-
-			formatBtn.addEventListener('click', function () {
-				const formatted = format(codeEl.value);
-				codeEl.value = formatted;
-				statusEl.textContent = 'formatted';
-				statusEl.className = 'ok';
-			});
-
 			// --- Batch mode ---
 
 			batchBtn.addEventListener('click', async function () {
@@ -769,14 +772,22 @@
 				setRunning('batch');
 
 				try {
-					const result = await trace(code, buildConfig());
-					const events = result.logs || [];
-
-					for (let i = 0; i < events.length; i++) {
-						appendEvent(events[i], i);
+					const generator = startTrace(code);
+					let count = 0;
+					let result = null;
+					// Drive the generator to completion; the TraceResult is the
+					// generator's return value (the `value` on `done: true`).
+					while (true) {
+						const { value, done } = await generator.next();
+						if (done) {
+							result = value;
+							break;
+						}
+						appendEvent(value, count);
+						count++;
 					}
 
-					setDone(result, events.length, false);
+					setDone(result, count, false);
 					console.log('--- trace result ---', result);
 				} catch (err) {
 					statusEl.textContent = 'unexpected error: ' + err.message;
@@ -794,9 +805,7 @@
 
 				setRunning('step');
 
-				const execution = trace(code, buildConfig());
-				currentExecution = execution;
-				currentIterator = execution[Symbol.asyncIterator]();
+				currentIterator = startTrace(code);
 				stepEventCount = 0;
 
 				setStepping();
@@ -815,9 +824,8 @@
 					const { value, done } = await currentIterator.next();
 
 					if (done) {
-						const result = await currentExecution.result;
-						setDone(result, stepEventCount, false);
-						console.log('--- trace result ---', result);
+						setDone(value, stepEventCount, false);
+						console.log('--- trace result ---', value);
 						return;
 					}
 
@@ -826,32 +834,29 @@
 					statusEl.textContent = stepEventCount + ' event(s) — click Next or Stop';
 					setStepping();
 				} catch (err) {
-					const result = await currentExecution.result;
-					setDone(result, stepEventCount, true);
-					console.log('--- trace result ---', result);
+					statusEl.textContent = 'trace error: ' + err.message + ' (' + stepEventCount + ' events)';
+					statusEl.className = 'error';
+					setDone(null, stepEventCount, true);
 				}
 			});
 
 			// --- Stop ---
 
-			stopBtn.addEventListener('click', function () {
-				if (currentExecution) {
-					currentExecution.cancel();
+			stopBtn.addEventListener('click', async function () {
+				if (currentIterator) {
 					stopBtn.disabled = true;
+					// Generator .return() runs the finally block while suspended at a
+					// yield — clearing the timeout and terminating the worker.
+					await currentIterator.return(undefined);
+					setDone(null, stepEventCount, true);
 				}
 			});
 
 			// --- Snippet loading ---
 
-			selectEl.addEventListener('change', async function () {
+			selectEl.addEventListener('change', function () {
 				if (!selectEl.value) return;
-				try {
-					const res = await fetch(SNIPPET_DIR + '/' + selectEl.value);
-					if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
-					codeEl.value = await res.text();
-				} catch (err) {
-					codeEl.value = '// Failed to load ' + selectEl.value + ': ' + err.message;
-				}
+				codeEl.value = SNIPPETS[selectEl.value] || '';
 			});
 
 			// --- Copy ---
