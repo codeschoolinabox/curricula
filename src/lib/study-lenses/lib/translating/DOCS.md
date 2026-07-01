@@ -49,11 +49,11 @@ identity; no pack).
    range of every `Identifier` that is neither a declaration id nor a member
    property). Both are facts the emit phase filters by pack membership.
 
-3. **Project declared names** (pure) — `buildScope(ast).allDeclarations` is a
-   `DeclarationInfo[]`; project it to the set of `.name`s (mirroring
-   `collect-jej-surface.ts`'s `isVisibleLocal`), used in phase 4 to suppress a
-   builtin whose name the learner has shadowed (coarse flat-name suppression — §
-   Decisions D3).
+3. **Resolve scope** (pure) — build the scope tree with `buildScope(ast)`; phase
+   4 suppresses a `builtins` candidate iff the identifier resolves to an
+   in-scope binding at its position (scope-chain walk from its innermost scope
+   upward), reusing `check-undeclared-globals.ts`'s `findChildScope` +
+   `isNameDeclared` (lexical resolution — § Decisions D3).
 
 4. **Emit spans** (pure) — three disjoint triggers over the phase-2/3 facts:
    - **keyword** — a token contributes a `keyword` span iff its text is a
@@ -67,8 +67,8 @@ identity; no pack).
      is a `pack.members` key. Total and safe because JEJ admits no user-defined
      properties.
    - **builtin** — a `builtin` span for every phase-2 identifier-reference whose
-     name is a `pack.builtins` key AND is absent from the phase-3 declared-name
-     set.
+     name is a `pack.builtins` key AND does not resolve to an in-scope binding
+     (phase 3).
 
 5. **Merge + freeze** (pure, shape finalization) — concatenate the three span
    lists, sort ascending by `range[0]`, deep-freeze via
@@ -89,15 +89,15 @@ flowchart TD
     In["TranslateInput<br/>{ code, tokens, ast, pack }"]
     Shaped["shape-confirmed input"]
     Facts["AST facts<br/>(member-property set +<br/>identifier-reference set)"]
-    Decls["declared-name set<br/>(∈-tested; from buildScope.allDeclarations)"]
+    Decls["scope tree<br/>(lexical; buildScope + scope-chain walk)"]
     KW["keyword spans<br/>(tokens: .keyword ∩ pack.keywords;<br/>true/false/null guarded by member-property set)"]
     Mem["member spans<br/>(member-property set ∩ pack.members)"]
-    Bi["builtin spans<br/>(identifier-reference set ∩ pack.builtins ∖ decls)"]
+    Bi["builtin spans<br/>(identifier-reference set ∩ pack.builtins,<br/>minus in-scope bindings)"]
     Out["frozen TranslationSpan[]<br/>(source-ordered, non-overlapping)"]
 
     In -->|"validate — throws TypeError on null/missing"| Shaped
     Shaped -->|"one AST descent (pure)"| Facts
-    Shaped -->|"buildScope + project to names (pure)"| Decls
+    Shaped -->|"buildScope → scope tree (pure)"| Decls
     Shaped -->|"token pass (pure)"| KW
     Facts -->|"member-property offsets guard true/false/null"| KW
     Facts -->|"∩ pack.members"| Mem
@@ -153,8 +153,9 @@ flowchart LR
   `unicode_guard` — Milestone 4.
 - **The dropdown + its JEJ-validation gate.** Orchestrator concern; this module
   only supplies registry metadata.
-- **Scope analysis beyond the flat declared-name set.** True lexical resolution
-  is deferred (§ Decisions D3).
+- **Scope analysis beyond binding resolution.** Read/write usage counts, type
+  inference, and control-flow reachability are out of scope; the builtin guard
+  needs only lexical binding resolution (§ Decisions D3).
 - **Pack content authoring quality.** Native word choice is a linguistic concern
   refined with the Legesher lead; this module guarantees only structure (drift +
   round-trip), not fidelity.
@@ -183,14 +184,17 @@ per DEV.md).
   per-partition reverse composes with it and gives M4's native tokenizer
   category-scoped lookup for free.
 
-- **D3 — Builtin shadow = coarse flat-name suppression** (AR-1 C3). A `builtins`
-  span is suppressed iff its name is in `buildScope(ast).allDeclarations`,
-  reusing the sibling's `isVisibleLocal` projection. Chosen over true lexical
-  resolution (negligible accuracy gap in JEJ — no functions, only block scopes)
-  and over no-scope (which would mistranslate a shadowed global). Errs toward
-  not-translating — the safe direction for a display projection. The `lib/` peer
-  rule permits the `embody/lib/scope/` import (README `:67`); the sibling
-  already takes it.
+- **D3 — Builtin shadow = lexical scope resolution** (AR-1 C3; human ruling at
+  the Phase-0 gate — lexical over coarse). A `builtins` span is suppressed iff
+  the identifier resolves to an in-scope binding at its position, via a
+  scope-chain walk reusing `check-undeclared-globals.ts`'s `findChildScope` +
+  `isNameDeclared` over `buildScope(ast)`'s scope tree — the same machinery that
+  module uses to decide allowed-global-vs-user-binding. Chosen over coarse
+  flat-name suppression (which under-translates a genuine global sharing a name
+  with an unrelated block-local) and over no-scope (which mistranslates a real
+  shadow). Errs toward not-translating a true shadow. The `lib/` peer rule
+  permits the `embody/lib/scope/` + `embody/lib/validating/` imports; the
+  siblings already take them.
 
 - **D4 — Keyword guard is `.keyword` totality + a property guard** (AR-1 C4,
   sharpened per AR-2 C1). All 16 JEJ keyword keys — including

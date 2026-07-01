@@ -178,18 +178,16 @@ Behavior:
 
 - **Builtin shadowed by a learner binding.** `let console = 5; console` — the
   reference is the learner's variable, not the global, and must not translate.
-  The default is **coarse flat-name suppression**: a `builtins` span is
-  suppressed iff its name is in the declared-name set projected from
-  `buildScope(ast).allDeclarations` (a `DeclarationInfo[]` → set of `.name`s),
-  reusing
-  [`../../embody/lib/scope/build-scope.ts`](../../embody/lib/scope/build-scope.ts)
-  exactly as
-  [`../completing/collect-jej-surface.ts`](../completing/collect-jej-surface.ts)
-  does (`isVisibleLocal`). This errs toward not-translating (never paints a
-  native word over the learner's binding) and needs no lexical walker; for the
-  JEJ surface (no functions, only block scopes) the gap vs. true lexical
-  resolution is negligible. The coarse-vs-lexical-vs-none trade is recorded in
-  DOCS.md § Decisions.
+  Resolution is **lexical**: a `builtins` span is suppressed iff the identifier
+  resolves to an in-scope binding at its position — a scope-chain walk from the
+  identifier's innermost scope upward, reusing
+  [`../../embody/lib/validating/check-undeclared-globals.ts`](../../embody/lib/validating/check-undeclared-globals.ts)'s
+  `findChildScope` + `isNameDeclared` over
+  [`../../embody/lib/scope/build-scope.ts`](../../embody/lib/scope/build-scope.ts)'s
+  scope tree (the same machinery that module uses to decide
+  allowed-global-vs-user-binding). A name declared in an unrelated sibling block
+  does not suppress a genuine global elsewhere. Errs toward not-translating a
+  true shadow — the safe direction for a display projection.
 - **Member vs. same-named global.** `floor` is a `members` key; a bare
   identifier `floor` (a learner variable) is not a member and yields no span —
   only `x.floor` (a `MemberExpression.property`) does. The AST guard, not the
@@ -253,9 +251,9 @@ Module-specific rules:
 - **Pure-sync only.** No async, no I/O, no side effects, no randomness.
   Module-level pack/registry constants; deep-freeze on return.
 - **No `embody()`, no `Snippet` construction.** Type-only imports from
-  `../../embody/types.ts` and a value import of `../../embody/lib/scope/` for
-  shadow resolution are permitted; the module never constructs embodiments or
-  mutates parse data.
+  `../../embody/types.ts` and value imports of `../../embody/lib/scope/` and
+  `../../embody/lib/validating/` for lexical shadow resolution are permitted;
+  the module never constructs embodiments or mutates parse data.
 - **Range anchoring, never text matching.** A span comes from a token's
   `[start, end)`; the module never regex-replaces `\bword\b` (that is Legesher's
   toy path — it corrupts strings and comments).
