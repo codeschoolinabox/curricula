@@ -1,25 +1,50 @@
 /**
- * @file The public contract of the JEJ intercept evaluator, plus the two
+ * @file The public contract of the JEJ intercept evaluator, plus the four
  * cross-increment seams the pipeline is built against.
  *
  * The vocabulary is pinned in README.md § Vocabulary pinning, with the old
- * intercept engine as the behavior oracle (README § Bounded context). This
- * evaluator produces its OWN typed streamed-event union and settlement; the
- * embody adapter mapping (to `EmitNMEvent` / `ErrorNMEvent` / `RunInstance` /
- * `EndReport`) is out of scope.
+ * intercept engine (and its guard-loops sibling) as the behavior oracle
+ * (README § Bounded context). This evaluator produces its OWN typed
+ * streamed-event union and settlement; the embody adapter mapping (to
+ * `EmitNMEvent` / `ErrorNMEvent` / `RunInstance` / `EndReport`) is out of
+ * scope.
  *
- * Two seams are pinned here so the increments do not reverse-engineer each
+ * Four seams are pinned here so the increments do not reverse-engineer each
  * other:
  *   1. the worker→thread message (what the worker emits, what the thread maps);
- *   2. the dialog call-request (what the worker's `call` carries, what the
- *      thread's `onCall` reads before answering).
+ *   2. the io call-request (what the worker's `call` carries, what the
+ *      thread's call hook reads before answering);
+ *   3. the worker config (the clone-safe data delivered at setup — the
+ *      iteration limit);
+ *   4. the instrumentation helper protocol (the spliced calls the instrumenter
+ *      emits and the worker logic implements).
  *
  * This module imports nothing: the evaluator is self-contained, and `unknown`
- * argument arrays plus a locally-mirrored io shape keep it decoupled from both
- * the engine and embody. `InterceptIoMocks` deliberately mirrors embody's
- * `IoMocks` structurally so the adapter passes the consumer's mocks straight
- * through — a structural, not nominal, coupling.
+ * argument arrays plus locally-mirrored io/location shapes keep it decoupled
+ * from both the engine and embody. `InterceptIoMocks` and
+ * `InterceptSourceLocation` deliberately mirror embody's `IoMocks` and
+ * `SourceLocation` structurally so the adapter passes data straight through —
+ * a structural, not nominal, coupling.
  */
+
+// ─── Source attribution ────────────────────────────────────────────────────────
+
+/** A position in the learner's source. Line is 1-indexed, column 0-indexed. */
+type InterceptSourcePosition = {
+	readonly line: number;
+	readonly column: number;
+};
+
+/**
+ * The span of the io call (or throw site) an event is attributed to, stamped
+ * by the instrumenter at splice time — never looked up in an AST index.
+ * Structurally mirrors embody's `SourceLocation`. Line numbers are the
+ * learner's own: the instrumenter is line-preserving.
+ */
+type InterceptSourceLocation = {
+	readonly start: InterceptSourcePosition;
+	readonly end: InterceptSourcePosition;
+};
 
 // ─── Streamed event vocabulary ─────────────────────────────────────────────────
 
@@ -52,18 +77,22 @@ type StandardConsoleMethod =
 
 /**
  * Fields every streamed event carries. `step` is the monotonic emission order
- * (1-indexed, assigned worker-side). No `nodePath`: an evaluator does no
- * instrumentation, so events carry no source attribution (README § Bounded
- * context).
+ * (1-indexed, assigned worker-side). `loc` is the io call's stamped source
+ * span — `null` only when the call fired outside any loc wrap (defensive;
+ * unreachable for instrumented learner code). No `nodePath`: an evaluator
+ * never observes the interior (README § Bounded context).
  */
 type InterceptEventBase = {
 	readonly step: number;
+	readonly loc: InterceptSourceLocation | null;
 };
 
 /**
- * A `console.<method>(…)` call. One-way (no value returns to the program).
- * `args` have passed the clone-safe args pass — an argument the worker boundary
- * cannot structured-clone rides as its `String(…)` form.
+ * A `console.<method>(…)` call. The consumer's console mock was AWAITED during
+ * this event's io round-trip (the program held until it settled); nothing
+ * returns to the program (`console` yields `undefined`). `args` have passed
+ * the clone-safe args pass — an argument the worker boundary cannot
+ * structured-clone rides as its `String(…)` form.
  */
 type InterceptConsoleEvent = InterceptEventBase & {
 	readonly event: 'console';
@@ -72,20 +101,20 @@ type InterceptConsoleEvent = InterceptEventBase & {
 	readonly args: ReadonlyArray<unknown>;
 };
 
-/** An `alert(…)` dialog round-trip. Returns `undefined` to the program. */
+/** An `alert(…)` io round-trip. Returns `undefined` to the program. */
 type InterceptAlertEvent = InterceptEventBase & {
 	readonly event: 'alert';
 	readonly args: ReadonlyArray<unknown>;
 };
 
-/** A `confirm(…)` dialog round-trip. `returnValue` is the consumer's answer. */
+/** A `confirm(…)` io round-trip. `returnValue` is the consumer's answer. */
 type InterceptConfirmEvent = InterceptEventBase & {
 	readonly event: 'confirm';
 	readonly args: ReadonlyArray<unknown>;
 	readonly returnValue: boolean;
 };
 
-/** A `prompt(…)` dialog round-trip. `returnValue` is the consumer's answer. */
+/** A `prompt(…)` io round-trip. `returnValue` is the consumer's answer. */
 type InterceptPromptEvent = InterceptEventBase & {
 	readonly event: 'prompt';
 	readonly args: ReadonlyArray<unknown>;
@@ -106,15 +135,22 @@ type InterceptEvent =
 // ─── Consumer io mocks ─────────────────────────────────────────────────────────
 
 /**
- * The consumer-supplied I/O handlers the thread logic invokes. Structurally
- * mirrors embody's `IoMocks` so the adapter passes the consumer's mocks through
- * unchanged.
+ * The consumer-supplied I/O handlers the thread logic invokes during the call
+ * half of each io round-trip. Structurally mirrors embody's `IoMocks` so the
+ * adapter passes the consumer's mocks through unchanged.
  *
- * A `console` mock is invoked as a SYNCHRONOUS side effect (the engine's
- * `onMessage` hook is synchronous — a returned Promise runs but is not awaited
- * before the program resumes). A dialog mock IS awaited (the engine's `onCall`
- * hook is async), so its answer may be asynchronous; the program's time budget
- * pauses meanwhile.
+ * EVERY mock is awaited — console mocks included (embody's `IoMocks` contract;
+ * the oracle awaited console mocks before resuming the worker). The program
+ * holds until the mock settles and its time budget pauses meanwhile — the
+ * pause that lets a quiz or an animation ride each io moment. An omitted
+ * console mock is a no-op; an omitted dialog mock falls back to the inert
+ * native default (`alert` → `undefined`, `confirm` → `false`, `prompt` →
+ * `null`).
+ *
+ * A THROWING (or rejecting) mock is an engine-made `call-error` stop: the run
+ * ends `errored` with no halt and no event for that call. (Deliberate
+ * deviation from the oracle, which surfaced a terminal in-stream
+ * InternalError event instead.) Consumer mocks should not throw.
  */
 type InterceptIoMocks = {
 	readonly alert?: (message: string) => void | Promise<void>;
@@ -130,21 +166,33 @@ type InterceptIoMocks = {
 
 // ─── Settlement and handle (public facade) ─────────────────────────────────────
 
-/** Options forwarded to the engine spec and the thread logic. */
+/** Options forwarded to the engine spec, the instrumenter, and the thread logic. */
 type InterceptEvaluateOptions = {
 	/** Time budget in seconds; the engine defaults to 5 when omitted. */
 	readonly seconds?: number;
+	/**
+	 * Max iterations PER LOOP ENTRY before the iteration guard's marked throw
+	 * (surfacing downstream as `limit-exceeded`) — each fresh entry into a
+	 * loop restarts its count (oracle semantics; never a run total). Omitted →
+	 * no cap; the guard still counts (the halt's `iterationCount` is always
+	 * real).
+	 */
+	readonly iterations?: number;
 	/** The consumer's I/O mocks; absent members fall back to inert defaults. */
 	readonly io?: InterceptIoMocks;
 };
 
 /**
  * The worker-authored stop, typed by this evaluator. Present on every
- * worker-side stop (a natural end and a throw alike). No `nodePath` (no
- * instrumentation) and no `phase`: the engine collapses construction and
- * execution into one `throw`, so neither the source location nor the
- * creation/execution phase is authorable worker-side (README § Vocabulary
- * pinning).
+ * worker-side stop (a natural end and a throw alike). `loc` is the stamped
+ * throw span: the call site for a throw that propagated through a loc wrap,
+ * the LOOP's own span for the iteration guard's throw, and `null` on a
+ * natural end or an unstamped throw (a statement-level throw outside any
+ * wrapped call — the oracle's `Error.stack` fallback is deliberately not
+ * reproduced; no milestone consumer reads a throw's loc). No
+ * creation/execution `phase`: the engine collapses construction and execution
+ * into one `throw`, so the phase is not authorable worker-side (README
+ * § Vocabulary pinning).
  */
 type InterceptHalt = {
 	/** `true` on a natural end (no throw). */
@@ -152,6 +200,15 @@ type InterceptHalt = {
 	/** The thrown error's name (`ReferenceError`, `TypeError`, …); `''` on a natural end. */
 	readonly errorName: string;
 	readonly message: string;
+	readonly loc: InterceptSourceLocation | null;
+	/** `true` iff the throw was the iteration guard's marked RangeError. */
+	readonly iterationLimit: boolean;
+	/**
+	 * The never-reset run TOTAL of loop iterations — carried on EVERY halt
+	 * (natural ends too). Distinct from the per-loop-entry counter the limit
+	 * is checked against (seam 4).
+	 */
+	readonly iterationCount: number;
 };
 
 /**
@@ -205,9 +262,21 @@ type InterceptEvaluateHandle = AsyncIterable<InterceptEvent> & {
 };
 
 /**
+ * The instrumenter's boundary throw on unparseable input — the evaluator's
+ * only synchronous throw, reachable only through misuse (the adapter
+ * pre-gates JEJ admission). `name` is the discriminant a caller may branch
+ * on; the `message` carries the parse failure.
+ */
+type InterceptInstrumentError = Error & {
+	readonly name: 'InterceptInstrumentError';
+};
+
+/**
  * The evaluator's primary export: runnable code in, typed handle out. Assumes a
  * pre-admitted (runnable JEJ) string — the JEJ admission gate and the embody
  * _not-runnable_ shape are the adapter's concern (README § Bounded context).
+ * The instrumenter throws an {@link InterceptInstrumentError} on unparseable
+ * input (reachable only through misuse; the adapter pre-gates).
  */
 type InterceptEvaluate = (
 	code: string,
@@ -218,37 +287,94 @@ type InterceptEvaluate = (
 
 /**
  * What the worker emits and the thread maps to a public event. The worker
- * authors the COMPLETE event (step, and — for a dialog — the answered
- * `returnValue`), so the thread logic's mapping stays a pure narrowing; the
- * message is therefore the clone-safe wire form of an {@link InterceptEvent}.
- * The thread narrows the engine's opaque `unknown` to this and yields it BY
- * REFERENCE (the engine freezes the item at yield); a message that fails the
- * narrowing is dropped.
- *
- * On a `console` message the thread ALSO invokes the consumer's `console` mock
- * as a side effect (the mapping's one impurity — see README § thread logic,
- * io-bound). A dialog message carries no side effect: its mock was already
- * invoked during the dialog call (seam 2).
+ * authors the COMPLETE event (step, loc, and — for a dialog — the answered
+ * `returnValue`), so the thread logic's mapping is a PURE narrowing (the
+ * consumer's mocks were already awaited during the call half of the round-trip
+ * — seam 2); the message is therefore the clone-safe wire form of an
+ * {@link InterceptEvent}. The thread narrows the engine's opaque `unknown` to
+ * this and yields it BY REFERENCE (the engine freezes the item at yield); a
+ * message that fails the narrowing is dropped.
  */
 type InterceptMessage = InterceptEvent;
 
-// ─── Seam 2: the dialog call-request ───────────────────────────────────────────
+// ─── Seam 2: the io call-request ───────────────────────────────────────────────
 
 /**
- * What the worker's synchronous `call` carries for a dialog round-trip: which
- * dialog, and the call's raw arguments. The thread's `onCall` reads `name` to
- * pick the consumer mock and `arguments_` to build its parameters (message,
- * and the optional `prompt` default), awaits the mock, and returns the answer
- * as the engine's `CallResponse` (`string | boolean | null | undefined`) — the
- * set of answers the mocks produce.
+ * What the worker's synchronous `call` carries for one io round-trip: which io
+ * kind, the console method when applicable, and the call's raw arguments. The
+ * thread's call hook picks the consumer mock (console → `io.console[method]`,
+ * no-op when absent; dialog → the dialog mock, inert default when absent),
+ * AWAITS it, and returns the answer as the engine's `CallResponse`
+ * (`string | boolean | null | undefined`) — `undefined` for every console
+ * call.
  */
-type InterceptCallRequest = {
-	readonly name: 'alert' | 'confirm' | 'prompt';
-	readonly arguments_: ReadonlyArray<unknown>;
+type InterceptCallRequest =
+	| {
+			readonly name: 'console';
+			readonly method: string;
+			readonly arguments_: ReadonlyArray<unknown>;
+	  }
+	| {
+			readonly name: 'alert' | 'confirm' | 'prompt';
+			readonly arguments_: ReadonlyArray<unknown>;
+	  };
+
+// ─── Seam 3: the worker config ─────────────────────────────────────────────────
+
+/**
+ * The clone-safe data the evaluator delivers to the worker logic at setup (the
+ * engine spec's `workerConfig`). `iterationLimit` is the consumer's
+ * `iterations` option; absent → the guard counts but never throws.
+ */
+type InterceptWorkerConfig = {
+	readonly iterationLimit?: number;
+};
+
+// ─── Seam 4: the instrumentation helper protocol ───────────────────────────────
+
+/**
+ * The two helpers the instrumenter splices calls against and the worker logic
+ * implements as injected globals. Pinned so the instrumenter and the worker
+ * setup do not reverse-engineer each other:
+ *
+ * - `__$il(loopIndex, locString)` — the iteration guard: spliced as a
+ *   statement at the top of each guarded loop's BLOCK body
+ *   (`__$il(n, 'L:C:L:C');`), with a counter reset spliced after the loop
+ *   (do-while: after the trailing `while(cond);`). The guarded set is the
+ *   oracle's: `while` / classic `for` / `do-while` / `for-of` with a braced
+ *   body; `for-in` and brace-less bodies are NOT guarded (a brace-less
+ *   runaway loop is caught by the time budget only). The helper increments
+ *   TWO counters: that loop's PER-ENTRY counter — the one checked against the
+ *   configured limit, reset after the loop so each fresh entry restarts the
+ *   count (oracle semantics: the limit is per loop entry, never a run total)
+ *   — and the never-reset run-total `iterationCount` carried on every halt.
+ *   On exceed it throws the MARKED RangeError, pre-stamped with `locString`
+ *   (the LOOP's own span, encoded at splice time) so a limit halt is always
+ *   attributed to its loop.
+ * - `__$lc(locString, thunk)` — the loc stamp: spliced as a same-line wrap
+ *   around each `CallExpression` — and ONLY `CallExpression`s, the oracle's
+ *   exact node set (`NewExpression` is not wrapped; `super()` and class
+ *   constructs are outside admissible JEJ) — as
+ *   `__$lc('L:C:L:C', () => <call>)`, where `locString` encodes start/end
+ *   line:column of the original call. Pushes the decoded loc onto the
+ *   current-loc stack, invokes the thunk, stamps the loc onto any error
+ *   propagating through (for halt attribution), and restores the stack in
+ *   `finally`.
+ *
+ * The names ride the engine's injected `new Function` parameters (the
+ * delivery channel); the collision guard is the NAMING — `__$il` / `__$lc`
+ * sit outside the JEJ (camelCase) identifier surface, so admissible learner
+ * code cannot reference or shadow them.
+ */
+type InterceptHelperProtocol = {
+	readonly __$il: (loopIndex: number, locString: string) => void;
+	readonly __$lc: <T>(locString: string, thunk: () => T) => T;
 };
 
 export type {
 	StandardConsoleMethod,
+	InterceptSourcePosition,
+	InterceptSourceLocation,
 	InterceptConsoleEvent,
 	InterceptAlertEvent,
 	InterceptConfirmEvent,
@@ -262,7 +388,10 @@ export type {
 	InterceptSettlement,
 	InterceptEvaluateResult,
 	InterceptEvaluateHandle,
+	InterceptInstrumentError,
 	InterceptEvaluate,
 	InterceptMessage,
 	InterceptCallRequest,
+	InterceptWorkerConfig,
+	InterceptHelperProtocol,
 };
