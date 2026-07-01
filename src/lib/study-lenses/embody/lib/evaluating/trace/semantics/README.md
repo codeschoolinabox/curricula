@@ -107,12 +107,12 @@ Using a different name in code is a bug, not a stylistic choice.
   tracer**; the sibling intercept tracer's `ASTNode.syntaxId` is a separate,
   pre-existing surface — a known cross-tracer naming inconsistency, out of scope
   here.)
-- **provided builtins** — the fixed, tracer-owned allowlist of realm names a JEJ
-  program may reference without declaring (the dialog names, console, and the
-  JEJ-documented globals). The undeclared-identifier gate checks against this
-  list; its one invariant is that every listed name actually exists in the
-  sandbox the program runs in — a name the gate admits must never be undefined
-  at runtime.
+- **provided globals** — the realm names a JEJ program may reference without
+  declaring (the dialog names, console, and the JEJ-documented globals). Their
+  one invariant is runtime truth: every provided name actually exists in the
+  sandbox (the dialog traps are installed at setup), and every OTHER identifier
+  read behaves exactly as raw JS says — `ReferenceError` at the moment of
+  evaluation, never a substituted value.
 - **ast record** — the flat `Record<nodePath, ASTNode>` built at instrument
   time. `ast['$']` is the root Program node. Mutable (`events: []`, `visits: 0`)
   until linking freezes it.
@@ -207,27 +207,27 @@ Using a different name in code is a bug, not a stylistic choice.
 ## Bounded context
 
 This tracer **owns**: the admission gate at its boundary — the JEJ gate (throws
-on non-JEJ or unparseable input, `with` included: there is no sloppy-mode path)
-plus this tracer's own **undeclared-identifier check** (an identifier that
-resolves to no declaration and no provided builtin is rejected at the gate,
-naming the identifier); config preparation (shorthand expansion → default
-filling → schema validation → cross-field checks, in [`prepare/`](./prepare/));
-the Aran instrumentation pipeline and its weave-time gating; the worker logic,
-thin worker entry, and thread logic; the iteration limit and its branded
-classification; the dialog round-trips; the linking pass; the built handle and
-its typed facade.
+on non-JEJ or unparseable input, `with` included: there is no sloppy-mode path);
+**runtime error fidelity** — anything raw JavaScript would throw at runtime
+throws the same error at the same evaluation moment inside the trace; config
+preparation (shorthand expansion → default filling → schema validation →
+cross-field checks, in [`prepare/`](./prepare/)); the Aran instrumentation
+pipeline and its weave-time gating; the worker logic, thin worker entry, and
+thread logic; the iteration limit and its branded classification; the dialog
+round-trips; the linking pass; the built handle and its typed facade.
 
-Two gate decisions are deliberate, named deviations:
+Two gate decisions are deliberate, named commitments:
 
-- **Undeclared identifiers are rejected statically — stricter than JavaScript.**
-  Real JS throws `ReferenceError` only when the read executes; this gate rejects
-  the program even when the undeclared read sits in a never-taken branch.
-  Rationale: the alternative is worse on both sides — the woven runtime does not
-  faithfully reproduce the ReferenceError (an undeclared read resolves through
-  the instrumentation and coerces into a fabricated value, falsifying the data
-  layer), and a mid-trace error explains a typo less clearly than a gate
-  rejection that names the identifier before anything runs. A data tracer must
-  never present a value the notional machine says cannot exist.
+- **The gate never pre-empts runtime errors — ECMA-faithful throw fidelity.**
+  The gate rejects only language-level violations (parse failures, non-JEJ
+  constructs); a program that would merely THROW in a raw JS run is admitted,
+  and the error happens where raw JS would produce it: an undeclared identifier
+  read throws `ReferenceError` at the moment of evaluation (never before — an
+  undeclared read in a never-taken branch never throws), a TDZ access and a
+  const reassignment throw at their access moments. The error appears in the
+  event stream where it occurs (the error channel) and the settlement carries
+  the halt. The instrumentation MUST reproduce these errors faithfully —
+  resolving an undeclared read into any value is a mistrace, full stop.
 - **`with` is rejected, full stop.** The former `with` easter egg is dropped:
   supporting it forks the instrumentation into a second sloppy-mode Aran
   configuration and weakens the gate for a construct JEJ deliberately excludes.
@@ -254,7 +254,7 @@ It does **not** own, and explicitly excludes:
 - **Caching.** Each call is a fresh instrument + fresh run; memoizing
   instrumented code or results is the caller's concern.
 - **User-defined functions.** JEJ has no function declarations or arrows;
-  `FunctionCallEvent` covers calls to provided builtins. Non-JEJ input dies at
+  `FunctionCallEvent` covers calls to provided globals. Non-JEJ input dies at
   the gate.
 
 ## TraceResult shape

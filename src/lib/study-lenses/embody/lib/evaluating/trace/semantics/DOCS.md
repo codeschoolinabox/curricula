@@ -15,9 +15,11 @@ instrumentation pipeline's own architecture:
 
 1. **Gate** (sync, throws) — the admission boundary. Input: a raw source string.
    Output: a validated program, or a typed boundary throw naming its reason
-   (parse failure, JEJ violation — `with` included — or an undeclared
-   identifier, named). A gated program never reaches instrumentation. This is
-   the only phase that throws; everything downstream degrades into a settlement.
+   (parse failure or JEJ violation — `with` included). The gate rejects only
+   language-level violations, NEVER a program that would merely throw at runtime
+   — runtime errors belong in the trace, at their ECMA-faithful evaluation
+   moments. A gated program never reaches instrumentation. This is the only
+   phase that throws; everything downstream degrades into a settlement.
 
 2. **Prepare** (sync, throws — part of the gate boundary) — config resolution.
    Input: the raw user config. Output: fully resolved options (no optional layer
@@ -67,7 +69,7 @@ instrumentation pipeline's own architecture:
 
 ```mermaid
 flowchart TD
-    SRC[JEJ source string + raw config] -->|gate + prepare — sync, throws on parse / JEJ violation / undeclared identifier / invalid config| VALID[validated program + resolved options + runtime gates + dialog provider]
+    SRC[JEJ source string + raw config] -->|gate + prepare — sync, throws on parse / JEJ violation / invalid config| VALID[validated program + resolved options + runtime gates + dialog provider]
     VALID -->|instrument — pure, main thread, weave-time gating| CODE[instrumented source carrying tags and discriminants]
     VALID -->|instrument — same pass, stays thread-side| RECORD[tag map + mutable ast record]
     CODE -->|engine spec: code + worker entry + runtime gate bundle + thread logic + time budget| RUN[running program in engine sandbox — lazy]
@@ -87,10 +89,12 @@ flowchart TD
 
 ### Structural constraints
 
-- **The gate is the only throwing boundary.** Parse failure, JEJ violation,
-  undeclared identifier, and invalid config all throw synchronously, typed,
-  before any engine work. Everything after a successful gate degrades into a
-  settlement — never an exception.
+- **The gate is the only throwing boundary — and it never pre-empts runtime
+  errors.** Parse failure, JEJ violation, and invalid config throw
+  synchronously, typed, before any engine work; a program that would merely
+  throw at runtime is admitted and its error occurs inside the trace, at its
+  ECMA-faithful evaluation moment. Everything after a successful gate degrades
+  into a settlement — never an exception.
 - **Instrument is pure and range-independent.** Same program + same options →
   same instrumented source. The runtime-checked gates (range window, name
   filters, iteration cap) ride the worker config, never the woven code — a
@@ -160,17 +164,21 @@ scope (the engine's documented channel for lookup-resolved instrumentation),
 wires the dispatcher's emission to the engine's emit, and authors the halt; the
 thread logic narrows, services dialogs, and refines.
 
-### The gate rejects undeclared identifiers — stricter than JavaScript
+### Runtime errors are ECMA-faithful — the gate never pre-empts them
 
-Real JS throws ReferenceError only when the undeclared read executes. This gate
-rejects the program statically, naming the identifier. Two forces make the
-stricter boundary right here: the woven runtime does not faithfully reproduce
-the ReferenceError (an undeclared read resolves through the instrumentation and
-coerces into a fabricated value — observed: `"5() => boom"` — which a data
-tracer must never present), and a gate rejection that names the identifier
-before anything runs explains a typo better than a mid-trace error. The cost —
-rejecting a program whose undeclared read sits in a never-taken branch — is a
-deliberate, documented deviation suited to JEJ's teaching context.
+Learners must see the error appear in the event stream where a raw JS run would
+produce it. So the gate admits any program that would merely throw at runtime,
+and the run reproduces the throw exactly: an undeclared identifier read throws
+`ReferenceError` at its evaluation moment (an undeclared read in a never-taken
+branch never throws), TDZ accesses and const reassignments throw at theirs. The
+instrumentation bears the cost of this fidelity: the legacy weave resolved an
+undeclared read through the instrumentation and coerced it into a fabricated
+value (observed: `"5() => boom"`, a run that "completed") — a mistrace this
+design forbids outright. Making the woven runtime throw the faithful
+`ReferenceError`, with the error event and halt attribution, is a named
+implementation obligation with its own tests — worth the cost, because a data
+tracer that substitutes values where the language throws is teaching a false
+machine.
 
 ### `with` is gone
 

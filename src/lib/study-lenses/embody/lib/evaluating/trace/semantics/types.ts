@@ -28,30 +28,26 @@ import type { SourceRange, TraceConfig, TraceOptions } from './config.types.js';
 /**
  * Why the admission gate rejected a program or its config. `'parse'` = not
  * valid JavaScript; `'jej-violation'` = valid JS outside the JEJ subset
- * (`with` included — there is no sloppy-mode path);
- * `'undeclared-identifier'` = an identifier resolving to no declaration and
- * no provided builtin (rejected statically — deliberately stricter than
- * JavaScript's runtime ReferenceError; README § Bounded context);
- * `'invalid-config'` = the config failed preparation (shape, schema, or
- * cross-field checks) — the gate boundary covers Prepare too, so one catch
- * handles every synchronous rejection.
+ * (`with` included — there is no sloppy-mode path); `'invalid-config'` = the
+ * config failed preparation (shape, schema, or cross-field checks) — the
+ * gate boundary covers Prepare too, so one catch handles every synchronous
+ * rejection.
+ *
+ * The gate never pre-empts runtime errors: a program that would merely THROW
+ * in a raw JS run (an undeclared identifier read, a TDZ access, a const
+ * reassignment) is admitted, and the error occurs at its ECMA-faithful
+ * evaluation moment inside the trace (README § Bounded context).
  */
-type GateBoundaryReason =
-	| 'parse'
-	| 'jej-violation'
-	| 'undeclared-identifier'
-	| 'invalid-config';
+type GateBoundaryReason = 'parse' | 'jej-violation' | 'invalid-config';
 
 /**
  * The typed boundary error the entry throws synchronously on inadmissible
  * input. A real `Error` (stack, `instanceof Error`) augmented with a
  * structural discriminant — callers identify it without parsing the message.
- * `identifier` is present on `'undeclared-identifier'` rejections.
  */
 type GateBoundaryError = Error & {
 	readonly gateBoundary: true;
 	readonly reason: GateBoundaryReason;
-	readonly identifier?: string;
 };
 
 // ─── Settlement family (mirrors the engine, typed by this tracer) ────────────

@@ -93,6 +93,11 @@ flowchart TD
 - **Value representation runs worker-side.** After the clone boundary an Error's
   prototype is stripped (`instanceof Error` fails), so thrown values and event
   payload values are represented where they are still themselves.
+- **Undeclared reads throw, faithfully.** The woven output must reproduce raw
+  JS's `ReferenceError` at the evaluation moment of an undeclared identifier
+  read — never resolve it through the instrumentation into a value (the legacy
+  weave fabricated one). The error event and the halt carry the attribution; a
+  dedicated test pins this against the observed legacy failure.
 - **Events are structured at emit time.** No post-processing, no parsing of
   output — the config decided at weave time what exists; the dispatcher decides
   at runtime only what the gate bundle governs (the range window and the name
